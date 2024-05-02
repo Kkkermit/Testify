@@ -8,6 +8,7 @@ module.exports = {
 
     // EMBED COLORS //
 
+    embedColor: "Green",
     embedAutomod: "Blue",
     embedCommunity: "Blurple",
     embedModLight: "Red",
