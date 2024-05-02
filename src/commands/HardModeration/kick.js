@@ -41,14 +41,13 @@ module.exports = {
         .setFooter({ text: `Someone got kicked hard`})
         .setTimestamp()
 
-        await kickedmember.send({ embeds: [dmEmbed] }).catch(err => {
-            return;
-        })
+        await kickedmember.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error('Failed to DM user.') });
 
         await kickedmember.kick().catch(err => {
             return interaction.reply({ content: `**Couldn't** kick this member! Check my **role position** and try again.`, ephemeral: true});
         })
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ content: "Embed sent to channel", ephemeral: true})
+        await interaction.channel.send({ embeds: [embed] });
     }
 }

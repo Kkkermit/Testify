@@ -40,6 +40,7 @@ module.exports = {
             })
         })
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.reply({ content: "Embed sent to channel", ephemeral: true})
+        await interaction.channel.send({ embeds: [embed] });
     }
 }

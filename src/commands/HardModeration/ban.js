@@ -45,7 +45,8 @@ module.exports = {
         let ban = await guild.members.ban(target, { reason: `${interaction.user.tag} - ${reason}` }).catch((err) => { client.logs.error("Error with Ban command: " + err) })
         if (ban) {
             await interaction.channel.sendTyping(),
-            await interaction.reply({ embeds: [banEmbed] })
+            await interaction.reply({ content: "Embed sent to channel", ephemeral: true })
+            await interaction.channel.send({ embeds: [banEmbed] })
         } else if (!ban) {
             interaction.reply({ content: `Failed to ban **${target.tag}** from **${guild.name}**`, ephemeral: true })
         }
