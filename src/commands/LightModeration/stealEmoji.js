@@ -47,7 +47,7 @@ module.exports = {
             .setAuthor({ name: `${client.user.username} steal emoji command ${client.config.devBy}`})
             .setFooter({ text: `Emoji heist successful`})
             .setTimestamp()
-            .setTitle(`${client.config.modEmojiLight} Emoji added to **${interaction.guild.name}**`)
+            .setTitle(`${client.config.modEmojiLight} Emoji added to **${interaction.guild.name}** ${client.config.arrowEmoji}`)
             .setDescription(`Emoji Details \n\n> ${emoji} added with the name of **${name}**\n\n`)
             .setThumbnail(client.user.avatarURL())
             
