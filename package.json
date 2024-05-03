@@ -15,6 +15,7 @@
     "discord-gamecord": "^4.4.1",
     "discord.js": "^14.14.1",
     "dotenv": "^16.4.5",
-    "fs": "^0.0.1-security"
+    "fs": "^0.0.1-security",
+    "puppeteer": "^22.7.1"
   }
 }

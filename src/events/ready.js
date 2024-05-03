@@ -13,7 +13,7 @@ module.exports = {
         const triggerFolder = path.join(__dirname, '../triggers'); 
         fs.readdir(triggerFolder, (err, files) => {
             if (err) {
-                console.error('Error reading trigger folder:', err);
+                client.logs.error('Error reading trigger folder:', err);
                 return;
             }
             client.logs.info(`[TRIGGERS] Started loading triggers...`);
