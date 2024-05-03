@@ -78,6 +78,7 @@ require('dotenv').config();
 
 const functions = fs.readdirSync("./src/functions").filter(file => file.endsWith(".js"));
 const eventFiles = fs.readdirSync("./src/events").filter(file => file.endsWith(".js"));
+const triggerFiles = fs.readdirSync("./src/triggers").filter(file => file.endsWith(".js"));
 const commandFolders = fs.readdirSync("./src/commands");
 
 (async () => {
@@ -85,6 +86,7 @@ const commandFolders = fs.readdirSync("./src/commands");
         require(`./functions/${file}`)(client);
     }
     client.handleEvents(eventFiles, "./src/events");
+    client.handleTriggers(triggerFiles, "./src/triggers")
     client.handleCommands(commandFolders, "./src/commands");
     client.login(process.env.token)
 })();

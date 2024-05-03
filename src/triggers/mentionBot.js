@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder, ButtonStyle, ButtonBuilder, ActionRowBuilder } = require("discord.js");
+const { Events, EmbedBuilder } = require("discord.js");
 const config = require('../config');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
         const commandList = commands.map((command) => `> **/${command.data.name}**: ${command.data.description}`).join('\n');
         
         const pingEmbed = new EmbedBuilder()
-        .setAuthor({ name: `${client.user.username} | Developed By ${config.dev}`})
+        .setAuthor({ name: `${client.user.username} ${client.config.devBy}`})
         .setTitle(`Hello I am ${client.user.username}, check out my commands below!`)
         .setDescription(`${commandList}`)
         .setColor(config.embedColor)
