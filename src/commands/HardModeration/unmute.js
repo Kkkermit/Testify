@@ -40,7 +40,7 @@ module.exports = {
             .setTitle(`> ${client.config.modEmojiHard}  You were **untimed-out** in "${interaction.guild.name}"  ${client.config.arrowEmoji}`)
             .addFields({ name: 'Server', value: `> ${interaction.guild.name}`, inline: true})
             .addFields({ name: 'Reason', value: `> ${reason}`, inline: true})
-            .setFooter({ text: `untimed-out from ${interaction.guild.name} ${client.config.devBy}`})
+            .setFooter({ text: `Untimed-out from ${interaction.guild.name} ${client.config.devBy}`})
             .setTimestamp()
             .setThumbnail(client.user.avatarURL())
 
