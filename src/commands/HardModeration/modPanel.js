@@ -130,7 +130,7 @@ module.exports = {
                 if (i.user.id !== interaction.user.id) {
                     return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
                 }
-                target.send({ embeds: [kickEmbed] }).catch((err) => { return client.logs.error('Failed to DM user.') });
+                target.send({ embeds: [kickEmbed] }).catch((err) => { return client.logs.error('[MOD_PANEL_KICK] Failed to DM user.') });
                 let kick = await guild.members.kick(target).catch((err) => {
                     client.logs.error("Error with Kick command: " + err) 
                 })
@@ -143,7 +143,7 @@ module.exports = {
                 if (i.user.id !== interaction.user.id) {
                     return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
                 }
-                target.send({ embeds: [timeoutEmbed] }).catch((err) => { return client.logs.error('Failed to DM user.') });
+                target.send({ embeds: [timeoutEmbed] }).catch((err) => { return client.logs.error('[MOD_PANEL_TIMEOUT] Failed to DM user.') });
                 let timeout = await member.timeout(length * 60000).catch((err) => {
                     client.logs.error("Error with timeout command: " + err)
                 })
@@ -162,7 +162,7 @@ module.exports = {
                 if (i.user.id !== interaction.user.id) {
                     return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
                 }
-                target.send({ embeds: [banEmbed] }).catch((err) => { return client.logs.error('Failed to DM user.') });
+                target.send({ embeds: [banEmbed] }).catch((err) => { return client.logs.error('[MOD_PANEL_BAN] Failed to DM user.') });
                 await interaction.channel.send({ embeds: [banEmbed2] });
                 let ban = await guild.members.ban(target, { reason: `${reason}`}).catch((err) => { 
                     client.logs.error("Error with Ban command: " + err) 

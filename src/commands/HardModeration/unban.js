@@ -39,8 +39,6 @@ module.exports = {
                 return interaction.reply({ content: `**Couldn't** unban user specified!`, ephemeral: true})
             })
         })
-
-        await interaction.reply({ content: "Embed sent to channel", ephemeral: true})
-        await interaction.channel.send({ embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     }
 }
