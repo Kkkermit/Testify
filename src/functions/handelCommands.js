@@ -61,7 +61,7 @@ module.exports = (client) => {
 
         (async () => {
             try {
-                client.logs.info(`[FUNCTION] Started refreshing application (/) commands.`);
+                client.logs.info(`[SLASH_COMMANDS] Started refreshing application (/) commands.`);
 
                 await rest.put(
                     Routes.applicationCommands(clientId), {
@@ -69,7 +69,7 @@ module.exports = (client) => {
                     },
                 );
 
-                client.logs.success(`[FUNCTION] Successfully reloaded application (/) commands.`);
+                client.logs.success(`[SLASH_COMMANDS] Successfully reloaded application (/) commands.`);
             } catch (error) {
                 console.error(error);
             }

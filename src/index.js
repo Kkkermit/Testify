@@ -40,6 +40,13 @@ partials: [
 client.logs = require('./utils/logs');
 client.config = require('./config');
 
+// Packages //
+
+const { DisTube } = require("distube")
+const { SpotifyPlugin } = require('@distube/spotify')
+const { SoundCloudPlugin } = require('@distube/soundcloud')
+const { YtDlpPlugin } = require('@distube/yt-dlp')
+
 // Rotating Activity //
 
 client.on("ready", async (client) => {
@@ -73,12 +80,15 @@ client.on("ready", () => {
 require('./functions/processHandlers')();
 
 client.commands = new Collection();
+client.pcommands = new Collection();
+client.aliases = new Collection();
 
 require('dotenv').config();
 
 const functions = fs.readdirSync("./src/functions").filter(file => file.endsWith(".js"));
 const eventFiles = fs.readdirSync("./src/events").filter(file => file.endsWith(".js"));
 const triggerFiles = fs.readdirSync("./src/triggers").filter(file => file.endsWith(".js"));
+const pcommandFolders = fs.readdirSync('./src/prefix');
 const commandFolders = fs.readdirSync("./src/commands");
 
 (async () => {
@@ -88,6 +98,7 @@ const commandFolders = fs.readdirSync("./src/commands");
     client.handleEvents(eventFiles, "./src/events");
     client.handleTriggers(triggerFiles, "./src/triggers")
     client.handleCommands(commandFolders, "./src/commands");
+    client.prefixCommands(pcommandFolders, './src/prefix')
     client.login(process.env.token)
 })();
 
@@ -137,3 +148,53 @@ client.on("guildDelete", async guild => {
 
 console.log(`${color.blue}[${getTimestamp()}]${color.reset} [GUILD_DELETE] ${client.user.username} has left a guild. \n${color.blue}> GuildName: ${guild.name} \n> GuildID: ${guild.id} \n> Owner: ${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`} \n> MemberCount: ${guild.memberCount}`)
 });
+
+// Music System //
+
+client.distube = new DisTube(client, {
+    leaveOnStop: false,
+    emitNewSongOnly: true,
+    emitAddSongWhenCreatingQueue: false,
+    emitAddListWhenCreatingQueue: false,
+    plugins: [
+        new SpotifyPlugin({
+            emitEventsAfterFetching: true
+        }),
+    new SoundCloudPlugin(),
+    new YtDlpPlugin()
+    ]
+})
+
+const status = queue =>
+    `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${
+        queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
+    }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``
+client.distube
+    .on('playSong', (queue, song) =>
+        queue.textChannel.send(
+            `${client.emotes.play} | Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${
+            song.user
+        }\n${status(queue)}`
+        )
+    )
+    .on('addSong', (queue, song) =>
+        queue.textChannel.send(
+            `${client.emotes.success} | Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user}`
+        )
+    )
+    .on('addList', (queue, playlist) =>
+        queue.textChannel.send(
+            `${client.emotes.success} | Added \`${playlist.name}\` playlist (${
+                playlist.songs.length
+            } songs) to queue\n${status(queue)}`
+        )
+    )
+    .on('error', (channel, e) => {
+    if (channel) channel.send(`${client.emotes.error} | An error encountered: ${e.toString().slice(0, 1974)}`)
+    else console.error(e)
+    })
+    .on('empty', channel => channel.send('Voice channel is empty! Leaving the channel...'))
+    .on('searchNoResult', (message, query) =>
+    message.channel.send(`${client.emotes.error} | No result found for \`${query}\`!`)
+    )
+    .on('finish', queue => queue.textChannel.send('Finished!'))

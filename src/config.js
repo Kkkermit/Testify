@@ -1,6 +1,7 @@
 module.exports = {
     
     // BOT INFO //
+    prefix: "?",
     status: "dnd",
     eventListeners: 100,
     dev: "Kkermit",
