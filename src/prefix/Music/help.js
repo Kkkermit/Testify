@@ -3,13 +3,17 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
   name: 'help',
   aliases: ['h', 'cmd', 'command'],
-  run: async (client, message) => {
+  async execute(message, client, args) {
+
     message.channel.send({
       embeds: [
         new EmbedBuilder()
-          .setTitle('Commands')
-          .setDescription(client.commands.map(cmd => `\`${cmd.name}\``).join(', '))
-          .setColor("Purple")
+        .setAuthor({ name: `${client.user.username} ${client.config.devBy}`})
+        .setTitle(`${client.user.username} **prefix** commands | **My prefix**: \`\`?\`\``)
+        .setDescription(client.pcommands.map(cmd => `> ${cmd.name}`).join('\n'))
+        .setColor(client.config.embedColor)
+        .setFooter({ text: `Watching over ${client.pcommands.size} commands.`})
+        .setTimestamp()
       ]
     });
   }

@@ -1,7 +1,7 @@
 module.exports = {
   name: 'leave',
   aliases: ['l'],
-  run: async (client, message) => {
+  async execute(message, client, args) {
     client.distube.voices.leave(message)
   }
 }
