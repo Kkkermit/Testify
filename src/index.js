@@ -194,7 +194,7 @@ const status = queue =>
 client.distube
     .on('playSong', (queue, song) =>
         queue.textChannel.send({
-            embeds: [new EmbedBuilder().setColor("Green")
+            embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
                 .setDescription(`🎶 | Playing \`${song.name}\` - \`${song.formattedDuration}\`\nRequested by: ${song.user
                     }\n${status(queue)}`)]
         })
@@ -202,7 +202,7 @@ client.distube
     .on('addSong', (queue, song) =>
         queue.textChannel.send(
             {
-                embeds: [new EmbedBuilder().setColor("Green")
+                embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
                     .setDescription(`🎶 | Added ${song.name} - \`${song.formattedDuration}\` to the queue by ${song.user}`)]
             }
         )
@@ -210,7 +210,7 @@ client.distube
     .on('addList', (queue, playlist) =>
         queue.textChannel.send(
             {
-                embeds: [new EmbedBuilder().setColor("Green")
+                embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
                     .setDescription(`🎶 | Added \`${playlist.name}\` playlist (${playlist.songs.length
                         } songs) to queue\n${status(queue)}`)]
             }
@@ -221,17 +221,17 @@ client.distube
         else console.error(e)
     })
     .on('empty', channel => channel.send({
-        embeds: [new EmbedBuilder().setColor("Red")
+        embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
             .setDescription('⛔ |Voice channel is empty! Leaving the channel...')]
     }))
     .on('searchNoResult', (message, query) =>
         message.channel.send(
             {
-                embeds: [new EmbedBuilder().setColor("Red")
+                embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
                     .setDescription('`⛔ | No result found for \`${query}\`!`')]
             })
     )
     .on('finish', queue => queue.textChannel.send({
-        embeds: [new EmbedBuilder().setColor("Green")
+        embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
             .setDescription('🏁 | Queue finished!')]
     }))
