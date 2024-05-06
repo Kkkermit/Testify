@@ -23,4 +23,11 @@ module.exports = {
     modEmojiLight: "<a:wompus:1235671799241510973>",
     arrowEmoji: "⤵",
 
+    // MUSIC EMOJIS //
+    musicEmojiPlay: "▶️",
+    musicEmojiStop: "⏹️",
+    musicEmojiQueue: "📄",
+    musicEmojiSuccess: "☑️",
+    musicEmojiRepeat: "🔁",
+    musicEmojiError: "❌",
 }

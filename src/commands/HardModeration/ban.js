@@ -35,7 +35,7 @@ module.exports = {
         .setFooter({ text: `Someone got got struck by the ban hammer` })
     
         const perm = interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers);
-        if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`ban\`\` command on yourself...'});
+        if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`ban\`\` command on yourself...', ephemeral: true });
         if (!perm)
             return await interaction.channel.sendTyping(),
             interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
