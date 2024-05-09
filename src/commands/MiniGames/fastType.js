@@ -38,7 +38,7 @@ module.exports = {
             },
             timeoutTime: 60000,
             sentence: sentence,
-            winMessage: '> 🎉 | You won! You finished the type race in {time} seconds with {wpm} wpm.',
+            winMessage: '> 🎉 | You won! You finished the type race in **{time}** seconds with **{wpm}** wpm.',
             loseMessage: `> You lost, you couldn't type the correct sentence in time.`,
             timeoutMessage: '> The game went unfinished.',
         });
