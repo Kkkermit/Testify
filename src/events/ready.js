@@ -1,11 +1,27 @@
 const config = require('../config');
 const fs = require('fs');
 const path = require('path');
+const mongoose = require('mongoose');
+const mongodbURL = process.env.mongodb;
 
 module.exports = {
     name: 'ready',
     once: true,
     async execute(client) {
+
+        if (!mongodbURL) return;
+
+        mongoose.set("strictQuery", false);
+        await mongoose.connect(mongodbURL || ``, {
+            keepAlive: true,
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        })
+
+        if (mongoose.connect) {
+            client.logs.success('[DATABASE] Connected to MongoDB successfully.')
+        }
+
         client.logs.success(`[BOT] ${client.user.username} has been launched!`);
         client.logs.info(`[EVENTS] Started loading events...`)
         client.logs.success(`[EVENTS] Loaded ${client.eventNames().length} events.`);

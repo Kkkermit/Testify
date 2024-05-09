@@ -1,7 +1,7 @@
 const fs = require('node:fs');
 
-module.exports = function () {
-	const schemas = fs.readdirSync('../schemas').filter(file => file.endsWith(".js"));
+module.exports = function (client) {
+	const schemas = fs.readdirSync(`../../src/schemas`).filter(file => file.endsWith(".js"));
 
 	const schemaExports = {};
 
@@ -10,6 +10,7 @@ module.exports = function () {
 		schemaExports[fileName] = require(`../schemas/${file}`);
 	}
 	client.logs.info("[SCHEMAS] Started loading schemas...")
+	client.logs.success(`[SCHEMAS] Loaded ${schemas.length} schemas.`)
 
 	return schemaExports;
 }
