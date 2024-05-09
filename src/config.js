@@ -16,6 +16,7 @@ module.exports = {
     embedModHard: "DarkRed",
     embedInfo: "LuminousVividPink",
     embedMusic: "Gold",
+    embedMiniGames: "Orange",
 
     // EMOJIS //
     automodEmoji: "<:auto:1235660206856474704>",
