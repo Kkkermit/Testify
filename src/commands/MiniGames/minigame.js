@@ -380,7 +380,7 @@ module.exports = {
             break;
             case 'would-you-rather':
 
-            const questions = require('../../wouldYouRather.json');
+            const questions = require('../../jsons/wouldYouRather.json');
             const randomize = questions[Math.floor(Math.random() * questions.length)]
 
             const embed1 = new EmbedBuilder()
