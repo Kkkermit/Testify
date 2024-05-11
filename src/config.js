@@ -25,6 +25,7 @@ module.exports = {
     automodEmoji: "<:auto:1235660206856474704>",
     modEmojiHard: "<a:mod:1235642403986083840>",
     modEmojiLight: "<a:wompus:1235671799241510973>",
+    pepeCoffeeEmoji: "<:pepe:1238878395303989309>",
     arrowEmoji: "⤵",
     errorEmoji: "❌",
 

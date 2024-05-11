@@ -18,6 +18,7 @@
     "apexify.js": "^3.3.6",
     "ascii-table": "^0.0.9",
     "axios": "^1.6.8",
+    "canvas": "^2.11.2",
     "discord-gamecord": "^4.4.2",
     "discord.js": "^14.14.1",
     "distube": "^4.1.1",
