@@ -8,7 +8,7 @@ module.exports = {
 
         const role = message.guild.roles.cache.get(args[0]) || message.mentions.roles.first();
 
-        if (!role) return message.channel.send({ embeds: [new EmbedBuilder().setColor(client.config.embedInfo).setDescription(`${client.config.errorEmoji} I couldn't find the role ${args[0] || ''}`)] });
+        if (!role) return message.channel.send({ embeds: [new EmbedBuilder().setColor(client.config.embedInfo).setDescription(`I couldn't find the role ${args[0] || ''}`)], ephemeral: true });
 
         const perms = {
 			administrator: 'Administrator',
