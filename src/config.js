@@ -1,3 +1,5 @@
+const { error } = require("./utils/logs");
+
 module.exports = {
     
     // BOT INFO //
@@ -24,6 +26,7 @@ module.exports = {
     modEmojiHard: "<a:mod:1235642403986083840>",
     modEmojiLight: "<a:wompus:1235671799241510973>",
     arrowEmoji: "⤵",
+    errorEmoji: "❌",
 
     // MUSIC EMOJIS //
     musicEmojiPlay: "▶️",
