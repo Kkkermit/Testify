@@ -6,6 +6,7 @@ module.exports = {
     eventListeners: 100,
     dev: "Kkermit",
     devBy: "| Developed by kkermit",
+    developers: "526853643962679323",
     noPerms: `You **do not** have the permission to do that!`,
 
     // EMBED COLORS //
