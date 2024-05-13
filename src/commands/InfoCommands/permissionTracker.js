@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("disc
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("permissions")
-    .setDescription("Displays Permissions")
+    .setDescription("Displays permissions of given user.")
     .addUserOption(option => option.setName("user").setDescription("The user to get permissions for").setRequired(false)),
     
     async execute(interaction, client) {

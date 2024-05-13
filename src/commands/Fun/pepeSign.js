@@ -46,7 +46,7 @@ module.exports = {
         const attachment = new AttachmentBuilder(canvas.toBuffer(), { name: "pepesign.png" });
 
         const embed = new EmbedBuilder()
-            .setColor(client.config.embedCommunity)
+            .setColor(client.config.embedFun)
             .setTitle(`${client.user.username} Pepe Sign ${client.config.arrowEmoji}`)
             .setImage("attachment://pepesign.png")
             .setFooter({ text: `Pepe sign created ${client.config.devBy}`})
