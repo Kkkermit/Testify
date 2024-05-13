@@ -33,7 +33,7 @@ module.exports = {
         const embed = new EmbedBuilder()
         .setAuthor({ name: `${client.user.username} Hacking System`})
         .setColor(client.config.embedFun)
-        .setTitle(`> **${target}'s** data`)
+        .setTitle(`**${target.tag}'s** data ${client.config.arrowEmoji}`)
         .addFields(
             { name: `> Device Password:`, value: `\`\`Device Password: ${target.tag}845!!\`\``},
             { name: `> ID:`, value: `\`\`ID: 1234567890\`\`` },
