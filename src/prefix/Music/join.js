@@ -7,11 +7,11 @@ module.exports = {
 
     const embed = new EmbedBuilder()
       .setColor(client.config.embedMusic)
-      .setDescription(`${client.client.musicEmojiError} | ${args[0]} **is not** a valid voice channel!`)
+      .setDescription(`${client.config.musicEmojiError} | ${args[0]} **is not** a valid voice channel!`)
 
     const embed1 = new EmbedBuilder()
       .setColor(client.config.embedMusic)
-      .setDescription(`${client.client.musicEmojiError} | You **must** be in a voice channel or enter a voice channel id!`)
+      .setDescription(`${client.config.musicEmojiError} | You **must** be in a voice channel or enter a voice channel id!`)
 
     let voiceChannel = message.member.voice.channel
     if (args[0]) {

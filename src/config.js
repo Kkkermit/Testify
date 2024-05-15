@@ -1,3 +1,5 @@
+const bugReport = require("./commands/Devs/bugReport");
+const suggestion = require("./commands/Devs/suggestion");
 const { error } = require("./utils/logs");
 
 module.exports = {
@@ -21,6 +23,7 @@ module.exports = {
     embedMusic: "Gold",
     embedMiniGames: "Orange",
     embedFun: "Yellow",
+    embedDev: "Aqua",
 
     // EMOJIS //
     automodEmoji: "<:auto:1235660206856474704>",
@@ -37,4 +40,9 @@ module.exports = {
     musicEmojiSuccess: "☑️",
     musicEmojiRepeat: "🔁",
     musicEmojiError: "❌",
+
+    // CHANNEL IDS //
+    suggestionChannel: "1240335460463677503",
+    bugReportChannel: "1240341717031456840",
 }
+

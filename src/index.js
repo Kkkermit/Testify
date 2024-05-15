@@ -164,7 +164,7 @@ client.distube = new DisTube(client, {
     new SoundCloudPlugin(),
     new YtDlpPlugin()
     ]
-})
+});
 
 client.on('messageCreate', async message => {
     if (message.author.bot || !message.guild) return
