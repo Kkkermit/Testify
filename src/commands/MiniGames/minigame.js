@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { Wordle, Connect4, TwoZeroFourEight, Minesweeper, RockPaperScissors, Snake, TicTacToe, MatchPairs, Hangman, Flood, FindEmoji } = require('discord-gamecord');
+const { Wordle, Connect4, TwoZeroFourEight, Minesweeper, RockPaperScissors, Snake, TicTacToe, MatchPairs, Hangman, Flood, FindEmoji, Slots } = require('discord-gamecord');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,7 +17,8 @@ module.exports = {
     .addSubcommand(subcommand => subcommand.setName('hangman').setDescription('Play a game of Hangman!'))
     .addSubcommand(subcommand => subcommand.setName('flood').setDescription('Play a game of Flood!'))
     .addSubcommand(subcommand => subcommand.setName('find-emoji').setDescription('Play a game of Find Emoji!'))
-    .addSubcommand(subcommand => subcommand.setName('would-you-rather').setDescription('Play a game of Would You Rather!')),
+    .addSubcommand(subcommand => subcommand.setName('would-you-rather').setDescription('Play a game of Would You Rather!'))
+    .addSubcommand(subcommand => subcommand.setName('slots').setDescription('Play a game of Slots!')),
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
@@ -378,6 +379,26 @@ module.exports = {
             }
             
             break;
+            case "slots":
+
+            const gameSlots = new Slots({
+                message: interaction,
+                isSlashGame: true,
+                embed: {
+                    title: '> Slot Machine',
+                    color: client.config.embedMiniGames
+                },
+                slots: ['🍇', '🍊', '🍋', '🍌']
+            });
+            
+            try {
+                await gameSlots.startGame();
+            } catch (err) {
+                console.log(err);
+                await interaction.reply('\`\`\`There was an error starting the game!\`\`\`');
+            }
+
+            break;
             case 'would-you-rather':
 
             const questions = require('../../jsons/wouldYouRather.json');
@@ -409,7 +430,7 @@ module.exports = {
             .setFooter({ text: `Random Question chosen`})
             .setColor(client.config.embedMiniGames)
             .setTimestamp()
- 
+
             const button1 = new ActionRowBuilder()
             .addComponents(
                 new ButtonBuilder()
