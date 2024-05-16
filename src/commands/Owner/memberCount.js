@@ -3,7 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('bot-member-count')
-    .setDescription('Shows the amount of members the bot watches over.')
+    .setDescription('Shows the amount of members the bot watches over (OWNER ONLY COMMAND).')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction, client) {
         
