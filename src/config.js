@@ -44,5 +44,7 @@ module.exports = {
     // CHANNEL IDS //
     suggestionChannel: "1240335460463677503",
     bugReportChannel: "1240341717031456840",
+    botLeaveChannel: "1139731092329480332",
+    botJoinChannel: "1240480049681928203"
 }
 
