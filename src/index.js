@@ -294,6 +294,5 @@ client.on(Events.InteractionCreate, async interaction => {
         .setFooter({ text: `Command Logger ${client.config.devBy}`, iconURL: interaction.user.avatarURL({ dynamic: true })})
 
         await channel.send({ embeds: [embed] });
-        
     }
 })
