@@ -1,7 +1,3 @@
-const bugReport = require("./commands/Devs/bugReport");
-const suggestion = require("./commands/Devs/suggestion");
-const { error } = require("./utils/logs");
-
 module.exports = {
     
     // BOT INFO //

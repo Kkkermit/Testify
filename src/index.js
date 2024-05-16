@@ -145,13 +145,12 @@ client.on("guildCreate", async guild => {
         { name: "Owner Info", value: `>>> \`\`\`${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`}\`\`\`` },
         { name: "Member Count", value: `>>> \`\`\`${guild.memberCount}\`\`\`` },
         { name: "Server Number", value: `>>> \`\`\`${client.guilds.cache.size}\`\`\`` },
-        { name: "Server Invite", value: `>>> \`\`\`${invite}\`\`\`` }
-    )
+        { name: "Server Invite", value: `>>> \`\`\`${invite}\`\`\`` })
     .setThumbnail(guild.iconURL({ dynamic: true }))
     .setFooter({ text: `Orbit ${client.guilds.cache.size}`, iconURL: client.user.avatarURL({ dynamic: true }) })
     .setTimestamp();
 
-    const LogChannel = client.channels.cache.get(logcchannelid) || await client.channels.fetch(logchannelid).catch(() => {}) || false;
+    const LogChannel = client.channels.cache.get(logchannelid) || await client.channels.fetch(logchannelid).catch(() => {}) || false;
     if (LogChannel) LogChannel.send({ embeds: [embed] }).catch(console.warn);
 
 console.log(`${color.orange}[${getTimestamp()}]${color.reset} [GUILD_CREATE] ${client.user.username} has been added to a new guild. \n${color.orange}> GuildName: ${guild.name} \n> GuildID: ${guild.id} \n> Owner: ${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`} \n> MemberCount: ${guild.memberCount} \n> ServerNumber: ${client.guilds.cache.size} \n> ServerInvite: ${invite}`)
