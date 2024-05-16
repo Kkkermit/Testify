@@ -45,7 +45,7 @@ module.exports = {
             const embed = new EmbedBuilder()
             .setColor(client.config.embedModLight)
             .setAuthor({ name: `${client.user.username} steal emoji command ${client.config.devBy}`})
-            .setFooter({ text: `Emoji heist successful`})
+            .setFooter({ text: `Emoji heist successful | Added by ${interaction.user.username}`})
             .setTimestamp()
             .setTitle(`${client.config.modEmojiLight} Emoji added to **${interaction.guild.name}** ${client.config.arrowEmoji}`)
             .setDescription(`Emoji Details \n\n> ${emoji} added with the name of **${name}**\n\n`)
