@@ -29,7 +29,7 @@ module.exports = {
         .setColor(client.config.embedModLight)
         .setDescription(`> Successfully assigned the role **<@&${role.id}>** to **${member.user.username}**`)
         .setThumbnail(client.user.avatarURL())
-        .setFooter({ text: `Role assignment` })
+        .setFooter({ text: `Role assigned by ${interaction.user.username}` })
         .setTimestamp()
 
         await interaction.reply({ embeds: [embed] });
