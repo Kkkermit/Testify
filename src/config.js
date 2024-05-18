@@ -21,6 +21,7 @@ module.exports = {
     embedMiniGames: "Orange",
     embedFun: "Yellow",
     embedDev: "Aqua",
+    embedProfile: "Navy",
 
     // EMOJIS //
     automodEmoji: "<:auto:1235660206856474704>",
