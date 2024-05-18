@@ -1,11 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('soundboard')
-    .setDMPermission(false)
-    .setDescription('Play a sound ')
+    .setDescription('Play a sound effect in your voice channel.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.UseSoundboard)
     .addStringOption(option => option.setName('sound').setDescription('Your choice').setRequired(true)
         .addChoices(
             {name:'Bruh',value:'Bruh'},       
@@ -14,6 +14,9 @@ module.exports = {
     ),
     async execute(interaction, client) {
         const sound = interaction.options.getString('sound');
+
+        if (!interaction.member.permissions.has(PermissionFlagsBits.UseSoundboard)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+
         let audioURL;
 
         if (sound === 'Bruh') {
