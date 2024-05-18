@@ -10,7 +10,7 @@ module.exports = {
         
         const canvas = Canvas.createCanvas(200, 200);
         const ctx = canvas.getContext("2d");
-        const blankSign = await Canvas.loadImage("https://cdn.discordapp.com/attachments/1236758171385729156/1236758171519942756/UNfSMpT.png?ex=66406c8d&is=663f1b0d&hm=c9747f69f916bdaf122ca95720d0a95f38b031e6a2cbee60f9b23d7898dc309b&");
+        const blankSign = await Canvas.loadImage("https://i.postimg.cc/28bjZ4GW/pepesign.png");
         
         const signText = interaction.options.getString("text").trim();
 

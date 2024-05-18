@@ -10,7 +10,7 @@ welcomeCanvas.context.font = "72px sans-serif";
 welcomeCanvas.context.fillStyle = "#ffffff";
 
 Canvas.loadImage(
-    "https://cdn.discordapp.com/attachments/1096544053069353040/1240693177372114984/Testi_9.png?ex=66477d10&is=66462b90&hm=a061469308738aea5ff00cdd53d74af076b76cd478e574b90cd1536b5695848f&"
+    "https://i.postimg.cc/DwNqcd3K/Testi-9.png"
 ).then(async (img) => {
     welcomeCanvas.context.drawImage(img, 0, 0, 1024, 500);
     welcomeCanvas.context.fillText("Welcome", 360, 360);
