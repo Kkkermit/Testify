@@ -25,7 +25,7 @@ module.exports = {
 
         const embed = new EmbedBuilder()
         .setAuthor({ name: `Give Role Command ${client.config.devBy}`})
-        .setTitle(`${client.user.username} Role Assignment ${client.config.arrowEmoji}`)
+        .setTitle(`>  ${client.config.modEmojiLight} ${client.user.username} Role Assignment ${client.config.arrowEmoji}`)
         .setColor(client.config.embedModLight)
         .setDescription(`> Successfully assigned the role **<@&${role.id}>** to **${member.user.username}**`)
         .setThumbnail(client.user.avatarURL())
