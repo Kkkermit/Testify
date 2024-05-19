@@ -4,6 +4,7 @@ module.exports = {
     name: 'clear',
     aliases : ['purge'],
     async execute(message, client, args) {
+        
         const amount = args[0];
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
 

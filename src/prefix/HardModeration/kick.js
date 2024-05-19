@@ -8,7 +8,7 @@ module.exports = {
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
 
         if (!message.member.permissions.has(PermissionFlagsBits.KickMembers)) return message.reply({ content: `${client.config.noPerms}`, ephemeral: true });
-        if (!user) return message.reply({ content: 'Please mention a **user** to kick.', ephemeral: true });
+        if (!user) return message.channel.send({ content: 'Please mention a **user** to kick.', ephemeral: true });
 
         const reason = args.slice(1).join(' ') || `\`\`No reason given\`\``;
 
