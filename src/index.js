@@ -283,7 +283,7 @@ client.on(Events.InteractionCreate, async interaction => {
     if (!interaction.isChatInputCommand()) return;
     else {
 
-        const channel = await client.channels.cache.get(client.config.commandLoggingChannel);
+        const channel = await client.channels.cache.get(client.config.slashCommandLoggingChannel);
         const server = interaction.guild.name;
         const user = interaction.user.username;
         const userID = interaction.user.id;
@@ -307,7 +307,7 @@ client.on(Events.MessageCreate, async message => {
     const prefix = client.config.prefix
     if (!message.author.bot && message.content.startsWith(prefix)) {
 
-        const channel = await client.channels.cache.get(client.config.commandLoggingChannel);
+        const channel = await client.channels.cache.get(client.config.prefixCommandLoggingChannel);
         const server = message.guild.name;
         const user = message.author.username;
         const userID = message.author.id;
