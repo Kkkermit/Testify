@@ -1,13 +1,12 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const QuickChart = require('quickchart-js');
 
 module.exports = {
-    data: new SlashCommandBuilder()
-        .setName('member-count')
-        .setDescription('Shows the number of members on the server.'),
-    async execute(interaction, client) {
+    name: 'membercount',
+    aliases: ['membercountgraph'],
+    async execute(message, client, args) {
 
-        const guild = interaction.guild;
+        const guild = message.guild;
         const totalMembers = guild.memberCount;
         const botMembers = guild.members.cache.filter(member => member.user.bot).size;
         const humanMembers = totalMembers - botMembers;
@@ -43,15 +42,14 @@ module.exports = {
         const chartUrl = await chart.getShortUrl();
 
         const embed = new EmbedBuilder()
-        
-            .setAuthor({ name: `Member Graph`, iconURL: guild.iconURL({ size: 1024 })})
-            .setTitle(`Member Count for ${guild.name} ${client.config.arrowEmoji}`)
-            .setColor(client.config.embedInfo)
-            .setDescription(`Total: **${totalMembers}**\nMembers: **${humanMembers}**\nBots: **${botMembers}**\nLast 24h: **${last24Hours}**\nLast 7 days: **${last7Days}**`)
-            .setImage(chartUrl)
-            .setFooter({ text: `Member count ${client.config.devBy}` })
-            .setTimestamp();
+        .setAuthor({ name: `Member Graph`, iconURL: guild.iconURL({ size: 1024 })})
+        .setTitle(`Member Count for ${guild.name} ${client.config.arrowEmoji}`)
+        .setColor(client.config.embedInfo)
+        .setDescription(`Total: **${totalMembers}**\nMembers: **${humanMembers}**\nBots: **${botMembers}**\nLast 24h: **${last24Hours}**\nLast 7 days: **${last7Days}**`)
+        .setImage(chartUrl)
+        .setFooter({ text: `Member count ${client.config.devBy}` })
+        .setTimestamp();
 
-        await interaction.reply({ embeds: [embed] });
-    },
-};
+        message.channel.send({ embeds: [embed]});
+    }
+}

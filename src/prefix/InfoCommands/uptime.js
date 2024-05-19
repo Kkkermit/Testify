@@ -1,10 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
-    data: new SlashCommandBuilder()
-    .setName('bot-uptime')
-    .setDescription(`Displays the bots current uptime.`),
-    async execute(interaction, client) {
+    name: 'uptime',
+    aliases: ['botuptime'],
+    async execute(message, client, args) {
 
         let totalSeconds = (client.uptime / 1000);
         let days = Math.floor(totalSeconds / 86400);
@@ -25,7 +24,6 @@ module.exports = {
         .setFooter({ text: `Uptime command`})
         .setTimestamp()
 
-        await interaction.reply({ content: "Message sent to channel", ephemeral: true});
-        await interaction.channel.send({ embeds: [uptimeEmbed]});
-    },
-};
+        message.channel.send({ embeds: [uptimeEmbed]});
+    }
+}
