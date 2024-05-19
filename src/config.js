@@ -22,6 +22,7 @@ module.exports = {
     embedFun: "Yellow",
     embedDev: "Aqua",
     embedProfile: "Navy",
+    embedAuditLogs: "Purple",
 
     // EMOJIS //
     automodEmoji: "<:auto:1235660206856474704>",
@@ -30,6 +31,7 @@ module.exports = {
     pepeCoffeeEmoji: "<:pepe:1238878395303989309>",
     arrowEmoji: "⤵",
     errorEmoji: "❌",
+    auditLogEmoji: "📋",
 
     // MUSIC EMOJIS //
     musicEmojiPlay: "▶️",
