@@ -21,7 +21,7 @@ module.exports = {
             .setThumbnail(client.user.avatarURL())
             .setFooter({ text: `Banned - ${message.channel.guild} ${client.config.devBy}` });
 
-            user.send({ embeds: [dmEmbed] })
+            user.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error('[KICK] Failed to DM user.') });
             user.ban({ reason: reason })
 
             const banSuccess = new EmbedBuilder()
