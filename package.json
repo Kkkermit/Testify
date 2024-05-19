@@ -20,6 +20,7 @@
     "ascii-table": "^0.0.9",
     "axios": "^1.6.8",
     "canvacord": "^5.4.8",
+    "canvafy": "^7.1.0",
     "canvas": "^2.11.2",
     "discord-arts": "^0.5.8",
     "discord-gamecord": "^4.4.2",

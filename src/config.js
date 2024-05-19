@@ -23,6 +23,7 @@ module.exports = {
     embedDev: "Aqua",
     embedProfile: "Navy",
     embedAuditLogs: "Purple",
+    embedLevels: "Fuchsia",
 
     // EMOJIS //
     automodEmoji: "<:auto:1235660206856474704>",
