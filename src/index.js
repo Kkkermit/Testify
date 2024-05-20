@@ -1035,7 +1035,7 @@ client.on(Events.MessageCreate, async (message, err) => {
         .setColor(client.config.embedLevels)
         .setAuthor({ name: `Leveling System ${client.config.devBy}` })
         .setTitle(`> ${client.user.username} Leveling System ${client.config.arrowEmoji}`)
-        .setDescription(`\`\`\`${author.username} has leveled up to level **${data.Level}**!\`\`\``)
+        .setDescription(`\`\`\`${author.username} has leveled up to level ${data.Level}!\`\`\``)
         .setThumbnail(author.avatarURL({ dynamic: true }))
         .setFooter({ text: `${author.username} Leveled Up`})
         .setTimestamp()

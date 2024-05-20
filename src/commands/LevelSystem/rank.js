@@ -45,11 +45,6 @@ module.exports = {
 
         const attachment = new AttachmentBuilder(Card, { name: "rank.png"})
 
-        const embed2 = new EmbedBuilder()
-        .setColor(client.config.embedLevels)
-        .setTitle(`${member.user.username}'s Rank Card`)
-        .setImage("attachment://rank.png")
-
-        await interaction.editReply({ embeds: [embed2], files: [attachment] })
+        await interaction.editReply({ files: [attachment] })
     }
 }
