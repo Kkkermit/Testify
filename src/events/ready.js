@@ -9,6 +9,8 @@ module.exports = {
     once: true,
     async execute(client) {
 
+        client.logs.info(`[SCHEMAS] Started loading schemas...`);
+
         if (!mongodbURL) return;
 
         mongoose.set("strictQuery", false);
@@ -20,6 +22,15 @@ module.exports = {
 
         if (mongoose.connect) {
             client.logs.success('[DATABASE] Connected to MongoDB successfully.')
+
+            const schemaFolder = path.join(__dirname, '../schemas'); 
+            fs.readdir(schemaFolder, (err, files) => {
+                if (err) {
+                    client.logs.error('[ERROR] Error reading schemas folder:', err);
+                    return;
+                }
+                client.logs.success(`[SCHEMAS] Loaded ${files.length} schema files.`);
+            });
         }
 
         client.logs.success(`[BOT] ${client.user.username} has been launched!`);
