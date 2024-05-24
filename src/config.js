@@ -24,6 +24,7 @@ module.exports = {
     embedProfile: "Navy",
     embedAuditLogs: "Purple",
     embedLevels: "Fuchsia",
+    embedEconomy: "DarkOrange",
 
     // EMOJIS //
     automodEmoji: "<:auto:1235660206856474704>",
