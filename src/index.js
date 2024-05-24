@@ -54,6 +54,7 @@ const voiceSchema = require('./schemas/voiceChannelMembersSystem');
 const AuditLog = require('./schemas/auditLoggingSystem');
 const levelSchema = require('./schemas/userLevelSystem');
 const levelschema = require('./schemas/levelSetupSystem');
+const roleSchema = require("./schemas/autoRoleSystem");
 
 // Rotating Activity //
 
@@ -475,15 +476,15 @@ client.on(Events.GuildMemberAdd, async (member) => {
         .setTitle("Logs | New Member Joined")
         .setColor(client.config.embedAuditLogs)
         .addFields([
-            { name: "👤 Member", value: `${member.user.tag} (${member.id})`, inline: true },
-            { name: "👥 Total Members", value: `${member.guild.memberCount}`, inline: true },
-            { name: '\u200B', value: '\u200B', inline: true },
-            { name: "📅 Joined", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`, inline: true },
-            { name: "📅 User Joined Discord", value: `<t:${Math.floor(member.user.createdAt.getTime() / 1000)}:R>`, inline: true },
+            { name: "Member", value: `> ${member.user.tag} (${member.id})` },
+            { name: "Total Members", value: `> ${member.guild.memberCount}` },
+            { name: '\u200B', value: '> \u200B' },
+            { name: "Joined", value: `> <t:${Math.floor(member.joinedTimestamp / 1000)}:F>` },
+            { name: "User Joined Discord", value: `> <t:${Math.floor(member.user.createdAt.getTime() / 1000)}:R>` },
         ])
         .setDescription(`${member.user} Joined`)
         .setTimestamp()
-        .setFooter({ text: "Member Join" })
+        .setFooter({ text: `${client.user.username} Member Join Logs` })
         .setThumbnail(client.user.avatarURL({ dynamic: true}))
 
         await logChannel.send({ embeds: [embed] });
@@ -502,27 +503,27 @@ client.on(Events.ChannelUpdate, async (oldChannel, newChannel) => {
     let changes = [];
     
     if (oldChannel.name !== newChannel.name) {
-        changes.push(`Name from **${oldChannel.name}** to **${newChannel.name}**`);
+        changes.push(`> Name from **${oldChannel.name}** to **${newChannel.name}**`);
     }
     
     if (oldChannel.topic !== newChannel.topic) {
-        changes.push(`Topic updated`);
+        changes.push(`> Topic updated`);
     }
     
     if (oldChannel.nsfw !== newChannel.nsfw) {
-        changes.push(`NSFW status changed to **${newChannel.nsfw ? 'Yes' : 'No'}**`);
+        changes.push(`> NSFW status changed to **${newChannel.nsfw ? 'Yes' : 'No'}**`);
     }
     
     if (oldChannel.rateLimitPerUser !== newChannel.rateLimitPerUser) {
-        changes.push(`Slow mode set to **${newChannel.rateLimitPerUser}** seconds`);
+        changes.push(`> Slow mode set to **${newChannel.rateLimitPerUser}** seconds`);
     }
     
     if (oldChannel.rawPosition !== newChannel.rawPosition) {
-        changes.push(`Position changed`);
+        changes.push(`> Position changed`);
     }
     
     if (JSON.stringify(oldChannel.permissionOverwrites.cache) !== JSON.stringify(newChannel.permissionOverwrites.cache)) {
-        changes.push(`Permissions modified`);
+        changes.push(`> Permissions modified`);
     }
 
     if (changes.length === 0) return;
@@ -532,7 +533,7 @@ client.on(Events.ChannelUpdate, async (oldChannel, newChannel) => {
     .setColor(client.config.embedAuditLogs)
     .setDescription(`**${newChannel.name}** was updated:\n- ${changes.join('\n- ')}`)
     .setTimestamp()
-    .setFooter({ text: "Channel Update" })
+    .setFooter({ text: `${client.user.username} Channel Updated Logs` })
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
 
     await logChannel.send({ embeds: [embed] });
@@ -557,13 +558,13 @@ client.on(Events.MessageDelete, async (message) => {
             .setTitle("Logs | Message Deleted")
             .setColor(client.config.embedAuditLogs)
             .addFields(
-                { name: "👤 Author", value: `${message.author.tag}`, inline: true },
-                { name: "📚 Channel", value: `<#${message.channel.id}>`, inline: true },
-                { name: "📄 Content", value: `${contentPreview}`, inline: false },
+                { name: "Author", value: `> ${message.author.tag}` },
+                { name: "Channel", value: `> <#${message.channel.id}>` },
+                { name: "Content", value: `> ${contentPreview}` },
             )
             .setDescription(`A message was deleted.`)
             .setTimestamp()
-            .setFooter({ text: "Message Deletion" })
+            .setFooter({ text: `${client.user.username} Message Deleted Logs`})
             .setThumbnail(client.user.avatarURL({ dynamic: true}))
 
             await logChannel.send({ embeds: [embed] });
@@ -590,13 +591,13 @@ client.on(Events.MessageCreate, async (message) => {
             .setTitle("Logs | Message Created")
             .setColor(client.config.embedAuditLogs)
             .addFields(
-                { name: "👤 Author", value: `${message.author.tag}`, inline: true },
-                { name: "📚 Channel", value: `<#${message.channel.id}>`, inline: true },
-                { name: "📄 Content", value: `${contentPreview}`, inline: false },
+                { name: "Author", value: `> ${message.author.tag}` },
+                { name: "Channel", value: `> <#${message.channel.id}>` },
+                { name: "Content", value: `> ${contentPreview}` },
             )
             .setDescription(`A message was created.`)
             .setTimestamp()
-            .setFooter({ text: "Message Creation" })
+            .setFooter({ text: `${client.user.username} Message Created Logs` })
             .setThumbnail(client.user.avatarURL({ dynamic: true}))
 
             await logChannel.send({ embeds: [embed] });
@@ -617,14 +618,14 @@ client.on(Events.ChannelCreate, async (channel) => {
             .setTitle("Logs | Channel Created")
             .setColor(client.config.embedAuditLogs)
             .addFields(
-                { name: "📚 Channel", value: `<#${channel.id}>`, inline: true },
-                { name: "Channel Type", value: `${channel.type}`, inline: true },
-                { name: "Channel ID", value: `${channel.id}`, inline: false },
+                { name: "Channel", value: `> <#${channel.id}>` },
+                { name: "Channel Type", value: `> ${channel.type}` },
+                { name: "Channel ID", value: `> ${channel.id}` },
             )
             .setThumbnail(client.user.avatarURL({ dynamic: true}))
             .setDescription(`A new channel was created.`)
             .setTimestamp()
-            .setFooter({ text: "Channel Creation" });
+            .setFooter({ text: `${client.user.username} Channel Creation Logs` });
 
             await logChannel.send({ embeds: [embed] });
         }
@@ -644,14 +645,14 @@ client.on(Events.ChannelDelete, async (channel) => {
             .setTitle("Logs | Channel Deleted")
             .setColor(client.config.embedAuditLogs)
             .addFields(
-                { name: "📚 Channel Name", value: `${channel.name}`, inline: true },
-                { name: "Channel Type", value: `${channel.type}`, inline: true },
-                { name: "Channel ID", value: `${channel.id}`, inline: false },
+                { name: "Channel Name", value: `> ${channel.name}` },
+                { name: "Channel Type", value: `> ${channel.type}` },
+                { name: "Channel ID", value: `> ${channel.id}` },
             )
             .setThumbnail(client.user.avatarURL({ dynamic: true}))
             .setDescription(`A channel was deleted.`)
             .setTimestamp()
-            .setFooter({ text: "Channel Deletion" });
+            .setFooter({ text: `${client.user.username} Channel Deleted Logs` });
 
             await logChannel.send({ embeds: [embed] });
         }
@@ -669,17 +670,17 @@ client.on(Events.GuildMemberRemove, async (member) => {
             .setTitle("Logs | Member Left")
             .setColor(client.config.embedAuditLogs)
             .addFields(
-                { name: "👤 Member", value: `${member.user.tag} (${member.id})`, inline: false },
-                { name: "Username", value: `${member.user.username}`, inline: true },
-                { name: "Discriminator", value: `#${member.user.discriminator}`, inline: true },
-                { name: "User ID", value: `${member.user.id}`, inline: true },
-                { name: "Joined", value: `<t:${Math.floor(member.joinedTimestamp / 1000)}:F>`, inline: true },
-                { name: "Account Created", value: `<t:${Math.floor(member.user.createdTimestamp / 1000)}:R>`, inline: true },
+                { name: "Member", value: `> ${member.user.tag} (${member.id})` },
+                { name: "Username", value: `> ${member.user.username}` },
+                { name: "Discriminator", value: `> #${member.user.discriminator}` },
+                { name: "User ID", value: `> ${member.user.id}` },
+                { name: "Joined", value: `> <t:${Math.floor(member.joinedTimestamp / 1000)}:F>` },
+                { name: "Account Created", value: `> <t:${Math.floor(member.user.createdTimestamp / 1000)}:R>` },
             )
             .setDescription(`A member has left or was kicked from the guild.`)
             .setThumbnail(client.user.avatarURL({ dynamic: true}))
             .setTimestamp()
-            .setFooter({ text: "Member Removal" });
+            .setFooter({ text: `${client.user.username} Member Delete Logs` });
 
             if (member.user.displayAvatarURL()) {
                 embed.setThumbnail(member.user.displayAvatarURL());
@@ -711,16 +712,16 @@ client.on('roleCreate', async (role) => {
     .setTitle("Logs | Role Created")
     .setColor(client.config.embedAuditLogs)
     .addFields(
-        { name: "Role Name", value: `${role.name}`, inline: true },
-        { name: "Role ID", value: `${role.id}`, inline: true },
-        { name: "Created By", value: `${executor}`, inline: false },
-        { name: "Permissions", value: `${role.permissions.toString() ? "No Permissions Added" : role.permissions.toString()}`, inline: false },
-        { name: "Mentionable", value: `${role.mentionable ? "Yes" : "No"}`, inline: true },
-        { name: "Hoisted", value: `${role.hoist ? "Yes" : "No"}`, inline: true },
+        { name: "Role Name", value: `> ${role.name}` },
+        { name: "Role ID", value: `> ${role.id}` },
+        { name: "Created By", value: `> ${executor}` },
+        { name: "Permissions", value: `> ${role.permissions.toString() ? "No Permissions Added" : role.permissions.toString()}` },
+        { name: "Mentionable", value: `> ${role.mentionable ? "Yes" : "No"}` },
+        { name: "Hoisted", value: `> ${role.hoist ? "Yes" : "No"}` },
     )
     .setTimestamp()
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
-    .setFooter({ text: "Role Creation" });
+    .setFooter({ text: `${client.user.username} Role Created Logs` });
 
     await logChannel.send({ embeds: [embed] });
 });
@@ -743,19 +744,19 @@ client.on('roleUpdate', async (oldRole, newRole) => {
     const removedPermissions = oldPermissions.remove(newPermissions).toArray();
 
     if (addedPermissions.length > 0) {
-        changes.push({ name: "Added Permissions", value: `${addedPermissions.join(", ")}` });
+        changes.push({ name: "Added Permissions", value: `> ${addedPermissions.join(", ")}` });
     }
 
     if (removedPermissions.length > 0) {
-        changes.push({ name: "Removed Permissions", value: `${removedPermissions.join(", ")}` });
+        changes.push({ name: "Removed Permissions", value: `> ${removedPermissions.join(", ")}` });
     }
 
     if (oldRole.mentionable !== newRole.mentionable) {
-        changes.push({ name: "Mentionable", value: `Changed to "${newRole.mentionable ? 'Yes' : 'No'}"` });
+        changes.push({ name: "Mentionable", value: `Changed to "> ${newRole.mentionable ? 'Yes' : 'No'}"` });
     }
     
     if (oldRole.hoist !== newRole.hoist) {
-        changes.push({ name: "Hoisted", value: `Changed to "${newRole.hoist ? 'Yes' : 'No'}"` });
+        changes.push({ name: "Hoisted", value: `Changed to "> ${newRole.hoist ? 'Yes' : 'No'}"` });
     }
 
     if (changes.length === 0) return;
@@ -766,7 +767,7 @@ client.on('roleUpdate', async (oldRole, newRole) => {
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
     .addFields(changes)
     .setTimestamp()
-    .setFooter({ text: "Role Update" });
+    .setFooter({ text: `${client.user.username} Role Update Logs` });
 
     await logChannel.send({ embeds: [embed] });
 });
@@ -785,14 +786,14 @@ client.on('messageUpdate', async (oldMessage, newMessage) => {
     .setColor(client.config.embedAuditLogs)
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
     .addFields(
-        { name: "Author", value: `${newMessage.author.tag}`, inline: true },
-        { name: "Channel", value: `${newMessage.channel}`, inline: true },
-        { name: "Before", value: `${oldMessage.content ? oldMessage.content.substring(0, 1024) : "No Content / Embed"}`, inline: true },
-        { name: "After", value: `${newMessage.content.substring(0, 1024)}`, inline: true },
-        { name: "Message Link", value: `[Jump to message](${newMessage.url})`, inline: true },
+        { name: "Author", value: `> ${newMessage.author.tag}` },
+        { name: "Channel", value: `> ${newMessage.channel}` },
+        { name: "Before", value: `> ${oldMessage.content ? oldMessage.content.substring(0, 1024) : "No Content / Embed"}` },
+        { name: "After", value: `> ${newMessage.content.substring(0, 1024)}` },
+        { name: "Message Link", value: `> [Jump to message](${newMessage.url})` },
     )
     .setTimestamp()
-    .setFooter({ text: "Message Update" });
+    .setFooter({ text: `${client.user.username} Message Edited Logs` });
 
     await logChannel.send({ embeds: [embed] });
 });
@@ -811,14 +812,14 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
     let memberCount = newState.channel ? newState.channel.members.size : 0;
 
     if (!oldState.channel && newState.channel) {
-        description = `${newState.member.user.tag} joined **${newState.channel.name}**. \nMembers now: **${memberCount}**.`;
+        description = `${newState.member.user.tag} joined **${newState.channel.name}**. \n> Members now: **${memberCount}**.`;
     }
     else if (oldState.channel && !newState.channel) {
         memberCount = oldState.channel.members.size;
         description = `${oldState.member.user.tag} left **${oldState.channel.name}**.`;
     }
     else if (oldState.channel && newState.channel && oldState.channel.id !== newState.channel.id) {
-        description = `${newState.member.user.tag} switched from **${oldState.channel.name}** to **${newState.channel.name}**.\nMembers now in new channel: **${memberCount}**.`;
+        description = `${newState.member.user.tag} switched from **${oldState.channel.name}** to **${newState.channel.name}**.\n> Members now in new channel: **${memberCount}**.`;
     }
 
     if (description) {
@@ -828,7 +829,7 @@ client.on(Events.VoiceStateUpdate, async (oldState, newState) => {
         .setThumbnail(client.user.avatarURL({ dynamic: true}))
         .setDescription(description)
         .setTimestamp()
-        .setFooter({ text: "Voice Channel Update" });
+        .setFooter({ text: `${client.user.username} Voice Channel Activity Logs` });
 
         await logChannel.send({ embeds: [embed] });
     }
@@ -847,19 +848,20 @@ client.on(Events.InviteCreate, async (invite) => {
     const expire = invite.expiresAt ? `<t:${Math.floor(invite.expiresAt.getTime() / 1000)}:F>` : 'Never';
 
     const embed = new EmbedBuilder()
-    .setTitle("Logs | 🔗 Invite Created")
+    .setTitle("Logs | Invite Created")
     .setColor(client.config.embedAuditLogs)
     .setDescription(`An invite has been created by **${invite.inviter.tag}**.`)
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
     .addFields(
-        { name: "Channel", value: `${invite.channel.name}`, inline: true },
-        { name: "Code", value: `${invite.code}`, inline: true },
-        { name: "Expires", value: `${expire}`, inline: true },
-        { name: "Max Uses", value: `${invite.maxUses === 0 ? 'Unlimited' : invite.maxUses}`, inline: true },
-        { name: "Temporary", value: `${invite.temporary ? 'Yes' : 'No'}`, inline: true },
-        { name: "Max Age", value: `${invite.maxAge === 0 ? 'Unlimited' : `${invite.maxAge} seconds`}`, inline: true }
+        { name: "Channel", value: `> ${invite.channel.name}` },
+        { name: "Code", value: `> ${invite.code}` },
+        { name: "Expires", value: `> ${expire}` },
+        { name: "Max Uses", value: `> ${invite.maxUses === 0 ? 'Unlimited' : invite.maxUses}` },
+        { name: "Temporary", value: `> ${invite.temporary ? 'Yes' : 'No'}` },
+        { name: "Max Age", value: `> ${invite.maxAge === 0 ? 'Unlimited' : `${invite.maxAge} seconds`}` }
     )
-    .setFooter({ text: `Invite ID: ${invite.code}` })
+    .setFooter({ text: `${client.user.username} Invite Creation Logs`})
+    .setAuthor({ name: `Invite ID: ${invite.code}`})
     .setTimestamp();
 
     await logChannel.send({ embeds: [embed] });
@@ -877,11 +879,12 @@ client.on(Events.EmojiCreate, async (emoji) => {
     .setColor(client.config.embedAuditLogs)
     .setDescription(`A new emoji has been added to the guild.`)
     .addFields(
-        { name: "Name", value: `${emoji.name}`, inline: true },
-        { name: "ID", value: `${emoji.id}`, inline: true },
-        { name: "Animated", value: `${emoji.animated ? 'Yes' : 'No'}`, inline: true }
+        { name: "Name", value: `> ${emoji.name}` },
+        { name: "ID", value: `> ${emoji.id}` },
+        { name: "Animated", value: `> ${emoji.animated ? 'Yes' : 'No'}` }
     )
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
+    .setFooter({ text: `${client.user.username} Emoji Creation Logs`})
     .setTimestamp();
 
     await logChannel.send({ embeds: [embed] });
@@ -904,9 +907,10 @@ client.on(Events.EmojiUpdate, async (oldEmoji, newEmoji) => {
     .setColor(client.config.embedAuditLogs)
     .setDescription(`An emoji has been updated.`)
     .addFields(
-        { name: "Changes", value: `${changes.join('\n')}`, inline: false }
+        { name: "Changes", value: `> ${changes.join('\n')}` }
     )
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
+    .setFooter({ text: `${client.user.username} Emoji Update Logs`})
     .setTimestamp();
 
     await logChannel.send({ embeds: [embed] });
@@ -924,10 +928,13 @@ client.on(Events.EmojiDelete, async (emoji) => {
     .setColor(client.config.embedAuditLogs)
     .setDescription(`An emoji has been removed from the guild.`)
     .addFields(
-        { name: "Name", value: `${emoji.name}`, inline: true },
-        { name: "ID", value: `${emoji.id}`, inline: true }
+        { name: "Name", value: `> ${emoji.name}` },
+        { name: "ID", value: `> ${emoji.id}` },
+        { name: "Animated", value: `> ${emoji.animated ? 'Yes' : 'No'}` },
+        { name: "Deleted By", value: `> ${emoji.deletedBy ? emoji.deletedBy.tag : 'Unknown'}`}
     )
     .setThumbnail(client.user.avatarURL({ dynamic: true}))
+    .setFooter({ text: `${client.user.username} Emoji Deletion Logs`})
     .setTimestamp();
 
     await logChannel.send({ embeds: [embed] });
@@ -968,7 +975,7 @@ client.on(Events.GuildMemberUpdate, async (oldMember, newMember) => {
 
     if (oldMember.communicationDisabledUntilTimestamp !== newMember.communicationDisabledUntilTimestamp) {
         const timeoutStatus = newMember.communicationDisabledUntilTimestamp ? `until <t:${Math.floor(newMember.communicationDisabledUntilTimestamp / 1000)}:f>` : 'removed';
-        description += `\n**Timeout**\nTimeout ${timeoutStatus}`;
+        description += `\n**Timeout**\n> Timeout ${timeoutStatus}`;
         fieldsChanged = true;
     }
 
@@ -1040,12 +1047,25 @@ client.on(Events.MessageCreate, async (message, err) => {
         .setFooter({ text: `${author.username} Leveled Up`})
         .setTimestamp()
 
-        await message.channel.send({ embeds: [levelEmbed] }).catch(err => console.log('Error sending level up message!'));
+        await message.channel.send({ embeds: [levelEmbed] }).catch(err => client.logs.error('[LEVEL_ERROR] Error sending level up message!'));
     } else {
 
         if(message.member.roles.cache.find(r => r.id === leveldata.Role)) {
             data.XP += give * multiplier;
         } data.XP += give;
         data.save();
+    }
+})
+
+// Auto Role System //
+
+client.on("guildMemberAdd", async member => {
+    const { guild } = member;
+
+    const data = await roleSchema.findOne({ GuildID: guild.id });
+    if (!data) return;
+    if (data.Roles.length < 0) return;
+    for (const r of data.Roles) {
+        await member.roles.add(r);
     }
 })
