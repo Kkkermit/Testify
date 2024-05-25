@@ -46,6 +46,7 @@ const { DisTube } = require("distube");
 const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
+const GiveawaysManager = require("./utils/giveaway");
 
 // Schemas //
 
@@ -1069,3 +1070,14 @@ client.on("guildMemberAdd", async member => {
         await member.roles.add(r);
     }
 })
+
+// Giveaway Manager //
+
+client.giveawayManager = new GiveawaysManager(client, {
+    default: {
+        botsCanWin: false,
+        embedColor: "#a200ff",
+        embedColorEnd: "#550485",
+        reaction: "🎉",
+    },
+});
