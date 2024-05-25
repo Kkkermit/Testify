@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, embedLength } = require('discord.js'); 
-const ecoSchema = require('../../Schemas.js/economy');
+const ecoSchema = require('../../schemas/economySystem');
 
 var timeout = [];
 module.exports = {

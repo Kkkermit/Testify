@@ -21,6 +21,6 @@ module.exports = {
         .setColor(client.config.embedCommunity)
         .setFooter({ text: `Advice given`})
 
-        await interaction.reply({embeds: [embed] });
+        await interaction.reply({ embeds: [embed] });
     }
 }
