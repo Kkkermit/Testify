@@ -7,7 +7,7 @@ module.exports = {
     dev: "Kkermit",
     devBy: "| Developed by kkermit",
     developers: "526853643962679323",
-    noPerms: `You **do not** have the permission to use that command!`,
+    noPerms: `You **do not** have the required permissions to use this command!`,
     ownerOnlyCommand: `This command is **only** available for the owner of the bot!`,
 
     // EMBED COLORS //
