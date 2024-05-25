@@ -37,7 +37,7 @@ module.exports = {
         .setFooter({ text: `Suggestion sent from ${guild.name}`, iconURL: guild.iconURL({ size: 1024 })})
         .setTimestamp()
 
-        const channel = interaction.client.channels.cache.get(client.config.bugReportChannel);
+        const channel = interaction.client.channels.cache.get(client.config.suggestionChannel);
 
         channel.send({ embeds: [suggestionEmbed]}).catch(err => {
             return;
