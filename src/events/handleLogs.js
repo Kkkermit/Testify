@@ -39,7 +39,7 @@ function handleLogs(client) {
 
             return send_log(message.guild.id, embed);
         } catch (err) {
-            client.logs.error(`[AUDIT_LOGGING] Couldn't log deleted message.`);
+            client.logs.error(`[AUDIT_LOGGING] Couldn't log deleted message. Message content: ${message.content}`);
         }
     });
 

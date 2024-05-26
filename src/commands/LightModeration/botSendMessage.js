@@ -53,7 +53,7 @@ module.exports = {
                 await channel.send(message)
             }
 
-            await response.reply({content: `Your message has been sent in <#${interaction.guild.channel}>`, ephemeral: true})
+            await response.reply({content: `Your message has been sent in <#${interaction.channel.id}>`, ephemeral: true})
         } catch (error) {
             console.error(error)
             return;

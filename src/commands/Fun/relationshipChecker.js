@@ -3,7 +3,7 @@ const { SlashCommandBuilder } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
-    .setName("love-checker")
+    .setName("relationship-checker")
     .setDMPermission(false)
     .setDescription("Shows the probability of two users being lovers!")
     .addUserOption(option => option.setName("user").setDescription("The 1st user you want to ship!").setRequired(true))
