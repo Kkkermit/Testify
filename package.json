@@ -25,6 +25,7 @@
     "discord-arts": "^0.5.8",
     "discord-gamecord": "^4.4.2",
     "discord-giveaways": "^6.0.1",
+    "discord-logs": "^2.2.1",
     "discord.js": "^14.14.1",
     "distube": "^4.1.1",
     "dotenv": "^16.4.5",

@@ -6,6 +6,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("warn")
     .setDescription("Warn command")
+    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addSubcommand(command => command.setName("create").setDescription("Create a warn").addUserOption(option => option.setName("user").setDescription("the user you want to warn").setRequired(true)).addStringOption(option => option.setName("reason").setDescription("the reason for the warn").setRequired(true)))
     .addSubcommand(command => command.setName("list").setDescription("Get a list of a users warns").addUserOption(option => option.setName("user").setDescription("the user you want to get the warns").setRequired(false)))
     .addSubcommand(command => command.setName("info").setDescription("Get a info about a warn").addUserOption(option => option.setName("user").setDescription("the user you want to get the warn info").setRequired(true)).addStringOption(option => option.setName("warn-id").setDescription("the warn id").setRequired(true)))

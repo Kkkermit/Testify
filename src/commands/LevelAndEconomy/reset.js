@@ -12,7 +12,7 @@ module.exports = {
     .addSubcommand(command => command.setName('all-xp').setDescription('Resets all XP progress in this server.'))
     .addSubcommand(command => command.setName('all-currency').setDescription('Resets all economy progress in this server.'))
     .addSubcommand(command => command.setName('currency').setDescription(`Resets specified user's economy currency.`).addUserOption(option => option.setName('user').setDescription(`Specified user's economy account will be reset.`).setRequired(true)))
-    .addSubcommand(command => command.setName('xp').setDescription(`Resets specified user's economy currency.`).addUserOption(option => option.setName('user').setDescription('Specified user will have their xp reset.').setRequired(true))),
+    .addSubcommand(command => command.setName('xp').setDescription(`Resets specified user's XP.`).addUserOption(option => option.setName('user').setDescription('Specified user will have their xp reset.').setRequired(true))),
     async execute(interaction) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});

@@ -1,9 +1,8 @@
 const { model, Schema } = require("mongoose");
 
-let schema = new Schema({
+let logschema = new Schema({
     Guild: String,
     Channel: String,
-    LogLevel: [String],
 });
 
-module.exports = model("audit_log", schema);
+module.exports = model("logs", logschema);

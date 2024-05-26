@@ -4,7 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('mod-panel')
     .setDescription('Moderate a member.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption(option => option.setName("user").setDescription("The user you want to moderate").setRequired(true))
     .addStringOption(option => option.setName('reason').setDescription('Reason for moderating the member').setRequired(false))
     .addIntegerOption(option => option.setName('time').setDescription('This is how long the user\'s punishment is going to last (in minutes). Default: 1 hour').setRequired(false)),
