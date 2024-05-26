@@ -5,6 +5,8 @@ module.exports = {
     name: Events.MessageCreate,
     async execute (message, client) {
 
+        if (!message.guild || !message.channel) return;
+
         var data = await sticky.find({ Guild: message.guild.id, Channel: message.channel.id});
         if (data.length == 0) return;
         if (message.author.bot) return;
