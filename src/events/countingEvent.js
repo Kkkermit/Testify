@@ -37,11 +37,12 @@ module.exports = {
 
             const response = new EmbedBuilder()
             .setAuthor({ name: `${client.user.username}'s counting system` })
-            .setTitle(`Current number: ${countingData.Count}`)
-            .setColor('Green');
+            .setTitle(`> **${message.author.username}** has successfully counted to \`${countingData.Count}\`.`)
+            .setColor('Green')
+            .setTimestamp();
 
             const reaction = await message.channel.send({ embeds: [response] });
-            await reaction.react(client.config.verifyEmoji);
+            await reaction.react(client.config.countSuccessEmoji);
 
             if (countingData.Count === countingData.MaxCount) {
                 const congratulationsEmbed = new EmbedBuilder()
