@@ -1,4 +1,5 @@
 const { EmbedBuilder } = require("discord.js");
+
 module.exports = {
   name: "test",
   aliases: ["t"],
@@ -8,7 +9,7 @@ module.exports = {
 
     if (message.user.id !== client.config.developers) {
       return await message.channel.send({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
-  }
+    }
 
     const msg = args.join(" ");
 
