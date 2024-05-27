@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require("discord.js");
-const filter = require('../../jsons/filter.json')
+const filter = require('../../jsons/filter.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
