@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder }=require('discord.js');
+const filter = require('../../jsons/filter.json');
 
 module.exports={
     data: new SlashCommandBuilder()
@@ -8,6 +9,8 @@ module.exports={
     async execute(interaction, client) {
 
         const quote = interaction.options.getString('quote');
+
+        if (filter.words.includes(quote)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
 
         let canvas = `https://some-random-api.com/canvas/misc/oogway?quote=${encodeURIComponent(quote)}`;
 

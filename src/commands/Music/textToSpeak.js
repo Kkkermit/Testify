@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
+const filter = require('../../jsons/filter.json');
 
 module.exports={
     data: new SlashCommandBuilder()
@@ -11,6 +12,8 @@ module.exports={
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.SendTTSMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true})
 
         const message = interaction.options.getString('message');
+
+        if (filter.words.includes(message)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
 
         const embed = new EmbedBuilder()
         .setAuthor({ name: `TTS Command ${client.config.devBy}`})

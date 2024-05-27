@@ -1,5 +1,6 @@
 const { Events, EmbedBuilder } = require("discord.js");
 const config = require('../config');
+const filter = require('../jsons/filter.json')
 
 module.exports = {
     name: Events.MessageCreate,
@@ -11,6 +12,8 @@ module.exports = {
         const args = message.content.split(' ');
         const user = message.mentions.users.first() || client.users.cache.get(args[1]);
         const reason = args.slice(2).join(' ') || '\`\`Reason for ban not given\`\`';
+
+        if (filter.words.includes(reason)) return message.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
         
         if (!user) return message.reply({ content: 'Please mention a user to bon.', ephemeral: true });
         

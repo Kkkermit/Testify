@@ -9,6 +9,7 @@ module.exports = {
     developers: "526853643962679323",
     noPerms: `You **do not** have the required permissions to use this command!`,
     ownerOnlyCommand: `This command is **only** available for the owner of the bot!`,
+    filterMessage: "Your message includes profanity which is **not** allowed!",
 
     // EMBED COLORS //
     embedColor: "Green",

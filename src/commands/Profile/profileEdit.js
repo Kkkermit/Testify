@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const Profile = require('../../schemas/profileSystem');
 const moment = require('moment');
+const filter = require('../../jsons/filter.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -20,6 +21,9 @@ module.exports = {
         const birthdayInput = interaction.options.getString('birthday');
         const hobbies = interaction.options.getString('hobbies');
         const favoriteGame = interaction.options.getString('favorite_game');
+
+        if (filter.words.includes(about)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(hobbies)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
 
         const userProfile = await Profile.findOne({ userId: userId });
         if (!userProfile) {

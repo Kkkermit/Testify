@@ -5,6 +5,11 @@ module.exports = {
   args: true,
 
   async execute(message, client, args) {
+
+    if (message.user.id !== client.config.developers) {
+      return await message.channel.send({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+  }
+
     const msg = args.join(" ");
 
     const embed = new EmbedBuilder()

@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder }=require('discord.js');
+const filter = require('../../jsons/filter.json');
 
 module.exports= {
     data: new SlashCommandBuilder()
@@ -8,6 +9,8 @@ module.exports= {
     async execute(interaction, client){
 
         const word = interaction.options.getString('word');
+
+        if (filter.words.includes(word)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
 
         let data = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
 

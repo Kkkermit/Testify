@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder }= require('discord.js');
 const wiki = require('wikijs').default();
+const filter = require('../../jsons/filter.json');
 
 module.exports = {
     data: new SlashCommandBuilder() 
@@ -9,6 +10,9 @@ module.exports = {
     async execute(interaction, client){
         
         const query = interaction.options.getString(`query`);
+
+        if (filter.words.includes(query)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+
         await interaction.deferReply();
 
         const search = await wiki.search(query);

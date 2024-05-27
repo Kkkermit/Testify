@@ -1,5 +1,6 @@
 const { EmbedBuilder, AttachmentBuilder, SlashCommandBuilder } = require("discord.js");
 const Canvas = require("canvas");
+const filter = require("../../jsons/filter.json");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,6 +14,8 @@ module.exports = {
         const blankSign = await Canvas.loadImage("https://i.postimg.cc/28bjZ4GW/pepesign.png");
         
         const signText = interaction.options.getString("text").trim();
+
+        if (filter.words.includes(text)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
 
         const maxLineWidth = 60;
         let lines = [];
