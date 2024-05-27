@@ -563,7 +563,7 @@ client.on(Events.InteractionCreate, async interaction => {
             .setImage('attachment://captcha.png')
             .setThumbnail(interaction.guild.iconURL())
             .setTitle('> Verification Step: Captcha')
-            .setDescription(`Verify value: \n> Please use the button bellow to submit your captcha!`)
+            .setDescription(`**Verify value**: \n> *Please use the button bellow to submit your captcha!*`)
         
             const verifybutton = new ActionRowBuilder()
             .addComponents(

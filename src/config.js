@@ -35,6 +35,7 @@ module.exports = {
     arrowEmoji: "⤵",
     errorEmoji: "❌",
     auditLogEmoji: "📋",
+    verifyEmoji: "<a:verify:1244447791103742105>",
 
     // MUSIC EMOJIS //
     musicEmojiPlay: "▶️",

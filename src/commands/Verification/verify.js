@@ -38,7 +38,7 @@ module.exports = {
                 .addComponents(
                     new ButtonBuilder()
                     .setCustomId('verify')
-                    .setLabel('Verify')
+                    .setLabel(`Verify`)
                     .setStyle(ButtonStyle.Success)
                 )
 
@@ -46,7 +46,7 @@ module.exports = {
                 .setColor(client.config.embedVerify)
                 .setThumbnail(interaction.guild.iconURL())
                 .setTimestamp()
-                .setTitle(`${client.user.username} Verification System ${client.config.arrowEmoji}`)
+                .setTitle(`${client.config.verifyEmoji} ${client.user.username} Verification System ${client.config.arrowEmoji}`)
                 .setAuthor({ name: `Verification System ${client.config.devBy}`})
                 .setFooter({ text: `${interaction.guild.name} Verification System`})
                 .setDescription(`> ${message}`)
