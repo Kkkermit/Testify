@@ -4,7 +4,7 @@ const Canvacord = require(`canvacord`)
 
 module.exports = {
     data: new ContextMenuCommandBuilder()
-    .setName('Rank')
+    .setName('• Rank')
     .setType(ApplicationCommandType.User),
     async execute(interaction, client) {
 

@@ -70,7 +70,7 @@ module.exports = {
         interaction.editReply({ embeds: [Embed], components: [row], files: [imageAttachment] });
 
     } catch (error) {
-        interaction.editReply({ content: `\`\`\`There was an error generating the info for ${member}\`\`\`` });
+        interaction.editReply({ content: `There was an error generating the info for **${member}**` });
         throw error;
     }
     }

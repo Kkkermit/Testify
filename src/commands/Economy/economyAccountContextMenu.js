@@ -1,9 +1,9 @@
-const { ContextMenuCommandBuilder, EmbedBuilder, ApplicationCommandType, AttachmentBuilder } = require('discord.js');
+const { ContextMenuCommandBuilder, EmbedBuilder, ApplicationCommandType } = require('discord.js');
 const ecoS = require('../../schemas/economySystem');
 
 module.exports = {
     data: new ContextMenuCommandBuilder()
-    .setName('Economy Account')
+    .setName('• Economy Account')
     .setType(ApplicationCommandType.User),
     async execute(interaction, client) {
 
