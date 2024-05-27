@@ -28,7 +28,7 @@ module.exports = {
         (canvas.context.textAlign = "center");
         canvas.context.fillText(member.user.username.toUpperCase(), 512, 410);
         canvas.context.font = "32px sans-serif";
-        canvas.context.fillText(`You are the ${member.guild.memberCount} member to join the server`,512,455);
+        canvas.context.fillText(`You are the ${addSuffix(member.guild.memberCount)} member to join the server`,512,455);
         canvas.context.beginPath();
         canvas.context.arc(512, 166, 119, 0, Math.PI * 2, true);
         canvas.context.closePath();
@@ -65,3 +65,15 @@ module.exports = {
         }
     },
 };
+
+function addSuffix(number) {
+    if (number % 100 >= 11 && number % 100 <= 13)
+    return number + "th";
+
+    switch (number % 10) {
+        case 1: return number + "st";
+        case 2: return number + "nd";
+        case 3: return number + "rd";
+    }
+    return number + "th";
+}
