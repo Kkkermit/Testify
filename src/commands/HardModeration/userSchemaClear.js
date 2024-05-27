@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 const fs = require('fs');
 const path = require('path');
 
@@ -11,6 +11,7 @@ const choices = schemaNames.map(name => ({ name, value: name }));
 const commandData = new SlashCommandBuilder()
     .setName('wipe-user-data')
     .setDescription('Clears a user\'s data from a specified schema.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addUserOption(option => option.setName('user').setDescription('The user to clear the data for.').setRequired(true))
     .addStringOption(option => option.setName('schema').setDescription('The schema to clear the data from.').setRequired(true).addChoices(...choices))
     
@@ -20,6 +21,8 @@ module.exports = {
         const user = interaction.options.getUser("user");
         const guild = interaction.guild.id;
         const schemaName = interaction.options.getString("schema");
+
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
     
         try {
             const schema = require(`../../schemas/${schemaName}`);
