@@ -5,10 +5,6 @@ module.exports = {
     aliases: ["bi", "botinfo"],
     async execute(message, client) {
 
-        if (message.author.id !== client.config.developers) {
-            return await message.channel.send({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
-        }
-
         let serverCount = await client.guilds.cache.reduce((a,b) => a+b.memberCount, 0);
 
         let totalSeconds = (client.uptime / 1000);
@@ -28,10 +24,16 @@ module.exports = {
         .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
         .setFooter({ text: `Most up-to-date information about ${client.user.username}`})
         .setTimestamp()
+        .addFields({ name: 'Developer', value: `> \`${client.config.dev}\`` })
         .addFields({ name: 'Servers Count', value: `> \`${client.guilds.cache.size}\`` })
         .addFields({ name: 'Members Count', value: `> \`${serverCount}\`` })
+        .addFields({ name: 'Prefix', value: `> \`${client.config.prefix}\``})
+        .addFields({ name: 'Commands', value: `> \`${client.pcommands.size}\`` })
+        .addFields({ name: 'Aliases', value: `> \`${client.aliases.size}\`` })
+        .addFields({ name: 'Slash Commands', value: `> \`${client.commands.size}\``})
         .addFields({ name: 'Latency', value: `> \`${Math.round(client.ws.ping)}ms\`` })
         .addFields({ name: 'Uptime', value: `> \`\`\`${uptime}\`\`\`` })
+        
 
         const refresh = new ActionRowBuilder()
         .addComponents(
@@ -67,8 +69,13 @@ module.exports = {
                     .setThumbnail(client.user.displayAvatarURL({ dynamic: true }))
                     .setFooter({ text: `Most up-to-date information about ${client.user.username}`})
                     .setTimestamp()
+                    .addFields({ name: 'Developer', value: `> \`${client.config.dev}\`` })
                     .addFields({ name: 'Servers Count', value: `> \`${client.guilds.cache.size}\`` })
                     .addFields({ name: 'Members Count', value: `> \`${serverCount}\`` })
+                    .addFields({ name: 'Prefix', value: `> \`${client.config.prefix}\``})
+                    .addFields({ name: 'Commands', value: `> \`${client.pcommands.size}\`` })
+                    .addFields({ name: 'Aliases', value: `> \`${client.aliases.size}\`` })
+                    .addFields({ name: 'Slash Commands', value: `> \`${client.commands.size}\``})
                     .addFields({ name: 'Latency', value: `> \`${Math.round(client.ws.ping)}ms\`` })
                     .addFields({ name: 'Uptime', value: `> \`\`\`${uptime}\`\`\`` })
 
