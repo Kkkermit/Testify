@@ -5,6 +5,10 @@ module.exports = {
     aliases: ["bi", "botinfo"],
     async execute(message, client) {
 
+        if (message.author.id !== client.config.developers) {
+            return await message.channel.send({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+        }
+
         let serverCount = await client.guilds.cache.reduce((a,b) => a+b.memberCount, 0);
 
         let totalSeconds = (client.uptime / 1000);
