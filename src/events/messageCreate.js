@@ -25,7 +25,7 @@ module.exports = {
             .setDescription(`> The command you tried **does not exist**. \n> To see **all** commands, use \`\`${client.config.prefix}help\`\``)
 
             return message.reply({ embeds: [embed], ephemeral: true});
-        }
+        };
 
         if (!command) return;
 
