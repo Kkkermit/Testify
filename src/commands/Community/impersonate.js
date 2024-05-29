@@ -21,7 +21,7 @@ module.exports = {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.createWebhook)) return await interaction.reply({
             content: `${client.config.noPerms}`
         })
- 
+
         if (message.includes('@everyone') || message.includes('@here')) return await interaction.reply({ 
             content: `You **cannot** mention \`\`everyone/here\`\` with this command`, 
             ephemeral: true
