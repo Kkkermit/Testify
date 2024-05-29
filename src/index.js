@@ -129,8 +129,11 @@ const color = {
     yellow: '\x1b[33m',
     green: '\x1b[32m',
     blue: '\x1b[34m',
+    pink: '\x1b[38;5;213m',
+    torquise: '\x1b[38;5;45m',
+    purple: '\x1b[38;5;57m',
     reset: '\x1b[0m'
-};
+}
 
 function getTimestamp() {
     const date = new Date();

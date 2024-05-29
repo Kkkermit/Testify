@@ -7,6 +7,8 @@ const color = {
     green: '\x1b[32m',
     blue: '\x1b[34m',
     pink: '\x1b[38;5;213m',
+    torquise: '\x1b[38;5;45m',
+    purple: '\x1b[38;5;57m',
     reset: '\x1b[0m'
 }
 
@@ -61,4 +63,13 @@ function logging(message) {
     return write(message, `${color.pink}[${getTimestamp()}]${color.reset} `);
 }
 
-module.exports = { getTimestamp, write, info, warn, error, success, debug, logging, color};
+function torquise(message) {
+    return write(message, `${color.torquise}[${getTimestamp()}]${color.reset} `);
+}
+
+function purple(message) {
+    return write(message, `${color.purple}[${getTimestamp()}]${color.reset} `);
+
+}
+
+module.exports = { getTimestamp, write, info, warn, error, success, debug, logging, torquise, purple, color };
