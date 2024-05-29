@@ -17,6 +17,16 @@ module.exports = {
     let command = client.pcommands.get(cmd);
         if (!command) command = client.pcommands.get(client.aliases.get(cmd));
 
+        if (!command) {
+
+            const embed = new EmbedBuilder()
+            .setColor("Red")
+            .setTitle(`${client.user.username} prefix system ${client.config.arrowEmoji}`)
+            .setDescription(`> The command you tried **does not exist**. \n> To see **all** commands, use \`\`${client.config.prefix}help\`\``)
+
+            return message.reply({ embeds: [embed], ephemeral: true});
+        }
+
         if (!command) return;
 
         if (command.args && !args.length) {

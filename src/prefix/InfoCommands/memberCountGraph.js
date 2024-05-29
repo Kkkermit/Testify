@@ -2,9 +2,9 @@ const { EmbedBuilder } = require('discord.js');
 const QuickChart = require('quickchart-js');
 
 module.exports = {
-    name: 'membercount',
-    aliases: ['membercountgraph'],
-    async execute(message, client, args) {
+    name: "member-graph",
+    aliases: ["mg", "member-count-graph", 'membergraph', 'membercountgraph'],
+    async execute(message, client) {
 
         const guild = message.guild;
         const totalMembers = guild.memberCount;
@@ -42,14 +42,15 @@ module.exports = {
         const chartUrl = await chart.getShortUrl();
 
         const embed = new EmbedBuilder()
-        .setAuthor({ name: `Member Graph`, iconURL: guild.iconURL({ size: 1024 })})
-        .setTitle(`Member Count for ${guild.name} ${client.config.arrowEmoji}`)
-        .setColor(client.config.embedInfo)
-        .setDescription(`Total: **${totalMembers}**\nMembers: **${humanMembers}**\nBots: **${botMembers}**\nLast 24h: **${last24Hours}**\nLast 7 days: **${last7Days}**`)
-        .setImage(chartUrl)
-        .setFooter({ text: `Member count ${client.config.devBy}` })
-        .setTimestamp();
+        
+            .setAuthor({ name: `Member Graph`, iconURL: guild.iconURL({ size: 1024 })})
+            .setTitle(`Member Count for **${guild.name}** ${client.config.arrowEmoji}`)
+            .setColor(client.config.embedInfo)
+            .setDescription(`Total: **${totalMembers}**\nMembers: **${humanMembers}**\nBots: **${botMembers}**\nLast 24h: **${last24Hours}**\nLast 7 days: **${last7Days}**`)
+            .setImage(chartUrl)
+            .setFooter({ text: `Member count ${client.config.devBy}` })
+            .setTimestamp();
 
-        message.channel.send({ embeds: [embed]});
+        await message.channel.send({ embeds: [embed] });
     }
 }
