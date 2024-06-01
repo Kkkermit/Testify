@@ -46,3 +46,5 @@ function error(message) {
 function warn(message) {
     client.logs.warn(`[WARN] ${message}`);
 }
+
+client.logs.success(`[PROCESS] Process handlers loaded.`);
