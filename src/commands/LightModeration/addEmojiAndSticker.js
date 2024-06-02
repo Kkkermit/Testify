@@ -95,6 +95,6 @@ module.exports = {
 
                 interaction.editReply({ content: ``, embeds: [embed]});
             }, 3000);
-        }
-    }
-}
+        };
+    },
+};

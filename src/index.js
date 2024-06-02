@@ -3,6 +3,10 @@ const {
     } = require(`discord.js`);
 const fs = require('fs');
 
+// Version Control //
+
+const currentVersion = "v2.0";
+
 const client = new Client({ intents: [
     GatewayIntentBits.Guilds, 
 	GatewayIntentBits.GuildMessages, 
@@ -51,6 +55,7 @@ const { handleLogs } = require("./events/handleLogs");
 const Logs = require('discord-logs');
 const { CaptchaGenerator } = require('captcha-canvas');
 const { createCanvas } = require('canvas');
+const { checkVersion } = require('./lib/version')
 
 // Schemas //
 
@@ -118,6 +123,9 @@ const commandFolders = fs.readdirSync("./src/commands");
     client.prefixCommands(pcommandFolders, './src/prefix');
     client.login(process.env.token).then(() => {
         handleLogs(client)
+        checkVersion(currentVersion);
+    }).catch((error) => {
+        client.logs.error(`[LOGIN] Error while logging in. Check if your token is correct.`);
     })
 })();
 
