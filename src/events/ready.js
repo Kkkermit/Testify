@@ -56,16 +56,6 @@ module.exports = {
             });
         }
 
-        console.log(`${color.pink}[${getTimestamp()}] ======================================================`)
-        console.log(`${color.pink}[${getTimestamp()}] ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗`)
-        console.log(`${color.pink}[${getTimestamp()}] ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝`)
-        console.log(`${color.pink}[${getTimestamp()}]    ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝ `)
-        console.log(`${color.pink}[${getTimestamp()}]    ██║   ██╔══╝  ╚════██║   ██║   ██║██╔══╝    ╚██╔╝  `)
-        console.log(`${color.pink}[${getTimestamp()}]    ██║   ███████╗███████║   ██║   ██║██║        ██║   `)
-        console.log(`${color.pink}[${getTimestamp()}]    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   `)
-        console.log(`${color.pink}[${getTimestamp()}] ======================================================`) 
-
-        client.logs.logging(`[BOT] ${client.user.username} has been launched!`);
         client.logs.info(`[EVENTS] Started loading events...`)
         client.logs.success(`[EVENTS] Loaded ${client.eventNames().length} events.`);
         
@@ -78,6 +68,17 @@ module.exports = {
             client.logs.info(`[TRIGGERS] Started loading triggers...`);
             client.logs.success(`[TRIGGERS] Loaded ${files.length} trigger files.`);
         });
+
+        console.log(`${color.pink}[${getTimestamp()}] ======================================================`)
+        console.log(`${color.pink}[${getTimestamp()}] ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗`)
+        console.log(`${color.pink}[${getTimestamp()}] ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝`)
+        console.log(`${color.pink}[${getTimestamp()}]    ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝ `)
+        console.log(`${color.pink}[${getTimestamp()}]    ██║   ██╔══╝  ╚════██║   ██║   ██║██╔══╝    ╚██╔╝  `)
+        console.log(`${color.pink}[${getTimestamp()}]    ██║   ███████╗███████║   ██║   ██║██║        ██║   `)
+        console.log(`${color.pink}[${getTimestamp()}]    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   `)
+        console.log(`${color.pink}[${getTimestamp()}] ======================================================`) 
+
+        client.logs.logging(`[BOT] ${client.user.username} has been launched!`);
 
         require('events').EventEmitter.defaultMaxListeners = config.eventListeners;
     },

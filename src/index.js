@@ -1,6 +1,17 @@
+
+// ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗
+// ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝
+//    ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝ 
+//    ██║   ██╔══╝  ╚════██║   ██║   ██║██╔══╝    ╚██╔╝  
+//    ██║   ███████╗███████║   ██║   ██║██║        ██║   
+//    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   
+
+// Developed by: Kkermit. All rights reserved. (2021)
+// MIT License
+
 const { 
     Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, Permissions, MessageManager, Embed, Collection, Events, Partials, ActivityType, Activity, AuditLogEvent, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, ComponentType, AttachmentBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType
-    } = require(`discord.js`);
+} = require(`discord.js`);
 const fs = require('fs');
 
 // Version Control //
