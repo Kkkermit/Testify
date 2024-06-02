@@ -7,39 +7,44 @@ const fs = require('fs');
 
 const currentVersion = "BETA-v0.0.1";
 
-const client = new Client({ intents: [
-    GatewayIntentBits.Guilds, 
-	GatewayIntentBits.GuildMessages, 
-	GatewayIntentBits.MessageContent, 
-	GatewayIntentBits.GuildMembers, 
-	GatewayIntentBits.GuildPresences, 
-	GatewayIntentBits.GuildIntegrations, 
-	GatewayIntentBits.GuildWebhooks, 
-    GatewayIntentBits.GuildMessageReactions,
-	GatewayIntentBits.MessageContent, 
-	GatewayIntentBits.GuildEmojisAndStickers, 
-	GatewayIntentBits.DirectMessages, 
-	GatewayIntentBits.DirectMessageTyping, 
-	GatewayIntentBits.GuildModeration, 
-	GatewayIntentBits.GuildVoiceStates,
-	GatewayIntentBits.GuildWebhooks, 
-	GatewayIntentBits.AutoModerationConfiguration,
-	GatewayIntentBits.GuildScheduledEvents, 
-	GatewayIntentBits.GuildMessageTyping, 
-	GatewayIntentBits.AutoModerationExecution, 
-],  
+let client;
+try{
+    client = new Client({ 
+        intents: [
+            GatewayIntentBits.Guilds, 
+            GatewayIntentBits.GuildMessages, 
+            GatewayIntentBits.MessageContent, 
+            GatewayIntentBits.GuildMembers, 
+            GatewayIntentBits.GuildPresences, 
+            GatewayIntentBits.GuildIntegrations, 
+            GatewayIntentBits.GuildWebhooks, 
+            GatewayIntentBits.GuildMessageReactions,
+            GatewayIntentBits.MessageContent, 
+            GatewayIntentBits.GuildEmojisAndStickers, 
+            GatewayIntentBits.DirectMessages, 
+            GatewayIntentBits.DirectMessageTyping, 
+            GatewayIntentBits.GuildModeration, 
+            GatewayIntentBits.GuildVoiceStates,
+            GatewayIntentBits.GuildWebhooks, 
+            GatewayIntentBits.AutoModerationConfiguration,
+            GatewayIntentBits.GuildScheduledEvents, 
+            GatewayIntentBits.GuildMessageTyping, 
+            GatewayIntentBits.AutoModerationExecution, 
+        ],  
 
-partials: [
-    Partials.GuildMember, 
-    Partials.Channel,
-    Partials.GuildScheduledEvent,
-    Partials.Message,
-    Partials.Reaction, 
-    Partials.ThreadMember, 
-    Partials.User
-]
-
-}); 
+        partials: [
+            Partials.GuildMember, 
+            Partials.Channel,
+            Partials.GuildScheduledEvent,
+            Partials.Message,
+            Partials.Reaction, 
+            Partials.ThreadMember, 
+            Partials.User
+        ],
+    }); 
+} catch (error) {
+    console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error while creating the client. \n${color.red}[${getTimestamp()}]${color.reset} [ERROR]`, error);
+};
 
 client.logs = require('./utils/logs');
 client.config = require('./config');
@@ -125,8 +130,8 @@ const commandFolders = fs.readdirSync("./src/commands");
         handleLogs(client)
         checkVersion(currentVersion);
     }).catch((error) => {
-        client.logs.error(`[LOGIN] Error while logging in. Check if your token is correct.`);
-    })
+        console.error(`${color.red}[${getTimestamp()}]${color.reset} [LOGIN] Error while logging in. Check if your token is correct or double check your also using the correct intents. \n${color.red}[${getTimestamp()}]${color.reset} [LOGIN]`, error);
+    });
 })();
 
 // Logging Effects //
