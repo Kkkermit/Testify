@@ -5,7 +5,7 @@ const fs = require('fs');
 
 // Version Control //
 
-const currentVersion = "v2.0";
+const currentVersion = "beta";
 
 const client = new Client({ intents: [
     GatewayIntentBits.Guilds, 

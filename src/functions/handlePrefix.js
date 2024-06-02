@@ -55,12 +55,10 @@ module.exports = (client) => {
 
         (async () => {
             try {
-
                 client.logs.success(`[PREFIX_COMMANDS] Successfully reloaded prefix (?) commands.`);
-
             } catch (error) {
                 console.error(error);
             }
         })();
-    }
-}
+    };
+};

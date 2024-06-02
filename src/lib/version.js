@@ -24,18 +24,19 @@ function getTimestamp() {
 
 async function getLatestVersion() {
     try {
-        const response = await axios.get('https://api.github.com/repos/Kkkermit/DiscordBotV14-template/releases/latest');
+        const response = await axios.get('https://api.github.com/repos/Kkkermit/Testify/releases/latest');
         const latestVersion = response.data.tag_name;
         return latestVersion;
     } catch (error) {
-        console.error(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] Error while retrieving the latest version, ${color.reset}`, error);
+        // Release has not yet come out yet causing this error to be thrown, just ignore it for it now.
+        console.error(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] Error while retrieving the latest version. No release found. ${color.reset}`);
     }
 }
 
 function checkVersion(currentVersion) {
     getLatestVersion().then((latestVersion) => {
         if (currentVersion < latestVersion) {
-            console.log(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] Attention, a new update is available, please install it - https://github.com/Kkkermit/DiscordBotV14-template`);
+            console.log(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] Attention, a new update is available, please install it - https://github.com/Kkkermit/Testify`);
         } else {
             console.log(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] You have the latest version of the code.`);
         }
