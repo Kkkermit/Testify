@@ -18,7 +18,7 @@ module.exports = {
             keepAlive: true,
             useNewUrlParser: true,
             useUnifiedTopology: true,
-        })
+        });
 
         const color = {
             red: '\x1b[31m',
@@ -30,7 +30,7 @@ module.exports = {
             torquise: '\x1b[38;5;45m',
             purple: '\x1b[38;5;57m',
             reset: '\x1b[0m'
-        }
+        };
         
         function getTimestamp() {
             const date = new Date();
@@ -44,19 +44,19 @@ module.exports = {
         };
 
         if (mongoose.connect) {
-            client.logs.success('[DATABASE] Connected to MongoDB successfully.')
+            client.logs.success('[DATABASE] Connected to MongoDB successfully.');
 
             const schemaFolder = path.join(__dirname, '../schemas'); 
             fs.readdir(schemaFolder, (err, files) => {
                 if (err) {
                     client.logs.error('[ERROR] Error reading schemas folder:', err);
                     return;
-                }
+                };
                 client.logs.success(`[SCHEMAS] Loaded ${files.length} schema files.`);
             });
-        }
+        };
 
-        client.logs.info(`[EVENTS] Started loading events...`)
+        client.logs.info(`[EVENTS] Started loading events...`);
         client.logs.success(`[EVENTS] Loaded ${client.eventNames().length} events.`);
         
         const triggerFolder = path.join(__dirname, '../triggers'); 
@@ -64,19 +64,19 @@ module.exports = {
             if (err) {
                 client.logs.error('Error reading trigger folder:', err);
                 return;
-            }
+            };
             client.logs.info(`[TRIGGERS] Started loading triggers...`);
             client.logs.success(`[TRIGGERS] Loaded ${files.length} trigger files.`);
         });
 
-        console.log(`${color.pink}[${getTimestamp()}] ======================================================`)
-        console.log(`${color.pink}[${getTimestamp()}] ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗`)
-        console.log(`${color.pink}[${getTimestamp()}] ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝`)
-        console.log(`${color.pink}[${getTimestamp()}]    ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝ `)
-        console.log(`${color.pink}[${getTimestamp()}]    ██║   ██╔══╝  ╚════██║   ██║   ██║██╔══╝    ╚██╔╝  `)
-        console.log(`${color.pink}[${getTimestamp()}]    ██║   ███████╗███████║   ██║   ██║██║        ██║   `)
-        console.log(`${color.pink}[${getTimestamp()}]    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   `)
-        console.log(`${color.pink}[${getTimestamp()}] ======================================================`) 
+        console.log(`${color.pink}[${getTimestamp()}] ======================================================`);
+        console.log(`${color.pink}[${getTimestamp()}] ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗`);
+        console.log(`${color.pink}[${getTimestamp()}] ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝`);
+        console.log(`${color.pink}[${getTimestamp()}]    ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝ `);
+        console.log(`${color.pink}[${getTimestamp()}]    ██║   ██╔══╝  ╚════██║   ██║   ██║██╔══╝    ╚██╔╝  `);
+        console.log(`${color.pink}[${getTimestamp()}]    ██║   ███████╗███████║   ██║   ██║██║        ██║   `);
+        console.log(`${color.pink}[${getTimestamp()}]    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   `);
+        console.log(`${color.pink}[${getTimestamp()}] ======================================================`);
 
         client.logs.logging(`[BOT] ${client.user.username} has been launched!`);
 
