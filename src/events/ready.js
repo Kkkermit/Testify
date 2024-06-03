@@ -85,8 +85,11 @@ module.exports = {
         console.log(`${color.pink}[${getTimestamp()}] ██████╔╝███████╗ ╚████╔╝     ██████╔╝   ██║       ██║  ██╗██║  ██╗███████╗██║  ██║██║ ╚═╝ ██║██║   ██║   `);
         console.log(`${color.pink}[${getTimestamp()}] ╚═════╝ ╚══════╝  ╚═══╝      ╚═════╝    ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝   ╚═╝   `);
         console.log(`${color.pink}[${getTimestamp()}] =========================================================================================================`);
-
-        client.logs.logging(`[BOT] ${client.user.username} has been launched!`);
+        console.log(`${color.pink}[${getTimestamp()}] ==================================`);
+        console.log(`${color.pink}[${getTimestamp()}] [BOT] ${client.user.username} has been launched!`);
+        console.log(`${color.pink}[${getTimestamp()}] [BOT] Watching over ${client.guilds.cache.reduce((a,b) => a+b.memberCount, 0)} members!`);
+        console.log(`${color.pink}[${getTimestamp()}] [BOT] Watching over ${client.guilds.cache.size} servers!`);
+        console.log(`${color.pink}[${getTimestamp()}] ==================================`);
 
         require('events').EventEmitter.defaultMaxListeners = config.eventListeners;
     },

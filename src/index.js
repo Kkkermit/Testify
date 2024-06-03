@@ -13,10 +13,11 @@ const {
     Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, Permissions, MessageManager, Embed, Collection, Events, Partials, ActivityType, Activity, AuditLogEvent, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, ComponentType, AttachmentBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType
 } = require(`discord.js`);
 const fs = require('fs');
+const config = require('./config')
 
 // Version Control //
 
-const currentVersion = "BETA-v0.0.1";
+const currentVersion = `${config.botVersion}`;
 
 let client;
 try{

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const config = require('../config')
 
 const color = {
     red: '\x1b[31m',
@@ -38,7 +39,7 @@ function checkVersion(currentVersion) {
         if (currentVersion < latestVersion) {
             console.log(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] Attention, a new update is available, please install it - https://github.com/Kkkermit/Testify`);
         } else {
-            console.log(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] You have the latest version of the code.`);
+            console.log(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] You have the latest version of the code. (${config.botVersion})`);
         }
     });
 }
