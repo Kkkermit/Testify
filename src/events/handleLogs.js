@@ -50,7 +50,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Channel Topic Updated__`)
+            .setDescription(`📚 __Channel Topic Updated__`)
             .setColor('DarkRed')
             .setTimestamp()
             .addFields({ name: `Channel`, value: `> ${channel}`})
@@ -73,7 +73,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Channel Permissions Updated__`)
+            .setDescription(`📚 __Channel Permissions Updated__`)
             .setColor('DarkRed')
             .setTimestamp()
             .addFields({ name: `Channel`, value: `> ${channel}`})
@@ -96,7 +96,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Channel Updated__`)
+            .setDescription(`📚 __Channel Updated__`)
             .setColor('DarkRed')
             .setTimestamp()
             .addFields({ name: `Channel`, value: `> ${oldChannel}`})
@@ -119,7 +119,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Member Started Boosting__`)
+            .setDescription(`<:booster:1189781755721429094> __Member Started Boosting__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${member.user}`})
@@ -142,7 +142,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Member Stopped Boosting__`)
+            .setDescription(`<:booster:1189781755721429094> __Member Stopped Boosting__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${member.user}`})
@@ -166,7 +166,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Member Received Role__`)
+            .setDescription(`📫 __Member Received Role__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${member.user}`})
@@ -190,7 +190,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Member Lost Role__`)
+            .setDescription(`📫 __Member Lost Role__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${member.user}`})
@@ -212,7 +212,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Nickname Changed__`)
+            .setDescription(`🏷️ __Nickname Changed__`)
             .setColor('DarkBlue')
             .setTimestamp()
             .setThumbnail(client.user.avatarURL())
@@ -237,7 +237,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Member Joined__`)
+            .setDescription(`📥 __Member Joined__`)
             .setColor('Green')
             .addFields({ name: `Member`, value: `> ${member.user}`})
             .addFields({ name: `Member ID`, value: `> ${member.user.id}`})
@@ -262,7 +262,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Member Left__`)
+            .setDescription(`📤 __Member Left__`)
             .setColor('DarkRed')
             .addFields({ name: `Member`, value: `> ${member.user}`})
             .addFields({ name: `Member ID`, value: `> ${member.user.id}`})
@@ -287,7 +287,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Server Boost Level Up__`)
+            .setDescription(`<:booster:1189781755721429094> __Server Boost Level Up__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Info`, value: `> **${guild.name}** advanced from level **${oldLevel}** to **${newLevel}**!`})
@@ -311,7 +311,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Server Boost Level Down__`)
+            .setDescription(`<:booster:1189781755721429094> __Server Boost Level Down__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Info`, value: `> **${guild.name}** lost a level, from **${oldLevel}** to **${newLevel}**!`})
@@ -335,7 +335,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Guild Banner Added__`)
+            .setDescription(`⚒️ __Guild Banner Added__`)
             .setColor('Purple')
             .addFields({ name: `Banner URL`, value: `> ${bannerURL}`})
             .setImage(bannerURL)
@@ -359,7 +359,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __AFK Channel Added__`)
+            .setDescription(`🎧 __AFK Channel Added__`)
             .setColor('DarkRed')
             .addFields({ name: `AFK Channel`, value: `> ${afkChannel}`})
             .setTimestamp()
@@ -452,7 +452,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Message Pinned__`)
+            .setDescription(`📌 __Message Pinned__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Pinner`, value: `> ${message.author}`})
@@ -483,6 +483,7 @@ function handleLogs(client) {
             .addFields({ name: `Member`, value: `> ${message.author}`})
             .addFields({ name: `Old Message`, value: `> ${oldContent}`})
             .addFields({ name: `New Message`, value: `> ${newContent}`})
+            .addFields({ name: `Jump to Message`, value: `> [Click here](${message.url})`})
             .setThumbnail(client.user.avatarURL())
             .setAuthor({ name: `Logging System ${client.config.devBy}`})
             .setFooter({ text: `Message Edited`})
@@ -502,7 +503,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Role Position Updated__`)
+            .setDescription(`🗃️ __Role Position Updated__`)
             .setColor('DarkRed')
             .addFields({ name: `Role`, value: `> ${role}`})
             .addFields({ name: `Old Position`, value: `> ${oldPosition}`})
@@ -527,7 +528,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Role Permissions Updated__`)
+            .setDescription(`🗃️ __Role Permissions Updated__`)
             .setColor('DarkRed')
             .addFields({ name: `Role`, value: `> ${role}`})
             .addFields({ name: `Old Permissions`, value: `> ${oldPermissions}`})
@@ -552,7 +553,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Voice Channel Switched__`)
+            .setDescription(`🔊 __Voice Channel Switched__`)
             .setColor('Purple')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${member.user}`})
@@ -577,7 +578,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Role Created__`)
+            .setDescription(`📰 __Role Created__`)
             .setColor('Green')
             .setTimestamp()
             .addFields({ name: `Role Name`, value: `> ${role.name}`})
@@ -603,7 +604,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Role Deleted__`)
+            .setDescription(`📰 __Role Deleted__`)
             .setColor('DarkRed')
             .setTimestamp()
             .addFields({ name: `Role Name`, value: `> ${role.name}`})
@@ -626,7 +627,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __User Banned__`)
+            .setDescription(`⚒️ __User Banned__`)
             .setColor('DarkRed')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${user}`})
@@ -651,7 +652,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __User Unbanned__`)
+            .setDescription(`⚒️ __User Unbanned__`)
             .setColor('Green')
             .setTimestamp()
             .addFields({ name: `Member`, value: `> ${user}`})
@@ -674,7 +675,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Channel Created__`)
+            .setDescription(`📚 __Channel Created__`)
             .setColor('Green')
             .setTimestamp()
             .addFields({ name: `Channel`, value: `> ${channel}`})
@@ -697,7 +698,7 @@ function handleLogs(client) {
 
             const embed = new EmbedBuilder()
             .setTitle(`${client.user.username} Logging system ${client.config.arrowEmoji}`)
-            .setDescription(`${client.config.auditLogEmoji} __Channel Deleted__`)
+            .setDescription(`📚 __Channel Deleted__`)
             .setColor('DarkRed')
             .setTimestamp()
             .addFields({ name: `Channel`, value: `> ${channel}`})

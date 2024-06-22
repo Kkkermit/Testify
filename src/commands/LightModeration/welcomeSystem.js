@@ -31,12 +31,12 @@ module.exports = {
             await welcomeMessage.save();
     
             const successEmbed = new EmbedBuilder()
-            .setAuthor(`Welcome System Command ${client.config.devBy}`)
+            .setAuthor({ name: `Welcome System Command ${client.config.devBy}`})
             .setTitle(`${client.user.username} Welcome System Tool ${client.config.arrowEmoji}`)
             .setColor(client.config.embedModLight)
             .setThumbnail(client.user.displayAvatarURL())
             .setDescription(`> Welcome message set to: **${message}**.\n\nChannel: <#${channelId}>\nEmbed: **${ isEmbed ? "Yes" : "No" }**`)
-            .setFooter(`Welcome system has been setup!`)
+            .setFooter({ text: `Welcome system has been setup!`})
             .setTimestamp();
     
             await interaction.reply({ embeds: [successEmbed], ephemeral: true });
@@ -48,17 +48,17 @@ module.exports = {
             if (!existingData) {
                 return await interaction.reply({ content: "Welcome system **has not** yet been set up in this guild. To set up, use \`\`/welcome-message\`\` set.", ephemeral: true });
             }
+
+            const removedEmbed = new EmbedBuilder()
+            .setAuthor({ name: `Welcome System Command ${client.config.devBy}`})
+            .setTitle(`${client.user.username} Welcome System Tool ${client.config.arrowEmoji}`)
+            .setColor(client.config.embedModLight)
+            .setThumbnail(client.user.displayAvatarURL())
+            .setDescription("> Welcome message has been **removed** from this server")
+            .setFooter({ text: `Welcome system has been removed!`})
+            .setTimestamp();
     
             if (existingData) {
-                const removedEmbed = new EmbedBuilder()
-                .setAuthor(`Welcome System Command ${client.config.devBy}`)
-                .setTitle(`${client.user.username} Welcome System Tool ${client.config.arrowEmoji}`)
-                .setColor(client.config.embedModLight)
-                .setThumbnail(client.user.displayAvatarURL())
-                .setDescription("> Welcome message has been **removed** from this server")
-                .setFooter(`Welcome system has been removed!`)
-                .setTimestamp();
-    
                 await WelcomeMessage.deleteOne({ guildId });
                 await interaction.reply({ embeds: [removedEmbed], ephemeral: true });
             }
