@@ -790,6 +790,11 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     description: 'Navigate to the Commands help page.',
                     value: 'commands',
                 },
+                {
+                    label: '• Prefix Commands Help',
+                    description: 'Navigate to the Prefix Commands help page.',
+                    value: 'pcommands',
+                }
             ),
         );
 
@@ -1041,7 +1046,7 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp();
 
-                    const commandpage6 = new EmbedBuilder()
+                const commandpage6 = new EmbedBuilder()
                     .setColor(client.config.embedColor)
                     .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
                     .setAuthor({ name: `🚑 Help Command ${client.config.devBy}` })
@@ -1073,7 +1078,7 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp();
 
-                    const commandpage7 = new EmbedBuilder()
+                const commandpage7 = new EmbedBuilder()
                     .setColor(client.config.embedColor)
                     .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
                     .setAuthor({ name: `🚑 Help Command ${client.config.devBy}` })
@@ -1084,9 +1089,6 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
 
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp(); 
-
-                    
-
 
                 const commandbuttons = new ActionRowBuilder()
                     .addComponents(
@@ -1397,6 +1399,183 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     if (i.customId === 'pageleft6') {
                         i.update({ embeds: [commandpage6], components: [commandbuttons5] }).catch(err);
                     } 
+                });
+            }
+
+            if (value === 'pcommands') {
+
+                const pcommandpage = new EmbedBuilder()
+                    .setColor(client.config.embedColor)
+                    .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
+                    .setAuthor({ name: `🚑 Help Command ${client.config.devBy}` })
+                    .setFooter({ text: `🚑 ${client.user.username}'s help center: Prefix Commands Page 1` })
+                    .setThumbnail(client.user.avatarURL())
+                    .setDescription(`> **Prefix Commands Help Page \`\`1\`\`**`)
+                    .addFields({ name: `• ${client.config.prefix}animalfacts`, value: `> Gives you a random animal fact.` })
+                    .addFields({ name: `• ${client.config.prefix}meme`, value: `> Displays a random meme.` })
+                    .addFields({ name: `• ${client.config.prefix}beg`, value: `> Beg for money. Results may vary.` })
+                    .addFields({ name: `• ${client.config.prefix}daily`, value: `> Collect your daily reward.` })
+                    .addFields({ name: `• ${client.config.prefix}work`, value: `> Work for money.` })
+                    .addFields({ name: `• ${client.config.prefix}account`, value: `> View your economy account information.` })
+                    .addFields({ name: `• ${client.config.prefix}ascii`, value: `> Converts text to ascii.` })
+                    .addFields({ name: `• ${client.config.prefix}dad-joke`, value: `> Tells a dad joke.` })
+                    .addFields({ name: `• ${client.config.prefix}iq`, value: `> Displays your IQ.` })
+                    .addFields({ name: `• ${client.config.prefix}nitro`, value: `> Generates a nitro code. (fake)` })
+                    .addFields({ name: `• ${client.config.prefix}rc`, value: `> Displays a relationship checker.` })
+                    .addFields({ name: `• ${client.config.prefix}ban`, value: `> Bans a user` })
+                    .addFields({ name: `• ${client.config.prefix}kick`, value: `> Kicks a user` })
+                    .addFields({ name: `• ${client.config.prefix}unban`, value: `> Unbans a user` })
+                    .addFields({ name: `• ${client.config.prefix}pfp`, value: `> Displays a users profile picture` })
+                    .addFields({ name: `• ${client.config.prefix}bot-specs`, value: `> Shows the bots specifications.` })
+                    .addFields({ name: `• ${client.config.prefix}bot-info`, value: `> Shows the bots information.` })
+                    .addFields({ name: `• ${client.config.prefix}member-graph`, value: `> Displays the server member graph.` })
+                    .addFields({ name: `• ${client.config.prefix}perms`, value: `> Displays a users permissions.` })
+                    .addFields({ name: `• ${client.config.prefix}serverinfo`, value: `> Displays the server information.` })
+                    .addFields({ name: `• ${client.config.prefix}userinfo`, value: `> Displays a users information.` })
+                    .addFields({ name: `• ${client.config.prefix}roleinfo`, value: `> Displays a roles information.` })
+                    .addFields({ name: `• ${client.config.prefix}uptime`, value: `> Shows the bots uptime.` })
+                    .addFields({ name: `• ${client.config.prefix}lb`, value: `> Displays the server leaderboard.` })
+                    .addFields({ name: `• ${client.config.prefix}rank`, value: `> Displays a users rank.` })
+
+                    .setImage('https://i.postimg.cc/TPTDJZt7/Screenshot-2024-06-22-211847.png')
+                    .setTimestamp();
+
+                const pcommandpage1 = new EmbedBuilder()
+                    .setColor(client.config.embedColor)
+                    .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
+                    .setAuthor({ name: `🚑 Help Command ${client.config.devBy}` })
+                    .setFooter({ text: `🚑 ${client.user.username}'s help center: Prefix Commands Page 2` })
+                    .setThumbnail(client.user.avatarURL())
+                    .setDescription(`> **Prefix Commands Help Page \`\`2\`\`**`)
+                    .addFields({ name: `• ${client.config.prefix}addrole`, value: `> Adds a role to a user.` })
+                    .addFields({ name: `• ${client.config.prefix}removerole`, value: `> Removes a role from a user.` })
+                    .addFields({ name: `• ${client.config.prefix}nick`, value: `> Changes a users nickname.` })
+                    .addFields({ name: `• ${client.config.prefix}clear`, value: `> Clears a specified amount of messages.` })
+                    .addFields({ name: `• ${client.config.prefix}autoplay`, value: `> Toggles autoplay for the music system.` })
+                    .addFields({ name: `• ${client.config.prefix}filter`, value: `> Toggles the music filter.` })
+                    .addFields({ name: `• ${client.config.prefix}forward`, value: `> Forwards the music.` })
+                    .addFields({ name: `• ${client.config.prefix}join`, value: `> Makes the bot join a voice channel.` })
+                    .addFields({ name: `• ${client.config.prefix}leave`, value: `> Makes the bot leave a voice channel.` })
+                    .addFields({ name: `• ${client.config.prefix}np`, value: `> Shows the currently playing song.` })
+                    .addFields({ name: `• ${client.config.prefix}pause`, value: `> Pauses the music.` })
+                    .addFields({ name: `• ${client.config.prefix}play`, value: `> Plays a song.` })
+                    .addFields({ name: `• ${client.config.prefix}playskip`, value: `> Plays a song and skips the current song.` })
+                    .addFields({ name: `• ${client.config.prefix}playtop`, value: `> Plays the top song in queue.` })
+                    .addFields({ name: `• ${client.config.prefix}previous`, value: `> Plays the previous song.` })
+                    .addFields({ name: `• ${client.config.prefix}queue`, value: `> Shows the music queue.` })
+                    .addFields({ name: `• ${client.config.prefix}repeat`, value: `> Toggles repeat for the music system.` })
+                    .addFields({ name: `• ${client.config.prefix}resume`, value: `> Resumes the music.` })
+                    .addFields({ name: `• ${client.config.prefix}rewind`, value: `> Rewinds the music.` })
+                    .addFields({ name: `• ${client.config.prefix}seek`, value: `> Seeks the music.` })
+                    .addFields({ name: `• ${client.config.prefix}shuffle`, value: `> Shuffles the music queue.` })
+                    .addFields({ name: `• ${client.config.prefix}skip`, value: `> Skips the current song.` })
+                    .addFields({ name: `• ${client.config.prefix}skipto`, value: `> Skips to a specified song.` })
+                    .addFields({ name: `• ${client.config.prefix}stop`, value: `> Stops the music.` })
+                    .addFields({ name: `• ${client.config.prefix}volume`, value: `> Changes the music volume.` })
+
+                    .setImage('https://i.postimg.cc/TPTDJZt7/Screenshot-2024-06-22-211847.png')
+                    .setTimestamp();
+
+                const pcommandbuttons = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('pcommand-helpcenterbutton')
+                            .setLabel('Help Center')
+                            .setStyle(ButtonStyle.Success),
+
+                            new ButtonBuilder()
+                            .setCustomId('pcommand-first')
+                            .setLabel('◀◀')
+                            .setDisabled(true)
+                            .setStyle(ButtonStyle.Primary),
+
+                        new ButtonBuilder()
+                            .setCustomId('pcommand-pageleft')
+                            .setLabel('◀')
+                            .setDisabled(true)
+                            .setStyle(ButtonStyle.Secondary),
+
+                        new ButtonBuilder()
+                            .setCustomId('pcommand-pageright')
+                            .setLabel('▶')
+                            .setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder()
+                            .setCustomId('pcommand-last')
+                            .setLabel('▶▶')
+                            .setStyle(ButtonStyle.Primary)
+                    );
+
+                const pcommandbuttons1 = new ActionRowBuilder()
+                    .addComponents(
+                        new ButtonBuilder()
+                            .setCustomId('pcommand-helpcenterbutton1')
+                            .setLabel('Help Center')
+                            .setStyle(ButtonStyle.Success),
+
+                            new ButtonBuilder()
+                            .setCustomId('pcommand-first')
+                            .setLabel('◀◀')
+                            .setStyle(ButtonStyle.Primary),
+
+                        new ButtonBuilder()
+                            .setCustomId('pcommand-pageleft1')
+                            .setLabel('◀')
+                            .setDisabled(false)
+                            .setStyle(ButtonStyle.Secondary),
+
+                        new ButtonBuilder()
+                            .setCustomId('pcommand-pageright1')
+                            .setDisabled(false)
+                            .setLabel('▶')
+                            .setStyle(ButtonStyle.Secondary),
+                            new ButtonBuilder()
+                            .setCustomId('pcommand-last')
+                            .setLabel('▶▶')
+                            .setStyle(ButtonStyle.Primary)
+                        );
+                    
+                await interaction.update({ embeds: [pcommandpage], components: [pcommandbuttons] }).catch(err);
+                const collector = interaction.message.createMessageComponentCollector({ componentType: ComponentType.Button });
+
+                collector.on('collect', async (i, err) => {
+                    try {
+
+                        await i.deferUpdate();
+
+                        if (i.customId === 'pcommand-last') {
+                            i.editReply({ embeds: [pcommandpage1], components: [pcommandbuttons1] }).catch(err);
+                        } 
+
+                        if (i.customId === 'pcommand-first') {
+                            i.editReply({ embeds: [pcommandpage], components: [pcommandbuttons] }).catch(err);
+                        }
+
+                        if (i.customId === 'pcommand-helpcenterbutton') {
+                            i.editReply({ embeds: [centerembed], components: [helprow2] }).catch(err);
+                        }
+
+                        if (i.customId === 'pcommand-pageleft') { 
+                            i.editReply({ embeds: [pcommandpage], components: [pcommandbuttons] }).catch(err);
+                        }
+
+                        if (i.customId === 'pcommand-pageright') { 
+                            i.editReply({ embeds: [pcommandpage1], components: [pcommandbuttons1] }).catch(err);
+                        }
+
+                        if (i.customId === 'pcommand-helpcenterbutton1') {
+                            i.editReply({ embeds: [centerembed], components: [helprow2] }).catch(err);
+                        }
+
+                        if (i.customId === 'pcommand-pageright1') {
+                            i.editReply({ embeds: [pcommandpage1], components: [pcommandbuttons1] }).catch(err);
+                        }
+
+                        if (i.customId === 'pcommand-pageleft1') {
+                            i.editReply({ embeds: [pcommandpage], components: [pcommandbuttons] }).catch(err);
+                        }
+                    } catch(err) {
+                        console.log(`${color.red}[${getTimestamp()}]${color.reset} [PREFIX_HELP_MENU] There was an error in the buttons on prefix command help center`, err);
+                    }
                 });
             }
         })

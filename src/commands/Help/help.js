@@ -66,10 +66,15 @@ module.exports = {
                     },
 
                     {
-                        label: '• Commands Help',
-                        description: 'Navigate to the Commands help page.',
+                        label: '• Slash Commands Help',
+                        description: 'Navigate to the Slash Commands help page.',
                         value: 'commands',
                     },
+                    {
+                        label: '• Prefix Commands Help',
+                        description: 'Navigate to the Prefix Commands help page.',
+                        value: 'pcommands',
+                    }
                 ),
             );
 
