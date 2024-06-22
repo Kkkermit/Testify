@@ -15,7 +15,7 @@ module.exports = {
         
         const signText = interaction.options.getString("text").trim();
 
-        if (filter.words.includes(text)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(signText)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
 
         const maxLineWidth = 60;
         let lines = [];
