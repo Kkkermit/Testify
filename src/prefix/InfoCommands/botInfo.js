@@ -18,7 +18,7 @@ module.exports = {
 
         let uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
-        const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
+        const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: message.guild.id });
         const guildPrefix = fetchGuildPrefix.Prefix;
 
         const embed = new EmbedBuilder()
@@ -65,9 +65,6 @@ module.exports = {
                     let seconds = Math.floor(totalSeconds % 60);
 
                     let uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
-
-                    const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
-                    const guildPrefix = fetchGuildPrefix.Prefix;
 
                     const refreshEmbed = new EmbedBuilder()
                     .setColor(client.config.embedDev)
