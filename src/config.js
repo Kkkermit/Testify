@@ -4,7 +4,7 @@ module.exports = {
     botVersion: "BETA-v1.0.0",
     
     // BOT INFO //
-    prefix: "t?",
+    prefix: "t?", // Default prefix
     status: "dnd",
     eventListeners: 100,
     dev: "Kkermit",
@@ -15,9 +15,9 @@ module.exports = {
     filterMessage: "Your message includes profanity which is **not** allowed!",
 
     // EMBED COLORS //
-    embedColor: "Green",
+    embedColor: "Blurple",
     embedAutomod: "Blue",
-    embedCommunity: "Blurple",
+    embedCommunity: "Green",
     embedModLight: "Red",
     embedModHard: "DarkRed",
     embedInfo: "LuminousVividPink",
