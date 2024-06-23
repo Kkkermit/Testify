@@ -29,7 +29,6 @@ async function getLatestVersion() {
         const latestVersion = response.data.tag_name;
         return latestVersion;
     } catch (error) {
-        // Release has not yet come out yet causing this error to be thrown, just ignore it for it now.
         console.error(`${color.torquise}[${getTimestamp()}] [LATEST_VERSION] Error while retrieving the latest version. No release found. ${color.reset}`);
     }
 }
