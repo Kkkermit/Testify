@@ -13,6 +13,8 @@ module.exports = {
     noPerms: `You **do not** have the required permissions to use this command!`,
     ownerOnlyCommand: `This command is **only** available for the owner of the bot!`,
     filterMessage: "Your message includes profanity which is **not** allowed!",
+    botInvite: "https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=bot%20applications.commands",
+    botServerInvite: "https://discord.gg/xcMVwAVjSD",
 
     // EMBED COLORS //
     embedColor: "Blurple",
