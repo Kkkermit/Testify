@@ -901,7 +901,6 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .addFields({ name: "• /chat", value: "> Chat with an AI modal." })
                     .addFields({ name: "• /change-prefix", value: "> Changes the bots prefix in your server." })
                     .addFields({ name: "• /clear", value: "> Clears a specified amount of messages." })
-                    .addFields({ name: "• /coin-flip", value: "> Flips a coin." })
 
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp();
