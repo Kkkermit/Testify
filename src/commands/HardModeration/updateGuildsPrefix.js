@@ -17,66 +17,78 @@ module.exports = {
 
         switch(sub) {
             case 'change':
+            try {
 
-            const prefix = interaction.options.getString('prefix');
-            if (prefix.length > 4) return interaction.reply({ content: 'The prefix **cannot** be longer than 4 characters!', ephemeral: true });
+                const prefix = interaction.options.getString('prefix');
+                if (prefix.length > 4) return interaction.reply({ content: 'The prefix **cannot** be longer than 4 characters!', ephemeral: true });
 
-            const data = await prefixSchema.findOne({ Guild: interaction.guild.id });
-            if (!data) {
-                await new prefixSchema({
-                    Guild: interaction.guild.id,
-                    Prefix: prefix
-                }).save();
-            } else {
-                await prefixSchema.findOneAndUpdate({
-                    Guild: interaction.guild.id,
-                    Prefix: prefix
-                });
+                const data = await prefixSchema.findOne({ Guild: interaction.guild.id });
+                if (!data) {
+                    await new prefixSchema({
+                        Guild: interaction.guild.id,
+                        Prefix: prefix
+                    }).save();
+                } else {
+                    await prefixSchema.findOneAndUpdate({
+                        Guild: interaction.guild.id,
+                        Prefix: prefix
+                    });
+                }
+
+                const embed = new EmbedBuilder()
+                .setColor(client.config.embedModHard)
+                .setAuthor({ name: `Prefix update command ${client.config.devBy}`})
+                .setTitle(`${client.user.username} prefix update ${client.config.arrowEmoji}`)
+                .setDescription(`The prefix has been changed to **\`${prefix}\`**`)
+                .setTimestamp()
+                .setFooter({ text: `Prefix updated by ${interaction.user.username}`});
+
+                await interaction.reply({ embeds: [embed], ephemeral: true });
+            } catch (err) {
+                await interaction.reply({ content: `Whoops, something went wrong! Please try again.`, ephemeral: true });
             }
-
-            const embed = new EmbedBuilder()
-            .setColor(client.config.embedModHard)
-            .setAuthor({ name: `Prefix update command ${client.config.devBy}`})
-            .setTitle(`${client.user.username} prefix update ${client.config.arrowEmoji}`)
-            .setDescription(`The prefix has been changed to **\`${prefix}\`**`)
-            .setTimestamp()
-            .setFooter({ text: `Prefix updated by ${interaction.user.username}`});
-
-            await interaction.reply({ embeds: [embed], ephemeral: true });
 
             break;
             case 'check':
+            try {
 
-            const data1 = await prefixSchema.findOne({ Guild: interaction.guild.id });
-            if (!data1) return interaction.reply({ content: `The prefix for ${interaction.guild.name} has not been updated and is using the default one of **\`${client.config.prefix}\`**`, ephemeral: true });
+                const data1 = await prefixSchema.findOne({ Guild: interaction.guild.id });
+                if (!data1) return interaction.reply({ content: `The prefix for ${interaction.guild.name} has not been updated and is using the default one of **\`${client.config.prefix}\`**`, ephemeral: true });
 
-            const embed1 = new EmbedBuilder()
-            .setColor(client.config.embedModHard)
-            .setAuthor({ name: `Prefix check command ${client.config.devBy}`})
-            .setTitle(`${client.user.username} prefix check ${client.config.arrowEmoji}`)
-            .setDescription(`The prefix for this server is **\`${data1.Prefix}\`**`)
-            .setTimestamp()
-            .setFooter({ text: `Prefix checked by ${interaction.user.username}`});
+                const embed1 = new EmbedBuilder()
+                .setColor(client.config.embedModHard)
+                .setAuthor({ name: `Prefix check command ${client.config.devBy}`})
+                .setTitle(`${client.user.username} prefix check ${client.config.arrowEmoji}`)
+                .setDescription(`The prefix for this server is **\`${data1.Prefix}\`**`)
+                .setTimestamp()
+                .setFooter({ text: `Prefix checked by ${interaction.user.username}`});
 
-            await interaction.reply({ embeds: [embed1] });
+                await interaction.reply({ embeds: [embed1] });
+            } catch (err) {
+                await interaction.reply({ content: `Whoops, something went wrong! Please try again.`, ephemeral: true });
+            }
 
             break;
             case 'reset':
+            try {
 
-            const data2 = await prefixSchema.findOne({ Guild: interaction.guild.id });
-            if (!data2) return interaction.reply({ content: 'The prefix is already set to the default!', ephemeral: true });
+                const data2 = await prefixSchema.findOne({ Guild: interaction.guild.id });
+                if (!data2) return interaction.reply({ content: 'The prefix is already set to the default!', ephemeral: true });
 
-            await prefixSchema.findOneAndDelete({ Guild: interaction.guild.id });
+                await prefixSchema.findOneAndDelete({ Guild: interaction.guild.id });
 
-            const embed2 = new EmbedBuilder()
-            .setColor(client.config.embedModHard)
-            .setAuthor({ name: `Prefix reset command ${client.config.devBy}`})
-            .setTitle(`${client.user.username} prefix reset ${client.config.arrowEmoji}`)
-            .setDescription(`The prefix has been reset to **\`${client.config.prefix}\`**`)
-            .setTimestamp()
-            .setFooter({ text: `Prefix reset by ${interaction.user.username}`});
-
-            await interaction.reply({ embeds: [embed2], ephemeral: true });
+                const embed2 = new EmbedBuilder()
+                .setColor(client.config.embedModHard)
+                .setAuthor({ name: `Prefix reset command ${client.config.devBy}`})
+                .setTitle(`${client.user.username} prefix reset ${client.config.arrowEmoji}`)
+                .setDescription(`The prefix has been reset to **\`${client.config.prefix}\`**`)
+                .setTimestamp()
+                .setFooter({ text: `Prefix reset by ${interaction.user.username}`});
+                
+                await interaction.reply({ embeds: [embed2], ephemeral: true });
+            } catch (err) {
+                await interaction.reply({ content: `Whoops, something went wrong! Please try again.`, ephemeral: true });
+            }
         };
     },
 };
