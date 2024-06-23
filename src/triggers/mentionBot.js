@@ -10,6 +10,17 @@ module.exports = {
 
             const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: message.guild.id });
             const guildPrefix = fetchGuildPrefix.Prefix;
+
+            let totalSeconds = (client.uptime / 1000);
+            let days = Math.floor(totalSeconds / 86400);
+            totalSeconds %= 86400;
+            let hours = Math.floor(totalSeconds / 3600);
+            totalSeconds %= 3600;
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = Math.floor(totalSeconds % 60);
+
+            let uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+
         
             const pingEmbed = new EmbedBuilder()
             .setColor("Purple")
@@ -20,7 +31,7 @@ module.exports = {
             .addFields({ name: `**👥 • Users:**`, value: `${client.guilds.cache.reduce((a,b) => a+b.memberCount, 0)}`, inline: true})
             .addFields({ name: `**💣 • Commands:**`, value: `\`\`${client.commands.size}\`\` **Slash** & \`\`${client.pcommands.size}\`\` **Prefix**`, inline: true})
             .addFields({ name: `**📡 • Latency:**`, value: `\`\`${Math.round(client.ws.ping)}ms\`\``, inline: true})
-            .addFields({ name: `**🕒 • Uptime:**`, value: `\`\`${client.uptime}\`\``, inline: true})
+            .addFields({ name: `**🕒 • Uptime:**`, value: `\`\`${uptime}\`\``, inline: true})
             .addFields({ name: `**🛎️ • Prefix:**`, value: `Server prefix is \`\`${guildPrefix}\`\``, inline: true})
             .setTimestamp()
             .setThumbnail(client.user.avatarURL())
