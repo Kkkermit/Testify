@@ -1,4 +1,5 @@
 const { SlashCommandBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder, EmbedBuilder, ActionRowBuilder } = require('discord.js');
+const guildSettingsSchema = require('../../schemas/prefixSystem.js');
 var timeout = [];
 
 module.exports = {
@@ -78,17 +79,21 @@ module.exports = {
                 ),
             );
 
-            const embed = new EmbedBuilder()
-            .setColor(client.config.embedColor)
-            .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
-            .setAuthor({ name: `🚑 Help Command ${client.config.devBy}`})
-            .setFooter({ text: `🚑 ${client.user.username}'s help center`})
-            .setThumbnail(client.user.avatarURL())
-            .addFields({ name: `• Commands Help`, value: `> Get all **Commands** (**${client.commands.size}** slash & **${client.pcommands.size}** prefix) ${client.user.username} looks over!`})
-            .addFields({ name: "• How to add Bot", value: `> Quick guide on how to add our **${client.user.username}** \n> to your server.`})
-            .addFields({ name: "• Feedback", value: "> How to send us feedback and suggestions."})
-            .addFields({ name: "• Exclusive Functionality", value: `> Guide on how to receive permission to \n> use exclusive functionality (${client.user.username} Beta version).`})
-            .setTimestamp()
+        const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
+        const guildPrefix = fetchGuildPrefix.Prefix;
+
+        const embed = new EmbedBuilder()
+        .setColor(client.config.embedColor)
+        .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
+        .setAuthor({ name: `🚑 Help Command ${client.config.devBy}`})
+        .setFooter({ text: `🚑 ${client.user.username}'s help center`})
+        .setThumbnail(client.user.avatarURL())
+        .addFields({ name: `• Commands Help`, value: `> Get all **Commands** (**${client.commands.size}** slash & **${client.pcommands.size}** prefix) ${client.user.username} looks over!`})
+        .addFields({ name: `• What's my prefix?`, value: `> The prefix for **${interaction.guild.name}** is \`\`${guildPrefix}\`\``})
+        .addFields({ name: "• How to add Bot", value: `> Quick guide on how to add our **${client.user.username}** \n> to your server.`})
+        .addFields({ name: "• Feedback", value: "> How to send us feedback and suggestions."})
+        .addFields({ name: "• Exclusive Functionality", value: `> Guide on how to receive permission to \n> use exclusive functionality (${client.user.username} Beta version).`})
+        .setTimestamp();
 
             await interaction.reply({ embeds: [embed], components: [helprow1] });
         }

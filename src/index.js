@@ -72,7 +72,7 @@ const { handleLogs } = require("./events/handleLogs");
 const Logs = require('discord-logs');
 const { CaptchaGenerator } = require('captcha-canvas');
 const { createCanvas } = require('canvas');
-const { checkVersion } = require('./lib/version')
+const { checkVersion } = require('./lib/version');
 
 // Schemas //
 
@@ -85,6 +85,7 @@ const capschema = require('./schemas/verifySystem');
 const verifyusers = require('./schemas/verifyUsersSystem');
 const linkSchema = require('./schemas/antiLinkSystem');
 const warningSchema = require('./schemas/warningSystem');
+const guildSettingsSchema = require('./schemas/prefixSystem');
 
 // Rotating Activity //
 
@@ -801,6 +802,8 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
     if (!interaction.isStringSelectMenu()) return;
     if (interaction.customId === 'selecthelp') {
         let choices = "";
+        const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
+        const guildPrefix = fetchGuildPrefix.Prefix;
 
         const centerembed = new EmbedBuilder()
         .setColor(client.config.embedColor)
@@ -809,6 +812,7 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
         .setFooter({ text: `🚑 ${client.user.username}'s help center`})
         .setThumbnail(client.user.avatarURL())
         .addFields({ name: `• Commands Help`, value: `> Get all **Commands** (**${client.commands.size}** slash & **${client.pcommands.size}** prefix) ${client.user.username} looks over!`})
+        .addFields({ name: `• What's my prefix?`, value: `> The prefix for **${interaction.guild.name}** is \`\`${guildPrefix}\`\``})
         .addFields({ name: "• How to add Bot", value: `> Quick guide on how to add our **${client.user.username}** \n> to your server.`})
         .addFields({ name: "• Feedback", value: "> How to send us feedback and suggestions."})
         .addFields({ name: "• Exclusive Functionality", value: `> Guide on how to receive permission to \n> use exclusive functionality (${client.user.username} Beta version).`})
@@ -1085,7 +1089,9 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .setFooter({ text: `🚑 ${client.user.username}'s help center: Commands Page 7` })
                     .setThumbnail(client.user.avatarURL())
                     .setDescription(`> **Commands Help Page \`\`7\`\`**`)
-                    .addFields({ name: '• More commands coming soon...', value: '> Coming soon.....'})
+                    .addFields({ name: '• /prefix change', value: '> Changes the bots prefix.'})
+                    .addFields({ name: '• /prefix reset', value: '> Resets the bots prefix.'})
+                    .addFields({ name: '• /prefix check', value: '> Checks the bots prefix.'})
 
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp(); 
@@ -1404,6 +1410,9 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
 
             if (value === 'pcommands') {
 
+                const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
+                const guildPrefix = fetchGuildPrefix.Prefix;
+
                 const pcommandpage = new EmbedBuilder()
                     .setColor(client.config.embedColor)
                     .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
@@ -1411,31 +1420,31 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .setFooter({ text: `🚑 ${client.user.username}'s help center: Prefix Commands Page 1` })
                     .setThumbnail(client.user.avatarURL())
                     .setDescription(`> **Prefix Commands Help Page \`\`1\`\`**`)
-                    .addFields({ name: `• ${client.config.prefix}animalfacts`, value: `> Gives you a random animal fact.` })
-                    .addFields({ name: `• ${client.config.prefix}meme`, value: `> Displays a random meme.` })
-                    .addFields({ name: `• ${client.config.prefix}beg`, value: `> Beg for money. Results may vary.` })
-                    .addFields({ name: `• ${client.config.prefix}daily`, value: `> Collect your daily reward.` })
-                    .addFields({ name: `• ${client.config.prefix}work`, value: `> Work for money.` })
-                    .addFields({ name: `• ${client.config.prefix}account`, value: `> View your economy account information.` })
-                    .addFields({ name: `• ${client.config.prefix}ascii`, value: `> Converts text to ascii.` })
-                    .addFields({ name: `• ${client.config.prefix}dad-joke`, value: `> Tells a dad joke.` })
-                    .addFields({ name: `• ${client.config.prefix}iq`, value: `> Displays your IQ.` })
-                    .addFields({ name: `• ${client.config.prefix}nitro`, value: `> Generates a nitro code. (fake)` })
-                    .addFields({ name: `• ${client.config.prefix}rc`, value: `> Displays a relationship checker.` })
-                    .addFields({ name: `• ${client.config.prefix}ban`, value: `> Bans a user` })
-                    .addFields({ name: `• ${client.config.prefix}kick`, value: `> Kicks a user` })
-                    .addFields({ name: `• ${client.config.prefix}unban`, value: `> Unbans a user` })
-                    .addFields({ name: `• ${client.config.prefix}pfp`, value: `> Displays a users profile picture` })
-                    .addFields({ name: `• ${client.config.prefix}bot-specs`, value: `> Shows the bots specifications.` })
-                    .addFields({ name: `• ${client.config.prefix}bot-info`, value: `> Shows the bots information.` })
-                    .addFields({ name: `• ${client.config.prefix}member-graph`, value: `> Displays the server member graph.` })
-                    .addFields({ name: `• ${client.config.prefix}perms`, value: `> Displays a users permissions.` })
-                    .addFields({ name: `• ${client.config.prefix}serverinfo`, value: `> Displays the server information.` })
-                    .addFields({ name: `• ${client.config.prefix}userinfo`, value: `> Displays a users information.` })
-                    .addFields({ name: `• ${client.config.prefix}roleinfo`, value: `> Displays a roles information.` })
-                    .addFields({ name: `• ${client.config.prefix}uptime`, value: `> Shows the bots uptime.` })
-                    .addFields({ name: `• ${client.config.prefix}lb`, value: `> Displays the server leaderboard.` })
-                    .addFields({ name: `• ${client.config.prefix}rank`, value: `> Displays a users rank.` })
+                    .addFields({ name: `• ${guildPrefix}animalfacts`, value: `> Gives you a random animal fact.` })
+                    .addFields({ name: `• ${guildPrefix}meme`, value: `> Displays a random meme.` })
+                    .addFields({ name: `• ${guildPrefix}beg`, value: `> Beg for money. Results may vary.` })
+                    .addFields({ name: `• ${guildPrefix}daily`, value: `> Collect your daily reward.` })
+                    .addFields({ name: `• ${guildPrefix}work`, value: `> Work for money.` })
+                    .addFields({ name: `• ${guildPrefix}account`, value: `> View your economy account information.` })
+                    .addFields({ name: `• ${guildPrefix}cprefix`, value: `> Changes the bots prefix.` })
+                    .addFields({ name: `• ${guildPrefix}dad-joke`, value: `> Tells a dad joke.` })
+                    .addFields({ name: `• ${guildPrefix}iq`, value: `> Displays your IQ.` })
+                    .addFields({ name: `• ${guildPrefix}nitro`, value: `> Generates a nitro code. (fake)` })
+                    .addFields({ name: `• ${guildPrefix}rc`, value: `> Displays a relationship checker.` })
+                    .addFields({ name: `• ${guildPrefix}ban`, value: `> Bans a user` })
+                    .addFields({ name: `• ${guildPrefix}kick`, value: `> Kicks a user` })
+                    .addFields({ name: `• ${guildPrefix}unban`, value: `> Unbans a user` })
+                    .addFields({ name: `• ${guildPrefix}pfp`, value: `> Displays a users profile picture` })
+                    .addFields({ name: `• ${guildPrefix}bot-specs`, value: `> Shows the bots specifications.` })
+                    .addFields({ name: `• ${guildPrefix}bot-info`, value: `> Shows the bots information.` })
+                    .addFields({ name: `• ${guildPrefix}member-graph`, value: `> Displays the server member graph.` })
+                    .addFields({ name: `• ${guildPrefix}perms`, value: `> Displays a users permissions.` })
+                    .addFields({ name: `• ${guildPrefix}serverinfo`, value: `> Displays the server information.` })
+                    .addFields({ name: `• ${guildPrefix}userinfo`, value: `> Displays a users information.` })
+                    .addFields({ name: `• ${guildPrefix}roleinfo`, value: `> Displays a roles information.` })
+                    .addFields({ name: `• ${guildPrefix}uptime`, value: `> Shows the bots uptime.` })
+                    .addFields({ name: `• ${guildPrefix}lb`, value: `> Displays the server leaderboard.` })
+                    .addFields({ name: `• ${guildPrefix}rank`, value: `> Displays a users rank.` })
 
                     .setImage('https://i.postimg.cc/TPTDJZt7/Screenshot-2024-06-22-211847.png')
                     .setTimestamp();
@@ -1447,31 +1456,31 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .setFooter({ text: `🚑 ${client.user.username}'s help center: Prefix Commands Page 2` })
                     .setThumbnail(client.user.avatarURL())
                     .setDescription(`> **Prefix Commands Help Page \`\`2\`\`**`)
-                    .addFields({ name: `• ${client.config.prefix}addrole`, value: `> Adds a role to a user.` })
-                    .addFields({ name: `• ${client.config.prefix}removerole`, value: `> Removes a role from a user.` })
-                    .addFields({ name: `• ${client.config.prefix}nick`, value: `> Changes a users nickname.` })
-                    .addFields({ name: `• ${client.config.prefix}clear`, value: `> Clears a specified amount of messages.` })
-                    .addFields({ name: `• ${client.config.prefix}autoplay`, value: `> Toggles autoplay for the music system.` })
-                    .addFields({ name: `• ${client.config.prefix}filter`, value: `> Toggles the music filter.` })
-                    .addFields({ name: `• ${client.config.prefix}forward`, value: `> Forwards the music.` })
-                    .addFields({ name: `• ${client.config.prefix}join`, value: `> Makes the bot join a voice channel.` })
-                    .addFields({ name: `• ${client.config.prefix}leave`, value: `> Makes the bot leave a voice channel.` })
-                    .addFields({ name: `• ${client.config.prefix}np`, value: `> Shows the currently playing song.` })
-                    .addFields({ name: `• ${client.config.prefix}pause`, value: `> Pauses the music.` })
-                    .addFields({ name: `• ${client.config.prefix}play`, value: `> Plays a song.` })
-                    .addFields({ name: `• ${client.config.prefix}playskip`, value: `> Plays a song and skips the current song.` })
-                    .addFields({ name: `• ${client.config.prefix}playtop`, value: `> Plays the top song in queue.` })
-                    .addFields({ name: `• ${client.config.prefix}previous`, value: `> Plays the previous song.` })
-                    .addFields({ name: `• ${client.config.prefix}queue`, value: `> Shows the music queue.` })
-                    .addFields({ name: `• ${client.config.prefix}repeat`, value: `> Toggles repeat for the music system.` })
-                    .addFields({ name: `• ${client.config.prefix}resume`, value: `> Resumes the music.` })
-                    .addFields({ name: `• ${client.config.prefix}rewind`, value: `> Rewinds the music.` })
-                    .addFields({ name: `• ${client.config.prefix}seek`, value: `> Seeks the music.` })
-                    .addFields({ name: `• ${client.config.prefix}shuffle`, value: `> Shuffles the music queue.` })
-                    .addFields({ name: `• ${client.config.prefix}skip`, value: `> Skips the current song.` })
-                    .addFields({ name: `• ${client.config.prefix}skipto`, value: `> Skips to a specified song.` })
-                    .addFields({ name: `• ${client.config.prefix}stop`, value: `> Stops the music.` })
-                    .addFields({ name: `• ${client.config.prefix}volume`, value: `> Changes the music volume.` })
+                    .addFields({ name: `• ${guildPrefix}addrole`, value: `> Adds a role to a user.` })
+                    .addFields({ name: `• ${guildPrefix}removerole`, value: `> Removes a role from a user.` })
+                    .addFields({ name: `• ${guildPrefix}nick`, value: `> Changes a users nickname.` })
+                    .addFields({ name: `• ${guildPrefix}clear`, value: `> Clears a specified amount of messages.` })
+                    .addFields({ name: `• ${guildPrefix}autoplay`, value: `> Toggles autoplay for the music system.` })
+                    .addFields({ name: `• ${guildPrefix}filter`, value: `> Toggles the music filter.` })
+                    .addFields({ name: `• ${guildPrefix}forward`, value: `> Forwards the music.` })
+                    .addFields({ name: `• ${guildPrefix}join`, value: `> Makes the bot join a voice channel.` })
+                    .addFields({ name: `• ${guildPrefix}leave`, value: `> Makes the bot leave a voice channel.` })
+                    .addFields({ name: `• ${guildPrefix}np`, value: `> Shows the currently playing song.` })
+                    .addFields({ name: `• ${guildPrefix}pause`, value: `> Pauses the music.` })
+                    .addFields({ name: `• ${guildPrefix}play`, value: `> Plays a song.` })
+                    .addFields({ name: `• ${guildPrefix}playskip`, value: `> Plays a song and skips the current song.` })
+                    .addFields({ name: `• ${guildPrefix}playtop`, value: `> Plays the top song in queue.` })
+                    .addFields({ name: `• ${guildPrefix}previous`, value: `> Plays the previous song.` })
+                    .addFields({ name: `• ${guildPrefix}queue`, value: `> Shows the music queue.` })
+                    .addFields({ name: `• ${guildPrefix}repeat`, value: `> Toggles repeat for the music system.` })
+                    .addFields({ name: `• ${guildPrefix}resume`, value: `> Resumes the music.` })
+                    .addFields({ name: `• ${guildPrefix}rewind`, value: `> Rewinds the music.` })
+                    .addFields({ name: `• ${guildPrefix}seek`, value: `> Seeks the music.` })
+                    .addFields({ name: `• ${guildPrefix}shuffle`, value: `> Shuffles the music queue.` })
+                    .addFields({ name: `• ${guildPrefix}skip`, value: `> Skips the current song.` })
+                    .addFields({ name: `• ${guildPrefix}skipto`, value: `> Skips to a specified song.` })
+                    .addFields({ name: `• ${guildPrefix}stop`, value: `> Stops the music.` })
+                    .addFields({ name: `• ${guildPrefix}volume`, value: `> Changes the music volume.` })
 
                     .setImage('https://i.postimg.cc/TPTDJZt7/Screenshot-2024-06-22-211847.png')
                     .setTimestamp();
