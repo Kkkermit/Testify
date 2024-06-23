@@ -1009,7 +1009,6 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .addFields({ name: "• /permissions", value: "> Displays a users permissions." })
                     .addFields({ name: "• /ping", value: "> Displays the bots ping." })
                     .addFields({ name: "• /pp-size", value: "> Displays your pp size." })
-                    .addFields({ name: "• /prefix-help", value: "> Displays the prefix help." })
 
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp();
