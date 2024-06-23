@@ -20,7 +20,7 @@ const config = require('./config')
 const currentVersion = `${config.botVersion}`;
 
 let client;
-try{
+try {
     client = new Client({ 
         intents: [
             GatewayIntentBits.Guilds, 
