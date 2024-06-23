@@ -1,4 +1,5 @@
 const { EmbedBuilder, ActionRowBuilder, ButtonStyle, ButtonBuilder } = require('discord.js');
+const guildSettingsSchema = require('../../schemas/prefixSystem.js');
 
 module.exports = {
     name: "bot-info",
@@ -17,6 +18,9 @@ module.exports = {
 
         let uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
+        const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
+        const guildPrefix = fetchGuildPrefix.Prefix;
+
         const embed = new EmbedBuilder()
         .setColor(client.config.embedDev)
         .setTitle(`__${client.user.username} Bot Information__ ${client.config.arrowEmoji}`)
@@ -27,7 +31,7 @@ module.exports = {
         .addFields({ name: 'Developer', value: `> \`${client.config.dev}\`` })
         .addFields({ name: 'Servers Count', value: `> \`${client.guilds.cache.size}\`` })
         .addFields({ name: 'Members Count', value: `> \`${serverCount}\`` })
-        .addFields({ name: 'Prefix', value: `> \`${client.config.prefix}\``})
+        .addFields({ name: 'Prefix', value: `> \`${guildPrefix}\``})
         .addFields({ name: 'Commands', value: `> \`${client.pcommands.size}\`` })
         .addFields({ name: 'Aliases', value: `> \`${client.aliases.size}\`` })
         .addFields({ name: 'Slash Commands', value: `> \`${client.commands.size}\``})
@@ -62,6 +66,9 @@ module.exports = {
 
                     let uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
+                    const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
+                    const guildPrefix = fetchGuildPrefix.Prefix;
+
                     const refreshEmbed = new EmbedBuilder()
                     .setColor(client.config.embedDev)
                     .setTitle(`__${client.user.username} Bot Information__ ${client.config.arrowEmoji}`)
@@ -72,7 +79,7 @@ module.exports = {
                     .addFields({ name: 'Developer', value: `> \`${client.config.dev}\`` })
                     .addFields({ name: 'Servers Count', value: `> \`${client.guilds.cache.size}\`` })
                     .addFields({ name: 'Members Count', value: `> \`${serverCount}\`` })
-                    .addFields({ name: 'Prefix', value: `> \`${client.config.prefix}\``})
+                    .addFields({ name: 'Prefix', value: `> \`${guildPrefix}\``})
                     .addFields({ name: 'Commands', value: `> \`${client.pcommands.size}\`` })
                     .addFields({ name: 'Aliases', value: `> \`${client.aliases.size}\`` })
                     .addFields({ name: 'Slash Commands', value: `> \`${client.commands.size}\``})

@@ -32,7 +32,7 @@ module.exports = {
             .setAuthor({ name: `🚑 Help Command ${client.config.devBy}`})
             .setDescription(`> Join our official support server for ${client.user.username}! \n> Get help, report bugs, and more!`)
             .setThumbnail(client.user.avatarURL())
-            .addFields({ name: `Manual link to the Discord server:`, value: `> [SERVER](https://discord.gg/xcMVwAVjSD)`})
+            .addFields({ name: `Manual link to the Discord server:`, value: `> [SERVER INVITE](https://discord.gg/xcMVwAVjSD)`})
         
             await interaction.reply({ embeds: [embedHelpServer], components: [button] })
 
