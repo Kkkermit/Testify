@@ -895,9 +895,9 @@ client.on(Events.InteractionCreate, async (interaction, err) => {
                     .addFields({ name: "• /bug-report", value: "> Opens a bug report." })
                     .addFields({ name: "• /calculate", value: "> Calculates a math problem." })
                     .addFields({ name: "• /chat", value: "> Chat with an AI modal." })
+                    .addFields({ name: "• /change-prefix", value: "> Changes the bots prefix in your server." })
                     .addFields({ name: "• /clear", value: "> Clears a specified amount of messages." })
                     .addFields({ name: "• /coin-flip", value: "> Flips a coin." })
-
 
                     .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                     .setTimestamp();
