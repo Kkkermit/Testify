@@ -6,7 +6,7 @@
 //    ██║   ███████╗███████║   ██║   ██║██║        ██║   
 //    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   
 
-// Developed by: Kkermit. All rights reserved. (2021)
+// Developed by: Kkermit. All rights reserved. (2024)
 // MIT License
 
 const { 
