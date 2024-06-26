@@ -17,7 +17,7 @@ module.exports = {
         }
         else {
             user.roles.add(role).catch(err => {
-                return interaction.reply({ content: `**Couldn't** add that role! **Check** my permissions and **role position** and try again.`, ephemeral: true });
+                return message.channel.send({ content: `**Couldn't** add that role! **Check** my permissions and **role position** and try again.`, ephemeral: true });
             })
         }
 

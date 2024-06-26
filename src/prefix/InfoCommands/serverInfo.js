@@ -1,24 +1,12 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, ChannelType, GuildVerificationLevel, GuildExplicitContentFilter, GuildNSFWLevel } = require("discord.js");
 
 module.exports = {
-    name: 'serverinfo',
-    description: 'Get server info/stats.',
-    aliases: ['server', 'guild', 'guildinfo'],
-    execute: async function (message, client, args) {
-        const guild = (client.config.developers.includes(message.author.id) && args && args.length) ? client.guilds.cache.get(args[0]) : message.channel.guild;
+    name: "server-info",
+    aliases: ["serverinfo", "guildinfo", "guild", "server"],
+    async execute(message, client, args) {
 
-		const owner = client.users.cache.get(guild.ownerId);
-
-		let categories = guild.channels.cache.filter(c => c.type === 4).length;
-		let textChannels = guild.channels.cache.filter(c => c.type === 0).length;
-		let voiceChannels = guild.channels.cache.filter(c => c.type === 2).length;
-
-        const {
-            members,
-            emojis,
-            roles,
-            stickers
-        } = guild;
+        const { guild } = message;
+        const { members, channels, emojis, roles, stickers } = guild;
         
         const sortedRoles  = roles.cache.map(role => role).slice(1, roles.cache.size).sort((a, b) => b.position - a.position);
         const userRoles    = sortedRoles.filter(role => !role.managed);
@@ -42,23 +30,98 @@ module.exports = {
             return result.length;
         }
 
-        const embed = new EmbedBuilder()
-        .setColor(client.config.embedInfo)
-        .setAuthor({ name: guild.name, iconURL: guild.iconURL() })
-        .setThumbnail(guild.iconURL())
-        .setTitle(`${client.user.username} Server Info ${client.config.arrowEmoji}`)
-        .setTimestamp(new Date(guild.createdAt))
-        .addFields({ name: 'Owner', value: `${owner.tag}`, inline: true })
-        .addFields({ name: 'Members', value: `${guild.memberCount.toString()}`, inline: true })
-        .addFields({ name: `Users (${guild.memberCount})`, value: [ `👨‍👩‍👧‍👦 **Members** ${guild.memberCount - botCount}`, `🤖 **Bots** ${botCount}` ].join("\n"), inline: true })
-        .addFields({ name: `User Roles (${maxDisplayRoles(userRoles)} of ${userRoles.length})`, value: `${userRoles.slice(0, maxDisplayRoles(userRoles)).join(" ") || "None"}`})
-        .addFields({ name: `Managed Roles (${maxDisplayRoles(managedRoles)} of ${managedRoles.length})`, value: `${managedRoles.slice(0, maxDisplayRoles(managedRoles)).join(" ") || "None"}`})
-        .addFields({ name: 'Category Channels', value: categories ? categories.toString() : '0', inline: true })
-        .addFields({ name: 'Text Channels', value: textChannels ? textChannels.toString() : '0', inline: true })
-        .addFields({ name: 'Voice Channels', value: voiceChannels ? voiceChannels.toString() : '0', inline: true })
-        .addFields({ name: 'Emojis', value: emojis.cache.size ? emojis.cache.size.toString() : '0', inline: true })
-        .setFooter({ text: `ID: ${guild.id} ${client.config.devBy}` })
+        const splitPascal = (string, separator) => string.split(/(?=[A-Z])/).join(separator);
+        const toPascalCase = (string, separator = false) => {
+            const pascal = string.charAt(0).toUpperCase() + string.slice(1).toLowerCase().replace(/[^a-zA-Z0-9]+(.)/g, (match, chr) => chr.toUpperCase());
+            return separator ? splitPascal(pascal, separator) : pascal;
+        };
 
-        message.channel.send({ embeds: [embed] });
+        const getChannelTypeSize = type => channels.cache.filter(channel => type.includes(channel.type)).size;
+        
+        const totalChannels = getChannelTypeSize([
+            ChannelType.GuildText,
+            ChannelType.GuildNews,
+            ChannelType.GuildVoice,
+            ChannelType.GuildStageVoice,
+            ChannelType.GuildForum,
+            ChannelType.GuildPublicThread,
+            ChannelType.GuildPrivateThread,
+            ChannelType.GuildNewsThread,
+            ChannelType.GuildCategory
+        ]);
+
+        message.channel.send({ embeds: [
+            new EmbedBuilder()
+                .setAuthor({ name: `Server Info Command ${client.config.devBy}`})
+                .setColor(members.me.roles.highest.hexColor)
+                .setTitle(`${client.user.username} Server Info ${client.config.arrowEmoji}`)
+                .setFooter({ text: `${guild.name} | ${guild.id}`, iconURL: guild.iconURL() })
+                .setThumbnail(guild.iconURL({ size: 1024 }))
+                .setImage(guild.bannerURL({ size: 1024 }))
+                .addFields(
+                    { name: "Description", value: `📝 ${guild.description || "None"}` },
+                    {
+                        name: "General",
+                        value: [
+                            `📜 **Created** <t:${parseInt(guild.createdTimestamp / 1000)}:R>`,
+                            `💳 **ID** ${guild.id}`,
+                            `👑 **Owner** <@${guild.ownerId}>`,
+                            `🌍 **Language** ${new Intl.DisplayNames(["en"], { type: "language" }).of(guild.preferredLocale)}`,
+                            `💻 **Vanity URL** ${guild.vanityURLCode || "None"}`,
+                        ].join("\n")
+                    },
+                    { name: "Features", value: guild.features?.map(feature => `- ${toPascalCase(feature, " ")}`)?.join("\n") || "None", inline: true },
+                    {
+                        name: "Security",
+                        value: [
+                            `👀 **Explicit Filter** ${splitPascal(GuildExplicitContentFilter[guild.explicitContentFilter], " ")}`,
+                            `🔞 **NSFW Level** ${splitPascal(GuildNSFWLevel[guild.nsfwLevel], " ")}`,
+                            `🔒 **Verification Level** ${splitPascal(GuildVerificationLevel[guild.verificationLevel], " ")}`
+                        ].join("\n"),
+                        inline: true
+                    },
+                    {
+                        name: `Users (${guild.memberCount})`,
+                        value: [
+                            `👨‍👩‍👧‍👦 **Members** ${guild.memberCount - botCount}`,
+                            `🤖 **Bots** ${botCount}`
+                        ].join("\n"),
+                        inline: true
+                    },
+                    { name: `User Roles (${maxDisplayRoles(userRoles)} of ${userRoles.length})`, value: `${userRoles.slice(0, maxDisplayRoles(userRoles)).join(" ") || "None"}`},
+                    { name: `Managed Roles (${maxDisplayRoles(managedRoles)} of ${managedRoles.length})`, value: `${managedRoles.slice(0, maxDisplayRoles(managedRoles)).join(" ") || "None"}`},
+                    {
+                        name: `Channels, Threads & Categories (${totalChannels})`,
+                        value: [
+                            `💬 **Text** ${getChannelTypeSize([ChannelType.GuildText, ChannelType.GuildForum, ChannelType.GuildNews])}`,
+                            `🔊 **Voice** ${getChannelTypeSize([ChannelType.GuildVoice, ChannelType.GuildStageVoice])}`,
+                            `🧵 **Threads** ${getChannelTypeSize([ChannelType.GuildPublicThread, ChannelType.GuildPrivateThread, ChannelType.GuildNewsThread])}`,
+                            `📑 **Categories** ${getChannelTypeSize([ChannelType.GuildCategory])}`
+                        ].join("\n"),
+                        inline: true
+                    },
+                    {
+                        name: `Emojis & Stickers (${emojis.cache.size + stickers.cache.size})`,
+                        value: [
+                            `📺 **Animated** ${emojis.cache.filter(emoji => emoji.animated).size}`,
+                            `🗿 **Static** ${emojis.cache.filter(emoji => !emoji.animated).size}`,
+                            `🏷 **Stickers** ${stickers.cache.size}`
+                        ].join("\n"),
+                        inline: true
+                    },
+                    { 
+                        name: "Nitro",
+                        value: [
+                            `📈 **Tier** ${guild.premiumTier || "None"}`,
+                            `💪🏻 **Boosts** ${guild.premiumSubscriptionCount}`,
+                            `💎 **Boosters** ${guild.members.cache.filter(member => member.roles.premiumSubscriberRole).size}`,
+                            `🏋🏻‍♀️ **Total Boosters** ${guild.members.cache.filter(member => member.premiumSince).size}`
+                        ].join("\n"),
+                        inline: true
+                    },
+                    { name: "Banner", value: guild.bannerURL() ? "** **" : "None" }
+                )
+                .setTimestamp()
+        ], ephemeral: false });
     }
 }
