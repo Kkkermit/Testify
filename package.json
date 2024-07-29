@@ -35,7 +35,7 @@
     "ffmpeg-static": "^5.2.0",
     "figlet": "^1.7.0",
     "fs": "^0.0.1-security",
-    "hercai": "12.3.1",
+    "hercai": "12.3.2",
     "libsodium-wrappers": "^0.7.13",
     "mathjs": "^12.4.2",
     "moment": "^2.30.1",
