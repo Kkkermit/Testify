@@ -7,7 +7,7 @@ module.exports = {
     .setDescription(`Play a game of Guess the Pokemon!`),
     async execute (interaction, client) {
 
-        const game = new GuessThePokemon({
+        const Game = new GuessThePokemon({
             message: interaction,
             isSlashGame: true,
             embed: {
@@ -23,7 +23,7 @@ module.exports = {
         });
         
         try {
-            await game.startGame();
+            await Game.startGame();
         } catch (err) {
             console.log(err);
             await interaction.reply('\`\`\`There was an error starting the game!\`\`\`');

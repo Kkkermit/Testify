@@ -1,5 +1,5 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
-const { Wordle, Connect4, TwoZeroFourEight, Minesweeper, RockPaperScissors, Snake, TicTacToe, MatchPairs, Hangman, Flood, FindEmoji, Slots } = require('discord-gamecord');
+const { Wordle, Connect4, TwoZeroFourEight, Minesweeper, RockPaperScissors, Snake, TicTacToe, MatchPairs, Hangman, Flood, FindEmoji, Slots, Trivia } = require('discord-gamecord');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -18,7 +18,13 @@ module.exports = {
     .addSubcommand(subcommand => subcommand.setName('flood').setDescription('Play a game of Flood!'))
     .addSubcommand(subcommand => subcommand.setName('find-emoji').setDescription('Play a game of Find Emoji!'))
     .addSubcommand(subcommand => subcommand.setName('would-you-rather').setDescription('Play a game of Would You Rather!'))
-    .addSubcommand(subcommand => subcommand.setName('slots').setDescription('Play a game of Slots!')),
+    .addSubcommand(subcommand => subcommand.setName('slots').setDescription('Play a game of Slots!'))
+    .addSubcommand(subcommand => subcommand.setName('trivia').setDescription('Play a game of Trivia!').addStringOption(option => option.setName('difficulty').setDescription('Select the difficulty of the trivia game.')
+        .addChoices(
+            { name: 'easy', value: 'easy' },
+            { name: 'medium', value: 'medium' },
+            { name: 'hard', value: 'hard' },
+        ).setRequired(true))),
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
@@ -449,20 +455,47 @@ module.exports = {
             const collector1 = await message.createMessageComponentCollector();
             const menu = 'You **cannot** use this menu.';
             collector1.on('collect', async i => {
-            if (i.customId === 'option1') {
-                if (i.user.id !== interaction.user.id) {
-                    return await i.reply({ content: `${menu}`, ephemeral: true})
+                if (i.customId === 'option1') {
+                    if (i.user.id !== interaction.user.id) {
+                        return await i.reply({ content: `${menu}`, ephemeral: true})
+                    }
+                    await i.update({embeds: [embed2], components: []})
                 }
-                await i.update({embeds: [embed2], components: []})
-            }
 
-            if (i.customId === 'option2') {
-                if (i.user.id !== interaction.user.id) {
-                    return await i.reply({ content: `${menu}`, ephemeral: true})
+                if (i.customId === 'option2') {
+                    if (i.user.id !== interaction.user.id) {
+                        return await i.reply({ content: `${menu}`, ephemeral: true})
+                    }
+                    await i.update({embeds: [embed3], components: []})
                 }
-                await i.update({embeds: [embed3], components: []})
+            })
+
+            break;
+            case "trivia":
+
+            const difficulty = interaction.options.getString('difficulty');
+
+            const gameTrivia = new Trivia({
+                message: interaction,
+                isSlashGame: true,
+                embed: {
+                    title: '> Trivia Game \nAnswer the question below.',
+                    color: client.config.embedMiniGames,
+                },
+                difficulty: difficulty,
+                timeoutTime: 60000,
+                winMessage: '> 🎉 | You answered the question correctly!',
+                loseMessage: '> You answered the question incorrectly!',
+                timeoutMessage: '> The game went unfinished.',
+                playerOnlyMessage: 'Only **{player}** can use these buttons.',
+            });
+
+            try {
+                await gameTrivia.startGame();
+            } catch (err) {
+                console.log(err);
+                await interaction.reply(gameFail);
             }
-        })
         }
     }
 }
