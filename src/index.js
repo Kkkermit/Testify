@@ -68,7 +68,7 @@ const { SpotifyPlugin } = require('@distube/spotify');
 const { SoundCloudPlugin } = require('@distube/soundcloud');
 const { YtDlpPlugin } = require('@distube/yt-dlp');
 const GiveawaysManager = require("./utils/giveaway");
-const { handleLogs } = require("./events/handleLogs");
+const { handleLogs } = require("./events/CommandEvents/handleLogs");
 const Logs = require('discord-logs');
 const { CaptchaGenerator } = require('captcha-canvas');
 const { createCanvas } = require('canvas');
@@ -128,8 +128,8 @@ client.aliases = new Collection();
 require('dotenv').config();
 
 const functions = fs.readdirSync("./src/functions").filter(file => file.endsWith(".js"));
-const eventFiles = fs.readdirSync("./src/events").filter(file => file.endsWith(".js"));
 const triggerFiles = fs.readdirSync("./src/triggers").filter(file => file.endsWith(".js"));
+const eventFiles = fs.readdirSync("./src/events")
 const pcommandFolders = fs.readdirSync('./src/prefix');
 const commandFolders = fs.readdirSync("./src/commands");
 
@@ -173,72 +173,6 @@ function getTimestamp() {
     const seconds = date.getSeconds();
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
-
-// Guild Create //
-
-client.on("guildCreate", async guild => {
-    const logchannelid = client.config.botJoinChannel;
-
-    let theowner = process.env.devid; 
-    let invite;
-    let invalidInv = 'Failed to create an invite for this server!'
-    try {
-    const channel2 = await guild.channels.cache.random()
-    const channelId = channel2.id;
-    invite = await guild.invites.create(channelId);
-    } catch (error) {
-        client.logs.warn(`[INVITE_ERROR] Failed to create an invite for ${guild.name}!`)
-    }
-
-    const inviteLink = invite ? invite.url : invalidInv;
-
-    await guild.fetchOwner().then(({ user }) => { theowner = user; }).catch(() => {});
-    let embed = new EmbedBuilder()
-    .setColor('Green')
-    .setTitle(`__**Joined a New Server**__`)
-    .setDescription(`${guild.name} has invited ${client.user.username} into their server`)
-    .addFields(
-        { name: "Guild Info", value: `>>> \`\`\`${guild.name} (${guild.id})\`\`\`` },
-        { name: "Owner Info", value: `>>> \`\`\`${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`}\`\`\`` },
-        { name: "Member Count", value: `>>> \`\`\`${guild.memberCount}\`\`\`` },
-        { name: "Server Number", value: `>>> \`\`\`${client.guilds.cache.size}\`\`\`` },
-        { name: "Server Invite", value: `>>> \`\`\`${inviteLink}\`\`\`` })
-    .setThumbnail(guild.iconURL({ dynamic: true }))
-    .setFooter({ text: `Orbit ${client.guilds.cache.size}`, iconURL: client.user.avatarURL({ dynamic: true }) })
-    .setTimestamp();
-
-    const LogChannel = client.channels.cache.get(logchannelid) || await client.channels.fetch(logchannelid).catch(() => {}) || false;
-    if (LogChannel) LogChannel.send({ embeds: [embed] }).catch(console.warn);
-
-console.log(`${color.orange}[${getTimestamp()}]${color.reset} [GUILD_CREATE] ${client.user.username} has been added to a new guild. \n${color.orange}> GuildName: ${guild.name} \n> GuildID: ${guild.id} \n> Owner: ${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`} \n> MemberCount: ${guild.memberCount} \n> ServerNumber: ${client.guilds.cache.size} \n> ServerInvite: ${inviteLink}`)
-});
-
-// Guild Delete //
-
-client.on("guildDelete", async guild => {
-    const logchannelid = client.config.botLeaveChannel;
-
-    let theowner = process.env.devid;
-
-    await guild.fetchOwner().then(({ user }) => { theowner = user; }).catch(() => {});
-    let embed = new EmbedBuilder()
-    .setColor('Red')
-    .setTitle(`__**Left a Server**__`)
-    .setDescription(`${guild.name} has kicked/ban ${client.user.username} out of their server`)
-    .addFields(
-        { name: "Guild Info", value: `>>> \`\`\`${guild.name} (${guild.id})\`\`\`` },
-        { name: "Owner Info", value: `>>> \`\`\`${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`}\`\`\`` },
-        { name: "Member Count", value: `>>> \`\`\`${guild.memberCount}\`\`\`` },
-        { name: "Server Number", value: `>>> \`\`\`${client.guilds.cache.size}\`\`\`` })
-    .setThumbnail(guild.iconURL({ dynamic: true }))
-    .setFooter({ text: `${client.user.username} ${client.guilds.cache.size}`, iconURL: client.user.avatarURL({ dynamic: true }) })
-    .setTimestamp();
-
-    const LogChannel = client.channels.cache.get(logchannelid) || await client.channels.fetch(logchannelid).catch(() => {}) || false;
-    if (LogChannel) LogChannel.send({ embeds: [embed] }).catch(console.warn);
-
-console.log(`${color.blue}[${getTimestamp()}]${color.reset} [GUILD_DELETE] ${client.user.username} has left a guild. \n${color.blue}> GuildName: ${guild.name} \n> GuildID: ${guild.id} \n> Owner: ${theowner ? `${theowner.tag} (${theowner.id})` : `${theowner} (${guild.ownerId})`} \n> MemberCount: ${guild.memberCount}`)
-});
 
 // Music System //
 

@@ -1,7 +1,7 @@
 const { Events, EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const Canvas = require("canvas"); 
-const WelcomeMessage = require("../schemas/welcomeSystem"); 
-const config = require('../config')
+const WelcomeMessage = require("../../schemas/welcomeSystem"); 
+const config = require('../../config')
 
 var welcomeCanvas = {};
 welcomeCanvas.create = Canvas.createCanvas(1024, 500);

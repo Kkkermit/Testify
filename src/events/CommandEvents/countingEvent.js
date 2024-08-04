@@ -1,8 +1,8 @@
-const { EmbedBuilder } = require('discord.js');
-const countingSchema = require('../schemas/countingSystem');
+const { EmbedBuilder, Events } = require('discord.js');
+const countingSchema = require('../../schemas/countingSystem');
 
 module.exports = {
-    name: 'messageCreate',
+    name: Events.MessageCreate,
     async execute(message, client) {
         if (message.author.bot) return;
 
