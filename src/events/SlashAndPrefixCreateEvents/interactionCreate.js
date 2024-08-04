@@ -1,5 +1,5 @@
 const { Interaction, EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
-const config = require('../config.js')
+const config = require('../../config')
 
 module.exports = {
     name: 'interactionCreate',

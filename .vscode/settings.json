@@ -53,6 +53,7 @@
         "playtop",
         "Proccess",
         "randomizer",
+        "rapidapikey",
         "removedata",
         "removerole",
         "roledata",
@@ -85,6 +86,7 @@
         "xpamount",
         "xpuser",
         "Yeet",
-        "youdied"
+        "youdied",
+        "ytmp"
     ]
 }

@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const sticky = require('../schemas/stickyMessageSystem');
+const sticky = require('../../schemas/stickyMessageSystem');
 
 module.exports = {
     name: Events.MessageCreate,

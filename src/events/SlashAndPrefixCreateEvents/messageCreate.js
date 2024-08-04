@@ -1,5 +1,5 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
-const GuildSettings = require('../schemas/prefixSystem.js');
+const GuildSettings = require('../../schemas/prefixSystem');
 
 module.exports = {
     name: "messageCreate",
