@@ -12,12 +12,14 @@ module.exports = {
 		const { options } = interaction;
 		const vidId = options.getString("video-id");
 
+		const apiKey = process.env.rapidapikey;
+
 		const input = {
 			method: "GET",
 			url: "https://youtube-mp3-download1.p.rapidapi.com/dl",
 			params: { id: vidId },
 			headers: {
-				"X-RapidAPI-Key": "c2e682c28bmsh98acedec2ca78e9p1fdcc9jsn6ed3c4625bed",
+				"X-RapidAPI-Key": `${apiKey}`,
 				"X-RapidAPI-Host": "youtube-mp3-download1.p.rapidapi.com",
 			},
 		};
