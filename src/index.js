@@ -76,8 +76,6 @@ const { checkVersion } = require('./lib/version');
 
 // Schemas //
 
-const botSchema = require('./schemas/voiceChannelBotSystem');
-const voiceSchema = require('./schemas/voiceChannelMembersSystem');
 const levelSchema = require('./schemas/userLevelSystem');
 const levelschema = require('./schemas/levelSetupSystem');
 const roleSchema = require("./schemas/autoRoleSystem");
@@ -259,76 +257,6 @@ client.distube
         embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
             .setDescription('🏁 | Queue finished!')]
     }))
-
-// Total Bots Voice Channel Code //
-
-client.on(Events.GuildMemberAdd, async (member, err) => {
-
-    if (member.guild === null) return;
-    const botData = await botSchema.findOne({ Guild: member.guild.id });
-
-    if (!botData) return;
-    else {
-
-        const botVoiceChannel = member.guild.channels.cache.get(botData.BotChannel);
-        if (!botVoiceChannel || botVoiceChannel === null) return;
-        const botsList = member.guild.members.cache.filter(member => member.user.bot).size;
-
-        botVoiceChannel.setName(`• Total Bots: ${botsList}`).catch(err);
-
-    }
-})
-
-client.on(Events.GuildMemberRemove, async (member, err) => {
-
-    if (member.guild === null) return;
-    const botData1 = await botSchema.findOne({ Guild: member.guild.id });
-
-    if (!botData1) return;
-    else {
-
-        const botVoiceChannel1 = member.guild.channels.cache.get(botData1.BotChannel);
-        if (!botVoiceChannel1 || botVoiceChannel1 === null) return;
-        const botsList1 = member.guild.members.cache.filter(member => member.user.bot).size;
-
-        botVoiceChannel1.setName(`• Total Bots: ${botsList1}`).catch(err);
-    
-    }
-})
-
-// Member Voice Channels Code //
-
-client.on(Events.GuildMemberAdd, async (member, err) => {
-
-    if (member.guild === null) return;
-    const voiceData = await voiceSchema.findOne({ Guild: member.guild.id });
-
-    if (!voiceData) return;
-    else {
-
-        const totalVoiceChannel = member.guild.channels.cache.get(voiceData.TotalChannel);
-        if (!totalVoiceChannel || totalVoiceChannel === null) return;
-        const totalMembers = member.guild.memberCount;
-
-        totalVoiceChannel.setName(`• Total Members: ${totalMembers}`).catch(err);
-    }
-})
-
-client.on(Events.GuildMemberRemove, async (member, err) => {
-
-    if (member.guild === null) return;
-    const voiceData1 = await voiceSchema.findOne({ Guild: member.guild.id });
-
-    if (!voiceData1) return;
-    else {
-
-        const totalVoiceChannel1 = member.guild.channels.cache.get(voiceData1.TotalChannel);
-        if (!totalVoiceChannel1 || totalVoiceChannel1 === null) return;
-        const totalMembers1 = member.guild.memberCount;
-
-        totalVoiceChannel1.setName(`• Total Members: ${totalMembers1}`).catch(err);
-    }
-})
 
 // Leveling System //
 
