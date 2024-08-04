@@ -9,9 +9,7 @@
 // Developed by: Kkermit. All rights reserved. (2024)
 // MIT License
 
-const { 
-    Client, GatewayIntentBits, EmbedBuilder, PermissionsBitField, Permissions, MessageManager, Embed, Collection, Events, Partials, ActivityType, Activity, AuditLogEvent, ActionRowBuilder, StringSelectMenuBuilder, ButtonBuilder, ButtonStyle, ComponentType, AttachmentBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ChannelType
-} = require(`discord.js`);
+const { Client, GatewayIntentBits, EmbedBuilder, Collection, Partials } = require(`discord.js`);
 const fs = require('fs');
 const config = require('./config')
 
