@@ -143,28 +143,6 @@ client.distube = new DisTube(client, {
     ]
 });
 
-// client.on('messageCreate', async message => {
-//     if (message.author.bot || !message.guild) return
-//     const prefix = client.config.prefix
-//     if (!message.content.startsWith(prefix)) return
-//     const args = message.content.slice(prefix.length).trim().split(/ +/g)
-//     const command = args.shift().toLowerCase()
-//     const cmd = client.pcommands.get(command) || client.pcommands.get(client.aliases.get(command))
-//     if (!cmd) return
-
-//     const noVoiceChannel = new EmbedBuilder()
-//         .setColor(client.config.embedMusic)
-//         .setDescription(`${client.config.musicEmojiError} | You **must** be in a voice channel!`)
-
-//     if (cmd.inVoiceChannel && !message.member.voice.channel) {
-//         return message.channel.send({ embeds: [noVoiceChannel] })
-//     }
-//     try {
-//     } catch {
-//         message.channel.send(`${client.config.musicEmojiError} | Error: \`${error}\``)
-//     }
-// })
-
 const status = queue =>
     `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
     }\` | Autoplay: \`${queue.autoplay ? 'On' : 'Off'}\``
