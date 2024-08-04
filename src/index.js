@@ -72,38 +72,6 @@ const { handleLogs } = require("./events/CommandEvents/handleLogsEvent");
 const Logs = require('discord-logs');
 const { checkVersion } = require('./lib/version');
 
-// Rotating Activity //
-
-client.on("ready", async (client) => {
-    setInterval(() => {
-
-        let activities = [
-            { type: 'Watching', name: `${client.commands.size} slash commands!`},
-            { type: 'Watching', name: `${client.pcommands.size} prefix commands!`},
-            { type: 'Watching', name: `${client.guilds.cache.size} servers!`},
-            { type: 'Watching', name: `${client.guilds.cache.reduce((a,b) => a+b.memberCount, 0)} members!`},
-            { type: 'Playing', name: `${client.config.prefix}help | @${client.user.username}`},
-        ];
-
-        const status = activities[Math.floor(Math.random() * activities.length)];
-
-        if (status.type === 'Watching') {
-            client.user.setPresence({ activities: [{ name: `${status.name}`, type: ActivityType.Watching }]});
-        } else {
-            client.user.setPresence({ activities: [{ name: `${status.name}`, type: ActivityType.Playing }]});
-        } 
-    }, 7500);
-    client.logs.success(`[STATUS] Rotating status loaded successfully.`);
-});
-
-// Status //
-
-client.on("ready", () => {
-
-    client.logs.success(`[STATUS] Bot status loaded as ${client.config.status}.`);
-    client.user.setStatus(client.config.status);
-});
-
 require('./functions/processHandlers')();
 
 client.commands = new Collection();
@@ -175,27 +143,27 @@ client.distube = new DisTube(client, {
     ]
 });
 
-client.on('messageCreate', async message => {
-    if (message.author.bot || !message.guild) return
-    const prefix = client.config.prefix
-    if (!message.content.startsWith(prefix)) return
-    const args = message.content.slice(prefix.length).trim().split(/ +/g)
-    const command = args.shift().toLowerCase()
-    const cmd = client.pcommands.get(command) || client.pcommands.get(client.aliases.get(command))
-    if (!cmd) return
+// client.on('messageCreate', async message => {
+//     if (message.author.bot || !message.guild) return
+//     const prefix = client.config.prefix
+//     if (!message.content.startsWith(prefix)) return
+//     const args = message.content.slice(prefix.length).trim().split(/ +/g)
+//     const command = args.shift().toLowerCase()
+//     const cmd = client.pcommands.get(command) || client.pcommands.get(client.aliases.get(command))
+//     if (!cmd) return
 
-    const noVoiceChannel = new EmbedBuilder()
-        .setColor(client.config.embedMusic)
-        .setDescription(`${client.config.musicEmojiError} | You **must** be in a voice channel!`)
+//     const noVoiceChannel = new EmbedBuilder()
+//         .setColor(client.config.embedMusic)
+//         .setDescription(`${client.config.musicEmojiError} | You **must** be in a voice channel!`)
 
-    if (cmd.inVoiceChannel && !message.member.voice.channel) {
-        return message.channel.send({ embeds: [noVoiceChannel] })
-    }
-    try {
-    } catch {
-        message.channel.send(`${client.config.musicEmojiError} | Error: \`${error}\``)
-    }
-})
+//     if (cmd.inVoiceChannel && !message.member.voice.channel) {
+//         return message.channel.send({ embeds: [noVoiceChannel] })
+//     }
+//     try {
+//     } catch {
+//         message.channel.send(`${client.config.musicEmojiError} | Error: \`${error}\``)
+//     }
+// })
 
 const status = queue =>
     `Volume: \`${queue.volume}%\` | Filter: \`${queue.filters.names.join(', ') || 'Off'}\` | Loop: \`${queue.repeatMode ? (queue.repeatMode === 2 ? 'All Queue' : 'This Song') : 'Off'
