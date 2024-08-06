@@ -337,6 +337,8 @@ module.exports = {
                         .addFields({ name: '• /prefix reset', value: '> Resets the bots prefix.'})
                         .addFields({ name: '• /prefix check', value: '> Checks the bots prefix.'})
                         .addFields({ name: '• /ytmp3', value: '> Converts a youtube video to mp3.'})
+                        .addFields({ name: '• /bot-stats-channel set', value: '> Sets the bot stats channel.'})
+                        .addFields({ name: '• /bot-stats-channel remove', value: '> Removes the bot stats channel and message.'})
 
                         .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                         .setTimestamp(); 
