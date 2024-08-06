@@ -21,7 +21,7 @@ module.exports = {
         const result = await wiki.page(search.results[0]);
 
         const summary = await result.summary();
-        if (summary.length > 8192) return await interaction.editReply({content: `${summary.slice(0, 2048)}`, ephemeral: true });
+        if (summary.length > 8192) return await interaction.editReply({content: `${summary.slice(0, 1020)}`, ephemeral: true });
         else {
             const embed=new EmbedBuilder()
             .setAuthor({ name: `Wiki Command ${client.config.devBy}`})
@@ -31,11 +31,9 @@ module.exports = {
             .setColor(client.config.embedCommunity)
             .setTitle(`${client.user.username} Wiki Tool ${client.config.arrowEmoji}`)
             .setDescription(`Wiki search: ${result.raw.title}`)
-            .addFields({ name: `Result`, value: `\`\`\`${summary.slice(0, 2048)}\`\`\``})
+            .addFields({ name: `Result`, value: `\`\`\`${summary.slice(0, 1020)}\`\`\``})
             .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true })});
-
             await interaction.editReply({ embeds: [embed]});
-
         }
     }
 }
