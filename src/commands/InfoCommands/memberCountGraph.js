@@ -4,9 +4,14 @@ const QuickChart = require('quickchart-js');
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('member-count')
-    .setDescription('Shows the number of members on the server.'),
+    .setDescription('Shows the number of members on the server.')
+    .addStringOption(option => option.setName('chart-type').setDescription('Type of chart to display').setRequired(true).addChoices(
+        { name: "bar", value: "bar" },
+        { name: "pie", value: "pie" },
+    )),
     async execute(interaction, client) {
 
+        const chartType = interaction.options.getString('chart-type');
         const guild = interaction.guild;
         const totalMembers = guild.memberCount;
         const botMembers = guild.members.cache.filter(member => member.user.bot).size;
@@ -17,7 +22,7 @@ module.exports = {
         const chart = new QuickChart();
         chart
             .setConfig({
-                type: 'bar',
+                type: `${chartType}`,
                 data: {
                     labels: ['Total', 'Members', 'Bots', '24h', '7 days'],
                     datasets: [{
