@@ -6,6 +6,9 @@ module.exports = {
     aliases: ["mg", "member-count-graph", 'membergraph', 'membercountgraph'],
     async execute(message, client) {
 
+        const chartType = message.content.split(' ')[1] || 'bar';
+        if (!['bar', 'pie'].includes(chartType)) return message.channel.send('Invalid chart type. Please use either `bar` or `pie` as the graph type.');
+
         const guild = message.guild;
         const totalMembers = guild.memberCount;
         const botMembers = guild.members.cache.filter(member => member.user.bot).size;
@@ -16,7 +19,7 @@ module.exports = {
         const chart = new QuickChart();
         chart
             .setConfig({
-                type: 'bar',
+                type: `${chartType}`,
                 data: {
                     labels: ['Total', 'Members', 'Bots', '24h', '7 days'],
                     datasets: [{
