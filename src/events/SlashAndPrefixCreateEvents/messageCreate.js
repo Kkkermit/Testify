@@ -1,5 +1,6 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const GuildSettings = require('../../schemas/prefixSystem');
+const blacklistSchema = require('../../schemas/blacklistSystem');
 
 module.exports = {
     name: "messageCreate",
@@ -9,6 +10,27 @@ module.exports = {
             message.author.bot || !message.guild || message.system || message.webhookId
         )
             return;
+
+            const userData = await blacklistSchema.findOne({
+                userId: message.author.id,
+            });
+    
+            if (userData) {
+                const embed = new EmbedBuilder()
+                .setAuthor({ name: `Blacklist System` })
+                .setTitle(`You are blacklisted from using ${client.user.username}`)
+                .setDescription(`Reason: ${userData.reason}`)
+                .setColor(client.config.embedColor)
+                .setFooter({ text: `You are blacklisted from using this bot` })
+                .setTimestamp();
+    
+                const reply = await message.reply({ embeds: [embed], fetchReply: true });
+                setTimeout(async () => {
+                    await reply.delete();
+                }, 5000);
+    
+                return;
+            }
 
         const guildSettings = await GuildSettings.findOneAndUpdate(
             { Guild: message.guild.id }, 
@@ -110,7 +132,7 @@ module.exports = {
             const row = new ActionRowBuilder()
                 .addComponents(yellowButton, greenButton, redButton);
             
-            client.on('interactionCreate', async (message) => {
+            client.on('messageCreate', async (message) => {
                 try {
                     if (!message.isButton()) return;
                     if (message.message.id !== message.id) return;

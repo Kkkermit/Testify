@@ -53,7 +53,17 @@ module.exports = {
             break;
             case "remove":
 
+            if (interaction.user.id !== client.config.developers) {
+                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+            }
+
             const removeBlacklistUser = interaction.options.getString("user")
+
+            const userToRemove = await blacklistSchema.findOne({ userId: removeBlacklistUser });
+
+            if (!userToRemove) {
+                return await interaction.reply({ content: `User ${removeBlacklistUser} has not been blacklisted from using ${client.user.username}`, ephemeral: true });
+            }
 
             const removeEmbed = new EmbedBuilder()
             .setAuthor({ name: `Blacklist Command ${client.config.devBy}` })

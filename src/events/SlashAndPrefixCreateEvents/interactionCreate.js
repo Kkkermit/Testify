@@ -14,7 +14,7 @@ module.exports = {
         if (userData) {
             const embed = new EmbedBuilder()
             .setAuthor({ name: `Blacklist System` })
-            .setTitle(`You are blacklisted from using this bot`)
+            .setTitle(`You are blacklisted from using ${client.user.username}`)
             .setDescription(`Reason: ${userData.reason}`)
             .setColor(client.config.embedColor)
             .setFooter({ text: `You are blacklisted from using this bot` })
