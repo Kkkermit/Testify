@@ -59,6 +59,45 @@ module.exports = {
     bugReportChannel: "1240341717031456840", // Bug report channel
     botLeaveChannel: "1139731092329480332", // Logging channel for bot leaving servers
     botJoinChannel: "1240480049681928203", // Logging channel for bot joining servers
-    commandErrorChannel: "1240912641719930970" // Logging channel for command errors
+    commandErrorChannel: "1240912641719930970", // Logging channel for command errors
+
+    // Ticket Configuration //
+    ticketName: 'ticket-',
+    ticketDescription: '🗳️ Ticket has been open by',
+    ticketCreate: '✅ Your ticket has been created',
+    ticketAlreadyExist: 'Sorry but you already have a ticket open. If you want to open a new ticket, please close the current one.',
+    ticketNoPermissions: 'Sorry, but you **do not** have permission to do this.',
+    ticketError: 'Something went wrong, try again later.',
+    ticketMessageTitle: 'Welcome, thanks for opening a ticket. Please describe your problem in detail.',
+    ticketMessageDescription: 'A member of our moderation team will soon take care of your request.\nThank you for waiting patiently.',
+    ticketMissingPerms: 'Sorry, it looks like I am missing the required permissions to do this. Try giving me higher permissions.',
+    ticketClose: 'Close',
+    ticketCloseEmoji: '📪',
+    ticketLock: 'Lock',
+    ticketLockEmoji: '🔒',
+    ticketUnlock: 'Unlock',
+    ticketUnlockEmoji: '🔓',
+    ticketClaim: 'Claim',
+    ticketClaimEmoji: '👋',
+    ticketManage: 'Members',
+    ticketManageEmoji: '➕',
+    ticketManageMenuTitle: 'Choose a member.',
+    ticketManageMenuEmoji: '❔',
+    ticketCloseTitle: 'This ticket is being closed...',
+    ticketCloseDescription: 'Ticket will be closed in 5 seconds.',
+    ticketSuccessLocked: 'Ticket was locked successfully.',
+    ticketAlreadyLocked: 'This ticket is already locked.',
+    ticketSuccessUnlocked: 'Ticket was unlocked successfully.',
+    ticketAlreadyUnlocked: 'This ticket is already unlocked.',
+    ticketSuccessClaim: 'Ticket was successfully claimed by',
+    ticketAlreadyClaim: 'Ticket is already claimed by',
+    ticketDescriptionClaim: ', it was claimed by',
+    ticketTranscriptMember: 'Member:',
+    ticketTranscriptTicket: 'Ticket:',
+    ticketTranscriptClaimed: 'Claimed:',
+    ticketTranscriptModerator: 'Moderator:',
+    ticketTranscriptTime: 'Time:',
+    ticketMemberAdd: 'has been added to the ticket.',
+    ticketMemberRemove: 'has been removed from the ticket.',
 }
 
