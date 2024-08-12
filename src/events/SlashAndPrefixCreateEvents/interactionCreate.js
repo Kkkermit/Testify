@@ -1,10 +1,32 @@
 const { Interaction, EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const config = require('../../config')
+const blacklistSchema = require("../../schemas/blacklistSystem");
 
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction, client) {
         if (!interaction.isCommand()) return;
+
+        const userData = await blacklistSchema.findOne({
+            userId: interaction.user.id,
+        });
+
+        if (userData) {
+            const embed = new EmbedBuilder()
+            .setAuthor({ name: `Blacklist System` })
+            .setTitle(`You are blacklisted from using this bot`)
+            .setDescription(`Reason: ${userData.reason}`)
+            .setColor(client.config.embedColor)
+            .setFooter({ text: `You are blacklisted from using this bot` })
+            .setTimestamp();
+
+            const reply = await interaction.reply({ embeds: [embed], fetchReply: true });
+            setTimeout(async () => {
+                await reply.delete();
+            }, 5000);
+
+            return;
+        }
 
         const command = client.commands.get(interaction.commandName);
 
