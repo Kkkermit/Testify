@@ -4,7 +4,9 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/index.js",
+    "development": "cross-env NODE_ENV=development node src/index.js"
   },
   "keywords": [],
   "author": "",
@@ -48,5 +50,8 @@
     "wikijs": "^6.4.1",
     "yt-search": "^2.10.4",
     "ytdl-core": "^4.11.5"
+  },
+  "devDependencies": {
+    "cross-env": "7.0.3"
   }
 }
