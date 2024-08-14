@@ -8,9 +8,9 @@ module.exports = {
     async execute(interaction, client) {
 
         const { guild, user } = interaction;
-        let data = await ecoS.findOne({ Guild: guild.id, user: user.id });
+        let data = await ecoS.findOne({ Guild: guild.id, User: user.id });
 
-        if (!data) return await interaction.reply({ content: "You don't have an account, create one using \`/economy-create account\`", ephemeral: true });
+        if (!data) return await interaction.reply({ content: "Economy account not found, create one using \`/economy-create account\`", ephemeral: true });
         else {
             const embed = new EmbedBuilder()
             .setAuthor({ name: `Economy System ${client.config.devBy}` })

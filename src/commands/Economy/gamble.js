@@ -11,7 +11,7 @@ module.exports = {
     async execute(interaction, client) {
 
         const { options, guild, user } = interaction;
-        let data = await ecoS.findOne({ Guild: guild.id, user: user.id });
+        let data = await ecoS.findOne({ Guild: guild.id, User: user.id });
 
         if (timeout.includes(interaction.user.id)) return await interaction.reply({ content: "Come back in **1min** to gamble more!", ephemeral: true });
 

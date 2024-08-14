@@ -15,9 +15,10 @@ module.exports = {
 
         switch (sub) {
             case "account":
-                if (!data) return await interaction.reply({ content: "You don't have an economy account to delete!", ephemeral: true });
-                else {
-                    await ecoS.deleteMany();
+                if (!data) { 
+                    return await interaction.reply({ content: "You don't have an economy account to delete!", ephemeral: true });
+                } else {
+                    await ecoS.deleteOne({ Guild: guild.id, User: user.id });
 
                     const deleted = new EmbedBuilder()
                     .setAuthor({ name: `Economy System ${client.config.devBy}` })

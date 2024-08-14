@@ -11,7 +11,7 @@ module.exports = {
     async execute(interaction, client) {
 
         const { options, guild, user } = interaction;
-        let data = await ecoS.findOne({ Guild: guild.id, user: user.id });
+        let data = await ecoS.findOne({ Guild: guild.id, User: user.id });
 
         const amount = options.getNumber('amount');
 

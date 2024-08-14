@@ -10,15 +10,16 @@ module.exports = {
 
         const { options, guild, user } = interaction;
 
-        let data = await ecoS.findOne({ Guild: guild.id });
+        let data = await ecoS.findOne({ Guild: guild.id, User: user.id});
         const sub = options.getSubcommand();
 
         const embed = new EmbedBuilder()
 
         switch (sub) {
             case "account":
-                if (data) return await interaction.reply({ content: "You already have an economy account!", ephemeral: true })
-                else {
+                if (data) {
+                    return await interaction.reply({ content: "You already have an economy account!", ephemeral: true })
+                } else {
                     await ecoS.create({
                         Guild: guild.id,
                         User: user.id,
@@ -40,9 +41,10 @@ module.exports = {
                     .setDescription('You have created an economy account, you have been awarded:\n\n• $5000 -> 🏦\n• $5000 -> 💵\n\n__Run \`/account view\` to view your balance and information.__')
                     .setFooter({ text: `${guild.name}'s Economy`, iconURL: guild.iconURL() })
                     .setTimestamp();
+
+                    await interaction.reply({ embeds: [embed] });
                 }
                 break;
         }
-        await interaction.reply({ embeds: [embed] });
     }
 }
