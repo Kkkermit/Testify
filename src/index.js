@@ -54,7 +54,7 @@ if (process.env.NODE_ENV === 'development') {
 if (fs.existsSync(envPath)) {
     dotenv.config({ path: envPath });
 } else {
-    console.error(`Environment file ${envFile} not found`);
+    console.error(`${color.red}[${getTimestamp()}] [ERROR] Environment file ${envFile} not found`, error);
     process.exit(1);
 }
 
