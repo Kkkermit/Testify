@@ -1,0 +1,5 @@
+# Rename this file to "evalLogs.txt", this stores the values each time someone used /eval 
+# This is to keep track of what people are executing to make sure no one is executing code that could compromise info such as bot Token
+
+[2024-8-15 20:55:37] [EVAL_COMMAND_INPUT] Eval command input: console.log("test")
+[2024-8-15 20:55:37] [EVAL_COMMAND_OUTPUT] Eval command output: test
