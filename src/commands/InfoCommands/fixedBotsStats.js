@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, version } = require('discord.js');
 const botStats = require('../../schemas/fixedBotsStatsSystem');
 const os = require('os');
+const { color, getTimestamp } = require('../../functions/utils.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -90,18 +91,3 @@ module.exports = {
         }
     }
 }
-
-const color = {
-    red: '\x1b[31m',
-}
-
-function getTimestamp() {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
