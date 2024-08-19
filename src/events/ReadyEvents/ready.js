@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 const mongoose = require('mongoose');
 const mongodbURL = process.env.mongodb;
-const { color, getTimestamp } = require('../../functions/utils.js');
+const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
 module.exports = {
     name: 'ready',

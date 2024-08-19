@@ -1,7 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, version } = require('discord.js');
 const botStats = require('../../schemas/fixedBotsStatsSystem');
 const os = require('os');
-const { color, getTimestamp } = require('../../functions/utils.js');
+const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
 module.exports = {
     data: new SlashCommandBuilder()

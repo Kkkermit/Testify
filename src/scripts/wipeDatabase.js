@@ -2,7 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const mongoose = require('mongoose');
 const prompts = require('prompts');
-const { color, getTimestamp } = require('../functions/utils.js');
+const { color, getTimestamp } = require('../utils/loggingEffects.js');
 
 const loadEnvironment = require('./bootMode');
 loadEnvironment();

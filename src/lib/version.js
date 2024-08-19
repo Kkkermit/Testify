@@ -1,6 +1,6 @@
 const axios = require('axios');
 const config = require('../config')
-const { color, getTimestamp } = require('../functions/utils.js');
+const { color, getTimestamp } = require('../utils/loggingEffects.js');
 
 async function getLatestVersion() {
     try {

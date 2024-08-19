@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
-const { color, getTimestamp } = require('../functions/utils.js');
+const { color, getTimestamp } = require('../utils/loggingEffects.js');
 
 function loadEnvironment() {
     const envFile = process.env.NODE_ENV === 'development' ? '.env.development' : '.env';

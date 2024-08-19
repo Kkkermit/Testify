@@ -1,5 +1,5 @@
 const { inspect } = require('node:util');
-const { color, getTimestamp } = require('../functions/utils.js');
+const { color, getTimestamp } = require('../utils/loggingEffects.js');
 
 function write(message = '', prefix = '', colors = true) {
     const properties = inspect(message, { depth: 3, colors: Boolean(colors && typeof message !== 'string') });

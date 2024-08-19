@@ -1,5 +1,5 @@
 const { Events, EmbedBuilder } = require('discord.js');
-const { color, getTimestamp } = require('../../functions/utils.js');
+const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
 module.exports = {
     name: Events.GuildDelete,

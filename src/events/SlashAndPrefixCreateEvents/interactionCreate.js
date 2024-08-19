@@ -1,7 +1,7 @@
 const { Interaction, EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const config = require('../../config')
 const blacklistSchema = require("../../schemas/blacklistSystem");
-const { color, getTimestamp } = require('../../functions/utils.js');
+const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
 module.exports = {
     name: 'interactionCreate',

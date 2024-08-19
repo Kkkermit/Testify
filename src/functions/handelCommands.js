@@ -2,7 +2,7 @@ const { REST } = require("@discordjs/rest");
 const { Routes } = require('discord-api-types/v9');
 const fs = require('fs');
 const ascii = require("ascii-table");
-const { color, getTimestamp } = require('../functions/utils.js');
+const { color, getTimestamp } = require('../utils/loggingEffects.js');
 
 const table = new ascii().setHeading("File Name", "Status");
 
