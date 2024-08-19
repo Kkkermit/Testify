@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const dotenv = require('dotenv');
+const { color, getTimestamp } = require('../functions/utils.js');
 
 function loadEnvironment() {
     const envFile = process.env.NODE_ENV === 'development' ? '.env.development' : '.env';
@@ -20,22 +21,5 @@ function loadEnvironment() {
         process.exit(1);
     }
 }
-
-const color = {
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    reset: '\x1b[0m'
-}
-
-function getTimestamp() {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hours = date.getHours();
-    const minutes = date.getMinutes();
-    const seconds = date.getSeconds();
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-};
 
 module.exports = loadEnvironment;
