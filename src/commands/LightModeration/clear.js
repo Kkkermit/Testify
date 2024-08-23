@@ -24,21 +24,8 @@ module.exports = {
         }
         
         await interaction.deferReply({ ephemeral: true });
-        
-        let messages;
-        if (user) {
-            messages = await interaction.channel.messages.fetch()
-                .then(messages => messages.filter(m => m.author.id === user.id))
-                .then(messages => messages.first(parseInt(amount)));
-        } else {
-            messages = await interaction.channel.messages.fetch({ limit: parseInt(amount) });
-        }
-        
-        await interaction.channel.bulkDelete(messages, true);
-        
-        const deletedMessages = await interaction.channel.bulkDelete(messages, true);
 
-        const deletedSize = deletedMessages.size;
+        const deletedSize = await deleteMessages(interaction.channel, parseInt(amount), user);
 
         const deletedUser = user ? user.username : 'everyone';
 
@@ -54,4 +41,29 @@ module.exports = {
         return interaction.followUp({ embeds: [clearEmbed], ephemeral: true });
 
     }
+}
+
+async function deleteMessages(channel, totalToDelete, user) {
+	let remaining = totalToDelete;
+	let count;
+	if (user) {
+		let messages;
+		while (remaining > 0) {
+			messages = await channel.messages.fetch()
+				.then(messages => messages.filter(m => m.author.id === user.id))
+				.then(messages => messages.first(parseInt(remaining)));
+			const deleteCount = remaining > 100 ? 100 : remaining;
+			// the true here forces the bot to delete msgs that older then 14 days.
+			count += await channel.bulkDelete(messages, true);
+			remaining -= deleteCount;
+		}
+		return count;
+	}
+	while (remaining > 0) {
+		const deleteCount = remaining > 100 ? 100 : remaining;
+		// the true here forces the bot to delete msgs that older then 14 days.
+		count += await channel.bulkDelete(deleteCount, true);
+		remaining -= deleteCount;
+	}
+	return count;
 }
