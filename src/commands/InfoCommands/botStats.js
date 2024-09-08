@@ -4,8 +4,8 @@ const os = require('os');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('bot')
-        .setDescription(`Displays the bots current uptime.`)
-        .addSubcommand(command => command.setName('uptime').setDescription('Displays the bots current uptime.'))
+        .setDescription(`Displays the bot's current uptime.`)
+        .addSubcommand(command => command.setName('uptime').setDescription('Displays the bot's current uptime.'))
         .addSubcommand(command => command.setName('specs').setDescription('Displays the specs of the bot.')),
     
     async execute(interaction, client) {
@@ -30,10 +30,10 @@ module.exports = {
                 const uptimeEmbed = new EmbedBuilder()
                     .setAuthor({ name: `${client.user.username} uptime ${client.config.devBy}`})
                     .setColor(client.config.embedInfo)
-                    .setTitle('⏳ **Current uptime**')
-                    .addFields({ name: "Uptime", value: `> ${uptime}`})
+                    .setTitle('⏳ **Current Uptime**')
+                    .addFields({ name: "Uptime", value: `> ${uptime}` })
                     .setThumbnail(client.user.avatarURL())
-                    .setFooter({ text: `Uptime command`})
+                    .setFooter({ text: `Uptime command` })
                     .setTimestamp()
 
                 const reloadButton = new ButtonBuilder()
@@ -47,7 +47,7 @@ module.exports = {
 
                 const filter = (i) => i.customId === 'reload_uptime' && i.user.id === interaction.user.id;
 
-                const collector = interaction.channel.createMessageComponentCollector({ filter, time: 60000 });
+                const collector = interaction.channel.createMessageComponentCollector({ filter });
 
                 collector.on('collect', async i => {
                     if (i.customId === 'reload_uptime') {
@@ -56,24 +56,14 @@ module.exports = {
                         const updatedEmbed = new EmbedBuilder()
                             .setAuthor({ name: `${client.user.username} uptime ${client.config.devBy}`})
                             .setColor(client.config.embedInfo)
-                            .setTitle('⏳ **Current uptime**')
-                            .addFields({ name: "Uptime", value: `> ${newUptime}`})
+                            .setTitle('⏳ **Current Uptime**')
+                            .addFields({ name: "Uptime", value: `> ${newUptime}` })
                             .setThumbnail(client.user.avatarURL())
-                            .setFooter({ text: `Uptime command`})
+                            .setFooter({ text: `Uptime command` })
                             .setTimestamp()
 
-                        await i.update({ embeds: [updatedEmbed] });
+                        await i.update({ embeds: [updatedEmbed], components: [row] });
                     }
-                });
-
-                collector.on('end', async () => {
-                    
-                    const disabledRow = new ActionRowBuilder()
-                        .addComponents(
-                            reloadButton.setDisabled(true)
-                        );
-
-                    await interaction.editReply({ components: [disabledRow] });
                 });
 
                 break;
@@ -87,17 +77,17 @@ module.exports = {
                 const memoryTotal = os.totalmem() / 1000000000;
 
                 const specsEmbed = new EmbedBuilder()
-                    .setTitle('💻 **Bots specs**')
+                    .setTitle('💻 **Bot Specs**')
                     .setThumbnail(client.user.avatarURL())
-                    .setAuthor({ name: `${client.user.username} bots spec command ${client.config.devBy}`})
+                    .setAuthor({ name: `${client.user.username} bot specs command ${client.config.devBy}`})
                     .setColor(client.config.embedInfo)
-                    .setFooter({ text: `Specs command`})
-                    .addFields({name: `Memory:`, value: `> ${(memoryUsed / memoryTotal * 100).toFixed(1)}%`})
-                    .addFields({name: 'OS:', value: `> ${os.type}`})
-                    .addFields({name: `OS Version:`, value: `> ${os.release}`})
-                    .addFields({name: 'CPU: ', value: `> ${usagePercent.toFixed(1)}%`, inline: true})
-                    .addFields({name: 'CPU Type (Arch): ', value: `> ${os.arch}`, inline: true})
-                    .setTimestamp()
+                    .setFooter({ text: `Specs command` })
+                    .addFields({ name: `Memory:`, value: `> ${(memoryUsed / memoryTotal * 100).toFixed(1)}%` })
+                    .addFields({ name: 'OS:', value: `> ${os.type()}` })
+                    .addFields({ name: `OS Version:`, value: `> ${os.release()}` })
+                    .addFields({ name: 'CPU: ', value: `> ${usagePercent.toFixed(1)}%`, inline: true })
+                    .addFields({ name: 'CPU Type (Arch): ', value: `> ${os.arch()}`, inline: true })
+                    .setTimestamp();
 
                 await interaction.reply({ embeds: [specsEmbed] });
         }
