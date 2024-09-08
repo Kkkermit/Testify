@@ -61,8 +61,9 @@ module.exports = {
                             .setThumbnail(client.user.avatarURL())
                             .setFooter({ text: `Uptime command` })
                             .setTimestamp()
-
-                        await i.update({ embeds: [updatedEmbed], components: [row] });
+                        
+                        await i.deferUpdate();
+                        await i.editReply({ embeds: [updatedEmbed], components: [row] });
                     }
                 });
 
