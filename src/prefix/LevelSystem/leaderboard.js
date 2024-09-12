@@ -27,6 +27,8 @@ module.exports = {
             })
         );
 
+        const limitedUsersData = usersData.slice(0, 10);
+
         const top = await new canvafy.Top()
         .setOpacity(0.5)
         .setScoreMessage("Level")
@@ -42,7 +44,7 @@ module.exports = {
             secondRank: "#9e9e9e",
             thirdRank: "#94610f",
         })
-        .setUsersData(usersData)
+        .setUsersData(limitedUsersData)
         .build();
 
         await message.channel.send({ files: [{ attachment: top, name: `top-${message.author.id}.png` }] });
