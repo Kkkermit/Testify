@@ -8,7 +8,9 @@
     "start": "node src/index.js",
     "development": "cross-env NODE_ENV=development node src/index.js",
     "wipe-data:dev": "cross-env NODE_ENV=development node src/scripts/wipeDatabase.js",
-    "wipe-data:prod": "node src/scripts/wipeDatabase.js"
+    "wipe-data:prod": "node src/scripts/wipeDatabase.js",
+    "installation": "npm i && npm run postinstall",
+    "postinstall": "node src/scripts/postInstallation.js"
   },
   "keywords": [],
   "author": "",
