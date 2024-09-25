@@ -10,7 +10,8 @@
     "wipe-data:dev": "cross-env NODE_ENV=development node src/scripts/wipeDatabase.js",
     "wipe-data:prod": "node src/scripts/wipeDatabase.js",
     "installation": "npm i && npm run postinstall",
-    "postinstall": "node src/scripts/postInstallation.js"
+    "postinstall": "node src/scripts/postInstallation.js",
+    "update-packages": "node src/scripts/updatePackages.js"
   },
   "keywords": [],
   "author": "",
