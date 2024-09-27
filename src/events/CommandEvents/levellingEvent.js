@@ -1,69 +1,65 @@
-const { Events, EmbedBuilder } = require('discord.js');
-const levelSchema = require('../../schemas/userLevelSystem');
-const levelschema = require('../../schemas/levelSetupSystem');
+const { Events } = require("discord.js");
+const levelSchema = require("../../schemas/userLevelSystem");
+const levelschema = require("../../schemas/levelSetupSystem");
 
 module.exports = {
-    name: Events.MessageCreate,
-    async execute (message, client, err) {
+	name: Events.MessageCreate,
+	async execute(message, client, err) {
+		const { guild, author } = message;
+		if (message.guild === null) return;
+		const leveldata = await levelschema.findOne({ Guild: message.guild.id });
 
-        const { guild, author } = message;
-        if (message.guild === null) return;
-        const leveldata = await levelschema.findOne({ Guild: message.guild.id });
+		if (!leveldata || leveldata.Disabled === "disabled") return;
+		let multiplier = 1;
 
-        if (!leveldata || leveldata.Disabled === 'disabled') return;
-        let multiplier = 1;
-        
-        multiplier = Math.floor(leveldata.Multi);
-        
+		multiplier = Math.floor(leveldata.Multi);
 
-        if (!guild || author.bot) return;
+		if (!guild || author.bot) return;
 
-        levelSchema.findOne({ Guild: guild.id, User: author.id}, async (err, data) => {
+		levelSchema.findOne({ Guild: guild.id, User: author.id }, async (err, data) => {
+			if (err) throw err;
 
-            if (err) throw err;
+			if (!data) {
+				levelSchema.create({
+					Guild: guild.id,
+					User: author.id,
+					XP: 0,
+					Level: 0,
+				});
+			}
+		});
 
-            if (!data) {
-                levelSchema.create({
-                    Guild: guild.id,
-                    User: author.id,
-                    XP: 0,
-                    Level: 0
-                })
-            }
-        })
+		const channel = message.channel;
+		const give = 1;
+		const data = await levelSchema.findOne({ Guild: guild.id, User: author.id });
 
-        const channel = message.channel;
-        const give = 1;
-        const data = await levelSchema.findOne({ Guild: guild.id, User: author.id});
+		if (!data) return;
 
-        if (!data) return;
+		const requiredXP = data.Level * data.Level * 20 + 20;
 
-        const requiredXP = data.Level * data.Level * 20 + 20;
+		if (data.XP + give >= requiredXP) {
+			data.XP += give;
+			data.Level += 1;
+			await data.save();
 
-        if (data.XP + give >= requiredXP) {
+			if (!channel) return;
 
-            data.XP += give;
-            data.Level += 1;
-            await data.save();
-            
-            if (!channel) return;
+			const messages = [
+				`Congratulations <@${author.id}>! You have leveled up to level ${data.Level}! ${client.config.confettiEmoji}`,
+				`<@${author.id}> has leveled up to level ${data.Level}! Congrats! ${client.config.confettiEmoji}`,
+				`Well done <@${author.id}>! You have leveled up to level ${data.Level}! ${client.config.confettiEmoji}`,
+				`Woohoo! <@${author.id}> has leveled up to level ${data.Level}! ${client.config.confettiEmoji}`,
+			];
 
-            const levelEmbed = new EmbedBuilder()
-            .setColor(client.config.embedLevels)
-            .setAuthor({ name: `Leveling System ${client.config.devBy}` })
-            .setTitle(`> ${client.user.username} Leveling System ${client.config.arrowEmoji}`)
-            .setDescription(`\`\`\`${author.username} has leveled up to level ${data.Level}!\`\`\``)
-            .setThumbnail(author.avatarURL({ dynamic: true }))
-            .setFooter({ text: `${author.username} Leveled Up`})
-            .setTimestamp()
+			const randomLevelMessage = messages[Math.floor(Math.random() * messages.length)];
 
-            await message.channel.send({ embeds: [levelEmbed] }).catch(err => client.logs.error('[LEVEL_ERROR] Error sending level up message!'));
-        } else {
-
-            if(message.member.roles.cache.find(r => r.id === leveldata.Role)) {
-                data.XP += give * multiplier;
-            } data.XP += give;
-            data.save();
-        }
-    }
-}
+			await message.channel.send({ content: `${randomLevelMessage}` }).catch((err) => client.logs.error("[LEVEL_ERROR] Error sending level up message!"));
+		} else {
+			if (message.member.roles.cache.find((r) => r.id === leveldata.Role)) {
+				data.XP += give * multiplier;
+			}
+			data.XP += give;
+			data.save();
+		}
+	},
+};

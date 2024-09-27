@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node src/index.js",
-    "development": "cross-env NODE_ENV=development node src/index.js",
+    "prod": "node src/index.js",
+    "dev": "cross-env NODE_ENV=development node src/index.js",
     "wipe-data:dev": "cross-env NODE_ENV=development node src/scripts/wipeDatabase.js",
     "wipe-data:prod": "node src/scripts/wipeDatabase.js",
     "installation": "npm i && npm run postinstall",
