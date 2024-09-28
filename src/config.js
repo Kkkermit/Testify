@@ -12,8 +12,7 @@ module.exports = {
 	noPerms: `You **do not** have the required permissions to use this command!`,
 	ownerOnlyCommand: `This command is **only** available for the owner of the bot!`,
 	filterMessage: "Your message includes profanity which is **not** allowed!",
-	botInvite:
-		"https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=bot%20applications.commands",
+	botInvite: "https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=bot%20applications.commands",
 	botServerInvite: "https://discord.gg/xcMVwAVjSD",
 
 	// EMBED COLORS //
@@ -67,15 +66,12 @@ module.exports = {
 	ticketName: "ticket-",
 	ticketDescription: "🗳️ Ticket has been open by",
 	ticketCreate: "✅ Your ticket has been created",
-	ticketAlreadyExist:
-		"Sorry but you already have a ticket open. If you want to open a new ticket, please close the current one.",
+	ticketAlreadyExist: "Sorry but you already have a ticket open. If you want to open a new ticket, please close the current one.",
 	ticketNoPermissions: "Sorry, but you **do not** have permission to do this.",
 	ticketError: "Something went wrong, try again later.",
 	ticketMessageTitle: "Welcome, thanks for opening a ticket. Please describe your problem in detail.",
-	ticketMessageDescription:
-		"A member of our moderation team will soon take care of your request.\nThank you for waiting patiently.",
-	ticketMissingPerms:
-		"Sorry, it looks like I am missing the required permissions to do this. Try giving me higher permissions.",
+	ticketMessageDescription: "A member of our moderation team will soon take care of your request.\nThank you for waiting patiently.",
+	ticketMissingPerms: "Sorry, it looks like I am missing the required permissions to do this. Try giving me higher permissions.",
 	ticketClose: "Close",
 	ticketCloseEmoji: "📪",
 	ticketLock: "Lock",
