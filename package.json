@@ -5,8 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "prod": "node src/index.js",
-    "dev": "cross-env NODE_ENV=development node src/index.js",
+    "prod": "nodemon src/index.js",
+    "dev": "cross-env NODE_ENV=development nodemon src/index.js",
     "wipe-data:dev": "cross-env NODE_ENV=development node src/scripts/wipeDatabase.js",
     "wipe-data:prod": "node src/scripts/wipeDatabase.js",
     "installation": "npm i && npm run postinstall",
@@ -60,6 +60,7 @@
   },
   "devDependencies": {
     "cross-env": "7.0.3",
-    "jest": "29.7.0"
+    "jest": "29.7.0",
+    "nodemon": "3.1.7"
   }
 }
