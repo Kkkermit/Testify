@@ -6,6 +6,7 @@
   "scripts": {
     "test": "jest",
     "prod": "nodemon src/index.js",
+    "node-runner": "node src/index.js",
     "dev": "cross-env NODE_ENV=development nodemon src/index.js",
     "wipe-data:dev": "cross-env NODE_ENV=development node src/scripts/wipeDatabase.js",
     "wipe-data:prod": "node src/scripts/wipeDatabase.js",
