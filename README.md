@@ -16,9 +16,9 @@
 Advanced all-in-one discord bot with prefix & slash commands
 </strong></p>
 
-<h1 align="center"><strong>
+<p align="center">
 With over 100 slash command and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features to use for your servers!
-</strong></h1>
+</p>
 
 > To test out Testify, be sure to invite him to your server by clicking [here](https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot)
 
@@ -28,9 +28,9 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 - [Support](#support)
 - [License](#license)
 
-<p align="center"> 
+<h1 align="center"><strong>
 ⭐ If your a fan of this repository or have used it or any of it's code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot! ⭐
-</p> 
+</strong></h1>
 
 ## Installation
 - Download [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
