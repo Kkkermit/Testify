@@ -6,6 +6,7 @@ module.exports = {
 	prefix: "t?", // Default prefix
 	status: "dnd",
 	eventListeners: 100,
+	botName: "Testify",
 	dev: "Kkermit",
 	devBy: "| Developed by kkermit",
 	developers: "526853643962679323",

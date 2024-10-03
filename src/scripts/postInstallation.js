@@ -3,7 +3,7 @@
 const { color, getTimestamp } = require('../utils/loggingEffects.js');
 const config = require('../config.js')
 
-console.log(`${color.pink}[${getTimestamp()}] [INSTALLATION_PROCESS] Welcome to the post installation process for the Discord Bot Template!`);
+console.log(`${color.pink}[${getTimestamp()}] [INSTALLATION_PROCESS] Welcome to the post installation process for ${config.botName}!`);
 console.log(`${color.pink}[${getTimestamp()}] [INSTALLATION_PROCESS] All dependencies have been installed successfully! Please continue with the installation process following the instructions found below`);
 console.log(`${color.pink}[${getTimestamp()}] [INSTALLATION_PROCESS] If you have any questions or need help, please visit our Discord server at ${config.botServerInvite}`);
 console.log(`${color.pink}[${getTimestamp()}] [INSTALLATION_PROCESS] ===============================================================================================`);
