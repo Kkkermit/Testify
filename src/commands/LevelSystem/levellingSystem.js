@@ -17,7 +17,7 @@ module.exports = {
         { name: 'EXTREME: 1000x Multiplier', value: '1000'}
     ).setRequired(true).setDescription('Specified amount of multiplier will be applied to specified role.')))
     .addSubcommand(command => command.setName('disable').setDescription('Disables your leveling system.'))
-    .addSubcommand(command => command.setName('enable').setDescription('Enables your leveling system.'))
+    .addSubcommand(command => command.setName('enable').setDescription('Enables your leveling system.').addChannelOption(option => option.setName('channel').setDescription('Channel where level message is sent, If blank message will be sent to channel where user last was').setRequired(false)))
     .addSubcommand(command => command.setName('disable-multiplier').setDescription('Disables the multiplier of your role.')),
     async execute(interaction, client) {
 
@@ -34,28 +34,30 @@ module.exports = {
 
             if (leveldata && leveldata.Disabled === 'enabled') return await interaction.reply({ content: `You **already** have your **leveling system** set up. \n> Do **\`\`/leveling disable\`\`** to undo.`, ephemeral: true});
             else {
+                const channel = interaction.options.getChannel('channel');
+                const levelUpChannelId = channel ? channel.id : 'current';
 
                 const setupEmbed = new EmbedBuilder()
-                .setColor(client.config.embedLevels)
-                .setThumbnail(client.user.avatarURL())
-                .setAuthor({ name: `Leveling System ${client.config.devBy}`})
-                .setFooter({ text: `Leveling System Setup`})
-                .setTimestamp()
-                .setTitle(`> ${client.user.username} Leveling System ${client.config.arrowEmoji}`)
-                .addFields({ name: `Leveling was set up`, value: `Your members will now be able to earn XP through the leveling system!`})
+                    .setColor(client.config.embedLevels)
+                    .setThumbnail(client.user.avatarURL())
+                    .setAuthor({ name: `Leveling System ${client.config.devBy}` })
+                    .setFooter({ text: `Leveling System Setup` })
+                    .setTimestamp()
+                    .setTitle(`> ${client.user.username} Leveling System ${client.config.arrowEmoji}`)
+                    .addFields({ name: `Leveling was set up`, value: `Your members will now be able to earn XP through the leveling system!` })
+                    .addFields({ name: `Level Up Channel`, value: `${channel ? `<#${channel.id}>` : 'Current Channel'}` });
 
-                if (leveldata) await levelschema.updateOne({ Guild: interaction.guild.id }, { $set: { Disabled: 'enabled' }});
-                else {
-
-                    levelschema.create({
+                if (leveldata) {
+                    await levelschema.updateOne({ Guild: interaction.guild.id }, { $set: { Disabled: 'enabled', LevelUpChannel: levelUpChannelId } });
+                } else {
+                    await levelschema.create({
                         Guild: interaction.guild.id,
                         Disabled: 'enabled',
                         Role: ' ',
-                        Multiplier: ' '
-                    })
-
+                        Multiplier: ' ',
+                        LevelUpChannel: levelUpChannelId
+                    });
                 }
-
                 await interaction.reply({ embeds: [setupEmbed] })
             }
 

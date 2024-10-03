@@ -4,7 +4,8 @@ let levelsetup = new Schema({
     Guild: String,
     Disabled: String,
     Role: String,
-    Multi: String
+    Multi: String,
+    LevelUpChannel: String,
 });
 
 module.exports = model('levelsetup', levelsetup);
