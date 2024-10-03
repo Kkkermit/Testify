@@ -12,9 +12,9 @@
 <img align="center" alt="GitHub license" src="https://img.shields.io/github/license/Kkkermit/Testify?style=for-the-badge">
 </p>
 
-<p align="center">
+<p align="center"><strong>
 Advanced all-in-one discord bot with prefix & slash commands
-</p>
+</strong></p>
 
 <p align="center">
 With over 100 slash command and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features to use for your servers!
