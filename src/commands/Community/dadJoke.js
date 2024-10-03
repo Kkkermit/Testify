@@ -7,15 +7,15 @@ module.exports = {
     .setDescription("Get a random dad joke."),
     async execute(interaction, client) {
 
-        await interaction.deferReply();
-
         const response = await fetch("https://icanhazdadjoke.com/", {
             headers: {
                 Accept: "application/json",
             },
         });
 
-        if (!response.ok) { interaction.followUp({ content: `An **error occurred** while attempting to fetch a dad joke. Please try again later.`, ephemeral: true })}
+        if (!response.ok) { 
+            interaction.reply({ content: `An **error occurred** while attempting to fetch a dad joke. Please try again later.`, ephemeral: true })
+        }
 
         const data = await response.json();
 
@@ -28,6 +28,6 @@ module.exports = {
         .setThumbnail(client.user.avatarURL())
         .setTimestamp();
 
-        interaction.followUp({ embeds: [jokeEmbed] });
+        interaction.reply({ embeds: [jokeEmbed] });
     },
 };
