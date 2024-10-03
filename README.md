@@ -96,10 +96,10 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 
 - **Runnable commands (scripts)**
 
-   **Wipe Database** 
+   **Wipe Database** - <br>
    To wipe the database that is connected via your mongoDB url, you can run the command `npm run wipe-data:prod`, this brings up a menu which you can follow in order to either wipe the entire database from all it's data, or wipe all the data from individual schemas. 
 
-   **Update Packages**
+   **Update Packages** - <br>
    To update all your dependencies, you can run the command `npm run update-packages`, this cycles through the dependencies and updates one's which are out of date.
 
 
