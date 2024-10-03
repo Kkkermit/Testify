@@ -1,12 +1,10 @@
-const { Events, EmbedBuilder } = require('discord.js');
-const guildSettingsSchema = require('../../schemas/prefixSystem');  
+const { Events, EmbedBuilder } = require('discord.js');  
 
 module.exports = {
     name: Events.MessageCreate,
     async execute (message, client) {
 
-        const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: message.guild.id });
-        const guildPrefix = fetchGuildPrefix ? fetchGuildPrefix.Prefix : null;
+        const guildPrefix = client.config.prefix;
         if (!message.author.bot && message.content.startsWith(guildPrefix)) {
 
             const channel = await client.channels.cache.get(client.config.prefixCommandLoggingChannel);
