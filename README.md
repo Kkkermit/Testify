@@ -16,9 +16,9 @@
 Advanced all-in-one discord bot with prefix & slash commands
 </strong></p>
 
-<p align="center">
+<h1 align="center"><strong>
 With over 100 slash command and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features to use for your servers!
-</p>
+</strong></h1>
 
 > To test out Testify, be sure to invite him to your server by clicking [here](https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot)
 
