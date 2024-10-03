@@ -28,7 +28,9 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 - [Support](#support)
 - [License](#license)
 
+<p align="center"> 
 ⭐ If your a fan of this repository or have used it or any of it's code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot! ⭐
+</p> 
 
 ## Installation
 - Download [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
