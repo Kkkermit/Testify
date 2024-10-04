@@ -168,10 +168,40 @@ client.distube
                     .setDescription('`⛔ | No result found for \`${query}\`!`')]
             })
     )
-    .on('finish', queue => queue.textChannel.send({
-        embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
-            .setDescription('🏁 | Queue finished!')]
-    }))
+    .on('finish', queue => {
+        queue.textChannel.send({
+            embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
+                .setDescription('🏁 | Fila terminada! Mensagem será apagada em 5 segundos.')]
+        }).then(async message => {
+            try {
+                // Aguarda 5 segundos antes de apagar a mensagem
+                for (let i = 5; i > 0; i--) {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                    await message.edit({
+                        embeds: [new EmbedBuilder().setColor(client.config.embedMusic)
+                            .setDescription(`🏁 | Fila terminada! Mensagem será apagada em ${i} segundos.`)]
+                    });
+                }
+
+                // Apaga a mensagem de fila terminada
+                await message.delete();
+
+                // Apaga as últimas 10 mensagens do canal (incluindo comandos e mensagens do bot)
+                await queue.textChannel.bulkDelete(10);
+            } catch (error) {
+                console.error('Erro ao editar ou excluir mensagens:', error);
+            }
+        });
+
+        // Apaga o último comando usado (assumindo que está armazenado em algum lugar)
+        if (queue.lastCommand) {
+            queue.lastCommand.delete().catch(console.error);
+        }
+    })
+    .on('initQueue', queue => {
+        // Apaga as últimas 10 mensagens do canal quando uma nova fila é iniciada
+        queue.textChannel.bulkDelete(10).catch(console.error);
+    })
 
 // Giveaway Manager //
 
