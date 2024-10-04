@@ -77,7 +77,7 @@ module.exports = {
         try {
             command.execute(message, client, args);
         } catch (error) {
-            console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Please check you are using the correct execute method: "async execute(message, client, args)":`, error);
+            console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Please check you are using the correct execute method: "async execute(message, client, args)": \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] `, error);
 
             const channelID = `${client.config.commandErrorChannel}`;
             const channel = client.channels.cache.get(channelID);   
