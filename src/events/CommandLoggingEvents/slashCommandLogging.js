@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder } = require('discord.js');
+const { Events, EmbedBuilder, WebhookClient } = require('discord.js');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -8,7 +8,7 @@ module.exports = {
         if (!interaction.isChatInputCommand()) return;
         else {
 
-            const channel = await client.channels.cache.get(client.config.slashCommandLoggingChannel);
+            const webhookURL = process.env.webhookSlashLogging;
             const server = interaction.guild.name;
             const user = interaction.user.username;
             const userID = interaction.user.id;
@@ -23,7 +23,17 @@ module.exports = {
             .setTimestamp()
             .setFooter({ text: `Command Logger ${client.config.devBy}`, iconURL: interaction.user.avatarURL({ dynamic: true })})
 
-            await channel.send({ embeds: [embed] });
+            try {
+                const webhookClient = new WebhookClient({ url: webhookURL });
+
+                await webhookClient.send({
+                    embeds: [embed],
+                    username: `${client.user.username} SlashCommand Logger`,
+                    avatarURL: client.user.avatarURL(),
+                });
+            } catch (error) {
+                client.logs.error('[COMMAND_SLASH_LOGGING_WEBHOOK] Error whilst sending webhook:', error);
+            }
         }
     }
 }

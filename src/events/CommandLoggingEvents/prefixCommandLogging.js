@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder } = require('discord.js');  
+const { Events, EmbedBuilder, WebhookClient } = require('discord.js');  
 
 module.exports = {
     name: Events.MessageCreate,
@@ -7,7 +7,7 @@ module.exports = {
         const guildPrefix = client.config.prefix;
         if (!message.author.bot && message.content.startsWith(guildPrefix)) {
 
-            const channel = await client.channels.cache.get(client.config.prefixCommandLoggingChannel);
+            const webhookURL = process.env.webhookPrefixLogging;
             const server = message.guild.name;
             const user = message.author.username;
             const userID = message.author.id;
@@ -22,7 +22,17 @@ module.exports = {
             .setTimestamp()
             .setFooter({ text: `Command Logger ${client.config.devBy}`, iconURL: message.author.avatarURL({ dynamic: true }) })
 
-            await channel.send({ embeds: [embed] });
+            try {
+                const webhookClient = new WebhookClient({ url: webhookURL });
+
+                await webhookClient.send({
+                    embeds: [embed],
+                    username: `${client.user.username} Prefix Command Logger`,
+                    avatarURL: client.user.avatarURL(),
+                });
+            } catch (error) {
+                client.logs.error('[COMMAND_PREFIX_LOGGING_WEBHOOK] Error whilst sending webhook:', error);
+            }
         }
     }
 }

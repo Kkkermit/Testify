@@ -54,8 +54,6 @@ module.exports = {
 	musicEmojiError: "❌",
 
 	// CHANNEL IDS //
-	slashCommandLoggingChannel: "1238869804744441896", // slash command logging channel
-	prefixCommandLoggingChannel: "1241592178480775188", // Prefix command logging channel
 	suggestionChannel: "1240335460463677503", // Suggestion channel
 	bugReportChannel: "1240341717031456840", // Bug report channel
 	botLeaveChannel: "1139731092329480332", // Logging channel for bot leaving servers
