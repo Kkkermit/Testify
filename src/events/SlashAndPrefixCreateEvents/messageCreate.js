@@ -80,79 +80,51 @@ module.exports = {
             console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Please check you are using the correct execute method: "async execute(message, client, args)": \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] `, error);
 
             const channelID = `${client.config.commandErrorChannel}`;
-            const channel = client.channels.cache.get(channelID);   
+            const channel = client.channels.cache.get(channelID);
 
-            const errorEmbed = new EmbedBuilder()
-            .setColor("Blue")
-            .setTimestamp()
-            .setAuthor({ name: `${client.user.username} Command Error ${config.devBy}`, iconURL: client.user.avatarURL()})
-            .setFooter({ text: 'Error reported at' })
-            .setTitle(`__Prefix Command Execution Error__ ${config.arrowEmoji}`)
-            .setDescription('An error occurred while executing the prefix command.')
-            .addFields(
-            { name: '> Command', value: `\`\`\`${message.command}\`\`\`` },
-            { name: '> Triggered By', value: `\`\`\`${message.author.username}#${message.author.discriminator}\`\`\`` },
-            { name: '> Guild', value: `\`\`\`${message.guild.name}\`\`\`` },
-            { name: '> Error', value: `\`\`\`${error}\`\`\`` })
-            
+            const embed = new EmbedBuilder()
+                .setColor("Blue")
+                .setTimestamp()
+                .setAuthor({ name: `${client.user.username} Command Error ${client.config.devBy}`, iconURL: client.user.avatarURL() })
+                .setFooter({ text: 'Error reported at' })
+                .setTitle(`__Prefix Command Execution Error__ ${client.config.arrowEmoji}`)
+                .setDescription('An error occurred while executing the prefix command.')
+                .addFields(
+                    { name: '> Command', value: `\`\`\`${message.content}\`\`\`` },
+                    { name: '> Triggered By', value: `\`\`\`${message.author.username}#${message.author.discriminator}\`\`\`` },
+                    { name: '> Guild', value: `\`\`\`${message.guild.name}\`\`\`` },
+                    { name: '> Error', value: `\`\`\`${error.message}\`\`\`` }
+                );
+
             const yellowButton = new ButtonBuilder()
                 .setCustomId('change_color_yellow')
                 .setLabel('Mark As Pending')
-                .setStyle('1');
-            
+                .setStyle('Primary');
+
             const greenButton = new ButtonBuilder()
                 .setCustomId('change_color_green')
                 .setLabel('Mark As Solved')
-                .setStyle('3');
-            
+                .setStyle('Success');
+
             const redButton = new ButtonBuilder()
                 .setCustomId('change_color_red')
                 .setLabel('Mark As Unsolved')
-                .setStyle('4');
-            
+                .setStyle('Danger');
+
             const row = new ActionRowBuilder()
                 .addComponents(yellowButton, greenButton, redButton);
-            
-            client.on('messageCreate', async (message) => {
-                try {
-                    if (!message.isButton()) return;
-                    if (message.message.id !== message.id) return;
-                    
-                    const { customId } = message;
 
-                    if (customId === 'change_color_yellow') {
-                        embed.setColor('#FFFF00');
-                        await message.channel.send({
-                        content: 'This error has been marked as pending.',
-                        ephemeral: true,
-                        });
-                    } else if (customId === 'change_color_green') {
-                        embed.setColor('#00FF00');
-                        await message.channel.send({
-                        content: 'This error has been marked as solved.',
-                        ephemeral: true,
-                        });
-                    } else if (customId === 'change_color_red') {
-                        embed.setColor('#FF0000');
-                        await message.channel.send({
-                        content: 'This error has been marked as unsolved.',
-                        ephemeral: true,
-                        });
-                    }
-                    await message.edit({ embeds: [embed], components: [row] });
-                    await message.deferUpdate();
-                } catch (error) {
-                    client.logs.error('[ERROR_LOGGING] Error in button interaction:', error);
-                }
-            });
+            const message = await channel.send({ embeds: [embed], components: [row] });  
 
-            const message = await channel.send({ embeds: [errorEmbed], components: [row] });       
+            client.errorMessageMessage = message;
+            client.errorEmbedMessage = embed;
+            client.errorRowMessage = row;
 
-            const embed = new EmbedBuilder()
+            const errorEmbed = new EmbedBuilder()
             .setColor("Red")
             .setDescription(`There was an error while executing this command!\n\`\`\`${error}\`\`\``)
 
-            await message.reply({ embeds: [embed], ephemeral: true});
+            await message.reply({ embeds: [errorEmbed], ephemeral: true});
         }
     },
 };

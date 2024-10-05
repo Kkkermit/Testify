@@ -1,4 +1,4 @@
-const { Interaction, EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const config = require('../../config')
 const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -72,41 +72,12 @@ module.exports = {
             
             const row = new ActionRowBuilder()
                 .addComponents(yellowButton, greenButton, redButton);
+
+            const message = await channel.send({ embeds: [embed], components: [row] });   
             
-            client.on('interactionCreate', async (interaction) => {
-                try {
-                    if (!interaction.isButton()) return;
-                    if (interaction.message.id !== message.id) return;
-                    
-                    const { customId } = interaction;
-
-                    if (customId === 'change_color_yellow') {
-                        embed.setColor('#FFFF00');
-                        await interaction.reply({
-                        content: 'This error has been marked as pending.',
-                        ephemeral: true,
-                        });
-                    } else if (customId === 'change_color_green') {
-                        embed.setColor('#00FF00');
-                        await interaction.reply({
-                        content: 'This error has been marked as solved.',
-                        ephemeral: true,
-                        });
-                    } else if (customId === 'change_color_red') {
-                        embed.setColor('#FF0000');
-                        await interaction.reply({
-                        content: 'This error has been marked as unsolved.',
-                        ephemeral: true,
-                        });
-                    }
-                    await message.edit({ embeds: [embed], components: [row] });
-                    await interaction.deferUpdate();
-                } catch (error) {
-                    client.logs.error('[ERROR_LOGGING] Error in button interaction:', error);
-                }
-            });
-
-            const message = await channel.send({ embeds: [embed], components: [row] });        
+            client.errorMessageInteraction = message;
+            client.errorEmbedInteraction = embed;
+            client.errorRowInteraction = row;
 
             const errorEmbed = new EmbedBuilder()
             .setColor("Red")
