@@ -54,8 +54,6 @@ module.exports = {
 	musicEmojiError: "❌",
 
 	// CHANNEL IDS //
-	suggestionChannel: "1240335460463677503", // Suggestion channel
-	bugReportChannel: "1240341717031456840", // Bug report channel
 	botLeaveChannel: "1139731092329480332", // Logging channel for bot leaving servers
 	botJoinChannel: "1240480049681928203", // Logging channel for bot joining servers
 	commandErrorChannel: "1240912641719930970", // Logging channel for command errors

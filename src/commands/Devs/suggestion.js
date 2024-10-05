@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, WebhookClient } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -37,11 +37,19 @@ module.exports = {
         .setFooter({ text: `Suggestion sent from ${guild.name}`, iconURL: guild.iconURL({ size: 1024 })})
         .setTimestamp()
 
-        const channel = interaction.client.channels.cache.get(client.config.suggestionChannel);
+        try {
+            const webhookURL = process.env.webhookSuggestionLogging;
 
-        channel.send({ embeds: [suggestionEmbed]}).catch(err => {
-            return;
-        });
+            const webhookClient = new WebhookClient({ url: webhookURL });
+
+            await webhookClient.send({
+                embeds: [suggestionEmbed],
+                username: `${client.user.username} Suggestion Logger`,
+                avatarURL: client.user.avatarURL(),
+            });
+        } catch (error) {
+            client.logs.error('[COMMAND_SUGGESTION_LOGGING_WEBHOOK] Error whilst sending webhook:', error);
+        }
 
         interaction.user.send({ embeds: [userEmbed]}).catch(err => {
             return;

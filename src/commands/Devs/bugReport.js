@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle, WebhookClient } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -10,17 +10,17 @@ module.exports = {
         const guild = interaction.guild;
 
         let modal = new ModalBuilder()
-        .setCustomId('report')
-        .setTitle('Report a bug')
+            .setCustomId('report')
+            .setTitle('Report a bug')
 
         let textInput = new TextInputBuilder()
-        .setCustomId('report')
-        .setPlaceholder('Type your issue here')
-        .setLabel('Bug Report | Issue')
-        .setMaxLength(250)
-        .setMinLength(5)
-        .setRequired(true)
-        .setStyle(TextInputStyle.Paragraph)
+            .setCustomId('report')
+            .setPlaceholder('Type your issue here')
+            .setLabel('Bug Report | Issue')
+            .setMaxLength(250)
+            .setMinLength(5)
+            .setRequired(true)
+            .setStyle(TextInputStyle.Paragraph)
 
         let report = new ActionRowBuilder().addComponents(textInput);
         modal.addComponents(report)
@@ -31,35 +31,43 @@ module.exports = {
             let message = response.fields.getTextInputValue('report')
 
             const bugEmbed = new EmbedBuilder()
-            .setAuthor({ name: `Bug Report Command ${client.config.devBy}`})
-            .setTitle(`${client.user.username} Bug Report Tool ${client.config.arrowEmoji}`)
-            .setColor(client.config.embedDev)
-            .addFields({ name:"User: ", value:`<@${user}>`, inline: false})
-            .setDescription(`New bug report from ${interaction.user.username}: \n> **${message}**`)
-            .setFooter({ text: `Bug report sent from ${guild.name}`, iconURL: guild.iconURL({ size: 1024 })})
-            .setTimestamp()
+                .setAuthor({ name: `Bug Report Command ${client.config.devBy}`})
+                .setTitle(`${client.user.username} Bug Report Tool ${client.config.arrowEmoji}`)
+                .setColor(client.config.embedDev)
+                .addFields({ name:"User: ", value:`<@${user}>`, inline: false})
+                .setDescription(`New bug report from ${interaction.user.username}: \n> **${message}**`)
+                .setFooter({ text: `Bug report sent from ${guild.name}`, iconURL: guild.iconURL({ size: 1024 })})
+                .setTimestamp()
 
             const channelEmbed = new EmbedBuilder()
-            .setAuthor({ name: `Bug Report Command ${client.config.devBy}`})
-            .setTitle(`You've sent a bug report to the developers of ${client.user.username}!`)
-            .setDescription(`Thank you for the bug report of: \n> **${message}**`)
-            .setColor(client.config.embedColor)
-            .setTimestamp()
+                .setAuthor({ name: `Bug Report Command ${client.config.devBy}`})
+                .setTitle(`You've sent a bug report to the developers of ${client.user.username}!`)
+                .setDescription(`Thank you for the bug report of: \n> **${message}**`)
+                .setColor(client.config.embedColor)
+                .setTimestamp()
 
             const userEmbed = new EmbedBuilder()
-            .setAuthor({ name: `Bug Report Command ${client.config.devBy}`})
-            .setTitle(`You've sent a bug report to the developers of ${client.user.username}!`)
-            .setThumbnail(client.user.avatarURL())
-            .setDescription(`Thank you for the bug report of: \n> **${message}**`)
-            .setColor(client.config.embedColor)
-            .setFooter({ text: `Bug report sent from ${guild.name}`, iconURL: guild.iconURL({ size: 1024 })})
-            .setTimestamp()
+                .setAuthor({ name: `Bug Report Command ${client.config.devBy}`})
+                .setTitle(`You've sent a bug report to the developers of ${client.user.username}!`)
+                .setThumbnail(client.user.avatarURL())
+                .setDescription(`Thank you for the bug report of: \n> **${message}**`)
+                .setColor(client.config.embedColor)
+                .setFooter({ text: `Bug report sent from ${guild.name}`, iconURL: guild.iconURL({ size: 1024 })})
+                .setTimestamp()
 
-            const channel = interaction.client.channels.cache.get(client.config.bugReportChannel);
+            try {
+                const webhookURL = process.env.webhookBugLogging;
 
-            channel.send({ embeds: [bugEmbed]}).catch(err => {
-                return;
-            });
+                const webhookClient = new WebhookClient({ url: webhookURL });
+
+                await webhookClient.send({
+                    embeds: [bugEmbed],
+                    username: `${client.user.username} Bug Report Logger`,
+                    avatarURL: client.user.avatarURL(),
+                });
+            } catch (error) {
+                client.logs.error('[COMMAND_BUG_REPORT_LOGGING_WEBHOOK] Error whilst sending webhook:', error);
+            }
 
             interaction.user.send({ embeds: [userEmbed]}).catch(err => {
                 return;
@@ -68,7 +76,6 @@ module.exports = {
             await response.reply({ embeds: [channelEmbed], ephemeral: true}).catch(err => {
                 return;
             });
-
         } catch (error) {
             client.logs.error(error)
             return;
