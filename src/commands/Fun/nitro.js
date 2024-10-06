@@ -24,7 +24,7 @@ module.exports = {
         let result15 = Math.floor(Math.random() * letter.length);
         let result16 = Math.floor(Math.random() * letter.length);
         
-        interaction.reply({ content: "Nitro gift sent to channel" })
+        interaction.reply({ content: "Nitro gift sent to channel", ephemeral: true })
         interaction.channel.send({ content: "http://discord.gift/" + letter[result] + letter[result2] + letter[result3] + letter[result4] + letter[result5] + letter[result6] + letter[result7] + letter[result8] + letter[result9] + letter[result10] + letter[result11] + letter[result12] + letter[result13] + letter[result14] + letter[result15] + letter[result16]})
     }
 }
