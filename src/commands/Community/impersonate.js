@@ -27,7 +27,7 @@ module.exports = {
             ephemeral: true
         });
         
-        interaction.channel.createWebhook({ name: member.username, avatar: member.displayAvatarURL({ dynamic: true })}).then((webhook) => {
+        interaction.channel.createWebhook({ name: member.displayName, avatar: member.displayAvatarURL({ dynamic: true })}).then((webhook) => {
         
             webhook.send({ content: message });
             setTimeout(() => {
