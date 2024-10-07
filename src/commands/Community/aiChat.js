@@ -6,7 +6,7 @@ module.exports = {
     .setName('chat')
     .setDescription('Generate AI chat response')
     .addStringOption(option => option.setName('prompt').setDescription('The prompt for gpt').setRequired(true))
-    .addStringOption(option => option.setName('modal').setDescription('The modal to use')
+    .addStringOption(option => option.setName('model').setDescription('The model to use')
     .addChoices(
             {name: "v3-32k", value: "v3-32k"},
             {name: "turbo", value: "turbo"},
@@ -16,7 +16,7 @@ module.exports = {
     async execute(interaction) {
 
     await interaction.deferReply()
-    const modal = interaction.options.getString('modal') || "turbo";
+    const modal = interaction.options.getString('model') || "turbo";
     const prompt = interaction.options.getString('prompt');
 
         try {
