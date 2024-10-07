@@ -239,6 +239,7 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
    ```
    3. This code makes the logs register like so this image below <img align="center" alt="Audit-logs" src="https://i.postimg.cc/NMJfsy0V/Screenshot-2024-10-07-184919.png">
    4. To update the color of the logs, you can change the part `${color.pink}` to the color you'd like which are defined in the color variable. 
+   5. That should be it, now when you start up the bot, it should look all cool 😎
 
 ## Support
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
