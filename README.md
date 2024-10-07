@@ -27,6 +27,7 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 ## Table of Contents
 - [Installation](#installation)
 - [Usage](#usage)
+- [Setting-Audit-Logs](#Setting-up-audit-logs)
 - [Support](#support)
 - [License](#license)
 
@@ -106,7 +107,7 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
    **Update Packages** - <br>
    To update all your dependencies, you can run the command `npm run update-packages`, this cycles through the dependencies and updates one's which are out of date.
 
-## Setting logs for audit-logs
+## Setting-up-audit-logs
 
 To set the advanced logs registry for the Testify audit-logs ( the event handler registers ) than follow this!
 
