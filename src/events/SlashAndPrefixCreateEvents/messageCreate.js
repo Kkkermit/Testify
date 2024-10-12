@@ -1,5 +1,6 @@
 const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
 const GuildSettings = require('../../schemas/prefixSystem');
+const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js')
 const blacklistSchema = require('../../schemas/blacklistSystem');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
@@ -7,31 +8,28 @@ module.exports = {
     name: "messageCreate",
     async execute(message, client) {
 
-        if (
-            message.author.bot || !message.guild || message.system || message.webhookId
-        )
+        if (message.author.bot || !message.guild || message.system || message.webhookId)
             return;
 
-            const userData = await blacklistSchema.findOne({
-                userId: message.author.id,
-            });
-    
-            if (userData) {
-                const embed = new EmbedBuilder()
-                .setAuthor({ name: `Blacklist System` })
-                .setTitle(`You are blacklisted from using ${client.user.username}`)
-                .setDescription(`Reason: ${userData.reason}`)
-                .setColor(client.config.embedColor)
-                .setFooter({ text: `You are blacklisted from using this bot` })
-                .setTimestamp();
-    
-                const reply = await message.reply({ embeds: [embed], fetchReply: true });
-                setTimeout(async () => {
-                    await reply.delete();
-                }, 5000);
-    
-                return;
-            }
+        const userData = await blacklistSchema.findOne({
+            userId: message.author.id,
+        });
+
+        if (userData) {
+            const embed = new EmbedBuilder()
+            .setAuthor({ name: `Blacklist System` })
+            .setTitle(`You are blacklisted from using ${client.user.username}`)
+            .setDescription(`Reason: ${userData.reason}`)
+            .setColor(client.config.embedColor)
+            .setFooter({ text: `You are blacklisted from using this bot` })
+            .setTimestamp();
+
+            const reply = await message.reply({ embeds: [embed], fetchReply: true });
+            setTimeout(async () => {
+                await reply.delete();
+            }, 2500);
+            return;
+        }
 
         const guildSettings = await GuildSettings.findOneAndUpdate(
             { Guild: message.guild.id }, 
@@ -40,6 +38,17 @@ module.exports = {
         );
 
         const prefix = guildSettings.Prefix || client.config.prefix;
+
+        const guildPrefixSettings = await GuildPrefixSettings.findOne({ Guild: message.guild.id });
+        if (!guildPrefixSettings || !guildPrefixSettings.Enabled) {
+            if (message.content.startsWith(prefix)) {
+                const reply = await message.reply({ content: 'The prefix system has been disabled.', ephemeral: true });
+                setTimeout(async () => {
+                    await reply.delete();
+                }, 2500);
+            }
+            return;
+        }
 
         if (!message.content.startsWith(prefix)) {
             return;
