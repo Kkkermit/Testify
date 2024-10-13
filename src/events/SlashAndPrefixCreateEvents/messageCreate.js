@@ -42,7 +42,7 @@ module.exports = {
         const guildPrefixSettings = await GuildPrefixSettings.findOne({ Guild: message.guild.id });
         if (!guildPrefixSettings || !guildPrefixSettings.Enabled) {
             if (message.content.startsWith(prefix)) {
-                const reply = await message.reply({ content: 'The prefix system has been disabled.', ephemeral: true });
+                const reply = await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', ephemeral: true });
                 setTimeout(async () => {
                     await reply.delete();
                 }, 2500);
