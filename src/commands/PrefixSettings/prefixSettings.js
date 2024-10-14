@@ -10,7 +10,7 @@ module.exports = {
     .addSubcommand(command => command.setName('change').setDescription('Change the prefix of the bot in your server.') .addStringOption(option => option.setName('prefix').setDescription('The new prefix you want to set.').setRequired(true)))
     .addSubcommand(command => command.setName('check').setDescription('Check the current prefix of the bot in your server.'))
     .addSubcommand(command => command.setName('reset').setDescription('Reset the prefix of the bot in your server back to the default.'))
-    .addSubcommand(command => command.setName('enable').setDescription('Enable the prefix system in your server.').addBooleanOption(option => option.setName('enable').setDescription('Enable the prefix system in your server.').setRequired(true)))
+    .addSubcommand(command => command.setName('enable').setDescription('Enable the prefix system in your server.').addBooleanOption(option => option.setName('enable').setDescription('Enable the prefix system in your server.').setRequired(true)).addStringOption(option => option.setName("prefix").setDescription("The prefix you want to set for the bot in your server. Leave blank to set to default prefix").setRequired(false)))
     .addSubcommand(command => command.setName('disable').setDescription('Disable the prefix system in your server.')),
     async execute(interaction, client) {
 
@@ -101,11 +101,32 @@ module.exports = {
             case 'enable':
             try {
                 const enable = interaction.options.getBoolean('enable');
+                let customPrefix = interaction.options.getString('prefix');
+
+                if (!customPrefix) {
+                    customPrefix = client.config.defaultPrefix;
+                }
+
+                if (customPrefix.length > 4) return interaction.reply({ content: 'The prefix **cannot** be longer than 4 characters!', ephemeral: true });
+
+                const customPrefixData = await prefixSchema.findOne({ Guild: interaction.guild.id });
+                if (!customPrefixData) {
+                    await new prefixSchema({
+                        Guild: interaction.guild.id,
+                        Prefix: customPrefix
+                    }).save();
+                } else {
+                    await prefixSchema.findOneAndUpdate({
+                        Guild: interaction.guild.id,
+                        Prefix: customPrefix
+                    });
+                }
+
                 const data = await prefixSetupSchema.findOne({ Guild: interaction.guild.id });
                 if (!data) {
                     await new prefixSetupSchema({
                         Guild: interaction.guild.id,
-                        Prefix: client.config.defaultPrefix,
+                        Prefix: customPrefix,
                         Enabled: enable
                     }).save();
                 } else {
@@ -113,13 +134,11 @@ module.exports = {
                     await data.save();
                 }
 
-                const prefix = data.Prefix || client.config.prefix;
-
                 const embed3 = new EmbedBuilder()
                 .setColor(client.config.embedModHard)
                 .setAuthor({ name: `Prefix setup command ${client.config.devBy}`})
                 .setTitle(`${client.user.username} prefix setup ${client.config.arrowEmoji}`)
-                .setDescription(`The prefix system has been ${enable ? 'enabled' : 'disabled'} \nThe prefix has been set to the default of \`${prefix}\`. \nYou can change the prefix by using the \`/prefix change\` command.`)
+                .setDescription(`The prefix system has been **${enable ? 'enabled' : 'disabled'}**! \n\nThe prefix has been set to \`${customPrefix}\`. \n\nYou can change the prefix by using the \`/prefix change\` command.`)
                 .setTimestamp()
                 .setFooter({ text: `Prefix system setup by ${interaction.user.username}`});
 
