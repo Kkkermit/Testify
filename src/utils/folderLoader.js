@@ -3,6 +3,10 @@ const path = require('path');
 const mongoose = require('mongoose');
 
 function folderLoader(client) {
+
+    client.logs.info(`[EVENTS] Started loading events...`);
+    client.logs.success(`[EVENTS] Loaded ${client.eventNames().length} events.`);
+
     if (mongoose.connect) {
         client.logs.success('[DATABASE] Connected to MongoDB successfully.');
 
@@ -15,19 +19,26 @@ function folderLoader(client) {
             client.logs.success(`[SCHEMAS] Loaded ${files.length} schema files.`);
         });
     };
-
-    client.logs.info(`[EVENTS] Started loading events...`);
-    client.logs.success(`[EVENTS] Loaded ${client.eventNames().length} events.`);
     
     const triggerFolder = path.join(__dirname, '../triggers'); 
+    client.logs.info(`[TRIGGERS] Started loading triggers...`);
     fs.readdir(triggerFolder, (err, files) => {
         if (err) {
             client.logs.error('[ERROR] Error reading trigger folder:', err);
             return;
         };
-        client.logs.info(`[TRIGGERS] Started loading triggers...`);
         client.logs.success(`[TRIGGERS] Loaded ${files.length} trigger files.`);
     });
+
+    const scriptsFolder = path.join(__dirname, '../scripts');
+    client.logs.info(`[SCRIPTS] started loading scripts...`)
+    fs.readdir(scriptsFolder, (err, files) => {
+        if(err) {
+            client.logs.error('[ERROR] Error reading scripts folder:', err);
+            return;
+        }
+        client.logs.success(`[SCRIPTS] Loaded ${files.length} script files.`);
+    })
 }
 
 module.exports = folderLoader;
