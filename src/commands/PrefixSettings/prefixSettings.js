@@ -20,7 +20,7 @@ module.exports = {
 
         const prefixSetupData = await prefixSetupSchema.findOne({ Guild: interaction.guild.id });
         if (sub !== 'enable' && sub !== 'disable' && (!prefixSetupData || !prefixSetupData.Enabled)) {
-            return await interaction.reply({ content: 'You **cannot** use this command as the prefix system has not yet been enabled. To enable the prefix system run \`prefix enable\`', ephemeral: true });
+            return await interaction.reply({ content: 'You **cannot** use this command as the prefix system has not yet been enabled. To enable the prefix system run **\`prefix enable\`**', ephemeral: true });
         }
 
         switch(sub) {
@@ -80,7 +80,7 @@ module.exports = {
             case 'reset':
             try {
                 const data2 = await prefixSchema.findOne({ Guild: interaction.guild.id });
-                if (!data2) return interaction.reply({ content: 'The prefix is already set to the default!', ephemeral: true });
+                if (!data2) return interaction.reply({ content: `The prefix is already set to the **default!** ( \`\`${client.config.prefix}\`\` )`, ephemeral: true });
 
                 await prefixSchema.findOneAndDelete({ Guild: interaction.guild.id });
 
@@ -137,7 +137,7 @@ module.exports = {
                     }).save();
                 } else {
                     if (data.Enabled) {
-                        return await interaction.reply({ content: 'The prefix system is already enabled in this guild.', ephemeral: true });
+                        return await interaction.reply({ content: 'The prefix system is already **enabled** in this guild.', ephemeral: true });
                     }
                     data.Prefix = customPrefix;
                     data.Enabled = enable;
@@ -166,14 +166,14 @@ module.exports = {
             try {
                 const data = await prefixSetupSchema.findOne({ Guild: interaction.guild.id });
                 if (!data || !data.Enabled) {
-                    return await interaction.reply({ content: 'The prefix system is already disabled in this guild', ephemeral: true });
+                    return await interaction.reply({ content: 'The prefix system is already **disabled** in this guild', ephemeral: true });
                 }
                 data.Enabled = false;
                 await data.save();
 
                 await prefixSchema.findOneAndDelete({ Guild: interaction.guild.id });
 
-                await interaction.reply({ content: 'The prefix system has been disabled.', ephemeral: true });
+                await interaction.reply({ content: 'The prefix system has been **disabled**.', ephemeral: true });
             } catch (error) {
                 console.error(error);
                 await interaction.reply({ content: `Whoops, something went wrong! Please try again.`, ephemeral: true });
