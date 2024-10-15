@@ -66,7 +66,7 @@ module.exports = {
 					if (!data) {
 						await new prefixSchema({
 							Guild: interaction.guild.id,
-							Prefix: [interaction.client.config.prefix, prefix]
+							Prefix: [interaction.client.config.prefix]
 						}).save();
 						return interaction.reply({ content: `There is no prefix to delete!`, ephemeral: true });
 					}
