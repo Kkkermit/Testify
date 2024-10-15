@@ -7,8 +7,9 @@ module.exports = {
     .setName('prefix')
     .setDescription('Change the prefix of the bot in your server.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
-    .addSubcommand(command => command.setName('change').setDescription('Change the prefix of the bot in your server.') .addStringOption(option => option.setName('prefix').setDescription('The new prefix you want to set.').setRequired(true)))
     .addSubcommand(command => command.setName('check').setDescription('Check the current prefix of the bot in your server.'))
+    .addSubcommand(command => command.setName('add').setDescription('Add a new prefix of the bot in your server.').addStringOption(option => option.setName('prefix').setDescription('The new prefix you want to add.').setRequired(true)))
+	.addSubcommand(command => command.setName('remove').setDescription('Remove prefix of the bot in your server.').addStringOption(option => option.setName('prefix').setDescription('The prefix you want to remove.').setRequired(true)))
     .addSubcommand(command => command.setName('reset').setDescription('Reset the prefix of the bot in your server back to the default.'))
     .addSubcommand(command => command.setName('enable').setDescription('Enable the prefix system in your server.').addBooleanOption(option => option.setName('enable').setDescription('Enable the prefix system in your server.').setRequired(true)).addStringOption(option => option.setName("prefix").setDescription("The prefix you want to set for the bot in your server. Leave blank to set to default prefix").setRequired(false)))
     .addSubcommand(command => command.setName('disable').setDescription('Disable the prefix system in your server.')),
@@ -24,7 +25,7 @@ module.exports = {
         }
 
         switch(sub) {
-            case 'change':
+            case 'add':
             try {
 
                 const prefix = interaction.options.getString('prefix');
@@ -34,13 +35,12 @@ module.exports = {
                 if (!data) {
                     await new prefixSchema({
                         Guild: interaction.guild.id,
-                        Prefix: prefix
+                        Prefix: [interaction.client.config.prefix, prefix]
                     }).save();
                 } else {
-                    await prefixSchema.findOneAndUpdate({
-                        Guild: interaction.guild.id,
-                        Prefix: prefix
-                    });
+                    const data = await prefixSchema.findOne({ Guild: interaction.guild.id });
+					data.Prefix.push(prefix);
+					await data.save();
                 }
 
                 const embed = new EmbedBuilder()
@@ -57,6 +57,39 @@ module.exports = {
             }
 
             break;
+			case 'remove':
+				try {
+					const prefix = interaction.options.getString('prefix');
+					if (prefix.length > 4) return interaction.reply({ content: 'The prefix **cannot** be longer than 4 characters!', ephemeral: true });
+					
+					const data = await prefixSchema.findOne({ Guild: interaction.guild.id });
+					if (!data) {
+						await new prefixSchema({
+							Guild: interaction.guild.id,
+							Prefix: [interaction.client.config.prefix, prefix]
+						}).save();
+						return interaction.reply({ content: `There is no prefix to delete!`, ephemeral: true });
+					}
+					if (!ArrSearch(data.Prefix, prefix))
+						return interaction.reply({ content: `That prefix was never added, try a diff one.\nThis are all the prefixes: \`${data.Prefix.join(' ')}\``, ephemeral: true });
+					
+					const i = data.Prefix.indexOf(prefix);
+					data.Prefix.splice(i , 1);
+					await data.save();
+	
+					const embed = new EmbedBuilder()
+					.setColor(client.config.embedModHard)
+					.setAuthor({ name: `Prefix update command ${client.config.devBy}`})
+					.setTitle(`${client.user.username} prefix update ${client.config.arrowEmoji}`)
+					.setDescription(`Removed a prefix: **\`${prefix}\`**`)
+					.setTimestamp()
+					.setFooter({ text: `Prefix updated by ${interaction.user.username}`});
+	
+					await interaction.reply({ embeds: [embed], ephemeral: true });
+				} catch (err) {
+					await interaction.reply({ content: `Whoops, something went wrong! Please try again.`, ephemeral: true });
+				}
+			break;
             case 'check':
             try {
 
@@ -67,7 +100,7 @@ module.exports = {
                 .setColor(client.config.embedModHard)
                 .setAuthor({ name: `Prefix check command ${client.config.devBy}`})
                 .setTitle(`${client.user.username} prefix check ${client.config.arrowEmoji}`)
-                .setDescription(`The prefix for this server is **\`${data1.Prefix}\`**`)
+                .setDescription(`The prefixes for this server are: **\`${data1.Prefix.join(' ')}\`**`)
                 .setTimestamp()
                 .setFooter({ text: `Prefix checked by ${interaction.user.username}`});
 
@@ -103,43 +136,38 @@ module.exports = {
                 const enable = interaction.options.getBoolean('enable');
                 let customPrefix = interaction.options.getString('prefix');
 
-                if (!enable) {
+                if (!enable)
                     return await interaction.reply({ content: "The prefix system won't be enabled and data has not been saved. To enable the prefix system, please choose the option **\`True\`** when trying again. If you just wanted to change the prefix, please use the command **\`prefix change <prefix>\`**", ephemeral: true });
-                }
 
-                if (!customPrefix) {
-                    customPrefix = client.config.prefix;
-                }
+                if (!customPrefix) customPrefix = client.config.prefix;
 
-                if (typeof customPrefix === 'string' && customPrefix.length > 4) {
+                if (typeof customPrefix === 'string' && customPrefix.length > 4)
                     return interaction.reply({ content: 'The prefix **cannot** be longer than 4 characters!', ephemeral: true });
-                }
 
                 const customPrefixData = await prefixSchema.findOne({ Guild: interaction.guild.id });
                 if (!customPrefixData) {
                     await new prefixSchema({
                         Guild: interaction.guild.id,
-                        Prefix: customPrefix
+                        Prefix: [interaction.client.config.prefix, customPrefix]
                     }).save();
                 } else {
-                    await prefixSchema.findOneAndUpdate({
-                        Guild: interaction.guild.id,
-                        Prefix: customPrefix
-                    });
+                    const data5 = await prefixSchema.findOne({ Guild: interaction.guild.id });
+					data5.Prefix.push(customPrefix);
+					await data5.save();
                 }
 
                 const data = await prefixSetupSchema.findOne({ Guild: interaction.guild.id });
                 if (!data) {
                     await new prefixSetupSchema({
                         Guild: interaction.guild.id,
-                        Prefix: customPrefix,
+                        Prefix: [interaction.client.config.prefix, customPrefix],
                         Enabled: enable
                     }).save();
                 } else {
                     if (data.Enabled) {
                         return await interaction.reply({ content: 'The prefix system is already **enabled** in this guild.', ephemeral: true });
                     }
-                    data.Prefix = customPrefix;
+                    data.Prefix.push(customPrefix);
                     data.Enabled = enable;
                     await data.save();
                 }
@@ -182,3 +210,9 @@ module.exports = {
         };
     },
 };
+
+function ArrSearch(array, searchString) {
+	const index = array.indexOf(searchString);
+	if (index !== -1) return true;
+	return false;
+}
