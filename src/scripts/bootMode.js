@@ -17,7 +17,7 @@ function loadEnvironment() {
     if (fs.existsSync(envPath)) {
         dotenv.config({ path: envPath });
     } else {
-        console.error(`${color.red}[${getTimestamp()}] [ERROR] Environment file ${envFile} not found`, error);
+        console.error(`${color.red}[${getTimestamp()}] [ERROR] Environment file ${envFile} not found`);
         process.exit(1);
     }
 }
