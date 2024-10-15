@@ -7,11 +7,11 @@ function loadEnvironment() {
     const envFile = process.env.NODE_ENV === 'development' ? '.env.development' : '.env';
     const envPath = path.resolve(process.cwd(), envFile);
 
-    console.log(`${color.green}[${getTimestamp()}]${color.reset} [PROCESS] Loading environment variables from: ${envPath}`);
+    console.log(`${color.green}[${getTimestamp()}]${color.reset} [PROCESS] Loading environment variables from: ${envPath}${color.reset}`);
     if (process.env.NODE_ENV === 'development') { 
-        console.log(`${color.green}[${getTimestamp()}]${color.reset} [PROCESS] ${process.env.NODE_ENV} mode has been loaded!`);
+        console.log(`${color.green}[${getTimestamp()}]${color.reset} [PROCESS] ${process.env.NODE_ENV} mode has been loaded!${color.reset}`);
     } else {
-        console.log(`${color.green}[${getTimestamp()}]${color.reset} [PROCESS] Non-development mode has been loaded!`);
+        console.log(`${color.green}[${getTimestamp()}]${color.reset} [PROCESS] Non-development mode has been loaded!${color.reset}`);
     }
 
     if (fs.existsSync(envPath)) {
