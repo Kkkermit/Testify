@@ -25,8 +25,9 @@ function warn(message) {
     return write(message, `${color.orange}[${getTimestamp()}]${color.reset} `);
 }
 
+// idk if this will cause any orther problems but i just didnt liked the ending terminal to always stay red <3
 function error(message) {
-    return write(message, `${color.red}[${getTimestamp()}] `, false);
+	return console.log(`${color.red}[${getTimestamp()}] ${message}${color.reset}`);
 }
 
 function success(message) {
