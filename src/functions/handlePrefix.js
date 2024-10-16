@@ -32,7 +32,7 @@ module.exports = (client) => {
 
         client.logs.info(`[PREFIX_COMMANDS] Started refreshing prefix (?) commands.`);
 
-        console.log(`${color.orange}${table.toString()} \n[${getTimestamp()}] ${color.reset}[PREFIX_COMMANDS] Loaded ${client.pcommands.size} PrefixCommands.`);
+        console.log(`${color.orange}${table.toString()} \n[${getTimestamp()}] ${color.reset}[PREFIX_COMMANDS] Found ${client.pcommands.size} PrefixCommands.`);
 
         (async () => {
             try {

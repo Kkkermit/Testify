@@ -11,18 +11,26 @@ module.exports = {
 
         client.logs.info(`[SCHEMAS] Started loading schemas...`);
 
-        if (!mongodbURL) return;
+        if (!mongodbURL) {
+            client.logs.error('[DATABASE] No MongoDB URL has been provided. Double check your .env file and make sure it is correct.');
+            return;
+        }
 
-        mongoose.set("strictQuery", false);
-        await mongoose.connect(mongodbURL || ``, {
-            keepAlive: true,
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-            serverSelectionTimeoutMS: 10000,
-        });
+        try {
+            mongoose.set("strictQuery", false);
+            await mongoose.connect(mongodbURL || ``, {
+                keepAlive: true,
+                useNewUrlParser: true,
+                useUnifiedTopology: true,
+                serverSelectionTimeoutMS: 10000,
+            });
+        } catch (err) {
+            client.logs.error(`[DATABASE] Error connecting to the database: ${err}`);
+            return;
+        }
 
         folderLoader(client);
         asciiText(client)
-        require('events').EventEmitter.defaultMaxListeners = config.eventListeners;
+        require('events').EventEmitter.setMaxListeners  = config.eventListeners;
     },
 };
