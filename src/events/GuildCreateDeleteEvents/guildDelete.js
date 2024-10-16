@@ -6,7 +6,15 @@ module.exports = {
     async execute (guild, client) {
     const logchannelid = client.config.botLeaveChannel;
 
+    if (!logchannelid) {
+        client.logs.error(`[GUILD_DELETE] No log channel ID provided. Please provide a valid channel ID in the config.js file.`);
+        return;
+    }
+
     let theowner = process.env.devid;
+    if (!theowner) {
+        client.logs.warn(`[GUILD_CREATE] No owner ID provided. Please provide a valid owner ID in the .env file.`);
+    }
 
     await guild.fetchOwner().then(({ user }) => { theowner = user; }).catch(() => {});
 

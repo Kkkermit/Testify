@@ -4,7 +4,7 @@ module.exports = {
     name: Events.ClientReady,
     async execute(client) {
         
-        client.logs.success(`[STATUS] Bot status loaded as ${client.config.status}.`);
+        client.logs.success(`[STATUS] ${client.user.username}'s status loaded as ${client.config.status}.`);
         client.user.setStatus(client.config.status);
     }
 }

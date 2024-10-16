@@ -13,6 +13,10 @@ module.exports = {
 		const vidId = options.getString("video-id");
 
 		const apiKey = process.env.rapidapikey;
+		if (!apiKey) { 
+			client.logs.error("[COMMAND_ERROR] No API key has been provided for Rapid API! Double check your .env file and make sure it is correct. If your unsure where to get this, please refer to the post installation guide by running 'npm run postinstall'."); 
+			return
+		}
 
 		const input = {
 			method: "GET",

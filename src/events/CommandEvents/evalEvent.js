@@ -52,7 +52,13 @@ module.exports = {
                         evaled = 'undefined';
                     }
 
-                    const channel = await client.channels.cache.get(client.config.evalLogsChannel);
+                    const channelID = client.config.evalLogsChannel;
+                    if (!channelID) {
+                        console.logs.error(`No eval logs channel ID provided. Please provide a valid channel ID in the config.js file.`);
+                        return;
+                    }
+
+                    const channel = await client.channels.cache.get(channelID);
 
                     const originalSend = channel.send;
 

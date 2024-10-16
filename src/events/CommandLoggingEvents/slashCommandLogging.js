@@ -9,6 +9,11 @@ module.exports = {
         else {
 
             const webhookURL = process.env.webhookSlashLogging;
+            if (!webhookURL) {
+                client.logs.error('[COMMAND_SLASH_LOGGING_WEBHOOK] No webhook URL provided. Please provide a valid webhook URL in the .env file.');
+                return;
+            };
+
             const server = interaction.guild.name;
             const user = interaction.user.username;
             const userID = interaction.user.id;

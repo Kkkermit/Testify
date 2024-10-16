@@ -9,8 +9,12 @@ module.exports = {
     async execute(interaction, client) {
 
         const apiKey = process.env.movietrackerapi
+        if (!apiKey) {
+            client.logs.error("[COMMAND_ERROR] No API key has been provided for the movie tracker API! Double check your .env file and make sure it is correct. If your unsure where to get this, please refer to the post installation guide by running 'npm run postinstall'.");
+            return
+        }
 
-        const { options, member, guild } = interaction;
+        const { options } = interaction;
         
         const name = options.getString("name")
         const apiUrl = `https://api.themoviedb.org/3/search/movie?api_key=${apiKey}&query=${encodeURIComponent(name)}`

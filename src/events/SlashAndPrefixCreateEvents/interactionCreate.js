@@ -40,6 +40,11 @@ module.exports = {
             console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [INTERACTION_CREATE] Please check you are using the correct execute method: "async execute(interaction, client)": \n${color.red}[${getTimestamp()}] [INTERACTION_CREATE]`, error);
 
             const channelID = `${client.config.commandErrorChannel}`;
+            if (!channelID) {
+                console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] No command error channel ID provided. Please provide a valid channel ID in the config.js file.`);
+                return;
+            }
+
             const channel = client.channels.cache.get(channelID);   
 
             const embed = new EmbedBuilder()

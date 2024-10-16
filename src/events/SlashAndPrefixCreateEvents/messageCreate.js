@@ -89,6 +89,11 @@ module.exports = {
             console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Please check you are using the correct execute method: "async execute(message, client, args)": \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] `, error);
 
             const channelID = `${client.config.commandErrorChannel}`;
+            if (!channelID) {
+                console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] No command error channel ID provided. Please provide a valid channel ID in the config.js file.`);
+                return;
+            }
+
             const channel = client.channels.cache.get(channelID);
 
             const embed = new EmbedBuilder()

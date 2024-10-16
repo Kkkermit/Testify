@@ -6,7 +6,16 @@ module.exports = {
     async execute (guild, client) {
     const logchannelid = client.config.botJoinChannel;
 
+    if (!logchannelid) {
+        client.logs.error(`[GUILD_CREATE] No log channel ID provided. Please provide a valid channel ID in the config.js file.`);
+        return;
+    }
+
     let theowner = process.env.devid; 
+    if (!theowner) {
+        client.logs.warn(`[GUILD_CREATE] No owner ID provided. Please provide a valid owner ID in the .env file.`);
+    }
+
     let invite;
     let invalidInv = 'Failed to create an invite for this server!'
     try {

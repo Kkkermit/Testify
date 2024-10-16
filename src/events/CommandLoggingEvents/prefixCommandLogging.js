@@ -8,6 +8,11 @@ module.exports = {
         if (!message.author.bot && message.content.startsWith(guildPrefix)) {
 
             const webhookURL = process.env.webhookPrefixLogging;
+            if (!webhookURL) {
+                client.logs.error('[COMMAND_PREFIX_LOGGING_WEBHOOK] No webhook URL provided. Please provide a valid webhook URL in the .env file.');
+                return;
+            };
+
             const server = message.guild.name;
             const user = message.author.username;
             const userID = message.author.id;

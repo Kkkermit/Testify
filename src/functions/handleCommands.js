@@ -7,6 +7,10 @@ const { color, getTimestamp } = require('../utils/loggingEffects.js');
 const table = new ascii().setHeading("File Name", "Status");
 
 const clientId = process.env.clientid; 
+if (!clientId) {
+    console.error(`${color.red}[${getTimestamp()}] [SLASH_COMMANDS] No client ID provided. Please provide a valid client ID in the .env file.`);
+    return;
+}
 const guildId = process.env.guildid; 
 
 module.exports = (client) => {

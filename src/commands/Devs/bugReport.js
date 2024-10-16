@@ -57,6 +57,10 @@ module.exports = {
 
             try {
                 const webhookURL = process.env.webhookBugLogging;
+                if (!webhookURL) {
+                    client.logs.error('[COMMAND_BUG_REPORT_LOGGING_WEBHOOK] No webhook URL provided. Please provide a valid webhook URL in the .env file.');
+                    return;
+                };
 
                 const webhookClient = new WebhookClient({ url: webhookURL });
 

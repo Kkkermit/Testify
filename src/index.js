@@ -93,6 +93,12 @@ const eventFiles = fs.readdirSync("./src/events")
 const pcommandFolders = fs.readdirSync('./src/prefix');
 const commandFolders = fs.readdirSync("./src/commands");
 
+const token = process.env.token;
+if (!token) {
+    console.log(`${color.red}[${getTimestamp()}]${color.reset} [TOKEN] No token provided. Please provide a valid token in the .env file. ${config.botName} cannot launch without a token.`);
+    return;
+}
+
 (async () => {
     for (file of functions) {
         require(`./functions/${file}`)(client);
@@ -101,7 +107,7 @@ const commandFolders = fs.readdirSync("./src/commands");
     client.handleTriggers(triggerFiles, "./src/triggers")
     client.handleCommands(commandFolders, "./src/commands");
     client.prefixCommands(pcommandFolders, './src/prefix');
-    client.login(process.env.token).then(() => {
+    client.login(token).then(() => {
         handleLogs(client)
         checkVersion(currentVersion);
     }).catch((error) => {
