@@ -1,10 +1,18 @@
-const { Events, EmbedBuilder, WebhookClient } = require('discord.js');  
+const { Events, EmbedBuilder, WebhookClient } = require('discord.js');
+const esysSchema = require('../../schemas/prefixEnableSystem.js');
 
 module.exports = {
     name: Events.MessageCreate,
     async execute (message, client) {
 
-        const guildPrefix = client.config.prefix;
+		const esys = await esysSchema.findOne({ Guild: message.guild.id });
+		if (!esys)
+			return message.reply({ content: `The prefix System is not **ENABLED** pls run \`\/prefix enable\` to turn enable it.`}).then((msg) => { setTimeout(() => { msg.delete(); }, 5 * 1000); }); // delete msg after 5 sec
+
+		const PREFIXES = esys.Prefix; // this never fails cuz there is always default prefix
+		const prefix = PREFIXES.find(ele => ele == message.content.startsWith(ele));
+
+        const guildPrefix = prefix;
         if (!message.author.bot && message.content.startsWith(guildPrefix)) {
 
             const webhookURL = process.env.webhookPrefixLogging;

@@ -1,8 +1,15 @@
 const mongoose = require('mongoose');
 
 const prefixSetupSchema = new mongoose.Schema({
-    Guild: String,
-    Prefix: String,
+	Guild: {
+		type: String,
+		required: true,
+		index: true // this is just to speed up querying by the Guild
+	},
+    Prefix: {
+        type: [String],
+        default: [`${config.prefix[0]}`],
+    },
     Enabled: { type: Boolean, default: true }
 });
 

@@ -24,41 +24,31 @@ module.exports = {
             .setFooter({ text: `You are blacklisted from using this bot` })
             .setTimestamp();
 
-            const reply = await message.reply({ embeds: [embed], fetchReply: true });
-            setTimeout(async () => {
-                await reply.delete();
-            }, 2500);
-            return;
+            return await message.reply({ embeds: [embed], fetchReply: true }).then((msg) => { setTimeout(() => { msg.delete(); }, 5 * 1000); }); // delete msg after 5 sec
         }
 
         const guildSettings = await GuildSettings.findOneAndUpdate(
             { Guild: message.guild.id }, 
-            { $setOnInsert: { Prefix: client.config.prefix } }, 
+            { $setOnInsert: { Prefix: [client.config.prefix] } },
             { upsert: true, new: true, setDefaultsOnInsert: true }
         );
 
-        const prefix = guildSettings.Prefix || client.config.prefix;
+		const PREFIXES = guildSettings.Prefix; // this never fails cuz there is always default prefix
+		const prefix = PREFIXES.find(ele => ele == message.content.startsWith(ele));
 
         const guildPrefixSettings = await GuildPrefixSettings.findOne({ Guild: message.guild.id });
         if (!guildPrefixSettings || !guildPrefixSettings.Enabled) {
             if (message.content.startsWith(prefix)) {
-                const reply = await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', ephemeral: true });
-                setTimeout(async () => {
-                    await reply.delete();
-                }, 2500);
+                await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', ephemeral: true }).then((msg) => { setTimeout(() => { msg.delete(); }, 5 * 1000); }); // delete msg after 5 sec
             }
             return;
         }
 
-        if (!message.content.startsWith(prefix)) {
-            return;
-        }
-
-        if (!message.content.startsWith(prefix)) return;
+        if (!message.content.toLowerCase().startsWith(prefix)) return;
         const args = message.content.slice(prefix.length).trim().split(/ +/);
 
         let cmd = args.shift().toLowerCase();
-            if (cmd.length === 0) return;
+        if (cmd.length === 0) return;
 
         let command = client.pcommands.get(cmd);
         if (!command) command = client.pcommands.get(client.aliases.get(cmd));
