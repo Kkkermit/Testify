@@ -3,7 +3,6 @@ const { Events, EmbedBuilder } = require("discord.js");
 module.exports = {
     name: Events.InteractionCreate,
     async execute(interaction, client) {
-        try {
             if (!interaction.isButton()) return;
             
             const message = interaction.message;
@@ -34,8 +33,5 @@ module.exports = {
 
             await message.edit({ embeds: [embed], components: [row] });
             await interaction.deferUpdate();
-        } catch (error) {
-            client.logs.error('[ERROR_LOGGING] Error in button interaction:', error);
-        }
     }
 };
