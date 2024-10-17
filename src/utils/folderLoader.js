@@ -36,9 +36,19 @@ function folderLoader(client) {
         if(err) {
             client.logs.error('[ERROR] Error reading scripts folder:', err);
             return;
-        }
+        };
         client.logs.success(`[SCRIPTS] Loaded ${files.length} script files.`);
-    })
-}
+    });
+
+    const clientFolder = path.join(__dirname, '../client');
+    client.logs.info(`[CLIENT] Started loading client files...`);
+    fs.readdir(clientFolder, (err, files) => {
+        if(err) {
+            client.logs.error('[ERROR] Error reading client folder:', err);
+            return;
+        };
+        client.logs.success(`[CLIENT] Loaded ${files.length} client files.`);
+    });
+};
 
 module.exports = folderLoader;
