@@ -5,15 +5,16 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
-    "prod": "node src/index.js",
-    "dev": "cross-env NODE_ENV=development node src/index.js",
-    "prod:nodemon": "nodemon src/index.js",
-    "dev:nodemon": "cross-env NODE_ENV=development nodemon src/index.js",
+    "prod": "npm run update-ytdl-core && node src/index.js",
+    "dev": "npm run update-ytdl-core && cross-env NODE_ENV=development node src/index.js",
+    "prod:nodemon": "npm run update-ytdl-core && nodemon src/index.js",
+    "dev:nodemon": "npm run update-ytdl-core && cross-env NODE_ENV=development nodemon src/index.js",
     "wipe-data:dev": "cross-env NODE_ENV=development node src/scripts/wipeDatabase.js",
     "wipe-data:prod": "node src/scripts/wipeDatabase.js",
     "setup": "npm i && npm run postinstall",
     "postinstall": "node src/scripts/postInstallation.js",
-    "update-packages": "node src/scripts/updatePackages.js"
+    "update-packages": "node src/scripts/updatePackages.js",
+    "update-ytdl-core": "node src/scripts/ytdlUpdater.js"
   },
   "keywords": [],
   "author": "",
