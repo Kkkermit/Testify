@@ -39,7 +39,7 @@ function handleLogs(client) {
 
             return send_log(message.guild.id, embed);
         } catch (err) {
-            client.logs.error(`[AUDIT_LOGGING] Couldn't log deleted message. Message content: ${message.content ? message.content : 'cannot log embeds'}`);
+            client.logs.error(`[AUDIT_LOGGING] Couldn't log deleted message. Message content: ${message.content ? message.content : 'message was an embed or attachment.'}`);
         }
     });
 
