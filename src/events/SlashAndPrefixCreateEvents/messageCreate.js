@@ -50,11 +50,10 @@ module.exports = {
             return;
         }
 
-        if (!message.content.startsWith(prefix)) {
+        if (!message.content.toLowerCase().startsWith(prefix)) {
             return;
         }
 
-        if (!message.content.startsWith(prefix)) return;
         const args = message.content.slice(prefix.length).trim().split(/ +/);
 
         let cmd = args.shift().toLowerCase();
