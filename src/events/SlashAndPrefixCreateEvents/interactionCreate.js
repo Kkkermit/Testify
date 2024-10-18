@@ -61,17 +61,17 @@ module.exports = {
             { name: '> Error', value: `\`\`\`${error}\`\`\`` })
             
             const yellowButton = new ButtonBuilder()
-                .setCustomId('change_color_yellow')
+                .setCustomId('change_color_yellow_slash')
                 .setLabel('Mark As Pending')
                 .setStyle('1');
             
             const greenButton = new ButtonBuilder()
-                .setCustomId('change_color_green')
+                .setCustomId('change_color_green_slash')
                 .setLabel('Mark As Solved')
                 .setStyle('3');
             
             const redButton = new ButtonBuilder()
-                .setCustomId('change_color_red')
+                .setCustomId('change_color_red_slash')
                 .setLabel('Mark As Unsolved')
                 .setStyle('4');
             

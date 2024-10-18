@@ -451,24 +451,30 @@ module.exports = {
             
             )
 
-            const message = await interaction.reply({embeds: [embed1], components: [button1]})
-            const collector1 = await message.createMessageComponentCollector();
-            const menu = 'You **cannot** use this menu.';
-            collector1.on('collect', async i => {
-                if (i.customId === 'option1') {
-                    if (i.user.id !== interaction.user.id) {
-                        return await i.reply({ content: `${menu}`, ephemeral: true})
-                    }
-                    await i.update({embeds: [embed2], components: []})
-                }
+            const message = await interaction.reply({ embeds: [embed1], components: [button1] });
+            const collector1 = message.createMessageComponentCollector();
 
-                if (i.customId === 'option2') {
-                    if (i.user.id !== interaction.user.id) {
-                        return await i.reply({ content: `${menu}`, ephemeral: true})
+            const menu = 'You **cannot** use this menu.';
+
+            collector1.on('collect', async i => {
+                try {
+                    if (i.customId === 'option1' || i.customId === 'option2') {
+                        if (i.user.id !== interaction.user.id) {
+                            return await i.reply({ content: `${menu}`, ephemeral: true });
+                        }
+
+                        await i.deferUpdate(); // Acknowledge the interaction
+
+                        if (i.customId === 'option1') {
+                            await i.editReply({ embeds: [embed2], components: [] });
+                        } else if (i.customId === 'option2') {
+                            await i.editReply({ embeds: [embed3], components: [] });
+                        }
                     }
-                    await i.update({embeds: [embed3], components: []})
+                } catch (error) {
+                    console.error('Error handling button interaction:', error);
                 }
-            })
+            });
 
             break;
             case "trivia":

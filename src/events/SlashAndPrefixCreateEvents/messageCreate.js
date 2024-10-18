@@ -1,4 +1,4 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const GuildSettings = require('../../schemas/prefixSystem');
 const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js')
 const blacklistSchema = require('../../schemas/blacklistSystem');
@@ -86,52 +86,6 @@ module.exports = {
             command.execute(message, client, args);
         } catch (error) {
             console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] Please check you are using the correct execute method: "async execute(message, client, args)": \n${color.red}[${getTimestamp()}] [MESSAGE_CREATE] `, error);
-
-            const channelID = `${client.config.commandErrorChannel}`;
-            if (!channelID) {
-                console.error(`${color.red}[${getTimestamp()}] [MESSAGE_CREATE] No command error channel ID provided. Please provide a valid channel ID in the config.js file.`);
-                return;
-            }
-
-            const channel = client.channels.cache.get(channelID);
-
-            const embed = new EmbedBuilder()
-                .setColor("Blue")
-                .setTimestamp()
-                .setAuthor({ name: `${client.user.username} Command Error ${client.config.devBy}`, iconURL: client.user.avatarURL() })
-                .setFooter({ text: 'Error reported at' })
-                .setTitle(`__Prefix Command Execution Error__ ${client.config.arrowEmoji}`)
-                .setDescription('An error occurred while executing the prefix command.')
-                .addFields(
-                    { name: '> Command', value: `\`\`\`${message.content}\`\`\`` },
-                    { name: '> Triggered By', value: `\`\`\`${message.author.username}#${message.author.discriminator}\`\`\`` },
-                    { name: '> Guild', value: `\`\`\`${message.guild.name}\`\`\`` },
-                    { name: '> Error', value: `\`\`\`${error.message}\`\`\`` }
-                );
-
-            const yellowButton = new ButtonBuilder()
-                .setCustomId('change_color_yellow')
-                .setLabel('Mark As Pending')
-                .setStyle('Primary');
-
-            const greenButton = new ButtonBuilder()
-                .setCustomId('change_color_green')
-                .setLabel('Mark As Solved')
-                .setStyle('Success');
-
-            const redButton = new ButtonBuilder()
-                .setCustomId('change_color_red')
-                .setLabel('Mark As Unsolved')
-                .setStyle('Danger');
-
-            const row = new ActionRowBuilder()
-                .addComponents(yellowButton, greenButton, redButton);
-
-            const message = await channel.send({ embeds: [embed], components: [row] });  
-
-            client.errorMessageMessage = message;
-            client.errorEmbedMessage = embed;
-            client.errorRowMessage = row;
 
             const errorEmbed = new EmbedBuilder()
             .setColor("Red")
