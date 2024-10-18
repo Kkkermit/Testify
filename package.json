@@ -14,7 +14,9 @@
     "setup": "npm i && npm run postinstall",
     "postinstall": "node src/scripts/postInstallation.js",
     "update-packages": "node src/scripts/updatePackages.js",
-    "update-ytdl-core": "node src/scripts/ytdlUpdater.js"
+    "update-ytdl-core": "node src/scripts/ytdlUpdater.js",
+    "setup-env:prod": "&& node src/scripts/setupEnvFile.js",
+    "setup-env:dev": "node src/scripts/setupEnvFile.js setup-env:dev"
   },
   "keywords": [],
   "author": "",

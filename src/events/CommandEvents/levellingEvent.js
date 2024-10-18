@@ -50,6 +50,7 @@ module.exports = {
 				`Well done <@${author.id}>! You have leveled up to level **${data.Level}**! ${client.config.confettiEmoji}`,
 				`Woohoo! <@${author.id}> has leveled up to level **${data.Level}**! ${client.config.confettiEmoji}`,
 				`Hey! <@${author.id}> has leveled up to level **${data.Level}**! ${client.config.confettiEmoji}`,
+				`Wow! <@${author.id}> has leveled up to level **${data.Level}**! ${client.config.confettiEmoji}`,
 			];
 
 			const randomLevelMessage = messages[Math.floor(Math.random() * messages.length)];

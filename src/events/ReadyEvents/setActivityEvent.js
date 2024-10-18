@@ -3,6 +3,8 @@ const { Events, ActivityType } = require('discord.js');
 module.exports = {
     name: Events.ClientReady,
     async execute(client) {
+        
+        client.logs.info(`[ROTATING_STATUS] Setting rotating status...`);
 
         setInterval(() => {
 
@@ -22,6 +24,6 @@ module.exports = {
                 client.user.setPresence({ activities: [{ name: `${status.name}`, type: ActivityType.Playing }]});
             } 
         }, 7500);
-        client.logs.success(`[STATUS] Rotating status loaded successfully.`);
+        client.logs.success(`[ROTATING_STATUS] Rotating status loaded successfully.`);
     }
 }
