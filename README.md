@@ -84,6 +84,18 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
     7. Copy your connection string and replace `<password>` with the password for the database user that you created earlier.
 
 
+- **Setting up the env file**
+
+    *If you go along with this, you can ignore the parts in the `Project Execution` that explain how to generate and fill in the `.env`*
+
+    1. For easy setup of the env files, ( `.env` & `.development.env` ) you can run the command `npm run setup-env:prod`
+    2. Once you've ran the command, it generates a script in the console
+    3. You need to then fill out the fields in the console. Fields marked with the text **"Required"** are you required fields and you need to fill those ones in. The script will not continue if you ignore to fill in those fields. 
+    4. Once you've filled in the field, it will write those fields into and generate the `.env`.
+    5. Alternatively, you can ignore this and fill in the fields yourself by viewing the `.example.env` file.
+    6. If you then want to setup the `.env.development` file, you can run the command `npm run setup-env:dev` and follow the steps above again.
+
+
 - **Project Execution**
 
     1. Rename the filed named `example.env` to `.env`
@@ -106,6 +118,15 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 
    **Update Packages** - <br>
    To update all your dependencies, you can run the command `npm run update-packages`, this cycles through the dependencies and updates one's which are out of date.
+
+   **update-ytdl-core** - <br>
+   To update the version of the `ytdl-core` package, you can run the command `npm run update-ytdl-core`, this updates the package to the most recent version to ensure the music system works.
+
+   **setup-env:prod** - <br>
+   To run the setup of the `.env` file you can run the command `npm run setup-env:prod`, this generates a script in the console that generates a `.env` file and where you fill out the fields with whats required for the `.env` file and it writes it in the file.
+
+   **setup-env:dev** - <br>
+   To run the setup of the `.env.development` file you can run the command `npm run setup-env:dev`, this generates a script in the console that generates a `.env.development` file and where you fill out the fields with whats required for the `.env.development` file and it writes it in the file.
 
 ## Setting-up-audit-logs
 
