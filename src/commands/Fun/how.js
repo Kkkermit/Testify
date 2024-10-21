@@ -121,7 +121,6 @@ module.exports = {
             .setAuthor({ name: `🧠 How Smart Tool`})
             .setFooter({ text: `🧠 Smart Percentage`})
             .setColor(client.config.embedCommunity)
-            .setDescription(`Checking IQ for ${user}`)
             .addFields({name: '• IQ level', value: (message)})
             .setTimestamp()
 
