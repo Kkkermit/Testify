@@ -23,7 +23,7 @@ module.exports = {
             .setThumbnail(client.user.avatarURL())
             .setFooter({ text: `Kicked - ${message.channel.guild} ${client.config.devBy}` });
     
-            user.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error('[KICK] Failed to DM user.') });
+            user.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[KICK] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
             user.kick({ reason: reason })
 
             const kickEmbed = new EmbedBuilder()
