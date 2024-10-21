@@ -44,7 +44,7 @@ module.exports = {
             .setTimestamp()
             .setThumbnail(client.user.avatarURL())
 
-            await timeMember.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error('[UNMUTE] Failed to DM user.') });
+            await timeMember.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[UNMUTE] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
             await interaction.reply({ embeds: [minEmbed] })
     },
 }

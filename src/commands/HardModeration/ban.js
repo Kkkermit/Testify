@@ -40,9 +40,9 @@ module.exports = {
             return await interaction.channel.sendTyping(),
             interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
 
-        await userID.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error('[BAN] Failed to DM user.') });
+        await userID.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[BAN] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
 
-        let ban = await guild.members.ban(userID, { reason: `${interaction.user.tag} - ${reason}` }).catch((err) => { client.logs.error("Error with Ban command: " + err) })
+        let ban = await guild.members.ban(userID, { reason: `${interaction.user.tag} - ${reason}` }).catch((err) => { client.logs.error("[BAN_ERROR] Error with Ban command: " + err) })
         if (ban) {
             await interaction.channel.sendTyping(),
             await interaction.reply({ embeds: [banEmbed] })

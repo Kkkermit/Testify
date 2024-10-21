@@ -48,7 +48,7 @@ module.exports = {
             }
         } catch (error) {
             client.logs.error("[SCHEMAS_WIPE] Error wiping user data:", error);
-            interaction.reply({ content: "An error occurred while wiping user data.", ephemeral: true });
+            interaction.reply({ content: "An error occurred while wiping user data. Please try again. If the error persists please submit a bug report by using the command \`\`/bug-report\`\`", ephemeral: true });
         }
     },
 };

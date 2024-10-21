@@ -41,7 +41,7 @@ module.exports = {
         .setFooter({ text: `Someone got kicked hard`})
         .setTimestamp()
 
-        await kickedmember.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error('[KICK] Failed to DM user.') });
+        await kickedmember.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[KICK] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
 
         await kickedmember.kick().catch(err => {
             return interaction.reply({ content: `**Couldn't** kick this member! Check my **role position** and try again.`, ephemeral: true});
