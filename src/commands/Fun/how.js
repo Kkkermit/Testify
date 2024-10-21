@@ -9,7 +9,8 @@ module.exports = {
     .addSubcommand(command => command.setName('stupid').setDescription('Shows how stupid you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's stupidity percentage will be displayed.`)))
     .addSubcommand(command => command.setName('simp').setDescription('Shows how much of a simp you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's simp percentage will be displayed.`)))
     .addSubcommand(command => command.setName('drunk').setDescription('Shows how drunk you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's drunk percentage will be displayed.`)))
-    .addSubcommand(command => command.setName('high').setDescription('Shows how high you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's high percentage will be displayed.`))),
+    .addSubcommand(command => command.setName('high').setDescription('Shows how high you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's high percentage will be displayed.`)))
+    .addSubcommand(command => command.setName('smart').setDescription('Shows how smart you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's smart percentage will be displayed.`))),
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
@@ -99,6 +100,32 @@ module.exports = {
             .setTimestamp()
 
             await interaction.reply({embeds: [embed5] });
+
+            break;
+            case 'smart':
+
+            const minIQ = 2;
+            const maxIQ = 200;
+            const randomIQ = Math.floor(Math.random() * (maxIQ - minIQ + 1)) + minIQ;
+            let message = `${target}'s IQ is ${randomIQ}.`;
+
+            if (randomIQ >= 80) {
+                message = `> ${target}'s IQ is high **${randomIQ}** You're a genius! 🧠`;
+            } else if (randomIQ <= 50) {
+                message = `> ${target}'s IQ is low **${randomIQ}** Keep learning and growing! 📚`;
+            }
+
+            const embed6 = new EmbedBuilder()
+            .setTitle(`> How smart is ${target.username}?`)
+            .setThumbnail(client.user.avatarURL())
+            .setAuthor({ name: `🧠 How Smart Tool`})
+            .setFooter({ text: `🧠 Smart Percentage`})
+            .setColor(client.config.embedCommunity)
+            .setDescription(`Checking IQ for ${user}`)
+            .addFields({name: '• IQ level', value: (message)})
+            .setTimestamp()
+
+            await interaction.reply({ embeds: [embed6] });
         } 
     }
 }
