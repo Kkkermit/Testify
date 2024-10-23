@@ -8,7 +8,8 @@ module.exports = {
         const user = message.mentions.users.first()
         const member = message.mentions.users.last() 
 
-        if (!user || !member) return message.channels.send("Please mention two users to ship!")
+        if (!args[0]) return message.channel.send("Please mention **two** users to ship!")
+        if (!user || !member) return message.channels.send("Please mention **two** users to ship!")
 
         const userAvatar = user.displayAvatarURL({
             forceStatic: true,

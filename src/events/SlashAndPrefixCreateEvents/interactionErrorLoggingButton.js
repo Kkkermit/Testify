@@ -16,19 +16,19 @@ module.exports = {
             return;
         }
 
-        if (customId === 'change_color_yellow') {
+        if (customId === 'change_color_yellow_slash') {
             embed.setColor('#FFFF00');
             await interaction.reply({
                 content: 'This error has been marked as pending.',
                 ephemeral: true,
             });
-        } else if (customId === 'change_color_green') {
+        } else if (customId === 'change_color_green_slash') {
             embed.setColor('#00FF00');
             await interaction.reply({
                 content: 'This error has been marked as solved.',
                 ephemeral: true,
             });
-        } else if (customId === 'change_color_red') {
+        } else if (customId === 'change_color_red_slash') {
             embed.setColor('#FF0000');
             await interaction.reply({
                 content: 'This error has been marked as unsolved.',
