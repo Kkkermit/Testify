@@ -1,5 +1,4 @@
-const { REST } = require("@discordjs/rest");
-const { Routes } = require('discord-api-types/v9');
+const { REST, Routes } = require('discord.js');
 const fs = require('fs');
 const ascii = require("ascii-table");
 const { color, getTimestamp } = require('../utils/loggingEffects.js');
@@ -11,7 +10,7 @@ if (!clientId) {
     console.error(`${color.red}[${getTimestamp()}] [SLASH_COMMANDS] No client ID provided. Please provide a valid client ID in the .env file.`);
     return;
 }
-const guildId = process.env.guildid; 
+const guildId = process.env.guildid;
 
 module.exports = (client) => {
     client.handleCommands = async (commandFolders, path) => {
