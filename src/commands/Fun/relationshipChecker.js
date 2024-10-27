@@ -38,7 +38,7 @@ module.exports = {
 
             await interaction.editReply({ content: `Probability of **${user.username}** & **${member.username}** being lovers!`, files: [{ attachment: ship, name: `ship.png` }] });
         } catch (error) {
-            console.error(`${color.red}[${getTimestamp()}] [ERROR] ${error.message}`);
+            console.error(`${color.red}[${getTimestamp()}] [ERROR] ${error.message}${color.reset}`);
             if (interaction.replied || interaction.deferred) {
                 await interaction.followUp({ content: '*Whoops*, looks like there was an error there. Try the command again, if it doesn\'t work, please submit a **bug report** using \`\`/bug-report\`\`', ephemeral: true });
             } else {

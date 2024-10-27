@@ -41,7 +41,7 @@ module.exports = {
 
             const channelID = `${client.config.commandErrorChannel}`;
             if (!channelID) {
-                console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] No command error channel ID provided. Please provide a valid channel ID in the config.js file.`);
+                console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] No command error channel ID provided. Please provide a valid channel ID in the config.js file.${color.reset}`);
                 return;
             }
 

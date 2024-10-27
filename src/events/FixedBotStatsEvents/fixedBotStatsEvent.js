@@ -7,7 +7,7 @@ module.exports = {
     name: Events.ClientReady,
     async execute(interaction, client) {
         if (!client || !client.guilds) {
-            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Client or client.guilds is not defined`);
+            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Client or client.guilds is not defined${color.reset}`);
             return;
         }
 
@@ -20,17 +20,17 @@ module.exports = {
                 try {
                     const guild = client.guilds.cache.get(data.Guild);
                         if (!guild) {
-                            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Guild not found: ${data.Guild}`);
+                            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Guild not found: ${data.Guild}${color.reset}`);
                             return;
                         }
                         const channel = guild.channels.cache.get(data.Channel);
                         if (!channel) {
-                            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Channel not found: ${data.Channel}`);
+                            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Channel not found: ${data.Channel}${color.reset}`);
                             return;
                         }
                         const message = await channel.messages.fetch(data.MessageId);
                         if (!message) {
-                            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Message not found: ${data.MessageId}`);
+                            console.error(`${color.red}[${getTimestamp()}] [BOT_STATS] Message not found: ${data.MessageId}${color.reset}`);
                             return;
                         }
 

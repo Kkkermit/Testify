@@ -5,11 +5,11 @@ console.log(`${color.torquise}[${getTimestamp()}]${color.reset} [UPDATING_PACKAG
 
 exec('npm update @distube/ytdl-core', (error, stderr) => {
     if (error) {
-        console.error(`${color.red}[${getTimestamp()}] [UPDATING_PACKAGE] Error updating @distube/ytdl-core: ${error.message}`);
+        console.error(`${color.red}[${getTimestamp()}] [UPDATING_PACKAGE] Error updating @distube/ytdl-core: ${error.message}${color.reset}`);
         return;
     }
     if (stderr) {
-        console.error(`${color.orange}[${getTimestamp()}]${color.reset} [UPDATING_PACKAGE] Package is already up to date.`);
+        console.error(`${color.orange}[${getTimestamp()}]${color.reset} [UPDATING_PACKAGE] Package is already up to date.${color.reset}`);
         return;
     }
     console.log(`${color.torquise}[${getTimestamp()}]${color.reset} [UPDATING_PACKAGE] @distube/ytdl-core package updated successfully.`);

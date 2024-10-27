@@ -12,7 +12,7 @@ mongoose.set('strictQuery', true);
 const mongodbURL = process.env.mongodb;
 
 if (!mongodbURL) {
-    console.error(`${color.red}[${getTimestamp()}]${color.reset} MongoDB URL is not set. Please set the mongodb environment variable.`);
+    console.error(`${color.red}[${getTimestamp()}]${color.reset} MongoDB URL is not set. Please set the mongodb environment variable.${color.reset}`);
     process.exit(1);
 }
 
