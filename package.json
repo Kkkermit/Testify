@@ -42,7 +42,7 @@
     "discord-giveaways": "^6.0.1",
     "discord-html-transcripts": "3.2.0",
     "discord-logs": "^2.2.1",
-    "discord.js": "^14.14.1",
+    "discord.js": "14.16.3",
     "distube": "^4.1.1",
     "dotenv": "^16.4.5",
     "figlet": "^1.7.0",
