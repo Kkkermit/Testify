@@ -10,7 +10,6 @@ if (!clientId) {
     console.error(`${color.red}[${getTimestamp()}] [SLASH_COMMANDS] No client ID provided. Please provide a valid client ID in the .env file.${color.reset}`);
     return;
 }
-const guildId = process.env.guildid;
 
 module.exports = (client) => {
     client.handleCommands = async (commandFolders, path) => {
