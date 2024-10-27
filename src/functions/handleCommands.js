@@ -7,7 +7,7 @@ const table = new ascii().setHeading("File Name", "Status");
 
 const clientId = process.env.clientid; 
 if (!clientId) {
-    console.error(`${color.red}[${getTimestamp()}] [SLASH_COMMANDS] No client ID provided. Please provide a valid client ID in the .env file.`);
+    console.error(`${color.red}[${getTimestamp()}] [SLASH_COMMANDS] No client ID provided. Please provide a valid client ID in the .env file.${color.reset}`);
     return;
 }
 const guildId = process.env.guildid;
