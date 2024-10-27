@@ -98,5 +98,7 @@
 		"youdied",
 		"ytdl",
 		"ytmp"
-	]
+	],
+	"files.trimTrailingWhitespace": true
+
 }
