@@ -26,7 +26,7 @@ function warn(message) {
 }
 
 function error(message) {
-    return write(message, `${color.red}[${getTimestamp()}] `, false);
+    return console.log(`${color.red}[${getTimestamp()}] ${message}${color.reset}`);
 }
 
 function success(message) {
