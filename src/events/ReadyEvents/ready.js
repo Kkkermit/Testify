@@ -2,7 +2,7 @@ const config = require('../../config');
 const mongoose = require('mongoose');
 const mongodbURL = process.env.mongodb;
 const folderLoader = require('../../utils/folderLoader.js');
-const asciiText = require('../../lib/asciiText.js')
+const { asciiText } = require('../../lib/asciiText.js')
 
 module.exports = {
     name: 'ready',

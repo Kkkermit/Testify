@@ -1,5 +1,6 @@
+const { color, getTimestamp } = require('../utils/loggingEffects.js');
+
 function asciiText(client) {
-    const { color, getTimestamp } = require('../utils/loggingEffects.js');
 
     console.log(`${color.pink}[${getTimestamp()}] ====================================================== ${color.reset}`);
     console.log(`${color.pink}[${getTimestamp()}] ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗ ${color.reset}`);
@@ -24,4 +25,16 @@ function asciiText(client) {
     console.log(`${color.pink}[${getTimestamp()}] ================================== ${color.reset}`);
 }
 
-module.exports = asciiText ;
+function asciiTextCommitRunner() {
+
+    console.log(`${color.blue}                                                                                                              ${color.reset}`);
+    console.log(`${color.blue}  ██████╗ ██████╗ ███╗   ███╗███╗   ███╗██╗████████╗    ██████╗ ██╗   ██╗███╗   ██╗███╗   ██╗███████╗██████╗  ${color.reset}`);
+    console.log(`${color.blue} ██╔════╝██╔═══██╗████╗ ████║████╗ ████║██║╚══██╔══╝    ██╔══██╗██║   ██║████╗  ██║████╗  ██║██╔════╝██╔══██╗ ${color.reset}`);
+    console.log(`${color.blue} ██║     ██║   ██║██╔████╔██║██╔████╔██║██║   ██║       ██████╔╝██║   ██║██╔██╗ ██║██╔██╗ ██║█████╗  ██████╔╝ ${color.reset}`);
+    console.log(`${color.blue} ██║     ██║   ██║██║╚██╔╝██║██║╚██╔╝██║██║   ██║       ██╔══██╗██║   ██║██║╚██╗██║██║╚██╗██║██╔══╝  ██╔══██╗ ${color.reset}`);
+    console.log(`${color.blue} ╚██████╗╚██████╔╝██║ ╚═╝ ██║██║ ╚═╝ ██║██║   ██║       ██║  ██║╚██████╔╝██║ ╚████║██║ ╚████║███████╗██║  ██║ ${color.reset}`);
+    console.log(`${color.blue}  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚═╝     ╚═╝╚═╝   ╚═╝       ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═══╝╚══════╝╚═╝  ╚═╝ ${color.reset}`);
+    console.log(`${color.blue}                                                                                                              ${color.reset}`);
+}
+
+module.exports = { asciiText, asciiTextCommitRunner };
