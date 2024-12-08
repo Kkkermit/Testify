@@ -18,7 +18,7 @@ module.exports = {
 
         const { instruction } = setupChannel;
 
-        const chatModel = 'v3';
+        const chatModel = 'mistral-large-latest';
         const chatPrompt = `${message.content}`;
         const chatOptions = {
             userId: `${message.author.id}-${message.guild.id}`,
