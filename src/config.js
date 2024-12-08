@@ -5,7 +5,7 @@ module.exports = {
 	// BOT INFO //
 	prefix: "t?", // Default prefix
 	status: "dnd",
-	eventListeners: 100,
+	eventListeners: 50,
 	botName: "testify",
 	dev: "Kkermit",
 	devBy: "| Developed by kkermit",

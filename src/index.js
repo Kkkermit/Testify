@@ -9,7 +9,7 @@
 // Developed by: Kkermit. All rights reserved. (2024)
 // MIT License
 
-const { Client, GatewayIntentBits, Collection, Partials } = require(`discord.js`);
+const { Client, Collection } = require(`discord.js`);
 const fs = require('fs');
 const config = require('./config')
 
@@ -26,40 +26,16 @@ const currentVersion = `${config.botVersion}`;
 
 const { getTimestamp, color } = require('./utils/loggingEffects.js');
 
+// Intents & Partials //
+
+const { intents, partials } = require('./utils/intents.js');
+
 let client;
 try {
     client = new Client({ 
-        intents: [
-            GatewayIntentBits.Guilds, 
-            GatewayIntentBits.GuildMessages, 
-            GatewayIntentBits.MessageContent, 
-            GatewayIntentBits.GuildMembers, 
-            GatewayIntentBits.GuildPresences, 
-            GatewayIntentBits.GuildIntegrations, 
-            GatewayIntentBits.GuildWebhooks, 
-            GatewayIntentBits.GuildMessageReactions,
-            GatewayIntentBits.MessageContent, 
-            GatewayIntentBits.GuildEmojisAndStickers, 
-            GatewayIntentBits.DirectMessages, 
-            GatewayIntentBits.DirectMessageTyping, 
-            GatewayIntentBits.GuildModeration, 
-            GatewayIntentBits.GuildVoiceStates,
-            GatewayIntentBits.GuildWebhooks, 
-            GatewayIntentBits.AutoModerationConfiguration,
-            GatewayIntentBits.GuildScheduledEvents, 
-            GatewayIntentBits.GuildMessageTyping, 
-            GatewayIntentBits.AutoModerationExecution, 
-        ],  
+        intents: [ ...intents],  
 
-        partials: [
-            Partials.GuildMember, 
-            Partials.Channel,
-            Partials.GuildScheduledEvent,
-            Partials.Message,
-            Partials.Reaction, 
-            Partials.ThreadMember, 
-            Partials.User
-        ],
+        partials: [ ...partials ],
     }); 
 } catch (error) {
     console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error while creating the client. \n${color.red}[${getTimestamp()}]${color.reset} [ERROR]`, error);

@@ -1,5 +1,6 @@
 const { Events, EmbedBuilder, ButtonStyle, ButtonBuilder, ActionRowBuilder,} = require("discord.js");
 const guildSettingsSchema = require('../schemas/prefixSystem.js');
+const SetupChannel = require('../schemas/aiChannelSystem.js');
 
 module.exports = {
     name: Events.MessageCreate,
@@ -7,6 +8,9 @@ module.exports = {
     async execute(message, client, interaction) {
         if (message.author.bot) return;
         if (message.content.includes(`<@${client.user.id}>`))  {
+
+            const setupChannel = await SetupChannel.findOne({ channelID: message.channel.id });
+            if (setupChannel) return;
 
             const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: message.guild.id });
             const guildPrefix = fetchGuildPrefix.Prefix;
@@ -21,7 +25,6 @@ module.exports = {
 
             let uptime = `${days}d ${hours}h ${minutes}m ${seconds}s`;
 
-        
             const pingEmbed = new EmbedBuilder()
             .setColor("Purple")
             .setTitle("🏓 • Who mentioned me??")
@@ -53,7 +56,6 @@ module.exports = {
             );
 
             return message.reply({ embeds: [pingEmbed], components: [buttons, buttons1] });
-        
         }
     },
 };

@@ -1,5 +1,6 @@
 const { Events, EmbedBuilder, ButtonStyle, ButtonBuilder, ActionRowBuilder, } = require("discord.js");
 const guildSettingsSchema = require('../schemas/prefixSystem.js');
+const SetupChannel = require('../schemas/aiChannelSystem.js');
 
 module.exports = {
     name: Events.MessageCreate,
@@ -7,6 +8,9 @@ module.exports = {
 
         if (message.author.bot) return;
         if (message.content.toLowerCase().includes(`${client.config.botName}`)) {
+
+            const setupChannel = await SetupChannel.findOne({ channelID: message.channel.id });
+            if (setupChannel) return;
 
             const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: message.guild.id });
             const guildPrefix = fetchGuildPrefix.Prefix;

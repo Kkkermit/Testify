@@ -1,5 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { ApexChat, ApexImagine, ApexImageAnalyzer } = require('apexify.js');
+const SetupChannel = require('../../schemas/aiChannelSystem');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -7,16 +8,19 @@ module.exports = {
     .setDescription('Generate AI chat response')
     .addSubcommand(command => command.setName('image-generate').setDescription('Generate AI image').addStringOption(option => option.setName('prompt').setDescription('Prompt for AI image generation').setRequired(true)))
     .addSubcommand(command => command.setName('image-analyser').setDescription('Generate AI response for a summary of an image').addStringOption(option => option.setName('image-url').setDescription('Url for the image you want a summary on').setRequired(true)).addStringOption(option => option.setName("prompt").setDescription("Prompt for AI image analyser").setRequired(false)))
-    .addSubcommand(command => command.setName('chat').setDescription('Generate AI chat response').addStringOption(option => option.setName('prompt').setDescription('Prompt for AI chat response').setRequired(true))),
+    .addSubcommand(command => command.setName('chat').setDescription('Generate AI chat response').addStringOption(option => option.setName('prompt').setDescription('Prompt for AI chat response').setRequired(true)))
+    .addSubcommand(command => command.setName('setup-channel').setDescription('Setup AI channel for AI chat response').addChannelOption(option => option.setName('channel').setDescription('Channel to setup AI chat response').setRequired(true)).addStringOption(option => option.setName('ai-instructions').setDescription('Instructions for AI chat response').setRequired(false)))
+    .addSubcommand(command => command.setName('disable-channel').setDescription('Disable AI chat response in a channel'))
+    .addSubcommand(command => command.setName('update-ai-instructions').setDescription('Update AI instructions for AI chat response').addStringOption(option => option.setName('ai-instructions').setDescription('Instructions for AI chat response').setRequired(true))),
     async execute(interaction, client) {
 
-        interaction.deferReply();
-        interaction.channel.sendTyping();
+        await interaction.deferReply();
 
         const sub = interaction.options.getSubcommand();
 
         switch (sub) {
             case "image-generate":
+                await interaction.channel.sendTyping();
 
                 const getPromptImage = interaction.options.getString('prompt');
 
@@ -54,13 +58,15 @@ module.exports = {
                 } catch (error) {
                     console.log(error);
                     await interaction.editReply({ content: `An error occurred while generating AI image with the prompt: **${prompt}**. Please try again later.`, ephemeral: true });
+                    client.logs.error("[AI_IMAGE_GENERATE] Error occurred in AI Image Generation: ", error);
                 }
 
             break;
             case "image-analyser":
+                await interaction.channel.sendTyping();
 
-                const getAnalysisPrompt = interaction.options.getString('prompt');
                 const getImageUrl = interaction.options.getString('image-url');
+                const getAnalysisPrompt = interaction.options.getString('prompt') || "Analyze this image";
 
                 try {
                     const analysisResult = await ApexImageAnalyzer({ imgURL: getImageUrl, getAnalysisPrompt });
@@ -77,10 +83,12 @@ module.exports = {
                 } catch (error) {
                     console.log(error);
                     await interaction.editReply({ content: `An error occurred while generating AI image-reader response with the URL: **${getImageUrl}** & prompt: **${getAnalysisPrompt}. Please try again later.`, ephemeral: true });
+                    client.logs.error("[AI_IMAGE_ANALYSER] Error occurred in AI Image Analyser: ", error);
                 }
 
             break;
             case 'chat':
+                await interaction.channel.sendTyping();
 
                 const getChatPrompt = interaction.options.getString('prompt');
 
@@ -108,8 +116,92 @@ module.exports = {
                 } catch (error) {
                     console.log(error);
                     await interaction.editReply({ content: `An error occurred while generating AI chat response with the prompt: **${getChatPrompt}**. Please try again later.`, ephemeral: true });
+                    client.logs.error("[AI_CHAT_RESPONSE] Error occurred in AI Chat Response: ", error);
                 }
 
+            break;
+            case 'setup-channel':
+
+                const channel = interaction.options.getChannel('channel');
+                const instruction = interaction.options.getString('ai-instructions') || 'You are a friendly assistant.';
+                const channelID = channel.id;
+                const serverID = interaction.guild.id;
+
+                const setupChannel = new SetupChannel({ 
+                    serverID, 
+                    channelID, 
+                    instruction 
+                });
+
+                await setupChannel.save();
+
+                try {
+                    const embed = new EmbedBuilder()
+                    .setAuthor({ name: `AI Channel Setup ${client.config.devBy}`})
+                    .setTitle(`${client.user.username} AI Channel Setup ${client.config.arrowEmoji}`)
+                    .setDescription(`AI chat response has been setup in this channel!`)
+                    .addFields({ name: `Channel`, value: `<#${channelID}>`})
+                    .addFields({ name: `AI Instructions`, value: `${instruction}`})
+                    .setColor(client.config.embedAi)
+                    .setFooter({ text: `AI Chat Response Setup`})
+                    .setTimestamp();
+
+                    await interaction.editReply({ embeds: [embed] });
+                } catch (error) {
+                    console.log(error);
+                    await interaction.editReply({ content: `An error occurred while setting up AI chat response in this channel. Please try again later.`, ephemeral: true });
+                    client.logs.error("[AI_CHANNEL_SETUP] Error occurred in AI Channel Setup: ", error);
+                }
+
+            break;
+            case 'disable-channel':
+
+                const disableChannel = await SetupChannel.findOneAndDelete({ serverID: interaction.guild.id });
+
+                if (!disableChannel) return await interaction.editReply({ content: `AI chat response has **not** yet been setup in this server!`, ephemeral: true });
+
+                try {
+                    const embed = new EmbedBuilder()
+                    .setAuthor({ name: `AI Channel Disable ${client.config.devBy}`})
+                    .setTitle(`${client.user.username} AI Channel Disable ${client.config.arrowEmoji}`)
+                    .setDescription(`AI chat response has been disabled in this server!`)
+                    .setColor(client.config.embedAi)
+                    .setFooter({ text: `AI Chat Response Disable`})
+                    .setTimestamp();
+
+                    await interaction.editReply({ embeds: [embed] });
+                } catch (error) {
+                    console.log(error);
+                    await interaction.editReply({ content: `An error occurred while disabling AI chat response in this channel. Please try again later.`, ephemeral: true });
+                    client.logs.error("[AI_CHANNEL_DISABLE] Error occurred in AI Channel Disable: ", error);
+                }
+
+            break;
+            case 'update-ai-instructions':
+
+                const getInstructions = interaction.options.getString('ai-instructions');
+
+                const updateInstructions = await SetupChannel.findOneAndUpdate({ serverID: interaction.guild.id }, { instruction: getInstructions });
+
+                if (!updateInstructions) return await interaction.editReply({ content: `AI chat response has **not** yet been setup in this server!`, ephemeral: true });
+
+                try {
+                    const embed = new EmbedBuilder()
+                    .setAuthor({ name: `AI Channel Update ${client.config.devBy}`})
+                    .setTitle(`${client.user.username} AI Channel Update ${client.config.arrowEmoji}`)
+                    .setDescription(`AI chat response instructions have been updated in this server!`)
+                    .addFields({ name: `AI Instructions`, value: `${getInstructions}`})
+                    .setColor(client.config.embedAi)
+                    .setFooter({ text: `AI Chat Response Update`})
+                    .setTimestamp();
+
+                    await interaction.editReply({ embeds: [embed] });
+                } catch (error) {
+                    console.log(error);
+                    await interaction.editReply({ content: `An error occurred while updating AI chat response instructions in this channel. Please try again later.`, ephemeral: true });
+                    client.logs.error("[AI_CHANNEL_UPDATE] Error occurred in AI Channel Update: ", error);
+                }
+                
             break;
         }
     }

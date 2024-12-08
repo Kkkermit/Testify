@@ -11,6 +11,8 @@ module.exports = {
 
         client.logs.info(`[SCHEMAS] Started loading schemas...`);
 
+        client.setMaxListeners(client.config.eventListeners || 20);
+
         if (!mongodbURL) {
             client.logs.error('[DATABASE] No MongoDB URL has been provided. Double check your .env file and make sure it is correct.');
             return;
@@ -31,6 +33,5 @@ module.exports = {
 
         folderLoader(client);
         asciiText(client)
-        require('events').EventEmitter.setMaxListeners  = config.eventListeners;
     },
 };
