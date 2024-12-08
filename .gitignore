@@ -8,6 +8,7 @@ lerna-debug.log*
 
 # Custom 
 
+Ai_Chat-History
 src/logs/evalLogs.txt
 
 # Diagnostic reports (https://nodejs.org/api/report.html)

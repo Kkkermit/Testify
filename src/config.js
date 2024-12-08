@@ -32,6 +32,7 @@ module.exports = {
 	embedLevels: "Fuchsia",
 	embedEconomy: "DarkOrange",
 	embedVerify: "DarkGreen",
+	embedAi: "DarkGrey",
 
 	// EMOJIS //
 	automodEmoji: "<:auto:1235660206856474704>",
