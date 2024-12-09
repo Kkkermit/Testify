@@ -24,7 +24,7 @@ module.exports = {
 
                 const getPromptImage = interaction.options.getString('prompt');
 
-                const model = 'flux-pro';
+                const model = `${client.config.aiImageGenModel}`;
                 const prompt = `${getPromptImage}`;
                 const imageOptions = {
                     count: 1,
@@ -92,7 +92,7 @@ module.exports = {
 
                 const getChatPrompt = interaction.options.getString('prompt');
 
-                const chatModel = 'gpt-4o';
+                const chatModel = `${client.config.aiChatModel}`;
                 const chatPrompt = `${getChatPrompt}`;
                 const chatOptions = {
                     userId: interaction.user.id,

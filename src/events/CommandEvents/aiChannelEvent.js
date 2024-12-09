@@ -18,7 +18,7 @@ module.exports = {
 
         const { instruction } = setupChannel;
 
-        const chatModel = 'mistral-large-latest';
+        const chatModel = `${client.config.aiChatChannelModel}`;
         const chatPrompt = `${message.content}`;
         const chatOptions = {
             userId: `${message.author.id}-${message.guild.id}`,
@@ -33,7 +33,7 @@ module.exports = {
             const chatResponse = await ApexChat(chatModel, chatPrompt, chatOptions);
 
             if (!chatResponse || chatResponse.trim().length === 0) {
-                client.logs.error(`[AI_CHANNEL_EVENT] Received an empty response from the AI for prompt: ${chatPrompt}`);
+                client.logs.error(`[AI_CHANNEL_EVENT] Received an empty response from the AI for prompt: ${chatPrompt}. Check the endpoint is active/ the prompt is valid.`);
                 await message.reply('The AI **did not** return a response. Please try again with a different prompt.');
                 return;
             }
@@ -47,7 +47,7 @@ module.exports = {
         } catch (error) {
             console.error(error);
             await message.reply('An error occurred while generating the AI response. Please try again later.');
-            client.logs.error("[AI_CHANNEL_EVENT] Error occurred in AI Channel Event");
+            client.logs.error(`[AI_CHANNEL_EVENT] Error occurred in AI Channel Event with prompt: ${chatPrompt}`);
         }
     },
 };

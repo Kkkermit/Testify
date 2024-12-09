@@ -98,4 +98,9 @@ module.exports = {
 	ticketTranscriptTime: "Time:",
 	ticketMemberAdd: "has been added to the ticket.",
 	ticketMemberRemove: "has been removed from the ticket.",
+
+	// AI Chat Models //
+	aiChatChannelModel: "mistral-large-latest",
+	aiChatModel: "gpt-4o",
+	aiImageGenModel: "flux-pro",
 };
