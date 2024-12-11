@@ -1,6 +1,7 @@
 const { Events } = require('discord.js');
 const SetupChannel = require('../../schemas/aiChannelSystem');
 const { ApexChat } = require('apexify.js');
+const filter = require('../../jsons/filter.json');
 
 module.exports = {
     name: Events.MessageCreate,
@@ -12,7 +13,8 @@ module.exports = {
         const isReplyToBot = message.reference && (await message.fetchReference()).author.id === client.user.id;
 
         if (!botMentioned && !isReplyToBot) return;
-
+        if (filter.words.includes(message.content)) return message.reply({ content: `Woah! Your message includes profanity which is **not** allowed! Try sending your message again but this time, without the need of using that language.`});
+        
         const setupChannel = await SetupChannel.findOne({ channelID: message.channel.id });
         if (!setupChannel) return;
 
