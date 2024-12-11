@@ -1,6 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const { ApexChat, ApexImagine, ApexImageAnalyzer } = require('apexify.js');
 const SetupChannel = require('../../schemas/aiChannelSystem');
+const filter = require('../../jsons/filter.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,6 +18,8 @@ module.exports = {
         await interaction.deferReply();
 
         const sub = interaction.options.getSubcommand();
+
+        const filterMessage = "The prompt you have entered includes profanity which is **not** allowed. Please try again with a different prompt.";
 
         switch (sub) {
             case "image-generate":
@@ -45,6 +48,11 @@ module.exports = {
                     const imageResponse = await ApexImagine(model, prompt, imageOptions);
                     const imageUrl = Array.isArray(imageResponse) ? imageResponse[0] : imageResponse;
 
+                    if (imageOptions.nsfw === false && filter.words.includes(prompt)) {
+                        await interaction.editReply({ content: `NSFW content has been disabled. Only the owner of the bot can change this. Please try with a different prompt that does not include NSFW content.`, ephemeral: true });
+                        return;
+                    }
+
                     const embed = new EmbedBuilder()
                     .setAuthor({ name: `AI Image Generation ${client.config.devBy}`})
                     .setTitle(`${client.user.username} AI Image Generation ${client.config.arrowEmoji}`)
@@ -67,6 +75,10 @@ module.exports = {
 
                 const getImageUrl = interaction.options.getString('image-url');
                 const getAnalysisPrompt = interaction.options.getString('prompt') || "Analyze this image";
+
+                if (filter.words.includes(getAnalysisPrompt)) {
+                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                }
 
                 try {
                     const analysisResult = await ApexImageAnalyzer({ imgURL: getImageUrl, getAnalysisPrompt });
@@ -91,6 +103,10 @@ module.exports = {
                 await interaction.channel.sendTyping();
 
                 const getChatPrompt = interaction.options.getString('prompt');
+
+                if (filter.words.includes(getChatPrompt)) {
+                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                }
 
                 const chatModel = `${client.config.aiChatModel}`;
                 const chatPrompt = `${getChatPrompt}`;
@@ -126,6 +142,10 @@ module.exports = {
                 const instruction = interaction.options.getString('ai-instructions') || 'You are a friendly assistant.';
                 const channelID = channel.id;
                 const serverID = interaction.guild.id;
+
+                if (filter.words.includes(instruction)) {
+                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                }
 
                 const setupChannel = new SetupChannel({ 
                     serverID, 
@@ -180,6 +200,10 @@ module.exports = {
             case 'update-ai-instructions':
 
                 const getInstructions = interaction.options.getString('ai-instructions');
+
+                if (filter.words.includes(getInstructions)) {
+                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                }
 
                 const updateInstructions = await SetupChannel.findOneAndUpdate({ serverID: interaction.guild.id }, { instruction: getInstructions });
 

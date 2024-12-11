@@ -340,6 +340,12 @@ module.exports = {
                         .addFields({ name: '• /ytmp3', value: '> Converts a youtube video to mp3.'})
                         .addFields({ name: '• /bot-stats-channel set', value: '> Sets the bot stats channel.'})
                         .addFields({ name: '• /bot-stats-channel remove', value: '> Removes the bot stats channel and message.'})
+                        .addFields({ name: '• /ai image-generate', value: '> Generates an image using AI.'})
+                        .addFields({ name: '• /ai chat', value: '> Generates text using AI.'})
+                        .addFields({ name: '• /ai image-analyser', value: '> Analyses an image using AI.'})
+                        .addFields({ name: '• /ai setup-channel', value: '> Sets up channel for AI responses.'})
+                        .addFields({ name: '• /ai disable-channel', value: '> Removes channel for AI responses.'})
+                        .addFields({ name: '• /ai update-ai-instructions', value: '> Updates the instructions for the AI in the AI channel.'})
 
                         .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
                         .setTimestamp(); 
