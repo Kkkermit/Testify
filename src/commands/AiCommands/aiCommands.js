@@ -120,10 +120,19 @@ module.exports = {
                 try {
                     const chatResponse = await ApexChat(chatModel, chatPrompt, chatOptions);
 
+                    if (chatResponse.includes('@here') || chatResponse.includes('@everyone')) {
+                        chatResponse = chatResponse.replace(/@here/g, '[here]').replace(/@everyone/g, '[everyone]');
+                    }
+
+                    let finalResponse = chatResponse;
+                    if (chatResponse.length > 2000) {
+                        finalResponse = chatResponse.substring(0, 1997) + '...';
+                    }
+
                     const embed = new EmbedBuilder()
                     .setAuthor({ name: `AI Chat Response ${client.config.devBy}`})
                     .setTitle(`${client.user.username} AI Chat Response ${client.config.arrowEmoji}`)
-                    .setDescription(`**Prompt:** ${getChatPrompt}\n\n**Response:**\n${chatResponse}`)
+                    .setDescription(`**Prompt:** ${getChatPrompt}\n\n**Response:**\n${finalResponse}`)
                     .setColor(client.config.embedAi)
                     .setFooter({ text: `AI Chat Response`})
                     .setTimestamp();

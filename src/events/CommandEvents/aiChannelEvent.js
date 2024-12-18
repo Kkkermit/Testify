@@ -40,6 +40,10 @@ module.exports = {
                 return;
             }
 
+            if (chatResponse.includes('@here') || chatResponse.includes('@everyone')) {
+                chatResponse = chatResponse.replace(/@here/g, '[here]').replace(/@everyone/g, '[everyone]');
+            }
+
             if (chatResponse.length > 1995) {
                 const truncatedResponse = chatResponse.substring(0, 1995) + '...';
                 await message.reply(truncatedResponse);
