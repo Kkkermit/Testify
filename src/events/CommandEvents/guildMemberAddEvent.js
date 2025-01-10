@@ -2,6 +2,7 @@ const { Events, EmbedBuilder, AttachmentBuilder } = require("discord.js");
 const Canvas = require("canvas"); 
 const WelcomeMessage = require("../../schemas/welcomeSystem"); 
 const config = require('../../config')
+const { addSuffix } = require("../../lib/addSuffix");
 
 module.exports = {
     name: Events.GuildMemberAdd,
@@ -65,15 +66,3 @@ module.exports = {
             }
     },
 };
-
-function addSuffix(number) {
-    if (number % 100 >= 11 && number % 100 <= 13)
-    return number + "th";
-
-    switch (number % 10) {
-        case 1: return number + "st";
-        case 2: return number + "nd";
-        case 3: return number + "rd";
-    }
-    return number + "th";
-}
