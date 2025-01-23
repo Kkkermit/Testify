@@ -1,0 +1,40 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+@keyframes spin {
+	from {
+		transform: rotate(0deg);
+	}
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+.animate-spin-slow {
+	animation: spin 4s linear infinite;
+}
+
+.glow-blue {
+	filter: drop-shadow(0 0 10px rgba(0, 0, 255, 0.7));
+}
+
+.particle {
+	position: absolute;
+	width: 5px;
+	height: 5px;
+	background-color: white;
+	border-radius: 50%;
+	opacity: 0;
+}
+
+@keyframes fly {
+	0% {
+		opacity: 1;
+		transform: translate(0, 0);
+	}
+	100% {
+		opacity: 0;
+		transform: translate(calc(100vw * (random() - 0.5)), calc(100vh * (random() - 0.5)));
+	}
+}
