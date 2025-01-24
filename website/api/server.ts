@@ -59,6 +59,7 @@ app.get("/api/bot", async (_, res) => {
 
 client.once("ready", () => {
 	console.log("Bot is ready!");
+	client.user?.setStatus("dnd");
 	updateCache();
 	setInterval(updateCache, 300000);
 });
