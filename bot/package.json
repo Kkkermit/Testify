@@ -38,14 +38,16 @@
     "canvafy": "^7.1.0",
     "canvas": "^2.11.2",
     "captcha-canvas": "^2.3.1",
+    "cors": "2.8.5",
     "discord-arts": "^0.6.1",
     "discord-gamecord": "4.4.2",
     "discord-giveaways": "^6.0.1",
     "discord-html-transcripts": "3.2.0",
     "discord-logs": "^2.2.1",
-    "discord.js": "^14.14.1",
+    "discord.js": "14.17.3",
     "distube": "^4.1.1",
-    "dotenv": "^16.4.5",
+    "dotenv": "16.4.7",
+    "express": "4.21.2",
     "ffmpeg-static": "^5.2.0",
     "figlet": "^1.7.0",
     "fs": "^0.0.1-security",
@@ -66,8 +68,11 @@
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
+    "@types/cors": "2.8.17",
+    "@types/express": "5.0.0",
     "cross-env": "7.0.3",
     "jest": "29.7.0",
-    "nodemon": "3.1.7"
+    "nodemon": "3.1.7",
+    "typescript": "5.7.3"
   }
 }

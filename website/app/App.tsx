@@ -1,14 +1,14 @@
 import "./styles/index.css";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Landing from "./components/landingPage/landing-page";
+import LandingPage from "./components/landing-page/landing-page";
 
 function App() {
 	return (
 		<>
-			<div className="bg-gray-800 min-h-screen" id="container" data-testid="render-ui">
+			<div id="container" data-testid="render-ui">
 				<Router>
 					<Routes>
-						<Route path="/" element={<Landing />} />
+						<Route path="/" element={<LandingPage />} />
 					</Routes>
 				</Router>
 			</div>
