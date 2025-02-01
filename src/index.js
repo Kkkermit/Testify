@@ -33,9 +33,8 @@ const { intents, partials } = require('./utils/intents.js');
 let client;
 try {
     client = new Client({ 
-        intents: [ ...intents],  
-
-        partials: [ ...partials ],
+        intents: [...intents],  
+        partials: [...partials],
     }); 
 } catch (error) {
     console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error while creating the client. \n${color.red}[${getTimestamp()}]${color.reset} [ERROR]`, error);
@@ -44,13 +43,19 @@ try {
 client.logs = require('./utils/logs');
 client.config = require('./config');
 
+// Val Api //
+
+client.skins = null;
+client.skinsTier = null;
+
 // Packages //
 
-const giveawayClient = require('./client/giveawayClientEvent.js')
-const distubeClient = require('./client/distubeClientEvent.js')
-const auditLogsClient = require('./client/auditLogsClientEvent.js')
+const giveawayClient = require('./client/giveawayClientEvent.js');
+const distubeClient = require('./client/distubeClientEvent.js');
+const auditLogsClient = require('./client/auditLogsClientEvent.js');
 const { handleLogs } = require("./events/CommandEvents/handleLogsEvent");
 const { checkVersion } = require('./lib/version');
+const { fetchValorantAPI } = require('./utils/fetchValorantApi.js');
 
 require('./functions/processHandlers')();
 
@@ -80,6 +85,8 @@ if (!token) {
     client.handleTriggers(triggerFiles, "./src/triggers")
     client.handleCommands(commandFolders, "./src/commands");
     client.prefixCommands(pcommandFolders, './src/prefix');
+    // Loads Val Api //
+    await fetchValorantAPI(client);
     client.login(token).then(() => {
         handleLogs(client)
         checkVersion(currentVersion);

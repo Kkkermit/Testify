@@ -103,4 +103,14 @@ module.exports = {
 	aiChatChannelModel: "mistral-large-latest",
 	aiChatModel: "gpt-4o",
 	aiImageGenModel: "flux-pro",
+
+	// ValorantEmoji //
+	valoRadianite: "<:ValoRadianite:1335281554942853271>",
+	valoPoints: "<:ValoPoints:1335278703294550156>",
+	valoKingdomCredits: "<:ValoKingdomCredits:1335281540107735172>",
+	ultraEdition: "<:Ultra_Edition:1335281525100380313>",
+	selectEdition: "<:Select_Edition:1335281506855288845>",
+	premiumEdition: "<:Premium_Edition:1335281487645249567>",
+	exclusiveEdition: "<:Exclusive_Edition:1335281472801869824>",
+	deluxeEdition: "<:Deluxe_Edition:1335281457563701289>",
 };

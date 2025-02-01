@@ -6,6 +6,19 @@ const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction, client) {
+
+        if (interaction.isAutocomplete()) {
+            const command = client.commands.get(interaction.commandName);
+            if (!command) return;
+
+            try {
+                await command.autocomplete(interaction, client);
+            } catch (error) {
+                console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error in autocomplete:`, error);
+            }
+            return;
+        }
+        
         if (!interaction.isCommand()) return;
 
         const userData = await blacklistSchema.findOne({
