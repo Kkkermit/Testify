@@ -31,6 +31,7 @@
     "@distube/ytdl-core": "4.14.4",
     "@distube/ytsr": "2.0.4",
     "@napi-rs/canvas": "^0.1.52",
+    "@napi-rs/canvas-darwin-arm64": "0.1.66",
     "apexify.js": "4.5.43",
     "ascii-table": "^0.0.9",
     "axios": "^1.6.8",
