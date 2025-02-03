@@ -10,6 +10,7 @@ const color = {
 	torquise: "\x1b[38;5;45m",
 	purple: "\x1b[38;5;57m",
 	reset: "\x1b[0m",
+	darkGrey: "\x1b[38;5;240m",
 };
 
 function getTimestamp() {
