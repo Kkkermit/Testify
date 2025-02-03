@@ -30,12 +30,27 @@ module.exports = {
                 `&scope=${encodeURIComponent(scopes.join(' '))}` +
                 `&state=${state}`;
 
+            const loginEmbed = new EmbedBuilder()
+            .setAuthor({ name: `Spotify Login ${client.config.devBy}`})
+            .setTitle(`Connect your Spotify Account ${client.config.arrowEmoji}`)
+            .setDescription(`Click the link below to connect your Spotify account to view your stats!`)
+            .setURL(authUrl)
+            .setFooter({ text: `Spotify Login` })
+            .setTimestamp()
+            .setColor(client.config.embedSpotify)
+
+            const loginButton = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setLabel('Connect Spotify')
+                        .setURL(authUrl)
+                        .setStyle(ButtonStyle.Link)
+                        .setEmoji('🎵')
+                );
+
             await interaction.reply({
-                content: 'Click the link below to connect your Spotify account:',
-                embeds: [{
-                    description: `[Connect Spotify Account](${authUrl})`,
-                    color: 0x1DB954
-                }],
+                embeds: [loginEmbed],
+                components: [loginButton],
                 ephemeral: true
             });
 
