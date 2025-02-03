@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
-const { color, getTimestamp } = require('../utils/loggingEffects');
+const { color, getTimestamp, textEffects } = require('../utils/loggingEffects');
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -29,17 +29,15 @@ async function setupEnvironment() {
     const envFile = process.argv.includes('setup-env:dev') ? '.env.development' : '.env';
     const envPath = path.resolve(process.cwd(), envFile);
 
-    const botToken = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your bot token: `);
-    const clientId = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your client ID: `);
+    const botToken = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}${textEffects.bold}[REQUIRED]${textEffects.reset}${color.reset} Please enter your bot token: `);
+    const clientId = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}${textEffects.bold}[REQUIRED]${textEffects.reset}${color.reset} Please enter your client ID: `);
     const guildId = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your guild ID: `);
-    const devId = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your developer ID: `);
-    const mongoDb = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your MongoDB connection string: `);
+    const devId = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}${textEffects.bold}[REQUIRED]${textEffects.reset}${color.reset} Please enter your developer ID: `);
+    const mongoDb = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}${textEffects.bold}[REQUIRED]${textEffects.reset}${color.reset} Please enter your MongoDB connection string: `);
     const movieTrackerApi = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Movie Tracker API key: `);
     const rapidApiKey = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your RapidAPI key: `);
-    const webhookSlashLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for slash command logging: `);
-    const webhookPrefixLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for prefix command logging: `);
-    const webhookBugLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for error/ bug logging: `);
-    const webhookSuggestionLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for suggestion logging: `);
+    const spotifyClientId = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client ID: `);
+    const spotifyClientSecret = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client Secret: `);
 
     const envContent = `
 token=${botToken}
@@ -50,10 +48,11 @@ mongodb=${mongoDb}
 movietrackerapi=${movieTrackerApi}
 rapidapikey=${rapidApiKey}
 
-webhookslashlogging=${webhookSlashLogging}
-webhookprefixlogging=${webhookPrefixLogging}
-webhookbuglogging=${webhookBugLogging}
-webhooksuggestionlogging=${webhookSuggestionLogging}
+SPOTIFY_CLIENT_ID=${spotifyClientId}
+SPOTIFY_CLIENT_SECRET=${spotifyClientSecret}
+SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
+
+PORT=3000
 `;
 
     fs.writeFileSync(envPath, envContent.trim() + '\n');
