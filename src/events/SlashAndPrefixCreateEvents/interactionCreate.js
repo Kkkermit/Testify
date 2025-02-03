@@ -10,6 +10,39 @@ module.exports = {
     name: 'interactionCreate',
     async execute(interaction, client) {
 
+        if (interaction.isButton()) {
+            if (interaction.customId.startsWith('spotify-')) {
+                const [prefix, type, userId] = interaction.customId.split('-');
+                const validTypes = ['tracks', 'artists', 'albums'];
+                
+                if (validTypes.includes(type)) {
+                    try {
+                        const targetUser = await interaction.client.users.fetch(userId);
+                        const user = await User.findOne({ discordId: userId });
+                        
+                        if (!user || !user.spotifyAccessToken) {
+                            return interaction.reply({
+                                content: 'This user no longer has their Spotify account connected!',
+                                ephemeral: true
+                            });
+                        }
+
+                        const items = await getTopItems(user.spotifyAccessToken, type);
+                        const embed = createStatsEmbed(items, type, targetUser);
+                        
+                        await interaction.update({ embeds: [embed] });
+                    } catch (error) {
+                        console.error(error);
+                        await interaction.reply({
+                            content: 'Error updating stats!',
+                            ephemeral: true
+                        });
+                    }
+                }
+                return;
+            }
+        }
+
         if (interaction.isAutocomplete()) {
             const command = client.commands.get(interaction.commandName);
             if (!command) return;
@@ -20,29 +53,6 @@ module.exports = {
                 console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error in autocomplete:`, error);
             }
             return;
-        }
-
-        if (!interaction.isButton()) return;
-
-        if (interaction.customId.startsWith('spotify-')) {
-            const type = interaction.customId.replace('spotify-', '');
-            const validTypes = ['tracks', 'artists', 'albums'];
-            
-            if (validTypes.includes(type)) {
-                try {
-                    const user = await User.findOne({ discordId: interaction.user.id });
-                    const items = await getTopItems(user.spotifyAccessToken, type);
-                    const embed = createStatsEmbed(items, type, interaction.user);
-                    
-                    await interaction.update({ embeds: [embed] });
-                } catch (error) {
-                    console.error(error);
-                    await interaction.reply({
-                        content: 'Error updating stats!',
-                        ephemeral: true
-                    });
-                }
-            }
         }
         
         if (!interaction.isCommand()) return;

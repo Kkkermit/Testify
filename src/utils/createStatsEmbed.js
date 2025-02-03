@@ -1,11 +1,10 @@
 const { EmbedBuilder } = require('discord.js');
-const config = require('../config')
 
 function createStatsEmbed(items, type, user) {
     const embed = new EmbedBuilder()
-        .setColor(config.embedCommunity)
-        .setAuthor({ name: user.username, iconURL: user.displayAvatarURL() })
-        .setTitle(`Your Top 10 ${type.charAt(0).toUpperCase() + type.slice(1)}`)
+        .setColor('#1DB954')
+        .setAuthor({ name: `${user.username}'s Stats`, iconURL: user.displayAvatarURL() })
+        .setTitle(`Top 10 ${type.charAt(0).toUpperCase() + type.slice(1)}`)
         .setTimestamp();
 
     let description = '';

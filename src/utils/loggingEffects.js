@@ -13,6 +13,12 @@ const color = {
 	darkGrey: "\x1b[38;5;240m",
 };
 
+const textEffects = {
+	bold: "\x1b[1m",
+	underline: "\x1b[4m",
+	reset: "\x1b[0m",
+}
+
 function getTimestamp() {
 	const date = new Date();
 	const year = date.getFullYear();
@@ -24,4 +30,4 @@ function getTimestamp() {
 	return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-module.exports = { color, getTimestamp };
+module.exports = { color, getTimestamp, textEffects };
