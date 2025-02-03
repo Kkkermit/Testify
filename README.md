@@ -107,10 +107,10 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
     7. Navigate to your discord server, enable developer mode and right click the dropdown beside the server name. 
     8. Click `Copy Server ID` and paste it into the `guildid` variable inside the `.env` file.
     9. Visit the [Spotify web API docs](https://developer.spotify.com/documentation/web-api) and sign in. Once signed in, navigate to dashboard. Once on here, you'll need to create an app. Fill out the steps on the site to create your app. Once created, you'll need to copy your clientid and client secret into the `SPOTIFY_CLIENT_ID` & `SPOTIFY_CLIENT_SECRET` fields in the `.env` file. You can leave the `SPOTIFY_REDIRECT_URI` as it is. Only change this if you're updating the port of the Spotify server.
-    9. Navigate to the `package.json` file and pay attention to the runnable commands listed under `scripts`.
-    10. Open the terminal in [Visual Studio Code](https://code.visualstudio.com/download) and install all necessary packages using `npm run setup`. This will install the dependencies and give you a brief install guide
-    11. Open a new terminal and type `npm run prod` to run the file without using **nodemon** or `npm run prod:nodemon` to run the bot with nodemon.
-    12. The bot should then turn online, you should be able to see this by the console logs that is setup upon start up
+    10. Navigate to the `package.json` file and pay attention to the runnable commands listed under `scripts`.
+    11. Open the terminal in [Visual Studio Code](https://code.visualstudio.com/download) and install all necessary packages using `npm run setup`. This will install the dependencies and give you a brief install guide
+    12. Open a new terminal and type `npm run prod` to run the file without using **nodemon** or `npm run prod:nodemon` to run the bot with nodemon.
+    13. The bot should then turn online, you should be able to see this by the console logs that is setup upon start up
 
 - **Runnable commands (scripts)**
 
