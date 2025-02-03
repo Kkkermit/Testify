@@ -9,7 +9,7 @@ const canvacord = require('canvacord');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('spotify')
-        .setDescription('Connect your Spotify account')
+        .setDescription('spotify commands')
         .addSubcommand(command => command.setName('login').setDescription('Connect your Spotify account'))
         .addSubcommand(command => command.setName('stats').setDescription('View your Spotify stats').addUserOption(option => option.setName('user').setDescription('The user to get stats for').setRequired(false)))
         .addSubcommand(command => command.setName('currently-playing').setDescription('View what you are currently playing').addUserOption(option => option.setName('user').setDescription('The user to get stats for').setRequired(false))),
