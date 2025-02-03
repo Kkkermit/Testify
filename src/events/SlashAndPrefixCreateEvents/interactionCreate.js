@@ -2,6 +2,9 @@ const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
 const config = require('../../config')
 const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
+const { getTopItems } = require('../../api/spotifyTrackerApi.js');
+const { createStatsEmbed } = require('../../utils/createStatsEmbed.js');
+const User = require('../../schemas/spotifyTrackerSystem.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -17,6 +20,29 @@ module.exports = {
                 console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error in autocomplete:`, error);
             }
             return;
+        }
+
+        if (!interaction.isButton()) return;
+
+        if (interaction.customId.startsWith('spotify-')) {
+            const type = interaction.customId.replace('spotify-', '');
+            const validTypes = ['tracks', 'artists', 'albums'];
+            
+            if (validTypes.includes(type)) {
+                try {
+                    const user = await User.findOne({ discordId: interaction.user.id });
+                    const items = await getTopItems(user.spotifyAccessToken, type);
+                    const embed = createStatsEmbed(items, type, interaction.user);
+                    
+                    await interaction.update({ embeds: [embed] });
+                } catch (error) {
+                    console.error(error);
+                    await interaction.reply({
+                        content: 'Error updating stats!',
+                        ephemeral: true
+                    });
+                }
+            }
         }
         
         if (!interaction.isCommand()) return;
