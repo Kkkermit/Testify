@@ -11,9 +11,13 @@ module.exports = {
         .setName('spotify')
         .setDescription('spotify commands')
         .addSubcommand(command => command.setName('login').setDescription('Connect your Spotify account'))
-        .addSubcommand(command => command.setName('stats').setDescription('View your Spotify stats').addUserOption(option => option.setName('user').setDescription('The user to get stats for').setRequired(false)))
+        .addSubcommand(command => command.setName('stats').setDescription('View your Spotify stats').addUserOption(option => option.setName('user').setDescription('The user to get stats for').setRequired(false)).addStringOption(option => option.setName('time-range').setDescription('The time range to get stats for').setRequired(false)
+            .addChoices(
+                { name: 'All Time', value: 'long_term' }, 
+                { name: 'Last 4 Weeks', value: 'short_term' }
+            )
+        ))
         .addSubcommand(command => command.setName('currently-playing').setDescription('View what you are currently playing').addUserOption(option => option.setName('user').setDescription('The user to get stats for').setRequired(false))),
-
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
@@ -59,6 +63,7 @@ module.exports = {
 
             try {
                 const targetUser = interaction.options.getUser('user') || interaction.user;
+                const timeRange = interaction.options.getString('time-range') || 'long_term';
                 const user = await User.findOne({ discordId: targetUser.id });
                 
                 if (!user || !user.spotifyAccessToken) {
@@ -71,26 +76,27 @@ module.exports = {
                 }
     
                 const row = new ActionRowBuilder()
-                    .addComponents(
-                        new ButtonBuilder()
-                            .setCustomId(`spotify-tracks-${targetUser.id}`)
-                            .setLabel('Top Tracks')
-                            .setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                            .setCustomId(`spotify-artists-${targetUser.id}`)
-                            .setLabel('Top Artists')
-                            .setStyle(ButtonStyle.Primary),
-                        new ButtonBuilder()
-                            .setCustomId(`spotify-albums-${targetUser.id}`)
-                            .setLabel('Top Albums')
-                            .setStyle(ButtonStyle.Primary)
-                    );
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId(`spotify-tracks-${targetUser.id}-${timeRange}`)
+                        .setLabel('Top Tracks')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(`spotify-artists-${targetUser.id}-${timeRange}`)
+                        .setLabel('Top Artists')
+                        .setStyle(ButtonStyle.Primary),
+                    new ButtonBuilder()
+                        .setCustomId(`spotify-albums-${targetUser.id}-${timeRange}`)
+                        .setLabel('Top Albums')
+                        .setStyle(ButtonStyle.Primary)
+                );
     
-                const tracks = await getTopItems(user.spotifyAccessToken, 'tracks');
-                const initialEmbed = createStatsEmbed(tracks, 'tracks', targetUser);
-    
+                const tracks = await getTopItems(user.spotifyAccessToken, 'tracks', timeRange);
+                const { embed, attachment } = await createStatsEmbed(tracks, 'tracks', targetUser, timeRange);
+        
                 await interaction.reply({
-                    embeds: [initialEmbed],
+                    embeds: [embed],
+                    files: attachment ? [attachment] : undefined,
                     components: [row]
                 });
             } catch (error) {
@@ -104,46 +110,66 @@ module.exports = {
             break;
             case 'currently-playing':
 
-            let user = interaction.options.getMember('user');
+            const user = interaction.options.getMember('user') || interaction.member;
                     
-            if (user.bot) return await interaction.reply({ content: `Invalid command. Cannot obtain a bots spotify status.`, ephemeral: true });
-            
-            let status;
-            if (user.presence.activities.length === 1) status = user.presence.activities[0];
-            else if (user.presence.activities.length > 1)status =user.presence.activities[1];
-    
-            if (user.presence.activities.length === 0 || status.name !== "Spotify" && status.type !== "LISTENING"){
-                return await interaction.reply({ content: `${user.user.username} is not listening to spotify!`, ephemeral: true });
+            if (!user) {
+                return await interaction.reply({ 
+                    content: 'Could not find that user!', 
+                    ephemeral: true 
+                });
             }
-    
-            if (status !== null && status.name === "Spotify" && status.assets !== null) {
-            
-                let image = `https://i.scdn.co/image/${status.assets.largeImage.slice(8)}`,
-                name = status.details,
-                artist = status.state,
-                album = status.assets.largeText;
-    
-                const card = new canvacord.Spotify()
+
+            if (user.bot) {
+                return await interaction.reply({ 
+                    content: `Invalid command. Cannot obtain a bot's spotify status.`, 
+                    ephemeral: true 
+                });
+            }
+
+            if (!user.presence) {
+                return await interaction.reply({ 
+                    content: `${user.user.username} is not online or their status cannot be seen!`, 
+                    ephemeral: true 
+                });
+            }
+
+            const activities = user.presence.activities || [];
+            const spotifyActivity = activities.find(activity => activity.name === "Spotify" && activity.type === "LISTENING");
+
+            if (!spotifyActivity || !spotifyActivity.assets) {
+                return await interaction.reply({ 
+                    content: `${user.user.username} is not listening to spotify at the moment! If you didn't expect this, make sure that your Spotify activity is the **top** level activity on your Discord profile.`, 
+                    ephemeral: true 
+                });
+            }
+
+            const image = `https://i.scdn.co/image/${spotifyActivity.assets.largeImage.slice(8)}`;
+            const name = spotifyActivity.details;
+            const artist = spotifyActivity.state;
+            const album = spotifyActivity.assets.largeText;
+
+            const card = new canvacord.Spotify()
                 .setAuthor(artist)
                 .setAlbum(album)
-                .setStartTimestamp(status.timestamps.start)
-                .setEndTimestamp(status.timestamps.end)
+                .setStartTimestamp(spotifyActivity.timestamps.start)
+                .setEndTimestamp(spotifyActivity.timestamps.end)
                 .setImage(image)
-                .setTitle(name)
-    
-                const Card = await card.build();
-                const attachments = new AttachmentBuilder(Card, { name: "spotify.png" }); 
-                
-                const embed = new EmbedBuilder()
+                .setTitle(name);
+
+            const Card = await card.build();
+            const attachments = new AttachmentBuilder(Card, { name: "spotify.png" }); 
+            
+            const embed = new EmbedBuilder()
                 .setAuthor({ name: `Spotify Command ${client.config.devBy}`})
                 .setColor(client.config.embedCommunity)
                 .setTitle(`${user.user.username}'s Spotify Track ${client.config.arrowEmoji}`)
                 .setImage(`attachment://spotify.png`)
                 .setTimestamp()
-                .setFooter({ text: `Spotify Tracker` })
-    
-                await interaction.reply({ embeds: [embed], files: [attachments] });
-            }
+                .setFooter({ text: `Spotify Tracker` });
+
+            await interaction.reply({ embeds: [embed], files: [attachments] });
+
+            break;
         }
     },
 };

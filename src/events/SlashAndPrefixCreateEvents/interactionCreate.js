@@ -1,4 +1,4 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder } = require("discord.js");
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require("discord.js");
 const config = require('../../config')
 const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -9,10 +9,9 @@ const User = require('../../schemas/spotifyTrackerSystem.js');
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction, client) {
-
         if (interaction.isButton()) {
             if (interaction.customId.startsWith('spotify-')) {
-                const [prefix, type, userId] = interaction.customId.split('-');
+                const [prefix, type, userId, timeRange] = interaction.customId.split('-');
                 const validTypes = ['tracks', 'artists', 'albums'];
                 
                 if (validTypes.includes(type)) {
@@ -27,12 +26,32 @@ module.exports = {
                             });
                         }
 
-                        const items = await getTopItems(user.spotifyAccessToken, type);
-                        const embed = createStatsEmbed(items, type, targetUser);
-                        
-                        await interaction.update({ embeds: [embed] });
+                        const items = await getTopItems(user.spotifyAccessToken, type, timeRange);
+                        const { embed, attachment } = await createStatsEmbed(items, type, targetUser, timeRange);
+
+                        const row = new ActionRowBuilder()
+                            .addComponents(
+                                new ButtonBuilder()
+                                    .setCustomId(`spotify-tracks-${userId}-${timeRange}`)
+                                    .setLabel('Top Tracks')
+                                    .setStyle(ButtonStyle.Primary),
+                                new ButtonBuilder()
+                                    .setCustomId(`spotify-artists-${userId}-${timeRange}`)
+                                    .setLabel('Top Artists')
+                                    .setStyle(ButtonStyle.Primary),
+                                new ButtonBuilder()
+                                    .setCustomId(`spotify-albums-${userId}-${timeRange}`)
+                                    .setLabel('Top Albums')
+                                    .setStyle(ButtonStyle.Primary)
+                            );
+
+                        await interaction.update({
+                            embeds: [embed],
+                            files: attachment ? [attachment] : [],
+                            components: [row]
+                        });
                     } catch (error) {
-                        console.error(error);
+                        console.error(`${color.red}[${getTimestamp()}] Spotify button error:`, error);
                         await interaction.reply({
                             content: 'Error updating stats!',
                             ephemeral: true

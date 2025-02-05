@@ -7,9 +7,20 @@ const { color, getTimestamp, textEffects } = require('../utils/loggingEffects');
 
 const app = express();
 
+const requiredEnvVars = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET', 'SPOTIFY_REDIRECT_URI'];
+for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+        console.error(`${color.red}[${getTimestamp()}] Missing required environment variable: ${envVar} ${color.reset}`);
+    }
+}
+
 app.get('/callback', async (req, res) => {
     const { code, state } = req.query;
     
+    if (!code) {
+        return res.status(400).send('No authorization code received');
+    }
+
     try {
         const response = await axios.post('https://accounts.spotify.com/api/token', 
             new URLSearchParams({
@@ -18,12 +29,17 @@ app.get('/callback', async (req, res) => {
                 redirect_uri: process.env.SPOTIFY_REDIRECT_URI,
                 client_id: process.env.SPOTIFY_CLIENT_ID,
                 client_secret: process.env.SPOTIFY_CLIENT_SECRET,
-            }), {
+            }).toString(),
+            {
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded'
                 }
             }
         );
+
+        if (!response.data.access_token) {
+            console.error(`${color.red}[${getTimestamp()}] Spotify auth error:`, response.data, `${color.reset}`);
+        }
 
         await User.findOneAndUpdate(
             { discordId: state },
@@ -87,8 +103,8 @@ app.get('/callback', async (req, res) => {
             </html>
         `);
     } catch (error) {
-        console.error(error);
-        res.status(500).send('Error connecting Spotify account');
+        console.error(`${color.red}[${getTimestamp()}] Spotify auth error:`, error.response?.data || error.message, `${color.reset}`);
+        res.status(500).send('Failed to authenticate with Spotify');
     }
 });
 
