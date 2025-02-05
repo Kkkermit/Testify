@@ -36,6 +36,10 @@ async function setupEnvironment() {
     const mongoDb = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}${textEffects.bold}[REQUIRED]${textEffects.reset}${color.reset} Please enter your MongoDB connection string: `);
     const movieTrackerApi = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Movie Tracker API key: `);
     const rapidApiKey = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your RapidAPI key: `);
+    const webhookSlashLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for slash command logging: `);
+    const webhookPrefixLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for prefix command logging: `);
+    const webhookBugLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for error/ bug logging: `);
+    const webhookSuggestionLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for suggestion logging: `);
     const spotifyClientId = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client ID: `);
     const spotifyClientSecret = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client Secret: `);
 
@@ -47,6 +51,11 @@ devid=${devId}
 mongodb=${mongoDb}
 movietrackerapi=${movieTrackerApi}
 rapidapikey=${rapidApiKey}
+
+webhookslashlogging=${webhookSlashLogging}
+webhookprefixlogging=${webhookPrefixLogging}
+webhookbuglogging=${webhookBugLogging}
+webhooksuggestionlogging=${webhookSuggestionLogging}
 
 SPOTIFY_CLIENT_ID=${spotifyClientId}
 SPOTIFY_CLIENT_SECRET=${spotifyClientSecret}
