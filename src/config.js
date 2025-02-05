@@ -33,6 +33,7 @@ module.exports = {
 	embedEconomy: "DarkOrange",
 	embedVerify: "DarkGreen",
 	embedAi: "DarkGrey",
+	embedSpotify: "#1DB954",
 
 	// EMOJIS //
 	automodEmoji: "<:auto:1235660206856474704>",
