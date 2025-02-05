@@ -58,6 +58,7 @@
     "mathjs": "^12.4.2",
     "moment": "^2.30.1",
     "mongoose": "^6.0.12",
+    "ngrok": "5.0.0-beta.2",
     "os": "^0.1.2",
     "prompts": "2.4.2",
     "puppeteer": "^22.7.1",

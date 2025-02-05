@@ -52,7 +52,7 @@ async function createStatsEmbed(items, type, user, timeRange = 'long_term') {
         .setThumbnail('https://i.postimg.cc/cLs5Yytb/spotify.webp')
 
     if (!items || items.length === 0) {
-        embed.setDescription('No data available.');
+        embed.setDescription('No data available. \n> One reason for this could be because your **login has expired**. Please re-login to Spotify using `/spotify login`.');
         return { embed };
     }
 

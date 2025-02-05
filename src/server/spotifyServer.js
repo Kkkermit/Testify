@@ -2,10 +2,19 @@ require('dotenv').config({ path: '../../../.env'});
 
 const express = require('express');
 const axios = require('axios');
+const ngrok = require('ngrok');
 const User = require('../schemas/spotifyTrackerSystem');
 const { color, getTimestamp, textEffects } = require('../utils/loggingEffects');
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.use((req, res, next) => {
+    res.setHeader('ngrok-skip-browser-warning', '*');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', '*');
+    next();
+});
 
 const requiredEnvVars = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET', 'SPOTIFY_REDIRECT_URI'];
 for (const envVar of requiredEnvVars) {
@@ -13,6 +22,7 @@ for (const envVar of requiredEnvVars) {
         console.error(`${color.red}[${getTimestamp()}] Missing required environment variable: ${envVar} ${color.reset}`);
     }
 }
+
 
 app.get('/callback', async (req, res) => {
     const { code, state } = req.query;
@@ -108,14 +118,40 @@ app.get('/callback', async (req, res) => {
     }
 });
 
-const PORT = process.env.PORT || 3000;
+async function startServer() {
+    try {
+        const server = app.listen(PORT, () => {
+            console.log(`${color.green}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Local server running on port:${textEffects.bold}${textEffects.underline}${color.torquise} http://localhost:${PORT} ${color.reset}${textEffects.reset}`);
+        });
 
-app.listen(PORT, () => {
-    console.log(`${color.green}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Spotify server is running on port:${textEffects.bold}${color.torquise} http://localhost:${PORT} ${color.reset}${textEffects.reset}`);
-}).on('error', (error) => {
-    if (error.code === 'EADDRINUSE') {
-        console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Port ${textEffects.bold}${PORT}${textEffects.reset} is already in use.`);
-    } else {
-        console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Error starting server:`, error);
+        const url = await ngrok.connect({
+            addr: PORT,
+            authtoken: process.env.NGROK_AUTH_TOKEN,
+            proto: 'http',
+            region: 'us',
+            httpHeadersProtected: false,
+            inspect: false
+        });
+
+        process.env.SPOTIFY_REDIRECT_URI = `${url}/callback`;
+        console.log(`${color.green}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Public URL:${textEffects.bold}${textEffects.underline}${color.torquise} ${url} ${color.reset}${textEffects.reset}`);
+
+        server.on('error', (error) => {
+            if (error.code === 'EADDRINUSE') {
+                console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Port ${textEffects.bold}${PORT}${textEffects.reset} is already in use.`);
+            } else {
+                console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Error starting server:`, error);
+            }
+        });
+
+    } catch (error) {
+        if (error.code === 'ECONNREFUSED') {
+            console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Ngrok connection refused. Make sure ngrok is properly authenticated.`);
+        } else {
+            console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Failed to start ngrok:`, error);
+        }
+        process.exit(1);
     }
-});
+}
+
+startServer();

@@ -42,6 +42,7 @@ async function setupEnvironment() {
     const webhookSuggestionLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for suggestion logging: `);
     const spotifyClientId = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client ID: `);
     const spotifyClientSecret = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client Secret: `);
+    const ngrokAuthToken = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your ngrok auth token: `);
 
     const envContent = `
 token=${botToken}
@@ -62,6 +63,8 @@ SPOTIFY_CLIENT_SECRET=${spotifyClientSecret}
 SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
 
 PORT=3000
+
+NGROK_AUTH_TOKEN=${ngrokAuthToken}
 `;
 
     fs.writeFileSync(envPath, envContent.trim() + '\n');

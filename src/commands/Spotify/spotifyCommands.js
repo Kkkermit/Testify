@@ -69,8 +69,8 @@ module.exports = {
                 if (!user || !user.spotifyAccessToken) {
                     return interaction.reply({
                         content: targetUser.id === interaction.user.id ? 
-                            'Please connect your Spotify account first!' : 
-                            'This user hasn\'t connected their Spotify account!',
+                            'Please connect your Spotify account first! You can do this by running the command `/spotify login`.' : 
+                            'This user hasn\'t connected their Spotify account! They can do this by running the command `/spotify login`.',
                         ephemeral: true
                     });
                 }
