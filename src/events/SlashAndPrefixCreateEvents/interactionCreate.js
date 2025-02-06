@@ -5,10 +5,12 @@ const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 const { getTopItems } = require('../../api/spotifyTrackerApi.js');
 const { createStatsEmbed } = require('../../utils/createStatsEmbed.js');
 const User = require('../../schemas/spotifyTrackerSystem.js');
+const { patchInteraction } = require('../../utils/interactionExtensions.js');
 
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction, client) {
+        patchInteraction(interaction);
         if (interaction.isButton()) {
             if (interaction.customId.startsWith('spotify-')) {
                 const [prefix, type, userId, timeRange] = interaction.customId.split('-');

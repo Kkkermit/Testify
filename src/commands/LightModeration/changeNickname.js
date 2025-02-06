@@ -34,7 +34,7 @@ module.exports = {
 
         } else {
 
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageNicknames)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageNicknames)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
             else {
 
                 await member.setNickname(nick).catch(err => {

@@ -23,7 +23,6 @@ for (const envVar of requiredEnvVars) {
     }
 }
 
-
 app.get('/callback', async (req, res) => {
     const { code, state } = req.query;
     
@@ -150,7 +149,6 @@ async function startServer() {
         } else {
             console.error(`${color.red}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Failed to start ngrok:`, error);
         }
-        process.exit(1);
     }
 }
 
