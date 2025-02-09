@@ -146,7 +146,7 @@ module.exports = {
                         .setTitle(`${client.user.username} Valorant Skin Search ${client.config.arrowEmoji}`)
                         .setColor(`#${skinTier["highlightColor"].slice(0, -2)}` || "DarkerGrey")
                         .setThumbnail(skinTier["displayIcon"])
-                        .setImage(foundSkin["displayIcon"] || foundSkin["levels"][0]["displayIcon"])
+                        .setImage(foundSkin["levels"][0]["displayIcon"] || foundSkin["displayIcon"])
                         .setFooter({ text: `Valorant Skin Search`, iconURL: interaction.user.displayAvatarURL() })
                         .setTimestamp()
                         .setDescription(`> **${foundSkin["displayName"]["en-US"]}** \n\nPrice: **${!foundSkin["displayName"]["en-US"].includes('Knife') ? skinTier["price"] || 0 : "1750 - 5950"}** ${client.config.valoPoints}`);
