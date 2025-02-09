@@ -162,7 +162,7 @@ class ValoAPI {
 
                     const skinTier = this.skinsTier.find(s => s["uuid"] === foundSkin["contentTierUuid"]);
 
-                    Skins.push({ name: foundSkin["displayName"]["en-US"], icon: foundSkin["displayIcon"] || foundSkin["levels"][0]["displayIcon"], price: `${skin["Cost"]["85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"]} ${CurrencyEmojis["85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"]}`, tier: { name: skinTier["displayName"], color: `#${skinTier["highlightColor"].slice(0, -2)}`, emoji: TierEmojis[skinTier["uuid"]] } })
+                    Skins.push({ name: foundSkin["displayName"]["en-US"], icon: foundSkin["levels"][0]["displayIcon"] || foundSkin["displayIcon"], price: `${skin["Cost"]["85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"]} ${CurrencyEmojis["85ad13f7-3d1b-5128-9eb2-7cd8ee0b5741"]}`, tier: { name: skinTier["displayName"], color: `#${skinTier["highlightColor"].slice(0, -2)}`, emoji: TierEmojis[skinTier["uuid"]] } })
                 }
 
                 return Skins;
