@@ -59,7 +59,8 @@ module.exports = {
                             .setStyle(ButtonStyle.Link)
                     );
 
-                    const response = await interaction.reply({ embeds: [Embed], 
+                    const response = await interaction.reply({ content: '[Copy link](https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid)', 
+                        embeds: [Embed], 
                         components: [Buttons], 
                         ephemeral: true 
                     });
@@ -145,7 +146,7 @@ module.exports = {
                         .setTitle(`${client.user.username} Valorant Skin Search ${client.config.arrowEmoji}`)
                         .setColor(`#${skinTier["highlightColor"].slice(0, -2)}` || "DarkerGrey")
                         .setThumbnail(skinTier["displayIcon"])
-                        .setImage(foundSkin["displayIcon"] || foundSkin["levels"][0]["displayIcon"])
+                        .setImage(foundSkin["levels"][0]["displayIcon"] || foundSkin["displayIcon"])
                         .setFooter({ text: `Valorant Skin Search`, iconURL: interaction.user.displayAvatarURL() })
                         .setTimestamp()
                         .setDescription(`> **${foundSkin["displayName"]["en-US"]}** \n\nPrice: **${!foundSkin["displayName"]["en-US"].includes('Knife') ? skinTier["price"] || 0 : "1750 - 5950"}** ${client.config.valoPoints}`);
