@@ -1,3 +1,5 @@
+const { EmbedBuilder } = require('discord.js');
+
 module.exports = {
     name: 'interactionCreate',
     async execute(interaction, client) {
@@ -15,7 +17,9 @@ module.exports = {
                 return;
             }
 
-            const embed = message.embeds[0];
+            const oldEmbed = message.embeds[0];
+
+            const embed = new EmbedBuilder(oldEmbed.data);
             const row = message.components[0];
 
             switch(customId) {

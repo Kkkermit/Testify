@@ -11,26 +11,6 @@ module.exports = {
         if (message.author.bot || !message.guild || message.system || message.webhookId)
             return;
 
-        const userData = await blacklistSchema.findOne({
-            userId: message.author.id,
-        });
-
-        if (userData) {
-            const embed = new EmbedBuilder()
-            .setAuthor({ name: `Blacklist System` })
-            .setTitle(`You are blacklisted from using ${client.user.username}`)
-            .setDescription(`Reason: ${userData.reason}`)
-            .setColor(client.config.embedColor)
-            .setFooter({ text: `You are blacklisted from using this bot` })
-            .setTimestamp();
-
-            const reply = await message.reply({ embeds: [embed], fetchReply: true });
-            setTimeout(async () => {
-                await reply.delete();
-            }, 2500);
-            return;
-        }
-
         const guildSettings = await GuildSettings.findOneAndUpdate(
             { Guild: message.guild.id }, 
             { $setOnInsert: { Prefix: client.config.prefix } }, 
@@ -51,6 +31,26 @@ module.exports = {
         }
 
         if (!message.content.toLowerCase().startsWith(prefix)) {
+            return;
+        }
+
+        const userData = await blacklistSchema.findOne({
+            userId: message.author.id,
+        });
+
+        if (userData) {
+            const embed = new EmbedBuilder()
+            .setAuthor({ name: `Blacklist System` })
+            .setTitle(`You are blacklisted from using ${client.user.username}`)
+            .setDescription(`Reason: ${userData.reason}`)
+            .setColor(client.config.embedColor)
+            .setFooter({ text: `You are blacklisted from using this bot` })
+            .setTimestamp();
+
+            const reply = await message.reply({ embeds: [embed], fetchReply: true });
+            setTimeout(async () => {
+                await reply.delete();
+            }, 2500);
             return;
         }
 
