@@ -140,6 +140,9 @@ module.exports = {
                         displayIcon: null,
                         price: 0
                     };
+
+                    const skinPrice = await fetch("https://val-skin-price.vercel.app/beta/skins/" + skinUUID);
+                    const skinPriceData = await skinPrice.json();
     
                     const skinEmbed = new EmbedBuilder()
                         .setAuthor({ name: `Valorant Skin Search | Developed by arnsfh`, iconURL: "https://i.postimg.cc/RVzrNstM/arnsfh.webp" })
@@ -149,7 +152,7 @@ module.exports = {
                         .setImage(foundSkin["levels"][0]["displayIcon"] || foundSkin["displayIcon"])
                         .setFooter({ text: `Valorant Skin Search`, iconURL: interaction.user.displayAvatarURL() })
                         .setTimestamp()
-                        .setDescription(`> **${foundSkin["displayName"]["en-US"]}** \n\nPrice: **${!foundSkin["displayName"]["en-US"].includes('Knife') ? skinTier["price"] || 0 : "1750 - 5950"}** ${client.config.valoPoints}`);
+                        .setDescription(`> **${foundSkin["displayName"]["en-US"]}** \n\nPrice: **${skinPriceData["price"]}** ${client.config.valoPoints}`);
     
                     await interaction.reply({ embeds: [skinEmbed] });
 
