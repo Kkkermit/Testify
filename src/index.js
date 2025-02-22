@@ -45,6 +45,7 @@ client.config = require('./config');
 
 // Val Api //
 
+client.swatch = null;
 client.skins = null;
 client.skinsTier = null;
 
