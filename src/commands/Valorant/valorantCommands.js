@@ -140,11 +140,14 @@ module.exports = {
                     const skinPriceData = await skinPrice.json();
             
                     const skinEmbed = new EmbedBuilder()
+                    .setAuthor({ name: `Valorant Skin Search | Developed by arnsfh`, iconURL: "https://i.postimg.cc/RVzrNstM/arnsfh.webp" })
+                    .setTitle(`${client.user.username} Valorant Skin Search ${client.config.arrowEmoji}`)
                     .setColor(`#${skinTier["highlightColor"].slice(0, -2)}` || "DarkerGrey")
-                    .setTitle(foundSkin["displayName"]["en-US"])
                     .setThumbnail(skinTier["displayIcon"])
                     .setImage(foundSkin["levels"][0]["displayIcon"] || foundSkin["displayIcon"])
-                    .setDescription(`Price: ${skinPriceData["price"] || skinTier["price"] || 'Error!'} ${client.config.Emojis["ValoPoints"]}`)
+                    .setFooter({ text: `Valorant Skin Search`, iconURL: interaction.user.displayAvatarURL() })
+                    .setTimestamp()
+                    .setDescription(`> **${foundSkin["displayName"]["en-US"]}** \n\nPrice: **${skinPriceData["price"]}** ${client.config.valoPoints}`);
             
                     const SkinChromas = new ActionRowBuilder()
                     const SkinLevels = new ActionRowBuilder()
