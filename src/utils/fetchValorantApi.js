@@ -26,7 +26,7 @@ async function fetchValorantAPI(client) {
 	const swatchData = await fetch("https://api.arnsfh.xyz/v1/valorant/data/swatch");
 
 	if (swatchData.status !== 200) {
-		client.logs.error(`Failed to fetch swatch data from API!`);
+		client.logs.error(`[VAL_API] Failed to fetch swatch data from API!`);
 	} 
 
 	const swatchJson = await swatchData.json();
@@ -37,7 +37,7 @@ async function fetchValorantAPI(client) {
 
     client.logs.info(`[VAL_API] Fetched ${skinsJson["data"].length} skins from API.`);
     client.logs.info(`[VAL_API] Fetched ${tierJson["data"].length} tiers from API.`);
-    client.logs.info(`Fetched ${swatchJson.length} swatches from API.`);
+    client.logs.info(`[VAL_API] Fetched ${swatchJson.length} swatches from API.`);
 }
 
 module.exports = { fetchValorantAPI };
