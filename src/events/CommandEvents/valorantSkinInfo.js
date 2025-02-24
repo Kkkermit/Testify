@@ -1,123 +1,140 @@
-const { Events } = require('discord.js');
+const { Events } = require("discord.js");
 
 module.exports = {
-    name: Events.InteractionCreate,
-    async execute(interaction, client) {
-        if (!interaction.isButton()) return;
+	name: Events.InteractionCreate,
+	async execute(interaction, client) {
+		if (!interaction.isButton()) return;
 
-        if (!interaction.customId.startsWith('skin-preview') || !interaction.customId.startsWith('skin-chroma') || !interaction.customId.startsWith('skin-level')) return;
+		const customId = interaction.customId;
+		if (!customId.startsWith("skin-")) return;
 
-        const args = interaction.customId.split("_");
-        const custom_id = args.shift();
+		const [type, ...rest] = customId.split("_");
+        const skinUUID = type === "skin-preview" ? rest[1] : rest[0];
 
-        const skin = client.skins.find(s => s["uuid"] === custom_id == "skin-preview" ? args[1] : args[0]);
+        const skin = client.skins.find((s) => s["uuid"] === skinUUID);
+        if (!skin) return interaction.reply({ content: "Skin not found!", ephemeral: true });
 
         let ChromaComponents, LevelComponents, PreviewComponents, Embed, i;
 
-        switch (custom_id) {
-            case 'skin-preview':
-                const PreviewType = args[0];
-                const index = args[2];
-        
-                const Video = PreviewType == 'chromas' && index == "0" ? skin["levels"][index]["streamedVideo"] : skin[PreviewType][index]["streamedVideo"];
-        
-                return await interaction.reply({ content: Video, ephemeral: true });
-            break;
-            case 'skin-chroma':
-                const SelectedChroma = skin["chromas"][Number(args[1])];
+		try {
+			switch (type) {
+				case "skin-preview":
+                    const PreviewType = rest[0];
+                    const index = parseInt(rest[2]);
 
-                const ChromaImage = SelectedChroma["displayIcon"] || SelectedChroma["fullRender"];
-                const ChromaPreviewVideo = SelectedChroma["streamedVideo"] || skin["levels"][0]["streamedVideo"];
-        
-                ChromaComponents = interaction.message.components[0];
-                LevelComponents = interaction.message.components[1];
-                PreviewComponents = interaction.message.components[2];
-        
-                i = 0;
-                for (const ChromaComponent of ChromaComponents["components"]) {
-                    if (i == args[1]) {
-                        ChromaComponent["data"]["disabled"] = true;
-                    } else {
-                        ChromaComponent["data"]["disabled"] = false;
+                    if (!skin[PreviewType] || !skin[PreviewType][index]) {
+                        return interaction.reply({ content: "Preview not available!", ephemeral: true });
                     }
-                    i++;
-                }
-        
-                let levelId;
-        
-                i = 0;
-                for (const LevelComponent of LevelComponents["components"]) {
-                    if (Number(args[1]) !== 0 && i === LevelComponents["components"].length - 1) {
-                        LevelComponent["data"]["disabled"] = true;
-                        levelId = i;
-                    } else if (Number(args[1]) === 0 && i === 0) {
-                        LevelComponent["data"]["disabled"] = true;
-                        levelId = i;
-                    } else {
-                        LevelComponent["data"]["disabled"] = false;
+
+                    const Video = PreviewType === "chromas" && index === 0 
+                        ? skin["levels"]?.[index]?.["streamedVideo"]
+                        : skin[PreviewType]?.[index]?.["streamedVideo"];
+
+                    if (!Video) {
+                        return interaction.reply({ content: "No video preview available!", ephemeral: true });
                     }
-                    i++;
-                }
-        
-                PreviewComponents["components"][0]["data"]["custom_id"] = PreviewComponents["components"][0]["data"]["custom_id"].slice(0, -1) + args[1];
-                PreviewComponents["components"][1]["data"]["custom_id"] = PreviewComponents["components"][1]["data"]["custom_id"].slice(0, -1) + levelId;
-        
-                PreviewComponents["components"][0]["data"]["disabled"] = ChromaPreviewVideo ? false : true;
-                PreviewComponents["components"][1]["data"]["disabled"] = skin["levels"][levelId]["streamedVideo"] ? false : true;
-        
-                Embed = interaction.message.embeds[0];
-        
-                Embed["data"]["image"] = {
-                    "url": ChromaImage
-                }
-        
-                return await interaction.update({ embeds: [Embed], components: [ChromaComponents, LevelComponents, PreviewComponents] });
-            break;
-            case 'skin-level':
-                const SelectedLevel = skin["levels"][Number(args[1])];
-                const BaseVariantImage = skin["chromas"][0]["displayIcon"] || skin["displayIcon"];
-                const LevelPreviewVideo = SelectedLevel["streamedVideo"];
-        
-                ChromaComponents = interaction.message.components[0];
-                LevelComponents = interaction.message.components[1];
-                PreviewComponents = interaction.message.components[2];
-        
-                i = 0;
-                for (const ChromaComponent of ChromaComponents["components"]) {
-                    if (i == 0) { //args[1]) {
-                        ChromaComponent["data"]["disabled"] = true;
-                    } else {
-                        ChromaComponent["data"]["disabled"] = false;
-                    }
-                    i++;
-                }
-        
-                i = 0;
-                for (const LevelComponent of LevelComponents["components"]) {
-                    if (i == Number(args[1])) {
-                        LevelComponent["data"]["disabled"] = true;
-                    // } else if (Number(args[1]) === 0 && i === 0) {
-                    //     LevelComponent["data"]["disabled"] = true;
-                   } else {
-                        LevelComponent["data"]["disabled"] = false;
-                    }
-                    i++;
-                }
-        
-                PreviewComponents["components"][0]["data"]["custom_id"] = PreviewComponents["components"][0]["data"]["custom_id"].slice(0, -1) + "0";
-                PreviewComponents["components"][1]["data"]["custom_id"] = PreviewComponents["components"][1]["data"]["custom_id"].slice(0, -1) + args[1];
-        
-                PreviewComponents["components"][0]["data"]["disabled"] = LevelPreviewVideo ? false : true;
-                PreviewComponents["components"][1]["data"]["disabled"] = skin["levels"][0]["streamedVideo"] ? false : true;
-        
-                Embed = interaction.message.embeds[0];
-        
-                Embed["data"]["image"] = {
-                    "url": BaseVariantImage
-                }
-        
-                return await interaction.update({ embeds: [Embed], components: [ChromaComponents, LevelComponents, PreviewComponents] });
-            break;
+
+                    return await interaction.reply({ content: Video, ephemeral: true });
+
+				case "skin-chroma":
+					const chromaIndex = Number(rest[1]);
+					if (!skin["chromas"] || !skin["chromas"][chromaIndex]) {
+						return interaction.reply({ content: "Chroma not found!", ephemeral: true });
+					}
+				
+					const SelectedChroma = skin["chromas"][chromaIndex];
+					const ChromaImage = SelectedChroma["displayIcon"] || SelectedChroma["fullRender"];
+					const ChromaPreviewVideo = SelectedChroma["streamedVideo"] || skin["levels"]?.[0]?.["streamedVideo"];
+				
+					ChromaComponents = interaction.message.components[0];
+					LevelComponents = interaction.message.components[1];
+					PreviewComponents = interaction.message.components[2];
+				
+					i = 0;
+					for (const ChromaComponent of ChromaComponents["components"]) {
+						ChromaComponent["data"]["disabled"] = i == rest[1]; 
+						i++;
+					}
+				
+					let levelId;
+					i = 0;
+					for (const LevelComponent of LevelComponents["components"]) {
+						if (Number(rest[1]) !== 0 && i === LevelComponents["components"].length - 1) {
+							LevelComponent["data"]["disabled"] = true;
+							levelId = i;
+						} else if (Number(rest[1]) === 0 && i === 0) {
+							LevelComponent["data"]["disabled"] = true;
+							levelId = i;
+						} else {
+							LevelComponent["data"]["disabled"] = false;
+						}
+						i++;
+					}
+				
+					PreviewComponents["components"][0]["data"]["custom_id"] = `skin-preview_chromas_${skinUUID}_${rest[1]}`;
+					PreviewComponents["components"][1]["data"]["custom_id"] = `skin-preview_levels_${skinUUID}_${levelId}`;
+					PreviewComponents["components"][0]["data"]["disabled"] = !ChromaPreviewVideo;
+					PreviewComponents["components"][1]["data"]["disabled"] = !skin["levels"]?.[levelId]?.["streamedVideo"];
+
+					Embed = interaction.message.embeds[0];
+					Embed["data"]["image"] = { url: ChromaImage };
+
+					return await interaction.update({
+						embeds: [Embed],
+						components: [ChromaComponents, LevelComponents, PreviewComponents],
+					});
+
+				case "skin-level":
+					const levelIndex = Number(rest[1]);
+					if (!skin["levels"] || !skin["levels"][levelIndex]) {
+						return interaction.reply({ content: "Level not found!", ephemeral: true });
+					}
+				
+					const SelectedLevel = skin["levels"][levelIndex];
+					const BaseVariantImage = skin["chromas"]?.[0]?.["displayIcon"] || skin["displayIcon"];
+					const LevelPreviewVideo = SelectedLevel?.["streamedVideo"];
+				
+					ChromaComponents = interaction.message.components[0];
+					LevelComponents = interaction.message.components[1];
+					PreviewComponents = interaction.message.components[2];
+				
+					i = 0;
+					for (const ChromaComponent of ChromaComponents["components"]) {
+						ChromaComponent["data"]["disabled"] = i === 0;
+						i++;
+					}
+				
+					i = 0;
+					for (const LevelComponent of LevelComponents["components"]) {
+						LevelComponent["data"]["disabled"] = i === Number(rest[1]);
+						i++;
+					}
+				
+					PreviewComponents["components"][0]["data"]["custom_id"] = `skin-preview_chromas_${skinUUID}_0`;
+					PreviewComponents["components"][1]["data"]["custom_id"] = `skin-preview_levels_${skinUUID}_${rest[1]}`; 
+					PreviewComponents["components"][0]["data"]["disabled"] = !LevelPreviewVideo;
+					PreviewComponents["components"][1]["data"]["disabled"] = !skin["levels"]?.[0]?.["streamedVideo"];
+				
+					Embed = interaction.message.embeds[0];
+					Embed["data"]["image"] = { url: BaseVariantImage };
+				
+					return await interaction.update({
+						embeds: [Embed],
+						components: [ChromaComponents, LevelComponents, PreviewComponents],
+					});
+			}
+		} catch (error) {
+            client.logs.error("[VAL_SEARCH_SKIN_BUTTON] Button Interaction Error:", {
+                error,
+                customId,
+                type,
+                rest,
+                skinUUID
+            });
+            return interaction.reply({
+                content: "An error occurred while processing the skin information.",
+                ephemeral: true
+            });
         }
-    }
-}
+	},
+};

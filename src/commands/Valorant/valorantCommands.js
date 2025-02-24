@@ -161,8 +161,8 @@ module.exports = {
                         const ChromaButton = new ButtonBuilder()
                         .setCustomId(`skin-chroma_${skinUUID}_${i}`)
                         .setStyle(ButtonStyle.Primary)
-                        .setLabel(`${i == 0 ? "Base Variant" : `Variant ${i}`}`)
-                        .setDisabled(i == 0 ? true : false)
+                        .setLabel(`${i === 0 ? "Base Variant" : `Variant ${i}`}`)
+                        .setDisabled(i === 0);
                         
                         if (chromaEmojiData) {
                             ChromaButton.setEmoji({ id: chromaEmojiData["emojiId"] });
