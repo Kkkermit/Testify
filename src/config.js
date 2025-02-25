@@ -115,11 +115,4 @@ module.exports = {
 	premiumEdition: "<:Premium_Edition:1335281487645249567>",
 	exclusiveEdition: "<:Exclusive_Edition:1335281472801869824>",
 	deluxeEdition: "<:Deluxe_Edition:1335281457563701289>",
-
-	// Embed Colors //
-	colors: {
-		success: 0x57F287, // Discord green
-		error: 0xED4245,   // Discord red
-		info: 0x5865F2     // Discord blue
-	}
 };
