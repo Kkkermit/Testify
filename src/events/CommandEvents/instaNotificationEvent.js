@@ -1,4 +1,4 @@
-const { Events } = require('discord.js');
+const { Events, EmbedBuilder } = require('discord.js');
 const InstagramSchema = require('../../schemas/instaNotificationSystem');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
 const fetch = require('node-fetch');
@@ -51,18 +51,18 @@ module.exports = {
                         if (!lastChecked || lastPostTime > lastChecked) {
                             const channel = client.channels.cache.get(guildData.Channel);
                             if (channel) {
-                                await channel.send({
-                                    embeds: [{
-                                        author: { name: `${client.user.username} Instagram Post Tracker`, iconURL: client.user.displayAvatarURL() },
-                                        color: 'LuminousVividPink',
-                                        title: `New Post from ${username}`,
-                                        description: latestPost.caption || 'No caption',
-                                        image: { url: latestPost.display_url },
-                                        url: `https://www.instagram.com/p/${latestPost.shortcode}`,
-                                        timestamp: lastPostTime,
-                                        footer: { text: `Posted on Instagram` }
-                                    }]
-                                });
+
+                                const embed = new EmbedBuilder()
+                                    .setAuthor({ name: `${client.user.username} Instagram Post Tracker`, iconURL: client.user.displayAvatarURL() })
+                                    .setColor(client.config.embedInsta)
+                                    .setTitle(`New Post from ${username}`)
+                                    .setDescription(latestPost.caption || 'No caption')
+                                    .setImage(latestPost.display_url)
+                                    .setURL(`https://www.instagram.com/p/${latestPost.shortcode}`)
+                                    .setTimestamp(lastPostTime)
+                                    .setFooter({ text: 'Posted on Instagram' });
+
+                                await channel.send({ embeds: [embed] });
 
                                 guildData.LastPostDates.set(username, lastPostTime);
                                 await guildData.save();
