@@ -1,4 +1,3 @@
-const config = require('../../config');
 const mongoose = require('mongoose');
 const mongodbURL = process.env.mongodb;
 const folderLoader = require('../../utils/folderLoader.js');
