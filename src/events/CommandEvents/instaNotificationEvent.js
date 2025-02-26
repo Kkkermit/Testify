@@ -3,21 +3,46 @@ const InstagramSchema = require('../../schemas/instaNotificationSystem');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
 const fetch = require('node-fetch');
 
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 async function getLatestPost(username) {
     try {
         const userResponse = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
             headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+                'Accept': 'application/json',
                 'Accept-Language': 'en-US,en;q=0.9',
-                'X-IG-App-ID': '936619743392459' 
+                'X-IG-App-ID': '936619743392459',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Referer': `https://www.instagram.com/${username}/`,
+                'Cookie': 'ig_did=1; csrftoken=1; mid=1;'
             }
         });
 
+        if (!userResponse.ok) {
+            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Instagram API returned ${userResponse.status} for ${username}${color.reset}`);
+            return null;
+        }
+
+        const contentType = userResponse.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Invalid content type ${contentType} for ${username}${color.reset}`);
+            return null;
+        }
+
         const userData = await userResponse.json();
+        
+        if (!userData || !userData.data || !userData.data.user) {
+            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No user data found for ${username}${color.reset}`);
+            return null;
+        }
+
         const user = userData.data.user;
 
-        if (!user || !user.edge_owner_to_timeline_media || !user.edge_owner_to_timeline_media.edges.length) {
+        if (!user.edge_owner_to_timeline_media?.edges?.length) {
+            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No posts found for ${username}${color.reset}`);
             return null;
         }
 
@@ -42,6 +67,7 @@ module.exports = {
 
             for (const guildData of allGuilds) {
                 for (const username of guildData.InstagramUsers) {
+                    await delay(2000);
                     const latestPost = await getLatestPost(username);
                     
                     if (latestPost) {
