@@ -73,7 +73,7 @@ module.exports = {
                         .setColor(client.config.embedInsta)
                         .setTitle(`${client.user.username} Instagram Notification Setup ${client.config.arrowEmoji}`)
                         .setDescription(`> Now tracking posts from: **${username}**\nNotifications will be sent to: ${channel}`)
-                        .setFooter(`Now tracking ${data.InstagramUsers.length} Instagram users`)
+                        .setFooter({ text: `Now tracking ${data.InstagramUsers.length} Instagram users` })
                         .setTimestamp();
 
                     await interaction.editReply({ embeds: [embed] });
@@ -106,7 +106,7 @@ module.exports = {
                         .setColor(client.config.embedInsta)
                         .setTitle(`${client.user.username} Instagram Notification Removed ${client.config.arrowEmoji}`)
                         .setDescription(`> Stopped tracking posts from: **${username}**`)
-                        .setFooter(`Now tracking ${data.InstagramUsers.length} Instagram users`)
+                        .setFooter({ text: `Now tracking ${data.InstagramUsers.length} Instagram users`})
                         .setTimestamp();
 
                     await interaction.editReply({ embeds: [embed] });
@@ -134,7 +134,7 @@ module.exports = {
                         .setColor(client.config.embedInsta)
                         .setTitle(`${client.user.username} Instagram Notification Check Tracker Users ${client.config.arrowEmoji}`)
                         .setDescription(`**Tracked Users:**\n${data.InstagramUsers.map(user => `• ${user}`).join('\n')}\n\n**Notification Channel:** <#${data.Channel}>`)
-                        .setFooter(`Tracking ${data.InstagramUsers.length} Instagram users`)
+                        .setFooter({ text: `Tracking ${data.InstagramUsers.length} Instagram users` })
                         .setTimestamp();
 
                     await interaction.editReply({ embeds: [embed] });
