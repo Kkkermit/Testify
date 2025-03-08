@@ -7,12 +7,13 @@ on:
     branches: [ main ]
   issues:
     types: [opened, closed, reopened]
-  star:
-    types: [created, deleted]
-  fork:
-    types: [created]
   watch:
     types: [started]
+  fork:
+    types: [created]
+  gollum:  # Wiki updates
+  release:
+    types: [published]
 
 jobs:
   notify:
@@ -30,6 +31,18 @@ jobs:
               "description": "${{ github.event.head_commit.message || github.event.issue.title || 'Repository event' }}",
               "url": "${{ github.event.head_commit.url || github.event.issue.html_url || github.event.repository.html_url }}",
               "color": 5814783,
+              "fields": [
+                {
+                  "name": "Event Type",
+                  "value": "${{ github.event_name }}",
+                  "inline": true
+                },
+                {
+                  "name": "Repository",
+                  "value": "[${{ github.repository }}](https://github.com/${{ github.repository }})",
+                  "inline": true
+                }
+              ],
               "author": {
                 "name": "${{ github.actor }}",
                 "url": "https://github.com/${{ github.actor }}",
