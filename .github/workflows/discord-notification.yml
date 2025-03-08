@@ -1,0 +1,43 @@
+name: Discord Notifications
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  issues:
+    types: [opened, closed, reopened]
+  star:
+    types: [created, deleted]
+  fork:
+    types: [created]
+  watch:
+    types: [started]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Discord Webhook
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+          DISCORD_EMBEDS: >
+            [{
+              "title": "${{ github.event_name }} on Testify",
+              "description": "${{ github.event.head_commit.message || github.event.issue.title || 'Repository event' }}",
+              "url": "${{ github.event.head_commit.url || github.event.issue.html_url || github.event.repository.html_url }}",
+              "color": 5814783,
+              "author": {
+                "name": "${{ github.actor }}",
+                "url": "https://github.com/${{ github.actor }}",
+                "icon_url": "https://github.com/${{ github.actor }}.png"
+              },
+              "timestamp": "${{ github.event.head_commit.timestamp || github.event.issue.created_at || '' }}",
+              "footer": {
+                "text": "GitHub Action • ${{ github.repository }}",
+                "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
+              }
+            }]
