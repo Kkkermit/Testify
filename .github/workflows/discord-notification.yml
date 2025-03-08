@@ -21,36 +21,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      # First validate the webhook URL is properly formatted
+      - name: Validate Webhook
+        run: |
+          if [[ "${{ secrets.DISCORD_WEBHOOK }}" =~ \?wait=true$ ]]; then
+            echo "DISCORD_WEBHOOK_CLEAN=$(echo ${{ secrets.DISCORD_WEBHOOK }} | sed 's/?wait=true//')" >> $GITHUB_ENV
+          elif [[ "${{ secrets.DISCORD_WEBHOOK }}" =~ /[0-9]+$ ]]; then
+            echo "DISCORD_WEBHOOK_CLEAN=${{ secrets.DISCORD_WEBHOOK }}" >> $GITHUB_ENV
+          else
+            echo "DISCORD_WEBHOOK_CLEAN=${{ secrets.DISCORD_WEBHOOK }}" >> $GITHUB_ENV
+          fi
+
       - name: Discord Webhook
-        uses: Ilshidur/action-discord@master
-        env:
-          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-          DISCORD_EMBEDS: >
-            [{
-              "title": "${{ github.event_name }} on Testify",
-              "description": "${{ github.event.head_commit.message || github.event.issue.title || 'Repository event' }}",
-              "url": "${{ github.event.head_commit.url || github.event.issue.html_url || github.event.repository.html_url }}",
-              "color": 5814783,
-              "fields": [
-                {
-                  "name": "Event Type",
-                  "value": "${{ github.event_name }}",
-                  "inline": true
-                },
-                {
-                  "name": "Repository",
-                  "value": "[${{ github.repository }}](https://github.com/${{ github.repository }})",
-                  "inline": true
-                }
-              ],
-              "author": {
-                "name": "${{ github.actor }}",
-                "url": "https://github.com/${{ github.actor }}",
-                "icon_url": "https://github.com/${{ github.actor }}.png"
-              },
-              "timestamp": "${{ github.event.head_commit.timestamp || github.event.issue.created_at || '' }}",
-              "footer": {
-                "text": "GitHub Action • ${{ github.repository }}",
-                "icon_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png"
-              }
-            }]
+        uses: sarisia/actions-status-discord@v1
+        with:
+          webhook: ${{ env.DISCORD_WEBHOOK_CLEAN }}
+          title: "${{ github.event_name }} on Testify"
+          description: "${{ github.event.head_commit.message || github.event.issue.title || 'Repository event' }}"
+          url: "${{ github.event.head_commit.url || github.event.issue.html_url || github.event.repository.html_url }}"
+          color: 0x58B9FF
+          username: GitHub Actions
+          avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
+          author_name: "${{ github.actor }}"
+          author_url: "https://github.com/${{ github.actor }}"
+          author_icon_url: "https://github.com/${{ github.actor }}.png"
+          footer: "GitHub Action • ${{ github.repository }}"
