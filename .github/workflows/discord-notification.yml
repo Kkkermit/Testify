@@ -32,6 +32,10 @@ jobs:
             echo "DISCORD_WEBHOOK_CLEAN=${{ secrets.DISCORD_WEBHOOK }}" >> $GITHUB_ENV
           fi
 
+      # Add a delay to avoid rate limiting
+      - name: Wait to avoid rate limits
+        run: sleep 2
+
       - name: Discord Webhook
         uses: sarisia/actions-status-discord@v1
         with:
@@ -42,7 +46,7 @@ jobs:
           color: 0x58B9FF
           username: GitHub Actions
           avatar_url: https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png
-          author_name: "${{ github.actor }}"
-          author_url: "https://github.com/${{ github.actor }}"
-          author_icon_url: "https://github.com/${{ github.actor }}.png"
-          footer: "GitHub Action • ${{ github.repository }}"
+          # Use content field instead of individual author fields
+          content: "**Action by:** [${{ github.actor }}](https://github.com/${{ github.actor }})\n**Repository:** [${{ github.repository }}](https://github.com/${{ github.repository }})"
+          nodetail: false
+          notimestamp: false
