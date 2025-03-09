@@ -1,4 +1,3 @@
-
 // ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗
 // ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝
 //    ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝ 
@@ -11,7 +10,13 @@
 
 const { Client, Collection } = require(`discord.js`);
 const fs = require('fs');
-const config = require('./config')
+const config = require('./config');
+const { getTimestamp, color } = require('./utils/loggingEffects.js');
+const updateYTDLPackages = require('./scripts/ytdlUpdater');
+
+// Run YTDL packages update at startup
+console.log(`${color.blue}[${getTimestamp()}] [STARTUP] Running package updates for music functionality${color.reset}`);
+updateYTDLPackages();
 
 // Client Loader //
 
@@ -21,10 +26,6 @@ loadEnvironment();
 // Version Control //
 
 const currentVersion = `${config.botVersion}`;
-
-// Logging Effects //
-
-const { getTimestamp, color } = require('./utils/loggingEffects.js');
 
 // Intents & Partials //
 
@@ -79,6 +80,12 @@ if (!token) {
     return;
 }
 
+// Client Loader //
+
+distubeClient(client);
+giveawayClient(client);
+auditLogsClient(client);
+
 (async () => {
     for (file of functions) {
         require(`./functions/${file}`)(client);
@@ -96,9 +103,3 @@ if (!token) {
         console.error(`${color.red}[${getTimestamp()}]${color.reset} [LOGIN] Error while logging into ${config.botName}. Check if your token is correct or double check your also using the correct intents. \n${color.red}[${getTimestamp()}]${color.reset} [LOGIN]`, error);
     });
 })();
-
-// Client Loader //
-
-distubeClient(client);
-giveawayClient(client);
-auditLogsClient(client);
