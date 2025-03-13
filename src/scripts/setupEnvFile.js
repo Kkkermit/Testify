@@ -40,6 +40,7 @@ async function setupEnvironment() {
     const webhookPrefixLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for prefix command logging: `);
     const webhookBugLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for error/ bug logging: `);
     const webhookSuggestionLogging = await askRequiredQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] ${color.red}[REQUIRED]${color.reset} Please enter your webhook URL for suggestion logging: `);
+    const webhookConsoleLogging = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your webhook URL for console logging: `);
     const spotifyClientId = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client ID: `);
     const spotifyClientSecret = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client Secret: `);
     const ngrokAuthToken = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your ngrok auth token: `);
@@ -57,6 +58,8 @@ webhookslashlogging=${webhookSlashLogging}
 webhookprefixlogging=${webhookPrefixLogging}
 webhookbuglogging=${webhookBugLogging}
 webhooksuggestionlogging=${webhookSuggestionLogging}
+
+LOG_WEBHOOK_URL=${webhookConsoleLogging}
 
 SPOTIFY_CLIENT_ID=${spotifyClientId}
 SPOTIFY_CLIENT_SECRET=${spotifyClientSecret}
