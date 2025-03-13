@@ -20,11 +20,17 @@ const gitLogDescription = `${color.darkGrey}`;
 
 const commit = async () => {
 	const types = [
+		{ type: "feat", description: "A new feature" },
+		{ type: "fix", description: "A bug fix" },
+		{ type: "docs", description: "Documentation changes" },
+		{ type: "style", description: "Code style changes (formatting, etc)" },
+		{ type: "refactor", description: "Code refactoring with no feature changes" },
+		{ type: "perf", description: "Performance improvements" },
 		{ type: "test", description: "Adding or updating tests" },
+		{ type: "chore", description: "Maintenance tasks, dependency updates, etc" },
 		{ type: "add", description: "Adding new features or files" },
 		{ type: "update", description: "Updating existing features or files" },
-		{ type: "remove", description: "Removing features or files" },
-		{ type: "fix", description: "Fixing bugs or issues" },
+		{ type: "remove", description: "Removing features or files" }
 	];
 
 	let selectedType;
