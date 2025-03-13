@@ -7,9 +7,6 @@
 
 <img align="center" alt="Nub Bot banner" src="https://i.postimg.cc/v87R8PSx/test.png">
 
-> ## ⚠️ IMPORTANT SECURITY WARNING
-> **Never share or commit your `.env` file or any of its values!** These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add `.env` to your `.gitignore` file.
-
 <p align="center">
 <img align="center" alt="GitHub issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge"> 
 <img align="center" alt="GitHub license" src="https://img.shields.io/github/license/Kkkermit/Testify?style=for-the-badge">
@@ -26,6 +23,9 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 </p>
 
 > To test out Testify, be sure to invite him to your server by clicking [here](https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot)
+
+> [!CAUTION]
+> **Never share or commit your `.env` file or any of its values!** These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add `.env` to your `.gitignore` file.
 
 ## Table of Contents
 - [Features](#features)
@@ -96,6 +96,10 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 | v19.x           | ✅ Supported | |
 | v20.x           | ✅ Supported | Recommended for best performance |
 | v21.x           | ✅ Supported | Latest features |
+
+> [!IMPORTANT]
+> **If you're struggling to use a certain node version, I'd suggest either downgrading or upgrading your version using nvm**
+> To install nvm, please follow this [**link**](https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/).
 
 ## Installation
 - Download [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
