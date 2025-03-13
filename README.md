@@ -19,12 +19,13 @@ Advanced all-in-one discord bot with prefix & slash commands
 </strong></p>
 
 <p align="center">
-With over 100 slash command and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features to use for your servers!
+With over 100 slash commands and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features for your servers!
 </p>
 
 > To test out Testify, be sure to invite him to your server by clicking [here](https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot)
 
 ## Table of Contents
+- [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Setting-Audit-Logs](#Setting-up-audit-logs)
@@ -32,8 +33,43 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 - [License](#license)
 
 <h1 align="center"><strong>
-⭐ If your a fan of this repository or have used it or any of it's code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot! ⭐
+⭐ If you're a fan of this repository or have used it or any of its code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot! ⭐
 </strong></h1>
+
+> ## ⚠️ IMPORTANT SECURITY WARNING
+> **Never share or commit your `.env` file or any of its values!** These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add `.env` to your `.gitignore` file.
+
+## Features
+
+### Moderation Tools
+- **Complete Moderation Suite**: Ban, kick, timeout, warn, and mute functionality
+- **Auto-moderation**: Filter profanity, spam, and inappropriate content
+- **Audit Logging**: Comprehensive logging of all moderation actions
+- **Ticket System**: Create and manage support tickets with transcripts
+
+### Entertainment & Fun
+- **Music System**: Play music from YouTube, Spotify, and SoundCloud with queue management
+- **Leveling System**: XP and ranking system with customizable rewards
+- **Mini-games**: Variety of games including RPS, coinflip, 8ball, and more
+- **Meme Commands**: Random memes, jokes, and fun interactions
+
+### Information & Utility
+- **User Info**: Detailed user information with profile cards
+- **Server Info**: Server statistics and information
+- **Role Info**: Detailed role information including permissions
+- **Profile System**: Create and customize user profiles
+
+### Integration & API Features
+- **Valorant Integration**: View skins, store, and player info
+- **Instagram Notifications**: Get notified of new posts from Instagram accounts
+- **Spotify Integration**: Advanced Spotify tracking and integration
+- **Weather Information**: Get weather forecasts for any location
+
+### Customization
+- **Custom Prefix**: Set a custom prefix for your server
+- **Custom Embeds**: Create and customize rich embeds
+- **Announcement System**: Create professional announcements
+- **Thread Management**: Create and manage threads
 
 ## Installation
 - Download [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
@@ -131,6 +167,25 @@ With over 100 slash command and over 50 prefix commands, Testify is an open sour
 
    **log-setup** - <br>
    To run the setup of the colored logs in the `discord-logs` module. This saves you from manually doing the below method [Setting-up-audit-logs](#setting-up-audit-logs)
+
+## Command Categories
+
+### Prefix Commands
+- **Music Commands**: Play, skip, queue, stop, volume control
+- **User Info Commands**: View user info, avatar, profile
+- **Moderation Commands**: Kick, ban, warn, timeout
+- **Developer Tools**: Flush logs, evaluate code, debug
+
+### Slash Commands
+- **Light Moderation**: Create embeds, threads, announcements
+- **Profile System**: Create and edit profiles
+- **Level System**: Check ranks, view leaderboards
+- **Valorant Integration**: Search skins, view store
+- **Ticket System**: Create and manage tickets
+- **Instagram Notifications**: Track Instagram accounts
+- **Prefix Settings**: Customize your server's prefix
+- **Info Commands**: User, role, server information
+- **Fun Commands**: How commands, 8ball, meme generators
 
 ## Setting-up-audit-logs
 
@@ -265,6 +320,30 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
    3. This code makes the logs register like so this image below <img align="center" alt="Audit-logs" src="https://i.postimg.cc/NMJfsy0V/Screenshot-2024-10-07-184919.png">
    4. To update the color of the logs, you can change the part `${color.pink}` to the color you'd like which are defined in the color variable. 
    5. That should be it, now when you start up the bot, it should look all cool 😎
+
+## Technical Features
+
+### Console Logger
+- **Discord Webhook Integration**: All console output is sent to a Discord webhook for remote monitoring
+- **Rate Limiting**: Intelligent handling of Discord API rate limits to prevent errors
+- **Message Batching**: Efficiently batches messages to reduce API calls
+- **Error Handling**: Robust error handling with proper logging
+
+### Database Integration
+- **MongoDB Integration**: Complete database integration for persistent data storage
+- **Schema System**: Well-organized schema system for all bot functionality
+- **Data Management**: Tools for data management and backup
+
+### API Integrations
+- **Valorant API**: Integration with Valorant API for game data
+- **Spotify API**: Integration with Spotify API for music data
+- **Instagram API**: Integration for tracking Instagram posts
+- **Weather API**: Integration for weather forecasts
+
+### Performance Optimization
+- **Command Handler**: Efficient command handling for both prefix and slash commands
+- **Event Manager**: Comprehensive event management system
+- **Process Management**: Proper handling of process events and termination
 
 ## Support
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
