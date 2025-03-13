@@ -12,29 +12,26 @@ permissions:
   contents: write
   pages: write
   id-token: write
-  deployments: write
-  actions: write
 
 jobs:
+  # Use a single job for simpler workflow
   build-and-deploy:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v4
-        
-      - name: Debug - Check directory structure
+      # Manual configuration message
+      - name: Configuration Notice
         run: |
-          ls -la
-          ls -la docs/
-          echo "Repository: ${{ github.repository }}"
-          echo "Actor: ${{ github.actor }}"
+          echo "Before this workflow can succeed, please enable GitHub Pages in your repository settings"
+          echo "Go to Settings > Pages and set the source to GitHub Actions"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          # Force enable Pages
+          enablement: true
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
@@ -44,3 +41,13 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Deployment Result
+        run: |
+          if [ $? -eq 0 ]; then
+            echo "✅ Deployment successful!"
+          else
+            echo "❌ Deployment failed. Please check GitHub Pages is enabled in repository settings."
+          fi
