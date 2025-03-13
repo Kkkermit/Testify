@@ -7,6 +7,9 @@
 
 <img align="center" alt="Nub Bot banner" src="https://i.postimg.cc/v87R8PSx/test.png">
 
+> ## ⚠️ IMPORTANT SECURITY WARNING
+> **Never share or commit your `.env` file or any of its values!** These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add `.env` to your `.gitignore` file.
+
 <p align="center">
 <img align="center" alt="GitHub issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge"> 
 <img align="center" alt="GitHub license" src="https://img.shields.io/github/license/Kkkermit/Testify?style=for-the-badge">
@@ -26,18 +29,18 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 
 ## Table of Contents
 - [Features](#features)
+- [Compatibility](#compatibility)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Command Categories](#command-categories)
 - [Setting-Audit-Logs](#Setting-up-audit-logs)
+- [Technical Features](#technical-features)
 - [Support](#support)
 - [License](#license)
 
 <h1 align="center"><strong>
 ⭐ If you're a fan of this repository or have used it or any of its code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot! ⭐
 </strong></h1>
-
-> ## ⚠️ IMPORTANT SECURITY WARNING
-> **Never share or commit your `.env` file or any of its values!** These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add `.env` to your `.gitignore` file.
 
 ## Features
 
@@ -70,6 +73,29 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 - **Custom Embeds**: Create and customize rich embeds
 - **Announcement System**: Create professional announcements
 - **Thread Management**: Create and manage threads
+
+## Compatibility
+
+### System Requirements
+
+| Operating System | Support Status | Notes |
+|------------------|---------------|-------|
+| Windows 11       | ✅ Full Support | Recommended for development |
+| Windows 10       | ✅ Full Support | Recommended for development |
+| macOS            | ✅ Full Support | Tested on macOS Ventura+ |
+| Linux (Ubuntu)   | ✅ Full Support | Tested on Ubuntu 20.04 LTS+ |
+| Linux (Debian)   | ✅ Full Support | Tested on Debian 11+ |
+| Linux (CentOS)   | ✅ Full Support | Tested on CentOS 8+ |
+| Linux (Fedora)   | ✅ Full Support | Tested on Fedora 34+ |
+
+### Node.js Support
+
+| Node.js Version | Support Status | Notes |
+|-----------------|---------------|-------|
+| v18.13.0+       | ✅ Supported | Minimum required version |
+| v19.x           | ✅ Supported | |
+| v20.x           | ✅ Supported | Recommended for best performance |
+| v21.x           | ✅ Supported | Latest features |
 
 ## Installation
 - Download [Node.js](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
@@ -170,22 +196,45 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 
 ## Command Categories
 
-### Prefix Commands
-- **Music Commands**: Play, skip, queue, stop, volume control
-- **User Info Commands**: View user info, avatar, profile
-- **Moderation Commands**: Kick, ban, warn, timeout
-- **Developer Tools**: Flush logs, evaluate code, debug
+### Slash Command Categories
 
-### Slash Commands
-- **Light Moderation**: Create embeds, threads, announcements
-- **Profile System**: Create and edit profiles
-- **Level System**: Check ranks, view leaderboards
-- **Valorant Integration**: Search skins, view store
-- **Ticket System**: Create and manage tickets
-- **Instagram Notifications**: Track Instagram accounts
-- **Prefix Settings**: Customize your server's prefix
-- **Info Commands**: User, role, server information
-- **Fun Commands**: How commands, 8ball, meme generators
+| Category Name | Description |
+|--------------|-------------|
+| AiCommands | AI-based commands for chat responses, image generation and analysis |
+| AuditLogging | Configuration for server audit logging |
+| Automod | Automated moderation tools to filter content |
+| Community | General utility commands for the community |
+| Devs | Developer-specific tools and utilities |
+| Economy | Currency and economic system commands |
+| Fun | Entertainment and amusement commands |
+| Giveaway | Tools for running server giveaways |
+| Help | Documentation and assistance commands |
+| InfoCommands | Information retrieval tools |
+| InstaNotification | Instagram post tracking system |
+| LevelAndEconomy | Experience and economy management |
+| LevelSystem | User level progression system |
+| MiniGames | Various interactive games |
+| Other | Miscellaneous commands |
+| Owner | Bot owner administration commands |
+| PrefixSettings | Configuration for custom prefixes |
+| Profile | User profile management system |
+| Spotify | Spotify integration and tracking |
+| Valorant | Valorant game information and tracking |
+
+### Prefix Command Categories
+
+| Category Name | Description |
+|--------------|-------------|
+| Dev | Developer-specific tools and debug commands |
+| EconomyCommands | Currency system management commands |
+| FunCommands | Entertainment and amusing interactions |
+| InfoCommands | Information retrieval commands |
+| LevelCommands | User progression and level management |
+| ModerationCommands | Server moderation and administration tools | 
+| Music | Audio playback and music commands |
+| OwnerCommands | Bot owner-only administrative commands |
+| TestCommands | Testing and experimental features |
+| UtilityCommands | General utility and helper commands |
 
 ## Setting-up-audit-logs
 
