@@ -22,7 +22,6 @@ jobs:
       
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        # Removed enablement parameter that was causing issues
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
