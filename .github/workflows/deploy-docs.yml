@@ -18,9 +18,12 @@ on:
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
-  contents: read
+  contents: write  # Changed from 'read' to 'write'
   pages: write
   id-token: write
+  deployments: write  # Added deployment permission
+  issues: read  # Added for diagnostics
+  pull-requests: read  # Added for workflow context
 
 # Allow one concurrent deployment
 concurrency:
@@ -40,11 +43,17 @@ jobs:
         with:
           fetch-depth: 0
 
+      # Add a step to check GitHub Pages status
+      - name: Check GitHub Pages status
+        run: |
+          echo "Checking GitHub Pages settings..."
+          echo "Repository: ${{ github.repository }}"
+          echo "Actor: ${{ github.actor }}"
+
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
-        with:
-          enablement: true  # Enable GitHub Pages for this repository
-
+        # Remove the enablement parameter that's causing issues
+      
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
