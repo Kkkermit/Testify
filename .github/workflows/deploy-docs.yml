@@ -1,12 +1,17 @@
 name: Deploy Docs to GitHub Pages
 
 on:
-  # Trigger deployment on pushes to main branch
+  # Trigger deployment on pushes to any branch
   push:
     branches:
       - main
+      - master
+      - develop
+      - feature/*
+      - release/*
     paths:
-      - 'docs/**'  # Only trigger when changes are made to docs folder
+      - 'docs/**'
+      - '.github/workflows/deploy-docs.yml'  # Also run when the workflow itself is updated
   
   # Allow manual triggering
   workflow_dispatch:
@@ -23,23 +28,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Single deploy job since we're just copying static files
+  # Build and deploy job
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v3
-      
-      - name: Setup Pages
+        with:
+          fetch-depth: 0
+
+      - name: Setup GitHub Pages
         uses: actions/configure-pages@v3
       
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
-          # Upload only the docs directory
+          # Upload the docs directory
           path: './docs'
       
       - name: Deploy to GitHub Pages
