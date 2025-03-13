@@ -13,6 +13,7 @@ const fs = require('fs');
 const config = require('./config');
 const { getTimestamp, color } = require('./utils/loggingEffects.js');
 const updateYTDLPackages = require('./scripts/ytdlUpdater');
+const setupLoggers = require('./utils/setupLoggers');
 
 // Run YTDL packages update at startup
 console.log(`${color.blue}[${getTimestamp()}] [STARTUP] Running package updates for music functionality${color.reset}`);
@@ -22,6 +23,12 @@ updateYTDLPackages();
 
 const loadEnvironment = require('./scripts/bootMode');
 loadEnvironment();
+
+// Set up environment variables
+require('dotenv').config();
+
+// Setup logging first to capture everything
+setupLoggers();
 
 // Version Control //
 
@@ -65,8 +72,6 @@ require('./server/spotifyServer.js')
 client.commands = new Collection();
 client.pcommands = new Collection();
 client.aliases = new Collection();
-
-require('dotenv').config();
 
 const functions = fs.readdirSync("./src/functions").filter(file => file.endsWith(".js"));
 const triggerFiles = fs.readdirSync("./src/triggers").filter(file => file.endsWith(".js"));
