@@ -9,45 +9,33 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
   pages: write
   id-token: write
 
 jobs:
-  # Use a single job for simpler workflow
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      # Manual configuration message
-      - name: Configuration Notice
-        run: |
-          echo "Before this workflow can succeed, please enable GitHub Pages in your repository settings"
-          echo "Go to Settings > Pages and set the source to GitHub Actions"
-
+      
       - name: Setup Pages
         uses: actions/configure-pages@v4
-        with:
-          # Force enable Pages
-          enablement: true
+        # Removed enablement parameter that was causing issues
       
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: 'docs'
-      
+  
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Deployment Result
-        run: |
-          if [ $? -eq 0 ]; then
-            echo "✅ Deployment successful!"
-          else
-            echo "❌ Deployment failed. Please check GitHub Pages is enabled in repository settings."
-          fi
