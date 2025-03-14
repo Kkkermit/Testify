@@ -72,6 +72,7 @@ require('./server/spotifyServer.js')
 client.commands = new Collection();
 client.pcommands = new Collection();
 client.aliases = new Collection();
+client.reloadValoAPI = fetchValorantAPI;
 
 const functions = fs.readdirSync("./src/functions").filter(file => file.endsWith(".js"));
 const triggerFiles = fs.readdirSync("./src/triggers").filter(file => file.endsWith(".js"));
