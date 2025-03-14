@@ -10,11 +10,8 @@ module.exports = {
 
     async execute(interaction, client) {
         try {
-            if (!client.config.developers.includes(interaction.user.id)) {
-                return interaction.reply({ 
-                    content: `${client.config.ownerOnlyCommand}`,
-                    ephemeral: true 
-                });
+            if (interaction.user.id !== client.config.developers) {
+                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
             }
 
             await interaction.deferReply();

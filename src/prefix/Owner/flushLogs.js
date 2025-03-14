@@ -8,10 +8,9 @@ module.exports = {
   async execute(message, client, args) {
     try {
 
-      if (!client.config.developers.includes(message.author.id)) {
-        return message.channel.send(`${client.config.ownerOnlyCommand}`);
-      }
-
+      if (message.author.id !== client.config.developers) {
+        return await message.reply({ content: `${client.config.ownerOnlyCommand}`});
+    }
       console.log(`${color.blue}[${getTimestamp()}] [LOGS] Manually flushing logs to Discord${color.reset}`);
       
       await message.channel.send(`Sending logs to webhook...`);

@@ -265,8 +265,9 @@ module.exports = {
 
                 break;
                 case 'reload':
-                    const AllowedUsers = ['674294528915800074', '526853643962679323'];
-                    if (!DEVS.includes(interaction.user.id)) return;
+                    if (interaction.user.id !== client.config.developers) {
+                        return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                    }
                 
                     await client.reloadValoAPI();
                     await interaction.reply({ content: 'API data reloaded successfully!', ephemeral: true });
