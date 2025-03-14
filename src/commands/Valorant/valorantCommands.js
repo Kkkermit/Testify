@@ -13,7 +13,8 @@ module.exports = {
         .setDescription('valorant commands')
         .addSubcommand(command => command.setName('login').setDescription('Connect your Valorant account'))
         .addSubcommand(command => command.setName('search-skin').setDescription('search a skin by its name').addStringOption(option => option.setName('name').setDescription('Name of the skin to search!').setRequired(true).setAutocomplete(true)))
-        .addSubcommand(command => command.setName('store').setDescription('View your Valorant store')),
+        .addSubcommand(command => command.setName('store').setDescription('View your Valorant store'))
+        .addSubcommand(command => command.setName('reload').setDescription('Reload the Valorant APIs')),
 
     async autocomplete(interaction, client) {
         const focused = interaction.options.getFocused(true);
@@ -262,6 +263,13 @@ module.exports = {
                         )
                     });
 
+                break;
+                case 'reload':
+                    const AllowedUsers = ['674294528915800074', '526853643962679323'];
+                    if (!DEVS.includes(interaction.user.id)) return;
+                
+                    await client.reloadValoAPI();
+                    await interaction.reply({ content: 'API data reloaded successfully!', ephemeral: true });
                 break;
             }
         }
