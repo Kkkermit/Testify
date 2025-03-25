@@ -1,590 +1,695 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark-mode">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Testify Documentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" type="image/png" href="https://i.postimg.cc/KznLsF43/Testi-1.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: '#8a2be2',
+                            light: '#9932cc',
+                            dark: '#6a0dad',
+                        },
+                        dark: {
+                            DEFAULT: '#121212',
+                            gray: '#1e1e1e',
+                            light: '#333333',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .sidebar-link {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            position: relative;
+            z-index: 5;
+        }
+        
+        #sidebar-toggle {
+            bottom: 5rem !important;
+            right: 1rem !important;
+            left: auto !important;
+        }
+        
+        .sidebar.active {
+            z-index: 1005 !important;
+        }
+        
+        .sidebar-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        @media (min-width: 769px) {
+            .sidebar {
+                transform: none !important;
+                display: block !important;
+            }
+            #sidebar-toggle {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .main-content {
+                margin-left: 0 !important;
+            }
+            #sidebar-toggle {
+                display: flex !important;
+            }
+        }
+    </style>
 </head>
-<body>
-    <!-- Mobile Toggle Button -->
-    <button id="sidebar-toggle" aria-label="Toggle sidebar">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="navbar-container">
-            <div class="logo">
-                <img src="https://i.postimg.cc/KznLsF43/Testi-1.png" alt="Testify Logo">
-                <h1>Testify</h1>
+<body class="bg-dark text-gray-200">
+    <nav class="navbar fixed w-full top-0 left-0 bg-dark-gray shadow-md z-50">
+        <div class="navbar-container flex justify-between items-center h-[70px] px-4 sm:px-8 max-w-7xl mx-auto">
+            <div class="logo flex items-center cursor-pointer" id="logo-container">
+                <img src="https://i.postimg.cc/KznLsF43/Testi-1.png" alt="Testify Logo" class="h-8 sm:h-10 w-auto mr-2 sm:mr-4 rounded-lg transform hover:scale-105 transition-transform duration-300">
+                <h1 class="text-xl sm:text-2xl font-bold text-white m-0">Testify</h1>
             </div>
-            <div class="nav-links">
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#installation" class="nav-link">Installation</a>
-                <a href="#commands" class="nav-link">Commands</a>
-                <a href="https://github.com/Kkkermit/Testify" target="_blank" class="nav-link">
+            
+            <div class="nav-links hidden md:flex gap-6">
+                <a href="#features" class="nav-link text-gray-300 font-medium hover:text-primary transition-colors duration-300">Features</a>
+                <a href="#installation" class="nav-link text-gray-300 font-medium hover:text-primary transition-colors duration-300">Installation</a>
+                <a href="#commands" class="nav-link text-gray-300 font-medium hover:text-primary transition-colors duration-300">Commands</a>
+                <a href="https://github.com/Kkkermit/Testify" target="_blank" class="nav-link text-gray-300 font-medium hover:text-primary transition-colors duration-300">
                     <i class="fab fa-github"></i> GitHub
                 </a>
-                <a href="https://discord.gg/xcMVwAVjSD" target="_blank" class="nav-link">
+                <a href="https://discord.gg/xcMVwAVjSD" target="_blank" class="nav-link text-gray-300 font-medium hover:text-primary transition-colors duration-300">
                     <i class="fab fa-discord"></i> Discord
                 </a>
             </div>
         </div>
     </nav>
 
-    <!-- Sidebar and Main Content Container -->
-    <div class="content-wrapper">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-header">
-                <h2>Documentation</h2>
+    <div id="mobile-menu-overlay" class="mobile-menu-overlay"></div>
+
+    <div class="content-wrapper flex pt-[70px] min-h-screen">
+        <button id="sidebar-toggle" aria-label="Toggle sidebar" class="fixed bottom-20 right-5 left-auto z-[1100] md:hidden bg-primary rounded-full w-12 h-12 flex items-center justify-center text-white shadow-md hover:bg-primary-light transition-all duration-300">
+            <i class="fas fa-bars"></i>
+        </button>
+    
+        <aside class="sidebar fixed top-[70px] left-0 w-[260px] bg-dark-gray h-[calc(100vh-70px)] overflow-y-auto z-40 shadow-md transition-transform duration-300">
+            <div class="sidebar-header p-6 border-b border-dark-light">
+                <h2 class="text-xl font-medium text-white m-0">Documentation</h2>
             </div>
-            <div class="sidebar-content">
-                <ul class="sidebar-nav">
-                    <li class="sidebar-item">
-                        <a href="#overview" class="sidebar-link">Overview</a>
+            <div class="sidebar-content py-4">
+                <ul class="sidebar-nav list-none p-0">
+                    <li class="sidebar-item mb-1">
+                        <a href="#overview" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Overview</a>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#features" class="sidebar-link">Features</a>
-                        <ul class="sidebar-sublist">
-                            <li><a href="#moderation-tools" class="sidebar-link">Moderation Tools</a></li>
-                            <li><a href="#entertainment" class="sidebar-link">Entertainment & Fun</a></li>
-                            <li><a href="#information" class="sidebar-link">Information & Utility</a></li>
-                            <li><a href="#integration" class="sidebar-link">API Integrations</a></li>
-                            <li><a href="#customization" class="sidebar-link">Customization</a></li>
+                    <li class="sidebar-item mb-1">
+                        <a href="#features" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Features</a>
+                        <ul class="sidebar-sublist ml-4 mt-1 mb-2 border-l-2 border-dark-light pl-0 list-none">
+                            <li><a href="#moderation-tools" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">Moderation Tools</a></li>
+                            <li><a href="#entertainment" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">Entertainment & Fun</a></li>
+                            <li><a href="#information" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">Information & Utility</a></li>
+                            <li><a href="#integration" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">API Integrations</a></li>
+                            <li><a href="#customization" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">Customization</a></li>
                         </ul>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#compatibility" class="sidebar-link">Compatibility</a>
+                    <li class="sidebar-item mb-1">
+                        <a href="#compatibility" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Compatibility</a>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#installation" class="sidebar-link">Installation</a>
+                    <li class="sidebar-item mb-1">
+                        <a href="#installation" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Installation</a>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#usage" class="sidebar-link">Usage</a>
+                    <li class="sidebar-item mb-1">
+                        <a href="#usage" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Usage</a>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#commands" class="sidebar-link">Commands</a>
-                        <ul class="sidebar-sublist">
-                            <li><a href="#slash-commands" class="sidebar-link">Slash Commands</a></li>
-                            <li><a href="#prefix-commands" class="sidebar-link">Prefix Commands</a></li>
+                    <li class="sidebar-item mb-1">
+                        <a href="#commands" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Commands</a>
+                        <ul class="sidebar-sublist ml-4 mt-1 mb-2 border-l-2 border-dark-light pl-0 list-none">
+                            <li><a href="#slash-commands" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">Slash Commands</a></li>
+                            <li><a href="#prefix-commands" class="sidebar-link block py-2 px-6 text-gray-300 text-sm hover:bg-dark-light hover:text-primary transition-all duration-200">Prefix Commands</a></li>
                         </ul>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#audit-logs" class="sidebar-link">Audit Logs Setup</a>
+                    <li class="sidebar-item mb-1">
+                        <a href="#audit-logs" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Audit Logs Setup</a>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#technical" class="sidebar-link">Technical Features</a>
+                    <li class="sidebar-item mb-1">
+                        <a href="#technical" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Technical Features</a>
                     </li>
-                    <li class="sidebar-item">
-                        <a href="#support" class="sidebar-link">Support</a>
+                    <li class="sidebar-item mb-1">
+                        <a href="#environment" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Environment Setup</a>
+                    </li>
+                    <li class="sidebar-item mb-1">
+                        <a href="#support" class="sidebar-link block py-3 px-6 text-gray-300 font-medium hover:bg-dark-light hover:text-primary transition-all duration-200">Support</a>
                     </li>
                 </ul>
             </div>
         </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <section class="hero-section">
-                <div class="hero-content">
-                    <img src="https://i.postimg.cc/wjx9pVCF/Screenshot-2025-03-13-211852.png" alt="Testify Banner" class="hero-image">
-                    <div class="hero-text">
-                        <h1>Advanced all-in-one discord bot with prefix & slash commands</h1>
-                        <p class="hero-text-fix">With over 100 slash commands and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features for your servers!</p>
-                        <div class="cta-buttons">
-                            <a href="https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot" class="cta-button primary" target="_blank">Invite Bot</a>
-                            <a href="https://github.com/Kkkermit/Testify" class="cta-button secondary" target="_blank">View on GitHub</a>
+        <div id="sidebar-overlay" class="sidebar-overlay"></div>
+
+        <main class="main-content flex-1 ml-0 md:ml-[260px] p-4 sm:p-6 md:p-8 transition-all duration-300">
+            <section class="hero-section mb-8 md:mb-12 rounded-xl overflow-hidden shadow-xl bg-gradient-to-r from-primary-dark to-primary animate__animated animate__fadeIn">
+                <div class="hero-content p-4 sm:p-6 md:p-8 flex flex-col items-center text-center">
+                    <img src="https://i.postimg.cc/wjx9pVCF/Screenshot-2025-03-13-211852.png" alt="Testify Banner" class="hero-image max-w-full h-auto mb-4 md:mb-8 rounded-xl shadow-lg filter drop-shadow-lg transform hover:scale-105 transition-transform duration-500">
+                    <div class="hero-text w-full flex flex-col items-center">
+                        <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 md:mb-6 text-white text-center animate__animated animate__fadeInUp">Advanced all-in-one discord bot with prefix & slash commands</h1>
+                        <p class="text-base sm:text-lg md:text-xl mb-4 md:mb-8 max-w-3xl text-gray-100 text-center mx-auto animate__animated animate__fadeInUp animate__delay-1s">With over 100 slash commands and over 50 prefix commands, Testify is an open source discord bot that's easy to set up and use and full of fun features for your servers!</p>
+                        <div class="cta-buttons flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center w-full sm:w-auto animate__animated animate__fadeInUp animate__delay-2s">
+                            <a href="https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot" class="cta-button primary bg-white text-primary py-2 md:py-3 px-4 md:px-6 rounded-md font-semibold uppercase tracking-wider transition-all duration-300 hover:-translate-y-1 hover:shadow-lg w-full sm:w-auto text-center" target="_blank">Invite Bot</a>
+                            <a href="https://github.com/Kkkermit/Testify" class="cta-button secondary bg-transparent text-white py-2 md:py-3 px-4 md:px-6 rounded-md font-semibold uppercase tracking-wider border-2 border-white transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:bg-white/10 w-full sm:w-auto text-center" target="_blank">View on GitHub</a>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section id="overview" class="content-section">
-                <h2>Overview</h2>
-                <p>Testify is a versatile Discord bot designed to enhance your server with a wide range of features. From moderation tools to fun mini-games, music playback to advanced API integrations, Testify has everything you need to create an engaging community experience.</p>
-                <div class="warning-box">
-                    <h3>⚠️ IMPORTANT SECURITY WARNING</h3>
-                    <p><strong>Never share or commit your <code>.env</code> file or any of its values!</strong> These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add <code>.env</code> to your <code>.gitignore</code> file.</p>
+            <section id="overview" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Overview</h2>
+                <p class="mb-4">Testify is a versatile Discord bot designed to enhance your server with a wide range of features. From moderation tools to fun mini-games, music playback to advanced API integrations, Testify has everything you need to create an engaging community experience.</p>
+                
+                <div class="github-stats bg-dark-light p-6 rounded-lg mb-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                    <div class="stats-badges flex flex-wrap justify-center md:justify-start gap-3">
+                        <div class="stats-badge flex items-center bg-dark px-3 py-2 rounded-md">
+                            <i class="fas fa-spinner fa-spin text-primary mr-2"></i>
+                            <span class="text-white">Loading stats...</span>
+                        </div>
+                    </div>
+                    <div class="support-link">
+                        <a href="https://buymeacoffee.com/kkermit" target="_blank" class="support-button flex items-center bg-[#FFDD00] text-[#000000] px-4 py-2 rounded-md font-bold transition-transform hover:scale-105 hover:shadow-md">
+                            <img src="https://i.postimg.cc/fypB0thz/buy-me-a-coffee6984-removebg-preview.png" alt="Buy Me a Coffee" class="h-8 w-auto mr-2">
+                            <span>Support the Project</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="warning-box p-6 rounded-md mb-8 border-l-4 border-red-500 bg-red-500/10">
+                    <h3 class="text-xl font-bold mb-2 text-white">⚠️ IMPORTANT SECURITY WARNING</h3>
+                    <p><strong>Never share or commit your <code class="bg-dark-light px-2 py-1 rounded text-sm">.env</code> file or any of its values!</strong> These contain sensitive information including your bot token, MongoDB credentials, and API keys that could be used to compromise your systems or incur unwanted charges if leaked. Always add <code class="bg-dark-light px-2 py-1 rounded text-sm">.env</code> to your <code class="bg-dark-light px-2 py-1 rounded text-sm">.gitignore</code> file.</p>
                 </div>
             </section>
 
-            <section id="features" class="content-section">
-                <h2>Features</h2>
+            <section id="features" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Features</h2>
                 
-                <div id="moderation-tools" class="feature-category">
-                    <h3>Moderation Tools</h3>
-                    <ul>
-                        <li><strong>Complete Moderation Suite:</strong> Ban, kick, timeout, warn, and mute functionality</li>
-                        <li><strong>Auto-moderation:</strong> Filter profanity, spam, and inappropriate content</li>
-                        <li><strong>Audit Logging:</strong> Comprehensive logging of all moderation actions</li>
-                        <li><strong>Ticket System:</strong> Create and manage support tickets with transcripts</li>
+                <div id="moderation-tools" class="feature-category mb-8 pb-4 border-b border-dark-light">
+                    <h3 class="text-2xl font-semibold mt-8 mb-4 text-primary-light">Moderation Tools</h3>
+                    <ul class="space-y-3">
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Complete Moderation Suite:</strong> Ban, kick, timeout, warn, and mute functionality</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Auto-moderation:</strong> Filter profanity, spam, and inappropriate content</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Audit Logging:</strong> Comprehensive logging of all moderation actions</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Ticket System:</strong> Create and manage support tickets with transcripts</li>
                     </ul>
                 </div>
                 
-                <div id="entertainment" class="feature-category">
-                    <h3>Entertainment & Fun</h3>
-                    <ul>
-                        <li><strong>Music System:</strong> Play music from YouTube, Spotify, and SoundCloud with queue management</li>
-                        <li><strong>Leveling System:</strong> XP and ranking system with customizable rewards</li>
-                        <li><strong>Mini-games:</strong> Variety of games including RPS, coinflip, 8ball, and more</li>
-                        <li><strong>Meme Commands:</strong> Random memes, jokes, and fun interactions</li>
+                <div id="entertainment" class="feature-category mb-8 pb-4 border-b border-dark-light">
+                    <h3 class="text-2xl font-semibold mt-8 mb-4 text-primary-light">Entertainment & Fun</h3>
+                    <ul class="space-y-3">
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Music System:</strong> Play music from YouTube, Spotify, and SoundCloud with queue management</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Leveling System:</strong> XP and ranking system with customizable rewards</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Mini-games:</strong> Variety of games including RPS, coinflip, 8ball, and more</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Meme Commands:</strong> Random memes, jokes, and fun interactions</li>
                     </ul>
                 </div>
                 
-                <div id="information" class="feature-category">
-                    <h3>Information & Utility</h3>
-                    <ul>
-                        <li><strong>User Info:</strong> Detailed user information with profile cards</li>
-                        <li><strong>Server Info:</strong> Server statistics and information</li>
-                        <li><strong>Role Info:</strong> Detailed role information including permissions</li>
-                        <li><strong>Profile System:</strong> Create and customize user profiles</li>
+                <div id="information" class="feature-category mb-8 pb-4 border-b border-dark-light">
+                    <h3 class="text-2xl font-semibold mt-8 mb-4 text-primary-light">Information & Utility</h3>
+                    <ul class="space-y-3">
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">User Info:</strong> Detailed user information with profile cards</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Server Info:</strong> Server statistics and information</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Role Info:</strong> Detailed role information including permissions</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Profile System:</strong> Create and customize user profiles</li>
                     </ul>
                 </div>
                 
-                <div id="integration" class="feature-category">
-                    <h3>Integration & API Features</h3>
-                    <ul>
-                        <li><strong>Valorant Integration:</strong> View skins, store, and player info</li>
-                        <li><strong>Instagram Notifications:</strong> Get notified of new posts from Instagram accounts</li>
-                        <li><strong>Spotify Integration:</strong> Advanced Spotify tracking and integration</li>
-                        <li><strong>Weather Information:</strong> Get weather forecasts for any location</li>
+                <div id="integration" class="feature-category mb-8 pb-4 border-b border-dark-light">
+                    <h3 class="text-2xl font-semibold mt-8 mb-4 text-primary-light">API Integrations</h3>
+                    <ul class="space-y-3">
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Valorant Integration:</strong> View skins, store, and player info</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Instagram Notifications:</strong> Get notified of new posts from Instagram accounts</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Spotify Integration:</strong> Advanced Spotify tracking and integration</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Weather Information:</strong> Get weather forecasts for any location</li>
                     </ul>
                 </div>
                 
-                <div id="customization" class="feature-category">
-                    <h3>Customization</h3>
-                    <ul>
-                        <li><strong>Custom Prefix:</strong> Set a custom prefix for your server</li>
-                        <li><strong>Custom Embeds:</strong> Create and customize rich embeds</li>
-                        <li><strong>Announcement System:</strong> Create professional announcements</li>
-                        <li><strong>Thread Management:</strong> Create and manage threads</li>
+                <div id="customization" class="feature-category mb-8">
+                    <h3 class="text-2xl font-semibold mt-8 mb-4 text-primary-light">Customization</h3>
+                    <ul class="space-y-3">
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Custom Prefix:</strong> Set a custom prefix for your server</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Custom Embeds:</strong> Create and customize rich embeds</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Announcement System:</strong> Create professional announcements</li>
+                        <li class="transform hover:translate-x-1 transition-transform duration-200"><strong class="text-white">Thread Management:</strong> Create and manage threads</li>
                     </ul>
                 </div>
             </section>
             
-            <section id="compatibility" class="content-section">
-                <h2>Compatibility</h2>
-                <div class="table-container">
-                    <h3>System Requirements</h3>
-                    <table>
+            <section id="compatibility" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Compatibility</h2>
+                
+                <div class="overflow-x-auto mb-8">
+                    <h3 class="text-2xl font-semibold mt-6 mb-4 text-primary-light">System Requirements</h3>
+                    <table class="w-full border-collapse">
                         <thead>
                             <tr>
-                                <th>Operating System</th>
-                                <th>Support Status</th>
-                                <th>Notes</th>
+                                <th class="bg-dark-light p-3 text-left text-white">Operating System</th>
+                                <th class="bg-dark-light p-3 text-left text-white">Support Status</th>
+                                <th class="bg-dark-light p-3 text-left text-white">Notes</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Windows 11</td>
-                                <td>✅ Full Support</td>
-                                <td>Recommended for development</td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">Windows 11</td>
+                                <td class="p-3 text-green-400">✅ Full Support</td>
+                                <td class="p-3">Recommended for development</td>
                             </tr>
-                            <tr>
-                                <td>Windows 10</td>
-                                <td>✅ Full Support</td>
-                                <td>Recommended for development</td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">Windows 10</td>
+                                <td class="p-3 text-green-400">✅ Full Support</td>
+                                <td class="p-3">Recommended for development</td>
                             </tr>
-                            <tr>
-                                <td>macOS</td>
-                                <td>✅ Full Support</td>
-                                <td>Tested on macOS Ventura+</td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">macOS</td>
+                                <td class="p-3 text-green-400">✅ Full Support</td>
+                                <td class="p-3">Tested on macOS Ventura+</td>
                             </tr>
-                            <tr>
-                                <td>Linux (Ubuntu)</td>
-                                <td>✅ Full Support</td>
-                                <td>Tested on Ubuntu 20.04 LTS+</td>
-                            </tr>
-                            <tr>
-                                <td>Linux (Debian)</td>
-                                <td>✅ Full Support</td>
-                                <td>Tested on Debian 11+</td>
-                            </tr>
-                            <tr>
-                                <td>Linux (CentOS)</td>
-                                <td>✅ Full Support</td>
-                                <td>Tested on CentOS 8+</td>
-                            </tr>
-                            <tr>
-                                <td>Linux (Fedora)</td>
-                                <td>✅ Full Support</td>
-                                <td>Tested on Fedora 34+</td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">Linux (Ubuntu)</td>
+                                <td class="p-3 text-green-400">✅ Full Support</td>
+                                <td class="p-3">Tested on Ubuntu 20.04 LTS+</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
                 
-                <div class="table-container">
-                    <h3>Node.js Support</h3>
-                    <table>
+                <div class="overflow-x-auto">
+                    <h3 class="text-2xl font-semibold mt-6 mb-4 text-primary-light">Node.js Support</h3>
+                    <table class="w-full border-collapse">
                         <thead>
                             <tr>
-                                <th>Node.js Version</th>
-                                <th>Support Status</th>
-                                <th>Notes</th>
+                                <th class="bg-dark-light p-3 text-left text-white">Node.js Version</th>
+                                <th class="bg-dark-light p-3 text-left text-white">Support Status</th>
+                                <th class="bg-dark-light p-3 text-left text-white">Notes</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>v18.13.0+</td>
-                                <td>✅ Supported</td>
-                                <td>Minimum required version</td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">v18.13.0+</td>
+                                <td class="p-3 text-green-400">✅ Supported</td>
+                                <td class="p-3">Minimum required version</td>
                             </tr>
-                            <tr>
-                                <td>v19.x</td>
-                                <td>✅ Supported</td>
-                                <td></td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">v20.x</td>
+                                <td class="p-3 text-green-400">✅ Supported</td>
+                                <td class="p-3">Recommended for best performance</td>
                             </tr>
-                            <tr>
-                                <td>v20.x</td>
-                                <td>✅ Supported</td>
-                                <td>Recommended for best performance</td>
-                            </tr>
-                            <tr>
-                                <td>v21.x</td>
-                                <td>✅ Supported</td>
-                                <td>Latest features</td>
+                            <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                <td class="p-3">v21.x</td>
+                                <td class="p-3 text-green-400">✅ Supported</td>
+                                <td class="p-3">Latest features</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+            </section>
+            
+            <section id="installation" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Installation</h2>
                 
-                <div class="note-box">
-                    <h4>⚠️ IMPORTANT</h4>
-                    <p>If you're struggling to use a certain node version, I'd suggest either downgrading or upgrading your version using nvm.<br>
-                    To install nvm, please follow this <a href="https://www.freecodecamp.org/news/node-version-manager-nvm-install-guide/" target="_blank">link</a>.</p>
+                <p class="mb-6">To set up Testify for your Discord server, follow these steps:</p>
+                
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-primary-light">Prerequisites</h3>
+                        <ul class="list-disc pl-6 space-y-2">
+                            <li>Download <a href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm" target="_blank" class="text-primary hover:underline">Node.js</a></li>
+                            <li>Download <a href="https://code.visualstudio.com/download" target="_blank" class="text-primary hover:underline">Visual Studio Code</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-primary-light">Project Setup</h3>
+                        <ol class="list-decimal pl-6 space-y-4">
+                            <li>
+                                <strong>Fork the Github project:</strong>
+                                <ul class="list-disc pl-6 mt-2 space-y-1">
+                                    <li>Sign up / Sign in to <a href="https://github.com/" target="_blank" class="text-primary hover:underline">GitHub</a></li>
+                                    <li>Navigate to <a href="https://github.com/Kkkermit/Testify" target="_blank" class="text-primary hover:underline">Testify</a></li>
+                                    <li>Click <code class="bg-dark-light px-2 py-1 rounded text-sm">Star</code> to support development</li>
+                                    <li>Click <code class="bg-dark-light px-2 py-1 rounded text-sm">Fork</code> to copy all code to your own repository</li>
+                                </ul>
+                            </li>
+                            <li class="pt-2">Click the <code class="bg-dark-light px-2 py-1 rounded text-sm">Code</code> button. From the drop-down that appears, click <code class="bg-dark-light px-2 py-1 rounded text-sm">Download ZIP</code> to download the entire repository as a ZIP folder.</li>
+                            <li class="pt-2">Extract the files to a new folder and open it with Visual Studio Code.</li>
+                        </ol>
+                    </div>
                 </div>
             </section>
             
-            <section id="installation" class="content-section">
-                <h2>Installation</h2>
-                <p>To set up Testify for your Discord server, follow these steps:</p>
-                <ol>
-                    <li>Download <a href="https://docs.npmjs.com/downloading-and-installing-node-js-and-npm" target="_blank">Node.js</a>.</li>
-                    <li>Download <a href="https://code.visualstudio.com/download" target="_blank">Visual Studio Code</a>.</li>
-                </ol>
+            <section id="usage" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Usage</h2>
                 
-                <h3>Project Setup</h3>
-                <ol>
-                    <li>
-                        <strong>Fork the Github project:</strong>
-                        <ul>
-                            <li>Sign up / Sign in to <a href="https://github.com/" target="_blank">GitHub</a>.</li>
-                            <li>Navigate to <a href="https://github.com/Kkkermit/Testify" target="_blank">Testify</a>.</li>
-                            <li>Click <code>Star</code> to support development.</li>
-                            <li>Click <code>Fork</code> to copy all code to your own repository.</li>
-                        </ul>
-                    </li>
-                    <li>Click the <code>Code</code> button. From the drop-down that appears, click <code>Download ZIP</code> to download the entire repository as a ZIP folder.</li>
-                    <li>Extract the files to a new folder and open it with Visual Studio Code.</li>
-                </ol>
-                
-                <h3>Obtain Discord Bot Token</h3>
-                <ol>
-                    <li>Sign in to <a href="https://discord.com/developers/applications" target="_blank">Discord Developer Portal</a>.</li>
-                    <li>
-                        <strong>Create a bot:</strong>
-                        <ul>
-                            <li>Enter the left side <code>Applications</code>.</li>
-                            <li>Click <code>New Application</code> in the upper right corner and enter the name of the bot. After confirmation, enter the new page.</li>
-                            <li>Click on the left side <code>Bot</code>.</li>
-                            <li>Enable all intents listed under <code>Privileged Gateway Intents</code> and click <code>Save Changes</code>.</li>
-                            <li>View and copy the token by clicking the <code>Reset Token</code> button.</li>
-                        </ul>
-                    </li>
-                    <li>
-                        <strong>Set up OAuth2:</strong>
-                        <ul>
-                            <li>Click on <code>OAuth2</code> in the left column.</li>
-                            <li>Click on <code>URL Generator</code> in the left column.</li>
-                            <li>In the right column, select <code>bot</code> and <code>applications.commands</code> under <code>SCOPES</code>.</li>
-                            <li>Scroll down and select <code>Administrator</code> under <code>BOT PERMISSIONS</code>.</li>
-                            <li>Copy the URL at the bottom and paste it into your browser.</li>
-                            <li>Choose the server you want to add the bot to and click <code>Continue</code> > <code>Authorize</code>.</li>
-                        </ul>
-                    </li>
-                </ol>
-                
-                <div class="code-container">
-                    <h3>Full Installation Guide</h3>
-                    <p>For complete installation instructions, including setting up MongoDB, configuring the .env file, and execution steps, check the <a href="https://github.com/Kkkermit/Testify#usage" target="_blank">full guide on GitHub</a>.</p>
+                <div class="space-y-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-primary-light">Getting Started</h3>
+                        <ol class="list-decimal pl-6 space-y-4">
+                            <li>Rename the filed named <code class="bg-dark-light px-2 py-1 rounded text-sm">example.env</code> to <code class="bg-dark-light px-2 py-1 rounded text-sm">.env</code></li>
+                            <li>Navigate to the <code class="bg-dark-light px-2 py-1 rounded text-sm">Bot</code> page on the <a href="https://discord.com/developers/applications" target="_blank" class="text-primary hover:underline">Discord Developer Portal</a> and click <code class="bg-dark-light px-2 py-1 rounded text-sm">Reset Token</code>. Copy your token</li>
+                            <li>Paste your bot token into the <code class="bg-dark-light px-2 py-1 rounded text-sm">token</code> variable inside the <code class="bg-dark-light px-2 py-1 rounded text-sm">.env</code> file</li>
+                            <li>Install dependencies with <code class="bg-dark-light px-2 py-1 rounded text-sm">npm run setup</code></li>
+                            <li>Run the bot with <code class="bg-dark-light px-2 py-1 rounded text-sm">npm run prod</code></li>
+                        </ol>
+                    </div>
                 </div>
             </section>
             
-            <section id="commands" class="content-section">
-                <h2>Commands</h2>
+            <section id="commands" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Commands</h2>
                 
-                <div id="slash-commands" class="command-section">
-                    <h3>Slash Command Categories</h3>
-                    <div class="table-container">
-                        <table>
+                <div class="note-box p-6 rounded-md mb-8 border-l-4 border-blue-500 bg-blue-500/10">
+                    <h4 class="text-lg font-bold mb-2 text-white">💡 Getting Help</h4>
+                    <p>For a complete list of available commands and their usage, use <code class="bg-dark-light px-2 py-1 rounded text-sm">/help</code> or <code class="bg-dark-light px-2 py-1 rounded text-sm">t?help</code> in your Discord server.</p>
+                </div>
+                
+                <div id="slash-commands" class="mb-12">
+                    <h3 class="text-2xl font-semibold mb-6 text-primary-light">Slash Commands</h3>
+                    <p class="mb-4">Testify offers over 100 slash commands across various categories:</p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
                             <thead>
                                 <tr>
-                                    <th>Category Name</th>
-                                    <th>Description</th>
+                                    <th class="bg-dark-light p-3 text-left text-white">Category Name</th>
+                                    <th class="bg-dark-light p-3 text-left text-white">Description</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>AiCommands</td>
-                                    <td>AI-based commands for chat responses, image generation and analysis</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">AiCommands</td>
+                                    <td class="p-3">AI-based commands for chat responses, image generation and analysis</td>
                                 </tr>
-                                <tr>
-                                    <td>AuditLogging</td>
-                                    <td>Configuration for server audit logging</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">AuditLogging</td>
+                                    <td class="p-3">Configuration for server audit logging</td>
                                 </tr>
-                                <tr>
-                                    <td>Automod</td>
-                                    <td>Automated moderation tools to filter content</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Automod</td>
+                                    <td class="p-3">Automated moderation tools to filter content</td>
                                 </tr>
-                                <tr>
-                                    <td>Community</td>
-                                    <td>General utility commands for the community</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Community</td>
+                                    <td class="p-3">General utility commands for the community</td>
                                 </tr>
-                                <tr>
-                                    <td>Devs</td>
-                                    <td>Developer-specific tools and utilities</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Devs</td>
+                                    <td class="p-3">Developer-specific tools and utilities</td>
                                 </tr>
-                                <tr>
-                                    <td>Economy</td>
-                                    <td>Currency and economic system commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Economy</td>
+                                    <td class="p-3">Currency and economic system commands</td>
                                 </tr>
-                                <tr>
-                                    <td>Fun</td>
-                                    <td>Entertainment and amusement commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Fun</td>
+                                    <td class="p-3">Entertainment and amusement commands</td>
                                 </tr>
-                                <tr>
-                                    <td>Giveaway</td>
-                                    <td>Tools for running server giveaways</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Giveaway</td>
+                                    <td class="p-3">Tools for running server giveaways</td>
                                 </tr>
-                                <tr>
-                                    <td>Help</td>
-                                    <td>Documentation and assistance commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Help</td>
+                                    <td class="p-3">Documentation and assistance commands</td>
                                 </tr>
-                                <tr>
-                                    <td>InfoCommands</td>
-                                    <td>Information retrieval tools</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">InfoCommands</td>
+                                    <td class="p-3">Information retrieval tools</td>
                                 </tr>
-                                <tr>
-                                    <td>InstaNotification</td>
-                                    <td>Instagram post tracking system</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">InstaNotification</td>
+                                    <td class="p-3">Instagram post tracking system</td>
                                 </tr>
-                                <tr>
-                                    <td>LevelAndEconomy</td>
-                                    <td>Experience and economy management</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">LevelAndEconomy</td>
+                                    <td class="p-3">Experience and economy management</td>
                                 </tr>
-                                <tr>
-                                    <td>LevelSystem</td>
-                                    <td>User level progression system</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">LevelSystem</td>
+                                    <td class="p-3">User level progression system</td>
                                 </tr>
-                                <tr>
-                                    <td>MiniGames</td>
-                                    <td>Various interactive games</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">MiniGames</td>
+                                    <td class="p-3">Various interactive games</td>
                                 </tr>
-                                <tr>
-                                    <td>Other</td>
-                                    <td>Miscellaneous commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Other</td>
+                                    <td class="p-3">Miscellaneous commands</td>
                                 </tr>
-                                <tr>
-                                    <td>Owner</td>
-                                    <td>Bot owner administration commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Owner</td>
+                                    <td class="p-3">Bot owner administration commands</td>
                                 </tr>
-                                <tr>
-                                    <td>PrefixSettings</td>
-                                    <td>Configuration for custom prefixes</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">PrefixSettings</td>
+                                    <td class="p-3">Configuration for custom prefixes</td>
                                 </tr>
-                                <tr>
-                                    <td>Profile</td>
-                                    <td>User profile management system</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Profile</td>
+                                    <td class="p-3">User profile management system</td>
                                 </tr>
-                                <tr>
-                                    <td>Spotify</td>
-                                    <td>Spotify integration and tracking</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Spotify</td>
+                                    <td class="p-3">Spotify integration and tracking</td>
                                 </tr>
-                                <tr>
-                                    <td>Valorant</td>
-                                    <td>Valorant game information and tracking</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Valorant</td>
+                                    <td class="p-3">Valorant game information and tracking</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
                 
-                <div id="prefix-commands" class="command-section">
-                    <h3>Prefix Command Categories</h3>
-                    <div class="table-container">
-                        <table>
+                <div id="prefix-commands">
+                    <h3 class="text-2xl font-semibold mb-6 text-primary-light">Prefix Commands</h3>
+                    <p class="mb-4">Testify also supports over 50 prefix commands with the default prefix <code class="bg-dark-light px-2 py-1 rounded text-sm">t?</code></p>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full border-collapse">
                             <thead>
                                 <tr>
-                                    <th>Category Name</th>
-                                    <th>Description</th>
+                                    <th class="bg-dark-light p-3 text-left text-white">Category Name</th>
+                                    <th class="bg-dark-light p-3 text-left text-white">Description</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>Dev</td>
-                                    <td>Developer-specific tools and debug commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Dev</td>
+                                    <td class="p-3">Developer-specific tools and debug commands</td>
                                 </tr>
-                                <tr>
-                                    <td>EconomyCommands</td>
-                                    <td>Currency system management commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">EconomyCommands</td>
+                                    <td class="p-3">Currency system management commands</td>
                                 </tr>
-                                <tr>
-                                    <td>FunCommands</td>
-                                    <td>Entertainment and amusing interactions</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">FunCommands</td>
+                                    <td class="p-3">Entertainment and amusing interactions</td>
                                 </tr>
-                                <tr>
-                                    <td>InfoCommands</td>
-                                    <td>Information retrieval commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">InfoCommands</td>
+                                    <td class="p-3">Information retrieval commands</td>
                                 </tr>
-                                <tr>
-                                    <td>LevelCommands</td>
-                                    <td>User progression and level management</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">LevelCommands</td>
+                                    <td class="p-3">User progression and level management</td>
                                 </tr>
-                                <tr>
-                                    <td>ModerationCommands</td>
-                                    <td>Server moderation and administration tools</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">ModerationCommands</td>
+                                    <td class="p-3">Server moderation and administration tools</td>
                                 </tr>
-                                <tr>
-                                    <td>Music</td>
-                                    <td>Audio playback and music commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">Music</td>
+                                    <td class="p-3">Audio playback and music commands</td>
                                 </tr>
-                                <tr>
-                                    <td>OwnerCommands</td>
-                                    <td>Bot owner-only administrative commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">OwnerCommands</td>
+                                    <td class="p-3">Bot owner-only administrative commands</td>
                                 </tr>
-                                <tr>
-                                    <td>TestCommands</td>
-                                    <td>Testing and experimental features</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">TestCommands</td>
+                                    <td class="p-3">Testing and experimental features</td>
                                 </tr>
-                                <tr>
-                                    <td>UtilityCommands</td>
-                                    <td>General utility and helper commands</td>
+                                <tr class="border-b border-dark-light hover:bg-dark-light/50 transition-colors">
+                                    <td class="p-3 font-medium">UtilityCommands</td>
+                                    <td class="p-3">General utility and helper commands</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="note-box">
-                        <p>For a complete list of available commands and their usage, use <code>/help</code> or <code>t?help</code> in your Discord server.</p>
-                    </div>
                 </div>
             </section>
             
-            <section id="audit-logs" class="content-section">
-                <h2>Setting up Audit Logs</h2>
-                <p>To set the advanced logs registry for the Testify audit-logs (the event handler registers), follow these steps:</p>
-                <ol>
-                    <li>Navigate to <code>node_modules</code> ➔ <code>discord-logs</code> ➔ <code>lib</code> ➔ <code>index.js</code></li>
-                    <li>Once in the <code>index.js</code> file for the discord logs package, replace the content with the code provided in the GitHub repository's README.md file.</li>
+            <section id="audit-logs" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Audit Logs Setup</h2>
+                
+                <p class="mb-4">To set the advanced logs registry for the Testify audit-logs (the event handler registers), follow these steps:</p>
+                
+                <ol class="list-decimal pl-6 space-y-3 mb-6">
+                    <li>Navigate to <code class="bg-dark-light px-2 py-1 rounded text-sm">node_modules</code> ➔ <code class="bg-dark-light px-2 py-1 rounded text-sm">discord-logs</code> ➔ <code class="bg-dark-light px-2 py-1 rounded text-sm">lib</code> ➔ <code class="bg-dark-light px-2 py-1 rounded text-sm">index.js</code></li>
+                    <li>Once in the <code class="bg-dark-light px-2 py-1 rounded text-sm">index.js</code> file for the discord logs package, replace the content with the code provided in the GitHub repository's README.md file</li>
                 </ol>
-                <div class="note-box">
-                    <p>Alternatively, you can run the command <code>npm run log-setup</code> to automatically set up the colored logs in the <code>discord-logs</code> module.</p>
+                
+                <div class="note-box p-6 rounded-md mb-6 border-l-4 border-blue-500 bg-blue-500/10">
+                    <h4 class="text-lg font-bold mb-2 text-white">Alternative Approach</h4>
+                    <p>Alternatively, you can run the command <code class="bg-dark-light px-2 py-1 rounded text-sm">npm run log-setup</code> to automatically set up the colored logs in the <code class="bg-dark-light px-2 py-1 rounded text-sm">discord-logs</code> module.</p>
                 </div>
-                <img src="https://i.postimg.cc/NMJfsy0V/Screenshot-2024-10-07-184919.png" alt="Audit logs screenshot" class="content-img">
+                
+                <img src="https://i.postimg.cc/NMJfsy0V/Screenshot-2024-10-07-184919.png" alt="Audit logs screenshot" class="rounded-lg shadow-md max-w-full border border-dark-light">
             </section>
             
-            <section id="technical" class="content-section">
-                <h2>Technical Features</h2>
+            <section id="technical" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Technical Features</h2>
                 
-                <div class="feature-category">
-                    <h3>Console Logger</h3>
-                    <ul>
-                        <li><strong>Discord Webhook Integration:</strong> All console output is sent to a Discord webhook for remote monitoring</li>
-                        <li><strong>Rate Limiting:</strong> Intelligent handling of Discord API rate limits to prevent errors</li>
-                        <li><strong>Message Batching:</strong> Efficiently batches messages to reduce API calls</li>
-                        <li><strong>Error Handling:</strong> Robust error handling with proper logging</li>
-                    </ul>
-                </div>
-                
-                <div class="feature-category">
-                    <h3>Database Integration</h3>
-                    <ul>
-                        <li><strong>MongoDB Integration:</strong> Complete database integration for persistent data storage</li>
-                        <li><strong>Schema System:</strong> Well-organized schema system for all bot functionality</li>
-                        <li><strong>Data Management:</strong> Tools for data management and backup</li>
-                    </ul>
-                </div>
-                
-                <div class="feature-category">
-                    <h3>API Integrations</h3>
-                    <ul>
-                        <li><strong>Valorant API:</strong> Integration with Valorant API for game data</li>
-                        <li><strong>Spotify API:</strong> Integration with Spotify API for music data</li>
-                        <li><strong>Instagram API:</strong> Integration for tracking Instagram posts</li>
-                        <li><strong>Weather API:</strong> Integration for weather forecasts</li>
-                    </ul>
-                </div>
-                
-                <div class="feature-category">
-                    <h3>Performance Optimization</h3>
-                    <ul>
-                        <li><strong>Command Handler:</strong> Efficient command handling for both prefix and slash commands</li>
-                        <li><strong>Event Manager:</strong> Comprehensive event management system</li>
-                        <li><strong>Process Management:</strong> Proper handling of process events and termination</li>
-                    </ul>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-dark-light p-6 rounded-lg transform hover:scale-[1.01] transition-all duration-300">
+                        <h3 class="text-xl font-semibold mb-3 text-primary-light">Console Logger</h3>
+                        <ul class="space-y-2 list-disc pl-5">
+                            <li>Discord Webhook Integration for remote monitoring</li>
+                            <li>Intelligent handling of API rate limits</li>
+                            <li>Efficient message batching</li>
+                            <li>Robust error handling with proper logging</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-dark-light p-6 rounded-lg transform hover:scale-[1.01] transition-all duration-300">
+                        <h3 class="text-xl font-semibold mb-3 text-primary-light">Database Integration</h3>
+                        <ul class="space-y-2 list-disc pl-5">
+                            <li>Complete MongoDB integration</li>
+                            <li>Well-organized schema system</li>
+                            <li>Tools for data management and backup</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-dark-light p-6 rounded-lg transform hover:scale-[1.01] transition-all duration-300">
+                        <h3 class="text-xl font-semibold mb-3 text-primary-light">API Integrations</h3>
+                        <ul class="space-y-2 list-disc pl-5">
+                            <li>Valorant API for game data</li>
+                            <li>Spotify API for music data</li>
+                            <li>Instagram API for post tracking</li>
+                            <li>Weather API for forecasts</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-dark-light p-6 rounded-lg transform hover:scale-[1.01] transition-all duration-300">
+                        <h3 class="text-xl font-semibold mb-3 text-primary-light">Performance</h3>
+                        <ul class="space-y-2 list-disc pl-5">
+                            <li>Efficient command handling</li>
+                            <li>Comprehensive event management system</li>
+                            <li>Proper process management</li>
+                        </ul>
+                    </div>
                 </div>
             </section>
             
-            <section id="support" class="content-section">
-                <h2>Support & Contributions</h2>
-                <div class="support-grid">
-                    <div class="support-item">
-                        <i class="fab fa-discord"></i>
-                        <h3>Discord Support</h3>
-                        <p>Connect with us on <a href="https://discord.gg/xcMVwAVjSD" target="_blank">Discord</a> for support or any related inquiry.</p>
+            <section id="environment" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Environment Setup</h2>
+                
+                <h3 class="text-2xl font-semibold mt-8 mb-4 text-primary-light">Setting up the .env file</h3>
+                <p class="mb-4">For easy setup of the environment files, you can use the provided scripts:</p>
+                
+                <div class="code-container bg-dark-light p-6 rounded-md mb-8 relative overflow-hidden transform hover:scale-[1.01] transition-transform duration-300">
+                    <pre class="text-gray-200"><code># For production environment
+npm run setup-env:prod
+
+# For development environment
+npm run setup-env:dev</code></pre>
+                </div>
+                
+                <p class="mb-4">When you run these commands:</p>
+                <ol class="list-decimal pl-6 space-y-2 mb-6">
+                    <li>A script will generate in the console</li>
+                    <li>You'll need to fill out fields in the console (fields marked "Required" must be completed)</li>
+                    <li>Once filled in, it will write those fields to generate the appropriate .env file</li>
+                </ol>
+                
+                <div class="note-box p-6 rounded-md mb-8 border-l-4 border-blue-500 bg-blue-500/10">
+                    <h4 class="text-lg font-bold mb-2 text-white">💡 Alternative Approach</h4>
+                    <p>Alternatively, you can manually fill in the fields by viewing the <code class="bg-dark-light px-2 py-1 rounded text-sm">.example.env</code> file and creating your own <code class="bg-dark-light px-2 py-1 rounded text-sm">.env</code> file based on it.</p>
+                </div>
+            </section>
+
+            <section id="support" class="content-section mb-16 p-8 bg-dark-gray rounded-xl shadow-md hover:shadow-lg transition-shadow duration-300 animate__animated animate__fadeIn">
+                <h2 class="text-3xl font-bold mb-6 pb-2 border-b-2 border-primary text-white">Support & Contributions</h2>
+                <div class="support-grid grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                    <div class="support-item bg-dark-light p-8 rounded-lg text-center transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+                        <i class="fab fa-discord text-5xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2 text-white">Discord Support</h3>
+                        <p>Connect with us on <a href="https://discord.gg/xcMVwAVjSD" target="_blank" class="text-primary hover:underline">Discord</a> for support or any related inquiry.</p>
                     </div>
-                    <div class="support-item">
-                        <i class="fab fa-github"></i>
-                        <h3>GitHub Repository</h3>
-                        <p>View the source code and contribute on <a href="https://github.com/Kkkermit/Testify" target="_blank">GitHub</a>.</p>
+                    <div class="support-item bg-dark-light p-8 rounded-lg text-center transform hover:-translate-y-2 transition-all duration-300 hover:shadow-xl">
+                        <i class="fab fa-github text-5xl text-primary mb-4"></i>
+                        <h3 class="text-xl font-bold mb-2 text-white">GitHub Repository</h3>
+                        <p>View the source code and contribute on <a href="https://github.com/Kkkermit/Testify" target="_blank" class="text-primary hover:underline">GitHub</a>.</p>
                     </div>
                 </div>
-                <div class="license-info">
-                    <h3>License</h3>
-                    <p>Released under the terms of <a href="https://github.com/Kkkermit/Testify/blob/main/LICENSE" target="_blank">MIT License</a>.</p>
-                    <p><strong>Thanks to <a href="https://github.com/TheLegenDev" target="_blank">TheLegendDev</a> for the readme template from <a href="https://github.com/TheLegenDev/Nub-Bot" target="_blank">Nub Bot</a></strong> 💛</p>
+                <div class="license-info mb-8 p-8 bg-dark-light rounded-lg transform hover:scale-[1.01] transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-2 text-white">License</h3>
+                    <p>Released under the terms of <a href="https://github.com/Kkkermit/Testify/blob/main/LICENSE" target="_blank" class="text-primary hover:underline">MIT License</a>.</p>
+                    <p class="mt-2"><strong>Thanks to <a href="https://github.com/TheLegenDev" target="_blank" class="text-primary hover:underline">TheLegendDev</a> for the readme template from <a href="https://github.com/TheLegenDev/Nub-Bot" target="_blank" class="text-primary hover:underline">Nub Bot</a></strong> 💛</p>
                 </div>
-                <div class="star-reminder">
-                    <h3>⭐ Support The Project</h3>
-                    <p>If you're a fan of this repository or have used it or any of its code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot!</p>
-                    <a href="https://github.com/Kkkermit/Testify" target="_blank" class="star-button">
-                        <i class="fas fa-star"></i> Star on GitHub
+                <div class="star-reminder p-8 bg-gradient-to-r from-primary-dark to-primary rounded-lg text-center shadow-lg transform hover:scale-[1.01] transition-transform duration-300">
+                    <h3 class="text-xl font-bold mb-2 text-white animate__animated animate__pulse animate__infinite">⭐ Support The Project</h3>
+                    <p class="text-white mb-4">If you're a fan of this repository or have used it or any of its code, please consider leaving us a star. It would be greatly appreciated and allows us to see if users value the bot!</p>
+                    <a href="https://github.com/Kkkermit/Testify" target="_blank" class="star-button inline-block mt-2 py-3 px-6 bg-white text-primary rounded-md font-semibold transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
+                        <i class="fas fa-star text-yellow-400 mr-2"></i> Star on GitHub
                     </a>
                 </div>
             </section>
         </main>
     </div>
     
-    <footer>
-        <div class="footer-content">
-            <div class="footer-logo">
-                <img src="https://i.postimg.cc/KznLsF43/Testi-1.png" alt="Testify Logo">
-                <h3>Testify</h3>
-            </div>
-            <div class="footer-links">
-                <div class="footer-column">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="https://github.com/Kkkermit/Testify/blob/main/README.md" target="_blank">Documentation</a></li>
-                        <li><a href="https://github.com/Kkkermit/Testify/blob/main/CONTRIBUTING.md" target="_blank">Contribution Guide</a></li>
-                        <li><a href="https://github.com/Kkkermit/Testify/issues" target="_blank">Issues</a></li>
-                    </ul>
+    <footer class="bg-dark-gray py-8 md:py-12 px-4 md:px-8 shadow-inner w-full">
+        <div class="container">
+            <div class="footer-branding text-center mb-8">
+                <div class="footer-logo inline-flex items-center justify-center mb-4">
+                    <img src="https://i.postimg.cc/KznLsF43/Testi-1.png" alt="Testify Logo" class="h-10 w-auto mr-4 rounded-lg transform hover:scale-110 transition-transform duration-300">
+                    <h3 class="text-xl font-bold text-white">Testify</h3>
                 </div>
-                <div class="footer-column">
-                    <h4>Connect</h4>
-                    <ul>
-                        <li><a href="https://discord.gg/xcMVwAVjSD" target="_blank">Discord</a></li>
-                        <li><a href="https://github.com/Kkkermit" target="_blank">Creator's GitHub</a></li>
-                    </ul>
+                <div class="max-w-xl mx-auto">
+                    <p class="text-gray-400">Advanced all-in-one discord bot with over 100 slash commands and over 50 prefix commands, easy to set up and use.</p>
                 </div>
             </div>
-        </div>
-        <div class="footer-bottom">
-            <p>&copy; 2025 Testify. All rights reserved.</p>
-            <p>Built with 💜 by the Testify community</p>
+            
+            <div class="footer-links-row grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-2xl mx-auto">
+                <div class="footer-links text-center md:text-left">
+                    <h4 class="text-lg font-bold mb-4 text-white">Resources</h4>
+                    <ul class="list-none p-0 space-y-2">
+                        <li><a href="https://github.com/Kkkermit/Testify/blob/main/README.md" target="_blank" class="text-gray-400 hover:text-primary transition-colors duration-200">Documentation</a></li>
+                        <li><a href="https://github.com/Kkkermit/Testify/blob/main/CONTRIBUTING.md" target="_blank" class="text-gray-400 hover:text-primary transition-colors duration-200">Contribution Guide</a></li>
+                        <li><a href="https://github.com/Kkkermit/Testify/issues" target="_blank" class="text-gray-400 hover:text-primary transition-colors duration-200">Issues</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-links text-center md:text-left">
+                    <h4 class="text-lg font-bold mb-4 text-white">Connect</h4>
+                    <ul class="list-none p-0 space-y-2">
+                        <li><a href="https://discord.gg/xcMVwAVjSD" target="_blank" class="text-gray-400 hover:text-primary transition-colors duration-200">Discord</a></li>
+                        <li><a href="https://github.com/Kkkermit" target="_blank" class="text-gray-400 hover:text-primary transition-colors duration-200">Creator's GitHub</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom text-center mt-8 pt-6 border-t border-dark-light text-gray-400">
+                <p>&copy; 2025 Testify. All rights reserved.</p>
+                <p class="mt-2">Built with 💜 by the Testify community</p>
+            </div>
         </div>
     </footer>
     
