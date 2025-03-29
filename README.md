@@ -8,11 +8,20 @@
 <img align="center" alt="Nub Bot banner" src="https://i.postimg.cc/v87R8PSx/test.png">
 
 <p align="center">
-<img align="center" alt="GitHub issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge"> 
+<img align="center" alt="GitHub Issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge"> 
 <img align="center" alt="GitHub license" src="https://img.shields.io/github/license/Kkkermit/Testify?style=for-the-badge">
-<img align="center" alt="GitHub license" src="https://img.shields.io/github/stars/Kkkermit/Testify?style=for-the-badge">
-<img align="center" alt="GitHub license" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub Stars" src="https://img.shields.io/github/stars/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub Forks" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub Contributors" src="https://img.shields.io/github/contributors/Kkkermit/Testify.svg?style=for-the-badge">
+<img align="center" alt="GitHub Watchers" src="https://img.shields.io/github/watchers/Kkkermit/Testify?style=for-the-badge">
 </p>
+
+<p align="center">
+  <a href="https://buymeacoffee.com/kkermit" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60px" width="217px">
+  </a>
+</p>
+
 
 <p align="center"><strong>
 Advanced all-in-one discord bot with prefix & slash commands
@@ -35,6 +44,7 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 - [Command Categories](#command-categories)
 - [Setting-Audit-Logs](#Setting-up-audit-logs)
 - [Technical Features](#technical-features)
+- [Contributors](#contributors)
 - [Support](#support)
 - [License](#license)
 
@@ -250,7 +260,7 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
    ```js
     "use strict";
     var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        function adopt(value) { return value instanceof P ? P : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
             function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
@@ -398,7 +408,22 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
 - **Event Manager**: Comprehensive event management system
 - **Process Management**: Proper handling of process events and termination
 
+## Contributors
+
+<p align="center">Thank you to all the amazing people who have contributed to Testify!</p>
+
+<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Kkkermit/Testify" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/graphs/contributors">View all contributors</a>
+</p>
+
 ## Support
+
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
 
 ## License

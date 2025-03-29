@@ -351,29 +351,28 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	fetchGitHubStats();
-	
-	// Add new function to fetch and display contributors
+
 	function fetchGitHubContributors() {
 		const repoPath = "Kkkermit/Testify";
 		const contributorsContainer = document.querySelector(".contributors-container");
-		
+
 		if (!contributorsContainer) return;
-		
+
 		fetch(`https://api.github.com/repos/${repoPath}/contributors?per_page=10`)
-			.then(response => {
+			.then((response) => {
 				if (!response.ok) {
 					throw new Error(`GitHub API returned ${response.status}`);
 				}
 				return response.json();
 			})
-			.then(contributors => {
+			.then((contributors) => {
 				if (contributors.length === 0) {
 					contributorsContainer.innerHTML = `<p class="text-white">No contributors found.</p>`;
 					return;
 				}
-				
+
 				let contributorsHTML = "";
-				contributors.forEach(contributor => {
+				contributors.forEach((contributor) => {
 					contributorsHTML += `
 						<a href="${contributor.html_url}" target="_blank" 
 						   class="contributor-item flex flex-col items-center p-3 hover:bg-dark/50 rounded-lg transition-all duration-200 transform hover:scale-105">
@@ -384,10 +383,10 @@ document.addEventListener("DOMContentLoaded", function () {
 						</a>
 					`;
 				});
-				
+
 				contributorsContainer.innerHTML = contributorsHTML;
 			})
-			.catch(error => {
+			.catch((error) => {
 				console.error("Error fetching GitHub contributors:", error);
 				contributorsContainer.innerHTML = `
 					<p class="text-white">Failed to load contributors. <a href="https://github.com/${repoPath}/graphs/contributors" 
@@ -395,8 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
 				`;
 			});
 	}
-	
-	// Call the function to fetch contributors
+
 	fetchGitHubContributors();
 
 	highlightActiveSection();
