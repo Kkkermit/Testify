@@ -286,11 +286,6 @@ body {
 	color: #333333;
 }
 
-.light-mode .support-item p,
-.light-mode .license-info p {
-	color: #4b5563;
-}
-
 @media (max-width: 1280px) {
 	.main-content {
 		padding: 1.5rem;
@@ -1098,4 +1093,33 @@ footer .container {
 
 .light-mode .content-section table tr:hover td {
 	background-color: rgba(138, 43, 226, 0.05);
+}
+
+/* Contributors section styling */
+.contributors-section {
+	overflow: hidden;
+}
+
+.contributors-container {
+	max-width: 100%;
+	overflow-x: auto;
+	padding-bottom: 0.5rem;
+	scrollbar-width: thin;
+}
+
+.contributor-item {
+	min-width: 90px;
+	width: fit-content;
+}
+
+.light-mode .contributor-item:hover {
+	background-color: rgba(0, 0, 0, 0.05);
+}
+
+.light-mode .contributors-section {
+	background-color: #f3f4f6;
+}
+
+.light-mode .contributors-section h3 {
+	color: #333333;
 }

@@ -351,6 +351,53 @@ document.addEventListener("DOMContentLoaded", function () {
 	}
 
 	fetchGitHubStats();
+	
+	// Add new function to fetch and display contributors
+	function fetchGitHubContributors() {
+		const repoPath = "Kkkermit/Testify";
+		const contributorsContainer = document.querySelector(".contributors-container");
+		
+		if (!contributorsContainer) return;
+		
+		fetch(`https://api.github.com/repos/${repoPath}/contributors?per_page=10`)
+			.then(response => {
+				if (!response.ok) {
+					throw new Error(`GitHub API returned ${response.status}`);
+				}
+				return response.json();
+			})
+			.then(contributors => {
+				if (contributors.length === 0) {
+					contributorsContainer.innerHTML = `<p class="text-white">No contributors found.</p>`;
+					return;
+				}
+				
+				let contributorsHTML = "";
+				contributors.forEach(contributor => {
+					contributorsHTML += `
+						<a href="${contributor.html_url}" target="_blank" 
+						   class="contributor-item flex flex-col items-center p-3 hover:bg-dark/50 rounded-lg transition-all duration-200 transform hover:scale-105">
+							<img src="${contributor.avatar_url}" alt="${contributor.login}" 
+								 class="w-16 h-16 rounded-full mb-2 border-2 border-primary shadow-md">
+							<span class="text-white text-sm font-medium">${contributor.login}</span>
+							<span class="text-gray-400 text-xs">${contributor.contributions} commits</span>
+						</a>
+					`;
+				});
+				
+				contributorsContainer.innerHTML = contributorsHTML;
+			})
+			.catch(error => {
+				console.error("Error fetching GitHub contributors:", error);
+				contributorsContainer.innerHTML = `
+					<p class="text-white">Failed to load contributors. <a href="https://github.com/${repoPath}/graphs/contributors" 
+					   target="_blank" class="text-primary hover:underline">View on GitHub</a></p>
+				`;
+			});
+	}
+	
+	// Call the function to fetch contributors
+	fetchGitHubContributors();
 
 	highlightActiveSection();
 
