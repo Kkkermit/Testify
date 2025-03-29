@@ -14,6 +14,13 @@
 <img align="center" alt="GitHub license" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge">
 </p>
 
+<p align="center">
+  <a href="https://buymeacoffee.com/kkermit" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60px" width="217px">
+  </a>
+</p>
+
+
 <p align="center"><strong>
 Advanced all-in-one discord bot with prefix & slash commands
 </strong></p>
@@ -416,14 +423,6 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
 ## Support
 
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
-
-<p align="center">
-  <a href="https://buymeacoffee.com/kkermit" target="_blank">
-    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60px" width="217px">
-  </a>
-</p>
-
-<p align="center">If you find Testify useful, consider supporting the project by buying me a coffee!</p>
 
 ## License
 Released under the terms of [MIT License](https://github.com/Kkkermit/Testify/blob/main/LICENSE) license.
