@@ -35,6 +35,7 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
 - [Command Categories](#command-categories)
 - [Setting-Audit-Logs](#Setting-up-audit-logs)
 - [Technical Features](#technical-features)
+- [Contributors](#contributors)
 - [Support](#support)
 - [License](#license)
 
@@ -398,8 +399,83 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
 - **Event Manager**: Comprehensive event management system
 - **Process Management**: Proper handling of process events and termination
 
+## Contributors
+
+<p align="center">Thank you to all the amazing people who have contributed to Testify!</p>
+
+<div id="contributors-section" align="center">
+  <p>Loading contributors data...</p>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const repoPath = "Kkkermit/Testify";
+    const contributorsSection = document.getElementById('contributors-section');
+    
+    fetch(`https://api.github.com/repos/${repoPath}/contributors?per_page=10`)
+      .then(response => response.json())
+      .then(contributors => {
+        if (contributors.length === 0) {
+          contributorsSection.innerHTML = `<p>No contributors found.</p>`;
+          return;
+        }
+        
+        let tableHtml = '<table><tr>';
+        contributors.forEach((contributor, index) => {
+          if (index > 0 && index % 3 === 0) {
+            tableHtml += '</tr><tr>';
+          }
+          
+          tableHtml += `
+            <td align="center">
+              <a href="${contributor.html_url}">
+                <img src="${contributor.avatar_url}" width="100px;" alt="${contributor.login}"/>
+                <br />
+                <sub><b>${contributor.login}</b></sub>
+                <br />
+                <sub>${contributor.contributions} commits</sub>
+              </a>
+            </td>`;
+        });
+        
+        const remaining = contributors.length % 3;
+        if (remaining > 0) {
+          for (let i = 0; i < 3 - remaining; i++) {
+            tableHtml += '<td></td>';
+          }
+        }
+        
+        tableHtml += '</tr></table>';
+        tableHtml += `<p><a href="https://github.com/${repoPath}/graphs/contributors">View all contributors</a></p>`;
+        
+        contributorsSection.innerHTML = tableHtml;
+      })
+      .catch(error => {
+        console.error("Error fetching contributors:", error);
+        contributorsSection.innerHTML = `
+          <p>Failed to load contributors data. <a href="https://github.com/${repoPath}/graphs/contributors">View on GitHub</a>.</p>
+        `;
+      });
+  });
+</script>
+
+<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Kkkermit/Testify" />
+  </a>
+</p>
+
 ## Support
+
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
+
+<p align="center">
+  <a href="https://buymeacoffee.com/kkermit" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60px" width="217px">
+  </a>
+</p>
+
+<p align="center">If you find Testify useful, consider supporting the project by buying me a coffee!</p>
 
 ## License
 Released under the terms of [MIT License](https://github.com/Kkkermit/Testify/blob/main/LICENSE) license.
