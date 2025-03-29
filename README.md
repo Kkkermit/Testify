@@ -398,6 +398,45 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
 - **Event Manager**: Comprehensive event management system
 - **Process Management**: Proper handling of process events and termination
 
+## Contributors
+
+We are grateful to all the contributors who have helped make Testify better! Here are some of our amazing contributors:
+
+<div align="center">
+  <!-- Contributors will be dynamically displayed here -->
+  <p>Loading contributors...</p>
+</div>
+
+### Features:
+- Displays top 10 most active contributors
+- Shows profile pictures, usernames, and contribution counts
+- Links directly to contributors' GitHub profiles
+- Horizontally scrollable container for easy viewing
+- Clean and responsive layout that matches the project's design
+- Automatic updates via GitHub API
+- Fallback to manual contributor list if API is unavailable
+
+Can't see the contributors? [View them on GitHub](https://github.com/Kkkermit/Testify/graphs/contributors)
+
+## Support the Project
+
+If you find Testify useful and would like to support its development, consider buying us a coffee! Your support helps maintain and improve the project.
+
+<div align="center">
+  <a href="https://buymeacoffee.com/kkermit" target="_blank">
+    <img src="https://i.postimg.cc/fypB0thz/buy-me-a-coffee6984-removebg-preview.png" alt="Buy Me A Coffee" height="60" width="217">
+  </a>
+</div>
+
+### Why Support?
+- Help maintain and improve the bot
+- Support new feature development
+- Enable faster bug fixes
+- Contribute to hosting costs
+- Show appreciation for the project
+
+Every contribution, no matter how small, makes a difference and is greatly appreciated! 💜
+
 ## Support
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
 
