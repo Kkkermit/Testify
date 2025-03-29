@@ -251,7 +251,7 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
    ```js
     "use strict";
     var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-        function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+        function adopt(value) { return value instanceof P ? P : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
             function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
             function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
@@ -403,66 +403,14 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
 
 <p align="center">Thank you to all the amazing people who have contributed to Testify!</p>
 
-<div id="contributors-section" align="center">
-  <p>Loading contributors data...</p>
-</div>
-
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    const repoPath = "Kkkermit/Testify";
-    const contributorsSection = document.getElementById('contributors-section');
-    
-    fetch(`https://api.github.com/repos/${repoPath}/contributors?per_page=10`)
-      .then(response => response.json())
-      .then(contributors => {
-        if (contributors.length === 0) {
-          contributorsSection.innerHTML = `<p>No contributors found.</p>`;
-          return;
-        }
-        
-        let tableHtml = '<table><tr>';
-        contributors.forEach((contributor, index) => {
-          if (index > 0 && index % 3 === 0) {
-            tableHtml += '</tr><tr>';
-          }
-          
-          tableHtml += `
-            <td align="center">
-              <a href="${contributor.html_url}">
-                <img src="${contributor.avatar_url}" width="100px;" alt="${contributor.login}"/>
-                <br />
-                <sub><b>${contributor.login}</b></sub>
-                <br />
-                <sub>${contributor.contributions} commits</sub>
-              </a>
-            </td>`;
-        });
-        
-        const remaining = contributors.length % 3;
-        if (remaining > 0) {
-          for (let i = 0; i < 3 - remaining; i++) {
-            tableHtml += '<td></td>';
-          }
-        }
-        
-        tableHtml += '</tr></table>';
-        tableHtml += `<p><a href="https://github.com/${repoPath}/graphs/contributors">View all contributors</a></p>`;
-        
-        contributorsSection.innerHTML = tableHtml;
-      })
-      .catch(error => {
-        console.error("Error fetching contributors:", error);
-        contributorsSection.innerHTML = `
-          <p>Failed to load contributors data. <a href="https://github.com/${repoPath}/graphs/contributors">View on GitHub</a>.</p>
-        `;
-      });
-  });
-</script>
-
 <p align="center">
   <a href="https://github.com/Kkkermit/Testify/graphs/contributors">
     <img src="https://contrib.rocks/image?repo=Kkkermit/Testify" />
   </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/graphs/contributors">View all contributors</a>
 </p>
 
 ## Support
