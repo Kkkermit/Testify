@@ -10,7 +10,7 @@ const intents = [
     GatewayIntentBits.GuildWebhooks, 
     GatewayIntentBits.GuildMessageReactions,
     GatewayIntentBits.MessageContent, 
-    GatewayIntentBits.GuildEmojisAndStickers, 
+    GatewayIntentBits.GuildExpressions, 
     GatewayIntentBits.DirectMessages, 
     GatewayIntentBits.DirectMessageTyping, 
     GatewayIntentBits.GuildModeration, 
