@@ -208,6 +208,9 @@ With over 100 slash commands and over 50 prefix commands, Testify is an open sou
    **log-setup** - <br>
    To run the setup of the colored logs in the `discord-logs` module. This saves you from manually doing the below method [Setting-up-audit-logs](#setting-up-audit-logs)
 
+   **codebase-info** - <br>
+   This displays some info of the codebase like how many lines of code are in the src directory, how many comments and how many files there are.
+
 ## Command Categories
 
 ### Slash Command Categories
