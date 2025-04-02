@@ -18,7 +18,8 @@
     "setup-env:prod": "&& node src/scripts/setupEnvFile.js",
     "setup-env:dev": "node src/scripts/setupEnvFile.js setup-env:dev",
     "commit": "node src/scripts/commitRunner.js",
-    "log-setup": "node src/scripts/setupLogs.js"
+    "log-setup": "node src/scripts/setupLogs.js",
+    "codebase-info": "node src/scripts/linesOfCode.js"
   },
   "keywords": [],
   "author": "",
