@@ -5,24 +5,28 @@
 //    ██║   ███████╗███████║   ██║   ██║██║        ██║   
 //    ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝   
 
-// Developed by: Kkermit. All rights reserved. (2024)
+// Developed by: Kkermit. All rights reserved. (2025)
 // MIT License
 
 const { Client, Collection } = require(`discord.js`);
 const fs = require('fs');
 const config = require('./config');
-const { getTimestamp, color } = require('./utils/loggingEffects.js');
 const updateYTDLPackages = require('./scripts/ytdlUpdater');
+
+// Utils //
+const { intents, partials } = require('./utils/intents.js');
+const { getTimestamp, color } = require('./utils/loggingEffects.js');
 const setupLoggers = require('./utils/setupLoggers');
 
 // Run YTDL packages update at startup
 console.log(`${color.blue}[${getTimestamp()}] [STARTUP] Running package updates for music functionality${color.reset}`);
 updateYTDLPackages();
 
-// Client Loader //
+// Version Control //
+const currentVersion = `${config.botVersion}`;
 
-const loadEnvironment = require('./scripts/bootMode');
-loadEnvironment();
+// Boot Mode //
+require('./utils/bootMode.js')();
 
 // Set up environment variables
 require('dotenv').config();
@@ -30,13 +34,6 @@ require('dotenv').config();
 // Setup logging first to capture everything
 setupLoggers();
 
-// Version Control //
-
-const currentVersion = `${config.botVersion}`;
-
-// Intents & Partials //
-
-const { intents, partials } = require('./utils/intents.js');
 
 let client;
 try {
