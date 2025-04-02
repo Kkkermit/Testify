@@ -37,4 +37,17 @@ function asciiTextCommitRunner() {
     console.log(`${color.blue}                                                                                                              ${color.reset}`);
 }
 
-module.exports = { asciiText, asciiTextCommitRunner };
+function asciiCodeBaseStats() {
+
+console.log(`${color.blue}                                                                                                                 ${color.reset}`);
+console.log(`${color.blue}  ██████╗ ██████╗ ██████╗ ███████╗██████╗  █████╗ ███████╗███████╗    ███████╗████████╗ █████╗ ████████╗███████╗ ${color.reset}`);
+console.log(`${color.blue} ██╔════╝██╔═══██╗██╔══██╗██╔════╝██╔══██╗██╔══██╗██╔════╝██╔════╝    ██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝██╔════╝ ${color.reset}`);
+console.log(`${color.blue} ██║     ██║   ██║██║  ██║█████╗  ██████╔╝███████║███████╗█████╗      ███████╗   ██║   ███████║   ██║   ███████╗ ${color.reset}`);
+console.log(`${color.blue} ██║     ██║   ██║██║  ██║██╔══╝  ██╔══██╗██╔══██║╚════██║██╔══╝      ╚════██║   ██║   ██╔══██║   ██║   ╚════██║ ${color.reset}`);
+console.log(`${color.blue} ╚██████╗╚██████╔╝██████╔╝███████╗██████╔╝██║  ██║███████║███████╗    ███████║   ██║   ██║  ██║   ██║   ███████║ ${color.reset}`);
+console.log(`${color.blue}  ╚═════╝ ╚═════╝ ╚═════╝ ╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝    ╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ${color.reset}`);
+console.log(`${color.blue}                                                                                                                 ${color.reset}`);
+
+}
+
+module.exports = { asciiText, asciiTextCommitRunner, asciiCodeBaseStats };
