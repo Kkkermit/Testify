@@ -15,7 +15,7 @@
     "postinstall": "node src/scripts/postInstallation.js",
     "update-packages": "node src/scripts/updatePackages.js",
     "update-ytdl-core": "node src/scripts/ytdlUpdater.js",
-    "setup-env:prod": "&& node src/scripts/setupEnvFile.js",
+    "setup-env:prod": "node src/scripts/setupEnvFile.js",
     "setup-env:dev": "node src/scripts/setupEnvFile.js setup-env:dev",
     "commit": "node src/scripts/commitRunner.js",
     "log-setup": "node src/scripts/setupLogs.js",
