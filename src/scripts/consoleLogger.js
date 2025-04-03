@@ -186,6 +186,7 @@ class ConsoleLogger {
 	groupLogs(logs) {
 		const messages = [];
 		let currentMessage = "";
+		const maxContentLength = this.maxMessageLength - 8;
 
 		logs.sort((a, b) => a.timestamp - b.timestamp);
 
@@ -198,7 +199,19 @@ class ConsoleLogger {
 			if (seen.has(hash)) continue;
 			seen.add(hash);
 
-			if (currentMessage.length + logEntry.length > this.maxMessageLength) {
+			if (logEntry.length > maxContentLength) {
+				if (currentMessage.length > 0) {
+					messages.push(currentMessage.trim());
+					currentMessage = "";
+				}
+
+				let remainingEntry = logEntry;
+				while (remainingEntry.length > 0) {
+					const chunk = remainingEntry.substring(0, maxContentLength);
+					messages.push(chunk.trim());
+					remainingEntry = remainingEntry.substring(maxContentLength);
+				}
+			} else if (currentMessage.length + logEntry.length > maxContentLength) {
 				messages.push(currentMessage.trim());
 				currentMessage = logEntry;
 			} else {
@@ -219,7 +232,11 @@ class ConsoleLogger {
 		content = content
 			.replace(/\u001b\[\d+m/g, "")
 			.replace(/\n\s*\n/g, "\n")
-			.trim();
+				.trim();
+			
+		if (content.length > 1994) {
+			content = content.substring(0, 1994);
+		}
 
 		const payload = {
 			username: "Testify Console Logger",
