@@ -3,7 +3,6 @@ const { EmbedBuilder, PermissionsBitField, SlashCommandBuilder, PermissionFlagsB
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('kick')
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
     .setDescription('Kicks specified user.')
     .addUserOption(option => option.setName('user').setDescription('Specify the user you want to kick.').setRequired(true))

@@ -5,7 +5,6 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("lyrics")
     .setDescription("Displays the lyrics from the given song")
-    .setDMPermission(false)
     .addStringOption(options => options.setName("song").setDescription("What is the song? You can also include the artist for a better search!").setRequired(true)),
     async execute(interaction, client) {
 

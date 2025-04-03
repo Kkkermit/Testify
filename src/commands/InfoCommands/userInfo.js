@@ -7,7 +7,6 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("user-info")
     .setDescription("Display a users information")
-    .setDMPermission(false)
     .addUserOption((option) => option.setName("member").setDescription("View member information")),
 
     async execute(interaction, client) {

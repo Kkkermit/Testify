@@ -5,7 +5,6 @@ const botSchema = require('../../schemas/voiceChannelBotSystem');
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('members-vc')
-    .setDMPermission(false)
     .setDescription('Configure your members voice channel.')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
     .addSubcommand(command => command.setName('total-set').setDescription('Sets your total members voice channel.').addChannelOption(option => option.setName('voice-channel').setDescription('Specified voice channel wll be your total members voice channel.').setRequired(true).addChannelTypes(ChannelType.GuildVoice)))

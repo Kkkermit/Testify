@@ -4,7 +4,6 @@ const ms = require('ms');
 module.exports = {
     data: new SlashCommandBuilder()
     .setName(`giveaway`)
-    .setDMPermission(false)
     .setDescription(`Start a giveaway or configure already existing ones.`)
     .setDefaultMemberPermissions(PermissionsBitField.Administrator)
     .addSubcommand(command => command.setName('start').setDescription('Starts a giveaway with the specified fields.').addStringOption(option => option.setName('duration').setDescription(`Specified duration will be the giveaway's duration (in ms)`).setRequired(true)).addIntegerOption(option => option.setName('winners').setDescription('Specified amount will be the amount of winners chosen.').setRequired(true)).addStringOption(option => option.setName('prize').setDescription('Specified prize will be the prize for the giveaway.').setRequired(true)).addChannelOption(option => option.setName('channel').setDescription('Specified channel will receive the giveaway.')).addStringOption(option => option.setName('content').setDescription('Specified content will be used for the giveaway embed.')))

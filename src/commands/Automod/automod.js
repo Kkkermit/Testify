@@ -3,7 +3,6 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsB
 module.exports = {
     data: new SlashCommandBuilder()
     .setName("automod")
-    .setDMPermission(false)
     .setDescription("Setup Automod for your server.")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(command => command.setName("flagged-words").setDescription("Blocks profanity, specific content, and slurs from being sent."))

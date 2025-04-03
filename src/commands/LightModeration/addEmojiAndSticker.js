@@ -4,7 +4,6 @@ const { default: axios } = require('axios');
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('add')
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuildExpressions)
     .setDescription('Adds specified emoji to the server.')
     .addSubcommand(command => command.setName('emoji').setDescription('Specified emoji will be added to the server.').addStringOption(option => option.setName('emoji').setDescription('Specified emoji will be added to the server.').setRequired(true)).addStringOption(option => option.setName('name').setDescription('Specified name will be applied to specified new emoji.').setRequired(true)))

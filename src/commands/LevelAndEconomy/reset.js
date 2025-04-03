@@ -7,7 +7,6 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('reset')
     .setDescription(`Reset something in this server.`)
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionsBitField.Administrator)
     .addSubcommand(command => command.setName('all-xp').setDescription('Resets all XP progress in this server.'))
     .addSubcommand(command => command.setName('all-currency').setDescription('Resets all economy progress in this server.'))

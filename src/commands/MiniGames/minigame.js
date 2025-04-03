@@ -5,7 +5,6 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('minigame')
     .setDescription(`Play a some minigames!`)
-    .setDMPermission(false)
     .addSubcommand(subcommand => subcommand.setName('wordle').setDescription(`Play a game of Wordle!`))
     .addSubcommand(subcommand => subcommand.setName('connect4').setDescription(`Play a game of Connect4!`).addUserOption(option => option.setName('opponent').setDescription('Specified user will be your opponent.').setRequired(true)))
     .addSubcommand(subcommand => subcommand.setName('2048').setDescription(`Play a game of 2048!`))

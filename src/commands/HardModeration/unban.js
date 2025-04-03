@@ -3,7 +3,6 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsB
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('unban')
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .setDescription('Unbans specified user.')
     .addUserOption(option => option.setName('user').setDescription('Specify the user you want to ban.').setRequired(true))

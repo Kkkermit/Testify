@@ -4,7 +4,6 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectio
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('radio')
-    .setDMPermission(false)
     .setDescription('Plays some radio music for you.')
     .addStringOption(option => option.setName('station').setDescription('Select which station you want to connect to.').addChoices(
         { name: `Lofi`, value: `http://lofi.stream.laut.fm/lofi?t302=2023-05-09_19-27-21&uuid=d646c9fa-d187-47d6-974c-adb3d6c36a66` },

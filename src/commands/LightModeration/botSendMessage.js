@@ -4,7 +4,6 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("say")
     .setDescription("Send a message through the bot")
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addChannelOption(options => options.setName("channel").setDescription("The channel you want to send the message").setRequired(false)),
     async execute(interaction, client) {

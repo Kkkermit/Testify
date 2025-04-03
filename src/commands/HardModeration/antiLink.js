@@ -4,7 +4,6 @@ const linkSchema = require('../../schemas/antiLinkSystem');
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('anti-link')
-    .setDMPermission(false)
     .setDescription('Enables/Disables the anti-link moderation system.')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(command => command.setName('setup').setDescription('Sets up the anti link system.').addStringOption(option => option.setName('permissions').setRequired(true).setDescription('Choose what permissions can bypass the anti-link system.')

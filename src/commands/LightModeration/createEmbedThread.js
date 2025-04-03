@@ -4,7 +4,6 @@ var timeout = [];
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('create')
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .setDescription('Creates threads & embeds for you.')
     .addSubcommand(command => command.setName('embed').setDescription('Creates an embed with specified values for you.')

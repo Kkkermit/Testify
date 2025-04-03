@@ -5,7 +5,6 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('counting')
     .setDescription(`Manages the counting system in your server.`)
-    .setDMPermission(false)
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(command => command.setName('setup').setDescription(`Sets up the counting system for your server.`).addChannelOption(option => option.setName('channel').setDescription(`Please indicate the channel where you would like the counting messages to be sent.`).setRequired(true).addChannelTypes(ChannelType.GuildText)).addIntegerOption(option => option.setName('max-count').setDescription(`The maximum number you want the server members to count up to (default 1000)`).setRequired(false).setMinValue(1)))
     .addSubcommand(command => command.setName('disable').setDescription(`Disables the counting system in your server.`)),

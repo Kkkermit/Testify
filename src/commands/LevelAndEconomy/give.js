@@ -6,7 +6,6 @@ const levelschema = require('../../schemas/levelSetupSystem');
 module.exports = {
     data: new SlashCommandBuilder()
     .setName('give')
-    .setDMPermission(false)
     .setDescription('Give a user specified amount of currency.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(command => command.setName('currency').setDescription('Give specified user specified amount of economy currency.').addUserOption(option => option.setName('user').setDescription('Specified user will be given specified amount of currency.').setRequired(true)).addNumberOption(option => option.setName('amount').setDescription('The amount of currency you want to give specified user.').setRequired(true).setMaxValue(100000000)))
