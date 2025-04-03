@@ -1,4 +1,4 @@
-const { Events } = require("discord.js");
+const { Events, MessageFlags } = require("discord.js");
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -12,7 +12,7 @@ module.exports = {
         const skinUUID = type === "skin-preview" ? rest[1] : rest[0];
 
         const skin = client.skins.find((s) => s["uuid"] === skinUUID);
-        if (!skin) return interaction.reply({ content: "Skin not found!", ephemeral: true });
+        if (!skin) return interaction.reply({ content: "Skin not found!", flags: MessageFlags.Ephemeral });
 
         let ChromaComponents, LevelComponents, PreviewComponents, Embed, i;
 
@@ -23,7 +23,7 @@ module.exports = {
                     const index = parseInt(rest[2]);
 
                     if (!skin[PreviewType] || !skin[PreviewType][index]) {
-                        return interaction.reply({ content: "Preview not available!", ephemeral: true });
+                        return interaction.reply({ content: "Preview not available!", flags: MessageFlags.Ephemeral });
                     }
 
                     const Video = PreviewType === "chromas" && index === 0 
@@ -31,15 +31,15 @@ module.exports = {
                         : skin[PreviewType]?.[index]?.["streamedVideo"];
 
                     if (!Video) {
-                        return interaction.reply({ content: "No video preview available!", ephemeral: true });
+                        return interaction.reply({ content: "No video preview available!", flags: MessageFlags.Ephemeral });
                     }
 
-                    return await interaction.reply({ content: Video, ephemeral: true });
+                    return await interaction.reply({ content: Video, flags: MessageFlags.Ephemeral });
 
 				case "skin-chroma":
 					const chromaIndex = Number(rest[1]);
 					if (!skin["chromas"] || !skin["chromas"][chromaIndex]) {
-						return interaction.reply({ content: "Chroma not found!", ephemeral: true });
+						return interaction.reply({ content: "Chroma not found!", flags: MessageFlags.Ephemeral });
 					}
 				
 					const SelectedChroma = skin["chromas"][chromaIndex];
@@ -87,7 +87,7 @@ module.exports = {
 				case "skin-level":
 					const levelIndex = Number(rest[1]);
 					if (!skin["levels"] || !skin["levels"][levelIndex]) {
-						return interaction.reply({ content: "Level not found!", ephemeral: true });
+						return interaction.reply({ content: "Level not found!", flags: MessageFlags.Ephemeral });
 					}
 				
 					const SelectedLevel = skin["levels"][levelIndex];
@@ -133,7 +133,7 @@ module.exports = {
             });
             return interaction.reply({
                 content: "An error occurred while processing the skin information.",
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
 	},

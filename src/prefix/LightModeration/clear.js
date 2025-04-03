@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'clear',
@@ -8,9 +8,9 @@ module.exports = {
         const amount = args[0];
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
 
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) return await message.channel.send({ content: `${client.config.noPerms}`, ephemeral: true});
-        if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) return message.channel.send({ content: 'Please provide a valid number between 1 and 99.', ephemeral: true});
-        if (!amount) return message.channel.send({ content: 'Please provide the amount of message you want to clear.', ephemeral: true});
+        if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
+        if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) return message.channel.send({ content: 'Please provide a valid number between 1 and 99.', flags: MessageFlags.Ephemeral});
+        if (!amount) return message.channel.send({ content: 'Please provide the amount of message you want to clear.', flags: MessageFlags.Ephemeral});
 
         let messages;
         if (user) {
@@ -35,7 +35,7 @@ module.exports = {
         .setFooter({ text: `Purge command`})
         .setTimestamp()
 
-        return message.channel.send({ embeds: [clearEmbed], ephemeral: true });
+        return message.channel.send({ embeds: [clearEmbed], flags: MessageFlags.Ephemeral });
 
     }
 }

@@ -1,4 +1,4 @@
-const { EmbedBuilder, SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require(`discord.js`);
+const { EmbedBuilder, SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, MessageFlags } = require(`discord.js`);
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -75,21 +75,21 @@ module.exports = {
       
             if (c.customId === 'avatar') {
               if (c.user.id !== interaction.user.id) {
-                return await c.reply({ content: `${response}`, ephemeral: true})
+                return await c.reply({ content: `${response}`, flags: MessageFlags.Ephemeral})
               }
               await c.update({ embeds: [embed], components: [cmp]})
             }
 
             if (c.customId === 'banner') {
               if (c.user.id !== interaction.user.id) {
-                return await c.reply({ content: `${response}`, ephemeral: true})
+                return await c.reply({ content: `${response}`, flags: MessageFlags.Ephemeral})
               }
               await c.update({ embeds: [embed2], components: [cmp2]})
             }
 
             if (c.customId === 'delete') {
               if (c.user.id !== interaction.user.id) {
-                return await c.reply({ content: `${response}`, ephemeral: true})
+                return await c.reply({ content: `${response}`, flags: MessageFlags.Ephemeral})
               }
               interaction.deleteReply();
             }

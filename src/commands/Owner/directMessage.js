@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,9 +32,9 @@ module.exports = {
             .setThumbnail(client.user.displayAvatarURL())
             .setTimestamp();
         
-            interaction.reply({ embeds: [embed], ephemeral: true })
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral })
         } else {
-            return interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true })
+            return interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral })
         } 
     }
 }

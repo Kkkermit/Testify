@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ module.exports = {
         
         try {
             if (interaction.user.id !== client.config.developers) {
-                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
             }
 
             const guilds = client.guilds.cache;
@@ -134,7 +134,7 @@ module.exports = {
             }
         } catch (error) {
             client.logs.error(error);
-            return interaction.reply({ content: "[GUILD_LIST] An error has occurred", ephemeral: true });
+            return interaction.reply({ content: "[GUILD_LIST] An error has occurred", flags: MessageFlags.Ephemeral });
         }
     },
 };

@@ -1,4 +1,4 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle } = require("discord.js");
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 const config = require('../../config')
 const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -22,7 +22,7 @@ module.exports = {
                         if (!user || !user.spotifyAccessToken) {
                             return interaction.reply({
                                 content: 'This user no longer has their Spotify account connected!',
-                                ephemeral: true
+                                flags: MessageFlags.Ephemeral
                             });
                         }
 
@@ -54,7 +54,7 @@ module.exports = {
                         console.error(`${color.red}[${getTimestamp()}] Spotify button error:`, error);
                         await interaction.reply({
                             content: 'Error updating stats!',
-                            ephemeral: true
+                            flags: MessageFlags.Ephemeral
                         });
                     }
                 }
@@ -156,7 +156,7 @@ module.exports = {
             .setColor("Red")
             .setDescription(`There was an error while executing this command!\n\`\`\`${error}\`\`\``)
 
-            await interaction.reply({ embeds: [errorEmbed], ephemeral: true});
+            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral});
         }
     },
 };

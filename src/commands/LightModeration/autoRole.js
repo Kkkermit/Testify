@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const autoRoleSchema = require("../../schemas/autoRoleSystem");
 
 module.exports = {
@@ -21,15 +21,15 @@ module.exports = {
     
         const bot = interaction.guild.members.me;
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
     
-        if (role && role.position > bot.roles.highest.position) return await interaction.reply({ content: "I **cannot** manager that role as it is higher than mine!", ephemeral: true });
+        if (role && role.position > bot.roles.highest.position) return await interaction.reply({ content: "I **cannot** manager that role as it is higher than mine!", flags: MessageFlags.Ephemeral });
 
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         async function dataCheck() {
             if (!data) 
-                await interaction.editReply({ content: "The **auto-role** system is not setup in this server!", ephemeral: true });
+                await interaction.editReply({ content: "The **auto-role** system is not setup in this server!", flags: MessageFlags.Ephemeral });
             return data;
         }
 

@@ -1,4 +1,4 @@
-const { EmbedBuilder, AttachmentBuilder, SlashCommandBuilder } = require("discord.js");
+const { EmbedBuilder, AttachmentBuilder, SlashCommandBuilder, MessageFlags } = require("discord.js");
 const Canvas = require("canvas");
 const filter = require("../../jsons/filter.json");
 
@@ -15,7 +15,7 @@ module.exports = {
         
         const signText = interaction.options.getString("text").trim();
 
-        if (filter.words.includes(signText)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(signText)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
         const maxLineWidth = 60;
         let lines = [];

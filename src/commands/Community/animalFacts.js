@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 
 module.exports = {
@@ -25,10 +25,10 @@ module.exports = {
 
                 await interaction.reply({ embeds: [embed] });
             } else {
-                await interaction.reply({ content: 'Failed to fetch a meme. Try again later.', ephemeral: true });
+                await interaction.reply({ content: 'Failed to fetch a meme. Try again later.', flags: MessageFlags.Ephemeral });
             }
         } catch (error) {
-            await interaction.reply({ content: 'There was an error getting the meme from axios!', ephemeral: true });
+            await interaction.reply({ content: 'There was an error getting the meme from axios!', flags: MessageFlags.Ephemeral });
         }
     }, 
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits} = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -20,7 +20,7 @@ module.exports = {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({
             content: client.config.noPerms,
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
 
         switch (sub) {

@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -12,7 +12,7 @@ module.exports = {
             if (!message || message.deleted) {
                 await interaction.reply({
                     content: 'This message is no longer available.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
                 return;
             }
@@ -45,14 +45,14 @@ module.exports = {
                     await fetchedMessage.edit({ embeds: [embed], components: [row] });
                     await interaction.followUp({
                         content: 'Status updated successfully.',
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
             } catch (error) {
                 if (error.code === 10008) {
                     await interaction.followUp({
                         content: 'The message could not be updated as it no longer exists.',
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 } else {
                     console.error('Failed to edit message:', error);
@@ -63,7 +63,7 @@ module.exports = {
             if (!interaction.replied && !interaction.deferred) {
                 await interaction.reply({
                     content: 'There was an error processing your request.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 }).catch(() => {});
             }
         }

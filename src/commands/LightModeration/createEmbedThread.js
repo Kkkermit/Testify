@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, GuildTextThreadManager, PermissionsBitField, PermissionFlagsBits } = require('discord.js')
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionsBitField, PermissionFlagsBits } = require('discord.js')
 var timeout = [];
 
 module.exports = {
@@ -76,14 +76,14 @@ module.exports = {
             const fieldn6 = interaction.options.getString('sixth-field-name');
 
             if (image) {
-                if (!image.startsWith('http') && image !== 'null') return await interaction.reply({ content: 'You **cannot** make this your image!', ephemeral: true})
+                if (!image.startsWith('http') && image !== 'null') return await interaction.reply({ content: 'You **cannot** make this your image!', flags: MessageFlags.Ephemeral})
             }
 
             if (thumbnail) {
-                if (!thumbnail.startsWith('http') && thumbnail !== 'null') return await interaction.reply({ content: 'You **cannot** make this your thumbnail!', ephemeral: true})
+                if (!thumbnail.startsWith('http') && thumbnail !== 'null') return await interaction.reply({ content: 'You **cannot** make this your thumbnail!', flags: MessageFlags.Ephemeral})
             }
         
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             const embed = new EmbedBuilder()
             .setTitle(title)
@@ -124,13 +124,13 @@ module.exports = {
                 embed.addFields({ name: `${fieldn6}`, value: `${fieldv6}`})
             }
         
-            await interaction.reply({ content: `Your **embed** has been created!`, ephemeral: true})
+            await interaction.reply({ content: `Your **embed** has been created!`, flags: MessageFlags.Ephemeral})
             await interaction.channel.send({ embeds: [embed]})
 
             break;
             case 'thread':
 
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && timeout.includes(interaction.member.id)) return await interaction.reply({ content: 'You are on cooldown! You **cannot** execute /create-thread.', ephemeral: true})
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && timeout.includes(interaction.member.id)) return await interaction.reply({ content: 'You are on cooldown! You **cannot** execute /create-thread.', flags: MessageFlags.Ephemeral})
         
             const threadtitle = interaction.options.getString('name') || 'Unnamed Thread';
             await interaction.channel.threads.create({
@@ -139,7 +139,7 @@ module.exports = {
                 reason: 'Created a thread by an Admin.'
             });
         
-            await interaction.reply({ content: `Created the "**${threadtitle}**" thread!`, ephemeral: true});
+            await interaction.reply({ content: `Created the "**${threadtitle}**" thread!`, flags: MessageFlags.Ephemeral});
 
             timeout.push(interaction.user.id);
             setTimeout(() => {

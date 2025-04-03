@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
     name: 'nick',
@@ -8,9 +8,9 @@ module.exports = {
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
         const nickname = args.slice(1).join(' ');
 
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageNicknames)) return message.channel.send({ content: `${client.config.noPerms}`, ephemeral: true });
-        if (!user) return message.channel.send({ content: 'Please mention a **user** to change their nickname.', ephemeral: true });
-        if (!nickname) return message.channel.send({ content: 'Please provide a **nickname** to change.', ephemeral: true });
+        if (!message.member.permissions.has(PermissionFlagsBits.ManageNicknames)) return message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
+        if (!user) return message.channel.send({ content: 'Please mention a **user** to change their nickname.', flags: MessageFlags.Ephemeral });
+        if (!nickname) return message.channel.send({ content: 'Please provide a **nickname** to change.', flags: MessageFlags.Ephemeral });
 
         user.setNickname(nickname);
 

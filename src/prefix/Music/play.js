@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
 const updateYTDLPackages = require('../../scripts/ytdlUpdater');
 
@@ -16,7 +16,7 @@ module.exports = {
             .setColor(client.config.embedMusic)
             .setDescription(`${client.config.musicEmojiError} | Please **enter a song url** or query to search.`)
         ],
-        ephemeral: true
+        flags: MessageFlags.Ephemeral
       });
     }
 

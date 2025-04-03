@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
         });
 
         if (!response.ok) { 
-            interaction.reply({ content: `An **error occurred** while attempting to fetch a dad joke. Please try again later.`, ephemeral: true })
+            interaction.reply({ content: `An **error occurred** while attempting to fetch a dad joke. Please try again later.`, flags: MessageFlags.Ephemeral })
         }
 
         const data = await response.json();

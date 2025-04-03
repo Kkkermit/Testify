@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder }=require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags }=require('discord.js');
 const filter = require('../../jsons/filter.json');
 
 module.exports={
@@ -10,7 +10,7 @@ module.exports={
 
         const quote = interaction.options.getString('quote');
 
-        if (filter.words.includes(quote)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(quote)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
         let canvas = `https://some-random-api.com/canvas/misc/oogway?quote=${encodeURIComponent(quote)}`;
 

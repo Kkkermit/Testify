@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const ecoS = require('../../schemas/economySystem');
 
 module.exports = {
@@ -9,7 +9,7 @@ module.exports = {
         const { guild, author } = message;
         let data = await ecoS.findOne({ Guild: guild.id, user: author.id });
 
-        if (!data) return await message.reply({ content: "You don't have an account, create one using \`/economy-create account\`", ephemeral: true });
+        if (!data) return await message.reply({ content: "You don't have an account, create one using \`/economy-create account\`", flags: MessageFlags.Ephemeral });
         else {
             const embed = new EmbedBuilder()
             .setAuthor({ name: `Economy System ${client.config.devBy}` })

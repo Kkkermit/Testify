@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const { Wordle, Connect4, TwoZeroFourEight, Minesweeper, RockPaperScissors, Snake, TicTacToe, MatchPairs, Hangman, Flood, FindEmoji, Slots, Trivia } = require('discord-gamecord');
 
 module.exports = {
@@ -58,8 +58,8 @@ module.exports = {
             case "connect4":
 
             const enemy = interaction.options.getUser('opponent');
-            if (interaction.user.id === enemy.id) return await interaction.reply({ content: `You **cannot** play against yourself`, ephemeral: true });
-            if (enemy.bot) return await interaction.reply({ content: `You **cannot** play against bot`, ephemeral: true });
+            if (interaction.user.id === enemy.id) return await interaction.reply({ content: `You **cannot** play against yourself`, flags: MessageFlags.Ephemeral });
+            if (enemy.bot) return await interaction.reply({ content: `You **cannot** play against bot`, flags: MessageFlags.Ephemeral });
     
             const gameConnect4 = new Connect4({
             message: interaction,
@@ -156,8 +156,8 @@ module.exports = {
             case "rps":
 
             const enemy1 = interaction.options.getUser('opponent');
-            if (interaction.user.id === enemy1.id) return await interaction.reply({ content: `You **cannot** play against yourself`, ephemeral: true });
-            if (enemy1.bot) return await interaction.reply({ content: `You **cannot** play against bot`, ephemeral: true });
+            if (interaction.user.id === enemy1.id) return await interaction.reply({ content: `You **cannot** play against yourself`, flags: MessageFlags.Ephemeral });
+            if (enemy1.bot) return await interaction.reply({ content: `You **cannot** play against bot`, flags: MessageFlags.Ephemeral });
         
             const gameRPS = new RockPaperScissors({
                 message: interaction,
@@ -237,8 +237,8 @@ module.exports = {
             case "tictactoe":
 
             const enemy2 = interaction.options.getUser('opponent');
-            if (interaction.user.id === enemy2.id) return await interaction.reply({ content: `You **cannot** play against yourself`, ephemeral: true });
-            if (enemy2.bot) return await interaction.reply({ content: `You **cannot** play against bot`, ephemeral: true });
+            if (interaction.user.id === enemy2.id) return await interaction.reply({ content: `You **cannot** play against yourself`, flags: MessageFlags.Ephemeral });
+            if (enemy2.bot) return await interaction.reply({ content: `You **cannot** play against bot`, flags: MessageFlags.Ephemeral });
 
             const gameTTT = new TicTacToe({
                 message: interaction,
@@ -459,7 +459,7 @@ module.exports = {
                 try {
                     if (i.customId === 'option1' || i.customId === 'option2') {
                         if (i.user.id !== interaction.user.id) {
-                            return await i.reply({ content: `${menu}`, ephemeral: true });
+                            return await i.reply({ content: `${menu}`, flags: MessageFlags.Ephemeral });
                         }
 
                         await i.deferUpdate(); // Acknowledge the interaction

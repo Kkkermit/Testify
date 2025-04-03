@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const Profile = require('../../schemas/profileSystem');
 const filter = require('../../jsons/filter.json');
 const moment = require('moment');
@@ -24,13 +24,13 @@ module.exports = {
             const createHobbies = interaction.options.getString('hobbies') || '';
             const createFavoriteGame = interaction.options.getString('favorite_game') || '';
 
-            if (filter.words.includes(createAbout)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
-            if (filter.words.includes(createHobbies)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+            if (filter.words.includes(createAbout)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
+            if (filter.words.includes(createHobbies)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
             const existingProfile = await Profile.findOne({ userId: createUserId });
 
             if (existingProfile) {
-                await interaction.reply({ content: 'You already have a profile created. You cannot create another one.', ephemeral: true });
+                await interaction.reply({ content: 'You already have a profile created. You cannot create another one.', flags: MessageFlags.Ephemeral });
                 return; 
             }
             const birthdayString = interaction.options.getString('birthday');
@@ -38,7 +38,7 @@ module.exports = {
             if (birthdayString) {
                 birthday = new Date(birthdayString);
                 if (isNaN(birthday.getTime())) {
-                    await interaction.reply({ content: 'Invalid date format. Please use YYYY-MM-DD.', ephemeral: true });
+                    await interaction.reply({ content: 'Invalid date format. Please use YYYY-MM-DD.', flags: MessageFlags.Ephemeral });
                     return;
                 }
             }
@@ -56,10 +56,10 @@ module.exports = {
 
             try {
                 await newProfile.save();
-                await interaction.reply({ content: 'Your profile has been created!', ephemeral: true });
+                await interaction.reply({ content: 'Your profile has been created!', flags: MessageFlags.Ephemeral });
             } catch (error) {
                 console.error("Error saving to MongoDB", error);
-                await interaction.reply({ content: 'There was an error creating your profile. Please try again later.', ephemeral: true });
+                await interaction.reply({ content: 'There was an error creating your profile. Please try again later.', flags: MessageFlags.Ephemeral });
             }
 
             break;
@@ -73,12 +73,12 @@ module.exports = {
             const hobbies = interaction.options.getString('hobbies');
             const favoriteGame = interaction.options.getString('favorite_game');
 
-            if (filter.words.includes(about)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
-            if (filter.words.includes(hobbies)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+            if (filter.words.includes(about)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
+            if (filter.words.includes(hobbies)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
             const userProfile = await Profile.findOne({ userId: userId });
             if (!userProfile) {
-                await interaction.reply({ content: 'You **do not** have a profile yet. Please create one first.', ephemeral: true });
+                await interaction.reply({ content: 'You **do not** have a profile yet. Please create one first.', flags: MessageFlags.Ephemeral });
                 return;
             }
 
@@ -91,7 +91,7 @@ module.exports = {
             if (birthdayInput) {
                 const birthday = moment(birthdayInput, 'YYYY-MM-DD', true);
                 if (!birthday.isValid()) {
-                    await interaction.reply({ content: 'Invalid birthday format. Please use YYYY-MM-DD.', ephemeral: true });
+                    await interaction.reply({ content: 'Invalid birthday format. Please use YYYY-MM-DD.', flags: MessageFlags.Ephemeral });
                     return;
                 }
                 updateData.birthday = birthday.toDate();
@@ -99,10 +99,10 @@ module.exports = {
 
             try {
                 await Profile.updateOne({ userId: userId }, { $set: updateData });
-                await interaction.reply({ content: 'Your profile has been updated!', ephemeral: true });
+                await interaction.reply({ content: 'Your profile has been updated!', flags: MessageFlags.Ephemeral });
             } catch (error) {
                 console.error("Error updating MongoDB", error);
-                await interaction.reply({ content: 'There was an error updating your profile. Please try again later.', ephemeral: true });
+                await interaction.reply({ content: 'There was an error updating your profile. Please try again later.', flags: MessageFlags.Ephemeral });
             }
 
             break;
@@ -113,7 +113,7 @@ module.exports = {
             const viewUserProfile = await Profile.findOne({ userId: user.id });
 
             if (!viewUserProfile) {
-                await interaction.reply({ content: `No profile found for ${user.tag}.`, ephemeral: true });
+                await interaction.reply({ content: `No profile found for ${user.tag}.`, flags: MessageFlags.Ephemeral });
                 return;
             }
 

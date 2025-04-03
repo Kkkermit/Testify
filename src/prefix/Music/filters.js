@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
   name: 'filter',
@@ -15,13 +15,13 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | Please enter a **valid** filter to apply to the music!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     const filter = args[0]
     if (filter === 'off' && queue.filters.size) queue.filters.clear()
     else if (Object.keys(client.distube.filters).includes(filter)) {
       if (queue.filters.has(filter)) queue.filters.remove(filter)
       else queue.filters.add(filter)
-    } else if (args[0]) return message.channel.send({ embeds: [embed1], ephemeral: true })
+    } else if (args[0]) return message.channel.send({ embeds: [embed1], flags: MessageFlags.Ephemeral })
 
       const embed2 = new EmbedBuilder()
       .setColor(client.config.embedMusic)

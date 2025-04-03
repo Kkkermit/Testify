@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const wait = require('node:timers/promises').setTimeout;
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
 
         const target = await interaction.options.getUser(`user`);
 
-        if(!target) return await interaction.reply({ content: '**please pick a target to hack!**', ephemeral: true })
+        if(!target) return await interaction.reply({ content: '**please pick a target to hack!**', flags: MessageFlags.Ephemeral })
         
         await interaction.reply({ content: `Running the process to hack **${target}**..` })
         await wait(2500);

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const ecoS = require('../../schemas/economySystem');
 
 var timeout = [];
@@ -15,7 +15,7 @@ module.exports = {
 
         const amount = options.getNumber('amount');
 
-        if (!data) return await interaction.reply({ content: "You don't have an account, create one using \`economy-create account\`", ephemeral: true });
+        if (!data) return await interaction.reply({ content: "You don't have an account, create one using \`economy-create account\`", flags: MessageFlags.Ephemeral });
         else {
             if (data.Bank < amount) return await interaction.reply({ content: `Your trying to withdraw **$${amount}** while you only have **$${data.Bank}** available to do so...`})
 

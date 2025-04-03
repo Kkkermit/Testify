@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,7 +11,7 @@ module.exports = {
         
         const userID = interaction.options.getUser('user');
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`unban\`\` command on yourself...'});
 
         let reason = interaction.options.getString('reason');
@@ -30,12 +30,12 @@ module.exports = {
         await interaction.guild.bans.fetch() 
         .then(async bans => {
 
-            if (bans.size == 0) return await interaction.reply({ content: 'There is **no one** to unban.', ephemeral: true})
+            if (bans.size == 0) return await interaction.reply({ content: 'There is **no one** to unban.', flags: MessageFlags.Ephemeral})
             let bannedID = bans.find(ban => ban.user.id == userID);
-            if (!bannedID ) return await interaction.reply({ content: 'That user **is not** banned.', ephemeral: true})
+            if (!bannedID ) return await interaction.reply({ content: 'That user **is not** banned.', flags: MessageFlags.Ephemeral})
 
             await interaction.guild.bans.remove(userID, reason).catch(err => {
-                return interaction.reply({ content: `**Couldn't** unban user specified!`, ephemeral: true})
+                return interaction.reply({ content: `**Couldn't** unban user specified!`, flags: MessageFlags.Ephemeral})
             })
         })
         await interaction.reply({ embeds: [embed] });

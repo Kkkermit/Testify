@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionsBitField } = require(`discord.js`);
+const { SlashCommandBuilder, PermissionsBitField, MessageFlags } = require(`discord.js`);
 const ms = require('ms');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
     .addSubcommand(command => command.setName(`reroll`).setDescription(`Rerolls specified giveaway.`).addStringOption(option => option.setName('message-id').setDescription('Specify the message ID of the giveaway you want to reroll.').setRequired(true))),
     async execute(interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = interaction.options.getSubcommand();
 
@@ -20,7 +20,7 @@ module.exports = {
 
             case 'start':
 
-            await interaction.reply({ content: `**Starting** your giveaway..`, ephemeral: true })
+            await interaction.reply({ content: `**Starting** your giveaway..`, flags: MessageFlags.Ephemeral })
             const { GiveawaysManager } = require("discord-giveaways");
 
             const duration = ms(interaction.options.getString("duration") || "")
@@ -84,12 +84,12 @@ module.exports = {
                 }
             });
 
-            interaction.editReply({ content: `Your **giveaway** has started successfully! Check ${showchannel}.`, ephemeral: true })
+            interaction.editReply({ content: `Your **giveaway** has started successfully! Check ${showchannel}.`, flags: MessageFlags.Ephemeral })
 
             break;
             case 'edit':
 
-            await interaction.reply({ content: `**Editing** your giveaway..`, ephemeral: true});
+            await interaction.reply({ content: `**Editing** your giveaway..`, flags: MessageFlags.Ephemeral});
 
             const newprize = interaction.options.getString('prize');
             const newduration = interaction.options.getString('time');
@@ -103,31 +103,31 @@ module.exports = {
 
             }).then(() => {
 
-                interaction.editReply({ content: `Your **giveaway** has been **edited** successfully!`, ephemeral: true});
+                interaction.editReply({ content: `Your **giveaway** has been **edited** successfully!`, flags: MessageFlags.Ephemeral});
             }).catch((err) => {
 
-                interaction.editReply({ content: `An **error** occurred! \n> **Error**: ${err}`, ephemeral: true});
+                interaction.editReply({ content: `An **error** occurred! \n> **Error**: ${err}`, flags: MessageFlags.Ephemeral});
             });
 
             break;
             case 'end':
 
-            await interaction.reply({ content: `**Ending** your giveaway..`, ephemeral: true});
+            await interaction.reply({ content: `**Ending** your giveaway..`, flags: MessageFlags.Ephemeral});
 
             const messageId1 = interaction.options.getString('message-id');
                         client.giveawayManager
             .end(messageId1)
             .then(() => {
-                interaction.editReply({ content: 'Your **giveaway** has ended **successfully!**', ephemeral: true});
+                interaction.editReply({ content: 'Your **giveaway** has ended **successfully!**', flags: MessageFlags.Ephemeral});
             })
             .catch((err) => {
-                interaction.editReply({ content: `An **error** occurred! \n> **Error**: ${err}`, ephemeral: true});
+                interaction.editReply({ content: `An **error** occurred! \n> **Error**: ${err}`, flags: MessageFlags.Ephemeral});
             });
 
             break;
             case 'reroll':
 
-            await interaction.reply({ content: `**Rerolling** your giveaway..`, ephemeral: true});
+            await interaction.reply({ content: `**Rerolling** your giveaway..`, flags: MessageFlags.Ephemeral});
 
             const query = interaction.options.getString('message-id');
             const giveaway =
@@ -137,13 +137,13 @@ module.exports = {
             client.giveawayManager.giveaways.find((g) => g.guildId === interaction.guildId && g.messageId === query);
 
 
-            if (!giveaway) return interaction.editReply({ content: `**Couldn't** find a **giveaway** with the ID of "**${query}**".`, ephemeral: true});
+            if (!giveaway) return interaction.editReply({ content: `**Couldn't** find a **giveaway** with the ID of "**${query}**".`, flags: MessageFlags.Ephemeral});
             const messageId2 = interaction.options.getString('message-id');
             client.giveawayManager.reroll(messageId2).then(() => {
                 interaction.editReply({ content: `Your **giveaway** has been **successfully** rerolled!`});
             })
             .catch((err) => {
-                interaction.editReply({ content: `An **error** occurred! \n> **Error**: ${err}`, ephemeral: true});
+                interaction.editReply({ content: `An **error** occurred! \n> **Error**: ${err}`, flags: MessageFlags.Ephemeral});
             });
         }
     }

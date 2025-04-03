@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, version } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, version, MessageFlags } = require('discord.js');
 const botStats = require('../../schemas/fixedBotsStatsSystem');
 const os = require('os');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -15,7 +15,7 @@ module.exports = {
         const { options } = interaction;
         const sub = options.getSubcommand();
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         switch(sub) {
             case 'set':
@@ -58,7 +58,7 @@ module.exports = {
                 MessageId: message.id
             });
 
-            await interaction.reply({ embeds: [embed], ephemeral: true});
+            await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral});
             
 
             newData.save();
@@ -68,12 +68,12 @@ module.exports = {
             const channelRemoveData = await botStats.findOne({ User: interaction.guild.id });
 
             if (!channelRemoveData) {
-                return await interaction.reply({ content: `Bot stats channel has not been set.`, ephemeral: true });
+                return await interaction.reply({ content: `Bot stats channel has not been set.`, flags: MessageFlags.Ephemeral });
             }
 
             const removeChannel = client.channels.cache.get(channelRemoveData.Channel);
             if (!removeChannel) {
-                return await interaction.reply({ content: `Channel not found.`, ephemeral: true });
+                return await interaction.reply({ content: `Channel not found.`, flags: MessageFlags.Ephemeral });
             }
 
             try {
@@ -87,7 +87,7 @@ module.exports = {
 
             await botStats.findOneAndDelete({ User: interaction.guild.id });
 
-            await interaction.reply({ content: `Bot stats channel has been removed and the message deleted.`, ephemeral: true });
+            await interaction.reply({ content: `Bot stats channel has been removed and the message deleted.`, flags: MessageFlags.Ephemeral });
         }
     }
 }

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ActionRowBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, EmbedBuilder, ButtonStyle, ButtonBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, MessageFlags } = require('discord.js');
 const ValoAPI = require('../../api/valorantApi');
 const ValorantUser = require('../../schemas/valorantUserSystem');
 const images = require('../../images');
@@ -67,7 +67,7 @@ module.exports = {
                     const response = await interaction.reply({ content: '[Copy link](https://auth.riotgames.com/authorize?redirect_uri=https%3A%2F%2Fplayvalorant.com%2Fopt_in&client_id=play-valorant-web-prod&response_type=token%20id_token&nonce=1&scope=account%20openid)', 
                         embeds: [Embed], 
                         components: [Buttons], 
-                        ephemeral: true 
+                        flags: MessageFlags.Ephemeral 
                     });
             
                     const collector = response.createMessageComponentCollector({ 
@@ -123,7 +123,7 @@ module.exports = {
                                 { upsert: true }
                             );
 
-                            await modalSubmit.reply({ content: `Successfully logged in! Expires (<t:${Math.floor(ExpireDate / 1000)}:R>)`, ephemeral: true });
+                            await modalSubmit.reply({ content: `Successfully logged in! Expires (<t:${Math.floor(ExpireDate / 1000)}:R>)`, flags: MessageFlags.Ephemeral });
                         }
                     });
 
@@ -211,9 +211,9 @@ module.exports = {
 
                     const userAccount = await ValorantUser.findOne({ userId: interaction.user.id });
 
-                    if (!userAccount) return interaction.reply({ content: 'No account found! use /login', ephemeral: true });
+                    if (!userAccount) return interaction.reply({ content: 'No account found! use /login', flags: MessageFlags.Ephemeral });
             
-                    if (Date.now() > userAccount.expires.getTime()) return interaction.reply({ content: 'Account access token expired! use /login', ephemeral: true });
+                    if (Date.now() > userAccount.expires.getTime()) return interaction.reply({ content: 'Account access token expired! use /login', flags: MessageFlags.Ephemeral });
             
                     const valApi = new ValoAPI({ 
                         SkinsData: client.skins, 
@@ -266,11 +266,11 @@ module.exports = {
                 break;
                 case 'reload':
                     if (interaction.user.id !== client.config.developers) {
-                        return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                        return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
                     }
                 
                     await client.reloadValoAPI();
-                    await interaction.reply({ content: 'API data reloaded successfully!', ephemeral: true });
+                    await interaction.reply({ content: 'API data reloaded successfully!', flags: MessageFlags.Ephemeral });
                 break;
             }
         }

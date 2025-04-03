@@ -1,4 +1,4 @@
-const {SlashCommandBuilder, PermissionFlagsBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder} = require("discord.js");
+const {SlashCommandBuilder, MessageFlags, PermissionFlagsBits, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, EmbedBuilder} = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -52,7 +52,7 @@ module.exports = {
                 await channel.send(message)
             }
 
-            await response.reply({content: `Your message has been sent in <#${interaction.channel.id}>`, ephemeral: true})
+            await response.reply({content: `Your message has been sent in <#${interaction.channel.id}>`, flags: MessageFlags.Ephemeral})
         } catch (error) {
             console.error(error)
             return;

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -15,10 +15,10 @@ module.exports = {
 
         if (user === interaction.user || user === null) {
 
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ChangeNickname)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ChangeNickname)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             await interaction.member.setNickname(nick).catch(err => {
-                return interaction.reply({ content: `**Couldn't** change your nickname! **Check** my permissions and **role position** and try again.`, ephemeral: true });
+                return interaction.reply({ content: `**Couldn't** change your nickname! **Check** my permissions and **role position** and try again.`, flags: MessageFlags.Ephemeral });
             })
 
             const embedUserChange = new EmbedBuilder()
@@ -30,15 +30,15 @@ module.exports = {
             .setThumbnail(client.user.displayAvatarURL())
             .setTimestamp();
 
-            await interaction.reply({ embeds: [embedUserChange], ephemeral: true})
+            await interaction.reply({ embeds: [embedUserChange], flags: MessageFlags.Ephemeral})
 
         } else {
 
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageNicknames)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageNicknames)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
             else {
 
                 await member.setNickname(nick).catch(err => {
-                    return interaction.reply({ content: `**Couldn't** change the nickname of **${user}**! **Check** my permissions and **role position** and try again.`, ephemeral: true });
+                    return interaction.reply({ content: `**Couldn't** change the nickname of **${user}**! **Check** my permissions and **role position** and try again.`, flags: MessageFlags.Ephemeral });
                 });
 
                 const embedMemberChange = new EmbedBuilder()
@@ -50,7 +50,7 @@ module.exports = {
                 .setThumbnail(client.user.displayAvatarURL())
                 .setTimestamp();
             
-                await interaction.reply({ embeds: [embedMemberChange], ephemeral: true})
+                await interaction.reply({ embeds: [embedMemberChange], flags: MessageFlags.Ephemeral})
             }
         }
     }

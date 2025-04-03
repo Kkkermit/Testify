@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const GuildSettings = require('../../schemas/prefixSystem');
 const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js')
 const blacklistSchema = require('../../schemas/blacklistSystem');
@@ -22,7 +22,7 @@ module.exports = {
         const guildPrefixSettings = await GuildPrefixSettings.findOne({ Guild: message.guild.id });
         if (!guildPrefixSettings || !guildPrefixSettings.Enabled) {
             if (message.content.startsWith(prefix)) {
-                const reply = await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', ephemeral: true });
+                const reply = await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', flags: MessageFlags.Ephemeral });
                 setTimeout(async () => {
                     await reply.delete();
                 }, 2500);
@@ -70,7 +70,7 @@ module.exports = {
                 .setTitle(`${client.user.username} prefix system ${client.config.arrowEmoji}`)
                 .setDescription(`> The command you tried **does not exist**. \n> To see **all** commands, use \`\`/help-manual\`\``)
 
-                return message.reply({ embeds: [embed], ephemeral: true});
+                return message.reply({ embeds: [embed], flags: MessageFlags.Ephemeral});
             } catch (error) {
                 client.logs.error(`[PREFIX_ERROR] Error sending 'cannot find prefix' embed.`, error);
             };
@@ -91,7 +91,7 @@ module.exports = {
             .setColor("Red")
             .setDescription(`There was an error while executing this command!\n\`\`\`${error}\`\`\``)
 
-            await message.reply({ embeds: [errorEmbed], ephemeral: true});
+            await message.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral});
         }
     },
 };

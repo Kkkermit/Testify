@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios');
 
 module.exports = {
@@ -24,10 +24,10 @@ module.exports = {
 
                 await message.channel.send({ embeds: [embed] });
             } else {
-                await message.channel.send({ content: 'Failed to fetch a meme. Try again later.', ephemeral: true });
+                await message.channel.send({ content: 'Failed to fetch a meme. Try again later.', flags: MessageFlags.Ephemeral });
             }
         } catch (error) {
-            await message.channel.send({ content: 'There was an error getting the meme from axios!', ephemeral: true });
+            await message.channel.send({ content: 'There was an error getting the meme from axios!', flags: MessageFlags.Ephemeral });
         }
     }
 }

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const axios = require('axios')
 
 module.exports = {
@@ -41,12 +41,12 @@ module.exports = {
                 .setTimestamp();
 
                 await interaction.reply({ embeds: [embed]}).catch((err) => { 
-                    interaction.editReply({ content: `An **error** occurred!\n> **Error**: ${err}`, ephemeral: true});
+                    interaction.editReply({ content: `An **error** occurred!\n> **Error**: ${err}`, flags: MessageFlags.Ephemeral});
                 });
 
             } else {
-                await interaction.reply({ content: "A movie with that name was not found!", ephemeral: true}).catch((err) => { 
-                    interaction.editReply({ content: `An **error** occurred!\n> **Error**: ${err}`, ephemeral: true});
+                await interaction.reply({ content: "A movie with that name was not found!", flags: MessageFlags.Ephemeral}).catch((err) => { 
+                    interaction.editReply({ content: `An **error** occurred!\n> **Error**: ${err}`, flags: MessageFlags.Ephemeral});
                 });
             }
         } 

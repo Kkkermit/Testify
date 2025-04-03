@@ -1,4 +1,4 @@
-const {SlashCommandBuilder, PermissionsBitField, EmbedBuilder, ChannelType, PermissionFlagsBits}= require('discord.js');
+const {SlashCommandBuilder, PermissionsBitField, EmbedBuilder, ChannelType, PermissionFlagsBits, MessageFlags}= require('discord.js');
 const logSchema = require("../../schemas/auditLoggingSystem");
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
     .addSubcommand(command => command.setName('disable').setDescription('Disables your logging system.')),
     async execute(interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = await interaction.options.getSubcommand();
         const data = await logSchema.findOne({ Guild: interaction.guild.id });
@@ -18,7 +18,7 @@ module.exports = {
         switch (sub) {
             case 'setup':
 
-            if (data) return await interaction.reply({ content: `You have **already** set up the logging system! \n> Do **/logs disable** to undo.`, ephemeral: true});
+            if (data) return await interaction.reply({ content: `You have **already** set up the logging system! \n> Do **/logs disable** to undo.`, flags: MessageFlags.Ephemeral});
             else {
 
                 const logchannel = interaction.options.getChannel("channel") || interaction.channel;
@@ -45,7 +45,7 @@ module.exports = {
             break;
             case 'disable':
 
-            if (!data) return await interaction.reply({ content: `You have **not** set up the logging system! Do \`/logs setup\` to set it up.`, ephemeral: true});
+            if (!data) return await interaction.reply({ content: `You have **not** set up the logging system! Do \`/logs setup\` to set it up.`, flags: MessageFlags.Ephemeral});
             else {
 
                 const disableEmbed = new EmbedBuilder()

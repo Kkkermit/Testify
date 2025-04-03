@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const linkSchema = require('../../schemas/antiLinkSystem');
 
 module.exports = {
@@ -31,7 +31,7 @@ module.exports = {
         
         const { options } = interaction;
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = options.getSubcommand();
 
@@ -42,7 +42,7 @@ module.exports = {
 
             const Data = await linkSchema.findOne({ Guild: interaction.guild.id });
 
-            if (Data) return await interaction.reply({ content: 'You already have a **anti-link system** set up. \n> Do \`\`/anti-link disable\`\` to undo.', ephemeral: true});
+            if (Data) return await interaction.reply({ content: 'You already have a **anti-link system** set up. \n> Do \`\`/anti-link disable\`\` to undo.', flags: MessageFlags.Ephemeral});
 
             if (!Data) {
                 await linkSchema.create({
@@ -69,7 +69,7 @@ module.exports = {
             case 'disable':
 
             const Data = await linkSchema.findOne({ Guild: interaction.guild.id });
-            if (!Data) return await interaction.reply({ content: 'You **do not** have a **anti-link system** set up. \n> Do \`\`/anti-link setup\`\` to set one up.', ephemeral: true});
+            if (!Data) return await interaction.reply({ content: 'You **do not** have a **anti-link system** set up. \n> Do \`\`/anti-link setup\`\` to set one up.', flags: MessageFlags.Ephemeral});
             
             await linkSchema.deleteMany({ Guild: interaction.guild.id });
 
@@ -91,12 +91,12 @@ module.exports = {
             case 'check':
             const Data = await linkSchema.findOne({ Guild: interaction.guild.id });
 
-            if (!Data) return await interaction.reply({ content: 'Anti-link system has not yet been setup. Use \`\`/anti-link setup\`\` to get started.', ephemeral: true});
+            if (!Data) return await interaction.reply({ content: 'Anti-link system has not yet been setup. Use \`\`/anti-link setup\`\` to get started.', flags: MessageFlags.Ephemeral});
 
             const permissions = Data.Perms;
 
-            if (!permissions) return await interaction.reply({ content: 'Anti-link system has not yet been setup. Use \`\`/anti-link setup\`\` to get started.', ephemeral: true});
-            else await interaction.reply({ content: `**Anti-link** system is set up in this server. Bypass permissions:\n \`\`\`**${permissions}**\`\`\``, ephemeral: true})
+            if (!permissions) return await interaction.reply({ content: 'Anti-link system has not yet been setup. Use \`\`/anti-link setup\`\` to get started.', flags: MessageFlags.Ephemeral});
+            else await interaction.reply({ content: `**Anti-link** system is set up in this server. Bypass permissions:\n \`\`\`**${permissions}**\`\`\``, flags: MessageFlags.Ephemeral})
         }
 
         switch (sub) {
@@ -105,7 +105,7 @@ module.exports = {
             const Data = await linkSchema.findOne({ Guild: interaction.guild.id });
             const permissions = options.getString('permissions');
 
-            if (!Data) return await interaction.reply({ content: 'Anti-link system has not yet been setup. Use \`\`/anti-link setup\`\` to get started.', ephemeral: true});
+            if (!Data) return await interaction.reply({ content: 'Anti-link system has not yet been setup. Use \`\`/anti-link setup\`\` to get started.', flags: MessageFlags.Ephemeral});
             else {
                 await linkSchema.deleteMany();
 

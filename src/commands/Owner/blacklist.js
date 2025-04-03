@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require("discord.js")
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js")
 const blacklistSchema = require("../../schemas/blacklistSystem")
 
 module.exports = {
@@ -16,7 +16,7 @@ module.exports = {
             case "add":
 
             if (interaction.user.id !== client.config.developers) {
-                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
             }
 
             const addBlacklistUser = interaction.options.getString("userid")
@@ -42,7 +42,7 @@ module.exports = {
                 .setDescription(`There was an error when adding user to blacklist.\nError(s):\n ${errorArray.join(`\n`)}`)
                 .setColor(client.config.embedDev);
 
-                await interaction.reply({ embeds: [errorEmbed], ephemeral: true });
+                await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
                 return;
             } else {
                 await blacklistSchema.create({ userId: addBlacklistUser, reason: reasonOption });
@@ -54,7 +54,7 @@ module.exports = {
             case "remove":
 
             if (interaction.user.id !== client.config.developers) {
-                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
             }
 
             const removeBlacklistUser = interaction.options.getString("user")
@@ -62,7 +62,7 @@ module.exports = {
             const userToRemove = await blacklistSchema.findOne({ userId: removeBlacklistUser });
 
             if (!userToRemove) {
-                return await interaction.reply({ content: `User ${removeBlacklistUser} has not been blacklisted from using ${client.user.username}`, ephemeral: true });
+                return await interaction.reply({ content: `User ${removeBlacklistUser} has not been blacklisted from using ${client.user.username}`, flags: MessageFlags.Ephemeral });
             }
 
             const removeEmbed = new EmbedBuilder()

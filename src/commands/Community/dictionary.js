@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder }=require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags }=require('discord.js');
 const filter = require('../../jsons/filter.json');
 
 module.exports= {
@@ -10,12 +10,12 @@ module.exports= {
 
         const word = interaction.options.getString('word');
 
-        if (filter.words.includes(word)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(word)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
         let data = await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${word}`)
 
         if (data.statusText =='Not Found'){
-            return interaction.reply({content: `That word **does not** exist`, ephemeral: true});
+            return interaction.reply({content: `That word **does not** exist`, flags: MessageFlags.Ephemeral});
         }
         
         let info = await data.json();

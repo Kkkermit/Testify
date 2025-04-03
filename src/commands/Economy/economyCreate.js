@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const ecoS = require('../../schemas/economySystem');
 
 module.exports = {
@@ -18,7 +18,7 @@ module.exports = {
         switch (sub) {
             case "account":
                 if (data) {
-                    return await interaction.reply({ content: "You already have an economy account!", ephemeral: true })
+                    return await interaction.reply({ content: "You already have an economy account!", flags: MessageFlags.Ephemeral })
                 } else {
                     await ecoS.create({
                         Guild: guild.id,

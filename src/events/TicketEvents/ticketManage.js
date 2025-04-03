@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { Events, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const TicketSchema = require('../../schemas/ticketSystem');
 
 module.exports = {
@@ -25,7 +25,7 @@ module.exports = {
             .setTimestamp()
 
             if (!data) 
-                return interaction.reply({ embeds: [errEmbed], ephemeral: true }).catch(error => { return });
+                return interaction.reply({ embeds: [errEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
             const findMembers = await TicketSchema.findOne({ GuildID: guild.id, ChannelID: channel.id, MembersID: interaction.values[0] });
 
             if(!findMembers) {

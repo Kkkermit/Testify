@@ -1,4 +1,4 @@
-const { Constants, EmbedBuilder } = require('discord.js');
+const { Constants, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
   name: 'join',
@@ -17,12 +17,12 @@ module.exports = {
     if (args[0]) {
       voiceChannel = await client.channels.fetch(args[0])
       if (!Constants.VoiceBasedChannelTypes.includes(voiceChannel?.type)) {
-        return message.channel.send({ embeds: [embed], ephemeral: true })
+        return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
       }
     }
     if (!voiceChannel) {
       return message.channel.send(
-        { embeds: [embed1], ephemeral: true }
+        { embeds: [embed1], flags: MessageFlags.Ephemeral }
       )
     }
     client.distube.voices.join(voiceChannel)

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js");
 const WelcomeMessage = require("../../schemas/welcomeSystem");
 
 module.exports = {
@@ -39,14 +39,14 @@ module.exports = {
             .setFooter({ text: `Welcome system has been setup!`})
             .setTimestamp();
     
-            await interaction.reply({ embeds: [successEmbed], ephemeral: true });
+            await interaction.reply({ embeds: [successEmbed], flags: MessageFlags.Ephemeral });
 
         } else if (subcommand === "remove") {
             
             let existingData = await WelcomeMessage.findOne({ guildId });
     
             if (!existingData) {
-                return await interaction.reply({ content: "Welcome system **has not** yet been set up in this guild. To set up, use \`\`/welcome-message\`\` set.", ephemeral: true });
+                return await interaction.reply({ content: "Welcome system **has not** yet been set up in this guild. To set up, use \`\`/welcome-message\`\` set.", flags: MessageFlags.Ephemeral });
             }
 
             const removedEmbed = new EmbedBuilder()
@@ -60,7 +60,7 @@ module.exports = {
     
             if (existingData) {
                 await WelcomeMessage.deleteOne({ guildId });
-                await interaction.reply({ embeds: [removedEmbed], ephemeral: true });
+                await interaction.reply({ embeds: [removedEmbed], flags: MessageFlags.Ephemeral });
             }
         }
     },

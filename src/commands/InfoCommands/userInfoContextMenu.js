@@ -1,4 +1,4 @@
-const { ContextMenuCommandBuilder, ApplicationCommandType, EmbedBuilder, AttachmentBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+const { ContextMenuCommandBuilder, ApplicationCommandType, EmbedBuilder, AttachmentBuilder, ButtonBuilder, ActionRowBuilder, MessageFlags } = require('discord.js');
 const { profileImage } = require('discord-arts');
 const { addBadges } = require('../../lib/discordBadges');
 const { addSuffix } = require('../../lib/addSuffix');
@@ -69,7 +69,7 @@ module.exports = {
             interaction.editReply({ embeds: [Embed], components: [row], files: [imageAttachment] });
 
         } catch (error) {
-            interaction.editReply({ content: `There was an error generating the info for **${member}**`, ephemeral: true });
+            interaction.editReply({ content: `There was an error generating the info for **${member}**`, flags: MessageFlags.Ephemeral });
             throw error;
         }
     }

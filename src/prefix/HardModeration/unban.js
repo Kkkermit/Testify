@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js")
+const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js")
 
 module.exports = {
     name: 'unban',
@@ -6,8 +6,8 @@ module.exports = {
         const userID = args[0];
         const user = client.users.cache.get(userID);
 
-        if (!message.member.permissions.has(PermissionFlagsBits.BanMembers)) return await message.channel.send({ content: `${client.config.noPerms}`, ephemeral: true});
-        if (!user) return message.channel.send({ content: `You need to provide a valid **user ID** to unban!`, ephemeral: true})
+        if (!message.member.permissions.has(PermissionFlagsBits.BanMembers)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
+        if (!user) return message.channel.send({ content: `You need to provide a valid **user ID** to unban!`, flags: MessageFlags.Ephemeral})
         
         const reason = args.slice(1).join(' ') || '\`\`No reason provided\`\`'
 
@@ -23,12 +23,12 @@ module.exports = {
 
         const bans = await message.guild.bans.fetch();
 
-        if (bans.size == 0) return await message.channel.send({ content: 'There is **no one** to unban.', ephemeral: true})
+        if (bans.size == 0) return await message.channel.send({ content: 'There is **no one** to unban.', flags: MessageFlags.Ephemeral})
         let bannedUser = bans.find(ban => ban.user.id == userID);
-        if (!bannedUser) return await message.channel.send({ content: 'That user **is not** banned.', ephemeral: true})
+        if (!bannedUser) return await message.channel.send({ content: 'That user **is not** banned.', flags: MessageFlags.Ephemeral})
 
         await message.guild.bans.remove(user, reason).catch(err => {
-            return message.channel.send({ content: `**Couldn't** unban user specified!`, ephemeral: true})
+            return message.channel.send({ content: `**Couldn't** unban user specified!`, flags: MessageFlags.Ephemeral})
         })
 
         await message.channel.send({ embeds: [embed] });

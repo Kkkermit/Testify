@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, ChannelType, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, ChannelType, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -8,7 +8,7 @@ module.exports = {
     .addChannelOption(option => option.setName('channel').setDescription('The channel you want to unlock').addChannelTypes(ChannelType.GuildText).setRequired(true)),
     async execute(interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         let channel = interaction.options.getChannel('channel');
 
@@ -22,7 +22,7 @@ module.exports = {
         .setDescription(`> **Channel:** ${channel} has been unlocked by **${interaction.user.username}**!`)
         .setFooter({ text: `Channel Unlocked`})
 
-        await interaction.reply({ content: `Message sent to channel`, ephemeral: true });
+        await interaction.reply({ content: `Message sent to channel`, flags: MessageFlags.Ephemeral });
         await channel.send({ embeds: [embed] });
     }
 }

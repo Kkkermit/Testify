@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const warningSchema = require("../../schemas/warningSystem");
 const config = require('../../config')
 
@@ -17,7 +17,7 @@ module.exports = {
 
         const { guild, member, user, options } = interaction;
 
-        if (!member.permissions.has(PermissionFlagsBits.ModerateMembers)) { return await interaction.reply({ content: `${config.noPerms}`, ephemeral: true });}
+        if (!member.permissions.has(PermissionFlagsBits.ModerateMembers)) { return await interaction.reply({ content: `${config.noPerms}`, flags: MessageFlags.Ephemeral });}
 
         const subcommand = options.getSubcommand();
 
@@ -53,7 +53,7 @@ module.exports = {
                 await removeWarn(interaction, c, wcid);
                 break;
             default:
-                await interaction.reply({ content: "Invalid subcommand!", ephemeral: true });
+                await interaction.reply({ content: "Invalid subcommand!", flags: MessageFlags.Ephemeral });
         }
     }
 }
@@ -265,7 +265,7 @@ async function getWarnInfo(interaction, targetUserId, warnId) {
 
         await interaction.reply({ embeds: [infoEmbed] });
     } catch (error) {
-        await interaction.reply({ content: "An **error** occurred while retrieving __warning information__.", ephemeral: true });
+        await interaction.reply({ content: "An **error** occurred while retrieving __warning information__.", flags: MessageFlags.Ephemeral });
     }
 }
 

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -63,7 +63,7 @@ module.exports = {
                 
                 await interaction.editReply({ embeds: [embed]});
                 } catch (error) {
-                    interaction.editReply({content: `Server **does not exist** or **cannot be reached**. One command issue can be the **incorrect IP address**. Double check your IP and try again!`, ephemeral: true});
+                    interaction.editReply({content: `Server **does not exist** or **cannot be reached**. One command issue can be the **incorrect IP address**. Double check your IP and try again!`, flags: MessageFlags.Ephemeral});
             }
         }
     }

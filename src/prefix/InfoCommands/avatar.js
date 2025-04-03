@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'avatar',
@@ -21,7 +21,7 @@ module.exports = {
             case 'guild':
                 user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() || message.member;
                 const user2 = message.guild.members.cache.get(args[0]) || message.mentions.members.first() || message.author;
-                if (user.displayAvatarURL() == user2.displayAvatarURL()) return message.channel.send({ embeds: [new EmbedBuilder().setColor(client.config.embedError).setDescription(`<:error:1205124558638813194> does not have a server avatar.`)], ephemeral: true });
+                if (user.displayAvatarURL() == user2.displayAvatarURL()) return message.channel.send({ embeds: [new EmbedBuilder().setColor(client.config.embedError).setDescription(`<:error:1205124558638813194> does not have a server avatar.`)], flags: MessageFlags.Ephemeral });
                 embed = new EmbedBuilder()
                 .setTitle('Server Avatar')
                 .setImage(user.displayAvatarURL({ size: 4096 }))

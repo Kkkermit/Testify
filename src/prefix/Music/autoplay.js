@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js")
+const { EmbedBuilder, MessageFlags } = require("discord.js")
 
 module.exports = {
   name: 'autoplay',
@@ -10,7 +10,7 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | There is **nothing** in the queue right now!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed1], ephemeral: true})
+    if (!queue) return message.channel.send({ embeds: [embed1], flags: MessageFlags.Ephemeral})
     const autoplay = queue.toggleAutoplay()
 
     const embed = new EmbedBuilder()

@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'roleinfo',
@@ -8,7 +8,7 @@ module.exports = {
 
         const role = message.guild.roles.cache.get(args[0]) || message.mentions.roles.first();
 
-        if (!role) return message.channel.send({ embeds: [new EmbedBuilder().setColor(client.config.embedInfo).setDescription(`I couldn't find the role ${args[0] || ''}`)], ephemeral: true });
+        if (!role) return message.channel.send({ embeds: [new EmbedBuilder().setColor(client.config.embedInfo).setDescription(`I couldn't find the role ${args[0] || ''}`)], flags: MessageFlags.Ephemeral });
 
         const perms = {
 			administrator: 'Administrator',

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionsBitField, ChannelType, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, ChannelType, PermissionFlagsBits, EmbedBuilder, MessageFlags } = require('discord.js');
 const countingSchema = require('../../schemas/countingSystem');
 
 module.exports = {
@@ -12,7 +12,7 @@ module.exports = {
 
         const sub = interaction.options.getSubcommand();
 
-        if(!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return await interaction.reply({content: `${client.config.noPerms}`, ephemeral: true })
+        if(!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return await interaction.reply({content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral })
 
         switch(sub) {
             case 'setup':
@@ -22,7 +22,7 @@ module.exports = {
 
             countingSchema.findOne({ Guild: interaction.guild.id }, async (err, data) => {
                 if (data) {
-                    return await interaction.reply({ content: 'You already have a counting system in place. To restart it, use the \`/counting-disable\` command.', ephemeral: true });
+                    return await interaction.reply({ content: 'You already have a counting system in place. To restart it, use the \`/counting-disable\` command.', flags: MessageFlags.Ephemeral });
                 }
 
                 countingSchema.create({
@@ -55,7 +55,7 @@ module.exports = {
             case 'disable':
 
             countingSchema.deleteMany({ Guild: interaction.guild.id }, async (err, data) => {
-                await interaction.reply({ content: 'The Counting System has been successfully **disabled**!', ephemeral: true });
+                await interaction.reply({ content: 'The Counting System has been successfully **disabled**!', flags: MessageFlags.Ephemeral });
             });
         }
     }

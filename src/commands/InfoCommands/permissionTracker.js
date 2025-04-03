@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
         const member = options.getMember("user") || interaction.member;
         const user = options.getUser("user") || interaction.user;
 
-        if (!member) return interaction.reply({ content: "Member **could not** be found!", ephemeral: true,});
+        if (!member) return interaction.reply({ content: "Member **could not** be found!", flags: MessageFlags.Ephemeral,});
   
         let permissionFlags = Object.keys(PermissionFlagsBits);
 

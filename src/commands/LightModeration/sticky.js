@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const sticky = require('../../schemas/stickyMessageSystem');
 
 module.exports = {
@@ -14,7 +14,7 @@ module.exports = {
         const { options } = interaction;
         const sub = options.getSubcommand();
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         var data;
 
@@ -28,7 +28,7 @@ module.exports = {
             .setThumbnail(client.user.avatarURL())
             .setFooter({ text: `Sticky Message System`})
 
-            await interaction.reply({ embeds: [embed], ephemeral: true });
+            await interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
         switch (sub) {
@@ -39,7 +39,7 @@ module.exports = {
                 data = await sticky.findOne({ Guild: interaction.guild.id, Channel: channel.id, Message: message })
 
                 if (data) {
-                    await sendMessage({ content: `You already have this **word** as a sticky message in <#${channel.id}>!`, ephemeral: true });
+                    await sendMessage({ content: `You already have this **word** as a sticky message in <#${channel.id}>!`, flags: MessageFlags.Ephemeral });
                 } else {
                     await sticky.create({
                         Guild: interaction.guild.id,

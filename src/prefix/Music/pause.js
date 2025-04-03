@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
   name: 'pause',
@@ -11,7 +11,7 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | There is **nothing** in the queue right now!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     if (queue.paused) {
       queue.resume()
 

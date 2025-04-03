@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const superagent = require("superagent");
 
 module.exports = {
@@ -48,7 +48,7 @@ module.exports = {
         
         } catch (error) {
             console.log(error);
-            interaction.followUp({ content: "An error occurred, try again later!", ephemeral: true });
+            interaction.followUp({ content: "An error occurred, try again later!", flags: MessageFlags.Ephemeral });
         }
     },
 };

@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField, SlashCommandBuilder, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, PermissionsBitField, SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,10 +13,10 @@ module.exports = {
         const ID = users.id;
         const kickedmember = interaction.options.getMember('user');
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers) && interaction.user.id !== process.env.clientid) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
-        if (interaction.member.id === ID) return await interaction.reply({ content: 'You **cannot** use the \`\`kick\`\` command on yourself...', ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers) && interaction.user.id !== process.env.clientid) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
+        if (interaction.member.id === ID) return await interaction.reply({ content: 'You **cannot** use the \`\`kick\`\` command on yourself...', flags: MessageFlags.Ephemeral});
 
-        if (!kickedmember) return await interaction.reply({ content: `That user **does not** exist within your server.`, ephemeral: true});
+        if (!kickedmember) return await interaction.reply({ content: `That user **does not** exist within your server.`, flags: MessageFlags.Ephemeral});
     
         const reason = interaction.options.getString('reason') || '\`\`Reason for kick not given\`\`';
         
@@ -43,7 +43,7 @@ module.exports = {
         await kickedmember.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[KICK] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
 
         await kickedmember.kick().catch(err => {
-            return interaction.reply({ content: `**Couldn't** kick this member! Check my **role position** and try again.`, ephemeral: true});
+            return interaction.reply({ content: `**Couldn't** kick this member! Check my **role position** and try again.`, flags: MessageFlags.Ephemeral});
         })
 
         await interaction.reply({ embeds: [embed] });

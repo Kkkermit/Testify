@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, Embed, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +16,7 @@ module.exports = {
             const duration = interaction.options.getInteger("duration");
 
             if (duration < 0 || duration > 21600) {
-                return await interaction.reply({ content: "Slowmode duration must be between **0** and **21600** seconds.", ephemeral: true });
+                return await interaction.reply({ content: "Slowmode duration must be between **0** and **21600** seconds.", flags: MessageFlags.Ephemeral });
             }
 
       try {
@@ -31,10 +31,10 @@ module.exports = {
         .setTimestamp()
         .setFooter({ text: `Slowmode has been activated` });
 
-        await interaction.reply({ embeds: [slowmodeEmbed], ephemeral: true});
+        await interaction.reply({ embeds: [slowmodeEmbed], flags: MessageFlags.Ephemeral});
       } catch (error) {
         client.logs.error("Failed to set slowmode:", error);
-        await interaction.reply({ content: "Failed to set slowmode in this channel. This could be due to lack of permissions or just a one off. Please try again.", ephemeral: true });
+        await interaction.reply({ content: "Failed to set slowmode in this channel. This could be due to lack of permissions or just a one off. Please try again.", flags: MessageFlags.Ephemeral });
       }
     } else if (interaction.options.getSubcommand() === "off") {
       try {
@@ -49,10 +49,10 @@ module.exports = {
         .setTimestamp()
         .setFooter({ text: `Slowmode has been disabled` });
 
-        await interaction.reply({ embeds: [slowmodeEmbed], ephemeral: true });
+        await interaction.reply({ embeds: [slowmodeEmbed], flags: MessageFlags.Ephemeral });
       } catch (error) {
         client.logs.error("Failed to disable slowmode:", error);
-        await interaction.reply({ content: "Failed to disable slowmode in this channel. This could be due to lack of permissions or just a one off. Please try again.", ephemeral: true });
+        await interaction.reply({ content: "Failed to disable slowmode in this channel. This could be due to lack of permissions or just a one off. Please try again.", flags: MessageFlags.Ephemeral });
       }
     } else if (interaction.options.getSubcommand() === "check") {
       try {
@@ -61,7 +61,7 @@ module.exports = {
         const slowmode = channel.rateLimitPerUser;
 
         if (slowmode === 0) {
-          await interaction.reply({ content: `Slowmode is not enabled in ${channel.name}.`, ephemeral: true });
+          await interaction.reply({ content: `Slowmode is not enabled in ${channel.name}.`, flags: MessageFlags.Ephemeral });
         } else {
 
           const slowmodeCheckEmbed = new EmbedBuilder()
@@ -73,11 +73,11 @@ module.exports = {
           .setTimestamp()
           .setFooter({ text: `Slowmode is enabled` });
 
-          await interaction.reply({ embeds: [slowmodeCheckEmbed], ephemeral: true });
+          await interaction.reply({ embeds: [slowmodeCheckEmbed], flags: MessageFlags.Ephemeral });
         }
       } catch (error) {
         client.logs.error("Failed to check slowmode:", error);
-        await interaction.reply({ content: "Failed to check slowmode status in this channel. This could be due to lack of permissions or just a one off. Please try again.", ephemeral: true });
+        await interaction.reply({ content: "Failed to check slowmode status in this channel. This could be due to lack of permissions or just a one off. Please try again.", flags: MessageFlags.Ephemeral });
       }
     }
   },

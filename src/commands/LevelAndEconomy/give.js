@@ -1,4 +1,4 @@
-const { EmbedBuilder, SlashCommandBuilder, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const ecoSchema = require('../../schemas/economySystem');
 const levelSchema = require('../../schemas/userLevelSystem');
 const levelschema = require('../../schemas/levelSetupSystem');
@@ -12,7 +12,7 @@ module.exports = {
     .addSubcommand(command => command.setName('xp').setDescription('Give specified user specified amount of XP.').addUserOption(option => option.setName('user').setDescription('Specified user will be given specified amount of XP.').setRequired(true)).addNumberOption(option => option.setName('amount').setDescription('The amount of XP you want to give specified user.').setRequired(true).setMaxValue(10000000).setMinValue(10))),
     async execute(interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         const sub = interaction.options.getSubcommand();
 
         switch (sub) {
@@ -26,7 +26,7 @@ module.exports = {
 
             if (err) throw err;
     
-            if (!data) return await interaction.reply({ content: `${user} needs to have **created** a past account in order to add to *their* currency.`, ephemeral: true})
+            if (!data) return await interaction.reply({ content: `${user} needs to have **created** a past account in order to add to *their* currency.`, flags: MessageFlags.Ephemeral})
 
             const give = amount;
 
@@ -44,14 +44,14 @@ module.exports = {
             .setFooter({ text: `${interaction.guild.name}'s Economy`, iconURL: interaction.guild.iconURL() })
             .setTimestamp()
 
-            interaction.reply({ embeds: [economyEmbed], ephemeral: true})
+            interaction.reply({ embeds: [economyEmbed], flags: MessageFlags.Ephemeral})
         })
 
         break;
         case 'xp':
 
         const levelsetup = await levelschema.findOne({ Guild: interaction.guild.id });
-        if (!levelsetup || levelsetup.Disabled === 'disabled') return await interaction.reply({ content: `The **Administrators** of this server **have not** set up the **leveling system** yet!`, ephemeral: true});
+        if (!levelsetup || levelsetup.Disabled === 'disabled') return await interaction.reply({ content: `The **Administrators** of this server **have not** set up the **leveling system** yet!`, flags: MessageFlags.Ephemeral});
 
         const xpuser = interaction.options.getUser('user');
         const xpamount = interaction.options.getNumber('amount');
@@ -60,7 +60,7 @@ module.exports = {
 
             if (err) throw err;
     
-            if (!data) return await interaction.reply({ content: `${xpuser} needs to have **earned** past XP in order to add to their XP.`, ephemeral: true})
+            if (!data) return await interaction.reply({ content: `${xpuser} needs to have **earned** past XP in order to add to their XP.`, flags: MessageFlags.Ephemeral})
 
             const give = xpamount;
 
@@ -80,7 +80,7 @@ module.exports = {
             .setFooter({ text: `${interaction.guild.name}'s Leveling`, iconURL: interaction.guild.iconURL() })
             .setTimestamp()
 
-            interaction.reply({ embeds: [xpEmbed], ephemeral: true})
+            interaction.reply({ embeds: [xpEmbed], flags: MessageFlags.Ephemeral})
         })
         }
     }

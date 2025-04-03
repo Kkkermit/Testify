@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { default: axios } = require('axios');
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
         switch (sub) {
             case 'emoji':
 
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuildExpressions)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuildExpressions)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             let emoji = interaction.options.getString('emoji')?.trim();
             const name = interaction.options.getString('name');
@@ -37,11 +37,11 @@ module.exports = {
             let emojiErr = 'You **cannot** add default emojis to your server.'
 
             if (!emoji.startsWith('http')) {
-                return await interaction.reply({ content: `${emojiErr}`, ephemeral: true})
+                return await interaction.reply({ content: `${emojiErr}`, flags: MessageFlags.Ephemeral})
             }
 
             if (!emoji.startsWith('https')) {
-                return await interaction.reply({ content: `${emojiErr}`, ephemeral: true})
+                return await interaction.reply({ content: `${emojiErr}`, flags: MessageFlags.Ephemeral})
             }
 
             interaction.guild.emojis.create({ attachment: `${emoji}`, name: `${name}` })
@@ -55,22 +55,22 @@ module.exports = {
                 .setDescription(`Emoji Details \n\n> ${emoji} added with the name of **${name}**\n\n`)
                 .setThumbnail(client.user.avatarURL())
                 
-                interaction.reply({ content: `Embed sent to channel`, ephemeral: true})
+                interaction.reply({ content: `Embed sent to channel`, flags: MessageFlags.Ephemeral})
                 return interaction.channel.send({ embeds: [embed] });
             }).catch(err => {
-                interaction.reply({ content: `This emoji **failed** to upload, perhaps you have reached your **emoji limit**?`, ephemeral: true})
+                interaction.reply({ content: `This emoji **failed** to upload, perhaps you have reached your **emoji limit**?`, flags: MessageFlags.Ephemeral})
             })
 
             break;
             case 'sticker':
 
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuildExpressions)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuildExpressions)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             const upload = interaction.options.getAttachment('sticker');
             const StickerName = interaction.options.getString('name');
 
-            if (StickerName.length <= 2) return await interaction.reply({ content: `Your name **has to be greater** than \`\`2\`\` characters`, ephemeral: true });
-            if (upload.contentType === 'image/gif') return await interaction.reply({ content: `You **cannot** upload gif files at this time`, ephemeral: true });
+            if (StickerName.length <= 2) return await interaction.reply({ content: `Your name **has to be greater** than \`\`2\`\` characters`, flags: MessageFlags.Ephemeral });
+            if (upload.contentType === 'image/gif') return await interaction.reply({ content: `You **cannot** upload gif files at this time`, flags: MessageFlags.Ephemeral });
 
             await interaction.reply(`Uploading your sticker...`);
 

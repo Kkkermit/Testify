@@ -88,7 +88,7 @@ describe('animal-facts command', () => {
         expect(axios.get).toHaveBeenCalledWith('https://www.reddit.com/r/animalfacts1935943924/random/.json');
         expect(interaction.reply).toHaveBeenCalledWith({
             content: 'There was an error getting the meme from axios!',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     });
 
@@ -101,7 +101,7 @@ describe('animal-facts command', () => {
         expect(axios.get).toHaveBeenCalledWith('https://www.reddit.com/r/animalfacts1935943924/random/.json');
         expect(interaction.reply).toHaveBeenCalledWith({
             content: 'Failed to fetch a meme. Try again later.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     });
 });

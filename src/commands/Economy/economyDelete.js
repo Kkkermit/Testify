@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const ecoS = require('../../schemas/economySystem');
 
 module.exports = {
@@ -16,7 +16,7 @@ module.exports = {
         switch (sub) {
             case "account":
                 if (!data) { 
-                    return await interaction.reply({ content: "You don't have an economy account to delete!", ephemeral: true });
+                    return await interaction.reply({ content: "You don't have an economy account to delete!", flags: MessageFlags.Ephemeral });
                 } else {
                     await ecoS.deleteOne({ Guild: guild.id, User: user.id });
 

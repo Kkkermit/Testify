@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -34,10 +34,10 @@ module.exports = {
         .setFooter({ text: `Someone got got struck by the ban hammer` })
     
         const perm = interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers);
-        if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`ban\`\` command on yourself...', ephemeral: true });
+        if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`ban\`\` command on yourself...', flags: MessageFlags.Ephemeral });
         if (!perm)
             return await interaction.channel.sendTyping(),
-            interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
+            interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
 
         await userID.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[BAN] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
 
@@ -46,7 +46,7 @@ module.exports = {
             await interaction.channel.sendTyping(),
             await interaction.reply({ embeds: [banEmbed] })
         } else if (!ban) {
-            interaction.reply({ content: `Failed to ban **${userID.tag}** from **${guild.name}**`, ephemeral: true })
+            interaction.reply({ content: `Failed to ban **${userID.tag}** from **${guild.name}**`, flags: MessageFlags.Ephemeral })
         }
     }
 }

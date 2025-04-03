@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
     name: 'kick',
@@ -7,8 +7,8 @@ module.exports = {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
 
-        if (!message.member.permissions.has(PermissionFlagsBits.KickMembers)) return message.reply({ content: `${client.config.noPerms}`, ephemeral: true });
-        if (!user) return message.channel.send({ content: 'Please mention a **user** to kick.', ephemeral: true });
+        if (!message.member.permissions.has(PermissionFlagsBits.KickMembers)) return message.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
+        if (!user) return message.channel.send({ content: 'Please mention a **user** to kick.', flags: MessageFlags.Ephemeral });
 
         const reason = args.slice(1).join(' ') || `\`\`No reason given\`\``;
 
@@ -42,7 +42,7 @@ module.exports = {
             const Failed = new EmbedBuilder()
             .setDescription(`Failed to kick **${user}**!`)
             .setColor(client.config.embedModHard)
-            message.channel.send({ embeds: [Failed], ephemeral: true}).catch(err => {
+            message.channel.send({ embeds: [Failed], flags: MessageFlags.Ephemeral}).catch(err => {
                 return;
             });
         }

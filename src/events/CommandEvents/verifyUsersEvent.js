@@ -1,4 +1,4 @@
-const { Events, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle } = require('discord.js');
+const { Events, AttachmentBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, ModalBuilder, TextInputBuilder, TextInputStyle, MessageFlags } = require('discord.js');
 const { createCanvas } = require('canvas');
 const capschema = require('../../schemas/verifySystem');
 const verifyusers = require('../../schemas/verifyUsersSystem'); 
@@ -13,9 +13,9 @@ module.exports = {
             const verifydata = await capschema.findOne({ Guild: interaction.guild.id });
             const verifyusersdata = await verifyusers.findOne({ Guild: interaction.guild.id, User: interaction.user.id });
 
-            if (!verifydata) return await interaction.reply({ content: `The **verification system** has been disabled in this server!`, ephemeral: true});
+            if (!verifydata) return await interaction.reply({ content: `The **verification system** has been disabled in this server!`, flags: MessageFlags.Ephemeral});
 
-            if (verifydata.Verified.includes(interaction.user.id)) return await interaction.reply({ content: 'You have **already** been verified!', ephemeral: true});
+            if (verifydata.Verified.includes(interaction.user.id)) return await interaction.reply({ content: 'You have **already** been verified!', flags: MessageFlags.Ephemeral});
             
             function generateCaptcha(length) {
                 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -64,7 +64,7 @@ module.exports = {
                     .setCustomId('captchaenter')
                 )
 
-                await interaction.reply({ embeds: [verifyembed], components: [verifybutton], files: [attachment], ephemeral: true });
+                await interaction.reply({ embeds: [verifyembed], components: [verifybutton], files: [attachment], flags: MessageFlags.Ephemeral });
             
                 if (verifyusersdata) {
 
@@ -110,7 +110,7 @@ module.exports = {
             const userverdata = await verifyusers.findOne({ Guild: interaction.guild.id, User: interaction.user.id });
             const verificationdata = await capschema.findOne({ Guild: interaction.guild.id });
         
-            if (verificationdata.Verified.includes(interaction.user.id)) return await interaction.reply({ content: `You have **already** verified within ${interaction.guild.name}!`, ephemeral: true});
+            if (verificationdata.Verified.includes(interaction.user.id)) return await interaction.reply({ content: `You have **already** verified within ${interaction.guild.name}!`, flags: MessageFlags.Ephemeral});
         
             const modalanswer = interaction.fields.getTextInputValue('answer');
             if (modalanswer === userverdata.Key) {
@@ -120,18 +120,18 @@ module.exports = {
                 try {
                     await interaction.member.roles.add(verrole);
                 } catch (err) {
-                    return await interaction.reply({ content: `There was an **issue** giving you the **<@&${verificationdata.Role}>** role, try again later!`, ephemeral: true})
+                    return await interaction.reply({ content: `There was an **issue** giving you the **<@&${verificationdata.Role}>** role, try again later!`, flags: MessageFlags.Ephemeral})
                 }
 
                 await capschema.updateOne({ Guild: interaction.guild.id }, { $push: { Verified: interaction.user.id }});
                 try {
-                    await interaction.reply({ content: 'You have been **verified!**', ephemeral: true});
+                    await interaction.reply({ content: 'You have been **verified!**', flags: MessageFlags.Ephemeral});
                 } catch (err) {
                     client.logs.error(`[VERIFY_ERROR] Error replying to the user that he has been verified!`);
                     return;
                 } 
             } else {
-                await interaction.reply({ content: `**Oops!** It looks like you **didn't** enter the valid **captcha code**!`, ephemeral: true})
+                await interaction.reply({ content: `**Oops!** It looks like you **didn't** enter the valid **captcha code**!`, flags: MessageFlags.Ephemeral})
             }
         }
     }

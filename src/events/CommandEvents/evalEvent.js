@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder } = require('discord.js');
+const { Events, EmbedBuilder, MessageFlags } = require('discord.js');
 const fs = require('fs');
 const path = require('path');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -14,7 +14,7 @@ module.exports = {
                 const ephemeralChoice = ephemeralInput.toLowerCase() === 'true';
 
                 if (interaction.user.id !== client.config.developers) {
-                    return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                    return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
                 }
 
                 try {
@@ -84,7 +84,7 @@ module.exports = {
                     fs.appendFileSync(logFilePath, `[${timestamp}] [EVAL_COMMAND_OUTPUT] Eval command output: ${evaled}\n`);
                 } catch (error) {
                     console.error(error);
-                    await interaction.reply({ content: `\`\`\`js\n${error}\n\`\`\``, ephemeral: true });
+                    await interaction.reply({ content: `\`\`\`js\n${error}\n\`\`\``, flags: MessageFlags.Ephemeral });
                 }
             }
         }

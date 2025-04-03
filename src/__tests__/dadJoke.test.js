@@ -86,7 +86,7 @@ describe('dad-joke command', () => {
 
         expect(interaction.reply).toHaveBeenCalledWith({
             content: 'An **error occurred** while attempting to fetch a dad joke. Please try again later.',
-            ephemeral: true,
+            flags: MessageFlags.Ephemeral,
         });
     });
 });

@@ -1,4 +1,4 @@
-const { EmbedBuilder, AttachmentBuilder, ButtonBuilder, ActionRowBuilder } = require('discord.js');
+const { EmbedBuilder, AttachmentBuilder, ButtonBuilder, ActionRowBuilder, MessageFlags } = require('discord.js');
 const { profileImage } = require('discord-arts');
 const { addBadges } = require('../../lib/discordBadges');
 const { addSuffix } = require('../../lib/addSuffix');
@@ -10,7 +10,7 @@ module.exports = {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() || message.member;
 
-        if (!user) return message.channel.send({ content: "Member **could not** be found!", ephemeral: true,});
+        if (!user) return message.channel.send({ content: "Member **could not** be found!", flags: MessageFlags.Ephemeral,});
 
         const profileBuffer = await profileImage(user.id);
         const imageAttachment = new AttachmentBuilder(profileBuffer, { name: 'profile.png' });

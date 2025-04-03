@@ -1,5 +1,5 @@
 const canvafy = require("canvafy");
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const { color, getTimestamp } = require("../../utils/loggingEffects")
 
 module.exports = {
@@ -39,9 +39,9 @@ module.exports = {
         } catch (error) {
             console.error(`${color.red}[${getTimestamp()}] [ERROR] ${error.message}`);
             if (interaction.replied || interaction.deferred) {
-                await interaction.followUp({ content: '*Whoops*, looks like there was an error there. Try the command again, if it doesn\'t work, please submit a **bug report** using \`\`/bug-report\`\`', ephemeral: true });
+                await interaction.followUp({ content: '*Whoops*, looks like there was an error there. Try the command again, if it doesn\'t work, please submit a **bug report** using \`\`/bug-report\`\`', flags: MessageFlags.Ephemeral });
             } else {
-                await interaction.reply({ content: '*Whoops*, looks like there was an error there. Try the command again, if it doesn\'t work, please submit a **bug report** using \`\`/bug-report\`\`', ephemeral: true });
+                await interaction.reply({ content: '*Whoops*, looks like there was an error there. Try the command again, if it doesn\'t work, please submit a **bug report** using \`\`/bug-report\`\`', flags: MessageFlags.Ephemeral });
             }
         }
     },

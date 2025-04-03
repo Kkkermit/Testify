@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -30,7 +30,7 @@ module.exports = {
     ).setRequired(false)),
     async execute (interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         const channelID = interaction.options.getChannel("channel");
         const title = interaction.options.getString("title") || "NEW ANNOUNCEMENT!";
         const desc = interaction.options.getString("description") || "*No description provided.*";
@@ -58,6 +58,6 @@ module.exports = {
         .setFooter({ text: `Announcement has been sent!` })
         .setTimestamp();
 
-        return interaction.reply({ embeds: [sentEmbed], ephemeral: true });
+        return interaction.reply({ embeds: [sentEmbed], flags: MessageFlags.Ephemeral });
     }
 }

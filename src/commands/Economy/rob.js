@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, embedLength } = require('discord.js'); 
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js'); 
 const ecoSchema = require('../../schemas/economySystem');
 
 var timeout = [];
@@ -10,17 +10,17 @@ module.exports = {
     async execute (interaction, client) {
 
         const { options, user, guild } = interaction
-        if (timeout.includes(interaction.user.id)) return await interaction.reply({ content: 'You need to wait **1min** to rob another user again', ephemeral: true });
+        if (timeout.includes(interaction.user.id)) return await interaction.reply({ content: 'You need to wait **1min** to rob another user again', flags: MessageFlags.Ephemeral });
 
         const userStealing = options.getUser('user');
 
         let Data = await ecoSchema.findOne({ Guild: guild.id, User: user.id });
         let DataUser = await ecoSchema.findOne({ Guild: guild.id, User: userStealing.id });
 
-        if (!Data) return await interaction.reply({ content: "You don't have an account, create one using \`/economy-create account\`", ephemeral: true });
-        if (userStealing == interaction.user) return await interaction.reply({ content: 'You **cannot** rob yourself!', ephemeral: true });
-        if (!DataUser) return await interaction.reply({ content: 'That user **does not** have an economy account created', ephemeral: true });
-        if (DataUser.Wallet <= 0) return await interaction.reply({ content: 'That user **does not** have any money in their wallet', ephemeral: true });
+        if (!Data) return await interaction.reply({ content: "You don't have an account, create one using \`/economy-create account\`", flags: MessageFlags.Ephemeral });
+        if (userStealing == interaction.user) return await interaction.reply({ content: 'You **cannot** rob yourself!', flags: MessageFlags.Ephemeral });
+        if (!DataUser) return await interaction.reply({ content: 'That user **does not** have an economy account created', flags: MessageFlags.Ephemeral });
+        if (DataUser.Wallet <= 0) return await interaction.reply({ content: 'That user **does not** have any money in their wallet', flags: MessageFlags.Ephemeral });
 
         let negative = Math.round((Math.random() * -150) - 10);
         let positive = Math.round((Math.random() * 300) - 10);
@@ -30,7 +30,7 @@ module.exports = {
         const amount = Math.round(Math.random() * posN.length);
         const value = posN[amount];
 
-        if (Data.Wallet <= 0) return await interaction.reply({ content: 'You **cannot** rob this person because your wallet has **$0** in it', ephemeral: true });
+        if (Data.Wallet <= 0) return await interaction.reply({ content: 'You **cannot** rob this person because your wallet has **$0** in it', flags: MessageFlags.Ephemeral });
 
         if (value > 0) {
             const positiveChoices = [
@@ -74,7 +74,7 @@ module.exports = {
             ]
 
             const wal = Data.Wallet;
-            if (isNaN(value)) return await interaction.reply({ content: 'This user called the cops on you, but you ran away. You didn\'t lose or gain anything', ephemeral: true });
+            if (isNaN(value)) return await interaction.reply({ content: 'This user called the cops on you, but you ran away. You didn\'t lose or gain anything', flags: MessageFlags.Ephemeral });
 
             const negName = Math.floor(Math.random() * negativeChoices.length);
 

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, PermissionFlagsBits} = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, PermissionFlagsBits, MessageFlags} = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,14 +16,14 @@ module.exports = {
     const user = options.getUser('user');
         
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
-            return interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
+            return interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
         }
         
         if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) {
-            return interaction.reply({ content: 'Please provide a valid number between 1 and 99.', ephemeral: true });
+            return interaction.reply({ content: 'Please provide a valid number between 1 and 99.', flags: MessageFlags.Ephemeral });
         }
         
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         const deletedSize = await deleteMessages(interaction.channel, parseInt(amount), user);
 
@@ -38,7 +38,7 @@ module.exports = {
         .setFooter({ text: `Purge command`})
         .setTimestamp()
 
-        return interaction.followUp({ embeds: [clearEmbed], ephemeral: true });
+        return interaction.followUp({ embeds: [clearEmbed], flags: MessageFlags.Ephemeral });
 
     }
 }

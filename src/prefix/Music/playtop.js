@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
   name: 'playtop',
@@ -11,7 +11,7 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | There is **nothing** in the queue right now!`)
 
-    if (!string) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!string) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     client.distube.play(message.member.voice.channel, string, {
       member: message.member,
       textChannel: message.channel,

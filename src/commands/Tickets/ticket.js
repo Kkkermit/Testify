@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, ChannelType, MessageFlags } = require('discord.js');
 const TicketSetup = require('../../schemas/ticketSetupSystem');
 
 module.exports = {
@@ -88,7 +88,7 @@ module.exports = {
             .setTitle('Somethings gone wrong...')
             .setTimestamp()
 
-            return interaction.reply({ embeds: [errEmbed], ephemeral: true }).catch(error => { return });
+            return interaction.reply({ embeds: [errEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
         }
     },
 };

@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const voiceSchema = require('../../schemas/voiceChannelMembersSystem');
 const botSchema = require('../../schemas/voiceChannelBotSystem');
 
@@ -13,7 +13,7 @@ module.exports = {
     .addSubcommand(command => command.setName('bot-remove').setDescription('Removes your total bots VC.')),
     async execute(interaction, client, err) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = interaction.options.getSubcommand();
 
@@ -43,10 +43,10 @@ module.exports = {
                 .addFields({ name: `• Channel was Set Up`, value: `> Your channel (${voiceChannel}) has been set \n> up to be your total members \n> voice channel! It will now display your \n> total members accordingly.`})
                 .setFooter({ text: `🔊 Total Channel Set`})
 
-                await interaction.reply({ embeds: [voiceEmbed], ephemeral: true })
+                await interaction.reply({ embeds: [voiceEmbed], flags: MessageFlags.Ephemeral })
 
             } else {
-                await interaction.reply({ content: `You have **already** set up a **total members** VC in this server!`, ephemeral: true})
+                await interaction.reply({ content: `You have **already** set up a **total members** VC in this server!`, flags: MessageFlags.Ephemeral})
             }
 
             break;
@@ -54,7 +54,7 @@ module.exports = {
 
             const totalRemoveData = await voiceSchema.findOne({ Guild: interaction.guild.id });
 
-            if (!totalRemoveData) return await interaction.reply({ content: `You **have not** set up a **total members** VC yet, cannot delete **nothing**..`, ephemeral: true});
+            if (!totalRemoveData) return await interaction.reply({ content: `You **have not** set up a **total members** VC yet, cannot delete **nothing**..`, flags: MessageFlags.Ephemeral});
             else {
 
                 const removeChannel = await interaction.guild.channels.cache.get(totalRemoveData.TotalChannel);
@@ -62,17 +62,17 @@ module.exports = {
                 if (!removeChannel) {
 
                     await voiceSchema.deleteMany({ Guild: interaction.guild.id });
-                    await interaction.reply({ content: `Your **total member** VC seems to be corrupt or non existent, we **disabled** it regardless!`, ephemeral: true});
+                    await interaction.reply({ content: `Your **total member** VC seems to be corrupt or non existent, we **disabled** it regardless!`, flags: MessageFlags.Ephemeral});
 
                 } else {
 
                     await removeChannel.delete().catch(err => {
                         voiceSchema.deleteMany({ Guild: interaction.guild.id });
-                        return interaction.reply({ content: `**Couldn't** delete your VC, but we **still** disabled your **total members** VC!`, ephemeral: true})
+                        return interaction.reply({ content: `**Couldn't** delete your VC, but we **still** disabled your **total members** VC!`, flags: MessageFlags.Ephemeral})
                     });
 
                     await voiceSchema.deleteMany({ Guild: interaction.guild.id });
-                    await interaction.reply({ content: `Your **total members** VC has been **successfully** disabled!`, ephemeral: true});
+                    await interaction.reply({ content: `Your **total members** VC has been **successfully** disabled!`, flags: MessageFlags.Ephemeral});
                 }
             }
 
@@ -103,9 +103,9 @@ module.exports = {
                 .addFields({ name: `• Channel was Set Up`, value: `> Your channel (${botGuildChannel}) has been set \n> up to be your total bots \n> voice channel! It will now display your \n> total bots accordingly.`})
                 .setFooter({ text: `🔊 Total Channel Set`})
 
-                await interaction.reply({ embeds: [botEmbed], ephemeral: true })
+                await interaction.reply({ embeds: [botEmbed], flags: MessageFlags.Ephemeral })
             } else {
-                await interaction.reply({ content: `You have **already** set up a **total bots** VC in this server!`, ephemeral: true})
+                await interaction.reply({ content: `You have **already** set up a **total bots** VC in this server!`, flags: MessageFlags.Ephemeral})
             }
 
             break;
@@ -113,7 +113,7 @@ module.exports = {
 
             const totalBotData = await botSchema.findOne({ Guild: interaction.guild.id });
 
-            if (!totalBotData) return await interaction.reply({ content: `You **have not** set up a **total bots** VC yet, cannot delete **nothing**..`, ephemeral: true});
+            if (!totalBotData) return await interaction.reply({ content: `You **have not** set up a **total bots** VC yet, cannot delete **nothing**..`, flags: MessageFlags.Ephemeral});
             else {
 
                 const removeBotChannel = await interaction.guild.channels.cache.get(totalBotData.BotChannel);
@@ -121,17 +121,17 @@ module.exports = {
                 if (!removeBotChannel) {
 
                     await botSchema.deleteMany({ Guild: interaction.guild.id });
-                    await interaction.reply({ content: `Your **total bots** VC seems to be corrupt or non existent, we **disabled** it regardless!`, ephemeral: true});
+                    await interaction.reply({ content: `Your **total bots** VC seems to be corrupt or non existent, we **disabled** it regardless!`, flags: MessageFlags.Ephemeral});
 
                 } else {
 
                     await removeBotChannel.delete().catch(err => {
                         botSchema.deleteMany({ Guild: interaction.guild.id });
-                        return interaction.reply({ content: `**Couldn't** delete your VC, but we **still** disabled your **total bots** VC!`, ephemeral: true})
+                        return interaction.reply({ content: `**Couldn't** delete your VC, but we **still** disabled your **total bots** VC!`, flags: MessageFlags.Ephemeral})
                     });
 
                     await botSchema.deleteMany({ Guild: interaction.guild.id });
-                    await interaction.reply({ content: `Your **total bots** VC has been **successfully** disabled!`, ephemeral: true});
+                    await interaction.reply({ content: `Your **total bots** VC has been **successfully** disabled!`, flags: MessageFlags.Ephemeral});
                 }
             }
         }

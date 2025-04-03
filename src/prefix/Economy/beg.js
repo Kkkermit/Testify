@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 const ecoS = require('../../schemas/economySystem');
 
 var timeout = [];
@@ -10,9 +10,9 @@ module.exports = {
         const { guild, author } = message;
         let data = await ecoS.findOne({ Guild: guild.id, user: author.id });
 
-        if (timeout.includes(message.author.id)) return await message.reply({ content: "Come back soon to beg **(1 min)**", ephemeral: true });
+        if (timeout.includes(message.author.id)) return await message.reply({ content: "Come back soon to beg **(1 min)**", flags: MessageFlags.Ephemeral });
 
-        if (!data) return await message.reply({ content: "You don't have an account, create one using \`/economy-create account.\`", ephemeral: true });
+        if (!data) return await message.reply({ content: "You don't have an account, create one using \`/economy-create account.\`", flags: MessageFlags.Ephemeral });
         else {
             const randAmount = Math.round((Math.random() * 750) + 10);
 

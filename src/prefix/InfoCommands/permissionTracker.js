@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: 'perms',
@@ -7,7 +7,7 @@ module.exports = {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first();
 
-        if (!user) return message.channel.send({ content: "Member **could not** be found!", ephemeral: true,});
+        if (!user) return message.channel.send({ content: "Member **could not** be found!", flags: MessageFlags.Ephemeral,});
 
         let permissionFlags = Object.keys(PermissionFlagsBits);
 

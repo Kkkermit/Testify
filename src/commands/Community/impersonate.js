@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require("discord.js");
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
@@ -16,7 +16,7 @@ module.exports = {
         const member = options.getUser("user");
         const message = options.getString("message");
 
-        if (filter.words.includes(message)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(message)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.createWebhook)) return await interaction.reply({
             content: `${client.config.noPerms}`
@@ -24,7 +24,7 @@ module.exports = {
 
         if (message.includes('@everyone') || message.includes('@here')) return await interaction.reply({ 
             content: `You **cannot** mention \`\`everyone/here\`\` with this command`, 
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
         
         interaction.channel.createWebhook({ name: member.displayName, avatar: member.displayAvatarURL({ dynamic: true })}).then((webhook) => {
@@ -35,6 +35,6 @@ module.exports = {
             }, 3000);
         });
         
-        interaction.reply({ content: `${member || "user"} has been **successfully** impersonated <#${interaction.channel.id}>!`, ephemeral: true });
+        interaction.reply({ content: `${member || "user"} has been **successfully** impersonated <#${interaction.channel.id}>!`, flags: MessageFlags.Ephemeral });
     },
 };

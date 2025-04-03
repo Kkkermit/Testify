@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -11,9 +11,9 @@ module.exports = {
         
         const role = options.getRole('role');
         
-        if (!role || !role.id) return interaction.reply({ content: `That role **doesn't** seem to exist in ${interaction.guild.name}`, ephemeral: true});
-        if (role.name === "@everyone") return interaction.reply({ content: `You **cannot** get the info of the \`\`@everyone\`\``, ephemeral: true});
-        if (role.name === "@here") return interaction.reply({ content: `You **cannot** get the info of the \`\`@here\`\``, ephemeral: true});
+        if (!role || !role.id) return interaction.reply({ content: `That role **doesn't** seem to exist in ${interaction.guild.name}`, flags: MessageFlags.Ephemeral});
+        if (role.name === "@everyone") return interaction.reply({ content: `You **cannot** get the info of the \`\`@everyone\`\``, flags: MessageFlags.Ephemeral});
+        if (role.name === "@here") return interaction.reply({ content: `You **cannot** get the info of the \`\`@here\`\``, flags: MessageFlags.Ephemeral});
         
         const created = parseInt(role.createdTimestamp / 1000);
         const isMentionable = role.isMentionable ? "true" : "false";

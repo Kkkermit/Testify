@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
   name: 'skipto',
@@ -18,12 +18,12 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | Please enter a **valid** number!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     if (!args[0]) {
-      return message.channel.send({ embeds: [embed1], ephemeral: true })
+      return message.channel.send({ embeds: [embed1], flags: MessageFlags.Ephemeral })
     }
     const num = Number(args[0])
-    if (isNaN(num)) return message.channel.send({ embeds: [embed2], ephemeral: true })
+    if (isNaN(num)) return message.channel.send({ embeds: [embed2], flags: MessageFlags.Ephemeral })
     await client.distube.jump(message, num).then(song => {
 
     const embed3 = new EmbedBuilder()

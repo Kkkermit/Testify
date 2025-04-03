@@ -1,4 +1,4 @@
-const { ContextMenuCommandBuilder, EmbedBuilder, ApplicationCommandType } = require('discord.js');
+const { ContextMenuCommandBuilder, EmbedBuilder, ApplicationCommandType, MessageFlags } = require('discord.js');
 const Profile = require('../../schemas/profileSystem');
 const moment = require('moment');
 
@@ -13,7 +13,7 @@ module.exports = {
         const userProfile = await Profile.findOne({ userId: user.id });
 
         if (!userProfile) {
-            await interaction.reply({ content: `No profile found for ${user.tag}.`, ephemeral: true });
+            await interaction.reply({ content: `No profile found for ${user.tag}.`, flags: MessageFlags.Ephemeral });
             return;
         }
 

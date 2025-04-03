@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder, PermissionFlagsBits, UserSelectMenuBuilder, ActionRowBuilder } = require('discord.js');
+const { Events, EmbedBuilder, PermissionFlagsBits, UserSelectMenuBuilder, ActionRowBuilder, MessageFlags } = require('discord.js');
 const { createTranscript } = require('discord-html-transcripts');
 const TicketSetup = require('../../schemas/ticketSetupSystem');
 const TicketSchema = require('../../schemas/ticketSystem');
@@ -22,7 +22,7 @@ module.exports = {
             .setTitle('Somethings gone wrong...')
             .setTimestamp()
 
-        if (!guild.members.me.permissions.has((r) => r.id === docs.Handlers)) return interaction.reply({embeds: [errorEmbed], ephemeral: true}).catch(error => { return });
+        if (!guild.members.me.permissions.has((r) => r.id === docs.Handlers)) return interaction.reply({embeds: [errorEmbed], flags: MessageFlags.Ephemeral}).catch(error => { return });
         
         const executeEmbed = new EmbedBuilder()
         .setColor('Aqua');
@@ -44,7 +44,7 @@ module.exports = {
             switch (customId) {
                 case 'ticket-close':
 
-                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({embeds: [nopermissionsEmbed], ephemeral: true}).catch(error => { return });
+                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({embeds: [nopermissionsEmbed], flags: MessageFlags.Ephemeral}).catch(error => { return });
                     const transcript = await createTranscript(channel, {
                         limit: -1,
                         returnType: 'attachment',
@@ -89,11 +89,11 @@ module.exports = {
                 break;
                 case 'ticket-lock':
 
-                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], ephemeral: true }).catch(error => { return });
+                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     alreadyEmbed.setDescription(client.config.ticketAlreadyLocked);
                     if (data.Locked == true) 
-                        return interaction.reply({ embeds: [alreadyEmbed], ephemeral: true }).catch(error => { return });
+                        return interaction.reply({ embeds: [alreadyEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     await TicketSchema.updateOne({ ChannelID: channel.id }, { Locked: true });
 
@@ -107,11 +107,11 @@ module.exports = {
 
                 case 'ticket-unlock':
 
-                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], ephemeral: true }).catch(error => { return });
+                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     alreadyEmbed.setDescription(client.config.ticketAlreadyUnlocked);
                     if (data.Locked == false) 
-                        return interaction.reply({ embeds: [alreadyEmbed], ephemeral: true }).catch(error => { return });
+                        return interaction.reply({ embeds: [alreadyEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     await TicketSchema.updateOne({ ChannelID: channel.id }, { Locked: false });
 
@@ -125,7 +125,7 @@ module.exports = {
 
                 case 'ticket-manage':
 
-                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], ephemeral: true }).catch(error => { return });
+                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     const menu = new UserSelectMenuBuilder()
                     .setCustomId('ticket-manage-menu')
@@ -136,15 +136,15 @@ module.exports = {
                     const row = new ActionRowBuilder()
                     .addComponents(menu);
 
-                    return interaction.reply({ components: [row], ephemeral: true }).catch(error => { return });
+                    return interaction.reply({ components: [row], flags: MessageFlags.Ephemeral }).catch(error => { return });
                     
                 case 'ticket-claim':
 
-                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], ephemeral: true }).catch(error => { return });
+                    if ((!member.permissions.has(ManageChannels)) & (!member.roles.cache.has(docs.Handlers))) return interaction.reply({ embeds: [nopermissionsEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     alreadyEmbed.setDescription(client.config.ticketAlreadyClaim + ' <@' + data.ClaimedBy + '>.');
                     if (data.Claimed == true) 
-                        return interaction.reply({ embeds: [alreadyEmbed], ephemeral: true }).catch(error => { return });
+                        return interaction.reply({ embeds: [alreadyEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
                     await TicketSchema.updateOne({ ChannelID: channel.id }, { Claimed: true, ClaimedBy: member.id });
 

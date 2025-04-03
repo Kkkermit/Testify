@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { ApexChat, ApexImagine, ApexImageAnalyzer } = require('apexify.js');
 const SetupChannel = require('../../schemas/aiChannelSystem');
 const filter = require('../../jsons/filter.json');
@@ -49,7 +49,7 @@ module.exports = {
                     const imageUrl = Array.isArray(imageResponse) ? imageResponse[0] : imageResponse;
 
                     if (imageOptions.nsfw === false && filter.words.includes(prompt)) {
-                        await interaction.editReply({ content: `NSFW content has been disabled. Only the owner of the bot can change this. Please try with a different prompt that does not include NSFW content.`, ephemeral: true });
+                        await interaction.editReply({ content: `NSFW content has been disabled. Only the owner of the bot can change this. Please try with a different prompt that does not include NSFW content.`, flags: MessageFlags.Ephemeral });
                         return;
                     }
 
@@ -65,7 +65,7 @@ module.exports = {
                     await interaction.editReply({ embeds: [embed] });
                 } catch (error) {
                     console.log(error);
-                    await interaction.editReply({ content: `An error occurred while generating AI image with the prompt: **${prompt}**. Please try again later.`, ephemeral: true });
+                    await interaction.editReply({ content: `An error occurred while generating AI image with the prompt: **${prompt}**. Please try again later.`, flags: MessageFlags.Ephemeral });
                     client.logs.error("[AI_IMAGE_GENERATE] Error occurred in AI Image Generation: ", error);
                 }
 
@@ -77,7 +77,7 @@ module.exports = {
                 const getAnalysisPrompt = interaction.options.getString('prompt') || "Analyze this image";
 
                 if (filter.words.includes(getAnalysisPrompt)) {
-                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                    return await interaction.editReply({ content: `${filterMessage}`, flags: MessageFlags.Ephemeral });
                 }
 
                 try {
@@ -94,7 +94,7 @@ module.exports = {
                     await interaction.editReply({ embeds: [embed] });
                 } catch (error) {
                     console.log(error);
-                    await interaction.editReply({ content: `An error occurred while generating AI image-reader response with the URL: **${getImageUrl}** & prompt: **${getAnalysisPrompt}. Please try again later.`, ephemeral: true });
+                    await interaction.editReply({ content: `An error occurred while generating AI image-reader response with the URL: **${getImageUrl}** & prompt: **${getAnalysisPrompt}. Please try again later.`, flags: MessageFlags.Ephemeral });
                     client.logs.error("[AI_IMAGE_ANALYSER] Error occurred in AI Image Analyser: ", error);
                 }
 
@@ -105,7 +105,7 @@ module.exports = {
                 const getChatPrompt = interaction.options.getString('prompt');
 
                 if (filter.words.includes(getChatPrompt)) {
-                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                    return await interaction.editReply({ content: `${filterMessage}`, flags: MessageFlags.Ephemeral });
                 }
 
                 const chatModel = `${client.config.aiChatModel}`;
@@ -140,7 +140,7 @@ module.exports = {
                     await interaction.editReply({ embeds: [embed] });
                 } catch (error) {
                     console.log(error);
-                    await interaction.editReply({ content: `An error occurred while generating AI chat response with the prompt: **${getChatPrompt}**. Please try again later.`, ephemeral: true });
+                    await interaction.editReply({ content: `An error occurred while generating AI chat response with the prompt: **${getChatPrompt}**. Please try again later.`, flags: MessageFlags.Ephemeral });
                     client.logs.error("[AI_CHAT_RESPONSE] Error occurred in AI Chat Response: ", error);
                 }
 
@@ -153,7 +153,7 @@ module.exports = {
                 const serverID = interaction.guild.id;
 
                 if (filter.words.includes(instruction)) {
-                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                    return await interaction.editReply({ content: `${filterMessage}`, flags: MessageFlags.Ephemeral });
                 }
 
                 const setupChannel = new SetupChannel({ 
@@ -178,7 +178,7 @@ module.exports = {
                     await interaction.editReply({ embeds: [embed] });
                 } catch (error) {
                     console.log(error);
-                    await interaction.editReply({ content: `An error occurred while setting up AI chat response in this channel. Please try again later.`, ephemeral: true });
+                    await interaction.editReply({ content: `An error occurred while setting up AI chat response in this channel. Please try again later.`, flags: MessageFlags.Ephemeral });
                     client.logs.error("[AI_CHANNEL_SETUP] Error occurred in AI Channel Setup: ", error);
                 }
 
@@ -187,7 +187,7 @@ module.exports = {
 
                 const disableChannel = await SetupChannel.findOneAndDelete({ serverID: interaction.guild.id });
 
-                if (!disableChannel) return await interaction.editReply({ content: `AI chat response has **not** yet been setup in this server!`, ephemeral: true });
+                if (!disableChannel) return await interaction.editReply({ content: `AI chat response has **not** yet been setup in this server!`, flags: MessageFlags.Ephemeral });
 
                 try {
                     const embed = new EmbedBuilder()
@@ -201,7 +201,7 @@ module.exports = {
                     await interaction.editReply({ embeds: [embed] });
                 } catch (error) {
                     console.log(error);
-                    await interaction.editReply({ content: `An error occurred while disabling AI chat response in this channel. Please try again later.`, ephemeral: true });
+                    await interaction.editReply({ content: `An error occurred while disabling AI chat response in this channel. Please try again later.`, flags: MessageFlags.Ephemeral });
                     client.logs.error("[AI_CHANNEL_DISABLE] Error occurred in AI Channel Disable: ", error);
                 }
 
@@ -211,12 +211,12 @@ module.exports = {
                 const getInstructions = interaction.options.getString('ai-instructions');
 
                 if (filter.words.includes(getInstructions)) {
-                    return await interaction.editReply({ content: `${filterMessage}`, ephemeral: true });
+                    return await interaction.editReply({ content: `${filterMessage}`, flags: MessageFlags.Ephemeral });
                 }
 
                 const updateInstructions = await SetupChannel.findOneAndUpdate({ serverID: interaction.guild.id }, { instruction: getInstructions });
 
-                if (!updateInstructions) return await interaction.editReply({ content: `AI chat response has **not** yet been setup in this server!`, ephemeral: true });
+                if (!updateInstructions) return await interaction.editReply({ content: `AI chat response has **not** yet been setup in this server!`, flags: MessageFlags.Ephemeral });
 
                 try {
                     const embed = new EmbedBuilder()
@@ -231,7 +231,7 @@ module.exports = {
                     await interaction.editReply({ embeds: [embed] });
                 } catch (error) {
                     console.log(error);
-                    await interaction.editReply({ content: `An error occurred while updating AI chat response instructions in this channel. Please try again later.`, ephemeral: true });
+                    await interaction.editReply({ content: `An error occurred while updating AI chat response instructions in this channel. Please try again later.`, flags: MessageFlags.Ephemeral });
                     client.logs.error("[AI_CHANNEL_UPDATE] Error occurred in AI Channel Update: ", error);
                 }
                 

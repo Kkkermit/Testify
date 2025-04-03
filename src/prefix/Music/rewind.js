@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
   name: 'rewind',
@@ -18,12 +18,12 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | Please enter a **valid** number!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     if (!args[0]) {
-      return message.channel.send({ embeds: [embed1], ephemeral: true })
+      return message.channel.send({ embeds: [embed1], flags: MessageFlags.Ephemeral })
     }
     const time = Number(args[0])
-    if (isNaN(time)) return message.channel.send({ embeds: [embed2], ephemeral: true })
+    if (isNaN(time)) return message.channel.send({ embeds: [embed2], flags: MessageFlags.Ephemeral })
     queue.seek((queue.currentTime - time))
 
     const embed3 = new EmbedBuilder()

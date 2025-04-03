@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require("discord.js");
+const { EmbedBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
   name: 'resume',
@@ -15,7 +15,7 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | The queue is not paused!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     if (queue.paused) {
       queue.resume()
 
@@ -28,7 +28,7 @@ module.exports = {
 
       message.channel.send({ embeds: [embed1] })
     } else {
-      message.channel.send({ embeds: [embed2], ephemeral: true })
+      message.channel.send({ embeds: [embed2], flags: MessageFlags.Ephemeral })
     }
   }
 }

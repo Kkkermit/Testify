@@ -1,4 +1,4 @@
-const { Events, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits } = require('discord.js');
+const { Events, ChannelType, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const TicketSchema = require('../../schemas/ticketSystem');
 const TicketSetup = require('../../schemas/ticketSetupSystem');
 
@@ -25,10 +25,10 @@ module.exports = {
         const findTicket = await TicketSchema.findOne({ GuildID: guild.id, OwnerID: member.id });
 
         if (findTicket) 
-            return interaction.reply({ embeds: [alreadyticketEmbed], ephemeral: true }).catch(error => { return });
+            return interaction.reply({ embeds: [alreadyticketEmbed], flags: MessageFlags.Ephemeral }).catch(error => { return });
 
         if (!guild.members.me.permissions.has(ManageChannels)) 
-            return interaction.reply({ content: `${client.config.ticketMissingPerms}`, ephemeral: true }).catch(error => { return });
+            return interaction.reply({ content: `${client.config.ticketMissingPerms}`, flags: MessageFlags.Ephemeral }).catch(error => { return });
         try {
             await guild.channels.create({
                 name: client.config.ticketName + ticketId,
@@ -104,7 +104,7 @@ module.exports = {
                 .setDescription(client.config.ticketCreate + ' <#' + channel.id + '>')
                 .setColor('Green');
 
-                interaction.reply({ embeds: [ticketmessage], ephemeral: true }).catch(error => { return });
+                interaction.reply({ embeds: [ticketmessage], flags: MessageFlags.Ephemeral }).catch(error => { return });
             })
         } catch (err) {
             return client.logs.error(`[TICKET_SYSTEM] Error while creating the ticket response in ${guild.name}`, err);

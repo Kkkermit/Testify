@@ -1,7 +1,7 @@
 const { getTopItems } = require('../../api/spotifyTrackerApi');
 const { createStatsEmbed } = require('../../utils/createStatsEmbed');
 const User = require('../../schemas/spotifyTrackerSystem');
-const { Events } = require('discord.js');
+const { Events, MessageFlags } = require('discord.js');
 
 module.exports = {
     name: Events.InteractionCreate,
@@ -22,7 +22,7 @@ module.exports = {
             if (!user || !user.spotifyAccessToken) {
                 return interaction.reply({
                     content: 'Please connect your Spotify account first!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -34,7 +34,7 @@ module.exports = {
             console.error(error);
             await interaction.reply({
                 content: 'Error updating stats!',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     },

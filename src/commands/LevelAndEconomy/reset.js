@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags } = require('discord.js');
 const levelSchema = require ("../../schemas/userLevelSystem");
 const ecoSchema = require ("../../schemas/economySystem");
 const levelschema = require('../../schemas/levelSetupSystem');
@@ -14,7 +14,7 @@ module.exports = {
     .addSubcommand(command => command.setName('xp').setDescription(`Resets specified user's XP.`).addUserOption(option => option.setName('user').setDescription('Specified user will have their xp reset.').setRequired(true))),
     async execute(interaction) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         const sub = interaction.options.getSubcommand();
         
         switch (sub) {
@@ -22,7 +22,7 @@ module.exports = {
             case 'all-xp':
 
             const levelsetup = await levelschema.findOne({ Guild: interaction.guild.id });
-            if (!levelsetup || levelsetup.Disabled === 'disabled') return await interaction.reply({ content: `The **Administrators** of this server **have not** set up the **leveling system** yet!`, ephemeral: true});
+            if (!levelsetup || levelsetup.Disabled === 'disabled') return await interaction.reply({ content: `The **Administrators** of this server **have not** set up the **leveling system** yet!`, flags: MessageFlags.Ephemeral});
 
             levelSchema.deleteMany({ Guild: interaction.guild.id}, async (err, data) => {
 
@@ -43,7 +43,7 @@ module.exports = {
             case 'xp':
 
             const levelsetup1 = await levelschema.findOne({ Guild: interaction.guild.id });
-            if (!levelsetup1 || levelsetup1.Disabled === 'disabled') return await interaction.reply({ content: `The **Administrators** of this server **have not** set up the **leveling system** yet!`, ephemeral: true});
+            if (!levelsetup1 || levelsetup1.Disabled === 'disabled') return await interaction.reply({ content: `The **Administrators** of this server **have not** set up the **leveling system** yet!`, flags: MessageFlags.Ephemeral});
 
             const target = interaction.options.getUser('user');
 
@@ -80,12 +80,12 @@ module.exports = {
 
                 if (err) throw err;
     
-                if (!data) return await interaction.reply({ content: `${user} needs to have **created** a past account in order to add to their currency.`, ephemeral: true})
+                if (!data) return await interaction.reply({ content: `${user} needs to have **created** a past account in order to add to their currency.`, flags: MessageFlags.Ephemeral})
 
                 const Data = await ecoSchema.findOne({ Guild: interaction.guild.id, User: user.id});
 
                 if (Data.Wallet + Data.Bank === 0) {
-                    return await interaction.reply({ content: `${user} has **no money**, you **do not** need to reset their money.`, ephemeral: true})
+                    return await interaction.reply({ content: `${user} has **no money**, you **do not** need to reset their money.`, flags: MessageFlags.Ephemeral})
                 } else {
                 
                     Data.Wallet = 0;

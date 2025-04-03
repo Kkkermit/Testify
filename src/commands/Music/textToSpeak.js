@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, MessageFlags } = require('discord.js');
 const filter = require('../../jsons/filter.json');
 
 module.exports={
@@ -9,11 +9,11 @@ module.exports={
     .addStringOption(option => option.setName('message').setDescription('The message you want to send').setRequired(true)),
     async execute(interaction, client){
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.SendTTSMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true})
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.SendTTSMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral})
 
         const message = interaction.options.getString('message');
 
-        if (filter.words.includes(message)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(message)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
         const embed = new EmbedBuilder()
         .setAuthor({ name: `TTS Command ${client.config.devBy}`})
@@ -23,7 +23,7 @@ module.exports={
         .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true })})
         .setTimestamp();
 
-        await interaction.reply({ content: `${message}`, ephemeral: true, tts: true})
+        await interaction.reply({ content: `${message}`, flags: MessageFlags.Ephemeral, tts: true})
         await interaction.channel.send({ embeds: [embed] });
     }
 }

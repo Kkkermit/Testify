@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const levelschema = require('../../schemas/levelSetupSystem');
 
 module.exports = {
@@ -21,7 +21,7 @@ module.exports = {
     .addSubcommand(command => command.setName('disable-multiplier').setDescription('Disables the multiplier of your role.')),
     async execute(interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = await interaction.options.getSubcommand();
         const multiplier = await interaction.options.getString('multiplier');
@@ -32,7 +32,7 @@ module.exports = {
 
             case 'enable':
 
-            if (leveldata && leveldata.Disabled === 'enabled') return await interaction.reply({ content: `You **already** have your **leveling system** set up. \n> Do **\`\`/leveling disable\`\`** to undo.`, ephemeral: true});
+            if (leveldata && leveldata.Disabled === 'enabled') return await interaction.reply({ content: `You **already** have your **leveling system** set up. \n> Do **\`\`/leveling disable\`\`** to undo.`, flags: MessageFlags.Ephemeral});
             else {
                 const channel = interaction.options.getChannel('channel');
                 const levelUpChannelId = channel ? channel.id : 'current';
@@ -64,7 +64,7 @@ module.exports = {
             break;
             case 'disable':
 
-            if (!leveldata || leveldata.Disabled === 'disabled') return await interaction.reply({ content: `You **have not** set up your **leveling system** yet. \n> Do **\`\`/leveling enable\`\`** to setup your **leveling system**.`, ephemeral: true });
+            if (!leveldata || leveldata.Disabled === 'disabled') return await interaction.reply({ content: `You **have not** set up your **leveling system** yet. \n> Do **\`\`/leveling enable\`\`** to setup your **leveling system**.`, flags: MessageFlags.Ephemeral });
             else {
 
                 const disableEmbed = new EmbedBuilder()
@@ -84,25 +84,25 @@ module.exports = {
             break;
             case 'role-multiplier':
 
-            if (!leveldata || leveldata.Disabled === 'disabled') return await interaction.reply({ content: `You **have not** set up your **leveling system** yet.`, ephemeral: true});
+            if (!leveldata || leveldata.Disabled === 'disabled') return await interaction.reply({ content: `You **have not** set up your **leveling system** yet.`, flags: MessageFlags.Ephemeral});
             else {
 
-                if (leveldata.Role !== ' ') return await interaction.reply({ content: `You **already** have a multiplier role **set up**! (${leveldata.Role})`, ephemeral: true});
+                if (leveldata.Role !== ' ') return await interaction.reply({ content: `You **already** have a multiplier role **set up**! (${leveldata.Role})`, flags: MessageFlags.Ephemeral});
                 else {
                     await levelschema.updateOne({ Guild: interaction.guild.id }, { $set: { Role: multirole.id }});
                     await levelschema.updateOne({ Guild: interaction.guild.id }, { $set: { Multi: multiplier }});
-                    await interaction.reply({ content: `Your role ${multirole} has been **set up** to receive **multiplied** XP! Multiplication level: **${multiplier}**x`, ephemeral: true})
+                    await interaction.reply({ content: `Your role ${multirole} has been **set up** to receive **multiplied** XP! Multiplication level: **${multiplier}**x`, flags: MessageFlags.Ephemeral})
                 } 
             }
 
             break;
             case 'disable-multiplier':
 
-            if (!leveldata || leveldata.Disabled === 'disabled') return await interaction.reply({ content: `You **have not** set up your **leveling system** yet.`, ephemeral: true});
+            if (!leveldata || leveldata.Disabled === 'disabled') return await interaction.reply({ content: `You **have not** set up your **leveling system** yet.`, flags: MessageFlags.Ephemeral});
             else {
-                if (leveldata.Role === ' ') return await interaction.reply({ content: `You **have not** set up a role multiplier yet, cannot disable **nothing**..`, ephemeral: true});
+                if (leveldata.Role === ' ') return await interaction.reply({ content: `You **have not** set up a role multiplier yet, cannot disable **nothing**..`, flags: MessageFlags.Ephemeral});
                 else {
-                    await interaction.reply({ content: `Your multiplier role <@&${leveldata.Role}> has been **disabled**!`, ephemeral: true });
+                    await interaction.reply({ content: `Your multiplier role <@&${leveldata.Role}> has been **disabled**!`, flags: MessageFlags.Ephemeral });
                     await levelschema.updateOne({ Guild: interaction.guild.id }, { $set: { Role: ' ' }});
                     await levelschema.updateOne({ Guild: interaction.guild.id }, { $set: { Multi: ' ' }});
                 }

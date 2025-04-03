@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
   name: 'volume',
@@ -15,9 +15,9 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | Please enter a **valid** number!`)
 
-    if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+    if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
     const volume = parseInt(args[0])
-    if (isNaN(volume)) return message.channel.send({ embeds: [embed1], ephemeral: true })
+    if (isNaN(volume)) return message.channel.send({ embeds: [embed1], flags: MessageFlags.Ephemeral })
     queue.setVolume(volume)
 
     const embed2 = new EmbedBuilder()

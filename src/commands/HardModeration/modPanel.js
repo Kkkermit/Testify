@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ module.exports = {
     .addStringOption(option => option.setName('reason').setDescription('Reason for moderating the member').setRequired(false))
     .addIntegerOption(option => option.setName('time').setDescription('This is how long the user\'s punishment is going to last (in minutes). Default: 1 hour').setRequired(false)),
     async execute (interaction, client) {
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const target = await interaction.options.getUser(`user`);
         const member = await interaction.options.getMember("user")
@@ -128,7 +128,7 @@ module.exports = {
         collector.on('collect', async i => {
             if(i.customId == 'kick') {
                 if (i.user.id !== interaction.user.id) {
-                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
+                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, flags: MessageFlags.Ephemeral})
                 }
                 target.send({ embeds: [kickEmbed] }).catch((err) => { return client.logs.error('[MOD_PANEL_KICK] Failed to DM user.') });
                 let kick = await guild.members.kick(target).catch((err) => {
@@ -136,12 +136,12 @@ module.exports = {
                 })
                 await interaction.channel.send({ embeds: [kickEmbed2] });
                 if(!kick) {
-                    await interaction.reply({ embeds: [failEmbed], ephemeral: true })
+                    await interaction.reply({ embeds: [failEmbed], flags: MessageFlags.Ephemeral })
                 }
             }
             if(i.customId == 'timeout') {
                 if (i.user.id !== interaction.user.id) {
-                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
+                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, flags: MessageFlags.Ephemeral})
                 }
                 target.send({ embeds: [timeoutEmbed] }).catch((err) => { return client.logs.error('[MOD_PANEL_TIMEOUT] Failed to DM user.') });
                 let timeout = await member.timeout(length * 60000).catch((err) => {
@@ -149,18 +149,18 @@ module.exports = {
                 })
                 await interaction.channel.send({ embeds: [timeoutEmbed2] });
                 if(!timeout) {
-                    await interaction.reply({ embeds: [failEmbed], ephemeral: true })
+                    await interaction.reply({ embeds: [failEmbed], flags: MessageFlags.Ephemeral })
                 }
             }
             if(i.customId == 'delete') {
                 if (i.user.id !== interaction.user.id) {
-                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
+                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, flags: MessageFlags.Ephemeral})
                 }
                 interaction.deleteReply();
             }
             if(i.customId == 'ban') {
                 if (i.user.id !== interaction.user.id) {
-                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, ephemeral: true})
+                    return await i.reply({ content: `Only ${interaction.user.tag} can interact with the buttons!`, flags: MessageFlags.Ephemeral})
                 }
                 target.send({ embeds: [banEmbed] }).catch((err) => { return client.logs.error('[MOD_PANEL_BAN] Failed to DM user.') });
                 await interaction.channel.send({ embeds: [banEmbed2] });
@@ -168,7 +168,7 @@ module.exports = {
                     client.logs.error("Error with Ban command: " + err) 
                 })
                 if(!ban) {
-                    await interaction.reply({ embeds: [failEmbed], ephemeral: true })
+                    await interaction.reply({ embeds: [failEmbed], flags: MessageFlags.Ephemeral })
                 }
             }
         })

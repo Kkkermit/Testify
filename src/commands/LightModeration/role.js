@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, PermissionsBitField } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,11 +17,11 @@ module.exports = {
             const role = interaction.options.getRole('role');
 
             if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
-                return interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true });
+                return interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
             }
 
             if (interaction.member.roles.cache.has(role.id)) {
-                return interaction.reply({ content: 'Member already has that role!', ephemeral: true });
+                return interaction.reply({ content: 'Member already has that role!', flags: MessageFlags.Ephemeral });
             }
             else {
                 member.roles.add(role).catch(console.error);
@@ -44,10 +44,10 @@ module.exports = {
             const memberRemove = interaction.options.getMember('member');
             const roleRemove = interaction.options.getRole('role');
 
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+            if (!interaction.member.permissions.has(PermissionFlagsBits.ManageRoles)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             if (interaction.member.roles.cache.has(roleRemove.id)) {
-                return interaction.reply({ content: `An error has occurred. This can happen when the user **does not** have the role or the role your trying to remove is **higher than ${client.user.username}'s top role.** Please adjust this and try again.`, ephemeral: true });
+                return interaction.reply({ content: `An error has occurred. This can happen when the user **does not** have the role or the role your trying to remove is **higher than ${client.user.username}'s top role.** Please adjust this and try again.`, flags: MessageFlags.Ephemeral });
             } else {
                 memberRemove.roles.remove(roleRemove).catch(console.error);
             }

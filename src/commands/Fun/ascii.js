@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 const figlet = require('figlet')
 const filter = require('../../jsons/filter.json');
 
@@ -13,10 +13,10 @@ module.exports = {
         figlet(`${text}`, function (err, data) {
 
             if (err) {
-                return interaction.reply({ content: `Something has gone wrong, please try again!`, ephemeral: true})
+                return interaction.reply({ content: `Something has gone wrong, please try again!`, flags: MessageFlags.Ephemeral})
             }
 
-            if (filter.words.includes(text)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+            if (filter.words.includes(text)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
 
             const embed = new EmbedBuilder()
             .setColor(client.config.embedFun)

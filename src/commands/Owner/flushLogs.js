@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const { flushLogs } = require('../../scripts/consoleLogger');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
 
@@ -11,7 +11,7 @@ module.exports = {
     async execute(interaction, client) {
         try {
             if (interaction.user.id !== client.config.developers) {
-                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, ephemeral: true,});
+                return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
             }
 
             await interaction.deferReply();
@@ -35,12 +35,12 @@ module.exports = {
             if (interaction.deferred) {
                 await interaction.editReply({
                     content: `${client.config.errorEmoji} Failed to send logs: ${error.message}`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             } else {
                 await interaction.reply({
                     content: `${client.config.errorEmoji} Failed to send logs: ${error.message}`,
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }

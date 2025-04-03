@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, WebhookClient } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, WebhookClient, MessageFlags } = require("discord.js");
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -59,7 +59,7 @@ module.exports = {
             return;
         });
 
-        return interaction.reply({ embeds: [channelEmbed], ephemeral: true}).catch(err => {
+        return interaction.reply({ embeds: [channelEmbed], flags: MessageFlags.Ephemeral}).catch(err => {
             return;
         });
     }

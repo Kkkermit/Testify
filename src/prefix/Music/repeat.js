@@ -1,4 +1,4 @@
-const { EmbedBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags } = require('discord.js');
 
 module.exports = {
   name: 'repeat',
@@ -11,7 +11,7 @@ module.exports = {
       .setColor(client.config.embedMusic)
       .setDescription(`${client.config.musicEmojiError} | There is **nothing** in the playing!`)
 
-      if (!queue) return message.channel.send({ embeds: [embed], ephemeral: true })
+      if (!queue) return message.channel.send({ embeds: [embed], flags: MessageFlags.Ephemeral })
 
         let mode = null
         const validModes = ['off', 'song', 'queue'];
@@ -21,7 +21,7 @@ module.exports = {
                 .setColor(client.config.embedMusic)
                 .setDescription(`${client.config.musicEmojiSuccess} | Please provide a valid mode: \`off\`, \`song\`, or \`queue\``)
         
-            return message.channel.send({ embeds: [embed2], ephemeral: true })
+            return message.channel.send({ embeds: [embed2], flags: MessageFlags.Ephemeral })
         }
         
         switch (args[0]) {

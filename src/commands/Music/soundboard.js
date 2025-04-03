@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 
 module.exports = {
@@ -15,7 +15,7 @@ module.exports = {
     async execute(interaction, client) {
         const sound = interaction.options.getString('sound');
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.UseSoundboard)) return await interaction.reply({ content: `${client.config.noPerms}`, ephemeral: true});
+        if (!interaction.member.permissions.has(PermissionFlagsBits.UseSoundboard)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         let audioURL;
 
@@ -50,7 +50,7 @@ module.exports = {
         .setTimestamp()
         .setThumbnail(client.user.avatarURL());
 
-        const message = await interaction.reply({ embeds: [embedPlay], fetchReply: true, ephemeral: true });
+        const message = await interaction.reply({ embeds: [embedPlay], fetchReply: true, flags: MessageFlags.Ephemeral });
 
         audioPlayer.on('stateChange', (oldState, newState) => {
 

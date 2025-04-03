@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require("discord.js");
+const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
@@ -10,13 +10,13 @@ module.exports = {
     async execute (interaction, client) {
 
         let tweet = interaction.options.getString("tweet");
-        if (filter.words.includes(tweet)) return interaction.reply({ content: `${client.config.filterMessage}`, ephemeral: true});
+        if (filter.words.includes(tweet)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
         let user = interaction.options.getUser("user") || interaction.user;
         let avatarUrl = user.avatarURL({ extension: "jpg" });
         let canvas = `https://some-random-api.com/canvas/tweet?avatar=${avatarUrl}&displayname=${encodeURIComponent(user.username)}&username=${encodeURIComponent(user.username)}&comment=${encodeURIComponent(tweet)}`;
 
         await interaction.channel.sendTyping(), 
         await interaction.channel.send({ content: canvas });
-        await interaction.reply({ content: "Message sent to channel", ephemeral: true});
+        await interaction.reply({ content: "Message sent to channel", flags: MessageFlags.Ephemeral});
     },
 };

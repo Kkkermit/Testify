@@ -1,6 +1,6 @@
 require('dotenv').config({ path: '../../../.env'});
 
-const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, AttachmentBuilder } = require('discord.js');
+const { SlashCommandBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, AttachmentBuilder, MessageFlags } = require('discord.js');
 const { getTopItems } = require('../../api/spotifyTrackerApi');
 const { createStatsEmbed } = require('../../utils/createStatsEmbed');
 const User = require('../../schemas/spotifyTrackerSystem');
@@ -55,7 +55,7 @@ module.exports = {
             await interaction.reply({
                 embeds: [loginEmbed],
                 components: [loginButton],
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
 
             break;
@@ -71,7 +71,7 @@ module.exports = {
                         content: targetUser.id === interaction.user.id ? 
                             'Please connect your Spotify account first! You can do this by running the command `/spotify login`.' : 
                             'This user hasn\'t connected their Spotify account! They can do this by running the command `/spotify login`.',
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
     
@@ -103,7 +103,7 @@ module.exports = {
                 console.error(error);
                 await interaction.reply({
                     content: 'Error fetching Spotify stats!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
 
@@ -115,21 +115,21 @@ module.exports = {
             if (!user) {
                 return await interaction.reply({ 
                     content: 'Could not find that user!', 
-                    ephemeral: true 
+                    flags: MessageFlags.Ephemeral 
                 });
             }
 
             if (user.bot) {
                 return await interaction.reply({ 
                     content: `Invalid command. Cannot obtain a bot's spotify status.`, 
-                    ephemeral: true 
+                    flags: MessageFlags.Ephemeral 
                 });
             }
 
             if (!user.presence) {
                 return await interaction.reply({ 
                     content: `${user.user.username} is not online or their status cannot be seen!`, 
-                    ephemeral: true 
+                    flags: MessageFlags.Ephemeral 
                 });
             }
 
@@ -139,7 +139,7 @@ module.exports = {
             if (!spotifyActivity || !spotifyActivity.assets) {
                 return await interaction.reply({ 
                     content: `${user.user.username} is not listening to spotify at the moment! If you didn't expect this, make sure that your Spotify activity is the **top** level activity on your Discord profile.`, 
-                    ephemeral: true 
+                    flags: MessageFlags.Ephemeral 
                 });
             }
 
