@@ -26,7 +26,7 @@ updateYTDLPackages();
 const currentVersion = `${config.botVersion}`;
 
 // Boot Mode //
-require('./utils/bootMode.js')();
+require('./scripts/bootMode.js')();
 
 // Set up environment variables
 require('dotenv').config();
