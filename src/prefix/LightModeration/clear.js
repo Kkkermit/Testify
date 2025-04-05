@@ -1,41 +1,141 @@
-const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
+const { color, getTimestamp } = require('../../utils/logEffects');
 
 module.exports = {
     name: 'clear',
-    aliases : ['purge'],
+    aliases: ['purge', 'delete'],
     async execute(message, client, args) {
-        
-        const amount = args[0];
-        const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
-
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
-        if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) return message.channel.send({ content: 'Please provide a valid number between 1 and 99.', flags: MessageFlags.Ephemeral});
-        if (!amount) return message.channel.send({ content: 'Please provide the amount of message you want to clear.', flags: MessageFlags.Ephemeral});
-
-        let messages;
-        if (user) {
-            messages = await message.channel.messages.fetch({ limit: parseInt(amount) + 1 })
-                .then(messages => messages.filter(m => m.author.id === user.id && m.id !== message.id))
-                .then(messages => messages.first(parseInt(amount)));
-        } else {
-            messages = await message.channel.messages.fetch({ limit: parseInt(amount) + 1 })
-                .then(messages => messages.filter(m => m.id !== message.id));
+        if (!args.length) {
+            return message.reply('Please provide the number of messages to clear!');
         }
 
-        const deletedMessages = await message.channel.bulkDelete(messages, true);
-        const deletedSize = deletedMessages.size;
-        const deletedUser = user ? user.username : 'everyone';
+        const amount = args[0];
+        const userMention = message.mentions.users.first();
 
+        if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
+
+        if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) {
+            return message.reply('Please provide a **valid** number between `1` and `99`.');
+        }
+        
+        let processingMsg;
+        try {
+            processingMsg = await message.reply('Processing message deletion...');
+        } catch (err) {
+            console.error(`${color.red}[${getTimestamp()}] [CLEAR_COMMAND] Failed to send processing message: `, err);
+        }
+
+        try {
+            await message.delete().catch(err => {
+                console.error(`${color.red}[${getTimestamp()}] [CLEAR_COMMAND] Failed to delete command message: `, err);
+            });
+        } catch (err) {
+        }
+
+        const result = await deleteMessages(message.channel, parseInt(amount), userMention);
+        
+        if (result.error) {
+            if (processingMsg) {
+                try {
+                    await processingMsg.delete();
+                } catch (err) {
+                }
+            }
+            
+            if (result.code === 50034) {
+                return message.channel.send('**Error**: Cannot delete messages older than 14 days. Try a smaller range or target more recent messages.');
+            } else {
+                return message.channel.send(`**Error**: ${result.error}`);
+            }
+        }
+        
+        const deletedUser = userMention ? userMention.username : 'everyone';
+        
         const clearEmbed = new EmbedBuilder()
-        .setAuthor({ name: `${client.user.username} purge command ${client.config.devBy}`})
-        .setColor(client.config.embedModLight)
-        .setTitle(`Purge command used in ${message.channel} ${client.config.arrowEmoji}`)
-        .setDescription(`> Successfully deleted **${deletedSize}** messages sent by **${deletedUser}**.`)
-        .setThumbnail(client.user.avatarURL())
-        .setFooter({ text: `Purge command`})
-        .setTimestamp()
+            .setAuthor({ name: `Purge Command`, iconURL: client.user.displayAvatarURL() })
+            .setColor(client.config.embedModColor)
+            .setTitle(`${client.user.username} Purge Tool ${client.config.arrowEmoji}`)
+            .setDescription(`> Successfully deleted **${result.deleted}** messages sent by **${deletedUser}** in **${message.channel}**.`)
+            .setFooter({ text: `Purged by ${message.author.tag}`, iconURL: message.author.displayAvatarURL() })
+            .setTimestamp();
 
-        return message.channel.send({ embeds: [clearEmbed], flags: MessageFlags.Ephemeral });
+        if (processingMsg) {
+            try {
+                await processingMsg.delete();
+            } catch (err) {
+            }
+        }
 
+        try {
+            const successMsg = await message.channel.send({ embeds: [clearEmbed] });
+
+            setTimeout(() => {
+                successMsg.delete().catch(() => {
+                });
+            }, 5000);
+        } catch (err) {
+            console.error(`${color.red}[${getTimestamp()}] [CLEAR_COMMAND] Failed to send success message: `, err);
+        }
+    }
+};
+
+async function deleteMessages(channel, totalToDelete, user) {
+    let remaining = totalToDelete;
+    let totalDeleted = 0;
+
+    try {
+        while (remaining > 0) {
+            const fetchAmount = Math.min(remaining, 100);
+            const messages = await channel.messages.fetch({ limit: fetchAmount });
+
+            if (messages.size === 0) break;
+
+            const toDelete = user 
+                ? messages.filter(msg => msg.author.id === user.id)
+                : messages;
+
+            if (toDelete.size === 0) break;
+            
+            try {
+                const twoWeeksAgo = Date.now() - 14 * 24 * 60 * 60 * 1000;
+                const recentMessages = toDelete.filter(msg => msg.createdTimestamp > twoWeeksAgo);
+                
+                if (recentMessages.size === 0) {
+                    return { 
+                        error: 'All selected messages are older than 14 days and cannot be bulk deleted.', 
+                        deleted: totalDeleted,
+                        code: 50034
+                    };
+                }
+                
+                await channel.bulkDelete(recentMessages);
+                totalDeleted += recentMessages.size;
+                
+                if (recentMessages.size < toDelete.size) {
+                    return { 
+                        deleted: totalDeleted,
+                        warning: 'Some messages were older than 14 days and couldn\'t be deleted.',
+                        code: 50034
+                    };
+                }
+            } catch (error) {
+                if (error.code === 50034) {
+                    return { 
+                        error: 'You can only bulk delete messages that are under 14 days old.', 
+                        deleted: totalDeleted,
+                        code: 50034
+                    };
+                }
+                throw error;
+            }
+
+            remaining -= fetchAmount;
+            if (messages.size < fetchAmount) break;
+        }
+
+        return { deleted: totalDeleted };
+    } catch (error) {
+        console.error(`${color.red}[${getTimestamp()}] [CLEAR_COMMAND] `, error);
+        return { error: error.message || 'An unknown error occurred', deleted: totalDeleted };
     }
 }
