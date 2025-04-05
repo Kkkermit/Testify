@@ -1,8 +1,18 @@
-const { model, Schema } = require("mongoose");
+const mongoose = require('mongoose');
 
-let logschema = new Schema({
-    Guild: String,
-    Channel: String,
+const logSchema = new mongoose.Schema({
+    Guild: {
+        type: String,
+        required: true
+    },
+    Channel: {
+        type: String,
+        required: true
+    },
+    EnabledLogs: {
+        type: [String],
+        default: ["all"],
+    }
 });
 
-module.exports = model("logs", logschema);
+module.exports = mongoose.model('AuditLogs', logSchema);
