@@ -1,5 +1,5 @@
 const { EmbedBuilder, PermissionFlagsBits } = require('discord.js');
-const { color, getTimestamp } = require('../../utils/logEffects');
+const { color, getTimestamp } = require('../../utils/loggingEffects');
 
 module.exports = {
     name: 'clear',
