@@ -15,7 +15,7 @@ module.exports = {
             .setColor(client.config.embedDev)
             .setTimestamp()
             .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
-            .setFooter({ text: `${client.config.devBy}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+            .setFooter({ text: `Eval warning embed ${client.config.devBy}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
 
             for (const developerId of client.config.developers) {
                 try {
