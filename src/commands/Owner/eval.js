@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags, EmbedBuilder } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -6,7 +6,26 @@ module.exports = {
     .setDescription('Evaluates JavaScript code.'),
     async execute(interaction, client) {
 
-        if (interaction.user.id !== client.config.developers) {
+        if (!client.config.developers.includes(interaction.user.id)) {
+            const embed = new EmbedBuilder()
+            .setAuthor({ name: `${interaction.user.tag} has tried to run the eval command`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
+            .setTitle(`Unauthorized Access Attempt Detected. ${interaction.user.tag} has tried to run the eval command but is not a developer.`)
+            .setDescription(`If this persists, consider **revoking their access** to ${client.config.username} with \`\`/blacklist add\`\`.`)
+            .addFields({ name: "UserID", value: `${interaction.user.id}`, inline: true })
+            .setColor(client.config.embedDev)
+            .setTimestamp()
+            .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
+            .setFooter({ text: `${client.config.devBy}`, iconURL: client.user.displayAvatarURL({ dynamic: true }) });
+
+            for (const developerId of client.config.developers) {
+                try {
+                    const developer = await client.users.fetch(developerId);
+                    await developer.send({ embeds: [embed] });
+                } catch (error) {
+                    client.logs.error(`[EVAL_ERROR] Failed to send message to developer ${developerId}:`, error);
+                }
+            }
+            
             return await interaction.reply({ content: `${client.config.ownerOnlyCommand}`, flags: MessageFlags.Ephemeral,});
         }
 
