@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const mongodbURL = process.env.mongodb;
 const folderLoader = require('../../utils/folderLoader.js');
 const { asciiText } = require('../../lib/asciiText.js')
+const { textEffects } = require('../../utils/loggingEffects.js')
 
 module.exports = {
     name: 'ready',
@@ -13,7 +14,7 @@ module.exports = {
         client.setMaxListeners(client.config.eventListeners || 20);
 
         if (!mongodbURL) {
-            client.logs.error('[DATABASE] No MongoDB URL has been provided. Double check your .env file and make sure it is correct.');
+            client.logs.error(`[DATABASE] No MongoDB URL has been provided. Double check your .env file and make sure it is correct. MongoDB is ${textEffects.bold}required${textEffects.reset} for ${client.user.username} to function.`);
             return;
         }
 

@@ -10,7 +10,7 @@ module.exports = {
             const embed = new EmbedBuilder()
             .setAuthor({ name: `${interaction.user.tag} has tried to run the eval command`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) })
             .setTitle(`Unauthorized Access Attempt Detected. ${interaction.user.tag} has tried to run the eval command but is not a developer.`)
-            .setDescription(`If this persists, consider **revoking their access** to ${client.config.username} with \`\`/blacklist add\`\`.`)
+            .setDescription(`If this persists, consider **revoking their access** to ${client.user.username} with \`\`/blacklist add\`\`.`)
             .addFields({ name: "UserID", value: `${interaction.user.id}`, inline: true })
             .setColor(client.config.embedDev)
             .setTimestamp()
