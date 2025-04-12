@@ -1,5 +1,5 @@
 const dadJokeCommand = require('../commands/Community/dadJoke');
-const { MessageFlags } = require('discord.js');
+const { setupTest, teardownTest, MessageFlags } = require('./testUtils');
 
 const originalFetch = global.fetch;
 
@@ -12,29 +12,14 @@ describe('dad-joke command', () => {
         fetchMock = jest.fn();
         global.fetch = fetchMock;
         
-        interaction = {
-            reply: jest.fn(),
-        };
-
-        client = {
-            user: {
-                username: 'TestBot',
-                avatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
-            },
-            config: {
-                devBy: 'DevName',
-                arrowEmoji: '➡️',
-                embedCommunity: '#00FF00',
-            },
-        };
-
-        jest.useFakeTimers();
-        jest.setSystemTime(new Date('2024-09-28T00:12:30.643Z'));
+        const setup = setupTest();
+        interaction = setup.interaction;
+        client = setup.client;
     });
 
     afterEach(() => {
         global.fetch = originalFetch;
-        jest.useRealTimers();
+        teardownTest();
     });
 
     it('should fetch a dad joke and reply with an embed', async () => {

@@ -1,37 +1,18 @@
 const coinFlipCommand = require('../commands/Community/coinFlip');
+const { setupTest, teardownTest } = require('./testUtils');
 
 describe('coin-flip command', () => {
     let interaction;
     let client;
 
     beforeEach(() => {
-        interaction = {
-            reply: jest.fn(),
-            editReply: jest.fn(),
-            user: {
-                tag: 'TestUser#1234',
-                displayAvatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
-            },
-        };
-
-        client = {
-            user: {
-                username: 'TestBot',
-                avatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
-            },
-            config: {
-                devBy: 'DevName',
-                arrowEmoji: '➡️',
-                embedCommunity: '#00FF00',
-            },
-        };
-
-        jest.useFakeTimers();
-        jest.setSystemTime(new Date('2024-09-28T00:12:30.643Z'));
+        const setup = setupTest();
+        interaction = setup.interaction;
+        client = setup.client;
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        teardownTest();
     });
 
     it('should reply with a coin flip embed and then edit the reply with the result', async () => {

@@ -1,5 +1,7 @@
 const axios = require('axios');
 const animalFactsCommand = require('../commands/Community/animalFacts');
+const { setupTest, teardownTest, MessageFlags } = require('./testUtils');
+
 jest.mock('axios');
 
 describe('animal-facts command', () => {
@@ -7,28 +9,13 @@ describe('animal-facts command', () => {
     let client;
 
     beforeEach(() => {
-        interaction = {
-            reply: jest.fn(),
-        };
-
-        client = {
-            user: {
-                username: 'TestBot',
-                avatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
-            },
-            config: {
-                devBy: 'DevName',
-                arrowEmoji: '➡️',
-                embedCommunity: '#00FF00',
-            },
-        };
-
-        jest.useFakeTimers();
-        jest.setSystemTime(new Date('2024-09-28T00:12:30.643Z'));
+        const setup = setupTest();
+        interaction = setup.interaction;
+        client = setup.client;
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        teardownTest();
     });
 
     it('should fetch an animal fact and reply with an embed', async () => {

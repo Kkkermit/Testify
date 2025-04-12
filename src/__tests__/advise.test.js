@@ -1,5 +1,7 @@
 const fetch = require('node-fetch');
 const adviceCommand = require('../commands/Community/advice');
+const { setupTest, teardownTest } = require('./testUtils');
+
 jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');
 
@@ -8,28 +10,13 @@ describe('advice command', () => {
     let client;
 
     beforeEach(() => {
-        interaction = {
-            reply: jest.fn(),
-        };
-
-        client = {
-            user: {
-                username: 'TestBot',
-                avatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
-            },
-            config: {
-                devBy: 'DevName',
-                arrowEmoji: '➡️',
-                embedCommunity: '#00FF00',
-            },
-        };
-
-        jest.useFakeTimers();
-        jest.setSystemTime(new Date('2024-09-28T00:12:30.643Z'));
+        const setup = setupTest();
+        interaction = setup.interaction;
+        client = setup.client;
     });
 
     afterEach(() => {
-        jest.useRealTimers();
+        teardownTest();
     });
 
     it('should fetch advice and reply with an embed', async () => {
