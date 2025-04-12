@@ -1,13 +1,17 @@
-const fetch = require('node-fetch');
 const dadJokeCommand = require('../commands/Community/dadJoke');
-jest.mock('node-fetch');
-const { Response } = jest.requireActual('node-fetch');
+const { MessageFlags } = require('discord.js');
+
+const originalFetch = global.fetch;
 
 describe('dad-joke command', () => {
     let interaction;
     let client;
+    let fetchMock;
 
     beforeEach(() => {
+        fetchMock = jest.fn();
+        global.fetch = fetchMock;
+        
         interaction = {
             reply: jest.fn(),
         };
@@ -29,19 +33,26 @@ describe('dad-joke command', () => {
     });
 
     afterEach(() => {
+        global.fetch = originalFetch;
         jest.useRealTimers();
     });
 
     it('should fetch a dad joke and reply with an embed', async () => {
         const mockJoke = { 
             id: 'abc123', 
-            joke: 'Why don’t skeletons fight each other? They don’t have the guts.' 
+            joke: 'Why don\'t skeletons fight each other? They don\'t have the guts.' 
         };
-        fetch.mockResolvedValue(new Response(JSON.stringify(mockJoke)));
+        
+        const mockResponse = {
+            ok: true,
+            json: jest.fn().mockResolvedValue(mockJoke)
+        };
+        
+        fetchMock.mockResolvedValue(mockResponse);
 
         await dadJokeCommand.execute(interaction, client);
 
-        expect(fetch).toHaveBeenCalledWith('https://icanhazdadjoke.com/', {
+        expect(fetchMock).toHaveBeenCalledWith('https://icanhazdadjoke.com/', {
             headers: {
                 Accept: 'application/json',
             },
@@ -57,7 +68,7 @@ describe('dad-joke command', () => {
                             url: undefined
                         },
                         title: 'TestBot Dad Joke ➡️',
-                        description: '> Why don’t skeletons fight each other? They don’t have the guts.',
+                        description: '> Why don\'t skeletons fight each other? They don\'t have the guts.',
                         color: 65280,
                         footer: { 
                             text: 'Joke ID: abc123',
@@ -74,11 +85,15 @@ describe('dad-joke command', () => {
     });
 
     it('should reply with an error message if fetching the dad joke fails', async () => {
-        fetch.mockResolvedValue(new Response(null, { status: 500 }));
+        const mockResponse = {
+            ok: false,
+        };
+        
+        fetchMock.mockResolvedValue(mockResponse);
 
         await dadJokeCommand.execute(interaction, client);
 
-        expect(fetch).toHaveBeenCalledWith('https://icanhazdadjoke.com/', {
+        expect(fetchMock).toHaveBeenCalledWith('https://icanhazdadjoke.com/', {
             headers: {
                 Accept: 'application/json',
             },

@@ -13,7 +13,7 @@ module.exports = {
         });
 
         if (!response.ok) { 
-            interaction.reply({ content: `An **error occurred** while attempting to fetch a dad joke. Please try again later.`, flags: MessageFlags.Ephemeral })
+            return interaction.reply({ content: `An **error occurred** while attempting to fetch a dad joke. Please try again later.`, flags: MessageFlags.Ephemeral });
         }
 
         const data = await response.json();
