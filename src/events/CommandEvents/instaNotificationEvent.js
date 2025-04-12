@@ -27,6 +27,21 @@ const rateLimiter = {
     }
 };
 
+const logRateLimiter = {
+    lastLogs: {},
+    
+    shouldLog: function(key, minutes = 30) {
+        const now = Date.now();
+        const lastLog = this.lastLogs[key] || 0;
+        
+        if (now - lastLog > minutes * 60 * 1000) {
+            this.lastLogs[key] = now;
+            return true;
+        }
+        return false;
+    }
+};
+
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -51,28 +66,36 @@ async function getLatestPost(username) {
 
         if (!userResponse.ok) {
             if (userResponse.status !== 429) {
-                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Instagram API returned ${userResponse.status} for ${username}${color.reset}`);
+                if (logRateLimiter.shouldLog(`api_error_${username}`, 60)) {
+                    console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Instagram API returned ${userResponse.status} for ${username}${color.reset}`);
+                }
             }
             return null;
         }
 
         const contentType = userResponse.headers.get('content-type');
         if (!contentType || !contentType.includes('application/json')) {
-            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Invalid content type ${contentType} for ${username}${color.reset}`);
+            if (logRateLimiter.shouldLog(`content_type_${username}`, 60)) {
+                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Invalid content type ${contentType} for ${username}${color.reset}`);
+            }
             return null;
         }
 
         const userData = await userResponse.json();
         
         if (!userData || !userData.data || !userData.data.user) {
-            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No user data found for ${username}${color.reset}`);
+            if (logRateLimiter.shouldLog(`no_user_data_${username}`, 60)) {
+                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No user data found for ${username}${color.reset}`);
+            }
             return null;
         }
 
         const user = userData.data.user;
 
         if (!user.edge_owner_to_timeline_media?.edges?.length) {
-            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No posts found for ${username}${color.reset}`);
+            if (logRateLimiter.shouldLog(`no_posts_${username}`, 60)) {
+                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No posts found for ${username}${color.reset}`);
+            }
             return null;
         }
 
@@ -97,10 +120,18 @@ async function getLatestPost(username) {
 module.exports = {
     name: Events.ClientReady,
     async execute(client) {
+        let lastRoutineLog = 0;
+        
         const checkInstagramPosts = async () => {
             try {
                 const allGuilds = await InstagramSchema.find();
-                console.log(`${color.blue}[${getTimestamp()}] [INSTA_NOTIFICATION] Checking posts for ${allGuilds.reduce((total, guild) => total + guild.InstagramUsers.length, 0)} Instagram users${color.reset}`);
+                const totalUsers = allGuilds.reduce((total, guild) => total + guild.InstagramUsers.length, 0);
+                
+                const now = Date.now();
+                if (now - lastRoutineLog > 6 * 60 * 60 * 1000) {
+                    console.log(`${color.blue}[${getTimestamp()}] [INSTA_NOTIFICATION] Checking posts for ${totalUsers} Instagram users${color.reset}`);
+                    lastRoutineLog = now;
+                }
 
                 for (const guildData of allGuilds) {
                     for (const username of guildData.InstagramUsers) {
@@ -135,7 +166,9 @@ module.exports = {
                     }
                 }
                 
-                console.log(`${color.green}[${getTimestamp()}] [INSTA_NOTIFICATION] Completed Instagram post check${color.reset}`);
+                if (now - lastRoutineLog < 10000) {
+                    console.log(`${color.green}[${getTimestamp()}] [INSTA_NOTIFICATION] Completed Instagram post check${color.reset}`);
+                }
             } catch (error) {
                 console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Error in post checking routine: ${color.reset}`, error);
             }
