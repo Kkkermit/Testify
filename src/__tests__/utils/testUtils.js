@@ -1,4 +1,4 @@
-const { MessageFlags, PermissionsBitField } = require('discord.js');
+const { MessageFlags, PermissionsBitField, ButtonStyle } = require('discord.js');
 
 /**
  * Create mock interaction and client objects for testing
@@ -110,5 +110,6 @@ module.exports = {
     setupTest,
     teardownTest,
     MessageFlags,
-    PermissionsBitField
+    PermissionsBitField,
+    ButtonStyle
 };
