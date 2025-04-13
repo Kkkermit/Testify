@@ -79,7 +79,12 @@
     "typescript": "5.7.3"
   },
   "jest": {
-    "testMatch": ["**/__tests__/**/*.test.js"],
-    "testPathIgnorePatterns": ["/node_modules/", "/testUtils.js"]
+    "testMatch": [
+      "**/__tests__/**/*.test.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/testUtils.js"
+    ]
   }
 }

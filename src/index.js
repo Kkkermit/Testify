@@ -18,6 +18,8 @@ const { intents, partials } = require('./utils/intents.js');
 const { getTimestamp, color } = require('./utils/loggingEffects.js');
 const setupLoggers = require('./utils/setupLoggers');
 
+const botStartTime = Date.now();
+
 // Run YTDL packages update at startup
 console.log(`${color.blue}[${getTimestamp()}] [STARTUP] Running package updates for music functionality${color.reset}`);
 updateYTDLPackages();
@@ -70,6 +72,7 @@ client.commands = new Collection();
 client.pcommands = new Collection();
 client.aliases = new Collection();
 client.reloadValoAPI = fetchValorantAPI;
+client.botStartTime = botStartTime;
 
 const functions = fs.readdirSync("./src/functions").filter(file => file.endsWith(".js"));
 const triggerFiles = fs.readdirSync("./src/triggers").filter(file => file.endsWith(".js"));

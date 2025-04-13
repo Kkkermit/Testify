@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 const mongodbURL = process.env.mongodb;
 const folderLoader = require('../../utils/folderLoader.js');
-const { asciiText } = require('../../lib/asciiText.js')
-const { textEffects } = require('../../utils/loggingEffects.js')
+const { textEffects } = require('../../utils/loggingEffects.js');
+const { asciiText } = require('../../lib/asciiText.js');
 
 module.exports = {
     name: 'ready',
@@ -32,6 +32,6 @@ module.exports = {
         }
 
         folderLoader(client);
-        asciiText(client)
+        asciiText(client, client.botStartTime);
     },
 };
