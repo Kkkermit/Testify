@@ -1,0 +1,32 @@
+name: Run Tests
+
+on:
+  # Run on every push
+  push:
+    branches: [ main, master ]
+  # Run on pull requests
+  pull_request:
+    branches: [ main, master ]
+  # Run every 24 hours (at midnight UTC)
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm run test
