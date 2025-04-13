@@ -1,4 +1,4 @@
-const { MessageFlags, PermissionsBitField, ButtonStyle, ChannelType } = require('discord.js');
+const { MessageFlags, PermissionsBitField, ButtonStyle, ChannelType, TextInputStyle } = require('discord.js');
 
 /**
  * Create mock interaction and client objects for testing
@@ -27,6 +27,15 @@ function setupTest(options = {}) {
     const mockWebhook = {
         send: jest.fn().mockResolvedValue({}),
         delete: jest.fn().mockResolvedValue({}),
+        edit: jest.fn().mockResolvedValue({}),
+        fetchMessage: jest.fn().mockResolvedValue({}),
+        ...options.webhook,
+    };
+
+    const mockWebhookClient = {
+        send: jest.fn().mockResolvedValue({}),
+        destroy: jest.fn(),
+        ...options.webhookClient,
     };
 
     const mockChannel = {
@@ -50,13 +59,31 @@ function setupTest(options = {}) {
         ...options.user,
     };
 
+    const mockShowModal = jest.fn(modal => {
+        interaction.lastShownModal = {
+            customId: modal.customId || modal.data?.custom_id,
+            title: modal.title,
+            components: modal.components
+        };
+        return Promise.resolve();
+    });
+
     const interaction = {
         reply: jest.fn().mockResolvedValue(mockMessage),
         editReply: jest.fn(),
+        deferReply: jest.fn().mockResolvedValue({}),
+        followUp: jest.fn().mockResolvedValue({}),
+        showModal: mockShowModal,
+        awaitModalSubmit: jest.fn(),
+        lastShownModal: null,
         user: mockUser,
         options: {
             getString: jest.fn(),
             getUser: jest.fn().mockReturnValue(mockUser),
+            getInteger: jest.fn(),
+            getSubcommand: jest.fn(),
+            getChannel: jest.fn(),
+            getBoolean: jest.fn(),
         },
         member: mockMember,
         channel: mockChannel,
@@ -91,6 +118,7 @@ function setupTest(options = {}) {
         interaction, 
         client, 
         mockWebhook,
+        mockWebhookClient,
         mockChannel,
         mockUser,
         mockMember,
@@ -112,5 +140,6 @@ module.exports = {
     MessageFlags,
     PermissionsBitField,
     ButtonStyle,
-    ChannelType
+    ChannelType,
+    TextInputStyle
 };
