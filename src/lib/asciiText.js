@@ -20,9 +20,12 @@ function asciiText(client, startTime) {
     console.log(`${color.pink}[${getTimestamp()}] ╚═════╝ ╚══════╝  ╚═══╝      ╚═════╝    ╚═╝       ╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝   ╚═╝    ${color.reset}`);
     console.log(`${color.pink}[${getTimestamp()}] ========================================================================================================= ${color.reset}`);
     console.log(`${color.pink}[${getTimestamp()}] ================================== ${color.reset}`);
-    console.log(`${color.pink}[${getTimestamp()}] [BOT] ${client.user.username} has been launched! ${startupTime} ${color.reset}`);
+    console.log(`${color.pink}[${getTimestamp()}] [BOT] ${client.user.username} has been launched! ${color.reset}`);
     console.log(`${color.pink}[${getTimestamp()}] [BOT] Watching over ${client.guilds.cache.reduce((a,b) => a+b.memberCount, 0)} members! ${color.reset}`);
     console.log(`${color.pink}[${getTimestamp()}] [BOT] Watching over ${client.guilds.cache.size} servers! ${color.reset}`);
+    console.log(`${color.pink}[${getTimestamp()}] [BOT]                                  `);
+    console.log(`${color.pink}[${getTimestamp()}] [BOT]  ${startupTime}${color.reset}`);
+    console.log(`${color.pink}[${getTimestamp()}] [BOT]                                  `);
     console.log(`${color.pink}[${getTimestamp()}] ================================== ${color.reset}`);
 }
 
