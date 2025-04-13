@@ -1,5 +1,5 @@
 const khaledQuotesCommand = require('../commands/Community/khalidQuotes');
-const { setupTest, teardownTest } = require('./testUtils');
+const { setupTest, teardownTest } = require('./utils/testUtils');
 
 // Mock the khalidQuotes.json dependency
 jest.mock('../jsons/khalidQuotes.json', () => [

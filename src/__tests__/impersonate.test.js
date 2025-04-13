@@ -1,5 +1,5 @@
 const impersonateCommand = require('../commands/Community/impersonate');
-const { setupTest, teardownTest, MessageFlags, PermissionsBitField } = require('./testUtils');
+const { setupTest, teardownTest, MessageFlags, PermissionsBitField } = require('./utils/testUtils');
 
 jest.mock('../jsons/filter.json', () => ({
     words: ['badword']

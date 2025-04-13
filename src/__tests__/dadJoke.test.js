@@ -1,5 +1,5 @@
 const dadJokeCommand = require('../commands/Community/dadJoke');
-const { setupTest, teardownTest, MessageFlags } = require('./testUtils');
+const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
 
 const originalFetch = global.fetch;
 

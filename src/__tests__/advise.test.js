@@ -1,6 +1,6 @@
 const fetch = require('node-fetch');
 const adviceCommand = require('../commands/Community/advice');
-const { setupTest, teardownTest } = require('./testUtils');
+const { setupTest, teardownTest } = require('./utils/testUtils');
 
 jest.mock('node-fetch');
 const { Response } = jest.requireActual('node-fetch');

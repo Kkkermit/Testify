@@ -5,16 +5,14 @@ const { MessageFlags, PermissionsBitField } = require('discord.js');
  * @param {Object} options - Optional overrides for the mock objects
  * @returns {Object} Object containing interaction and client mocks
  */
+
 function setupTest(options = {}) {
-    // Create a mock collector that we can trigger manually during tests
     const mockCollector = {
         on: jest.fn((event, callback) => {
-            // Store the callback so we can trigger it in tests
             mockCollector.callbacks = mockCollector.callbacks || {};
             mockCollector.callbacks[event] = callback;
             return mockCollector;
         }),
-        // Method to trigger a collector event manually
         simulateCollect: function(data) {
             if (this.callbacks && this.callbacks.collect) {
                 return this.callbacks.collect(data);
@@ -22,7 +20,6 @@ function setupTest(options = {}) {
         }
     };
 
-    // Mock message returned by interaction.reply
     const mockMessage = {
         createMessageComponentCollector: jest.fn().mockReturnValue(mockCollector)
     };

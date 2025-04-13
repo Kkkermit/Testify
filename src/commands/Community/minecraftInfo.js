@@ -21,7 +21,7 @@ module.exports = {
                 .setDescription(`> **${username}'s** Minecraft Skin:`)
                 .setImage(`https://minotar.net/body/${username}/100.png`)
                 .setColor(client.config.embedCommunity)
-                .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: `${interaction.user.avatarURL()}` })
+                .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: `${interaction.user.displayAvatarURL()}` })
                 .setTimestamp();
 
                 await interaction.reply({ embeds: [embed] });

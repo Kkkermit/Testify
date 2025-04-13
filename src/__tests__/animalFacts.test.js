@@ -1,6 +1,6 @@
 const axios = require('axios');
 const animalFactsCommand = require('../commands/Community/animalFacts');
-const { setupTest, teardownTest, MessageFlags } = require('./testUtils');
+const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
 
 jest.mock('axios');
 

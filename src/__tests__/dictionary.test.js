@@ -1,5 +1,5 @@
 const dictionaryCommand = require('../commands/Community/dictionary');
-const { setupTest, teardownTest, MessageFlags } = require('./testUtils');
+const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
 
 jest.mock('../jsons/filter.json', () => ({
     words: ['badword']
