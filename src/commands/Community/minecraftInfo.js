@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,59 +12,105 @@ module.exports = {
 
         switch(sub) {
             case 'skin':
-            
                 const username = interaction.options.getString('username');
 
                 const embed = new EmbedBuilder()
-                .setAuthor({ name: `MineCraft Skin Command ${client.config.devBy}`})
-                .setTitle(`${client.user.username} Minecraft Skin Tracker ${client.config.arrowEmoji}`)
-                .setDescription(`> **${username}'s** Minecraft Skin:`)
-                .setImage(`https://minotar.net/body/${username}/100.png`)
+                .setAuthor({ name: `🎮 Minecraft Skin Finder ${client.config.devBy}`, iconURL: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/img/menu/menu-buy--reversed.gif' })
+                .setTitle(`👤 ${username}'s Minecraft Skin`)
+                .setDescription(`> 🔍 Showing skin info for **${username}**\n> 📋 Use \`/minecraft skin <username>\` to check other skins`)
+                .setImage(`https://minotar.net/armor/body/${username}/300.png`)
                 .setColor(client.config.embedCommunity)
-                .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: `${interaction.user.displayAvatarURL()}` })
+                .addFields(
+                    { name: '📝 Download Options', value: `[Download Skin](https://mineskin.org/search?q=${username}) | [View in 3D](https://namemc.com/profile/${username})`, inline: false },
+                    { name: '🔗 Related Links', value: `[Minecraft.net](https://www.minecraft.net) | [Mojang Account](https://account.mojang.com)`, inline: false }
+                )
+                .setFooter({ text: `🕰️ Requested by ${interaction.user.tag}`, iconURL: `${interaction.user.displayAvatarURL()}` })
                 .setTimestamp();
 
                 await interaction.reply({ embeds: [embed] });
-            
-            break;
+                break;
+                
             case 'server':
-
-                interaction.deferReply()
+                await interaction.deferReply();
 
                 const ip = interaction.options.getString(`ip`);
-            
-                const url = `https://api.mcsrvstat.us/1/${ip}`;
+                const url = `https://api.mcsrvstat.us/2/${ip}`;
     
                 try {
-                    const data = await fetch(url).then((response) => response.json());
-                    const serverIp = data.hostname;
-                    const realIp = data.ip;
-                    const port = data.port;
-                    const version = data.version;
-                    const onlinePlayers = data.players.online;
-                    const maxPlayers = data.players.max;
-                    const motd = data.motd.clean     
+                    const response = await fetch(url);
+                    const data = await response.json();
                     
-                    const embed = new EmbedBuilder()
-                    .setColor(client.config.embedCommunity)
-                    .setAuthor({ name: `MineCraft Server Command ${client.config.devBy}`, iconURL: `${client.user.avatarURL()}`})
-                    .setTitle(`${client.user.username} Minecraft Server Tool ${client.config.arrowEmoji}`)
-                    .setThumbnail(client.user.avatarURL())
-                    .addFields(
-                        { name: "Server", value:`> ${serverIp}` },
-                        { name: "IP Address", value: `> ${realIp}`, inline: true},
-                        { name: "Port", value: `> ${port}`, inline: true},
-                        { name: "Version", value: `> ${version.toString()}` },
-                        { name: "MOTD", value: `> ${motd.toString()}`}, 
-                        { name: "Online Players", value: `> ${onlinePlayers.toString()}`, inline: true},
-                        { name: "Max Players", value: `> ${maxPlayers.toString()}`, inline: true})
-                    .setFooter({ text: "Server Status Displayed" })
-                    .setTimestamp();
+                    const isServerUp = data.online !== false && (data.ip || (data.players && data.players.online !== undefined));
+                    
+                    if (!isServerUp) {
+                        return await interaction.editReply({
+                            content: `❌ The server **${ip}** appears to be offline or doesn't exist. Please check the IP address and try again.`,
+                            flags: MessageFlags.Ephemeral
+                        });
+                    }
+                    
+                    const serverIp = data.hostname || ip;
+                    const realIp = data.ip || 'Unknown';
+                    const port = data.port || '25565';
+                    const version = data.version || 'Unknown';
+                    const onlinePlayers = data.players?.online || 0;
+                    const maxPlayers = data.players?.max || 0;
+                    const motd = data.motd?.clean?.[0] || 'No description available';
+                    
+                    const progressBarLength = 10;
+                    const filledBars = Math.round((onlinePlayers / Math.max(maxPlayers, 1)) * progressBarLength) || 0;
+                    const emptyBars = progressBarLength - filledBars;
+                    const progressBar = '🟩'.repeat(filledBars) + '⬜'.repeat(emptyBars);
+                    
+                    const statusEmoji = '🟢';
+                    const playerPercentage = Math.round((onlinePlayers / Math.max(maxPlayers, 1)) * 100);
+                    
+                    const serverEmbed = new EmbedBuilder()
+                        .setColor(client.config.embedCommunity)
+                        .setAuthor({ name: `🎮 Minecraft Server Info ${client.config.devBy}` })
+                        .setTitle(`🖥️ ${serverIp} Server Status`)
+                        .setDescription(`${statusEmoji} **Server is online!** Here's what we found:\n\n> "${motd}"`)
+                        .setThumbnail(`https://api.mcsrvstat.us/icon/${ip}`)
+                        .addFields(
+                            { name: '📋 Server Details', value: `\`\`\`\n🔹 Address: ${serverIp}\n🔹 Version: ${version}\n\`\`\``, inline: false },
+                            { name: '🌐 Network Info', value: `> IP: \`${realIp}\`\n> Port: \`${port}\``, inline: false },
+                            { name: `👥 Players (${onlinePlayers}/${maxPlayers}) - ${playerPercentage}% Full`, value: `${progressBar}\n\`${onlinePlayers}\` out of \`${maxPlayers}\` players online`, inline: false }
+                        )
+                        .setFooter({ text: `🕰️ Server data last refreshed`, iconURL: client.user.avatarURL() })
+                        .setTimestamp();
+                        
+                    serverEmbed.addFields({ 
+                        name: '🎮 How to Join', 
+                        value: `Launch Minecraft, go to Multiplayer and add a new server with the address:\n\`\`\`\n${serverIp}\n\`\`\``, 
+                        inline: false 
+                    });
                 
-                await interaction.editReply({ embeds: [embed]});
+                    const refreshButton = new ActionRowBuilder()
+                        .addComponents(
+                            new ButtonBuilder()
+                                .setCustomId(`minecraft-refresh_${ip}`)
+                                .setLabel('🔄 Refresh Server Info')
+                                .setStyle(ButtonStyle.Primary)
+                        );
+                
+                    await interaction.editReply({ 
+                        embeds: [serverEmbed],
+                        components: [refreshButton]
+                    });
                 } catch (error) {
-                    interaction.editReply({content: `Server **does not exist** or **cannot be reached**. One command issue can be the **incorrect IP address**. Double check your IP and try again!`, flags: MessageFlags.Ephemeral});
-            }
+                    console.error('Minecraft server info error:', error);
+                    await interaction.editReply({
+                        content: `❌ Failed to fetch server information. The server **${ip}** might not exist or cannot be reached. Please verify the IP address and try again.`,
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+                break;
+                
+            default:
+                await interaction.reply({
+                    content: '❓ Invalid subcommand. Please use `/minecraft skin <username>` or `/minecraft server <ip>`.', 
+                    ephemeral: true
+                });
         }
     }
 };
