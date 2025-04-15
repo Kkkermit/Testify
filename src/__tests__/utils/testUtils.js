@@ -5,7 +5,6 @@ const { MessageFlags, PermissionsBitField, ButtonStyle, ChannelType, TextInputSt
  * @param {Object} options - Optional overrides for the mock objects
  * @returns {Object} Object containing interaction and client mocks
  */
-
 function setupTest(options = {}) {
     const mockCollector = {
         on: jest.fn((event, callback) => {
@@ -105,6 +104,7 @@ function setupTest(options = {}) {
             devBy: 'DevName',
             arrowEmoji: '➡️',
             embedCommunity: '#00FF00',
+            embedEconomy: '#FFD700',
             filterMessage: 'This word is not allowed.',
             noPerms: 'You do not have permission to use this command.',
         },
@@ -133,6 +133,7 @@ function setupTest(options = {}) {
 function teardownTest() {
     jest.useRealTimers();
 }
+
 
 module.exports = {
     setupTest,
