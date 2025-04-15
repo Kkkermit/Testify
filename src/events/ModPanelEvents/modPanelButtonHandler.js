@@ -5,7 +5,19 @@ module.exports = {
     async execute(interaction, client) {
         if (!interaction.isButton() || !interaction.customId.startsWith('modpanel_')) return;
         
-        const [panelId, action] = interaction.customId.split('_');
+        const parts = interaction.customId.split('_');
+        if (parts.length < 5) {
+            return await interaction.reply({
+                content: 'Invalid moderation panel button. Please try again.',
+                flags: MessageFlags.Ephemeral
+            });
+        }
+        
+        const prefix = parts[0]; 
+        const panelId = parts[1]; 
+        const moderatorId = parts[2];
+        const targetId = parts[3];
+        const action = parts[4];
         
         if (!client.modPanels || !client.modPanels.has(panelId)) {
             return await interaction.reply({
@@ -105,6 +117,12 @@ module.exports = {
             modal.addComponents(durationRow);
         }
         
-        await interaction.showModal(modal);
+        await interaction.showModal(modal).catch(error => {
+            client.logs.error(`[MOD_PANEL] Error showing modal: ${error}`);
+            interaction.reply({ 
+                content: 'There was an error processing your request. Please try again.',
+                flags: MessageFlags.Ephemeral
+            }).catch(() => {});
+        });
     }
 };

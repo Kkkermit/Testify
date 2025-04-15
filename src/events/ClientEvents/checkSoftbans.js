@@ -6,6 +6,11 @@ module.exports = {
     once: true,
     async execute(client) {
         client.logs.info('[SOFTBAN] Starting softban check system');
+
+        if (!client.modPanels) {
+            client.modPanels = new Map();
+            client.logs.info('[MOD_PANEL] Initialized moderation panels cache from softban checker');
+        }
         
         let lastCheckHadResults = false;
         let checkCount = 0;

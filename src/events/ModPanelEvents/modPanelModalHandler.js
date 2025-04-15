@@ -6,7 +6,19 @@ module.exports = {
     async execute(interaction, client) {
         if (!interaction.isModalSubmit() || !interaction.customId.startsWith('modpanel_modal_')) return;
         
-        const [panelId, action] = interaction.customId.split('_');
+        const parts = interaction.customId.split('_');
+        
+        if (parts.length < 4) {
+            return await interaction.reply({
+                content: 'Invalid moderation modal submission. Please try again.',
+                flags: MessageFlags.Ephemeral
+            });
+        }
+        
+        const prefix = parts[0];
+        const modalType = parts[1]; 
+        const panelId = parts[2];
+        const action = parts[3];
         
         if (!client.modPanels || !client.modPanels.has(panelId)) {
             return await interaction.reply({
@@ -105,7 +117,7 @@ module.exports = {
                     break;
                 case 'month':
                 case 'months':
-                    softbanDuration = value * 30 * 24 * 60 * 60 * 1000; // Approximate
+                    softbanDuration = value * 30 * 24 * 60 * 60 * 1000; 
                     break;
                 default:
                     return await interaction.reply({
