@@ -4,7 +4,7 @@ const countingSchema = require('../../schemas/countingSystem');
 module.exports = {
     name: Events.MessageCreate,
     async execute(message, client) {
-        if (message.author.bot) return;
+        if (!message.guild || message.author.bot) return;
 
         const countingData = await countingSchema.findOne({ Guild: message.guild.id });
         if (!countingData) return;

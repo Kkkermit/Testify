@@ -213,7 +213,7 @@ describe('minecraft command', () => {
         
         expect(interaction.reply).toHaveBeenCalledWith({
             content: '❓ Invalid subcommand. Please use `/minecraft skin <username>` or `/minecraft server <ip>`.', 
-            ephemeral: true
+            flags: MessageFlags.Ephemeral
         });
     });
 });

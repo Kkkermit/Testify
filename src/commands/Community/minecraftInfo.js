@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -109,7 +109,7 @@ module.exports = {
             default:
                 await interaction.reply({
                     content: '❓ Invalid subcommand. Please use `/minecraft skin <username>` or `/minecraft server <ip>`.', 
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
         }
     }

@@ -60,7 +60,8 @@ module.exports = {
 	botLeaveChannel: "1139731092329480332", // Logging channel for bot leaving servers
 	botJoinChannel: "1240480049681928203", // Logging channel for bot joining servers
 	commandErrorChannel: "1240912641719930970", // Logging channel for command errors
-	evalLogsChannel: "1273733451677306880",
+	evalLogsChannel: "1273733451677306880", // Logging channel for eval command
+	dmLoggingChannel: "1362140847210233917", // Logging channel for DMs (when users direct message the bot)
 
 	// Ticket Configuration //
 	ticketName: "ticket-",
