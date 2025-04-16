@@ -1,14 +1,14 @@
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
-const { createEconomyUserMock } = require('./fixtures/economyMocks');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
+const { createEconomyUserMock } = require('../fixtures/economyMocks');
 
-jest.mock('../schemas/economySystem', () => ({
+jest.mock('../../schemas/economySystem', () => ({
     findOne: jest.fn(),
     create: jest.fn()
 }));
 
 const mockExecute = jest.fn();
 
-jest.mock('../commands/Economy/economyCreate', () => {
+jest.mock('../../commands/Economy/economyCreate', () => {
     return {
         data: {
             name: 'economy-create',
@@ -18,8 +18,8 @@ jest.mock('../commands/Economy/economyCreate', () => {
     };
 });
 
-const economyCreateCommand = require('../commands/Economy/economyCreate');
-const ecoS = require('../schemas/economySystem');
+const economyCreateCommand = require('../../commands/Economy/economyCreate');
+const ecoS = require('../../schemas/economySystem');
 
 describe('economy-create command', () => {
     let interaction;

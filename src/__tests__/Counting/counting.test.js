@@ -1,7 +1,7 @@
-const countingCommand = require('../commands/Counting/countingSetup');
-const { setupTest, teardownTest, MessageFlags, PermissionsBitField, ChannelType } = require('./utils/testUtils');
+const countingCommand = require('../../commands/Counting/countingSetup');
+const { setupTest, teardownTest, MessageFlags, PermissionsBitField, ChannelType } = require('../utils/testUtils');
 
-jest.mock('../schemas/countingSystem.js', () => {
+jest.mock('../../schemas/countingSystem.js', () => {
     return {
         findOne: jest.fn((query, callback) => {
             if (callback) {
@@ -64,7 +64,7 @@ describe('counting command', () => {
 
             await countingCommand.execute(interaction, client);
 
-            expect(require('../schemas/countingSystem').findOne).toHaveBeenCalledWith(
+            expect(require('../../schemas/countingSystem').findOne).toHaveBeenCalledWith(
                 { Guild: 'test-guild-123' },
                 expect.any(Function)
             );
@@ -97,7 +97,7 @@ describe('counting command', () => {
             
             await countingCommand.execute(interaction, client);
             
-            expect(require('../schemas/countingSystem').create).toHaveBeenCalledWith(
+            expect(require('../../schemas/countingSystem').create).toHaveBeenCalledWith(
                 expect.objectContaining({
                     MaxCount: 1000
                 })
@@ -122,7 +122,7 @@ describe('counting command', () => {
                 flags: MessageFlags.Ephemeral
             });
             
-            expect(require('../schemas/countingSystem').create).not.toHaveBeenCalled();
+            expect(require('../../schemas/countingSystem').create).not.toHaveBeenCalled();
         });
     });
 
@@ -140,7 +140,7 @@ describe('counting command', () => {
             
             await countingCommand.execute(interaction, client);
             
-            expect(require('../schemas/countingSystem').deleteMany).toHaveBeenCalledWith(
+            expect(require('../../schemas/countingSystem').deleteMany).toHaveBeenCalledWith(
                 { Guild: 'test-guild-123' },
                 expect.any(Function)
             );
@@ -164,9 +164,9 @@ describe('counting command', () => {
                 flags: MessageFlags.Ephemeral
             });
             
-            expect(require('../schemas/countingSystem').findOne).not.toHaveBeenCalled();
-            expect(require('../schemas/countingSystem').create).not.toHaveBeenCalled();
-            expect(require('../schemas/countingSystem').deleteMany).not.toHaveBeenCalled();
+            expect(require('../../schemas/countingSystem').findOne).not.toHaveBeenCalled();
+            expect(require('../../schemas/countingSystem').create).not.toHaveBeenCalled();
+            expect(require('../../schemas/countingSystem').deleteMany).not.toHaveBeenCalled();
         });
     });
 });

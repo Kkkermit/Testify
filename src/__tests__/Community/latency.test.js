@@ -1,5 +1,5 @@
-const latencyCommand = require("../commands/Community/latency");
-const { setupTest, teardownTest } = require("./utils/testUtils");
+const latencyCommand = require('../../commands/Community/latency');
+const { setupTest, teardownTest } = require('../utils/testUtils');
 
 describe("latency command", () => {
 	let interaction;

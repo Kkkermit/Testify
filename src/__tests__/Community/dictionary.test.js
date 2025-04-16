@@ -1,7 +1,7 @@
-const dictionaryCommand = require('../commands/Community/dictionary');
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
+const dictionaryCommand = require('../../commands/Community/dictionary');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
 
-jest.mock('../jsons/filter.json', () => ({
+jest.mock('../../jsons/filter.json', () => ({
     words: ['badword']
 }));
 

@@ -5,6 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "prod": "node src/index.js",
     "dev": "cross-env NODE_ENV=development node src/index.js",
     "prod:nodemon": "nodemon src/index.js",
@@ -71,20 +73,15 @@
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "7.18.6",
+    "@babel/plugin-transform-modules-commonjs": "7.26.3",
+    "@babel/preset-env": "7.26.9",
     "@types/cors": "2.8.17",
     "@types/express": "5.0.0",
+    "babel-jest": "29.7.0",
     "cross-env": "7.0.3",
     "jest": "29.7.0",
     "nodemon": "3.1.7",
     "typescript": "5.7.3"
-  },
-  "jest": {
-    "testMatch": [
-      "**/__tests__/**/*.test.js"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/testUtils.js"
-    ]
   }
 }

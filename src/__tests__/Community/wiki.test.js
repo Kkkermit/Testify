@@ -1,4 +1,4 @@
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
 
 const mockSearch = jest.fn();
 const mockPage = jest.fn();
@@ -14,11 +14,11 @@ jest.mock('wikijs', () => {
     return mock;
 });
 
-jest.mock('../jsons/filter.json', () => ({
+jest.mock('../../jsons/filter.json', () => ({
     words: ['badword']
 }));
 
-const wikiCommand = require('../commands/Community/wiki');
+const wikiCommand = require('../../commands/Community/wiki');
 
 describe('wiki command', () => {
     let interaction;

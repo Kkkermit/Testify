@@ -1,5 +1,5 @@
-const translateCommand = require('../commands/Community/translate');
-const { setupTest, teardownTest } = require('./utils/testUtils');
+const translateCommand = require('../../commands/Community/translate');
+const { setupTest, teardownTest } = require('../utils/testUtils');
 const translate = require('@iamtraction/google-translate');
 
 jest.mock('@iamtraction/google-translate');

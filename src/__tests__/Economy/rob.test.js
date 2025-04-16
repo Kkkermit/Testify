@@ -1,18 +1,18 @@
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
-const { createEconomyUserMock } = require('./fixtures/economyMocks');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
+const { createEconomyUserMock } = require('../fixtures/economyMocks');
 
 const originalSetTimeout = global.setTimeout;
 const originalMathRandom = global.Math.random;
 const originalMathFloor = global.Math.floor;
 
-jest.mock('../schemas/economySystem', () => ({
+jest.mock('../../schemas/economySystem', () => ({
     findOne: jest.fn()
 }));
 
 const mockExecute = jest.fn();
 const mockTimeout = [];
 
-jest.mock('../commands/Economy/rob', () => {
+jest.mock('../../commands/Economy/rob', () => {
     return {
         data: {
             name: 'rob',
@@ -23,8 +23,8 @@ jest.mock('../commands/Economy/rob', () => {
     };
 });
 
-const robCommand = require('../commands/Economy/rob');
-const ecoSchema = require('../schemas/economySystem');
+const robCommand = require('../../commands/Economy/rob');
+const ecoSchema = require('../../schemas/economySystem');
 
 describe('rob command', () => {
     let interaction;

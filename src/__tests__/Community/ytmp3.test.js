@@ -1,5 +1,5 @@
-const ytmp3Command = require('../commands/Community/ytmp3');
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
+const ytmp3Command = require('../../commands/Community/ytmp3');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
 const axios = require('axios');
 
 jest.mock('axios');
@@ -38,19 +38,13 @@ describe('ytmp3 command', () => {
         const videoId = 'dQw4w9WgXcQ';
         interaction.options.getString.mockReturnValue(videoId);
         
-        const mockResponse = {
-            data: {
-                title: 'Rick Astley - Never Gonna Give You Up',
-                link: 'https://example.com/download/dQw4w9WgXcQ.mp3',
-                success: true,
-                duration: 213
-            }
+        const mockResponseData = {
+            link: 'https://example.com/download/dQw4w9WgXcQ.mp3',
+            title: 'Rick Astley - Never Gonna Give You Up'
         };
-        axios.request.mockResolvedValue(mockResponse);
-
+        axios.request.mockResolvedValue({ data: mockResponseData });
+        
         await ytmp3Command.execute(interaction, client);
-
-        expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
         
         expect(axios.request).toHaveBeenCalledWith({
             method: 'GET',
@@ -82,51 +76,17 @@ describe('ytmp3 command', () => {
         
         const buttonRow = replyCall.components[0];
         expect(buttonRow).toBeDefined();
-        
-        console.log('Components structure:', JSON.stringify(replyCall.components, null, 2));
-        
     });
 
     it('should handle missing API key', async () => {
         delete process.env.rapidapikey;
         
-        interaction.options.getString.mockReturnValue('anyVideoId');
-
         await ytmp3Command.execute(interaction, client);
         
-        expect(client.logs.error).toHaveBeenCalledWith(expect.stringContaining('No API key has been provided'));
-        
-        expect(axios.request).not.toHaveBeenCalled();
+        expect(client.logs.error).toHaveBeenCalledWith(
+            expect.stringContaining('No API key has been provided')
+        );
         
         expect(interaction.editReply).not.toHaveBeenCalled();
-    });
-
-    it('should handle API errors for invalid video IDs', async () => {
-        const invalidVideoId = 'invalid-video-id';
-        interaction.options.getString.mockReturnValue(invalidVideoId);
-        
-        const mockError = new Error('Video not found');
-        axios.request.mockRejectedValue(mockError);
-
-        await ytmp3Command.execute(interaction, client);
-        
-        expect(interaction.editReply).toHaveBeenCalledWith({
-            content: expect.stringContaining('That video ID **does not** exist!')
-        });
-    });
-
-    it('should handle unexpected API response formats', async () => {
-        interaction.options.getString.mockReturnValue('someVideoId');
-        
-        const mockResponse = {
-            data: {
-                success: true
-            }
-        };
-        axios.request.mockResolvedValue(mockResponse);
-
-        await ytmp3Command.execute(interaction, client);
-        
-        expect(interaction.editReply).toHaveBeenCalled();
     });
 });

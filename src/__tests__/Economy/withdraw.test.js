@@ -1,7 +1,7 @@
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
-const { createEconomyUserMock } = require('./fixtures/economyMocks');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
+const { createEconomyUserMock } = require('../fixtures/economyMocks');
 
-jest.mock('../schemas/economySystem', () => ({
+jest.mock('../../schemas/economySystem', () => ({
     findOne: jest.fn(),
     create: jest.fn()
 }));
@@ -9,21 +9,21 @@ jest.mock('../schemas/economySystem', () => ({
 const mockExecute = jest.fn();
 const mockTimeout = [];
 
-jest.mock('../commands/Economy/deposit', () => {
+jest.mock('../../commands/Economy/withdraw', () => {
     return {
         data: {
-            name: 'deposit',
-            description: 'Deposit money from your wallet to bank.'
+            name: 'withdraw',
+            description: 'Withdraw money from your bank to wallet.'
         },
         timeout: mockTimeout,
         execute: mockExecute
     };
 });
 
-const depositCommand = require('../commands/Economy/deposit');
-const ecoS = require('../schemas/economySystem');
+const withdrawCommand = require('../../commands/Economy/withdraw');
+const ecoS = require('../../schemas/economySystem');
 
-describe('deposit command', () => {
+describe('withdraw command', () => {
     let interaction;
     let client;
     let mockData;
@@ -55,11 +55,11 @@ describe('deposit command', () => {
             guildId: interaction.guild.id,
             userId: interaction.user.id,
             commandsRan: 5,
-            wallet: 5000,
-            bank: 2000
+            wallet: 1000,
+            bank: 5000
         });
         
-        interaction.options.getNumber = jest.fn().mockReturnValue(1000);
+        interaction.options.getNumber = jest.fn().mockReturnValue(2000);
         
         mockExecute.mockImplementation(async (interaction, client) => {
             const { options, guild, user } = interaction;
@@ -69,18 +69,18 @@ describe('deposit command', () => {
             
             if (!data) {
                 return await interaction.reply({ 
-                    content: "You don't have an account, create one using `/economy-create account.`", 
+                    content: "You don't have an account, create one using `economy-create account`", 
                     flags: MessageFlags.Ephemeral 
                 });
             } else {
-                if (data.Wallet < amount) {
+                if (data.Bank < amount) {
                     return await interaction.reply({ 
-                        content: `You're trying to deposit $${amount} while you only have $${data.Wallet} available to do so...`
+                        content: `Your trying to withdraw **$${amount}** while you only have **$${data.Bank}** available to do so...`
                     });
                 }
                 
-                data.Wallet -= amount;
-                data.Bank += amount;
+                data.Bank -= amount;
+                data.Wallet += amount;
                 data.CommandsRan += 1;
                 await data.save();
                 
@@ -89,8 +89,8 @@ describe('deposit command', () => {
                     title: `${client.user.username} Economy System ${client.config.arrowEmoji}`,
                     thumbnail: { url: client.user.displayAvatarURL() },
                     color: parseInt(client.config.embedEconomy.replace('#', ''), 16),
-                    description: `> You successfully deposited **$${amount}** to your wallet \n\n• Run \`/account view\` to view your new info.`,
                     footer: { text: `${guild.name}'s Economy`, iconURL: guild.iconURL() },
+                    description: `You successfully withdrew **$${amount}** to your wallet \n\n• Run \`/account view\` to view your new info.`,
                     timestamp: new Date().toISOString()
                 };
                 
@@ -104,16 +104,16 @@ describe('deposit command', () => {
         teardownTest();
     });
     
-    it('should transfer money from wallet to bank when depositing successfully', async () => {
+    it('should transfer money from bank to wallet when withdrawing successfully', async () => {
         ecoS.findOne.mockResolvedValueOnce(mockData);
         
-        await depositCommand.execute(interaction, client);
+        await withdrawCommand.execute(interaction, client);
         
-        const depositAmount = interaction.options.getNumber('amount');
+        const withdrawalAmount = interaction.options.getNumber('amount');
         
         expect(mockData.CommandsRan).toBe(6);
-        expect(mockData.Wallet).toBe(5000 - depositAmount);
-        expect(mockData.Bank).toBe(2000 + depositAmount);
+        expect(mockData.Bank).toBe(5000 - withdrawalAmount);
+        expect(mockData.Wallet).toBe(1000 + withdrawalAmount);
         expect(mockData.save).toHaveBeenCalled();
         
         expect(interaction.reply).toHaveBeenCalled();
@@ -122,15 +122,15 @@ describe('deposit command', () => {
         expect(reply.embeds).toBeDefined();
         expect(reply.embeds.length).toBe(1);
         
-        expect(reply.embeds[0].description).toContain(`$${depositAmount}`);
-        expect(reply.embeds[0].description).toContain('successfully deposited');
+        expect(reply.embeds[0].description).toContain(`$${withdrawalAmount}`);
+        expect(reply.embeds[0].description).toContain('successfully withdrew');
         expect(reply.embeds[0].footer.text).toBe(`${interaction.guild.name}'s Economy`);
     });
     
     it('should show error if user has no economy account', async () => {
         ecoS.findOne.mockResolvedValueOnce(null);
         
-        await depositCommand.execute(interaction, client);
+        await withdrawCommand.execute(interaction, client);
         
         expect(interaction.reply).toHaveBeenCalledWith({
             content: expect.stringContaining("You don't have an account"),
@@ -138,51 +138,73 @@ describe('deposit command', () => {
         });
     });
     
-    it('should show error if user tries to deposit more than they have in wallet', async () => {
-        mockData.Wallet = 500;
+    it('should show error if user tries to withdraw more than they have in bank', async () => {
+        mockData.Bank = 1000;
         
         ecoS.findOne.mockResolvedValueOnce(mockData);
         
-        await depositCommand.execute(interaction, client);
+        await withdrawCommand.execute(interaction, client);
         
         expect(interaction.reply).toHaveBeenCalledWith({
-            content: expect.stringContaining("You're trying to deposit $1000 while you only have $500")
+            content: expect.stringContaining("Your trying to withdraw **$2000** while you only have **$1000** available")
         });
         
         expect(mockData.save).not.toHaveBeenCalled();
     });
     
-    it('should handle different deposit amounts correctly', async () => {
+    it('should handle different withdrawal amounts correctly', async () => {
         const testAmounts = [100, 1000, 4999];
         
         for (const amount of testAmounts) {
             jest.clearAllMocks();
             
             const testData = createEconomyUserMock({
-                wallet: 5000,
-                bank: 2000
+                wallet: 1000,
+                bank: 5000
             });
             
             interaction.options.getNumber.mockReturnValueOnce(amount);
             
             ecoS.findOne.mockResolvedValueOnce(testData);
             
-            await depositCommand.execute(interaction, client);
+            await withdrawCommand.execute(interaction, client);
             
-            expect(testData.Wallet).toBe(5000 - amount);
-            expect(testData.Bank).toBe(2000 + amount);
+            expect(testData.Bank).toBe(5000 - amount);
+            expect(testData.Wallet).toBe(1000 + amount);
             
             const replyCall = interaction.reply.mock.calls[0][0];
             expect(replyCall.embeds[0].description).toContain(`$${amount}`);
         }
     });
-    
-    it('should reject deposit when amount exceeds wallet balance', async () => {
+
+    it('should allow withdrawal of full bank balance', async () => {
         jest.clearAllMocks();
         
         const testData = createEconomyUserMock({
             wallet: 1000,
-            bank: 2000
+            bank: 5000
+        });
+        
+        const fullAmount = 5000;
+        interaction.options.getNumber.mockReturnValueOnce(fullAmount);
+        
+        ecoS.findOne.mockResolvedValueOnce(testData);
+        
+        await withdrawCommand.execute(interaction, client);
+        
+        expect(testData.Bank).toBe(0);
+        expect(testData.Wallet).toBe(1000 + fullAmount);
+        
+        const replyCall = interaction.reply.mock.calls[0][0];
+        expect(replyCall.embeds[0].description).toContain(`$${fullAmount}`);
+    });
+
+    it('should reject withdrawal when amount exceeds bank balance', async () => {
+        jest.clearAllMocks();
+        
+        const testData = createEconomyUserMock({
+            wallet: 1000,
+            bank: 1000
         });
         
         const excessiveAmount = 2000;
@@ -190,12 +212,12 @@ describe('deposit command', () => {
         
         ecoS.findOne.mockResolvedValueOnce(testData);
         
-        await depositCommand.execute(interaction, client);
+        await withdrawCommand.execute(interaction, client);
         
         expect(interaction.reply).toHaveBeenCalledWith({
-            content: expect.stringContaining(`You're trying to deposit $${excessiveAmount} while you only have $1000`)
+            content: expect.stringContaining(`Your trying to withdraw **$${excessiveAmount}** while you only have **$1000** available`)
         });
         
         expect(testData.save).not.toHaveBeenCalled();
-    });
+    }); 
 });

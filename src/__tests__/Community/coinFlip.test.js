@@ -1,5 +1,5 @@
-const coinFlipCommand = require("../commands/Community/coinFlip");
-const { setupTest, teardownTest } = require("./utils/testUtils");
+const coinFlipCommand = require("../../commands/Community/coinFlip");
+const { setupTest, teardownTest } = require("../utils/testUtils");
 
 describe("coin-flip command", () => {
 	let interaction;

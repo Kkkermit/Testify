@@ -1,4 +1,4 @@
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
 
 jest.mock('discord.js', () => {
     const original = jest.requireActual('discord.js');
@@ -9,7 +9,7 @@ jest.mock('discord.js', () => {
 });
 
 const { WebhookClient } = require('discord.js');
-const suggestionCommand = require('../commands/Devs/suggestion');
+const suggestionCommand = require('../../commands/Devs/suggestion');
 
 describe('suggest command', () => {
     let interaction;

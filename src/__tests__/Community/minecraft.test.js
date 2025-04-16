@@ -1,5 +1,5 @@
-const minecraftCommand = require('../commands/Community/minecraftInfo');
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
+const minecraftCommand = require('../../commands/Community/minecraftInfo');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
 
 describe('minecraft command', () => {
     let interaction;

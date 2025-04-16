@@ -1,8 +1,8 @@
-const khaledQuotesCommand = require('../commands/Community/khalidQuotes');
-const { setupTest, teardownTest } = require('./utils/testUtils');
+const khaledQuotesCommand = require('../../commands/Community/khalidQuotes');
+const { setupTest, teardownTest } = require('../utils/testUtils');
 
 // Mock the khalidQuotes.json dependency
-jest.mock('../jsons/khalidQuotes.json', () => [
+jest.mock('../../jsons/khalidQuotes.json', () => [
     'They don\'t want us to win.',
     'Another one.',
     'We the best music!',

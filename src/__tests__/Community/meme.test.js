@@ -1,5 +1,5 @@
-const memeCommand = require('../commands/Community/meme');
-const { setupTest, teardownTest, MessageFlags } = require('./utils/testUtils');
+const memeCommand = require('../../commands/Community/meme');
+const { setupTest, teardownTest, MessageFlags } = require('../utils/testUtils');
 const axios = require('axios');
 
 jest.mock('axios');
