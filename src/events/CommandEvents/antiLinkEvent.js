@@ -6,7 +6,7 @@ module.exports = {
     name: Events.MessageCreate,
     async execute (message, client) {
 
-        if (message.guild === null) return;
+        if (!message.guild || message.author.bot) return;
         
         if (message.content.startsWith('http') || message.content.startsWith('discord.gg') || message.content.includes('https://') || message.content.includes('http://') || message.content.includes('discord.gg/') || message.content.includes('www.') || message.content.includes('.net') || message.content.includes('.com')) {
 

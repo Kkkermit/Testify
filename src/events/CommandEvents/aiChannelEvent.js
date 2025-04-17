@@ -7,7 +7,7 @@ module.exports = {
     name: Events.MessageCreate,
     async execute(message, client) {
 
-        if (message.author.bot) return;
+        if (!message.guild || message.author.bot) return;
 
         const botMentioned = message.content.includes(`<@${client.user.id}>`);
         const isReplyToBot = message.reference && (await message.fetchReference()).author.id === client.user.id;

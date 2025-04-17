@@ -8,7 +8,8 @@ module.exports = {
     name: Events.GuildMemberAdd,
     async execute(member) {
 
-        if (member.guild === null) return;
+        if (!message.guild || message.author.bot) return;
+
         const guildData = await WelcomeMessage.findOne({ guildId: member.guild.id });
 
         if (!guildData) return;

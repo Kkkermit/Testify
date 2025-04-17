@@ -8,7 +8,7 @@ module.exports = {
     async execute(interaction, client) {
         if (interaction.customId === 'verify') {
 
-            if (interaction.guild === null) return;
+            if (!interaction.guild || interaction.user.bot) return;
 
             const verifydata = await capschema.findOne({ Guild: interaction.guild.id });
             const verifyusersdata = await verifyusers.findOne({ Guild: interaction.guild.id, User: interaction.user.id });

@@ -6,7 +6,9 @@ module.exports = {
 	name: Events.MessageCreate,
 	async execute(message, client, err) {
 		const { guild, author } = message;
-		if (message.guild === null) return;
+
+		if (!message.guild || message.author.bot) return;
+		
 		const leveldata = await levelschema.findOne({ Guild: message.guild.id });
 
 		if (!leveldata || leveldata.Disabled === "disabled") return;

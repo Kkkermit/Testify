@@ -4,7 +4,9 @@ const verifyusers = require('../../schemas/verifyUsersSystem');
 
 module.exports = {
     name: Events.GuildMemberRemove,
-    async execute(member, client) {
+    async execute(member, client, message) {
+        if (!message.guild || message.author.bot) return;
+
         try {
             const userId = member.user.id;
             const userverdata = await verifyusers.findOne({ Guild: member.guild.id, User: userId });
