@@ -1,6 +1,7 @@
 const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
 const DmLogger = require('../../schemas/dmLoggerSystem');
+const { getMessagePrefix } = require('../../utils/getMessagePrefix');
 
 module.exports = {
     name: Events.MessageCreate,
@@ -12,6 +13,12 @@ module.exports = {
 
             if (!dmLogChannelId) {
                 console.error(`${color.red}[${getTimestamp()}] [DM_LOGGER] DM log channel not found. Channel ID: ${dmLogChannelId}${color.reset}`);
+                return;
+            }
+
+            const prefix = await getMessagePrefix(message, client);
+
+            if(message.content.startsWith(prefix)) {
                 return;
             }
 

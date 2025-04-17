@@ -14,15 +14,17 @@ module.exports = {
                 return;
             };
 
-            const server = interaction.guild.name;
             const user = interaction.user.username;
             const userID = interaction.user.id;
+            
+            const isInGuild = interaction.guild !== null;
+            const location = isInGuild ? `Server: ${interaction.guild.name}` : "Direct Messages";
 
             const embed = new EmbedBuilder()
             .setColor(client.config.embedColor)
             .setAuthor({ name: `${user} has used a command.`, iconURL: client.user.avatarURL({ dynamic: true })})
             .setTitle(`${client.user.username} Command Logger ${client.config.arrowEmoji}`)
-            .addFields({ name: 'Server Name', value: `${server}`})
+            .addFields({ name: 'Location', value: location })
             .addFields({ name: 'Command', value: `\`\`\`${interaction}\`\`\``})
             .addFields({ name: 'User', value: `${user} | ${userID}`})
             .setTimestamp()

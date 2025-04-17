@@ -1,33 +1,30 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
-const GuildSettings = require('../../schemas/prefixSystem');
-const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js')
+const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js');
 const blacklistSchema = require('../../schemas/blacklistSystem');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
+const { checkMessageDmUsability } = require('../../utils/dmCommandCheck.js');
+const { getMessagePrefix } = require('../../utils/getMessagePrefix.js');
 
 module.exports = {
     name: "messageCreate",
     async execute(message, client) {
 
-        if (message.author.bot || !message.guild || message.system || message.webhookId)
+        if (message.author.bot || message.system || message.webhookId)
             return;
 
-        const guildSettings = await GuildSettings.findOneAndUpdate(
-            { Guild: message.guild.id }, 
-            { $setOnInsert: { Prefix: client.config.prefix } }, 
-            { upsert: true, new: true, setDefaultsOnInsert: true }
-        );
+        const prefix = await getMessagePrefix(message, client);
 
-        const prefix = guildSettings.Prefix || client.config.prefix;
-
-        const guildPrefixSettings = await GuildPrefixSettings.findOne({ Guild: message.guild.id });
-        if (!guildPrefixSettings || !guildPrefixSettings.Enabled) {
-            if (message.content.startsWith(prefix)) {
-                const reply = await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', flags: MessageFlags.Ephemeral });
-                setTimeout(async () => {
-                    await reply.delete();
-                }, 2500);
+        if (message.guild) {
+            const guildPrefixSettings = await GuildPrefixSettings.findOne({ Guild: message.guild.id });
+            if (!guildPrefixSettings || !guildPrefixSettings.Enabled) {
+                if (message.content.startsWith(prefix)) {
+                    const reply = await message.reply({ content: 'The prefix system is yet to be set-up for this guild.', flags: MessageFlags.Ephemeral });
+                    setTimeout(async () => {
+                        await reply.delete();
+                    }, 2500);
+                }
+                return;
             }
-            return;
         }
 
         if (!message.content.toLowerCase().startsWith(prefix)) {
@@ -64,7 +61,6 @@ module.exports = {
 
         if (!command) {
             try{
-
                 const embed = new EmbedBuilder()
                 .setColor("Red")
                 .setTitle(`${client.user.username} prefix system ${client.config.arrowEmoji}`)
@@ -76,7 +72,7 @@ module.exports = {
             };
         };
 
-        if (!command) return;
+        if (!checkMessageDmUsability(command, message)) return;
 
         if (command.args && !args.length) {
             return message.reply(`You **didn't** provide any \`\`arguments\`\`.`);

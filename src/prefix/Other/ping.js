@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: 'ping',
+    usableInDms: true,
     async execute(message, client) {
 
         const embed = new EmbedBuilder()

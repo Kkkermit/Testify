@@ -1,27 +1,31 @@
 const { Events, EmbedBuilder, WebhookClient } = require('discord.js');  
+const { getMessagePrefix } = require('../../utils/getMessagePrefix.js');
 
 module.exports = {
     name: Events.MessageCreate,
-    async execute (message, client) {
-
-        const guildPrefix = client.config.prefix;
-        if (!message.author.bot && message.content.startsWith(guildPrefix)) {
-
+    async execute(message, client) {
+        if (message.author.bot) return;
+        
+        const prefix = await getMessagePrefix(message, client);
+        
+        if (message.content.startsWith(prefix)) {
             const webhookURL = process.env.webhookPrefixLogging;
             if (!webhookURL) {
                 client.logs.error('[COMMAND_PREFIX_LOGGING_WEBHOOK] No webhook URL provided. Please provide a valid webhook URL in the .env file.');
                 return;
             };
 
-            const server = message.guild.name;
             const user = message.author.username;
             const userID = message.author.id;
+            
+            const isInGuild = message.guild !== null;
+            const location = isInGuild ? `Server: ${message.guild.name}` : "Direct Messages";
 
             const embed = new EmbedBuilder()
             .setColor(client.config.embedColor)
             .setAuthor({ name: `${user} has used a command.`, iconURL: client.user.avatarURL({ dynamic: true }) })
             .setTitle(`${client.user.username} Command Logger ${client.config.arrowEmoji}`)
-            .addFields({ name: 'Server Name', value: `${server}` })
+            .addFields({ name: 'Location', value: location })
             .addFields({ name: 'Command', value: `\`\`\`${message.content}\`\`\`` })
             .addFields({ name: 'User', value: `${user} | ${userID}` })
             .setTimestamp()
