@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'skip',
   inVoiceChannel: true,
+  description: 'Skip the current song',
+  usage: 'skip',
+  category: 'Music',
   usableInDms: false,
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)

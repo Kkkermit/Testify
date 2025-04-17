@@ -3,6 +3,9 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 module.exports = {
     name: "removerole",
     aliases: ["rrole"],
+    description: "Remove a role from a user",
+    usage: "removerole <user> <role>",
+    category: "Moderation",
     usableInDms: false,
     async execute(message, client, args) {
 

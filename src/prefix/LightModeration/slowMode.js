@@ -3,6 +3,9 @@ const { PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 module.exports = {
     name: "slowmode",
     aliases: ["slow", "sm"],
+    description: "Set slowmode in a channel",
+    usage: "slowmode <set|off|check> [duration]",
+    category: "Moderation",
     usableInDms: false,
     async execute(message, client, args) {
         if (!args.length) {

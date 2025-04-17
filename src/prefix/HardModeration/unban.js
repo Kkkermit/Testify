@@ -2,6 +2,10 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 
 module.exports = {
     name: 'unban',
+    aliases: ['unbanuser'],
+    description: 'Unban a user from the server',
+    usage: 'unban <userID> [reason]',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args) {
         const userID = args[0];

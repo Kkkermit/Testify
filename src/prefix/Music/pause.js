@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'pause',
   aliases: ['pause', 'hold'],
+  description: 'Pause the current song',
+  usage: 'pause',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

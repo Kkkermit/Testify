@@ -3,6 +3,9 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 module.exports = {
     name: 'addrole',
     aliases : ['add-role'],
+    description: 'Assigns a role to a user',
+    usage: 'addrole <user> <role>',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args) {
 

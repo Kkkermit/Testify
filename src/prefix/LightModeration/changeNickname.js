@@ -3,6 +3,9 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 module.exports = {
     name: 'nick',
     aliases : ['nickname'],
+    description: 'Change a user\'s nickname',
+    usage: 'nick <user> <nickname>',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args) {
 

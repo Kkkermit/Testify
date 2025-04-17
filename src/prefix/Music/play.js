@@ -5,6 +5,9 @@ const updateYTDLPackages = require('../../scripts/ytdlUpdater');
 module.exports = {
   name: 'play',
   aliases: ['p'],
+  description: 'Play a song from YouTube or Spotify.',
+  usage: 'play <song_name/url>',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

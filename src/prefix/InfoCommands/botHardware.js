@@ -4,6 +4,9 @@ const os = require('os');
 module.exports = {
     name: "bot-specs",
     aliases: ["bs", "bot-hardware"], 
+    description: "Bot specs command",
+    usage: "bot-specs",
+    category: "Info",
     usableInDms: true,
     async execute(message, client) {
         const usage2 = process.memoryUsage();

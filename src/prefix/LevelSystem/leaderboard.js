@@ -4,6 +4,9 @@ const canvafy = require("canvafy");
 module.exports = {
     name: "leaderboard",
     aliases: ["lb"],
+    category: "Leveling",
+    description: "Check the leaderboard of the server",
+    usage: "leaderboard",
     usableInDms: false,
     async execute(message, client) {
     

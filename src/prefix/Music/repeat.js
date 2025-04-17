@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'repeat',
   aliases: ['loop', 'rp'],
+  description: 'Repeat the current song or queue',
+  usage: 'repeat <mode>',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

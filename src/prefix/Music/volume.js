@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'volume',
   aliases: ['v', 'set', 'set-volume'],
+  description: 'Set the volume of the music player',
+  usage: 'volume <number>',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

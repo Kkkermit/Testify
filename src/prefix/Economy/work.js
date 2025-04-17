@@ -5,6 +5,10 @@ var timeout = [];
 
 module.exports = {
     name: 'work',
+    aliases: ['job'],
+    description: 'Work for money',
+    usage: 'work',
+    category: 'Economy',
     usableInDms: true,
     async execute(message, client, args) {
 

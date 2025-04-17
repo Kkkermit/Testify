@@ -2,6 +2,10 @@ const { EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js"
 
 module.exports = {
     name: 'ban',
+    aliases: ['banish'],
+    description: 'Ban a user from the server',
+    usage: 'ban <user> [reason]',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args)  {
         

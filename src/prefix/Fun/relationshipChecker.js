@@ -3,6 +3,9 @@ const canvafy = require("canvafy");
 module.exports = {
     name: "relationship-checker",
     aliases: ["ship", "lovers", "rc"],
+    description: "Check the relationship between two users.",
+    usage: "relationship-checker <user1> <user2>",
+    category: "Fun",
     usableInDms: false,
     async execute(message, client, args) {
 

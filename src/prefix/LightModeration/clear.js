@@ -4,6 +4,9 @@ const { color, getTimestamp } = require('../../utils/loggingEffects');
 module.exports = {
     name: 'clear',
     aliases: ['purge', 'delete'],
+    description: 'Delete a specified number of messages from the channel.',
+    usage: 'clear <number> [user]',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args) {
         if (!args.length) {

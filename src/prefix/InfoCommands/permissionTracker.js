@@ -3,6 +3,9 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js'
 module.exports = {
     name: 'perms',
     aliases: ['permissions'],
+    description: 'Check the permissions of a user',
+    usage: 'perms <user>',
+    category: 'Info',
     usableInDms: false,
     async execute(message, client, args) {
 

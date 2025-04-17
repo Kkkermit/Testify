@@ -3,6 +3,10 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'shuffle',
   inVoiceChannel: true,
+  aliases: ['shuff'],
+  description: 'Shuffle the current queue',
+  usage: 'shuffle',
+  category: 'Music',
   usableInDms: false,
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)

@@ -4,6 +4,10 @@ const filter = require('../../jsons/filter.json');
 
 module.exports = {
     name: 'ascii',
+    aliases: ['ascii-art'],
+    description: 'Convert text to ASCII art',
+    usage: 'ascii <text>',
+    category: 'Fun',
     usableInDms: true,
     async execute(message, client, args) {
 

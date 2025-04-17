@@ -3,6 +3,9 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
     name: 'uptime',
     aliases: ['botuptime'],
+    description: 'Check the bot uptime',
+    usage: 'uptime',
+    category: 'Info',
     usableInDms: true,
     async execute(message, client, args) {
 

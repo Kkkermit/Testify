@@ -3,6 +3,9 @@ const { Constants, EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'join',
   aliases: ['move'],
+  description: 'Join a voice channel',
+  usage: 'join <channel_id>',
+  category: 'Music',
   usableInDms: false,
   async execute(message, client, args) {
 

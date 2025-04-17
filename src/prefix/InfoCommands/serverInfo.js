@@ -3,6 +3,9 @@ const { EmbedBuilder, ChannelType, GuildVerificationLevel, GuildExplicitContentF
 module.exports = {
     name: "server-info",
     aliases: ["serverinfo", "guildinfo", "guild", "server"],
+    description: "Get information about the server.",
+    usage: "server-info",
+    category: "Info",
     usableInDms: false,
     async execute(message, client, args) {
 

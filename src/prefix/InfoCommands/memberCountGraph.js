@@ -4,6 +4,9 @@ const QuickChart = require('quickchart-js');
 module.exports = {
     name: "member-graph",
     aliases: ["mg", "member-count-graph", 'membergraph', 'membercountgraph'],
+    description: "Get a graph of the member count in the server.",
+    category: "Info",
+    usage: "member-graph <bar/pie>",
     usableInDms: false,
     async execute(message, client) {
 

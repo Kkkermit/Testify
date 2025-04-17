@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 module.exports = {
   name: 'playskip',
   aliases: ['ps'],
+  description: 'Play a song and skip the current one',
+  usage: 'playskip <song_name>',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'nowplaying',
   aliases: ['np'],
+  description: 'Check the current song playing',
+  usage: 'nowplaying',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

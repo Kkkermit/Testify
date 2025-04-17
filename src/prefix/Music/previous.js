@@ -4,6 +4,10 @@ module.exports = {
   name: 'previous',
   inVoiceChannel: true,
   usableInDms: false,
+  aliases: ['prev'],
+  description: 'Play the previous song',
+  usage: 'previous',
+  category: 'Music',
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)
 

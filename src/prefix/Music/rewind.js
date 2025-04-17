@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'rewind',
   inVoiceChannel: true,
+  description: 'Rewind the current song',
+  usage: 'rewind <time>',
+  category: 'Music',
   usableInDms: false,
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)

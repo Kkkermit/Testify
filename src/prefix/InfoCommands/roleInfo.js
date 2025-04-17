@@ -3,6 +3,8 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js'
 module.exports = {
     name: 'roleinfo',
     description: 'Get information about a role.',
+    usage: 'roleinfo <role id>',
+    category: 'info',
     aliases: ['roles'],
     usableInDms: false,
     execute: async function (message, client, args) {

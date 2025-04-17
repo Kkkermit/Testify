@@ -3,6 +3,9 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
     name: 'dad-joke',
     aliases: ['dadjoke', 'dadj', 'dadjokes'],
+    description: 'Get a random dad joke',
+    usage: 'dad-joke',
+    category: 'Fun',
     usableInDms: true,
     async execute(message, client, args) {
 

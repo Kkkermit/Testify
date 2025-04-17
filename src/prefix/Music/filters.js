@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 module.exports = {
   name: 'filter',
   aliases: ['filters'],
+  description: 'Apply filters to the music queue',
+  usage: 'filter [filter]',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

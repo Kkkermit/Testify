@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'stop',
   aliases: ['disconnect', 'leave'],
+  description: 'Stop the music and leave the voice channel',
+  usage: 'stop',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

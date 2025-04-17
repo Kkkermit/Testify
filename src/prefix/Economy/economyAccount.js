@@ -4,6 +4,9 @@ const ecoS = require('../../schemas/economySystem');
 module.exports = {
     name: 'account-view',
     aliases: ['account', 'account-info', 'ea'],
+    description: 'View your economy account',
+    usage: 'account-view',
+    category: 'Economy',
     usableInDms: true,
     async execute(message, client, args) {
 

@@ -5,6 +5,9 @@ var timeout = [];
 
 module.exports = {
     name: 'daily',
+    description: 'Get your daily money',
+    usage: 'daily',
+    category: 'Economy',
     usableInDms: true,
     async execute(message, client, args) {
 

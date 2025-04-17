@@ -6,6 +6,9 @@ const { addSuffix } = require('../../lib/addSuffix');
 module.exports = {
     name: 'userinfo',
     aliases: ['users', 'user'],
+    description: 'Get information about a user',
+    usage: 'userinfo <user>',
+    category: 'Info',
     usableInDms: false,
     async execute(message, client, args) {
 

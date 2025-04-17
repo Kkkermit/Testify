@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 module.exports = {
   name: 'resume',
   aliases: ['resume', 'unpause'],
+  description: 'Resume the current song',
+  usage: 'resume',
+  category: 'Music',
   inVoiceChannel: true,
   usableInDms: false,
   async execute(message, client, args) {

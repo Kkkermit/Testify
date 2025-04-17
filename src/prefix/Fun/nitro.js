@@ -1,5 +1,9 @@
 module.exports = {
     name: 'nitro',
+    aliases: ['nitrocode', 'nitrocodegen'],
+    description: 'Generate a fake nitro code',
+    category: 'Fun',
+    usage: 'nitro',
     usableInDms: true,
     async execute(message, client, args) {
 

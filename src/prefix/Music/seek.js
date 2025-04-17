@@ -3,6 +3,9 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 module.exports = {
   name: 'seek',
   inVoiceChannel: true,
+  description: 'Seek to a specific time in the current song',
+  usage: 'seek <time>',
+  category: 'Music',
   usableInDms: false,
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)

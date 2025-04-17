@@ -4,6 +4,9 @@ const axios = require('axios');
 module.exports = {
     name: 'animalfacts',
     aliases: ['animal-facts', 'animal-fact', 'af'],
+    description: 'Get a random animal fact from Reddit',
+    usage: 'animalfacts',
+    category: 'Community',
     usableInDms: true,
     async execute(message, client) {
         try {

@@ -4,6 +4,10 @@ const Canvacord = require(`canvacord`)
 
 module.exports = {
     name: 'rank',
+    aliases: ['rankcard', 'levelcard'],
+    description: 'Get your rank card',
+    usage: 'rank <user>',
+    category: 'Leveling',
     usableInDms: false,
     async execute(message, client, args) {
 

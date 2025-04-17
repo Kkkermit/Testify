@@ -4,6 +4,9 @@ const guildSettingsSchema = require('../../schemas/prefixSystem.js');
 module.exports = {
     name: "bot-info",
     aliases: ["bi", "botinfo"],
+    description: "Get information about the bot.",
+    usage: "bot-info",
+    category: "Info",
     usableInDms: true,
     async execute(message, client) {
 

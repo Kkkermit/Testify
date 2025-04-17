@@ -3,6 +3,9 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 module.exports = {
     name: 'kick',
     aliases: ['boot'],
+    description: 'Kick a user from the server',
+    usage: 'kick <user> [reason]',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args) {
 

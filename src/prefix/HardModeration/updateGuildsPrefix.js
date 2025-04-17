@@ -4,6 +4,9 @@ const prefixSchema = require('../../schemas/prefixSystem.js');
 module.exports = {
     name: 'change-prefix',
     aliases: ['uprefix', 'cprefix'],
+    description: 'Change the prefix for the bot in this server',
+    usage: 'change-prefix <prefix>',
+    category: 'Moderation',
     usableInDms: false,
     async execute(message, client, args)  {
 

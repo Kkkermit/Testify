@@ -2,6 +2,10 @@ const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: 'iq',
+    aliases: ['iqtest', 'iqscore'],
+    description: 'Check your IQ or someone else\'s IQ',
+    usage: 'iq <user>',
+    category: 'Fun',
     usableInDms: true,
     async execute(message, client, args) {
 
