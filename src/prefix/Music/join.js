@@ -3,6 +3,7 @@ const { Constants, EmbedBuilder, MessageFlags } = require('discord.js');
 module.exports = {
   name: 'join',
   aliases: ['move'],
+  usableInDms: false,
   async execute(message, client, args) {
 
     const embed = new EmbedBuilder()

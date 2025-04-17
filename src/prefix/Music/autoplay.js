@@ -3,6 +3,7 @@ const { EmbedBuilder, MessageFlags } = require("discord.js")
 module.exports = {
   name: 'autoplay',
   inVoiceChannel: true,
+  usableInDms: false,
   async execute (message, client) {
     const queue = client.distube.getQueue(message)
 

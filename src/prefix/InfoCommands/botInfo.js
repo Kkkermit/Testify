@@ -4,6 +4,7 @@ const guildSettingsSchema = require('../../schemas/prefixSystem.js');
 module.exports = {
     name: "bot-info",
     aliases: ["bi", "botinfo"],
+    usableInDms: true,
     async execute(message, client) {
 
         let serverCount = await client.guilds.cache.reduce((a,b) => a+b.memberCount, 0);

@@ -4,7 +4,7 @@ const os = require('os');
 module.exports = {
     name: "bot-specs",
     aliases: ["bs", "bot-hardware"], 
-
+    usableInDms: true,
     async execute(message, client) {
         const usage2 = process.memoryUsage();
         const usage = process.cpuUsage();

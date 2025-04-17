@@ -3,6 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
     name: 'uptime',
     aliases: ['botuptime'],
+    usableInDms: true,
     async execute(message, client, args) {
 
         let totalSeconds = (client.uptime / 1000);

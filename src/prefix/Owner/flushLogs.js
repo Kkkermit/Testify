@@ -5,6 +5,7 @@ const { color, getTimestamp } = require('../../utils/loggingEffects');
 module.exports = {
   name: 'flushlogs',
   aliases: ['sendlogs', 'pushlogs'],
+  usableInDms: true,
   async execute(message, client, args) {
     try {
 

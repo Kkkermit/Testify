@@ -4,6 +4,7 @@ const canvafy = require("canvafy");
 module.exports = {
     name: "leaderboard",
     aliases: ["lb"],
+    usableInDms: false,
     async execute(message, client) {
     
         const users = await UserLevel.find({

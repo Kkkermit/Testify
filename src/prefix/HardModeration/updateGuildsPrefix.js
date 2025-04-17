@@ -4,6 +4,7 @@ const prefixSchema = require('../../schemas/prefixSystem.js');
 module.exports = {
     name: 'change-prefix',
     aliases: ['uprefix', 'cprefix'],
+    usableInDms: false,
     async execute(message, client, args)  {
 
         if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

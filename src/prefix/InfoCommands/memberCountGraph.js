@@ -4,6 +4,7 @@ const QuickChart = require('quickchart-js');
 module.exports = {
     name: "member-graph",
     aliases: ["mg", "member-count-graph", 'membergraph', 'membercountgraph'],
+    usableInDms: false,
     async execute(message, client) {
 
         const chartType = message.content.split(' ')[1] || 'bar';

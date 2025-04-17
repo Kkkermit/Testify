@@ -2,6 +2,7 @@ const { EmbedBuilder } = require('discord.js');
 
 module.exports = {
     name: 'iq',
+    usableInDms: true,
     async execute(message, client, args) {
 
         const user = message.mentions.users.first() || message.author;

@@ -3,6 +3,7 @@ const { PermissionFlagsBits, EmbedBuilder } = require("discord.js");
 module.exports = {
     name: "slowmode",
     aliases: ["slow", "sm"],
+    usableInDms: false,
     async execute(message, client, args) {
         if (!args.length) {
             return message.reply("Please specify a subcommand: `set`, `off`, or `check`");

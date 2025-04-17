@@ -4,6 +4,7 @@ module.exports = {
   name: 'nowplaying',
   aliases: ['np'],
   inVoiceChannel: true,
+  usableInDms: false,
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)
 

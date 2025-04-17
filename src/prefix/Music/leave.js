@@ -3,6 +3,7 @@ const { EmbedBuilder } = require("discord.js")
 module.exports = {
   name: 'leave',
   aliases: ['l'],
+  usableInDms: false,
   async execute(message, client, args) {
     client.distube.voices.leave(message)
 

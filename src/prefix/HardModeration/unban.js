@@ -2,6 +2,7 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 
 module.exports = {
     name: 'unban',
+    usableInDms: false,
     async execute(message, client, args) {
         const userID = args[0];
         const user = client.users.cache.get(userID);

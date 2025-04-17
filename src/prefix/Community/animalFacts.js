@@ -4,6 +4,7 @@ const axios = require('axios');
 module.exports = {
     name: 'animalfacts',
     aliases: ['animal-facts', 'animal-fact', 'af'],
+    usableInDms: true,
     async execute(message, client) {
         try {
             const response = await axios.get('https://www.reddit.com/r/animalfacts1935943924/random/.json');

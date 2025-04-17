@@ -4,6 +4,7 @@ module.exports = {
     name: 'avatar',
     description: 'Get a users server/main avatar',
     aliases: ["pfp"],
+    usableInDms: true,
     execute: async function (message, client, args) {
         
         let user, embed;

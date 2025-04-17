@@ -4,6 +4,7 @@ module.exports = {
   name: 'playskip',
   aliases: ['ps'],
   inVoiceChannel: true,
+  usableInDms: false,
   async execute(message, client, args) {
     const string = args.join(' ')
 

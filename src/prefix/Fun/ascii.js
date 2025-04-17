@@ -4,6 +4,7 @@ const filter = require('../../jsons/filter.json');
 
 module.exports = {
     name: 'ascii',
+    usableInDms: true,
     async execute(message, client, args) {
 
         const text = args.join(" ");

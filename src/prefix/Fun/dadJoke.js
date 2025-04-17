@@ -3,6 +3,7 @@ const { EmbedBuilder } = require('discord.js');
 module.exports = {
     name: 'dad-joke',
     aliases: ['dadjoke', 'dadj', 'dadjokes'],
+    usableInDms: true,
     async execute(message, client, args) {
 
         const response = await fetch("https://icanhazdadjoke.com/", {

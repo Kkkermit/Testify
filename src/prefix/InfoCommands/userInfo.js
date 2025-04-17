@@ -6,6 +6,7 @@ const { addSuffix } = require('../../lib/addSuffix');
 module.exports = {
     name: 'userinfo',
     aliases: ['users', 'user'],
+    usableInDms: false,
     async execute(message, client, args) {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() || message.member;

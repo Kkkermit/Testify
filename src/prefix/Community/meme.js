@@ -3,6 +3,7 @@ const axios = require('axios');
 
 module.exports = {
     name: 'meme',
+    usableInDms: true,
     async execute(message, client) {
         try {
         const response = await axios.get('https://www.reddit.com/r/memes/random.json');

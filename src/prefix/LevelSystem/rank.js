@@ -4,6 +4,7 @@ const Canvacord = require(`canvacord`)
 
 module.exports = {
     name: 'rank',
+    usableInDms: false,
     async execute(message, client, args) {
 
         const { guild } = message;

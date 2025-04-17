@@ -5,6 +5,7 @@ var timeout = [];
 
 module.exports = {
     name: 'daily',
+    usableInDms: true,
     async execute(message, client, args) {
 
         const { guild, author } = message;

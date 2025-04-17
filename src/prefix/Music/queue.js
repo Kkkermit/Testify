@@ -3,6 +3,7 @@ const { EmbedBuilder, MessageFlags } = require("discord.js");
 module.exports = {
   name: 'queue',
   aliases: ['q'],
+  usableInDms: false,
   async execute(message, client, args){
     const queue = client.distube.getQueue(message)
 

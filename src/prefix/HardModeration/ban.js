@@ -2,6 +2,7 @@ const { EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js"
 
 module.exports = {
     name: 'ban',
+    usableInDms: false,
     async execute(message, client, args)  {
         
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 

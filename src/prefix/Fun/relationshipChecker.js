@@ -3,6 +3,7 @@ const canvafy = require("canvafy");
 module.exports = {
     name: "relationship-checker",
     aliases: ["ship", "lovers", "rc"],
+    usableInDms: false,
     async execute(message, client, args) {
 
         const user = message.mentions.users.first()

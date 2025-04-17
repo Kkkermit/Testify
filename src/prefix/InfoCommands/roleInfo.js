@@ -4,6 +4,7 @@ module.exports = {
     name: 'roleinfo',
     description: 'Get information about a role.',
     aliases: ['roles'],
+    usableInDms: false,
     execute: async function (message, client, args) {
 
         const role = message.guild.roles.cache.get(args[0]) || message.mentions.roles.first();

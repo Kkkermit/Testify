@@ -3,6 +3,7 @@ const { EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js"
 module.exports = {
     name: "removerole",
     aliases: ["rrole"],
+    usableInDms: false,
     async execute(message, client, args) {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first();

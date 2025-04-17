@@ -4,6 +4,7 @@ const { color, getTimestamp } = require('../../utils/loggingEffects');
 module.exports = {
     name: 'clear',
     aliases: ['purge', 'delete'],
+    usableInDms: false,
     async execute(message, client, args) {
         if (!args.length) {
             return message.reply('Please provide the number of messages to clear!');

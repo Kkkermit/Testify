@@ -4,6 +4,7 @@ module.exports = {
   name: 'volume',
   aliases: ['v', 'set', 'set-volume'],
   inVoiceChannel: true,
+  usableInDms: false,
   async execute(message, client, args) {
     const queue = client.distube.getQueue(message)
 

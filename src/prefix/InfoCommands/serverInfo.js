@@ -3,6 +3,7 @@ const { EmbedBuilder, ChannelType, GuildVerificationLevel, GuildExplicitContentF
 module.exports = {
     name: "server-info",
     aliases: ["serverinfo", "guildinfo", "guild", "server"],
+    usableInDms: false,
     async execute(message, client, args) {
 
         const { guild } = message;

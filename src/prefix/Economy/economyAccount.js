@@ -4,6 +4,7 @@ const ecoS = require('../../schemas/economySystem');
 module.exports = {
     name: 'account-view',
     aliases: ['account', 'account-info', 'ea'],
+    usableInDms: true,
     async execute(message, client, args) {
 
         const { guild, author } = message;
