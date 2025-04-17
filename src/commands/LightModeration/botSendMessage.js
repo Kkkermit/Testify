@@ -6,6 +6,7 @@ module.exports = {
     .setDescription("Send a message through the bot")
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addChannelOption(options => options.setName("channel").setDescription("The channel you want to send the message").setRequired(false)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         let channel = interaction.options.getChannel("channel");

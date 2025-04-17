@@ -48,6 +48,7 @@ module.exports = {
     
     .addSubcommand(command => command.setName('thread').setDescription('Creates a temporary thread for you.')
     .addStringOption(option => option.setName('name').setDescription("Specified name will be used for your thread.").setRequired(false))),
+    usableInDms: false,
     async execute(interaction) {
 
         const sub = interaction.options.getSubcommand();

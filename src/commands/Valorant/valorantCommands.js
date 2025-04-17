@@ -15,7 +15,7 @@ module.exports = {
         .addSubcommand(command => command.setName('search-skin').setDescription('search a skin by its name').addStringOption(option => option.setName('name').setDescription('Name of the skin to search!').setRequired(true).setAutocomplete(true)))
         .addSubcommand(command => command.setName('store').setDescription('View your Valorant store'))
         .addSubcommand(command => command.setName('reload').setDescription('Reload the Valorant APIs')),
-
+    usableInDms: true,
     async autocomplete(interaction, client) {
         const focused = interaction.options.getFocused(true);
         

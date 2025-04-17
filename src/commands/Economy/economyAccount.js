@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('account-view')
     .setDescription('View your economy account balance and info.'),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild, user } = interaction;

@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("dad-joke")
     .setDescription("Get a random dad joke."),
+    usableInDms: true,
     async execute(interaction, client) {
 
         const response = await fetch("https://icanhazdadjoke.com/", {

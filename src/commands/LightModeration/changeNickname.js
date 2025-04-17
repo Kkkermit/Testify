@@ -7,6 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ChangeNickname)
     .addStringOption(option => option.setName('nick').setDescription(`Specified nickname will become specified user's new nickname.`).setRequired(true).setMaxLength(32).setMinLength(1))
     .addUserOption(option => option.setName('user').setDescription(`Specified user's nickname will be changed.`).setRequired(true)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const nick = await interaction.options.getString('nick');

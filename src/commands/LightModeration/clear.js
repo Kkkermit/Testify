@@ -7,7 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addStringOption(option => option.setName('amount').setDescription('The number of messages to clear (up to 99)').setRequired(true))
     .addUserOption(option => option.setName('user').setDescription('Clear messages of a specific user')),
-    
+    usableInDms: false,
     async execute(interaction, client) {
 
     const { options } = interaction;

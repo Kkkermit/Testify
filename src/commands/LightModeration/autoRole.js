@@ -10,6 +10,7 @@ module.exports = {
     .addSubcommand(command => command.setName("remove").setDescription("Remove an auto-role trigger").addRoleOption(option => option.setName("role").setDescription("The role to remove from the list of triggers.").setRequired(true)))
     .addSubcommand(command => command.setName("disable").setDescription("Disable the whole system"))
     .addSubcommand(command => command.setName("list").setDescription("List all the roles in the system.")),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, guildId } = interaction;

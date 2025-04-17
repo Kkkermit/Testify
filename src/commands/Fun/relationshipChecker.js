@@ -8,6 +8,7 @@ module.exports = {
         .setDescription("Shows the probability of two users being lovers!")
         .addUserOption(option => option.setName("user").setDescription("The 1st user you want to ship!").setRequired(true))
         .addUserOption(option => option.setName("member").setDescription("The 2nd user you want to ship!").setRequired(true)),
+        usableInDms: false,
     async execute(interaction, client) {
         try {
             await interaction.deferReply();

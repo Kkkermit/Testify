@@ -5,6 +5,7 @@ module.exports = {
 	.setName("ytmp3")
 	.setDescription("Download MP3 versions of YT videos")
 	.addStringOption(option => option.setName("video-id").setDescription("The ID of your video").setRequired(true)),
+	usableInDms: true,
 	async execute(interaction, client) {
 		
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });

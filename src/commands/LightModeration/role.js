@@ -7,6 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .addSubcommand(command => command.setName('add').setDescription('Add a role to a member').addUserOption(option => option.setName('member').setDescription('Select a member to assign a role to').setRequired(true)).addRoleOption(option => option.setName('role').setDescription('Select the role to assign to the member').setRequired(true)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove a role from a member').addUserOption(option => option.setName('member').setDescription('Select a member to remove a role from').setRequired(true)).addRoleOption(option => option.setName('role').setDescription('Select the role to remove from the member').setRequired(true))),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

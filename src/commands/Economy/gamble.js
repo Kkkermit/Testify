@@ -8,6 +8,7 @@ module.exports = {
     .setName('gamble')
     .setDescription('Gamble to win or lose money.')
     .addNumberOption(option => option.setName('amount').setDescription('The amount to gamble (default = 500)').setRequired(false)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, guild, user } = interaction;

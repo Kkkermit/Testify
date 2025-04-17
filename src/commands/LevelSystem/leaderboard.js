@@ -6,6 +6,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("leaderboard")
     .setDescription("View the server's leaderboard"),
+    usableInDms: false,
     async execute(interaction, client) {
 
         await interaction.deferReply();

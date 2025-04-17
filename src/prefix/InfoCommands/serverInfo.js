@@ -122,6 +122,6 @@ module.exports = {
                     { name: "Banner", value: guild.bannerURL() ? "** **" : "None" }
                 )
                 .setTimestamp()
-        ], ephemeral: false });
+        ] });
     }
 }

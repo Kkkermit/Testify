@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('eval')
     .setDescription('Evaluates JavaScript code.'),
+    usableInDms: true,
     async execute(interaction, client) {
 
         if (!client.config.developers.includes(interaction.user.id)) {

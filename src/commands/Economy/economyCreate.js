@@ -6,6 +6,7 @@ module.exports = {
     .setName('economy-create')
     .setDescription('Create an economy account.')
     .addSubcommand(command => command.setName('account').setDescription('Create an economy account')),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, guild, user } = interaction;

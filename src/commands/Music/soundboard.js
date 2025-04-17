@@ -12,6 +12,7 @@ module.exports = {
             {name:'Aw Shit',value:'awShit'}
         )
     ),
+    usableInDms: false,
     async execute(interaction, client) {
         const sound = interaction.options.getString('sound');
 

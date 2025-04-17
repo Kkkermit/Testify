@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("bug-report")
     .setDescription("Report a bug in the bot"),
+    usableInDms: false,
     async execute (interaction, client) {
         
         const user = interaction.user.id;

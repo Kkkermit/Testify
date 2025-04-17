@@ -5,6 +5,7 @@ module.exports = {
     .setName('role-info')
     .setDescription('Retrieve info about a given role :)')
     .addRoleOption(option => option.setName('role').setDescription("The role you want to get the info of").setRequired(true)),
+    usableInDms: false,
     async execute(interaction, client) {
     
         const { options } = interaction;

@@ -7,6 +7,7 @@ module.exports = {
     .setName('wiki')
     .setDescription('Ask Wiki a question')
     .addStringOption(option => option.setName(`query`).setDescription(`Look something up on Wiki`).setRequired(true)),
+    usableInDms: true,
     async execute(interaction, client){
         
         const query = interaction.options.getString(`query`);

@@ -7,6 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .addUserOption(option => option.setName('user').setDescription('The user to be banned').setRequired(true))
     .addStringOption(option => option.setName('reason').setDescription('The reason for the ban').setRequired(false)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const userID = interaction.options.getUser('user');

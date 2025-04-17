@@ -7,7 +7,7 @@ module.exports = {
         .setName('flush-logs')
         .setDescription('Manually flush logs to Discord webhook (Owner Only)')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-
+    usableInDms: true,
     async execute(interaction, client) {
         try {
             if (interaction.user.id !== client.config.developers) {

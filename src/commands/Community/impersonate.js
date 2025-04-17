@@ -8,7 +8,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.createWebhook)
     .addUserOption(option => option.setName("user").setDescription("Mention a user to impersonate").setRequired(true))
     .addStringOption(option => option.setName("message").setDescription("What message do you want the user to type?").setRequired(true)),
-
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options } = interaction;

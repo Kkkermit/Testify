@@ -5,6 +5,7 @@ module.exports = {
     .setName('lock')
     .setDescription('Lock the specified channel.')
     .addChannelOption(option => option.setName('channel').setDescription('The channel you want to lock').addChannelTypes(ChannelType.GuildText).setRequired(true)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

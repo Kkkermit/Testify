@@ -7,6 +7,7 @@ module.exports = {
     .setName("pepe-sign")
     .setDescription("Creates a pepe sign emoji")
     .addStringOption(option => option.setName("text").setDescription("The text to put on the sign").setRequired(true)),
+    usableInDms: true,
     async execute(interaction, client) {
         
         const canvas = Canvas.createCanvas(200, 200);

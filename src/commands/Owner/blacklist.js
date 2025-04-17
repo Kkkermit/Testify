@@ -8,6 +8,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(command => command.setName('add').setDescription('Add a user to the blacklist').addStringOption(option => option.setName("userid").setDescription("The user to add to the blacklist (MUST BE THEIR ID)").setRequired(true)).addStringOption(option => option.setName("reason").setDescription("The reason for the blacklist").setRequired(false)))
     .addSubcommand(command => command.setName('remove').setDescription('Remove a user from the blacklist').addStringOption(option => option.setName("user").setDescription("The user to remove from the blacklist (MUST BE THEIR ID)").setRequired(true))),
+    usableInDms: true,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

@@ -4,7 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('test')
     .setDescription('Test command'),
-    usableInDms: false,
+    usableInDms: true,
     async execute(interaction, client) {
 
         const embed = new EmbedBuilder()

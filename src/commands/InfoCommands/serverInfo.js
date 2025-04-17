@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName("server-info")
     .setDescription("Displays information about the server."),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild } = interaction;
@@ -123,6 +124,6 @@ module.exports = {
                     { name: "Banner", value: guild.bannerURL() ? "** **" : "None" }
                 )
                 .setTimestamp()
-        ], ephemeral: false });
+        ] });
     }
 }

@@ -12,6 +12,7 @@ module.exports = {
     .addSubcommand(command => command.setName('reset').setDescription('Reset the prefix of the bot in your server back to the default.'))
     .addSubcommand(command => command.setName('enable').setDescription('Enable the prefix system in your server.').addBooleanOption(option => option.setName('enable').setDescription('Enable the prefix system in your server.').setRequired(true)).addStringOption(option => option.setName("prefix").setDescription("The prefix you want to set for the bot in your server. Leave blank to set to default prefix").setRequired(false)))
     .addSubcommand(command => command.setName('disable').setDescription('Disable the prefix system in your server.')),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
@@ -155,7 +156,7 @@ module.exports = {
                 .setTimestamp()
                 .setFooter({ text: `Prefix system setup by ${interaction.user.username}`});
 
-                await interaction.reply({ embeds: [embed3], ephemeral: false });
+                await interaction.reply({ embeds: [embed3] });
             } catch (error) {
                 console.error(error);
                 await interaction.reply({ content: `Whoops, something went wrong! Please try again.`, flags: MessageFlags.Ephemeral });

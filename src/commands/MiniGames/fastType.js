@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName(`fast-type`)
     .setDescription(`Play a game of Fast Type!`),
+    usableInDms: true,
     async execute (interaction, client) {
 
         const fastTypeSentences = [

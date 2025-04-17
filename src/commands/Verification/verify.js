@@ -8,6 +8,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(command => command.setName('setup').setDescription('Sets up the verification system for you.').addRoleOption(option => option.setName('role').setDescription('Specified role will be given to users who are verified.').setRequired(true)).addChannelOption(option => option.setName('channel').setDescription('Specified channel will be your verify channel').setRequired(true).addChannelTypes(ChannelType.GuildText, ChannelType.GuildAnnouncement)).addStringOption(option => option.setName('content').setDescription('Specified message will be included in the verification embed.').setRequired(false).setMinLength(1).setMaxLength(1000)))
     .addSubcommand(command => command.setName('disable').setDescription('Disables your verification system.')),
+    usableInDms: false,
     async execute(interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator) && interaction.user.id !== `${client.config.developers}`) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

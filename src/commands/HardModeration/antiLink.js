@@ -25,7 +25,9 @@ module.exports = {
             { name: 'Attach Files', value: 'AttachFiles' },
             { name: 'Manage Messages', value: 'ManageMessages' },
             { name: 'Administrator', value: 'Administrator' }
-        ))),
+        )
+    )),
+    usableInDms: false,
 
     async execute(interaction, client) {
         

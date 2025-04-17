@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('animal-facts')
     .setDescription('Get a random animal fact!'),
+    usableInDms: true,
     async execute(interaction, client) {
         try {
             const response = await axios.get('https://www.reddit.com/r/animalfacts1935943924/random/.json');

@@ -4,6 +4,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('pp-size')
     .setDescription('Shows the size of your pp.'),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const penisSize = Math.floor(Math.random() * 10) + 1;

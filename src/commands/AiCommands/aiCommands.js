@@ -13,6 +13,7 @@ module.exports = {
     .addSubcommand(command => command.setName('setup-channel').setDescription('Setup AI channel for AI chat response').addChannelOption(option => option.setName('channel').setDescription('Channel to setup AI chat response').setRequired(true)).addStringOption(option => option.setName('ai-instructions').setDescription('Instructions for AI chat response').setRequired(false)))
     .addSubcommand(command => command.setName('disable-channel').setDescription('Disable AI chat response in a channel'))
     .addSubcommand(command => command.setName('update-ai-instructions').setDescription('Update AI instructions for AI chat response').addStringOption(option => option.setName('ai-instructions').setDescription('Instructions for AI chat response').setRequired(true))),
+    usableInDms: false,
     async execute(interaction, client) {
 
         await interaction.deferReply();

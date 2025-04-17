@@ -11,6 +11,7 @@ module.exports = {
     .addSubcommand(command => command.setName('drunk').setDescription('Shows how drunk you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's drunk percentage will be displayed.`)))
     .addSubcommand(command => command.setName('high').setDescription('Shows how high you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's high percentage will be displayed.`)))
     .addSubcommand(command => command.setName('smart').setDescription('Shows how smart you are, results are accurate.').addUserOption(option => option.setName('user').setDescription(`Specified user's smart percentage will be displayed.`))),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

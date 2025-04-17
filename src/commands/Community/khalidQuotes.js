@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('khaled-quotes')
     .setDescription('Gives you a random quote from DJ Khaled.'),
+    usableInDms: true,
     async execute(interaction) {
 
         const randomize = Math.floor(Math.random() * khaledQuotes.length);

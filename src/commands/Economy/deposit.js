@@ -8,6 +8,7 @@ module.exports = {
     .setName('deposit')
     .setDescription('Deposit money from your wallet to bank.')
     .addNumberOption(option => option.setName('amount').setDescription('The amount to deposit').setRequired(true)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, guild, user } = interaction;

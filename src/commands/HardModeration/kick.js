@@ -7,6 +7,7 @@ module.exports = {
     .setDescription('Kicks specified user.')
     .addUserOption(option => option.setName('user').setDescription('Specify the user you want to kick.').setRequired(true))
     .addStringOption(option => option.setName('reason').setDescription('Reason as to why you want to kick specified user.').setRequired(false)),
+    usableInDms: false,
     async execute(interaction, client) {
         
         const users = interaction.options.getUser('user');

@@ -10,6 +10,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(command => command.setName("set").setDescription("Set the channel for the bot stats command.").addChannelOption(option => option.setName("channel").setDescription("The channel to set the bot stats command to.").setRequired(true).addChannelTypes(ChannelType.GuildText)))
     .addSubcommand(command => command.setName("remove").setDescription("Remove the channel for the bot stats command.")),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options } = interaction;

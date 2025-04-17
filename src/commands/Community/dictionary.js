@@ -6,6 +6,7 @@ module.exports= {
     .setName(`dictionary`)
     .setDescription(`This gets the definition and examples of a given word`)
     .addStringOption(option => option.setName('word').setDescription(`This is the word you want to look up`).setRequired(true)), 
+    usableInDms: true,
     async execute(interaction, client){
 
         const word = interaction.options.getString('word');

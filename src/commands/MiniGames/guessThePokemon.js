@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName(`guess-the-pokemon`)
     .setDescription(`Play a game of Guess the Pokemon!`),
+    usableInDms: true,
     async execute (interaction, client) {
 
         const Game = new GuessThePokemon({

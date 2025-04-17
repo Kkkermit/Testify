@@ -23,7 +23,9 @@ module.exports = {
             { name: 'easy', value: 'easy' },
             { name: 'medium', value: 'medium' },
             { name: 'hard', value: 'hard' },
-        ).setRequired(true))),
+        ).setRequired(true)
+    )),
+    usableInDms: true,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

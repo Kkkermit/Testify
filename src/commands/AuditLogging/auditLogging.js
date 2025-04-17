@@ -9,6 +9,7 @@ module.exports = {
         .addSubcommand(subcommand => subcommand.setName('configure').setDescription('Configure which logs you want to receive'))
         .addSubcommand(subcommand => subcommand.setName('disable').setDescription('Disable the logging system'))
         .addSubcommand(subcommand => subcommand.setName('status').setDescription('Check the status of your logging system')),
+        usableInDms: false,
     async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
 

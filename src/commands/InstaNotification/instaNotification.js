@@ -31,6 +31,7 @@ module.exports = {
         .addSubcommand(subcommand => subcommand.setName('add-user').setDescription('Add an Instagram user to track').addStringOption(option => option.setName('username').setDescription('The Instagram username to track').setRequired(true)).addChannelOption(option => option.setName('channel').setDescription('The channel to send notifications to').setRequired(true)))
         .addSubcommand(subcommand => subcommand.setName('delete-user').setDescription('Remove an Instagram user from tracking').addStringOption(option => option.setName('username').setDescription('The Instagram username to stop tracking').setRequired(true)))
         .addSubcommand(subcommand => subcommand.setName('check').setDescription('Check which Instagram users are being tracked')),
+        usableInDms: false,
     async execute(interaction, client) {
         await interaction.deferReply();
         

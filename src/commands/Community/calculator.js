@@ -5,6 +5,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('calculator')
     .setDescription('Opens up a neat cheat machine (calculator).'),
+    usableInDms: true,
     async execute(interaction, client) {
 
         const idPrefix = 'calculator'
@@ -118,7 +119,7 @@ module.exports = {
                     .setStyle(ButtonStyle.Primary)
             )
 
-        const msg = await interaction.reply({ embeds: [embed], components: [row, row1, row2, row3, row4], ephemeral: false });
+        const msg = await interaction.reply({ embeds: [embed], components: [row, row1, row2, row3, row4] });
 
         let data = "";
         const col = msg.createMessageComponentCollector({
@@ -153,7 +154,7 @@ module.exports = {
                 ) || data.length === 0 ? "" : " "}` + value;
             }
 
-            i.update({ embeds: [new EmbedBuilder().setFooter({ text: `🔢 Calculator Command`}).setTitle('> Calculator Interface').setTimestamp().setColor('DarkBlue').setThumbnail(client.user.avatarURL()).setDescription(`\`\`\`\n${data || extra}\n\`\`\``)], components: [row, row1, row2, row3, row4], ephemeral: false })
+            i.update({ embeds: [new EmbedBuilder().setFooter({ text: `🔢 Calculator Command`}).setTitle('> Calculator Interface').setTimestamp().setColor('DarkBlue').setThumbnail(client.user.avatarURL()).setDescription(`\`\`\`\n${data || extra}\n\`\`\``)], components: [row, row1, row2, row3, row4] })
         })
     }
 }

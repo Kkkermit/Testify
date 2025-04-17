@@ -6,6 +6,7 @@ module.exports={
     .setName('master-oogway')
     .setDescription("shares part of oogways wisdom")
     .addStringOption(option => option.setName('quote').setDescription('Your choice').setRequired(true)),
+    usableInDms: true,
     async execute(interaction, client) {
 
         const quote = interaction.options.getString('quote');

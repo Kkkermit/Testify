@@ -8,6 +8,7 @@ module.exports = {
     .addSubcommand(subcommand => subcommand.setName("set").setDescription("Set the welcome message system to the server").addStringOption(option => option.setName("message").setDescription("The welcome message to send. ` Use {user} to mention the user `").setRequired(true)).addChannelOption(option => option.setName("channel").setDescription("The channel to send welcome messages to").setRequired(true)).addBooleanOption(option => option.setName("embed").setDescription("Send the welcome message as an embed").setRequired(true)))
     .addSubcommand(subcommand => subcommand.setName("remove").setDescription("Remove the welcome message system from the server"))
     .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const subcommand = interaction.options.getSubcommand();

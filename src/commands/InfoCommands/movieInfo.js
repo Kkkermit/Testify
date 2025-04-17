@@ -6,6 +6,7 @@ module.exports = {
     .setName('movie-tracker')
     .setDescription('Gets information about a movie')
     .addStringOption(option => option.setName('name').setDescription('The name of the movie').setRequired(true)),
+    usableInDms: true,
     async execute(interaction, client) {
 
         const apiKey = process.env.movietrackerapi

@@ -9,25 +9,27 @@ module.exports = {
     .addStringOption(option => option.setName("title").setDescription("The title of the announcement").setRequired(false))
     .addStringOption(option => option.setName("description").setDescription("The description of this announcement").setRequired(false))
     .addStringOption(option => option.setName("color").setDescription("The color of the announcement")
-    .addChoices(
-        { name: "Aqua", value: "#00FFFF" },
-        { name: "Blurple", value: "#7289DA" },
-        { name: "Fuchsia", value: "#FF00FF" },
-        { name: "Gold", value: "#FFD700" },
-        { name: "Green", value: "#008000" },
-        { name: "Grey", value: "#808080" },
-        { name: "Greyple", value: "#7D7F9A" },
-        { name: "Light-grey", value: "#D3D3D3" },
-        { name: "Luminous-vivid-pink", value: "#FF007F" },
-        { name: "Navy", value: "#000080" },
-        { name: "Not-quite-black", value: "#232323" },
-        { name: "Orange", value: "#FFA500" },
-        { name: "Purple", value: "#800080" },
-        { name: "Red", value: "#FF0000" },
-        { name: "White", value: "#FFFFFF" },
-        { name: "Yellow", value: "#FFFF00" },
-        { name: "Blue", value: "#0000FF" }
-    ).setRequired(false)),
+        .addChoices(
+            { name: "Aqua", value: "#00FFFF" },
+            { name: "Blurple", value: "#7289DA" },
+            { name: "Fuchsia", value: "#FF00FF" },
+            { name: "Gold", value: "#FFD700" },
+            { name: "Green", value: "#008000" },
+            { name: "Grey", value: "#808080" },
+            { name: "Greyple", value: "#7D7F9A" },
+            { name: "Light-grey", value: "#D3D3D3" },
+            { name: "Luminous-vivid-pink", value: "#FF007F" },
+            { name: "Navy", value: "#000080" },
+            { name: "Not-quite-black", value: "#232323" },
+            { name: "Orange", value: "#FFA500" },
+            { name: "Purple", value: "#800080" },
+            { name: "Red", value: "#FF0000" },
+            { name: "White", value: "#FFFFFF" },
+            { name: "Yellow", value: "#FFFF00" },
+            { name: "Blue", value: "#0000FF" }
+        ).setRequired(false)
+    ),
+    usableInDms: false,
     async execute (interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

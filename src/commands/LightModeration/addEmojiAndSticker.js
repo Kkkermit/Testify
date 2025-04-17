@@ -8,6 +8,7 @@ module.exports = {
     .setDescription('Adds specified emoji to the server.')
     .addSubcommand(command => command.setName('emoji').setDescription('Specified emoji will be added to the server.').addStringOption(option => option.setName('emoji').setDescription('Specified emoji will be added to the server.').setRequired(true)).addStringOption(option => option.setName('name').setDescription('Specified name will be applied to specified new emoji.').setRequired(true)))
     .addSubcommand(command => command.setName('sticker').setDescription('Adds specified sticker to the server.').addAttachmentOption(option => option.setName('sticker').setDescription('Upload the sticker png/jpeg').setRequired(true)).addStringOption(option => option.setName('name').setDescription('The name of the sicker').setRequired(true))),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

@@ -45,10 +45,10 @@ module.exports = {
             { name: 'Polish', value: 'pl' },
             { name: 'Russian', value: 'ru' },
             { name: 'Spanish', value: 'es' },
-            { name: 'Swedish', value: 'sv' })),
-            
-    category: 'Text',
-    cooldown: 5000,
+            { name: 'Swedish', value: 'sv' }
+        )
+    ),
+    usableInDms: true,
 
     async execute(interaction, client) {
 

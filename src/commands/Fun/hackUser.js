@@ -6,6 +6,7 @@ module.exports = {
     .setName('hack')
     .setDescription('Hack the mentioned user. "its fake so no worries."')
     .addUserOption(option => option.setName('user').setDescription('The mentioned user will get hacked.').setRequired(true)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const target = await interaction.options.getUser(`user`);

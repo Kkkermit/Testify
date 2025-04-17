@@ -6,6 +6,7 @@ module.exports = {
     .setName('economy-delete')
     .setDescription('Delete an economy account.')
     .addSubcommand(command => command.setName('account').setDescription('Delete your economy account')),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, user, guild } = interaction;

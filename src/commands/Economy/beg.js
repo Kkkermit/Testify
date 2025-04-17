@@ -7,6 +7,7 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('beg')
     .setDescription('Beg to get money.'),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild, user } = interaction;

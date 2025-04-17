@@ -7,6 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addStringOption(option => option.setName('message').setDescription('Specified message will be sent to specified user.').setRequired(true))
     .addUserOption(option => option.setName('user').setDescription('Specified user will be sent the specified message.').setRequired(true)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const user = interaction.options.getUser('user');

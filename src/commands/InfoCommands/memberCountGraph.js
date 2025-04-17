@@ -5,10 +5,13 @@ module.exports = {
     data: new SlashCommandBuilder()
     .setName('member-count')
     .setDescription('Shows the number of members on the server.')
-    .addStringOption(option => option.setName('chart-type').setDescription('Type of chart to display').setRequired(true).addChoices(
-        { name: "bar", value: "bar" },
-        { name: "pie", value: "pie" },
-    )),
+    .addStringOption(option => option.setName('chart-type').setDescription('Type of chart to display').setRequired(true)
+        .addChoices(
+            { name: "bar", value: "bar" },
+            { name: "pie", value: "pie" },
+        )
+    ),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const chartType = interaction.options.getString('chart-type');

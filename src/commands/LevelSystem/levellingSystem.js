@@ -19,6 +19,7 @@ module.exports = {
     .addSubcommand(command => command.setName('disable').setDescription('Disables your leveling system.'))
     .addSubcommand(command => command.setName('enable').setDescription('Enables your leveling system.').addChannelOption(option => option.setName('channel').setDescription('Channel where level message is sent, If blank message will be sent to channel where user last was').setRequired(false)))
     .addSubcommand(command => command.setName('disable-multiplier').setDescription('Disables the multiplier of your role.')),
+    usableInDms: false,
     async execute(interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

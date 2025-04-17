@@ -7,26 +7,29 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(option => option.setName('target').setDescription('The user you would like to time out').setRequired(true))
     .addStringOption(option => option.setName('duration').setRequired(true).setDescription('The duration of the timeout')
-    .addChoices(
-    { name: '60 Secs', value: '60' },
-    { name: '2 Minutes', value: '120' },
-    { name: '5 Minutes', value: '300' },
-    { name: '10 Minutes', value: '600' },
-    { name: '15 Minutes', value: '900' },
-    { name: '20 Minutes', value: '1200' },
-    { name: '30 Minutes', value: '1800' },
-    { name: '45 Minutes', value: '2700' },
-    { name: '1 Hour', value: '3600' },
-    { name: '2 Hours', value: '7200' },
-    { name: '3 Hours', value: '10800' },
-    { name: '5 Hours', value: '18000' },
-    { name: '10 Hours', value: '36000' },
-    { name: '1 Day', value: '86400' },
-    { name: '2 Days', value: '172800' },
-    { name: '3 Days', value: '259200' },
-    { name: '5 Days', value: '432000' },
-    { name: 'One Week', value: '604800'}))
+        .addChoices(
+            { name: '60 Secs', value: '60' },
+            { name: '2 Minutes', value: '120' },
+            { name: '5 Minutes', value: '300' },
+            { name: '10 Minutes', value: '600' },
+            { name: '15 Minutes', value: '900' },
+            { name: '20 Minutes', value: '1200' },
+            { name: '30 Minutes', value: '1800' },
+            { name: '45 Minutes', value: '2700' },
+            { name: '1 Hour', value: '3600' },
+            { name: '2 Hours', value: '7200' },
+            { name: '3 Hours', value: '10800' },
+            { name: '5 Hours', value: '18000' },
+            { name: '10 Hours', value: '36000' },
+            { name: '1 Day', value: '86400' },
+            { name: '2 Days', value: '172800' },
+            { name: '3 Days', value: '259200' },
+            { name: '5 Days', value: '432000' },
+            { name: 'One Week', value: '604800'}
+        )
+    )
     .addStringOption(option => option.setName('reason').setDescription('The reason for timing out the user').setRequired(false)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const timeUser = interaction.options.getUser('target');

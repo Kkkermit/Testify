@@ -7,6 +7,7 @@ module.exports = {
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(option => option.setName('target').setDescription('The user you would like to untimeout').setRequired(true))
     .addStringOption(option => option.setName('reason').setDescription('The reason for untiming out the user').setRequired(false)),
+    usableInDms: false,
     async execute(interaction, client) {
 
         const timeUser = interaction.options.getUser('target');
