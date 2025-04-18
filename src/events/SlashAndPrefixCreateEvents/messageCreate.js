@@ -2,7 +2,8 @@ const { EmbedBuilder, MessageFlags } = require('discord.js');
 const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js');
 const blacklistSchema = require('../../schemas/blacklistSystem');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
-const { checkMessageDmUsability } = require('../../utils/dmCommandCheck.js');
+const { checkMessageDmUsability } = require('../../utils/commandParams/dmCommandCheck.js');
+const { checkMessageUnderDevelopment } = require('../../utils/commandParams/underDevelopmentCheck.js');
 const { getMessagePrefix } = require('../../utils/getMessagePrefix.js');
 
 module.exports = {
@@ -73,6 +74,8 @@ module.exports = {
         };
 
         if (!checkMessageDmUsability(command, message)) return;
+        
+        if (!checkMessageUnderDevelopment(command, message)) return;
 
         if (command.args && !args.length) {
             return message.reply(`You **didn't** provide any \`\`arguments\`\`.`);

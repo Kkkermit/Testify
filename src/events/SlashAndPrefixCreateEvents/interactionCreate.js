@@ -4,7 +4,8 @@ const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 const { getTopItems } = require('../../api/spotifyTrackerApi.js');
 const { createStatsEmbed } = require('../../utils/createStatsEmbed.js');
-const { checkDmUsability } = require("../../utils/dmCommandCheck.js");
+const { checkDmUsability } = require("../../utils/commandParams/dmCommandCheck.js");
+const { checkUnderDevelopment } = require("../../utils/commandParams/underDevelopmentCheck.js");
 const User = require('../../schemas/spotifyTrackerSystem.js');
 
 module.exports = {
@@ -103,6 +104,8 @@ module.exports = {
         if (!command) return
 
         if (!checkDmUsability(command, interaction)) return;
+        
+        if (!checkUnderDevelopment(command, interaction)) return;
         
         try{
             await command.execute(interaction, client);
