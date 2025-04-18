@@ -4,13 +4,14 @@ const os = require('os');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName('bot-stats-channel')
     .setDescription('Set the channel for the bot stats command.')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild)
     .addSubcommand(command => command.setName("set").setDescription("Set the channel for the bot stats command.").addChannelOption(option => option.setName("channel").setDescription("The channel to set the bot stats command to.").setRequired(true).addChannelTypes(ChannelType.GuildText)))
     .addSubcommand(command => command.setName("remove").setDescription("Remove the channel for the bot stats command.")),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { options } = interaction;

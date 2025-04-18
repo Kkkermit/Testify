@@ -1,11 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder, WebhookClient, MessageFlags } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Developer",
     data: new SlashCommandBuilder()
     .setName("suggest")
     .setDescription("Suggest for a feature the bot should have")
     .addStringOption(option => option.setName("suggestion").setDescription("The suggestion").setRequired(true)),
-    usableInDms: false,
     async execute (interaction, client) {
 
         const suggestion = interaction.options.getString("suggestion");

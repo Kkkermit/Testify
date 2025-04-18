@@ -2,12 +2,13 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const os = require('os');
 
 module.exports = {
+    usableInDms: true,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName('bot')
     .setDescription(`Displays the bots current uptime.`)
     .addSubcommand(command => command.setName('uptime').setDescription('Displays the bots current uptime.'))
     .addSubcommand(command => command.setName('specs').setDescription('Displays the specs of the bot.')),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

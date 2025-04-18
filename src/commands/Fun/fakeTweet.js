@@ -2,12 +2,14 @@ const { SlashCommandBuilder, MessageFlags } = require("discord.js");
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
+    usableInDms: false,
+    category: "Fun",
     data: new SlashCommandBuilder()
     .setName("fake-tweet")
     .setDescription("Make users tweet something ;)")
     .addStringOption(option => option.setName("tweet").setDescription("Tweet comment").setRequired(true))
     .addUserOption(option => option.setName("user").setDescription("Choose a user").setRequired(false)),
-    usableInDms: false,
+    
     async execute (interaction, client) {
 
         let tweet = interaction.options.getString("tweet");

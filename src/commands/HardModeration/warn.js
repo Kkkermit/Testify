@@ -3,6 +3,8 @@ const warningSchema = require("../../schemas/warningSystem");
 const config = require('../../config')
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName("warn")
     .setDescription("Warn command")
@@ -13,7 +15,6 @@ module.exports = {
     .addSubcommand(command => command.setName("edit").setDescription("Edit a warn").addUserOption(option => option.setName("user").setDescription("the user you want to get the warn info").setRequired(true)).addStringOption(option => option.setName("warn-id").setDescription("the warn id").setRequired(true)).addStringOption(option => option.setName("reason").setDescription("the reason for the warn").setRequired(true)))
     .addSubcommand(command => command.setName("clear").setDescription("Clear all warns of a user").addUserOption(option => option.setName("user").setDescription("the user you want to get the warn info").setRequired(true)))
     .addSubcommand(command => command.setName("remove").setDescription("Remove a users warn").addUserOption(option => option.setName("user").setDescription("the user you want to get the warn info").setRequired(true)).addStringOption(option => option.setName("warn-id").setDescription("the warn id").setRequired(true))),
-    usableInDms: false,
     async execute (interaction) {
 
         const { guild, member, user, options } = interaction;

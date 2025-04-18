@@ -3,6 +3,8 @@ const prefixSchema = require('../../schemas/prefixSystem.js')
 const prefixSetupSchema = require('../../schemas/prefixEnableSystem.js')
 
 module.exports = {
+    usableInDms: false,
+    category: "Prefix Settings",
     data: new SlashCommandBuilder()
     .setName('prefix')
     .setDescription('Change the prefix of the bot in your server.')
@@ -12,7 +14,6 @@ module.exports = {
     .addSubcommand(command => command.setName('reset').setDescription('Reset the prefix of the bot in your server back to the default.'))
     .addSubcommand(command => command.setName('enable').setDescription('Enable the prefix system in your server.').addBooleanOption(option => option.setName('enable').setDescription('Enable the prefix system in your server.').setRequired(true)).addStringOption(option => option.setName("prefix").setDescription("The prefix you want to set for the bot in your server. Leave blank to set to default prefix").setRequired(false)))
     .addSubcommand(command => command.setName('disable').setDescription('Disable the prefix system in your server.')),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder, ModalBuilder, TextInputBuilder, ActionRowBuilder, TextInputStyle, WebhookClient, MessageFlags } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Developer",
     data: new SlashCommandBuilder()
     .setName("bug-report")
     .setDescription("Report a bug in the bot"),
-    usableInDms: false,
     async execute (interaction, client) {
         
         const user = interaction.user.id;

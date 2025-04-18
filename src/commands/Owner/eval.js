@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags, EmbedBuilder } = require('discord.js');
 
 module.exports = {
+    usableInDms: true,
+    category: "Owner",
     data: new SlashCommandBuilder()
     .setName('eval')
     .setDescription('Evaluates JavaScript code.'),
-    usableInDms: true,
     async execute(interaction, client) {
 
         if (!client.config.developers.includes(interaction.user.id)) {

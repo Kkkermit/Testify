@@ -3,11 +3,12 @@ const figlet = require('figlet')
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
+    usableInDms: true,
+    category: "Fun",
     data: new SlashCommandBuilder()
     .setName('ascii')
     .setDescription('Converts text into ascii art.')
     .addStringOption(option => option.setName('text').setDescription('Specified text will be converted into art.').setRequired(true).setMaxLength(15)),
-    usableInDms: true,
     async execute(interaction, client) {
         const text = interaction.options.getString('text')
 

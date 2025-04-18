@@ -1,14 +1,16 @@
 const { SlashCommandBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder, EmbedBuilder, ActionRowBuilder } = require('discord.js');
 const guildSettingsSchema = require('../../schemas/prefixSystem.js');
+
 var timeout = [];
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName('help')
     .setDescription('Cannot find what you were wishing to? Check this out!')
     .addSubcommand(command => command.setName('server').setDescription('Join our official support server for Orbit!'))
     .addSubcommand(command => command.setName('manual').setDescription('Get some information on our bot commands and plans.')),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

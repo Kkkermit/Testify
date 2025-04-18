@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('latency')
     .setDescription('View the speed of the bot\'s response.'),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const embed = new EmbedBuilder()

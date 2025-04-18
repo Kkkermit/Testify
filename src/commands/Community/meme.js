@@ -2,10 +2,11 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js"
 const axios = require("axios");
 
 module.exports = {
+	usableInDms: true,
+	category: "Community",
 	data: new SlashCommandBuilder()
 	.setName("meme")
 	.setDescription("Get a random meme!"),
-	usableInDms: true,
 	async execute(interaction, client) {
 		try {
 			const response = await axios.get("https://www.reddit.com/r/memes/random.json");

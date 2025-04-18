@@ -1,12 +1,12 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName("permissions")
     .setDescription("Displays permissions of given user.")
     .addUserOption(option => option.setName("user").setDescription("The user to get permissions for").setRequired(false)),
-    usableInDms: false,
-    
     async execute(interaction, client) {
 
         const { options } = interaction;

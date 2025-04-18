@@ -2,10 +2,11 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const math = require('mathjs');
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('calculator')
     .setDescription('Opens up a neat cheat machine (calculator).'),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const idPrefix = 'calculator'

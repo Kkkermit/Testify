@@ -4,11 +4,12 @@ const ecoS = require('../../schemas/economySystem');
 var timeout = [];
 
 module.exports = {
+    usableInDms: false,
+    category: 'Economy',
     data: new SlashCommandBuilder()
     .setName('gamble')
     .setDescription('Gamble to win or lose money.')
     .addNumberOption(option => option.setName('amount').setDescription('The amount to gamble (default = 500)').setRequired(false)),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, guild, user } = interaction;

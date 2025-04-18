@@ -1,12 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName('mod-panel')
     .setDescription('Moderate a member with various punishment options.')
     .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers)
     .addUserOption(option => option.setName("user").setDescription("The user you want to moderate").setRequired(true)),
-    usableInDms: false,
     async execute(interaction, client) {
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ModerateMembers)) {
             return await interaction.reply({ 

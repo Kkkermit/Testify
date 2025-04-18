@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const QuickChart = require('quickchart-js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName('member-count')
     .setDescription('Shows the number of members on the server.')
@@ -11,7 +13,6 @@ module.exports = {
             { name: "pie", value: "pie" },
         )
     ),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const chartType = interaction.options.getString('chart-type');

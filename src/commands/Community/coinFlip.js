@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName("coin-flip")
     .setDescription("Flip a coin to see if it lands on heads or tails"),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const embedFlip = new EmbedBuilder()

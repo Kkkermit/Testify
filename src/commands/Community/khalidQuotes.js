@@ -2,10 +2,11 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const khaledQuotes = require('../../jsons/khalidQuotes.json');
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('khaled-quotes')
     .setDescription('Gives you a random quote from DJ Khaled.'),
-    usableInDms: true,
     async execute(interaction) {
 
         const randomize = Math.floor(Math.random() * khaledQuotes.length);

@@ -2,13 +2,14 @@ const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, MessageFl
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
+    usableInDms: false,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName("impersonate")
     .setDescription("Makes you look like someone else")
     .setDefaultMemberPermissions(PermissionFlagsBits.createWebhook)
     .addUserOption(option => option.setName("user").setDescription("Mention a user to impersonate").setRequired(true))
     .addStringOption(option => option.setName("message").setDescription("What message do you want the user to type?").setRequired(true)),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { options } = interaction;

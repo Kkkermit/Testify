@@ -2,10 +2,11 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js'
 const ecoS = require('../../schemas/economySystem');
 
 module.exports = {
+    usableInDms: false,
+    category: 'Economy',
     data: new SlashCommandBuilder()
     .setName('account-view')
     .setDescription('View your economy account balance and info.'),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild, user } = interaction;

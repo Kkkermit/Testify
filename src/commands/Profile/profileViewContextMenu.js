@@ -3,6 +3,8 @@ const Profile = require('../../schemas/profileSystem');
 const moment = require('moment');
 
 module.exports = {
+    usableInDms: false,
+    category: "Community",
     data: new ContextMenuCommandBuilder()
     .setName('• Profile View')
     .setType(ApplicationCommandType.User),

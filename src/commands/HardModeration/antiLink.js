@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsB
 const linkSchema = require('../../schemas/antiLinkSystem');
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName('anti-link')
     .setDescription('Enables/Disables the anti-link moderation system.')
@@ -27,7 +29,6 @@ module.exports = {
             { name: 'Administrator', value: 'Administrator' }
         )
     )),
-    usableInDms: false,
 
     async execute(interaction, client) {
         

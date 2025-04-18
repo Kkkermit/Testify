@@ -1,13 +1,14 @@
 const { EmbedBuilder, PermissionsBitField, SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName('kick')
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
     .setDescription('Kicks specified user.')
     .addUserOption(option => option.setName('user').setDescription('Specify the user you want to kick.').setRequired(true))
     .addStringOption(option => option.setName('reason').setDescription('Reason as to why you want to kick specified user.').setRequired(false)),
-    usableInDms: false,
     async execute(interaction, client) {
         
         const users = interaction.options.getUser('user');

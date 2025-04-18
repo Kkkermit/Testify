@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName("automod")
     .setDescription("Setup Automod for your server.")
@@ -9,7 +11,6 @@ module.exports = {
     .addSubcommand(command => command.setName("spam-messages").setDescription("Stops spam from being sent."))
     .addSubcommand(command => command.setName("mention-spam").setDescription("Stops users from spam pinging members.").addIntegerOption(option => option.setName("number").setDescription("Specified amount will be used as the max mention amount.").setRequired(true)))
     .addSubcommand(command => command.setName("keyword").setDescription("Block a specified word in the Server.").addStringOption(option => option.setName("word").setDescription("Specified word will be blocked from being sent.").setRequired(true))),
-    usableInDms: false,
     async execute (interaction, client) {
         const { guild, options } = interaction;
         const sub = options.getSubcommand();

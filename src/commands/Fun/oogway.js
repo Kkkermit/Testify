@@ -1,12 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags }=require('discord.js');
 const filter = require('../../jsons/filter.json');
 
-module.exports={
+module.exports = {
+    usableInDms: true,
+    category: "Fun",
     data: new SlashCommandBuilder()
     .setName('master-oogway')
     .setDescription("shares part of oogways wisdom")
     .addStringOption(option => option.setName('quote').setDescription('Your choice').setRequired(true)),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const quote = interaction.options.getString('quote');

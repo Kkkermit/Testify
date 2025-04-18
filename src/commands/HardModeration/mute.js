@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js')
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName('mute')
     .setDescription('Times out a server member.')
@@ -29,7 +31,6 @@ module.exports = {
         )
     )
     .addStringOption(option => option.setName('reason').setDescription('The reason for timing out the user').setRequired(false)),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const timeUser = interaction.options.getUser('target');

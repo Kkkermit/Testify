@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js')
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('test')
     .setDescription('Test command'),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const embed = new EmbedBuilder()

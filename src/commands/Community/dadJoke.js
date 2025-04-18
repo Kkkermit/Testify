@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js");
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName("dad-joke")
     .setDescription("Get a random dad joke."),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const response = await fetch("https://icanhazdadjoke.com/", {

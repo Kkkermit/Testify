@@ -4,13 +4,14 @@ const filter = require('../../jsons/filter.json');
 const moment = require('moment');
 
 module.exports = {
+    usableInDms: false,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('profile')
     .setDescription('Profile system')
     .addSubcommand(command => command.setName('create').setDescription('Creates a user profile.').addStringOption(option => option.setName('favorite_song').setDescription('Your favorite song').setRequired(true)).addStringOption(option => option.setName('about').setDescription('Something about you').setRequired(true)).addStringOption(option => option.setName('birthday').setDescription('Your birthday (YYYY-MM-DD)').setRequired(false)).addStringOption(option => option.setName('hobbies').setDescription('Your hobbies').setRequired(false)).addStringOption(option => option.setName('favorite_game').setDescription('Your favorite game').setRequired(false)))
     .addSubcommand(command => command.setName('edit').setDescription('Edits your user profile.').addStringOption(option => option.setName('favorite_song').setDescription('Your new favorite song').setRequired(false)).addStringOption(option => option.setName('about').setDescription('Something new about you').setRequired(false)).addStringOption(option => option.setName('birthday').setDescription('Your birthday (YYYY-MM-DD)').setRequired(false)).addStringOption(option => option.setName('hobbies').setDescription('Your new hobbies').setRequired(false)).addStringOption(option => option.setName('favorite_game').setDescription('Your new favorite game').setRequired(false)))
     .addSubcommand(command => command.setName('view').setDescription('Views a user profile.').addUserOption(option => option.setName('user').setDescription('The user to view the profile of').setRequired(false))),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

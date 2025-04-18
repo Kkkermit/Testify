@@ -1,11 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, MessageFlags } = require("discord.js");
 const axios = require("axios");
+
 module.exports = {
+	usableInDms: true,
+	category: "Community",
 	data: new SlashCommandBuilder()
 	.setName("ytmp3")
 	.setDescription("Download MP3 versions of YT videos")
 	.addStringOption(option => option.setName("video-id").setDescription("The ID of your video").setRequired(true)),
-	usableInDms: true,
 	async execute(interaction, client) {
 		
 		await interaction.deferReply({ flags: MessageFlags.Ephemeral });

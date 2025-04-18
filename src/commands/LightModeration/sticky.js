@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } =
 const sticky = require('../../schemas/stickyMessageSystem');
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName('sticky-message')
     .setDescription('sticky')
@@ -9,7 +11,6 @@ module.exports = {
     .addSubcommand(command => command.setName('setup').setDescription('Set a sticky message').addStringOption(option => option.setName('message').setDescription('The Message you want to be stickified').setRequired(true)).addChannelOption(option => option.setName('channel').setDescription('The channel to send the sticky in').setRequired(true)).addNumberOption(option => option.setName('cap').setDescription('The amount of messages it needs for the sticky message to resend').setRequired(true)))
     .addSubcommand(command => command.setName('disable').setDescription('Remove a sticky message').addStringOption(option => option.setName('message').setDescription('The exact message to remove').setRequired(true)))
     .addSubcommand(command => command.setName('check').setDescription('Check your active sticky messages')),
-    usableInDms: false,
     async execute (interaction, client) {
 
         const { options } = interaction;

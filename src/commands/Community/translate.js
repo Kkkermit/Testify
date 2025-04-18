@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const translate = require('@iamtraction/google-translate');
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('translate')
     .setDescription('Translate your message to a different language.')
@@ -48,8 +50,6 @@ module.exports = {
             { name: 'Swedish', value: 'sv' }
         )
     ),
-    usableInDms: true,
-
     async execute(interaction, client) {
 
         const msg = interaction.options.getString('text')

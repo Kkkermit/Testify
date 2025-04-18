@@ -4,13 +4,14 @@ const levelSchema = require('../../schemas/userLevelSystem');
 const levelschema = require('../../schemas/levelSetupSystem');
 
 module.exports = {
+    usableInDms: false,
+    category: "Level and Economy",
     data: new SlashCommandBuilder()
     .setName('give')
     .setDescription('Give a user specified amount of currency.')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(command => command.setName('currency').setDescription('Give specified user specified amount of economy currency.').addUserOption(option => option.setName('user').setDescription('Specified user will be given specified amount of currency.').setRequired(true)).addNumberOption(option => option.setName('amount').setDescription('The amount of currency you want to give specified user.').setRequired(true).setMaxValue(100000000)))
     .addSubcommand(command => command.setName('xp').setDescription('Give specified user specified amount of XP.').addUserOption(option => option.setName('user').setDescription('Specified user will be given specified amount of XP.').setRequired(true)).addNumberOption(option => option.setName('amount').setDescription('The amount of XP you want to give specified user.').setRequired(true).setMaxValue(10000000).setMinValue(10))),
-    usableInDms: false,
     async execute(interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

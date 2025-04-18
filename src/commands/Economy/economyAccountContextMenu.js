@@ -2,6 +2,8 @@ const { ContextMenuCommandBuilder, EmbedBuilder, ApplicationCommandType, Message
 const ecoS = require('../../schemas/economySystem');
 
 module.exports = {
+    usableInDms: false,
+    category: 'Economy',
     data: new ContextMenuCommandBuilder()
     .setName('• Economy Account')
     .setType(ApplicationCommandType.User),

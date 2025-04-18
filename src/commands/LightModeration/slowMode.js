@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName("slow-mode")
     .setDescription("Set, disable, or check slowmode")
@@ -8,7 +10,6 @@ module.exports = {
     .addSubcommand(subcommand => subcommand.setName("set").setDescription("Set slowmode in the channel").addIntegerOption(option => option.setName("duration").setDescription("Duration of the slowmode in seconds").setRequired(true)).addChannelOption(option => option.setName("channel").setDescription("Channel to set slowmode in").setRequired(false)))
     .addSubcommand(subcommand => subcommand.setName("off").setDescription("Disable slowmode in the channel").addChannelOption(option => option.setName("channel").setDescription("Channel to disable slowmode in").setRequired(false)))
     .addSubcommand(subcommand => subcommand.setName("check").setDescription("Check slowmode status in the channel").addChannelOption(option => option.setName("channel").setDescription("Channel to check slowmode in").setRequired(false))),
-    usableInDms: false,
     async execute(interaction, client) {
     
         const channel = interaction.options.getChannel("channel") || interaction.channel;

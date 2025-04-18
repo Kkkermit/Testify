@@ -3,11 +3,12 @@ const levelSchema = require("../../schemas/userLevelSystem");
 const Canvacord = require(`canvacord`)
 
 module.exports = {
+    usableInDms: false,
+    category: "Leveling",
     data: new SlashCommandBuilder()
     .setName('rank')
     .setDescription(`Check an user's level/rank within the server.`)
     .addUserOption(option => option.setName('user').setDescription(`The member you want to check the rank of`).setRequired(false)),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, user, guild } = interaction;

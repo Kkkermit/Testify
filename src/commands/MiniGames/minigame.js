@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const { Wordle, Connect4, TwoZeroFourEight, Minesweeper, RockPaperScissors, Snake, TicTacToe, MatchPairs, Hangman, Flood, FindEmoji, Slots, Trivia } = require('discord-gamecord');
 
 module.exports = {
+    usableInDms: true,
+    category: "Mini Games",
     data: new SlashCommandBuilder()
     .setName('minigame')
     .setDescription(`Play a some minigames!`)
@@ -25,7 +27,6 @@ module.exports = {
             { name: 'hard', value: 'hard' },
         ).setRequired(true)
     )),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

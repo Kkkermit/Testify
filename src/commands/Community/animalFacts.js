@@ -2,10 +2,11 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js'
 const axios = require('axios');
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName('animal-facts')
     .setDescription('Get a random animal fact!'),
-    usableInDms: true,
     async execute(interaction, client) {
         try {
             const response = await axios.get('https://www.reddit.com/r/animalfacts1935943924/random/.json');

@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, MessageFlags } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName("announce")
     .setDescription("Announce something in the server!")
@@ -29,7 +31,6 @@ module.exports = {
             { name: "Blue", value: "#0000FF" }
         ).setRequired(false)
     ),
-    usableInDms: false,
     async execute (interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

@@ -3,6 +3,8 @@ const levelSchema = require('../../schemas/userLevelSystem');
 const Canvacord = require(`canvacord`)
 
 module.exports = {
+    usableInDms: false,
+    category: "Leveling",
     data: new ContextMenuCommandBuilder()
     .setName('• Rank')
     .setType(ApplicationCommandType.User),

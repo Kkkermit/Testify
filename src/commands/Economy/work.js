@@ -4,10 +4,11 @@ const ecoS = require('../../schemas/economySystem');
 var timeout = [];
 
 module.exports = {
+    usableInDms: false,
+    category: 'Economy',
     data: new SlashCommandBuilder()
     .setName('work')
     .setDescription('Work to earn money.'),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild, user } = interaction;

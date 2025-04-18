@@ -1,10 +1,11 @@
 const { SlashCommandBuilder, EmbedBuilder, ChannelType, GuildVerificationLevel, GuildExplicitContentFilter, GuildNSFWLevel } = require("discord.js");
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName("server-info")
     .setDescription("Displays information about the server."),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild } = interaction;

@@ -2,11 +2,12 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require("discord.js"
 const superagent = require("superagent");
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName("lyrics")
     .setDescription("Displays the lyrics from the given song")
     .addStringOption(options => options.setName("song").setDescription("What is the song? You can also include the artist for a better search!").setRequired(true)),
-    usableInDms: true,
     async execute(interaction, client) {
 
     const song = interaction.options.getString("song");

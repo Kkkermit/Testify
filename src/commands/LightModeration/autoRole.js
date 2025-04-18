@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } =
 const autoRoleSchema = require("../../schemas/autoRoleSystem");
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName("autorole")
     .setDescription("An auto role system!")
@@ -10,7 +12,6 @@ module.exports = {
     .addSubcommand(command => command.setName("remove").setDescription("Remove an auto-role trigger").addRoleOption(option => option.setName("role").setDescription("The role to remove from the list of triggers.").setRequired(true)))
     .addSubcommand(command => command.setName("disable").setDescription("Disable the whole system"))
     .addSubcommand(command => command.setName("list").setDescription("List all the roles in the system.")),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { options, guildId } = interaction;

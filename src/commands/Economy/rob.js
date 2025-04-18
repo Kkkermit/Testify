@@ -2,12 +2,14 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js'
 const ecoSchema = require('../../schemas/economySystem');
 
 var timeout = [];
+
 module.exports = {
+    usableInDms: false,
+    category: 'Economy',
     data: new SlashCommandBuilder()
     .setName('rob')
     .setDescription('Rob a person money')
     .addUserOption(option => option.setName('user') .setDescription('Pick the user who you want to rob') .setRequired(true)),
-    usableInDms: false,
     async execute (interaction, client) {
 
         const { options, user, guild } = interaction

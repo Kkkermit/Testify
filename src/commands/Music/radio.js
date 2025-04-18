@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder} = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 
 module.exports = {
+    usableInDms: false,
+    category: "Music",
     data: new SlashCommandBuilder()
     .setName('radio')
     .setDescription('Plays some radio music for you.')
@@ -28,7 +30,6 @@ module.exports = {
             { name: `XMAS`, value: `https://streams.ilovemusic.de/iloveradio8.mp3` }
         ).setRequired(true)
     ),
-    usableInDms: false,
     async execute(interaction, client) {
 
         let audioURL = await interaction.options.getString('station');

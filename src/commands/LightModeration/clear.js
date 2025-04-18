@@ -1,13 +1,14 @@
 const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, PermissionFlagsBits, MessageFlags} = require('discord.js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName('clear')
     .setDescription('Clear messages')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
     .addStringOption(option => option.setName('amount').setDescription('The number of messages to clear (up to 99)').setRequired(true))
     .addUserOption(option => option.setName('user').setDescription('Clear messages of a specific user')),
-    usableInDms: false,
     async execute(interaction, client) {
 
     const { options } = interaction;

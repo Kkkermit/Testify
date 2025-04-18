@@ -1,12 +1,13 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, MessageFlags } = require('discord.js');
 
 module.exports = {
+    usableInDms: true,
+    category: 'Community',
     data: new SlashCommandBuilder()
     .setName('minecraft')
     .setDescription('Get info about a Minecraft user or server.')
     .addSubcommand(command => command.setName('skin').setDescription('Get a users minecraft skin!').addStringOption(option => option.setName('username').setDescription('Minecraft username').setRequired(true)))
     .addSubcommand(command => command.setName('server').setDescription('Get info about a Minecraft server!').addStringOption(option => option.setName('ip').setDescription('Minecraft server IP').setRequired(true))),
-    usableInDms: true,
     async execute(interaction, client) {
     
         const sub = interaction.options.getSubcommand();

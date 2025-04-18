@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, Butt
 const TicketSetup = require('../../schemas/ticketSetupSystem');
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName('ticket')
     .setDescription('A command to setup the ticket system.')
@@ -14,7 +16,6 @@ module.exports = {
     .addStringOption(option => option.setName('description').setDescription('Choose a description for the ticket embed.').setRequired(true))
     .addStringOption(option => option.setName('button').setDescription('Choose a name for the ticket embed.').setRequired(true))
     .addStringOption(option => option.setName('emoji').setDescription('Choose a style, so choose a emoji.').setRequired(true)),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild, options } = interaction;

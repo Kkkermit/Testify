@@ -2,10 +2,11 @@ const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const fetch = require('node-fetch');
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder()
     .setName(`advice`)
     .setDescription(`Get a random piece of advice.`),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const data = await fetch("https://api.adviceslip.com/advice").then((res) =>

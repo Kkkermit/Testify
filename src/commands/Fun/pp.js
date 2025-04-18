@@ -1,10 +1,11 @@
 const { SlashCommandBuilder,EmbedBuilder } = require('discord.js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Fun",
     data: new SlashCommandBuilder()
     .setName('pp-size')
     .setDescription('Shows the size of your pp.'),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const penisSize = Math.floor(Math.random() * 10) + 1;

@@ -4,10 +4,11 @@ const ecoS = require('../../schemas/economySystem');
 var timeout = [];
 
 module.exports = {
+    usableInDms: false,
+    category: 'Economy',
     data: new SlashCommandBuilder()
     .setName('daily')
     .setDescription('Claim your daily boost.'),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const { guild, user } = interaction;

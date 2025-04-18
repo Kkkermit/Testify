@@ -3,11 +3,12 @@ const { flushLogs } = require('../../scripts/consoleLogger');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
 
 module.exports = {
+    usableInDms: true,
+    category: "Owner",
     data: new SlashCommandBuilder()
         .setName('flush-logs')
         .setDescription('Manually flush logs to Discord webhook (Owner Only)')
         .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
-    usableInDms: true,
     async execute(interaction, client) {
         try {
             if (interaction.user.id !== client.config.developers) {

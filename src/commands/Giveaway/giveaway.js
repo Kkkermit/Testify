@@ -2,6 +2,8 @@ const { SlashCommandBuilder, PermissionsBitField, MessageFlags } = require(`disc
 const ms = require('ms');
 
 module.exports = {
+    usableInDms: false,
+    category: `Giveaway`,
     data: new SlashCommandBuilder()
     .setName(`giveaway`)
     .setDescription(`Start a giveaway or configure already existing ones.`)
@@ -10,7 +12,6 @@ module.exports = {
     .addSubcommand(command => command.setName(`edit`).setDescription(`Edits specified giveaway.`).addStringOption(option => option.setName('message-id').setDescription('Specify the message ID of the giveaway you want to edit.').setRequired(true)).addStringOption(option => option.setName('time').setDescription('Specify the added duration of the giveaway (in ms).').setRequired(true)).addIntegerOption(option => option.setName('winners').setDescription('Specify the new amount of winners.').setRequired(true)).addStringOption(option => option.setName('prize').setDescription('Specify the new prize for the giveaway.').setRequired(true)))
     .addSubcommand(command => command.setName('end').setDescription(`Ends specified giveaway.`).addStringOption(option => option.setName('message-id').setDescription('Specify the message ID of the giveaway you want to end.').setRequired(true)))
     .addSubcommand(command => command.setName(`reroll`).setDescription(`Rerolls specified giveaway.`).addStringOption(option => option.setName('message-id').setDescription('Specify the message ID of the giveaway you want to reroll.').setRequired(true))),
-    usableInDms: false,
     async execute(interaction, client) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

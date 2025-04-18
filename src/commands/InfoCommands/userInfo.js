@@ -4,11 +4,12 @@ const { addBadges } = require('../../lib/discordBadges');
 const { addSuffix } = require('../../lib/addSuffix');
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new SlashCommandBuilder()
     .setName("user-info")
     .setDescription("Display a users information")
     .addUserOption((option) => option.setName("member").setDescription("View member information")),
-    usableInDms: false,
     async execute(interaction, client) {
 
     await interaction.deferReply();

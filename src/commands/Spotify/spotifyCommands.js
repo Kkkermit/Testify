@@ -7,6 +7,8 @@ const User = require('../../schemas/spotifyTrackerSystem');
 const canvacord = require('canvacord');
 
 module.exports = {
+    usableInDms: true,
+    category: "Spotify",
     data: new SlashCommandBuilder()
         .setName('spotify')
         .setDescription('spotify commands')
@@ -18,7 +20,6 @@ module.exports = {
             )
         ))
         .addSubcommand(command => command.setName('currently-playing').setDescription('View what you are currently playing').addUserOption(option => option.setName('user').setDescription('The user to get stats for').setRequired(false))),
-    usableInDms: false,
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();

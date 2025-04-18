@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } =
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 
 module.exports = {
+    usableInDms: false,
+    category: "Music",
     data: new SlashCommandBuilder()
     .setName('soundboard')
     .setDescription('Play a sound effect in your voice channel.')
@@ -12,7 +14,6 @@ module.exports = {
             {name:'Aw Shit',value:'awShit'}
         )
     ),
-    usableInDms: false,
     async execute(interaction, client) {
         const sound = interaction.options.getString('sound');
 

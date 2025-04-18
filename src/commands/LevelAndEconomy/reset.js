@@ -4,6 +4,8 @@ const ecoSchema = require ("../../schemas/economySystem");
 const levelschema = require('../../schemas/levelSetupSystem');
 
 module.exports = {
+    usableInDms: false,
+    category: "Level and Economy",
     data: new SlashCommandBuilder()
     .setName('reset')
     .setDescription(`Reset something in this server.`)
@@ -12,7 +14,6 @@ module.exports = {
     .addSubcommand(command => command.setName('all-currency').setDescription('Resets all economy progress in this server.'))
     .addSubcommand(command => command.setName('currency').setDescription(`Resets specified user's economy currency.`).addUserOption(option => option.setName('user').setDescription(`Specified user's economy account will be reset.`).setRequired(true)))
     .addSubcommand(command => command.setName('xp').setDescription(`Resets specified user's XP.`).addUserOption(option => option.setName('user').setDescription('Specified user will have their xp reset.').setRequired(true))),
-    usableInDms: false,
     async execute(interaction) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

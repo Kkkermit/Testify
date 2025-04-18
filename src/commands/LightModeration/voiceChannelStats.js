@@ -3,6 +3,8 @@ const voiceSchema = require('../../schemas/voiceChannelMembersSystem');
 const botSchema = require('../../schemas/voiceChannelBotSystem');
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName('members-vc')
     .setDescription('Configure your members voice channel.')
@@ -11,7 +13,6 @@ module.exports = {
     .addSubcommand(command => command.setName('total-remove').setDescription('Removes your total members VC.'))
     .addSubcommand(command => command.setName('bot-set').setDescription('Sets your total bots voice channel.').addChannelOption(option => option.setName('voice-channel').setDescription('Specified voice channel wll be your total bots voice channel.').setRequired(true).addChannelTypes(ChannelType.GuildVoice)))
     .addSubcommand(command => command.setName('bot-remove').setDescription('Removes your total bots VC.')),
-    usableInDms: false,
     async execute(interaction, client, err) {
 
         if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageChannels)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});

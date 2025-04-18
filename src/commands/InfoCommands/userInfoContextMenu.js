@@ -4,6 +4,8 @@ const { addBadges } = require('../../lib/discordBadges');
 const { addSuffix } = require('../../lib/addSuffix');
 
 module.exports = {
+    usableInDms: false,
+    category: "Info",
     data: new ContextMenuCommandBuilder()
     .setName('• User Info')
     .setType(ApplicationCommandType.User),

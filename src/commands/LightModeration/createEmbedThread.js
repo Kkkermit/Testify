@@ -2,6 +2,8 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionsBitField, Pe
 var timeout = [];
 
 module.exports = {
+    usableInDms: false,
+    category: "Server Utils",
     data: new SlashCommandBuilder()
     .setName('create')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
@@ -45,10 +47,8 @@ module.exports = {
     .addStringOption(option => option.setName('sixth-field-name').setDescription(`Embed's preferred field-name.`).setRequired(false).setMaxLength(256))
     .addStringOption(option => option.setName('sixth-field-value').setDescription(`Embed's preferred field-value.`).setRequired(false).setMaxLength(1024))
     .addStringOption(option => option.setName('footer').setDescription(`Embed's preferred footer.`).setRequired(false)))
-    
     .addSubcommand(command => command.setName('thread').setDescription('Creates a temporary thread for you.')
     .addStringOption(option => option.setName('name').setDescription("Specified name will be used for your thread.").setRequired(false))),
-    usableInDms: false,
     async execute(interaction) {
 
         const sub = interaction.options.getSubcommand();

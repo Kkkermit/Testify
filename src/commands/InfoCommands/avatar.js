@@ -1,11 +1,12 @@
 const { EmbedBuilder, SlashCommandBuilder, ButtonBuilder, ActionRowBuilder, ButtonStyle, MessageFlags } = require(`discord.js`);
 
 module.exports = {
+    usableInDms: false,
+    category: `Info`,
     data: new SlashCommandBuilder()
     .setName(`avatar`)
     .setDescription(`Get anybody's Profile Picture / Banner.`)
     .addUserOption(option => option.setName(`user`).setDescription(`Select a user`).setRequired(false)),
-    usableInDms: false,
     async execute (interaction, client) {
 
         const userMention = interaction.options.getUser(`user`) || interaction.user;

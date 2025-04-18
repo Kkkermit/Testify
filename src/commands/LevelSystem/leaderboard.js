@@ -3,10 +3,11 @@ const UserLevel = require("../../schemas/userLevelSystem");
 const canvafy = require("canvafy");
 
 module.exports = {
+    usableInDms: false,
+    category: "Leveling",
     data: new SlashCommandBuilder()
     .setName("leaderboard")
     .setDescription("View the server's leaderboard"),
-    usableInDms: false,
     async execute(interaction, client) {
 
         await interaction.deferReply();

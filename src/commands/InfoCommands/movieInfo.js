@@ -2,11 +2,12 @@ const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js'
 const axios = require('axios')
 
 module.exports = {
+    usableInDms: true,
+    category: "Info",
     data: new SlashCommandBuilder() 
     .setName('movie-tracker')
     .setDescription('Gets information about a movie')
     .addStringOption(option => option.setName('name').setDescription('The name of the movie').setRequired(true)),
-    usableInDms: true,
     async execute(interaction, client) {
 
         const apiKey = process.env.movietrackerapi

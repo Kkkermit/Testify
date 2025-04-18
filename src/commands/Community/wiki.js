@@ -3,11 +3,12 @@ const wiki = require('wikijs').default();
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
+    usableInDms: true,
+    category: "Community",
     data: new SlashCommandBuilder() 
     .setName('wiki')
     .setDescription('Ask Wiki a question')
     .addStringOption(option => option.setName(`query`).setDescription(`Look something up on Wiki`).setRequired(true)),
-    usableInDms: true,
     async execute(interaction, client){
         
         const query = interaction.options.getString(`query`);

@@ -1,13 +1,14 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
+    usableInDms: false,
+    category: "Moderation",
     data: new SlashCommandBuilder()
     .setName('unban')
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
     .setDescription('Unbans specified user.')
     .addUserOption(option => option.setName('user').setDescription('Specify the user you want to ban.').setRequired(true))
     .addStringOption(option => option.setName('reason').setDescription('Reason as to why you want to unban specified user.').setRequired(false)),
-    usableInDms: false,
     async execute(interaction, client) {
         
         const userID = interaction.options.getUser('user');
