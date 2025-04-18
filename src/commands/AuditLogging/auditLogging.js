@@ -3,7 +3,7 @@ const logSchema = require('../../schemas/auditLoggingSystem');
 
 module.exports = {
     usableInDms: false,
-    category: "Audit Logs",
+    category: "Server Utils",
     data: new SlashCommandBuilder()
         .setName('logs')
         .setDescription('Set up and manage server logging system')
