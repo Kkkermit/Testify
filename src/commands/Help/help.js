@@ -67,6 +67,15 @@ module.exports = {
                     .addOptions(categoryOptions)
                 );
                 
+                // Create button to switch to prefix command help
+                const switchToPrefixRow = new ActionRowBuilder()
+                .addComponents(
+                    new ButtonBuilder()
+                        .setCustomId('switch_to_prefix_help')
+                        .setLabel('View Prefix Commands')
+                        .setStyle(ButtonStyle.Primary)
+                );
+                
                 const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: interaction.guild.id });
                 const guildPrefix = fetchGuildPrefix ? fetchGuildPrefix.Prefix : client.config.prefix;
                 
@@ -94,7 +103,7 @@ module.exports = {
                     guildPrefix
                 };
                 
-                await interaction.reply({ embeds: [embed], components: [categorySelectMenu], flags: MessageFlags.Ephemeral });
+                await interaction.reply({ embeds: [embed], components: [categorySelectMenu, switchToPrefixRow], flags: MessageFlags.Ephemeral });
                 break;
         }
     }
