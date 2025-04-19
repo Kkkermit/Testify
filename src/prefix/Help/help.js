@@ -8,28 +8,23 @@ module.exports = {
     category: 'Info',
     usableInDms: true,
     async execute(message, client, args) {
-        // Get guild prefix
         const fetchGuildPrefix = message.guild ? 
             await guildSettingsSchema.findOne({ Guild: message.guild.id }) : null;
         const guildPrefix = fetchGuildPrefix ? fetchGuildPrefix.Prefix : client.config.prefix;
 
-        // Get command data
         const slashCommandCategories = getSlashCommandsByCategory(client);
         const prefixCommandCategories = getPrefixCommandsByCategory(client);
         
-        // Generate category list with emojis
         const categoryList = Object.keys(prefixCommandCategories)
             .map(cat => `${getCategoryEmoji(cat)} **${cat}**`)
             .join(' • ');
 
-        // Store command data for later use in interactions
         client.helpData = {
             slashCommandCategories,
             prefixCommandCategories,
             guildPrefix
         };
 
-        // If category was specified in arguments
         if (args.length > 0) {
             const category = args[0].charAt(0).toUpperCase() + args[0].slice(1).toLowerCase();
             
@@ -37,21 +32,18 @@ module.exports = {
                 const commandsCategory = prefixCommandCategories[category];
                 const pages = createCommandPages(commandsCategory, 6, guildPrefix);
                 
-                // Create the category embed for the first page
                 const categoryEmbed = new EmbedBuilder()
                     .setColor(client.config.embedColor)
                     .setTitle(`${getCategoryEmoji(category)} ${category} Commands ${client.config.arrowEmoji}`)
                     .setDescription(`Here are all the ${category.toLowerCase()} prefix commands:`)
                     .setFooter({ text: `${client.user.username} Help • ${category} • Page 1/${pages.length}`, iconURL: client.user.displayAvatarURL() });
 
-                // Add commands to the embed
                 pages[0].forEach(cmd => {
                     let devStatus = cmd.underDevelopment ? '🛠️ [Under Development]' : '';
                     let aliasText = cmd.aliases && cmd.aliases.length ? `(Aliases: ${cmd.aliases.join(', ')})` : '';
 
                     let commandInfo = `> ${cmd.description} ${devStatus}`;
 
-                    // Add subcommands if any
                     if (cmd.subcommands && cmd.subcommands.length > 0) {
                         commandInfo += '\n\n**Subcommands:**';
                         cmd.subcommands.forEach(sub => {
@@ -65,7 +57,6 @@ module.exports = {
                     });
                 });
                 
-                // Create navigation buttons for pagination
                 const switchTypeButton = new ButtonBuilder()
                     .setCustomId(`help_switch_slash_${category}_0`)
                     .setLabel('Show Slash Commands')
@@ -89,7 +80,6 @@ module.exports = {
                             .setDisabled(pages.length <= 1)
                     );
                 
-                // Add type switch button if slash commands exist for this category
                 if (slashCommandCategories[category]) {
                     navigationRow.addComponents(switchTypeButton);
                 }
@@ -100,7 +90,6 @@ module.exports = {
             }
         }
 
-        // Create main help embed if no category was specified
         const embed = new EmbedBuilder()
             .setColor(client.config.embedColor)
             .setTitle(`${client.user.username} Help Center ${client.config.arrowEmoji}`)
@@ -115,7 +104,6 @@ module.exports = {
             .setImage('https://i.postimg.cc/8CbGp6D5/Screenshot-300.png')
             .setTimestamp();
 
-        // Create category options for the select menu
         const categoryOptions = Object.keys(prefixCommandCategories).map(category => {
             return {
                 label: `${getCategoryEmoji(category)} ${category}`,
@@ -125,7 +113,6 @@ module.exports = {
             };
         });
         
-        // Add help center option
         categoryOptions.unshift({
             label: '📚 Help Center',
             description: 'Navigate to the Help Center.',
@@ -133,7 +120,6 @@ module.exports = {
             emoji: '📚'
         });
         
-        // Create select menu for categories
         const categorySelectMenu = new ActionRowBuilder()
         .addComponents(
             new StringSelectMenuBuilder()
@@ -144,7 +130,6 @@ module.exports = {
             .addOptions(categoryOptions)
         );
         
-        // Create button to switch to slash command help
         const switchToSlashRow = new ActionRowBuilder()
         .addComponents(
             new ButtonBuilder()
@@ -153,7 +138,6 @@ module.exports = {
                 .setStyle(ButtonStyle.Primary)
         );
 
-        // Send the help message with components
         await message.reply({ embeds: [embed], components: [categorySelectMenu, switchToSlashRow] });
     },
 };
