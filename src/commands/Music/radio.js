@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder} = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags } = require('discord.js');
 const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectionStatus } = require('@discordjs/voice');
 
 module.exports = {
@@ -35,7 +35,7 @@ module.exports = {
         let audioURL = await interaction.options.getString('station');
 
         if (!interaction.member.voice.channel) {
-            await interaction.reply({ content: 'You must be in a **voice channel** to use this command.', ephemeral:true });
+            await interaction.reply({ content: 'You must be in a **voice channel** to use this command.', flags: MessageFlags.Ephemeral });
         return;
         }
 

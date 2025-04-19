@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require("discord.js");
 
 module.exports = {
     usableInDms: false,
@@ -18,125 +18,116 @@ module.exports = {
             const pageSize = 5;
             const pages = Math.ceil(guilds.size / pageSize);
             let page = 1;
-            const start = (page - 1) * pageSize;
-            const end = page * pageSize;
 
-            let guildList = "";
-            let index = 1;
-
-            for (const [guildId, guild] of guilds) {
-                const owner = guild.members.cache.get(guild.ownerId);
-
-                if (!owner) continue;
-                if (index > end) break;
-                if (index > start) {
-
-                    guildList += `**Guild**: ${guild.name} (${guildId})\n`;
-                    guildList += `**Members**: ${guild.memberCount}\n`;
-                    guildList += `**Owner**: ${owner.user.tag} (${owner.user.id})\n`;
-
-                    let bot = guild.members.cache.get(client.user.id);
-                    
-                    if (bot.permissions.has(PermissionsBitField.Flags.CreateInstantInvite)) {
-                        const inviteChannel = guild.channels.cache.find((c) => c.type === 0);
-                            if (inviteChannel) {
-                                const invite = await inviteChannel.createInvite();
-                                
-                                guildList += `**Invite**: ${invite.url}\n\n`;
-                            } else {
-                                guildList += "**Invite**: Invite cannot be generated\n\n";
-                            }
-                    } else {
-                        guildList += "**Invite**: Bot does not have permission to create invites\n\n";
-                    }
-                }  
-                index++;
-            }
-
-            const embed = new EmbedBuilder()
-            .setAuthor({ name: `Guild List Command ${client.config.devBy}` })
-            .setTitle(`${client.user.username} Guild List Tool ${client.config.arrowEmoji}`)
-            .setDescription(guildList)
-            .setColor(client.config.embedDev)
-            .setFooter({ text: `Page ${page}/${pages}` })
-            .setThumbnail(client.user.displayAvatarURL())
-            .setTimestamp();
-
-            const msg = await interaction.reply({ embeds: [embed], fetchReply: true });
-
-            if (pages > 1) {
-                await msg.react("⬅️");
-                await msg.react("➡️");
-
-                const filter = (reaction, user) =>
-                    ["⬅️", "➡️"].includes(reaction.emoji.name) && user.id === interaction.user.id;
-                    
-                const collector = msg.createReactionCollector({ filter, time: 30000 });
-
-                collector.on("collect", async (reaction) => {
-                    if (reaction.emoji.name === "⬅️" && page > 1) {
-                        page--;
-                    } else if (reaction.emoji.name === "➡️" && page < pages) {
-                        page++;
-                    } else if (reaction.emoji.name === "⬅️" && page === 1) {
-                        page = pages;
-                    } else if (reaction.emoji.name === "➡️" && page === pages) {
-                        page = 1;
-                    }
-
-                    const newStart = (page - 1) * pageSize;
-                    const newEnd = page * pageSize;
-
-                    guildList = "";
-                    index = 1;
-
-                    for (const [guildId, guild] of guilds) {
-                        const owner = guild.members.cache.get(guild.ownerId);
-
-                        if (!owner) continue;
-                        if (index > newEnd) break;
-                        if (index > newStart) {
-
+            const generateGuildList = async (pageNum) => {
+                const start = (pageNum - 1) * pageSize;
+                const end = pageNum * pageSize;
+                
+                let guildList = "";
+                let index = 1;
+                
+                for (const [guildId, guild] of guilds) {
+                    try {
+                        const owner = await guild.fetchOwner().catch(() => null);
+                        
+                        if (!owner) {
+                            guildList += `**Guild**: ${guild.name} (${guildId})\n`;
+                            guildList += `**Members**: ${guild.memberCount}\n`;
+                            guildList += `**Owner**: Could not fetch owner\n\n`;
+                            continue;
+                        }
+                        
+                        if (index > end) break;
+                        if (index > start) {
                             guildList += `**Guild**: ${guild.name} (${guildId})\n`;
                             guildList += `**Members**: ${guild.memberCount}\n`;
                             guildList += `**Owner**: ${owner.user.tag} (${owner.user.id})\n`;
-                            
+
                             let bot = guild.members.cache.get(client.user.id);
                             
-                            if (bot.permissions.has(PermissionsBitField.Flags.CreateInstantInvite)) {
-                                const inviteChannel = guild.channels.cache.find((c) => c.type === 0);
-                                    if (inviteChannel) {
-                                        const invite = await inviteChannel.createInvite();
-                                        
+                            if (bot && bot.permissions.has(PermissionsBitField.Flags.CreateInstantInvite)) {
+                                const inviteChannel = guild.channels.cache.find((c) => c.type === 0 && c.permissionsFor(bot).has(PermissionsBitField.Flags.CreateInstantInvite));
+                                
+                                if (inviteChannel) {
+                                    try {
+                                        const invite = await inviteChannel.createInvite({ maxAge: 86400, maxUses: 1 });
                                         guildList += `**Invite**: ${invite.url}\n\n`;
-                                    } else {
-                                        guildList += "**Invite**: Invite cannot be generated\n\n";
+                                    } catch {
+                                        guildList += "**Invite**: Failed to create invite\n\n";
                                     }
+                                } else {
+                                    guildList += "**Invite**: No suitable channel found\n\n";
+                                }
                             } else {
-                                guildList += "**Invite**: Bot does not have permission to create invites\n\n";
+                                guildList += "**Invite**: Missing permissions\n\n";
                             }
                         }
                         index++;
-                    }   
-                    embed
-                    .setDescription(guildList)
-                    .setFooter({ text: `Page ${page}/${pages}` });
+                    } catch (err) {
+                        console.error(`Error processing guild ${guildId}:`, err);
+                        continue;
+                    }
+                }
                 
-                    await msg.edit({ embeds: [embed] });
-                    await reaction.users.remove(interaction.user);
-                    collector.resetTimer();
-                });
+                return guildList || "No guilds to display on this page.";
+            };
+
+            const guildList = await generateGuildList(page);
+
+            const embed = new EmbedBuilder()
+                .setAuthor({ name: `Guild List Command ${client.config.devBy}` })
+                .setTitle(`${client.user.username} Guild List Tool ${client.config.arrowEmoji}`)
+                .setDescription(guildList)
+                .setColor(client.config.embedDev)
+                .setFooter({ text: `Page ${page}/${pages} • Total Guilds: ${guilds.size}` })
+                .setThumbnail(client.user.displayAvatarURL())
+                .setTimestamp();
+
+            const buttons = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`guildlist-first-${interaction.user.id}`)
+                    .setEmoji('⏮️')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(page === 1),
+                new ButtonBuilder()
+                    .setCustomId(`guildlist-prev-${interaction.user.id}`)
+                    .setEmoji('◀️')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(page === 1),
+                new ButtonBuilder()
+                    .setCustomId(`guildlist-refresh-${interaction.user.id}`)
+                    .setEmoji('🔄')
+                    .setStyle(ButtonStyle.Secondary),
+                new ButtonBuilder()
+                    .setCustomId(`guildlist-next-${interaction.user.id}`)
+                    .setEmoji('▶️')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(page === pages),
+                new ButtonBuilder()
+                    .setCustomId(`guildlist-last-${interaction.user.id}`)
+                    .setEmoji('⏭️')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(page === pages)
+            );
+
+            const metadata = { page, pages, userId: interaction.user.id };
             
-                collector.on("end", async () => {
-                    msg.reactions.removeAll().catch(console.error);
-                    
-                    embed.setFooter({ text: `Page ${page}/${pages} (Inactive)` });
-                    await msg.edit({ embeds: [embed] });
+            await interaction.reply({ 
+                embeds: [embed], 
+                components: pages > 1 ? [buttons] : [],
+                content: `\`\`\`json\n${JSON.stringify(metadata)}\n\`\`\``,
+                fetchReply: true
+            }).then(reply => {
+                interaction.editReply({
+                    embeds: [embed],
+                    components: pages > 1 ? [buttons] : [],
+                    content: null
                 });
-            }
+            });
+                
         } catch (error) {
-            client.logs.error(error);
-            return interaction.reply({ content: "[GUILD_LIST] An error has occurred", flags: MessageFlags.Ephemeral });
+            console.error("Guild list command error:", error);
+            return interaction.reply({ content: "❌ An error occurred while listing guilds.", flags: MessageFlags.Ephemeral });
         }
     },
 };

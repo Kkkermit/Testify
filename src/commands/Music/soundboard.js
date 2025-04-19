@@ -28,7 +28,7 @@ module.exports = {
         }   
 
         if (!interaction.member.voice.channel) {
-            await interaction.reply({ content: 'You must be in a **voice channel** to use this command.', ephemeral:true});
+            await interaction.reply({ content: 'You must be in a **voice channel** to use this command.', flags: MessageFlags.Ephemeral });
         return;
         }
 
@@ -68,7 +68,7 @@ module.exports = {
                 .setTimestamp()
                 .setThumbnail(client.user.avatarURL());
 
-                interaction.editReply({ embeds: [embedStop], ephemeral:true });
+                interaction.editReply({ embeds: [embedStop], flags: MessageFlags.Ephemeral });
             }
 
         });

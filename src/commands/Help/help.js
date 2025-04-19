@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder, EmbedBuilder, ActionRowBuilder } = require('discord.js');
+const { SlashCommandBuilder, StringSelectMenuBuilder, ButtonStyle, ButtonBuilder, EmbedBuilder, ActionRowBuilder, MessageFlags } = require('discord.js');
 const guildSettingsSchema = require('../../schemas/prefixSystem.js');
 const { getSlashCommandsByCategory, getPrefixCommandsByCategory, getCategoryEmoji } = require('../../utils/helpCommandUtils.js');
 
@@ -94,7 +94,7 @@ module.exports = {
                     guildPrefix
                 };
                 
-                await interaction.reply({ embeds: [embed], components: [categorySelectMenu], ephemeral: false });
+                await interaction.reply({ embeds: [embed], components: [categorySelectMenu], flags: MessageFlags.Ephemeral });
                 break;
         }
     }
