@@ -1,41 +1,10 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, MessageFlags, AttachmentBuilder } = require('discord.js');
 const fetch = require('node-fetch');
 const { createCanvas, loadImage } = require('canvas');
-const { 
-    formatPerkName, 
-    getDBDPerkWithBackground 
-} = require('../../images');
+const { formatPerkName, getDBDPerkWithBackground } = require('../../images');
+const dbdPerks = require('../../jsons/dbdPerks.json');
+const { findPerkKeyByName } = require('../../utils/dbdPerkHelper');
 
-function normalizeSpecialChars(str) {
-    if (!str) return '';
-    
-    return str
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
-        .replace(/[&]/g, 'And')
-        .replace(/[œ]/g, 'oe')
-        .replace(/[æ]/g, 'ae')
-        .replace(/[ø]/g, 'o');
-}
-
-function formatPerkNameForAPI(perkName) {
-    if (!perkName) return '';
-    
-    const normalizedName = normalizeSpecialChars(perkName);
-    
-    const lowerName = normalizedName.toLowerCase();
-    if (specialCases[lowerName]) {
-        return specialCases[lowerName];
-    }
-
-    return normalizedName
-        .toLowerCase()
-        .split(/\s+/)
-        .map((word, index) => {
-            return index === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1);
-        })
-        .join('');
-}
 
 module.exports = {
     usableInDms: true,
@@ -43,45 +12,15 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('dbd')
         .setDescription('Dead by Daylight game information commands')
-        .addSubcommand(subcommand => 
-            subcommand
-                .setName('perkinfo')
-                .setDescription('Get information about a specific Dead by Daylight perk')
-                .addStringOption(option => 
-                    option.setName('perk')
-                        .setDescription('Name of the perk (e.g. Adrenaline, DeadHard, BBQAndChili)')
-                        .setRequired(true)
-                )
+        .addSubcommand(subcommand => subcommand.setName('perkinfo').setDescription('Get information about a specific Dead by Daylight perk').addStringOption(option => option.setName('perk').setDescription('Name of the perk (e.g. Adrenaline, Dead Hard, Barbecue & Chili)').setRequired(true).setAutocomplete(true)))
+        .addSubcommand(subcommand => subcommand.setName('playerstats').setDescription('Get player statistics for a Dead by Daylight player').addStringOption(option => option.setName('steamid').setDescription('Steam ID of the player (e.g. 76561199012448515)').setRequired(true)))
+        .addSubcommand(subcommand => subcommand.setName('randomperks').setDescription('Get random Dead by Daylight perks').addStringOption(option => option.setName('role').setDescription('Choose the role (survivor or killer)').setRequired(true)
+            .addChoices(
+                { name: 'Survivor', value: 'survivor' },
+                { name: 'Killer', value: 'killer' }
+            ))
         )
-        .addSubcommand(subcommand => 
-            subcommand
-                .setName('playerstats')
-                .setDescription('Get player statistics for a Dead by Daylight player')
-                .addStringOption(option => 
-                    option.setName('steamid')
-                        .setDescription('Steam ID of the player (e.g. 76561199012448515)')
-                        .setRequired(true)
-                )
-        )
-        .addSubcommand(subcommand => 
-            subcommand
-                .setName('randomperks')
-                .setDescription('Get random Dead by Daylight perks')
-                .addStringOption(option => 
-                    option.setName('role')
-                        .setDescription('Choose the role (survivor or killer)')
-                        .setRequired(true)
-                        .addChoices(
-                            { name: 'Survivor', value: 'survivor' },
-                            { name: 'Killer', value: 'killer' }
-                        )
-                )
-        )
-        .addSubcommand(subcommand => 
-            subcommand
-                .setName('shrine')
-                .setDescription('Get the current Dead by Daylight shrine of secrets')
-        ),
+        .addSubcommand(subcommand => subcommand.setName('shrine').setDescription('Get the current Dead by Daylight shrine of secrets')),
     async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
 
@@ -109,15 +48,41 @@ module.exports = {
                 flags: MessageFlags.Ephemeral
             });
         }
+    },
+    
+    async autocomplete(interaction, client) {
+        const focusedValue = interaction.options.getFocused().toLowerCase();
+        
+        let choices = [];
+        for (const [key, data] of Object.entries(dbdPerks)) {
+            if (data.name && data.name.toLowerCase().includes(focusedValue)) {
+                choices.push({
+                    name: data.name,
+                    value: data.name
+                });
+            }
+        }
+        
+        choices = choices.slice(0, 25);
+        
+        await interaction.respond(choices);
     }
 };
 
 async function handlePerkInfo(interaction, client) {
     const rawPerkName = interaction.options.getString('perk');
-    const perkName = formatPerkNameForAPI(rawPerkName);
+    
+    const perkKey = findPerkKeyByName(rawPerkName);
+    
+    if (!perkKey) {
+        return interaction.editReply({ 
+            content: `Could not find information for perk: "${rawPerkName}". Please check the spelling and try again.`,
+            flags: MessageFlags.Ephemeral
+        });
+    }
     
     try {
-        const response = await fetch(`https://dbd.tricky.lol/api/perkinfo?perk=${encodeURIComponent(perkName)}`);
+        const response = await fetch(`https://dbd.tricky.lol/api/perkinfo?perk=${encodeURIComponent(perkKey)}`);
         const data = await response.json();
         
         if (!data || data.error) {
@@ -233,7 +198,27 @@ async function handlePlayerStats(interaction, client) {
     
     try {
         const response = await fetch(`https://dbd.tricky.lol/api/playerstats?steamid=${encodeURIComponent(steamId)}`);
-        const data = await response.json();
+        
+        if (!response.ok) {
+            return interaction.editReply({ 
+                content: `Could not fetch player stats for SteamID: "${steamId}". Please check the ID and try again.`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
+        
+        let data;
+        try {
+            const text = await response.text();
+            if (!text || text.trim() === '') {
+                throw new Error('Empty response');
+            }
+            data = JSON.parse(text);
+        } catch (parseError) {
+            return interaction.editReply({ 
+                content: `There was a problem fetching your stats. One reason for this is that your privacy settings on game details is set to private or friends only, please change this to be public. Also ensure the Steam ID is correct.`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
         
         if (!data || data.error) {
             return interaction.editReply({ 
@@ -340,6 +325,14 @@ async function handlePlayerStats(interaction, client) {
         await interaction.editReply({ embeds: [survivorEmbed, killerEmbed] });
     } catch (error) {
         console.error(`Error fetching player stats: ${error}`);
+        
+        if (error.name === 'FetchError' && error.message.includes('invalid json response')) {
+            return interaction.editReply({ 
+                content: `There was a problem fetching your stats. One reason for this is that your privacy settings on game details is set to private or friends only, please change this to be public. Also ensure the Steam ID is correct.`,
+                flags: MessageFlags.Ephemeral
+            });
+        }
+        
         await interaction.editReply({ 
             content: 'An error occurred while fetching player stats. Please try again later.',
             flags: MessageFlags.Ephemeral
