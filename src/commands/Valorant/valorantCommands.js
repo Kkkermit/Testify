@@ -242,16 +242,21 @@ module.exports = {
                     const usedEditions = new Set();
             
                     for (const Skin of StoreSkins) {
-                        const tierName = Skin.tier.emoji.match(/:(.*?):/)[1];
+                        const tierName = Skin.tier && Skin.tier.emoji ? 
+                            Skin.tier.emoji.match(/:(.*?):/) : null;
+                            
                         const embed = new EmbedBuilder()
-                            .setColor(Skin.tier.color)
-                            .setTitle(`${Skin.tier.emoji} - ${Skin.name}`)
-                            .setDescription(`Price: **${Skin.price}**`)
-                            .setImage(Skin.icon);
+                            .setColor(Skin.tier ? Skin.tier.color : 'Grey')
+                            .setTitle(`${Skin.tier ? Skin.tier.emoji : ''} ${Skin.name || 'Unknown Skin'}`)
+                            .setDescription(`Price: **${Skin.price || 'Unknown'}**`);
+                            
+                        if (Skin.icon) {
+                            embed.setImage(Skin.icon);
+                        }
             
-                        if (tierName) {
-                            usedEditions.add(tierName);
-                            embed.setThumbnail(images.getEditionURL(tierName));
+                        if (tierName && tierName[1]) {
+                            usedEditions.add(tierName[1]);
+                            embed.setThumbnail(images.getEditionURL(tierName[1]));
                         }
             
                         Embeds.push(embed);
