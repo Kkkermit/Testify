@@ -71,7 +71,6 @@ module.exports = {
 
 async function handlePerkInfo(interaction, client) {
     const rawPerkName = interaction.options.getString('perk');
-    
     const perkKey = findPerkKeyByName(rawPerkName);
     
     if (!perkKey) {
@@ -92,12 +91,16 @@ async function handlePerkInfo(interaction, client) {
             });
         }
         
-        let processedDescription = data.description.replace(/<br>/g, '\n').replace(/<\/?[^>]+(>|$)/g, '');
+        let processedDescription = data.description ? data.description.replace(/<br>/g, '\n').replace(/<\/?[^>]+(>|$)/g, '') : 'No description available';
         
-        data.tunables.forEach((tunable, index) => {
-            const value = Array.isArray(tunable[0]) ? tunable[0][0] : tunable[0];
-            processedDescription = processedDescription.replace(new RegExp(`\\{${index}\\}`, 'g'), value);
-        });
+        if (data.tunables && Array.isArray(data.tunables)) {
+            data.tunables.forEach((tunable, index) => {
+                if (Array.isArray(tunable) && tunable.length > 0) {
+                    const value = Array.isArray(tunable[0]) ? tunable[0][0] : tunable[0];
+                    processedDescription = processedDescription.replace(new RegExp(`\\{${index}\\}`, 'g'), value);
+                }
+            });
+        }
         
         const roleEmoji = data.role === 'survivor' ? '👱' : '🔪';
         const roleColor = data.role === 'survivor' ? '#3498DB' : '#E74C3C';
@@ -119,35 +122,61 @@ async function handlePerkInfo(interaction, client) {
             'buff': '⬆️',
             'interrogation': '❓',
             'power': '⚡',
-            'control': '🎮'
+            'control': '🎮',
+            'hinderance': '🛑',
+            'safeguard': '🛡️',
+            'chasing': '🏃‍♂️',
+            'cruelty': '😈'
         };
         
-        const categoriesWithEmojis = data.categories.map(cat => {
+        const categories = data.categories || [];
+        
+        const categoriesWithEmojis = categories.map(cat => {
+            if (!cat) return '📌 Unknown';
             const emoji = categoryEmojis[cat.toLowerCase()] || '📌';
             return `${emoji} ${cat.charAt(0).toUpperCase() + cat.slice(1)}`;
         }).join(' • ');
         
-        const tunableTiersText = data.tunables.map((tunable, index) => {
-            if (tunable.length === 1) {
-                return `• Tier {${index}}: **${tunable[0]}**`;
-            } else {
-                return `• Tier {${index}}: **${tunable.join(' / ')}**`;
-            }
-        }).join('\n');
+        const tunableTiersText = data.tunables && Array.isArray(data.tunables) ? 
+            data.tunables.map((tunable, index) => {
+                if (!Array.isArray(tunable) || tunable.length === 0) {
+                    return `• Tier {${index}}: **Unknown**`;
+                }
+                if (tunable.length === 1) {
+                    return `• Tier {${index}}: **${tunable[0]}**`;
+                } else {
+                    return `• Tier {${index}}: **${tunable.join(' / ')}**`;
+                }
+            }).join('\n') : '';
 
-        const formattedPerkName = formatPerkName(data.name);
+        const formattedPerkName = formatPerkName(data.name || rawPerkName);
         const perkImage = await getDBDPerkWithBackground(formattedPerkName);
         
         const embed = new EmbedBuilder()
             .setColor(roleColor)
-            .setTitle(`${roleEmoji} ${data.name}`)
+            .setTitle(`${roleEmoji} ${data.name || rawPerkName}`)
             .setDescription(`*${processedDescription}*`)
             .addFields(
-                { name: '📋 __Categories__', value: categoriesWithEmojis || '*None*', inline: false },
-                { name: '⚖️ __Role__', value: `${roleEmoji} **${data.role.charAt(0).toUpperCase() + data.role.slice(1)}**`, inline: true },
-                { name: '🏆 __Teachable Level__', value: data.teachable ? `**Level ${data.teachable}**` : '**Common Perk**', inline: true }
-            )
-            .setFooter({ text: '💀 Data provided by dbd.tricky.lol API' })
+                { name: '📋 __Categories__', value: categoriesWithEmojis || '*None*', inline: false }
+            );
+        
+        if (data.role) {
+            embed.addFields({ 
+                name: '⚖️ __Role__', 
+                value: `${roleEmoji} **${data.role.charAt(0).toUpperCase() + data.role.slice(1)}**`, 
+                inline: true 
+            });
+        }
+        
+        if (data.teachable !== undefined) {
+            embed.addFields({ 
+                name: '🏆 __Teachable Level__', 
+                value: data.teachable ? `**Level ${data.teachable}**` : '**Common Perk**', 
+                inline: true 
+            });
+        }
+        
+        embed.setFooter({ text: '💀 Data provided by dbd.tricky.lol API' })
             .setTimestamp();
 
         if (tunableTiersText) {
@@ -169,6 +198,72 @@ async function handlePerkInfo(interaction, client) {
                 11: 'Quentin Smith',
                 12: 'Tapp',
                 13: 'Adam Francis',
+                14: 'Jeff Johansen',
+                15: 'Jane Romero',
+                16: 'Ash Williams',
+                17: 'Nancy Wheeler',
+                18: 'Steve Harrington',
+                19: 'Yui Kimura',
+                20: 'Zarina Kassir',
+                21: 'Cheryl Mason',
+                22: 'Felix Richter',
+                23: 'Élodie Rakoto',
+                24: 'Yun-Jin Lee',
+                25: 'Jill Valentine',
+                26: 'Leon S. Kennedy',
+                27: 'Mikaela Reid',
+                28: 'Jonah Vasquez',
+                29: 'Yoichi Asakawa',
+                30: 'Haddie Kaur',
+                31: 'Ada Wong',
+                32: 'Rebecca Chambers',
+                33: 'Vittorio Toscano',
+                34: 'Thalita Lyra',
+                35: 'Renato Lyra',
+                36: 'Nicolas Cage',
+                37: 'Ellen Burstyn',
+                38: 'Ellen Ripley',
+                39: 'Alan Wake',
+                40: 'Sable Ward',
+                268435456: 'Trapper',
+                268435457: 'Wraith',
+                268435458: 'Hillbilly',
+                268435459: 'Nurse',
+                268435460: 'Hag',
+                268435461: 'Shape',
+                268435462: 'Doctor',
+                268435463: 'Huntress',
+                268435464: 'Cannibal',
+                268435465: 'Nightmare',
+                268435466: 'Pig',
+                268435467: 'Clown',
+                268435468: 'Spirit',
+                268435469: 'Legion',
+                268435470: 'Plague',
+                268435471: 'Ghost Face',
+                268435472: 'Demogorgon',
+                268435473: 'Oni',
+                268435474: 'Deathslinger',
+                268435475: 'Executioner',
+                268435476: 'Blight',
+                268435477: 'Twin',
+                268435478: 'Trickster',
+                268435479: 'Nemesis',
+                268435480: 'Cenobite',
+                268435481: 'Artist',
+                268435482: 'Onryō',
+                268435483: 'Dredge',
+                268435484: 'Mastermind',
+                268435485: 'Knight',
+                268435486: 'Skull Merchant',
+                268435487: 'Singularity',
+                268435488: 'Xenomorph',
+                268435489: 'Good Guy',
+                268435490: 'Unknown',
+                268435491: 'Vecna',
+                268435492: 'Dracula',
+                268435493: 'Portia Maye',
+                268435494: 'Kaneki Ken'
             };
             
             const characterName = characterNames[data.character] || `Character ID: ${data.character}`;
@@ -201,7 +296,7 @@ async function handlePlayerStats(interaction, client) {
         
         if (!response.ok) {
             return interaction.editReply({ 
-                content: `Could not fetch player stats for SteamID: "${steamId}". Please check the ID and try again.`,
+                content: `Could not fetch player stats for SteamID: "${steamId}". If you haven't added yourself to be tracked by the API yet, please do this first. Visit \`\`https://dbd.tricky.lol/\`\` and enter in your steamID (${steamId}).`,
                 flags: MessageFlags.Ephemeral
             });
         }
@@ -215,14 +310,14 @@ async function handlePlayerStats(interaction, client) {
             data = JSON.parse(text);
         } catch (parseError) {
             return interaction.editReply({ 
-                content: `There was a problem fetching your stats. One reason for this is that your privacy settings on game details is set to private or friends only, please change this to be public. Also ensure the Steam ID is correct.`,
+                content: "There was a problem fetching your stats. There could be a few reasons for this. One is that you have not added yourself to be tracked using the api. Please visit this site `https://dbd.tricky.lol/` and enter in your steamID. Two is that your privacy settings on game details is set to private or friends only, please change this to be public. Also ensure the Steam ID is correct.",
                 flags: MessageFlags.Ephemeral
             });
         }
         
         if (!data || data.error) {
             return interaction.editReply({ 
-                content: `Could not find player stats for SteamID: "${steamId}". Please check the ID and try again.`,
+                content: `Could not fetch player stats for SteamID: "${steamId}". If you haven't added yourself to be tracked by the API yet, please do this first. Visit \`\`https://dbd.tricky.lol/\`\` and enter in your steamID (${steamId}).`,
                 flags: MessageFlags.Ephemeral
             });
         }
