@@ -66,7 +66,7 @@ module.exports = {
                         embeds: [warningEmbed], 
                         components: [row], 
                         flags: MessageFlags.Ephemeral,
-                        fetchReply: true
+                        withResponse: true
                     });
 
                     const collector = response.createMessageComponentCollector({ 

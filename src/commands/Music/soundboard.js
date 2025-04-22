@@ -52,7 +52,7 @@ module.exports = {
         .setTimestamp()
         .setThumbnail(client.user.avatarURL());
 
-        const message = await interaction.reply({ embeds: [embedPlay], fetchReply: true, flags: MessageFlags.Ephemeral });
+        const message = await interaction.reply({ embeds: [embedPlay], withResponse: true, flags: MessageFlags.Ephemeral });
 
         audioPlayer.on('stateChange', (oldState, newState) => {
 

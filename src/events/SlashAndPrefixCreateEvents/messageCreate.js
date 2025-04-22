@@ -45,7 +45,7 @@ module.exports = {
             .setFooter({ text: `You are blacklisted from using this bot` })
             .setTimestamp();
 
-            const reply = await message.reply({ embeds: [embed], fetchReply: true });
+            const reply = await message.reply({ embeds: [embed], withResponse: true });
             setTimeout(async () => {
                 await reply.delete();
             }, 2500);

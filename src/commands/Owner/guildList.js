@@ -116,7 +116,7 @@ module.exports = {
                 embeds: [embed], 
                 components: pages > 1 ? [buttons] : [],
                 content: `\`\`\`json\n${JSON.stringify(metadata)}\n\`\`\``,
-                fetchReply: true
+                withResponse: true
             }).then(reply => {
                 interaction.editReply({
                     embeds: [embed],
