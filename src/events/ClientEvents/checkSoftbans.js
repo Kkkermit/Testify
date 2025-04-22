@@ -26,10 +26,8 @@ module.exports = {
                 });
                 
                 if (expiredSoftbans.length > 0) {
-                    client.logs.info(`[SOFTBAN] Found ${expiredSoftbans.length} expired softbans to process`);
                     lastCheckHadResults = true;
                 } else if (lastCheckHadResults || checkCount % 60 === 0) {
-                    client.logs.debug(`[SOFTBAN] No expired softbans to process (check #${checkCount})`);
                     lastCheckHadResults = false;
                 }
                 
@@ -37,7 +35,6 @@ module.exports = {
                     try {
                         const guild = client.guilds.cache.get(softban.guildId);
                         if (!guild) {
-                            client.logs.warn(`[SOFTBAN] Guild ${softban.guildId} not found for softban ID ${softban._id}`);
                             softban.isActive = false;
                             await softban.save();
                             continue;
@@ -53,8 +50,6 @@ module.exports = {
                                 client.logs.error(`[SOFTBAN] Error unbanning user ${softban.userId} from guild ${softban.guildId}: ${error.message}`);
                             }
                         });
-                        
-                        client.logs.info(`[SOFTBAN] User ${softban.userId} automatically unbanned from guild ${softban.guildId}`);
                         
                         softban.isActive = false;
                         await softban.save();

@@ -129,7 +129,6 @@ module.exports = {
                 
                 const now = Date.now();
                 if (now - lastRoutineLog > 6 * 60 * 60 * 1000) {
-                    console.log(`${color.blue}[${getTimestamp()}] [INSTA_NOTIFICATION] Checking posts for ${totalUsers} Instagram users${color.reset}`);
                     lastRoutineLog = now;
                 }
 
@@ -165,10 +164,6 @@ module.exports = {
                         }
                     }
                 }
-                
-                if (now - lastRoutineLog < 10000) {
-                    console.log(`${color.green}[${getTimestamp()}] [INSTA_NOTIFICATION] Completed Instagram post check${color.reset}`);
-                }
             } catch (error) {
                 console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Error in post checking routine: ${color.reset}`, error);
             }
@@ -177,7 +172,6 @@ module.exports = {
         setInterval(checkInstagramPosts, 15 * 60 * 1000);
 
         setTimeout(() => {
-            console.log(`${color.blue}[${getTimestamp()}] [INSTA_NOTIFICATION] Starting initial Instagram post check${color.reset}`);
             checkInstagramPosts();
         }, 60000); 
     }
