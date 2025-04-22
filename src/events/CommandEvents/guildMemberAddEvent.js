@@ -6,7 +6,7 @@ const { addSuffix } = require("../../lib/addSuffix");
 
 module.exports = {
     name: Events.GuildMemberAdd,
-    async execute(member) {
+    async execute(member, message) {
 
         if (!message.guild || message.author.bot) return;
 
