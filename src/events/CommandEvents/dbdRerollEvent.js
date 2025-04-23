@@ -1,4 +1,4 @@
-const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder } = require('discord.js');
+const { Events, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle, AttachmentBuilder, MessageFlags } = require('discord.js');
 const fetch = require('node-fetch');
 const { createCanvas, loadImage } = require('canvas');
 const { formatPerkName, getDBDPerkWithBackground } = require('../../images');
@@ -20,7 +20,7 @@ module.exports = {
                 if (!data || Object.keys(data).length === 0) {
                     return interaction.followUp({ 
                         content: `Could not fetch new random ${role} perks. Please try again later.`,
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
                 
@@ -215,7 +215,7 @@ module.exports = {
                 console.error(`Error in DBD reroll: ${error}`);
                 await interaction.followUp({ 
                     content: 'An error occurred while rerolling perks. Please try again later.',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             }
         }
