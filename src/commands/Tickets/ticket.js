@@ -4,10 +4,11 @@ const TicketSetup = require('../../schemas/ticketSetupSystem');
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName('ticket')
     .setDescription('A command to setup the ticket system.')
-    .setDefaultMemberPermissions(PermissionFlagsBits.ManageChannels)
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addChannelOption(option => option.setName('channel').setDescription('Select the channel where the tickets should be created.').setRequired(true).addChannelTypes(ChannelType.GuildText))
     .addChannelOption(option => option.setName('category').setDescription('Select the parent where the tickets should be created.').setRequired(true).addChannelTypes(ChannelType.GuildCategory))
     .addChannelOption(option => option.setName('transcripts').setDescription('Select the channel where the transcripts should be sent.').setRequired(true).addChannelTypes(ChannelType.GuildText))

@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField, MessageFlags } = require('discord.js');
+const { EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const prefixSchema = require('../../schemas/prefixSystem.js');
 
 module.exports = {
@@ -8,9 +8,8 @@ module.exports = {
     usage: 'change-prefix <prefix>',
     category: 'Moderation',
     usableInDms: false,
+    permissions: [PermissionFlagsBits.Administrator],
     async execute(message, client, args)  {
-
-        if (!message.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const prefix = args[0];
         if (prefix.length > 4) return message.channel.send({ content: 'The prefix **cannot** be longer than 4 characters!', flags: MessageFlags.Ephemeral });

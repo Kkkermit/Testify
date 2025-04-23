@@ -4,6 +4,7 @@ const autoRoleSchema = require("../../schemas/autoRoleSystem");
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName("autorole")
     .setDescription("An auto role system!")
@@ -22,8 +23,6 @@ module.exports = {
         const embed = new EmbedBuilder();
     
         const bot = interaction.guild.members.me;
-
-        if (!interaction.member.permissions.has(PermissionFlagsBits.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
     
         if (role && role.position > bot.roles.highest.position) return await interaction.reply({ content: "I **cannot** manager that role as it is higher than mine!", flags: MessageFlags.Ephemeral });
 

@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsB
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.ModerateMembers],
     data: new SlashCommandBuilder()
     .setName('unmute')
     .setDescription('Unmute a server member')
@@ -15,7 +16,6 @@ module.exports = {
         const timeMember = await interaction.guild.members.fetch(timeUser.id);
         const user = interaction.options.getUser('user') || interaction.user;
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ModerateMembers)) return interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral})
         if (!timeMember.kickable) return interaction.reply({ content: 'I **cannot** timeout this user! This is either because their role is **higher** then me or you.', flags: MessageFlags.Ephemeral})
         if (interaction.member.id === timeMember.id) return interaction.reply({content: "You **cannot** use the \`\`unmute\`\` command on yourself...", flags: MessageFlags.Ephemeral})
         if (timeMember.permissions.has(PermissionsBitField.Flags.Administrator)) return interaction.reply({content: "You **cannot** untimeout staff members or people with the **Administrator** permission!", flags: MessageFlags.Ephemeral})

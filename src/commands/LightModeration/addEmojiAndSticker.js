@@ -1,9 +1,10 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const { default: axios } = require('axios');
 
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageGuildExpressions],
     data: new SlashCommandBuilder()
     .setName('add')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuildExpressions)
@@ -16,8 +17,6 @@ module.exports = {
         
         switch (sub) {
             case 'emoji':
-
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuildExpressions)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             let emoji = interaction.options.getString('emoji')?.trim();
             const name = interaction.options.getString('name');

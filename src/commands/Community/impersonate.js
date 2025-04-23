@@ -1,9 +1,10 @@
-const { SlashCommandBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require("discord.js");
+const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require("discord.js");
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
     usableInDms: false,
     category: "Community",
+    permissions: [PermissionFlagsBits.createWebhook],
     data: new SlashCommandBuilder()
     .setName("impersonate")
     .setDescription("Makes you look like someone else")
@@ -18,10 +19,6 @@ module.exports = {
         const message = options.getString("message");
 
         if (filter.words.includes(message)) return interaction.reply({ content: `${client.config.filterMessage}`, flags: MessageFlags.Ephemeral});
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.createWebhook)) return await interaction.reply({
-            content: `${client.config.noPerms}`
-        })
 
         if (message.includes('@everyone') || message.includes('@here')) return await interaction.reply({ 
             content: `You **cannot** mention \`\`everyone/here\`\` with this command`, 

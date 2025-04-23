@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsB
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.BanMembers],
     data: new SlashCommandBuilder()
     .setName('unban')
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers)
@@ -13,7 +14,6 @@ module.exports = {
         
         const userID = interaction.options.getUser('user');
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`unban\`\` command on yourself...'});
 
         let reason = interaction.options.getString('reason');

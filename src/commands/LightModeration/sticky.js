@@ -4,6 +4,7 @@ const sticky = require('../../schemas/stickyMessageSystem');
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName('sticky-message')
     .setDescription('sticky')
@@ -15,8 +16,6 @@ module.exports = {
 
         const { options } = interaction;
         const sub = options.getSubcommand();
-
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         var data;
 

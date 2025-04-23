@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } =
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.ChangeNickname],
     data: new SlashCommandBuilder()
     .setName('nick')
     .setDescription(`Change specified user's nickname.`)
@@ -16,8 +17,6 @@ module.exports = {
         const member = await interaction.options.getMember('user');
 
         if (user === interaction.user || user === null) {
-
-            if (!interaction.member.permissions.has(PermissionFlagsBits.ChangeNickname)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             await interaction.member.setNickname(nick).catch(err => {
                 return interaction.reply({ content: `**Couldn't** change your nickname! **Check** my permissions and **role position** and try again.`, flags: MessageFlags.Ephemeral });

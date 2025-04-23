@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags, Ac
 module.exports = {
     usableInDms: false,
     category: "Owner",
+    permissions: [PermissionsBitField.Administrator],
     data: new SlashCommandBuilder()
     .setName("guild-list")
     .setDescription("Lists all guilds the bot is in (OWNER ONLY COMMAND).")

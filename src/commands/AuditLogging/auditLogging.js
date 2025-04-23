@@ -4,22 +4,17 @@ const logSchema = require('../../schemas/auditLoggingSystem');
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
         .setName('logs')
         .setDescription('Set up and manage server logging system')
+        .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
         .addSubcommand(subcommand => subcommand.setName('setup').setDescription('Set up the logging system').addChannelOption(option => option.setName('channel').setDescription('The channel to send logs to').setRequired(true)))
         .addSubcommand(subcommand => subcommand.setName('configure').setDescription('Configure which logs you want to receive'))
         .addSubcommand(subcommand => subcommand.setName('disable').setDescription('Disable the logging system'))
         .addSubcommand(subcommand => subcommand.setName('status').setDescription('Check the status of your logging system')),
     async execute(interaction, client) {
         const subcommand = interaction.options.getSubcommand();
-
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) {
-            return interaction.reply({
-                content: `${client.config.noPerms}`,
-                flags: MessageFlags.Ephemeral
-            });
-        }
 
         switch (subcommand) {
             case 'setup':

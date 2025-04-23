@@ -16,6 +16,13 @@ module.exports = {
 	botInvite: "https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=bot%20applications.commands",
 	botServerInvite: "https://discord.gg/xcMVwAVjSD",
 
+	noPerms: (missingPerms) => {
+		const formattedPerms = missingPerms
+			.map((perm) => `\`${perm.toString().split("_").join(" ").toLowerCase()}\``)
+			.join(", ");
+		return `You **do not** have the required permissions to use this command!\nMissing Permissions: ${formattedPerms}`;
+	},
+
 	// EMBED COLORS //
 	embedColor: "Blurple",
 	embedAutomod: "Blue",

@@ -7,12 +7,12 @@ module.exports = {
     usage: 'addrole <user> <role>',
     category: 'Moderation',
     usableInDms: false,
+    permissions: [PermissionFlagsBits.ManageRoles],
     async execute(message, client, args) {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
         const role = message.guild.roles.cache.get(args[2]) || message.mentions.roles.first();
         
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageRoles)) return message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
         if (!user) return message.channel.send({ content: 'Please mention a **user** to assign a role to.', flags: MessageFlags.Ephemeral });
         if (!role) return message.channel.send({ content: 'Please mention a **role** to assign to the user.', flags: MessageFlags.Ephemeral });
 

@@ -7,14 +7,13 @@ module.exports = {
     usage: "slowmode <set|off|check> [duration]",
     category: "Moderation",
     usableInDms: false,
+    permissions: [PermissionFlagsBits.ManageChannels],
     async execute(message, client, args) {
         if (!args.length) {
             return message.reply("Please specify a subcommand: `set`, `off`, or `check`");
         }
 
         const sub = args[0].toLowerCase();
-
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageChannels)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const mentionedChannel = message.mentions.channels.first();
         const channel = mentionedChannel || message.channel;

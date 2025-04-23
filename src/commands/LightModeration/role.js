@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageRoles],
     data: new SlashCommandBuilder()
     .setName('role')
     .setDescription('Role management tool')
@@ -17,10 +18,6 @@ module.exports = {
 
             const member = interaction.options.getMember('member');
             const role = interaction.options.getRole('role');
-
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageRoles)) {
-                return interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
-            }
 
             if (interaction.member.roles.cache.has(role.id)) {
                 return interaction.reply({ content: 'Member already has that role!', flags: MessageFlags.Ephemeral });

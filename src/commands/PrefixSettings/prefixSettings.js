@@ -1,10 +1,11 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const prefixSchema = require('../../schemas/prefixSystem.js')
 const prefixSetupSchema = require('../../schemas/prefixEnableSystem.js')
 
 module.exports = {
     usableInDms: false,
     category: "Prefix Settings",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName('prefix')
     .setDescription('Change the prefix of the bot in your server.')
@@ -17,8 +18,6 @@ module.exports = {
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const prefixSetupData = await prefixSetupSchema.findOne({ Guild: interaction.guild.id });
         if (sub !== 'enable' && sub !== 'disable' && (!prefixSetupData || !prefixSetupData.Enabled)) {

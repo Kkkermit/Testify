@@ -3,6 +3,7 @@ const { EmbedBuilder, PermissionsBitField, SlashCommandBuilder, PermissionFlagsB
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.KickMembers],
     data: new SlashCommandBuilder()
     .setName('kick')
     .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers)
@@ -15,7 +16,6 @@ module.exports = {
         const ID = users.id;
         const kickedmember = interaction.options.getMember('user');
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers) && interaction.user.id !== process.env.clientid) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         if (interaction.member.id === ID) return await interaction.reply({ content: 'You **cannot** use the \`\`kick\`\` command on yourself...', flags: MessageFlags.Ephemeral});
 
         if (!kickedmember) return await interaction.reply({ content: `That user **does not** exist within your server.`, flags: MessageFlags.Ephemeral});

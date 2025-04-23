@@ -4,6 +4,7 @@ const levelschema = require('../../schemas/levelSetupSystem');
 module.exports = {
     usableInDms: false,
     category: "Leveling",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName('leveling-system')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
@@ -22,8 +23,6 @@ module.exports = {
     .addSubcommand(command => command.setName('enable').setDescription('Enables your leveling system.').addChannelOption(option => option.setName('channel').setDescription('Channel where level message is sent, If blank message will be sent to channel where user last was').setRequired(false)))
     .addSubcommand(command => command.setName('disable-multiplier').setDescription('Disables the multiplier of your role.')),
     async execute(interaction, client) {
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = await interaction.options.getSubcommand();
         const multiplier = await interaction.options.getString('multiplier');

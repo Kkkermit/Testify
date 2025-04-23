@@ -3,6 +3,7 @@ const { SlashCommandBuilder, PermissionFlagsBits, MessageFlags, EmbedBuilder } =
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageChannels],
     data: new SlashCommandBuilder()
     .setName("slow-mode")
     .setDescription("Set, disable, or check slowmode")

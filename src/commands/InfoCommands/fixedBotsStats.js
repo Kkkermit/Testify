@@ -6,6 +6,7 @@ const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 module.exports = {
     usableInDms: false,
     category: "Info",
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName('bot-stats-channel')
     .setDescription('Set the channel for the bot stats command.')
@@ -16,8 +17,6 @@ module.exports = {
 
         const { options } = interaction;
         const sub = options.getSubcommand();
-
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         switch(sub) {
             case 'set':

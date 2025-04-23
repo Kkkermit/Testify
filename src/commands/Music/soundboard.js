@@ -4,6 +4,7 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, VoiceConnectio
 module.exports = {
     usableInDms: false,
     category: "Music",
+    permissions: [PermissionFlagsBits.UseSoundboard],
     data: new SlashCommandBuilder()
     .setName('soundboard')
     .setDescription('Play a sound effect in your voice channel.')
@@ -16,8 +17,6 @@ module.exports = {
     ),
     async execute(interaction, client) {
         const sound = interaction.options.getString('sound');
-
-        if (!interaction.member.permissions.has(PermissionFlagsBits.UseSoundboard)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         let audioURL;
 

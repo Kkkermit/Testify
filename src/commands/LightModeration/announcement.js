@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, ChannelType, PermissionFlagsBits, Mes
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName("announce")
     .setDescription("Announce something in the server!")
@@ -33,7 +34,6 @@ module.exports = {
     ),
     async execute (interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionFlagsBits.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         const channelID = interaction.options.getChannel("channel");
         const title = interaction.options.getString("title") || "NEW ANNOUNCEMENT!";
         const desc = interaction.options.getString("description") || "*No description provided.*";

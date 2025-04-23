@@ -7,14 +7,17 @@ module.exports = {
     usage: 'kick <user> [reason]',
     category: 'Moderation',
     usableInDms: false,
+    permissions: [PermissionFlagsBits.KickMembers],
     async execute(message, client, args) {
 
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
 
-        if (!message.member.permissions.has(PermissionFlagsBits.KickMembers)) return message.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
         if (!user) return message.channel.send({ content: 'Please mention a **user** to kick.', flags: MessageFlags.Ephemeral });
 
         const reason = args.slice(1).join(' ') || `\`\`No reason given\`\``;
+
+        if (user.id === client.user.id) return message.channel.send({ content: 'You cannot kick me from the server', flags: MessageFlags.Ephemeral });
+        if (user.id === message.member.id) return message.channel.send({ content: 'You cannot kick yourself from the server', flags: MessageFlags.Ephemeral });
 
         if (user.kickable) {
 

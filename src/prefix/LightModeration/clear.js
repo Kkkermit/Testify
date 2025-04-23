@@ -8,6 +8,7 @@ module.exports = {
     usage: 'clear <number> [user]',
     category: 'Moderation',
     usableInDms: false,
+    permissions: [PermissionFlagsBits.ManageMessages],
     async execute(message, client, args) {
         if (!args.length) {
             return message.reply('Please provide the number of messages to clear!');
@@ -15,8 +16,6 @@ module.exports = {
 
         const amount = args[0];
         const userMention = message.mentions.users.first();
-
-        if (!message.member.permissions.has(PermissionFlagsBits.ManageMessages)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) {
             return message.reply('Please provide a **valid** number between `1` and `99`.');

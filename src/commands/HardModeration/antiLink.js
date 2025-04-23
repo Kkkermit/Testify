@@ -4,6 +4,7 @@ const linkSchema = require('../../schemas/antiLinkSystem');
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName('anti-link')
     .setDescription('Enables/Disables the anti-link moderation system.')
@@ -33,8 +34,6 @@ module.exports = {
     async execute(interaction, client) {
         
         const { options } = interaction;
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
         const sub = options.getSubcommand();
 

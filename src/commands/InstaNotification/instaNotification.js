@@ -26,6 +26,7 @@ async function validateInstagramUser(username) {
 module.exports = {
     usableInDms: false,
     category: 'Instagram',
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName('insta-notification')
     .setDescription('Manage Instagram notifications')

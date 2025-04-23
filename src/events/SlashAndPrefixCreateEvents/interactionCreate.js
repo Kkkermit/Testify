@@ -1,4 +1,4 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, MessageFlags } = require("discord.js");
+const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const config = require('../../config')
 const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -51,6 +51,26 @@ module.exports = {
         if (!checkDmUsability(command, interaction)) return;
         
         if (!checkUnderDevelopment(command, interaction)) return;
+
+        if (command.permissions && command.permissions.length) {
+            const missingPerms = command.permissions.filter(perm => {
+                if (!interaction.member.permissions.has(perm)) {
+                    return true;
+                }
+                return false;
+            }).map(perm => {
+                return Object.keys(PermissionFlagsBits).find(p => 
+                    PermissionFlagsBits[p] === perm
+                ).replace(/_/g, ' ').toLowerCase();
+            });
+
+            if (missingPerms.length > 0) {
+                return interaction.reply({ 
+                    content: client.config.noPerms(missingPerms),
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
+        }
         
         try{
             await command.execute(interaction, client);

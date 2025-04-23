@@ -3,6 +3,7 @@ const {SlashCommandBuilder, MessageFlags, PermissionFlagsBits, ModalBuilder, Tex
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName("say")
     .setDescription("Send a message through the bot")

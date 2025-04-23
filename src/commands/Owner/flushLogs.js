@@ -5,6 +5,7 @@ const { color, getTimestamp } = require('../../utils/loggingEffects');
 module.exports = {
     usableInDms: true,
     category: "Owner",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
         .setName('flush-logs')
         .setDescription('Manually flush logs to Discord webhook (Owner Only)')

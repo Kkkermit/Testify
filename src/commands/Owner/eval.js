@@ -1,11 +1,13 @@
-const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags, EmbedBuilder } = require('discord.js');
+const { SlashCommandBuilder, ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder, MessageFlags, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 
 module.exports = {
     usableInDms: true,
     category: "Owner",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName('eval')
-    .setDescription('Evaluates JavaScript code.'),
+    .setDescription('Evaluates JavaScript code.')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
     async execute(interaction, client) {
 
         if (!client.config.developers.includes(interaction.user.id)) {

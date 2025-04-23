@@ -1,4 +1,4 @@
-const { EmbedBuilder, SlashCommandBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require('discord.js');
+const { EmbedBuilder, SlashCommandBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 const ecoSchema = require('../../schemas/economySystem');
 const levelSchema = require('../../schemas/userLevelSystem');
 const levelschema = require('../../schemas/levelSetupSystem');
@@ -6,6 +6,7 @@ const levelschema = require('../../schemas/levelSetupSystem');
 module.exports = {
     usableInDms: false,
     category: "Level and Economy",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName('give')
     .setDescription('Give a user specified amount of currency.')
@@ -14,7 +15,6 @@ module.exports = {
     .addSubcommand(command => command.setName('xp').setDescription('Give specified user specified amount of XP.').addUserOption(option => option.setName('user').setDescription('Specified user will be given specified amount of XP.').setRequired(true)).addNumberOption(option => option.setName('amount').setDescription('The amount of XP you want to give specified user.').setRequired(true).setMaxValue(10000000).setMinValue(10))),
     async execute(interaction, client) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         const sub = interaction.options.getSubcommand();
 
         switch (sub) {

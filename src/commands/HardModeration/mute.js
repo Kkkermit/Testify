@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsB
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.ModerateMembers],
     data: new SlashCommandBuilder()
     .setName('mute')
     .setDescription('Times out a server member.')
@@ -39,7 +40,6 @@ module.exports = {
         const duration = interaction.options.getString('duration');
         const user = interaction.options.getUser('user') || interaction.user;
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ModerateMembers)) return interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral})
         if (!timeMember) return await interaction.reply({ content: 'The **user** mentioned is no longer within the server.', flags: MessageFlags.Ephemeral})
         if (!timeMember.kickable) return interaction.reply({ content: 'I **cannot** timeout this user! This is either because their **higher** then me or you.', flags: MessageFlags.Ephemeral})
         if (!duration) return interaction.reply({content: 'You **must** set a valid duration for the timeout', flags: MessageFlags.Ephemeral})

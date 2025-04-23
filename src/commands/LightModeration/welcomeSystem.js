@@ -1,15 +1,16 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const WelcomeMessage = require("../../schemas/welcomeSystem");
 
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName("welcome-system")
     .setDescription("Configure the welcome message system")
     .addSubcommand(subcommand => subcommand.setName("set").setDescription("Set the welcome message system to the server").addStringOption(option => option.setName("message").setDescription("The welcome message to send. ` Use {user} to mention the user `").setRequired(true)).addChannelOption(option => option.setName("channel").setDescription("The channel to send welcome messages to").setRequired(true)).addBooleanOption(option => option.setName("embed").setDescription("Send the welcome message as an embed").setRequired(true)))
     .addSubcommand(subcommand => subcommand.setName("remove").setDescription("Remove the welcome message system from the server"))
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.ManageGuild),
+    .setDefaultMemberPermissions(PermissionFlagsBits.ManageGuild),
     async execute(interaction, client) {
 
         const subcommand = interaction.options.getSubcommand();

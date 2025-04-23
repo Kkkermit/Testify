@@ -4,6 +4,7 @@ var timeout = [];
 module.exports = {
     usableInDms: false,
     category: "Server Utils",
+    permissions: [PermissionFlagsBits.ManageMessages],
     data: new SlashCommandBuilder()
     .setName('create')
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
@@ -83,8 +84,6 @@ module.exports = {
             if (thumbnail) {
                 if (!thumbnail.startsWith('http') && thumbnail !== 'null') return await interaction.reply({ content: 'You **cannot** make this your thumbnail!', flags: MessageFlags.Ephemeral})
             }
-        
-            if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
 
             const embed = new EmbedBuilder()
             .setTitle(title)

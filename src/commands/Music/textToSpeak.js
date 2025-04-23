@@ -1,17 +1,16 @@
-const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const filter = require('../../jsons/filter.json');
 
 module.exports = {
     usableInDms: false,
     category: "Music",
+    permissions: [PermissionFlagsBits.SendTTSMessages],
     data: new SlashCommandBuilder()
     .setName('tts')
     .setDescription('Sends a text to speech message in the server')
-    .setDefaultMemberPermissions(PermissionsBitField.Flags.SendTTSMessages)
+    .setDefaultMemberPermissions(PermissionFlagsBits.SendTTSMessages)
     .addStringOption(option => option.setName('message').setDescription('The message you want to send').setRequired(true)),
     async execute(interaction, client){
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.SendTTSMessages)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral})
 
         const message = interaction.options.getString('message');
 

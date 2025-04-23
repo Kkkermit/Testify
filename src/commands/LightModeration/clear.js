@@ -3,6 +3,7 @@ const { SlashCommandBuilder, PermissionsBitField, EmbedBuilder, PermissionFlagsB
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.ManageMessages],
     data: new SlashCommandBuilder()
     .setName('clear')
     .setDescription('Clear messages')
@@ -15,10 +16,6 @@ module.exports = {
 
     const amount = options.getString('amount');
     const user = options.getUser('user');
-        
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageMessages)) {
-            return interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
-        }
         
         if (isNaN(amount) || parseInt(amount) < 1 || parseInt(amount) > 99) {
             return interaction.reply({ content: 'Please provide a valid number between 1 and 99.', flags: MessageFlags.Ephemeral });

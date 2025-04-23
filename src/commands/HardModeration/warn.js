@@ -5,6 +5,7 @@ const config = require('../../config')
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.ModerateMembers],
     data: new SlashCommandBuilder()
     .setName("warn")
     .setDescription("Warn command")
@@ -18,8 +19,6 @@ module.exports = {
     async execute (interaction) {
 
         const { guild, member, user, options } = interaction;
-
-        if (!member.permissions.has(PermissionFlagsBits.ModerateMembers)) { return await interaction.reply({ content: `${config.noPerms}`, flags: MessageFlags.Ephemeral });}
 
         const subcommand = options.getSubcommand();
 

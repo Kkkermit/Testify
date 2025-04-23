@@ -4,6 +4,7 @@ const blacklistSchema = require("../../schemas/blacklistSystem")
 module.exports = {
     usableInDms: true,
     category: "Owner",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName("blacklist")
     .setDescription("Blacklist system for users (OWNER ONLY COMMAND)")

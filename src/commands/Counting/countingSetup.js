@@ -4,6 +4,7 @@ const countingSchema = require('../../schemas/countingSystem');
 module.exports = {
     usableInDms: false,
     category: "Fun",
+    permissions: [PermissionFlagsBits.ManageGuild],
     data: new SlashCommandBuilder()
     .setName('counting')
     .setDescription(`Manages the counting system in your server.`)
@@ -13,8 +14,6 @@ module.exports = {
     async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
-
-        if(!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) return await interaction.reply({content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral })
 
         switch(sub) {
             case 'setup':

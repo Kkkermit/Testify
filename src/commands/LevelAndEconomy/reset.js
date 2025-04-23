@@ -6,6 +6,7 @@ const levelschema = require('../../schemas/levelSetupSystem');
 module.exports = {
     usableInDms: false,
     category: "Level and Economy",
+    permissions: [PermissionsBitField.Flags.Administrator],
     data: new SlashCommandBuilder()
     .setName('reset')
     .setDescription(`Reset something in this server.`)
@@ -16,7 +17,6 @@ module.exports = {
     .addSubcommand(command => command.setName('xp').setDescription(`Resets specified user's XP.`).addUserOption(option => option.setName('user').setDescription('Specified user will have their xp reset.').setRequired(true))),
     async execute(interaction) {
 
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         const sub = interaction.options.getSubcommand();
         
         switch (sub) {

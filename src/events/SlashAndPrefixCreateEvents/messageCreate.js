@@ -1,4 +1,4 @@
-const { EmbedBuilder, MessageFlags } = require('discord.js');
+const { EmbedBuilder, MessageFlags, PermissionFlagsBits } = require('discord.js');
 const GuildPrefixSettings = require('../../schemas/prefixEnableSystem.js');
 const blacklistSchema = require('../../schemas/blacklistSystem');
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
@@ -79,6 +79,26 @@ module.exports = {
 
         if (command.args && !args.length) {
             return message.reply(`You **didn't** provide any \`\`arguments\`\`.`);
+        }
+
+        if (command.permissions && command.permissions.length) {
+            const missingPerms = command.permissions.filter(perm => {
+                if (!message.member.permissions.has(perm)) {
+                    return true;
+                }
+                return false;
+            }).map(perm => {
+                return Object.keys(PermissionFlagsBits).find(p => 
+                    PermissionFlagsBits[p] === perm
+                ).replace(/_/g, ' ').toLowerCase();
+            });
+
+            if (missingPerms.length > 0) {
+                return message.reply({ 
+                    content: client.config.noPerms(missingPerms),
+                    flags: MessageFlags.Ephemeral,
+                });
+            }
         }
 
         try {

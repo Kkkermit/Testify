@@ -1,4 +1,4 @@
-const { EmbedBuilder, PermissionsBitField, MessageFlags } = require("discord.js")
+const { EmbedBuilder, PermissionsBitField, MessageFlags, PermissionFlagsBits } = require("discord.js")
 
 module.exports = {
     name: 'ban',
@@ -7,11 +7,11 @@ module.exports = {
     usage: 'ban <user> [reason]',
     category: 'Moderation',
     usableInDms: false,
+    permissions: [PermissionFlagsBits.BanMembers],
     async execute(message, client, args)  {
         
         const user = message.guild.members.cache.get(args[1]) || message.mentions.members.first() 
 
-        if (!message.member.permissions.has(PermissionsBitField.Flags.BanMembers)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         if (!user) return message.channel.send({ content: `You need to mention a **user** to ban!`, flags: MessageFlags.Ephemeral})
         const reason = args.slice(1).join(' ') || '\`\`No reason provided\`\`'
 

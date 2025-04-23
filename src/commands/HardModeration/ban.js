@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, PermissionsBitField, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } = require('discord.js');
 
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.BanMembers],
     data: new SlashCommandBuilder()
     .setName('ban')
     .setDescription('Bans a user from the server')
@@ -35,11 +36,7 @@ module.exports = {
         .setThumbnail(client.user.avatarURL())
         .setFooter({ text: `Someone got got struck by the ban hammer` })
     
-        const perm = interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers);
-        if (interaction.member.id === userID) return await interaction.reply({ content: 'You **cannot** use the \`\`ban\`\` command on yourself...', flags: MessageFlags.Ephemeral });
-        if (!perm)
-            return await interaction.channel.sendTyping(),
-            interaction.reply({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral });
+        if (userID.id === client.user.id) return interaction.reply({ content: `You cannot ban me from the server`, flags: MessageFlags.Ephemeral });
 
         await userID.send({ embeds: [dmEmbed] }).catch((err) => { return client.logs.error("[BAN] Failed to DM user. This can happen when their DM's are off, or the user is a bot.") });
 

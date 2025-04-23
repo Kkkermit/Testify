@@ -1,8 +1,9 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, PermissionFlagsBits, MessageFlags } = require("discord.js");
+const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require("discord.js");
 
 module.exports = {
     usableInDms: false,
     category: "Moderation",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName("automod")
     .setDescription("Setup Automod for your server.")
@@ -17,11 +18,6 @@ module.exports = {
 
         let author = "Automod Tool"
         let loadingRule = `Loading your **automod rule**..`
-
-        if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) return await interaction.reply({
-            content: client.config.noPerms,
-            flags: MessageFlags.Ephemeral
-        });
 
         switch (sub) {
             case "flagged-words":

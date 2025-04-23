@@ -3,6 +3,7 @@ const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits, MessageFlags } =
 module.exports = {
     usableInDms: false,
     category: "Owner",
+    permissions: [PermissionFlagsBits.Administrator],
     data: new SlashCommandBuilder()
     .setName('direct-message')
     .setDescription('Messages a user, only available for the owner of the bot.')

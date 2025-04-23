@@ -7,11 +7,11 @@ module.exports = {
     usage: 'unban <userID> [reason]',
     category: 'Moderation',
     usableInDms: false,
+    permissions: [PermissionFlagsBits.BanMembers],
     async execute(message, client, args) {
         const userID = args[0];
         const user = client.users.cache.get(userID);
 
-        if (!message.member.permissions.has(PermissionFlagsBits.BanMembers)) return await message.channel.send({ content: `${client.config.noPerms}`, flags: MessageFlags.Ephemeral});
         if (!user) return message.channel.send({ content: `You need to provide a valid **user ID** to unban!`, flags: MessageFlags.Ephemeral})
         
         const reason = args.slice(1).join(' ') || '\`\`No reason provided\`\`'
