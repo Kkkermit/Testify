@@ -1,4 +1,5 @@
 const { EmbedBuilder, MessageFlags } = require('discord.js');
+const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 
 module.exports = {
     name: 'interactionCreate',
@@ -6,6 +7,10 @@ module.exports = {
         if (!interaction.isButton()) return;
 
         const { customId } = interaction;
+        if (!['change_color_yellow_slash', 'change_color_green_slash', 'change_color_red_slash'].includes(customId)) {
+            return;
+        }
+
         const message = interaction.message;
 
         try {
@@ -17,54 +22,87 @@ module.exports = {
                 return;
             }
 
-            const oldEmbed = message.embeds[0];
+            if (!message.embeds.length || !message.embeds[0].title || !message.embeds[0].title.includes('Command Execution Error')) {
+                await interaction.reply({
+                    content: 'This button can only be used on error messages.',
+                    flags: MessageFlags.Ephemeral
+                });
+                return;
+            }
 
-            const embed = new EmbedBuilder(oldEmbed.data);
-            const row = message.components[0];
-
+            let colorCode, statusText;
             switch(customId) {
                 case 'change_color_yellow_slash':
-                    embed.setColor('#FFFF00');
-                    await interaction.deferUpdate();
+                    colorCode = '#FFFF00';
+                    statusText = 'Pending';
                     break;
                 case 'change_color_green_slash':
-                    embed.setColor('#00FF00');
-                    await interaction.deferUpdate();
+                    colorCode = '#00FF00';
+                    statusText = 'Solved';
                     break;
                 case 'change_color_red_slash':
-                    embed.setColor('#FF0000');
-                    await interaction.deferUpdate();
+                    colorCode = '#FF0000';
+                    statusText = 'Unsolved';
                     break;
                 default:
                     return;
             }
 
-            try {
-                const fetchedMessage = await message.channel.messages.fetch(message.id);
-                if (fetchedMessage) {
-                    await fetchedMessage.edit({ embeds: [embed], components: [row] });
-                    await interaction.followUp({
-                        content: 'Status updated successfully.',
-                        flags: MessageFlags.Ephemeral
-                    });
-                }
-            } catch (error) {
-                if (error.code === 10008) {
-                    await interaction.followUp({
-                        content: 'The message could not be updated as it no longer exists.',
-                        flags: MessageFlags.Ephemeral
-                    });
-                } else {
-                    console.error('Failed to edit message:', error);
-                }
+            const oldEmbed = EmbedBuilder.from(message.embeds[0]);
+            oldEmbed.setColor(colorCode);
+            
+            const fields = oldEmbed.data.fields || [];
+            const statusFieldIndex = fields.findIndex(field => field.name === '> Status');
+            
+            if (statusFieldIndex !== -1) {
+                fields[statusFieldIndex].value = `\`\`\`${statusText}\`\`\``;
+            } else {
+                oldEmbed.addFields([
+                    { name: '> Status', value: `\`\`\`${statusText}\`\`\``, inline: false }
+                ]);
             }
+
+            oldEmbed.setTimestamp();
+            oldEmbed.setFooter({ 
+                text: `Last updated by ${interaction.user.username}`, 
+                iconURL: interaction.user.displayAvatarURL({ dynamic: true }) 
+            });
+
+            await interaction.deferUpdate();
+            
+            await message.edit({ 
+                embeds: [oldEmbed], 
+                components: message.components 
+            });
+            
+            await interaction.followUp({
+                content: `Status updated to ${statusText} successfully.`,
+                flags: MessageFlags.Ephemeral
+            });
+            
+            console.log(`${color.green}[${getTimestamp()}] [BUTTON] Error status updated to ${statusText} by ${interaction.user.username}`);
+            
         } catch (error) {
-            console.error('Error handling button interaction:', error);
+            console.error(`${color.red}[${getTimestamp()}] [BUTTON] Error handling button interaction:`, error);
+            
             if (!interaction.replied && !interaction.deferred) {
-                await interaction.reply({
-                    content: 'There was an error processing your request.',
-                    flags: MessageFlags.Ephemeral
-                }).catch(() => {});
+                try {
+                    await interaction.reply({
+                        content: 'There was an error processing your request.',
+                        flags: MessageFlags.Ephemeral
+                    });
+                } catch (e) {
+                    console.error(`${color.red}[${getTimestamp()}] [BUTTON] Failed to reply with error:`, e);
+                }
+            } else if (interaction.deferred) {
+                try {
+                    await interaction.followUp({
+                        content: 'There was an error processing your request.',
+                        flags: MessageFlags.Ephemeral
+                    });
+                } catch (e) {
+                    console.error(`${color.red}[${getTimestamp()}] [BUTTON] Failed to follow up with error:`, e);
+                }
             }
         }
     }

@@ -1,9 +1,9 @@
-const { EmbedBuilder, ButtonBuilder, ActionRowBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
-const config = require('../../config')
+const { EmbedBuilder, MessageFlags, PermissionFlagsBits } = require("discord.js");
 const blacklistSchema = require("../../schemas/blacklistSystem");
 const { color, getTimestamp } = require('../../utils/loggingEffects.js');
 const { checkDmUsability } = require("../../utils/commandParams/dmCommandCheck.js");
 const { checkUnderDevelopment } = require("../../utils/commandParams/underDevelopmentCheck.js");
+const { logCommandError } = require("../../utils/errorLogging.js");
 
 module.exports = {
     name: 'interactionCreate',
@@ -77,56 +77,21 @@ module.exports = {
         } catch (error) {
             console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] Error while executing command. \n${color.red}[${getTimestamp()}] [INTERACTION_CREATE] Please check you are using the correct execute method: "async execute(interaction, client)": \n${color.red}[${getTimestamp()}] [INTERACTION_CREATE]`, error);
 
-            const channelID = `${client.config.commandErrorChannel}`;
-            if (!channelID) {
-                console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] No command error channel ID provided. Please provide a valid channel ID in the config.js file.`);
-                return;
-            }
-
-            const channel = client.channels.cache.get(channelID);   
-
-            const embed = new EmbedBuilder()
-            .setColor("Blue")
-            .setTimestamp()
-            .setAuthor({ name: `${client.user.username} Command Error ${config.devBy}`, iconURL: client.user.avatarURL()})
-            .setFooter({ text: 'Error reported at' })
-            .setTitle(`__Command Execution Error__ ${config.arrowEmoji}`)
-            .setDescription('An error occurred while executing the command.')
-            .addFields(
-            { name: '> Command', value: `\`\`\`${interaction.commandName}\`\`\`` },
-            { name: '> Triggered By', value: `\`\`\`${interaction.user.username}#${interaction.user.discriminator}\`\`\`` },
-            { name: '> Guild', value: `\`\`\`${interaction.guild.name}\`\`\`` },
-            { name: '> Error', value: `\`\`\`${error}\`\`\`` })
-            
-            const yellowButton = new ButtonBuilder()
-                .setCustomId('change_color_yellow_slash')
-                .setLabel('Mark As Pending')
-                .setStyle('1');
-            
-            const greenButton = new ButtonBuilder()
-                .setCustomId('change_color_green_slash')
-                .setLabel('Mark As Solved')
-                .setStyle('3');
-            
-            const redButton = new ButtonBuilder()
-                .setCustomId('change_color_red_slash')
-                .setLabel('Mark As Unsolved')
-                .setStyle('4');
-            
-            const row = new ActionRowBuilder()
-                .addComponents(yellowButton, greenButton, redButton);
-
-            const message = await channel.send({ embeds: [embed], components: [row] });   
-            
-            client.errorMessageInteraction = message;
-            client.errorEmbedInteraction = embed;
-            client.errorRowInteraction = row;
+            await logCommandError(error, interaction, client);
 
             const errorEmbed = new EmbedBuilder()
-            .setColor("Red")
-            .setDescription(`There was an error while executing this command!\n\`\`\`${error}\`\`\``)
+                .setColor("Red")
+                .setDescription(`There was an error while executing this command!\n\`\`\`${error}\`\`\``)
 
-            await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral});
+            try {
+                if (!interaction.replied && !interaction.deferred) {
+                    await interaction.reply({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+                } else {
+                    await interaction.followUp({ embeds: [errorEmbed], flags: MessageFlags.Ephemeral });
+                }
+            } catch (replyError) {
+                console.error(`${color.red}[${getTimestamp()}] [INTERACTION_CREATE] Failed to reply to interaction:`, replyError);
+            }
         }
     },
 };
