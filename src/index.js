@@ -47,6 +47,14 @@ try {
     console.error(`${color.red}[${getTimestamp()}]${color.reset} [ERROR] Error while creating the client. \n${color.red}[${getTimestamp()}]${color.reset} [ERROR]`, error);
 };
 
+const listeners = config.eventListeners || 20;
+
+if (listeners > 0) {
+    client.setMaxListeners(listeners);
+} else {
+    client.setMaxListeners(0);
+}
+
 client.logs = require('./utils/logs');
 client.config = require('./config');
 
