@@ -9,7 +9,7 @@ lerna-debug.log*
 # Custom 
 
 Ai_Chat-History
-src/logs/evalLogs.txt
+/logs/evalLogs.txt
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
