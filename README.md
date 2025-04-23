@@ -13,6 +13,9 @@
 <img align="center" alt="GitHub Stars" src="https://img.shields.io/github/stars/Kkkermit/Testify?style=for-the-badge">
 <img align="center" alt="GitHub Forks" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge">
 <img align="center" alt="GitHub Contributors" src="https://img.shields.io/github/contributors/Kkkermit/Testify.svg?style=for-the-badge">
+</p>
+
+<p align="center">
 <img align="center" alt="GitHub Watchers" src="https://img.shields.io/github/watchers/Kkkermit/Testify?style=for-the-badge">
 <img align="center" alt="GitHub Workflow" src="https://img.shields.io/github/actions/workflow/status/Kkkermit/Testify/run-tests.yml?style=for-the-badge">
 <img align="center" alt="GitHub Commits-Since" src="https://img.shields.io/github/commits-since/Kkkermit/Testify/latest?style=for-the-badge">
