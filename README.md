@@ -429,6 +429,19 @@ To set the advanced logs registry for the Testify audit-logs ( the event handler
 
 Connect with us on [Discord](https://discord.gg/xcMVwAVjSD) for support / any related inquiry.
 
+## Star History
+
+<div align="center">
+ <a href="https://www.star-history.com/#Kkkermit/Testify&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date" />
+  </picture>
+ </a>
+</div>
+
+
 ## License
 Released under the terms of [MIT License](https://github.com/Kkkermit/Testify/blob/main/LICENSE) license.
 
