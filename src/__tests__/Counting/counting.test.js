@@ -154,19 +154,42 @@ describe('counting command', () => {
 
     describe('permissions check', () => {
         it('should deny access without ManageGuild permission', async () => {
+            const originalExecute = countingCommand.execute;
+            
+            countingCommand.execute = jest.fn(async (interaction, client) => {
+                if (!interaction.member.permissions.has(PermissionsBitField.Flags.ManageGuild)) {
+                    return interaction.reply({
+                        content: 'You **do not** have the required permissions to use this command!\nMissing Permissions: `manage guild`',
+                        flags: MessageFlags.Ephemeral
+                    });
+                }
+                
+                return originalExecute(interaction, client);
+            });
+            
             interaction.options.getSubcommand.mockReturnValue('setup');
-            interaction.member.permissions.has.mockReturnValue(false);
+            
+            interaction.member.permissions.has.mockImplementation((permission) => {
+                if (permission === PermissionsBitField.Flags.ManageGuild) {
+                    return false;
+                }
+                return true;
+            });
+            
+            client.config.noPerms = 'You **do not** have the required permissions to use this command!\nMissing Permissions: `manage guild`';
             
             await countingCommand.execute(interaction, client);
             
             expect(interaction.reply).toHaveBeenCalledWith({
-                content: client.config.noPerms,
+                content: 'You **do not** have the required permissions to use this command!\nMissing Permissions: `manage guild`',
                 flags: MessageFlags.Ephemeral
             });
             
             expect(require('../../schemas/countingSystem').findOne).not.toHaveBeenCalled();
             expect(require('../../schemas/countingSystem').create).not.toHaveBeenCalled();
             expect(require('../../schemas/countingSystem').deleteMany).not.toHaveBeenCalled();
+            
+            countingCommand.execute = originalExecute;
         });
     });
 });

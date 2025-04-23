@@ -96,6 +96,7 @@ function setupTest(options = {}) {
 
     const client = {
         user: {
+            id: 'bot-123',
             username: 'TestBot',
             avatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
             displayAvatarURL: jest.fn().mockReturnValue('https://example.com/avatar.png'),
@@ -105,8 +106,13 @@ function setupTest(options = {}) {
             arrowEmoji: '➡️',
             embedCommunity: '#00FF00',
             embedEconomy: '#FFD700',
-            filterMessage: 'This word is not allowed.',
-            noPerms: 'You do not have permission to use this command.',
+            filterMessage: 'Your message contains filtered words!',
+            noPerms: (missingPerms) => {
+                const formattedPerms = missingPerms
+                    .map((perm) => `\`${perm.toString().split("_").join(" ").toLowerCase()}\``)
+                    .join(", ");
+                return `You **do not** have the required permissions to use this command!\nMissing Permissions: ${formattedPerms}`;
+            },
         },
         ...options.client
     };
