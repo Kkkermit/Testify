@@ -286,6 +286,36 @@ body {
 	color: #333333;
 }
 
+.light-mode .star-history-container {
+	background-color: #f3f4f6;
+}
+
+.light-mode .star-history-container h3 {
+	color: #333333;
+}
+
+.star-history-chart {
+	overflow: hidden;
+	border-radius: 8px;
+	transition: transform 0.3s ease;
+	max-width: 100%;
+}
+
+.star-history-chart:hover {
+	transform: scale(1.02);
+}
+
+.star-history-chart img {
+	max-width: 100%;
+	display: block;
+}
+
+@media (max-width: 768px) {
+	.star-history-chart img {
+		width: 100%;
+	}
+}
+
 @media (max-width: 1280px) {
 	.main-content {
 		padding: 1.5rem;
@@ -542,6 +572,10 @@ body {
 	#sidebar-toggle {
 		width: 40px;
 		height: 40px;
+	}
+
+	.star-history-chart img {
+		width: 100%;
 	}
 }
 

@@ -263,17 +263,32 @@ document.addEventListener("DOMContentLoaded", function () {
 			document.documentElement.classList.add("light-mode");
 			themeToggle.innerHTML = '<i class="fas fa-moon"></i>';
 			localStorage.setItem("theme", "light");
+			updateStarHistoryChart('light');
 		} else {
 			document.documentElement.classList.remove("light-mode");
 			document.documentElement.classList.add("dark-mode");
 			themeToggle.innerHTML = '<i class="fas fa-sun"></i>';
 			localStorage.setItem("theme", "dark");
+			updateStarHistoryChart('dark');
 		}
 
 		setTimeout(() => {
 			document.documentElement.style.transition = "";
 		}, 500);
 	});
+
+	function updateStarHistoryChart(theme) {
+		const starHistoryImg = document.querySelector('.star-history-chart img');
+		if (starHistoryImg) {
+			const baseUrl = 'https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date';
+			starHistoryImg.src = theme === 'light' ? 
+				`${baseUrl}` : 
+				`${baseUrl}&theme=dark`;
+		}
+	}
+
+	const currentTheme = localStorage.getItem('theme') || 'dark';
+	updateStarHistoryChart(currentTheme === 'light' ? 'light' : 'dark');
 
 	function fetchGitHubStats() {
 		const repoPath = "Kkkermit/Testify";
