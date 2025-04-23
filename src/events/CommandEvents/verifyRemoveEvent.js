@@ -4,19 +4,26 @@ const verifyusers = require('../../schemas/verifyUsersSystem');
 
 module.exports = {
     name: Events.GuildMemberRemove,
-    async execute(member, client, message) {
-        if (!message.guild || message.author.bot) return;
-
+    async execute(member, client) {
+        
         try {
-            const userId = member.user.id;
+            if (!member || !member.guild) return;
+            
+            const userId = member.user?.id;
+            if (!userId) return;
+            
             const userverdata = await verifyusers.findOne({ Guild: member.guild.id, User: userId });
             const verificationdata = await capschema.findOne({ Guild: member.guild.id });
+            
             if (userverdata && verificationdata) {
-                await capschema.updateOne({ Guild: member.guild.id },{ $pull: { Verified: userId } });
+                await capschema.updateOne({ Guild: member.guild.id }, { $pull: { Verified: userId } });
                 await verifyusers.deleteOne({ Guild: member.guild.id, User: userId });
             }
         } catch (err) {
-            client.logs.error(`[VERIFY_ERROR] Error deleting the data from the user that left the server!`);
+            console.error(`[VERIFY_ERROR] Error deleting data for user that left server:`, err);
+            if (client?.logs?.error) {
+                client.logs.error(`[VERIFY_ERROR] Error deleting the data from the user that left the server! ${err}`);
+            }
         }
     }
 };
