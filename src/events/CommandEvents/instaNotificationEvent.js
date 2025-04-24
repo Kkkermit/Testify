@@ -42,6 +42,40 @@ const logRateLimiter = {
     }
 };
 
+const USER_AGENTS = [
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15'
+];
+
+function getRandomUserAgent() {
+    return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
+}
+
+async function fetchWithRetry(url, options, maxRetries = 3) {
+    let lastError;
+    
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+            if (attempt > 0) {
+                await delay(1000 * attempt);
+            }
+            
+            if (attempt > 0) {
+                options.headers['User-Agent'] = getRandomUserAgent();
+            }
+            
+            return await fetch(url, options);
+        } catch (error) {
+            lastError = error;
+            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Fetch attempt ${attempt + 1} failed: ${error.message}${color.reset}`);
+        }
+    }
+    
+    throw lastError;
+}
+
 function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -52,22 +86,33 @@ async function getLatestPost(username) {
     }
     
     try {
-        const userResponse = await fetch(`https://www.instagram.com/api/v1/users/web_profile_info/?username=${username}`, {
-            headers: {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                'Accept': 'application/json',
-                'Accept-Language': 'en-US,en;q=0.9',
-                'X-IG-App-ID': '936619743392459',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Referer': `https://www.instagram.com/${username}/`,
-                'Cookie': 'ig_did=1; csrftoken=1; mid=1;'
-            }
-        });
+        const headers = {
+            'User-Agent': getRandomUserAgent(),
+            'Accept': '*/*',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'X-IG-App-ID': '936619743392459',
+            'X-Requested-With': 'XMLHttpRequest',
+            'Referer': `https://www.instagram.com/${username}/`,
+            'Origin': 'https://www.instagram.com',
+            'Sec-Fetch-Site': 'same-origin',
+            'Sec-Fetch-Mode': 'cors',
+            'Sec-Fetch-Dest': 'empty',
+        };
+
+        const encodedUsername = encodeURIComponent(username);
+        const apiUrl = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodedUsername}`;
+        
+        const userResponse = await fetchWithRetry(apiUrl, { headers });
 
         if (!userResponse.ok) {
-            if (userResponse.status !== 429) {
-                if (logRateLimiter.shouldLog(`api_error_${username}`, 60)) {
-                    console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: Instagram API returned ${userResponse.status} for ${username}${color.reset}`);
+            const statusCode = userResponse.status;
+            if (logRateLimiter.shouldLog(`api_error_${username}_${statusCode}`, 30)) {
+                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Instagram API returned ${statusCode} for ${username}${color.reset}`);
+                
+                if (statusCode === 429) {
+                    console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Rate limited by Instagram${color.reset}`);
+                } else if (statusCode === 401 || statusCode === 403) {
+                    console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Authentication error for Instagram API${color.reset}`);
                 }
             }
             return null;
@@ -83,9 +128,10 @@ async function getLatestPost(username) {
 
         const userData = await userResponse.json();
         
-        if (!userData || !userData.data || !userData.data.user) {
+        if (!userData?.data?.user) {
             if (logRateLimiter.shouldLog(`no_user_data_${username}`, 60)) {
-                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No user data found for ${username}${color.reset}`);
+                const errorDetails = userData?.status === 'fail' ? ` - Reason: ${userData.message}` : '';
+                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Warning: No user data found for ${username}${errorDetails}${color.reset}`);
             }
             return null;
         }
@@ -110,7 +156,7 @@ async function getLatestPost(username) {
         const now = Date.now();
         const lastErrorTime = rateLimiter.lastWarning[`error_${username}`] || 0;
         if (now - lastErrorTime > 60 * 60 * 1000) { 
-            console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Error fetching Instagram posts for ${username}: ${color.reset}`, error);
+            console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Error fetching Instagram posts for ${username}: ${error.message}${color.reset}`);
             rateLimiter.lastWarning[`error_${username}`] = now;
         }
         return null;

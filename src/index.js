@@ -69,6 +69,7 @@ client.skinsTier = null;
 const giveawayClient = require('./client/giveawayClientEvent.js');
 const distubeClient = require('./client/distubeClientEvent.js');
 const auditLogsClient = require('./client/auditLogsClientEvent.js');
+
 const { handleLogs } = require("./events/CommandEvents/handleLogsEvent");
 const { checkVersion } = require('./lib/version');
 const { fetchValorantAPI } = require('./utils/fetchValorantApi.js');
