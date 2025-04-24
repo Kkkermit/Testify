@@ -1,76 +1,7 @@
 const { SlashCommandBuilder, EmbedBuilder, PermissionFlagsBits } = require('discord.js');
 const InstagramSchema = require('../../schemas/instaNotificationSystem');
-const fetch = require('node-fetch');
+const instagramApi = require('../../api/instagramApi');
 const { color, getTimestamp } = require('../../utils/loggingEffects');
-
-const USER_AGENTS = [
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36 Edg/122.0.0.0',
-    'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-];
-
-function getRandomUserAgent() {
-    return USER_AGENTS[Math.floor(Math.random() * USER_AGENTS.length)];
-}
-
-async function fetchWithRetry(url, options, maxRetries = 2) {
-    let lastError;
-    
-    for (let attempt = 0; attempt < maxRetries; attempt++) {
-        try {
-            if (attempt > 0) {
-                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-                options.headers['User-Agent'] = getRandomUserAgent();
-            }
-            
-            return await fetch(url, options);
-        } catch (error) {
-            lastError = error;
-        }
-    }
-    
-    throw lastError;
-}
-
-async function validateInstagramUser(username) {
-    try {
-        const encodedUsername = encodeURIComponent(username);
-        const apiUrl = `https://www.instagram.com/api/v1/users/web_profile_info/?username=${encodedUsername}`;
-
-        const headers = {
-            'User-Agent': getRandomUserAgent(),
-            'Accept': '*/*',
-            'Accept-Language': 'en-US,en;q=0.9',
-            'X-IG-App-ID': '936619743392459',
-            'X-Requested-With': 'XMLHttpRequest',
-            'Referer': `https://www.instagram.com/${username}/`,
-            'Origin': 'https://www.instagram.com',
-            'Sec-Fetch-Site': 'same-origin',
-            'Sec-Fetch-Mode': 'cors',
-            'Sec-Fetch-Dest': 'empty',
-        };
-        
-        const response = await fetchWithRetry(apiUrl, { headers });
-        
-        if (!response.ok) {
-            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] Failed to validate user ${username}: Status ${response.status}${color.reset}`);
-            return false;
-        }
-        
-        const data = await response.json();
-        
-        if (!data?.data?.user) {
-            console.error(`${color.yellow}[${getTimestamp()}] [INSTA_NOTIFICATION] User ${username} not found or private${color.reset}`);
-            return false;
-        }
-        
-        return true;
-    } catch (error) {
-        console.error(`${color.red}[${getTimestamp()}] [INSTA_NOTIFICATION] Error validating Instagram user ${username}: ${color.reset}`, error);
-        return false;
-    }
-}
 
 module.exports = {
     usableInDms: false,
@@ -94,7 +25,7 @@ module.exports = {
                 const channel = interaction.options.getChannel('channel');
 
                 try {
-                    const isValid = await validateInstagramUser(username);
+                    const isValid = await instagramApi.validateUser(username);
                     if (!isValid) {
                         return await interaction.editReply({
                             content: `The Instagram username '${username}' does not exist or is not accessible. Double check the username and try again!`
