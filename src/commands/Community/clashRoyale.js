@@ -14,7 +14,8 @@ module.exports = {
     .setDescription('Get information about Clash Royale players and clans')
     .addSubcommand(subcommand => subcommand.setName('player').setDescription('Get information about a Clash Royale player').addStringOption(option => option.setName('player-tag').setDescription('The player tag (e.g. #20022JR28)').setRequired(true)))
     .addSubcommand(subcommand => subcommand.setName('clan-info').setDescription('Get information about a Clash Royale clan').addStringOption(option => option.setName('clan-tag').setDescription('The clan tag (e.g. #QPP0VPCR)').setRequired(true)))
-    .addSubcommand(subcommand => subcommand.setName('card-info').setDescription('Get information about a specific Clash Royale card').addStringOption(option => option.setName('card-name').setDescription('Name of the card you want to look up').setAutocomplete(true).setRequired(true))),                
+    .addSubcommand(subcommand => subcommand.setName('card-info').setDescription('Get information about a specific Clash Royale card').addStringOption(option => option.setName('card-name').setDescription('Name of the card you want to look up').setAutocomplete(true).setRequired(true)))
+    .addSubcommand(subcommand => subcommand.setName('recent-player-battles').setDescription('Get recent battle information for a player').addStringOption(option => option.setName('player-tag').setDescription('The player tag (e.g. #20022JR28)').setRequired(true))),
     async autocomplete(interaction, client) {
         if (interaction.options.getSubcommand() === 'card-info') {
             const focusedValue = interaction.options.getFocused().toLowerCase();
@@ -48,7 +49,7 @@ module.exports = {
                     }))
                 );
             } catch (error) {
-                console.error('Error during card autocomplete:', error);
+                client.logs.error('[CLASH_ROYALE] Error during card autocomplete:', error);
                 await interaction.respond([]);
             }
         }
@@ -65,6 +66,8 @@ module.exports = {
             await handleClanCommand(interaction, client);
         } else if (subcommand === 'card-info') {
             await handleCardCommand(interaction, client);
+        } else if (subcommand === 'recent-player-battles') {
+            await handlePlayerBattlesCommand(interaction, client);
         }
     }
 };
@@ -94,7 +97,7 @@ async function getCardData() {
         
         return allCards;
     } catch (error) {
-        console.error('Error fetching card data:', error);
+        client.logs.error('[CLASH_ROYALE] Error fetching card data:', error);
         return cardCache || [];
     }
 }
@@ -127,7 +130,7 @@ async function handleCardCommand(interaction, client) {
                 
                 cardEmbed.setImage('attachment://card.png');
             } catch (imageError) {
-                console.error('Error creating card image:', imageError);
+                client.logs.error('[CLASH_ROYALE] Error creating card image:', imageError);
             }
         }
         
@@ -143,7 +146,7 @@ async function handleCardCommand(interaction, client) {
         }
         
     } catch (error) {
-        console.error('Error fetching card info:', error);
+        client.logs.error('[CLASH_ROYALE] Error fetching card info:', error);
         
         if (error.response && error.response.status === 403) {
             return interaction.editReply({
@@ -242,7 +245,7 @@ async function createCardVisual(card, imageUrl) {
             ctx.fillText(card.elixirCost.toString(), canvas.width / 2, 400);
         }
     } catch (error) {
-        console.error('Error creating card visual:', error);
+        client.logs.error('[CLASH_ROYALE] Error creating card visual:', error);
         
         ctx.fillStyle = '#FFFFFF';
         ctx.font = 'bold 28px Arial';
@@ -319,7 +322,7 @@ async function handlePlayerCommand(interaction, client) {
         });
         
     } catch (error) {
-        console.error('Error fetching Clash Royale player data:', error);
+        client.logs.error('[CLASH_ROYALE] Error fetching Clash Royale player data:', error);
         
         if (error.response && error.response.status === 404) {
             return interaction.editReply({ 
@@ -371,7 +374,7 @@ async function handleClanCommand(interaction, client) {
         });
         
     } catch (error) {
-        console.error('Error fetching Clash Royale clan data:', error);
+        client.logs.error('[CLASH_ROYALE] Error fetching Clash Royale clan data:', error);
         
         if (error.response && error.response.status === 404) {
             return interaction.editReply({ 
@@ -389,6 +392,453 @@ async function handleClanCommand(interaction, client) {
             content: 'An error occurred while fetching clan data. Please try again later.',
             flags: MessageFlags.Ephemeral
         });
+    }
+}
+
+async function handlePlayerBattlesCommand(interaction, client) {
+    let playerTag = interaction.options.getString('player-tag');
+    
+    if (!playerTag.startsWith('#')) {
+        playerTag = '#' + playerTag;
+    }
+    
+    try {
+        const encodedTag = encodeURIComponent(playerTag);
+        
+        const response = await axios.get(`https://api.clashroyale.com/v1/players/${encodedTag}/battlelog`, {
+            headers: {
+                'Authorization': `Bearer ${process.env.CLASH_ROYAL_API_KEY}`
+            }
+        });
+        
+        const battles = response.data;
+        
+        const recentBattles = battles.slice(0, 8);
+        
+        if (recentBattles.length === 0) {
+            return interaction.editReply({
+                content: 'No recent battles found for this player.',
+                flags: MessageFlags.Ephemeral
+            });
+        }
+        
+        const playerResponse = await axios.get(`https://api.clashroyale.com/v1/players/${encodedTag}`, {
+            headers: {
+                'Authorization': `Bearer ${process.env.CLASH_ROYAL_API_KEY}`
+            }
+        });
+        
+        const playerData = playerResponse.data;
+        
+        const overviewEmbed = createBattlesOverviewEmbed(playerData, recentBattles, client);
+        
+        const battleEmbeds = [];
+        const battleImages = [];
+        
+        for (let i = 0; i < Math.min(recentBattles.length, 4); i++) {
+            const battle = recentBattles[i];
+            
+            const playerBattleData = battle.team.find(player => player.tag === playerTag);
+            const opponentBattleData = battle.opponent[0];
+            
+            if (playerBattleData && opponentBattleData) {
+                const battleImage = await createBattleDecksImage(playerBattleData, opponentBattleData, battle);
+                const attachment = new AttachmentBuilder(battleImage, { name: `battle-${i+1}.png` });
+                battleImages.push(attachment);
+                
+                const battleEmbed = createBattleEmbed(battle, playerBattleData, opponentBattleData, client, i);
+                battleEmbeds.push(battleEmbed);
+            }
+        }
+        
+        await interaction.editReply({
+            embeds: [overviewEmbed, ...battleEmbeds],
+            files: battleImages
+        });
+        
+    } catch (error) {
+        client.logs.error('[CLASH_ROYALE] Error fetching Clash Royale battle data:', error);
+        
+        if (error.response && error.response.status === 404) {
+            return interaction.editReply({ 
+                content: `Player with tag ${playerTag} not found. Please check the tag and try again.`,
+                flags: MessageFlags.Ephemeral
+            });
+        } else if (error.response && error.response.status === 403) {
+            return interaction.editReply({
+                content: "API key invalid or expired. Please contact the bot owner to update the API key.",
+                flags: MessageFlags.Ephemeral
+            });
+        }
+        
+        await interaction.editReply({ 
+            content: 'An error occurred while fetching battle data. Please try again later.',
+            flags: MessageFlags.Ephemeral
+        });
+    }
+}
+
+function createBattlesOverviewEmbed(playerData, battles, client) {
+    const stats = battles.reduce((acc, battle) => {
+        const playerInTeam = battle.team.find(player => player.tag === playerData.tag);
+        const opponentCrowns = battle.opponent[0].crowns || 0;
+        const playerCrowns = playerInTeam?.crowns || 0;
+        
+        if (playerCrowns > opponentCrowns) {
+            acc.wins++;
+        } else if (playerCrowns < opponentCrowns) {
+            acc.losses++;
+        } else {
+            acc.draws++;
+        }
+        
+        if (!acc.battleTypes[battle.type]) {
+            acc.battleTypes[battle.type] = 0;
+        }
+        acc.battleTypes[battle.type]++;
+        
+        if (playerInTeam && playerInTeam.trophyChange) {
+            acc.trophyChange += playerInTeam.trophyChange;
+        }
+        
+        return acc;
+    }, { wins: 0, losses: 0, draws: 0, battleTypes: {}, trophyChange: 0 });
+    
+    const battleTypesText = Object.entries(stats.battleTypes)
+        .map(([type, count]) => `${formatBattleType(type)}: ${count}`)
+        .join('\n');
+    
+    const totalGames = stats.wins + stats.losses + stats.draws;
+    const winRate = totalGames > 0 ? ((stats.wins / totalGames) * 100).toFixed(1) + '%' : 'N/A';
+    
+    const embed = new EmbedBuilder()
+        .setColor(client.config.embedCommunity)
+        .setAuthor({ name: `Clash Royale Recent Battles ${client.config.devBy}` })
+        .setTitle(`${playerData.name} (${playerData.tag})`)
+        .setThumbnail('https://static.wikia.nocookie.net/clashroyale/images/1/16/War_Shield.png/revision/latest?cb=20180425130200')
+        .setDescription(`> Recent battle statistics for **${playerData.name}**`)
+        .addFields(
+            { name: '🏆 Trophy Change', value: formatTrophyChange(stats.trophyChange), inline: true },
+            { name: '📊 Record', value: `W: ${stats.wins} | L: ${stats.losses} | D: ${stats.draws}`, inline: true },
+            { name: '📋 Win Rate', value: winRate, inline: true },
+            { name: '🎮 Battle Types', value: battleTypesText || 'None', inline: false }
+        )
+        .setFooter({ text: 'Clash Royale API', iconURL: 'https://play-lh.googleusercontent.com/rIvZQ_H3hfmexC8vurmLczLtMNBFtxCEdmb2NwkSPz2ZuJJ5nRPD0HbSJ7YTyFGdADQ' })
+        .setTimestamp();
+        
+    return embed;
+}
+
+function createBattleEmbed(battle, playerBattleData, opponentBattleData, client, index) {
+    const battleTime = formatBattleTime(battle.battleTime);
+    
+    const playerCrowns = playerBattleData.crowns || 0;
+    const opponentCrowns = opponentBattleData.crowns || 0;
+    
+    let resultText, resultEmoji;
+    if (playerCrowns > opponentCrowns) {
+        resultText = 'Victory';
+        resultEmoji = '🏆';
+    } else if (playerCrowns < opponentCrowns) {
+        resultText = 'Defeat';
+        resultEmoji = '❌';
+    } else {
+        resultText = 'Draw';
+        resultEmoji = '🔄';
+    }
+    
+    const trophyChangeText = playerBattleData.trophyChange !== undefined
+        ? (playerBattleData.trophyChange > 0 ? `+${playerBattleData.trophyChange}` : `${playerBattleData.trophyChange}`)
+        : 'N/A';
+    
+    const embed = new EmbedBuilder()
+        .setColor(resultEmoji === '🏆' ? '#4CAF50' : resultEmoji === '❌' ? '#F44336' : '#FFC107')
+        .setTitle(`${resultEmoji} Battle ${index + 1}: ${resultText}`)
+        .setDescription(`${playerBattleData.name} (${playerCrowns}) vs ${opponentBattleData.name} (${opponentCrowns})`)
+        .addFields(
+            { name: '🕒 Battle Time', value: battleTime, inline: true },
+            { name: '🏆 Trophy Change', value: trophyChangeText, inline: true },
+            { name: '🏟️ Arena', value: battle.arena?.name || 'Unknown', inline: true },
+            { name: '🎮 Game Mode', value: battle.gameMode?.name || formatBattleType(battle.type), inline: true },
+            { name: '👑 Crowns', value: `${playerBattleData.crowns || 0} - ${opponentBattleData.crowns || 0}`, inline: true },
+            { name: '⚔️ Battle Type', value: formatBattleType(battle.type), inline: true }
+        )
+        .setImage(`attachment://battle-${index+1}.png`)
+        .setTimestamp();
+    
+    if (playerBattleData.clan) {
+        embed.addFields({ 
+            name: '🛡️ Player Clan', 
+            value: playerBattleData.clan.name, 
+            inline: true 
+        });
+    }
+    
+    if (opponentBattleData.clan) {
+        embed.addFields({ 
+            name: '🛡️ Opponent Clan', 
+            value: opponentBattleData.clan.name, 
+            inline: true 
+        });
+    }
+    
+    return embed;
+}
+
+async function createBattleDecksImage(playerBattleData, opponentBattleData, battle) {
+    const canvas = createCanvas(900, 600);
+    const ctx = canvas.getContext('2d');
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 600);
+    gradient.addColorStop(0, '#1a1c20');
+    gradient.addColorStop(1, '#2C2F33');
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.strokeStyle = '#5865F2';
+    ctx.lineWidth = 3;
+    ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
+    
+    ctx.fillStyle = '#36393f';
+    roundRect(ctx, 20, 20, canvas.width - 40, 90, 10, true, false);
+    
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 32px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${battle.gameMode?.name || formatBattleType(battle.type)}`, canvas.width / 2, 55);
+    
+    const readableTime = formatBattleTimeForImage(battle.battleTime);
+    
+    ctx.font = 'bold 20px Arial';
+    ctx.fillStyle = '#DCDDDE';
+    ctx.fillText(readableTime, canvas.width / 2, 90);
+    
+    const leftSection = { x: 50, width: 350 };
+    const rightSection = { x: 500, width: 350 };
+    const dividerX = 450;
+    
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 24px Arial';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(`${playerBattleData.name}`, leftSection.x, 150);
+    ctx.fillText(`👑 ${playerBattleData.crowns || 0}`, leftSection.x, 180);
+    
+    ctx.textAlign = 'right';
+    ctx.fillText(`${opponentBattleData.name}`, rightSection.x + rightSection.width, 150);
+    ctx.fillText(`${opponentBattleData.crowns || 0} 👑`, rightSection.x + rightSection.width, 180);
+    
+    ctx.strokeStyle = '#5865F2';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.setLineDash([5, 3]);
+    ctx.moveTo(dividerX, 120);
+    ctx.lineTo(dividerX, 530);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    
+    await drawDeck(ctx, playerBattleData.cards, leftSection.x, 200, 'left', leftSection.width);
+    await drawDeck(ctx, opponentBattleData.cards, rightSection.x, 200, 'left', rightSection.width);
+    
+    const supportY = 460;
+    if (playerBattleData.supportCards && playerBattleData.supportCards.length > 0) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 18px Arial';
+        ctx.fillText('Support Card:', leftSection.x, supportY);
+        
+        await drawCard(ctx, playerBattleData.supportCards[0], leftSection.x + 120, supportY + 15, 70, 90);
+    }
+    
+    if (opponentBattleData.supportCards && opponentBattleData.supportCards.length > 0) {
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'left';
+        ctx.font = 'bold 18px Arial';
+        ctx.fillText('Support Card:', rightSection.x, supportY);
+        
+        await drawCard(ctx, opponentBattleData.supportCards[0], rightSection.x + 120, supportY + 15, 70, 90);
+    }
+    
+    const playerCrowns = playerBattleData.crowns || 0;
+    const opponentCrowns = opponentBattleData.crowns || 0;
+    
+    let resultText, resultColor;
+    if (playerCrowns > opponentCrowns) {
+        resultText = 'VICTORY';
+        resultColor = '#4CAF50';
+    } else if (playerCrowns < opponentCrowns) {
+        resultText = 'DEFEAT';
+        resultColor = '#F44336';
+    } else {
+        resultText = 'DRAW';
+        resultColor = '#FFC107';
+    }
+    
+    ctx.fillStyle = '#36393f';
+    roundRect(ctx, 300, 545, 300, 40, 10, true, false);
+    
+    ctx.font = 'bold 28px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = resultColor;
+    ctx.fillText(resultText, canvas.width / 2, 573);
+    
+    return canvas.toBuffer();
+}
+
+async function drawDeck(ctx, cards, xStart, yStart, alignment, sectionWidth) {
+    const cardWidth = 70;
+    const cardHeight = 90;
+    const padding = 15;
+    const cardsPerRow = 4;
+    
+    for (let i = 0; i < Math.min(cards.length, 8); i++) {
+        const row = Math.floor(i / cardsPerRow);
+        const col = i % cardsPerRow;
+        
+        const x = xStart + col * (cardWidth + padding);
+        const y = yStart + row * (cardHeight + padding);
+        
+        if (x + cardWidth <= xStart + sectionWidth) {
+            await drawCard(ctx, cards[i], x, y, cardWidth, cardHeight);
+        }
+    }
+}
+
+function formatBattleTimeForImage(battleTime) {
+    if (!battleTime) return 'Unknown Time';
+            
+    try {
+        const regex = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})\.(\d{3})Z$/;
+        const match = battleTime.match(regex);
+        
+        if (match) {
+            const year = match[1];
+            const month = match[2];
+            const day = match[3];
+            const hour = match[4];
+            const minute = match[5];
+            
+            const date = new Date(`${year}-${month}-${day}T${hour}:${minute}:00Z`);
+            
+            const options = { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                timeZoneName: 'short'
+            };
+            
+            return date.toLocaleDateString(undefined, options);
+        }
+        
+        return battleTime;
+    } catch (e) {
+        return 'Date format error';
+    }
+}
+
+async function drawCard(ctx, card, x, y, width, height) {
+    const gradient = ctx.createLinearGradient(x, y, x, y + height);
+    const rarityColor = getCardRarityColor(card.rarity);
+    gradient.addColorStop(0, rarityColor);
+    gradient.addColorStop(1, '#36393f');
+    
+    ctx.fillStyle = gradient;
+    roundRect(ctx, x, y, width, height, 5, true, false);
+    
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 1.5;
+    roundRect(ctx, x, y, width, height, 5, false, true);
+    
+    if (card.iconUrls && (card.iconUrls.medium || card.iconUrls.evolutionMedium)) {
+        try {
+            const imageUrl = card.iconUrls.evolutionMedium || card.iconUrls.medium;
+            const image = await loadImage(imageUrl);
+            
+            const imageSize = width - 15;
+            const imageX = x + (width - imageSize) / 2;
+            const imageY = y + 5;
+            ctx.drawImage(image, imageX, imageY, imageSize, imageSize);
+        } catch (error) {
+            client.logs.error(`[CLASH_ROYALE] Error loading card image for ${card.name}:`, error);
+            
+            ctx.fillStyle = '#555555';
+            ctx.fillRect(x + 5, y + 5, width - 10, width - 10);
+            
+            ctx.fillStyle = '#FFFFFF';
+            ctx.textAlign = 'center';
+            ctx.font = 'bold 10px Arial';
+            ctx.fillText('No Image', x + width / 2, y + width / 2);
+        }
+    }
+    
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    roundRect(ctx, x + 3, y + height - 18, 38, 15, 3, true, false);
+    
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'left';
+    ctx.font = 'bold 12px Arial';
+    ctx.fillText(`Lv ${card.level}`, x + 6, y + height - 6);
+    
+    if (card.elixirCost !== undefined) {
+        ctx.fillStyle = '#7B68EE';
+        ctx.beginPath();
+        ctx.arc(x + width - 12, y + 12, 12, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = '#9370DB';
+        ctx.beginPath();
+        ctx.arc(x + width - 12, y + 10, 10, 0, Math.PI, true);
+        ctx.fill();
+        
+        ctx.fillStyle = '#FFFFFF';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 12px Arial';
+        ctx.fillText(card.elixirCost.toString(), x + width - 12, y + 16);
+    }
+}
+
+function formatBattleTime(battleTime) {
+    if (!battleTime) return 'Unknown';
+            
+    try {
+        const regex = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})\.(\d{3})Z$/;
+        const match = battleTime.match(regex);
+        
+        if (match) {
+            const isoTimestamp = `${match[1]}-${match[2]}-${match[3]}T${match[4]}:${match[5]}:${match[6]}.${match[7]}Z`;
+            const date = new Date(isoTimestamp);
+            
+            if (!isNaN(date.getTime())) {
+                return `<t:${Math.floor(date.getTime() / 1000)}:R>`;
+            }
+        }
+        
+        return battleTime;
+    } catch (e) {
+        return battleTime;
+    }
+}
+
+function formatBattleType(type) {
+    if (!type) return 'Unknown';
+    
+    return type
+        .replace(/([A-Z])/g, ' $1')
+        .replace(/_/g, ' ')
+        .replace(/^\w/, c => c.toUpperCase())
+        .trim();
+}
+
+function formatTrophyChange(trophyChange) {
+    if (trophyChange === undefined || trophyChange === null) {
+        return '0 🏆';
+    }
+    
+    if (trophyChange > 0) {
+        return `+${trophyChange} 🏆`;
+    } else {
+        return `${trophyChange} 🏆`;
     }
 }
 
@@ -551,7 +1001,7 @@ function createClanActivityEmbed(clanData, client) {
                 
                 return timestamp;
             } catch (e) {
-                console.error("Error formatting timestamp:", e);
+                client.logs.error("[CLASH_ROYALE] Error formatting timestamp:", e);
                 return timestamp;
             }
         };
@@ -724,14 +1174,14 @@ async function createDeckImage(deck) {
                     try {
                         const image = await loadImage(deck[i].iconUrls.medium);
                         
-                        const imageSize = cardWidth - 20;
+                        const imageSize = cardWidth - 30;
                         
                         const imageX = x + (cardWidth - imageSize) / 2;
                         const imageY = y + 10;
                         
                         ctx.drawImage(image, imageX, imageY, imageSize, imageSize);
                     } catch (error) {
-                        console.error(`Error loading card image for ${deck[i].name}:`, error);
+                        client.logs.error(`[CLASH_ROYALE] Error loading card image for ${deck[i].name}:`, error);
                         
                         ctx.fillStyle = '#555555';
                         ctx.fillRect(x + 15, y + 15, cardWidth - 30, cardWidth - 30);
@@ -777,12 +1227,12 @@ async function createDeckImage(deck) {
                 ctx.textAlign = 'left';
                 
             } catch (error) {
-                console.error(`Error drawing card ${i}:`, error);
+                client.logs.error(`[CLASH_ROYALE] Error drawing card ${i}:`, error);
             }
         }
         
     } catch (error) {
-        console.error('Error creating deck image:', error);
+        client.logs.error('[CLASH_ROYALE] Error creating deck image:', error);
         ctx.fillStyle = '#FF0000';
         ctx.font = 'bold 24px Arial';
         ctx.fillText('Error rendering deck image', canvas.width/2 - 150, canvas.height/2);
