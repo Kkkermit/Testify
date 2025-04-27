@@ -11,12 +11,10 @@ module.exports = {
         const checkInstagramPosts = async () => {
             try {
                 const allGuilds = await InstagramSchema.find();
-                const totalUsers = allGuilds.reduce((total, guild) => total + guild.InstagramUsers.length, 0);
                 
                 const now = Date.now();
                 if (now - lastRoutineLog > 6 * 60 * 60 * 1000) {
                     lastRoutineLog = now;
-                    console.log(`${color.blue}[${getTimestamp()}] [INSTA_NOTIFICATION] Checking posts for ${totalUsers} Instagram users across ${allGuilds.length} guilds${color.reset}`);
                 }
 
                 for (const guildData of allGuilds) {
