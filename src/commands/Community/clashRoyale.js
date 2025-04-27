@@ -11,7 +11,7 @@ module.exports = {
     category: "Community",
     data: new SlashCommandBuilder()
     .setName('clash-royale')
-    .setDescription('Get information about Clash Royale players and clans')
+    .setDescription('Get information about Clash Royale players, cards and clans')
     .addSubcommand(subcommand => subcommand.setName('player').setDescription('Get information about a Clash Royale player').addStringOption(option => option.setName('player-tag').setDescription('The player tag (e.g. #20022JR28)').setRequired(true)))
     .addSubcommand(subcommand => subcommand.setName('clan-info').setDescription('Get information about a Clash Royale clan').addStringOption(option => option.setName('clan-tag').setDescription('The clan tag (e.g. #QPP0VPCR)').setRequired(true)))
     .addSubcommand(subcommand => subcommand.setName('card-info').setDescription('Get information about a specific Clash Royale card').addStringOption(option => option.setName('card-name').setDescription('Name of the card you want to look up').setAutocomplete(true).setRequired(true)))
