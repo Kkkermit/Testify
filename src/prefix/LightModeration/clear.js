@@ -56,7 +56,7 @@ module.exports = {
         
         const clearEmbed = new EmbedBuilder()
             .setAuthor({ name: `Purge Command`, iconURL: client.user.displayAvatarURL() })
-            .setColor(client.config.embedModColor)
+            .setColor(client.config.embedModLight)
             .setTitle(`${client.user.username} Purge Tool ${client.config.arrowEmoji}`)
             .setDescription(`> Successfully deleted **${result.deleted}** messages sent by **${deletedUser}** in **${message.channel}**.`)
             .setFooter({ text: `Purged by ${message.author.tag}`, iconURL: message.author.displayAvatarURL() })
