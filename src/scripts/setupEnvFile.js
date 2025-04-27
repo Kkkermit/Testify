@@ -44,6 +44,7 @@ async function setupEnvironment() {
     const spotifyClientId = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client ID: `);
     const spotifyClientSecret = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Spotify Client Secret: `);
     const ngrokAuthToken = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your ngrok auth token: `);
+    const clashRoyaleApiKey = await askQuestion(`${color.yellow}[${getTimestamp()}]${color.reset} [SETUP_ENV] Please enter your Clash Royale SuperCell developer API key: `);
 
     const envContent = `
 token=${botToken}
@@ -68,6 +69,8 @@ SPOTIFY_REDIRECT_URI=http://localhost:3000/callback
 PORT=3000
 
 NGROK_AUTH_TOKEN=${ngrokAuthToken}
+
+CLASH_ROYAL_API_KEY=${clashRoyaleApiKey}
 `;
 
     fs.writeFileSync(envPath, envContent.trim() + '\n');
