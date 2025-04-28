@@ -1,5 +1,5 @@
 const { ContextMenuCommandBuilder, ApplicationCommandType, EmbedBuilder, AttachmentBuilder, ButtonBuilder, ActionRowBuilder, MessageFlags } = require('discord.js');
-const { profileImage } = require('discord-arts');
+const { Profile } = require('discord-arts');
 const { addBadges } = require('../../lib/discordBadges');
 const { addSuffix } = require('../../lib/addSuffix');
 
@@ -18,7 +18,7 @@ module.exports = {
         try {
             const fetchedMembers = await interaction.guild.members.fetch();
 
-            const profileBuffer = await profileImage(member.id);
+            const profileBuffer = await Profile(member.id);
             const imageAttachment = new AttachmentBuilder(profileBuffer, { name: 'profile.png' });
 
             const joinPosition = Array.from(fetchedMembers

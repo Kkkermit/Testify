@@ -43,7 +43,7 @@
     "canvas": "^2.11.2",
     "captcha-canvas": "^2.3.1",
     "cors": "2.8.5",
-    "discord-arts": "^0.6.1",
+    "discord-arts": "0.7.1",
     "discord-gamecord": "4.4.2",
     "discord-giveaways": "^6.0.1",
     "discord-html-transcripts": "3.2.0",
