@@ -218,8 +218,6 @@ class InstagramAPI {
                     }
                     
                     options.headers = this.createInstagramHeaders(username, authStrategy);
-                    
-                    console.log(`${color.blue}[${getTimestamp()}] [INSTA_API] Retry ${attempt} for ${username} with auth strategy: ${authStrategy}${color.reset}`);
                 }
                 
                 const response = await fetch(url, options);
@@ -231,8 +229,6 @@ class InstagramAPI {
                 }
                 
                 if (response.status === 401 || response.status === 403) {
-                    console.error(`${color.yellow}[${getTimestamp()}] [INSTA_API] Authentication error (${response.status}) with strategy ${authStrategy}${color.reset}`);
-                    
                     this.authStrategies.failures[authStrategy] = (this.authStrategies.failures[authStrategy] || 0) + 1;
                     
                     if (username !== 'unknown') {
@@ -250,7 +246,6 @@ class InstagramAPI {
                 
             } catch (error) {
                 lastError = error;
-                console.error(`${color.yellow}[${getTimestamp()}] [INSTA_API] Fetch attempt ${attempt + 1} failed: ${error.message}${color.reset}`);
             }
         }
         
@@ -340,11 +335,9 @@ class InstagramAPI {
                 
                 await this.delay(1000);
             }
-            
             console.error(`${color.yellow}[${getTimestamp()}] [INSTA_API] User ${username} not found or private (tried all methods)${color.reset}`);
             return false;
         } catch (error) {
-            console.error(`${color.red}[${getTimestamp()}] [INSTA_API] Error validating Instagram user ${username}: ${error.message}${color.reset}`);
             return false;
         }
     }
@@ -372,9 +365,7 @@ class InstagramAPI {
             let posts = userData.edge_owner_to_timeline_media?.edges;
             
             if (!posts || posts.length === 0) {
-                if (this.logRateLimiter.shouldLog(`no_posts_${username}`, 60)) {
-                    console.error(`${color.yellow}[${getTimestamp()}] [INSTA_API] Warning: No posts found for ${username}${color.reset}`);
-                }
+                if (this.logRateLimiter.shouldLog(`no_posts_${username}`, 60)) {}
                 return null;
             }
             
@@ -390,7 +381,6 @@ class InstagramAPI {
             const now = Date.now();
             const lastErrorTime = this.rateLimiter.lastWarning[`error_${username}`] || 0;
             if (now - lastErrorTime > 60 * 60 * 1000) { 
-                console.error(`${color.red}[${getTimestamp()}] [INSTA_API] Error fetching Instagram posts for ${username}: ${error.message}${color.reset}`);
                 this.rateLimiter.lastWarning[`error_${username}`] = now;
             }
             return null;
