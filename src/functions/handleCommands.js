@@ -1,5 +1,5 @@
 const { REST } = require("@discordjs/rest");
-const { Routes } = require('discord-api-types/v9');
+const { Routes } = require('discord-api-types/v10');
 const fs = require('fs');
 const ascii = require("ascii-table");
 const { color, getTimestamp } = require('../utils/loggingEffects.js');
@@ -42,7 +42,7 @@ module.exports = (client) => {
         console.log(`${color.blue}${table.toString()} \n[${getTimestamp()}] ${color.reset}[COMMANDS] Found ${client.commands.size} SlashCommands.`);
 
         const rest = new REST({
-            version: '9'
+            version: '10'
         }).setToken(process.env.token);
 
         (async () => {
