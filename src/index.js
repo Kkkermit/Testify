@@ -75,7 +75,7 @@ const { checkVersion } = require('./lib/version');
 const { fetchValorantAPI } = require('./utils/fetchValorantApi.js');
 
 require('./functions/processHandlers')();
-require('./server/spotifyServer.js')
+require('./server/server.js')
 
 client.commands = new Collection();
 client.pcommands = new Collection();
