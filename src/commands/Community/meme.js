@@ -1,62 +1,90 @@
 const { SlashCommandBuilder, EmbedBuilder } = require("discord.js");
-const axios = require("axios");
+const Parser = require('rss-parser');
 
 module.exports = {
 	usableInDms: true,
 	category: "Community",
 	data: new SlashCommandBuilder()
-	.setName("meme")
-	.setDescription("Get a random meme!"),
+		.setName("meme")
+		.setDescription("Get a random meme!"),
 	async execute(interaction, client) {
 		try {
 			await interaction.deferReply();
 			
-			const headers = {
-				'User-Agent': `DiscordBot/${client.user.username || 'Bot'} (Node.js/${process.version})`,
-				'Accept': 'application/json'
-			};
-			
-			const response = await axios.get("https://www.reddit.com/r/memes/hot.json?limit=100", { headers });
-			
-			if (response.data && response.data.data && Array.isArray(response.data.data.children) && response.data.data.children.length > 0) {
-				const randomIndex = Math.floor(Math.random() * response.data.data.children.length);
-				let memeData = response.data.data.children[randomIndex].data;
-				
-				if (memeData.stickied || !memeData.url || memeData.is_self || memeData.over_18) {
-					const newIndex = (randomIndex + 1) % response.data.data.children.length;
-					const newMemeData = response.data.data.children[newIndex].data;
-					
-					if (newMemeData.stickied || !newMemeData.url || newMemeData.is_self || newMemeData.over_18) {
-						await interaction.editReply({ content: "Couldn't find a good meme. Try again later!" });
-						return;
-					}
-					
-					memeData = newMemeData;
+			const parser = new Parser({
+				customFields: {
+					item: [
+						['media:thumbnail', 'thumbnail'],
+						['media:content', 'mediaContent']
+					]
 				}
-
-				const { url, title, ups, num_comments } = memeData;
-
-				const embed = new EmbedBuilder()
-					.setAuthor({ name: `Meme Command ${client.config.devBy}` })
-					.setColor(client.config.embedCommunity)
-					.setTitle(`${client.user.username} Meme Tool ${client.config.arrowEmoji}`)
-					.setDescription(`**${title}**`)
-					.setURL(`https://www.reddit.com${memeData.permalink}`)
-					.setImage(url)
-					.setFooter({ text: `👍 ${ups}  |  💬 ${num_comments || 0}` })
-					.setTimestamp();
-
-				await interaction.editReply({ embeds: [embed] });
-			} else {
-				client.logs.error("[MEME_COMMAND] Invalid response structure from Reddit API:", response.data);
-				await interaction.editReply({ content: "Failed to fetch a meme. Try again later." });
+			});
+			
+			const feed = await parser.parseURL('https://www.reddit.com/r/memes/hot.rss');
+			
+			if (!feed.items || feed.items.length === 0) {
+				await interaction.editReply({ content: "Failed to fetch memes. Try again later!" });
+				return;
 			}
+			
+			const validMemes = feed.items.filter(item => {
+				const content = item.content || item.contentSnippet || '';
+				const hasRedditImage = content.includes('i.redd.it') || 
+									 content.includes('preview.redd.it') ||
+									 content.includes('i.imgur.com');
+				const isNSFW = item.title.toLowerCase().includes('nsfw') ||
+							  content.toLowerCase().includes('nsfw');
+				
+				return hasRedditImage && !isNSFW;
+			});
+			
+			if (validMemes.length === 0) {
+				await interaction.editReply({ content: "Couldn't find a good meme. Try again later!" });
+				return;
+			}
+			
+			const randomMeme = validMemes[Math.floor(Math.random() * validMemes.length)];
+			
+			let imageUrl = null;
+			const content = randomMeme.content || randomMeme.contentSnippet || '';
+			
+			const redditImgMatch = content.match(/https?:\/\/i\.redd\.it\/[^\s"'<>]+/);
+			const previewImgMatch = content.match(/https?:\/\/preview\.redd\.it\/[^\s"'<>]+/);
+			const imgurMatch = content.match(/https?:\/\/i\.imgur\.com\/[^\s"'<>]+/);
+			
+			if (redditImgMatch) {
+				imageUrl = redditImgMatch[0];
+			} else if (previewImgMatch) {
+				imageUrl = previewImgMatch[0];
+			} else if (imgurMatch) {
+				imageUrl = imgurMatch[0];
+			}
+			
+			const embed = new EmbedBuilder()
+				.setAuthor({ name: `Meme Command ${client.config.devBy}` })
+				.setColor(client.config.embedCommunity)
+				.setTitle(`${client.user.username} Meme Tool ${client.config.arrowEmoji}`)
+				.setDescription(`**${randomMeme.title}**`)
+				.setURL(randomMeme.link)
+				.setFooter({ text: `From r/memes • ${new Date(randomMeme.pubDate).toLocaleDateString()}` })
+				.setTimestamp(new Date(randomMeme.pubDate));
+			
+			if (imageUrl) {
+				embed.setImage(imageUrl);
+			}
+			
+			await interaction.editReply({ embeds: [embed] });
+			
 		} catch (error) {
 			client.logs.error("[MEME_COMMAND] Error in meme command:", error.message);
-			if (error.response && error.response.status) {
-				client.logs.error(`[MEME_COMMAND] Status code: ${error.response.status}, Response data:`, error.response.data);
+			
+			if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+				await interaction.editReply({ content: "Could not connect to Reddit. Check your internet connection." });
+			} else if (error.message.includes('timeout')) {
+				await interaction.editReply({ content: "Request timed out. Try again!" });
+			} else {
+				await interaction.editReply({ content: "There was an error getting the meme from Reddit. Try again later!" });
 			}
-			await interaction.editReply({ content: "There was an error getting the meme from Reddit. Try again later!" });
 		}
 	},
 };
