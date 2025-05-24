@@ -9,4 +9,4 @@ let prefixSchema = new Schema({
     },
 });
 
-module.exports = model('prefix', prefixSchema);;
+module.exports = model('prefix', prefixSchema);

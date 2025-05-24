@@ -13,7 +13,7 @@ module.exports = {
             if (setupChannel) return;
 
             const fetchGuildPrefix = await guildSettingsSchema.findOne({ Guild: message.guild.id });
-            const guildPrefix = fetchGuildPrefix.Prefix;
+            const guildPrefix = fetchGuildPrefix?.Prefix || client.config.prefix
 
             let totalSeconds = (client.uptime / 1000);
             let days = Math.floor(totalSeconds / 86400);
