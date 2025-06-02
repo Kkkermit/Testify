@@ -16,7 +16,7 @@ app.use((req, res, next) => {
     next();
 });
 
-const requiredEnvVars = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET', 'SPOTIFY_REDIRECT_URI'];
+const requiredEnvVars = ['SPOTIFY_CLIENT_ID', 'SPOTIFY_CLIENT_SECRET'];
 for (const envVar of requiredEnvVars) {
     if (!process.env[envVar]) {
         console.error(`${color.red}[${getTimestamp()}] Missing required environment variable: ${envVar} ${color.reset}`);
@@ -134,6 +134,7 @@ async function startServer() {
 
         process.env.SPOTIFY_REDIRECT_URI = `${url}/callback`;
         console.log(`${color.green}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Public URL:${textEffects.bold}${textEffects.underline}${color.torquise} ${url} ${color.reset}${textEffects.reset}`);
+        console.log(`${color.green}[${getTimestamp()}]${color.reset} [SPOTIFY_SERVER] Redirect URI set to:${textEffects.bold}${textEffects.underline}${color.torquise} ${process.env.SPOTIFY_REDIRECT_URI} ${color.reset}${textEffects.reset}`);
 
         server.on('error', (error) => {
             if (error.code === 'EADDRINUSE') {
