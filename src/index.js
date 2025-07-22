@@ -73,6 +73,7 @@ const auditLogsClient = require('./client/auditLogsClientEvent.js');
 const { handleLogs } = require("./events/CommandEvents/handleLogsEvent");
 const { checkVersion } = require('./lib/version');
 const { fetchValorantAPI } = require('./utils/fetchValorantApi.js');
+const { checkLotteries } = require('./jobs/lotteryDrawJob');
 
 require('./functions/processHandlers')();
 require('./server/server.js')
@@ -109,6 +110,11 @@ auditLogsClient(client);
     client.handleTriggers(triggerFiles, "./src/triggers")
     client.handleCommands(commandFolders, "./src/commands");
     client.prefixCommands(pcommandFolders, './src/prefix');
+
+    setInterval(() => {
+        checkLotteries(client);
+    }, 60000);
+
     // Loads Val Api //
     await fetchValorantAPI(client);
     client.login(token).then(() => {

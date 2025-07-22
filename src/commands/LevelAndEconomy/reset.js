@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags } = require('discord.js');
+const { SlashCommandBuilder, EmbedBuilder, PermissionsBitField, MessageFlags, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const levelSchema = require ("../../schemas/userLevelSystem");
 const ecoSchema = require ("../../schemas/economySystem");
 const levelschema = require('../../schemas/levelSetupSystem');
@@ -15,7 +15,7 @@ module.exports = {
     .addSubcommand(command => command.setName('all-currency').setDescription('Resets all economy progress in this server.'))
     .addSubcommand(command => command.setName('currency').setDescription(`Resets specified user's economy currency.`).addUserOption(option => option.setName('user').setDescription(`Specified user's economy account will be reset.`).setRequired(true)))
     .addSubcommand(command => command.setName('xp').setDescription(`Resets specified user's XP.`).addUserOption(option => option.setName('user').setDescription('Specified user will have their xp reset.').setRequired(true))),
-    async execute(interaction) {
+    async execute(interaction, client) {
 
         const sub = interaction.options.getSubcommand();
         
@@ -69,53 +69,66 @@ module.exports = {
 
             const user = interaction.options.getUser('user');
 
-            ecoSchema.findOne({ Guild: interaction.guild.id, User: user.id}, async (err, data) => {
+            const confirmRow = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`reset_user_confirm_${user.id}`)
+                    .setLabel('Reset User Data')
+                    .setStyle(ButtonStyle.Danger),
+                new ButtonBuilder()
+                    .setCustomId('reset_cancel')
+                    .setLabel('Cancel')
+                    .setStyle(ButtonStyle.Secondary)
+            );
 
-                const embed = new EmbedBuilder()
-                .setColor(client.config.embedEconomy)
-                .setAuthor({ name: `Economy System ${client.config.devBy}` })
-                .setTitle(`${client.user.username} Economy System ${client.config.arrowEmoji}`)
-                .setThumbnail(client.user.displayAvatarURL())
-                .setDescription(`Reset **${user.username}**'s economy account.`)
-                .setFooter({ text: `${interaction.guild.name}'s Economy`, iconURL: interaction.guild.iconURL() })
-                .setTimestamp()
+            const userData = await ecoSchema.findOne({ Guild: interaction.guild.id, User: user.id });
 
-                if (err) throw err;
-    
-                if (!data) return await interaction.reply({ content: `${user} needs to have **created** a past account in order to add to their currency.`, flags: MessageFlags.Ephemeral})
+            if (!userData) {
+                return await interaction.reply({ 
+                    content: `${user} needs to have **created** a past account in order to reset their currency.`, 
+                    flags: MessageFlags.Ephemeral
+                });
+            }
 
-                const Data = await ecoSchema.findOne({ Guild: interaction.guild.id, User: user.id});
+            if (userData.Wallet + userData.Bank === 0) {
+                return await interaction.reply({ 
+                    content: `${user} has **no money**, you **do not** need to reset their money.`, 
+                    flags: MessageFlags.Ephemeral
+                });
+            }
 
-                if (Data.Wallet + Data.Bank === 0) {
-                    return await interaction.reply({ content: `${user} has **no money**, you **do not** need to reset their money.`, flags: MessageFlags.Ephemeral})
-                } else {
-                
-                    Data.Wallet = 0;
-                    Data.Bank = 0;
-                    Data.save();
+            const embed = new EmbedBuilder()
+            .setColor('Red')
+            .setTitle('⚠️ Reset User Economy Data')
+            .setDescription(`Are you sure you want to reset all economy data for **${user.tag}**?\n\n**Current Balance:**\n💰 Wallet: $${userData.Wallet.toLocaleString()}\n🏦 Bank: $${userData.Bank.toLocaleString()}\n\n**This action cannot be undone!**`)
+            .setFooter({ text: 'Please confirm this action' })
+            .setTimestamp();
 
-                    interaction.reply({ embeds: [embed]})
-            
-                }
-            })
+            await interaction.reply({ embeds: [embed], components: [confirmRow], flags: MessageFlags.Ephemeral });
 
             break;
             case 'all-currency':
 
-            ecoSchema.deleteMany({ Guild: interaction.guild.id}, async (err, data) => {
+            const confirmRowAll = new ActionRowBuilder().addComponents(
+                new ButtonBuilder()
+                    .setCustomId(`reset_server_confirm_${interaction.guild.id}`)
+                    .setLabel('YES, RESET ALL DATA')
+                    .setStyle(ButtonStyle.Danger),
+                new ButtonBuilder()
+                    .setCustomId('reset_cancel')
+                    .setLabel('NO, CANCEL')
+                    .setStyle(ButtonStyle.Success)
+            );
 
-                const embed = new EmbedBuilder()
-                .setColor(client.config.embedEconomy)
-                .setAuthor({ name: `Economy System ${client.config.devBy}` })
-                .setTitle(`${client.user.username} Economy System ${client.config.arrowEmoji}`)
-                .setThumbnail(client.user.displayAvatarURL())
-                .setDescription(`Reset **all** economy accounts in the ${interaction.guild.name}!`)
-                .setFooter({ text: `${interaction.guild.name}'s Economy`, iconURL: interaction.guild.iconURL() })
-                .setTimestamp()
-    
-                await interaction.reply({ embeds: [embed] })
-    
-            })
+            const embedAll = new EmbedBuilder()
+            .setColor('DarkRed')
+            .setTitle('⚠️ DANGER: Server-Wide Economy Reset')
+            .setDescription(`**WARNING! You are about to reset ALL economy data for EVERY user in ${interaction.guild.name}!**\n\n**This will:**\n• Delete ALL user balances\n• Remove ALL wallet and bank data\n• Reset ALL economy statistics for EVERYONE\n\n**This action is IRREVERSIBLE and will affect all members!**\n\n**Are you absolutely sure you want to continue?**`)
+            .setFooter({ text: 'THIS ACTION CANNOT BE UNDONE!' })
+            .setTimestamp();
+
+            await interaction.reply({ embeds: [embedAll], components: [confirmRowAll], flags: MessageFlags.Ephemeral });
+
+            break;
         }
     }
 }

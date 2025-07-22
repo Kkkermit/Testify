@@ -1,52 +1,45 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const economySchema = require('../../schemas/economySchema');
 
 module.exports = {
+    name: 'withdraw',
+    aliases: ['with', 'wd'],
+    description: 'Withdraw money from your bank',
     usableInDms: false,
-    category: "Economy",
-    data: new SlashCommandBuilder()
-        .setName('withdraw')
-        .setDescription('Withdraw money from your bank')
-        .addStringOption(option => 
-            option.setName('amount')
-                .setDescription('Amount to withdraw (number or "all")')
-                .setRequired(true)),
+    usage: '<amount|all>',
+    category: 'Economy',
+    async execute(message, client, args) {
+        const guild = message.guild;
+        const user = message.author;
         
-    async execute(interaction, client) {
-        const { guild, user } = interaction;
-        const amountInput = interaction.options.getString('amount');
+        if (!args[0]) {
+            return message.reply("Please specify an amount to withdraw or use 'all'.");
+        }
+        
+        const amountInput = args[0].toLowerCase();
         
         let data = await economySchema.findOne({ Guild: guild.id, User: user.id });
         
         if (!data) {
-            return interaction.reply({
-                content: "You don't have an economy account yet. Create one using `/economy create`!",
-                ephemeral: true
-            });
+            return message.reply("You don't have an economy account yet. Create one using the economy create command!");
         }
         
         let amount;
 
-        if (amountInput.toLowerCase() === 'all') {
+        if (amountInput === 'all') {
             amount = data.Bank;
         } else {
             amount = parseInt(amountInput);
-
+            
             if (isNaN(amount) || amount <= 0) {
-                return interaction.reply({
-                    content: "Please enter a valid positive amount or 'all'.",
-                    ephemeral: true
-                });
+                return message.reply("Please enter a valid positive amount or 'all'.");
             }
         }
-
+        
         if (amount > data.Bank) {
-            return interaction.reply({
-                content: `You don't have that much money in your bank. You only have **$${data.Bank.toLocaleString()}**.`,
-                ephemeral: true
-            });
+            return message.reply(`You don't have that much money in your bank. You only have **$${data.Bank.toLocaleString()}**.`);
         }
-
+        
         data.Bank -= amount;
         data.Wallet += amount;
         data.CommandsRan += 1;
@@ -64,6 +57,6 @@ module.exports = {
             .setFooter({ text: `${guild.name} Economy`, iconURL: guild.iconURL() })
             .setTimestamp();
             
-        return interaction.reply({ embeds: [embed] });
+        return message.reply({ embeds: [embed] });
     }
 };

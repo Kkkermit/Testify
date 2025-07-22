@@ -1,78 +1,63 @@
-const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const economySchema = require('../../schemas/economySchema');
 const { getTimeBetween } = require('../../utils/timeUtils');
 
 module.exports = {
+    name: 'rob',
+    aliases: ['steal'],
+    description: 'Try to rob another user',
+    usage: '<user>',
     usableInDms: false,
-    category: "Economy",
-    data: new SlashCommandBuilder()
-        .setName('rob')
-        .setDescription('Try to rob another user')
-        .addUserOption(option => 
-            option.setName('target')
-                .setDescription('The user to rob')
-                .setRequired(true)),
+    category: 'Economy',
+    async execute(message, client, args) {
+        const guild = message.guild;
+        const user = message.author;
         
-    async execute(interaction, client) {
-        const { guild, user } = interaction;
-        const target = interaction.options.getUser('target');
-
-        if (target.id === user.id) {
-            return interaction.reply({
-                content: "You can't rob yourself!",
-                ephemeral: true
-            });
+        if (!args[0]) {
+            return message.reply("You need to specify a user to rob!");
         }
-
+        
+        const target = message.mentions.users.first();
+        
+        if (!target) {
+            return message.reply("I couldn't find that user. Please mention a valid user.");
+        }
+        
+        if (target.id === user.id) {
+            return message.reply("You can't rob yourself!");
+        }
+        
         if (target.bot) {
-            return interaction.reply({
-                content: "You can't rob bots!",
-                ephemeral: true
-            });
+            return message.reply("You can't rob bots!");
         }
         
         let userData = await economySchema.findOne({ Guild: guild.id, User: user.id });
         let targetData = await economySchema.findOne({ Guild: guild.id, User: target.id });
-
+        
         if (!userData) {
-            return interaction.reply({
-                content: "You don't have an economy account yet. Create one using `/economy create`!",
-                ephemeral: true
-            });
+            return message.reply("You don't have an economy account yet. Create one using the economy create command!");
         }
         
         if (!targetData) {
-            return interaction.reply({
-                content: `${target.username} doesn't have an economy account to rob!`,
-                ephemeral: true
-            });
+            return message.reply(`${target.username} doesn't have an economy account to rob!`);
         }
         
         const now = new Date();
-
+        
         if (userData.LastRobbed && (now - new Date(userData.LastRobbed)) < 3600000) {
             const timeLeft = getTimeBetween(now, new Date(userData.LastRobbed).getTime() + 3600000);
             
-            return interaction.reply({
-                content: `You're still laying low after your last robbery. Try again in **${timeLeft}**.`,
-                ephemeral: true
-            });
+            return message.reply(`You're still laying low after your last robbery. Try again in **${timeLeft}**.`);
         }
-
+        
         if (targetData.Wallet < 100) {
-            return interaction.reply({
-                content: `${target.username} doesn't have enough money to rob. Find a richer target!`,
-                ephemeral: true
-            });
+            return message.reply(`${target.username} doesn't have enough money to rob. Find a richer target!`);
         }
-
+        
         if (userData.Wallet < 1000) {
-            return interaction.reply({
-                content: "You need at least $1,000 in your wallet to attempt a robbery (risk money).",
-                ephemeral: true
-            });
+            return message.reply("You need at least $1,000 in your wallet to attempt a robbery (risk money).");
         }
-
+        
         const hasProtection = targetData.Inventory.find(item => item.id === "padlock");
         
         if (hasProtection) {
@@ -82,10 +67,10 @@ module.exports = {
             userData.LastRobbed = now;
             userData.RobberyFailed += 1;
             userData.CommandsRan += 1;
-
+            
             targetData.Inventory = targetData.Inventory.filter((item, index) => {
                 if (item.id === "padlock") {
-                    return false;
+                    return false; 
                 }
                 return true;
             });
@@ -100,7 +85,7 @@ module.exports = {
                 .setFooter({ text: `${target.username}'s padlock broke in the process.` })
                 .setTimestamp();
                 
-            return interaction.reply({ embeds: [embed] });
+            return message.reply({ embeds: [embed] });
         }
         
         const successChance = 0.4;
@@ -132,9 +117,9 @@ module.exports = {
                 .setFooter({ text: `Better hide before they find out!` })
                 .setTimestamp();
                 
-            return interaction.reply({ embeds: [embed] });
+            return message.reply({ embeds: [embed] });
         } else {
-            const penalty = Math.floor(userData.Wallet * (Math.random() * 0.1 + 0.1)); 
+            const penalty = Math.floor(userData.Wallet * (Math.random() * 0.1 + 0.1));
             
             userData.Wallet -= penalty;
             userData.LastRobbed = now;
@@ -153,7 +138,7 @@ module.exports = {
                 .setFooter({ text: `Try again in 1 hour. Maybe pick an easier target?` })
                 .setTimestamp();
                 
-            return interaction.reply({ embeds: [embed] });
+            return message.reply({ embeds: [embed] });
         }
     }
 };

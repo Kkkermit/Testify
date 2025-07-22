@@ -42,6 +42,7 @@ module.exports = {
 	embedAi: "DarkGrey",
 	embedSpotify: "#1DB954",
 	embedInsta: "LuminousVividPink",
+	embedEconomyColor: "#00FF00",
 
 	// EMOJIS //
 	automodEmoji: "<:auto:1235660206856474704>",
