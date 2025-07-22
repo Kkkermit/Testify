@@ -1,6 +1,6 @@
 {
   "name": "testify",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "Open Source Discord Bot",
   "main": "src/index.js",
   "scripts": {
