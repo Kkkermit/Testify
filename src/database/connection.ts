@@ -1,3 +1,4 @@
+import { getServers } from "node:dns";
 import mongoose from "mongoose";
 import { SetupError, toError } from "../core/errors";
 import { type Logger } from "../core/logger";
@@ -23,22 +24,31 @@ export function explainConnectionFailure(error: unknown, uri: string): string {
 	const text = message ?? String(error);
 
 	if (code === "ECONNREFUSED" && text.includes("querySrv")) {
+		const servers = getServers();
+
 		return [
-			"Your computer could not look up the database's address.",
+			"Node could not look up the database's address.",
 			"",
-			"A `mongodb+srv://` string needs a DNS SRV lookup, and the DNS server your",
-			"machine is using refused it. Mongo itself was never contacted, so this is a",
-			"network problem rather than a database one.",
+			"A `mongodb+srv://` string needs a DNS SRV lookup. Node does those with its",
+			"own resolver rather than the operating system's, and it could not reach the",
+			"servers it was told to use:",
 			"",
-			"Things that fix it, most likely first:",
-			"  1. Change your DNS servers to 1.1.1.1 and 8.8.8.8.",
+			`  ${servers.join(", ")}`,
+			"",
+			"This is why `nslookup` can work while the bot still fails — they do not ask",
+			"the same resolver. An address starting `fe80::` above is the usual cause:",
+			"that is your router advertised over IPv6, and Node's resolver cannot use it.",
+			"",
+			"Either of these fixes it:",
+			"  1. Set real DNS servers — 1.1.1.1 and 8.8.8.8.",
 			"     macOS: System Settings → Network → your connection → Details → DNS.",
-			"  2. Turn off any VPN, or switch network — some block SRV lookups.",
-			"  3. Use the non-SRV connection string. In Atlas: Connect → Drivers →",
-			"     choose Node.js 2.2.12 or earlier. It starts `mongodb://` and lists the",
-			"     hosts directly, so no SRV lookup is needed.",
+			"     Then check `cat /etc/resolv.conf` shows them.",
+			"  2. Use a connection string with no SRV lookup in it. In Atlas:",
+			"     Connect → Drivers → Node.js 2.2.12 or earlier. It starts `mongodb://`",
+			"     and names the hosts directly.",
 			"",
-			`  Check it yourself with:  nslookup -type=SRV ${srvHostOf(uri)}`,
+			`  Confirm the diagnosis with:  nslookup -type=SRV ${srvHostOf(uri)}`,
+			"  If that works but this does not, it is definitely the resolver above.",
 		].join("\n");
 	}
 

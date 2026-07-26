@@ -1,3 +1,4 @@
+import { getServers } from "node:dns";
 import { explainConnectionFailure } from "../../src/database/connection";
 
 const SECRET = "sup3rs3cr3tw0rd";
@@ -17,6 +18,18 @@ describe("explainConnectionFailure", () => {
 		expect(explanation).toContain("could not look up the database's address");
 		expect(explanation).toContain("1.1.1.1");
 		expect(explanation).not.toContain("Authentication");
+	});
+
+	it("names the resolvers Node was actually using, which is the thing to change", () => {
+		const explanation = explainConnectionFailure(driverError("querySrv ECONNREFUSED", "ECONNREFUSED"), URI);
+
+		for (const server of getServers()) expect(explanation).toContain(server);
+		expect(explanation).toContain("fe80::");
+	});
+
+	it("explains why nslookup can succeed while the bot fails", () => {
+		const explanation = explainConnectionFailure(driverError("querySrv ECONNREFUSED", "ECONNREFUSED"), URI);
+		expect(explanation).toContain("do not ask");
 	});
 
 	it("tells you the exact command to check it with", () => {
