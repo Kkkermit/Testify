@@ -1,93 +1,133 @@
 # Contributing to Testify
 
-Thank you for considering contributing to Testify! This document outlines the process and guidelines for contributing to this project.
+Thanks for taking the time. This document covers the conventions the codebase
+follows and what has to pass before a change can be merged.
 
-## How to Contribute
+---
 
-### Setting Up Your Development Environment
-
-1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/Testify.git`
-3. Navigate to the project directory: `cd Testify`
-4. Install dependencies: `npm install`
-5. Create a new branch for your feature: `git checkout -b feature/your-feature-name`
-
-### Making Changes
-
-- Only make necessary changes related to your feature or bug fix
-- Follow the existing code style and patterns
-- Use meaningful variable and function names
-- Add comments where necessary to explain complex logic
-- Write or update tests for your changes when applicable
-
-### Package.json Etiquette
-
-**Important:** Do not modify `package.json` unless:
-- You need to add a new dependency
-- You need to update a dependency version to fix a critical issue
-- You're creating a new npm script
-
-For version bumps, let the maintainers handle version changes in package.json as part of the release process.
-
-### Committing Your Changes
-
-We use a standardized commit message format to keep our git history clean and informative. Use our custom commit script:
+## Getting set up
 
 ```bash
-npm run commit
+npm ci
+npm run env:setup
+npm run dev
 ```
 
-This script will guide you through creating a properly formatted commit message in the format:
+`npm ci` installs cleanly with no warnings. If you see one, please open an
+issue — that is a bug, not background noise.
+
+Git hooks are installed by `npm ci`:
+
+- **pre-commit** runs ESLint and Prettier over the staged files
+- **pre-push** runs the typecheck, the linter and the test suite
+
+---
+
+## Before you open a pull request
+
+```bash
+npm run check
 ```
-type: concise description of the change
+
+That runs the typecheck, the linter, the formatting check and the tests — the
+same four things CI runs.
+
+---
+
+## Commit messages
+
+Conventional Commits:
+
+```
+feat(economy): add atomic wallet adjustments
+fix(moderation): read args[0] instead of args[1] for the kick target
+docs(readme): document the token encryption key
 ```
 
-Where "type" is one of:
-- `feat`: A new feature
-- `fix`: A bug fix
-- `docs`: Documentation changes
-- `style`: Code style changes (formatting, etc)
-- `refactor`: Code refactoring with no feature changes
-- `perf`: Performance improvements
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks, dependency updates, etc
-- `add`: Adding new features or files
-- `update`: Updating existing features or files
-- `remove`: Removing features or files
+Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
 
-### Pull Request Process
+Branches: `feat/…`, `fix/…`, `docs/…`, `refactor/…`.
 
-1. Ensure your code follows the style guidelines and passes all tests
-2. Update documentation if necessary
-3. Push your changes to your fork: `git push origin feature/your-feature-name`
-4. Create a Pull Request from your fork to the main repository
-5. In your Pull Request description, include:
-   - What changes you've made
-   - Why you've made them
-   - How they work
-   - Any screenshots for UI changes
-   - Any relevant issue numbers (e.g., "Fixes #123")
+`npx tsx scripts/commit.ts` builds a conforming message interactively.
 
-## Pull Request Requirements
+---
 
-For your PR to be considered:
+## Conventions
 
-1. It must focus on a single feature or fix
-2. The code must be well-tested
-3. It should not include unrelated changes
-4. The commit history should follow our guidelines
-5. It must not break existing functionality
+### Naming
 
-## Code Review Process
+| Kind                 | Convention                                                    |
+| -------------------- | ------------------------------------------------------------- |
+| Files                | `camelCase.ts`                                                |
+| Interfaces and types | `PascalCase`, **no `I` prefix**                               |
+| Functions            | `camelCase`, verb first                                       |
+| Module constants     | `SCREAMING_SNAKE_CASE`                                        |
+| Booleans             | read as assertions: `isEnabled`, `hasPermission`, `canAfford` |
 
-1. The maintainers will review your PR
-2. They may request changes or clarifications
-3. Once approved, your PR will be merged
+Database fields are `camelCase`, with `guildId` and `userId` universally.
 
-## Additional Guidelines
+### Size
 
-- **Bug Reports**: Use the Issues tab with the bug report template
-- **Feature Requests**: Use the Issues tab with the feature request template
-- **Questions**: Join our [Discord server](https://discord.gg/xcMVwAVjSD) for questions rather than opening an issue
+Files soft-limit at 200 lines and hard-limit at 400. A command's `execute()`
+should stay under 40 lines — anything longer belongs in a service.
 
-Thank you for contributing to Testify!
+`services/` must not import discord.js. That single rule is what keeps the bulk
+of the logic testable without mocks.
+
+### Comments
+
+Comments explain **why**, never what. Document workarounds with their reason.
+No commented-out code. Large numeric literals use separators: `86_400_000`.
+
+---
+
+## Things that must not come back
+
+Each of these was a real defect in v1 and several are enforced by lint rules.
+
+| Pattern                                                | Instead                                                   |
+| ------------------------------------------------------ | --------------------------------------------------------- |
+| Read-modify-`save()` on anything numeric               | An atomic `$inc` in a repository                          |
+| Inline `new EmbedBuilder()`                            | The `embed()` factory in `src/ui/embeds.ts`               |
+| `console.*`                                            | The logger                                                |
+| Unawaited promises                                     | `await`, always                                           |
+| `setInterval` outside the timer registry               | `client.timers.interval(...)`                             |
+| Ad-hoc custom-ID strings                               | `encodeId()` with a registered namespace                  |
+| Single mutable slots on the client                     | Per-invocation state, or a keyed map owned by its feature |
+| Hardcoded IDs, emoji or URLs                           | `config/` or the environment                              |
+| Queries outside a repository                           | A repository function                                     |
+| Catching an error only to return `null`                | Let it reach the error boundary                           |
+| `npm install` at runtime, or writing to `node_modules` | Never                                                     |
+
+---
+
+## Adding things
+
+**A command** — drop a file in `src/features/<feature>/commands/`. It is
+discovered automatically. Give it a `Category` from the enum and at least one
+surface.
+
+**A component** — `src/features/<feature>/components/`, with a namespace
+registered in `core/customId.ts`. Duplicate namespaces fail the boot.
+
+**A message feature** — `src/features/<feature>/messages/`, as an ordered
+processor. Do not add another `messageCreate` listener.
+
+**An environment variable** — add it to the schema in `src/config/env.ts` and to
+the field list in `scripts/setupEnv.ts`. The example file is generated from
+that list, so it cannot drift.
+
+---
+
+## Reviewer checklist
+
+- [ ] No read-modify-`save()` on numeric fields
+- [ ] Embeds come from the factory
+- [ ] No raw `console.*`
+- [ ] Every promise awaited
+- [ ] Timers registered with the timer registry
+- [ ] New custom IDs use the codec and a unique namespace
+- [ ] New env vars are in the schema and the setup script
+- [ ] No hardcoded IDs, emoji or URLs
+- [ ] Business logic sits in `services/`, not in `execute()`
+- [ ] Tests cover the new logic

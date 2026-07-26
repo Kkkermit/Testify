@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest something new.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like it to do
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Moderation
+        - Economy
+        - Levelling
+        - Music
+        - Community
+        - Settings
+        - Tickets or giveaways
+        - Integrations
+        - Fun or mini-games
+        - Core framework
+        - Documentation
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
