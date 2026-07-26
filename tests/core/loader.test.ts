@@ -1,0 +1,73 @@
+import { Collection } from "discord.js";
+import { CATEGORIES } from "../../src/config/categories";
+import { type TestifyClient } from "../../src/core/client";
+import { buildSlashCommand, subcommandsOf } from "../../src/core/command";
+import { loadEverything } from "../../src/core/loader";
+import { createLogger } from "../../src/core/logger";
+
+/**
+ * Loads every command, button, event and message handler from disk. If a file
+ * is malformed — a bad category, a missing `run`, a duplicate name — this fails
+ * here rather than at start-up in production.
+ */
+function fakeClient(): TestifyClient {
+	return {
+		commands: new Collection(),
+		buttons: new Collection(),
+		messageHandlers: [],
+		logger: createLogger("fatal", false),
+		on: () => undefined,
+		once: () => undefined,
+	} as unknown as TestifyClient;
+}
+
+const client = fakeClient();
+const counts = loadEverything(client);
+
+describe("loadEverything", () => {
+	it("finds the modules on disk", () => {
+		expect(counts.commands).toBeGreaterThan(0);
+		expect(counts.buttons).toBeGreaterThan(0);
+		expect(counts.events).toBeGreaterThan(0);
+		expect(counts.messageHandlers).toBeGreaterThan(0);
+	});
+
+	it("sorts message handlers by their order", () => {
+		const orders = client.messageHandlers.map((handler) => handler.order ?? 100);
+		expect([...orders].sort((a, b) => a - b)).toEqual(orders);
+	});
+});
+
+describe("every command", () => {
+	const commands = [...client.commands.values()];
+
+	it.each(commands.map((command) => [command.name, command] as const))("%s is valid", (_name, command) => {
+		expect(command.name).toMatch(/^[a-z0-9-]{1,32}$/);
+		expect(command.description.length).toBeGreaterThan(0);
+		expect(command.description.length).toBeLessThanOrEqual(100);
+		expect(Object.keys(CATEGORIES)).toContain(command.category);
+	});
+
+	it.each(commands.map((command) => [command.name, command] as const))(
+		"%s builds a payload Discord accepts",
+		(_name, command) => {
+			expect(() => buildSlashCommand(command).toJSON()).not.toThrow();
+		},
+	);
+
+	it("never mixes top-level options with subcommands", () => {
+		const mixed = commands.filter((command) => subcommandsOf(command).length > 0 && (command.options?.length ?? 0) > 0);
+		expect(mixed.map((command) => command.name)).toEqual([]);
+	});
+
+	it("puts every command in the folder its category names", () => {
+		expect(commands.filter((command) => !(command.category in CATEGORIES))).toEqual([]);
+	});
+});
+
+describe("every button", () => {
+	it("has a unique id with no separator in it", () => {
+		for (const [id] of client.buttons) expect(id).not.toContain(":");
+		expect(new Set(client.buttons.keys()).size).toBe(client.buttons.size);
+	});
+});

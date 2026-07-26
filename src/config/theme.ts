@@ -1,58 +1,46 @@
 import { type ColorResolvable } from "discord.js";
-import { Category, categoryColor } from "./categories";
+import { CATEGORIES, type Category } from "./categories";
 
-/**
- * Colours, emoji and branding. Everything here is cosmetic — nothing that differs
- * between deployments (IDs, secrets, channels) belongs in this file.
- */
+/** Colours, emoji and branding. Change these to make the bot look like yours. */
 export const theme = {
-	brand: {
-		name: "Testify",
-		developer: "Kkermit",
-		credit: "| Developed by Kkermit",
-		repository: "https://github.com/Kkkermit/Testify",
-		supportInvite: "https://discord.gg/xcMVwAVjSD",
-	},
+	name: "Testify",
+	author: "Kkermit",
+	credit: "Testify",
+	repository: "https://github.com/Kkkermit/Testify",
+	supportServer: "https://discord.gg/xcMVwAVjSD",
 
-	colors: {
+	colours: {
 		default: "Blurple",
 		error: "Red",
 		success: "Green",
 		warning: "Yellow",
-		info: "LuminousVividPink",
-		audit: "Purple",
-		verify: "DarkGreen",
-		spotify: "#1db954",
-		instagram: "LuminousVividPink",
-		valorant: "#fd4556",
-		automod: "Blue",
+		info: "Blue",
+		audit: "DarkPurple",
 	} satisfies Record<string, ColorResolvable>,
 
 	/**
-	 * Unicode only. Custom emoji render as raw text in guilds that do not have them,
-	 * which is exactly what the previous ~30 hardcoded emoji IDs did for self-hosters.
+	 * Plain Unicode only. Custom emoji show up as raw text in any server that does
+	 * not have them, which is what made the old bot look broken elsewhere.
 	 */
 	emoji: {
-		arrow: "⤵",
 		error: "❌",
-		success: "☑️",
+		success: "✅",
 		warning: "⚠️",
 		info: "ℹ️",
+		arrow: "➜",
 		auditLog: "📋",
-		verify: "✅",
-		counting: "✔️",
-		confetti: "🎉",
-		coffee: "☕",
-		automod: "🤖",
-		moderation: "🔨",
 		coin: "🪙",
 		bank: "🏦",
 		wallet: "👛",
+		confetti: "🎉",
+		counting: "🔢",
+		moderation: "🛡️",
+		verify: "🔓",
 		first: "⏮️",
 		previous: "◀️",
 		next: "▶️",
 		last: "⏭️",
-		close: "🗑️",
+		tick: "✔️",
 	},
 
 	music: {
@@ -60,23 +48,17 @@ export const theme = {
 		pause: "⏸️",
 		stop: "⏹️",
 		queue: "📄",
-		success: "☑️",
 		repeat: "🔁",
 		shuffle: "🔀",
-		error: "❌",
-		volume: "🔊",
 		skip: "⏭️",
 		previous: "⏮️",
+		volume: "🔊",
+		success: "🎵",
 	},
 
-	currency: {
-		symbol: "🪙",
-		name: "coins",
-	},
+	currency: "🪙",
 } as const;
 
-export function colorFor(category: Category): ColorResolvable {
-	return categoryColor[category];
+export function categoryColour(category: Category): ColorResolvable {
+	return CATEGORIES[category].colour;
 }
-
-export const DEFAULT_CATEGORY: Category = Category.Info;

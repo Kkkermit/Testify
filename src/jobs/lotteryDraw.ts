@@ -1,11 +1,10 @@
 import { randomInt } from "node:crypto";
-import { Category } from "../config/categories";
 import { type TestifyClient } from "../core/client";
+import { type LotteryWinner } from "../database/models/lottery";
 import { adjustWallet } from "../database/repositories/economyRepository";
 import { claimDueDraw, recordDraw } from "../database/repositories/lotteryRepository";
-import { type LotteryWinner } from "../database/models/lottery";
-import { embed } from "../ui/embeds";
-import { formatNumber } from "../ui/format";
+import { embed } from "../lib/embeds";
+import { formatNumber } from "../lib/format";
 
 /**
  * The draw is claimed by pushing `nextDrawTime` forward inside the same query
@@ -31,7 +30,7 @@ export async function runLotteryDraws(client: TestifyClient): Promise<void> {
 				await channel.send({
 					embeds: [
 						embed({
-							category: Category.Economy,
+							category: "economy",
 							title: "Lottery draw",
 							description: "Nobody entered this round, so the prize pool rolls over.",
 						}),
@@ -69,7 +68,7 @@ export async function runLotteryDraws(client: TestifyClient): Promise<void> {
 			await channel.send({
 				embeds: [
 					embed({
-						category: Category.Economy,
+						category: "economy",
 						title: "\u{1f39f}\ufe0f Lottery draw",
 						description: `**${formatNumber(lottery.prizePool)}** was shared between ${winners.length} winner(s).`,
 						fields: [

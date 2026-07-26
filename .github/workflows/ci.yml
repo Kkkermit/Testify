@@ -82,9 +82,9 @@ jobs:
 
       - name: Verify assets reached dist/
         run: |
-          test -d dist/assets/images || { echo "dist/assets/images missing"; exit 1; }
-          test -d dist/assets/jsons  || { echo "dist/assets/jsons missing"; exit 1; }
-          test -f dist/index.js      || { echo "dist/index.js missing"; exit 1; }
+          test -d dist/assets   || { echo "dist/assets missing"; exit 1; }
+          test -f dist/index.js || { echo "dist/index.js missing"; exit 1; }
+          test -d dist/commands || { echo "dist/commands missing"; exit 1; }
 
   audit:
     name: Dependency audit

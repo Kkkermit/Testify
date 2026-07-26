@@ -1,27 +1,17 @@
-# Contributing to Testify
+# Contributing
 
-Thanks for taking the time. This document covers the conventions the codebase
-follows and what has to pass before a change can be merged.
-
----
+Thanks for taking a look. Issues and pull requests are both welcome.
 
 ## Getting set up
 
 ```bash
-npm ci
-npm run env:setup
+npm install
+npm run setup   # writes a .env
 npm run dev
 ```
 
-`npm ci` installs cleanly with no warnings. If you see one, please open an
-issue — that is a bug, not background noise.
-
-Git hooks are installed by `npm ci`:
-
-- **pre-commit** runs ESLint and Prettier over the staged files
-- **pre-push** runs the typecheck, the linter and the test suite
-
----
+You need Node 22.11 or newer and a MongoDB you can connect to. Set
+`DISCORD_DEV_GUILD_ID` to a test server so your commands appear immediately.
 
 ## Before you open a pull request
 
@@ -29,105 +19,51 @@ Git hooks are installed by `npm ci`:
 npm run check
 ```
 
-That runs the typecheck, the linter, the formatting check and the tests — the
-same four things CI runs.
+That runs the typecheck, the linter, the formatter check and the tests — exactly
+what CI runs. The pre-commit and pre-push hooks run most of it for you.
 
----
+## House style
 
-## Commit messages
+- **No comments that restate the code.** Write one when the _why_ is not obvious
+  from the _what_ — an ordering constraint, a Discord API quirk, a decision that
+  looks wrong until you know the reason.
+- **Formatting is Prettier's job.** Tabs, 120 columns; do not fight it by hand.
+- **British spelling** in user-facing text and in names we own (`colour`,
+  `levelling`). discord.js spellings stay as discord.js writes them.
+- **Throw, do not reply, on failure.** `UserFacingError` is shown to the user;
+  anything else is logged and they get a generic apology.
+- **Build embeds with `embed()`** from `src/lib/embeds.ts` so everything matches.
+  The linter enforces this.
 
-Conventional Commits:
+## Where things go
+
+| You are adding…            | Put it in                  |
+| -------------------------- | -------------------------- |
+| A command                  | `src/commands/<category>/` |
+| A button, menu or modal    | `src/buttons/`             |
+| A gateway event            | `src/events/`              |
+| Something on every message | `src/events/message/`      |
+| Repeating background work  | `src/jobs/`                |
+| A shared helper            | `src/lib/`                 |
+| A database model or query  | `src/database/`            |
+
+Nothing needs registering — the loader picks files up from these folders at
+start-up. If a file is shaped wrongly the bot refuses to start and names it.
+
+## Tests
+
+Tests live in `tests/` and mirror `src/`. Anything with real logic in it —
+formatting, pagination, the levelling curve, a repository — should have one.
+Repository tests use an in-memory MongoDB and skip themselves when one cannot be
+started, so they never fail for environmental reasons.
+
+## Commits
+
+Short, present tense, and say what changed:
 
 ```
-feat(economy): add atomic wallet adjustments
-fix(moderation): read args[0] instead of args[1] for the kick target
-docs(readme): document the token encryption key
+add /coinflip command
+fix lost XP when two messages arrive together
 ```
 
-Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `chore`.
-
-Branches: `feat/…`, `fix/…`, `docs/…`, `refactor/…`.
-
-`npx tsx scripts/commit.ts` builds a conforming message interactively.
-
----
-
-## Conventions
-
-### Naming
-
-| Kind                 | Convention                                                    |
-| -------------------- | ------------------------------------------------------------- |
-| Files                | `camelCase.ts`                                                |
-| Interfaces and types | `PascalCase`, **no `I` prefix**                               |
-| Functions            | `camelCase`, verb first                                       |
-| Module constants     | `SCREAMING_SNAKE_CASE`                                        |
-| Booleans             | read as assertions: `isEnabled`, `hasPermission`, `canAfford` |
-
-Database fields are `camelCase`, with `guildId` and `userId` universally.
-
-### Size
-
-Files soft-limit at 200 lines and hard-limit at 400. A command's `execute()`
-should stay under 40 lines — anything longer belongs in a service.
-
-`services/` must not import discord.js. That single rule is what keeps the bulk
-of the logic testable without mocks.
-
-### Comments
-
-Comments explain **why**, never what. Document workarounds with their reason.
-No commented-out code. Large numeric literals use separators: `86_400_000`.
-
----
-
-## Things that must not come back
-
-Each of these was a real defect in v1 and several are enforced by lint rules.
-
-| Pattern                                                | Instead                                                   |
-| ------------------------------------------------------ | --------------------------------------------------------- |
-| Read-modify-`save()` on anything numeric               | An atomic `$inc` in a repository                          |
-| Inline `new EmbedBuilder()`                            | The `embed()` factory in `src/ui/embeds.ts`               |
-| `console.*`                                            | The logger                                                |
-| Unawaited promises                                     | `await`, always                                           |
-| `setInterval` outside the timer registry               | `client.timers.interval(...)`                             |
-| Ad-hoc custom-ID strings                               | `encodeId()` with a registered namespace                  |
-| Single mutable slots on the client                     | Per-invocation state, or a keyed map owned by its feature |
-| Hardcoded IDs, emoji or URLs                           | `config/` or the environment                              |
-| Queries outside a repository                           | A repository function                                     |
-| Catching an error only to return `null`                | Let it reach the error boundary                           |
-| `npm install` at runtime, or writing to `node_modules` | Never                                                     |
-
----
-
-## Adding things
-
-**A command** — drop a file in `src/features/<feature>/commands/`. It is
-discovered automatically. Give it a `Category` from the enum and at least one
-surface.
-
-**A component** — `src/features/<feature>/components/`, with a namespace
-registered in `core/customId.ts`. Duplicate namespaces fail the boot.
-
-**A message feature** — `src/features/<feature>/messages/`, as an ordered
-processor. Do not add another `messageCreate` listener.
-
-**An environment variable** — add it to the schema in `src/config/env.ts` and to
-the field list in `scripts/setupEnv.ts`. The example file is generated from
-that list, so it cannot drift.
-
----
-
-## Reviewer checklist
-
-- [ ] No read-modify-`save()` on numeric fields
-- [ ] Embeds come from the factory
-- [ ] No raw `console.*`
-- [ ] Every promise awaited
-- [ ] Timers registered with the timer registry
-- [ ] New custom IDs use the codec and a unique namespace
-- [ ] New env vars are in the schema and the setup script
-- [ ] No hardcoded IDs, emoji or URLs
-- [ ] Business logic sits in `services/`, not in `execute()`
-- [ ] Tests cover the new logic
+Conventional-commit prefixes are fine but not required.

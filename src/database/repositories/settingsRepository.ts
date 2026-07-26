@@ -1,6 +1,4 @@
 import {
-	AiChannel,
-	type AiChannelSettings,
 	AntiLink,
 	type AntiLinkSettings,
 	AuditLogConfig,
@@ -186,26 +184,6 @@ export async function disableWelcome(guildId: string): Promise<boolean> {
 	return (await Welcome.deleteOne({ guildId }).exec()).deletedCount > 0;
 }
 
-export async function getAiChannel(guildId: string): Promise<AiChannelSettings | null> {
-	return AiChannel.findOne({ guildId }).lean<AiChannelSettings>().exec();
-}
-
-export async function setAiChannel(
-	guildId: string,
-	channelId: string,
-	instruction: string,
-): Promise<AiChannelSettings> {
-	return AiChannel.findOneAndUpdate(
-		{ guildId },
-		{ $set: { channelId, instruction } },
-		UPSERT,
-	).exec() as Promise<AiChannelSettings>;
-}
-
-export async function disableAiChannel(guildId: string): Promise<boolean> {
-	return (await AiChannel.deleteOne({ guildId }).exec()).deletedCount > 0;
-}
-
 export async function getVoiceCounter(guildId: string): Promise<VoiceCounterSettings | null> {
 	return VoiceCounter.findOne({ guildId }).lean<VoiceCounterSettings>().exec();
 }
@@ -266,7 +244,6 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		Counting.deleteMany({ guildId }).exec(),
 		Sticky.deleteMany({ guildId }).exec(),
 		Welcome.deleteMany({ guildId }).exec(),
-		AiChannel.deleteMany({ guildId }).exec(),
 		VoiceCounter.deleteMany({ guildId }).exec(),
 		FixedStats.deleteMany({ guildId }).exec(),
 		TreasureConfig.deleteMany({ guildId }).exec(),

@@ -39,10 +39,9 @@
 		"test:coverage": "jest --coverage",
 		"check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
 		"db:wipe": "tsx scripts/wipeDatabase.ts",
-		"env:setup": "tsx scripts/setupEnv.ts",
-		"codebase:info": "tsx scripts/linesOfCode.ts",
 		"prepare": "husky",
-		"docs:commands": "tsx scripts/generateCommandDocs.ts"
+		"docs:commands": "tsx scripts/generateCommandDocs.ts",
+		"setup": "tsx scripts/setupEnv.ts"
 	},
 	"lint-staged": {
 		"*.ts": [
@@ -58,9 +57,6 @@
 		"test-exclude": "^7.0.1",
 		"esbuild": "^0.28.1",
 		"serialize-javascript": "^7.0.7",
-		"spotify-web-api-node": {
-			"superagent": "^10.2.3"
-		},
 		"discord-html-transcripts": {
 			"undici": "^6.28.0"
 		}
@@ -68,16 +64,13 @@
 	"dependencies": {
 		"@discordjs/voice": "0.19.2",
 		"@distube/soundcloud": "2.0.4",
-		"@distube/spotify": "2.0.2",
 		"@distube/yt-dlp": "2.0.1",
 		"@napi-rs/canvas": "1.0.2",
-		"@ngrok/ngrok": "1.7.0",
 		"discord-giveaways": "6.0.1",
 		"discord-html-transcripts": "3.2.0",
 		"discord.js": "14.27.0",
 		"distube": "5.2.3",
 		"dotenv": "17.4.2",
-		"express": "5.2.1",
 		"ffmpeg-static": "5.2.0",
 		"figlet": "1.11.3",
 		"glob": "13.0.6",
@@ -95,7 +88,6 @@
 		"@eslint/js": "10.0.1",
 		"@swc/core": "1.15.46",
 		"@swc/jest": "0.2.39",
-		"@types/express": "5.0.6",
 		"@types/figlet": "1.7.0",
 		"@types/jest": "30.0.0",
 		"@types/node": "22.20.1",

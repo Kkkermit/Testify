@@ -2,11 +2,7 @@ import mongoose from "mongoose";
 import { toError } from "../core/errors";
 import { type Logger } from "../core/logger";
 
-/**
- * The only place a Mongo connection is opened. The previous code connected from a
- * ready handler and again from a script, both passing options that have been
- * no-ops since Mongoose 6.
- */
+/** The only place a Mongo connection is opened. */
 
 export interface ConnectOptions {
 	uri: string;

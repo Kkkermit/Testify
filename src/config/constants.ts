@@ -52,7 +52,6 @@ export const INTERVALS = {
 	lotteryCheckMs: MINUTE_MS,
 	softbanCheckMs: MINUTE_MS,
 	fixedStatsRefreshMs: 5 * MINUTE_MS,
-	instagramPollMs: 15 * MINUTE_MS,
 	passiveIncomeMs: HOUR_MS,
 } as const;
 
@@ -79,8 +78,6 @@ export const LIMITS = {
 	externalApiTimeoutMs: 10 * SECOND_MS,
 } as const;
 
-export const DEFAULT_PREFIX = "t?";
-
 export const TICKET = {
 	namePrefix: "ticket-",
 	closeDelayMs: 5 * SECOND_MS,
@@ -97,4 +94,3 @@ export const TREASURE_DEFAULTS = {
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 
 /** Used where a "never expires" sentinel is needed instead of a made-up huge number. */
-export const NEVER = Number.MAX_SAFE_INTEGER;

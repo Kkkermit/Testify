@@ -1,4 +1,16 @@
-/** Message is shown to the user verbatim. */
+import { type ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from "discord.js";
+import { theme } from "../config/theme";
+import { type ComponentInteraction } from "./button";
+import { type TestifyClient } from "./client";
+import { type Command, dispatch } from "./command";
+
+/**
+ * Throw this when the user needs to read the message — a bad argument, not
+ * enough money, a missing role. It is shown to them word for word.
+ *
+ * Anything else that is thrown gets logged with full context and the user sees a
+ * generic apology, so stack traces never leak into chat.
+ */
 export class UserFacingError extends Error {
 	constructor(message: string) {
 		super(message);
@@ -6,71 +18,134 @@ export class UserFacingError extends Error {
 	}
 }
 
-export class PermissionError extends UserFacingError {
-	constructor(message: string) {
-		super(message);
-		this.name = "PermissionError";
-	}
-}
-
-export class NotFoundError extends UserFacingError {
-	constructor(message: string) {
-		super(message);
-		this.name = "NotFoundError";
-	}
-}
-
-export class ValidationError extends UserFacingError {
-	constructor(message: string) {
-		super(message);
-		this.name = "ValidationError";
-	}
-}
-
-export class CooldownError extends UserFacingError {
-	constructor(
-		readonly retryAfterMs: number,
-		message: string,
-	) {
-		super(message);
-		this.name = "CooldownError";
-	}
-}
-
-/** Logged with full context; the user only ever sees a generic message. */
-export class ExternalApiError extends Error {
+/** An external API failed. Logged in full; the user is told the service is down. */
+export class ServiceError extends Error {
 	constructor(
 		readonly service: string,
 		override readonly cause: unknown,
 	) {
-		super(`External API call to ${service} failed`);
-		this.name = "ExternalApiError";
+		super(`${service} is not responding`);
+		this.name = "ServiceError";
 	}
 }
 
-export class ModuleLoadError extends Error {
-	constructor(
-		readonly file: string,
-		override readonly cause: unknown,
-	) {
-		super(`Failed to load module: ${file}`);
-		this.name = "ModuleLoadError";
-	}
-}
-
-export class ConfigurationError extends Error {
+/** A required setting is missing, so a feature cannot run at all. */
+export class SetupError extends Error {
 	constructor(message: string) {
 		super(message);
-		this.name = "ConfigurationError";
+		this.name = "SetupError";
 	}
 }
 
-export function isUserFacing(error: unknown): error is UserFacingError {
-	return error instanceof UserFacingError;
-}
-
-/** Normalises anything thrown into an Error, so logging never loses the value. */
 export function toError(value: unknown): Error {
 	if (value instanceof Error) return value;
 	return new Error(typeof value === "string" ? value : JSON.stringify(value));
+}
+
+/** Red, with a cross. Kept here so the error path never depends on the UI layer. */
+function failureEmbed(message: string): EmbedBuilder {
+	return new EmbedBuilder().setColor(theme.colours.error).setDescription(`${theme.emoji.error} ${message}`);
+}
+
+/**
+ * Runs a command and makes sure the user always gets an answer, whatever
+ * happens. This is the only place command errors are handled.
+ */
+export async function runCommand(
+	interaction: ChatInputCommandInteraction,
+	command: Command,
+	client: TestifyClient,
+): Promise<void> {
+	try {
+		await dispatch(interaction, command, client);
+	} catch (error) {
+		await reportFailure(interaction, error, client, command.name);
+	}
+}
+
+export async function runButton(
+	interaction: ComponentInteraction,
+	handler: () => Promise<void>,
+	client: TestifyClient,
+	label: string,
+): Promise<void> {
+	try {
+		await handler();
+	} catch (error) {
+		await reportFailure(interaction, error, client, label);
+	}
+}
+
+async function reportFailure(
+	interaction: ChatInputCommandInteraction | ComponentInteraction,
+	error: unknown,
+	client: TestifyClient,
+	label: string,
+): Promise<void> {
+	const userFacing = error instanceof UserFacingError;
+	const setup = error instanceof SetupError;
+	const service = error instanceof ServiceError;
+
+	const message = userFacing
+		? error.message
+		: setup
+			? error.message
+			: service
+				? `${error.service} is not responding right now. Try again in a bit.`
+				: "Something went wrong. The problem has been logged.";
+
+	if (!userFacing) {
+		client.logger.error(
+			{ err: toError(error), command: label, user: interaction.user.id, guild: interaction.guildId },
+			"Command failed",
+		);
+		if (!setup && !service) await postToErrorChannel(client, label, interaction, toError(error));
+	}
+
+	await tell(interaction, message);
+}
+
+async function tell(interaction: ChatInputCommandInteraction | ComponentInteraction, message: string): Promise<void> {
+	const payload = { embeds: [failureEmbed(message)], flags: MessageFlags.Ephemeral } as const;
+
+	try {
+		if (interaction.deferred) await interaction.editReply({ embeds: payload.embeds });
+		else if (interaction.replied) await interaction.followUp(payload);
+		else await interaction.reply(payload);
+	} catch {
+		// The interaction expired or was already answered elsewhere. Nothing more
+		// can reach the user, and this must not mask the original error.
+	}
+}
+
+async function postToErrorChannel(
+	client: TestifyClient,
+	label: string,
+	interaction: ChatInputCommandInteraction | ComponentInteraction,
+	error: Error,
+): Promise<void> {
+	const channelId = client.env.CHANNEL_ERROR_LOG;
+	if (!channelId) return;
+
+	try {
+		const channel = await client.channels.fetch(channelId);
+		if (!channel?.isTextBased() || !channel.isSendable()) return;
+
+		await channel.send({
+			embeds: [
+				new EmbedBuilder()
+					.setColor(theme.colours.error)
+					.setTitle("Command failed")
+					.setTimestamp()
+					.addFields(
+						{ name: "Command", value: `\`${label}\``, inline: true },
+						{ name: "User", value: `${interaction.user.username} (${interaction.user.id})`, inline: true },
+						{ name: "Server", value: interaction.guild?.name ?? "Direct message", inline: true },
+						{ name: "Error", value: `\`\`\`\n${(error.stack ?? error.message).slice(0, 1_000)}\n\`\`\`` },
+					),
+			],
+		});
+	} catch (reportError) {
+		client.logger.warn({ err: toError(reportError) }, "Could not post to the error channel");
+	}
 }

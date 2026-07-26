@@ -2,18 +2,18 @@ import { type ClientEvents } from "discord.js";
 import { type TestifyClient } from "./client";
 
 /**
- * `client` comes first, which makes the payload spread type-safe. The previous
- * loader appended it last, producing a different arity per event type — and three
- * handlers whose signature was wrong enough that they never ran at all.
+ * Handles a Discord gateway event. The client comes first so the payload after
+ * it is correctly typed for whichever event you named.
  */
-export interface EventHandler<K extends keyof ClientEvents = keyof ClientEvents> {
+export interface Event<K extends keyof ClientEvents = keyof ClientEvents> {
 	name: K;
+	/** Run only the first time the event fires. Use this for start-up work. */
 	once?: boolean;
-	execute(client: TestifyClient, ...args: ClientEvents[K]): Promise<void> | void;
+	run(client: TestifyClient, ...args: ClientEvents[K]): Promise<void> | void;
 }
 
-export function defineEvent<K extends keyof ClientEvents>(handler: EventHandler<K>): EventHandler<K> {
-	return handler;
+export function defineEvent<K extends keyof ClientEvents>(event: Event<K>): Event<K> {
+	return event;
 }
 
-export type AnyEventHandler = EventHandler<keyof ClientEvents>;
+export type AnyEvent = Event<keyof ClientEvents>;

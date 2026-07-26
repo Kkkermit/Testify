@@ -1,16 +1,12 @@
-import { resetContentFilter } from "../src/core/contentFilter";
-import { clearCooldowns } from "../src/core/middleware";
+import { resetEnv } from "../src/config/env";
+import { clearCooldowns } from "../src/core/checks";
 import { clearBlacklistCache } from "../src/database/repositories/blacklistRepository";
-import { clearGuildSettingsCache } from "../src/database/repositories/guildSettingsRepository";
-import { resetEnvCache } from "../src/config/env";
 
 // One place resets shared module state, so no suite inherits another's cache.
 beforeEach(() => {
 	clearCooldowns();
 	clearBlacklistCache();
-	clearGuildSettingsCache();
-	resetContentFilter();
-	resetEnvCache();
+	resetEnv();
 });
 
 jest.setTimeout(20_000);

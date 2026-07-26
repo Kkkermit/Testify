@@ -1,68 +1,164 @@
+import { resolve } from "node:path";
+import { REST, Routes } from "discord.js";
 import { globSync } from "glob";
-import { ModuleLoadError } from "./errors";
-import { type Logger } from "./logger";
-import { SOURCE_ROOT } from "./paths";
+import { isCategory } from "../config/categories";
+import { type Button } from "./button";
+import { type TestifyClient } from "./client";
+import { buildSlashCommand, type Command } from "./command";
+import { type AnyEvent } from "./event";
+import { type MessageHandler } from "./message";
 
 /**
- * Compiled-safe module discovery. Patterns resolve from this module's own tree —
- * `src/` under tsx, `dist/` after a build — so the same code finds the same files
- * in both, which the previous `fs.readdirSync("./src/…")` calls could not do.
+ * `__dirname` is `src/core` while developing and `dist/core` after a build, and
+ * both trees have the same shape. Resolving from here rather than from the
+ * working directory is what lets the same code find the same files either way.
  */
-export function discover(pattern: string): string[] {
-	// Under tsx and Jest the tree is TypeScript; after a build it is JavaScript.
-	// Globbing both keeps `npm run dev` and `npm start` loading the same modules.
-	return globSync(pattern, {
-		cwd: SOURCE_ROOT,
+const ROOT = resolve(__dirname, "..");
+
+function find(folder: string): string[] {
+	return globSync(`${folder}/**/*.{js,ts}`, {
+		cwd: ROOT,
 		absolute: true,
 		nodir: true,
 		ignore: ["**/*.d.ts", "**/*.map", "**/*.test.*"],
 	}).sort();
 }
 
-/** Expands a bare module pattern to the extensions this runtime can load. */
-export function modulePattern(relative: string): string {
-	return `${relative}.{js,ts}`;
-}
+function importFile(file: string): unknown {
+	// The one dynamic require in the codebase: it is how dropping a file into a
+	// folder is enough to register a command.
 
-export interface LoadResult<T> {
-	module: T;
-	file: string;
-}
-
-/**
- * Loads every module matching `pattern`, validating each one. A file that fails
- * validation fails the boot with its own filename attached, instead of throwing an
- * opaque error deep inside the loader the way the previous version did.
- */
-export function loadModules<T>(
-	pattern: string,
-	validate: (mod: unknown, file: string) => T,
-	logger: Logger,
-): LoadResult<T>[] {
-	const files = discover(pattern);
-	const loaded: LoadResult<T>[] = [];
-
-	for (const file of files) {
-		try {
-			// The one sanctioned dynamic require: this is the plugin-style discovery
-			// that lets commands and events be files on disk rather than a manifest.
-
-			const raw: unknown = require(file);
-			const candidate = extractDefault(raw);
-			loaded.push({ module: validate(candidate, file), file });
-		} catch (error) {
-			logger.error({ file, err: error }, "Failed to load module");
-			throw new ModuleLoadError(file, error);
-		}
+	const loaded: unknown = require(file);
+	if (typeof loaded === "object" && loaded !== null && "default" in loaded) {
+		return loaded.default;
 	}
-
-	logger.debug({ pattern, count: loaded.length }, "Loaded modules");
 	return loaded;
 }
 
-function extractDefault(raw: unknown): unknown {
-	if (typeof raw === "object" && raw !== null && "default" in raw) {
-		return raw.default;
+function fail(file: string, problem: string): never {
+	throw new Error(`${file}\n  ${problem}`);
+}
+
+function isObject(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null;
+}
+
+export interface LoadCounts {
+	commands: number;
+	events: number;
+	buttons: number;
+	messageHandlers: number;
+}
+
+/**
+ * Loads everything from disk and registers it on the client. A file that is not
+ * shaped correctly stops start-up and names itself, rather than failing later
+ * with something unhelpful.
+ */
+export function loadEverything(client: TestifyClient): LoadCounts {
+	return {
+		commands: loadCommands(client),
+		buttons: loadButtons(client),
+		messageHandlers: loadMessageHandlers(client),
+		events: loadEvents(client),
+	};
+}
+
+function loadCommands(client: TestifyClient): number {
+	for (const file of find("commands")) {
+		const command = importFile(file);
+
+		if (!isObject(command)) fail(file, "should `export default defineCommand({ … })`");
+		if (typeof command.name !== "string" || !command.name) fail(file, "is missing `name`");
+		if (typeof command.description !== "string" || !command.description) fail(file, "is missing `description`");
+		if (typeof command.category !== "string" || !isCategory(command.category)) {
+			fail(file, `has an unknown category: ${String(command.category)}`);
+		}
+		if (typeof command.run !== "function" && !Array.isArray(command.subcommands)) {
+			fail(file, "needs either `run` or `subcommands`");
+		}
+		if (client.commands.has(command.name)) fail(file, `uses the command name "${command.name}" twice`);
+
+		client.commands.set(command.name, command as unknown as Command);
 	}
-	return raw;
+
+	return client.commands.size;
+}
+
+function loadButtons(client: TestifyClient): number {
+	for (const file of find("buttons")) {
+		const button = importFile(file);
+
+		if (!isObject(button)) fail(file, "should `export default defineButton({ … })`");
+		if (typeof button.id !== "string" || !button.id) fail(file, "is missing `id`");
+		if (typeof button.run !== "function") fail(file, "is missing `run`");
+		if (client.buttons.has(button.id)) fail(file, `uses the button id "${button.id}" twice`);
+
+		client.buttons.set(button.id, button as unknown as Button);
+	}
+
+	return client.buttons.size;
+}
+
+function loadMessageHandlers(client: TestifyClient): number {
+	for (const file of find("events/message")) {
+		const handler = importFile(file);
+
+		if (!isObject(handler)) fail(file, "should `export default defineMessageHandler({ … })`");
+		if (typeof handler.name !== "string" || !handler.name) fail(file, "is missing `name`");
+		if (typeof handler.run !== "function") fail(file, "is missing `run`");
+
+		client.messageHandlers.push(handler as unknown as MessageHandler);
+	}
+
+	client.messageHandlers.sort((a, b) => (a.order ?? 100) - (b.order ?? 100));
+	return client.messageHandlers.length;
+}
+
+function loadEvents(client: TestifyClient): number {
+	const files = find("events").filter((file) => !file.includes(`${resolve(ROOT, "events", "message")}`));
+	let count = 0;
+
+	for (const file of files) {
+		const event = importFile(file);
+
+		if (!isObject(event)) fail(file, "should `export default defineEvent({ … })`");
+		if (typeof event.name !== "string" || !event.name) fail(file, "is missing `name`");
+		if (typeof event.run !== "function") fail(file, "is missing `run`");
+
+		const handler = event as unknown as AnyEvent;
+		const invoke = (...args: unknown[]): void => {
+			void Promise.resolve(
+				(handler.run as (client: TestifyClient, ...rest: unknown[]) => Promise<void> | void)(client, ...args),
+			).catch((error: unknown) => {
+				client.logger.error({ err: error, event: handler.name }, "Event handler failed");
+			});
+		};
+
+		if (event.once === true) client.once(handler.name, invoke);
+		else client.on(handler.name, invoke);
+
+		count += 1;
+	}
+
+	return count;
+}
+
+/**
+ * Tells Discord about the commands. Set DISCORD_DEV_GUILD_ID while developing —
+ * guild commands appear immediately, global ones can take up to an hour.
+ */
+export async function publishCommands(client: TestifyClient): Promise<number> {
+	const body = [...client.commands.values()].map((command) => buildSlashCommand(command).toJSON());
+	const rest = new REST({ version: "10" }).setToken(client.env.DISCORD_TOKEN);
+
+	const guildId = client.env.DISCORD_DEV_GUILD_ID;
+	const route = guildId
+		? Routes.applicationGuildCommands(client.env.DISCORD_CLIENT_ID, guildId)
+		: Routes.applicationCommands(client.env.DISCORD_CLIENT_ID);
+
+	await rest.put(route, { body });
+	client.logger.info({ count: body.length, scope: guildId ? "this server" : "all servers" }, "Published commands");
+
+	return body.length;
 }

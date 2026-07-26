@@ -1,66 +1,115 @@
-import { Client, Collection, type GatewayIntentBits, type Partials } from "discord.js";
+import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 import { type Env } from "../config/env";
-import { type SharedCommand } from "./command";
-import { type ComponentHandler } from "./component";
+import { type Button } from "./button";
+import { type Command } from "./command";
 import { type Logger } from "./logger";
-import { MessagePipeline } from "./messagePipeline";
-import { TimerRegistry } from "./timers";
+import { type MessageHandler } from "./message";
 
-export interface ClientOptions {
-	intents: GatewayIntentBits[];
-	partials: Partials[];
-	env: Env;
-	logger: Logger;
-}
+export const intents = [
+	GatewayIntentBits.Guilds,
+	GatewayIntentBits.GuildMembers,
+	GatewayIntentBits.GuildModeration,
+	GatewayIntentBits.GuildExpressions,
+	GatewayIntentBits.GuildVoiceStates,
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.GuildMessageReactions,
+	GatewayIntentBits.DirectMessages,
+	GatewayIntentBits.MessageContent,
+	GatewayIntentBits.AutoModerationConfiguration,
+];
+
+export const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 
 /**
- * Replaces the twenty ad-hoc properties the previous code monkey-patched onto
- * `Client`. Everything optional here is genuinely optional — an integration that
- * is not configured is simply absent, rather than silently `null`.
+ * The bot. Everything the rest of the code needs hangs off here, and it is all
+ * typed — nothing is attached at runtime.
  */
 export class TestifyClient extends Client {
-	readonly commands = new Collection<string, SharedCommand>();
-	/** Prefix aliases → canonical command name. */
-	readonly aliases = new Collection<string, string>();
-	readonly components = new Collection<string, ComponentHandler>();
+	/** Every loaded command, by name. */
+	readonly commands = new Collection<string, Command>();
+	/** Button, select-menu and modal handlers, by custom-ID prefix. */
+	readonly buttons = new Collection<string, Button>();
+	/** Things that run on every message, in order. */
+	readonly messageHandlers: MessageHandler[] = [];
 
 	readonly env: Env;
 	readonly logger: Logger;
-	readonly timers: TimerRegistry;
-	readonly messages: MessagePipeline;
+	readonly timers = new TimerRegistry();
 	readonly startedAt = Date.now();
 
-	/** Populated by the feature modules that own them; never created ad hoc at a call site. */
-	readonly state = new Map<string, unknown>();
-
-	constructor(options: ClientOptions) {
-		super({ intents: options.intents, partials: options.partials });
-		this.env = options.env;
-		this.logger = options.logger;
-		this.timers = new TimerRegistry(options.logger);
-		this.messages = new MessagePipeline(options.logger);
+	constructor(env: Env, logger: Logger) {
+		super({ intents, partials });
+		this.env = env;
+		this.logger = logger;
 	}
 
 	isOwner(userId: string): boolean {
 		return this.env.DISCORD_OWNER_IDS.includes(userId);
 	}
+}
 
-	/**
-	 * Typed, lazily-created feature state. Keeps per-feature maps out of the client
-	 * surface while still giving them one owner and one creation site.
-	 */
-	featureState<T>(key: string, create: () => T): T {
-		const existing = this.state.get(key);
-		if (existing !== undefined) return existing as T;
-		const created = create();
-		this.state.set(key, created);
-		return created;
+/**
+ * Every repeating or delayed task is registered here so shutdown can stop it.
+ * Use `every` for something that repeats and `after` for a one-off.
+ */
+export class TimerRegistry {
+	private readonly handles = new Map<string, NodeJS.Timeout>();
+	private readonly running = new Set<string>();
+
+	/** Repeats forever. A run is skipped if the previous one is still going. */
+	every(name: string, ms: number, task: () => Promise<void> | void): void {
+		this.stop(name);
+
+		this.handles.set(
+			name,
+			setInterval(() => {
+				if (this.running.has(name)) return;
+				this.running.add(name);
+				void run(task).finally(() => this.running.delete(name));
+			}, ms),
+		);
 	}
 
-	resolveCommand(name: string): SharedCommand | undefined {
-		const direct = this.commands.get(name);
-		if (direct) return direct;
-		const aliased = this.aliases.get(name);
-		return aliased !== undefined ? this.commands.get(aliased) : undefined;
+	/** Runs once, then forgets itself. */
+	after(name: string, ms: number, task: () => Promise<void> | void): void {
+		this.stop(name);
+
+		this.handles.set(
+			name,
+			setTimeout(() => {
+				this.handles.delete(name);
+				void run(task);
+			}, ms),
+		);
+	}
+
+	stop(name: string): void {
+		const handle = this.handles.get(name);
+		if (handle === undefined) return;
+
+		clearTimeout(handle);
+		clearInterval(handle);
+		this.handles.delete(name);
+	}
+
+	stopAll(): void {
+		for (const name of [...this.handles.keys()]) this.stop(name);
+	}
+
+	get size(): number {
+		return this.handles.size;
+	}
+
+	names(): string[] {
+		return [...this.handles.keys()];
+	}
+}
+
+/** A task that throws must never take the process down with it. */
+async function run(task: () => Promise<void> | void): Promise<void> {
+	try {
+		await task();
+	} catch {
+		// Deliberately swallowed: a background job is not worth crashing for.
 	}
 }

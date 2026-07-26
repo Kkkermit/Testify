@@ -1,88 +1,38 @@
-import { type ColorResolvable } from "discord.js";
-
-export const Category = {
-	Economy: "economy",
-	Moderation: "moderation",
-	Community: "community",
-	Info: "info",
-	Fun: "fun",
-	Music: "music",
-	Levelling: "levelling",
-	MiniGames: "minigames",
-	Settings: "settings",
-	Tickets: "tickets",
-	Giveaway: "giveaway",
-	Profile: "profile",
-	Integrations: "integrations",
-	Owner: "owner",
-	Developer: "developer",
-	Help: "help",
+/**
+ * Command categories. Adding one here makes it available to `/help` and to the
+ * `category` field on a command — nothing else needs changing.
+ */
+export const CATEGORIES = {
+	community: { label: "Community", emoji: "👥", colour: "Green" },
+	economy: { label: "Economy", emoji: "💰", colour: "DarkOrange" },
+	fun: { label: "Fun", emoji: "🎮", colour: "Yellow" },
+	games: { label: "Games", emoji: "🎯", colour: "Orange" },
+	info: { label: "Info", emoji: "📚", colour: "Blurple" },
+	levelling: { label: "Levelling", emoji: "📈", colour: "Fuchsia" },
+	moderation: { label: "Moderation", emoji: "🛡️", colour: "DarkRed" },
+	music: { label: "Music", emoji: "🎵", colour: "Gold" },
+	settings: { label: "Settings", emoji: "⚙️", colour: "Blue" },
+	tickets: { label: "Tickets", emoji: "🎫", colour: "Blurple" },
+	giveaway: { label: "Giveaways", emoji: "🎁", colour: "Aqua" },
+	developer: { label: "Feedback", emoji: "💬", colour: "Aqua" },
+	owner: { label: "Owner", emoji: "👑", colour: "DarkGrey" },
 } as const;
 
-export type Category = (typeof Category)[keyof typeof Category];
+export type Category = keyof typeof CATEGORIES;
 
-export const ALL_CATEGORIES: readonly Category[] = Object.values(Category);
+export const ALL_CATEGORIES = Object.keys(CATEGORIES) as Category[];
 
-/** Categories hidden from `/help` and the public command listing. */
-export const HIDDEN_CATEGORIES: readonly Category[] = [Category.Owner];
-
-export const categoryLabel: Record<Category, string> = {
-	[Category.Economy]: "Economy",
-	[Category.Moderation]: "Moderation",
-	[Category.Community]: "Community",
-	[Category.Info]: "Info",
-	[Category.Fun]: "Fun",
-	[Category.Music]: "Music",
-	[Category.Levelling]: "Levelling",
-	[Category.MiniGames]: "Mini Games",
-	[Category.Settings]: "Settings",
-	[Category.Tickets]: "Tickets",
-	[Category.Giveaway]: "Giveaway",
-	[Category.Profile]: "Profile",
-	[Category.Integrations]: "Integrations",
-	[Category.Owner]: "Owner",
-	[Category.Developer]: "Developer",
-	[Category.Help]: "Help",
-};
-
-export const categoryEmoji: Record<Category, string> = {
-	[Category.Economy]: "💰",
-	[Category.Moderation]: "🛡️",
-	[Category.Community]: "👥",
-	[Category.Info]: "📚",
-	[Category.Fun]: "🎮",
-	[Category.Music]: "🎵",
-	[Category.Levelling]: "📈",
-	[Category.MiniGames]: "🎯",
-	[Category.Settings]: "⚙️",
-	[Category.Tickets]: "🎫",
-	[Category.Giveaway]: "🎁",
-	[Category.Profile]: "🪪",
-	[Category.Integrations]: "🔌",
-	[Category.Owner]: "👑",
-	[Category.Developer]: "👨‍💻",
-	[Category.Help]: "❓",
-};
-
-export const categoryColor: Record<Category, ColorResolvable> = {
-	[Category.Economy]: "DarkOrange",
-	[Category.Moderation]: "DarkRed",
-	[Category.Community]: "Green",
-	[Category.Info]: "LuminousVividPink",
-	[Category.Fun]: "Yellow",
-	[Category.Music]: "Gold",
-	[Category.Levelling]: "Fuchsia",
-	[Category.MiniGames]: "Orange",
-	[Category.Settings]: "Blue",
-	[Category.Tickets]: "Blurple",
-	[Category.Giveaway]: "Aqua",
-	[Category.Profile]: "Navy",
-	[Category.Integrations]: "#1db954",
-	[Category.Owner]: "DarkGrey",
-	[Category.Developer]: "Aqua",
-	[Category.Help]: "Blurple",
-};
+/** Hidden from `/help`. */
+export const HIDDEN_CATEGORIES: Category[] = ["owner"];
 
 export function isCategory(value: string): value is Category {
-	return (ALL_CATEGORIES as readonly string[]).includes(value);
+	return value in CATEGORIES;
+}
+
+export function categoryLabel(category: Category): string {
+	return CATEGORIES[category].label;
+}
+
+export function categoryEmoji(category: Category): string {
+	return CATEGORIES[category].emoji;
 }

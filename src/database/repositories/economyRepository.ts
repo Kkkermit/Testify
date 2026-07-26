@@ -1,7 +1,7 @@
 import { ECONOMY, type EconomyCooldownKey } from "../../config/constants";
-import { UserFacingError } from "../../core/errors";
 import { strings } from "../../config/strings";
-import { type EconomyAccount, Economy, type InventoryItem } from "../models/economy";
+import { UserFacingError } from "../../core/errors";
+import { Economy, type EconomyAccount, type InventoryItem } from "../models/economy";
 
 /**
  * The only place economy queries live. Every mutation is atomic — the previous

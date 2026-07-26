@@ -1,24 +1,5 @@
 import { model, Schema } from "mongoose";
-import { COUNTING_DEFAULT_MAX, DEFAULT_PREFIX } from "../../config/constants";
-
-export interface PrefixSettings {
-	guildId: string;
-	prefix: string;
-	isEnabled: boolean;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-const prefixSchema = new Schema<PrefixSettings>(
-	{
-		guildId: { type: String, required: true, unique: true },
-		prefix: { type: String, required: true, default: DEFAULT_PREFIX },
-		isEnabled: { type: Boolean, required: true, default: true },
-	},
-	{ timestamps: true },
-);
-
-export const GuildPrefix = model<PrefixSettings>("prefix", prefixSchema);
+import { COUNTING_DEFAULT_MAX } from "../../config/constants";
 
 export interface AntiLinkSettings {
 	guildId: string;
@@ -167,25 +148,6 @@ const welcomeSchema = new Schema<WelcomeSettings>(
 );
 
 export const Welcome = model<WelcomeSettings>("WelcomeMessage", welcomeSchema);
-
-export interface AiChannelSettings {
-	guildId: string;
-	channelId: string;
-	instruction: string;
-	createdAt: Date;
-	updatedAt: Date;
-}
-
-const aiChannelSchema = new Schema<AiChannelSettings>(
-	{
-		guildId: { type: String, required: true, unique: true },
-		channelId: { type: String, required: true },
-		instruction: { type: String, required: true, default: "" },
-	},
-	{ timestamps: true },
-);
-
-export const AiChannel = model<AiChannelSettings>("SetupChannel", aiChannelSchema);
 
 export interface VoiceCounterSettings {
 	guildId: string;

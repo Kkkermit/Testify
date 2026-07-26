@@ -1,37 +1,33 @@
-import {
-	CooldownError,
-	ExternalApiError,
-	isUserFacing,
-	ModuleLoadError,
-	NotFoundError,
-	PermissionError,
-	toError,
-	UserFacingError,
-	ValidationError,
-} from "../../src/core/errors";
+import { ServiceError, SetupError, toError, UserFacingError } from "../../src/core/errors";
 
-describe("error types", () => {
-	it("recognises every user-facing subclass", () => {
-		expect(isUserFacing(new UserFacingError("x"))).toBe(true);
-		expect(isUserFacing(new PermissionError("x"))).toBe(true);
-		expect(isUserFacing(new NotFoundError("x"))).toBe(true);
-		expect(isUserFacing(new ValidationError("x"))).toBe(true);
-		expect(isUserFacing(new CooldownError(1_000, "x"))).toBe(true);
+describe("toError", () => {
+	it("passes an Error straight through", () => {
+		const original = new Error("nope");
+		expect(toError(original)).toBe(original);
 	});
 
-	it("does not treat internal errors as user-facing", () => {
-		expect(isUserFacing(new ExternalApiError("tmdb", new Error("boom")))).toBe(false);
-		expect(isUserFacing(new ModuleLoadError("a.js", new Error("boom")))).toBe(false);
-		expect(isUserFacing(new Error("boom"))).toBe(false);
+	it("wraps a thrown string", () => {
+		expect(toError("nope").message).toBe("nope");
 	});
 
-	it("keeps the retry window on a cooldown error", () => {
-		expect(new CooldownError(5_000, "wait").retryAfterMs).toBe(5_000);
-	});
-
-	it("normalises anything thrown into an Error", () => {
-		expect(toError(new Error("real")).message).toBe("real");
-		expect(toError("a string").message).toBe("a string");
+	it("wraps a thrown object without losing it", () => {
 		expect(toError({ code: 42 }).message).toBe('{"code":42}');
+	});
+});
+
+describe("the error types", () => {
+	it("keeps a user-facing message as written", () => {
+		expect(new UserFacingError("You need 500 more coins.").message).toBe("You need 500 more coins.");
+	});
+
+	it("names the service that failed", () => {
+		const error = new ServiceError("TMDB", new Error("timeout"));
+		expect(error.message).toBe("TMDB is not responding");
+		expect(error.service).toBe("TMDB");
+	});
+
+	it("marks a setup problem separately, so it is not reported as a bug", () => {
+		expect(new SetupError("Set CHANNEL_ERROR_LOG first.")).toBeInstanceOf(SetupError);
+		expect(new SetupError("x")).not.toBeInstanceOf(UserFacingError);
 	});
 });

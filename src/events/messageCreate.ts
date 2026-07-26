@@ -1,15 +1,15 @@
 import { Events, type Message } from "discord.js";
-import { type TestifyClient } from "../core/client";
 import { defineEvent } from "../core/event";
+import { runMessageHandlers } from "../core/message";
 
 /**
- * The only `messageCreate` listener. Features contribute ordered processors
- * through the message pipeline rather than binding their own listeners.
+ * The only `messageCreate` listener. Levelling, counting, anti-link and the rest
+ * are message handlers in `events/message/`, so nothing else binds here.
  */
 export default defineEvent({
 	name: Events.MessageCreate,
-	async execute(client: TestifyClient, message: Message) {
+	async run(client, message: Message) {
 		if (message.system || message.webhookId !== null) return;
-		await client.messages.run(client, message);
+		await runMessageHandlers(message, client);
 	},
 });

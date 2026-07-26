@@ -7,7 +7,7 @@ import { connectDatabase, disconnectDatabase } from "../src/database/connection"
 /** Drops every collection. Requires typing the database name to confirm. */
 async function main(): Promise<void> {
 	const env = loadEnv();
-	const logger = createLogger({ level: env.LOG_LEVEL, pretty: true });
+	const logger = createLogger(env.LOG_LEVEL, true);
 
 	await connectDatabase({ uri: env.MONGODB_URI, logger });
 
