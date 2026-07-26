@@ -8,7 +8,7 @@ import { connectDatabase } from "./database/connection";
 
 async function main(): Promise<void> {
 	const env = loadEnv();
-	const logger = createLogger(env.LOG_LEVEL, env.NODE_ENV !== "production");
+	const logger = createLogger(env.LOG_LEVEL);
 
 	const client = new TestifyClient(env, logger);
 	handleProcessSignals(client);

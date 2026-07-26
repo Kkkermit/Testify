@@ -48,6 +48,25 @@ Everything else in [`.env.example`](.env.example) is optional and can stay blank
 
 For production: `npm run build` then `npm start`.
 
+### If it will not connect to the database
+
+The bot tells you what to try, but the common ones are:
+
+| What you see                 | What it usually means                                                                                                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `querySrv ECONNREFUSED`      | Your DNS server will not do SRV lookups. Switch to 1.1.1.1 / 8.8.8.8, drop any VPN, or use the non-SRV connection string from Atlas (Connect → Drivers → Node.js 2.2.12 or earlier). |
+| `Authentication failed`      | Wrong user or password. If the password has `@ : / ? # [ ]` in it, percent-encode it.                                                                                                |
+| `Server selection timed out` | Your IP is not on the Atlas allow list. Atlas → Network Access.                                                                                                                      |
+| `ENOTFOUND`                  | Typo in the hostname, or the cluster is paused.                                                                                                                                      |
+
+Put the database name in the URI, before the `?`, or you will end up writing to
+a database called `test`:
+
+```
+mongodb+srv://user:password@cluster.mongodb.net/testify?retryWrites=true
+                                                ^^^^^^^^
+```
+
 ## What it can do
 
 | Category       | What you get                                                                                     |
