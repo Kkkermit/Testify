@@ -13,6 +13,7 @@ export default defineCommand({
 	name: "play",
 	description: "Plays a track, playlist or search query.",
 	category: "music",
+	aliases: ["p"],
 	guildOnly: true,
 	botPermissions: [PermissionFlagsBits.Connect, PermissionFlagsBits.Speak],
 	options: [{ name: "query", description: "A URL or search terms.", type: "string", required: true }],

@@ -12,6 +12,7 @@ export default defineCommand({
 	name: "leaderboard",
 	description: "Shows the server leaderboards.",
 	category: "economy",
+	aliases: ["lb", "top"],
 	guildOnly: true,
 	subcommands: [
 		{

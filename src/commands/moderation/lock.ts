@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, inTextChannel } from "../../core/command";
+import { channelOption, defineCommand, inGuild, inTextChannel } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
 import { embed } from "../../lib/embeds";
 import { DEFAULT_REASON } from "../../lib/moderationActions";
@@ -23,7 +23,7 @@ export default defineCommand({
 
 	async run(interaction) {
 		const guild = inGuild(interaction);
-		const channel = interaction.options.getChannel("channel") ?? inTextChannel(interaction);
+		const channel = channelOption(interaction, "channel") ?? inTextChannel(interaction);
 		const reason = interaction.options.getString("reason") ?? DEFAULT_REASON;
 
 		if (!("permissionOverwrites" in channel)) throw new UserFacingError("That channel cannot be locked.");

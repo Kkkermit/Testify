@@ -1,8 +1,8 @@
-import { type ChatInputCommandInteraction, EmbedBuilder, MessageFlags } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 import { theme } from "../config/theme";
 import { type ComponentInteraction } from "./button";
 import { type TestifyClient } from "./client";
-import { type Command, dispatch } from "./command";
+import { type Command, type CommandInput, dispatch } from "./command";
 
 /**
  * Throw this when the user needs to read the message — a bad argument, not
@@ -51,11 +51,7 @@ function failureEmbed(message: string): EmbedBuilder {
  * Runs a command and makes sure the user always gets an answer, whatever
  * happens. This is the only place command errors are handled.
  */
-export async function runCommand(
-	interaction: ChatInputCommandInteraction,
-	command: Command,
-	client: TestifyClient,
-): Promise<void> {
+export async function runCommand(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	try {
 		await dispatch(interaction, command, client);
 	} catch (error) {
@@ -77,7 +73,7 @@ export async function runButton(
 }
 
 async function reportFailure(
-	interaction: ChatInputCommandInteraction | ComponentInteraction,
+	interaction: CommandInput | ComponentInteraction,
 	error: unknown,
 	client: TestifyClient,
 	label: string,
@@ -105,7 +101,7 @@ async function reportFailure(
 	await tell(interaction, message);
 }
 
-async function tell(interaction: ChatInputCommandInteraction | ComponentInteraction, message: string): Promise<void> {
+async function tell(interaction: CommandInput | ComponentInteraction, message: string): Promise<void> {
 	const payload = { embeds: [failureEmbed(message)], flags: MessageFlags.Ephemeral } as const;
 
 	try {
@@ -121,7 +117,7 @@ async function tell(interaction: ChatInputCommandInteraction | ComponentInteract
 async function postToErrorChannel(
 	client: TestifyClient,
 	label: string,
-	interaction: ChatInputCommandInteraction | ComponentInteraction,
+	interaction: CommandInput | ComponentInteraction,
 	error: Error,
 ): Promise<void> {
 	const channelId = client.env.CHANNEL_ERROR_LOG;

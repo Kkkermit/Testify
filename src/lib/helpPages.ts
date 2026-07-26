@@ -28,7 +28,7 @@ export function populatedCategories(client: TestifyClient): Category[] {
 	return ALL_CATEGORIES.filter((category) => used.has(category));
 }
 
-export function overviewEmbed(client: TestifyClient): EmbedBuilder {
+export function overviewEmbed(client: TestifyClient, prefix: string): EmbedBuilder {
 	const categories = populatedCategories(client);
 
 	return embed({
@@ -36,6 +36,8 @@ export function overviewEmbed(client: TestifyClient): EmbedBuilder {
 		title: `${client.user?.username ?? theme.name} help`,
 		description: [
 			`I have **${visibleCommands(client).length}** commands across **${categories.length}** categories.`,
+			"",
+			`Every one works as \`/name\` or as \`${prefix}name\`.`,
 			"",
 			"Pick a category from the menu below.",
 		].join("\n"),
@@ -48,7 +50,7 @@ export function overviewEmbed(client: TestifyClient): EmbedBuilder {
 	});
 }
 
-export function categoryEmbed(client: TestifyClient, category: Category): EmbedBuilder {
+export function categoryEmbed(client: TestifyClient, category: Category, prefix: string): EmbedBuilder {
 	const commands = commandsInCategory(client, category);
 
 	return embed({
@@ -57,7 +59,7 @@ export function categoryEmbed(client: TestifyClient, category: Category): EmbedB
 		fields: commands.slice(0, 25).map((command) => {
 			const subcommands = subcommandsOf(command).map((sub) => sub.name);
 			return {
-				name: `/${command.name}`,
+				name: `/${command.name}${command.aliases?.length ? ` (${command.aliases.map((alias) => prefix + alias).join(", ")})` : ""}`,
 				value: truncate(
 					[command.description, subcommands.length > 0 ? `Subcommands: ${subcommands.join(", ")}` : ""]
 						.filter(Boolean)
@@ -71,7 +73,7 @@ export function categoryEmbed(client: TestifyClient, category: Category): EmbedB
 	});
 }
 
-export function commandEmbed(command: Command): EmbedBuilder {
+export function commandEmbed(command: Command, prefix: string): EmbedBuilder {
 	const subcommands = subcommandsOf(command);
 
 	return embed({
@@ -80,6 +82,16 @@ export function commandEmbed(command: Command): EmbedBuilder {
 		description: command.description,
 		fields: [
 			{ name: "Category", value: categoryLabel(command.category), inline: true },
+			{ name: "Usage", value: `\`/${command.name}\` or \`${prefix}${command.name}\``, inline: true },
+			...(command.aliases?.length
+				? [
+						{
+							name: "Also known as",
+							value: command.aliases.map((alias) => `\`${prefix}${alias}\``).join(", "),
+							inline: true,
+						},
+					]
+				: []),
 			...(command.cooldown !== undefined
 				? [{ name: "Cooldown", value: `${Math.round(command.cooldown / 1_000)}s`, inline: true }]
 				: []),

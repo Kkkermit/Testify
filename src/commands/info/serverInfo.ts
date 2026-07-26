@@ -13,6 +13,7 @@ export default defineCommand({
 	name: "server-info",
 	description: "Displays information about this server.",
 	category: "info",
+	aliases: ["server", "guildinfo"],
 	guildOnly: true,
 
 	async run(interaction) {

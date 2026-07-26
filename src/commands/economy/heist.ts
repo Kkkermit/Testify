@@ -1,8 +1,8 @@
 import { randomInt } from "node:crypto";
-import { ButtonStyle, type ChatInputCommandInteraction } from "discord.js";
+import { ButtonStyle } from "discord.js";
 import { ECONOMY, ECONOMY_COOLDOWNS } from "../../config/constants";
 import { customId } from "../../core/button";
-import { defineCommand, inGuild } from "../../core/command";
+import { defineCommand, inGuild, type CommandInput } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
 import { getOrCreateAccount } from "../../database/repositories/economyRepository";
 import { button, row } from "../../lib/components";
@@ -114,7 +114,7 @@ export default defineCommand({
 	},
 });
 
-async function resolveHeist(interaction: ChatInputCommandInteraction, state: HeistState): Promise<void> {
+async function resolveHeist(interaction: CommandInput, state: HeistState): Promise<void> {
 	const { adjustWallet, debitWallet, incrementCounters, setCooldown } =
 		await import("../../database/repositories/economyRepository");
 

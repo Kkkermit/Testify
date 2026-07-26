@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "avatar",
 	description: "Shows a user's avatar and banner.",
 	category: "info",
+	aliases: ["av", "pfp"],
 	options: [{ name: "user", description: "The user to look up. Defaults to you.", type: "user" }],
 
 	async run(interaction) {

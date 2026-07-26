@@ -55,7 +55,7 @@ export default defineCommand({
 
 		for (const stage of STAGES) {
 			await wait(2_000);
-			await interaction.editReply(stage);
+			await interaction.editReply({ content: stage });
 		}
 
 		await wait(2_000);

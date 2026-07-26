@@ -6,6 +6,7 @@ export default defineCommand({
 	name: "ping",
 	description: "Checks the bot's latency.",
 	category: "info",
+	aliases: ["latency"],
 
 	async run(interaction, client) {
 		const sentAt = Date.now();

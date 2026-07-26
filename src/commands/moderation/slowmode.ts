@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inTextChannel } from "../../core/command";
+import { channelOption, defineCommand, inTextChannel } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
 import { parseDuration } from "../../lib/duration";
 import { successEmbed } from "../../lib/embeds";
@@ -26,7 +26,7 @@ export default defineCommand({
 	],
 
 	async run(interaction) {
-		const channel = interaction.options.getChannel("channel") ?? inTextChannel(interaction);
+		const channel = channelOption(interaction, "channel") ?? inTextChannel(interaction);
 		if (!("setRateLimitPerUser" in channel)) throw new UserFacingError("That channel does not support slowmode.");
 
 		const raw = interaction.options.getString("duration", true);

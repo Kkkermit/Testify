@@ -1,6 +1,8 @@
 import { StringSelectMenuOptionBuilder } from "discord.js";
 import { categoryEmoji, categoryLabel } from "../config/categories";
+import { DEFAULT_PREFIX } from "../config/constants";
 import { customId, defineButton } from "../core/button";
+import { getPrefix } from "../database/repositories/settingsRepository";
 import { select, selectRow } from "../lib/components";
 import { categoryEmbed, overviewEmbed, populatedCategories, resolveCategory } from "../lib/helpPages";
 
@@ -12,6 +14,7 @@ export default defineButton({
 		if (!interaction.isStringSelectMenu()) return;
 
 		const ownerId = context.args[0] ?? interaction.user.id;
+		const prefix = interaction.guildId === null ? DEFAULT_PREFIX : await getPrefix(interaction.guildId);
 		const chosen = interaction.values[0] ?? "";
 		const category = resolveCategory(chosen);
 
@@ -28,7 +31,7 @@ export default defineButton({
 		});
 
 		await interaction.update({
-			embeds: [category ? categoryEmbed(context.client, category) : overviewEmbed(context.client)],
+			embeds: [category ? categoryEmbed(context.client, category, prefix) : overviewEmbed(context.client, prefix)],
 			components: [selectRow(menu)],
 		});
 	},

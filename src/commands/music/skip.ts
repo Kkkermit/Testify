@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "skip",
 	description: "Skips the current track.",
 	category: "music",
+	aliases: ["s", "next"],
 	guildOnly: true,
 
 	async run(interaction, client) {

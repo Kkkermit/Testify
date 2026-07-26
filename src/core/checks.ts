@@ -1,8 +1,8 @@
-import { type ChatInputCommandInteraction, PermissionsBitField } from "discord.js";
+import { PermissionsBitField } from "discord.js";
 import { findBlacklistEntry } from "../database/repositories/blacklistRepository";
 import { formatDuration, humanisePermission } from "../lib/format";
 import { type TestifyClient } from "./client";
-import { type Command } from "./command";
+import { type Command, type CommandInput } from "./command";
 
 /** Why a command was refused, or null if it may run. */
 export type CheckFailure = string | null;
@@ -14,7 +14,7 @@ const cooldowns = new Map<string, number>();
  * Returns the message to show the user, or null to let the command through.
  */
 export async function runChecks(
-	interaction: ChatInputCommandInteraction,
+	interaction: CommandInput,
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
@@ -58,11 +58,7 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
-function checkCooldown(
-	interaction: ChatInputCommandInteraction,
-	command: Command,
-	client: TestifyClient,
-): CheckFailure {
+function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {
 	if (!command.cooldown || client.isOwner(interaction.user.id)) return null;
 
 	const key = `${command.name}:${interaction.user.id}`;

@@ -50,6 +50,25 @@ what CI runs. The pre-commit and pre-push hooks run most of it for you.
 Nothing needs registering — the loader picks files up from these folders at
 start-up. If a file is shaped wrongly the bot refuses to start and names it.
 
+## Slash and prefix
+
+Commands are written once, against the `CommandInput` contract in
+`src/core/command.ts`. A slash interaction satisfies it, and so does
+`PrefixInteraction` in `src/core/prefix.ts` — that one file is the only place in
+the codebase that knows prefix commands exist.
+
+If you add something to `CommandInput`, the compiler will make you teach the
+prefix side to answer it too. That is deliberate: it is what stops the two
+surfaces drifting apart.
+
+Two things to keep in mind when adding options:
+
+- **Required options come first.** Prefix commands fill options by position, and
+  Discord rejects a slash command that lists a required option after an optional
+  one. A test enforces this.
+- **Put the free-text option last.** The final text option swallows the rest of
+  the message, so `t?ban @someone being a nuisance` works without quotes.
+
 ## Tests
 
 Tests live in `tests/` and mirror `src/`. Anything with real logic in it —

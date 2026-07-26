@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "stop",
 	description: "Stops playback and clears the queue.",
 	category: "music",
+	aliases: ["disconnect"],
 	// `leave` used to be an alias here and a command name elsewhere, so it was
 	// permanently shadowed. Alias collisions now fail at boot instead.
 	guildOnly: true,

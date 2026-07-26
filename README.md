@@ -6,6 +6,8 @@
 
 Moderation · economy · levelling · music · tickets · giveaways · games
 
+Every command works as `/ban` **and** as `t?ban`.
+
 [![CI](https://github.com/Kkkermit/Testify/actions/workflows/ci.yml/badge.svg)](https://github.com/Kkkermit/Testify/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Node](https://img.shields.io/badge/node-%3E%3D22.11-brightgreen.svg)](https://nodejs.org)
@@ -60,6 +62,24 @@ For production: `npm run build` then `npm start`.
 
 The full list lives in [COMMANDS.md](COMMANDS.md), which is generated from the code.
 
+## Slash and prefix
+
+Every command answers to both, and each one is written only once:
+
+```
+/ban user:@someone reason:spamming
+t?ban @someone spamming
+```
+
+- The default prefix is `t?`. Change it per server with `/prefix set !`.
+- Mentioning the bot works anywhere: `@Testify help`.
+- Options are filled in order, and the last text option takes the rest of the
+  message — so you rarely need quotes. Use `"quotes"` when you do.
+- Popular commands have short forms: `t?bal`, `t?lb`, `t?p`, `t?np`, `t?av`.
+
+Replies that would be private on a slash command are sent in the channel
+instead, since a normal message cannot be ephemeral.
+
 ## How the project is laid out
 
 ```
@@ -100,7 +120,8 @@ export default defineCommand({
 });
 ```
 
-Restart the bot and `/coinflip` is live. That is all of it.
+Restart the bot and both `/coinflip` and `t?coinflip` are live. That is all of it —
+you never write the prefix version, `src/core/prefix.ts` handles it.
 
 **Options** are described rather than built:
 
@@ -118,6 +139,12 @@ subcommands: [
 	{ name: "set", description: "Sets it.", async run(interaction) { /* … */ } },
 	{ name: "clear", description: "Clears it.", async run(interaction) { /* … */ } },
 ],
+```
+
+**Aliases** are prefix-only short forms:
+
+```ts
+aliases: ["cf", "flip"],
 ```
 
 **Guards** are fields, not code you write:

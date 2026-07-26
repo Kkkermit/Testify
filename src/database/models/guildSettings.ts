@@ -1,5 +1,22 @@
 import { model, Schema } from "mongoose";
-import { COUNTING_DEFAULT_MAX } from "../../config/constants";
+import { COUNTING_DEFAULT_MAX, DEFAULT_PREFIX } from "../../config/constants";
+
+export interface PrefixSettings {
+	guildId: string;
+	prefix: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+const prefixSchema = new Schema<PrefixSettings>(
+	{
+		guildId: { type: String, required: true, unique: true },
+		prefix: { type: String, required: true, default: DEFAULT_PREFIX },
+	},
+	{ timestamps: true },
+);
+
+export const GuildPrefix = model<PrefixSettings>("prefix", prefixSchema);
 
 export interface AntiLinkSettings {
 	guildId: string;

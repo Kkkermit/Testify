@@ -1,5 +1,7 @@
+import { DEFAULT_PREFIX } from "../../config/constants";
 import { theme } from "../../config/theme";
 import { defineMessageHandler } from "../../core/message";
+import { getPrefix } from "../../database/repositories/settingsRepository";
 import { linkButton, row } from "../../lib/components";
 import { embed } from "../../lib/embeds";
 
@@ -12,12 +14,14 @@ export default defineMessageHandler({
 		if (botId === undefined) return;
 		if (!new RegExp(`^<@!?${botId}>$`).test(message.content.trim())) return;
 
+		const prefix = message.guild === null ? DEFAULT_PREFIX : await getPrefix(message.guild.id);
+
 		await message.reply({
 			embeds: [
 				embed({
 					category: "info",
 					title: `Hello, I am ${client.user?.username ?? theme.name}`,
-					description: "Use `/help` to see everything I can do.",
+					description: `My prefix here is \`${prefix}\`.\n\nUse \`/help\` or \`${prefix}help\` to see everything I can do.`,
 					thumbnail: client.user?.displayAvatarURL(),
 				}),
 			],

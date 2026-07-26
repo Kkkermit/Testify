@@ -13,6 +13,7 @@ import { createLogger } from "../../src/core/logger";
 function fakeClient(): TestifyClient {
 	return {
 		commands: new Collection(),
+		aliases: new Collection(),
 		buttons: new Collection(),
 		messageHandlers: [],
 		logger: createLogger("fatal", false),
@@ -62,6 +63,51 @@ describe("every command", () => {
 
 	it("puts every command in the folder its category names", () => {
 		expect(commands.filter((command) => !(command.category in CATEGORIES))).toEqual([]);
+	});
+});
+
+describe("prefix aliases", () => {
+	it("never shadows a real command name", () => {
+		for (const [alias] of client.aliases) expect(client.commands.has(alias)).toBe(false);
+	});
+
+	it("is unique across the whole bot", () => {
+		expect(new Set(client.aliases.keys()).size).toBe(client.aliases.size);
+	});
+
+	it("points at a command that exists", () => {
+		for (const [, name] of client.aliases) expect(client.commands.has(name)).toBe(true);
+	});
+});
+
+describe("every command's options", () => {
+	const commands = [...client.commands.values()];
+
+	/**
+	 * A prefix command fills options by position, and only the last string option
+	 * can swallow the rest of the message. A required option sitting after an
+	 * optional one can therefore never be filled.
+	 */
+	it("never puts a required option after an optional one", () => {
+		const offenders: string[] = [];
+
+		for (const command of commands) {
+			const groups: [string, typeof command.options][] = [
+				[command.name, command.options],
+				...subcommandsOf(command).map(
+					(sub) => [`${command.name} ${sub.name}`, sub.options] as [string, typeof sub.options],
+				),
+			];
+
+			for (const [label, options] of groups) {
+				const firstOptional = (options ?? []).findIndex((option) => option.required !== true);
+				const lastRequired = (options ?? []).map((option) => option.required === true).lastIndexOf(true);
+
+				if (firstOptional !== -1 && lastRequired !== -1 && lastRequired > firstOptional) offenders.push(label);
+			}
+		}
+
+		expect(offenders).toEqual([]);
 	});
 });
 

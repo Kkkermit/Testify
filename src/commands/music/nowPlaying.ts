@@ -10,6 +10,7 @@ export default defineCommand({
 	name: "now-playing",
 	description: "Shows what is playing right now.",
 	category: "music",
+	aliases: ["np"],
 	guildOnly: true,
 
 	async run(interaction, client) {

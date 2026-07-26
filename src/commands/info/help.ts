@@ -1,8 +1,10 @@
 import { StringSelectMenuOptionBuilder } from "discord.js";
 import { categoryEmoji, categoryLabel } from "../../config/categories";
+import { DEFAULT_PREFIX } from "../../config/constants";
 import { customId } from "../../core/button";
 import { defineCommand } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
+import { getPrefix } from "../../database/repositories/settingsRepository";
 import { select, selectRow } from "../../lib/components";
 import { categoryEmbed, commandEmbed, overviewEmbed, populatedCategories, resolveCategory } from "../../lib/helpPages";
 import { reply } from "../../lib/reply";
@@ -11,21 +13,23 @@ export default defineCommand({
 	name: "help",
 	description: "Lists everything the bot can do.",
 	category: "info",
+	aliases: ["commands", "h"],
 	options: [{ name: "query", description: "A command or category name.", type: "string", autocomplete: true }],
 
 	async run(interaction, client) {
+		const prefix = interaction.guild ? await getPrefix(interaction.guild.id) : DEFAULT_PREFIX;
 		const query = interaction.options.getString("query")?.toLowerCase().trim();
 
 		if (query !== undefined && query.length > 0) {
-			const command = client.commands.get(query);
+			const command = client.commands.get(query) ?? client.commands.get(client.aliases.get(query) ?? "");
 			if (command) {
-				await reply(interaction, { embeds: [commandEmbed(command)] });
+				await reply(interaction, { embeds: [commandEmbed(command, prefix)] });
 				return;
 			}
 
 			const category = resolveCategory(query);
 			if (category) {
-				await reply(interaction, { embeds: [categoryEmbed(client, category)] });
+				await reply(interaction, { embeds: [categoryEmbed(client, category, prefix)] });
 				return;
 			}
 
@@ -45,7 +49,7 @@ export default defineCommand({
 			),
 		});
 
-		await reply(interaction, { embeds: [overviewEmbed(client)], components: [selectRow(menu)] });
+		await reply(interaction, { embeds: [overviewEmbed(client, prefix)], components: [selectRow(menu)] });
 	},
 
 	async autocomplete(interaction, client) {

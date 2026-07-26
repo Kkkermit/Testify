@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "volume",
 	description: "Sets the playback volume.",
 	category: "music",
+	aliases: ["vol"],
 	guildOnly: true,
 	options: [
 		{

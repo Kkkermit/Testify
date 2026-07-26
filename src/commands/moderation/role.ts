@@ -1,6 +1,6 @@
-import { type ChatInputCommandInteraction, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { strings } from "../../config/strings";
-import { asMember, defineCommand, inGuild, roleOption } from "../../core/command";
+import { asMember, defineCommand, inGuild, roleOption, type CommandInput } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
 import { successEmbed } from "../../lib/embeds";
 import { reply } from "../../lib/reply";
@@ -42,7 +42,7 @@ export default defineCommand({
 	},
 });
 
-async function apply(interaction: ChatInputCommandInteraction, mode: "add" | "remove"): Promise<void> {
+async function apply(interaction: CommandInput, mode: "add" | "remove"): Promise<void> {
 	const guild = inGuild(interaction);
 	const moderator = asMember(interaction);
 	const target = interaction.options.getUser("user", true);

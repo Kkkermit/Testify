@@ -1,14 +1,14 @@
 import { arch, type as osType, cpus, freemem, platform, totalmem } from "node:os";
-import { type ChatInputCommandInteraction, version as djsVersion } from "discord.js";
+import { version as djsVersion } from "discord.js";
 import { theme } from "../../config/theme";
 import { type TestifyClient } from "../../core/client";
-import { defineCommand } from "../../core/command";
+import { defineCommand, type CommandInput } from "../../core/command";
 import { linkButton, row } from "../../lib/components";
 import { embed } from "../../lib/embeds";
 import { discordTime, formatBytes, formatNumber, formatUptime } from "../../lib/format";
 import { reply } from "../../lib/reply";
 
-async function showUptime(interaction: ChatInputCommandInteraction, client: TestifyClient): Promise<void> {
+async function showUptime(interaction: CommandInput, client: TestifyClient): Promise<void> {
 	await reply(interaction, {
 		embeds: [
 			embed({
@@ -24,7 +24,7 @@ async function showUptime(interaction: ChatInputCommandInteraction, client: Test
 	});
 }
 
-async function showSpecs(interaction: ChatInputCommandInteraction, client: TestifyClient): Promise<void> {
+async function showSpecs(interaction: CommandInput, client: TestifyClient): Promise<void> {
 	const usage = process.memoryUsage();
 	const cpu = cpus()[0];
 
@@ -53,7 +53,7 @@ async function showSpecs(interaction: ChatInputCommandInteraction, client: Testi
 	});
 }
 
-async function showInfo(interaction: ChatInputCommandInteraction, client: TestifyClient): Promise<void> {
+async function showInfo(interaction: CommandInput, client: TestifyClient): Promise<void> {
 	const members = client.guilds.cache.reduce(
 		(total: number, guild: { memberCount: number }) => total + guild.memberCount,
 		0,

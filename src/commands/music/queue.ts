@@ -12,6 +12,7 @@ export default defineCommand({
 	name: "queue",
 	description: "Shows the current queue.",
 	category: "music",
+	aliases: ["q"],
 	guildOnly: true,
 
 	async run(interaction, client) {

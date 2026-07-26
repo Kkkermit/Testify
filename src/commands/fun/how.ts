@@ -1,6 +1,5 @@
 import { randomInt } from "node:crypto";
-import { type ChatInputCommandInteraction } from "discord.js";
-import { defineCommand, type Subcommand } from "../../core/command";
+import { defineCommand, type CommandInput, type Subcommand } from "../../core/command";
 import { embed } from "../../lib/embeds";
 import { progressBar } from "../../lib/format";
 import { reply } from "../../lib/reply";
@@ -26,7 +25,7 @@ const METERS: Meter[] = [
  * Seven near-identical embed builders in the original collapsed into one renderer
  * driven by a table.
  */
-async function renderMeter(interaction: ChatInputCommandInteraction, meter: Meter): Promise<void> {
+async function renderMeter(interaction: CommandInput, meter: Meter): Promise<void> {
 	const target = interaction.options.getUser("user") ?? interaction.user;
 
 	if (meter.name === "smart") {

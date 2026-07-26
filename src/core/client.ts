@@ -27,6 +27,8 @@ export const partials = [Partials.User, Partials.Channel, Partials.GuildMember, 
 export class TestifyClient extends Client {
 	/** Every loaded command, by name. */
 	readonly commands = new Collection<string, Command>();
+	/** Alternative prefix-command names, pointing at the command they belong to. */
+	readonly aliases = new Collection<string, string>();
 	/** Button, select-menu and modal handlers, by custom-ID prefix. */
 	readonly buttons = new Collection<string, Button>();
 	/** Things that run on every message, in order. */

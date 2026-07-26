@@ -15,6 +15,7 @@ export default defineCommand({
 	name: "mute",
 	description: "Times a member out.",
 	category: "moderation",
+	aliases: ["timeout"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ModerateMembers],
 	botPermissions: [PermissionFlagsBits.ModerateMembers],

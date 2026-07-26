@@ -55,6 +55,9 @@ export const INTERVALS = {
 	passiveIncomeMs: HOUR_MS,
 } as const;
 
+/** The prefix a server gets before anyone changes it. */
+export const DEFAULT_PREFIX = "t?";
+
 export const CACHE = {
 	guildSettingsTtlMs: 5 * MINUTE_MS,
 	guildSettingsMaxEntries: 5_000,

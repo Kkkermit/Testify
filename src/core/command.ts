@@ -1,10 +1,15 @@
 import {
-	type AutocompleteInteraction,
+	type APIInteractionGuildMember,
 	type ChatInputCommandInteraction,
+	type AutocompleteInteraction,
+	type Client,
 	type Guild,
+	type GuildBasedChannel,
 	type GuildMember,
 	type GuildTextBasedChannel,
 	InteractionContextType,
+	type InteractionEditReplyOptions,
+	type InteractionReplyOptions,
 	type PermissionResolvable,
 	PermissionsBitField,
 	type Role,
@@ -19,10 +24,60 @@ import {
 	type SlashCommandUserOption,
 	type SlashCommandOptionsOnlyBuilder,
 	type SlashCommandSubcommandsOnlyBuilder,
+	type TextBasedChannel,
+	type User,
 } from "discord.js";
 import { type Category } from "../config/categories";
 import { type TestifyClient } from "./client";
 import { UserFacingError } from "./errors";
+
+/**
+ * What a command is allowed to ask of whoever invoked it.
+ *
+ * A slash interaction satisfies this, and so does `PrefixInteraction` in
+ * `core/prefix.ts`. That is the whole trick: commands are written once against
+ * this shape and work as both `/ban` and `t?ban`. Adding something here means
+ * teaching the prefix side to answer it too, which is deliberate.
+ */
+export interface CommandInput {
+	readonly user: User;
+	readonly member: GuildMember | APIInteractionGuildMember | null;
+	readonly guild: Guild | null;
+	readonly guildId: string | null;
+	readonly channel: TextBasedChannel | null;
+	readonly client: Client;
+	readonly commandName: string;
+	readonly deferred: boolean;
+	readonly replied: boolean;
+
+	readonly options: CommandInputOptions;
+
+	deferReply(options?: { flags?: unknown }): Promise<unknown>;
+	reply(options: InteractionReplyOptions): Promise<unknown>;
+	editReply(options: InteractionEditReplyOptions | string): Promise<unknown>;
+	followUp(options: InteractionReplyOptions): Promise<unknown>;
+	fetchReply(): Promise<{ id: string }>;
+}
+
+/** The option getters, in both their "give me it or null" and "it must be there" forms. */
+export interface CommandInputOptions {
+	getSubcommand(required?: boolean): string;
+	getString(name: string, required: true): string;
+	getString(name: string, required?: boolean): string | null;
+	getInteger(name: string, required: true): number;
+	getInteger(name: string, required?: boolean): number | null;
+	getNumber(name: string, required: true): number;
+	getNumber(name: string, required?: boolean): number | null;
+	getBoolean(name: string, required: true): boolean;
+	getBoolean(name: string, required?: boolean): boolean | null;
+	getUser(name: string, required: true): User;
+	getUser(name: string, required?: boolean): User | null;
+	getChannel(name: string, required: true): { id: string; name: string | null };
+	getChannel(name: string, required?: boolean): { id: string; name: string | null } | null;
+	getRole(name: string, required: true): { id: string; name: string };
+	getRole(name: string, required?: boolean): { id: string; name: string } | null;
+	getAttachment(name: string, required?: boolean): { url: string } | null;
+}
 
 /**
  * A command option. Simpler than chaining SlashCommandBuilder calls, and the
@@ -44,7 +99,7 @@ export interface Subcommand {
 	name: string;
 	description: string;
 	options?: CommandOption[];
-	run(interaction: ChatInputCommandInteraction, client: TestifyClient): Promise<void>;
+	run(interaction: CommandInput, client: TestifyClient): Promise<void>;
 }
 
 /**
@@ -58,6 +113,9 @@ export interface Command {
 
 	options?: CommandOption[];
 	subcommands?: Subcommand[];
+
+	/** Extra names this command answers to as a prefix command, e.g. `["bal"]`. */
+	aliases?: string[];
 
 	/** Permissions the person running it needs. */
 	permissions?: PermissionResolvable[];
@@ -73,9 +131,17 @@ export interface Command {
 	nsfw?: boolean;
 
 	/** Optional when the command is nothing but subcommands. */
-	run?(interaction: ChatInputCommandInteraction, client: TestifyClient): Promise<void>;
+	run?(interaction: CommandInput, client: TestifyClient): Promise<void>;
 	autocomplete?(interaction: AutocompleteInteraction, client: TestifyClient): Promise<void>;
 }
+
+/**
+ * Proof that a real slash interaction satisfies the contract. If someone widens
+ * `CommandInput` beyond what discord.js provides, this line stops compiling.
+ */
+const _slashSatisfiesCommandInput: (interaction: ChatInputCommandInteraction) => CommandInput = (interaction) =>
+	interaction;
+void _slashSatisfiesCommandInput;
 
 /** Wraps a command so TypeScript checks it as you write it. */
 export function defineCommand(command: Command): Command {
@@ -91,11 +157,7 @@ export function subcommandsOf(command: Command): Subcommand[] {
  * subcommands does not need a top-level `run` — this finds the one Discord says
  * was used and calls it.
  */
-export async function dispatch(
-	interaction: ChatInputCommandInteraction,
-	command: Command,
-	client: TestifyClient,
-): Promise<void> {
+export async function dispatch(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	const subcommands = subcommandsOf(command);
 
 	if (subcommands.length > 0) {
@@ -220,18 +282,18 @@ function addOption(host: OptionHost, option: CommandOption): void {
  * `guildOnly: true` already stops a command reaching a DM, but TypeScript cannot
  * see that. These narrow the types without an `!`.
  */
-export function inGuild(interaction: ChatInputCommandInteraction): Guild {
+export function inGuild(interaction: CommandInput): Guild {
 	if (!interaction.guild) throw new UserFacingError("This command only works inside a server.");
 	return interaction.guild;
 }
 
-export function asMember(interaction: ChatInputCommandInteraction): GuildMember {
+export function asMember(interaction: CommandInput): GuildMember {
 	const member = interaction.member;
 	if (!member || !("guild" in member)) throw new UserFacingError("This command only works inside a server.");
 	return member;
 }
 
-export function inTextChannel(interaction: ChatInputCommandInteraction): GuildTextBasedChannel {
+export function inTextChannel(interaction: CommandInput): GuildTextBasedChannel {
 	const channel = interaction.channel;
 	if (!channel || !("guild" in channel)) throw new UserFacingError("This command only works inside a server.");
 	return channel;
@@ -241,10 +303,7 @@ export function inTextChannel(interaction: ChatInputCommandInteraction): GuildTe
  * A `channel` option comes back as a partial API object. This looks the real one
  * up in the guild so you get a channel you can actually send to.
  */
-export function textChannelOption(
-	interaction: ChatInputCommandInteraction,
-	name: string,
-): GuildTextBasedChannel | null {
+export function textChannelOption(interaction: CommandInput, name: string): GuildTextBasedChannel | null {
 	const picked = interaction.options.getChannel(name);
 	if (!picked) return null;
 
@@ -254,8 +313,19 @@ export function textChannelOption(
 	return channel;
 }
 
+/** Any kind of channel, resolved to the real object rather than the API stub. */
+export function channelOption(interaction: CommandInput, name: string): GuildBasedChannel | null {
+	const picked = interaction.options.getChannel(name);
+	if (!picked) return null;
+
+	const channel = interaction.guild?.channels.cache.get(picked.id);
+	if (!channel) throw new UserFacingError("I could not find that channel in this server.");
+
+	return channel;
+}
+
 /** The same idea for a `role` option. */
-export function roleOption(interaction: ChatInputCommandInteraction, name: string, required = false): Role | null {
+export function roleOption(interaction: CommandInput, name: string, required = false): Role | null {
 	const picked = interaction.options.getRole(name, required);
 	if (!picked) return null;
 

@@ -15,8 +15,8 @@ export default defineCommand({
 	guildOnly: true,
 	cooldown: 8_000,
 	options: [
-		{ name: "user", description: "Who is 'tweeting'.", type: "user" },
 		{ name: "tweet", description: "What they said.", type: "string", required: true, maxLength: 240 },
+		{ name: "user", description: "Who is 'tweeting'.", type: "user" },
 	],
 
 	async run(interaction) {

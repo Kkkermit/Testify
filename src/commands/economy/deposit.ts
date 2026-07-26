@@ -11,6 +11,7 @@ export default defineCommand({
 	name: "deposit",
 	description: "Moves money from your wallet into the bank.",
 	category: "economy",
+	aliases: ["dep"],
 	guildOnly: true,
 	options: [{ name: "amount", description: "An amount, or `all`.", type: "string", required: true }],
 

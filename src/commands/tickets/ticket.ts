@@ -1,6 +1,6 @@
 import { ButtonStyle, ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { customId } from "../../core/button";
-import { defineCommand, inGuild, roleOption, textChannelOption } from "../../core/command";
+import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
 import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "../../database/repositories/ticketRepository";
 import { button, row } from "../../lib/components";
@@ -39,8 +39,8 @@ export default defineCommand({
 				const panelChannel = textChannelOption(interaction, "panel-channel");
 				if (!panelChannel) throw new UserFacingError("Pick a channel I can post the panel in.");
 
-				const category = interaction.options.getChannel("category", true);
-				if (category.type !== ChannelType.GuildCategory) {
+				const category = channelOption(interaction, "category");
+				if (category?.type !== ChannelType.GuildCategory) {
 					throw new UserFacingError("The category has to be an actual channel category.");
 				}
 

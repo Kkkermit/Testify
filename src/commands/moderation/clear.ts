@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "clear",
 	description: "Bulk deletes recent messages in this channel.",
 	category: "moderation",
+	aliases: ["purge", "prune"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageMessages],
 	botPermissions: [PermissionFlagsBits.ManageMessages],

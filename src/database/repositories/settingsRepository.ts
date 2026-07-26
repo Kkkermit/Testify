@@ -1,3 +1,4 @@
+import { CACHE, DEFAULT_PREFIX } from "../../config/constants";
 import {
 	AntiLink,
 	type AntiLinkSettings,
@@ -17,9 +18,42 @@ import {
 	type VoiceCounterSettings,
 	Welcome,
 	type WelcomeSettings,
+	GuildPrefix,
+	type PrefixSettings,
 } from "../models/guildSettings";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
+
+/**
+ * Prefixes are read on every single message, so they are cached. The cache is
+ * per-process and short-lived, which is enough — a changed prefix takes effect
+ * within a minute at worst.
+ */
+const prefixCache = new Map<string, { prefix: string; expiresAt: number }>();
+
+export async function getPrefix(guildId: string): Promise<string> {
+	const cached = prefixCache.get(guildId);
+	if (cached && cached.expiresAt > Date.now()) return cached.prefix;
+
+	const record = await GuildPrefix.findOne({ guildId }).lean<PrefixSettings>().exec();
+	const prefix = record?.prefix ?? DEFAULT_PREFIX;
+
+	if (prefixCache.size > CACHE.guildSettingsMaxEntries) prefixCache.clear();
+	prefixCache.set(guildId, { prefix, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
+
+	return prefix;
+}
+
+export async function setPrefix(guildId: string, prefix: string): Promise<string> {
+	await GuildPrefix.findOneAndUpdate({ guildId }, { $set: { prefix } }, UPSERT).exec();
+	prefixCache.set(guildId, { prefix, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
+	return prefix;
+}
+
+/** Used by the tests, and after a prefix is changed elsewhere. */
+export function clearPrefixCache(): void {
+	prefixCache.clear();
+}
 
 export async function getAntiLink(guildId: string): Promise<AntiLinkSettings | null> {
 	return AntiLink.findOne({ guildId }).lean<AntiLinkSettings>().exec();
@@ -237,6 +271,7 @@ export async function saveTreasureConfig(
 
 /** Deletes every per-guild document when the bot is removed from a server. */
 export async function purgeGuild(guildId: string): Promise<void> {
+	prefixCache.delete(guildId);
 	await Promise.all([
 		AntiLink.deleteMany({ guildId }).exec(),
 		AuditLogConfig.deleteMany({ guildId }).exec(),
@@ -247,5 +282,6 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		VoiceCounter.deleteMany({ guildId }).exec(),
 		FixedStats.deleteMany({ guildId }).exec(),
 		TreasureConfig.deleteMany({ guildId }).exec(),
+		GuildPrefix.deleteMany({ guildId }).exec(),
 	]);
 }

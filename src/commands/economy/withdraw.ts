@@ -11,6 +11,7 @@ export default defineCommand({
 	name: "withdraw",
 	description: "Moves money from the bank into your wallet.",
 	category: "economy",
+	aliases: ["with"],
 	guildOnly: true,
 	options: [{ name: "amount", description: "An amount, or `all`.", type: "string", required: true }],
 

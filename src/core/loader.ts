@@ -80,6 +80,12 @@ function loadCommands(client: TestifyClient): number {
 		if (client.commands.has(command.name)) fail(file, `uses the command name "${command.name}" twice`);
 
 		client.commands.set(command.name, command as unknown as Command);
+
+		for (const alias of (command as unknown as Command).aliases ?? []) {
+			if (client.commands.has(alias)) fail(file, `uses "${alias}" as an alias, but that is already a command`);
+			if (client.aliases.has(alias)) fail(file, `uses the alias "${alias}" twice`);
+			client.aliases.set(alias, command.name);
+		}
 	}
 
 	return client.commands.size;

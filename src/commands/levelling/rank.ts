@@ -10,6 +10,7 @@ export default defineCommand({
 	name: "rank",
 	description: "Shows your level and rank in this server.",
 	category: "levelling",
+	aliases: ["level", "xp"],
 	guildOnly: true,
 	options: [{ name: "user", description: "Whose rank to check. Defaults to you.", type: "user" }],
 

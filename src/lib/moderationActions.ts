@@ -1,12 +1,6 @@
-import {
-	type ChatInputCommandInteraction,
-	type EmbedBuilder,
-	type Guild,
-	type GuildMember,
-	type User,
-} from "discord.js";
+import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
 import { strings } from "../config/strings";
-import { asMember } from "../core/command";
+import { asMember, type CommandInput } from "../core/command";
 import { UserFacingError } from "../core/errors";
 import { embed } from "./embeds";
 
@@ -17,12 +11,12 @@ export const DEFAULT_REASON = "No reason provided";
  * commands each wrote their own subset, and several skipped the bot-side check
  * entirely so the action failed with a raw API error.
  */
-export function assertModeratable(ctx: ChatInputCommandInteraction, target: GuildMember): void {
+export function assertModeratable(ctx: CommandInput, target: GuildMember): void {
 	const moderator = asMember(ctx);
 	const guild = target.guild;
 
 	if (target.id === ctx.user.id) throw new UserFacingError(strings.moderation.selfTarget);
-	if (target.id === ctx.client.user.id) throw new UserFacingError(strings.moderation.botTarget);
+	if (target.id === ctx.client.user?.id) throw new UserFacingError(strings.moderation.botTarget);
 	if (target.id === guild.ownerId) throw new UserFacingError("You cannot moderate the server owner.");
 
 	if (moderator.id !== guild.ownerId && moderator.roles.highest.position <= target.roles.highest.position) {
