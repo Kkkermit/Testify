@@ -45,18 +45,18 @@ Read alongside `13-DEDUPLICATION-MAP.md` (which pairs merge) and `10-TARGET-ARCH
 
 | Current | Lines | Target | Note |
 |---|---:|---|---|
-| `__tests__/Community/impersonate.test.js` | 131 | `tests/impersonate.test.ts` | Vitest |
-| `__tests__/Community/meme.test.js` | 192 | `tests/meme.test.ts` | Vitest |
-| `__tests__/Community/minecraft.test.js` | 219 | `tests/minecraft.test.ts` | Vitest |
-| `__tests__/Community/translate.test.js` | 162 | `tests/translate.test.ts` | Vitest |
-| `__tests__/Community/wiki.test.js` | 156 | `tests/wiki.test.ts` | Vitest |
-| `__tests__/Counting/counting.test.js` | 195 | `tests/counting.test.ts` | Vitest |
-| `__tests__/Devs/bugReport.test.js` | 185 | `tests/bugReport.test.ts` | Vitest |
-| `__tests__/Devs/suggestion.test.js` | 145 | `tests/suggestion.test.ts` | Vitest |
-| `__tests__/fixtures/economyMocks.js` | 62 | `tests/economyMocks.test.ts` | Vitest |
+| `__tests__/Community/impersonate.test.js` | 131 | `tests/impersonate.test.ts` | Jest + @swc/jest |
+| `__tests__/Community/meme.test.js` | 192 | `tests/meme.test.ts` | Jest + @swc/jest |
+| `__tests__/Community/minecraft.test.js` | 219 | `tests/minecraft.test.ts` | Jest + @swc/jest |
+| `__tests__/Community/translate.test.js` | 162 | `tests/translate.test.ts` | Jest + @swc/jest |
+| `__tests__/Community/wiki.test.js` | 156 | `tests/wiki.test.ts` | Jest + @swc/jest |
+| `__tests__/Counting/counting.test.js` | 195 | `tests/counting.test.ts` | Jest + @swc/jest |
+| `__tests__/Devs/bugReport.test.js` | 185 | `tests/bugReport.test.ts` | Jest + @swc/jest |
+| `__tests__/Devs/suggestion.test.js` | 145 | `tests/suggestion.test.ts` | Jest + @swc/jest |
+| `__tests__/fixtures/economyMocks.js` | 62 | `tests/helpers/economyMocks.ts` | test harness, not a spec file |
 | `__tests__/mocks/emptyMock.js` | 9 | `**DELETED**` | No moduleNameMapper; nothing references it |
-| `__tests__/setup.js` | 36 | `tests/setup.test.ts` | Vitest |
-| `__tests__/utils/testUtils.js` | 152 | `tests/testUtils.test.ts` | Vitest |
+| `__tests__/setup.js` | 36 | `tests/helpers/setup.ts` | test harness, not a spec file |
+| `__tests__/utils/testUtils.js` | 152 | `tests/helpers/testUtils.ts` | test harness, not a spec file |
 
 ### `src/api` — 3 files
 

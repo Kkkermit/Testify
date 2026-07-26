@@ -107,7 +107,7 @@ The five files collapse into three core modules:
 export async function loadModules<T>(pattern: string, validate: (m: unknown, p: string) => T): Promise<T[]>
 ```
 
-Resolving from `import.meta.url` rather than `process.cwd()` — this is what makes `dist/` work — and
+Resolving from `__dirname` rather than `process.cwd()` — this is what makes `dist/` work — and
 **validating every module**, which is what turns today's opaque boot crashes into named errors.
 
 ```ts

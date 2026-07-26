@@ -72,7 +72,10 @@ See [`../migration/11-TYPED-CONTRACTS.md`](../migration/11-TYPED-CONTRACTS.md#3-
 
 ## Rewrite target
 
-Move to **Vitest** (native ESM + TypeScript, no babel layer) at `tests/`, mirroring `src/features/`.
+**Stay on Jest**, at `tests/`, mirroring `src/features/`. The runner is not the problem — the **babel
+transform** is, because it exists only for Jest and makes tests run differently-transformed code from
+production. Replace it with `@swc/jest`. The ESM-only-dependency hazard in `transformIgnorePatterns` is
+resolved separately, by dropping `node-fetch` and `superagent` in favour of global `fetch`.
 
 **Priority order** — the inverse of today's coverage:
 
@@ -84,4 +87,6 @@ Move to **Vitest** (native ESM + TypeScript, no babel layer) at `tests/`, mirror
 5. `integrations/` — against recorded fixtures, with Zod validation at the boundary
 
 Set honest coverage thresholds (start ~40% lines) and ratchet, rather than excluding most of the codebase from
-measurement. Full config in [`../migration/12-TOOLING.md`](../migration/12-TOOLING.md#6-testing--vitest).
+measurement. Full config in [`../migration/12-TOOLING.md`](../migration/12-TOOLING.md#6-testing--jest), and
+full guidance on *how* to write these tests in
+[`../migration/16-TESTING-STRATEGY.md`](../migration/16-TESTING-STRATEGY.md).

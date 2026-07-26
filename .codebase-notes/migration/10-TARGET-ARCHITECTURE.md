@@ -136,40 +136,50 @@ CWD-relative path while `require`-ing via a `__dirname`-relative one. **None of 
 ```ts
 // src/core/loader.ts
 import { glob } from 'glob';
-import { fileURLToPath } from 'node:url';
-import { dirname, resolve } from 'node:path';
-
-const here = dirname(fileURLToPath(import.meta.url));
+import { resolve } from 'node:path';
 
 export async function loadModules<T>(
   pattern: string,
   validate: (mod: unknown, path: string) => T,
 ): Promise<T[]> {
-  // Resolve from THIS module, never from the CWD — works identically in src/ and dist/
-  const files = await glob(pattern, { cwd: resolve(here, '..'), absolute: true });
+  // Resolve from THIS module's directory, never from the CWD.
+  // __dirname is `src/core` in development and `dist/core` after a build, so the
+  // same code finds the same relative tree in both — which is precisely what the
+  // current `fs.readdirSync("./src/commands")` cannot do.
+  const files = await glob(pattern, { cwd: resolve(__dirname, '..'), absolute: true });
   const loaded: T[] = [];
 
   for (const file of files) {
     try {
-      const mod = await import(file);
-      loaded.push(validate(mod.default ?? mod, file));   // ← the validation the current loader lacks
+      const mod = require(file);                          // eslint-disable-line @typescript-eslint/no-require-imports
+      loaded.push(validate(mod.default ?? mod, file));    // ← the validation the current loader lacks
     } catch (err) {
       logger.error({ file, err }, 'Failed to load module');
-      throw new ModuleLoadError(file, err);              // fail loudly, with the filename
+      throw new ModuleLoadError(file, err);               // fail loudly, with the filename
     }
   }
   return loaded;
 }
 ```
 
+The dynamic `require` here is intentional and is the **one** place it is allowed — it is how the plugin-style
+command and event discovery works. Everything else uses static `import` syntax, which TypeScript compiles to
+`require` calls under `module: "CommonJS"`.
+
 Two failures this fixes directly: a command file missing `.data` currently crashes boot with an opaque error,
 and `handleLogsEvent.js` currently registers a `client.on(undefined, …)` listener because nothing validates that
 an event module has a `name`.
 
-**Decision — ESM vs CommonJS.** Go ESM (`"type": "module"`, `module: "NodeNext"`). It is the direction of the
-ecosystem, `node-fetch` v3 and several other deps are ESM-only, and top-level `await` simplifies the boot
-sequence. The cost is that the top-level `return` statements and `__dirname` uses must be rewritten — which is
-required work anyway.
+**Decision — ESM vs CommonJS.** Stay on **CommonJS** (`module: "CommonJS"`, no `"type": "module"`).
+
+The case for ESM is ecosystem direction and top-level `await`. The case against, which wins here: the only
+ESM-only dependency in play is `node-fetch` v3, and **the migration removes it anyway** in favour of global
+`fetch`. So ESM would buy very little while adding real friction — Jest's ESM support still needs
+`--experimental-vm-modules`, and `jest.mock()` hoisting behaves differently under it.
+
+Note that the **top-level `return` statements still have to go** (finding 76) — they are invalid in a
+TypeScript module regardless of the emit target, and they are being replaced by proper guard functions in the
+loader rewrite. That work is required either way; it was never an argument for ESM specifically.
 
 ---
 
@@ -311,7 +321,7 @@ export async function withErrorBoundary(ctx: CommandContext, fn: () => Promise<v
 
 ```ts
 // src/database/repositories/economyRepository.ts
-export async function getOrCreateAccount(guildId: string, userId: string): Promise<IEconomy> {
+export async function getOrCreateAccount(guildId: string, userId: string): Promise<EconomyAccount> {
   return Economy.findOneAndUpdate(
     { guildId, userId },
     { $setOnInsert: { guildId, userId, wallet: 0, bank: 0 } },
@@ -320,7 +330,7 @@ export async function getOrCreateAccount(guildId: string, userId: string): Promi
 }
 
 // ATOMIC — fixes the money-duplication race (finding 14)
-export async function adjustWallet(guildId: string, userId: string, delta: number): Promise<IEconomy> {
+export async function adjustWallet(guildId: string, userId: string, delta: number): Promise<EconomyAccount> {
   return Economy.findOneAndUpdate({ guildId, userId }, { $inc: { wallet: delta } }, { new: true, lean: true });
 }
 ```
@@ -340,10 +350,10 @@ export async function getGuildSettings(guildId: string): Promise<GuildSettings> 
 
 | Decision | Recommendation | Why |
 |---|---|---|
-| Module system | **ESM** | Ecosystem direction; several deps are ESM-only; top-level await |
+| Module system | **CommonJS** | The only ESM-only dep (`node-fetch` v3) is being removed anyway; keeps Jest flag-free and the loader `require`-based |
 | Build | **tsup** (esbuild) | Fast; handles the asset copy; `tsc --noEmit` still gates types |
 | Runtime target | **Node 22 LTS** | Resolves the three-way `.nvmrc`/CI/README disagreement |
-| Test runner | **Vitest** | Native ESM+TS, no babel layer; the current jest+babel setup is already fragile |
+| Test runner | **Jest** | Already the project's runner and familiar to contributors; the fragility is the *babel transform*, not Jest — `@swc/jest` replaces it |
 | Mongoose | **v8** | v6 is EOL; the removed options are already being passed |
 | Prefix commands | **Keep** | 26 commands — all of music — exist *only* as prefix. Removing them is a feature cut, not a refactor |
 | `/ai` (`apexify.js`) | **Delete and rebuild** | Untyped, unstable, and already unreachable behind `underDevelopment: true` |

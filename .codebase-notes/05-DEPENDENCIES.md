@@ -51,10 +51,14 @@ Verified by grepping every form of `require` across all 321 files.
 | `fs` | ^0.0.1-security | **Must be removed.** This is not the Node built-in — it is a squatted placeholder published to reserve the name. Every `require('fs')` in the codebase resolves to the *built-in* regardless, so this entry does nothing but add supply-chain surface. |
 | `os` | ^0.1.2 | **Must be removed.** Same problem as `fs` — a userland shim shadowing a built-in name. |
 
-**Legitimately declared-but-not-directly-imported** (do not delete): `@babel/*`, `babel-jest`, `jest`, `nodemon`,
-`cross-env`, `typescript` (tooling); `@discordjs/opus`, `libsodium-wrappers`, `ffmpeg-static` (loaded implicitly by
-`@discordjs/voice`/DisTube as encryption and transcoding backends); `@distube/ytdl-core`, `@distube/ytsr`
-(resolved by DisTube at runtime, and updated by `src/scripts/ytdlUpdater.js`).
+**Legitimately declared-but-not-directly-imported** (do not delete): `jest`, `nodemon`, `typescript` (tooling);
+`@discordjs/opus`, `libsodium-wrappers`, `ffmpeg-static` (loaded implicitly by `@discordjs/voice`/DisTube as
+encryption and transcoding backends); `@distube/ytdl-core`, `@distube/ytsr` (resolved by DisTube at runtime,
+and updated by `src/scripts/ytdlUpdater.js`).
+
+> **`jest` stays** in the rewrite — it is the chosen test runner. `@babel/*` and `babel-jest` do **not**:
+> the babel layer exists only to transpile for Jest, and `@swc/jest` replaces it. `cross-env` also goes —
+> native `NODE_ENV=` assignment works on Node 22. See [`migration/12-TOOLING.md`](migration/12-TOOLING.md#8-dependency-changes).
 
 ---
 

@@ -18,12 +18,20 @@ The documents are sized to be pasted individually. A practical sequence:
 |---|---|
 | Give an agent the whole picture | `00-INDEX.md` + `01-ARCHITECTURE.md` + `04-AUDIT-FINDINGS.md` |
 | Set up the new project | `migration/12-TOOLING.md` + `migration/10-TARGET-ARCHITECTURE.md` |
-| Define the core framework | `migration/11-TYPED-CONTRACTS.md` + `02-CONTRACTS.md` |
-| Port one command category | `commands/<Category>.md` + `migration/11-TYPED-CONTRACTS.md` |
+| Define the core framework | `migration/11-TYPED-CONTRACTS.md` + `migration/18-HELPERS-AND-UTILS.md` |
+| Build the shared helpers | `migration/18-HELPERS-AND-UTILS.md` |
+| Port one command category | `commands/<Category>.md` + `migration/11-TYPED-CONTRACTS.md` + `migration/17-CODING-STANDARDS.md` |
 | Port the data layer | `07-DATA-MODEL.md` + `migration/11-TYPED-CONTRACTS.md` |
 | Merge a duplicated command pair | `migration/13-DEDUPLICATION-MAP.md` + both category docs |
+| Write tests | `migration/16-TESTING-STRATEGY.md` |
+| Review a PR / set house style | `migration/17-CODING-STANDARDS.md` |
+| Make the bot self-hostable, add community files | `migration/19-OPEN-SOURCE.md` |
 | Decide what to work on next | `migration/14-MIGRATION-PHASES.md` |
 | Find where a specific file goes | `migration/15-FILE-MAPPING.md` |
+
+**Toolchain decisions already made** (recorded in `12-TOOLING.md`): **TypeScript on CommonJS**, **Jest** with
+`@swc/jest`, tsup for the build, ESLint flat config + Prettier, Node 22, Mongoose 8. The bot stays **MIT open
+source and must work on a fresh clone** — see `19-OPEN-SOURCE.md`.
 
 **Start with `migration/14-MIGRATION-PHASES.md`.** It has an ordered plan, and its Phase 0 lists work that
 should happen in JavaScript *before* any TypeScript is written.
@@ -73,10 +81,14 @@ external URLs, env vars, issues and rewrite notes.
 |---|---|
 | [`migration/10-TARGET-ARCHITECTURE.md`](migration/10-TARGET-ARCHITECTURE.md) | Target folder tree, typed client, loader, router, shared command core, embed factory, decisions to confirm |
 | [`migration/11-TYPED-CONTRACTS.md`](migration/11-TYPED-CONTRACTS.md) | Full interfaces: `SharedCommand`, `CommandContext`, events, components, models, `.d.ts` shims, `tsconfig` strictness |
-| [`migration/12-TOOLING.md`](migration/12-TOOLING.md) | `package.json`, `tsconfig`, tsup, ESLint, Prettier, Vitest, CI, dependency changes |
+| [`migration/12-TOOLING.md`](migration/12-TOOLING.md) | `package.json`, `tsconfig`, tsup, ESLint, Prettier, **Jest**, CI, dependency changes |
 | [`migration/13-DEDUPLICATION-MAP.md`](migration/13-DEDUPLICATION-MAP.md) | All 46 duplicated command pairs → single implementations, plus non-command duplication |
 | [`migration/14-MIGRATION-PHASES.md`](migration/14-MIGRATION-PHASES.md) | Phases 0–7 with exit criteria, sequencing rules, risk register |
 | [`migration/15-FILE-MAPPING.md`](migration/15-FILE-MAPPING.md) | **All 321 files** → target TypeScript path or deletion |
+| [`migration/16-TESTING-STRATEGY.md`](migration/16-TESTING-STRATEGY.md) | Jest setup, the testing pyramid, mocking discord.js, the `CommandContext` harness, repository and concurrency tests, regression tests per finding, coverage targets |
+| [`migration/17-CODING-STANDARDS.md`](migration/17-CODING-STANDARDS.md) | Naming, file organisation, **the anti-patterns that must not come back**, error handling, async, imports, JSDoc, commits, the PR checklist |
+| [`migration/18-HELPERS-AND-UTILS.md`](migration/18-HELPERS-AND-UTILS.md) | Full API for every shared module, each stating which duplication it eliminates, plus the build order |
+| [`migration/19-OPEN-SOURCE.md`](migration/19-OPEN-SOURCE.md) | Self-hostability, the missing GitHub templates, `SECURITY.md`, releases, README corrections, good-first-issue backlog |
 
 ---
 

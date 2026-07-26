@@ -229,23 +229,23 @@ user ID in the custom ID and comparing — and that others simply forget.
 
 ```ts
 // src/database/models/economy.ts
-export interface IPet {
+export interface Pet {
   id: string; name: string; type: string; emoji: string;
   happiness: number; hunger: number;
   purchasedAt: Date; lastFed: Date | null; lastWalked: Date | null;
 }
 
-export interface IEconomy {
+export interface EconomyAccount {
   guildId: string;
   userId: string;
   wallet: number;
   bank: number;
-  inventory: IInventoryItem[];
+  inventory: InventoryItem[];
   job: string;
   jobLevel: number;
-  house: IHouse | null;
-  businesses: IBusiness[];
-  pet: IPet | null;
+  house: House | null;
+  businesses: Business[];
+  pet: Pet | null;
   dailyStreak: number;
   lastDaily: Date | null;
   // … all 27 fields, explicitly typed
@@ -253,7 +253,7 @@ export interface IEconomy {
   updatedAt: Date;
 }
 
-const economySchema = new Schema<IEconomy>({
+const economySchema = new Schema<EconomyAccount>({
   guildId: { type: String, required: true },
   userId:  { type: String, required: true },
   wallet:  { type: Number, required: true, default: 0 },
@@ -263,7 +263,7 @@ const economySchema = new Schema<IEconomy>({
 
 economySchema.index({ guildId: 1, userId: 1 }, { unique: true });   // the index that does not exist today
 
-export const Economy = model<IEconomy>('Economy', economySchema);
+export const Economy = model<EconomyAccount>('Economy', economySchema);
 ```
 
 Note `required: true` with defaults on the numeric fields. Today 19 of 32 schemas declare **no** `required` and
@@ -272,10 +272,10 @@ balances non-nullable removes a large class of `?? 0` noise from the feature cod
 
 ```ts
 // src/database/repositories/economyRepository.ts
-export async function getOrCreateAccount(guildId: string, userId: string): Promise<IEconomy>;
-export async function adjustWallet(guildId: string, userId: string, delta: number): Promise<IEconomy>;  // atomic $inc
+export async function getOrCreateAccount(guildId: string, userId: string): Promise<EconomyAccount>;
+export async function adjustWallet(guildId: string, userId: string, delta: number): Promise<EconomyAccount>;  // atomic $inc
 export async function transfer(guildId: string, from: string, to: string, amount: number): Promise<void>;
-export async function getLeaderboard(guildId: string, limit: number): Promise<IEconomy[]>;
+export async function getLeaderboard(guildId: string, limit: number): Promise<EconomyAccount[]>;
 ```
 
 ---
@@ -343,7 +343,10 @@ export type ClashPlayer = z.infer<typeof ClashPlayerSchema>;
     "noFallthroughCasesInSwitch": true,    // the switch statements in valorantApi.js
     "allowUnreachableCode": false,         // the `break` after `return` in valorantApi.js
     "allowUnusedLabels": false,
-    "verbatimModuleSyntax": true
+
+    "module": "CommonJS",                  // see 12-TOOLING.md §1 for why CommonJS
+    "moduleResolution": "Node",
+    "esModuleInterop": true
   }
 }
 ```

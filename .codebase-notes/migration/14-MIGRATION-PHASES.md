@@ -31,10 +31,10 @@ intact, and the six crash paths have manual reproductions that no longer crash.
 No feature code yet. Prove the build pipeline before committing 300 files to it.
 
 - `tsconfig.json` with `strict: true` (see `12-TOOLING.md`)
-- `"type": "module"`, ESM throughout
+- CommonJS throughout (no `"type": "module"`) — see `12-TOOLING.md` §1
 - tsup build → `dist/`, with the asset copy step for `assets/images` and `assets/jsons`
 - ESLint flat config + Prettier, wired into CI as a **blocking** step (there is no lint in CI today)
-- Vitest replacing jest+babel
+- Jest kept, with `@swc/jest` replacing the babel transform
 - CI: align Node to 22 across `.nvmrc`, `engines` and the workflow
 - Move `src/images/` → `assets/images/`, `src/jsons/` → `assets/jsons/`
 
@@ -69,7 +69,7 @@ responds to a single hardcoded `/ping`, and shuts down cleanly on `SIGINT` with 
 
 ## Phase 3 — Data layer
 
-- 30 surviving schemas → `interface I<Name>` + `Schema<I<Name>>` + `model<I<Name>>`
+- 30 surviving schemas → `interface <Name>` + `Schema<<Name>>` + `model<<Name>>` (no `I` prefix — see 17-CODING-STANDARDS.md)
 - Repositories for every access pattern; **atomic `$inc`** for all balance mutations (finding 14)
 - Indexes for every documented query shape, starting with `{ guildId, userId }` on economy (finding 37)
 - `{ timestamps: true }`, retiring the hand-rolled date fields

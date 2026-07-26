@@ -163,7 +163,7 @@ plus merging the two triggers into one handler. This alone removes 6 of the 7 qu
 export async function connectDatabase(uri: string): Promise<typeof mongoose>
 
 // src/database/models/economy.ts — interface + typed model, colocated
-export interface IEconomy {
+export interface EconomyAccount {
   guildId: string;
   userId: string;
   bank: number;
@@ -172,20 +172,20 @@ export interface IEconomy {
   pet?: Pet;
   // …
 }
-const economySchema = new Schema<IEconomy>({ /* … */ }, { timestamps: true });
+const economySchema = new Schema<EconomyAccount>({ /* … */ }, { timestamps: true });
 economySchema.index({ guildId: 1, userId: 1 }, { unique: true });
-export const Economy = model<IEconomy>('Economy', economySchema);
+export const Economy = model<EconomyAccount>('Economy', economySchema);
 
 // src/database/repositories/economyRepository.ts — the ~43 duplicated lookups collapse to this
-export async function getOrCreateAccount(guildId: string, userId: string): Promise<IEconomy>
-export async function adjustWallet(guildId: string, userId: string, delta: number): Promise<IEconomy>  // atomic $inc
+export async function getOrCreateAccount(guildId: string, userId: string): Promise<EconomyAccount>
+export async function adjustWallet(guildId: string, userId: string, delta: number): Promise<EconomyAccount>  // atomic $inc
 ```
 
 ### Checklist
 - [ ] Delete `economySystem.js` after migrating its 3 consumers (§2). **Do this first.**
 - [ ] Delete `verifyLeftUsersSystem.js` (zero consumers).
 - [ ] One connection module; drop the removed Mongoose options; add health checks and graceful shutdown.
-- [ ] `interface I<Name>` + `Schema<I<Name>>` + `model<I<Name>>` for all 30 surviving schemas.
+- [ ] `interface <Name>` + `Schema<<Name>>` + `model<<Name>>` (no `I` prefix — see 17-CODING-STANDARDS.md) for all 30 surviving schemas.
 - [ ] Add the `{ guildId, userId }` compound index to the economy collection, and indexes for every other
       documented query shape.
 - [ ] `{ timestamps: true }` everywhere; retire the hand-rolled `CreatedAt`/`LastModifiedAt` fields.
