@@ -1,8 +1,7 @@
 {
-	"//": "Advisories deliberately not acted on. Every entry needs three things: why it cannot be fixed now, the version that fixes it, and a hard expiry — so a suppression cannot rot into a permanent blind spot. `npm audit` currently reports nothing, so this file is empty apart from this note and the shape to follow.",
 	"//example": {
 		"active": false,
-		"notes": "Reached only through <package>@<version>, which cannot be upgraded without a breaking change to <dependency>. Fixed in <package>@<version> — re-evaluate when <dependency> ships a compatible release.",
+		"notes": "TEMPLATE — copy this shape, do not activate it. Every real entry needs three things: why it cannot be fixed now, the version that fixes it, and a hard expiry, so a suppression cannot rot into a permanent blind spot. Wording to follow: reached only through <package>@<version>, which cannot be upgraded without a breaking change to <dependency>. Fixed in <package>@<version> — re-evaluate when <dependency> ships a compatible release.",
 		"expiry": 1789776000000
 	}
 }
