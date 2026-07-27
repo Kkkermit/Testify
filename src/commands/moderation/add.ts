@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 const CUSTOM_EMOJI = /^<(a)?:\w+:(\d{15,})>$/;
 

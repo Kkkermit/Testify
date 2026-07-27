@@ -1,7 +1,7 @@
 import { Events, type Guild } from "discord.js";
-import { defineEvent } from "../core/event";
-import { purgeGuild } from "../database/repositories/settingsRepository";
-import { announceGuildChange } from "../lib/guildLifecycle";
+import { defineEvent } from "@core/event";
+import { purgeGuild } from "@database/repositories/settingsRepository";
+import { announceGuildChange } from "@lib/guildLifecycle";
 
 export default defineEvent({
 	name: Events.GuildDelete,

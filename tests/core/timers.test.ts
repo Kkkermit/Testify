@@ -1,4 +1,4 @@
-import { TimerRegistry } from "../../src/core/client";
+import { TimerRegistry } from "@core/client";
 
 async function flush(): Promise<void> {
 	for (let turn = 0; turn < 5; turn += 1) await Promise.resolve();

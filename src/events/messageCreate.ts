@@ -1,6 +1,6 @@
 import { Events, type Message } from "discord.js";
-import { defineEvent } from "../core/event";
-import { runMessageHandlers } from "../core/message";
+import { defineEvent } from "@core/event";
+import { runMessageHandlers } from "@core/message";
 
 /**
  * The only `messageCreate` listener. Levelling, counting, anti-link and the rest

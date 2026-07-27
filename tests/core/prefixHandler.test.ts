@@ -1,17 +1,17 @@
 import { Collection, type Message } from "discord.js";
-import { type TestifyClient } from "../../src/core/client";
-import { defineCommand } from "../../src/core/command";
-import { createLogger } from "../../src/core/logger";
-import { runMessageHandlers } from "../../src/core/message";
+import { type TestifyClient } from "@core/client";
+import { defineCommand } from "@core/command";
+import { createLogger } from "@core/logger";
+import { runMessageHandlers } from "@core/message";
 
 const prefixConfig = { prefix: "t?", isEnabled: true };
 
-jest.mock("../../src/database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/settingsRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
 }));
 // The checks themselves have their own tests; this is about routing a message
 // to the right command, which is what broke.
-jest.mock("../../src/core/checks", () => ({
+jest.mock("@core/checks", () => ({
 	runChecks: jest.fn(() => Promise.resolve(null)),
 	clearCooldowns: jest.fn(),
 }));

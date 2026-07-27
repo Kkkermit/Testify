@@ -1,9 +1,9 @@
 import { ActivityType, type Client, Events } from "discord.js";
-import { DEFAULT_PREFIX, INTERVALS } from "../config/constants";
-import { type TestifyClient } from "../core/client";
-import { defineEvent } from "../core/event";
-import { publishScope } from "../core/loader";
-import { printBanner } from "../lib/banner";
+import { DEFAULT_PREFIX, INTERVALS } from "@config/constants";
+import { type TestifyClient } from "@core/client";
+import { defineEvent } from "@core/event";
+import { publishScope } from "@core/loader";
+import { printBanner } from "@lib/banner";
 
 export default defineEvent({
 	name: Events.ClientReady,

@@ -1,3 +1,4 @@
+import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
 import {
 	addXp,
 	awardXp,
@@ -8,8 +9,7 @@ import {
 	resetGuildLevels,
 	setLevel,
 	xpForNextLevel,
-} from "../../src/database/repositories/levelRepository";
-import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
+} from "@database/repositories/levelRepository";
 
 const GUILD = "111111111111111111";
 const ALICE = "222222222222222222";

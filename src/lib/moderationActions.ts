@@ -1,8 +1,8 @@
 import { type EmbedBuilder, type Guild, type GuildMember, type User } from "discord.js";
-import { strings } from "../config/strings";
-import { asMember, type CommandInput } from "../core/command";
-import { UserFacingError } from "../core/errors";
-import { embed } from "./embeds";
+import { strings } from "@config/strings";
+import { asMember, type CommandInput } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
 
 export const DEFAULT_REASON = "No reason provided";
 

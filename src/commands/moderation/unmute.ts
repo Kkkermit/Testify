@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
-import { strings } from "../../config/strings";
-import { theme } from "../../config/theme";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { actionEmbed, DEFAULT_REASON, dmEmbed, notifyTarget } from "../../lib/moderationActions";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { theme } from "@config/theme";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { actionEmbed, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "unmute",

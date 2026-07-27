@@ -6,14 +6,14 @@ import {
 	categoryLabel,
 	HIDDEN_CATEGORIES,
 	isCategory,
-} from "../config/categories";
-import { theme } from "../config/theme";
-import { customId } from "../core/button";
-import { type TestifyClient } from "../core/client";
-import { type Command, subcommandsOf } from "../core/command";
-import { button, linkButton, row, select, selectRow } from "./components";
-import { embed } from "./embeds";
-import { truncate } from "./format";
+} from "@config/categories";
+import { theme } from "@config/theme";
+import { customId } from "@core/button";
+import { type TestifyClient } from "@core/client";
+import { type Command, subcommandsOf } from "@core/command";
+import { button, linkButton, row, select, selectRow } from "@lib/components";
+import { embed } from "@lib/embeds";
+import { truncate } from "@lib/format";
 
 /** How the help pages are laid out. `surface` decides whether it shows `/` or the prefix. */
 export type Surface = "slash" | "prefix";

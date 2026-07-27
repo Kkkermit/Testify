@@ -1,10 +1,10 @@
-import { ECONOMY } from "../config/constants";
-import { defineButton } from "../core/button";
-import { UserFacingError } from "../core/errors";
-import { findAccount } from "../database/repositories/economyRepository";
-import { embed } from "../lib/embeds";
-import { formatNumber } from "../lib/format";
-import { activeHeists } from "../lib/heistState";
+import { ECONOMY } from "@config/constants";
+import { defineButton } from "@core/button";
+import { UserFacingError } from "@core/errors";
+import { findAccount } from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { activeHeists } from "@lib/heistState";
 
 export default defineButton({
 	id: "heist",

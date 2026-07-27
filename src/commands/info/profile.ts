@@ -1,12 +1,12 @@
 import { MessageFlags } from "discord.js";
-import { strings } from "../../config/strings";
-import { defineCommand } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { deleteProfile, getProfile, saveProfile } from "../../database/repositories/profileRepository";
-import { containsProfanity } from "../../lib/contentFilter";
-import { embed, successEmbed } from "../../lib/embeds";
-import { discordTime } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deleteProfile, getProfile, saveProfile } from "@database/repositories/profileRepository";
+import { containsProfanity } from "@lib/contentFilter";
+import { embed, successEmbed } from "@lib/embeds";
+import { discordTime } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 

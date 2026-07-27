@@ -1,12 +1,12 @@
 import { MessageFlags } from "discord.js";
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { debitWallet, requireAccount, setFields } from "../../database/repositories/economyRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { discordTime, formatNumber, progressBar } from "../../lib/format";
-import { ALL_PETS, decayValue, findPet, PETS_BY_RARITY, petStatus } from "../../lib/pets";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { discordTime, formatNumber, progressBar } from "@lib/format";
+import { ALL_PETS, decayValue, findPet, PETS_BY_RARITY, petStatus } from "@lib/pets";
+import { reply } from "@lib/reply";
 
 const RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
 

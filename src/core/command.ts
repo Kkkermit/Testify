@@ -27,9 +27,9 @@ import {
 	type TextBasedChannel,
 	type User,
 } from "discord.js";
-import { type Category } from "../config/categories";
-import { type TestifyClient } from "./client";
-import { UserFacingError } from "./errors";
+import { type Category } from "@config/categories";
+import { type TestifyClient } from "@core/client";
+import { UserFacingError } from "@core/errors";
 
 /**
  * What a command is allowed to ask of whoever invoked it.

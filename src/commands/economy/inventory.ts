@@ -1,10 +1,10 @@
-import { defineCommand, inGuild } from "../../core/command";
-import { requireAccount } from "../../database/repositories/economyRepository";
-import { embed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { buildPage } from "../../lib/pagination";
-import { reply } from "../../lib/reply";
-import { findShopItem } from "../../lib/shop";
+import { defineCommand, inGuild } from "@core/command";
+import { requireAccount } from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { buildPage } from "@lib/pagination";
+import { reply } from "@lib/reply";
+import { findShopItem } from "@lib/shop";
 
 export const INVENTORY_PAGE_SIZE = 8;
 

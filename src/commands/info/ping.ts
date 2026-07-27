@@ -1,6 +1,6 @@
-import { defineCommand } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "ping",

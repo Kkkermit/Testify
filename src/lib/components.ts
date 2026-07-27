@@ -6,8 +6,8 @@ import {
 	StringSelectMenuBuilder,
 	type StringSelectMenuOptionBuilder,
 } from "discord.js";
-import { theme } from "../config/theme";
-import { customId } from "../core/button";
+import { theme } from "@config/theme";
+import { customId } from "@core/button";
 
 export interface ButtonOptions {
 	id: string;

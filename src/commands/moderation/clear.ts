@@ -1,9 +1,9 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { LIMITS } from "../../config/constants";
-import { defineCommand, inTextChannel } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { LIMITS } from "@config/constants";
+import { defineCommand, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "clear",

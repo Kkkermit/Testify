@@ -1,18 +1,18 @@
 import { PermissionFlagsBits } from "discord.js";
-import { theme } from "../../config/theme";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
+import { theme } from "@config/theme";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
 import {
 	createSoftban,
 	deactivateSoftban,
 	getActiveSoftban,
 	listActiveSoftbans,
-} from "../../database/repositories/moderationRepository";
-import { parseDuration } from "../../lib/duration";
-import { embed, successEmbed } from "../../lib/embeds";
-import { discordTime, formatDurationLong } from "../../lib/format";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "../../lib/moderationActions";
-import { reply } from "../../lib/reply";
+} from "@database/repositories/moderationRepository";
+import { parseDuration } from "@lib/duration";
+import { embed, successEmbed } from "@lib/embeds";
+import { discordTime, formatDurationLong } from "@lib/format";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "softban",

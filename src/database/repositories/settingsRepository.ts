@@ -1,4 +1,4 @@
-import { CACHE, DEFAULT_PREFIX } from "../../config/constants";
+import { CACHE, DEFAULT_PREFIX } from "@config/constants";
 import {
 	AntiLink,
 	type AntiLinkSettings,
@@ -20,7 +20,7 @@ import {
 	type WelcomeSettings,
 	GuildPrefix,
 	type PrefixSettings,
-} from "../models/guildSettings";
+} from "@database/models/guildSettings";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 

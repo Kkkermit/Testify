@@ -1,10 +1,10 @@
-import { theme } from "../../config/theme";
-import { defineCommand } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { formatTrackTime, truncate } from "../../lib/format";
-import { requireQueue } from "../../lib/musicGuards";
-import { buildPage } from "../../lib/pagination";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { formatTrackTime, truncate } from "@lib/format";
+import { requireQueue } from "@lib/musicGuards";
+import { buildPage } from "@lib/pagination";
+import { reply } from "@lib/reply";
 
 const PAGE_SIZE = 10;
 

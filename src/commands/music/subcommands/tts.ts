@@ -1,12 +1,12 @@
 import { PermissionFlagsBits } from "discord.js";
-import { strings } from "../../../config/strings";
-import { defineCommand, inTextChannel } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { containsProfanity } from "../../../lib/contentFilter";
-import { embed } from "../../../lib/embeds";
-import { truncate } from "../../../lib/format";
-import { requireVoice } from "../../../lib/musicGuards";
-import { reply } from "../../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { containsProfanity } from "@lib/contentFilter";
+import { embed } from "@lib/embeds";
+import { truncate } from "@lib/format";
+import { requireVoice } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 const LANGUAGES = [
 	{ name: "English", value: "en" },

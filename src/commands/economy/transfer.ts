@@ -1,12 +1,12 @@
-import { ECONOMY } from "../../config/constants";
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { requireAccount, transfer } from "../../database/repositories/economyRepository";
-import { resolveAmount } from "../../lib/amount";
-import { successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { ECONOMY } from "@config/constants";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { requireAccount, transfer } from "@database/repositories/economyRepository";
+import { resolveAmount } from "@lib/amount";
+import { successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "transfer",

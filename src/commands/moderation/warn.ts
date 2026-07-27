@@ -1,18 +1,18 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { theme } from "../../config/theme";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
+import { theme } from "@config/theme";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
 import {
 	addWarning,
 	clearWarnings,
 	editWarning,
 	getWarnings,
 	removeWarning,
-} from "../../database/repositories/moderationRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { discordTime, truncate } from "../../lib/format";
-import { DEFAULT_REASON, dmEmbed, notifyTarget } from "../../lib/moderationActions";
-import { reply } from "../../lib/reply";
+} from "@database/repositories/moderationRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { discordTime, truncate } from "@lib/format";
+import { DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions";
+import { reply } from "@lib/reply";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
 const WARN_ID_OPTION = { name: "warn-id", description: "The warning ID.", type: "string", required: true } as const;

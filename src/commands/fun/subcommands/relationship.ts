@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { defineCommand } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { embed } from "../../../lib/embeds";
-import { progressBar } from "../../../lib/format";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { progressBar } from "@lib/format";
+import { reply } from "@lib/reply";
 
 /**
  * Deterministic per-pair so the same two people always get the same answer —

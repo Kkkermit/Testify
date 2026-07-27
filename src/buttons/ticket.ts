@@ -7,10 +7,10 @@ import {
 	StringSelectMenuOptionBuilder,
 	type TextChannel,
 } from "discord.js";
-import { TICKET } from "../config/constants";
-import { strings } from "../config/strings";
-import { customId, defineButton } from "../core/button";
-import { UserFacingError } from "../core/errors";
+import { TICKET } from "@config/constants";
+import { strings } from "@config/strings";
+import { customId, defineButton } from "@core/button";
+import { UserFacingError } from "@core/errors";
 import {
 	addTicketMember,
 	claimTicket,
@@ -21,9 +21,9 @@ import {
 	getTicketSetup,
 	removeTicketMember,
 	setTicketLocked,
-} from "../database/repositories/ticketRepository";
-import { button, row, select, selectRow } from "../lib/components";
-import { embed, successEmbed } from "../lib/embeds";
+} from "@database/repositories/ticketRepository";
+import { button, row, select, selectRow } from "@lib/components";
+import { embed, successEmbed } from "@lib/embeds";
 
 function controlRow() {
 	return row(

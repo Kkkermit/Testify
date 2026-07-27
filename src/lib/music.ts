@@ -2,11 +2,11 @@ import { SoundCloudPlugin } from "@distube/soundcloud";
 import { YtDlpPlugin } from "@distube/yt-dlp";
 import { DisTube, Events as DisTubeEvent, type Playlist, type Queue, type Song } from "distube";
 import ffmpegPath from "ffmpeg-static";
-import { theme } from "../config/theme";
-import { type TestifyClient } from "../core/client";
-import { toError } from "../core/errors";
-import { embed, errorEmbed } from "./embeds";
-import { formatTrackTime } from "./format";
+import { theme } from "@config/theme";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { embed, errorEmbed } from "@lib/embeds";
+import { formatTrackTime } from "@lib/format";
 
 let distube: DisTube | undefined;
 

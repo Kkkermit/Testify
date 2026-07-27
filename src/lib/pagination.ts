@@ -1,8 +1,8 @@
 import { type ActionRowBuilder, type EmbedBuilder, type MessageActionRowComponentBuilder } from "discord.js";
-import { type Button, defineButton } from "../core/button";
-import { type TestifyClient } from "../core/client";
-import { navRow } from "./components";
-import { withPageFooter } from "./embeds";
+import { type Button, defineButton } from "@core/button";
+import { type TestifyClient } from "@core/client";
+import { navRow } from "@lib/components";
+import { withPageFooter } from "@lib/embeds";
 
 export interface PageOptions<T> {
 	items: T[];

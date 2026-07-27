@@ -1,9 +1,9 @@
 import { randomInt } from "node:crypto";
-import { defineMessageHandler } from "../../core/message";
-import { adjustWallet } from "../../database/repositories/economyRepository";
-import { getTreasureConfig } from "../../database/repositories/settingsRepository";
-import { embed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
+import { defineMessageHandler } from "@core/message";
+import { adjustWallet } from "@database/repositories/economyRepository";
+import { getTreasureConfig } from "@database/repositories/settingsRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
 
 interface DropState {
 	messagesUntilDrop: number;

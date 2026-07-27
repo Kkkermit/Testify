@@ -1,10 +1,10 @@
 import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
-import { LIMITS } from "../../config/constants";
-import { defineCommand, inTextChannel, type CommandOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { COLOUR_CHOICES, resolveColour } from "../../lib/colours";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { LIMITS } from "@config/constants";
+import { defineCommand, inTextChannel, type CommandOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { COLOUR_CHOICES, resolveColour } from "@lib/colours";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 /**
  * The original declared twelve individual `field-name` / `field-value` string

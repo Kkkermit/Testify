@@ -1,10 +1,10 @@
-import { ECONOMY } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { createAccount, deleteAccount, findAccount } from "../../database/repositories/economyRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { ECONOMY } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { createAccount, deleteAccount, findAccount } from "@database/repositories/economyRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "economy",

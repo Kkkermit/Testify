@@ -1,10 +1,10 @@
 import { randomInt } from "node:crypto";
-import { type TestifyClient } from "../core/client";
-import { type LotteryWinner } from "../database/models/lottery";
-import { adjustWallet } from "../database/repositories/economyRepository";
-import { claimDueDraw, recordDraw } from "../database/repositories/lotteryRepository";
-import { embed } from "../lib/embeds";
-import { formatNumber } from "../lib/format";
+import { type TestifyClient } from "@core/client";
+import { type LotteryWinner } from "@database/models/lottery";
+import { adjustWallet } from "@database/repositories/economyRepository";
+import { claimDueDraw, recordDraw } from "@database/repositories/lotteryRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
 
 /**
  * The draw is claimed by pushing `nextDrawTime` forward inside the same query

@@ -1,10 +1,10 @@
-import { DEFAULT_PREFIX } from "../../config/constants";
-import { runChecks } from "../../core/checks";
-import { runCommand } from "../../core/errors";
-import { defineMessageHandler } from "../../core/message";
-import { parseMessage, PrefixInteraction } from "../../core/prefix";
-import { getPrefixConfig } from "../../database/repositories/settingsRepository";
-import { errorEmbed } from "../../lib/embeds";
+import { DEFAULT_PREFIX } from "@config/constants";
+import { runChecks } from "@core/checks";
+import { runCommand } from "@core/errors";
+import { defineMessageHandler } from "@core/message";
+import { parseMessage, PrefixInteraction } from "@core/prefix";
+import { getPrefixConfig } from "@database/repositories/settingsRepository";
+import { errorEmbed } from "@lib/embeds";
 
 /**
  * Runs `t?ban @someone` through exactly the same code as `/ban`, including the

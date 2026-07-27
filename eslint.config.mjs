@@ -16,7 +16,7 @@ export default ts.config(
 			},
 		},
 		plugins: { "import-x": importX },
-		settings: { "import-x/resolver": { typescript: true, node: true } },
+		settings: { "import-x/resolver": { typescript: { project: "./tsconfig.json" }, node: true } },
 		rules: {
 			eqeqeq: ["error", "always"],
 			"no-var": "error",

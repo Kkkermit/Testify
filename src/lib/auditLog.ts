@@ -1,9 +1,9 @@
 import { type APIEmbedField, type ColorResolvable, type Guild } from "discord.js";
-import { theme } from "../config/theme";
-import { type TestifyClient } from "../core/client";
-import { toError } from "../core/errors";
-import { getAuditLogConfig } from "../database/repositories/settingsRepository";
-import { embed } from "./embeds";
+import { theme } from "@config/theme";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { getAuditLogConfig } from "@database/repositories/settingsRepository";
+import { embed } from "@lib/embeds";
 
 /**
  * Replaces `discord-logs` and the script that overwrote that package's source

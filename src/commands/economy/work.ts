@@ -1,17 +1,17 @@
 import { randomInt } from "node:crypto";
-import { ECONOMY, ECONOMY_COOLDOWNS } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
+import { ECONOMY, ECONOMY_COOLDOWNS } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
 import {
 	adjustWallet,
 	getOrCreateAccount,
 	incrementCounters,
 	setCooldown,
-} from "../../database/repositories/economyRepository";
-import { embed } from "../../lib/embeds";
-import { formatDuration, formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
-import { findJob } from "../../lib/shop";
+} from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { formatDuration, formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
+import { findJob } from "@lib/shop";
 
 const SCENARIOS = [
 	"You covered a shift and nobody noticed you were on your phone.",

@@ -1,8 +1,8 @@
 import { randomInt } from "node:crypto";
-import { LEVELLING } from "../../config/constants";
-import { theme } from "../../config/theme";
-import { defineMessageHandler } from "../../core/message";
-import { awardXp, getLevelSettings } from "../../database/repositories/levelRepository";
+import { LEVELLING } from "@config/constants";
+import { theme } from "@config/theme";
+import { defineMessageHandler } from "@core/message";
+import { awardXp, getLevelSettings } from "@database/repositories/levelRepository";
 
 const CONGRATULATIONS = [
 	"Congratulations {user}, you reached level **{level}**!",

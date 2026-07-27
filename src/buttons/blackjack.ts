@@ -1,8 +1,8 @@
 import { type ButtonInteraction } from "discord.js";
-import { defineButton } from "../core/button";
-import { type TestifyClient } from "../core/client";
-import { UserFacingError } from "../core/errors";
-import { adjustWallet } from "../database/repositories/economyRepository";
+import { defineButton } from "@core/button";
+import { type TestifyClient } from "@core/client";
+import { UserFacingError } from "@core/errors";
+import { adjustWallet } from "@database/repositories/economyRepository";
 import {
 	type BlackjackGame,
 	blackjackGames,
@@ -12,9 +12,9 @@ import {
 	playDealer,
 	renderHand,
 	settle,
-} from "../lib/blackjack";
-import { embed } from "../lib/embeds";
-import { formatNumber } from "../lib/format";
+} from "@lib/blackjack";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
 
 export default defineButton({
 	id: "blackjack",

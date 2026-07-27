@@ -5,10 +5,10 @@ import {
 	AutoModerationRuleTriggerType,
 	PermissionFlagsBits,
 } from "discord.js";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 /**
  * The raw numeric enums the previous version passed (`eventType: 1`,

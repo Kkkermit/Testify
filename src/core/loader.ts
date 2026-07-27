@@ -1,13 +1,13 @@
 import { resolve, sep } from "node:path";
 import { REST, Routes } from "discord.js";
 import { globSync } from "glob";
-import { isCategory } from "../config/categories";
-import { type Button } from "./button";
-import { type TestifyClient } from "./client";
-import { buildSlashCommand, type Command, subcommandsOf } from "./command";
-import { SetupError } from "./errors";
-import { type AnyEvent } from "./event";
-import { type MessageHandler } from "./message";
+import { isCategory } from "@config/categories";
+import { type Button } from "@core/button";
+import { type TestifyClient } from "@core/client";
+import { buildSlashCommand, type Command, subcommandsOf } from "@core/command";
+import { SetupError } from "@core/errors";
+import { type AnyEvent } from "@core/event";
+import { type MessageHandler } from "@core/message";
 
 /**
  * `__dirname` is `src/core` while developing and `dist/core` after a build, and

@@ -1,16 +1,16 @@
 import { randomInt } from "node:crypto";
-import { ECONOMY, ECONOMY_COOLDOWNS } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
+import { ECONOMY, ECONOMY_COOLDOWNS } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
 import {
 	adjustWallet,
 	getOrCreateAccount,
 	incrementCounters,
 	setCooldown,
-} from "../../database/repositories/economyRepository";
-import { embed } from "../../lib/embeds";
-import { formatDuration, formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+} from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { formatDuration, formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "beg",

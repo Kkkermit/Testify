@@ -1,6 +1,6 @@
 import { GiveawaysManager } from "discord-giveaways";
-import { type TestifyClient } from "../core/client";
-import { Giveaway, type GiveawayRecord } from "../database/models/giveaway";
+import { type TestifyClient } from "@core/client";
+import { Giveaway, type GiveawayRecord } from "@database/models/giveaway";
 
 /** Mongo-backed persistence for `discord-giveaways`. */
 class MongoGiveawaysManager extends GiveawaysManager {

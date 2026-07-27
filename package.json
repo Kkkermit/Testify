@@ -102,6 +102,7 @@
 		"lint-staged": "17.2.0",
 		"mongodb-memory-server": "11.2.0",
 		"prettier": "3.9.6",
+		"tsc-alias": "1.8.16",
 		"tsup": "8.5.1",
 		"tsx": "4.23.1",
 		"typescript": "5.9.3",

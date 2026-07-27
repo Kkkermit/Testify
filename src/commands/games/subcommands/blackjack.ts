@@ -1,15 +1,15 @@
 import { ButtonStyle } from "discord.js";
-import { strings } from "../../../config/strings";
-import { customId } from "../../../core/button";
-import { defineCommand, inGuild } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { debitWallet, requireAccount } from "../../../database/repositories/economyRepository";
-import { resolveAmount } from "../../../lib/amount";
-import { blackjackGames, draw, gameKey, handValue, renderHand, shuffledDeck } from "../../../lib/blackjack";
-import { button, row } from "../../../lib/components";
-import { embed } from "../../../lib/embeds";
-import { formatNumber } from "../../../lib/format";
-import { reply } from "../../../lib/reply";
+import { strings } from "@config/strings";
+import { customId } from "@core/button";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { debitWallet, requireAccount } from "@database/repositories/economyRepository";
+import { resolveAmount } from "@lib/amount";
+import { blackjackGames, draw, gameKey, handValue, renderHand, shuffledDeck } from "@lib/blackjack";
+import { button, row } from "@lib/components";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "blackjack",

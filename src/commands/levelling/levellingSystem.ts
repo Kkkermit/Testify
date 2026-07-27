@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, roleOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "../../database/repositories/levelRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild, roleOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "levelling",

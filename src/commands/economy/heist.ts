@@ -1,15 +1,15 @@
 import { randomInt } from "node:crypto";
 import { ButtonStyle } from "discord.js";
-import { ECONOMY, ECONOMY_COOLDOWNS } from "../../config/constants";
-import { customId } from "../../core/button";
-import { defineCommand, inGuild, type CommandInput } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { getOrCreateAccount } from "../../database/repositories/economyRepository";
-import { button, row } from "../../lib/components";
-import { embed } from "../../lib/embeds";
-import { formatDuration, formatNumber } from "../../lib/format";
-import { activeHeists, type HeistState } from "../../lib/heistState";
-import { reply } from "../../lib/reply";
+import { ECONOMY, ECONOMY_COOLDOWNS } from "@config/constants";
+import { customId } from "@core/button";
+import { defineCommand, inGuild, type CommandInput } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { getOrCreateAccount } from "@database/repositories/economyRepository";
+import { button, row } from "@lib/components";
+import { embed } from "@lib/embeds";
+import { formatDuration, formatNumber } from "@lib/format";
+import { activeHeists, type HeistState } from "@lib/heistState";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "heist",

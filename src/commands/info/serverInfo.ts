@@ -1,9 +1,9 @@
 import { ChannelType, GuildExplicitContentFilter, GuildNSFWLevel, GuildVerificationLevel } from "discord.js";
-import { defineCommand } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { discordTime, formatNumber, titleCase, truncate } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { discordTime, formatNumber, titleCase, truncate } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const TEXT_TYPES = [ChannelType.GuildText, ChannelType.GuildAnnouncement, ChannelType.GuildForum];
 const VOICE_TYPES = [ChannelType.GuildVoice, ChannelType.GuildStageVoice];

@@ -1,12 +1,12 @@
 import { PermissionFlagsBits } from "discord.js";
-import { strings } from "../../config/strings";
-import { theme } from "../../config/theme";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { parseDuration } from "../../lib/duration";
-import { formatDurationLong } from "../../lib/format";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "../../lib/moderationActions";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { theme } from "@config/theme";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { parseDuration } from "@lib/duration";
+import { formatDurationLong } from "@lib/format";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions";
+import { reply } from "@lib/reply";
 
 /** Discord's timeout ceiling. */
 const MAX_TIMEOUT_MS = 28 * 24 * 60 * 60 * 1_000;

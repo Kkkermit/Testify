@@ -1,8 +1,8 @@
 import { type APIEmbedField, type ColorResolvable, EmbedBuilder } from "discord.js";
-import { type Category } from "../config/categories";
-import { LIMITS } from "../config/constants";
-import { categoryColour, theme } from "../config/theme";
-import { truncate } from "./format";
+import { type Category } from "@config/categories";
+import { LIMITS } from "@config/constants";
+import { categoryColour, theme } from "@config/theme";
+import { truncate } from "@lib/format";
 
 export interface EmbedOptions {
 	category?: Category | undefined;

@@ -1,7 +1,7 @@
 import { type Message } from "discord.js";
-import { defineCommand } from "../../src/core/command";
-import { UserFacingError } from "../../src/core/errors";
-import { parseMessage, PrefixInteraction, splitArgs } from "../../src/core/prefix";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { parseMessage, PrefixInteraction, splitArgs } from "@core/prefix";
 
 const BOT = "111111111111111111";
 const ALICE = "222222222222222222";

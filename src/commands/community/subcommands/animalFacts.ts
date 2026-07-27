@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { defineCommand } from "../../../core/command";
-import { embed } from "../../../lib/embeds";
-import { fetchJson } from "../../../lib/http";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { fetchJson } from "@lib/http";
+import { reply } from "@lib/reply";
 
 const factSchema = z.object({ fact: z.string(), image: z.url().optional() });
 

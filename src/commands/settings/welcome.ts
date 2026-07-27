@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { disableWelcome, getWelcome, setWelcome } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { disableWelcome, getWelcome, setWelcome } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "welcome-system",

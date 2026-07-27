@@ -1,4 +1,4 @@
-import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS, WEEK_MS } from "../config/constants";
+import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS, WEEK_MS } from "@config/constants";
 
 const UNITS: Record<string, number> = {
 	s: SECOND_MS,

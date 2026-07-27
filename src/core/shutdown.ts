@@ -1,6 +1,6 @@
-import { disconnectDatabase } from "../database/connection";
-import { type TestifyClient } from "./client";
-import { toError } from "./errors";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { disconnectDatabase } from "@database/connection";
 
 let stopping = false;
 

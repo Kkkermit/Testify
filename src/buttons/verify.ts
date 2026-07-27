@@ -6,17 +6,17 @@ import {
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
-import { strings } from "../config/strings";
-import { customId, defineButton } from "../core/button";
-import { UserFacingError } from "../core/errors";
+import { strings } from "@config/strings";
+import { customId, defineButton } from "@core/button";
+import { UserFacingError } from "@core/errors";
 import {
 	getPendingCode,
 	getVerifyConfig,
 	issueCode,
 	isVerified,
 	markVerified,
-} from "../database/repositories/verificationRepository";
-import { successEmbed } from "../lib/embeds";
+} from "@database/repositories/verificationRepository";
+import { successEmbed } from "@lib/embeds";
 
 /**
  * A short code entered through a modal replaces the previous captcha image

@@ -1,8 +1,8 @@
 import { randomInt } from "node:crypto";
-import { defineCommand } from "../../../core/command";
-import { embed } from "../../../lib/embeds";
-import { truncate } from "../../../lib/format";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { truncate } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const ANSWERS = [
 	"It is certain.",

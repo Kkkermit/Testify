@@ -1,9 +1,9 @@
-import { defineCommand, inGuild } from "../../core/command";
-import { getGuildTotals, requireAccount } from "../../database/repositories/economyRepository";
-import { embed } from "../../lib/embeds";
-import { discordTime, formatNumber } from "../../lib/format";
-import { decayValue, petStatus } from "../../lib/pets";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { getGuildTotals, requireAccount } from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { discordTime, formatNumber } from "@lib/format";
+import { decayValue, petStatus } from "@lib/pets";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "economy-info",

@@ -1,5 +1,5 @@
 import { type ColorResolvable } from "discord.js";
-import { CATEGORIES, type Category } from "./categories";
+import { CATEGORIES, type Category } from "@config/categories";
 
 /** Colours, emoji and branding. Change these to make the bot look like yours. */
 export const theme = {

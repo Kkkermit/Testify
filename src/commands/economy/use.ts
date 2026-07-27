@@ -1,11 +1,11 @@
 import { randomInt } from "node:crypto";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { adjustWallet, removeInventoryItem, requireAccount } from "../../database/repositories/economyRepository";
-import { embed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
-import { findShopItem } from "../../lib/shop";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { adjustWallet, removeInventoryItem, requireAccount } from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
+import { findShopItem } from "@lib/shop";
 
 const OUTCOMES: Record<string, { verb: string; min: number; max: number; emoji: string }> = {
 	fishing_rod: { verb: "You cast a line and reeled in a decent haul", min: 100, max: 900, emoji: "\u{1f3a3}" },

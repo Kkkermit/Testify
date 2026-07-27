@@ -1,9 +1,9 @@
-import { strings } from "../../../config/strings";
-import { defineCommand } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { containsProfanity } from "../../../lib/contentFilter";
-import { embed } from "../../../lib/embeds";
-import { reply } from "../../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { containsProfanity } from "@lib/contentFilter";
+import { embed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "master-oogway",

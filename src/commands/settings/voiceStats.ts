@@ -1,10 +1,10 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { getVoiceCounter, setVoiceCounter } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
-import { syncVoiceCounters } from "../../lib/voiceCounters";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { getVoiceCounter, setVoiceCounter } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
+import { syncVoiceCounters } from "@lib/voiceCounters";
 
 export default defineCommand({
 	name: "voice-stats",

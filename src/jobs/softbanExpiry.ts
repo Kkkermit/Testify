@@ -1,6 +1,6 @@
-import { type TestifyClient } from "../core/client";
-import { toError } from "../core/errors";
-import { claimExpiredSoftban } from "../database/repositories/moderationRepository";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { claimExpiredSoftban } from "@database/repositories/moderationRepository";
 
 /**
  * Each expired softban is claimed atomically, so two ticks cannot both try to

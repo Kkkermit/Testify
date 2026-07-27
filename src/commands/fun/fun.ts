@@ -1,13 +1,13 @@
-import { asSubcommand, defineCommand } from "../../core/command";
-import ascii from "./subcommands/ascii";
-import dadJoke from "./subcommands/dadJoke";
-import fakeTweet from "./subcommands/fakeTweet";
-import hack from "./subcommands/hack";
-import iq from "./subcommands/iq";
-import nitro from "./subcommands/nitro";
-import oogway from "./subcommands/oogway";
-import pepeSign from "./subcommands/pepeSign";
-import relationship from "./subcommands/relationship";
+import ascii from "@commands/fun/subcommands/ascii";
+import dadJoke from "@commands/fun/subcommands/dadJoke";
+import fakeTweet from "@commands/fun/subcommands/fakeTweet";
+import hack from "@commands/fun/subcommands/hack";
+import iq from "@commands/fun/subcommands/iq";
+import nitro from "@commands/fun/subcommands/nitro";
+import oogway from "@commands/fun/subcommands/oogway";
+import pepeSign from "@commands/fun/subcommands/pepeSign";
+import relationship from "@commands/fun/subcommands/relationship";
+import { asSubcommand, defineCommand } from "@core/command";
 
 /**
  * Discord allows an application 100 commands, so related ones live together

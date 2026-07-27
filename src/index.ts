@@ -1,10 +1,10 @@
-import { loadEnv } from "./config/env";
-import { TestifyClient } from "./core/client";
-import { toError } from "./core/errors";
-import { loadEverything, publishCommands } from "./core/loader";
-import { createLogger } from "./core/logger";
-import { handleProcessSignals } from "./core/shutdown";
-import { connectDatabase } from "./database/connection";
+import { loadEnv } from "@config/env";
+import { TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { loadEverything, publishCommands } from "@core/loader";
+import { createLogger } from "@core/logger";
+import { handleProcessSignals } from "@core/shutdown";
+import { connectDatabase } from "@database/connection";
 
 async function main(): Promise<void> {
 	const env = loadEnv();

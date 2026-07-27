@@ -1,11 +1,11 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { parseDuration } from "../../lib/duration";
-import { successEmbed } from "../../lib/embeds";
-import { formatDurationLong } from "../../lib/format";
-import { giveaways } from "../../lib/giveaways";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { parseDuration } from "@lib/duration";
+import { successEmbed } from "@lib/embeds";
+import { formatDurationLong } from "@lib/format";
+import { giveaways } from "@lib/giveaways";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "giveaway",

@@ -1,10 +1,10 @@
 import { ButtonStyle } from "discord.js";
-import { customId } from "../../core/button";
-import { defineMessageHandler } from "../../core/message";
-import { logDirectMessage } from "../../database/repositories/profileRepository";
-import { button, row } from "../../lib/components";
-import { embed } from "../../lib/embeds";
-import { discordTime, truncate } from "../../lib/format";
+import { customId } from "@core/button";
+import { defineMessageHandler } from "@core/message";
+import { logDirectMessage } from "@database/repositories/profileRepository";
+import { button, row } from "@lib/components";
+import { embed } from "@lib/embeds";
+import { discordTime, truncate } from "@lib/format";
 
 export default defineMessageHandler({
 	name: "directMessageLog",

@@ -1,8 +1,8 @@
 import { type Guild } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { toError } from "../core/errors";
-import { getVoiceCounter } from "../database/repositories/settingsRepository";
-import { formatNumber } from "./format";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { getVoiceCounter } from "@database/repositories/settingsRepository";
+import { formatNumber } from "@lib/format";
 
 /**
  * Four byte-identical event files (with `1`-suffixed variables) collapse into

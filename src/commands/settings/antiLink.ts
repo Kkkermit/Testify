@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { disableAntiLink, getAntiLink, setAntiLink } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { humanisePermission } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { humanisePermission } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const BYPASS_CHOICES = [
 	{ name: "Manage messages", value: "ManageMessages" },

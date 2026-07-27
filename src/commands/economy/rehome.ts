@@ -1,10 +1,10 @@
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { adjustWallet, requireAccount, setFields } from "../../database/repositories/economyRepository";
-import { successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { findPet } from "../../lib/pets";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { adjustWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
+import { successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { findPet } from "@lib/pets";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "rehome",

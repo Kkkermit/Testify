@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inTextChannel } from "../../../core/command";
-import { embed } from "../../../lib/embeds";
-import { requireVoice } from "../../../lib/musicGuards";
-import { reply } from "../../../lib/reply";
+import { defineCommand, inTextChannel } from "@core/command";
+import { embed } from "@lib/embeds";
+import { requireVoice } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "play-skip",

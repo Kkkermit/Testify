@@ -1,10 +1,10 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { strings } from "../../config/strings";
-import { defineCommand, inTextChannel } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { containsProfanity } from "../../lib/contentFilter";
-import { successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { containsProfanity } from "@lib/contentFilter";
+import { successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "impersonate",

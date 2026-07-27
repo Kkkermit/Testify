@@ -1,8 +1,8 @@
 import { EmbedBuilder, MessageFlags } from "discord.js";
-import { theme } from "../config/theme";
-import { type ComponentInteraction } from "./button";
-import { type TestifyClient } from "./client";
-import { type Command, type CommandInput, dispatch } from "./command";
+import { theme } from "@config/theme";
+import { type ComponentInteraction } from "@core/button";
+import { type TestifyClient } from "@core/client";
+import { type Command, type CommandInput, dispatch } from "@core/command";
 
 /**
  * Throw this when the user needs to read the message — a bad argument, not

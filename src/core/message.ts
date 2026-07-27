@@ -1,5 +1,5 @@
 import { type Message } from "discord.js";
-import { type TestifyClient } from "./client";
+import { type TestifyClient } from "@core/client";
 
 /**
  * Runs on every message. Levelling, counting, anti-link and the rest are all

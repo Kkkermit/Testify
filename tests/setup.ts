@@ -1,6 +1,6 @@
-import { resetEnv } from "../src/config/env";
-import { clearCooldowns } from "../src/core/checks";
-import { clearBlacklistCache } from "../src/database/repositories/blacklistRepository";
+import { resetEnv } from "@config/env";
+import { clearCooldowns } from "@core/checks";
+import { clearBlacklistCache } from "@database/repositories/blacklistRepository";
 
 // One place resets shared module state, so no suite inherits another's cache.
 beforeEach(() => {

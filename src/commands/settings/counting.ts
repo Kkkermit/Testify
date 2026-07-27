@@ -1,11 +1,11 @@
 import { PermissionFlagsBits } from "discord.js";
-import { COUNTING_DEFAULT_MAX } from "../../config/constants";
-import { defineCommand, inGuild, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { disableCounting, getCounting, resetCount, setCounting } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { COUNTING_DEFAULT_MAX } from "@config/constants";
+import { defineCommand, inGuild, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "counting",

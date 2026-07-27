@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
-import { defineCommand, inTextChannel } from "../../../core/command";
-import { embed } from "../../../lib/embeds";
-import { reply } from "../../../lib/reply";
+import { defineCommand, inTextChannel } from "@core/command";
+import { embed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 const SENTENCES = [
 	"The quick brown fox jumps over the lazy dog near the riverbank",

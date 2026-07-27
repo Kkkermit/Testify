@@ -1,8 +1,8 @@
-import { defineCommand, inGuild } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { embed } from "../../../lib/embeds";
-import { requireVoice } from "../../../lib/musicGuards";
-import { reply } from "../../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { requireVoice } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "leave",

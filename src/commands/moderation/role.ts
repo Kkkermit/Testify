@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { strings } from "../../config/strings";
-import { asMember, defineCommand, inGuild, roleOption, type CommandInput } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { asMember, defineCommand, inGuild, roleOption, type CommandInput } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 /**
  * `addRole` and `removeRole` were separate prefix commands and a separate slash

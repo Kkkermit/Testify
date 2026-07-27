@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { z } from "zod";
-import { jsonPath } from "../core/paths";
+import { jsonPath } from "@core/paths";
 
 /**
  * Replaces the thirteen hand-rolled profanity checks the audit found, each with

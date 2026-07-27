@@ -1,17 +1,12 @@
 import { randomInt } from "node:crypto";
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import {
-	adjustWallet,
-	debitWallet,
-	incrementCounters,
-	requireAccount,
-} from "../../database/repositories/economyRepository";
-import { resolveAmount } from "../../lib/amount";
-import { embed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { adjustWallet, debitWallet, incrementCounters, requireAccount } from "@database/repositories/economyRepository";
+import { resolveAmount } from "@lib/amount";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 type GameKind = "coinflip" | "dice" | "slots";
 

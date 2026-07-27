@@ -1,4 +1,4 @@
-import { ServiceError, SetupError, toError, UserFacingError } from "../../src/core/errors";
+import { ServiceError, SetupError, toError, UserFacingError } from "@core/errors";
 
 describe("toError", () => {
 	it("passes an Error straight through", () => {

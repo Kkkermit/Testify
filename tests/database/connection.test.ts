@@ -1,5 +1,5 @@
 import { getServers } from "node:dns";
-import { explainConnectionFailure } from "../../src/database/connection";
+import { explainConnectionFailure } from "@database/connection";
 
 const SECRET = "sup3rs3cr3tw0rd";
 const URI = `mongodb+srv://user:${SECRET}@cluster0.example.mongodb.net/testify`;

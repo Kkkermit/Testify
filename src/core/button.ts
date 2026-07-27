@@ -1,5 +1,5 @@
 import { type MessageComponentInteraction, type ModalSubmitInteraction } from "discord.js";
-import { type TestifyClient } from "./client";
+import { type TestifyClient } from "@core/client";
 
 export type ComponentInteraction = MessageComponentInteraction | ModalSubmitInteraction;
 

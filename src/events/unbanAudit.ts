@@ -1,7 +1,7 @@
 import { Events, type GuildBan } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { defineEvent } from "../core/event";
-import { writeAuditLog } from "../lib/auditLog";
+import { type TestifyClient } from "@core/client";
+import { defineEvent } from "@core/event";
+import { writeAuditLog } from "@lib/auditLog";
 
 export default defineEvent({
 	name: Events.GuildBanRemove,

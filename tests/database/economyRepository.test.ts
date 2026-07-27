@@ -1,3 +1,4 @@
+import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
 import {
 	adjustWallet,
 	debitWallet,
@@ -8,8 +9,7 @@ import {
 	resetGuild,
 	transfer,
 	withdraw,
-} from "../../src/database/repositories/economyRepository";
-import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
+} from "@database/repositories/economyRepository";
 
 const GUILD = "111111111111111111";
 const ALICE = "222222222222222222";

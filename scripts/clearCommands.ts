@@ -1,5 +1,5 @@
 import { REST, Routes } from "discord.js";
-import { loadEnv } from "../src/config/env";
+import { loadEnv } from "@config/env";
 
 /**
  * Removes every slash command this application has registered, both globally and

@@ -1,8 +1,8 @@
 import { cpus, freemem, totalmem } from "node:os";
 import { type EmbedBuilder, version as djsVersion } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { embed } from "./embeds";
-import { formatBytes, formatNumber, formatUptime } from "./format";
+import { type TestifyClient } from "@core/client";
+import { embed } from "@lib/embeds";
+import { formatBytes, formatNumber, formatUptime } from "@lib/format";
 
 /** Shared by the `/bot-stats-channel` command and the interval that refreshes it. */
 export function botStatsEmbed(client: TestifyClient): EmbedBuilder {

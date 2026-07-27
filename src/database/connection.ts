@@ -1,7 +1,7 @@
 import { getServers } from "node:dns";
 import mongoose from "mongoose";
-import { SetupError, toError } from "../core/errors";
-import { type Logger } from "../core/logger";
+import { SetupError, toError } from "@core/errors";
+import { type Logger } from "@core/logger";
 
 /** The only place a Mongo connection is opened. */
 

@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { theme } from "../../config/theme";
-import { defineCommand, inTextChannel } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { requireVoice } from "../../lib/musicGuards";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { defineCommand, inTextChannel } from "@core/command";
+import { embed } from "@lib/embeds";
+import { requireVoice } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 /**
  * All playback was prefix-only before. Every music command now declares both

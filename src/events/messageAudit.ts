@@ -1,8 +1,8 @@
 import { Events, type Message, type PartialMessage } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { defineEvent } from "../core/event";
-import { writeAuditLog } from "../lib/auditLog";
-import { truncate } from "../lib/format";
+import { type TestifyClient } from "@core/client";
+import { defineEvent } from "@core/event";
+import { writeAuditLog } from "@lib/auditLog";
+import { truncate } from "@lib/format";
 
 export default defineEvent({
 	name: Events.MessageDelete,

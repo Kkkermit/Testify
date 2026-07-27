@@ -1,17 +1,17 @@
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
 import {
 	addInventoryItem,
 	adjustWallet,
 	debitWallet,
 	requireAccount,
 	setFields,
-} from "../../database/repositories/economyRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
-import { BUSINESSES, findBusiness, findHouse, findShopItem, HOUSES, SHOP_ITEMS } from "../../lib/shop";
+} from "@database/repositories/economyRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
+import { BUSINESSES, findBusiness, findHouse, findShopItem, HOUSES, SHOP_ITEMS } from "@lib/shop";
 
 export default defineCommand({
 	name: "shop",

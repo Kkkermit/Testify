@@ -1,9 +1,9 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { defineCommand, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { COLOUR_CHOICES, resolveColour } from "../../lib/colours";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { COLOUR_CHOICES, resolveColour } from "@lib/colours";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "announce",

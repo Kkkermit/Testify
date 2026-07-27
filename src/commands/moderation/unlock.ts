@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { channelOption, defineCommand, inGuild, inTextChannel } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { DEFAULT_REASON } from "../../lib/moderationActions";
-import { reply } from "../../lib/reply";
+import { channelOption, defineCommand, inGuild, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { DEFAULT_REASON } from "@lib/moderationActions";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "unlock",

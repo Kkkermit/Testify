@@ -1,8 +1,8 @@
 import { randomInt } from "node:crypto";
-import { defineCommand, type CommandInput, type Subcommand } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { progressBar } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand, type CommandInput, type Subcommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { progressBar } from "@lib/format";
+import { reply } from "@lib/reply";
 
 interface Meter {
 	name: string;

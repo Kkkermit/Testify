@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { COUNTING_DEFAULT_MAX, DEFAULT_PREFIX } from "../../config/constants";
+import { COUNTING_DEFAULT_MAX, DEFAULT_PREFIX } from "@config/constants";
 
 export interface PrefixSettings {
 	guildId: string;

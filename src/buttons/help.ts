@@ -1,6 +1,6 @@
-import { DEFAULT_PREFIX } from "../config/constants";
-import { defineButton } from "../core/button";
-import { getPrefix } from "../database/repositories/settingsRepository";
+import { DEFAULT_PREFIX } from "@config/constants";
+import { defineButton } from "@core/button";
+import { getPrefix } from "@database/repositories/settingsRepository";
 import {
 	categoryControls,
 	categoryMenu,
@@ -11,7 +11,7 @@ import {
 	pagesOf,
 	resolveCategory,
 	resolveSurface,
-} from "../lib/helpPages";
+} from "@lib/helpPages";
 
 /**
  * Drives the help menu. Everything it needs — which category, which page, and

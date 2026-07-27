@@ -1,10 +1,10 @@
-import { theme } from "../../config/theme";
-import { defineCommand } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { progressBar } from "../../lib/format";
-import { requireQueue } from "../../lib/musicGuards";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { progressBar } from "@lib/format";
+import { requireQueue } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "now-playing",

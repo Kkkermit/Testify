@@ -1,10 +1,10 @@
 import { type GuildMember, type VoiceBasedChannel } from "discord.js";
 import { type DisTube, type Queue } from "distube";
-import { strings } from "../config/strings";
-import { type TestifyClient } from "../core/client";
-import { asMember, inGuild, type CommandInput } from "../core/command";
-import { UserFacingError } from "../core/errors";
-import { music } from "./music";
+import { strings } from "@config/strings";
+import { type TestifyClient } from "@core/client";
+import { asMember, inGuild, type CommandInput } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { music } from "@lib/music";
 
 export interface MusicSession {
 	distube: DisTube;

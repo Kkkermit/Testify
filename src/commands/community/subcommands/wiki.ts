@@ -1,10 +1,10 @@
 import { z } from "zod";
-import { defineCommand } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { embed } from "../../../lib/embeds";
-import { truncate } from "../../../lib/format";
-import { fetchJson } from "../../../lib/http";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { truncate } from "@lib/format";
+import { fetchJson } from "@lib/http";
+import { reply } from "@lib/reply";
 
 const summarySchema = z.object({
 	title: z.string(),

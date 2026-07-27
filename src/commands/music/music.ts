@@ -1,19 +1,19 @@
-import { asSubcommand, defineCommand } from "../../core/command";
-import autoplay from "./subcommands/autoplay";
-import filters from "./subcommands/filters";
-import forward from "./subcommands/forward";
-import join from "./subcommands/join";
-import leave from "./subcommands/leave";
-import playSkip from "./subcommands/playSkip";
-import playTop from "./subcommands/playTop";
-import previous from "./subcommands/previous";
-import radio from "./subcommands/radio";
-import repeat from "./subcommands/repeat";
-import rewind from "./subcommands/rewind";
-import seek from "./subcommands/seek";
-import shuffle from "./subcommands/shuffle";
-import skipTo from "./subcommands/skipTo";
-import tts from "./subcommands/tts";
+import autoplay from "@commands/music/subcommands/autoplay";
+import filters from "@commands/music/subcommands/filters";
+import forward from "@commands/music/subcommands/forward";
+import join from "@commands/music/subcommands/join";
+import leave from "@commands/music/subcommands/leave";
+import playSkip from "@commands/music/subcommands/playSkip";
+import playTop from "@commands/music/subcommands/playTop";
+import previous from "@commands/music/subcommands/previous";
+import radio from "@commands/music/subcommands/radio";
+import repeat from "@commands/music/subcommands/repeat";
+import rewind from "@commands/music/subcommands/rewind";
+import seek from "@commands/music/subcommands/seek";
+import shuffle from "@commands/music/subcommands/shuffle";
+import skipTo from "@commands/music/subcommands/skipTo";
+import tts from "@commands/music/subcommands/tts";
+import { asSubcommand, defineCommand } from "@core/command";
 
 /**
  * Discord allows an application 100 commands, so related ones live together

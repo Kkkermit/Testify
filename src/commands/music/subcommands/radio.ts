@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
-import { theme } from "../../../config/theme";
-import { defineCommand, inTextChannel } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { embed } from "../../../lib/embeds";
-import { requireVoice } from "../../../lib/musicGuards";
-import { reply } from "../../../lib/reply";
+import { theme } from "@config/theme";
+import { defineCommand, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { requireVoice } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 /**
  * Public radio streams. The previous implementation embedded a session-bound

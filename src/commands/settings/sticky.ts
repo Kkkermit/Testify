@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { listSticky, removeSticky, setSticky } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { truncate } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { listSticky, removeSticky, setSticky } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { truncate } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "sticky-message",

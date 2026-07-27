@@ -1,11 +1,11 @@
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { deposit, requireAccount } from "../../database/repositories/economyRepository";
-import { resolveAmount } from "../../lib/amount";
-import { successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deposit, requireAccount } from "@database/repositories/economyRepository";
+import { resolveAmount } from "@lib/amount";
+import { successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "deposit",

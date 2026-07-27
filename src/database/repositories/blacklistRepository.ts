@@ -1,5 +1,5 @@
-import { CACHE } from "../../config/constants";
-import { Blacklist, type BlacklistEntry } from "../models/moderation";
+import { CACHE } from "@config/constants";
+import { Blacklist, type BlacklistEntry } from "@database/models/moderation";
 
 /**
  * The blacklist gate runs before every command on both surfaces, so it is cached

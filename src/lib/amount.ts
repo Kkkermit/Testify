@@ -1,5 +1,5 @@
-import { strings } from "../config/strings";
-import { UserFacingError } from "../core/errors";
+import { strings } from "@config/strings";
+import { UserFacingError } from "@core/errors";
 
 /**
  * Parses the amount argument shared by deposit, withdraw, transfer and gamble.

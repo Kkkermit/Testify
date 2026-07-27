@@ -1,12 +1,12 @@
 import { arch, type as osType, cpus, freemem, platform, totalmem } from "node:os";
 import { version as djsVersion } from "discord.js";
-import { theme } from "../../config/theme";
-import { type TestifyClient } from "../../core/client";
-import { defineCommand, type CommandInput } from "../../core/command";
-import { linkButton, row } from "../../lib/components";
-import { embed } from "../../lib/embeds";
-import { discordTime, formatBytes, formatNumber, formatUptime } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { type TestifyClient } from "@core/client";
+import { defineCommand, type CommandInput } from "@core/command";
+import { linkButton, row } from "@lib/components";
+import { embed } from "@lib/embeds";
+import { discordTime, formatBytes, formatNumber, formatUptime } from "@lib/format";
+import { reply } from "@lib/reply";
 
 async function showUptime(interaction: CommandInput, client: TestifyClient): Promise<void> {
 	await reply(interaction, {

@@ -1,8 +1,8 @@
 import { Events, type GuildMember, type PartialGuildMember } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { defineEvent } from "../core/event";
-import { writeAuditLog } from "../lib/auditLog";
-import { syncVoiceCounters } from "../lib/voiceCounters";
+import { type TestifyClient } from "@core/client";
+import { defineEvent } from "@core/event";
+import { writeAuditLog } from "@lib/auditLog";
+import { syncVoiceCounters } from "@lib/voiceCounters";
 
 export default defineEvent({
 	name: Events.GuildMemberRemove,

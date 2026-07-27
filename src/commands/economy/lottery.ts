@@ -1,19 +1,19 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { type LotteryFrequency } from "../../database/models/lottery";
-import { debitWallet, requireAccount } from "../../database/repositories/economyRepository";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { type LotteryFrequency } from "@database/models/lottery";
+import { debitWallet, requireAccount } from "@database/repositories/economyRepository";
 import {
 	addEntry,
 	deleteLottery,
 	getLottery,
 	intervalFor,
 	saveLottery,
-} from "../../database/repositories/lotteryRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { discordTime, formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+} from "@database/repositories/lotteryRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { discordTime, formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const FREQUENCIES: LotteryFrequency[] = ["hourly", "daily", "weekly"];
 

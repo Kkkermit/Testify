@@ -1,4 +1,4 @@
-import { loadEnv, resetEnv } from "../../src/config/env";
+import { loadEnv, resetEnv } from "@config/env";
 
 const VALID = {
 	DISCORD_TOKEN: "a-token",

@@ -1,4 +1,4 @@
-import { customId, parseCustomId } from "../../src/core/button";
+import { customId, parseCustomId } from "@core/button";
 
 describe("customId", () => {
 	it("joins the parts with colons", () => {

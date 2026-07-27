@@ -1,10 +1,10 @@
 import { MessageFlags } from "discord.js";
-import { type TestifyClient } from "../../core/client";
-import { defineCommand } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { discordTime, formatNumber } from "../../lib/format";
-import { buildPage } from "../../lib/pagination";
-import { reply } from "../../lib/reply";
+import { type TestifyClient } from "@core/client";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { discordTime, formatNumber } from "@lib/format";
+import { buildPage } from "@lib/pagination";
+import { reply } from "@lib/reply";
 
 export const GUILD_PAGE_SIZE = 10;
 

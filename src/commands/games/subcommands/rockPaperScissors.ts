@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
-import { defineCommand } from "../../../core/command";
-import { embed } from "../../../lib/embeds";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 const MOVES = ["rock", "paper", "scissors"] as const;
 type Move = (typeof MOVES)[number];

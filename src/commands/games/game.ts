@@ -1,11 +1,11 @@
-import { asSubcommand, defineCommand } from "../../core/command";
-import blackjack from "./subcommands/blackjack";
-import eightBall from "./subcommands/eightBall";
-import fastType from "./subcommands/fastType";
-import guessTheNumber from "./subcommands/guessTheNumber";
-import guessThePokemon from "./subcommands/guessThePokemon";
-import rockPaperScissors from "./subcommands/rockPaperScissors";
-import wouldYouRather from "./subcommands/wouldYouRather";
+import blackjack from "@commands/games/subcommands/blackjack";
+import eightBall from "@commands/games/subcommands/eightBall";
+import fastType from "@commands/games/subcommands/fastType";
+import guessTheNumber from "@commands/games/subcommands/guessTheNumber";
+import guessThePokemon from "@commands/games/subcommands/guessThePokemon";
+import rockPaperScissors from "@commands/games/subcommands/rockPaperScissors";
+import wouldYouRather from "@commands/games/subcommands/wouldYouRather";
+import { asSubcommand, defineCommand } from "@core/command";
 
 /**
  * Discord allows an application 100 commands, so related ones live together

@@ -1,8 +1,8 @@
 import { PermissionsBitField } from "discord.js";
-import { findBlacklistEntry } from "../database/repositories/blacklistRepository";
-import { formatDuration, humanisePermission } from "../lib/format";
-import { type TestifyClient } from "./client";
-import { type Command, type CommandInput } from "./command";
+import { type TestifyClient } from "@core/client";
+import { type Command, type CommandInput } from "@core/command";
+import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
+import { formatDuration, humanisePermission } from "@lib/format";
 
 /** Why a command was refused, or null if it may run. */
 export type CheckFailure = string | null;

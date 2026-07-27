@@ -50,6 +50,24 @@ what CI runs. The pre-commit and pre-push hooks run most of it for you.
 Nothing needs registering — the loader picks files up from these folders at
 start-up. If a file is shaped wrongly the bot refuses to start and names it.
 
+## Imports
+
+Modules are imported by alias, never by a relative path that climbs:
+
+```ts
+import { theme } from "@config/theme";
+import { embed } from "@lib/embeds";
+import { type CommandInput } from "@core/command";
+```
+
+The map lives in `tsconfig.json` and nowhere else — `jest.config.ts` reads it,
+and the build rewrites the aliases to relative paths with `tsc-alias` so `dist/`
+runs under plain Node. Adding an alias means editing one file.
+
+Each aliased directory also has a barrel, so `import { embed, reply } from "@lib"`
+works when you want several things at once. They use `export *` and maintain
+themselves; a new file needs no edit.
+
 ## Slash and prefix
 
 Commands are written once, against the `CommandInput` contract in

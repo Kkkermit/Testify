@@ -1,6 +1,6 @@
-import { defineMessageHandler } from "../../core/message";
-import { bumpSticky, setStickyMessageId } from "../../database/repositories/settingsRepository";
-import { embed } from "../../lib/embeds";
+import { defineMessageHandler } from "@core/message";
+import { bumpSticky, setStickyMessageId } from "@database/repositories/settingsRepository";
+import { embed } from "@lib/embeds";
 
 /**
  * The counter advance and the "time to repost" decision happen in one atomic

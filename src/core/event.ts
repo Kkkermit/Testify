@@ -1,5 +1,5 @@
 import { type ClientEvents } from "discord.js";
-import { type TestifyClient } from "./client";
+import { type TestifyClient } from "@core/client";
 
 /**
  * Handles a Discord gateway event. The client comes first so the payload after

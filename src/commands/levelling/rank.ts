@@ -1,10 +1,10 @@
-import { LEVELLING } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { getRank, getUserLevel, xpForNextLevel } from "../../database/repositories/levelRepository";
-import { embed } from "../../lib/embeds";
-import { formatNumber, ordinal, progressBar } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { LEVELLING } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { getRank, getUserLevel, xpForNextLevel } from "@database/repositories/levelRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber, ordinal, progressBar } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "rank",

@@ -1,9 +1,9 @@
 import { evaluate, format } from "mathjs";
-import { defineCommand } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { truncate } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { truncate } from "@lib/format";
+import { reply } from "@lib/reply";
 
 /**
  * `mathjs` can evaluate assignments and function definitions, which is more than

@@ -1,11 +1,11 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { Collection } from "discord.js";
-import { ALL_CATEGORIES, categoryEmoji, categoryLabel, HIDDEN_CATEGORIES } from "../src/config/categories";
-import { type TestifyClient } from "../src/core/client";
-import { type Command, subcommandsOf } from "../src/core/command";
-import { loadEverything } from "../src/core/loader";
-import { createLogger } from "../src/core/logger";
+import { ALL_CATEGORIES, categoryEmoji, categoryLabel, HIDDEN_CATEGORIES } from "@config/categories";
+import { type TestifyClient } from "@core/client";
+import { type Command, subcommandsOf } from "@core/command";
+import { loadEverything } from "@core/loader";
+import { createLogger } from "@core/logger";
 
 /** Writes COMMANDS.md from the commands on disk, so the list cannot go stale. */
 

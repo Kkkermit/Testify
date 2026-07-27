@@ -1,8 +1,8 @@
 import { MessageFlags } from "discord.js";
-import { defineCommand, inTextChannel } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 const MAX_FLUSH = 100;
 

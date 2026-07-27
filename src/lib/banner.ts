@@ -1,7 +1,7 @@
 import { type Client } from "discord.js";
-import { theme } from "../config/theme";
-import { type TestifyClient } from "../core/client";
-import { formatNumber } from "./format";
+import { theme } from "@config/theme";
+import { type TestifyClient } from "@core/client";
+import { formatNumber } from "@lib/format";
 
 /**
  * The start-up banner. Printed rather than logged: it is for a human watching a

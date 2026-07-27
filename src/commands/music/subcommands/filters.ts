@@ -1,8 +1,8 @@
-import { defineCommand } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { embed, successEmbed } from "../../../lib/embeds";
-import { requireQueue } from "../../../lib/musicGuards";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed, successEmbed } from "@lib/embeds";
+import { requireQueue } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 const AVAILABLE = [
 	"3d",

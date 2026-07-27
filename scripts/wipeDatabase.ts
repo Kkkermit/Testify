@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 import prompts from "prompts";
-import { loadEnv } from "../src/config/env";
-import { createLogger } from "../src/core/logger";
-import { connectDatabase, disconnectDatabase } from "../src/database/connection";
+import { loadEnv } from "@config/env";
+import { createLogger } from "@core/logger";
+import { connectDatabase, disconnectDatabase } from "@database/connection";
 
 /** Drops every collection. Requires typing the database name to confirm. */
 async function main(): Promise<void> {

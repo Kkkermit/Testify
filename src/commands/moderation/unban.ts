@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { theme } from "../../config/theme";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { actionEmbed, DEFAULT_REASON } from "../../lib/moderationActions";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { actionEmbed, DEFAULT_REASON } from "@lib/moderationActions";
+import { reply } from "@lib/reply";
 
 const SNOWFLAKE = /^\d{17,20}$/;
 

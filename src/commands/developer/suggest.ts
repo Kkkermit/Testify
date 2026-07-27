@@ -1,10 +1,10 @@
 import { MessageFlags, WebhookClient } from "discord.js";
-import { strings } from "../../config/strings";
-import { defineCommand } from "../../core/command";
-import { SetupError, UserFacingError } from "../../core/errors";
-import { containsProfanity } from "../../lib/contentFilter";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand } from "@core/command";
+import { SetupError, UserFacingError } from "@core/errors";
+import { containsProfanity } from "@lib/contentFilter";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "suggest",

@@ -1,7 +1,7 @@
 import { type ChatInputCommandInteraction } from "discord.js";
-import { type TestifyClient } from "../../src/core/client";
-import { defineCommand, dispatch } from "../../src/core/command";
-import { UserFacingError } from "../../src/core/errors";
+import { type TestifyClient } from "@core/client";
+import { defineCommand, dispatch } from "@core/command";
+import { UserFacingError } from "@core/errors";
 
 const client = {} as TestifyClient;
 

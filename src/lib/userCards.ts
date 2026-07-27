@@ -1,6 +1,6 @@
 import { type APIEmbedField, type EmbedBuilder, type GuildMember, type User } from "discord.js";
-import { embed } from "./embeds";
-import { discordTime } from "./format";
+import { embed } from "@lib/embeds";
+import { discordTime } from "@lib/format";
 
 export function avatarEmbed(user: User): EmbedBuilder {
 	const url = user.displayAvatarURL({ size: 1024 });

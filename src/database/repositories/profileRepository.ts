@@ -1,5 +1,5 @@
-import { DmLog, type DmLogEntry } from "../models/moderation";
-import { Profile, type UserProfile } from "../models/profile";
+import { DmLog, type DmLogEntry } from "@database/models/moderation";
+import { Profile, type UserProfile } from "@database/models/profile";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 

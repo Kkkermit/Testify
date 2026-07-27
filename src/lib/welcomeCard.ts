@@ -1,6 +1,6 @@
 import { type AttachmentBuilder, type GuildMember } from "discord.js";
-import { createCanvas, drawAvatar, fitFont, toAttachment } from "./canvas";
-import { formatNumber } from "./format";
+import { createCanvas, drawAvatar, fitFont, toAttachment } from "@lib/canvas";
+import { formatNumber } from "@lib/format";
 
 const WIDTH = 900;
 const HEIGHT = 300;

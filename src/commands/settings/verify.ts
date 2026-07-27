@@ -1,16 +1,12 @@
 import { ButtonStyle, MessageFlags, PermissionFlagsBits } from "discord.js";
-import { theme } from "../../config/theme";
-import { customId } from "../../core/button";
-import { defineCommand, inGuild, roleOption, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import {
-	deleteVerifyConfig,
-	getVerifyConfig,
-	saveVerifyConfig,
-} from "../../database/repositories/verificationRepository";
-import { button, row } from "../../lib/components";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { customId } from "@core/button";
+import { defineCommand, inGuild, roleOption, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
+import { button, row } from "@lib/components";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "verify",

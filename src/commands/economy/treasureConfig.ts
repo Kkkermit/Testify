@@ -1,11 +1,11 @@
 import { PermissionFlagsBits } from "discord.js";
-import { TREASURE_DEFAULTS } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { getTreasureConfig, saveTreasureConfig } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { formatDuration, formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { TREASURE_DEFAULTS } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { formatDuration, formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "treasure",

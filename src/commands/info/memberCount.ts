@@ -1,10 +1,10 @@
 import QuickChart from "quickchart-js";
-import { DAY_MS, WEEK_MS } from "../../config/constants";
-import { defineCommand } from "../../core/command";
-import { ServiceError, UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { DAY_MS, WEEK_MS } from "@config/constants";
+import { defineCommand } from "@core/command";
+import { ServiceError, UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "member-count",

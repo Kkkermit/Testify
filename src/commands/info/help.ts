@@ -1,7 +1,7 @@
-import { DEFAULT_PREFIX } from "../../config/constants";
-import { defineCommand } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { getPrefix } from "../../database/repositories/settingsRepository";
+import { DEFAULT_PREFIX } from "@config/constants";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { getPrefix } from "@database/repositories/settingsRepository";
 import {
 	categoryControls,
 	categoryMenu,
@@ -11,8 +11,8 @@ import {
 	helpLinks,
 	pagesOf,
 	resolveCategory,
-} from "../../lib/helpPages";
-import { reply } from "../../lib/reply";
+} from "@lib/helpPages";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "help",

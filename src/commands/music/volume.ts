@@ -1,8 +1,8 @@
-import { theme } from "../../config/theme";
-import { defineCommand } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { requireQueue } from "../../lib/musicGuards";
-import { reply } from "../../lib/reply";
+import { theme } from "@config/theme";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { requireQueue } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "volume",

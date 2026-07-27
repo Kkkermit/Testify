@@ -1,10 +1,10 @@
-import { asSubcommand, defineCommand } from "../../core/command";
-import advice from "./subcommands/advice";
-import animalFacts from "./subcommands/animalFacts";
-import meme from "./subcommands/meme";
-import minecraft from "./subcommands/minecraft";
-import translate from "./subcommands/translate";
-import wiki from "./subcommands/wiki";
+import advice from "@commands/community/subcommands/advice";
+import animalFacts from "@commands/community/subcommands/animalFacts";
+import meme from "@commands/community/subcommands/meme";
+import minecraft from "@commands/community/subcommands/minecraft";
+import translate from "@commands/community/subcommands/translate";
+import wiki from "@commands/community/subcommands/wiki";
+import { asSubcommand, defineCommand } from "@core/command";
 
 /**
  * Discord allows an application 100 commands, so related ones live together

@@ -1,11 +1,11 @@
 import { ButtonStyle, ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
-import { customId } from "../../core/button";
-import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "../../database/repositories/ticketRepository";
-import { button, row } from "../../lib/components";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { customId } from "@core/button";
+import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
+import { button, row } from "@lib/components";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "ticket",

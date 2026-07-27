@@ -1,9 +1,9 @@
 import { ButtonStyle } from "discord.js";
-import { customId } from "../../core/button";
-import { defineCommand } from "../../core/command";
-import { button, row } from "../../lib/components";
-import { reply } from "../../lib/reply";
-import { userInfoEmbed } from "../../lib/userCards";
+import { customId } from "@core/button";
+import { defineCommand } from "@core/command";
+import { button, row } from "@lib/components";
+import { reply } from "@lib/reply";
+import { userInfoEmbed } from "@lib/userCards";
 
 export default defineCommand({
 	name: "user-info",

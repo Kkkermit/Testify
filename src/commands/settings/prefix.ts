@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { getPrefixConfig, setPrefix, setPrefixEnabled } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 const MAX_LENGTH = 5;
 

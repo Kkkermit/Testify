@@ -1,10 +1,10 @@
-import { ECONOMY_COOLDOWNS, type EconomyCooldownKey } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { type EconomyAccount } from "../../database/models/economy";
-import { requireAccount } from "../../database/repositories/economyRepository";
-import { embed } from "../../lib/embeds";
-import { formatDuration } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { ECONOMY_COOLDOWNS, type EconomyCooldownKey } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { type EconomyAccount } from "@database/models/economy";
+import { requireAccount } from "@database/repositories/economyRepository";
+import { embed } from "@lib/embeds";
+import { formatDuration } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const TRACKED: {
 	key: EconomyCooldownKey;

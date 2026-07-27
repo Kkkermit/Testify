@@ -1,9 +1,9 @@
 import { Events, type Interaction, MessageFlags } from "discord.js";
-import { parseCustomId } from "../core/button";
-import { runChecks } from "../core/checks";
-import { runButton, runCommand, toError } from "../core/errors";
-import { defineEvent } from "../core/event";
-import { errorEmbed } from "../lib/embeds";
+import { parseCustomId } from "@core/button";
+import { runChecks } from "@core/checks";
+import { runButton, runCommand, toError } from "@core/errors";
+import { defineEvent } from "@core/event";
+import { errorEmbed } from "@lib/embeds";
 
 /** The only `interactionCreate` listener. Everything is routed from here. */
 export default defineEvent({

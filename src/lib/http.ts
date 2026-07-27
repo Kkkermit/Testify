@@ -1,6 +1,6 @@
 import { type ZodType } from "zod";
-import { LIMITS } from "../config/constants";
-import { ServiceError } from "../core/errors";
+import { LIMITS } from "@config/constants";
+import { ServiceError } from "@core/errors";
 
 /**
  * Every outbound HTTP call goes through here: one timeout policy, one error type,

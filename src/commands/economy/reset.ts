@@ -1,11 +1,11 @@
 import { ButtonStyle, MessageFlags, PermissionFlagsBits } from "discord.js";
-import { customId } from "../../core/button";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { deleteAccount } from "../../database/repositories/economyRepository";
-import { button, row } from "../../lib/components";
-import { successEmbed, warningEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { customId } from "@core/button";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deleteAccount } from "@database/repositories/economyRepository";
+import { button, row } from "@lib/components";
+import { successEmbed, warningEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "reset",

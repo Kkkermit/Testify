@@ -1,12 +1,12 @@
 import { PermissionFlagsBits } from "discord.js";
-import { strings } from "../../config/strings";
-import { defineCommand, inGuild } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { adjustBank, adjustWallet } from "../../database/repositories/economyRepository";
-import { addXp } from "../../database/repositories/levelRepository";
-import { successEmbed } from "../../lib/embeds";
-import { formatNumber } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { strings } from "@config/strings";
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { adjustBank, adjustWallet } from "@database/repositories/economyRepository";
+import { addXp } from "@database/repositories/levelRepository";
+import { successEmbed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
+import { reply } from "@lib/reply";
 
 /**
  * This wrote through a second, ten-field Mongoose model that shared the economy

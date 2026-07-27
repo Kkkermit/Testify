@@ -2,10 +2,10 @@ import { randomInt } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { setTimeout as wait } from "node:timers/promises";
 import { z } from "zod";
-import { defineCommand } from "../../../core/command";
-import { jsonPath } from "../../../core/paths";
-import { embed } from "../../../lib/embeds";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { jsonPath } from "@core/paths";
+import { embed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 const hackDataSchema = z.object({
 	id: z.array(z.string()),

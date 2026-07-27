@@ -1,9 +1,9 @@
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
-import { type Env } from "../config/env";
-import { type Button } from "./button";
-import { type Command } from "./command";
-import { type Logger } from "./logger";
-import { type MessageHandler } from "./message";
+import { type Env } from "@config/env";
+import { type Button } from "@core/button";
+import { type Command } from "@core/command";
+import { type Logger } from "@core/logger";
+import { type MessageHandler } from "@core/message";
 
 export const intents = [
 	GatewayIntentBits.Guilds,

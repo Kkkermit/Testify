@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
-import { asMember, defineCommand, inGuild, roleOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { addAutoRole, getAutoRoles, removeAutoRole } from "../../database/repositories/settingsRepository";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { asMember, defineCommand, inGuild, roleOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { addAutoRole, getAutoRoles, removeAutoRole } from "@database/repositories/settingsRepository";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "auto-role",

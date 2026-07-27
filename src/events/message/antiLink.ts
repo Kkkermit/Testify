@@ -1,8 +1,8 @@
 import { PermissionsBitField } from "discord.js";
-import { defineMessageHandler } from "../../core/message";
-import { addWarning } from "../../database/repositories/moderationRepository";
-import { getAntiLink } from "../../database/repositories/settingsRepository";
-import { embed } from "../../lib/embeds";
+import { defineMessageHandler } from "@core/message";
+import { addWarning } from "@database/repositories/moderationRepository";
+import { getAntiLink } from "@database/repositories/settingsRepository";
+import { embed } from "@lib/embeds";
 
 const LINK_PATTERN = /(https?:\/\/|www\.|discord\.gg\/|\b[a-z0-9-]+\.(com|net|org|io|gg|xyz|co)\b)/i;
 

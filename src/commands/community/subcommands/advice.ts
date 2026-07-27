@@ -1,8 +1,8 @@
 import { z } from "zod";
-import { defineCommand } from "../../../core/command";
-import { embed } from "../../../lib/embeds";
-import { fetchJson } from "../../../lib/http";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds";
+import { fetchJson } from "@lib/http";
+import { reply } from "@lib/reply";
 
 const adviceSchema = z.object({ slip: z.object({ id: z.number(), advice: z.string() }) });
 

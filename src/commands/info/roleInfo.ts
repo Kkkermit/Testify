@@ -1,8 +1,8 @@
-import { defineCommand, roleOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { discordTime, formatNumber, humanisePermission, truncate } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand, roleOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { discordTime, formatNumber, humanisePermission, truncate } from "@lib/format";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "role-info",

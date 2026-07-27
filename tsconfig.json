@@ -7,6 +7,23 @@
 		"rootDir": ".",
 		"noEmit": true,
 
+		"baseUrl": ".",
+		"paths": {
+			"@core": ["src/core/index.ts"],
+			"@core/*": ["src/core/*"],
+			"@config": ["src/config/index.ts"],
+			"@config/*": ["src/config/*"],
+			"@lib": ["src/lib/index.ts"],
+			"@lib/*": ["src/lib/*"],
+			"@commands/*": ["src/commands/*"],
+			"@events/*": ["src/events/*"],
+			"@buttons/*": ["src/buttons/*"],
+			"@database": ["src/database/index.ts"],
+			"@database/*": ["src/database/*"],
+			"@jobs/*": ["src/jobs/*"],
+			"@root/*": ["src/*"]
+		},
+
 		"strict": true,
 		"noUncheckedIndexedAccess": true,
 		"exactOptionalPropertyTypes": true,

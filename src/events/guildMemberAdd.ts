@@ -1,12 +1,12 @@
 import { Events, type GuildMember } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { toError } from "../core/errors";
-import { defineEvent } from "../core/event";
-import { getAutoRoles, getWelcome } from "../database/repositories/settingsRepository";
-import { writeAuditLog } from "../lib/auditLog";
-import { embed } from "../lib/embeds";
-import { syncVoiceCounters } from "../lib/voiceCounters";
-import { renderWelcomeCard } from "../lib/welcomeCard";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { defineEvent } from "@core/event";
+import { getAutoRoles, getWelcome } from "@database/repositories/settingsRepository";
+import { writeAuditLog } from "@lib/auditLog";
+import { embed } from "@lib/embeds";
+import { syncVoiceCounters } from "@lib/voiceCounters";
+import { renderWelcomeCard } from "@lib/welcomeCard";
 
 function fillTemplate(template: string, member: GuildMember): string {
 	return template

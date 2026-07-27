@@ -1,11 +1,11 @@
 import { readdirSync } from "node:fs";
 import { resolve } from "node:path";
 import { Collection } from "discord.js";
-import { CATEGORIES } from "../../src/config/categories";
-import { type TestifyClient } from "../../src/core/client";
-import { buildSlashCommand, subcommandsOf } from "../../src/core/command";
-import { loadEverything, MAX_COMMANDS } from "../../src/core/loader";
-import { createLogger } from "../../src/core/logger";
+import { CATEGORIES } from "@config/categories";
+import { type TestifyClient } from "@core/client";
+import { buildSlashCommand, subcommandsOf } from "@core/command";
+import { loadEverything, MAX_COMMANDS } from "@core/loader";
+import { createLogger } from "@core/logger";
 
 /**
  * Loads every command, button, event and message handler from disk. If a file

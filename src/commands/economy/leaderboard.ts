@@ -1,10 +1,10 @@
-import { ECONOMY } from "../../config/constants";
-import { defineCommand, inGuild } from "../../core/command";
-import { getLeaderboard } from "../../database/repositories/economyRepository";
-import { getLevelLeaderboard } from "../../database/repositories/levelRepository";
-import { embed } from "../../lib/embeds";
-import { formatNumber, ordinal } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { ECONOMY } from "@config/constants";
+import { defineCommand, inGuild } from "@core/command";
+import { getLeaderboard } from "@database/repositories/economyRepository";
+import { getLevelLeaderboard } from "@database/repositories/levelRepository";
+import { embed } from "@lib/embeds";
+import { formatNumber, ordinal } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const MEDALS = ["\u{1f947}", "\u{1f948}", "\u{1f949}"];
 

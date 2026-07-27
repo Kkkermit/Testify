@@ -1,10 +1,10 @@
 import { PermissionFlagsBits } from "discord.js";
-import { channelOption, defineCommand, inTextChannel } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { parseDuration } from "../../lib/duration";
-import { successEmbed } from "../../lib/embeds";
-import { formatDurationLong } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { channelOption, defineCommand, inTextChannel } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { parseDuration } from "@lib/duration";
+import { successEmbed } from "@lib/embeds";
+import { formatDurationLong } from "@lib/format";
+import { reply } from "@lib/reply";
 
 /** Discord's per-channel rate limit ceiling. */
 const MAX_SLOWMODE_SECONDS = 21_600;

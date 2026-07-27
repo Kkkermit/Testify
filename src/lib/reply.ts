@@ -1,5 +1,5 @@
 import { type InteractionEditReplyOptions, type InteractionReplyOptions } from "discord.js";
-import { type CommandInput } from "../core/command";
+import { type CommandInput } from "@core/command";
 
 /**
  * Sends the command's answer.

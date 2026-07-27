@@ -1,10 +1,10 @@
 import { MessageFlags, PermissionFlagsBits, StringSelectMenuOptionBuilder } from "discord.js";
-import { defineCommand, inGuild, textChannelOption } from "../../core/command";
-import { UserFacingError } from "../../core/errors";
-import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "../../database/repositories/settingsRepository";
-import { AUDIT_EVENTS } from "../../lib/auditLog";
-import { embed, successEmbed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand, inGuild, textChannelOption } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
+import { AUDIT_EVENTS } from "@lib/auditLog";
+import { embed, successEmbed } from "@lib/embeds";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "audit-logging",

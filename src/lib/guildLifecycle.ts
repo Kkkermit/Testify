@@ -1,8 +1,8 @@
 import { type EmbedBuilder, type Guild } from "discord.js";
-import { type TestifyClient } from "../core/client";
-import { toError } from "../core/errors";
-import { embed } from "./embeds";
-import { formatNumber } from "./format";
+import { type TestifyClient } from "@core/client";
+import { toError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { formatNumber } from "@lib/format";
 
 /**
  * `guildCreate` and `guildDelete` shared roughly eighty percent of their code and

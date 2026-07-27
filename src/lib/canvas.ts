@@ -1,6 +1,6 @@
 import { type Canvas, createCanvas, type Image, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { AttachmentBuilder } from "discord.js";
-import { ServiceError } from "../core/errors";
+import { ServiceError } from "@core/errors";
 
 /**
  * Shared canvas helpers. The bot renders its own cards rather than hotlinking

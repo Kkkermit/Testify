@@ -16,8 +16,8 @@ import {
 	type CommandInputOptions,
 	type CommandOption,
 	subcommandsOf,
-} from "./command";
-import { UserFacingError } from "./errors";
+} from "@core/command";
+import { UserFacingError } from "@core/errors";
 
 /**
  * Lets `t?ban @someone spamming` run the exact same code as `/ban`.

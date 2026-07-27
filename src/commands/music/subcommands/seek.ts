@@ -1,10 +1,10 @@
-import { defineCommand } from "../../../core/command";
-import { UserFacingError } from "../../../core/errors";
-import { parseDuration } from "../../../lib/duration";
-import { embed } from "../../../lib/embeds";
-import { formatTrackTime } from "../../../lib/format";
-import { requireQueue } from "../../../lib/musicGuards";
-import { reply } from "../../../lib/reply";
+import { defineCommand } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { parseDuration } from "@lib/duration";
+import { embed } from "@lib/embeds";
+import { formatTrackTime } from "@lib/format";
+import { requireQueue } from "@lib/musicGuards";
+import { reply } from "@lib/reply";
 
 export default defineCommand({
 	name: "seek",

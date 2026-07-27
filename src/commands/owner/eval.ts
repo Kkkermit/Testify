@@ -1,11 +1,11 @@
 import { inspect } from "node:util";
 import { runInNewContext } from "node:vm";
 import { MessageFlags } from "discord.js";
-import { defineCommand } from "../../core/command";
-import { toError } from "../../core/errors";
-import { embed } from "../../lib/embeds";
-import { truncate } from "../../lib/format";
-import { reply } from "../../lib/reply";
+import { defineCommand } from "@core/command";
+import { toError } from "@core/errors";
+import { embed } from "@lib/embeds";
+import { truncate } from "@lib/format";
+import { reply } from "@lib/reply";
 
 const SECRET_PATTERN = /(token|secret|password|mongodb(_|-)?uri|api(_|-)?key)/i;
 

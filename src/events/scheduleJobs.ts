@@ -1,10 +1,10 @@
 import { Events } from "discord.js";
-import { INTERVALS } from "../config/constants";
-import { defineEvent } from "../core/event";
-import { runLotteryDraws } from "../jobs/lotteryDraw";
-import { payPassiveIncome } from "../jobs/passiveIncome";
-import { refreshBotStats } from "../jobs/refreshBotStats";
-import { processExpiredSoftbans } from "../jobs/softbanExpiry";
+import { INTERVALS } from "@config/constants";
+import { defineEvent } from "@core/event";
+import { runLotteryDraws } from "@jobs/lotteryDraw";
+import { payPassiveIncome } from "@jobs/passiveIncome";
+import { refreshBotStats } from "@jobs/refreshBotStats";
+import { processExpiredSoftbans } from "@jobs/softbanExpiry";
 
 /** Starts the repeating background jobs. Add a new one by adding a line here. */
 export default defineEvent({

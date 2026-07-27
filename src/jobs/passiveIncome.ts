@@ -1,6 +1,6 @@
-import { type TestifyClient } from "../core/client";
-import { Economy } from "../database/models/economy";
-import { findBusiness, findHouse } from "../lib/shop";
+import { type TestifyClient } from "@core/client";
+import { Economy } from "@database/models/economy";
+import { findBusiness, findHouse } from "@lib/shop";
 
 /**
  * Pays out house and business income. Every credit is an atomic `$inc` rather

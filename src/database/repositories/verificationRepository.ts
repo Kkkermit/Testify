@@ -1,5 +1,10 @@
 import { randomInt } from "node:crypto";
-import { type PendingVerification, PendingVerify, VerifyConfig, type VerifySettings } from "../models/verification";
+import {
+	type PendingVerification,
+	PendingVerify,
+	VerifyConfig,
+	type VerifySettings,
+} from "@database/models/verification";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
