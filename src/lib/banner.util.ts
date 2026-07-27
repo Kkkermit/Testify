@@ -64,6 +64,8 @@ export interface BannerFacts {
 	prefix: string;
 	scope: string;
 	startupMs: number;
+	/** What the loader found on disk. A category failing to load shows up here first. */
+	loaded: { commands: number; buttons: number; events: number; messageHandlers: number };
 }
 
 /** Kept separate from printing so it can be tested without capturing stdout. */
@@ -74,8 +76,10 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 	const width = Math.max(64, ...art.map((line) => [...line].length));
 	const rule = "═".repeat(width);
 
-	const fact = (label: string, value: string): string =>
-		`  ${paint(ansi.cyan, label.padEnd(12))}${paint(ansi.bold, value)}`;
+	const fact = (icon: string, label: string, value: string): string =>
+		`  ${icon} ${paint(ansi.cyan, `${label.padEnd(11)}:`)} ${paint(ansi.bold, value)}`;
+
+	const thin = "─".repeat(width);
 
 	return [
 		"",
@@ -85,19 +89,33 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 		"",
 		`  ${paint(ansi.green, "✓")} ${paint(ansi.bold, "Online and ready")}`,
 		"",
-		fact("Bot", facts.name),
-		fact("Servers", formatNumber(facts.servers)),
-		fact("Members", formatNumber(facts.members)),
-		fact("Commands", `${formatNumber(facts.commands)}   /  and  ${facts.prefix}`),
-		fact("Visible in", facts.scope),
-		fact("Ready in", `${formatNumber(facts.startupMs)}ms`),
+		fact("🤖", "Bot", facts.name),
+		fact("🌍", "Servers", formatNumber(facts.servers)),
+		fact("👥", "Members", formatNumber(facts.members)),
+		fact("💬", "Commands", `${formatNumber(facts.commands)}   /  and  ${facts.prefix}`),
+		fact("📡", "Visible in", facts.scope),
+		fact("⚡", "Ready in", `${paint(ansi.green, "➜")}  ${formatNumber(facts.startupMs)}ms`),
+		"",
+		paint(ansi.grey, thin),
+		`  ${paint(ansi.bold, "📦 Loaded from disk")}`,
+		"",
+		fact("🗃", "Commands", `${formatNumber(facts.loaded.commands)} loaded`),
+		fact("🔘", "Buttons", `${formatNumber(facts.loaded.buttons)} loaded`),
+		fact("⚡", "Events", `${formatNumber(facts.loaded.events)} loaded`),
+		fact("💌", "Messages", `${formatNumber(facts.loaded.messageHandlers)} loaded`),
 		"",
 		paint(ansi.grey, `  ${theme.repository}`),
 		"",
 	];
 }
 
-export function printBanner(client: TestifyClient, ready: Client<true>, prefix: string, scope: string): void {
+export function printBanner(
+	client: TestifyClient,
+	ready: Client<true>,
+	prefix: string,
+	scope: string,
+	loaded: BannerFacts["loaded"],
+): void {
 	const lines = bannerLines(
 		{
 			name: ready.user.username,
@@ -106,6 +124,7 @@ export function printBanner(client: TestifyClient, ready: Client<true>, prefix: 
 			commands: client.commands.size,
 			prefix,
 			scope,
+			loaded,
 			startupMs: Date.now() - client.startedAt,
 		},
 		process.stdout.isTTY === true,

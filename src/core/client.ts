@@ -34,6 +34,14 @@ export class TestifyClient extends Client {
 	/** Things that run on every message, in order. */
 	readonly messageHandlers: MessageHandler[] = [];
 
+	/** What the loader found, filled in by `loadEverything()` and shown on the banner. */
+	loaded: { commands: number; buttons: number; events: number; messageHandlers: number } = {
+		commands: 0,
+		buttons: 0,
+		events: 0,
+		messageHandlers: 0,
+	};
+
 	readonly env: Env;
 	readonly logger: Logger;
 	readonly timers = new TimerRegistry();

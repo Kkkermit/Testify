@@ -123,11 +123,25 @@ started, so they never fail for environmental reasons.
 
 ## Commits
 
-Short, present tense, and say what changed:
+`type: Capitalized subject` — no scopes, no trailing full stop:
 
 ```
-add /coinflip command
-fix lost XP when two messages arrive together
+feat: Added the coinflip command
+fix: Stopped losing XP when two messages arrive together
 ```
 
-Conventional-commit prefixes are fine but not required.
+Eleven types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
+`chore`, `add`, `update`, `remove`.
+
+`npm run commit` walks you through it. A `commit-msg` hook runs commitlint
+either way, so the convention holds whether or not you use the wizard.
+
+Branches: `feature/your-feature-name`.
+
+## Hooks
+
+| Hook         | Runs                          | Why                                                              |
+| ------------ | ----------------------------- | ---------------------------------------------------------------- |
+| `pre-commit` | `typecheck`, then lint-staged | Staged-only linting cannot see a type error in an unstaged file  |
+| `commit-msg` | `commitlint`                  | The commit format holds without relying on people remembering it |
+| `pre-push`   | `lint`, `test:coverage`       | Coverage thresholds gate the push, not just CI                   |

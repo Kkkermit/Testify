@@ -1,0 +1,13 @@
+# Snyk policy. Same rule as .nsprc: a suppression states why, what fixes it, and
+# when it expires. Nothing is currently suppressed; the shape below is the one to
+# follow when something has to be.
+version: v1.25.0
+ignore: {}
+# ignore:
+#   SNYK-JS-EXAMPLE-1234567:
+#     - "*":
+#         reason: >-
+#           Reached only through <package>, which cannot be upgraded without a
+#           breaking change to <dependency>. Fixed in <package>@<version>.
+#         expires: "2026-09-19T00:00:00.000Z"
+patch: {}

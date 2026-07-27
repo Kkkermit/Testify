@@ -1,18 +1,16 @@
 name: CI
 
 on:
+  # Every branch, so work is checked before a pull request exists.
   push:
-    branches: [main, master]
+    branches: ["**"]
   pull_request:
-    branches: [main, master]
+    branches: ["**"]
   workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  NODE_VERSION: "22"
 
 jobs:
   check:
@@ -23,7 +21,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          # .nvmrc is the single source of truth for the Node version.
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
@@ -46,7 +45,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          # .nvmrc is the single source of truth for the Node version.
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
@@ -71,7 +71,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          # .nvmrc is the single source of truth for the Node version.
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies
@@ -94,7 +95,8 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          # .nvmrc is the single source of truth for the Node version.
+          node-version-file: .nvmrc
           cache: npm
 
       - name: Install dependencies

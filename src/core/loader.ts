@@ -61,12 +61,15 @@ export interface LoadCounts {
  * only because its parent imports it.
  */
 export function loadEverything(client: TestifyClient): LoadCounts {
-	return {
+	const counts = {
 		commands: loadCommands(client),
 		buttons: loadButtons(client),
 		messageHandlers: loadMessageHandlers(client),
 		events: loadEvents(client),
 	};
+
+	client.loaded = counts;
+	return counts;
 }
 
 function loadCommands(client: TestifyClient): number {

@@ -1,0 +1,107 @@
+name: Nightly
+
+# Dependency scanning belongs on a schedule rather than on every commit: it is
+# slow, it depends on third-party APIs, and a CVE published overnight should be
+# found without waiting for someone to push.
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: nightly-${{ github.ref }}
+  cancel-in-progress: true
+
+# Read-only by default; the one job that needs more asks for it itself.
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      # `if: always()` so a failing run still uploads the report that explains it.
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-coverage
+          path: coverage/
+          retention-days: 7
+
+  npm-audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - run: npm ci
+
+      # Reads .nsprc, where every suppression carries a reason and an expiry.
+      - name: Audit
+        run: npx --yes better-npm-audit@3 audit --level high
+
+  snyk:
+    name: Snyk
+    runs-on: ubuntu-latest
+    # A Snyk token quota or an org permission change must not fail the pipeline
+    # and raise a false alarm about this repository's dependencies.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high --policy-path=.snyk
+
+  notify-on-failure:
+    name: Open an issue if the nightly failed
+    runs-on: ubuntu-latest
+    needs: [unit-tests, npm-audit, snyk]
+    if: failure()
+    permissions:
+      issues: write
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const date = new Date().toISOString().slice(0, 10);
+            const run = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Nightly pipeline failed — ${date}`,
+              labels: ["bug", "ci-failure"],
+              body: [
+                `The nightly run failed: ${run}`,
+                "",
+                "**What to check**",
+                "",
+                "- Tests: did a dependency update change behaviour?",
+                "- Audit: a new advisory may need a fix, or an entry in `.nsprc` with a reason and an expiry.",
+                "- Snyk: this job is `continue-on-error`, so it cannot be the cause on its own.",
+                "",
+                "Close this once the run is green again.",
+              ].join("\n"),
+            });

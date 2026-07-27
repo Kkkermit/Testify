@@ -9,7 +9,7 @@ export default defineEvent({
 	name: Events.ClientReady,
 	once: true,
 	run(client, ready: Client<true>) {
-		printBanner(client, ready, DEFAULT_PREFIX, publishScope(client));
+		printBanner(client, ready, DEFAULT_PREFIX, publishScope(client), client.loaded);
 
 		ready.user.setStatus("online");
 		rotatePresence(client, ready);

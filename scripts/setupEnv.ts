@@ -2,7 +2,10 @@ import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import prompts from "prompts";
 
-/** Asks for the settings the bot needs and writes them to `.env`. */
+/**
+ * Asks for the settings the bot needs and writes them to `.env`, or to
+ * `.env.development` with `--dev`.
+ */
 
 interface Field {
 	key: string;
@@ -24,17 +27,21 @@ const FIELDS: Field[] = [
 ];
 
 async function main(): Promise<void> {
-	const target = resolve(process.cwd(), ".env");
+	// `npm run setup -- --dev` writes the file `npm run dev` reads, so a
+	// development bot can be set up without touching the production one.
+	const isDev = process.argv.includes("--dev");
+	const filename = isDev ? ".env.development" : ".env";
+	const target = resolve(process.cwd(), filename);
 
 	if (existsSync(target)) {
 		const { overwrite } = await prompts({
 			type: "confirm",
 			name: "overwrite",
-			message: ".env already exists. Replace it?",
+			message: `${filename} already exists. Replace it?`,
 			initial: false,
 		});
 		if (overwrite !== true) {
-			console.log("Left your .env alone.");
+			console.log(`Left your ${filename} alone.`);
 			return;
 		}
 	}
@@ -58,7 +65,7 @@ async function main(): Promise<void> {
 	const lines = FIELDS.map((field) => `${field.key}=${String(answers[field.key] ?? "").trim()}`);
 	writeFileSync(target, `${lines.join("\n")}\n`, "utf8");
 
-	console.log("Wrote .env. Start the bot with `npm run dev`.");
+	console.log(`Wrote ${filename}. Start the bot with \`npm run ${isDev ? "dev" : "start"}\`.`);
 }
 
 main().catch((error: unknown) => {

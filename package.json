@@ -42,7 +42,9 @@
 		"prepare": "husky",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
 		"setup": "tsx scripts/setupEnv.ts",
-		"commands:clear": "tsx scripts/clearCommands.ts"
+		"commands:clear": "tsx scripts/clearCommands.ts",
+		"audit": "better-npm-audit audit --level high",
+		"commit": "tsx scripts/commitRunner.ts"
 	},
 	"lint-staged": {
 		"*.ts": [
@@ -86,6 +88,8 @@
 		"zod": "4.4.3"
 	},
 	"devDependencies": {
+		"@commitlint/cli": "20.5.3",
+		"@commitlint/config-conventional": "20.5.3",
 		"@eslint/js": "10.0.1",
 		"@swc/core": "1.15.46",
 		"@swc/jest": "0.2.39",
@@ -93,6 +97,7 @@
 		"@types/jest": "30.0.0",
 		"@types/node": "22.20.1",
 		"@types/prompts": "2.4.9",
+		"better-npm-audit": "3.11.0",
 		"eslint": "10.8.0",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-import-resolver-typescript": "4.4.5",

@@ -28,11 +28,13 @@ FFmpeg comes with the project; there is nothing extra to install for music.
 git clone https://github.com/Kkkermit/Testify.git
 cd Testify
 npm install
-npm run setup   # asks for your token, database and so on, then writes .env
-npm run dev     # starts the bot and restarts it when you save a file
+npm run setup -- --dev   # asks for your token, database and so on
+npm run dev              # starts the bot and restarts it when you save a file
 ```
 
-That is the whole setup. `npm run setup` only asks for four things:
+That is the whole setup. `--dev` writes `.env.development`, which `npm run dev`
+reads — so your test bot and your production bot never share a token. Drop the
+flag to write `.env` for production. Either way it only asks for four things:
 
 | Setting             | Where to find it                                                               |
 | ------------------- | ------------------------------------------------------------------------------ |

@@ -45,3 +45,38 @@ fifteen minutes.
 - Restrict network access to the OAuth callback port, or put it behind a proxy
   that terminates TLS.
 - `npm audit` runs in CI and the build fails on high-severity findings.
+
+## Dependency scanning
+
+`npm audit --audit-level=high` runs on every CI build, and a nightly workflow
+runs it again alongside Snyk so an advisory published overnight is found without
+waiting for someone to push. A failing nightly opens an issue labelled
+`ci-failure`.
+
+### Suppressions expire
+
+`.nsprc` (npm audit) and `.snyk` hold anything deliberately not acted on. Every
+entry needs three things, and an entry missing any of them should be removed:
+
+1. **Why** it cannot be fixed now.
+2. **The version that fixes it**, so there is something to wait for.
+3. **A hard expiry**, so the suppression cannot rot into a permanent blind spot.
+
+Nothing is currently suppressed. Both files carry a commented example of the
+shape to follow.
+
+### Version pins
+
+`overrides` in `package.json` pins transitive dependencies. npm does not allow
+comments there, so the reasons live here:
+
+| Pin                                   | Why                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `glob: $glob`                         | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses. |
+| `test-exclude: ^7.0.1`                | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                      |
+| `esbuild: ^0.28.1`                    | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                        |
+| `serialize-javascript: ^7.0.7`        | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                               |
+| `discord-html-transcripts` → `undici` | The package pins undici v5, which has open advisories. v6 is API-compatible for the calls it makes.                             |
+
+Each one should be dropped the moment its parent updates — check when a
+dependency bump lands.

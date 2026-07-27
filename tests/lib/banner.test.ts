@@ -8,6 +8,7 @@ const FACTS = {
 	prefix: "t?",
 	scope: "every server",
 	startupMs: 1_843,
+	loaded: { commands: 87, buttons: 10, events: 16, messageHandlers: 8 },
 };
 const ESCAPE = "";
 
@@ -41,6 +42,21 @@ describe("bannerLines", () => {
 		expect(text).toContain("1,843ms");
 		expect(text).toContain("t?");
 		expect(text).toContain("every server");
+	});
+
+	it("reports what the loader found, so a category failing to load is visible", () => {
+		const text = bannerLines(FACTS, false).join("\n");
+
+		expect(text).toContain("87 loaded");
+		expect(text).toContain("16 loaded");
+		expect(text).toContain("8 loaded");
+	});
+
+	it("labels each fact with an icon", () => {
+		const text = bannerLines(FACTS, false).join("\n");
+
+		expect(text).toContain("🤖");
+		expect(text).toContain("📦 Loaded from disk");
 	});
 
 	it("leaves out colour when the output is not a terminal", () => {
