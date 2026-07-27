@@ -1,4 +1,4 @@
-import { bannerLines, bigText } from "@lib/banner.util";
+import { bannerLines, bigText, ICONS } from "@lib/banner.util";
 
 const FACTS = {
 	name: "Testify",
@@ -9,6 +9,7 @@ const FACTS = {
 	scope: "every server",
 	startupMs: 1_843,
 	loaded: { commands: 87, buttons: 10, events: 16, messageHandlers: 8 },
+	watching: false,
 };
 const ESCAPE = "";
 
@@ -69,5 +70,40 @@ describe("bannerLines", () => {
 
 	it("survives a bot named something it cannot draw", () => {
 		expect(() => bannerLines({ ...FACTS, name: "!!!" }, false)).not.toThrow();
+	});
+});
+
+/**
+ * The rows are padded on the assumption that every icon takes two terminal
+ * columns. A glyph without `Emoji_Presentation` renders one column wide, which
+ * silently pulls that one row's colon out of line — the exact bug U+1F5C3 caused
+ * in the "Loaded from disk" block.
+ */
+describe("row icons", () => {
+	it.each(Object.entries(ICONS))("%s renders two columns wide", (_name, icon) => {
+		expect(icon).toMatch(/^\p{Emoji_Presentation}$/u);
+	});
+
+	it("lines every colon up in the same column", () => {
+		const rows = bannerLines(FACTS, false).filter((line) => line.includes(" : "));
+		expect(rows.length).toBeGreaterThan(4);
+
+		// Two columns per icon, one per remaining character.
+		const columnOf = (row: string): number => {
+			const upToColon = row.slice(0, row.indexOf(":"));
+			return [...upToColon].reduce((n, char) => n + (/\p{Emoji_Presentation}/u.test(char) ? 2 : 1), 0);
+		};
+
+		expect(new Set(rows.map(columnOf)).size).toBe(1);
+	});
+});
+
+describe("the hot reload notice", () => {
+	it("is shown while watching, so a dev knows saving will restart the bot", () => {
+		expect(bannerLines({ ...FACTS, watching: true }, false).join("\n")).toContain("Hot reload is on");
+	});
+
+	it("is absent in production", () => {
+		expect(bannerLines({ ...FACTS, watching: false }, false).join("\n")).not.toContain("Hot reload");
 	});
 });

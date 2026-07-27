@@ -1,6 +1,7 @@
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { disconnectDatabase } from "@database/connection";
+import { printReloading } from "@lib/banner.util";
 
 let stopping = false;
 
@@ -26,7 +27,13 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 /** Makes Ctrl+C, `docker stop` and crashes all shut down cleanly. */
 export function handleProcessSignals(client: TestifyClient): void {
 	process.once("SIGINT", () => void shutdown(client, "SIGINT"));
-	process.once("SIGTERM", () => void shutdown(client, "SIGTERM"));
+
+	process.once("SIGTERM", () => {
+		// Under `npm run dev` tsx restarts the bot by killing it with SIGTERM, so
+		// in development this signal means "a file was saved", not "stop".
+		if (client.env.NODE_ENV === "development") printReloading();
+		void shutdown(client, "SIGTERM");
+	});
 
 	process.on("uncaughtException", (error) => {
 		client.logger.fatal({ err: error }, "Uncaught exception");
