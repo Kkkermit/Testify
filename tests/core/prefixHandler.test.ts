@@ -18,7 +18,7 @@ jest.mock("@core/checks", () => ({
 
 // Imported after the mocks so the handler picks them up.
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const handler = require("../../src/events/message/prefixCommands").default as {
+const handler = require("@events/message/prefixCommands.event").default as {
 	run(message: Message, client: TestifyClient): Promise<boolean | void>;
 };
 

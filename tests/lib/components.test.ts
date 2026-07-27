@@ -1,6 +1,6 @@
 import { ButtonStyle } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { button, confirmRow, disableAll, linkButton, navRow, row } from "@lib/components";
+import { button, confirmRow, disableAll, linkButton, navRow, row } from "@lib/components.util";
 
 const OWNER = "111111111111111111";
 

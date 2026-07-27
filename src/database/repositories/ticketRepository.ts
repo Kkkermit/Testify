@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { Ticket, type TicketRecord, TicketSetup, type TicketSetupRecord } from "@database/models/tickets";
+import { Ticket, type TicketRecord, TicketSetup, type TicketSetupRecord } from "@database/models/tickets.schema";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 

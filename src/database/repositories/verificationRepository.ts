@@ -4,7 +4,7 @@ import {
 	PendingVerify,
 	VerifyConfig,
 	type VerifySettings,
-} from "@database/models/verification";
+} from "@database/models/verification.schema";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 

@@ -1,5 +1,5 @@
-import { embed } from "@lib/embeds";
-import { buildPage, pageCount } from "@lib/pagination";
+import { embed } from "@lib/embeds.util";
+import { buildPage, pageCount } from "@lib/pagination.util";
 
 const OWNER = "111111111111111111";
 const items = Array.from({ length: 25 }, (_unused, index) => index);

@@ -11,7 +11,7 @@ import {
 	pagesOf,
 	resolveCategory,
 	resolveSurface,
-} from "@lib/helpPages";
+} from "@lib/helpPages.util";
 
 /**
  * Drives the help menu. Everything it needs — which category, which page, and

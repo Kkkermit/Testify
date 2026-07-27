@@ -9,7 +9,7 @@ import {
 	progressBar,
 	titleCase,
 	truncate,
-} from "@lib/format";
+} from "@lib/format.util";
 
 describe("formatDuration", () => {
 	it.each([

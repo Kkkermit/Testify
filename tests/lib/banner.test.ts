@@ -1,4 +1,4 @@
-import { bannerLines, bigText } from "@lib/banner";
+import { bannerLines, bigText } from "@lib/banner.util";
 
 const FACTS = {
 	name: "Testify",

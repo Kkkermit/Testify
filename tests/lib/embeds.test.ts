@@ -1,5 +1,5 @@
 import { theme } from "@config/theme";
-import { embed, errorEmbed, successEmbed, withPageFooter } from "@lib/embeds";
+import { embed, errorEmbed, successEmbed, withPageFooter } from "@lib/embeds.util";
 
 describe("embed", () => {
 	it("colours by category", () => {

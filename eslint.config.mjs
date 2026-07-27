@@ -54,7 +54,7 @@ export default ts.config(
 				"error",
 				{
 					selector: "NewExpression[callee.name='EmbedBuilder']",
-					message: "Use embed() from src/lib/embeds.ts instead of building an embed by hand.",
+					message: "Use embed() from src/lib/embeds.util.ts instead of building an embed by hand.",
 				},
 			],
 		},
@@ -66,7 +66,7 @@ export default ts.config(
 	},
 	{
 		// Where embeds are actually built.
-		files: ["src/lib/embeds.ts", "src/core/errors.ts", "src/buttons/errorTriage.ts"],
+		files: ["src/lib/embeds.util.ts", "src/core/errors.ts", "src/buttons/errorTriage.ts"],
 		rules: { "no-restricted-syntax": "off" },
 	},
 	{

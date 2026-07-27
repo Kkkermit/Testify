@@ -1,6 +1,6 @@
 import { LEVELLING } from "@config/constants";
-import { LevelConfig, type LevelSettings } from "@database/models/guildSettings";
-import { UserLevel, type UserLevelRecord } from "@database/models/levelling";
+import { LevelConfig, type LevelSettings } from "@database/models/guildSettings.schema";
+import { UserLevel, type UserLevelRecord } from "@database/models/levelling.schema";
 
 const LEAN = { lean: true as const, new: true as const };
 

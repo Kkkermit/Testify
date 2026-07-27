@@ -22,8 +22,8 @@ import {
 	removeTicketMember,
 	setTicketLocked,
 } from "@database/repositories/ticketRepository";
-import { button, row, select, selectRow } from "@lib/components";
-import { embed, successEmbed } from "@lib/embeds";
+import { button, row, select, selectRow } from "@lib/components.util";
+import { embed, successEmbed } from "@lib/embeds.util";
 
 function controlRow() {
 	return row(

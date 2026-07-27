@@ -12,9 +12,9 @@ import {
 	playDealer,
 	renderHand,
 	settle,
-} from "@lib/blackjack";
-import { embed } from "@lib/embeds";
-import { formatNumber } from "@lib/format";
+} from "@lib/blackjack.util";
+import { embed } from "@lib/embeds.util";
+import { formatNumber } from "@lib/format.util";
 
 export default defineButton({
 	id: "blackjack",

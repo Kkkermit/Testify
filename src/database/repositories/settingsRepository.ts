@@ -20,7 +20,7 @@ import {
 	type WelcomeSettings,
 	GuildPrefix,
 	type PrefixSettings,
-} from "@database/models/guildSettings";
+} from "@database/models/guildSettings.schema";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 

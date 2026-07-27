@@ -1,6 +1,6 @@
 import { ButtonStyle, EmbedBuilder } from "discord.js";
 import { customId, defineButton } from "@core/button";
-import { button, row } from "@lib/components";
+import { button, row } from "@lib/components.util";
 
 const COLORS = { pending: 0xfee75c, solved: 0x57f287, unsolved: 0xed4245 } as const;
 const LABELS = { pending: "Pending", solved: "Solved", unsolved: "Unsolved" } as const;

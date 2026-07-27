@@ -2,7 +2,7 @@ import * as configBarrel from "@config";
 import * as coreBarrel from "@core";
 import * as databaseBarrel from "@database";
 import * as libBarrel from "@lib";
-import { embed } from "@lib/embeds";
+import { embed } from "@lib/embeds.util";
 
 /**
  * Importing a barrel pulls in every module behind it, so this catches both a

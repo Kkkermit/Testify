@@ -1,10 +1,10 @@
-import { INVENTORY_PAGE_SIZE } from "@commands/economy/inventory";
-import { type InventoryItem } from "@database/models/economy";
+import { INVENTORY_PAGE_SIZE } from "@commands/economy/inventory.slash";
+import { type InventoryItem } from "@database/models/economy.schema";
 import { findAccount } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds";
-import { formatNumber } from "@lib/format";
-import { paginatedButton } from "@lib/pagination";
-import { findShopItem } from "@lib/shop";
+import { embed } from "@lib/embeds.util";
+import { formatNumber } from "@lib/format.util";
+import { paginatedButton } from "@lib/pagination.util";
+import { findShopItem } from "@lib/shop.util";
 
 /**
  * Page state lives entirely in the custom ID, so the list is rebuilt on demand.

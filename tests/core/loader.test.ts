@@ -1,5 +1,5 @@
 import { readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
 import { Collection } from "discord.js";
 import { CATEGORIES } from "@config/categories";
 import { type TestifyClient } from "@core/client";
@@ -43,10 +43,17 @@ describe("loadEverything", () => {
 	 * so nothing ran on a message at all and no prefix command worked.
 	 */
 	it("binds a listener for every event file", () => {
-		expect(counts.events).toBe(
-			readdirSync(resolve(__dirname, "../../src/events"), { withFileTypes: true }).filter((entry) => entry.isFile())
-				.length,
-		);
+		const root = resolve(__dirname, "../../src/events");
+
+		const count = (directory: string): number =>
+			readdirSync(directory, { withFileTypes: true }).reduce((total, entry) => {
+				// `events/message/` holds message handlers, which the loader registers
+				// separately — they are not gateway listeners.
+				if (entry.isDirectory()) return entry.name === "message" ? total : total + count(join(directory, entry.name));
+				return entry.name.endsWith(".event.ts") ? total + 1 : total;
+			}, 0);
+
+		expect(counts.events).toBe(count(root));
 	});
 
 	it("binds the listeners the message handlers depend on", () => {

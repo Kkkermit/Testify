@@ -56,9 +56,9 @@ export interface LoadCounts {
  * shaped correctly stops start-up and names itself, rather than failing later
  * with something unhelpful.
  *
- * `src/commands/<category>/name.ts` is a command. Anything deeper — such as
- * `src/commands/music/subcommands/seek.ts` — is a piece of one, reached only
- * because its parent imports it.
+ * `src/commands/<category>/name.slash.ts` is a command. Anything deeper — such
+ * as `src/commands/music/subcommands/seek.slash.ts` — is a piece of one, reached
+ * only because its parent imports it.
  */
 export function loadEverything(client: TestifyClient): LoadCounts {
 	return {
@@ -70,7 +70,7 @@ export function loadEverything(client: TestifyClient): LoadCounts {
 }
 
 function loadCommands(client: TestifyClient): number {
-	for (const file of find("commands/*/*.{js,ts}")) {
+	for (const file of find("commands/*/*.slash.{js,ts}")) {
 		const command = importFile(file);
 
 		if (!isObject(command)) fail(file, "should `export default defineCommand({ … })`");
@@ -122,7 +122,7 @@ function loadButtons(client: TestifyClient): number {
 }
 
 function loadMessageHandlers(client: TestifyClient): number {
-	for (const file of find("events/message/**/*.{js,ts}")) {
+	for (const file of find("events/message/**/*.event.{js,ts}")) {
 		const handler = importFile(file);
 
 		if (!isObject(handler)) fail(file, "should `export default defineMessageHandler({ … })`");
@@ -140,7 +140,7 @@ function loadEvents(client: TestifyClient): number {
 	// The trailing separator matters: without it this also excluded
 	// `events/messageCreate.ts`, which is the file that runs every message handler.
 	const messageFolder = resolve(ROOT, "events", "message") + sep;
-	const files = find("events/**/*.{js,ts}").filter((file) => !file.startsWith(messageFolder));
+	const files = find("events/**/*.event.{js,ts}").filter((file) => !file.startsWith(messageFolder));
 	let count = 0;
 
 	for (const file of files) {

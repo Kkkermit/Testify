@@ -1,5 +1,5 @@
 import { DAY_MS, HOUR_MS, WEEK_MS } from "@config/constants";
-import { Lottery, type LotteryDraw, type LotteryFrequency, type LotteryRecord } from "@database/models/lottery";
+import { Lottery, type LotteryDraw, type LotteryFrequency, type LotteryRecord } from "@database/models/lottery.schema";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 

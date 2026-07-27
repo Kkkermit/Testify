@@ -16,7 +16,7 @@ import {
 	isVerified,
 	markVerified,
 } from "@database/repositories/verificationRepository";
-import { successEmbed } from "@lib/embeds";
+import { successEmbed } from "@lib/embeds.util";
 
 /**
  * A short code entered through a modal replaces the previous captcha image

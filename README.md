@@ -115,34 +115,40 @@ if it sees it happening.
 
 ```
 src/
-  index.ts        starts everything
-  config/         env, categories, theme, constants — the knobs you turn
-  core/           the small framework: client, command, button, event, loader
-  commands/       one file per command, in a folder named after its category
-  buttons/        button, select-menu and modal handlers
-  events/         Discord gateway events
-  events/message/ things that run on every message
-  jobs/           repeating background work
-  lib/            shared helpers: embeds, components, formatting, pagination
-  database/       Mongoose models and the functions that read and write them
+  index.ts                     starts everything
+  config/                      env, categories, theme, constants
+  core/                        the framework: client, command, button, loader
+  commands/<category>/*.slash.ts   one file per command
+  buttons/                     button, select-menu and modal handlers
+  events/ReadyEvents/          start-up
+  events/CommandEvents/        the two dispatch entry points
+  events/CreateEvents/         guild and member lifecycle
+  events/LoggingEvents/        audit logging
+  events/message/              things that run on every message
+  jobs/                        repeating background work
+  lib/*.util.ts                shared helpers
+  database/models/*.schema.ts  Mongoose models
 ```
+
+The suffix says what a file is, and the loader uses it: only `*.slash.ts` in a
+category folder becomes a command, only `*.event.ts` becomes a listener.
 
 There is no registry to update and nothing to import by hand. Drop a file in the
 right folder and it is picked up when the bot starts.
 
 Only files sitting directly in a category folder are commands. A `subcommands/`
 folder holds commands that have been grouped under a parent — so
-`src/commands/fun/subcommands/dadJoke.ts` is `/fun dad-joke` — because Discord
-only allows 100 top-level commands.
+`src/commands/fun/subcommands/dadJoke.slash.ts` is `/fun dad-joke` — because
+Discord only allows 100 top-level commands.
 
 ## Adding a command
 
-Create `src/commands/fun/coinflip.ts`:
+Create `src/commands/fun/coinflip.slash.ts`:
 
 ```ts
-import { defineCommand } from "../../core/command";
-import { embed } from "../../lib/embeds";
-import { reply } from "../../lib/reply";
+import { defineCommand } from "@core/command";
+import { embed } from "@lib/embeds.util";
+import { reply } from "@lib/reply.util";
 
 export default defineCommand({
 	name: "coinflip",
@@ -205,7 +211,7 @@ Buttons are matched on the first part of their custom ID:
 
 ```ts
 // src/buttons/coinflip.ts
-import { defineButton } from "../core/button";
+import { defineButton } from "@core/button";
 
 export default defineButton({
 	id: "coinflip",

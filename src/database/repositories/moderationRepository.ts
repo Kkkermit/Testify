@@ -1,5 +1,11 @@
 import { randomUUID } from "node:crypto";
-import { Softban, type SoftbanEntry, type WarnEntry, Warnings, type WarnRecord } from "@database/models/moderation";
+import {
+	Softban,
+	type SoftbanEntry,
+	type WarnEntry,
+	Warnings,
+	type WarnRecord,
+} from "@database/models/moderation.schema";
 
 const LEAN = { lean: true as const, new: true as const };
 
