@@ -33,8 +33,23 @@ const config: Config = {
 			},
 		],
 	},
-	collectCoverageFrom: ["src/**/*.ts", "!src/index.ts"],
-	coverageThreshold: { global: { lines: 40, functions: 40, branches: 30 } },
+	/**
+	 * Scoped to the code unit tests are meant to reach. Commands, events and
+	 * buttons are almost entirely calls into discord.js — they are covered
+	 * structurally by tests/core/loader and behaviourally through the dispatcher,
+	 * and counting their untested API calls would only dilute the threshold into
+	 * something nobody trusts.
+	 */
+	collectCoverageFrom: [
+		"src/core/**/*.ts",
+		"src/lib/**/*.ts",
+		"src/config/**/*.ts",
+		"!src/**/index.ts",
+		"!src/lib/canvas.util.ts",
+	],
+	// Ratcheted to just under what the suite currently achieves, so coverage
+	// cannot quietly fall back.
+	coverageThreshold: { global: { lines: 55, functions: 50, branches: 45 } },
 	clearMocks: true,
 	restoreMocks: true,
 };

@@ -21,7 +21,8 @@
 			"@database": ["src/database/index.ts"],
 			"@database/*": ["src/database/*"],
 			"@jobs/*": ["src/jobs/*"],
-			"@root/*": ["src/*"]
+			"@root/*": ["src/*"],
+			"@tests/*": ["tests/*"]
 		},
 
 		"strict": true,
