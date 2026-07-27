@@ -119,7 +119,7 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 		fact(ICONS.bot, "Bot", facts.name),
 		fact(ICONS.servers, "Servers", formatNumber(facts.servers)),
 		fact(ICONS.members, "Members", formatNumber(facts.members)),
-		fact(ICONS.commands, "Commands", `${formatNumber(facts.commands)}   /  and  ${facts.prefix}`),
+		fact(ICONS.commands, "Commands", `${formatNumber(facts.commands)} Slash [/] and Prefix [${facts.prefix}]`),
 		fact(ICONS.scope, "Visible in", facts.scope),
 		fact(ICONS.readyIn, "Ready in", `${paint(ansi.green, "➜")}  ${formatNumber(facts.startupMs)}ms`),
 		"",
