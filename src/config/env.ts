@@ -56,8 +56,10 @@ let cached: Env | undefined;
 export function loadEnv(): Env {
 	if (cached) return cached;
 
-	const file = resolve(process.cwd(), process.env.NODE_ENV === "development" ? ".env.development" : ".env");
-	if (existsSync(file)) loadDotenv({ path: file, quiet: true });
+	if (process.env.JEST_WORKER_ID === undefined) {
+		const file = resolve(process.cwd(), process.env.NODE_ENV === "development" ? ".env.development" : ".env");
+		if (existsSync(file)) loadDotenv({ path: file, quiet: true });
+	}
 
 	const result = schema.safeParse(withoutBlanks(process.env));
 
