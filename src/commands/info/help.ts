@@ -1,17 +1,22 @@
-import { StringSelectMenuOptionBuilder } from "discord.js";
-import { categoryEmoji, categoryLabel } from "../../config/categories";
 import { DEFAULT_PREFIX } from "../../config/constants";
-import { customId } from "../../core/button";
 import { defineCommand } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
 import { getPrefix } from "../../database/repositories/settingsRepository";
-import { select, selectRow } from "../../lib/components";
-import { categoryEmbed, commandEmbed, overviewEmbed, populatedCategories, resolveCategory } from "../../lib/helpPages";
+import {
+	categoryControls,
+	categoryMenu,
+	categoryPage,
+	commandPage,
+	helpHome,
+	helpLinks,
+	pagesOf,
+	resolveCategory,
+} from "../../lib/helpPages";
 import { reply } from "../../lib/reply";
 
 export default defineCommand({
 	name: "help",
-	description: "Lists everything the bot can do.",
+	description: "Everything the bot can do, category by category.",
 	category: "info",
 	aliases: ["commands", "h"],
 	options: [{ name: "query", description: "A command or category name.", type: "string", autocomplete: true }],
@@ -19,37 +24,37 @@ export default defineCommand({
 	async run(interaction, client) {
 		const prefix = interaction.guild ? await getPrefix(interaction.guild.id) : DEFAULT_PREFIX;
 		const query = interaction.options.getString("query")?.toLowerCase().trim();
+		const surface = "slash";
 
-		if (query !== undefined && query.length > 0) {
-			const command = client.commands.get(query) ?? client.commands.get(client.aliases.get(query) ?? "");
+		if (query !== undefined && query !== "") {
+			const alias = client.aliases.get(query)?.split(" ")[0];
+			const command = client.commands.get(query) ?? client.commands.get(alias ?? "");
+
 			if (command) {
-				await reply(interaction, { embeds: [commandEmbed(command, prefix)] });
+				await reply(interaction, { embeds: [commandPage(command, surface, prefix)] });
 				return;
 			}
 
 			const category = resolveCategory(query);
 			if (category) {
-				await reply(interaction, { embeds: [categoryEmbed(client, category, prefix)] });
+				const pages = pagesOf(client, category);
+				await reply(interaction, {
+					embeds: [categoryPage(client, category, 0, surface, prefix)],
+					components: [
+						categoryMenu(client, surface, category, interaction.user.id),
+						categoryControls(category, 0, pages.length, surface, interaction.user.id),
+					],
+				});
 				return;
 			}
 
-			throw new UserFacingError(`Nothing matches \`${query}\`. Run \`/help\` with no arguments to browse.`);
+			throw new UserFacingError(`Nothing matches \`${query}\`. Run \`/help\` on its own to browse everything.`);
 		}
 
-		// The chosen category is carried in the custom ID, so two people running
-		// /help at once cannot overwrite each other's page.
-		const menu = select({
-			id: customId("help", "category", interaction.user.id),
-			placeholder: "Pick a category",
-			options: populatedCategories(client).map((category) =>
-				new StringSelectMenuOptionBuilder()
-					.setLabel(categoryLabel(category))
-					.setValue(category)
-					.setEmoji(categoryEmoji(category)),
-			),
+		await reply(interaction, {
+			embeds: [helpHome(client, surface, prefix)],
+			components: [categoryMenu(client, surface, null, interaction.user.id), helpLinks()],
 		});
-
-		await reply(interaction, { embeds: [overviewEmbed(client, prefix)], components: [selectRow(menu)] });
 	},
 
 	async autocomplete(interaction, client) {

@@ -16,7 +16,7 @@ async function main(): Promise<void> {
 	await connectDatabase({ uri: env.MONGODB_URI, logger });
 
 	const counts = loadEverything(client);
-	logger.info(counts, "Loaded");
+	logger.debug(counts, "Loaded modules");
 
 	await publishCommands(client);
 	await client.login(env.DISCORD_TOKEN);

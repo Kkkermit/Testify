@@ -41,7 +41,8 @@
 		"db:wipe": "tsx scripts/wipeDatabase.ts",
 		"prepare": "husky",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
-		"setup": "tsx scripts/setupEnv.ts"
+		"setup": "tsx scripts/setupEnv.ts",
+		"commands:clear": "tsx scripts/clearCommands.ts"
 	},
 	"lint-staged": {
 		"*.ts": [

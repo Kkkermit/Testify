@@ -1,4 +1,4 @@
-import { type EmbedBuilder } from "discord.js";
+import { ButtonStyle, type EmbedBuilder, StringSelectMenuOptionBuilder } from "discord.js";
 import {
 	ALL_CATEGORIES,
 	type Category,
@@ -8,10 +8,18 @@ import {
 	isCategory,
 } from "../config/categories";
 import { theme } from "../config/theme";
+import { customId } from "../core/button";
 import { type TestifyClient } from "../core/client";
 import { type Command, subcommandsOf } from "../core/command";
+import { button, linkButton, row, select, selectRow } from "./components";
 import { embed } from "./embeds";
 import { truncate } from "./format";
+
+/** How the help pages are laid out. `surface` decides whether it shows `/` or the prefix. */
+export type Surface = "slash" | "prefix";
+
+export const HELP_PAGE_SIZE = 6;
+export const HELP_HOME = "home";
 
 export function visibleCommands(client: TestifyClient): Command[] {
 	return [...client.commands.values()].filter((command) => !HIDDEN_CATEGORIES.includes(command.category));
@@ -28,72 +36,110 @@ export function populatedCategories(client: TestifyClient): Category[] {
 	return ALL_CATEGORIES.filter((category) => used.has(category));
 }
 
-export function overviewEmbed(client: TestifyClient, prefix: string): EmbedBuilder {
+export function pagesOf(client: TestifyClient, category: Category): Command[][] {
+	const commands = commandsInCategory(client, category);
+	const pages: Command[][] = [];
+
+	for (let start = 0; start < commands.length; start += HELP_PAGE_SIZE) {
+		pages.push(commands.slice(start, start + HELP_PAGE_SIZE));
+	}
+
+	return pages.length > 0 ? pages : [[]];
+}
+
+function usage(command: Command, surface: Surface, prefix: string): string {
+	return surface === "slash" ? `/${command.name}` : `${prefix}${command.name}`;
+}
+
+/** The front page: what the bot is, how many commands, and where to get help. */
+export function helpHome(client: TestifyClient, surface: Surface, prefix: string): EmbedBuilder {
 	const categories = populatedCategories(client);
+	const total = visibleCommands(client).length;
+	const subcommands = visibleCommands(client).reduce((count, command) => count + subcommandsOf(command).length, 0);
 
 	return embed({
 		category: "info",
-		title: `${client.user?.username ?? theme.name} help`,
+		title: `${client.user?.username ?? theme.name} help centre`,
 		description: [
-			`I have **${visibleCommands(client).length}** commands across **${categories.length}** categories.`,
+			`Everything here works as a slash command **and** with the \`${prefix}\` prefix.`,
 			"",
-			`Every one works as \`/name\` or as \`${prefix}name\`.`,
-			"",
-			"Pick a category from the menu below.",
+			"Pick a category from the menu below to browse.",
 		].join("\n"),
-		fields: categories.map((category) => ({
-			name: `${categoryEmoji(category)} ${categoryLabel(category)}`,
-			value: `${commandsInCategory(client, category).length} command(s)`,
-			inline: true,
-		})),
 		thumbnail: client.user?.displayAvatarURL(),
+		fields: [
+			{
+				name: "📊 Commands",
+				value: `> **${total}** commands and **${subcommands}** subcommands across **${categories.length}** categories.`,
+			},
+			{
+				name: "🔤 Prefix here",
+				value: `> \`${prefix}\` — change it with \`/prefix set\`. Mentioning me works too.`,
+			},
+			{
+				name: "📂 Categories",
+				value: `> ${categories.map((category) => `${categoryEmoji(category)} **${categoryLabel(category)}**`).join(" • ")}`,
+			},
+			{ name: "💬 Feedback", value: "> Use `/suggest` or `/bug-report` to tell me what to fix next." },
+		],
+		footer: `Showing ${surface === "slash" ? "slash" : "prefix"} commands`,
 	});
 }
 
-export function categoryEmbed(client: TestifyClient, category: Category, prefix: string): EmbedBuilder {
-	const commands = commandsInCategory(client, category);
+/** One page of one category. */
+export function categoryPage(
+	client: TestifyClient,
+	category: Category,
+	page: number,
+	surface: Surface,
+	prefix: string,
+): EmbedBuilder {
+	const pages = pagesOf(client, category);
+	const current = Math.min(Math.max(0, page), pages.length - 1);
 
 	return embed({
 		category,
 		title: `${categoryEmoji(category)} ${categoryLabel(category)}`,
-		fields: commands.slice(0, 25).map((command) => {
-			const subcommands = subcommandsOf(command).map((sub) => sub.name);
-			return {
-				name: `/${command.name}${command.aliases?.length ? ` (${command.aliases.map((alias) => prefix + alias).join(", ")})` : ""}`,
-				value: truncate(
-					[command.description, subcommands.length > 0 ? `Subcommands: ${subcommands.join(", ")}` : ""]
-						.filter(Boolean)
-						.join("\n"),
-					1_000,
-				),
-				inline: false,
-			};
+		description: `Here is everything under ${categoryLabel(category).toLowerCase()}.`,
+		fields: (pages[current] ?? []).map((command) => {
+			const subs = subcommandsOf(command);
+			const aliases = [...(command.aliases ?? []), ...subs.flatMap((sub) => sub.aliases ?? [])];
+
+			const lines = [`> ${command.description}`];
+
+			if (subs.length > 0) {
+				lines.push("", "**Subcommands**");
+				for (const sub of subs.slice(0, 10)) {
+					lines.push(`> \`${usage(command, surface, prefix)} ${sub.name}\` — ${sub.description}`);
+				}
+				if (subs.length > 10) lines.push(`> …and ${subs.length - 10} more.`);
+			}
+
+			if (surface === "prefix" && aliases.length > 0) {
+				lines.push("", `**Also** ${aliases.map((alias) => `\`${prefix}${alias}\``).join(", ")}`);
+			}
+
+			return { name: usage(command, surface, prefix), value: truncate(lines.join("\n"), 1_000), inline: false };
 		}),
-		footer: `${commands.length} command(s) in this category`,
+		footer: `${categoryLabel(category)} • Page ${current + 1} of ${pages.length}`,
 	});
 }
 
-export function commandEmbed(command: Command, prefix: string): EmbedBuilder {
-	const subcommands = subcommandsOf(command);
+/** Everything about one command. */
+export function commandPage(command: Command, surface: Surface, prefix: string): EmbedBuilder {
+	const subs = subcommandsOf(command);
 
 	return embed({
 		category: command.category,
-		title: `/${command.name}`,
+		title: usage(command, surface, prefix),
 		description: command.description,
 		fields: [
 			{ name: "Category", value: categoryLabel(command.category), inline: true },
 			{ name: "Usage", value: `\`/${command.name}\` or \`${prefix}${command.name}\``, inline: true },
-			...(command.aliases?.length
-				? [
-						{
-							name: "Also known as",
-							value: command.aliases.map((alias) => `\`${prefix}${alias}\``).join(", "),
-							inline: true,
-						},
-					]
-				: []),
 			...(command.cooldown !== undefined
 				? [{ name: "Cooldown", value: `${Math.round(command.cooldown / 1_000)}s`, inline: true }]
+				: []),
+			...(command.aliases?.length
+				? [{ name: "Aliases", value: command.aliases.map((alias) => `\`${prefix}${alias}\``).join(", ") }]
 				: []),
 			...(command.options?.length
 				? [
@@ -105,11 +151,11 @@ export function commandEmbed(command: Command, prefix: string): EmbedBuilder {
 						},
 					]
 				: []),
-			...(subcommands.length > 0
+			...(subs.length > 0
 				? [
 						{
 							name: "Subcommands",
-							value: subcommands.map((sub) => `\`${sub.name}\` — ${sub.description}`).join("\n"),
+							value: truncate(subs.map((sub) => `\`${sub.name}\` — ${sub.description}`).join("\n"), 1_000),
 						},
 					]
 				: []),
@@ -117,6 +163,73 @@ export function commandEmbed(command: Command, prefix: string): EmbedBuilder {
 	});
 }
 
+/** The category picker. The chosen surface travels in the custom ID. */
+export function categoryMenu(client: TestifyClient, surface: Surface, chosen: Category | null, ownerId: string) {
+	const options = [
+		new StringSelectMenuOptionBuilder()
+			.setLabel("Help centre")
+			.setDescription("Back to the front page.")
+			.setValue(HELP_HOME)
+			.setEmoji("📚")
+			.setDefault(chosen === null),
+		...populatedCategories(client).map((category) =>
+			new StringSelectMenuOptionBuilder()
+				.setLabel(categoryLabel(category))
+				.setDescription(`${commandsInCategory(client, category).length} commands`)
+				.setValue(category)
+				.setEmoji(categoryEmoji(category))
+				.setDefault(category === chosen),
+		),
+	];
+
+	return selectRow(
+		select({ id: customId("help", "pick", surface, ownerId), placeholder: "📚 Choose a category", options }),
+	);
+}
+
+/** Page arrows plus the slash/prefix toggle. */
+export function categoryControls(
+	category: Category,
+	page: number,
+	totalPages: number,
+	surface: Surface,
+	ownerId: string,
+) {
+	const other: Surface = surface === "slash" ? "prefix" : "slash";
+
+	return row(
+		button({
+			id: customId("help", "page", surface, category, Math.max(0, page - 1), ownerId),
+			emoji: theme.emoji.previous,
+			disabled: page <= 0,
+		}),
+		button({
+			id: customId("help", "noop", surface, category, page, ownerId),
+			label: `${page + 1} / ${totalPages}`,
+			disabled: true,
+		}),
+		button({
+			id: customId("help", "page", surface, category, Math.min(totalPages - 1, page + 1), ownerId),
+			emoji: theme.emoji.next,
+			disabled: page >= totalPages - 1,
+		}),
+		button({
+			id: customId("help", "swap", other, category, page, ownerId),
+			label: other === "slash" ? "Show slash" : "Show prefix",
+			style: ButtonStyle.Primary,
+		}),
+	);
+}
+
+/** Links, shown under the front page. */
+export function helpLinks() {
+	return row(linkButton("Support server", theme.supportServer), linkButton("Source code", theme.repository));
+}
+
 export function resolveCategory(value: string): Category | null {
 	return isCategory(value) ? value : null;
+}
+
+export function resolveSurface(value: string | undefined): Surface {
+	return value === "prefix" ? "prefix" : "slash";
 }

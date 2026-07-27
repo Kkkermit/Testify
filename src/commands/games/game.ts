@@ -1,16 +1,17 @@
 import { asSubcommand, defineCommand } from "../../core/command";
-import blackjack from "./_blackjack";
-import eightBall from "./_eightBall";
-import fastType from "./_fastType";
-import guessTheNumber from "./_guessTheNumber";
-import guessThePokemon from "./_guessThePokemon";
-import rockPaperScissors from "./_rockPaperScissors";
-import wouldYouRather from "./_wouldYouRather";
+import blackjack from "./subcommands/blackjack";
+import eightBall from "./subcommands/eightBall";
+import fastType from "./subcommands/fastType";
+import guessTheNumber from "./subcommands/guessTheNumber";
+import guessThePokemon from "./subcommands/guessThePokemon";
+import rockPaperScissors from "./subcommands/rockPaperScissors";
+import wouldYouRather from "./subcommands/wouldYouRather";
 
 /**
  * Discord allows an application 100 commands, so related ones live together
- * here. Each `_name.ts` file beside this one is a normal command definition —
- * the leading underscore just stops the loader registering it twice.
+ * here. Each file in `subcommands/` is an ordinary command definition; the
+ * loader only registers files sitting directly in a category folder, so they
+ * appear only as part of this one.
  *
  * `t?meme` still works: a folded-in command keeps its own name as a prefix alias.
  */

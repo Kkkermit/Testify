@@ -16,6 +16,6 @@ export default defineEvent({
 		client.timers.every("passive-income", INTERVALS.passiveIncomeMs, () => payPassiveIncome(client));
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
 
-		client.logger.info({ jobs: client.timers.names() }, "Background jobs scheduled");
+		client.logger.debug({ jobs: client.timers.names() }, "Background jobs scheduled");
 	},
 });

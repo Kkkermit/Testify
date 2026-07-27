@@ -99,6 +99,10 @@ t?ban @someone spamming
 Replies that would be private on a slash command are sent in the channel
 instead, since a normal message cannot be ephemeral.
 
+**Seeing a command Discord knows about but the bot does not?** That is an old
+registration left behind after a rename. Run `npm run commands:clear`, then
+start the bot to publish the current set.
+
 ## How the project is laid out
 
 ```
@@ -118,9 +122,10 @@ src/
 There is no registry to update and nothing to import by hand. Drop a file in the
 right folder and it is picked up when the bot starts.
 
-A file starting with `_` is skipped by the loader. Those are commands that have
-been grouped under a parent — `src/commands/fun/_dadJoke.ts` is `/fun dad-joke`
-— because Discord only allows 100 top-level commands.
+Only files sitting directly in a category folder are commands. A `subcommands/`
+folder holds commands that have been grouped under a parent — so
+`src/commands/fun/subcommands/dadJoke.ts` is `/fun dad-joke` — because Discord
+only allows 100 top-level commands.
 
 ## Adding a command
 

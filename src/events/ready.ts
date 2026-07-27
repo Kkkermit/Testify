@@ -1,21 +1,14 @@
 import { ActivityType, type Client, Events } from "discord.js";
-import { INTERVALS } from "../config/constants";
+import { DEFAULT_PREFIX, INTERVALS } from "../config/constants";
 import { type TestifyClient } from "../core/client";
 import { defineEvent } from "../core/event";
+import { printBanner } from "../lib/banner";
 
 export default defineEvent({
 	name: Events.ClientReady,
 	once: true,
 	run(client, ready: Client<true>) {
-		client.logger.info(
-			{
-				user: ready.user.tag,
-				servers: ready.guilds.cache.size,
-				commands: client.commands.size,
-				buttons: client.buttons.size,
-			},
-			"Logged in",
-		);
+		printBanner(client, ready, DEFAULT_PREFIX);
 
 		ready.user.setStatus("online");
 		rotatePresence(client, ready);

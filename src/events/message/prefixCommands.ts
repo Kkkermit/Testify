@@ -1,3 +1,4 @@
+import { DEFAULT_PREFIX } from "../../config/constants";
 import { runChecks } from "../../core/checks";
 import { runCommand } from "../../core/errors";
 import { defineMessageHandler } from "../../core/message";
@@ -15,9 +16,10 @@ export default defineMessageHandler({
 	order: 10,
 	async run(message, client) {
 		const botId = client.user?.id;
-		if (botId === undefined || message.guild === null) return;
+		if (botId === undefined) return;
 
-		const prefix = await getPrefix(message.guild.id);
+		// A direct message has no server to have configured a prefix.
+		const prefix = message.guild === null ? DEFAULT_PREFIX : await getPrefix(message.guild.id);
 		const parsed = parseMessage(message.content, prefix, botId);
 		if (parsed === null) return;
 
@@ -29,12 +31,7 @@ export default defineMessageHandler({
 		const command = client.commands.get(name);
 		if (!command) return;
 
-		// Autocomplete has nowhere to appear on a message, and a command that only
-		// makes sense with it would be confusing rather than broken.
-		if (command.autocomplete) {
-			await message.reply({ embeds: [errorEmbed(`\`${command.name}\` is only available as \`/${command.name}\`.`)] });
-			return true;
-		}
+		client.logger.debug({ command: command.name, user: message.author.id }, "Running a prefix command");
 
 		const interaction = new PrefixInteraction(message, command, args);
 

@@ -113,7 +113,7 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 			await mongoose.connect(options.uri, { serverSelectionTimeoutMS: 10_000 });
 			connected = true;
 			everConnected = true;
-			options.logger.info({ database: mongoose.connection.name }, "Connected to MongoDB");
+			options.logger.debug({ database: mongoose.connection.name }, "Connected to MongoDB");
 			return mongoose;
 		} catch (error) {
 			if (attempt === retries) throw new SetupError(explainConnectionFailure(error, options.uri));

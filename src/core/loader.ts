@@ -16,17 +16,12 @@ import { type MessageHandler } from "./message";
  */
 const ROOT = resolve(__dirname, "..");
 
-/**
- * A file whose name starts with `_` is a building block rather than a command —
- * something a neighbouring file imports and exposes as a subcommand. It is
- * skipped here so it does not also register on its own.
- */
-function find(folder: string): string[] {
-	return globSync(`${folder}/**/*.{js,ts}`, {
+function find(pattern: string): string[] {
+	return globSync(pattern, {
 		cwd: ROOT,
 		absolute: true,
 		nodir: true,
-		ignore: ["**/*.d.ts", "**/*.map", "**/*.test.*", "**/_*"],
+		ignore: ["**/*.d.ts", "**/*.map", "**/*.test.*"],
 	}).sort();
 }
 
@@ -60,6 +55,10 @@ export interface LoadCounts {
  * Loads everything from disk and registers it on the client. A file that is not
  * shaped correctly stops start-up and names itself, rather than failing later
  * with something unhelpful.
+ *
+ * `src/commands/<category>/name.ts` is a command. Anything deeper — such as
+ * `src/commands/music/subcommands/seek.ts` — is a piece of one, reached only
+ * because its parent imports it.
  */
 export function loadEverything(client: TestifyClient): LoadCounts {
 	return {
@@ -71,7 +70,7 @@ export function loadEverything(client: TestifyClient): LoadCounts {
 }
 
 function loadCommands(client: TestifyClient): number {
-	for (const file of find("commands")) {
+	for (const file of find("commands/*/*.{js,ts}")) {
 		const command = importFile(file);
 
 		if (!isObject(command)) fail(file, "should `export default defineCommand({ … })`");
@@ -108,7 +107,7 @@ function loadCommands(client: TestifyClient): number {
 }
 
 function loadButtons(client: TestifyClient): number {
-	for (const file of find("buttons")) {
+	for (const file of find("buttons/**/*.{js,ts}")) {
 		const button = importFile(file);
 
 		if (!isObject(button)) fail(file, "should `export default defineButton({ … })`");
@@ -123,7 +122,7 @@ function loadButtons(client: TestifyClient): number {
 }
 
 function loadMessageHandlers(client: TestifyClient): number {
-	for (const file of find("events/message")) {
+	for (const file of find("events/message/**/*.{js,ts}")) {
 		const handler = importFile(file);
 
 		if (!isObject(handler)) fail(file, "should `export default defineMessageHandler({ … })`");
@@ -138,7 +137,7 @@ function loadMessageHandlers(client: TestifyClient): number {
 }
 
 function loadEvents(client: TestifyClient): number {
-	const files = find("events").filter((file) => !file.includes(`${resolve(ROOT, "events", "message")}`));
+	const files = find("events/**/*.{js,ts}").filter((file) => !file.includes(`${resolve(ROOT, "events", "message")}`));
 	let count = 0;
 
 	for (const file of files) {
@@ -178,9 +177,9 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 			[
 				`You have ${client.commands.size} commands and Discord allows ${MAX_COMMANDS}.`,
 				"",
-				"Group related ones under a shared parent rather than deleting them: rename",
-				"the file with a leading `_` so the loader skips it, then expose it with",
-				"`asSubcommand()` from a parent command. `src/commands/fun/fun.ts` does this.",
+				"Group related ones under a shared parent rather than deleting them: move",
+				"the file into a `subcommands/` folder, then expose it with `asSubcommand()`",
+				"from the parent. `src/commands/fun/fun.ts` does exactly this.",
 				"",
 				"Subcommands do not count towards the limit, so one parent can hold 25.",
 			].join("\n"),
@@ -196,7 +195,17 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 		: Routes.applicationCommands(client.env.DISCORD_CLIENT_ID);
 
 	await rest.put(route, { body });
-	client.logger.info({ count: body.length, scope: guildId ? "this server" : "all servers" }, "Published commands");
+
+	// Commands published to the other scope stay registered until something
+	// clears them, and a stale one looks like a working command until you use it
+	// and get "unknown command". Only one scope is ever in use, so empty the other.
+	const stale = guildId
+		? Routes.applicationCommands(client.env.DISCORD_CLIENT_ID)
+		: Routes.applicationGuildCommands(client.env.DISCORD_CLIENT_ID, client.env.DISCORD_DEV_GUILD_ID ?? "0");
+
+	if (guildId !== undefined || client.env.DISCORD_DEV_GUILD_ID !== undefined) {
+		await rest.put(stale, { body: [] }).catch(() => undefined);
+	}
 
 	return body.length;
 }

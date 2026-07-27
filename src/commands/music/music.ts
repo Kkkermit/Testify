@@ -1,24 +1,25 @@
 import { asSubcommand, defineCommand } from "../../core/command";
-import autoplay from "./_autoplay";
-import filters from "./_filters";
-import forward from "./_forward";
-import join from "./_join";
-import leave from "./_leave";
-import playSkip from "./_playSkip";
-import playTop from "./_playTop";
-import previous from "./_previous";
-import radio from "./_radio";
-import repeat from "./_repeat";
-import rewind from "./_rewind";
-import seek from "./_seek";
-import shuffle from "./_shuffle";
-import skipTo from "./_skipTo";
-import tts from "./_tts";
+import autoplay from "./subcommands/autoplay";
+import filters from "./subcommands/filters";
+import forward from "./subcommands/forward";
+import join from "./subcommands/join";
+import leave from "./subcommands/leave";
+import playSkip from "./subcommands/playSkip";
+import playTop from "./subcommands/playTop";
+import previous from "./subcommands/previous";
+import radio from "./subcommands/radio";
+import repeat from "./subcommands/repeat";
+import rewind from "./subcommands/rewind";
+import seek from "./subcommands/seek";
+import shuffle from "./subcommands/shuffle";
+import skipTo from "./subcommands/skipTo";
+import tts from "./subcommands/tts";
 
 /**
  * Discord allows an application 100 commands, so related ones live together
- * here. Each `_name.ts` file beside this one is a normal command definition —
- * the leading underscore just stops the loader registering it twice.
+ * here. Each file in `subcommands/` is an ordinary command definition; the
+ * loader only registers files sitting directly in a category folder, so they
+ * appear only as part of this one.
  *
  * `t?meme` still works: a folded-in command keeps its own name as a prefix alias.
  */

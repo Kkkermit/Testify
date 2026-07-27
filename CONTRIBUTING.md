@@ -75,13 +75,14 @@ An application may publish 100 slash commands, and Discord rejects the whole
 batch if you go over — so one command too many stops the bot starting. There is
 a test for it, and start-up refuses with an explanation.
 
-Subcommands do not count, so the way to add more is to group. Rename the file
-with a leading `_` — the loader skips those — and expose it from a parent:
+Subcommands do not count, so the way to add more is to group. Move the file into
+a `subcommands/` folder — the loader only reads files directly inside a category
+folder — and expose it from a parent:
 
 ```ts
 // src/commands/fun/fun.ts
 import { asSubcommand, defineCommand } from "../../core/command";
-import dadJoke from "./_dadJoke";
+import dadJoke from "./subcommands/dadJoke";
 
 export default defineCommand({
 	name: "fun",
@@ -91,9 +92,9 @@ export default defineCommand({
 });
 ```
 
-`_dadJoke.ts` stays an ordinary command file — nothing inside it changes. It
-keeps its own name as a prefix alias, so `t?dad-joke` still works alongside
-`/fun dad-joke`, and the second argument adds more.
+`subcommands/dadJoke.ts` stays an ordinary command file — nothing inside it
+changes. It keeps its own name as a prefix alias, so `t?dad-joke` still works
+alongside `/fun dad-joke`, and the second argument adds more.
 
 ## Tests
 
