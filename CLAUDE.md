@@ -65,21 +65,34 @@ message convention**, and **the boot banner as presentation written to stdout, n
 
 Everything below is a real divergence from the reference standard, ordered roughly by value.
 
-| #   | Area              | Reference standard                                                                                                            | Here today                                                       | Action                                                                                    |
-| --- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 1   | Nightly security  | `nightly.yml`: 2 scanners + auto-filed issue; `.nsprc`/`.snyk` suppressions carry reason + fixed-in version + **hard expiry** | `npm audit --audit-level=high` inside `ci.yml` only              | Add `nightly.yml`, `.nsprc`, `.snyk`. See [§15](#15-ci-workflows)                         |
-| 2   | CI branch scope   | `branches: ['**']` — feature branches checked before a PR exists                                                              | `[main, master]` only                                            | Widen the trigger                                                                         |
-| 3   | File suffixes     | `ban.slash.js`, `ready.event.js`, `getGuildPrefix.util.js`                                                                    | `src/commands/moderation/ban.ts`, `src/events/ready.ts`          | Adopt `.slash.ts` / `.prefix.ts` / `.event.ts` / `.util.ts` / `.schema.ts`                |
-| 4   | Import aliases    | `@utils`, `@config`, `@lib`, `@schemas`                                                                                       | relative imports only; no `paths` in `tsconfig.json`             | Add `compilerOptions.paths` + tsup + Jest mapper. See [§5](#5-import-aliases-and-barrels) |
-| 5   | Barrels           | one `index.js` per aliased directory                                                                                          | none                                                             | Add `index.ts` barrels using `export *`                                                   |
-| 6   | Commit convention | `npm run commit` wizard, 11 types, `type: Capitalized subject`                                                                | no runner, no commitlint                                         | Add `scripts/commitRunner.ts` **and** a `commit-msg` commitlint hook                      |
-| 7   | Event grouping    | `ReadyEvents/`, `CreateEvents/`, `LoggingEvents/`, `CommandEvents/`                                                           | 17 files flat in `src/events/` (+ `message/`)                    | Group into `…Events/` folders — the eight `*Audit.ts` files are one cluster               |
-| 8   | Dev env template  | a committed dev template alongside `.env.example`                                                                             | only `.env.example`, though `loadEnv()` reads `.env.development` | Add `.env.development.example`                                                            |
-| 9   | Banner detail     | emoji label icons + a `📦 Loading project files…` module-count block                                                          | text labels, no module counts                                    | Add the emoji icons and the loaded-module counts to `bannerLines()`                       |
-| 10  | Pre-commit        | `npm run lint` **then** `lint-staged`                                                                                         | `lint-staged` only                                               | Consider adding `npm run typecheck` — staged-only lint misses type breakage               |
-| 11  | Pre-push coverage | `test:coverage` (thresholds enforced locally)                                                                                 | `test` (no coverage)                                             | Switch to `test:coverage` so the threshold gates the push                                 |
-| 12  | Lint report       | colourised Node-API report; **warnings never fail**                                                                           | plain `eslint .`                                                 | Optional: port `lintRunner` to `scripts/lintRunner.ts`                                    |
-| 13  | Category folders  | `SlashCommands/Moderation/` — PascalCase, kind-then-domain                                                                    | `src/commands/moderation/` — lowercase, flat                     | **Decide.** See the note in [§4](#4-folder-naming-and-grouping)                           |
+| #   | Area              | Status              | Where it landed                                                                                     |
+| --- | ----------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
+| 1   | Nightly security  | Done                | `.github/workflows/nightly.yml`, `.nsprc`, `.snyk`; version pins explained in `SECURITY.md`         |
+| 2   | CI branch scope   | Done                | `ci.yml` triggers on `["**"]`, and reads the Node version from `.nvmrc`                             |
+| 3   | File suffixes     | Done                | `.slash.ts` / `.event.ts` / `.util.ts` / `.schema.ts`; enforced by `tests/core/conventions.test.ts` |
+| 4   | Import aliases    | Done                | `tsconfig.json` `paths`; Jest derives its mapper from it, `tsc-alias` rewrites the build            |
+| 5   | Barrels           | Done                | `index.ts` in `@config`, `@core`, `@lib`, `@database`, using `export *`                             |
+| 6   | Commit convention | Done                | `scripts/commitRunner.ts` and a `commit-msg` hook running commitlint                                |
+| 7   | Event grouping    | Done                | `ReadyEvents/`, `CommandEvents/`, `CreateEvents/`, `LoggingEvents/`                                 |
+| 8   | Dev env template  | Done                | `.env.development.example`, and `npm run setup -- --dev`                                            |
+| 9   | Banner detail     | Done                | Emoji icons and a "Loaded from disk" block in `bannerLines()`                                       |
+| 10  | Pre-commit        | Done                | `typecheck` runs before `lint-staged`                                                               |
+| 11  | Pre-push coverage | Done                | `test:coverage`, so the thresholds gate the push                                                    |
+| 12  | Lint report       | Done                | `scripts/lintRunner.ts` — errors fail, warnings never do                                            |
+| 13  | Category folders  | **Decided against** | Kept flat and lowercase. See [§4](#4-folder-naming-and-grouping)                                    |
+
+### Why #13 was declined
+
+The reference nests categories under an interaction-kind folder because slash and
+prefix are separate implementations there. Here they are not: one command object
+serves both surfaces through the `CommandInput` contract, and `src/core/prefix.ts`
+is the only file that knows prefix commands exist. A `SlashCommands/` /
+`PrefixCommands/` split would describe an architecture this codebase deliberately
+does not have, and would undo the deduplication the rewrite exists to achieve.
+
+The casing was left lowercase to match the rest of `src/`, which is uniformly
+camelCase. Two casing regimes inside one tree is a rule to remember rather than a
+distinction the reader gains anything from here.
 
 ---
 
@@ -105,8 +118,9 @@ The reference's `.function.js` suffix has **no counterpart here and should not b
 `src/core/loader.ts`, and a typed loader is strictly better than a set of files that mutate the client.
 
 > [!NOTE]
-> This is a rename touching most of `src/`. Do it as one mechanical commit (`refactor:`) with no behaviour
-> change, and remember `src/core/loader.ts` discovers files by glob — update its patterns in the same commit.
+> Done in `edc86a5` — 188 files, one mechanical commit, loader globs updated alongside. The suffix is
+> load-bearing: `commands/*/*.slash.ts` and `events/**/*.event.ts` are what the loader looks for, so a file
+> that misses its suffix is silently never registered. `tests/core/conventions.test.ts` enforces it.
 
 ---
 
@@ -165,8 +179,14 @@ Declare it once in `tsconfig.json` and derive everywhere else:
 - `jest.config.ts` → `pathsToModuleNameMapper(compilerOptions.paths)` from `ts-jest/utils`, or a hand-written
   mapper generated from the same object — never a second literal copy.
 
-Suggested aliases, mirroring the reference's shape: `@core`, `@config`, `@lib`, `@commands`, `@events`,
-`@database`, `@root`.
+Aliases in use: `@core`, `@config`, `@lib`, `@commands`, `@events`, `@buttons`, `@database`, `@jobs`, `@root`
+and `@tests`. Each is declared twice — bare for the barrel (`@lib`) and wildcard for a single module
+(`@lib/embeds.util`) — because a bare specifier does not match a wildcard path.
+
+> [!NOTE]
+> esbuild does not rewrite alias specifiers when `bundle` is off, so `dist/` shipped `require("@core/…")` and
+> would not have started. The build runs `tsc-alias` in `onSuccess` to rewrite them from the same tsconfig map.
+> Verify with `grep -r 'require("@core' dist` after any change to the build.
 
 **Barrels: one `index.ts` per aliased directory.** The reference hand-maintains a flat list of 40 names in
 `src/utils/index.js`, which has to be edited for every new function. Use `export * from "./x"` instead so the
