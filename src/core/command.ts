@@ -159,8 +159,9 @@ export function subcommandsOf(command: Command): Subcommand[] {
  * command count under Discord's limit of 100 without rewriting the commands
  * themselves — see `src/commands/fun/fun.ts` for the pattern.
  *
- * The file being folded in must be named with a leading `_` so the loader does
- * not also register it on its own.
+ * The file being folded in lives in a `subcommands/` folder, which the loader's
+ * `commands/*­/*.slash.ts` glob does not reach, so it is not also registered as a
+ * command in its own right.
  */
 export function asSubcommand(command: Command, aliases: string[] = []): Subcommand {
 	if (command.subcommands?.length) {

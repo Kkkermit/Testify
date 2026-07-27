@@ -1,4 +1,6 @@
-import { bannerLines, bigText, ICONS } from "@lib/banner.util";
+import { type TestifyClient } from "@core/client";
+import { bannerLines, bigText, ICONS, printBanner, printReloading } from "@lib/banner.util";
+import { createMockClient } from "@tests/helpers/mocks";
 
 const FACTS = {
 	name: "Testify",
@@ -105,5 +107,80 @@ describe("the hot reload notice", () => {
 
 	it("is absent in production", () => {
 		expect(bannerLines({ ...FACTS, watching: false }, false).join("\n")).not.toContain("Hot reload");
+	});
+});
+
+describe("printBanner", () => {
+	function clientFor(nodeEnv = "production"): TestifyClient {
+		return createMockClient({
+			env: { DISCORD_OWNER_IDS: [], NODE_ENV: nodeEnv },
+			commands: new Map([["ping", {}]]),
+			startedAt: Date.now() - 500,
+		} as never);
+	}
+
+	const ready = {
+		user: { username: "Testify" },
+		guilds: {
+			cache: {
+				size: 2,
+				reduce: (fn: (t: number, g: { memberCount: number }) => number, seed: number) => fn(seed, { memberCount: 40 }),
+			},
+		},
+	} as never;
+
+	const loaded = { commands: 87, buttons: 10, events: 16, messageHandlers: 8 };
+
+	let written: string;
+	let spy: jest.SpyInstance;
+
+	beforeEach(() => {
+		written = "";
+		spy = jest.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
+			written += String(chunk);
+			return true;
+		});
+	});
+
+	afterEach(() => spy.mockRestore());
+
+	/** One write, so the banner cannot be interleaved with a log line. */
+	it("writes the whole banner in a single call", () => {
+		printBanner(clientFor(), ready, "t?", "every server", loaded);
+		expect(spy).toHaveBeenCalledTimes(1);
+	});
+
+	it("reports the facts it was handed", () => {
+		printBanner(clientFor(), ready, "t?", "every server", loaded);
+
+		expect(written).toContain("Testify");
+		expect(written).toContain("t?");
+		expect(written).toContain("every server");
+		expect(written).toContain("87 loaded");
+	});
+
+	it("mentions hot reload only in development", () => {
+		printBanner(clientFor("development"), ready, "t?", "every server", loaded);
+		expect(written).toContain("Hot reload");
+
+		written = "";
+		printBanner(clientFor(), ready, "t?", "every server", loaded);
+		expect(written).not.toContain("Hot reload");
+	});
+});
+
+describe("printReloading", () => {
+	it("says a change was detected, so a restart is not mistaken for a crash", () => {
+		let written = "";
+		const spy = jest.spyOn(process.stdout, "write").mockImplementation((chunk: unknown) => {
+			written += String(chunk);
+			return true;
+		});
+
+		printReloading();
+		spy.mockRestore();
+
+		expect(written).toContain("Change detected");
+		expect(written).toContain("reloading");
 	});
 });

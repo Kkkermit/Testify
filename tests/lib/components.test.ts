@@ -1,6 +1,6 @@
-import { ButtonStyle } from "discord.js";
+import { ButtonStyle, StringSelectMenuOptionBuilder } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { button, confirmRow, disableAll, linkButton, navRow, row } from "@lib/components.util";
+import { button, confirmRow, disableAll, linkButton, navRow, row, select, selectRow } from "@lib/components.util";
 
 const OWNER = "111111111111111111";
 
@@ -54,5 +54,61 @@ describe("disableAll", () => {
 		const rows = disableAll([row(button({ id: "a:b" }), linkButton("Docs", "https://example.com"))]);
 		expect(rows[0]?.components[0]?.data.disabled).toBe(true);
 		expect(rows[0]?.components[1]?.data.disabled).toBeUndefined();
+	});
+});
+
+describe("select", () => {
+	const option = (value: string): StringSelectMenuOptionBuilder =>
+		new StringSelectMenuOptionBuilder().setLabel(value).setValue(value);
+
+	it("carries the custom ID and options", () => {
+		const data = select({ id: "pick", options: [option("a"), option("b")] }).toJSON();
+
+		expect(data.custom_id).toBe("pick");
+		expect(data.options).toHaveLength(2);
+	});
+
+	it("defaults to choosing exactly one, enabled", () => {
+		const data = select({ id: "pick", options: [option("a")] }).toJSON();
+
+		expect(data.min_values).toBe(1);
+		expect(data.max_values).toBe(1);
+		expect(data.disabled).toBe(false);
+	});
+
+	it("takes an explicit range and disabled state", () => {
+		const data = select({
+			id: "pick",
+			options: [option("a"), option("b")],
+			minValues: 0,
+			maxValues: 2,
+			disabled: true,
+		}).toJSON();
+
+		expect(data).toMatchObject({ min_values: 0, max_values: 2, disabled: true });
+	});
+
+	it("sets a placeholder only when given one", () => {
+		expect(select({ id: "p", options: [option("a")], placeholder: "Pick one" }).toJSON().placeholder).toBe("Pick one");
+		expect(select({ id: "p", options: [option("a")] }).toJSON().placeholder).toBeUndefined();
+	});
+});
+
+describe("selectRow", () => {
+	it("wraps a menu in its own action row", () => {
+		const menu = select({ id: "pick", options: [new StringSelectMenuOptionBuilder().setLabel("a").setValue("a")] });
+		const data = selectRow(menu).toJSON();
+
+		expect(data.components).toHaveLength(1);
+	});
+});
+
+describe("row", () => {
+	it("groups components into one row", () => {
+		expect(row(button({ id: "a", label: "A" }), button({ id: "b", label: "B" })).toJSON().components).toHaveLength(2);
+	});
+
+	it("builds an empty row without complaint", () => {
+		expect(row().toJSON().components).toHaveLength(0);
 	});
 });

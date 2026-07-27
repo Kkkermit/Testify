@@ -1,8 +1,13 @@
 import {
 	compactNumber,
+	discordTime,
+	escapeMarkdown,
 	formatBytes,
 	formatDuration,
+	formatDurationLong,
 	formatNumber,
+	formatTrackTime,
+	formatUptime,
 	humanisePermission,
 	ordinal,
 	pluralise,
@@ -78,5 +83,151 @@ describe("formatBytes", () => {
 	it("picks a sensible unit", () => {
 		expect(formatBytes(512)).toBe("512 B");
 		expect(formatBytes(2048)).toBe("2.0 KB");
+	});
+});
+
+describe("formatDurationLong", () => {
+	it("writes prose rather than abbreviations", () => {
+		expect(formatDurationLong(2 * 3_600_000 + 5 * 60_000)).toBe("2 hours, 5 minutes");
+	});
+
+	it("singularises a unit of one", () => {
+		expect(formatDurationLong(3_600_000)).toBe("1 hour");
+		expect(formatDurationLong(1_000)).toBe("1 second");
+	});
+
+	it("counts days separately from hours", () => {
+		expect(formatDurationLong(25 * 3_600_000)).toBe("1 day, 1 hour");
+	});
+
+	it("leaves out units that are zero", () => {
+		expect(formatDurationLong(2 * 86_400_000)).toBe("2 days");
+	});
+
+	it.each([0, -5, Number.NaN, Number.POSITIVE_INFINITY])("collapses %p to zero seconds", (input) => {
+		expect(formatDurationLong(input)).toBe("0 seconds");
+	});
+
+	it("rounds a sub-second duration down to nothing", () => {
+		expect(formatDurationLong(400)).toBe("0 seconds");
+	});
+});
+
+describe("formatUptime", () => {
+	it("measures forwards from the start time", () => {
+		const now = Date.now();
+		expect(formatUptime(now - 3_600_000, now)).toBe("1 hour");
+	});
+
+	it("reads as zero for a process that just started", () => {
+		const now = Date.now();
+		expect(formatUptime(now, now)).toBe("0 seconds");
+	});
+});
+
+describe("formatTrackTime", () => {
+	it("uses clock style for a track under an hour", () => {
+		expect(formatTrackTime(187_000)).toBe("3:07");
+	});
+
+	it("adds an hours segment when the track is long enough", () => {
+		expect(formatTrackTime(3_753_000)).toBe("1:02:33");
+	});
+
+	it("pads seconds to two digits", () => {
+		expect(formatTrackTime(65_000)).toBe("1:05");
+	});
+
+	it("reads as 0:00 at the start of a track", () => {
+		expect(formatTrackTime(0)).toBe("0:00");
+	});
+
+	/** A negative position is a seek bug, not something to render as "-1:-3". */
+	it("clamps a negative position to zero", () => {
+		expect(formatTrackTime(-5_000)).toBe("0:00");
+	});
+});
+
+describe("discordTime", () => {
+	it("renders a Discord timestamp in seconds, not milliseconds", () => {
+		expect(discordTime(new Date(1_700_000_000_000))).toBe("<t:1700000000:f>");
+	});
+
+	it("accepts a raw millisecond value too", () => {
+		expect(discordTime(1_700_000_000_000)).toBe("<t:1700000000:f>");
+	});
+
+	it("takes a style", () => {
+		expect(discordTime(1_700_000_000_000, "R")).toBe("<t:1700000000:R>");
+	});
+});
+
+describe("ordinal", () => {
+	it.each([
+		[1, "1st"],
+		[2, "2nd"],
+		[3, "3rd"],
+		[4, "4th"],
+		[11, "11th"],
+		[12, "12th"],
+		[13, "13th"],
+		[21, "21st"],
+		[22, "22nd"],
+		[23, "23rd"],
+		[101, "101st"],
+		[111, "111th"],
+	])("renders %i as %s", (input, expected) => {
+		expect(ordinal(input)).toBe(expected);
+	});
+});
+
+describe("escapeMarkdown", () => {
+	it("stops user text from formatting the embed around it", () => {
+		expect(escapeMarkdown("**bold**")).not.toBe("**bold**");
+	});
+
+	it("leaves plain text alone", () => {
+		expect(escapeMarkdown("hello")).toBe("hello");
+	});
+});
+
+describe("humanisePermission", () => {
+	// Lower case throughout, because the result is dropped into a sentence.
+	it("splits a camel-case permission flag into words", () => {
+		expect(humanisePermission("BanMembers")).toBe("ban members");
+	});
+
+	it("splits a snake-case flag too", () => {
+		expect(humanisePermission("MANAGE_ROLES")).toBe("manage roles");
+	});
+
+	it("leaves a single word as one word", () => {
+		expect(humanisePermission("Administrator")).toBe("administrator");
+	});
+});
+
+describe("pluralise", () => {
+	it("keeps the singular for one", () => {
+		expect(pluralise(1, "member")).toBe("1 member");
+	});
+
+	it("adds an s for anything else", () => {
+		expect(pluralise(0, "member")).toBe("0 members");
+		expect(pluralise(5, "member")).toBe("5 members");
+	});
+
+	it("takes an irregular plural", () => {
+		expect(pluralise(2, "person", "people")).toBe("2 people");
+	});
+});
+
+describe("compactNumber", () => {
+	it("shortens large numbers", () => {
+		expect(compactNumber(1_500)).toBe("1.5K");
+		expect(compactNumber(2_400_000)).toBe("2.4M");
+	});
+
+	it("leaves small numbers alone", () => {
+		expect(compactNumber(42)).toBe("42");
 	});
 });

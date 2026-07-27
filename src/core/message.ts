@@ -15,8 +15,19 @@ export interface MessageHandler {
 	run(message: Message, client: TestifyClient): Promise<boolean | void>;
 }
 
+/**
+ * Marks a module as a message handler.
+ *
+ * A handler and a gateway event are both `{ name, run }`, so without this the
+ * loader cannot tell them apart — and a stray copy of `events/message/` (the
+ * ` 2` directories cloud sync and editors leave behind) gets registered as eight
+ * gateway events named `levelling`, `counting` and so on, which Discord never
+ * emits. The bot boots, the banner counts them, and nothing runs.
+ */
+export const MESSAGE_HANDLER = Symbol.for("testify.messageHandler");
+
 export function defineMessageHandler(handler: MessageHandler): MessageHandler {
-	return handler;
+	return Object.defineProperty(handler, MESSAGE_HANDLER, { value: true, enumerable: false });
 }
 
 export async function runMessageHandlers(message: Message, client: TestifyClient): Promise<void> {

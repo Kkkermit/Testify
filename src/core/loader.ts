@@ -7,7 +7,7 @@ import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, type Command, subcommandsOf } from "@core/command";
 import { SetupError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
-import { type MessageHandler } from "@core/message";
+import { MESSAGE_HANDLER, type MessageHandler } from "@core/message";
 
 /**
  * `__dirname` is `src/core` while developing and `dist/core` after a build, and
@@ -150,6 +150,9 @@ function loadEvents(client: TestifyClient): number {
 		const event = importFile(file);
 
 		if (!isObject(event)) fail(file, "should `export default defineEvent({ … })`");
+		if (MESSAGE_HANDLER in event) {
+			fail(file, "is a message handler, so it belongs in events/message/. Delete this stray copy of the folder");
+		}
 		if (typeof event.name !== "string" || !event.name) fail(file, "is missing `name`");
 		if (typeof event.run !== "function") fail(file, "is missing `run`");
 

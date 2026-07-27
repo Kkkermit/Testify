@@ -47,9 +47,10 @@ const config: Config = {
 		"!src/**/index.ts",
 		"!src/lib/canvas.util.ts",
 	],
-	// Ratcheted to just under what the suite currently achieves, so coverage
-	// cannot quietly fall back.
-	coverageThreshold: { global: { lines: 55, functions: 50, branches: 45 } },
+	// The agreed floor. The suite currently sits comfortably above every one of
+	// these, so the gap absorbs ordinary changes while a real drop still fails
+	// `npm run test:coverage` — which is what the pre-push hook runs.
+	coverageThreshold: { global: { statements: 80, lines: 80, functions: 80, branches: 80 } },
 	clearMocks: true,
 	restoreMocks: true,
 };

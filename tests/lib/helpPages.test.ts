@@ -89,3 +89,90 @@ describe("resolving what the user asked for", () => {
 		expect(resolveSurface(undefined)).toBe("slash");
 	});
 });
+
+describe("richer command pages", () => {
+	const full = defineCommand({
+		name: "ban",
+		description: "Bans a member.",
+		category: "moderation",
+		aliases: ["hammer"],
+		cooldown: 5_000,
+		options: [
+			{ name: "user", description: "Who to ban.", type: "user", required: true },
+			{ name: "reason", description: "Why.", type: "string" },
+		],
+		run: () => Promise.resolve(),
+	});
+
+	const withSubs = defineCommand({
+		name: "music",
+		description: "Music controls.",
+		category: "music",
+		subcommands: Array.from({ length: 14 }, (_unused, index) => ({
+			name: `sub${index}`,
+			description: `Does thing ${index}.`,
+			aliases: [`s${index}`],
+			run: () => Promise.resolve(),
+		})),
+	});
+
+	it("lists cooldown, aliases and options when a command has them", () => {
+		const rendered = JSON.stringify(commandPage(full, "slash", "t?").toJSON());
+
+		expect(rendered).toContain("Cooldown");
+		expect(rendered).toContain("5s");
+		expect(rendered).toContain("hammer");
+		expect(rendered).toContain("(required)");
+	});
+
+	it("leaves those fields out when a command has none of them", () => {
+		const plain = defineCommand({
+			name: "ping",
+			description: "Pong.",
+			category: "info",
+			run: () => Promise.resolve(),
+		});
+		const names = commandPage(plain, "slash", "t?")
+			.toJSON()
+			.fields?.map((field) => field.name);
+
+		expect(names).not.toEqual(expect.arrayContaining(["Cooldown", "Aliases", "Options"]));
+	});
+
+	it("shows both ways of running a command", () => {
+		const usage = commandPage(full, "slash", "t?")
+			.toJSON()
+			.fields?.find((field) => field.name === "Usage");
+
+		expect(usage?.value).toContain("/ban");
+		expect(usage?.value).toContain("t?ban");
+	});
+
+	/** Discord caps a field at 1024 characters, so a long subcommand list has to stop. */
+	it("caps a long subcommand list and says how many were hidden", () => {
+		const client = createMockClient({
+			commands: new Collection([["music", withSubs]]),
+		});
+
+		const rendered = JSON.stringify(categoryPage(client, "music", 0, "slash", "t?").toJSON());
+
+		expect(rendered).toContain("and 4 more");
+	});
+
+	it("lists prefix aliases only on the prefix surface", () => {
+		const client = createMockClient({
+			commands: new Collection([["ban", full]]),
+		});
+
+		expect(JSON.stringify(categoryPage(client, "moderation", 0, "prefix", "t?").toJSON())).toContain("**Also**");
+		expect(JSON.stringify(categoryPage(client, "moderation", 0, "slash", "t?").toJSON())).not.toContain("**Also**");
+	});
+
+	it("clamps a page number past the end back onto the last page", () => {
+		const client = createMockClient({
+			commands: new Collection([["ban", full]]),
+		});
+
+		expect(() => categoryPage(client, "moderation", 99, "slash", "t?")).not.toThrow();
+	});
+});

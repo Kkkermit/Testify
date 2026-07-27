@@ -63,7 +63,7 @@ async function createInvite(guild: Guild): Promise<string | null> {
 }
 
 export async function announceGuildChange(client: TestifyClient, guild: Guild, kind: "joined" | "left"): Promise<void> {
-	const channelId = kind === "joined" ? client.env.CHANNEL_GUILD_LOG : client.env.CHANNEL_GUILD_LOG;
+	const channelId = client.env.CHANNEL_GUILD_LOG;
 
 	client.logger.info(
 		{ guildId: guild.id, guildName: guild.name, members: guild.memberCount, total: client.guilds.cache.size },

@@ -58,7 +58,20 @@ describe("event grouping", () => {
 			statSync(join(SRC, "events", entry)).isDirectory(),
 		);
 
-		expect(groups.sort()).toEqual(["CommandEvents", "CreateEvents", "LoggingEvents", "ReadyEvents", "message"]);
+		const expected = ["CommandEvents", "CreateEvents", "LoggingEvents", "ReadyEvents", "message"];
+		const stray = groups.filter((group) => !expected.includes(group));
+
+		// Cloud sync and editors leave ` 2` copies behind. Naming them beats an array
+		// diff, because the copy is invisible in an editor sidebar sorted next to the
+		// original and the loader would register its handlers as gateway events.
+		if (stray.length > 0) {
+			throw new Error(
+				`Unexpected ${stray.length === 1 ? "directory" : "directories"} in src/events/: ${stray.join(", ")}.\n` +
+					"This is almost always a duplicate left by cloud sync or an editor. Delete it.",
+			);
+		}
+
+		expect(groups.sort()).toEqual(expected);
 	});
 
 	it("leaves nothing loose at the top of events/", () => {
