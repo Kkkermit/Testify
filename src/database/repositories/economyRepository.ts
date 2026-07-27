@@ -238,12 +238,3 @@ export async function resetGuild(guildId: string): Promise<number> {
 	const result = await Economy.deleteMany({ guildId }).exec();
 	return result.deletedCount;
 }
-
-/** Robbery target selection needs a minimum wallet, so it is filtered in the query. */
-export async function findRobbableTarget(guildId: string, excludeUserId: string): Promise<EconomyAccount | null> {
-	const [candidate] = await Economy.aggregate<EconomyAccount>([
-		{ $match: { guildId, userId: { $ne: excludeUserId }, wallet: { $gte: ECONOMY.robMinTargetWallet } } },
-		{ $sample: { size: 1 } },
-	]).exec();
-	return candidate ?? null;
-}

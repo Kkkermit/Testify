@@ -109,18 +109,6 @@ export async function addXp(guildId: string, userId: string, amount: number): Pr
 	);
 }
 
-export async function saveRankCardStyle(
-	guildId: string,
-	userId: string,
-	style: Partial<Pick<UserLevelRecord, "background" | "barColor" | "borderColor" | "blur">>,
-): Promise<UserLevelRecord> {
-	return UserLevel.findOneAndUpdate(
-		{ guildId, userId },
-		{ $set: style, $setOnInsert: { guildId, userId } },
-		{ ...LEAN, upsert: true, setDefaultsOnInsert: true },
-	).exec() as Promise<UserLevelRecord>;
-}
-
 export async function getLevelLeaderboard(guildId: string, limit: number): Promise<UserLevelRecord[]> {
 	return UserLevel.find({ guildId }).sort({ level: -1, xp: -1 }).limit(limit).lean<UserLevelRecord[]>().exec();
 }

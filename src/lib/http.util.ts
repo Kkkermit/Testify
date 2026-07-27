@@ -73,13 +73,3 @@ export async function fetchJson<T>(
 	}
 	return parsed.data;
 }
-
-export async function fetchText(service: string, url: string, options: RequestOptions = {}): Promise<string> {
-	const response = await fetchRaw(service, url, options);
-	return response.text();
-}
-
-export async function fetchBuffer(service: string, url: string, options: RequestOptions = {}): Promise<Buffer> {
-	const response = await fetchRaw(service, url, options);
-	return Buffer.from(await response.arrayBuffer());
-}

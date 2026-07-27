@@ -173,10 +173,6 @@ export async function resetCount(guildId: string): Promise<void> {
 	await Counting.updateOne({ guildId }, { $set: { count: 0, lastUserId: null } }).exec();
 }
 
-export async function getSticky(guildId: string, channelId: string): Promise<StickyMessage | null> {
-	return Sticky.findOne({ guildId, channelId }).lean<StickyMessage>().exec();
-}
-
 export async function listSticky(guildId: string): Promise<StickyMessage[]> {
 	return Sticky.find({ guildId }).lean<StickyMessage[]>().exec();
 }

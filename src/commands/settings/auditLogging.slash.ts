@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits, StringSelectMenuOptionBuilder } from "discord.js";
+import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
@@ -97,7 +97,3 @@ export default defineCommand({
 		});
 	},
 });
-
-export const AUDIT_EVENT_OPTIONS = AUDIT_EVENTS.map((event) =>
-	new StringSelectMenuOptionBuilder().setLabel(event).setValue(event),
-);

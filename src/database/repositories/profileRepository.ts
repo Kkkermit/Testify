@@ -1,4 +1,4 @@
-import { DmLog, type DmLogEntry } from "@database/models/moderation.schema";
+import { DmLog } from "@database/models/moderation.schema";
 import { Profile, type UserProfile } from "@database/models/profile.schema";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
@@ -36,8 +36,4 @@ export async function logDirectMessage(entry: {
 		},
 		{ upsert: true, setDefaultsOnInsert: true },
 	).exec();
-}
-
-export async function listDirectMessages(authorId: string, limit = 25): Promise<DmLogEntry[]> {
-	return DmLog.find({ authorId }).sort({ createdAt: -1 }).limit(limit).lean<DmLogEntry[]>().exec();
 }

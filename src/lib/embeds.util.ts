@@ -81,10 +81,6 @@ export function warningEmbed(message: string): EmbedBuilder {
 	return embed({ colour: theme.colours.warning, description: `${theme.emoji.warning} ${message}` });
 }
 
-export function infoEmbed(message: string): EmbedBuilder {
-	return embed({ colour: theme.colours.info, description: `${theme.emoji.info} ${message}` });
-}
-
 /** Appends "Page 2 of 5" without clobbering existing footer text. */
 export function withPageFooter(builder: EmbedBuilder, page: number, total: number): EmbedBuilder {
 	const existing = builder.data.footer?.text;

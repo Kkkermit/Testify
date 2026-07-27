@@ -12,7 +12,6 @@ export interface ConnectOptions {
 	retryDelayMs?: number;
 }
 
-let connected = false;
 let everConnected = false;
 
 /**
@@ -94,12 +93,10 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	mongoose.set("strictQuery", true);
 
 	mongoose.connection.on("disconnected", () => {
-		connected = false;
 		// Only worth saying once we have had a connection to lose.
 		if (everConnected) options.logger.warn("Lost connection to MongoDB");
 	});
 	mongoose.connection.on("reconnected", () => {
-		connected = true;
 		options.logger.info("Reconnected to MongoDB");
 	});
 	mongoose.connection.on("error", (error: unknown) => {
@@ -111,7 +108,6 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	for (let attempt = 1; attempt <= retries; attempt += 1) {
 		try {
 			await mongoose.connect(options.uri, { serverSelectionTimeoutMS: 10_000 });
-			connected = true;
 			everConnected = true;
 			options.logger.debug({ database: mongoose.connection.name }, "Connected to MongoDB");
 			return mongoose;
@@ -126,13 +122,7 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	throw new Error("unreachable");
 }
 
-/** Guards every repository read so a dropped connection surfaces as a clear failure. */
-export function isDatabaseReady(): boolean {
-	return connected && mongoose.connection.readyState === mongoose.ConnectionStates.connected;
-}
-
 export async function disconnectDatabase(): Promise<void> {
 	if (mongoose.connection.readyState === mongoose.ConnectionStates.disconnected) return;
 	await mongoose.disconnect();
-	connected = false;
 }

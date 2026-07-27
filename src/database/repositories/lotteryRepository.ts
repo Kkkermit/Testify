@@ -90,7 +90,3 @@ export async function recordDraw(guildId: string, draw: LotteryDraw, basePrizePo
 		{ $push: { history: { $each: [draw], $slice: -25 } }, $set: { entries: [], prizePool: basePrizePool } },
 	).exec();
 }
-
-export async function listActiveLotteries(): Promise<LotteryRecord[]> {
-	return Lottery.find({ isActive: true }).lean<LotteryRecord[]>().exec();
-}

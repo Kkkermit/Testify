@@ -23,10 +23,6 @@ export async function findBlacklistEntry(userId: string): Promise<BlacklistEntry
 	return value;
 }
 
-export async function isBlacklisted(userId: string): Promise<boolean> {
-	return (await findBlacklistEntry(userId)) !== null;
-}
-
 export async function addToBlacklist(userId: string, reason: string): Promise<BlacklistEntry> {
 	const entry = (await Blacklist.findOneAndUpdate(
 		{ userId },

@@ -78,10 +78,6 @@ export async function editWarning(
 	return result.modifiedCount > 0;
 }
 
-export async function listGuildWarnings(guildId: string, limit = 100): Promise<WarnRecord[]> {
-	return Warnings.find({ guildId }).sort({ updatedAt: -1 }).limit(limit).lean<WarnRecord[]>().exec();
-}
-
 export async function createSoftban(entry: {
 	guildId: string;
 	userId: string;

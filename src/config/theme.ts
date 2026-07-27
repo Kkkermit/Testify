@@ -55,8 +55,6 @@ export const theme = {
 		volume: "🔊",
 		success: "🎵",
 	},
-
-	currency: "🪙",
 } as const;
 
 export function categoryColour(category: Category): ColorResolvable {

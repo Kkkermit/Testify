@@ -11,7 +11,7 @@ import {
 } from "@database/repositories/moderationRepository";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { discordTime, truncate } from "@lib/format.util";
-import { DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions.util";
+import { dmEmbed, notifyTarget } from "@lib/moderationActions.util";
 import { reply } from "@lib/reply.util";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
@@ -209,5 +209,3 @@ export default defineCommand({
 		});
 	},
 });
-
-export const DEFAULT_WARN_REASON = DEFAULT_REASON;

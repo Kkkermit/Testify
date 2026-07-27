@@ -1,6 +1,5 @@
 import { escapeMarkdown as djsEscapeMarkdown } from "discord.js";
 import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS } from "@config/constants";
-import { theme } from "@config/theme";
 
 /** Compact duration: "2h 5m 3s". Zero and negative values collapse to "0s". */
 export function formatDuration(ms: number): string {
@@ -38,13 +37,6 @@ export function formatDurationLong(ms: number): string {
 		if (value > 0) parts.push(`${value} ${label}${value === 1 ? "" : "s"}`);
 	}
 	return parts.length > 0 ? parts.join(", ") : "0 seconds";
-}
-
-/** Time remaining until a future instant, or "ready now" once it has passed. */
-export function formatCooldown(until: Date | number, now: number = Date.now()): string {
-	const target = until instanceof Date ? until.getTime() : until;
-	const remaining = target - now;
-	return remaining <= 0 ? "ready now" : formatDuration(remaining);
 }
 
 export function formatUptime(startedAt: number, now: number = Date.now()): string {
@@ -86,10 +78,6 @@ export function compactNumber(n: number): string {
 	return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(n);
 }
 
-export function formatCurrency(amount: number): string {
-	return `${theme.currency} ${formatNumber(amount)}`;
-}
-
 export function formatBytes(bytes: number): string {
 	const units = ["B", "KB", "MB", "GB", "TB"];
 	let value = Math.max(0, bytes);
@@ -107,10 +95,6 @@ export type TimestampStyle = "t" | "T" | "d" | "D" | "f" | "F" | "R";
 export function discordTime(date: Date | number, style: TimestampStyle = "f"): string {
 	const seconds = Math.floor((date instanceof Date ? date.getTime() : date) / 1_000);
 	return `<t:${seconds}:${style}>`;
-}
-
-export function relativeTime(date: Date | number): string {
-	return discordTime(date, "R");
 }
 
 export function truncate(text: string, max: number): string {

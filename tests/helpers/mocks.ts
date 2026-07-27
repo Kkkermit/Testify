@@ -48,7 +48,6 @@ export function mockCollection<V>(entries: [string, V][] = []): Collection<strin
 
 export const OWNER_ID = "100000000000000001";
 export const USER_ID = "200000000000000002";
-export const OTHER_USER_ID = "300000000000000003";
 export const GUILD_ID = "400000000000000004";
 export const CHANNEL_ID = "500000000000000005";
 export const ROLE_ID = "600000000000000006";

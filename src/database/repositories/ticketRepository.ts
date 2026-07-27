@@ -78,7 +78,3 @@ export async function removeTicketMember(channelId: string, userId: string): Pro
 export async function deleteTicket(channelId: string): Promise<boolean> {
 	return (await Ticket.deleteOne({ channelId }).exec()).deletedCount > 0;
 }
-
-export async function listTickets(guildId: string): Promise<TicketRecord[]> {
-	return Ticket.find({ guildId }).sort({ createdAt: -1 }).lean<TicketRecord[]>().exec();
-}

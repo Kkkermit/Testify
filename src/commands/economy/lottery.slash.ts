@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -168,5 +168,3 @@ export default defineCommand({
 		});
 	},
 });
-
-export const LOTTERY_ADMIN_PERMISSION = PermissionFlagsBits.ManageGuild;

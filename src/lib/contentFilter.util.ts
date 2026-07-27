@@ -54,20 +54,3 @@ export function containsProfanity(text: string): boolean {
 	const list = words();
 	return tokenise(text).some((token) => list.has(token));
 }
-
-export function findProfanity(text: string): string[] {
-	const list = words();
-	return [...new Set(tokenise(text).filter((token) => list.has(token)))];
-}
-
-export function censor(text: string, replacement = "\\*"): string {
-	const list = words();
-	return text.replace(/[\p{L}\p{N}@$!+*]+/gu, (match) =>
-		list.has(normalise(match)) ? replacement.repeat(match.length) : match,
-	);
-}
-
-/** Test seam — forces the word list to be re-read on the next call. */
-export function resetContentFilter(): void {
-	blocked = undefined;
-}
