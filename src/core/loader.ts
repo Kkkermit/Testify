@@ -4,7 +4,8 @@ import { globSync } from "glob";
 import { isCategory } from "../config/categories";
 import { type Button } from "./button";
 import { type TestifyClient } from "./client";
-import { buildSlashCommand, type Command } from "./command";
+import { buildSlashCommand, type Command, subcommandsOf } from "./command";
+import { SetupError } from "./errors";
 import { type AnyEvent } from "./event";
 import { type MessageHandler } from "./message";
 
@@ -15,12 +16,17 @@ import { type MessageHandler } from "./message";
  */
 const ROOT = resolve(__dirname, "..");
 
+/**
+ * A file whose name starts with `_` is a building block rather than a command —
+ * something a neighbouring file imports and exposes as a subcommand. It is
+ * skipped here so it does not also register on its own.
+ */
 function find(folder: string): string[] {
 	return globSync(`${folder}/**/*.{js,ts}`, {
 		cwd: ROOT,
 		absolute: true,
 		nodir: true,
-		ignore: ["**/*.d.ts", "**/*.map", "**/*.test.*"],
+		ignore: ["**/*.d.ts", "**/*.map", "**/*.test.*", "**/_*"],
 	}).sort();
 }
 
@@ -81,10 +87,20 @@ function loadCommands(client: TestifyClient): number {
 
 		client.commands.set(command.name, command as unknown as Command);
 
-		for (const alias of (command as unknown as Command).aliases ?? []) {
-			if (client.commands.has(alias)) fail(file, `uses "${alias}" as an alias, but that is already a command`);
-			if (client.aliases.has(alias)) fail(file, `uses the alias "${alias}" twice`);
-			client.aliases.set(alias, command.name);
+		const loadedCommand = command as unknown as Command;
+		const named: [string, string][] = [
+			...(loadedCommand.aliases ?? []).map((alias): [string, string] => [alias, loadedCommand.name]),
+			// Only aliases a subcommand asks for by name. Registering every
+			// subcommand name would collide — plenty of commands have a `delete`.
+			...subcommandsOf(loadedCommand).flatMap((sub) =>
+				(sub.aliases ?? []).map((alias): [string, string] => [alias, `${loadedCommand.name} ${sub.name}`]),
+			),
+		];
+
+		for (const [alias, target] of named) {
+			if (client.commands.has(alias)) continue;
+			if (client.aliases.has(alias)) fail(file, `uses the alias "${alias}", which is already taken`);
+			client.aliases.set(alias, target);
 		}
 	}
 
@@ -154,7 +170,23 @@ function loadEvents(client: TestifyClient): number {
  * Tells Discord about the commands. Set DISCORD_DEV_GUILD_ID while developing —
  * guild commands appear immediately, global ones can take up to an hour.
  */
+export const MAX_COMMANDS = 100;
+
 export async function publishCommands(client: TestifyClient): Promise<number> {
+	if (client.commands.size > MAX_COMMANDS) {
+		throw new SetupError(
+			[
+				`You have ${client.commands.size} commands and Discord allows ${MAX_COMMANDS}.`,
+				"",
+				"Group related ones under a shared parent rather than deleting them: rename",
+				"the file with a leading `_` so the loader skips it, then expose it with",
+				"`asSubcommand()` from a parent command. `src/commands/fun/fun.ts` does this.",
+				"",
+				"Subcommands do not count towards the limit, so one parent can hold 25.",
+			].join("\n"),
+		);
+	}
+
 	const body = [...client.commands.values()].map((command) => buildSlashCommand(command).toJSON());
 	const rest = new REST({ version: "10" }).setToken(client.env.DISCORD_TOKEN);
 

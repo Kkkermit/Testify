@@ -118,6 +118,10 @@ src/
 There is no registry to update and nothing to import by hand. Drop a file in the
 right folder and it is picked up when the bot starts.
 
+A file starting with `_` is skipped by the loader. Those are commands that have
+been grouped under a parent — `src/commands/fun/_dadJoke.ts` is `/fun dad-joke`
+— because Discord only allows 100 top-level commands.
+
 ## Adding a command
 
 Create `src/commands/fun/coinflip.ts`:

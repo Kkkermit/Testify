@@ -21,7 +21,12 @@ export default defineMessageHandler({
 		const parsed = parseMessage(message.content, prefix, botId);
 		if (parsed === null) return;
 
-		const command = client.commands.get(parsed.name) ?? client.commands.get(client.aliases.get(parsed.name) ?? "");
+		// An alias can point at a subcommand — "meme" means "lookup meme" — in which
+		// case the subcommand name goes back on the front of the arguments.
+		const [name = parsed.name, subcommand] = (client.aliases.get(parsed.name) ?? parsed.name).split(" ");
+		const args = subcommand === undefined ? parsed.args : [subcommand, ...parsed.args];
+
+		const command = client.commands.get(name);
 		if (!command) return;
 
 		// Autocomplete has nowhere to appear on a message, and a command that only
@@ -31,7 +36,7 @@ export default defineMessageHandler({
 			return true;
 		}
 
-		const interaction = new PrefixInteraction(message, command, parsed.args);
+		const interaction = new PrefixInteraction(message, command, args);
 
 		const refusal = await runChecks(interaction, command, client);
 		if (refusal !== null) {

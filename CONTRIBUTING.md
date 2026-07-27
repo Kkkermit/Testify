@@ -69,6 +69,32 @@ Two things to keep in mind when adding options:
 - **Put the free-text option last.** The final text option swallows the rest of
   the message, so `t?ban @someone being a nuisance` works without quotes.
 
+## Discord's limit of 100 commands
+
+An application may publish 100 slash commands, and Discord rejects the whole
+batch if you go over — so one command too many stops the bot starting. There is
+a test for it, and start-up refuses with an explanation.
+
+Subcommands do not count, so the way to add more is to group. Rename the file
+with a leading `_` — the loader skips those — and expose it from a parent:
+
+```ts
+// src/commands/fun/fun.ts
+import { asSubcommand, defineCommand } from "../../core/command";
+import dadJoke from "./_dadJoke";
+
+export default defineCommand({
+	name: "fun",
+	description: "Jokes, generators and other nonsense.",
+	category: "fun",
+	subcommands: [asSubcommand(dadJoke, ["dadjoke"])],
+});
+```
+
+`_dadJoke.ts` stays an ordinary command file — nothing inside it changes. It
+keeps its own name as a prefix alias, so `t?dad-joke` still works alongside
+`/fun dad-joke`, and the second argument adds more.
+
 ## Tests
 
 Tests live in `tests/` and mirror `src/`. Anything with real logic in it —

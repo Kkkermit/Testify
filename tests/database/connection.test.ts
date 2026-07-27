@@ -2,7 +2,7 @@ import { getServers } from "node:dns";
 import { explainConnectionFailure } from "../../src/database/connection";
 
 const SECRET = "sup3rs3cr3tw0rd";
-const URI = `mongodb+srv://user:${SECRET}@testify.gnzdxb7.mongodb.net/?appName=testify`;
+const URI = `mongodb+srv://user:${SECRET}@cluster0.example.mongodb.net/testify`;
 
 function driverError(message: string, code?: string): Error {
 	return Object.assign(new Error(message), code === undefined ? {} : { code });
@@ -11,7 +11,7 @@ function driverError(message: string, code?: string): Error {
 describe("explainConnectionFailure", () => {
 	it("recognises a refused SRV lookup as a DNS problem", () => {
 		const explanation = explainConnectionFailure(
-			driverError("querySrv ECONNREFUSED _mongodb._tcp.testify.gnzdxb7.mongodb.net", "ECONNREFUSED"),
+			driverError("querySrv ECONNREFUSED _mongodb._tcp.cluster0.example.mongodb.net", "ECONNREFUSED"),
 			URI,
 		);
 
@@ -34,7 +34,7 @@ describe("explainConnectionFailure", () => {
 
 	it("tells you the exact command to check it with", () => {
 		const explanation = explainConnectionFailure(driverError("querySrv ECONNREFUSED", "ECONNREFUSED"), URI);
-		expect(explanation).toContain("nslookup -type=SRV _mongodb._tcp.testify.gnzdxb7.mongodb.net");
+		expect(explanation).toContain("nslookup -type=SRV _mongodb._tcp.cluster0.example.mongodb.net");
 	});
 
 	it("copes with a connection string it cannot parse", () => {

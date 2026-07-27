@@ -2,7 +2,7 @@ import { Collection } from "discord.js";
 import { CATEGORIES } from "../../src/config/categories";
 import { type TestifyClient } from "../../src/core/client";
 import { buildSlashCommand, subcommandsOf } from "../../src/core/command";
-import { loadEverything } from "../../src/core/loader";
+import { loadEverything, MAX_COMMANDS } from "../../src/core/loader";
 import { createLogger } from "../../src/core/logger";
 
 /**
@@ -75,8 +75,16 @@ describe("prefix aliases", () => {
 		expect(new Set(client.aliases.keys()).size).toBe(client.aliases.size);
 	});
 
-	it("points at a command that exists", () => {
-		for (const [, name] of client.aliases) expect(client.commands.has(name)).toBe(true);
+	it("points at a command, or a subcommand, that exists", () => {
+		for (const [, target] of client.aliases) {
+			const [name = "", subcommand] = target.split(" ");
+			const command = client.commands.get(name);
+
+			expect(command).toBeDefined();
+			if (subcommand !== undefined) {
+				expect(subcommandsOf(command!).map((sub) => sub.name)).toContain(subcommand);
+			}
+		}
 	});
 });
 
@@ -108,6 +116,17 @@ describe("every command's options", () => {
 		}
 
 		expect(offenders).toEqual([]);
+	});
+});
+
+describe("the command count", () => {
+	/**
+	 * Discord refuses to publish more than this, and refuses the whole batch — so
+	 * going over does not break one command, it breaks the bot. Group related
+	 * commands under a parent with `asSubcommand()` rather than deleting them.
+	 */
+	it(`is within Discord's limit of ${MAX_COMMANDS}`, () => {
+		expect(client.commands.size).toBeLessThanOrEqual(MAX_COMMANDS);
 	});
 });
 

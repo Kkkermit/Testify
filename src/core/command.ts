@@ -99,6 +99,8 @@ export interface Subcommand {
 	name: string;
 	description: string;
 	options?: CommandOption[];
+	/** Prefix-only short forms, so `t?meme` still works after `/lookup meme`. */
+	aliases?: string[];
 	run(interaction: CommandInput, client: TestifyClient): Promise<void>;
 }
 
@@ -150,6 +152,31 @@ export function defineCommand(command: Command): Command {
 
 export function subcommandsOf(command: Command): Subcommand[] {
 	return command.subcommands ?? [];
+}
+
+/**
+ * Exposes a standalone command as a subcommand of another. Used to keep the
+ * command count under Discord's limit of 100 without rewriting the commands
+ * themselves — see `src/commands/fun/fun.ts` for the pattern.
+ *
+ * The file being folded in must be named with a leading `_` so the loader does
+ * not also register it on its own.
+ */
+export function asSubcommand(command: Command, aliases: string[] = []): Subcommand {
+	if (command.subcommands?.length) {
+		throw new Error(`${command.name} already has subcommands, and Discord only allows one level of nesting.`);
+	}
+	if (!command.run) throw new Error(`${command.name} has no run function to fold in.`);
+
+	return {
+		name: command.name,
+		description: command.description,
+		...(command.options ? { options: command.options } : {}),
+		// The command keeps its old name as a prefix alias, so folding `/meme` into
+		// `/lookup meme` does not break `t?meme`.
+		aliases: [command.name, ...(command.aliases ?? []), ...aliases],
+		run: async (interaction, client) => command.run?.(interaction, client),
+	};
 }
 
 /**

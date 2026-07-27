@@ -46,7 +46,9 @@ for (const category of ALL_CATEGORIES) {
 		const subcommands = subcommandsOf(command)
 			.map((sub) => `\`${sub.name}\``)
 			.join(", ");
-		const aliases = (command.aliases ?? []).map((alias) => `\`t?${alias}\``).join(", ");
+		const aliases = [...(command.aliases ?? []), ...subcommandsOf(command).flatMap((sub) => sub.aliases ?? [])]
+			.map((alias) => `\`t?${alias}\``)
+			.join(", ");
 
 		lines.push(`| \`/${command.name}\` | ${command.description} | ${subcommands || "—"} | ${aliases || "—"} |`);
 	}
