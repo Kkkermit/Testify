@@ -49,6 +49,43 @@ describe("loadEnv", () => {
 		expect(() => loadEnv()).toThrow(/DISCORD_CLIENT_ID/);
 	});
 
+	/**
+	 * `.env.example` ships every optional key present but blank, which is an empty
+	 * string rather than an absent one. Following the documented setup has to work.
+	 */
+	it("treats a blank optional setting as unset", () => {
+		setEnv({
+			...VALID,
+			DISCORD_DEV_GUILD_ID: "",
+			LOG_LEVEL: "",
+			CHANNEL_ERROR_LOG: "",
+			CHANNEL_GUILD_LOG: "",
+			CHANNEL_DM_LOG: "",
+			CHANNEL_FEEDBACK_LOG: "",
+		});
+
+		const env = loadEnv();
+
+		expect(env.DISCORD_DEV_GUILD_ID).toBeUndefined();
+		expect(env.CHANNEL_ERROR_LOG).toBeUndefined();
+		expect(env.LOG_LEVEL).toBe("info");
+	});
+
+	it("counts whitespace as blank too", () => {
+		setEnv({ ...VALID, DISCORD_DEV_GUILD_ID: "   " });
+		expect(loadEnv().DISCORD_DEV_GUILD_ID).toBeUndefined();
+	});
+
+	it("still rejects an optional setting filled in wrongly", () => {
+		setEnv({ ...VALID, DISCORD_DEV_GUILD_ID: "not-an-id" });
+		expect(() => loadEnv()).toThrow(/DISCORD_DEV_GUILD_ID/);
+	});
+
+	it("still rejects a required setting left blank", () => {
+		setEnv({ ...VALID, DISCORD_TOKEN: "" });
+		expect(() => loadEnv()).toThrow(/DISCORD_TOKEN/);
+	});
+
 	it("caches, so the file is read once", () => {
 		setEnv(VALID);
 		expect(loadEnv()).toBe(loadEnv());

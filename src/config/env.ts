@@ -40,6 +40,17 @@ const schema = z.object({
 
 export type Env = z.infer<typeof schema>;
 
+/**
+ * `KEY=` in a .env file is an empty string, not an absent one, and the optional
+ * settings are meant to be left blank — so a blank line has to mean "not set"
+ * rather than "set to nothing".
+ */
+function withoutBlanks(source: NodeJS.ProcessEnv): Record<string, string> {
+	return Object.fromEntries(
+		Object.entries(source).filter((entry): entry is [string, string] => (entry[1] ?? "").trim() !== ""),
+	);
+}
+
 let cached: Env | undefined;
 
 export function loadEnv(): Env {
@@ -48,7 +59,7 @@ export function loadEnv(): Env {
 	const file = resolve(process.cwd(), process.env.NODE_ENV === "development" ? ".env.development" : ".env");
 	if (existsSync(file)) loadDotenv({ path: file, quiet: true });
 
-	const result = schema.safeParse(process.env);
+	const result = schema.safeParse(withoutBlanks(process.env));
 
 	if (!result.success) {
 		const problems = result.error.issues.map((issue) => `  ${issue.path.join(".")} ${issue.message}`).join("\n");
