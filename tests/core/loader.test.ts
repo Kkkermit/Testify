@@ -1,3 +1,5 @@
+import { readdirSync } from "node:fs";
+import { resolve } from "node:path";
 import { Collection } from "discord.js";
 import { CATEGORIES } from "../../src/config/categories";
 import { type TestifyClient } from "../../src/core/client";
@@ -10,6 +12,8 @@ import { createLogger } from "../../src/core/logger";
  * is malformed — a bad category, a missing `run`, a duplicate name — this fails
  * here rather than at start-up in production.
  */
+const bound: string[] = [];
+
 function fakeClient(): TestifyClient {
 	return {
 		commands: new Collection(),
@@ -17,8 +21,8 @@ function fakeClient(): TestifyClient {
 		buttons: new Collection(),
 		messageHandlers: [],
 		logger: createLogger("fatal", false),
-		on: () => undefined,
-		once: () => undefined,
+		on: (name: string) => bound.push(name),
+		once: (name: string) => bound.push(name),
 	} as unknown as TestifyClient;
 }
 
@@ -31,6 +35,22 @@ describe("loadEverything", () => {
 		expect(counts.buttons).toBeGreaterThan(0);
 		expect(counts.events).toBeGreaterThan(0);
 		expect(counts.messageHandlers).toBeGreaterThan(0);
+	});
+
+	/**
+	 * Every file in `events/` has to end up on the client. A path filter meant to
+	 * skip the `events/message/` folder also matched `events/messageCreate.ts`,
+	 * so nothing ran on a message at all and no prefix command worked.
+	 */
+	it("binds a listener for every event file", () => {
+		expect(counts.events).toBe(
+			readdirSync(resolve(__dirname, "../../src/events"), { withFileTypes: true }).filter((entry) => entry.isFile())
+				.length,
+		);
+	});
+
+	it("binds the listeners the message handlers depend on", () => {
+		expect(bound).toContain("messageCreate");
 	});
 
 	it("sorts message handlers by their order", () => {

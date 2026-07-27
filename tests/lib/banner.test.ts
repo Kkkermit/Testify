@@ -1,6 +1,14 @@
 import { bannerLines, bigText } from "../../src/lib/banner";
 
-const FACTS = { name: "Testify", servers: 12, members: 48_213, commands: 87, prefix: "t?", startupMs: 1_843 };
+const FACTS = {
+	name: "Testify",
+	servers: 12,
+	members: 48_213,
+	commands: 87,
+	prefix: "t?",
+	scope: "every server",
+	startupMs: 1_843,
+};
 const ESCAPE = "";
 
 describe("bigText", () => {
@@ -32,6 +40,7 @@ describe("bannerLines", () => {
 		expect(text).toContain("48,213");
 		expect(text).toContain("1,843ms");
 		expect(text).toContain("t?");
+		expect(text).toContain("every server");
 	});
 
 	it("leaves out colour when the output is not a terminal", () => {

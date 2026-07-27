@@ -90,7 +90,8 @@ Every command answers to both, and each one is written only once:
 t?ban @someone spamming
 ```
 
-- The default prefix is `t?`. Change it per server with `/prefix set !`.
+- The default prefix is `t?`. Change it with `/prefix set !`, and turn text
+  commands off entirely with `/prefix disable` — slash commands keep working.
 - Mentioning the bot works anywhere: `@Testify help`.
 - Options are filled in order, and the last text option takes the rest of the
   message — so you rarely need quotes. Use `"quotes"` when you do.
@@ -99,9 +100,16 @@ t?ban @someone spamming
 Replies that would be private on a slash command are sent in the channel
 instead, since a normal message cannot be ephemeral.
 
-**Seeing a command Discord knows about but the bot does not?** That is an old
-registration left behind after a rename. Run `npm run commands:clear`, then
-start the bot to publish the current set.
+**Where do the commands appear?** With `DISCORD_DEV_GUILD_ID` set, they are
+published to that one server only and show up instantly. Leave it blank and they
+go to every server, which can take up to an hour to roll out. The start-up banner
+says which. If Discord still lists commands that no longer exist, run
+`npm run commands:clear` and start the bot again.
+
+**Typed a prefix command and nothing happened?** Check the Message Content
+intent is on: Developer Portal → your app → Bot → Privileged Gateway Intents.
+Without it every message reaches the bot blank. It warns about this on start-up
+if it sees it happening.
 
 ## How the project is laid out
 

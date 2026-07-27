@@ -29,25 +29,51 @@ const UPSERT = { upsert: true as const, new: true as const, lean: true as const,
  * per-process and short-lived, which is enough — a changed prefix takes effect
  * within a minute at worst.
  */
-const prefixCache = new Map<string, { prefix: string; expiresAt: number }>();
+export interface PrefixConfig {
+	prefix: string;
+	isEnabled: boolean;
+}
 
-export async function getPrefix(guildId: string): Promise<string> {
+const prefixCache = new Map<string, { config: PrefixConfig; expiresAt: number }>();
+
+function remember(guildId: string, config: PrefixConfig): PrefixConfig {
+	if (prefixCache.size > CACHE.guildSettingsMaxEntries) prefixCache.clear();
+	prefixCache.set(guildId, { config, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
+	return config;
+}
+
+export async function getPrefixConfig(guildId: string): Promise<PrefixConfig> {
 	const cached = prefixCache.get(guildId);
-	if (cached && cached.expiresAt > Date.now()) return cached.prefix;
+	if (cached && cached.expiresAt > Date.now()) return cached.config;
 
 	const record = await GuildPrefix.findOne({ guildId }).lean<PrefixSettings>().exec();
-	const prefix = record?.prefix ?? DEFAULT_PREFIX;
 
-	if (prefixCache.size > CACHE.guildSettingsMaxEntries) prefixCache.clear();
-	prefixCache.set(guildId, { prefix, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
+	return remember(guildId, {
+		prefix: record?.prefix ?? DEFAULT_PREFIX,
+		// A server that has never touched the setting gets prefix commands on.
+		isEnabled: record?.isEnabled ?? true,
+	});
+}
 
-	return prefix;
+export async function getPrefix(guildId: string): Promise<string> {
+	return (await getPrefixConfig(guildId)).prefix;
 }
 
 export async function setPrefix(guildId: string, prefix: string): Promise<string> {
-	await GuildPrefix.findOneAndUpdate({ guildId }, { $set: { prefix } }, UPSERT).exec();
-	prefixCache.set(guildId, { prefix, expiresAt: Date.now() + CACHE.guildSettingsTtlMs });
+	const record = await GuildPrefix.findOneAndUpdate({ guildId }, { $set: { prefix } }, UPSERT)
+		.lean<PrefixSettings>()
+		.exec();
+
+	remember(guildId, { prefix, isEnabled: record?.isEnabled ?? true });
 	return prefix;
+}
+
+export async function setPrefixEnabled(guildId: string, isEnabled: boolean): Promise<PrefixConfig> {
+	const record = await GuildPrefix.findOneAndUpdate({ guildId }, { $set: { isEnabled } }, UPSERT)
+		.lean<PrefixSettings>()
+		.exec();
+
+	return remember(guildId, { prefix: record?.prefix ?? DEFAULT_PREFIX, isEnabled });
 }
 
 /** Used by the tests, and after a prefix is changed elsewhere. */

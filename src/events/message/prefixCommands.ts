@@ -3,7 +3,7 @@ import { runChecks } from "../../core/checks";
 import { runCommand } from "../../core/errors";
 import { defineMessageHandler } from "../../core/message";
 import { parseMessage, PrefixInteraction } from "../../core/prefix";
-import { getPrefix } from "../../database/repositories/settingsRepository";
+import { getPrefixConfig } from "../../database/repositories/settingsRepository";
 import { errorEmbed } from "../../lib/embeds";
 
 /**
@@ -18,8 +18,13 @@ export default defineMessageHandler({
 		const botId = client.user?.id;
 		if (botId === undefined) return;
 
-		// A direct message has no server to have configured a prefix.
-		const prefix = message.guild === null ? DEFAULT_PREFIX : await getPrefix(message.guild.id);
+		// A direct message has no server to have configured anything.
+		const config =
+			message.guild === null ? { prefix: DEFAULT_PREFIX, isEnabled: true } : await getPrefixConfig(message.guild.id);
+
+		if (!config.isEnabled) return;
+
+		const prefix = config.prefix;
 		const parsed = parseMessage(message.content, prefix, botId);
 		if (parsed === null) return;
 

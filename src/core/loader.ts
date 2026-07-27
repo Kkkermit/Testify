@@ -1,4 +1,4 @@
-import { resolve } from "node:path";
+import { resolve, sep } from "node:path";
 import { REST, Routes } from "discord.js";
 import { globSync } from "glob";
 import { isCategory } from "../config/categories";
@@ -137,7 +137,10 @@ function loadMessageHandlers(client: TestifyClient): number {
 }
 
 function loadEvents(client: TestifyClient): number {
-	const files = find("events/**/*.{js,ts}").filter((file) => !file.includes(`${resolve(ROOT, "events", "message")}`));
+	// The trailing separator matters: without it this also excluded
+	// `events/messageCreate.ts`, which is the file that runs every message handler.
+	const messageFolder = resolve(ROOT, "events", "message") + sep;
+	const files = find("events/**/*.{js,ts}").filter((file) => !file.startsWith(messageFolder));
 	let count = 0;
 
 	for (const file of files) {
@@ -196,16 +199,14 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 
 	await rest.put(route, { body });
 
-	// Commands published to the other scope stay registered until something
-	// clears them, and a stale one looks like a working command until you use it
-	// and get "unknown command". Only one scope is ever in use, so empty the other.
-	const stale = guildId
-		? Routes.applicationCommands(client.env.DISCORD_CLIENT_ID)
-		: Routes.applicationGuildCommands(client.env.DISCORD_CLIENT_ID, client.env.DISCORD_DEV_GUILD_ID ?? "0");
-
-	if (guildId !== undefined || client.env.DISCORD_DEV_GUILD_ID !== undefined) {
-		await rest.put(stale, { body: [] }).catch(() => undefined);
-	}
+	client.logger.debug({ count: body.length, guildId: guildId ?? null }, "Published commands");
 
 	return body.length;
+}
+
+/** Where the commands went, for the start-up banner. */
+export function publishScope(client: TestifyClient): string {
+	return client.env.DISCORD_DEV_GUILD_ID === undefined
+		? "every server"
+		: `server ${client.env.DISCORD_DEV_GUILD_ID} only`;
 }

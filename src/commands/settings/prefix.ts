@@ -1,11 +1,23 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "../../core/command";
 import { UserFacingError } from "../../core/errors";
-import { getPrefix, setPrefix } from "../../database/repositories/settingsRepository";
+import { getPrefixConfig, setPrefix, setPrefixEnabled } from "../../database/repositories/settingsRepository";
 import { embed, successEmbed } from "../../lib/embeds";
 import { reply } from "../../lib/reply";
 
 const MAX_LENGTH = 5;
+
+/** Changing any of this needs Manage Server; anyone may look. */
+function requireManager(interaction: Parameters<typeof inGuild>[0]): void {
+	const member = interaction.member;
+	const allowed =
+		member !== null &&
+		"permissions" in member &&
+		typeof member.permissions !== "string" &&
+		member.permissions.has(PermissionFlagsBits.ManageGuild);
+
+	if (!allowed) throw new UserFacingError("You need Manage Server to change this.");
+}
 
 export default defineCommand({
 	name: "prefix",
@@ -16,21 +28,27 @@ export default defineCommand({
 	subcommands: [
 		{
 			name: "show",
-			description: "Shows the current prefix.",
+			description: "Shows the current prefix and whether text commands are on.",
 			async run(interaction) {
 				const guild = inGuild(interaction);
-				const prefix = await getPrefix(guild.id);
+				const { prefix, isEnabled } = await getPrefixConfig(guild.id);
 
 				await reply(interaction, {
 					embeds: [
 						embed({
 							category: "settings",
 							title: "Prefix",
-							description: [
-								`This server's prefix is \`${prefix}\`.`,
-								"",
-								`Try \`${prefix}help\`. Mentioning me works too, and every command is also available with \`/\`.`,
-							].join("\n"),
+							description: isEnabled
+								? [
+										`This server's prefix is \`${prefix}\`.`,
+										"",
+										`Try \`${prefix}help\`. Mentioning me works too, and every command is also available with \`/\`.`,
+									].join("\n")
+								: [
+										"Text commands are switched **off** in this server.",
+										"",
+										`Turn them on with \`/prefix enable\`. Slash commands work either way.`,
+									].join("\n"),
 						}),
 					],
 				});
@@ -43,15 +61,7 @@ export default defineCommand({
 
 			async run(interaction) {
 				const guild = inGuild(interaction);
-				const member = interaction.member;
-
-				const allowed =
-					member !== null &&
-					"permissions" in member &&
-					typeof member.permissions !== "string" &&
-					member.permissions.has(PermissionFlagsBits.ManageGuild);
-
-				if (!allowed) throw new UserFacingError("You need Manage Server to change the prefix.");
+				requireManager(interaction);
 
 				const wanted = interaction.options.getString("prefix", true).trim();
 
@@ -64,6 +74,34 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed(`The prefix is now \`${wanted}\`. Try \`${wanted}help\`.`)],
+				});
+			},
+		},
+		{
+			name: "enable",
+			description: "Lets members use text commands here. Needs Manage Server.",
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				requireManager(interaction);
+
+				const { prefix } = await setPrefixEnabled(guild.id, true);
+
+				await reply(interaction, {
+					embeds: [successEmbed(`Text commands are on. Try \`${prefix}help\`.`)],
+				});
+			},
+		},
+		{
+			name: "disable",
+			description: "Turns text commands off, leaving slash commands. Needs Manage Server.",
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				requireManager(interaction);
+
+				await setPrefixEnabled(guild.id, false);
+
+				await reply(interaction, {
+					embeds: [successEmbed("Text commands are off. Slash commands still work.")],
 				});
 			},
 		},

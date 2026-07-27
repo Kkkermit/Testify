@@ -4,8 +4,10 @@ import { defineCommand } from "../../src/core/command";
 import { createLogger } from "../../src/core/logger";
 import { runMessageHandlers } from "../../src/core/message";
 
+const prefixConfig = { prefix: "t?", isEnabled: true };
+
 jest.mock("../../src/database/repositories/settingsRepository", () => ({
-	getPrefix: jest.fn(() => Promise.resolve("t?")),
+	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
 }));
 // The checks themselves have their own tests; this is about routing a message
 // to the right command, which is what broke.
@@ -123,6 +125,22 @@ describe("the prefix handler", () => {
 	it("ignores a bare prefix", async () => {
 		await runMessageHandlers(fakeMessage("t?"), fakeClient());
 		expect(ping).not.toHaveBeenCalled();
+	});
+
+	it("stays quiet in a server that switched text commands off", async () => {
+		prefixConfig.isEnabled = false;
+		await runMessageHandlers(fakeMessage("t?ping"), fakeClient());
+		prefixConfig.isEnabled = true;
+
+		expect(ping).not.toHaveBeenCalled();
+	});
+
+	it("uses whatever prefix the server chose", async () => {
+		prefixConfig.prefix = "!";
+		await runMessageHandlers(fakeMessage("!ping"), fakeClient());
+		prefixConfig.prefix = "t?";
+
+		expect(ping).toHaveBeenCalledTimes(1);
 	});
 
 	it("says nothing when the command does not exist", async () => {

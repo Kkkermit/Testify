@@ -62,6 +62,7 @@ export interface BannerFacts {
 	members: number;
 	commands: number;
 	prefix: string;
+	scope: string;
 	startupMs: number;
 }
 
@@ -88,6 +89,7 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 		fact("Servers", formatNumber(facts.servers)),
 		fact("Members", formatNumber(facts.members)),
 		fact("Commands", `${formatNumber(facts.commands)}   /  and  ${facts.prefix}`),
+		fact("Visible in", facts.scope),
 		fact("Ready in", `${formatNumber(facts.startupMs)}ms`),
 		"",
 		paint(ansi.grey, `  ${theme.repository}`),
@@ -95,7 +97,7 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 	];
 }
 
-export function printBanner(client: TestifyClient, ready: Client<true>, prefix: string): void {
+export function printBanner(client: TestifyClient, ready: Client<true>, prefix: string, scope: string): void {
 	const lines = bannerLines(
 		{
 			name: ready.user.username,
@@ -103,6 +105,7 @@ export function printBanner(client: TestifyClient, ready: Client<true>, prefix: 
 			members: ready.guilds.cache.reduce((total, guild) => total + guild.memberCount, 0),
 			commands: client.commands.size,
 			prefix,
+			scope,
 			startupMs: Date.now() - client.startedAt,
 		},
 		process.stdout.isTTY === true,
