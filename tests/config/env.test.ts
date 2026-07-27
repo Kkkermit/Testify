@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { loadEnv, resetEnv } from "@config/env";
 
 const VALID = {
@@ -89,5 +91,25 @@ describe("loadEnv", () => {
 	it("caches, so the file is read once", () => {
 		setEnv(VALID);
 		expect(loadEnv()).toBe(loadEnv());
+	});
+});
+
+/**
+ * The dev/prod split is only as good as the script that triggers it: `loadEnv()`
+ * picks `.env.development` off `NODE_ENV`, so a `dev` script that forgets to set
+ * it starts the production bot against the production database. That is anti-pattern
+ * #1 in the migration notes, and it is invisible until it has already happened.
+ */
+describe("the dev script", () => {
+	const { scripts } = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf8")) as {
+		scripts: Record<string, string>;
+	};
+
+	it("sets NODE_ENV=development, so npm run dev reads .env.development", () => {
+		expect(scripts.dev).toMatch(/NODE_ENV=development/);
+	});
+
+	it("does not set NODE_ENV=development anywhere in start, which must read .env", () => {
+		expect(scripts.start).not.toMatch(/NODE_ENV=development/);
 	});
 });
