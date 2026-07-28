@@ -1,5 +1,3 @@
-import { SoundCloudPlugin } from "@distube/soundcloud";
-import { YtDlpPlugin } from "@distube/yt-dlp";
 import { DisTube, Events as DisTubeEvent, type Playlist, type Queue, type Song } from "distube";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
@@ -7,6 +5,7 @@ import { toError } from "@core/errors";
 import { embed, errorEmbed } from "@lib/embeds.util";
 import { resolveFfmpeg } from "@lib/ffmpeg.util";
 import { formatTrackTime } from "@lib/format.util";
+import { ProgressiveSoundCloudPlugin, ProgressiveYtDlpPlugin } from "@lib/musicPlugins.util";
 import { StreamRelay } from "@lib/streamRelay.util";
 
 let distube: DisTube | undefined;
@@ -20,12 +19,15 @@ export async function stopMusic(): Promise<void> {
 }
 
 /**
- * FFmpeg writes its ordinary progress to stderr too, so a plain "there was output"
- * check would warn on every track. These are the lines that mean a stream never
- * arrived — an HTTP status from the CDN, a refused connection, a non-zero exit.
+ * Only stream-level failures, deliberately.
+ *
+ * An undecodable stream emits "Error while decoding" once per frame — hundreds of
+ * lines a second — so matching that turned the log into a wall of warnings that
+ * buried the one line naming the cause. Per-frame decode noise stays at debug;
+ * this is the set that means the stream itself never arrived or died.
  */
 const FFMPEG_FAILURE =
-	/\b(4\d{2}|5\d{2}) (Forbidden|Not Found|Unauthorized|Bad Gateway|Service Unavailable)|Server returned|Connection refused|Invalid data found|No such file|error(?!s? in)/i;
+	/\b(4\d{2}|5\d{2}) (Forbidden|Not Found|Unauthorized|Bad Gateway|Service Unavailable)|Server returned|Connection refused|Premature close|No such file|ffmpeg exited/i;
 
 /**
  * Routes a plugin's stream URLs through the relay, leaving everything else alone.
@@ -76,7 +78,10 @@ function build(client: TestifyClient): DisTube {
 	const player = new DisTube(client, {
 		// The yt-dlp plugin refreshes its binary on construction, and must be last:
 		// its `validate()` returns true for every URL, so anything after it is dead.
-		plugins: [relayed(new SoundCloudPlugin(), relay), relayed(new YtDlpPlugin({ update: true }), relay)],
+		plugins: [
+			relayed(new ProgressiveSoundCloudPlugin(), relay),
+			relayed(new ProgressiveYtDlpPlugin({ update: true }), relay),
+		],
 		emitNewSongOnly: true,
 		savePreviousSongs: true,
 		nsfw: false,
@@ -168,6 +173,10 @@ export function explainPlaybackFailure(error: unknown): string {
 	}
 	if (/Sign in to confirm|not a bot|429|Too Many Requests/i.test(text)) {
 		return "YouTube is rate limiting this server. Wait a few minutes, or try a SoundCloud link.";
+	}
+	// The signature of decoding an encrypted stream as if it were plain AAC.
+	if (/\/cbcs\/|\/cenc\/|Reserved bit set|exceeds limit|is not allocated|invalid band type/i.test(text)) {
+		return "That track is DRM-protected, so it cannot be played. Try a different source.";
 	}
 	if (/Video unavailable|Private video|members-only|age[- ]restricted/i.test(text)) {
 		return "That track is not available — it may be private, age-restricted or region-locked.";
