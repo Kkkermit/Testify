@@ -117,6 +117,10 @@ Port by **feature**, not by folder, merging each duplicated pair as you reach it
 | 9 | `integrations` | Valorant, Spotify, Instagram | External APIs, OAuth, the Express server |
 | 10 | **`economy`** | 19 slash + 16 prefix + 9 events | **Last.** Largest, most entangled, most duplicated, and the 158 `ephemeral` sites are concentrated here |
 
+**Build each feature's interaction screens as you port it**, not as a separate pass afterwards — see
+[`../ux/04-TARGET-DESIGN.md`](../ux/04-TARGET-DESIGN.md) for the screen abstraction and
+[`../ux/05-FEATURE-BLUEPRINTS.md`](../ux/05-FEATURE-BLUEPRINTS.md) for the proposed music and settings panels.
+
 **Exit criterion per feature:** every command in it works on both surfaces, its duplicated pair is merged, its
 tests pass, and no `@ts-expect-error` remains without a comment explaining why.
 

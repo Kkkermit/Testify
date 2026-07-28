@@ -23,7 +23,8 @@ The documents are sized to be pasted individually. A practical sequence:
 | Port one command category | `commands/<Category>.md` + `migration/11-TYPED-CONTRACTS.md` + `migration/17-CODING-STANDARDS.md` |
 | Port the data layer | `07-DATA-MODEL.md` + `migration/11-TYPED-CONTRACTS.md` |
 | Merge a duplicated command pair | `migration/13-DEDUPLICATION-MAP.md` + both category docs |
-| Design a button/menu/modal flow | `migration/20-INTERACTIVE-UX-PATTERNS.md` |
+| Design a button/menu/modal flow | `ux/` — start at `ux/00-UX-OVERVIEW.md` |
+| Find who handles a custom ID | `ux/02-COMPONENT-REGISTRY.md` |
 | Write tests | `migration/16-TESTING-STRATEGY.md` |
 | Review a PR / set house style | `migration/17-CODING-STANDARDS.md` |
 | Make the bot self-hostable, add community files | `migration/19-OPEN-SOURCE.md` |
@@ -90,7 +91,21 @@ external URLs, env vars, issues and rewrite notes.
 | [`migration/17-CODING-STANDARDS.md`](migration/17-CODING-STANDARDS.md) | Naming, file organisation, **the anti-patterns that must not come back**, error handling, async, imports, JSDoc, commits, the PR checklist |
 | [`migration/18-HELPERS-AND-UTILS.md`](migration/18-HELPERS-AND-UTILS.md) | Full API for every shared module, each stating which duplication it eliminates, plus the build order |
 | [`migration/19-OPEN-SOURCE.md`](migration/19-OPEN-SOURCE.md) | Self-hostability, the missing GitHub templates, `SECURITY.md`, releases, README corrections, good-first-issue backlog |
-| [`migration/20-INTERACTIVE-UX-PATTERNS.md`](migration/20-INTERACTIVE-UX-PATTERNS.md) | **How buttons, select menus and modals make commands feel seamless** — the shop drill-down exemplar, the six interaction archetypes, ownership rules, where the bot still forces typing (music has *no* components), and the screen-based TypeScript design |
+
+## UI / UX
+
+**How the bot actually feels to use** — the buttons, select menus and modals that let features work without
+users typing IDs. Kept separate because none of it is visible from the command definitions, which makes it the
+part most easily lost in a rewrite.
+
+| Document | Contents |
+|---|---|
+| [`ux/00-UX-OVERVIEW.md`](ux/00-UX-OVERVIEW.md) | Section index and the design principles |
+| [`ux/01-CURRENT-PATTERNS.md`](ux/01-CURRENT-PATTERNS.md) | The shop drill-down exemplar, the six interaction archetypes, ownership rules, and the two competing dispatch mechanisms |
+| [`ux/02-COMPONENT-REGISTRY.md`](ux/02-COMPONENT-REGISTRY.md) | **Every custom ID in the bot** — what mints it, what handles it, the three separator conventions, and the known collisions |
+| [`ux/03-GAPS.md`](ux/03-GAPS.md) | Where the bot still forces typing — music has **zero** components across 23 commands; `/treasureconfig` takes 11 typed options |
+| [`ux/04-TARGET-DESIGN.md`](ux/04-TARGET-DESIGN.md) | Screens, state in custom IDs, declarative ownership, reusable builders, modal forms |
+| [`ux/05-FEATURE-BLUEPRINTS.md`](ux/05-FEATURE-BLUEPRINTS.md) | Concrete proposed flows: the music control panel, settings panels, economy quick actions |
 
 ---
 
