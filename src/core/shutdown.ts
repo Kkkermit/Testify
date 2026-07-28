@@ -2,6 +2,7 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { disconnectDatabase } from "@database/connection";
 import { printReloading } from "@lib/banner.util";
+import { stopMusic } from "@lib/music.util";
 
 let stopping = false;
 
@@ -14,6 +15,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 
 	try {
 		client.timers.stopAll();
+		await stopMusic();
 		await disconnectDatabase();
 		await client.destroy();
 	} catch (error) {

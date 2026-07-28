@@ -46,13 +46,13 @@ async function checkFfmpeg(chosen: FfmpegChoice): Promise<Check[]> {
 		},
 		{
 			name: "FFmpeg network",
-			status: chosen.degraded === true ? "fail" : "ok",
+			status: chosen.degraded === true ? "warn" : "ok",
 			detail:
 				chosen.degraded === true
-					? "Segfaults on ANY network URL — this alone stops every track, on every source, with no error message. " +
-						"It is the statically-linked glibc in ffmpeg-static failing to resolve hostnames. " +
-						"Fix: install FFmpeg system-wide (apt install ffmpeg / brew install ffmpeg), or set FFMPEG_PATH."
-					: "survives a hostname lookup without crashing",
+					? "Cannot resolve hostnames (static-glibc FFmpeg). Music still works — tracks are relayed " +
+						"through a local loopback server automatically. Installing FFmpeg system-wide, or setting " +
+						"FFMPEG_PATH, removes the extra hop but is not required."
+					: "resolves hostnames without crashing",
 		},
 	];
 }
@@ -144,7 +144,11 @@ async function checkFetch(label: string, url: string, ffmpegPath: string | null)
 			}
 
 			if (signal === "SIGSEGV" || code === 139) {
-				resolve({ name: label, status: "fail", detail: "FFmpeg segfaulted — see the FFmpeg network check above." });
+				resolve({
+					name: label,
+					status: "warn",
+					detail: "FFmpeg cannot fetch directly, so the relay will do it — see the FFmpeg network check above.",
+				});
 				return;
 			}
 

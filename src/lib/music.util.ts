@@ -7,8 +7,17 @@ import { toError } from "@core/errors";
 import { embed, errorEmbed } from "@lib/embeds.util";
 import { resolveFfmpeg } from "@lib/ffmpeg.util";
 import { formatTrackTime } from "@lib/format.util";
+import { StreamRelay } from "@lib/streamRelay.util";
 
 let distube: DisTube | undefined;
+let activeRelay: StreamRelay | undefined;
+
+/** Closes the relay if one was started, so shutdown does not hang on an open socket. */
+export async function stopMusic(): Promise<void> {
+	await activeRelay?.stop();
+	activeRelay = undefined;
+	distube = undefined;
+}
 
 /**
  * FFmpeg writes its ordinary progress to stderr too, so a plain "there was output"
@@ -17,6 +26,27 @@ let distube: DisTube | undefined;
  */
 const FFMPEG_FAILURE =
 	/\b(4\d{2}|5\d{2}) (Forbidden|Not Found|Unauthorized|Bad Gateway|Service Unavailable)|Server returned|Connection refused|Invalid data found|No such file|error(?!s? in)/i;
+
+/**
+ * Routes a plugin's stream URLs through the relay, leaving everything else alone.
+ *
+ * `getStreamURL` is the one method that hands FFmpeg a remote address, so it is the
+ * only seam that needs to know the relay exists. With no relay the plugin is
+ * returned untouched.
+ */
+export function relayed<T extends { getStreamURL(song: never): Promise<string> }>(plugin: T, relay?: StreamRelay): T {
+	if (relay === undefined) return plugin;
+
+	const original = plugin.getStreamURL.bind(plugin);
+
+	plugin.getStreamURL = async (song: never): Promise<string> => {
+		const url = await original(song);
+		await relay.start();
+		return relay.register(url);
+	};
+
+	return plugin;
+}
 
 /** Built once, on first use, because DisTube needs the logged-in client. */
 export function music(client: TestifyClient): DisTube {
@@ -27,26 +57,32 @@ export function music(client: TestifyClient): DisTube {
 function build(client: TestifyClient): DisTube {
 	const ffmpeg = resolveFfmpeg(client.env.FFMPEG_PATH);
 
+	// Only when the chosen FFmpeg cannot resolve a hostname. A healthy host streams
+	// straight from the CDN and never starts a relay.
+	const relay = ffmpeg.degraded === true ? new StreamRelay() : undefined;
+	activeRelay = relay;
+
+	if (relay !== undefined) {
+		client.logger.warn(
+			{ ffmpegPath: ffmpeg.path },
+			"[MUSIC] This FFmpeg build cannot resolve hostnames, so tracks are being relayed through " +
+				"a local loopback server. Playback works; installing FFmpeg system-wide or setting " +
+				"FFMPEG_PATH avoids the extra hop. Run `npm run music:doctor` for detail.",
+		);
+	} else {
+		client.logger.debug({ ffmpegPath: ffmpeg.path, source: ffmpeg.source }, "[MUSIC] Selected FFmpeg");
+	}
+
 	const player = new DisTube(client, {
 		// The yt-dlp plugin refreshes its binary on construction, and must be last:
 		// its `validate()` returns true for every URL, so anything after it is dead.
-		plugins: [new SoundCloudPlugin(), new YtDlpPlugin({ update: true })],
+		plugins: [relayed(new SoundCloudPlugin(), relay), relayed(new YtDlpPlugin({ update: true }), relay)],
 		emitNewSongOnly: true,
 		savePreviousSongs: true,
 		nsfw: false,
 		joinNewVoiceChannel: false,
 		...(ffmpeg.path !== null ? { ffmpeg: { path: ffmpeg.path } } : {}),
 	});
-
-	if (ffmpeg.degraded === true) {
-		client.logger.warn(
-			{ ffmpegPath: ffmpeg.path },
-			"[MUSIC] The bundled FFmpeg crashes on network input, so no track will stream. " +
-				"Install FFmpeg system-wide (apt install ffmpeg) or set FFMPEG_PATH. Run `npm run music:doctor` for detail.",
-		);
-	} else {
-		client.logger.debug({ ffmpegPath: ffmpeg.path, source: ffmpeg.source }, "[MUSIC] Selected FFmpeg");
-	}
 
 	// Every source ends up as an FFmpeg process fed a stream URL, and DisTube reports
 	// that process — its command line, its stderr, its exit code — only through this
