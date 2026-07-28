@@ -33,7 +33,7 @@ The new and improved TypeScript rewrite of Testify — an all-in-one Discord bot
 </strong></p>
 
 <p align="center">
-87 slash commands, 143 subcommands and 230 things you can actually run: moderation, economy, levelling, music,
+78 slash commands, 128 subcommands and 206 things you can actually run: moderation, economy, levelling,
 tickets, giveaways and games. Every command works as <code>/ban</code> <strong>and</strong> as
 <code>t?ban</code> — because underneath it is one command, not two copies.
 </p>
@@ -104,9 +104,8 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **Shops, houses, businesses and jobs** — plus pets that need feeding and walking
 - **Levelling** — XP with configurable channels, boost roles and multipliers, and a leaderboard
 
-### 🎵 Music and games
+### 🎯 Games
 
-- **Music** — YouTube and SoundCloud playback with a queue, filters, seek, autoplay, radio and TTS
 - **Games** — blackjack, guess the number, guess the Pokémon, fast type, rock paper scissors, 8ball
 
 ### 🎉 Community and utility
@@ -282,7 +281,6 @@ list.
 | 🛡️ Moderation |    17     | Ban, kick, mute, warn, softban, lock, clear, roles, slowmode                |
 | 📚 Info       |    11     | User, server and role info, avatars, profiles, ping, help                   |
 | ⚙️ Settings   |    10     | Automod, audit logging, auto roles, counting, welcome, verification, prefix |
-| 🎵 Music      |     9     | Play, queue, skip, seek, filters, autoplay, radio, TTS                      |
 | 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                 |
 | 👥 Community  |     3     | Memes, translation, Minecraft lookups, advice, wiki                         |
 | 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                      |
@@ -292,7 +290,7 @@ list.
 | 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                  |
 | 🎫 Tickets    |     1     | Setup, status, disable                                                      |
 
-Some categories look small but hold a lot: `/game`, `/fun`, `/lookup` and `/music` group many subcommands
+Some categories look small but hold a lot: `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.
 
 ## Adding your own command
@@ -469,15 +467,14 @@ not required. The name, colours and links live in `src/config/theme.ts`.
 
 ## Troubleshooting
 
-| Symptom                                          | Fix                                                                                                                    |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
-| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                                      |
-| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string                   |
-| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                                             |
-| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how                     |
-| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                                                 |
-| `EBADENGINE` during install                      | Your Node is older than 22.11. Run `nvm use`                                                                           |
-| Music will not play                              | The bot has to be in a voice channel with you. ffmpeg ships with the project, so check the console for a DisTube error |
+| Symptom                                          | Fix                                                                                                  |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                    |
+| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string |
+| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                           |
+| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how   |
+| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                               |
+| `EBADENGINE` during install                      | Your Node is older than 22.11. Run `nvm use`                                                         |
 
 Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 [open an issue](https://github.com/Kkkermit/Testify/issues).

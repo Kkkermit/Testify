@@ -42,19 +42,6 @@ export const theme = {
 		last: "⏭️",
 		tick: "✔️",
 	},
-
-	music: {
-		play: "▶️",
-		pause: "⏸️",
-		stop: "⏹️",
-		queue: "📄",
-		repeat: "🔁",
-		shuffle: "🔀",
-		skip: "⏭️",
-		previous: "⏮️",
-		volume: "🔊",
-		success: "🎵",
-	},
 } as const;
 
 export function categoryColour(category: Category): ColorResolvable {

@@ -9,7 +9,6 @@ import {
 	sectionWithThumbnail,
 	text,
 } from "@lib/containers.util";
-import { explainPlaybackFailure } from "@lib/music.util";
 
 const json = (builder: { toJSON(): unknown }): Record<string, unknown> => builder.toJSON() as Record<string, unknown>;
 
@@ -122,36 +121,5 @@ describe("container", () => {
 
 	it("builds an empty container without throwing", () => {
 		expect(() => container({ parts: [] })).not.toThrow();
-	});
-});
-
-/**
- * The failure the user actually sees. An extraction error used to surface as an
- * instantly-ended queue with no explanation.
- */
-describe("explainPlaybackFailure", () => {
-	it.each([
-		["Deprecated Feature: --no-call-home", /out of date/i],
-		["ERROR: Sign in to confirm you're not a bot", /rate limiting/i],
-		["ERROR: Video unavailable", /not available/i],
-		["Unable to download webpage: proxy", /reach the track source/i],
-		["ffmpeg exited with code 1", /FFmpeg/i],
-	])("explains %p", (stderr, expected) => {
-		expect(explainPlaybackFailure(new Error(stderr))).toMatch(expected);
-	});
-
-	it("reads yt-dlp's stderr in preference to the wrapper message", () => {
-		const error = Object.assign(new Error("YTDLP_ERROR"), { stderr: "ERROR: Private video" });
-		expect(explainPlaybackFailure(error)).toMatch(/not available/i);
-	});
-
-	it("falls back to something useful for an error it does not recognise", () => {
-		expect(explainPlaybackFailure(new Error("something odd"))).toMatch(/logs/i);
-	});
-
-	/** The raw stderr must never reach chat — it leaks paths and is a wall of text. */
-	it("never returns the raw error text", () => {
-		const raw = "Traceback (most recent call last): /home/user/secret/path.py";
-		expect(explainPlaybackFailure(new Error(raw))).not.toContain("/home/user");
 	});
 });

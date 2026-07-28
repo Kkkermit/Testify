@@ -23,8 +23,6 @@ export * from "./heistState.util";
 export * from "./helpPages.util";
 export * from "./http.util";
 export * from "./moderationActions.util";
-export * from "./music.util";
-export * from "./musicGuards.util";
 export * from "./pagination.util";
 export * from "./pets.util";
 export * from "./reply.util";

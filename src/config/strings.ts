@@ -38,13 +38,6 @@ export const strings = {
 		botTarget: "Bots do not have economy accounts.",
 	},
 
-	music: {
-		noVoiceChannel: "Join a voice channel first.",
-		differentVoiceChannel: "You have to be in the same voice channel as me.",
-		nothingPlaying: "There is nothing playing right now.",
-		queueEmpty: "The queue is empty.",
-	},
-
 	ticket: {
 		description: "🗳️ Ticket has been opened by",
 		created: "Your ticket has been created.",

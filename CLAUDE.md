@@ -105,7 +105,7 @@ an editor tab, a stack trace and a `git log` line. The reference applied this de
 | Suffix       | For                              | Example                             |
 | ------------ | -------------------------------- | ----------------------------------- |
 | `.slash.ts`  | a slash command                  | `commands/moderation/ban.slash.ts`  |
-| `.prefix.ts` | a prefix-only command            | `commands/music/play.prefix.ts`     |
+| `.prefix.ts` | a prefix-only command            | `commands/fun/ascii.prefix.ts`      |
 | `.event.ts`  | a gateway event handler          | `events/ReadyEvents/ready.event.ts` |
 | `.util.ts`   | a shared helper                  | `lib/duration.util.ts`              |
 | `.schema.ts` | a Mongoose model                 | `database/models/economy.schema.ts` |

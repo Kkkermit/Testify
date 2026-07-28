@@ -57,7 +57,7 @@ export interface LoadCounts {
  * with something unhelpful.
  *
  * `src/commands/<category>/name.slash.ts` is a command. Anything deeper — such
- * as `src/commands/music/subcommands/seek.slash.ts` — is a piece of one, reached
+ * as `src/commands/economy/subcommands/shop.slash.ts` — is a piece of one, reached
  * only because its parent imports it.
  */
 export function loadEverything(client: TestifyClient): LoadCounts {

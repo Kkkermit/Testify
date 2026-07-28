@@ -105,9 +105,9 @@ describe("richer command pages", () => {
 	});
 
 	const withSubs = defineCommand({
-		name: "music",
-		description: "Music controls.",
-		category: "music",
+		name: "settings",
+		description: "Server settings.",
+		category: "settings",
 		subcommands: Array.from({ length: 14 }, (_unused, index) => ({
 			name: `sub${index}`,
 			description: `Does thing ${index}.`,
@@ -151,10 +151,10 @@ describe("richer command pages", () => {
 	/** Discord caps a field at 1024 characters, so a long subcommand list has to stop. */
 	it("caps a long subcommand list and says how many were hidden", () => {
 		const client = createMockClient({
-			commands: new Collection([["music", withSubs]]),
+			commands: new Collection([["settings", withSubs]]),
 		});
 
-		const rendered = JSON.stringify(categoryPage(client, "music", 0, "slash", "t?").toJSON());
+		const rendered = JSON.stringify(categoryPage(client, "settings", 0, "slash", "t?").toJSON());
 
 		expect(rendered).toContain("and 4 more");
 	});
