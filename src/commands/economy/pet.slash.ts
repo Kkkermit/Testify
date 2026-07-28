@@ -1,12 +1,14 @@
 import { MessageFlags } from "discord.js";
+import { balancesOf } from "@buttons/shop";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { discordTime, formatNumber, progressBar } from "@lib/format.util";
-import { ALL_PETS, decayValue, findPet, PETS_BY_RARITY, petStatus } from "@lib/pets.util";
+import { ALL_PETS, decayValue, findPet, petStatus } from "@lib/pets.util";
 import { reply } from "@lib/reply.util";
+import { isPetRarity, shopScreen } from "@lib/shopScreen.util";
 
 const RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
 
@@ -28,23 +30,19 @@ export default defineCommand({
 				},
 			],
 			async run(interaction) {
-				const rarity = (interaction.options.getString("rarity") ?? "common") as (typeof RARITIES)[number];
-				const pets = PETS_BY_RARITY[rarity];
+				const guild = inGuild(interaction);
+				const rarity = interaction.options.getString("rarity") ?? "common";
+				const account = await requireAccount(guild.id, interaction.user.id);
 
-				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "economy",
-							title: `Pet shop \u2014 ${rarity}`,
-							description: "Buy one with `/pet buy <id> <name>`.",
-							fields: pets.map((pet) => ({
-								name: `${pet.emoji} ${pet.name} \u2014 ${formatNumber(pet.price)}`,
-								value: `${pet.description}\nFeeding: **${formatNumber(pet.feedCost)}** \u00b7 Income bonus: **+${pet.incomeBonus}**\n\`${pet.id}\``,
-								inline: false,
-							})),
-						}),
-					],
-				});
+				// The pet shop is the shop's pets section — one browser, not two.
+				await reply(
+					interaction,
+					shopScreen(
+						{ section: "pets", ...(isPetRarity(rarity) ? { rarity } : {}) },
+						balancesOf(account),
+						interaction.user.id,
+					),
+				);
 			},
 		},
 		{

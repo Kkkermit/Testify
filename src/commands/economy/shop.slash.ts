@@ -1,3 +1,4 @@
+import { balancesOf } from "@buttons/shop";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -8,10 +9,11 @@ import {
 	requireAccount,
 	setFields,
 } from "@database/repositories/economyRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
+import { successEmbed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
-import { BUSINESSES, findBusiness, findHouse, findShopItem, HOUSES, SHOP_ITEMS } from "@lib/shop.util";
+import { findBusiness, findHouse, findShopItem } from "@lib/shop.util";
+import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/shopScreen.util";
 
 export default defineCommand({
 	name: "shop",
@@ -27,45 +29,18 @@ export default defineCommand({
 					name: "section",
 					description: "Which part of the shop.",
 					type: "string",
-					choices: [
-						{ name: "items", value: "items" },
-						{ name: "houses", value: "houses" },
-						{ name: "businesses", value: "businesses" },
-					],
+					choices: SHOP_SECTIONS.map((section) => ({ name: section, value: section })),
 				},
 			],
 			async run(interaction) {
+				const guild = inGuild(interaction);
 				const section = interaction.options.getString("section") ?? "items";
+				const account = await requireAccount(guild.id, interaction.user.id);
 
-				const entries =
-					section === "houses"
-						? HOUSES.map((house) => ({
-								name: `${house.emoji} ${house.name} \u2014 ${formatNumber(house.price)}`,
-								value: `${house.description}\nPassive income: **${formatNumber(house.income)}/hour**\n\`${house.id}\``,
-								inline: false,
-							}))
-						: section === "businesses"
-							? BUSINESSES.map((business) => ({
-									name: `${business.emoji} ${business.name} \u2014 ${formatNumber(business.price)}`,
-									value: `${business.description}\nPassive income: **${formatNumber(business.income)}/hour**\n\`${business.id}\``,
-									inline: false,
-								}))
-							: SHOP_ITEMS.map((item) => ({
-									name: `${item.emoji} ${item.name} \u2014 ${formatNumber(item.price)}`,
-									value: `${item.description}\n\`${item.id}\``,
-									inline: false,
-								}));
-
-				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "economy",
-							title: `Shop \u2014 ${section}`,
-							description: "Buy with `/shop buy <id>`.",
-							fields: entries,
-						}),
-					],
-				});
+				await reply(
+					interaction,
+					shopScreen({ section: isShopSection(section) ? section : "items" }, balancesOf(account), interaction.user.id),
+				);
 			},
 		},
 		{
@@ -151,7 +126,7 @@ export default defineCommand({
 					return;
 				}
 
-				throw new UserFacingError(`Nothing in the shop has the id \`${id}\`. Use \`/shop view\` to browse.`);
+				throw new UserFacingError(`Nothing in the shop has the id \`${id}\`. Use \`/shop view\` to browse it.`);
 			},
 		},
 		{
