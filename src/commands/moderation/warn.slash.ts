@@ -15,7 +15,18 @@ import { dmEmbed, notifyTarget } from "@lib/moderationActions.util";
 import { reply } from "@lib/reply.util";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
-const WARN_ID_OPTION = { name: "warn-id", description: "The warning ID.", type: "string", required: true } as const;
+/**
+ * Autocompleted rather than typed. Making someone copy a generated ID out of a
+ * previous embed is the exact pattern the UX notes call out — the bot already
+ * knows every warning this user has, so it offers them.
+ */
+const WARN_ID_OPTION = {
+	name: "warn-id",
+	description: "Start typing to pick a warning.",
+	type: "string",
+	required: true,
+	autocomplete: true,
+} as const;
 
 export default defineCommand({
 	name: "warn",
@@ -207,5 +218,32 @@ export default defineCommand({
 			content: "Pick a subcommand: `create`, `list`, `info`, `edit`, `remove` or `clear`.",
 			flags: MessageFlags.Ephemeral,
 		});
+	},
+
+	/** Offers the chosen member's warnings, newest first, described not just listed. */
+	async autocomplete(interaction) {
+		const guildId = interaction.guildId;
+		// Discord does not resolve user objects during autocomplete, so the option
+		// comes back as a raw snowflake.
+		const targetId = interaction.options.get("user")?.value;
+		if (guildId === null || typeof targetId !== "string") {
+			await interaction.respond([]);
+			return;
+		}
+
+		const query = interaction.options.getFocused().toLowerCase();
+		const record = await getWarnings(guildId, targetId);
+
+		const choices = (record?.warnings ?? [])
+			.slice()
+			.reverse()
+			.filter((warning) => warning.warnId.toLowerCase().includes(query) || warning.reason.toLowerCase().includes(query))
+			.slice(0, 25)
+			.map((warning) => ({
+				name: truncate(`${warning.warnId} — ${warning.reason}`, 100),
+				value: warning.warnId,
+			}));
+
+		await interaction.respond(choices);
 	},
 });

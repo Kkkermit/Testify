@@ -1,4 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
+import { settingsOf, treasurePanel } from "@buttons/treasure";
 import { TREASURE_DEFAULTS } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -106,4 +107,14 @@ export default defineCommand({
 			},
 		},
 	],
+
+	// The panel is the discoverable path: every setting visible at once with its
+	// current value, instead of eleven options nobody finds. `configure` stays for
+	// anyone who would rather type it in one go.
+	async run(interaction) {
+		const guild = inGuild(interaction);
+		const config = await getTreasureConfig(guild.id);
+
+		await reply(interaction, treasurePanel(settingsOf(config), config !== null));
+	},
 });

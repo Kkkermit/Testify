@@ -2,12 +2,22 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	type EmbedBuilder,
 	type MessageActionRowComponentBuilder,
+	ModalBuilder,
 	StringSelectMenuBuilder,
 	type StringSelectMenuOptionBuilder,
+	TextInputBuilder,
+	TextInputStyle,
 } from "discord.js";
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
+
+/** What every panel returns: one embed set and its controls. */
+export interface RenderedScreen {
+	embeds: EmbedBuilder[];
+	components: ActionRowBuilder<MessageActionRowComponentBuilder>[];
+}
 
 export interface ButtonOptions {
 	id: string;
@@ -122,4 +132,86 @@ export function disableAll(
 		}
 	}
 	return rows;
+}
+
+/**
+ * `[25%] [50%] [All] [Custom…]` for an amount the user would otherwise type.
+ *
+ * The percentages are resolved to real figures here rather than in the handler,
+ * so the label shows what pressing it will actually do.
+ */
+export function quickAmountRow(
+	id: string,
+	action: string,
+	max: number,
+	ownerId: string,
+	format: (amount: number) => string = String,
+): ActionRowBuilder<MessageActionRowComponentBuilder> {
+	const quarter = Math.floor(max * 0.25);
+	const half = Math.floor(max * 0.5);
+
+	return row(
+		button({
+			id: customId(id, action, quarter, ownerId),
+			label: `25% — ${format(quarter)}`,
+			disabled: quarter <= 0,
+		}),
+		button({ id: customId(id, action, half, ownerId), label: `50% — ${format(half)}`, disabled: half <= 0 }),
+		button({
+			id: customId(id, action, max, ownerId),
+			label: `All — ${format(max)}`,
+			style: ButtonStyle.Success,
+			disabled: max <= 0,
+		}),
+		button({ id: customId(id, `${action}-custom`, ownerId), label: "Custom…", style: ButtonStyle.Secondary }),
+	);
+}
+
+export interface ModalField {
+	id: string;
+	label: string;
+	/** Defaults to a single-line input. */
+	paragraph?: boolean;
+	required?: boolean;
+	placeholder?: string;
+	maxLength?: number;
+	/** Pre-fills the input. Passing the current setting turns a form into an editor. */
+	value?: string;
+}
+
+/**
+ * Builds a modal whose custom ID carries its own state, so the submit handler
+ * knows what it is editing without anything being held in memory.
+ *
+ * Pre-filling `value` with the current setting is what turns a config command
+ * into an editable form rather than a list of options nobody can discover.
+ */
+export function modalForm(options: {
+	id: string;
+	action: string;
+	args?: (string | number)[];
+	title: string;
+	fields: ModalField[];
+}): ModalBuilder {
+	const modal = new ModalBuilder()
+		.setCustomId(customId(options.id, options.action, ...(options.args ?? [])))
+		.setTitle(options.title.slice(0, 45));
+
+	modal.addComponents(
+		options.fields.map((field) => {
+			const input = new TextInputBuilder()
+				.setCustomId(field.id)
+				.setLabel(field.label.slice(0, 45))
+				.setStyle(field.paragraph === true ? TextInputStyle.Paragraph : TextInputStyle.Short)
+				.setRequired(field.required ?? true);
+
+			if (field.placeholder !== undefined) input.setPlaceholder(field.placeholder);
+			if (field.maxLength !== undefined) input.setMaxLength(field.maxLength);
+			if (field.value !== undefined && field.value !== "") input.setValue(field.value);
+
+			return new ActionRowBuilder<TextInputBuilder>().addComponents(input);
+		}),
+	);
+
+	return modal;
 }
