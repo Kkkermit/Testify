@@ -23,6 +23,7 @@ The documents are sized to be pasted individually. A practical sequence:
 | Port one command category | `commands/<Category>.md` + `migration/11-TYPED-CONTRACTS.md` + `migration/17-CODING-STANDARDS.md` |
 | Port the data layer | `07-DATA-MODEL.md` + `migration/11-TYPED-CONTRACTS.md` |
 | Merge a duplicated command pair | `migration/13-DEDUPLICATION-MAP.md` + both category docs |
+| Design a button/menu/modal flow | `migration/20-INTERACTIVE-UX-PATTERNS.md` |
 | Write tests | `migration/16-TESTING-STRATEGY.md` |
 | Review a PR / set house style | `migration/17-CODING-STANDARDS.md` |
 | Make the bot self-hostable, add community files | `migration/19-OPEN-SOURCE.md` |
@@ -89,6 +90,7 @@ external URLs, env vars, issues and rewrite notes.
 | [`migration/17-CODING-STANDARDS.md`](migration/17-CODING-STANDARDS.md) | Naming, file organisation, **the anti-patterns that must not come back**, error handling, async, imports, JSDoc, commits, the PR checklist |
 | [`migration/18-HELPERS-AND-UTILS.md`](migration/18-HELPERS-AND-UTILS.md) | Full API for every shared module, each stating which duplication it eliminates, plus the build order |
 | [`migration/19-OPEN-SOURCE.md`](migration/19-OPEN-SOURCE.md) | Self-hostability, the missing GitHub templates, `SECURITY.md`, releases, README corrections, good-first-issue backlog |
+| [`migration/20-INTERACTIVE-UX-PATTERNS.md`](migration/20-INTERACTIVE-UX-PATTERNS.md) | **How buttons, select menus and modals make commands feel seamless** — the shop drill-down exemplar, the six interaction archetypes, ownership rules, where the bot still forces typing (music has *no* components), and the screen-based TypeScript design |
 
 ---
 
