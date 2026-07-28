@@ -31,6 +31,8 @@ const schema = z.object({
 	// Optional.
 	NODE_ENV: z.enum(["development", "production", "test"]).default("production"),
 	LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
+	// Escape hatch for hosts where the bundled FFmpeg crashes on network input.
+	FFMPEG_PATH: z.string().optional(),
 	DISCORD_DEV_GUILD_ID: id.optional(),
 	CHANNEL_ERROR_LOG: id.optional(),
 	CHANNEL_GUILD_LOG: id.optional(),

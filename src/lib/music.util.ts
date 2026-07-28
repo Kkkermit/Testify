@@ -1,14 +1,22 @@
 import { SoundCloudPlugin } from "@distube/soundcloud";
 import { YtDlpPlugin } from "@distube/yt-dlp";
 import { DisTube, Events as DisTubeEvent, type Playlist, type Queue, type Song } from "distube";
-import ffmpegPath from "ffmpeg-static";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { embed, errorEmbed } from "@lib/embeds.util";
+import { resolveFfmpeg } from "@lib/ffmpeg.util";
 import { formatTrackTime } from "@lib/format.util";
 
 let distube: DisTube | undefined;
+
+/**
+ * FFmpeg writes its ordinary progress to stderr too, so a plain "there was output"
+ * check would warn on every track. These are the lines that mean a stream never
+ * arrived — an HTTP status from the CDN, a refused connection, a non-zero exit.
+ */
+const FFMPEG_FAILURE =
+	/\b(4\d{2}|5\d{2}) (Forbidden|Not Found|Unauthorized|Bad Gateway|Service Unavailable)|Server returned|Connection refused|Invalid data found|No such file|error(?!s? in)/i;
 
 /** Built once, on first use, because DisTube needs the logged-in client. */
 export function music(client: TestifyClient): DisTube {
@@ -17,16 +25,36 @@ export function music(client: TestifyClient): DisTube {
 }
 
 function build(client: TestifyClient): DisTube {
+	const ffmpeg = resolveFfmpeg(client.env.FFMPEG_PATH);
+
 	const player = new DisTube(client, {
-		// yt-dlp breaks every time YouTube changes something, so it refreshes itself
-		// on first use. The download is lazy — `music()` is only built when someone
-		// actually plays something, so this never slows start-up down.
+		// The yt-dlp plugin refreshes its binary on construction, and must be last:
+		// its `validate()` returns true for every URL, so anything after it is dead.
 		plugins: [new SoundCloudPlugin(), new YtDlpPlugin({ update: true })],
 		emitNewSongOnly: true,
 		savePreviousSongs: true,
 		nsfw: false,
 		joinNewVoiceChannel: false,
-		...(ffmpegPath !== null ? { ffmpeg: { path: ffmpegPath } } : {}),
+		...(ffmpeg.path !== null ? { ffmpeg: { path: ffmpeg.path } } : {}),
+	});
+
+	if (ffmpeg.degraded === true) {
+		client.logger.warn(
+			{ ffmpegPath: ffmpeg.path },
+			"[MUSIC] The bundled FFmpeg crashes on network input, so no track will stream. " +
+				"Install FFmpeg system-wide (apt install ffmpeg) or set FFMPEG_PATH. Run `npm run music:doctor` for detail.",
+		);
+	} else {
+		client.logger.debug({ ffmpegPath: ffmpeg.path, source: ffmpeg.source }, "[MUSIC] Selected FFmpeg");
+	}
+
+	// Every source ends up as an FFmpeg process fed a stream URL, and DisTube reports
+	// that process — its command line, its stderr, its exit code — only through this
+	// event. Without a listener a failed fetch is silent: the queue just ends. Run
+	// with LOG_LEVEL=debug to see it, and `npm run music:doctor` to check the rest.
+	player.on(DisTubeEvent.FFMPEG_DEBUG, (message: string) => {
+		if (FFMPEG_FAILURE.test(message)) client.logger.warn({ ffmpeg: message }, "[MUSIC] FFmpeg reported a problem");
+		else client.logger.debug({ ffmpeg: message }, "[MUSIC] FFmpeg");
 	});
 
 	player.on(DisTubeEvent.PLAY_SONG, (queue: Queue, song: Song) => {
