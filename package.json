@@ -42,6 +42,7 @@
 		"prepare": "husky",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
 		"setup": "tsx scripts/setupEnv.ts",
+		"music:update": "tsx scripts/updateYtDlp.ts",
 		"commands:clear": "tsx scripts/clearCommands.ts",
 		"audit": "better-npm-audit audit --level high",
 		"commit": "tsx scripts/commitRunner.ts"

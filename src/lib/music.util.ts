@@ -2,14 +2,11 @@ import { SoundCloudPlugin } from "@distube/soundcloud";
 import { YtDlpPlugin } from "@distube/yt-dlp";
 import { DisTube, Events as DisTubeEvent, type Playlist, type Queue, type Song } from "distube";
 import ffmpegPath from "ffmpeg-static";
-import { panelStateOf } from "@buttons/music";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
-import { type RenderedScreen } from "@lib/components.util";
 import { embed, errorEmbed } from "@lib/embeds.util";
 import { formatTrackTime } from "@lib/format.util";
-import { musicPanel } from "@lib/musicPanel.util";
 
 let distube: DisTube | undefined;
 
@@ -21,7 +18,10 @@ export function music(client: TestifyClient): DisTube {
 
 function build(client: TestifyClient): DisTube {
 	const player = new DisTube(client, {
-		plugins: [new SoundCloudPlugin(), new YtDlpPlugin({ update: false })],
+		// yt-dlp breaks every time YouTube changes something, so it refreshes itself
+		// on first use. The download is lazy — `music()` is only built when someone
+		// actually plays something, so this never slows start-up down.
+		plugins: [new SoundCloudPlugin(), new YtDlpPlugin({ update: true })],
 		emitNewSongOnly: true,
 		savePreviousSongs: true,
 		nsfw: false,
@@ -29,10 +29,18 @@ function build(client: TestifyClient): DisTube {
 		...(ffmpegPath !== null ? { ffmpeg: { path: ffmpegPath } } : {}),
 	});
 
-	// One panel per queue, edited in place. Posting a fresh "now playing" for every
-	// track is what made the channel unreadable on a long queue.
-	player.on(DisTubeEvent.PLAY_SONG, (queue: Queue) => {
-		void showPanel(queue);
+	player.on(DisTubeEvent.PLAY_SONG, (queue: Queue, song: Song) => {
+		void queue.textChannel?.send({
+			embeds: [
+				embed({
+					category: "music",
+					title: `${theme.music.play} Now playing`,
+					description: `**[${song.name}](${song.url})** — ${song.formattedDuration}`,
+					footer: `Requested by ${song.user?.username ?? "unknown"} • /now-playing for the controls`,
+					...(song.thumbnail !== undefined ? { thumbnail: song.thumbnail } : {}),
+				}),
+			],
+		});
 	});
 
 	player.on(DisTubeEvent.ADD_SONG, (queue: Queue, song: Song) => {
@@ -61,8 +69,9 @@ function build(client: TestifyClient): DisTube {
 	});
 
 	player.on(DisTubeEvent.FINISH, (queue: Queue) => {
-		// A dead button should look dead, so the panel is greyed out rather than left live.
-		void editPanel(queue, musicPanel({ ...panelStateOf(queue), finished: true }));
+		void queue.textChannel?.send({
+			embeds: [embed({ category: "music", description: `${theme.music.stop} The queue has finished.` })],
+		});
 	});
 
 	player.on(DisTubeEvent.DISCONNECT, (queue: Queue) => {
@@ -72,48 +81,39 @@ function build(client: TestifyClient): DisTube {
 	});
 
 	player.on(DisTubeEvent.ERROR, (error: Error, queue: Queue | undefined) => {
-		client.logger.error({ err: toError(error), guildId: queue?.id ?? null }, "Music playback error");
-		void queue?.textChannel?.send({ embeds: [errorEmbed("Something went wrong while playing that track.")] });
+		client.logger.error({ err: toError(error), guildId: queue?.id ?? null }, "[MUSIC_ERROR] Playback failed");
+		void queue?.textChannel?.send({ embeds: [errorEmbed(explainPlaybackFailure(error))] });
 	});
 
 	return player;
 }
 
 /**
- * The message ID of each guild's panel, so the next track edits the existing one
- * instead of posting another. Losing the entry just means a new panel is posted.
+ * Turns an extraction failure into something a server owner can act on.
+ *
+ * yt-dlp breaks whenever YouTube changes, and the raw stderr is a wall of Python
+ * warnings — so the common causes get named explicitly instead of the user
+ * seeing an empty queue and no explanation.
  */
-const panels = new Map<string, string>();
+export function explainPlaybackFailure(error: unknown): string {
+	const detail = error as { stderr?: string; message?: string };
+	const text = String(detail.stderr ?? detail.message ?? error);
 
-async function showPanel(queue: Queue): Promise<void> {
-	const channel = queue.textChannel;
-	if (!channel?.isSendable()) return;
-
-	const rendered = musicPanel(panelStateOf(queue));
-
-	if (await editPanel(queue, rendered)) return;
-
-	try {
-		const sent = await channel.send(rendered);
-		panels.set(queue.id, sent.id);
-	} catch {
-		// A missing-permissions failure here must not take the playback down with it.
+	if (/no-call-home|Deprecated Feature/i.test(text)) {
+		return "The track extractor is out of date. Run `npm run music:update` to refresh yt-dlp, then try again.";
 	}
-}
-
-/** Returns false when there was no panel to edit, so the caller can post one. */
-async function editPanel(queue: Queue, rendered: RenderedScreen): Promise<boolean> {
-	const messageId = panels.get(queue.id);
-	const channel = queue.textChannel;
-	if (messageId === undefined || !channel?.isSendable()) return false;
-
-	try {
-		const message = await channel.messages.fetch(messageId);
-		await message.edit(rendered);
-		return true;
-	} catch {
-		// Deleted or too old to edit — fall back to posting a fresh one.
-		panels.delete(queue.id);
-		return false;
+	if (/Sign in to confirm|not a bot|429|Too Many Requests/i.test(text)) {
+		return "YouTube is rate limiting this server. Wait a few minutes, or try a SoundCloud link.";
 	}
+	if (/Video unavailable|Private video|members-only|age[- ]restricted/i.test(text)) {
+		return "That track is not available — it may be private, age-restricted or region-locked.";
+	}
+	if (/Unable to (download|connect)|proxy|ENOTFOUND|ETIMEDOUT/i.test(text)) {
+		return "Could not reach the track source. Check the host's network, then try again.";
+	}
+	if (/ffmpeg/i.test(text)) {
+		return "FFmpeg could not decode that track. Reinstall dependencies with `npm ci`.";
+	}
+
+	return "Something went wrong while playing that track. The full error is in the bot's logs.";
 }

@@ -1,13 +1,16 @@
-import {
-	type ActionRowBuilder,
-	ButtonStyle,
-	type EmbedBuilder,
-	type MessageActionRowComponentBuilder,
-} from "discord.js";
+import { type ActionRowBuilder, ButtonStyle, type MessageActionRowComponentBuilder } from "discord.js";
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
-import { button, disableAll, type RenderedScreen, row } from "@lib/components.util";
-import { embed } from "@lib/embeds.util";
+import { button, disableAll, row } from "@lib/components.util";
+import {
+	container,
+	type ContainerMessage,
+	containerMessage,
+	type ContainerPart,
+	divider,
+	sectionWithThumbnail,
+	text,
+} from "@lib/containers.util";
 import { formatNumber, formatTrackTime, progressBar } from "@lib/format.util";
 
 /**
@@ -17,13 +20,17 @@ import { formatNumber, formatTrackTime, progressBar } from "@lib/format.util";
  * twenty-one separate typed commands for what is one set of transport controls.
  * This renders the whole thing as one message the handlers mutate in place.
  *
+ * Built as a Components V2 container rather than an embed so the album art sits
+ * beside the track rather than floating in a corner, and so the transport rows
+ * are part of the same bordered block instead of hanging underneath it.
+ *
  * Kept pure and free of DisTube types so it can be tested without a player: the
  * command layer reads the queue, this decides what the panel looks like.
  */
 
 export const MUSIC_PANEL_ID = "music";
 
-/** What the panel needs to know. A queue is mapped onto this at the call site. */
+/** What the panel needs to know. A queue is mapped onto this by `@lib/musicQueue.util`. */
 export interface PanelState {
 	title: string;
 	url?: string;
@@ -57,30 +64,34 @@ export function nextVolume(current: number, direction: "up" | "down"): number {
 	return Math.max(0, Math.min(VOLUME_MAX, target));
 }
 
-export function panelEmbed(state: PanelState): EmbedBuilder {
-	const position = `${formatTrackTime(state.elapsedMs)} / ${formatTrackTime(state.durationMs)}`;
+/** The written half of the panel, without the controls. */
+export function panelBody(state: PanelState): ContainerPart[] {
 	const heading = state.finished === true ? "Queue ended" : state.paused ? "Paused" : "Now playing";
+	const title = state.url !== undefined ? `**[${state.title}](${state.url})**` : `**${state.title}**`;
 
-	return embed({
-		category: "music",
-		title: `${state.paused ? theme.music.pause : theme.music.play} ${heading}`,
-		description: [
-			state.url !== undefined ? `**[${state.title}](${state.url})**` : `**${state.title}**`,
-			state.author ?? "",
-			"",
-			progressBar(state.elapsedMs, Math.max(1, state.durationMs)),
-			position,
-		]
-			.filter(Boolean)
-			.join("\n"),
-		fields: [
-			{ name: "Volume", value: `${theme.music.volume} ${state.volume}%`, inline: true },
-			{ name: "Repeat", value: `${theme.music.repeat} ${repeatLabel(state.repeatMode)}`, inline: true },
-			{ name: "Up next", value: `${theme.music.queue} ${formatNumber(state.queueLength)} queued`, inline: true },
-		],
-		...(state.thumbnail !== undefined ? { thumbnail: state.thumbnail } : {}),
-		...(state.requestedBy !== undefined ? { footer: `Requested by ${state.requestedBy}` } : {}),
-	});
+	const summary = [
+		`### ${state.paused ? theme.music.pause : theme.music.play} ${heading}`,
+		title,
+		state.author ?? "",
+		"",
+		progressBar(state.elapsedMs, Math.max(1, state.durationMs)),
+		`\`${formatTrackTime(state.elapsedMs)}\` / \`${formatTrackTime(state.durationMs)}\``,
+	]
+		.filter(Boolean)
+		.join("\n");
+
+	const details = [
+		`${theme.music.volume} **${state.volume}%**`,
+		`${theme.music.repeat} **${repeatLabel(state.repeatMode)}**`,
+		`${theme.music.queue} **${formatNumber(state.queueLength)}** queued`,
+		...(state.requestedBy !== undefined ? [`-# Requested by ${state.requestedBy}`] : []),
+	];
+
+	return [
+		state.thumbnail !== undefined ? sectionWithThumbnail(summary, state.thumbnail, state.title) : text(summary),
+		divider(),
+		text(details.slice(0, 3).join("  ·  ") + (details[3] !== undefined ? `\n${details[3]}` : "")),
+	];
 }
 
 export function panelComponents(state: PanelState): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
@@ -117,8 +128,16 @@ export function panelComponents(state: PanelState): ActionRowBuilder<MessageActi
 	return state.finished === true ? disableAll(rows) : rows;
 }
 
-export function musicPanel(state: PanelState): RenderedScreen {
-	return { embeds: [panelEmbed(state)], components: panelComponents(state) };
+export function musicPanel(state: PanelState): ContainerMessage {
+	return containerMessage(container({ category: "music", parts: [...panelBody(state), ...panelComponents(state)] }));
+}
+
+/** The panel with its controls swapped for a confirm/cancel pair. */
+export function panelWithControls(
+	state: PanelState,
+	controls: ActionRowBuilder<MessageActionRowComponentBuilder>[],
+): ContainerMessage {
+	return containerMessage(container({ category: "music", parts: [...panelBody(state), ...controls] }));
 }
 
 /** The paginated queue browser behind the Queue button. */
@@ -130,7 +149,7 @@ export interface QueueEntry {
 	requestedBy?: string;
 }
 
-export function queuePage(entries: QueueEntry[], page: number): RenderedScreen {
+export function queuePage(entries: QueueEntry[], page: number): ContainerMessage {
 	const total = Math.max(1, Math.ceil(entries.length / QUEUE_PAGE_SIZE));
 	const current = Math.min(Math.max(0, page), total - 1);
 	const start = current * QUEUE_PAGE_SIZE;
@@ -142,29 +161,27 @@ export function queuePage(entries: QueueEntry[], page: number): RenderedScreen {
 		return `\`${position}.\` ${entry.title} — ${formatTrackTime(entry.durationMs)}${by}`;
 	});
 
-	return {
-		embeds: [
-			embed({
-				category: "music",
-				title: `${theme.music.queue} Queue`,
-				description: lines.join("\n") || "Nothing queued.",
-				footer: `Page ${current + 1} of ${total} • ${formatNumber(entries.length)} tracks`,
-			}),
-		],
-		components: [
-			row(
-				button({
-					id: customId(MUSIC_PANEL_ID, "queue", Math.max(0, current - 1)),
-					emoji: theme.emoji.previous,
-					disabled: current <= 0,
-				}),
-				button({
-					id: customId(MUSIC_PANEL_ID, "queue", Math.min(total - 1, current + 1)),
-					emoji: theme.emoji.next,
-					disabled: current >= total - 1,
-				}),
-				button({ id: customId(MUSIC_PANEL_ID, "panel"), label: "Back", style: ButtonStyle.Secondary }),
-			),
-		],
-	};
+	return containerMessage(
+		container({
+			category: "music",
+			parts: [
+				text(`### ${theme.music.queue} Queue\n${lines.join("\n") || "Nothing queued."}`),
+				divider(),
+				text(`-# Page ${current + 1} of ${total} • ${formatNumber(entries.length)} tracks`),
+				row(
+					button({
+						id: customId(MUSIC_PANEL_ID, "queue", Math.max(0, current - 1)),
+						emoji: theme.emoji.previous,
+						disabled: current <= 0,
+					}),
+					button({
+						id: customId(MUSIC_PANEL_ID, "queue", Math.min(total - 1, current + 1)),
+						emoji: theme.emoji.next,
+						disabled: current >= total - 1,
+					}),
+					button({ id: customId(MUSIC_PANEL_ID, "panel"), label: "Back", style: ButtonStyle.Secondary }),
+				),
+			],
+		}),
+	);
 }

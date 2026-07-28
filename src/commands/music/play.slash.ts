@@ -1,7 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
 import { theme } from "@config/theme";
 import { defineCommand, inTextChannel } from "@core/command";
+import { toError, UserFacingError } from "@core/errors";
 import { embed } from "@lib/embeds.util";
+import { explainPlaybackFailure } from "@lib/music.util";
 import { requireVoice } from "@lib/musicGuards.util";
 import { reply } from "@lib/reply.util";
 
@@ -26,9 +28,16 @@ export default defineCommand({
 			embeds: [embed({ category: "music", description: `${theme.music.play} Looking for **${query}**…` })],
 		});
 
-		await distube.play(voiceChannel, query, {
-			member,
-			textChannel: inTextChannel(interaction),
-		});
+		try {
+			await distube.play(voiceChannel, query, {
+				member,
+				textChannel: inTextChannel(interaction),
+			});
+		} catch (error) {
+			// A resolve failure would otherwise surface as a generic error while the
+			// queue quietly ends, which is indistinguishable from the track finishing.
+			client.logger.error({ err: toError(error), query }, "[MUSIC_ERROR] Could not start playback");
+			throw new UserFacingError(explainPlaybackFailure(error));
+		}
 	},
 });

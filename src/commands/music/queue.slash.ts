@@ -1,52 +1,21 @@
-import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
-import { embed } from "@lib/embeds.util";
-import { formatTrackTime, truncate } from "@lib/format.util";
 import { requireQueue } from "@lib/musicGuards.util";
-import { buildPage } from "@lib/pagination.util";
+import { queuePage } from "@lib/musicPanel.util";
+import { queueEntriesOf } from "@lib/musicQueue.util";
 import { reply } from "@lib/reply.util";
-
-const PAGE_SIZE = 10;
 
 export default defineCommand({
 	name: "queue",
-	description: "Shows the current queue.",
+	description: "Browses the queue.",
 	category: "music",
 	aliases: ["q"],
 	guildOnly: true,
 
 	async run(interaction, client) {
 		const { queue } = requireQueue(interaction, client);
-		const [current, ...upcoming] = queue.songs;
 
-		const page = buildPage(
-			{
-				items: upcoming,
-				pageSize: PAGE_SIZE,
-				id: "music",
-				ownerId: interaction.user.id,
-				render: (items, index) =>
-					embed({
-						category: "music",
-						title: `${theme.music.queue} Queue`,
-						description: [
-							`**Now playing**\n[${truncate(current?.name ?? "Unknown", 60)}](${current?.url ?? ""}) — ${current?.formattedDuration ?? "unknown"}`,
-							"",
-							items.length > 0
-								? items
-										.map(
-											(song, offset) =>
-												`\`${index * PAGE_SIZE + offset + 1}.\` [${truncate(song.name ?? "Unknown", 50)}](${song.url}) — ${song.formattedDuration}`,
-										)
-										.join("\n")
-								: "Nothing else is queued.",
-						].join("\n"),
-						footer: `${upcoming.length} queued • ${formatTrackTime(queue.duration * 1_000)} total`,
-					}),
-			},
-			0,
-		);
-
-		await reply(interaction, page);
+		// The same browser the panel's Queue button opens, so the arrows and the Back
+		// button are handled by the one place that knows how to page a queue.
+		await reply(interaction, queuePage(queueEntriesOf(queue), 0));
 	},
 });

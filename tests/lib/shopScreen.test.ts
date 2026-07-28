@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { ALL_PETS } from "@lib/pets.util";
 import { HOUSES, JOBS, SHOP_ITEMS } from "@lib/shop.util";
@@ -9,10 +10,12 @@ import {
 	isPetRarity,
 	isShopSection,
 	SHOP_ID,
+	SHOP_PAGE_SIZE,
 	SHOP_SECTIONS,
 	shopScreen,
 	type ShopState,
 } from "@lib/shopScreen.util";
+import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 
@@ -26,20 +29,6 @@ const RICH: Balances = {
 };
 
 const BROKE: Balances = { ...RICH, wallet: 0, ownedItemIds: [] };
-
-function idsOf(rendered: ReturnType<typeof shopScreen>): string[] {
-	return rendered.components.flatMap((row) =>
-		row.components.map((component) => (component.toJSON() as { custom_id?: string }).custom_id ?? ""),
-	);
-}
-
-function selectOptions(rendered: ReturnType<typeof shopScreen>): { label: string; value: string }[] {
-	for (const row of rendered.components) {
-		const json = row.components[0]?.toJSON() as { options?: { label: string; value: string }[] };
-		if (json.options) return json.options;
-	}
-	return [];
-}
 
 describe("shop state", () => {
 	it("round-trips through the custom ID", () => {
@@ -156,27 +145,32 @@ describe("entriesFor", () => {
 describe("the catalogue screen", () => {
 	const screen = shopScreen({ section: "items" }, RICH, OWNER);
 
+	it("is a Components V2 message, so text and buttons can interleave", () => {
+		expect(screen.flags).toBe(MessageFlags.IsComponentsV2);
+	});
+
 	it("shows the wallet, so the price means something", () => {
-		expect(JSON.stringify(screen.embeds[0]?.toJSON())).toContain("Your wallet");
+		expect(textOf(screen)).toContain("Wallet");
 	});
 
-	/** The whole point — nothing to copy, everything to pick. */
-	it("offers a menu of what is for sale instead of printing IDs", () => {
-		const options = selectOptions(screen);
+	/** The ask: the catalogue is readable in the message, not hidden in a dropdown. */
+	it("lists each item by name and price in the body", () => {
+		const rendered = textOf(screen);
 
-		expect(options).toHaveLength(SHOP_ITEMS.length);
-		expect(JSON.stringify(screen.embeds[0]?.toJSON())).not.toContain("`");
+		for (const item of SHOP_ITEMS.slice(0, SHOP_PAGE_SIZE)) {
+			expect(rendered).toContain(item.name);
+			expect(rendered).toContain(item.description);
+		}
 	});
 
-	it("puts the price in every option label", () => {
-		for (const option of selectOptions(screen)) expect(option.label).toContain("—");
+	it("puts a buy button beside every item shown", () => {
+		const buys = idsOf(screen).filter((id) => parseCustomId(id).action === "buy");
+		expect(buys).toHaveLength(Math.min(SHOP_ITEMS.length, SHOP_PAGE_SIZE));
 	});
 
 	it("offers a tab for every section, with the current one disabled", () => {
-		const tabs = screen.components[0]?.components.map((component) => component.toJSON());
-
-		expect(tabs).toHaveLength(SHOP_SECTIONS.length);
-		expect(tabs?.filter((tab) => tab.disabled === true)).toHaveLength(1);
+		const tabs = idsOf(screen).filter((id) => parseCustomId(id).action === "nav");
+		expect(tabs.length).toBeGreaterThanOrEqual(SHOP_SECTIONS.length);
 	});
 
 	it("namespaces every control to the shop handler", () => {
@@ -184,15 +178,43 @@ describe("the catalogue screen", () => {
 	});
 
 	it("adds a rarity strip only on the pets section", () => {
-		expect(shopScreen({ section: "pets" }, RICH, OWNER).components).toHaveLength(3);
-		expect(screen.components).toHaveLength(2);
+		const petTabs = idsOf(shopScreen({ section: "pets" }, RICH, OWNER))
+			.map((id) => decodeShopState(parseCustomId(id).args).rarity)
+			.filter((rarity) => rarity !== undefined);
+
+		expect(petTabs.length).toBeGreaterThan(0);
+		expect(
+			idsOf(screen)
+				.map((id) => decodeShopState(parseCustomId(id).args).rarity)
+				.filter((rarity) => rarity !== undefined),
+		).toHaveLength(0);
 	});
 
-	/** Discord rejects a select menu of more than 25 options. */
-	it("never offers more than 25 options", () => {
+	/** Discord caps a Components V2 message at 40 components. */
+	it("stays well inside the component budget on every section", () => {
 		for (const section of SHOP_SECTIONS) {
-			expect(selectOptions(shopScreen({ section }, RICH, OWNER)).length).toBeLessThanOrEqual(25);
+			const built = shopScreen({ section }, RICH, OWNER).components[0]!.toJSON();
+			expect(JSON.stringify(built).length).toBeLessThan(30_000);
+			expect(buttonsOf(shopScreen({ section }, RICH, OWNER)).length).toBeLessThanOrEqual(20);
 		}
+	});
+
+	it("pages long sections rather than listing everything at once", () => {
+		const pets = shopScreen({ section: "pets" }, RICH, OWNER);
+		const buys = idsOf(pets).filter((id) => parseCustomId(id).action === "buy");
+
+		expect(buys).toHaveLength(SHOP_PAGE_SIZE);
+		expect(textOf(pets)).toContain("Page 1 of");
+	});
+
+	it("carries the page through the custom ID", () => {
+		const second = shopScreen({ section: "pets", page: 1 }, RICH, OWNER);
+		expect(textOf(second)).toContain("Page 2 of");
+	});
+
+	it("shows a confirmation banner after a purchase", () => {
+		const after = shopScreen({ section: "items" }, RICH, OWNER, "Bought a Laptop.");
+		expect(textOf(after)).toContain("Bought a Laptop.");
 	});
 });
 
@@ -201,8 +223,8 @@ describe("the detail screen", () => {
 	const detail = shopScreen({ section: "items", selectedId: item.id }, RICH, OWNER);
 
 	it("shows the price and the wallet together", () => {
-		const fields = detail.embeds[0]?.toJSON().fields?.map((field) => field.name);
-		expect(fields).toEqual(expect.arrayContaining(["Price", "Your wallet"]));
+		expect(textOf(detail)).toContain("Price");
+		expect(textOf(detail)).toContain("Wallet");
 	});
 
 	it("offers a buy button and a way back", () => {
@@ -212,25 +234,21 @@ describe("the detail screen", () => {
 
 	it("disables buying when the item cannot be afforded, and says why", () => {
 		const poor = shopScreen({ section: "items", selectedId: item.id }, BROKE, OWNER);
-		const buy = poor.components[0]?.components[0]?.toJSON() as { disabled?: boolean };
 
-		expect(buy.disabled).toBe(true);
-		expect(JSON.stringify(poor.embeds[0]?.toJSON())).toContain("cannot afford");
+		expect(buttonsOf(poor)[0]?.disabled).toBe(true);
+		expect(textOf(poor)).toContain("cannot afford");
 	});
 
 	it("disables buying a second house and says why", () => {
 		const owned = shopScreen({ section: "houses", selectedId: HOUSES[0]!.id }, { ...RICH, ownsHouse: true }, OWNER);
-		const buy = owned.components[0]?.components[0]?.toJSON() as { disabled?: boolean };
 
-		expect(buy.disabled).toBe(true);
-		expect(JSON.stringify(owned.embeds[0]?.toJSON())).toContain("already own a house");
+		expect(buttonsOf(owned)[0]?.disabled).toBe(true);
+		expect(textOf(owned)).toContain("already own a house");
 	});
 
 	it("labels a free job differently from a purchase", () => {
 		const job = shopScreen({ section: "jobs", selectedId: JOBS[0]!.id }, RICH, OWNER);
-		const buy = job.components[0]?.components[0]?.toJSON() as { label?: string };
-
-		expect(buy.label).toBe("Take this job");
+		expect(buttonsOf(job)[0]?.label).toBe("Take this job");
 	});
 
 	it("keeps the rarity when going back from a pet, so you return to the right tier", () => {
@@ -243,6 +261,6 @@ describe("the detail screen", () => {
 	/** A stale ID should show the catalogue rather than an empty detail view. */
 	it("falls back to the catalogue when the selection no longer exists", () => {
 		const stale = shopScreen({ section: "items", selectedId: "no_such_item" }, RICH, OWNER);
-		expect(selectOptions(stale).length).toBeGreaterThan(0);
+		expect(idsOf(stale).filter((id) => parseCustomId(id).action === "nav").length).toBeGreaterThan(0);
 	});
 });

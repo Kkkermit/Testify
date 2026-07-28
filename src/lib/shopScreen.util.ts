@@ -1,8 +1,16 @@
-import { ButtonStyle, StringSelectMenuOptionBuilder } from "discord.js";
+import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
-import { button, type RenderedScreen, row, select, selectRow } from "@lib/components.util";
-import { embed } from "@lib/embeds.util";
-import { formatNumber, truncate } from "@lib/format.util";
+import { button, row } from "@lib/components.util";
+import {
+	container,
+	type ContainerMessage,
+	containerMessage,
+	type ContainerPart,
+	divider,
+	sectionWithButton,
+	text,
+} from "@lib/containers.util";
+import { formatNumber } from "@lib/format.util";
 import { ALL_PETS, type PetSpecies, PETS_BY_RARITY } from "@lib/pets.util";
 import { BUSINESSES, HOUSES, JOBS, SHOP_ITEMS } from "@lib/shop.util";
 
@@ -18,6 +26,9 @@ import { BUSINESSES, HOUSES, JOBS, SHOP_ITEMS } from "@lib/shop.util";
  */
 
 export const SHOP_ID = "shop";
+
+/** How many entries get their own row with a buy button before it pages. */
+export const SHOP_PAGE_SIZE = 5;
 
 export const SHOP_SECTIONS = ["items", "houses", "businesses", "jobs", "pets"] as const;
 export type ShopSection = (typeof SHOP_SECTIONS)[number];
@@ -42,6 +53,8 @@ export interface ShopState {
 	rarity?: PetRarity;
 	/** Set on the detail view. */
 	selectedId?: string;
+	/** Which page of the catalogue. */
+	page?: number;
 }
 
 export function isShopSection(value: string): value is ShopSection {
@@ -53,16 +66,26 @@ export function isPetRarity(value: string): value is PetRarity {
 }
 
 export function encodeShopState(action: string, state: ShopState, ownerId: string): string {
-	return customId(SHOP_ID, action, state.section, state.rarity ?? NONE, state.selectedId ?? NONE, ownerId);
+	return customId(
+		SHOP_ID,
+		action,
+		state.section,
+		state.rarity ?? NONE,
+		state.selectedId ?? NONE,
+		state.page ?? 0,
+		ownerId,
+	);
 }
 
 export function decodeShopState(args: string[]): ShopState {
-	const [section = "items", rarity = NONE, selectedId = NONE] = args;
+	const [section = "items", rarity = NONE, selectedId = NONE, page = "0"] = args;
+	const parsed = Number.parseInt(page, 10);
 
 	return {
 		section: isShopSection(section) ? section : "items",
 		...(rarity !== NONE && isPetRarity(rarity) ? { rarity } : {}),
 		...(selectedId !== NONE ? { selectedId } : {}),
+		...(Number.isInteger(parsed) && parsed > 0 ? { page: parsed } : {}),
 	};
 }
 
@@ -182,15 +205,67 @@ function priceLabel(entry: Entry): string {
 	return entry.price > 0 ? formatNumber(entry.price) : "Free";
 }
 
-function catalogue(state: ShopState, balances: Balances, ownerId: string): RenderedScreen {
+function catalogue(state: ShopState, balances: Balances, ownerId: string, note?: string): ContainerMessage {
 	const entries = entriesFor(state, balances);
+	const pages = Math.max(1, Math.ceil(entries.length / SHOP_PAGE_SIZE));
+	const page = Math.min(Math.max(0, state.page ?? 0), pages - 1);
+	const shown = entries.slice(page * SHOP_PAGE_SIZE, page * SHOP_PAGE_SIZE + SHOP_PAGE_SIZE);
 
-	const rows = [sectionTabs(state, ownerId)];
+	const parts: ContainerPart[] = [
+		text(
+			`## 🛒 Shop — ${SECTION_LABELS[state.section]}\n` +
+				`Wallet **${formatNumber(balances.wallet)}** · ${entries.length} for sale`,
+		),
+		divider(),
+	];
 
-	// Pets get a second tab strip, because five rarities of five is too many for
-	// one 25-option menu to stay readable.
+	if (note !== undefined) parts.push(text(`✅ ${note}`), divider());
+
+	// One row per entry, with its buy button beside it rather than in a row
+	// underneath — so nobody has to count buttons to match them to items.
+	for (const entry of shown) {
+		const note = entry.blocked ?? entry.detail;
+
+		parts.push(
+			sectionWithButton(
+				`**${entry.emoji} ${entry.name}** — ${priceLabel(entry)}\n` +
+					`${entry.description}${note !== undefined ? `\n-# ${note}` : ""}`,
+				button({
+					id: encodeShopState("buy", { ...state, selectedId: entry.id, page }, ownerId),
+					label: entry.blocked !== undefined ? "Unavailable" : entry.price > 0 ? "Buy" : "Take",
+					style: ButtonStyle.Success,
+					disabled: entry.blocked !== undefined || balances.wallet < entry.price,
+				}),
+			),
+		);
+	}
+
+	if (shown.length === 0) parts.push(text("_Nothing for sale here yet._"));
+
+	parts.push(divider());
+
+	if (pages > 1) {
+		parts.push(
+			text(`-# Page ${page + 1} of ${pages}`),
+			row(
+				button({
+					id: encodeShopState("nav", { ...state, page: page - 1 }, ownerId),
+					label: "Previous",
+					disabled: page <= 0,
+				}),
+				button({
+					id: encodeShopState("nav", { ...state, page: page + 1 }, ownerId),
+					label: "Next",
+					disabled: page >= pages - 1,
+				}),
+			),
+		);
+	}
+
+	parts.push(sectionTabs(state, ownerId));
+
 	if (state.section === "pets") {
-		rows.push(
+		parts.push(
 			row(
 				...PET_RARITIES.map((rarity) =>
 					button({
@@ -203,87 +278,52 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string): Rende
 		);
 	}
 
-	if (entries.length > 0) {
-		rows.push(
-			selectRow(
-				select({
-					id: encodeShopState("pick", state, ownerId),
-					placeholder: `Pick something to see it in full…`,
-					options: entries.slice(0, 25).map((entry) =>
-						new StringSelectMenuOptionBuilder()
-							.setLabel(truncate(`${entry.name} — ${priceLabel(entry)}`, 100))
-							.setValue(entry.id)
-							.setDescription(truncate(entry.blocked ?? entry.description, 100))
-							.setEmoji(entry.emoji),
-					),
-				}),
-			),
-		);
-	}
-
-	return {
-		embeds: [
-			embed({
-				category: "economy",
-				title: `🛒 Shop — ${SECTION_LABELS[state.section]}`,
-				description:
-					entries.length > 0 ? "Pick anything below to see the detail and buy it." : "Nothing for sale here yet.",
-				fields: [
-					{ name: "Your wallet", value: formatNumber(balances.wallet), inline: true },
-					{ name: "For sale", value: String(entries.length), inline: true },
-				],
-			}),
-		],
-		components: rows,
-	};
+	return containerMessage(container({ category: "economy", parts }));
 }
 
-function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: string): RenderedScreen {
+function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: string): ContainerMessage {
 	const affordable = balances.wallet >= entry.price;
 	const reason = entry.blocked ?? (affordable ? undefined : "You cannot afford this yet.");
 
-	return {
-		embeds: [
-			embed({
-				category: "economy",
-				title: `${entry.emoji} ${entry.name}`,
-				description: entry.description,
-				fields: [
-					{ name: "Price", value: priceLabel(entry), inline: true },
-					{ name: "Your wallet", value: formatNumber(balances.wallet), inline: true },
-					...(entry.detail !== undefined ? [{ name: "Details", value: entry.detail, inline: false }] : []),
-					...(reason !== undefined ? [{ name: "Not available", value: reason, inline: false }] : []),
-				],
-			}),
-		],
-		components: [
-			row(
-				button({
-					id: encodeShopState("buy", { ...state, selectedId: entry.id }, ownerId),
-					label: entry.price > 0 ? `Buy — ${formatNumber(entry.price)}` : "Take this job",
-					style: ButtonStyle.Success,
-					disabled: reason !== undefined,
-				}),
-				button({
-					// Every screen needs a way back.
-					id: encodeShopState(
-						"nav",
-						{ section: state.section, ...(state.rarity ? { rarity: state.rarity } : {}) },
-						ownerId,
-					),
-					label: "Back",
-					style: ButtonStyle.Secondary,
-				}),
-			),
-		],
-	};
+	return containerMessage(
+		container({
+			category: "economy",
+			parts: [
+				text(
+					`## ${entry.emoji} ${entry.name}\n${entry.description}\n\n` +
+						`**Price** ${priceLabel(entry)}  ·  **Wallet** ${formatNumber(balances.wallet)}` +
+						(entry.detail !== undefined ? `\n${entry.detail}` : "") +
+						(reason !== undefined ? `\n\n⚠️ ${reason}` : ""),
+				),
+				divider(),
+				row(
+					button({
+						id: encodeShopState("buy", { ...state, selectedId: entry.id }, ownerId),
+						label: entry.price > 0 ? `Buy — ${formatNumber(entry.price)}` : "Take this job",
+						style: ButtonStyle.Success,
+						disabled: reason !== undefined,
+					}),
+					button({
+						// Every screen needs a way back.
+						id: encodeShopState(
+							"nav",
+							{ section: state.section, ...(state.rarity ? { rarity: state.rarity } : {}) },
+							ownerId,
+						),
+						label: "Back",
+						style: ButtonStyle.Secondary,
+					}),
+				),
+			],
+		}),
+	);
 }
 
-export function shopScreen(state: ShopState, balances: Balances, ownerId: string): RenderedScreen {
-	if (state.selectedId !== undefined) {
+export function shopScreen(state: ShopState, balances: Balances, ownerId: string, note?: string): ContainerMessage {
+	if (state.selectedId !== undefined && note === undefined) {
 		const entry = findEntry(state, balances, state.selectedId);
 		if (entry) return detail(state, balances, entry, ownerId);
 	}
 
-	return catalogue(state, balances, ownerId);
+	return catalogue(state, balances, ownerId, note);
 }

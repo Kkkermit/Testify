@@ -2,7 +2,6 @@ import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { type EconomyAccount } from "@database/models/economy.schema";
 import { addInventoryItem, debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
-import { successEmbed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
 import { findPet } from "@lib/pets.util";
 import { findBusiness, findHouse, findJob, findShopItem } from "@lib/shop.util";
@@ -181,10 +180,9 @@ export default defineButton({
 		const message = await purchase(state, guildId, userId, account);
 		const updated = await requireAccount(guildId, userId);
 
-		await interaction.update({
-			embeds: [successEmbed(message)],
-			// Straight back to the catalogue, so buying chains into the next action.
-			components: shopScreen({ section: state.section }, balancesOf(updated), userId).components,
-		});
+		// Straight back to the catalogue with the new balance, so buying chains into
+		// the next purchase. The confirmation rides along at the top rather than as a
+		// separate message — a Components V2 payload cannot carry an embed.
+		await interaction.update(shopScreen({ section: state.section }, balancesOf(updated), userId, message));
 	},
 });
