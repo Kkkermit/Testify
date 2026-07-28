@@ -1,257 +1,533 @@
-<div align="center">
+<!--     ████████╗███████╗███████╗████████╗██╗███████╗██╗   ██╗
+         ╚══██╔══╝██╔════╝██╔════╝╚══██╔══╝██║██╔════╝╚██╗ ██╔╝
+            ██║   █████╗  ███████╗   ██║   ██║█████╗   ╚████╔╝
+            ██║   ██╔══╝  ╚════██║   ██║   ██║██╔══╝    ╚██╔╝
+            ██║   ███████╗███████║   ██║   ██║██║        ██║
+            ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝    -->
 
-# Testify
+<img align="center" alt="Testify banner" src="https://i.postimg.cc/v87R8PSx/test.png">
 
-**An open source, multipurpose Discord bot written in TypeScript.**
+<p align="center">
+<img align="center" alt="GitHub Issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub license" src="https://img.shields.io/github/license/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub Stars" src="https://img.shields.io/github/stars/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub Forks" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="GitHub Contributors" src="https://img.shields.io/github/contributors/Kkkermit/Testify.svg?style=for-the-badge">
+</p>
 
-Moderation · economy · levelling · music · tickets · giveaways · games
+<p align="center">
+<img align="center" alt="CI" src="https://img.shields.io/github/actions/workflow/status/Kkkermit/Testify/ci.yml?style=for-the-badge&label=CI">
+<img align="center" alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
+<img align="center" alt="Node" src="https://img.shields.io/badge/node-%3E%3D22.11-5FA04E?style=for-the-badge&logo=node.js&logoColor=white">
+<img align="center" alt="GitHub Version" src="https://img.shields.io/github/package-json/v/Kkkermit/Testify?style=for-the-badge">
+</p>
 
-Every command works as `/ban` **and** as `t?ban`.
+<p align="center">
+  <a href="https://buymeacoffee.com/kkermit" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60px" width="217px">
+  </a>
+</p>
 
-[![CI](https://github.com/Kkkermit/Testify/actions/workflows/ci.yml/badge.svg)](https://github.com/Kkkermit/Testify/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Node](https://img.shields.io/badge/node-%3E%3D22.11-brightgreen.svg)](https://nodejs.org)
+<p align="center"><strong>
+The new and improved TypeScript rewrite of Testify — an all-in-one Discord bot with prefix &amp; slash commands.
+</strong></p>
 
-</div>
+<p align="center">
+87 slash commands, 143 subcommands and 230 things you can actually run: moderation, economy, levelling, music,
+tickets, giveaways and games. Every command works as <code>/ban</code> <strong>and</strong> as
+<code>t?ban</code> — because underneath it is one command, not two copies.
+</p>
 
-## What you need
+> Want to try it before setting anything up? [**Invite Testify to your server**](https://discord.com/oauth2/authorize?client_id=1211784897627168778&permissions=8&scope=applications.commands%20bot)
 
-- **Node.js 22.11 or newer** — `.nvmrc` pins the version, so `nvm use` picks it up
-- **MongoDB** — a local install or a free Atlas cluster
-- A **Discord application** with the _Message Content_, _Server Members_ and _Presence_ intents switched on
+> [!CAUTION]
+> **Never share or commit your `.env` file or any of its values.** It holds your bot token and your MongoDB
+> password — anyone who gets them controls your bot and your data. `.gitignore` already covers `.env*`. If a
+> token ever reaches somewhere public, reset it immediately in the Developer Portal.
 
-FFmpeg comes with the project; there is nothing extra to install for music.
+## Table of Contents
 
-## Get it running
+- [What's new in v2](#whats-new-in-v2)
+- [Features](#features)
+- [Compatibility](#compatibility)
+- [Quick start](#quick-start)
+- [Full setup guide](#full-setup-guide)
+- [Slash and prefix](#slash-and-prefix)
+- [Command categories](#command-categories)
+- [Adding your own command](#adding-your-own-command)
+- [Scripts](#scripts)
+- [FAQ](#faq)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+- [Support](#support)
+- [Star history](#star-history)
+- [License](#license)
+
+<h1 align="center"><strong>
+⭐ If you like Testify, or have used any of its code, please consider leaving a star. It genuinely helps, and
+it tells us the project is worth continuing! ⭐
+</strong></h1>
+
+## What's new in v2
+
+v2 is a **complete rewrite of the original JavaScript bot in TypeScript** — not a port with types bolted on.
+The whole thing was rebuilt around the problems the old codebase actually had.
+
+|                    | v1 (JavaScript)                                                                        | v2 (TypeScript)                                                              |
+| ------------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **Slash + prefix** | Two separate implementations of each command, kept in sync by hand                     | **One command serves both.** 46 duplicated pairs became one file each        |
+| **Types**          | None                                                                                   | `strict`, plus `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`   |
+| **Config**         | Bot IDs and log channels hardcoded, so a fresh clone logged into someone else's server | Everything through a **validated `.env`** — no IDs committed to the repo     |
+| **Start-up**       | Command registration raced the login                                                   | Each step awaited in order; a malformed file names itself and stops the boot |
+| **Errors**         | Stack traces could reach chat                                                          | One error boundary — users get a plain apology, you get the full context     |
+| **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
+| **Tests**          | A handful                                                                              | **829 tests**, with an enforced 80% coverage floor                           |
+| **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
+
+Everything the old bot did is still here, apart from the integrations that needed paid or personal API keys
+(Spotify, Valorant, Instagram and the AI commands).
+
+## Features
+
+### 🛡️ Moderation
+
+- **Full moderation suite** — ban, softban, kick, mute, warn, lock, slowmode, nickname and role management
+- **Warnings with history** — every warning keeps its reason, its moderator and a full edit trail
+- **Automod** — flagged words, spam, mention spam, keyword and link filtering
+- **Audit logging** — 18 event types, each switchable per server
+- **Tickets** — panels, claiming, locking and HTML transcripts
+
+### 💰 Economy and levelling
+
+- **Economy** — wallet and bank, work, daily, beg, gamble, rob, heist, transfers and a server lottery
+- **Shops, houses, businesses and jobs** — plus pets that need feeding and walking
+- **Levelling** — XP with configurable channels, boost roles and multipliers, and a leaderboard
+
+### 🎵 Music and games
+
+- **Music** — YouTube and SoundCloud playback with a queue, filters, seek, autoplay, radio and TTS
+- **Games** — blackjack, guess the number, guess the Pokémon, fast type, rock paper scissors, 8ball
+
+### 🎉 Community and utility
+
+- **Giveaways** — start, end, reroll and delete, persisted so they survive a restart
+- **Info** — user, server, role and bot information, plus avatars, banners and profiles
+- **Welcome system** — with a generated welcome card
+- **Counting, sticky messages, auto roles, verification and voice-channel stat counters**
+
+## Compatibility
+
+### Operating systems
+
+| Operating system        | Support | Notes                                                                                 |
+| ----------------------- | ------- | ------------------------------------------------------------------------------------- |
+| Windows 10 / 11         | ✅ Full | `cross-env` sets the environment variables, so the scripts work in cmd and PowerShell |
+| macOS                   | ✅ Full | Apple Silicon and Intel                                                               |
+| Linux (Ubuntu / Debian) | ✅ Full | What CI runs on                                                                       |
+| Linux (Fedora / Arch)   | ✅ Full |                                                                                       |
+| Linux (Alpine)          | ✅ Full | Needs `apk add --no-cache python3 make g++` for the native modules                    |
+| Raspberry Pi            | ✅ Full | Use a **64-bit** OS — the prebuilt canvas binaries are arm64 only                     |
+
+### Node.js
+
+| Version          | Support            | Notes                                        |
+| ---------------- | ------------------ | -------------------------------------------- |
+| 20.x and older   | ❌ Not supported   | `npm install` will refuse to install         |
+| **22.11+ (LTS)** | ✅ **Recommended** | What `.nvmrc` pins and what CI tests against |
+| 23.x / 24.x      | ✅ Supported       | Works, but not what CI runs                  |
+
+> [!IMPORTANT]
+> Testify requires **Node 22.11 or newer**. If you are stuck on an older version, use
+> [nvm](https://github.com/nvm-sh/nvm) — the repo ships a `.nvmrc`, so `nvm use` picks the right version
+> automatically.
+
+### What is tested
+
+Every push runs typecheck, lint, formatting, **829 unit tests**, a coverage gate and a real build — then
+verifies the compiled `dist/` actually starts. A nightly workflow re-runs the tests and scans dependencies for
+newly published vulnerabilities.
+
+## Quick start
+
+Already have Node 22 and a MongoDB connection string? You are five commands away.
 
 ```bash
 git clone https://github.com/Kkkermit/Testify.git
 cd Testify
 npm install
-npm run setup -- --dev   # asks for your token, database and so on
-npm run dev              # starts the bot and restarts it when you save a file
+npm run setup      # asks for your token, client ID, owner ID and database URL
+npm run dev        # starts the bot, restarting whenever you save a file
 ```
 
-That is the whole setup. `--dev` writes `.env.development`, which `npm run dev`
-reads — so your test bot and your production bot never share a token. Drop the
-flag to write `.env` for production. Either way it only asks for four things:
+That is the whole setup. `npm run setup` writes the `.env` for you, so there is no file to hand-edit and
+nothing to paste in the wrong place.
 
-| Setting             | Where to find it                                                               |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `DISCORD_TOKEN`     | Developer Portal → your app → Bot → Reset Token                                |
-| `DISCORD_CLIENT_ID` | Developer Portal → your app → General Information                              |
-| `DISCORD_OWNER_IDS` | Your own user ID (turn on Developer Mode, right-click yourself → Copy User ID) |
-| `MONGODB_URI`       | `mongodb://localhost:27017/testify`, or your Atlas connection string           |
+No token or database yet? The next section walks through both from scratch.
 
-Everything else in [`.env.example`](.env.example) is optional and can stay blank.
+## Full setup guide
 
-> **Tip:** set `DISCORD_DEV_GUILD_ID` to your test server's ID while you are
-> working. Commands show up there straight away instead of taking up to an hour.
+### 1. Install the tools
 
-For production: `npm run build` then `npm start`.
+- **[Node.js 22.11 or newer](https://nodejs.org)** — check yours with `node -v`
+- **[Git](https://git-scm.com/downloads)**
+- **A code editor** — [VS Code](https://code.visualstudio.com/download) is a good default
 
-### If it will not connect to the database
+### 2. Create your bot and get a token
 
-The bot tells you what to try, but the common ones are:
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications) and sign in.
+2. Click **New Application**, name it, and confirm.
+3. Open the **Bot** tab on the left.
+4. Under **Privileged Gateway Intents**, turn on **all three**, then **Save Changes**. Message Content is not
+   optional — without it the bot cannot read any prefix command.
+5. Click **Reset Token** and copy it. **This is the one value you must never share.**
 
-| What you see                 | What it usually means                                                                                                                                                                |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `querySrv ECONNREFUSED`      | Your DNS server will not do SRV lookups. Switch to 1.1.1.1 / 8.8.8.8, drop any VPN, or use the non-SRV connection string from Atlas (Connect → Drivers → Node.js 2.2.12 or earlier). |
-| `Authentication failed`      | Wrong user or password. If the password has `@ : / ? # [ ]` in it, percent-encode it.                                                                                                |
-| `Server selection timed out` | Your IP is not on the Atlas allow list. Atlas → Network Access.                                                                                                                      |
-| `ENOTFOUND`                  | Typo in the hostname, or the cluster is paused.                                                                                                                                      |
+### 3. Invite the bot to your server
 
-Put the database name in the URI, before the `?`, or you will end up writing to
-a database called `test`:
+1. Open **OAuth2 → URL Generator**.
+2. Under **Scopes**, tick `bot` and `applications.commands`.
+3. Under **Bot Permissions**, tick **Administrator** while you are getting started.
+4. Copy the URL at the bottom, open it, pick your server, and authorise.
 
+### 4. Get a database
+
+Testify keeps everything in MongoDB. The free tier is plenty.
+
+1. Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register).
+2. Create a **free M0 cluster**.
+3. Under **Database Access**, create a database user and save the password.
+4. Under **Network Access**, click **Add IP Address** and choose **Allow access from anywhere**.
+5. Back on **Database**, click **Connect → Drivers** and copy the connection string.
+6. Replace `<password>` in it with your database user's password.
+
+### 5. Fill in your settings
+
+```bash
+npm run setup
 ```
-mongodb+srv://user:password@cluster.mongodb.net/testify?retryWrites=true
-                                                ^^^^^^^^
+
+It asks for each value and writes `.env` for you. Required fields are marked and it will not let you skip
+them. Prefer doing it by hand? Copy `.env.example` to `.env` and fill it in.
+
+| Variable               | Required | What it is                                                                        |
+| ---------------------- | :------: | --------------------------------------------------------------------------------- |
+| `DISCORD_TOKEN`        |    ✅    | The token from step 2                                                             |
+| `DISCORD_CLIENT_ID`    |    ✅    | **OAuth2 → Client ID** in the Developer Portal                                    |
+| `DISCORD_OWNER_IDS`    |    ✅    | Your Discord user ID. Comma-separate for several owners                           |
+| `MONGODB_URI`          |    ✅    | The connection string from step 4                                                 |
+| `DISCORD_DEV_GUILD_ID` |    —     | A test server ID. Commands appear there instantly instead of taking up to an hour |
+| `LOG_LEVEL`            |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                    |
+| `CHANNEL_ERROR_LOG`    |    —     | Where command failures are reported                                               |
+| `CHANNEL_GUILD_LOG`    |    —     | Where server joins and leaves are reported                                        |
+| `CHANNEL_DM_LOG`       |    —     | Where DMs to the bot are logged                                                   |
+| `CHANNEL_FEEDBACK_LOG` |    —     | Where `/suggest` and `/bug-report` land                                           |
+
+Leave any optional value blank and that feature simply stays off. Nothing breaks.
+
+> **Getting an ID:** enable **Developer Mode** in Discord (Settings → Advanced), then right-click any user,
+> server or channel and choose **Copy ID**.
+
+### 6. Run it
+
+```bash
+npm run dev
 ```
 
-## What it can do
+You should see the Testify banner, a count of everything that loaded, and your commands appearing in Discord.
+Save any file and the bot restarts itself.
 
-| Category       | What you get                                                                                     |
-| -------------- | ------------------------------------------------------------------------------------------------ |
-| **Moderation** | ban, kick, mute, softban with automatic expiry, warnings, lock, clear, slowmode, roles, AutoMod  |
-| **Economy**    | balances, daily streaks, work, rob, heists, gambling, a shop, pets, a lottery and treasure drops |
-| **Levelling**  | XP per message, level-up announcements, boost roles, rank cards and a leaderboard                |
-| **Music**      | play, queue, skip, seek, filters, loop, shuffle, autoplay and radio                              |
-| **Tickets**    | a ticket panel, claiming, locking and HTML transcripts                                           |
-| **Settings**   | welcome messages, auto-roles, anti-link, sticky messages, counting, verification, audit logging  |
-| **Fun**        | memes, ASCII art, blackjack, would-you-rather, rock-paper-scissors and more                      |
+For production:
 
-The full list lives in [COMMANDS.md](COMMANDS.md), which is generated from the code.
+```bash
+npm run build
+npm start
+```
+
+> [!TIP]
+> Use **two bot applications** — one for development, one for production. `npm run setup -- --dev` writes
+> `.env.development`, which `npm run dev` reads instead of `.env`. That way testing can never touch your live
+> bot or its database.
 
 ## Slash and prefix
 
-Every command answers to both, and each one is written only once:
+Every command works both ways, from a single implementation:
 
 ```
 /ban user:@someone reason:spamming
 t?ban @someone spamming
 ```
 
-- The default prefix is `t?`. Change it with `/prefix set !`, and turn text
-  commands off entirely with `/prefix disable` — slash commands keep working.
-- Mentioning the bot works anywhere: `@Testify help`.
-- Options are filled in order, and the last text option takes the rest of the
-  message — so you rarely need quotes. Use `"quotes"` when you do.
-- Popular commands have short forms: `t?bal`, `t?lb`, `t?p`, `t?np`, `t?av`.
+The default prefix is `t?`, and prefix commands are **on by default**. Server admins can change either:
 
-Replies that would be private on a slash command are sent in the channel
-instead, since a normal message cannot be ephemeral.
+| Command                | What it does                               |
+| ---------------------- | ------------------------------------------ |
+| `/prefix show`         | Show the current prefix                    |
+| `/prefix set <prefix>` | Change it                                  |
+| `/prefix enable`       | Turn prefix commands on                    |
+| `/prefix disable`      | Turn them off, leaving slash commands only |
 
-**Where do the commands appear?** With `DISCORD_DEV_GUILD_ID` set, they are
-published to that one server only and show up instantly. Leave it blank and they
-go to every server, which can take up to an hour to roll out. The start-up banner
-says which. If Discord still lists commands that no longer exist, run
-`npm run commands:clear` and start the bot again.
+Many commands also have shorter prefix aliases — `t?bal`, `t?p`, `t?np`, `t?lb` and 24 others.
 
-**Typed a prefix command and nothing happened?** Check the Message Content
-intent is on: Developer Portal → your app → Bot → Privileged Gateway Intents.
-Without it every message reaches the bot blank. It warns about this on start-up
-if it sees it happening.
+Anything that would be a private reply on a slash command is sent in the channel instead, since a normal
+message cannot be ephemeral.
 
-## How the project is laid out
+## Command categories
 
-```
-src/
-  index.ts                     starts everything
-  config/                      env, categories, theme, constants
-  core/                        the framework: client, command, button, loader
-  commands/<category>/*.slash.ts   one file per command
-  buttons/                     button, select-menu and modal handlers
-  events/ReadyEvents/          start-up
-  events/CommandEvents/        the two dispatch entry points
-  events/CreateEvents/         guild and member lifecycle
-  events/LoggingEvents/        audit logging
-  events/message/              things that run on every message
-  jobs/                        repeating background work
-  lib/*.util.ts                shared helpers
-  database/models/*.schema.ts  Mongoose models
-```
+Run `/help` in Discord for the browsable version, or see [`COMMANDS.md`](COMMANDS.md) for the full generated
+list.
 
-The suffix says what a file is, and the loader uses it: only `*.slash.ts` in a
-category folder becomes a command, only `*.event.ts` becomes a listener.
+| Category      | Top-level | What is in it                                                               |
+| ------------- | :-------: | --------------------------------------------------------------------------- |
+| 💰 Economy    |    23     | Balance, work, daily, gamble, rob, heist, shop, pets, lottery, leaderboards |
+| 🛡️ Moderation |    17     | Ban, kick, mute, warn, softban, lock, clear, roles, slowmode                |
+| 📚 Info       |    11     | User, server and role info, avatars, profiles, ping, help                   |
+| ⚙️ Settings   |    10     | Automod, audit logging, auto roles, counting, welcome, verification, prefix |
+| 🎵 Music      |     9     | Play, queue, skip, seek, filters, autoplay, radio, TTS                      |
+| 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                 |
+| 👥 Community  |     3     | Memes, translation, Minecraft lookups, advice, wiki                         |
+| 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                      |
+| 📈 Levelling  |     2     | Rank cards and the levelling settings                                       |
+| 💬 Feedback   |     2     | Suggestions and bug reports                                                 |
+| 🎯 Games      |     1     | Blackjack, guess the number, Pokémon, fast type, RPS                        |
+| 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                  |
+| 🎫 Tickets    |     1     | Setup, status, disable                                                      |
 
-There is no registry to update and nothing to import by hand. Drop a file in the
-right folder and it is picked up when the bot starts.
+Some categories look small but hold a lot: `/game`, `/fun`, `/lookup` and `/music` group many subcommands
+under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.
 
-Only files sitting directly in a category folder are commands. A `subcommands/`
-folder holds commands that have been grouped under a parent — so
-`src/commands/fun/subcommands/dadJoke.slash.ts` is `/fun dad-joke` — because
-Discord only allows 100 top-level commands.
+## Adding your own command
 
-## Adding a command
-
-Create `src/commands/fun/coinflip.slash.ts`:
+Create one file. The loader finds it, `/help` lists it, and it works as a slash **and** a prefix command
+straight away.
 
 ```ts
+// src/commands/fun/coinflip.slash.ts
 import { defineCommand } from "@core/command";
-import { embed } from "@lib/embeds.util";
+import { successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 
 export default defineCommand({
 	name: "coinflip",
 	description: "Flips a coin.",
 	category: "fun",
-
+	aliases: ["flip", "cf"],
 	async run(interaction) {
 		const side = Math.random() < 0.5 ? "Heads" : "Tails";
-		await reply(interaction, { embeds: [embed({ category: "fun", description: side })] });
+		await reply(interaction, { embeds: [successEmbed(`🪙 ${side}!`)] });
 	},
 });
 ```
 
-Restart the bot and both `/coinflip` and `t?coinflip` are live. That is all of it —
-you never write the prefix version, `src/core/prefix.ts` handles it.
+Restart, and you have `/coinflip`, `t?coinflip`, `t?flip` and `t?cf`. There is no registry to update and
+nothing to import by hand.
 
-**Options** are described rather than built:
+**Three rules worth knowing:**
 
-```ts
-options: [
-	{ name: "user", description: "Who to flip for.", type: "user", required: true },
-	{ name: "times", description: "How many flips.", type: "integer", min: 1, max: 10 },
-],
-```
+1. **The `.slash.ts` suffix is what the loader looks for.** A file without it is silently never loaded — so a
+   test enforces the naming.
+2. **`category` must be a key from `src/config/categories.ts`.** A typo is a compile error, not a runtime
+   surprise.
+3. **Build embeds with `embed()` from `@lib/embeds.util`.** The linter blocks bare `new EmbedBuilder()`, so
+   every embed gets consistent colours and footers for free.
 
-**Subcommands** work the same way and are dispatched for you:
-
-```ts
-subcommands: [
-	{ name: "set", description: "Sets it.", async run(interaction) { /* … */ } },
-	{ name: "clear", description: "Clears it.", async run(interaction) { /* … */ } },
-],
-```
-
-**Aliases** are prefix-only short forms:
-
-```ts
-aliases: ["cf", "flip"],
-```
-
-**Guards** are fields, not code you write:
-
-```ts
-guildOnly: true,
-cooldown: 5_000,
-permissions: [PermissionFlagsBits.ManageMessages],
-botPermissions: [PermissionFlagsBits.ManageMessages],
-```
-
-**Errors** are thrown, not replied to. `UserFacingError` is shown to the user word
-for word; anything else is logged and the user gets a generic apology.
-
-```ts
-if (amount > account.wallet) throw new UserFacingError("You do not have that much.");
-```
-
-## Adding a button
-
-Buttons are matched on the first part of their custom ID:
-
-```ts
-// src/buttons/coinflip.ts
-import { defineButton } from "@core/button";
-
-export default defineButton({
-	id: "coinflip",
-	ownerOnly: true,
-	async run(interaction, { action }) {
-		await interaction.update({ content: `You pressed ${action}.` });
-	},
-});
-```
-
-Build the ID with `customId("coinflip", "again", interaction.user.id)`. Put the
-user's ID last and `ownerOnly` stops anyone else pressing it.
-
-## Making it yours
-
-- **Colours, emoji and links** — `src/config/theme.ts`
-- **Categories** — `src/config/categories.ts`
-- **Cooldowns, limits and payouts** — `src/config/constants.ts`
-- **Wording** — `src/config/strings.ts`
+Options, subcommands and buttons are all covered in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ## Scripts
 
-| Command                 | What it does                            |
-| ----------------------- | --------------------------------------- |
-| `npm run dev`           | Runs the bot, restarting on save        |
-| `npm run build`         | Compiles to `dist/`                     |
-| `npm start`             | Runs the compiled bot                   |
-| `npm run setup`         | Writes a `.env`                         |
-| `npm test`              | Runs the tests                          |
-| `npm run check`         | Typecheck, lint, format check and tests |
-| `npm run docs:commands` | Regenerates `COMMANDS.md`               |
-| `npm run db:wipe`       | Empties the database, after confirming  |
+| Command                     | What it does                                                         |
+| --------------------------- | -------------------------------------------------------------------- |
+| `npm run dev`               | Runs the bot from source, restarting whenever you save               |
+| `npm run build`             | Compiles to `dist/`                                                  |
+| `npm start`                 | Runs the compiled bot                                                |
+| `npm run setup`             | Interactive `.env` generator (add `-- --dev` for `.env.development`) |
+| `npm test`                  | Runs the test suite                                                  |
+| `npm run test:coverage`     | Runs the tests with a coverage report                                |
+| `npm run check`             | Typecheck, lint, format check and tests — everything CI runs         |
+| `npm run lint` / `lint:fix` | Lints, optionally fixing what it can                                 |
+| `npm run format`            | Formats everything with Prettier                                     |
+| `npm run commit`            | Guided commit message in the project's format                        |
+| `npm run docs:commands`     | Regenerates `COMMANDS.md` from the real commands                     |
+| `npm run commands:clear`    | Removes every registered slash command from Discord                  |
+| `npm run db:wipe`           | Wipes the database, or individual collections                        |
+| `npm run audit`             | Checks dependencies for known vulnerabilities                        |
+
+## FAQ
+
+<details>
+<summary><strong>Does any of this cost money?</strong></summary>
+
+No. Discord bots are free, and MongoDB Atlas has a free tier that is far more than enough. You only start
+paying if you outgrow the free database, or want to host the bot somewhere other than your own machine.
+
+</details>
+
+<details>
+<summary><strong>Do I need to know TypeScript to use this?</strong></summary>
+
+No. To _run_ the bot you never touch the code at all. To add a command, basic JavaScript is enough — the types
+mostly help by telling you something is wrong before you start the bot rather than after. Copy an existing
+file in `src/commands/` and change it.
+
+</details>
+
+<details>
+<summary><strong>My slash commands are not showing up in Discord.</strong></summary>
+
+Almost always one of three things:
+
+1. **You are waiting on a global deploy.** Without `DISCORD_DEV_GUILD_ID` set, Discord can take up to an hour
+   to show new commands. Set it to your test server and they appear instantly.
+2. **The bot was invited without `applications.commands`.** Re-invite it with both `bot` and
+   `applications.commands` ticked in the URL Generator.
+3. **Start-up failed before publishing.** Commands are published before login, so check the console.
+
+If Discord is showing commands that no longer exist, run `npm run commands:clear` and start the bot again.
+
+</details>
+
+<details>
+<summary><strong>Prefix commands are not working.</strong></summary>
+
+Check **Message Content Intent** is enabled in the Developer Portal. Without it Discord sends the bot empty
+message content, so it cannot see any prefix at all — the bot warns about this on start-up if it notices.
+Then check `/prefix show`, and that prefix commands have not been switched off with `/prefix disable`.
+
+</details>
+
+<details>
+<summary><strong>Can I use only slash commands?</strong></summary>
+
+Yes — run `/prefix disable` in each server. Nothing else changes.
+
+</details>
+
+<details>
+<summary><strong>Do I really need all three privileged intents?</strong></summary>
+
+**Message Content** is required — prefix commands, automod, levelling and counting all read messages.
+**Server Members** is needed for welcome messages, auto roles and member counters. **Presence** is the one you
+can most comfortably leave off.
+
+</details>
+
+<details>
+<summary><strong>Can I remove features I do not want?</strong></summary>
+
+Yes, and it is built for that. Delete a command file and it stops existing — there is no registry to update and
+no imports to clean up. To drop a whole category, delete its folder under `src/commands/` and its entry in
+`src/config/categories.ts`.
+
+</details>
+
+<details>
+<summary><strong>What is the difference between <code>npm run dev</code> and <code>npm start</code>?</strong></summary>
+
+`npm run dev` runs from TypeScript source, restarts when you save, and reads `.env.development` if you have
+one — so it can drive a separate test bot. `npm start` runs the compiled `dist/` build against `.env`, which is
+what you use in production. Run `npm run build` first.
+
+</details>
+
+<details>
+<summary><strong>Where should I host it?</strong></summary>
+
+Anywhere that runs Node 22 — a VPS, a Raspberry Pi, Railway, Fly.io, or a machine at home. It needs no inbound
+ports, so there is no domain or reverse proxy to set up. Use something like `pm2` or a systemd service so it
+restarts itself if it crashes.
+
+</details>
+
+<details>
+<summary><strong>How do I update to a newer version?</strong></summary>
+
+```bash
+git pull
+npm install
+npm run build
+```
+
+Your `.env` and your database are untouched.
+
+</details>
+
+<details>
+<summary><strong>I accidentally leaked my token. What now?</strong></summary>
+
+Reset it straight away: **Developer Portal → your application → Bot → Reset Token**, then update your `.env`.
+If a MongoDB password leaked, change it under **Atlas → Database Access → Edit**. Deleting the commit is not
+enough — treat anything ever pushed to GitHub as public forever.
+
+</details>
+
+<details>
+<summary><strong>Can I use this for my own bot, or rename it?</strong></summary>
+
+Yes. It is MIT licensed — use it, change it, rebrand it, run it commercially. A credit back is appreciated but
+not required. The name, colours and links live in `src/config/theme.ts`.
+
+</details>
+
+## Troubleshooting
+
+| Symptom                                          | Fix                                                                                                                    |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `Your .env file needs attention`                 | The message lists exactly which values are wrong. Optional ones can be left blank                                      |
+| `querySrv ECONNREFUSED`                          | Your DNS cannot resolve the Atlas address. Try another network, or use the non-SRV connection string                   |
+| `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                                             |
+| `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how                     |
+| `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                                                 |
+| `EBADENGINE` during install                      | Your Node is older than 22.11. Run `nvm use`                                                                           |
+| Music will not play                              | The bot has to be in a voice channel with you. ffmpeg ships with the project, so check the console for a DisTube error |
+
+Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
+[open an issue](https://github.com/Kkkermit/Testify/issues).
 
 ## Contributing
 
-Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
-`npm run check` is what CI runs, so if it passes locally it will pass there.
+Contributions are very welcome, including from first-timers.
 
-## Licence
+```bash
+npm run check     # typecheck, lint, format and tests — run this before pushing
+npm run commit    # guided commit message in the project's format
+```
 
-MIT — see [LICENSE](LICENSE).
+[`CONTRIBUTING.md`](CONTRIBUTING.md) has the full guide. New logic needs a test — the suite has an 80% coverage
+floor and the pre-push hook enforces it.
+
+## Contributors
+
+<p align="center">Thank you to all the amazing people who have contributed to Testify!</p>
+
+<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/graphs/contributors">
+    <img src="https://contrib.rocks/image?repo=Kkkermit/Testify" />
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/Kkkermit/Testify/graphs/contributors">View all contributors</a>
+</p>
+
+## Support
+
+Join us on [Discord](https://discord.gg/xcMVwAVjSD) for support, questions, or just to say hello.
+
+If Testify has been useful to you, a [coffee](https://buymeacoffee.com/kkermit) keeps it going 💛
+
+## Star history
+
+<div align="center">
+ <a href="https://www.star-history.com/#Kkkermit/Testify&Date">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date&theme=dark" />
+    <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date" />
+    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Kkkermit/Testify&type=Date" />
+  </picture>
+ </a>
+</div>
+
+## License
+
+Released under the terms of the [MIT License](LICENSE) [2026].
+
+**Thanks to [TheLegendDev](https://github.com/TheLegenDev) for the readme template from [Nub Bot](https://github.com/TheLegenDev/Nub-Bot)** 💛
