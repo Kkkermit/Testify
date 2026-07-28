@@ -75,13 +75,13 @@ function build(client: TestifyClient): DisTube {
 		client.logger.debug({ ffmpegPath: ffmpeg.path, source: ffmpeg.source }, "[MUSIC] Selected FFmpeg");
 	}
 
+	const soundcloud = new ProgressiveSoundCloudPlugin();
+	soundcloud.debugLog = (message) => client.logger.debug(message);
+
 	const player = new DisTube(client, {
 		// The yt-dlp plugin refreshes its binary on construction, and must be last:
 		// its `validate()` returns true for every URL, so anything after it is dead.
-		plugins: [
-			relayed(new ProgressiveSoundCloudPlugin(), relay),
-			relayed(new ProgressiveYtDlpPlugin({ update: true }), relay),
-		],
+		plugins: [relayed(soundcloud, relay), relayed(new ProgressiveYtDlpPlugin({ update: true }), relay)],
 		emitNewSongOnly: true,
 		savePreviousSongs: true,
 		nsfw: false,
@@ -93,6 +93,12 @@ function build(client: TestifyClient): DisTube {
 	// that process — its command line, its stderr, its exit code — only through this
 	// event. Without a listener a failed fetch is silent: the queue just ends. Run
 	// with LOG_LEVEL=debug to see it, and `npm run music:doctor` to check the rest.
+	// Names the plugin handling each song — the one fact missing from a failed
+	// resolve, since DisTube reports only an opaque CANNOT_GET_STREAM_URL.
+	player.on(DisTubeEvent.DEBUG, (message: string) => {
+		client.logger.debug({ distube: message }, "[MUSIC] DisTube");
+	});
+
 	player.on(DisTubeEvent.FFMPEG_DEBUG, (message: string) => {
 		if (FFMPEG_FAILURE.test(message)) client.logger.warn({ ffmpeg: message }, "[MUSIC] FFmpeg reported a problem");
 		else client.logger.debug({ ffmpeg: message }, "[MUSIC] FFmpeg");

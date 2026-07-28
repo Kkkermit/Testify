@@ -1,5 +1,5 @@
 import { explainPlaybackFailure } from "@lib/music.util";
-import { ProgressiveSoundCloudPlugin, YTDLP_AUDIO_FORMAT } from "@lib/musicPlugins.util";
+import { playableTranscodings, ProgressiveSoundCloudPlugin, YTDLP_AUDIO_FORMAT } from "@lib/musicPlugins.util";
 
 /**
  * SoundCloud now serves a DRM-protected (`/cbcs/`) HLS transcoding first, which
@@ -58,6 +58,48 @@ describe("ProgressiveSoundCloudPlugin", () => {
 		expect(chosen[0]).toBe(PLAIN_HLS);
 	});
 
+	/**
+	 * The regression that produced DisTube's opaque CANNOT_GET_STREAM_URL:
+	 * `getStreamLink` reads `.url` off a JSON body, so it returns undefined rather
+	 * than null when SoundCloud answers with anything unexpected.
+	 */
+	it("moves on to the next transcoding when one yields no URL", async () => {
+		const plugin = new ProgressiveSoundCloudPlugin();
+		const tried: unknown[] = [];
+
+		(plugin as unknown as { soundcloud: unknown }).soundcloud = {
+			util: {
+				sortTranscodings: () => Promise.resolve([PROGRESSIVE, PLAIN_HLS]),
+				getStreamLink: (transcoding: unknown) => {
+					tried.push(transcoding);
+					return Promise.resolve(transcoding === PROGRESSIVE ? undefined : "https://cdn.test/second.mp3");
+				},
+			},
+		};
+
+		expect(await plugin.getStreamURL({ url: "https://soundcloud.com/a/b" })).toBe("https://cdn.test/second.mp3");
+		expect(tried).toEqual([PROGRESSIVE, PLAIN_HLS]);
+	});
+
+	it("survives a transcoding whose lookup throws, rather than failing the track", async () => {
+		const plugin = new ProgressiveSoundCloudPlugin();
+
+		(plugin as unknown as { soundcloud: unknown }).soundcloud = {
+			util: {
+				sortTranscodings: () => Promise.resolve([PROGRESSIVE, PLAIN_HLS]),
+				getStreamLink: (transcoding: unknown) =>
+					transcoding === PROGRESSIVE ? Promise.reject(new Error("429")) : Promise.resolve("https://cdn.test/ok.mp3"),
+			},
+		};
+
+		expect(await plugin.getStreamURL({ url: "https://soundcloud.com/a/b" })).toBe("https://cdn.test/ok.mp3");
+	});
+
+	it("explains itself when every transcoding comes back empty", async () => {
+		const { plugin } = pluginWith([PROGRESSIVE, PLAIN_HLS], "");
+		await expect(plugin.getStreamURL({ url: "https://soundcloud.com/a/b" })).rejects.toThrow(/no playable stream/i);
+	});
+
 	it("never picks an encrypted transcoding, even as the only option", async () => {
 		const { plugin } = pluginWith([ENCRYPTED_HLS]);
 
@@ -75,9 +117,23 @@ describe("ProgressiveSoundCloudPlugin", () => {
 		await expect(plugin.getStreamURL({})).rejects.toThrow(/invalid song/i);
 	});
 
-	it("explains a refused stream request instead of returning an empty URL", async () => {
+	it("never returns a falsy URL, which DisTube reports as an unexplained failure", async () => {
 		const { plugin } = pluginWith([PROGRESSIVE], "");
-		await expect(plugin.getStreamURL({ url: "https://soundcloud.com/a/b" })).rejects.toThrow(/try again/i);
+		await expect(plugin.getStreamURL({ url: "https://soundcloud.com/a/b" })).rejects.toThrow();
+	});
+});
+
+describe("playableTranscodings", () => {
+	it("puts progressive first and drops every encrypted option", () => {
+		expect(playableTranscodings([ENCRYPTED_HLS, PLAIN_HLS, PROGRESSIVE])).toEqual([PROGRESSIVE, PLAIN_HLS]);
+	});
+
+	it("ignores a transcoding with no URL at all", () => {
+		expect(playableTranscodings([{ format: { protocol: "progressive" } }, PLAIN_HLS])).toEqual([PLAIN_HLS]);
+	});
+
+	it("returns nothing when every option is encrypted", () => {
+		expect(playableTranscodings([ENCRYPTED_HLS])).toEqual([]);
 	});
 });
 

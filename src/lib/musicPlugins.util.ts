@@ -40,7 +40,25 @@ interface SoundCloudInternals {
 	};
 }
 
+/**
+ * Unencrypted transcodings, best first.
+ *
+ * Exported because the ordering is the entire decision and is worth testing on
+ * its own, without a SoundCloud client.
+ */
+export function playableTranscodings(all: Transcoding[]): Transcoding[] {
+	const usable = all.filter((option) => !ENCRYPTED.test(option.url ?? "") && (option.url ?? "") !== "");
+
+	return [
+		...usable.filter((option) => option.format?.protocol === "progressive"),
+		...usable.filter((option) => option.format?.protocol !== "progressive"),
+	];
+}
+
 export class ProgressiveSoundCloudPlugin extends SoundCloudPlugin {
+	/** Set by the player so the choice shows up in the log when a track fails. */
+	debugLog: (message: string) => void = () => undefined;
+
 	override async getStreamURL(song: { url?: string }): Promise<string> {
 		if (song.url === undefined || song.url === "") {
 			throw new DisTubeError("SOUNDCLOUD_PLUGIN_INVALID_SONG", "Cannot get stream url from invalid song.");
@@ -48,30 +66,40 @@ export class ProgressiveSoundCloudPlugin extends SoundCloudPlugin {
 
 		const { util } = this.soundcloud as unknown as SoundCloudInternals;
 		const all = await util.sortTranscodings(song.url);
+		const candidates = playableTranscodings(all);
 
-		// Progressive first, then anything that at least is not encrypted. Falling
-		// back keeps older tracks playing where SoundCloud has not published a
-		// progressive rendition.
-		const playable =
-			all.find((option) => option.format?.protocol === "progressive" && !ENCRYPTED.test(option.url ?? "")) ??
-			all.find((option) => !ENCRYPTED.test(option.url ?? ""));
+		this.debugLog(
+			`[SOUNDCLOUD] ${all.length} transcoding(s), ${candidates.length} unencrypted: ` +
+				all
+					.map((option) => `${option.format?.protocol ?? "?"}${ENCRYPTED.test(option.url ?? "") ? " (drm)" : ""}`)
+					.join(", "),
+		);
 
-		if (playable === undefined) {
+		if (candidates.length === 0) {
 			throw new DisTubeError(
 				"SOUNDCLOUD_DRM",
 				"SoundCloud only offers this track as a DRM-protected stream, which cannot be played.",
 			);
 		}
 
-		const link = await util.getStreamLink(playable);
-		if (link === null || link === "") {
-			throw new DisTubeError(
-				"SOUNDCLOUD_PLUGIN_RATE_LIMITED",
-				"SoundCloud refused the stream request. Try again shortly.",
-			);
+		// Each candidate is a separate API call that can come back without a URL —
+		// a rate limit, a region block, a Go+ track. Trying the next one is far more
+		// robust than betting on the first, which is how this returned undefined and
+		// surfaced as DisTube's opaque CANNOT_GET_STREAM_URL.
+		for (const candidate of candidates) {
+			const link = await util.getStreamLink(candidate).catch(() => null);
+
+			// `getStreamLink` reads `.url` off a JSON body, so it yields undefined —
+			// not null — whenever SoundCloud answers with anything unexpected.
+			if (typeof link === "string" && link !== "") return link;
+
+			this.debugLog(`[SOUNDCLOUD] No stream URL from the ${candidate.format?.protocol ?? "unknown"} transcoding.`);
 		}
 
-		return link;
+		throw new DisTubeError(
+			"SOUNDCLOUD_PLUGIN_RATE_LIMITED",
+			"SoundCloud returned no playable stream for this track. It may be rate limited, region locked or Go+ only.",
+		);
 	}
 }
 
