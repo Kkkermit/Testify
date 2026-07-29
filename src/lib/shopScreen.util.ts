@@ -112,11 +112,17 @@ export interface Entry {
 	detail?: string;
 	/** Why this entry cannot be bought right now. */
 	blocked?: string;
+	/** Already yours, and sellable — the button becomes Sell rather than Buy. */
+	owned?: boolean;
+	/** What selling it back would pay. */
+	refund?: number;
 }
 
 export interface Balances {
 	wallet: number;
 	ownsHouse: boolean;
+	/** Which house, so it can offer to sell that one specifically. */
+	houseId?: string;
 	ownedBusinessIds: string[];
 	ownedItemIds: string[];
 	job: string;
@@ -139,15 +145,23 @@ function petEntry(pet: PetSpecies, balances: Balances): Entry {
 export function entriesFor(state: ShopState, balances: Balances): Entry[] {
 	switch (state.section) {
 		case "houses":
-			return HOUSES.map((house) => ({
-				id: house.id,
-				name: house.name,
-				emoji: house.emoji,
-				price: house.price,
-				description: house.description,
-				detail: `Passive income **${formatNumber(house.income)}/hour**`,
-				...(balances.ownsHouse ? { blocked: "You already own a house. Sell it first." } : {}),
-			}));
+			return HOUSES.map((house) => {
+				// The one you own turns into a Sell button rather than a dead
+				// "already owned" row — selling used to be a separate subcommand
+				// that took no confirmation.
+				const isMine = balances.ownsHouse && balances.houseId === house.id;
+
+				return {
+					id: house.id,
+					name: house.name,
+					emoji: house.emoji,
+					price: house.price,
+					description: house.description,
+					detail: `Passive income **${formatNumber(house.income)}/hour**`,
+					...(isMine ? { owned: true, refund: Math.floor(house.price / 2) } : {}),
+					...(balances.ownsHouse && !isMine ? { blocked: "You already own a house. Sell it first." } : {}),
+				};
+			});
 
 		case "businesses":
 			return BUSINESSES.map((business) => ({
@@ -224,18 +238,27 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 	// One row per entry, with its buy button beside it rather than in a row
 	// underneath — so nobody has to count buttons to match them to items.
 	for (const entry of shown) {
-		const note = entry.blocked ?? entry.detail;
+		const owned = entry.owned === true;
+		const note = owned
+			? `You own this · sells for **${formatNumber(entry.refund ?? 0)}**`
+			: (entry.blocked ?? entry.detail);
 
 		parts.push(
 			sectionWithButton(
 				`**${entry.emoji} ${entry.name}** — ${priceLabel(entry)}\n` +
 					`${entry.description}${note !== undefined ? `\n-# ${note}` : ""}`,
-				button({
-					id: encodeShopState("buy", { ...state, selectedId: entry.id, page }, ownerId),
-					label: entry.blocked !== undefined ? "Unavailable" : entry.price > 0 ? "Buy" : "Take",
-					style: ButtonStyle.Success,
-					disabled: entry.blocked !== undefined || balances.wallet < entry.price,
-				}),
+				owned
+					? button({
+							id: encodeShopState("sell", { ...state, selectedId: entry.id, page }, ownerId),
+							label: "Sell",
+							style: ButtonStyle.Danger,
+						})
+					: button({
+							id: encodeShopState("buy", { ...state, selectedId: entry.id, page }, ownerId),
+							label: entry.blocked !== undefined ? "Unavailable" : entry.price > 0 ? "Buy" : "Take",
+							style: ButtonStyle.Success,
+							disabled: entry.blocked !== undefined || balances.wallet < entry.price,
+						}),
 			),
 		);
 	}
@@ -313,6 +336,38 @@ function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: str
 						label: "Back",
 						style: ButtonStyle.Secondary,
 					}),
+				),
+			],
+		}),
+	);
+}
+
+/**
+ * Selling asks first, because it pays back half and cannot be undone.
+ *
+ * The confirm row lives inside the container: a Components V2 message cannot carry
+ * a loose action row alongside one, so it has to be part of the same block.
+ */
+export function sellConfirmScreen(entry: Entry, balances: Balances, ownerId: string): ContainerMessage {
+	const refund = entry.refund ?? 0;
+
+	return containerMessage(
+		container({
+			category: "economy",
+			parts: [
+				text(
+					`## ${entry.emoji} Sell ${entry.name}?\n` +
+						`You paid **${formatNumber(entry.price)}** and get **${formatNumber(refund)}** back — half.\n` +
+						`-# Wallet after selling: **${formatNumber(balances.wallet + refund)}**`,
+				),
+				divider(),
+				row(
+					button({
+						id: customId(SHOP_ID, "sell-yes", ownerId),
+						label: `Sell for ${formatNumber(refund)}`,
+						style: ButtonStyle.Danger,
+					}),
+					button({ id: customId(SHOP_ID, "sell-no", ownerId), label: "Keep it", style: ButtonStyle.Secondary }),
 				),
 			],
 		}),

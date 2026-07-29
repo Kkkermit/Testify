@@ -61,7 +61,10 @@ export async function runChecks(
 function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {
 	if (!command.cooldown || client.isOwner(interaction.user.id)) return null;
 
-	const key = `${command.name}:${interaction.user.id}`;
+	// Scoped per guild: economy, levelling and every other stateful feature is
+	// per-guild, so a global key would let a cooldown earned in one server block
+	// the same command in another.
+	const key = `${interaction.guildId ?? "dm"}:${command.name}:${interaction.user.id}`;
 	const now = Date.now();
 	const readyAt = cooldowns.get(key) ?? 0;
 

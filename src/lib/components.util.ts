@@ -2,11 +2,13 @@ import {
 	ActionRowBuilder,
 	ButtonBuilder,
 	ButtonStyle,
+	ChannelSelectMenuBuilder,
+	ChannelType,
 	type EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 	ModalBuilder,
 	StringSelectMenuBuilder,
-	type StringSelectMenuOptionBuilder,
+	StringSelectMenuOptionBuilder,
 	TextInputBuilder,
 	TextInputStyle,
 } from "discord.js";
@@ -70,6 +72,43 @@ export function select(options: {
 		.setDisabled(options.disabled ?? false);
 
 	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	return builder;
+}
+
+/**
+ * A channel picker, which beats asking someone to paste an ID or hunt for a
+ * `#channel` mention. Discord filters the list to the types given.
+ */
+export function channelSelect(options: {
+	id: string;
+	placeholder?: string;
+	channelTypes?: ChannelType[];
+	disabled?: boolean;
+}): ChannelSelectMenuBuilder {
+	const builder = new ChannelSelectMenuBuilder()
+		.setCustomId(options.id)
+		.setChannelTypes(options.channelTypes ?? [ChannelType.GuildText, ChannelType.GuildAnnouncement])
+		.setDisabled(options.disabled ?? false);
+
+	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	return builder;
+}
+
+/** An option for `select()`, with `default: true` making it show as already chosen. */
+export function option(config: {
+	label: string;
+	value: string;
+	description?: string;
+	emoji?: string;
+	selected?: boolean;
+}): StringSelectMenuOptionBuilder {
+	const builder = new StringSelectMenuOptionBuilder()
+		.setLabel(config.label.slice(0, 100))
+		.setValue(config.value)
+		.setDefault(config.selected ?? false);
+
+	if (config.description !== undefined) builder.setDescription(config.description.slice(0, 100));
+	if (config.emoji !== undefined) builder.setEmoji(config.emoji);
 	return builder;
 }
 

@@ -1,10 +1,9 @@
 import { strings } from "@config/strings";
-import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { findAccount } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { balancePanel } from "@lib/balancePanel.util";
+import { dailyReady } from "@lib/economyActions.util";
 import { reply } from "@lib/reply.util";
 
 export default defineCommand({
@@ -30,19 +29,20 @@ export default defineCommand({
 			);
 		}
 
-		await reply(interaction, {
-			embeds: [
-				embed({
-					category: "economy",
-					title: `${target.username}'s balance`,
-					fields: [
-						{ name: `${theme.emoji.wallet} Wallet`, value: formatNumber(account.wallet), inline: true },
-						{ name: `${theme.emoji.bank} Bank`, value: formatNumber(account.bank), inline: true },
-						{ name: `${theme.emoji.coin} Total`, value: formatNumber(account.wallet + account.bank), inline: true },
-					],
-					thumbnail: target.displayAvatarURL(),
-				}),
-			],
-		});
+		// Controls only on your own balance — you cannot spend someone else's.
+		await reply(
+			interaction,
+			balancePanel(
+				{
+					wallet: account.wallet,
+					bank: account.bank,
+					username: target.username,
+					avatarUrl: target.displayAvatarURL(),
+					own: target.id === interaction.user.id,
+					dailyReady: dailyReady(account.lastDaily),
+				},
+				interaction.user.id,
+			),
+		);
 	},
 });

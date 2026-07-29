@@ -1,17 +1,32 @@
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { type EconomyAccount } from "@database/models/economy.schema";
-import { addInventoryItem, debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
+import {
+	addInventoryItem,
+	adjustWallet,
+	debitWallet,
+	requireAccount,
+	setFields,
+} from "@database/repositories/economyRepository";
 import { formatNumber } from "@lib/format.util";
 import { findPet } from "@lib/pets.util";
 import { findBusiness, findHouse, findJob, findShopItem } from "@lib/shop.util";
-import { type Balances, decodeShopState, findEntry, SHOP_ID, shopScreen, type ShopState } from "@lib/shopScreen.util";
+import {
+	type Balances,
+	decodeShopState,
+	findEntry,
+	sellConfirmScreen,
+	SHOP_ID,
+	shopScreen,
+	type ShopState,
+} from "@lib/shopScreen.util";
 
 /** What the screen needs to know about the buyer, derived from their account. */
 export function balancesOf(account: EconomyAccount): Balances {
 	return {
 		wallet: account.wallet,
 		ownsHouse: account.house !== null,
+		...(account.house !== null ? { houseId: account.house.houseId } : {}),
 		ownedBusinessIds: account.businesses.map((business) => business.businessId),
 		ownedItemIds: account.inventory.filter((entry) => entry.quantity > 0).map((entry) => entry.itemId),
 		job: account.job,
@@ -165,6 +180,48 @@ export default defineButton({
 			// A tab press clears the selection, so it lands on the catalogue.
 			const { selectedId: _cleared, ...withoutSelection } = state;
 			await interaction.update(shopScreen(withoutSelection, balancesOf(await requireAccount(guildId, userId)), userId));
+			return;
+		}
+
+		// Selling is destructive and pays back half, so it asks first.
+		if (context.action === "sell") {
+			const account = await requireAccount(guildId, userId);
+			if (account.house === null) throw new UserFacingError("You do not own a house.");
+
+			const balances = balancesOf(account);
+			const entry = findEntry({ section: "houses" }, balances, state.selectedId ?? "");
+			if (!entry) throw new UserFacingError("That is not something you own.");
+
+			await interaction.update(sellConfirmScreen(entry, balances, userId));
+			return;
+		}
+
+		if (context.action === "sell-no") {
+			await interaction.update(
+				shopScreen({ section: "houses" }, balancesOf(await requireAccount(guildId, userId)), userId),
+			);
+			return;
+		}
+
+		if (context.action === "sell-yes") {
+			const account = await requireAccount(guildId, userId);
+			if (account.house === null) throw new UserFacingError("You do not own a house.");
+
+			const refund = Math.floor(account.house.value / 2);
+			const name = account.house.name;
+
+			await setFields(guildId, userId, { house: null });
+			await adjustWallet(guildId, userId, refund);
+
+			const updated = await requireAccount(guildId, userId);
+			await interaction.update(
+				shopScreen(
+					{ section: "houses" },
+					balancesOf(updated),
+					userId,
+					`Sold **${name}** for **${formatNumber(refund)}**.`,
+				),
+			);
 			return;
 		}
 

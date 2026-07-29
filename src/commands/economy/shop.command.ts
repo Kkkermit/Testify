@@ -1,150 +1,40 @@
 import { balancesOf } from "@buttons/shop";
-import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
-import { UserFacingError } from "@core/errors";
-import {
-	addInventoryItem,
-	adjustWallet,
-	debitWallet,
-	requireAccount,
-	setFields,
-} from "@database/repositories/economyRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { requireAccount } from "@database/repositories/economyRepository";
 import { reply } from "@lib/reply.util";
-import { findBusiness, findHouse, findShopItem } from "@lib/shop.util";
 import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/shopScreen.util";
 
+/**
+ * The whole shop is one browsable panel.
+ *
+ * There used to be a `buy` subcommand taking a raw `id` string, so buying meant
+ * reading an ID out of `/shop view` and retyping it — and a `sell` subcommand that
+ * silently sold your house with no confirmation. Both are now buttons on the
+ * screen that already lists what you can afford.
+ */
 export default defineCommand({
 	name: "shop",
 	description: "Browses and buys from the shop.",
 	category: "economy",
+	aliases: ["store", "buy"],
 	guildOnly: true,
-	subcommands: [
+	options: [
 		{
-			name: "view",
-			description: "See everything for sale.",
-			options: [
-				{
-					name: "section",
-					description: "Which part of the shop.",
-					type: "string",
-					choices: SHOP_SECTIONS.map((section) => ({ name: section, value: section })),
-				},
-			],
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const section = interaction.options.getString("section") ?? "items";
-				const account = await requireAccount(guild.id, interaction.user.id);
-
-				await reply(
-					interaction,
-					shopScreen({ section: isShopSection(section) ? section : "items" }, balancesOf(account), interaction.user.id),
-				);
-			},
-		},
-		{
-			name: "buy",
-			description: "Buy something from the shop.",
-			options: [
-				{ name: "id", description: "The item, house or business id.", type: "string", required: true },
-				{ name: "quantity", description: "How many to buy.", type: "integer", min: 1, max: 100 },
-			],
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const id = interaction.options.getString("id", true).toLowerCase().replace(/\s+/g, "_");
-				const quantity = interaction.options.getInteger("quantity") ?? 1;
-				const account = await requireAccount(guild.id, interaction.user.id);
-
-				const item = findShopItem(id);
-				if (item) {
-					const cost = item.price * quantity;
-					const paid = await debitWallet(guild.id, interaction.user.id, cost);
-					if (!paid) throw new UserFacingError(strings.economy.insufficientWallet(cost - account.wallet));
-
-					await addInventoryItem(guild.id, interaction.user.id, {
-						itemId: item.id,
-						name: item.name,
-						emoji: item.emoji,
-						quantity,
-					});
-
-					await reply(interaction, {
-						embeds: [
-							successEmbed(`Bought ${item.emoji} **${item.name}** \u00d7${quantity} for **${formatNumber(cost)}**.`),
-						],
-					});
-					return;
-				}
-
-				const house = findHouse(id);
-				if (house) {
-					if (account.house !== null) throw new UserFacingError("You already own a house. Sell it first.");
-
-					const paid = await debitWallet(guild.id, interaction.user.id, house.price);
-					if (!paid) throw new UserFacingError(strings.economy.insufficientWallet(house.price - account.wallet));
-
-					await setFields(guild.id, interaction.user.id, {
-						house: {
-							houseId: house.id,
-							name: house.name,
-							emoji: house.emoji,
-							value: house.price,
-							purchasedAt: new Date(),
-						},
-					});
-
-					await reply(interaction, { embeds: [successEmbed(`You bought ${house.emoji} **${house.name}**.`)] });
-					return;
-				}
-
-				const business = findBusiness(id);
-				if (business) {
-					if (account.businesses.some((owned) => owned.businessId === business.id)) {
-						throw new UserFacingError("You already own that business.");
-					}
-
-					const paid = await debitWallet(guild.id, interaction.user.id, business.price);
-					if (!paid) throw new UserFacingError(strings.economy.insufficientWallet(business.price - account.wallet));
-
-					await setFields(guild.id, interaction.user.id, {
-						businesses: [
-							...account.businesses,
-							{
-								businessId: business.id,
-								name: business.name,
-								emoji: business.emoji,
-								level: 1,
-								income: business.income,
-								purchasedAt: new Date(),
-								lastCollected: null,
-							},
-						],
-					});
-
-					await reply(interaction, { embeds: [successEmbed(`You bought ${business.emoji} **${business.name}**.`)] });
-					return;
-				}
-
-				throw new UserFacingError(`Nothing in the shop has the id \`${id}\`. Use \`/shop view\` to browse it.`);
-			},
-		},
-		{
-			name: "sell",
-			description: "Sell your house back for half its value.",
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const account = await requireAccount(guild.id, interaction.user.id);
-				if (account.house === null) throw new UserFacingError("You do not own a house.");
-
-				const refund = Math.floor(account.house.value / 2);
-				await setFields(guild.id, interaction.user.id, { house: null });
-				await adjustWallet(guild.id, interaction.user.id, refund);
-
-				await reply(interaction, {
-					embeds: [successEmbed(`Sold **${account.house.name}** for **${formatNumber(refund)}**.`)],
-				});
-			},
+			name: "section",
+			description: "Jump straight to a part of the shop.",
+			type: "string",
+			choices: SHOP_SECTIONS.map((section) => ({ name: section, value: section })),
 		},
 	],
+
+	async run(interaction) {
+		const guild = inGuild(interaction);
+		const section = interaction.options.getString("section") ?? "items";
+		const account = await requireAccount(guild.id, interaction.user.id);
+
+		await reply(
+			interaction,
+			shopScreen({ section: isShopSection(section) ? section : "items" }, balancesOf(account), interaction.user.id),
+		);
+	},
 });

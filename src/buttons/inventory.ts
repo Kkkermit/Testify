@@ -1,32 +1,78 @@
-import { INVENTORY_PAGE_SIZE } from "@commands/economy/inventory.command";
-import { type InventoryItem } from "@database/models/economy.schema";
-import { findAccount } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { paginatedButton } from "@lib/pagination.util";
-import { findShopItem } from "@lib/shop.util";
+import { randomInt } from "node:crypto";
+import { balancesOf } from "@buttons/shop";
+import { defineButton } from "@core/button";
+import { requireAccount } from "@database/repositories/economyRepository";
+import { BALANCE_PANEL_ID, balancePanel } from "@lib/balancePanel.util";
+import { dailyReady, useItem } from "@lib/economyActions.util";
+import { INVENTORY_PANEL_ID, inventoryScreen } from "@lib/inventoryScreen.util";
+import { shopScreen } from "@lib/shopScreen.util";
 
 /**
- * Page state lives entirely in the custom ID, so the list is rebuilt on demand.
- * The previous paginator kept a module-scope map and scheduled a fresh five-minute
- * timeout on every button press.
+ * Using an item, and moving between the economy panels.
+ *
+ * The page number rides in the custom ID, so nothing is held in memory and a
+ * stale message still pages correctly after a restart.
  */
-export default paginatedButton<InventoryItem>({
-	id: "inventory",
-	pageSize: INVENTORY_PAGE_SIZE,
-	async resolve(key, context) {
-		if (context.guildId === null) return [];
-		const account = await findAccount(context.guildId, key);
-		return account?.inventory ?? [];
+export default defineButton({
+	id: INVENTORY_PANEL_ID,
+	ownerOnly: true,
+
+	async run(interaction, context) {
+		if (interaction.guild === null) return;
+		if (!interaction.isButton()) return;
+
+		const guildId = interaction.guild.id;
+		const userId = interaction.user.id;
+		const username = interaction.user.username;
+
+		switch (context.action) {
+			case "use": {
+				const [itemId = "", rawPage = "0"] = context.args;
+				const result = await useItem(guildId, userId, itemId, (min, max) => randomInt(min, max + 1));
+				const updated = await requireAccount(guildId, userId);
+
+				await interaction.update(
+					inventoryScreen(updated, username, userId, Number.parseInt(rawPage, 10) || 0, result.message),
+				);
+				return;
+			}
+
+			case "page": {
+				const [rawPage = "0"] = context.args;
+				const account = await requireAccount(guildId, userId);
+
+				await interaction.update(inventoryScreen(account, username, userId, Number.parseInt(rawPage, 10) || 0));
+				return;
+			}
+
+			case "shop": {
+				const account = await requireAccount(guildId, userId);
+				await interaction.update(shopScreen({ section: "items" }, balancesOf(account), userId));
+				return;
+			}
+
+			case "bal": {
+				const account = await requireAccount(guildId, userId);
+				await interaction.update(
+					balancePanel(
+						{
+							wallet: account.wallet,
+							bank: account.bank,
+							username,
+							avatarUrl: interaction.user.displayAvatarURL(),
+							own: true,
+							dailyReady: dailyReady(account.lastDaily),
+						},
+						userId,
+					),
+				);
+				return;
+			}
+
+			default:
+				return;
+		}
 	},
-	render: (items) =>
-		embed({
-			category: "economy",
-			title: "Inventory",
-			fields: items.map((item) => ({
-				name: `${item.emoji} ${item.name} \u00d7${formatNumber(item.quantity)}`,
-				value: findShopItem(item.itemId)?.description ?? "\u200b",
-				inline: false,
-			})),
-		}),
 });
+
+export { BALANCE_PANEL_ID };
