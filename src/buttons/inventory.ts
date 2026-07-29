@@ -1,4 +1,4 @@
-import { INVENTORY_PAGE_SIZE } from "@commands/economy/inventory.slash";
+import { INVENTORY_PAGE_SIZE } from "@commands/economy/inventory.command";
 import { type InventoryItem } from "@database/models/economy.schema";
 import { findAccount } from "@database/repositories/economyRepository";
 import { embed } from "@lib/embeds.util";

@@ -299,7 +299,7 @@ Create one file. The loader finds it, `/help` lists it, and it works as a slash 
 straight away.
 
 ```ts
-// src/commands/fun/coinflip.slash.ts
+// src/commands/fun/coinflip.command.ts
 import { defineCommand } from "@core/command";
 import { successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
@@ -321,7 +321,7 @@ nothing to import by hand.
 
 **Three rules worth knowing:**
 
-1. **The `.slash.ts` suffix is what the loader looks for.** A file without it is silently never loaded — so a
+1. **The `.command.ts` suffix is what the loader looks for.** A file without it is silently never loaded — so a
    test enforces the naming.
 2. **`category` must be a key from `src/config/categories.ts`.** A typo is a compile error, not a runtime
    surprise.

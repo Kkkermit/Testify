@@ -65,21 +65,21 @@ message convention**, and **the boot banner as presentation written to stdout, n
 
 Everything below is a real divergence from the reference standard, ordered roughly by value.
 
-| #   | Area              | Status              | Where it landed                                                                                     |
-| --- | ----------------- | ------------------- | --------------------------------------------------------------------------------------------------- |
-| 1   | Nightly security  | Done                | `.github/workflows/nightly.yml`, `.nsprc`, `.snyk`; version pins explained in `SECURITY.md`         |
-| 2   | CI branch scope   | Done                | `ci.yml` triggers on `["**"]`, and reads the Node version from `.nvmrc`                             |
-| 3   | File suffixes     | Done                | `.slash.ts` / `.event.ts` / `.util.ts` / `.schema.ts`; enforced by `tests/core/conventions.test.ts` |
-| 4   | Import aliases    | Done                | `tsconfig.json` `paths`; Jest derives its mapper from it, `tsc-alias` rewrites the build            |
-| 5   | Barrels           | Done                | `index.ts` in `@config`, `@core`, `@lib`, `@database`, using `export *`                             |
-| 6   | Commit convention | Done                | `scripts/commitRunner.ts` and a `commit-msg` hook running commitlint                                |
-| 7   | Event grouping    | Done                | `ReadyEvents/`, `CommandEvents/`, `CreateEvents/`, `LoggingEvents/`                                 |
-| 8   | Dev env template  | Done                | `.env.development.example`, and `npm run setup -- --dev`                                            |
-| 9   | Banner detail     | Done                | Emoji icons and a "Loaded from disk" block in `bannerLines()`                                       |
-| 10  | Pre-commit        | Done                | `typecheck` runs before `lint-staged`                                                               |
-| 11  | Pre-push coverage | Done                | `test:coverage`, so the thresholds gate the push                                                    |
-| 12  | Lint report       | Done                | `scripts/lintRunner.ts` — errors fail, warnings never do                                            |
-| 13  | Category folders  | **Decided against** | Kept flat and lowercase. See [§4](#4-folder-naming-and-grouping)                                    |
+| #   | Area              | Status              | Where it landed                                                                                       |
+| --- | ----------------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
+| 1   | Nightly security  | Done                | `.github/workflows/nightly.yml`, `.nsprc`, `.snyk`; version pins explained in `SECURITY.md`           |
+| 2   | CI branch scope   | Done                | `ci.yml` triggers on `["**"]`, and reads the Node version from `.nvmrc`                               |
+| 3   | File suffixes     | Done                | `.command.ts` / `.event.ts` / `.util.ts` / `.schema.ts`; enforced by `tests/core/conventions.test.ts` |
+| 4   | Import aliases    | Done                | `tsconfig.json` `paths`; Jest derives its mapper from it, `tsc-alias` rewrites the build              |
+| 5   | Barrels           | Done                | `index.ts` in `@config`, `@core`, `@lib`, `@database`, using `export *`                               |
+| 6   | Commit convention | Done                | `scripts/commitRunner.ts` and a `commit-msg` hook running commitlint                                  |
+| 7   | Event grouping    | Done                | `ReadyEvents/`, `CommandEvents/`, `CreateEvents/`, `LoggingEvents/`                                   |
+| 8   | Dev env template  | Done                | `.env.development.example`, and `npm run setup -- --dev`                                              |
+| 9   | Banner detail     | Done                | Emoji icons and a "Loaded from disk" block in `bannerLines()`                                         |
+| 10  | Pre-commit        | Done                | `typecheck` runs before `lint-staged`                                                                 |
+| 11  | Pre-push coverage | Done                | `test:coverage`, so the thresholds gate the push                                                      |
+| 12  | Lint report       | Done                | `scripts/lintRunner.ts` — errors fail, warnings never do                                              |
+| 13  | Category folders  | **Decided against** | Kept flat and lowercase. See [§4](#4-folder-naming-and-grouping)                                      |
 
 ### Why #13 was declined
 
@@ -102,14 +102,19 @@ distinction the reader gains anything from here.
 an editor tab, a stack trace and a `git log` line. The reference applied this deliberately in two sweeps
 (commits `1e64090`, `8d62700`) and it is the single most visible convention in that repo.
 
-| Suffix       | For                              | Example                             |
-| ------------ | -------------------------------- | ----------------------------------- |
-| `.slash.ts`  | a slash command                  | `commands/moderation/ban.slash.ts`  |
-| `.prefix.ts` | a prefix-only command            | `commands/fun/ascii.prefix.ts`      |
-| `.event.ts`  | a gateway event handler          | `events/ReadyEvents/ready.event.ts` |
-| `.util.ts`   | a shared helper                  | `lib/duration.util.ts`              |
-| `.schema.ts` | a Mongoose model                 | `database/models/economy.schema.ts` |
-| `.test.ts`   | a test (drops the source suffix) | `tests/core/loader.test.ts`         |
+| Suffix        | For                              | Example                              |
+| ------------- | -------------------------------- | ------------------------------------ |
+| `.command.ts` | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
+| `.event.ts`   | a gateway event handler          | `events/ReadyEvents/ready.event.ts`  |
+| `.util.ts`    | a shared helper                  | `lib/duration.util.ts`               |
+| `.schema.ts`  | a Mongoose model                 | `database/models/economy.schema.ts`  |
+| `.test.ts`    | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
+
+**There is no `.slash.ts` or `.prefix.ts`, and reintroducing either would be a mistake.** The reference splits
+them because slash and prefix are separate implementations there. Here one object serves both surfaces through
+`CommandInput`, and `src/core/prefix.ts` is the only file that knows prefix commands exist — so a suffix naming
+one surface describes an architecture this codebase deliberately does not have. It is the same reasoning that
+[§4](#4-folder-naming-and-grouping) uses to reject `SlashCommands/` / `PrefixCommands/` folders.
 
 **Unsuffixed, deliberately:** `src/index.ts`, everything in `src/core/` and `src/config/`, everything in
 `scripts/`, and `*.config.ts` at the root.
@@ -118,9 +123,11 @@ The reference's `.function.js` suffix has **no counterpart here and should not b
 `src/core/loader.ts`, and a typed loader is strictly better than a set of files that mutate the client.
 
 > [!NOTE]
-> Done in `edc86a5` — 188 files, one mechanical commit, loader globs updated alongside. The suffix is
-> load-bearing: `commands/*/*.slash.ts` and `events/**/*.event.ts` are what the loader looks for, so a file
-> that misses its suffix is silently never registered. `tests/core/conventions.test.ts` enforces it.
+> Done in `edc86a5` — 188 files, one mechanical commit, loader globs updated alongside. Commands were renamed
+> again from `.slash.ts` to `.command.ts` once the music system was removed, since nothing in the tree was ever
+> `.prefix.ts` and the old suffix advertised a split that does not exist. The suffix is load-bearing:
+> `commands/*/*.command.ts` and `events/**/*.event.ts` are what the loader looks for, so a file that misses its
+> suffix is silently never registered. `tests/core/conventions.test.ts` enforces it.
 
 ---
 

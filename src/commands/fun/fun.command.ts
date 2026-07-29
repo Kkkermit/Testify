@@ -1,12 +1,12 @@
-import ascii from "@commands/fun/subcommands/ascii.slash";
-import dadJoke from "@commands/fun/subcommands/dadJoke.slash";
-import fakeTweet from "@commands/fun/subcommands/fakeTweet.slash";
-import hack from "@commands/fun/subcommands/hack.slash";
-import iq from "@commands/fun/subcommands/iq.slash";
-import nitro from "@commands/fun/subcommands/nitro.slash";
-import oogway from "@commands/fun/subcommands/oogway.slash";
-import pepeSign from "@commands/fun/subcommands/pepeSign.slash";
-import relationship from "@commands/fun/subcommands/relationship.slash";
+import ascii from "@commands/fun/subcommands/ascii.command";
+import dadJoke from "@commands/fun/subcommands/dadJoke.command";
+import fakeTweet from "@commands/fun/subcommands/fakeTweet.command";
+import hack from "@commands/fun/subcommands/hack.command";
+import iq from "@commands/fun/subcommands/iq.command";
+import nitro from "@commands/fun/subcommands/nitro.command";
+import oogway from "@commands/fun/subcommands/oogway.command";
+import pepeSign from "@commands/fun/subcommands/pepeSign.command";
+import relationship from "@commands/fun/subcommands/relationship.command";
 import { asSubcommand, defineCommand } from "@core/command";
 
 /**

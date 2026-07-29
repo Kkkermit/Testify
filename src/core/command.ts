@@ -160,7 +160,7 @@ export function subcommandsOf(command: Command): Subcommand[] {
  * themselves — see `src/commands/fun/fun.ts` for the pattern.
  *
  * The file being folded in lives in a `subcommands/` folder, which the loader's
- * `commands/*­/*.slash.ts` glob does not reach, so it is not also registered as a
+ * `commands/*­/*.command.ts` glob does not reach, so it is not also registered as a
  * command in its own right.
  */
 export function asSubcommand(command: Command, aliases: string[] = []): Subcommand {

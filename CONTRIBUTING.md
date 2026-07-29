@@ -98,9 +98,9 @@ a `subcommands/` folder — the loader only reads files directly inside a catego
 folder — and expose it from a parent:
 
 ```ts
-// src/commands/fun/fun.slash.ts
+// src/commands/fun/fun.command.ts
 import { asSubcommand, defineCommand } from "../../core/command";
-import dadJoke from "./subcommands/dadJoke.slash";
+import dadJoke from "./subcommands/dadJoke.command";
 
 export default defineCommand({
 	name: "fun",
@@ -110,7 +110,7 @@ export default defineCommand({
 });
 ```
 
-`subcommands/dadJoke.slash.ts` stays an ordinary command file — nothing inside it
+`subcommands/dadJoke.command.ts` stays an ordinary command file — nothing inside it
 changes. It keeps its own name as a prefix alias, so `t?dad-joke` still works
 alongside `/fun dad-joke`, and the second argument adds more.
 

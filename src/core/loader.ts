@@ -56,8 +56,8 @@ export interface LoadCounts {
  * shaped correctly stops start-up and names itself, rather than failing later
  * with something unhelpful.
  *
- * `src/commands/<category>/name.slash.ts` is a command. Anything deeper — such
- * as `src/commands/economy/subcommands/shop.slash.ts` — is a piece of one, reached
+ * `src/commands/<category>/name.command.ts` is a command. Anything deeper — such
+ * as `src/commands/economy/subcommands/shop.command.ts` — is a piece of one, reached
  * only because its parent imports it.
  */
 export function loadEverything(client: TestifyClient): LoadCounts {
@@ -73,7 +73,7 @@ export function loadEverything(client: TestifyClient): LoadCounts {
 }
 
 function loadCommands(client: TestifyClient): number {
-	for (const file of find("commands/*/*.slash.{js,ts}")) {
+	for (const file of find("commands/*/*.command.{js,ts}")) {
 		const command = importFile(file);
 
 		if (!isObject(command)) fail(file, "should `export default defineCommand({ … })`");

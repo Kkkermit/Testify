@@ -14,7 +14,7 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 }));
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const command = require("@commands/settings/prefix.slash").default as Parameters<typeof dispatch>[1];
+const command = require("@commands/settings/prefix.command").default as Parameters<typeof dispatch>[1];
 
 function run(subcommand: string, options: Record<string, string> = {}, canManage = true) {
 	const interaction = createMockSubcommandInteraction(subcommand, { options });

@@ -24,8 +24,8 @@ function filesIn(folder: string, pattern: RegExp): string[] {
 }
 
 describe("file naming", () => {
-	it("gives every command the .slash.ts suffix", () => {
-		const wrong = filesIn("commands", /\.ts$/).filter((file) => !file.endsWith(".slash.ts"));
+	it("gives every command the .command.ts suffix", () => {
+		const wrong = filesIn("commands", /\.ts$/).filter((file) => !file.endsWith(".command.ts"));
 		expect(wrong).toEqual([]);
 	});
 

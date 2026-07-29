@@ -1,10 +1,10 @@
-import blackjack from "@commands/games/subcommands/blackjack.slash";
-import eightBall from "@commands/games/subcommands/eightBall.slash";
-import fastType from "@commands/games/subcommands/fastType.slash";
-import guessTheNumber from "@commands/games/subcommands/guessTheNumber.slash";
-import guessThePokemon from "@commands/games/subcommands/guessThePokemon.slash";
-import rockPaperScissors from "@commands/games/subcommands/rockPaperScissors.slash";
-import wouldYouRather from "@commands/games/subcommands/wouldYouRather.slash";
+import blackjack from "@commands/games/subcommands/blackjack.command";
+import eightBall from "@commands/games/subcommands/eightBall.command";
+import fastType from "@commands/games/subcommands/fastType.command";
+import guessTheNumber from "@commands/games/subcommands/guessTheNumber.command";
+import guessThePokemon from "@commands/games/subcommands/guessThePokemon.command";
+import rockPaperScissors from "@commands/games/subcommands/rockPaperScissors.command";
+import wouldYouRather from "@commands/games/subcommands/wouldYouRather.command";
 import { asSubcommand, defineCommand } from "@core/command";
 
 /**
