@@ -76,7 +76,24 @@ export interface CommandInputOptions {
 	getChannel(name: string, required?: boolean): { id: string; name: string | null } | null;
 	getRole(name: string, required: true): { id: string; name: string };
 	getRole(name: string, required?: boolean): { id: string; name: string } | null;
-	getAttachment(name: string, required?: boolean): { url: string } | null;
+	getAttachment(name: string, required: true): CommandAttachment;
+	getAttachment(name: string, required?: boolean): CommandAttachment | null;
+}
+
+/**
+ * What both surfaces really hand back for an attachment — the shape of discord.js's
+ * `Attachment`, narrowed to the fields a command can rely on.
+ *
+ * This used to declare only `url`, which meant a command could not check the type
+ * or size of an upload before downloading it.
+ */
+export interface CommandAttachment {
+	url: string;
+	name: string;
+	size: number;
+	contentType: string | null;
+	width: number | null;
+	height: number | null;
 }
 
 /**

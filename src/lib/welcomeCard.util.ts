@@ -1,55 +1,138 @@
-import { type AttachmentBuilder, type GuildMember } from "discord.js";
-import { createCanvas, drawAvatar, fitFont, toAttachment } from "@lib/canvas.util";
+import { loadImage } from "@napi-rs/canvas";
+import { type AttachmentBuilder } from "discord.js";
+import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas.util";
 import { formatNumber } from "@lib/format.util";
 
-const WIDTH = 900;
-const HEIGHT = 300;
-
 /**
- * The original welcome card never rendered: its handler declared the wrong
+ * The join card: avatar, name, and which member they are.
+ *
+ * A guild can supply its own background; without one the card falls back to a
+ * gradient, so it looks deliberate rather than broken on a fresh setup. The
+ * background is passed in as bytes because Discord's attachment URLs expire
+ * within hours — see `WelcomeBackground` in the settings schema.
+ *
+ * The original card never rendered at all: its handler declared the wrong
  * signature so the first guard always returned, and it called `canvas.context`,
  * which does not exist.
  */
-export async function renderWelcomeCard(member: GuildMember): Promise<AttachmentBuilder> {
+
+const WIDTH = 1024;
+const HEIGHT = 400;
+const PALETTE = {
+	from: "#1e1f22",
+	to: "#2b2d31",
+	accent: "#5865f2",
+	text: "#ffffff",
+	muted: "#c9ccd1",
+	scrim: "rgba(0, 0, 0, 0.55)",
+} as const;
+
+export interface WelcomeCardData {
+	displayName: string;
+	avatarUrl: string;
+	serverName: string;
+	/** Which member they are — 1 for the very first. */
+	memberCount: number;
+	/** The guild's own background. Falls back to a gradient when absent. */
+	background?: Buffer | null;
+}
+
+export interface WelcomeCardText {
+	heading: string;
+	name: string;
+	position: string;
+}
+
+export function welcomeCardText(data: WelcomeCardData): WelcomeCardText {
+	return {
+		heading: `WELCOME TO ${data.serverName.toUpperCase()}`,
+		name: data.displayName,
+		position: `Member #${formatNumber(data.memberCount)}`,
+	};
+}
+
+/**
+ * Where to draw a background so it covers the card without distorting it —
+ * the same maths as CSS `object-fit: cover`, cropping the overflowing axis.
+ *
+ * Returning the rect rather than drawing it keeps the arithmetic testable, which
+ * matters because a wrong sign here silently stretches every guild's image.
+ */
+export function coverRect(
+	source: { width: number; height: number },
+	target: { width: number; height: number },
+): { x: number; y: number; width: number; height: number } {
+	if (source.width <= 0 || source.height <= 0) {
+		return { x: 0, y: 0, ...target };
+	}
+
+	const scale = Math.max(target.width / source.width, target.height / source.height);
+	const width = source.width * scale;
+	const height = source.height * scale;
+
+	return { x: (target.width - width) / 2, y: (target.height - height) / 2, width, height };
+}
+
+export async function renderWelcomeCard(data: WelcomeCardData): Promise<AttachmentBuilder> {
 	const canvas = createCanvas(WIDTH, HEIGHT);
 	const draw = canvas.getContext("2d");
+	const copy = welcomeCardText(data);
 
-	const gradient = draw.createLinearGradient(0, 0, WIDTH, HEIGHT);
-	gradient.addColorStop(0, "#1e1f22");
-	gradient.addColorStop(1, "#2b2d31");
-	draw.fillStyle = gradient;
-	draw.fillRect(0, 0, WIDTH, HEIGHT);
+	let painted = false;
+	if (data.background) {
+		try {
+			const image = await loadImage(data.background);
+			const rect = coverRect(image, { width: WIDTH, height: HEIGHT });
+			draw.drawImage(image, rect.x, rect.y, rect.width, rect.height);
 
-	draw.strokeStyle = "#5865f2";
-	draw.lineWidth = 6;
-	draw.strokeRect(3, 3, WIDTH - 6, HEIGHT - 6);
+			// A scrim over whatever they uploaded, so white text stays readable on a
+			// bright photo. Without it the card is unreadable half the time.
+			draw.fillStyle = PALETTE.scrim;
+			draw.fillRect(0, 0, WIDTH, HEIGHT);
+			painted = true;
+		} catch {
+			painted = false;
+		}
+	}
 
-	const avatarSize = 160;
-	const avatarX = 60;
-	const avatarY = (HEIGHT - avatarSize) / 2;
+	if (!painted) {
+		const gradient = draw.createLinearGradient(0, 0, WIDTH, HEIGHT);
+		gradient.addColorStop(0, PALETTE.from);
+		gradient.addColorStop(1, PALETTE.to);
+		draw.fillStyle = gradient;
+		draw.fillRect(0, 0, WIDTH, HEIGHT);
+	}
+
+	draw.strokeStyle = PALETTE.accent;
+	draw.lineWidth = 8;
+	roundedRect(draw, 4, 4, WIDTH - 8, HEIGHT - 8, 28);
+	draw.stroke();
+
+	const avatarSize = 190;
+	const avatarX = (WIDTH - avatarSize) / 2;
+	const avatarY = 46;
 
 	draw.beginPath();
 	draw.arc(avatarX + avatarSize / 2, avatarY + avatarSize / 2, avatarSize / 2 + 6, 0, Math.PI * 2);
-	draw.fillStyle = "#5865f2";
+	draw.fillStyle = PALETTE.accent;
 	draw.fill();
 
-	await drawAvatar(draw, member.user.displayAvatarURL({ extension: "png", size: 256 }), avatarX, avatarY, avatarSize);
+	await drawAvatarOrInitial(draw, data.avatarUrl, avatarX, avatarY, avatarSize, data.displayName, PALETTE.accent);
 
-	const textX = avatarX + avatarSize + 50;
+	draw.textAlign = "center";
 	draw.textBaseline = "middle";
-	draw.textAlign = "left";
 
-	draw.fillStyle = "#b5bac1";
-	draw.font = "28px sans-serif";
-	draw.fillText("WELCOME", textX, 90);
+	draw.fillStyle = PALETTE.muted;
+	fitFont(draw, copy.heading, WIDTH - 120, 30, "sans-serif");
+	draw.fillText(copy.heading, WIDTH / 2, avatarY + avatarSize + 42);
 
-	draw.fillStyle = "#ffffff";
-	fitFont(draw, member.displayName, WIDTH - textX - 50, 52, "sans-serif");
-	draw.fillText(member.displayName, textX, 148);
+	draw.fillStyle = PALETTE.text;
+	fitFont(draw, copy.name, WIDTH - 120, 52, "sans-serif");
+	draw.fillText(copy.name, WIDTH / 2, avatarY + avatarSize + 92);
 
-	draw.fillStyle = "#b5bac1";
+	draw.fillStyle = PALETTE.muted;
 	draw.font = "26px sans-serif";
-	draw.fillText(`Member #${formatNumber(member.guild.memberCount)}`, textX, 200);
+	draw.fillText(copy.position, WIDTH / 2, avatarY + avatarSize + 136);
 
 	return toAttachment(canvas, "welcome.png");
 }

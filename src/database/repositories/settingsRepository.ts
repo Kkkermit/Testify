@@ -236,6 +236,14 @@ export async function setWelcome(
 	).exec() as Promise<WelcomeSettings>;
 }
 
+/** Partial update, so the panel can change one setting without resending the rest. */
+export async function saveWelcome(
+	guildId: string,
+	patch: Partial<Pick<WelcomeSettings, "channelId" | "message" | "style" | "background">>,
+): Promise<WelcomeSettings> {
+	return Welcome.findOneAndUpdate({ guildId }, { $set: patch }, UPSERT).exec() as Promise<WelcomeSettings>;
+}
+
 export async function disableWelcome(guildId: string): Promise<boolean> {
 	return (await Welcome.deleteOne({ guildId }).exec()).deletedCount > 0;
 }

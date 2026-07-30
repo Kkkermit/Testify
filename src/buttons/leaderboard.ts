@@ -22,8 +22,6 @@ export default defineButton({
 		if (kind === undefined || !isBoardKind(kind)) return;
 
 		const requested = Number.parseInt(page ?? "0", 10);
-		await interaction.deferUpdate();
-
 		const rendered = await boardMessage(
 			interaction.guild,
 			kind,
@@ -31,8 +29,9 @@ export default defineButton({
 			interaction.user.id,
 		);
 
-		// The old image has to go explicitly: an edit that adds a file keeps the
-		// previous attachment otherwise, and the message ends up with both.
-		await interaction.editReply({ ...rendered, attachments: [] });
+		// `update` replaces the message, where deferring and then editing it appended
+		// each new board to the ones already there. `attachments: []` says the old
+		// image is not among the ones to keep, so the message carries exactly one.
+		await interaction.update({ ...rendered, attachments: [] });
 	},
 });

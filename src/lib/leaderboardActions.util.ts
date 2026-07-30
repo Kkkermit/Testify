@@ -89,11 +89,14 @@ async function entriesFor(guild: Guild, kind: BoardKind, page: number): Promise<
  * dropping them would renumber everyone below.
  */
 async function decorate(guild: Guild, entries: Entry[], page: number): Promise<BoardRow[]> {
-	const ids = entries.map((entry) => entry.userId);
-	const members = ids.length === 0 ? null : await guild.members.fetch({ user: ids }).catch(() => null);
+	// Cache first, and only fetch what is genuinely missing: the handler answers the
+	// interaction directly rather than deferring, so this has to stay well inside
+	// Discord's three-second window.
+	const missing = entries.map((entry) => entry.userId).filter((id) => !guild.members.cache.has(id));
+	if (missing.length > 0) await guild.members.fetch({ user: missing }).catch(() => null);
 
 	return entries.map((entry, index) => {
-		const member = members?.get(entry.userId) ?? null;
+		const member = guild.members.cache.get(entry.userId) ?? null;
 
 		return {
 			rank: page * PAGE_SIZE + index + 1,

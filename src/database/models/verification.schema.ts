@@ -5,6 +5,8 @@ export interface VerifySettings {
 	channelId: string;
 	roleId: string;
 	messageId: string | null;
+	/** The text on the public panel. Added later, so a first-version document lacks it. */
+	message?: string;
 	verifiedIds: string[];
 	createdAt: Date;
 	updatedAt: Date;
@@ -16,6 +18,7 @@ const verifySchema = new Schema<VerifySettings>(
 		channelId: { type: String, required: true },
 		roleId: { type: String, required: true },
 		messageId: { type: String, default: null },
+		message: { type: String, default: null },
 		verifiedIds: { type: [String], required: true, default: [] },
 	},
 	{ timestamps: true },

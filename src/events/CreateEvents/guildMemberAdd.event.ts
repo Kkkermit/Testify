@@ -4,17 +4,9 @@ import { toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { getAutoRoles, getWelcome } from "@database/repositories/settingsRepository";
 import { writeAuditLog } from "@lib/auditLog.util";
-import { embed } from "@lib/embeds.util";
 import { syncVoiceCounters } from "@lib/voiceCounters.util";
-import { renderWelcomeCard } from "@lib/welcomeCard.util";
-
-function fillTemplate(template: string, member: GuildMember): string {
-	return template
-		.replaceAll("{user}", `<@${member.id}>`)
-		.replaceAll("{username}", member.user.username)
-		.replaceAll("{server}", member.guild.name)
-		.replaceAll("{count}", String(member.guild.memberCount));
-}
+import { normaliseWelcome } from "@lib/welcome.util";
+import { greetingFor } from "@lib/welcomeActions.util";
 
 export default defineEvent({
 	name: Events.GuildMemberAdd,
@@ -46,28 +38,24 @@ export default defineEvent({
 			);
 		}
 
-		const welcome = await getWelcome(member.guild.id);
-		if (welcome) {
-			const channel = await client.channels.fetch(welcome.channelId).catch(() => null);
-			if (channel?.isTextBased() && channel.isSendable()) {
-				const message = fillTemplate(welcome.message, member);
+		const settings = await getWelcome(member.guild.id);
+		const welcome = normaliseWelcome(settings);
 
-				if (welcome.isEmbed) {
-					const card = await renderWelcomeCard(member).catch(() => null);
-					await channel.send({
-						embeds: [
-							embed({
-								category: "community",
-								title: `Welcome to ${member.guild.name}`,
-								description: message,
-								...(card !== null ? { image: "attachment://welcome.png" } : {}),
-							}),
-						],
-						...(card !== null ? { files: [card] } : {}),
-					});
-				} else {
-					await channel.send({ content: message, allowedMentions: { users: [member.id] } });
-				}
+		if (welcome !== null) {
+			const channel = await client.channels.fetch(welcome.channelId).catch(() => null);
+
+			if (channel?.isTextBased() === true && channel.isSendable()) {
+				// The same builder `/welcome test` and the panel's Preview use, so what an
+				// admin checks is exactly what a member gets.
+				const greeting = await greetingFor(member, welcome, settings).catch((error: unknown) => {
+					client.logger.warn(
+						{ err: toError(error), guildId: member.guild.id },
+						"[WELCOME] Could not build the greeting",
+					);
+					return null;
+				});
+
+				if (greeting !== null) await channel.send(greeting);
 			}
 		}
 
