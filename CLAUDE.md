@@ -1,106 +1,312 @@
-# CLAUDE.md — Testify (TypeScript) conventions
+# CLAUDE.md — working on Testify
 
-House style for this codebase, and the standard it is being held to.
-
-The reference implementation of that standard is **`Kkkermit/Testify-rewrite`** — the JavaScript rewrite. It is
-smaller than this repo but its conventions are deliberate, and its own `CLAUDE.md` documents them in full. This
-file states the rules in their TypeScript form, then records exactly where this codebase currently diverges.
+Everything needed to work on this repo: how the bot is built, how to run and test it, the conventions, and the
+rules that have been agreed over time. Read this first. It is written so that someone (or some Claude) arriving
+with no memory of previous sessions can make a correct change and commit it.
 
 > [!IMPORTANT]
-> **This file is about conventions.** It does not restate the architecture, the data model, the audit findings
-> or the migration plan — those live in [`.codebase-notes/`](.codebase-notes/00-INDEX.md) and are far more
-> detailed than anything that belongs here. Read them for _what the code does_; read this for _how it should be
-> written_. In particular [`migration/17-CODING-STANDARDS.md`](.codebase-notes/migration/17-CODING-STANDARDS.md)
-> is the deeper treatment of naming, error handling, imports and the PR checklist — where the two overlap, it
-> wins, and this file should be corrected to match.
+> Two companion documents, both authoritative in their own area:
+>
+> - [`.codebase-notes/`](.codebase-notes/00-INDEX.md) — the architecture, data model and the 100-finding audit
+>   of the original JavaScript bot. Read it for _what the code does and why_.
+>   [`migration/17-CODING-STANDARDS.md`](.codebase-notes/migration/17-CODING-STANDARDS.md) is the deeper
+>   treatment of naming and error handling; **where it and this file overlap, it wins**.
+> - [`COMMANDS.md`](COMMANDS.md) — the command list. **Generated. Never hand-edit it**; run
+>   `npm run docs:commands`.
 
 ---
 
 ## Contents
 
-1. [Where this codebase already exceeds the reference](#1-where-this-codebase-already-exceeds-the-reference)
-2. [Gap table — what to change](#2-gap-table--what-to-change)
-3. [File naming](#3-file-naming)
-4. [Folder naming and grouping](#4-folder-naming-and-grouping)
-5. [Import aliases and barrels](#5-import-aliases-and-barrels)
-6. [Config: constants vs environment](#6-config-constants-vs-environment)
-7. [Environment files and the dev/prod bot split](#7-environment-files-and-the-devprod-bot-split)
-8. [Logging](#8-logging)
-9. [Startup](#9-startup)
-10. [Module contracts](#10-module-contracts)
-11. [Splitting code into helpers](#11-splitting-code-into-helpers)
-12. [Testing](#12-testing)
-13. [Linting and formatting](#13-linting-and-formatting)
-14. [Git hooks and commit convention](#14-git-hooks-and-commit-convention)
-15. [CI workflows](#15-ci-workflows)
-16. [Anti-patterns from the JS codebase that must not come back](#16-anti-patterns-from-the-js-codebase-that-must-not-come-back)
+1. [What this project is](#1-what-this-project-is)
+2. [Getting set up](#2-getting-set-up)
+3. [Running, testing, verifying](#3-running-testing-verifying)
+4. [Project structure](#4-project-structure)
+5. [How a command runs, end to end](#5-how-a-command-runs-end-to-end)
+6. [Naming conventions](#6-naming-conventions)
+7. [Import aliases and barrels](#7-import-aliases-and-barrels)
+8. [Adding a command](#8-adding-a-command)
+9. [Adding an event](#9-adding-an-event)
+10. [Adding an interactive panel](#10-adding-an-interactive-panel)
+11. [Components V2](#11-components-v2)
+12. [Multi-guild rules](#12-multi-guild-rules)
+13. [Data layer](#13-data-layer)
+14. [Config and environment](#14-config-and-environment)
+15. [Logging](#15-logging)
+16. [Errors](#16-errors)
+17. [Testing](#17-testing)
+18. [Lint, format, style](#18-lint-format-style)
+19. [Committing and branching](#19-committing-and-branching)
+20. [CI](#20-ci)
+21. [Decisions already made — do not relitigate](#21-decisions-already-made--do-not-relitigate)
+22. [Anti-patterns that must not come back](#22-anti-patterns-that-must-not-come-back)
+23. [Working style expected here](#23-working-style-expected-here)
 
 ---
 
-## 1. Where this codebase already exceeds the reference
+## 1. What this project is
 
-Worth stating plainly, so nobody "aligns to the reference" by making something worse. On these axes this repo
-is ahead and should not be changed to match:
+**Testify v2** — a multi-purpose Discord bot, written as a full TypeScript rewrite of the original JavaScript
+bot. discord.js v14, MongoDB via Mongoose, Node ≥ 22.11.
 
-| Concern      | Reference (JS)                                                   | Here                                                                                                       |
-| ------------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Environment  | `bootMode.js`, no validation; dev/prod split is **broken**       | `src/config/env.ts` — zod-validated, cached, frozen, fail-fast with a list of what to fix                  |
-| Logging      | 9 colour aliases masquerading as levels, single-arg, stdout-only | `pino` with real levels, `LOG_LEVEL`, TTY-aware pretty vs JSON                                             |
-| Types        | none (`jsconfig.json` for editor paths only)                     | `strict` + `noUncheckedIndexedAccess` + `exactOptionalPropertyTypes` + `useUnknownInCatchVariables`        |
-| Structure    | `src/functions/*.function.js` mutating the client                | a real `src/core/` layer: `client`, `loader`, `command`, `event`, `button`, `checks`, `errors`, `shutdown` |
-| Startup      | un-awaited handlers racing `client.login()`                      | `main()` awaits in order; `publishCommands()` completes before login                                       |
-| Shutdown     | `SIGTERM` claims to close the DB and doesn't                     | `src/core/shutdown.ts`                                                                                     |
-| Lint         | `no-console: "off"`, no type-aware rules                         | `no-console: "error"`, `no-floating-promises`, `no-misused-promises`, `import-x/order`, `no-cycle`         |
-| Coverage     | no thresholds anywhere                                           | `coverageThreshold` (lines 40, functions 40, branches 30) + `collectCoverageFrom`                          |
-| CI           | tests only                                                       | typecheck, lint, format:check, coverage, build, **dist artifact verification**, audit, `concurrency`       |
-| Boot banner  | 25 `console.log`s, timestamp on every ASCII line                 | `bannerLines()` is pure and testable; `printBanner()` writes once; colour dropped when not a TTY           |
-| Node version | `.nvmrc` 24.3.0 vs CI 20 vs README 18–21, no `engines`           | `engines.node: ">=22.11.0"`                                                                                |
+The defining architectural decision: **one command object serves both the slash and the prefix surface.** The
+original had two near-duplicate implementations of every command; here a command is written once against the
+`CommandInput` contract, and `src/core/prefix.ts` is the only file that knows prefix commands exist. Keep it
+that way — it is the reason the rewrite exists.
 
-Two habits from the reference that this repo already got right and must keep: **the `[TAG] Sentence` log
-message convention**, and **the boot banner as presentation written to stdout, never through the logger**.
+Current size (verify with the commands in [§3](#3-running-testing-verifying) rather than trusting these
+numbers, which drift):
 
----
+| Thing                | Count                             |
+| -------------------- | --------------------------------- |
+| Commands             | 78, across 12 categories          |
+| Command files        | 100 (incl. folded-in subcommands) |
+| Subcommands          | 128                               |
+| Prefix aliases       | 57                                |
+| Button handlers      | 15                                |
+| Events               | 24, in 5 groups                   |
+| `src/lib` helpers    | 33                                |
+| Schemas/repositories | 9 / 9                             |
+| Scheduled jobs       | 4                                 |
+| Tests                | ~934 across 50 suites             |
 
-## 2. Gap table — what to change
-
-Everything below is a real divergence from the reference standard, ordered roughly by value.
-
-| #   | Area              | Status              | Where it landed                                                                                       |
-| --- | ----------------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| 1   | Nightly security  | Done                | `.github/workflows/nightly.yml`, `.nsprc`, `.snyk`; version pins explained in `SECURITY.md`           |
-| 2   | CI branch scope   | Done                | `ci.yml` triggers on `["**"]`, and reads the Node version from `.nvmrc`                               |
-| 3   | File suffixes     | Done                | `.command.ts` / `.event.ts` / `.util.ts` / `.schema.ts`; enforced by `tests/core/conventions.test.ts` |
-| 4   | Import aliases    | Done                | `tsconfig.json` `paths`; Jest derives its mapper from it, `tsc-alias` rewrites the build              |
-| 5   | Barrels           | Done                | `index.ts` in `@config`, `@core`, `@lib`, `@database`, using `export *`                               |
-| 6   | Commit convention | Done                | `scripts/commitRunner.ts` and a `commit-msg` hook running commitlint                                  |
-| 7   | Event grouping    | Done                | `ReadyEvents/`, `CommandEvents/`, `CreateEvents/`, `LoggingEvents/`                                   |
-| 8   | Dev env template  | Done                | `.env.development.example`, and `npm run setup -- --dev`                                              |
-| 9   | Banner detail     | Done                | Emoji icons and a "Loaded from disk" block in `bannerLines()`                                         |
-| 10  | Pre-commit        | Done                | `typecheck` runs before `lint-staged`                                                                 |
-| 11  | Pre-push coverage | Done                | `test:coverage`, so the thresholds gate the push                                                      |
-| 12  | Lint report       | Done                | `scripts/lintRunner.ts` — errors fail, warnings never do                                              |
-| 13  | Category folders  | **Decided against** | Kept flat and lowercase. See [§4](#4-folder-naming-and-grouping)                                      |
-
-### Why #13 was declined
-
-The reference nests categories under an interaction-kind folder because slash and
-prefix are separate implementations there. Here they are not: one command object
-serves both surfaces through the `CommandInput` contract, and `src/core/prefix.ts`
-is the only file that knows prefix commands exist. A `SlashCommands/` /
-`PrefixCommands/` split would describe an architecture this codebase deliberately
-does not have, and would undo the deduplication the rewrite exists to achieve.
-
-The casing was left lowercase to match the rest of `src/`, which is uniformly
-camelCase. Two casing regimes inside one tree is a rule to remember rather than a
-distinction the reader gains anything from here.
+**There is no music system.** It was removed deliberately — see
+[§21](#21-decisions-already-made--do-not-relitigate). Do not add one back without reading that section.
 
 ---
 
-## 3. File naming
+## 2. Getting set up
 
-**camelCase basename + a domain suffix before the extension.** The suffix makes the kind of module visible in
-an editor tab, a stack trace and a `git log` line. The reference applied this deliberately in two sweeps
-(commits `1e64090`, `8d62700`) and it is the single most visible convention in that repo.
+```bash
+nvm use                 # or install Node >= 22.11
+npm ci                  # ALWAYS ci, never install, unless changing dependencies
+npm run setup           # interactive: writes .env
+npm run setup -- --dev  # writes .env.development instead
+```
+
+`npm run setup` asks for each value and retries on the required ones. To do it by hand, copy `.env.example` to
+`.env` (or `.env.development.example` to `.env.development`) and fill it in.
+
+**Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
+**Optional:** `NODE_ENV`, `LOG_LEVEL`, `DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
+`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`.
+
+Then:
+
+```bash
+npm run dev     # development bot, hot reload, reads .env.development
+npm run build   # compile to dist/
+npm start       # production bot from dist/, reads .env
+```
+
+> [!WARNING]
+> **`npm run dev` must never start the production bot.** It sets `NODE_ENV=development` via `cross-env`, which
+> is what makes `loadEnv()` read `.env.development`. This was a real bug once — the script had no `cross-env`,
+> so `dev` silently ran production. There is a regression test for it. Do not remove `cross-env`.
+
+Never commit real tokens, snowflakes, database passwords or cluster hostnames. `.gitignore` covers `.env*`
+except the `.example` templates. Use `cluster0.example.mongodb.net` in any documentation.
+
+---
+
+## 3. Running, testing, verifying
+
+| Command                  | What it does                                                         |
+| ------------------------ | -------------------------------------------------------------------- |
+| `npm run dev`            | Development bot with hot reload                                      |
+| `npm start`              | Production bot from `dist/`                                          |
+| `npm run build`          | `tsup` → `dist/`, then `tsc-alias` rewrites `@`-aliases              |
+| **`npm run check`**      | **typecheck → lint → format:check → test. Run before every commit.** |
+| `npm run typecheck`      | `tsc --noEmit`                                                       |
+| `npm run lint`           | ESLint via `scripts/lintRunner.ts` (errors fail, warnings never do)  |
+| `npm run lint:fix`       | Same, with `--fix`                                                   |
+| `npm run format`         | Prettier write                                                       |
+| `npm test`               | Jest                                                                 |
+| `npm run test:coverage`  | Jest with the 80/80/80/80 thresholds enforced                        |
+| `npm run test:watch`     | Jest watch                                                           |
+| `npm run docs:commands`  | Regenerate `COMMANDS.md`                                             |
+| `npm run commit`         | Guided commit wizard (enforces the message format)                   |
+| `npm run commands:clear` | Deregister all application commands                                  |
+| `npm run db:wipe`        | Destructive. Wipes the database                                      |
+| `npm run audit`          | `better-npm-audit --level high`, reading `.nsprc`                    |
+
+### The verification discipline — this part matters
+
+`npm run check` passing is **necessary but not sufficient**. A broken loader glob compiles perfectly, passes
+every test, and registers nothing. Several real bugs in this repo's history were invisible to the type checker.
+So after any change to the loader, the build, file names, or a `define*` contract, also:
+
+**1. Build and smoke-test the loader against the real `dist/`:**
+
+```bash
+rm -rf dist && npm run build
+cat > loadcheck.cjs <<'EOF'
+const { loadEverything } = require("./dist/core/loader.js");
+const { Collection } = require("discord.js");
+const stub = { commands:new Collection(), prefixCommands:new Collection(), aliases:new Collection(),
+ buttons:new Collection(), modals:new Collection(), selects:new Collection(), contextMenus:new Collection(),
+ messageHandlers:[], on:()=>stub, once:()=>stub,
+ logger:{debug(){},info(){},warn(){},error(){},trace(){}} };
+console.log(loadEverything(stub));
+console.log("buttons:", [...stub.buttons.keys()].sort().join(", "));
+console.log("aliases:", stub.aliases.size);
+EOF
+node loadcheck.cjs; rm -f loadcheck.cjs
+```
+
+Expect counts that match what you expect, and no missing handler. This has caught more real breakage than the
+test suite has.
+
+**2. Check `dist/` has no unrewritten aliases.** `tsup` runs with `bundle: false`, so esbuild does **not**
+rewrite `@core/…` specifiers; `tsc-alias` does, in `onSuccess`. If that breaks, `dist/` will not start.
+
+```bash
+grep -rl 'require("@core\|require("@lib\|require("@commands' dist   # must find nothing
+```
+
+`@napi-rs/canvas` and other real scoped packages will still show up in a looser grep — that is fine.
+
+**3. If you touched dependencies, prove a clean install works:**
+
+```bash
+rm -rf node_modules && npm ci
+```
+
+`npm install` and `npm ci` disagree about lockfiles in ways that only show up in CI. A malformed lockfile once
+broke CI with `EUSAGE` while local `npm install` was perfectly happy.
+
+**4. If you added an enforcement test, prove it can fail.** Introduce the violation, watch the test go red,
+then revert. A convention test that passes vacuously is worse than none, because it grants false confidence.
+
+---
+
+## 4. Project structure
+
+Grouped by **technical role first, then domain**. One feature is spread across layers; that is intended.
+
+```
+src/
+├── index.ts              Entry point. One async main() that awaits each step in order.
+├── core/                 The framework. 13 files, no domain logic.
+│   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
+│   ├── loader.ts         Finds and registers everything from disk. Globs live here.
+│   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
+│   ├── prefix.ts         The ONLY file that knows prefix commands exist
+│   ├── button.ts         Button contract, defineButton, customId / parseCustomId
+│   ├── event.ts          defineEvent
+│   ├── message.ts        Message-handler contract (automod, counting, levelling XP …)
+│   ├── checks.ts         Gates: permissions, cooldowns, guildOnly, ownerOnly, nsfw
+│   ├── errors.ts         UserFacingError, toError, runCommand wrapper
+│   ├── logger.ts         pino transport
+│   ├── shutdown.ts       Graceful shutdown + signal handlers
+│   ├── paths.ts          Path resolution from __dirname (never the CWD)
+│   └── index.ts          Barrel
+├── config/               Constants. Zero runtime logic.
+│   ├── env.ts            EVERYTHING from process.env, zod-validated. Nothing else reads env.
+│   ├── categories.ts     The category union — single source of truth
+│   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
+│   ├── theme.ts          Colours, emoji, repo URL
+│   └── strings.ts        User-facing copy
+├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               24 handlers in CommandEvents, CreateEvents, LoggingEvents, ReadyEvents, message
+├── buttons/              15 component handlers, keyed by custom-ID prefix
+├── lib/                  33 domain helpers, formatters and panel renderers
+├── database/
+│   ├── connection.ts
+│   ├── models/           9 Mongoose schemas
+│   └── repositories/     9 query layers. Commands never touch a model directly.
+└── jobs/                 4 scheduled jobs (lottery draw, passive income, bot stats, softban expiry)
+
+tests/                    Mirrors src/. 50 suites.
+└── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
+scripts/                  One-off tooling. `no-console` is off here.
+.codebase-notes/          Architecture + audit of the original JS bot
+```
+
+**Categories:** `community`, `economy`, `fun`, `games`, `info`, `levelling`, `moderation`, `settings`,
+`tickets`, `giveaway`, `developer`, `owner`. Defined `as const` in `src/config/categories.ts` with a derived
+union type, so a mistyped category is a **compile error**. Adding a category there is all that is needed for
+`/help` to pick it up.
+
+### Where to look for a given job
+
+| I want to…                                 | Go to                                                              |
+| ------------------------------------------ | ------------------------------------------------------------------ |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                             |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                   |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                               |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist         |
+| Build a button/select/modal                | `src/lib/components.util.ts`                                       |
+| Build a Components V2 message              | `src/lib/containers.util.ts`                                       |
+| Build an embed                             | `src/lib/embeds.util.ts` (nothing else may `new EmbedBuilder()`)   |
+| Reply to an interaction                    | `src/lib/reply.util.ts`                                            |
+| Format a number, duration, time            | `src/lib/format.util.ts`                                           |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly          |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts` |
+| Change user-facing copy                    | `src/config/strings.ts`                                            |
+| Change a colour or emoji                   | `src/config/theme.ts`                                              |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ReadyEvents/scheduleJobs.event.ts`  |
+| Share logic between a command and a button | `src/lib/*Actions.util.ts` (e.g. `economyActions.util.ts`)         |
+
+### The panel renderers in `src/lib`
+
+Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
+
+| Renderer                  | Handler                | Pattern it demonstrates                              |
+| ------------------------- | ---------------------- | ---------------------------------------------------- |
+| `shopScreen.util.ts`      | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step      |
+| `auditPanel.util.ts`      | `buttons/auditLog.ts`  | Channel select + multi-select, state re-read from DB |
+| `balancePanel.util.ts`    | `buttons/balance.ts`   | Hub panel, read-only mode for other users            |
+| `inventoryScreen.util.ts` | `buttons/inventory.ts` | Per-row action button, paging in the custom ID       |
+| `settingsPanel.util.ts`   | —                      | Generic settings rows + pre-filled modal editors     |
+| `musicPanel` — **gone**   | —                      | Removed with the music system. Do not resurrect.     |
+
+Two exceptions worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler
+file rather than a separate renderer (it composes `settingsPanel.util.ts` instead), and `buttons/money.ts` still
+returns an embed-based `RenderedScreen`. Both are fine; new panels should prefer the split.
+
+---
+
+## 5. How a command runs, end to end
+
+Worth understanding before changing anything in `core/`.
+
+**Startup** (`src/index.ts`) — the order is load-bearing, and every step of it fixes a real bug in the original:
+
+```ts
+async function main(): Promise<void> {
+	const env = loadEnv(); // 1. env first, validated, fail-fast
+	const logger = createLogger(env.LOG_LEVEL); // 2. then the logger
+	const client = new TestifyClient(env, logger);
+	handleProcessSignals(client); // registered exactly once
+	await connectDatabase({ uri: env.MONGODB_URI, logger });
+	const counts = loadEverything(client); // globs the tree, registers everything
+	await publishCommands(client); // AWAITED, before login
+	await client.login(env.DISCORD_TOKEN);
+}
+```
+
+**Command registration scope** — this is the single-guild vs multi-guild switch:
+
+- `DISCORD_DEV_GUILD_ID` **set** → commands register to that guild only, and appear instantly.
+- `DISCORD_DEV_GUILD_ID` **blank** → commands register globally, and take up to an hour to roll out.
+
+**Dispatch:**
+
+- Slash → `events/CommandEvents/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
+- Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`
+- Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
+  `button.run(interaction, { client, action, args })`
+
+There is **exactly one** `interactionCreate` listener. The original had 27.
+
+---
+
+## 6. Naming conventions
+
+**camelCase basename + a domain suffix.** The suffix makes the kind of module visible in an editor tab, a stack
+trace and a `git log` line — and for commands and events it is **load-bearing**, because the loader globs on it.
+A file that misses its suffix is silently never registered.
 
 | Suffix        | For                              | Example                              |
 | ------------- | -------------------------------- | ------------------------------------ |
@@ -110,538 +316,608 @@ an editor tab, a stack trace and a `git log` line. The reference applied this de
 | `.schema.ts`  | a Mongoose model                 | `database/models/economy.schema.ts`  |
 | `.test.ts`    | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
 
-**There is no `.slash.ts` or `.prefix.ts`, and reintroducing either would be a mistake.** The reference splits
-them because slash and prefix are separate implementations there. Here one object serves both surfaces through
-`CommandInput`, and `src/core/prefix.ts` is the only file that knows prefix commands exist — so a suffix naming
-one surface describes an architecture this codebase deliberately does not have. It is the same reasoning that
-[§4](#4-folder-naming-and-grouping) uses to reject `SlashCommands/` / `PrefixCommands/` folders.
+Loader globs: `commands/*/*.command.{js,ts}` and `events/**/*.event.{js,ts}`.
+`tests/core/conventions.test.ts` enforces the suffixes.
 
 **Unsuffixed, deliberately:** `src/index.ts`, everything in `src/core/` and `src/config/`, everything in
-`scripts/`, and `*.config.ts` at the root.
+`src/buttons/`, everything in `scripts/`, and `*.config.ts` at the root.
 
-The reference's `.function.js` suffix has **no counterpart here and should not be introduced** — that layer is
-`src/core/loader.ts`, and a typed loader is strictly better than a set of files that mutate the client.
+**There is no `.slash.ts` or `.prefix.ts`, and reintroducing either would be a mistake.** Commands were renamed
+from `.slash.ts` to `.command.ts` precisely because one object serves both surfaces — a suffix naming one surface
+describes an architecture this codebase does not have. There has never been a single `.prefix.ts` file.
 
-> [!NOTE]
-> Done in `edc86a5` — 188 files, one mechanical commit, loader globs updated alongside. Commands were renamed
-> again from `.slash.ts` to `.command.ts` once the music system was removed, since nothing in the tree was ever
-> `.prefix.ts` and the old suffix advertised a split that does not exist. The suffix is load-bearing:
-> `commands/*/*.command.ts` and `events/**/*.event.ts` are what the loader looks for, so a file that misses its
-> suffix is silently never registered. `tests/core/conventions.test.ts` enforces it.
+The original's `.function.js` layer has **no counterpart here and must not be introduced** — that job is
+`core/loader.ts`, and a typed loader beats a set of files that mutate the client.
 
 ---
 
-## 4. Folder naming and grouping
+## 7. Import aliases and barrels
 
-**Group by type first, then by domain.** The top level of `src/` is organised by technical role, not by
-feature — one feature is spread across layers. That is already true here (`commands/` + `core/` + `database/` +
-`lib/` + `jobs/`) and should stay true.
-
-The reference uses **two casing regimes** to mark a real distinction:
-
-- **camelCase for the infrastructure layer** — `core/`, `config/`, `database/`, `lib/`, `jobs/`, `buttons/`.
-  This repo already matches.
-- **PascalCase for the user-facing category layer** — `SlashCommands/Moderation/`, `ReadyEvents/`,
-  `LoggingEvents/`. This repo uses lowercase (`commands/moderation/`) and has no event grouping at all.
-
-**Events (gap #7) — group them.** Seventeen files sit flat in `src/events/`. They already fall into obvious
-clusters: the eight `*Audit.ts` files, the guild lifecycle pair, the dispatch entry points
-(`interactionCreate`, `messageCreate`), and `ready` + `scheduleJobs`. Mirror the reference:
-`ReadyEvents/`, `CreateEvents/`, `LoggingEvents/` (the audit handlers), `CommandEvents/`.
-
-**Command category folders (gap #13) — a genuine decision, not an oversight.** The reference nests categories
-under an _interaction-kind_ folder (`SlashCommands/Moderation/`, `PrefixCommands/Moderation/`) because slash
-and prefix are separate implementations there. This repo deliberately unified them — a single command serves
-both surfaces — so a `SlashCommands/` / `PrefixCommands/` split would actively misrepresent the architecture.
-
-**Recommendation: keep the flat `commands/<category>/` layout and record the divergence as intentional
-here.** Adopt only the casing if consistency with the reference is wanted. Do not restructure into
-kind-then-domain — that would undo the deduplication this rewrite exists to achieve
-([`13-DEDUPLICATION-MAP.md`](.codebase-notes/migration/13-DEDUPLICATION-MAP.md) covers all 46 pairs).
-
-**Categories must be a type, not a string.** Keep `src/config/categories.ts` as the single source of truth,
-exported `as const` with a derived union type, so a mistyped category is a compile error. In the JS codebase
-the enum values drifted from the folder names (`"ModerationCommands"` vs `Moderation/`) and nothing caught it —
-the audit notes flag it with ⚠️ per file.
-
----
-
-## 5. Import aliases and barrels
-
-Modules should be imported by alias, never by a relative path that climbs:
+Always import by alias. Never a relative path that climbs (`../../`).
 
 ```ts
 import { theme } from "@config/theme";
-import { embed } from "@lib/embeds";
-import { type CommandContext } from "@core/command";
+import { embed } from "@lib/embeds.util";
+import { defineCommand, type CommandInput } from "@core/command";
 ```
 
-**One alias map, not several.** The reference maintains the same map in three files by hand
-(`package.json _moduleAliases`, `jsconfig.json paths`, `jest.config.js moduleNameMapper`) — do not copy that.
-Declare it once in `tsconfig.json` and derive everywhere else:
+| Alias                                                                      | Points at               | Barrel? |
+| -------------------------------------------------------------------------- | ----------------------- | ------- |
+| `@core`                                                                    | `src/core/index.ts`     | yes     |
+| `@config`                                                                  | `src/config/index.ts`   | yes     |
+| `@lib`                                                                     | `src/lib/index.ts`      | yes     |
+| `@database`                                                                | `src/database/index.ts` | yes     |
+| `@commands/*`, `@events/*`, `@buttons/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
 
-- `tsconfig.json` → `compilerOptions.baseUrl` + `paths` — the source of truth;
-- `tsup.config.ts` → resolve the same aliases at build time (tsup reads `tsconfig` paths; verify `dist/`
-  actually runs, since `module: "CommonJS"` output must not keep `@`-specifiers);
-- `jest.config.ts` → `pathsToModuleNameMapper(compilerOptions.paths)` from `ts-jest/utils`, or a hand-written
-  mapper generated from the same object — never a second literal copy.
-
-Aliases in use: `@core`, `@config`, `@lib`, `@commands`, `@events`, `@buttons`, `@database`, `@jobs`, `@root`
-and `@tests`. Each is declared twice — bare for the barrel (`@lib`) and wildcard for a single module
-(`@lib/embeds.util`) — because a bare specifier does not match a wildcard path.
-
-> [!NOTE]
-> esbuild does not rewrite alias specifiers when `bundle` is off, so `dist/` shipped `require("@core/…")` and
-> would not have started. The build runs `tsc-alias` in `onSuccess` to rewrite them from the same tsconfig map.
-> Verify with `grep -r 'require("@core' dist` after any change to the build.
-
-**Barrels: one `index.ts` per aliased directory.** The reference hand-maintains a flat list of 40 names in
-`src/utils/index.js`, which has to be edited for every new function. Use `export * from "./x"` instead so the
-barrel maintains itself.
+**One alias map only** — `tsconfig.json` `compilerOptions.paths`. `jest.config.ts` derives its mapper from it;
+`tsup` reads it and `tsc-alias` rewrites the build from it. Never write a second literal copy. Each aliased
+directory is declared twice: bare for the barrel, wildcard for a single module, because a bare specifier does
+not match a wildcard path.
 
 > [!WARNING]
-> Barrels plus `import-x/no-cycle` need care — `src/lib/` and `src/core/` already reference each other, and a
-> barrel can turn a fine dependency into a cycle. Add barrels leaf-first and let the lint rule (already
-> configured at `maxDepth: 6`) be the check. In the reference, `folderLoader.util.js` and `asciiText.js` both
-> `require("@utils")` _inside the function body_ purely to dodge a barrel cycle — that workaround is a smell,
-> not a pattern to copy.
+> Barrels plus `import-x/no-cycle` need care — `src/lib/` and `src/core/` already reference each other, and
+> adding a barrel export can turn a fine dependency into a cycle. Add exports leaf-first and let the lint rule
+> (configured at `maxDepth: 6`) be the check. Do **not** work around a cycle with a `require()` inside a
+> function body; that is a smell, not a pattern.
 
 ---
 
-## 6. Config: constants vs environment
+## 8. Adding a command
 
-**The rule from the reference, and it is a good one: the constants module reads zero environment variables.**
-`src/config.js` there holds only values that are identical for every deployment; everything per-deployment
-comes from `process.env`. This repo already splits it correctly:
-
-| Module                     | Holds                                                  |
-| -------------------------- | ------------------------------------------------------ |
-| `src/config/constants.ts`  | fixed operational values                               |
-| `src/config/theme.ts`      | embed colours, repository URL — presentation constants |
-| `src/config/strings.ts`    | user-facing copy                                       |
-| `src/config/categories.ts` | the category union                                     |
-| `src/config/env.ts`        | **everything from the environment**, and nothing else  |
-
-Two rules to hold:
-
-- **Export `as const`** so `embedColor` is the literal `"Blurple"` and not `string`.
-- **No committed snowflakes.** The reference has its own logging-channel IDs and `developerIds` hardcoded in
-  `config.js`, so a fresh clone logs into someone else's Discord channel. Every ID here goes through
-  `env.ts` (`DISCORD_OWNER_IDS`, `CHANNEL_*_LOG`) — keep it that way.
-
----
-
-## 7. Environment files and the dev/prod bot split
-
-**The point: `npm run dev` must start a throwaway test bot, never the production one.**
-
-This repo already implements it correctly — `loadEnv()` in `src/config/env.ts` is the first statement of
-`main()`, before anything reads `process.env`:
+Create **one file**. The loader finds it, `/help` lists it, and it works as both `/name` and `t?name`.
 
 ```ts
-const file = resolve(process.cwd(), process.env.NODE_ENV === "development" ? ".env.development" : ".env");
-if (existsSync(file)) loadDotenv({ path: file, quiet: true });
+// src/commands/fun/coinflip.command.ts
+import { defineCommand } from "@core/command";
+import { successEmbed } from "@lib/embeds.util";
+import { reply } from "@lib/reply.util";
+
+export default defineCommand({
+	name: "coinflip",
+	description: "Flips a coin.",
+	category: "fun",
+	aliases: ["flip", "cf"],
+	async run(interaction) {
+		const side = Math.random() < 0.5 ? "Heads" : "Tails";
+		await reply(interaction, { embeds: [successEmbed(`🪙 ${side}!`)] });
+	},
+});
 ```
 
-Conventions to keep:
+Full `Command` shape: `name`, `description`, `category` (required); then optional `options`, `subcommands`,
+`aliases`, `permissions`, `botPermissions`, `cooldown` (ms), `guildOnly`, `ownerOnly`, `nsfw`, `run`,
+`autocomplete`. `run` is optional when the command is nothing but subcommands.
 
-- **Validate once, at startup, and fail with a list.** A missing or malformed value stops the bot immediately
-  rather than breaking halfway through a command hours later. The zod schema is the single declaration of every
-  variable, its format (`/^\d{17,20}$/` for Discord IDs) and its default.
-- **`SCREAMING_SNAKE` with a `DISCORD_` prefix** for Discord-owned values. The reference uses bare lowercase
-  (`token`, `clientid`, `devid`) which is ambiguous and, per the audit notes, produced live casing bugs where
-  the setup script wrote one case and the code read another.
-- **Blank means absent.** `KEY=` in a file is an empty string, not an absent one, and optional settings are
-  meant to be left blank — `withoutBlanks()` handles this. Keep it.
-- **One source of truth for ownership.** `DISCORD_OWNER_IDS` only. The reference has two competing ones —
-  `ownerOnly` checks `process.env.devid` while `devOnly` checks a hardcoded `config.developerIds` array.
-- **Keep the interactive generator.** `npm run setup` (`scripts/setupEnv.ts`) is the equivalent of the
-  reference's `setup-env`, and its required-field retry loop is the behaviour worth preserving.
+Rules:
 
-**Gap #8 — add `.env.development.example`.** `loadEnv()` reads `.env.development`, but only `.env.example` is
-committed, so there is nothing to copy when setting up a dev bot. The reference has the same fault in mirror
-image: its template is named `.development.example.env` while its loader reads `.env.development`. **Name the
-template after the file it becomes.** `.gitignore` already covers `.env*` — confirm the new template is
-explicitly un-ignored.
+1. **`export default defineCommand({ … })`.** The loader fails start-up and names the file otherwise.
+2. **`category` must be a key of `CATEGORIES`.** A typo is a compile error.
+3. **Use `reply()` from `@lib/reply.util`**, never `interaction.reply` directly — it picks `reply` vs
+   `editReply` vs `followUp` based on `deferred`/`replied`. Calling reply twice throws
+   `InteractionAlreadyReplied`.
+4. **Build embeds with `embed()` / `successEmbed()` / `errorEmbed()` from `@lib/embeds.util`.** A
+   `no-restricted-syntax` lint rule blocks bare `new EmbedBuilder()` outside the three files allowed to build
+   them.
+5. **Throw `UserFacingError` for anything the user did wrong.** See [§16](#16-errors).
+6. **Guard with the declarative fields** (`guildOnly`, `permissions`, …) rather than hand-rolled checks in
+   `run`. `checks.ts` handles them uniformly and the failure messages stay consistent.
+7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
+   to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
+8. Run `npm run docs:commands` afterwards.
 
-Also make sure `npm run setup` can write _either_ file (a `--dev` flag), and that `.env.example`'s comments
-say which values must differ between the dev and production bots — `DISCORD_TOKEN` and `DISCORD_CLIENT_ID`
-must, `DISCORD_DEV_GUILD_ID` should be set in development and blank in production.
+**Discord caps top-level commands at 100.** When close to it, group: move the file into a `subcommands/` folder
+(which the loader does **not** scan) and expose it from a parent with `asSubcommand`:
+
+```ts
+// src/commands/fun/fun.command.ts
+import { asSubcommand, defineCommand } from "@core/command";
+import dadJoke from "@commands/fun/subcommands/dadJoke.command";
+
+export default defineCommand({
+	name: "fun",
+	description: "Jokes, generators and other nonsense.",
+	category: "fun",
+	subcommands: [asSubcommand(dadJoke, ["dadjoke"])],
+});
+```
+
+The folded-in file stays an ordinary command file — nothing inside it changes, and it keeps its own name as a
+prefix alias, so `t?dad-joke` still works alongside `/fun dad-joke`.
 
 ---
 
-## 8. Logging
+## 9. Adding an event
 
-Two separate jobs, and the reference conflates them. Keep them apart.
+```ts
+// src/events/CreateEvents/guildCreate.event.ts
+import { defineEvent } from "@core/event";
 
-### Transport — `src/core/logger.ts`
+export default defineEvent({
+	name: "guildCreate",
+	once: false,
+	async run(client, guild) {
+		client.logger.info({ guildId: guild.id }, "[GUILD] Joined a new server");
+	},
+});
+```
 
-`pino`, with a real level threshold from `LOG_LEVEL`, pretty-printed and colourised when
-`process.stdout.isTTY` and structured JSON when it isn't. Rules:
+**The client comes first, then the event payload.** `defineEvent` is generic over the event name, so the payload
+is correctly typed for whichever event you named — and a handler whose parameters are in the wrong order is a
+compile error. In the original JS bot two features were silently dead for exactly that reason.
 
-- **`no-console: "error"`** is already enforced in application code (off for `scripts/` and tests). Keep it.
-- **Pass the error as structured context, not as a second string argument:**
-  `logger.error({ err }, "[BAN] Failed to ban member")`. The reference's logger takes exactly one argument and
-  **silently discards** the error object at roughly five call sites, losing the stack trace every time.
-- **Keep the message convention:** a `[SCREAMING_SNAKE_TAG]`, then a sentence-case sentence that usually ends
-  with remediation advice. Tag suffixes are meaningful — `[X]` for a notice, `[X_ERROR]` for a failure in that
-  subsystem, `[X_SUCCESS]` for a completion. Examples from the reference:
+Group it into `ReadyEvents/`, `CommandEvents/`, `CreateEvents/`, `LoggingEvents/` or `message/`. Any depth under
+`src/events/` is scanned.
+
+`once: true` for start-up work. Never register a handler both in a file and by hand elsewhere — the original
+did, so every signal fired twice.
+
+---
+
+## 10. Adding an interactive panel
+
+This is the dominant UI pattern in the repo. Every panel is **two pieces**:
+
+**1. A pure renderer in `src/lib/<name>Panel.util.ts` or `<name>Screen.util.ts`** — state in, message out. No
+database calls, no interaction object. This is what makes it unit-testable.
+
+**2. A handler in `src/buttons/<name>.ts`** — `defineButton({ id, ownerOnly, run })`.
+
+Both call the same renderer, so the first render and every re-render cannot drift. Examples to copy:
+`shopScreen.util.ts` + `buttons/shop.ts`, `auditPanel.util.ts` + `buttons/auditLog.ts`,
+`balancePanel.util.ts` + `buttons/balance.ts`, `inventoryScreen.util.ts` + `buttons/inventory.ts`.
+
+### Custom IDs
+
+`customId(id, action, ...args)` builds `id:action:arg1:arg2`. `parseCustomId` splits it back. `id` selects the
+handler and must be unique bot-wide; `action` and `args` arrive in the handler's `context`.
+
+`customId()` **throws** if a part contains `:` or the result exceeds Discord's 100 characters — deliberately, so
+you find out while writing rather than when Discord rejects the whole message.
+
+### Two absolute rules about state
+
+- **Never store per-interaction state on the client or in a module-level variable.** The original had
+  `client.helpData` — global, single-slot, shared across every guild and user, so two people using `/help` at
+  once corrupted each other's session.
+- **Either encode the state in the custom ID, or re-read it from the database.** Encode small things (page
+  number, selected id, section). Re-read when it will not fit — the audit panel's 18 event names cannot fit in
+  100 characters, so it re-reads the config on every interaction, which also stops two admins overwriting each
+  other with stale state.
+
+### `ownerOnly`
+
+Set `ownerOnly: true` on the handler and **put the invoking user's ID last** in every custom ID it builds. The
+router compares the last argument. This is a convention the router depends on; test it
+(`expect(parseCustomId(id).args.at(-1)).toBe(OWNER)`).
+
+### Re-read before you write
+
+Every handler branch that changes data must re-read the record rather than trusting what the message was
+rendered with. A balance shown 30 seconds ago may already be spent.
+
+### Never offer someone else's data as actionable
+
+If a panel can display another user (`/balance @someone`, `/inventory @someone`), render it **read-only**. A Use
+or Buy button beside their items that spends _your_ balance is a real bug — it happened, and there are tests
+pinning it now.
+
+---
+
+## 11. Components V2
+
+`src/lib/containers.util.ts` is the helper layer. Prefer V2 whenever a control belongs **beside** the thing it
+acts on — a Buy button next to an item, a Use button next to an inventory row — instead of a row of buttons under
+a list where the reader has to count to match them up.
+
+```ts
+import { button, row } from "@lib/components.util";
+import {
+	container,
+	containerMessage,
+	type ContainerPart,
+	divider,
+	sectionWithButton,
+	text,
+} from "@lib/containers.util";
+
+const parts: ContainerPart[] = [text("## 🛒 Shop"), divider()];
+parts.push(sectionWithButton("**🎣 Fishing Rod** — 2,500", button({ id, label: "Buy" })));
+
+return containerMessage(container({ category: "economy", parts }));
+```
+
+Helpers: `text`, `divider({ large?, spacer? })`, `sectionWithButton`, `sectionWithThumbnail`, `gallery`,
+`container({ category?, parts })`, `containerMessage`.
+Also in `components.util.ts`: `button`, `row`, `select`, `selectRow`, `option`, `channelSelect`, `confirmRow`,
+`navRow`, `quickAmountRow`, `modalForm`, `disableAll`.
+
+**Two rules Discord enforces, both easy to get wrong:**
+
+1. A V2 message **must** set `MessageFlags.IsComponentsV2`.
+2. That flag makes `content` and `embeds` **illegal** on the same message.
+
+`containerMessage()` handles both, so a caller cannot send a half-converted payload. The practical consequence:
+**you cannot attach a loose action row next to a container.** A confirm step has to be rendered _inside_ the
+container — see `sellConfirmScreen` in `shopScreen.util.ts`.
+
+Gotchas found the hard way:
+
+- **Type `parts` as `ContainerPart[]` explicitly.** TypeScript otherwise narrows the array from its initial
+  literal and rejects sections and rows appended later.
+- `container()` colours itself from `categoryColour`, which returns named colours for embeds; `setAccentColor`
+  needs a number, so anything non-numeric falls back rather than throwing. A colour is never worth failing a
+  message over.
+- Discord caps a V2 message at 40 components. Page long lists (the shop uses 5 entries per page).
+
+Embeds are still correct for one-shot results — `/beg`, `/rob`, `/work` — where buttons would add noise. Do not
+convert something just to convert it.
+
+---
+
+## 12. Multi-guild rules
+
+**The bot is multi-guild.** The only single-guild behaviour is command _registration_ when
+`DISCORD_DEV_GUILD_ID` is set, which is a development convenience.
+
+Rules:
+
+1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
+   `userId` alone for per-guild data.
+2. **Two deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design) and the user
+   profile (about the person, not the server). Do not "fix" these.
+3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
+   `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
+   server blocked `/beg` in another.
+4. **Never cache a guild-specific setting in a module-level variable.** Read it per interaction.
+5. **A job that scans across guilds is correct** — `lotteryDraw` finding every due draw is the intended shape.
+
+---
+
+## 13. Data layer
+
+`src/database/models/*.schema.ts` define Mongoose schemas. `src/database/repositories/*.ts` hold every query.
+**Commands and handlers use repositories, never models directly.**
+
+Rules:
+
+1. **Money is atomic.** `$inc`, `findOneAndUpdate`, and `debitWallet()` returning a boolean you must check.
+   Never read-modify-`save()` a balance — the original could duplicate money that way.
+2. **Debit before you deliver.** Every purchase branch takes payment first and only writes the goods on success,
+   so a failed payment can never hand out the item.
+3. **`getOrCreate*` never returns null.** Use it when absence should mean "start them off"; use `find*` when
+   absence is meaningful.
+4. **One collection per shape.** Two models sharing a collection with different shapes was the single worst
+   finding in the audit of the original.
+5. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
+   model when it is not.
+
+---
+
+## 14. Config and environment
+
+**`src/config/env.ts` is the only file that reads `process.env`.** Everything else takes `client.env` or a
+parameter. The zod schema is the single declaration of every variable, its format (`/^\d{17,20}$/` for Discord
+IDs) and its default.
+
+- **Validate once, at startup, and fail with a list** of everything wrong — not one error at a time.
+- **`SCREAMING_SNAKE`, `DISCORD_` prefix** for Discord-owned values.
+- **Blank means absent.** `KEY=` is an empty string, not an absent one; optional settings are meant to be left
+  blank, and `withoutBlanks()` handles it.
+- **One source of truth for ownership:** `DISCORD_OWNER_IDS`. The original had two competing ones.
+- **The constants modules read zero environment variables.** `constants.ts` / `theme.ts` / `strings.ts` /
+  `categories.ts` hold only values identical for every deployment, exported `as const` so `embedColor` is the
+  literal `"Blurple"` and not `string`.
+- **No committed snowflakes.** Every ID goes through `env.ts`.
+
+Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
+comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
+
+---
+
+## 15. Logging
+
+Two separate jobs. Keep them apart.
+
+**Transport — `src/core/logger.ts`.** `pino`, level from `LOG_LEVEL`, pretty and colourised when
+`process.stdout.isTTY`, structured JSON when it is not.
+
+- **`no-console: "error"`** in application code (off in `scripts/` and tests). Use `client.logger`.
+- **Pass the error as structured context, never as a second string:**
+  `logger.error({ err: toError(error) }, "[BAN] Failed to ban member")`. The original's logger took one argument
+  and silently discarded the error object at five call sites, losing every stack trace.
+- **Message convention:** `[SCREAMING_SNAKE_TAG]` then a sentence-case sentence that usually ends with
+  remediation advice. `[X]` a notice, `[X_ERROR]` a failure, `[X_SUCCESS]` a completion.
 
   ```
   [DATABASE] No MongoDB URL has been provided. Skipping database connection.
   [BAN] Failed to DM user. This can happen when their DM's are off, or the user is a bot.
   ```
 
-  This is the most valuable logging habit in that repo and it is transport-independent.
+- **Never log a token, a connection string, or a full env dump.**
+- **Do not put per-frame noise at `warn`.** A broken stream once emitted an error per frame, and matching it at
+  `warn` buried the single line naming the cause under hundreds of duplicates. Warn on decisive failures; leave
+  the rest at `debug`.
 
-- Never log a token, a connection string, or a full env dump.
+**Presentation — `src/lib/banner.util.ts`.** The boot banner is for a human watching a terminal and is
+`process.stdout.write`-n directly, **never through the logger**. `bannerLines()` is pure and unit-tested,
+`printBanner()` writes once, colour is dropped when not a TTY.
 
-### Presentation — `src/lib/banner.ts`
-
-The boot banner is for a human watching a terminal and is `process.stdout.write`-n directly, never routed
-through the logger. The current design is right and better than the reference's: `bannerLines()` is pure and
-unit-testable, `printBanner()` writes once, colour is dropped when not a TTY, and there is no timestamp
-prefixed to every line of ASCII art (the reference prints its six-line wordmark as six timestamped
-`console.log` calls).
-
-**Gap #9 — two details to bring across:**
-
-1. **Emoji label icons**, column-aligned so the colons line up. The reference's ready block:
-
-   ```
-   [ts]  🤖 Bot Name   : Testify
-   [ts]  🌍 Servers    : 12
-   [ts]  👥 Members    : 3401
-   [ts]  ⚡ Startup    :  ➜  Ready in: 812ms
-   ```
-
-   Here `fact()` already pads to 12 characters — adding the icon is a one-line change.
-
-2. **A loaded-module count block.** `folderLoader.util.js` prints what was loaded, which is the fastest way to
-   notice that a whole category silently failed to load:
-
-   ```
-   [ts]  📦 Loading project files...
-   [ts]  🗃  Schemas     : 3 loaded
-   [ts]  📜 Scripts     : 4 loaded
-   [ts]  ⚡ Events      : 8 loaded
-   ```
-
-   `loadEverything(client)` already returns `counts` and it currently only goes to `logger.debug`. Surface it.
-
-Glyph vocabulary, shared between banner and logs: `✓` done (green), `↻` in progress (yellow), `⚠` warning
-(yellow), `➜` a measurement. Section rules are `"═".repeat(n)` heavy and `"─".repeat(n)` thin.
+Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
+`"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is
+text-presentation and 1 column, which is why it was swapped for 📂. There is an `ICONS` map and a test.
 
 ---
 
-## 9. Startup
-
-`src/index.ts` is the shape to keep — a single `async function main()` that awaits each step in order, with a
-top-level catch that writes to stderr and exits non-zero:
+## 16. Errors
 
 ```ts
-async function main(): Promise<void> {
-	const env = loadEnv(); // 1. env first, validated
-	const logger = createLogger(env.LOG_LEVEL); // 2. then the logger
-	const client = new TestifyClient(env, logger);
-	handleProcessSignals(client); // registered exactly once
-	await connectDatabase({ uri: env.MONGODB_URI, logger });
-	const counts = loadEverything(client);
-	await publishCommands(client); // awaited, before login
-	await client.login(env.DISCORD_TOKEN);
-}
+import { UserFacingError } from "@core/errors";
+
+if (!account) throw new UserFacingError("You do not have an account yet. Use `/economy create`.");
 ```
 
-Why each part matters — every one of these is a bug in the reference:
-
-| Rule                                          | What it prevents there                                                                                   |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Env loaded and validated first                | token read before the env file loads, so `dev` runs the production bot                                   |
-| `await` every registration step               | `client.login()` racing the REST command deploy                                                          |
-| Signal handlers registered once, in one place | double registration, so every signal logs twice and `process.exit()` races                               |
-| No circular import back into the entry point  | `require("@src/index")` resolving to `{}` and being used as a client                                     |
-| Subclass the client; declare its fields       | six ad-hoc properties bolted onto the instance, documented nowhere                                       |
-| Resolve paths from `__dirname`                | `readdirSync("./src/…")` breaking unless started from the repo root — and the reason `dist/` was blocked |
-| Shutdown actually closes mongoose             | `SIGTERM` logging "Closing database and exiting..." and closing nothing                                  |
-
-`src/core/shutdown.ts` owns graceful shutdown. `uncaughtException` and `unhandledRejection` must set a
-non-zero exit code and terminate — never log and continue, which leaves the process in an undefined state.
+- **`UserFacingError`** — the message is shown to the user verbatim. Use it for anything they did wrong or can
+  fix. Write it as advice, not an accusation.
+- **Any other throw** is a bug: caught by `runCommand`, logged with its stack, and the user gets a generic
+  apology.
+- **Never interpolate a raw error into a user-visible embed.** It leaks internal paths and can exceed the
+  4096-character description limit.
+- **Never swallow an error into a `.catch()` that only logs** and then continue on a possibly-undefined value.
+- `uncaughtException` and `unhandledRejection` set a non-zero exit code and terminate. Never log and continue —
+  that leaves the process in an undefined state.
 
 ---
 
-## 10. Module contracts
+## 17. Testing
 
-Every loadable module gets its shape from a `define*` helper in `src/core/`, so the contract is checked at
-compile time rather than by the loader at runtime:
+`tests/` mirrors `src/`. Tests drop the source suffix (`shopScreen.util.ts` → `shopScreen.test.ts`).
+`tests/setup.ts` runs via `setupFilesAfterEnv`. Coverage thresholds are **80% statements / lines / functions /
+branches**, enforced by `npm run test:coverage` and by the pre-push hook.
 
-| Kind    | Defined by            | Registered by             |
-| ------- | --------------------- | ------------------------- |
-| Command | `src/core/command.ts` | `src/core/loader.ts`      |
-| Event   | `src/core/event.ts`   | `src/core/loader.ts`      |
-| Button  | `src/core/button.ts`  | `src/core/loader.ts`      |
-| Gate    | `src/core/checks.ts`  | called by the dispatchers |
+Shared harness in `tests/helpers/` (these are not tests):
 
-Rules:
+- **`mocks.ts`** — `createMockInteraction()`, `createMockMessage()`, `createMockClient()`, `createMockModel()`.
+  Every method is already a `jest.fn()`, `overrides` spread last, and the factories are typed so a mock that
+  drifts from the real Discord shape is a compile error. `createMockModel` is `hasOwnProperty`-aware so an
+  override of `null`/`0`/`false` is honoured rather than falling through to the default.
+- **`mongo.ts`** — `mongodb-memory-server` setup.
+- **`containers.ts`** — `idsOf()`, `buttonsOf()`, `textOf()` for walking a Components V2 tree. A container nests
+  sections inside containers and buttons inside sections, so asserting on one means walking it.
 
-- **Components go in a registry keyed by `customId`, never an if-chain.** `src/buttons/` plus
-  `src/core/button.ts` is the right structure; the reference routes eight `customId` values through a
-  711-line `if`/`else` in one event file. The audit notes record 27 concurrent `interactionCreate` listeners,
-  three separator conventions and a live collision in the JS codebase.
-- **Component state is per-interaction.** Never stash it on the client — the reference's `client.helpData` is
-  global, single-slot and shared across every guild and user, so two people using `/help` at once corrupt each
-  other's session. Encode what you need in the `customId`, or look it up again.
-- **Exactly one `interactionCreate` listener**, dispatching to the registries.
-- **Build embeds with `embed()` from `src/lib/embeds.ts`** — enforced by the `no-restricted-syntax` rule
-  banning bare `new EmbedBuilder()`. The JS codebase has 459 hand-built embeds; the factory removes ~800 lines.
-- **Deploy guild-scoped commands to `DISCORD_DEV_GUILD_ID` when it is set**, globally when it isn't. The
-  reference registers globally on every boot and collects a `guildid` it never uses, so dev command changes
-  take up to an hour to appear.
+What good tests here look like:
 
----
-
-## 11. Splitting code into helpers
-
-**The dividing line: extract when a second call site appears, or when the logic is worth testing in
-isolation.** The reference's rule was narrower — extract only what both the slash and prefix surfaces need —
-and because those were separate implementations there, it produced a near-duplicate pair for every helper
-(`checkDmUsability` / `checkMessageDmUsability`, and so on for five of six gate concerns).
-
-**This repo's unified command model makes that pair pattern unnecessary — do not reintroduce it.** One
-`CommandContext` covering both a slash interaction and a prefix message, with a `reply()` that does the right
-thing for each, means one `checkX(ctx)` per concern.
-
-Two further improvements on the reference:
-
-- **Gates should be pure and return a result, not reply.** The reference's gates are side-effecting predicates
-  that both decide _and_ reply, which makes them untestable without a mock interaction, and inconsistent —
-  the sync ones don't await their replies while `checkBlacklist*` is async, so call sites mix
-  `if (!(await checkBlacklistSlash(...)))` with `if (!checkDmUsability(...))`. Return a discriminated result
-  (`{ ok: true } | { ok: false; reason: string }`) and let the dispatcher reply.
-- **Extract what the reference left copy-pasted:** the missing-permissions diff, the error embed, and the
-  `replied || deferred ? followUp : reply` decision. All three exist here (`lib/embeds.ts`, `lib/reply.ts`) —
-  keep them the only implementations.
-
-Where a helper belongs: `src/lib/` for domain helpers and formatters, `src/core/` for framework concerns
-(loading, dispatch, contracts, errors, shutdown), `src/config/` for constants. A helper that pre-formats its
-output with Discord markdown is doing presentation — keep formatting at the edge, as `lib/format.ts` does.
-
----
-
-## 12. Testing
-
-`tests/` mirrors `src/` (`tests/config/`, `tests/core/`, `tests/database/`, `tests/lib/`, plus
-`tests/helpers/` for shared harness code), tests drop the source suffix, and `tests/setup.ts` runs via
-`setupFilesAfterEnv`. Coverage is configured and thresholded — keep both.
-
-The pattern to bring over from the reference is its **mock factory layer**, which is the strongest idea in
-that test suite:
-
-- **A factory per surface**, pre-stubbing everything: `createMockInteraction()`, `createMockMessage()`,
-  `createMockSubcommandInteraction()`. Every method is already a `jest.fn()`, so a test only configures what
-  it cares about.
-- **`overrides` spread last**, so any single branch can be replaced without rebuilding the object.
-- **Defaults that respect falsy overrides.** The reference's `createMockModel(defaultDoc, methodOverrides)`
-  uses a `hasOwnProperty`-aware helper so an override of `null` / `0` / `false` is honoured rather than
-  falling through to the default — a subtle bug that a naive `??` default would introduce.
-- **Type the factories** (`createMockInteraction(overrides?: Partial<ChatInputCommandInteraction>)`) so a mock
-  that drifts from the real Discord shape is a compile error. This is the part the reference cannot do.
-
-Use `mongodb-memory-server` where the query itself is under test, and a mocked model where it isn't.
-
----
-
-## 13. Linting and formatting
-
-**Prettier stays fully decoupled from ESLint** — `eslint-config-prettier` last in the config, no
-`eslint-plugin-prettier`. Settings match the reference exactly, and both repos agree:
-
-```json
-{
-	"useTabs": true,
-	"printWidth": 120,
-	"trailingComma": "all",
-	"arrowParens": "always"
-}
-```
-
-`eslint.config.mjs` already exceeds the reference's config: type-aware rules via `projectService`, `import-x`
-ordering and cycle detection, `no-console: "error"`, and per-area overrides for `src/core/loader.ts`,
-`scripts/**` and `tests/**`. Two conventions in it worth calling out because they are unusual and deliberate:
-
-- **`no-restricted-syntax` banning `new EmbedBuilder()`** outside the three files that legitimately build
-  embeds. An architectural rule enforced by the linter, which is exactly where it belongs.
-- **Every override carries a comment explaining why.** Keep that — an unexplained rule override rots.
-
-**Gap #12, optional:** the reference's `lintRunner.js` drives the ESLint **Node API** to print a colourised
-per-file report and a summary, and **exits non-zero on errors only — warnings never fail the build.** That
-error/warn split is the substance; the pretty report is taste. If ported to `scripts/lintRunner.ts`, keep the
-split.
-
----
-
-## 14. Git hooks and commit convention
-
-### Hooks
-
-| Hook         | Reference                      | Here today                    | Target                                                 |
-| ------------ | ------------------------------ | ----------------------------- | ------------------------------------------------------ |
-| `pre-commit` | `npm run lint` + `lint-staged` | `lint-staged`                 | add `npm run typecheck` (gap #10)                      |
-| `commit-msg` | — (none; the gap)              | —                             | **`commitlint`** (gap #6)                              |
-| `pre-push`   | `test:coverage`                | `typecheck` + `lint` + `test` | `test:coverage`, so thresholds gate the push (gap #11) |
-
-Staged-only linting cannot see a type error introduced in an unstaged file, which is why `typecheck` belongs
-in `pre-commit` and not only in `pre-push`.
-
-### Commit format
-
-**`type: Capitalized subject`** — no scopes, no bodies, no `!` markers, no trailers. Eleven types:
-
-| Type       | Meaning                                  |
-| ---------- | ---------------------------------------- |
-| `feat`     | A new feature                            |
-| `fix`      | A bug fix                                |
-| `docs`     | Documentation changes                    |
-| `style`    | Code style changes (formatting, etc)     |
-| `refactor` | Code refactoring with no feature changes |
-| `perf`     | Performance improvements                 |
-| `test`     | Adding or updating tests                 |
-| `chore`    | Maintenance tasks, dependency updates    |
-| `add`      | Adding new features or files             |
-| `update`   | Updating existing features or files      |
-| `remove`   | Removing features or files               |
-
-`add`, `update` and `remove` are extensions beyond Conventional Commits and are part of the house style.
-Examples from the reference's history:
-
-```
-feat: Added in blacklist command system and unit tests
-refactor: Updated file names to include slash & prefix
-chore: Upgraded flatted package version
-```
-
-Branches: `feature/your-feature-name`.
-
-**Gap #6 — do this in two halves, and the second half is the important one.**
-
-1. `scripts/commitRunner.ts` (`npm run commit`): banner, numbered type menu, reject empty, capitalise the
-   subject, confirm, commit. Use `prompts` (already a dependency) rather than raw `readline`, and
-   **`execFile("git", ["commit", "-m", message])` with an argv array** — the reference interpolates the message
-   into a double-quoted shell string, so a `"`, a backtick or a `$` breaks or injects.
-2. A **`commit-msg` hook running `commitlint`**, configured with exactly these eleven types, no scope, and a
-   capitalised subject. The reference has no such hook, so its convention is enforced only by asking nicely —
-   and a malformed commit (`ea0fe07 add: Add: Added in helper directory…`) is already in its history. A wizard
-   helps the people who use it; the hook is what makes the convention true.
-
----
-
-## 15. CI workflows
-
-### `ci.yml` — keep, and widen the trigger
-
-The four jobs (`check`, `test`, `build`, `audit`) and the `dist/` verification step are ahead of the reference
-and should stay. Two changes:
-
-- **Gap #2: trigger on all branches.** The reference runs on `branches: ['**']` for both `push` and
-  `pull_request`, so a feature branch is checked before a PR exists. Currently `[main, master]` only, which
-  means most work is unverified until PR time.
-- Read the Node version from `engines`/`.nvmrc` rather than the hardcoded `NODE_VERSION: "22"`, so there is one
-  source of truth. (The reference has the opposite problem — three sources that disagree.)
-
-### `nightly.yml` — add (gap #1, the highest-value item here)
-
-Scheduled dependency scanning belongs on a nightly, not on every commit: it is slow, it depends on third-party
-APIs, and a new CVE published overnight should be found without waiting for someone to push. Copy the
-reference's structure:
-
-`on: schedule: cron: '0 0 * * *'` plus `workflow_dispatch`, and four jobs:
-
-1. **`unit-tests`** — with an `if: always()` artifact upload, `retention-days: 7`.
-2. **`npm-audit`** — `better-npm-audit audit --level=high`, reading `.nsprc`.
-3. **`snyk`** — `snyk/actions/node@master` with `--severity-threshold=high --policy-path=.snyk`, and
-   **`continue-on-error: true`** so a transient Snyk 403 (token quota, org permissions) cannot fail the
-   pipeline and raise a false alarm.
-4. **`notify-on-failure`** — `needs: [...]` + `if: failure()`, opening an issue via `actions/github-script@v7`
-   titled `🚨 Nightly pipeline failed — <date>`, labelled `['bug', 'ci-failure']`, with a "What to check" list
-   and a link to the run.
-
-**Least privilege, escalated per job:**
-
-At the top of the workflow, default everything to read-only:
-
-```yaml
-permissions:
-  contents: read
-```
-
-Then grant write access on the one job that needs it, and nowhere else:
-
-```yaml
-jobs:
-  notify-on-failure:
-    permissions:
-      issues: write
-```
-
-**And the pattern that matters most: suppressions expire.** Both allowlists require three things — a written
-reason, the version that fixes it, and a hard expiry — so a suppression cannot rot silently into a permanent
-blind spot.
-
-`.nsprc`:
-
-```json
-{
-	"1112496": {
-		"active": true,
-		"notes": "Introduced transitively via discord.js@14.x -> undici@6.21.3. Cannot upgrade undici without a breaking downgrade of discord.js. Fixed in undici@6.24.0 — re-evaluate when discord.js ships a compatible release.",
-		"expiry": 1789776000000
-	}
-}
-```
-
-`.snyk` carries the same three facts in Snyk's YAML form with `expires: '2026-09-19T00:00:00.000Z'`.
-
-This repo already pins several `overrides` (including `discord-html-transcripts` → `undici`) — those need the
-same treatment: each one gets a comment saying why it exists and when to re-check.
+- **Test the pure renderer, not the handler.** That is the whole reason panels are split in two.
+- **Name the behaviour, not the implementation** — `"disables Use on an item that cannot be used"`.
+- **A comment above a test should explain _why it matters_**, ideally naming the bug it prevents.
+- **Cover the degenerate cases**: empty list, page past the end, stale id, zero quantity, someone else's data.
+- **Inject randomness** (`useItem(..., roll)`) rather than fighting it.
+- **A test must be able to fail.** If you add an enforcement test, prove it goes red.
 
 > [!NOTE]
-> Two mistakes in the reference's `nightly.yml` not to copy: it uploads `coverage/` and `junit.xml` from a job
-> that runs plain `npm test` (no `--coverage`, no junit reporter), and uploads `npm-audit.json` from a tool
-> that only writes to stdout — three artifact paths that never contain anything. Make the uploads match what
-> the commands actually produce.
+> When a test disagrees with the code, **the code is not automatically wrong.** Three times in this repo's
+> history a test I wrote was the thing at fault: `humanisePermission` lowercases deliberately,
+> `buildSlashCommand` does not reorder required options, and pets deliberately cost more to feed than they earn.
+> Read the code and decide which is right before changing either.
 
 ---
 
-## 16. Anti-patterns from the JS codebase that must not come back
+## 18. Lint, format, style
 
-The full, numbered list is [`04-AUDIT-FINDINGS.md`](.codebase-notes/04-AUDIT-FINDINGS.md) (100 findings) and
-the standards doc's own list is in
-[`17-CODING-STANDARDS.md`](.codebase-notes/migration/17-CODING-STANDARDS.md). This is the short version — the
-classes of defect that the conventions above exist to prevent:
+**Prettier is fully decoupled from ESLint** — `eslint-config-prettier` last, no `eslint-plugin-prettier`.
+`.prettierrc` is exactly:
 
-1. **Reading `process.env` before the env file is loaded**, and relying on `dotenv` to override an
-   already-loaded value (it doesn't). One validated `loadEnv()` first, always.
-2. **Un-awaited async registration**, so login races command deployment. `no-floating-promises` is on; keep it
-   on.
-3. **Handlers registered twice** because a directory scan re-invokes a module that was already called directly.
-4. **A circular import back into the entry point**, resolving to `{}` and being used as though it were a client.
-5. **Properties bolted onto the client at runtime** — 20 of them in the JS codebase. Declare fields on
-   `TestifyClient`.
-6. **Global single-slot state for per-interaction data** (`client.helpData`).
-7. **A handler whose parameters are in the wrong order**, so its first guard always returns and the feature is
-   silently dead. Two features in the JS codebase never ran once. Typed `defineEvent()` prevents exactly this.
-8. **`catch` blocks calling `interaction.reply()` with no `replied`/`deferred` guard** → unhandled
-   `InteractionAlreadyReplied`. Use `lib/reply.ts`.
-9. **Raw errors interpolated into user-visible embeds** — leaks internal paths and can exceed the 4096-char
-   description limit.
-10. **Swallowing an error into a `.catch()` that only logs**, then continuing on a possibly-undefined value.
-11. **Read-modify-`save()` on balances with no atomic operation** — money can be duplicated. Use atomic updates.
-12. **Two models sharing one collection with different shapes** — the single worst finding in the audit.
-13. **Directory scans resolved against the CWD** (`readdirSync("./src/…")`), which breaks `dist/` and any start
-    from another directory.
-14. **`console.*` as the log path**, and a logger that drops the error object it was handed.
-15. **Undeclared dependencies** resolving through transitive hoisting, and declared-but-unused packages.
-    `import-x/no-extraneous-dependencies` is on.
-16. **An alias map duplicated across several files**, and a category enum whose values drift from the folders.
-17. **A commit convention with nothing enforcing it.**
-18. **A README describing features and scripts that do not exist.** Regenerate `COMMANDS.md` with
-    `npm run docs:commands` rather than hand-maintaining it.
+```json
+{ "useTabs": true, "printWidth": 120, "trailingComma": "all", "arrowParens": "always" }
+```
+
+`eslint.config.mjs` is a flat config with type-aware rules via `projectService`. The ones that shape the code:
+
+| Rule                                          | Why                                                          |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| `no-console: "error"`                         | Use `client.logger`. Off in `scripts/` and tests.            |
+| `no-floating-promises`, `no-misused-promises` | An un-awaited registration once raced `client.login()`       |
+| `import-x/order`                              | Node builtins → packages → aliases, alphabetical             |
+| `import-x/no-cycle` (`maxDepth: 6`)           | Barrels plus cross-references make cycles easy               |
+| `switch-exhaustiveness-check`                 | Adding a shop section becomes a compile error, not a bug     |
+| `no-restricted-syntax`                        | Bans bare `new EmbedBuilder()` outside the three embed files |
+| `no-extraneous-dependencies`                  | The original resolved packages through transitive hoisting   |
+
+**Every override in that config carries a comment explaining why.** Keep that — an unexplained override rots.
+
+`scripts/lintRunner.ts` drives the ESLint Node API: colourised per-file report, and **exits non-zero on errors
+only — warnings never fail the build.**
+
+### Comments
+
+**This is a standing instruction for the repo: do not write AI-flavoured commentary.** Leave comments out unless
+they are genuinely necessary or you are describing something non-obvious.
+
+What earns a comment:
+
+- **Why**, never what. `// Debit first so a failed payment cannot hand out the goods.`
+- A file-level block explaining the module's job and the mistake it exists to prevent.
+- A non-obvious constraint:
+  `// A V2 message cannot carry an embed, so the confirm row goes inside the container.`
+- A `/** */` above a test explaining what bug it pins.
+
+What does not: restating the next line, `// Imports`, TODOs without an owner, or anything a reader would infer
+from the code.
+
+Match the surrounding code's density and idiom. If a file has sparse comments, do not flood it.
+
+---
+
+## 19. Committing and branching
+
+**Format: `type: Capitalized subject`.** No scopes, no bodies, no `!`, no trailers. Enforced by a `commit-msg`
+hook running commitlint — not by asking nicely. Eleven types:
+
+| Type       | Meaning                             |
+| ---------- | ----------------------------------- |
+| `feat`     | A new feature                       |
+| `fix`      | A bug fix                           |
+| `docs`     | Documentation changes               |
+| `style`    | Code style (formatting, etc)        |
+| `refactor` | Refactoring with no feature change  |
+| `perf`     | Performance improvements            |
+| `test`     | Adding or updating tests            |
+| `chore`    | Maintenance, dependency updates     |
+| `add`      | Adding new features or files        |
+| `update`   | Updating existing features or files |
+| `remove`   | Removing features or files          |
+
+`add`, `update` and `remove` are house-style extensions beyond Conventional Commits.
+
+```
+feat: Added Components V2 panels for economy and audit logging
+fix: Try every unencrypted SoundCloud transcoding before failing
+remove: Removed the music system
+refactor: Renamed command files from slash to command
+```
+
+`npm run commit` is a guided wizard. It uses `execFile("git", ["commit", "-m", msg])` with an argv array — never
+interpolate a message into a shell string, or a `"`, backtick or `$` breaks or injects.
+
+**Hooks:**
+
+| Hook         | Runs                                |
+| ------------ | ----------------------------------- |
+| `pre-commit` | `npm run typecheck` + `lint-staged` |
+| `commit-msg` | `commitlint`                        |
+| `pre-push`   | `npm run lint` + `test:coverage`    |
+
+`typecheck` is in `pre-commit` because staged-only linting cannot see a type error introduced in an unstaged
+file.
+
+**Branches:** `feature/your-feature-name` for normal work. Push with `git push -u origin <branch>`; on a network
+failure retry up to four times with exponential backoff (2s, 4s, 8s, 16s).
+
+**Do not open a pull request unless explicitly asked.**
+
+**Before committing:** `npm run check`, plus the loader smoke test from [§3](#3-running-testing-verifying) if you
+touched loading, naming or the build. Regenerate `COMMANDS.md` if the command surface changed. Commit related
+work together — a rename sweep is one mechanical commit, not 100.
+
+---
+
+## 20. CI
+
+`.github/workflows/ci.yml` — four jobs (`check`, `test`, `build`, `audit`), triggered on `branches: ["**"]` for
+push and pull_request so a feature branch is verified before a PR exists. Node version comes from `.nvmrc`, not a
+hardcoded string. The `build` job **verifies the `dist/` artifact**, which is what catches the unrewritten alias
+problem.
+
+`.github/workflows/nightly.yml` — `cron: "0 0 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests`,
+`npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false alarm), and
+`notify-on-failure` which opens a labelled issue. Permissions default to `contents: read` at the top and are
+escalated to `issues: write` on that one job only.
+
+**Suppressions expire.** `.nsprc` and `.snyk` each require three things: a written reason, the version that
+fixes it, and a hard expiry — so a suppression cannot rot silently into a permanent blind spot. Every `overrides`
+pin in `package.json` needs the same treatment.
+
+---
+
+## 21. Decisions already made — do not relitigate
+
+### The music system was removed
+
+Deleted in `9541ec6` — 27 command files, 7 lib modules, 6 test files, 7 dependencies, 3,452 lines. **Do not add
+it back without reading this.**
+
+Five rounds of debugging established:
+
+- **SoundCloud now serves DRM-protected streams.** The URL contains `/cbcs/` — Common Encryption, as used by
+  FairPlay and Widevine. FFmpeg downloads the segments and decodes ciphertext as AAC, which produces
+  `Reserved bit set`, `Number of bands exceeds limit`, `channel element is not allocated` while output stays at
+  0 kB. **Decrypting it is not an option** — it is illegal and will not be implemented here.
+- **`ffmpeg-static` ships a statically-linked-glibc binary** whose `getaddrinfo` segfaults on modern glibc: exit
+  139, no stderr, every hostname dead while local input works. `@ffmpeg-installer/ffmpeg` is the same
+  johnvansickle build and fails identically. There is no npm package that avoids it.
+- **The whole approach is a treadmill.** DisTube + yt-dlp + scraped SoundCloud endpoints break whenever a
+  platform ships a change.
+
+If music is ever wanted again: `git revert 9541ec6` restores everything, and the honest path forward is
+[Lavalink](https://lavalink.dev/) — a separate audio server that absorbs this churn — not another round of
+patching extractors. It costs a Java daemon, which is why it was not done.
+
+### One command object, both surfaces
+
+No `SlashCommands/` / `PrefixCommands/` folder split, and no `.slash.ts` / `.prefix.ts` suffixes. Both would
+describe an architecture this codebase deliberately does not have, and would undo the deduplication the rewrite
+exists to achieve.
+
+### Command folders stay flat and lowercase
+
+`commands/<category>/`, matching the rest of `src/`, which is uniformly camelCase. Two casing regimes inside one
+tree is a rule to remember rather than a distinction the reader gains anything from.
+
+### No dedicated `types/` directory
+
+Measured rather than assumed: 46% of exported types never leave the file that declares them. Types live beside
+the code that owns them.
+
+### Global by design
+
+The blacklist and the user profile are intentionally not guild-scoped. See [§12](#12-multi-guild-rules).
+
+---
+
+## 22. Anti-patterns that must not come back
+
+The full numbered list is [`04-AUDIT-FINDINGS.md`](.codebase-notes/04-AUDIT-FINDINGS.md) (100 findings). The
+short version — the classes of defect the conventions above exist to prevent:
+
+1. Reading `process.env` before the env file loads, and trusting `dotenv` to override an already-loaded value
+   (it does not). One validated `loadEnv()` first, always.
+2. Un-awaited async registration, so login races the command deploy.
+3. Handlers registered twice because a directory scan re-invokes a module that was already called directly.
+4. A circular import back into the entry point, resolving to `{}` and being used as a client.
+5. Properties bolted onto the client at runtime — 20 of them in the original. Declare fields on `TestifyClient`.
+6. Global single-slot state for per-interaction data (`client.helpData`).
+7. A handler whose parameters are in the wrong order, so its first guard always returns and the feature is
+   silently dead. Two features in the original never ran once.
+8. `catch` blocks calling `interaction.reply()` with no `replied`/`deferred` guard.
+9. Raw errors interpolated into user-visible embeds.
+10. Swallowing an error into a `.catch()` that only logs, then continuing on a possibly-undefined value.
+11. Read-modify-`save()` on balances with no atomic operation — money can be duplicated.
+12. Two models sharing one collection with different shapes.
+13. Directory scans resolved against the CWD (`readdirSync("./src/…")`), which breaks `dist/` and any start from
+    another directory. Use `core/paths.ts`.
+14. `console.*` as the log path, and a logger that drops the error object it was handed.
+15. Undeclared dependencies resolving through transitive hoisting.
+16. An alias map duplicated across several files, and a category enum whose values drift from the folder names.
+17. A commit convention with nothing enforcing it.
+18. A README describing features and scripts that do not exist. Regenerate `COMMANDS.md`.
+19. **A user-facing flow that requires typing an ID.** `/shop buy <id>` made people read an ID out of one message
+    and retype it. If the bot knows the catalogue, the user should be picking from it.
+20. **A control that acts on data it is not showing.** A Use button beside someone else's item that spends yours.
+
+---
+
+## 23. Working style expected here
+
+Behaviour that has been asked for repeatedly in this repo, recorded so it does not need asking again.
+
+**Verify, do not assume.** Read the actual source of a dependency before theorising about it. Twice in this repo
+a confident diagnosis was wrong in a way five minutes of reading `node_modules` would have caught: the yt-dlp
+plugin's `update` option already defaulted to `true`, and its `getStreamURL` hardcoded a format that could not be
+overridden.
+
+**Say what you could not verify.** If a fix cannot be tested in the current environment — no network, no live
+Discord, no database — say so plainly and name which part is proven and which is inference. Do not present a
+plausible fix as a confirmed one.
+
+**Own mistakes plainly and move on.** State the correction in a sentence, fix it, continue. No ceremony, no
+re-litigating.
+
+**Do the whole task.** If part of it is blocked, finish everything else and say explicitly what was left and why.
+Scaling the work down is the user's call.
+
+**Prefer the fix with no setup cost.** This is an open-source bot that has to work on macOS, Windows and Linux
+with minimal installs. "Install this system-wide" is a last resort, and if it is genuinely needed, it should
+degrade automatically rather than fail.
+
+**Read the log the user pasted, all of it.** The line that mattered in a 900-line FFmpeg dump was the last one.
+
+**Regenerate, do not hand-edit.** `COMMANDS.md` comes from `npm run docs:commands`.
