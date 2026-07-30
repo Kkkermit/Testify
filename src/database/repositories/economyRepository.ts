@@ -142,23 +142,30 @@ export async function getLeaderboard(
 	guildId: string,
 	limit: number,
 	field: LeaderboardField = "total",
+	skip = 0,
 ): Promise<(EconomyAccount & { total: number })[]> {
 	if (field === "total") {
 		return Economy.aggregate<EconomyAccount & { total: number }>([
 			{ $match: { guildId } },
 			{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
 			{ $sort: { total: -1 } },
+			{ $skip: skip },
 			{ $limit: limit },
 		]).exec();
 	}
 
 	const accounts = await Economy.find({ guildId })
 		.sort({ [field]: -1 })
+		.skip(skip)
 		.limit(limit)
 		.lean<EconomyAccount[]>()
 		.exec();
 
 	return accounts.map((account) => ({ ...account, total: account.wallet + account.bank }));
+}
+
+export async function countAccounts(guildId: string): Promise<number> {
+	return Economy.countDocuments({ guildId }).exec();
 }
 
 export async function getGuildTotals(

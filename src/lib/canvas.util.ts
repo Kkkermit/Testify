@@ -87,3 +87,40 @@ export async function drawAvatar(ctx: SKRSContext2D, url: string, x: number, y: 
 	ctx.drawImage(image, x, y, size, size);
 	ctx.restore();
 }
+
+/**
+ * The avatar, or a lettered circle when it cannot be fetched. Returns whether the
+ * real image was drawn.
+ *
+ * A card is worth rendering without the picture — the CDN being briefly unreachable
+ * should cost a face, not the whole `/rank` reply.
+ */
+export async function drawAvatarOrInitial(
+	ctx: SKRSContext2D,
+	url: string,
+	x: number,
+	y: number,
+	size: number,
+	initial: string,
+	background = "#5865f2",
+): Promise<boolean> {
+	try {
+		await drawAvatar(ctx, url, x, y, size);
+		return true;
+	} catch {
+		ctx.save();
+		ctx.beginPath();
+		ctx.arc(x + size / 2, y + size / 2, size / 2, 0, Math.PI * 2);
+		ctx.fillStyle = background;
+		ctx.fill();
+
+		ctx.fillStyle = "#ffffff";
+		ctx.font = `${Math.round(size * 0.45)}px sans-serif`;
+		ctx.textAlign = "center";
+		ctx.textBaseline = "middle";
+		ctx.fillText((initial.trim()[0] ?? "?").toUpperCase(), x + size / 2, y + size / 2);
+		ctx.restore();
+
+		return false;
+	}
+}

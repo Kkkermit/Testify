@@ -7,6 +7,7 @@ import {
 	type EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 	ModalBuilder,
+	RoleSelectMenuBuilder,
 	StringSelectMenuBuilder,
 	StringSelectMenuOptionBuilder,
 	TextInputBuilder,
@@ -84,13 +85,43 @@ export function channelSelect(options: {
 	placeholder?: string;
 	channelTypes?: ChannelType[];
 	disabled?: boolean;
+	minValues?: number;
+	maxValues?: number;
+	/** Pre-ticks these, which is what turns the menu into an editable list. */
+	defaultChannelIds?: string[];
 }): ChannelSelectMenuBuilder {
 	const builder = new ChannelSelectMenuBuilder()
 		.setCustomId(options.id)
 		.setChannelTypes(options.channelTypes ?? [ChannelType.GuildText, ChannelType.GuildAnnouncement])
-		.setDisabled(options.disabled ?? false);
+		.setDisabled(options.disabled ?? false)
+		.setMinValues(options.minValues ?? 1)
+		.setMaxValues(options.maxValues ?? 1);
 
 	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	if (options.defaultChannelIds !== undefined) builder.setDefaultChannels(options.defaultChannelIds);
+	return builder;
+}
+
+/**
+ * A role picker. With `defaultRoleIds` the menu doubles as the current list, so
+ * deselecting a role is how you remove it — no separate remove button per row.
+ */
+export function roleSelect(options: {
+	id: string;
+	placeholder?: string;
+	disabled?: boolean;
+	minValues?: number;
+	maxValues?: number;
+	defaultRoleIds?: string[];
+}): RoleSelectMenuBuilder {
+	const builder = new RoleSelectMenuBuilder()
+		.setCustomId(options.id)
+		.setDisabled(options.disabled ?? false)
+		.setMinValues(options.minValues ?? 1)
+		.setMaxValues(options.maxValues ?? 1);
+
+	if (options.placeholder !== undefined) builder.setPlaceholder(options.placeholder);
+	if (options.defaultRoleIds !== undefined) builder.setDefaultRoles(options.defaultRoleIds);
 	return builder;
 }
 

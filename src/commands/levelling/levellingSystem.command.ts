@@ -1,114 +1,87 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, roleOption } from "@core/command";
+import { type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
+import { deleteLevelSettings, getLevelSettings } from "@database/repositories/levelRepository";
+import { successEmbed } from "@lib/embeds.util";
+import { normaliseSettings } from "@lib/levelling.util";
+import { levelPanel, type LevelTab } from "@lib/levelPanel.util";
 import { reply } from "@lib/reply.util";
+
+/**
+ * One panel, opened on whichever tab was asked for.
+ *
+ * The old `setup` subcommand took a channel, a role and a multiplier as options,
+ * so three of the settings were reachable and the rest did not exist. `setup` and
+ * `edit` open the same screen deliberately: the panel shows the current config, so
+ * setting up and changing it are the same gesture, and both names exist because
+ * people look for both.
+ */
+async function openPanel(interaction: CommandInput, tab: LevelTab): Promise<void> {
+	const guild = inGuild(interaction);
+	const config = normaliseSettings(await getLevelSettings(guild.id));
+
+	await reply(interaction, levelPanel({ tab, config }, interaction.user.id));
+}
 
 export default defineCommand({
 	name: "levelling",
 	description: "Configures the levelling system.",
 	category: "levelling",
+	aliases: ["levels"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	subcommands: [
 		{
 			name: "setup",
-			description: "Turn levelling on and configure it.",
-			options: [
-				{
-					name: "channel",
-					description: "Where level-up messages go. Leave empty to use the current channel.",
-					type: "channel",
-				},
-				{ name: "boost-role", description: "Members with this role earn bonus XP.", type: "role" },
-				{
-					name: "multiplier",
-					description: "The XP multiplier for that role.",
-					type: "integer",
-					min: 1,
-					max: 5,
-				},
-			],
+			description: "Open the levelling panel and switch it on.",
 			async run(interaction) {
-				const guild = inGuild(interaction);
-				const channel = interaction.options.getChannel("channel");
-				const role = roleOption(interaction, "boost-role");
-
-				await saveLevelSettings(guild.id, {
-					isDisabled: false,
-					levelUpChannelId: channel?.id ?? "current",
-					roleId: role?.id ?? null,
-					multiplier: interaction.options.getInteger("multiplier") ?? 1,
-				});
-
-				await reply(interaction, { embeds: [successEmbed("Levelling is enabled and configured.")] });
+				await openPanel(interaction, "overview");
 			},
 		},
 		{
-			name: "toggle",
-			description: "Turn levelling on or off.",
-			options: [{ name: "enabled", description: "Whether members earn XP.", type: "boolean", required: true }],
+			name: "edit",
+			description: "Change the levelling configuration.",
 			async run(interaction) {
-				const guild = inGuild(interaction);
-				const enabled = interaction.options.getBoolean("enabled", true);
-
-				await saveLevelSettings(guild.id, { isDisabled: !enabled });
-				await reply(interaction, { embeds: [successEmbed(enabled ? "Levelling is on." : "Levelling is off.")] });
+				await openPanel(interaction, "overview");
 			},
 		},
 		{
-			name: "disable",
-			description: "Remove the levelling configuration entirely.",
+			name: "boosts",
+			description: "Choose which roles earn bonus XP.",
+			async run(interaction) {
+				await openPanel(interaction, "boosts");
+			},
+		},
+		{
+			name: "rewards",
+			description: "Choose which roles are handed out at which level.",
+			async run(interaction) {
+				await openPanel(interaction, "rewards");
+			},
+		},
+		{
+			name: "ignored",
+			description: "Choose channels and roles that earn no XP.",
+			async run(interaction) {
+				await openPanel(interaction, "ignores");
+			},
+		},
+		{
+			name: "reset",
+			description: "Remove the levelling configuration. Earned XP is kept.",
 			async run(interaction) {
 				const guild = inGuild(interaction);
 				const removed = await deleteLevelSettings(guild.id);
 				if (!removed) throw new UserFacingError("Levelling is not configured here.");
 
-				await reply(interaction, { embeds: [successEmbed("Levelling configuration removed.")] });
-			},
-		},
-		{
-			name: "status",
-			description: "Show the current levelling configuration.",
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const settings = await getLevelSettings(guild.id);
-
 				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "levelling",
-							title: "Levelling",
-							description: settings
-								? settings.isDisabled
-									? "Configured but disabled."
-									: "Enabled."
-								: "Not configured.",
-							...(settings
-								? {
-										fields: [
-											{
-												name: "Level-up channel",
-												value:
-													settings.levelUpChannelId === null || settings.levelUpChannelId === "current"
-														? "Wherever the message was sent"
-														: `<#${settings.levelUpChannelId}>`,
-												inline: true,
-											},
-											{
-												name: "Boost role",
-												value: settings.roleId !== null ? `<@&${settings.roleId}>` : "None",
-												inline: true,
-											},
-											{ name: "Multiplier", value: `\u00d7${settings.multiplier}`, inline: true },
-										],
-									}
-								: {}),
-						}),
-					],
+					embeds: [successEmbed("Levelling configuration removed. Everyone keeps the XP they earned.")],
 				});
 			},
 		},
 	],
+
+	async run(interaction) {
+		await openPanel(interaction, "overview");
+	},
 });

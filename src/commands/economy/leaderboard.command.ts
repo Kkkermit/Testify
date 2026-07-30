@@ -1,12 +1,17 @@
-import { ECONOMY } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
-import { getLeaderboard } from "@database/repositories/economyRepository";
-import { getLevelLeaderboard } from "@database/repositories/levelRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber, ordinal } from "@lib/format.util";
+import { type BoardKind, boardMessage } from "@lib/leaderboardActions.util";
 import { reply } from "@lib/reply.util";
 
-const MEDALS = ["\u{1f947}", "\u{1f948}", "\u{1f949}"];
+/**
+ * Both boards, one command. The levelling board used to be a second subcommand of
+ * an economy command, which is the last place anyone would look for it, and the
+ * top-level `run` was a verbatim copy of the economy subcommand's body.
+ */
+async function show(interaction: Parameters<typeof reply>[0], kind: BoardKind): Promise<void> {
+	const guild = inGuild(interaction);
+	await interaction.deferReply();
+	await reply(interaction, await boardMessage(guild, kind, 0, interaction.user.id));
+}
 
 export default defineCommand({
 	name: "leaderboard",
@@ -19,70 +24,19 @@ export default defineCommand({
 			name: "economy",
 			description: "Richest members in this server.",
 			async run(interaction) {
-				const guild = inGuild(interaction);
-				const rows = await getLeaderboard(guild.id, ECONOMY.leaderboardPageSize);
-
-				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "economy",
-							title: `Richest members in ${guild.name}`,
-							description:
-								rows
-									.map(
-										(row, index) =>
-											`${MEDALS[index] ?? `\`${ordinal(index + 1)}\``} <@${row.userId}> \u2014 **${formatNumber(row.total)}**`,
-									)
-									.join("\n") || "Nobody has an account here yet.",
-						}),
-					],
-				});
+				await show(interaction, "economy");
 			},
 		},
 		{
 			name: "levels",
 			description: "Highest levels in this server.",
 			async run(interaction) {
-				const guild = inGuild(interaction);
-				const rows = await getLevelLeaderboard(guild.id, ECONOMY.leaderboardPageSize);
-
-				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "levelling",
-							title: `Top levels in ${guild.name}`,
-							description:
-								rows
-									.map(
-										(row, index) =>
-											`${MEDALS[index] ?? `\`${ordinal(index + 1)}\``} <@${row.userId}> \u2014 level **${row.level}** (${formatNumber(row.xp)} XP)`,
-									)
-									.join("\n") || "Nobody has earned XP here yet.",
-						}),
-					],
-				});
+				await show(interaction, "levels");
 			},
 		},
 	],
 
 	async run(interaction) {
-		const guild = inGuild(interaction);
-		const rows = await getLeaderboard(guild.id, ECONOMY.leaderboardPageSize);
-
-		await reply(interaction, {
-			embeds: [
-				embed({
-					category: "economy",
-					title: `Richest members in ${guild.name}`,
-					description:
-						rows
-							.map(
-								(row, index) =>
-									`${MEDALS[index] ?? `\`${ordinal(index + 1)}\``} <@${row.userId}> \u2014 **${formatNumber(row.total)}**`,
-							)
-							.join("\n") || "Nobody has an account here yet.",
-				}),
-			],
-		});
+		await show(interaction, "economy");
 	},
 });

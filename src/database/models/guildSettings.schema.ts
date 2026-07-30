@@ -98,15 +98,55 @@ const countingSchema = new Schema<CountingSettings>(
 
 export const Counting = model<CountingSettings>("countingSchema", countingSchema);
 
+/** A role whose holders earn more XP per message. */
+export interface XpBoost {
+	roleId: string;
+	multiplier: number;
+}
+
+/** A role handed out on reaching a level. */
+export interface LevelReward {
+	level: number;
+	roleId: string;
+}
+
 export interface LevelSettings {
 	guildId: string;
 	isDisabled: boolean;
+	/**
+	 * The single boost role the first version supported. Still read so an existing
+	 * guild keeps its multiplier, but nothing writes it any more — `boosts` does.
+	 */
 	roleId: string | null;
 	multiplier: number;
+	boosts: XpBoost[];
+	rewards: LevelReward[];
+	/** Keep every reward earned so far, rather than only the newest one. */
+	stackRewards: boolean;
 	levelUpChannelId: string | null;
+	/** Announce level-ups at all. Off still awards XP, it just says nothing. */
+	announce: boolean;
+	ignoredChannelIds: string[];
+	ignoredRoleIds: string[];
 	createdAt: Date;
 	updatedAt: Date;
 }
+
+const xpBoostSchema = new Schema<XpBoost>(
+	{
+		roleId: { type: String, required: true },
+		multiplier: { type: Number, required: true, default: 2 },
+	},
+	{ _id: false },
+);
+
+const levelRewardSchema = new Schema<LevelReward>(
+	{
+		level: { type: Number, required: true },
+		roleId: { type: String, required: true },
+	},
+	{ _id: false },
+);
 
 const levelSettingsSchema = new Schema<LevelSettings>(
 	{
@@ -114,7 +154,13 @@ const levelSettingsSchema = new Schema<LevelSettings>(
 		isDisabled: { type: Boolean, required: true, default: false },
 		roleId: { type: String, default: null },
 		multiplier: { type: Number, required: true, default: 1 },
+		boosts: { type: [xpBoostSchema], required: true, default: [] },
+		rewards: { type: [levelRewardSchema], required: true, default: [] },
+		stackRewards: { type: Boolean, required: true, default: true },
 		levelUpChannelId: { type: String, default: null },
+		announce: { type: Boolean, required: true, default: true },
+		ignoredChannelIds: { type: [String], required: true, default: [] },
+		ignoredRoleIds: { type: [String], required: true, default: [] },
 	},
 	{ timestamps: true },
 );

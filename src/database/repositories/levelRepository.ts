@@ -109,8 +109,17 @@ export async function addXp(guildId: string, userId: string, amount: number): Pr
 	);
 }
 
-export async function getLevelLeaderboard(guildId: string, limit: number): Promise<UserLevelRecord[]> {
-	return UserLevel.find({ guildId }).sort({ level: -1, xp: -1 }).limit(limit).lean<UserLevelRecord[]>().exec();
+export async function getLevelLeaderboard(guildId: string, limit: number, skip = 0): Promise<UserLevelRecord[]> {
+	return UserLevel.find({ guildId })
+		.sort({ level: -1, xp: -1 })
+		.skip(skip)
+		.limit(limit)
+		.lean<UserLevelRecord[]>()
+		.exec();
+}
+
+export async function countRanked(guildId: string): Promise<number> {
+	return UserLevel.countDocuments({ guildId }).exec();
 }
 
 export async function getRank(guildId: string, userId: string): Promise<number | null> {

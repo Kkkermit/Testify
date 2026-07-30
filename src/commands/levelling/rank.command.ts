@@ -1,9 +1,8 @@
-import { LEVELLING } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getRank, getUserLevel, xpForNextLevel } from "@database/repositories/levelRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber, ordinal, progressBar } from "@lib/format.util";
+import { getLevelSettings, getRank, getUserLevel } from "@database/repositories/levelRepository";
+import { multiplierFor, normaliseSettings, progressOf } from "@lib/levelling.util";
+import { renderRankCard } from "@lib/rankCard.util";
 import { reply } from "@lib/reply.util";
 
 export default defineCommand({
@@ -21,26 +20,30 @@ export default defineCommand({
 		const record = await getUserLevel(guild.id, target.id);
 		if (!record) throw new UserFacingError(`${target.username} has not earned any XP here yet.`);
 
-		const rank = await getRank(guild.id, target.id);
-		const floor = LEVELLING.xpForLevel(record.level);
-		const ceiling = xpForNextLevel(record.level);
-		const progress = record.xp - floor;
-		const needed = ceiling - floor;
+		// Drawing the card and fetching the avatar together take longer than the three
+		// seconds Discord allows before the interaction expires.
+		await interaction.deferReply();
 
-		await reply(interaction, {
-			embeds: [
-				embed({
-					category: "levelling",
-					title: `${target.displayName}'s rank`,
-					description: `${progressBar(progress, needed)}\n**${formatNumber(progress)}** / **${formatNumber(needed)}** XP to level ${record.level + 1}`,
-					fields: [
-						{ name: "Level", value: String(record.level), inline: true },
-						{ name: "Total XP", value: formatNumber(record.xp), inline: true },
-						{ name: "Rank", value: rank !== null ? ordinal(rank) : "Unranked", inline: true },
-					],
-					thumbnail: target.displayAvatarURL({ size: 256 }),
-				}),
-			],
+		const [rank, settings, member] = await Promise.all([
+			getRank(guild.id, target.id),
+			getLevelSettings(guild.id),
+			guild.members.fetch(target.id).catch(() => null),
+		]);
+
+		const config = normaliseSettings(settings);
+		const progress = progressOf(record.xp, record.level);
+
+		const card = await renderRankCard({
+			displayName: member?.displayName ?? target.displayName,
+			avatarUrl: (member ?? target).displayAvatarURL({ extension: "png", size: 256 }),
+			level: record.level,
+			rank,
+			xp: record.xp,
+			progress: progress.progress,
+			needed: progress.needed,
+			multiplier: member === null ? 1 : multiplierFor(config, [...member.roles.cache.keys()]),
 		});
+
+		await reply(interaction, { files: [card] });
 	},
 });
