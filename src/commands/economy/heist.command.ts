@@ -4,7 +4,13 @@ import { ECONOMY, ECONOMY_COOLDOWNS } from "@config/constants";
 import { customId } from "@core/button";
 import { defineCommand, inGuild, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getOrCreateAccount } from "@database/repositories/economyRepository";
+import {
+	adjustWallet,
+	debitWallet,
+	getOrCreateAccount,
+	incrementCounters,
+	setCooldown,
+} from "@database/repositories/economyRepository";
 import { button, row } from "@lib/components.util";
 import { embed } from "@lib/embeds.util";
 import { formatDuration, formatNumber } from "@lib/format.util";
@@ -115,9 +121,6 @@ export default defineCommand({
 });
 
 async function resolveHeist(interaction: CommandInput, state: HeistState): Promise<void> {
-	const { adjustWallet, debitWallet, incrementCounters, setCooldown } =
-		await import("../../database/repositories/economyRepository");
-
 	const paid: string[] = [];
 	for (const userId of state.participants) {
 		const debited = await debitWallet(state.guildId, userId, state.stake);

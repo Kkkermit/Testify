@@ -2,27 +2,33 @@
 	"compilerOptions": {
 		"target": "ES2023",
 		"lib": ["ES2023"],
-		"module": "CommonJS",
-		"moduleResolution": "Node",
+		// tsc only type-checks here — tsup/esbuild does the emit, so this models
+		// "a bundler resolves this" rather than Node's own algorithm. "Node" was
+		// deprecated and stops working in TypeScript 7; "Node16" would be right if
+		// tsc emitted, but it rejects dual packages that ship one .d.ts (mathjs),
+		// which resolves and runs perfectly well under require().
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
 		"rootDir": ".",
 		"noEmit": true,
 
-		"baseUrl": ".",
+		// No "baseUrl" — deprecated in TypeScript 6, removed in 7. Without it the
+		// targets below are relative to this file, hence the leading "./".
 		"paths": {
-			"@core": ["src/core/index.ts"],
-			"@core/*": ["src/core/*"],
-			"@config": ["src/config/index.ts"],
-			"@config/*": ["src/config/*"],
-			"@lib": ["src/lib/index.ts"],
-			"@lib/*": ["src/lib/*"],
-			"@commands/*": ["src/commands/*"],
-			"@events/*": ["src/events/*"],
-			"@buttons/*": ["src/buttons/*"],
-			"@database": ["src/database/index.ts"],
-			"@database/*": ["src/database/*"],
-			"@jobs/*": ["src/jobs/*"],
-			"@root/*": ["src/*"],
-			"@tests/*": ["tests/*"]
+			"@core": ["./src/core/index.ts"],
+			"@core/*": ["./src/core/*"],
+			"@config": ["./src/config/index.ts"],
+			"@config/*": ["./src/config/*"],
+			"@lib": ["./src/lib/index.ts"],
+			"@lib/*": ["./src/lib/*"],
+			"@commands/*": ["./src/commands/*"],
+			"@events/*": ["./src/events/*"],
+			"@buttons/*": ["./src/buttons/*"],
+			"@database": ["./src/database/index.ts"],
+			"@database/*": ["./src/database/*"],
+			"@jobs/*": ["./src/jobs/*"],
+			"@root/*": ["./src/*"],
+			"@tests/*": ["./tests/*"]
 		},
 
 		"strict": true,
@@ -48,6 +54,6 @@
 
 		"types": ["node", "jest"]
 	},
-	"include": ["src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "*.config.ts"],
+	"include": ["./src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "*.config.ts"],
 	"exclude": ["node_modules", "dist"]
 }

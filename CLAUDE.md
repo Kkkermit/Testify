@@ -372,6 +372,16 @@ import { defineCommand, type CommandInput } from "@core/command";
 directory is declared twice: bare for the barrel, wildcard for a single module, because a bare specifier does
 not match a wildcard path.
 
+**Every target starts `./`.** There is no `baseUrl` — it is deprecated in TypeScript 6 and gone in 7 — so path
+targets resolve relative to `tsconfig.json` itself and a bare `src/…` is a compile error. Only `//` line
+comments may be added to that file: `jest.config.ts` strips those before `JSON.parse`, and a `/* */` block would
+break the test run.
+
+`module` is `Preserve` and `moduleResolution` is `Bundler`, because `tsc` only type-checks here — `tsup`/esbuild
+does the emit. `Node` is deprecated, and `Node16` would be right if `tsc` emitted, but it rejects dual packages
+that ship a single `.d.ts` (`mathjs`) even though `require()` of them works. That was verified against the real
+build, not assumed.
+
 > [!WARNING]
 > Barrels plus `import-x/no-cycle` need care — `src/lib/` and `src/core/` already reference each other, and
 > adding a barrel export can turn a fine dependency into a cycle. Add exports leaf-first and let the lint rule
