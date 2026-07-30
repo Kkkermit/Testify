@@ -1,7 +1,18 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { AUDIT_EVENTS } from "@lib/auditLog.util";
-import { AUDIT_PANEL_ID, auditPanel, collapseEnabled, isAuditEvent, resolveEnabled } from "@lib/auditPanel.util";
+import {
+	AUDIT_PANEL_ID,
+	auditPanel,
+	auditSavedPanel,
+	collapseEnabled,
+	decodeDraft,
+	decodeEvents,
+	encodeEvents,
+	hasUnsavedChanges,
+	isAuditEvent,
+	resolveEnabled,
+} from "@lib/auditPanel.util";
 import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
@@ -68,6 +79,100 @@ describe("isAuditEvent", () => {
 		expect(isAuditEvent("banAdd")).toBe(true);
 		expect(isAuditEvent("all")).toBe(false);
 		expect(isAuditEvent("somethingElse")).toBe(false);
+	});
+});
+
+describe("the draft codec", () => {
+	/**
+	 * The whole reason a Save button is possible: eighteen names would blow Discord's
+	 * 100-character custom ID, eighteen bits in base 36 do not.
+	 */
+	it("round-trips a selection", () => {
+		expect(decodeEvents(encodeEvents(["banAdd", "voiceUpdate"]))).toEqual(["banAdd", "voiceUpdate"]);
+	});
+
+	it("round-trips every event", () => {
+		expect(decodeEvents(encodeEvents([...AUDIT_EVENTS]))).toEqual([...AUDIT_EVENTS]);
+	});
+
+	it("round-trips an empty selection", () => {
+		expect(decodeEvents(encodeEvents([]))).toEqual([]);
+	});
+
+	it("stays inside a custom ID", () => {
+		expect(encodeEvents([...AUDIT_EVENTS]).length).toBeLessThanOrEqual(8);
+	});
+
+	it("returns events in AUDIT_EVENTS order however they were given", () => {
+		expect(decodeEvents(encodeEvents(["voiceUpdate", "banAdd"]))).toEqual(["banAdd", "voiceUpdate"]);
+	});
+
+	/** A stale or hand-edited custom ID must not crash the panel. */
+	it("treats a token that is not a number as nothing selected", () => {
+		expect(decodeEvents("")).toEqual([]);
+		expect(decodeEvents("!!")).toEqual([]);
+	});
+
+	it("reads a channel and a selection back out of custom ID arguments", () => {
+		const args = [CHANNEL, encodeEvents(["banAdd"]), OWNER];
+		expect(decodeDraft(args)).toEqual({ channelId: CHANNEL, events: ["banAdd"] });
+	});
+
+	it("reads the no-channel placeholder back as null", () => {
+		expect(decodeDraft(["-", "0", OWNER])).toEqual({ channelId: null, events: [] });
+	});
+
+	it("copes with arguments that are missing entirely", () => {
+		expect(decodeDraft([])).toEqual({ channelId: null, events: [] });
+	});
+});
+
+describe("hasUnsavedChanges", () => {
+	it("sees no change when the draft matches what is stored", () => {
+		expect(
+			hasUnsavedChanges({ channelId: CHANNEL, enabled: ["banAdd"] }, { channelId: CHANNEL, events: ["banAdd"] }),
+		).toBe(false);
+	});
+
+	/**
+	 * The stored `all` shorthand expands to the same set as a fully ticked menu, so
+	 * opening the panel on a fully configured guild must not offer to save nothing.
+	 */
+	it("treats a stored all as equal to every box being ticked", () => {
+		expect(
+			hasUnsavedChanges({ channelId: CHANNEL, enabled: ["all"] }, { channelId: CHANNEL, events: [...AUDIT_EVENTS] }),
+		).toBe(false);
+	});
+
+	it("sees a changed channel", () => {
+		expect(
+			hasUnsavedChanges({ channelId: CHANNEL, enabled: ["banAdd"] }, { channelId: "999", events: ["banAdd"] }),
+		).toBe(true);
+	});
+
+	it("sees an added event", () => {
+		expect(
+			hasUnsavedChanges(
+				{ channelId: CHANNEL, enabled: ["banAdd"] },
+				{ channelId: CHANNEL, events: ["banAdd", "roleCreate"] },
+			),
+		).toBe(true);
+	});
+
+	it("sees a removed event", () => {
+		expect(
+			hasUnsavedChanges(
+				{ channelId: CHANNEL, enabled: ["banAdd", "roleCreate"] },
+				{ channelId: CHANNEL, events: ["banAdd"] },
+			),
+		).toBe(true);
+	});
+
+	/** Same count, different members — a length check alone would miss this. */
+	it("sees a swap that keeps the count the same", () => {
+		expect(
+			hasUnsavedChanges({ channelId: CHANNEL, enabled: ["banAdd"] }, { channelId: CHANNEL, events: ["roleCreate"] }),
+		).toBe(true);
 	});
 });
 
@@ -140,5 +245,87 @@ describe("the audit panel", () => {
 		const logEverything = buttonsOf(all).find((control) => control.label === "Log everything");
 
 		expect(logEverything?.disabled).toBe(true);
+	});
+
+	/** The status line is for admins, not for whoever named the gateway events. */
+	it("describes events in plain English rather than as gateway names", () => {
+		const text = textOf(configured);
+
+		expect(text).toContain("Member banned");
+		expect(text).not.toContain("banAdd");
+	});
+
+	describe("saving", () => {
+		const dirty = auditPanel({ channelId: CHANNEL, enabled: ["banAdd"], dirty: true }, OWNER);
+		const saveOf = (rendered: ReturnType<typeof auditPanel>): Record<string, unknown> | undefined =>
+			buttonsOf(rendered).find((control) => control.label === "Save");
+
+		it("offers a Save button", () => {
+			expect(saveOf(configured)).toBeDefined();
+		});
+
+		/** Pressing Save when the draft already matches the database writes nothing. */
+		it("greys out Save when there is nothing to save", () => {
+			expect(saveOf(configured)?.disabled).toBe(true);
+		});
+
+		it("enables Save once something has been changed", () => {
+			expect(saveOf(dirty)?.disabled).toBe(false);
+		});
+
+		/**
+		 * Editing is a draft, so the panel must never read as though a selection is
+		 * already live — an admin who closes it without saving has changed nothing.
+		 */
+		it("says the changes are not applied yet", () => {
+			expect(textOf(dirty)).toMatch(/saved yet/i);
+			expect(textOf(dirty)).not.toMatch(/^Logging/m);
+		});
+	});
+});
+
+describe("the saved panel", () => {
+	const saved = auditSavedPanel({ channelId: CHANNEL, enabled: ["banAdd", "roleCreate"] }, OWNER);
+
+	it("is a Components V2 message", () => {
+		expect(saved.flags).toBe(MessageFlags.IsComponentsV2);
+	});
+
+	it("says logging is active and where it goes", () => {
+		expect(textOf(saved)).toMatch(/is active/i);
+		expect(textOf(saved)).toContain(CHANNEL);
+	});
+
+	it("lists what was enabled, in plain English", () => {
+		expect(textOf(saved)).toContain("Member banned");
+		expect(textOf(saved)).toContain("Role created");
+	});
+
+	it("says so plainly when everything is on", () => {
+		expect(textOf(auditSavedPanel({ channelId: CHANNEL, enabled: ["all"] }, OWNER))).toContain("every event");
+	});
+
+	/** Saving an empty selection is legal but does nothing, so it must not claim success. */
+	it("does not claim to be active when nothing is selected", () => {
+		const silent = textOf(auditSavedPanel({ channelId: CHANNEL, enabled: [] }, OWNER));
+
+		expect(silent).not.toMatch(/is active/i);
+		expect(silent).toMatch(/nothing will be logged/i);
+	});
+
+	it("offers only a way back and a way out", () => {
+		expect(buttonsOf(saved).map((control) => control.label)).toEqual(["Edit", "Turn off"]);
+	});
+
+	/** No half-made edits on this screen, so there is nothing to pick from either. */
+	it("has no menus", () => {
+		expect(selectsOf(saved)).toHaveLength(0);
+	});
+
+	it("namespaces every control to the audit handler, with the owner last", () => {
+		for (const id of idsOf(saved)) {
+			expect(parseCustomId(id).id).toBe(AUDIT_PANEL_ID);
+			expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
+		}
 	});
 });

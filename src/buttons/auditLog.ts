@@ -1,12 +1,17 @@
+import { type Guild } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
 import { AUDIT_EVENTS } from "@lib/auditLog.util";
 import {
 	AUDIT_PANEL_ID,
+	type AuditDraft,
 	type AuditPanelState,
 	auditPanel,
+	auditSavedPanel,
 	collapseEnabled,
+	decodeDraft,
+	hasUnsavedChanges,
 	isAuditEvent,
 	resolveEnabled,
 } from "@lib/auditPanel.util";
@@ -14,13 +19,25 @@ import {
 /**
  * Every control on the audit logging panel.
  *
- * The configuration is re-read before each change rather than trusted from the
- * message, so two admins with the panel open cannot overwrite each other with a
- * stale selection.
+ * Only `save` and `off` write anything. The menus and the other buttons re-render
+ * the panel from the draft carried in the custom ID, so an admin can change their
+ * mind and what is stored only ever moves on a deliberate press.
+ *
+ * The stored config is still re-read on every interaction, because Save has to know
+ * whether there is anything to write and the panel has to say so.
  */
 async function currentState(guildId: string): Promise<AuditPanelState> {
 	const config = await getAuditLogConfig(guildId);
 	return { channelId: config?.channelId ?? null, enabled: config?.enabledLogs ?? [] };
+}
+
+/** Checked when picked and again on Save, since a channel can be deleted between the two. */
+async function requireSendable(guild: Guild, channelId: string): Promise<void> {
+	const channel = await guild.channels.fetch(channelId).catch(() => null);
+
+	if (!channel?.isTextBased() || !channel.isSendable()) {
+		throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
+	}
 }
 
 export default defineButton({
@@ -31,9 +48,23 @@ export default defineButton({
 		if (interaction.guild === null) return;
 		if (!interaction.isMessageComponent()) return;
 
-		const guildId = interaction.guild.id;
+		const guild = interaction.guild;
 		const userId = interaction.user.id;
-		const state = await currentState(guildId);
+		const saved = await currentState(guild.id);
+		const draft = decodeDraft(context.args);
+
+		const showEditor = async (next: AuditDraft): Promise<void> => {
+			await interaction.update(
+				auditPanel(
+					{
+						channelId: next.channelId,
+						enabled: collapseEnabled(next.events),
+						dirty: hasUnsavedChanges(saved, next),
+					},
+					userId,
+				),
+			);
+		};
 
 		switch (context.action) {
 			case "channel": {
@@ -41,52 +72,58 @@ export default defineButton({
 
 				const [channelId] = interaction.values;
 				if (channelId === undefined) return;
+				await requireSendable(guild, channelId);
 
-				const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
-				if (!channel?.isTextBased() || !channel.isSendable()) {
-					throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
-				}
-
-				// Choosing a channel for the first time turns everything on, which is
-				// what someone enabling audit logging almost always wants.
-				const enabled = state.channelId === null && state.enabled.length === 0 ? ["all"] : state.enabled;
-				await setAuditLogConfig(guildId, channelId, enabled);
-
-				await interaction.update(auditPanel({ channelId, enabled }, userId));
+				// A first-time setup starts with everything ticked, which is what someone
+				// enabling audit logging almost always wants.
+				const fresh = saved.channelId === null && saved.enabled.length === 0 && draft.events.length === 0;
+				await showEditor({ channelId, events: fresh ? [...AUDIT_EVENTS] : draft.events });
 				return;
 			}
 
 			case "events": {
 				if (!interaction.isStringSelectMenu()) return;
-				if (state.channelId === null) throw new UserFacingError("Choose a log channel first.");
+				if (draft.channelId === null) throw new UserFacingError("Choose a log channel first.");
 
-				const chosen = interaction.values.filter(isAuditEvent);
-				const enabled = collapseEnabled(chosen);
-
-				await setAuditLogConfig(guildId, state.channelId, enabled);
-				await interaction.update(auditPanel({ channelId: state.channelId, enabled }, userId));
+				await showEditor({ channelId: draft.channelId, events: interaction.values.filter(isAuditEvent) });
 				return;
 			}
 
 			case "all": {
-				if (state.channelId === null) throw new UserFacingError("Choose a log channel first.");
+				if (draft.channelId === null) throw new UserFacingError("Choose a log channel first.");
 
-				await setAuditLogConfig(guildId, state.channelId, ["all"]);
-				await interaction.update(auditPanel({ channelId: state.channelId, enabled: ["all"] }, userId));
+				await showEditor({ channelId: draft.channelId, events: [...AUDIT_EVENTS] });
 				return;
 			}
 
 			case "none": {
-				if (state.channelId === null) throw new UserFacingError("Choose a log channel first.");
+				if (draft.channelId === null) throw new UserFacingError("Choose a log channel first.");
 
-				await setAuditLogConfig(guildId, state.channelId, []);
-				await interaction.update(auditPanel({ channelId: state.channelId, enabled: [] }, userId));
+				await showEditor({ channelId: draft.channelId, events: [] });
+				return;
+			}
+
+			case "save": {
+				if (draft.channelId === null) throw new UserFacingError("Choose a log channel first.");
+				await requireSendable(guild, draft.channelId);
+
+				const enabled = collapseEnabled(draft.events);
+				await setAuditLogConfig(guild.id, draft.channelId, enabled);
+
+				await interaction.update(auditSavedPanel({ channelId: draft.channelId, enabled }, userId));
+				return;
+			}
+
+			case "edit": {
+				// Starts from what is stored rather than from whatever the confirmation
+				// happened to be rendered with.
+				await showEditor({ channelId: saved.channelId, events: resolveEnabled(saved.enabled) });
 				return;
 			}
 
 			case "off": {
-				await disableAuditLog(guildId);
-				await interaction.update(auditPanel({ channelId: null, enabled: [] }, userId));
+				await disableAuditLog(guild.id);
+				await interaction.update(auditPanel({ channelId: null, enabled: [], dirty: false }, userId));
 				return;
 			}
 
@@ -95,6 +132,3 @@ export default defineButton({
 		}
 	},
 });
-
-/** Re-exported so the command and the handler cannot drift on what counts as valid. */
-export { AUDIT_EVENTS, resolveEnabled };
