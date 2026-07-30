@@ -15,7 +15,7 @@ import {
 	shopScreen,
 	type ShopState,
 } from "@lib/shopScreen.util";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 
@@ -262,5 +262,30 @@ describe("the detail screen", () => {
 	it("falls back to the catalogue when the selection no longer exists", () => {
 		const stale = shopScreen({ section: "items", selectedId: "no_such_item" }, RICH, OWNER);
 		expect(idsOf(stale).filter((id) => parseCustomId(id).action === "nav").length).toBeGreaterThan(0);
+	});
+});
+
+describe("custom ID uniqueness", () => {
+	/**
+	 * Discord rejects the entire message when two components share a custom ID,
+	 * disabled ones included. On page 1 the Previous button targets page 0 — which
+	 * is exactly what the current section's own tab encodes — so every multi-page
+	 * section failed to send until the pager got its own action.
+	 */
+	it.each(SHOP_SECTIONS)("has no duplicate IDs anywhere in the %s section", (section) => {
+		for (const page of [0, 1, 2, 20]) {
+			expect(duplicateIds(shopScreen({ section, page }, RICH, OWNER))).toEqual([]);
+		}
+	});
+
+	it("has no duplicate IDs on the pet rarity tabs", () => {
+		for (const rarity of ["common", "uncommon", "rare", "epic", "legendary"] as const) {
+			expect(duplicateIds(shopScreen({ section: "pets", rarity, page: 1 }, RICH, OWNER))).toEqual([]);
+		}
+	});
+
+	it("has no duplicate IDs when a house is owned", () => {
+		const owner: Balances = { ...RICH, ownsHouse: true, houseId: HOUSES[0]!.id };
+		expect(duplicateIds(shopScreen({ section: "houses" }, owner, OWNER))).toEqual([]);
 	});
 });

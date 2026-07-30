@@ -176,8 +176,8 @@ export default defineButton({
 
 		if (!interaction.isButton()) return;
 
-		if (context.action === "nav") {
-			// A tab press clears the selection, so it lands on the catalogue.
+		if (context.action === "nav" || context.action === "page") {
+			// A tab or page press clears the selection, so it lands on the catalogue.
 			const { selectedId: _cleared, ...withoutSelection } = state;
 			await interaction.update(shopScreen(withoutSelection, balancesOf(await requireAccount(guildId, userId)), userId));
 			return;

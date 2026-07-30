@@ -270,14 +270,17 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 	if (pages > 1) {
 		parts.push(
 			text(`-# Page ${page + 1} of ${pages}`),
+			// "page" rather than "nav" so Previous on page 1 cannot collide with the
+			// current section's own tab, which also encodes page 0. Discord rejects the
+			// whole message when two custom IDs match, disabled or not.
 			row(
 				button({
-					id: encodeShopState("nav", { ...state, page: page - 1 }, ownerId),
+					id: encodeShopState("page", { ...state, page: page - 1 }, ownerId),
 					label: "Previous",
 					disabled: page <= 0,
 				}),
 				button({
-					id: encodeShopState("nav", { ...state, page: page + 1 }, ownerId),
+					id: encodeShopState("page", { ...state, page: page + 1 }, ownerId),
 					label: "Next",
 					disabled: page >= pages - 1,
 				}),

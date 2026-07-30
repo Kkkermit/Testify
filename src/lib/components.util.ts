@@ -156,7 +156,16 @@ export function confirmRow(
 	);
 }
 
-/** Pagination controls. Page state lives in the custom ID, so nothing is held in memory. */
+/**
+ * Pagination controls. Page state lives in the custom ID, so nothing is held in
+ * memory.
+ *
+ * The slot name is part of every ID because two arrows legitimately target the
+ * same page — first and previous both mean 0 on page 1, next and last both mean
+ * the end on the second-to-last — and **Discord rejects the whole message if two
+ * custom IDs match, disabled or not.** Without the slot, a one-page list, a
+ * two-page list, and page 1 of anything all failed to send.
+ */
 export function navRow(
 	id: string,
 	page: number,
@@ -166,29 +175,18 @@ export function navRow(
 ): ActionRowBuilder<MessageActionRowComponentBuilder> {
 	const atStart = page <= 0;
 	const atEnd = page >= total - 1;
+	const goto = (slot: string, target: number): string => customId(id, "goto", key, target, slot, ownerId);
 
 	return row(
-		button({ id: customId(id, "goto", key, 0, ownerId), emoji: theme.emoji.first, disabled: atStart }),
+		button({ id: goto("first", 0), emoji: theme.emoji.first, disabled: atStart }),
+		button({ id: goto("prev", Math.max(0, page - 1)), emoji: theme.emoji.previous, disabled: atStart }),
 		button({
-			id: customId(id, "goto", key, Math.max(0, page - 1), ownerId),
-			emoji: theme.emoji.previous,
-			disabled: atStart,
-		}),
-		button({
-			id: customId(id, "noop", key, page, ownerId),
+			id: customId(id, "noop", key, page, "at", ownerId),
 			label: `${page + 1} / ${Math.max(1, total)}`,
 			disabled: true,
 		}),
-		button({
-			id: customId(id, "goto", key, Math.min(total - 1, page + 1), ownerId),
-			emoji: theme.emoji.next,
-			disabled: atEnd,
-		}),
-		button({
-			id: customId(id, "goto", key, Math.max(0, total - 1), ownerId),
-			emoji: theme.emoji.last,
-			disabled: atEnd,
-		}),
+		button({ id: goto("next", Math.min(total - 1, page + 1)), emoji: theme.emoji.next, disabled: atEnd }),
+		button({ id: goto("last", Math.max(0, total - 1)), emoji: theme.emoji.last, disabled: atEnd }),
 	);
 }
 
@@ -220,15 +218,16 @@ export function quickAmountRow(
 	const quarter = Math.floor(max * 0.25);
 	const half = Math.floor(max * 0.5);
 
+	// The slot goes after the amount — the handler reads args[0] — because the
+	// three amounts collide on a small balance (0 gives 0, 0, 0) and Discord
+	// rejects a message carrying two identical custom IDs.
+	const amount = (slot: string, value: number): string => customId(id, action, value, slot, ownerId);
+
 	return row(
+		button({ id: amount("quarter", quarter), label: `25% — ${format(quarter)}`, disabled: quarter <= 0 }),
+		button({ id: amount("half", half), label: `50% — ${format(half)}`, disabled: half <= 0 }),
 		button({
-			id: customId(id, action, quarter, ownerId),
-			label: `25% — ${format(quarter)}`,
-			disabled: quarter <= 0,
-		}),
-		button({ id: customId(id, action, half, ownerId), label: `50% — ${format(half)}`, disabled: half <= 0 }),
-		button({
-			id: customId(id, action, max, ownerId),
+			id: amount("all", max),
 			label: `All — ${format(max)}`,
 			style: ButtonStyle.Success,
 			disabled: max <= 0,

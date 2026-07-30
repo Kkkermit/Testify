@@ -13,7 +13,7 @@ import {
 	isAuditEvent,
 	resolveEnabled,
 } from "@lib/auditPanel.util";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 const CHANNEL = "200000000000000002";
@@ -208,6 +208,14 @@ describe("the audit panel", () => {
 
 	it("names the channel it is logging to", () => {
 		expect(textOf(configured)).toContain(CHANNEL);
+	});
+
+	/** Discord rejects the whole message when two components share a custom ID. */
+	it("gives every control a distinct custom ID", () => {
+		expect(duplicateIds(configured)).toEqual([]);
+		expect(duplicateIds(auditPanel({ channelId: null, enabled: [] }, OWNER))).toEqual([]);
+		expect(duplicateIds(auditPanel({ channelId: CHANNEL, enabled: ["all"], dirty: true }, OWNER))).toEqual([]);
+		expect(duplicateIds(auditSavedPanel({ channelId: CHANNEL, enabled: ["all"] }, OWNER))).toEqual([]);
 	});
 
 	it("namespaces every control to the audit handler", () => {

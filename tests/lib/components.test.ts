@@ -1,6 +1,17 @@
 import { ButtonStyle, StringSelectMenuOptionBuilder } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { button, confirmRow, disableAll, linkButton, navRow, row, select, selectRow } from "@lib/components.util";
+import {
+	button,
+	confirmRow,
+	disableAll,
+	linkButton,
+	navRow,
+	quickAmountRow,
+	row,
+	select,
+	selectRow,
+} from "@lib/components.util";
+import { duplicateIds } from "@tests/helpers/containers";
 
 const OWNER = "111111111111111111";
 
@@ -38,6 +49,54 @@ describe("navRow", () => {
 			expect(parsed.id).toBe("inventory");
 			expect(parsed.args.at(-1)).toBe(OWNER);
 		}
+	});
+
+	/**
+	 * Discord rejects the whole message with COMPONENT_CUSTOM_ID_DUPLICATED when two
+	 * components share an ID — disabled ones included. First and previous both mean
+	 * page 0 on page 1; next and last both mean the end on the second-to-last; on a
+	 * single-page list all four collapse to the same page. Every one of those sent a
+	 * message Discord refused.
+	 */
+	it.each([
+		["one page", 0, 1],
+		["two pages, first", 0, 2],
+		["two pages, last", 1, 2],
+		["three pages, middle", 1, 3],
+		["page one of many", 1, 9],
+		["second to last", 7, 9],
+		["last of many", 8, 9],
+		["no pages at all", 0, 0],
+	])("gives every button a distinct custom ID: %s", (_name, page, total) => {
+		expect(duplicateIds(navRow("board", page, total, OWNER, "key"))).toEqual([]);
+	});
+
+	it("still points each arrow at the right page", () => {
+		const pageOf = (index: number): string | undefined => {
+			const id = (navRow("board", 4, 9, OWNER, "key").components[index]?.data as { custom_id?: string }).custom_id;
+			return id === undefined ? undefined : parseCustomId(id).args[1];
+		};
+
+		expect([pageOf(0), pageOf(1), pageOf(3), pageOf(4)]).toEqual(["0", "3", "5", "8"]);
+	});
+});
+
+describe("quickAmountRow", () => {
+	/** A wallet of 0 made all three amounts 0, so the panel could not be sent at all. */
+	it.each([0, 1, 2, 3, 4, 100, 1_000_000])("gives every button a distinct custom ID for a balance of %s", (max) => {
+		expect(duplicateIds(quickAmountRow("money", "dep", max, OWNER))).toEqual([]);
+	});
+
+	it("still carries the amount as the first argument", () => {
+		const [quarter] = quickAmountRow("money", "dep", 100, OWNER).components;
+		const id = (quarter?.data as { custom_id?: string }).custom_id ?? "";
+
+		expect(parseCustomId(id).args[0]).toBe("25");
+	});
+
+	it("disables what cannot be pressed on an empty balance", () => {
+		const components = quickAmountRow("money", "dep", 0, OWNER).components;
+		expect(components.slice(0, 3).every((control) => control.data.disabled === true)).toBe(true);
 	});
 });
 

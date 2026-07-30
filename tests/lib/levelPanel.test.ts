@@ -9,7 +9,7 @@ import {
 	type LevelPanelState,
 	type LevelTab,
 } from "@lib/levelPanel.util";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 const CHANNEL = "200000000000000002";
@@ -87,6 +87,35 @@ describe("the levelling panel", () => {
 
 		expect(tabs).toHaveLength(LEVEL_TABS.length);
 		expect(tabs.filter((control) => control.disabled === true)).toHaveLength(1);
+	});
+
+	/** Discord rejects the whole message when two components share a custom ID. */
+	it.each(LEVEL_TABS)("gives every control on the %s tab a distinct custom ID", (tab) => {
+		const filled = {
+			boosts: Array.from({ length: LEVEL_LIMITS.maxBoosts }, (_, index) => ({
+				roleId: `role${index}`,
+				multiplier: 2,
+			})),
+			rewards: Array.from({ length: LEVEL_LIMITS.maxRewards }, (_, index) => ({
+				level: index + 1,
+				roleId: `reward${index}`,
+			})),
+			ignoredChannelIds: [CHANNEL],
+			ignoredRoleIds: [BOOSTER],
+		};
+
+		expect(duplicateIds(panel(tab))).toEqual([]);
+		expect(duplicateIds(panel(tab, filled))).toEqual([]);
+	});
+
+	/** Two levels pointing at one role is legal, and must not collide on the role ID. */
+	it("keeps reward controls distinct when two levels share a role", () => {
+		const shared = [
+			{ level: 5, roleId: VIP },
+			{ level: 10, roleId: VIP },
+		];
+
+		expect(duplicateIds(panel("rewards", { rewards: shared }))).toEqual([]);
 	});
 
 	it("shows a note from the last press when there is one", () => {

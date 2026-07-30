@@ -129,10 +129,12 @@ export async function boardMessage(
 			row(
 				switchButton(kind, ownerId),
 				button({
+					// The "me" slot keeps this distinct from the nav arrow that happens to
+					// target the same page; Discord rejects duplicate custom IDs outright.
 					id:
 						mine === null
-							? customId(LEADERBOARD_ID, "noop", kind, page, ownerId)
-							: customId(LEADERBOARD_ID, "goto", kind, pageOfRank(mine), ownerId),
+							? customId(LEADERBOARD_ID, "noop", kind, page, "me", ownerId)
+							: customId(LEADERBOARD_ID, "goto", kind, pageOfRank(mine), "me", ownerId),
 					label: mine === null ? "You are not on this board" : `Find me — ${ordinal(mine)}`,
 					// Already looking at your own page, so there is nowhere to jump to.
 					disabled: mine === null || pageOfRank(mine) === page,
@@ -165,7 +167,7 @@ export function switchButton(kind: BoardKind, ownerId: string): ButtonBuilder {
 	const target = otherKind(kind);
 
 	return button({
-		id: customId(LEADERBOARD_ID, "goto", target, 0, ownerId),
+		id: customId(LEADERBOARD_ID, "goto", target, 0, "swap", ownerId),
 		label: target === "economy" ? "Richest members" : "Highest levels",
 		style: ButtonStyle.Primary,
 	});
