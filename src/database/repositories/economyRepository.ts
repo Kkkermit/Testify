@@ -168,6 +168,25 @@ export async function countAccounts(guildId: string): Promise<number> {
 	return Economy.countDocuments({ guildId }).exec();
 }
 
+/**
+ * Where one account sits on the leaderboard, counted in the database rather than
+ * by paging through it. `null` means they have no account here.
+ */
+export async function getEconomyRank(guildId: string, userId: string): Promise<number | null> {
+	const account = await findAccount(guildId, userId);
+	if (!account) return null;
+
+	const total = account.wallet + account.bank;
+	const [result] = await Economy.aggregate<{ ahead: number }>([
+		{ $match: { guildId } },
+		{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
+		{ $match: { total: { $gt: total } } },
+		{ $count: "ahead" },
+	]).exec();
+
+	return (result?.ahead ?? 0) + 1;
+}
+
 export async function getGuildTotals(
 	guildId: string,
 ): Promise<{ accounts: number; wallet: number; bank: number; richest: EconomyAccount | null }> {

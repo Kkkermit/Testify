@@ -206,7 +206,7 @@ export function entriesFor(state: ShopState, balances: Balances): Entry[] {
 				emoji: item.emoji,
 				price: item.price,
 				description: item.description,
-				...(item.usable ? { detail: "Usable with `/use`" } : {}),
+				...(item.usable ? { detail: "Usable from `/inventory`" } : {}),
 			}));
 	}
 }

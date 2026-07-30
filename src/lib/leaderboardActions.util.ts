@@ -7,11 +7,11 @@ import {
 	type MessageActionRowComponentBuilder,
 } from "discord.js";
 import { customId } from "@core/button";
-import { countAccounts, getLeaderboard } from "@database/repositories/economyRepository";
-import { countRanked, getLevelLeaderboard } from "@database/repositories/levelRepository";
+import { countAccounts, getEconomyRank, getLeaderboard } from "@database/repositories/economyRepository";
+import { countRanked, getLevelLeaderboard, getRank } from "@database/repositories/levelRepository";
 import { type BoardRow, renderBoardImage } from "@lib/boardCard.util";
 import { button, navRow, row } from "@lib/components.util";
-import { formatNumber } from "@lib/format.util";
+import { formatNumber, ordinal } from "@lib/format.util";
 
 /**
  * The leaderboards, shared by `/leaderboard` and by its paging buttons so the
@@ -120,15 +120,41 @@ export async function boardMessage(
 	const rows = await decorate(guild, entries, page);
 	const image = await renderBoardImage(boardTitle(kind, guild.name, page), rows, emptyMessage(kind));
 
+	const mine = await rankOf(guild, kind, ownerId);
+
 	return {
 		files: [image],
-		components: [navRow(LEADERBOARD_ID, page, pageCount(total), ownerId, kind), row(switchButton(kind, ownerId))],
+		components: [
+			navRow(LEADERBOARD_ID, page, pageCount(total), ownerId, kind),
+			row(
+				switchButton(kind, ownerId),
+				button({
+					id:
+						mine === null
+							? customId(LEADERBOARD_ID, "noop", kind, page, ownerId)
+							: customId(LEADERBOARD_ID, "goto", kind, pageOfRank(mine), ownerId),
+					label: mine === null ? "You are not on this board" : `Find me — ${ordinal(mine)}`,
+					// Already looking at your own page, so there is nowhere to jump to.
+					disabled: mine === null || pageOfRank(mine) === page,
+				}),
+			),
+		],
 	};
 }
 
 /** The other board, for the button that swaps between them. */
 export function otherKind(kind: BoardKind): BoardKind {
 	return kind === "economy" ? "levels" : "economy";
+}
+
+/** Which page someone at this rank is on. Rank 1 is on page 0. */
+export function pageOfRank(rank: number): number {
+	return Math.max(0, Math.ceil(rank / PAGE_SIZE) - 1);
+}
+
+/** Where the viewer sits, so "Find me" can jump straight there. */
+export async function rankOf(guild: Guild, kind: BoardKind, userId: string): Promise<number | null> {
+	return kind === "economy" ? getEconomyRank(guild.id, userId) : getRank(guild.id, userId);
 }
 
 /**

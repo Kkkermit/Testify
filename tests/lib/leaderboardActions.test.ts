@@ -7,6 +7,7 @@ import {
 	otherKind,
 	PAGE_SIZE,
 	pageCount,
+	pageOfRank,
 	switchButton,
 } from "@lib/leaderboardActions.util";
 
@@ -55,6 +56,22 @@ describe("pageCount", () => {
 	/** An empty board still renders one page saying it is empty. */
 	it("never reports fewer than one page", () => {
 		expect(pageCount(0)).toBe(1);
+	});
+});
+
+describe("pageOfRank", () => {
+	/** Powers the Find me button, which jumps straight to the page you are on. */
+	it("puts the first page's ranks on page zero", () => {
+		expect(pageOfRank(1)).toBe(0);
+		expect(pageOfRank(PAGE_SIZE)).toBe(0);
+	});
+
+	it("puts the next rank on the next page", () => {
+		expect(pageOfRank(PAGE_SIZE + 1)).toBe(1);
+	});
+
+	it("never returns a negative page", () => {
+		expect(pageOfRank(0)).toBe(0);
 	});
 });
 

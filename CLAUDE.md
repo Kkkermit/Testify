@@ -57,18 +57,18 @@ that way — it is the reason the rewrite exists.
 Current size (verify with the commands in [§3](#3-running-testing-verifying) rather than trusting these
 numbers, which drift):
 
-| Thing                | Count                             |
-| -------------------- | --------------------------------- |
-| Commands             | 78, across 12 categories          |
-| Command files        | 100 (incl. folded-in subcommands) |
-| Subcommands          | 128                               |
-| Prefix aliases       | 57                                |
-| Button handlers      | 15                                |
-| Events               | 24, in 5 groups                   |
-| `src/lib` helpers    | 33                                |
-| Schemas/repositories | 9 / 9                             |
-| Scheduled jobs       | 4                                 |
-| Tests                | ~934 across 50 suites             |
+| Thing                | Count                            |
+| -------------------- | -------------------------------- |
+| Commands             | 76, across 12 categories         |
+| Command files        | 98 (incl. folded-in subcommands) |
+| Subcommands          | 122                              |
+| Prefix aliases       | 65                               |
+| Button handlers      | 17                               |
+| Events               | 24, in 5 groups                  |
+| `src/lib` helpers    | 39                               |
+| Schemas/repositories | 9 / 9                            |
+| Scheduled jobs       | 4                                |
+| Tests                | ~1081 across 55 suites           |
 
 **There is no music system.** It was removed deliberately — see
 [§21](#21-decisions-already-made--do-not-relitigate). Do not add one back without reading that section.
@@ -239,6 +239,8 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Build a button/select/modal                | `src/lib/components.util.ts`                                       |
 | Build a Components V2 message              | `src/lib/containers.util.ts`                                       |
 | Build an embed                             | `src/lib/embeds.util.ts` (nothing else may `new EmbedBuilder()`)   |
+| Draw an image card                         | `src/lib/canvas.util.ts`, then a `*Card.util.ts` beside it         |
+| Change how XP or level rewards work        | `src/lib/levelling.util.ts` — pure rules, no database              |
 | Reply to an interaction                    | `src/lib/reply.util.ts`                                            |
 | Format a number, duration, time            | `src/lib/format.util.ts`                                           |
 | Query the database                         | `src/database/repositories/*.ts` — never a model directly          |
@@ -252,14 +254,30 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
 
-| Renderer                  | Handler                | Pattern it demonstrates                              |
-| ------------------------- | ---------------------- | ---------------------------------------------------- |
-| `shopScreen.util.ts`      | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step      |
-| `auditPanel.util.ts`      | `buttons/auditLog.ts`  | Channel select + multi-select, state re-read from DB |
-| `balancePanel.util.ts`    | `buttons/balance.ts`   | Hub panel, read-only mode for other users            |
-| `inventoryScreen.util.ts` | `buttons/inventory.ts` | Per-row action button, paging in the custom ID       |
-| `settingsPanel.util.ts`   | —                      | Generic settings rows + pre-filled modal editors     |
-| `musicPanel` — **gone**   | —                      | Removed with the music system. Do not resurrect.     |
+| Renderer                  | Handler                | Pattern it demonstrates                                    |
+| ------------------------- | ---------------------- | ---------------------------------------------------------- |
+| `shopScreen.util.ts`      | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step            |
+| `auditPanel.util.ts`      | `buttons/auditLog.ts`  | Draft edits in a bit-packed custom ID, then Save           |
+| `levelPanel.util.ts`      | `buttons/levelling.ts` | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
+| `balancePanel.util.ts`    | `buttons/balance.ts`   | Hub panel, read-only mode for other users                  |
+| `inventoryScreen.util.ts` | `buttons/inventory.ts` | Per-row action button, paging in the custom ID             |
+| `settingsPanel.util.ts`   | —                      | Generic settings rows + pre-filled modal editors           |
+| `musicPanel` — **gone**   | —                      | Removed with the music system. Do not resurrect.           |
+
+Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
+`/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
+layout maths in pure exported functions (`rankCardText`, `barFill`, `boardHeight`) so the parts that can be
+wrong are tested without a canvas or a network. `drawAvatarOrInitial` falls back to a lettered circle, so a card
+still renders when Discord's CDN is unreachable.
+
+**Two panels, two different answers about when to write.** Copy whichever fits:
+
+- **Save-button panels** (`auditPanel`) batch edits into a draft carried in the custom ID and write once. Use
+  this when the settings are one decision — the audit picker is "which events, where", and half of it applied is
+  not a state anyone wants.
+- **Apply-immediately panels** (`levelPanel`, `settingsPanel`) write on every press and re-read before each one.
+  Use this when each control is independent, which is most config: there is nothing to batch, and a Save button
+  would just be a step between the admin and the thing they already decided.
 
 Two exceptions worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler
 file rather than a separate renderer (it composes `settingsPanel.util.ts` instead), and `buttons/money.ts` still
@@ -480,9 +498,15 @@ you find out while writing rather than when Discord rejects the whole message.
   `client.helpData` — global, single-slot, shared across every guild and user, so two people using `/help` at
   once corrupted each other's session.
 - **Either encode the state in the custom ID, or re-read it from the database.** Encode small things (page
-  number, selected id, section). Re-read when it will not fit — the audit panel's 18 event names cannot fit in
-  100 characters, so it re-reads the config on every interaction, which also stops two admins overwriting each
-  other with stale state.
+  number, selected id, section, tab). Re-read anything that will not fit — and re-read the stored config
+  regardless before a write, so two admins with the panel open cannot overwrite each other.
+
+  **100 characters goes further than it looks.** The audit panel needs a draft of up to 18 chosen event names,
+  which will not fit as names — but it fits as 18 bits: one per event at its index in `AUDIT_EVENTS`, written in
+  base 36, four characters for the lot (`encodeEvents` / `decodeEvents`). That is what makes a Save button
+  possible there. The rule when you pack state this way: **the database still stores names.** A mask only ever
+  travels inside a live message, so reordering the source array can at worst misread a panel left open across a
+  deploy, rather than silently corrupting a stored config.
 
 ### `ownerOnly`
 
@@ -528,8 +552,14 @@ return containerMessage(container({ category: "economy", parts }));
 
 Helpers: `text`, `divider({ large?, spacer? })`, `sectionWithButton`, `sectionWithThumbnail`, `gallery`,
 `container({ category?, parts })`, `containerMessage`.
-Also in `components.util.ts`: `button`, `row`, `select`, `selectRow`, `option`, `channelSelect`, `confirmRow`,
-`navRow`, `quickAmountRow`, `modalForm`, `disableAll`.
+Also in `components.util.ts`: `button`, `row`, `select`, `selectRow`, `option`, `channelSelect`, `roleSelect`,
+`confirmRow`, `navRow`, `quickAmountRow`, `modalForm`, `disableAll`.
+
+**Pre-tick a select and it becomes the list, not just an add box.** `roleSelect({ defaultRoleIds })` and
+`channelSelect({ defaultChannelIds })` render the current selection as already chosen, so removing something is
+deselecting it — no second "remove" control to build, and no way for the menu and the list above it to disagree.
+Pair it with `minValues: 0`, or emptying the list is impossible. The levelling panel's boost roles and ignore
+lists both work this way.
 
 **Two rules Discord enforces, both easy to get wrong:**
 
@@ -590,6 +620,13 @@ Rules:
    finding in the audit of the original.
 5. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
    model when it is not.
+6. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
+   not appear on records written yesterday, however `required: true` it is — so the type the schema declares is a
+   promise about new writes, not a description of what a `find()` returns. When you add a field, normalise on
+   read and type the input for what can actually arrive: `normaliseSettings` in `src/lib/levelling.util.ts` does
+   this, and its `StoredLevelSettings` marks the fields added later as optional. That function is also where the
+   levelling system's old single `roleId`/`multiplier` pair is folded into the `boosts` array, so no other file
+   knows the old shape existed. **Migrate on read, in one place, with a test per field.**
 
 ---
 
@@ -857,6 +894,21 @@ tree is a rule to remember rather than a distinction the reader gains anything f
 Measured rather than assumed: 46% of exported types never leave the file that declares them. Types live beside
 the code that owns them.
 
+### One leaderboard command, and no command that only forwards to another
+
+`/leaderboard` serves both the economy and the levelling board, with a button to swap and a **Find me** button
+that jumps to the page you are on. There is deliberately no `/levelling leaderboard` — a second name for the same
+screen is the overlap this pass removed, not a convenience.
+
+The same reasoning deleted `/use` (the inventory panel's per-row Use buttons do it better), `/rehome` (now
+`/pet rehome`, with `t?rehome` kept as a prefix alias) and `/pet buy` (the shop sells pets with a button; `/pet
+rename` covers the one thing `/pet buy` could do that the shop could not). A command whose whole body is
+"do what that other command does" should be an alias or a subcommand, not a command.
+
+**`/levelling setup` and `/levelling edit` are the exception, and it is deliberate.** They open the same panel
+because the panel shows the current configuration — setting up and changing it are one gesture — and people look
+for both names. One line each, delegating to one function; not two implementations.
+
 ### Global by design
 
 The blacklist and the user profile are intentionally not guild-scoped. See [§12](#12-multi-guild-rules).
@@ -890,8 +942,14 @@ short version — the classes of defect the conventions above exist to prevent:
 17. A commit convention with nothing enforcing it.
 18. A README describing features and scripts that do not exist. Regenerate `COMMANDS.md`.
 19. **A user-facing flow that requires typing an ID.** `/shop buy <id>` made people read an ID out of one message
-    and retype it. If the bot knows the catalogue, the user should be picking from it.
+    and retype it. If the bot knows the catalogue, the user should be picking from it. `/use <item>` and
+    `/pet buy <species>` were both deleted for this — the inventory panel and the shop already put a button
+    beside each thing, and `/use`'s autocomplete was a hardcoded list of three items that did not even match the
+    real catalogue.
 20. **A control that acts on data it is not showing.** A Use button beside someone else's item that spends yours.
+21. **Two commands that do one job.** `/leaderboard`'s top-level `run` was a verbatim copy of its `economy`
+    subcommand, and the levelling board was hidden as a second subcommand of an economy command. One command,
+    one implementation, and a button to swap boards.
 
 ---
 

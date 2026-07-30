@@ -72,8 +72,8 @@ export interface UseResult {
 }
 
 /**
- * Consumes one of an item and pays out. Shared by `/use` and the Use button on the
- * inventory panel, so the two cannot drift on what an item is worth.
+ * Consumes one of an item and pays out, for the Use button on each inventory row.
+ * `/use <item>` used to do the same thing from a hardcoded list of three items.
  *
  * `roll` is injected so a test can assert the payout without fighting randomness.
  */

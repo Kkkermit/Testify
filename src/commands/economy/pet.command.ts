@@ -3,10 +3,10 @@ import { balancesOf } from "@buttons/shop";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
+import { adjustWallet, debitWallet, requireAccount, setFields } from "@database/repositories/economyRepository";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { discordTime, formatNumber, progressBar } from "@lib/format.util";
-import { ALL_PETS, decayValue, findPet, petStatus } from "@lib/pets.util";
+import { decayValue, findPet, petStatus } from "@lib/pets.util";
 import { reply } from "@lib/reply.util";
 import { isPetRarity, shopScreen } from "@lib/shopScreen.util";
 
@@ -14,7 +14,7 @@ const RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
 
 export default defineCommand({
 	name: "pet",
-	description: "Buys and looks after a pet.",
+	description: "Looks after your pet. Adopt one from the shop.",
 	category: "economy",
 	guildOnly: true,
 	subcommands: [
@@ -46,51 +46,42 @@ export default defineCommand({
 			},
 		},
 		{
-			name: "buy",
-			description: "Adopt a pet.",
-			options: [
-				{
-					name: "species",
-					description: "The pet id from the shop.",
-					type: "string",
-					required: true,
-					autocomplete: true,
-				},
-				{ name: "name", description: "What to call it.", type: "string", required: true, maxLength: 32 },
-			],
+			name: "rename",
+			description: "Give your pet a name of your own.",
+			options: [{ name: "name", description: "What to call it.", type: "string", required: true, maxLength: 32 }],
 			async run(interaction) {
 				const guild = inGuild(interaction);
 				const account = await requireAccount(guild.id, interaction.user.id);
-				if (account.pet?.petId !== null && account.pet?.petId !== undefined) {
-					throw new UserFacingError("You already have a pet. Use `/rehome` before adopting another.");
-				}
+				const pet = account.pet;
+				if (!pet?.petId) throw new UserFacingError("You do not have a pet yet. Adopt one from `/shop`.");
 
-				const speciesId = interaction.options.getString("species", true).toLowerCase().replace(/\s+/g, "_");
-				const species = findPet(speciesId);
-				if (!species) throw new UserFacingError(`There is no pet with the id \`${speciesId}\`.`);
+				const name = interaction.options.getString("name", true).trim();
+				if (name.length === 0) throw new UserFacingError("Give it an actual name.");
 
-				const paid = await debitWallet(guild.id, interaction.user.id, species.price);
-				if (!paid) throw new UserFacingError(strings.economy.insufficientWallet(species.price - account.wallet));
+				await setFields(guild.id, interaction.user.id, { pet: { ...pet, name } });
+				await reply(interaction, { embeds: [successEmbed(`${pet.emoji ?? ""} is now called **${name}**.`)] });
+			},
+		},
+		{
+			name: "rehome",
+			description: "Rehome your pet for half of what you paid.",
+			aliases: ["rehome"],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				const account = await requireAccount(guild.id, interaction.user.id);
+				const pet = account.pet;
+				if (!pet?.petId) throw new UserFacingError("You do not have a pet to rehome.");
 
-				const now = new Date();
-				await setFields(guild.id, interaction.user.id, {
-					pet: {
-						petId: species.id,
-						name: interaction.options.getString("name", true),
-						type: species.rarity,
-						emoji: species.emoji,
-						happiness: 100,
-						hunger: 100,
-						purchasedAt: now,
-						lastFed: now,
-						lastWalked: now,
-					},
-				});
+				const species = findPet(pet.petId);
+				const refund = Math.floor((species?.price ?? 0) / 2);
+
+				await setFields(guild.id, interaction.user.id, { pet: null });
+				if (refund > 0) await adjustWallet(guild.id, interaction.user.id, refund);
 
 				await reply(interaction, {
 					embeds: [
 						successEmbed(
-							`You adopted ${species.emoji} **${interaction.options.getString("name", true)}** the ${species.name}.`,
+							`${pet.emoji ?? ""} **${pet.name ?? "Your pet"}** has found a new home. You received **${formatNumber(refund)}**.`,
 						),
 					],
 				});
@@ -191,20 +182,8 @@ export default defineCommand({
 
 	async run(interaction) {
 		await reply(interaction, {
-			content: "Pick a subcommand: `shop`, `buy`, `view`, `feed` or `walk`.",
+			content: "Pick a subcommand: `shop`, `view`, `feed`, `walk`, `rename` or `rehome`.",
 			flags: MessageFlags.Ephemeral,
 		});
-	},
-
-	async autocomplete(interaction) {
-		const query = interaction.options.getFocused().toLowerCase();
-		const matches = ALL_PETS.filter((pet) => pet.id.includes(query) || pet.name.toLowerCase().includes(query)).slice(
-			0,
-			25,
-		);
-
-		await interaction.respond(
-			matches.map((pet) => ({ name: `${pet.name} (${pet.rarity}) \u2014 ${pet.price}`, value: pet.id })),
-		);
 	},
 });
