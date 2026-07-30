@@ -129,6 +129,11 @@ export async function addAutoRole(guildId: string, roleId: string): Promise<Auto
 	).exec() as Promise<AutoRoleSettings>;
 }
 
+/** Replaces the whole list, which is what a pre-ticked role menu hands back. */
+export async function setAutoRoles(guildId: string, roleIds: string[]): Promise<AutoRoleSettings> {
+	return AutoRole.findOneAndUpdate({ guildId }, { $set: { roleIds } }, UPSERT).exec() as Promise<AutoRoleSettings>;
+}
+
 export async function removeAutoRole(guildId: string, roleId: string): Promise<AutoRoleSettings | null> {
 	return AutoRole.findOneAndUpdate({ guildId }, { $pull: { roleIds: roleId } }, { new: true, lean: true })
 		.lean<AutoRoleSettings>()

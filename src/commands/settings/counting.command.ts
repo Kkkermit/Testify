@@ -1,93 +1,26 @@
 import { PermissionFlagsBits } from "discord.js";
-import { COUNTING_DEFAULT_MAX } from "@config/constants";
-import { defineCommand, inGuild, textChannelOption } from "@core/command";
-import { UserFacingError } from "@core/errors";
-import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/settingsRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { countingState } from "@buttons/counting";
+import { defineCommand, inGuild } from "@core/command";
+import { countingPanel } from "@lib/countingPanel.util";
 import { reply } from "@lib/reply.util";
 
+/**
+ * One panel instead of `setup`, `disable`, `reset` and `status`.
+ *
+ * Three of those four existed only because `setup` never showed you the result.
+ */
 export default defineCommand({
 	name: "counting",
 	description: "Runs the counting game in a channel.",
 	category: "settings",
+	aliases: ["count"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
-	subcommands: [
-		{
-			name: "setup",
-			description: "Choose the counting channel.",
-			options: [
-				{
-					name: "channel",
-					description: "Where counting happens.",
-					type: "channel",
-					required: true,
-				},
-				{
-					name: "goal",
-					description: "The number to count up to.",
-					type: "integer",
-					min: 10,
-					max: COUNTING_DEFAULT_MAX,
-				},
-			],
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const channel = textChannelOption(interaction, "channel");
-				if (!channel?.isTextBased()) throw new UserFacingError("Pick a text channel.");
+	botPermissions: [PermissionFlagsBits.SendMessages],
 
-				const goal = interaction.options.getInteger("goal") ?? COUNTING_DEFAULT_MAX;
-				await setCounting(guild.id, channel.id, goal);
+	async run(interaction) {
+		const guild = inGuild(interaction);
 
-				await reply(interaction, {
-					embeds: [
-						successEmbed(`Counting is set up in ${channel}. Start at **1** and count to **${formatNumber(goal)}**.`),
-					],
-				});
-			},
-		},
-		{
-			name: "disable",
-			description: "Turn the counting game off.",
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const removed = await disableCounting(guild.id);
-				if (!removed) throw new UserFacingError("Counting is not set up here.");
-				await reply(interaction, { embeds: [successEmbed("Counting has been turned off.")] });
-			},
-		},
-		{
-			name: "reset",
-			description: "Reset the count back to zero.",
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const settings = await getCounting(guild.id);
-				if (!settings) throw new UserFacingError("Counting is not set up here.");
-
-				await resetCount(guild.id);
-				await reply(interaction, { embeds: [successEmbed("The count has been reset. The next number is **1**.")] });
-			},
-		},
-		{
-			name: "status",
-			description: "Show the current count.",
-			async run(interaction) {
-				const guild = inGuild(interaction);
-				const settings = await getCounting(guild.id);
-
-				await reply(interaction, {
-					embeds: [
-						embed({
-							category: "settings",
-							title: "Counting",
-							description: settings
-								? `Channel: <#${settings.channelId}>\nCurrent count: **${formatNumber(settings.count)}**\nGoal: **${formatNumber(settings.maxCount)}**`
-								: "Counting is not set up here.",
-						}),
-					],
-				});
-			},
-		},
-	],
+		await reply(interaction, countingPanel(await countingState(guild.id), interaction.user.id));
+	},
 });

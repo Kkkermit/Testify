@@ -1,16 +1,31 @@
-import { defineCommand, inGuild } from "@core/command";
+import { type CommandInput, defineCommand, inGuild } from "@core/command";
 import { type BoardKind, boardMessage } from "@lib/leaderboardActions.util";
 import { reply } from "@lib/reply.util";
 
 /**
- * Both boards, one command. The levelling board used to be a second subcommand of
- * an economy command, which is the last place anyone would look for it, and the
- * top-level `run` was a verbatim copy of the economy subcommand's body.
+ * Both boards, one command, and no buttons.
+ *
+ * The board used to page and swap from buttons, but re-rendering it left the old
+ * image attached and added the new one beside it — a few presses produced a grid of
+ * four boards. A message that is never edited cannot accumulate anything, so the
+ * page is an option and each request is its own message.
  */
-async function show(interaction: Parameters<typeof reply>[0], kind: BoardKind): Promise<void> {
+const pageOption = {
+	name: "page",
+	description: "Which page to show. Defaults to the first.",
+	type: "integer",
+	min: 1,
+	max: 1_000,
+} as const;
+
+async function show(interaction: CommandInput, kind: BoardKind): Promise<void> {
 	const guild = inGuild(interaction);
+	const page = Math.max(0, (interaction.options.getInteger("page") ?? 1) - 1);
+
+	// Drawing the board and fetching avatars takes longer than the three seconds
+	// Discord allows before the interaction expires.
 	await interaction.deferReply();
-	await reply(interaction, await boardMessage(guild, kind, 0, interaction.user.id));
+	await reply(interaction, await boardMessage(guild, kind, page, interaction.user.id));
 }
 
 export default defineCommand({
@@ -23,6 +38,7 @@ export default defineCommand({
 		{
 			name: "economy",
 			description: "Richest members in this server.",
+			options: [pageOption],
 			async run(interaction) {
 				await show(interaction, "economy");
 			},
@@ -30,6 +46,7 @@ export default defineCommand({
 		{
 			name: "levels",
 			description: "Highest levels in this server.",
+			options: [pageOption],
 			async run(interaction) {
 				await show(interaction, "levels");
 			},

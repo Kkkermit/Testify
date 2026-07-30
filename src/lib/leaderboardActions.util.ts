@@ -1,16 +1,7 @@
-import {
-	type ActionRowBuilder,
-	type AttachmentBuilder,
-	type ButtonBuilder,
-	ButtonStyle,
-	type Guild,
-	type MessageActionRowComponentBuilder,
-} from "discord.js";
-import { customId } from "@core/button";
+import { type AttachmentBuilder, type Guild } from "discord.js";
 import { countAccounts, getEconomyRank, getLeaderboard } from "@database/repositories/economyRepository";
 import { countRanked, getLevelLeaderboard, getRank } from "@database/repositories/levelRepository";
 import { type BoardRow, renderBoardImage } from "@lib/boardCard.util";
-import { button, navRow, row } from "@lib/components.util";
 import { formatNumber, ordinal } from "@lib/format.util";
 
 /**
@@ -109,42 +100,49 @@ async function decorate(guild: Guild, entries: Entry[], page: number): Promise<B
 }
 
 export interface BoardMessage {
+	content: string;
 	files: AttachmentBuilder[];
-	components: ActionRowBuilder<MessageActionRowComponentBuilder>[];
 }
 
+/**
+ * One board, as an image and a line of text. **Deliberately has no buttons.**
+ *
+ * It used to page and swap boards from buttons, but every re-render left the
+ * previous image attached and added the new one beside it, so a few presses turned
+ * the message into a grid of four boards. Three fixes — a deferred `editReply`,
+ * an `update`, and a direct `Message#edit`, each explicitly listing the
+ * attachments to keep — all failed against the live API.
+ *
+ * A message that is never edited cannot accumulate anything, so the page is a
+ * command option instead. Less clever, and it works.
+ */
 export async function boardMessage(
 	guild: Guild,
 	kind: BoardKind,
 	page: number,
-	ownerId: string,
+	viewerId: string,
 ): Promise<BoardMessage> {
 	const { entries, total } = await entriesFor(guild, kind, page);
 	const rows = await decorate(guild, entries, page);
 	const image = await renderBoardImage(boardTitle(kind, guild.name, page), rows, emptyMessage(kind));
 
-	const mine = await rankOf(guild, kind, ownerId);
+	return { content: footerFor(kind, page, pageCount(total), await rankOf(guild, kind, viewerId)), files: [image] };
+}
 
-	return {
-		files: [image],
-		components: [
-			navRow(LEADERBOARD_ID, page, pageCount(total), ownerId, kind),
-			row(
-				switchButton(kind, ownerId),
-				button({
-					// The "me" slot keeps this distinct from the nav arrow that happens to
-					// target the same page; Discord rejects duplicate custom IDs outright.
-					id:
-						mine === null
-							? customId(LEADERBOARD_ID, "noop", kind, page, "me", ownerId)
-							: customId(LEADERBOARD_ID, "goto", kind, pageOfRank(mine), "me", ownerId),
-					label: mine === null ? "You are not on this board" : `Find me — ${ordinal(mine)}`,
-					// Already looking at your own page, so there is nowhere to jump to.
-					disabled: mine === null || pageOfRank(mine) === page,
-				}),
-			),
-		],
-	};
+/**
+ * The line under the board: where the viewer sits, and how to reach the rest.
+ * This is what the Find me and paging buttons used to do.
+ */
+export function footerFor(kind: BoardKind, page: number, pages: number, rank: number | null): string {
+	const where =
+		rank === null
+			? "-# You are not on this board yet."
+			: `-# You are **${ordinal(rank)}**${pageOfRank(rank) === page ? " — on this page." : `, on page ${pageOfRank(rank) + 1}.`}`;
+
+	const more =
+		pages > 1 ? `\n-# Page **${page + 1}** of **${pages}** — \`/leaderboard ${kind} page:2\` for the next.` : "";
+
+	return `${where}${more}`;
 }
 
 /** The other board, for the button that swaps between them. */
@@ -160,18 +158,4 @@ export function pageOfRank(rank: number): number {
 /** Where the viewer sits, so "Find me" can jump straight there. */
 export async function rankOf(guild: Guild, kind: BoardKind, userId: string): Promise<number | null> {
 	return kind === "economy" ? getEconomyRank(guild.id, userId) : getRank(guild.id, userId);
-}
-
-/**
- * Swapping board is a `goto` on the other kind's first page, so the handler has one
- * action to implement rather than two that do the same thing.
- */
-export function switchButton(kind: BoardKind, ownerId: string): ButtonBuilder {
-	const target = otherKind(kind);
-
-	return button({
-		id: customId(LEADERBOARD_ID, "goto", target, 0, "swap", ownerId),
-		label: target === "economy" ? "Richest members" : "Highest levels",
-		style: ButtonStyle.Primary,
-	});
 }

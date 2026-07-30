@@ -1,22 +1,12 @@
-import { parseCustomId } from "@core/button";
 import {
 	boardTitle,
 	emptyMessage,
+	footerFor,
 	isBoardKind,
-	LEADERBOARD_ID,
-	otherKind,
 	PAGE_SIZE,
 	pageCount,
 	pageOfRank,
-	switchButton,
 } from "@lib/leaderboardActions.util";
-
-const OWNER = "100000000000000001";
-
-/** `ButtonBuilder.data` is a union that includes SKU buttons, which have no custom ID. */
-function dataOf(builder: ReturnType<typeof switchButton>): Record<string, unknown> {
-	return builder.toJSON() as unknown as Record<string, unknown>;
-}
 
 describe("isBoardKind", () => {
 	it("accepts the two boards and nothing else", () => {
@@ -75,33 +65,35 @@ describe("pageOfRank", () => {
 	});
 });
 
-describe("otherKind", () => {
-	it("swaps between the two boards", () => {
-		expect(otherKind("economy")).toBe("levels");
-		expect(otherKind("levels")).toBe("economy");
-	});
-});
-
-describe("switchButton", () => {
+describe("footerFor", () => {
 	/**
-	 * Swapping board is a `goto` on the other board's first page, so the handler has
-	 * one action rather than two doing the same job.
+	 * This line replaced the Find me and paging buttons. Every attempt to re-render
+	 * the board in place left the old image attached and added the new one beside it,
+	 * so the board is now a message that is never edited.
 	 */
-	it("jumps to the other board's first page", () => {
-		const parsed = parseCustomId(dataOf(switchButton("levels", OWNER)).custom_id as string);
-
-		expect(parsed.id).toBe(LEADERBOARD_ID);
-		expect(parsed.action).toBe("goto");
-		expect(parsed.args.slice(0, 2)).toEqual(["economy", "0"]);
+	it("says where the viewer sits", () => {
+		expect(footerFor("levels", 0, 1, 1)).toMatch(/1st/);
 	});
 
-	it("puts the owner last, so ownerOnly can read it", () => {
-		const parsed = parseCustomId(dataOf(switchButton("economy", OWNER)).custom_id as string);
-		expect(parsed.args.at(-1)).toBe(OWNER);
+	it("says when the viewer is on the page already", () => {
+		expect(footerFor("levels", 0, 3, 4)).toMatch(/on this page/i);
 	});
 
-	it("is labelled with the board it goes to", () => {
-		expect(dataOf(switchButton("economy", OWNER)).label).toBe("Highest levels");
-		expect(dataOf(switchButton("levels", OWNER)).label).toBe("Richest members");
+	it("names the page the viewer is on when it is a different one", () => {
+		expect(footerFor("levels", 0, 3, 24)).toMatch(/page 3/i);
+	});
+
+	it("says so when the viewer is not on the board", () => {
+		expect(footerFor("economy", 0, 1, null)).toMatch(/not on this board/i);
+	});
+
+	/** No point telling someone about page 2 of 1. */
+	it("only explains paging when there is more than one page", () => {
+		expect(footerFor("levels", 0, 1, 1)).not.toMatch(/page:2/);
+		expect(footerFor("levels", 0, 4, 1)).toMatch(/page:2/);
+	});
+
+	it("names the board in the example command", () => {
+		expect(footerFor("economy", 0, 4, 1)).toContain("/leaderboard economy");
 	});
 });
