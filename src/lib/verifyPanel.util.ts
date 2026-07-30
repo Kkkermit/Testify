@@ -116,6 +116,9 @@ export function verifyPanel(state: VerifyPanelState, ownerId: string): Container
 		divider(),
 		text(`**The panel says**\n>>> ${config.message}`),
 		divider(),
+		// Captioned because two stacked menus look identical once something is chosen:
+		// the placeholder that told them apart is replaced by the selection.
+		text("**Panel channel**\n-# Where members find the Verify button."),
 		row(
 			channelSelect({
 				id: control("channel", ownerId),
@@ -123,6 +126,8 @@ export function verifyPanel(state: VerifyPanelState, ownerId: string): Container
 				...(config.channelId !== null ? { defaultChannelIds: [config.channelId] } : {}),
 			}),
 		),
+		divider({ spacer: true }),
+		text("**Verified role**\n-# Given the moment someone passes."),
 		row(
 			roleSelect({
 				id: control("role", ownerId),

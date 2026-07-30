@@ -46,15 +46,19 @@ export function autoRolePanel(state: AutoRolePanelState, ownerId: string): Conta
 						},
 					],
 		pickers: [
-			row(
-				roleSelect({
-					id: customId(AUTOROLE_PANEL_ID, "roles", ownerId),
-					placeholder: "Roles to give new members…",
-					minValues: 0,
-					maxValues: MAX_AUTO_ROLES,
-					defaultRoleIds: state.roleIds,
-				}),
-			),
+			{
+				label: "Roles given on join",
+				hint: "What is ticked is what new members get — deselect a role to stop giving it.",
+				control: row(
+					roleSelect({
+						id: customId(AUTOROLE_PANEL_ID, "roles", ownerId),
+						placeholder: "Roles to give new members…",
+						minValues: 0,
+						maxValues: MAX_AUTO_ROLES,
+						defaultRoleIds: state.roleIds,
+					}),
+				),
+			},
 		],
 		actions: [
 			{

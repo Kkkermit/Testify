@@ -79,6 +79,7 @@ export function welcomePanel(state: WelcomePanelState, ownerId: string): Contain
 
 	parts.push(
 		divider(),
+		text("**Greeting channel**\n-# Where the welcome is posted when someone joins."),
 		row(
 			channelSelect({
 				id: control("channel", ownerId),

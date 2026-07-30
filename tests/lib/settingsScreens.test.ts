@@ -3,7 +3,7 @@ import { DEFAULT_PREFIX } from "@config/constants";
 import { parseCustomId } from "@core/button";
 import { ANTILINK_PANEL_ID, antiLinkPanel, isBypassPermission } from "@lib/antiLinkPanel.util";
 import { autoRolePanel, AUTOROLE_PANEL_ID, MAX_AUTO_ROLES } from "@lib/autoRolePanel.util";
-import { type ContainerMessage } from "@lib/containers.util";
+import { type ContainerMessage, text } from "@lib/containers.util";
 import { COUNTING_LIMITS, COUNTING_PANEL_ID, countingPanel } from "@lib/countingPanel.util";
 import { checkPrefix, PREFIX_LIMITS, PREFIX_PANEL_ID, prefixPanel } from "@lib/prefixPanel.util";
 import { channelValue, roleValue, settingsScreen, statusDot } from "@lib/settingsScreen.util";
@@ -87,6 +87,30 @@ describe("settingsScreen", () => {
 	it("only builds a button for rows that ask for one", () => {
 		const labels = buttonsOf(screen).map((control) => control.label);
 		expect(labels).toEqual(["Change", "Turn off"]);
+	});
+
+	/**
+	 * Two bare menus stacked together look identical once something is chosen — the
+	 * placeholder that told them apart is replaced by the selection.
+	 */
+	it("captions each picker so the reader knows which is which", () => {
+		const twoPickers = settingsScreen({
+			id: "demo",
+			ownerId: OWNER,
+			category: "settings",
+			title: "Two",
+			status: "…",
+			pickers: [
+				{ label: "First menu", hint: "Does one thing.", control: text("a") },
+				{ label: "Second menu", control: text("b") },
+			],
+		});
+
+		const rendered = textOf(twoPickers);
+
+		expect(rendered).toContain("First menu");
+		expect(rendered).toContain("Does one thing.");
+		expect(rendered).toContain("Second menu");
 	});
 
 	it("leaves out the optional parts when they are not given", () => {
@@ -249,6 +273,14 @@ describe("the voice counter panel", () => {
 
 	it("explains the rename rate limit, which is why counts lag", () => {
 		expect(textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER))).toMatch(/rate-limit/i);
+	});
+
+	/** The report that prompted this: two identical menus with no way to tell them apart. */
+	it("labels which counter each menu changes", () => {
+		const rendered = textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER));
+
+		expect(rendered).toMatch(/member counter/i);
+		expect(rendered).toMatch(/bot counter/i);
 	});
 
 	it("disables both actions until a channel is chosen", () => {

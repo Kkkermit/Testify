@@ -36,21 +36,25 @@ export function antiLinkPanel(state: AntiLinkPanelState, ownerId: string): Conta
 			: "Members can post links freely. Turn it on below.",
 		...(state.note !== undefined ? { note: state.note } : {}),
 		pickers: [
-			selectRow(
-				select({
-					id: customId(ANTILINK_PANEL_ID, "bypass", ownerId),
-					placeholder: "Who may still post links…",
-					disabled: !state.enabled,
-					options: BYPASS_PERMISSIONS.map((permission) =>
-						option({
-							label: humanisePermission(permission),
-							value: permission,
-							description: `Members with ${humanisePermission(permission)} are not filtered`,
-							selected: permission === state.bypass,
-						}),
-					),
-				}),
-			),
+			{
+				label: "Bypass permission",
+				hint: "Members holding this may post links. Everyone else has theirs removed.",
+				control: selectRow(
+					select({
+						id: customId(ANTILINK_PANEL_ID, "bypass", ownerId),
+						placeholder: "Who may still post links…",
+						disabled: !state.enabled,
+						options: BYPASS_PERMISSIONS.map((permission) =>
+							option({
+								label: humanisePermission(permission),
+								value: permission,
+								description: `Members with ${humanisePermission(permission)} are not filtered`,
+								selected: permission === state.bypass,
+							}),
+						),
+					}),
+				),
+			},
 		],
 		actions: [
 			{

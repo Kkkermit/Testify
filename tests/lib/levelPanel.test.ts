@@ -269,8 +269,10 @@ describe("the levelling panel", () => {
 		it("says when nothing is ignored", () => {
 			const text = textOf(panel("ignores"));
 
-			expect(text).toMatch(/No ignored channels/i);
-			expect(text).toMatch(/No ignored roles/i);
+			expect(text).toMatch(/Ignored channels/i);
+			expect(text).toMatch(/Ignored roles/i);
+			expect(text).toMatch(/every channel earns XP/i);
+			expect(text).toMatch(/every member earns XP/i);
 		});
 
 		it("lists ignored channels and roles", () => {

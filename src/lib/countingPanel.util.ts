@@ -42,13 +42,17 @@ export function countingPanel(state: CountingPanelState, ownerId: string): Conta
 					},
 				],
 		pickers: [
-			row(
-				channelSelect({
-					id: customId(COUNTING_PANEL_ID, "channel", ownerId),
-					placeholder: off ? "Count in…" : "Move counting somewhere else…",
-					...(state.channelId !== null ? { defaultChannelIds: [state.channelId] } : {}),
-				}),
-			),
+			{
+				label: "Counting channel",
+				hint: "Where members count. Moving it keeps the current number.",
+				control: row(
+					channelSelect({
+						id: customId(COUNTING_PANEL_ID, "channel", ownerId),
+						placeholder: off ? "Count in…" : "Move counting somewhere else…",
+						...(state.channelId !== null ? { defaultChannelIds: [state.channelId] } : {}),
+					}),
+				),
+			},
 		],
 		actions: [{ action: "off", label: "Turn off", style: ButtonStyle.Danger, disabled: off }],
 		footer: "Nobody may count twice in a row, and a wrong number puts everyone back to 1.",

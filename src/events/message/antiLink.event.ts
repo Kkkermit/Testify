@@ -3,6 +3,7 @@ import { defineMessageHandler } from "@core/message";
 import { addWarning } from "@database/repositories/moderationRepository";
 import { getAntiLink } from "@database/repositories/settingsRepository";
 import { embed } from "@lib/embeds.util";
+import { cleanupFooter, TIDY_AFTER_MS } from "@lib/tidyReply.util";
 
 const LINK_PATTERN = /(https?:\/\/|www\.|discord\.gg\/|\b[a-z0-9-]+\.(com|net|org|io|gg|xyz|co)\b)/i;
 
@@ -41,11 +42,12 @@ export default defineMessageHandler({
 					category: "moderation",
 					title: "Link removed",
 					description: `${message.author}, links are not allowed in **${message.guild.name}**.`,
+					footer: cleanupFooter(),
 				}),
 			],
 		});
 
-		client.timers.after(`antilink:${notice.id}`, 5_000, async () => {
+		client.timers.after(`tidy:${notice.id}`, TIDY_AFTER_MS, async () => {
 			await notice.delete().catch(() => null);
 		});
 

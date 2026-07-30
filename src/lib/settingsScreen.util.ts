@@ -49,6 +49,20 @@ export interface ScreenAction {
 	args?: (string | number)[];
 }
 
+/**
+ * A select menu with a caption above it.
+ *
+ * Two bare pickers stacked on top of each other give the reader no way to tell
+ * which is which — a placeholder disappears the moment something is chosen, so a
+ * configured panel ends up showing two identical-looking menus.
+ */
+export interface ScreenPicker {
+	label: string;
+	/** A line of smaller text under the label, for anything worth explaining. */
+	hint?: string;
+	control: ContainerPart;
+}
+
 export interface ScreenRow {
 	label: string;
 	value: string;
@@ -67,7 +81,7 @@ export interface SettingsScreenOptions {
 	note?: string;
 	rows?: ScreenRow[];
 	/** Pre-built select rows, which only the caller knows how to fill. */
-	pickers?: ContainerPart[];
+	pickers?: ScreenPicker[];
 	actions?: ScreenAction[];
 	footer?: string;
 }
@@ -107,8 +121,17 @@ export function settingsScreen(options: SettingsScreenOptions): ContainerMessage
 		}
 	}
 
-	if (options.pickers !== undefined && options.pickers.length > 0) {
-		parts.push(divider(), ...options.pickers);
+	const pickers = options.pickers ?? [];
+	if (pickers.length > 0) {
+		parts.push(divider());
+
+		for (const [index, picker] of pickers.entries()) {
+			// A spacer between menus, so the caption reads as belonging to the one below
+			// it rather than floating between two.
+			if (index > 0) parts.push(divider({ spacer: true }));
+
+			parts.push(text(`**${picker.label}**${picker.hint === undefined ? "" : `\n-# ${picker.hint}`}`), picker.control);
+		}
 	}
 
 	const actions = options.actions ?? [];

@@ -90,6 +90,7 @@ function overview(state: LevelPanelState, ownerId: string): ContainerPart[] {
 				: "Levelling is off. Nobody is earning XP.\n-# Turn it on below; everything else can be set up afterwards.",
 		),
 		divider(),
+		text("**Announcement channel**\n-# Leave it unset to reply wherever they were talking."),
 		row(
 			channelSelect({
 				id: control("channel", state, ownerId),
@@ -152,6 +153,7 @@ function boosts(state: LevelPanelState, ownerId: string): ContainerPart[] {
 
 	parts.push(
 		divider(),
+		text("**Boost roles**\n-# What is ticked earns extra XP. Deselect a role to stop boosting it."),
 		row(
 			roleSelect({
 				id: control("boost-roles", state, ownerId),
@@ -196,6 +198,7 @@ function rewards(state: LevelPanelState, ownerId: string): ContainerPart[] {
 
 	parts.push(
 		divider(),
+		text("**Add a reward**\n-# Pick a role and I will ask which level earns it."),
 		row(
 			roleSelect({
 				id: control("reward-role", state, ownerId),
@@ -225,7 +228,7 @@ function ignores(state: LevelPanelState, ownerId: string): ContainerPart[] {
 		divider(),
 		text(
 			config.ignoredChannelIds.length === 0
-				? "-# No ignored channels."
+				? "**Ignored channels**\n-# None — every channel earns XP."
 				: `**Ignored channels**\n${config.ignoredChannelIds.map((id) => `<#${id}>`).join(" ")}`,
 		),
 		row(
@@ -240,7 +243,7 @@ function ignores(state: LevelPanelState, ownerId: string): ContainerPart[] {
 		divider({ spacer: true }),
 		text(
 			config.ignoredRoleIds.length === 0
-				? "-# No ignored roles."
+				? "**Ignored roles**\n-# None — every member earns XP."
 				: `**Ignored roles**\n${config.ignoredRoleIds.map((id) => `<@&${id}>`).join(" ")}`,
 		),
 		row(

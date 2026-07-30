@@ -36,24 +36,32 @@ export function voiceStatsPanel(state: VoiceStatsPanelState, ownerId: string): C
 					{ label: "Bots", value: channelValue(state.botChannelId) },
 				],
 		pickers: [
-			row(
-				channelSelect({
-					id: customId(VOICESTATS_PANEL_ID, "members", ownerId),
-					placeholder: "Voice channel for the member count…",
-					channelTypes: VOICE_TYPES,
-					minValues: 0,
-					...(state.memberChannelId !== null ? { defaultChannelIds: [state.memberChannelId] } : {}),
-				}),
-			),
-			row(
-				channelSelect({
-					id: customId(VOICESTATS_PANEL_ID, "bots", ownerId),
-					placeholder: "Voice channel for the bot count…",
-					channelTypes: VOICE_TYPES,
-					minValues: 0,
-					...(state.botChannelId !== null ? { defaultChannelIds: [state.botChannelId] } : {}),
-				}),
-			),
+			{
+				label: "👥 Member counter",
+				hint: "This channel is renamed to the member count. Deselect it to stop.",
+				control: row(
+					channelSelect({
+						id: customId(VOICESTATS_PANEL_ID, "members", ownerId),
+						placeholder: "Voice channel for the member count…",
+						channelTypes: VOICE_TYPES,
+						minValues: 0,
+						...(state.memberChannelId !== null ? { defaultChannelIds: [state.memberChannelId] } : {}),
+					}),
+				),
+			},
+			{
+				label: "🤖 Bot counter",
+				hint: "This one is renamed to how many bots are in the server.",
+				control: row(
+					channelSelect({
+						id: customId(VOICESTATS_PANEL_ID, "bots", ownerId),
+						placeholder: "Voice channel for the bot count…",
+						channelTypes: VOICE_TYPES,
+						minValues: 0,
+						...(state.botChannelId !== null ? { defaultChannelIds: [state.botChannelId] } : {}),
+					}),
+				),
+			},
 		],
 		actions: [
 			{ action: "refresh", label: "Update now", disabled: off },

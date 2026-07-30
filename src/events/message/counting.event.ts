@@ -3,6 +3,7 @@ import { defineMessageHandler } from "@core/message";
 import { advanceCount, getCounting, resetCount } from "@database/repositories/settingsRepository";
 import { embed, errorEmbed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
+import { replyTemporarily } from "@lib/tidyReply.util";
 
 /**
  * The expected number and the "not twice in a row" rule are both enforced inside
@@ -11,7 +12,7 @@ import { formatNumber } from "@lib/format.util";
 export default defineMessageHandler({
 	name: "counting",
 	order: 20,
-	async run(message, _client) {
+	async run(message, client) {
 		if (!message.guild) return;
 
 		const settings = await getCounting(message.guild.id);
@@ -24,19 +25,22 @@ export default defineMessageHandler({
 
 		if (parsed !== expected) {
 			await resetCount(message.guild.id);
-			await message.reply({
-				embeds: [
-					errorEmbed(
-						`**${message.author.username}** broke the chain at **${formatNumber(settings.count)}**. The next number is **1**.`,
-					),
-				],
-			});
+
+			// Tidied away after a few seconds: a counting channel fills with corrections
+			// otherwise, and the numbers become hard to find among them.
+			await replyTemporarily(
+				client,
+				message,
+				errorEmbed(
+					`**${message.author.username}** broke the chain at **${formatNumber(settings.count)}**. The next number is **1**.`,
+				),
+			);
 			return true;
 		}
 
 		const advanced = await advanceCount(message.guild.id, expected, message.author.id);
 		if (!advanced) {
-			await message.reply({ embeds: [errorEmbed("You cannot count twice in a row.")] });
+			await replyTemporarily(client, message, errorEmbed("You cannot count twice in a row."));
 			return true;
 		}
 
