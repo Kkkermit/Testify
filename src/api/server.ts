@@ -7,7 +7,13 @@ import { ApiProblem, badRequest, notFound, problemBody } from "@api/errors";
 import { verifyCsrf } from "@api/middleware/csrf";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
+import { loadSession } from "@api/middleware/session";
+import { oauthConfigFrom } from "@api/oauth";
+import { auth } from "@api/routes/auth";
+import { guilds } from "@api/routes/guilds";
 import { health } from "@api/routes/health";
+import { owner } from "@api/routes/owner";
+import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
@@ -18,6 +24,9 @@ const MAX_BODY_BYTES = 128 * 1024;
 /** Generous for a person clicking around, and nowhere near enough to scrape with. */
 const GENERAL_LIMIT = { limit: 300, windowMs: 60_000 };
 
+/** Tighter, and counted separately so a spent sign-in allowance does not also block reading a page. */
+const SIGN_IN_LIMIT = { limit: 20, windowMs: 60_000 };
+
 /**
  * The dashboard's HTTP API, inside the bot process so it can read the live client cache.
  *
@@ -27,10 +36,13 @@ const GENERAL_LIMIT = { limit: 300, windowMs: 60_000 };
 export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
 	const general = new RateLimiter(GENERAL_LIMIT);
+	const signIn = new RateLimiter(SIGN_IN_LIMIT);
+	const oauth = oauthConfigFrom(env);
 
 	app.use("*", async (context, next) => {
 		context.set("client", client);
 		context.set("env", env);
+		context.set("oauth", oauth);
 		await next();
 	});
 
@@ -38,6 +50,10 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("*", rateLimit(general, { name: "general", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("*", bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => raise(badRequest("That request is too large.")) }));
 	app.use("*", verifyCsrf);
+	// The one flow an unauthenticated caller can reach that costs a Discord round trip.
+	app.use("/api/auth/login", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("/api/*", loadSession);
 
 	app.onError((error, context) => {
 		const problem = asProblem(error);
@@ -61,6 +77,9 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.notFound((context) => context.json(problemBody(notFound()), 404));
 
 	app.route("/api/health", health);
+	app.route("/api/auth", auth);
+	app.route("/api/guilds", guilds);
+	app.route("/api/owner", owner);
 
 	return app;
 }
@@ -90,6 +109,9 @@ export interface RunningApi {
 /** Started after `client.login()`, so a request can never arrive before the cache is warm. */
 export function startApi(client: TestifyClient, env: Env): RunningApi {
 	const app = createApi(client, env);
+
+	// After the API and nowhere else: it is a catch-all, so anything registered behind it never runs.
+	serveDashboard(app);
 
 	let listening: (port: number) => void = () => undefined;
 	const ready = new Promise<number>((resolve) => {

@@ -1,10 +1,10 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { render, screen } from "@testing-library/react";
 
 /**
- * Everything the dashboard shows about a guild — a welcome message, a role name, a level-up template — was
- * typed by somebody. React escapes it, and these pin that it stays escaped: the failure mode is one
+ * Everything the dashboard shows about a guild — a server name, a welcome message, a role name — was typed by
+ * somebody. React escapes it, and these pin that it stays escaped: the failure mode is one
  * `dangerouslySetInnerHTML` added later "just for this one bit of markdown".
  */
 describe("rendering text a guild manager typed", () => {
@@ -32,24 +32,42 @@ describe("rendering text a guild manager typed", () => {
 		expect(document.querySelector("img")).toBeNull();
 		expect((window as { __owned?: boolean }).__owned).toBeUndefined();
 	});
-
-	/** React refuses a `javascript:` href with a warning, but the assertion is what makes it a rule. */
-	it("never builds an href out of raw user text", () => {
-		const sources = readFileSync(join(__dirname, "../App.tsx"), "utf8");
-
-		expect(sources).not.toMatch(/href=\{(?!["'/])/);
-	});
 });
 
-describe("the source tree", () => {
-	/** The lint rule bans these; this states the intent in a place a reader of the tests will see. */
-	it("contains no way of injecting HTML", () => {
-		for (const file of ["../App.tsx", "./api.ts"]) {
-			const source = readFileSync(join(__dirname, file), "utf8");
+function sourceFiles(directory: string): string[] {
+	return readdirSync(directory).flatMap((entry) => {
+		const path = join(directory, entry);
+		if (statSync(path).isDirectory()) return sourceFiles(path);
 
-			expect(source).not.toContain("dangerouslySetInnerHTML");
-			expect(source).not.toContain("innerHTML");
-			expect(source).not.toMatch(/\beval\(/);
+		return /\.tsx?$/.test(entry) ? [path] : [];
+	});
+}
+
+describe("the source tree", () => {
+	// This file names the very things it bans, so it cannot be one of the files it reads.
+	const files = sourceFiles(join(__dirname, "..")).filter((path) => !path.endsWith("escaping.test.tsx"));
+
+	/** The lint rule bans these; this states the intent where a reader of the tests will see it. */
+	it("contains no way of injecting HTML, anywhere", () => {
+		for (const file of files) {
+			const source = readFileSync(file, "utf8");
+
+			expect({ file, has: source.includes("dangerouslySetInnerHTML") }).toEqual({ file, has: false });
+			expect({ file, has: /\.innerHTML\s*=/.test(source) }).toEqual({ file, has: false });
+			expect({ file, has: /\beval\(/.test(source) }).toEqual({ file, has: false });
 		}
+	});
+
+	/** `javascript:` in an href is the one XSS React does not escape away on its own. */
+	it("never builds a link target out of a value", () => {
+		for (const file of files) {
+			const source = readFileSync(file, "utf8");
+
+			expect({ file, has: source.includes("javascript:") }).toEqual({ file, has: false });
+		}
+	});
+
+	it("checks something", () => {
+		expect(files.length).toBeGreaterThan(5);
 	});
 });

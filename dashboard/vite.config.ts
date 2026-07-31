@@ -24,7 +24,14 @@ export default defineConfig(({ mode }) => {
 		},
 		build: {
 			outDir: "dist",
+			// Open source: a stack trace someone can read is worth the file size.
 			sourcemap: true,
+			rollupOptions: {
+				// A vendor chunk of its own, so an app change does not invalidate the whole cache.
+				output: {
+					manualChunks: (id) => (id.includes("node_modules") ? "vendor" : undefined),
+				},
+			},
 		},
 	};
 });

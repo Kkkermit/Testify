@@ -1027,6 +1027,16 @@ shared/        @testify/shared — types and zod schemas the API and the SPA bot
 dashboard/     Vite + React + Tailwind SPA
 ```
 
+**What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview and the
+owner console. The settings screens are next — `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
+
+| Route         | Screen                                                        |
+| ------------- | ------------------------------------------------------------- |
+| `/sign-in`    | One button; also the setup screen for a half-install          |
+| `/guilds`     | Picker, with an invite card for guilds without the bot        |
+| `/guilds/:id` | Stat tiles, feature grid, permission warnings, recent changes |
+| `/owner`      | Fleet stats and every guild, owner only                       |
+
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
 | `npm run dev:all`       | Bot and Vite together. The page is on :5173, the API on :8080 |
@@ -1091,6 +1101,26 @@ Rules that are easy to break and silent when broken:
   rate-limit bucket.
 - **Rotating `DASHBOARD_SESSION_SECRET` signs everybody out**, because the sealed tokens no longer open. That
   is the intended behaviour after a leak, and `npm run secret -- --write` is the whole procedure.
+
+### `requireGuild` is the security boundary
+
+Everything behind it assumes it ran, so five things in it are load-bearing:
+
+1. **The guild id comes from the path parameter only**, and is shape-checked before it is used to look anything
+   up. A handler reads `c.get("guild").id`, never a guild id from a body. This is the most likely way one
+   guild's data leaks into another's — make it a review rule.
+2. **`guild.members.fetch()` is live, every request.** The OAuth guild list is a login-time snapshot, so
+   someone demoted five minutes ago still has it in their session. This is the difference between losing access
+   on their next click and losing it next time they sign in.
+3. **404 before 403.** The bot not being in a guild is not a secret, and "here is an invite" is the right answer.
+   A 403 for a guild the caller cannot manage carries a code and nothing else — no name, no icon.
+4. **Owners skip the member fetch.** They may not be in the guild at all, and `requireOwner` answers **404**
+   rather than 403, so a manager never learns the owner console is there.
+5. **`.catch(() => null)` on the fetch.** An unknown member throws, and an unhandled throw would be a 500 that
+   looks like a bug rather than a 403 that looks like a denial.
+
+`serveDashboard()` is registered in `startApi`, **after** every route, because it is a catch-all — anything
+registered behind it silently never runs.
 
 ### Rules that carry over
 

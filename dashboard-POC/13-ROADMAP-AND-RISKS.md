@@ -30,7 +30,7 @@ Two things this phase found that were not in the plan, both recorded in `CLAUDE.
   `transformIgnorePatterns` allowlist for MSW's ESM-only dependencies, and a React pin, because
   `discord-html-transcripts` puts React 18 in the root `node_modules`.
 
-### Phase 1 — Sign in and guild picker (~1 week)
+### Phase 1 — Sign in and guild picker (~1 week) — **done**
 
 The riskiest part, so it comes early.
 
@@ -42,6 +42,15 @@ The riskiest part, so it comes early.
 
 **Done when:** you sign in, see your manageable guilds, and a user without Manage Server gets 403 on their next
 request after being demoted — verified live, not just in a test.
+
+Built with the guild overview and the owner console alongside, since both are read-only and fall out of the same
+middleware. What this phase turned up, beyond the plan:
+
+- **`serveDashboard` has to be registered after every route.** It is a catch-all, so anything behind it never
+  runs — which showed up as routes returning 404 rather than as anything failing loudly.
+- **The SPA's path cannot be resolved through `assetPath`.** That lands inside `dist/` after a build, so the
+  built bot looked for `dist/dashboard/dist` and served a 404 for every page. Nothing but a real HTTP request
+  caught it; there is a test pinning it now.
 
 ### Phase 2 — Guild overview and levelling (~1½ weeks)
 
