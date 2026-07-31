@@ -39,7 +39,15 @@ const config: Config = {
 		"\\.css$": "<rootDir>/src/test/styleMock.ts",
 	},
 	// Vendored shadcn source is someone else's library; testing it would pad the number, not the confidence.
-	collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/components/ui/**", "!src/main.tsx", "!src/**/*.d.ts"],
+	// starfield.ts is the same argument from the other direction: it needs a real WebGL context, which jsdom
+	// has none of. Everything in it that can be reasoned about was extracted to lib/three/field.ts.
+	collectCoverageFrom: [
+		"src/**/*.{ts,tsx}",
+		"!src/components/ui/**",
+		"!src/lib/three/starfield.ts",
+		"!src/main.tsx",
+		"!src/**/*.d.ts",
+	],
 	coverageThreshold: { global: { statements: 80, branches: 80, functions: 80, lines: 80 } },
 };
 

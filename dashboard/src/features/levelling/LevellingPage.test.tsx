@@ -1,7 +1,8 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
-import { LevellingPage, tabFrom } from "@/features/levelling/LevellingPage";
+import { tabFrom } from "@/features/levelling/levelling.utils";
+import { LevellingPage } from "@/features/levelling/LevellingPage";
 import { levelConfig } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -56,6 +57,27 @@ describe("the general tab", () => {
 
 		await waitFor(() => {
 			expect(sent).toEqual({ enabled: false });
+		});
+	});
+
+	it.each([
+		["announce level-ups", "announce"],
+		["rewards stack", "stackRewards"],
+	])("sends only %s when that switch is used", async (label, field) => {
+		const user = userEvent.setup();
+		let sent: unknown;
+		server.use(
+			http.patch("/api/guilds/:guildId/levelling", async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json(levelConfig);
+			}),
+		);
+
+		renderPage();
+		await user.click(await screen.findByRole("switch", { name: new RegExp(label, "i") }));
+
+		await waitFor(() => {
+			expect(sent).toEqual({ [field]: false });
 		});
 	});
 
@@ -247,6 +269,33 @@ describe("the boosts tab", () => {
 
 		await waitFor(() => {
 			expect(sent).toEqual([{ roleId: "300000000000000002", multiplier: 4 }]);
+		});
+	});
+
+	/** The list is replaced whole, so an unrelated add must not reset a multiplier somebody already chose. */
+	it("keeps the existing multipliers when another role is added", async () => {
+		const user = userEvent.setup();
+		let sent: unknown;
+		server.use(
+			http.put("/api/guilds/:guildId/levelling/boosts", async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json(levelConfig);
+			}),
+		);
+
+		renderPage("boosts");
+		await user.selectOptions(await screen.findByLabelText(/multiplier for booster/i), "5");
+		await waitFor(() => {
+			expect(sent).toEqual([{ roleId: "300000000000000002", multiplier: 5 }]);
+		});
+
+		await user.click(screen.getByRole("checkbox", { name: /member/i }));
+
+		await waitFor(() => {
+			expect(sent).toEqual([
+				{ roleId: "300000000000000002", multiplier: 2 },
+				{ roleId: "300000000000000001", multiplier: 2 },
+			]);
 		});
 	});
 

@@ -14,7 +14,8 @@ describe("the guild overview", () => {
 		renderPage();
 
 		expect(await screen.findByText("Test Server")).toBeInTheDocument();
-		expect(screen.getByText("1,234")).toBeInTheDocument();
+		// The tile counts up to its value, so the settled number is what is asserted on.
+		expect(await screen.findByText("1,234")).toBeInTheDocument();
 		expect(screen.getByText("Levelling")).toBeInTheDocument();
 		expect(screen.getByText("2 role rewards, 1 boost")).toBeInTheDocument();
 	});

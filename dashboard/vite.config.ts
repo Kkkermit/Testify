@@ -37,12 +37,21 @@ export default defineConfig(({ mode }) => {
 		},
 		build: {
 			outDir: "dist",
+			// three is deliberately over the 500 kB default, and it is already split and loaded on demand — the
+			// advice the warning gives is the thing that was done.
+			chunkSizeWarningLimit: 600,
 			// Open source: a stack trace someone can read is worth the file size.
 			sourcemap: true,
 			rollupOptions: {
-				// A vendor chunk of its own, so an app change does not invalidate the whole cache.
 				output: {
-					manualChunks: (id) => (id.includes("node_modules") ? "vendor" : undefined),
+					manualChunks: (id) => {
+						// three is half a megabyte and only the backdrop imports it, dynamically. Left in `vendor` it
+						// would be pulled into the initial load anyway, which is the opposite of the point.
+						if (id.includes("node_modules/three")) return "three";
+						// A vendor chunk of its own, so an app change does not invalidate the whole cache.
+						if (id.includes("node_modules")) return "vendor";
+						return undefined;
+					},
 				},
 			},
 		},

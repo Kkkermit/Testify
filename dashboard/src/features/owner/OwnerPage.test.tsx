@@ -1,7 +1,8 @@
 import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
 import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
-import { formatUptime, OwnerPage, pageFrom } from "@/features/owner/OwnerPage";
+import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
+import { OwnerPage } from "@/features/owner/OwnerPage";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -55,6 +56,18 @@ describe("formatUptime", () => {
 		expect(formatUptime(90_000_000)).toBe("1d 1h");
 		expect(formatUptime(3_900_000)).toBe("1h 5m");
 		expect(formatUptime(120_000)).toBe("2m");
+	});
+});
+
+describe("pageCount", () => {
+	it("rounds a part-full last page up", () => {
+		expect(pageCount(51, 25)).toBe(3);
+	});
+
+	/** Zero servers is still one page, or the pager renders "Page 1 of 0". */
+	it("is never less than one", () => {
+		expect(pageCount(0, 25)).toBe(1);
+		expect(pageCount(10, 0)).toBe(1);
 	});
 });
 

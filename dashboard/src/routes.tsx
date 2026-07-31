@@ -2,7 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppShell } from "@/app/AppShell";
 import { RequireAuth } from "@/app/RequireAuth";
-import { Skeleton } from "@/components/common/primitives";
+import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 
 // Lazy per route, so a server manager never downloads the owner console.

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/*
+ * The palette is the one worked out in dashboard-POC/08-DESIGN.md, where every ratio is calculated rather than
+ * asserted. Changing a value here means re-checking it there.
+ */
 @theme {
 	--color-background: #0a0a0f;
 	--color-foreground: #ffffff;
@@ -20,15 +24,99 @@
 	--radius: 0.625rem;
 	--font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
+	--animate-reveal: reveal 320ms var(--ease-out-soft) both;
+	--animate-fade: fade 200ms var(--ease-out-soft) both;
+	--animate-pop: pop 200ms var(--ease-out-soft) both;
+	--animate-sheen: sheen 1.6s linear infinite;
+
+	@keyframes reveal {
+		from {
+			opacity: 0;
+			transform: translate3d(0, 6px, 0);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@keyframes fade {
+		from {
+			opacity: 0;
+		}
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes pop {
+		from {
+			opacity: 0;
+			transform: scale(0.97);
+		}
+		to {
+			opacity: 1;
+			transform: none;
+		}
+	}
+
+	@keyframes sheen {
+		from {
+			transform: translateX(-100%);
+		}
+		to {
+			transform: translateX(100%);
+		}
+	}
 }
 
 @layer base {
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
+		/* A single wash behind the WebGL field, so the page still has depth when WebGL is unavailable. */
+		background-image: radial-gradient(80rem 50rem at 15% -10%, --alpha(var(--color-primary) / 14%), transparent 60%);
+		background-attachment: fixed;
 	}
 
 	:focus-visible {
 		@apply outline-ring outline-2 outline-offset-2;
+	}
+}
+
+@utility motion-reveal {
+	animation: var(--animate-reveal);
+}
+
+@utility motion-fade {
+	animation: var(--animate-fade);
+}
+
+@utility motion-pop {
+	animation: var(--animate-pop);
+}
+
+/*
+ * A 1px inset highlight along the top edge. Elevation without a drop shadow, which on near-black reads as a
+ * smudge — see 08-DESIGN.md.
+ */
+@utility surface-edge {
+	box-shadow: inset 0 1px 0 0 --alpha(var(--color-foreground) / 6%);
+}
+
+/* The pulse a skeleton uses is a brightness change; this is the highlight sweeping across it. */
+@utility skeleton-sheen {
+	position: relative;
+	overflow: hidden;
+
+	&::after {
+		content: "";
+		position: absolute;
+		inset: 0;
+		background-image: linear-gradient(90deg, transparent, --alpha(var(--color-foreground) / 6%), transparent);
+		animation: var(--animate-sheen);
 	}
 }
 
@@ -41,5 +129,9 @@
 		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
+	}
+
+	.skeleton-sheen::after {
+		display: none;
 	}
 }

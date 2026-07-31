@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { Button, Card } from "@/components/common/primitives";
+import { Button, Card } from "@/components/primitives";
 import { ApiError } from "@/lib/api";
 
 /**

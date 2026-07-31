@@ -1,10 +1,13 @@
-import { type ManageableGuild } from "@testify/shared";
-import { ServerOff } from "lucide-react";
+import { Search, ServerOff } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link } from "react-router";
-import { Badge, Card, EmptyState, GuildIcon, PageHeader, Skeleton } from "@/components/common/primitives";
+import { FIELD } from "@/components/form";
+import { Reveal } from "@/components/motion";
+import { EmptyState, PageHeader, Skeleton } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
-import { usePageTitle } from "@/lib/usePageTitle";
+import { GuildCard } from "@/features/guilds/GuildCard";
+import { filterGuilds } from "@/features/guilds/guilds.utils";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { cn } from "@/lib/cn";
 
 export function GuildPickerPage(): React.JSX.Element {
 	usePageTitle("Servers");
@@ -19,8 +22,13 @@ export function GuildPickerPage(): React.JSX.Element {
 		<>
 			<PageHeader title="Servers" subtitle="Servers where you can change Testify's settings." />
 
-			<label className="mb-6 block">
+			<label className="motion-reveal relative mb-6 block">
 				<span className="sr-only">Search servers</span>
+				<Search
+					size={16}
+					aria-hidden="true"
+					className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
+				/>
 				<input
 					type="search"
 					// Someone in 40 servers should type rather than scroll.
@@ -30,13 +38,13 @@ export function GuildPickerPage(): React.JSX.Element {
 						setSearch(event.target.value);
 					}}
 					placeholder="Search servers"
-					className="bg-card border-border focus-visible:border-ring w-full rounded-lg border px-3 py-2 text-sm outline-none"
+					className={cn(FIELD, "pl-9")}
 				/>
 			</label>
 
 			{guilds.length === 0 ? (
 				<EmptyState
-					icon={<ServerOff size={32} />}
+					icon={<ServerOff size={28} />}
 					title={search === "" ? "Nothing to configure yet" : "No server matches that"}
 					body={
 						search === ""
@@ -46,54 +54,14 @@ export function GuildPickerPage(): React.JSX.Element {
 				/>
 			) : (
 				<ul className="grid gap-3 sm:grid-cols-2">
-					{guilds.map((guild) => (
-						<li key={guild.id}>
+					{guilds.map((guild, index) => (
+						<Reveal as="li" key={guild.id} index={index}>
 							<GuildCard guild={guild} />
-						</li>
+						</Reveal>
 					))}
 				</ul>
 			)}
 		</>
-	);
-}
-
-export function filterGuilds(guilds: ManageableGuild[], search: string): ManageableGuild[] {
-	const term = search.trim().toLowerCase();
-	return term === "" ? guilds : guilds.filter((guild) => guild.name.toLowerCase().includes(term));
-}
-
-function GuildCard({ guild }: { guild: ManageableGuild }): React.JSX.Element {
-	const body = (
-		<>
-			<GuildIcon name={guild.name} url={guild.iconUrl} />
-			<span className="min-w-0 flex-1">
-				<span className="block truncate font-medium">{guild.name}</span>
-				<span className="text-muted-foreground block text-xs tabular-nums">
-					{guild.memberCount === null
-						? "Testify is not in this server"
-						: `${guild.memberCount.toLocaleString()} members`}
-				</span>
-			</span>
-		</>
-	);
-
-	// A guild without the bot is shown rather than hidden — the invite is the point, and it costs nothing.
-	if (!guild.botPresent) {
-		return (
-			<Card className="flex items-center gap-3 p-4 opacity-70">
-				{body}
-				<Badge>Not added</Badge>
-			</Card>
-		);
-	}
-
-	return (
-		<Link
-			to={`/guilds/${guild.id}`}
-			className="bg-card border-border hover:border-ring flex items-center gap-3 rounded-[0.625rem] border p-4 transition-colors duration-150"
-		>
-			{body}
-		</Link>
 	);
 }
 

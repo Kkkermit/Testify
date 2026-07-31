@@ -1027,6 +1027,25 @@ shared/        @testify/shared — types and zod schemas the API and the SPA bot
 dashboard/     Vite + React + Tailwind SPA
 ```
 
+Inside `dashboard/src`, the same rule as the bot: technical role first, then domain.
+
+```
+app/            AppShell, RequireAuth, ErrorState, and layout/ for the sidebar
+components/
+  primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon
+  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning
+  motion/       Backdrop (three.js), Reveal, AnimatedNumber
+  ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
+features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
+hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible
+lib/            api, cn, queries, redirect, and three/ for the backdrop's maths and shaders
+```
+
+A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL
+means, what a page count is, which channels can be posted in — belongs in a `.utils.ts` beside it where it can
+be tested without rendering. `features/levelling/` is the worked example: a 416-line file became a 45-line page,
+four tabs, three shared components and two testable modules.
+
 **What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview and the
 owner console. The settings screens are next — `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
@@ -1152,6 +1171,27 @@ Three things there are load-bearing and non-obvious, all commented in place:
 `transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
 `moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
 `node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
+
+### The WebGL backdrop
+
+`components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things about it are
+load-bearing, and all four are what keep an ornament from costing anything:
+
+- **three is imported dynamically and chunked on its own.** `manualChunks` in `dashboard/vite.config.ts` gives
+  it its own 513 kB chunk — left in `vendor` it would be in the initial load, which is the opposite of lazy.
+  `vendor` is the same size with the backdrop as without it.
+- **`prefers-reduced-motion` skips the import entirely**, rather than loading three and then sitting still. So
+  does a machine with no WebGL, and `createStarfield` returns null rather than throwing if the context is
+  refused. Verified in a real browser: with the preference set, no canvas and no chunk fetched.
+- **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, the frame-rate
+  independent easing and the parallax, all pure and unit tested; `starfield.ts` is the part that needs a GPU and
+  is the one file excluded from coverage.
+- **It reads the palette rather than restating it.** `lib/three/tokens.ts` pulls `--color-accent` off `:root`,
+  so the design tokens in `index.css` stay the only place a colour is written, and a token three cannot parse
+  falls back instead of rendering a black field.
+
+The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never be able to take
+a click meant for a control.
 
 ### Vite has to pin React too, and for a worse symptom
 

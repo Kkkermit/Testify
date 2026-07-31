@@ -1,7 +1,8 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { filterGuilds, GuildPickerPage } from "@/features/guilds/GuildPickerPage";
+import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
+import { filterGuilds } from "@/features/guilds/guilds.utils";
 import { aGuild, me, withoutBot } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";

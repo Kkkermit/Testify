@@ -164,6 +164,21 @@ Then a small set of your own in `components/common/`:
 Motion here is feedback, not decoration. A row highlighting for 400ms after it saves tells you the save landed;
 a page transition tells you nothing and costs 200ms.
 
+### The one deliberate exception
+
+The WebGL backdrop is decoration, and it is allowed on terms that keep the rule above intact: it never delays
+an interaction, it is on its own lazily-fetched chunk so it costs nothing until it is drawn, and
+`prefers-reduced-motion` skips it entirely rather than merely slowing it. It sits behind the content at
+`opacity: 0.22`, dimmer than on the sign-in screen, because behind a settings form it is a texture rather than
+the subject.
+
+Two constraints on it that are not negotiable: it is `aria-hidden` and `pointer-events-none`, so it carries no
+information and can never take a click; and the surfaces above it stay **opaque**, so the contrast ratios in
+this document still hold. A translucent card over a moving field is where a dark theme quietly loses AA.
+
+The entrance animations obey the same test. `Reveal` staggers a list by 40ms per item and caps the total at
+240ms — long enough to read as arriving in order, short enough that the last card is not visibly late.
+
 ## Brand
 
 Use Testify's existing identity rather than inventing a second one: `src/config/theme.ts` already holds the

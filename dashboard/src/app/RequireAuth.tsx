@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { Skeleton } from "@/components/common/primitives";
+import { Skeleton } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
 
 /**
