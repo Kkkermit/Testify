@@ -1,20 +1,15 @@
 import { LEVELLING } from "@config/constants";
 import { type LevelReward, type LevelSettings, type XpBoost } from "@database/models/guildSettings.schema";
+import { LEVEL_LIMITS } from "@testify/shared";
 
 /**
  * The rules of the levelling system, with no database or Discord objects in sight, so every decision it makes is
  * unit-testable.
  */
 
-export const LEVEL_LIMITS = {
-	maxBoosts: 5,
-	maxRewards: 10,
-	maxIgnoredChannels: 10,
-	maxIgnoredRoles: 5,
-	minMultiplier: 1,
-	maxMultiplier: 5,
-	maxRewardLevel: 500,
-} as const;
+// Declared in `@testify/shared` so the dashboard's forms validate against the same numbers, and re-exported
+// here because every caller in the bot already imports it from this module.
+export { LEVEL_LIMITS };
 
 /** Level settings with every optional field resolved. */
 export interface LevelConfig {

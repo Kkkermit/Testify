@@ -52,7 +52,7 @@ middleware. What this phase turned up, beyond the plan:
   built bot looked for `dist/dashboard/dist` and served a 404 for every page. Nothing but a real HTTP request
   caught it; there is a test pinning it now.
 
-### Phase 2 — Guild overview and levelling (~1½ weeks)
+### Phase 2 — Guild overview and levelling (~1½ weeks) — **done**
 
 The vertical slice that proves the architecture. Levelling first because it is the freshest, richest config and
 its rules already live in `src/lib/levelling.util.ts`.
@@ -64,6 +64,15 @@ its rules already live in `src/lib/levelling.util.ts`.
 
 **Done when:** levelling can be configured end to end from the browser and the change is visible in
 `/levelling edit` in Discord.
+
+`jest-axe` is not wired in yet, and the live check against a running bot is still outstanding — this sandbox has
+neither Discord nor a MongoDB binary. What this phase settled:
+
+- **`LEVEL_LIMITS` had to move into `@testify/shared`.** The plan had the shared schemas importing it from
+  `src/lib/`, which inverts the dependency — `shared/` is consumed by the browser and cannot reach into the bot.
+  It lives in shared now and `levelling.util.ts` re-exports it, so every existing caller is unchanged.
+- **Hono does pass a mount-path parameter into a sub-app.** Worth recording because the opposite looked true for
+  a while: a 404 during this phase was a trailing slash in a test URL, not the router.
 
 ### Phase 3 — The rest of the settings (~2 weeks)
 

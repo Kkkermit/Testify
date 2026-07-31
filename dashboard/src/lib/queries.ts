@@ -5,6 +5,7 @@ export const keys = {
 	guild: (id: string) => ({
 		all: () => ["guild", id] as const,
 		overview: () => ["guild", id, "overview"] as const,
+		levelling: () => ["guild", id, "levelling"] as const,
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,

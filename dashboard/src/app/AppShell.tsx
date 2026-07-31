@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { LayoutGrid, LogOut, Server, ShieldCheck } from "lucide-react";
+import { LayoutGrid, LogOut, Server, ShieldCheck, TrendingUp } from "lucide-react";
 import { Link, NavLink, Outlet, useParams } from "react-router";
 import { GuildIcon } from "@/components/common/primitives";
 import { useMe } from "@/features/auth/useMe";
@@ -38,6 +38,9 @@ export function AppShell(): React.JSX.Element {
 				<SidebarLink to="/guilds" icon={<LayoutGrid size={18} />} label="Servers" />
 				{guild !== undefined && (
 					<SidebarLink to={`/guilds/${guild.id}`} icon={<Server size={18} />} label={guild.name} end={false} />
+				)}
+				{guild !== undefined && (
+					<SidebarLink to={`/guilds/${guild.id}/levelling`} icon={<TrendingUp size={18} />} label="Levelling" />
 				)}
 				{me.data?.isOwner === true && <SidebarLink to="/owner" icon={<ShieldCheck size={18} />} label="Owner" />}
 

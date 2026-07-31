@@ -1030,12 +1030,13 @@ dashboard/     Vite + React + Tailwind SPA
 **What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview and the
 owner console. The settings screens are next — `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
-| Route         | Screen                                                        |
-| ------------- | ------------------------------------------------------------- |
-| `/sign-in`    | One button; also the setup screen for a half-install          |
-| `/guilds`     | Picker, with an invite card for guilds without the bot        |
-| `/guilds/:id` | Stat tiles, feature grid, permission warnings, recent changes |
-| `/owner`      | Fleet stats and every guild, owner only                       |
+| Route                   | Screen                                                        |
+| ----------------------- | ------------------------------------------------------------- |
+| `/sign-in`              | One button; also the setup screen for a half-install          |
+| `/guilds`               | Picker, with an invite card for guilds without the bot        |
+| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes |
+| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings              |
+| `/owner`                | Fleet stats and every guild, owner only                       |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -1126,7 +1127,16 @@ registered behind it silently never runs.
 
 - **The dashboard owns no logic.** It is a third surface onto the same domain — repositories and
   `*Actions.util.ts` — exactly as commands and buttons are. A validation rule that exists only in a route
-  handler is how the two surfaces start disagreeing.
+  handler is how the two surfaces start disagreeing. `GET /levelling` is literally
+  `normaliseSettings(await getLevelSettings())`, so the web inherits the migration off the old `roleId` shape
+  rather than reimplementing it.
+- **Limits live in `@testify/shared`, not in `src/lib/`.** `LEVEL_LIMITS` moved there and `levelling.util.ts`
+  re-exports it, because the browser form and the API have to validate against the same numbers — the web
+  accepting a sixth boost role the Discord panel cannot render is exactly the drift this prevents.
+- **A list is replaced whole, not patched.** `PUT /boosts` takes the entire array, because the control is a
+  multi-select whose value _is_ the list: one request, and no add-then-remove race between two open tabs.
+- **Every mutation writes an audit record, after the change succeeds.** If the audit write itself fails it is
+  logged and the request still succeeds — the change did happen, and failing over the bookkeeping is worse.
 - **The API starts after `client.login()`** and closes in `src/core/shutdown.ts`. Both matter: before login the
   cache is empty, and a listener left open holds the port against a restart.
 - **Every route runs behind an error boundary.** `shutdown.ts` terminates on an uncaught exception, which is
