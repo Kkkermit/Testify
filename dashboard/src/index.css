@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 /*
- * The palette is the one worked out in dashboard-POC/08-DESIGN.md, where every ratio is calculated rather than
- * asserted. Changing a value here means re-checking it there.
+ * The palette is the one worked out in dashboard-POC/08-DESIGN.md, where every contrast ratio is calculated
+ * rather than asserted. Changing a value here means re-checking it there.
+ *
+ * Everything a screen can be restyled with lives in this block. A component never writes a hex value, a radius
+ * or a duration of its own — that is what makes a fork's rebrand a change to this file alone.
  */
 @theme {
 	--color-background: #0a0a0f;
@@ -21,7 +24,17 @@
 	--color-warning: #fbbf24;
 	--color-destructive: #dc2626;
 
-	--radius: 0.625rem;
+	/* Feature tints. Text colours at AA on the page background, used as icons and as 15% fills. */
+	--color-feature-levelling: #a78bfa;
+	--color-feature-economy: #fbbf24;
+	--color-feature-moderation: #f87171;
+	--color-feature-welcome: #34d399;
+	--color-feature-tickets: #60a5fa;
+	--color-feature-community: #f472b6;
+
+	--radius-card: 0.625rem;
+	--radius-field: 0.5rem;
+
 	--font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, monospace;
 
@@ -84,6 +97,11 @@
 	:focus-visible {
 		@apply outline-ring outline-2 outline-offset-2;
 	}
+
+	/* Native controls default to the browser's accent, which is nobody's brand. */
+	input[type="checkbox"] {
+		accent-color: var(--color-primary);
+	}
 }
 
 @utility motion-reveal {
@@ -118,6 +136,25 @@
 		background-image: linear-gradient(90deg, transparent, --alpha(var(--color-foreground) / 6%), transparent);
 		animation: var(--animate-sheen);
 	}
+}
+
+/*
+ * Tippy ships a light theme meant for a white page. This is the whole of its appearance here, reading the same
+ * tokens as everything else so a rebrand does not leave the tooltips behind.
+ */
+.tippy-box[data-theme~="testify"] {
+	background-color: var(--color-popover);
+	color: var(--color-foreground);
+	border: 1px solid var(--color-border);
+	border-radius: var(--radius-field);
+	font-size: 0.75rem;
+	line-height: 1.4;
+	padding: 0.125rem 0.25rem;
+	box-shadow: inset 0 1px 0 0 --alpha(var(--color-foreground) / 6%);
+}
+
+.tippy-box[data-theme~="testify"] > .tippy-arrow {
+	color: var(--color-popover);
 }
 
 /* Motion here is feedback, not decoration, so removing it costs nothing and keeps the dashboard usable. */

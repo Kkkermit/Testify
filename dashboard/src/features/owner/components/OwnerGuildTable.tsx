@@ -24,7 +24,7 @@ export function OwnerGuildTable({ guilds }: { guilds: OwnerGuildRow[] }): React.
 						<tr key={guild.id} className="hover:bg-muted/40 transition-colors duration-150">
 							<td className="px-6 py-3">
 								<span className="flex items-center gap-2">
-									<GuildIcon name={guild.name} url={guild.iconUrl} size={24} />
+									<GuildIcon name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
 									<span className="truncate">{guild.name}</span>
 								</span>
 							</td>

@@ -1,3 +1,4 @@
+import { Hash, Shield, Sparkles, Users } from "lucide-react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { PageHeader, Skeleton, StatTile } from "@/components/primitives";
@@ -23,10 +24,16 @@ export function GuildOverviewPage(): React.JSX.Element {
 			<PageHeader title={guild.name} subtitle="What Testify is doing in this server." />
 
 			<section aria-label="Server at a glance" className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-				<StatTile label="Members" value={guild.memberCount} />
-				<StatTile label="Channels" value={guild.channelCount} />
-				<StatTile label="Roles" value={guild.roleCount} />
-				<StatTile label="Features on" value={guild.features.filter((feature) => feature.enabled).length} />
+				<StatTile label="Members" value={guild.memberCount} icon={Users} tint="text-feature-welcome" />
+				<StatTile label="Channels" value={guild.channelCount} icon={Hash} tint="text-feature-tickets" />
+				<StatTile label="Roles" value={guild.roleCount} icon={Shield} tint="text-feature-levelling" />
+				<StatTile
+					label="Features on"
+					value={guild.features.filter((feature) => feature.enabled).length}
+					icon={Sparkles}
+					tint="text-feature-economy"
+					hint="Features Testify is actively running here, out of everything it offers."
+				/>
 			</section>
 
 			<MissingPermissions permissions={guild.missingPermissions} />

@@ -186,4 +186,26 @@ colours and emoji the embeds use, and the sidebar should carry the bot's own ava
 `client.user.displayAvatarURL()` so a self-hoster's fork looks like _their_ bot without editing any CSS.
 
 Guild icons come from Discord's CDN, already allowed by the CSP in `03-AUTH.md`. Always render a fallback — a
-guild with no icon is common, and a broken image in the picker is the first thing anyone sees.
+guild with no icon is common, and a broken image in the picker is the first thing anyone sees. The fallback is a
+lettered tile whose colour is derived from the server's id, so the picker is scannable by shape rather than by
+reading every name, and a server keeps its colour between visits.
+
+## Iconography
+
+Icons come from `lucide-react`, at 14–18px beside text and 26–28px in an empty state. Two rules:
+
+- **An icon beside a label is `aria-hidden`.** It repeats the text; announcing it twice is noise.
+- **An icon without a label needs an accessible name**, and a tooltip is not one — see the tooltip rule below.
+
+Every bot feature has a fixed icon and tint in `dashboard/src/config/features.ts`, so levelling is the same
+purple everywhere it appears and a reader learns the mapping once. Unknown keys get a neutral fallback rather
+than a gap.
+
+## Tooltips
+
+A tooltip **describes**; it never names. `aria-describedby`, never `aria-labelledby`, and every tooltip opens on
+keyboard focus as well as hover — one that only a pointer can reach is one most people never see.
+
+The place this matters most is the icon-only sidebar, and the tooltip is the _second_ half of that fix. The
+first is that the labels there are `sr-only`, not `hidden`: `display: none` takes them out of the accessibility
+tree, and a nav link named nothing is worse than an unlabelled icon.

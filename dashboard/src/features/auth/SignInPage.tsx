@@ -1,5 +1,5 @@
-import { ShieldCheck } from "lucide-react";
 import { useSearchParams } from "react-router";
+import { LogoTile } from "@/components/brand/Logo";
 import { Backdrop } from "@/components/motion";
 import { Button, Card } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
@@ -23,9 +23,7 @@ export function SignInPage(): React.JSX.Element {
 
 			<Card className="motion-pop flex flex-col gap-5">
 				<div className="flex items-center gap-3">
-					<span className="bg-primary/15 text-accent rounded-[0.625rem] p-2">
-						<ShieldCheck size={26} aria-hidden="true" />
-					</span>
+					<LogoTile />
 					<h1 className="text-2xl font-semibold tracking-tight">Testify</h1>
 				</div>
 

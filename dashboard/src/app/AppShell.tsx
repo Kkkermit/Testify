@@ -1,17 +1,28 @@
+import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router";
+import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { Backdrop } from "@/components/motion";
 import { useMe } from "@/features/auth/useMe";
 
-/** Sidebar, backdrop and the outlet. */
+/** Navigation, backdrop and the outlet. */
 export function AppShell(): React.JSX.Element {
 	const me = useMe();
 	const { guildId } = useParams();
 	const location = useLocation();
+	const [menuOpen, setMenuOpen] = useState(false);
+
 	const guild = me.data?.guilds.find((candidate) => candidate.id === guildId);
+	const audience = { guild, isOwner: me.data?.isOwner === true };
+	const user = me.data?.user ?? null;
+
+	// A drawer left open across a navigation covers the page it just moved to.
+	useEffect(() => {
+		setMenuOpen(false);
+	}, [location.pathname]);
 
 	return (
-		<div className="flex min-h-dvh">
+		<div className="flex min-h-dvh flex-col md:flex-row">
 			{/* Dimmer than the sign-in screen: behind a settings form it is a texture, not the subject. */}
 			<Backdrop opacity={0.22} />
 
@@ -22,10 +33,15 @@ export function AppShell(): React.JSX.Element {
 				Skip to content
 			</a>
 
-			<Sidebar user={me.data?.user ?? null} guild={guild} isOwner={me.data?.isOwner === true} />
+			<MobileNav {...audience} user={user} open={menuOpen} onOpenChange={setMenuOpen} />
+			<Sidebar {...audience} user={user} />
 
 			{/* Keyed on the path so each screen fades in on arrival rather than swapping in place. */}
-			<main id="content" key={location.pathname} className="motion-fade mx-auto w-full max-w-[1100px] flex-1 p-6">
+			<main
+				id="content"
+				key={location.pathname}
+				className="motion-fade mx-auto w-full max-w-[1100px] flex-1 p-4 sm:p-6"
+			>
 				<Outlet />
 			</main>
 		</div>

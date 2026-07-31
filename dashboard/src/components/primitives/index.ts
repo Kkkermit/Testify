@@ -8,3 +8,4 @@ export { GuildIcon } from "@/components/primitives/GuildIcon";
 export { PageHeader } from "@/components/primitives/PageHeader";
 export { Skeleton } from "@/components/primitives/Skeleton";
 export { StatTile } from "@/components/primitives/StatTile";
+export { Tooltip } from "@/components/primitives/Tooltip";

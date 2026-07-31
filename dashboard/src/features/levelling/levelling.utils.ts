@@ -3,7 +3,7 @@ import { TABS, type Tab } from "@/features/levelling/levelling.types";
 
 /** A tab name out of a URL can be anything at all. */
 export function tabFrom(raw: string | null): Tab {
-	return TABS.some(([key]) => key === raw) ? (raw as Tab) : "general";
+	return TABS.some((tab) => tab.key === raw) ? (raw as Tab) : "general";
 }
 
 /** A role deleted in Discord after being configured here still has to render as something. */

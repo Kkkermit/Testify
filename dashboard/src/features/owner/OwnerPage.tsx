@@ -1,3 +1,4 @@
+import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { PageHeader, Skeleton, StatTile } from "@/components/primitives";
@@ -28,12 +29,34 @@ export function OwnerPage(): React.JSX.Element {
 					[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
 				) : (
 					<>
-						<StatTile label="Servers" value={stats.data.guilds} />
-						<StatTile label="Members" value={stats.data.users} />
-						<StatTile label="Commands" value={stats.data.commands} />
-						<StatTile label="Uptime" value={formatUptime(stats.data.uptimeMs)} />
-						<StatTile label="Memory" value={`${String(stats.data.memoryMb)} MB`} />
-						<StatTile label="Database" value={stats.data.database} />
+						<StatTile label="Servers" value={stats.data.guilds} icon={Server} tint="text-feature-tickets" />
+						<StatTile
+							label="Members"
+							value={stats.data.users}
+							icon={Users}
+							tint="text-feature-welcome"
+							hint="Everyone Testify can see, counted across every server. People in two servers count twice."
+						/>
+						<StatTile label="Commands" value={stats.data.commands} icon={Terminal} tint="text-feature-levelling" />
+						<StatTile
+							label="Uptime"
+							value={formatUptime(stats.data.uptimeMs)}
+							icon={Clock}
+							tint="text-feature-economy"
+							hint="Since the bot process last started, not since it last connected to Discord."
+						/>
+						<StatTile
+							label="Memory"
+							value={`${String(stats.data.memoryMb)} MB`}
+							icon={Cpu}
+							tint="text-feature-economy"
+						/>
+						<StatTile
+							label="Database"
+							value={stats.data.database}
+							icon={Database}
+							tint={stats.data.database === "connected" ? "text-success" : "text-destructive"}
+						/>
 					</>
 				)}
 			</section>

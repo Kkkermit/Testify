@@ -1032,13 +1032,15 @@ Inside `dashboard/src`, the same rule as the bot: technical role first, then dom
 ```
 app/            AppShell, RequireAuth, ErrorState, and layout/ for the sidebar
 components/
-  primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon
+  brand/        Logo and LogoTile — the mark, inline, inheriting currentColor
+  primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, Tooltip
   form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning
   motion/       Backdrop (three.js), Reveal, AnimatedNumber
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
+config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
 hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible
-lib/            api, cn, queries, redirect, and three/ for the backdrop's maths and shaders
+lib/            api, cn, queries, redirect, tint, and three/ for the backdrop's maths and shaders
 ```
 
 A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL
@@ -1171,6 +1173,49 @@ Three things there are load-bearing and non-obvious, all commented in place:
 `transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
 `moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
 `node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
+
+### Adding to the dashboard
+
+Three registries exist so the common changes are data rather than edits to a screen. Reach for these first — a
+new `if` in the shell is nearly always the wrong answer.
+
+| To add…              | Edit                                    | And nothing else changes                                |
+| -------------------- | --------------------------------------- | ------------------------------------------------------- |
+| a sidebar section    | `config/navigation.ts`                  | icon rail, tooltips, active marker, mobile drawer       |
+| a bot feature's look | `config/features.ts`                    | the overview grid, and anywhere else a feature is shown |
+| a levelling tab      | `features/levelling/levelling.types.ts` | the tab bar, its icon, and `?tab=` in the URL           |
+
+`featureLook` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before the
+dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
+
+**No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
+`--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. A hex value in a
+`.tsx` is a review comment.
+
+### Tooltips describe, they never name
+
+`components/primitives/Tooltip.tsx` is the only place tooltips are configured. The rule it exists to enforce:
+**anything a tooltip says must be an addition to a control that already has its own accessible name.** A tooltip
+is a pointer affordance; a control labelled only by one is unreachable to anybody arriving another way.
+
+Two things follow, and both have tests:
+
+- It opens on `focusin` as well as hover, so a keyboard reaches it.
+- It sets `aria-describedby`, never `aria-labelledby`.
+
+It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in React
+19, so the wrapper warns on every render and is one release from breaking. Popper positions with inline styles,
+which the CSP allows under `style-src 'unsafe-inline'`; that combination is verified against the real built
+page, not assumed.
+
+### Responsiveness, and the label trap
+
+Three widths: a drawer below `md`, an icon-only rail from `md`, the full sidebar from `lg`.
+
+**At the icon-only width the labels are `sr-only`, never `hidden`.** `hidden` is `display: none`, which removes
+them from the accessibility tree and leaves every navigation link named nothing — the exact bug this pattern
+exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
+unit test pins the class and a real browser check confirms the accessible name survives.
 
 ### The WebGL backdrop
 
