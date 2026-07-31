@@ -16,7 +16,7 @@ export function RecentChanges({ changes }: { changes: GuildOverview["recentChang
 	}
 
 	return (
-		<Card className="p-0">
+		<Card padding="none">
 			<ul className="divide-border divide-y">
 				{changes.map((change) => (
 					<li

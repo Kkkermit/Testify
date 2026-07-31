@@ -1192,6 +1192,12 @@ dashboard knows about it and the grid renders a row rather than a hole. There is
 `--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. A hex value in a
 `.tsx` is a review comment.
 
+**Nor does one write its own padding.** `Card` takes `padding="none" | "compact" | "default"`, and all three use
+the same 24px inline padding so every card's content starts on the same column whatever its density — a card
+that reaches for `p-4` puts its text 8px left of the rest of the page. Vertical rhythm is one `gap-6` on the
+content column in `AppShell`, not a margin per section. Both are pinned by tests, and both were found by
+measuring the rendered page rather than by looking at it.
+
 ### Tooltips describe, they never name
 
 `components/primitives/Tooltip.tsx` is the only place tooltips are configured. The rule it exists to enforce:

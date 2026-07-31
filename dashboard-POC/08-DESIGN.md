@@ -129,7 +129,27 @@ number in a table so columns of figures line up and do not jitter as they update
 
 - Sidebar 240px, fixed, collapsing to icons below 1280px and to a sheet below 768px.
 - Content max-width 1100px, centred. A settings form spanning a 4K monitor is unreadable.
-- 8px spacing scale. Cards `p-6`, list rows `py-3`, sections `gap-6`.
+- 8px spacing scale. Sections `gap-6`, list rows `py-3`.
+
+### Two columns, and only two
+
+The whole layout resolves to two left edges, and it is worth keeping it that way:
+
+- **The page column** — page title, section headings, the first tab's label. Everything at the top level of a
+  screen starts here.
+- **The card column** — 24px inside a card, wherever content sits inside one.
+
+That is why `Card` has a fixed padding scale (`none` / `compact` / `default`) rather than a class per call site,
+and why **all three share the same 24px inline padding**: only the vertical rhythm changes with density, so a
+dense tile and a roomy panel still start their text on the same line. A card that sets its own `p-4` puts its
+content 8px left of every other card on the page. There is a test pinning this.
+
+Vertical rhythm comes from one `gap-6` on the content column, not from a margin on each child. Margins drift as
+sections are added and removed; a single gap cannot.
+
+The sidebar follows the same discipline: every row shares one class, so the icons sit on one axis and the labels
+on another. They were four pixels apart before it was measured.
+
 - Radius 10px on cards and buttons, 8px on inputs. Consistent, and softer than shadcn's default 6px, which suits
   the darker palette.
 - **No drop shadows.** On near-black they read as smudges. Elevation is surface colour and a 1px border.

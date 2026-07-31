@@ -3,7 +3,7 @@ import { Badge, Card, GuildIcon } from "@/components/primitives";
 
 export function OwnerGuildTable({ guilds }: { guilds: OwnerGuildRow[] }): React.JSX.Element {
 	return (
-		<Card className="overflow-x-auto p-0">
+		<Card padding="none" className="overflow-x-auto">
 			<table className="w-full text-sm">
 				<caption className="sr-only">Servers Testify is in, largest first</caption>
 				<thead className="text-muted-foreground border-border border-b">

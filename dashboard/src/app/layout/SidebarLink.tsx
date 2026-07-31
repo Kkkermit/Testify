@@ -18,13 +18,14 @@ export function SidebarLink({ item, expanded = false }: { item: NavItem; expande
 				end={exact}
 				className={({ isActive }) =>
 					cn(
-						"rounded-card group relative flex items-center gap-3 px-2 py-2 text-sm transition-colors duration-150",
+						"rounded-card relative flex items-center gap-3 px-2 py-2 text-sm transition-colors duration-150",
 						isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
 					)
 				}
 			>
 				{({ isActive }) => (
 					<>
+						{/* Sits in the row's padding rather than in the flow, so the icon column does not shift. */}
 						<span
 							aria-hidden="true"
 							className={cn(
@@ -32,7 +33,9 @@ export function SidebarLink({ item, expanded = false }: { item: NavItem; expande
 								isActive ? "h-5 opacity-100" : "h-0 opacity-0",
 							)}
 						/>
-						<Icon size={18} aria-hidden="true" className="shrink-0" />
+						<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+							<Icon size={18} />
+						</span>
 						<span className={expanded ? "truncate" : "sr-only truncate lg:not-sr-only"}>{label}</span>
 					</>
 				)}

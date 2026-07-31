@@ -23,7 +23,7 @@ export function StatTile({
 	hint?: string;
 }): React.JSX.Element {
 	const tile = (
-		<Card className="hover:border-input p-4 transition-colors duration-150">
+		<Card padding="compact" className="hover:border-input transition-colors duration-150">
 			<p className="text-muted-foreground flex items-center gap-1.5 text-[0.8125rem] font-medium">
 				{Icon !== undefined && <Icon size={14} aria-hidden="true" className={cn("shrink-0", tint)} />}
 				{label}

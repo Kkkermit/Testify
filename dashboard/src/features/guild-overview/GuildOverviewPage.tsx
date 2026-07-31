@@ -23,7 +23,7 @@ export function GuildOverviewPage(): React.JSX.Element {
 		<>
 			<PageHeader title={guild.name} subtitle="What Testify is doing in this server." />
 
-			<section aria-label="Server at a glance" className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+			<section aria-label="Server at a glance" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 				<StatTile label="Members" value={guild.memberCount} icon={Users} tint="text-feature-welcome" />
 				<StatTile label="Channels" value={guild.channelCount} icon={Hash} tint="text-feature-tickets" />
 				<StatTile label="Roles" value={guild.roleCount} icon={Shield} tint="text-feature-levelling" />
@@ -38,15 +38,15 @@ export function GuildOverviewPage(): React.JSX.Element {
 
 			<MissingPermissions permissions={guild.missingPermissions} />
 
-			<section aria-labelledby="features-heading" className="mb-6">
-				<h2 id="features-heading" className="mb-3 text-lg font-semibold">
+			<section aria-labelledby="features-heading" className="flex flex-col gap-3">
+				<h2 id="features-heading" className="text-lg font-semibold">
 					Features
 				</h2>
 				<FeatureGrid features={guild.features} />
 			</section>
 
-			<section aria-labelledby="changes-heading">
-				<h2 id="changes-heading" className="mb-3 text-lg font-semibold">
+			<section aria-labelledby="changes-heading" className="flex flex-col gap-3">
+				<h2 id="changes-heading" className="text-lg font-semibold">
 					Recent changes
 				</h2>
 				<RecentChanges changes={guild.recentChanges} />
@@ -59,12 +59,12 @@ function OverviewSkeleton(): React.JSX.Element {
 	return (
 		<>
 			<Skeleton className="h-8 w-56" />
-			<div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+			<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 				{[0, 1, 2, 3].map((index) => (
 					<Skeleton key={index} className="h-[86px]" />
 				))}
 			</div>
-			<Skeleton className="mt-6 h-56 w-full" />
+			<Skeleton className="h-56 w-full" />
 		</>
 	);
 }

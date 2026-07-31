@@ -2,7 +2,7 @@
 
 export { Badge, type BadgeTone } from "@/components/primitives/Badge";
 export { Button, type ButtonVariant } from "@/components/primitives/Button";
-export { Card } from "@/components/primitives/Card";
+export { Card, cardClass, type CardPadding } from "@/components/primitives/Card";
 export { EmptyState } from "@/components/primitives/EmptyState";
 export { GuildIcon } from "@/components/primitives/GuildIcon";
 export { PageHeader } from "@/components/primitives/PageHeader";

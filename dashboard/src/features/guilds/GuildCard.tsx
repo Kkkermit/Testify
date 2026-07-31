@@ -1,7 +1,7 @@
 import { type ManageableGuild } from "@testify/shared";
 import { ChevronRight } from "lucide-react";
 import { Link } from "react-router";
-import { Badge, Card, GuildIcon, Tooltip } from "@/components/primitives";
+import { Badge, Card, cardClass, GuildIcon, Tooltip } from "@/components/primitives";
 
 export function GuildCard({ guild }: { guild: ManageableGuild }): React.JSX.Element {
 	const body = (
@@ -21,7 +21,7 @@ export function GuildCard({ guild }: { guild: ManageableGuild }): React.JSX.Elem
 	// A server without the bot is shown rather than hidden — the invite is the point, and it costs nothing.
 	if (!guild.botPresent) {
 		return (
-			<Card className="flex items-center gap-3 p-4 opacity-70">
+			<Card padding="compact" className="flex items-center gap-3 opacity-70">
 				{body}
 				<Tooltip label="Invite Testify to this server and it will appear here as configurable.">
 					<span tabIndex={0} className="rounded-full">
@@ -35,7 +35,10 @@ export function GuildCard({ guild }: { guild: ManageableGuild }): React.JSX.Elem
 	return (
 		<Link
 			to={`/guilds/${guild.id}`}
-			className="bg-card border-border hover:border-input surface-edge rounded-card group flex items-center gap-3 border p-4 transition-colors duration-150"
+			className={cardClass(
+				"compact",
+				"hover:border-input group flex items-center gap-3 transition-colors duration-150",
+			)}
 		>
 			{body}
 			<ChevronRight

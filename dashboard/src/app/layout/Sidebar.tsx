@@ -7,9 +7,17 @@ import { Logo } from "@/components/brand/Logo";
 import { GuildIcon, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
 import { api } from "@/lib/api";
+import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
-/** Icons only below `lg`, full width above it. The drawer on a phone renders the same thing at full width. */
+/**
+ * Icons only below `lg`, full width above it; the drawer on a phone renders the same thing at full width.
+ *
+ * Every row — the wordmark, the links, the account, the sign-out — shares `ROW`, so all four icons sit on one
+ * vertical line and all four labels on another. They were on two columns four pixels apart before this.
+ */
+const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
+
 export function Sidebar({
 	user,
 	guild,
@@ -23,6 +31,7 @@ export function Sidebar({
 	onNavigate?: () => void;
 }): React.JSX.Element {
 	const queryClient = useQueryClient();
+	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
 
 	async function signOut(): Promise<void> {
 		await api.post("/auth/logout");
@@ -37,26 +46,27 @@ export function Sidebar({
 			className={cnSidebar(expanded)}
 			data-testid={expanded ? "sidebar-drawer" : "sidebar"}
 		>
-			<Link to="/guilds" className="rounded-card mb-6 flex items-center gap-2 px-1 py-1">
-				<Logo size={22} className="text-accent" />
-				<span
-					className={expanded ? "font-semibold tracking-tight" : "sr-only font-semibold tracking-tight lg:not-sr-only"}
-				>
-					Testify
+			<Link to="/guilds" className={cn(ROW, "mb-4")}>
+				{/* Boxed to 18px like every other row icon, so the wordmark starts on the label column too. */}
+				<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+					<Logo size={22} className="text-accent" />
 				</span>
+				<span className={label("truncate font-semibold tracking-tight")}>Testify</span>
 			</Link>
 
-			{navigationFor({ guild, isOwner }).map((item) => (
-				<SidebarLink key={item.to} item={item} expanded={expanded} />
-			))}
+			<div className="flex flex-col gap-1">
+				{navigationFor({ guild, isOwner }).map((item) => (
+					<SidebarLink key={item.to} item={item} expanded={expanded} />
+				))}
+			</div>
 
-			<div className="mt-auto flex flex-col gap-2 pt-4">
+			<div className="border-border mt-auto flex flex-col gap-1 border-t pt-3">
 				{user !== null && (
-					<div className="flex items-center gap-2 px-1">
-						<GuildIcon name={user.username} url={user.avatarUrl} size={28} seed={user.id} />
-						<span className={expanded ? "truncate text-sm" : "sr-only truncate text-sm lg:not-sr-only"}>
-							{user.username}
+					<div className={ROW}>
+						<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+							<GuildIcon name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
 						</span>
+						<span className={label("truncate text-sm")}>{user.username}</span>
 					</div>
 				)}
 
@@ -64,10 +74,13 @@ export function Sidebar({
 					<button
 						type="button"
 						onClick={() => void signOut()}
-						className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-card flex items-center gap-3 px-2 py-2 text-sm transition-colors duration-150"
+						className={cn(
+							ROW,
+							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+						)}
 					>
 						<LogOut size={18} aria-hidden="true" className="shrink-0" />
-						<span className={expanded ? "" : "sr-only lg:not-sr-only"}>Sign out</span>
+						<span className={label("truncate")}>Sign out</span>
 					</button>
 				</Tooltip>
 			</div>

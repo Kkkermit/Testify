@@ -22,7 +22,7 @@ export function GuildPickerPage(): React.JSX.Element {
 		<>
 			<PageHeader title="Servers" subtitle="Servers where you can change Testify's settings." />
 
-			<label className="motion-reveal relative mb-6 block">
+			<label className="motion-reveal relative block">
 				<span className="sr-only">Search servers</span>
 				<Search
 					size={16}
@@ -53,7 +53,7 @@ export function GuildPickerPage(): React.JSX.Element {
 					}
 				/>
 			) : (
-				<ul className="grid gap-3 sm:grid-cols-2">
+				<ul className="grid gap-4 sm:grid-cols-2">
 					{guilds.map((guild, index) => (
 						<Reveal as="li" key={guild.id} index={index}>
 							<GuildCard guild={guild} />
@@ -69,8 +69,8 @@ function PickerSkeleton(): React.JSX.Element {
 	return (
 		<>
 			<Skeleton className="h-8 w-40" />
-			<Skeleton className="mt-6 h-10 w-full" />
-			<div className="mt-6 grid gap-3 sm:grid-cols-2">
+			<Skeleton className="h-10 w-full" />
+			<div className="grid gap-4 sm:grid-cols-2">
 				{[0, 1, 2, 3].map((index) => (
 					<Skeleton key={index} className="h-[74px]" />
 				))}

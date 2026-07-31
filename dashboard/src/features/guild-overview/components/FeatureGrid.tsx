@@ -6,13 +6,16 @@ import { cn } from "@/lib/cn";
 
 export function FeatureGrid({ features }: { features: GuildOverview["features"] }): React.JSX.Element {
 	return (
-		<ul className="grid gap-3 sm:grid-cols-2">
+		<ul className="grid gap-4 sm:grid-cols-2">
 			{features.map((feature, index) => {
 				const { icon: Icon, tint, wash } = featureLook(feature.key);
 
 				return (
 					<Reveal as="li" key={feature.key} index={index}>
-						<Card className="hover:border-input flex items-center gap-3 p-4 transition-colors duration-150">
+						<Card
+							padding="compact"
+							className="hover:border-input flex items-center gap-3 transition-colors duration-150"
+						>
 							<span className={cn("rounded-card shrink-0 p-2", wash, tint)} aria-hidden="true">
 								<Icon size={18} />
 							</span>

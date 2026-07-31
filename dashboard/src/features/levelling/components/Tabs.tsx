@@ -8,11 +8,7 @@ import { cn } from "@/lib/cn";
  */
 export function Tabs({ active, onSelect }: { active: Tab; onSelect: (tab: Tab) => void }): React.JSX.Element {
 	return (
-		<div
-			role="tablist"
-			aria-label="Levelling settings"
-			className="border-border mb-6 flex gap-1 overflow-x-auto border-b"
-		>
+		<div role="tablist" aria-label="Levelling settings" className="border-border flex gap-1 overflow-x-auto border-b">
 			{TABS.map(({ key, label, icon: Icon }) => (
 				<button
 					key={key}
@@ -23,7 +19,8 @@ export function Tabs({ active, onSelect }: { active: Tab; onSelect: (tab: Tab) =
 						onSelect(key);
 					}}
 					className={cn(
-						"relative -mb-px flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-medium",
+						// The first tab is flush left, so its label sits on the same column as the page title above it.
+						"relative -mb-px flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-medium first:pl-0",
 						"transition-colors duration-150",
 						active === key ? "text-foreground" : "text-muted-foreground hover:text-foreground",
 					)}

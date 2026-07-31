@@ -24,7 +24,7 @@ export function OwnerPage(): React.JSX.Element {
 		<>
 			<PageHeader title="Owner console" subtitle="Every server Testify is in." />
 
-			<section aria-label="Bot health" className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-3">
+			<section aria-label="Bot health" className="grid grid-cols-2 gap-4 lg:grid-cols-3">
 				{stats.isPending ? (
 					[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
 				) : (
@@ -61,21 +61,25 @@ export function OwnerPage(): React.JSX.Element {
 				)}
 			</section>
 
-			<h2 className="mb-3 text-lg font-semibold">Servers</h2>
+			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
+				<h2 id="servers-heading" className="text-lg font-semibold">
+					Servers
+				</h2>
 
-			{guilds.data === undefined ? (
-				<Skeleton className="h-64 w-full" />
-			) : (
-				<OwnerGuildTable guilds={guilds.data.items} />
-			)}
+				{guilds.data === undefined ? (
+					<Skeleton className="h-64 w-full" />
+				) : (
+					<OwnerGuildTable guilds={guilds.data.items} />
+				)}
 
-			<Pager
-				page={page}
-				pages={pageCount(guilds.data?.total ?? 0, PER_PAGE)}
-				onChange={(next) => {
-					setParams({ page: String(next) });
-				}}
-			/>
+				<Pager
+					page={page}
+					pages={pageCount(guilds.data?.total ?? 0, PER_PAGE)}
+					onChange={(next) => {
+						setParams({ page: String(next) });
+					}}
+				/>
+			</section>
 		</>
 	);
 }
