@@ -27,8 +27,8 @@ export async function getTicketByChannel(channelId: string): Promise<TicketRecor
 }
 
 /**
- * Ticket IDs are UUID-derived rather than a random five-digit integer, which the
- * previous implementation generated with no uniqueness check at all.
+ * Ticket IDs are UUID-derived rather than a random five-digit integer, which the previous implementation generated
+ * with no uniqueness check at all.
  */
 export async function createTicket(input: {
 	guildId: string;

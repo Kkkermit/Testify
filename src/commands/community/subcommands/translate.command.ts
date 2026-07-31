@@ -7,9 +7,7 @@ import { fetchJson } from "@lib/http.util";
 import { reply } from "@lib/reply.util";
 
 /**
- * The `@iamtraction/google-translate` package was imported but never declared as a
- * dependency, and shipped no types. This calls the same public endpoint directly,
- * validated at the boundary.
+ * The `@iamtraction/google-translate` package was imported but never declared as a dependency, and shipped no types.
  */
 const responseSchema = z.tuple([z.array(z.array(z.string().nullable())), z.unknown(), z.string()]).rest(z.unknown());
 

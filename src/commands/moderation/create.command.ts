@@ -6,11 +6,7 @@ import { COLOUR_CHOICES, resolveColour } from "@lib/colours.util";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * The original declared twelve individual `field-name` / `field-value` string
- * options by hand. Three pairs, generated, covers the same ground without the
- * copy-paste.
- */
+/** Three pairs, generated, covers the same ground without the copy-paste. */
 const FIELD_OPTIONS: CommandOption[] = [1, 2, 3].flatMap((index) => [
 	{
 		name: `field-${index}-name`,

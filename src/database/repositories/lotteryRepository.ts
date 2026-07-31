@@ -63,10 +63,7 @@ export async function addEntry(
 		.exec();
 }
 
-/**
- * Claims a due draw by pushing `nextDrawTime` forward in the same query that
- * selects it. A slow draw can no longer overlap the next tick and pay out twice.
- */
+/** Claims a due draw by pushing `nextDrawTime` forward in the same query that selects it. */
 export async function claimDueDraw(now: Date = new Date()): Promise<LotteryRecord | null> {
 	const due = await Lottery.findOne({ isActive: true, isFrozen: false, nextDrawTime: { $lte: now } })
 		.lean<LotteryRecord>()

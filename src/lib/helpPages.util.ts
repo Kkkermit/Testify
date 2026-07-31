@@ -15,7 +15,7 @@ import { button, linkButton, row, select, selectRow } from "@lib/components.util
 import { embed } from "@lib/embeds.util";
 import { truncate } from "@lib/format.util";
 
-/** How the help pages are laid out. `surface` decides whether it shows `/` or the prefix. */
+/** How the help pages are laid out. */
 export type Surface = "slash" | "prefix";
 
 export const HELP_PAGE_SIZE = 6;
@@ -163,7 +163,7 @@ export function commandPage(command: Command, surface: Surface, prefix: string):
 	});
 }
 
-/** The category picker. The chosen surface travels in the custom ID. */
+/** The category picker. */
 export function categoryMenu(client: TestifyClient, surface: Surface, chosen: Category | null, ownerId: string) {
 	const options = [
 		new StringSelectMenuOptionBuilder()

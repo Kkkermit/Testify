@@ -13,12 +13,7 @@ import {
 import { greetingFor } from "@lib/welcomeActions.util";
 import { welcomePanel, WELCOME_PANEL_ID } from "@lib/welcomePanel.util";
 
-/**
- * Every control on the welcome panel.
- *
- * The stored config is re-read before each change, so two admins with the panel
- * open see each other's work rather than overwriting it with a stale copy.
- */
+/** Every control on the welcome panel. */
 async function currentConfig(guildId: string): Promise<WelcomeConfig | null> {
 	return normaliseWelcome(await getWelcome(guildId));
 }
@@ -30,8 +25,6 @@ export default defineButton({
 	async run(interaction, context) {
 		if (interaction.guild === null) return;
 
-		// The panel is an ordinary message, so the permission is the gate rather than
-		// whoever happens to be pressing.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change the welcome messages.");
 		}
@@ -63,8 +56,6 @@ export default defineButton({
 					throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
 				}
 
-				// A first-time setup needs a message to send, so it starts with one that
-				// already uses every placeholder rather than an empty string.
 				const saved = await saveWelcome(guild.id, {
 					channelId,
 					...(config === null ? { message: DEFAULT_WELCOME_MESSAGE, style: "card" as const } : {}),
@@ -125,8 +116,6 @@ export default defineButton({
 				if (config === null) return;
 				if (interaction.member === null) return;
 
-				// Rendered by exactly the code that greets a real member, so the preview
-				// cannot flatter the result.
 				const member = await guild.members.fetch(ownerId).catch(() => null);
 				if (member === null) throw new UserFacingError("I could not read your member profile to build a preview.");
 

@@ -13,8 +13,8 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 const command = require("@commands/settings/prefix.command").default as Parameters<typeof dispatch>[1];
 
 /**
- * `/prefix` was four subcommands — `show`, `set`, `enable`, `disable` — where three
- * existed only because `set` never showed you the result. It is one panel now.
+ * `/prefix` was four subcommands — `show`, `set`, `enable`, `disable` — where three existed only because `set` never
+ * showed you the result.
  */
 describe("/prefix", () => {
 	beforeEach(() => {

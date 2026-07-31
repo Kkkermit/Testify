@@ -4,11 +4,7 @@ import { defineCommand, inGuild } from "@core/command";
 import { countingPanel } from "@lib/countingPanel.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * One panel instead of `setup`, `disable`, `reset` and `status`.
- *
- * Three of those four existed only because `setup` never showed you the result.
- */
+/** One panel instead of `setup`, `disable`, `reset` and `status`. */
 export default defineCommand({
 	name: "counting",
 	description: "Runs the counting game in a channel.",

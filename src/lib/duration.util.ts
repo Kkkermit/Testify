@@ -26,15 +26,11 @@ const UNITS: Record<string, number> = {
 
 const PATTERN = /(\d+(?:\.\d+)?)\s*([a-z]+)/gi;
 
-/**
- * Parses "10m", "2h30m", "1d 12h" into milliseconds. Replaces the `ms` package,
- * which was imported but never declared as a dependency.
- */
+/** Parses "10m", "2h30m", "1d 12h" into milliseconds. */
 export function parseDuration(input: string): number | null {
 	const trimmed = input.trim().toLowerCase();
 	if (trimmed.length === 0) return null;
 
-	// Bare numbers are treated as seconds, matching the old choice-list behaviour.
 	if (/^\d+$/.test(trimmed)) return Number.parseInt(trimmed, 10) * SECOND_MS;
 
 	let total = 0;

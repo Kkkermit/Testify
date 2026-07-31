@@ -3,11 +3,7 @@ import { requireAccount } from "@database/repositories/economyRepository";
 import { inventoryScreen } from "@lib/inventoryScreen.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * `use` is an alias rather than its own command. `/use <item>` made you name an
- * item from a hardcoded list of three, while every row here already has a Use
- * button beside the thing it uses.
- */
+/** `use` is an alias rather than its own command. */
 export default defineCommand({
 	name: "inventory",
 	description: "Shows what you own, and uses it.",

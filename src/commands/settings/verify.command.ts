@@ -6,14 +6,7 @@ import { successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 import { normaliseVerify, verifyPanel } from "@lib/verifyPanel.util";
 
-/**
- * One panel instead of three subcommands.
- *
- * `/verify setup <role> <channel> <content>` posted the public panel as a side
- * effect of configuring, so changing the wording meant running setup again and
- * leaving the old panel behind. The panel separates the two: configure freely,
- * then post once.
- */
+/** One panel instead of three subcommands. */
 async function openPanel(interaction: CommandInput): Promise<void> {
 	const guild = inGuild(interaction);
 	const config = normaliseVerify(await getVerifyConfig(guild.id));

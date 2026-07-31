@@ -1,8 +1,4 @@
-/**
- * Every user-facing string the framework itself produces. Feature copy that is
- * genuinely local to one command stays with that command; anything reused, or
- * likely to be translated, lives here.
- */
+/** Every user-facing string the framework itself produces. */
 export const strings = {
 	generic: {
 		error: "Something went wrong while running that. The incident has been logged.",

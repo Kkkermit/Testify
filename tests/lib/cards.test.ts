@@ -2,11 +2,7 @@ import { AttachmentBuilder } from "discord.js";
 import { boardHeight, medalColour, renderBoardImage } from "@lib/boardCard.util";
 import { barFill, type RankCardData, rankCardText, renderRankCard } from "@lib/rankCard.util";
 
-/**
- * The avatar fetch is deliberately pointed at a closed local port. Nothing here
- * touches the network, and it exercises the path that matters: a card must still
- * render when Discord's CDN cannot be reached.
- */
+/** The avatar fetch is deliberately pointed at a closed local port. */
 const UNREACHABLE = "http://127.0.0.1:1/avatar.png";
 
 function card(overrides: Partial<RankCardData> = {}): RankCardData {

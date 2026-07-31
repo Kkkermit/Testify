@@ -90,8 +90,8 @@ describe("settingsScreen", () => {
 	});
 
 	/**
-	 * Two bare menus stacked together look identical once something is chosen — the
-	 * placeholder that told them apart is replaced by the selection.
+	 * Two bare menus stacked together look identical once something is chosen — the placeholder that told them apart is
+	 * replaced by the selection.
 	 */
 	it("captions each picker so the reader knows which is which", () => {
 		const twoPickers = settingsScreen({

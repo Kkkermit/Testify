@@ -1,10 +1,4 @@
-/**
- * Shared helpers. Domain logic and formatting, never framework concerns.
- *
- * Re-exported with `export *` so the barrel maintains itself — adding a file
- * here needs no edit. Import a module directly (`@lib/embeds.util`) when you only
- * want one; the barrel is for when you want several.
- */
+/** Shared helpers. */
 
 export * from "./amount.util";
 export * from "./auditLog.util";

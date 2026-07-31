@@ -7,9 +7,8 @@ import { getPrefixConfig } from "@database/repositories/settingsRepository";
 import { errorEmbed } from "@lib/embeds.util";
 
 /**
- * Runs `t?ban @someone` through exactly the same code as `/ban`, including the
- * permission, cooldown and blacklist checks. Set the server's prefix with
- * `/prefix`; mentioning the bot works too.
+ * Runs `t?ban @someone` through exactly the same code as `/ban`, including the permission, cooldown and blacklist
+ * checks.
  */
 export default defineMessageHandler({
 	name: "prefixCommands",

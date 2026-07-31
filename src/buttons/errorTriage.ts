@@ -11,11 +11,7 @@ function isTriageState(value: string): value is TriageState {
 	return value === "pending" || value === "solved" || value === "unsolved";
 }
 
-/**
- * Recolours the error report in place. The previous implementation stored the
- * message, embed and row in three single global slots on the client, so two
- * concurrent errors made the button edit the wrong report.
- */
+/** Recolours the error report in place. */
 export default defineButton({
 	id: "error",
 

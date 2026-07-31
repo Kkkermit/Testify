@@ -17,11 +17,6 @@ function redact(output: string, secrets: string[]): string {
 	return cleaned;
 }
 
-/**
- * Owner-only, gated by `ownerOnly` rather than the previous `.includes()` check
- * against a single developer-ID string — which did substring matching, so a user
- * ID that happened to be a substring passed.
- */
 export default defineCommand({
 	name: "eval",
 	description: "Evaluates JavaScript. Owner only.",

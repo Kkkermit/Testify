@@ -1,11 +1,7 @@
 import { readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-/**
- * The file-naming rules from CLAUDE.md §3, enforced rather than asked for.
- * A file that misses its suffix is silently skipped by the loader, which is a
- * whole feature disappearing with no error anywhere.
- */
+/** The file-naming rules from CLAUDE.md §3, enforced rather than asked for. */
 const SRC = resolve(__dirname, "../../src");
 
 function filesIn(folder: string, pattern: RegExp): string[] {

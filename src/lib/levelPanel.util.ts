@@ -13,21 +13,7 @@ import {
 import { LEVEL_LIMITS, type LevelConfig } from "@lib/levelling.util";
 
 /**
- * The levelling configuration, as four tabs of controls rather than a command with
- * eleven options nobody discovers.
- *
- * Two things this leans on Components V2 for:
- *
- * - Each boost role and each reward is a section with its own button, so the
- *   control sits beside the thing it changes. The old panel could only offer a row
- *   of buttons under a list, which means matching them up by counting.
- * - The role and channel menus carry their current selection as pre-ticked
- *   defaults, so the menu *is* the list — deselecting removes, and there is no
- *   separate remove button to hunt for.
- *
- * Every control applies immediately. Unlike the audit panel there is no draft to
- * save: each setting here is independent, so there is nothing to batch, and a
- * half-applied config is not a state anyone would want to be in.
+ * The levelling configuration, as four tabs of controls rather than a command with eleven options nobody discovers.
  */
 
 export const LEVEL_PANEL_ID = "levelling";
@@ -54,8 +40,8 @@ export interface LevelPanelState {
 }
 
 /**
- * The tab is always the first argument, so every control knows which screen to
- * re-render without anything being remembered between presses.
+ * The tab is always the first argument, so every control knows which screen to re-render without anything being
+ * remembered between presses.
  */
 function control(action: string, state: LevelPanelState, ownerId: string, ...args: (string | number)[]): string {
 	return customId(LEVEL_PANEL_ID, action, state.tab, ...args, ownerId);

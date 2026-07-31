@@ -4,13 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { getAutoRoles, setAutoRoles } from "@database/repositories/settingsRepository";
 import { AUTOROLE_PANEL_ID, autoRolePanel, MAX_AUTO_ROLES } from "@lib/autoRolePanel.util";
 
-/**
- * Every control on the auto-role panel.
- *
- * Which roles the bot cannot assign is worked out on every render rather than
- * only when one is added — the hierarchy changes without telling anyone, and a
- * silently dead auto-role is the failure people report weeks later.
- */
+/** Every control on the auto-role panel. */
 export function unusableRoles(guild: Guild, roleIds: readonly string[]): string[] {
 	const ceiling = guild.members.me?.roles.highest.position ?? Number.POSITIVE_INFINITY;
 

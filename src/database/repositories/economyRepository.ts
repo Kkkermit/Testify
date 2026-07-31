@@ -3,15 +3,11 @@ import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
 import { Economy, type EconomyAccount, type InventoryItem } from "@database/models/economy.schema";
 
-/**
- * The only place economy queries live. Every mutation is atomic — the previous
- * read-modify-`save()` pattern lost writes under concurrency, which was
- * exploitable as money duplication rather than merely theoretical.
- */
+/** The only place economy queries live. */
 
 const LEAN = { lean: true as const, new: true as const };
 
-/** Fetches the account, creating it on first use. Never returns null. */
+/** Fetches the account, creating it on first use. */
 export async function getOrCreateAccount(guildId: string, userId: string): Promise<EconomyAccount> {
 	return Economy.findOneAndUpdate(
 		{ guildId, userId },
@@ -20,7 +16,7 @@ export async function getOrCreateAccount(guildId: string, userId: string): Promi
 	).exec() as Promise<EconomyAccount>;
 }
 
-/** Reads without creating. Used where "no account yet" is a meaningful answer. */
+/** Reads without creating. */
 export async function findAccount(guildId: string, userId: string): Promise<EconomyAccount | null> {
 	return Economy.findOne({ guildId, userId }).lean<EconomyAccount>().exec();
 }
@@ -65,9 +61,8 @@ export async function adjustBank(guildId: string, userId: string, delta: number)
 }
 
 /**
- * Conditional debit: the filter itself requires sufficient funds, so two
- * concurrent spends cannot both succeed against the same balance.
- * Returns null when the funds were not available.
+ * Conditional debit: the filter itself requires sufficient funds, so two concurrent spends cannot both succeed
+ * against the same balance.
  */
 export async function debitWallet(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	return Economy.findOneAndUpdate({ guildId, userId, wallet: { $gte: amount } }, { $inc: { wallet: -amount } }, LEAN)
@@ -81,7 +76,7 @@ export async function debitBank(guildId: string, userId: string, amount: number)
 		.exec();
 }
 
-/** Wallet → bank. Debit is conditional, so an over-deposit is impossible. */
+/** Wallet → bank. */
 export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	const debited = await debitWallet(guildId, userId, amount);
 	if (!debited) return null;
@@ -168,10 +163,7 @@ export async function countAccounts(guildId: string): Promise<number> {
 	return Economy.countDocuments({ guildId }).exec();
 }
 
-/**
- * Where one account sits on the leaderboard, counted in the database rather than
- * by paging through it. `null` means they have no account here.
- */
+/** Where one account sits on the leaderboard, counted in the database rather than by paging through it. */
 export async function getEconomyRank(guildId: string, userId: string): Promise<number | null> {
 	const account = await findAccount(guildId, userId);
 	if (!account) return null;

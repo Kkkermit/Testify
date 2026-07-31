@@ -54,10 +54,7 @@ describe("normaliseSettings", () => {
 		expect(normaliseSettings(stored({ isDisabled: false })).enabled).toBe(true);
 	});
 
-	/**
-	 * The first version stored one boost role in `roleId` and `multiplier`. A guild
-	 * that configured it back then must keep its boost without re-running setup.
-	 */
+	/** A guild that configured it back then must keep its boost without re-running setup. */
 	it("folds the old single boost role into the boosts list", () => {
 		const migrated = normaliseSettings(stored({ roleId: BOOSTER, multiplier: 3 }));
 		expect(migrated.boosts).toEqual([{ roleId: BOOSTER, multiplier: 3 }]);
@@ -86,8 +83,8 @@ describe("normaliseSettings", () => {
 	});
 
 	/**
-	 * Mongoose applies defaults on write, not to documents already on disk, so a
-	 * record written before these fields existed arrives without them.
+	 * Mongoose applies defaults on write, not to documents already on disk, so a record written before these fields
+	 * existed arrives without them.
 	 */
 	it("fills in fields a document written by the first version does not have", () => {
 		const partial = stored();
@@ -158,8 +155,8 @@ describe("multiplierFor", () => {
 	});
 
 	/**
-	 * Highest wins rather than the product: three stacked ×5 roles would be ×125,
-	 * which is not what anyone setting up "×5 for boosters" is asking for.
+	 * Highest wins rather than the product: three stacked ×5 roles would be ×125, which is not what anyone setting up
+	 * "×5 for boosters" is asking for.
 	 */
 	it("takes the best multiplier rather than multiplying them together", () => {
 		expect(multiplierFor(boosted, [BOOSTER, VIP])).toBe(4);
@@ -222,10 +219,7 @@ describe("rewardChangeFor", () => {
 		expect(rewardChangeFor(config({ rewards, stackRewards: false }), 12, []).remove).toEqual([]);
 	});
 
-	/**
-	 * A guild that points two levels at one role must not have it taken away and
-	 * handed straight back.
-	 */
+	/** A guild that points two levels at one role must not have it taken away and handed straight back. */
 	it("does not strip a role that is also the current tier's reward", () => {
 		const reused = [
 			{ level: 5, roleId: VIP },

@@ -6,7 +6,6 @@ import { announceGuildChange } from "@lib/guildLifecycle.util";
 export default defineEvent({
 	name: Events.GuildDelete,
 	async run(client, guild: Guild) {
-		// Nothing is kept for a server the bot is no longer in.
 		await purgeGuild(guild.id);
 		await announceGuildChange(client, guild, "left");
 	},

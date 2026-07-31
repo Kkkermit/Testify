@@ -10,10 +10,6 @@ import { UserFacingError } from "@core/errors";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * The raw numeric enums the previous version passed (`eventType: 1`,
- * `triggerType: 4`, `presets: [1, 2, 3]`) are now the named discord.js enums.
- */
 export default defineCommand({
 	name: "automod",
 	description: "Creates Discord AutoMod rules.",

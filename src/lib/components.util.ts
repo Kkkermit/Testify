@@ -76,10 +76,7 @@ export function select(options: {
 	return builder;
 }
 
-/**
- * A channel picker, which beats asking someone to paste an ID or hunt for a
- * `#channel` mention. Discord filters the list to the types given.
- */
+/** A channel picker, which beats asking someone to paste an ID or hunt for a `#channel` mention. */
 export function channelSelect(options: {
 	id: string;
 	placeholder?: string;
@@ -102,10 +99,7 @@ export function channelSelect(options: {
 	return builder;
 }
 
-/**
- * A role picker. With `defaultRoleIds` the menu doubles as the current list, so
- * deselecting a role is how you remove it — no separate remove button per row.
- */
+/** A role picker. */
 export function roleSelect(options: {
 	id: string;
 	placeholder?: string;
@@ -143,7 +137,7 @@ export function option(config: {
 	return builder;
 }
 
-/** Confirm / cancel pair. The invoking user ID goes last so `ownerOnly` can read it. */
+/** Confirm / cancel pair. */
 export function confirmRow(
 	id: string,
 	action: string,
@@ -156,16 +150,7 @@ export function confirmRow(
 	);
 }
 
-/**
- * Pagination controls. Page state lives in the custom ID, so nothing is held in
- * memory.
- *
- * The slot name is part of every ID because two arrows legitimately target the
- * same page — first and previous both mean 0 on page 1, next and last both mean
- * the end on the second-to-last — and **Discord rejects the whole message if two
- * custom IDs match, disabled or not.** Without the slot, a one-page list, a
- * two-page list, and page 1 of anything all failed to send.
- */
+/** Pagination controls. */
 export function navRow(
 	id: string,
 	page: number,
@@ -202,12 +187,7 @@ export function disableAll(
 	return rows;
 }
 
-/**
- * `[25%] [50%] [All] [Custom…]` for an amount the user would otherwise type.
- *
- * The percentages are resolved to real figures here rather than in the handler,
- * so the label shows what pressing it will actually do.
- */
+/** `[25%] [50%] [All] [Custom…]` for an amount the user would otherwise type. */
 export function quickAmountRow(
 	id: string,
 	action: string,
@@ -244,16 +224,13 @@ export interface ModalField {
 	required?: boolean;
 	placeholder?: string;
 	maxLength?: number;
-	/** Pre-fills the input. Passing the current setting turns a form into an editor. */
+	/** Pre-fills the input. */
 	value?: string;
 }
 
 /**
- * Builds a modal whose custom ID carries its own state, so the submit handler
- * knows what it is editing without anything being held in memory.
- *
- * Pre-filling `value` with the current setting is what turns a config command
- * into an editable form rather than a list of options nobody can discover.
+ * Builds a modal whose custom ID carries its own state, so the submit handler knows what it is editing without
+ * anything being held in memory.
  */
 export function modalForm(options: {
 	id: string;

@@ -1,7 +1,7 @@
 import { type ColorResolvable } from "discord.js";
 import { CATEGORIES, type Category } from "@config/categories";
 
-/** Colours, emoji and branding. Change these to make the bot look like yours. */
+/** Colours, emoji and branding. */
 export const theme = {
 	name: "Testify",
 	author: "Kkermit",
@@ -18,10 +18,7 @@ export const theme = {
 		audit: "DarkPurple",
 	} satisfies Record<string, ColorResolvable>,
 
-	/**
-	 * Plain Unicode only. Custom emoji show up as raw text in any server that does
-	 * not have them, which is what made the old bot look broken elsewhere.
-	 */
+	/** Plain Unicode only. */
 	emoji: {
 		error: "❌",
 		success: "✅",

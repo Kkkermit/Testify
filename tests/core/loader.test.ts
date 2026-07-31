@@ -7,11 +7,7 @@ import { buildSlashCommand, subcommandsOf } from "@core/command";
 import { loadEverything, MAX_COMMANDS } from "@core/loader";
 import { createLogger } from "@core/logger";
 
-/**
- * Loads every command, button, event and message handler from disk. If a file
- * is malformed — a bad category, a missing `run`, a duplicate name — this fails
- * here rather than at start-up in production.
- */
+/** Loads every command, button, event and message handler from disk. */
 const bound: string[] = [];
 
 function fakeClient(): TestifyClient {
@@ -37,11 +33,7 @@ describe("loadEverything", () => {
 		expect(counts.messageHandlers).toBeGreaterThan(0);
 	});
 
-	/**
-	 * Every file in `events/` has to end up on the client. A path filter meant to
-	 * skip the `events/message/` folder also matched `events/messageCreate.ts`,
-	 * so nothing ran on a message at all and no prefix command worked.
-	 */
+	/** Every file in `events/` has to end up on the client. */
 	it("binds a listener for every event file", () => {
 		const root = resolve(__dirname, "../../src/events");
 
@@ -119,9 +111,7 @@ describe("every command's options", () => {
 	const commands = [...client.commands.values()];
 
 	/**
-	 * A prefix command fills options by position, and only the last string option
-	 * can swallow the rest of the message. A required option sitting after an
-	 * optional one can therefore never be filled.
+	 * A prefix command fills options by position, and only the last string option can swallow the rest of the message.
 	 */
 	it("never puts a required option after an optional one", () => {
 		const offenders: string[] = [];
@@ -148,9 +138,8 @@ describe("every command's options", () => {
 
 describe("the command count", () => {
 	/**
-	 * Discord refuses to publish more than this, and refuses the whole batch — so
-	 * going over does not break one command, it breaks the bot. Group related
-	 * commands under a parent with `asSubcommand()` rather than deleting them.
+	 * Discord refuses to publish more than this, and refuses the whole batch — so going over does not break one
+	 * command, it breaks the bot.
 	 */
 	it(`is within Discord's limit of ${MAX_COMMANDS}`, () => {
 		expect(client.commands.size).toBeLessThanOrEqual(MAX_COMMANDS);

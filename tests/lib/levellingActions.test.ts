@@ -15,7 +15,7 @@ interface RoleStub {
 interface MemberStubOptions {
 	held?: string[];
 	roles?: RoleStub[];
-	/** The position of the bot's own highest role. Anything at or above it is untouchable. */
+	/** The position of the bot's own highest role. */
 	botCeiling?: number;
 	canManageRoles?: boolean;
 	addFails?: boolean;
@@ -110,8 +110,8 @@ describe("applyLevelRewards", () => {
 	});
 
 	/**
-	 * A member sending a message must not see an error because the bot was set up
-	 * without Manage Roles — the reward is reported as skipped and logged once.
+	 * A member sending a message must not see an error because the bot was set up without Manage Roles — the reward is
+	 * reported as skipped and logged once.
 	 */
 	it("skips everything and warns when the bot cannot manage roles", async () => {
 		const { member, add } = memberStub({ canManageRoles: false });

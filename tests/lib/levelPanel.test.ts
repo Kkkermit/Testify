@@ -70,8 +70,8 @@ describe("the levelling panel", () => {
 	});
 
 	/**
-	 * The tab is the first argument of every control, which is how a press knows
-	 * which screen to redraw without anything being remembered between presses.
+	 * The tab is the first argument of every control, which is how a press knows which screen to redraw without
+	 * anything being remembered between presses.
 	 */
 	it.each(LEVEL_TABS)("carries the %s tab in the controls it draws", (tab) => {
 		const ids = idsOf(panel(tab)).map((id) => parseCustomId(id));
@@ -185,10 +185,7 @@ describe("the levelling panel", () => {
 			expect(text).toContain("×4");
 		});
 
-		/**
-		 * The button sits in a section beside its own role. A row of buttons under the
-		 * list would leave the reader counting to work out which is which.
-		 */
+		/** The button sits in a section beside its own role. */
 		it("gives each boost role its own multiplier button", () => {
 			const cycles = buttonsOf(boosted).filter(
 				(control) => parseCustomId(String(control.custom_id)).action === "cycle",

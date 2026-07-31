@@ -8,13 +8,7 @@ import {
 import { formatDuration, formatNumber } from "@lib/format.util";
 import { findShopItem } from "@lib/shop.util";
 
-/**
- * Economy actions that more than one surface performs.
- *
- * Claiming the daily used to live entirely inside `/daily`, so the button on the
- * balance panel had no way to do it without copying the streak maths. Anything a
- * button and a command both need belongs here.
- */
+/** Economy actions that more than one surface performs. */
 
 export interface DailyResult {
 	claimed: boolean;
@@ -53,7 +47,6 @@ export async function claimDaily(guildId: string, userId: string, now = Date.now
 	};
 }
 
-/** Whether the daily is claimable, used to grey out the button before it is pressed. */
 export function dailyReady(lastDaily: Date | null, now = Date.now()): boolean {
 	return lastDaily === null || now >= lastDaily.getTime() + ECONOMY_COOLDOWNS.daily;
 }
@@ -71,12 +64,7 @@ export interface UseResult {
 	reward?: number;
 }
 
-/**
- * Consumes one of an item and pays out, for the Use button on each inventory row.
- * `/use <item>` used to do the same thing from a hardcoded list of three items.
- *
- * `roll` is injected so a test can assert the payout without fighting randomness.
- */
+/** Consumes one of an item and pays out, for the Use button on each inventory row. */
 export async function useItem(
 	guildId: string,
 	userId: string,

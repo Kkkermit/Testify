@@ -6,8 +6,8 @@ import { truncate } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
 
 /**
- * `mathjs` can evaluate assignments and function definitions, which is more than
- * a calculator needs, so the input is restricted to arithmetic before evaluation.
+ * `mathjs` can evaluate assignments and function definitions, which is more than a calculator needs, so the input is
+ * restricted to arithmetic before evaluation.
  */
 const ALLOWED = /^[\d\s+\-*/^%().,!eEpiPI a-z]+$/;
 const BLOCKED = /\b(import|createUnit|evaluate|parse|simplify|derivative|config)\b|=/;

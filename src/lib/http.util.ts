@@ -3,10 +3,8 @@ import { LIMITS } from "@config/constants";
 import { ServiceError } from "@core/errors";
 
 /**
- * Every outbound HTTP call goes through here: one timeout policy, one error type,
- * and schema validation at the boundary. Third-party APIs change without notice,
- * and the previous code consumed every response untyped — each failure collapsing
- * to `null` or an unhandled `TypeError`.
+ * Every outbound HTTP call goes through here: one timeout policy, one error type, and schema validation at the
+ * boundary.
  */
 
 export interface RequestOptions {

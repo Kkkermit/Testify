@@ -36,10 +36,7 @@ describe("normaliseWelcome", () => {
 		expect(normaliseWelcome(null)).toBeNull();
 	});
 
-	/**
-	 * The first version only had an `isEmbed` boolean. A guild that turned it on must
-	 * keep embeds without re-running setup.
-	 */
+	/** A guild that turned it on must keep embeds without re-running setup. */
 	it("reads the old embed flag as the embed style", () => {
 		const legacy = stored({ isEmbed: true });
 		delete (legacy as Partial<WelcomeSettings>).style;

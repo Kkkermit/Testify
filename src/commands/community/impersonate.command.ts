@@ -11,7 +11,6 @@ export default defineCommand({
 	description: "Sends a message through a webhook that looks like another member.",
 	category: "community",
 	guildOnly: true,
-	// The original declared `PermissionFlagsBits.createWebhook`, which does not
 	// exist, so the gate crashed on `undefined` instead of checking anything.
 	permissions: [PermissionFlagsBits.ManageWebhooks],
 	botPermissions: [PermissionFlagsBits.ManageWebhooks],

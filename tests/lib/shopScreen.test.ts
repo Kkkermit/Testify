@@ -266,12 +266,7 @@ describe("the detail screen", () => {
 });
 
 describe("custom ID uniqueness", () => {
-	/**
-	 * Discord rejects the entire message when two components share a custom ID,
-	 * disabled ones included. On page 1 the Previous button targets page 0 — which
-	 * is exactly what the current section's own tab encodes — so every multi-page
-	 * section failed to send until the pager got its own action.
-	 */
+	/** Discord rejects the entire message when two components share a custom ID, disabled ones included. */
 	it.each(SHOP_SECTIONS)("has no duplicate IDs anywhere in the %s section", (section) => {
 		for (const page of [0, 1, 2, 20]) {
 			expect(duplicateIds(shopScreen({ section, page }, RICH, OWNER))).toEqual([]);

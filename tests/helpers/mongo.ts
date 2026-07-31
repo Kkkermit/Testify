@@ -3,11 +3,7 @@ import mongoose from "mongoose";
 
 let server: MongoMemoryServer | null = null;
 
-/**
- * Repository suites need a real MongoDB. Where one cannot be started — a
- * sandbox with no access to the binary download, for instance — the suite is
- * skipped rather than failing, and CI still runs it.
- */
+/** Repository suites need a real MongoDB. */
 export async function startMongo(): Promise<boolean> {
 	if (process.env["SKIP_DB_TESTS"] === "1") return false;
 

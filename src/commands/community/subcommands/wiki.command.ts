@@ -15,8 +15,8 @@ const summarySchema = z.object({
 });
 
 /**
- * The `wikijs` dependency has been dropped in favour of Wikipedia's own REST
- * summary endpoint, which is typed at the boundary like every other API call.
+ * The `wikijs` dependency has been dropped in favour of Wikipedia's own REST summary endpoint, which is typed at the
+ * boundary like every other API call.
  */
 export default defineCommand({
 	name: "wiki",

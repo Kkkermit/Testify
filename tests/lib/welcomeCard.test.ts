@@ -1,15 +1,7 @@
 import { AttachmentBuilder } from "discord.js";
 import { coverRect, renderWelcomeCard, type WelcomeCardData, welcomeCardText } from "@lib/welcomeCard.util";
 
-/**
- * Rendered for real through `@napi-rs/canvas` rather than against a mocked
- * context. The original card never produced an image at all — its handler took
- * its parameters in the wrong order and it called `canvas.context`, which does
- * not exist — so "does it actually come out as a PNG" is the thing worth testing.
- *
- * The avatar URL points at a closed local port, so nothing here touches the
- * network and the lettered-circle fallback is exercised on every case.
- */
+/** Rendered for real through `@napi-rs/canvas` rather than against a mocked context. */
 const UNREACHABLE = "http://127.0.0.1:1/avatar.png";
 
 function card(overrides: Partial<WelcomeCardData> = {}): WelcomeCardData {

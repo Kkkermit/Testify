@@ -2,10 +2,7 @@ import { type TestifyClient } from "@core/client";
 import { Economy } from "@database/models/economy.schema";
 import { findBusiness, findHouse } from "@lib/shop.util";
 
-/**
- * Pays out house and business income. Every credit is an atomic `$inc` rather
- * than the previous read-modify-`save()` over the whole collection.
- */
+/** Pays out house and business income. */
 export async function payPassiveIncome(client: TestifyClient): Promise<void> {
 	const cursor = Economy.find({
 		$or: [{ house: { $ne: null } }, { "businesses.0": { $exists: true } }],

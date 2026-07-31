@@ -9,9 +9,8 @@ import { formatNumber } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
 
 /**
- * This wrote through a second, ten-field Mongoose model that shared the economy
- * collection, which could strip inventory, pets, houses and streaks off any
- * document it touched. There is now one model and one repository.
+ * This wrote through a second, ten-field Mongoose model that shared the economy collection, which could strip
+ * inventory, pets, houses and streaks off any document it touched.
  */
 export default defineCommand({
 	name: "give",

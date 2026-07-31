@@ -5,10 +5,7 @@ import { UserFacingError } from "@core/errors";
 import { successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * `addRole` and `removeRole` were separate prefix commands and a separate slash
- * command with two subcommands. All three are this one implementation.
- */
+/** `addRole` and `removeRole` were separate prefix commands and a separate slash command with two subcommands. */
 export default defineCommand({
 	name: "role",
 	description: "Adds or removes a role from a member.",

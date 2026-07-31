@@ -19,14 +19,7 @@ import {
 } from "@core/command";
 import { UserFacingError } from "@core/errors";
 
-/**
- * Lets `t?ban @someone spamming` run the exact same code as `/ban`.
- *
- * Commands are written once, against a slash interaction. This file is the only
- * place that knows prefix commands exist: it turns a message into something that
- * answers the handful of questions a command asks — who ran it, where, what were
- * the options — and sends replies back to the channel.
- */
+/** Lets `t?ban @someone spamming` run the exact same code as `/ban`. */
 
 const MENTION = /^<@!?(\d+)>$/;
 const CHANNEL_MENTION = /^<#(\d+)>$/;
@@ -50,10 +43,7 @@ export interface ParsedMessage {
 	args: string[];
 }
 
-/**
- * Finds the command name in a message. Returns null when the message is not
- * addressed to us, which is the overwhelmingly common case — so this stays cheap.
- */
+/** Finds the command name in a message. */
 export function parseMessage(content: string, prefix: string, botId: string): ParsedMessage | null {
 	const mention = new RegExp(`^<@!?${botId}>\\s+`);
 	const used = mention.exec(content)?.[0] ?? (content.startsWith(prefix) ? prefix : null);
@@ -65,12 +55,7 @@ export function parseMessage(content: string, prefix: string, botId: string): Pa
 	return { name: name.toLowerCase(), args };
 }
 
-/**
- * Answers the option questions a command asks. Options are matched by position,
- * in the order the command declares them, and the last string option swallows
- * whatever is left — so `t?ban @someone being a nuisance` reads the way you
- * would expect rather than stopping at the first space.
- */
+/** Answers the option questions a command asks. */
 class PrefixOptions implements CommandInputOptions {
 	private readonly message: Message;
 	private readonly command: Command;
@@ -84,9 +69,8 @@ class PrefixOptions implements CommandInputOptions {
 	}
 
 	/**
-	 * Parsing is deferred to the first question asked, so a message that names no
-	 * subcommand fails inside the command's error boundary and the user gets a
-	 * proper answer, rather than throwing while the object is being built.
+	 * Parsing is deferred to the first question asked, so a message that names no subcommand fails inside the command's
+	 * error boundary and the user gets a proper answer, rather than throwing while the object is being built.
 	 */
 	private get state(): { values: Map<string, string>; subcommand: string | null } {
 		if (this.parsed !== null) return this.parsed;
@@ -244,11 +228,7 @@ class PrefixOptions implements CommandInputOptions {
 	}
 }
 
-/**
- * A message pretending to be a slash interaction, closely enough that a command
- * cannot tell. Replies go to the channel; the first one is a real reply to the
- * user's message and the rest edit it, mirroring how a slash reply behaves.
- */
+/** A message pretending to be a slash interaction, closely enough that a command cannot tell. */
 export class PrefixInteraction implements CommandInput {
 	readonly options: PrefixOptions;
 	readonly user: User;
@@ -304,8 +284,8 @@ export class PrefixInteraction implements CommandInput {
 	}
 
 	/**
-	 * The first answer replies to the user's message; every one after it edits
-	 * that reply, which is how a slash command behaves.
+	 * The first answer replies to the user's message; every one after it edits that reply, which is how a slash command
+	 * behaves.
 	 */
 	private async send(options: InteractionReplyOptions | InteractionEditReplyOptions | string): Promise<Message> {
 		const payload = withoutInteractionFlags(options);
@@ -324,9 +304,8 @@ export class PrefixInteraction implements CommandInput {
 }
 
 /**
- * `flags: MessageFlags.Ephemeral` only means something to an interaction, and
- * Discord rejects it on a normal message — so a reply that would have been
- * private is simply sent in the channel instead.
+ * `flags: MessageFlags.Ephemeral` only means something to an interaction, and Discord rejects it on a normal message
+ * — so a reply that would have been private is simply sent in the channel instead.
  */
 function withoutInteractionFlags(options: InteractionReplyOptions | InteractionEditReplyOptions | string): never {
 	if (typeof options === "string") return { content: options } as never;

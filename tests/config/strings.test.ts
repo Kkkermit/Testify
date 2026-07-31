@@ -1,9 +1,8 @@
 import { strings } from "@config/strings";
 
 /**
- * Every string is user-visible copy, so the risk is a template that silently
- * renders `undefined` or `[object Object]` into chat. Calling each builder with
- * a realistic argument is what catches that.
+ * Every string is user-visible copy, so the risk is a template that silently renders `undefined` or `[object
+ * Object]` into chat.
  */
 type Leaf = string | ((...args: never[]) => string);
 

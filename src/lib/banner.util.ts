@@ -3,11 +3,7 @@ import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { formatNumber } from "@lib/format.util";
 
-/**
- * The start-up banner. Printed rather than logged: it is for a human watching a
- * terminal, and a log drain should not have to carry ASCII art. Colour is
- * dropped automatically when the output is not a terminal.
- */
+/** The start-up banner. */
 
 const ansi = {
 	reset: "\u001b[0m",
@@ -19,13 +15,7 @@ const ansi = {
 	grey: "\u001b[38;5;245m",
 };
 
-/**
- * Rows are padded assuming every icon is two terminal columns wide. Most emoji
- * are, but a handful — U+1F5C3 among them — default to a one-column *text*
- * presentation, which pulls that row's colon a column left of all the others.
- * The test suite holds every icon here to Emoji_Presentation so a future icon
- * cannot quietly break the alignment again.
- */
+/** Rows are padded assuming every icon is two terminal columns wide. */
 export const ICONS = {
 	bot: "\u{1F916}",
 	servers: "\u{1F30D}",
@@ -73,7 +63,7 @@ const LETTERS: Record<string, string[]> = {
 	" ": ["   ", "   ", "   ", "   ", "   ", "   "],
 };
 
-/** Turns a word into six lines of block capitals. Unknown characters are dropped. */
+/** Turns a word into six lines of block capitals. */
 export function bigText(text: string): string[] {
 	const glyphs = [...text.toUpperCase()].map((character) => LETTERS[character]).filter((glyph) => glyph !== undefined);
 	if (glyphs.length === 0) return [];
@@ -89,7 +79,7 @@ export interface BannerFacts {
 	prefix: string;
 	scope: string;
 	startupMs: number;
-	/** What the loader found on disk. A category failing to load shows up here first. */
+	/** What the loader found on disk. */
 	loaded: { commands: number; buttons: number; events: number; messageHandlers: number };
 	/** True under `npm run dev`, where tsx restarts the process whenever a file is saved. */
 	watching: boolean;
@@ -162,11 +152,7 @@ export function printBanner(
 	process.stdout.write(`${lines.join("\n")}\n`);
 }
 
-/**
- * Printed when tsx tears the process down to restart it. Under `npm run dev` a
- * SIGTERM is a reload rather than a shutdown, and without a line saying so the
- * restart is indistinguishable from the bot having simply died.
- */
+/** Printed when tsx tears the process down to restart it. */
 export function printReloading(): void {
 	const glyph = process.stdout.isTTY === true ? `${ansi.yellow}${RELOAD_GLYPH}${ansi.reset}` : RELOAD_GLYPH;
 	process.stdout.write(`\n  ${glyph} Change detected \u2014 reloading\u2026\n\n`);

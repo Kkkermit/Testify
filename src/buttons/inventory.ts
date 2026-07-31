@@ -7,12 +7,7 @@ import { dailyReady, useItem } from "@lib/economyActions.util";
 import { INVENTORY_PANEL_ID, inventoryScreen } from "@lib/inventoryScreen.util";
 import { shopScreen } from "@lib/shopScreen.util";
 
-/**
- * Using an item, and moving between the economy panels.
- *
- * The page number rides in the custom ID, so nothing is held in memory and a
- * stale message still pages correctly after a restart.
- */
+/** Using an item, and moving between the economy panels. */
 export default defineButton({
 	id: INVENTORY_PANEL_ID,
 	ownerOnly: true,

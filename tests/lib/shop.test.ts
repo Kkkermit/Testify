@@ -30,8 +30,8 @@ describe("the economy catalogues", () => {
 	});
 
 	/**
-	 * A job gated behind an item nobody can buy is unreachable, which is exactly
-	 * the kind of dead content the audit found in the JavaScript economy.
+	 * A job gated behind an item nobody can buy is unreachable, which is exactly the kind of dead content the audit
+	 * found in the JavaScript economy.
 	 */
 	it("only requires items that are actually purchasable", () => {
 		for (const job of JOBS) {

@@ -1,10 +1,7 @@
 import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
 
-/**
- * Parses the amount argument shared by deposit, withdraw, transfer and gamble.
- * Accepts a number, `all`, `half`, or a percentage such as `25%`.
- */
+/** Parses the amount argument shared by deposit, withdraw, transfer and gamble. */
 export function resolveAmount(input: string, available: number): number {
 	const normalised = input.trim().toLowerCase().replace(/[,_]/g, "");
 

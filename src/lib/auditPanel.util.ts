@@ -11,19 +11,7 @@ import {
 	text,
 } from "@lib/containers.util";
 
-/**
- * Audit logging, as a panel you click rather than a list you type.
- *
- * `/audit-logging enable` used to take a comma-separated string of event names,
- * which meant knowing all eighteen of them and spelling each one correctly — a
- * typo silently dropped that event. The old JS bot had a select menu for this and
- * it was the better design.
- *
- * Editing is a draft: the menus and buttons change what the panel shows, and
- * nothing reaches the database until Save is pressed. `auditSavedPanel` is what
- * Save renders, and it is the only view that can promise what it shows is what the
- * bot will actually do.
- */
+/** Audit logging, as a panel you click rather than a list you type. */
 
 export const AUDIT_PANEL_ID = "audit";
 
@@ -77,20 +65,16 @@ export function resolveEnabled(enabled: string[]): AuditEvent[] {
 }
 
 /**
- * Collapses a full selection back to `all`, so a guild that ticks everything keeps
- * logging events added in a later release rather than being frozen at today's list.
+ * Collapses a full selection back to `all`, so a guild that ticks everything keeps logging events added in a later
+ * release rather than being frozen at today's list.
  */
 export function collapseEnabled(events: AuditEvent[]): string[] {
 	return events.length === AUDIT_EVENTS.length ? ["all"] : events;
 }
 
 /**
- * Eighteen event names do not fit in Discord's 100 characters, but eighteen bits
- * do: one bit per event at its index in `AUDIT_EVENTS`, written in base 36.
- *
- * The mask only ever travels in a live message's custom IDs — the database still
- * stores names — so reordering `AUDIT_EVENTS` can at worst misread a panel someone
- * left open across a deploy.
+ * Eighteen event names do not fit in Discord's 100 characters, but eighteen bits do: one bit per event at its index
+ * in `AUDIT_EVENTS`, written in base 36.
  */
 export function encodeEvents(events: AuditEvent[]): string {
 	let mask = 0;
@@ -111,10 +95,7 @@ export function decodeDraft(args: string[]): AuditDraft {
 	return { channelId: channelId === NO_CHANNEL ? null : channelId, events: decodeEvents(events) };
 }
 
-/**
- * Whether Save has anything to do. Compared against the expanded list, so a stored
- * `all` and a fully ticked menu count as the same thing rather than as a change.
- */
+/** Whether Save has anything to do. */
 export function hasUnsavedChanges(saved: AuditPanelState, draft: AuditDraft): boolean {
 	if (saved.channelId !== draft.channelId) return true;
 

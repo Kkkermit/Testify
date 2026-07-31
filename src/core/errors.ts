@@ -4,13 +4,7 @@ import { type ComponentInteraction } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, dispatch } from "@core/command";
 
-/**
- * Throw this when the user needs to read the message — a bad argument, not
- * enough money, a missing role. It is shown to them word for word.
- *
- * Anything else that is thrown gets logged with full context and the user sees a
- * generic apology, so stack traces never leak into chat.
- */
+/** Throw this when the user needs to read the message — a bad argument, not enough money, a missing role. */
 export class UserFacingError extends Error {
 	constructor(message: string) {
 		super(message);
@@ -18,7 +12,7 @@ export class UserFacingError extends Error {
 	}
 }
 
-/** An external API failed. Logged in full; the user is told the service is down. */
+/** An external API failed. */
 export class ServiceError extends Error {
 	constructor(
 		readonly service: string,
@@ -42,15 +36,12 @@ export function toError(value: unknown): Error {
 	return new Error(typeof value === "string" ? value : JSON.stringify(value));
 }
 
-/** Red, with a cross. Kept here so the error path never depends on the UI layer. */
+/** Red, with a cross. */
 function failureEmbed(message: string): EmbedBuilder {
 	return new EmbedBuilder().setColor(theme.colours.error).setDescription(`${theme.emoji.error} ${message}`);
 }
 
-/**
- * Runs a command and makes sure the user always gets an answer, whatever
- * happens. This is the only place command errors are handled.
- */
+/** Runs a command and makes sure the user always gets an answer, whatever happens. */
 export async function runCommand(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	try {
 		await dispatch(interaction, command, client);
@@ -110,7 +101,6 @@ async function tell(interaction: CommandInput | ComponentInteraction, message: s
 		else await interaction.reply(payload);
 	} catch {
 		// The interaction expired or was already answered elsewhere. Nothing more
-		// can reach the user, and this must not mask the original error.
 	}
 }
 

@@ -5,8 +5,8 @@ import * as libBarrel from "@lib";
 import { embed } from "@lib/embeds.util";
 
 /**
- * Importing a barrel pulls in every module behind it, so this catches both a
- * broken re-export and an import cycle that only shows up at runtime.
+ * Importing a barrel pulls in every module behind it, so this catches both a broken re-export and an import cycle
+ * that only shows up at runtime.
  */
 describe("the directory barrels", () => {
 	it.each([

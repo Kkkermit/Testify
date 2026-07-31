@@ -1,7 +1,7 @@
 import { escapeMarkdown as djsEscapeMarkdown } from "discord.js";
 import { DAY_MS, HOUR_MS, MINUTE_MS, SECOND_MS } from "@config/constants";
 
-/** Compact duration: "2h 5m 3s". Zero and negative values collapse to "0s". */
+/** Compact duration: "2h 5m 3s". */
 export function formatDuration(ms: number): string {
 	if (!Number.isFinite(ms) || ms <= 0) return "0s";
 

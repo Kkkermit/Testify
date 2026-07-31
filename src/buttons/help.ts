@@ -13,11 +13,7 @@ import {
 	resolveSurface,
 } from "@lib/helpPages.util";
 
-/**
- * Drives the help menu. Everything it needs — which category, which page, and
- * whether slash or prefix commands are being shown — travels in the custom ID,
- * so two people can browse at once and a restart does not break the buttons.
- */
+/** Drives the help menu. */
 export default defineButton({
 	id: "help",
 	ownerOnly: true,

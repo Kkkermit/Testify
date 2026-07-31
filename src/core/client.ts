@@ -20,10 +20,7 @@ export const intents = [
 
 export const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 
-/**
- * The bot. Everything the rest of the code needs hangs off here, and it is all
- * typed — nothing is attached at runtime.
- */
+/** The bot. */
 export class TestifyClient extends Client {
 	/** Every loaded command, by name. */
 	readonly commands = new Collection<string, Command>();
@@ -58,15 +55,12 @@ export class TestifyClient extends Client {
 	}
 }
 
-/**
- * Every repeating or delayed task is registered here so shutdown can stop it.
- * Use `every` for something that repeats and `after` for a one-off.
- */
+/** Every repeating or delayed task is registered here so shutdown can stop it. */
 export class TimerRegistry {
 	private readonly handles = new Map<string, NodeJS.Timeout>();
 	private readonly running = new Set<string>();
 
-	/** Repeats forever. A run is skipped if the previous one is still going. */
+	/** Repeats forever. */
 	every(name: string, ms: number, task: () => Promise<void> | void): void {
 		this.stop(name);
 

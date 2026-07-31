@@ -4,12 +4,7 @@ import { type Logger } from "@core/logger";
 import { type LevelConfig, rewardChangeFor } from "@lib/levelling.util";
 
 /**
- * Handing out level reward roles, shared by the message handler and by the admin
- * commands that set a level directly.
- *
- * Nothing here throws. A member sending a message must not see an error because
- * one reward role sits above the bot in the role list, so anything undoable is
- * reported back in `skipped` and logged once.
+ * Handing out level reward roles, shared by the message handler and by the admin commands that set a level directly.
  */
 
 export interface RewardOutcome {

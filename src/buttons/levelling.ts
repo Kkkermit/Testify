@@ -14,13 +14,7 @@ import {
 import { isLevelTab, LEVEL_PANEL_ID, type LevelPanelState, levelPanel, type LevelTab } from "@lib/levelPanel.util";
 import { parseWholeNumber } from "@lib/settingsPanel.util";
 
-/**
- * Every control on the levelling panel.
- *
- * The config is re-read from the database before each change and written back
- * immediately, so two admins with the panel open see each other's work rather than
- * overwriting it with whatever their copy of the message was rendered with.
- */
+/** Every control on the levelling panel. */
 async function currentConfig(guildId: string): Promise<LevelConfig> {
 	return normaliseSettings(await getLevelSettings(guildId));
 }
@@ -46,8 +40,6 @@ export default defineButton({
 	async run(interaction, context) {
 		if (interaction.guild === null) return;
 
-		// The panel is a normal message, so the permission is the gate rather than who
-		// happens to be pressing.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change the levelling settings.");
 		}
@@ -62,8 +54,6 @@ export default defineButton({
 			const state: LevelPanelState = { tab, config: next, ...(note !== undefined ? { note } : {}) };
 			const payload = levelPanel(state, ownerId);
 
-			// A modal opened from the panel can edit the message it came from; one opened
-			// any other way has nothing to edit and has to answer on its own.
 			if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
 				await interaction.reply(payload);
 				return;

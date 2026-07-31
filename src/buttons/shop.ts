@@ -34,10 +34,7 @@ export function balancesOf(account: EconomyAccount): Balances {
 	};
 }
 
-/**
- * Applies a purchase. Each branch debits first and only writes on success, so a
- * failed payment can never hand out the goods.
- */
+/** Applies a purchase. */
 async function purchase(state: ShopState, guildId: string, userId: string, account: EconomyAccount): Promise<string> {
 	const id = state.selectedId ?? "";
 
@@ -237,9 +234,6 @@ export default defineButton({
 		const message = await purchase(state, guildId, userId, account);
 		const updated = await requireAccount(guildId, userId);
 
-		// Straight back to the catalogue with the new balance, so buying chains into
-		// the next purchase. The confirmation rides along at the top rather than as a
-		// separate message — a Components V2 payload cannot carry an embed.
 		await interaction.update(shopScreen({ section: state.section }, balancesOf(updated), userId, message));
 	},
 });

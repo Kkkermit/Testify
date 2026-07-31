@@ -7,15 +7,7 @@ import { normaliseSettings } from "@lib/levelling.util";
 import { levelPanel, type LevelTab } from "@lib/levelPanel.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * One panel, opened on whichever tab was asked for.
- *
- * The old `setup` subcommand took a channel, a role and a multiplier as options,
- * so three of the settings were reachable and the rest did not exist. `setup` and
- * `edit` open the same screen deliberately: the panel shows the current config, so
- * setting up and changing it are the same gesture, and both names exist because
- * people look for both.
- */
+/** One panel, opened on whichever tab was asked for. */
 async function openPanel(interaction: CommandInput, tab: LevelTab): Promise<void> {
 	const guild = inGuild(interaction);
 	const config = normaliseSettings(await getLevelSettings(guild.id));

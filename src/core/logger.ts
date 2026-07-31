@@ -5,9 +5,8 @@ export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 export type Logger = pino.Logger;
 
 /**
- * Pretty, colourised output when you are watching a terminal, and plain JSON
- * when you are not — which is what a hosting platform wants in its log drain.
- * Pass `pretty` to decide for yourself.
+ * Pretty, colourised output when you are watching a terminal, and plain JSON when you are not — which is what a
+ * hosting platform wants in its log drain.
  */
 export function createLogger(level: LogLevel, pretty: boolean = process.stdout.isTTY === true): Logger {
 	if (!pretty) return pino({ level });

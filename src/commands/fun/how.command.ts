@@ -21,10 +21,6 @@ const METERS: Meter[] = [
 	{ name: "smart", label: "smart", emoji: "🧠", description: "Shows someone's IQ." },
 ];
 
-/**
- * Seven near-identical embed builders in the original collapsed into one renderer
- * driven by a table.
- */
 async function renderMeter(interaction: CommandInput, meter: Meter): Promise<void> {
 	const target = interaction.options.getUser("user") ?? interaction.user;
 

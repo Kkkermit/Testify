@@ -2,12 +2,7 @@ import { type Canvas, createCanvas, type Image, loadImage, type SKRSContext2D } 
 import { AttachmentBuilder } from "discord.js";
 import { ServiceError } from "@core/errors";
 
-/**
- * Shared canvas helpers. The bot renders its own cards rather than hotlinking
- * third-party image services, which is what the previous `some-random-api`,
- * postimg and freepik URLs did — every one of them a silent runtime failure the
- * moment the host changed.
- */
+/** Shared canvas helpers. */
 
 export { createCanvas };
 export type { Canvas, SKRSContext2D };
@@ -88,13 +83,7 @@ export async function drawAvatar(ctx: SKRSContext2D, url: string, x: number, y: 
 	ctx.restore();
 }
 
-/**
- * The avatar, or a lettered circle when it cannot be fetched. Returns whether the
- * real image was drawn.
- *
- * A card is worth rendering without the picture — the CDN being briefly unreachable
- * should cost a face, not the whole `/rank` reply.
- */
+/** The avatar, or a lettered circle when it cannot be fetched. */
 export async function drawAvatarOrInitial(
 	ctx: SKRSContext2D,
 	url: string,

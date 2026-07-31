@@ -58,8 +58,8 @@ describe("resolveEnabled", () => {
 
 describe("collapseEnabled", () => {
 	/**
-	 * Storing `all` rather than today's eighteen names means a guild that ticked
-	 * everything keeps logging events added in a later release.
+	 * Storing `all` rather than today's eighteen names means a guild that ticked everything keeps logging events added
+	 * in a later release.
 	 */
 	it("collapses a full selection back to the all shorthand", () => {
 		expect(collapseEnabled([...AUDIT_EVENTS])).toEqual(["all"]);
@@ -84,8 +84,8 @@ describe("isAuditEvent", () => {
 
 describe("the draft codec", () => {
 	/**
-	 * The whole reason a Save button is possible: eighteen names would blow Discord's
-	 * 100-character custom ID, eighteen bits in base 36 do not.
+	 * The whole reason a Save button is possible: eighteen names would blow Discord's 100-character custom ID, eighteen
+	 * bits in base 36 do not.
 	 */
 	it("round-trips a selection", () => {
 		expect(decodeEvents(encodeEvents(["banAdd", "voiceUpdate"]))).toEqual(["banAdd", "voiceUpdate"]);
@@ -135,8 +135,8 @@ describe("hasUnsavedChanges", () => {
 	});
 
 	/**
-	 * The stored `all` shorthand expands to the same set as a fully ticked menu, so
-	 * opening the panel on a fully configured guild must not offer to save nothing.
+	 * The stored `all` shorthand expands to the same set as a fully ticked menu, so opening the panel on a fully
+	 * configured guild must not offer to save nothing.
 	 */
 	it("treats a stored all as equal to every box being ticked", () => {
 		expect(
@@ -282,8 +282,8 @@ describe("the audit panel", () => {
 		});
 
 		/**
-		 * Editing is a draft, so the panel must never read as though a selection is
-		 * already live — an admin who closes it without saving has changed nothing.
+		 * Editing is a draft, so the panel must never read as though a selection is already live — an admin who closes it
+		 * without saving has changed nothing.
 		 */
 		it("says the changes are not applied yet", () => {
 			expect(textOf(dirty)).toMatch(/saved yet/i);

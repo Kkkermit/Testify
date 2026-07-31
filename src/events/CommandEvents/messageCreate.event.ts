@@ -2,10 +2,7 @@ import { Events, type Message } from "discord.js";
 import { defineEvent } from "@core/event";
 import { runMessageHandlers } from "@core/message";
 
-/**
- * The only `messageCreate` listener. Levelling, counting, anti-link and the rest
- * are message handlers in `events/message/`, so nothing else binds here.
- */
+/** The only `messageCreate` listener. */
 let warnedAboutContent = false;
 
 export default defineEvent({

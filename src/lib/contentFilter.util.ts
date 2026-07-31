@@ -2,12 +2,7 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { jsonPath } from "@core/paths";
 
-/**
- * Replaces the thirteen hand-rolled profanity checks the audit found, each with
- * its own matching rules. Tokenises and normalises once, then does set lookups —
- * the old approach re-scanned the raw word list with `Array.includes` on every
- * call and missed casing and punctuation variants.
- */
+/** Replaces the thirteen hand-rolled profanity checks the audit found, each with its own matching rules. */
 
 const filterFileSchema = z.object({ words: z.array(z.string()) });
 

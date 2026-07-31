@@ -25,7 +25,6 @@ export default defineMessageHandler({
 		await message.delete().catch(() => null);
 
 		// The warning is attributed to the bot rather than a hardcoded user ID and
-		// tag from the original author's account.
 		await addWarning(
 			message.guild.id,
 			message.author.id,

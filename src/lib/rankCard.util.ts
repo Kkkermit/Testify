@@ -2,13 +2,7 @@ import { type AttachmentBuilder } from "discord.js";
 import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas.util";
 import { formatNumber, ordinal } from "@lib/format.util";
 
-/**
- * The `/rank` card.
- *
- * The layout maths and every string on the card are worked out by `rankCardText`
- * and `barFill`, which are pure — the drawing itself needs a real canvas and the
- * member's avatar, so it is kept as thin as possible on top of them.
- */
+/** The `/rank` card. */
 
 const WIDTH = 934;
 const HEIGHT = 282;
@@ -54,11 +48,7 @@ export function rankCardText(data: RankCardData): RankCardText {
 	};
 }
 
-/**
- * How much of the track to fill. Clamped at both ends so a record whose XP has
- * drifted past its level — an admin setting a level by hand, say — cannot draw a
- * bar wider than the card.
- */
+/** How much of the track to fill. */
 export function barFill(progress: number, needed: number, trackWidth: number): number {
 	if (needed <= 0) return trackWidth;
 

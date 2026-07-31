@@ -776,21 +776,30 @@ only — warnings never fail the build.**
 
 ### Comments
 
-**This is a standing instruction for the repo: do not write AI-flavoured commentary.** Leave comments out unless
-they are genuinely necessary or you are describing something non-obvious.
+**This is a standing instruction for the repo: do not write AI-flavoured commentary.** The default is no comment.
+Fewer, shorter, and only where the code genuinely cannot speak for itself.
 
-What earns a comment:
+Hard rules:
 
-- **Why**, never what. `// Debit first so a failed payment cannot hand out the goods.`
-- A file-level block explaining the module's job and the mistake it exists to prevent.
-- A non-obvious constraint:
+- **One sentence.** A doc comment is `/** … */` on a single line unless a second sentence is truly load-bearing.
+  Multi-paragraph blocks are for `CLAUDE.md`, not for source files.
+- **Never narrate the change.** No "the original did X", "this used to be Y", "three fixes failed before this".
+  That is what `git log` is for, and it rots the moment the code moves on.
+- **Never restate the identifier.** `/** Formats a number. */` above `formatNumber` earns nothing and is deleted
+  on sight.
+- **Never explain your own reasoning to the reader.** "The panel is an ordinary message, so the permission is the
+  gate" is a note to a reviewer, not a comment.
+
+What still earns one:
+
+- A constraint a reader could not infer, stated flatly:
   `// A V2 message cannot carry an embed, so the confirm row goes inside the container.`
-- A `/** */` above a test explaining what bug it pins.
+- A magic value or an API quirk: `// 10026 is "unknown ban" — already unbanned, which is not a failure.`
+- A one-line file header saying what the module is for.
+- A `/** */` above a test naming the bug it pins.
 
-What does not: restating the next line, `// Imports`, TODOs without an owner, or anything a reader would infer
-from the code.
-
-Match the surrounding code's density and idiom. If a file has sparse comments, do not flood it.
+Match the surrounding density. `src/` sits at roughly 3% comment lines; a new file well above that is a signal to
+cut, not a sign of thoroughness.
 
 ---
 

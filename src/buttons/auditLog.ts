@@ -16,16 +16,7 @@ import {
 	resolveEnabled,
 } from "@lib/auditPanel.util";
 
-/**
- * Every control on the audit logging panel.
- *
- * Only `save` and `off` write anything. The menus and the other buttons re-render
- * the panel from the draft carried in the custom ID, so an admin can change their
- * mind and what is stored only ever moves on a deliberate press.
- *
- * The stored config is still re-read on every interaction, because Save has to know
- * whether there is anything to write and the panel has to say so.
- */
+/** Every control on the audit logging panel. */
 async function currentState(guildId: string): Promise<AuditPanelState> {
 	const config = await getAuditLogConfig(guildId);
 	return { channelId: config?.channelId ?? null, enabled: config?.enabledLogs ?? [] };

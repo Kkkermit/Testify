@@ -1,17 +1,7 @@
 import { type AttachmentBuilder } from "discord.js";
 import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas.util";
 
-/**
- * A leaderboard, drawn rather than listed.
- *
- * A column of `1. @someone — level 4` makes Discord resolve a dozen mentions and
- * reads as a wall of text; the card puts a face next to each name. It is generic
- * over what the two right-hand columns say so the economy and levelling boards are
- * the same picture with different numbers in it.
- *
- * `boardHeight` is pure and tested, because an image sized for ten rows showing
- * three looks broken.
- */
+/** A leaderboard, drawn rather than listed. */
 
 const WIDTH = 900;
 const HEADER = 96;

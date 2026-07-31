@@ -5,11 +5,8 @@ import { fillTemplate, type WelcomeConfig } from "@lib/welcome.util";
 import { renderWelcomeCard } from "@lib/welcomeCard.util";
 
 /**
- * Builds the greeting, once, for every surface that sends one: the join event, the
- * panel's Preview button and `/welcome test`.
- *
- * Sharing it is the point — a preview rendered by different code than the real
- * greeting is a preview that can lie.
+ * Builds the greeting, once, for every surface that sends one: the join event, the panel's Preview button and
+ * `/welcome test`.
  */
 
 export interface Greeting {

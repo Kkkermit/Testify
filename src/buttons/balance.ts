@@ -7,12 +7,7 @@ import { claimDaily, dailyReady } from "@lib/economyActions.util";
 import { inventoryScreen } from "@lib/inventoryScreen.util";
 import { shopScreen } from "@lib/shopScreen.util";
 
-/**
- * The quick actions on the balance panel.
- *
- * Each branch re-reads the account rather than trusting what the message was
- * rendered with, so a balance that changed elsewhere cannot be spent twice.
- */
+/** The quick actions on the balance panel. */
 export default defineButton({
 	id: BALANCE_PANEL_ID,
 	ownerOnly: true,

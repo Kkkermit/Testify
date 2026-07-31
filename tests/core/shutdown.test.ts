@@ -3,8 +3,8 @@ import type * as shutdownModuleType from "@core/shutdown";
 import { createMockClient } from "@tests/helpers/mocks";
 
 /**
- * `shutdown()` keeps a module-level `stopping` flag so a second signal cannot
- * start a second teardown, which means every test needs a fresh module registry.
+ * `shutdown()` keeps a module-level `stopping` flag so a second signal cannot start a second teardown, which means
+ * every test needs a fresh module registry.
  */
 function loadShutdown(): {
 	shutdown: (client: TestifyClient, reason: string, code?: number) => Promise<void>;

@@ -14,10 +14,7 @@ export interface ConnectOptions {
 
 let everConnected = false;
 
-/**
- * Turns the driver's failure into something you can act on. Nearly every
- * first-run problem is one of these three, and the stack trace says none of it.
- */
+/** Turns the driver's failure into something you can act on. */
 export function explainConnectionFailure(error: unknown, uri: string): string {
 	const { code, message } = error as { code?: string; message?: string };
 	const text = message ?? String(error);
@@ -101,7 +98,6 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	});
 	mongoose.connection.on("error", (error: unknown) => {
 		// While connecting, the retry loop below reports the failure; logging the
-		// same error from here as well is what made one problem look like four.
 		if (everConnected) options.logger.error({ err: toError(error) }, "MongoDB connection error");
 	});
 

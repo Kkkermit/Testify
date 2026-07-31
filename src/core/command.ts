@@ -31,14 +31,7 @@ import { type Category } from "@config/categories";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 
-/**
- * What a command is allowed to ask of whoever invoked it.
- *
- * A slash interaction satisfies this, and so does `PrefixInteraction` in
- * `core/prefix.ts`. That is the whole trick: commands are written once against
- * this shape and work as both `/ban` and `t?ban`. Adding something here means
- * teaching the prefix side to answer it too, which is deliberate.
- */
+/** What a command is allowed to ask of whoever invoked it. */
 export interface CommandInput {
 	readonly user: User;
 	readonly member: GuildMember | APIInteractionGuildMember | null;
@@ -81,11 +74,8 @@ export interface CommandInputOptions {
 }
 
 /**
- * What both surfaces really hand back for an attachment — the shape of discord.js's
- * `Attachment`, narrowed to the fields a command can rely on.
- *
- * This used to declare only `url`, which meant a command could not check the type
- * or size of an upload before downloading it.
+ * What both surfaces really hand back for an attachment — the shape of discord.js's `Attachment`, narrowed to the
+ * fields a command can rely on.
  */
 export interface CommandAttachment {
 	url: string;
@@ -96,10 +86,7 @@ export interface CommandAttachment {
 	height: number | null;
 }
 
-/**
- * A command option. Simpler than chaining SlashCommandBuilder calls, and the
- * loader turns it into the real thing for you.
- */
+/** A command option. */
 export interface CommandOption {
 	name: string;
 	description: string;
@@ -121,10 +108,7 @@ export interface Subcommand {
 	run(interaction: CommandInput, client: TestifyClient): Promise<void>;
 }
 
-/**
- * One command. Drop a file exporting one of these into `src/commands/<category>/`
- * and it is picked up automatically — there is nothing to register by hand.
- */
+/** One command. */
 export interface Command {
 	name: string;
 	description: string;
@@ -133,12 +117,12 @@ export interface Command {
 	options?: CommandOption[];
 	subcommands?: Subcommand[];
 
-	/** Extra names this command answers to as a prefix command, e.g. `["bal"]`. */
+	/** Extra names this command answers to as a prefix command, e.g. */
 	aliases?: string[];
 
 	/** Permissions the person running it needs. */
 	permissions?: PermissionResolvable[];
-	/** Permissions the bot needs. Checked before the command runs. */
+	/** Permissions the bot needs. */
 	botPermissions?: PermissionResolvable[];
 	/** Milliseconds a user must wait between uses. */
 	cooldown?: number;
@@ -154,10 +138,7 @@ export interface Command {
 	autocomplete?(interaction: AutocompleteInteraction, client: TestifyClient): Promise<void>;
 }
 
-/**
- * Proof that a real slash interaction satisfies the contract. If someone widens
- * `CommandInput` beyond what discord.js provides, this line stops compiling.
- */
+/** Proof that a real slash interaction satisfies the contract. */
 const _slashSatisfiesCommandInput: (interaction: ChatInputCommandInteraction) => CommandInput = (interaction) =>
 	interaction;
 void _slashSatisfiesCommandInput;
@@ -171,15 +152,7 @@ export function subcommandsOf(command: Command): Subcommand[] {
 	return command.subcommands ?? [];
 }
 
-/**
- * Exposes a standalone command as a subcommand of another. Used to keep the
- * command count under Discord's limit of 100 without rewriting the commands
- * themselves — see `src/commands/fun/fun.ts` for the pattern.
- *
- * The file being folded in lives in a `subcommands/` folder, which the loader's
- * `commands/*­/*.command.ts` glob does not reach, so it is not also registered as a
- * command in its own right.
- */
+/** Exposes a standalone command as a subcommand of another. */
 export function asSubcommand(command: Command, aliases: string[] = []): Subcommand {
 	if (command.subcommands?.length) {
 		throw new Error(`${command.name} already has subcommands, and Discord only allows one level of nesting.`);
@@ -197,11 +170,7 @@ export function asSubcommand(command: Command, aliases: string[] = []): Subcomma
 	};
 }
 
-/**
- * Sends the interaction to the right handler. A command made only of
- * subcommands does not need a top-level `run` — this finds the one Discord says
- * was used and calls it.
- */
+/** Sends the interaction to the right handler. */
 export async function dispatch(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	const subcommands = subcommandsOf(command);
 
@@ -323,10 +292,7 @@ function addOption(host: OptionHost, option: CommandOption): void {
 	}
 }
 
-/**
- * `guildOnly: true` already stops a command reaching a DM, but TypeScript cannot
- * see that. These narrow the types without an `!`.
- */
+/** `guildOnly: true` already stops a command reaching a DM, but TypeScript cannot see that. */
 export function inGuild(interaction: CommandInput): Guild {
 	if (!interaction.guild) throw new UserFacingError("This command only works inside a server.");
 	return interaction.guild;
@@ -344,10 +310,7 @@ export function inTextChannel(interaction: CommandInput): GuildTextBasedChannel 
 	return channel;
 }
 
-/**
- * A `channel` option comes back as a partial API object. This looks the real one
- * up in the guild so you get a channel you can actually send to.
- */
+/** A `channel` option comes back as a partial API object. */
 export function textChannelOption(interaction: CommandInput, name: string): GuildTextBasedChannel | null {
 	const picked = interaction.options.getChannel(name);
 	if (!picked) return null;

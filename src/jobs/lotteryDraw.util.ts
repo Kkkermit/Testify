@@ -7,9 +7,8 @@ import { embed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
 
 /**
- * The draw is claimed by pushing `nextDrawTime` forward inside the same query
- * that selects it, so a slow draw can no longer overlap the next tick and pay out
- * twice. The old job also called `save()` on the same document twice.
+ * The draw is claimed by pushing `nextDrawTime` forward inside the same query that selects it, so a slow draw can no
+ * longer overlap the next tick and pay out twice.
  */
 export async function runLotteryDraws(client: TestifyClient): Promise<void> {
 	for (let processed = 0; processed < 10; processed += 1) {

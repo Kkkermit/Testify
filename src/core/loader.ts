@@ -9,11 +9,7 @@ import { SetupError } from "@core/errors";
 import { type AnyEvent } from "@core/event";
 import { MESSAGE_HANDLER, type MessageHandler } from "@core/message";
 
-/**
- * `__dirname` is `src/core` while developing and `dist/core` after a build, and
- * both trees have the same shape. Resolving from here rather than from the
- * working directory is what lets the same code find the same files either way.
- */
+/** `__dirname` is `src/core` while developing and `dist/core` after a build, and both trees have the same shape. */
 const ROOT = resolve(__dirname, "..");
 
 function find(pattern: string): string[] {
@@ -51,15 +47,7 @@ export interface LoadCounts {
 	messageHandlers: number;
 }
 
-/**
- * Loads everything from disk and registers it on the client. A file that is not
- * shaped correctly stops start-up and names itself, rather than failing later
- * with something unhelpful.
- *
- * `src/commands/<category>/name.command.ts` is a command. Anything deeper — such
- * as `src/commands/economy/subcommands/shop.command.ts` — is a piece of one, reached
- * only because its parent imports it.
- */
+/** Loads everything from disk and registers it on the client. */
 export function loadEverything(client: TestifyClient): LoadCounts {
 	const counts = {
 		commands: loadCommands(client),
@@ -174,10 +162,7 @@ function loadEvents(client: TestifyClient): number {
 	return count;
 }
 
-/**
- * Tells Discord about the commands. Set DISCORD_DEV_GUILD_ID while developing —
- * guild commands appear immediately, global ones can take up to an hour.
- */
+/** Tells Discord about the commands. */
 export const MAX_COMMANDS = 100;
 
 export async function publishCommands(client: TestifyClient): Promise<number> {

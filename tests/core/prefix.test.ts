@@ -236,10 +236,7 @@ describe("subcommands from a message", () => {
 		);
 	});
 
-	/**
-	 * Building the object must not throw. It happens outside the command's error
-	 * boundary, so a user who typed the command wrong would get silence.
-	 */
+	/** Building the object must not throw. */
 	it("does not throw while being constructed", () => {
 		expect(() => new PrefixInteraction(fakeMessage(), welcome, [])).not.toThrow();
 		expect(() => new PrefixInteraction(fakeMessage(), welcome, ["nope"])).not.toThrow();

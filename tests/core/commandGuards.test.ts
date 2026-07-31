@@ -225,12 +225,7 @@ describe("buildSlashCommand", () => {
 		expect((json.options as { type: number }[])[0]?.type).toBe(apiType);
 	});
 
-	/**
-	 * The builder emits options in the order they were declared — it does not sort
-	 * them. Discord rejects the whole payload when a required option follows an
-	 * optional one, and that rule is enforced against every real command in
-	 * `tests/core/loader.test.ts` rather than silently corrected here.
-	 */
+	/** The builder emits options in the order they were declared — it does not sort them. */
 	it("emits options in the order they were declared", () => {
 		const json = build([
 			{ name: "a", description: "d", type: "string" },

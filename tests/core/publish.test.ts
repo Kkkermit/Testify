@@ -70,8 +70,8 @@ describe("publishCommands", () => {
 	});
 
 	/**
-	 * Discord rejects the entire batch when it is over the limit, so failing here
-	 * with an explanation beats a 400 that names no command.
+	 * Discord rejects the entire batch when it is over the limit, so failing here with an explanation beats a 400 that
+	 * names no command.
 	 */
 	it("refuses to publish over the limit, and says how to fix it", async () => {
 		const failing = publishCommands(clientWith(MAX_COMMANDS + 1));

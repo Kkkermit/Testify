@@ -3,19 +3,11 @@ import { type TestifyClient } from "@core/client";
 
 export type ComponentInteraction = MessageComponentInteraction | ModalSubmitInteraction;
 
-/**
- * Handles the buttons, select menus and modals for one feature.
- *
- * Custom IDs look like `shop:buy:item_42`. The first part picks the handler, the
- * second is passed as `action`, and anything after that is passed as `args`.
- */
+/** Handles the buttons, select menus and modals for one feature. */
 export interface Button {
-	/** The first part of the custom ID. Must be unique across the bot. */
+	/** The first part of the custom ID. */
 	id: string;
-	/**
-	 * When true, only the user whose ID is the last argument may use it. Put the
-	 * user's ID last in the custom ID when you build the component.
-	 */
+	/** When true, only the user whose ID is the last argument may use it. */
 	ownerOnly?: boolean;
 	run(interaction: ComponentInteraction, context: ButtonContext): Promise<void>;
 }
@@ -34,10 +26,7 @@ export function defineButton(button: Button): Button {
 
 const SEPARATOR = ":";
 
-/**
- * Builds a custom ID. Throws above Discord's 100-character limit so you find out
- * here rather than when the whole message is rejected.
- */
+/** Builds a custom ID. */
 export function customId(id: string, action: string, ...args: (string | number)[]): string {
 	const parts = [id, action, ...args.map(String)];
 

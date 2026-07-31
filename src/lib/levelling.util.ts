@@ -2,12 +2,8 @@ import { LEVELLING } from "@config/constants";
 import { type LevelReward, type LevelSettings, type XpBoost } from "@database/models/guildSettings.schema";
 
 /**
- * The rules of the levelling system, with no database or Discord objects in
- * sight, so every decision it makes is unit-testable.
- *
- * The first version stored one boost role and one multiplier. Guilds still have
- * those fields, so `normaliseSettings` folds them into `boosts` on read and
- * nothing else in the codebase has to know the old shape existed.
+ * The rules of the levelling system, with no database or Discord objects in sight, so every decision it makes is
+ * unit-testable.
  */
 
 export const LEVEL_LIMITS = {
@@ -45,19 +41,12 @@ export const DEFAULT_LEVEL_CONFIG: LevelConfig = {
 	ignoredRoleIds: [],
 };
 
-/**
- * `"current"` was the sentinel the first version wrote into `levelUpChannelId` to
- * mean "reply in the channel they were talking in". A null covers that now.
- */
+/** A null covers that now. */
 const CURRENT_CHANNEL = "current";
 
-/** Fields added after the first version, which a document written back then will not have. */
 type AddedLater = "boosts" | "rewards" | "stackRewards" | "announce" | "ignoredChannelIds" | "ignoredRoleIds";
 
-/**
- * What a stored document can actually look like, as opposed to what the schema
- * declares. Mongoose applies defaults on write, not to documents already on disk.
- */
+/** What a stored document can actually look like, as opposed to what the schema declares. */
 export type StoredLevelSettings = Omit<LevelSettings, AddedLater> & Partial<Pick<LevelSettings, AddedLater>>;
 
 export function normaliseSettings(settings: StoredLevelSettings | null): LevelConfig {
@@ -94,9 +83,8 @@ export function sortRewards(rewards: LevelReward[]): LevelReward[] {
 }
 
 /**
- * The best multiplier the member qualifies for, rather than the product of all of
- * them: three stacked ×5 roles would be ×125, which nobody configuring "×5 for
- * boosters" is asking for.
+ * The best multiplier the member qualifies for, rather than the product of all of them: three stacked ×5 roles would
+ * be ×125, which nobody configuring "×5 for boosters" is asking for.
  */
 export function multiplierFor(config: LevelConfig, roleIds: readonly string[]): number {
 	const held = config.boosts.filter((boost) => roleIds.includes(boost.roleId));
@@ -118,13 +106,7 @@ export interface RewardChange {
 	remove: string[];
 }
 
-/**
- * Which reward roles a member at `level` should hold, and which they should lose.
- *
- * `remove` is only ever populated when rewards do not stack, and it deliberately
- * leaves alone any role that is also earned at the current tier — a guild that
- * uses the same role for two levels should not have it taken away and given back.
- */
+/** Which reward roles a member at `level` should hold, and which they should lose. */
 export function rewardChangeFor(config: LevelConfig, level: number, held: readonly string[]): RewardChange {
 	const earned = config.rewards.filter((reward) => reward.level <= level);
 	if (earned.length === 0) return { add: [], remove: [] };
@@ -169,8 +151,8 @@ export function progressOf(xp: number, level: number): LevelProgress {
 }
 
 /**
- * Adding a boost role that is already boosting replaces its multiplier rather than
- * adding a second entry, so the list cannot end up with two answers for one role.
+ * Adding a boost role that is already boosting replaces its multiplier rather than adding a second entry, so the
+ * list cannot end up with two answers for one role.
  */
 export function withBoost(boosts: XpBoost[], roleId: string, multiplier: number): XpBoost[] {
 	const without = boosts.filter((boost) => boost.roleId !== roleId);

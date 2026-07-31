@@ -4,18 +4,7 @@ import { customId } from "@core/button";
 import { button, disableAll, type RenderedScreen, row } from "@lib/components.util";
 import { embed } from "@lib/embeds.util";
 
-/**
- * A config screen: current values on the left, one button per editable field.
- *
- * Eleven slash options on one command means nobody ever discovers nine of them.
- * A panel shows every setting at once with its current value beside it, and each
- * button opens a modal pre-filled with that value — so editing is the same
- * gesture as reading.
- *
- * Generic on purpose: `/treasure`, `/lottery`, `/welcome-system`, `/anti-link`,
- * `/automod`, `/levelling` and `/counting` are all "show the config, edit one
- * field, persist, re-render".
- */
+/** A config screen: current values on the left, one button per editable field. */
 
 export interface SettingsField {
 	label: string;
@@ -90,12 +79,7 @@ export function statusValue(enabled: boolean): string {
 	return enabled ? "🟢 Enabled" : "🔴 Disabled";
 }
 
-/**
- * Reads a whole number out of a modal field, rejecting anything that is not one.
- *
- * Returns the reason rather than throwing so a form can report every bad field
- * at once instead of failing on the first.
- */
+/** Reads a whole number out of a modal field, rejecting anything that is not one. */
 export function parseWholeNumber(
 	raw: string,
 	label: string,

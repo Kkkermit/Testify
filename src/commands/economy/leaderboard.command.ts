@@ -2,14 +2,7 @@ import { type CommandInput, defineCommand, inGuild } from "@core/command";
 import { type BoardKind, boardMessage } from "@lib/leaderboardActions.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * Both boards, one command, and no buttons.
- *
- * The board used to page and swap from buttons, but re-rendering it left the old
- * image attached and added the new one beside it — a few presses produced a grid of
- * four boards. A message that is never edited cannot accumulate anything, so the
- * page is an option and each request is its own message.
- */
+/** Both boards, one command, and no buttons. */
 const pageOption = {
 	name: "page",
 	description: "Which page to show. Defaults to the first.",

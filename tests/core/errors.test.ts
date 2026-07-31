@@ -160,10 +160,7 @@ describe("runCommand", () => {
 		expect(interaction.followUp).toHaveBeenCalled();
 	});
 
-	/**
-	 * An expired interaction must not turn one failure into an unhandled rejection
-	 * on top of it.
-	 */
+	/** An expired interaction must not turn one failure into an unhandled rejection on top of it. */
 	it("swallows a failure to deliver the apology", async () => {
 		// Replaced after construction: `reply` is overloaded three ways in discord.js
 		// and a rejecting stub cannot satisfy every overload.
@@ -227,7 +224,6 @@ describe("the error channel", () => {
 		expect(send).not.toHaveBeenCalled();
 	});
 
-	/** A misconfigured channel must not replace the original error with its own. */
 	it("warns rather than throwing when the channel cannot be reached", async () => {
 		const send = jest.fn(() => Promise.reject(new Error("Missing Access")));
 		const client = clientWithChannel(send, "123");

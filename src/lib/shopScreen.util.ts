@@ -14,16 +14,7 @@ import { formatNumber } from "@lib/format.util";
 import { ALL_PETS, type PetSpecies, PETS_BY_RARITY } from "@lib/pets.util";
 import { BUSINESSES, HOUSES, JOBS, SHOP_ITEMS } from "@lib/shop.util";
 
-/**
- * The shop, as a drill-down rather than a list of IDs to copy.
- *
- * `/shop view` used to print every item with its raw ID in backticks so people
- * could paste it into `/shop buy <id>`. The bot already knows the catalogue, so
- * the user should be picking from it.
- *
- * Pure: state in, rendered screen out. Both the command and the button handler
- * call the same function, so the first render and every re-render cannot drift.
- */
+/** The shop, as a drill-down rather than a list of IDs to copy. */
 
 export const SHOP_ID = "shop";
 
@@ -147,7 +138,6 @@ export function entriesFor(state: ShopState, balances: Balances): Entry[] {
 		case "houses":
 			return HOUSES.map((house) => {
 				// The one you own turns into a Sell button rather than a dead
-				// "already owned" row — selling used to be a separate subcommand
 				// that took no confirmation.
 				const isMine = balances.ownsHouse && balances.houseId === house.id;
 
@@ -345,12 +335,7 @@ function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: str
 	);
 }
 
-/**
- * Selling asks first, because it pays back half and cannot be undone.
- *
- * The confirm row lives inside the container: a Components V2 message cannot carry
- * a loose action row alongside one, so it has to be part of the same block.
- */
+/** Selling asks first, because it pays back half and cannot be undone. */
 export function sellConfirmScreen(entry: Entry, balances: Balances, ownerId: string): ContainerMessage {
 	const refund = entry.refund ?? 0;
 

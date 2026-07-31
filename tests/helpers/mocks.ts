@@ -11,23 +11,11 @@ import {
 import { type TestifyClient } from "@core/client";
 import { createLogger } from "@core/logger";
 
-/**
- * Mock factories, one per surface, with every method already stubbed.
- *
- * A test configures only what it cares about and spreads `overrides` last, so a
- * single branch can be replaced without rebuilding the object. They are typed
- * against the real discord.js shapes, so a mock that drifts from what the
- * library actually provides is a compile error rather than a passing test.
- */
+/** Mock factories, one per surface, with every method already stubbed. */
 
+/** Applies overrides so that an explicit `null`, `0` or `false` wins. */
 /**
- * Applies overrides so that an explicit `null`, `0` or `false` wins.
- * A naive `??` would fall through to the default and quietly ignore the test.
- */
-/**
- * `User`, `Role` and `GuildMember` type `toString()` as a template literal, which
- * an object literal cannot satisfy. Overriding it is never the point, so it is
- * excluded rather than forcing every call site to cast.
+ * `User`, `Role` and `GuildMember` type `toString()` as a template literal, which an object literal cannot satisfy.
  */
 export type Overrides<T> = Partial<Omit<T, "toString" | "valueOf">>;
 
@@ -203,10 +191,7 @@ export interface MockInteractionSetup {
 	overrides?: Overrides<ChatInputCommandInteraction>;
 }
 
-/**
- * A slash interaction. `sent` collects everything the command replied with, so
- * a test can assert on the answer without unpicking mock calls.
- */
+/** A slash interaction. */
 export function createMockInteraction(setup: MockInteractionSetup = {}): ChatInputCommandInteraction & {
 	sent: Record<string, unknown>[];
 } {
@@ -259,7 +244,7 @@ export interface MockMessageSetup {
 	overrides?: Overrides<Message>;
 }
 
-/** A message, for the prefix surface. `sent` collects the replies. */
+/** A message, for the prefix surface. */
 export function createMockMessage(setup: MockMessageSetup = {}): Message & { sent: Record<string, unknown>[] } {
 	const { content = "", inGuild = true, mentions = [], attachments = [], overrides = {} } = setup;
 
@@ -298,11 +283,7 @@ export function createMockMessage(setup: MockMessageSetup = {}): Message & { sen
 	return merge(base, overrides as Overrides<typeof base>);
 }
 
-/**
- * A Mongoose model stub. `defaultDoc` is what every query resolves to unless a
- * method is overridden — and an override of `null` is honoured, which is how a
- * test says "this record does not exist".
- */
+/** A Mongoose model stub. */
 export interface MockQuery {
 	lean: jest.Mock<MockQuery>;
 	sort: jest.Mock<MockQuery>;

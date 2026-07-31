@@ -52,11 +52,8 @@ describe("navRow", () => {
 	});
 
 	/**
-	 * Discord rejects the whole message with COMPONENT_CUSTOM_ID_DUPLICATED when two
-	 * components share an ID — disabled ones included. First and previous both mean
-	 * page 0 on page 1; next and last both mean the end on the second-to-last; on a
-	 * single-page list all four collapse to the same page. Every one of those sent a
-	 * message Discord refused.
+	 * Discord rejects the whole message with COMPONENT_CUSTOM_ID_DUPLICATED when two components share an ID — disabled
+	 * ones included.
 	 */
 	it.each([
 		["one page", 0, 1],

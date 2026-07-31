@@ -66,11 +66,7 @@ describe("pageOfRank", () => {
 });
 
 describe("footerFor", () => {
-	/**
-	 * This line replaced the Find me and paging buttons. Every attempt to re-render
-	 * the board in place left the old image attached and added the new one beside it,
-	 * so the board is now a message that is never edited.
-	 */
+	/** This line replaced the Find me and paging buttons. */
 	it("says where the viewer sits", () => {
 		expect(footerFor("levels", 0, 1, 1)).toMatch(/1st/);
 	});

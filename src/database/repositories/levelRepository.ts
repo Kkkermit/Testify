@@ -43,9 +43,8 @@ export interface XpResult {
 }
 
 /**
- * Atomic XP award with a per-user message cooldown enforced in the query filter,
- * which is what stops XP being farmed by message spam. The previous handler added
- * the multiplied amount and then added the base amount a second time.
+ * Atomic XP award with a per-user message cooldown enforced in the query filter, which is what stops XP being farmed
+ * by message spam.
  */
 export async function awardXp(
 	guildId: string,

@@ -6,7 +6,7 @@ import { payPassiveIncome } from "@jobs/passiveIncome.util";
 import { refreshBotStats } from "@jobs/refreshBotStats.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 
-/** Starts the repeating background jobs. Add a new one by adding a line here. */
+/** Starts the repeating background jobs. */
 export default defineEvent({
 	name: Events.ClientReady,
 	once: true,

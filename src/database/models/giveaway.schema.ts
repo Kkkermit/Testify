@@ -1,9 +1,6 @@
 import { model, Schema, SchemaTypes } from "mongoose";
 
-/**
- * Persistence for `discord-giveaways`. The library owns the document shape, so the
- * fields stay exactly as it writes them — this model is storage, not a domain type.
- */
+/** Persistence for `discord-giveaways`. */
 export interface GiveawayRecord {
 	messageId: string;
 	channelId: string;

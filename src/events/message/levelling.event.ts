@@ -13,11 +13,7 @@ const CONGRATULATIONS = [
 	"{user} levelled up to **{level}**!",
 ];
 
-/**
- * XP is awarded once per cooldown window through an atomic update. The previous
- * handler added the multiplied amount and then the base amount again, and had no
- * cooldown at all, so XP was trivially farmable.
- */
+/** XP is awarded once per cooldown window through an atomic update. */
 export default defineMessageHandler({
 	name: "levelling",
 	order: 40,

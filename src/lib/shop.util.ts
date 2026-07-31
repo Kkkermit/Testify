@@ -1,7 +1,4 @@
-/**
- * The shop catalogue. Static data, `as const`, so every id is a literal type and a
- * typo in a command is a compile error rather than a silent lookup failure.
- */
+/** The shop catalogue. */
 
 export interface ShopItem {
 	id: string;

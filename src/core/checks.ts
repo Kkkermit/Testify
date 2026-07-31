@@ -9,10 +9,7 @@ export type CheckFailure = string | null;
 
 const cooldowns = new Map<string, number>();
 
-/**
- * Everything that can stop a command before it runs, in one place and in order.
- * Returns the message to show the user, or null to let the command through.
- */
+/** Everything that can stop a command before it runs, in one place and in order. */
 export async function runChecks(
 	interaction: CommandInput,
 	command: Command,

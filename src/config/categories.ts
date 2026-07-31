@@ -1,7 +1,4 @@
-/**
- * Command categories. Adding one here makes it available to `/help` and to the
- * `category` field on a command — nothing else needs changing.
- */
+/** Command categories. */
 export const CATEGORIES = {
 	community: { label: "Community", emoji: "👥", colour: "Green" },
 	economy: { label: "Economy", emoji: "💰", colour: "DarkOrange" },

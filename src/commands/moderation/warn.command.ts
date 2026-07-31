@@ -15,11 +15,7 @@ import { dmEmbed, notifyTarget } from "@lib/moderationActions.util";
 import { reply } from "@lib/reply.util";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
-/**
- * Autocompleted rather than typed. Making someone copy a generated ID out of a
- * previous embed is the exact pattern the UX notes call out — the bot already
- * knows every warning this user has, so it offers them.
- */
+/** Autocompleted rather than typed. */
 const WARN_ID_OPTION = {
 	name: "warn-id",
 	description: "Start typing to pick a warning.",

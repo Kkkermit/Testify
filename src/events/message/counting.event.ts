@@ -6,8 +6,8 @@ import { formatNumber } from "@lib/format.util";
 import { replyTemporarily } from "@lib/tidyReply.util";
 
 /**
- * The expected number and the "not twice in a row" rule are both enforced inside
- * the update filter, so two messages arriving together can no longer both count.
+ * The expected number and the "not twice in a row" rule are both enforced inside the update filter, so two messages
+ * arriving together can no longer both count.
  */
 export default defineMessageHandler({
 	name: "counting",
@@ -26,8 +26,6 @@ export default defineMessageHandler({
 		if (parsed !== expected) {
 			await resetCount(message.guild.id);
 
-			// Tidied away after a few seconds: a counting channel fills with corrections
-			// otherwise, and the numbers become hard to find among them.
 			await replyTemporarily(
 				client,
 				message,

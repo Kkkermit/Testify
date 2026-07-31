@@ -7,14 +7,7 @@ import rockPaperScissors from "@commands/games/subcommands/rockPaperScissors.com
 import wouldYouRather from "@commands/games/subcommands/wouldYouRather.command";
 import { asSubcommand, defineCommand } from "@core/command";
 
-/**
- * Discord allows an application 100 commands, so related ones live together
- * here. Each file in `subcommands/` is an ordinary command definition; the
- * loader only registers files sitting directly in a category folder, so they
- * appear only as part of this one.
- *
- * `t?meme` still works: a folded-in command keeps its own name as a prefix alias.
- */
+/** Discord allows an application 100 commands, so related ones live together here. */
 export default defineCommand({
 	name: "game",
 	description: "Something to play.",

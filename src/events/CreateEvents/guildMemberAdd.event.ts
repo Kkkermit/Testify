@@ -24,8 +24,6 @@ export default defineEvent({
 
 		const autoRoles = await getAutoRoles(member.guild.id);
 		if (autoRoles && autoRoles.roleIds.length > 0) {
-			// `if (data.Roles.length < 0)` in the original was never true, but the
-			// roles were also added one await at a time with no error handling.
 			await Promise.all(
 				autoRoles.roleIds.map((roleId) =>
 					member.roles.add(roleId, "Auto-role").catch((error: unknown) => {
@@ -45,8 +43,6 @@ export default defineEvent({
 			const channel = await client.channels.fetch(welcome.channelId).catch(() => null);
 
 			if (channel?.isTextBased() === true && channel.isSendable()) {
-				// The same builder `/welcome test` and the panel's Preview use, so what an
-				// admin checks is exactly what a member gets.
 				const greeting = await greetingFor(member, welcome, settings).catch((error: unknown) => {
 					client.logger.warn(
 						{ err: toError(error), guildId: member.guild.id },

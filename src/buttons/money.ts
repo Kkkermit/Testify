@@ -5,12 +5,7 @@ import { modalForm, quickAmountRow, type RenderedScreen } from "@lib/components.
 import { embed, successEmbed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
 
-/**
- * Quick-amount buttons for moving money between wallet and bank.
- *
- * `/deposit 500` still works, but the common cases — a quarter, half, the lot —
- * are one press instead of a number nobody wants to work out.
- */
+/** Quick-amount buttons for moving money between wallet and bank. */
 
 export const MONEY_PANEL_ID = "money";
 

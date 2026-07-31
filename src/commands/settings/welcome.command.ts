@@ -8,14 +8,7 @@ import { checkBackground, normaliseWelcome } from "@lib/welcome.util";
 import { greetingFor } from "@lib/welcomeActions.util";
 import { welcomePanel } from "@lib/welcomePanel.util";
 
-/**
- * One panel, plus the two things a panel cannot do: take a file upload, and post a
- * real greeting.
- *
- * The old `set <channel> <message> <embed>` asked people to write the greeting
- * blind in a slash-command box, with the placeholders documented only in an option
- * description nobody reads twice.
- */
+/** One panel, plus the two things a panel cannot do: take a file upload, and post a real greeting. */
 export default defineCommand({
 	name: "welcome",
 	description: "Greets new members when they join.",
@@ -92,7 +85,6 @@ export default defineCommand({
 				const member = await guild.members.fetch(interaction.user.id).catch(() => null);
 				if (member === null) throw new UserFacingError("I could not read your member profile.");
 
-				// The same builder the join event uses, so the test cannot flatter it.
 				await reply(interaction, await greetingFor(member, config, settings));
 			},
 		},

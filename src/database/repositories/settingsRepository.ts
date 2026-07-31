@@ -24,11 +24,7 @@ import {
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
-/**
- * Prefixes are read on every single message, so they are cached. The cache is
- * per-process and short-lived, which is enough — a changed prefix takes effect
- * within a minute at worst.
- */
+/** Prefixes are read on every single message, so they are cached. */
 export interface PrefixConfig {
 	prefix: string;
 	isEnabled: boolean;
@@ -157,8 +153,8 @@ export async function disableCounting(guildId: string): Promise<boolean> {
 }
 
 /**
- * Conditional increment: the expected count and "not the same user twice" rule are
- * both in the filter, so two concurrent messages cannot double-count.
+ * Conditional increment: the expected count and "not the same user twice" rule are both in the filter, so two
+ * concurrent messages cannot double-count.
  */
 export async function advanceCount(
 	guildId: string,

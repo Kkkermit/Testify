@@ -4,12 +4,7 @@ import { defineCommand, inGuild } from "@core/command";
 import { autoRolePanel } from "@lib/autoRolePanel.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * One panel instead of `add`, `remove` and `list`.
- *
- * The three subcommands meant three round trips to change two roles, and `list`
- * existed only because `add` never showed you the result.
- */
+/** One panel instead of `add`, `remove` and `list`. */
 export default defineCommand({
 	name: "auto-role",
 	description: "Gives roles automatically to new members.",

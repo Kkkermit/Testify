@@ -6,9 +6,8 @@ import { getAuditLogConfig } from "@database/repositories/settingsRepository";
 import { embed } from "@lib/embeds.util";
 
 /**
- * Replaces `discord-logs` and the script that overwrote that package's source
- * inside `node_modules` — a patch every install destroyed. These handlers use
- * discord.js's own gateway events, so nothing needs patching.
+ * Replaces `discord-logs` and the script that overwrote that package's source inside `node_modules` — a patch every
+ * install destroyed.
  */
 export const AUDIT_EVENTS = [
 	"messageDelete",

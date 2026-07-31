@@ -40,11 +40,7 @@ export function renderGuildPage(items: GuildSummary[]) {
 	});
 }
 
-/**
- * The previous version declared `permissions: [PermissionsBitField.Administrator]`,
- * a property that does not exist, so the array was `[undefined]` and the gate threw.
- * Ownership is now a first-class command flag.
- */
+/** Ownership is now a first-class command flag. */
 export default defineCommand({
 	name: "guild-list",
 	description: "Lists every server the bot is in.",

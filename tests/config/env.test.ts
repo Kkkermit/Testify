@@ -51,10 +51,7 @@ describe("loadEnv", () => {
 		expect(() => loadEnv()).toThrow(/DISCORD_CLIENT_ID/);
 	});
 
-	/**
-	 * `.env.example` ships every optional key present but blank, which is an empty
-	 * string rather than an absent one. Following the documented setup has to work.
-	 */
+	/** `.env.example` ships every optional key present but blank, which is an empty string rather than an absent one. */
 	it("treats a blank optional setting as unset", () => {
 		setEnv({
 			...VALID,
@@ -95,10 +92,8 @@ describe("loadEnv", () => {
 });
 
 /**
- * The dev/prod split is only as good as the script that triggers it: `loadEnv()`
- * picks `.env.development` off `NODE_ENV`, so a `dev` script that forgets to set
- * it starts the production bot against the production database. That is anti-pattern
- * #1 in the migration notes, and it is invisible until it has already happened.
+ * The dev/prod split is only as good as the script that triggers it: `loadEnv()` picks `.env.development` off
+ * `NODE_ENV`, so a `dev` script that forgets to set it starts the production bot against the production database.
  */
 describe("the dev script", () => {
 	const { scripts } = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf8")) as {

@@ -26,7 +26,6 @@ export default defineCommand({
 
 		if (!SNOWFLAKE.test(userId)) throw new UserFacingError("That is not a valid user ID.");
 
-		// The previous version compared a User object against a ban entry's user id,
 		// so the "is this user banned" check never matched and unban always ran blind.
 		const ban = await guild.bans.fetch(userId).catch(() => null);
 		if (!ban) throw new UserFacingError("That user is not banned in this server.");

@@ -14,12 +14,7 @@ import {
 import { formatNumber } from "@lib/format.util";
 import { findShopItem } from "@lib/shop.util";
 
-/**
- * What you own, with the thing you would do to each item beside it.
- *
- * The old view was a paginated embed of fields, so using an item meant reading its
- * name and typing `/use <name>`. A usable item now carries its own Use button.
- */
+/** What you own, with the thing you would do to each item beside it. */
 
 export const INVENTORY_PANEL_ID = "inv";
 export const INVENTORY_PAGE = 5;

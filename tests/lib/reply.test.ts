@@ -19,8 +19,8 @@ describe("reply", () => {
 	});
 
 	/**
-	 * Calling `reply()` twice is what produced unhandled `InteractionAlreadyReplied`
-	 * rejections in the JavaScript codebase — finding 8.
+	 * Calling `reply()` twice is what produced unhandled `InteractionAlreadyReplied` rejections in the JavaScript
+	 * codebase — finding 8.
 	 */
 	it("edits instead when something already replied", async () => {
 		const interaction = createMockInteraction({ overrides: { replied: true } });

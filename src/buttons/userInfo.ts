@@ -4,10 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { button, row } from "@lib/components.util";
 import { avatarEmbed, bannerEmbed, userInfoEmbed } from "@lib/userCards.util";
 
-/**
- * One handler for the whole `userinfo` namespace. The previous version had three
- * separate `interactionCreate` listeners doing prefix matching on raw custom IDs.
- */
+/** One handler for the whole `userinfo` namespace. */
 export default defineButton({
 	id: "userinfo",
 	ownerOnly: true,

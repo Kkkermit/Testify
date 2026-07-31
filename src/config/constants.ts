@@ -1,4 +1,4 @@
-/** Time, size and rate limits. No raw millisecond literals anywhere else in the codebase. */
+/** Time, size and rate limits. */
 
 export const SECOND_MS = 1_000;
 export const MINUTE_MS = 60 * SECOND_MS;

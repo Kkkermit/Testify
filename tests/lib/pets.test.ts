@@ -23,10 +23,8 @@ describe("the pet catalogue", () => {
 	});
 
 	/**
-	 * Pets are a money sink by design — nearly all of them cost more to feed than
-	 * they return, and `happinessBoost` is the reason to own one. So the invariant
-	 * worth holding is that every pet costs something and gives something back,
-	 * not that it pays for itself.
+	 * Pets are a money sink by design — nearly all of them cost more to feed than they return, and `happinessBoost` is
+	 * the reason to own one.
 	 */
 	it("charges to feed every pet and gives every pet a happiness boost", () => {
 		for (const pet of ALL_PETS) {

@@ -37,10 +37,7 @@ export function buildPage<T>(options: PageOptions<T>, page = 0): RenderedPage {
 	return { embeds: [rendered], components };
 }
 
-/**
- * Turns a list into a paged view with working arrows. `resolve` rebuilds the list
- * from the key stored in the custom ID, so no page state is kept in memory.
- */
+/** Turns a list into a paged view with working arrows. */
 export function paginatedButton<T>(config: {
 	id: string;
 	pageSize: number;

@@ -12,16 +12,7 @@ import {
 } from "@lib/containers.util";
 import { formatNumber } from "@lib/format.util";
 
-/**
- * Setting up verification, as one screen rather than a command with three
- * required options.
- *
- * The old `/verify setup <role> <channel> <content>` posted the public panel as a
- * side effect of configuring, so changing the wording meant running setup again
- * and leaving the previous panel behind. Here the configuration and the posted
- * message are separate: pick the channel and role, write the wording, then press
- * **Post the panel** — which edits the existing one if there is one.
- */
+/** Setting up verification, as one screen rather than a command with three required options. */
 
 export const VERIFY_PANEL_ID = "verifysetup";
 
@@ -35,7 +26,6 @@ export interface VerifyConfig {
 	verifiedCount: number;
 }
 
-/** Fields added after the first version, which a document written then will lack. */
 export type StoredVerifySettings = Omit<VerifySettings, "message"> & Partial<Pick<VerifySettings, "message">>;
 
 export function normaliseVerify(settings: StoredVerifySettings | null): VerifyConfig {

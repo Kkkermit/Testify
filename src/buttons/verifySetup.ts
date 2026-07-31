@@ -7,12 +7,7 @@ import { button, modalForm, row } from "@lib/components.util";
 import { embed } from "@lib/embeds.util";
 import { isReady, normaliseVerify, type VerifyConfig, verifyPanel, VERIFY_PANEL_ID } from "@lib/verifyPanel.util";
 
-/**
- * Every control on the verification setup panel.
- *
- * Kept separate from `buttons/verify.ts`, which is the button members press: that
- * one is public and must stay so, while everything here is gated on Manage Server.
- */
+/** Every control on the verification setup panel. */
 async function currentConfig(guildId: string): Promise<VerifyConfig> {
 	return normaliseVerify(await getVerifyConfig(guildId));
 }
@@ -58,8 +53,6 @@ async function publish(guild: Guild, config: VerifyConfig): Promise<string> {
 		],
 	};
 
-	// Editing the existing panel rather than posting a second one, which is what the
-	// old setup command did every time the wording changed.
 	if (config.messageId !== null) {
 		const existing = await channel.messages.fetch(config.messageId).catch(() => null);
 		if (existing !== null) {
@@ -113,8 +106,6 @@ export default defineButton({
 					throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
 				}
 
-				// Moving the panel leaves the old message behind, so the id is cleared and
-				// the next Post publishes a fresh one in the new home.
 				const messageId = channelId === config.channelId ? config.messageId : null;
 				await saveVerifyConfig(guild.id, { channelId, messageId, message: config.message });
 				await show({ ...config, channelId, messageId });
@@ -156,7 +147,6 @@ export default defineButton({
 				await saveVerifyConfig(guild.id, { message });
 				const next = { ...config, message };
 
-				// Keep the posted panel in step, so the preview above is never a lie.
 				if (next.messageId !== null && isReady(next)) await publish(guild, next);
 				await show(next, "Wording updated.");
 				return;

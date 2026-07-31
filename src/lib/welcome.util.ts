@@ -1,12 +1,6 @@
 import { type WelcomeSettings, type WelcomeStyle } from "@database/models/guildSettings.schema";
 
-/**
- * The rules of the welcome system, with no Discord objects in sight.
- *
- * Template filling used to live inside the `guildMemberAdd` handler, where it
- * could not be tested — so a broken placeholder was only ever discovered by a
- * member seeing `{usrname}` in their greeting.
- */
+/** The rules of the welcome system, with no Discord objects in sight. */
 
 export const WELCOME_LIMITS = {
 	maxMessage: 1_500,
@@ -37,13 +31,12 @@ export interface WelcomeConfig {
 	hasBackground: boolean;
 }
 
-/** Fields the first version did not have, which a document written then will lack. */
 type AddedLater = "style" | "background";
 export type StoredWelcomeSettings = Omit<WelcomeSettings, AddedLater> & Partial<Pick<WelcomeSettings, AddedLater>>;
 
 /**
- * The old `isEmbed` boolean becomes the three-way style, so a guild that turned
- * embeds on keeps them and nothing else in the codebase knows the flag existed.
+ * The old `isEmbed` boolean becomes the three-way style, so a guild that turned embeds on keeps them and nothing
+ * else in the codebase knows the flag existed.
  */
 export function normaliseWelcome(settings: StoredWelcomeSettings | null): WelcomeConfig | null {
 	if (settings === null) return null;
@@ -63,10 +56,7 @@ export interface GreetingContext {
 	memberCount: number;
 }
 
-/**
- * Fills the placeholders. Unknown tokens are left alone rather than blanked, so a
- * typo shows up as itself instead of silently vanishing from the greeting.
- */
+/** Fills the placeholders. */
 export function fillTemplate(template: string, context: GreetingContext): string {
 	return template
 		.replaceAll("{user}", context.mention)
@@ -80,10 +70,7 @@ export interface BackgroundCheck {
 	reason?: string;
 }
 
-/**
- * Whether an uploaded file can be used as a card background. Checked before it is
- * downloaded, so a 40 MB video never reaches the bot's memory.
- */
+/** Whether an uploaded file can be used as a card background. */
 export function checkBackground(file: {
 	contentType: string | null;
 	size: number;

@@ -3,11 +3,7 @@ import { type TestifyClient } from "@core/client";
 import { errorEmbed } from "@lib/embeds.util";
 import { cleanupFooter, replyTemporarily, TIDY_AFTER_MS } from "@lib/tidyReply.util";
 
-/**
- * A counting channel used to fill with "you cannot count twice in a row" until the
- * numbers were hard to find among the corrections. These notices clean themselves
- * up, and say so — a message that vanishes unannounced reads as a glitch.
- */
+/** These notices clean themselves up, and say so — a message that vanishes unannounced reads as a glitch. */
 function harness(): { client: TestifyClient; message: Message; deleted: jest.Mock; after: jest.Mock } {
 	const deleted = jest.fn(() => Promise.resolve());
 	const after = jest.fn();
@@ -55,8 +51,8 @@ describe("replyTemporarily", () => {
 	});
 
 	/**
-	 * Scheduled through the client's registry rather than a bare `setTimeout`, so a
-	 * shutdown cancels it instead of holding the process open.
+	 * Scheduled through the client's registry rather than a bare `setTimeout`, so a shutdown cancels it instead of
+	 * holding the process open.
 	 */
 	it("schedules the delete on the client's timers", async () => {
 		const { client, message, after } = harness();

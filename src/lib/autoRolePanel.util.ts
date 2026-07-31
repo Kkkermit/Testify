@@ -4,12 +4,7 @@ import { roleSelect, row } from "@lib/components.util";
 import { type ContainerMessage } from "@lib/containers.util";
 import { roleValue, settingsScreen } from "@lib/settingsScreen.util";
 
-/**
- * Auto-roles, as a pre-ticked menu rather than `add` and `remove` subcommands.
- *
- * The menu *is* the list: what is ticked is what new members get, so removing a
- * role is deselecting it and there is no second control to hunt for.
- */
+/** Auto-roles, as a pre-ticked menu rather than `add` and `remove` subcommands. */
 
 export const AUTOROLE_PANEL_ID = "autorole";
 

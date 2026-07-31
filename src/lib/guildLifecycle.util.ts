@@ -5,9 +5,8 @@ import { embed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
 
 /**
- * `guildCreate` and `guildDelete` shared roughly eighty percent of their code and
- * the delete handler still logged a `[GUILD_CREATE]` tag. Both now build the same
- * embed through one function.
+ * `guildCreate` and `guildDelete` shared roughly eighty percent of their code and the delete handler still logged a
+ * `[GUILD_CREATE]` tag.
  */
 export async function buildGuildEmbed(
 	client: TestifyClient,

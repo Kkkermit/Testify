@@ -15,10 +15,7 @@ export interface PrefixPanelState {
 	note?: string;
 }
 
-/**
- * A prefix with a space in it can never match, and one that is only whitespace
- * would match every message. Returns the reason so the modal can say it.
- */
+/** A prefix with a space in it can never match, and one that is only whitespace would match every message. */
 export function checkPrefix(raw: string): { ok: true; value: string } | { ok: false; reason: string } {
 	const value = raw.trim();
 

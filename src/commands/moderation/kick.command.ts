@@ -20,7 +20,6 @@ export default defineCommand({
 
 	async run(interaction) {
 		const guild = inGuild(interaction);
-		// The previous prefix version read args[1] here, so it kicked the wrong person
 		// whenever an ID was supplied instead of a mention.
 		const target = interaction.options.getUser("user", true);
 		const reason = interaction.options.getString("reason") ?? DEFAULT_REASON;

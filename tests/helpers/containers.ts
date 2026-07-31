@@ -1,12 +1,6 @@
 import { type ContainerMessage } from "@lib/containers.util";
 
-/**
- * Reading a Components V2 payload back out.
- *
- * A container nests sections inside containers and buttons inside sections, so
- * asserting on one means walking the tree rather than indexing into a flat list
- * of rows the way an embed screen allowed.
- */
+/** Reading a Components V2 payload back out. */
 
 function walk(rendered: ContainerMessage, visit: (node: Record<string, unknown>) => void): void {
 	const descend = (node: unknown): void => {
@@ -60,14 +54,7 @@ export function customIdsOf(rendered: Rendered): string[] {
 	return found;
 }
 
-/**
- * Custom IDs that appear more than once.
- *
- * Discord rejects the **entire message** with `COMPONENT_CUSTOM_ID_DUPLICATED`
- * when two components share an ID — including disabled ones, which is what made
- * a one-page leaderboard impossible to send. Assert this is empty on any screen
- * that builds IDs from state.
- */
+/** Custom IDs that appear more than once. */
 export function duplicateIds(rendered: Rendered): string[] {
 	const seen = new Set<string>();
 	const repeated = new Set<string>();

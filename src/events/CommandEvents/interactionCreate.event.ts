@@ -5,7 +5,7 @@ import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { errorEmbed } from "@lib/embeds.util";
 
-/** The only `interactionCreate` listener. Everything is routed from here. */
+/** The only `interactionCreate` listener. */
 export default defineEvent({
 	name: Events.InteractionCreate,
 	async run(client, interaction: Interaction) {

@@ -75,12 +75,7 @@ describe("bannerLines", () => {
 	});
 });
 
-/**
- * The rows are padded on the assumption that every icon takes two terminal
- * columns. A glyph without `Emoji_Presentation` renders one column wide, which
- * silently pulls that one row's colon out of line — the exact bug U+1F5C3 caused
- * in the "Loaded from disk" block.
- */
+/** The rows are padded on the assumption that every icon takes two terminal columns. */
 describe("row icons", () => {
 	it.each(Object.entries(ICONS))("%s renders two columns wide", (_name, icon) => {
 		expect(icon).toMatch(/^\p{Emoji_Presentation}$/u);

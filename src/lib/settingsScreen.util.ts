@@ -13,29 +13,8 @@ import {
 } from "@lib/containers.util";
 
 /**
- * The house style for a Components V2 settings panel.
- *
- * Every configurable feature used to have its own shape: some were three
- * subcommands taking options, some an embed with a row of buttons, some nothing
- * at all. This is the one screen they all render now, so an admin who has set up
- * levelling already knows how to set up automod.
- *
- * The layout, top to bottom:
- *
- * ```
- * ## 🔗 Anti-link                     title
- * Links are removed in #general.      status
- * -# Saved.                           note, from the last press
- * ───────────────────────────────
- * **Bypass** — Manage Messages  [Edit]   rows, each with its own button
- * ───────────────────────────────
- * [channel picker]                    pickers
- * [Turn off] [Reset]                  actions
- * -# Anything worth explaining.       footer
- * ```
- *
- * `settingsPanel.util.ts` is the embed-based ancestor of this and is still used by
- * the panels that have not been converted. New panels use this one.
+ * The house style for a Components V2 settings panel: title, status, an optional note, rows with their own control
+ * beside them, captioned pickers, then actions.
  */
 
 export interface ScreenAction {
@@ -49,13 +28,7 @@ export interface ScreenAction {
 	args?: (string | number)[];
 }
 
-/**
- * A select menu with a caption above it.
- *
- * Two bare pickers stacked on top of each other give the reader no way to tell
- * which is which — a placeholder disappears the moment something is chosen, so a
- * configured panel ends up showing two identical-looking menus.
- */
+/** A select menu with a caption above it. */
 export interface ScreenPicker {
 	label: string;
 	/** A line of smaller text under the label, for anything worth explaining. */
@@ -111,8 +84,6 @@ export function settingsScreen(options: SettingsScreenOptions): ContainerMessage
 		for (const entry of rows) {
 			const line = `**${entry.label}**\n${entry.value}`;
 
-			// A button in its own section sits beside the setting it changes, rather
-			// than in a row underneath where the reader has to count to match them up.
 			parts.push(
 				entry.action === undefined
 					? text(line)
@@ -126,8 +97,6 @@ export function settingsScreen(options: SettingsScreenOptions): ContainerMessage
 		parts.push(divider());
 
 		for (const [index, picker] of pickers.entries()) {
-			// A spacer between menus, so the caption reads as belonging to the one below
-			// it rather than floating between two.
 			if (index > 0) parts.push(divider({ spacer: true }));
 
 			parts.push(text(`**${picker.label}**${picker.hint === undefined ? "" : `\n-# ${picker.hint}`}`), picker.control);
@@ -138,7 +107,6 @@ export function settingsScreen(options: SettingsScreenOptions): ContainerMessage
 	if (actions.length > 0) {
 		parts.push(divider());
 
-		// Five per row is Discord's limit, so they wrap rather than being rejected.
 		for (let index = 0; index < actions.length; index += 5) {
 			parts.push(
 				row(...actions.slice(index, index + 5).map((action) => toButton(options.id, action, options.ownerId))),

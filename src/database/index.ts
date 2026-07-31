@@ -1,10 +1,4 @@
-/**
- * Mongoose models and the functions that read and write them.
- *
- * Re-exported with `export *` so the barrel maintains itself — adding a file
- * here needs no edit. Import a module directly (`@database/repositories/economyRepository`) when you only
- * want one; the barrel is for when you want several.
- */
+/** Mongoose models and the functions that read and write them. */
 
 export * from "./connection";
 export * from "./models/economy.schema";

@@ -137,8 +137,8 @@ describe("the verification panel", () => {
 	});
 
 	/**
-	 * Setup can look complete while every verification fails at the last step, and
-	 * Discord gives no warning until it does.
+	 * Setup can look complete while every verification fails at the last step, and Discord gives no warning until it
+	 * does.
 	 */
 	it("warns when the chosen role sits above the bot", () => {
 		expect(textOf(verifyPanel({ config: config(), roleTooHigh: true }, OWNER))).toMatch(/above mine/i);

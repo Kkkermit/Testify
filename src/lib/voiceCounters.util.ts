@@ -4,12 +4,7 @@ import { toError } from "@core/errors";
 import { getVoiceCounter } from "@database/repositories/settingsRepository";
 import { formatNumber } from "@lib/format.util";
 
-/**
- * Four byte-identical event files (with `1`-suffixed variables) collapse into
- * this. Discord rate-limits channel renames to two per ten minutes, so failures
- * are logged rather than passed to `.catch(err)` where `err` was undefined —
- * which is to say, no handler at all.
- */
+/** Four byte-identical event files (with `1`-suffixed variables) collapse into this. */
 export async function syncVoiceCounters(client: TestifyClient, guild: Guild): Promise<void> {
 	const settings = await getVoiceCounter(guild.id);
 	if (!settings) return;

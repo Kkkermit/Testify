@@ -29,10 +29,7 @@ describe("buildMessage", () => {
 		expect(buildMessage("feat", "added the thing")).toBe("feat: Added the thing");
 	});
 
-	/**
-	 * The message goes to git as an argv element, so characters that would break
-	 * a shell string are just data. This pins that they survive intact.
-	 */
+	/** The message goes to git as an argv element, so characters that would break a shell string are just data. */
 	it("passes shell metacharacters through untouched", () => {
 		expect(buildMessage("fix", 'handle a " quote and a $VAR and a `tick`')).toBe(
 			'fix: Handle a " quote and a $VAR and a `tick`',

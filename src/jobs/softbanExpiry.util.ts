@@ -2,11 +2,7 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { claimExpiredSoftban } from "@database/repositories/moderationRepository";
 
-/**
- * Each expired softban is claimed atomically, so two ticks cannot both try to
- * unban the same user. The previous version used self-rescheduling `setTimeout`
- * recursion, which could not be cancelled at all.
- */
+/** Each expired softban is claimed atomically, so two ticks cannot both try to unban the same user. */
 export async function processExpiredSoftbans(client: TestifyClient): Promise<void> {
 	for (let processed = 0; processed < 25; processed += 1) {
 		const softban = await claimExpiredSoftban();

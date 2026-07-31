@@ -5,12 +5,8 @@ import { type BoardRow, renderBoardImage } from "@lib/boardCard.util";
 import { formatNumber, ordinal } from "@lib/format.util";
 
 /**
- * The leaderboards, shared by `/leaderboard` and by its paging buttons so the
- * first page and every later one are drawn by the same code.
- *
- * Both boards are one command rather than one per system: the levelling board used
- * to sit under the economy command as a second subcommand, which is where anyone
- * looking for it would never think to check.
+ * The leaderboards, shared by `/leaderboard` and by its paging buttons so the first page and every later one are
+ * drawn by the same code.
  */
 
 export const LEADERBOARD_ID = "leaderboard";
@@ -74,11 +70,7 @@ async function entriesFor(guild: Guild, kind: BoardKind, page: number): Promise<
 	};
 }
 
-/**
- * Names and avatars come from one bulk member fetch rather than one request each.
- * Someone who has since left the server keeps their place with their ID as a name —
- * dropping them would renumber everyone below.
- */
+/** Names and avatars come from one bulk member fetch rather than one request each. */
 async function decorate(guild: Guild, entries: Entry[], page: number): Promise<BoardRow[]> {
 	// Cache first, and only fetch what is genuinely missing: the handler answers the
 	// interaction directly rather than deferring, so this has to stay well inside
@@ -104,18 +96,7 @@ export interface BoardMessage {
 	files: AttachmentBuilder[];
 }
 
-/**
- * One board, as an image and a line of text. **Deliberately has no buttons.**
- *
- * It used to page and swap boards from buttons, but every re-render left the
- * previous image attached and added the new one beside it, so a few presses turned
- * the message into a grid of four boards. Three fixes — a deferred `editReply`,
- * an `update`, and a direct `Message#edit`, each explicitly listing the
- * attachments to keep — all failed against the live API.
- *
- * A message that is never edited cannot accumulate anything, so the page is a
- * command option instead. Less clever, and it works.
- */
+/** One board, as an image and a line of text. */
 export async function boardMessage(
 	guild: Guild,
 	kind: BoardKind,
@@ -129,10 +110,7 @@ export async function boardMessage(
 	return { content: footerFor(kind, page, pageCount(total), await rankOf(guild, kind, viewerId)), files: [image] };
 }
 
-/**
- * The line under the board: where the viewer sits, and how to reach the rest.
- * This is what the Find me and paging buttons used to do.
- */
+/** The line under the board: where the viewer sits, and how to reach the rest. */
 export function footerFor(kind: BoardKind, page: number, pages: number, rank: number | null): string {
 	const where =
 		rank === null
@@ -150,7 +128,7 @@ export function otherKind(kind: BoardKind): BoardKind {
 	return kind === "economy" ? "levels" : "economy";
 }
 
-/** Which page someone at this rank is on. Rank 1 is on page 0. */
+/** Which page someone at this rank is on. */
 export function pageOfRank(rank: number): number {
 	return Math.max(0, Math.ceil(rank / PAGE_SIZE) - 1);
 }

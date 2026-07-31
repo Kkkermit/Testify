@@ -3,13 +3,7 @@ import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { z } from "zod";
 
-/**
- * Everything the bot reads from the environment, in one list.
- *
- * It is checked once at start-up, so a missing or malformed value stops the bot
- * immediately with a list of what to fix — rather than breaking halfway through
- * a command hours later.
- */
+/** Everything the bot reads from the environment, in one list. */
 
 const id = z.string().regex(/^\d{17,20}$/, "should be a Discord ID (17-20 digits)");
 
@@ -41,9 +35,8 @@ const schema = z.object({
 export type Env = z.infer<typeof schema>;
 
 /**
- * `KEY=` in a .env file is an empty string, not an absent one, and the optional
- * settings are meant to be left blank — so a blank line has to mean "not set"
- * rather than "set to nothing".
+ * `KEY=` in a .env file is an empty string, not an absent one, and the optional settings are meant to be left blank
+ * — so a blank line has to mean "not set" rather than "set to nothing".
  */
 function withoutBlanks(source: NodeJS.ProcessEnv): Record<string, string> {
 	return Object.fromEntries(

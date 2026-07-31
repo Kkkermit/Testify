@@ -13,16 +13,7 @@ import {
 } from "@lib/containers.util";
 import { formatNumber } from "@lib/format.util";
 
-/**
- * The wallet, and the things you would do next.
- *
- * `/balance` printed three numbers and left you to type `/deposit`, `/shop` or
- * `/daily` yourself. The figures are the same; the difference is that every
- * obvious next action is now a button beside them.
- *
- * Only rendered with controls for your own balance — someone else's is a
- * read-only card, since you cannot spend their money.
- */
+/** The wallet, and the things you would do next. */
 
 export const BALANCE_PANEL_ID = "balance";
 

@@ -6,11 +6,7 @@ import { embed } from "@lib/embeds.util";
 
 export const DEFAULT_REASON = "No reason provided";
 
-/**
- * The hierarchy checks every moderation command needs, in one place. The previous
- * commands each wrote their own subset, and several skipped the bot-side check
- * entirely so the action failed with a raw API error.
- */
+/** The hierarchy checks every moderation command needs, in one place. */
 export function assertModeratable(ctx: CommandInput, target: GuildMember): void {
 	const moderator = asMember(ctx);
 	const guild = target.guild;
@@ -29,7 +25,7 @@ export function assertModeratable(ctx: CommandInput, target: GuildMember): void 
 	}
 }
 
-/** Best-effort DM to the target. Returns false when it could not be delivered. */
+/** Best-effort DM to the target. */
 export async function notifyTarget(user: User, builder: EmbedBuilder): Promise<boolean> {
 	try {
 		await user.send({ embeds: [builder] });

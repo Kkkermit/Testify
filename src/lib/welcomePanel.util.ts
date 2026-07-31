@@ -11,18 +11,7 @@ import {
 } from "@lib/containers.util";
 import { type WelcomeConfig, WELCOME_PLACEHOLDERS } from "@lib/welcome.util";
 
-/**
- * Setting up the welcome system, as one screen you read and press.
- *
- * The old command was `/welcome-system set <channel> <message> <embed>`, which
- * meant writing the message blind in a slash-command box with no idea what the
- * placeholders were or what the result would look like. Here the placeholders are
- * listed, the message opens in a pre-filled editor, and **Preview** shows the real
- * greeting before a single member sees it.
- *
- * Every control applies immediately; there is nothing to batch, and each setting
- * is independent.
- */
+/** Setting up the welcome system, as one screen you read and press. */
 
 export const WELCOME_PANEL_ID = "welcome";
 

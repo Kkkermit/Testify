@@ -39,7 +39,6 @@ describe("buildGuildEmbed", () => {
 		expect(data.description).toContain("Test Server");
 	});
 
-	/** The delete handler used to log a `[GUILD_CREATE]` tag; wording must match the event. */
 	it("describes a leave differently from a join", async () => {
 		const data = (await buildGuildEmbed(clientWith(12), guildWith(), "left")).toJSON();
 

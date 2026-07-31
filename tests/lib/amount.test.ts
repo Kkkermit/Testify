@@ -26,9 +26,8 @@ describe("resolveAmount", () => {
 	});
 
 	/**
-	 * A plain number is passed through unchecked — whether it can be afforded is
-	 * the caller's business, and the repository decides atomically. Only the
-	 * relative forms are bounded by the balance.
+	 * A plain number is passed through unchecked — whether it can be afforded is the caller's business, and the
+	 * repository decides atomically.
 	 */
 	it("passes a plain number through without checking the balance", () => {
 		expect(resolveAmount("2000", 1_000)).toBe(2_000);

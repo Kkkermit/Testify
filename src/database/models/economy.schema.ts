@@ -153,7 +153,6 @@ const economySchema = new Schema<EconomyAccount>(
 	{ timestamps: true },
 );
 
-// ~43 call sites query by this pair; there was no index at all before.
 economySchema.index({ guildId: 1, userId: 1 }, { unique: true });
 economySchema.index({ guildId: 1, wallet: -1 });
 economySchema.index({ guildId: 1, bank: -1 });

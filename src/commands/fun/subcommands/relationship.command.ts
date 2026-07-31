@@ -5,11 +5,6 @@ import { embed } from "@lib/embeds.util";
 import { progressBar } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * Deterministic per-pair so the same two people always get the same answer —
- * the previous version re-rolled on every invocation, which made the "checker"
- * meaningless.
- */
 function compatibility(firstId: string, secondId: string): number {
 	const key = [firstId, secondId].sort().join(":");
 	const digest = createHash("sha256").update(key).digest();

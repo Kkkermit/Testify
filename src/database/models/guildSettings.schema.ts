@@ -113,10 +113,7 @@ export interface LevelReward {
 export interface LevelSettings {
 	guildId: string;
 	isDisabled: boolean;
-	/**
-	 * The single boost role the first version supported. Still read so an existing
-	 * guild keeps its multiplier, but nothing writes it any more — `boosts` does.
-	 */
+	/** Still read so an existing guild keeps its multiplier, but nothing writes it any more — `boosts` does. */
 	roleId: string | null;
 	multiplier: number;
 	boosts: XpBoost[];
@@ -124,7 +121,7 @@ export interface LevelSettings {
 	/** Keep every reward earned so far, rather than only the newest one. */
 	stackRewards: boolean;
 	levelUpChannelId: string | null;
-	/** Announce level-ups at all. Off still awards XP, it just says nothing. */
+	/** Announce level-ups at all. */
 	announce: boolean;
 	ignoredChannelIds: string[];
 	ignoredRoleIds: string[];
@@ -197,13 +194,7 @@ export const Sticky = model<StickyMessage>("stickyschema", stickySchema);
 /** How the greeting is drawn: plain text, an embed, or the rendered image card. */
 export type WelcomeStyle = "text" | "embed" | "card";
 
-/**
- * The guild's background image, stored as bytes rather than a URL.
- *
- * Discord's attachment URLs are signed and expire within hours, so a stored link
- * would quietly stop working the day after it was set. Keeping the bytes means the
- * card renders forever, offline, with no second request on every join.
- */
+/** The guild's background image, stored as bytes rather than a URL. */
 export interface WelcomeBackground {
 	data: Buffer;
 	contentType: string;
@@ -214,7 +205,7 @@ export interface WelcomeSettings {
 	guildId: string;
 	channelId: string;
 	message: string;
-	/** The first version's only choice. Folded into `style` on read. */
+	/** Folded into `style` on read. */
 	isEmbed: boolean;
 	style?: WelcomeStyle;
 	background?: WelcomeBackground | null;

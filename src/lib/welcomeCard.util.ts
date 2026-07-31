@@ -3,18 +3,7 @@ import { type AttachmentBuilder } from "discord.js";
 import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas.util";
 import { formatNumber } from "@lib/format.util";
 
-/**
- * The join card: avatar, name, and which member they are.
- *
- * A guild can supply its own background; without one the card falls back to a
- * gradient, so it looks deliberate rather than broken on a fresh setup. The
- * background is passed in as bytes because Discord's attachment URLs expire
- * within hours — see `WelcomeBackground` in the settings schema.
- *
- * The original card never rendered at all: its handler declared the wrong
- * signature so the first guard always returned, and it called `canvas.context`,
- * which does not exist.
- */
+/** The join card: avatar, name, and which member they are. */
 
 const WIDTH = 1024;
 const HEIGHT = 400;
@@ -33,7 +22,7 @@ export interface WelcomeCardData {
 	serverName: string;
 	/** Which member they are — 1 for the very first. */
 	memberCount: number;
-	/** The guild's own background. Falls back to a gradient when absent. */
+	/** The guild's own background. */
 	background?: Buffer | null;
 }
 
@@ -52,11 +41,8 @@ export function welcomeCardText(data: WelcomeCardData): WelcomeCardText {
 }
 
 /**
- * Where to draw a background so it covers the card without distorting it —
- * the same maths as CSS `object-fit: cover`, cropping the overflowing axis.
- *
- * Returning the rect rather than drawing it keeps the arithmetic testable, which
- * matters because a wrong sign here silently stretches every guild's image.
+ * Where to draw a background so it covers the card without distorting it — the same maths as CSS `object-fit:
+ * cover`, cropping the overflowing axis.
  */
 export function coverRect(
 	source: { width: number; height: number },
