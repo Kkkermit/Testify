@@ -11,7 +11,8 @@ const VALID = {
 
 function setEnv(values: Record<string, string | undefined>): void {
 	for (const key of Object.keys(process.env)) {
-		if (key.startsWith("DISCORD_") || key.startsWith("CHANNEL_") || key === "MONGODB_URI") delete process.env[key];
+		const owned = ["DISCORD_", "CHANNEL_", "DASHBOARD_"].some((prefix) => key.startsWith(prefix));
+		if (owned || key === "MONGODB_URI") delete process.env[key];
 	}
 	for (const [key, value] of Object.entries(values)) {
 		if (value !== undefined) process.env[key] = value;
@@ -88,6 +89,75 @@ describe("loadEnv", () => {
 	it("caches, so the file is read once", () => {
 		setEnv(VALID);
 		expect(loadEnv()).toBe(loadEnv());
+	});
+});
+
+describe("the dashboard settings", () => {
+	const original = { ...process.env };
+
+	afterEach(() => {
+		process.env = { ...original };
+		resetEnv();
+	});
+
+	it("is off unless it is asked for, so a bot-only install needs none of the rest", () => {
+		setEnv(VALID);
+		const env = loadEnv();
+
+		expect(env.DASHBOARD_ENABLED).toBe(false);
+		expect(env.DISCORD_CLIENT_SECRET).toBeUndefined();
+	});
+
+	/**
+	 * Binding to every interface would put an admin panel on the open internet on a VPS, and trusting
+	 * `x-forwarded-for` with no proxy in front lets anyone forge their address.
+	 */
+	it("defaults to the safe side of both choices that are silent when wrong", () => {
+		setEnv(VALID);
+		const env = loadEnv();
+
+		expect(env.DASHBOARD_BIND).toBe("127.0.0.1");
+		expect(env.DASHBOARD_TRUST_PROXY).toBe(false);
+	});
+
+	/** `z.coerce.boolean()` reads the string "false" as true, which would turn the switch into an on switch. */
+	it("reads the word false as false", () => {
+		setEnv({ ...VALID, DASHBOARD_ENABLED: "false", DASHBOARD_TRUST_PROXY: "false" });
+		const env = loadEnv();
+
+		expect(env.DASHBOARD_ENABLED).toBe(false);
+		expect(env.DASHBOARD_TRUST_PROXY).toBe(false);
+	});
+
+	it("names all three missing secrets at once rather than one per attempt", () => {
+		setEnv({ ...VALID, DASHBOARD_ENABLED: "true" });
+
+		expect(() => loadEnv()).toThrow(/DISCORD_CLIENT_SECRET[\s\S]*DASHBOARD_BASE_URL[\s\S]*DASHBOARD_SESSION_SECRET/);
+	});
+
+	/** A short secret is a guessable key for the OAuth tokens it encrypts. */
+	it("refuses a session secret too short to be a key", () => {
+		setEnv({
+			...VALID,
+			DASHBOARD_ENABLED: "true",
+			DISCORD_CLIENT_SECRET: "a-secret",
+			DASHBOARD_BASE_URL: "https://dash.example.com",
+			DASHBOARD_SESSION_SECRET: "tooshort",
+		});
+
+		expect(() => loadEnv()).toThrow(/DASHBOARD_SESSION_SECRET/);
+	});
+
+	it("accepts a complete dashboard configuration", () => {
+		setEnv({
+			...VALID,
+			DASHBOARD_ENABLED: "true",
+			DISCORD_CLIENT_SECRET: "a-secret",
+			DASHBOARD_BASE_URL: "https://dash.example.com",
+			DASHBOARD_SESSION_SECRET: "a".repeat(32),
+		});
+
+		expect(loadEnv().DASHBOARD_ENABLED).toBe(true);
 	});
 });
 

@@ -57,6 +57,24 @@ export default ts.config(
 					selector: "NewExpression[callee.name='EmbedBuilder']",
 					message: "Use embed() from src/lib/embeds.util.ts instead of building an embed by hand.",
 				},
+				// The dashboard renders text a guild manager typed. React escapes it; these four undo that,
+				// and the CSP is the last line of defence rather than the only one.
+				{
+					selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+					message: "React escapes text for a reason. Render it as a child instead.",
+				},
+				{
+					selector: "MemberExpression[property.name=/^(innerHTML|outerHTML)$/]",
+					message: "Assigning HTML is an XSS vector. Set textContent, or render it through React.",
+				},
+				{
+					selector: "CallExpression[callee.name='eval']",
+					message: "eval() executes whatever reaches it, and the CSP blocks it in the browser anyway.",
+				},
+				{
+					selector: "NewExpression[callee.name='Function']",
+					message: "new Function() is eval() with a longer name.",
+				},
 			],
 		},
 	},

@@ -1,21 +1,32 @@
 import { type Server } from "node:http";
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
+import { bodyLimit } from "hono/body-limit";
 import { type ApiBindings } from "@api/context";
+import { ApiProblem, badRequest, notFound, problemBody } from "@api/errors";
+import { verifyCsrf } from "@api/middleware/csrf";
+import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
+import { securityHeaders } from "@api/middleware/security";
 import { health } from "@api/routes/health";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { toError } from "@core/errors";
-import { type ApiErrorBody } from "@testify/shared";
+import { toError, UserFacingError } from "@core/errors";
+
+/** Config patches, not uploads. Anything larger than this is a mistake or an attempt. */
+const MAX_BODY_BYTES = 128 * 1024;
+
+/** Generous for a person clicking around, and nowhere near enough to scrape with. */
+const GENERAL_LIMIT = { limit: 300, windowMs: 60_000 };
 
 /**
  * The dashboard's HTTP API, inside the bot process so it can read the live client cache.
  *
  * `src/core/shutdown.ts` terminates on an uncaught exception, which is right for a bot and fatal for a web
- * server — so every route runs behind an error boundary that turns a throw into a 500.
+ * server — so every route runs behind an error boundary that turns a throw into a response.
  */
 export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
+	const general = new RateLimiter(GENERAL_LIMIT);
 
 	app.use("*", async (context, next) => {
 		context.set("client", client);
@@ -23,24 +34,51 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 		await next();
 	});
 
+	app.use("*", securityHeaders(env));
+	app.use("*", rateLimit(general, { name: "general", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("*", bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => raise(badRequest("That request is too large.")) }));
+	app.use("*", verifyCsrf);
+
 	app.onError((error, context) => {
-		client.logger.error(
-			{ err: toError(error), path: context.req.path, method: context.req.method },
-			"[API_ERROR] A dashboard request failed",
-		);
+		const problem = asProblem(error);
 
-		const body: ApiErrorBody = { error: { code: "internal", message: "Something went wrong on our side." } };
-		return context.json(body, 500);
+		if (problem.status >= 500) {
+			client.logger.error(
+				{ err: toError(error), path: context.req.path, method: context.req.method },
+				"[API_ERROR] A dashboard request failed",
+			);
+		} else {
+			client.logger.debug(
+				{ code: problem.code, path: context.req.path, method: context.req.method },
+				"[API] A dashboard request was refused",
+			);
+		}
+
+		for (const [name, value] of Object.entries(problem.headers)) context.header(name, value);
+		return context.json(problemBody(problem), problem.status);
 	});
 
-	app.notFound((context) => {
-		const body: ApiErrorBody = { error: { code: "not_found", message: "No such endpoint." } };
-		return context.json(body, 404);
-	});
+	app.notFound((context) => context.json(problemBody(notFound()), 404));
 
 	app.route("/api/health", health);
 
 	return app;
+}
+
+/**
+ * A refusal keeps its status and its wording; a `UserFacingError` is the bot's own "you did something wrong",
+ * which is exactly a 400. Anything else is a bug, and the caller is told nothing about it.
+ */
+function asProblem(error: unknown): ApiProblem {
+	if (error instanceof ApiProblem) return error;
+	if (error instanceof UserFacingError) return badRequest(error.message);
+
+	return new ApiProblem(500, "internal", "Something went wrong on our side.");
+}
+
+/** `bodyLimit` wants a response from `onError`, and throwing from inside it is what reaches the boundary. */
+function raise(problem: ApiProblem): never {
+	throw problem;
 }
 
 export interface RunningApi {

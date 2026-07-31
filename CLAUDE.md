@@ -128,6 +128,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run test:coverage`  | Jest with the 80/80/80/80 thresholds enforced                        |
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `COMMANDS.md`                                             |
+| `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
 | `npm run commit`         | Guided commit wizard (enforces the message format)                   |
 | `npm run commands:clear` | Deregister all application commands                                  |
 | `npm run db:wipe`        | Destructive. Wipes the database                                      |
@@ -1058,6 +1059,38 @@ So the workspace resolves like any other package, and each consumer reads what s
 bot is the one case that needs `npm run build:shared` by hand.
 
 `shared/` stays dependency-light: zod and nothing else. No discord.js, no React.
+
+### The security layer
+
+Built before the first screen, deliberately: retrofitting a guard into fifteen routes is much harder than
+writing it once. Every piece has a test proven able to fail.
+
+| Where                     | What it does                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS      |
+| `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
+| `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
+| `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
+| `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
+| `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
+| `lib/secretBox.util.ts`   | AES-256-GCM over the OAuth tokens, keyed by HKDF from the session secret       |
+
+Rules that are easy to break and silent when broken:
+
+- **Nothing reads `c.req.param()` or a raw body.** Everything goes through `validate.ts`, so an unvalidated
+  snowflake can never reach a Mongo filter and a page number can never become a negative skip.
+- **`script-src` has no `'unsafe-inline'` and no `'unsafe-eval'`.** That single directive is what makes an
+  injected `<script>` or `onerror=` inert. A lint rule bans `dangerouslySetInnerHTML`, `innerHTML`, `eval()`
+  and `new Function()` so the CSP is the last line rather than the only one.
+- **`returnTo` rejects `//evil.example`.** A protocol-relative URL is an absolute one to a browser, so a check
+  that only looks for a leading `/` is an open redirect. Backslashes go too — browsers normalise them.
+- **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
+  `http://localhost` install, which is the most common self-hosting trip-up there is.
+- **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
+  admin panel on the internet; trusting `x-forwarded-for` with no proxy in front lets anyone forge their
+  rate-limit bucket.
+- **Rotating `DASHBOARD_SESSION_SECRET` signs everybody out**, because the sealed tokens no longer open. That
+  is the intended behaviour after a leak, and `npm run secret -- --write` is the whole procedure.
 
 ### Rules that carry over
 
