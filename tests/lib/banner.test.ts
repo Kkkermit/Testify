@@ -12,6 +12,7 @@ const FACTS = {
 	startupMs: 1_843,
 	loaded: { commands: 87, buttons: 10, events: 16, messageHandlers: 8 },
 	watching: false,
+	dashboardUrl: null,
 };
 const ESCAPE = "";
 
@@ -105,10 +106,24 @@ describe("the hot reload notice", () => {
 	});
 });
 
+/** The API logs the port it binds, which in development is not the address anybody opens. */
+describe("the dashboard address", () => {
+	it("is shown, so the page is not confused with the API's port", () => {
+		const text = bannerLines({ ...FACTS, dashboardUrl: "http://localhost:5174" }, false).join("\n");
+
+		expect(text).toContain("Dashboard");
+		expect(text).toContain("http://localhost:5174");
+	});
+
+	it("is absent when the dashboard is off", () => {
+		expect(bannerLines(FACTS, false).join("\n")).not.toContain("Dashboard");
+	});
+});
+
 describe("printBanner", () => {
-	function clientFor(nodeEnv = "production"): TestifyClient {
+	function clientFor(nodeEnv = "production", env: Record<string, unknown> = {}): TestifyClient {
 		return createMockClient({
-			env: { DISCORD_OWNER_IDS: [], NODE_ENV: nodeEnv },
+			env: { DISCORD_OWNER_IDS: [], NODE_ENV: nodeEnv, ...env },
 			commands: new Map([["ping", {}]]),
 			startedAt: Date.now() - 500,
 		} as never);
@@ -152,6 +167,37 @@ describe("printBanner", () => {
 		expect(written).toContain("t?");
 		expect(written).toContain("every server");
 		expect(written).toContain("87 loaded");
+	});
+
+	it("prints the base URL a browser opens, not the address the API binds", () => {
+		const client = clientFor("development", {
+			DASHBOARD_ENABLED: true,
+			DASHBOARD_BASE_URL: "http://localhost:5174",
+			DASHBOARD_BIND: "127.0.0.1",
+			DASHBOARD_PORT: 3_000,
+		});
+
+		printBanner(client, ready, "t?", "every server", loaded);
+
+		expect(written).toContain("http://localhost:5174");
+		expect(written).not.toContain("127.0.0.1:3000");
+	});
+
+	it("falls back to the bind address when no base URL is set", () => {
+		const client = clientFor("production", {
+			DASHBOARD_ENABLED: true,
+			DASHBOARD_BIND: "127.0.0.1",
+			DASHBOARD_PORT: 3_000,
+		});
+
+		printBanner(client, ready, "t?", "every server", loaded);
+
+		expect(written).toContain("http://127.0.0.1:3000");
+	});
+
+	it("says nothing about a dashboard that is switched off", () => {
+		printBanner(clientFor(), ready, "t?", "every server", loaded);
+		expect(written).not.toContain("Dashboard");
 	});
 
 	it("mentions hot reload only in development", () => {

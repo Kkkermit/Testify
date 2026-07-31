@@ -13,7 +13,7 @@ const CSRF = "a-csrf-secret-of-some-length";
 function envFor(overrides: Partial<Env> = {}): Env {
 	return {
 		NODE_ENV: "production",
-		DASHBOARD_PORT: 8_080,
+		DASHBOARD_PORT: 3_000,
 		DASHBOARD_BIND: "127.0.0.1",
 		DASHBOARD_TRUST_PROXY: false,
 		...overrides,
@@ -68,7 +68,7 @@ describe("security headers", () => {
 
 	/** HSTS over plain HTTP would pin a self-hoster's localhost to a scheme it cannot serve. */
 	it("only pins HTTPS when it is actually served over HTTPS", async () => {
-		const plain = apiFor(envFor({ DASHBOARD_BASE_URL: "http://localhost:5173" }));
+		const plain = apiFor(envFor({ DASHBOARD_BASE_URL: "http://localhost:5174" }));
 		const secure = apiFor(envFor({ DASHBOARD_BASE_URL: "https://dash.example.com" }));
 
 		expect((await plain.request("/api/health")).headers.get("strict-transport-security")).toBeNull();

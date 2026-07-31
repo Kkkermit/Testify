@@ -234,7 +234,7 @@ URL or in TanStack Query instead.
 
 - `@tailwindcss/vite` and `@vitejs/plugin-react`.
 - `resolve.alias`: `@` → `dashboard/src`, `@testify/shared` → `../shared/src`.
-- `server.proxy["/api"] = "http://localhost:8080"` — no CORS in development (`02-ARCHITECTURE.md`).
+- `server.proxy["/api"] = "http://localhost:3000"` — no CORS in development (`02-ARCHITECTURE.md`).
 - `build.outDir = "dist"`, served by the bot in production.
 - `build.sourcemap = true` — it is open source; a stack trace someone can read is worth the file size.
 - Manual chunks: split `react`/`react-dom` and `@tanstack/react-query` into a vendor chunk so an app change does

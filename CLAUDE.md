@@ -1040,7 +1040,7 @@ owner console. The settings screens are next — `dashboard-POC/13-ROADMAP-AND-R
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
-| `npm run dev:all`       | Bot and Vite together. The page is on :5173, the API on :8080 |
+| `npm run dev:all`       | Bot and Vite together. The page is on :5174, the API on :3000 |
 | `npm run dashboard:dev` | Just Vite                                                     |
 | `npm run build`         | shared → bot → dashboard, in that order                       |
 | `npm run build:shared`  | Only needed by hand after editing `shared/src`                |

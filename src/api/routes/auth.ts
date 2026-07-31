@@ -73,7 +73,7 @@ auth.get("/setup", (context) => {
 	const body: SetupStatus = {
 		configured: missing.length === 0,
 		missing,
-		redirectUri: callbackUrl(env.DASHBOARD_BASE_URL ?? "http://localhost:5173"),
+		redirectUri: callbackUrl(env.DASHBOARD_BASE_URL ?? "http://localhost:5174"),
 	};
 
 	return context.json(body);

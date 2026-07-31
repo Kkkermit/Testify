@@ -8,6 +8,7 @@ export * from "./canvas.util";
 export * from "./colours.util";
 export * from "./components.util";
 export * from "./contentFilter.util";
+export * from "./dashboard.util";
 export * from "./duration.util";
 export * from "./embeds.util";
 export * from "./format.util";

@@ -150,19 +150,19 @@ Discord surface — see `06-COMMAND-CONTROL.md`.
 **Development** — two processes, no CORS:
 
 ```
-localhost:5173   Vite dev server (HMR)
-    │ proxy /api → localhost:8080
-localhost:8080   bot + API
+localhost:5174   Vite dev server (HMR)
+    │ proxy /api → localhost:3000
+localhost:3000   bot + API
 ```
 
-`vite.config.ts` gets `server.proxy = { "/api": "http://localhost:8080" }`. Because the browser only ever talks
-to 5173, requests are same-origin and cookies just work. No CORS configuration in development at all, which
+`vite.config.ts` gets `server.proxy = { "/api": "http://localhost:3000" }`. Because the browser only ever talks
+to 5174, requests are same-origin and cookies just work. No CORS configuration in development at all, which
 removes the single most common "why am I getting 401" question from self-hosters.
 
 **Production** — one process, one origin:
 
 ```
-localhost:8080   bot + API + static files from dashboard/dist
+localhost:3000   bot + API + static files from dashboard/dist
 ```
 
 `npm run build` builds the bot to `dist/` and the SPA to `dashboard/dist`. The API serves that directory, with an

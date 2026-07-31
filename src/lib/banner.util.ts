@@ -1,6 +1,7 @@
 import { type Client } from "discord.js";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
+import { dashboardUrl } from "@lib/dashboard.util";
 import { formatNumber } from "@lib/format.util";
 
 /** The start-up banner. */
@@ -28,6 +29,7 @@ export const ICONS = {
 	buttons: "\u{1F518}",
 	events: "\u26A1",
 	messages: "\u{1F48C}",
+	dashboard: "\u{1F517}",
 } as const;
 
 /** The shared in-progress glyph. */
@@ -83,6 +85,8 @@ export interface BannerFacts {
 	loaded: { commands: number; buttons: number; events: number; messageHandlers: number };
 	/** True under `npm run dev`, where tsx restarts the process whenever a file is saved. */
 	watching: boolean;
+	/** Where a browser opens the dashboard — Vite's port in development, not the one the API binds. */
+	dashboardUrl: string | null;
 }
 
 /** Kept separate from printing so it can be tested without capturing stdout. */
@@ -112,6 +116,7 @@ export function bannerLines(facts: BannerFacts, colour: boolean): string[] {
 		fact(ICONS.commands, "Commands", `${formatNumber(facts.commands)} Slash [/] and Prefix [${facts.prefix}]`),
 		fact(ICONS.scope, "Visible in", facts.scope),
 		fact(ICONS.readyIn, "Ready in", `${paint(ansi.green, "➜")}  ${formatNumber(facts.startupMs)}ms`),
+		...(facts.dashboardUrl === null ? [] : [fact(ICONS.dashboard, "Dashboard", paint(ansi.green, facts.dashboardUrl))]),
 		"",
 		paint(ansi.grey, thin),
 		`  ${paint(ansi.bold, `${ICONS.package} Loaded from disk`)}`,
@@ -145,6 +150,7 @@ export function printBanner(
 			loaded,
 			startupMs: Date.now() - client.startedAt,
 			watching: client.env.NODE_ENV === "development",
+			dashboardUrl: dashboardUrl(client.env),
 		},
 		process.stdout.isTTY === true,
 	);

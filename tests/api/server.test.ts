@@ -10,7 +10,7 @@ jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true
 const connected = jest.mocked(databaseConnected);
 
 function apiFor(client: TestifyClient): ReturnType<typeof createApi> {
-	return createApi(client, { DASHBOARD_PORT: 8_080, DASHBOARD_BIND: "127.0.0.1" } as Env);
+	return createApi(client, { DASHBOARD_PORT: 3_000, DASHBOARD_BIND: "127.0.0.1" } as Env);
 }
 
 function readyClient(isReady = true): TestifyClient {
@@ -107,6 +107,28 @@ describe("startApi", () => {
 
 		expect(client.api).toBe(running);
 		await expect(running.close()).resolves.toBeUndefined();
+	});
+
+	/** The bound port is not the address to open in development, and the log said only the bound port. */
+	it("logs where the dashboard is opened alongside where the API listens", async () => {
+		const client = readyClient();
+		const logged = jest.spyOn(client.logger, "info");
+		const running = startApi(client, {
+			DASHBOARD_PORT: 0,
+			DASHBOARD_BIND: "127.0.0.1",
+			DASHBOARD_ENABLED: true,
+			DASHBOARD_BASE_URL: "http://localhost:5174",
+		} as Env);
+
+		try {
+			await running.ready;
+			expect(logged).toHaveBeenCalledWith(
+				expect.objectContaining({ open: "http://localhost:5174" }),
+				expect.stringContaining("[DASHBOARD]"),
+			);
+		} finally {
+			await running.close();
+		}
 	});
 
 	it("refuses a request once it has been closed", async () => {

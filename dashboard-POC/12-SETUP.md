@@ -35,7 +35,7 @@ already promises.
 | `DISCORD_CLIENT_SECRET`      | enabled       | —           | Developer Portal → OAuth2. **Never in the browser**        |
 | `DASHBOARD_BASE_URL`         | enabled       | —           | e.g. `https://dash.example.com`. Builds the redirect URI   |
 | `DASHBOARD_SESSION_SECRET`   | enabled       | —           | ≥32 random bytes. Signs cookies, derives the token key     |
-| `DASHBOARD_PORT`             | no            | `8080`      |                                                            |
+| `DASHBOARD_PORT`             | no            | `3000`      |                                                            |
 | `DASHBOARD_BIND`             | no            | `127.0.0.1` | Localhost by default; a reverse proxy is the intended path |
 | `DASHBOARD_TRUST_PROXY`      | no            | `false`     | Only then is `x-forwarded-for` believed, for rate limiting |
 | `DASHBOARD_SESSION_TTL_DAYS` | no            | `7`         |                                                            |
@@ -69,11 +69,11 @@ Enable the web dashboard? (y/N) y
   1. https://discord.com/developers/applications → your app → OAuth2
   2. Copy the Client Secret
   3. Under Redirects, add EXACTLY:
-         http://localhost:8080/api/auth/callback
+         http://localhost:5174/api/auth/callback
      (add your production URL too when you deploy)
 
 Client secret: ›
-Dashboard base URL (http://localhost:8080): ›
+Dashboard base URL (http://localhost:5174): ›
 Session secret [generated]: ›
 ```
 
@@ -83,8 +83,8 @@ Generating the session secret for them removes the "what do I put here" question
 Then:
 
 ```bash
-npm run dev            # bot + API on 8080
-npm run dashboard:dev  # Vite on 5173, proxying /api → 8080
+npm run dev            # bot + API on 3000
+npm run dashboard:dev  # Vite on 5174, proxying /api → 3000
 ```
 
 Two terminals. Or one, with `concurrently` — worth the dependency for the developer experience, since "run these
@@ -134,7 +134,7 @@ server {
 	# certs from certbot
 
 	location / {
-		proxy_pass http://127.0.0.1:8080;
+		proxy_pass http://127.0.0.1:3000;
 		proxy_set_header Host              $host;
 		proxy_set_header X-Forwarded-For   $remote_addr;
 		proxy_set_header X-Forwarded-Proto $scheme;

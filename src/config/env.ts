@@ -40,7 +40,7 @@ const schema = z
 		DISCORD_CLIENT_SECRET: z.string().min(1).optional(),
 		DASHBOARD_BASE_URL: z.string().url().optional(),
 		DASHBOARD_SESSION_SECRET: z.string().min(32, "needs at least 32 characters").optional(),
-		DASHBOARD_PORT: z.coerce.number().int().min(1).max(65_535).default(8_080),
+		DASHBOARD_PORT: z.coerce.number().int().min(1).max(65_535).default(3_000),
 		DASHBOARD_BIND: z.string().min(1).default("127.0.0.1"),
 		DASHBOARD_TRUST_PROXY: flag.default(false),
 		DASHBOARD_SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(7),

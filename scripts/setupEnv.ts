@@ -43,9 +43,9 @@ function dashboardFields(isDev: boolean): Field[] {
 			key: "DASHBOARD_BASE_URL",
 			message: "Where the dashboard will be reachable",
 			required: true,
-			initial: isDev ? "http://localhost:5173" : "https://dashboard.example.com",
+			initial: isDev ? "http://localhost:5174" : "https://dashboard.example.com",
 		},
-		{ key: "DASHBOARD_PORT", message: "Port for the API", required: false, initial: "8080" },
+		{ key: "DASHBOARD_PORT", message: "Port for the API", required: false, initial: "3000" },
 	];
 }
 

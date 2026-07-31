@@ -17,6 +17,7 @@ import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
+import { dashboardUrl } from "@lib/dashboard.util";
 
 /** Config patches, not uploads. Anything larger than this is a mistake or an attempt. */
 const MAX_BODY_BYTES = 128 * 1024;
@@ -119,9 +120,10 @@ export function startApi(client: TestifyClient, env: Env): RunningApi {
 	});
 
 	const server = serve({ fetch: app.fetch, port: env.DASHBOARD_PORT, hostname: env.DASHBOARD_BIND }, (info) => {
+		const api = `http://${env.DASHBOARD_BIND}:${String(info.port)}`;
 		client.logger.info(
-			{ url: `http://${env.DASHBOARD_BIND}:${String(info.port)}` },
-			"[DASHBOARD] The dashboard API is listening",
+			{ api, open: dashboardUrl(env) ?? api },
+			"[DASHBOARD] The API is listening. Open the dashboard at the `open` address.",
 		);
 		listening(info.port);
 	}) as Server;

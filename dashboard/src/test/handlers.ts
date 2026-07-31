@@ -17,7 +17,7 @@ export const healthy: HealthResponse = { ok: true, uptimeMs: 65_000, discord: "r
 export const configured: SetupStatus = {
 	configured: true,
 	missing: [],
-	redirectUri: "http://localhost:5173/api/auth/callback",
+	redirectUri: "http://localhost:5174/api/auth/callback",
 };
 
 export const aGuild: ManageableGuild = {

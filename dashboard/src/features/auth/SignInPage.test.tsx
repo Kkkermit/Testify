@@ -62,7 +62,7 @@ describe("a half-configured install", () => {
 				HttpResponse.json({
 					configured: false,
 					missing: ["DISCORD_CLIENT_SECRET", "DASHBOARD_SESSION_SECRET"],
-					redirectUri: "http://localhost:5173/api/auth/callback",
+					redirectUri: "http://localhost:5174/api/auth/callback",
 				}),
 			),
 		);
@@ -83,7 +83,7 @@ describe("a half-configured install", () => {
 	it("gives the exact redirect URI to paste into the Developer Portal", async () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in" });
 
-		expect(await screen.findByText("http://localhost:5173/api/auth/callback")).toBeInTheDocument();
+		expect(await screen.findByText("http://localhost:5174/api/auth/callback")).toBeInTheDocument();
 	});
 
 	it("points at the script that generates the secret", async () => {
