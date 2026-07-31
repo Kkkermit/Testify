@@ -1152,3 +1152,19 @@ Three things there are load-bearing and non-obvious, all commented in place:
 `transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
 `moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
 `node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
+
+### Vite has to pin React too, and for a worse symptom
+
+The same hoisting breaks the browser. `discord-html-transcripts` needs React 18, so npm puts **18** at the root
+and leaves the dashboard's **19** in `dashboard/node_modules` — and `@tanstack/react-query` and `react-router`,
+hoisted to the root beside it, then resolve React 18 while the app renders with 19. Every hook in those packages
+reads a null dispatcher: `Cannot read properties of null (reading 'useEffect')`, an "Invalid hook call" warning,
+and a blank page. It afflicted `npm run dev:all` and the production bundle alike.
+
+`dashboard/vite.config.ts` fixes it with `resolve.dedupe` plus explicit `react` / `react-dom` aliases resolved
+through `createRequire(import.meta.url)`, so they find whichever copy the app itself imports rather than a
+hardcoded path that breaks the day the hoisting changes.
+
+**Nothing else catches this.** It type-checks, it lints, and the tests pin React themselves, so all 1567 pass
+against a page that cannot mount. `npm run verify:bundle` is the guard: it reads `dashboard/dist/assets` and
+fails if more than one React version is in there. `build:dashboard` runs it, so `npm run build` and CI both do.

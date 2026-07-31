@@ -28,7 +28,7 @@
 		"audit": "better-npm-audit audit --level high",
 		"build": "npm run build:shared && npm run build:bot && npm run build:dashboard",
 		"build:bot": "tsup",
-		"build:dashboard": "npm run build --workspace dashboard",
+		"build:dashboard": "npm run build --workspace dashboard && npm run verify:bundle",
 		"build:shared": "npm run build --workspace @testify/shared",
 		"check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
 		"commands:clear": "tsx scripts/clearCommands.ts",
@@ -50,7 +50,8 @@
 		"test:coverage": "jest --coverage && npm run test:coverage:dashboard",
 		"test:coverage:dashboard": "jest --config dashboard/jest.config.ts --coverage",
 		"test:watch": "jest --watch",
-		"typecheck": "tsc --noEmit && npm run typecheck --workspace @testify/dashboard"
+		"typecheck": "tsc --noEmit && npm run typecheck --workspace @testify/dashboard",
+		"verify:bundle": "tsx scripts/verifyBundle.ts"
 	},
 	"lint-staged": {
 		"*.ts": [

@@ -29,6 +29,10 @@ Two things this phase found that were not in the plan, both recorded in `CLAUDE.
 - **Jest with MSW needs three pieces of configuration**, none of them guessable: `jest-fixed-jsdom`, a
   `transformIgnorePatterns` allowlist for MSW's ESM-only dependencies, and a React pin, because
   `discord-html-transcripts` puts React 18 in the root `node_modules`.
+- **Vite needs the same React pin, and the browser is where it bites.** The hoisted React 18 also captures
+  `@tanstack/react-query` and `react-router`, which then run their hooks against a different React than the one
+  rendering — a blank page and `Cannot read properties of null (reading 'useEffect')`. `resolve.dedupe` and
+  explicit aliases fix it; `npm run verify:bundle` fails the build if a second copy ever returns.
 
 ### Phase 1 — Sign in and guild picker (~1 week) — **done**
 
