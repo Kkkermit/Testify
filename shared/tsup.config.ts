@@ -12,7 +12,9 @@ export default defineConfig({
 	outDir: "dist",
 	format: ["cjs", "esm"],
 	target: "node22",
-	dts: true,
+	// No declarations: `types` points at src/index.ts, so every type consumer already reads the source. Emitting
+	// them added four seconds to `prepare`, and so to every npm install, for two files nothing opens.
+	dts: false,
 	sourcemap: true,
 	clean: true,
 });
