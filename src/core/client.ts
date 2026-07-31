@@ -44,6 +44,12 @@ export class TestifyClient extends Client {
 	readonly timers = new TimerRegistry();
 	readonly startedAt = Date.now();
 
+	/**
+	 * The dashboard listener, once `startApi()` has opened one. Typed structurally rather than as `RunningApi`
+	 * because `src/api` imports this file, and shutdown only ever needs to close it.
+	 */
+	api: { close(): Promise<void> } | null = null;
+
 	constructor(env: Env, logger: Logger) {
 		super({ intents, partials });
 		this.env = env;

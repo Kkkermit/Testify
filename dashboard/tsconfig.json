@@ -1,0 +1,37 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"lib": ["ES2023", "DOM", "DOM.Iterable"],
+		"module": "Preserve",
+		"moduleResolution": "Bundler",
+		"jsx": "react-jsx",
+		"noEmit": true,
+
+		"paths": {
+			"@/*": ["./src/*"],
+			"@testify/shared": ["../shared/src/index.ts"],
+			"@testify/shared/*": ["../shared/src/*"]
+		},
+
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"noImplicitOverride": true,
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"allowUnreachableCode": false,
+		"allowUnusedLabels": false,
+		"useUnknownInCatchVariables": true,
+
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"isolatedModules": true,
+
+		"types": ["node", "jest", "@testing-library/jest-dom"]
+	},
+	"include": ["./src/**/*.ts", "./src/**/*.tsx", "../shared/src/**/*.ts", "*.config.ts"]
+}

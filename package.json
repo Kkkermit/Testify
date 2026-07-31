@@ -26,24 +26,30 @@
 	},
 	"scripts": {
 		"audit": "better-npm-audit audit --level high",
-		"build": "tsup",
+		"build": "npm run build:shared && npm run build:bot && npm run build:dashboard",
+		"build:bot": "tsup",
+		"build:dashboard": "npm run build --workspace dashboard",
+		"build:shared": "npm run build --workspace @testify/shared",
 		"check": "npm run typecheck && npm run lint && npm run format:check && npm run test",
 		"commands:clear": "tsx scripts/clearCommands.ts",
 		"commit": "tsx scripts/commitRunner.ts",
+		"dashboard:dev": "npm run dev --workspace dashboard",
 		"db:wipe": "tsx scripts/wipeDatabase.ts",
 		"dev": "cross-env NODE_ENV=development tsx watch --clear-screen=false src/index.ts",
+		"dev:all": "concurrently --names \"bot,web\" --prefix-colors \"magenta,cyan\" --kill-others-on-fail \"npm:dev\" \"npm:dashboard:dev\"",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint": "tsx scripts/lintRunner.ts",
 		"lint:fix": "tsx scripts/lintRunner.ts --fix",
-		"prepare": "husky",
+		"prepare": "husky && npm run build:shared",
 		"setup": "tsx scripts/setupEnv.ts",
 		"start": "node dist/index.js",
-		"test": "jest",
-		"test:coverage": "jest --coverage",
+		"test": "jest --projects jest.config.ts dashboard/jest.config.ts",
+		"test:coverage": "jest --coverage && npm run test:coverage:dashboard",
+		"test:coverage:dashboard": "jest --config dashboard/jest.config.ts --coverage",
 		"test:watch": "jest --watch",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit && npm run typecheck --workspace @testify/dashboard"
 	},
 	"lint-staged": {
 		"*.ts": [
@@ -64,6 +70,7 @@
 		}
 	},
 	"dependencies": {
+		"@hono/node-server": "2.0.12",
 		"@napi-rs/canvas": "1.0.2",
 		"discord-giveaways": "6.0.1",
 		"discord-html-transcripts": "3.2.0",
@@ -71,6 +78,7 @@
 		"dotenv": "17.4.2",
 		"figlet": "1.11.3",
 		"glob": "13.0.6",
+		"hono": "4.12.32",
 		"mathjs": "15.2.0",
 		"mongoose": "8.24.1",
 		"pino": "10.3.1",
@@ -90,6 +98,7 @@
 		"@types/node": "22.20.1",
 		"@types/prompts": "2.4.9",
 		"better-npm-audit": "3.11.0",
+		"concurrently": "10.0.4",
 		"cross-env": "10.1.0",
 		"eslint": "10.8.0",
 		"eslint-config-prettier": "10.1.8",
@@ -105,5 +114,9 @@
 		"tsx": "4.23.1",
 		"typescript": "5.9.3",
 		"typescript-eslint": "8.65.0"
-	}
+	},
+	"workspaces": [
+		"shared",
+		"dashboard"
+	]
 }

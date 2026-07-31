@@ -1,0 +1,22 @@
+{
+	"name": "@testify/shared",
+	"version": "2.0.0",
+	"private": true,
+	"description": "Types and zod schemas shared by the bot's API and the dashboard.",
+	"license": "MIT",
+	"main": "dist/index.js",
+	"module": "dist/index.mjs",
+	"types": "src/index.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup"
+	},
+	"dependencies": {
+		"zod": "4.4.3"
+	},
+	"devDependencies": {
+		"tsup": "8.5.1"
+	}
+}

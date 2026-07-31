@@ -1,0 +1,31 @@
+{
+	"name": "@testify/dashboard",
+	"version": "2.0.0",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "vite build",
+		"dev": "vite",
+		"preview": "vite preview",
+		"typecheck": "tsc --noEmit"
+	},
+	"dependencies": {
+		"@testify/shared": "*",
+		"react": "19.2.8",
+		"react-dom": "19.2.8"
+	},
+	"devDependencies": {
+		"@tailwindcss/vite": "4.3.3",
+		"@testing-library/jest-dom": "7.0.0",
+		"@testing-library/react": "16.3.2",
+		"@testing-library/user-event": "14.6.1",
+		"@types/react": "19.2.18",
+		"@types/react-dom": "19.2.4",
+		"@vitejs/plugin-react": "6.0.5",
+		"jest-environment-jsdom": "30.4.1",
+		"jest-fixed-jsdom": "0.0.11",
+		"msw": "2.15.0",
+		"tailwindcss": "4.3.3",
+		"vite": "8.2.0"
+	}
+}

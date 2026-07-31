@@ -14,6 +14,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 
 	try {
 		client.timers.stopAll();
+		await client.api?.close();
 		await disconnectDatabase();
 		await client.destroy();
 	} catch (error) {

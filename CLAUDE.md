@@ -41,6 +41,7 @@ with no memory of previous sessions can make a correct change and commit it.
 21. [Decisions already made — do not relitigate](#21-decisions-already-made--do-not-relitigate)
 22. [Anti-patterns that must not come back](#22-anti-patterns-that-must-not-come-back)
 23. [Working style expected here](#23-working-style-expected-here)
+24. [The dashboard](#24-the-dashboard)
 
 ---
 
@@ -89,7 +90,8 @@ npm run setup -- --dev  # writes .env.development instead
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
 **Optional:** `NODE_ENV`, `LOG_LEVEL`, `DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
-`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`.
+`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, and the `DASHBOARD_*` block — off unless you want the web dashboard,
+and covered in [§24](#24-the-dashboard).
 
 Then:
 
@@ -114,8 +116,9 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | Command                  | What it does                                                         |
 | ------------------------ | -------------------------------------------------------------------- |
 | `npm run dev`            | Development bot with hot reload                                      |
+| `npm run dev:all`        | Bot and dashboard together — see [§24](#24-the-dashboard)            |
 | `npm start`              | Production bot from `dist/`                                          |
-| `npm run build`          | `tsup` → `dist/`, then `tsc-alias` rewrites `@`-aliases              |
+| `npm run build`          | shared → `tsup` to `dist/` → dashboard. `tsc-alias` rewrites `@`s    |
 | **`npm run check`**      | **typecheck → lint → format:check → test. Run before every commit.** |
 | `npm run typecheck`      | `tsc --noEmit`                                                       |
 | `npm run lint`           | ESLint via `scripts/lintRunner.ts` (errors fail, warnings never do)  |
@@ -215,11 +218,15 @@ src/
 │   ├── connection.ts
 │   ├── models/           9 Mongoose schemas
 │   └── repositories/     9 query layers. Commands never touch a model directly.
-└── jobs/                 4 scheduled jobs (lottery draw, passive income, bot stats, softban expiry)
+├── jobs/                 4 scheduled jobs (lottery draw, passive income, bot stats, softban expiry)
+└── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
 tests/                    Mirrors src/. 50 suites.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
+shared/                   npm workspace @testify/shared — types and zod both surfaces import
+dashboard/                npm workspace — the Vite + React SPA
+dashboard-POC/            The dashboard's design documents. Read before changing §24
 .codebase-notes/          Architecture + audit of the original JS bot
 ```
 
@@ -998,3 +1005,77 @@ degrade automatically rather than fail.
 **Read the log the user pasted, all of it.** The line that mattered in a 900-line FFmpeg dump was the last one.
 
 **Regenerate, do not hand-edit.** `COMMANDS.md` comes from `npm run docs:commands`.
+
+---
+
+## 24. The dashboard
+
+A web dashboard for controlling the bot, built to the plan in [`dashboard-POC/`](dashboard-POC/00-INDEX.md).
+**Read the relevant document there before changing anything in this section** — it holds the reasoning, the
+threat model and the phase order. `13-ROADMAP-AND-RISKS.md` says what is built and what is next.
+
+**It is off by default.** `DASHBOARD_ENABLED` is the switch, and while it is false a bot-only install needs none
+of the other dashboard variables. Enabling it without `DISCORD_CLIENT_SECRET`, `DASHBOARD_BASE_URL` and
+`DASHBOARD_SESSION_SECRET` fails at startup naming all three at once.
+
+### Three workspaces, one repository
+
+```
+src/api/       Hono routes, inside the bot process so they can read the live client cache
+shared/        @testify/shared — types and zod schemas the API and the SPA both import
+dashboard/     Vite + React + Tailwind SPA
+```
+
+| Command                 | What it does                                                  |
+| ----------------------- | ------------------------------------------------------------- |
+| `npm run dev:all`       | Bot and Vite together. The page is on :5173, the API on :8080 |
+| `npm run dashboard:dev` | Just Vite                                                     |
+| `npm run build`         | shared → bot → dashboard, in that order                       |
+| `npm run build:shared`  | Only needed by hand after editing `shared/src`                |
+| `npm run test:coverage` | Both projects, each against its own thresholds                |
+
+In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
+work with no CORS configuration at all. In production the API serves `dashboard/dist` from the same port.
+
+### `@testify/shared` is a real package, not an alias
+
+**It is deliberately absent from `tsconfig.json`'s `paths`, and adding it there would break the build in a way
+nothing catches.** `tsc-alias` rewrites every alias in that map to a relative path inside `dist/`, and nothing
+outside `src/` is emitted there — with the alias present it resolved `@testify/shared` to `dist/index.js`, which
+is the bot's own entry point. That is anti-pattern 4 in [§22](#22-anti-patterns-that-must-not-come-back), it
+type-checks, and the only symptom is an empty object at runtime.
+
+So the workspace resolves like any other package, and each consumer reads what suits it:
+
+| Consumer          | Reads                     | Needs a build? |
+| ----------------- | ------------------------- | -------------- |
+| `tsc`             | `types: "src/index.ts"`   | No             |
+| Jest              | an explicit source mapper | No             |
+| Vite              | an alias to source        | No             |
+| The bot's `dist/` | `main: "dist/index.js"`   | **Yes**        |
+
+`prepare` builds it after any install, so a fresh clone works. Editing `shared/src` and then running the built
+bot is the one case that needs `npm run build:shared` by hand.
+
+`shared/` stays dependency-light: zod and nothing else. No discord.js, no React.
+
+### Rules that carry over
+
+- **The dashboard owns no logic.** It is a third surface onto the same domain — repositories and
+  `*Actions.util.ts` — exactly as commands and buttons are. A validation rule that exists only in a route
+  handler is how the two surfaces start disagreeing.
+- **The API starts after `client.login()`** and closes in `src/core/shutdown.ts`. Both matter: before login the
+  cache is empty, and a listener left open holds the port against a restart.
+- **Every route runs behind an error boundary.** `shutdown.ts` terminates on an uncaught exception, which is
+  right for a bot and would let one bad route take the whole thing offline.
+- **No `GET` may mutate anything.** CSRF protection exempts them.
+- **`/eval` is never exposed.** It turns a stolen session cookie into a remote shell.
+- **`DISCORD_CLIENT_SECRET` never reaches a browser.** The API holds it and nothing else does.
+
+### The dashboard's Jest config earns its comments
+
+Three things there are load-bearing and non-obvious, all commented in place:
+`jest-fixed-jsdom` (plain jsdom deletes the `fetch`/`Request`/stream globals MSW needs), a
+`transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
+`moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
+`node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").

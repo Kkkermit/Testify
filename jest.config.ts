@@ -23,7 +23,13 @@ const config: Config = {
 	roots: ["<rootDir>/tests"],
 	testMatch: ["**/tests/**/*.test.ts"],
 	setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
-	moduleNameMapper: aliasesFromTsconfig(),
+	moduleNameMapper: {
+		...aliasesFromTsconfig(),
+		// The workspace's own `main` is its build output. Tests read the source instead, so editing
+		// `shared/` does not need a build before the suite reflects it.
+		"^@testify/shared$": "<rootDir>/shared/src/index.ts",
+		"^@testify/shared/(.*)$": "<rootDir>/shared/src/$1",
+	},
 	transform: {
 		"^.+\\.tsx?$": [
 			"@swc/jest",
@@ -44,7 +50,10 @@ const config: Config = {
 		"src/core/**/*.ts",
 		"src/lib/**/*.ts",
 		"src/config/**/*.ts",
+		"src/api/**/*.ts",
+		"shared/src/**/*.ts",
 		"!src/**/index.ts",
+		"!shared/src/index.ts",
 		"!src/lib/canvas.util.ts",
 	],
 	// The agreed floor. The suite currently sits comfortably above every one of

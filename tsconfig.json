@@ -14,6 +14,11 @@
 
 		// No "baseUrl" — deprecated in TypeScript 6, removed in 7. Without it the
 		// targets below are relative to this file, hence the leading "./".
+		//
+		// "@testify/shared" is deliberately NOT here. tsc-alias rewrites everything in
+		// this map to a relative path inside dist/, and nothing outside src/ is emitted
+		// there — it resolved the package to dist/index.js, the bot's own entry point.
+		// Left as a bare specifier it resolves through node_modules like any package.
 		"paths": {
 			"@core": ["./src/core/index.ts"],
 			"@core/*": ["./src/core/*"],
@@ -28,6 +33,7 @@
 			"@database/*": ["./src/database/*"],
 			"@jobs/*": ["./src/jobs/*"],
 			"@root/*": ["./src/*"],
+			"@api/*": ["./src/api/*"],
 			"@tests/*": ["./tests/*"]
 		},
 
@@ -54,6 +60,13 @@
 
 		"types": ["node", "jest"]
 	},
-	"include": ["./src/**/*.ts", "tests/**/*.ts", "scripts/**/*.ts", "*.config.ts"],
-	"exclude": ["node_modules", "dist"]
+	"include": [
+		"./src/**/*.ts",
+		"./shared/src/**/*.ts",
+		"tests/**/*.ts",
+		"scripts/**/*.ts",
+		"*.config.ts",
+		"shared/*.config.ts"
+	],
+	"exclude": ["node_modules", "dist", "dashboard"]
 }

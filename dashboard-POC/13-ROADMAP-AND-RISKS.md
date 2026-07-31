@@ -5,7 +5,7 @@
 Each phase ends with something demonstrable, `npm run check` green, and no half-finished screen behind a feature
 flag. Estimates assume one person working in evenings; halve them for full days.
 
-### Phase 0 — Foundations (~1 week)
+### Phase 0 — Foundations (~1 week) — **done**
 
 Nothing user-visible. Get the plumbing right or every later phase pays for it.
 
@@ -19,6 +19,16 @@ Nothing user-visible. Get the plumbing right or every later phase pays for it.
 
 **Done when:** `npm run dev:all` gives a React page calling `/api/health` through the proxy, and `npm run check`
 passes for both projects.
+
+Two things this phase found that were not in the plan, both recorded in `CLAUDE.md` §24:
+
+- **`@testify/shared` cannot be a `tsconfig.json` path.** `tsc-alias` rewrites every alias in that map to a
+  relative path inside `dist/`, and nothing outside `src/` is emitted there — it resolved the package to
+  `dist/index.js`, the bot's own entry point. So the workspace ships a real build and resolves like any other
+  package, while TypeScript, Jest and Vite all read its source.
+- **Jest with MSW needs three pieces of configuration**, none of them guessable: `jest-fixed-jsdom`, a
+  `transformIgnorePatterns` allowlist for MSW's ESM-only dependencies, and a React pin, because
+  `discord-html-transcripts` puts React 18 in the root `node_modules`.
 
 ### Phase 1 — Sign in and guild picker (~1 week)
 

@@ -4,7 +4,8 @@ import importX from "eslint-plugin-import-x";
 import ts from "typescript-eslint";
 
 export default ts.config(
-	{ ignores: ["dist/**", "coverage/**", "node_modules/**", "assets/**", "site/**", ".codebase-notes/**"] },
+	// Globbed at any depth, because the workspaces build into their own dist/ and coverage/.
+	{ ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "assets/**", "site/**", ".codebase-notes/**"] },
 	js.configs.recommended,
 	ts.configs.recommendedTypeChecked,
 	ts.configs.stylisticTypeChecked,
@@ -70,7 +71,7 @@ export default ts.config(
 		rules: { "no-restricted-syntax": "off" },
 	},
 	{
-		files: ["scripts/**/*.ts", "*.config.ts"],
+		files: ["scripts/**/*.ts", "**/*.config.ts"],
 		rules: {
 			"no-console": "off",
 			"@typescript-eslint/no-unsafe-assignment": "off",

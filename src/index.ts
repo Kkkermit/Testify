@@ -1,3 +1,4 @@
+import { startApi } from "@api/server";
 import { loadEnv } from "@config/env";
 import { TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
@@ -20,6 +21,9 @@ async function main(): Promise<void> {
 
 	await publishCommands(client);
 	await client.login(env.DISCORD_TOKEN);
+
+	// After login, so the dashboard can never read a cache that is not filled yet.
+	if (env.DASHBOARD_ENABLED) startApi(client, env);
 }
 
 main().catch((error: unknown) => {

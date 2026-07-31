@@ -87,6 +87,19 @@ jobs:
           test -f dist/index.js || { echo "dist/index.js missing"; exit 1; }
           test -d dist/commands || { echo "dist/commands missing"; exit 1; }
 
+      # esbuild does not rewrite @-aliases (tsup runs with bundle: false); tsc-alias does, in
+      # onSuccess. If that step ever breaks, dist/ compiles and then fails to start.
+      - name: Verify no unrewritten import aliases
+        run: |
+          if grep -rlE 'require\("@(core|lib|config|commands|events|buttons|database|jobs|root|api)/' dist; then
+            echo "dist/ still contains unrewritten aliases"; exit 1
+          fi
+
+      - name: Verify the dashboard was built
+        run: |
+          test -f dashboard/dist/index.html || { echo "dashboard/dist/index.html missing"; exit 1; }
+          test -d dashboard/dist/assets     || { echo "dashboard/dist/assets missing"; exit 1; }
+
   audit:
     name: Dependency audit
     runs-on: ubuntu-latest

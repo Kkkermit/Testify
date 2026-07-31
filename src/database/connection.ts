@@ -118,6 +118,10 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	throw new Error("unreachable");
 }
 
+export function databaseConnected(): boolean {
+	return mongoose.connection.readyState === mongoose.ConnectionStates.connected;
+}
+
 export async function disconnectDatabase(): Promise<void> {
 	if (mongoose.connection.readyState === mongoose.ConnectionStates.disconnected) return;
 	await mongoose.disconnect();

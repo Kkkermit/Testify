@@ -60,6 +60,27 @@ describe("shutdown", () => {
 		expect(client.destroy).toHaveBeenCalled();
 	});
 
+	/** A listener left open holds the port, so a restart cannot bind it and the bot never comes back. */
+	it("closes the dashboard listener when there is one", async () => {
+		const { shutdown } = loadShutdown();
+		const client = clientFor();
+		const close = jest.fn(() => Promise.resolve());
+		client.api = { close };
+
+		await shutdown(client, "SIGINT");
+
+		expect(close).toHaveBeenCalled();
+	});
+
+	it("shuts down normally when the dashboard was never started", async () => {
+		const { shutdown } = loadShutdown();
+		const client = clientFor();
+
+		await shutdown(client, "SIGINT");
+
+		expect(client.destroy).toHaveBeenCalled();
+	});
+
 	it("exits zero on a clean stop", async () => {
 		const { shutdown } = loadShutdown();
 		await shutdown(clientFor(), "SIGINT");
