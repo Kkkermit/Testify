@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Button, Card } from "@/components/common/primitives";
 import { ApiError } from "@/lib/api";
 

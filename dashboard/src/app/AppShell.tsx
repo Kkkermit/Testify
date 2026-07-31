@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { LayoutGrid, LogOut, Server, ShieldCheck } from "lucide-react";
-import { Link, NavLink, Outlet, useParams } from "react-router-dom";
+import { Link, NavLink, Outlet, useParams } from "react-router";
 import { GuildIcon } from "@/components/common/primitives";
 import { useMe } from "@/features/auth/useMe";
 import { api } from "@/lib/api";

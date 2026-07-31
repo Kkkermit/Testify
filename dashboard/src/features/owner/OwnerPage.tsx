@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Badge, Button, Card, GuildIcon, PageHeader, Skeleton, StatTile } from "@/components/common/primitives";
 import { api } from "@/lib/api";

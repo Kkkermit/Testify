@@ -115,5 +115,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # `npm run audit` and not bare `npm audit`: better-npm-audit reads .nsprc, where every suppression
+      # carries a reason, the version that fixes it and a hard expiry. Bare `npm audit` ignores that file,
+      # so this job used to fail on an advisory the repository had already ruled on.
       - name: Audit
-        run: npm audit --audit-level=high
+        run: npm run audit

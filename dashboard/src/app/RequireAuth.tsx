@@ -1,4 +1,4 @@
-import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { Skeleton } from "@/components/common/primitives";
 import { useMe } from "@/features/auth/useMe";
 

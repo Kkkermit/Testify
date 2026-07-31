@@ -1,7 +1,7 @@
 import { type ManageableGuild } from "@testify/shared";
 import { ServerOff } from "lucide-react";
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { Badge, Card, EmptyState, GuildIcon, PageHeader, Skeleton } from "@/components/common/primitives";
 import { useMe } from "@/features/auth/useMe";
 import { usePageTitle } from "@/lib/usePageTitle";

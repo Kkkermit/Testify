@@ -1,5 +1,5 @@
 import { ShieldCheck } from "lucide-react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router";
 import { Button, Card } from "@/components/common/primitives";
 import { useSetup } from "@/features/auth/useMe";
 import { hardRedirect } from "@/lib/redirect";

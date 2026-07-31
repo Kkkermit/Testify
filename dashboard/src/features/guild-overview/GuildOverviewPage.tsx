@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { type GuildOverview } from "@testify/shared";
 import { AlertTriangle, History } from "lucide-react";
-import { useParams } from "react-router-dom";
+import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Badge, Card, EmptyState, PageHeader, Skeleton, StatTile } from "@/components/common/primitives";
 import { api } from "@/lib/api";

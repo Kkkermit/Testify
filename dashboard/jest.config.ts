@@ -11,10 +11,11 @@ const config: Config = {
 		// "automatic" or every test file would have to import React itself.
 		"^.+\\.[mc]?[tj]sx?$": ["@swc/jest", { jsc: { transform: { react: { runtime: "automatic" } } } }],
 	},
-	// MSW's CommonJS build requires these, and each of them ships ESM only, so Jest has to transform
-	// them rather than skip node_modules wholesale.
+	// Jest runs CommonJS, and each of these ships ESM only — react-router since v8, the rest because MSW's
+	// own CommonJS build requires them. So they are transformed rather than skipped with the node_modules.
 	transformIgnorePatterns: [
 		`/node_modules/(?!(${[
+			"react-router",
 			"rettime",
 			"until-async",
 			"tagged-tag",
