@@ -36,6 +36,10 @@ export function AuditLogPage(): React.JSX.Element {
 	const saved = config.data;
 	const dirty = auditLogChanged(saved, draft);
 	const blocked = saveBlocked(draft);
+	const notice =
+		draft.events.length === AUDIT_EVENTS.length
+			? "Everything is selected, so events added in a future update are logged too."
+			: null;
 
 	function edit(change: Partial<AuditLogPut>): void {
 		setDraft((current) => (current === null ? current : { ...current, ...change }));
@@ -71,77 +75,87 @@ export function AuditLogPage(): React.JSX.Element {
 				}
 			/>
 
-			<Card className="motion-pop flex flex-col gap-4">
-				<Toggle
-					label="Record server events"
-					hint="Off removes the configuration entirely. Nothing already posted is deleted."
-					checked={draft.enabled}
-					onChange={(enabled) => {
-						edit({ enabled });
-					}}
-				/>
+			{/*
+			 * One panel with divided rows rather than separate cards: the destination and the events are one
+			 * configuration, and stacking them as cards put 24px of page gutter through the middle of it.
+			 */}
+			<Card padding="none" className="motion-pop divide-border divide-y">
+				<div className="flex flex-col gap-3 px-6 py-5">
+					<Toggle
+						label="Record server events"
+						hint="Off removes the configuration entirely. Nothing already posted is deleted."
+						checked={draft.enabled}
+						onChange={(enabled) => {
+							edit({ enabled });
+						}}
+					/>
 
-				<ChannelPicker
-					label="Post the log to"
-					hint="Somewhere only moderators can read — an audit log names who did what."
-					channels={channels.data ?? []}
-					value={draft.channelId}
-					allowNone={false}
-					onChange={(channelId) => {
-						edit({ channelId });
-					}}
-				/>
-			</Card>
+					<ChannelPicker
+						label="Post the log to"
+						hint="Somewhere only moderators can read — an audit log names who did what."
+						channels={channels.data ?? []}
+						value={draft.channelId}
+						allowNone={false}
+						onChange={(channelId) => {
+							edit({ channelId });
+						}}
+					/>
+				</div>
 
-			<section aria-labelledby="events-heading" className="flex flex-col gap-3">
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<h2 id="events-heading" className="text-lg font-semibold">
-						Events
-					</h2>
-					<div className="flex items-center gap-2">
-						<p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
-							{draft.events.length} of {AUDIT_EVENTS.length} chosen
-						</p>
-						<Button
-							variant="ghost"
-							onClick={() => {
-								edit({ events: draft.events.length === AUDIT_EVENTS.length ? [] : [...AUDIT_EVENTS] });
-							}}
-						>
-							{draft.events.length === AUDIT_EVENTS.length ? "Clear all" : "Select all"}
-						</Button>
+				<section aria-labelledby="events-heading">
+					<div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 py-4">
+						<h2 id="events-heading" className="text-base font-semibold">
+							Events
+						</h2>
+						<div className="flex items-center gap-2">
+							<p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
+								{draft.events.length} of {AUDIT_EVENTS.length} chosen
+							</p>
+							<Button
+								variant="ghost"
+								onClick={() => {
+									edit({ events: draft.events.length === AUDIT_EVENTS.length ? [] : [...AUDIT_EVENTS] });
+								}}
+							>
+								{draft.events.length === AUDIT_EVENTS.length ? "Clear all" : "Select all"}
+							</Button>
+						</div>
 					</div>
-				</div>
 
-				{/* `items-start` so a group of three is not stretched to the height of the group of six beside it. */}
-				<div className="grid items-start gap-4 sm:grid-cols-2 xl:grid-cols-3">
-					{AUDIT_GROUPS.map((group) => (
-						<EventGroup
-							key={group}
-							group={group}
-							state={groupState(draft.events, group)}
-							events={draft.events}
-							onToggleGroup={(on) => {
-								edit({ events: setGroup(draft.events, group, on) });
-							}}
-							onToggleEvent={(event) => {
-								edit({ events: toggleEvent(draft.events, event) });
-							}}
-						/>
-					))}
-				</div>
+					{/*
+					 * Columns rather than a grid: the groups are two to six rows long, and a grid row is as tall as
+					 * its tallest cell, which left a column of dead space under the short ones.
+					 */}
+					<div className="gap-x-8 px-6 pb-5 sm:columns-2 xl:columns-3 [&>*]:break-inside-avoid">
+						{AUDIT_GROUPS.map((group) => (
+							<EventGroup
+								key={group}
+								group={group}
+								state={groupState(draft.events, group)}
+								events={draft.events}
+								onToggleGroup={(on) => {
+									edit({ events: setGroup(draft.events, group, on) });
+								}}
+								onToggleEvent={(event) => {
+									edit({ events: toggleEvent(draft.events, event) });
+								}}
+							/>
+						))}
+					</div>
+				</section>
 
-				{draft.events.length === AUDIT_EVENTS.length && (
-					<p className="text-muted-foreground text-xs">
-						Everything is selected, so events added in a future update are logged too.
-					</p>
+				{(notice !== null || blocked !== null || save.error !== null) && (
+					<div className="flex flex-col gap-2 px-6 py-4">
+						{notice !== null && <p className="text-muted-foreground text-xs">{notice}</p>}
+						{blocked !== null && <Warning>{blocked}</Warning>}
+						{save.error !== null && (
+							<Warning>
+								{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}
+							</Warning>
+						)}
+					</div>
 				)}
-
-				{blocked !== null && <Warning>{blocked}</Warning>}
-				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}</Warning>
-				)}
-			</section>
+			</Card>
 		</>
 	);
 }

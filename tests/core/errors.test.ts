@@ -168,13 +168,14 @@ describe("runCommand", () => {
 		(interaction as { reply: unknown }).reply = jest.fn(() => Promise.reject(new Error("Unknown interaction")));
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
+		// False rather than a throw: the command did fail, and saying so is what lets a caller count it.
 		await expect(
 			runCommand(
 				interaction as unknown as CommandInput,
 				command(() => Promise.reject(new Error("boom"))),
 				client,
 			),
-		).resolves.toBeUndefined();
+		).resolves.toBe(false);
 	});
 });
 
@@ -228,9 +229,7 @@ describe("the error channel", () => {
 		const send = jest.fn(() => Promise.reject(new Error("Missing Access")));
 		const client = clientWithChannel(send, "123");
 
-		await expect(
-			runCommand(createMockInteraction() as unknown as CommandInput, command, client),
-		).resolves.toBeUndefined();
+		await expect(runCommand(createMockInteraction() as unknown as CommandInput, command, client)).resolves.toBe(false);
 		expect(client.logger.warn).toHaveBeenCalled();
 	});
 

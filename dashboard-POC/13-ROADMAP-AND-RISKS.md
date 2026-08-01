@@ -124,13 +124,27 @@ lottery — extracting any logic still living inside a command `run()` into `*Ac
 
 **Done when:** a manager can handle a problem member without opening Discord.
 
-### Phase 5 — Owner console (~1 week)
+### Phase 5 — Owner console (~1 week) — **partly done**
 
 - Stats, guild table, leave guild, blacklist.
 - The generated command runner over the allowlist.
 - The error ring buffer, if you want `/owner/errors`.
 
 **Done when:** you can answer "which of my servers is misconfigured" in one screen.
+
+**Built:** the four-tab console — fleet stats and the guild table, command-usage analytics, the log feed and a
+runtime card. **Still to do:** leave guild, blacklist and the command runner.
+
+Open question 3 is answered: the ring buffer is worth it, and it turned out to be a pino `logMethod` hook
+rather than a transport, which is a dozen lines. Three things it settled:
+
+- **Usage had to be counted, not logged.** A row per invocation grows without bound; one row per command per
+  server per day per surface, `$inc`-ed in place with a TTL, answers every question this console asks.
+- **No user IDs are stored, and that is a decision rather than an omission.** A self-hoster's analytics turning
+  into a per-person activity log is a much worse default than not being able to answer "who ran that".
+- **The buffer redacts on the way in, not on the way out.** A dashboard page is easier to read over someone's
+  shoulder than a terminal, and a line that was never stored with a connection string in it cannot leak one
+  through a future endpoint.
 
 ### Phase 6 — Polish (~1 week)
 

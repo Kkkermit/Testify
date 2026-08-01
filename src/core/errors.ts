@@ -41,12 +41,19 @@ function failureEmbed(message: string): EmbedBuilder {
 	return new EmbedBuilder().setColor(theme.colours.error).setDescription(`${theme.emoji.error} ${message}`);
 }
 
-/** Runs a command and makes sure the user always gets an answer, whatever happens. */
-export async function runCommand(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
+/**
+ * Runs a command and makes sure the user always gets an answer, whatever happens.
+ *
+ * Returns whether it finished cleanly, which is the only way a caller can count a failure without catching the
+ * error itself and breaking that guarantee.
+ */
+export async function runCommand(interaction: CommandInput, command: Command, client: TestifyClient): Promise<boolean> {
 	try {
 		await dispatch(interaction, command, client);
+		return true;
 	} catch (error) {
 		await reportFailure(interaction, error, client, command.name);
+		return false;
 	}
 }
 

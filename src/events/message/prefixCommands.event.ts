@@ -5,6 +5,7 @@ import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/settingsRepository";
 import { errorEmbed } from "@lib/embeds.util";
+import { countCommandUse } from "@lib/usage.util";
 
 /**
  * Runs `t?ban @someone` through exactly the same code as `/ban`, including the permission, cooldown and blacklist
@@ -45,7 +46,13 @@ export default defineMessageHandler({
 			return true;
 		}
 
-		await runCommand(interaction, command, client);
+		const ok = await runCommand(interaction, command, client);
+		countCommandUse(client, {
+			command: command.name,
+			guildId: message.guildId,
+			surface: "prefix",
+			failed: !ok,
+		});
 		return true;
 	},
 });

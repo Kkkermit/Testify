@@ -1,5 +1,13 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
-import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
+import {
+	type LogFeed,
+	type OwnerGuildRow,
+	type OwnerStats,
+	type Paged,
+	type ReportedLogLevel,
+	type RuntimeInfo,
+	type UsageReport,
+} from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -17,5 +25,31 @@ export function useOwnerGuilds(page: number): UseQueryResult<Paged<OwnerGuildRow
 	return useQuery({
 		queryKey: keys.owner.guilds(page),
 		queryFn: () => api.get<Paged<OwnerGuildRow>>(`/owner/guilds?page=${String(page)}&perPage=${String(PER_PAGE)}`),
+	});
+}
+
+export function useUsage(days: number): UseQueryResult<UsageReport> {
+	return useQuery({
+		queryKey: keys.owner.usage(days),
+		queryFn: () => api.get<UsageReport>(`/analytics/usage?days=${String(days)}`),
+		staleTime: 60_000,
+	});
+}
+
+/** The one screen worth polling: it is read while something is going wrong. */
+export function useLogs(level: ReportedLogLevel): UseQueryResult<LogFeed> {
+	return useQuery({
+		queryKey: keys.owner.logs(level),
+		queryFn: () => api.get<LogFeed>(`/analytics/logs?level=${level}&limit=150`),
+		refetchInterval: 15_000,
+		staleTime: 0,
+	});
+}
+
+export function useRuntime(): UseQueryResult<RuntimeInfo> {
+	return useQuery({
+		queryKey: keys.owner.runtime(),
+		queryFn: () => api.get<RuntimeInfo>("/analytics/runtime"),
+		staleTime: 30_000,
 	});
 }

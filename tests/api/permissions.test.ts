@@ -4,7 +4,7 @@ import { type ApiBindings } from "@api/context";
 import { ApiProblem, problemBody } from "@api/errors";
 import { requireGuild, requireOwner } from "@api/middleware/session";
 import { type Env } from "@config/env";
-import { type TestifyClient } from "@core/client";
+import { TestifyClient } from "@core/client";
 
 const OWNER = "100000000000000001";
 const MANAGER = "100000000000000002";
@@ -184,5 +184,68 @@ describe("requireOwner", () => {
 
 	it("refuses anyone who is not signed in", async () => {
 		expect((await appFor(fake(), null).request("/owner/thing")).status).toBe(401);
+	});
+});
+
+/**
+ * The tests above stub `isOwner`. These run the real one, because the whole guarantee of the owner console is
+ * that the Discord account signing in is one of the IDs in `DISCORD_OWNER_IDS` — nothing else grants it, and
+ * the answer is read from the environment on every request rather than stored on the session.
+ */
+describe("who counts as the bot owner", () => {
+	function ownerApp(ownerIds: string[], userId: string) {
+		const env = { DISCORD_OWNER_IDS: ownerIds } as Env;
+		// The real method, bound to the real env shape — a stub here would test nothing.
+		const client = { env, isOwner: TestifyClient.prototype.isOwner } as unknown as TestifyClient;
+
+		const app = new Hono<ApiBindings>();
+		app.use("*", async (context, next) => {
+			context.set("client", client);
+			context.set("env", env);
+			context.set("oauth", null);
+			context.set("session", { _id: "s", userId } as never);
+			await next();
+		});
+		app.get("/owner/thing", requireOwner, (context) => context.json({ ok: true }));
+		app.onError((error) => {
+			const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
+			return Response.json(problemBody(problem), { status: problem.status });
+		});
+
+		return { app, env };
+	}
+
+	it("admits an ID listed in DISCORD_OWNER_IDS", async () => {
+		const { app } = ownerApp([OWNER], OWNER);
+
+		expect((await app.request("/owner/thing")).status).toBe(200);
+	});
+
+	it("admits any of several listed IDs, and nobody else", async () => {
+		expect((await ownerApp([OWNER, MANAGER], MANAGER).app.request("/owner/thing")).status).toBe(200);
+		expect((await ownerApp([OWNER, MANAGER], MEMBER).app.request("/owner/thing")).status).toBe(404);
+	});
+
+	/** Managing every server in the fleet still is not ownership — the two are unrelated permissions. */
+	it("refuses an ID that is not listed, however privileged they are in Discord", async () => {
+		expect((await ownerApp([OWNER], MANAGER).app.request("/owner/thing")).status).toBe(404);
+	});
+
+	/**
+	 * Ownership is re-read per request, so removing someone from the env takes effect on their next click
+	 * rather than the next time they sign in. Their session stays valid; it just stops being an owner's.
+	 */
+	it("revokes access on the next request when the ID is taken out of the env", async () => {
+		const { app, env } = ownerApp([OWNER, MANAGER], MANAGER);
+		expect((await app.request("/owner/thing")).status).toBe(200);
+
+		env.DISCORD_OWNER_IDS = [OWNER];
+
+		expect((await app.request("/owner/thing")).status).toBe(404);
+	});
+
+	/** A near-miss ID must not match — `includes` on a joined string would let a substring through. */
+	it("matches the whole ID rather than part of one", async () => {
+		expect((await ownerApp([`${OWNER}9`], OWNER).app.request("/owner/thing")).status).toBe(404);
 	});
 });

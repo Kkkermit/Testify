@@ -1062,7 +1062,7 @@ shape —
 | `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                |
 | `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save            |
 | `/commands`             | Every command, searchable, with the coverage tile             |
-| `/owner`                | Fleet stats and every guild, owner only                       |
+| `/owner`                | Four tabs: fleet, usage analytics, logs, runtime — owner only |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -1291,6 +1291,48 @@ Two rules it enforces:
   can do is not something a server manager needs, and naming them invites probing. There is a test that the
   response does not contain them at all.
 - **Metadata only.** The registry holds `run` functions; a test pins the exact key set of a serialised command.
+
+### The owner console, and what it is allowed to know
+
+Four tabs — overview, usage, logs, runtime — all behind `requireOwner`, which answers **404** so a manager never
+learns the console is there. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
+the whole console, and the logs tab is precisely the screen you want when something is wrong.
+
+**Ownership is `DISCORD_OWNER_IDS` and nothing else.** `requireOwner` calls `client.isOwner(session.userId)`,
+which reads the env array on every request — so removing an ID revokes the console on that person's next click
+rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the
+whole shape of that, including that a near-miss ID cannot match.
+
+**Usage is counted, not logged.** `commandusage` holds one row per command per server per day per surface,
+`$inc`-ed in place by `countCommandUse` at the two dispatch sites, with a TTL that reaps a row 90 days after it
+was created. Three things about it are load-bearing:
+
+- **No user IDs, anywhere.** "What is this bot used for" is the question; "who used it" is not, and a
+  self-hoster's analytics must not quietly become a per-person activity log. Say so when adding a field.
+- **A row per invocation would grow without bound.** The aggregate shape is what lets one query answer a
+  90-day window on a busy bot.
+- **`runCommand` returns whether it succeeded** so a failure can be counted without catching the error and
+  breaking the guarantee that the user always gets an answer. `countCommandUse` is not awaited and drops its
+  own error after a debug line — the count is the least important thing that happened, and nothing reads a
+  result from it.
+
+**Least-used is ranked over `client.commands`, not over the usage rows.** A command nobody has ever run has no
+row at all, and it is exactly what that list exists to surface.
+
+**The log ring is in memory and redacts on the way in.** `src/core/logRing.ts` keeps the last 250 lines at info
+and above, fed by a pino `logMethod` hook rather than a second transport. A dashboard page is a much easier
+thing to read over someone's shoulder than a terminal, so any context key matching
+`token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is replaced before the record
+is stored — not before it is served. A restart clears the buffer, which is the trade for something that needs
+no collection, no retention policy and cannot fill a disk.
+
+**Testify never phones home.** The runtime tab reports the version it is running and links the releases page; it
+does not check for a newer one. A self-hosted bot that contacts a server on a timer is not something to ship by
+default, and the tab says so in as many words.
+
+**No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
+`<table>` in a `sr-only` `<figcaption>`. The bundle budget in `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the
+reason, and a bar is a div with a width.
 
 ### The dashboard wears the bot's face
 

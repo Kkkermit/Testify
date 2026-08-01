@@ -3,6 +3,9 @@ import {
 	type BotIdentity,
 	type ChannelSummary,
 	type CommandCatalogue,
+	type LogFeed,
+	type RuntimeInfo,
+	type UsageReport,
 	type GuildOverview,
 	type LevelConfigResponse,
 	type HealthResponse,
@@ -95,6 +98,55 @@ export const auditLogConfig: AuditLogConfigResponse = {
 	all: false,
 };
 
+export const usageReport: UsageReport = {
+	days: 30,
+	runs: 1_240,
+	failures: 12,
+	activeGuilds: 3,
+	commandsUsed: 2,
+	commandsTotal: 76,
+	surfaces: { slash: 1_100, prefix: 140 },
+	daily: [
+		{ day: "2026-07-31", count: 500, failures: 4 },
+		{ day: "2026-08-01", count: 740, failures: 8 },
+	],
+	mostUsed: [
+		{ command: "rank", category: "levelling", count: 800, failures: 2 },
+		{ command: "ban", category: "moderation", count: 440, failures: 10 },
+	],
+	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
+	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
+};
+
+export const logFeed: LogFeed = {
+	lines: [
+		{
+			at: "2026-08-01T12:00:00.000Z",
+			level: "error",
+			message: "[BAN] Failed to ban member",
+			context: { guildId: aGuild.id },
+		},
+		{ at: "2026-08-01T11:59:00.000Z", level: "info", message: "[READY] Logged in", context: {} },
+	],
+	buffered: 2,
+	capacity: 250,
+};
+
+export const runtimeInfo: RuntimeInfo = {
+	version: "2.0.0",
+	nodeVersion: "v22.22.2",
+	discordVersion: "14.27.0",
+	platform: "linux x64",
+	environment: "production",
+	startedAt: "2026-07-31T12:00:00.000Z",
+	uptimeMs: 90_000_000,
+	memoryMb: { heapUsed: 128, heapTotal: 256, rss: 320 },
+	repositoryUrl: "https://github.com/Kkkermit/Testify",
+	commands: 76,
+	events: 16,
+	guilds: 3,
+};
+
 export const catalogue: CommandCatalogue = {
 	prefix: "t?",
 	categories: ["info", "moderation"],
@@ -154,4 +206,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
+	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
+	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
+	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 ];

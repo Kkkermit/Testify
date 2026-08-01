@@ -31,20 +31,21 @@ export function EventGroup({
 	const inGroup = auditEventsIn(group);
 
 	return (
-		<fieldset className="border-border rounded-card border p-4">
-			<legend className="px-1">
-				<label className="flex cursor-pointer items-center gap-2 text-sm font-semibold">
-					<input
-						ref={heading}
-						type="checkbox"
-						checked={state === "all"}
-						onChange={(event) => {
-							onToggleGroup(event.target.checked);
-						}}
-					/>
-					{group}
-				</label>
-			</legend>
+		// No border: these sit inside a card that already has one, and a box in a box reads as a gap.
+		<fieldset className="mb-5 min-w-0">
+			<legend className="sr-only">{group}</legend>
+
+			<label className="border-border flex cursor-pointer items-center gap-2 border-b pb-2 text-sm font-semibold">
+				<input
+					ref={heading}
+					type="checkbox"
+					checked={state === "all"}
+					onChange={(event) => {
+						onToggleGroup(event.target.checked);
+					}}
+				/>
+				{group}
+			</label>
 
 			<div className="mt-1 flex flex-col">
 				{inGroup.map((event) => {
@@ -52,7 +53,7 @@ export function EventGroup({
 					const checked = events.includes(event);
 
 					return (
-						<label key={event} className={cn(CHECK_ROW, "hover:bg-muted rounded-lg px-2")}>
+						<label key={event} className={cn(CHECK_ROW, "hover:bg-muted -mx-2 rounded-lg px-2 py-1.5")}>
 							<input
 								type="checkbox"
 								checked={checked}

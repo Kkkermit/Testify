@@ -17,5 +17,8 @@ export const keys = {
 	owner: {
 		stats: () => ["owner", "stats"] as const,
 		guilds: (page: number) => ["owner", "guilds", page] as const,
+		usage: (days: number) => ["owner", "usage", days] as const,
+		logs: (level: string) => ["owner", "logs", level] as const,
+		runtime: () => ["owner", "runtime"] as const,
 	},
 };

@@ -4,6 +4,7 @@ import { runChecks } from "@core/checks";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { errorEmbed } from "@lib/embeds.util";
+import { countCommandUse } from "@lib/usage.util";
 
 /** The only `interactionCreate` listener. */
 export default defineEvent({
@@ -34,7 +35,13 @@ export default defineEvent({
 				return;
 			}
 
-			await runCommand(interaction, command, client);
+			const ok = await runCommand(interaction, command, client);
+			countCommandUse(client, {
+				command: command.name,
+				guildId: interaction.guildId,
+				surface: "slash",
+				failed: !ok,
+			});
 			return;
 		}
 

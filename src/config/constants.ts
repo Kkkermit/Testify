@@ -96,4 +96,14 @@ export const TREASURE_DEFAULTS = {
 
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 
+export const ANALYTICS = {
+	/** Long enough to see a month-on-month trend, short enough that the collection stays small. */
+	retentionDays: 90,
+	/** What the owner console asks for unless a window is chosen. */
+	defaultWindowDays: 30,
+	maxWindowDays: 90,
+	/** Recent log lines held in memory for the owner console. */
+	logRingCapacity: 250,
+} as const;
+
 /** Used where a "never expires" sentinel is needed instead of a made-up huge number. */

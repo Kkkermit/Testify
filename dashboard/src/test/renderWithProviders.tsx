@@ -10,7 +10,7 @@ import { createMemoryRouter, RouterProvider } from "react-router";
 export function renderWithProviders(
 	ui: ReactElement,
 	options: { route?: string; path?: string } = {},
-): RenderResult & { client: QueryClient } {
+): RenderResult & { client: QueryClient; search: () => string } {
 	const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
 	const router = createMemoryRouter([{ path: options.path ?? "/", element: ui }], {
@@ -24,5 +24,7 @@ export function renderWithProviders(
 			</QueryClientProvider>,
 		),
 		client,
+		// A memory router never touches `window.location`, so a test that pins URL state has to ask the router.
+		search: () => router.state.location.search,
 	};
 }

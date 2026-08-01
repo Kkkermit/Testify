@@ -1,85 +1,66 @@
-import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
+import { type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
 import { useSearchParams } from "react-router";
-import { ErrorState } from "@/app/ErrorState";
-import { PageHeader, Skeleton, StatTile } from "@/components/primitives";
-import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
-import { Pager } from "@/features/owner/components/Pager";
-import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
-import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
+import { PageHeader, TabBar } from "@/components/primitives";
+import { OWNER_TABS, ownerTabFrom } from "@/features/owner/owner.types";
+import { levelFrom, windowFrom } from "@/features/owner/owner.utils";
+import { LogsTab } from "@/features/owner/tabs/LogsTab";
+import { OverviewTab } from "@/features/owner/tabs/OverviewTab";
+import { RuntimeTab } from "@/features/owner/tabs/RuntimeTab";
+import { UsageTab } from "@/features/owner/tabs/UsageTab";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/** Answers "which of my servers is misconfigured" in one screen, which is the whole reason it exists. */
+/**
+ * Everything about the bot itself rather than about one server. The API answers 404 to anybody who is not a bot
+ * owner, so this page is a convenience rather than the gate.
+ *
+ * Each tab fetches its own data, so a failing endpoint takes out one tab rather than the console — the logs
+ * tab in particular has to survive whatever is wrong with the rest of it.
+ */
 export function OwnerPage(): React.JSX.Element {
 	usePageTitle("Owner console");
-	// In the URL rather than in state, so a link to page 3 is a link to page 3.
+	// In the URL, so a link to the usage tab is a link to the usage tab and Back works.
 	const [params, setParams] = useSearchParams();
-	const page = pageFrom(params.get("page"));
+	const tab = ownerTabFrom(params.get("tab"));
 
-	const stats = useOwnerStats();
-	const guilds = useOwnerGuilds(page);
-
-	if (stats.isError) return <ErrorState error={stats.error} onRetry={() => void stats.refetch()} />;
+	function put(key: string, value: string): void {
+		setParams((current) => {
+			const merged = new URLSearchParams(current);
+			merged.set(key, value);
+			return merged;
+		});
+	}
 
 	return (
 		<>
-			<PageHeader title="Owner console" subtitle="Every server Testify is in." />
+			<PageHeader title="Owner console" subtitle="How Testify is running, and what it is being used for." />
 
-			<section aria-label="Bot health" className="grid grid-cols-2 gap-4 lg:grid-cols-3">
-				{stats.isPending ? (
-					[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
-				) : (
-					<>
-						<StatTile label="Servers" value={stats.data.guilds} icon={Server} tint="text-feature-tickets" />
-						<StatTile
-							label="Members"
-							value={stats.data.users}
-							icon={Users}
-							tint="text-feature-welcome"
-							hint="Everyone Testify can see, counted across every server. People in two servers count twice."
-						/>
-						<StatTile label="Commands" value={stats.data.commands} icon={Terminal} tint="text-feature-levelling" />
-						<StatTile
-							label="Uptime"
-							value={formatUptime(stats.data.uptimeMs)}
-							icon={Clock}
-							tint="text-feature-economy"
-							hint="Since the bot process last started, not since it last connected to Discord."
-						/>
-						<StatTile
-							label="Memory"
-							value={`${String(stats.data.memoryMb)} MB`}
-							icon={Cpu}
-							tint="text-feature-economy"
-						/>
-						<StatTile
-							label="Database"
-							value={stats.data.database}
-							icon={Database}
-							tint={stats.data.database === "connected" ? "text-success" : "text-destructive"}
-						/>
-					</>
-				)}
-			</section>
+			<TabBar
+				label="Owner console"
+				tabs={OWNER_TABS}
+				active={tab}
+				onSelect={(next) => {
+					put("tab", next);
+				}}
+			/>
 
-			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
-				<h2 id="servers-heading" className="text-lg font-semibold">
-					Servers
-				</h2>
-
-				{guilds.data === undefined ? (
-					<Skeleton className="h-64 w-full" />
-				) : (
-					<OwnerGuildTable guilds={guilds.data.items} />
-				)}
-
-				<Pager
-					page={page}
-					pages={pageCount(guilds.data?.total ?? 0, PER_PAGE)}
-					onChange={(next) => {
-						setParams({ page: String(next) });
+			{tab === "overview" && <OverviewTab />}
+			{tab === "usage" && (
+				<UsageTab
+					days={windowFrom(params.get("days"))}
+					onWindow={(days: AnalyticsWindow) => {
+						put("days", String(days));
 					}}
 				/>
-			</section>
+			)}
+			{tab === "logs" && (
+				<LogsTab
+					level={levelFrom(params.get("level"))}
+					onLevel={(level: ReportedLogLevel) => {
+						put("level", level);
+					}}
+				/>
+			)}
+			{tab === "runtime" && <RuntimeTab />}
 		</>
 	);
 }
