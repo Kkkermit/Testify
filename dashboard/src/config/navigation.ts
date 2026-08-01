@@ -14,37 +14,62 @@ export interface NavItem {
 	exact?: boolean;
 }
 
+/**
+ * Groups keep the list readable as screens are added, and put the server's own settings under its name so it is
+ * always clear which server is being edited.
+ */
+export interface NavGroup {
+	/** Absent for the first group, which needs no heading to be understood. */
+	heading?: string;
+	items: NavItem[];
+}
+
 export interface NavAudience {
 	guild: { id: string; name: string } | undefined;
 	isOwner: boolean;
 }
 
-export function navigationFor({ guild, isOwner }: NavAudience): NavItem[] {
-	const items: NavItem[] = [
-		{ to: "/guilds", label: "Servers", icon: LayoutGrid, hint: "Every server you can configure" },
+export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
+	const groups: NavGroup[] = [
+		{
+			items: [
+				{ to: "/guilds", label: "Servers", icon: LayoutGrid, hint: "Every server you can configure" },
+				{
+					to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
+					label: "Commands",
+					icon: Terminal,
+					hint: "Every command Testify has",
+				},
+			],
+		},
 	];
 
 	if (guild !== undefined) {
-		items.push(
-			{ to: `/guilds/${guild.id}`, label: guild.name, icon: Server, hint: "This server at a glance", exact: false },
-			{ to: `/guilds/${guild.id}/levelling`, label: "Levelling", icon: TrendingUp, hint: "XP, rewards and boosts" },
-			{
-				to: `/guilds/${guild.id}/welcome`,
-				label: "Welcome",
-				icon: Users,
-				hint: "What Testify says when somebody joins",
-			},
-		);
+		groups.push({
+			heading: guild.name,
+			items: [
+				{ to: `/guilds/${guild.id}`, label: "Overview", icon: Server, hint: "This server at a glance" },
+				{ to: `/guilds/${guild.id}/levelling`, label: "Levelling", icon: TrendingUp, hint: "XP, rewards and boosts" },
+				{
+					to: `/guilds/${guild.id}/welcome`,
+					label: "Welcome",
+					icon: Users,
+					hint: "What Testify says when somebody joins",
+				},
+			],
+		});
 	}
 
-	items.push({
-		to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
-		label: "Commands",
-		icon: Terminal,
-		hint: "Every command Testify has",
-	});
+	if (isOwner) {
+		groups.push({
+			heading: "Bot",
+			items: [{ to: "/owner", label: "Owner console", icon: ShieldCheck, hint: "Every server Testify is in" }],
+		});
+	}
 
-	if (isOwner) items.push({ to: "/owner", label: "Owner", icon: ShieldCheck, hint: "Every server Testify is in" });
+	return groups;
+}
 
-	return items;
+export function allNavItems(groups: NavGroup[]): NavItem[] {
+	return groups.flatMap((group) => group.items);
 }

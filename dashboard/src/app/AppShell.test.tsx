@@ -27,14 +27,17 @@ describe("the app shell", () => {
 	it("names the guild being configured once there is one", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 
-		expect(await screen.findByRole("link", { name: "Test Server" })).toBeInTheDocument();
+		// The group is named by the list's label rather than a heading, so the page's heading outline stays clean.
+		expect(await screen.findByRole("list", { name: "Test Server" })).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("href", `/guilds/${aGuild.id}`);
 	});
 
-	it("shows no guild link on the picker itself", async () => {
+	it("shows no server section on the picker itself", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds" });
 		await screen.findByRole("link", { name: "Servers" });
 
-		expect(screen.queryByRole("link", { name: "Test Server" })).toBeNull();
+		expect(screen.queryByRole("list", { name: "Test Server" })).toBeNull();
+		expect(screen.queryByRole("link", { name: "Overview" })).toBeNull();
 	});
 
 	/** Hiding it is not access control — the API refuses too — but a manager has no use for the link. */
@@ -42,7 +45,7 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds" });
 		await screen.findByRole("link", { name: "Servers" });
 
-		expect(screen.queryByRole("link", { name: "Owner" })).toBeNull();
+		expect(screen.queryByRole("link", { name: "Owner console" })).toBeNull();
 	});
 
 	it("shows the owner console to the bot owner", async () => {
@@ -50,7 +53,7 @@ describe("the app shell", () => {
 
 		renderWithProviders(<AppShell />, { path: "/guilds" });
 
-		expect(await screen.findByRole("link", { name: "Owner" })).toHaveAttribute("href", "/owner");
+		expect(await screen.findByRole("link", { name: "Owner console" })).toHaveAttribute("href", "/owner");
 	});
 
 	/**
@@ -84,7 +87,7 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds" });
 
 		// The owner link is the last to appear, so waiting on it means the whole nav is rendered.
-		const owner = await screen.findByRole("link", { name: "Owner" });
+		const owner = await screen.findByRole("link", { name: "Owner console" });
 		const label = owner.querySelector("span:not([aria-hidden])");
 
 		expect(label).toHaveClass("sr-only");

@@ -1,44 +1,52 @@
-import { navigationFor } from "@/config/navigation";
+import { allNavItems, navigationFor, type NavAudience } from "@/config/navigation";
 
 const guild = { id: "900000000000000001", name: "Testify HQ" };
 
+function pathsFor(audience: NavAudience): string[] {
+	return allNavItems(navigationFor(audience)).map((item) => item.to);
+}
+
 describe("navigationFor", () => {
-	it("always offers the server picker", () => {
-		expect(navigationFor({ guild: undefined, isOwner: false }).map((item) => item.to)).toEqual([
-			"/guilds",
-			"/commands",
-		]);
+	it("always offers the server picker and the command list", () => {
+		expect(pathsFor({ guild: undefined, isOwner: false })).toEqual(["/guilds", "/commands"]);
 	});
 
 	it("adds the current server's screens once one is open", () => {
-		expect(navigationFor({ guild, isOwner: false }).map((item) => item.to)).toEqual([
+		expect(pathsFor({ guild, isOwner: false })).toEqual([
 			"/guilds",
+			`/guilds/${guild.id}/commands`,
 			`/guilds/${guild.id}`,
 			`/guilds/${guild.id}/levelling`,
 			`/guilds/${guild.id}/welcome`,
-			`/guilds/${guild.id}/commands`,
 		]);
 	});
 
 	/** The console 404s for anyone else, so offering the link would only be a dead end. */
 	it("shows the owner console to an owner and nobody else", () => {
-		expect(navigationFor({ guild: undefined, isOwner: true }).some((item) => item.to === "/owner")).toBe(true);
-		expect(navigationFor({ guild: undefined, isOwner: false }).some((item) => item.to === "/owner")).toBe(false);
+		expect(pathsFor({ guild: undefined, isOwner: true })).toContain("/owner");
+		expect(pathsFor({ guild: undefined, isOwner: false })).not.toContain("/owner");
 	});
 
-	/**
-	 * The server's own entry stays current while a settings screen under it is open — it is a section, not a
-	 * destination, and marking it inactive there loses the sense of where you are.
-	 */
-	it("keeps the server entry matching its child routes", () => {
-		const items = navigationFor({ guild, isOwner: false });
+	/** The heading is how anybody knows which server the settings under it belong to. */
+	it("puts the server's screens under its name", () => {
+		const groups = navigationFor({ guild, isOwner: false });
 
-		expect(items.find((item) => item.to === `/guilds/${guild.id}`)?.exact).toBe(false);
-		expect(items.find((item) => item.to === `/guilds/${guild.id}/levelling`)?.exact).toBeUndefined();
+		expect(groups[0]?.heading).toBeUndefined();
+		expect(groups[1]?.heading).toBe("Testify HQ");
+	});
+
+	it("keeps the owner console in a group of its own", () => {
+		const groups = navigationFor({ guild, isOwner: true });
+
+		expect(groups.at(-1)).toMatchObject({ heading: "Bot", items: [expect.objectContaining({ to: "/owner" })] });
+	});
+
+	it("groups nothing under a server heading when no server is open", () => {
+		expect(navigationFor({ guild: undefined, isOwner: false })).toHaveLength(1);
 	});
 
 	it("names every entry, since the label is the accessible name at the icon-only width", () => {
-		for (const item of navigationFor({ guild, isOwner: true })) {
+		for (const item of allNavItems(navigationFor({ guild, isOwner: true }))) {
 			expect(item.label.length).toBeGreaterThan(0);
 		}
 	});

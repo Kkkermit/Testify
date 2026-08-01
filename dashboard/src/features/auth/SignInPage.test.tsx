@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { hardRedirect } from "@/lib/redirect";
+import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -116,5 +117,14 @@ describe("the bot's own identity", () => {
 
 		expect(await screen.findByRole("button", { name: /sign in with discord/i })).toBeInTheDocument();
 		expect(screen.getByRole("heading", { name: "Testify" })).toBeInTheDocument();
+	});
+});
+
+describe("SignInPage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		const { container } = renderWithProviders(<SignInPage />, { path: "/sign-in" });
+		await screen.findByRole("button", { name: /sign in with discord/i });
+
+		await expectNoViolations(container);
 	});
 });

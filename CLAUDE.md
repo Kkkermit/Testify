@@ -1199,6 +1199,25 @@ that reaches for `p-4` puts its text 8px left of the rest of the page. Vertical 
 content column in `AppShell`, not a margin per section. Both are pinned by tests, and both were found by
 measuring the rendered page rather than by looking at it.
 
+### The accessibility floor is automated, the rest is not
+
+`jest-axe` runs on every page-level test through `src/test/axe.ts`, with `color-contrast` disabled — jsdom
+computes no styles, so that one rule can only report false negatives there. It is a floor, roughly 40% of
+issues; `dashboard-POC/10-ACCESSIBILITY.md` lists the manual passes for the rest.
+
+Four things it does not catch, all built deliberately:
+
+- **`RouteAnnouncer`** reads the new `document.title` into a polite live region after a navigation. Without it a
+  screen reader gets no signal that an SPA changed page at all.
+- **Role colours are swatches.** `RoleSwatch` puts the colour on a bordered dot and leaves the name at full
+  contrast — a role set to `#1a1a1a` as text is invisible on this background.
+- **Sidebar groups are labelled lists, not headings.** A heading there would put "Testify HQ" into the page's
+  heading outline twice; the `<ul aria-label>` names the group without competing with the page.
+- **`prefers-contrast: more`** swaps dividers for the interactive border and muted text for white.
+
+`eslint-plugin-jsx-a11y` is deliberately absent: its latest release peers on ESLint ≤9 and this repo is on 10,
+so installing it needs `--force` and breaks `npm ci`.
+
 ### Tooltips describe, they never name
 
 `components/primitives/Tooltip.tsx` is the only place tooltips are configured. The rule it exists to enforce:

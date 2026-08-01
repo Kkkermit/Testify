@@ -59,6 +59,7 @@ export function RewardsTab({
 					Level
 					<input
 						type="number"
+						inputMode="numeric"
 						min={1}
 						max={LEVEL_LIMITS.maxRewardLevel}
 						value={level}

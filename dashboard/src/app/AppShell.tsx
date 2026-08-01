@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Outlet, useLocation, useParams } from "react-router";
 import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
+import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { Backdrop } from "@/components/motion";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
@@ -27,6 +28,7 @@ export function AppShell(): React.JSX.Element {
 		<div className="flex min-h-dvh flex-col md:flex-row">
 			{/* Dimmer than the sign-in screen: behind a settings form it is a texture, not the subject. */}
 			<Backdrop opacity={0.22} />
+			<RouteAnnouncer />
 
 			<a
 				href="#content"

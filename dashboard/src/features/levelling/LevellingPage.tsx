@@ -1,6 +1,7 @@
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { PageHeader, Skeleton } from "@/components/primitives";
+import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { Tabs } from "@/features/levelling/components/Tabs";
 import { tabFrom } from "@/features/levelling/levelling.utils";
 import { BoostsTab } from "@/features/levelling/tabs/BoostsTab";
@@ -11,7 +12,6 @@ import { useChannels, useLevelling, useRoles } from "@/features/levelling/useLev
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function LevellingPage(): React.JSX.Element {
-	usePageTitle("Levelling");
 	const { guildId = "" } = useParams();
 	// In the URL, so a link to the rewards tab is a link to the rewards tab and Back works.
 	const [params, setParams] = useSearchParams();
@@ -20,6 +20,9 @@ export function LevellingPage(): React.JSX.Element {
 	const config = useLevelling(guildId);
 	const channels = useChannels(guildId);
 	const roles = useRoles(guildId);
+	const overview = useGuildOverview(guildId);
+
+	usePageTitle("Levelling", overview.data?.name);
 
 	if (config.isPending) return <Skeleton className="h-96 w-full" />;
 	if (config.isError) return <ErrorState error={config.error} onRetry={() => void config.refetch()} />;

@@ -69,8 +69,8 @@ its rules already live in `src/lib/levelling.util.ts`.
 **Done when:** levelling can be configured end to end from the browser and the change is visible in
 `/levelling edit` in Discord.
 
-`jest-axe` is not wired in yet, and the live check against a running bot is still outstanding — this sandbox has
-neither Discord nor a MongoDB binary. What this phase settled:
+`jest-axe` is wired in now (see `10-ACCESSIBILITY.md`); the live check against a running bot is still
+outstanding, as this sandbox has neither Discord nor a MongoDB binary. What this phase settled:
 
 - **`LEVEL_LIMITS` had to move into `@testify/shared`.** The plan had the shared schemas importing it from
   `src/lib/`, which inverts the dependency — `shared/` is consumed by the browser and cannot reach into the bot.
@@ -119,8 +119,9 @@ living inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-C
 
 ### Phase 6 — Polish (~1 week)
 
-- Full accessibility pass: screen reader, 200% zoom, reduced motion, greyscale.
-- Bundle budget check (<200 kB gzipped first load).
+- Full accessibility pass: screen reader, 200% zoom, reduced motion, greyscale. The automated half is done.
+- Bundle budget check (<200 kB gzipped first load). **Measured at 152 kB** — vendor is 136 kB of it, and three
+  is not in the first load at all.
 - Docker image and compose file; README screenshots; `CONTRIBUTING.md` section.
 - Light theme, if wanted — cheap now that everything is tokens, but re-verify every contrast ratio.
 

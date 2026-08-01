@@ -3,6 +3,7 @@ import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
+import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -137,5 +138,15 @@ describe("the owner console", () => {
 
 		expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
 		expect(screen.queryByRole("table")).toBeNull();
+	});
+});
+
+describe("OwnerPage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		useOwnerApi([row()]);
+		const { container } = renderWithProviders(<OwnerPage />, { path: "/owner" });
+		await screen.findByRole("table");
+
+		await expectNoViolations(container);
 	});
 });

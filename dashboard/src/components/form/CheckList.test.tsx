@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { CheckList, type CheckItem } from "@/components/form/CheckList";
+import { RoleSwatch } from "@/components/form/RoleSwatch";
 import { SavingIndicator, savingStateOf } from "@/components/form/SavingIndicator";
 import { Toggle } from "@/components/form/Toggle";
 
@@ -96,5 +97,32 @@ describe("Toggle", () => {
 
 		await userEvent.click(screen.getByRole("switch", { name: "Locked" }));
 		expect(onChange).not.toHaveBeenCalled();
+	});
+});
+
+describe("RoleSwatch", () => {
+	/**
+	 * Role colours are chosen by whoever made the role, so plenty are unreadable on a near-black page — one set
+	 * to `#1a1a1a` would be invisible as text. The colour goes on a bordered dot, the name stays readable.
+	 */
+	it("puts the colour on a swatch, never on the name", () => {
+		render(<RoleSwatch name="Booster" colour="#1a1a1a" />);
+
+		const name = screen.getByText("Booster");
+		expect(name).not.toHaveStyle({ color: "#1a1a1a" });
+
+		const swatch = name.parentElement!.querySelector("[aria-hidden]");
+		expect(swatch).toHaveStyle({ backgroundColor: "#1a1a1a" });
+	});
+
+	it("renders a colourless role without an empty style", () => {
+		render(<RoleSwatch name="Member" colour={null} />);
+		expect(screen.getByText("Member")).toBeInTheDocument();
+	});
+
+	it("hides the swatch from assistive technology, since the name carries the meaning", () => {
+		render(<RoleSwatch name="Booster" colour="#7c3aed" />);
+
+		expect(screen.getByText("Booster").parentElement!.querySelector("[aria-hidden='true']")).toBeInTheDocument();
 	});
 });

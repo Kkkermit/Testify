@@ -15,13 +15,14 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function WelcomePage(): React.JSX.Element {
-	usePageTitle("Welcome messages");
 	const { guildId = "" } = useParams();
 
 	const config = useWelcome(guildId);
 	const channels = useChannels(guildId);
 	const overview = useGuildOverview(guildId);
 	const update = useUpdateWelcome(guildId);
+
+	usePageTitle("Welcome messages", overview.data?.name);
 
 	const textarea = useRef<HTMLTextAreaElement>(null);
 	const [draft, setDraft] = useState("");

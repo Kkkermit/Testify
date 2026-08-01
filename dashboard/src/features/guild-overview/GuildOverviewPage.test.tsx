@@ -1,6 +1,7 @@
 import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { GuildOverviewPage } from "@/features/guild-overview/GuildOverviewPage";
+import { expectNoViolations } from "@/test/axe";
 import { aGuild, overview } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -145,5 +146,14 @@ describe("the feature grid", () => {
 
 		expect(await screen.findByText("Giveaways")).toBeInTheDocument();
 		expect(screen.queryByRole("link", { name: /giveaways/i })).toBeNull();
+	});
+});
+
+describe("GuildOverviewPage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		const { container } = renderPage();
+		await screen.findByText("Test Server");
+
+		await expectNoViolations(container);
 	});
 });

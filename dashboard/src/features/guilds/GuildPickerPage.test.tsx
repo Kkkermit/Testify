@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { filterGuilds } from "@/features/guilds/guilds.utils";
+import { expectNoViolations } from "@/test/axe";
 import { aGuild, me, withoutBot } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -94,5 +95,14 @@ describe("the guild picker", () => {
 		renderWithProviders(<GuildPickerPage />);
 
 		expect(screen.queryByText("Test Server")).toBeNull();
+	});
+});
+
+describe("GuildPickerPage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		const { container } = renderWithProviders(<GuildPickerPage />, { path: "/guilds" });
+		await screen.findByText("Test Server");
+
+		await expectNoViolations(container);
 	});
 });

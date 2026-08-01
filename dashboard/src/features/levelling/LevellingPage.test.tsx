@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { tabFrom } from "@/features/levelling/levelling.utils";
 import { LevellingPage } from "@/features/levelling/LevellingPage";
+import { expectNoViolations } from "@/test/axe";
 import { levelConfig } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -360,5 +361,14 @@ describe("moving between tabs", () => {
 		await user.click(await screen.findByRole("tab", { name: /role rewards/i }));
 
 		expect(await screen.findByText("Level 5")).toBeInTheDocument();
+	});
+});
+
+describe("LevellingPage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		const { container } = renderPage();
+		await screen.findByRole("switch", { name: /members earn xp/i });
+
+		await expectNoViolations(container);
 	});
 });

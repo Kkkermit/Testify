@@ -160,5 +160,27 @@ missing labels and bad ARIA at authoring time.
 4. Check with the OS in reduced-motion mode.
 5. Grey-scale the page and confirm every state is still distinguishable.
 
+## What is wired up
+
+- **`jest-axe` on every page-level test** — seven suites, each rendering the real screen and asserting no
+  violations. Colour contrast is disabled in that config because jsdom computes no styles, so the rule there can
+  only report false negatives; the ratios are worked out above and checked against the rendered page instead.
+  The check is proven able to fail: removing a `<label>` turns it red.
+- **A route announcer.** `app/RouteAnnouncer.tsx` is a polite live region that reads the new `document.title`
+  after a navigation, so a screen reader is told the page changed.
+- **Titles carry the server** — `"Levelling · Testify HQ · Testify"` — so two tabs on the same screen in
+  different servers are told apart.
+- **Role colours are swatches, never text.** `RoleSwatch` puts the colour on a bordered dot beside a
+  full-contrast name, which is the rule below that a purple theme most wants to break.
+- **`prefers-contrast: more`** swaps the divider colour for the interactive one and muted text for white.
+- **`scroll-margin-top` on `:focus-visible`** (2.4.11), because the header on a phone is sticky.
+- **Buttons are at least 44px tall** (2.5.8), and number inputs carry `inputMode="numeric"`.
+
+`eslint-plugin-jsx-a11y` is **not** installed: its latest release (6.10.2) declares a peer of ESLint ≤9 and this
+repo is on ESLint 10, so adding it needs `--force` and breaks `npm ci`. Revisit when it supports ESLint 10;
+`jest-axe` covers the render-time half in the meantime.
+
+Still outstanding: the manual passes — screen reader, 200% and 400% zoom, greyscale — which no tool replaces.
+
 **Do not ship a "a11y: TODO" phase.** It is far cheaper as you go, and a dashboard people can actually operate is
 part of what "open source friendly" means — contributors and users are not all sighted mouse users.

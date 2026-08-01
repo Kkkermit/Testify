@@ -8,6 +8,7 @@ import {
 	isConfigurable,
 } from "@/features/commands/commands.utils";
 import { CommandsPage } from "@/features/commands/CommandsPage";
+import { expectNoViolations } from "@/test/axe";
 import { catalogue } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
@@ -191,5 +192,14 @@ describe("the commands page", () => {
 
 		const card = screen.getByText("/ban").closest<HTMLElement>("div.bg-card")!;
 		expect(within(card).getByText("user")).toBeInTheDocument();
+	});
+});
+
+describe("CommandsPage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		const { container } = renderPage();
+		await screen.findByText("/ban");
+
+		await expectNoViolations(container);
 	});
 });

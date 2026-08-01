@@ -1,5 +1,6 @@
 import { type RoleSummary } from "@testify/shared";
 import { CheckList, type CheckItem } from "@/components/form/CheckList";
+import { RoleSwatch } from "@/components/form/RoleSwatch";
 
 /**
  * A checkbox list rather than a `<select multiple>`: the latter is close to unusable with a keyboard and on
@@ -25,7 +26,7 @@ export function RoleChecklist({
 }): React.JSX.Element {
 	const items: CheckItem[] = roles.map((role) => ({
 		id: role.id,
-		label: <span style={role.colour === null ? undefined : { color: role.colour }}>{role.name}</span>,
+		label: <RoleSwatch name={role.name} colour={role.colour} />,
 		blocked: requireAssignable && !role.assignableByBot,
 		blockedNote: "above Testify",
 	}));

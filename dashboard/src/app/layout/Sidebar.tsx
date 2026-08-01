@@ -57,11 +57,36 @@ export function Sidebar({
 				<span className={label("truncate font-semibold tracking-tight")}>{bot?.username ?? "Testify"}</span>
 			</Link>
 
-			<div className="flex flex-col gap-1">
-				{navigationFor({ guild, isOwner }).map((item) => (
-					<SidebarLink key={item.to} item={item} expanded={expanded} />
-				))}
-			</div>
+			{navigationFor({ guild, isOwner }).map((group, index) => (
+				<div key={group.heading ?? "global"} className={index > 0 ? "mt-4" : undefined}>
+					{group.heading !== undefined && (
+						<>
+							{/* At the icon-only width the rule carries the grouping, where there is no room for the words. */}
+							<hr className="border-border mx-2 mb-2 lg:hidden" />
+							{/*
+							 * Shown, but not a heading: the group is named for assistive technology by the list's own
+							 * label, so the page's heading outline stays the page's rather than the sidebar's.
+							 */}
+							<p
+								aria-hidden="true"
+								className={cn(
+									"text-muted-foreground truncate px-2 pb-1 text-[0.6875rem] font-semibold tracking-wider uppercase",
+									expanded ? "" : "hidden lg:block",
+								)}
+							>
+								{group.heading}
+							</p>
+						</>
+					)}
+					<ul className="flex flex-col gap-1" {...(group.heading === undefined ? {} : { "aria-label": group.heading })}>
+						{group.items.map((item) => (
+							<li key={item.to}>
+								<SidebarLink item={item} expanded={expanded} />
+							</li>
+						))}
+					</ul>
+				</div>
+			))}
 
 			<div className="border-border mt-auto flex flex-col gap-1 border-t pt-3">
 				{user !== null && (

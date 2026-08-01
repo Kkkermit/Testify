@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
 import { insertToken, messageTooLong } from "@/features/welcome/welcome.utils";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
+import { expectNoViolations } from "@/test/axe";
 import { welcomeConfig } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -178,5 +179,14 @@ describe("the welcome page", () => {
 			expect(toggle).toBeChecked();
 		});
 		expect(await screen.findByText(/need manage server/i)).toBeInTheDocument();
+	});
+});
+
+describe("WelcomePage accessibility", () => {
+	it("has no automatically detectable violations", async () => {
+		const { container } = renderPage();
+		await screen.findByRole("switch", { name: /greet new members/i });
+
+		await expectNoViolations(container);
 	});
 });

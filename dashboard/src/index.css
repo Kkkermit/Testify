@@ -96,6 +96,8 @@
 
 	:focus-visible {
 		@apply outline-ring outline-2 outline-offset-2;
+		/* 2.4.11: the header on a phone is sticky, so a focused control must not scroll underneath it. */
+		scroll-margin-top: 5rem;
 	}
 
 	/* Native controls default to the browser's accent, which is nobody's brand. */
@@ -155,6 +157,18 @@
 
 .tippy-box[data-theme~="testify"] > .tippy-arrow {
 	color: var(--color-popover);
+}
+
+/*
+ * WCAG 1.4.11 asks for a visible boundary on anything you need to see to use. `prefers-contrast: more` goes
+ * further: dividers become the interactive border and secondary text becomes full white, which makes the theme
+ * usable for people who otherwise cannot read a dark UI at all.
+ */
+@media (prefers-contrast: more) {
+	:root {
+		--color-border: var(--color-input);
+		--color-muted-foreground: var(--color-foreground);
+	}
 }
 
 /* Motion here is feedback, not decoration, so removing it costs nothing and keeps the dashboard usable. */
