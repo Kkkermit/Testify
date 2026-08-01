@@ -1223,6 +1223,19 @@ them from the accessibility tree and leaves every navigation link named nothing 
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
 unit test pins the class and a real browser check confirms the accessible name survives.
 
+### The dashboard wears the bot's face
+
+`GET /api/bot` returns the application's own profile and every brand surface reads it, so a fork looks like its
+own bot without a line of CSS. Two things about it are easy to get wrong:
+
+- **The banner is not in the READY payload.** `client.user.banner` is undefined until the user is fetched over
+  REST, so `botIdentity()` fetches once and caches for an hour. A failed fetch still yields the avatar.
+- **Everything falls back to `components/brand/Logo`** — no profile yet, no avatar, or a CDN that will not load.
+  A brand mark is never worth a broken image icon, and `BotMark` handles all three the same way.
+
+The endpoint takes no session because the sign-in screen needs it before one exists; it carries nothing beyond
+the public profile, and a test pins the exact key set so nothing private drifts into it.
+
 ### The WebGL backdrop
 
 `components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things about it are

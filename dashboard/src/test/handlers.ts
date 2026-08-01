@@ -1,4 +1,5 @@
 import {
+	type BotIdentity,
 	type ChannelSummary,
 	type GuildOverview,
 	type LevelConfigResponse,
@@ -18,6 +19,14 @@ export const configured: SetupStatus = {
 	configured: true,
 	missing: [],
 	redirectUri: "http://localhost:5174/api/auth/callback",
+};
+
+export const botProfile: BotIdentity = {
+	id: "100000000000000001",
+	username: "Testify",
+	avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
+	bannerUrl: null,
+	accentColour: null,
 };
 
 export const aGuild: ManageableGuild = {
@@ -83,6 +92,7 @@ export const someRoles: RoleSummary[] = [
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
 	http.get("/api/auth/setup", () => HttpResponse.json(configured)),
+	http.get("/api/bot", () => HttpResponse.json(botProfile)),
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),

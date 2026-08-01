@@ -1,8 +1,10 @@
 import { useSearchParams } from "react-router";
-import { LogoTile } from "@/components/brand/Logo";
+import { BotBanner } from "@/components/brand/BotBanner";
+import { BotMark } from "@/components/brand/BotMark";
 import { Backdrop } from "@/components/motion";
 import { Button, Card } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
+import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { hardRedirect } from "@/lib/redirect";
@@ -12,6 +14,7 @@ export function SignInPage(): React.JSX.Element {
 	usePageTitle("Sign in");
 	const [params] = useSearchParams();
 	const setup = useSetup();
+	const bot = useBot();
 	const returnTo = params.get("returnTo") ?? "/guilds";
 
 	if (setup.data?.configured === false)
@@ -21,36 +24,43 @@ export function SignInPage(): React.JSX.Element {
 		<main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
 			<Backdrop />
 
-			<Card className="motion-pop flex flex-col gap-5">
-				<div className="flex items-center gap-3">
-					<LogoTile />
-					<h1 className="text-2xl font-semibold tracking-tight">Testify</h1>
-				</div>
+			<Card padding="none" className="motion-pop overflow-hidden">
+				<BotBanner src={bot.data?.bannerUrl} accent={bot.data?.accentColour} className="h-24" />
 
-				<p className="text-muted-foreground text-sm">
-					Configure Testify in any server where you have Manage Server, without opening Discord.
-				</p>
+				{/* Positioned, or the banner — which is — paints over the avatar lifted into it. */}
+				<div className="relative flex flex-col gap-5 p-6">
+					{/* Lifted into the banner, the way a profile card reads. */}
+					<div className="-mt-14 flex items-end gap-3">
+						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-2xl ring-4" />
+						<h1 className="pb-1 text-2xl font-semibold tracking-tight">{bot.data?.username ?? "Testify"}</h1>
+					</div>
 
-				{params.get("denied") !== null && (
-					<p className="text-warning text-sm" role="status">
-						You cancelled the Discord sign-in. Nothing was shared.
+					<p className="text-muted-foreground text-sm">
+						Configure {bot.data?.username ?? "Testify"} in any server where you have Manage Server, without opening
+						Discord.
 					</p>
-				)}
 
-				<Button
-					className="w-full"
-					onClick={() => {
-						hardRedirect(`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
-					}}
-				>
-					Sign in with Discord
-				</Button>
+					{params.get("denied") !== null && (
+						<p className="text-warning text-sm" role="status">
+							You cancelled the Discord sign-in. Nothing was shared.
+						</p>
+					)}
 
-				<p className="text-muted-foreground text-xs">
-					Testify asks for <strong className="text-foreground">identify</strong> to know who you are and{" "}
-					<strong className="text-foreground">guilds</strong> to list your servers. It never asks for your email, and it
-					cannot read your messages through this.
-				</p>
+					<Button
+						className="w-full"
+						onClick={() => {
+							hardRedirect(`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
+						}}
+					>
+						Sign in with Discord
+					</Button>
+
+					<p className="text-muted-foreground text-xs">
+						Testify asks for <strong className="text-foreground">identify</strong> to know who you are and{" "}
+						<strong className="text-foreground">guilds</strong> to list your servers. It never asks for your email, and
+						it cannot read your messages through this.
+					</p>
+				</div>
 			</Card>
 		</main>
 	);

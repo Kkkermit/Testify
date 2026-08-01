@@ -1,8 +1,8 @@
-import { type DashboardUser } from "@testify/shared";
+import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { Sidebar } from "@/app/layout/Sidebar";
-import { Logo } from "@/components/brand/Logo";
+import { BotMark } from "@/components/brand/BotMark";
 import { type NavAudience } from "@/config/navigation";
 
 /**
@@ -12,12 +12,14 @@ import { type NavAudience } from "@/config/navigation";
  */
 export function MobileNav({
 	user,
+	bot,
 	guild,
 	isOwner,
 	open,
 	onOpenChange,
 }: NavAudience & {
 	user: DashboardUser | null;
+	bot?: BotIdentity | undefined;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }): React.JSX.Element {
@@ -60,8 +62,8 @@ export function MobileNav({
 					<Menu size={20} aria-hidden="true" />
 					<span className="sr-only">Menu</span>
 				</button>
-				<Logo size={20} className="text-accent" />
-				<span className="font-semibold tracking-tight">Testify</span>
+				<BotMark src={bot?.avatarUrl} size={20} />
+				<span className="font-semibold tracking-tight">{bot?.username ?? "Testify"}</span>
 			</header>
 
 			{open && (
@@ -72,7 +74,7 @@ export function MobileNav({
 					 */}
 					<div aria-hidden="true" onClick={close} className="bg-background/70 motion-fade absolute inset-0" />
 					<div id="mobile-nav" ref={panelRef} className="motion-fade absolute inset-y-0 left-0">
-						<Sidebar user={user} guild={guild} isOwner={isOwner} expanded onNavigate={close} />
+						<Sidebar user={user} bot={bot} guild={guild} isOwner={isOwner} expanded onNavigate={close} />
 					</div>
 					<button
 						type="button"

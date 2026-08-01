@@ -1,4 +1,4 @@
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { SignInPage } from "@/features/auth/SignInPage";
@@ -90,5 +90,31 @@ describe("a half-configured install", () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in" });
 
 		expect(await screen.findByText(/npm run secret -- --write/)).toBeInTheDocument();
+	});
+});
+
+describe("the bot's own identity", () => {
+	/** 08-DESIGN.md: a fork should look like their bot without anybody editing CSS. */
+	it("shows the bot's name and avatar rather than a hardcoded brand", async () => {
+		const { container } = renderWithProviders(<SignInPage />, { path: "/sign-in" });
+
+		expect(await screen.findByRole("heading", { name: "Testify" })).toBeInTheDocument();
+		await waitFor(() => {
+			expect(container.querySelector('img[src*="cdn.discordapp.com"]')).toBeInTheDocument();
+		});
+	});
+
+	/** The profile is a separate request; the page must be usable whether or not it ever answers. */
+	it("still offers the sign-in button when the profile cannot be fetched", async () => {
+		server.use(
+			http.get("/api/bot", () =>
+				HttpResponse.json({ error: { code: "bot_connecting", message: "Connecting." } }, { status: 503 }),
+			),
+		);
+
+		renderWithProviders(<SignInPage />, { path: "/sign-in" });
+
+		expect(await screen.findByRole("button", { name: /sign in with discord/i })).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: "Testify" })).toBeInTheDocument();
 	});
 });

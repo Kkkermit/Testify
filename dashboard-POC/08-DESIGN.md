@@ -202,8 +202,22 @@ The entrance animations obey the same test. `Reveal` staggers a list by 40ms per
 ## Brand
 
 Use Testify's existing identity rather than inventing a second one: `src/config/theme.ts` already holds the
-colours and emoji the embeds use, and the sidebar should carry the bot's own avatar from
-`client.user.displayAvatarURL()` so a self-hoster's fork looks like _their_ bot without editing any CSS.
+colours and emoji the embeds use, and the sidebar carries the bot's own avatar so a self-hoster's fork looks
+like _their_ bot without editing any CSS.
+
+`GET /api/bot` serves that profile — id, username, avatar, banner and accent colour. It is unauthenticated
+because the sign-in screen needs it before a session exists, and because it is the same public profile anybody
+sees by clicking the bot in a member list. Nothing else is in the response, and there is a test asserting the
+exact key set so nothing else drifts into it.
+
+**The banner never arrives in the gateway's READY payload.** `client.user.banner` is undefined until the user is
+fetched over REST, so `botIdentity()` does that once and caches it for an hour — a rate-limited call for a value
+that only changes when somebody edits the application. A failed fetch still returns the avatar; only the banner
+and accent are lost.
+
+Every surface degrades in the same direction. No profile yet, no avatar set, or Discord's CDN unreachable all
+land on the built-in `Logo`; no banner lands on a wash in the accent colour, which is the common case since few
+applications have one.
 
 Guild icons come from Discord's CDN, already allowed by the CSP in `03-AUTH.md`. Always render a fallback — a
 guild with no icon is common, and a broken image in the picker is the first thing anyone sees. The fallback is a

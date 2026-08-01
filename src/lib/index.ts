@@ -7,6 +7,7 @@ export * from "./blackjack.util";
 export * from "./canvas.util";
 export * from "./colours.util";
 export * from "./components.util";
+export * from "./botIdentity.util";
 export * from "./contentFilter.util";
 export * from "./dashboard.util";
 export * from "./duration.util";

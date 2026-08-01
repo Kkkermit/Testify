@@ -3,11 +3,13 @@ import { Outlet, useLocation, useParams } from "react-router";
 import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { Backdrop } from "@/components/motion";
+import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 
 /** Navigation, backdrop and the outlet. */
 export function AppShell(): React.JSX.Element {
 	const me = useMe();
+	const bot = useBot();
 	const { guildId } = useParams();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
@@ -33,8 +35,8 @@ export function AppShell(): React.JSX.Element {
 				Skip to content
 			</a>
 
-			<MobileNav {...audience} user={user} open={menuOpen} onOpenChange={setMenuOpen} />
-			<Sidebar {...audience} user={user} />
+			<MobileNav {...audience} user={user} bot={bot.data} open={menuOpen} onOpenChange={setMenuOpen} />
+			<Sidebar {...audience} user={user} bot={bot.data} />
 
 			{/* Keyed on the path so each screen fades in on arrival rather than swapping in place. */}
 			<main

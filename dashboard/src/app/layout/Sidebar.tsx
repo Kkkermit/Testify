@@ -1,9 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type DashboardUser } from "@testify/shared";
+import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { LogOut } from "lucide-react";
 import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
-import { Logo } from "@/components/brand/Logo";
+import { BotMark } from "@/components/brand/BotMark";
 import { GuildIcon, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
 import { api } from "@/lib/api";
@@ -20,12 +20,15 @@ const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
 
 export function Sidebar({
 	user,
+	bot,
 	guild,
 	isOwner,
 	expanded = false,
 	onNavigate,
 }: NavAudience & {
 	user: DashboardUser | null;
+	/** The bot's own profile, so a fork's sidebar carries its identity rather than Testify's. */
+	bot?: BotIdentity | undefined;
 	/** True inside the mobile drawer, where there is room for the labels. */
 	expanded?: boolean;
 	onNavigate?: () => void;
@@ -49,9 +52,9 @@ export function Sidebar({
 			<Link to="/guilds" className={cn(ROW, "mb-4")}>
 				{/* Boxed to 18px like every other row icon, so the wordmark starts on the label column too. */}
 				<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
-					<Logo size={22} className="text-accent" />
+					<BotMark src={bot?.avatarUrl} size={22} />
 				</span>
-				<span className={label("truncate font-semibold tracking-tight")}>Testify</span>
+				<span className={label("truncate font-semibold tracking-tight")}>{bot?.username ?? "Testify"}</span>
 			</Link>
 
 			<div className="flex flex-col gap-1">

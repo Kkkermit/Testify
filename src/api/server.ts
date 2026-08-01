@@ -10,6 +10,7 @@ import { securityHeaders } from "@api/middleware/security";
 import { loadSession } from "@api/middleware/session";
 import { oauthConfigFrom } from "@api/oauth";
 import { auth } from "@api/routes/auth";
+import { bot } from "@api/routes/bot";
 import { guilds } from "@api/routes/guilds";
 import { health } from "@api/routes/health";
 import { owner } from "@api/routes/owner";
@@ -79,6 +80,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 
 	app.route("/api/health", health);
 	app.route("/api/auth", auth);
+	app.route("/api/bot", bot);
 	app.route("/api/guilds", guilds);
 	app.route("/api/owner", owner);
 

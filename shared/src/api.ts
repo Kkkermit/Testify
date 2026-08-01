@@ -14,6 +14,20 @@ export interface HealthResponse {
 	database: "connected" | "disconnected";
 }
 
+/**
+ * The bot's own public profile, as anybody sees it in Discord. Unauthenticated: it lets the sign-in screen and
+ * the sidebar carry the bot's identity, so a self-hoster's fork looks like their bot without editing any CSS.
+ */
+export interface BotIdentity {
+	id: string;
+	username: string;
+	avatarUrl: string;
+	/** Applications rarely have one, so every surface needs a fallback. */
+	bannerUrl: string | null;
+	/** The profile accent as a CSS hex, when the application has set one. */
+	accentColour: string | null;
+}
+
 export interface DashboardUser {
 	id: string;
 	username: string;
