@@ -1,4 +1,4 @@
-import { LayoutGrid, Server, ShieldCheck, TrendingUp, type LucideIcon } from "lucide-react";
+import { LayoutGrid, Server, ShieldCheck, TrendingUp, Users, type LucideIcon } from "lucide-react";
 
 /**
  * The sidebar, as data. A new settings screen is one entry here and one route — nothing in the shell needs
@@ -28,6 +28,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavItem[] {
 		items.push(
 			{ to: `/guilds/${guild.id}`, label: guild.name, icon: Server, hint: "This server at a glance", exact: false },
 			{ to: `/guilds/${guild.id}/levelling`, label: "Levelling", icon: TrendingUp, hint: "XP, rewards and boosts" },
+			{
+				to: `/guilds/${guild.id}/welcome`,
+				label: "Welcome",
+				icon: Users,
+				hint: "What Testify says when somebody joins",
+			},
 		);
 	}
 

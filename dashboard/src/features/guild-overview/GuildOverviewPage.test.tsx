@@ -119,3 +119,31 @@ describe("the guild overview", () => {
 		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
 	});
 });
+
+describe("the feature grid", () => {
+	it("links a feature the dashboard can configure to its settings", async () => {
+		renderPage();
+
+		expect(await screen.findByRole("link", { name: /levelling/i })).toHaveAttribute(
+			"href",
+			`/guilds/${aGuild.id}/levelling`,
+		);
+	});
+
+	/** A card that looks clickable and goes nowhere is worse than one that plainly does not. */
+	it("leaves a Discord-only feature inert rather than linking it nowhere", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({
+					...overview,
+					features: [{ key: "giveaway", label: "Giveaways", enabled: true, detail: "1 running" }],
+				}),
+			),
+		);
+
+		renderPage();
+
+		expect(await screen.findByText("Giveaways")).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /giveaways/i })).toBeNull();
+	});
+});

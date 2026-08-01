@@ -20,8 +20,8 @@ export default defineConfig(({ mode }) => {
 		plugins: [react(), tailwind()],
 		resolve: {
 			// discord-html-transcripts pins React 18, which npm hoists to the root and leaves this workspace's
-			// React 19 nested — so react-query and react-router, hoisted alongside it, bound to 18 while the app
-			// rendered with 19. Two Reacts in one page means every hook reads a null dispatcher.
+			// React 19 nested. Without this, react-query and react-router resolve the hoisted 18 while the app
+			// renders with 19, and every hook in them reads a null dispatcher.
 			dedupe: ["react", "react-dom"],
 			alias: {
 				"@": fileURLToPath(new URL("./src", import.meta.url)),

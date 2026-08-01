@@ -11,8 +11,8 @@ import "tippy.js/dist/tippy.css";
  * an accessible name of its own, because a pointer-only affordance is invisible to anyone who reaches the
  * control another way.
  *
- * This drives tippy.js directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in
- * React 19, so the wrapper warns on every render and is one release from breaking outright.
+ * It drives tippy.js directly rather than through `@tippyjs/react`, which reads `element.ref` — a property
+ * React 19 removed.
  */
 export function Tooltip({
 	label,

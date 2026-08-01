@@ -21,8 +21,8 @@ export type CardPadding = keyof typeof PADDING;
 const SURFACE = "bg-card border-border surface-edge rounded-card border";
 
 /**
- * The card surface as a class string, for the cases that cannot be a `<div>` — a whole card that is also a
- * link. Exported so those do not hand-roll the surface and drift from it, which is exactly what happened.
+ * The card surface as a class string, for a card that has to be something other than a `<div>` — a whole card
+ * that is also a link. Those read the surface from here rather than restating it.
  */
 export function cardClass(padding: CardPadding = "default", ...extra: string[]): string {
 	return cn(SURFACE, PADDING[padding], ...extra);

@@ -1048,8 +1048,9 @@ means, what a page count is, which channels can be posted in — belongs in a `.
 be tested without rendering. `features/levelling/` is the worked example: a 416-line file became a 45-line page,
 four tabs, three shared components and two testable modules.
 
-**What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview and the
-owner console. The settings screens are next — `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
+**What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview, the owner
+console, and the levelling and welcome settings. The rest of the settings screens follow the same shape —
+`dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
 | Route                   | Screen                                                        |
 | ----------------------- | ------------------------------------------------------------- |

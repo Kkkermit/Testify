@@ -8,6 +8,7 @@ import {
 	type MeResponse,
 	type RoleSummary,
 	type SetupStatus,
+	type WelcomeConfigResponse,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -77,6 +78,14 @@ export const levelConfig: LevelConfigResponse = {
 	ignoredRoleIds: [],
 };
 
+export const welcomeConfig: WelcomeConfigResponse = {
+	enabled: true,
+	channelId: "400000000000000001",
+	message: "Welcome to **{server}**, {user}! You are member **{count}**.",
+	style: "card",
+	hasBackground: false,
+};
+
 export const someChannels: ChannelSummary[] = [
 	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
 	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
@@ -96,6 +105,7 @@ export const handlers = [
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
+	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 ];

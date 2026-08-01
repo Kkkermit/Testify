@@ -11,8 +11,8 @@ export interface CheckItem {
 }
 
 /**
- * The scrolling list of checkboxes both pickers are built from. Split out because the ignored-channel list and
- * the role list had grown into two copies of it, and only one of them had the at-limit dimming.
+ * The scrolling list of checkboxes both pickers are built from: the ignored-channel list and the role list are
+ * the same control over different items.
  */
 export function CheckList({
 	label,

@@ -12,6 +12,7 @@ describe("navigationFor", () => {
 			"/guilds",
 			`/guilds/${guild.id}`,
 			`/guilds/${guild.id}/levelling`,
+			`/guilds/${guild.id}/welcome`,
 		]);
 	});
 

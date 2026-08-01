@@ -42,7 +42,7 @@ export function GuildOverviewPage(): React.JSX.Element {
 				<h2 id="features-heading" className="text-lg font-semibold">
 					Features
 				</h2>
-				<FeatureGrid features={guild.features} />
+				<FeatureGrid features={guild.features} guildId={guildId} />
 			</section>
 
 			<section aria-labelledby="changes-heading" className="flex flex-col gap-3">

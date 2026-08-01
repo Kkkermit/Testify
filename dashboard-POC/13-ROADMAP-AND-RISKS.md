@@ -78,14 +78,25 @@ neither Discord nor a MongoDB binary. What this phase settled:
 - **Hono does pass a mount-path parameter into a sub-app.** Worth recording because the opposite looked true for
   a while: a 404 during this phase was a trailing slash in a test URL, not the router.
 
-### Phase 3 — The rest of the settings (~2 weeks)
+### Phase 3 — The rest of the settings (~2 weeks) — **in progress**
 
-Repetitive by design — phase 2 built the pattern, this applies it.
+Repetitive by design — phase 2 built the pattern, this applies it. **Welcome is done** and is the worked example
+for the rest: `WELCOME_LIMITS`, the placeholders and `fillTemplate` moved into `@testify/shared`, so the
+dashboard's live preview fills the template with the same function the bot posts with, and the API reuses
+`normaliseWelcome` rather than reimplementing the migration off the old `isEmbed` flag.
 
-- Audit logging (with its Save button and dirty state, mirroring the panel), welcome, anti-link, automod,
-  counting, sticky, prefix, treasure, voice stats, verification, tickets, lottery.
-- Extract any logic still living inside a command `run()` into `*Actions.util.ts` as you go
-  (`06-COMMAND-CONTROL.md`).
+Two shapes worth copying from it:
+
+- **A typed field is not a toggle.** Every other control writes on change; the message template is held in local
+  state and saved on blur or on an explicit Save, with Discard beside it. Saving per keystroke would be a write
+  per character.
+- **"Off" can be the absence of a record.** The welcome document is deleted rather than flagged, so the API
+  turns that into `enabled: false` plus the defaults a form needs to render — a 404 would make the screen
+  unbuildable.
+
+Still to do: audit logging (with its Save button and dirty state, mirroring the panel), anti-link, automod,
+counting, sticky, prefix, treasure, voice stats, verification, tickets and lottery — extracting any logic still
+living inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
 
 **Done when:** every guild-scoped setting the bot has is editable on the web.
 

@@ -14,7 +14,7 @@ import { hardRedirect } from "@/lib/redirect";
  * Icons only below `lg`, full width above it; the drawer on a phone renders the same thing at full width.
  *
  * Every row — the wordmark, the links, the account, the sign-out — shares `ROW`, so all four icons sit on one
- * vertical line and all four labels on another. They were on two columns four pixels apart before this.
+ * vertical line and all four labels on another.
  */
 const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
 

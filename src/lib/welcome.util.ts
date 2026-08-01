@@ -1,28 +1,27 @@
 import { type WelcomeSettings, type WelcomeStyle } from "@database/models/guildSettings.schema";
+import {
+	DEFAULT_WELCOME_MESSAGE,
+	fillTemplate,
+	type GreetingContext,
+	isWelcomeStyle,
+	WELCOME_LIMITS,
+	WELCOME_PLACEHOLDERS,
+	WELCOME_STYLES,
+} from "@testify/shared";
 
 /** The rules of the welcome system, with no Discord objects in sight. */
 
-export const WELCOME_LIMITS = {
-	maxMessage: 1_500,
-	/** Bigger than this and the guild settings document starts to matter. */
-	maxBackgroundBytes: 4 * 1024 * 1024,
-} as const;
-
-export const WELCOME_STYLES = ["text", "embed", "card"] as const;
-
-export function isWelcomeStyle(value: string): value is WelcomeStyle {
-	return (WELCOME_STYLES as readonly string[]).includes(value);
-}
-
-/** What a greeting can say about the member who just joined. */
-export const WELCOME_PLACEHOLDERS = [
-	{ token: "{user}", describes: "Mentions them" },
-	{ token: "{username}", describes: "Their name, unlinked" },
-	{ token: "{server}", describes: "This server's name" },
-	{ token: "{count}", describes: "How many members there are now" },
-] as const;
-
-export const DEFAULT_WELCOME_MESSAGE = "Welcome to **{server}**, {user}! You are member **{count}**.";
+// Declared in `@testify/shared` so the dashboard's form validates against the same rules, and re-exported here
+// because every caller in the bot already imports them from this module.
+export {
+	DEFAULT_WELCOME_MESSAGE,
+	fillTemplate,
+	type GreetingContext,
+	isWelcomeStyle,
+	WELCOME_LIMITS,
+	WELCOME_PLACEHOLDERS,
+	WELCOME_STYLES,
+};
 
 export interface WelcomeConfig {
 	channelId: string;
@@ -47,22 +46,6 @@ export function normaliseWelcome(settings: StoredWelcomeSettings | null): Welcom
 		style: settings.style ?? (settings.isEmbed ? "embed" : "text"),
 		hasBackground: (settings.background?.data.byteLength ?? 0) > 0,
 	};
-}
-
-export interface GreetingContext {
-	mention: string;
-	username: string;
-	serverName: string;
-	memberCount: number;
-}
-
-/** Fills the placeholders. */
-export function fillTemplate(template: string, context: GreetingContext): string {
-	return template
-		.replaceAll("{user}", context.mention)
-		.replaceAll("{username}", context.username)
-		.replaceAll("{server}", context.serverName)
-		.replaceAll("{count}", String(context.memberCount));
 }
 
 export interface BackgroundCheck {

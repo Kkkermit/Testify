@@ -4,6 +4,7 @@ import { type ApiBindings } from "@api/context";
 import { notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { levelling } from "@api/routes/levelling";
+import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
@@ -33,8 +34,9 @@ export const guilds = new Hono<ApiBindings>();
 
 guilds.use("/:guildId/*", requireGuild);
 
-// Mounted here so it inherits `requireGuild` and reads the guild from the path like everything else.
+// Mounted here so they inherit `requireGuild` and read the guild from the path like everything else.
 guilds.route("/:guildId/levelling", levelling);
+guilds.route("/:guildId/welcome", welcome);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
 	const guild = context.get("guild");

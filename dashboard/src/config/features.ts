@@ -25,14 +25,26 @@ export interface FeatureLook {
 	tint: string;
 	/** The 15% fill behind the icon. */
 	wash: string;
+	/** The settings screen for it, where the dashboard has one. Absent while a feature is Discord-only. */
+	path?: (guildId: string) => string;
 }
 
 const LOOKS: Record<string, FeatureLook> = {
-	levelling: { icon: TrendingUp, tint: "text-feature-levelling", wash: "bg-feature-levelling/15" },
+	levelling: {
+		icon: TrendingUp,
+		tint: "text-feature-levelling",
+		wash: "bg-feature-levelling/15",
+		path: (guildId) => `/guilds/${guildId}/levelling`,
+	},
 	economy: { icon: Coins, tint: "text-feature-economy", wash: "bg-feature-economy/15" },
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	automod: { icon: MessageSquareWarning, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
-	welcome: { icon: Users, tint: "text-feature-welcome", wash: "bg-feature-welcome/15" },
+	welcome: {
+		icon: Users,
+		tint: "text-feature-welcome",
+		wash: "bg-feature-welcome/15",
+		path: (guildId) => `/guilds/${guildId}/welcome`,
+	},
 	tickets: { icon: LifeBuoy, tint: "text-feature-tickets", wash: "bg-feature-tickets/15" },
 	giveaway: { icon: Gift, tint: "text-feature-community", wash: "bg-feature-community/15" },
 	counting: { icon: Hash, tint: "text-feature-community", wash: "bg-feature-community/15" },
