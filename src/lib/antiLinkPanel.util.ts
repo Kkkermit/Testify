@@ -4,20 +4,14 @@ import { option, select, selectRow } from "@lib/components.util";
 import { type ContainerMessage } from "@lib/containers.util";
 import { humanisePermission } from "@lib/format.util";
 import { settingsScreen } from "@lib/settingsScreen.util";
+import { BYPASS_PERMISSIONS, type BypassPermission, DEFAULT_BYPASS, isBypassPermission } from "@testify/shared";
 
 /** Link removal, configured from one screen rather than `enable`/`disable`/`status`. */
 
 export const ANTILINK_PANEL_ID = "antilink";
 
-/** The permissions worth offering as a bypass, coarsest last. */
-export const BYPASS_PERMISSIONS = ["ManageMessages", "ManageGuild", "ModerateMembers", "Administrator"] as const;
-export type BypassPermission = (typeof BYPASS_PERMISSIONS)[number];
-
-export const DEFAULT_BYPASS: BypassPermission = "ManageMessages";
-
-export function isBypassPermission(value: string): value is BypassPermission {
-	return (BYPASS_PERMISSIONS as readonly string[]).includes(value);
-}
+/** The permissions worth offering as a bypass live in `@testify/shared`, so the web form offers the same four. */
+export { BYPASS_PERMISSIONS, type BypassPermission, DEFAULT_BYPASS, isBypassPermission };
 
 export interface AntiLinkPanelState {
 	enabled: boolean;

@@ -1,4 +1,5 @@
 import {
+	AudioLines,
 	Code2,
 	Coins,
 	Dices,
@@ -6,6 +7,7 @@ import {
 	Hash,
 	Info,
 	LifeBuoy,
+	Link as LinkIcon,
 	MessageSquareWarning,
 	MessagesSquare,
 	ScrollText,
@@ -15,6 +17,7 @@ import {
 	Smile,
 	Sparkles,
 	TrendingUp,
+	UserPlus,
 	Users,
 	type LucideIcon,
 } from "lucide-react";
@@ -51,6 +54,24 @@ const LOOKS: Record<string, FeatureLook> = {
 		path: (guildId) => `/guilds/${guildId}/audit-log`,
 	},
 	economy: { icon: Coins, tint: "text-feature-economy", wash: "bg-feature-economy/15" },
+	"anti-link": {
+		icon: LinkIcon,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/settings`,
+	},
+	"auto-roles": {
+		icon: UserPlus,
+		tint: "text-feature-welcome",
+		wash: "bg-feature-welcome/15",
+		path: (guildId) => `/guilds/${guildId}/settings`,
+	},
+	"voice-stats": {
+		icon: AudioLines,
+		tint: "text-feature-tickets",
+		wash: "bg-feature-tickets/15",
+		path: (guildId) => `/guilds/${guildId}/settings`,
+	},
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	automod: { icon: MessageSquareWarning, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	welcome: {
@@ -61,7 +82,12 @@ const LOOKS: Record<string, FeatureLook> = {
 	},
 	tickets: { icon: LifeBuoy, tint: "text-feature-tickets", wash: "bg-feature-tickets/15" },
 	giveaway: { icon: Gift, tint: "text-feature-community", wash: "bg-feature-community/15" },
-	counting: { icon: Hash, tint: "text-feature-community", wash: "bg-feature-community/15" },
+	counting: {
+		icon: Hash,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/settings`,
+	},
 	community: { icon: MessagesSquare, tint: "text-feature-community", wash: "bg-feature-community/15" },
 	fun: { icon: Smile, tint: "text-feature-community", wash: "bg-feature-community/15" },
 	games: { icon: Dices, tint: "text-feature-economy", wash: "bg-feature-economy/15" },

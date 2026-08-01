@@ -1049,8 +1049,8 @@ be tested without rendering. `features/levelling/` is the worked example: a 416-
 four tabs, three shared components and two testable modules.
 
 **What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview, the owner
-console, and the levelling, welcome and audit-logging settings. The rest of the settings screens follow the same
-shape —
+console, and the levelling, welcome, audit-logging and server settings. The rest of the settings screens follow
+the same shape —
 `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
 | Route                   | Screen                                                        |
@@ -1061,6 +1061,7 @@ shape —
 | `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings              |
 | `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                |
 | `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save            |
+| `/guilds/:id/settings`  | Prefix, link filtering, roles on join, counting, voice stats  |
 | `/commands`             | Every command, searchable, with the coverage tile             |
 | `/owner`                | Four tabs: fleet, usage analytics, logs, runtime — owner only |
 

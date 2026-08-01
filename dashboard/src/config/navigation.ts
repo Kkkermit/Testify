@@ -3,6 +3,7 @@ import {
 	ScrollText,
 	Server,
 	ShieldCheck,
+	SlidersHorizontal,
 	Terminal,
 	TrendingUp,
 	Users,
@@ -70,6 +71,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					label: "Audit log",
 					icon: ScrollText,
 					hint: "Which server events Testify records",
+				},
+				{
+					to: `/guilds/${guild.id}/settings`,
+					label: "Settings",
+					icon: SlidersHorizontal,
+					hint: "Prefix, link filtering, joins and counting",
 				},
 			],
 		});

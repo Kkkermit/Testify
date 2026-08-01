@@ -147,8 +147,9 @@ to the screen that replaces it.
 
 That last part is deliberate: the coverage tile counts how many of the bot's commands have a web screen, so the
 distance left to "every command on the dashboard" is a number on the page rather than a note in this file. It
-reads 5 of 76 today — `/levelling` with the `/rank` and `/leaderboard` views onto it, `/welcome` and
-`/audit-logging` — and the way to move it is the promotion work above, one feature at a time.
+reads 10 of 76 today — `/levelling` with the `/rank` and `/leaderboard` views onto it, `/welcome`,
+`/audit-logging`, and `/prefix`, `/anti-link`, `/auto-role`, `/counting` and `/voice-stats` on the shared server
+settings page — and the way to move it is the promotion work above, one feature at a time.
 
 The generated form runner described below is **not built**. The metadata it needs is now there, which was the
 prerequisite.

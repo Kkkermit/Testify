@@ -13,6 +13,11 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	leaderboard: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
 	welcome: { path: (guildId) => `/guilds/${guildId}/welcome`, screen: "Welcome" },
 	"audit-logging": { path: (guildId) => `/guilds/${guildId}/audit-log`, screen: "Audit logging" },
+	prefix: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
+	"anti-link": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
+	"auto-role": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
+	counting: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
+	"voice-stats": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 };
 
 export interface CommandPlace {

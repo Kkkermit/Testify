@@ -21,6 +21,9 @@ const WelcomePage = lazy(async () => ({
 const AuditLogPage = lazy(async () => ({
 	default: (await import("@/features/audit-log/AuditLogPage")).AuditLogPage,
 }));
+const SettingsPage = lazy(async () => ({
+	default: (await import("@/features/settings/SettingsPage")).SettingsPage,
+}));
 const CommandsPage = lazy(async () => ({
 	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
 }));
@@ -48,6 +51,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/levelling", element: lazily(<LevellingPage />) },
 					{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
 					{ path: "/guilds/:guildId/audit-log", element: lazily(<AuditLogPage />) },
+					{ path: "/guilds/:guildId/settings", element: lazily(<SettingsPage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },
 					{ path: "/owner", element: lazily(<OwnerPage />) },

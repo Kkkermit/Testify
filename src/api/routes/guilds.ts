@@ -5,6 +5,7 @@ import { notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
 import { levelling } from "@api/routes/levelling";
+import { settings } from "@api/routes/settings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
@@ -39,6 +40,7 @@ guilds.use("/:guildId/*", requireGuild);
 guilds.route("/:guildId/levelling", levelling);
 guilds.route("/:guildId/welcome", welcome);
 guilds.route("/:guildId/audit-log", auditLog);
+guilds.route("/:guildId/settings", settings);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
 	const guild = context.get("guild");

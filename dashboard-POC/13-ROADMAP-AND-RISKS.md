@@ -109,9 +109,19 @@ holds a draft and writes once, mirroring the panel's Save button. Three things i
   exactly like a permission refusal. `tests/api/server.test.ts` reads Hono's route table instead, and that test
   was proved able to fail.
 
-Still to do: anti-link, automod, counting, sticky, prefix, treasure, voice stats, verification, tickets and
-lottery — extracting any logic still living inside a command `run()` into `*Actions.util.ts` as you go
-(`06-COMMAND-CONTROL.md`).
+**Prefix, anti-link, roles on join, counting and voice stats are done** as well, and they answered a question
+the plan left open: whether every setting needs its own screen. They do not. Five small independent switches on
+one **Server settings** page read better than five sidebar entries, and each still has its own endpoint — so a
+refusal in one section leaves the other four alone. Two details worth copying:
+
+- **A page of sections is not a page with one Save.** Each section writes on change, because each is an
+  independent decision. The one typed field on it, the prefix, is held locally and saved on blur, exactly as the
+  welcome template is.
+- **Every write answers with the whole settings document.** One response keeps the page consistent, so a section
+  that refuses cannot leave the rest of the screen showing a value the bot does not have.
+
+Still to do: automod, sticky, treasure, verification, tickets and lottery — extracting any logic still living
+inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
 
 **Done when:** every guild-scoped setting the bot has is editable on the web.
 

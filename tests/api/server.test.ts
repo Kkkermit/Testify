@@ -97,6 +97,15 @@ describe("the guild settings sub-routes", () => {
 		["GET", "/api/guilds/:guildId/welcome"],
 		["GET", "/api/guilds/:guildId/audit-log"],
 		["PUT", "/api/guilds/:guildId/audit-log"],
+		["GET", "/api/guilds/:guildId/settings"],
+		["PATCH", "/api/guilds/:guildId/settings/prefix"],
+		["PATCH", "/api/guilds/:guildId/settings/anti-link"],
+		["PUT", "/api/guilds/:guildId/settings/auto-roles"],
+		["PATCH", "/api/guilds/:guildId/settings/counting"],
+		["PATCH", "/api/guilds/:guildId/settings/voice-stats"],
+		["GET", "/api/analytics/usage"],
+		["GET", "/api/analytics/logs"],
+		["GET", "/api/analytics/runtime"],
 	])("mounts %s %s", (method, path) => {
 		expect(pathsOf(method)).toContain(path);
 	});

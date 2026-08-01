@@ -5,6 +5,7 @@ import {
 	type CommandCatalogue,
 	type LogFeed,
 	type RuntimeInfo,
+	type ServerSettings,
 	type UsageReport,
 	type GuildOverview,
 	type LevelConfigResponse,
@@ -96,6 +97,14 @@ export const auditLogConfig: AuditLogConfigResponse = {
 	channelId: "400000000000000001",
 	events: ["messageDelete", "banAdd"],
 	all: false,
+};
+
+export const serverSettings: ServerSettings = {
+	prefix: { prefix: "t?", enabled: true },
+	antiLink: { enabled: false, bypassPermission: "ManageMessages" },
+	autoRoles: { roleIds: ["300000000000000001"] },
+	counting: { enabled: true, channelId: "400000000000000001", maxCount: 1_000, count: 412 },
+	voiceStats: { memberChannelId: null, botChannelId: null },
 };
 
 export const usageReport: UsageReport = {
@@ -204,6 +213,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
+	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
