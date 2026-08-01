@@ -47,7 +47,9 @@ dashboard is just another caller.
 **Concretely, per feature:**
 
 1. Is the logic already in a repository or an action module? Then the route is four lines. Levelling, audit
-   logging, welcome, prefix, counting, treasure, automod and the rest are all in this bucket today.
+   logging, welcome, prefix, counting, treasure, automod and the rest are all in this bucket today. Watch for a
+   rule that lives beside the panel rather than in the repository — audit logging's `all` shorthand was expanded
+   in `auditPanel.util.ts`, which is Discord presentation, so it moved into `@testify/shared` on the way past.
 2. Is it still inside a command's `run()` body? Extract it into `src/lib/<feature>Actions.util.ts`, have the
    command call it, and have the route call it. The command gets shorter and gains a unit test; the dashboard
    gets the feature. This is the same de-duplication the rewrite exists for, applied once more.
@@ -145,8 +147,8 @@ to the screen that replaces it.
 
 That last part is deliberate: the coverage tile counts how many of the bot's commands have a web screen, so the
 distance left to "every command on the dashboard" is a number on the page rather than a note in this file. It
-reads 2 of 76 today — levelling and welcome — and the way to move it is the promotion work above, one feature at
-a time.
+reads 5 of 76 today — `/levelling` with the `/rank` and `/leaderboard` views onto it, `/welcome` and
+`/audit-logging` — and the way to move it is the promotion work above, one feature at a time.
 
 The generated form runner described below is **not built**. The metadata it needs is now there, which was the
 prerequisite.

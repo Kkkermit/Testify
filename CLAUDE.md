@@ -1049,7 +1049,8 @@ be tested without rendering. `features/levelling/` is the worked example: a 416-
 four tabs, three shared components and two testable modules.
 
 **What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview, the owner
-console, and the levelling and welcome settings. The rest of the settings screens follow the same shape —
+console, and the levelling, welcome and audit-logging settings. The rest of the settings screens follow the same
+shape —
 `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
 | Route                   | Screen                                                        |
@@ -1058,6 +1059,9 @@ console, and the levelling and welcome settings. The rest of the settings screen
 | `/guilds`               | Picker, with an invite card for guilds without the bot        |
 | `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes |
 | `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings              |
+| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                |
+| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save            |
+| `/commands`             | Every command, searchable, with the coverage tile             |
 | `/owner`                | Fleet stats and every guild, owner only                       |
 
 | Command                 | What it does                                                  |
@@ -1188,6 +1192,28 @@ new `if` in the shell is nearly always the wrong answer.
 
 `featureLook` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before the
 dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
+
+**A whole settings screen is six edits, in this order.** Audit logging is the most recent worked example — copy
+it rather than starting from a page.
+
+1. `shared/src/<name>.ts` — the limits, the response shape and the zod schema, exported from `shared/src/index.ts`.
+   Anything the bot already knows (an event list, a label map, a shorthand like audit logging's `all`) **moves**
+   here and is re-exported from `src/lib/`, rather than being copied.
+2. `src/api/routes/<name>.ts` — read and write through the repository, `auditChange` after the write succeeds.
+3. `src/api/routes/guilds.ts` — one `guilds.route("/:guildId/<name>", …)` line, so it inherits `requireGuild`.
+4. `dashboard/src/features/<name>/` — `use<Name>.ts`, `<name>.utils.ts` for the rules, then the page.
+5. `dashboard/src/routes.tsx` and `config/navigation.ts` — one lazy import and one nav entry.
+6. `config/features.ts` and `features/commands/commands.utils.ts` — the overview tile links to it, and the
+   command it replaces stops counting as Discord-only.
+
+Step 3 is the one that fails silently: an unmounted sub-app falls through to the SPA catch-all and lands the
+browser back on the guild picker. A request cannot tell that apart from a refusal, because `requireGuild`
+answers first — so `tests/api/server.test.ts` reads Hono's route table instead.
+
+**Two write shapes, the same split as the Discord panels ([§4](#the-panel-renderers-in-srclib)).** Levelling and
+welcome write on every control and re-read before each one, because each control is an independent decision.
+Audit logging holds a whole draft and writes once, because a channel and a set of events are one decision and
+half of it applied is not a state anyone wants. Pick by that test, not by which is less code.
 
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
 `--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. A hex value in a

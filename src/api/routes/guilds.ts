@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
+import { auditLog } from "@api/routes/auditLog";
 import { levelling } from "@api/routes/levelling";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
@@ -37,6 +38,7 @@ guilds.use("/:guildId/*", requireGuild);
 // Mounted here so they inherit `requireGuild` and read the guild from the path like everything else.
 guilds.route("/:guildId/levelling", levelling);
 guilds.route("/:guildId/welcome", welcome);
+guilds.route("/:guildId/audit-log", auditLog);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
 	const guild = context.get("guild");

@@ -6,7 +6,7 @@
 
 export { ChannelPicker, postableChannels } from "@/components/form/ChannelPicker";
 export { CheckList, type CheckItem } from "@/components/form/CheckList";
-export { FIELD } from "@/components/form/field";
+export { CHECK_ROW, FIELD } from "@/components/form/field";
 export { RoleChecklist } from "@/components/form/RoleChecklist";
 export { RoleSwatch } from "@/components/form/RoleSwatch";
 export { SavingIndicator, savingStateOf, type SavingState } from "@/components/form/SavingIndicator";

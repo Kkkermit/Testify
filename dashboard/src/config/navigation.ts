@@ -1,4 +1,13 @@
-import { LayoutGrid, Server, ShieldCheck, Terminal, TrendingUp, Users, type LucideIcon } from "lucide-react";
+import {
+	LayoutGrid,
+	ScrollText,
+	Server,
+	ShieldCheck,
+	Terminal,
+	TrendingUp,
+	Users,
+	type LucideIcon,
+} from "lucide-react";
 
 /**
  * The sidebar, as data. A new settings screen is one entry here and one route — nothing in the shell needs
@@ -55,6 +64,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					label: "Welcome",
 					icon: Users,
 					hint: "What Testify says when somebody joins",
+				},
+				{
+					to: `/guilds/${guild.id}/audit-log`,
+					label: "Audit log",
+					icon: ScrollText,
+					hint: "Which server events Testify records",
 				},
 			],
 		});

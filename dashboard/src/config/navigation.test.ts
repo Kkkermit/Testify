@@ -18,6 +18,7 @@ describe("navigationFor", () => {
 			`/guilds/${guild.id}`,
 			`/guilds/${guild.id}/levelling`,
 			`/guilds/${guild.id}/welcome`,
+			`/guilds/${guild.id}/audit-log`,
 		]);
 	});
 

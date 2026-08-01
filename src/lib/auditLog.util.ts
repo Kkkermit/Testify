@@ -4,33 +4,15 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { getAuditLogConfig } from "@database/repositories/settingsRepository";
 import { embed } from "@lib/embeds.util";
+import { AUDIT_EVENTS, type AuditEvent } from "@testify/shared";
 
 /**
  * Replaces `discord-logs` and the script that overwrote that package's source inside `node_modules` — a patch every
  * install destroyed.
+ *
+ * The event list lives in `@testify/shared` so the dashboard's checklist and this file's dispatch cannot drift.
  */
-export const AUDIT_EVENTS = [
-	"messageDelete",
-	"messageUpdate",
-	"channelCreate",
-	"channelDelete",
-	"channelUpdate",
-	"roleCreate",
-	"roleDelete",
-	"roleUpdate",
-	"memberJoin",
-	"memberLeave",
-	"memberUpdate",
-	"banAdd",
-	"banRemove",
-	"emojiUpdate",
-	"guildUpdate",
-	"inviteUpdate",
-	"threadUpdate",
-	"voiceUpdate",
-] as const;
-
-export type AuditEvent = (typeof AUDIT_EVENTS)[number];
+export { AUDIT_EVENTS, type AuditEvent };
 
 export interface AuditEntry {
 	event: AuditEvent;

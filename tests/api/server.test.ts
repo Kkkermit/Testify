@@ -78,6 +78,30 @@ describe("the error boundary", () => {
 	});
 });
 
+/**
+ * Each settings screen adds one `guilds.route(…)` line, and forgetting it fails silently: the request falls
+ * through to the SPA catch-all and the browser lands back on the guild picker with nothing to explain why.
+ *
+ * A request cannot tell the two apart, because `requireGuild` refuses an anonymous caller before the router
+ * decides there is no handler — so this reads the route table instead.
+ */
+describe("the guild settings sub-routes", () => {
+	function pathsOf(method: string): string[] {
+		return apiFor(readyClient())
+			.routes.filter((route) => route.method === method)
+			.map((route) => route.path);
+	}
+
+	it.each([
+		["GET", "/api/guilds/:guildId/levelling"],
+		["GET", "/api/guilds/:guildId/welcome"],
+		["GET", "/api/guilds/:guildId/audit-log"],
+		["PUT", "/api/guilds/:guildId/audit-log"],
+	])("mounts %s %s", (method, path) => {
+		expect(pathsOf(method)).toContain(path);
+	});
+});
+
 describe("startApi", () => {
 	/**
 	 * Port 0 asks the operating system for a free one, so this cannot collide with a real bot or with another

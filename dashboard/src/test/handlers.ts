@@ -1,4 +1,5 @@
 import {
+	type AuditLogConfigResponse,
 	type BotIdentity,
 	type ChannelSummary,
 	type CommandCatalogue,
@@ -87,6 +88,13 @@ export const welcomeConfig: WelcomeConfigResponse = {
 	hasBackground: false,
 };
 
+export const auditLogConfig: AuditLogConfigResponse = {
+	enabled: true,
+	channelId: "400000000000000001",
+	events: ["messageDelete", "banAdd"],
+	all: false,
+};
+
 export const catalogue: CommandCatalogue = {
 	prefix: "t?",
 	categories: ["info", "moderation"],
@@ -143,6 +151,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
+	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 ];

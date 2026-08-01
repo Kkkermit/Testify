@@ -94,9 +94,24 @@ Two shapes worth copying from it:
   turns that into `enabled: false` plus the defaults a form needs to render — a 404 would make the screen
   unbuildable.
 
-Still to do: audit logging (with its Save button and dirty state, mirroring the panel), anti-link, automod,
-counting, sticky, prefix, treasure, voice stats, verification, tickets and lottery — extracting any logic still
-living inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
+**Audit logging is done** too, and is the other half of the pattern: where welcome writes per control, this one
+holds a draft and writes once, mirroring the panel's Save button. Three things it settled:
+
+- **The event list, its labels and the `all` shorthand moved into `@testify/shared`.** They were declared in
+  `src/lib/auditLog.util.ts` and again inside `auditPanel.util.ts`; a third copy in the browser would have been
+  the moment the two surfaces started disagreeing about which events a guild logs. `src/lib/` re-exports, so no
+  caller changed.
+- **`all` has to survive a round trip.** The API expands it for the checklist and collapses a full selection back
+  on save, because storing eighteen names would freeze the guild at today's list rather than opting it into
+  events added later. The dashboard says so on screen when everything is ticked.
+- **Mounting a sub-app is the step that fails silently**, and a request cannot detect it: `requireGuild` refuses
+  an anonymous caller before the router decides there is no handler, so a missing `guilds.route(…)` line looks
+  exactly like a permission refusal. `tests/api/server.test.ts` reads Hono's route table instead, and that test
+  was proved able to fail.
+
+Still to do: anti-link, automod, counting, sticky, prefix, treasure, voice stats, verification, tickets and
+lottery — extracting any logic still living inside a command `run()` into `*Actions.util.ts` as you go
+(`06-COMMAND-CONTROL.md`).
 
 **Done when:** every guild-scoped setting the bot has is editable on the web.
 

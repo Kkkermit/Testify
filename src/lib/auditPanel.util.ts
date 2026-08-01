@@ -1,6 +1,5 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
-import { AUDIT_EVENTS, type AuditEvent } from "@lib/auditLog.util";
 import { button, channelSelect, option, row, select, selectRow } from "@lib/components.util";
 import {
 	container,
@@ -10,6 +9,14 @@ import {
 	divider,
 	text,
 } from "@lib/containers.util";
+import {
+	AUDIT_EVENT_LABELS,
+	AUDIT_EVENTS,
+	type AuditEvent,
+	collapseEnabled,
+	isAuditEvent,
+	resolveEnabled,
+} from "@testify/shared";
 
 /** Audit logging, as a panel you click rather than a list you type. */
 
@@ -18,27 +25,7 @@ export const AUDIT_PANEL_ID = "audit";
 /** Stands in for "no channel yet", because a custom ID part cannot be empty. */
 const NO_CHANNEL = "-";
 
-/** Human labels, so the menu does not read like a list of gateway constants. */
-const EVENT_LABELS: Record<AuditEvent, { label: string; description: string }> = {
-	messageDelete: { label: "Message deleted", description: "Someone's message was removed" },
-	messageUpdate: { label: "Message edited", description: "A message was changed" },
-	channelCreate: { label: "Channel created", description: "A new channel appeared" },
-	channelDelete: { label: "Channel deleted", description: "A channel was removed" },
-	channelUpdate: { label: "Channel updated", description: "A channel was renamed or reconfigured" },
-	roleCreate: { label: "Role created", description: "A new role was added" },
-	roleDelete: { label: "Role deleted", description: "A role was removed" },
-	roleUpdate: { label: "Role updated", description: "A role's name, colour or permissions changed" },
-	memberJoin: { label: "Member joined", description: "Someone joined the server" },
-	memberLeave: { label: "Member left", description: "Someone left or was removed" },
-	memberUpdate: { label: "Member updated", description: "Nickname or roles changed" },
-	banAdd: { label: "Member banned", description: "Someone was banned" },
-	banRemove: { label: "Member unbanned", description: "A ban was lifted" },
-	emojiUpdate: { label: "Emoji changed", description: "Server emoji were added or removed" },
-	guildUpdate: { label: "Server updated", description: "Server settings changed" },
-	inviteUpdate: { label: "Invites changed", description: "An invite was created or deleted" },
-	threadUpdate: { label: "Threads changed", description: "A thread was created, archived or deleted" },
-	voiceUpdate: { label: "Voice activity", description: "Members joining or leaving voice channels" },
-};
+export { collapseEnabled, isAuditEvent, resolveEnabled };
 
 export interface AuditPanelState {
 	channelId: string | null;
@@ -52,24 +39,6 @@ export interface AuditPanelState {
 export interface AuditDraft {
 	channelId: string | null;
 	events: AuditEvent[];
-}
-
-export function isAuditEvent(value: string): value is AuditEvent {
-	return (AUDIT_EVENTS as readonly string[]).includes(value);
-}
-
-/** Expands the stored `all` shorthand so the menu can tick each option. */
-export function resolveEnabled(enabled: string[]): AuditEvent[] {
-	if (enabled.includes("all")) return [...AUDIT_EVENTS];
-	return enabled.filter(isAuditEvent);
-}
-
-/**
- * Collapses a full selection back to `all`, so a guild that ticks everything keeps logging events added in a later
- * release rather than being frozen at today's list.
- */
-export function collapseEnabled(events: AuditEvent[]): string[] {
-	return events.length === AUDIT_EVENTS.length ? ["all"] : events;
 }
 
 /**
@@ -104,7 +73,7 @@ export function hasUnsavedChanges(saved: AuditPanelState, draft: AuditDraft): bo
 }
 
 function labelsOf(events: AuditEvent[]): string {
-	return events.map((event) => EVENT_LABELS[event].label).join(", ");
+	return events.map((event) => AUDIT_EVENT_LABELS[event].label).join(", ");
 }
 
 /** Every control carries the draft, so the next interaction knows what is on screen. */
@@ -167,9 +136,9 @@ export function auditPanel(state: AuditPanelState, ownerId: string): ContainerMe
 						disabled: noChannel,
 						options: AUDIT_EVENTS.map((event) =>
 							option({
-								label: EVENT_LABELS[event].label,
+								label: AUDIT_EVENT_LABELS[event].label,
 								value: event,
-								description: EVENT_LABELS[event].description,
+								description: AUDIT_EVENT_LABELS[event].describes,
 								selected: active.includes(event),
 							}),
 						),

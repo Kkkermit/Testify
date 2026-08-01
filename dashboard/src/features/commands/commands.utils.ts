@@ -12,6 +12,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	rank: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
 	leaderboard: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
 	welcome: { path: (guildId) => `/guilds/${guildId}/welcome`, screen: "Welcome" },
+	"audit-logging": { path: (guildId) => `/guilds/${guildId}/audit-log`, screen: "Audit logging" },
 };
 
 export interface CommandPlace {
