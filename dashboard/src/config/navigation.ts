@@ -1,4 +1,4 @@
-import { LayoutGrid, Server, ShieldCheck, TrendingUp, Users, type LucideIcon } from "lucide-react";
+import { LayoutGrid, Server, ShieldCheck, Terminal, TrendingUp, Users, type LucideIcon } from "lucide-react";
 
 /**
  * The sidebar, as data. A new settings screen is one entry here and one route — nothing in the shell needs
@@ -36,6 +36,13 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavItem[] {
 			},
 		);
 	}
+
+	items.push({
+		to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
+		label: "Commands",
+		icon: Terminal,
+		hint: "Every command Testify has",
+	});
 
 	if (isOwner) items.push({ to: "/owner", label: "Owner", icon: ShieldCheck, hint: "Every server Testify is in" });
 

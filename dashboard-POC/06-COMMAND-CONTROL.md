@@ -135,6 +135,22 @@ allow it in bulk.
 | Panels (`/shop`, `/inventory`, …)              | Rebuilt as native web UI — not proxied  |
 | `/eval`, `/say`, `/impersonate`, `/flush-logs` | Not exposed                             |
 
+## What is built so far
+
+`GET /api/commands` is live: the whole registry, sorted, with each command's aliases, subcommands, options,
+permissions and flags. Owner commands are filtered out for anybody the client does not consider an owner, so a
+manager never learns they exist. `/commands` in the dashboard renders it — searchable by name, alias,
+subcommand or description, filterable by category — and every command the dashboard can already configure links
+to the screen that replaces it.
+
+That last part is deliberate: the coverage tile counts how many of the bot's commands have a web screen, so the
+distance left to "every command on the dashboard" is a number on the page rather than a note in this file. It
+reads 2 of 76 today — levelling and welcome — and the way to move it is the promotion work above, one feature at
+a time.
+
+The generated form runner described below is **not built**. The metadata it needs is now there, which was the
+prerequisite.
+
 ## The rule to hold onto
 
 **If the dashboard needs logic, it goes in `src/lib/` where Discord can use it too.** No rule lives only in a

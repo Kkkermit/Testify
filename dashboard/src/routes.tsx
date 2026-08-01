@@ -18,6 +18,9 @@ const LevellingPage = lazy(async () => ({
 const WelcomePage = lazy(async () => ({
 	default: (await import("@/features/welcome/WelcomePage")).WelcomePage,
 }));
+const CommandsPage = lazy(async () => ({
+	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
+}));
 const OwnerPage = lazy(async () => ({ default: (await import("@/features/owner/OwnerPage")).OwnerPage }));
 
 function Loading(): React.JSX.Element {
@@ -41,6 +44,8 @@ export const routes = [
 					{ path: "/guilds/:guildId", element: lazily(<GuildOverviewPage />) },
 					{ path: "/guilds/:guildId/levelling", element: lazily(<LevellingPage />) },
 					{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
+					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
+					{ path: "/commands", element: lazily(<CommandsPage />) },
 					{ path: "/owner", element: lazily(<OwnerPage />) },
 				],
 			},

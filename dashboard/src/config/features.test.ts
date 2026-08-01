@@ -42,3 +42,31 @@ describe("tintFor", () => {
 		expect(tintFor("")).toMatch(/^bg-\S+ text-\S+$/);
 	});
 });
+
+describe("category coverage", () => {
+	/**
+	 * The command list keys this map by category, so a category with no entry renders every one of its commands
+	 * under the same neutral fallback icon.
+	 */
+	it("has an icon for every category the bot ships", () => {
+		const categories = [
+			"community",
+			"economy",
+			"fun",
+			"games",
+			"info",
+			"levelling",
+			"moderation",
+			"settings",
+			"tickets",
+			"giveaway",
+			"developer",
+			"owner",
+		];
+
+		// Some categories share the neutral tint on purpose, so the icon is what has to be its own.
+		for (const category of categories) {
+			expect(featureLook(category).icon).not.toBe(featureLook("__unknown__").icon);
+		}
+	});
+});

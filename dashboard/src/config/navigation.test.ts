@@ -4,7 +4,10 @@ const guild = { id: "900000000000000001", name: "Testify HQ" };
 
 describe("navigationFor", () => {
 	it("always offers the server picker", () => {
-		expect(navigationFor({ guild: undefined, isOwner: false }).map((item) => item.to)).toEqual(["/guilds"]);
+		expect(navigationFor({ guild: undefined, isOwner: false }).map((item) => item.to)).toEqual([
+			"/guilds",
+			"/commands",
+		]);
 	});
 
 	it("adds the current server's screens once one is open", () => {
@@ -13,6 +16,7 @@ describe("navigationFor", () => {
 			`/guilds/${guild.id}`,
 			`/guilds/${guild.id}/levelling`,
 			`/guilds/${guild.id}/welcome`,
+			`/guilds/${guild.id}/commands`,
 		]);
 	});
 

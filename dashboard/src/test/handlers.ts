@@ -1,6 +1,7 @@
 import {
 	type BotIdentity,
 	type ChannelSummary,
+	type CommandCatalogue,
 	type GuildOverview,
 	type LevelConfigResponse,
 	type HealthResponse,
@@ -86,6 +87,41 @@ export const welcomeConfig: WelcomeConfigResponse = {
 	hasBackground: false,
 };
 
+export const catalogue: CommandCatalogue = {
+	prefix: "t?",
+	categories: ["info", "moderation"],
+	commands: [
+		{
+			name: "ban",
+			description: "Bans a member.",
+			category: "moderation",
+			aliases: ["b"],
+			subcommands: [],
+			options: [{ name: "user", description: "Who.", type: "user", required: true, choices: [], min: null, max: null }],
+			permissions: ["ban members"],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: true,
+			ownerOnly: false,
+			nsfw: false,
+		},
+		{
+			name: "levelling",
+			description: "Sets up levelling.",
+			category: "info",
+			aliases: [],
+			subcommands: [{ name: "setup", description: "Opens the panel.", aliases: [], options: [] }],
+			options: [],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: true,
+			ownerOnly: false,
+			nsfw: false,
+		},
+	],
+};
+
 export const someChannels: ChannelSummary[] = [
 	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
 	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
@@ -102,6 +138,7 @@ export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
 	http.get("/api/auth/setup", () => HttpResponse.json(configured)),
 	http.get("/api/bot", () => HttpResponse.json(botProfile)),
+	http.get("/api/commands", () => HttpResponse.json(catalogue)),
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),

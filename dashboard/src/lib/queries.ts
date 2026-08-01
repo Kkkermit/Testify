@@ -3,6 +3,7 @@ export const keys = {
 	setup: () => ["setup"] as const,
 	me: () => ["me"] as const,
 	bot: () => ["bot"] as const,
+	commands: () => ["commands"] as const,
 	guild: (id: string) => ({
 		all: () => ["guild", id] as const,
 		overview: () => ["guild", id, "overview"] as const,

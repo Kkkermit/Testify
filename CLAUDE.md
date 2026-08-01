@@ -1224,6 +1224,29 @@ them from the accessibility tree and leaves every navigation link named nothing 
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
 unit test pins the class and a real browser check confirms the accessible name survives.
 
+### Getting every command onto the dashboard
+
+The goal is that everything the bot does is reachable from the web. `dashboard-POC/06-COMMAND-CONTROL.md` is the
+authoritative plan and its conclusion is the thing to hold onto: **the dashboard is a third surface onto the
+domain, not onto the presentation.** A `DashboardInteraction implements CommandInput` adapter looks like it
+would give all 76 commands for free, and it does not — the most useful commands open a Components V2 panel whose
+work lives in `src/buttons/`, and a panel serialised to JSON is not a settings page.
+
+So each feature is promoted rather than proxied: route → repository or `*Actions.util.ts`, the same layer the
+command and the button already call.
+
+`GET /api/commands` is the map of that work. It reads `client.commands` — the same metadata `buildSlashCommand`
+registers with Discord — so the page cannot drift from `/help`, and `commands.utils.ts` holds the one list of
+which commands have a screen here. The coverage tile on `/commands` is that list counted, which makes the
+remaining work visible rather than a note in a document.
+
+Two rules it enforces:
+
+- **Owner commands are filtered out for everyone else**, not shown and disabled. The list of what a bot owner
+  can do is not something a server manager needs, and naming them invites probing. There is a test that the
+  response does not contain them at all.
+- **Metadata only.** The registry holds `run` functions; a test pins the exact key set of a serialised command.
+
 ### The dashboard wears the bot's face
 
 `GET /api/bot` returns the application's own profile and every brand surface reads it, so a fork looks like its

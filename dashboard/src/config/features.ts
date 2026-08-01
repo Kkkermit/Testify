@@ -1,10 +1,17 @@
 import {
+	Code2,
 	Coins,
+	Dices,
 	Gift,
 	Hash,
+	Info,
 	LifeBuoy,
 	MessageSquareWarning,
+	MessagesSquare,
+	Settings,
 	Shield,
+	ShieldCheck,
+	Smile,
 	Sparkles,
 	TrendingUp,
 	Users,
@@ -12,9 +19,9 @@ import {
 } from "lucide-react";
 
 /**
- * How a bot feature is drawn wherever it appears. Adding a feature to the dashboard is an entry here plus
- * whatever the API starts returning — no screen needs editing, and an unknown key falls back rather than
- * rendering a hole.
+ * How a bot feature is drawn wherever it appears — the overview grid keys it by feature, the command list by
+ * category, and the two names overlap enough to share one map. Adding one is an entry here plus whatever the
+ * API starts returning: no screen needs editing, and an unknown key falls back rather than rendering a hole.
  *
  * The tint classes are Tailwind utilities over the `--color-feature-*` tokens in `index.css`, so a rebrand is
  * still one file.
@@ -48,6 +55,13 @@ const LOOKS: Record<string, FeatureLook> = {
 	tickets: { icon: LifeBuoy, tint: "text-feature-tickets", wash: "bg-feature-tickets/15" },
 	giveaway: { icon: Gift, tint: "text-feature-community", wash: "bg-feature-community/15" },
 	counting: { icon: Hash, tint: "text-feature-community", wash: "bg-feature-community/15" },
+	community: { icon: MessagesSquare, tint: "text-feature-community", wash: "bg-feature-community/15" },
+	fun: { icon: Smile, tint: "text-feature-community", wash: "bg-feature-community/15" },
+	games: { icon: Dices, tint: "text-feature-economy", wash: "bg-feature-economy/15" },
+	info: { icon: Info, tint: "text-feature-tickets", wash: "bg-feature-tickets/15" },
+	settings: { icon: Settings, tint: "text-muted-foreground", wash: "bg-muted" },
+	developer: { icon: Code2, tint: "text-muted-foreground", wash: "bg-muted" },
+	owner: { icon: ShieldCheck, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 };
 
 const FALLBACK: FeatureLook = { icon: Sparkles, tint: "text-muted-foreground", wash: "bg-muted" };
