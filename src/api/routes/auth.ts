@@ -193,7 +193,7 @@ async function guildsFor(
 
 	return (await fetchGuilds(accessToken))
 		.filter((guild) => owner || canManage(guild.permissions))
-		.map((guild) => toManageable(guild, client.guilds.cache.get(guild.id)?.memberCount))
+		.map((guild) => toManageable(guild, client.guilds.cache.get(guild.id)?.memberCount, canManage(guild.permissions)))
 		.sort((a, b) => Number(b.botPresent) - Number(a.botPresent) || a.name.localeCompare(b.name));
 }
 
@@ -217,12 +217,13 @@ async function usableToken(oauth: OauthConfig, session: DashboardSession): Promi
 	return refreshed.accessToken;
 }
 
-function toManageable(guild: OauthGuild, memberCount: number | undefined): ManageableGuild {
+function toManageable(guild: OauthGuild, memberCount: number | undefined, canInvite: boolean): ManageableGuild {
 	return {
 		id: guild.id,
 		name: guild.name,
 		iconUrl: guildIconUrl(guild.id, guild.icon),
 		memberCount: memberCount ?? null,
 		botPresent: memberCount !== undefined,
+		canInvite,
 	};
 }

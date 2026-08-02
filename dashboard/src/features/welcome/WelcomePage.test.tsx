@@ -180,6 +180,32 @@ describe("the welcome page", () => {
 		});
 		expect(await screen.findByText(/need manage server/i)).toBeInTheDocument();
 	});
+
+	/**
+	 * The stored record requires a channel, so the API refuses a style or a message change until there is one.
+	 * Every control that would be refused is disabled instead, or the page hands out 400s nobody expected.
+	 */
+	it("gates everything on the channel, rather than letting the API refuse it", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/welcome", () =>
+				HttpResponse.json({ ...welcomeConfig, channelId: null, enabled: false }),
+			),
+		);
+
+		renderPage();
+
+		expect(await screen.findByRole("switch", { name: /greet new members/i })).toBeDisabled();
+		expect(screen.getByRole("radio", { name: /card/i })).toBeDisabled();
+		expect(screen.getByLabelText("Message")).toBeDisabled();
+		expect(screen.getByText(/pick a channel and the rest of this page turns on/i)).toBeInTheDocument();
+	});
+
+	it("turns those controls on once a channel is chosen", async () => {
+		renderPage();
+
+		expect(await screen.findByRole("switch", { name: /greet new members/i })).toBeEnabled();
+		expect(screen.getByLabelText("Message")).toBeEnabled();
+	});
 });
 
 describe("WelcomePage accessibility", () => {

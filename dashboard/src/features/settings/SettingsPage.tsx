@@ -8,6 +8,7 @@ import { AutoRoleSection } from "@/features/settings/sections/AutoRoleSection";
 import { CountingSection } from "@/features/settings/sections/CountingSection";
 import { NicknameSection } from "@/features/settings/sections/NicknameSection";
 import { PrefixSection } from "@/features/settings/sections/PrefixSection";
+import { VerificationSection } from "@/features/settings/sections/VerificationSection";
 import { VoiceStatsSection } from "@/features/settings/sections/VoiceStatsSection";
 import { useSettings } from "@/features/settings/useSettings";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -36,7 +37,7 @@ export function SettingsPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				title="Server settings"
-				subtitle="The smaller switches: prefix, link filtering, joins and counting."
+				subtitle="The smaller switches: prefix, link filtering, joins, verification and counting."
 			/>
 
 			<div className="grid items-start gap-4 lg:grid-cols-2">
@@ -44,6 +45,7 @@ export function SettingsPage(): React.JSX.Element {
 				<NicknameSection guildId={guildId} />
 				<AntiLinkSection guildId={guildId} value={value.antiLink} />
 				<AutoRoleSection guildId={guildId} value={value.autoRoles} roles={roles.data ?? []} />
+				<VerificationSection {...shared} roles={roles.data ?? []} />
 				<CountingSection {...shared} value={value.counting} />
 				<VoiceStatsSection {...shared} value={value.voiceStats} />
 			</div>

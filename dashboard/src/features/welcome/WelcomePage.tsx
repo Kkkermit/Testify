@@ -38,6 +38,9 @@ export function WelcomePage(): React.JSX.Element {
 	const welcome = config.data;
 	const dirty = draft !== welcome.message;
 	const tooLong = messageTooLong(draft);
+	// The stored record requires a channel, so the API refuses every write except "off" until there is one.
+	// Gating the controls on it is the difference between a disabled switch and a 400 nobody expected.
+	const needsChannel = welcome.channelId === null;
 
 	function saveMessage(): void {
 		if (!dirty || tooLong || draft.trim() === "") return;
@@ -54,17 +57,9 @@ export function WelcomePage(): React.JSX.Element {
 					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
 				</div>
 
-				<Toggle
-					label="Greet new members"
-					hint="Off means Testify says nothing when somebody joins. The message is kept."
-					checked={welcome.enabled}
-					onChange={(enabled) => {
-						update.mutate({ enabled });
-					}}
-				/>
-
 				<ChannelPicker
 					label="Send the greeting to"
+					hint="Everything below is stored against this channel, so it has to be chosen first."
 					channels={channels.data ?? []}
 					value={welcome.channelId}
 					allowNone={false}
@@ -73,7 +68,19 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				/>
 
-				<fieldset className="flex flex-col gap-2">
+				{needsChannel && <Warning>Pick a channel and the rest of this page turns on.</Warning>}
+
+				<Toggle
+					label="Greet new members"
+					hint="Off means Testify says nothing when somebody joins. The message is kept."
+					checked={welcome.enabled}
+					disabled={needsChannel}
+					onChange={(enabled) => {
+						update.mutate({ enabled });
+					}}
+				/>
+
+				<fieldset className="flex flex-col gap-2" disabled={needsChannel}>
 					<legend className={LABEL}>Sent as</legend>
 					<div className="grid gap-2 sm:grid-cols-3">
 						{STYLE_ORDER.map((style) => (
@@ -81,6 +88,7 @@ export function WelcomePage(): React.JSX.Element {
 								key={style}
 								style={style}
 								checked={welcome.style === style}
+								disabled={needsChannel}
 								onChange={() => {
 									update.mutate({ style });
 								}}
@@ -99,6 +107,7 @@ export function WelcomePage(): React.JSX.Element {
 						ref={textarea}
 						rows={3}
 						value={draft}
+						disabled={needsChannel}
 						onChange={(event) => {
 							setDraft(event.target.value);
 						}}
@@ -111,6 +120,7 @@ export function WelcomePage(): React.JSX.Element {
 				</div>
 
 				<PlaceholderHelp
+					disabled={needsChannel}
 					onInsert={(token) => {
 						setDraft((current) => insertToken(current, token, textarea.current?.selectionStart ?? null));
 						textarea.current?.focus();
@@ -159,10 +169,12 @@ export function WelcomePage(): React.JSX.Element {
 function StyleChoice({
 	style,
 	checked,
+	disabled,
 	onChange,
 }: {
 	style: WelcomeStyle;
 	checked: boolean;
+	disabled: boolean;
 	onChange: () => void;
 }): React.JSX.Element {
 	const { label, describes } = STYLE_LABELS[style];
@@ -170,15 +182,16 @@ function StyleChoice({
 	return (
 		<label
 			className={cn(
-				"rounded-card cursor-pointer border p-3 transition-colors duration-150",
-				checked ? "border-primary bg-primary/10" : "border-border hover:border-input",
+				"rounded-card flex flex-col gap-1 border p-3 transition-colors duration-150",
+				disabled ? "border-border opacity-50" : "cursor-pointer",
+				checked ? "border-primary bg-primary/10" : !disabled && "border-border hover:border-input",
 			)}
 		>
 			<span className="flex items-center gap-2">
-				<input type="radio" name="welcome-style" checked={checked} onChange={onChange} />
+				<input type="radio" name="welcome-style" checked={checked} disabled={disabled} onChange={onChange} />
 				<span className="text-sm font-medium">{label}</span>
 			</span>
-			<span className="text-muted-foreground mt-1 block text-xs">{describes}</span>
+			<span className="text-muted-foreground text-xs">{describes}</span>
 		</label>
 	);
 }

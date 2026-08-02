@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
+import { plainLine } from "./text";
 
 /**
  * The guild settings that are only ever configuration — a prefix, a filter, a list of roles. Each is a small
@@ -70,12 +71,7 @@ export interface ServerSettings {
 /** A prefix of pure whitespace matches every message; one with a space inside can never be typed. */
 export const prefixPatch = z
 	.object({
-		prefix: z
-			.string()
-			.trim()
-			.min(1, "cannot be empty")
-			.max(SETTINGS_LIMITS.maxPrefix, "is too long")
-			.refine((value) => !/\s/.test(value), "cannot contain a space"),
+		prefix: plainLine(1, SETTINGS_LIMITS.maxPrefix).refine((value) => !/\s/.test(value), "cannot contain a space"),
 		enabled: z.boolean(),
 	})
 	.partial()

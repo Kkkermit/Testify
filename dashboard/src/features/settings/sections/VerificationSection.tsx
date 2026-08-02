@@ -1,0 +1,139 @@
+import { type ChannelSummary, type RoleSummary, VERIFY_LIMITS, verificationBlocked } from "@testify/shared";
+import { ShieldCheck } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChannelPicker, FIELD, LABEL, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
+import { Button } from "@/components/primitives";
+import { Section } from "@/features/settings/components/Section";
+import { useSaveVerification, useVerification } from "@/features/settings/useVerification";
+import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/cn";
+
+/**
+ * The web half of `/verify`. Posting the panel is its own button rather than a side effect of choosing a
+ * channel, because the panel is a message in a public channel and nobody wants one appearing mid-setup.
+ */
+export function VerificationSection({
+	guildId,
+	channels,
+	roles,
+}: {
+	guildId: string;
+	channels: ChannelSummary[];
+	roles: RoleSummary[];
+}): React.JSX.Element {
+	const config = useVerification(guildId);
+	const save = useSaveVerification(guildId);
+	const [draft, setDraft] = useState("");
+
+	useEffect(() => {
+		if (config.data !== undefined) setDraft(config.data.message);
+	}, [config.data?.message]);
+
+	const value = config.data;
+	const blocked = value === undefined ? null : verificationBlocked(value);
+	const dirty = value !== undefined && draft.trim() !== value.message;
+
+	return (
+		<Section
+			icon={ShieldCheck}
+			tint="text-feature-moderation"
+			title="Verification"
+			describes="A button new members press to prove they are there, and the role it hands them."
+			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
+		>
+			{value === undefined ? (
+				<p className="text-muted-foreground text-sm">Reading the current configuration…</p>
+			) : (
+				<>
+					<Toggle
+						label="Verify new members"
+						hint="Off removes the configuration. The panel already posted stops working."
+						checked={value.enabled}
+						disabled={!value.enabled && blocked !== null}
+						onChange={(enabled) => {
+							save.mutate(enabled ? { publish: true } : { enabled: false });
+						}}
+					/>
+
+					<ChannelPicker
+						label="Show the Verify button in"
+						hint="A channel new members can see before they have the role."
+						channels={channels}
+						value={value.channelId}
+						allowNone={false}
+						onChange={(channelId) => {
+							save.mutate({ channelId });
+						}}
+					/>
+
+					<label className="flex flex-col gap-2">
+						<span className={LABEL}>Give them this role</span>
+						<select
+							className={cn(FIELD, SELECT)}
+							value={value.roleId ?? ""}
+							onChange={(event) => {
+								save.mutate({ roleId: event.target.value === "" ? null : event.target.value });
+							}}
+						>
+							<option value="">No role chosen</option>
+							{roles.map((role) => (
+								<option key={role.id} value={role.id} disabled={!role.assignableByBot}>
+									{role.name}
+									{role.assignableByBot ? "" : " — Testify cannot give this out"}
+								</option>
+							))}
+						</select>
+					</label>
+
+					<div className="flex flex-col gap-2">
+						<label htmlFor="verify-message" className={LABEL}>
+							What the panel says
+						</label>
+						<textarea
+							id="verify-message"
+							rows={3}
+							value={draft}
+							maxLength={VERIFY_LIMITS.maxMessage}
+							onChange={(event) => {
+								setDraft(event.target.value);
+							}}
+							onBlur={() => {
+								if (dirty && draft.trim() !== "") save.mutate({ message: draft });
+							}}
+							className={cn(FIELD, "resize-y")}
+						/>
+					</div>
+
+					{value.roleTooHigh && (
+						<Warning>
+							That role sits at or above Testify&apos;s own, so Testify cannot give it to anybody. Move Testify&apos;s
+							role higher in Server Settings → Roles, or pick a lower one.
+						</Warning>
+					)}
+
+					{blocked !== null && <Warning>{blocked}</Warning>}
+
+					{blocked === null && (
+						<div className="flex flex-wrap items-center gap-3">
+							<Button
+								disabled={save.isPending}
+								onClick={() => {
+									save.mutate({ publish: true });
+								}}
+							>
+								{value.posted ? "Update the posted panel" : "Post the panel"}
+							</Button>
+							<p className="text-muted-foreground text-sm tabular-nums">
+								{value.posted ? `${value.verifiedCount.toLocaleString()} verified so far` : "Not posted yet"}
+							</p>
+						</div>
+					)}
+
+					{save.error !== null && (
+						<Warning>{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}</Warning>
+					)}
+				</>
+			)}
+		</Section>
+	);
+}

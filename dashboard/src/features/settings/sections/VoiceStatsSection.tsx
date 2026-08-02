@@ -1,6 +1,6 @@
 import { type ChannelSummary, type VoiceStatsPatch, type VoiceStatsSetting } from "@testify/shared";
 import { AudioLines } from "lucide-react";
-import { FIELD, LABEL, savingStateOf } from "@/components/form";
+import { FIELD, LABEL, savingStateOf, SELECT } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
@@ -61,7 +61,7 @@ function VoicePicker({
 		<label className="block">
 			<span className={cn(LABEL, "block")}>{label}</span>
 			<select
-				className={cn(FIELD, "mt-1")}
+				className={cn(FIELD, SELECT, "mt-1")}
 				value={value ?? ""}
 				onChange={(event) => {
 					onChange(event.target.value === "" ? null : event.target.value);

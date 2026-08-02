@@ -1,5 +1,5 @@
 import { type ChannelSummary } from "@testify/shared";
-import { FIELD, LABEL } from "@/components/form/field";
+import { FIELD, LABEL, SELECT } from "@/components/form/field";
 import { Warning } from "@/components/form/Warning";
 import { cn } from "@/lib/cn";
 
@@ -29,12 +29,14 @@ export function ChannelPicker({
 	const chosen = postable.find((channel) => channel.id === value);
 
 	return (
-		<label className="block">
-			<span className={cn(LABEL, "block")}>{label}</span>
-			{hint !== undefined && <span className="text-muted-foreground block text-xs">{hint}</span>}
+		<label className="flex flex-col gap-2">
+			<span className="flex flex-col gap-0.5">
+				<span className={LABEL}>{label}</span>
+				{hint !== undefined && <span className="text-muted-foreground text-xs">{hint}</span>}
+			</span>
 
 			<select
-				className={cn(FIELD, "mt-1")}
+				className={cn(FIELD, SELECT)}
 				value={value ?? ""}
 				onChange={(event) => {
 					onChange(event.target.value === "" ? null : event.target.value);

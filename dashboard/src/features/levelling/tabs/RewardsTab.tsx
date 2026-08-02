@@ -1,7 +1,7 @@
 import { LEVEL_LIMITS, type LevelRewardInput } from "@testify/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { FIELD, LABEL, savingStateOf, Warning } from "@/components/form";
+import { FIELD, SELECT, LABEL, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
@@ -76,7 +76,7 @@ export function RewardsTab({
 						onChange={(event) => {
 							setRoleId(event.target.value);
 						}}
-						className={cn(FIELD, "mt-1")}
+						className={cn(FIELD, SELECT, "mt-1")}
 					>
 						<option value="">Choose a role</option>
 						{assignable.map((role) => (

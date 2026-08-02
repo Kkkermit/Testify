@@ -100,9 +100,85 @@
 		scroll-margin-top: 5rem;
 	}
 
-	/* Native controls default to the browser's accent, which is nobody's brand. */
+	/*
+	 * Native controls default to the browser's accent and metrics, which are nobody's brand and are sized for a
+	 * light page. A checkbox is fixed at 16px because the flex rows it sits in would otherwise shrink it, which
+	 * takes it below the 24px touch target and misaligns it against the label beside it.
+	 */
 	input[type="checkbox"] {
 		accent-color: var(--color-primary);
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+	}
+
+	input[type="radio"] {
+		accent-color: var(--color-primary);
+		width: 1rem;
+		height: 1rem;
+		flex-shrink: 0;
+	}
+
+	/*
+	 * Firefox and WebKit take different properties for the same thing, so both are set. Without this a dark page
+	 * gets the platform's light scrollbar — a bright strip down the side of every list and dialog.
+	 */
+	* {
+		scrollbar-width: thin;
+		scrollbar-color: var(--color-border) transparent;
+	}
+
+	::-webkit-scrollbar {
+		width: 0.5rem;
+		height: 0.5rem;
+	}
+
+	::-webkit-scrollbar-track {
+		background: transparent;
+	}
+
+	::-webkit-scrollbar-thumb {
+		background-color: var(--color-border);
+		border-radius: 999px;
+	}
+
+	::-webkit-scrollbar-thumb:hover {
+		background-color: var(--color-input);
+	}
+
+	::-webkit-scrollbar-corner {
+		background: transparent;
+	}
+
+	/*
+	 * A native select draws its own chevron in the platform's colour and leaves no room for one of ours, so the
+	 * arrow is an inline SVG background and the right padding is what stops the longest option running under it.
+	 * `currentColor` cannot be used in a `url()`, so the muted foreground is written out here and only here.
+	 */
+	select {
+		appearance: none;
+		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+		background-repeat: no-repeat;
+		background-position: right 0.75rem center;
+		padding-right: 2.25rem;
+	}
+
+	/* The list a native select drops down is drawn by the platform, so its colours have to be set on the options. */
+	select option {
+		background-color: var(--color-popover);
+		color: var(--color-foreground);
+	}
+}
+
+/*
+ * A scroller whose bar would sit on top of the thing it scrolls — a tab underline, a row of chips. The content
+ * still scrolls; only the bar is hidden, so this is never the only way to reach what is off-screen.
+ */
+@utility scrollbar-none {
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
 	}
 }
 

@@ -13,6 +13,7 @@ export const keys = {
 		welcome: () => ["guild", id, "welcome"] as const,
 		auditLog: () => ["guild", id, "audit-log"] as const,
 		settings: () => ["guild", id, "settings"] as const,
+		verification: () => ["guild", id, "verification"] as const,
 		nickname: () => ["guild", id, "nickname"] as const,
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,

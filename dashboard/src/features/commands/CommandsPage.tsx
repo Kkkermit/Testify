@@ -100,7 +100,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					/>
 				</label>
 
-				<div className="flex flex-wrap gap-1.5" role="group" aria-label="Filter by category">
+				<div className="flex flex-wrap gap-2 py-1" role="group" aria-label="Filter by category">
 					<CategoryChip label="All" active={category === null} onSelect={() => setCategory(null)} />
 					{catalogue.data.categories.map((name) => (
 						<CategoryChip
@@ -169,7 +169,8 @@ function CategoryChip({
 			aria-pressed={active}
 			onClick={onSelect}
 			className={cn(
-				"rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors duration-150",
+				"rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition-colors duration-150",
+				"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
 				active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground",
 			)}
 		>

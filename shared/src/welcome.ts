@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
+import { plainText } from "./text";
 
 /**
  * The rules of the welcome greeting, shared so the browser form, the API and the Discord panel all enforce the
@@ -60,7 +61,7 @@ export const welcomePatchSchema = z
 	.object({
 		enabled: z.boolean(),
 		channelId: snowflake.nullable(),
-		message: z.string().trim().min(1, "cannot be empty").max(WELCOME_LIMITS.maxMessage, "is too long"),
+		message: plainText(1, WELCOME_LIMITS.maxMessage),
 		style: z.enum(WELCOME_STYLES),
 	})
 	.partial()

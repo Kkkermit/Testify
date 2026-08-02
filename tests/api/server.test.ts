@@ -103,6 +103,9 @@ describe("the guild settings sub-routes", () => {
 		["PUT", "/api/guilds/:guildId/settings/auto-roles"],
 		["PATCH", "/api/guilds/:guildId/settings/counting"],
 		["PATCH", "/api/guilds/:guildId/settings/voice-stats"],
+
+		["GET", "/api/guilds/:guildId/verification"],
+		["PATCH", "/api/guilds/:guildId/verification"],
 		["GET", "/api/analytics/usage"],
 		["GET", "/api/analytics/logs"],
 		["GET", "/api/analytics/runtime"],

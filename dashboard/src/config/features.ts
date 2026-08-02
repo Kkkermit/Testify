@@ -70,6 +70,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		wash: "bg-feature-tickets/15",
 		path: (guildId) => `/guilds/${guildId}/settings`,
 	},
+	verification: {
+		icon: ShieldCheck,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/settings`,
+	},
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	automod: { icon: MessageSquareWarning, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	welcome: {

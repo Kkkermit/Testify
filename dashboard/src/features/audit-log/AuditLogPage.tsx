@@ -3,9 +3,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Button, Card, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, PageHeader, Skeleton } from "@/components/primitives";
 import { draftFrom, groupState, saveBlocked, setGroup, toggleEvent } from "@/features/audit-log/auditLog.utils";
 import { EventGroup } from "@/features/audit-log/components/EventGroup";
+import { Step } from "@/features/audit-log/components/Step";
 import { useAuditLog, useSaveAuditLog } from "@/features/audit-log/useAuditLog";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
@@ -76,86 +77,88 @@ export function AuditLogPage(): React.JSX.Element {
 			/>
 
 			{/*
-			 * One panel with divided rows rather than separate cards: the destination and the events are one
-			 * configuration, and stacking them as cards put 24px of page gutter through the middle of it.
+			 * Two numbered steps rather than one panel of controls: the destination and the event list are
+			 * different decisions, and a divided panel gave the reader no signal about which was which.
 			 */}
-			<Card padding="none" className="motion-pop divide-border divide-y">
-				<div className="flex flex-col gap-3 px-6 py-5">
-					<Toggle
-						label="Record server events"
-						hint="Off removes the configuration entirely. Nothing already posted is deleted."
-						checked={draft.enabled}
-						onChange={(enabled) => {
-							edit({ enabled });
-						}}
-					/>
+			<Step
+				number={1}
+				title="Where the log goes"
+				describes="One channel receives every event chosen below."
+				className="motion-pop"
+			>
+				<Toggle
+					label="Record server events"
+					hint="Off removes the configuration entirely. Nothing already posted is deleted."
+					checked={draft.enabled}
+					onChange={(enabled) => {
+						edit({ enabled });
+					}}
+				/>
 
-					<ChannelPicker
-						label="Post the log to"
-						hint="Somewhere only moderators can read — an audit log names who did what."
-						channels={channels.data ?? []}
-						value={draft.channelId}
-						allowNone={false}
-						onChange={(channelId) => {
-							edit({ channelId });
-						}}
-					/>
+				<ChannelPicker
+					label="Post the log to"
+					hint="Somewhere only moderators can read — an audit log names who did what."
+					channels={channels.data ?? []}
+					value={draft.channelId}
+					allowNone={false}
+					onChange={(channelId) => {
+						edit({ channelId });
+					}}
+				/>
+			</Step>
+
+			<Step
+				number={2}
+				title="What gets recorded"
+				describes="Tick a heading to take the whole group."
+				action={
+					<div className="flex items-center gap-2">
+						<p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
+							{draft.events.length} of {AUDIT_EVENTS.length} chosen
+						</p>
+						<Button
+							variant="ghost"
+							onClick={() => {
+								edit({ events: draft.events.length === AUDIT_EVENTS.length ? [] : [...AUDIT_EVENTS] });
+							}}
+						>
+							{draft.events.length === AUDIT_EVENTS.length ? "Clear all" : "Select all"}
+						</Button>
+					</div>
+				}
+			>
+				{/*
+				 * Columns rather than a grid: the groups are two to six rows long, and a grid row is as tall as
+				 * its tallest cell, which left a column of dead space under the short ones.
+				 */}
+				<div className="gap-x-8 sm:columns-2 xl:columns-3 [&>*]:break-inside-avoid">
+					{AUDIT_GROUPS.map((group) => (
+						<EventGroup
+							key={group}
+							group={group}
+							state={groupState(draft.events, group)}
+							events={draft.events}
+							onToggleGroup={(on) => {
+								edit({ events: setGroup(draft.events, group, on) });
+							}}
+							onToggleEvent={(event) => {
+								edit({ events: toggleEvent(draft.events, event) });
+							}}
+						/>
+					))}
 				</div>
 
-				<section aria-labelledby="events-heading">
-					<div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-6 py-4">
-						<h2 id="events-heading" className="text-base font-semibold">
-							Events
-						</h2>
-						<div className="flex items-center gap-2">
-							<p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
-								{draft.events.length} of {AUDIT_EVENTS.length} chosen
-							</p>
-							<Button
-								variant="ghost"
-								onClick={() => {
-									edit({ events: draft.events.length === AUDIT_EVENTS.length ? [] : [...AUDIT_EVENTS] });
-								}}
-							>
-								{draft.events.length === AUDIT_EVENTS.length ? "Clear all" : "Select all"}
-							</Button>
-						</div>
-					</div>
+				{notice !== null && <p className="text-muted-foreground text-xs">{notice}</p>}
+			</Step>
 
-					{/*
-					 * Columns rather than a grid: the groups are two to six rows long, and a grid row is as tall as
-					 * its tallest cell, which left a column of dead space under the short ones.
-					 */}
-					<div className="gap-x-8 px-6 pb-5 sm:columns-2 xl:columns-3 [&>*]:break-inside-avoid">
-						{AUDIT_GROUPS.map((group) => (
-							<EventGroup
-								key={group}
-								group={group}
-								state={groupState(draft.events, group)}
-								events={draft.events}
-								onToggleGroup={(on) => {
-									edit({ events: setGroup(draft.events, group, on) });
-								}}
-								onToggleEvent={(event) => {
-									edit({ events: toggleEvent(draft.events, event) });
-								}}
-							/>
-						))}
-					</div>
-				</section>
-
-				{(notice !== null || blocked !== null || save.error !== null) && (
-					<div className="flex flex-col gap-2 px-6 py-4">
-						{notice !== null && <p className="text-muted-foreground text-xs">{notice}</p>}
-						{blocked !== null && <Warning>{blocked}</Warning>}
-						{save.error !== null && (
-							<Warning>
-								{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}
-							</Warning>
-						)}
-					</div>
-				)}
-			</Card>
+			{(blocked !== null || save.error !== null) && (
+				<div className="flex flex-col gap-2">
+					{blocked !== null && <Warning>{blocked}</Warning>}
+					{save.error !== null && (
+						<Warning>{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}</Warning>
+					)}
+				</div>
+			)}
 		</>
 	);
 }

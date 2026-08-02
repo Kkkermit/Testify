@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { filterGuilds } from "@/features/guilds/guilds.utils";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild, me, withoutBot } from "@/test/handlers";
+import { aGuild, cannotAdd, me, withoutBot } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -35,12 +35,33 @@ describe("the guild picker", () => {
 	});
 
 	/** The invite is a real conversion path, so a guild without the bot is shown rather than hidden. */
-	it("shows a guild the bot is not in, but does not make it a link", async () => {
+	/**
+	 * Three states, not two. A server you can invite the bot to and one you cannot looked identical before, while
+	 * only one of them had an action that would work.
+	 */
+	it("separates the servers you can add Testify to from the ones you cannot", async () => {
 		renderWithProviders(<GuildPickerPage />);
 
-		expect(await screen.findByText("Somewhere Else")).toBeInTheDocument();
-		expect(screen.getByText("Not added")).toBeInTheDocument();
-		expect(screen.queryByRole("link", { name: /somewhere else/i })).toBeNull();
+		expect(await screen.findByRole("heading", { name: /ready to configure/i })).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: /add testify/i })).toBeInTheDocument();
+		expect(screen.getByRole("heading", { name: /needs somebody else/i })).toBeInTheDocument();
+	});
+
+	it("offers an invite for a server you may add Testify to", async () => {
+		renderWithProviders(<GuildPickerPage />);
+
+		const invite = await screen.findByRole("link", { name: /somewhere else/i });
+		expect(invite).toHaveAttribute("target", "_blank");
+		expect(invite.getAttribute("href")).toContain(`guild_id=${withoutBot.id}`);
+	});
+
+	/** Discord would refuse the invite, so offering the button would be a lie rather than a shortcut. */
+	it("offers no invite where the viewer lacks Manage Server", async () => {
+		renderWithProviders(<GuildPickerPage />);
+
+		expect(await screen.findByText(cannotAdd.name)).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: new RegExp(cannotAdd.name, "i") })).toBeNull();
+		expect(screen.getByText(/no permission/i)).toBeInTheDocument();
 	});
 
 	it("links through to a guild that can be configured", async () => {

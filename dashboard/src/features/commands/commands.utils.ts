@@ -15,6 +15,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	"auto-role": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	counting: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	"voice-stats": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
+	verify: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 };
 
 export interface CommandPlace {

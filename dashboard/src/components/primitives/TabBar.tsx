@@ -10,7 +10,8 @@ export interface TabDefinition<Key extends string = string> {
 /**
  * The active underline is a child of the pressed tab rather than one bar positioned by measurement, so it needs
  * no layout reads and cannot drift when the labels reflow. The bar scrolls sideways on a phone instead of
- * wrapping, which would move the panel down the screen every time a tab changed.
+ * wrapping, which would move the panel down the screen every time a tab changed — and the scrollbar is hidden,
+ * because it draws over the 2px underline directly beneath it.
  */
 export function TabBar<Key extends string>({
 	label,
@@ -24,7 +25,7 @@ export function TabBar<Key extends string>({
 	onSelect: (tab: Key) => void;
 }): React.JSX.Element {
 	return (
-		<div role="tablist" aria-label={label} className="border-border flex gap-1 overflow-x-auto border-b">
+		<div role="tablist" aria-label={label} className="border-border scrollbar-none flex gap-1 overflow-x-auto border-b">
 			{tabs.map(({ key, label: text, icon: Icon }) => (
 				<button
 					key={key}

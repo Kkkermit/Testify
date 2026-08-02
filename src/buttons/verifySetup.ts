@@ -1,67 +1,14 @@
-import { ButtonStyle, type Guild, PermissionFlagsBits } from "discord.js";
-import { theme } from "@config/theme";
-import { customId, defineButton } from "@core/button";
+import { PermissionFlagsBits } from "discord.js";
+import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
-import { button, modalForm, row } from "@lib/components.util";
-import { embed } from "@lib/embeds.util";
+import { modalForm } from "@lib/components.util";
+import { publishVerifyPanel, roleTooHigh } from "@lib/verifyActions.util";
 import { isReady, normaliseVerify, type VerifyConfig, verifyPanel, VERIFY_PANEL_ID } from "@lib/verifyPanel.util";
 
 /** Every control on the verification setup panel. */
 async function currentConfig(guildId: string): Promise<VerifyConfig> {
 	return normaliseVerify(await getVerifyConfig(guildId));
-}
-
-/** Discord refuses a role at or above the bot's own, and says nothing until it does. */
-function roleTooHigh(guild: Guild, roleId: string | null): boolean {
-	if (roleId === null) return false;
-
-	const role = guild.roles.cache.get(roleId);
-	const me = guild.members.me;
-	if (!role || me === null) return false;
-
-	return role.managed || role.position >= me.roles.highest.position;
-}
-
-/** Posts the public panel, or edits the one already there. */
-async function publish(guild: Guild, config: VerifyConfig): Promise<string> {
-	if (config.channelId === null) throw new UserFacingError("Pick a channel first.");
-
-	const channel = await guild.channels.fetch(config.channelId).catch(() => null);
-	if (channel?.isSendable() !== true) {
-		throw new UserFacingError("I cannot post in that channel any more. Pick another one.");
-	}
-
-	const payload = {
-		embeds: [
-			embed({
-				category: "settings",
-				title: `${theme.emoji.verify} Verification`,
-				description: config.message,
-				...(guild.iconURL() !== null ? { thumbnail: guild.iconURL()! } : {}),
-			}),
-		],
-		components: [
-			row(
-				button({
-					id: customId("verify", "start"),
-					label: "Verify",
-					emoji: theme.emoji.verify,
-					style: ButtonStyle.Success,
-				}),
-			),
-		],
-	};
-
-	if (config.messageId !== null) {
-		const existing = await channel.messages.fetch(config.messageId).catch(() => null);
-		if (existing !== null) {
-			await existing.edit(payload);
-			return existing.id;
-		}
-	}
-
-	return (await channel.send(payload)).id;
 }
 
 export default defineButton({
@@ -147,7 +94,7 @@ export default defineButton({
 				await saveVerifyConfig(guild.id, { message });
 				const next = { ...config, message };
 
-				if (next.messageId !== null && isReady(next)) await publish(guild, next);
+				if (next.messageId !== null && isReady(next)) await publishVerifyPanel(guild, next);
 				await show(next, "Wording updated.");
 				return;
 			}
@@ -155,7 +102,7 @@ export default defineButton({
 			case "post": {
 				if (!isReady(config)) throw new UserFacingError("Pick a channel and a role first.");
 
-				const messageId = await publish(guild, config);
+				const messageId = await publishVerifyPanel(guild, config);
 				await saveVerifyConfig(guild.id, { messageId });
 				await show({ ...config, messageId }, "Panel posted. Members can verify now.");
 				return;

@@ -1,6 +1,6 @@
 import { BYPASS_LABELS, BYPASS_PERMISSIONS, type AntiLinkPatch, type AntiLinkSetting } from "@testify/shared";
 import { LinkIcon } from "lucide-react";
-import { FIELD, LABEL, savingStateOf, Toggle } from "@/components/form";
+import { FIELD, LABEL, savingStateOf, SELECT, Toggle } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
@@ -29,7 +29,7 @@ export function AntiLinkSection({ guildId, value }: { guildId: string; value: An
 				<span className={cn(LABEL, "block")}>Who may still post links</span>
 				<span className="text-muted-foreground block text-xs">Anybody with this permission is never filtered.</span>
 				<select
-					className={cn(FIELD, "mt-1")}
+					className={cn(FIELD, SELECT, "mt-1")}
 					value={value.bypassPermission}
 					disabled={!value.enabled}
 					onChange={(event) => {

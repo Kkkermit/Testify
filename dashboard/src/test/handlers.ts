@@ -10,6 +10,7 @@ import {
 	type RuntimeInfo,
 	type ServerSettings,
 	type UsageReport,
+	type VerificationConfigResponse,
 	type GuildNickname,
 	type GuildOverview,
 	type LevelConfigResponse,
@@ -46,6 +47,7 @@ export const aGuild: ManageableGuild = {
 	iconUrl: null,
 	memberCount: 1_234,
 	botPresent: true,
+	canInvite: true,
 };
 
 export const withoutBot: ManageableGuild = {
@@ -54,12 +56,22 @@ export const withoutBot: ManageableGuild = {
 	iconUrl: null,
 	memberCount: null,
 	botPresent: false,
+	canInvite: true,
+};
+
+export const cannotAdd: ManageableGuild = {
+	id: "900000000000000003",
+	name: "Someone Else's Server",
+	iconUrl: null,
+	memberCount: null,
+	botPresent: false,
+	canInvite: false,
 };
 
 export const me: MeResponse = {
 	user: { id: "100000000000000001", username: "someone", avatarUrl: null },
 	isOwner: false,
-	guilds: [aGuild, withoutBot],
+	guilds: [aGuild, withoutBot, cannotAdd],
 };
 
 export const overview: GuildOverview = {
@@ -109,6 +121,16 @@ export const serverSettings: ServerSettings = {
 	autoRoles: { roleIds: ["300000000000000001"] },
 	counting: { enabled: true, channelId: "400000000000000001", maxCount: 1_000, count: 412 },
 	voiceStats: { memberChannelId: null, botChannelId: null },
+};
+
+export const verificationConfig: VerificationConfigResponse = {
+	enabled: true,
+	channelId: "400000000000000001",
+	roleId: "300000000000000001",
+	message: "Press the button below to verify yourself.",
+	posted: true,
+	verifiedCount: 42,
+	roleTooHigh: false,
 };
 
 export const botControl: BotControlState = { gateway: "online", since: null, guilds: 3, pingMs: 42 };
@@ -250,6 +272,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
+	http.get("/api/guilds/:guildId/verification", () => HttpResponse.json(verificationConfig)),
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),

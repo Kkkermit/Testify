@@ -1,6 +1,5 @@
 import { BarChart3 } from "lucide-react";
 import { type ReactNode } from "react";
-import { EmptyState } from "@/components/primitives";
 import { barWidth } from "@/features/owner/owner.utils";
 
 export interface BarRow {
@@ -24,7 +23,15 @@ export function UsageBars({
 	empty: string;
 	tint?: string;
 }): React.JSX.Element {
-	if (rows.length === 0) return <EmptyState icon={<BarChart3 size={20} />} title="Nothing yet" body={empty} />;
+	// A full EmptyState here is 200px of nothing beside a list of ten, which is the "massive gap" it looks like.
+	if (rows.length === 0) {
+		return (
+			<p className="text-muted-foreground flex items-center gap-2 py-2 text-sm">
+				<BarChart3 size={16} aria-hidden="true" className="shrink-0" />
+				{empty}
+			</p>
+		);
+	}
 
 	const max = Math.max(...rows.map((row) => row.count));
 

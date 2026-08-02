@@ -1184,6 +1184,12 @@ registered behind it silently never runs.
 - **No `GET` may mutate anything.** CSRF protection exempts them.
 - **`/eval` is never exposed.** It turns a stolen session cookie into a remote shell.
 - **`DISCORD_CLIENT_SECRET` never reaches a browser.** The API holds it and nothing else does.
+- **Every free-text field goes through `plainText` / `plainLine` in `@testify/shared`.** Not an HTML sanitiser —
+  nothing renders these as HTML, and stripping tags would break the `<@123>` and `<#456>` Discord itself needs.
+  What it strips is what a markup sanitiser would miss: control characters, and the bidi overrides and
+  zero-width characters that make a stored string read as something other than what was typed. The length bound
+  runs **after** the strip, so a value padded to the minimum with zero-width spaces is refused rather than
+  stored short.
 
 ### The dashboard's Jest config earns its comments
 
@@ -1228,6 +1234,13 @@ answers first — so `tests/api/server.test.ts` reads Hono's route table instead
 welcome write on every control and re-read before each one, because each control is an independent decision.
 Audit logging holds a whole draft and writes once, because a channel and a set of events are one decision and
 half of it applied is not a state anyone wants. Pick by that test, not by which is less code.
+
+**Native controls are restyled once, in `index.css`'s base layer, never per call site.** The scrollbars
+(`scrollbar-width` for Firefox _and_ `::-webkit-scrollbar` for WebKit — both, or a dark page gets a bright strip
+down the side of every list), the checkbox and radio metrics, and the select's chevron all live there. Two
+consequences worth knowing: a Tailwind utility beats a base-layer rule, so the room for the chevron is the
+`SELECT` class rather than the base `padding-right`; and `scrollbar-none` is a utility for a scroller whose bar
+would draw over the thing it scrolls — the tab underline is the case it exists for.
 
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
 `--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. A hex value in a

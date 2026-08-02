@@ -124,8 +124,15 @@ refusal in one section leaves the other four alone. Two details worth copying:
 owner can turn one off everywhere. `checks.ts` is the gate — hiding a switch is not access control — and
 `ALWAYS_ENABLED` keeps `/help` reachable so a server cannot lock itself out.
 
-Still to do: automod, sticky, treasure, verification, tickets and lottery — extracting any logic still living
-inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
+**Verification is done** as a section on the same page, and it settled one thing the earlier sections did not
+have to: a write can have a side effect in a public channel. Posting the panel is its own explicit action rather
+than something a channel change implies, and that section alone is not optimistic — a control that moved before
+the server agreed would be claiming a message had been sent that may not have been. `publishVerifyPanel` moved
+into `src/lib/verifyActions.util.ts` so the button and the route post the identical panel.
+
+Still to do: automod, sticky, treasure, tickets and lottery — extracting any logic still living inside a command
+`run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`). Sticky is the one that wants its own screen
+rather than a section: it is a list keyed by channel, each with its own message body.
 
 **Done when:** every guild-scoped setting the bot has is editable on the web.
 

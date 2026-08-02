@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
+import { plainLine } from "./text";
 
 /**
  * What the bot owner can do to the running bot from a browser.
@@ -38,7 +39,7 @@ export const BOT_IDENTITY_LIMITS = { minUsername: 2, maxUsername: 32, maxAvatarB
  */
 export const botIdentityPatch = z
 	.object({
-		username: z.string().trim().min(BOT_IDENTITY_LIMITS.minUsername).max(BOT_IDENTITY_LIMITS.maxUsername),
+		username: plainLine(BOT_IDENTITY_LIMITS.minUsername, BOT_IDENTITY_LIMITS.maxUsername),
 		/** A data URI. Rejected here rather than at Discord, so the error names the real problem. */
 		avatar: z
 			.string()
@@ -53,7 +54,12 @@ export type BotIdentityPatch = z.infer<typeof botIdentityPatch>;
 export const NICKNAME_MAX = 32;
 
 /** Per-guild, and the one piece of the bot's appearance a server manager may change. */
-export const nicknamePatch = z.object({ nickname: z.string().trim().max(NICKNAME_MAX).nullable() });
+// Null clears it; an empty string is the same intent typed rather than clicked, so it is folded into null.
+export const nicknamePatch = z.object({
+	nickname: plainLine(0, NICKNAME_MAX)
+		.transform((value) => (value === "" ? null : value))
+		.nullable(),
+});
 
 export type NicknamePatch = z.infer<typeof nicknamePatch>;
 

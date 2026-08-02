@@ -1,5 +1,5 @@
 import { LEVEL_LIMITS, type XpBoostInput } from "@testify/shared";
-import { FIELD, RoleChecklist, savingStateOf } from "@/components/form";
+import { FIELD, SELECT, RoleChecklist, savingStateOf } from "@/components/form";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
@@ -57,7 +57,7 @@ export function BoostsTab({
 											),
 										);
 									}}
-									className={cn(FIELD, "w-auto px-2 py-1")}
+									className={cn(FIELD, SELECT, "w-auto py-1 pl-2")}
 								>
 									{multiplierChoices().map((value) => (
 										<option key={value} value={value}>

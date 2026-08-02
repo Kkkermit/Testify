@@ -8,4 +8,6 @@ export * from "./levelling";
 export * from "./permissions";
 export * from "./schemas";
 export * from "./settings";
+export * from "./text";
+export * from "./verification";
 export * from "./welcome";

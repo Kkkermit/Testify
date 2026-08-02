@@ -32,7 +32,7 @@ export function EventGroup({
 
 	return (
 		// No border: these sit inside a card that already has one, and a box in a box reads as a gap.
-		<fieldset className="mb-5 min-w-0">
+		<fieldset className="mb-6 min-w-0">
 			<legend className="sr-only">{group}</legend>
 
 			<label className="border-border flex cursor-pointer items-center gap-2 border-b pb-2 text-sm font-semibold">

@@ -7,6 +7,7 @@ import { auditLog } from "@api/routes/auditLog";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
 import { settings } from "@api/routes/settings";
+import { verification } from "@api/routes/verification";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
@@ -43,6 +44,7 @@ guilds.route("/:guildId/welcome", welcome);
 guilds.route("/:guildId/audit-log", auditLog);
 guilds.route("/:guildId/settings", settings);
 guilds.route("/:guildId/commands", guildCommandToggles);
+guilds.route("/:guildId/verification", verification);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
 	const guild = context.get("guild");

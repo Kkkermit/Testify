@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type BotIdentity, type DashboardUser } from "@testify/shared";
-import { LogOut } from "lucide-react";
+import { FileText, LogOut, ShieldQuestion } from "lucide-react";
 import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { BotMark } from "@/components/brand/BotMark";
@@ -17,6 +17,11 @@ import { hardRedirect } from "@/lib/redirect";
  * vertical line and all four labels on another.
  */
 const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
+
+const LEGAL = [
+	{ to: "/terms", label: "Terms", icon: FileText },
+	{ to: "/privacy", label: "Privacy", icon: ShieldQuestion },
+] as const;
 
 export function Sidebar({
 	user,
@@ -98,15 +103,24 @@ export function Sidebar({
 					</div>
 				)}
 
-				{/* Small, at the bottom, and always reachable — but never competing with the navigation above it. */}
-				<div className={cn("flex gap-2 px-2 pb-1 text-xs", expanded ? "" : "hidden lg:flex")}>
-					<Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors duration-150">
-						Terms
-					</Link>
-					<Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors duration-150">
-						Privacy
-					</Link>
-				</div>
+				{/*
+				 * Rows rather than a line of small links, so they survive the icon-only width: `hidden` there took
+				 * them off the page entirely, and these two are the ones that have to be reachable from anywhere.
+				 */}
+				{LEGAL.map(({ to, label: text, icon: Icon }) => (
+					<Tooltip key={to} label={`Read the ${text.toLowerCase()}`} placement="right">
+						<Link
+							to={to}
+							className={cn(
+								ROW,
+								"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+							)}
+						>
+							<Icon size={18} aria-hidden="true" className="shrink-0" />
+							<span className={label("truncate")}>{text}</span>
+						</Link>
+					</Tooltip>
+				))}
 
 				<Tooltip label="Sign out of the dashboard" placement="right">
 					<button

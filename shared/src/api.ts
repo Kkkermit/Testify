@@ -40,6 +40,35 @@ export interface ManageableGuild {
 	iconUrl: string | null;
 	memberCount: number | null;
 	botPresent: boolean;
+	/**
+	 * Whether this person could add Testify. Discord requires Manage Server to invite a bot, so a server the
+	 * owner console lists but the viewer cannot manage is neither configurable nor invitable — a third state the
+	 * picker has to be able to say out loud rather than showing a button that would fail.
+	 */
+	canInvite: boolean;
+}
+
+/**
+ * Everything Testify asks for on the invite, as one bitfield: view/send/embed/attach/history/react/emoji,
+ * manage messages, roles, channels, nicknames and server, view audit log, and kick/ban/timeout/mute/deafen/move.
+ * Asking for exactly what the features need beats asking for Administrator.
+ */
+export const INVITE_PERMISSIONS = "1374821936374";
+
+export function inviteUrl(clientId: string, guildId?: string): string {
+	const query = new URLSearchParams({
+		client_id: clientId,
+		permissions: INVITE_PERMISSIONS,
+		scope: "bot applications.commands",
+	});
+
+	if (guildId !== undefined) {
+		query.set("guild_id", guildId);
+		// Discord greys the picker out on the consent screen, so the server they clicked from is the one they get.
+		query.set("disable_guild_select", "true");
+	}
+
+	return `https://discord.com/oauth2/authorize?${query.toString()}`;
 }
 
 export interface MeResponse {
