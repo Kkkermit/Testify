@@ -28,8 +28,9 @@ export function windowFrom(raw: string | null): AnalyticsWindow {
 	return ANALYTICS_WINDOWS.find((option) => option === parsed) ?? 30;
 }
 
+/** Defaults to everything: the console exists to be looked through, not to hide most of the buffer. */
 export function levelFrom(raw: string | null): ReportedLogLevel {
-	return LOG_LEVELS.find((option) => option === raw) ?? "info";
+	return LOG_LEVELS.find((option) => option === raw) ?? "trace";
 }
 
 /**

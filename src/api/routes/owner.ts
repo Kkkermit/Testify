@@ -2,6 +2,7 @@ import { type Guild } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { requireOwner } from "@api/middleware/session";
+import { globalCommandToggles } from "@api/routes/commandToggles";
 import { parseQuery } from "@api/validate";
 import { databaseConnected } from "@database/connection";
 import { getLevelSettings } from "@database/repositories/levelRepository";
@@ -11,6 +12,9 @@ import { type OwnerGuildRow, type OwnerStats, type Paged, pagination } from "@te
 export const owner = new Hono<ApiBindings>();
 
 owner.use("*", requireOwner);
+
+// Behind the same gate as the rest of the console, so a manager cannot reach the bot-wide switches.
+owner.route("/commands", globalCommandToggles);
 
 owner.get("/stats", (context) => {
 	const client = context.get("client");

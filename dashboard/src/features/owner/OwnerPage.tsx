@@ -1,6 +1,7 @@
 import { type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
 import { useSearchParams } from "react-router";
 import { PageHeader, TabBar } from "@/components/primitives";
+import { CommandsPage } from "@/features/commands/CommandsPage";
 import { OWNER_TABS, ownerTabFrom } from "@/features/owner/owner.types";
 import { levelFrom, windowFrom } from "@/features/owner/owner.utils";
 import { LogsTab } from "@/features/owner/tabs/LogsTab";
@@ -55,11 +56,20 @@ export function OwnerPage(): React.JSX.Element {
 			{tab === "logs" && (
 				<LogsTab
 					level={levelFrom(params.get("level"))}
+					search={params.get("q") ?? ""}
+					paused={params.get("paused") === "1"}
 					onLevel={(level: ReportedLogLevel) => {
 						put("level", level);
 					}}
+					onSearch={(next) => {
+						put("q", next);
+					}}
+					onPause={(next) => {
+						put("paused", next ? "1" : "0");
+					}}
 				/>
 			)}
+			{tab === "commands" && <CommandsPage scope="global" />}
 			{tab === "runtime" && <RuntimeTab />}
 		</>
 	);

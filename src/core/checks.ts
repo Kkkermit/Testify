@@ -2,7 +2,9 @@ import { PermissionsBitField } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
+import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { formatDuration, humanisePermission } from "@lib/format.util";
+import { isAlwaysEnabled } from "@testify/shared";
 
 /** Why a command was refused, or null if it may run. */
 export type CheckFailure = string | null;
@@ -17,6 +19,9 @@ export async function runChecks(
 ): Promise<CheckFailure> {
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
 	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
+
+	const switchedOff = await checkSwitchedOff(interaction, command);
+	if (switchedOff !== null) return switchedOff;
 
 	if (command.ownerOnly && !client.isOwner(interaction.user.id)) {
 		return "This command is only for the bot owner.";
@@ -53,6 +58,24 @@ export async function runChecks(
 	}
 
 	return checkCooldown(interaction, command, client);
+}
+
+/**
+ * Nobody bypasses a switch, the bot owner included: "off" that quietly still runs for one person is a worse
+ * thing to debug than one that is simply off, and the dashboard is one click away for whoever turned it off.
+ */
+async function checkSwitchedOff(interaction: CommandInput, command: Command): Promise<CheckFailure> {
+	if (isAlwaysEnabled(command.name)) return null;
+
+	if ((await disabledGlobally()).includes(command.name)) {
+		return "That command is switched off. The bot owner can turn it back on from the dashboard.";
+	}
+
+	if (interaction.guildId !== null && (await disabledInGuild(interaction.guildId)).includes(command.name)) {
+		return "That command is switched off in this server. Anybody with Manage Server can turn it back on.";
+	}
+
+	return null;
 }
 
 function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {

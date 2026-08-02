@@ -48,13 +48,13 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 		isOwner: (id: string) => id === OWNER,
 		eventNames: () => ["ready", "interactionCreate"],
 		startedAt: Date.now() - 60_000,
-		env: { NODE_ENV: "test" } as Env,
+		env: { NODE_ENV: "test", LOG_LEVEL: "warn" } as Env,
 	} as unknown as TestifyClient;
 
 	const app = new Hono<ApiBindings>();
 	app.use("*", async (context, next) => {
 		context.set("client", client);
-		context.set("env", {} as Env);
+		context.set("env", { LOG_LEVEL: "warn" } as Env);
 		context.set("oauth", null);
 		context.set("session", { _id: "s", userId } as never);
 		await next();
@@ -209,8 +209,49 @@ describe("the log feed", () => {
 		expect(body).toContain("[redacted]");
 	});
 
-	it("rejects a level it does not report", async () => {
-		expect((await appFor().request("/analytics/logs?level=trace")).status).toBe(400);
+	it("rejects a level pino does not have", async () => {
+		expect((await appFor().request("/analytics/logs?level=verbose")).status).toBe(400);
+	});
+
+	/** Every level now, so a debug line put in the buffer can actually be got back out of it. */
+	it("serves debug and trace", async () => {
+		logRing.push({ at: Date.now(), level: "debug", message: "fine detail", context: {} });
+
+		const feed = (await (await appFor().request("/analytics/logs?level=trace")).json()) as LogFeed;
+
+		expect(feed.lines.map((line) => line.message)).toContain("fine detail");
+	});
+
+	it("searches the message and the context", async () => {
+		logRing.push({ at: Date.now(), level: "info", message: "[READY] online", context: {} });
+		logRing.push({ at: Date.now(), level: "error", message: "[BAN] failed", context: { guildId: GUILD } });
+
+		const byMessage = (await (await appFor().request("/analytics/logs?q=ready")).json()) as LogFeed;
+		const byContext = (await (await appFor().request(`/analytics/logs?q=${GUILD}`)).json()) as LogFeed;
+
+		expect(byMessage.lines.map((line) => line.message)).toEqual(["[READY] online"]);
+		expect(byContext.lines.map((line) => line.message)).toEqual(["[BAN] failed"]);
+	});
+
+	/**
+	 * An empty list at the lowest level would otherwise read as "the bot is idle" when it really means the bot
+	 * was started at a level that never writes those lines.
+	 */
+	it("reports the level the bot's own logger is running at", async () => {
+		const feed = (await (await appFor().request("/analytics/logs")).json()) as LogFeed;
+
+		expect(feed.loggerLevel).toBe("warn");
+	});
+
+	/** Showing 200 of 640 is a different thing from finding exactly 200, and the page has to say which. */
+	it("counts what matched before the limit cut the list", async () => {
+		for (const index of [0, 1, 2])
+			logRing.push({ at: Date.now(), level: "info", message: `line ${String(index)}`, context: {} });
+
+		const feed = (await (await appFor().request("/analytics/logs?limit=2")).json()) as LogFeed;
+
+		expect(feed.lines).toHaveLength(2);
+		expect(feed.matched).toBe(3);
 	});
 });
 

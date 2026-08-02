@@ -21,6 +21,7 @@ import {
 	GuildPrefix,
 	type PrefixSettings,
 } from "@database/models/guildSettings.schema";
+import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
@@ -314,5 +315,6 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		FixedStats.deleteMany({ guildId }).exec(),
 		TreasureConfig.deleteMany({ guildId }).exec(),
 		GuildPrefix.deleteMany({ guildId }).exec(),
+		purgeCommandToggles(guildId),
 	]);
 }

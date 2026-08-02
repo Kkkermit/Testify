@@ -68,10 +68,11 @@ analytics.get("/usage", async (context) => {
 });
 
 analytics.get("/logs", (context) => {
-	const { limit, level } = parseQuery(context, logQuery);
+	const { limit, level, q } = parseQuery(context, logQuery);
+	const { lines, matched } = logRing.recent({ limit, minLevel: level, ...(q === undefined ? {} : { search: q }) });
 
 	const body: LogFeed = {
-		lines: logRing.recent({ limit, minLevel: level }).map((record) => ({
+		lines: lines.map((record) => ({
 			at: new Date(record.at).toISOString(),
 			level: record.level,
 			message: record.message,
@@ -79,6 +80,9 @@ analytics.get("/logs", (context) => {
 		})),
 		buffered: logRing.size,
 		capacity: ANALYTICS.logRingCapacity,
+		// Nothing below this is ever written, so an empty list at `trace` means the bot is quiet rather than broken.
+		loggerLevel: context.get("env").LOG_LEVEL,
+		matched,
 	};
 
 	return context.json(body);

@@ -60,13 +60,28 @@ export interface UsageReport {
 	busiestGuilds: GuildUsageRow[];
 }
 
-export const LOG_LEVELS = ["info", "warn", "error", "fatal"] as const;
+/** Every level pino has, so the console can show the whole buffer rather than a slice of it. */
+export const LOG_LEVELS = ["trace", "debug", "info", "warn", "error", "fatal"] as const;
 
 export type ReportedLogLevel = (typeof LOG_LEVELS)[number];
 
+/** Ranked, so "at least warn" is a comparison rather than a list membership test. */
+export const LOG_LEVEL_RANK: Record<ReportedLogLevel, number> = {
+	trace: 10,
+	debug: 20,
+	info: 30,
+	warn: 40,
+	error: 50,
+	fatal: 60,
+};
+
+export const MAX_LOG_SEARCH = 100;
+
 export const logQuery = z.object({
-	limit: z.coerce.number().int().min(1).max(250).default(100),
-	level: z.enum(LOG_LEVELS).default("info"),
+	limit: z.coerce.number().int().min(1).max(1_000).default(200),
+	level: z.enum(LOG_LEVELS).default("trace"),
+	/** Free text matched against the message and the context, so a guild id finds every line about it. */
+	q: z.string().trim().max(MAX_LOG_SEARCH).optional(),
 });
 
 export interface LogLine {
@@ -82,6 +97,13 @@ export interface LogFeed {
 	/** How many the buffer is holding, so the page can say "the last 250" honestly. */
 	buffered: number;
 	capacity: number;
+	/**
+	 * The level the bot's logger is running at. Nothing below it is ever written, so the console has to say so
+	 * rather than showing an empty list and letting somebody conclude the bot is idle.
+	 */
+	loggerLevel: ReportedLogLevel;
+	/** How many lines matched, before `limit` cut the list down. */
+	matched: number;
 }
 
 export interface RuntimeInfo {

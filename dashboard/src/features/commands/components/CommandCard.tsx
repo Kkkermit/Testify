@@ -1,24 +1,32 @@
-import { type CommandSummary } from "@testify/shared";
+import { type CommandAvailability, type CommandSummary } from "@testify/shared";
 import { ChevronRight, Lock, Shield } from "lucide-react";
 import { Link } from "react-router";
 import { Badge, Card, Tooltip } from "@/components/primitives";
 import { featureLook } from "@/config/features";
 import { type CommandPlace } from "@/features/commands/commands.utils";
+import { CommandSwitch } from "@/features/commands/components/CommandSwitch";
 import { cn } from "@/lib/cn";
 
 export function CommandCard({
 	command,
 	prefix,
 	place,
+	availability,
+	onToggle,
 }: {
 	command: CommandSummary;
 	prefix: string;
 	place: CommandPlace | null;
+	/** Absent when nobody on this page may switch commands, which is most visitors on `/commands`. */
+	availability?: CommandAvailability;
+	onToggle?: (on: boolean) => void;
 }): React.JSX.Element {
 	const { icon: Icon, tint, wash } = featureLook(command.category);
 
+	const off = availability === "off-here" || availability === "off-everywhere";
+
 	return (
-		<Card padding="compact" className="flex flex-col gap-3">
+		<Card padding="compact" className={cn("flex flex-col gap-3", off && "opacity-60")}>
 			<div className="flex items-start gap-3">
 				<span className={cn("rounded-card mt-0.5 shrink-0 p-2", wash, tint)} aria-hidden="true">
 					<Icon size={18} />
@@ -46,6 +54,10 @@ export function CommandCard({
 
 					<p className="text-muted-foreground mt-1 text-sm">{command.description}</p>
 				</div>
+
+				{availability !== undefined && onToggle !== undefined && (
+					<CommandSwitch name={command.name} availability={availability} onChange={onToggle} />
+				)}
 
 				{place !== null && (
 					<Link

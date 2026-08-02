@@ -1,4 +1,4 @@
-import { countSubcommands } from "@testify/shared";
+import { availabilityOf, countSubcommands, toggleName } from "@testify/shared";
 import { Search, SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
@@ -9,13 +9,25 @@ import { Card, EmptyState, PageHeader, Skeleton, StatTile } from "@/components/p
 import { configurableAt, coverage, filterCommands, groupByCategory } from "@/features/commands/commands.utils";
 import { CommandCard } from "@/features/commands/components/CommandCard";
 import { useCommands } from "@/features/commands/useCommands";
+import { useCommandToggles, useSaveCommandToggles } from "@/features/commands/useCommandToggles";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-export function CommandsPage(): React.JSX.Element {
+/**
+ * Every command the bot has, and — inside a server, or on the owner console — a switch for each one.
+ *
+ * `scope` is what decides which list is being edited: a guild id edits that server's, `"global"` edits the
+ * bot-wide one. Neither is a permission: the API answers 404 or 403 regardless of what this page renders.
+ */
+export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.Element {
 	usePageTitle("Commands");
 	// Present when the page is reached from inside a server, which is what makes a Configure link possible.
 	const { guildId = null } = useParams();
+
+	const global = scope === "global";
+	const toggleScope = global ? null : guildId;
+	const toggles = useCommandToggles(toggleScope, global || guildId !== null);
+	const saveToggles = useSaveCommandToggles(toggleScope);
 
 	const catalogue = useCommands();
 	const [search, setSearch] = useState("");
@@ -29,10 +41,33 @@ export function CommandsPage(): React.JSX.Element {
 	if (catalogue.isError) return <ErrorState error={catalogue.error} onRetry={() => void catalogue.refetch()} />;
 
 	const { covered, total } = coverage(commands);
+	const state = toggles.data;
+
+	function setDisabled(name: string): void {
+		if (state === undefined) return;
+		saveToggles.mutate({ disabled: toggleName(state.disabled, name) });
+	}
 
 	return (
 		<>
-			<PageHeader title="Commands" subtitle="Everything Testify can do, on both the slash and prefix surfaces." />
+			<PageHeader
+				title="Commands"
+				subtitle={
+					global
+						? "Everything Testify can do. A command switched off here is off in every server."
+						: "Everything Testify can do, on both the slash and prefix surfaces."
+				}
+			/>
+
+			{state !== undefined && (
+				<p className="text-muted-foreground text-sm">
+					{state.disabled.length === 0
+						? global
+							? "Every command is available in every server."
+							: "Every command is available in this server."
+						: `${String(state.disabled.length)} switched off${global ? " everywhere" : " here"}.`}
+				</p>
+			)}
 
 			<section aria-label="Command surface" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 				<StatTile label="Commands" value={total} />
@@ -100,6 +135,14 @@ export function CommandsPage(): React.JSX.Element {
 										command={command}
 										prefix={catalogue.data.prefix}
 										place={configurableAt(command, guildId)}
+										{...(state === undefined
+											? {}
+											: {
+													availability: availabilityOf(command.name, state),
+													onToggle: () => {
+														setDisabled(command.name);
+													},
+												})}
 									/>
 								</Reveal>
 							))}

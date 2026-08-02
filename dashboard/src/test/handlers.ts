@@ -3,6 +3,7 @@ import {
 	type BotIdentity,
 	type ChannelSummary,
 	type CommandCatalogue,
+	type CommandToggleState,
 	type LogFeed,
 	type RuntimeInfo,
 	type ServerSettings,
@@ -138,7 +139,9 @@ export const logFeed: LogFeed = {
 		{ at: "2026-08-01T11:59:00.000Z", level: "info", message: "[READY] Logged in", context: {} },
 	],
 	buffered: 2,
-	capacity: 250,
+	capacity: 1_000,
+	loggerLevel: "info",
+	matched: 2,
 };
 
 export const runtimeInfo: RuntimeInfo = {
@@ -191,6 +194,12 @@ export const catalogue: CommandCatalogue = {
 	],
 };
 
+export const commandToggles: CommandToggleState = {
+	disabled: ["ban"],
+	disabledGlobally: [],
+	locked: ["help"],
+};
+
 export const someChannels: ChannelSummary[] = [
 	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
 	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
@@ -216,6 +225,8 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
+	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
+	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
 	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),

@@ -10,12 +10,24 @@ jest.mock("@database/repositories/blacklistRepository", () => ({
 	clearBlacklistCache: jest.fn(),
 }));
 
+const offGlobally = jest.fn<Promise<string[]>, []>(() => Promise.resolve([]));
+const offInGuild = jest.fn<Promise<string[]>, []>(() => Promise.resolve([]));
+
+jest.mock("@database/repositories/commandToggleRepository", () => ({
+	disabledGlobally: () => offGlobally(),
+	disabledInGuild: () => offInGuild(),
+	purgeCommandToggles: jest.fn(),
+	clearCommandToggleCache: jest.fn(),
+}));
+
 const plain = defineCommand({ name: "ping", description: "Pings.", category: "info", run: jest.fn() });
 
 describe("runChecks", () => {
 	beforeEach(() => {
 		clearCooldowns();
 		findBlacklistEntry.mockResolvedValue(null);
+		offGlobally.mockResolvedValue([]);
+		offInGuild.mockResolvedValue([]);
 	});
 
 	it("lets an ordinary command through", async () => {
@@ -91,5 +103,70 @@ describe("runChecks", () => {
 		const other = createMockInteraction({ overrides: { user: { id: USER_ID + "9" } as never } });
 
 		expect(await runChecks(other, command, client)).toBeNull();
+	});
+});
+
+/**
+ * Hiding a switch is not access control and neither is a greyed-out button — this is the gate, and it runs
+ * before the command body on both surfaces.
+ */
+describe("commands that have been switched off", () => {
+	beforeEach(() => {
+		clearCooldowns();
+		findBlacklistEntry.mockResolvedValue(null);
+		offGlobally.mockResolvedValue([]);
+		offInGuild.mockResolvedValue([]);
+	});
+
+	it("refuses one the owner switched off everywhere", async () => {
+		offGlobally.mockResolvedValue(["ping"]);
+
+		const refusal = await runChecks(createMockInteraction(), plain, createMockClient());
+
+		expect(refusal).toContain("switched off");
+	});
+
+	it("refuses one this server switched off", async () => {
+		offInGuild.mockResolvedValue(["ping"]);
+
+		const refusal = await runChecks(createMockInteraction(), plain, createMockClient());
+
+		expect(refusal).toContain("this server");
+	});
+
+	/**
+	 * Nobody bypasses a switch, the bot owner included: "off" that quietly still runs for one person is a much
+	 * worse thing to debug than one that is simply off.
+	 */
+	it("refuses the bot owner too", async () => {
+		offGlobally.mockResolvedValue(["ping"]);
+		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });
+
+		expect(await runChecks(interaction, plain, createMockClient())).toContain("switched off");
+	});
+
+	it("lets a command through when a different one is off", async () => {
+		offGlobally.mockResolvedValue(["ban"]);
+		offInGuild.mockResolvedValue(["rank"]);
+
+		expect(await runChecks(createMockInteraction(), plain, createMockClient())).toBeNull();
+	});
+
+	/** A server that switched off `/help` would have no way back inside Discord. */
+	it("ignores a stored switch against a command the bot will not let go", async () => {
+		const help = { ...plain, name: "help" };
+		offGlobally.mockResolvedValue(["help"]);
+		offInGuild.mockResolvedValue(["help"]);
+
+		expect(await runChecks(createMockInteraction(), help, createMockClient())).toBeNull();
+	});
+
+	/** A direct message has no guild list to consult, and looking one up under a null id would throw. */
+	it("does not consult a server list outside a server", async () => {
+		const interaction = createMockInteraction({ overrides: { guildId: null, guild: null } });
+		offInGuild.mockResolvedValue(["ping"]);
+
+		expect(await runChecks(interaction, plain, createMockClient())).toBeNull();
+		expect(offInGuild).not.toHaveBeenCalled();
 	});
 });

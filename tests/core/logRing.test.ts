@@ -62,7 +62,7 @@ describe("the log ring", () => {
 		ring.push(record("info", "first"));
 		ring.push(record("warn", "second"));
 
-		expect(ring.recent().map((line) => line.message)).toEqual(["second", "first"]);
+		expect(ring.recent().lines.map((line) => line.message)).toEqual(["second", "first"]);
 	});
 
 	/** A buffer that grows forever is a leak, and this one is fed by every log line the bot writes. */
@@ -71,7 +71,7 @@ describe("the log ring", () => {
 		for (const message of ["a", "b", "c", "d", "e"]) ring.push(record("info", message));
 
 		expect(ring.size).toBe(3);
-		expect(ring.recent().map((line) => line.message)).toEqual(["e", "d", "c"]);
+		expect(ring.recent().lines.map((line) => line.message)).toEqual(["e", "d", "c"]);
 	});
 
 	it("filters to a minimum level", () => {
@@ -79,21 +79,53 @@ describe("the log ring", () => {
 		ring.push(record("info", "chatter"));
 		ring.push(record("error", "broken"));
 
-		expect(ring.recent({ minLevel: "warn" }).map((line) => line.message)).toEqual(["broken"]);
+		expect(ring.recent({ minLevel: "warn" }).lines.map((line) => line.message)).toEqual(["broken"]);
 	});
 
-	it("honours a limit", () => {
+	it("honours a limit, and says how many matched before it was applied", () => {
 		const ring = new LogRing(10);
 		for (const message of ["a", "b", "c"]) ring.push(record("info", message));
 
-		expect(ring.recent({ limit: 2 }).map((line) => line.message)).toEqual(["c", "b"]);
+		const { lines, matched } = ring.recent({ limit: 2 });
+
+		expect(lines.map((line) => line.message)).toEqual(["c", "b"]);
+		expect(matched).toBe(3);
+	});
+
+	describe("searching", () => {
+		function searchable(): LogRing {
+			const ring = new LogRing(10);
+			ring.push(record("info", "[READY] Testify is online"));
+			ring.push(record("error", "[BAN] Failed", { guildId: "900000000000000001" }));
+			return ring;
+		}
+
+		it("matches the message", () => {
+			expect(searchable().recent({ search: "ready" }).lines).toHaveLength(1);
+		});
+
+		/** A guild id is never in the message, so a search that only read the message would never find one. */
+		it("matches a value inside the context", () => {
+			const found = searchable().recent({ search: "900000000000000001" });
+
+			expect(found.lines.map((line) => line.message)).toEqual(["[BAN] Failed"]);
+		});
+
+		it("ignores case, and returns everything for an empty search", () => {
+			expect(searchable().recent({ search: "TESTIFY" }).lines).toHaveLength(1);
+			expect(searchable().recent({ search: "  " }).lines).toHaveLength(2);
+		});
+
+		it("finds nothing rather than everything when nothing matches", () => {
+			expect(searchable().recent({ search: "nonsense" })).toEqual({ lines: [], matched: 0 });
+		});
 	});
 
 	it("redacts on the way in, so nothing sensitive is ever held", () => {
 		const ring = new LogRing(10);
 		ring.push(record("error", "failed", { token: "abc" }));
 
-		expect(ring.recent()[0]?.context["token"]).toBe("[redacted]");
+		expect(ring.recent().lines[0]?.context["token"]).toBe("[redacted]");
 	});
 });
 
@@ -129,20 +161,40 @@ describe("the logger's ring hook", () => {
 
 		logger.error({ guildId: "900000000000000001" }, "[BAN] Failed to ban member");
 
-		expect(ring.recent()[0]).toMatchObject({
+		expect(ring.recent().lines[0]).toMatchObject({
 			level: "error",
 			message: "[BAN] Failed to ban member",
 			context: { guildId: "900000000000000001" },
 		});
 	});
 
-	it("does not fill the buffer with debug noise", () => {
+	/**
+	 * Every level, not just info and above: the console filters, and a debug line that was never captured cannot
+	 * be filtered back into existence when somebody goes looking for it.
+	 */
+	it("captures debug and trace as well", () => {
 		const ring = new LogRing(10);
 		const logger = createLogger("trace", false, ring);
 
+		logger.trace("very fine detail");
 		logger.debug("per-message chatter");
 		logger.info("worth keeping");
 
-		expect(ring.recent().map((line) => line.message)).toEqual(["worth keeping"]);
+		expect(ring.recent().lines.map((line) => line.message)).toEqual([
+			"worth keeping",
+			"per-message chatter",
+			"very fine detail",
+		]);
+	});
+
+	/** pino never calls the hook below its own level, so `LOG_LEVEL` still decides what exists at all. */
+	it("records nothing the logger's own level suppresses", () => {
+		const ring = new LogRing(10);
+		const logger = createLogger("warn", false, ring);
+
+		logger.debug("suppressed");
+		logger.warn("kept");
+
+		expect(ring.recent().lines.map((line) => line.message)).toEqual(["kept"]);
 	});
 });

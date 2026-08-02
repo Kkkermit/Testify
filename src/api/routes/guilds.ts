@@ -4,6 +4,7 @@ import { type ApiBindings } from "@api/context";
 import { notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
+import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
 import { settings } from "@api/routes/settings";
 import { welcome } from "@api/routes/welcome";
@@ -41,6 +42,7 @@ guilds.route("/:guildId/levelling", levelling);
 guilds.route("/:guildId/welcome", welcome);
 guilds.route("/:guildId/audit-log", auditLog);
 guilds.route("/:guildId/settings", settings);
+guilds.route("/:guildId/commands", guildCommandToggles);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
 	const guild = context.get("guild");

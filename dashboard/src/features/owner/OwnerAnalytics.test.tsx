@@ -1,4 +1,4 @@
-import { screen, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { barWidth, levelFrom, percent, shortDay, windowFrom } from "@/features/owner/owner.utils";
@@ -25,9 +25,11 @@ describe("windowFrom", () => {
 });
 
 describe("levelFrom", () => {
-	it("falls back to info, and never to a level the API refuses", () => {
-		expect(levelFrom("trace")).toBe("info");
-		expect(levelFrom(null)).toBe("info");
+	/** Everything by default: the console exists to be looked through, not to hide most of the buffer. */
+	it("shows every level by default, and never one the API refuses", () => {
+		expect(levelFrom(null)).toBe("trace");
+		expect(levelFrom("nonsense")).toBe("trace");
+		expect(levelFrom("debug")).toBe("debug");
 		expect(levelFrom("error")).toBe("error");
 	});
 });
@@ -139,10 +141,60 @@ describe("the logs tab", () => {
 		expect(screen.getByText("[READY] Logged in")).toBeInTheDocument();
 	});
 
-	it("says how much of the buffer is in use", async () => {
+	it("says what is on screen and what is behind it", async () => {
 		renderTab("logs");
 
-		expect(await screen.findByText(/last 2 of 250 lines/i)).toBeInTheDocument();
+		expect(await screen.findByText(/showing 2 of 2 matching lines, 2 of 1,?000 held/i)).toBeInTheDocument();
+	});
+
+	/** Every level is offered now, so a debug line can actually be found. */
+	it("offers every level the bot can write", async () => {
+		renderTab("logs");
+		await screen.findByText("[READY] Logged in");
+
+		for (const label of ["All", "Debug", "Info", "Warnings", "Errors", "Fatal"]) {
+			expect(screen.getByRole("button", { name: label })).toBeInTheDocument();
+		}
+	});
+
+	it("sends a search to the API rather than filtering what it already has", async () => {
+		const user = userEvent.setup();
+		const asked: (string | null)[] = [];
+		server.use(
+			http.get("/api/analytics/logs", ({ request }) => {
+				asked.push(new URL(request.url).searchParams.get("q"));
+				return HttpResponse.json(logFeed);
+			}),
+		);
+
+		renderTab("logs");
+		await screen.findByText("[READY] Logged in");
+		await user.type(screen.getByRole("searchbox", { name: /search the log/i }), "ban");
+
+		await waitFor(() => {
+			expect(asked).toContain("ban");
+		});
+	});
+
+	/**
+	 * An empty list at "All" would otherwise read as "the bot is idle" when it really means the bot was started
+	 * at a level that never writes those lines.
+	 */
+	it("says when the bot's own level is suppressing everything below it", async () => {
+		renderTab("logs");
+
+		expect(await screen.findByText(/LOG_LEVEL=info/)).toBeInTheDocument();
+	});
+
+	it("can be paused", async () => {
+		const user = userEvent.setup();
+		const { search } = renderTab("logs");
+		await screen.findByText("[READY] Logged in");
+
+		await user.click(screen.getByRole("button", { name: /pause/i }));
+
+		expect(search()).toContain("paused=1");
+		expect(await screen.findByText(/paused\./i)).toBeInTheDocument();
 	});
 
 	it("asks the API for the level that was chosen", async () => {

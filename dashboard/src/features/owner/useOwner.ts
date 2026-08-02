@@ -36,12 +36,18 @@ export function useUsage(days: number): UseQueryResult<UsageReport> {
 	});
 }
 
-/** The one screen worth polling: it is read while something is going wrong. */
-export function useLogs(level: ReportedLogLevel): UseQueryResult<LogFeed> {
+/**
+ * The one screen worth polling: it is read while something is going wrong. Pausing stops the poll rather than
+ * freezing a snapshot, so a line cannot scroll away while it is being read.
+ */
+export function useLogs(level: ReportedLogLevel, search: string, paused: boolean): UseQueryResult<LogFeed> {
+	const query = new URLSearchParams({ level, limit: "300" });
+	if (search.trim() !== "") query.set("q", search.trim());
+
 	return useQuery({
-		queryKey: keys.owner.logs(level),
-		queryFn: () => api.get<LogFeed>(`/analytics/logs?level=${level}&limit=150`),
-		refetchInterval: 15_000,
+		queryKey: keys.owner.logs(level, search),
+		queryFn: () => api.get<LogFeed>(`/analytics/logs?${query.toString()}`),
+		refetchInterval: paused ? false : 5_000,
 		staleTime: 0,
 	});
 }
