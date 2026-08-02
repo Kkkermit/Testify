@@ -1078,6 +1078,15 @@ the same shape —
 In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
 work with no CORS configuration at all. In production the API serves `dashboard/dist` from the same port.
 
+**`dev:all` starts Vite only once the API answers.** `startApi` runs after `client.login()`, so for the twenty-odd
+seconds the bot spends connecting there is nothing on the port — and the proxy answers every poll in that window
+with a stack trace that reads like a broken install. `scripts/waitForApi.ts` polls `/api/health` first (no
+`wait-on`; it is a `fetch` in a loop, and one fewer install matters for a self-hosted bot), and refuses with a
+sentence naming the cause when `DASHBOARD_ENABLED` is false or the bot never comes up. `tsx watch` restarts the
+bot on every save, which the ordering cannot help with, so the proxy's own error handler is replaced with one
+line per outage — Vite registers its handler immediately **after** calling `configure`, so the replacement waits
+a tick, and that ordering was read out of `vite/dist/node/chunks/node.js` rather than guessed.
+
 ### `@testify/shared` is a real package, not an alias
 
 **It is deliberately absent from `tsconfig.json`'s `paths`, and adding it there would break the build in a way
