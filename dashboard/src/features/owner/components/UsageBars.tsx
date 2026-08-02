@@ -13,9 +13,7 @@ export interface BarRow {
 
 /**
  * A ranked list with the bar behind the row rather than beside it, so the label is never squeezed by the value.
- *
- * Hand-rolled: a chart library is the single easiest way to double this bundle, and a horizontal bar is a div
- * with a width.
+ * Hand-rolled, because a chart library is the easiest way there is to double this bundle.
  */
 export function UsageBars({
 	rows,

@@ -56,6 +56,54 @@ describe("switching commands off in a server", () => {
 		expect((captured.body as CommandTogglePut).disabled).toEqual(["ban", "levelling"]);
 	});
 
+	/**
+	 * Two clicks in a row, the first answered last. The order answers arrive in says nothing about the order the
+	 * server applied them, so the burst has to end in a read rather than in whichever whole-list answer came back
+	 * last — otherwise the slow one silently undoes the click after it.
+	 */
+	it("does not let a slow answer undo a later click", async () => {
+		const user = userEvent.setup();
+		let stored = ["ban"];
+		let release = (): void => undefined;
+		const held = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+		let first = true;
+
+		const body = (disabled: string[]) => ({ disabled, disabledGlobally: [], locked: ["help"] });
+
+		server.use(
+			http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(body(stored))),
+			http.put("/api/guilds/:guildId/commands", async ({ request }) => {
+				const sent = ((await request.json()) as CommandTogglePut).disabled;
+				stored = sent;
+
+				if (first) {
+					first = false;
+					await held;
+				}
+
+				return HttpResponse.json(body(sent));
+			}),
+		);
+
+		const { client } = inGuild();
+		await user.click(await screen.findByRole("switch", { name: "/levelling" }));
+		await user.click(screen.getByRole("switch", { name: "/ban" }));
+		release();
+
+		// Asserting before the burst drains would pass on the optimistic state alone, whatever landed after it.
+		await waitFor(() => {
+			expect(client.isMutating()).toBe(0);
+		});
+		await waitFor(() => {
+			expect(client.isFetching()).toBe(0);
+		});
+
+		expect(screen.getByRole("switch", { name: "/ban" })).toBeChecked();
+		expect(screen.getByRole("switch", { name: "/levelling" })).not.toBeChecked();
+	});
+
 	it("says how many are off", async () => {
 		inGuild();
 

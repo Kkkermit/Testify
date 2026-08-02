@@ -13,10 +13,8 @@ import { useSettings } from "@/features/settings/useSettings";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 /**
- * The settings that are only ever configuration, on one page rather than five.
- *
- * Each section writes on change and each has its own endpoint, so a refusal in one leaves the others alone —
- * the split `CLAUDE.md` §24 describes, on the apply-immediately side of it.
+ * Each section writes on change and has its own endpoint, so a refusal in one leaves the others alone — the
+ * apply-immediately side of the split in `CLAUDE.md` §24.
  */
 export function SettingsPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();

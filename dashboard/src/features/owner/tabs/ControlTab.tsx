@@ -1,7 +1,7 @@
 import { BOT_IDENTITY_LIMITS } from "@testify/shared";
 import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
-import { FIELD, savingStateOf, SavingIndicator, Warning } from "@/components/form";
+import { FIELD, LABEL, savingStateOf, SavingIndicator, Warning } from "@/components/form";
 import { Badge, Button, Card, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
 import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/features/owner/useControl";
@@ -9,10 +9,8 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 /**
- * Pausing, renaming and stopping the bot.
- *
  * There is no Start, and the card says why: this API is served by the bot process, so a stopped bot has nothing
- * left to answer with. Pause is the reversible half and is what "stopped" means to a server.
+ * left to answer with. Pause is the reversible half, and what "stopped" means to a server.
  */
 export function ControlTab(): React.JSX.Element {
 	const control = useBotControl();
@@ -94,7 +92,7 @@ export function ControlTab(): React.JSX.Element {
 				</div>
 
 				<div className="flex flex-col gap-2">
-					<label htmlFor="bot-name" className="text-muted-foreground text-[0.8125rem] font-medium">
+					<label htmlFor="bot-name" className={LABEL}>
 						Username
 					</label>
 					<div className="flex flex-wrap items-center gap-2">
@@ -136,7 +134,7 @@ export function ControlTab(): React.JSX.Element {
 					</p>
 				</div>
 
-				<label htmlFor="shutdown-confirm" className="text-muted-foreground text-[0.8125rem] font-medium">
+				<label htmlFor="shutdown-confirm" className={LABEL}>
 					Type <span className="text-foreground font-mono">shut down</span> to confirm
 				</label>
 				<div className="flex flex-wrap items-center gap-2">

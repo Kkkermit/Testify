@@ -1,7 +1,7 @@
 import { type ChannelSummary, type CountingPatch, type CountingSetting } from "@testify/shared";
 import { Hash } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ChannelPicker, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
+import { ChannelPicker, FIELD, LABEL, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { countCapProblem, countProgress } from "@/features/settings/settings.utils";
@@ -60,7 +60,7 @@ export function CountingSection({
 			/>
 
 			<div className="flex flex-col gap-2">
-				<label htmlFor="counting-cap" className="text-muted-foreground text-[0.8125rem] font-medium">
+				<label htmlFor="counting-cap" className={LABEL}>
 					Count up to
 				</label>
 				<div className="flex flex-wrap items-center gap-2">

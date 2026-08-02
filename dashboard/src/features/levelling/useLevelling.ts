@@ -36,10 +36,8 @@ export function useRoles(guildId: string): UseQueryResult<RoleSummary[]> {
 }
 
 /**
- * Optimistic with a rollback. The rollback matters as much as the optimism: a switch that flips back with
- * "You need Manage Server" is honest, where one that stays on while the server said no is a lie.
- *
- * Every mutation here goes through the same wrapper so no screen can forget the rollback.
+ * Optimistic with a rollback, and every mutation here goes through this so none can forget it: a switch that
+ * flips back with "You need Manage Server" is honest, where one that stays on after a refusal is a lie.
  */
 function useLevellingMutation<TInput>(
 	guildId: string,

@@ -30,8 +30,11 @@ export function useSaveCommandToggles(
 ): UseMutationResult<CommandToggleState, Error, CommandTogglePut> {
 	const client = useQueryClient();
 	const key = keys.commandToggles(guildId);
+	// A snapshot taken before a later click has already been moved on from, so only the last write may use one.
+	const alone = (): boolean => client.isMutating({ mutationKey: key }) === 1;
 
 	return useMutation({
+		mutationKey: key,
 		mutationFn: (body: CommandTogglePut) => api.put<CommandToggleState>(pathFor(guildId), body),
 		// Optimistic: a switch that waits for a round trip before moving feels broken, and a refusal puts it back.
 		onMutate: async (body) => {
@@ -44,10 +47,14 @@ export function useSaveCommandToggles(
 			return { previous };
 		},
 		onError: (_error, _body, context) => {
-			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
+			if (alone() && context?.previous !== undefined) client.setQueryData(key, context.previous);
 		},
 		onSuccess: (state) => {
-			client.setQueryData(key, state);
+			if (alone()) client.setQueryData(key, state);
+		},
+		// One authoritative read once the burst of clicks has drained, whatever order the answers arrived in.
+		onSettled: () => {
+			if (alone()) void client.invalidateQueries({ queryKey: key });
 		},
 	});
 }

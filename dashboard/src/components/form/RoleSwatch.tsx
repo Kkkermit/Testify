@@ -1,9 +1,6 @@
 /**
- * A role's colour as a bordered dot beside its name, never as the name's colour.
- *
- * Role colours are chosen by whoever made the role, so plenty of them are unreadable on a near-black page — one
- * set to `#1a1a1a` would be invisible as text. The border keeps a dark swatch visible against the surface, and
- * the name stays at full contrast.
+ * A role's colour as a bordered dot, never as the name's colour: a role set to `#1a1a1a` would be invisible as
+ * text on this background. The border is what keeps a dark swatch visible against the surface.
  */
 export function RoleSwatch({ name, colour }: { name: string; colour: string | null }): React.JSX.Element {
 	return (

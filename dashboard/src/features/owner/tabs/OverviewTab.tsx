@@ -19,8 +19,19 @@ export function OverviewTab(): React.JSX.Element {
 	if (health.isError) return <ErrorState error={health.error} onRetry={() => void health.refetch()} />;
 
 	const selected = params.get("server");
-
 	const stats = health.data;
+
+	// Merged rather than replaced, or paging would drop the `?tab=` that got you here.
+	function put(changes: Record<string, string | null>): void {
+		setParams((current) => {
+			const merged = new URLSearchParams(current);
+			for (const [key, value] of Object.entries(changes)) {
+				if (value === null) merged.delete(key);
+				else merged.set(key, value);
+			}
+			return merged;
+		});
+	}
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -65,11 +76,7 @@ export function OverviewTab(): React.JSX.Element {
 					<GuildDetail
 						guildId={selected}
 						onClose={() => {
-							setParams((current) => {
-								const merged = new URLSearchParams(current);
-								merged.delete("server");
-								return merged;
-							});
+							put({ server: null });
 						}}
 					/>
 				)}
@@ -81,11 +88,7 @@ export function OverviewTab(): React.JSX.Element {
 						guilds={guilds.data.items}
 						selected={selected}
 						onSelect={(guildId) => {
-							setParams((current) => {
-								const merged = new URLSearchParams(current);
-								merged.set("server", guildId);
-								return merged;
-							});
+							put({ server: guildId });
 						}}
 					/>
 				)}
@@ -94,12 +97,7 @@ export function OverviewTab(): React.JSX.Element {
 					page={page}
 					pages={pageCount(guilds.data?.total ?? 0, PER_PAGE)}
 					onChange={(next) => {
-						// Merged rather than replaced, or paging would drop the `?tab=` that got you here.
-						setParams((current) => {
-							const merged = new URLSearchParams(current);
-							merged.set("page", String(next));
-							return merged;
-						});
+						put({ page: String(next) });
 					}}
 				/>
 			</section>

@@ -3,9 +3,11 @@
 export { Badge, type BadgeTone } from "@/components/primitives/Badge";
 export { Button, type ButtonVariant } from "@/components/primitives/Button";
 export { Card, cardClass, type CardPadding } from "@/components/primitives/Card";
+export { DataList, type DataRow, Figure } from "@/components/primitives/DataList";
 export { EmptyState } from "@/components/primitives/EmptyState";
 export { GuildIcon } from "@/components/primitives/GuildIcon";
 export { PageHeader } from "@/components/primitives/PageHeader";
+export { type Segment, SegmentedControl } from "@/components/primitives/SegmentedControl";
 export { Skeleton } from "@/components/primitives/Skeleton";
 export { StatTile } from "@/components/primitives/StatTile";
 export { TabBar, type TabDefinition } from "@/components/primitives/TabBar";

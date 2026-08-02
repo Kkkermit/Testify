@@ -2,12 +2,9 @@ import { type ComponentPropsWithoutRef } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * Three paddings, not an arbitrary class per call site — that is what keeps every card's content on the same
- * column as the next one.
- *
- * `compact` is for a tile or a row, `default` for a panel you read, `none` for a card whose children own their
- * own padding (a table, a divided list). All three share the same 24px inline padding, so only the vertical
- * rhythm changes with density.
+ * `compact` for a tile or a row, `default` for a panel you read, `none` for a card whose children own their
+ * padding. All three share the same 24px inline padding, so density changes the vertical rhythm only and every
+ * card's content starts on the same column.
  */
 const PADDING = {
 	none: "p-0",

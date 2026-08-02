@@ -12,7 +12,7 @@ export function Pager({
 	if (pages <= 1) return null;
 
 	return (
-		<nav aria-label="Pages" className="mt-4 flex items-center justify-between">
+		<nav aria-label="Pages" className="flex items-center justify-between">
 			<Button
 				variant="secondary"
 				disabled={page <= 1}

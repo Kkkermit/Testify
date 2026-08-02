@@ -1,9 +1,7 @@
 /**
- * The terms and the privacy notice, as data.
- *
- * Written for a self-hosted bot, so they describe what *this software* does rather than what some hosted
- * service promises: every deployment is somebody's own, and the operator is whoever runs it. Keeping the text
- * here rather than in the pages means a fork edits one file and both pages stay laid out the same.
+ * Written for a self-hosted bot, so the text describes what this software does rather than what a hosted service
+ * promises — the operator is whoever runs it. Held as data so a fork edits one file and both pages keep their
+ * layout.
  */
 
 export interface LegalSection {

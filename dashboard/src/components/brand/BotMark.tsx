@@ -3,10 +3,8 @@ import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/cn";
 
 /**
- * The bot's own avatar wherever the product identifies itself, falling back to the built-in mark.
- *
- * Three things can go wrong and all three land on the same fallback: the API has not answered yet, the bot is
- * still connecting, or Discord's CDN is unreachable. A brand mark is never worth a broken image icon.
+ * The bot's own avatar wherever the product identifies itself. Three things can go wrong — no answer yet, no
+ * avatar set, an unreachable CDN — and all three land on the built-in mark rather than a broken image icon.
  */
 export function BotMark({
 	src,

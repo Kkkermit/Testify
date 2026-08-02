@@ -195,6 +195,50 @@ describe("the settings page", () => {
 		});
 	});
 
+	/**
+	 * Every section answers with the whole settings document, so a slow write carries a snapshot taken before a
+	 * later one — landing it on the cache would put the other section's control back where it was.
+	 */
+	it("does not let one section's slow answer undo another's", async () => {
+		const user = userEvent.setup();
+		let stored = serverSettings;
+		let release = (): void => undefined;
+		const held = new Promise<void>((resolve) => {
+			release = resolve;
+		});
+
+		server.use(
+			http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(stored)),
+			http.patch("/api/guilds/:guildId/settings/prefix", async ({ request }) => {
+				const patch = (await request.json()) as { enabled: boolean };
+				const answer = { ...stored, prefix: { ...stored.prefix, ...patch } };
+				stored = answer;
+				await held;
+				return HttpResponse.json(answer);
+			}),
+			http.patch("/api/guilds/:guildId/settings/counting", async ({ request }) => {
+				const patch = (await request.json()) as { enabled: boolean };
+				stored = { ...stored, counting: { ...stored.counting, ...patch } };
+				return HttpResponse.json(stored);
+			}),
+		);
+
+		const { client } = renderPage();
+		await user.click(await screen.findByRole("switch", { name: /allow prefix commands/i }));
+		await user.click(screen.getByRole("switch", { name: /run a counting channel/i }));
+		release();
+
+		await waitFor(() => {
+			expect(client.isMutating()).toBe(0);
+		});
+		await waitFor(() => {
+			expect(client.isFetching()).toBe(0);
+		});
+
+		expect(screen.getByRole("switch", { name: /run a counting channel/i })).not.toBeChecked();
+		expect(screen.getByRole("switch", { name: /allow prefix commands/i })).not.toBeChecked();
+	});
+
 	it("has no automatically detectable accessibility violations", async () => {
 		const { container } = renderPage();
 		await screen.findByRole("heading", { name: "Command prefix" });

@@ -24,12 +24,16 @@ export function OwnerPage(): React.JSX.Element {
 	const [params, setParams] = useSearchParams();
 	const tab = ownerTabFrom(params.get("tab"));
 
-	function put(key: string, value: string): void {
-		setParams((current) => {
-			const merged = new URLSearchParams(current);
-			merged.set(key, value);
-			return merged;
-		});
+	/** `replace` is for a value that changes as it is typed — a history entry per keystroke makes Back useless. */
+	function put(key: string, value: string, replace = false): void {
+		setParams(
+			(current) => {
+				const merged = new URLSearchParams(current);
+				merged.set(key, value);
+				return merged;
+			},
+			{ replace },
+		);
 	}
 
 	return (
@@ -63,7 +67,7 @@ export function OwnerPage(): React.JSX.Element {
 						put("level", level);
 					}}
 					onSearch={(next) => {
-						put("q", next);
+						put("q", next, true);
 					}}
 					onPause={(next) => {
 						put("paused", next ? "1" : "0");

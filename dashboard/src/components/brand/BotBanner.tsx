@@ -2,11 +2,8 @@ import { useState } from "react";
 import { cn } from "@/lib/cn";
 
 /**
- * The application's profile banner, or a wash in its accent colour when it has none — which is most bots, so
- * the fallback is the common case rather than the exception.
- *
- * The accent is data from Discord, not a design token, so it is the one colour here that arrives as a value
- * rather than a class.
+ * The application's profile banner, or a wash in its accent colour when it has none — which is most bots. The
+ * accent is data from Discord rather than a design token, so it is the one colour here written as a value.
  */
 export function BotBanner({
 	src,

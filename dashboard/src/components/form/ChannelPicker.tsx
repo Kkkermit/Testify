@@ -1,5 +1,5 @@
 import { type ChannelSummary } from "@testify/shared";
-import { FIELD } from "@/components/form/field";
+import { FIELD, LABEL } from "@/components/form/field";
 import { Warning } from "@/components/form/Warning";
 import { cn } from "@/lib/cn";
 
@@ -30,7 +30,7 @@ export function ChannelPicker({
 
 	return (
 		<label className="block">
-			<span className="text-muted-foreground block text-[0.8125rem] font-medium">{label}</span>
+			<span className={cn(LABEL, "block")}>{label}</span>
 			{hint !== undefined && <span className="text-muted-foreground block text-xs">{hint}</span>}
 
 			<select

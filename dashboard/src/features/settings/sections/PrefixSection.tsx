@@ -1,7 +1,7 @@
 import { type PrefixPatch, type PrefixSetting } from "@testify/shared";
 import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
+import { FIELD, LABEL, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { prefixProblem } from "@/features/settings/settings.utils";
@@ -43,7 +43,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 			/>
 
 			<div className="flex flex-col gap-2">
-				<label htmlFor="prefix" className="text-muted-foreground text-[0.8125rem] font-medium">
+				<label htmlFor="prefix" className={LABEL}>
 					Prefix
 				</label>
 				<div className="flex flex-wrap items-center gap-2">

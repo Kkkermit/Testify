@@ -1,11 +1,8 @@
 import { type CommandSummary, matchesSearch } from "@testify/shared";
 
 /**
- * Which commands the dashboard can already configure, keyed by command name.
- *
- * The value is the settings screen that replaces it — `path` takes the server being configured. Everything not
- * listed is still Discord-only, and the page says so rather than pretending otherwise, so this map doubles as
- * the visible progress toward covering the whole command surface.
+ * Which commands the dashboard can already configure, keyed by command name; the value is the screen that
+ * replaces it. Everything unlisted is still Discord-only, which is what the coverage tile counts.
  */
 const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: string }> = {
 	levelling: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },

@@ -2,13 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 
 /**
- * Announces the page a navigation landed on.
- *
- * A single-page app replaces the content without a page load, so a screen reader is given no signal that
- * anything happened — the user is left on a page that has silently become a different one. This reads the title
- * the new screen set and says it once.
- *
- * The first render is skipped: arriving at a page is already announced by the page load itself.
+ * A single-page app replaces its content without a page load, so a screen reader gets no signal that the page
+ * changed at all. This reads the title the new screen set and says it once; the first render is skipped, since
+ * the page load announces that one itself.
  */
 export function RouteAnnouncer(): React.JSX.Element {
 	const { pathname } = useLocation();

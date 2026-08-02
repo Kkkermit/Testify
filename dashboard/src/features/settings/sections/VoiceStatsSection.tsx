@@ -1,6 +1,6 @@
 import { type ChannelSummary, type VoiceStatsPatch, type VoiceStatsSetting } from "@testify/shared";
 import { AudioLines } from "lucide-react";
-import { FIELD, savingStateOf } from "@/components/form";
+import { FIELD, LABEL, savingStateOf } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
@@ -59,7 +59,7 @@ function VoicePicker({
 }): React.JSX.Element {
 	return (
 		<label className="block">
-			<span className="text-muted-foreground block text-[0.8125rem] font-medium">{label}</span>
+			<span className={cn(LABEL, "block")}>{label}</span>
 			<select
 				className={cn(FIELD, "mt-1")}
 				value={value ?? ""}

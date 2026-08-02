@@ -1,3 +1,9 @@
+/**
+ * The name above a control, whatever element carries it — a `<label>`, a `<legend>`, or a `<span>` inside a
+ * wrapping label. One string, so the type scale is not restated at fifteen call sites.
+ */
+export const LABEL = "text-muted-foreground text-[0.8125rem] font-medium";
+
 /** One class string for every input, so a focus or border change happens in one place. */
 export const FIELD =
 	"bg-card border-border focus-visible:border-ring w-full rounded-lg border px-3 py-2 text-sm outline-none transition-colors duration-150";

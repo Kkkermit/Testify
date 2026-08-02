@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { CHECK_ROW, SCROLL_LIST } from "@/components/form/field";
+import { CHECK_ROW, LABEL, SCROLL_LIST } from "@/components/form/field";
 import { cn } from "@/lib/cn";
 
 export interface CheckItem {
@@ -33,7 +33,7 @@ export function CheckList({
 
 	return (
 		<fieldset>
-			<legend className="text-muted-foreground text-[0.8125rem] font-medium">{label}</legend>
+			<legend className={LABEL}>{label}</legend>
 			{hint !== undefined && <p className="text-muted-foreground text-xs">{hint}</p>}
 			<p className="text-muted-foreground mt-1 text-xs tabular-nums" aria-live="polite">
 				{value.length} of {max} chosen

@@ -12,9 +12,9 @@ export function RequireAuth(): React.JSX.Element {
 
 	if (me.isPending) {
 		return (
-			<div className="mx-auto max-w-5xl p-6">
+			<div className="mx-auto flex max-w-5xl flex-col gap-4 p-6">
 				<Skeleton className="h-8 w-48" />
-				<Skeleton className="mt-4 h-64 w-full" />
+				<Skeleton className="h-64 w-full" />
 			</div>
 		);
 	}

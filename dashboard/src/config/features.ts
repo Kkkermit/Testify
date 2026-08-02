@@ -23,12 +23,10 @@ import {
 } from "lucide-react";
 
 /**
- * How a bot feature is drawn wherever it appears — the overview grid keys it by feature, the command list by
- * category, and the two names overlap enough to share one map. Adding one is an entry here plus whatever the
- * API starts returning: no screen needs editing, and an unknown key falls back rather than rendering a hole.
- *
- * The tint classes are Tailwind utilities over the `--color-feature-*` tokens in `index.css`, so a rebrand is
- * still one file.
+ * How a bot feature is drawn wherever it appears. The overview grid keys it by feature and the command list by
+ * category, and the two overlap enough to share one map; an unknown key falls back rather than rendering a hole,
+ * so the API can ship a feature before this knows about it. Tints are utilities over the `--color-feature-*`
+ * tokens, so a rebrand stays one file.
  */
 export interface FeatureLook {
 	icon: LucideIcon;

@@ -9,10 +9,7 @@ export interface FieldShape {
 	depth: number;
 }
 
-/**
- * Points in a slab in front of the camera rather than a sphere: a sphere puts most of its points where the
- * camera is, and they arrive as a blurred smear across the middle of the screen.
- */
+/** A slab rather than a sphere: a sphere puts most of its points at the camera, as a smear across the screen. */
 export function fieldPositions(shape: FieldShape, random: () => number = Math.random): Float32Array {
 	const positions = new Float32Array(Math.max(0, shape.count) * 3);
 
@@ -38,18 +35,12 @@ export function fieldSizes(positions: Float32Array, depth: number, min = 1, max 
 	return sizes;
 }
 
-/**
- * Frame-rate independent easing: `lambda` is how much of the remaining distance is covered per second, so the
- * motion is identical at 30fps and 144fps. `1 - e^(-λt)` rather than a fixed fraction per frame.
- */
+/** `lambda` is the fraction of the remaining distance covered per second, so 30fps and 144fps ease alike. */
 export function damp(current: number, target: number, lambda: number, deltaSeconds: number): number {
 	return current + (target - current) * (1 - Math.exp(-lambda * deltaSeconds));
 }
 
-/**
- * Maps a pointer position to the camera offset it should drift towards. Centre is zero, and the edges reach
- * `strength`, so the parallax is symmetrical however the window is shaped.
- */
+/** Centre is zero and the edges reach `strength`, so the parallax is symmetrical however the window is shaped. */
 export function parallaxTarget(
 	pointer: { x: number; y: number },
 	viewport: { width: number; height: number },

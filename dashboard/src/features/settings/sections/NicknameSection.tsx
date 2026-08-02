@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tan
 import { NICKNAME_MAX, type GuildNickname, type NicknamePatch } from "@testify/shared";
 import { UserPen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FIELD, savingStateOf, Warning } from "@/components/form";
+import { FIELD, LABEL, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { ApiError, api } from "@/lib/api";
@@ -49,7 +49,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 		>
 			<div className="flex flex-col gap-2">
-				<label htmlFor="nickname" className="text-muted-foreground text-[0.8125rem] font-medium">
+				<label htmlFor="nickname" className={LABEL}>
 					Nickname
 				</label>
 				<div className="flex flex-wrap items-center gap-2">

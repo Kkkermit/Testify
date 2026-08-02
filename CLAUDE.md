@@ -1033,13 +1033,14 @@ Inside `dashboard/src`, the same rule as the bot: technical role first, then dom
 app/            AppShell, RequireAuth, ErrorState, and layout/ for the sidebar
 components/
   brand/        Logo and LogoTile — the mark, inline, inheriting currentColor
-  primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, Tooltip
-  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning
+  primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
+                SegmentedControl, DataList/Figure, Tooltip
+  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
   motion/       Backdrop (three.js), Reveal, AnimatedNumber
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
-hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible
+hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible, useDebounced
 lib/            api, cn, queries, redirect, tint, and three/ for the backdrop's maths and shaders
 ```
 
@@ -1163,6 +1164,17 @@ registered behind it silently never runs.
   accepting a sixth boost role the Discord panel cannot render is exactly the drift this prevents.
 - **A list is replaced whole, not patched.** `PUT /boosts` takes the entire array, because the control is a
   multi-select whose value _is_ the list: one request, and no add-then-remove race between two open tabs.
+- **A whole-document answer is only trusted while it is the only write in flight.** The settings sections and the
+  command toggles each answer with the entire list, and the order those answers arrive in says nothing about the
+  order the server applied them — a slow one carries a snapshot taken before a later click and would put that
+  click's control back where it was. Every mutation that writes a shared cache key therefore declares the same
+  `mutationKey` and guards `setQueryData` with `client.isMutating({ mutationKey }) === 1`, ending the burst in an
+  `invalidateQueries` so a read decides. A mutation is counted as pending across `onMutate`, `onSuccess` and
+  `onSettled` — verified in `@tanstack/query-core`'s `mutation.ts`, not assumed. Both are pinned by tests that
+  were proved to go red without the guard.
+- **A control that is typed into does not write the URL per keystroke.** `?q=` is written with `replace: true`,
+  or Back walks the user back through every character, and the request behind it is debounced (`useDebounced`) so
+  a five-character search is one query rather than five. Confirmed in a real browser, not in jsdom.
 - **Every mutation writes an audit record, after the change succeeds.** If the audit write itself fails it is
   logged and the request still succeeds — the change did happen, and failing over the bookkeeping is worse.
 - **The API starts after `client.login()`** and closes in `src/core/shutdown.ts`. Both matter: before login the
@@ -1226,6 +1238,17 @@ the same 24px inline padding so every card's content starts on the same column w
 that reaches for `p-4` puts its text 8px left of the rest of the page. Vertical rhythm is one `gap-6` on the
 content column in `AppShell`, not a margin per section. Both are pinned by tests, and both were found by
 measuring the rendered page rather than by looking at it.
+
+A margin between siblings is nearly always the wrong tool — a flex column with a `gap` is the right one, because
+it cannot leave a stray margin behind when a sibling is conditionally absent. **A grid of panels wants
+`items-start`** unless the cards genuinely should match heights: without it the shorter card stretches, and the
+dead space inside its border is the "massive gap" that keeps getting reported. The one legitimate margin is
+inside a CSS `columns` layout, where `gap` does not apply between items at all (`EventGroup`'s `mb-5`).
+
+**Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
+places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
+`LABEL` / `CHECK_ROW` class strings exist so a control's semantics and its type scale are each written once.
+Before writing a local `Row`, `Figure` or picker in a feature directory, check `components/primitives`.
 
 ### The accessibility floor is automated, the rest is not
 

@@ -1,10 +1,8 @@
 import { SETTINGS_LIMITS } from "@testify/shared";
 
 /**
- * Why a prefix cannot be saved, in the words shown under the field.
- *
- * The same three rules the API enforces: a prefix of pure whitespace matches every message, one with a space
- * inside can never be typed, and Discord's own commands start with `/`.
+ * Why a prefix cannot be saved, in the words shown under the field — the same three rules the API enforces:
+ * pure whitespace matches every message, a space inside can never be typed, and `/` collides with Discord's own.
  */
 export function prefixProblem(value: string): string | null {
 	const trimmed = value.trim();

@@ -1,7 +1,7 @@
 import { LEVEL_LIMITS, type LevelRewardInput } from "@testify/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { FIELD, savingStateOf, Warning } from "@/components/form";
+import { FIELD, LABEL, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
@@ -55,7 +55,7 @@ export function RewardsTab({
 			)}
 
 			<div className="flex flex-wrap items-end gap-2">
-				<label className="text-muted-foreground text-[0.8125rem] font-medium">
+				<label className={LABEL}>
 					Level
 					<input
 						type="number"
@@ -69,7 +69,7 @@ export function RewardsTab({
 						className={cn(FIELD, "mt-1 w-24")}
 					/>
 				</label>
-				<label className="text-muted-foreground min-w-48 flex-1 text-[0.8125rem] font-medium">
+				<label className={cn(LABEL, "min-w-48 flex-1")}>
 					Role
 					<select
 						value={roleId}

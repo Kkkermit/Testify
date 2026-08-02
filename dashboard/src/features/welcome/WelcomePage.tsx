@@ -2,7 +2,7 @@ import { WELCOME_LIMITS, type WelcomeStyle } from "@testify/shared";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, FIELD, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
+import { ChannelPicker, FIELD, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button, Card, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
@@ -74,7 +74,7 @@ export function WelcomePage(): React.JSX.Element {
 				/>
 
 				<fieldset className="flex flex-col gap-2">
-					<legend className="text-muted-foreground text-[0.8125rem] font-medium">Sent as</legend>
+					<legend className={LABEL}>Sent as</legend>
 					<div className="grid gap-2 sm:grid-cols-3">
 						{STYLE_ORDER.map((style) => (
 							<StyleChoice
@@ -91,7 +91,7 @@ export function WelcomePage(): React.JSX.Element {
 
 				<div className="flex flex-col gap-2">
 					{/* The counter is a status, not part of the field's name, so it sits outside the label. */}
-					<label htmlFor="welcome-message" className="text-muted-foreground text-[0.8125rem] font-medium">
+					<label htmlFor="welcome-message" className={LABEL}>
 						Message
 					</label>
 					<textarea

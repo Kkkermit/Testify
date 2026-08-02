@@ -1,9 +1,10 @@
 import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
 import { Pause, Play, Search } from "lucide-react";
 import { FIELD, Warning } from "@/components/form";
-import { Button, Card, Skeleton } from "@/components/primitives";
+import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
 import { LogLines } from "@/features/owner/components/LogLines";
 import { useLogs } from "@/features/owner/useOwner";
+import { useDebounced } from "@/hooks/useDebounced";
 import { cn } from "@/lib/cn";
 
 /**
@@ -11,14 +12,16 @@ import { cn } from "@/lib/cn";
  * whether a CSS transform changes an element's accessible name — and a control named "error" in one browser
  * and "Error" in another is a control nobody can write a reliable instruction for.
  */
-const LEVELS: Record<ReportedLogLevel, { label: string; describes: string }> = {
-	trace: { label: "All", describes: "Every line the bot writes" },
-	debug: { label: "Debug", describes: "Debug and above" },
-	info: { label: "Info", describes: "Start-up and routine notices" },
-	warn: { label: "Warnings", describes: "Warnings and worse" },
-	error: { label: "Errors", describes: "Failures only" },
-	fatal: { label: "Fatal", describes: "Only what stopped the bot" },
+const LEVELS: Record<ReportedLogLevel, Omit<Segment<ReportedLogLevel>, "value">> = {
+	trace: { label: "All", hint: "Every line the bot writes" },
+	debug: { label: "Debug", hint: "Debug and above" },
+	info: { label: "Info", hint: "Start-up and routine notices" },
+	warn: { label: "Warnings", hint: "Warnings and worse" },
+	error: { label: "Errors", hint: "Failures only" },
+	fatal: { label: "Fatal", hint: "Only what stopped the bot" },
 };
+
+const LEVEL_SEGMENTS = LOG_LEVELS.map((level) => ({ value: level, ...LEVELS[level] }));
 
 /**
  * The bot's own log, held in memory rather than in the database — a restart clears it, which is the trade for a
@@ -39,7 +42,8 @@ export function LogsTab({
 	onSearch: (search: string) => void;
 	onPause: (paused: boolean) => void;
 }): React.JSX.Element {
-	const logs = useLogs(level, search, paused);
+	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
+	const logs = useLogs(level, useDebounced(search), paused);
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -62,25 +66,7 @@ export function LogsTab({
 					/>
 				</label>
 
-				<div role="group" aria-label="Minimum level" className="border-border flex rounded-lg border p-0.5">
-					{LOG_LEVELS.map((option) => (
-						<button
-							key={option}
-							type="button"
-							aria-pressed={level === option}
-							title={LEVELS[option].describes}
-							onClick={() => {
-								onLevel(option);
-							}}
-							className={cn(
-								"rounded-md px-2.5 py-1 text-sm transition-colors duration-150",
-								level === option ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground",
-							)}
-						>
-							{LEVELS[option].label}
-						</button>
-					))}
-				</div>
+				<SegmentedControl label="Minimum level" segments={LEVEL_SEGMENTS} value={level} onChange={onLevel} />
 
 				<Button
 					variant="ghost"

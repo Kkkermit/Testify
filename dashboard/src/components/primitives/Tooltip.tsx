@@ -4,15 +4,10 @@ import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import "tippy.js/dist/tippy.css";
 
 /**
- * Every tooltip in the dashboard goes through here, so the theme, the delay and the accessibility contract are
- * set once rather than per call site.
- *
- * A tooltip **describes**; it never names. Anything it says has to be an addition to a control that already has
- * an accessible name of its own, because a pointer-only affordance is invisible to anyone who reaches the
- * control another way.
- *
- * It drives tippy.js directly rather than through `@tippyjs/react`, which reads `element.ref` — a property
- * React 19 removed.
+ * A tooltip describes; it never names. Anything it says must be an addition to a control that already has its
+ * own accessible name, because a pointer-only affordance is invisible to anyone arriving another way — hence
+ * `describedby` and a `focusin` trigger below. Drives tippy.js directly: `@tippyjs/react` reads `element.ref`,
+ * which React 19 removed.
  */
 export function Tooltip({
 	label,

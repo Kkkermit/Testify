@@ -9,10 +9,8 @@ const DESCRIBES: Record<CommandAvailability, string> = {
 };
 
 /**
- * One switch per command.
- *
- * Locked and bot-wide-off both render disabled, and the reason is on the control rather than in a footnote —
- * a switch that silently does nothing is the thing this avoids.
+ * Locked and bot-wide-off both render disabled with the reason on the control rather than in a footnote — a
+ * switch that silently does nothing is the thing this avoids.
  */
 export function CommandSwitch({
 	name,
