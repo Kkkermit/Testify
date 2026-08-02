@@ -20,6 +20,9 @@ export function defineMessageHandler(handler: MessageHandler): MessageHandler {
 }
 
 export async function runMessageHandlers(message: Message, client: TestifyClient): Promise<void> {
+	// Paused means paused: no XP, no counting, no automod, no prefix commands.
+	if (client.paused) return;
+
 	for (const handler of client.messageHandlers) {
 		if (message.author.bot && !handler.allowBots) continue;
 

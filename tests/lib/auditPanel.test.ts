@@ -337,3 +337,21 @@ describe("the saved panel", () => {
 		}
 	});
 });
+
+describe("the dashboard pointer", () => {
+	/** A link to nothing is worse than no link, so it only appears when the dashboard is switched on. */
+	it("is absent when there is no hint", () => {
+		const message = auditPanel({ channelId: "400000000000000001", enabled: ["all"] }, OWNER);
+
+		expect(textOf(message)).not.toContain("in a browser");
+	});
+
+	it("appears above the controls when there is one", () => {
+		const message = auditPanel(
+			{ channelId: "400000000000000001", enabled: ["all"], hint: "You can also set this up in a browser: https://x" },
+			OWNER,
+		);
+
+		expect(textOf(message)).toContain("https://x");
+	});
+});

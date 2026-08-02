@@ -50,6 +50,18 @@ export class TestifyClient extends Client {
 	 */
 	api: { close(): Promise<void> } | null = null;
 
+	/**
+	 * True while the owner has paused the bot from the dashboard.
+	 *
+	 * A flag rather than a gateway disconnect: `Client#destroy()` nulls the token and tears down the websocket
+	 * workers, and whether the same instance can be logged back in is not something to find out on a live bot.
+	 * Paused refuses every command, skips every message handler and shows the bot as invisible, which is what
+	 * "stopped" means to a server — and it is reversible from the same screen that set it.
+	 */
+	paused = false;
+
+	pausedAt: number | null = null;
+
 	constructor(env: Env, logger: Logger) {
 		super({ intents, partials });
 		this.env = env;

@@ -120,6 +120,10 @@ refusal in one section leaves the other four alone. Two details worth copying:
 - **Every write answers with the whole settings document.** One response keeps the page consistent, so a section
   that refuses cannot leave the rest of the screen showing a value the bot does not have.
 
+**Per-command switches are done** as well, in both scopes: a server can turn a command off for itself, and the
+owner can turn one off everywhere. `checks.ts` is the gate — hiding a switch is not access control — and
+`ALWAYS_ENABLED` keeps `/help` reachable so a server cannot lock itself out.
+
 Still to do: automod, sticky, treasure, verification, tickets and lottery — extracting any logic still living
 inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
 
@@ -142,8 +146,19 @@ inside a command `run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.
 
 **Done when:** you can answer "which of my servers is misconfigured" in one screen.
 
-**Built:** the four-tab console — fleet stats and the guild table, command-usage analytics, the log feed and a
-runtime card. **Still to do:** leave guild, blacklist and the command runner.
+**Built:** the six-tab console — fleet stats and a clickable guild table, command-usage analytics, per-command
+switches, a searchable log feed at every level, a runtime card, and pause / rename / shut down.
+**Still to do:** leave guild, blacklist and the generated command runner.
+
+Two things the control tab settled, both worth recording because they are properties of the architecture rather
+than choices:
+
+- **There is no "start the bot".** The HTTP server is inside the bot process, so a stopped bot cannot serve the
+  button that would start it. Pause is a flag honoured by `runChecks` and `runMessageHandlers`, which is what
+  "stopped" means to a server and is reversible from the same screen; shutting down is real and says plainly
+  that only the host can undo it.
+- **Discord has no per-guild avatar for bots.** The global name and picture are owner-only; a manager gets a
+  per-server nickname and nothing else. A per-guild picture control would be a button that cannot work.
 
 Open question 3 is answered: the ring buffer is worth it, and it turned out to be a pino `logMethod` hook
 rather than a transport, which is a dozen lines. Three things it settled:
@@ -156,7 +171,12 @@ rather than a transport, which is a dozen lines. Three things it settled:
   shoulder than a terminal, and a line that was never stored with a connection string in it cannot leak one
   through a future endpoint.
 
-### Phase 6 — Polish (~1 week)
+### Phase 6 — Polish (~1 week) — **partly done**
+
+Terms and privacy pages are built, and they sit **outside** `RequireAuth`: somebody deciding whether to add the
+bot has to be able to read them before signing in. Both are written for a self-hosted bot — the operator is
+whoever runs the instance, not the project — and the privacy notice lists what is actually stored, with tests
+pinning the four claims the code has to keep true.
 
 - Full accessibility pass: screen reader, 200% zoom, reduced motion, greyscale. The automated half is done.
 - Bundle budget check (<200 kB gzipped first load). **Measured at 152 kB** — vendor is 136 kB of it, and three

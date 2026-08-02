@@ -2,6 +2,7 @@ import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Skeleton, StatTile } from "@/components/primitives";
+import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
 import { Pager } from "@/features/owner/components/Pager";
 import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
@@ -16,6 +17,8 @@ export function OverviewTab(): React.JSX.Element {
 	const guilds = useOwnerGuilds(page);
 
 	if (health.isError) return <ErrorState error={health.error} onRetry={() => void health.refetch()} />;
+
+	const selected = params.get("server");
 
 	const stats = health.data;
 
@@ -58,10 +61,33 @@ export function OverviewTab(): React.JSX.Element {
 					Servers
 				</h2>
 
+				{selected !== null && (
+					<GuildDetail
+						guildId={selected}
+						onClose={() => {
+							setParams((current) => {
+								const merged = new URLSearchParams(current);
+								merged.delete("server");
+								return merged;
+							});
+						}}
+					/>
+				)}
+
 				{guilds.data === undefined ? (
 					<Skeleton className="h-64 w-full" />
 				) : (
-					<OwnerGuildTable guilds={guilds.data.items} />
+					<OwnerGuildTable
+						guilds={guilds.data.items}
+						selected={selected}
+						onSelect={(guildId) => {
+							setParams((current) => {
+								const merged = new URLSearchParams(current);
+								merged.set("server", guildId);
+								return merged;
+							});
+						}}
+					/>
 				)}
 
 				<Pager

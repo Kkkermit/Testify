@@ -4,6 +4,7 @@ import { PageHeader, TabBar } from "@/components/primitives";
 import { CommandsPage } from "@/features/commands/CommandsPage";
 import { OWNER_TABS, ownerTabFrom } from "@/features/owner/owner.types";
 import { levelFrom, windowFrom } from "@/features/owner/owner.utils";
+import { ControlTab } from "@/features/owner/tabs/ControlTab";
 import { LogsTab } from "@/features/owner/tabs/LogsTab";
 import { OverviewTab } from "@/features/owner/tabs/OverviewTab";
 import { RuntimeTab } from "@/features/owner/tabs/RuntimeTab";
@@ -71,6 +72,7 @@ export function OwnerPage(): React.JSX.Element {
 			)}
 			{tab === "commands" && <CommandsPage scope="global" />}
 			{tab === "runtime" && <RuntimeTab />}
+			{tab === "control" && <ControlTab />}
 		</>
 	);
 }

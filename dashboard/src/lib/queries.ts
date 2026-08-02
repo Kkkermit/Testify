@@ -13,6 +13,7 @@ export const keys = {
 		welcome: () => ["guild", id, "welcome"] as const,
 		auditLog: () => ["guild", id, "audit-log"] as const,
 		settings: () => ["guild", id, "settings"] as const,
+		nickname: () => ["guild", id, "nickname"] as const,
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,
@@ -23,5 +24,7 @@ export const keys = {
 		usage: (days: number) => ["owner", "usage", days] as const,
 		logs: (level: string, search: string) => ["owner", "logs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,
+		control: () => ["owner", "control"] as const,
+		guildDetail: (id: string) => ["owner", "guild", id] as const,
 	},
 };

@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
 import { Backdrop } from "@/components/motion";
@@ -62,6 +62,18 @@ export function SignInPage(): React.JSX.Element {
 					</p>
 				</div>
 			</Card>
+
+			<p className="text-muted-foreground text-xs">
+				By signing in you agree to the{" "}
+				<Link to="/terms" className="hover:text-foreground underline">
+					terms of use
+				</Link>
+				. What Testify stores is set out in the{" "}
+				<Link to="/privacy" className="hover:text-foreground underline">
+					privacy notice
+				</Link>
+				.
+			</p>
 		</main>
 	);
 }

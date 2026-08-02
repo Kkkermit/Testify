@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
@@ -29,6 +30,8 @@ import {
 	type CountingPatch,
 	countingPatch,
 	DEFAULT_BYPASS,
+	type GuildNickname,
+	nicknamePatch,
 	isBypassPermission,
 	type PrefixPatch,
 	prefixPatch,
@@ -89,6 +92,56 @@ async function settingsOf(guildId: string): Promise<ServerSettings> {
 }
 
 settings.get("/", async (context) => context.json(await settingsOf(guildIdOf(context))));
+
+function guildOf(context: ApiContext) {
+	const guild = context.get("guild");
+	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+
+	return guild;
+}
+
+/**
+ * The bot's nickname in this server — the only part of its appearance a manager may change, because Discord
+ * has no per-guild avatar for bots. The global name and picture belong to the owner console.
+ */
+settings.get("/nickname", (context) => {
+	const me = guildOf(context).members.me;
+
+	const body: GuildNickname = {
+		nickname: me?.nickname ?? null,
+		canChange: me?.permissions.has(PermissionFlagsBits.ChangeNickname) ?? false,
+	};
+
+	return context.json(body);
+});
+
+settings.patch("/nickname", async (context) => {
+	const guild = guildOf(context);
+	const { nickname } = await parseBody(context, nicknamePatch);
+	const me = guild.members.me;
+
+	if (me === null) throw notFound("guild_not_found", "Testify is not in that server.");
+
+	// Surfaced rather than left to fail at Discord, so the message names the permission to grant.
+	if (!me.permissions.has(PermissionFlagsBits.ChangeNickname)) {
+		throw badRequest("Testify needs the Change Nickname permission in this server.");
+	}
+
+	try {
+		await me.setNickname(nickname === "" ? null : nickname);
+	} catch (error) {
+		throw badRequest(error instanceof Error ? error.message : "Discord refused that nickname.");
+	}
+
+	await auditChange(context, {
+		action: "settings.nickname",
+		summary: nickname === null || nickname === "" ? "Cleared the bot's nickname" : `Renamed the bot to ${nickname}`,
+		after: { nickname },
+	});
+
+	const body: GuildNickname = { nickname: me.nickname, canChange: true };
+	return context.json(body);
+});
 
 settings.patch("/prefix", async (context) => {
 	const guildId = guildIdOf(context);

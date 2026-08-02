@@ -1063,7 +1063,8 @@ the same shape —
 | `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save            |
 | `/guilds/:id/settings`  | Prefix, link filtering, roles on join, counting, voice stats  |
 | `/commands`             | Every command, searchable, with the coverage tile             |
-| `/owner`                | Four tabs: fleet, usage analytics, logs, runtime — owner only |
+| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately               |
+| `/owner`                | Six tabs: fleet, usage, commands, logs, runtime, control      |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -1320,8 +1321,37 @@ was created. Three things about it are load-bearing:
 **Least-used is ranked over `client.commands`, not over the usage rows.** A command nobody has ever run has no
 row at all, and it is exactly what that list exists to surface.
 
-**The log ring is in memory and redacts on the way in.** `src/core/logRing.ts` keeps the last 250 lines at info
-and above, fed by a pino `logMethod` hook rather than a second transport. A dashboard page is a much easier
+**Commands can be switched off, in one server or everywhere.** `commandtoggles` holds one row per scope, keyed
+by guild id with `GLOBAL` as the bot-wide row — a Discord id is 17-20 digits, so the sentinel cannot collide.
+Four things about it are load-bearing:
+
+- **`checks.ts` is the gate.** Hiding a switch is not access control and neither is a greyed-out control; the
+  refusal runs before the command body on both surfaces, and there are tests proved able to fail.
+- **Nobody bypasses it, the bot owner included.** "Off" that quietly still runs for one person is a much worse
+  thing to debug than one that is simply off, and the dashboard is one click away for whoever turned it off.
+- **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
+  that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
+- **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
+  out, so a hand-written request cannot make one visible or switch one off.
+
+**There is no "start the bot", and that is structural.** The HTTP server lives inside the bot process, so a
+stopped bot has nothing left to serve a start button. What exists instead:
+
+- **Pause** sets `client.paused`, which `runChecks` and `runMessageHandlers` both honour, and drops the presence
+  to invisible. Reversible from the same screen. A flag rather than `client.destroy()`, because destroy nulls
+  the token and tears down the websocket workers, and whether the same instance can log back in is not a thing
+  to find out on somebody's live bot.
+- **Shut down** really ends the process, behind a typed confirmation, and says on screen that only the host can
+  start it again.
+
+**The bot's picture is global; only its nickname is per-server.** Discord has no per-guild avatar for bots, so
+`PATCH /api/control/identity` is owner-only and application-wide, while `PATCH /guilds/:id/settings/nickname`
+is what a manager gets. Do not add a per-guild avatar control — it cannot work.
+
+**The log ring is in memory and redacts on the way in.** `src/core/logRing.ts` keeps the last 1,000 lines at
+**every** level, fed by a pino `logMethod` hook rather than a second transport — pino never calls the hook below
+its own level, so `LOG_LEVEL` still decides what exists at all, and the console says so rather than showing an
+empty list. Search matches the message _and_ the stringified context, so a guild id finds every line about it. A dashboard page is a much easier
 thing to read over someone's shoulder than a terminal, so any context key matching
 `token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is replaced before the record
 is stored — not before it is served. A restart clears the buffer, which is the trade for something that needs

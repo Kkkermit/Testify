@@ -4,6 +4,7 @@ import { AppShell } from "@/app/AppShell";
 import { RequireAuth } from "@/app/RequireAuth";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
+import { PRIVACY, TERMS } from "@/features/legal/legal.content";
 
 // Lazy per route, so a server manager never downloads the owner console.
 const GuildPickerPage = lazy(async () => ({
@@ -21,6 +22,7 @@ const WelcomePage = lazy(async () => ({
 const AuditLogPage = lazy(async () => ({
 	default: (await import("@/features/audit-log/AuditLogPage")).AuditLogPage,
 }));
+const LegalPage = lazy(async () => ({ default: (await import("@/features/legal/LegalPage")).LegalPage }));
 const SettingsPage = lazy(async () => ({
 	default: (await import("@/features/settings/SettingsPage")).SettingsPage,
 }));
@@ -40,6 +42,9 @@ function lazily(element: React.JSX.Element): React.JSX.Element {
 export const routes = [
 	{ path: "/", element: <Navigate to="/guilds" replace /> },
 	{ path: "/sign-in", element: <SignInPage /> },
+	// Outside RequireAuth: somebody deciding whether to add the bot has to be able to read these first.
+	{ path: "/terms", element: lazily(<LegalPage document={TERMS} />) },
+	{ path: "/privacy", element: lazily(<LegalPage document={PRIVACY} />) },
 	{
 		element: <RequireAuth />,
 		children: [

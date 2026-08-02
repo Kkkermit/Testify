@@ -3,6 +3,7 @@ export * from "./api";
 export * from "./auditLog";
 export * from "./commands";
 export * from "./commandToggles";
+export * from "./control";
 export * from "./levelling";
 export * from "./permissions";
 export * from "./schemas";

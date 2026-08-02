@@ -47,9 +47,16 @@ const OWNER = "100000000000000001";
 const CHANNEL = "400000000000000001";
 const ROLE = "300000000000000001";
 
-function app(): Hono<ApiBindings> {
+const setNickname = jest.fn(() => Promise.resolve({}));
+
+function app(canRename = true): Hono<ApiBindings> {
+	const guild = {
+		id: GUILD,
+		name: "Test Server",
+		members: { me: { nickname: "Testy", permissions: { has: () => canRename }, setNickname } },
+	};
 	const client = {
-		guilds: { cache: new Collection<string, unknown>([[GUILD, { id: GUILD, name: "Test Server" }]]) },
+		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
 		isOwner: (id: string) => id === OWNER,
 		logger: { error: jest.fn() },
 	} as unknown as TestifyClient;
@@ -85,6 +92,7 @@ async function read(): Promise<ServerSettings> {
 
 beforeEach(() => {
 	jest.clearAllMocks();
+	setNickname.mockClear();
 	jest.mocked(getPrefixConfig).mockResolvedValue({ prefix: "t?", isEnabled: true });
 	jest.mocked(getAntiLink).mockResolvedValue(null);
 	jest.mocked(getAutoRoles).mockResolvedValue(null);
@@ -282,5 +290,50 @@ describe("every write", () => {
 		expect(recordAudit).toHaveBeenCalledWith(
 			expect.objectContaining({ action: "settings.prefix", summary: "Turned prefix commands off" }),
 		);
+	});
+});
+
+describe("the bot's nickname in this server", () => {
+	it("reports the current one and whether it can be changed", async () => {
+		const body = (await (await send("GET", "/nickname")).json()) as { nickname: string; canChange: boolean };
+
+		expect(body).toEqual({ nickname: "Testy", canChange: true });
+	});
+
+	it("sets a new one", async () => {
+		await send("PATCH", "/nickname", { nickname: "Helper" });
+
+		expect(setNickname).toHaveBeenCalledWith("Helper");
+	});
+
+	/** Null and empty both mean "go back to the bot's own name", and only null does that at Discord. */
+	it("clears it with null or an empty string", async () => {
+		await send("PATCH", "/nickname", { nickname: null });
+		expect(setNickname).toHaveBeenCalledWith(null);
+
+		setNickname.mockClear();
+		await send("PATCH", "/nickname", { nickname: "" });
+		expect(setNickname).toHaveBeenCalledWith(null);
+	});
+
+	it("rejects one longer than Discord accepts", async () => {
+		expect((await send("PATCH", "/nickname", { nickname: "x".repeat(33) })).status).toBe(400);
+		expect(setNickname).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Surfaced rather than left to fail at Discord, so the message names the permission to grant rather than
+	 * repeating a gateway error nobody can act on.
+	 */
+	it("refuses when the bot cannot change its own nickname there", async () => {
+		const response = await app(false).request(`/guilds/${GUILD}/settings/nickname`, {
+			method: "PATCH",
+			headers: { "content-type": "application/json" },
+			body: JSON.stringify({ nickname: "Helper" }),
+		});
+
+		expect(response.status).toBe(400);
+		expect(await response.text()).toContain("Change Nickname");
+		expect(setNickname).not.toHaveBeenCalled();
 	});
 });

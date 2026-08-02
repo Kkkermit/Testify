@@ -1,6 +1,8 @@
 import {
 	type AuditLogConfigResponse,
+	type BotControlState,
 	type BotIdentity,
+	type OwnerGuildDetail,
 	type ChannelSummary,
 	type CommandCatalogue,
 	type CommandToggleState,
@@ -8,6 +10,7 @@ import {
 	type RuntimeInfo,
 	type ServerSettings,
 	type UsageReport,
+	type GuildNickname,
 	type GuildOverview,
 	type LevelConfigResponse,
 	type HealthResponse,
@@ -107,6 +110,27 @@ export const serverSettings: ServerSettings = {
 	counting: { enabled: true, channelId: "400000000000000001", maxCount: 1_000, count: 412 },
 	voiceStats: { memberChannelId: null, botChannelId: null },
 };
+
+export const botControl: BotControlState = { gateway: "online", since: null, guilds: 3, pingMs: 42 };
+
+export const guildDetail: OwnerGuildDetail = {
+	id: aGuild.id,
+	name: aGuild.name,
+	iconUrl: null,
+	memberCount: 1_234,
+	channelCount: 20,
+	roleCount: 8,
+	joinedAt: "2026-01-01T00:00:00.000Z",
+	createdAt: "2025-01-01T00:00:00.000Z",
+	ownerId: "700000000000000001",
+	nickname: "Testy",
+	highestRole: "Bots",
+	missingPermissions: ["Manage Roles"],
+	configured: ["levelling"],
+	usage: 900,
+};
+
+export const guildNickname: GuildNickname = { nickname: "Testy", canChange: true };
 
 export const usageReport: UsageReport = {
 	days: 30,
@@ -223,6 +247,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
+	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
@@ -230,4 +255,17 @@ export const handlers = [
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
 	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
+	http.get("/api/control", () => HttpResponse.json(botControl)),
+	http.get("/api/control/guilds/:guildId", () => HttpResponse.json(guildDetail)),
+	http.get("/api/owner/stats", () =>
+		HttpResponse.json({
+			guilds: 3,
+			users: 4_200,
+			uptimeMs: 90_000_000,
+			memoryMb: 128,
+			commands: 76,
+			database: "connected",
+		}),
+	),
+	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
 ];

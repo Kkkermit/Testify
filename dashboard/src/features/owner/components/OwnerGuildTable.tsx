@@ -1,7 +1,16 @@
 import { type OwnerGuildRow } from "@testify/shared";
 import { Badge, Card, GuildIcon } from "@/components/primitives";
+import { cn } from "@/lib/cn";
 
-export function OwnerGuildTable({ guilds }: { guilds: OwnerGuildRow[] }): React.JSX.Element {
+export function OwnerGuildTable({
+	guilds,
+	selected,
+	onSelect,
+}: {
+	guilds: OwnerGuildRow[];
+	selected?: string | null;
+	onSelect?: (guildId: string) => void;
+}): React.JSX.Element {
 	return (
 		<Card padding="none" className="overflow-x-auto">
 			<table className="w-full text-sm">
@@ -21,12 +30,33 @@ export function OwnerGuildTable({ guilds }: { guilds: OwnerGuildRow[] }): React.
 				</thead>
 				<tbody className="divide-border divide-y">
 					{guilds.map((guild) => (
-						<tr key={guild.id} className="hover:bg-muted/40 transition-colors duration-150">
+						<tr
+							key={guild.id}
+							className={cn(
+								"transition-colors duration-150",
+								selected === guild.id ? "bg-muted/60" : "hover:bg-muted/40",
+							)}
+						>
 							<td className="px-6 py-3">
-								<span className="flex items-center gap-2">
-									<GuildIcon name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
-									<span className="truncate">{guild.name}</span>
-								</span>
+								{onSelect === undefined ? (
+									<span className="flex items-center gap-2">
+										<GuildIcon name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
+										<span className="truncate">{guild.name}</span>
+									</span>
+								) : (
+									// A button rather than a clickable row: a row is not focusable and announces nothing.
+									<button
+										type="button"
+										aria-pressed={selected === guild.id}
+										onClick={() => {
+											onSelect(guild.id);
+										}}
+										className="hover:text-primary flex items-center gap-2 text-left transition-colors duration-150"
+									>
+										<GuildIcon name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
+										<span className="truncate">{guild.name}</span>
+									</button>
+								)}
 							</td>
 							<td className="px-6 py-3 text-right font-mono tabular-nums">{guild.memberCount.toLocaleString()}</td>
 							<td className="px-6 py-3">

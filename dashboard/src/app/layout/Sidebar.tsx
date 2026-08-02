@@ -98,6 +98,16 @@ export function Sidebar({
 					</div>
 				)}
 
+				{/* Small, at the bottom, and always reachable — but never competing with the navigation above it. */}
+				<div className={cn("flex gap-2 px-2 pb-1 text-xs", expanded ? "" : "hidden lg:flex")}>
+					<Link to="/terms" className="text-muted-foreground hover:text-foreground transition-colors duration-150">
+						Terms
+					</Link>
+					<Link to="/privacy" className="text-muted-foreground hover:text-foreground transition-colors duration-150">
+						Privacy
+					</Link>
+				</div>
+
 				<Tooltip label="Sign out of the dashboard" placement="right">
 					<button
 						type="button"

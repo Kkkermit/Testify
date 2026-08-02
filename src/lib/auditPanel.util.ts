@@ -33,6 +33,8 @@ export interface AuditPanelState {
 	enabled: string[];
 	/** True when the panel is showing edits that are not in the database yet. */
 	dirty?: boolean;
+	/** Where the same thing can be configured in a browser, when the dashboard is switched on. */
+	hint?: string | null;
 }
 
 /** What the admin has picked in one message, before Save writes it. */
@@ -118,6 +120,7 @@ export function auditPanel(state: AuditPanelState, ownerId: string): ContainerMe
 			category: "settings",
 			parts: [
 				text(summary(state)),
+				...(typeof state.hint === "string" ? [text(`-# ${state.hint}`)] : []),
 				divider(),
 				row(
 					channelSelect({

@@ -17,6 +17,10 @@ export async function runChecks(
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
+	if (client.paused) {
+		return "Testify is paused right now. The bot owner can resume it from the dashboard.";
+	}
+
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
 	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
 

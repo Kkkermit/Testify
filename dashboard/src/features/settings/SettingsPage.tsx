@@ -6,6 +6,7 @@ import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { AntiLinkSection } from "@/features/settings/sections/AntiLinkSection";
 import { AutoRoleSection } from "@/features/settings/sections/AutoRoleSection";
 import { CountingSection } from "@/features/settings/sections/CountingSection";
+import { NicknameSection } from "@/features/settings/sections/NicknameSection";
 import { PrefixSection } from "@/features/settings/sections/PrefixSection";
 import { VoiceStatsSection } from "@/features/settings/sections/VoiceStatsSection";
 import { useSettings } from "@/features/settings/useSettings";
@@ -42,6 +43,7 @@ export function SettingsPage(): React.JSX.Element {
 
 			<div className="grid items-start gap-4 lg:grid-cols-2">
 				<PrefixSection guildId={guildId} value={value.prefix} />
+				<NicknameSection guildId={guildId} />
 				<AntiLinkSection guildId={guildId} value={value.antiLink} />
 				<AutoRoleSection guildId={guildId} value={value.autoRoles} roles={roles.data ?? []} />
 				<CountingSection {...shared} value={value.counting} />

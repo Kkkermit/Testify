@@ -12,6 +12,7 @@ import { customId } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { type Command, subcommandsOf } from "@core/command";
 import { button, linkButton, row, select, selectRow } from "@lib/components.util";
+import { dashboardUrl } from "@lib/dashboard.util";
 import { embed } from "@lib/embeds.util";
 import { truncate } from "@lib/format.util";
 
@@ -79,10 +80,24 @@ export function helpHome(client: TestifyClient, surface: Surface, prefix: string
 				name: "📂 Categories",
 				value: `> ${categories.map((category) => `${categoryEmoji(category)} **${categoryLabel(category)}**`).join(" • ")}`,
 			},
+			...dashboardField(client),
 			{ name: "💬 Feedback", value: "> Use `/suggest` or `/bug-report` to tell me what to fix next." },
 		],
 		footer: `Showing ${surface === "slash" ? "slash" : "prefix"} commands`,
 	});
+}
+
+/** Only when the dashboard is actually running: a link to nothing is worse than no link. */
+function dashboardField(client: TestifyClient): { name: string; value: string }[] {
+	const url = dashboardUrl(client.env);
+	if (url === null) return [];
+
+	return [
+		{
+			name: "🖥️ Set it up in a browser",
+			value: `> Everything below can be configured at ${url} — sign in with Discord and pick your server.`,
+		},
+	];
 }
 
 /** One page of one category. */
