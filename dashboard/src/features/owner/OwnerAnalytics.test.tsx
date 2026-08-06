@@ -223,7 +223,7 @@ describe("the runtime tab", () => {
 
 		// The version appears in the table and again in the update note, so both are expected.
 		expect(await screen.findAllByText("v2.0.0")).toHaveLength(2);
-		expect(screen.getByText("v22.22.2")).toBeInTheDocument();
+		expect(screen.getByText("v24.19.0")).toBeInTheDocument();
 		expect(screen.getByText("v14.27.0")).toBeInTheDocument();
 	});
 

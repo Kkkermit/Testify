@@ -10,7 +10,7 @@ npm run setup   # writes a .env
 npm run dev
 ```
 
-You need Node 22.11 or newer and a MongoDB you can connect to. Set
+You need Node 24.11 or newer and a MongoDB you can connect to. Set
 `DISCORD_DEV_GUILD_ID` to a test server so your commands appear immediately.
 
 ## Before you open a pull request

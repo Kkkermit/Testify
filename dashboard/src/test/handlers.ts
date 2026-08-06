@@ -192,7 +192,7 @@ export const logFeed: LogFeed = {
 
 export const runtimeInfo: RuntimeInfo = {
 	version: "2.0.0",
-	nodeVersion: "v22.22.2",
+	nodeVersion: "v24.19.0",
 	discordVersion: "14.27.0",
 	platform: "linux x64",
 	environment: "production",

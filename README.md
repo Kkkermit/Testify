@@ -18,7 +18,7 @@
 <p align="center">
 <img align="center" alt="CI" src="https://img.shields.io/github/actions/workflow/status/Kkkermit/Testify/ci.yml?style=for-the-badge&label=CI">
 <img align="center" alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white">
-<img align="center" alt="Node" src="https://img.shields.io/badge/node-%3E%3D22.11-5FA04E?style=for-the-badge&logo=node.js&logoColor=white">
+<img align="center" alt="Node" src="https://img.shields.io/badge/node-%3E%3D24.11-5FA04E?style=for-the-badge&logo=node.js&logoColor=white">
 <img align="center" alt="GitHub Version" src="https://img.shields.io/github/package-json/v/Kkkermit/Testify?style=for-the-badge">
 </p>
 
@@ -132,12 +132,12 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 | Version          | Support            | Notes                                        |
 | ---------------- | ------------------ | -------------------------------------------- |
-| 20.x and older   | ❌ Not supported   | `npm install` will refuse to install         |
-| **22.11+ (LTS)** | ✅ **Recommended** | What `.nvmrc` pins and what CI tests against |
-| 23.x / 24.x      | ✅ Supported       | Works, but not what CI runs                  |
+| 22.x and older   | ❌ Not supported   | `npm install` warns with `EBADENGINE`        |
+| **24.11+ (LTS)** | ✅ **Recommended** | What `.nvmrc` pins and what CI tests against |
+| 25.x             | ✅ Supported       | Works, but not what CI runs                  |
 
 > [!IMPORTANT]
-> Testify requires **Node 22.11 or newer**. If you are stuck on an older version, use
+> Testify requires **Node 24.11 or newer**. If you are stuck on an older version, use
 > [nvm](https://github.com/nvm-sh/nvm) — the repo ships a `.nvmrc`, so `nvm use` picks the right version
 > automatically.
 
@@ -149,7 +149,7 @@ newly published vulnerabilities.
 
 ## Quick start
 
-Already have Node 22 and a MongoDB connection string? You are five commands away.
+Already have Node 24 and a MongoDB connection string? You are five commands away.
 
 ```bash
 git clone https://github.com/Kkkermit/Testify.git
@@ -168,7 +168,7 @@ No token or database yet? The next section walks through both from scratch.
 
 ### 1. Install the tools
 
-- **[Node.js 22.11 or newer](https://nodejs.org)** — check yours with `node -v`
+- **[Node.js 24.11 or newer](https://nodejs.org)** — check yours with `node -v`
 - **[Git](https://git-scm.com/downloads)**
 - **A code editor** — [VS Code](https://code.visualstudio.com/download) is a good default
 
@@ -429,7 +429,7 @@ what you use in production. Run `npm run build` first.
 <details>
 <summary><strong>Where should I host it?</strong></summary>
 
-Anywhere that runs Node 22 — a VPS, a Raspberry Pi, Railway, Fly.io, or a machine at home. It needs no inbound
+Anywhere that runs Node 24 — a VPS, a Raspberry Pi, Railway, Fly.io, or a machine at home. It needs no inbound
 ports, so there is no domain or reverse proxy to set up. Use something like `pm2` or a systemd service so it
 restarts itself if it crashes.
 
@@ -474,7 +474,7 @@ not required. The name, colours and links live in `src/config/theme.ts`.
 | `MongoServerError: bad auth`                     | Wrong database password, or `<password>` was left in the connection string                           |
 | `Maximum number of application commands reached` | You are over Discord's limit of 100. Group commands under a shared parent — the error explains how   |
 | `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                               |
-| `EBADENGINE` during install                      | Your Node is older than 22.11. Run `nvm use`                                                         |
+| `EBADENGINE` during install                      | Your Node is older than 24.11. Run `nvm use`                                                         |
 
 Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 [open an issue](https://github.com/Kkkermit/Testify/issues).

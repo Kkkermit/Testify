@@ -48,7 +48,7 @@ with no memory of previous sessions can make a correct change and commit it.
 ## 1. What this project is
 
 **Testify v2** — a multi-purpose Discord bot, written as a full TypeScript rewrite of the original JavaScript
-bot. discord.js v14, MongoDB via Mongoose, Node ≥ 22.11.
+bot. discord.js v14, MongoDB via Mongoose, Node ≥ 24.11.
 
 The defining architectural decision: **one command object serves both the slash and the prefix surface.** The
 original had two near-duplicate implementations of every command; here a command is written once against the
@@ -79,7 +79,7 @@ numbers, which drift):
 ## 2. Getting set up
 
 ```bash
-nvm use                 # or install Node >= 22.11
+nvm use                 # or install Node >= 24.11
 npm ci                  # ALWAYS ci, never install, unless changing dependencies
 npm run setup           # interactive: writes .env
 npm run setup -- --dev  # writes .env.development instead

@@ -42,7 +42,7 @@ body:
     id: node
     attributes:
       label: Node version
-      placeholder: v22.11.0
+      placeholder: v24.11.0
     validations:
       required: true
 

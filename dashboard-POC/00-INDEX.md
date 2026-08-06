@@ -55,7 +55,7 @@ thirteen files.
 
 Written against the bot as it stands on `claude/testify-bot-typescript-rewrite-f35fmu`:
 
-- discord.js v14, Mongoose, Node ≥ 22.11, CommonJS output via `tsup`.
+- discord.js v14, Mongoose, Node ≥ 24.11, CommonJS output via `tsup`.
 - 76 commands in 12 categories; one command object serves both the slash and prefix surfaces.
 - 9 Mongoose schemas with 9 repositories in front of them. **Commands never touch a model directly** — which is
   exactly why an API can reuse them.
