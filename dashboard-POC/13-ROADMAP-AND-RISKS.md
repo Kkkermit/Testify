@@ -130,9 +130,16 @@ than something a channel change implies, and that section alone is not optimisti
 the server agreed would be claiming a message had been sent that may not have been. `publishVerifyPanel` moved
 into `src/lib/verifyActions.util.ts` so the button and the route post the identical panel.
 
-Still to do: automod, sticky, treasure, tickets and lottery — extracting any logic still living inside a command
-`run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`). Sticky is the one that wants its own screen
-rather than a section: it is a list keyed by channel, each with its own message body.
+**Sticky is done**, and it is the first screen here that is a list rather than a form. Two things it settled:
+
+- **A list keyed by something is not a settings section.** One sticky per channel is a unique index underneath,
+  so the channel is the identity: `PUT` upserts, and a channel that already has one is dropped from the add
+  picker rather than refused after the fact.
+- **`DELETE` carries its key in the path.** A proxy is free to drop a body on `DELETE` and some do, so the
+  channel is a path parameter and `api.delete` needs no body at all.
+
+Still to do: automod, treasure, tickets and lottery — extracting any logic still living inside a command
+`run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
 
 **Done when:** every guild-scoped setting the bot has is editable on the web.
 

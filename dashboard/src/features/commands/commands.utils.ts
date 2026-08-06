@@ -13,6 +13,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	counting: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	"voice-stats": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	verify: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
+	sticky: { path: (guildId) => `/guilds/${guildId}/sticky`, screen: "Sticky messages" },
 };
 
 export interface CommandPlace {

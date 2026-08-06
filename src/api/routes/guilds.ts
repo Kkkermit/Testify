@@ -7,6 +7,7 @@ import { auditLog } from "@api/routes/auditLog";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
 import { settings } from "@api/routes/settings";
+import { sticky } from "@api/routes/sticky";
 import { verification } from "@api/routes/verification";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
@@ -19,8 +20,10 @@ import {
 	getCounting,
 	getVoiceCounter,
 	getWelcome,
+	listSticky,
 } from "@database/repositories/settingsRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
+import { canPostInChannel } from "@lib/channels.util";
 import { normaliseSettings } from "@lib/levelling.util";
 import {
 	type AuditEntrySummary,
@@ -44,6 +47,7 @@ guilds.route("/:guildId/welcome", welcome);
 guilds.route("/:guildId/audit-log", auditLog);
 guilds.route("/:guildId/settings", settings);
 guilds.route("/:guildId/commands", guildCommandToggles);
+guilds.route("/:guildId/sticky", sticky);
 guilds.route("/:guildId/verification", verification);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
@@ -79,7 +83,6 @@ guilds.get("/:guildId/overview", async (context) => {
  */
 guilds.get("/:guildId/channels", (context) => {
 	const guild = guildOf(context);
-	const me = guild.members.me;
 
 	const channels = [...guild.channels.cache.values()]
 		.filter((channel) => kindOf(channel) !== "other")
@@ -88,10 +91,7 @@ guilds.get("/:guildId/channels", (context) => {
 			name: channel.name,
 			kind: kindOf(channel),
 			position: "position" in channel ? channel.position : 0,
-			canSend:
-				me !== null &&
-				channel.isTextBased() &&
-				channel.permissionsFor(me).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages]),
+			canSend: canPostInChannel(guild, channel),
 		}))
 		.sort((a, b) => a.position - b.position || a.name.localeCompare(b.name));
 
@@ -151,7 +151,7 @@ function colourOf(role: Role): string | null {
 
 /** One line per feature, read through the repositories so the web and the Discord panels cannot disagree. */
 async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice] = await Promise.all([
+	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
 		getWelcome(guild.id),
@@ -160,6 +160,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		getAutoRoles(guild.id),
 		getVerifyConfig(guild.id),
 		getVoiceCounter(guild.id),
+		listSticky(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -214,6 +215,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Voice stats",
 			enabled: voice !== null,
 			detail: null,
+		},
+		{
+			key: "sticky",
+			label: "Sticky messages",
+			enabled: stickies.length > 0,
+			detail: stickies.length === 0 ? null : count(stickies.length, "channel"),
 		},
 	];
 }

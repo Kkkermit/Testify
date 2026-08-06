@@ -20,6 +20,7 @@ import {
 	type RoleSummary,
 	type SetupStatus,
 	type WelcomeConfigResponse,
+	type StickyList,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -121,6 +122,13 @@ export const serverSettings: ServerSettings = {
 	autoRoles: { roleIds: ["300000000000000001"] },
 	counting: { enabled: true, channelId: "400000000000000001", maxCount: 1_000, count: 412 },
 	voiceStats: { memberChannelId: null, botChannelId: null },
+};
+
+export const stickyList: StickyList = {
+	limit: 25,
+	entries: [
+		{ channelId: "400000000000000001", message: "Read the rules", cap: 5, count: 3, posted: true, canSend: true },
+	],
 };
 
 export const verificationConfig: VerificationConfigResponse = {
@@ -273,6 +281,9 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 	http.get("/api/guilds/:guildId/verification", () => HttpResponse.json(verificationConfig)),
+	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),

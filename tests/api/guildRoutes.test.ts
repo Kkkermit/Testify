@@ -15,6 +15,7 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
 	getWelcome: jest.fn(() => Promise.resolve(null)),
+	listSticky: jest.fn(() => Promise.resolve([])),
 }));
 jest.mock("@database/repositories/verificationRepository", () => ({
 	getVerifyConfig: jest.fn(() => Promise.resolve(null)),

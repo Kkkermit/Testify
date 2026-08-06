@@ -9,6 +9,7 @@ export * from "./markup";
 export * from "./permissions";
 export * from "./schemas";
 export * from "./settings";
+export * from "./sticky";
 export * from "./text";
 export * from "./verification";
 export * from "./welcome";

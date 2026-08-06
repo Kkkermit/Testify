@@ -3,6 +3,7 @@ import {
 	ScrollText,
 	Server,
 	ShieldCheck,
+	Pin,
 	SlidersHorizontal,
 	Terminal,
 	TrendingUp,
@@ -68,6 +69,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					label: "Audit log",
 					icon: ScrollText,
 					hint: "Which server events Testify records",
+				},
+				{
+					to: `/guilds/${guild.id}/sticky`,
+					label: "Sticky",
+					icon: Pin,
+					hint: "Messages Testify keeps at the bottom of a channel",
 				},
 				{
 					to: `/guilds/${guild.id}/settings`,

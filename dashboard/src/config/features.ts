@@ -17,6 +17,7 @@ import {
 	Smile,
 	Sparkles,
 	TrendingUp,
+	Pin,
 	UserPlus,
 	Users,
 	type LucideIcon,
@@ -32,6 +33,12 @@ export interface FeatureLook {
 }
 
 const LOOKS: Record<string, FeatureLook> = {
+	sticky: {
+		icon: Pin,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/sticky`,
+	},
 	levelling: {
 		icon: TrendingUp,
 		tint: "text-feature-levelling",
