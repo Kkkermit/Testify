@@ -7,6 +7,7 @@ import { Section } from "@/features/settings/components/Section";
 import { useSaveVerification, useVerification } from "@/features/settings/useVerification";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 /** Posting the panel is its own button rather than a side effect of choosing a channel, because it is a message in a public channel. */
 export function VerificationSection({
@@ -91,11 +92,13 @@ export function VerificationSection({
 								setDraft(event.target.value);
 							}}
 							onBlur={() => {
-								if (dirty && draft.trim() !== "") save.mutate({ message: draft });
+								if (dirty && draft.trim() !== "") save.mutate({ message: sanitiseInput(draft) });
 							}}
 							className={cn(FIELD, "resize-y")}
 						/>
 					</Field>
+
+					{markupWarning(draft) !== null && <Warning>{markupWarning(draft)}</Warning>}
 
 					{value.roleTooHigh && (
 						<Warning>

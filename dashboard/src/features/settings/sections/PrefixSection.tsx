@@ -7,6 +7,7 @@ import { Section } from "@/features/settings/components/Section";
 import { prefixProblem } from "@/features/settings/settings.utils";
 import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
+import { sanitiseInput } from "@/lib/sanitise";
 
 /** The one typed field on this page, so it is held locally and saved on blur rather than per keystroke. */
 export function PrefixSection({ guildId, value }: { guildId: string; value: PrefixSetting }): React.JSX.Element {
@@ -22,7 +23,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 
 	function commit(): void {
 		if (!dirty || problem !== null) return;
-		save.mutate({ prefix: draft.trim() });
+		save.mutate({ prefix: sanitiseInput(draft) });
 	}
 
 	return (

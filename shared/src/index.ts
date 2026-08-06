@@ -5,6 +5,7 @@ export * from "./commands";
 export * from "./commandToggles";
 export * from "./control";
 export * from "./levelling";
+export * from "./markup";
 export * from "./permissions";
 export * from "./schemas";
 export * from "./settings";

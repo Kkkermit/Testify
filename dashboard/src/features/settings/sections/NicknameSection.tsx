@@ -8,6 +8,7 @@ import { Section } from "@/features/settings/components/Section";
 import { ApiError, api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { keys } from "@/lib/queries";
+import { sanitiseInput } from "@/lib/sanitise";
 
 function useNickname(guildId: string): UseQueryResult<GuildNickname> {
 	return useQuery({
@@ -62,7 +63,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 						<>
 							<Button
 								onClick={() => {
-									save.mutate({ nickname: draft.trim() === "" ? null : draft.trim() });
+									save.mutate({ nickname: draft.trim() === "" ? null : sanitiseInput(draft) });
 								}}
 							>
 								Save name

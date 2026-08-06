@@ -7,6 +7,7 @@ import { useBot } from "@/features/auth/useBot";
 import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/features/owner/useControl";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { sanitiseInput } from "@/lib/sanitise";
 
 /** There is no Start: this API is served by the bot process, so a stopped bot has nothing left to answer with. */
 export function ControlTab(): React.JSX.Element {
@@ -102,7 +103,7 @@ export function ControlTab(): React.JSX.Element {
 						<Button
 							disabled={draft.trim() === currentName || draft.trim().length < BOT_IDENTITY_LIMITS.minUsername}
 							onClick={() => {
-								identity.mutate({ username: draft.trim() });
+								identity.mutate({ username: sanitiseInput(draft) });
 							}}
 						>
 							Rename

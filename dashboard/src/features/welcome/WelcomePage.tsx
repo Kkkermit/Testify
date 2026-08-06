@@ -13,6 +13,7 @@ import { insertToken, messageTooLong, STYLE_LABELS, STYLE_ORDER } from "@/featur
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function WelcomePage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
@@ -43,7 +44,7 @@ export function WelcomePage(): React.JSX.Element {
 
 	function saveMessage(): void {
 		if (!dirty || tooLong || draft.trim() === "") return;
-		update.mutate({ message: draft });
+		update.mutate({ message: sanitiseInput(draft) });
 	}
 
 	return (
@@ -124,6 +125,7 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				/>
 
+				{markupWarning(draft) !== null && <Warning>{markupWarning(draft)}</Warning>}
 				{tooLong && <Warning>That message is longer than Discord will accept. Shorten it before saving.</Warning>}
 				{dirty && !tooLong && (
 					<div className="flex items-center gap-3">

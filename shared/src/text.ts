@@ -1,13 +1,12 @@
 import { z } from "zod";
+import { containsMarkup, MARKUP_REFUSAL } from "./markup";
 
 /**
- * Every free-text field the API accepts goes through here.
+ * Every free-text field the API accepts goes through here: control characters and bidi overrides are stripped,
+ * HTML is refused, and the length is checked last.
  *
- * These strings are never rendered as HTML — React escapes them, `dangerouslySetInnerHTML` is banned by a lint
- * rule and pinned by `escaping.test.tsx`, and Discord escapes them again on the way out — so stripping tags
- * would only break the angle brackets Discord itself needs (`<@123>`, `<#456>`, `<:name:1>`). What is left is
- * the part a markup sanitiser would not catch anyway: characters that make a stored string read as something
- * other than what it is.
+ * Markup is refused rather than stripped because these values are re-rendered by Discord and by the ticket
+ * transcripts, and a sanitiser run over them eats mentions, custom emoji and timestamps — see `markup.ts`.
  */
 
 /** C0 and C1 controls, minus the tab and newline a multi-line template legitimately contains. */
@@ -41,6 +40,10 @@ export function plainLine(min: number, max: number): z.ZodType<string, string> {
 	return z.string().transform(sanitiseLine).pipe(bounds(min, max));
 }
 
-function bounds(min: number, max: number): z.ZodString {
-	return z.string().min(min, "cannot be empty").max(max, "is too long");
+function bounds(min: number, max: number): z.ZodType<string, string> {
+	return z
+		.string()
+		.min(min, "cannot be empty")
+		.max(max, "is too long")
+		.refine((value) => !containsMarkup(value), MARKUP_REFUSAL);
 }
