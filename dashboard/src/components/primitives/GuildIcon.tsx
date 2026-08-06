@@ -1,10 +1,7 @@
 import { cn } from "@/lib/cn";
 import { tintFor } from "@/lib/tint";
 
-/**
- * A server with no icon is common, and a broken image is the first thing anyone sees in the picker — so the
- * fallback is a lettered tile in a colour derived from the name, not an alt attribute.
- */
+/** A lettered tile in a colour derived from the name, because a server with no icon is common and a broken image is the first thing anyone sees. */
 export function GuildIcon({
 	name,
 	url,

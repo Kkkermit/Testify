@@ -38,10 +38,7 @@ export function groupState(events: AuditEvent[], group: AuditGroup): GroupState 
 	return chosen === inGroup.length ? "all" : "some";
 }
 
-/**
- * Why Save is unavailable, in the words shown beside it. A configuration that cannot work is refused here as
- * well as by the API, so nobody discovers it after pressing the button.
- */
+/** Why Save is unavailable, in the words shown beside it, so nobody discovers it after pressing the button. */
 export function saveBlocked(draft: AuditLogPut): string | null {
 	if (!draft.enabled) return null;
 	if (draft.channelId === null) return "Choose a channel for the log before turning it on.";

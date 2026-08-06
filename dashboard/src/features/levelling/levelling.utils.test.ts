@@ -19,7 +19,6 @@ describe("roleNameOf", () => {
 		expect(roleNameOf(roles, "1")).toBe("Regulars");
 	});
 
-	/** A role deleted in Discord after being configured here still has to render as something. */
 	it("says a role is gone rather than rendering an empty row", () => {
 		expect(roleNameOf(roles, "999")).toBe("A deleted role");
 	});

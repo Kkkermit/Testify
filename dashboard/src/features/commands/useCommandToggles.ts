@@ -9,10 +9,7 @@ import { type CommandToggleState, type CommandTogglePut } from "@testify/shared"
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/**
- * Which commands are switched off. The path is the only difference between the two scopes — a server's own
- * list, and the bot-wide one behind the owner gate.
- */
+/** Which commands are switched off; the path is the only difference between a server's list and the bot-wide one. */
 function pathFor(guildId: string | null): string {
 	return guildId === null ? "/owner/commands" : `/guilds/${guildId}/commands`;
 }

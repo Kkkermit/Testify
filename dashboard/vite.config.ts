@@ -36,16 +36,7 @@ export default defineConfig(({ mode }) => {
 			proxy: {
 				"/api": {
 					target: `http://localhost:${port}`,
-					/**
-					 * `npm run dev:all` holds Vite back until the API answers, but `tsx watch` restarts the bot on
-					 * every save and the API is down for a second each time. Vite's own handler prints a stack per
-					 * refused request, which reads like a broken install — so it is replaced with one line per
-					 * outage. Anything that is not the bot being down is still logged in full.
-					 *
-					 * Vite registers its handler immediately *after* calling this one, so replacing it has to wait a
-					 * tick — verified against `vite/dist/node/chunks/node.js`, where `configure` is called on the
-					 * line above `proxy.on("error", …)`.
-					 */
+					/** `tsx watch` restarts the bot on every save, so Vite's handler would print a stack per refused request; this is one line per outage instead. Vite registers its own handler immediately after calling this, so the replacement waits a tick. */
 					configure: (proxy) => {
 						let reported = false;
 
@@ -80,8 +71,7 @@ export default defineConfig(({ mode }) => {
 		},
 		build: {
 			outDir: "dist",
-			// three is deliberately over the 500 kB default, and it is already split and loaded on demand — the
-			// advice the warning gives is the thing that was done.
+			// three is over the default and is already split and loaded on demand.
 			chunkSizeWarningLimit: 600,
 			// Open source: a stack trace someone can read is worth the file size.
 			sourcemap: true,

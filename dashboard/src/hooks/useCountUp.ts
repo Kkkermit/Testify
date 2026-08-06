@@ -10,10 +10,7 @@ export function countUpValue(from: number, to: number, progress: number): number
 	return Math.round(from + (to - from) * easeOutCubic(Math.min(1, Math.max(0, progress))));
 }
 
-/**
- * Counts a statistic up to its value on first paint. It returns the target immediately under reduced motion,
- * and whenever the target changes mid-flight it restarts from what is on screen rather than from zero.
- */
+/** Returns the target immediately under reduced motion, and restarts from what is on screen when the target changes mid-flight. */
 export function useCountUp(target: number, durationMs = 650): number {
 	const reduced = usePrefersReducedMotion();
 	const [value, setValue] = useState(reduced ? target : 0);

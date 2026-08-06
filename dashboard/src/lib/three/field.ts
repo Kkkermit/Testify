@@ -1,11 +1,8 @@
 /** The geometry and easing behind the backdrop, kept away from three.js so it can be tested without a GPU. */
 
 export interface FieldShape {
-	/** How many points to scatter. */
 	count: number;
-	/** Half-width and half-height of the slab they sit in. */
 	spread: number;
-	/** How far back the furthest point sits, in the same units. */
 	depth: number;
 }
 

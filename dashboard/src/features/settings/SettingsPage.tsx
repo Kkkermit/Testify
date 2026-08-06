@@ -13,10 +13,7 @@ import { VoiceStatsSection } from "@/features/settings/sections/VoiceStatsSectio
 import { useSettings } from "@/features/settings/useSettings";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/**
- * Each section writes on change and has its own endpoint, so a refusal in one leaves the others alone — the
- * apply-immediately side of the split in `CLAUDE.md` §24.
- */
+/** Each section writes on change and has its own endpoint, so a refusal in one leaves the others alone. */
 export function SettingsPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 
@@ -40,11 +37,7 @@ export function SettingsPage(): React.JSX.Element {
 				subtitle="The smaller switches: prefix, link filtering, joins, verification and counting."
 			/>
 
-			{/*
-			 * Columns rather than a grid: these cards are two to ten rows tall, and a grid row is as tall as its
-			 * tallest cell — which left a card-sized hole under every short one. `gap` does not apply between items
-			 * in a column layout, so the space below each card is its own margin.
-			 */}
+			{/* Columns, because a grid row is as tall as its tallest cell; `gap` does not apply here, so each card carries its own margin. */}
 			<div className="gap-x-4 lg:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
 				<PrefixSection guildId={guildId} value={value.prefix} />
 				<NicknameSection guildId={guildId} />

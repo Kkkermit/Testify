@@ -28,15 +28,12 @@ export function windowFrom(raw: string | null): AnalyticsWindow {
 	return ANALYTICS_WINDOWS.find((option) => option === parsed) ?? 30;
 }
 
-/** Defaults to everything: the console exists to be looked through, not to hide most of the buffer. */
+/** Defaults to everything: the console exists to be looked through. */
 export function levelFrom(raw: string | null): ReportedLogLevel {
 	return LOG_LEVELS.find((option) => option === raw) ?? "trace";
 }
 
-/**
- * A bar's width as a percentage of the busiest row, floored at 2 so a row with one use is still visibly a row
- * rather than an empty track.
- */
+/** A percentage of the busiest row, floored at 2 so a row with one use is still visibly a row. */
 export function barWidth(count: number, max: number): number {
 	if (max <= 0 || count <= 0) return 0;
 	return Math.max(2, Math.round((count / max) * 100));

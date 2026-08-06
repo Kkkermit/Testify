@@ -2,11 +2,7 @@ import { type RoleSummary } from "@testify/shared";
 import { CheckList, type CheckItem } from "@/components/form/CheckList";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
 
-/**
- * A checkbox list rather than a `<select multiple>`: the latter is close to unusable with a keyboard and on
- * touch, and this is a list people revisit. Roles the bot could not grant are greyed with the reason, which is
- * the same check the bot makes at runtime.
- */
+/** A checkbox list rather than `<select multiple>`, which is close to unusable with a keyboard and on touch. */
 export function RoleChecklist({
 	roles,
 	value,

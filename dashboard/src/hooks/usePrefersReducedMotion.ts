@@ -8,10 +8,7 @@ export function prefersReducedMotion(): boolean {
 	return window.matchMedia(QUERY).matches;
 }
 
-/**
- * The CSS in `index.css` already flattens every transition, but WebGL and JS-driven animation never reach a
- * stylesheet — so anything that animates outside CSS has to ask.
- */
+/** CSS already flattens every transition, but WebGL and JS-driven animation never reach a stylesheet, so they have to ask. */
 export function usePrefersReducedMotion(): boolean {
 	const [reduced, setReduced] = useState(prefersReducedMotion);
 

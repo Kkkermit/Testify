@@ -39,7 +39,6 @@ export function WelcomePage(): React.JSX.Element {
 	const dirty = draft !== welcome.message;
 	const tooLong = messageTooLong(draft);
 	// The stored record requires a channel, so the API refuses every write except "off" until there is one.
-	// Gating the controls on it is the difference between a disabled switch and a 400 nobody expected.
 	const needsChannel = welcome.channelId === null;
 
 	function saveMessage(): void {

@@ -2,15 +2,7 @@ import { type ReactNode } from "react";
 import { FIELD_GROUP, LABEL } from "@/components/form/field";
 import { cn } from "@/lib/cn";
 
-/**
- * A control with its name, and its hint, above it.
- *
- * Every labelled control goes through this, so the distance between a name and its box is one number rather
- * than a `mt-1` on one card and a `gap-2` on the next — which is what made a page of them read as unaligned.
- *
- * Pass `htmlFor` when the control carries its own id and this becomes a sibling label; omit it and the control
- * is wrapped, which labels it implicitly.
- */
+/** Every labelled control goes through this. Pass `htmlFor` when the control has its own id; omit it and the control is wrapped. */
 export function Field({
 	label,
 	hint,

@@ -30,10 +30,7 @@ describe("SegmentedControl", () => {
 		expect(onChange).toHaveBeenCalledWith("errors");
 	});
 
-	/**
-	 * A hint is a description, never a name. A segment named by its tooltip would be unreachable to anyone who
-	 * arrives without a pointer, so the label has to stand on its own.
-	 */
+	/** A hint describes, never names: a segment named by its tooltip is unreachable without a pointer. */
 	it("leaves a hinted segment named by its label", () => {
 		renderControl();
 

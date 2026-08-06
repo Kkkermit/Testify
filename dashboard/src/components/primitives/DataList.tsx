@@ -7,11 +7,7 @@ export interface DataRow {
 	mono?: boolean;
 }
 
-/**
- * Label-and-value pairs as a real `<dl>`, which every read-only panel in the console needs.
- *
- * `dense` drops the row padding and the dividers, for a list sitting inside a card that already has both.
- */
+/** Label-and-value pairs as a real `<dl>`; `dense` drops the padding and dividers for a list inside a card that has both. */
 export function DataList({
 	rows,
 	mono = false,

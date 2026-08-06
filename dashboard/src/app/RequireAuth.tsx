@@ -2,10 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router";
 import { Skeleton } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
 
-/**
- * Hiding a screen is never access control — every route behind this is also refused by the API. This exists so
- * a signed-out visitor sees the sign-in page instead of a wall of 401s.
- */
+/** Not access control — the API refuses too — but a signed-out visitor sees the sign-in page rather than a wall of 401s. */
 export function RequireAuth(): React.JSX.Element {
 	const location = useLocation();
 	const me = useMe();

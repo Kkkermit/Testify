@@ -2,10 +2,7 @@ import { fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { GuildIcon } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
-/**
- * The greeting as the server will see it, with the placeholders filled by the same function the bot posts with.
- * The point is that nobody has to save a template and then join with an alt to find out what `{count}` does.
- */
+/** Filled by the same function the bot posts with, so nobody has to save a template and join with an alt to find out what `{count}` does. */
 export function GreetingPreview({
 	message,
 	style,

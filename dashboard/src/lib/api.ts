@@ -3,10 +3,7 @@ import { type ApiErrorBody } from "@testify/shared";
 const BASE = "/api";
 const CSRF_COOKIE = "dash_csrf";
 
-/**
- * Carries the API's `code` through to the UI, so a screen can tell "you were signed out" from "you are not
- * allowed to do that" without matching on prose.
- */
+/** Carries the API's `code` through, so a screen can tell "signed out" from "not allowed" without matching on prose. */
 export class ApiError extends Error {
 	readonly status: number;
 	readonly code: string;

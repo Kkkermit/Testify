@@ -1,7 +1,4 @@
-/**
- * A role's colour as a bordered dot, never as the name's colour: a role set to `#1a1a1a` would be invisible as
- * text on this background. The border is what keeps a dark swatch visible against the surface.
- */
+/** A bordered dot, never the name's colour: a role set to `#1a1a1a` would be invisible on this background. */
 export function RoleSwatch({ name, colour }: { name: string; colour: string | null }): React.JSX.Element {
 	return (
 		<span className="flex min-w-0 items-center gap-2">

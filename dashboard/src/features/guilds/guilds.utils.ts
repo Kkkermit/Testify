@@ -35,11 +35,7 @@ const GROUPS: { key: GuildGroupKey; title: string; describes: string; holds: (gu
 	},
 ];
 
-/**
- * Three states, not two: a server the bot is in, one you could invite it to, and one you could not. Sorting the
- * first to the top left the last two looking identical while only one of them had a button that would work.
- * Empty groups are dropped rather than rendered as a heading over nothing.
- */
+/** Three states: the bot is in it, you could invite it, or you could not. Empty groups are dropped. */
 export function groupGuilds(guilds: ManageableGuild[]): GuildGroup[] {
 	return GROUPS.map(({ holds, ...group }) => ({ ...group, guilds: guilds.filter(holds) })).filter(
 		(group) => group.guilds.length > 0,

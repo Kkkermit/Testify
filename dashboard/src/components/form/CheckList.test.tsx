@@ -101,10 +101,7 @@ describe("Toggle", () => {
 });
 
 describe("RoleSwatch", () => {
-	/**
-	 * Role colours are chosen by whoever made the role, so plenty are unreadable on a near-black page — one set
-	 * to `#1a1a1a` would be invisible as text. The colour goes on a bordered dot, the name stays readable.
-	 */
+	/** A role set to `#1a1a1a` would be invisible as text, so the colour goes on a bordered dot. */
 	it("puts the colour on a swatch, never on the name", () => {
 		render(<RoleSwatch name="Booster" colour="#1a1a1a" />);
 

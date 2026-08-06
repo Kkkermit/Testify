@@ -16,10 +16,7 @@ function useNickname(guildId: string): UseQueryResult<GuildNickname> {
 	});
 }
 
-/**
- * The bot's name in this server, and the only part of its appearance a manager may change: Discord has no
- * per-server avatar for bots, so the picture is global and belongs to the owner console.
- */
+/** The only part of the bot's appearance a manager may change: Discord has no per-server avatar for bots. */
 export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Element {
 	const client = useQueryClient();
 	const current = useNickname(guildId);

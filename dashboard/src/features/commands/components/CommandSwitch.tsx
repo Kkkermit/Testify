@@ -8,10 +8,7 @@ const DESCRIBES: Record<CommandAvailability, string> = {
 	locked: "Testify needs this one to stay on",
 };
 
-/**
- * Locked and bot-wide-off both render disabled with the reason on the control rather than in a footnote — a
- * switch that silently does nothing is the thing this avoids.
- */
+/** Locked and bot-wide-off render disabled with the reason on the control, not in a footnote. */
 export function CommandSwitch({
 	name,
 	availability,

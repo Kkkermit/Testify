@@ -56,10 +56,7 @@ describe("the app shell", () => {
 		expect(await screen.findByRole("link", { name: "Owner console" })).toHaveAttribute("href", "/owner");
 	});
 
-	/**
-	 * Clearing the cache matters as much as the redirect: without it the next person at this browser would see
-	 * the previous one's guild list until the queries went stale.
-	 */
+	/** Without clearing the cache the next person at this browser sees the previous one's guild list. */
 	it("drops every cached answer when signing out", async () => {
 		const user = userEvent.setup();
 		server.use(http.post("/api/auth/logout", () => new HttpResponse(null, { status: 204 })));
@@ -75,13 +72,7 @@ describe("the app shell", () => {
 		expect(client.getQueryCache().getAll()).toHaveLength(0);
 	});
 
-	/**
-	 * At the icon-only width the labels are `sr-only`, not `hidden` — `hidden` is `display: none`, which takes
-	 * them out of the accessibility tree and leaves every nav link named nothing.
-	 *
-	 * jsdom loads no stylesheet, so it cannot tell the two apart by computing a name; the class is the only
-	 * observable difference here. The rendered outcome is checked against a real browser instead.
-	 */
+	/** `hidden` is `display: none`, which would leave every nav link named nothing; jsdom computes no styles, so the class is what is asserted. */
 	it("hides the nav labels visually rather than removing them", async () => {
 		server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, isOwner: true })));
 		renderWithProviders(<AppShell />, { path: "/guilds" });

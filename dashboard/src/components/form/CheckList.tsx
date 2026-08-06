@@ -10,10 +10,7 @@ export interface CheckItem {
 	blockedNote?: string;
 }
 
-/**
- * The scrolling list of checkboxes both pickers are built from: the ignored-channel list and the role list are
- * the same control over different items.
- */
+/** The scrolling checkbox list both pickers are built from. */
 export function CheckList({
 	label,
 	hint,
@@ -32,8 +29,7 @@ export function CheckList({
 	const atLimit = value.length >= max;
 	const nameId = `checklist-${useId()}`;
 
-	// A named group rather than a `Field`: a `<label>` names one control, and this is a set of them. A
-	// `<fieldset>` would be the other answer, but a `<legend>` is not a flex item, so its gap would not apply.
+	// A named group rather than a `Field`: a `<label>` names one control. A `<legend>` is not a flex item, so a `<fieldset>` would lose the gap.
 	return (
 		<div role="group" aria-labelledby={nameId} className={FIELD_GROUP}>
 			<span className="flex flex-col gap-0.5">

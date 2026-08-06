@@ -10,10 +10,7 @@ import {
 	type LucideIcon,
 } from "lucide-react";
 
-/**
- * The sidebar, as data. A new settings screen is one entry here and one route — nothing in the shell needs
- * touching, and the icon-only width, the tooltips and the active marker all follow automatically.
- */
+/** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips and active marker follow. */
 export interface NavItem {
 	to: string;
 	label: string;
@@ -24,10 +21,7 @@ export interface NavItem {
 	exact?: boolean;
 }
 
-/**
- * Groups keep the list readable as screens are added, and put the server's own settings under its name so it is
- * always clear which server is being edited.
- */
+/** Groups put a server's own settings under its name, so it is always clear which server is being edited. */
 export interface NavGroup {
 	/** Absent for the first group, which needs no heading to be understood. */
 	heading?: string;

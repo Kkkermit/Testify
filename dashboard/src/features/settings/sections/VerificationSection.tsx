@@ -8,10 +8,7 @@ import { useSaveVerification, useVerification } from "@/features/settings/useVer
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/**
- * The web half of `/verify`. Posting the panel is its own button rather than a side effect of choosing a
- * channel, because the panel is a message in a public channel and nobody wants one appearing mid-setup.
- */
+/** Posting the panel is its own button rather than a side effect of choosing a channel, because it is a message in a public channel. */
 export function VerificationSection({
 	guildId,
 	channels,

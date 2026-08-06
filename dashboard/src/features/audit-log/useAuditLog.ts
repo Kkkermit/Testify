@@ -16,10 +16,7 @@ export function useAuditLog(guildId: string): UseQueryResult<AuditLogConfigRespo
 	});
 }
 
-/**
- * Not optimistic, unlike the toggles elsewhere: this screen holds a draft until Save, so there is nothing to
- * show early — the answer replaces the draft's origin, and a refusal leaves the draft on screen to correct.
- */
+/** Not optimistic, unlike the toggles elsewhere: this screen holds a draft until Save, so a refusal leaves it on screen to correct. */
 export function useSaveAuditLog(guildId: string): UseMutationResult<AuditLogConfigResponse, Error, AuditLogPut> {
 	const client = useQueryClient();
 
@@ -29,7 +26,6 @@ export function useSaveAuditLog(guildId: string): UseMutationResult<AuditLogConf
 			client.setQueryData(keys.guild(guildId).auditLog(), config);
 		},
 		onSettled: () => {
-			// The overview's feature grid and its audit list both change with this.
 			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
 		},
 	});

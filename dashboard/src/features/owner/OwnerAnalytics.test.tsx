@@ -25,7 +25,6 @@ describe("windowFrom", () => {
 });
 
 describe("levelFrom", () => {
-	/** Everything by default: the console exists to be looked through, not to hide most of the buffer. */
 	it("shows every level by default, and never one the API refuses", () => {
 		expect(levelFrom(null)).toBe("trace");
 		expect(levelFrom("nonsense")).toBe("trace");
@@ -176,10 +175,7 @@ describe("the logs tab", () => {
 		});
 	});
 
-	/**
-	 * An empty list at "All" would otherwise read as "the bot is idle" when it really means the bot was started
-	 * at a level that never writes those lines.
-	 */
+	/** An empty list at "All" otherwise reads as an idle bot rather than a level that never writes those lines. */
 	it("says when the bot's own level is suppressing everything below it", async () => {
 		renderTab("logs");
 

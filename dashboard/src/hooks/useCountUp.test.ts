@@ -7,7 +7,7 @@ describe("easeOutCubic", () => {
 		expect(easeOutCubic(1)).toBe(1);
 	});
 
-	/** Decelerating means most of the distance is covered early — that is what makes it land softly. */
+	/** Most of the distance is covered early, which is what makes it land softly. */
 	it("is past halfway before halfway", () => {
 		expect(easeOutCubic(0.5)).toBeGreaterThan(0.5);
 	});

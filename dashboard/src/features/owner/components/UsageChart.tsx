@@ -1,10 +1,7 @@
 import { type UsageDay } from "@testify/shared";
 import { shortDay } from "@/features/owner/owner.utils";
 
-/**
- * Commands per day as a column per day, over a `<table>` rather than a canvas: the numbers are the information
- * and a screen reader gets them. No chart library — a bar is a div with a height.
- */
+/** A `<table>` rather than a canvas, so a screen reader gets the numbers. No chart library — a bar is a div with a height. */
 export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
 	const max = Math.max(1, ...days.map((day) => day.count));
 

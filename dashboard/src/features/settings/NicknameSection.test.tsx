@@ -72,10 +72,7 @@ describe("the bot's nickname in a server", () => {
 		});
 	});
 
-	/**
-	 * Explained rather than left to fail on save: the message names the permission to grant, and the field is
-	 * disabled so nobody types a name that cannot be applied.
-	 */
+	/** The message names the permission to grant, and the field is disabled so nobody types a name that cannot be applied. */
 	it("explains when the bot cannot rename itself there", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json({ nickname: null, canChange: false })),

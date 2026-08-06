@@ -10,12 +10,7 @@ import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
-/**
- * Icons only below `lg`, full width above it; the drawer on a phone renders the same thing at full width.
- *
- * Every row — the wordmark, the links, the account, the sign-out — shares `ROW`, so all four icons sit on one
- * vertical line and all four labels on another.
- */
+/** Every row shares `ROW`, so all four icons sit on one vertical line and all four labels on another. */
 const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
 
 const LEGAL = [
@@ -68,10 +63,7 @@ export function Sidebar({
 						<>
 							{/* At the icon-only width the rule carries the grouping, where there is no room for the words. */}
 							<hr className="border-border mx-2 mb-2 lg:hidden" />
-							{/*
-							 * Shown, but not a heading: the group is named for assistive technology by the list's own
-							 * label, so the page's heading outline stays the page's rather than the sidebar's.
-							 */}
+							{/* Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's. */}
 							<p
 								aria-hidden="true"
 								className={cn(
@@ -103,10 +95,7 @@ export function Sidebar({
 					</div>
 				)}
 
-				{/*
-				 * Rows rather than a line of small links, so they survive the icon-only width: `hidden` there took
-				 * them off the page entirely, and these two are the ones that have to be reachable from anywhere.
-				 */}
+				{/* Rows rather than small links, because `hidden` at the icon-only width took these two off the page entirely. */}
 				{LEGAL.map(({ to, label: text, icon: Icon }) => (
 					<Tooltip key={to} label={`Read the ${text.toLowerCase()}`} placement="right">
 						<Link
@@ -140,13 +129,7 @@ export function Sidebar({
 	);
 }
 
-/**
- * Opaque in the drawer — a translucent panel over the page it covers is unreadable.
- *
- * The rail is capped to the viewport and stuck to the top of it. A flex child stretches to its container, and
- * the container grows with the page, so on a long screen like `/commands` the footer this ends with — the
- * account, the legal links and Sign out — was thousands of pixels down the document rather than on screen.
- */
+/** Opaque in the drawer, and capped to the viewport in the rail — a flex child otherwise stretches to a container that grows with the page. */
 function cnSidebar(expanded: boolean): string {
 	const base = "border-border flex shrink-0 flex-col p-3";
 	return expanded

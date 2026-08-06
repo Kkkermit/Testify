@@ -41,10 +41,7 @@ describe("the audit log page", () => {
 		expect(screen.getByRole("checkbox", { name: /message edited/i })).not.toBeChecked();
 	});
 
-	/**
-	 * A channel and a set of events are one decision, so nothing may be written until Save — the mistake this
-	 * pins is a control that saves per click and leaves half a configuration applied.
-	 */
+	/** Nothing may be written until Save: the mistake this pins is a control that saves per click and leaves half a configuration applied. */
 	it("writes nothing until Save is pressed", async () => {
 		const user = userEvent.setup();
 		const captured = capturePut();
@@ -132,7 +129,6 @@ describe("the audit log page", () => {
 		expect(save()).toBeDisabled();
 	});
 
-	/** Turning it off deletes the record, so it must not be held back by the empty-selection rule. */
 	it("allows turning logging off with nothing selected", async () => {
 		const user = userEvent.setup();
 		renderPage();

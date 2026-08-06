@@ -16,7 +16,6 @@ describe("useDocumentVisible", () => {
 		expect(renderHook(() => useDocumentVisible()).result.current).toBe(false);
 	});
 
-	/** A background tab that keeps rendering WebGL is a laptop's battery, so this is what pauses the loop. */
 	it("follows the tab being hidden and shown again", () => {
 		const { result } = renderHook(() => useDocumentVisible());
 		expect(result.current).toBe(true);

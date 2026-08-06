@@ -22,17 +22,10 @@ import {
 	type LucideIcon,
 } from "lucide-react";
 
-/**
- * How a bot feature is drawn wherever it appears. The overview grid keys it by feature and the command list by
- * category, and the two overlap enough to share one map; an unknown key falls back rather than rendering a hole,
- * so the API can ship a feature before this knows about it. Tints are utilities over the `--color-feature-*`
- * tokens, so a rebrand stays one file.
- */
+/** An unknown key falls back rather than rendering a hole, so the API can ship a feature before this knows about it. */
 export interface FeatureLook {
 	icon: LucideIcon;
-	/** Icon colour. */
 	tint: string;
-	/** The 15% fill behind the icon. */
 	wash: string;
 	/** The settings screen for it, where the dashboard has one. Absent while a feature is Discord-only. */
 	path?: (guildId: string) => string;

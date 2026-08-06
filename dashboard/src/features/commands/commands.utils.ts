@@ -1,9 +1,6 @@
 import { type CommandSummary, matchesSearch } from "@testify/shared";
 
-/**
- * Which commands the dashboard can already configure, keyed by command name; the value is the screen that
- * replaces it. Everything unlisted is still Discord-only, which is what the coverage tile counts.
- */
+/** Which commands the dashboard can configure, keyed by name; everything unlisted is Discord-only and is what the coverage tile counts. */
 const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: string }> = {
 	levelling: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
 	rank: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },

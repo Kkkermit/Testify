@@ -5,11 +5,7 @@ import { Sidebar } from "@/app/layout/Sidebar";
 import { BotMark } from "@/components/brand/BotMark";
 import { type NavAudience } from "@/config/navigation";
 
-/**
- * Below `md` the rail would leave too little room for a settings form, so it becomes a drawer. Escape closes
- * it, focus moves into it on open and back to the button on close, and a click on any link inside closes it —
- * without that last one a phone stays covered by the menu after every navigation.
- */
+/** A drawer below `md`, closing on Escape, on a link, and returning focus to its button. */
 export function MobileNav({
 	user,
 	bot,
@@ -68,10 +64,7 @@ export function MobileNav({
 
 			{open && (
 				<div className="fixed inset-0 z-40 md:hidden">
-					{/*
-					 * Clicking away closes it, but the scrim is not a control: Escape and the button below already
-					 * cover the keyboard, and a second "close" in the tab order is only noise to read past.
-					 */}
+					{/* Not a control: Escape and the close button already cover the keyboard, and a second one is only noise in the tab order. */}
 					<div aria-hidden="true" onClick={close} className="bg-background/70 motion-fade absolute inset-0" />
 					<div id="mobile-nav" ref={panelRef} className="motion-fade absolute inset-y-0 left-0">
 						<Sidebar user={user} bot={bot} guild={guild} isOwner={isOwner} expanded onNavigate={close} />

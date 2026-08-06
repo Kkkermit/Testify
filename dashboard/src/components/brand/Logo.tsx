@@ -1,9 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/**
- * The shield-and-tick mark, inline so it inherits `currentColor` and needs no network request. A fork replaces
- * this one file and the favicon in `index.html` to rebrand.
- */
+/** Inline, so it inherits `currentColor` and needs no request; a fork replaces this file and the favicon to rebrand. */
 export function Logo({ size = 24, className }: { size?: number; className?: string }): React.JSX.Element {
 	return (
 		<svg
@@ -34,7 +31,7 @@ export function Logo({ size = 24, className }: { size?: number; className?: stri
 	);
 }
 
-/** The mark on its tinted tile, which is how it appears anywhere it stands for the product rather than a link. */
+/** The mark on its tile, for anywhere it stands for the product rather than for a link. */
 export function LogoTile({ size = 26, className }: { size?: number; className?: string }): React.JSX.Element {
 	return (
 		<span className={cn("bg-primary/15 text-accent rounded-card inline-flex p-2", className)}>

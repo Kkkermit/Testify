@@ -38,10 +38,7 @@ describe("the control tab", () => {
 		expect(await screen.findByRole("button", { name: /resume testify/i })).toBeInTheDocument();
 	});
 
-	/**
-	 * Shutting down ends the process this page is served by, so it is typed rather than clicked — and the
-	 * button stays disabled until the words match exactly.
-	 */
+	/** Shutting down ends the process this page is served by, so it is typed rather than clicked. */
 	it("keeps shut down disabled until it is typed out", async () => {
 		const user = userEvent.setup();
 		renderTab("control");

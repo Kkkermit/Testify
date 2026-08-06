@@ -11,13 +11,7 @@ import { RuntimeTab } from "@/features/owner/tabs/RuntimeTab";
 import { UsageTab } from "@/features/owner/tabs/UsageTab";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/**
- * Everything about the bot itself rather than about one server. The API answers 404 to anybody who is not a bot
- * owner, so this page is a convenience rather than the gate.
- *
- * Each tab fetches its own data, so a failing endpoint takes out one tab rather than the console — the logs
- * tab in particular has to survive whatever is wrong with the rest of it.
- */
+/** Each tab fetches its own data, so a failing endpoint takes out one tab rather than the console. */
 export function OwnerPage(): React.JSX.Element {
 	usePageTitle("Owner console");
 	// In the URL, so a link to the usage tab is a link to the usage tab and Back works.

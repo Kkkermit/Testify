@@ -10,10 +10,7 @@ export interface BarRow {
 	count: number;
 }
 
-/**
- * A ranked list with the bar behind the row rather than beside it, so the label is never squeezed by the value.
- * Hand-rolled, because a chart library is the easiest way there is to double this bundle.
- */
+/** The bar sits behind the row rather than beside it, so the label is never squeezed by the value. */
 export function UsageBars({
 	rows,
 	empty,

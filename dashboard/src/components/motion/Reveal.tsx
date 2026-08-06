@@ -8,10 +8,7 @@ export function revealDelay(index: number, step = 40): number {
 	return Math.min(MAX_DELAY_MS, Math.max(0, index) * step);
 }
 
-/**
- * A short rise-and-fade on first paint. The stagger is capped, and `index` is the item's position in its list
- * so a grid arrives in reading order instead of all at once.
- */
+/** `index` is the item's position, so a grid arrives in reading order rather than all at once. */
 export function Reveal({
 	as: Tag = "div",
 	index = 0,

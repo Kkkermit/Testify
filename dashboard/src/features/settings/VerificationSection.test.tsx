@@ -34,10 +34,7 @@ describe("the verification section", () => {
 		expect(screen.getByRole("heading", { name: "Verification" })).toBeInTheDocument();
 	});
 
-	/**
-	 * The panel is a message in a public channel. Making it an explicit button rather than a consequence of
-	 * choosing a channel is the difference between posting when asked and posting mid-setup.
-	 */
+	/** An explicit button rather than a consequence of choosing a channel, so the panel is not posted mid-setup. */
 	it("posts the panel only when the button is pressed", async () => {
 		const user = userEvent.setup();
 		const captured = capture();

@@ -4,10 +4,7 @@ import { Card, PageHeader } from "@/components/primitives";
 import { type LegalDocument } from "@/features/legal/legal.content";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/**
- * Renders either legal document. Both are public: somebody deciding whether to add the bot has to be able to
- * read them without signing in first, which is why these routes sit outside `RequireAuth`.
- */
+/** Both documents are public — read before signing in — which is why these routes sit outside `RequireAuth`. */
 export function LegalPage({ document }: { document: LegalDocument }): React.JSX.Element {
 	usePageTitle(document.title);
 

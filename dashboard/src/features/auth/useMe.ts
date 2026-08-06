@@ -3,10 +3,7 @@ import { type MeResponse, type SetupStatus } from "@testify/shared";
 import { api, ApiError } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/**
- * The bootstrap call. A 401 is a normal answer — it means "show the sign-in screen" — so it must not be
- * retried, and it must not be treated as an error the boundary catches.
- */
+/** The bootstrap call. A 401 means "show the sign-in screen", so it is neither retried nor treated as an error. */
 export function useMe(): UseQueryResult<MeResponse | null> {
 	return useQuery({
 		queryKey: keys.me(),

@@ -7,11 +7,7 @@ import { useLogs } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { cn } from "@/lib/cn";
 
-/**
- * The label is written out rather than produced by `text-transform: capitalize`, because engines disagree about
- * whether a CSS transform changes an element's accessible name — and a control named "error" in one browser
- * and "Error" in another is a control nobody can write a reliable instruction for.
- */
+/** Written out rather than `text-transform: capitalize`, because engines disagree about whether a CSS transform changes an accessible name. */
 const LEVELS: Record<ReportedLogLevel, Omit<Segment<ReportedLogLevel>, "value">> = {
 	trace: { label: "All", hint: "Every line the bot writes" },
 	debug: { label: "Debug", hint: "Debug and above" },
@@ -23,10 +19,7 @@ const LEVELS: Record<ReportedLogLevel, Omit<Segment<ReportedLogLevel>, "value">>
 
 const LEVEL_SEGMENTS = LOG_LEVELS.map((level) => ({ value: level, ...LEVELS[level] }));
 
-/**
- * The bot's own log, held in memory rather than in the database — a restart clears it, which is the trade for a
- * buffer that needs no retention policy and cannot fill a disk.
- */
+/** Held in memory rather than in the database, so a restart clears it. */
 export function LogsTab({
 	level,
 	search,

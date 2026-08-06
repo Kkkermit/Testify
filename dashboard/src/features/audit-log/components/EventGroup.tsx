@@ -4,10 +4,7 @@ import { CHECK_ROW } from "@/components/form";
 import { type GroupState } from "@/features/audit-log/auditLog.utils";
 import { cn } from "@/lib/cn";
 
-/**
- * One part of a server as its own panel, with a heading checkbox that ticks the lot. Eighteen flat checkboxes
- * are a wall; five bordered groups of three or four say which part of the server each one is about.
- */
+/** One part of a server as its own panel: eighteen flat checkboxes are a wall, five bordered groups are a decision. */
 export function EventGroup({
 	group,
 	state,

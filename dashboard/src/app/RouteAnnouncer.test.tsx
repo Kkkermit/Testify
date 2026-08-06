@@ -69,10 +69,7 @@ describe("RouteAnnouncer", () => {
 		expect(screen.getByRole("status", { hidden: true })).toBeEmptyDOMElement();
 	});
 
-	/**
-	 * Without this a screen reader gets no signal that anything changed — the user is left on a page that has
-	 * silently become a different one.
-	 */
+	/** Without this a screen reader gets no signal that the page changed at all. */
 	it("announces the new page after a navigation", async () => {
 		const { router } = renderApp();
 

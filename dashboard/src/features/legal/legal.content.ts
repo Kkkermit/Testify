@@ -1,8 +1,4 @@
-/**
- * Written for a self-hosted bot, so the text describes what this software does rather than what a hosted service
- * promises — the operator is whoever runs it. Held as data so a fork edits one file and both pages keep their
- * layout.
- */
+/** Written for a self-hosted bot, so the operator is whoever runs it; held as data so a fork edits one file. */
 
 export interface LegalSection {
 	heading: string;

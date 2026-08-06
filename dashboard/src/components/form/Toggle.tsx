@@ -1,9 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/**
- * A real checkbox drives it, kept in the accessibility tree and only visually replaced — so it stays operable
- * with a keyboard and announces itself as a switch, and the track is decoration the peer selectors follow.
- */
+/** A real checkbox drives it and stays in the accessibility tree; the track is decoration the peer selectors follow. */
 export function Toggle({
 	label,
 	hint,

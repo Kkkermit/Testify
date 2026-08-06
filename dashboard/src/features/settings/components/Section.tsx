@@ -3,10 +3,7 @@ import { type ReactNode } from "react";
 import { SavingIndicator, type SavingState } from "@/components/form";
 import { Card } from "@/components/primitives";
 
-/**
- * One setting, one card: an icon, a heading, a sentence saying what it does, and its controls. Every section on
- * this page is the same shape, so adding one is a component rather than a layout decision.
- */
+/** One setting, one card, all the same shape — so adding one is a component rather than a layout decision. */
 export function Section({
 	icon: Icon,
 	tint,

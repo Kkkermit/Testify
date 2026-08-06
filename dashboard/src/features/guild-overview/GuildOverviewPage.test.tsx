@@ -28,10 +28,7 @@ describe("the guild overview", () => {
 		expect(screen.getByText("Not set up")).toBeInTheDocument();
 	});
 
-	/**
-	 * A feature can be configured perfectly and still do nothing, because Discord revokes permissions silently.
-	 * This is the only place anyone would find out.
-	 */
+	/** Discord revokes permissions silently, and this is the only place anyone would find out. */
 	it("warns when the bot is missing a permission a feature needs", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/overview", () =>

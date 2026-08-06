@@ -3,10 +3,7 @@ import { render, type RenderResult } from "@testing-library/react";
 import { type ReactElement } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
 
-/**
- * A fresh QueryClient per test, or one test's cached `/auth/me` answers the next one's question. Retries are
- * off so a deliberate 500 fails in milliseconds rather than after a backoff.
- */
+/** A fresh QueryClient per test, or one test's cached `/auth/me` answers the next one's question. */
 export function renderWithProviders(
 	ui: ReactElement,
 	options: { route?: string; path?: string } = {},

@@ -1,12 +1,6 @@
 @import "tailwindcss";
 
-/*
- * The palette is the one worked out in dashboard-POC/08-DESIGN.md, where every contrast ratio is calculated
- * rather than asserted. Changing a value here means re-checking it there.
- *
- * Everything a screen can be restyled with lives in this block. A component never writes a hex value, a radius
- * or a duration of its own — that is what makes a fork's rebrand a change to this file alone.
- */
+/** The palette from dashboard-POC/08-DESIGN.md. Nothing else writes a hex value, a radius or a duration. */
 @theme {
 	--color-background: #0a0a0f;
 	--color-foreground: #ffffff;
@@ -100,11 +94,7 @@
 		scroll-margin-top: 5rem;
 	}
 
-	/*
-	 * Native controls default to the browser's accent and metrics, which are nobody's brand and are sized for a
-	 * light page. A checkbox is fixed at 16px because the flex rows it sits in would otherwise shrink it, which
-	 * takes it below the 24px touch target and misaligns it against the label beside it.
-	 */
+	/** A checkbox is fixed at 16px because the flex rows it sits in would otherwise shrink it below the 24px touch target. */
 	input[type="checkbox"] {
 		accent-color: var(--color-primary);
 		width: 1rem;
@@ -119,10 +109,7 @@
 		flex-shrink: 0;
 	}
 
-	/*
-	 * Firefox and WebKit take different properties for the same thing, so both are set. Without this a dark page
-	 * gets the platform's light scrollbar — a bright strip down the side of every list and dialog.
-	 */
+	/** Firefox and WebKit take different properties for this, and without both a dark page gets the platform's light scrollbar. */
 	* {
 		scrollbar-width: thin;
 		scrollbar-color: var(--color-border) transparent;
@@ -150,11 +137,7 @@
 		background: transparent;
 	}
 
-	/*
-	 * A native select draws its own chevron in the platform's colour and leaves no room for one of ours, so the
-	 * arrow is an inline SVG background and the right padding is what stops the longest option running under it.
-	 * `currentColor` cannot be used in a `url()`, so the muted foreground is written out here and only here.
-	 */
+	/** A native select leaves no room for a chevron of ours, so it is an inline SVG background; `currentColor` cannot be used in a `url()`. */
 	select {
 		appearance: none;
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -170,10 +153,7 @@
 	}
 }
 
-/*
- * A scroller whose bar would sit on top of the thing it scrolls — a tab underline, a row of chips. The content
- * still scrolls; only the bar is hidden, so this is never the only way to reach what is off-screen.
- */
+/** For a scroller whose bar would sit on top of what it scrolls. The content still scrolls, so this is never the only way to reach it. */
 @utility scrollbar-none {
 	scrollbar-width: none;
 
@@ -194,10 +174,7 @@
 	animation: var(--animate-pop);
 }
 
-/*
- * A 1px inset highlight along the top edge. Elevation without a drop shadow, which on near-black reads as a
- * smudge — see 08-DESIGN.md.
- */
+/** A 1px inset highlight: elevation without a drop shadow, which on near-black reads as a smudge. */
 @utility surface-edge {
 	box-shadow: inset 0 1px 0 0 --alpha(var(--color-foreground) / 6%);
 }
@@ -216,10 +193,7 @@
 	}
 }
 
-/*
- * Tippy ships a light theme meant for a white page. This is the whole of its appearance here, reading the same
- * tokens as everything else so a rebrand does not leave the tooltips behind.
- */
+/** Tippy ships a light theme, so this is the whole of its appearance here, reading the same tokens as everything else. */
 .tippy-box[data-theme~="testify"] {
 	background-color: var(--color-popover);
 	color: var(--color-foreground);
@@ -235,11 +209,7 @@
 	color: var(--color-popover);
 }
 
-/*
- * WCAG 1.4.11 asks for a visible boundary on anything you need to see to use. `prefers-contrast: more` goes
- * further: dividers become the interactive border and secondary text becomes full white, which makes the theme
- * usable for people who otherwise cannot read a dark UI at all.
- */
+/** `prefers-contrast: more` swaps dividers for the interactive border and muted text for white. */
 @media (prefers-contrast: more) {
 	:root {
 		--color-border: var(--color-input);

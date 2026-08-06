@@ -8,10 +8,7 @@ const TINTS = [
 	"bg-feature-moderation/20 text-feature-moderation",
 ] as const;
 
-/**
- * A stable colour per server, so the picker is scannable by shape rather than by reading every name — and the
- * same server keeps its colour between visits, which a random one would not.
- */
+/** A stable colour per server, so the picker is scannable by shape and the same server keeps its colour between visits. */
 export function tintFor(seed: string): string {
 	let hash = 0;
 	for (const character of seed) hash = (hash * 31 + character.codePointAt(0)!) % 100_000;

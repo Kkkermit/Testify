@@ -69,10 +69,7 @@ describe("a half-configured install", () => {
 		);
 	});
 
-	/**
-	 * Journey 4. Getting this wrong is where most self-hosted dashboards lose people, so it names each missing
-	 * variable rather than saying "check your configuration".
-	 */
+	/** Journey 4: a half-configured install has to name each missing variable. */
 	it("lists exactly what is missing instead of offering a button that cannot work", async () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in" });
 

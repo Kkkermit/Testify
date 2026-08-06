@@ -9,7 +9,7 @@ import { useSetup } from "@/features/auth/useMe";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { hardRedirect } from "@/lib/redirect";
 
-/** One button, the two scopes named and why, and nothing else. Asking for less is a feature, so say what it is. */
+/** One button, and the two scopes named — asking for less is a feature, so say what it is. */
 export function SignInPage(): React.JSX.Element {
 	usePageTitle("Sign in");
 	const [params] = useSearchParams();

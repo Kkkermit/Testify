@@ -8,12 +8,7 @@ export interface Segment<Value extends string | number> {
 	hint?: string;
 }
 
-/**
- * A row of mutually exclusive choices — a reporting window, a log level, a filter.
- *
- * `aria-pressed` rather than radio semantics: these switch what is shown rather than submitting a value, and a
- * radio group would promise a form that does not exist.
- */
+/** `aria-pressed` rather than radio semantics: these switch what is shown rather than submitting a value. */
 export function SegmentedControl<Value extends string | number>({
 	label,
 	segments,

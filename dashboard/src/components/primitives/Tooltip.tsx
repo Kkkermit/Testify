@@ -3,12 +3,7 @@ import tippy, { type Instance, type Placement } from "tippy.js";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import "tippy.js/dist/tippy.css";
 
-/**
- * A tooltip describes; it never names. Anything it says must be an addition to a control that already has its
- * own accessible name, because a pointer-only affordance is invisible to anyone arriving another way — hence
- * `describedby` and a `focusin` trigger below. Drives tippy.js directly: `@tippyjs/react` reads `element.ref`,
- * which React 19 removed.
- */
+/** Describes, never names — hence `describedby`. Drives tippy.js directly: `@tippyjs/react` reads `element.ref`, removed in React 19. */
 export function Tooltip({
 	label,
 	placement = "top",

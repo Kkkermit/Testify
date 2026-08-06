@@ -1,7 +1,4 @@
-/**
- * WebGL takes numbers, not class names, so the backdrop is the one place a colour has to be read rather than
- * applied. Reading it back off `:root` keeps the palette in `index.css` — nothing here hardcodes a hex.
- */
+/** WebGL takes numbers, not class names, so this is the one place a colour is read rather than applied — and it is read off `:root`. */
 export function cssColour(name: string, fallback: string, root: Element = document.documentElement): string {
 	const value = getComputedStyle(root).getPropertyValue(name).trim();
 	return value === "" ? fallback : value;

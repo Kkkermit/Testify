@@ -17,10 +17,7 @@ describe("the legal pages", () => {
 		}
 	});
 
-	/**
-	 * The privacy notice is only worth anything if it matches what the bot does. These are the four claims the
-	 * code has to keep true, so a change that breaks one should break a test.
-	 */
+	/** The four claims the code has to keep true, so a change that breaks one breaks a test. */
 	it("says what the code actually does", () => {
 		const text = PRIVACY.sections.flatMap((section) => [...section.paragraphs, ...(section.list ?? [])]).join(" ");
 

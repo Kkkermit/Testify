@@ -1,10 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 
-/**
- * The application's profile banner, or a wash in its accent colour when it has none — which is most bots. The
- * accent is data from Discord rather than a design token, so it is the one colour here written as a value.
- */
+/** The profile banner, or a wash in the accent colour Discord returns — the one colour here written as a value rather than a token. */
 export function BotBanner({
 	src,
 	accent,

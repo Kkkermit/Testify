@@ -16,15 +16,7 @@ export function useSettings(guildId: string): UseQueryResult<ServerSettings> {
 	});
 }
 
-/**
- * One hook per section, because each section is its own endpoint. Every write answers with the whole settings
- * document, so the cache is replaced rather than merged — a section that refuses cannot leave the rest of the
- * screen showing a value the bot does not have.
- *
- * Sharing one mutation key across the sections is what makes concurrent writes safe: response order says nothing
- * about the order the server applied them, so a whole-document answer is only trusted while it is the only write
- * in flight, and the refetch on settle is what decides otherwise.
- */
+/** One mutation key across the sections: a whole-document answer is only trusted while it is the only write in flight, and the refetch on settle decides otherwise. */
 export function useSaveSection<Patch>(
 	guildId: string,
 	section: string,
@@ -43,7 +35,6 @@ export function useSaveSection<Patch>(
 		onSettled: () => {
 			if (!alone()) return;
 			void client.invalidateQueries({ queryKey: key });
-			// The overview's feature grid and its audit list both change with this.
 			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
 		},
 	});

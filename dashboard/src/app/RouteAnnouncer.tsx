@@ -1,11 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 
-/**
- * A single-page app replaces its content without a page load, so a screen reader gets no signal that the page
- * changed at all. This reads the title the new screen set and says it once; the first render is skipped, since
- * the page load announces that one itself.
- */
+/** An SPA changes page without a load, so this reads the new title once; the first render is skipped. */
 export function RouteAnnouncer(): React.JSX.Element {
 	const { pathname } = useLocation();
 	const [message, setMessage] = useState("");

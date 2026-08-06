@@ -36,10 +36,7 @@ export function useUsage(days: number): UseQueryResult<UsageReport> {
 	});
 }
 
-/**
- * The one screen worth polling: it is read while something is going wrong. Pausing stops the poll rather than
- * freezing a snapshot, so a line cannot scroll away while it is being read.
- */
+/** The one screen worth polling; pausing stops the poll rather than freezing a snapshot, so a line cannot scroll away while it is being read. */
 export function useLogs(level: ReportedLogLevel, search: string, paused: boolean): UseQueryResult<LogFeed> {
 	const query = new URLSearchParams({ level, limit: "300" });
 	if (search.trim() !== "") query.set("q", search.trim());

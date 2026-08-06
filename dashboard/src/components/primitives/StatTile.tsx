@@ -4,10 +4,7 @@ import { Card } from "@/components/primitives/Card";
 import { Tooltip } from "@/components/primitives/Tooltip";
 import { cn } from "@/lib/cn";
 
-/**
- * A number is animated only when it is given as one — an uptime or a database name is a string, and counting
- * up to "connected" is meaningless.
- */
+/** Animated only when the value is a number — counting up to "connected" is meaningless. */
 export function StatTile({
 	label,
 	value,

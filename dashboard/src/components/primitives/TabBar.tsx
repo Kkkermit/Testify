@@ -7,15 +7,7 @@ export interface TabDefinition<Key extends string = string> {
 	icon: LucideIcon;
 }
 
-/**
- * The active underline is a child of the pressed tab rather than one bar positioned by measurement, so it needs
- * no layout reads and cannot drift when the labels reflow. The bar scrolls sideways on a phone instead of
- * wrapping, which would move the panel down the screen every time a tab changed — and the scrollbar is hidden,
- * because it draws over the 2px underline directly beneath it.
- *
- * The rule below the tabs is on a wrapper rather than on the scroller: `overflow-x` also computes `overflow-y`
- * to `auto`, so a marker hung past the scroller's edge to reach the rule was clipped away instead of drawn.
- */
+/** The rule is on a wrapper rather than the scroller: `overflow-x` also computes `overflow-y` to `auto`, which clips a marker hung past the edge. */
 export function TabBar<Key extends string>({
 	label,
 	tabs,

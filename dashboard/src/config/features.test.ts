@@ -44,10 +44,7 @@ describe("tintFor", () => {
 });
 
 describe("category coverage", () => {
-	/**
-	 * The command list keys this map by category, so a category with no entry renders every one of its commands
-	 * under the same neutral fallback icon.
-	 */
+	/** A category with no entry renders every one of its commands under the neutral fallback icon. */
 	it("has an icon for every category the bot ships", () => {
 		const categories = [
 			"community",

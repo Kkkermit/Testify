@@ -2,10 +2,7 @@ import { Link } from "react-router";
 import { Button, Card } from "@/components/primitives";
 import { ApiError } from "@/lib/api";
 
-/**
- * What failed, whether it is worth retrying, and one action. A 404 here means Testify is not in the server,
- * which is a different screen from "you cannot manage it" — and both are different from a bug.
- */
+/** A 404 here means Testify is not in the server, which is a different screen from both a refusal and a bug. */
 export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }): React.JSX.Element {
 	const { title, body, retryable } = describe(error);
 

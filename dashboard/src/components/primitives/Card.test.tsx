@@ -2,10 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { Card, cardClass } from "@/components/primitives/Card";
 
 describe("cardClass", () => {
-	/**
-	 * The rule the whole layout rests on: every card's content starts on the same column whatever its density.
-	 * A card that sets its own `p-4` puts its content 8px left of every other card on the page.
-	 */
+	/** A card that sets its own `p-4` puts its content 8px left of every other card on the page. */
 	it("gives every density the same inline padding", () => {
 		for (const padding of ["compact", "default"] as const) {
 			expect(cardClass(padding)).toMatch(/(^|\s)(p-6|px-6)(\s|$)/);

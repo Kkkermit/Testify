@@ -1,9 +1,6 @@
 import { useEffect } from "react";
 
-/**
- * Set on every route, or browser history is fourteen entries all called "Testify". The server's name goes in the
- * middle, so two tabs on the same screen in different servers are told apart.
- */
+/** Set on every route, or history is fourteen entries all called "Testify"; the server name tells two tabs on the same screen apart. */
 export function pageTitle(title: string, context?: string): string {
 	return [title, context, "Testify"].filter((part) => part !== undefined && part !== "").join(" · ");
 }

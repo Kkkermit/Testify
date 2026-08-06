@@ -43,10 +43,7 @@ describe("Tooltip", () => {
 		});
 	});
 
-	/**
-	 * The contract the whole component rests on: it describes, it never names. A control whose only label is a
-	 * tooltip is unreachable to anyone who arrives at it without a pointer.
-	 */
+	/** It describes, it never names: a control labelled only by a tooltip is unreachable without a pointer. */
 	it("describes the control rather than naming it", async () => {
 		render(
 			<Tooltip label="Every server you can configure">

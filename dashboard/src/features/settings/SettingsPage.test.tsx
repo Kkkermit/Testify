@@ -195,10 +195,7 @@ describe("the settings page", () => {
 		});
 	});
 
-	/**
-	 * Every section answers with the whole settings document, so a slow write carries a snapshot taken before a
-	 * later one — landing it on the cache would put the other section's control back where it was.
-	 */
+	/** A slow write carries a snapshot taken before a later one, so landing it on the cache would put the other section's control back. */
 	it("does not let one section's slow answer undo another's", async () => {
 		const user = userEvent.setup();
 		let stored = serverSettings;

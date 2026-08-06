@@ -2,10 +2,7 @@ import { useState } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { cn } from "@/lib/cn";
 
-/**
- * The bot's own avatar wherever the product identifies itself. Three things can go wrong — no answer yet, no
- * avatar set, an unreachable CDN — and all three land on the built-in mark rather than a broken image icon.
- */
+/** No answer yet, no avatar set and an unreachable CDN all land on the built-in mark rather than a broken image icon. */
 export function BotMark({
 	src,
 	size = 22,

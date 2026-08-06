@@ -23,7 +23,6 @@ describe("isHexColour", () => {
 		expect(isHexColour("#A78BFA")).toBe(true);
 	});
 
-	/** three's Color parses nothing else, and a bad parse is a black field rather than an error. */
 	it("rejects anything three would not parse", () => {
 		expect(isHexColour("oklch(70% 0.1 300)")).toBe(false);
 		expect(isHexColour("rebeccapurple")).toBe(false);

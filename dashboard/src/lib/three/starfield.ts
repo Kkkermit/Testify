@@ -13,10 +13,7 @@ import { damp, fieldPositions, fieldSizes, parallaxTarget, renderScale } from "@
 import { STARFIELD_FRAGMENT, STARFIELD_VERTEX } from "@/lib/three/shaders";
 import { accentColour } from "@/lib/three/tokens";
 
-/**
- * The ambient field behind the app. Everything that can be reasoned about — the scatter, the easing, the
- * parallax — lives in `field.ts` and is unit tested; this file is the part that needs a GPU.
- */
+/** The part of the backdrop that needs a GPU; everything that can be reasoned about is in `field.ts` and unit tested. */
 
 export interface StarfieldOptions {
 	count?: number;

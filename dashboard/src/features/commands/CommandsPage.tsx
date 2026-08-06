@@ -13,12 +13,7 @@ import { useCommandToggles, useSaveCommandToggles } from "@/features/commands/us
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-/**
- * Every command the bot has, and — inside a server, or on the owner console — a switch for each one.
- *
- * `scope` is what decides which list is being edited: a guild id edits that server's, `"global"` edits the
- * bot-wide one. Neither is a permission: the API answers 404 or 403 regardless of what this page renders.
- */
+/** `scope` decides which list is edited. Neither scope is a permission — the API answers 404 or 403 regardless. */
 export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.Element {
 	usePageTitle("Commands");
 	// Present when the page is reached from inside a server, which is what makes a Configure link possible.

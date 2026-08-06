@@ -17,8 +17,7 @@ afterAll(() => {
 	server.close();
 });
 
-// jsdom has no matchMedia at all, and the motion hooks read it. Defaulting to "no preference" means the
-// animated path — the one production runs — is the one under test; individual tests override it.
+// jsdom has no matchMedia, and the motion hooks read it; "no preference" puts the animated path under test, and individual tests override it.
 window.matchMedia = jest.fn().mockImplementation((query: string) => ({
 	matches: false,
 	media: query,
@@ -28,8 +27,7 @@ window.matchMedia = jest.fn().mockImplementation((query: string) => ({
 	dispatchEvent: jest.fn(),
 }));
 
-// Node's fetch demands an absolute URL where a browser resolves against the document. `lib/api.ts` is
-// browser code and requests "/api/…", so the harness supplies the origin jsdom would have.
+// Node's fetch demands an absolute URL where a browser resolves against the document, so the harness supplies the origin.
 const nodeFetch = globalThis.fetch;
 globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) =>
 	nodeFetch(typeof input === "string" && input.startsWith("/") ? new URL(input, window.location.origin) : input, init);

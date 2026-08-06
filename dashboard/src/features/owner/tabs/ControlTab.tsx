@@ -8,10 +8,7 @@ import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/featur
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/**
- * There is no Start, and the card says why: this API is served by the bot process, so a stopped bot has nothing
- * left to answer with. Pause is the reversible half, and what "stopped" means to a server.
- */
+/** There is no Start: this API is served by the bot process, so a stopped bot has nothing left to answer with. */
 export function ControlTab(): React.JSX.Element {
 	const control = useBotControl();
 	const gateway = useGateway();

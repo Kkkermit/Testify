@@ -35,10 +35,7 @@ export function useRoles(guildId: string): UseQueryResult<RoleSummary[]> {
 	});
 }
 
-/**
- * Optimistic with a rollback, and every mutation here goes through this so none can forget it: a switch that
- * flips back with "You need Manage Server" is honest, where one that stays on after a refusal is a lie.
- */
+/** Optimistic with a rollback, and every mutation here goes through it so none can forget one. */
 function useLevellingMutation<TInput>(
 	guildId: string,
 	send: (input: TInput) => Promise<LevelConfigResponse>,
@@ -76,8 +73,7 @@ export function useUpdateLevelling(guildId: string) {
 	return useLevellingMutation<LevellingPatch>(
 		guildId,
 		(patch) => api.patch<LevelConfigResponse>(`/guilds/${guildId}/levelling`, patch),
-		// Written out rather than spread: `levelUpChannelId` can legitimately be null, so `??` would read a
-		// deliberate "announce where they were talking" as "leave it alone".
+		// Written out rather than spread: `levelUpChannelId` can legitimately be null, and `??` would read that as "leave it alone".
 		(current, patch) => ({
 			...current,
 			enabled: patch.enabled ?? current.enabled,

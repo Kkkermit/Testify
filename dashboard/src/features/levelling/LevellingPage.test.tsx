@@ -26,7 +26,6 @@ function refuseWith(method: "patch" | "put", path: string, code: string, message
 }
 
 describe("tabFrom", () => {
-	/** A tab name out of a URL can be anything at all. */
 	it("falls back to General for anything that is not a tab", () => {
 		for (const raw of [null, "", "nope", "__proto__"]) expect(tabFrom(raw)).toBe("general");
 	});
@@ -82,10 +81,7 @@ describe("the general tab", () => {
 		});
 	});
 
-	/**
-	 * A toggle that lags 400ms feels broken, so it moves first and the server confirms after. The delay is
-	 * what makes that observable — without it the answer lands before the assertion and proves nothing.
-	 */
+	/** The delay is what makes the optimism observable — without it the answer lands before the assertion. */
 	it("flips immediately rather than waiting for the server", async () => {
 		const user = userEvent.setup();
 		server.use(
@@ -102,10 +98,7 @@ describe("the general tab", () => {
 		expect(toggle).not.toBeChecked();
 	});
 
-	/**
-	 * The rollback matters as much as the optimism: a switch that stays on while the server said no is a lie,
-	 * and one that flips back without saying why looks like a bug.
-	 */
+	/** A switch that stays on while the server said no is a lie, and one that flips back silently looks like a bug. */
 	it("puts the switch back and says why when the server refuses", async () => {
 		const user = userEvent.setup();
 		refuseWith("patch", "", "missing_manage_guild", "You need Manage Server in that server.");
@@ -169,7 +162,6 @@ describe("the rewards tab", () => {
 		expect(screen.getByRole("listitem")).toHaveTextContent("Member");
 	});
 
-	/** A role deleted in Discord after being configured here still has to render as something. */
 	it("names a reward whose role no longer exists", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/levelling", () =>
@@ -348,7 +340,6 @@ describe("the ignores tab", () => {
 });
 
 describe("moving between tabs", () => {
-	/** In the URL, so a link to the rewards tab is a link to the rewards tab and Back works. */
 	it("opens the tab the URL asked for", async () => {
 		renderPage("boosts");
 

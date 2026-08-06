@@ -3,11 +3,7 @@ import { Tooltip } from "@/components/primitives";
 import { type NavItem } from "@/config/navigation";
 import { cn } from "@/lib/cn";
 
-/**
- * The label is `sr-only` at the icon-only width rather than `hidden`: `hidden` is `display: none`, which takes
- * it out of the accessibility tree and leaves the link named nothing. The tooltip is the sighted half of the
- * same job and adds nothing a screen reader needs.
- */
+/** `sr-only` rather than `hidden` at the icon-only width: `display: none` would leave the link named nothing. */
 export function SidebarLink({ item, expanded = false }: { item: NavItem; expanded?: boolean }): React.JSX.Element {
 	const { to, label, icon: Icon, hint, exact = true } = item;
 

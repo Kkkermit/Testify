@@ -2,10 +2,7 @@ import { type ReactNode } from "react";
 import { Card } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
-/**
- * A numbered card, for a page whose parts are read in order. The number is decorative — the heading is what
- * names the section — so it is hidden rather than read out as "1" before every title.
- */
+/** The number is decorative — the heading names the section — so it is hidden rather than read out before every title. */
 export function Step({
 	number,
 	title,

@@ -1,7 +1,4 @@
-/**
- * A round, soft-edged point costs two short shaders; the alternative is `PointsMaterial`, which draws squares
- * unless it is handed a sprite texture to fetch.
- */
+/** Two short shaders, because `PointsMaterial` draws squares unless it is handed a sprite texture to fetch. */
 
 export const STARFIELD_VERTEX = /* glsl */ `
 	attribute float aSize;

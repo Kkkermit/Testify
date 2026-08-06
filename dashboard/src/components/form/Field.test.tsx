@@ -2,10 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { Field } from "@/components/form/Field";
 
 describe("Field", () => {
-	/**
-	 * The wrapping form labels implicitly, so nothing in the caller has to remember an id — and forgetting one
-	 * is the way a control ends up named nothing.
-	 */
+	/** The wrapping form labels implicitly, so a caller cannot forget an id and leave the control named nothing. */
 	it("names a control it wraps", () => {
 		render(
 			<Field label="Prefix">

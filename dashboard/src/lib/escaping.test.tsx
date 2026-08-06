@@ -2,11 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { render, screen } from "@testing-library/react";
 
-/**
- * Everything the dashboard shows about a guild — a server name, a welcome message, a role name — was typed by
- * somebody. React escapes it, and these pin that it stays escaped: the failure mode is one
- * `dangerouslySetInnerHTML` added later "just for this one bit of markdown".
- */
+/** Everything shown about a guild was typed by somebody; the failure mode is one `dangerouslySetInnerHTML` added later for a bit of markdown. */
 describe("rendering text a guild manager typed", () => {
 	const payload = `<img src=x onerror="window.__owned = true">`;
 

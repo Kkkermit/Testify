@@ -41,7 +41,6 @@ describe("fieldSizes", () => {
 		expect(fieldSizes(positions, 100).length).toBe(4);
 	});
 
-	/** Nearer points drawn larger is what makes the field read as depth rather than as noise. */
 	it("draws a near point larger than a far one", () => {
 		const positions = new Float32Array([0, 0, -1, 0, 0, -99]);
 		const sizes = fieldSizes(positions, 100);
@@ -74,10 +73,7 @@ describe("damp", () => {
 		expect(damp(3, 10, 2, 0)).toBe(3);
 	});
 
-	/**
-	 * The reason this is exponential rather than a fixed fraction per frame: the same elapsed time has to
-	 * produce the same movement whether it arrived as one long frame or several short ones.
-	 */
+	/** The same elapsed time has to produce the same movement whether it arrived as one long frame or several short ones. */
 	it("covers the same ground at 30fps as at 120fps", () => {
 		const slow = damp(0, 10, 4, 1 / 30);
 
@@ -102,7 +98,6 @@ describe("parallaxTarget", () => {
 		expect(parallaxTarget({ x: 1000, y: 250 }, viewport, 2).x).toBeCloseTo(2);
 	});
 
-	/** Screen y grows downwards and world y grows upwards, so the sign has to flip or the field leans away. */
 	it("leans towards the pointer rather than away from it", () => {
 		expect(parallaxTarget({ x: 500, y: 0 }, viewport, 2).y).toBeCloseTo(2);
 	});

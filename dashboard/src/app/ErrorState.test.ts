@@ -5,10 +5,7 @@ function problem(status: number, code: string, message = "no"): ApiError {
 	return new ApiError(status, { error: { code, message } });
 }
 
-/**
- * Each of these is a different screen on purpose. "Something went wrong" for all four is how a dashboard trains
- * people to ignore its error messages.
- */
+/** Each of these is a different screen on purpose: "Something went wrong" for all four trains people to ignore the message. */
 describe("describing a failure", () => {
 	it("tells someone the bot has left rather than that something broke", () => {
 		expect(describeError(problem(404, "guild_not_found"))).toMatchObject({

@@ -1,10 +1,7 @@
 import { Card } from "@/components/primitives";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/**
- * Getting this wrong is where most self-hosted dashboards lose people, so it names each missing variable and
- * the exact redirect URI to paste rather than saying "check your configuration".
- */
+/** Names each missing variable and the exact redirect URI to paste, because this is where most self-hosted dashboards lose people. */
 export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redirectUri: string }): React.JSX.Element {
 	usePageTitle("Finish setting up");
 

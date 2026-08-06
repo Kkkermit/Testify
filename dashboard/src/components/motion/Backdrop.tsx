@@ -14,11 +14,7 @@ export function supportsWebgl(): boolean {
 	}
 }
 
-/**
- * The ambient field behind every screen. three.js is imported dynamically so it lands in its own chunk and is
- * never fetched by a browser that would not draw it, and the canvas is decorative — it carries no information,
- * so it is hidden from assistive technology and skipped entirely under reduced motion.
- */
+/** three.js is imported dynamically so it lands in its own chunk and is never fetched by a browser that would not draw it. */
 export function Backdrop({ opacity }: { opacity?: number } = {}): React.JSX.Element | null {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const fieldRef = useRef<Starfield | null>(null);

@@ -56,11 +56,7 @@ describe("switching commands off in a server", () => {
 		expect((captured.body as CommandTogglePut).disabled).toEqual(["ban", "levelling"]);
 	});
 
-	/**
-	 * Two clicks in a row, the first answered last. The order answers arrive in says nothing about the order the
-	 * server applied them, so the burst has to end in a read rather than in whichever whole-list answer came back
-	 * last — otherwise the slow one silently undoes the click after it.
-	 */
+	/** Two clicks in a row, the first answered last: the burst has to end in a read, or the slow answer undoes the click after it. */
 	it("does not let a slow answer undo a later click", async () => {
 		const user = userEvent.setup();
 		let stored = ["ban"];
@@ -110,10 +106,7 @@ describe("switching commands off in a server", () => {
 		expect(await screen.findByText(/1 switched off here/i)).toBeInTheDocument();
 	});
 
-	/**
-	 * The switch is disabled rather than absent, and the reason is on the control — a switch that silently
-	 * does nothing is the thing this avoids.
-	 */
+	/** Disabled with the reason on the control: a switch that silently does nothing is what this avoids. */
 	it("locks a command the bot needs, rather than letting the request be refused", async () => {
 		server.use(
 			http.get("/api/commands", () =>

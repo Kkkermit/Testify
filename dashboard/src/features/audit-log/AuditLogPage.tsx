@@ -25,8 +25,7 @@ export function AuditLogPage(): React.JSX.Element {
 
 	const [draft, setDraft] = useState<AuditLogPut | null>(null);
 
-	// A channel and a set of events are one decision, so nothing is written until Save — the same shape as the
-	// Discord panel this mirrors.
+	// A channel and a set of events are one decision, so nothing is written until Save.
 	useEffect(() => {
 		if (config.data !== undefined) setDraft(draftFrom(config.data));
 	}, [config.data]);
@@ -76,10 +75,7 @@ export function AuditLogPage(): React.JSX.Element {
 				}
 			/>
 
-			{/*
-			 * Two numbered steps rather than one panel of controls: the destination and the event list are
-			 * different decisions, and a divided panel gave the reader no signal about which was which.
-			 */}
+			{/* Two numbered steps: the destination and the event list are different decisions. */}
 			<Step
 				number={1}
 				title="Where the log goes"
@@ -127,11 +123,7 @@ export function AuditLogPage(): React.JSX.Element {
 					</div>
 				}
 			>
-				{/*
-				 * Columns rather than a grid: the groups are two to six rows long, and a grid row is as tall as
-				 * its tallest cell, which left a column of dead space under the short ones. `gap` does not apply
-				 * between items here, so the space below each panel is its own margin.
-				 */}
+				{/* Columns, because a grid row is as tall as its tallest cell; `gap` does not apply here, so each panel carries its own margin. */}
 				<div className="-mb-4 gap-x-4 sm:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
 					{AUDIT_GROUPS.map((group) => (
 						<EventGroup
