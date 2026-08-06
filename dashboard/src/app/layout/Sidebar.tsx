@@ -140,10 +140,16 @@ export function Sidebar({
 	);
 }
 
-/** Opaque in the drawer — a translucent panel over the page it covers is unreadable. */
+/**
+ * Opaque in the drawer — a translucent panel over the page it covers is unreadable.
+ *
+ * The rail is capped to the viewport and stuck to the top of it. A flex child stretches to its container, and
+ * the container grows with the page, so on a long screen like `/commands` the footer this ends with — the
+ * account, the legal links and Sign out — was thousands of pixels down the document rather than on screen.
+ */
 function cnSidebar(expanded: boolean): string {
 	const base = "border-border flex shrink-0 flex-col p-3";
 	return expanded
 		? `${base} bg-card h-full w-64 border-r`
-		: `${base} bg-card/80 hidden w-16 border-r backdrop-blur-sm md:flex lg:w-60`;
+		: `${base} bg-card/80 scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r backdrop-blur-sm md:flex lg:w-60`;
 }

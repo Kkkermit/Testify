@@ -40,11 +40,16 @@ export function AppShell(): React.JSX.Element {
 			<MobileNav {...audience} user={user} bot={bot.data} open={menuOpen} onOpenChange={setMenuOpen} />
 			<Sidebar {...audience} user={user} bot={bot.data} />
 
-			{/* Keyed on the path so each screen fades in on arrival rather than swapping in place. */}
+			{/*
+			 * Keyed on the path so each screen fades in on arrival rather than swapping in place.
+			 *
+			 * `min-w-0` because a flex item will not shrink below its content by default, and a page whose widest
+			 * part is wider than the space left beside the rail pushed the whole document sideways instead.
+			 */}
 			<main
 				id="content"
 				key={location.pathname}
-				className="motion-fade mx-auto flex w-full max-w-[1100px] flex-1 flex-col gap-6 p-4 sm:p-6"
+				className="motion-fade mx-auto flex w-full max-w-[1100px] min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6"
 			>
 				<Outlet />
 			</main>

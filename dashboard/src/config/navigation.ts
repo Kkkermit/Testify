@@ -48,7 +48,10 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
 					label: "Commands",
 					icon: Terminal,
-					hint: "Every command Testify has",
+					hint:
+						guild === undefined
+							? "Every command Testify has"
+							: "Every command Testify has, and which of them this server allows",
 				},
 			],
 		},

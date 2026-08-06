@@ -1,7 +1,7 @@
 import { type ChannelSummary, type RoleSummary, VERIFY_LIMITS, verificationBlocked } from "@testify/shared";
 import { ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
-import { ChannelPicker, FIELD, LABEL, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
+import { ChannelPicker, Field, FIELD, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveVerification, useVerification } from "@/features/settings/useVerification";
@@ -66,8 +66,7 @@ export function VerificationSection({
 						}}
 					/>
 
-					<label className="flex flex-col gap-2">
-						<span className={LABEL}>Give them this role</span>
+					<Field label="Give them this role">
 						<select
 							className={cn(FIELD, SELECT)}
 							value={value.roleId ?? ""}
@@ -83,12 +82,9 @@ export function VerificationSection({
 								</option>
 							))}
 						</select>
-					</label>
+					</Field>
 
-					<div className="flex flex-col gap-2">
-						<label htmlFor="verify-message" className={LABEL}>
-							What the panel says
-						</label>
+					<Field label="What the panel says" htmlFor="verify-message">
 						<textarea
 							id="verify-message"
 							rows={3}
@@ -102,7 +98,7 @@ export function VerificationSection({
 							}}
 							className={cn(FIELD, "resize-y")}
 						/>
-					</div>
+					</Field>
 
 					{value.roleTooHigh && (
 						<Warning>

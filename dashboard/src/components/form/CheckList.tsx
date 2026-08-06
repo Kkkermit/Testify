@@ -1,5 +1,5 @@
-import { type ReactNode } from "react";
-import { CHECK_ROW, LABEL, SCROLL_LIST } from "@/components/form/field";
+import { useId, type ReactNode } from "react";
+import { CHECK_ROW, FIELD_GROUP, LABEL, SCROLL_LIST } from "@/components/form/field";
 import { cn } from "@/lib/cn";
 
 export interface CheckItem {
@@ -30,14 +30,21 @@ export function CheckList({
 	onChange: (ids: string[]) => void;
 }): React.JSX.Element {
 	const atLimit = value.length >= max;
+	const nameId = `checklist-${useId()}`;
 
+	// A named group rather than a `Field`: a `<label>` names one control, and this is a set of them. A
+	// `<fieldset>` would be the other answer, but a `<legend>` is not a flex item, so its gap would not apply.
 	return (
-		<fieldset>
-			<legend className={LABEL}>{label}</legend>
-			{hint !== undefined && <p className="text-muted-foreground text-xs">{hint}</p>}
-			<p className="text-muted-foreground mt-1 text-xs tabular-nums" aria-live="polite">
-				{value.length} of {max} chosen
-			</p>
+		<div role="group" aria-labelledby={nameId} className={FIELD_GROUP}>
+			<span className="flex flex-col gap-0.5">
+				<span id={nameId} className={LABEL}>
+					{label}
+				</span>
+				{hint !== undefined && <span className="text-muted-foreground text-xs">{hint}</span>}
+				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
+					{value.length} of {max} chosen
+				</span>
+			</span>
 
 			<div className={SCROLL_LIST}>
 				{items.map((item) => {
@@ -62,6 +69,6 @@ export function CheckList({
 					);
 				})}
 			</div>
-		</fieldset>
+		</div>
 	);
 }

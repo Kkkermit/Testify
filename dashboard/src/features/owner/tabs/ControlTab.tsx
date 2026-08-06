@@ -1,7 +1,7 @@
 import { BOT_IDENTITY_LIMITS } from "@testify/shared";
 import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
-import { FIELD, LABEL, savingStateOf, SavingIndicator, Warning } from "@/components/form";
+import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
 import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/features/owner/useControl";
@@ -91,10 +91,7 @@ export function ControlTab(): React.JSX.Element {
 					</p>
 				</div>
 
-				<div className="flex flex-col gap-2">
-					<label htmlFor="bot-name" className={LABEL}>
-						Username
-					</label>
+				<Field label="Username" htmlFor="bot-name">
 					<div className="flex flex-wrap items-center gap-2">
 						<input
 							id="bot-name"
@@ -118,7 +115,7 @@ export function ControlTab(): React.JSX.Element {
 					<p className="text-muted-foreground text-xs">
 						Discord allows two username changes an hour, and refuses the rest — the message below is theirs, not ours.
 					</p>
-				</div>
+				</Field>
 
 				{identity.error !== null && (
 					<Warning>{identity.error instanceof ApiError ? identity.error.message : "Discord refused that."}</Warning>
@@ -134,30 +131,36 @@ export function ControlTab(): React.JSX.Element {
 					</p>
 				</div>
 
-				<label htmlFor="shutdown-confirm" className={LABEL}>
-					Type <span className="text-foreground font-mono">shut down</span> to confirm
-				</label>
-				<div className="flex flex-wrap items-center gap-2">
-					<input
-						id="shutdown-confirm"
-						value={confirm}
-						autoComplete="off"
-						onChange={(event) => {
-							setConfirm(event.target.value);
-						}}
-						className={cn(FIELD, "max-w-48")}
-					/>
-					<Button
-						variant="destructive"
-						disabled={confirm !== "shut down" || shutdown.isPending}
-						onClick={() => {
-							shutdown.mutate();
-						}}
-					>
-						<Power size={15} aria-hidden="true" />
-						Shut down
-					</Button>
-				</div>
+				<Field
+					htmlFor="shutdown-confirm"
+					label={
+						<>
+							Type <span className="text-foreground font-mono">shut down</span> to confirm
+						</>
+					}
+				>
+					<div className="flex flex-wrap items-center gap-2">
+						<input
+							id="shutdown-confirm"
+							value={confirm}
+							autoComplete="off"
+							onChange={(event) => {
+								setConfirm(event.target.value);
+							}}
+							className={cn(FIELD, "max-w-48")}
+						/>
+						<Button
+							variant="destructive"
+							disabled={confirm !== "shut down" || shutdown.isPending}
+							onClick={() => {
+								shutdown.mutate();
+							}}
+						>
+							<Power size={15} aria-hidden="true" />
+							Shut down
+						</Button>
+					</div>
+				</Field>
 
 				{shutdown.isSuccess && <Warning>Testify is stopping. This page will stop responding in a moment.</Warning>}
 			</Card>

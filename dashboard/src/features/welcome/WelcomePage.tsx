@@ -2,7 +2,7 @@ import { WELCOME_LIMITS, type WelcomeStyle } from "@testify/shared";
 import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, FIELD, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
+import { ChannelPicker, Field, FIELD, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button, Card, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
@@ -80,9 +80,10 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				/>
 
-				<fieldset className="flex flex-col gap-2" disabled={needsChannel}>
+				{/* A `<legend>` is not a flex item, so the gap under it has to be a margin on the group itself. */}
+				<fieldset disabled={needsChannel}>
 					<legend className={LABEL}>Sent as</legend>
-					<div className="grid gap-2 sm:grid-cols-3">
+					<div className="mt-2 grid gap-2 sm:grid-cols-3">
 						{STYLE_ORDER.map((style) => (
 							<StyleChoice
 								key={style}
@@ -97,11 +98,8 @@ export function WelcomePage(): React.JSX.Element {
 					</div>
 				</fieldset>
 
-				<div className="flex flex-col gap-2">
-					{/* The counter is a status, not part of the field's name, so it sits outside the label. */}
-					<label htmlFor="welcome-message" className={LABEL}>
-						Message
-					</label>
+				{/* The counter is a status, not part of the field's name, so it sits after the control. */}
+				<Field label="Message" htmlFor="welcome-message">
 					<textarea
 						id="welcome-message"
 						ref={textarea}
@@ -117,7 +115,7 @@ export function WelcomePage(): React.JSX.Element {
 					<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 						{draft.length} of {WELCOME_LIMITS.maxMessage}
 					</span>
-				</div>
+				</Field>
 
 				<PlaceholderHelp
 					disabled={needsChannel}

@@ -50,14 +50,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 
 	return (
 		<>
-			<PageHeader
-				title="Commands"
-				subtitle={
-					global
-						? "Everything Testify can do. A command switched off here is off in every server."
-						: "Everything Testify can do, on both the slash and prefix surfaces."
-				}
-			/>
+			<PageHeader title="Commands" subtitle={subtitleFor(global, state !== undefined)} />
 
 			{state !== undefined && (
 				<p className="text-muted-foreground text-sm">
@@ -152,6 +145,14 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 			)}
 		</>
 	);
+}
+
+/** Says what the switches do wherever there are any, because a row of them with no explanation is a guess. */
+function subtitleFor(global: boolean, switchable: boolean): string {
+	if (global) return "Everything Testify can do. A command switched off here is off in every server, for everybody.";
+	if (switchable) return "Everything Testify can do. Switch one off and nobody in this server can run it, either way.";
+
+	return "Everything Testify can do, on both the slash and prefix surfaces.";
 }
 
 function CategoryChip({

@@ -40,7 +40,12 @@ export function SettingsPage(): React.JSX.Element {
 				subtitle="The smaller switches: prefix, link filtering, joins, verification and counting."
 			/>
 
-			<div className="grid items-start gap-4 lg:grid-cols-2">
+			{/*
+			 * Columns rather than a grid: these cards are two to ten rows tall, and a grid row is as tall as its
+			 * tallest cell — which left a card-sized hole under every short one. `gap` does not apply between items
+			 * in a column layout, so the space below each card is its own margin.
+			 */}
+			<div className="gap-x-4 lg:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
 				<PrefixSection guildId={guildId} value={value.prefix} />
 				<NicknameSection guildId={guildId} />
 				<AntiLinkSection guildId={guildId} value={value.antiLink} />

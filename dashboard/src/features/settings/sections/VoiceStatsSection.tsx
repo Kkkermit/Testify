@@ -1,6 +1,6 @@
 import { type ChannelSummary, type VoiceStatsPatch, type VoiceStatsSetting } from "@testify/shared";
 import { AudioLines } from "lucide-react";
-import { FIELD, LABEL, savingStateOf, SELECT } from "@/components/form";
+import { Field, FIELD, savingStateOf, SELECT } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
@@ -58,10 +58,9 @@ function VoicePicker({
 	onChange: (channelId: string | null) => void;
 }): React.JSX.Element {
 	return (
-		<label className="block">
-			<span className={cn(LABEL, "block")}>{label}</span>
+		<Field label={label}>
 			<select
-				className={cn(FIELD, SELECT, "mt-1")}
+				className={cn(FIELD, SELECT)}
 				value={value ?? ""}
 				onChange={(event) => {
 					onChange(event.target.value === "" ? null : event.target.value);
@@ -74,6 +73,6 @@ function VoicePicker({
 					</option>
 				))}
 			</select>
-		</label>
+		</Field>
 	);
 }

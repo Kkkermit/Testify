@@ -1,7 +1,7 @@
 import { LEVEL_LIMITS, type LevelRewardInput } from "@testify/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { FIELD, SELECT, LABEL, savingStateOf, Warning } from "@/components/form";
+import { Field, FIELD, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
@@ -54,9 +54,8 @@ export function RewardsTab({
 				</ul>
 			)}
 
-			<div className="flex flex-wrap items-end gap-2">
-				<label className={LABEL}>
-					Level
+			<div className="flex flex-wrap items-end gap-3">
+				<Field label="Level" className="w-24">
 					<input
 						type="number"
 						inputMode="numeric"
@@ -66,17 +65,16 @@ export function RewardsTab({
 						onChange={(event) => {
 							setLevel(Number(event.target.value));
 						}}
-						className={cn(FIELD, "mt-1 w-24")}
+						className={FIELD}
 					/>
-				</label>
-				<label className={cn(LABEL, "min-w-48 flex-1")}>
-					Role
+				</Field>
+				<Field label="Role" className="min-w-48 flex-1">
 					<select
 						value={roleId}
 						onChange={(event) => {
 							setRoleId(event.target.value);
 						}}
-						className={cn(FIELD, SELECT, "mt-1")}
+						className={cn(FIELD, SELECT)}
 					>
 						<option value="">Choose a role</option>
 						{assignable.map((role) => (
@@ -85,7 +83,7 @@ export function RewardsTab({
 							</option>
 						))}
 					</select>
-				</label>
+				</Field>
 				<Button
 					disabled={roleId === "" || full || taken}
 					onClick={() => {

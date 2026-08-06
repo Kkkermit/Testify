@@ -129,9 +129,10 @@ export function AuditLogPage(): React.JSX.Element {
 			>
 				{/*
 				 * Columns rather than a grid: the groups are two to six rows long, and a grid row is as tall as
-				 * its tallest cell, which left a column of dead space under the short ones.
+				 * its tallest cell, which left a column of dead space under the short ones. `gap` does not apply
+				 * between items here, so the space below each panel is its own margin.
 				 */}
-				<div className="gap-x-8 sm:columns-2 xl:columns-3 [&>*]:break-inside-avoid">
+				<div className="-mb-4 gap-x-4 sm:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
 					{AUDIT_GROUPS.map((group) => (
 						<EventGroup
 							key={group}

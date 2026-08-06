@@ -1,5 +1,6 @@
 import { type ChannelSummary } from "@testify/shared";
-import { FIELD, LABEL, SELECT } from "@/components/form/field";
+import { Field } from "@/components/form/Field";
+import { FIELD, SELECT } from "@/components/form/field";
 import { Warning } from "@/components/form/Warning";
 import { cn } from "@/lib/cn";
 
@@ -29,12 +30,7 @@ export function ChannelPicker({
 	const chosen = postable.find((channel) => channel.id === value);
 
 	return (
-		<label className="flex flex-col gap-2">
-			<span className="flex flex-col gap-0.5">
-				<span className={LABEL}>{label}</span>
-				{hint !== undefined && <span className="text-muted-foreground text-xs">{hint}</span>}
-			</span>
-
+		<Field label={label} {...(hint === undefined ? {} : { hint })}>
 			<select
 				className={cn(FIELD, SELECT)}
 				value={value ?? ""}
@@ -54,6 +50,6 @@ export function ChannelPicker({
 			{chosen?.canSend === false && (
 				<Warning>Testify cannot post in #{chosen.name}. Level-ups will not appear until that is fixed.</Warning>
 			)}
-		</label>
+		</Field>
 	);
 }

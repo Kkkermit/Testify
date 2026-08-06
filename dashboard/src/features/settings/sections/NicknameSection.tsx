@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tan
 import { NICKNAME_MAX, type GuildNickname, type NicknamePatch } from "@testify/shared";
 import { UserPen } from "lucide-react";
 import { useEffect, useState } from "react";
-import { FIELD, LABEL, savingStateOf, Warning } from "@/components/form";
+import { Field, FIELD, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
 import { ApiError, api } from "@/lib/api";
@@ -48,10 +48,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 			describes="A nickname for this server only. The picture is the same everywhere and only the bot owner can change it."
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 		>
-			<div className="flex flex-col gap-2">
-				<label htmlFor="nickname" className={LABEL}>
-					Nickname
-				</label>
+			<Field label="Nickname" htmlFor="nickname">
 				<div className="flex flex-wrap items-center gap-2">
 					<input
 						id="nickname"
@@ -84,7 +81,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 						</>
 					)}
 				</div>
-			</div>
+			</Field>
 
 			{!allowed && current.data !== undefined && (
 				<Warning>Testify needs the Change Nickname permission in this server before it can be renamed.</Warning>
