@@ -62,7 +62,11 @@ entry needs three things, and an entry missing any of them should be removed:
 2. **The version that fixes it**, so there is something to wait for.
 3. **A hard expiry**, so the suppression cannot rot into a permanent blind spot.
 
-Nothing is currently suppressed. Both files carry a commented example of the
+One advisory is suppressed: `GHSA-qwww-vcr4-c8h2`, React Router's RSC-mode CSRF
+bypass, which is reachable only through React Server Components. The dashboard
+is a browser-only SPA on `createBrowserRouter` with no loaders, no actions and
+nothing rendered on the server, so the affected path is not in this build. It
+expires on 1 November 2026. Both files also carry a commented example of the
 shape to follow.
 
 ### Version pins
@@ -76,6 +80,8 @@ comments there, so the reasons live here:
 | `test-exclude: ^7.0.1`                | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                      |
 | `esbuild: ^0.28.1`                    | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                        |
 | `serialize-javascript: ^7.0.7`        | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                               |
+| `brace-expansion: ^5.0.9`             | Reached through eslint-plugin-import-x → minimatch. 5.0.9 fixes GHSA-rgw5-rvv9-x895; minimatch asks for `^5.0.8`.               |
+| `fast-uri: ^3.1.5`                    | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                         |
 | `discord-html-transcripts` → `undici` | The package pins undici v5, which has open advisories. v6 is API-compatible for the calls it makes.                             |
 
 Each one should be dropped the moment its parent updates — check when a
