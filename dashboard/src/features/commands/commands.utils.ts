@@ -14,6 +14,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	"voice-stats": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	verify: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	sticky: { path: (guildId) => `/guilds/${guildId}/sticky`, screen: "Sticky messages" },
+	automod: { path: (guildId) => `/guilds/${guildId}/automod`, screen: "AutoMod" },
 };
 
 export interface CommandPlace {

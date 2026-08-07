@@ -1,6 +1,7 @@
 import {
 	LayoutGrid,
 	ScrollText,
+	ShieldAlert,
 	Server,
 	ShieldCheck,
 	Pin,
@@ -69,6 +70,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					label: "Audit log",
 					icon: ScrollText,
 					hint: "Which server events Testify records",
+				},
+				{
+					to: `/guilds/${guild.id}/automod`,
+					label: "AutoMod",
+					icon: ShieldAlert,
+					hint: "Discord's own message filters",
 				},
 				{
 					to: `/guilds/${guild.id}/sticky`,

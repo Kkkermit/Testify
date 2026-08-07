@@ -26,6 +26,9 @@ const LegalPage = lazy(async () => ({ default: (await import("@/features/legal/L
 const SettingsPage = lazy(async () => ({
 	default: (await import("@/features/settings/SettingsPage")).SettingsPage,
 }));
+const AutomodPage = lazy(async () => ({
+	default: (await import("@/features/automod/AutomodPage")).AutomodPage,
+}));
 const StickyPage = lazy(async () => ({
 	default: (await import("@/features/sticky/StickyPage")).StickyPage,
 }));
@@ -60,6 +63,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
 					{ path: "/guilds/:guildId/audit-log", element: lazily(<AuditLogPage />) },
 					{ path: "/guilds/:guildId/settings", element: lazily(<SettingsPage />) },
+					{ path: "/guilds/:guildId/automod", element: lazily(<AutomodPage />) },
 					{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },

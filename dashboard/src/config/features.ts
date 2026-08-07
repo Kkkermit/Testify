@@ -77,7 +77,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		path: (guildId) => `/guilds/${guildId}/settings`,
 	},
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
-	automod: { icon: MessageSquareWarning, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
+	automod: {
+		icon: MessageSquareWarning,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/automod`,
+	},
 	welcome: {
 		icon: Users,
 		tint: "text-feature-welcome",

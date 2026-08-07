@@ -1,14 +1,10 @@
-import {
-	AutoModerationActionType,
-	AutoModerationRuleEventType,
-	AutoModerationRuleKeywordPresetType,
-	AutoModerationRuleTriggerType,
-	PermissionFlagsBits,
-} from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
+import { createAutomodRule, listAutomodRules } from "@lib/automodActions.util";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
+import { AUTOMOD_LIMITS } from "@testify/shared";
 
 export default defineCommand({
 	name: "automod",
@@ -25,27 +21,11 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				await interaction.deferReply();
 
-				const rule = await guild.autoModerationRules.create({
-					name: "Blocked words",
-					enabled: true,
-					eventType: AutoModerationRuleEventType.MessageSend,
-					triggerType: AutoModerationRuleTriggerType.KeywordPreset,
-					triggerMetadata: {
-						presets: [
-							AutoModerationRuleKeywordPresetType.Profanity,
-							AutoModerationRuleKeywordPresetType.SexualContent,
-							AutoModerationRuleKeywordPresetType.Slurs,
-						],
-					},
-					actions: [
-						{
-							type: AutoModerationActionType.BlockMessage,
-							metadata: { customMessage: "That message was blocked by AutoMod." },
-						},
-					],
-					reason: `Created by ${interaction.user.username}`,
-				});
-
+				const rule = await createAutomodRule(
+					guild,
+					{ preset: "flagged-words" },
+					`Created by ${interaction.user.username}`,
+				);
 				await reply(interaction, { embeds: [successEmbed(`AutoMod rule **${rule.name}** created.`)] });
 			},
 		},
@@ -56,83 +36,53 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				await interaction.deferReply();
 
-				const rule = await guild.autoModerationRules.create({
-					name: "Block spam",
-					enabled: true,
-					eventType: AutoModerationRuleEventType.MessageSend,
-					triggerType: AutoModerationRuleTriggerType.Spam,
-					actions: [
-						{
-							type: AutoModerationActionType.BlockMessage,
-							metadata: { customMessage: "That message looked like spam." },
-						},
-					],
-					reason: `Created by ${interaction.user.username}`,
-				});
-
+				const rule = await createAutomodRule(guild, { preset: "spam" }, `Created by ${interaction.user.username}`);
 				await reply(interaction, { embeds: [successEmbed(`AutoMod rule **${rule.name}** created.`)] });
 			},
 		},
 		{
 			name: "mention-spam",
-			description: "Limit how many members one message can mention.",
+			description: "Block messages that mention too many people.",
 			options: [
 				{
 					name: "limit",
-					description: "Maximum mentions per message.",
+					description: "How many mentions to allow in one message.",
 					type: "integer",
 					required: true,
-					min: 1,
-					max: 50,
+					min: AUTOMOD_LIMITS.minMentions,
+					max: AUTOMOD_LIMITS.maxMentions,
 				},
 			],
 			async run(interaction) {
 				const guild = inGuild(interaction);
 				await interaction.deferReply();
 
-				const rule = await guild.autoModerationRules.create({
-					name: "Mention spam",
-					enabled: true,
-					eventType: AutoModerationRuleEventType.MessageSend,
-					triggerType: AutoModerationRuleTriggerType.MentionSpam,
-					triggerMetadata: { mentionTotalLimit: interaction.options.getInteger("limit", true) },
-					actions: [
-						{
-							type: AutoModerationActionType.BlockMessage,
-							metadata: { customMessage: "That message mentioned too many people." },
-						},
-					],
-					reason: `Created by ${interaction.user.username}`,
-				});
+				const limit = interaction.options.getInteger("limit", true);
+				const rule = await createAutomodRule(
+					guild,
+					{ preset: "mention-spam", limit },
+					`Created by ${interaction.user.username}`,
+				);
 
 				await reply(interaction, { embeds: [successEmbed(`AutoMod rule **${rule.name}** created.`)] });
 			},
 		},
 		{
 			name: "keyword",
-			description: "Block a specific word or phrase.",
+			description: "Block a word or phrase.",
 			options: [{ name: "word", description: "The word or phrase to block.", type: "string", required: true }],
 			async run(interaction) {
 				const guild = inGuild(interaction);
-				const word = interaction.options.getString("word", true).trim();
-				if (word.length === 0) throw new UserFacingError("Provide a word to block.");
-
 				await interaction.deferReply();
 
-				const rule = await guild.autoModerationRules.create({
-					name: `Blocked keyword: ${word}`.slice(0, 100),
-					enabled: true,
-					eventType: AutoModerationRuleEventType.MessageSend,
-					triggerType: AutoModerationRuleTriggerType.Keyword,
-					triggerMetadata: { keywordFilter: [word] },
-					actions: [
-						{
-							type: AutoModerationActionType.BlockMessage,
-							metadata: { customMessage: "That message contained a blocked word." },
-						},
-					],
-					reason: `Created by ${interaction.user.username}`,
-				});
+				const word = interaction.options.getString("word", true).trim();
+				if (word === "") throw new UserFacingError("Give a word or phrase to block.");
+
+				const rule = await createAutomodRule(
+					guild,
+					{ preset: "keyword", word },
+					`Created by ${interaction.user.username}`,
+				);
 
 				await reply(interaction, { embeds: [successEmbed(`AutoMod rule **${rule.name}** created.`)] });
 			},
@@ -140,19 +90,18 @@ export default defineCommand({
 		{
 			name: "list",
 			description: "List the AutoMod rules in this server.",
-			async run(interaction) {
+			async run(interaction, client) {
 				const guild = inGuild(interaction);
-				const rules = await guild.autoModerationRules.fetch();
+				const rules = await listAutomodRules(guild, client.user?.id ?? "");
 
 				await reply(interaction, {
 					embeds: [
 						embed({
 							category: "settings",
-							title: `AutoMod rules (${rules.size})`,
+							title: `AutoMod rules (${String(rules.length)})`,
 							description:
-								rules
-									.map((rule) => `\`${rule.id}\` ${rule.name} \u2014 ${rule.enabled ? "enabled" : "disabled"}`)
-									.join("\n") || "No rules configured.",
+								rules.map((rule) => `${rule.enabled ? "🟢" : "⚪"} **${rule.name}** — ${rule.trigger}`).join("\n") ||
+								"No rules configured.",
 						}),
 					],
 				});

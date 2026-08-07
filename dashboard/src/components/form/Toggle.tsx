@@ -7,15 +7,24 @@ export function Toggle({
 	checked,
 	onChange,
 	disabled = false,
+	hideLabel = false,
 }: {
 	label: string;
 	hint?: string;
 	checked: boolean;
 	onChange: (next: boolean) => void;
 	disabled?: boolean;
+	/** For a row that already names the thing. `sr-only`, never `hidden` — the switch keeps its name either way. */
+	hideLabel?: boolean;
 }): React.JSX.Element {
 	return (
-		<label className={cn("group flex items-start gap-3 py-2", disabled ? "opacity-50" : "cursor-pointer")}>
+		<label
+			className={cn(
+				"group flex items-start gap-3",
+				hideLabel ? "" : "py-2",
+				disabled ? "opacity-50" : "cursor-pointer",
+			)}
+		>
 			<input
 				type="checkbox"
 				role="switch"
@@ -43,7 +52,7 @@ export function Toggle({
 				/>
 			</span>
 
-			<span>
+			<span className={hideLabel ? "sr-only" : undefined}>
 				<span className="block text-sm font-medium">{label}</span>
 				{hint !== undefined && <span className="text-muted-foreground block text-xs">{hint}</span>}
 			</span>

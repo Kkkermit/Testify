@@ -1,6 +1,7 @@
 export * from "./analytics";
 export * from "./api";
 export * from "./auditLog";
+export * from "./automod";
 export * from "./commands";
 export * from "./commandToggles";
 export * from "./control";

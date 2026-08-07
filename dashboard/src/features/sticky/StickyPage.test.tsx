@@ -3,6 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { StickyPage } from "@/features/sticky/StickyPage";
 import { expectNoViolations } from "@/test/axe";
+import { someChannels } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -101,5 +102,183 @@ describe("the sticky page", () => {
 		await screen.findByRole("heading", { name: "#general" });
 
 		await expectNoViolations(container);
+	});
+});
+
+describe("adding a sticky", () => {
+	const FREE = "400000000000000004";
+
+	// The fixture's only other postable channel cannot be posted in, so its option is disabled by design.
+	beforeEach(() => {
+		server.use(
+			http.get(`/api/guilds/${GUILD}/channels`, () =>
+				HttpResponse.json([...someChannels, { id: FREE, name: "rules", kind: "text", position: 4, canSend: true }]),
+			),
+		);
+	});
+
+	async function fillIn(user: ReturnType<typeof userEvent.setup>, message: string): Promise<void> {
+		await screen.findByRole("heading", { name: "#general" });
+		await user.selectOptions(screen.getByLabelText(/^Channel/), FREE);
+		await user.type(screen.getByLabelText(/^Message/, { selector: "#sticky-message" }), message);
+	}
+
+	it("sends the channel, message and cap it was given", async () => {
+		const user = userEvent.setup();
+		let sent: unknown = null;
+		server.use(
+			http.put(`/api/guilds/${GUILD}/sticky`, async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json({ limit: 25, entries: [] });
+			}),
+		);
+		renderPage();
+		await fillIn(user, "Read this first");
+
+		await user.click(screen.getByRole("button", { name: /add sticky/i }));
+
+		await waitFor(() => {
+			expect(sent).toEqual({ channelId: FREE, message: "Read this first", cap: 5 });
+		});
+	});
+
+	/** Leaving the typed message in place after a save reads as though the add silently failed. */
+	it("clears the form once it has been sent", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await fillIn(user, "Read this first");
+
+		await user.click(screen.getByRole("button", { name: /add sticky/i }));
+
+		await waitFor(() => {
+			expect(screen.getByLabelText(/^Message/, { selector: "#sticky-message" })).toHaveValue("");
+		});
+	});
+
+	it("counts the message against the limit as it is typed", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await fillIn(user, "abc");
+
+		expect(screen.getByText(/^3 of \d+$/)).toBeInTheDocument();
+	});
+
+	/** The warning is a heads-up, not a refusal: the strip runs on the way out and the save still goes through. */
+	it("strips HTML on the way out, having said it would", async () => {
+		const user = userEvent.setup();
+		let sent: unknown = null;
+		server.use(
+			http.put(`/api/guilds/${GUILD}/sticky`, async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json({ limit: 25, entries: [] });
+			}),
+		);
+		renderPage();
+		await fillIn(user, "<b>hi</b>");
+
+		expect(await screen.findByText(/HTML is not allowed here/i)).toBeInTheDocument();
+
+		await user.click(screen.getByRole("button", { name: /add sticky/i }));
+
+		await waitFor(() => {
+			expect(sent).toMatchObject({ message: "hi" });
+		});
+	});
+
+	it("refuses another once the server is full", async () => {
+		server.use(
+			http.get(`/api/guilds/${GUILD}/sticky`, () =>
+				HttpResponse.json({
+					limit: 1,
+					entries: [
+						{
+							channelId: "400000000000000001",
+							message: "Read the rules",
+							cap: 5,
+							count: 3,
+							posted: true,
+							canSend: true,
+						},
+					],
+				}),
+			),
+		);
+		renderPage();
+
+		expect(await screen.findByText(/most stickies Testify can hold/i)).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /add sticky/i })).toBeDisabled();
+	});
+
+	it("shows what the server said when a save is refused", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.put(`/api/guilds/${GUILD}/sticky`, () =>
+				HttpResponse.json(
+					{ error: { code: "bad_request", message: "That channel is not in this server." } },
+					{
+						status: 400,
+					},
+				),
+			),
+		);
+		renderPage();
+		await fillIn(user, "Read this first");
+
+		await user.click(screen.getByRole("button", { name: /add sticky/i }));
+
+		expect(await screen.findByText(/not in this server/i)).toBeInTheDocument();
+	});
+});
+
+describe("editing a sticky in place", () => {
+	/** Save appears only once something has changed, so an untouched row cannot post a no-op write. */
+	it("offers Save only after an edit", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await screen.findByRole("heading", { name: "#general" });
+
+		expect(screen.queryByRole("button", { name: "Save" })).not.toBeInTheDocument();
+
+		await user.type(screen.getByLabelText(/^Message/, { selector: "#sticky-400000000000000001" }), "!");
+
+		expect(screen.getByRole("button", { name: "Save" })).toBeInTheDocument();
+	});
+
+	it("sends the edited message and cap", async () => {
+		const user = userEvent.setup();
+		let sent: unknown = null;
+		server.use(
+			http.put(`/api/guilds/${GUILD}/sticky`, async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json({ limit: 25, entries: [] });
+			}),
+		);
+		renderPage();
+		await screen.findByRole("heading", { name: "#general" });
+
+		await user.clear(screen.getByLabelText(/^Repost after/, { selector: "#cap-400000000000000001" }));
+		await user.type(screen.getByLabelText(/^Repost after/, { selector: "#cap-400000000000000001" }), "9");
+		await user.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => {
+			expect(sent).toMatchObject({ channelId: "400000000000000001", cap: 9 });
+		});
+	});
+
+	it("will not save a row emptied to nothing", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await screen.findByRole("heading", { name: "#general" });
+
+		await user.clear(screen.getByLabelText(/^Message/, { selector: "#sticky-400000000000000001" }));
+
+		expect(screen.getByRole("button", { name: "Save" })).toBeDisabled();
+	});
+
+	it("names a channel that has since been deleted rather than showing its id", async () => {
+		server.use(http.get(`/api/guilds/${GUILD}/channels`, () => HttpResponse.json([])));
+		renderPage();
+
+		expect(await screen.findByRole("heading", { name: "#a deleted channel" })).toBeInTheDocument();
 	});
 });

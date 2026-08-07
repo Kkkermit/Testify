@@ -4,6 +4,7 @@ import { type ApiBindings } from "@api/context";
 import { notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
+import { automod } from "@api/routes/automod";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
 import { settings } from "@api/routes/settings";
@@ -47,6 +48,7 @@ guilds.route("/:guildId/welcome", welcome);
 guilds.route("/:guildId/audit-log", auditLog);
 guilds.route("/:guildId/settings", settings);
 guilds.route("/:guildId/commands", guildCommandToggles);
+guilds.route("/:guildId/automod", automod);
 guilds.route("/:guildId/sticky", sticky);
 guilds.route("/:guildId/verification", verification);
 

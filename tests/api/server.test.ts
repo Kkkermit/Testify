@@ -106,6 +106,10 @@ describe("the guild settings sub-routes", () => {
 
 		["GET", "/api/guilds/:guildId/verification"],
 		["PATCH", "/api/guilds/:guildId/verification"],
+		["GET", "/api/guilds/:guildId/automod"],
+		["POST", "/api/guilds/:guildId/automod"],
+		["PATCH", "/api/guilds/:guildId/automod/:ruleId"],
+		["DELETE", "/api/guilds/:guildId/automod/:ruleId"],
 		["GET", "/api/guilds/:guildId/sticky"],
 		["PUT", "/api/guilds/:guildId/sticky"],
 		["DELETE", "/api/guilds/:guildId/sticky/:channelId"],

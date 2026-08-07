@@ -21,6 +21,7 @@ import {
 	type SetupStatus,
 	type WelcomeConfigResponse,
 	type StickyList,
+	type AutomodRules,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -122,6 +123,30 @@ export const serverSettings: ServerSettings = {
 	autoRoles: { roleIds: ["300000000000000001"] },
 	counting: { enabled: true, channelId: "400000000000000001", maxCount: 1_000, count: 412 },
 	voiceStats: { memberChannelId: null, botChannelId: null },
+};
+
+export const automodRules: AutomodRules = {
+	canManage: true,
+	rules: [
+		{
+			id: "500000000000000001",
+			name: "Block spam",
+			enabled: true,
+			preset: "spam",
+			trigger: "Spam",
+			actions: ["block"],
+			fromTestify: true,
+		},
+		{
+			id: "500000000000000002",
+			name: "Server rules",
+			enabled: false,
+			preset: null,
+			trigger: "Something else",
+			actions: ["alert"],
+			fromTestify: false,
+		},
+	],
 };
 
 export const stickyList: StickyList = {
@@ -281,6 +306,10 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 	http.get("/api/guilds/:guildId/verification", () => HttpResponse.json(verificationConfig)),
+	http.get("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),
+	http.post("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),
+	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
+	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),

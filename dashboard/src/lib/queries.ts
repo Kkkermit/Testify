@@ -15,6 +15,7 @@ export const keys = {
 		settings: () => ["guild", id, "settings"] as const,
 		verification: () => ["guild", id, "verification"] as const,
 		sticky: () => ["guild", id, "sticky"] as const,
+		automod: () => ["guild", id, "automod"] as const,
 		nickname: () => ["guild", id, "nickname"] as const,
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
