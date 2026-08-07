@@ -3,6 +3,7 @@ import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { FileText, LogOut, ShieldQuestion } from "lucide-react";
 import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
+import { SidebarSection } from "@/app/layout/SidebarSection";
 import { BotMark } from "@/components/brand/BotMark";
 import { GuildIcon, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
@@ -80,6 +81,9 @@ export function Sidebar({
 							<li key={item.to}>
 								<SidebarLink item={item} expanded={expanded} />
 							</li>
+						))}
+						{(group.sections ?? []).map((section) => (
+							<SidebarSection key={section.label} section={section} expanded={expanded} />
 						))}
 					</ul>
 				</div>

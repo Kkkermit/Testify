@@ -6,24 +6,40 @@ function pathsFor(audience: NavAudience): string[] {
 	return allNavItems(navigationFor(audience)).map((item) => item.to);
 }
 
+/** Sorted, because which section a screen sits in is a grouping choice and reachability is the rule. */
+function sortedPathsFor(audience: NavAudience): string[] {
+	return pathsFor(audience).sort();
+}
+
 describe("navigationFor", () => {
 	it("always offers the server picker and the command list", () => {
 		expect(pathsFor({ guild: undefined, isOwner: false })).toEqual(["/guilds", "/commands"]);
 	});
 
 	it("adds the current server's screens once one is open", () => {
-		expect(pathsFor({ guild, isOwner: false })).toEqual([
-			"/guilds",
-			`/guilds/${guild.id}/commands`,
-			`/guilds/${guild.id}`,
-			`/guilds/${guild.id}/levelling`,
-			`/guilds/${guild.id}/welcome`,
-			`/guilds/${guild.id}/audit-log`,
-			`/guilds/${guild.id}/automod`,
-			`/guilds/${guild.id}/sticky`,
-			`/guilds/${guild.id}/treasure`,
-			`/guilds/${guild.id}/settings`,
-		]);
+		expect(sortedPathsFor({ guild, isOwner: false })).toEqual(
+			[
+				"/guilds",
+				`/guilds/${guild.id}/commands`,
+				`/guilds/${guild.id}`,
+				`/guilds/${guild.id}/levelling`,
+				`/guilds/${guild.id}/welcome`,
+				`/guilds/${guild.id}/audit-log`,
+				`/guilds/${guild.id}/automod`,
+				`/guilds/${guild.id}/sticky`,
+				`/guilds/${guild.id}/treasure`,
+				`/guilds/${guild.id}/settings`,
+			].sort(),
+		);
+	});
+
+	/** A screen reachable only from a section would be missed by every consumer that reads this list flat. */
+	it("counts the screens inside sections as navigation too", () => {
+		const [, guildGroup] = navigationFor({ guild, isOwner: false });
+		const inSections = (guildGroup?.sections ?? []).flatMap((section) => section.items.map((item) => item.to));
+
+		expect(inSections.length).toBeGreaterThan(0);
+		expect(pathsFor({ guild, isOwner: false })).toEqual(expect.arrayContaining(inSections));
 	});
 
 	/** The console 404s for anyone else, so offering the link would only be a dead end. */

@@ -32,6 +32,62 @@ describe("the app shell", () => {
 		expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("href", `/guilds/${aGuild.id}`);
 	});
 
+	it("groups a server's screens behind a toggle rather than listing all ten", async () => {
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		await screen.findByRole("link", { name: "Overview" });
+
+		expect(screen.getByRole("button", { name: "Members" })).toHaveAttribute("aria-expanded", "false");
+		expect(screen.getByRole("button", { name: "Moderation" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+	});
+
+	it("opens a section when its toggle is pressed", async () => {
+		const user = userEvent.setup();
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		await screen.findByRole("link", { name: "Overview" });
+
+		const members = screen.getByRole("button", { name: "Members" });
+		await user.click(members);
+
+		expect(members).toHaveAttribute("aria-expanded", "true");
+	});
+
+	/** A collapsed section that hid the page you are on would leave no way back to its siblings. */
+	it("starts open when the current page is inside it", async () => {
+		renderWithProviders(<AppShell />, {
+			path: "/guilds/:guildId/treasure",
+			route: `/guilds/${aGuild.id}/treasure`,
+		});
+		await screen.findByRole("link", { name: "Overview" });
+
+		expect(screen.getByRole("button", { name: "Messages" })).toHaveAttribute("aria-expanded", "true");
+		expect(screen.getByRole("button", { name: "Members" })).toHaveAttribute("aria-expanded", "false");
+	});
+
+	/**
+	 * The toggle controls a list that must still be findable: `aria-controls` pointing at nothing is a dead
+	 * reference for anyone navigating by relationship.
+	 */
+	it("points each toggle at the list it opens", async () => {
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		await screen.findByRole("link", { name: "Overview" });
+
+		const controls = screen.getByRole("button", { name: "Members" }).getAttribute("aria-controls");
+
+		expect(controls).not.toBeNull();
+		expect(document.getElementById(controls ?? "")).not.toBeNull();
+	});
+
+	/** Every screen stays reachable whatever a section is set to — the rail has no toggles to open. */
+	it("keeps every screen in the drawer's markup", async () => {
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		await screen.findByRole("link", { name: "Overview" });
+
+		for (const name of ["Levelling", "Welcome", "AutoMod", "Audit log", "Sticky", "Treasure", "Settings"]) {
+			expect(screen.getByRole("link", { name })).toBeInTheDocument();
+		}
+	});
+
 	it("shows no server section on the picker itself", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds" });
 		await screen.findByRole("link", { name: "Servers" });
