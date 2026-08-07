@@ -1,5 +1,5 @@
 import { useId, type ReactNode } from "react";
-import { CHECK_ROW, FIELD_GROUP, LABEL, SCROLL_LIST } from "@/components/form/field";
+import { CHECK_ROW, FIELD_GROUP, LABEL, SCROLL_LIST } from "@/components/form/fieldStyles";
 import { cn } from "@/lib/cn";
 
 export interface CheckItem {

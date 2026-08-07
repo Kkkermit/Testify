@@ -1,6 +1,6 @@
 import { type ChannelSummary } from "@testify/shared";
 import { Field } from "@/components/form/Field";
-import { FIELD, SELECT } from "@/components/form/field";
+import { FIELD, SELECT } from "@/components/form/fieldStyles";
 import { Warning } from "@/components/form/Warning";
 import { cn } from "@/lib/cn";
 

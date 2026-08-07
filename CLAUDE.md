@@ -1267,6 +1267,12 @@ it cannot leave a stray margin behind when a sibling is conditionally absent. **
 dead space inside its border is the "massive gap" that keeps getting reported. The one legitimate margin is
 inside a CSS `columns` layout, where `gap` does not apply between items at all (`EventGroup`'s `mb-5`).
 
+**No two modules may differ only by case.** `Field.tsx` beside `field.ts` is two files on Linux and one on
+macOS or Windows, so `@/components/form/Field` resolves to the class strings there and the page dies at start-up
+with `does not provide an export named 'Field'`. Nothing local catches it — Linux is case-sensitive and so is
+CI — so `tests/core/conventions.test.ts` walks `src`, `shared/src` and `dashboard/src` and names the pair. The
+class strings are `fieldStyles.ts` for exactly this reason.
+
 **Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
 places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
 `LABEL` / `CHECK_ROW` class strings exist so a control's semantics and its type scale are each written once.

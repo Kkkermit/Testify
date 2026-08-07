@@ -75,3 +75,39 @@ describe("event grouping", () => {
 		expect(loose).toEqual([]);
 	});
 });
+
+/**
+ * `Field.tsx` beside `field.ts` resolves to two different modules on Linux and one on macOS or Windows, so an
+ * import of the component silently lands on the other file and the page dies at start-up with a missing export.
+ */
+describe("module names", () => {
+	const ROOT = resolve(__dirname, "../..");
+	const MODULE = /\.(?:[cm]?js|tsx?|jsx)$/;
+
+	function stemsUnder(root: string): Map<string, string[]> {
+		const byKey = new Map<string, string[]>();
+
+		const walk = (directory: string): void => {
+			for (const entry of readdirSync(directory)) {
+				const path = join(directory, entry);
+				if (statSync(path).isDirectory()) {
+					walk(path);
+					continue;
+				}
+				if (!MODULE.test(entry)) continue;
+
+				const key = `${directory}/${entry.replace(MODULE, "")}`.toLowerCase();
+				byKey.set(key, [...(byKey.get(key) ?? []), path.slice(ROOT.length + 1)]);
+			}
+		};
+
+		walk(root);
+		return byKey;
+	}
+
+	it.each(["src", "shared/src", "dashboard/src"])("has no two modules in %s differing only by case", (folder) => {
+		const clashes = [...stemsUnder(join(ROOT, folder)).values()].filter((paths) => paths.length > 1);
+
+		expect(clashes).toEqual([]);
+	});
+});

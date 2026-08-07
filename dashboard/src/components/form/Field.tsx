@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { FIELD_GROUP, LABEL } from "@/components/form/field";
+import { FIELD_GROUP, LABEL } from "@/components/form/fieldStyles";
 import { cn } from "@/lib/cn";
 
 /** Every labelled control goes through this. Pass `htmlFor` when the control has its own id; omit it and the control is wrapped. */

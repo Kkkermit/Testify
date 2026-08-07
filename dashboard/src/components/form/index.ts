@@ -1,6 +1,6 @@
 export { ChannelPicker, postableChannels } from "@/components/form/ChannelPicker";
 export { CheckList, type CheckItem } from "@/components/form/CheckList";
-export { CHECK_ROW, FIELD, FIELD_GROUP, LABEL, SELECT } from "@/components/form/field";
+export { CHECK_ROW, FIELD, FIELD_GROUP, LABEL, SELECT } from "@/components/form/fieldStyles";
 export { Field } from "@/components/form/Field";
 export { RoleChecklist } from "@/components/form/RoleChecklist";
 export { RoleSwatch } from "@/components/form/RoleSwatch";
