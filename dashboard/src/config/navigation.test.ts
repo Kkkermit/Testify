@@ -28,6 +28,7 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/automod`,
 				`/guilds/${guild.id}/sticky`,
 				`/guilds/${guild.id}/treasure`,
+				`/guilds/${guild.id}/tickets`,
 				`/guilds/${guild.id}/settings`,
 			].sort(),
 		);

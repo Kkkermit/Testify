@@ -21,6 +21,7 @@ import {
 	type SetupStatus,
 	type WelcomeConfigResponse,
 	type StickyList,
+	type TicketSettings,
 	type TreasureSettings,
 	type AutomodRules,
 } from "@testify/shared";
@@ -148,6 +149,18 @@ export const automodRules: AutomodRules = {
 			fromTestify: false,
 		},
 	],
+};
+
+export const ticketSettings: TicketSettings = {
+	enabled: true,
+	panelChannelId: "400000000000000001",
+	categoryId: "400000000000000005",
+	transcriptChannelId: "400000000000000002",
+	staffRoleId: "300000000000000003",
+	description: "Press the button below and we will be with you shortly.",
+	buttonLabel: "Create ticket",
+	posted: true,
+	openTickets: 3,
 };
 
 export const treasureSettings: TreasureSettings = {
@@ -294,6 +307,7 @@ export const someChannels: ChannelSummary[] = [
 	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
 	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
 	{ id: "400000000000000003", name: "Voice", kind: "voice", position: 3, canSend: false },
+	{ id: "400000000000000005", name: "Support", kind: "category", position: 4, canSend: false },
 ];
 
 export const someRoles: RoleSummary[] = [
@@ -323,6 +337,9 @@ export const handlers = [
 	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.patch("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.delete("/api/guilds/:guildId/tickets", () => HttpResponse.json({ ...ticketSettings, enabled: false })),
 	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),

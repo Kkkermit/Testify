@@ -9,6 +9,7 @@ import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
 import { settings } from "@api/routes/settings";
 import { sticky } from "@api/routes/sticky";
+import { tickets } from "@api/routes/tickets";
 import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
 import { welcome } from "@api/routes/welcome";
@@ -27,6 +28,7 @@ import {
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { canPostInChannel } from "@lib/channels.util";
 import { normaliseSettings } from "@lib/levelling.util";
+import { readTickets } from "@lib/ticketActions.util";
 import { readTreasure } from "@lib/treasureActions.util";
 import {
 	type AuditEntrySummary,
@@ -52,6 +54,7 @@ guilds.route("/:guildId/settings", settings);
 guilds.route("/:guildId/commands", guildCommandToggles);
 guilds.route("/:guildId/automod", automod);
 guilds.route("/:guildId/sticky", sticky);
+guilds.route("/:guildId/tickets", tickets);
 guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/verification", verification);
 
@@ -156,18 +159,20 @@ function colourOf(role: Role): string | null {
 
 /** One line per feature, read through the repositories so the web and the Discord panels cannot disagree. */
 async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies, treasure] = await Promise.all([
-		getLevelSettings(guild.id),
-		getAuditLogConfig(guild.id),
-		getWelcome(guild.id),
-		getAntiLink(guild.id),
-		getCounting(guild.id),
-		getAutoRoles(guild.id),
-		getVerifyConfig(guild.id),
-		getVoiceCounter(guild.id),
-		listSticky(guild.id),
-		readTreasure(guild.id),
-	]);
+	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies, treasure, ticketing] =
+		await Promise.all([
+			getLevelSettings(guild.id),
+			getAuditLogConfig(guild.id),
+			getWelcome(guild.id),
+			getAntiLink(guild.id),
+			getCounting(guild.id),
+			getAutoRoles(guild.id),
+			getVerifyConfig(guild.id),
+			getVoiceCounter(guild.id),
+			listSticky(guild.id),
+			readTreasure(guild.id),
+			readTickets(guild),
+		]);
 
 	const level = normaliseSettings(levels);
 
@@ -233,6 +238,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Treasure drops",
 			enabled: treasure.enabled,
 			detail: treasure.configured ? `${String(treasure.minAmount)}–${String(treasure.maxAmount)} a drop` : null,
+		},
+		{
+			key: "tickets",
+			label: "Tickets",
+			enabled: ticketing.enabled,
+			detail: ticketing.enabled ? count(ticketing.openTickets, "ticket open") : null,
 		},
 	];
 }

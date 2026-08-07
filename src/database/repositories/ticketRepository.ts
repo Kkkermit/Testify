@@ -18,6 +18,10 @@ export async function deleteTicketSetup(guildId: string): Promise<boolean> {
 	return (await TicketSetup.deleteOne({ guildId }).exec()).deletedCount > 0;
 }
 
+export async function countOpenTickets(guildId: string): Promise<number> {
+	return Ticket.countDocuments({ guildId }).exec();
+}
+
 export async function findOpenTicket(guildId: string, ownerId: string): Promise<TicketRecord | null> {
 	return Ticket.findOne({ guildId, ownerId }).lean<TicketRecord>().exec();
 }

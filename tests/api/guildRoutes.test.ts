@@ -21,6 +21,10 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 jest.mock("@database/repositories/verificationRepository", () => ({
 	getVerifyConfig: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/ticketRepository", () => ({
+	countOpenTickets: jest.fn(() => Promise.resolve(0)),
+	getTicketSetup: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({
 	auditPage: jest.fn(() => Promise.resolve([])),
 	countAudits: jest.fn(() => Promise.resolve(0)),

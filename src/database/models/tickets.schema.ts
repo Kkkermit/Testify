@@ -10,6 +10,7 @@ export interface TicketSetupRecord {
 	description: string;
 	buttonLabel: string;
 	buttonEmoji: string;
+	messageId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
 }
@@ -25,6 +26,7 @@ const ticketSetupSchema = new Schema<TicketSetupRecord>(
 		description: { type: String, required: true, default: "Click the button below to open a ticket." },
 		buttonLabel: { type: String, required: true, default: "Create ticket" },
 		buttonEmoji: { type: String, required: true, default: "🎫" },
+		messageId: { type: String, default: null },
 	},
 	{ timestamps: true },
 );

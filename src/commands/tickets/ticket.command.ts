@@ -1,11 +1,10 @@
-import { ButtonStyle, ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
-import { customId } from "@core/button";
+import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
-import { button, row } from "@lib/components.util";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
+import { normaliseTicketSetup, publishTicketPanel } from "@lib/ticketActions.util";
 
 export default defineCommand({
 	name: "ticket",
@@ -54,18 +53,11 @@ export default defineCommand({
 					interaction.options.getString("message") ?? "Press the button below and we will be with you shortly.";
 				const buttonLabel = interaction.options.getString("button-label") ?? "Create ticket";
 
-				await panelChannel.send({
-					embeds: [embed({ category: "tickets", title: "Need a hand?", description })],
-					components: [
-						row(
-							button({
-								id: customId("ticket", "open"),
-								label: buttonLabel,
-								emoji: "🎫",
-								style: ButtonStyle.Primary,
-							}),
-						),
-					],
+				const messageId = await publishTicketPanel(guild, {
+					...normaliseTicketSetup(null),
+					panelChannelId: panelChannel.id,
+					description,
+					buttonLabel,
 				});
 
 				await saveTicketSetup(guild.id, {
@@ -77,6 +69,7 @@ export default defineCommand({
 					description,
 					buttonLabel,
 					buttonEmoji: "🎫",
+					messageId,
 				});
 
 				await reply(interaction, {

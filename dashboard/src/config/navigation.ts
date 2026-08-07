@@ -12,6 +12,7 @@ import {
 	Users,
 	UserPlus,
 	MessagesSquare,
+	LifeBuoy,
 	type LucideIcon,
 } from "lucide-react";
 
@@ -129,6 +130,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							label: "Treasure",
 							icon: Coins,
 							hint: "Random money drops in chat",
+						},
+						{
+							to: `/guilds/${guild.id}/tickets`,
+							label: "Tickets",
+							icon: LifeBuoy,
+							hint: "A button members press to reach your staff",
 						},
 					],
 				},
