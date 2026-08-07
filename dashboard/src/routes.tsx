@@ -32,6 +32,9 @@ const AutomodPage = lazy(async () => ({
 const StickyPage = lazy(async () => ({
 	default: (await import("@/features/sticky/StickyPage")).StickyPage,
 }));
+const TreasurePage = lazy(async () => ({
+	default: (await import("@/features/treasure/TreasurePage")).TreasurePage,
+}));
 const CommandsPage = lazy(async () => ({
 	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
 }));
@@ -65,6 +68,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/settings", element: lazily(<SettingsPage />) },
 					{ path: "/guilds/:guildId/automod", element: lazily(<AutomodPage />) },
 					{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
+					{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },
 					{ path: "/owner", element: lazily(<OwnerPage />) },

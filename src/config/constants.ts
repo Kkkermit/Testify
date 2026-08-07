@@ -86,13 +86,7 @@ export const TICKET = {
 	closeDelayMs: 5 * SECOND_MS,
 } as const;
 
-export const TREASURE_DEFAULTS = {
-	minMessages: 15,
-	maxMessages: 50,
-	minAmount: 10,
-	maxAmount: 500,
-	cooldownMs: 5 * MINUTE_MS,
-} as const;
+export { TREASURE_DEFAULTS } from "@testify/shared";
 
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 

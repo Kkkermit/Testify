@@ -21,6 +21,7 @@ import {
 	type SetupStatus,
 	type WelcomeConfigResponse,
 	type StickyList,
+	type TreasureSettings,
 	type AutomodRules,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
@@ -147,6 +148,16 @@ export const automodRules: AutomodRules = {
 			fromTestify: false,
 		},
 	],
+};
+
+export const treasureSettings: TreasureSettings = {
+	enabled: true,
+	minMessages: 15,
+	maxMessages: 50,
+	minAmount: 10,
+	maxAmount: 500,
+	cooldownMs: 300_000,
+	configured: true,
 };
 
 export const stickyList: StickyList = {
@@ -311,6 +322,9 @@ export const handlers = [
 	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),

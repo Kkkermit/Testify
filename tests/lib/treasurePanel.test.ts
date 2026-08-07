@@ -23,7 +23,8 @@ describe("settingsOf", () => {
 	/** An unconfigured guild still gets a full panel rather than a half-empty one. */
 	it("falls back to the defaults when nothing is saved", () => {
 		expect(settingsOf(null)).toEqual({
-			isEnabled: false,
+			enabled: false,
+			configured: false,
 			minMessages: TREASURE_DEFAULTS.minMessages,
 			maxMessages: TREASURE_DEFAULTS.maxMessages,
 			minAmount: TREASURE_DEFAULTS.minAmount,
@@ -33,11 +34,11 @@ describe("settingsOf", () => {
 	});
 
 	it("uses the saved values when there are some", () => {
-		expect(settingsOf(CONFIGURED)).toMatchObject({ minMessages: 20, maxAmount: 900, isEnabled: true });
+		expect(settingsOf(CONFIGURED)).toMatchObject({ minMessages: 20, maxAmount: 900, enabled: true });
 	});
 
 	it("defaults to disabled, so drops never start without being asked for", () => {
-		expect(settingsOf(null).isEnabled).toBe(false);
+		expect(settingsOf(null).enabled).toBe(false);
 	});
 });
 
@@ -78,7 +79,7 @@ describe("treasurePanel", () => {
 			label?: string;
 		};
 		const off = treasurePanel(
-			{ ...settingsOf(CONFIGURED), isEnabled: false },
+			{ ...settingsOf(CONFIGURED), enabled: false },
 			true,
 		).components[0]?.components[0]?.toJSON() as {
 			label?: string;

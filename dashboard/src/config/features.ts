@@ -52,6 +52,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		path: (guildId) => `/guilds/${guildId}/audit-log`,
 	},
 	economy: { icon: Coins, tint: "text-feature-economy", wash: "bg-feature-economy/15" },
+	treasure: {
+		icon: Coins,
+		tint: "text-feature-economy",
+		wash: "bg-feature-economy/15",
+		path: (guildId) => `/guilds/${guildId}/treasure`,
+	},
 	"anti-link": {
 		icon: LinkIcon,
 		tint: "text-feature-moderation",

@@ -1,31 +1,25 @@
 import { ButtonStyle, PermissionFlagsBits } from "discord.js";
-import { TREASURE_DEFAULTS } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { type TreasureConfigSettings } from "@database/models/guildSettings.schema";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
 import { confirmRow, modalForm, type RenderedScreen } from "@lib/components.util";
 import { errorEmbed } from "@lib/embeds.util";
 import { formatDuration, formatNumber } from "@lib/format.util";
 import { parseWholeNumber, settingsPanel, statusValue } from "@lib/settingsPanel.util";
+import { normaliseTreasure } from "@lib/treasureActions.util";
+import { TREASURE_DEFAULTS, TREASURE_LIMITS, type TreasureSettings } from "@testify/shared";
 
 export const TREASURE_PANEL_ID = "treasure";
 
-type Settings = Pick<
-	TreasureConfigSettings,
-	"isEnabled" | "minMessages" | "maxMessages" | "minAmount" | "maxAmount" | "cooldownMs"
->;
+type Settings = TreasureSettings;
 
-/** Falls back to the defaults so an unconfigured guild still renders a full panel. */
-export function settingsOf(config: TreasureConfigSettings | null): Settings {
-	return {
-		isEnabled: config?.isEnabled ?? false,
-		minMessages: config?.minMessages ?? TREASURE_DEFAULTS.minMessages,
-		maxMessages: config?.maxMessages ?? TREASURE_DEFAULTS.maxMessages,
-		minAmount: config?.minAmount ?? TREASURE_DEFAULTS.minAmount,
-		maxAmount: config?.maxAmount ?? TREASURE_DEFAULTS.maxAmount,
-		cooldownMs: config?.cooldownMs ?? TREASURE_DEFAULTS.cooldownMs,
-	};
+export const settingsOf = normaliseTreasure;
+
+/** The panel's shape carries `configured`, which is not a stored column. */
+function toStored(settings: Settings): Omit<Settings, "enabled" | "configured"> & { isEnabled: boolean } {
+	const { configured: _configured, enabled, ...rest } = settings;
+
+	return { ...rest, isEnabled: enabled };
 }
 
 export function treasurePanel(settings: Settings, configured: boolean): RenderedScreen {
@@ -37,7 +31,7 @@ export function treasurePanel(settings: Settings, configured: boolean): Rendered
 			? "Random money drops in chat. Press a setting to change it."
 			: "Not set up yet. These are the defaults — press **Toggle** to switch drops on.",
 		fields: [
-			{ name: "Status", value: statusValue(settings.isEnabled) },
+			{ name: "Status", value: statusValue(settings.enabled) },
 			{ name: "Messages between drops", value: `${settings.minMessages}–${settings.maxMessages}` },
 			{ name: "Drop size", value: `${formatNumber(settings.minAmount)}–${formatNumber(settings.maxAmount)}` },
 			{ name: "Cooldown", value: formatDuration(settings.cooldownMs) },
@@ -45,8 +39,8 @@ export function treasurePanel(settings: Settings, configured: boolean): Rendered
 		actions: [
 			{
 				action: "toggle",
-				label: settings.isEnabled ? "Turn off" : "Turn on",
-				style: settings.isEnabled ? ButtonStyle.Danger : ButtonStyle.Success,
+				label: settings.enabled ? "Turn off" : "Turn on",
+				style: settings.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
 			},
 			{ action: "edit-messages", label: "Message range" },
 			{ action: "edit-amount", label: "Drop size" },
@@ -81,8 +75,8 @@ export default defineButton({
 			switch (context.action) {
 				case "toggle":
 					await saveTreasureConfig(guildId, {
-						...current,
-						isEnabled: !current.isEnabled,
+						...toStored(current),
+						isEnabled: !current.enabled,
 						lastModifiedBy: interaction.user.id,
 					});
 					await interaction.update(await render(guildId));
@@ -144,7 +138,7 @@ export default defineButton({
 				case "reset-yes":
 					await saveTreasureConfig(guildId, {
 						...TREASURE_DEFAULTS,
-						isEnabled: current.isEnabled,
+						isEnabled: current.enabled,
 						lastModifiedBy: interaction.user.id,
 					});
 					await interaction.update(await render(guildId));
@@ -166,23 +160,38 @@ export default defineButton({
 		const next: Settings = { ...current };
 
 		if (context.action === "save-messages") {
-			const min = parseWholeNumber(fields.getTextInputValue("min"), "Fewest messages", { min: 5, max: 500 });
-			const max = parseWholeNumber(fields.getTextInputValue("max"), "Most messages", { min: 5, max: 1_000 });
+			const min = parseWholeNumber(fields.getTextInputValue("min"), "Fewest messages", {
+				min: TREASURE_LIMITS.minMessages,
+				max: TREASURE_LIMITS.maxMessages,
+			});
+			const max = parseWholeNumber(fields.getTextInputValue("max"), "Most messages", {
+				min: TREASURE_LIMITS.minMessages,
+				max: TREASURE_LIMITS.maxMessages,
+			});
 
 			if (!min.ok) problems.push(min.reason);
 			if (!max.ok) problems.push(max.reason);
 			if (min.ok && max.ok && min.value > max.value) problems.push("The fewest cannot be more than the most.");
 			if (min.ok && max.ok) Object.assign(next, { minMessages: min.value, maxMessages: max.value });
 		} else if (context.action === "save-amount") {
-			const min = parseWholeNumber(fields.getTextInputValue("min"), "Smallest drop", { min: 1, max: 100_000 });
-			const max = parseWholeNumber(fields.getTextInputValue("max"), "Largest drop", { min: 1, max: 100_000 });
+			const min = parseWholeNumber(fields.getTextInputValue("min"), "Smallest drop", {
+				min: TREASURE_LIMITS.minAmount,
+				max: TREASURE_LIMITS.maxAmount,
+			});
+			const max = parseWholeNumber(fields.getTextInputValue("max"), "Largest drop", {
+				min: TREASURE_LIMITS.minAmount,
+				max: TREASURE_LIMITS.maxAmount,
+			});
 
 			if (!min.ok) problems.push(min.reason);
 			if (!max.ok) problems.push(max.reason);
 			if (min.ok && max.ok && min.value > max.value) problems.push("The smallest cannot be more than the largest.");
 			if (min.ok && max.ok) Object.assign(next, { minAmount: min.value, maxAmount: max.value });
 		} else if (context.action === "save-cooldown") {
-			const minutes = parseWholeNumber(fields.getTextInputValue("minutes"), "Minutes", { min: 1, max: 1_440 });
+			const minutes = parseWholeNumber(fields.getTextInputValue("minutes"), "Minutes", {
+				min: TREASURE_LIMITS.minCooldownMinutes,
+				max: TREASURE_LIMITS.maxCooldownMinutes,
+			});
 
 			if (!minutes.ok) problems.push(minutes.reason);
 			else next.cooldownMs = minutes.value * MINUTE;
@@ -197,7 +206,7 @@ export default defineButton({
 			return;
 		}
 
-		await saveTreasureConfig(guildId, { ...next, lastModifiedBy: interaction.user.id });
+		await saveTreasureConfig(guildId, { ...toStored(next), lastModifiedBy: interaction.user.id });
 
 		// A modal can only edit the message it was opened from; if it somehow was not,
 		// answering privately still beats leaving the interaction hanging.

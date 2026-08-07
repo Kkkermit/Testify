@@ -6,6 +6,7 @@ import {
 	ShieldCheck,
 	Pin,
 	SlidersHorizontal,
+	Coins,
 	Terminal,
 	TrendingUp,
 	Users,
@@ -82,6 +83,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					label: "Sticky",
 					icon: Pin,
 					hint: "Messages Testify keeps at the bottom of a channel",
+				},
+				{
+					to: `/guilds/${guild.id}/treasure`,
+					label: "Treasure",
+					icon: Coins,
+					hint: "Random money drops in chat",
 				},
 				{
 					to: `/guilds/${guild.id}/settings`,

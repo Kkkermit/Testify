@@ -9,6 +9,7 @@ import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
 import { settings } from "@api/routes/settings";
 import { sticky } from "@api/routes/sticky";
+import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
@@ -26,6 +27,7 @@ import {
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { canPostInChannel } from "@lib/channels.util";
 import { normaliseSettings } from "@lib/levelling.util";
+import { readTreasure } from "@lib/treasureActions.util";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
@@ -50,6 +52,7 @@ guilds.route("/:guildId/settings", settings);
 guilds.route("/:guildId/commands", guildCommandToggles);
 guilds.route("/:guildId/automod", automod);
 guilds.route("/:guildId/sticky", sticky);
+guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/verification", verification);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
@@ -153,7 +156,7 @@ function colourOf(role: Role): string | null {
 
 /** One line per feature, read through the repositories so the web and the Discord panels cannot disagree. */
 async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies] = await Promise.all([
+	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies, treasure] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
 		getWelcome(guild.id),
@@ -163,6 +166,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		getVerifyConfig(guild.id),
 		getVoiceCounter(guild.id),
 		listSticky(guild.id),
+		readTreasure(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -223,6 +227,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Sticky messages",
 			enabled: stickies.length > 0,
 			detail: stickies.length === 0 ? null : count(stickies.length, "channel"),
+		},
+		{
+			key: "treasure",
+			label: "Treasure drops",
+			enabled: treasure.enabled,
+			detail: treasure.configured ? `${String(treasure.minAmount)}–${String(treasure.maxAmount)} a drop` : null,
 		},
 	];
 }

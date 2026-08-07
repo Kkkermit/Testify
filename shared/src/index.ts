@@ -11,6 +11,7 @@ export * from "./permissions";
 export * from "./schemas";
 export * from "./settings";
 export * from "./sticky";
+export * from "./treasure";
 export * from "./text";
 export * from "./verification";
 export * from "./welcome";
