@@ -20,7 +20,6 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** Discord's own AutoMod, not Testify's — nothing here is stored by the bot, so Discord is the only truth. */
 export function AutomodPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 

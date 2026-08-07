@@ -35,7 +35,6 @@ describe("createAutomodRule", () => {
 		expect(create).toHaveBeenCalledWith(expect.objectContaining({ triggerMetadata: { mentionTotalLimit: 7 } }));
 	});
 
-	/** The word is what the rule is for, so it has to reach Discord and name the rule people will read. */
 	it("puts the keyword in both the filter and the name", async () => {
 		const create = jest.fn().mockResolvedValue({ name: "x" });
 		await createAutomodRule(guildWith(create), { preset: "keyword", word: "badword" }, "why");

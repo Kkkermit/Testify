@@ -155,7 +155,7 @@ describe("the automod rule form", () => {
 		});
 	});
 
-	/** The warning is a heads-up, not a refusal: the strip runs on the way out and the add still goes through. */
+	/** The warning is a heads-up, not a refusal: the strip runs on the way out and the add goes through. */
 	it("strips HTML from the word, having said it would", async () => {
 		const user = userEvent.setup();
 		let sent: unknown = null;
@@ -199,7 +199,6 @@ describe("the automod rule form", () => {
 		});
 	});
 
-	/** Leaving the word in place after an add reads as though nothing happened. */
 	it("clears the word once the rule has been sent", async () => {
 		const user = userEvent.setup();
 		renderPage();
@@ -240,10 +239,7 @@ describe("the automod rule form", () => {
 	});
 });
 
-/**
- * Every write here goes to Discord rather than to Mongo, so the page holds every control while one is in
- * flight. That is what makes two answers arriving out of order impossible, rather than merely guarded against.
- */
+/** Holding every control is what makes two answers arriving out of order impossible rather than merely guarded. */
 describe("a write already in flight", () => {
 	it("holds every other control until it lands", async () => {
 		const user = userEvent.setup();

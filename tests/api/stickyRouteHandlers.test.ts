@@ -88,7 +88,6 @@ describe("GET /sticky", () => {
 		expect(body).toEqual({ limit: STICKY_LIMITS.maxPerGuild, entries: [] });
 	});
 
-	/** A sticky that has been posted can be edited in place; one that has not has nothing out there yet. */
 	it("says which entries have a message out there already", async () => {
 		listed.mockResolvedValue([entry(CHANNEL, { lastMessageId: "999" })] as never);
 

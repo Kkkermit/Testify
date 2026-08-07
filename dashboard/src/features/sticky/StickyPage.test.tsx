@@ -108,7 +108,7 @@ describe("the sticky page", () => {
 describe("adding a sticky", () => {
 	const FREE = "400000000000000004";
 
-	// The fixture's only other postable channel cannot be posted in, so its option is disabled by design.
+	// The fixture's only other postable channel has `canSend: false`, so its option is disabled.
 	beforeEach(() => {
 		server.use(
 			http.get(`/api/guilds/${GUILD}/channels`, () =>
@@ -142,7 +142,6 @@ describe("adding a sticky", () => {
 		});
 	});
 
-	/** Leaving the typed message in place after a save reads as though the add silently failed. */
 	it("clears the form once it has been sent", async () => {
 		const user = userEvent.setup();
 		renderPage();
@@ -163,7 +162,7 @@ describe("adding a sticky", () => {
 		expect(screen.getByText(/^3 of \d+$/)).toBeInTheDocument();
 	});
 
-	/** The warning is a heads-up, not a refusal: the strip runs on the way out and the save still goes through. */
+	/** The warning is a heads-up, not a refusal: the strip runs on the way out and the save goes through. */
 	it("strips HTML on the way out, having said it would", async () => {
 		const user = userEvent.setup();
 		let sent: unknown = null;

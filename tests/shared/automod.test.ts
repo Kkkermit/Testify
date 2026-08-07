@@ -36,7 +36,6 @@ describe("automodCreate", () => {
 		).toBe(false);
 	});
 
-	/** The keyword is stored by Discord and shown back in its UI, so it takes the same strip as every field. */
 	it("refuses HTML but keeps Discord syntax", () => {
 		expect(automodCreate.safeParse({ preset: "keyword", word: "<b>rude</b>" }).success).toBe(false);
 		expect(automodCreate.safeParse({ preset: "keyword", word: "<@100000000000000001>" }).success).toBe(true);
@@ -68,7 +67,7 @@ describe("automodBlocked", () => {
 	});
 });
 
-/** The form renders a row per preset, so a preset with no copy would render a blank option. */
+/** A preset with no copy renders a blank option in the form. */
 describe("AUTOMOD_PRESET_LABELS", () => {
 	it("describes every preset the form offers", () => {
 		for (const preset of AUTOMOD_PRESETS) {

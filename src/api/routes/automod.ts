@@ -45,7 +45,6 @@ automod.post("/", async (context) => {
 	return context.json(await rulesFor(guild, botIdOf(context)));
 });
 
-/** The rule id comes from the path and is shape-checked, so it can never reach Discord as arbitrary text. */
 automod.patch("/:ruleId", async (context) => {
 	const guild = guildOf(context);
 	const { ruleId } = parseParams(context, automodRuleParam);

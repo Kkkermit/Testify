@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { plainLine } from "./text";
 
-/** The rules Testify knows how to build. Discord holds many more; those are listed but not offered here. */
+/** Discord holds more trigger types than these; the rest are listed but not offered. */
 export const AUTOMOD_PRESETS = ["flagged-words", "spam", "mention-spam", "keyword"] as const;
 
 export type AutomodPreset = (typeof AUTOMOD_PRESETS)[number];
@@ -10,7 +10,7 @@ export const AUTOMOD_LIMITS = {
 	minMentions: 1,
 	maxMentions: 50,
 	maxKeyword: 60,
-	/** Discord's own cap per trigger type, and the reason a create can be refused before it is sent. */
+	/** Discord's own cap per trigger type. */
 	maxRules: 6,
 } as const;
 
@@ -24,24 +24,21 @@ export const AUTOMOD_PRESET_LABELS: Record<AutomodPreset, { label: string; descr
 	keyword: { label: "A word you choose", describes: "One word or phrase, blocked outright." },
 };
 
-/** What a rule does when it fires, in the words the list shows. */
 export type AutomodAction = "block" | "alert" | "timeout" | "other";
 
 export interface AutomodRuleSummary {
 	id: string;
 	name: string;
 	enabled: boolean;
-	/** Absent for a trigger Testify does not build, which is still listed so the page matches Discord. */
 	preset: AutomodPreset | null;
 	trigger: string;
 	actions: AutomodAction[];
-	/** True when Testify created it, so a rule somebody made in Discord is recognisable. */
 	fromTestify: boolean;
 }
 
 export interface AutomodRules {
 	rules: AutomodRuleSummary[];
-	/** False when Testify lacks Manage Server, which is the only reason the whole page cannot work. */
+	/** False when Testify lacks Manage Server. */
 	canManage: boolean;
 }
 
@@ -61,7 +58,7 @@ export const automodPatch = z.object({ enabled: z.boolean() });
 
 export const automodRuleParam = z.object({ ruleId: z.string().regex(/^\d{17,20}$/, "is not a rule id") });
 
-/** Why a create would be refused, in the words the form shows, so nobody presses Add and gets a 400. */
+/** Why a create would be refused, in the words the form shows. */
 export function automodBlocked(draft: { preset: AutomodPreset; word: string; limit: number }): string | null {
 	if (draft.preset === "keyword" && draft.word.trim() === "") return "Type the word or phrase to block.";
 	if (draft.preset === "mention-spam" && !Number.isInteger(draft.limit)) return "Choose how many mentions to allow.";

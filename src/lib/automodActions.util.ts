@@ -9,10 +9,7 @@ import {
 } from "discord.js";
 import { type AutomodAction, type AutomodCreate, type AutomodPreset, type AutomodRuleSummary } from "@testify/shared";
 
-/**
- * Discord's AutoMod, not Testify's — there is no record of these anywhere in the database, so Discord is the
- * only source of truth and both surfaces read and write it directly.
- */
+/** Discord's AutoMod: nothing here is stored by the bot, so Discord is the only source of truth. */
 
 const TRIGGER_PRESET = new Map<AutoModerationRuleTriggerType, AutomodPreset>([
 	[AutoModerationRuleTriggerType.KeywordPreset, "flagged-words"],

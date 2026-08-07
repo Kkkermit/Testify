@@ -36,7 +36,6 @@ function ruleDoc(overrides: Record<string, unknown> = {}): Record<string, unknow
 	};
 }
 
-/** `canManage` is the whole page's switch, so every test says outright which side of it it is on. */
 function app(canManage = true): Hono<ApiBindings> {
 	const guild = {
 		id: GUILD,
@@ -96,10 +95,7 @@ describe("GET /automod", () => {
 		expect(body.rules[0]).toMatchObject({ id: RULE, name: "Block spam", preset: "spam", fromTestify: true });
 	});
 
-	/**
-	 * Without Manage Server the fetch throws, and a 500 would read as a broken dashboard rather than a
-	 * permission the admin can grant.
-	 */
+	/** Without Manage Server the fetch throws, and a 500 reads as a broken dashboard rather than a permission. */
 	it("says so rather than throwing when the bot cannot read them", async () => {
 		const response = await send("GET", "", undefined, false);
 		const body = (await response.json()) as AutomodRules;
@@ -135,7 +131,6 @@ describe("POST /automod", () => {
 		expect(created).not.toHaveBeenCalled();
 	});
 
-	/** The word reaches Discord's filter, so the same markup refusal as every other free-text field applies. */
 	it("refuses HTML in the keyword", async () => {
 		const response = await send("POST", "", { preset: "keyword", word: "<script>x</script>" });
 
@@ -219,7 +214,6 @@ describe("DELETE /automod/:ruleId", () => {
 		expect(removed).toHaveBeenCalled();
 	});
 
-	/** The name is read before the delete, because afterwards there is nothing left to read it from. */
 	it("names the removed rule in the audit record", async () => {
 		await send("DELETE", `/${RULE}`);
 
