@@ -74,15 +74,17 @@ shape to follow.
 `overrides` in `package.json` pins transitive dependencies. npm does not allow
 comments there, so the reasons live here:
 
-| Pin                                   | Why                                                                                                                             |
-| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `glob: $glob`                         | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses. |
-| `test-exclude: ^7.0.1`                | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                      |
-| `esbuild: ^0.28.1`                    | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                        |
-| `serialize-javascript: ^7.0.7`        | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                               |
-| `brace-expansion: ^5.0.9`             | Reached through eslint-plugin-import-x → minimatch. 5.0.9 fixes GHSA-rgw5-rvv9-x895; minimatch asks for `^5.0.8`.               |
-| `fast-uri: ^3.1.5`                    | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                         |
-| `discord-html-transcripts` → `undici` | The package pins undici v5, which has open advisories. v6 is API-compatible for the calls it makes.                             |
+| Pin                                                | Why                                                                                                                             |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `glob: $glob`                                      | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses. |
+| `test-exclude: ^7.0.1`                             | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                      |
+| `esbuild: ^0.28.1`                                 | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                        |
+| `serialize-javascript: ^7.0.7`                     | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                               |
+| `brace-expansion: ^5.0.9`                          | Reached through eslint-plugin-import-x → minimatch. 5.0.9 fixes GHSA-rgw5-rvv9-x895; minimatch asks for `^5.0.8`.               |
+| `fast-uri: ^3.1.5`                                 | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                         |
+| `js-yaml: ^4.3.1`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.              |
+| `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.     |
+| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible for the calls it makes.                             |
 
 Each one should be dropped the moment its parent updates — check when a
 dependency bump lands.

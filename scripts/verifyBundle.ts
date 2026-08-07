@@ -17,9 +17,30 @@ const ASSETS = resolve(process.cwd(), "dashboard", "dist", "assets");
 /** React writes its own version into its bundle, once per copy. */
 const VERSION = /version\s*[=:]\s*[`"']([\d]+\.[\d]+\.[\d]+)[`"']/g;
 
+/**
+ * Identifiers React ships beside that version and nothing else does.
+ *
+ * The bare pattern matches any package that exports a semver string — `dompurify` writes `t.version = "3.4.13"`
+ * next to `t.removed = []` — and one of those reported as a second React is a build failure with no bug behind
+ * it. Minified names change every release; these are export names and payload keys, which do not.
+ */
+const REACT_NEIGHBOUR =
+	/useTransition|useFormStatus|useSyncExternalStore|rendererPackageName|react-dom|react\.transitional/;
+
+/** Either side, because the DevTools descriptor names the renderer after the version rather than before it. */
+const WINDOW = 220;
+
 export function reactVersionsIn(code: string): string[] {
-	const found = [...code.matchAll(VERSION)].map(([, version]) => version).filter((v) => v !== undefined);
+	const found = [...code.matchAll(VERSION)]
+		.filter((match) => REACT_NEIGHBOUR.test(near(code, match.index, match[0].length)))
+		.map(([, version]) => version)
+		.filter((version) => version !== undefined);
+
 	return [...new Set(found)].sort();
+}
+
+function near(code: string, index: number, length: number): string {
+	return code.slice(Math.max(0, index - WINDOW), index) + code.slice(index + length, index + length + WINDOW);
 }
 
 function main(): void {
