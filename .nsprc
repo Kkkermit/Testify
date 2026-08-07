@@ -3,10 +3,5 @@
 		"active": false,
 		"notes": "TEMPLATE — copy this shape, do not activate it. Every real entry needs three things: why it cannot be fixed now, the version that fixes it, and a hard expiry, so a suppression cannot rot into a permanent blind spot. Wording to follow: reached only through <package>@<version>, which cannot be upgraded without a breaking change to <dependency>. Fixed in <package>@<version> — re-evaluate when <dependency> ships a compatible release.",
 		"expiry": 1789776000000
-	},
-	"GHSA-qwww-vcr4-c8h2": {
-		"active": true,
-		"notes": "React Router RSC-mode CSRF bypass, reachable only through React Server Components — which needs a server, server actions and the RSC entry point. The dashboard is a browser-only SPA on createBrowserRouter with no loaders, no actions and nothing rendered on the server, so the affected path is not in this build. Fixed in react-router@8.3.0, which ships ESM only and cannot be required by the CommonJS Jest project (swc leaves import.meta unlowered, so the SSR modules fail to parse). Re-evaluate when the dashboard's Jest project moves to ESM, or sooner if an advisory lands on 8.x.",
-		"expiry": 1793491200000
 	}
 }
