@@ -10,6 +10,7 @@ import {
 	Link as LinkIcon,
 	MessageSquareWarning,
 	MessagesSquare,
+	Ticket,
 	ScrollText,
 	Settings,
 	Shield,
@@ -52,6 +53,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		path: (guildId) => `/guilds/${guildId}/audit-log`,
 	},
 	economy: { icon: Coins, tint: "text-feature-economy", wash: "bg-feature-economy/15" },
+	lottery: {
+		icon: Ticket,
+		tint: "text-feature-economy",
+		wash: "bg-feature-economy/15",
+		path: (guildId) => `/guilds/${guildId}/lottery`,
+	},
 	treasure: {
 		icon: Coins,
 		tint: "text-feature-economy",

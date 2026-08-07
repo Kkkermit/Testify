@@ -7,6 +7,7 @@ import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { levelling } from "@api/routes/levelling";
+import { lottery } from "@api/routes/lottery";
 import { settings } from "@api/routes/settings";
 import { sticky } from "@api/routes/sticky";
 import { tickets } from "@api/routes/tickets";
@@ -28,6 +29,7 @@ import {
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { canPostInChannel } from "@lib/channels.util";
 import { normaliseSettings } from "@lib/levelling.util";
+import { readLottery } from "@lib/lotteryActions.util";
 import { readTickets } from "@lib/ticketActions.util";
 import { readTreasure } from "@lib/treasureActions.util";
 import {
@@ -55,6 +57,7 @@ guilds.route("/:guildId/commands", guildCommandToggles);
 guilds.route("/:guildId/automod", automod);
 guilds.route("/:guildId/sticky", sticky);
 guilds.route("/:guildId/tickets", tickets);
+guilds.route("/:guildId/lottery", lottery);
 guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/verification", verification);
 
@@ -159,7 +162,7 @@ function colourOf(role: Role): string | null {
 
 /** One line per feature, read through the repositories so the web and the Discord panels cannot disagree. */
 async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies, treasure, ticketing] =
+	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies, treasure, ticketing, draw] =
 		await Promise.all([
 			getLevelSettings(guild.id),
 			getAuditLogConfig(guild.id),
@@ -172,6 +175,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			listSticky(guild.id),
 			readTreasure(guild.id),
 			readTickets(guild),
+			readLottery(guild.id),
 		]);
 
 	const level = normaliseSettings(levels);
@@ -244,6 +248,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Tickets",
 			enabled: ticketing.enabled,
 			detail: ticketing.enabled ? count(ticketing.openTickets, "ticket open") : null,
+		},
+		{
+			key: "lottery",
+			label: "Lottery",
+			enabled: draw.enabled && !draw.frozen,
+			detail: draw.enabled ? count(draw.ticketsSold, "ticket sold") : null,
 		},
 	];
 }

@@ -21,6 +21,7 @@ import {
 	type SetupStatus,
 	type WelcomeConfigResponse,
 	type StickyList,
+	type LotterySettings,
 	type TicketSettings,
 	type TreasureSettings,
 	type AutomodRules,
@@ -147,6 +148,28 @@ export const automodRules: AutomodRules = {
 			trigger: "Something else",
 			actions: ["alert"],
 			fromTestify: false,
+		},
+	],
+};
+
+export const lotterySettings: LotterySettings = {
+	enabled: true,
+	frozen: false,
+	entryFee: 100,
+	basePrizePool: 500,
+	maxWinners: 2,
+	frequency: "weekly",
+	announcementChannelId: "400000000000000001",
+	prizePool: 2500,
+	ticketsSold: 20,
+	entrants: 7,
+	nextDrawAt: "2026-08-14T12:00:00.000Z",
+	history: [
+		{
+			at: "2026-08-07T12:00:00.000Z",
+			prizePool: 1800,
+			tickets: 12,
+			winners: [{ userTag: "kate", prizeAmount: 1800 }],
 		},
 	],
 };
@@ -338,6 +361,9 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.get("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
+	http.patch("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
+	http.delete("/api/guilds/:guildId/lottery", () => HttpResponse.json({ ...lotterySettings, enabled: false })),
 	http.patch("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.delete("/api/guilds/:guildId/tickets", () => HttpResponse.json({ ...ticketSettings, enabled: false })),
 	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),

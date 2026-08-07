@@ -13,6 +13,7 @@ import {
 	UserPlus,
 	MessagesSquare,
 	LifeBuoy,
+	Ticket,
 	type LucideIcon,
 } from "lucide-react";
 
@@ -136,6 +137,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							label: "Tickets",
 							icon: LifeBuoy,
 							hint: "A button members press to reach your staff",
+						},
+						{
+							to: `/guilds/${guild.id}/lottery`,
+							label: "Lottery",
+							icon: Ticket,
+							hint: "A pot members buy tickets into",
 						},
 					],
 				},

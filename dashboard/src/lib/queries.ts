@@ -18,6 +18,7 @@ export const keys = {
 		automod: () => ["guild", id, "automod"] as const,
 		treasure: () => ["guild", id, "treasure"] as const,
 		tickets: () => ["guild", id, "tickets"] as const,
+		lottery: () => ["guild", id, "lottery"] as const,
 		nickname: () => ["guild", id, "nickname"] as const,
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
