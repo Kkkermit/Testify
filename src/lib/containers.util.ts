@@ -27,7 +27,6 @@ export function containerMessage(container: ContainerBuilder): ContainerMessage 
 	return { components: [container], flags: MessageFlags.IsComponentsV2 };
 }
 
-/** Markdown text. */
 export function text(markdown: string): TextDisplayBuilder {
 	return new TextDisplayBuilder().setContent(markdown);
 }

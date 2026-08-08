@@ -100,7 +100,6 @@ function dashboardField(client: TestifyClient): { name: string; value: string }[
 	];
 }
 
-/** One page of one category. */
 export function categoryPage(
 	client: TestifyClient,
 	category: Category,

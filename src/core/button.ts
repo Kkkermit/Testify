@@ -26,7 +26,6 @@ export function defineButton(button: Button): Button {
 
 const SEPARATOR = ":";
 
-/** Builds a custom ID. */
 export function customId(id: string, action: string, ...args: (string | number)[]): string {
 	const parts = [id, action, ...args.map(String)];
 

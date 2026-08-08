@@ -54,7 +54,7 @@ describe("event grouping", () => {
 			statSync(join(SRC, "events", entry)).isDirectory(),
 		);
 
-		const expected = ["CommandEvents", "CreateEvents", "LoggingEvents", "ReadyEvents", "message"];
+		const expected = ["command", "create", "logging", "message", "ready"];
 		const stray = groups.filter((group) => !expected.includes(group));
 
 		// Cloud sync and editors leave ` 2` copies behind. Naming them beats an array

@@ -34,7 +34,6 @@ export function balancesOf(account: EconomyAccount): Balances {
 	};
 }
 
-/** Applies a purchase. */
 async function purchase(state: ShopState, guildId: string, userId: string, account: EconomyAccount): Promise<string> {
 	const id = state.selectedId ?? "";
 

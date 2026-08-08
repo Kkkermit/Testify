@@ -212,7 +212,7 @@ src/
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               24 handlers in CommandEvents, CreateEvents, LoggingEvents, ReadyEvents, message
+├── events/               24 handlers in command, create, logging, ready and message
 ├── buttons/              15 component handlers, keyed by custom-ID prefix
 ├── lib/                  33 domain helpers, formatters and panel renderers
 ├── database/
@@ -255,7 +255,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts` |
 | Change user-facing copy                    | `src/config/strings.ts`                                            |
 | Change a colour or emoji                   | `src/config/theme.ts`                                              |
-| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ReadyEvents/scheduleJobs.event.ts`  |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`        |
 | Share logic between a command and a button | `src/lib/*Actions.util.ts` (e.g. `economyActions.util.ts`)         |
 
 ### The panel renderers in `src/lib`
@@ -319,7 +319,7 @@ async function main(): Promise<void> {
 
 **Dispatch:**
 
-- Slash → `events/CommandEvents/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
+- Slash → `events/command/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
 - Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`
 - Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
   `button.run(interaction, { client, action, args })`
@@ -337,7 +337,7 @@ A file that misses its suffix is silently never registered.
 | Suffix        | For                              | Example                              |
 | ------------- | -------------------------------- | ------------------------------------ |
 | `.command.ts` | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
-| `.event.ts`   | a gateway event handler          | `events/ReadyEvents/ready.event.ts`  |
+| `.event.ts`   | a gateway event handler          | `events/ready/ready.event.ts`        |
 | `.util.ts`    | a shared helper                  | `lib/duration.util.ts`               |
 | `.schema.ts`  | a Mongoose model                 | `database/models/economy.schema.ts`  |
 | `.test.ts`    | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
@@ -465,7 +465,7 @@ prefix alias, so `t?dad-joke` still works alongside `/fun dad-joke`.
 ## 9. Adding an event
 
 ```ts
-// src/events/CreateEvents/guildCreate.event.ts
+// src/events/create/guildCreate.event.ts
 import { defineEvent } from "@core/event";
 
 export default defineEvent({
@@ -481,7 +481,7 @@ export default defineEvent({
 is correctly typed for whichever event you named — and a handler whose parameters are in the wrong order is a
 compile error. In the original JS bot two features were silently dead for exactly that reason.
 
-Group it into `ReadyEvents/`, `CommandEvents/`, `CreateEvents/`, `LoggingEvents/` or `message/`. Any depth under
+Group it into `ready/`, `command/`, `create/`, `logging/` or `message/`. Any depth under
 `src/events/` is scanned.
 
 `once: true` for start-up work. Never register a handler both in a file and by hand elsewhere — the original
@@ -806,8 +806,11 @@ What still earns one:
 - A one-line file header saying what the module is for.
 - A `/** */` above a test naming the bug it pins.
 
-Match the surrounding density. `src/` sits at roughly 3% comment lines; a new file well above that is a signal to
-cut, not a sign of thoroughness.
+Match the surrounding density. Measured rather than guessed: `dashboard/src` sits at **2.9%** comment lines and
+`src/` at **5.4%**, and the gap is deliberate — `src/api/` runs to a third, because a security constraint is
+exactly the thing a reader cannot infer. Outside that, a new file well above the local figure is a signal to
+cut rather than a sign of thoroughness. `npm run check` will not catch a comment that only restates its
+identifier; read it back and ask what the signature already said.
 
 ---
 
@@ -911,10 +914,11 @@ No `SlashCommands/` / `PrefixCommands/` folder split, and no `.slash.ts` / `.pre
 describe an architecture this codebase deliberately does not have, and would undo the deduplication the rewrite
 exists to achieve.
 
-### Command folders stay flat and lowercase
+### Every folder under `src/` is lowercase
 
-`commands/<category>/`, matching the rest of `src/`, which is uniformly camelCase. Two casing regimes inside one
-tree is a rule to remember rather than a distinction the reader gains anything from.
+`commands/<category>/` and `events/<group>/` both, matching the rest of `src/`, which is uniformly camelCase.
+Two casing regimes inside one tree is a rule to remember rather than a distinction the reader gains anything
+from — and the event groups were the last holdout, PascalCase beside a lowercase `message/` sibling.
 
 ### No dedicated `types/` directory
 
