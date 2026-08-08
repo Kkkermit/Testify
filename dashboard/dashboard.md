@@ -627,6 +627,19 @@ asked again before every write. Clearing a warning record asks for the member's 
 recovers it. A screen nested under another (`…/members/:userId` under `…/members`) needs `exact: false` on the
 parent's nav entry, or the sidebar section collapses the moment you open it.
 
+Four more things about that page are load-bearing:
+
+- **Lifting a softban skips the hierarchy check, and has to.** A softbanned user is banned, so they are not a
+  member and have no roles to compare — running `actOn()` there would refuse every lift. `requireGuild` is the
+  gate, and there is a test proved to go red if the check is added back.
+- **A level change hands out the role rewards it earns.** `changeLevel` writes the number and then calls
+  `applyLevelRewards`, the same function the message handler uses. Writing the number alone leaves somebody at
+  level 10 without the level-10 role until their next message.
+- **Money is `$inc`-ed, never read and written back**, so two managers cannot overwrite each other, and the
+  route refuses a subtraction that would leave a negative balance — nothing else in the economy can produce one.
+- **A level and an XP change are refused together**, because setting a level rewrites the XP and accepting both
+  would silently discard one. `levelBody` enforces it in zod and the form disables both buttons.
+
 ### The owner console
 
 Everything behind `requireOwner`, which answers **404** so a manager never learns it is there. Each tab fetches

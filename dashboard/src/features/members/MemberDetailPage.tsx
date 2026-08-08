@@ -7,6 +7,8 @@ import { Field, SavingIndicator, savingStateOf, Warning } from "@/components/for
 import { FIELD } from "@/components/form/fieldStyles";
 import { Avatar, Badge, Button, Card, Figure, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
+import { LevelCard } from "@/features/members/components/LevelCard";
+import { MoneyCard } from "@/features/members/components/MoneyCard";
 import { WarningList } from "@/features/members/components/WarningList";
 import {
 	clearConfirmed,
@@ -15,7 +17,15 @@ import {
 	statsOf,
 	warningSummary,
 } from "@/features/members/memberDetail.utils";
-import { useClearWarnings, useMemberDetail, useRemoveWarning, useWarn } from "@/features/members/useMemberDetail";
+import {
+	useChangeMoney,
+	useClearWarnings,
+	useLiftSoftban,
+	useMemberDetail,
+	useRemoveWarning,
+	useSetLevel,
+	useWarn,
+} from "@/features/members/useMemberDetail";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
@@ -27,6 +37,9 @@ export function MemberDetailPage(): React.JSX.Element {
 	const warn = useWarn(guildId, userId);
 	const remove = useRemoveWarning(guildId, userId);
 	const clear = useClearWarnings(guildId, userId);
+	const money = useChangeMoney(guildId, userId);
+	const level = useSetLevel(guildId, userId);
+	const lift = useLiftSoftban(guildId, userId);
 
 	const [reason, setReason] = useState("");
 	const [confirming, setConfirming] = useState(false);
@@ -38,10 +51,11 @@ export function MemberDetailPage(): React.JSX.Element {
 	if (member.data === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const detail = member.data;
-	const busy = warn.isPending || remove.isPending || clear.isPending;
+	const busy = [warn, remove, clear, money, level, lift].some((one) => one.isPending);
 	const canModerate = detail.moderationProblem === null;
 	const problem = warningProblem(reason);
-	const failure = [warn.error, remove.error, clear.error].find((error) => error !== null) ?? null;
+	const failure =
+		[warn, remove, clear, money, level, lift].map((one) => one.error).find((error) => error !== null) ?? null;
 
 	return (
 		<>
@@ -94,15 +108,48 @@ export function MemberDetailPage(): React.JSX.Element {
 			)}
 
 			{softbanActive(detail) && detail.softban !== null && (
-				<Card className="flex flex-col gap-1">
-					<h2 className="flex items-center gap-2 text-base font-semibold">
-						<ShieldAlert size={18} className="text-destructive" aria-hidden="true" /> Active softban
-					</h2>
-					<p className="text-muted-foreground text-sm">{detail.softban.reason}</p>
-					<p className="text-muted-foreground text-xs">
-						Lifts <time dateTime={detail.softban.expiresAt}>{new Date(detail.softban.expiresAt).toLocaleString()}</time>
-					</p>
+				<Card className="flex flex-wrap items-end justify-between gap-4">
+					<div className="flex flex-col gap-1">
+						<h2 className="flex items-center gap-2 text-base font-semibold">
+							<ShieldAlert size={18} className="text-destructive" aria-hidden="true" /> Active softban
+						</h2>
+						<p className="text-muted-foreground text-sm">{detail.softban.reason}</p>
+						<p className="text-muted-foreground text-xs">
+							Lifts{" "}
+							<time dateTime={detail.softban.expiresAt}>{new Date(detail.softban.expiresAt).toLocaleString()}</time>
+						</p>
+					</div>
+
+					{/* Not behind the hierarchy check: a softbanned user is banned, so they have no roles to compare. */}
+					<Button
+						variant="secondary"
+						disabled={busy}
+						onClick={() => {
+							lift.mutate();
+						}}
+					>
+						Lift it now
+					</Button>
 				</Card>
+			)}
+
+			{canModerate && (
+				<div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+					<MoneyCard
+						detail={detail}
+						busy={busy}
+						onChange={(purse, delta) => {
+							money.mutate({ purse, delta });
+						}}
+					/>
+					<LevelCard
+						detail={detail}
+						busy={busy}
+						onChange={(body) => {
+							level.mutate(body);
+						}}
+					/>
+				</div>
 			)}
 
 			<Card className="flex flex-col gap-4">

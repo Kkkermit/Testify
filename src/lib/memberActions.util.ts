@@ -1,7 +1,25 @@
 import { type Guild, type GuildMember } from "discord.js";
-import { findAccount, getEconomyRank, countAccounts, getLeaderboard } from "@database/repositories/economyRepository";
-import { countRanked, getLevelLeaderboard, getRank, getUserLevel } from "@database/repositories/levelRepository";
-import { getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { type Logger } from "@core/logger";
+import {
+	adjustBank,
+	adjustWallet,
+	countAccounts,
+	findAccount,
+	getEconomyRank,
+	getLeaderboard,
+} from "@database/repositories/economyRepository";
+import {
+	addXp,
+	countRanked,
+	getLevelLeaderboard,
+	getLevelSettings,
+	getRank,
+	getUserLevel,
+	setLevel,
+} from "@database/repositories/levelRepository";
+import { deactivateSoftban, getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { normaliseSettings } from "@lib/levelling.util";
+import { applyLevelRewards, type RewardOutcome } from "@lib/levellingActions.util";
 import { moderationProblem } from "@lib/moderationActions.util";
 import {
 	BOARD_PAGE_SIZE,
@@ -11,6 +29,7 @@ import {
 	type MemberBoard,
 	type MemberDetail,
 	type MemberWarning,
+	type MoneyPurse,
 	pageOfRank,
 } from "@testify/shared";
 
@@ -158,6 +177,56 @@ export async function readMemberDetail(options: {
 					? "Only somebody in this server can moderate its members."
 					: moderationProblem(moderator, member, botId),
 	};
+}
+
+/** Lifts a softban early: the Discord ban first, because the record is what the sweep job reads. */
+export async function revokeSoftban(guild: Guild, userId: string, byName: string): Promise<boolean> {
+	if ((await getActiveSoftban(guild.id, userId)) === null) return false;
+
+	await guild.bans.remove(userId, `Softban lifted early by ${byName}`).catch(() => null);
+
+	return deactivateSoftban(guild.id, userId);
+}
+
+export interface LevelChange {
+	level: number;
+	xp: number;
+	rewards: RewardOutcome;
+}
+
+/**
+ * Sets a level outright or moves XP, then hands out whatever role rewards the new level earns.
+ *
+ * The reward pass is what makes this different from writing the number: a level set that skipped it would leave
+ * somebody at level 10 without the level-10 role, and nothing would fix it until their next message.
+ */
+export async function changeLevel(
+	guild: Guild,
+	member: GuildMember,
+	change: { level?: number; xp?: number },
+	logger?: Logger,
+): Promise<LevelChange> {
+	const record =
+		change.level === undefined
+			? await addXp(guild.id, member.id, change.xp ?? 0)
+			: await setLevel(guild.id, member.id, change.level);
+
+	const config = normaliseSettings(await getLevelSettings(guild.id));
+
+	return { level: record.level, xp: record.xp, rewards: await applyLevelRewards(member, config, record.level, logger) };
+}
+
+/** Money is `$inc`-ed rather than read and written back, so two managers cannot overwrite each other's change. */
+export async function changeMoney(
+	guildId: string,
+	userId: string,
+	purse: MoneyPurse,
+	delta: number,
+): Promise<{ wallet: number; bank: number }> {
+	const account =
+		purse === "wallet" ? await adjustWallet(guildId, userId, delta) : await adjustBank(guildId, userId, delta);
+
+	return { wallet: account.wallet, bank: account.bank };
 }
 
 export async function readBoard(guild: Guild, board: MemberBoard, page: number, viewerId: string): Promise<BoardPage> {

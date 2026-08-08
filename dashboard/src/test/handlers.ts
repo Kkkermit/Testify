@@ -435,6 +435,11 @@ export const handlers = [
 	http.delete("/api/guilds/:guildId/members/:userId/warnings", () =>
 		HttpResponse.json({ ...memberDetail, warnings: [] }),
 	),
+	http.patch("/api/guilds/:guildId/members/:userId/level", () => HttpResponse.json(memberDetail)),
+	http.patch("/api/guilds/:guildId/members/:userId/money", () => HttpResponse.json(memberDetail)),
+	http.delete("/api/guilds/:guildId/members/:userId/softban", () =>
+		HttpResponse.json({ ...memberDetail, softban: null }),
+	),
 	http.get("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
 	http.patch("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
 	http.delete("/api/guilds/:guildId/lottery", () => HttpResponse.json({ ...lotterySettings, enabled: false })),

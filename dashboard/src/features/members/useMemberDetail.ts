@@ -5,7 +5,7 @@ import {
 	type UseMutationResult,
 	type UseQueryResult,
 } from "@tanstack/react-query";
-import { type MemberDetail } from "@testify/shared";
+import { type LevelBody, type MemberDetail, type MoneyBody } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -31,6 +31,24 @@ export function useRemoveWarning(guildId: string, userId: string): UseMutationRe
 export function useClearWarnings(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, void> {
 	return useMemberMutation(guildId, userId, () =>
 		api.delete<MemberDetail>(`/guilds/${guildId}/members/${userId}/warnings`),
+	);
+}
+
+export function useSetLevel(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, LevelBody> {
+	return useMemberMutation(guildId, userId, (body: LevelBody) =>
+		api.patch<MemberDetail>(`/guilds/${guildId}/members/${userId}/level`, body),
+	);
+}
+
+export function useChangeMoney(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, MoneyBody> {
+	return useMemberMutation(guildId, userId, (body: MoneyBody) =>
+		api.patch<MemberDetail>(`/guilds/${guildId}/members/${userId}/money`, body),
+	);
+}
+
+export function useLiftSoftban(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, void> {
+	return useMemberMutation(guildId, userId, () =>
+		api.delete<MemberDetail>(`/guilds/${guildId}/members/${userId}/softban`),
 	);
 }
 

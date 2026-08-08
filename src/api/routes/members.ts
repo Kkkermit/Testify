@@ -2,12 +2,21 @@ import { type Guild, type GuildMember } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { forbidden, notFound } from "@api/errors";
+import { badRequest, forbidden, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { addWarning, clearWarnings, removeWarning } from "@database/repositories/moderationRepository";
-import { readBoard, readMemberDetail } from "@lib/memberActions.util";
-import { boardQuery, type MemberDetail, memberParams, warningBody, warningParams } from "@testify/shared";
+import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/memberActions.util";
+import {
+	boardQuery,
+	levelBody,
+	type MemberDetail,
+	memberParams,
+	moneyBody,
+	moneyProblem,
+	warningBody,
+	warningParams,
+} from "@testify/shared";
 
 export const members = new Hono<ApiBindings>();
 
@@ -57,17 +66,21 @@ async function detail(context: Context<ApiBindings>): Promise<MemberDetail> {
  * `readMemberDetail` answers it for the page too, so a greyed-out button and a refused request can never
  * disagree — but the greying is a courtesy and this is the gate.
  */
-async function actOn(context: Context<ApiBindings>): Promise<MemberDetail> {
-	const current = await detail(context);
-	if (current.moderationProblem !== null) throw forbidden("cannot_moderate", current.moderationProblem);
+async function actOn(context: Context<ApiBindings>): Promise<{ current: MemberDetail; member: GuildMember }> {
+	const { guild, userId, member, moderator } = await scene(context);
+	const current = await readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
 
-	return current;
+	if (current.moderationProblem !== null || member === null) {
+		throw forbidden("cannot_moderate", current.moderationProblem ?? "They are no longer in this server.");
+	}
+
+	return { current, member };
 }
 
 members.get("/:userId", async (context) => context.json(await detail(context)));
 
 members.post("/:userId/warnings", async (context) => {
-	const current = await actOn(context);
+	const { current } = await actOn(context);
 	const { reason } = await parseBody(context, warningBody);
 	const guild = guildOf(context);
 	const session = context.get("session");
@@ -89,7 +102,7 @@ members.post("/:userId/warnings", async (context) => {
 });
 
 members.delete("/:userId/warnings/:warnId", async (context) => {
-	const current = await actOn(context);
+	const { current } = await actOn(context);
 	const { warnId } = parseParams(context, warningParams);
 
 	if (!(await removeWarning(guildOf(context).id, current.userId, warnId))) {
@@ -101,7 +114,7 @@ members.delete("/:userId/warnings/:warnId", async (context) => {
 });
 
 members.delete("/:userId/warnings", async (context) => {
-	const current = await actOn(context);
+	const { current } = await actOn(context);
 	const count = current.warnings.length;
 
 	if (!(await clearWarnings(guildOf(context).id, current.userId))) {
@@ -111,6 +124,61 @@ members.delete("/:userId/warnings", async (context) => {
 		action: "member.warn.clear",
 		summary: `Cleared ${String(count)} warning${count === 1 ? "" : "s"} from ${current.username}`,
 	});
+
+	return context.json(await detail(context));
+});
+
+members.patch("/:userId/level", async (context) => {
+	const { current, member } = await actOn(context);
+	const body = await parseBody(context, levelBody);
+	const client = context.get("client");
+
+	const change = body.level === undefined ? { xp: body.xp ?? 0 } : { level: body.level };
+	const result = await changeLevel(guildOf(context), member, change, client.logger);
+
+	await auditChange(context, {
+		action: "member.level",
+		summary:
+			body.level === undefined
+				? `Gave ${current.username} ${String(body.xp ?? 0)} XP`
+				: `Set ${current.username} to level ${String(body.level)}`,
+		after: { level: result.level, xp: result.xp, rolesAdded: result.rewards.added.length },
+	});
+
+	return context.json(await detail(context));
+});
+
+members.patch("/:userId/money", async (context) => {
+	const { current, member } = await actOn(context);
+	const { purse, delta } = await parseBody(context, moneyBody);
+
+	const held = purse === "wallet" ? (current.economy?.wallet ?? 0) : (current.economy?.bank ?? 0);
+	const problem = moneyProblem(delta, purse, held);
+	if (problem !== null) throw badRequest(problem);
+
+	await changeMoney(guildOf(context).id, member.id, purse, delta);
+	await auditChange(context, {
+		action: "member.money",
+		summary: `${delta > 0 ? "Added" : "Took"} ${Math.abs(delta).toLocaleString()} ${delta > 0 ? "to" : "from"} ${current.username}'s ${purse}`,
+		before: { [purse]: held },
+	});
+
+	return context.json(await detail(context));
+});
+
+/**
+ * Lifting a softban skips the hierarchy check, and has to: a softbanned user is banned, so they are not a member
+ * and have no roles to compare. `requireGuild` is the gate here.
+ */
+members.delete("/:userId/softban", async (context) => {
+	const guild = guildOf(context);
+	const { userId } = parseParams(context, memberParams);
+	const session = context.get("session");
+
+	if (!(await revokeSoftban(guild, userId, session?.username ?? "a server manager"))) {
+		throw notFound("softban_not_found", "There is no active softban for them.");
+	}
+	await auditChange(context, { action: "member.softban.revoke", summary: "Lifted a softban early" });
 
 	return context.json(await detail(context));
 });

@@ -6,15 +6,17 @@ import { members } from "@api/routes/members";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { findAccount, getEconomyRank } from "@database/repositories/economyRepository";
-import { getRank, getUserLevel } from "@database/repositories/levelRepository";
+import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
+import { addXp, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
 import {
 	addWarning,
 	clearWarnings,
+	deactivateSoftban,
 	getActiveSoftban,
 	getWarnings,
 	removeWarning,
 } from "@database/repositories/moderationRepository";
+import { applyLevelRewards } from "@lib/levellingActions.util";
 import { type BoardPage, type MemberDetail } from "@testify/shared";
 
 jest.mock("@database/repositories/economyRepository", () => ({
@@ -22,12 +24,17 @@ jest.mock("@database/repositories/economyRepository", () => ({
 	countAccounts: jest.fn(() => Promise.resolve(0)),
 	findAccount: jest.fn(() => Promise.resolve(null)),
 	getEconomyRank: jest.fn(() => Promise.resolve(null)),
+	adjustWallet: jest.fn(() => Promise.resolve({ wallet: 0, bank: 0 })),
+	adjustBank: jest.fn(() => Promise.resolve({ wallet: 0, bank: 0 })),
 }));
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelLeaderboard: jest.fn(() => Promise.resolve([])),
 	countRanked: jest.fn(() => Promise.resolve(0)),
 	getUserLevel: jest.fn(() => Promise.resolve(null)),
 	getRank: jest.fn(() => Promise.resolve(null)),
+	getLevelSettings: jest.fn(() => Promise.resolve(null)),
+	setLevel: jest.fn(() => Promise.resolve({ level: 10, xp: 5_000 })),
+	addXp: jest.fn(() => Promise.resolve({ level: 3, xp: 400 })),
 }));
 jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnings: jest.fn(() => Promise.resolve(null)),
@@ -35,6 +42,10 @@ jest.mock("@database/repositories/moderationRepository", () => ({
 	addWarning: jest.fn(() => Promise.resolve({})),
 	removeWarning: jest.fn(() => Promise.resolve(true)),
 	clearWarnings: jest.fn(() => Promise.resolve(true)),
+	deactivateSoftban: jest.fn(() => Promise.resolve(true)),
+}));
+jest.mock("@lib/levellingActions.util", () => ({
+	applyLevelRewards: jest.fn(() => Promise.resolve({ added: [], removed: [], skipped: [] })),
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
 
@@ -53,6 +64,12 @@ const warned = jest.mocked(addWarning);
 const unwarned = jest.mocked(removeWarning);
 const cleared = jest.mocked(clearWarnings);
 const audited = jest.mocked(recordAudit);
+const walletChange = jest.mocked(adjustWallet);
+const bankChange = jest.mocked(adjustBank);
+const levelSet = jest.mocked(setLevel);
+const xpAdded = jest.mocked(addXp);
+const rewarded = jest.mocked(applyLevelRewards);
+const softbanLifted = jest.mocked(deactivateSoftban);
 
 interface Scene {
 	actorPosition?: number;
@@ -87,6 +104,7 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 		id: GUILD,
 		name: "Test Server",
 		ownerId: guildOwnerId,
+		bans: { remove: jest.fn(() => Promise.resolve({})) },
 	} as unknown as Guild;
 
 	const me = member(BOT, botPosition, "Testify");
@@ -165,6 +183,12 @@ beforeEach(() => {
 	softban.mockResolvedValue(null);
 	unwarned.mockResolvedValue(true);
 	cleared.mockResolvedValue(true);
+	walletChange.mockResolvedValue({ wallet: 0, bank: 0 } as never);
+	bankChange.mockResolvedValue({ wallet: 0, bank: 0 } as never);
+	levelSet.mockResolvedValue({ level: 10, xp: 5_000 } as never);
+	xpAdded.mockResolvedValue({ level: 3, xp: 400 } as never);
+	rewarded.mockResolvedValue({ added: [], removed: [], skipped: [] });
+	softbanLifted.mockResolvedValue(true);
 });
 
 describe("GET /members/:userId", () => {
@@ -317,5 +341,137 @@ describe("DELETE /members/:userId/warnings", () => {
 
 		expect(response.status).toBe(403);
 		expect(cleared).not.toHaveBeenCalled();
+	});
+});
+
+describe("PATCH /members/:userId/money", () => {
+	it("adds to the wallet and audits it", async () => {
+		account.mockResolvedValue({ wallet: 500, bank: 0 } as never);
+
+		await request("PATCH", "/money", { purse: "wallet", delta: 250 });
+
+		expect(walletChange).toHaveBeenCalledWith(GUILD, TARGET, 250);
+		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.money" }));
+	});
+
+	it("takes from the bank when that purse is named", async () => {
+		account.mockResolvedValue({ wallet: 0, bank: 900 } as never);
+
+		await request("PATCH", "/money", { purse: "bank", delta: -400 });
+
+		expect(bankChange).toHaveBeenCalledWith(GUILD, TARGET, -400);
+	});
+
+	/** Nothing else in the economy can produce a negative balance, so the API must not either. */
+	it("refuses taking more than they hold", async () => {
+		account.mockResolvedValue({ wallet: 100, bank: 0 } as never);
+
+		const response = await request("PATCH", "/money", { purse: "wallet", delta: -500 });
+
+		expect(response.status).toBe(400);
+		expect(walletChange).not.toHaveBeenCalled();
+	});
+
+	it("refuses a change of nothing", async () => {
+		expect((await request("PATCH", "/money", { purse: "wallet", delta: 0 })).status).toBe(400);
+	});
+
+	it("refuses a purse it does not have", async () => {
+		expect((await request("PATCH", "/money", { purse: "pocket", delta: 10 })).status).toBe(400);
+	});
+
+	it("refuses a moderator who sits below the target", async () => {
+		const response = await request("PATCH", "/money", { purse: "wallet", delta: 10 }, { actorPosition: 1 });
+
+		expect(response.status).toBe(403);
+		expect(walletChange).not.toHaveBeenCalled();
+	});
+});
+
+describe("PATCH /members/:userId/level", () => {
+	it("sets a level outright", async () => {
+		await request("PATCH", "/level", { level: 10 });
+
+		expect(levelSet).toHaveBeenCalledWith(GUILD, TARGET, 10);
+		expect(xpAdded).not.toHaveBeenCalled();
+	});
+
+	it("moves XP when that is what was sent", async () => {
+		await request("PATCH", "/level", { xp: 400 });
+
+		expect(xpAdded).toHaveBeenCalledWith(GUILD, TARGET, 400);
+		expect(levelSet).not.toHaveBeenCalled();
+	});
+
+	/**
+	 * Writing the number alone would leave somebody at level 10 without the level-10 role, and nothing would
+	 * fix it until their next message.
+	 */
+	it("hands out the role rewards the new level earns", async () => {
+		await request("PATCH", "/level", { level: 10 });
+
+		expect(rewarded).toHaveBeenCalledWith(
+			expect.objectContaining({ id: TARGET }),
+			expect.anything(),
+			10,
+			expect.anything(),
+		);
+	});
+
+	it("refuses a body carrying neither", async () => {
+		expect((await request("PATCH", "/level", {})).status).toBe(400);
+	});
+
+	it("refuses a body carrying both", async () => {
+		expect((await request("PATCH", "/level", { level: 5, xp: 100 })).status).toBe(400);
+		expect(levelSet).not.toHaveBeenCalled();
+	});
+
+	it("refuses a level past the cap", async () => {
+		expect((await request("PATCH", "/level", { level: 5_000 })).status).toBe(400);
+	});
+
+	it("refuses a moderator who sits below the target", async () => {
+		expect((await request("PATCH", "/level", { level: 5 }, { actorPosition: 1 })).status).toBe(403);
+		expect(levelSet).not.toHaveBeenCalled();
+	});
+});
+
+describe("DELETE /members/:userId/softban", () => {
+	function softbanned(): void {
+		softban.mockResolvedValue({
+			guildId: GUILD,
+			userId: TARGET,
+			moderatorId: ACTOR,
+			reason: "Spam",
+			expiresAt: new Date("2099-01-01T00:00:00.000Z"),
+			isActive: true,
+		} as never);
+	}
+
+	it("lifts the Discord ban and closes the record", async () => {
+		softbanned();
+
+		const response = await request("DELETE", "/softban");
+
+		expect(response.status).toBe(200);
+		expect(softbanLifted).toHaveBeenCalledWith(GUILD, TARGET);
+		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.softban.revoke" }));
+	});
+
+	/**
+	 * A softbanned user is banned, so they are not a member and have no roles to compare — running the
+	 * hierarchy check here would refuse every lift.
+	 */
+	it("works for somebody who is not in the server, which every softbanned user is", async () => {
+		softbanned();
+
+		expect((await request("DELETE", "/softban", undefined, { targetMissing: true })).status).toBe(200);
+		expect(softbanLifted).toHaveBeenCalled();
+	});
+
+	it("says so when there is no active softban", async () => {
+		expect((await request("DELETE", "/softban")).status).toBe(404);
+		expect(softbanLifted).not.toHaveBeenCalled();
 	});
 });

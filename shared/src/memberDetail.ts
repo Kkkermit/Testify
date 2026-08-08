@@ -52,6 +52,53 @@ export const warningBody = z.object({
 
 export type WarningBody = z.infer<typeof warningBody>;
 
+export const MEMBER_LIMITS = {
+	maxLevel: 500,
+	maxXpGrant: 1_000_000,
+	/** Both directions: a manager can hand out this much or take it away, per request. */
+	maxMoneyChange: 10_000_000,
+} as const;
+
+export const MONEY_PURSES = ["wallet", "bank"] as const;
+
+export type MoneyPurse = (typeof MONEY_PURSES)[number];
+
+export const levelBody = z
+	.object({
+		level: z.coerce.number().int().min(0).max(MEMBER_LIMITS.maxLevel).optional(),
+		xp: z.coerce.number().int().min(-MEMBER_LIMITS.maxXpGrant).max(MEMBER_LIMITS.maxXpGrant).optional(),
+	})
+	.refine((body) => body.level !== undefined || body.xp !== undefined, "give either a level or an XP change")
+	.refine((body) => body.level === undefined || body.xp === undefined, "set a level or grant XP, not both");
+
+export type LevelBody = z.infer<typeof levelBody>;
+
+export const moneyBody = z.object({
+	purse: z.enum(MONEY_PURSES),
+	delta: z.coerce
+		.number()
+		.int()
+		.min(-MEMBER_LIMITS.maxMoneyChange)
+		.max(MEMBER_LIMITS.maxMoneyChange)
+		.refine((value) => value !== 0, "cannot be zero"),
+});
+
+export type MoneyBody = z.infer<typeof moneyBody>;
+
+/** What is wrong with a money change, in the words the form shows — or null when it can be sent. */
+export function moneyProblem(delta: number, purse: MoneyPurse, held: number): string | null {
+	if (!Number.isInteger(delta) || delta === 0) return "Enter an amount to add or take away.";
+	if (Math.abs(delta) > MEMBER_LIMITS.maxMoneyChange) {
+		return `One change cannot be more than ${MEMBER_LIMITS.maxMoneyChange.toLocaleString()}.`;
+	}
+	// Taking more than they hold would leave a negative balance, which nothing else in the economy can produce.
+	if (delta < 0 && held + delta < 0) {
+		return `They only have ${held.toLocaleString()} in their ${purse}.`;
+	}
+
+	return null;
+}
+
 /** What is still missing before a warning can be issued, in the words the form shows. */
 export function warningProblem(reason: string): string | null {
 	const trimmed = reason.trim();
