@@ -181,13 +181,19 @@ describe("handleProcessSignals", () => {
 		expect(client.logger.fatal).toHaveBeenCalled();
 	});
 
-	it("logs an unhandled rejection without killing the process", () => {
-		const { handleProcessSignals } = loadShutdown();
+	/**
+	 * Node terminates on an unhandled rejection by default, so a listener that only logged would quietly disable
+	 * that and keep the bot running on state nothing can vouch for. CLAUDE.md section 16 is explicit about it.
+	 */
+	it("treats an unhandled rejection as fatal too", async () => {
+		const { handleProcessSignals, disconnectDatabase } = loadShutdown();
 		const client = clientFor();
 		handleProcessSignals(client);
 
 		process.emit("unhandledRejection", new Error("boom"), Promise.resolve());
+		await Promise.resolve();
 
-		expect(client.logger.error).toHaveBeenCalled();
+		expect(client.logger.fatal).toHaveBeenCalled();
+		expect(disconnectDatabase).toHaveBeenCalled();
 	});
 });

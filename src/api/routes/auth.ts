@@ -23,7 +23,7 @@ import {
 	startLogin,
 	statesMatch,
 } from "@api/discord";
-import { badRequest, forbidden, unauthorised } from "@api/errors";
+import { badRequest, unauthorised } from "@api/errors";
 import { requireAuth } from "@api/middleware/session";
 import { missingSettings, type OauthConfig, requireOauth } from "@api/oauth";
 import { parseQuery } from "@api/validate";
@@ -104,8 +104,11 @@ auth.get("/callback", async (context) => {
 	if (query.error !== undefined) return context.redirect("/sign-in?denied=1", 302);
 	if (query.code === undefined || query.state === undefined) throw badRequest("That sign-in link is incomplete.");
 
+	// Returned rather than thrown: `onError` builds a fresh response, which would drop the cleared cookies above
+	// and leave a still-valid state in the browser. This is also only ever reached by a browser navigation, so a
+	// page it can read beats a JSON problem in the address bar.
 	if (pending === null || !statesMatch(query.state, pending.state)) {
-		throw forbidden("bad_state", "That sign-in could not be verified. Start again.");
+		return context.redirect("/sign-in?error=state", 302);
 	}
 
 	const tokens = await exchangeCode(oauth, query.code, pending.verifier);

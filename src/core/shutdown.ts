@@ -37,11 +37,17 @@ export function handleProcessSignals(client: TestifyClient): void {
 	});
 
 	process.on("uncaughtException", (error) => {
-		client.logger.fatal({ err: error }, "Uncaught exception");
+		client.logger.fatal({ err: error }, "[FATAL] Uncaught exception. Shutting down rather than continuing.");
 		void shutdown(client, "uncaughtException", 1);
 	});
 
+	// Node terminates on an unhandled rejection by default; a listener that only logs would quietly disable that
+	// and leave the process running on state nothing can vouch for.
 	process.on("unhandledRejection", (reason) => {
-		client.logger.error({ err: toError(reason) }, "Unhandled rejection");
+		client.logger.fatal(
+			{ err: toError(reason) },
+			"[FATAL] Unhandled promise rejection. Shutting down rather than continuing.",
+		);
+		void shutdown(client, "unhandledRejection", 1);
 	});
 }
