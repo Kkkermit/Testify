@@ -47,6 +47,19 @@ describe("resolveAsset", () => {
 		}
 	});
 
+	/**
+	 * Containment is checked with `relative` rather than a string prefix. A prefix check has to spell the
+	 * separator, which is `\` on Windows — and it also breaks on a root that already ends in one, which is the
+	 * half of that bug this can prove without a Windows machine.
+	 */
+	it("finds a built file whatever shape the root arrives in", () => {
+		expect(resolveAsset(`${root}/`, "/assets/index-abc123.js")).toBe(join(root, "assets", "index-abc123.js"));
+	});
+
+	it("still refuses a climb when the root ends in a separator", () => {
+		expect(resolveAsset(`${root}/`, "/../.env")).toBeNull();
+	});
+
 	it("refuses a path it cannot decode", () => {
 		expect(resolveAsset(root, "/%")).toBeNull();
 	});

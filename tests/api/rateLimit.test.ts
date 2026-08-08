@@ -1,5 +1,6 @@
 import { type Context, Hono } from "hono";
-import { callerKey, clientAddress, RateLimiter } from "@api/middleware/rateLimit";
+import { ApiProblem } from "@api/errors";
+import { callerKeys, clientAddress, rateLimit, RateLimiter } from "@api/middleware/rateLimit";
 
 describe("RateLimiter", () => {
 	it("allows up to the limit and refuses the next one", () => {
@@ -72,18 +73,28 @@ async function contextFor(headers: Record<string, string> = {}): Promise<Context
 	return captured!;
 }
 
-describe("callerKey", () => {
-	/** A session identifies a person; an address identifies a household. */
-	it("prefers the session over the address", async () => {
+describe("callerKeys", () => {
+	/**
+	 * The session cookie is attacker-controlled. Counted on it alone, a flood mints a fresh allowance per
+	 * request by rotating one header — 400 requests once passed a 300-per-minute limit without a single refusal.
+	 */
+	it("always counts against the address, even when a session cookie is present", async () => {
 		const context = await contextFor({ cookie: "dash_session=abc123" });
 
-		expect(callerKey(context, false)).toBe("s:abc123");
+		expect(callerKeys(context, false)[0]).toMatch(/^i:/);
 	});
 
-	it("falls back to the address for anyone not signed in, which is who a sign-in flood is", async () => {
+	/** A session identifies a person where an address identifies a household, so it narrows the bucket. */
+	it("adds the session as a second, tighter key", async () => {
+		const context = await contextFor({ cookie: "dash_session=abc123" });
+
+		expect(callerKeys(context, false)).toContain("s:abc123");
+	});
+
+	it("counts only the address for anyone not signed in, which is who a sign-in flood is", async () => {
 		const context = await contextFor();
 
-		expect(callerKey(context, false)).toMatch(/^i:/);
+		expect(await Promise.resolve(callerKeys(context, false))).toHaveLength(1);
 	});
 });
 
@@ -108,5 +119,48 @@ describe("clientAddress", () => {
 		const context = await contextFor();
 
 		expect(clientAddress(context, true)).toBe("unknown");
+	});
+});
+
+describe("the middleware, against a caller who forges cookies", () => {
+	function app(): Hono {
+		const instance = new Hono();
+		const limiters = {
+			perCaller: new RateLimiter({ limit: 3, windowMs: 60_000 }),
+			perAddress: new RateLimiter({ limit: 5, windowMs: 60_000 }),
+		};
+		instance.use("*", rateLimit(limiters, { name: "t", trustProxy: false }));
+		instance.get("/", (context) => context.text("ok"));
+		instance.onError((error) => Response.json({ e: 1 }, { status: error instanceof ApiProblem ? error.status : 500 }));
+		return instance;
+	}
+
+	/**
+	 * Rotating the session cookie once bought a fresh allowance per request: 400 requests passed a 300-per-minute
+	 * limit with none refused. The address is now always one of the keys, so the ceiling cannot be forged past.
+	 */
+	it("still refuses once the address ceiling is spent, however many cookies are used", async () => {
+		const instance = app();
+		const statuses: number[] = [];
+
+		for (let index = 0; index < 8; index += 1) {
+			const response = await instance.request("/", { headers: { cookie: `dash_session=forged${String(index)}` } });
+			statuses.push(response.status);
+		}
+
+		expect(statuses.filter((status) => status === 429).length).toBeGreaterThan(0);
+	});
+
+	/** One person's own bucket is the tighter of the two, so a single session cannot spend the whole address. */
+	it("refuses one session at its own limit before the address ceiling", async () => {
+		const instance = app();
+		const statuses: number[] = [];
+
+		for (let index = 0; index < 5; index += 1) {
+			const response = await instance.request("/", { headers: { cookie: "dash_session=same" } });
+			statuses.push(response.status);
+		}
+
+		expect(statuses).toEqual([200, 200, 200, 429, 429]);
 	});
 });

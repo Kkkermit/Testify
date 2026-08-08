@@ -32,6 +32,19 @@ const GENERAL_LIMIT = { limit: 300, windowMs: 60_000 };
 /** Tighter, and counted separately so a spent sign-in allowance does not also block reading a page. */
 const SIGN_IN_LIMIT = { limit: 20, windowMs: 60_000 };
 
+/** One address can be a household, an office or a school, so its ceiling is a multiple of one person's. */
+const ADDRESS_MULTIPLIER = 6;
+
+function limiterPair(window: { limit: number; windowMs: number }): {
+	perCaller: RateLimiter;
+	perAddress: RateLimiter;
+} {
+	return {
+		perCaller: new RateLimiter(window),
+		perAddress: new RateLimiter({ ...window, limit: window.limit * ADDRESS_MULTIPLIER }),
+	};
+}
+
 /**
  * The dashboard's HTTP API, inside the bot process so it can read the live client cache.
  *
@@ -40,8 +53,8 @@ const SIGN_IN_LIMIT = { limit: 20, windowMs: 60_000 };
  */
 export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
-	const general = new RateLimiter(GENERAL_LIMIT);
-	const signIn = new RateLimiter(SIGN_IN_LIMIT);
+	const general = limiterPair(GENERAL_LIMIT);
+	const signIn = limiterPair(SIGN_IN_LIMIT);
 	const oauth = oauthConfigFrom(env);
 
 	app.use("*", async (context, next) => {
@@ -54,11 +67,12 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("*", securityHeaders(env));
 	app.use("*", rateLimit(general, { name: "general", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("*", bodyLimit({ maxSize: MAX_BODY_BYTES, onError: () => raise(badRequest("That request is too large.")) }));
-	app.use("*", verifyCsrf);
 	// The one flow an unauthenticated caller can reach that costs a Discord round trip.
 	app.use("/api/auth/login", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	// Before `verifyCsrf`, which compares against the session's stored secret when there is one.
 	app.use("/api/*", loadSession);
+	app.use("*", verifyCsrf);
 
 	app.onError((error, context) => {
 		const problem = asProblem(error);

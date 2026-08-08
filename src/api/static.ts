@@ -1,5 +1,5 @@
 import { existsSync, readFileSync } from "node:fs";
-import { extname, join, normalize, resolve } from "node:path";
+import { extname, isAbsolute, join, normalize, relative, resolve } from "node:path";
 import { type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 
@@ -44,7 +44,11 @@ export function resolveAsset(root: string, pathname: string): string | null {
 	if (decoded === null) return null;
 
 	const candidate = resolve(root, `.${normalize(decoded)}`);
-	if (!candidate.startsWith(`${root}/`) && candidate !== root) return null;
+
+	// Compared with `relative` rather than a string prefix: the separator is `\` on Windows, so a check written
+	// with `/` refuses every real asset there and serves the SPA shell in place of the bundle.
+	const inside = relative(root, candidate);
+	if (inside.startsWith("..") || isAbsolute(inside)) return null;
 
 	return existsSync(candidate) && extname(candidate) !== "" ? candidate : null;
 }

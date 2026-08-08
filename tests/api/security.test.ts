@@ -3,9 +3,16 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { databaseConnected } from "@database/connection";
+import { findSession } from "@database/repositories/dashboardSessionRepository";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
+jest.mock("@database/repositories/dashboardSessionRepository", () => ({
+	findSession: jest.fn(() => Promise.resolve(null)),
+	touchSession: jest.fn(() => Promise.resolve()),
+	deleteSession: jest.fn(() => Promise.resolve()),
+	deleteSessionsFor: jest.fn(() => Promise.resolve()),
+}));
 jest.mocked(databaseConnected).mockReturnValue(true);
 
 const CSRF = "a-csrf-secret-of-some-length";
@@ -200,16 +207,69 @@ describe("the body limit", () => {
 });
 
 describe("rate limiting", () => {
+	/** One signed-in caller spends their own bucket long before the looser ceiling their address gets. */
 	it("eventually refuses a caller hammering the API, and says when to come back", async () => {
 		const app = apiFor();
+		const headers = { cookie: "dash_session=one-caller" };
 
-		let last = await app.request("/api/health");
+		let last = await app.request("/api/health", { headers });
 		for (let attempt = 0; attempt < 400 && last.status !== 429; attempt += 1) {
-			last = await app.request("/api/health");
+			last = await app.request("/api/health", { headers });
 		}
 
 		expect(last.status).toBe(429);
 		expect(Number(last.headers.get("retry-after"))).toBeGreaterThan(0);
 		expect(((await last.json()) as { error: { code: string } }).error.code).toBe("rate_limited");
+	});
+});
+
+/**
+ * `verifyCsrf` prefers the session's stored secret over the readable cookie, which is what makes the
+ * double-submit resistant to an attacker who can write cookies. Registered before `loadSession` the session was
+ * always undefined there, so the stronger half never ran and only the forgeable half was left.
+ */
+describe("the CSRF check and the session it reads", () => {
+	const SESSION_SECRET = "the-secret-stored-on-the-session";
+
+	function oauthEnv(): Env {
+		return envFor({
+			DISCORD_CLIENT_ID: "100000000000000009",
+			DISCORD_CLIENT_SECRET: "a-client-secret",
+			DASHBOARD_BASE_URL: "https://dash.example.test",
+			DASHBOARD_SESSION_SECRET: "a-session-secret-long-enough-to-derive-from",
+			DASHBOARD_SESSION_TTL_DAYS: 7,
+		});
+	}
+
+	function withSession(): TestifyClient {
+		jest.mocked(findSession).mockResolvedValue({
+			_id: "session-id",
+			userId: "100000000000000001",
+			username: "someone",
+			csrfSecret: SESSION_SECRET,
+		} as never);
+
+		return createMockClient({ isReady: () => true } as never);
+	}
+
+	it("refuses a matched cookie and header that are not the session's secret", async () => {
+		const response = await apiFor(oauthEnv(), withSession()).request("/api/auth/logout", {
+			method: "POST",
+			headers: { cookie: `dash_session=session-id; dash_csrf=${CSRF}`, "x-csrf-token": CSRF },
+		});
+
+		expect(response.status).toBe(403);
+	});
+
+	it("accepts the session's own secret", async () => {
+		const response = await apiFor(oauthEnv(), withSession()).request("/api/auth/logout", {
+			method: "POST",
+			headers: {
+				cookie: `dash_session=session-id; dash_csrf=${SESSION_SECRET}`,
+				"x-csrf-token": SESSION_SECRET,
+			},
+		});
+
+		expect(response.status).not.toBe(403);
 	});
 });

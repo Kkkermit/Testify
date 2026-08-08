@@ -70,14 +70,19 @@ export class RateLimiter {
 }
 
 /**
- * A session id identifies a caller far better than an address does, since a household shares one address. The
- * address is the fallback for anyone not signed in, which is exactly who a sign-in flood comes from.
+ * Every key a request is counted against.
+ *
+ * The address is always one of them, because the session cookie is attacker-controlled: keyed on the cookie
+ * alone, a flood mints a fresh allowance per request by rotating one header. The session narrows the bucket so
+ * a household sharing one address does not share one allowance — it can never widen it.
  */
-export function callerKey(context: Context, trustProxy: boolean): string {
+export function callerKeys(context: Context, trustProxy: boolean): string[] {
+	const keys = [`i:${clientAddress(context, trustProxy)}`];
 	const session = readCookie(context, SESSION_COOKIE);
-	if (session !== null && session !== "") return `s:${session}`;
 
-	return `i:${clientAddress(context, trustProxy)}`;
+	if (session !== null && session !== "") keys.push(`s:${session}`);
+
+	return keys;
 }
 
 export function clientAddress(context: Context, trustProxy: boolean): string {
@@ -97,14 +102,26 @@ export function clientAddress(context: Context, trustProxy: boolean): string {
 	}
 }
 
+/**
+ * `perAddress` is the ceiling nobody can forge their way past; `perCaller` is the tighter per-session bucket.
+ * Both are checked, and the longest wait wins.
+ */
 export function rateLimit(
-	limiter: RateLimiter,
+	limiters: { perCaller: RateLimiter; perAddress: RateLimiter },
 	options: Pick<RateLimitOptions, "name"> & { trustProxy: boolean },
 ): ReturnType<typeof createMiddleware<ApiBindings>> {
 	return createMiddleware<ApiBindings>(async (context, next) => {
-		const { allowed, retryAfterMs } = limiter.check(`${options.name}:${callerKey(context, options.trustProxy)}`);
+		const [address, ...rest] = callerKeys(context, options.trustProxy);
 
-		if (!allowed) throw tooManyRequests(Math.max(1, Math.ceil(retryAfterMs / 1_000)));
+		const results = [
+			limiters.perAddress.check(`${options.name}:${address ?? "unknown"}`),
+			...rest.map((key) => limiters.perCaller.check(`${options.name}:${key}`)),
+		];
+
+		const refused = results.filter((result) => !result.allowed);
+		if (refused.length > 0) {
+			throw tooManyRequests(Math.max(1, Math.ceil(Math.max(...refused.map((one) => one.retryAfterMs)) / 1_000)));
+		}
 
 		await next();
 	});

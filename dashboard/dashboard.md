@@ -313,6 +313,13 @@ registered behind it silently never runs.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1`, `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
   admin panel on the internet; trusting `x-forwarded-for` with no proxy lets anyone forge their rate-limit
   bucket.
+- **Rate limiting counts against the address first, and the session only narrows it.** The session cookie is
+  attacker-controlled: keyed on it alone, a flood mints a fresh allowance per request by rotating one header.
+  Measured, not theorised — 400 requests once passed a 300-per-minute limit with none refused.
+- **Middleware order is load-bearing.** `loadSession` runs **before** `verifyCsrf`, or the session's stored
+  secret is always `undefined` there and only the forgeable half of the double-submit is left.
+- **Path containment is checked with `relative`, never a string prefix.** A prefix has to spell the separator,
+  which is `\\` on Windows.
 - **No `GET` may mutate anything.** CSRF protection exempts them.
 - **`/eval` is never exposed.** It turns a stolen session cookie into a remote shell.
 - **`DISCORD_CLIENT_SECRET` never reaches a browser.**
