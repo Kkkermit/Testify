@@ -305,6 +305,18 @@ describe("the member detail page", () => {
 		});
 	});
 
+	/**
+	 * WCAG 2.2 AA wants 24px on a target, and this link measured 196x20 in a real browser — the inline-text
+	 * exception does not cover a standalone navigational link. jsdom computes no layout, so the class is what
+	 * this can pin; the browser sweep is what measured it.
+	 */
+	it("gives the back link enough height to be a target", async () => {
+		renderPage();
+
+		const link = await screen.findByRole("link", { name: /Back to the leaderboards/ });
+		expect(link.className).toContain("py-1");
+	});
+
 	it("has no accessibility violations", async () => {
 		const { container } = renderPage();
 		await screen.findByText("Spamming in general");

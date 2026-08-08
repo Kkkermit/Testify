@@ -36,9 +36,10 @@ export function MemberDetailPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess)} />}
 			/>
 
+			{/* `py-1` carries it past the 24px WCAG 2.2 target minimum; the margin absorbs the padding it adds. */}
 			<Link
 				to={`/guilds/${guildId}/members`}
-				className="text-muted-foreground hover:text-foreground -mt-2 flex w-fit items-center gap-1 text-sm"
+				className="text-muted-foreground hover:text-foreground -mt-3 flex w-fit items-center gap-1 py-1 text-sm"
 			>
 				<ArrowLeft size={16} aria-hidden="true" /> Back to the leaderboards
 			</Link>
