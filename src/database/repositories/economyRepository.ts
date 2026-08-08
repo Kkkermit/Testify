@@ -133,6 +133,10 @@ export async function incrementCounters(
 
 export type LeaderboardField = "wallet" | "bank" | "total";
 
+/**
+ * `_id` last so the order is total. Money ties are the normal case — everybody starts on the same number — and
+ * `skip` over a partial order shows one account twice and hides another.
+ */
 export async function getLeaderboard(
 	guildId: string,
 	limit: number,
@@ -143,14 +147,14 @@ export async function getLeaderboard(
 		return Economy.aggregate<EconomyAccount & { total: number }>([
 			{ $match: { guildId } },
 			{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
-			{ $sort: { total: -1 } },
+			{ $sort: { total: -1, _id: 1 } },
 			{ $skip: skip },
 			{ $limit: limit },
 		]).exec();
 	}
 
 	const accounts = await Economy.find({ guildId })
-		.sort({ [field]: -1 })
+		.sort({ [field]: -1, _id: 1 })
 		.skip(skip)
 		.limit(limit)
 		.lean<EconomyAccount[]>()

@@ -108,9 +108,10 @@ export async function addXp(guildId: string, userId: string, amount: number): Pr
 	);
 }
 
+/** `_id` last so the order is total: level and XP tie constantly, and `skip` on a partial order repeats rows. */
 export async function getLevelLeaderboard(guildId: string, limit: number, skip = 0): Promise<UserLevelRecord[]> {
 	return UserLevel.find({ guildId })
-		.sort({ level: -1, xp: -1 })
+		.sort({ level: -1, xp: -1, _id: 1 })
 		.skip(skip)
 		.limit(limit)
 		.lean<UserLevelRecord[]>()

@@ -22,6 +22,6 @@ const userLevelSchema = new Schema<UserLevelRecord>(
 );
 
 userLevelSchema.index({ guildId: 1, userId: 1 }, { unique: true });
-userLevelSchema.index({ guildId: 1, level: -1, xp: -1 });
+userLevelSchema.index({ guildId: 1, level: -1, xp: -1, _id: 1 });
 
 export const UserLevel = model<UserLevelRecord>("UserLevel", userLevelSchema);

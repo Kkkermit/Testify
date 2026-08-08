@@ -287,6 +287,7 @@ export function createMockMessage(setup: MockMessageSetup = {}): Message & { sen
 export interface MockQuery {
 	lean: jest.Mock<MockQuery>;
 	sort: jest.Mock<MockQuery>;
+	skip: jest.Mock<MockQuery>;
 	limit: jest.Mock<MockQuery>;
 	exec: jest.Mock<Promise<unknown>>;
 }
@@ -298,6 +299,7 @@ export function createMockModel<T>(
 	const chain = (value: unknown): MockQuery => ({
 		lean: jest.fn((): MockQuery => chain(value)),
 		sort: jest.fn((): MockQuery => chain(value)),
+		skip: jest.fn((): MockQuery => chain(value)),
 		limit: jest.fn((): MockQuery => chain(value)),
 		exec: jest.fn(() => Promise.resolve(value)),
 	});

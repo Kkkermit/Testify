@@ -1,3 +1,4 @@
+import { DashboardAudits } from "@database/models/dashboardAudit.schema";
 import {
 	auditPage,
 	countAudits,
@@ -59,6 +60,26 @@ describeWithMongo("the dashboard audit repository", () => {
 		for (let index = 0; index < 5; index += 1) await recordAudit(entry({ summary: `change ${String(index)}` }));
 
 		expect((await auditPage(GUILD, 2, 2)).map((record) => record.summary)).toEqual(["change 2", "change 1"]);
+	});
+
+	/**
+	 * Five changes saved in the same millisecond share an `at`, and MongoDB promises no order between documents
+	 * that tie on the sort key — so paging over them could show one twice and never show another. This forces
+	 * the tie the loop above only sometimes produces: it passed locally for months and failed on CI.
+	 */
+	it("pages consistently when every change shares a timestamp", async () => {
+		if (!mongoAvailable()) return;
+		for (let index = 0; index < 5; index += 1) await recordAudit(entry({ summary: `change ${String(index)}` }));
+		await DashboardAudits.updateMany({ guildId: GUILD }, { $set: { at: new Date("2026-01-01T00:00:00.000Z") } });
+
+		const seen = [
+			...(await auditPage(GUILD, 1, 2)),
+			...(await auditPage(GUILD, 2, 2)),
+			...(await auditPage(GUILD, 3, 2)),
+		].map((record) => record.summary);
+
+		expect(seen).toEqual(["change 4", "change 3", "change 2", "change 1", "change 0"]);
+		expect(new Set(seen).size).toBe(5);
 	});
 
 	/** A page number out of a URL can be anything; page zero must not turn into a negative skip. */
