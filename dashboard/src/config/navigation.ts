@@ -90,6 +90,8 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							label: "Leaderboards",
 							icon: Trophy,
 							hint: "Who is ahead on money and levels",
+							// A member's own page lives under this path, and it is still where you are in the sidebar.
+							exact: false,
 						},
 						{
 							to: `/guilds/${guild.id}/levelling`,

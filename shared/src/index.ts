@@ -7,6 +7,7 @@ export * from "./commandToggles";
 export * from "./control";
 export * from "./levelling";
 export * from "./markup";
+export * from "./memberDetail";
 export * from "./members";
 export * from "./permissions";
 export * from "./schemas";

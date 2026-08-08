@@ -1,8 +1,17 @@
 import { BOARD_LABELS, type BoardPage } from "@testify/shared";
+import { Link } from "react-router";
 import { Avatar, Badge, Card } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
-export function BoardTable({ data, youId }: { data: BoardPage; youId: string | null }): React.JSX.Element {
+export function BoardTable({
+	data,
+	youId,
+	guildId,
+}: {
+	data: BoardPage;
+	youId: string | null;
+	guildId: string;
+}): React.JSX.Element {
 	const labels = BOARD_LABELS[data.board];
 
 	return (
@@ -32,12 +41,15 @@ export function BoardTable({ data, youId }: { data: BoardPage; youId: string | n
 						<tr key={row.userId} className={cn(row.userId === youId && "bg-muted/60")}>
 							<td className="px-6 py-3 text-right font-mono tabular-nums">{row.rank}</td>
 							<th scope="row" className="px-6 py-3 text-left font-normal">
-								<span className="flex items-center gap-2">
+								<Link
+									to={`/guilds/${guildId}/members/${row.userId}`}
+									className="hover:text-primary flex items-center gap-2 transition-colors duration-150"
+								>
 									<Avatar name={row.displayName} url={row.avatarUrl} size={24} seed={row.userId} />
 									<span className="truncate">{row.displayName}</span>
 									{row.userId === youId && <Badge>You</Badge>}
 									{!row.inGuild && <Badge tone="warning">Left</Badge>}
-								</span>
+								</Link>
 							</th>
 							<td className="px-6 py-3 text-right font-mono tabular-nums">{row.primary.toLocaleString()}</td>
 							<td className="text-muted-foreground px-6 py-3 text-right font-mono tabular-nums">

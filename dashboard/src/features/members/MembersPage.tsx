@@ -75,7 +75,7 @@ export function MembersPage(): React.JSX.Element {
 						{summarise(data.data)}
 					</p>
 
-					<BoardTable data={data.data} youId={me.data?.user.id ?? null} />
+					<BoardTable data={data.data} youId={me.data?.user.id ?? null} guildId={guildId} />
 
 					<Pager
 						page={data.data.page}

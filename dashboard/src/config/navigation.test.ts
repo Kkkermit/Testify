@@ -1,4 +1,4 @@
-import { allNavItems, navigationFor, type NavAudience } from "@/config/navigation";
+import { allNavItems, navigationFor, type NavAudience, sectionHolds } from "@/config/navigation";
 
 const guild = { id: "900000000000000001", name: "Testify HQ" };
 
@@ -67,6 +67,18 @@ describe("navigationFor", () => {
 
 	it("groups nothing under a server heading when no server is open", () => {
 		expect(navigationFor({ guild: undefined, isOwner: false })).toHaveLength(1);
+	});
+
+	/**
+	 * A member's own page is nested under the leaderboards, so a section that only matched exactly would
+	 * collapse itself the moment somebody clicked a row and leave nothing in the sidebar marked as current.
+	 */
+	it("opens the Members section for a page nested under one of its screens", () => {
+		const [, guildGroup] = navigationFor({ guild, isOwner: false });
+		const membersSection = (guildGroup?.sections ?? []).find((section) => section.label === "Members");
+
+		expect(membersSection).toBeDefined();
+		expect(sectionHolds(membersSection as never, `/guilds/${guild.id}/members/100000000000000002`)).toBe(true);
 	});
 
 	it("names every entry, since the label is the accessible name at the icon-only width", () => {

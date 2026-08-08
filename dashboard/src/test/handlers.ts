@@ -26,6 +26,7 @@ import {
 	type TreasureSettings,
 	type AutomodRules,
 	type BoardPage,
+	type MemberDetail,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -210,6 +211,31 @@ export const economyBoard: BoardPage = {
 		},
 	],
 	you: { rank: 1, page: 1 },
+};
+
+export const memberDetail: MemberDetail = {
+	userId: "100000000000000002",
+	displayName: "kate",
+	username: "kate",
+	avatarUrl: null,
+	inGuild: true,
+	isBot: false,
+	joinedAt: "2026-01-04T00:00:00.000Z",
+	roles: [{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff" }],
+	economy: { wallet: 5_000, bank: 120, total: 5_120, rank: 2 },
+	levels: { level: 12, xp: 4_800, rank: 3 },
+	warnings: [
+		{
+			id: "a1b2c3d4",
+			reason: "Spamming in general",
+			byId: "100000000000000001",
+			byTag: "someone",
+			at: "2026-08-01T12:00:00.000Z",
+			edited: false,
+		},
+	],
+	softban: null,
+	moderationProblem: null,
 };
 
 export const ticketSettings: TicketSettings = {
@@ -403,6 +429,12 @@ export const handlers = [
 		const board = new URL(request.url).searchParams.get("board") ?? "economy";
 		return HttpResponse.json({ ...economyBoard, board });
 	}),
+	http.get("/api/guilds/:guildId/members/:userId", () => HttpResponse.json(memberDetail)),
+	http.post("/api/guilds/:guildId/members/:userId/warnings", () => HttpResponse.json(memberDetail)),
+	http.delete("/api/guilds/:guildId/members/:userId/warnings/:warnId", () => HttpResponse.json(memberDetail)),
+	http.delete("/api/guilds/:guildId/members/:userId/warnings", () =>
+		HttpResponse.json({ ...memberDetail, warnings: [] }),
+	),
 	http.get("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
 	http.patch("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
 	http.delete("/api/guilds/:guildId/lottery", () => HttpResponse.json({ ...lotterySettings, enabled: false })),

@@ -44,6 +44,9 @@ const LotteryPage = lazy(async () => ({
 const MembersPage = lazy(async () => ({
 	default: (await import("@/features/members/MembersPage")).MembersPage,
 }));
+const MemberDetailPage = lazy(async () => ({
+	default: (await import("@/features/members/MemberDetailPage")).MemberDetailPage,
+}));
 const CommandsPage = lazy(async () => ({
 	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
 }));
@@ -81,6 +84,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/tickets", element: lazily(<TicketsPage />) },
 					{ path: "/guilds/:guildId/lottery", element: lazily(<LotteryPage />) },
 					{ path: "/guilds/:guildId/members", element: lazily(<MembersPage />) },
+					{ path: "/guilds/:guildId/members/:userId", element: lazily(<MemberDetailPage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },
 					{ path: "/owner", element: lazily(<OwnerPage />) },

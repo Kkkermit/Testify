@@ -609,6 +609,7 @@ indentation you matched on may already have changed.
 | `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                                        |
 | `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                           |
 | `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page                 |
+| `…/members/:userId`     | One member: standing, roles, warnings, softban — and the moderation controls         |
 | `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |
 | `/guilds/:id/commands`  | Per-command switches for this server                                                 |
 | `/commands`             | Every command, searchable, with the coverage tile                                    |
@@ -618,6 +619,13 @@ indentation you matched on may already have changed.
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the
 seven sections live.
+
+**A member's page is the first screen that writes to a person rather than to a setting**, and two things follow.
+`moderationProblem` is computed by `moderationActions.util.ts` and travels in the response, so the page greys its
+controls with the same answer the route refuses by — but the greying is a courtesy and `actOn()` is the gate,
+asked again before every write. Clearing a warning record asks for the member's name typed out, because nothing
+recovers it. A screen nested under another (`…/members/:userId` under `…/members`) needs `exact: false` on the
+parent's nav entry, or the sidebar section collapses the moment you open it.
 
 ### The owner console
 

@@ -11,7 +11,7 @@ import {
 } from "@database/repositories/moderationRepository";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { discordTime, truncate } from "@lib/format.util";
-import { dmEmbed, notifyTarget } from "@lib/moderationActions.util";
+import { assertModeratable, dmEmbed, notifyTarget } from "@lib/moderationActions.util";
 import { reply } from "@lib/reply.util";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
@@ -44,7 +44,9 @@ export default defineCommand({
 				const reason = interaction.options.getString("reason", true);
 
 				if (target.bot) throw new UserFacingError("Bots cannot be warned.");
-				if (target.id === interaction.user.id) throw new UserFacingError("You cannot warn yourself.");
+
+				const member = await guild.members.fetch(target.id).catch(() => null);
+				if (member) assertModeratable(interaction, member);
 
 				const entry = await addWarning(
 					guild.id,

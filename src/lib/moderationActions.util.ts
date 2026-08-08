@@ -6,23 +6,32 @@ import { embed } from "@lib/embeds.util";
 
 export const DEFAULT_REASON = "No reason provided";
 
-/** The hierarchy checks every moderation command needs, in one place. */
-export function assertModeratable(ctx: CommandInput, target: GuildMember): void {
-	const moderator = asMember(ctx);
+/**
+ * Why this moderator may not act on this target, in the words the refusal shows — or null when they may.
+ *
+ * Every surface asks the same question, so the answer lives here rather than in a command or a route handler.
+ */
+export function moderationProblem(moderator: GuildMember, target: GuildMember, botId?: string): string | null {
 	const guild = target.guild;
 
-	if (target.id === ctx.user.id) throw new UserFacingError(strings.moderation.selfTarget);
-	if (target.id === ctx.client.user?.id) throw new UserFacingError(strings.moderation.botTarget);
-	if (target.id === guild.ownerId) throw new UserFacingError("You cannot moderate the server owner.");
+	if (target.id === moderator.id) return strings.moderation.selfTarget;
+	// The id is passed rather than read off `members.me`, which is null when the bot's own member is uncached.
+	if (target.id === (botId ?? guild.members.me?.id)) return strings.moderation.botTarget;
+	if (target.id === guild.ownerId) return "You cannot moderate the server owner.";
 
 	if (moderator.id !== guild.ownerId && moderator.roles.highest.position <= target.roles.highest.position) {
-		throw new UserFacingError(strings.moderation.hierarchyUser);
+		return strings.moderation.hierarchyUser;
 	}
 
 	const me = guild.members.me;
-	if (me && me.roles.highest.position <= target.roles.highest.position) {
-		throw new UserFacingError(strings.moderation.hierarchyBot);
-	}
+	if (me && me.roles.highest.position <= target.roles.highest.position) return strings.moderation.hierarchyBot;
+
+	return null;
+}
+
+export function assertModeratable(ctx: CommandInput, target: GuildMember): void {
+	const problem = moderationProblem(asMember(ctx), target, ctx.client.user?.id);
+	if (problem !== null) throw new UserFacingError(problem);
 }
 
 /** Best-effort DM to the target. */

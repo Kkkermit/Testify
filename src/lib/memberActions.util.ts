@@ -1,12 +1,16 @@
-import { type Guild } from "discord.js";
-import { countAccounts, getEconomyRank, getLeaderboard } from "@database/repositories/economyRepository";
-import { countRanked, getLevelLeaderboard, getRank } from "@database/repositories/levelRepository";
+import { type Guild, type GuildMember } from "discord.js";
+import { findAccount, getEconomyRank, countAccounts, getLeaderboard } from "@database/repositories/economyRepository";
+import { countRanked, getLevelLeaderboard, getRank, getUserLevel } from "@database/repositories/levelRepository";
+import { getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { moderationProblem } from "@lib/moderationActions.util";
 import {
 	BOARD_PAGE_SIZE,
 	type BoardPage,
 	boardPages,
 	type BoardRow,
 	type MemberBoard,
+	type MemberDetail,
+	type MemberWarning,
 	pageOfRank,
 } from "@testify/shared";
 
@@ -64,6 +68,96 @@ export async function decorateRows(guild: Guild, entries: BoardEntry[], firstRan
 			inGuild: member !== null,
 		};
 	});
+}
+
+function toWarning(entry: {
+	warnId: string;
+	reason: string;
+	executorId: string;
+	executorTag: string;
+	timestamp: Date;
+	edits?: unknown[];
+}): MemberWarning {
+	return {
+		id: entry.warnId,
+		reason: entry.reason,
+		byId: entry.executorId,
+		byTag: entry.executorTag,
+		at: entry.timestamp.toISOString(),
+		edited: (entry.edits ?? []).length > 0,
+	};
+}
+
+/**
+ * Everything one member's page shows, in one read.
+ *
+ * `member` is null once somebody leaves, and every section survives that: warnings, balance and XP all outlive
+ * the membership, so the page names them rather than answering 404.
+ */
+export async function readMemberDetail(options: {
+	guild: Guild;
+	userId: string;
+	member: GuildMember | null;
+	moderator: GuildMember | null;
+	botId: string | undefined;
+}): Promise<MemberDetail> {
+	const { guild, userId, member, moderator, botId } = options;
+
+	const [account, economyRank, level, levelRank, warnings, softban] = await Promise.all([
+		findAccount(guild.id, userId),
+		getEconomyRank(guild.id, userId),
+		getUserLevel(guild.id, userId),
+		getRank(guild.id, userId),
+		getWarnings(guild.id, userId),
+		getActiveSoftban(guild.id, userId),
+	]);
+
+	return {
+		userId,
+		displayName: member?.displayName ?? warnings?.userTag ?? "Left the server",
+		username: member?.user.username ?? warnings?.userTag ?? userId,
+		avatarUrl: member?.displayAvatarURL({ extension: "png", size: 128 }) ?? null,
+		inGuild: member !== null,
+		isBot: member?.user.bot ?? false,
+		joinedAt: member?.joinedAt?.toISOString() ?? null,
+		roles:
+			member === null
+				? []
+				: [...member.roles.cache.values()]
+						.filter((role) => role.id !== guild.id)
+						.sort((a, b) => b.position - a.position)
+						.map((role) => ({
+							id: role.id,
+							name: role.name,
+							colour: role.hexColor === "#000000" ? null : role.hexColor,
+						})),
+		economy:
+			account === null
+				? null
+				: {
+						wallet: account.wallet,
+						bank: account.bank,
+						total: account.wallet + account.bank,
+						rank: economyRank,
+					},
+		levels: level === null ? null : { level: level.level, xp: level.xp, rank: levelRank },
+		warnings: (warnings?.warnings ?? []).map(toWarning).reverse(),
+		softban:
+			softban === null
+				? null
+				: {
+						reason: softban.reason,
+						moderatorId: softban.moderatorId,
+						expiresAt: softban.expiresAt.toISOString(),
+					},
+		// A member who has left cannot be acted on through Discord, and neither can one the caller sits below.
+		moderationProblem:
+			member === null
+				? "They are no longer in this server."
+				: moderator === null
+					? "Only somebody in this server can moderate its members."
+					: moderationProblem(moderator, member, botId),
+	};
 }
 
 export async function readBoard(guild: Guild, board: MemberBoard, page: number, viewerId: string): Promise<BoardPage> {
