@@ -48,8 +48,8 @@ function limiterPair(window: { limit: number; windowMs: number }): {
 /**
  * The dashboard's HTTP API, inside the bot process so it can read the live client cache.
  *
- * `src/core/shutdown.ts` terminates on an uncaught exception, which is right for a bot and fatal for a web
- * server — so every route runs behind an error boundary that turns a throw into a response.
+ * Every route runs behind an error boundary, so a throw becomes a response rather than an open request that
+ * never answers.
  */
 export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
@@ -135,14 +135,33 @@ export function listenAdvice(error: NodeJS.ErrnoException, port: number): string
 	return "[DASHBOARD_ERROR] The dashboard could not start listening. The bot is running without it.";
 }
 
+/** How many times a listen is worth retrying, and how long to wait between attempts. */
+export const LISTEN_RETRIES = 5;
+export const LISTEN_RETRY_MS = 3_000;
+
+/**
+ * Waiting only helps for a port somebody else still holds — a restart releasing its old listener is the usual
+ * case, and by the third attempt it has. A permission it does not have will never arrive.
+ */
+export function worthRetrying(error: NodeJS.ErrnoException): boolean {
+	return error.code === "EADDRINUSE" || error.code === "EAGAIN";
+}
+
 export interface RunningApi {
 	/** Resolves with the port actually bound, which is only the configured one when it was not 0. */
 	ready: Promise<number>;
 	close(): Promise<void>;
 }
 
+export interface ListenOptions {
+	retries?: number;
+	retryDelayMs?: number;
+}
+
 /** Started after `client.login()`, so a request can never arrive before the cache is warm. */
-export function startApi(client: TestifyClient, env: Env): RunningApi {
+export function startApi(client: TestifyClient, env: Env, options: ListenOptions = {}): RunningApi {
+	const retries = options.retries ?? LISTEN_RETRIES;
+	const retryDelayMs = options.retryDelayMs ?? LISTEN_RETRY_MS;
 	const app = createApi(client, env);
 
 	// After the API and nowhere else: it is a catch-all, so anything registered behind it never runs.
@@ -155,29 +174,53 @@ export function startApi(client: TestifyClient, env: Env): RunningApi {
 		failed = reject;
 	});
 
-	const server = serve({ fetch: app.fetch, port: env.DASHBOARD_PORT, hostname: env.DASHBOARD_BIND }, (info) => {
-		const api = `http://${env.DASHBOARD_BIND}:${String(info.port)}`;
-		client.logger.info(
-			{ api, open: dashboardUrl(env) ?? api },
-			"[DASHBOARD] The API is listening. Open the dashboard at the `open` address.",
-		);
-		listening(info.port);
-	}) as Server;
+	let server: Server | null = null;
+	let retry: NodeJS.Timeout | null = null;
+	let closed = false;
 
-	// Without this an unhandled `error` event on the server throws, and a busy port takes the whole bot down
-	// rather than only the optional thing that could not start.
-	server.on("error", (error: NodeJS.ErrnoException) => {
-		client.logger.error(
-			{ err: error, port: env.DASHBOARD_PORT, bind: env.DASHBOARD_BIND },
-			listenAdvice(error, env.DASHBOARD_PORT),
-		);
-		failed(error);
-	});
+	function attempt(remaining: number): void {
+		if (closed) return;
+
+		server = serve({ fetch: app.fetch, port: env.DASHBOARD_PORT, hostname: env.DASHBOARD_BIND }, (info) => {
+			const api = `http://${env.DASHBOARD_BIND}:${String(info.port)}`;
+			client.logger.info(
+				{ api, open: dashboardUrl(env) ?? api },
+				"[DASHBOARD] The API is listening. Open the dashboard at the `open` address.",
+			);
+			listening(info.port);
+		}) as Server;
+
+		// An unhandled `error` event on a Node server throws, so a busy port needs a listener here rather than a
+		// trip through the process handlers.
+		server.on("error", (error: NodeJS.ErrnoException) => {
+			if (remaining > 0 && worthRetrying(error)) {
+				client.logger.warn(
+					{ port: env.DASHBOARD_PORT, attemptsLeft: remaining },
+					"[DASHBOARD] The port is still busy. Trying again shortly.",
+				);
+				retry = setTimeout(() => attempt(remaining - 1), retryDelayMs);
+				retry.unref();
+				return;
+			}
+
+			client.logger.error(
+				{ err: error, port: env.DASHBOARD_PORT, bind: env.DASHBOARD_BIND },
+				listenAdvice(error, env.DASHBOARD_PORT),
+			);
+			failed(error);
+		});
+	}
+
+	attempt(retries);
 
 	const running: RunningApi = {
 		ready,
 		close: () =>
 			new Promise<void>((resolve) => {
+				closed = true;
+				if (retry !== null) clearTimeout(retry);
+				if (server === null) return resolve();
+
 				server.close(() => {
 					resolve();
 				});

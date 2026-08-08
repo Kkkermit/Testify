@@ -85,4 +85,39 @@ describe("TimerRegistry", () => {
 
 		expect(() => jest.advanceTimersByTime(2_000)).not.toThrow();
 	});
+
+	/** Contained is not the same as unnoticed: a job failing every minute in silence is unfindable. */
+	it("reports a job that failed, naming it", async () => {
+		const logger = { error: jest.fn() };
+		const reporting = new TimerRegistry(logger as never);
+
+		reporting.every("lotteryDraw", 1_000, () => {
+			throw new Error("boom");
+		});
+		jest.advanceTimersByTime(1_000);
+		await flush();
+		reporting.stopAll();
+
+		expect(logger.error).toHaveBeenCalledWith(
+			expect.objectContaining({ scope: "JOB_LOTTERYDRAW" }),
+			expect.stringContaining("still running"),
+		);
+	});
+
+	it("keeps running the job on its next tick after a failure", async () => {
+		const logger = { error: jest.fn() };
+		const reporting = new TimerRegistry(logger as never);
+		const task = jest.fn(() => {
+			throw new Error("boom");
+		});
+
+		reporting.every("flaky", 1_000, task);
+		for (let tick = 0; tick < 3; tick += 1) {
+			jest.advanceTimersByTime(1_000);
+			await flush();
+		}
+		reporting.stopAll();
+
+		expect(task).toHaveBeenCalledTimes(3);
+	});
 });

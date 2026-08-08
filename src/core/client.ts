@@ -4,6 +4,7 @@ import { type Button } from "@core/button";
 import { type Command } from "@core/command";
 import { type Logger } from "@core/logger";
 import { type MessageHandler } from "@core/message";
+import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 
 export const intents = [
 	GatewayIntentBits.Guilds,
@@ -41,7 +42,7 @@ export class TestifyClient extends Client {
 
 	readonly env: Env;
 	readonly logger: Logger;
-	readonly timers = new TimerRegistry();
+	readonly timers: TimerRegistry;
 	readonly startedAt = Date.now();
 
 	/**
@@ -66,6 +67,7 @@ export class TestifyClient extends Client {
 		super({ intents, partials });
 		this.env = env;
 		this.logger = logger;
+		this.timers = new TimerRegistry(logger);
 	}
 
 	isOwner(userId: string): boolean {
@@ -77,6 +79,12 @@ export class TestifyClient extends Client {
 export class TimerRegistry {
 	private readonly handles = new Map<string, NodeJS.Timeout>();
 	private readonly running = new Set<string>();
+	private readonly throttle = new ErrorThrottle();
+	private readonly logger: Logger | undefined;
+
+	constructor(logger?: Logger) {
+		this.logger = logger;
+	}
 
 	/** Repeats forever. */
 	every(name: string, ms: number, task: () => Promise<void> | void): void {
@@ -87,7 +95,7 @@ export class TimerRegistry {
 			setInterval(() => {
 				if (this.running.has(name)) return;
 				this.running.add(name);
-				void run(task).finally(() => this.running.delete(name));
+				void this.run(name, task).finally(() => this.running.delete(name));
 			}, ms),
 		);
 	}
@@ -100,7 +108,7 @@ export class TimerRegistry {
 			name,
 			setTimeout(() => {
 				this.handles.delete(name);
-				void run(task);
+				void this.run(name, task);
 			}, ms),
 		);
 	}
@@ -125,13 +133,15 @@ export class TimerRegistry {
 	names(): string[] {
 		return [...this.handles.keys()];
 	}
-}
 
-/** A task that throws must never take the process down with it. */
-async function run(task: () => Promise<void> | void): Promise<void> {
-	try {
-		await task();
-	} catch {
-		// Deliberately swallowed: a background job is not worth crashing for.
+	/** A task that throws must never take the process down with it, and must never fail in silence either. */
+	private async run(name: string, task: () => Promise<void> | void): Promise<void> {
+		try {
+			await task();
+		} catch (error) {
+			if (this.logger !== undefined) {
+				reportSurvivable(this.logger, this.throttle, `JOB_${name.toUpperCase()}`, error);
+			}
+		}
 	}
 }

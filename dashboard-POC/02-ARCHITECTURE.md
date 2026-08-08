@@ -15,8 +15,9 @@ In-process, `GET /api/guilds/:id/roles` is `client.guilds.cache.get(id)?.roles.c
 It is also the answer that matches "easy to setup": one process, one port, one `npm start`, one thing to keep
 alive. A self-hoster does not have to run and reverse-proxy two services.
 
-**What it costs, and the mitigation.** An HTTP handler that throws must not take the bot down. `src/core/shutdown.ts`
-deliberately terminates on `uncaughtException` — correct for a bot, fatal for a web server. So:
+**What it costs, and the mitigation.** One process means one failure is two outages unless each layer contains
+its own. `src/core/shutdown.ts` keeps the process alive through anything unexpected (CLAUDE.md §16), and on top
+of that:
 
 - Every route body is wrapped in a top-level error boundary that converts a throw into a 500 and logs it. The
   bot's own `runCommand` wrapper is the precedent; the API gets `runRoute`.

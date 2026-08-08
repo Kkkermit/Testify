@@ -170,22 +170,24 @@ describe("handleProcessSignals", () => {
 		expect(printReloading).not.toHaveBeenCalled();
 	});
 
-	/** Logging and carrying on would leave the process in an undefined state. */
-	it("treats an uncaught exception as fatal", () => {
+	/**
+	 * One broken handler must not take every server's bot offline with it, so the failure is recorded and the
+	 * process carries on. Only a signal or the owner console stops it.
+	 */
+	it("records an uncaught exception and keeps running", () => {
 		const { handleProcessSignals } = loadShutdown();
 		const client = clientFor();
 		handleProcessSignals(client);
 
 		process.emit("uncaughtException", new Error("boom"));
 
-		expect(client.logger.fatal).toHaveBeenCalled();
+		expect(client.logger.error).toHaveBeenCalled();
+		expect(exitSpy).not.toHaveBeenCalled();
+		expect(client.destroy).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * Node terminates on an unhandled rejection by default, so a listener that only logged would quietly disable
-	 * that and keep the bot running on state nothing can vouch for. CLAUDE.md section 16 is explicit about it.
-	 */
-	it("treats an unhandled rejection as fatal too", async () => {
+	/** Node terminates on an unhandled rejection by default, and a listener is what opts out of that. */
+	it("records an unhandled rejection and keeps running", async () => {
 		const { handleProcessSignals, disconnectDatabase } = loadShutdown();
 		const client = clientFor();
 		handleProcessSignals(client);
@@ -193,7 +195,65 @@ describe("handleProcessSignals", () => {
 		process.emit("unhandledRejection", new Error("boom"), Promise.resolve());
 		await Promise.resolve();
 
-		expect(client.logger.fatal).toHaveBeenCalled();
-		expect(disconnectDatabase).toHaveBeenCalled();
+		expect(client.logger.error).toHaveBeenCalled();
+		expect(exitSpy).not.toHaveBeenCalled();
+		expect(disconnectDatabase).not.toHaveBeenCalled();
+	});
+
+	/** An unhandled `error` event on an EventEmitter throws, so an absent listener is itself the fatal path. */
+	it("listens for the client's own error events", () => {
+		const { handleProcessSignals } = loadShutdown();
+		const client = clientFor();
+		handleProcessSignals(client);
+
+		const listened = (client.on as jest.Mock).mock.calls.map(([event]: [string]) => event);
+		expect(listened).toContain("error");
+		expect(listened).toContain("shardError");
+	});
+
+	it("reports a gateway error without stopping", () => {
+		const { handleProcessSignals } = loadShutdown();
+		const client = clientFor();
+		handleProcessSignals(client);
+
+		emitOn(client, "error", new Error("gateway went away"));
+
+		expect(client.logger.error).toHaveBeenCalledWith(
+			expect.objectContaining({ scope: "GATEWAY" }),
+			expect.stringContaining("still running"),
+		);
+		expect(exitSpy).not.toHaveBeenCalled();
+	});
+
+	/** A shard is one connection of several, so its id belongs in the line that reports it. */
+	it("names the shard when one of them fails", () => {
+		const { handleProcessSignals } = loadShutdown();
+		const client = clientFor();
+		handleProcessSignals(client);
+
+		emitOn(client, "shardError", new Error("closed"), 2);
+
+		expect(client.logger.error).toHaveBeenCalledWith(
+			expect.objectContaining({ scope: "SHARD_2" }),
+			expect.stringContaining("SHARD_2"),
+		);
+	});
+
+	/** The same fault repeating every frame would bury the one line naming its cause. */
+	it("writes one line for a fault that repeats", () => {
+		const { handleProcessSignals } = loadShutdown();
+		const client = clientFor();
+		handleProcessSignals(client);
+
+		for (let index = 0; index < 50; index += 1) process.emit("uncaughtException", new Error("same"));
+
+		expect((client.logger.error as jest.Mock).mock.calls).toHaveLength(1);
 	});
 });
+
+/** `client.on` is a mock rather than a real emitter, so emitting means calling back what it recorded. */
+function emitOn(client: TestifyClient, event: string, ...args: unknown[]): void {
+	for (const [name, listener] of (client.on as jest.Mock).mock.calls as [string, (...a: unknown[]) => void][]) {
+		if (name === event) listener(...args);
+	}
+}

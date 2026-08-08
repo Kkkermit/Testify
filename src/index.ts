@@ -29,6 +29,9 @@ async function main(): Promise<void> {
 	}
 }
 
+// The one place that still exits on a failure. Everything after startup is contained and logged instead, but a
+// bot that never connected has nothing left to keep alive, and staying up would look healthy to a supervisor
+// while answering nobody.
 main().catch((error: unknown) => {
 	const problem = toError(error);
 	// The logger may not exist yet if reading the environment is what failed, so this goes straight to stderr —

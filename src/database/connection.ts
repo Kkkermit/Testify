@@ -97,7 +97,7 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 		options.logger.info("Reconnected to MongoDB");
 	});
 	mongoose.connection.on("error", (error: unknown) => {
-		// While connecting, the retry loop below reports the failure; logging the
+		// The retry loop below reports a failure to connect, so this would only say the same thing twice.
 		if (everConnected) options.logger.error({ err: toError(error) }, "MongoDB connection error");
 	});
 

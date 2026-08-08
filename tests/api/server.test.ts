@@ -1,4 +1,4 @@
-import { createApi, listenAdvice, startApi } from "@api/server";
+import { createApi, listenAdvice, startApi, worthRetrying } from "@api/server";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { databaseConnected } from "@database/connection";
@@ -48,10 +48,7 @@ describe("the health endpoint", () => {
 });
 
 describe("the error boundary", () => {
-	/**
-	 * `shutdown.ts` kills the process on an uncaught exception, which is right for a bot and would let one bad
-	 * route take the whole bot offline.
-	 */
+	/** Without the boundary a throwing route leaves the request hanging, with nothing to say what happened. */
 	it("turns a throwing route into a 500 rather than letting it escape", async () => {
 		const client = readyClient();
 		const logged = jest.spyOn(client.logger, "error");
@@ -200,6 +197,14 @@ describe("startApi", () => {
 	});
 });
 
+async function waitFor(condition: () => boolean, timeoutMs = 2_000): Promise<void> {
+	const deadline = Date.now() + timeoutMs;
+	while (!condition()) {
+		if (Date.now() > deadline) throw new Error("condition never became true");
+		await new Promise((done) => setTimeout(done, 10));
+	}
+}
+
 describe("a port that cannot be listened on", () => {
 	/**
 	 * An unhandled `error` event on a Node server throws, so a busy port used to reach `uncaughtException` and
@@ -211,7 +216,7 @@ describe("a port that cannot be listened on", () => {
 
 		const client = readyClient();
 		const logged = jest.spyOn(client.logger, "error");
-		const clash = startApi(client, { DASHBOARD_PORT: port, DASHBOARD_BIND: "127.0.0.1" } as Env);
+		const clash = startApi(client, { DASHBOARD_PORT: port, DASHBOARD_BIND: "127.0.0.1" } as Env, { retries: 0 });
 
 		try {
 			await expect(clash.ready).rejects.toThrow();
@@ -220,6 +225,63 @@ describe("a port that cannot be listened on", () => {
 			await held.close();
 			await clash.close();
 		}
+	});
+
+	/**
+	 * `tsx watch` starts the new bot before the old one has released the port, so the dashboard used to stay
+	 * down for the rest of the run over a clash that resolves itself in a second.
+	 */
+	it("comes up on its own once the port is released", async () => {
+		const held = startApi(readyClient(), { DASHBOARD_PORT: 0, DASHBOARD_BIND: "127.0.0.1" } as Env);
+		const port = await held.ready;
+
+		const client = readyClient();
+		const waiting = jest.spyOn(client.logger, "warn");
+		const second = startApi(client, { DASHBOARD_PORT: port, DASHBOARD_BIND: "127.0.0.1" } as Env, {
+			retryDelayMs: 25,
+		});
+		// Settled here rather than awaited later: an unhandled rejection outlives the test that caused it.
+		const outcome = second.ready.then(
+			() => "listening",
+			() => "gave up",
+		);
+
+		try {
+			// The clash has to have happened before the port is given up, or there was nothing to retry.
+			await waitFor(() => waiting.mock.calls.length > 0);
+			expect(waiting).toHaveBeenCalledWith(expect.objectContaining({ port }), expect.stringContaining("still busy"));
+
+			await held.close();
+			await expect(outcome).resolves.toBe("listening");
+		} finally {
+			await held.close();
+			await second.close();
+		}
+	});
+
+	/** Waiting cannot conjure a privilege, so retrying one would only delay the line that says what to do. */
+	it("does not retry a failure that waiting cannot fix", () => {
+		expect(worthRetrying({ code: "EADDRINUSE" } as NodeJS.ErrnoException)).toBe(true);
+		expect(worthRetrying({ code: "EACCES" } as NodeJS.ErrnoException)).toBe(false);
+	});
+
+	it("stops retrying when the bot shuts down first", async () => {
+		const held = startApi(readyClient(), { DASHBOARD_PORT: 0, DASHBOARD_BIND: "127.0.0.1" } as Env);
+		const port = await held.ready;
+
+		const client = readyClient();
+		const second = startApi(client, { DASHBOARD_PORT: port, DASHBOARD_BIND: "127.0.0.1" } as Env, {
+			retryDelayMs: 10,
+		});
+		second.ready.catch(() => undefined);
+
+		await new Promise((done) => setTimeout(done, 30));
+		await expect(second.close()).resolves.toBeUndefined();
+		await held.close();
+
+		const listening = jest.spyOn(client.logger, "info");
+		await new Promise((done) => setTimeout(done, 40));
+		expect(listening).not.toHaveBeenCalled();
 	});
 });
 

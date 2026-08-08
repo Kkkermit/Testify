@@ -1,5 +1,6 @@
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
+import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 import { disconnectDatabase } from "@database/connection";
 import { printReloading } from "@lib/banner.util";
 
@@ -36,18 +37,25 @@ export function handleProcessSignals(client: TestifyClient): void {
 		void shutdown(client, "SIGTERM");
 	});
 
+	// Nothing here exits. A bot serving many servers must not go dark because one handler threw, so an
+	// unexpected failure is recorded and the process carries on. Only a signal or the owner console stops it.
+	const throttle = new ErrorThrottle();
+
 	process.on("uncaughtException", (error) => {
-		client.logger.fatal({ err: error }, "[FATAL] Uncaught exception. Shutting down rather than continuing.");
-		void shutdown(client, "uncaughtException", 1);
+		reportSurvivable(client.logger, throttle, "UNCAUGHT", error);
 	});
 
-	// Node terminates on an unhandled rejection by default; a listener that only logs would quietly disable that
-	// and leave the process running on state nothing can vouch for.
 	process.on("unhandledRejection", (reason) => {
-		client.logger.fatal(
-			{ err: toError(reason) },
-			"[FATAL] Unhandled promise rejection. Shutting down rather than continuing.",
-		);
-		void shutdown(client, "unhandledRejection", 1);
+		reportSurvivable(client.logger, throttle, "UNHANDLED_REJECTION", reason);
+	});
+
+	// discord.js emits these on the client, and an unhandled `error` event on an EventEmitter throws — which is
+	// the likeliest way a gateway hiccup would otherwise have become a fatal exception.
+	client.on("error", (error) => {
+		reportSurvivable(client.logger, throttle, "GATEWAY", error);
+	});
+
+	client.on("shardError", (error, shardId) => {
+		reportSurvivable(client.logger, throttle, `SHARD_${String(shardId)}`, error);
 	});
 }

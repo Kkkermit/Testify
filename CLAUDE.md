@@ -718,8 +718,30 @@ if (!account) throw new UserFacingError("You do not have an account yet. Use `/e
 - **Never interpolate a raw error into a user-visible embed.** It leaks internal paths and can exceed the
   4096-character description limit.
 - **Never swallow an error into a `.catch()` that only logs** and then continue on a possibly-undefined value.
-- `uncaughtException` and `unhandledRejection` set a non-zero exit code and terminate. Never log and continue —
-  that leaves the process in an undefined state.
+
+### The process stays up
+
+**Nothing after startup may end the process.** A bot serving many servers must not go dark because one handler
+threw, and the dashboard must not disappear because one request did. `uncaughtException`, `unhandledRejection`,
+the client's own `error` and `shardError` events, and every scheduled job all route into
+`reportSurvivable()` in `src/core/resilience.ts`, which writes the failure down and returns. Only a signal, or
+the owner console's Shut down, calls `shutdown()`.
+
+Node's warning about `uncaughtException` — that the process may be left holding state nothing can vouch for —
+is real, and this is a deliberate trade: for a bot, an instance that is mostly working beats one that is off.
+
+Four things follow, and they are what keep this from being the anti-pattern it looks like:
+
+- **Contained is not unnoticed.** Anything caught here is logged at `error` with its stack and a scope, and the
+  line says the bot is still running so a reader knows the state they are in. A background job that catches and
+  says nothing is still wrong — `TimerRegistry` reports every failure under `JOB_<NAME>`.
+- **Repeats collapse.** A broken gateway handler can throw hundreds of times a second, and the same line that
+  often buries the cause. `ErrorThrottle` logs the first occurrence, then one summary a minute carrying how many
+  were swallowed. It is bounded, so a message embedding a unique id cannot grow it forever.
+- **Startup is the exception.** `main().catch()` in `src/index.ts` still exits. A bot that never connected has
+  nothing to keep alive, and a process that stays up looks healthy to a supervisor while answering nobody.
+- **Optional things retry rather than give up.** A busy port takes the dashboard down for one restart, not for
+  the rest of the run: `startApi` retries `EADDRINUSE` five times before it reports the advice.
 
 ---
 
@@ -1202,8 +1224,8 @@ registered behind it silently never runs.
   logged and the request still succeeds — the change did happen, and failing over the bookkeeping is worse.
 - **The API starts after `client.login()`** and closes in `src/core/shutdown.ts`. Both matter: before login the
   cache is empty, and a listener left open holds the port against a restart.
-- **Every route runs behind an error boundary.** `shutdown.ts` terminates on an uncaught exception, which is
-  right for a bot and would let one bad route take the whole thing offline.
+- **Every route runs behind an error boundary**, so a throw becomes a 500 with a code rather than a request that
+  never answers. A busy port retries before it gives up, and giving up costs the dashboard rather than the bot.
 - **No `GET` may mutate anything.** CSRF protection exempts them.
 - **`/eval` is never exposed.** It turns a stolen session cookie into a remote shell.
 - **`DISCORD_CLIENT_SECRET` never reaches a browser.** The API holds it and nothing else does.
