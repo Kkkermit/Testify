@@ -1,6 +1,6 @@
 import { ANALYTICS_WINDOWS, errorRate, type AnalyticsWindow } from "@testify/shared";
 import { BarChart3 } from "lucide-react";
-import { Card, EmptyState, Figure, GuildIcon, SegmentedControl, Skeleton } from "@/components/primitives";
+import { Card, EmptyState, Figure, Avatar, SegmentedControl, Skeleton } from "@/components/primitives";
 import { UsageBars } from "@/features/owner/components/UsageBars";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { percent } from "@/features/owner/owner.utils";
@@ -101,7 +101,7 @@ export function UsageTab({
 							id: row.guildId,
 							label: (
 								<span className="flex items-center gap-2">
-									<GuildIcon name={row.name} url={row.iconUrl} size={18} seed={row.guildId} />
+									<Avatar name={row.name} url={row.iconUrl} size={18} seed={row.guildId} />
 									<span className="truncate">{row.name}</span>
 								</span>
 							),

@@ -5,7 +5,7 @@ import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
 import { BotMark } from "@/components/brand/BotMark";
-import { GuildIcon, Tooltip } from "@/components/primitives";
+import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -93,7 +93,7 @@ export function Sidebar({
 				{user !== null && (
 					<div className={ROW}>
 						<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
-							<GuildIcon name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
+							<Avatar name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
 						</span>
 						<span className={label("truncate text-sm")}>{user.username}</span>
 					</div>

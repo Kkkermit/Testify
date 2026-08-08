@@ -1,10 +1,9 @@
 import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Skeleton, StatTile } from "@/components/primitives";
+import { Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
-import { Pager } from "@/features/owner/components/Pager";
 import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
 import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
 

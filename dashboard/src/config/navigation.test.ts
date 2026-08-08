@@ -30,6 +30,7 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/treasure`,
 				`/guilds/${guild.id}/tickets`,
 				`/guilds/${guild.id}/lottery`,
+				`/guilds/${guild.id}/members`,
 				`/guilds/${guild.id}/settings`,
 			].sort(),
 		);

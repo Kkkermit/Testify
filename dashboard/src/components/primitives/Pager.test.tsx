@@ -1,6 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { Pager } from "@/features/owner/components/Pager";
+import { Pager } from "@/components/primitives/Pager";
 
 describe("Pager", () => {
 	it("renders nothing when everything fits on one page", () => {

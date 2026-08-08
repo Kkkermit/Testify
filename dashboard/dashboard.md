@@ -151,7 +151,7 @@ src/
 │   └── layout/         Sidebar, SidebarLink, SidebarSection, MobileNav
 ├── components/
 │   ├── brand/          Logo, LogoTile, BotMark — the mark, inheriting currentColor
-│   ├── primitives/     Badge Button Card DataList EmptyState GuildIcon PageHeader
+│   ├── primitives/     Avatar Badge Button Card DataList EmptyState PageHeader Pager
 │   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
 │   │                   SavingIndicator Toggle Warning + fieldStyles.ts
@@ -396,16 +396,18 @@ Three files with their own segmented control is three places to fix an `aria-pre
 
 ### Primitives
 
-| Component                                                                 | Notes                                                                   |
-| ------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| `Card`                                                                    | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>` |
-| `Button`                                                                  | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`          |
-| `Badge`                                                                   | `tone="neutral" \| "success" \| "warning" \| "danger"`                  |
-| `StatTile`                                                                | Takes an **icon component**, not an element: `icon={Coins}`             |
-| `PageHeader`                                                              | `title`, `subtitle`, `action` — every page starts with one              |
-| `EmptyState`                                                              | Takes an **element**: `icon={<History size={28} />}`                    |
-| `Skeleton`                                                                | What `isPending` returns                                                |
-| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `GuildIcon`, `Tooltip` |                                                                         |
+| Component                                                    | Notes                                                                   |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>` |
+| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`          |
+| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                  |
+| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`             |
+| `PageHeader`                                                 | `title`, `subtitle`, `action` — every page starts with one              |
+| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                    |
+| `Skeleton`                                                   | What `isPending` returns                                                |
+| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike      |
+| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page    |
+| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                         |
 
 ### Form
 
@@ -606,6 +608,7 @@ indentation you matched on may already have changed.
 | `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                                        |
 | `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                                        |
 | `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                           |
+| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page                 |
 | `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |
 | `/guilds/:id/commands`  | Per-command switches for this server                                                 |
 | `/commands`             | Every command, searchable, with the coverage tile                                    |

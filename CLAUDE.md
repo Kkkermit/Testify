@@ -1014,6 +1014,8 @@ degrade automatically rather than fail.
 A web dashboard for controlling the bot, built to the plan in [`dashboard-POC/`](dashboard-POC/00-INDEX.md).
 **Read the relevant document there before changing anything in this section** — it holds the reasoning, the
 threat model and the phase order. `13-ROADMAP-AND-RISKS.md` says what is built and what is next.
+[`dashboard/dashboard.md`](dashboard/dashboard.md) is the practical detail — the layout, the six edits a screen
+takes, the components and the traps; **this section wins where the two overlap.**
 
 **It is off by default.** `DASHBOARD_ENABLED` is the switch, and while it is false a bot-only install needs none
 of the other dashboard variables. Enabling it without `DISCORD_CLIENT_SECRET`, `DASHBOARD_BASE_URL` and
@@ -1054,18 +1056,25 @@ console, and the levelling, welcome, audit-logging and server settings. The rest
 the same shape —
 `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
-| Route                   | Screen                                                        |
-| ----------------------- | ------------------------------------------------------------- |
-| `/sign-in`              | One button; also the setup screen for a half-install          |
-| `/guilds`               | Picker, with an invite card for guilds without the bot        |
-| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes |
-| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings              |
-| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                |
-| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save            |
-| `/guilds/:id/settings`  | Prefix, link filtering, roles on join, counting, voice stats  |
-| `/commands`             | Every command, searchable, with the coverage tile             |
-| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately               |
-| `/owner`                | Six tabs: fleet, usage, commands, logs, runtime, control      |
+| Route                   | Screen                                                                  |
+| ----------------------- | ----------------------------------------------------------------------- |
+| `/sign-in`              | One button; also the setup screen for a half-install                    |
+| `/guilds`               | Picker, with an invite card for guilds without the bot                  |
+| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes           |
+| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings                        |
+| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                          |
+| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save                      |
+| `/guilds/:id/automod`   | Discord's own filters — no database behind it                           |
+| `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                  |
+| `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                           |
+| `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                           |
+| `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                              |
+| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page    |
+| `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting |
+| `/guilds/:id/commands`  | Per-command switches for this server                                    |
+| `/commands`             | Every command, searchable, with the coverage tile                       |
+| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                         |
+| `/owner`                | Six tabs: fleet, usage, commands, logs, runtime, control                |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |

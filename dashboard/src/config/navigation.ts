@@ -9,6 +9,7 @@ import {
 	Coins,
 	Terminal,
 	TrendingUp,
+	Trophy,
 	Users,
 	UserPlus,
 	MessagesSquare,
@@ -84,6 +85,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					label: "Members",
 					icon: Users,
 					items: [
+						{
+							to: `/guilds/${guild.id}/members`,
+							label: "Leaderboards",
+							icon: Trophy,
+							hint: "Who is ahead on money and levels",
+						},
 						{
 							to: `/guilds/${guild.id}/levelling`,
 							label: "Levelling",

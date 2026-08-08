@@ -1,7 +1,7 @@
 import { inviteUrl, type ManageableGuild } from "@testify/shared";
 import { ChevronRight, Lock, Plus } from "lucide-react";
 import { Link } from "react-router";
-import { Card, cardClass, GuildIcon, Tooltip } from "@/components/primitives";
+import { Card, cardClass, Avatar, Tooltip } from "@/components/primitives";
 import { type GuildGroupKey } from "@/features/guilds/guilds.utils";
 
 export function GuildCard({
@@ -15,7 +15,7 @@ export function GuildCard({
 }): React.JSX.Element {
 	const body = (
 		<>
-			<GuildIcon name={guild.name} url={guild.iconUrl} seed={guild.id} />
+			<Avatar name={guild.name} url={guild.iconUrl} seed={guild.id} />
 			<span className="min-w-0 flex-1">
 				<span className="block truncate font-medium">{guild.name}</span>
 				<span className="text-muted-foreground block text-xs tabular-nums">

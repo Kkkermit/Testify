@@ -122,6 +122,7 @@ describe("the guild settings sub-routes", () => {
 		["GET", "/api/guilds/:guildId/lottery"],
 		["PATCH", "/api/guilds/:guildId/lottery"],
 		["DELETE", "/api/guilds/:guildId/lottery"],
+		["GET", "/api/guilds/:guildId/members/leaderboard"],
 		["GET", "/api/analytics/usage"],
 		["GET", "/api/analytics/logs"],
 		["GET", "/api/analytics/runtime"],

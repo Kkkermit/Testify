@@ -1,8 +1,7 @@
 import { type AttachmentBuilder, type Guild } from "discord.js";
-import { countAccounts, getEconomyRank, getLeaderboard } from "@database/repositories/economyRepository";
-import { countRanked, getLevelLeaderboard, getRank } from "@database/repositories/levelRepository";
 import { type BoardRow, renderBoardImage } from "@lib/boardCard.util";
 import { formatNumber, ordinal } from "@lib/format.util";
+import { boardEntries, rankOnBoard } from "@lib/memberActions.util";
 
 /**
  * The leaderboards, shared by `/leaderboard` and by its paging buttons so the first page and every later one are
@@ -40,32 +39,14 @@ interface Entry {
 }
 
 async function entriesFor(guild: Guild, kind: BoardKind, page: number): Promise<{ entries: Entry[]; total: number }> {
-	const skip = page * PAGE_SIZE;
-
-	if (kind === "economy") {
-		const [rows, total] = await Promise.all([
-			getLeaderboard(guild.id, PAGE_SIZE, "total", skip),
-			countAccounts(guild.id),
-		]);
-
-		return {
-			total,
-			entries: rows.map((row) => ({
-				userId: row.userId,
-				primary: formatNumber(row.total),
-				secondary: `${formatNumber(row.bank)} banked`,
-			})),
-		};
-	}
-
-	const [rows, total] = await Promise.all([getLevelLeaderboard(guild.id, PAGE_SIZE, skip), countRanked(guild.id)]);
+	const { entries, total } = await boardEntries(guild.id, kind, { limit: PAGE_SIZE, skip: page * PAGE_SIZE });
 
 	return {
 		total,
-		entries: rows.map((row) => ({
-			userId: row.userId,
-			primary: `Level ${formatNumber(row.level)}`,
-			secondary: `${formatNumber(row.xp)} XP`,
+		entries: entries.map((entry) => ({
+			userId: entry.userId,
+			primary: kind === "economy" ? formatNumber(entry.primary) : `Level ${formatNumber(entry.primary)}`,
+			secondary: kind === "economy" ? `${formatNumber(entry.secondary)} banked` : `${formatNumber(entry.secondary)} XP`,
 		})),
 	};
 }
@@ -135,5 +116,5 @@ export function pageOfRank(rank: number): number {
 
 /** Where the viewer sits, so "Find me" can jump straight there. */
 export async function rankOf(guild: Guild, kind: BoardKind, userId: string): Promise<number | null> {
-	return kind === "economy" ? getEconomyRank(guild.id, userId) : getRank(guild.id, userId);
+	return rankOnBoard(guild.id, kind, userId);
 }

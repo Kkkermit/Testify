@@ -25,6 +25,7 @@ import {
 	type TicketSettings,
 	type TreasureSettings,
 	type AutomodRules,
+	type BoardPage,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -172,6 +173,43 @@ export const lotterySettings: LotterySettings = {
 			winners: [{ userTag: "kate", prizeAmount: 1800 }],
 		},
 	],
+};
+
+export const economyBoard: BoardPage = {
+	board: "economy",
+	page: 1,
+	pages: 2,
+	total: 30,
+	rows: [
+		{
+			userId: "100000000000000001",
+			rank: 1,
+			displayName: "someone",
+			avatarUrl: null,
+			primary: 9_400,
+			secondary: 6_000,
+			inGuild: true,
+		},
+		{
+			userId: "100000000000000002",
+			rank: 2,
+			displayName: "kate",
+			avatarUrl: null,
+			primary: 5_120,
+			secondary: 120,
+			inGuild: true,
+		},
+		{
+			userId: "100000000000000003",
+			rank: 3,
+			displayName: "Left the server",
+			avatarUrl: null,
+			primary: 800,
+			secondary: 0,
+			inGuild: false,
+		},
+	],
+	you: { rank: 1, page: 1 },
 };
 
 export const ticketSettings: TicketSettings = {
@@ -361,6 +399,10 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
+		const board = new URL(request.url).searchParams.get("board") ?? "economy";
+		return HttpResponse.json({ ...economyBoard, board });
+	}),
 	http.get("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
 	http.patch("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
 	http.delete("/api/guilds/:guildId/lottery", () => HttpResponse.json({ ...lotterySettings, enabled: false })),

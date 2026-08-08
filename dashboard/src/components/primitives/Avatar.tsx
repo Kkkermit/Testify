@@ -1,8 +1,8 @@
 import { cn } from "@/lib/cn";
 import { tintFor } from "@/lib/tint";
 
-/** A lettered tile in a colour derived from the name, because a server with no icon is common and a broken image is the first thing anyone sees. */
-export function GuildIcon({
+/** A lettered tile in a colour derived from the name, because a missing picture is common and a broken image is the first thing anyone sees. */
+export function Avatar({
 	name,
 	url,
 	size = 40,

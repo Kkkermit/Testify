@@ -1,5 +1,5 @@
 import { type OwnerGuildRow } from "@testify/shared";
-import { Badge, Card, GuildIcon } from "@/components/primitives";
+import { Badge, Card, Avatar } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
 export function OwnerGuildTable({
@@ -40,7 +40,7 @@ export function OwnerGuildTable({
 							<td className="px-6 py-3">
 								{onSelect === undefined ? (
 									<span className="flex items-center gap-2">
-										<GuildIcon name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
+										<Avatar name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
 										<span className="truncate">{guild.name}</span>
 									</span>
 								) : (
@@ -53,7 +53,7 @@ export function OwnerGuildTable({
 										}}
 										className="hover:text-primary flex items-center gap-2 text-left transition-colors duration-150"
 									>
-										<GuildIcon name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
+										<Avatar name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
 										<span className="truncate">{guild.name}</span>
 									</button>
 								)}

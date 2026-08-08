@@ -4,7 +4,7 @@ import { type CommandSummary, matchesSearch } from "@testify/shared";
 const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: string }> = {
 	levelling: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
 	rank: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
-	leaderboard: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
+	leaderboard: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Leaderboards" },
 	welcome: { path: (guildId) => `/guilds/${guildId}/welcome`, screen: "Welcome" },
 	"audit-logging": { path: (guildId) => `/guilds/${guildId}/audit-log`, screen: "Audit logging" },
 	prefix: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },

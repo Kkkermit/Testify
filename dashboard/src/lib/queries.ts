@@ -23,6 +23,7 @@ export const keys = {
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,
+		board: (board: string, page: number) => ["guild", id, "board", board, page] as const,
 	}),
 	owner: {
 		stats: () => ["owner", "stats"] as const,

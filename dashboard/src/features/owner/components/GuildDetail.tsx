@@ -1,7 +1,7 @@
 import { ExternalLink, X } from "lucide-react";
 import { Link } from "react-router";
 import { Warning } from "@/components/form";
-import { Badge, Button, Card, DataList, Figure, GuildIcon, Skeleton } from "@/components/primitives";
+import { Badge, Button, Card, DataList, Figure, Avatar, Skeleton } from "@/components/primitives";
 import { useGuildDetail } from "@/features/owner/useControl";
 
 /** One server at a glance, opened from the fleet table rather than by hunting for its id. */
@@ -15,7 +15,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 	return (
 		<Card className="motion-pop flex flex-col gap-4">
 			<div className="flex items-start gap-3">
-				<GuildIcon name={guild.name} url={guild.iconUrl} size={40} seed={guild.id} />
+				<Avatar name={guild.name} url={guild.iconUrl} size={40} seed={guild.id} />
 				<div className="min-w-0 flex-1">
 					<h3 className="truncate text-base font-semibold">{guild.name}</h3>
 					<p className="text-muted-foreground font-mono text-xs">{guild.id}</p>

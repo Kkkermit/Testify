@@ -1,5 +1,5 @@
 import { fillTemplate, type WelcomeStyle } from "@testify/shared";
-import { GuildIcon } from "@/components/primitives";
+import { Avatar } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
 /** Filled by the same function the bot posts with, so nobody has to save a template and join with an alt to find out what `{count}` does. */
@@ -24,7 +24,7 @@ export function GreetingPreview({
 	return (
 		<div className="bg-background border-border rounded-card border p-4">
 			<div className="flex gap-3">
-				<GuildIcon name="Testify" url={null} size={36} seed={guildName} />
+				<Avatar name="Testify" url={null} size={36} seed={guildName} />
 				<div className="min-w-0 flex-1">
 					<p className="text-sm font-medium">
 						Testify <span className="bg-primary/20 text-accent ml-1 rounded px-1 py-0.5 text-[0.625rem]">BOT</span>
