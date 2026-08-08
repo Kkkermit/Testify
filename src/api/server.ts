@@ -123,6 +123,18 @@ function raise(problem: ApiProblem): never {
 	throw problem;
 }
 
+/** The two ways a listen fails are both the operator's to fix, so the log says which one and what to do. */
+export function listenAdvice(error: NodeJS.ErrnoException, port: number): string {
+	if (error.code === "EADDRINUSE") {
+		return `[DASHBOARD_ERROR] Port ${String(port)} is already in use. Stop whatever is on it, or set DASHBOARD_PORT to a free port. The bot is running without the dashboard.`;
+	}
+	if (error.code === "EACCES") {
+		return `[DASHBOARD_ERROR] Port ${String(port)} needs elevated privileges. Use a port above 1024. The bot is running without the dashboard.`;
+	}
+
+	return "[DASHBOARD_ERROR] The dashboard could not start listening. The bot is running without it.";
+}
+
 export interface RunningApi {
 	/** Resolves with the port actually bound, which is only the configured one when it was not 0. */
 	ready: Promise<number>;
@@ -137,8 +149,10 @@ export function startApi(client: TestifyClient, env: Env): RunningApi {
 	serveDashboard(app);
 
 	let listening: (port: number) => void = () => undefined;
-	const ready = new Promise<number>((resolve) => {
+	let failed: (error: Error) => void = () => undefined;
+	const ready = new Promise<number>((resolve, reject) => {
 		listening = resolve;
+		failed = reject;
 	});
 
 	const server = serve({ fetch: app.fetch, port: env.DASHBOARD_PORT, hostname: env.DASHBOARD_BIND }, (info) => {
@@ -149,6 +163,16 @@ export function startApi(client: TestifyClient, env: Env): RunningApi {
 		);
 		listening(info.port);
 	}) as Server;
+
+	// Without this an unhandled `error` event on the server throws, and a busy port takes the whole bot down
+	// rather than only the optional thing that could not start.
+	server.on("error", (error: NodeJS.ErrnoException) => {
+		client.logger.error(
+			{ err: error, port: env.DASHBOARD_PORT, bind: env.DASHBOARD_BIND },
+			listenAdvice(error, env.DASHBOARD_PORT),
+		);
+		failed(error);
+	});
 
 	const running: RunningApi = {
 		ready,

@@ -1,4 +1,4 @@
-import { createApi, startApi } from "@api/server";
+import { createApi, listenAdvice, startApi } from "@api/server";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { databaseConnected } from "@database/connection";
@@ -197,5 +197,43 @@ describe("startApi", () => {
 		await running.close();
 
 		await expect(fetch(`http://127.0.0.1:${String(port)}/api/health`)).rejects.toThrow();
+	});
+});
+
+describe("a port that cannot be listened on", () => {
+	/**
+	 * An unhandled `error` event on a Node server throws, so a busy port used to reach `uncaughtException` and
+	 * take the whole bot down — for the optional half of it, and with a message that never named the port.
+	 */
+	it("rejects `ready` and logs advice rather than throwing", async () => {
+		const held = startApi(readyClient(), { DASHBOARD_PORT: 0, DASHBOARD_BIND: "127.0.0.1" } as Env);
+		const port = await held.ready;
+
+		const client = readyClient();
+		const logged = jest.spyOn(client.logger, "error");
+		const clash = startApi(client, { DASHBOARD_PORT: port, DASHBOARD_BIND: "127.0.0.1" } as Env);
+
+		try {
+			await expect(clash.ready).rejects.toThrow();
+			expect(logged).toHaveBeenCalledWith(expect.objectContaining({ port }), expect.stringContaining("already in use"));
+		} finally {
+			await held.close();
+			await clash.close();
+		}
+	});
+});
+
+describe("listenAdvice", () => {
+	it.each([
+		["EADDRINUSE", /already in use/i],
+		["EACCES", /elevated privileges/i],
+		["EPIPE", /could not start listening/i],
+	])("names what to do about %s", (code, expected) => {
+		expect(listenAdvice({ code } as NodeJS.ErrnoException, 3_000)).toMatch(expected);
+	});
+
+	/** Whatever went wrong, the operator has to know the commands still work. */
+	it.each(["EADDRINUSE", "EACCES", "EPIPE"])("says the bot is still running for %s", (code) => {
+		expect(listenAdvice({ code } as NodeJS.ErrnoException, 3_000)).toMatch(/bot is running without/i);
 	});
 });
