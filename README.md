@@ -55,6 +55,7 @@ tickets, giveaways and games. Every command works as <code>/ban</code> <strong>a
 - [Slash and prefix](#slash-and-prefix)
 - [Command categories](#command-categories)
 - [Adding your own command](#adding-your-own-command)
+- [The web dashboard](#the-web-dashboard)
 - [Scripts](#scripts)
 - [FAQ](#faq)
 - [Troubleshooting](#troubleshooting)
@@ -330,24 +331,84 @@ nothing to import by hand.
 
 Options, subcommands and buttons are all covered in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
+## The web dashboard
+
+Testify ships an optional web dashboard: sixteen screens for everything the bot does, signed in with Discord
+and served **from inside the bot process**, so there is no second service to deploy and no API key to manage.
+
+**It is off by default, and a bot-only install needs none of this.** Leave `DASHBOARD_ENABLED` unset and nothing
+below applies.
+
+### Turning it on
+
+Four settings. `npm run setup` handles all of them: it asks for the client secret and the base URL, sets
+`DASHBOARD_ENABLED=true`, generates the session secret, and prints the redirect URL to paste into Discord.
+
+| Variable                   | What it is                                                            |
+| -------------------------- | --------------------------------------------------------------------- |
+| `DASHBOARD_ENABLED`        | `true` to serve it at all                                             |
+| `DISCORD_CLIENT_SECRET`    | From the same Discord application page as your token — **OAuth2** tab |
+| `DASHBOARD_BASE_URL`       | Where people open it, e.g. `http://localhost:5174`                    |
+| `DASHBOARD_SESSION_SECRET` | `npm run secret -- --write` writes one into your `.env`               |
+
+The redirect URL goes on that same OAuth2 tab: your base URL with `/api/auth/callback` on the end. `npm run
+setup` prints the exact string, and so does the sign-in screen if you get it wrong.
+
+Then:
+
+```bash
+npm run dev:all   # the bot and the dashboard together
+```
+
+The page is on `:5174`, the API on `:3000`, and Vite proxies between them so your browser only ever talks to one
+origin. In production `npm run build && npm start` serves the built page from the bot's own port.
+
+> [!IMPORTANT]
+> Enabling the dashboard without the other three settings fails at start-up naming all three at once, rather
+> than starting half-configured. If the port is already in use the bot **keeps running without the dashboard**
+> and the log says which port to change.
+
+### Who can see what
+
+Signing in with Discord gets you the servers you already have **Manage Server** in, and nothing else. Every
+request re-checks that against Discord live, so losing the permission locks you out on your next click rather
+than at your next sign-in. The owner console is `DISCORD_OWNER_IDS` and nothing else — to everybody else those
+routes answer 404, so they cannot even be found.
+
+### If you put it on the internet
+
+The defaults are the safe ones and they assume you are on your own machine:
+
+- **`DASHBOARD_BIND` is `127.0.0.1`.** Changing it to `0.0.0.0` puts an admin panel on the internet. Put a
+  reverse proxy with HTTPS in front of it first.
+- **`DASHBOARD_TRUST_PROXY` is `false`.** Turn it on **only** when a proxy you control sets
+  `x-forwarded-for` — trusting that header without one lets anyone forge their rate-limit bucket.
+- **Use `https://` in `DASHBOARD_BASE_URL`** once you have a certificate. That is what turns on HSTS and the
+  `Secure` flag on cookies.
+- **Rotating `DASHBOARD_SESSION_SECRET` signs everybody out.** That is the whole procedure after a leak.
+
+Full detail, including the threat model, is in [`dashboard/dashboard.md`](dashboard/dashboard.md).
+
 ## Scripts
 
-| Command                     | What it does                                                         |
-| --------------------------- | -------------------------------------------------------------------- |
-| `npm run dev`               | Runs the bot from source, restarting whenever you save               |
-| `npm run build`             | Compiles to `dist/`                                                  |
-| `npm start`                 | Runs the compiled bot                                                |
-| `npm run setup`             | Interactive `.env` generator (add `-- --dev` for `.env.development`) |
-| `npm test`                  | Runs the test suite                                                  |
-| `npm run test:coverage`     | Runs the tests with a coverage report                                |
-| `npm run check`             | Typecheck, lint, format check and tests — everything CI runs         |
-| `npm run lint` / `lint:fix` | Lints, optionally fixing what it can                                 |
-| `npm run format`            | Formats everything with Prettier                                     |
-| `npm run commit`            | Guided commit message in the project's format                        |
-| `npm run docs:commands`     | Regenerates `COMMANDS.md` from the real commands                     |
-| `npm run commands:clear`    | Removes every registered slash command from Discord                  |
-| `npm run db:wipe`           | Wipes the database, or individual collections                        |
-| `npm run audit`             | Checks dependencies for known vulnerabilities                        |
+| Command                     | What it does                                                          |
+| --------------------------- | --------------------------------------------------------------------- |
+| `npm run dev`               | Runs the bot from source, restarting whenever you save                |
+| `npm run dev:all`           | Runs the bot and the web dashboard together                           |
+| `npm run build`             | Compiles to `dist/`                                                   |
+| `npm start`                 | Runs the compiled bot                                                 |
+| `npm run setup`             | Interactive `.env` generator (add `-- --dev` for `.env.development`)  |
+| `npm test`                  | Runs the test suite                                                   |
+| `npm run test:coverage`     | Runs the tests with a coverage report                                 |
+| `npm run check`             | Typecheck, lint, format check and tests — everything CI runs          |
+| `npm run lint` / `lint:fix` | Lints, optionally fixing what it can                                  |
+| `npm run format`            | Formats everything with Prettier                                      |
+| `npm run commit`            | Guided commit message in the project's format                         |
+| `npm run docs:commands`     | Regenerates `COMMANDS.md` from the real commands                      |
+| `npm run commands:clear`    | Removes every registered slash command from Discord                   |
+| `npm run db:wipe`           | Wipes the database, or individual collections                         |
+| `npm run audit`             | Checks dependencies for known vulnerabilities                         |
+| `npm run secret`            | Generates a dashboard session secret (`-- --write` puts it in `.env`) |
 
 ## FAQ
 
