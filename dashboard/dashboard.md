@@ -796,24 +796,45 @@ at full strength will not pass contrast for the icon sitting on it — check bot
 `featureLook()` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before
 the dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
 
-### 18.4 Type scale
+### 18.4 Type
 
-Measured across `dashboard/src`, not aspirational: **four sizes do 96% of the work.**
+**Three faces, all self-hosted, 104 kB for the lot.** Before the rewrite `@theme` named `"Inter var"` with no
+`@font-face` behind it, so every install had silently been rendering in `system-ui` — the scale below meant
+nothing until the faces actually existed.
 
-| Size        | Where it is used                                                   | Count |
-| ----------- | ------------------------------------------------------------------ | ----- |
-| `text-2xl`  | The page title in `PageHeader`, and the sign-in heading            | 4     |
-| `text-lg`   | A stat's value, an occasional section lead                         | 12    |
-| `text-base` | A card heading (`<h2>`, `<h3>`) — the default weight is `semibold` | 29    |
-| `text-sm`   | Body copy, every control, every button, table cells                | 100   |
-| `text-xs`   | Meta lines, IDs, timestamps, badges                                | 51    |
+| Token            | Face           | Job                                                     |
+| ---------------- | -------------- | ------------------------------------------------------- |
+| `--font-sans`    | Inter          | Everything that is prose or a control                   |
+| `--font-display` | Space Grotesk  | The page title, every card heading, the brand — 32 uses |
+| `--font-mono`    | JetBrains Mono | Numbers, IDs, the eyebrow, a command name — 42 uses     |
+
+Inter and Space Grotesk are `<link rel="preload">`-ed in `index.html`; mono is not, because it carries small
+labels where a swap is much less visible than it would be in a heading. Verified in a production build that
+each font is fetched **once** — a preload that does not dedupe is worse than no preload. No external host, so
+the CSP is untouched and a self-hosted bot still phones nowhere.
+
+Sizes, measured across `dashboard/src` rather than aspirational: **three do 96% of the work.**
+
+| Size        | Where it is used                                    | Count |
+| ----------- | --------------------------------------------------- | ----- |
+| `text-2xl`  | The page title in `PageHeader`, the sign-in heading | 2     |
+| `text-lg`   | An occasional section lead                          | 3     |
+| `text-base` | A card heading — `font-display font-bold`           | 31    |
+| `text-sm`   | Body copy, every control, every button, table cells | 108   |
+| `text-xs`   | Meta lines, IDs, timestamps, badges                 | 55    |
 
 Rules that hold today and are worth keeping:
 
-- **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them.
-- **A card heading is `text-base font-semibold`**, not `text-lg`. The size difference between a page and a card
-  is carried by `text-2xl` vs `text-base`; adding a third step in between makes cards compete with the page.
+- **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them, and it caught the
+  owner console mounting the whole of `CommandsPage` — `PageHeader` and all — inside a tab.
+- **Headings never skip a level.** Every card heading is an `<h2>`; two `<h3>`s in the owner console were
+  jumping straight from the page's `<h1>` and left a hole in the outline.
+- **A card heading is `font-display text-base font-bold`**, not `text-lg`. The step between a page and a card
+  is carried by the size _and_ the face; adding a third size in between makes cards compete with the page.
+- **A section label is an `Eyebrow`, not a heading you style yourself.** 14 uses, and ten of them were
+  hand-rolled copies of the same class string until the primitive grew an `as` prop.
 - **An ID is always `font-mono text-xs`** with `--color-muted-foreground`. It is a reference, not a name.
+- **Headings carry `text-wrap: balance`** from the base layer, so a title never leaves one word on its own line.
 - **`text-xl` appears once** in the whole app. If a rewrite wants it, use it deliberately or delete it.
 
 ### 18.5 Surfaces and elevation
@@ -1150,14 +1171,14 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🖼️ Layout (5–10)
 
-| #   | Rule                              | Verdict | Note                                                                                                     |
-| --- | --------------------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
-| 5   | Negative space                    | Apply   | The densest screens (owner console, member detail) are the ones to look at first                         |
-| 6   | Golden ratio or rule of thirds    | N/A     | A settings form is a single column of cards; proportion here is the spacing ladder in §18.6, not a ratio |
-| 7   | Hierarchy via size, colour, space | Held    | §18.4 — four type sizes, and muted vs foreground carries the rest                                        |
-| 8   | Grid systems                      | Held    | `max-w-[1100px]`, one `gap-6` column, `sm:grid-cols-2` inside cards                                      |
-| 9   | A clear focal point               | Apply   | Most screens have none — every card weighs the same. The primary action on a page should win             |
-| 10  | Rhythm to direct attention        | Apply   | Related to 9. The F-pattern applies to the tables; the Z-pattern does not apply to a form                |
+| #   | Rule                              | Verdict | Note                                                                                                                                                                         |
+| --- | --------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 5   | Negative space                    | Held    | The settings page's dead space was measured, not eyeballed: 48px above a tab with no description, and 276px of page from one card's source order inside a `columns` balancer |
+| 6   | Golden ratio or rule of thirds    | N/A     | A settings form is a single column of cards; proportion here is the spacing ladder in §18.6, not a ratio                                                                     |
+| 7   | Hierarchy via size, colour, space | Held    | §18.4 — four type sizes, and muted vs foreground carries the rest                                                                                                            |
+| 8   | Grid systems                      | Held    | `max-w-[1100px]`, one `gap-6` column, `sm:grid-cols-2` inside cards                                                                                                          |
+| 9   | A clear focal point               | Held    | `Card focal` puts an accent hairline on the one card that is the point of a screen, and a browser sweep counts `[data-variant="primary"]` on every route                     |
+| 10  | Rhythm to direct attention        | Held    | The F-pattern now holds on every list: recent changes lead with what changed rather than when, and both tables put the identifier left and the figures right                 |
 
 ### 🎟 Essentialism (11–16)
 
@@ -1172,31 +1193,31 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🧭 Guidance (17–22)
 
-| #   | Rule                       | Verdict | Note                                                                                           |
-| --- | -------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
-| 17  | Engaging onboarding        | Apply   | §19.2 covers the half-install. A first-run tour of what the dashboard can do does not exist    |
-| 18  | Intuitive flow             | Held    | §19.5 — overview grid to feature screen, and the grid is the navigation                        |
-| 19  | Contextual hints and tips  | Held    | `Field`'s `hint`, hierarchy warnings, `Tooltip` — which describes, never names (§11)           |
-| 20  | Progressive disclosure     | Apply   | The settings page shows all seven sections at once. Tabs do this on levelling; sections do not |
-| 21  | Design to encourage action | Apply   | Related to 9 — a page whose cards all look alike encourages nothing in particular              |
-| 22  | Feedback for every action  | Held    | `SavingIndicator`, optimistic writes, a refusal beside its control (§19.1)                     |
+| #   | Rule                       | Verdict | Note                                                                                                                                                                      |
+| --- | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 17  | Engaging onboarding        | Apply   | §19.2 covers the half-install. A first-run tour of what the dashboard can do does not exist                                                                               |
+| 18  | Intuitive flow             | Held    | §19.5 — overview grid to feature screen, and the grid is the navigation                                                                                                   |
+| 19  | Contextual hints and tips  | Held    | `Field`'s `hint`, hierarchy warnings, `Tooltip` — which describes, never names (§11)                                                                                      |
+| 20  | Progressive disclosure     | Held    | `Disclosure` groups the settings page's seven cards under three questions. A `<details>`, so the fold is keyboard-operable and announced without an `aria-*` to get wrong |
+| 21  | Design to encourage action | Held    | Settled with 9 — exactly one primary action per route, verified in a browser rather than by reading                                                                       |
+| 22  | Feedback for every action  | Held    | `SavingIndicator`, optimistic writes, a refusal beside its control (§19.1)                                                                                                |
 
 ### 💎 Typography and colour (23–34)
 
-| #   | Rule                            | Verdict | Note                                                                                                                                                    |
-| --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 23  | Typography hierarchy            | Held    | §18.4                                                                                                                                                   |
-| 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                          |
-| 25  | Reflect brand mood              | Apply   | The type is neutral to the point of anonymous. This is where a rewrite has the most room                                                                |
-| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                        |
-| 27  | Limit font and style variations | Held    | §18.4 — four sizes carry 96% of the app                                                                                                                 |
-| 28  | Line spacing, kerning, height   | Apply   | The one rule the `typography` skill also covers; defer to it. Nothing sets a line height today                                                          |
-| 29  | Contrast is key                 | Apply   | **The known gap.** `jest-axe` runs with `color-contrast` disabled, so this is unverified — §18.10 step 4, and the `accessibility-*` skills are the tool |
-| 30  | Consistent palette              | Held    | §18.2, and no component may write a colour                                                                                                              |
-| 31  | The 60–30–10 rule               | Apply   | Worth measuring. The page is ~95% background and card, and the accent barely appears                                                                    |
-| 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                 |
-| 33  | Semantic colours for status     | Held    | `Badge` tones, `Warning`, the destructive button variant                                                                                                |
-| 34  | Colour to guide action          | Apply   | One primary per screen would make this true; today several cards each have a primary button                                                             |
+| #   | Rule                            | Verdict | Note                                                                                                                                                                                                                           |
+| --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 23  | Typography hierarchy            | Held    | §18.4                                                                                                                                                                                                                          |
+| 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                                                                                                 |
+| 25  | Reflect brand mood              | Held    | Three self-hosted faces where there had been none, and the section label is the bot's own boot banner in HTML. The type is no longer anonymous                                                                                 |
+| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                                                                                               |
+| 27  | Limit font and style variations | Held    | §18.4 — four sizes carry 96% of the app                                                                                                                                                                                        |
+| 28  | Line spacing, kerning, height   | Apply   | Headings now carry `text-wrap: balance` and `font-feature-settings`, but nothing sets a line-height scale                                                                                                                      |
+| 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `lib/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette |
+| 30  | Consistent palette              | Held    | §18.2, and no component may write a colour                                                                                                                                                                                     |
+| 31  | The 60–30–10 rule               | Apply   | Still not measured. The accent appears more than it did, but nobody has counted the pixels                                                                                                                                     |
+| 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                                                                                        |
+| 33  | Semantic colours for status     | Held    | `Badge` tones, `Warning`, the destructive button variant                                                                                                                                                                       |
+| 34  | Colour to guide action          | Held    | One primary per screen, and the pairs that were never primary-and-secondary — Add/Take, Set level/Change XP — now weigh the same as each other                                                                                 |
 
 ### 🖼 Visual content (35–40)
 
@@ -1211,14 +1232,14 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🛸 Novelty (41–46)
 
-| #   | Rule                                 | Verdict | Note                                                                                                 |
-| --- | ------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------- |
-| 41  | Originality and uniqueness           | Apply   | The honest assessment: this reads as a competent Tailwind dashboard. That is what the rewrite is for |
-| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19, a WebGL backdrop that costs nothing when unwanted                   |
-| 43  | Most advanced, yet acceptable        | Held    | The backdrop is the whole of the risk taken, and it degrades to a CSS wash                           |
-| 44  | Inspiration from other industries    | Apply   | Nothing here looks outside dashboards for its ideas                                                  |
-| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                   |
-| 46  | Novelty must enhance, not complicate | Held    | The rule that keeps the backdrop `aria-hidden` and `pointer-events-none`                             |
+| #   | Rule                                 | Verdict | Note                                                                                                                                                      |
+| --- | ------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 41  | Originality and uniqueness           | Apply   | Better — a display face, the console voice, a WebGL field. Still recognisably a dashboard, and this one is the reader's call rather than mine             |
+| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19, a WebGL backdrop that costs nothing when unwanted                                                                        |
+| 43  | Most advanced, yet acceptable        | Held    | The backdrop is the whole of the risk taken, and it degrades to a CSS wash                                                                                |
+| 44  | Inspiration from other industries    | Held    | `Eyebrow` is the terminal boot banner `bannerLines()` prints on every start, rendered as HTML. It looks at the bot itself rather than at other dashboards |
+| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                                                                        |
+| 46  | Novelty must enhance, not complicate | Held    | The rule that keeps the backdrop `aria-hidden` and `pointer-events-none`                                                                                  |
 
 ### 🎛 Consistency (47–52)
 
@@ -1244,18 +1265,26 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### What this adds up to
 
-**Thirty-two held, seventeen to apply, nine deliberately not applicable.** The seventeen cluster tightly, and
-they are the same three problems wearing different hats:
+**Forty-one held, eight to apply, nine deliberately not applicable** — the rewrite in
+[`re-write.md`](re-write.md) closed nine, and the three clusters it was aimed at are all shut:
 
-1. **No focal point** (9, 10, 21, 34). Every card carries equal weight and several offer a primary button, so
-   no screen says what to do first. This is the biggest single win and it is mostly a matter of demoting things.
-2. **The type and palette are anonymous** (25, 31, 41, 44). Correct, accessible and unmemorable — the honest
-   reading of rule 41. This is what the aesthetic skills are for, and §18 is explicitly a baseline to rewrite.
-3. **Contrast is unverified** (28, 29). `jest-axe` cannot check it and nothing else has. The `accessibility-*`
-   skills close this, and it must be re-checked after any palette change — §18.10 step 4.
+1. **No focal point** (9, 10, 21, 34) — closed. `Card focal` marks the one card that is the point of a screen,
+   and a browser sweep counts primary buttons on every route so the rule cannot quietly drift back.
+2. **The type and palette are anonymous** (25, 44) — closed. Three self-hosted faces where `@theme` had named
+   one with no `@font-face` behind it, and a section label that is the bot's own boot banner rather than a
+   borrowed dashboard idiom. 31 and 41 stay open and are judgement calls rather than defects.
+3. **Contrast is unverified** (29) — closed. Every pair is computed in the test suite from the tokens
+   themselves, and the two live AA failures it found are fixed.
 
-The rest — density (5), conciseness (37), progressive disclosure (20), copy consistency (52) — is ordinary
-polish that can ride along with the rewrite rather than driving it.
+**The eight that remain are honestly open**, not quietly downgraded:
+
+- **3, 37, 52** — copy. §19.11 states the voice; nothing enforces it, and some card descriptions still run to
+  three lines.
+- **16, 17** — a first-run tour, and smart defaults beyond the leaderboard's Find me.
+- **28** — headings balance and the faces are set, but nothing defines a line-height scale.
+- **31** — the 60–30–10 balance still has not been measured. The accent appears more than it did; nobody has
+  counted.
+- **41** — better, and still recognisably a dashboard. This one is the reader's call rather than the author's.
 
 ---
 
@@ -1272,5 +1301,7 @@ right because owner commands are one-shot and embed-based. `/eval` is never expo
 
 Still open:
 
-- **Phase 6** — the manual half of the accessibility pass, a Docker image and compose file, README screenshots,
-  and a light theme if wanted. §18.10 is the order to do the last one in.
+- **Phase 6** — a Docker image and compose file, README screenshots, and a light theme if wanted. §18.10 is the
+  order to do the last one in. The manual half of the accessibility pass is **done**: reflow at 320px, a visible
+  focus indicator on every keyboard stop, `prefers-reduced-motion`, and a tab walk for traps, all run in a real
+  browser. [`re-write.md`](re-write.md) §9 records what they found and the exemptions worth keeping.

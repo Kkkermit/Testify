@@ -92,18 +92,18 @@ Read this list before touching anything. Each of these has a test that will fail
 Taken from the repository **before** the rewrite, not estimated. The "after" column is the same commands re-run
 at the end of Phase 4 — see [§12](#12-how-to-verify-anything).
 
-| Thing                          | Before                                      | After                              |
-| ------------------------------ | ------------------------------------------- | ---------------------------------- |
-| Routes                         | 21                                          | 21 — none moved, by design         |
-| Feature directories            | 16                                          | 16                                 |
-| Components and pages (`.tsx`)  | 105                                         | 107                                |
-| Primitives                     | 17                                          | 17 components + 2 class modules    |
-| Dashboard test files / tests   | 54 / 640                                    | **60 / 702**                       |
-| First-load JS, gzipped         | **159 kB** (`vendor` 150 kB + `index` 9 kB) | **158.9 kB** — `vendor` unchanged  |
-| CSS, gzipped                   | **8.9 kB**                                  | **9.2 kB**                         |
-| Self-hosted fonts              | none declared, so nothing ever loaded       | 104 kB, two of three preloaded     |
-| three.js                       | its own chunk, not in the first load        | unchanged                          |
-| 58 rules held / to apply / N/A | 32 / 17 / 9                                 | see [§20](dashboard.md) of the doc |
+| Thing                          | Before                                      | After                             |
+| ------------------------------ | ------------------------------------------- | --------------------------------- |
+| Routes                         | 21                                          | 21 — none moved, by design        |
+| Feature directories            | 16                                          | 16                                |
+| Components and pages (`.tsx`)  | 105                                         | 107                               |
+| Primitives                     | 17                                          | 17 components + 2 class modules   |
+| Dashboard test files / tests   | 54 / 640                                    | **60 / 702**                      |
+| First-load JS, gzipped         | **159 kB** (`vendor` 150 kB + `index` 9 kB) | **158.9 kB** — `vendor` unchanged |
+| CSS, gzipped                   | **8.9 kB**                                  | **9.2 kB**                        |
+| Self-hosted fonts              | none declared, so nothing ever loaded       | 104 kB, two of three preloaded    |
+| three.js                       | its own chunk, not in the first load        | unchanged                         |
+| 58 rules held / to apply / N/A | 32 / 17 / 9                                 | **41 / 8 / 9**                    |
 
 The font row is the one number that went **up**, and it is the only real cost of the rewrite: `"Inter var"`
 was named in `@theme` with no `@font-face` behind it, so every install had silently been falling through to
@@ -326,7 +326,7 @@ one is a commit.
 
 ---
 
-## 9. Phase 4 — prove it and write it down — **in progress**
+## 9. Phase 4 — prove it and write it down — **done**
 
 1. **The full verification set** in [§12](#12-how-to-verify-anything), all of it. ✓
 2. **The manual accessibility tier** `jest-axe` cannot reach. ✓ — reflow at 320px (1.4.10), a visible focus
@@ -334,10 +334,15 @@ one is a commit.
    both fixed: `/owner` overflowed 320px by 13px because `StatTile`'s 26px mono number does not fit two to a
    row, and that was the whole of it.
 3. **`web-design-guidelines`** as a final review pass. ✓ — see the table below.
-4. **Update `dashboard.md` §18** so it describes what was built. It is the baseline for the _next_ person.
-5. **Update §20's verdicts.** Every rule moved from Apply to Held gets its note rewritten. If the Apply count
-   has not fallen, say so rather than quietly leaving it.
-6. **Update the screenshots** referenced by the README.
+4. **Update `dashboard.md` §18** so it describes what was built. ✓ — §18.4 is now "Type" rather than "Type
+   scale", because the three faces are the change and the sizes were only ever a symptom. Counts re-measured.
+5. **Update §20's verdicts.** ✓ — **41 held / 8 apply / 9 N/A**, up from 32/17/9. Nine moved, each with a note
+   naming what closed it. The eight that remain are listed as open rather than quietly downgraded, and two of
+   them (31, 41) are judgement calls the next reader should make for themselves.
+6. **Update the screenshots** referenced by the README. **Nothing to do** — the README has no dashboard
+   screenshots. It carries an externally hosted banner and a sponsor button, and that is all. Adding a set
+   would mean committing a megabyte of PNGs to a bot repository, which is a decision for the maintainer rather
+   than a step in a restyle.
 
 ### What the guidelines pass found
 
