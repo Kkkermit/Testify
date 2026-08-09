@@ -46,7 +46,7 @@ export function MemberStanding({ detail }: { detail: MemberDetail }): React.JSX.
 
 	return (
 		<Card>
-			<h2 className="text-base font-semibold">Standing in this server</h2>
+			<h2 className="font-display text-base font-bold tracking-tight">Standing in this server</h2>
 			<dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
 				{rows.map((row) => (
 					<Figure key={row.label} label={row.label} value={row.value} size="md" />

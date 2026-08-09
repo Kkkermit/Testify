@@ -54,7 +54,10 @@ export function StickyPage(): React.JSX.Element {
 			/>
 
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
-				<h2 id="current-heading" className="text-lg font-semibold">
+				<h2
+					id="current-heading"
+					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
+				>
 					In use
 					<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
 						{entries.length} of {list.data.limit}
@@ -91,7 +94,7 @@ export function StickyPage(): React.JSX.Element {
 
 			<Card className="motion-pop flex flex-col gap-4">
 				<div>
-					<h2 className="text-base font-semibold">Add a sticky</h2>
+					<h2 className="font-display text-base font-bold tracking-tight">Add a sticky</h2>
 					<p className="text-muted-foreground text-sm">One per channel. Editing an existing one is done above.</p>
 				</div>
 

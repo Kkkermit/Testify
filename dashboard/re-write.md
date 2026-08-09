@@ -147,7 +147,11 @@ A rewrite with no exit criteria is churn. These are the criteria. **All of them 
 
 ---
 
-## 5. Phase 0 — fix what is broken
+## 5. Phase 0 — fix what is broken — **done**
+
+> Links and inline red now read `--color-accent` and `--color-destructive-text`; the fill violet is a fill only.
+> `src/lib/contrast.test.ts` reads the tokens out of `index.css` and fails if any pair drops below its
+> threshold — proved by setting `--color-accent` back to the fill violet and watching three tests go red.
 
 Do this before any restyling. It is a bug fix, not a taste decision, and it is covered by "the accessibility
 floor only rises" — so it stands whatever the rewrite decides afterwards.
@@ -177,7 +181,21 @@ Jest, is enough and needs no browser.
 
 ---
 
-## 6. Phase 1 — direction
+## 6. Phase 1 — direction — **done**
+
+> **The direction is "operator console".** Testify already prints a boot banner with heavy `═` and thin `─`
+> rules and status glyphs; that vernacular is the product's own and the dashboard ignored it. The signature is
+> the section eyebrow — a short accent rule, then a letterspaced mono label — which is that banner header in
+> HTML, and names which subsystem a block belongs to rather than decorating.
+>
+> **Three faces, self-hosted, latin subset, variable: Space Grotesk (display), Inter (body), JetBrains Mono
+> (data).** Space Grotesk is the proportional cut of Space Mono, so a console's headings and its figures come
+> from one skeleton — the pairing is the concept, not a taste. Before this, `"Inter var"` was named in the
+> tokens but never loaded: every install fell through to `system-ui`, which is why the type looked different on
+> every machine and like nothing in particular on all of them.
+>
+> Cost: 104 kB of font files, cached and outside the JS budget. **Add a font budget to §4 before adding a
+> fourth face.**
 
 The part that decides what it looks like. **Do not start in a component.**
 

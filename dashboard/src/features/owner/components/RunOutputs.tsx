@@ -16,7 +16,7 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 	return (
 		<Card className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-baseline justify-between gap-2">
-				<h2 className="text-base font-semibold">
+				<h2 className="font-display text-base font-bold tracking-tight">
 					<span className="font-mono">
 						/{result.command}
 						{result.subcommand === null ? "" : ` ${result.subcommand}`}

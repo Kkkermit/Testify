@@ -733,7 +733,7 @@ the wrong file.
 | ------------------------------- | ----------------------------------------------------- | --------------------------------------- |
 | Any colour                      | `@theme` in `src/index.css`                           | Everything                              |
 | Corner radius                   | `--radius-card`, `--radius-field`                     | Everything                              |
-| Font family                     | `--font-sans`, `--font-mono`                          | Everything                              |
+| Font family                     | `--font-display`, `--font-mono`                       | Everything                              |
 | Animation and easing            | `--animate-*`, `--ease-out-soft`, `@utility motion-*` | Everything                              |
 | Card surface, border, padding   | `components/primitives/Card.tsx`                      | Every card                              |
 | Button shape and variants       | `components/primitives/Button.tsx`                    | Every button                            |
@@ -749,23 +749,24 @@ the wrong file.
 Names are **roles, not colours**. `--color-destructive` is red today; the name still reads correctly if a fork
 makes it orange. Renaming a token to its hue is how a palette stops being swappable.
 
-| Token                        | Value     | What it is for                                                     |
-| ---------------------------- | --------- | ------------------------------------------------------------------ |
-| `--color-background`         | `#0a0a0f` | The page. Everything else sits on it                               |
-| `--color-foreground`         | `#ffffff` | Body text, headings, an active icon                                |
-| `--color-muted`              | `#1a1a25` | A recessed fill: secondary buttons, hover states, icon tiles       |
-| `--color-muted-foreground`   | `#a1a1b5` | Secondary text, meta lines, an inactive icon                       |
-| `--color-card`               | `#12121a` | Every card and panel surface                                       |
-| `--color-popover`            | `#1a1a25` | Anything floating: tooltips, native `<option>` lists               |
-| `--color-border`             | `#26263a` | Card borders, dividers, table rules                                |
-| `--color-input`              | `#6b6b8f` | Field borders — deliberately lighter, so a control looks touchable |
-| `--color-primary`            | `#7c3aed` | The one action colour: primary buttons, the active nav marker      |
-| `--color-primary-foreground` | `#ffffff` | Text on primary                                                    |
-| `--color-accent`             | `#a78bfa` | Links, the WebGL field, secondary emphasis                         |
-| `--color-ring`               | `#a78bfa` | The focus ring, and nothing else                                   |
-| `--color-success`            | `#34d399` | Saved, connected, healthy                                          |
-| `--color-warning`            | `#fbbf24` | A missing permission, a hierarchy problem, "nothing set up"        |
-| `--color-destructive`        | `#dc2626` | Delete, leave, block, shut down                                    |
+| Token                        | Value     | What it is for                                                          |
+| ---------------------------- | --------- | ----------------------------------------------------------------------- |
+| `--color-background`         | `#07070b` | The page. Everything else sits on it                                    |
+| `--color-foreground`         | `#ffffff` | Body text, headings, an active icon                                     |
+| `--color-muted`              | `#1c1c2a` | A recessed fill: secondary buttons, hover states, icon tiles            |
+| `--color-muted-foreground`   | `#a2a2ba` | Secondary text, meta lines, an inactive icon                            |
+| `--color-card`               | `#12121c` | Every card and panel surface                                            |
+| `--color-popover`            | `#171722` | Anything floating: tooltips, native `<option>` lists                    |
+| `--color-border`             | `#262639` | Card borders, dividers, table rules                                     |
+| `--color-input`              | `#7676a0` | Field borders — deliberately lighter, so a control looks touchable      |
+| `--color-primary`            | `#7c3aed` | The one action colour: primary buttons, the active nav marker           |
+| `--color-primary-foreground` | `#ffffff` | Text on primary                                                         |
+| `--color-accent`             | `#a78bfa` | **Every violet that is text**: links, the eyebrow rule, the WebGL field |
+| `--color-ring`               | `#a78bfa` | The focus ring, and nothing else                                        |
+| `--color-success`            | `#3ddc97` | Saved, connected, healthy                                               |
+| `--color-warning`            | `#fbbf24` | A missing permission, a hierarchy problem, "nothing set up"             |
+| `--color-destructive`        | `#dc2626` | Delete, leave, block — as a **fill**, always with white on it           |
+| `--color-destructive-text`   | `#f87171` | The same meaning as **text**. One token cannot be legible as both       |
 
 Two conventions worth keeping:
 
@@ -785,7 +786,7 @@ ticket. Regroup them freely; the only constraint is the contrast rule below.
 | `--color-feature-levelling`  | `#a78bfa` | `levelling`                                                   |
 | `--color-feature-economy`    | `#fbbf24` | `economy`, `lottery`, `treasure`, `games`                     |
 | `--color-feature-moderation` | `#f87171` | `moderation`, `automod`, `anti-link`, `verification`, `owner` |
-| `--color-feature-welcome`    | `#34d399` | `welcome`, `auto-roles`                                       |
+| `--color-feature-welcome`    | `#3ddc97` | `welcome`, `auto-roles`                                       |
 | `--color-feature-tickets`    | `#60a5fa` | `tickets`, `audit-logging`, `voice-stats`, `info`             |
 | `--color-feature-community`  | `#f472b6` | `sticky`, `counting`, `giveaway`, `community`, `fun`          |
 

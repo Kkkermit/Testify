@@ -35,7 +35,7 @@ export function WarningsCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className="text-base font-semibold">Warnings</h2>
+				<h2 className="font-display text-base font-bold tracking-tight">Warnings</h2>
 				<p className="text-muted-foreground text-sm">{warningSummary(detail.warnings)}</p>
 			</div>
 

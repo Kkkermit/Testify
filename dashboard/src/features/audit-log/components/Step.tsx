@@ -31,7 +31,7 @@ export function Step({
 						{number}
 					</span>
 					<div className="min-w-0">
-						<h2 id={headingId} className="text-base font-semibold">
+						<h2 id={headingId} className="font-display text-base font-bold tracking-tight">
 							{title}
 						</h2>
 						<p className="text-muted-foreground text-sm">{describes}</p>

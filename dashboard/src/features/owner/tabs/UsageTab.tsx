@@ -48,7 +48,7 @@ export function UsageTab({
 						className="px-6 py-4"
 						label="Failed"
 						value={percent(report.failures, report.runs)}
-						{...(errorRate(report) > 0.05 ? { tone: "text-destructive" } : {})}
+						{...(errorRate(report) > 0.05 ? { tone: "text-destructive-text" } : {})}
 					/>
 					<Figure className="px-6 py-4" label="Active servers" value={report.activeGuilds.toLocaleString()} />
 					<Figure
@@ -138,7 +138,7 @@ function Panel({
 	return (
 		<Card className="flex flex-col gap-3">
 			<div>
-				<h3 className="text-base font-semibold">{title}</h3>
+				<h3 className="font-display text-base font-bold tracking-tight">{title}</h3>
 				<p className="text-muted-foreground text-xs">{hint}</p>
 			</div>
 			{children}

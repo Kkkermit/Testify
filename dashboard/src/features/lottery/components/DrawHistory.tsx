@@ -12,7 +12,7 @@ export function DrawHistory({
 	return (
 		<Card className="flex flex-col gap-3">
 			<div className="flex flex-wrap items-center justify-between gap-2">
-				<h2 className="text-base font-semibold">Past draws</h2>
+				<h2 className="font-display text-base font-bold tracking-tight">Past draws</h2>
 				{nextDrawAt !== null && (
 					<p className="text-muted-foreground text-sm">
 						Next draw <time dateTime={nextDrawAt}>{new Date(nextDrawAt).toLocaleString()}</time>

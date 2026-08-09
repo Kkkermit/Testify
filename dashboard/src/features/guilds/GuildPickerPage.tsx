@@ -59,7 +59,10 @@ export function GuildPickerPage(): React.JSX.Element {
 				groups.map((group) => (
 					<section key={group.key} aria-labelledby={`guilds-${group.key}`} className="flex flex-col gap-3">
 						<div className="flex flex-col gap-0.5">
-							<h2 id={`guilds-${group.key}`} className="text-lg font-semibold">
+							<h2
+								id={`guilds-${group.key}`}
+								className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
+							>
 								{group.title}
 								<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
 									{group.guilds.length}

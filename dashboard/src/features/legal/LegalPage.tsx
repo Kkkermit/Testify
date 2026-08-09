@@ -22,7 +22,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 
 			{document.sections.map((section) => (
 				<Card key={section.heading} className="flex flex-col gap-3">
-					<h2 className="text-base font-semibold">{section.heading}</h2>
+					<h2 className="font-display text-base font-bold tracking-tight">{section.heading}</h2>
 					{section.paragraphs.map((paragraph) => (
 						<p key={paragraph} className="text-muted-foreground text-sm leading-relaxed">
 							{paragraph}

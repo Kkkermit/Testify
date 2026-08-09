@@ -51,7 +51,7 @@ export function OwnerGuildTable({
 										onClick={() => {
 											onSelect(guild.id);
 										}}
-										className="hover:text-primary flex items-center gap-2 text-left transition-colors duration-150"
+										className="hover:text-accent flex items-center gap-2 text-left transition-colors duration-150"
 									>
 										<Avatar name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
 										<span className="truncate">{guild.name}</span>

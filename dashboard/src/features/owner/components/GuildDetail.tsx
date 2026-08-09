@@ -63,10 +63,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 				<Warning>Missing in this server: {guild.missingPermissions.join(", ")}.</Warning>
 			)}
 
-			<Link
-				to={`/guilds/${guild.id}`}
-				className="text-primary inline-flex items-center gap-1.5 text-sm hover:underline"
-			>
+			<Link to={`/guilds/${guild.id}`} className="text-accent inline-flex items-center gap-1.5 text-sm hover:underline">
 				Open its settings
 				<ExternalLink size={14} aria-hidden="true" />
 			</Link>

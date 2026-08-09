@@ -60,14 +60,17 @@ export function OverviewTab(): React.JSX.Element {
 							label="Database"
 							value={stats.database}
 							icon={Database}
-							tint={stats.database === "connected" ? "text-success" : "text-destructive"}
+							tint={stats.database === "connected" ? "text-success" : "text-destructive-text"}
 						/>
 					</>
 				)}
 			</section>
 
 			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
-				<h2 id="servers-heading" className="text-lg font-semibold">
+				<h2
+					id="servers-heading"
+					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
+				>
 					Servers
 				</h2>
 

@@ -29,7 +29,7 @@ export function MoneyCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className="text-base font-semibold">Money</h2>
+				<h2 className="font-display text-base font-bold tracking-tight">Money</h2>
 				<p className="text-muted-foreground text-sm">
 					{detail.economy === null
 						? "They have no account here yet — adding money opens one."

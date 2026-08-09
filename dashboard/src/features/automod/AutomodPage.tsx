@@ -64,7 +64,10 @@ export function AutomodPage(): React.JSX.Element {
 			)}
 
 			<section aria-labelledby="rules-heading" className="flex flex-col gap-3">
-				<h2 id="rules-heading" className="text-lg font-semibold">
+				<h2
+					id="rules-heading"
+					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
+				>
 					Rules
 					<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">{list.length}</span>
 				</h2>
@@ -103,7 +106,7 @@ export function AutomodPage(): React.JSX.Element {
 			{canManage && (
 				<Card className="motion-pop flex flex-col gap-4">
 					<div>
-						<h2 className="text-base font-semibold">Add a rule</h2>
+						<h2 className="font-display text-base font-bold tracking-tight">Add a rule</h2>
 						<p className="text-muted-foreground text-sm">
 							Discord allows a handful of each kind. It refuses the rest, and this says so when it does.
 						</p>

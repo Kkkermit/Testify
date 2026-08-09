@@ -43,7 +43,7 @@ export function BoardTable({
 							<th scope="row" className="px-6 py-3 text-left font-normal">
 								<Link
 									to={`/guilds/${guildId}/members/${row.userId}`}
-									className="hover:text-primary flex items-center gap-2 transition-colors duration-150"
+									className="hover:text-accent flex items-center gap-2 transition-colors duration-150"
 								>
 									<Avatar name={row.displayName} url={row.avatarUrl} size={24} seed={row.userId} />
 									<span className="truncate">{row.displayName}</span>

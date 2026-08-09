@@ -5,7 +5,7 @@ const TONES = {
 	muted: "bg-muted text-muted-foreground",
 	success: "bg-success/15 text-success",
 	warning: "bg-warning/15 text-warning",
-	danger: "bg-destructive/15 text-destructive",
+	danger: "bg-destructive/15 text-destructive-text",
 } as const;
 
 export type BadgeTone = keyof typeof TONES;

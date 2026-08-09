@@ -38,7 +38,7 @@ export function BlacklistTab(): React.JSX.Element {
 		<div className="flex flex-col gap-4">
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="text-base font-semibold">Block someone from Testify</h2>
+					<h2 className="font-display text-base font-bold tracking-tight">Block someone from Testify</h2>
 					<p className="text-muted-foreground text-sm">
 						A blocked account cannot run a command in any server, on either the slash or the prefix surface. This is
 						bot-wide — for one server, turn the command off instead.
@@ -91,7 +91,9 @@ export function BlacklistTab(): React.JSX.Element {
 			</Card>
 
 			<Card className="flex flex-col gap-4">
-				<h2 className="text-base font-semibold">Blocked accounts {rows.data && `(${String(rows.data.length)})`}</h2>
+				<h2 className="font-display text-base font-bold tracking-tight">
+					Blocked accounts {rows.data && `(${String(rows.data.length)})`}
+				</h2>
 
 				{rows.isPending && <Skeleton className="h-24 w-full" />}
 

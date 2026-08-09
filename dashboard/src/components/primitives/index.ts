@@ -6,6 +6,7 @@ export { Button, type ButtonVariant } from "@/components/primitives/Button";
 export { Card, cardClass, type CardPadding } from "@/components/primitives/Card";
 export { DataList, type DataRow, Figure } from "@/components/primitives/DataList";
 export { EmptyState } from "@/components/primitives/EmptyState";
+export { Eyebrow } from "@/components/primitives/Eyebrow";
 export { PageHeader } from "@/components/primitives/PageHeader";
 export { Pager } from "@/components/primitives/Pager";
 export { type Segment, SegmentedControl } from "@/components/primitives/SegmentedControl";

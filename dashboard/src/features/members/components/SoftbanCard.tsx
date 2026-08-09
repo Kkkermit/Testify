@@ -15,7 +15,7 @@ export function SoftbanCard({
 		<Card className="flex flex-wrap items-end justify-between gap-4">
 			<div className="flex flex-col gap-1">
 				<h2 className="flex items-center gap-2 text-base font-semibold">
-					<ShieldAlert size={18} className="text-destructive" aria-hidden="true" /> Active softban
+					<ShieldAlert size={18} className="text-destructive-text" aria-hidden="true" /> Active softban
 				</h2>
 				<p className="text-muted-foreground text-sm">{softban.reason}</p>
 				<p className="text-muted-foreground text-xs">

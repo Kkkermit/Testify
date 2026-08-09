@@ -5,8 +5,8 @@ import { formatClock } from "@/features/owner/owner.utils";
 import { cn } from "@/lib/cn";
 
 const TONE: Record<string, string> = {
-	error: "text-destructive",
-	fatal: "text-destructive",
+	error: "text-destructive-text",
+	fatal: "text-destructive-text",
 	warn: "text-warning",
 	info: "text-muted-foreground",
 };

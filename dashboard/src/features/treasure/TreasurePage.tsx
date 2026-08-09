@@ -58,7 +58,7 @@ export function TreasurePage(): React.JSX.Element {
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div>
-					<h2 className="text-base font-semibold">Drops in this server</h2>
+					<h2 className="font-display text-base font-bold tracking-tight">Drops in this server</h2>
 					<p className="text-muted-foreground text-sm">
 						{settings.configured
 							? describeRate(draftOf(settings))
@@ -78,7 +78,7 @@ export function TreasurePage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="text-base font-semibold">How often, and how much</h2>
+					<h2 className="font-display text-base font-bold tracking-tight">How often, and how much</h2>
 					<p className="text-muted-foreground text-sm">
 						Testify picks a number in each range, so drops do not land on a predictable beat.
 					</p>

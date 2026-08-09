@@ -53,7 +53,9 @@ export function WelcomePage(): React.JSX.Element {
 
 			<Card className="motion-pop flex flex-col gap-4">
 				<div className="flex items-center justify-between gap-3">
-					<h2 className="text-lg font-semibold">Greeting</h2>
+					<h2 className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']">
+						Greeting
+					</h2>
 					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
 				</div>
 
@@ -151,7 +153,10 @@ export function WelcomePage(): React.JSX.Element {
 			</Card>
 
 			<section aria-labelledby="preview-heading" className="flex flex-col gap-3">
-				<h2 id="preview-heading" className="text-lg font-semibold">
+				<h2
+					id="preview-heading"
+					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
+				>
 					Preview
 				</h2>
 				<GreetingPreview

@@ -36,7 +36,7 @@ export function RuntimeTab(): React.JSX.Element {
 			</Card>
 
 			<Card className="flex flex-col gap-2">
-				<h3 className="text-base font-semibold">Updates</h3>
+				<h3 className="font-display text-base font-bold tracking-tight">Updates</h3>
 				<p className="text-muted-foreground text-sm">
 					You are running <span className="font-mono">v{info.version}</span>. Testify never contacts a server to check
 					for a newer one — a self-hosted bot that phones home on a timer is not something to ship by default. Compare
@@ -46,7 +46,7 @@ export function RuntimeTab(): React.JSX.Element {
 					href={`${info.repositoryUrl}/releases`}
 					target="_blank"
 					rel="noreferrer"
-					className="text-primary inline-flex items-center gap-1.5 text-sm hover:underline"
+					className="text-accent inline-flex items-center gap-1.5 text-sm hover:underline"
 				>
 					Releases on GitHub
 					<ExternalLink size={14} aria-hidden="true" />

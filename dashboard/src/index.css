@@ -1,35 +1,74 @@
 @import "tailwindcss";
 
-/** The palette from dashboard-POC/08-DESIGN.md. Nothing else writes a hex value, a radius or a duration. */
+/**
+ * Self-hosted, latin subset, variable. Nothing is fetched from a font host: the CSP forbids it, and a
+ * self-hosted bot should not phone out to render its own settings page. Before this, `"Inter var"` was named
+ * but never loaded — every install fell through to `system-ui`, which is why the type looked different on every
+ * machine and like nothing in particular on all of them.
+ */
+@font-face {
+	font-family: "Space Grotesk";
+	src: url("/fonts/space-grotesk-latin.woff2") format("woff2");
+	font-weight: 300 700;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter";
+	src: url("/fonts/inter-latin.woff2") format("woff2");
+	font-weight: 100 900;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "JetBrains Mono";
+	src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
+	font-weight: 100 800;
+	font-display: swap;
+}
+
+/**
+ * The console palette. Every value is verified against WCAG before it lands — see `re-write.md` §3, and the
+ * check in `tests/tokens.test.ts` that fails if one drops below its threshold.
+ *
+ * Two colours carry the violet because one cannot: `--color-primary` is a **fill** and only ever wears white
+ * text on it, while `--color-accent` is the **text** violet for links and live state. Using the fill colour as
+ * 14px text measured 3.47:1 and failed AA in five real places.
+ */
 @theme {
-	--color-background: #0a0a0f;
+	--color-background: #07070b;
 	--color-foreground: #ffffff;
-	--color-muted: #1a1a25;
-	--color-muted-foreground: #a1a1b5;
-	--color-card: #12121a;
-	--color-popover: #1a1a25;
-	--color-border: #26263a;
-	--color-input: #6b6b8f;
+	--color-muted: #1c1c2a;
+	--color-muted-foreground: #a2a2ba;
+	--color-card: #12121c;
+	--color-popover: #171722;
+	--color-border: #262639;
+	--color-input: #7676a0;
 	--color-primary: #7c3aed;
 	--color-primary-foreground: #ffffff;
 	--color-accent: #a78bfa;
 	--color-ring: #a78bfa;
-	--color-success: #34d399;
+	--color-success: #3ddc97;
 	--color-warning: #fbbf24;
 	--color-destructive: #dc2626;
+	/* Red is legible as a fill or as text, never as both: 4.83:1 with white on it, 6.72:1 as text on a card. */
+	--color-destructive-text: #f87171;
 
-	/* Feature tints. Text colours at AA on the page background, used as icons and as 15% fills. */
+	/* Feature tints. Text colours at AA on the card, used as icons and as 15% fills. */
 	--color-feature-levelling: #a78bfa;
 	--color-feature-economy: #fbbf24;
 	--color-feature-moderation: #f87171;
-	--color-feature-welcome: #34d399;
+	--color-feature-welcome: #3ddc97;
 	--color-feature-tickets: #60a5fa;
 	--color-feature-community: #f472b6;
 
 	--radius-card: 0.625rem;
 	--radius-field: 0.5rem;
 
-	--font-sans: "Inter var", ui-sans-serif, system-ui, sans-serif;
+	/* Three roles, three faces. Space Grotesk is the proportional cut of Space Mono, so a console's headings and
+	   its data are drawn from the same skeleton — the pairing is the concept rather than a taste. */
+	--font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, monospace;
 
 	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
@@ -84,8 +123,16 @@
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
 		/* A single wash behind the WebGL field, so the page still has depth when WebGL is unavailable. */
-		background-image: radial-gradient(80rem 50rem at 15% -10%, --alpha(var(--color-primary) / 14%), transparent 60%);
+		background-image:
+			radial-gradient(70rem 45rem at 12% -12%, --alpha(var(--color-accent) / 10%), transparent 62%),
+			radial-gradient(50rem 35rem at 92% 4%, --alpha(var(--color-primary) / 8%), transparent 58%);
 		background-attachment: fixed;
+	}
+
+	h1,
+	h2,
+	h3 {
+		font-feature-settings: "ss01", "cv11";
 	}
 
 	:focus-visible {
@@ -172,6 +219,33 @@
 
 @utility motion-pop {
 	animation: var(--animate-pop);
+}
+
+/** The boot banner draws its sections with a heavy rule and its rows with a thin one; these are those two. */
+@utility rule-heavy {
+	border-top: 2px solid var(--color-border);
+}
+
+@utility rule-thin {
+	border-top: 1px solid var(--color-border);
+}
+
+/**
+ * A hairline of accent along the top edge, for the one card on a screen that is the point of the screen.
+ * Rule 9 wants a focal point; this is how a card claims it without shouting.
+ */
+@utility card-focal {
+	position: relative;
+}
+
+@utility card-focal-mark {
+	content: "";
+	position: absolute;
+	inset-inline: -1px;
+	top: -1px;
+	height: 2px;
+	border-radius: var(--radius-card) var(--radius-card) 0 0;
+	background: linear-gradient(90deg, var(--color-accent), transparent 70%);
 }
 
 /** A 1px inset highlight: elevation without a drop shadow, which on near-black reads as a smudge. */

@@ -50,7 +50,7 @@ export function GuildCard({
 				className={cardClass("compact", surface, "hover:border-primary group")}
 			>
 				{body}
-				<span className="text-primary flex shrink-0 items-center gap-1.5 text-sm font-medium">
+				<span className="text-accent flex shrink-0 items-center gap-1.5 text-sm font-medium">
 					<Plus size={15} aria-hidden="true" />
 					Add
 				</span>
