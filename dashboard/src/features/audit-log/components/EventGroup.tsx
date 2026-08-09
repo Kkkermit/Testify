@@ -1,6 +1,7 @@
 import { AUDIT_EVENT_LABELS, type AuditEvent, type AuditGroup, auditEventsIn } from "@testify/shared";
 import { useEffect, useRef } from "react";
 import { CHECK_ROW } from "@/components/form";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { type GroupState } from "@/features/audit-log/auditLog.utils";
 import { cn } from "@/lib/cn";
 
@@ -34,7 +35,12 @@ export function EventGroup({
 
 			{/* The count is beside the label rather than inside it: it is a status, not part of the tickbox's name. */}
 			<div className="border-border flex items-center gap-2 border-b px-3 py-2.5 text-sm font-semibold">
-				<label className="hover:text-accent flex min-w-0 flex-1 cursor-pointer items-center gap-2 transition-colors duration-150">
+				<label
+					className={cn(
+						INLINE_TARGET,
+						"hover:text-accent min-w-0 flex-1 cursor-pointer gap-2 transition-colors duration-150",
+					)}
+				>
 					<input
 						ref={heading}
 						type="checkbox"

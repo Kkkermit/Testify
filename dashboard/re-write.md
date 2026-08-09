@@ -291,6 +291,18 @@ one is a commit.
 > `[data-variant="primary"]` on all 22 routes. The member page had three and the owner control tab two; every
 > route is now at most one. Add/Take and Set level/Change XP were never primary-and-secondary pairs — the first
 > is one decision in two directions, the second is driven by two different fields.
+>
+> **Done: 8, 9, 10.** The remaining guild settings, the owner console's eight tabs, and the public pages —
+> swept mechanically against §10 rather than screen by screen, because at this point the shared pieces carry
+> the design and what is left is defects. 59 real findings became 0:
+>
+> - **`INLINE_TARGET`** in `components/primitives/targetStyles.ts`. A line of `text-sm` is 20px, so a
+>   standalone text link misses WCAG 2.2's 24px by four. It was already fixed once with an ad-hoc `py-1` on
+>   the member page; four more places had the same defect and no shared name. Now one rule, four call sites.
+> - **Two `<h1>`s on `/owner?tab=commands`**, because the tab mounts the whole `CommandsPage`, `PageHeader`
+>   and all. It renders the subtitle alone in that scope now — `TabContent` already names the panel.
+> - **Two headings that skipped h1 → h3** (runtime and usage). Every other card heading in the app is an h2.
+> - **The fleet table overflowed a phone by 63px**, the same defect as the leaderboard and the same fix.
 
 | Order | Screen                             | Why here                                                       |
 | ----- | ---------------------------------- | -------------------------------------------------------------- |
@@ -383,11 +395,30 @@ const r=(a,b)=>{const [x,y]=[lum(a),lum(b)];return (Math.max(x,y)+0.05)/(Math.mi
 console.log(r("#a78bfa","#0a0a0f").toFixed(2));'
 ```
 
-**The browser sweep** — jsdom computes no layout, so this is the only thing that measures a real page. The
-pattern used throughout this repo: start Vite, route `**/api/**` to fixtures with Playwright, then per width
-count sideways scroll, `<h1>`s, controls with an empty accessible name, inputs with no `<label>`, and any
-target under 24px. Run it at 1440, 820 and 390. It has found things every single time — a 196×20 link, a reason
-column truncated to "Spam…", and a JSX parse error that type-checked.
+**The browser sweep** — jsdom computes no layout, so this is the only thing that measures a real page. It is
+deliberately **not** in the repository: it needs Playwright, and a self-hosted bot should not carry a browser
+download for a design check. Rebuild it per session — start Vite, route `**/api/**` to the fixtures, and walk
+every route at 1440 and 390 checking:
+
+- exactly one `<h1>`, and no heading level skipped
+- `documentElement.scrollWidth` against the viewport
+- every `button`, `a[href]`, `input`, `select`, `textarea` has an accessible name
+- every target is ≥ 24×24 (WCAG 2.2 AA, 2.5.8)
+- no `<table>` wider than the card that holds it
+
+The script is quick to rewrite; **the exemptions are the part worth keeping**, because each one cost a round of
+chasing a finding that was not a defect:
+
+| Looks like a failure             | Why it is not                                                     |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Skip link at 24×16               | `sr-only` until focus. It has no pointer target to be too small   |
+| Checkbox at 1×1 or 16×16         | The effective target is the `<label>` around it — measure that    |
+| "terms of use" at 71×15          | 2.5.8 exempts a link inside a sentence; line-height sets its size |
+| `UsageChart`'s table overflowing | It lives in an `sr-only` `<figcaption>`, which clips to 1px       |
+
+It has found something every single time it has been run: a 196×20 link, a reason column truncated to "Spam…",
+a JSX parse error that type-checked, a phone leaderboard showing no figures at all, three competing primary
+buttons, two `<h1>`s on one page, and two headings that skipped a level.
 
 ---
 

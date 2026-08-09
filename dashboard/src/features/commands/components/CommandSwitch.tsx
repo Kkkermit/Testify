@@ -1,4 +1,5 @@
 import { type CommandAvailability } from "@testify/shared";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { cn } from "@/lib/cn";
 
 const DESCRIBES: Record<CommandAvailability, string> = {
@@ -24,7 +25,7 @@ export function CommandSwitch({
 	return (
 		<label
 			title={DESCRIBES[availability]}
-			className={cn("flex shrink-0 items-center gap-2", fixed ? "cursor-not-allowed opacity-60" : "cursor-pointer")}
+			className={cn(INLINE_TARGET, "shrink-0 gap-2", fixed ? "cursor-not-allowed opacity-60" : "cursor-pointer")}
 		>
 			<span className="text-muted-foreground text-xs">{on ? "On" : "Off"}</span>
 			<input

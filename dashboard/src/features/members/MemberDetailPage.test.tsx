@@ -1,6 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { MemberDetailPage } from "@/features/members/MemberDetailPage";
 import { expectNoViolations } from "@/test/axe";
 import { memberDetail } from "@/test/handlers";
@@ -329,7 +330,7 @@ describe("the member detail page", () => {
 		renderPage();
 
 		const link = await screen.findByRole("link", { name: /Back to the leaderboards/ });
-		expect(link.className).toContain("py-1");
+		expect(link.className).toContain(INLINE_TARGET);
 	});
 
 	it("has no accessibility violations", async () => {

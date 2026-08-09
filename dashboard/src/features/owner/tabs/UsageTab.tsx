@@ -138,7 +138,7 @@ function Panel({
 	return (
 		<Card className="flex flex-col gap-3">
 			<div>
-				<h3 className="font-display text-base font-bold tracking-tight">{title}</h3>
+				<h2 className="font-display text-base font-bold tracking-tight">{title}</h2>
 				<p className="text-muted-foreground text-xs">{hint}</p>
 			</div>
 			{children}

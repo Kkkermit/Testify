@@ -20,7 +20,7 @@ export function Toggle({
 	return (
 		<label
 			className={cn(
-				"group flex items-start gap-3",
+				"group flex min-h-6 items-start gap-3",
 				hideLabel ? "" : "py-2",
 				disabled ? "opacity-50" : "cursor-pointer",
 			)}

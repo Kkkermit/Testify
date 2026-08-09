@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { PageHeader, Skeleton } from "@/components/primitives";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { LevelCard } from "@/features/members/components/LevelCard";
 import { MemberIdentity, MemberStanding } from "@/features/members/components/MemberIdentity";
@@ -13,6 +14,7 @@ import { softbanActive } from "@/features/members/memberDetail.utils";
 import { useMemberActions } from "@/features/members/useMemberActions";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/cn";
 
 export function MemberDetailPage(): React.JSX.Element {
 	const { guildId = "", userId = "" } = useParams();
@@ -39,7 +41,7 @@ export function MemberDetailPage(): React.JSX.Element {
 			{/* `py-1` carries it past the 24px WCAG 2.2 target minimum; the margin absorbs the padding it adds. */}
 			<Link
 				to={`/guilds/${guildId}/members`}
-				className="text-muted-foreground hover:text-foreground -mt-3 flex w-fit items-center gap-1 py-1 text-sm"
+				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground -mt-3 w-fit gap-1 text-sm")}
 			>
 				<ArrowLeft size={16} aria-hidden="true" /> Back to the leaderboards
 			</Link>

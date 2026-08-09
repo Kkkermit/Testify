@@ -45,7 +45,11 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 
 	return (
 		<>
-			<PageHeader title="Commands" subtitle={subtitleFor(global, state !== undefined)} />
+			{global ? (
+				<p className="text-muted-foreground text-sm">{subtitleFor(global, state !== undefined)}</p>
+			) : (
+				<PageHeader title="Commands" subtitle={subtitleFor(global, state !== undefined)} />
+			)}
 
 			{state !== undefined && (
 				<p className="text-muted-foreground text-sm">
