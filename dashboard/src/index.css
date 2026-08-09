@@ -71,6 +71,9 @@
 	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "JetBrains Mono", ui-monospace, monospace;
 
+	/* Tailwind's default for this size is 1.43, which is tight for prose — and `text-sm` is most of the app. */
+	--text-sm--line-height: 1.55;
+
 	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
 	--animate-reveal: reveal 320ms var(--ease-out-soft) both;
@@ -134,6 +137,8 @@
 	h3 {
 		font-feature-settings: "ss01", "cv11";
 		text-wrap: balance;
+		/* Set on the element rather than the size token, so `text-base` prose keeps its reading measure. */
+		line-height: 1.2;
 	}
 
 	/* Without this a tap waits ~300ms for a second one that is never coming, because zoom is still possible. */

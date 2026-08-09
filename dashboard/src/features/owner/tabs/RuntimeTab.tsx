@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
 import { Card, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { formatUptime } from "@/features/owner/owner.utils";
 import { useRuntime } from "@/features/owner/useOwner";
 import { cn } from "@/lib/cn";
@@ -39,7 +40,7 @@ export function RuntimeTab(): React.JSX.Element {
 			</Card>
 
 			<Card className="flex flex-col gap-2">
-				<h2 className="font-display text-base font-bold tracking-tight">Updates</h2>
+				<h2 className={CARD_HEADING}>Updates</h2>
 				<p className="text-muted-foreground text-sm">
 					You are running <span className="font-mono">v{info.version}</span>. Testify never contacts a server to check
 					for a newer one — a self-hosted bot that phones home on a timer is not something to ship by default. Compare

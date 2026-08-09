@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Button, Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { StickyRow } from "@/features/sticky/components/StickyRow";
@@ -88,7 +89,7 @@ export function StickyPage(): React.JSX.Element {
 
 			<Card className="motion-pop flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Add a sticky</h2>
+					<h2 className={CARD_HEADING}>Add a sticky</h2>
 					<p className="text-muted-foreground text-sm">One per channel. Editing an existing one is done above.</p>
 				</div>
 

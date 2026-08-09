@@ -3,6 +3,7 @@ import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
 import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/features/owner/useControl";
 import { ApiError } from "@/lib/api";
@@ -34,7 +35,7 @@ export function ControlTab(): React.JSX.Element {
 			<Card className="flex flex-col gap-4">
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div>
-						<h2 className="font-display text-base font-bold tracking-tight">Running state</h2>
+						<h2 className={CARD_HEADING}>Running state</h2>
 						<p className="text-muted-foreground text-sm">
 							{paused
 								? "Testify is connected but refusing everything. No commands, no XP, no automod."
@@ -83,7 +84,7 @@ export function ControlTab(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Name and picture</h2>
+					<h2 className={CARD_HEADING}>Name and picture</h2>
 					<p className="text-muted-foreground text-sm">
 						The bot's global profile, in every server at once. Discord has no per-server picture for bots — a server
 						manager can only set a nickname, from that server's own settings page.
@@ -124,7 +125,7 @@ export function ControlTab(): React.JSX.Element {
 
 			<Card className="border-destructive/40 flex flex-col gap-3">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Shut down</h2>
+					<h2 className={CARD_HEADING}>Shut down</h2>
 					<p className="text-muted-foreground text-sm">
 						Stops the whole process, and this dashboard with it — it is served by the bot. Nothing here can start it
 						again; that is your host's job, whether that is systemd, Docker or a terminal.

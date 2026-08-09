@@ -34,7 +34,9 @@ export function SignInPage(): React.JSX.Element {
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-2xl ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
 							<Eyebrow>Sign in</Eyebrow>
-							<h1 className="font-display text-2xl font-bold tracking-tight">{bot.data?.username ?? "Testify"}</h1>
+							<h1 className="font-display text-2xl leading-tight font-bold tracking-tight">
+								{bot.data?.username ?? "Testify"}
+							</h1>
 						</div>
 					</div>
 

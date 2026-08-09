@@ -14,4 +14,5 @@ export { type Segment, SegmentedControl } from "@/components/primitives/Segmente
 export { Skeleton } from "@/components/primitives/Skeleton";
 export { StatTile } from "@/components/primitives/StatTile";
 export { TabBar, TabContent, type TabDefinition, tabIds } from "@/components/primitives/TabBar";
+export { CARD_HEADING } from "@/components/primitives/textStyles";
 export { Tooltip } from "@/components/primitives/Tooltip";

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 
 export function LevelCard({
 	detail,
@@ -25,7 +26,7 @@ export function LevelCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className="font-display text-base font-bold tracking-tight">Level and XP</h2>
+				<h2 className={CARD_HEADING}>Level and XP</h2>
 				<p className="text-muted-foreground text-sm">
 					{detail.levels === null
 						? "They have earned no XP here yet."

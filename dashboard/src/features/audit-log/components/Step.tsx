@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Card } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { cn } from "@/lib/cn";
 
 /** The number is decorative — the heading names the section — so it is hidden rather than read out before every title. */
@@ -31,7 +32,7 @@ export function Step({
 						{number}
 					</span>
 					<div className="min-w-0">
-						<h2 id={headingId} className="font-display text-base font-bold tracking-tight">
+						<h2 id={headingId} className={CARD_HEADING}>
 							{title}
 						</h2>
 						<p className="text-muted-foreground text-sm">{describes}</p>

@@ -1,6 +1,7 @@
 import { ANALYTICS_WINDOWS, errorRate, type AnalyticsWindow } from "@testify/shared";
 import { BarChart3 } from "lucide-react";
 import { Card, EmptyState, Figure, Avatar, SegmentedControl, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { UsageBars } from "@/features/owner/components/UsageBars";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { percent } from "@/features/owner/owner.utils";
@@ -138,7 +139,7 @@ function Panel({
 	return (
 		<Card className="flex flex-col gap-3">
 			<div>
-				<h2 className="font-display text-base font-bold tracking-tight">{title}</h2>
+				<h2 className={CARD_HEADING}>{title}</h2>
 				<p className="text-muted-foreground text-xs">{hint}</p>
 			</div>
 			{children}

@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Badge, Button, Card, PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { DrawHistory } from "@/features/lottery/components/DrawHistory";
@@ -63,7 +64,7 @@ export function LotteryPage(): React.JSX.Element {
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-3">
-					<h2 className="font-display text-base font-bold tracking-tight">This server's lottery</h2>
+					<h2 className={CARD_HEADING}>This server's lottery</h2>
 					{!settings.enabled && <Badge>Not running</Badge>}
 					{settings.enabled && settings.frozen && <Badge tone="warning">Frozen</Badge>}
 					{settings.enabled && !settings.frozen && <Badge tone="success">Running</Badge>}
@@ -92,7 +93,7 @@ export function LotteryPage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">How the draw runs</h2>
+					<h2 className={CARD_HEADING}>How the draw runs</h2>
 					<p className="text-muted-foreground text-sm">
 						Members buy tickets with <code>/lottery enter</code>. Every ticket adds its fee to the pot.
 					</p>
@@ -206,7 +207,7 @@ export function LotteryPage(): React.JSX.Element {
 				<Card className="flex flex-col gap-3">
 					<div className="flex flex-wrap items-center justify-between gap-4">
 						<div>
-							<h2 className="font-display text-base font-bold tracking-tight">End the lottery</h2>
+							<h2 className={CARD_HEADING}>End the lottery</h2>
 							<p className="text-muted-foreground text-sm">
 								The pot of {settings.prizePool.toLocaleString()} goes with it, and nobody is refunded.
 							</p>

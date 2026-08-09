@@ -2,6 +2,7 @@ import { Ban, ShieldOff, UserX } from "lucide-react";
 import { useState } from "react";
 import { FIELD, Field, Warning } from "@/components/form";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { isSnowflake } from "@/features/owner/owner.utils";
 import { useBlacklist, useBlockUser, useUnblockUser } from "@/features/owner/useBlacklist";
 import { ApiError } from "@/lib/api";
@@ -38,7 +39,7 @@ export function BlacklistTab(): React.JSX.Element {
 		<div className="flex flex-col gap-4">
 			<Card focal className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Block someone from Testify</h2>
+					<h2 className={CARD_HEADING}>Block someone from Testify</h2>
 					<p className="text-muted-foreground text-sm">
 						A blocked account cannot run a command in any server, on either the slash or the prefix surface. This is
 						bot-wide — for one server, turn the command off instead.
@@ -91,9 +92,7 @@ export function BlacklistTab(): React.JSX.Element {
 			</Card>
 
 			<Card className="flex flex-col gap-4">
-				<h2 className="font-display text-base font-bold tracking-tight">
-					Blocked accounts {rows.data && `(${String(rows.data.length)})`}
-				</h2>
+				<h2 className={CARD_HEADING}>Blocked accounts {rows.data && `(${String(rows.data.length)})`}</h2>
 
 				{rows.isPending && <Skeleton className="h-24 w-full" />}
 

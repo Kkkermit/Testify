@@ -2,6 +2,7 @@ import { type CommandRunResult } from "@testify/shared";
 import { Info } from "lucide-react";
 import { Warning } from "@/components/form";
 import { Card } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { hexColour } from "@/features/owner/runner.utils";
 import { clockTime } from "@/lib/datetime";
 
@@ -17,7 +18,7 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 	return (
 		<Card className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-baseline justify-between gap-2">
-				<h2 className="font-display text-base font-bold tracking-tight">
+				<h2 className={CARD_HEADING}>
 					<span className="font-mono">
 						/{result.command}
 						{result.subcommand === null ? "" : ` ${result.subcommand}`}

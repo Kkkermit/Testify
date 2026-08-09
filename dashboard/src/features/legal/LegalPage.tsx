@@ -2,6 +2,7 @@ import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router";
 import { Card, PageHeader } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { type LegalDocument } from "@/features/legal/legal.content";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -24,7 +25,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 
 			{document.sections.map((section) => (
 				<Card key={section.heading} className="flex flex-col gap-3">
-					<h2 className="font-display text-base font-bold tracking-tight">{section.heading}</h2>
+					<h2 className={CARD_HEADING}>{section.heading}</h2>
 					{section.paragraphs.map((paragraph) => (
 						<p key={paragraph} className="text-muted-foreground text-sm leading-relaxed">
 							{paragraph}

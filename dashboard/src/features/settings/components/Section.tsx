@@ -2,6 +2,7 @@ import { type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
 import { SavingIndicator, type SavingState } from "@/components/form";
 import { Card } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 
 /** One setting, one card, all the same shape — so adding one is a component rather than a layout decision. */
 export function Section({
@@ -26,7 +27,7 @@ export function Section({
 					<Icon size={18} />
 				</span>
 				<div className="min-w-0 flex-1">
-					<h2 className="font-display text-base font-bold tracking-tight">{title}</h2>
+					<h2 className={CARD_HEADING}>{title}</h2>
 					<p className="text-muted-foreground text-sm">{describes}</p>
 				</div>
 				<SavingIndicator state={saving} />

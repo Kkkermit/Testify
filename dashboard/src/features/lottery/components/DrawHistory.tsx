@@ -1,6 +1,7 @@
 import { type LotteryDrawSummary } from "@testify/shared";
 import { History } from "lucide-react";
 import { Card, EmptyState } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { dateAndTime, shortDate } from "@/lib/datetime";
 
 export function DrawHistory({
@@ -13,7 +14,7 @@ export function DrawHistory({
 	return (
 		<Card className="flex flex-col gap-3">
 			<div className="flex flex-wrap items-center justify-between gap-2">
-				<h2 className="font-display text-base font-bold tracking-tight">Past draws</h2>
+				<h2 className={CARD_HEADING}>Past draws</h2>
 				{nextDrawAt !== null && (
 					<p className="text-muted-foreground text-sm">
 						Next draw <time dateTime={nextDrawAt}>{dateAndTime(nextDrawAt)}</time>

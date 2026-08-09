@@ -12,6 +12,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button, Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -102,7 +103,7 @@ export function AutomodPage(): React.JSX.Element {
 			{canManage && (
 				<Card className="motion-pop flex flex-col gap-4">
 					<div>
-						<h2 className="font-display text-base font-bold tracking-tight">Add a rule</h2>
+						<h2 className={CARD_HEADING}>Add a rule</h2>
 						<p className="text-muted-foreground text-sm">
 							Discord allows a handful of each kind. It refuses the rest, and this says so when it does.
 						</p>

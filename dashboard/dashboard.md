@@ -823,14 +823,24 @@ Sizes, measured across `dashboard/src` rather than aspirational: **three do 96% 
 | `text-sm`   | Body copy, every control, every button, table cells | 108   |
 | `text-xs`   | Meta lines, IDs, timestamps, badges                 | 55    |
 
+**Line height is set in three places, and the split matters.** `--text-sm--line-height: 1.55` in `@theme`
+loosens body copy past Tailwind's 1.43, which is tight for a multi-line description and is most of the reading
+in the app. `h1, h2, h3` take `line-height: 1.2` in the base layer. And `CARD_HEADING` carries its own
+`leading-tight`, because **a Tailwind size utility ships a `line-height` and beats both** — the same trap as
+the select's chevron room. Set it in `@theme` or the base layer alone and a card heading stays at 1.5, which is
+body spacing with a larger font.
+
+Measured on the settings page after the change: 28px @ 1.25, card headings 16px @ 1.25, body 14px @ 1.55.
+
 Rules that hold today and are worth keeping:
 
 - **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them, and it caught the
   owner console mounting the whole of `CommandsPage` — `PageHeader` and all — inside a tab.
 - **Headings never skip a level.** Every card heading is an `<h2>`; two `<h3>`s in the owner console were
   jumping straight from the page's `<h1>` and left a hole in the outline.
-- **A card heading is `font-display text-base font-bold`**, not `text-lg`. The step between a page and a card
-  is carried by the size _and_ the face; adding a third size in between makes cards compete with the page.
+- **A card heading is `CARD_HEADING`**, not a string you write out — it was spelled identically in 28 files
+  before it had a name, and the line height has to live on it. The step between a page and a card is carried by
+  the size _and_ the face; adding a third size in between makes cards compete with the page.
 - **A section label is an `Eyebrow`, not a heading you style yourself.** 14 uses, and ten of them were
   hand-rolled copies of the same class string until the primitive grew an `as` prop.
 - **An ID is always `font-mono text-xs`** with `--color-muted-foreground`. It is a reference, not a name.
@@ -1204,20 +1214,20 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 💎 Typography and colour (23–34)
 
-| #   | Rule                            | Verdict | Note                                                                                                                                                                                                                           |
-| --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 23  | Typography hierarchy            | Held    | §18.4                                                                                                                                                                                                                          |
-| 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                                                                                                 |
-| 25  | Reflect brand mood              | Held    | Three self-hosted faces where there had been none, and the section label is the bot's own boot banner in HTML. The type is no longer anonymous                                                                                 |
-| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                                                                                               |
-| 27  | Limit font and style variations | Held    | §18.4 — four sizes carry 96% of the app                                                                                                                                                                                        |
-| 28  | Line spacing, kerning, height   | Apply   | Headings now carry `text-wrap: balance` and `font-feature-settings`, but nothing sets a line-height scale                                                                                                                      |
-| 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `lib/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette |
-| 30  | Consistent palette              | Held    | §18.2, and no component may write a colour                                                                                                                                                                                     |
-| 31  | The 60–30–10 rule               | Apply   | Still not measured. The accent appears more than it did, but nobody has counted the pixels                                                                                                                                     |
-| 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                                                                                        |
-| 33  | Semantic colours for status     | Held    | `Badge` tones, `Warning`, the destructive button variant                                                                                                                                                                       |
-| 34  | Colour to guide action          | Held    | One primary per screen, and the pairs that were never primary-and-secondary — Add/Take, Set level/Change XP — now weigh the same as each other                                                                                 |
+| #   | Rule                            | Verdict | Note                                                                                                                                                                                                                                                                                                    |
+| --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23  | Typography hierarchy            | Held    | §18.4                                                                                                                                                                                                                                                                                                   |
+| 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                                                                                                                                                                          |
+| 25  | Reflect brand mood              | Held    | Three self-hosted faces where there had been none, and the section label is the bot's own boot banner in HTML. The type is no longer anonymous                                                                                                                                                          |
+| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                                                                                                                                                                        |
+| 27  | Limit font and style variations | Held    | §18.4 — four sizes carry 96% of the app                                                                                                                                                                                                                                                                 |
+| 28  | Line spacing, kerning, height   | Held    | Body is 1.55, headings 1.2, card headings `leading-tight` on `CARD_HEADING` because a size utility beats both `@theme` and the base layer. Measured, not assumed                                                                                                                                        |
+| 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `lib/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette                                                                          |
+| 30  | Consistent palette              | Held    | §18.2, and no component may write a colour                                                                                                                                                                                                                                                              |
+| 31  | The 60–30–10 rule               | Held    | **Measured** across six screens: 67% ground, 33% surface, 0.2% accent by area. The first two are the rule; the third is deliberately far below 10%, because accent _area_ on an admin tool would be a toy. It appears on every screen — 10 to 26 elements each, as text, borders, icons and small fills |
+| 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                                                                                                                                                                 |
+| 33  | Semantic colours for status     | Held    | `Badge` tones, `Warning`, the destructive button variant                                                                                                                                                                                                                                                |
+| 34  | Colour to guide action          | Held    | One primary per screen, and the pairs that were never primary-and-secondary — Add/Take, Set level/Change XP — now weigh the same as each other                                                                                                                                                          |
 
 ### 🖼 Visual content (35–40)
 
@@ -1265,25 +1275,23 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### What this adds up to
 
-**Forty-one held, eight to apply, nine deliberately not applicable** — the rewrite in
-[`re-write.md`](re-write.md) closed nine, and the three clusters it was aimed at are all shut:
+**Forty-three held, six to apply, nine deliberately not applicable** — the rewrite in
+[`re-write.md`](re-write.md) closed eleven, and the three clusters it was aimed at are all shut:
 
 1. **No focal point** (9, 10, 21, 34) — closed. `Card focal` marks the one card that is the point of a screen,
    and a browser sweep counts primary buttons on every route so the rule cannot quietly drift back.
-2. **The type and palette are anonymous** (25, 44) — closed. Three self-hosted faces where `@theme` had named
-   one with no `@font-face` behind it, and a section label that is the bot's own boot banner rather than a
-   borrowed dashboard idiom. 31 and 41 stay open and are judgement calls rather than defects.
+2. **The type and palette are anonymous** (25, 28, 31, 44) — closed. Three self-hosted faces where `@theme`
+   had named one with no `@font-face` behind it, a line-height scale where there had been Tailwind's defaults,
+   a measured 67/33/0.2 colour balance, and a section label that is the bot's own boot banner rather than a
+   borrowed dashboard idiom. 41 stays open and is a judgement call rather than a defect.
 3. **Contrast is unverified** (29) — closed. Every pair is computed in the test suite from the tokens
    themselves, and the two live AA failures it found are fixed.
 
-**The eight that remain are honestly open**, not quietly downgraded:
+**The six that remain are honestly open**, not quietly downgraded:
 
 - **3, 37, 52** — copy. §19.11 states the voice; nothing enforces it, and some card descriptions still run to
   three lines.
 - **16, 17** — a first-run tour, and smart defaults beyond the leaderboard's Find me.
-- **28** — headings balance and the faces are set, but nothing defines a line-height scale.
-- **31** — the 60–30–10 balance still has not been measured. The accent appears more than it did; nobody has
-  counted.
 - **41** — better, and still recognisably a dashboard. This one is the reader's call rather than the author's.
 
 ---

@@ -3,6 +3,7 @@ import { Play, Terminal } from "lucide-react";
 import { useState } from "react";
 import { FIELD, Field, SELECT, Warning } from "@/components/form";
 import { Button, Card, EmptyState, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { RunOutputs } from "@/features/owner/components/RunOutputs";
 import { buildArgs, canRun, controlFor, needsSubcommand, optionsShown } from "@/features/owner/runner.utils";
 import { useRunCommand, useRunnable } from "@/features/owner/useRunner";
@@ -42,7 +43,7 @@ export function RunnerTab(): React.JSX.Element {
 		<div className="flex flex-col gap-4">
 			<Card focal className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Run a command</h2>
+					<h2 className={CARD_HEADING}>Run a command</h2>
 					<p className="text-muted-foreground text-sm">
 						Runs here rather than in a server — nothing is posted to Discord, and the reply comes back below. Only
 						read-only owner commands are available; anything whose real work is a panel has its own screen.

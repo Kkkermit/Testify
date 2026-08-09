@@ -97,13 +97,13 @@ at the end of Phase 4 — see [§12](#12-how-to-verify-anything).
 | Routes                         | 21                                          | 21 — none moved, by design        |
 | Feature directories            | 16                                          | 16                                |
 | Components and pages (`.tsx`)  | 105                                         | 107                               |
-| Primitives                     | 17                                          | 17 components + 2 class modules   |
-| Dashboard test files / tests   | 54 / 640                                    | **60 / 702**                      |
+| Primitives                     | 17                                          | 17 components + 3 class modules   |
+| Dashboard test files / tests   | 54 / 640                                    | **61 / 706**                      |
 | First-load JS, gzipped         | **159 kB** (`vendor` 150 kB + `index` 9 kB) | **158.9 kB** — `vendor` unchanged |
-| CSS, gzipped                   | **8.9 kB**                                  | **9.2 kB**                        |
+| CSS, gzipped                   | **8.9 kB**                                  | **9.3 kB**                        |
 | Self-hosted fonts              | none declared, so nothing ever loaded       | 104 kB, two of three preloaded    |
 | three.js                       | its own chunk, not in the first load        | unchanged                         |
-| 58 rules held / to apply / N/A | 32 / 17 / 9                                 | **41 / 8 / 9**                    |
+| 58 rules held / to apply / N/A | 32 / 17 / 9                                 | **43 / 6 / 9**                    |
 
 The font row is the one number that went **up**, and it is the only real cost of the rewrite: `"Inter var"`
 was named in `@theme` with no `@font-face` behind it, so every install had silently been falling through to

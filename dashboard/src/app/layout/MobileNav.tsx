@@ -59,7 +59,9 @@ export function MobileNav({
 					<span className="sr-only">Menu</span>
 				</button>
 				<BotMark src={bot?.avatarUrl} size={20} />
-				<span className="font-semibold tracking-tight">{bot?.username ?? "Testify"}</span>
+				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
+					{bot?.username ?? "Testify"}
+				</span>
 			</header>
 
 			{open && (

@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Badge, Button, Card, PageHeader, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import {
@@ -76,7 +77,7 @@ export function TicketsPage(): React.JSX.Element {
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-3">
-					<h2 className="font-display text-base font-bold tracking-tight">Tickets in this server</h2>
+					<h2 className={CARD_HEADING}>Tickets in this server</h2>
 					{settings.enabled ? <Badge tone="success">On</Badge> : <Badge>Off</Badge>}
 					{settings.posted && <Badge>Panel posted</Badge>}
 				</div>
@@ -85,7 +86,7 @@ export function TicketsPage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Where tickets live</h2>
+					<h2 className={CARD_HEADING}>Where tickets live</h2>
 					<p className="text-muted-foreground text-sm">All four are needed before the panel can be posted.</p>
 				</div>
 
@@ -152,7 +153,7 @@ export function TicketsPage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">What the panel says</h2>
+					<h2 className={CARD_HEADING}>What the panel says</h2>
 					<p className="text-muted-foreground text-sm">
 						{settings.posted
 							? "Posting again edits the panel already out there rather than leaving a second one."
@@ -216,7 +217,7 @@ export function TicketsPage(): React.JSX.Element {
 			{settings.enabled && (
 				<Card className="flex flex-wrap items-center justify-between gap-4">
 					<div>
-						<h2 className="font-display text-base font-bold tracking-tight">Turn tickets off</h2>
+						<h2 className={CARD_HEADING}>Turn tickets off</h2>
 						<p className="text-muted-foreground text-sm">
 							Open ticket channels are left alone. The panel message has to be deleted by hand.
 						</p>

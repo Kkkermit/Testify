@@ -5,6 +5,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button, Card, PageHeader, Skeleton } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { NumberField } from "@/features/treasure/components/NumberField";
 import {
@@ -58,7 +59,7 @@ export function TreasurePage(): React.JSX.Element {
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">Drops in this server</h2>
+					<h2 className={CARD_HEADING}>Drops in this server</h2>
 					<p className="text-muted-foreground text-sm">
 						{settings.configured
 							? describeRate(draftOf(settings))
@@ -78,7 +79,7 @@ export function TreasurePage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className="font-display text-base font-bold tracking-tight">How often, and how much</h2>
+					<h2 className={CARD_HEADING}>How often, and how much</h2>
 					<p className="text-muted-foreground text-sm">
 						Testify picks a number in each range, so drops do not land on a predictable beat.
 					</p>

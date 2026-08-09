@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card } from "@/components/primitives";
+import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { WarningList } from "@/features/members/components/WarningList";
 import { clearConfirmed, warningSummary } from "@/features/members/memberDetail.utils";
 
@@ -35,7 +36,7 @@ export function WarningsCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className="font-display text-base font-bold tracking-tight">Warnings</h2>
+				<h2 className={CARD_HEADING}>Warnings</h2>
 				<p className="text-muted-foreground text-sm">{warningSummary(detail.warnings)}</p>
 			</div>
 
