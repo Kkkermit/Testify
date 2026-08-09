@@ -4,6 +4,9 @@ Everything needed to work on the web dashboard: how it is put together, how a sc
 and components work, how the API is reached, how it is built and tested. Written so somebody arriving with no
 memory of previous sessions can make a correct change.
 
+**Re-skinning it or reworking a flow?** [§18](#18-the-design-system) is the full token reference and the order
+to change things in; [§19](#19-user-journeys) is every journey end to end. Those two are the ones to edit.
+
 > [!IMPORTANT]
 > Two companion documents:
 >
@@ -33,6 +36,8 @@ memory of previous sessions can make a correct change.
 15. [Testing](#15-testing)
 16. [Traps that have bitten before](#16-traps-that-have-bitten-before)
 17. [Current screens](#17-current-screens)
+18. [The design system](#18-the-design-system)
+19. [User journeys](#19-user-journeys)
 
 ---
 
@@ -621,7 +626,7 @@ indentation you matched on may already have changed.
 | `/guilds/:id/commands`  | Per-command switches for this server                                                 |
 | `/commands`             | Every command, searchable, with the coverage tile                                    |
 | `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                                      |
-| `/owner`                | Six tabs: fleet, usage, commands, logs, runtime, control                             |
+| `/owner`                | Seven tabs: fleet, usage, commands, logs, blacklist, runtime, control                |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the
@@ -664,6 +669,11 @@ precisely the screen you want when something is wrong.
 - **The log ring is in memory and redacts on the way in** — any context key matching
   `token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is replaced before the record
   is stored. A restart clears it, which is the trade for something needing no retention policy.
+- **The blacklist is bot-wide, and one module owns the rule about who may be on it.** `blacklistActions.util.ts`
+  holds `blacklistProblem`, which both `/blacklist add` and the route call — an owner able to block another owner
+  could lock every one of them out of their own bot.
+- **Leaving a server is confirmed by name, and the audit record is written before `guild.leave()`** — afterwards
+  the name is no longer readable from the cache and the record would say only that something was left.
 - **There is no "start the bot".** Pause is a flag `runChecks` honours; shut down really ends the process behind
   a typed confirmation.
 - **Testify never phones home.** The runtime tab reports its version and links the releases page; it does not
@@ -680,11 +690,417 @@ back to `components/brand/Logo`; a brand mark is never worth a broken image icon
 
 ---
 
+## 18. The design system
+
+§12 is the short rule — everything comes from `@theme` in `src/index.css`. This section is the reference behind
+it: every token that exists, what each one is for, and the order to change them in. **If you are re-skinning the
+dashboard, work through [18.10](#1810-re-skinning-the-order-to-do-it-in) rather than grepping for hex values.**
+
+### 18.1 Where each visual decision lives
+
+One place per decision. If you find yourself editing a screen to change how something looks, you are probably in
+the wrong file.
+
+| Decision                        | Lives in                                              | Blast radius                            |
+| ------------------------------- | ----------------------------------------------------- | --------------------------------------- |
+| Any colour                      | `@theme` in `src/index.css`                           | Everything                              |
+| Corner radius                   | `--radius-card`, `--radius-field`                     | Everything                              |
+| Font family                     | `--font-sans`, `--font-mono`                          | Everything                              |
+| Animation and easing            | `--animate-*`, `--ease-out-soft`, `@utility motion-*` | Everything                              |
+| Card surface, border, padding   | `components/primitives/Card.tsx`                      | Every card                              |
+| Button shape and variants       | `components/primitives/Button.tsx`                    | Every button                            |
+| Page title size and header slot | `components/primitives/PageHeader.tsx`                | Every page                              |
+| Labelled-control spacing        | `components/form/fieldStyles.ts`                      | Every form row                          |
+| Page width and vertical rhythm  | `app/AppShell.tsx`                                    | Every page                              |
+| A feature's icon and tint       | `config/features.ts`                                  | Overview grid, anywhere a feature shows |
+| Sidebar shape and grouping      | `config/navigation.ts`                                | Sidebar, rail, drawer                   |
+| Native control appearance       | `@layer base` in `src/index.css`                      | Selects, checkboxes, scrollbars         |
+
+### 18.2 The palette
+
+Names are **roles, not colours**. `--color-destructive` is red today; the name still reads correctly if a fork
+makes it orange. Renaming a token to its hue is how a palette stops being swappable.
+
+| Token                        | Value     | What it is for                                                     |
+| ---------------------------- | --------- | ------------------------------------------------------------------ |
+| `--color-background`         | `#0a0a0f` | The page. Everything else sits on it                               |
+| `--color-foreground`         | `#ffffff` | Body text, headings, an active icon                                |
+| `--color-muted`              | `#1a1a25` | A recessed fill: secondary buttons, hover states, icon tiles       |
+| `--color-muted-foreground`   | `#a1a1b5` | Secondary text, meta lines, an inactive icon                       |
+| `--color-card`               | `#12121a` | Every card and panel surface                                       |
+| `--color-popover`            | `#1a1a25` | Anything floating: tooltips, native `<option>` lists               |
+| `--color-border`             | `#26263a` | Card borders, dividers, table rules                                |
+| `--color-input`              | `#6b6b8f` | Field borders — deliberately lighter, so a control looks touchable |
+| `--color-primary`            | `#7c3aed` | The one action colour: primary buttons, the active nav marker      |
+| `--color-primary-foreground` | `#ffffff` | Text on primary                                                    |
+| `--color-accent`             | `#a78bfa` | Links, the WebGL field, secondary emphasis                         |
+| `--color-ring`               | `#a78bfa` | The focus ring, and nothing else                                   |
+| `--color-success`            | `#34d399` | Saved, connected, healthy                                          |
+| `--color-warning`            | `#fbbf24` | A missing permission, a hierarchy problem, "nothing set up"        |
+| `--color-destructive`        | `#dc2626` | Delete, leave, block, shut down                                    |
+
+Two conventions worth keeping:
+
+- **`--color-input` is lighter than `--color-border` on purpose.** A field that borrows the divider colour reads
+  as a label. If the two converge in a rewrite, every form goes flat.
+- **`--color-ring` is used by exactly one rule** — `:focus-visible` in the base layer. Keeping it separate from
+  `--color-accent` means a rebrand can make the focus ring louder than the brand without touching links.
+
+### 18.3 Feature tints
+
+Six hues, used as an icon colour and as a 15% wash behind it. The grouping is by **feel rather than by
+subsystem** — audit logging reads the tickets blue because it is an operational screen, not because it is a
+ticket. Regroup them freely; the only constraint is the contrast rule below.
+
+| Token                        | Value     | Feature keys that read it (`config/features.ts`)              |
+| ---------------------------- | --------- | ------------------------------------------------------------- |
+| `--color-feature-levelling`  | `#a78bfa` | `levelling`                                                   |
+| `--color-feature-economy`    | `#fbbf24` | `economy`, `lottery`, `treasure`, `games`                     |
+| `--color-feature-moderation` | `#f87171` | `moderation`, `automod`, `anti-link`, `verification`, `owner` |
+| `--color-feature-welcome`    | `#34d399` | `welcome`, `auto-roles`                                       |
+| `--color-feature-tickets`    | `#60a5fa` | `tickets`, `audit-logging`, `voice-stats`, `info`             |
+| `--color-feature-community`  | `#f472b6` | `sticky`, `counting`, `giveaway`, `community`, `fun`          |
+
+Each is a **text colour at AA on the page background** and is paired with `/15` as a fill. A tint used as a fill
+at full strength will not pass contrast for the icon sitting on it — check both if you change one.
+
+`featureLook()` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before
+the dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
+
+### 18.4 Type scale
+
+Measured across `dashboard/src`, not aspirational: **four sizes do 96% of the work.**
+
+| Size        | Where it is used                                                   | Count |
+| ----------- | ------------------------------------------------------------------ | ----- |
+| `text-2xl`  | The page title in `PageHeader`, and the sign-in heading            | 4     |
+| `text-lg`   | A stat's value, an occasional section lead                         | 12    |
+| `text-base` | A card heading (`<h2>`, `<h3>`) — the default weight is `semibold` | 29    |
+| `text-sm`   | Body copy, every control, every button, table cells                | 100   |
+| `text-xs`   | Meta lines, IDs, timestamps, badges                                | 51    |
+
+Rules that hold today and are worth keeping:
+
+- **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them.
+- **A card heading is `text-base font-semibold`**, not `text-lg`. The size difference between a page and a card
+  is carried by `text-2xl` vs `text-base`; adding a third step in between makes cards compete with the page.
+- **An ID is always `font-mono text-xs`** with `--color-muted-foreground`. It is a reference, not a name.
+- **`text-xl` appears once** in the whole app. If a rewrite wants it, use it deliberately or delete it.
+
+### 18.5 Surfaces and elevation
+
+**There are no drop shadows anywhere.** On a near-black background a shadow reads as a smudge, not as height.
+Depth comes from three things instead:
+
+1. **Surface colour** — `--color-background` → `--color-card` → `--color-popover`, each a step lighter.
+2. **A 1px `--color-border`** around a card.
+3. **`surface-edge`**, a `@utility` putting a 1px inset white highlight at 6% along the top edge. That single
+   line is what stops a card reading as a flat rectangle.
+
+The body also carries a fixed radial wash of `--color-primary` at 14%, top-left, so the page still has depth
+when WebGL is unavailable and the backdrop never loads.
+
+### 18.6 Spacing and rhythm
+
+| Level             | Value                                        | Set in                |
+| ----------------- | -------------------------------------------- | --------------------- |
+| Page column width | `max-w-[1100px]`, centred                    | `AppShell`            |
+| Page padding      | `p-4`, `sm:p-6`                              | `AppShell`            |
+| Between sections  | one `gap-6` on the content column            | `AppShell`            |
+| Card padding      | `p-6` / `px-6 py-4` / `p-0`                  | `Card`, via `padding` |
+| Inside a card     | `gap-4` between blocks, `gap-3` between rows | the screen            |
+| Inside a row      | `gap-2`, `gap-3`                             | the screen            |
+
+Measured usage: `gap-3` (71), `gap-4` (48), `gap-2` (45), `gap-1` (25), `gap-6` (7). **A screen that reaches for
+a fifth value is usually solving a problem that is really about nesting.**
+
+Three rules that came from real complaints:
+
+- **All three card paddings share the same 24px inline value**, so every card's content starts on the same
+  column whatever its density. A card reaching for `p-4` puts its text 8px left of the rest of the page.
+- **A margin between siblings is nearly always wrong.** A flex column with a `gap` cannot leave a stray margin
+  behind when a sibling is conditionally absent. The one legitimate margin is inside a CSS `columns` layout,
+  where `gap` does not apply between items at all.
+- **A grid of panels wants `items-start`** unless the cards genuinely should match heights. Without it the
+  shorter card stretches and the dead space inside its border is the "massive gap" that keeps getting reported.
+
+### 18.7 Radius
+
+`--radius-card` (10px) for cards, buttons and anything the eye reads as a surface. `--radius-field` (8px) for
+inputs, selects and tooltips. `rounded-full` for avatars, dots and the scrollbar thumb.
+
+**Buttons use `--radius-card`, not `--radius-field`.** They are surfaces you press, not boxes you type in — and
+a button beside an input with a tighter radius looks like part of the input.
+
+### 18.8 Motion
+
+Four animations, all short, all built from one easing token.
+
+| Utility          | Animation                     | Used for                                    |
+| ---------------- | ----------------------------- | ------------------------------------------- |
+| `motion-reveal`  | 320ms, fade + 6px rise        | A page header, a section arriving           |
+| `motion-fade`    | 200ms, opacity only           | The `<main>` outlet on every navigation     |
+| `motion-pop`     | 200ms, fade + scale from 0.97 | A card that appears in place, e.g. a detail |
+| `skeleton-sheen` | 1.6s linear, infinite         | The highlight sweeping a loading skeleton   |
+
+`--ease-out-soft` is `cubic-bezier(0.22, 1, 0.36, 1)` — fast out, long settle. Everything decelerating uses it.
+
+Three rules:
+
+- **Motion is feedback, never decoration.** `prefers-reduced-motion: reduce` drops every duration to 0.01ms and
+  hides the skeleton sheen, and nothing about the dashboard becomes harder to use. If a rewrite adds motion that
+  would be _missed_ under that media query, the motion is carrying information it should not be.
+- **A press moves.** `active:scale-[0.98]` on `Button` is the cheapest confirmation that a click landed.
+- **Transitions are property-scoped** — `transition-[background-color,color,transform]`, never `transition-all`,
+  which animates layout properties nobody asked it to.
+
+### 18.9 Iconography
+
+`lucide-react`, imported per icon so the bundle only carries what is used.
+
+| Context                     | Size | Notes                                              |
+| --------------------------- | ---- | -------------------------------------------------- |
+| Inside a button             | 15   | Beside a label, `aria-hidden`                      |
+| Beside a row or list item   | 16   | Beside a label, `aria-hidden`                      |
+| A feature tile, empty state | 20   | `EmptyState` takes an **element**, not a component |
+| A stat tile                 | —    | `StatTile` takes a **component**: `icon={Coins}`   |
+
+**An icon is never the only label.** An icon-only button carries an `sr-only` span or an `aria-label`; the
+browser sweep counts controls whose accessible name is empty and fails on any.
+
+### 18.10 Re-skinning: the order to do it in
+
+Tokens cover almost everything, but not quite. Work in this order and the browser check at the end should come
+back clean.
+
+1. **Rewrite the palette in `@theme`.** Keep the role names. Every component follows.
+2. **Then the four things that cannot read a token**, because nothing else will:
+   - The **select chevron** is an inline SVG data URI in `@layer base` with `stroke='%23a1a1b5'` hardcoded —
+     `currentColor` cannot be used inside a `url()`. Change it to the new `--color-muted-foreground` by hand.
+   - The **body wash** hardcodes its geometry (`80rem 50rem at 15% -10%`) though not its colour.
+   - The **tippy theme block** (`.tippy-box[data-theme~="testify"]`) reads tokens but restates the radius,
+     padding and font size. Check it still matches the new field radius.
+   - The **`prefers-contrast: more` block** remaps `--color-border` to `--color-input` and muted text to
+     foreground. If the new palette changes their relationship, this remap may need inverting.
+3. **Check the backdrop.** `lib/three/tokens.ts` reads `--color-accent` off `:root` at runtime and falls back
+   rather than rendering a black field, so a token three cannot parse fails quietly. Load a page and look.
+4. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
+   automated axe pass has `color-contrast` **disabled** — jsdom computes no styles, so it can only report false
+   negatives. This step is manual and there is no substitute.
+5. **Run a real browser sweep** at 1440 / 820 / 390. `dashboard-POC/10-ACCESSIBILITY.md` lists the manual passes;
+   the practical script is in §15.
+6. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
+
+> [!WARNING]
+> **A hex value in a `.tsx` is a review comment.** The four exceptions above are all in `index.css` and all
+> commented in place. If a rewrite adds a fifth, comment it there too — a hardcoded colour nobody knows about is
+> the thing that makes the _next_ re-skin look half-finished.
+
+---
+
+## 19. User journeys
+
+What somebody is actually trying to do, in order, and what the screen owes them at each step. **This is the
+section to rewrite when a flow feels wrong** — the components are §11, the styling is §18, and this is the shape
+of the path between them.
+
+### 19.1 The states every screen owes
+
+Before any specific journey: a screen is not finished until all six exist. Most of the rough edges ever reported
+here have been a missing one of these rather than a wrong layout.
+
+| State   | What renders                                                  | Rule                                                      |
+| ------- | ------------------------------------------------------------- | --------------------------------------------------------- |
+| Loading | `<Skeleton>` roughly the shape of the answer                  | Never a spinner in the middle of an empty page            |
+| Empty   | `<EmptyState>` — icon, one sentence, the action that fixes it | "No results" is not an empty state                        |
+| Error   | `<ErrorState>`, with a Retry when the failure is retryable    | The request failed. Different from empty and from refused |
+| Refused | `<Warning>` **beside the control**                            | The server said no. The page stays, nothing navigates     |
+| Saving  | `<SavingIndicator state={savingStateOf(busy, ok)} />`         | In the `PageHeader` action slot                           |
+| Busy    | `disabled` on every control that writes                       | A double-click must not send two writes                   |
+
+**A refusal is placed, not announced.** It goes next to the control that caused it, not at the top of the page —
+somebody who scrolled to a card at the bottom will never see a banner above the fold.
+
+### 19.2 First run, and the half-install
+
+**Who:** whoever just turned `DASHBOARD_ENABLED` on.
+
+1. They open the base URL and land on `/sign-in`, which is public.
+2. `GET /api/auth/setup` answers first. If `DISCORD_CLIENT_SECRET`, `DASHBOARD_BASE_URL` or
+   `DASHBOARD_SESSION_SECRET` is missing, the page becomes `SetupNeeded` — it names **all** the missing values at
+   once and shows the exact redirect URI to paste into the Discord developer portal.
+3. With those set and the bot restarted, the same URL shows the sign-in button.
+
+**Why it is a screen rather than a startup crash:** the value most likely to be wrong is the redirect URI, and
+the only place that can show the exact string to paste is a page served at the URL in question.
+
+### 19.3 Signing in
+
+**Who:** anybody with Manage Server somewhere the bot is.
+
+1. One button — "Sign in with Discord". No form, no second option.
+2. OAuth2 with `state` and PKCE; the callback sets the session cookie and redirects to `returnTo`, which is
+   validated (`//evil.example` is an absolute URL to a browser, and backslashes are normalised, so a check that
+   only looks for a leading `/` is an open redirect).
+3. They arrive at `/guilds`, or at whatever page they originally asked for.
+
+**Exits:** the session expires, or `DASHBOARD_SESSION_SECRET` is rotated, and they are back at step 1 with the
+page they wanted preserved in `returnTo`.
+
+### 19.4 Choosing a server
+
+**Who:** a signed-in manager.
+
+1. `/guilds` lists every server where they have Manage Server, from the OAuth guild list intersected with the
+   bot's own.
+2. A server **the bot is not in** still appears, with an invite card rather than being hidden — "the bot is not
+   here" is not a secret, and the useful answer is an invite link.
+3. A server they cannot manage is not listed at all.
+4. Picking one goes to `/guilds/:id`.
+
+**Rough edge, known:** the OAuth guild list is a login-time snapshot, so a server joined five minutes ago is
+missing until the next sign-in. The **permission** check is live per request (`guild.members.fetch()`), so this
+is a staleness problem in the picker only, never a security one.
+
+### 19.5 Configuring a feature
+
+**Who:** a manager who has picked a server. This is the dominant journey — most screens are this shape.
+
+1. `/guilds/:id` shows stat tiles, a feature grid, permission warnings and recent changes. The grid is the
+   navigation: each tile carries the feature's tint and links to its screen where one exists.
+2. They open a feature — say `/guilds/:id/levelling`.
+3. The screen loads its own data and renders skeletons meanwhile. Tabs are in the URL (`?tab=`), so a link to a
+   tab is a link to a tab.
+4. They change a control. **What happens next depends on the control's shape** — see 19.8.
+5. The `SavingIndicator` in the header says saved. A refusal appears beside the control instead.
+6. The change is written to the audit log and shows up in "recent changes" on the overview.
+
+**The check that makes this journey trustworthy:** a channel the bot cannot post in is disabled in the picker
+_before_ anybody saves a configuration that would silently do nothing, and a role above the bot's own is warned
+about at configuration time rather than at the moment it fails to be assigned.
+
+### 19.6 Handling a problem member
+
+**Who:** a manager dealing with somebody specific. The first journey that writes to a **person** rather than to
+a setting.
+
+1. `/guilds/:id/members` — money and levels as real tables, with a "find me" jump to your own page.
+2. They open a member, or arrive directly at `…/members/:userId`.
+3. The page shows standing, roles, warnings and any live softban. `moderationProblem` travels in the response,
+   so if the caller may not act on this member the controls are not rendered and the reason is shown once.
+4. Warnings are added with a reason; removed one at a time; **cleared only after typing the member's name**,
+   because nothing recovers the record.
+5. Money is `$inc`-ed, and the route refuses a subtraction that would leave a negative balance.
+6. A level change hands out the role rewards that level earns, using the same function the message handler does.
+7. A softban can be lifted even though the member is not in the server — they are banned, so they have no roles
+   to compare, and running the hierarchy check there would refuse every lift.
+
+**The greying is a courtesy; `actOn()` is the gate**, asked again before every write.
+
+### 19.7 The owner journeys
+
+All behind `requireOwner`, which answers **404** so a manager never learns the console is there.
+
+| Journey               | Path                                                                                                   |
+| --------------------- | ------------------------------------------------------------------------------------------------------ |
+| Triage the fleet      | `/owner` → Overview → a server row → the detail card → "Open its settings" or Leave                    |
+| Understand usage      | `/owner?tab=usage` → a window (7/30/90 days) → busiest and least-used commands                         |
+| Turn a command off    | `/owner?tab=commands` → bot-wide switches; the per-server equivalent is `/guilds/:id/commands`         |
+| Find out what broke   | `/owner?tab=logs` → level filter and a search that matches message **and** context                     |
+| Block somebody        | `/owner?tab=blacklist` → paste an ID, give a reason → the row appears with a name if Discord knows one |
+| Leave a server        | `/owner` → the server's detail card → type its name → Leave                                            |
+| Pause or stop the bot | `/owner?tab=control` → Pause is reversible here; Shut down is typed and final                          |
+
+Three things shape these:
+
+- **Each tab fetches its own data.** A failing `/owner/stats` used to blank the whole console, and the logs tab
+  is precisely the screen you want when something is wrong.
+- **The blacklist takes an ID, not a picker.** Somebody worth blocking is usually in no server the bot can still
+  see, so there is no list to choose from. A row whose account Discord no longer knows still renders with its
+  ID — an entry nobody can read is an entry nobody can lift.
+- **There is no "start the bot".** The HTTP server is inside the bot process, so a stopped bot cannot serve the
+  button that would start it. The Control tab says so in as many words.
+
+### 19.8 When a control writes — the three shapes
+
+Pick by the question being asked, not by which is less code. Getting this wrong is the most common way a screen
+feels wrong without looking wrong.
+
+| Shape                   | Writes                             | Use when                                                                              | Built example            |
+| ----------------------- | ---------------------------------- | ------------------------------------------------------------------------------------- | ------------------------ |
+| **Apply immediately**   | on every change                    | Each control is an independent decision. Most config                                  | Levelling, settings      |
+| **Draft then Save**     | once, on an explicit Save          | The controls are **one** decision, and half of it applied is not a state anyone wants | Audit logging            |
+| **Local, save on blur** | when the field is left, or on Save | A typed field. Per-keystroke would be a write per character                           | Welcome template, prefix |
+
+Two corollaries:
+
+- **Re-read before you write.** Every branch that changes data re-reads rather than trusting what the screen was
+  rendered with. A balance shown 30 seconds ago may already be spent.
+- **A whole-document answer is only trusted while it is the only write in flight** — see §10's write-race guard,
+  and copy it exactly.
+
+### 19.9 Confirmations — three tiers
+
+| Tier              | Cost of a misclick                     | Examples                           |
+| ----------------- | -------------------------------------- | ---------------------------------- |
+| None              | Reversible from the same screen        | Every toggle, every picker, Pause  |
+| Typed **name**    | Unrecoverable, but scoped to one thing | Clear all warnings, leave a server |
+| Typed **literal** | Ends the process or affects everything | `shut down`                        |
+
+**The server checks it too.** The browser asking for the name is the warning; `confirm !== guild.name` in the
+route is what makes a hand-written request with an empty body impossible. A confirmation that exists only in the
+form is decoration.
+
+### 19.10 Navigation after an action
+
+- **A destructive action that removes the thing you were looking at closes the card** and refetches the list it
+  came from. Leaving a server does this.
+- **A refusal never navigates.** The card stays open with the reason beside the control.
+- **A value that changes as it is typed writes the URL with `replace: true`**, or Back walks the user through
+  every keystroke. `OwnerPage`'s `put(key, value, replace)` is the shape to copy, and the request behind it is
+  debounced (`useDebounced`) so a five-character search is one query rather than five.
+- **Search params are merged, never replaced wholesale.** Paging with a fresh `URLSearchParams` drops the
+  `?tab=` that got you there — there is a test pinning it.
+- **A tab is `?tab=`**, so a link to a tab is a link to a tab and Back works between them.
+
+### 19.11 Voice
+
+- **Sentence case everywhere.** Headings, buttons, labels. Not Title Case.
+- **A refusal says what to do next**, not what went wrong internally: "A user ID is 17 to 20 digits", not
+  "Invalid input".
+- **Say what a thing costs before it is done.** "Getting back in needs a fresh invite from someone still inside"
+  belongs beside the Leave button, not in a toast afterwards.
+- **Never blame.** Write refusals as advice.
+- **British spelling**, matching the bot's own copy in `src/config/strings.ts`.
+
+### 19.12 Where to rewrite a journey
+
+| To change…                       | Edit                                                           |
+| -------------------------------- | -------------------------------------------------------------- |
+| What a screen does, step by step | `features/<name>/<Name>Page.tsx` — routing and states only     |
+| A rule inside a journey          | `features/<name>/<name>.utils.ts` — testable without rendering |
+| When a control writes            | `features/<name>/use<Name>.ts`                                 |
+| The order of screens             | `config/navigation.ts` and `routes.tsx`                        |
+| What the overview grid promotes  | `config/features.ts`                                           |
+| The words                        | The component — there is no string table on this side          |
+
+A page holds routing, loading and error branches and **nothing else**. Anything with a rule in it — which tab a
+URL means, what a page count is, which channels can be posted in — belongs in a `.utils.ts` beside it where it
+can be tested without rendering.
+
+---
+
 ## What is left
 
-`dashboard-POC/13-ROADMAP-AND-RISKS.md` is authoritative. As of the last commit: **Phase 3 is complete** — every
-guild-scoped setting the bot has is editable on the web. Still open:
+`dashboard-POC/13-ROADMAP-AND-RISKS.md` is authoritative. As of the last commit, **phases 3 and 4 are
+complete** — every guild-scoped setting is editable on the web, and a manager can handle a problem member
+without opening Discord. Phase 5 is all but done: leaving a server and the bot-wide blacklist are built.
 
-- **Phase 4** — members, moderation and economy: leaderboards as accessible tables, a member detail page,
-  warnings and softbans through `moderationActions.util.ts`, XP grants that also apply role rewards.
-- **Phase 5** — leave guild and blacklist on the owner console, and the generated command runner.
+Still open:
+
+- **Phase 5** — the generated command runner over an allowlist. `dashboard-POC/06-COMMAND-CONTROL.md` is the
+  plan, and its conclusion is the thing to hold onto: the dashboard is a third surface onto the **domain**, not
+  onto the presentation. The runner is the one place an adapter is right, because owner commands are one-shot
+  and embed-based. `/eval` is never exposed.
+- **Phase 6** — the manual half of the accessibility pass, a Docker image and compose file, README screenshots,
+  and a light theme if wanted. §18.10 is the order to do the last one in.
