@@ -5,7 +5,18 @@ import ts from "typescript-eslint";
 
 export default ts.config(
 	// Globbed at any depth, because the workspaces build into their own dist/ and coverage/.
-	{ ignores: ["**/dist/**", "**/coverage/**", "**/node_modules/**", "assets/**", "site/**", ".codebase-notes/**"] },
+	// `.claude/skills` is vendored third-party content — linting somebody else's scripts fails on their style, not ours.
+	{
+		ignores: [
+			"**/dist/**",
+			"**/coverage/**",
+			"**/node_modules/**",
+			"assets/**",
+			"site/**",
+			".codebase-notes/**",
+			".claude/skills/**",
+		],
+	},
 	js.configs.recommended,
 	ts.configs.recommendedTypeChecked,
 	ts.configs.stylisticTypeChecked,

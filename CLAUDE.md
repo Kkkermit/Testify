@@ -1287,6 +1287,12 @@ consequences worth knowing: a Tailwind utility beats a base-layer rule, so the r
 `SELECT` class rather than the base `padding-right`; and `scrollbar-none` is a utility for a scroller whose bar
 would draw over the thing it scrolls — the tab underline is the case it exists for.
 
+**The design skills in `.claude/skills` lead the visual direction.** They are vendored rather than installed so
+they load in every session, including the remote ones. `dashboard/dashboard.md` §18 records the palette, type
+scale and spacing as they stand today, and is a baseline to rewrite against rather than a contract to defend —
+where a skill disagrees with it, the skill wins and §18 is updated. What does **not** move: tokens stay the
+single source, the accessibility floor only rises, and the CSP is untouchable.
+
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
 `--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. A hex value in a
 `.tsx` is a review comment.

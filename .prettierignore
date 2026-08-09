@@ -5,3 +5,6 @@ assets
 site
 package-lock.json
 .codebase-notes
+
+# Third-party skills, vendored verbatim. Reformatting them would make every upstream update a conflict.
+.claude/skills

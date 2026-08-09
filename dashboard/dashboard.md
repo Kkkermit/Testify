@@ -8,6 +8,13 @@ memory of previous sessions can make a correct change.
 to change things in; [§19](#19-user-journeys) is every journey end to end. Those two are the ones to edit.
 
 > [!IMPORTANT]
+> **§18 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../.claude/skills/README.md)
+> now lead the dashboard's visual direction — where their guidance and the values recorded in §18 disagree, the
+> skill wins and §18 is updated to describe what was built. Three things are architecture rather than aesthetics
+> and do not move: tokens stay the single source (no hex in a `.tsx`), the accessibility floor in §14 only ever
+> rises, and the CSP and security boundary in §9 are untouchable.
+
+> [!IMPORTANT]
 > Two companion documents:
 >
 > - [`../CLAUDE.md`](../CLAUDE.md) §24 — the repo-wide rules. **Where it and this file disagree, it wins.**
