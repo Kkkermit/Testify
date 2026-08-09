@@ -5,7 +5,8 @@ and components work, how the API is reached, how it is built and tested. Written
 memory of previous sessions can make a correct change.
 
 **Re-skinning it or reworking a flow?** [§18](#18-the-design-system) is the full token reference and the order
-to change things in; [§19](#19-user-journeys) is every journey end to end. Those two are the ones to edit.
+to change things in, [§19](#19-user-journeys) is every journey end to end, and [§20](#20-the-58-rules) is the
+checklist the rewrite is working through. Those three are the ones to edit.
 
 > [!IMPORTANT]
 > **§18 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../.claude/skills/README.md)
@@ -45,6 +46,7 @@ to change things in; [§19](#19-user-journeys) is every journey end to end. Thos
 17. [Current screens](#17-current-screens)
 18. [The design system](#18-the-design-system)
 19. [User journeys](#19-user-journeys)
+20. [The 58 rules](#20-the-58-rules)
 
 ---
 
@@ -95,6 +97,13 @@ Each consumer reads what suits it:
 `prepare` builds it after any install. Editing `shared/src` and then running the **built** bot is the one case
 needing `npm run build:shared` by hand.
 
+> [!WARNING]
+> **This bit once cost an afternoon.** `tsx` resolves `@testify/shared` to `dist/index.js`, so the **dev** bot
+> reads the build too, and `shared/dist` is gitignored — pulling never refreshes it. A new export in
+> `shared/src` is then `undefined` at runtime and every route using it 500s with
+> `Cannot read properties of undefined (reading 'safeParse')`. `npm run dev` and `npm run dev:all` build shared
+> first now, so it cannot recur.
+
 `shared/` stays dependency-light: **zod and nothing else.** No discord.js, no React.
 
 ---
@@ -110,6 +119,14 @@ needing `npm run build:shared` by hand.
 
 In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
 work with **no CORS configuration at all**. In production the API serves `dashboard/dist` from the same port.
+
+**`dev:all` is one supervisor process, and one Ctrl+C stops everything.** `scripts/devAll.ts` replaced
+`concurrently` for a reason worth knowing: concurrently spawns every command through a shell — `cmd.exe /s /c`
+on Windows, in `dist/lib/spawn.js` — and each of those batch layers stops to ask "Terminate batch job (Y/N)?"
+when the console is interrupted. Two children meant two prompts and a bot left running. The supervisor spawns
+the real binaries with `shell: false`, so there is no batch layer left to ask; children are `detached` so one
+signal reaches the grandchildren `tsx watch` and Vite spawn, and a 5s grace timer kills anything that will not
+go. It builds `@testify/shared` before either child starts, for the reason in the warning above.
 
 **`dev:all` starts Vite only once the API answers.** `startApi` runs after `client.login()`, so for the
 twenty-odd seconds the bot spends connecting there is nothing on the port, and the proxy answers every poll in
@@ -1099,6 +1116,141 @@ form is decoration.
 A page holds routing, loading and error branches and **nothing else**. Anything with a rule in it — which tab a
 URL means, what a page count is, which channels can be posted in — belongs in a `.utils.ts` beside it where it
 can be tested without rendering.
+
+---
+
+## 20. The 58 rules
+
+Taras Bakusevych's [58 rules for beautiful UI design](https://uxdesign.cc/58-rules-for-stunning-and-effective-user-interface-design-ea4b93f931f6),
+carried here as a working checklist for the rewrite. Almost none of it is covered by the skills in
+[`.claude/skills`](../.claude/skills/README.md) — only typography's kerning rule overlaps — so this is
+additional, not a restatement.
+
+Each rule gets a verdict, because a checklist where everything is "todo" is not a checklist:
+
+- **Held** — the dashboard already does this. Do not undo it; §18 or §19 records how.
+- **Apply** — a real gap. This is the rewrite's actual worklist.
+- **N/A** — deliberately not applicable to a self-hosted admin dashboard, with the reason. Ignoring these is a
+  decision, not an oversight; a bot's settings panel is not a consumer app competing for attention, and several
+  of these rules assume it is.
+
+### 🫀 Empathy (1–4)
+
+| #   | Rule                            | Verdict | Note                                                                                                                      |
+| --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Cultural and societal influence | Held    | Sentence case, British spelling, no idiom, no flags-as-languages. Colour is never the only signal                         |
+| 2   | Industry and context of use     | Held    | The context is a Discord server admin at a desk with the bot open in another window                                       |
+| 3   | User demographics               | Apply   | The audience is one narrow group — a self-hoster who runs a bot. Write for them specifically, not for a generic "user"    |
+| 4   | Tech-savviness                  | Held    | It already assumes somebody who can read an ID and edit a `.env`. §19.2's setup screen is the one place that assumes less |
+
+### 🖼️ Layout (5–10)
+
+| #   | Rule                              | Verdict | Note                                                                                                     |
+| --- | --------------------------------- | ------- | -------------------------------------------------------------------------------------------------------- |
+| 5   | Negative space                    | Apply   | The densest screens (owner console, member detail) are the ones to look at first                         |
+| 6   | Golden ratio or rule of thirds    | N/A     | A settings form is a single column of cards; proportion here is the spacing ladder in §18.6, not a ratio |
+| 7   | Hierarchy via size, colour, space | Held    | §18.4 — four type sizes, and muted vs foreground carries the rest                                        |
+| 8   | Grid systems                      | Held    | `max-w-[1100px]`, one `gap-6` column, `sm:grid-cols-2` inside cards                                      |
+| 9   | A clear focal point               | Apply   | Most screens have none — every card weighs the same. The primary action on a page should win             |
+| 10  | Rhythm to direct attention        | Apply   | Related to 9. The F-pattern applies to the tables; the Z-pattern does not apply to a form                |
+
+### 🎟 Essentialism (11–16)
+
+| #   | Rule                               | Verdict | Note                                                                                            |
+| --- | ---------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
+| 11  | Simplicity by reduction            | Held    | §21's "two commands that do one job" is the same instinct applied to the bot                    |
+| 12  | Organisation makes many look fewer | Held    | Collapsible sidebar sections, the eight-tab owner console, seven settings sections on one page  |
+| 13  | Don't make users think             | Held    | A channel the bot cannot post in is disabled **before** saving, not refused after               |
+| 14  | As little design as possible       | Held    | No drop shadows, no chart library, one accent colour                                            |
+| 15  | Break big tasks into steps         | N/A     | There is no multi-step task here. The one long flow — OAuth — is Discord's                      |
+| 16  | Savings in time feel simple        | Apply   | Debounced search is in; smart defaults and a jump-to-your-own-row exist only on the leaderboard |
+
+### 🧭 Guidance (17–22)
+
+| #   | Rule                       | Verdict | Note                                                                                           |
+| --- | -------------------------- | ------- | ---------------------------------------------------------------------------------------------- |
+| 17  | Engaging onboarding        | Apply   | §19.2 covers the half-install. A first-run tour of what the dashboard can do does not exist    |
+| 18  | Intuitive flow             | Held    | §19.5 — overview grid to feature screen, and the grid is the navigation                        |
+| 19  | Contextual hints and tips  | Held    | `Field`'s `hint`, hierarchy warnings, `Tooltip` — which describes, never names (§11)           |
+| 20  | Progressive disclosure     | Apply   | The settings page shows all seven sections at once. Tabs do this on levelling; sections do not |
+| 21  | Design to encourage action | Apply   | Related to 9 — a page whose cards all look alike encourages nothing in particular              |
+| 22  | Feedback for every action  | Held    | `SavingIndicator`, optimistic writes, a refusal beside its control (§19.1)                     |
+
+### 💎 Typography and colour (23–34)
+
+| #   | Rule                            | Verdict | Note                                                                                                                                                    |
+| --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 23  | Typography hierarchy            | Held    | §18.4                                                                                                                                                   |
+| 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                          |
+| 25  | Reflect brand mood              | Apply   | The type is neutral to the point of anonymous. This is where a rewrite has the most room                                                                |
+| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                        |
+| 27  | Limit font and style variations | Held    | §18.4 — four sizes carry 96% of the app                                                                                                                 |
+| 28  | Line spacing, kerning, height   | Apply   | The one rule the `typography` skill also covers; defer to it. Nothing sets a line height today                                                          |
+| 29  | Contrast is key                 | Apply   | **The known gap.** `jest-axe` runs with `color-contrast` disabled, so this is unverified — §18.10 step 4, and the `accessibility-*` skills are the tool |
+| 30  | Consistent palette              | Held    | §18.2, and no component may write a colour                                                                                                              |
+| 31  | The 60–30–10 rule               | Apply   | Worth measuring. The page is ~95% background and card, and the accent barely appears                                                                    |
+| 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                 |
+| 33  | Semantic colours for status     | Held    | `Badge` tones, `Warning`, the destructive button variant                                                                                                |
+| 34  | Colour to guide action          | Apply   | One primary per screen would make this true; today several cards each have a primary button                                                             |
+
+### 🖼 Visual content (35–40)
+
+| #   | Rule                       | Verdict | Note                                                                                       |
+| --- | -------------------------- | ------- | ------------------------------------------------------------------------------------------ |
+| 35  | Content over UI styling    | Held    | The reason there are no shadows and no chart library                                       |
+| 36  | Purposeful imagery         | Held    | The only images are real Discord avatars and icons; `Avatar` falls back to a lettered tile |
+| 37  | Concise text               | Apply   | Some card descriptions run to three lines. §19.11 says what to aim for                     |
+| 38  | Micro-interactions         | Held    | §18.8 — four short animations, and `prefers-reduced-motion` removes them all               |
+| 39  | Video for storytelling     | N/A     | An admin panel has nothing to narrate, and a video is a dependency and a bundle cost       |
+| 40  | High-quality product shots | N/A     | There is no product to photograph                                                          |
+
+### 🛸 Novelty (41–46)
+
+| #   | Rule                                 | Verdict | Note                                                                                                 |
+| --- | ------------------------------------ | ------- | ---------------------------------------------------------------------------------------------------- |
+| 41  | Originality and uniqueness           | Apply   | The honest assessment: this reads as a competent Tailwind dashboard. That is what the rewrite is for |
+| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19, a WebGL backdrop that costs nothing when unwanted                   |
+| 43  | Most advanced, yet acceptable        | Held    | The backdrop is the whole of the risk taken, and it degrades to a CSS wash                           |
+| 44  | Inspiration from other industries    | Apply   | Nothing here looks outside dashboards for its ideas                                                  |
+| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                   |
+| 46  | Novelty must enhance, not complicate | Held    | The rule that keeps the backdrop `aria-hidden` and `pointer-events-none`                             |
+
+### 🎛 Consistency (47–52)
+
+| #   | Rule                            | Verdict | Note                                                                                    |
+| --- | ------------------------------- | ------- | --------------------------------------------------------------------------------------- |
+| 47  | A comprehensive design system   | Held    | §18 is that document, and `@theme` is its single source                                 |
+| 48  | Limit design patterns           | Held    | §19.8 — three write shapes, and you pick by the question rather than inventing a fourth |
+| 49  | Predictable element behaviour   | Held    | One `Field`, one `Button`, one `Card`; `components/primitives` before a local copy      |
+| 50  | Standardised templates          | Held    | §7's six edits, and every page opens with a `PageHeader`                                |
+| 51  | Cross-device consistency        | Held    | §13's three widths, and `sr-only` rather than `hidden` at the rail                      |
+| 52  | Standardised content guidelines | Apply   | §19.11 states the voice; nothing enforces it, and the copy drifts between screens       |
+
+### 🕹 Engagement (53–58)
+
+| #   | Rule                      | Verdict | Note                                                                                                                                   |
+| --- | ------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 53  | Gamification              | N/A     | Points and badges belong in the bot's levelling feature, which the dashboard **configures**. Gamifying the admin panel would be absurd |
+| 54  | Personalisation           | N/A     | The panel is already scoped to your servers. A theme picker is §21's open question, not engagement                                     |
+| 55  | Storytelling              | N/A     | An admin changing a prefix wants the control, not a narrative                                                                          |
+| 56  | Visually display progress | Held    | `SavingIndicator`, `Pager`, the `/commands` coverage tile                                                                              |
+| 57  | Variable rewards          | N/A     | Deliberately not. Unpredictable reinforcement in a tool somebody has to use for work is a dark pattern                                 |
+| 58  | Social features           | N/A     | There is nothing to share, and the audit log is the opposite of a social feed                                                          |
+
+### What this adds up to
+
+**Thirty-two held, seventeen to apply, nine deliberately not applicable.** The seventeen cluster tightly, and
+they are the same three problems wearing different hats:
+
+1. **No focal point** (9, 10, 21, 34). Every card carries equal weight and several offer a primary button, so
+   no screen says what to do first. This is the biggest single win and it is mostly a matter of demoting things.
+2. **The type and palette are anonymous** (25, 31, 41, 44). Correct, accessible and unmemorable — the honest
+   reading of rule 41. This is what the aesthetic skills are for, and §18 is explicitly a baseline to rewrite.
+3. **Contrast is unverified** (28, 29). `jest-axe` cannot check it and nothing else has. The `accessibility-*`
+   skills close this, and it must be re-checked after any palette change — §18.10 step 4.
+
+The rest — density (5), conciseness (37), progressive disclosure (20), copy consistency (52) — is ordinary
+polish that can ride along with the rewrite rather than driving it.
 
 ---
 

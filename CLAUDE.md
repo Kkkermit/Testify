@@ -1143,6 +1143,13 @@ So the workspace resolves like any other package, and each consumer reads what s
 `prepare` builds it after any install, so a fresh clone works. Editing `shared/src` and then running the built
 bot is the one case that needs `npm run build:shared` by hand.
 
+> [!WARNING]
+> **`tsx` reads the built `dist`, not the source — and `shared/dist` is gitignored.** So does the dev bot, not
+> just the production one. Pull a commit that adds an export to `shared/src`, run the bot without reinstalling,
+> and that export is `undefined` at runtime: every route validating with it dies on
+> `Cannot read properties of undefined (reading 'safeParse')`, naming nothing that points at the cause. `dev`
+> and `dev:all` now build shared first — about 40ms — so the state cannot happen.
+
 `shared/` stays dependency-light: zod and nothing else. No discord.js, no React.
 
 ### The security layer
