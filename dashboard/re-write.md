@@ -225,8 +225,14 @@ builds; contrast passes; screenshots of all 21 routes taken for comparison.
 > switch and a tile reads as one measurement. The sidebar's brand wears the display face, its group headings
 > take the eyebrow voice, and the active marker moved from the fill violet to the accent.
 >
-> **Still to do:** one primary action per screen — several screens still offer two or three — and the
-> settings page's progressive disclosure (rule 20). Those are per-screen work, which is Phase 3.
+> **Rule 20 is done.** `Disclosure` groups the settings page's seven sections under three questions — how
+> Testify appears, who gets in, what happens in channels. It is a `<details>`, so the fold is keyboard-operable
+> and announced without an `aria-*` to get wrong, and it starts open: a page visited rarely and read top to
+> bottom should not cost a click per section. Verified in a real browser, because jsdom renders a closed
+> `<details>` in full and cannot tell the two states apart.
+>
+> **Still to do:** one primary action per screen — several screens still offer two or three. That is per-screen
+> work, which is Phase 3.
 
 The biggest single win, and mostly a matter of demoting things. §20 rules 9, 10, 21 and 34 are one problem:
 **every card weighs the same and several offer a primary button, so no screen says what to do first.**

@@ -1,6 +1,7 @@
+import { type ReactNode } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { PageHeader, Skeleton } from "@/components/primitives";
+import { Disclosure, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { AntiLinkSection } from "@/features/settings/sections/AntiLinkSection";
@@ -37,16 +38,33 @@ export function SettingsPage(): React.JSX.Element {
 				subtitle="The smaller switches: prefix, link filtering, joins, verification and counting."
 			/>
 
-			{/* Columns, because a grid row is as tall as its tallest cell; `gap` does not apply here, so each card carries its own margin. */}
-			<div className="gap-x-4 lg:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
-				<PrefixSection guildId={guildId} value={value.prefix} />
-				<NicknameSection guildId={guildId} />
-				<AntiLinkSection guildId={guildId} value={value.antiLink} />
-				<AutoRoleSection guildId={guildId} value={value.autoRoles} roles={roles.data ?? []} />
-				<VerificationSection {...shared} roles={roles.data ?? []} />
-				<CountingSection {...shared} value={value.counting} />
-				<VoiceStatsSection {...shared} value={value.voiceStats} />
-			</div>
+			<Disclosure label="How Testify appears">
+				<Group>
+					<PrefixSection guildId={guildId} value={value.prefix} />
+					<NicknameSection guildId={guildId} />
+				</Group>
+			</Disclosure>
+
+			<Disclosure label="Who gets in">
+				<Group>
+					<AutoRoleSection guildId={guildId} value={value.autoRoles} roles={roles.data ?? []} />
+					<VerificationSection {...shared} roles={roles.data ?? []} />
+				</Group>
+			</Disclosure>
+
+			<Disclosure label="What happens in channels">
+				<Group>
+					{/* Counting is twice the height of the other two, and a column can only take a prefix of this order. */}
+					<AntiLinkSection guildId={guildId} value={value.antiLink} />
+					<VoiceStatsSection {...shared} value={value.voiceStats} />
+					<CountingSection {...shared} value={value.counting} />
+				</Group>
+			</Disclosure>
 		</>
 	);
+}
+
+/** Columns, because a grid row is as tall as its tallest cell; `gap` does not apply here, so each card carries its own margin. */
+function Group({ children }: { children: ReactNode }): React.JSX.Element {
+	return <div className="-mb-4 gap-x-4 lg:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">{children}</div>;
 }

@@ -85,6 +85,28 @@ describe("the settings page", () => {
 		expect(screen.getByRole("heading", { name: "Member count channels" })).toBeInTheDocument();
 	});
 
+	/**
+	 * Seven flat cards was more than one glance takes, so they are grouped by the question each answers. jsdom
+	 * renders a closed `<details>` in full, so this pins the state rather than the visibility.
+	 */
+	it("groups the sections, and folds one away without touching the rest", async () => {
+		const user = userEvent.setup();
+		renderPage();
+
+		const groupOf = (label: string): Element | null => screen.getByText(label).closest("details");
+
+		expect(await screen.findByText("Who gets in")).toBeInTheDocument();
+		for (const label of ["How Testify appears", "Who gets in", "What happens in channels"]) {
+			expect(groupOf(label)).toHaveAttribute("open");
+		}
+
+		await user.click(screen.getByText("What happens in channels"));
+
+		expect(groupOf("What happens in channels")).not.toHaveAttribute("open");
+		expect(groupOf("How Testify appears")).toHaveAttribute("open");
+		expect(screen.getByRole("heading", { name: "Command prefix" })).toBeInTheDocument();
+	});
+
 	it("shows what is configured", async () => {
 		renderPage();
 

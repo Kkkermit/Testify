@@ -1319,6 +1319,11 @@ it cannot leave a stray margin behind when a sibling is conditionally absent. **
 dead space inside its border is the "massive gap" that keeps getting reported. The one legitimate margin is
 inside a CSS `columns` layout, where `gap` does not apply between items at all (`EventGroup`'s `mb-5`).
 
+**A `columns` balancer can only give a column a _prefix_ of the DOM order**, so with one card much taller than
+the rest, source order decides how big the void is. The settings page's third group balances to 590 against 640
+with the voice-stats card written before counting, and to 320 against 910 with it written after — the same
+three cards, 276px of page apart. Measure the rendered page rather than reasoning about it.
+
 **No two modules may differ only by case.** `Field.tsx` beside `field.ts` is two files on Linux and one on
 macOS or Windows, so `@/components/form/Field` resolves to the class strings there and the page dies at start-up
 with `does not provide an export named 'Field'`. Nothing local catches it — Linux is case-sensitive and so is
