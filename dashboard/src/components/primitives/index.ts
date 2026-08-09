@@ -13,5 +13,5 @@ export { Pager } from "@/components/primitives/Pager";
 export { type Segment, SegmentedControl } from "@/components/primitives/SegmentedControl";
 export { Skeleton } from "@/components/primitives/Skeleton";
 export { StatTile } from "@/components/primitives/StatTile";
-export { TabBar, type TabDefinition } from "@/components/primitives/TabBar";
+export { TabBar, TabContent, type TabDefinition, tabIds } from "@/components/primitives/TabBar";
 export { Tooltip } from "@/components/primitives/Tooltip";

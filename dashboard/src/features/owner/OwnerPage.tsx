@@ -1,6 +1,6 @@
 import { type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
 import { useSearchParams } from "react-router";
-import { PageHeader, TabBar } from "@/components/primitives";
+import { PageHeader, TabBar, TabContent } from "@/components/primitives";
 import { CommandsPage } from "@/features/commands/CommandsPage";
 import { OWNER_TABS, ownerTabFrom } from "@/features/owner/owner.types";
 import { levelFrom, windowFrom } from "@/features/owner/owner.utils";
@@ -14,6 +14,8 @@ import { UsageTab } from "@/features/owner/tabs/UsageTab";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 /** Each tab fetches its own data, so a failing endpoint takes out one tab rather than the console. */
+const TABS_LABEL = "Owner console";
+
 export function OwnerPage(): React.JSX.Element {
 	usePageTitle("Owner console");
 	// In the URL, so a link to the usage tab is a link to the usage tab and Back works.
@@ -37,7 +39,7 @@ export function OwnerPage(): React.JSX.Element {
 			<PageHeader title="Owner console" subtitle="How Testify is running, and what it is being used for." />
 
 			<TabBar
-				label="Owner console"
+				label={TABS_LABEL}
 				tabs={OWNER_TABS}
 				active={tab}
 				onSelect={(next) => {
@@ -45,36 +47,38 @@ export function OwnerPage(): React.JSX.Element {
 				}}
 			/>
 
-			{tab === "overview" && <OverviewTab />}
-			{tab === "usage" && (
-				<UsageTab
-					days={windowFrom(params.get("days"))}
-					onWindow={(days: AnalyticsWindow) => {
-						put("days", String(days));
-					}}
-				/>
-			)}
-			{tab === "logs" && (
-				<LogsTab
-					level={levelFrom(params.get("level"))}
-					search={params.get("q") ?? ""}
-					paused={params.get("paused") === "1"}
-					onLevel={(level: ReportedLogLevel) => {
-						put("level", level);
-					}}
-					onSearch={(next) => {
-						put("q", next, true);
-					}}
-					onPause={(next) => {
-						put("paused", next ? "1" : "0");
-					}}
-				/>
-			)}
-			{tab === "commands" && <CommandsPage scope="global" />}
-			{tab === "run" && <RunnerTab />}
-			{tab === "blacklist" && <BlacklistTab />}
-			{tab === "runtime" && <RuntimeTab />}
-			{tab === "control" && <ControlTab />}
+			<TabContent label={TABS_LABEL} active={tab}>
+				{tab === "overview" && <OverviewTab />}
+				{tab === "usage" && (
+					<UsageTab
+						days={windowFrom(params.get("days"))}
+						onWindow={(days: AnalyticsWindow) => {
+							put("days", String(days));
+						}}
+					/>
+				)}
+				{tab === "logs" && (
+					<LogsTab
+						level={levelFrom(params.get("level"))}
+						search={params.get("q") ?? ""}
+						paused={params.get("paused") === "1"}
+						onLevel={(level: ReportedLogLevel) => {
+							put("level", level);
+						}}
+						onSearch={(next) => {
+							put("q", next, true);
+						}}
+						onPause={(next) => {
+							put("paused", next ? "1" : "0");
+						}}
+					/>
+				)}
+				{tab === "commands" && <CommandsPage scope="global" />}
+				{tab === "run" && <RunnerTab />}
+				{tab === "blacklist" && <BlacklistTab />}
+				{tab === "runtime" && <RuntimeTab />}
+				{tab === "control" && <ControlTab />}
+			</TabContent>
 		</>
 	);
 }

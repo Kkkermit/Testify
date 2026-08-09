@@ -1,8 +1,8 @@
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { PageHeader, Skeleton } from "@/components/primitives";
+import { PageHeader, Skeleton, TabContent } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
-import { Tabs } from "@/features/levelling/components/Tabs";
+import { TABS_LABEL, Tabs } from "@/features/levelling/components/Tabs";
 import { tabFrom } from "@/features/levelling/levelling.utils";
 import { BoostsTab } from "@/features/levelling/tabs/BoostsTab";
 import { GeneralTab } from "@/features/levelling/tabs/GeneralTab";
@@ -40,12 +40,14 @@ export function LevellingPage(): React.JSX.Element {
 				}}
 			/>
 
-			{tab === "general" && <GeneralTab {...shared} config={config.data} />}
-			{tab === "rewards" && <RewardsTab {...shared} rewards={config.data.rewards} />}
-			{tab === "boosts" && <BoostsTab {...shared} boosts={config.data.boosts} />}
-			{tab === "ignores" && (
-				<IgnoresTab {...shared} channelIds={config.data.ignoredChannelIds} roleIds={config.data.ignoredRoleIds} />
-			)}
+			<TabContent label={TABS_LABEL} active={tab}>
+				{tab === "general" && <GeneralTab {...shared} config={config.data} />}
+				{tab === "rewards" && <RewardsTab {...shared} rewards={config.data.rewards} />}
+				{tab === "boosts" && <BoostsTab {...shared} boosts={config.data.boosts} />}
+				{tab === "ignores" && (
+					<IgnoresTab {...shared} channelIds={config.data.ignoredChannelIds} roleIds={config.data.ignoredRoleIds} />
+				)}
+			</TabContent>
 		</>
 	);
 }

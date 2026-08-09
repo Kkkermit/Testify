@@ -25,7 +25,6 @@ export function RewardsTab({
 
 	return (
 		<TabPanel
-			title="Role rewards"
 			description={`A role handed out when someone reaches a level. ${String(rewards.length)} of ${String(LEVEL_LIMITS.maxRewards)} used.`}
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 		>

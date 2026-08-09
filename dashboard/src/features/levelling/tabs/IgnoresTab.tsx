@@ -16,7 +16,6 @@ export function IgnoresTab({
 
 	return (
 		<TabPanel
-			title="Ignored channels and roles"
 			description="Nothing said here, or by anyone holding these roles, earns XP."
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 			className="gap-6"

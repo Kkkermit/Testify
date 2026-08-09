@@ -1,5 +1,6 @@
 import { fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { Avatar } from "@/components/primitives";
+import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
 import { cn } from "@/lib/cn";
 
 /** Filled by the same function the bot posts with, so nobody has to save a template and join with an alt to find out what `{count}` does. */
@@ -36,8 +37,11 @@ export function GreetingPreview({
 							style === "embed" && "border-primary bg-card rounded-r border-l-4 p-3",
 						)}
 					>
-						{/* Deliberately not rendered as markdown: the point is what was typed, not a second renderer to keep in step. */}
-						<p className="whitespace-pre-wrap">{filled}</p>
+						<p className="whitespace-pre-wrap">
+							{markSpans(filled).map((span, index) => (
+								<Marked key={index} span={span} />
+							))}
+						</p>
 						{style === "card" && (
 							<div className="from-primary/30 to-card mt-2 flex h-24 items-center justify-center rounded-lg bg-gradient-to-br">
 								<span className="text-muted-foreground text-xs">Welcome card image</span>
@@ -47,5 +51,23 @@ export function GreetingPreview({
 				</div>
 			</div>
 		</div>
+	);
+}
+
+/** Discord's own marks, so the preview answers "what will this look like" rather than "what did I type". */
+function Marked({ span }: { span: MarkSpan }): React.JSX.Element {
+	if (span.marks.includes("code")) return <code className="bg-muted rounded px-1 py-0.5 font-mono">{span.text}</code>;
+
+	return (
+		<span
+			className={cn(
+				span.marks.includes("bold") && "font-bold",
+				span.marks.includes("italic") && "italic",
+				span.marks.includes("underline") && "underline",
+				span.marks.includes("strike") && "line-through",
+			)}
+		>
+			{span.text}
+		</span>
 	);
 }

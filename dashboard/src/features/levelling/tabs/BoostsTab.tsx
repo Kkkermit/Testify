@@ -18,7 +18,6 @@ export function BoostsTab({
 
 	return (
 		<TabPanel
-			title="XP boosts"
 			description="Members holding one of these earn more XP. Someone with several gets the highest, not the product."
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 		>

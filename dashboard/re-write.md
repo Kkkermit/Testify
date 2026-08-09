@@ -273,6 +273,13 @@ one is a commit.
 >
 > `autoFocus` on the guild search is now conditional (`searchIsWorthFocusing`): on a short list it cost a phone
 > user the keyboard over the list they came to read, and paid back nothing.
+>
+> **Done: 6.** `/guilds/:id/levelling` and `/guilds/:id/welcome`. The tab pattern was half-built — `role="tab"`
+> with no `role="tabpanel"`, no `aria-controls`, every tab its own tab stop and no arrow keys. `TabBar` now
+> carries the whole pattern and `TabContent` is the other half, which lands on the owner console's eight tabs
+> as well. With the panel named by its tab, all four levelling tabs could drop the heading that restated the
+> tab 40px above it. The welcome preview renders Discord's inline marks rather than showing `**Testify HQ**`
+> — a preview whose one job is "what will this look like" should not answer with the asterisks.
 
 | Order | Screen                             | Why here                                                       |
 | ----- | ---------------------------------- | -------------------------------------------------------------- |

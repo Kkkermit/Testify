@@ -12,7 +12,7 @@ export function GeneralTab({
 	const update = useUpdateLevelling(guildId);
 
 	return (
-		<TabPanel title="General" saving={savingStateOf(update.isPending, update.isSuccess)}>
+		<TabPanel saving={savingStateOf(update.isPending, update.isSuccess)}>
 			<Toggle
 				label="Members earn XP"
 				hint="Turning this off stops XP being awarded. Nobody loses what they already earned."

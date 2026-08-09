@@ -102,6 +102,19 @@ describe("the welcome page", () => {
 		expect(within(preview).queryByText(/\{user\}/)).toBeNull();
 	});
 
+	/**
+	 * Discord renders `**bold**` as bold, so a preview showing the asterisks answers a question nobody asked
+	 * and invites somebody to delete them.
+	 */
+	it("renders Discord's marks rather than showing the asterisks", async () => {
+		renderPage();
+
+		const preview = await screen.findByRole("region", { name: "Preview" });
+
+		expect(within(preview).getByText("Test Server")).toHaveClass("font-bold");
+		expect(preview.textContent).not.toContain("**");
+	});
+
 	it("inserts a placeholder at the caret when its chip is used", async () => {
 		const user = userEvent.setup();
 		renderPage();
