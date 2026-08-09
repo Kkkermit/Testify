@@ -23,7 +23,7 @@ export function GuildPickerPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title="Servers" subtitle="Everywhere you can change Testify's settings, or add it." />
+			<PageHeader title="Servers" subtitle="Everywhere you can change Testify’s settings, or add it." />
 
 			<label className="motion-reveal relative block">
 				<span className="sr-only">Search servers</span>

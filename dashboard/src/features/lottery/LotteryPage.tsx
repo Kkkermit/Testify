@@ -64,7 +64,7 @@ export function LotteryPage(): React.JSX.Element {
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-3">
-					<h2 className={CARD_HEADING}>This server's lottery</h2>
+					<h2 className={CARD_HEADING}>This server’s lottery</h2>
 					{!settings.enabled && <Badge>Not running</Badge>}
 					{settings.enabled && settings.frozen && <Badge tone="warning">Frozen</Badge>}
 					{settings.enabled && !settings.frozen && <Badge tone="success">Running</Badge>}

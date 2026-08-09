@@ -54,7 +54,7 @@ export function AutomodPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				title="AutoMod"
-				subtitle="Discord's own message filters. Testify sets them up; Discord enforces them."
+				subtitle="Discord’s own message filters. Testify sets them up; Discord enforces them."
 				action={<SavingIndicator state={savingStateOf(busy, add.isSuccess)} />}
 			/>
 
@@ -77,7 +77,7 @@ export function AutomodPage(): React.JSX.Element {
 							body={
 								canManage
 									? "Add one below, and Discord blocks matching messages before anyone reads them."
-									: "Grant Testify the Manage Server permission to see this server's rules."
+									: "Grant Testify the Manage Server permission to see this server’s rules."
 							}
 						/>
 					</Card>

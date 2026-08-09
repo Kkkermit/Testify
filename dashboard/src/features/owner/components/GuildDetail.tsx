@@ -46,8 +46,8 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 					},
 					{ label: "Created", value: shortDate(guild.createdAt) },
 					{ label: "Server owner", value: guild.ownerId, mono: true },
-					{ label: "Testify's nickname", value: guild.nickname ?? "None set" },
-					{ label: "Testify's top role", value: guild.highestRole ?? "None" },
+					{ label: "Testify’s nickname", value: guild.nickname ?? "None set" },
+					{ label: "Testify’s top role", value: guild.highestRole ?? "None" },
 				]}
 			/>
 

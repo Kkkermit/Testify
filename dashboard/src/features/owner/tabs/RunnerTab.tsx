@@ -45,8 +45,8 @@ export function RunnerTab(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>Run a command</h2>
 					<p className="text-muted-foreground text-sm">
-						Runs here rather than in a server — nothing is posted to Discord, and the reply comes back below. Only
-						read-only owner commands are available; anything whose real work is a panel has its own screen.
+						Runs here rather than in a server: nothing is posted to Discord, and the reply comes back below. Only
+						read-only owner commands are listed.
 					</p>
 				</div>
 

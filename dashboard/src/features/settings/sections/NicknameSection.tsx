@@ -42,7 +42,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 		<Section
 			icon={UserPen}
 			tint="text-feature-community"
-			title="Testify's name here"
+			title="Testify’s name here"
 			describes="A nickname for this server only. The picture is the same everywhere and only the bot owner can change it."
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 		>

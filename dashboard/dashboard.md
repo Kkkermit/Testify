@@ -1137,6 +1137,14 @@ form is decoration.
   belongs beside the Leave button, not in a toast afterwards.
 - **Never blame.** Write refusals as advice.
 - **British spelling**, matching the bot's own copy in `src/config/strings.ts`.
+- **Second person.** Never "we" or "our" — this is the reader's bot, not a product team's.
+- **A curly apostrophe in prose**, and a real `…` rather than three dots.
+
+**Four of those are enforced.** `src/test/voice.test.ts` walks every `.tsx`, pulls the JSX text nodes and the
+props that put a string on screen, and fails on an American spelling, a first person, `...` or a straight
+apostrophe. The rest — never blame, say what a thing costs, sentence case — needs a reader, and the file says
+so rather than pretending otherwise. It also asserts it found copy at all, so a matcher that stops matching
+cannot pass vacuously.
 
 ### 19.12 Where to rewrite a journey
 
@@ -1231,14 +1239,14 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🖼 Visual content (35–40)
 
-| #   | Rule                       | Verdict | Note                                                                                       |
-| --- | -------------------------- | ------- | ------------------------------------------------------------------------------------------ |
-| 35  | Content over UI styling    | Held    | The reason there are no shadows and no chart library                                       |
-| 36  | Purposeful imagery         | Held    | The only images are real Discord avatars and icons; `Avatar` falls back to a lettered tile |
-| 37  | Concise text               | Apply   | Some card descriptions run to three lines. §19.11 says what to aim for                     |
-| 38  | Micro-interactions         | Held    | §18.8 — four short animations, and `prefers-reduced-motion` removes them all               |
-| 39  | Video for storytelling     | N/A     | An admin panel has nothing to narrate, and a video is a dependency and a bundle cost       |
-| 40  | High-quality product shots | N/A     | There is no product to photograph                                                          |
+| #   | Rule                       | Verdict | Note                                                                                                                                                                                                     |
+| --- | -------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 35  | Content over UI styling    | Held    | The reason there are no shadows and no chart library                                                                                                                                                     |
+| 36  | Purposeful imagery         | Held    | The only images are real Discord avatars and icons; `Avatar` falls back to a lettered tile                                                                                                               |
+| 37  | Concise text               | Held    | **Measured**: nothing runs to three lines at 1440px, and the four owner-console paragraphs that ran to four at 390px are down to three at 24–26 words. The rest each carry two facts a self-hoster needs |
+| 38  | Micro-interactions         | Held    | §18.8 — four short animations, and `prefers-reduced-motion` removes them all                                                                                                                             |
+| 39  | Video for storytelling     | N/A     | An admin panel has nothing to narrate, and a video is a dependency and a bundle cost                                                                                                                     |
+| 40  | High-quality product shots | N/A     | There is no product to photograph                                                                                                                                                                        |
 
 ### 🛸 Novelty (41–46)
 
@@ -1253,14 +1261,14 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🎛 Consistency (47–52)
 
-| #   | Rule                            | Verdict | Note                                                                                    |
-| --- | ------------------------------- | ------- | --------------------------------------------------------------------------------------- |
-| 47  | A comprehensive design system   | Held    | §18 is that document, and `@theme` is its single source                                 |
-| 48  | Limit design patterns           | Held    | §19.8 — three write shapes, and you pick by the question rather than inventing a fourth |
-| 49  | Predictable element behaviour   | Held    | One `Field`, one `Button`, one `Card`; `components/primitives` before a local copy      |
-| 50  | Standardised templates          | Held    | §7's six edits, and every page opens with a `PageHeader`                                |
-| 51  | Cross-device consistency        | Held    | §13's three widths, and `sr-only` rather than `hidden` at the rail                      |
-| 52  | Standardised content guidelines | Apply   | §19.11 states the voice; nothing enforces it, and the copy drifts between screens       |
+| #   | Rule                            | Verdict | Note                                                                                                                                                 |
+| --- | ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 47  | A comprehensive design system   | Held    | §18 is that document, and `@theme` is its single source                                                                                              |
+| 48  | Limit design patterns           | Held    | §19.8 — three write shapes, and you pick by the question rather than inventing a fourth                                                              |
+| 49  | Predictable element behaviour   | Held    | One `Field`, one `Button`, one `Card`; `components/primitives` before a local copy                                                                   |
+| 50  | Standardised templates          | Held    | §7's six edits, and every page opens with a `PageHeader`                                                                                             |
+| 51  | Cross-device consistency        | Held    | §13's three widths, and `sr-only` rather than `hidden` at the rail                                                                                   |
+| 52  | Standardised content guidelines | Held    | `src/test/voice.test.ts` enforces the four mechanical rules on every run. The judgement calls stay judgement calls, and the file says which is which |
 
 ### 🕹 Engagement (53–58)
 
@@ -1275,8 +1283,8 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### What this adds up to
 
-**Forty-three held, six to apply, nine deliberately not applicable** — the rewrite in
-[`re-write.md`](re-write.md) closed eleven, and the three clusters it was aimed at are all shut:
+**Forty-five held, four to apply, nine deliberately not applicable** — the rewrite in
+[`re-write.md`](re-write.md) closed thirteen, and the three clusters it was aimed at are all shut:
 
 1. **No focal point** (9, 10, 21, 34) — closed. `Card focal` marks the one card that is the point of a screen,
    and a browser sweep counts primary buttons on every route so the rule cannot quietly drift back.
@@ -1287,11 +1295,12 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 3. **Contrast is unverified** (29) — closed. Every pair is computed in the test suite from the tokens
    themselves, and the two live AA failures it found are fixed.
 
-**The six that remain are honestly open**, not quietly downgraded:
+**The four that remain are honestly open**, not quietly downgraded:
 
-- **3, 37, 52** — copy. §19.11 states the voice; nothing enforces it, and some card descriptions still run to
-  three lines.
-- **16, 17** — a first-run tour, and smart defaults beyond the leaderboard's Find me.
+- **3** — the copy is written for a self-hoster, but nothing states who the reader is in one place, so each
+  screen decides for itself.
+- **16, 17** — a first-run tour, and smart defaults beyond the leaderboard's Find me. Both are features rather
+  than styling, which is why a restyle did not reach them.
 - **41** — better, and still recognisably a dashboard. This one is the reader's call rather than the author's.
 
 ---

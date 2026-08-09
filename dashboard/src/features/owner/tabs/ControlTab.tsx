@@ -86,8 +86,8 @@ export function ControlTab(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>Name and picture</h2>
 					<p className="text-muted-foreground text-sm">
-						The bot's global profile, in every server at once. Discord has no per-server picture for bots — a server
-						manager can only set a nickname, from that server's own settings page.
+						The bot's global profile, in every server at once. Discord has no per-server picture for bots — a manager
+						gets a nickname and nothing more.
 					</p>
 				</div>
 
@@ -127,8 +127,8 @@ export function ControlTab(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>Shut down</h2>
 					<p className="text-muted-foreground text-sm">
-						Stops the whole process, and this dashboard with it — it is served by the bot. Nothing here can start it
-						again; that is your host's job, whether that is systemd, Docker or a terminal.
+						Stops the whole process, and this dashboard with it — the bot serves it. Only your host can start it again:
+						systemd, Docker or a terminal.
 					</p>
 				</div>
 

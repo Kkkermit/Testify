@@ -38,7 +38,7 @@ export function MembersPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				title="Members"
-				subtitle="Who is ahead on money and on levels. Both boards are the same ones Discord's /leaderboard shows."
+				subtitle="Who is ahead on money and on levels. Both boards are the same ones Discord’s /leaderboard shows."
 			/>
 
 			<div className="flex flex-wrap items-center justify-between gap-3">

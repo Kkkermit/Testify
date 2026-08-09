@@ -53,10 +53,11 @@ describe("the control tab", () => {
 		expect(button).toBeEnabled();
 	});
 
-	it("says plainly that nothing here can start it again", async () => {
+	/** Shutting down takes the dashboard with it, so the screen has to say who can bring it back before the click. */
+	it("says plainly that only the host can start it again", async () => {
 		renderTab("control");
 
-		expect(await screen.findByText(/nothing here can start it again/i)).toBeInTheDocument();
+		expect(await screen.findByText(/only your host can start it again/i)).toBeInTheDocument();
 	});
 
 	/** Discord has no per-server avatar for bots, and the screen has to say so rather than offering one. */

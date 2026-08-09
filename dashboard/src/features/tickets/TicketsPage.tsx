@@ -121,7 +121,7 @@ export function TicketsPage(): React.JSX.Element {
 
 				<ChannelPicker
 					label="Transcripts"
-					hint="Where a closed ticket's transcript is sent."
+					hint="Where a closed ticket’s transcript is sent."
 					channels={channels.data ?? []}
 					value={draft.transcriptChannelId}
 					allowNone={false}

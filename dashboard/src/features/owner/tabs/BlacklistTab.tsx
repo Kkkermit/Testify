@@ -41,8 +41,8 @@ export function BlacklistTab(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>Block someone from Testify</h2>
 					<p className="text-muted-foreground text-sm">
-						A blocked account cannot run a command in any server, on either the slash or the prefix surface. This is
-						bot-wide — for one server, turn the command off instead.
+						A blocked account cannot run any command, on either surface, in any server. Bot-wide — to stop one command
+						in one server, switch it off instead.
 					</p>
 				</div>
 
