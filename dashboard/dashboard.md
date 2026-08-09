@@ -9,6 +9,10 @@ to change things in, [§19](#19-user-journeys) is every journey end to end, and 
 checklist the rewrite is working through. Those three are the ones to edit.
 
 > [!IMPORTANT]
+> **Doing the rewrite? [`re-write.md`](re-write.md) is the plan** — the order to work in, what must not change,
+> the measured baseline, and what "better" has to prove before it counts.
+
+> [!IMPORTANT]
 > **§18 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../.claude/skills/README.md)
 > now lead the dashboard's visual direction — where their guidance and the values recorded in §18 disagree, the
 > skill wins and §18 is updated to describe what was built. Three things are architecture rather than aesthetics

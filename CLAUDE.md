@@ -1294,6 +1294,9 @@ consequences worth knowing: a Tailwind utility beats a base-layer rule, so the r
 `SELECT` class rather than the base `padding-right`; and `scrollbar-none` is a utility for a scroller whose bar
 would draw over the thing it scrolls — the tab underline is the case it exists for.
 
+**The rewrite has a plan: [`dashboard/re-write.md`](dashboard/re-write.md).** Phases, invariants, a measured
+baseline and checkable exit criteria. Start there rather than in a component.
+
 **The design skills in `.claude/skills` lead the visual direction.** They are vendored rather than installed so
 they load in every session, including the remote ones. `dashboard/dashboard.md` §18 records the palette, type
 scale and spacing as they stand today, and is a baseline to rewrite against rather than a contract to defend —
