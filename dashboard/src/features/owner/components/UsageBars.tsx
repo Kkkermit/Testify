@@ -35,7 +35,7 @@ export function UsageBars({
 	return (
 		<ol className="flex flex-col gap-1">
 			{rows.map((row) => (
-				<li key={row.id} className="relative isolate flex items-center gap-3 rounded-lg px-2 py-1.5">
+				<li key={row.id} className="relative isolate flex items-center gap-3 rounded-lg px-2 py-2">
 					<span
 						aria-hidden="true"
 						className={`absolute inset-y-0 left-0 -z-10 rounded-lg transition-[width] duration-500 ${tint}`}

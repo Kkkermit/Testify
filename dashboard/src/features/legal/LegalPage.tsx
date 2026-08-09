@@ -15,7 +15,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
 			<Link
 				to="/guilds"
-				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-1.5 self-start text-sm")}
+				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}
 			>
 				<ArrowLeft size={15} aria-hidden="true" />
 				Back to the dashboard
@@ -32,7 +32,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 						</p>
 					))}
 					{section.list !== undefined && (
-						<ul className="text-muted-foreground flex list-disc flex-col gap-1.5 pl-5 text-sm">
+						<ul className="text-muted-foreground flex list-disc flex-col gap-2 pl-5 text-sm">
 							{section.list.map((item) => (
 								<li key={item}>{item}</li>
 							))}

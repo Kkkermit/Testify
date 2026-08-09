@@ -872,7 +872,14 @@ when WebGL is unavailable and the backdrop never loads.
 | Inside a row      | `gap-2`, `gap-3`                             | the screen            |
 
 Measured usage: `gap-3` (71), `gap-4` (48), `gap-2` (45), `gap-1` (25), `gap-6` (7). **A screen that reaches for
-a fifth value is usually solving a problem that is really about nesting.**
+a sixth value is usually solving a problem that is really about nesting** — the commands page had a `gap-8`
+between its category groups, and what it actually needed was one more level of nesting so the shell's own
+`gap-6` applied to them.
+
+**`src/test/spacing.test.ts` enforces this.** It fails on any `gap-*` half-step or value outside the five, and
+on a `p-*`/`px-*` written beside a `Card`. Half-steps arrive one at a time and each looks harmless: thirteen
+files had drifted to `gap-1.5`, `gap-2.5`, `py-1.5` or `px-3.5` before anything checked. The one padding off
+the scale is `pl-9`/`pr-9`, which is room for an icon rather than rhythm.
 
 Three rules that came from real complaints:
 

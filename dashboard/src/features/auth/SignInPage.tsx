@@ -28,7 +28,7 @@ export function SignInPage(): React.JSX.Element {
 				<BotBanner src={bot.data?.bannerUrl} accent={bot.data?.accentColour} className="h-24" />
 
 				{/* Positioned, or the banner — which is — paints over the avatar lifted into it. */}
-				<div className="relative flex flex-col gap-5 p-6">
+				<div className="relative flex flex-col gap-4 p-6">
 					{/* Lifted into the banner, the way a profile card reads. */}
 					<div className="-mt-14 flex items-end gap-3">
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-2xl ring-4" />

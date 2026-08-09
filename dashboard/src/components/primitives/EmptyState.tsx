@@ -14,7 +14,7 @@ export function EmptyState({
 	action?: ReactNode;
 }): React.JSX.Element {
 	return (
-		<div className="motion-fade flex flex-col items-center gap-2.5 py-8 text-center">
+		<div className="motion-fade flex flex-col items-center gap-2 py-8 text-center">
 			<div className="bg-muted text-muted-foreground rounded-full p-3" aria-hidden="true">
 				{icon}
 			</div>

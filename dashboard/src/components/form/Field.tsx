@@ -26,7 +26,7 @@ export function Field({
 	if (htmlFor !== undefined) {
 		return (
 			<div className={cn(FIELD_GROUP, className)}>
-				<label htmlFor={htmlFor} className="flex flex-col gap-0.5">
+				<label htmlFor={htmlFor} className="flex flex-col gap-1">
 					{name}
 				</label>
 				{children}
@@ -36,7 +36,7 @@ export function Field({
 
 	return (
 		<label className={cn(FIELD_GROUP, className)}>
-			<span className="flex flex-col gap-0.5">{name}</span>
+			<span className="flex flex-col gap-1">{name}</span>
 			{children}
 		</label>
 	);

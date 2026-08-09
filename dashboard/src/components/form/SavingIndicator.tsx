@@ -8,7 +8,7 @@ export function SavingIndicator({ state }: { state: SavingState }): React.JSX.El
 	return (
 		<span
 			className={cn(
-				"flex items-center gap-1.5 text-xs transition-opacity duration-150",
+				"flex items-center gap-2 text-xs transition-opacity duration-150",
 				state === "saved" ? "text-success" : "text-muted-foreground",
 				state === "idle" && "opacity-0",
 			)}

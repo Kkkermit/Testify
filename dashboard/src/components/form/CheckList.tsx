@@ -32,7 +32,7 @@ export function CheckList({
 	// A named group rather than a `Field`: a `<label>` names one control. A `<legend>` is not a flex item, so a `<fieldset>` would lose the gap.
 	return (
 		<div role="group" aria-labelledby={nameId} className={FIELD_GROUP}>
-			<span className="flex flex-col gap-0.5">
+			<span className="flex flex-col gap-1">
 				<span id={nameId} className={LABEL}>
 					{label}
 				</span>

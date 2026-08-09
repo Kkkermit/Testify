@@ -17,7 +17,7 @@ export function Disclosure({
 }): React.JSX.Element {
 	return (
 		<details open={defaultOpen} className={cn("group", className)}>
-			<summary className="marker:content-none flex cursor-pointer list-none items-center gap-2.5 py-1 select-none">
+			<summary className="marker:content-none flex cursor-pointer list-none items-center gap-2 py-1 select-none">
 				<Eyebrow>{label}</Eyebrow>
 				<ChevronDown
 					size={14}

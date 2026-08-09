@@ -25,7 +25,7 @@ export function Eyebrow({
 		<Tag
 			id={id}
 			className={cn(
-				"text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
+				"text-muted-foreground flex items-center gap-2 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
 				className,
 			)}
 		>

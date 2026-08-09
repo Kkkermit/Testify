@@ -50,7 +50,7 @@ export function RuntimeTab(): React.JSX.Element {
 					href={`${info.repositoryUrl}/releases`}
 					target="_blank"
 					rel="noreferrer"
-					className={cn(INLINE_TARGET, "text-accent gap-1.5 text-sm hover:underline")}
+					className={cn(INLINE_TARGET, "text-accent gap-2 text-sm hover:underline")}
 				>
 					Releases on GitHub
 					<ExternalLink size={14} aria-hidden="true" />

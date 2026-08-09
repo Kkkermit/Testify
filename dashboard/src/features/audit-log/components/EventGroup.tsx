@@ -62,7 +62,7 @@ export function EventGroup({
 					const checked = events.includes(event);
 
 					return (
-						<label key={event} className={cn(CHECK_ROW, "hover:bg-muted cursor-pointer rounded-lg py-1.5")}>
+						<label key={event} className={cn(CHECK_ROW, "hover:bg-muted cursor-pointer rounded-lg py-2")}>
 							<input
 								type="checkbox"
 								checked={checked}

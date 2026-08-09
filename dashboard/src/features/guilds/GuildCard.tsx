@@ -50,7 +50,7 @@ export function GuildCard({
 				className={cardClass("compact", surface, "hover:border-primary group")}
 			>
 				{body}
-				<span className="text-accent flex shrink-0 items-center gap-1.5 text-sm font-medium">
+				<span className="text-accent flex shrink-0 items-center gap-2 text-sm font-medium">
 					<Plus size={15} aria-hidden="true" />
 					Add
 				</span>
@@ -62,7 +62,7 @@ export function GuildCard({
 		<Card padding="compact" className={`${surface} opacity-70`}>
 			{body}
 			<Tooltip label="Adding a bot needs the Manage Server permission. Ask somebody who has it.">
-				<span tabIndex={0} className="text-muted-foreground flex shrink-0 items-center gap-1.5 rounded-full text-xs">
+				<span tabIndex={0} className="text-muted-foreground flex shrink-0 items-center gap-2 rounded-full text-xs">
 					<Lock size={14} aria-hidden="true" />
 					No permission
 				</span>

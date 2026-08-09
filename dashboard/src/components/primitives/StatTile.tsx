@@ -20,13 +20,13 @@ export function StatTile({
 	hint?: string;
 }): React.JSX.Element {
 	const tile = (
-		<Card padding="compact" className="hover:border-input transition-colors duration-150">
-			<p className="text-muted-foreground flex items-center gap-1.5 font-mono text-[0.6875rem] tracking-[0.12em] uppercase">
+		<Card padding="compact" className="hover:border-input flex flex-col gap-1 transition-colors duration-150">
+			<p className="text-muted-foreground flex items-center gap-2 font-mono text-[0.6875rem] tracking-[0.12em] uppercase">
 				{Icon !== undefined && <Icon size={14} aria-hidden="true" className={cn("shrink-0", tint)} />}
 				{label}
 			</p>
 			{/* Two of these share a 320px row, which is WCAG 1.4.10's reflow width — the full size does not fit. */}
-			<p className="mt-1.5 font-mono text-[1.25rem] leading-none font-medium tabular-nums sm:text-[1.625rem]">
+			<p className="font-mono text-[1.25rem] leading-none font-medium tabular-nums sm:text-[1.625rem]">
 				{typeof value === "number" ? <AnimatedNumber value={value} /> : value}
 			</p>
 		</Card>

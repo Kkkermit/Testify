@@ -109,8 +109,8 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					/>
 				</Card>
 			) : (
-				// The gap between groups has to beat the gap inside one, or the labels read as part of the card above.
-				<div className="flex flex-col gap-8">
+				// Sections are nested one level deep, so §18.6's between-sections gap-6 applies here rather than the shell's.
+				<div className="flex flex-col gap-6">
 					{groups.map(([name, group]) => (
 						<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">
 							<Eyebrow as="h2" id={`category-${name}`} count={group.length} className="capitalize">
@@ -175,7 +175,7 @@ function CategoryChip({
 			aria-pressed={active}
 			onClick={onSelect}
 			className={cn(
-				"rounded-full px-3.5 py-1.5 text-xs font-medium capitalize transition-colors duration-150",
+				"rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors duration-150",
 				"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
 				active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground",
 			)}

@@ -57,7 +57,7 @@ export function GuildPickerPage(): React.JSX.Element {
 			) : (
 				groups.map((group) => (
 					<section key={group.key} aria-labelledby={`guilds-${group.key}`} className="flex flex-col gap-3">
-						<div className="flex flex-col gap-0.5">
+						<div className="flex flex-col gap-1">
 							<Eyebrow as="h2" id={`guilds-${group.key}`} count={group.guilds.length}>
 								{group.title}
 							</Eyebrow>
