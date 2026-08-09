@@ -1,7 +1,7 @@
 import { Hash, Shield, Sparkles, Users } from "lucide-react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import { Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
 import { FeatureGrid } from "@/features/guild-overview/components/FeatureGrid";
 import { MissingPermissions } from "@/features/guild-overview/components/MissingPermissions";
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
@@ -39,22 +39,16 @@ export function GuildOverviewPage(): React.JSX.Element {
 			<MissingPermissions permissions={guild.missingPermissions} />
 
 			<section aria-labelledby="features-heading" className="flex flex-col gap-3">
-				<h2
-					id="features-heading"
-					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
-				>
+				<Eyebrow as="h2" id="features-heading">
 					Features
-				</h2>
+				</Eyebrow>
 				<FeatureGrid features={guild.features} guildId={guildId} />
 			</section>
 
 			<section aria-labelledby="changes-heading" className="flex flex-col gap-3">
-				<h2
-					id="changes-heading"
-					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
-				>
+				<Eyebrow as="h2" id="changes-heading">
 					Recent changes
-				</h2>
+				</Eyebrow>
 				<RecentChanges changes={guild.recentChanges} />
 			</section>
 		</>

@@ -11,7 +11,7 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -64,13 +64,10 @@ export function AutomodPage(): React.JSX.Element {
 			)}
 
 			<section aria-labelledby="rules-heading" className="flex flex-col gap-3">
-				<h2
-					id="rules-heading"
-					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
-				>
+				<Eyebrow as="h2" id="rules-heading">
 					Rules
 					<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">{list.length}</span>
-				</h2>
+				</Eyebrow>
 
 				{list.length === 0 ? (
 					<Card>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Button, Card, EmptyState, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { StickyRow } from "@/features/sticky/components/StickyRow";
@@ -54,15 +54,12 @@ export function StickyPage(): React.JSX.Element {
 			/>
 
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
-				<h2
-					id="current-heading"
-					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
-				>
+				<Eyebrow as="h2" id="current-heading">
 					In use
 					<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
 						{entries.length} of {list.data.limit}
 					</span>
-				</h2>
+				</Eyebrow>
 
 				{entries.length === 0 ? (
 					<Card>

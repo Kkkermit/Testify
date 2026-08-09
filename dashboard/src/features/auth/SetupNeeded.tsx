@@ -1,4 +1,4 @@
-import { Card } from "@/components/primitives";
+import { Card, Eyebrow } from "@/components/primitives";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 /** Names each missing variable and the exact redirect URI to paste, because this is where most self-hosted dashboards lose people. */
@@ -8,7 +8,10 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 	return (
 		<main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 p-6">
 			<Card className="motion-pop flex flex-col gap-4">
-				<h1 className="text-2xl font-semibold tracking-tight">Almost there</h1>
+				<div className="flex flex-col gap-1">
+					<Eyebrow>Setup</Eyebrow>
+					<h1 className="font-display text-2xl font-bold tracking-tight">Almost there</h1>
+				</div>
 				<p className="text-muted-foreground text-sm">
 					The dashboard is switched on but cannot sign anybody in yet. Add these to your <code>.env</code> and restart
 					the bot:

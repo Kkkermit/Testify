@@ -2,7 +2,7 @@ import { Search, ServerOff } from "lucide-react";
 import { useMemo, useState } from "react";
 import { FIELD } from "@/components/form";
 import { Reveal } from "@/components/motion";
-import { EmptyState, PageHeader, Skeleton } from "@/components/primitives";
+import { EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { GuildCard } from "@/features/guilds/GuildCard";
@@ -59,15 +59,12 @@ export function GuildPickerPage(): React.JSX.Element {
 				groups.map((group) => (
 					<section key={group.key} aria-labelledby={`guilds-${group.key}`} className="flex flex-col gap-3">
 						<div className="flex flex-col gap-0.5">
-							<h2
-								id={`guilds-${group.key}`}
-								className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
-							>
+							<Eyebrow as="h2" id={`guilds-${group.key}`}>
 								{group.title}
 								<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
 									{group.guilds.length}
 								</span>
-							</h2>
+							</Eyebrow>
 							<p className="text-muted-foreground text-sm">{group.describes}</p>
 						</div>
 

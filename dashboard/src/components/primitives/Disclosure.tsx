@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { type ReactNode } from "react";
+import { Eyebrow } from "@/components/primitives/Eyebrow";
 import { cn } from "@/lib/cn";
 
 /** A named, foldable group of cards, open unless a caller says otherwise — the fold is for the reader who wants it. */
@@ -17,8 +18,7 @@ export function Disclosure({
 	return (
 		<details open={defaultOpen} className={cn("group", className)}>
 			<summary className="marker:content-none flex cursor-pointer list-none items-center gap-2.5 py-1 select-none">
-				<span aria-hidden="true" className="bg-accent/70 h-px w-5 shrink-0" />
-				<span className="text-muted-foreground font-mono text-[0.6875rem] tracking-[0.18em] uppercase">{label}</span>
+				<Eyebrow>{label}</Eyebrow>
 				<ChevronDown
 					size={14}
 					aria-hidden="true"

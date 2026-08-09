@@ -1,7 +1,7 @@
 import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Pager, Skeleton, StatTile } from "@/components/primitives";
+import { Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
 import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
@@ -67,12 +67,9 @@ export function OverviewTab(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
-				<h2
-					id="servers-heading"
-					className="text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase before:bg-accent/70 before:h-px before:w-5 before:shrink-0 before:content-['']"
-				>
+				<Eyebrow as="h2" id="servers-heading">
 					Servers
-				</h2>
+				</Eyebrow>
 
 				{selected !== null && (
 					<GuildDetail

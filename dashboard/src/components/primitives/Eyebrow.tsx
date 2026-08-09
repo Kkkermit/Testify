@@ -8,9 +8,20 @@ import { cn } from "@/lib/cn";
  * heavy `═` and thin `─` rules); the dashboard used to ignore that vernacular entirely. It names which
  * subsystem a block of the page belongs to, so it encodes something true rather than decorating.
  */
-export function Eyebrow({ children, className }: { children: ReactNode; className?: string }): React.JSX.Element {
+export function Eyebrow({
+	children,
+	as: Tag = "p",
+	id,
+	className,
+}: {
+	children: ReactNode;
+	as?: "p" | "h2" | "h3" | "span";
+	id?: string;
+	className?: string;
+}): React.JSX.Element {
 	return (
-		<p
+		<Tag
+			id={id}
 			className={cn(
 				"text-muted-foreground flex items-center gap-2.5 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
 				className,
@@ -18,6 +29,6 @@ export function Eyebrow({ children, className }: { children: ReactNode; classNam
 		>
 			<span aria-hidden="true" className="bg-accent/70 h-px w-5 shrink-0" />
 			{children}
-		</p>
+		</Tag>
 	);
 }

@@ -2,7 +2,7 @@ import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
 import { Backdrop } from "@/components/motion";
-import { Button, Card } from "@/components/primitives";
+import { Button, Card, Eyebrow } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
 import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
@@ -32,7 +32,10 @@ export function SignInPage(): React.JSX.Element {
 					{/* Lifted into the banner, the way a profile card reads. */}
 					<div className="-mt-14 flex items-end gap-3">
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-2xl ring-4" />
-						<h1 className="pb-1 text-2xl font-semibold tracking-tight">{bot.data?.username ?? "Testify"}</h1>
+						<div className="flex flex-col gap-1 pb-1">
+							<Eyebrow>Sign in</Eyebrow>
+							<h1 className="font-display text-2xl font-bold tracking-tight">{bot.data?.username ?? "Testify"}</h1>
+						</div>
 					</div>
 
 					<p className="text-muted-foreground text-sm">
