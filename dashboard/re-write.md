@@ -89,22 +89,26 @@ Read this list before touching anything. Each of these has a test that will fail
 
 ## 3. The baseline, measured
 
-Taken from the repository as it stands, not estimated. Re-run the commands in [§12](#12-how-to-verify-anything)
-after the rewrite and compare.
+Taken from the repository **before** the rewrite, not estimated. The "after" column is the same commands re-run
+at the end of Phase 4 — see [§12](#12-how-to-verify-anything).
 
-| Thing                          | Today                                                     |
-| ------------------------------ | --------------------------------------------------------- |
-| Routes                         | 21                                                        |
-| Feature directories            | 16                                                        |
-| Components and pages (`.tsx`)  | 105                                                       |
-| Primitives                     | 17                                                        |
-| Dashboard test files / tests   | 54 / 640                                                  |
-| First-load JS, gzipped         | **159 kB** (`vendor` 150 kB + `index` 9 kB)               |
-| CSS, gzipped                   | **8.9 kB**                                                |
-| three.js                       | its own chunk, not in the first load                      |
-| Type sizes in use              | 5 (`2xl` ×4, `lg` ×12, `base` ×29, `sm` ×100, `xs` ×51)   |
-| Spacing values in use          | `gap-3` 71, `gap-4` 48, `gap-2` 45, `gap-1` 25, `gap-6` 7 |
-| 58 rules held / to apply / N/A | 32 / 17 / 9                                               |
+| Thing                          | Before                                      | After                              |
+| ------------------------------ | ------------------------------------------- | ---------------------------------- |
+| Routes                         | 21                                          | 21 — none moved, by design         |
+| Feature directories            | 16                                          | 16                                 |
+| Components and pages (`.tsx`)  | 105                                         | 107                                |
+| Primitives                     | 17                                          | 17 components + 2 class modules    |
+| Dashboard test files / tests   | 54 / 640                                    | **60 / 702**                       |
+| First-load JS, gzipped         | **159 kB** (`vendor` 150 kB + `index` 9 kB) | **158.9 kB** — `vendor` unchanged  |
+| CSS, gzipped                   | **8.9 kB**                                  | **9.2 kB**                         |
+| Self-hosted fonts              | none declared, so nothing ever loaded       | 104 kB, two of three preloaded     |
+| three.js                       | its own chunk, not in the first load        | unchanged                          |
+| 58 rules held / to apply / N/A | 32 / 17 / 9                                 | see [§20](dashboard.md) of the doc |
+
+The font row is the one number that went **up**, and it is the only real cost of the rewrite: `"Inter var"`
+was named in `@theme` with no `@font-face` behind it, so every install had silently been falling through to
+`system-ui`. Declaring the three faces is what makes the type scale mean anything, and it is its own budget
+rather than a regression against the JS one.
 
 ### Contrast, computed
 
@@ -122,8 +126,11 @@ nothing had ever checked these. Computed from the real tokens:
 | **`primary` on `background`** | **3.47:1**   | **fails AA for text**             |
 | **`destructive` on `card`**   | **3.86:1**   | **fails AA for text**             |
 
-The palette is in far better shape than "unverified" suggested — but the last two rows are a live conformance
-failure, which is Phase 0.
+The palette was in far better shape than "unverified" suggested — but the last two rows were a live conformance
+failure. **Phase 0 fixed both** by splitting fill from text: `--color-primary` stays the button fill and
+`--color-accent` carries every violet that is read as text, with `--color-destructive-text` doing the same for
+red. `lib/contrast.ts` now computes these in the test suite, reading the tokens straight out of `index.css`, so
+the table above cannot drift from the palette again.
 
 ---
 
@@ -217,7 +224,7 @@ builds; contrast passes; screenshots of all 21 routes taken for comparison.
 
 ---
 
-## 7. Phase 2 — hierarchy — **in progress**
+## 7. Phase 2 — hierarchy — **done**
 
 > **Done so far, at the primitive and shell level, so it lands everywhere at once:** `Card` gained a `focal`
 > prop — an accent hairline along the top edge, so the one card that is the point of a screen claims it without
@@ -257,7 +264,7 @@ body copy.
 
 ---
 
-## 8. Phase 3 — screen by screen
+## 8. Phase 3 — screen by screen — **done**
 
 Order matters. Do the shell first — everything inherits it — then the most-used screens, then the rest. Each
 one is a commit.
@@ -319,15 +326,39 @@ one is a commit.
 
 ---
 
-## 9. Phase 4 — prove it and write it down
+## 9. Phase 4 — prove it and write it down — **in progress**
 
-1. **The full verification set** in [§12](#12-how-to-verify-anything), all of it.
-2. **`accessibility-audit`** across the sampled routes — the manual tier `jest-axe` cannot reach.
-3. **`web-design-guidelines`** as a final review pass over the changed code.
+1. **The full verification set** in [§12](#12-how-to-verify-anything), all of it. ✓
+2. **The manual accessibility tier** `jest-axe` cannot reach. ✓ — reflow at 320px (1.4.10), a visible focus
+   indicator on every keyboard stop (2.4.7), `prefers-reduced-motion`, and a tab walk for traps. Two findings,
+   both fixed: `/owner` overflowed 320px by 13px because `StatTile`'s 26px mono number does not fit two to a
+   row, and that was the whole of it.
+3. **`web-design-guidelines`** as a final review pass. ✓ — see the table below.
 4. **Update `dashboard.md` §18** so it describes what was built. It is the baseline for the _next_ person.
 5. **Update §20's verdicts.** Every rule moved from Apply to Held gets its note rewritten. If the Apply count
    has not fallen, say so rather than quietly leaving it.
 6. **Update the screenshots** referenced by the README.
+
+### What the guidelines pass found
+
+| Finding                                    | Verdict                                                                 |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| `transition-all` on the sidebar marker     | **Fixed** — now `transition-[height,opacity]`                           |
+| No `<meta name="theme-color">`             | **Fixed** — matches `--color-background`                                |
+| Fonts discovered only after the CSS parses | **Fixed** — Inter and Space Grotesk preloaded, deduped in production    |
+| No `touch-action: manipulation`            | **Fixed** in the base layer; a tap no longer waits 300ms for a second   |
+| No `text-wrap: balance` on headings        | **Fixed** in the base layer                                             |
+| Drawer had no `overscroll-behavior`        | **Fixed** — `overscroll-contain` on the panel                           |
+| `Avatar`'s `<img>` had no width/height     | **Fixed** — attributes as well as the inline style                      |
+| `outline-none` in `FIELD`                  | **Not a defect** — `focus-visible:border-ring` replaces it, verified    |
+| `<div onClick>` backdrop in `MobileNav`    | **Not a defect** — `aria-hidden`, and Escape and a real button cover it |
+| `autoFocus` on the commands search         | **Kept** — the list is always ~76 long, which is the rule's threshold   |
+
+**A false alarm worth recording.** The first focus-visibility run reported 14 keyboard stops with no indicator
+at all, which would have been a site-wide AA failure. It was the measurement: `FIELD` carries
+`transition-colors duration-150`, so `getComputedStyle` immediately after `.focus()` returns the _resting_
+border. Read it 220ms later and every one of them is `#a78bfa`. **Wait for the transition before believing a
+computed style.**
 
 ---
 

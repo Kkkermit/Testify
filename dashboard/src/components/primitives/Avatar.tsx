@@ -32,5 +32,7 @@ export function Avatar({
 		);
 	}
 
-	return <img src={url} alt="" className="shrink-0 rounded-full" style={style} loading="lazy" />;
+	return (
+		<img src={url} alt="" width={size} height={size} className="shrink-0 rounded-full" style={style} loading="lazy" />
+	);
 }

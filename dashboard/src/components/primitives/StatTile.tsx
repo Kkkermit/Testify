@@ -25,7 +25,8 @@ export function StatTile({
 				{Icon !== undefined && <Icon size={14} aria-hidden="true" className={cn("shrink-0", tint)} />}
 				{label}
 			</p>
-			<p className="mt-1.5 font-mono text-[1.625rem] leading-none font-medium tabular-nums">
+			{/* Two of these share a 320px row, which is WCAG 1.4.10's reflow width — the full size does not fit. */}
+			<p className="mt-1.5 font-mono text-[1.25rem] leading-none font-medium tabular-nums sm:text-[1.625rem]">
 				{typeof value === "number" ? <AnimatedNumber value={value} /> : value}
 			</p>
 		</Card>

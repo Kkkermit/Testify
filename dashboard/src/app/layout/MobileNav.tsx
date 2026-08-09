@@ -66,7 +66,7 @@ export function MobileNav({
 				<div className="fixed inset-0 z-40 md:hidden">
 					{/* Not a control: Escape and the close button already cover the keyboard, and a second one is only noise in the tab order. */}
 					<div aria-hidden="true" onClick={close} className="bg-background/70 motion-fade absolute inset-0" />
-					<div id="mobile-nav" ref={panelRef} className="motion-fade absolute inset-y-0 left-0">
+					<div id="mobile-nav" ref={panelRef} className="motion-fade absolute inset-y-0 left-0 overscroll-contain">
 						<Sidebar user={user} bot={bot} guild={guild} isOwner={isOwner} expanded onNavigate={close} />
 					</div>
 					<button

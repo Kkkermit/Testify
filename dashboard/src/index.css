@@ -133,6 +133,16 @@
 	h2,
 	h3 {
 		font-feature-settings: "ss01", "cv11";
+		text-wrap: balance;
+	}
+
+	/* Without this a tap waits ~300ms for a second one that is never coming, because zoom is still possible. */
+	button,
+	a,
+	summary,
+	label,
+	[role="tab"] {
+		touch-action: manipulation;
 	}
 
 	:focus-visible {
