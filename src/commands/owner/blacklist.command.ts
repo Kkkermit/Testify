@@ -2,6 +2,7 @@ import { MessageFlags } from "discord.js";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { addToBlacklist, listBlacklist, removeFromBlacklist } from "@database/repositories/blacklistRepository";
+import { assertBlacklistable } from "@lib/blacklistActions.util";
 import { embed, successEmbed } from "@lib/embeds.util";
 import { discordTime } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
@@ -21,7 +22,7 @@ export default defineCommand({
 			],
 			async run(interaction, client) {
 				const target = interaction.options.getUser("user", true);
-				if (client.isOwner(target.id)) throw new UserFacingError("You cannot blacklist a bot owner.");
+				assertBlacklistable(client, target.id);
 
 				await addToBlacklist(target.id, interaction.options.getString("reason") ?? "No reason provided");
 				await reply(interaction, {

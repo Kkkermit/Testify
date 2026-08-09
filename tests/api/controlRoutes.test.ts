@@ -255,3 +255,92 @@ describe("a server's detail", () => {
 		expect((await send("/guilds/nonsense")).status).toBe(400);
 	});
 });
+
+describe("leaving a server", () => {
+	function clientThatCanLeave(leave = jest.fn(() => Promise.resolve({}))): {
+		client: TestifyClient;
+		leave: jest.Mock;
+	} {
+		const client = clientFor();
+		const guild = client.guilds.cache.get(GUILD) as unknown as { leave: jest.Mock };
+		guild.leave = leave;
+
+		return { client, leave };
+	}
+
+	it("leaves when the name matches", async () => {
+		const { client, leave } = clientThatCanLeave();
+
+		const response = await send(`/guilds/${GUILD}/leave`, { method: "POST", body: { confirm: "Test Server" }, client });
+
+		expect(response.status).toBe(200);
+		expect(leave).toHaveBeenCalled();
+	});
+
+	/**
+	 * The browser asking for the name is a courtesy; this check is the gate. A hand-written request with an
+	 * empty body must not be able to remove the bot from a server.
+	 */
+	it("refuses a name that does not match, and does not leave", async () => {
+		const { client, leave } = clientThatCanLeave();
+
+		const response = await send(`/guilds/${GUILD}/leave`, { method: "POST", body: { confirm: "test server" }, client });
+
+		expect(response.status).toBe(400);
+		expect(leave).not.toHaveBeenCalled();
+	});
+
+	it("refuses a request with no confirmation at all", async () => {
+		const { client, leave } = clientThatCanLeave();
+
+		expect((await send(`/guilds/${GUILD}/leave`, { method: "POST", body: {}, client })).status).toBe(400);
+		expect(leave).not.toHaveBeenCalled();
+	});
+
+	it("hides it from a manager", async () => {
+		const { client, leave } = clientThatCanLeave();
+		const response = await send(`/guilds/${GUILD}/leave`, {
+			method: "POST",
+			body: { confirm: "Test Server" },
+			client,
+			userId: MANAGER,
+		});
+
+		expect(response.status).toBe(404);
+		expect(leave).not.toHaveBeenCalled();
+	});
+
+	it("404s for a server the bot is not in", async () => {
+		const response = await send("/guilds/900000000000000009/leave", { method: "POST", body: { confirm: "x" } });
+
+		expect(response.status).toBe(404);
+	});
+
+	/** The name is unreadable once the guild is gone, so the record has to be written while it still is. */
+	it("writes the audit record before it leaves", async () => {
+		const order: string[] = [];
+		jest.mocked(recordAudit).mockImplementation(() => {
+			order.push("audit");
+			return Promise.resolve();
+		});
+		const { client } = clientThatCanLeave(
+			jest.fn(() => {
+				order.push("leave");
+				return Promise.resolve({});
+			}),
+		);
+
+		await send(`/guilds/${GUILD}/leave`, { method: "POST", body: { confirm: "Test Server" }, client });
+
+		expect(order).toEqual(["audit", "leave"]);
+	});
+
+	it("explains itself when Discord refuses", async () => {
+		const { client } = clientThatCanLeave(jest.fn(() => Promise.reject(new Error("500 internal"))));
+
+		const response = await send(`/guilds/${GUILD}/leave`, { method: "POST", body: { confirm: "Test Server" }, client });
+
+		expect(response.status).toBe(400);
+		expect(client.logger.error).toHaveBeenCalled();
+	});
+});

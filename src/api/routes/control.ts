@@ -13,7 +13,14 @@ import { guildTallies } from "@database/repositories/usageRepository";
 import { controlState, pause, resume } from "@lib/botControl.util";
 import { botIdentity, forgetBotIdentity } from "@lib/botIdentity.util";
 import { normaliseSettings } from "@lib/levelling.util";
-import { botIdentityPatch, gatewayAction, guildIdParam, type OwnerGuildDetail, shutdownRequest } from "@testify/shared";
+import {
+	botIdentityPatch,
+	gatewayAction,
+	guildIdParam,
+	leaveGuildRequest,
+	type OwnerGuildDetail,
+	shutdownRequest,
+} from "@testify/shared";
 
 /**
  * What the bot owner can do to the running bot. Everything here is behind `requireOwner`.
@@ -118,6 +125,37 @@ control.get("/guilds/:guildId", async (context) => {
 	};
 
 	return context.json(body);
+});
+
+/**
+ * Leaving is one way: the bot needs a fresh invite to come back, and only somebody still in that server can
+ * issue one. So the server compares the typed name itself rather than trusting the browser to have asked, and
+ * the audit record is written before the guild is gone — afterwards its name is no longer readable from the
+ * cache.
+ */
+control.post("/guilds/:guildId/leave", async (context) => {
+	const client = context.get("client");
+	const { guildId } = parseParams(context, guildIdParam);
+	const { confirm } = await parseBody(context, leaveGuildRequest);
+	const guild = client.guilds.cache.get(guildId);
+
+	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (confirm !== guild.name) throw badRequest("That is not the server's name, so nothing was changed.");
+
+	await auditChange(context, {
+		action: "bot.leaveGuild",
+		summary: `Left ${guild.name}`,
+		before: { guildId: guild.id, name: guild.name, memberCount: guild.memberCount },
+	});
+
+	try {
+		await guild.leave();
+	} catch (error) {
+		client.logger.error({ err: error, guildId }, "[CONTROL_ERROR] Could not leave the server");
+		throw badRequest("Discord refused to remove the bot from that server. Try again in a moment.");
+	}
+
+	return context.json({ left: guild.id });
 });
 
 /** The same four the fleet table counts, so a row and its detail cannot disagree. */

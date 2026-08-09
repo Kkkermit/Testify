@@ -1,8 +1,12 @@
-import { ExternalLink, X } from "lucide-react";
+import { type OwnerGuildDetail } from "@testify/shared";
+import { ExternalLink, LogOut, X } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router";
-import { Warning } from "@/components/form";
-import { Badge, Button, Card, DataList, Figure, Avatar, Skeleton } from "@/components/primitives";
-import { useGuildDetail } from "@/features/owner/useControl";
+import { FIELD, Field, Warning } from "@/components/form";
+import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
+import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
+import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/cn";
 
 /** One server at a glance, opened from the fleet table rather than by hunting for its id. */
 export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: () => void }): React.JSX.Element {
@@ -66,6 +70,65 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 				Open its settings
 				<ExternalLink size={14} aria-hidden="true" />
 			</Link>
+
+			<LeaveServer guild={guild} onLeft={onClose} />
 		</Card>
+	);
+}
+
+/**
+ * Leaving needs a fresh invite to undo, and only somebody still in that server can issue one — so this asks for
+ * the name rather than a click. The server checks it too; this half is the warning, not the gate.
+ */
+function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () => void }): React.JSX.Element {
+	const leave = useLeaveGuild(guild.id);
+	const [confirm, setConfirm] = useState("");
+	const inputId = `leave-${guild.id}`;
+
+	return (
+		<div className="border-border flex flex-col gap-3 border-t pt-4">
+			<div>
+				<h4 className="text-sm font-semibold">Leave this server</h4>
+				<p className="text-muted-foreground text-sm">
+					Testify stops answering there immediately. Getting back in needs a fresh invite from someone still inside, and
+					its settings are kept in case it returns.
+				</p>
+			</div>
+
+			<Field
+				htmlFor={inputId}
+				label={
+					<>
+						Type <span className="text-foreground font-mono">{guild.name}</span> to confirm
+					</>
+				}
+			>
+				<div className="flex flex-wrap items-center gap-2">
+					<input
+						id={inputId}
+						value={confirm}
+						autoComplete="off"
+						onChange={(event) => {
+							setConfirm(event.target.value);
+						}}
+						className={cn(FIELD, "max-w-64")}
+					/>
+					<Button
+						variant="destructive"
+						disabled={confirm !== guild.name || leave.isPending}
+						onClick={() => {
+							leave.mutate(confirm, { onSuccess: onLeft });
+						}}
+					>
+						<LogOut size={15} aria-hidden="true" />
+						Leave
+					</Button>
+				</div>
+			</Field>
+
+			{leave.error !== null && (
+				<Warning>{leave.error instanceof ApiError ? leave.error.message : "Testify could not leave."}</Warning>
+			)}
+		</div>
 	);
 }

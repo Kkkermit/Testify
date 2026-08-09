@@ -1,4 +1,4 @@
-import { ANALYTICS_WINDOWS, LOG_LEVELS, type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
+import { ANALYTICS_WINDOWS, LOG_LEVELS, snowflake, type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
 
 /** A page number out of a URL can be anything at all. */
 export function pageFrom(raw: string | null): number {
@@ -57,4 +57,9 @@ export function formatClock(iso: string): string {
 	if (Number.isNaN(at.getTime())) return iso;
 
 	return at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+}
+
+/** The same rule the API validates against, so the form cannot disagree with the refusal it would get. */
+export function isSnowflake(value: string): boolean {
+	return snowflake.safeParse(value).success;
 }

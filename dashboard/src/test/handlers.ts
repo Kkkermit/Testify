@@ -1,5 +1,6 @@
 import {
 	type AuditLogConfigResponse,
+	type BlacklistRow,
 	type BotControlState,
 	type BotIdentity,
 	type OwnerGuildDetail,
@@ -298,6 +299,23 @@ export const guildDetail: OwnerGuildDetail = {
 
 export const guildNickname: GuildNickname = { nickname: "Testy", canChange: true };
 
+export const blacklistRows: BlacklistRow[] = [
+	{
+		userId: "100000000000000007",
+		tag: "spammer",
+		avatarUrl: null,
+		reason: "Spamming commands in three servers",
+		createdAt: "2026-06-01T00:00:00.000Z",
+	},
+	{
+		userId: "100000000000000008",
+		tag: null,
+		avatarUrl: null,
+		reason: "No reason provided",
+		createdAt: "2026-06-02T00:00:00.000Z",
+	},
+];
+
 export const usageReport: UsageReport = {
 	days: 30,
 	runs: 1_240,
@@ -467,4 +485,8 @@ export const handlers = [
 		}),
 	),
 	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
+	http.get("/api/owner/blacklist", () => HttpResponse.json(blacklistRows)),
+	http.post("/api/owner/blacklist", () => HttpResponse.json(blacklistRows[0])),
+	http.delete("/api/owner/blacklist/:userId", () => HttpResponse.json({ userId: "100000000000000007" })),
+	http.post("/api/control/guilds/:guildId/leave", () => HttpResponse.json({ left: aGuild.id })),
 ];

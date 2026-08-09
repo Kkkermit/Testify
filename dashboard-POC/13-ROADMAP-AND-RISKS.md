@@ -78,7 +78,7 @@ outstanding, as this sandbox has neither Discord nor a MongoDB binary. What this
 - **Hono does pass a mount-path parameter into a sub-app.** Worth recording because the opposite looked true for
   a while: a 404 during this phase was a trailing slash in a test URL, not the router.
 
-### Phase 3 — The rest of the settings (~2 weeks) — **in progress**
+### Phase 3 — The rest of the settings (~2 weeks) — **done**
 
 Repetitive by design — phase 2 built the pattern, this applies it. **Welcome is done** and is the worked example
 for the rest: `WELCOME_LIMITS`, the placeholders and `fillTemplate` moved into `@testify/shared`, so the
@@ -138,19 +138,19 @@ into `src/lib/verifyActions.util.ts` so the button and the route post the identi
 - **`DELETE` carries its key in the path.** A proxy is free to drop a body on `DELETE` and some do, so the
   channel is a path parameter and `api.delete` needs no body at all.
 
-Still to do: automod, treasure, tickets and lottery — extracting any logic still living inside a command
-`run()` into `*Actions.util.ts` as you go (`06-COMMAND-CONTROL.md`).
+**Automod, treasure, tickets and lottery are done** too, each extracting what still lived inside a command
+`run()` into a `*Actions.util.ts` on the way (`06-COMMAND-CONTROL.md`). Phase 3 is complete.
 
-**Done when:** every guild-scoped setting the bot has is editable on the web.
+**Done when:** every guild-scoped setting the bot has is editable on the web. — **done**
 
-### Phase 4 — Members, moderation, economy (~1½ weeks)
+### Phase 4 — Members, moderation, economy (~1½ weeks) — **done**
 
 - Leaderboards as accessible tables; member detail page.
 - Warnings, softbans, unban through `moderationActions.util.ts`, with the actor-hierarchy checks added there.
 - XP grants and level sets that also apply role rewards.
 - Destructive actions behind typed-name confirmation.
 
-**Done when:** a manager can handle a problem member without opening Discord.
+**Done when:** a manager can handle a problem member without opening Discord. — **done**
 
 ### Phase 5 — Owner console (~1 week) — **partly done**
 
@@ -160,9 +160,19 @@ Still to do: automod, treasure, tickets and lottery — extracting any logic sti
 
 **Done when:** you can answer "which of my servers is misconfigured" in one screen.
 
-**Built:** the six-tab console — fleet stats and a clickable guild table, command-usage analytics, per-command
-switches, a searchable log feed at every level, a runtime card, and pause / rename / shut down.
-**Still to do:** leave guild, blacklist and the generated command runner.
+**Built:** the seven-tab console — fleet stats and a clickable guild table, command-usage analytics, per-command
+switches, a searchable log feed at every level, the bot-wide blacklist, a runtime card, and pause / rename /
+shut down. Leaving a server is on the guild detail card, behind its name typed out.
+**Still to do:** the generated command runner.
+
+Two things the blacklist and leave settled:
+
+- **A destructive confirmation is checked by the server, not by the form.** The browser asks for the server's
+  name because a misclick should be impossible; `confirm !== guild.name` in the route is what makes a
+  hand-written request with an empty body impossible too. The same split as every other gate here.
+- **A row has to survive the account behind it disappearing.** A blacklisted user is usually in no server the
+  bot can see, so the name comes from a REST lookup that is allowed to fail — and the row still renders with
+  its id, because an entry nobody can read is an entry nobody can lift.
 
 Two things the control tab settled, both worth recording because they are properties of the architecture rather
 than choices:

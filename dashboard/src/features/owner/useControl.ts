@@ -52,6 +52,24 @@ export function useBotIdentity(): UseMutationResult<BotIdentity, Error, BotIdent
 	});
 }
 
+/**
+ * The server is gone from every list once this succeeds, so the fleet table and the stats above it are both
+ * refetched rather than patched — the counts they show are the bot's, not this card's to recompute.
+ */
+export function useLeaveGuild(guildId: string): UseMutationResult<{ left: string }, Error, string> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: (confirm: string) => api.post<{ left: string }>(`/control/guilds/${guildId}/leave`, { confirm }),
+		onSuccess: async () => {
+			await Promise.all([
+				client.invalidateQueries({ queryKey: ["owner", "guilds"] }),
+				client.invalidateQueries({ queryKey: keys.owner.stats() }),
+			]);
+		},
+	});
+}
+
 export function useGuildDetail(guildId: string | null): UseQueryResult<OwnerGuildDetail> {
 	return useQuery({
 		queryKey: keys.owner.guildDetail(guildId ?? ""),

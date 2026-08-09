@@ -1101,7 +1101,7 @@ the same shape —
 | `/guilds/:id/commands`  | Per-command switches for this server                                    |
 | `/commands`             | Every command, searchable, with the coverage tile                       |
 | `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                         |
-| `/owner`                | Six tabs: fleet, usage, commands, logs, runtime, control                |
+| `/owner`                | Seven tabs: fleet, usage, commands, logs, blacklist, runtime, control   |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -1400,7 +1400,7 @@ Two rules it enforces:
 
 ### The owner console, and what it is allowed to know
 
-Four tabs — overview, usage, logs, runtime — all behind `requireOwner`, which answers **404** so a manager never
+Seven tabs — overview, usage, commands, logs, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so a manager never
 learns the console is there. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
 the whole console, and the logs tab is precisely the screen you want when something is wrong.
 
@@ -1437,6 +1437,18 @@ Four things about it are load-bearing:
   that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
   out, so a hand-written request cannot make one visible or switch one off.
+
+**The blacklist is bot-wide, and the rule about who may be on it lives in one place.**
+`src/lib/blacklistActions.util.ts` holds `blacklistProblem`, which both `/blacklist add` and the route call — an
+owner able to blacklist another owner could lock every one of them out of their own bot, and a rule written
+twice is a rule that will eventually be written differently. The list is an id field rather than a picker
+because somebody worth blocking is usually in no server the bot can still see, and a row whose account Discord
+no longer knows still renders: an entry nobody can read is an entry nobody can lift.
+
+**Leaving a server is confirmed by name, and the server is what compares it.** Rejoining needs a fresh invite
+from somebody still inside, so the browser asking for the name is the warning and `confirm !== guild.name` is
+the gate. The audit record is written **before** `guild.leave()`, because afterwards the name is no longer
+readable from the cache and the record would say only that something was left.
 
 **There is no "start the bot", and that is structural.** The HTTP server lives inside the bot process, so a
 stopped bot has nothing left to serve a start button. What exists instead:
