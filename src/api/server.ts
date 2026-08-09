@@ -84,7 +84,13 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 			);
 		} else {
 			client.logger.debug(
-				{ code: problem.code, path: context.req.path, method: context.req.method },
+				{
+					code: problem.code,
+					path: context.req.path,
+					method: context.req.method,
+					// The field and the rule it broke, never the value — `code: "invalid"` alone says nothing.
+					...(problem.issues.length > 0 ? { issues: problem.issues.map((i) => `${i.path} ${i.message}`) } : {}),
+				},
 				"[API] A dashboard request was refused",
 			);
 		}

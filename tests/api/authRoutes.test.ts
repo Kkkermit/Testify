@@ -148,6 +148,18 @@ describe("GET /auth/login", () => {
 	it("refuses a protocol-relative return address, which a browser reads as absolute", async () => {
 		expect((await app().request("/auth/login?returnTo=//evil.example")).status).toBe(400);
 	});
+
+	/**
+	 * `RequireAuth` sends `pathname + search`, so signing in from any tabbed or searched page carried a query
+	 * string. Refusing it answered 400 and left no way in at all from the owner console or a levelling tab.
+	 */
+	it("accepts the query string a tabbed page signs in from", async () => {
+		const path = encodeURIComponent("/owner?tab=logs");
+		const response = await app().request(`/auth/login?returnTo=${path}`);
+
+		expect(response.status).toBe(302);
+		expect(response.headers.get("location")).toContain("discord.com");
+	});
 });
 
 describe("GET /auth/callback", () => {

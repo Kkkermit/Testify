@@ -1175,7 +1175,11 @@ Rules that are easy to break and silent when broken:
   injected `<script>` or `onerror=` inert. A lint rule bans `dangerouslySetInnerHTML`, `innerHTML`, `eval()`
   and `new Function()` so the CSP is the last line rather than the only one.
 - **`returnTo` rejects `//evil.example`.** A protocol-relative URL is an absolute one to a browser, so a check
-  that only looks for a leading `/` is an open redirect. Backslashes go too — browsers normalise them.
+  that only looks for a leading `/` is an open redirect. Backslashes go too — browsers normalise them. The
+  **path and the query are checked separately**, because `RequireAuth` carries `pathname + search` through the
+  sign-in and a single pattern that refused `?` made signing in impossible from every tabbed page. A `//` inside
+  a query _value_ is data — the browser still resolves the path to this origin — and the one place a value
+  becomes a redirect target is `returnTo` itself, which is parsed by the same schema on the way through.
 - **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
   `http://localhost` install, which is the most common self-hosting trip-up there is.
 - **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
