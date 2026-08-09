@@ -1,7 +1,8 @@
 import { type MemberDetail, type MemberWarning } from "@testify/shared";
+import { shortDate } from "@/lib/datetime";
 
 export function describeJoined(joinedAt: string | null): string {
-	return joinedAt === null ? "Join date unknown" : `Joined ${new Date(joinedAt).toLocaleDateString()}`;
+	return joinedAt === null ? "Join date unknown" : `Joined ${shortDate(joinedAt)}`;
 }
 
 /** A softban that has already lapsed is history, not a live restriction — the job just has not swept it yet. */

@@ -68,10 +68,30 @@ describe("the guild picker", () => {
 		expect(link).toHaveAttribute("href", `/guilds/${aGuild.id}`);
 	});
 
-	/** The box is focused on load. */
-	it("focuses the search box so typing works immediately", async () => {
+	/** Autofocus costs a phone user the keyboard over the list, and pays back only on a list worth searching. */
+	it("leaves the search box alone on a list short enough to read", async () => {
 		renderWithProviders(<GuildPickerPage />);
 		await screen.findByText("Test Server");
+
+		expect(screen.getByRole("searchbox")).not.toHaveFocus();
+	});
+
+	it("focuses the search box once scrolling beats typing", async () => {
+		server.use(
+			http.get("/api/auth/me", () =>
+				HttpResponse.json({
+					...me,
+					guilds: Array.from({ length: 12 }, (_, index) => ({
+						...aGuild,
+						id: `90000000000000${String(index).padStart(4, "0")}`,
+						name: `Server ${String(index)}`,
+					})),
+				}),
+			),
+		);
+
+		renderWithProviders(<GuildPickerPage />);
+		await screen.findByText("Server 0");
 
 		expect(screen.getByRole("searchbox")).toHaveFocus();
 	});

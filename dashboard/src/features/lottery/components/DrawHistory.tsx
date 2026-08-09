@@ -1,6 +1,7 @@
 import { type LotteryDrawSummary } from "@testify/shared";
 import { History } from "lucide-react";
 import { Card, EmptyState } from "@/components/primitives";
+import { dateAndTime, shortDate } from "@/lib/datetime";
 
 export function DrawHistory({
 	draws,
@@ -15,7 +16,7 @@ export function DrawHistory({
 				<h2 className="font-display text-base font-bold tracking-tight">Past draws</h2>
 				{nextDrawAt !== null && (
 					<p className="text-muted-foreground text-sm">
-						Next draw <time dateTime={nextDrawAt}>{new Date(nextDrawAt).toLocaleString()}</time>
+						Next draw <time dateTime={nextDrawAt}>{dateAndTime(nextDrawAt)}</time>
 					</p>
 				)}
 			</div>
@@ -31,7 +32,7 @@ export function DrawHistory({
 						>
 							<div>
 								<time dateTime={draw.at} className="text-sm font-medium">
-									{new Date(draw.at).toLocaleDateString()}
+									{shortDate(draw.at)}
 								</time>
 								<p className="text-muted-foreground text-xs tabular-nums">
 									{draw.prizePool.toLocaleString()} across {draw.tickets.toLocaleString()} tickets

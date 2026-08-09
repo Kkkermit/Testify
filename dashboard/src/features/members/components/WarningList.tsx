@@ -1,6 +1,7 @@
 import { type MemberWarning } from "@testify/shared";
 import { Trash2 } from "lucide-react";
 import { Badge, Button } from "@/components/primitives";
+import { shortDate } from "@/lib/datetime";
 
 export function WarningList({
 	warnings,
@@ -24,7 +25,7 @@ export function WarningList({
 						<p className="text-sm break-words">{warning.reason}</p>
 						<p className="text-muted-foreground mt-1 flex flex-wrap items-center gap-2 text-xs">
 							<span>
-								by {warning.byTag} · <time dateTime={warning.at}>{new Date(warning.at).toLocaleDateString()}</time>
+								by {warning.byTag} · <time dateTime={warning.at}>{shortDate(warning.at)}</time>
 							</span>
 							{warning.edited && <Badge tone="warning">Edited</Badge>}
 						</p>

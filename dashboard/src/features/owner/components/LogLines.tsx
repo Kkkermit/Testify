@@ -1,8 +1,8 @@
 import { type LogLine } from "@testify/shared";
 import { ScrollText } from "lucide-react";
 import { EmptyState } from "@/components/primitives";
-import { formatClock } from "@/features/owner/owner.utils";
 import { cn } from "@/lib/cn";
+import { clockTime } from "@/lib/datetime";
 
 const TONE: Record<string, string> = {
 	error: "text-destructive-text",
@@ -27,7 +27,7 @@ export function LogLines({ lines }: { lines: LogLine[] }): React.JSX.Element {
 		<ol className="divide-border divide-y font-mono text-xs">
 			{lines.map((line, index) => (
 				<li key={`${line.at}-${String(index)}`} className="flex flex-col gap-1 py-2 sm:flex-row sm:gap-3">
-					<span className="text-muted-foreground shrink-0 tabular-nums">{formatClock(line.at)}</span>
+					<span className="text-muted-foreground shrink-0 tabular-nums">{clockTime(line.at)}</span>
 					<span className={cn("w-12 shrink-0 uppercase", TONE[line.level] ?? "text-muted-foreground")}>
 						{line.level}
 					</span>

@@ -3,6 +3,7 @@ import { Info } from "lucide-react";
 import { Warning } from "@/components/form";
 import { Card } from "@/components/primitives";
 import { hexColour } from "@/features/owner/runner.utils";
+import { clockTime } from "@/lib/datetime";
 
 /**
  * What the command replied with, drawn as cards.
@@ -24,7 +25,7 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 					replied
 				</h2>
 				<time className="text-muted-foreground text-xs" dateTime={result.ranAt}>
-					{new Date(result.ranAt).toLocaleTimeString()}
+					{clockTime(result.ranAt)}
 				</time>
 			</div>
 

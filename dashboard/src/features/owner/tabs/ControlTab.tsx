@@ -7,6 +7,7 @@ import { useBot } from "@/features/auth/useBot";
 import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/features/owner/useControl";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { dateAndTime } from "@/lib/datetime";
 import { sanitiseInput } from "@/lib/sanitise";
 
 /** There is no Start: this API is served by the bot process, so a stopped bot has nothing left to answer with. */
@@ -57,7 +58,7 @@ export function ControlTab(): React.JSX.Element {
 					{state.since !== null && (
 						<div className="flex gap-2">
 							<dt>Paused since</dt>
-							<dd className="text-foreground">{new Date(state.since).toLocaleString()}</dd>
+							<dd className="text-foreground">{dateAndTime(state.since)}</dd>
 						</div>
 					)}
 				</dl>

@@ -1330,6 +1330,12 @@ with `does not provide an export named 'Field'`. Nothing local catches it — Li
 CI — so `tests/core/conventions.test.ts` walks `src`, `shared/src` and `dashboard/src` and names the pair. The
 class strings are `fieldStyles.ts` for exactly this reason.
 
+**Nor does one format its own dates.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`, `clockTime` and
+`since`, and the locale is pinned rather than left to the browser: a bare `toLocaleString()` renders `7/30/2026`
+for one admin and `30/07/2026` for another, and the two are unreadable as each other. `30 Jul 2026` cannot be
+misread by anybody, which matters most on an audit trail. Eleven call sites each had their own answer before
+this existed.
+
 **Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
 places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
 `LABEL` / `CHECK_ROW` class strings exist so a control's semantics and its type scale are each written once.

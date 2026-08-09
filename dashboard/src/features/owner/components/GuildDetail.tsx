@@ -7,6 +7,7 @@ import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/compo
 import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { shortDate } from "@/lib/datetime";
 
 /** One server at a glance, opened from the fleet table rather than by hunting for its id. */
 export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: () => void }): React.JSX.Element {
@@ -41,9 +42,9 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 				rows={[
 					{
 						label: "Joined",
-						value: guild.joinedAt === null ? "Unknown" : new Date(guild.joinedAt).toLocaleDateString(),
+						value: guild.joinedAt === null ? "Unknown" : shortDate(guild.joinedAt),
 					},
-					{ label: "Created", value: new Date(guild.createdAt).toLocaleDateString() },
+					{ label: "Created", value: shortDate(guild.createdAt) },
 					{ label: "Server owner", value: guild.ownerId, mono: true },
 					{ label: "Testify's nickname", value: guild.nickname ?? "None set" },
 					{ label: "Testify's top role", value: guild.highestRole ?? "None" },

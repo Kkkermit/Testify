@@ -6,7 +6,7 @@ import { EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitiv
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { GuildCard } from "@/features/guilds/GuildCard";
-import { filterGuilds, groupGuilds } from "@/features/guilds/guilds.utils";
+import { filterGuilds, groupGuilds, searchIsWorthFocusing } from "@/features/guilds/guilds.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
@@ -34,8 +34,7 @@ export function GuildPickerPage(): React.JSX.Element {
 				/>
 				<input
 					type="search"
-					// Someone in 40 servers should type rather than scroll.
-					autoFocus
+					autoFocus={searchIsWorthFocusing(me.data?.guilds.length ?? 0)}
 					value={search}
 					onChange={(event) => {
 						setSearch(event.target.value);
@@ -59,11 +58,8 @@ export function GuildPickerPage(): React.JSX.Element {
 				groups.map((group) => (
 					<section key={group.key} aria-labelledby={`guilds-${group.key}`} className="flex flex-col gap-3">
 						<div className="flex flex-col gap-0.5">
-							<Eyebrow as="h2" id={`guilds-${group.key}`}>
+							<Eyebrow as="h2" id={`guilds-${group.key}`} count={group.guilds.length}>
 								{group.title}
-								<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
-									{group.guilds.length}
-								</span>
 							</Eyebrow>
 							<p className="text-muted-foreground text-sm">{group.describes}</p>
 						</div>

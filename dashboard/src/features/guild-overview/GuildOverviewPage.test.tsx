@@ -78,6 +78,56 @@ describe("the guild overview", () => {
 		expect(screen.getByText("someone")).toBeInTheDocument();
 	});
 
+	/**
+	 * What changed identifies the row; the stamp does not. Leading with the stamp spent the most scannable
+	 * column on the least identifying thing.
+	 */
+	it("leads each change with what happened, not when", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({
+					...overview,
+					recentChanges: [
+						{
+							actorTag: "someone",
+							action: "levelling.update",
+							summary: "Turned levelling on",
+							at: "2026-01-01T10:00:00.000Z",
+						},
+					],
+				}),
+			),
+		);
+
+		renderPage();
+
+		const row = (await screen.findByText("Turned levelling on")).closest("li");
+		expect(row?.firstElementChild).toHaveTextContent("Turned levelling on");
+	});
+
+	/** `7/30/2026` and `30/07/2026` are the same stamp to two different admins, and unreadable as each other. */
+	it("dates a change unambiguously whatever the browser's locale is", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({
+					...overview,
+					recentChanges: [
+						{
+							actorTag: "someone",
+							action: "levelling.update",
+							summary: "Turned levelling on",
+							at: "2026-01-05T10:00:00.000Z",
+						},
+					],
+				}),
+			),
+		);
+
+		renderPage();
+
+		expect(await screen.findByText("5 Jan 2026")).toBeInTheDocument();
+	});
+
 	/** 404 here means the bot was removed while they were looking at the page — a different screen from a bug. */
 	it("says the bot is gone rather than showing a generic failure", async () => {
 		server.use(

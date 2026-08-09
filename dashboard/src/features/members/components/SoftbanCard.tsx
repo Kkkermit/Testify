@@ -1,6 +1,7 @@
 import { type MemberSoftban } from "@testify/shared";
 import { ShieldAlert } from "lucide-react";
 import { Button, Card } from "@/components/primitives";
+import { dateAndTime } from "@/lib/datetime";
 
 export function SoftbanCard({
 	softban,
@@ -19,7 +20,7 @@ export function SoftbanCard({
 				</h2>
 				<p className="text-muted-foreground text-sm">{softban.reason}</p>
 				<p className="text-muted-foreground text-xs">
-					Lifts <time dateTime={softban.expiresAt}>{new Date(softban.expiresAt).toLocaleString()}</time>
+					Lifts <time dateTime={softban.expiresAt}>{dateAndTime(softban.expiresAt)}</time>
 				</p>
 			</div>
 

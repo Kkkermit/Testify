@@ -10,11 +10,13 @@ import { cn } from "@/lib/cn";
  */
 export function Eyebrow({
 	children,
+	count,
 	as: Tag = "p",
 	id,
 	className,
 }: {
 	children: ReactNode;
+	count?: ReactNode;
 	as?: "p" | "h2" | "h3" | "span";
 	id?: string;
 	className?: string;
@@ -29,6 +31,8 @@ export function Eyebrow({
 		>
 			<span aria-hidden="true" className="bg-accent/70 h-px w-5 shrink-0" />
 			{children}
+			{/* Kept at the label's own scale, or a two-digit count outweighs the words it is counting. */}
+			{count !== undefined && <span className="text-foreground tabular-nums">{count}</span>}
 		</Tag>
 	);
 }

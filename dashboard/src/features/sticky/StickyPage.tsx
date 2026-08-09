@@ -54,11 +54,8 @@ export function StickyPage(): React.JSX.Element {
 			/>
 
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="current-heading">
+				<Eyebrow as="h2" id="current-heading" count={`${String(entries.length)} of ${String(list.data.limit)}`}>
 					In use
-					<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">
-						{entries.length} of {list.data.limit}
-					</span>
 				</Eyebrow>
 
 				{entries.length === 0 ? (

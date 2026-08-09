@@ -2,6 +2,7 @@ import { ExternalLink } from "lucide-react";
 import { Card, DataList, Skeleton } from "@/components/primitives";
 import { formatUptime } from "@/features/owner/owner.utils";
 import { useRuntime } from "@/features/owner/useOwner";
+import { dateAndTime } from "@/lib/datetime";
 
 /** What this bot is running as — the first thing to check before believing anything else on this screen. */
 export function RuntimeTab(): React.JSX.Element {
@@ -24,7 +25,7 @@ export function RuntimeTab(): React.JSX.Element {
 						{ label: "Platform", value: info.platform },
 						{
 							label: "Started",
-							value: `${new Date(info.startedAt).toLocaleString()} (${formatUptime(info.uptimeMs)})`,
+							value: `${dateAndTime(info.startedAt)} (${formatUptime(info.uptimeMs)})`,
 						},
 						{
 							label: "Memory",

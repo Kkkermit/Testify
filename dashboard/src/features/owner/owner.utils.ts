@@ -52,13 +52,6 @@ export function shortDay(day: string): string {
 	return at.toLocaleDateString(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
-export function formatClock(iso: string): string {
-	const at = new Date(iso);
-	if (Number.isNaN(at.getTime())) return iso;
-
-	return at.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
-
 /** The same rule the API validates against, so the form cannot disagree with the refusal it would get. */
 export function isSnowflake(value: string): boolean {
 	return snowflake.safeParse(value).success;

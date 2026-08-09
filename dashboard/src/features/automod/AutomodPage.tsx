@@ -64,9 +64,8 @@ export function AutomodPage(): React.JSX.Element {
 			)}
 
 			<section aria-labelledby="rules-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="rules-heading">
+				<Eyebrow as="h2" id="rules-heading" count={list.length}>
 					Rules
-					<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">{list.length}</span>
 				</Eyebrow>
 
 				{list.length === 0 ? (

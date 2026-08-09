@@ -262,6 +262,18 @@ body copy.
 Order matters. Do the shell first — everything inherits it — then the most-used screens, then the rest. Each
 one is a commit.
 
+> **Done: 1–5.** The shell and primitives, `/sign-in` and the setup screen, `/guilds` and `/guilds/:id`, and
+> `/guilds/:id/settings`.
+>
+> Three of those were repetition rather than styling, and each fix landed on screens the sweep had not reached
+> yet. **Ten hand-rolled eyebrows** became `Eyebrow as="h2"`, which also gave the counts beside them one scale
+> instead of three. **Eleven date call sites** became `lib/datetime.ts`, with the locale pinned so an audit
+> trail cannot read `7/30/2026` to one admin and `30/07/2026` to another. **Recent changes** now leads with what
+> happened rather than when, because the stamp was holding the most scannable column and identifying nothing.
+>
+> `autoFocus` on the guild search is now conditional (`searchIsWorthFocusing`): on a short list it cost a phone
+> user the keyboard over the list they came to read, and paid back nothing.
+
 | Order | Screen                             | Why here                                                       |
 | ----- | ---------------------------------- | -------------------------------------------------------------- |
 | 1     | `AppShell`, `Sidebar`, `MobileNav` | Every page sits inside it; three widths to check               |
