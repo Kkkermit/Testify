@@ -217,7 +217,16 @@ builds; contrast passes; screenshots of all 21 routes taken for comparison.
 
 ---
 
-## 7. Phase 2 — hierarchy
+## 7. Phase 2 — hierarchy — **in progress**
+
+> **Done so far, at the primitive and shell level, so it lands everywhere at once:** `Card` gained a `focal`
+> prop — an accent hairline along the top edge, so the one card that is the point of a screen claims it without
+> anything around it getting louder. `TabBar` and `StatTile` labels are mono caps, so a tab bar reads as a mode
+> switch and a tile reads as one measurement. The sidebar's brand wears the display face, its group headings
+> take the eyebrow voice, and the active marker moved from the fill violet to the accent.
+>
+> **Still to do:** one primary action per screen — several screens still offer two or three — and the
+> settings page's progressive disclosure (rule 20). Those are per-screen work, which is Phase 3.
 
 The biggest single win, and mostly a matter of demoting things. §20 rules 9, 10, 21 and 34 are one problem:
 **every card weighs the same and several offer a primary button, so no screen says what to do first.**

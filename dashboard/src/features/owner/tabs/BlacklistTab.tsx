@@ -36,7 +36,7 @@ export function BlacklistTab(): React.JSX.Element {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<Card className="flex flex-col gap-4">
+			<Card focal className="flex flex-col gap-4">
 				<div>
 					<h2 className="font-display text-base font-bold tracking-tight">Block someone from Testify</h2>
 					<p className="text-muted-foreground text-sm">

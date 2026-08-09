@@ -21,11 +21,11 @@ export function StatTile({
 }): React.JSX.Element {
 	const tile = (
 		<Card padding="compact" className="hover:border-input transition-colors duration-150">
-			<p className="text-muted-foreground flex items-center gap-1.5 text-[0.8125rem] font-medium">
+			<p className="text-muted-foreground flex items-center gap-1.5 font-mono text-[0.6875rem] tracking-[0.12em] uppercase">
 				{Icon !== undefined && <Icon size={14} aria-hidden="true" className={cn("shrink-0", tint)} />}
 				{label}
 			</p>
-			<p className="mt-1 font-mono text-2xl font-semibold tabular-nums">
+			<p className="mt-1.5 font-mono text-[1.625rem] leading-none font-medium tabular-nums">
 				{typeof value === "number" ? <AnimatedNumber value={value} /> : value}
 			</p>
 		</Card>

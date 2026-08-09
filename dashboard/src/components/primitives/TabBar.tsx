@@ -33,7 +33,7 @@ export function TabBar<Key extends string>({
 						}}
 						className={cn(
 							// The first tab is flush left, so its label sits on the same column as the page title above it.
-							"relative flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-medium first:pl-0",
+							"relative flex shrink-0 items-center gap-2 px-4 py-2 font-mono text-[0.75rem] tracking-[0.08em] uppercase first:pl-0",
 							"transition-colors duration-150",
 							active === key ? "text-foreground" : "text-muted-foreground hover:text-foreground",
 						)}

@@ -55,7 +55,9 @@ export function Sidebar({
 				<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
 					<BotMark src={bot?.avatarUrl} size={22} />
 				</span>
-				<span className={label("truncate font-semibold tracking-tight")}>{bot?.username ?? "Testify"}</span>
+				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
+					{bot?.username ?? "Testify"}
+				</span>
 			</Link>
 
 			{navigationFor({ guild, isOwner }).map((group, index) => (
@@ -68,7 +70,7 @@ export function Sidebar({
 							<p
 								aria-hidden="true"
 								className={cn(
-									"text-muted-foreground truncate px-2 pb-1 text-[0.6875rem] font-semibold tracking-wider uppercase",
+									"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
 									expanded ? "" : "hidden lg:block",
 								)}
 							>

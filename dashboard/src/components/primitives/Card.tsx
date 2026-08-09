@@ -18,10 +18,19 @@ export function cardClass(padding: CardPadding = "default", ...extra: string[]):
 	return cn(SURFACE, PADDING[padding], ...extra);
 }
 
+/**
+ * A hairline of accent along the top edge. Rule 9 wants one focal point per screen, and a card claims it here
+ * rather than by shouting — everything around it stays exactly as quiet as it was.
+ */
+const FOCAL =
+	"relative before:absolute before:inset-x-[-1px] before:top-[-1px] before:h-0.5 before:rounded-t-card " +
+	"before:bg-linear-to-r before:from-accent before:to-transparent before:content-['']";
+
 export function Card({
 	padding = "default",
+	focal = false,
 	className,
 	...props
-}: ComponentPropsWithoutRef<"div"> & { padding?: CardPadding }): React.JSX.Element {
-	return <div className={cardClass(padding, className ?? "")} {...props} />;
+}: ComponentPropsWithoutRef<"div"> & { padding?: CardPadding; focal?: boolean }): React.JSX.Element {
+	return <div className={cardClass(padding, focal ? FOCAL : "", className ?? "")} {...props} />;
 }
