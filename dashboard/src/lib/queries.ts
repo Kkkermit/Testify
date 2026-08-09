@@ -35,5 +35,6 @@ export const keys = {
 		control: () => ["owner", "control"] as const,
 		guildDetail: (id: string) => ["owner", "guild", id] as const,
 		blacklist: () => ["owner", "blacklist"] as const,
+		runner: () => ["owner", "runner"] as const,
 	},
 };

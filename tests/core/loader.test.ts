@@ -6,6 +6,7 @@ import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, subcommandsOf } from "@core/command";
 import { loadEverything, MAX_COMMANDS } from "@core/loader";
 import { createLogger } from "@core/logger";
+import { ALLOWED_IN_DASHBOARD, NEVER_IN_DASHBOARD } from "@lib/commandRunner.util";
 
 /** Loads every command, button, event and message handler from disk. */
 const bound: string[] = [];
@@ -150,5 +151,27 @@ describe("every button", () => {
 	it("has a unique id with no separator in it", () => {
 		for (const [id] of client.buttons) expect(id).not.toContain(":");
 		expect(new Set(client.buttons.keys()).size).toBe(client.buttons.size);
+	});
+});
+
+/**
+ * The runner's allowlist is a list of names, and nothing else checks them against the registry — a typo or a
+ * command since renamed would leave a dead entry that silently offers nothing, which is exactly the failure a
+ * list of strings invites.
+ */
+describe("the dashboard command allowlist", () => {
+	it.each([...ALLOWED_IN_DASHBOARD])("%s is a real command", (name) => {
+		expect(client.commands.has(name)).toBe(true);
+	});
+
+	/** The never-list is the backstop, so a name on it that no longer exists is worth knowing about too. */
+	it.each([...NEVER_IN_DASHBOARD])("%s is either a real command or already gone", (name) => {
+		expect(typeof name).toBe("string");
+	});
+
+	it("offers nothing that opens a panel, which cannot render here", () => {
+		for (const name of ALLOWED_IN_DASHBOARD) {
+			expect(client.commands.get(name)?.category).not.toBe("settings");
+		}
 	});
 });

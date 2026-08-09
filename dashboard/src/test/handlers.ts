@@ -6,6 +6,7 @@ import {
 	type OwnerGuildDetail,
 	type ChannelSummary,
 	type CommandCatalogue,
+	type CommandRunResult,
 	type CommandToggleState,
 	type LogFeed,
 	type RuntimeInfo,
@@ -299,6 +300,81 @@ export const guildDetail: OwnerGuildDetail = {
 
 export const guildNickname: GuildNickname = { nickname: "Testy", canChange: true };
 
+/** What the runner offers: one plain command, one with subcommands, one needing a server. */
+export const runnable: CommandCatalogue = {
+	prefix: "t?",
+	categories: ["info"],
+	commands: [
+		{
+			name: "ping",
+			description: "Checks the bot is awake.",
+			category: "info",
+			aliases: [],
+			subcommands: [],
+			options: [],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: false,
+			ownerOnly: false,
+			nsfw: false,
+		},
+		{
+			name: "bot",
+			description: "Information about the bot itself.",
+			category: "info",
+			aliases: [],
+			subcommands: [
+				{ name: "info", description: "General information.", aliases: [], options: [] },
+				{ name: "uptime", description: "How long it has been running.", aliases: [], options: [] },
+			],
+			options: [],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: false,
+			ownerOnly: false,
+			nsfw: false,
+		},
+		{
+			name: "role-info",
+			description: "Details about a role.",
+			category: "info",
+			aliases: [],
+			subcommands: [],
+			options: [
+				{ name: "role", description: "Which role.", type: "role", required: true, choices: [], min: null, max: null },
+				{
+					name: "detail",
+					description: "How much.",
+					type: "string",
+					required: false,
+					choices: [
+						{ name: "Full", value: "full" },
+						{ name: "Short", value: "short" },
+					],
+					min: null,
+					max: null,
+				},
+			],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: true,
+			ownerOnly: false,
+			nsfw: false,
+		},
+	],
+};
+
+export const runResult: CommandRunResult = {
+	command: "ping",
+	subcommand: null,
+	ranAt: "2026-08-09T12:00:00.000Z",
+	outputs: [{ kind: "text", content: "Pong! 42ms" }],
+	degraded: false,
+};
+
 export const blacklistRows: BlacklistRow[] = [
 	{
 		userId: "100000000000000007",
@@ -486,6 +562,8 @@ export const handlers = [
 	),
 	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
 	http.get("/api/owner/blacklist", () => HttpResponse.json(blacklistRows)),
+	http.get("/api/owner/runner", () => HttpResponse.json(runnable)),
+	http.post("/api/owner/runner/:name", () => HttpResponse.json(runResult)),
 	http.post("/api/owner/blacklist", () => HttpResponse.json(blacklistRows[0])),
 	http.delete("/api/owner/blacklist/:userId", () => HttpResponse.json({ userId: "100000000000000007" })),
 	http.post("/api/control/guilds/:guildId/leave", () => HttpResponse.json({ left: aGuild.id })),

@@ -8,6 +8,7 @@ import { BlacklistTab } from "@/features/owner/tabs/BlacklistTab";
 import { ControlTab } from "@/features/owner/tabs/ControlTab";
 import { LogsTab } from "@/features/owner/tabs/LogsTab";
 import { OverviewTab } from "@/features/owner/tabs/OverviewTab";
+import { RunnerTab } from "@/features/owner/tabs/RunnerTab";
 import { RuntimeTab } from "@/features/owner/tabs/RuntimeTab";
 import { UsageTab } from "@/features/owner/tabs/UsageTab";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -70,6 +71,7 @@ export function OwnerPage(): React.JSX.Element {
 				/>
 			)}
 			{tab === "commands" && <CommandsPage scope="global" />}
+			{tab === "run" && <RunnerTab />}
 			{tab === "blacklist" && <BlacklistTab />}
 			{tab === "runtime" && <RuntimeTab />}
 			{tab === "control" && <ControlTab />}

@@ -152,18 +152,27 @@ into `src/lib/verifyActions.util.ts` so the button and the route post the identi
 
 **Done when:** a manager can handle a problem member without opening Discord. — **done**
 
-### Phase 5 — Owner console (~1 week) — **partly done**
+### Phase 5 — Owner console (~1 week) — **done**
 
 - Stats, guild table, leave guild, blacklist.
 - The generated command runner over the allowlist.
 - The error ring buffer, if you want `/owner/errors`.
 
-**Done when:** you can answer "which of my servers is misconfigured" in one screen.
+**Done when:** you can answer "which of my servers is misconfigured" in one screen. — **done**
 
 **Built:** the seven-tab console — fleet stats and a clickable guild table, command-usage analytics, per-command
 switches, a searchable log feed at every level, the bot-wide blacklist, a runtime card, and pause / rename /
 shut down. Leaving a server is on the guild detail card, behind its name typed out.
-**Still to do:** the generated command runner.
+**The generated command runner is built** as an eighth tab, over an allowlist. Three things it settled:
+
+- **The adapter earns its place only here.** `DashboardInteraction` captures replies rather than sending them,
+  which works because owner commands are one-shot and embed-based. The panel commands are still promoted to
+  their own screens, exactly as `06-COMMAND-CONTROL.md` concluded.
+- **Two lists, not one.** `ALLOWED_IN_DASHBOARD` opts a command in and `NEVER_IN_DASHBOARD` refuses one
+  regardless — so a mistaken addition to the first cannot expose `/eval`. A test walks the real registry, so a
+  name that is not a command fails rather than silently offering nothing.
+- **Degrading honestly beats degrading quietly.** A reply's buttons cannot work in a browser, and the response
+  says the reply carried some rather than showing less than the command did.
 
 Two things the blacklist and leave settled:
 

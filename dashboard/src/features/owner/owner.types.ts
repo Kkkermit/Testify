@@ -1,4 +1,4 @@
-import { Activity, Ban, Power, ScrollText, Server, Terminal, Wrench } from "lucide-react";
+import { Activity, Ban, Play, Power, ScrollText, Server, Terminal, Wrench } from "lucide-react";
 import { type TabDefinition } from "@/components/primitives";
 
 /** Adding a section of the console is an entry here and a branch in the page; the tab bar and `?tab=` follow. */
@@ -7,6 +7,7 @@ export const OWNER_TABS = [
 	{ key: "usage", label: "Usage", icon: Server },
 	{ key: "commands", label: "Commands", icon: Terminal },
 	{ key: "logs", label: "Logs", icon: ScrollText },
+	{ key: "run", label: "Run", icon: Play },
 	{ key: "blacklist", label: "Blacklist", icon: Ban },
 	{ key: "runtime", label: "Runtime", icon: Wrench },
 	{ key: "control", label: "Control", icon: Power },

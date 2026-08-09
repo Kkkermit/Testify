@@ -127,6 +127,8 @@ describe("the guild settings sub-routes", () => {
 		["PATCH", "/api/guilds/:guildId/members/:userId/level"],
 		["PATCH", "/api/guilds/:guildId/members/:userId/money"],
 		["DELETE", "/api/guilds/:guildId/members/:userId/softban"],
+		["GET", "/api/owner/runner"],
+		["POST", "/api/owner/runner/:name"],
 		["GET", "/api/owner/blacklist"],
 		["POST", "/api/owner/blacklist"],
 		["DELETE", "/api/owner/blacklist/:userId"],

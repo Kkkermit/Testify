@@ -3,6 +3,7 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { requireOwner } from "@api/middleware/session";
 import { blacklist } from "@api/routes/blacklist";
+import { commandRunner } from "@api/routes/commandRunner";
 import { globalCommandToggles } from "@api/routes/commandToggles";
 import { parseQuery } from "@api/validate";
 import { databaseConnected } from "@database/connection";
@@ -17,6 +18,7 @@ owner.use("*", requireOwner);
 // Behind the same gate as the rest of the console, so a manager cannot reach the bot-wide switches.
 owner.route("/commands", globalCommandToggles);
 owner.route("/blacklist", blacklist);
+owner.route("/runner", commandRunner);
 
 owner.get("/stats", (context) => {
 	const client = context.get("client");

@@ -1082,26 +1082,26 @@ console, and the levelling, welcome, audit-logging and server settings. The rest
 the same shape —
 `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the running order.
 
-| Route                   | Screen                                                                  |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `/sign-in`              | One button; also the setup screen for a half-install                    |
-| `/guilds`               | Picker, with an invite card for guilds without the bot                  |
-| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes           |
-| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings                        |
-| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                          |
-| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save                      |
-| `/guilds/:id/automod`   | Discord's own filters — no database behind it                           |
-| `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                  |
-| `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                           |
-| `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                           |
-| `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                              |
-| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page    |
-| `…/members/:userId`     | One member: standing, roles, warnings, softban, moderation controls     |
-| `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting |
-| `/guilds/:id/commands`  | Per-command switches for this server                                    |
-| `/commands`             | Every command, searchable, with the coverage tile                       |
-| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                         |
-| `/owner`                | Seven tabs: fleet, usage, commands, logs, blacklist, runtime, control   |
+| Route                   | Screen                                                                     |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `/sign-in`              | One button; also the setup screen for a half-install                       |
+| `/guilds`               | Picker, with an invite card for guilds without the bot                     |
+| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes              |
+| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings                           |
+| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                             |
+| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save                         |
+| `/guilds/:id/automod`   | Discord's own filters — no database behind it                              |
+| `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                     |
+| `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                              |
+| `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                              |
+| `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                 |
+| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page       |
+| `…/members/:userId`     | One member: standing, roles, warnings, softban, moderation controls        |
+| `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting    |
+| `/guilds/:id/commands`  | Per-command switches for this server                                       |
+| `/commands`             | Every command, searchable, with the coverage tile                          |
+| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                            |
+| `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -1400,7 +1400,7 @@ Two rules it enforces:
 
 ### The owner console, and what it is allowed to know
 
-Seven tabs — overview, usage, commands, logs, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so a manager never
+Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so a manager never
 learns the console is there. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
 the whole console, and the logs tab is precisely the screen you want when something is wrong.
 
@@ -1437,6 +1437,20 @@ Four things about it are load-bearing:
   that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
   out, so a hand-written request cannot make one visible or switch one off.
+
+**The command runner is the one place a `CommandInput` adapter is right, and it runs over an allowlist.**
+`DashboardInteraction` in `src/lib/commandRunner.util.ts` captures replies instead of sending them, and the form
+is generated from the same metadata `buildSlashCommand` registers — so a command gaining an option gains a field
+with no frontend work. Four things about it are load-bearing:
+
+- **`ALLOWED_IN_DASHBOARD` is opt-in, and `NEVER_IN_DASHBOARD` is the backstop.** A command added six months
+  from now must not become web-reachable by accident, and `/eval` must stay unreachable even if somebody adds it
+  to the first list by mistake. A test walks the real registry so a name that is not a command fails the build.
+- **A getter can only read an option the command declared.** Arguments are filtered against the command's own
+  option list before `run()` is called, so a hand-written request cannot smuggle a value the form never showed.
+- **What cannot cross the gap is named, not dropped.** A button posts back to Discord's interaction endpoint and
+  is meaningless in a browser; the response says the reply carried one rather than quietly showing less.
+- **A switched-off command is off here too**, and every run is audit-logged with the arguments it was given.
 
 **The blacklist is bot-wide, and the rule about who may be on it lives in one place.**
 `src/lib/blacklistActions.util.ts` holds `blacklistProblem`, which both `/blacklist add` and the route call — an

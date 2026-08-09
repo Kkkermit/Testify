@@ -626,7 +626,7 @@ indentation you matched on may already have changed.
 | `/guilds/:id/commands`  | Per-command switches for this server                                                 |
 | `/commands`             | Every command, searchable, with the coverage tile                                    |
 | `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                                      |
-| `/owner`                | Seven tabs: fleet, usage, commands, logs, blacklist, runtime, control                |
+| `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control           |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the
@@ -1007,6 +1007,7 @@ All behind `requireOwner`, which answers **404** so a manager never learns the c
 | Understand usage      | `/owner?tab=usage` → a window (7/30/90 days) → busiest and least-used commands                         |
 | Turn a command off    | `/owner?tab=commands` → bot-wide switches; the per-server equivalent is `/guilds/:id/commands`         |
 | Find out what broke   | `/owner?tab=logs` → level filter and a search that matches message **and** context                     |
+| Run a command         | `/owner?tab=run` → pick one → the form is generated from its own options → the reply is drawn below    |
 | Block somebody        | `/owner?tab=blacklist` → paste an ID, give a reason → the row appears with a name if Discord knows one |
 | Leave a server        | `/owner` → the server's detail card → type its name → Leave                                            |
 | Pause or stop the bot | `/owner?tab=control` → Pause is reversible here; Shut down is typed and final                          |
@@ -1018,6 +1019,10 @@ Three things shape these:
 - **The blacklist takes an ID, not a picker.** Somebody worth blocking is usually in no server the bot can still
   see, so there is no list to choose from. A row whose account Discord no longer knows still renders with its
   ID — an entry nobody can read is an entry nobody can lift.
+- **The runner is an allowlist, and the list is the whole of what it can reach.** `ALLOWED_IN_DASHBOARD` in
+  `src/lib/commandRunner.util.ts` opts a command in; `NEVER_IN_DASHBOARD` refuses one even if it somehow reaches
+  the first list. The panel commands are not on it and will not be — a Components V2 tree serialised to JSON is
+  not a settings page, which is why every other feature has its own screen instead.
 - **There is no "start the bot".** The HTTP server is inside the bot process, so a stopped bot cannot serve the
   button that would start it. The Control tab says so in as many words.
 
@@ -1096,11 +1101,12 @@ can be tested without rendering.
 complete** — every guild-scoped setting is editable on the web, and a manager can handle a problem member
 without opening Discord. Phase 5 is all but done: leaving a server and the bot-wide blacklist are built.
 
+**Phase 5 is complete** too: the owner console now carries the command runner, the blacklist and leaving a
+server. `dashboard-POC/06-COMMAND-CONTROL.md`'s conclusion still governs everything after it — the dashboard is
+a third surface onto the **domain**, not onto the presentation, and the runner is the one place an adapter is
+right because owner commands are one-shot and embed-based. `/eval` is never exposed.
+
 Still open:
 
-- **Phase 5** — the generated command runner over an allowlist. `dashboard-POC/06-COMMAND-CONTROL.md` is the
-  plan, and its conclusion is the thing to hold onto: the dashboard is a third surface onto the **domain**, not
-  onto the presentation. The runner is the one place an adapter is right, because owner commands are one-shot
-  and embed-based. `/eval` is never exposed.
 - **Phase 6** — the manual half of the accessibility pass, a Docker image and compose file, README screenshots,
   and a light theme if wanted. §18.10 is the order to do the last one in.
