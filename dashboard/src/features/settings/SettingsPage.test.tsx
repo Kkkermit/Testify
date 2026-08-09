@@ -95,15 +95,15 @@ describe("the settings page", () => {
 
 		const groupOf = (label: string): Element | null => screen.getByText(label).closest("details");
 
-		expect(await screen.findByText("Who gets in")).toBeInTheDocument();
-		for (const label of ["How Testify appears", "Who gets in", "What happens in channels"]) {
+		expect(await screen.findByText("Joining")).toBeInTheDocument();
+		for (const label of ["Testify in this server", "Joining", "Moderation", "Channels"]) {
 			expect(groupOf(label)).toHaveAttribute("open");
 		}
 
-		await user.click(screen.getByText("What happens in channels"));
+		await user.click(screen.getByText("Channels"));
 
-		expect(groupOf("What happens in channels")).not.toHaveAttribute("open");
-		expect(groupOf("How Testify appears")).toHaveAttribute("open");
+		expect(groupOf("Channels")).not.toHaveAttribute("open");
+		expect(groupOf("Testify in this server")).toHaveAttribute("open");
 		expect(screen.getByRole("heading", { name: "Command prefix" })).toBeInTheDocument();
 	});
 

@@ -16,7 +16,8 @@ export function FeatureGrid({
 	guildId: string;
 }): React.JSX.Element {
 	return (
-		<ul className="grid gap-4 sm:grid-cols-2">
+		// A grid item defaults to `min-width: auto`, so without this the widest tile sets the row's width.
+		<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
 			{features.map((feature, index) => {
 				const { icon: Icon, tint, wash, path } = featureLook(feature.key);
 
@@ -26,7 +27,7 @@ export function FeatureGrid({
 							<Icon size={18} />
 						</span>
 						<span className="min-w-0 flex-1">
-							<span className="block font-medium">{feature.label}</span>
+							<span className="block truncate font-medium">{feature.label}</span>
 							<span className="text-muted-foreground block truncate text-xs">{feature.detail ?? "Not set up"}</span>
 						</span>
 						<Badge tone={feature.enabled ? "success" : "muted"}>{feature.enabled ? "On" : "Off"}</Badge>

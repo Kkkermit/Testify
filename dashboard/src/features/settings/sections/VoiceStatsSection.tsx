@@ -1,9 +1,8 @@
 import { type ChannelSummary, type VoiceStatsPatch, type VoiceStatsSetting } from "@testify/shared";
 import { AudioLines } from "lucide-react";
-import { Field, FIELD, savingStateOf, SELECT } from "@/components/form";
+import { Field, savingStateOf, SELECT } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
-import { cn } from "@/lib/cn";
 
 /** Voice channels, not text ones — the count is the channel's own name, so `ChannelPicker` is the wrong control. */
 export function VoiceStatsSection({
@@ -60,7 +59,7 @@ function VoicePicker({
 	return (
 		<Field label={label}>
 			<select
-				className={cn(FIELD, SELECT)}
+				className={SELECT}
 				value={value ?? ""}
 				onChange={(event) => {
 					onChange(event.target.value === "" ? null : event.target.value);

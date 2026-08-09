@@ -67,3 +67,65 @@ describe("category coverage", () => {
 		}
 	});
 });
+
+describe("the feature grid's links", () => {
+	/**
+	 * Tickets had a screen at `/guilds/:id/tickets` and no `path` here, so its tile on the overview rendered
+	 * as an inert `<div>` — the feature was built, reachable from the sidebar, and dead from the grid.
+	 */
+	it("links every feature whose screen exists", () => {
+		const routed: Record<string, string> = {
+			levelling: "levelling",
+			welcome: "welcome",
+			"audit-logging": "audit-log",
+			automod: "automod",
+			sticky: "sticky",
+			treasure: "treasure",
+			tickets: "tickets",
+			lottery: "lottery",
+		};
+
+		for (const [key, segment] of Object.entries(routed)) {
+			const look = featureLook(key);
+			expect(look.path).toBeDefined();
+			expect(look.path?.("900000000000000001")).toBe(`/guilds/900000000000000001/${segment}`);
+		}
+	});
+
+	/** A tile pointing at a route that does not exist lands the browser back on the guild picker. */
+	it("points only at paths the router serves", () => {
+		const served = new Set([
+			"levelling",
+			"welcome",
+			"audit-log",
+			"settings",
+			"automod",
+			"sticky",
+			"treasure",
+			"tickets",
+			"lottery",
+			"members",
+			"commands",
+		]);
+
+		for (const key of [
+			"levelling",
+			"welcome",
+			"audit-logging",
+			"automod",
+			"sticky",
+			"treasure",
+			"tickets",
+			"lottery",
+			"anti-link",
+			"auto-roles",
+			"voice-stats",
+			"verification",
+			"counting",
+		]) {
+			const path = featureLook(key).path?.("900000000000000001");
+			if (path === undefined) continue;
+			expect(served).toContain(path.split("/").at(-1));
+		}
+	});
+});

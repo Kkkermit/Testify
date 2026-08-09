@@ -66,7 +66,7 @@ export function VerificationSection({
 
 					<Field label="Give them this role">
 						<select
-							className={cn(FIELD, SELECT)}
+							className={SELECT}
 							value={value.roleId ?? ""}
 							onChange={(event) => {
 								save.mutate({ roleId: event.target.value === "" ? null : event.target.value });

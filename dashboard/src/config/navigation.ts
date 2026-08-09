@@ -126,7 +126,25 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					],
 				},
 				{
-					label: "Messages",
+					label: "Economy",
+					icon: Coins,
+					items: [
+						{
+							to: `/guilds/${guild.id}/treasure`,
+							label: "Treasure",
+							icon: Coins,
+							hint: "Random money drops in chat",
+						},
+						{
+							to: `/guilds/${guild.id}/lottery`,
+							label: "Lottery",
+							icon: Ticket,
+							hint: "A pot members buy tickets into",
+						},
+					],
+				},
+				{
+					label: "Channels",
 					icon: MessagesSquare,
 					items: [
 						{
@@ -136,22 +154,10 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							hint: "Messages Testify keeps at the bottom of a channel",
 						},
 						{
-							to: `/guilds/${guild.id}/treasure`,
-							label: "Treasure",
-							icon: Coins,
-							hint: "Random money drops in chat",
-						},
-						{
 							to: `/guilds/${guild.id}/tickets`,
 							label: "Tickets",
 							icon: LifeBuoy,
 							hint: "A button members press to reach your staff",
-						},
-						{
-							to: `/guilds/${guild.id}/lottery`,
-							label: "Lottery",
-							icon: Ticket,
-							hint: "A pot members buy tickets into",
 						},
 					],
 				},

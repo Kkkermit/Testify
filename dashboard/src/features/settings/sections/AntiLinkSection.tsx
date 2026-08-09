@@ -1,9 +1,8 @@
 import { BYPASS_LABELS, BYPASS_PERMISSIONS, type AntiLinkPatch, type AntiLinkSetting } from "@testify/shared";
 import { LinkIcon } from "lucide-react";
-import { Field, FIELD, savingStateOf, SELECT, Toggle } from "@/components/form";
+import { Field, savingStateOf, SELECT, Toggle } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
-import { cn } from "@/lib/cn";
 
 export function AntiLinkSection({ guildId, value }: { guildId: string; value: AntiLinkSetting }): React.JSX.Element {
 	const save = useSaveSection<AntiLinkPatch>(guildId, "anti-link");
@@ -27,7 +26,7 @@ export function AntiLinkSection({ guildId, value }: { guildId: string; value: An
 
 			<Field label="Who may still post links" hint="Anybody with this permission is never filtered.">
 				<select
-					className={cn(FIELD, SELECT)}
+					className={SELECT}
 					value={value.bypassPermission}
 					disabled={!value.enabled}
 					onChange={(event) => {

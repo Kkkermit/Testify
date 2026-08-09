@@ -5,7 +5,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { FIELD } from "@/components/form";
 import { Reveal } from "@/components/motion";
-import { Card, EmptyState, PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import { Card, EmptyState, Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
 import { configurableAt, coverage, filterCommands, groupByCategory } from "@/features/commands/commands.utils";
 import { CommandCard } from "@/features/commands/components/CommandCard";
 import { useCommands } from "@/features/commands/useCommands";
@@ -46,19 +46,14 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	return (
 		<>
 			{global ? (
-				<p className="text-muted-foreground text-sm">{subtitleFor(global, state !== undefined)}</p>
-			) : (
-				<PageHeader title="Commands" subtitle={subtitleFor(global, state !== undefined)} />
-			)}
-
-			{state !== undefined && (
 				<p className="text-muted-foreground text-sm">
-					{state.disabled.length === 0
-						? global
-							? "Every command is available in every server."
-							: "Every command is available in this server."
-						: `${String(state.disabled.length)} switched off${global ? " everywhere" : " here"}.`}
+					{subtitleFor(global, state !== undefined)} {switchedOff(state, global)}
 				</p>
+			) : (
+				<PageHeader
+					title="Commands"
+					subtitle={`${subtitleFor(global, state !== undefined)} ${switchedOff(state, global)}`}
+				/>
 			)}
 
 			<section aria-label="Command surface" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -114,39 +109,50 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					/>
 				</Card>
 			) : (
-				groups.map(([name, group]) => (
-					<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">
-						<h2 id={`category-${name}`} className="text-lg font-semibold capitalize">
-							{name}
-							<span className="text-muted-foreground ml-2 text-sm font-normal tabular-nums">{group.length}</span>
-						</h2>
-						<ul className="flex flex-col gap-3">
-							{group.map((command, index) => (
-								<Reveal as="li" key={command.name} index={index}>
-									<CommandCard
-										command={command}
-										prefix={catalogue.data.prefix}
-										place={configurableAt(command, guildId)}
-										{...(state === undefined
-											? {}
-											: {
-													availability: availabilityOf(command.name, state),
-													onToggle: () => {
-														setDisabled(command.name);
-													},
-												})}
-									/>
-								</Reveal>
-							))}
-						</ul>
-					</section>
-				))
+				// The gap between groups has to beat the gap inside one, or the labels read as part of the card above.
+				<div className="flex flex-col gap-8">
+					{groups.map(([name, group]) => (
+						<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">
+							<Eyebrow as="h2" id={`category-${name}`} count={group.length} className="capitalize">
+								{name}
+							</Eyebrow>
+							<ul className="flex flex-col gap-3">
+								{group.map((command, index) => (
+									<Reveal as="li" key={command.name} index={index}>
+										<CommandCard
+											command={command}
+											prefix={catalogue.data.prefix}
+											place={configurableAt(command, guildId)}
+											{...(state === undefined
+												? {}
+												: {
+														availability: availabilityOf(command.name, state),
+														onToggle: () => {
+															setDisabled(command.name);
+														},
+													})}
+										/>
+									</Reveal>
+								))}
+							</ul>
+						</section>
+					))}
+				</div>
 			)}
 		</>
 	);
 }
 
 /** Says what the switches do wherever there are any, because a row of them with no explanation is a guess. */
+/** Folded into the subtitle rather than stacked under it as a second loose paragraph. */
+function switchedOff(state: { disabled: string[] } | undefined, global: boolean): string {
+	if (state === undefined) return "";
+	if (state.disabled.length === 0)
+		return global ? "Every one is available everywhere." : "Every one is available here.";
+
+	return `${String(state.disabled.length)} switched off${global ? " everywhere" : " here"}.`;
+}
+
 function subtitleFor(global: boolean, switchable: boolean): string {
 	if (global) return "Everything Testify can do. A command switched off here is off in every server, for everybody.";
 	if (switchable) return "Everything Testify can do. Switch one off and nobody in this server can run it, either way.";

@@ -113,7 +113,7 @@ export function LotteryPage(): React.JSX.Element {
 				<Field label="Draw" htmlFor="lottery-frequency" hint="Changing this restarts the countdown.">
 					<select
 						id="lottery-frequency"
-						className={cn(FIELD, SELECT, "max-w-48")}
+						className={cn(SELECT, "max-w-48")}
 						value={draft.frequency}
 						onChange={(event) => {
 							set("frequency", event.target.value as LotteryFrequency);

@@ -38,7 +38,8 @@ describe("the app shell", () => {
 
 		expect(screen.getByRole("button", { name: "Members" })).toHaveAttribute("aria-expanded", "false");
 		expect(screen.getByRole("button", { name: "Moderation" })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Messages" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Economy" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Channels" })).toBeInTheDocument();
 	});
 
 	it("opens a section when its toggle is pressed", async () => {
@@ -60,7 +61,7 @@ describe("the app shell", () => {
 		});
 		await screen.findByRole("link", { name: "Overview" });
 
-		expect(screen.getByRole("button", { name: "Messages" })).toHaveAttribute("aria-expanded", "true");
+		expect(screen.getByRole("button", { name: "Economy" })).toHaveAttribute("aria-expanded", "true");
 		expect(screen.getByRole("button", { name: "Members" })).toHaveAttribute("aria-expanded", "false");
 	});
 

@@ -33,29 +33,31 @@ export function SettingsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader
-				title="Server settings"
-				subtitle="The smaller switches: prefix, link filtering, joins, verification and counting."
-			/>
+			<PageHeader title="Server settings" subtitle="The switches that do not have a screen of their own." />
 
-			<Disclosure label="How Testify appears">
+			<Disclosure label="Testify in this server">
 				<Group>
 					<PrefixSection guildId={guildId} value={value.prefix} />
 					<NicknameSection guildId={guildId} />
 				</Group>
 			</Disclosure>
 
-			<Disclosure label="Who gets in">
+			<Disclosure label="Joining">
 				<Group>
 					<AutoRoleSection guildId={guildId} value={value.autoRoles} roles={roles.data ?? []} />
 					<VerificationSection {...shared} roles={roles.data ?? []} />
 				</Group>
 			</Disclosure>
 
-			<Disclosure label="What happens in channels">
+			<Disclosure label="Moderation">
 				<Group>
-					{/* Counting is twice the height of the other two, and a column can only take a prefix of this order. */}
 					<AntiLinkSection guildId={guildId} value={value.antiLink} />
+				</Group>
+			</Disclosure>
+
+			<Disclosure label="Channels">
+				<Group>
+					{/* Counting is twice the height of the other, and a column can only take a prefix of this order. */}
 					<VoiceStatsSection {...shared} value={value.voiceStats} />
 					<CountingSection {...shared} value={value.counting} />
 				</Group>

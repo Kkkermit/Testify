@@ -112,7 +112,7 @@ export function AutomodPage(): React.JSX.Element {
 					<Field label="What to block" htmlFor="automod-preset">
 						<select
 							id="automod-preset"
-							className={cn(FIELD, SELECT)}
+							className={SELECT}
 							value={preset}
 							onChange={(event) => {
 								setPreset(event.target.value as AutomodPreset);

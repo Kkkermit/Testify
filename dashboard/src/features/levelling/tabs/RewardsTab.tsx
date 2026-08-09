@@ -8,7 +8,6 @@ import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
 import { roleNameOf } from "@/features/levelling/levelling.utils";
 import { useUpdateRewards } from "@/features/levelling/useLevelling";
-import { cn } from "@/lib/cn";
 
 export function RewardsTab({
 	guildId,
@@ -73,7 +72,7 @@ export function RewardsTab({
 						onChange={(event) => {
 							setRoleId(event.target.value);
 						}}
-						className={cn(FIELD, SELECT)}
+						className={SELECT}
 					>
 						<option value="">Choose a role</option>
 						{assignable.map((role) => (

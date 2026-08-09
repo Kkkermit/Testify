@@ -104,7 +104,7 @@ export function TicketsPage(): React.JSX.Element {
 				<Field label="Category" htmlFor="ticket-category" hint="New ticket channels are created under this.">
 					<select
 						id="ticket-category"
-						className={cn(FIELD, SELECT)}
+						className={SELECT}
 						value={draft.categoryId ?? ""}
 						onChange={(event) => {
 							set("categoryId", event.target.value === "" ? null : event.target.value);
@@ -133,7 +133,7 @@ export function TicketsPage(): React.JSX.Element {
 				<Field label="Staff role" htmlFor="ticket-staff" hint="The role that can see and handle every ticket.">
 					<select
 						id="ticket-staff"
-						className={cn(FIELD, SELECT)}
+						className={SELECT}
 						value={draft.staffRoleId ?? ""}
 						onChange={(event) => {
 							set("staffRoleId", event.target.value === "" ? null : event.target.value);

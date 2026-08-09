@@ -1,8 +1,7 @@
 import { type ChannelSummary } from "@testify/shared";
 import { Field } from "@/components/form/Field";
-import { FIELD, SELECT } from "@/components/form/fieldStyles";
+import { SELECT } from "@/components/form/fieldStyles";
 import { Warning } from "@/components/form/Warning";
-import { cn } from "@/lib/cn";
 
 /** Only channels a message can be sent to, and the ones the bot cannot post in say so rather than disappearing. */
 export function postableChannels(channels: ChannelSummary[]): ChannelSummary[] {
@@ -32,7 +31,7 @@ export function ChannelPicker({
 	return (
 		<Field label={label} {...(hint === undefined ? {} : { hint })}>
 			<select
-				className={cn(FIELD, SELECT)}
+				className={SELECT}
 				value={value ?? ""}
 				onChange={(event) => {
 					onChange(event.target.value === "" ? null : event.target.value);
