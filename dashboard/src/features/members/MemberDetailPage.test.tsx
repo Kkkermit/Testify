@@ -44,6 +44,21 @@ describe("the member detail page", () => {
 		expect(within(standing!).getByText("Level rank")).toBeInTheDocument();
 	});
 
+	/**
+	 * Three filled buttons said three things were the recommended one. Add and Take are the same decision in
+	 * two directions, and Set level and Change XP are driven by different fields — neither pair has a winner.
+	 */
+	it("offers one recommended action, on the densest screen in the app", async () => {
+		const { container } = renderPage();
+		await screen.findByRole("heading", { name: "kate", level: 1 });
+
+		const primary = [...container.querySelectorAll('[data-variant="primary"]')].map((button) =>
+			button.textContent.trim(),
+		);
+
+		expect(primary).toEqual(["Add warning"]);
+	});
+
 	it("lists the warnings on record", async () => {
 		renderPage();
 

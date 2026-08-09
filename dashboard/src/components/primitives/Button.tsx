@@ -18,6 +18,8 @@ export function Button({
 	return (
 		<button
 			type="button"
+			// Readable from a test and a browser sweep, which is how "one primary per screen" is checked at all.
+			data-variant={variant}
 			className={cn(
 				"inline-flex min-h-11 items-center justify-center gap-2 rounded-card px-4 py-2 text-sm font-medium",
 				"transition-[background-color,color,transform] duration-150 ease-out",

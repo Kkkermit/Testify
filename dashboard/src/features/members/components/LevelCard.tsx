@@ -73,6 +73,7 @@ export function LevelCard({
 
 			<div className="flex flex-wrap gap-3">
 				<Button
+					variant="secondary"
 					disabled={!levelValid || xpValid || busy}
 					onClick={() => {
 						onChange({ level: levelValue });

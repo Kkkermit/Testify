@@ -280,6 +280,17 @@ one is a commit.
 > as well. With the panel named by its tab, all four levelling tabs could drop the heading that restated the
 > tab 40px above it. The welcome preview renders Discord's inline marks rather than showing `**Testify HQ**`
 > — a preview whose one job is "what will this look like" should not answer with the asterisks.
+>
+> **Done: 7.** `/guilds/:id/members` and the member detail page. On a phone the leaderboard showed rank and
+> name and no figures at all — four `px-6` cells ate 192px of a 390px screen, so Total and Banked sat off the
+> end of a scroller with no affordance. A leaderboard without the figure is a list of names. `table-fixed`,
+> tighter padding below `sm`, and dropping only the supplementary column fixed it.
+>
+> **The one-primary rule is done, and it was two screens rather than "several".** `Button` now carries
+> `data-variant`, which is what makes the rule checkable at all: a browser sweep counts
+> `[data-variant="primary"]` on all 22 routes. The member page had three and the owner control tab two; every
+> route is now at most one. Add/Take and Set level/Change XP were never primary-and-secondary pairs — the first
+> is one decision in two directions, the second is driven by two different fields.
 
 | Order | Screen                             | Why here                                                       |
 | ----- | ---------------------------------- | -------------------------------------------------------------- |

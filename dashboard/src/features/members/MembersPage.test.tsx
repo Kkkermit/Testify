@@ -41,6 +41,20 @@ describe("the members page", () => {
 		expect(table.querySelector("caption")?.textContent).toContain("Richest");
 	});
 
+	/**
+	 * On a phone the figures sat off the end of a scroller with no affordance, so a leaderboard read as a list
+	 * of names. jsdom loads no stylesheet, so this pins the classes; the widths themselves are checked in a
+	 * real browser.
+	 */
+	it("keeps the figure the board is named after at every width", async () => {
+		renderPage();
+
+		const table = await screen.findByRole("table");
+		expect(table).toHaveClass("table-fixed");
+		expect(within(table).getByRole("columnheader", { name: "Total" })).not.toHaveClass("hidden");
+		expect(within(table).getByRole("columnheader", { name: "Banked" })).toHaveClass("hidden", "sm:table-cell");
+	});
+
 	it("names each member as the row header", async () => {
 		renderPage();
 

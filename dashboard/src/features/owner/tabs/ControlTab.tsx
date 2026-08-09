@@ -102,6 +102,7 @@ export function ControlTab(): React.JSX.Element {
 							className={cn(FIELD, "max-w-64")}
 						/>
 						<Button
+							variant="secondary"
 							disabled={draft.trim() === currentName || draft.trim().length < BOT_IDENTITY_LIMITS.minUsername}
 							onClick={() => {
 								identity.mutate({ username: sanitiseInput(draft) });

@@ -63,6 +63,7 @@ export function MoneyCard({
 
 			<div className="flex flex-wrap gap-3">
 				<Button
+					variant="secondary"
 					disabled={!valid || addProblem !== null || busy}
 					onClick={() => {
 						onChange(purse, Math.abs(parsed));
