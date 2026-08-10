@@ -15,7 +15,7 @@ export function OverviewTab(): React.JSX.Element {
 	const health = useOwnerStats();
 	const guilds = useOwnerGuilds(page);
 
-	if (health.isError) return <ErrorState error={health.error} onRetry={() => void health.refetch()} />;
+	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
 
 	const selected = params.get("server");
 	const stats = health.data;
@@ -80,7 +80,9 @@ export function OverviewTab(): React.JSX.Element {
 					/>
 				)}
 
-				{guilds.data === undefined ? (
+				{guilds.isError ? (
+					<ErrorState as="h2" error={guilds.error} onRetry={() => void guilds.refetch()} />
+				) : guilds.data === undefined ? (
 					<Skeleton className="h-64 w-full" />
 				) : (
 					<OwnerGuildTable

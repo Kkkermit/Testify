@@ -35,7 +35,9 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	const groups = useMemo(() => groupByCategory(shown, catalogue.data?.categories ?? []), [shown, catalogue.data]);
 
 	if (catalogue.isPending) return <Skeleton className="h-96 w-full" />;
-	if (catalogue.isError) return <ErrorState error={catalogue.error} onRetry={() => void catalogue.refetch()} />;
+	// Mounted inside an owner console tab, this page has no header of its own — the console owns the `<h1>`.
+	if (catalogue.isError)
+		return <ErrorState as={global ? "h2" : "h1"} error={catalogue.error} onRetry={() => void catalogue.refetch()} />;
 
 	const { covered, total } = coverage(commands);
 	const state = toggles.data;

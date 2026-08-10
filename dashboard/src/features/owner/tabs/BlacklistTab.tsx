@@ -96,6 +96,16 @@ export function BlacklistTab(): React.JSX.Element {
 
 				{rows.isPending && <Skeleton className="h-24 w-full" />}
 
+				{/* "Nobody is blocked" and "the list would not load" are opposite answers on a security screen. */}
+				{rows.isError && (
+					<Warning>
+						The block list could not be loaded, so this is not a list of who is blocked.{" "}
+						<button type="button" className="underline" onClick={() => void rows.refetch()}>
+							Try again
+						</button>
+					</Warning>
+				)}
+
 				{rows.data?.length === 0 && (
 					<EmptyState
 						icon={<ShieldOff size={20} aria-hidden="true" />}

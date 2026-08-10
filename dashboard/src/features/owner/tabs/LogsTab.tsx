@@ -1,5 +1,6 @@
 import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
 import { Pause, Play, Search } from "lucide-react";
+import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Warning } from "@/components/form";
 import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
 import { LogLines } from "@/features/owner/components/LogLines";
@@ -83,9 +84,14 @@ export function LogsTab({
 				</Warning>
 			)}
 
-			<Card padding="compact" aria-busy={logs.isPending}>
-				{logs.isPending ? <Skeleton className="h-64 w-full" /> : <LogLines lines={logs.data?.lines ?? []} />}
-			</Card>
+			{/* An unreadable feed must not render as an empty one — this is the screen you open when things are wrong. */}
+			{logs.isError ? (
+				<ErrorState as="h2" error={logs.error} onRetry={() => void logs.refetch()} />
+			) : (
+				<Card padding="compact" aria-busy={logs.isPending}>
+					{logs.isPending ? <Skeleton className="h-64 w-full" /> : <LogLines lines={logs.data.lines} />}
+				</Card>
+			)}
 
 			<p className="text-muted-foreground text-xs">
 				Anything that looked like a token, a password or a connection string was removed before the line was stored.

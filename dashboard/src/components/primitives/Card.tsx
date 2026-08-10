@@ -22,8 +22,10 @@ export function cardClass(padding: CardPadding = "default", ...extra: string[]):
  * A hairline of accent along the top edge. Rule 9 wants one focal point per screen, and a card claims it here
  * rather than by shouting — everything around it stays exactly as quiet as it was.
  */
+// Inset past the corner arc: a 2px-tall bar clamps its own radius to 2px, so a full-width one overhangs the
+// card's 10px corners and reads as a line floating above the card rather than its top edge.
 const FOCAL =
-	"relative before:absolute before:inset-x-[-1px] before:top-[-1px] before:h-0.5 before:rounded-t-card " +
+	"relative before:absolute before:inset-x-2 before:top-0 before:h-0.5 " +
 	"before:bg-linear-to-r before:from-accent before:to-transparent before:content-['']";
 
 export function Card({

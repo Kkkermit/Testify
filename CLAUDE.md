@@ -1443,6 +1443,17 @@ Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control
 learns the console is there. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
 the whole console, and the logs tab is precisely the screen you want when something is wrong.
 
+**A tab whose read fails says so, and offers a retry.** Isolating the tabs is only half of it — every one of
+them then found its own way to hide the failure: runtime and control returned a skeleton whenever `data` was
+undefined, which is indistinguishable from still loading and never resolves; usage reported a 500 as **"No usage
+yet"**, telling an owner their bot is unused; the runner showed an empty command picker; and the blacklist
+showed a bare "Blocked accounts" heading, which on a security screen reads as nobody being blocked. The rule
+that falls out: **`isPending` and `data === undefined` are not the same condition**, and a fallback like
+`data?.lines ?? []` is where an unread answer becomes an empty one. `ErrorState` takes `as="h2"` for this, because
+the console owns the page's `<h1>` and a tab that brought its own would make two — which is also why
+`CommandsPage` picks its heading level from `scope`. `OwnerReadFailures.test.tsx` fails one endpoint per tab and
+was proved to go red for each of the nine branches separately.
+
 **Ownership is `DISCORD_OWNER_IDS` and nothing else.** `requireOwner` calls `client.isOwner(session.userId)`,
 which reads the env array on every request — so removing an ID revokes the console on that person's next click
 rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the
@@ -1533,6 +1544,12 @@ default, and the tab says so in as many words.
 **No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
 `<table>` in a `sr-only` `<figcaption>`. The bundle budget in `dashboard-POC/13-ROADMAP-AND-RISKS.md` is the
 reason, and a bar is a div with a width.
+
+`UsageBars` puts its bar **behind** the row rather than beside it, so a long label is never squeezed by the
+value — but a proportional fill then ends wherever the number says, which on a short bar is the middle of a
+word: "Prefix commands" read as "Prefix" being highlighted and the rest clipped. The bar's last 24px are masked
+to transparent (`mask-r-from-[calc(100%-1.5rem)]`), so it fades out instead of cutting. The length still encodes
+the value; the ranking and the printed number are what carry it precisely.
 
 ### The dashboard wears the bot's face
 

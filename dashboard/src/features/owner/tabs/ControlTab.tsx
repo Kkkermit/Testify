@@ -1,6 +1,7 @@
 import { BOT_IDENTITY_LIMITS } from "@testify/shared";
 import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
+import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, Skeleton } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -22,7 +23,10 @@ export function ControlTab(): React.JSX.Element {
 	const [name, setName] = useState<string | null>(null);
 	const [confirm, setConfirm] = useState("");
 
-	if (control.isPending || control.data === undefined) return <Skeleton className="h-64 w-full" />;
+	if (control.isPending) return <Skeleton className="h-64 w-full" />;
+	// Without this the tab sits on a skeleton for ever, which reads as still loading rather than as failed.
+	if (control.data === undefined)
+		return <ErrorState as="h2" error={control.error} onRetry={() => void control.refetch()} />;
 
 	const state = control.data;
 	const paused = state.gateway === "paused";

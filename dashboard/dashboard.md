@@ -991,6 +991,18 @@ here have been a missing one of these rather than a wrong layout.
 **A refusal is placed, not announced.** It goes next to the control that caused it, not at the top of the page —
 somebody who scrolled to a card at the bottom will never see a banner above the fold.
 
+**Error is the one that goes missing, and it hides as one of the other two.** Every owner console tab had it
+wrong in a different way, and none of it looked broken: `isPending || data === undefined` returns the skeleton
+for ever once the read fails, `data?.rows ?? []` turns an unread answer into an empty list, and the usage tab
+reported a 500 as "No usage yet". Two things to check on any screen with a read:
+
+- **`isPending` is not `data === undefined`.** Branch on `isError` before you branch on the data.
+- **A `??` fallback on a read is where empty and failed become the same screen.** With the error branch above it,
+  the fallback is unreachable and `no-unnecessary-condition` will say so — that lint error is the tell.
+
+`ErrorState` takes `as="h2"` for a panel inside a screen that already has its own `<h1>`, such as an owner
+console tab or `CommandsPage` mounted in one.
+
 ### 19.2 First run, and the half-install
 
 **Who:** whoever just turned `DASHBOARD_ENABLED` on.

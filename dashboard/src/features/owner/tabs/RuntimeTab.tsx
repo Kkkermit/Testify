@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react";
+import { ErrorState } from "@/app/ErrorState";
 import { Card, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -11,7 +12,10 @@ import { dateAndTime } from "@/lib/datetime";
 export function RuntimeTab(): React.JSX.Element {
 	const runtime = useRuntime();
 
-	if (runtime.isPending || runtime.data === undefined) return <Skeleton className="h-64 w-full" />;
+	if (runtime.isPending) return <Skeleton className="h-64 w-full" />;
+	// Without this the tab sits on a skeleton for ever, which reads as still loading rather than as failed.
+	if (runtime.data === undefined)
+		return <ErrorState as="h2" error={runtime.error} onRetry={() => void runtime.refetch()} />;
 
 	const info = runtime.data;
 

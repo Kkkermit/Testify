@@ -1,6 +1,6 @@
 import { ANALYTICS_WINDOWS, errorRate, type AnalyticsWindow } from "@testify/shared";
-import { BarChart3 } from "lucide-react";
-import { Card, EmptyState, Figure, Avatar, SegmentedControl, Skeleton } from "@/components/primitives";
+import { ErrorState } from "@/app/ErrorState";
+import { Card, Figure, Avatar, SegmentedControl, Skeleton } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { UsageBars } from "@/features/owner/components/UsageBars";
 import { UsageChart } from "@/features/owner/components/UsageChart";
@@ -20,15 +20,8 @@ export function UsageTab({
 	const usage = useUsage(days);
 
 	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
-	if (usage.isError) {
-		return (
-			<EmptyState
-				icon={<BarChart3 size={20} />}
-				title="No usage yet"
-				body="Nothing has been recorded since analytics were added."
-			/>
-		);
-	}
+	// A failed read is not an empty one: reporting it as "no usage yet" tells an owner their bot is unused.
+	if (usage.isError) return <ErrorState as="h2" error={usage.error} onRetry={() => void usage.refetch()} />;
 
 	const report = usage.data;
 

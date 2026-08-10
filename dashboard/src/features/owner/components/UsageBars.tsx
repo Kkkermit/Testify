@@ -36,9 +36,10 @@ export function UsageBars({
 		<ol className="flex flex-col gap-1">
 			{rows.map((row) => (
 				<li key={row.id} className="relative isolate flex items-center gap-3 rounded-lg px-2 py-2">
+					{/* Faded at the end: a hard edge lands mid-word on a short bar and reads as the label being clipped. */}
 					<span
 						aria-hidden="true"
-						className={`absolute inset-y-0 left-0 -z-10 rounded-lg transition-[width] duration-500 ${tint}`}
+						className={`absolute inset-y-0 left-0 -z-10 rounded-lg mask-r-from-[calc(100%-1.5rem)] transition-[width] duration-500 ${tint}`}
 						style={{ width: `${String(barWidth(row.count, max))}%` }}
 					/>
 					<span className="min-w-0 flex-1">

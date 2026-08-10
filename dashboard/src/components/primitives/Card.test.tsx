@@ -30,6 +30,22 @@ describe("Card", () => {
 		expect(screen.getByTestId("card")).toHaveClass("p-6");
 	});
 
+	/**
+	 * The accent is 2px tall, which clamps its own corner radius to 2px — reaching the card's 10px corners it
+	 * overhangs them and reads as a line floating above the card rather than as its top edge.
+	 */
+	it("keeps the focal accent inside the card's corner arc", () => {
+		render(
+			<Card data-testid="card" focal>
+				Body
+			</Card>,
+		);
+
+		const accent = screen.getByTestId("card").className;
+		expect(accent).toContain("before:inset-x-2");
+		expect(accent).not.toMatch(/before:inset-x-\[?-/);
+	});
+
 	it("lets a caller add classes without losing the surface", () => {
 		render(
 			<Card data-testid="card" padding="compact" className="flex">

@@ -3,12 +3,21 @@ import { Button, Card } from "@/components/primitives";
 import { ApiError } from "@/lib/api";
 
 /** A 404 here means Testify is not in the server, which is a different screen from both a refusal and a bug. */
-export function ErrorState({ error, onRetry }: { error: unknown; onRetry?: () => void }): React.JSX.Element {
+export function ErrorState({
+	error,
+	onRetry,
+	as: Heading = "h1",
+}: {
+	error: unknown;
+	onRetry?: () => void;
+	/** `h2` when it replaces one panel of a screen that still has its own `<h1>`, such as an owner console tab. */
+	as?: "h1" | "h2";
+}): React.JSX.Element {
 	const { title, body, retryable } = describe(error);
 
 	return (
 		<Card className="flex flex-col items-start gap-3">
-			<h1 className="text-lg font-semibold">{title}</h1>
+			<Heading className="text-lg font-semibold">{title}</Heading>
 			<p className="text-muted-foreground text-sm">{body}</p>
 			<div className="flex gap-2">
 				{retryable && onRetry !== undefined && (

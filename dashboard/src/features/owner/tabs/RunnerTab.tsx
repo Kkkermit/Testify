@@ -1,6 +1,7 @@
 import { type CommandOptionSummary } from "@testify/shared";
 import { Play, Terminal } from "lucide-react";
 import { useState } from "react";
+import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Field, SELECT, Warning } from "@/components/form";
 import { Button, Card, EmptyState, Skeleton } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -27,8 +28,10 @@ export function RunnerTab(): React.JSX.Element {
 	const [values, setValues] = useState<Record<string, string>>({});
 
 	if (catalogue.isPending) return <Skeleton className="h-64 w-full" />;
+	// A picker with nothing in it reads as "no command may be run here" rather than as a failed read.
+	if (catalogue.isError) return <ErrorState as="h2" error={catalogue.error} onRetry={() => void catalogue.refetch()} />;
 
-	const commands = catalogue.data?.commands ?? [];
+	const commands = catalogue.data.commands;
 	const command = commands.find((candidate) => candidate.name === name);
 	const options = optionsShown(command, subcommand);
 
