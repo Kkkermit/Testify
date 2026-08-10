@@ -24,7 +24,6 @@ export function pageCount(total: number, pageSize: number): number {
 	return Math.max(1, Math.ceil(total / Math.max(1, pageSize)));
 }
 
-/** Builds one page and its navigation row. */
 export function buildPage<T>(options: PageOptions<T>, page = 0): RenderedPage {
 	const total = pageCount(options.items.length, options.pageSize);
 	const current = Math.min(Math.max(0, page), total - 1);

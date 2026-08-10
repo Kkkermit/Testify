@@ -8,7 +8,6 @@ import { boardEntries, rankOnBoard } from "@lib/memberActions.util";
  * drawn by the same code.
  */
 
-export const LEADERBOARD_ID = "leaderboard";
 export const BOARD_KINDS = ["economy", "levels"] as const;
 export type BoardKind = (typeof BOARD_KINDS)[number];
 
@@ -104,12 +103,6 @@ export function footerFor(kind: BoardKind, page: number, pages: number, rank: nu
 	return `${where}${more}`;
 }
 
-/** The other board, for the button that swaps between them. */
-export function otherKind(kind: BoardKind): BoardKind {
-	return kind === "economy" ? "levels" : "economy";
-}
-
-/** Which page someone at this rank is on. */
 export function pageOfRank(rank: number): number {
 	return Math.max(0, Math.ceil(rank / PAGE_SIZE) - 1);
 }

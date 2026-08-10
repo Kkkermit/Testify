@@ -4,7 +4,7 @@ labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Please do not report security issues here — see SECURITY.md.
+      value: Please do not report security issues here — see docs/security.md.
 
   - type: textarea
     id: what-happened

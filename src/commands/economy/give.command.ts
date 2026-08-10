@@ -8,10 +8,6 @@ import { successEmbed } from "@lib/embeds.util";
 import { formatNumber } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
 
-/**
- * This wrote through a second, ten-field Mongoose model that shared the economy collection, which could strip
- * inventory, pets, houses and streaks off any document it touched.
- */
 export default defineCommand({
 	name: "give",
 	description: "Grants currency or XP to a member.",

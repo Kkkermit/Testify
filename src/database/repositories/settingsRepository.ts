@@ -118,23 +118,9 @@ export async function getAutoRoles(guildId: string): Promise<AutoRoleSettings | 
 	return AutoRole.findOne({ guildId }).lean<AutoRoleSettings>().exec();
 }
 
-export async function addAutoRole(guildId: string, roleId: string): Promise<AutoRoleSettings> {
-	return AutoRole.findOneAndUpdate(
-		{ guildId },
-		{ $addToSet: { roleIds: roleId } },
-		UPSERT,
-	).exec() as Promise<AutoRoleSettings>;
-}
-
 /** Replaces the whole list, which is what a pre-ticked role menu hands back. */
 export async function setAutoRoles(guildId: string, roleIds: string[]): Promise<AutoRoleSettings> {
 	return AutoRole.findOneAndUpdate({ guildId }, { $set: { roleIds } }, UPSERT).exec() as Promise<AutoRoleSettings>;
-}
-
-export async function removeAutoRole(guildId: string, roleId: string): Promise<AutoRoleSettings | null> {
-	return AutoRole.findOneAndUpdate({ guildId }, { $pull: { roleIds: roleId } }, { new: true, lean: true })
-		.lean<AutoRoleSettings>()
-		.exec();
 }
 
 export async function getCounting(guildId: string): Promise<CountingSettings | null> {
@@ -223,19 +209,6 @@ export async function setStickyMessageId(guildId: string, channelId: string, mes
 
 export async function getWelcome(guildId: string): Promise<WelcomeSettings | null> {
 	return Welcome.findOne({ guildId }).lean<WelcomeSettings>().exec();
-}
-
-export async function setWelcome(
-	guildId: string,
-	channelId: string,
-	message: string,
-	isEmbed: boolean,
-): Promise<WelcomeSettings> {
-	return Welcome.findOneAndUpdate(
-		{ guildId },
-		{ $set: { channelId, message, isEmbed } },
-		UPSERT,
-	).exec() as Promise<WelcomeSettings>;
 }
 
 /** Partial update, so the panel can change one setting without resending the rest. */

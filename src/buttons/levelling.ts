@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
+import { pickedChannelId } from "@lib/channelPick.util";
 import { modalForm } from "@lib/components.util";
 import {
 	LEVEL_LIMITS,
@@ -94,15 +95,8 @@ export default defineButton({
 			}
 
 			case "channel": {
-				if (!interaction.isChannelSelectMenu()) return;
-
-				const [channelId] = interaction.values;
-				if (channelId === undefined) return;
-
-				const channel = await interaction.guild.channels.fetch(channelId).catch(() => null);
-				if (channel?.isSendable() !== true) {
-					throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
-				}
+				const channelId = await pickedChannelId(interaction, interaction.guild);
+				if (channelId === null) return;
 
 				await save({ ...config, levelUpChannelId: channelId });
 				return;

@@ -28,10 +28,6 @@ export function botVersion(): string {
 	return cachedVersion;
 }
 
-export function forgetVersion(): void {
-	cachedVersion = null;
-}
-
 const MB = 1024 * 1024;
 
 export function runtimeInfo(client: TestifyClient, now = Date.now()): RuntimeInfo {

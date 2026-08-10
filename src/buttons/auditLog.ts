@@ -1,4 +1,3 @@
-import { type Guild } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
@@ -15,20 +14,12 @@ import {
 	isAuditEvent,
 	resolveEnabled,
 } from "@lib/auditPanel.util";
+import { requireSendable } from "@lib/channelPick.util";
 
 /** Every control on the audit logging panel. */
 async function currentState(guildId: string): Promise<AuditPanelState> {
 	const config = await getAuditLogConfig(guildId);
 	return { channelId: config?.channelId ?? null, enabled: config?.enabledLogs ?? [] };
-}
-
-/** Checked when picked and again on Save, since a channel can be deleted between the two. */
-async function requireSendable(guild: Guild, channelId: string): Promise<void> {
-	const channel = await guild.channels.fetch(channelId).catch(() => null);
-
-	if (!channel?.isTextBased() || !channel.isSendable()) {
-		throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
-	}
 }
 
 export default defineButton({

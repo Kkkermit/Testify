@@ -33,7 +33,7 @@ The new and improved TypeScript rewrite of Testify — an all-in-one Discord bot
 </strong></p>
 
 <p align="center">
-78 slash commands, 128 subcommands and 206 things you can actually run: moderation, economy, levelling,
+76 commands, 108 subcommands and 184 things you can actually run: moderation, economy, levelling,
 tickets, giveaways and games. Every command works as <code>/ban</code> <strong>and</strong> as
 <code>t?ban</code> — because underneath it is one command, not two copies.
 </p>
@@ -84,7 +84,7 @@ The whole thing was rebuilt around the problems the old codebase actually had.
 | **Start-up**       | Command registration raced the login                                                   | Each step awaited in order; a malformed file names itself and stops the boot |
 | **Errors**         | Stack traces could reach chat                                                          | One error boundary — users get a plain apology, you get the full context     |
 | **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
-| **Tests**          | A handful                                                                              | **829 tests**, with an enforced 80% coverage floor                           |
+| **Tests**          | A handful                                                                              | **2,985 tests**, with an enforced 80% coverage floor                         |
 | **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
 
 Everything the old bot did is still here, apart from the integrations that needed paid or personal API keys

@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
 /**
@@ -88,5 +87,3 @@ export interface OwnerGuildDetail {
 	/** Commands run there in the last 30 days. */
 	usage: number;
 }
-
-export const guildIdBody = z.object({ guildId: snowflake });

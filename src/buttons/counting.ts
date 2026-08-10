@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/settingsRepository";
+import { pickedChannelId } from "@lib/channelPick.util";
 import { modalForm } from "@lib/components.util";
 import { COUNTING_LIMITS, COUNTING_PANEL_ID, countingPanel, type CountingPanelState } from "@lib/countingPanel.util";
 import { formatNumber } from "@lib/format.util";
@@ -46,15 +47,8 @@ export default defineButton({
 
 		switch (context.action) {
 			case "channel": {
-				if (!interaction.isChannelSelectMenu()) return;
-
-				const [channelId] = interaction.values;
-				if (channelId === undefined) return;
-
-				const channel = await guild.channels.fetch(channelId).catch(() => null);
-				if (channel?.isSendable() !== true) {
-					throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
-				}
+				const channelId = await pickedChannelId(interaction, guild);
+				if (channelId === null) return;
 
 				await setCounting(guild.id, channelId, state.goal);
 				await show({ ...state, channelId }, state.channelId === null ? "Counting starts at **1**." : undefined);

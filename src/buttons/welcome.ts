@@ -2,6 +2,7 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
+import { pickedChannelId } from "@lib/channelPick.util";
 import { modalForm } from "@lib/components.util";
 import {
 	DEFAULT_WELCOME_MESSAGE,
@@ -46,15 +47,8 @@ export default defineButton({
 
 		switch (context.action) {
 			case "channel": {
-				if (!interaction.isChannelSelectMenu()) return;
-
-				const [channelId] = interaction.values;
-				if (channelId === undefined) return;
-
-				const channel = await guild.channels.fetch(channelId).catch(() => null);
-				if (channel?.isSendable() !== true) {
-					throw new UserFacingError("I cannot post in that channel. Pick one I can send messages to.");
-				}
+				const channelId = await pickedChannelId(interaction, guild);
+				if (channelId === null) return;
 
 				const saved = await saveWelcome(guild.id, {
 					channelId,

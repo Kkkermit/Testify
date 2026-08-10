@@ -86,7 +86,6 @@ export interface CommandAttachment {
 	height: number | null;
 }
 
-/** A command option. */
 export interface CommandOption {
 	name: string;
 	description: string;
@@ -108,7 +107,6 @@ export interface Subcommand {
 	run(interaction: CommandInput, client: TestifyClient): Promise<void>;
 }
 
-/** One command. */
 export interface Command {
 	name: string;
 	description: string;

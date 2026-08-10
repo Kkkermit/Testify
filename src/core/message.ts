@@ -12,7 +12,6 @@ export interface MessageHandler {
 	run(message: Message, client: TestifyClient): Promise<boolean | void>;
 }
 
-/** Marks a module as a message handler. */
 export const MESSAGE_HANDLER = Symbol.for("testify.messageHandler");
 
 export function defineMessageHandler(handler: MessageHandler): MessageHandler {

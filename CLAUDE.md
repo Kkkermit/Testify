@@ -62,14 +62,14 @@ numbers, which drift):
 | -------------------- | -------------------------------- |
 | Commands             | 76, across 12 categories         |
 | Command files        | 98 (incl. folded-in subcommands) |
-| Subcommands          | 122                              |
-| Prefix aliases       | 65                               |
-| Button handlers      | 17                               |
+| Subcommands          | 108                              |
+| Prefix aliases       | 75                               |
+| Button handlers      | 23                               |
 | Events               | 24, in 5 groups                  |
-| `src/lib` helpers    | 39                               |
-| Schemas/repositories | 9 / 9                            |
+| `src/lib` helpers    | 67                               |
+| Schemas/repositories | 13 / 13                          |
 | Scheduled jobs       | 4                                |
-| Tests                | ~1081 across 55 suites           |
+| Tests                | 2,985 across 192 suites          |
 
 **There is no music system.** It was removed deliberately — see
 [§21](#21-decisions-already-made--do-not-relitigate). Do not add one back without reading that section.
@@ -191,7 +191,7 @@ Grouped by **technical role first, then domain**. One feature is spread across l
 ```
 src/
 ├── index.ts              Entry point. One async main() that awaits each step in order.
-├── core/                 The framework. 13 files, no domain logic.
+├── core/                 The framework. 15 files, no domain logic.
 │   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
 │   ├── loader.ts         Finds and registers everything from disk. Globs live here.
 │   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
@@ -211,18 +211,18 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  98 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               24 handlers in command, create, logging, ready and message
-├── buttons/              15 component handlers, keyed by custom-ID prefix
-├── lib/                  33 domain helpers, formatters and panel renderers
+├── buttons/              23 component handlers, keyed by custom-ID prefix
+├── lib/                  67 domain helpers, formatters and panel renderers
 ├── database/
 │   ├── connection.ts
-│   ├── models/           9 Mongoose schemas
-│   └── repositories/     9 query layers. Commands never touch a model directly.
+│   ├── models/           13 Mongoose schemas
+│   └── repositories/     13 query layers. Commands never touch a model directly.
 ├── jobs/                 4 scheduled jobs (lottery draw, passive income, bot stats, softban expiry)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 50 suites.
+tests/                    Mirrors src/. 126 suites.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -247,6 +247,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Change a permission or cooldown gate       | `src/core/checks.ts`                                               |
 | Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist         |
 | Build a button/select/modal                | `src/lib/components.util.ts`                                       |
+| Read a channel a select menu picked        | `src/lib/channelPick.util.ts` — one rule for "can the bot post"    |
 | Build a Components V2 message              | `src/lib/containers.util.ts`                                       |
 | Build an embed                             | `src/lib/embeds.util.ts` (nothing else may `new EmbedBuilder()`)   |
 | Draw an image card                         | `src/lib/canvas.util.ts`, then a `*Card.util.ts` beside it         |
@@ -830,10 +831,10 @@ What still earns one:
 - A one-line file header saying what the module is for.
 - A `/** */` above a test naming the bug it pins.
 
-Match the surrounding density. Measured rather than guessed: `dashboard/src` sits at **2.9%** comment lines and
-`src/` at **5.4%**, and the gap is deliberate — `src/api/` runs to a third, because a security constraint is
-exactly the thing a reader cannot infer. Outside that, a new file well above the local figure is a signal to
-cut rather than a sign of thoroughness. `npm run check` will not catch a comment that only restates its
+Match the surrounding density. Measured rather than guessed: `dashboard/src` sits at **3.8%** comment lines and
+`src/` at **5.7%**, and the gap is deliberate — `src/api/` and `shared/` both run far higher, because a security
+constraint and a two-surface contract are exactly the things a reader cannot infer. Outside those, a new file
+well above the local figure is a signal to cut rather than a sign of thoroughness. `npm run check` will not catch a comment that only restates its
 identifier; read it back and ask what the signature already said.
 
 ---

@@ -30,12 +30,3 @@ export function Logo({ size = 24, className }: { size?: number; className?: stri
 		</svg>
 	);
 }
-
-/** The mark on its tile, for anywhere it stands for the product rather than for a link. */
-export function LogoTile({ size = 26, className }: { size?: number; className?: string }): React.JSX.Element {
-	return (
-		<span className={cn("bg-primary/15 text-accent rounded-card inline-flex p-2", className)}>
-			<Logo size={size} />
-		</span>
-	);
-}

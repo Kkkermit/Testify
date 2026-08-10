@@ -1,4 +1,3 @@
-/** Command categories. */
 export const CATEGORIES = {
 	community: { label: "Community", emoji: "👥", colour: "Green" },
 	economy: { label: "Economy", emoji: "💰", colour: "DarkOrange" },

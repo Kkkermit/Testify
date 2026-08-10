@@ -6,7 +6,7 @@ import { reply } from "@lib/reply.util";
 
 const factSchema = z.object({ fact: z.string(), image: z.url().optional() });
 
-const SOURCES: Record<string, { url: string; emoji: string }> = {
+const SOURCES = {
 	dog: { url: "https://some-random-api.com/animal/dog", emoji: "\u{1f436}" },
 	cat: { url: "https://some-random-api.com/animal/cat", emoji: "\u{1f431}" },
 	panda: { url: "https://some-random-api.com/animal/panda", emoji: "\u{1f43c}" },
@@ -14,6 +14,12 @@ const SOURCES: Record<string, { url: string; emoji: string }> = {
 	koala: { url: "https://some-random-api.com/animal/koala", emoji: "\u{1f428}" },
 	bird: { url: "https://some-random-api.com/animal/bird", emoji: "\u{1f426}" },
 };
+
+type Animal = keyof typeof SOURCES;
+
+function isAnimal(value: string): value is Animal {
+	return value in SOURCES;
+}
 
 export default defineCommand({
 	name: "animal-fact",
@@ -34,7 +40,7 @@ export default defineCommand({
 		await interaction.deferReply();
 
 		const animal = interaction.options.getString("animal", true).toLowerCase();
-		const source = SOURCES[animal] ?? SOURCES.dog!;
+		const source = isAnimal(animal) ? SOURCES[animal] : SOURCES.dog;
 		const payload = await fetchJson("some-random-api", source.url, factSchema);
 
 		await reply(interaction, {
