@@ -7,7 +7,7 @@ import { type Command, subcommandsOf } from "@core/command";
 import { loadEverything } from "@core/loader";
 import { createLogger } from "@core/logger";
 
-/** Writes COMMANDS.md from the commands on disk, so the list cannot go stale. */
+/** Writes docs/commands.md from the commands on disk, so the list cannot go stale. */
 
 const client = {
 	commands: new Collection<string, Command>(),
@@ -56,5 +56,5 @@ for (const category of ALL_CATEGORIES) {
 	lines.push("");
 }
 
-writeFileSync(resolve(process.cwd(), "COMMANDS.md"), `${lines.join("\n")}\n`, "utf8");
-console.log(`Wrote COMMANDS.md with ${commands.length} commands.`);
+writeFileSync(resolve(process.cwd(), "docs", "commands.md"), `${lines.join("\n")}\n`, "utf8");
+console.log(`Wrote docs/commands.md with ${commands.length} commands.`);

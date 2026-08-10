@@ -61,7 +61,7 @@ Written against the bot as it stands on `claude/testify-bot-typescript-rewrite-f
   exactly why an API can reuse them.
 - `src/config/env.ts` is the only file that reads `process.env`, zod-validated once at startup.
 - No inbound HTTP server exists yet. `src/lib/http.util.ts` is outbound only.
-- Conventions in [`../CLAUDE.md`](../CLAUDE.md) apply to any dashboard code that lands in `src/`.
+- Conventions in [`../../../CLAUDE.md`](../../../CLAUDE.md) apply to any dashboard code that lands in `src/`.
 
 The single most important thing this plan leans on: **the bot's repositories and `*Actions.util.ts` modules are
 already surface-agnostic.** They take a `guildId`, a `userId` and plain data. They do not know what an

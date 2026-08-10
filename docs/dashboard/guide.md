@@ -13,7 +13,7 @@ checklist the rewrite is working through. Those three are the ones to edit.
 > the measured baseline, and what "better" has to prove before it counts.
 
 > [!IMPORTANT]
-> **§18 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../.claude/skills/README.md)
+> **§18 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../../.claude/skills/README.md)
 > now lead the dashboard's visual direction — where their guidance and the values recorded in §18 disagree, the
 > skill wins and §18 is updated to describe what was built. Three things are architecture rather than aesthetics
 > and do not move: tokens stay the single source (no hex in a `.tsx`), the accessibility floor in §14 only ever
@@ -22,9 +22,9 @@ checklist the rewrite is working through. Those three are the ones to edit.
 > [!IMPORTANT]
 > Two companion documents:
 >
-> - [`../CLAUDE.md`](../CLAUDE.md) §24 — the repo-wide rules. **Where it and this file disagree, it wins.**
+> - [`../../CLAUDE.md`](../../CLAUDE.md) §24 — the repo-wide rules. **Where it and this file disagree, it wins.**
 >   This file is the practical detail; that one is the contract.
-> - [`../dashboard-POC/`](../dashboard-POC/00-INDEX.md) — the design plan, threat model and phase order.
+> - [`design-plan/`](design-plan/00-INDEX.md) — the design plan, threat model and phase order.
 >   `13-ROADMAP-AND-RISKS.md` says what is built and what is next.
 
 ---
@@ -561,7 +561,7 @@ A drawer below `md`, an icon-only rail from `md`, the full sidebar from `lg`.
 
 `jest-axe` runs on every page-level test through `src/test/axe.ts`, with `color-contrast` disabled — jsdom
 computes no styles, so that rule can only report false negatives there. It is a floor, roughly 40% of issues;
-`dashboard-POC/10-ACCESSIBILITY.md` lists the manual passes.
+`design-plan/10-ACCESSIBILITY.md` lists the manual passes.
 
 Four things it does not catch, all built deliberately:
 
@@ -957,7 +957,7 @@ back clean.
 4. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
    automated axe pass has `color-contrast` **disabled** — jsdom computes no styles, so it can only report false
    negatives. This step is manual and there is no substitute.
-5. **Run a real browser sweep** at 1440 / 820 / 390. `dashboard-POC/10-ACCESSIBILITY.md` lists the manual passes;
+5. **Run a real browser sweep** at 1440 / 820 / 390. `design-plan/10-ACCESSIBILITY.md` lists the manual passes;
    the practical script is in §15.
 6. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
 
@@ -1189,7 +1189,7 @@ can be tested without rendering.
 
 Taras Bakusevych's [58 rules for beautiful UI design](https://uxdesign.cc/58-rules-for-stunning-and-effective-user-interface-design-ea4b93f931f6),
 carried here as a working checklist for the rewrite. Almost none of it is covered by the skills in
-[`.claude/skills`](../.claude/skills/README.md) — only typography's kerning rule overlaps — so this is
+[`.claude/skills`](../../.claude/skills/README.md) — only typography's kerning rule overlaps — so this is
 additional, not a restatement.
 
 Each rule gets a verdict, because a checklist where everything is "todo" is not a checklist:
@@ -1329,12 +1329,12 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ## What is left
 
-`dashboard-POC/13-ROADMAP-AND-RISKS.md` is authoritative. As of the last commit, **phases 3 and 4 are
+`design-plan/13-ROADMAP-AND-RISKS.md` is authoritative. As of the last commit, **phases 3 and 4 are
 complete** — every guild-scoped setting is editable on the web, and a manager can handle a problem member
 without opening Discord. Phase 5 is all but done: leaving a server and the bot-wide blacklist are built.
 
 **Phase 5 is complete** too: the owner console now carries the command runner, the blacklist and leaving a
-server. `dashboard-POC/06-COMMAND-CONTROL.md`'s conclusion still governs everything after it — the dashboard is
+server. `design-plan/06-COMMAND-CONTROL.md`'s conclusion still governs everything after it — the dashboard is
 a third surface onto the **domain**, not onto the presentation, and the runner is the one place an adapter is
 right because owner commands are one-shot and embed-based. `/eval` is never exposed.
 

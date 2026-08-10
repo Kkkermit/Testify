@@ -59,6 +59,7 @@ tickets, giveaways and games. Every command works as <code>/ban</code> <strong>a
 - [Scripts](#scripts)
 - [FAQ](#faq)
 - [Troubleshooting](#troubleshooting)
+- [Documentation](#documentation)
 - [Contributing](#contributing)
 - [Contributors](#contributors)
 - [Support](#support)
@@ -273,7 +274,7 @@ message cannot be ephemeral.
 
 ## Command categories
 
-Run `/help` in Discord for the browsable version, or see [`COMMANDS.md`](COMMANDS.md) for the full generated
+Run `/help` in Discord for the browsable version, or see [`docs/commands.md`](docs/commands.md) for the full generated
 list.
 
 | Category      | Top-level | What is in it                                                               |
@@ -329,7 +330,7 @@ nothing to import by hand.
 3. **Build embeds with `embed()` from `@lib/embeds.util`.** The linter blocks bare `new EmbedBuilder()`, so
    every embed gets consistent colours and footers for free.
 
-Options, subcommands and buttons are all covered in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+Options, subcommands and buttons are all covered in [`docs/contributing.md`](docs/contributing.md).
 
 ## The web dashboard
 
@@ -387,7 +388,7 @@ The defaults are the safe ones and they assume you are on your own machine:
   `Secure` flag on cookies.
 - **Rotating `DASHBOARD_SESSION_SECRET` signs everybody out.** That is the whole procedure after a leak.
 
-Full detail, including the threat model, is in [`dashboard/dashboard.md`](dashboard/dashboard.md).
+Full detail, including the threat model, is in [`docs/dashboard/guide.md`](docs/dashboard/guide.md).
 
 ## Scripts
 
@@ -404,7 +405,7 @@ Full detail, including the threat model, is in [`dashboard/dashboard.md`](dashbo
 | `npm run lint` / `lint:fix` | Lints, optionally fixing what it can                                  |
 | `npm run format`            | Formats everything with Prettier                                      |
 | `npm run commit`            | Guided commit message in the project's format                         |
-| `npm run docs:commands`     | Regenerates `COMMANDS.md` from the real commands                      |
+| `npm run docs:commands`     | Regenerates `docs/commands.md` from the real commands                 |
 | `npm run commands:clear`    | Removes every registered slash command from Discord                   |
 | `npm run db:wipe`           | Wipes the database, or individual collections                         |
 | `npm run audit`             | Checks dependencies for known vulnerabilities                         |
@@ -540,6 +541,19 @@ not required. The name, colours and links live in `src/config/theme.ts`.
 Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 [open an issue](https://github.com/Kkkermit/Testify/issues).
 
+## Documentation
+
+Everything written down lives in [`docs/`](docs/README.md), which has an index pointing at the right file for
+what you are doing.
+
+| Document                                             | For                                       |
+| ---------------------------------------------------- | ----------------------------------------- |
+| [`docs/commands.md`](docs/commands.md)               | Every command, generated from the code    |
+| [`docs/contributing.md`](docs/contributing.md)       | Proposing a change                        |
+| [`docs/security.md`](docs/security.md)               | Reporting a vulnerability                 |
+| [`docs/dashboard/guide.md`](docs/dashboard/guide.md) | Working on the web dashboard              |
+| [`CLAUDE.md`](CLAUDE.md)                             | The conventions every change here follows |
+
 ## Contributing
 
 Contributions are very welcome, including from first-timers.
@@ -549,7 +563,7 @@ npm run check     # typecheck, lint, format and tests — run this before pushin
 npm run commit    # guided commit message in the project's format
 ```
 
-[`CONTRIBUTING.md`](CONTRIBUTING.md) has the full guide. New logic needs a test — the suite has an 80% coverage
+[`docs/contributing.md`](docs/contributing.md) has the full guide. New logic needs a test — the suite has an 80% coverage
 floor and the pre-push hook enforces it.
 
 ## Contributors

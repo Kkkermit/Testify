@@ -1,12 +1,21 @@
-# Testify — Codebase Audit & TypeScript Migration Notes
+# The original JavaScript bot — audit and migration notes
 
-Complete documentation of the Testify Discord bot as it exists today, plus a blueprint for the
-JavaScript → TypeScript rewrite.
+> [!IMPORTANT]
+> **This tree is history, not a description of the code in this repository.** It documents the JavaScript bot
+> that Testify v2 replaced, and the plan that produced the rewrite. Every file, path and count below refers to
+> that codebase. For how Testify works today, read [`../../CLAUDE.md`](../../CLAUDE.md) and
+> [`../commands.md`](../commands.md).
+>
+> It is kept for two reasons: [`04-AUDIT-FINDINGS.md`](04-AUDIT-FINDINGS.md) is the list of 100 defects the
+> current conventions exist to prevent, and
+> [`migration/17-CODING-STANDARDS.md`](migration/17-CODING-STANDARDS.md) is still the authoritative naming and
+> error-handling standard for the rewrite.
 
-**Scope:** 321 JavaScript files · 32,784 lines · 103 slash commands · 67 prefix commands · 55 event modules ·
-32 Mongoose schemas · 3 API clients · 10 scripts.
+**Scope of the audit:** 321 JavaScript files · 32,784 lines · 103 slash commands · 67 prefix commands ·
+55 event modules · 32 Mongoose schemas · 3 API clients · 10 scripts.
 
-Every number in these documents was produced by walking `src/` programmatically. Nothing is estimated.
+Every number in these documents was produced by walking the original `src/` programmatically. Nothing is
+estimated.
 
 ---
 
