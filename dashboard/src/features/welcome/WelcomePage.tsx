@@ -49,7 +49,11 @@ export function WelcomePage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title="Welcome messages" subtitle="What Testify says when somebody joins, and where." />
+			<PageHeader
+				eyebrow={overview.data?.name}
+				title="Welcome messages"
+				subtitle="What Testify says when somebody joins, and where."
+			/>
 
 			<Card className="motion-pop flex flex-col gap-4">
 				<div className="flex items-center justify-between gap-3">

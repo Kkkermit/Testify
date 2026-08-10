@@ -1389,6 +1389,14 @@ them from the accessibility tree and leaves every navigation link named nothing 
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
 unit test pins the class and a real browser check confirms the accessible name survives.
 
+**Every guild-scoped screen names its server, in `PageHeader`'s `eyebrow`.** Below `md` the sidebar is a drawer,
+so with it closed nothing else on the page says which server is being configured — and "turn levelling off" is a
+different decision in each of them. The overview is the one exception: its `<h1>` _is_ the name, so an eyebrow
+there would say it twice. `src/test/pageHeader.test.ts` reads the guild-scoped routes out of `routes.tsx` and
+names any screen that stopped passing it, because the prop existed unused on all twelve for as long as it
+existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
+(`/commands` is both), so neither has to invent an id to satisfy the hook.
+
 **A server's screens are grouped into collapsible sections**, because a flat list grew past what one glance
 takes. `NavGroup.sections` in `config/navigation.ts` holds them, `SidebarSection` renders one, and adding a
 screen now means choosing which section it belongs in — `items` stays for the screens that are not a category

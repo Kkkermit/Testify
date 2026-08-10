@@ -70,6 +70,7 @@ export function TicketsPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
+				eyebrow={overview.data?.name}
 				title="Tickets"
 				subtitle="A button members press to open a private channel with your staff."
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}

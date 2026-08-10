@@ -33,7 +33,11 @@ export function SettingsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title="Server settings" subtitle="The switches that do not have a screen of their own." />
+			<PageHeader
+				eyebrow={overview.data?.name}
+				title="Server settings"
+				subtitle="The switches that do not have a screen of their own."
+			/>
 
 			<Disclosure label="Testify in this server">
 				<Group>

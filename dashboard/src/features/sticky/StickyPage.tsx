@@ -49,6 +49,7 @@ export function StickyPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
+				eyebrow={overview.data?.name}
 				title="Sticky messages"
 				subtitle="A message Testify reposts to keep it at the bottom of a busy channel."
 				action={<SavingIndicator state={savingStateOf(save.isPending || remove.isPending, save.isSuccess)} />}

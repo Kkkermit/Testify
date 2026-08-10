@@ -31,7 +31,11 @@ export function LevellingPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title="Levelling" subtitle="Who earns XP, what they get for it, and where it is announced." />
+			<PageHeader
+				eyebrow={overview.data?.name}
+				title="Levelling"
+				subtitle="Who earns XP, what they get for it, and where it is announced."
+			/>
 
 			<Tabs
 				active={tab}

@@ -48,6 +48,7 @@ export function AuditLogPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
+				eyebrow={overview.data?.name}
 				title="Audit logging"
 				subtitle="Which server events Testify records, and where it posts them."
 				action={

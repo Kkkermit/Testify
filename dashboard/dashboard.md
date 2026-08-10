@@ -442,7 +442,7 @@ Three files with their own segmented control is three places to fix an `aria-pre
 | `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`          |
 | `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                  |
 | `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`             |
-| `PageHeader`                                                 | `title`, `subtitle`, `action` — every page starts with one              |
+| `PageHeader`                                                 | `title`, `subtitle`, `action`, `eyebrow` — the server, on guild screens |
 | `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                    |
 | `Skeleton`                                                   | What `isPending` returns                                                |
 | `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike      |
@@ -836,6 +836,9 @@ Rules that hold today and are worth keeping:
 
 - **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them, and it caught the
   owner console mounting the whole of `CommandsPage` — `PageHeader` and all — inside a tab.
+- **A guild screen names its server above that `<h1>`**, in the `eyebrow`. With the drawer closed on a phone
+  nothing else on the page says which server the switches belong to. The overview is exempt: its title is the
+  name already.
 - **Headings never skip a level.** Every card heading is an `<h2>`; two `<h3>`s in the owner console were
   jumping straight from the page's `<h1>` and left a hole in the outline.
 - **A card heading is `CARD_HEADING`**, not a string you write out — it was spelled identically in 28 files

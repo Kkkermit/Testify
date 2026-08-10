@@ -10,6 +10,7 @@ import { configurableAt, coverage, filterCommands, groupByCategory } from "@/fea
 import { CommandCard } from "@/features/commands/components/CommandCard";
 import { useCommands } from "@/features/commands/useCommands";
 import { useCommandToggles, useSaveCommandToggles } from "@/features/commands/useCommandToggles";
+import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
@@ -25,6 +26,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	const saveToggles = useSaveCommandToggles(toggleScope);
 
 	const catalogue = useCommands();
+	const overview = useGuildOverview(guildId);
 	const [search, setSearch] = useState("");
 	const [category, setCategory] = useState<string | null>(null);
 
@@ -51,6 +53,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 				</p>
 			) : (
 				<PageHeader
+					eyebrow={overview.data?.name}
 					title="Commands"
 					subtitle={`${subtitleFor(global, state !== undefined)} ${switchedOff(state, global)}`}
 				/>
@@ -144,7 +147,6 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 }
 
 /** Says what the switches do wherever there are any, because a row of them with no explanation is a guess. */
-/** Folded into the subtitle rather than stacked under it as a second loose paragraph. */
 function switchedOff(state: { disabled: string[] } | undefined, global: boolean): string {
 	if (state === undefined) return "";
 	if (state.disabled.length === 0)

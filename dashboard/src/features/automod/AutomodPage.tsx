@@ -53,6 +53,7 @@ export function AutomodPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
+				eyebrow={overview.data?.name}
 				title="AutoMod"
 				subtitle="Discord’s own message filters. Testify sets them up; Discord enforces them."
 				action={<SavingIndicator state={savingStateOf(busy, add.isSuccess)} />}

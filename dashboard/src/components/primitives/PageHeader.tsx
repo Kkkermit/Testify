@@ -9,8 +9,8 @@ export function PageHeader({
 }: {
 	title: string;
 	subtitle?: string;
-	/** Which part of the bot this screen configures. Omitted on the screens that are not about one. */
-	eyebrow?: string;
+	/** Which server this screen is about — the sidebar is a drawer on a phone, so the page has to say. */
+	eyebrow?: string | undefined;
 	action?: ReactNode;
 }): React.JSX.Element {
 	return (

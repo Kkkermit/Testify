@@ -52,6 +52,7 @@ export function TreasurePage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
+				eyebrow={overview.data?.name}
 				title="Treasure drops"
 				subtitle="Testify drops money into chat now and then, for whoever claims it first."
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess)} />}
