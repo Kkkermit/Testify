@@ -42,6 +42,9 @@ export function securityHeaders(env: Env): ReturnType<typeof createMiddleware<Ap
 		context.header("Cross-Origin-Opener-Policy", "same-origin");
 		context.header("Cross-Origin-Resource-Policy", "same-origin");
 		context.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
+		// This is an admin panel. robots.txt asks a crawler not to look; this tells one that ignored it not to keep
+		// what it found, and covers the links a search engine finds without ever fetching robots.txt.
+		context.header("X-Robots-Tag", "noindex, nofollow, noarchive");
 
 		// Sending HSTS over plain HTTP would pin a self-hoster's localhost to a scheme it cannot serve.
 		if (overTls) context.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");

@@ -4,7 +4,7 @@ import { Card, Figure, Avatar, SegmentedControl, Skeleton } from "@/components/p
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { UsageBars } from "@/features/owner/components/UsageBars";
 import { UsageChart } from "@/features/owner/components/UsageChart";
-import { percent } from "@/features/owner/owner.utils";
+import { percent, screenLabel } from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";
 
 const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
@@ -113,6 +113,22 @@ export function UsageTab({
 							{ id: "slash", label: "Slash commands", count: report.surfaces.slash },
 							{ id: "prefix", label: "Prefix commands", count: report.surfaces.prefix },
 						]}
+					/>
+				</Panel>
+
+				<Panel
+					title="Dashboard screens"
+					hint="Counted bot-wide by route, with no server or account attached — see the privacy notice."
+				>
+					<UsageBars
+						tint="bg-feature-welcome/25"
+						empty="No screen has been opened yet."
+						rows={report.screens.map((screen) => ({
+							id: screen.route,
+							label: screenLabel(screen.route),
+							sub: screen.route,
+							count: screen.count,
+						}))}
 					/>
 				</Panel>
 			</div>

@@ -51,5 +51,10 @@ export function runtimeInfo(client: TestifyClient, now = Date.now()): RuntimeInf
 		commands: client.commands.size,
 		events: client.eventNames().length,
 		guilds: client.guilds.cache.size,
+		// -1 until the first heartbeat comes back, which is what discord.js reports before the gateway settles.
+		gatewayPingMs: Math.round(client.ws.ping),
+		shards: client.ws.shards.size,
+		cachedUsers: client.users.cache.size,
+		cachedChannels: client.channels.cache.size,
 	};
 }

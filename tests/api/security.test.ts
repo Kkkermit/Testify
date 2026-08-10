@@ -54,6 +54,11 @@ describe("security headers", () => {
 		expect(headers.get("x-frame-options")).toBe("DENY");
 	});
 
+	/** robots.txt only asks; this tells a crawler that ignored it not to keep what it found. */
+	it("refuses to be indexed", async () => {
+		expect((await apiFor().request("/api/health")).headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+	});
+
 	it("stops a JSON response being sniffed as HTML", async () => {
 		expect((await apiFor().request("/api/health")).headers.get("x-content-type-options")).toBe("nosniff");
 	});

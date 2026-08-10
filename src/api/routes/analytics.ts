@@ -12,6 +12,7 @@ import {
 	dailyTallies,
 	type DayTally,
 	guildTallies,
+	screenTallies,
 	surfaceTallies,
 	usageTotals,
 } from "@database/repositories/usageRepository";
@@ -38,12 +39,13 @@ analytics.get("/usage", async (context) => {
 	const { days } = parseQuery(context, analyticsQuery);
 	const client = context.get("client");
 
-	const [totals, tallies, guilds, daily, surfaces] = await Promise.all([
+	const [totals, tallies, guilds, daily, surfaces, screens] = await Promise.all([
 		usageTotals(days),
 		commandTallies(days),
 		guildTallies(days, TOP),
 		dailyTallies(days),
 		surfaceTallies(days),
+		screenTallies(days, TOP),
 	]);
 
 	const body: UsageReport = {
@@ -57,6 +59,7 @@ analytics.get("/usage", async (context) => {
 		daily: zeroFill(daily, days),
 		mostUsed: tallies.slice(0, TOP).map((tally) => toCommandRow(client, tally)),
 		leastUsed: leastUsed(client, tallies),
+		screens,
 		busiestGuilds: guilds.flatMap(({ guildId, count }) => {
 			const guild = client.guilds.cache.get(guildId);
 			// A guild the bot has since left still has rows; naming it "unknown" would be noise, so it is dropped.

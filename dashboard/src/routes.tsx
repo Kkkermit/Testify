@@ -55,6 +55,9 @@ const CommandsPage = lazy(async () => ({
 	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
 }));
 const OwnerPage = lazy(async () => ({ default: (await import("@/features/owner/OwnerPage")).OwnerPage }));
+const NotFoundPage = lazy(async () => ({
+	default: (await import("@/features/not-found/NotFoundPage")).NotFoundPage,
+}));
 
 function Loading(): React.JSX.Element {
 	return <Skeleton className="h-64 w-full" />;
@@ -97,7 +100,9 @@ export const routes = [
 			},
 		],
 	},
-	{ path: "*", element: <Navigate to="/guilds" replace /> },
+	// A real 404 rather than a redirect: bouncing an unknown address to the picker hides both a typo and a
+	// dashboard link that points at nothing.
+	{ path: "*", element: lazily(<NotFoundPage />) },
 ];
 
 export const router = createBrowserRouter(routes);

@@ -39,6 +39,18 @@ export function RuntimeTab(): React.JSX.Element {
 							value: `${String(info.memoryMb.heapUsed)} MB heap of ${String(info.memoryMb.heapTotal)} MB, ${String(info.memoryMb.rss)} MB resident`,
 						},
 						{ label: "Loaded", value: `${String(info.commands)} commands, ${String(info.events)} event listeners` },
+						{
+							label: "Gateway",
+							// -1 is what discord.js reports before the first heartbeat comes back, not a real latency.
+							value:
+								info.gatewayPingMs < 0
+									? `still connecting, ${String(info.shards)} shard${info.shards === 1 ? "" : "s"}`
+									: `${String(info.gatewayPingMs)} ms, ${String(info.shards)} shard${info.shards === 1 ? "" : "s"}`,
+						},
+						{
+							label: "Cached",
+							value: `${info.guilds.toLocaleString()} servers, ${info.cachedChannels.toLocaleString()} channels, ${info.cachedUsers.toLocaleString()} users`,
+						},
 					]}
 				/>
 			</Card>

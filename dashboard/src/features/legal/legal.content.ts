@@ -77,6 +77,7 @@ export const PRIVACY: LegalDocument = {
 				"A dashboard session when you sign in: your Discord user id, your username, and your OAuth tokens, encrypted at rest.",
 				"An audit record for every change made from the dashboard: who made it, what changed, and when.",
 				"Command usage counts: which command, in which server, on which day. No user ids are stored with these.",
+				"Dashboard screen counts: which screen was opened and on which day. Counted bot-wide — no user id and no server id is stored with these, so they say which screens get used and nothing about who used them.",
 			],
 		},
 		{
@@ -112,7 +113,7 @@ export const PRIVACY: LegalDocument = {
 		{
 			heading: "Cookies",
 			paragraphs: [
-				"One cookie, set when you sign in, holding a signed session identifier. It is httpOnly, same-site, and marked Secure when the dashboard is served over HTTPS. There is no analytics, no tracking, and no third-party cookie.",
+				"One cookie, set when you sign in, holding a signed session identifier. It is httpOnly, same-site, and marked Secure when the dashboard is served over HTTPS. There is no third-party cookie, no advertising identifier, and nothing that follows you between sites. Your IP address is not stored, and neither is your location, your browser or your device.",
 			],
 		},
 	],

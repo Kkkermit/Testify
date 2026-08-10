@@ -17,7 +17,7 @@ describe("the legal pages", () => {
 		}
 	});
 
-	/** The four claims the code has to keep true, so a change that breaks one breaks a test. */
+	/** The claims the code has to keep true, so a change that breaks one breaks a test. */
 	it("says what the code actually does", () => {
 		const text = PRIVACY.sections.flatMap((section) => [...section.paragraphs, ...(section.list ?? [])]).join(" ");
 
@@ -25,6 +25,9 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/No user ids are stored/i);
 		expect(text).toMatch(/90 days/);
 		expect(text).toMatch(/encrypted at rest/i);
+		// Screen counts carry neither, which is the whole reason they are safe to keep.
+		expect(text).toMatch(/no user id and no server id is stored/i);
+		expect(text).toMatch(/IP address is not stored/i);
 	});
 
 	it("offers a way back to the dashboard", () => {

@@ -438,6 +438,10 @@ export const usageReport: UsageReport = {
 	],
 	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
 	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
+	screens: [
+		{ route: "/guilds/:guildId/levelling", count: 42 },
+		{ route: "/guilds/:guildId/settings", count: 18 },
+	],
 };
 
 export const logFeed: LogFeed = {
@@ -469,6 +473,10 @@ export const runtimeInfo: RuntimeInfo = {
 	commands: 76,
 	events: 16,
 	guilds: 3,
+	gatewayPingMs: 48,
+	shards: 1,
+	cachedUsers: 4200,
+	cachedChannels: 120,
 };
 
 export const catalogue: CommandCatalogue = {

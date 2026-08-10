@@ -56,3 +56,13 @@ export function shortDay(day: string): string {
 export function isSnowflake(value: string): boolean {
 	return snowflake.safeParse(value).success;
 }
+
+/** A route pattern read as a screen name, so the list is scannable without decoding `:guildId` every row. */
+export function screenLabel(route: string): string {
+	const parts = route.split("/").filter((part) => part !== "" && !part.startsWith(":"));
+	const last = parts.at(-1);
+
+	if (last === undefined) return "Home";
+
+	return last.replace(/-/g, " ").replace(/^./, (first) => first.toUpperCase());
+}

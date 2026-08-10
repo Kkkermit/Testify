@@ -21,6 +21,7 @@ jest.mock("@database/repositories/usageRepository", () => ({
 	guildTallies: jest.fn(() => Promise.resolve([])),
 	dailyTallies: jest.fn(() => Promise.resolve([])),
 	surfaceTallies: jest.fn(() => Promise.resolve({ slash: 0, prefix: 0 })),
+	screenTallies: jest.fn(() => Promise.resolve([])),
 }));
 
 const OWNER = "100000000000000001";
@@ -48,6 +49,9 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 		isOwner: (id: string) => id === OWNER,
 		eventNames: () => ["ready", "interactionCreate"],
 		startedAt: Date.now() - 60_000,
+		users: { cache: new Collection<string, unknown>() },
+		channels: { cache: new Collection<string, unknown>() },
+		ws: { ping: 42, shards: new Collection<string, unknown>() },
 		env: { NODE_ENV: "test", LOG_LEVEL: "warn" } as Env,
 	} as unknown as TestifyClient;
 

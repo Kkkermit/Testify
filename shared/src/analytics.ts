@@ -58,6 +58,8 @@ export interface UsageReport {
 	mostUsed: CommandUsageRow[];
 	leastUsed: CommandUsageRow[];
 	busiestGuilds: GuildUsageRow[];
+	/** Which dashboard screens were opened, bot-wide. */
+	screens: ScreenTally[];
 }
 
 /** Every level pino has, so the console can show the whole buffer rather than a slice of it. */
@@ -120,7 +122,25 @@ export interface RuntimeInfo {
 	commands: number;
 	events: number;
 	guilds: number;
+	/** Round trip to Discord’s gateway. The one number that says whether the bot is healthy right now. */
+	gatewayPingMs: number;
+	shards: number;
+	cachedUsers: number;
+	cachedChannels: number;
 }
+
+/**
+ * Which dashboard screens get opened, bot-wide and by route pattern.
+ *
+ * No guild id and no user id: a server has one or two people who can open this dashboard, so a per-server count
+ * would describe one identifiable person’s browsing rather than an aggregate.
+ */
+export interface ScreenTally {
+	route: string;
+	count: number;
+}
+
+export const screenView = z.object({ route: z.string().min(1).max(120) });
 
 export function errorRate({ runs, failures }: { runs: number; failures: number }): number {
 	return runs === 0 ? 0 : failures / runs;

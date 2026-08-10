@@ -1,0 +1,4 @@
+# Testify's dashboard is an admin panel for a single self-hosted bot. There is nothing here worth indexing,
+# and every useful page is behind a sign-in gate anyway.
+User-agent: *
+Disallow: /

@@ -1484,6 +1484,24 @@ was created. Three things about it are load-bearing:
   own error after a debug line — the count is the least important thing that happened, and nothing reads a
   result from it.
 
+**Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
+dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
+`useScreenView.ts` puts every matched parameter back as its name before the request leaves the browser, so no
+server id and no member id is ever sent. It carries **no guild id either**, which is the one field that makes it
+different from `commandusage`: a server has one or two people who can open this dashboard, so a per-server view
+count would describe one identifiable person's browsing rather than an aggregate. Bot-wide answers the question
+the count exists for — which screens are worth investing in — and nothing else.
+
+Two things follow. The write lives in its own `/api/screens` route rather than in the owner-only `analytics`
+app, because every signed-in manager generates one while only the owner reads them back. And the privacy notice
+names it, with `LegalPage.test.tsx` pinning both the "no user id and no server id" and "IP address is not
+stored" claims — a change that starts storing either breaks a test.
+
+**No IP address, no geolocation, no device or browser string.** Not an oversight: an admin panel that records
+where its users connect from is keeping personal data, and this bot's privacy notice promises it does not. If a
+self-hoster ever needs that, it belongs in their reverse proxy's access log where they own the retention
+decision, not in the bot's database.
+
 **Least-used is ranked over `client.commands`, not over the usage rows.** A command nobody has ever run has no
 row at all, and it is exactly what that list exists to surface.
 

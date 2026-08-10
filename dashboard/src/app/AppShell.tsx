@@ -6,6 +6,7 @@ import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { Backdrop } from "@/components/motion";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { useScreenView } from "@/hooks/useScreenView";
 
 /** Navigation, backdrop and the outlet. */
 export function AppShell(): React.JSX.Element {
@@ -14,6 +15,8 @@ export function AppShell(): React.JSX.Element {
 	const { guildId } = useParams();
 	const location = useLocation();
 	const [menuOpen, setMenuOpen] = useState(false);
+
+	useScreenView();
 
 	const guild = me.data?.guilds.find((candidate) => candidate.id === guildId);
 	const audience = { guild, isOwner: me.data?.isOwner === true };

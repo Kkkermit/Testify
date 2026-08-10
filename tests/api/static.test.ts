@@ -12,6 +12,7 @@ beforeEach(() => {
 	mkdirSync(join(root, "assets"));
 	writeFileSync(join(root, "index.html"), "<!doctype html><div id=root></div>");
 	writeFileSync(join(root, "assets", "index-abc123.js"), "console.log(1)");
+	writeFileSync(join(root, "robots.txt"), "User-agent: *\nDisallow: /\n");
 });
 
 afterEach(() => {
@@ -82,6 +83,15 @@ describe("serveDashboard", () => {
 
 		return app;
 	}
+
+	/** An admin panel has nothing worth indexing, and a crawler that finds one page finds the sign-in gate. */
+	it("serves robots.txt as readable text rather than a download", async () => {
+		const response = await appFor().request("/robots.txt");
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("content-type")).toContain("text/plain");
+		expect(await response.text()).toContain("Disallow: /");
+	});
 
 	it("serves a hashed asset with a long cache", async () => {
 		const response = await appFor().request("/assets/index-abc123.js");

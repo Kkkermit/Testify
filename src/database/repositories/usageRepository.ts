@@ -1,5 +1,6 @@
 import { ANALYTICS } from "@config/constants";
 import { type CommandUsage, CommandUsages } from "@database/models/analytics.schema";
+import { ScreenViews } from "@database/models/screenViews.schema";
 
 /** Command usage, counted rather than logged. Every query here is scoped to a window of whole UTC days. */
 
@@ -135,4 +136,34 @@ export async function surfaceTallies(days: number, now?: Date): Promise<Record<S
 	for (const row of rows) totals[row.surface] = row.count;
 
 	return totals;
+}
+
+/**
+ * Dashboard screen views, counted the same way commands are but without a guild id — see the note on
+ * `screenViews.schema.ts` for why that one field is the difference between an aggregate and a browsing history.
+ */
+export async function recordScreenView(route: string, now: Date = new Date()): Promise<void> {
+	const expiresAt = new Date(now.getTime() + ANALYTICS.retentionDays * 24 * 60 * 60 * 1000);
+
+	await ScreenViews.updateOne(
+		{ day: dayKey(now), route },
+		{ $inc: { count: 1 }, $setOnInsert: { expiresAt } },
+		{ upsert: true },
+	).exec();
+}
+
+export interface ScreenTally {
+	route: string;
+	count: number;
+}
+
+export async function screenTallies(days: number, limit = 0, now?: Date): Promise<ScreenTally[]> {
+	const rows = await ScreenViews.aggregate<{ _id: string; count: number }>([
+		{ $match: { day: { $gte: since(days, now) } } },
+		{ $group: { _id: "$route", count: { $sum: "$count" } } },
+		{ $sort: { count: -1, _id: 1 } },
+		...(limit > 0 ? [{ $limit: limit }] : []),
+	]).exec();
+
+	return rows.map((row) => ({ route: row._id, count: row.count }));
 }
