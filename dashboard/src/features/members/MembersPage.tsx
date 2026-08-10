@@ -65,7 +65,7 @@ export function MembersPage(): React.JSX.Element {
 			</div>
 
 			{data.isError ? (
-				<ErrorState error={data.error} onRetry={() => void data.refetch()} />
+				<ErrorState as="h2" error={data.error} onRetry={() => void data.refetch()} />
 			) : data.data === undefined ? (
 				<Skeleton className="h-96 w-full" />
 			) : data.data.total === 0 ? (

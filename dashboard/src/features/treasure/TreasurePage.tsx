@@ -37,8 +37,8 @@ export function TreasurePage(): React.JSX.Element {
 		if (settings !== undefined) setDraft(draftOf(settings));
 	}, [settings]);
 
-	if (treasure.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (treasure.isError) return <ErrorState error={treasure.error} onRetry={() => void treasure.refetch()} />;
+	if (treasure.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const problem = draftProblem(draft);

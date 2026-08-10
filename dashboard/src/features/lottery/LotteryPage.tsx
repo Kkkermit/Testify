@@ -41,8 +41,8 @@ export function LotteryPage(): React.JSX.Element {
 		if (settings !== undefined) setDraft(draftOf(settings));
 	}, [settings]);
 
-	if (lottery.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (lottery.isError) return <ErrorState error={lottery.error} onRetry={() => void lottery.refetch()} />;
+	if (lottery.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const problem = draftProblem(draft);

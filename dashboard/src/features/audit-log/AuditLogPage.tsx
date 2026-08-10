@@ -30,8 +30,8 @@ export function AuditLogPage(): React.JSX.Element {
 		if (config.data !== undefined) setDraft(draftFrom(config.data));
 	}, [config.data]);
 
-	if (config.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (config.isError) return <ErrorState error={config.error} onRetry={() => void config.refetch()} />;
+	if (config.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 
 	const saved = config.data;
 	const dirty = auditLogChanged(saved, draft);

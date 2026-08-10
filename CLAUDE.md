@@ -1458,6 +1458,14 @@ the console owns the page's `<h1>` and a tab that brought its own would make two
 `CommandsPage` picks its heading level from `scope`. `OwnerReadFailures.test.tsx` fails one endpoint per tab and
 was proved to go red for each of the nine branches separately.
 
+**The same class bit four guild screens, through ordering rather than a fallback.** Audit logging, treasure,
+tickets and lottery each edit a draft held in `useState` and filled from the answer by a `useEffect`, and each
+checked `isPending || draft === null` **above** `isError`. The draft never fills when the read fails, so the
+skeleton returned and the error branch under it could not be reached — a blank page, for ever. Branch on
+`isError` first. The members page had the mirror image: an `ErrorState` rendered _beside_ its `PageHeader`
+rather than instead of it, so the page carried two `<h1>`s. An early `return` keeps the default `h1`; an
+inline one takes `as="h2"`. `GuildReadFailures.test.tsx` pins both halves, and all five were proved to go red.
+
 **Ownership is `DISCORD_OWNER_IDS` and nothing else.** `requireOwner` calls `client.isOwner(session.userId)`,
 which reads the env array on every request — so removing an ID revokes the console on that person's next click
 rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the

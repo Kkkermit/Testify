@@ -997,12 +997,21 @@ wrong in a different way, and none of it looked broken: `isPending || data === u
 for ever once the read fails, `data?.rows ?? []` turns an unread answer into an empty list, and the usage tab
 reported a 500 as "No usage yet". Two things to check on any screen with a read:
 
-- **`isPending` is not `data === undefined`.** Branch on `isError` before you branch on the data.
+- **`isPending` is not `data === undefined`.** Branch on `isError` **first**, before you branch on the data.
+  Order is the whole bug on a screen that edits a draft: `const [draft, setDraft] = useState(null)` filled from
+  a `useEffect`, then `if (q.isPending || draft === null) return <Skeleton/>` above `if (q.isError)`. The draft
+  never fills when the read fails, so the skeleton returns and the error branch below it is **unreachable** —
+  audit logging, treasure, tickets and lottery each shipped that way and rendered a blank page for ever.
 - **A `??` fallback on a read is where empty and failed become the same screen.** With the error branch above it,
   the fallback is unreachable and `no-unnecessary-condition` will say so — that lint error is the tell.
 
 `ErrorState` takes `as="h2"` for a panel inside a screen that already has its own `<h1>`, such as an owner
-console tab or `CommandsPage` mounted in one.
+console tab, `CommandsPage` mounted in one, or an error rendered **beside** a `PageHeader` rather than instead
+of it — which is what the members page does. An early `return <ErrorState/>` replaces the page and keeps the
+default `h1`; an inline one needs the `h2`.
+
+`GuildReadFailures.test.tsx` and `OwnerReadFailures.test.tsx` fail one endpoint per screen and assert both
+halves: a retry control appears, and there is still exactly one `<h1>`.
 
 ### 19.2 First run, and the half-install
 

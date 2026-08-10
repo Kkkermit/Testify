@@ -41,8 +41,8 @@ export function TicketsPage(): React.JSX.Element {
 		if (settings !== undefined) setDraft(draftOf(settings));
 	}, [settings]);
 
-	if (tickets.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (tickets.isError) return <ErrorState error={tickets.error} onRetry={() => void tickets.refetch()} />;
+	if (tickets.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
 
 	const problem = draftProblem(draft);
