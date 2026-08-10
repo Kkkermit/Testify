@@ -184,15 +184,15 @@ describe("the feature grid", () => {
 			http.get("/api/guilds/:guildId/overview", () =>
 				HttpResponse.json({
 					...overview,
-					features: [{ key: "giveaway", label: "Giveaways", enabled: true, detail: "1 running" }],
+					features: [{ key: "games", label: "Games", enabled: true, detail: "6 available" }],
 				}),
 			),
 		);
 
 		renderPage();
 
-		expect(await screen.findByText("Giveaways")).toBeInTheDocument();
-		expect(screen.queryByRole("link", { name: /giveaways/i })).toBeNull();
+		expect(await screen.findByText("Games")).toBeInTheDocument();
+		expect(screen.queryByRole("link", { name: /games/i })).toBeNull();
 	});
 });
 

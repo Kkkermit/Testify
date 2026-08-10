@@ -211,7 +211,16 @@ bot has to be able to read them before signing in. Both are written for a self-h
 whoever runs the instance, not the project — and the privacy notice lists what is actually stored, with tests
 pinning the four claims the code has to keep true.
 
-- Full accessibility pass: screen reader, 200% zoom, reduced motion, greyscale. The automated half is done.
+- Full accessibility pass — **the checkable half is done and holds**, verified in a real browser rather than
+  in jsdom:
+  - **Reflow (1.4.10)**: no two-directional scrolling on any of 16 routes at 640 or 320 CSS px.
+  - **Reduced motion**: the backdrop canvas is not rendered, the three.js chunk is not fetched at all, nothing
+    animates over 50ms, and no screen loses content.
+  - **Colour alone (1.4.1)**: every `Badge` states its status in text, and `Warning` and `SavingIndicator`
+    each carry an icon plus a word. Colour is redundant everywhere it is used.
+  - **Keyboard**: the skip link works, and the mobile drawer sets `aria-expanded`, moves focus inside itself,
+    traps Tab and closes on Escape.
+  - Still needs a human: a real screen reader, and greyscale judgement on the feature tints.
 - Bundle budget check (<200 kB gzipped first load). **Measured at 152 kB** — vendor is 136 kB of it, and three
   is not in the first load at all.
 - Docker image and compose file; README screenshots; `CONTRIBUTING.md` section.

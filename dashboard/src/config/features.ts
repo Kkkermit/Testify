@@ -108,7 +108,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		wash: "bg-feature-tickets/15",
 		path: (guildId) => `/guilds/${guildId}/tickets`,
 	},
-	giveaway: { icon: Gift, tint: "text-feature-community", wash: "bg-feature-community/15" },
+	giveaway: {
+		icon: Gift,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/giveaways`,
+	},
 	counting: {
 		icon: Hash,
 		tint: "text-feature-community",

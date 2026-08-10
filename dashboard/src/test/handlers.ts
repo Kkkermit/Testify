@@ -22,6 +22,7 @@ import {
 	type RoleSummary,
 	type SetupStatus,
 	type WelcomeConfigResponse,
+	type GiveawayList,
 	type StickyList,
 	type LotterySettings,
 	type TicketSettings,
@@ -260,6 +261,33 @@ export const treasureSettings: TreasureSettings = {
 	maxAmount: 500,
 	cooldownMs: 300_000,
 	configured: true,
+};
+
+export const giveawayList: GiveawayList = {
+	giveaways: [
+		{
+			messageId: "700000000000000001",
+			channelId: "400000000000000001",
+			prize: "A copy of the game",
+			winnerCount: 2,
+			startAt: "2026-08-09T10:00:00.000Z",
+			endAt: "2026-08-11T10:00:00.000Z",
+			ended: false,
+			winners: [],
+			hostedBy: "100000000000000001",
+		},
+		{
+			messageId: "700000000000000002",
+			channelId: "400000000000000001",
+			prize: "Server boost",
+			winnerCount: 1,
+			startAt: "2026-08-01T10:00:00.000Z",
+			endAt: "2026-08-02T10:00:00.000Z",
+			ended: true,
+			winners: [{ id: "100000000000000002", tag: "winner#0001" }],
+			hostedBy: "100000000000000001",
+		},
+	],
 };
 
 export const stickyList: StickyList = {
@@ -517,6 +545,11 @@ export const handlers = [
 	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
+	http.post("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
+	http.post("/api/guilds/:guildId/giveaways/:messageId/end", () => HttpResponse.json(giveawayList)),
+	http.post("/api/guilds/:guildId/giveaways/:messageId/reroll", () => HttpResponse.json(giveawayList)),
+	http.delete("/api/guilds/:guildId/giveaways/:messageId", () => HttpResponse.json({ giveaways: [] })),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {

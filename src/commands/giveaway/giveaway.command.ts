@@ -4,7 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { parseDuration } from "@lib/duration.util";
 import { successEmbed } from "@lib/embeds.util";
 import { formatDurationLong } from "@lib/format.util";
-import { giveaways } from "@lib/giveaways.util";
+import { deleteGiveaway, endGiveaway, rerollGiveaway, startGiveaway } from "@lib/giveawayActions.util";
 import { reply } from "@lib/reply.util";
 
 export default defineCommand({
@@ -29,7 +29,7 @@ export default defineCommand({
 				},
 			],
 			async run(interaction, client) {
-				inGuild(interaction);
+				const guild = inGuild(interaction);
 
 				const durationMs = parseDuration(interaction.options.getString("duration", true));
 				if (durationMs === null || durationMs <= 0) {
@@ -41,24 +41,12 @@ export default defineCommand({
 					throw new UserFacingError("Pick a text channel in this server.");
 				}
 
-				await giveaways(client).start(channel, {
+				await startGiveaway(client, guild, {
+					channelId: channel.id,
 					prize: interaction.options.getString("prize", true),
 					winnerCount: interaction.options.getInteger("winners") ?? 1,
-					duration: durationMs,
+					durationMs,
 					hostedBy: interaction.user,
-					messages: {
-						giveaway: "\u{1f389} **Giveaway** \u{1f389}",
-						giveawayEnded: "\u{1f389} **Giveaway ended** \u{1f389}",
-						inviteToParticipate: "React with \u{1f389} to enter",
-						winMessage: "Congratulations {winners}, you won **{this.prize}**!",
-						drawing: "Drawing in {timestamp}",
-						dropMessage: "Be the first to react to win!",
-						embedFooter: "{this.winnerCount} winner(s)",
-						noWinner: "Nobody entered, so there is no winner.",
-						hostedBy: "Hosted by {this.hostedBy}",
-						winners: "Winner(s)",
-						endedAt: "Ended at",
-					},
 				});
 
 				await reply(interaction, {
@@ -74,11 +62,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const messageId = interaction.options.getString("message-id", true).trim();
 
-				await giveaways(client)
-					.end(messageId)
-					.catch(() => {
-						throw new UserFacingError("I could not find a running giveaway with that message id.");
-					});
+				await endGiveaway(client, messageId);
 
 				await reply(interaction, {
 					embeds: [successEmbed("The giveaway has been ended.")],
@@ -93,11 +77,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const messageId = interaction.options.getString("message-id", true).trim();
 
-				await giveaways(client)
-					.reroll(messageId)
-					.catch(() => {
-						throw new UserFacingError("I could not reroll that giveaway. Check the message id.");
-					});
+				await rerollGiveaway(client, messageId);
 
 				await reply(interaction, {
 					embeds: [successEmbed("New winners have been drawn.")],
@@ -112,11 +92,7 @@ export default defineCommand({
 			async run(interaction, client) {
 				const messageId = interaction.options.getString("message-id", true).trim();
 
-				await giveaways(client)
-					.delete(messageId)
-					.catch(() => {
-						throw new UserFacingError("I could not find a giveaway with that message id.");
-					});
+				await deleteGiveaway(client, messageId);
 
 				await reply(interaction, {
 					embeds: [successEmbed("The giveaway has been deleted.")],

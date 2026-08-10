@@ -1081,7 +1081,7 @@ be tested without rendering. `features/levelling/` is the worked example: a 416-
 four tabs, three shared components and two testable modules.
 
 **What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview, the owner
-console, and the levelling, welcome, audit-logging and server settings. The rest of the settings screens follow
+console, giveaways, and the levelling, welcome, audit-logging and server settings. The rest of the settings screens follow
 the same shape —
 `docs/dashboard/design-plan/13-ROADMAP-AND-RISKS.md` is the running order.
 
@@ -1098,6 +1098,7 @@ the same shape —
 | `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                              |
 | `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                              |
 | `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                 |
+| `/guilds/:id/giveaways` | Start, end early, reroll and delete — each keyed to its own row            |
 | `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page       |
 | `…/members/:userId`     | One member: standing, roles, warnings, softban, moderation controls        |
 | `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting    |

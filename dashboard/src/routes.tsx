@@ -38,6 +38,10 @@ const TreasurePage = lazy(async () => ({
 const TicketsPage = lazy(async () => ({
 	default: (await import("@/features/tickets/TicketsPage")).TicketsPage,
 }));
+const GiveawaysPage = lazy(async () => ({
+	default: (await import("@/features/giveaways/GiveawaysPage")).GiveawaysPage,
+}));
+
 const LotteryPage = lazy(async () => ({
 	default: (await import("@/features/lottery/LotteryPage")).LotteryPage,
 }));
@@ -83,6 +87,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 					{ path: "/guilds/:guildId/tickets", element: lazily(<TicketsPage />) },
 					{ path: "/guilds/:guildId/lottery", element: lazily(<LotteryPage />) },
+					{ path: "/guilds/:guildId/giveaways", element: lazily(<GiveawaysPage />) },
 					{ path: "/guilds/:guildId/members", element: lazily(<MembersPage />) },
 					{ path: "/guilds/:guildId/members/:userId", element: lazily(<MemberDetailPage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },

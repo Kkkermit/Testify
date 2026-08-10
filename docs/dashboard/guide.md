@@ -648,6 +648,7 @@ indentation you matched on may already have changed.
 | `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                                        |
 | `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                                        |
 | `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                           |
+| `/guilds/:id/giveaways` | Start, end early, reroll and delete — each keyed to its own row                      |
 | `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page                 |
 | `…/members/:userId`     | One member: standing, roles, warnings, softban — and the moderation controls         |
 | `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |

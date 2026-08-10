@@ -16,6 +16,7 @@ import {
 	LifeBuoy,
 	Ticket,
 	type LucideIcon,
+	Gift,
 } from "lucide-react";
 
 /** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips and active marker follow. */
@@ -140,6 +141,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							label: "Lottery",
 							icon: Ticket,
 							hint: "A pot members buy tickets into",
+						},
+						{
+							to: `/guilds/${guild.id}/giveaways`,
+							label: "Giveaways",
+							icon: Gift,
+							hint: "Prize draws members enter with a reaction",
 						},
 					],
 				},

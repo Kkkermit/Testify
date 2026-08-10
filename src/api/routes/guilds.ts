@@ -6,6 +6,7 @@ import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
 import { guildCommandToggles } from "@api/routes/commandToggles";
+import { giveaways } from "@api/routes/giveaways";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
 import { members } from "@api/routes/members";
@@ -60,6 +61,7 @@ guilds.route("/:guildId/sticky", sticky);
 guilds.route("/:guildId/tickets", tickets);
 guilds.route("/:guildId/lottery", lottery);
 guilds.route("/:guildId/treasure", treasure);
+guilds.route("/:guildId/giveaways", giveaways);
 guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
 
