@@ -33,6 +33,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 			title="Command prefix"
 			describes="What people type before a command name. Slash commands are unaffected by anything here."
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
+			failure={save.error}
 		>
 			<Toggle
 				label="Allow prefix commands"

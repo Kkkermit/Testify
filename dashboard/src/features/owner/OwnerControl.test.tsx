@@ -53,6 +53,26 @@ describe("the control tab", () => {
 		expect(button).toBeEnabled();
 	});
 
+	/**
+	 * A working shutdown and a refused one both leave the page sitting there, so silence on failure reads as success
+	 * on the one control where being wrong means believing the bot is off while it is still serving.
+	 */
+	it("says so when the shutdown is refused", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.post("/api/control/shutdown", () =>
+				HttpResponse.json({ error: { code: "forbidden", message: "The host refused that." } }, { status: 403 }),
+			),
+		);
+
+		renderTab("control");
+		await user.type(await screen.findByLabelText(/type .* to confirm/i), "shut down");
+		await user.click(screen.getByRole("button", { name: /^shut down$/i }));
+
+		expect(await screen.findByText("The host refused that.")).toBeInTheDocument();
+		expect(screen.queryByText(/testify is stopping/i)).toBeNull();
+	});
+
 	/** Shutting down takes the dashboard with it, so the screen has to say who can bring it back before the click. */
 	it("says plainly that only the host can start it again", async () => {
 		renderTab("control");

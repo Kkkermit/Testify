@@ -1466,6 +1466,21 @@ skeleton returned and the error branch under it could not be reached — a blank
 rather than instead of it, so the page carried two `<h1>`s. An early `return` keeps the default `h1`; an
 inline one takes `as="h2"`. `GuildReadFailures.test.tsx` pins both halves, and all five were proved to go red.
 
+**A refused write has to say so too, and beside the control that caused it.** The read audits above have a
+mirror: a mutation whose `.error` nothing renders. Three screens had one. The settings page rendered a `Warning`
+only for its own local validation, so a 400 from the API said nothing at all — and the page has seven
+independent sections, which is why `Section` now takes a `failure` prop rather than each section growing its own
+block: the refusal lands inside the card whose switch caused it, and the six that saved are left alone. The
+command switches roll back optimistically on a refusal, which on its own is indistinguishable from the click not
+registering. **Shut down was the worst of the three**, because success and failure look identical there — the
+page just sits — and an owner who believes the bot is off while it is still serving is the one wrong belief that
+control can produce.
+
+The rule: **`onError` rollback is not a message.** Reverting a control tells the reader what the state is, never
+why it moved. Every `useMutation` handle a component holds should have its `.error` read somewhere in that
+component, and a probe that fails one write endpoint per screen and looks for the message in the rendered page
+is what finds the gaps — `npm run check` cannot, because a mutation with no error branch type-checks perfectly.
+
 **Ownership is `DISCORD_OWNER_IDS` and nothing else.** `requireOwner` calls `client.isOwner(session.userId)`,
 which reads the env array on every request — so removing an ID revokes the console on that person's next click
 rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the

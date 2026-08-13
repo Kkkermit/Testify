@@ -45,6 +45,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 			title="Testify’s name here"
 			describes="A nickname for this server only. The picture is the same everywhere and only the bot owner can change it."
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
+			failure={save.error}
 		>
 			<Field label="Nickname" htmlFor="nickname">
 				<div className="flex flex-wrap items-center gap-2">

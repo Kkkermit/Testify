@@ -1,8 +1,9 @@
 import { type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
-import { SavingIndicator, type SavingState } from "@/components/form";
+import { SavingIndicator, type SavingState, Warning } from "@/components/form";
 import { Card } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { ApiError } from "@/lib/api";
 
 /** One setting, one card, all the same shape — so adding one is a component rather than a layout decision. */
 export function Section({
@@ -11,6 +12,7 @@ export function Section({
 	title,
 	describes,
 	saving,
+	failure = null,
 	children,
 }: {
 	icon: LucideIcon;
@@ -18,6 +20,8 @@ export function Section({
 	title: string;
 	describes: string;
 	saving: SavingState;
+	/** The section's own write error, rendered here so a refusal lands beside the control that caused it. */
+	failure?: Error | null;
 	children: ReactNode;
 }): React.JSX.Element {
 	return (
@@ -34,6 +38,10 @@ export function Section({
 			</div>
 
 			{children}
+
+			{failure !== null && (
+				<Warning>{failure instanceof ApiError ? failure.message : "That could not be saved."}</Warning>
+			)}
 		</Card>
 	);
 }

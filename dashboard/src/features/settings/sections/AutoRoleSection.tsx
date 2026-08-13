@@ -24,6 +24,7 @@ export function AutoRoleSection({
 			title="Roles on join"
 			describes="Given to everybody who joins, as soon as they arrive."
 			saving={savingStateOf(save.isPending, save.isSuccess)}
+			failure={save.error}
 		>
 			<RoleChecklist
 				label="Give these roles"

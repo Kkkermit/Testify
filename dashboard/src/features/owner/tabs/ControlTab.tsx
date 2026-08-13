@@ -168,6 +168,13 @@ export function ControlTab(): React.JSX.Element {
 				</Field>
 
 				{shutdown.isSuccess && <Warning>Testify is stopping. This page will stop responding in a moment.</Warning>}
+
+				{/* A refused shutdown otherwise looks exactly like a successful one: nothing on the page moves either way. */}
+				{shutdown.error !== null && (
+					<Warning>
+						{shutdown.error instanceof ApiError ? shutdown.error.message : "Testify could not be shut down."}
+					</Warning>
+				)}
 			</Card>
 		</div>
 	);

@@ -38,6 +38,7 @@ export function VerificationSection({
 			title="Verification"
 			describes="A button new members press to prove they are there, and the role it hands them."
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
+			failure={save.error}
 		>
 			{value === undefined ? (
 				<p className="text-muted-foreground text-sm">Reading the current configuration…</p>

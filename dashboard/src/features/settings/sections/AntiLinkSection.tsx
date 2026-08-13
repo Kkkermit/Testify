@@ -14,6 +14,7 @@ export function AntiLinkSection({ guildId, value }: { guildId: string; value: An
 			title="Link filtering"
 			describes="Deletes links posted by anybody without the bypass permission."
 			saving={savingStateOf(save.isPending, save.isSuccess)}
+			failure={save.error}
 		>
 			<Toggle
 				label="Delete links"

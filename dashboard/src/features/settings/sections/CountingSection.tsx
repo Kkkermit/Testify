@@ -39,6 +39,7 @@ export function CountingSection({
 			title="Counting"
 			describes="One channel where members count upwards, one number each."
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
+			failure={save.error}
 		>
 			<Toggle
 				label="Run a counting channel"

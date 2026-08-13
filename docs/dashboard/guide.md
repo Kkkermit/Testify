@@ -1013,6 +1013,25 @@ default `h1`; an inline one needs the `h2`.
 `GuildReadFailures.test.tsx` and `OwnerReadFailures.test.tsx` fail one endpoint per screen and assert both
 halves: a retry control appears, and there is still exactly one `<h1>`.
 
+**Refused goes missing the same way, and for the same reason: nothing renders `mutation.error`.** The read
+audits have a mirror, and three screens failed it. Settings rendered a `Warning` for its own local validation
+only, so a 400 from the API said nothing — `Section` now takes a `failure` prop, because seven independent
+sections each growing their own block is seven places to get it wrong, and the refusal has to land in the card
+whose control caused it rather than on the six that saved. The command switches roll back optimistically, which
+by itself is indistinguishable from the click never registering. And **Shut down** was the worst, because there
+success and failure render identically — the page just sits — so silence reads as "it worked" on the one control
+where believing that wrongly means thinking the bot is off while it is still serving.
+
+**An `onError` rollback is not a message.** Putting a control back says what the state is, never why it moved.
+Two checks:
+
+- **Every `useMutation` handle a component holds should have its `.error` read in that component.** A quick
+  sweep: for each `const x = useSomething()` that the file calls `x.mutate` on, grep the same file for
+  `x.error`. That is exactly how the shutdown gap was found.
+- **`npm run check` cannot catch this** — a mutation with no error branch type-checks, lints and passes every
+  test. A browser probe that fails one write endpoint per screen, clicks the first control, and looks for the
+  message in the rendered page is what finds them.
+
 ### 19.2 First run, and the half-install
 
 **Who:** whoever just turned `DASHBOARD_ENABLED` on.

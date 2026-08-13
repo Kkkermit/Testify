@@ -138,6 +138,30 @@ describe("switching commands off in a server", () => {
 		expect(await screen.findByRole("switch", { name: "/help" })).toBeDisabled();
 	});
 
+	/**
+	 * The switch rolls back on a refusal, which on its own is indistinguishable from the click not registering.
+	 * Saying why is the difference between a bug report and a reader who knows what to do next.
+	 */
+	it("says why a refused switch went back", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.put("/api/guilds/:guildId/commands", () =>
+				HttpResponse.json(
+					{ error: { code: "command_locked", message: "That one cannot be switched off." } },
+					{ status: 400 },
+				),
+			),
+		);
+
+		inGuild();
+		await user.click(await screen.findByRole("switch", { name: "/levelling" }));
+
+		expect(await screen.findByText("That one cannot be switched off.")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(screen.getByRole("switch", { name: "/levelling" })).toBeChecked();
+		});
+	});
+
 	/** A server cannot re-enable what the owner switched off, so the switch must not pretend otherwise. */
 	it("locks a command the owner switched off everywhere", async () => {
 		server.use(

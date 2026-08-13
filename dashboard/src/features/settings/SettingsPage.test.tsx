@@ -201,7 +201,11 @@ describe("the settings page", () => {
 		expect(screen.queryByRole("option", { name: "general" })).toBeNull();
 	});
 
-	it("explains a refusal from the API", async () => {
+	/**
+	 * This asserted only that the switch was still on the page, which passes with no error handling at all — and
+	 * it did, for as long as a refused section write said nothing a reader could see.
+	 */
+	it("explains a refusal from the API, beside the control that caused it", async () => {
 		const user = userEvent.setup();
 		server.use(
 			http.patch("/api/guilds/:guildId/settings/counting", () =>
@@ -212,9 +216,29 @@ describe("the settings page", () => {
 		renderPage();
 		await user.click(await screen.findByRole("switch", { name: /run a counting channel/i }));
 
-		await waitFor(() => {
-			expect(screen.getByRole("switch", { name: /run a counting channel/i })).toBeInTheDocument();
-		});
+		const warning = await screen.findByText("Choose a channel first.");
+
+		expect(warning).toBeInTheDocument();
+		// Beside its own control, not at the top of the page: the reader may never have scrolled past it.
+		expect(warning.closest("section, div")).toContainElement(
+			screen.getByRole("switch", { name: /run a counting channel/i }),
+		);
+	});
+
+	/** One section refusing must not put a warning on the six that saved fine. */
+	it("keeps a refusal inside the section it came from", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.patch("/api/guilds/:guildId/settings/counting", () =>
+				HttpResponse.json({ error: { code: "bad_request", message: "Choose a channel first." } }, { status: 400 }),
+			),
+		);
+
+		renderPage();
+		await user.click(await screen.findByRole("switch", { name: /run a counting channel/i }));
+		await screen.findByText("Choose a channel first.");
+
+		expect(screen.getAllByText("Choose a channel first.")).toHaveLength(1);
 	});
 
 	/** A slow write carries a snapshot taken before a later one, so landing it on the cache would put the other section's control back. */

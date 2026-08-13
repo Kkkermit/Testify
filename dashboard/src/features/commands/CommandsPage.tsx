@@ -3,7 +3,7 @@ import { Search, SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { FIELD } from "@/components/form";
+import { FIELD, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
 import { Card, EmptyState, Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
 import { configurableAt, coverage, filterCommands, groupByCategory } from "@/features/commands/commands.utils";
@@ -12,6 +12,7 @@ import { useCommands } from "@/features/commands/useCommands";
 import { useCommandToggles, useSaveCommandToggles } from "@/features/commands/useCommandToggles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 /** `scope` decides which list is edited. Neither scope is a permission — the API answers 404 or 403 regardless. */
@@ -104,6 +105,13 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					))}
 				</div>
 			</div>
+
+			{/* The API refuses a command `ALWAYS_ENABLED` covers, so a switch can bounce back with a reason. */}
+			{saveToggles.error !== null && (
+				<Warning>
+					{saveToggles.error instanceof ApiError ? saveToggles.error.message : "That switch could not be saved."}
+				</Warning>
+			)}
 
 			{shown.length === 0 ? (
 				<Card>

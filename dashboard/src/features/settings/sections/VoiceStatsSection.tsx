@@ -24,6 +24,7 @@ export function VoiceStatsSection({
 			title="Member count channels"
 			describes="Voice channels renamed to show how many members and bots the server has."
 			saving={savingStateOf(save.isPending, save.isSuccess)}
+			failure={save.error}
 		>
 			<VoicePicker
 				label="Members"
