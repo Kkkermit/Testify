@@ -38,10 +38,7 @@ export function AuditLogPage(): React.JSX.Element {
 	const saved = config.data;
 	const dirty = auditLogChanged(saved, draft);
 	const blocked = saveBlocked(draft);
-	const notice =
-		draft.events.length === AUDIT_EVENTS.length
-			? "Everything is selected, so events added in a future update are logged too."
-			: null;
+	const notice = draft.events.length === AUDIT_EVENTS.length ? t("auditLog.allSelected") : null;
 
 	function edit(change: Partial<AuditLogPut>): void {
 		setDraft((current) => (current === null ? current : { ...current, ...change }));
@@ -146,7 +143,7 @@ export function AuditLogPage(): React.JSX.Element {
 				<div className="flex flex-col gap-2">
 					{blocked !== null && <Warning>{blocked}</Warning>}
 					{save.error !== null && (
-						<Warning>{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}</Warning>
+						<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 					)}
 				</div>
 			)}

@@ -31,7 +31,7 @@ export function LevelCard({
 				<h2 className={CARD_HEADING}>{t("members.levelAndXp")}</h2>
 				<p className="text-muted-foreground text-sm">
 					{detail.levels === null
-						? "They have earned no XP here yet."
+						? t("members.noXpYet")
 						: `Level ${String(detail.levels.level)} on ${detail.levels.xp.toLocaleString()} XP.`}
 				</p>
 			</div>

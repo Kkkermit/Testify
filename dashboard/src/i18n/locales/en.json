@@ -20,7 +20,15 @@
 		"notSetUp": "Not set up",
 		"couldNotSave": "That could not be saved.",
 		"memberCount_one": "{{count, number}} member",
-		"memberCount_other": "{{count, number}} members"
+		"memberCount_other": "{{count, number}} members",
+		"couldNotChange": "That could not be changed.",
+		"couldNotRemove": "That could not be removed.",
+		"couldNotReset": "That could not be reset.",
+		"couldNotEnd": "That could not be ended.",
+		"couldNotRun": "That could not be run.",
+		"didNotWork": "That did not work.",
+		"discordRefused": "Discord refused that.",
+		"unknownAccount": "Unknown account"
 	},
 	"nav": {
 		"servers": "Servers",
@@ -155,11 +163,20 @@
 		"whatToBlock": "What to block",
 		"wordOrPhrase": "Word or phrase",
 		"mentionsToAllow": "Mentions to allow",
-		"mentionsHint": "A message with more is blocked."
+		"mentionsHint": "A message with more is blocked.",
+		"blocks": "Blocks the message",
+		"alerts": "Alerts moderators",
+		"timesOut": "Times the member out",
+		"somethingElse": "Does something else",
+		"nothingToShow": "Nothing to show",
+		"addOneBelow": "Add one below, and Discord blocks matching messages before anyone reads them.",
+		"needsPermission": "Grant Testify the Manage Server permission to see this server’s rules.",
+		"refusedRule": "Discord refused that rule."
 	},
 	"auth": {
 		"almostThere": "Almost there",
-		"signIn": "Sign in"
+		"signIn": "Sign in",
+		"finishSetup": "Finish setting up"
 	},
 	"auditLog": {
 		"title": "Audit logging",
@@ -171,7 +188,8 @@
 		"postTo": "Post the log to",
 		"postToHint": "Somewhere only moderators can read — an audit log names who did what.",
 		"whatTitle": "What gets recorded",
-		"whatBody": "Tick a heading to take the whole group."
+		"whatBody": "Tick a heading to take the whole group.",
+		"allSelected": "Everything is selected, so events added in a future update are logged too."
 	},
 	"treasure": {
 		"title": "Treasure drops",
@@ -184,7 +202,8 @@
 		"smallest": "Smallest drop",
 		"largest": "Largest drop",
 		"cooldown": "Cooldown",
-		"cooldownHint": "Minutes before another drop can appear, however busy the chat is."
+		"cooldownHint": "Minutes before another drop can appear, however busy the chat is.",
+		"notSetUpYet": "Not set up yet — the numbers below are the defaults until you turn drops on."
 	},
 	"welcome": {
 		"title": "Welcome messages",
@@ -236,7 +255,11 @@
 		"switchedOffHere": "{{count}} switched off here.",
 		"subtitleGlobal": "Everything Testify can do. A command switched off here is off in every server, for everybody.",
 		"subtitleGuild": "Everything Testify can do. Switch one off and nobody in this server can run it, either way.",
-		"subtitlePlain": "Everything Testify can do, on both the slash and prefix surfaces."
+		"subtitlePlain": "Everything Testify can do, on both the slash and prefix surfaces.",
+		"availableToAll": "Anybody who may use it can run it",
+		"offHere": "Nobody in this server can run it",
+		"offEverywhere": "The bot owner switched this off everywhere",
+		"locked": "Testify needs this one to stay on"
 	},
 	"giveaways": {
 		"title": "Giveaways",
@@ -271,7 +294,10 @@
 		"role": "Role",
 		"chooseRole": "Choose a role",
 		"rewardsFull": "That is the most rewards Testify can hold. Remove one to add another.",
-		"hierarchyNote": "Roles above Testify in the hierarchy are hidden, because it could not grant them."
+		"hierarchyNote": "Roles above Testify in the hierarchy are hidden, because it could not grant them.",
+		"tabsLabel": "Levelling settings",
+		"ignoresBody": "Nothing said here, or by anyone holding these roles, earns XP.",
+		"boostsBody": "Members holding one of these earn more XP. Someone with several gets the highest, not the product."
 	},
 	"members": {
 		"title": "Members",
@@ -293,7 +319,9 @@
 		"leftServer": "Left the server",
 		"softbanned": "Softbanned",
 		"standing": "Standing in this server",
-		"edited": "Edited"
+		"edited": "Edited",
+		"noXpYet": "They have earned no XP here yet.",
+		"noAccountYet": "They have no account here yet — adding money opens one."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -315,7 +343,11 @@
 		"panelSays": "What the panel says",
 		"message": "Message",
 		"buttonLabel": "Button label",
-		"turnOff": "Turn tickets off"
+		"turnOff": "Turn tickets off",
+		"postAgain": "Posting again edits the panel already out there rather than leaving a second one.",
+		"nothingPosted": "Nothing is posted until you press the button below.",
+		"updatePanel": "Update the panel",
+		"postPanel": "Post the panel"
 	},
 	"lottery": {
 		"title": "Lottery",
@@ -340,7 +372,8 @@
 		"cannotUndo": "This cannot be undone.",
 		"pastDraws": "Past draws",
 		"noDraws": "No draws yet",
-		"noDrawsBody": "The first one appears here once it runs."
+		"noDrawsBody": "The first one appears here once it runs.",
+		"start": "Start the lottery"
 	},
 	"settings": {
 		"title": "Server settings",
@@ -389,7 +422,9 @@
 		"verifyInHint": "A channel new members can see before they have the role.",
 		"verifyRole": "Give them this role",
 		"verifyNoRole": "No role chosen",
-		"verifyPanel": "What the panel says"
+		"verifyPanel": "What the panel says",
+		"updatePanel": "Update the posted panel",
+		"postPanel": "Post the panel"
 	},
 	"owner": {
 		"title": "Owner console",
@@ -453,6 +488,40 @@
 		"configured": "Configured:",
 		"nothingSetUp": "Nothing set up",
 		"leaveServer": "Leave this server",
-		"guildTableCaption": "Servers Testify is in, largest first"
+		"guildTableCaption": "Servers Testify is in, largest first",
+		"pausedBody": "Testify is connected but refusing everything. No commands, no XP, no automod.",
+		"runningBody": "Testify is answering commands normally.",
+		"paused": "Paused",
+		"resume": "Resume Testify",
+		"pause": "Pause Testify",
+		"couldNotLeave": "Testify could not leave.",
+		"nickname": "Testify’s nickname",
+		"topRole": "Testify’s top role",
+		"noCommandRun": "No command has been run yet.",
+		"noCommandsRegistered": "No commands are registered.",
+		"noServerRun": "No server has run a command yet.",
+		"nothingRecorded": "Nothing recorded yet.",
+		"slashCommands": "Slash commands",
+		"prefixCommands": "Prefix commands",
+		"noScreenOpened": "No screen has been opened yet.",
+		"levelTrace": "Every line the bot writes",
+		"levelDebug": "Debug and above",
+		"levelInfo": "Start-up and routine notices",
+		"levelWarn": "Warnings and worse",
+		"levelFatal": "Only what stopped the bot",
+		"readingBuffer": "Reading the buffer…",
+		"refreshing": "Refreshing every 5 seconds.",
+		"running": "Running",
+		"couldNotShutDown": "Testify could not be shut down.",
+		"levelError": "Failures only",
+		"levelAll": "All",
+		"levelDebugName": "Debug",
+		"levelInfoName": "Info",
+		"levelWarnName": "Warnings",
+		"levelErrorName": "Errors",
+		"levelFatalName": "Fatal",
+		"showing": "Showing {{shown}} of {{matched}} matching lines",
+		"held": "{{buffered}} of {{capacity}} held",
+		"pausedFull": "Paused."
 	}
 }

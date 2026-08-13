@@ -120,7 +120,7 @@ export function VerificationSection({
 									save.mutate({ publish: true });
 								}}
 							>
-								{value.posted ? "Update the posted panel" : "Post the panel"}
+								{value.posted ? t("settings.updatePanel") : t("settings.postPanel")}
 							</Button>
 							<p className="text-muted-foreground text-sm tabular-nums">
 								{value.posted ? `${value.verifiedCount.toLocaleString()} verified so far` : "Not posted yet"}
@@ -129,7 +129,7 @@ export function VerificationSection({
 					)}
 
 					{save.error !== null && (
-						<Warning>{save.error instanceof ApiError ? save.error.message : "That change could not be saved."}</Warning>
+						<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 					)}
 				</>
 			)}

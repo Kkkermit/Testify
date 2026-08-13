@@ -35,7 +35,7 @@ export function MoneyCard({
 				<h2 className={CARD_HEADING}>Money</h2>
 				<p className="text-muted-foreground text-sm">
 					{detail.economy === null
-						? "They have no account here yet — adding money opens one."
+						? t("members.noAccountYet")
 						: `They hold ${held.toLocaleString()} in their ${purse}.`}
 				</p>
 			</div>

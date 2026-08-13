@@ -147,7 +147,7 @@ export function RunnerTab(): React.JSX.Element {
 				</div>
 
 				{run.error !== null && (
-					<Warning>{run.error instanceof ApiError ? run.error.message : "That could not be run."}</Warning>
+					<Warning>{run.error instanceof ApiError ? run.error.message : t("common.couldNotRun")}</Warning>
 				)}
 			</Card>
 

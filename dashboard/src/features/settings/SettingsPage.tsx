@@ -25,7 +25,7 @@ export function SettingsPage(): React.JSX.Element {
 	const roles = useRoles(guildId);
 	const overview = useGuildOverview(guildId);
 
-	usePageTitle("Server settings", overview.data?.name);
+	usePageTitle(t("settings.title"), overview.data?.name);
 
 	if (settings.isPending) return <Skeleton className="h-96 w-full" />;
 	if (settings.isError) return <ErrorState error={settings.error} onRetry={() => void settings.refetch()} />;

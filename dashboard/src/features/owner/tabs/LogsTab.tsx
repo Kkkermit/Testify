@@ -1,4 +1,5 @@
 import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { Pause, Play, Search } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
@@ -7,19 +8,21 @@ import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/compon
 import { LogLines } from "@/features/owner/components/LogLines";
 import { useLogs } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
+import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-/** Written out rather than `text-transform: capitalize`, because engines disagree about whether a CSS transform changes an accessible name. */
-const LEVELS: Record<ReportedLogLevel, Omit<Segment<ReportedLogLevel>, "value">> = {
-	trace: { label: "All", hint: "Every line the bot writes" },
-	debug: { label: "Debug", hint: "Debug and above" },
-	info: { label: "Info", hint: "Start-up and routine notices" },
-	warn: { label: "Warnings", hint: "Warnings and worse" },
-	error: { label: "Errors", hint: "Failures only" },
-	fatal: { label: "Fatal", hint: "Only what stopped the bot" },
+/**
+ * Keys rather than text: a module-level map is built before a locale is chosen. Written out rather than
+ * `text-transform: capitalize`, because engines disagree about whether a CSS transform changes an accessible name.
+ */
+const LEVELS: Record<ReportedLogLevel, { label: TranslationKey; hint: TranslationKey }> = {
+	trace: { label: "owner.levelAll", hint: "owner.levelTrace" },
+	debug: { label: "owner.levelDebugName", hint: "owner.levelDebug" },
+	info: { label: "owner.levelInfoName", hint: "owner.levelInfo" },
+	warn: { label: "owner.levelWarnName", hint: "owner.levelWarn" },
+	error: { label: "owner.levelErrorName", hint: "owner.levelError" },
+	fatal: { label: "owner.levelFatalName", hint: "owner.levelFatal" },
 };
-
-const LEVEL_SEGMENTS = LOG_LEVELS.map((level) => ({ value: level, ...LEVELS[level] }));
 
 /** Held in memory rather than in the database, so a restart clears it. */
 export function LogsTab({
@@ -38,6 +41,11 @@ export function LogsTab({
 	onPause: (paused: boolean) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
+	const levelSegments: Segment<ReportedLogLevel>[] = LOG_LEVELS.map((level) => ({
+		value: level,
+		label: t(LEVELS[level].label),
+		hint: t(LEVELS[level].hint),
+	}));
 	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
 	const logs = useLogs(level, useDebounced(search), paused);
 
@@ -62,7 +70,7 @@ export function LogsTab({
 					/>
 				</label>
 
-				<SegmentedControl label={t("owner.minimumLevel")} segments={LEVEL_SEGMENTS} value={level} onChange={onLevel} />
+				<SegmentedControl label={t("owner.minimumLevel")} segments={levelSegments} value={level} onChange={onLevel} />
 
 				<Button
 					variant="ghost"
@@ -76,7 +84,7 @@ export function LogsTab({
 			</Card>
 
 			<p className="text-muted-foreground text-sm" aria-live="polite">
-				{summarise(logs.data, paused)}
+				{summarise(logs.data, paused, t)}
 			</p>
 
 			{logs.data !== undefined && LOG_LEVEL_RANK[logs.data.loggerLevel] > LOG_LEVEL_RANK[level] && (
@@ -103,11 +111,11 @@ export function LogsTab({
 }
 
 /** Says what is on screen and what is behind it, so nobody reads a truncated list as the whole buffer. */
-function summarise(feed: LogFeed | undefined, paused: boolean): string {
-	if (feed === undefined) return "Reading the buffer…";
+function summarise(feed: LogFeed | undefined, paused: boolean, t: TFunction): string {
+	if (feed === undefined) return t("owner.readingBuffer");
 
-	const shown = `Showing ${String(feed.lines.length)} of ${String(feed.matched)} matching lines`;
-	const held = `${String(feed.buffered)} of ${String(feed.capacity)} held`;
+	const shown = t("owner.showing", { shown: feed.lines.length, matched: feed.matched });
+	const held = t("owner.held", { buffered: feed.buffered, capacity: feed.capacity });
 
-	return `${shown}, ${held}. ${paused ? "Paused." : "Refreshing every 5 seconds."}`;
+	return `${shown}, ${held}. ${paused ? t("owner.pausedFull") : t("owner.refreshing")}`;
 }

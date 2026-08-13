@@ -5,7 +5,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 /** Names each missing variable and the exact redirect URI to paste, because this is where most self-hosted dashboards lose people. */
 export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redirectUri: string }): React.JSX.Element {
 	const { t } = useTranslation();
-	usePageTitle("Finish setting up");
+	usePageTitle(t("auth.finishSetup"));
 
 	return (
 		<main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 p-6">

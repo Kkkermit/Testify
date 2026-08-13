@@ -63,7 +63,7 @@ export function UsageTab({
 			<div className="grid items-start gap-4 lg:grid-cols-2">
 				<Panel title={t("owner.mostUsed")} hint={t("owner.mostUsedHint")}>
 					<UsageBars
-						empty="No command has been run yet."
+						empty={t("owner.noCommandRun")}
 						rows={report.mostUsed.map((row) => ({
 							id: row.command,
 							label: `/${row.command}`,
@@ -76,7 +76,7 @@ export function UsageTab({
 				<Panel title={t("owner.leastUsed")} hint={t("owner.leastUsedHint")}>
 					<UsageBars
 						tint="bg-muted"
-						empty="No commands are registered."
+						empty={t("owner.noCommandsRegistered")}
 						rows={report.leastUsed.map((row) => ({
 							id: row.command,
 							label: `/${row.command}`,
@@ -89,7 +89,7 @@ export function UsageTab({
 				<Panel title={t("owner.busiest")} hint={t("owner.busiestHint")}>
 					<UsageBars
 						tint="bg-feature-tickets/25"
-						empty="No server has run a command yet."
+						empty={t("owner.noServerRun")}
 						rows={report.busiestGuilds.map((row) => ({
 							id: row.guildId,
 							label: (
@@ -107,10 +107,10 @@ export function UsageTab({
 				<Panel title={t("owner.howRun")} hint={t("owner.howRunHint")}>
 					<UsageBars
 						tint="bg-feature-levelling/25"
-						empty="Nothing recorded yet."
+						empty={t("owner.nothingRecorded")}
 						rows={[
-							{ id: "slash", label: "Slash commands", count: report.surfaces.slash },
-							{ id: "prefix", label: "Prefix commands", count: report.surfaces.prefix },
+							{ id: "slash", label: t("owner.slashCommands"), count: report.surfaces.slash },
+							{ id: "prefix", label: t("owner.prefixCommands"), count: report.surfaces.prefix },
 						]}
 					/>
 				</Panel>
@@ -118,7 +118,7 @@ export function UsageTab({
 				<Panel title={t("owner.screens")} hint={t("owner.screensHint")}>
 					<UsageBars
 						tint="bg-feature-welcome/25"
-						empty="No screen has been opened yet."
+						empty={t("owner.noScreenOpened")}
 						rows={report.screens.map((screen) => ({
 							id: screen.route,
 							label: screenLabel(screen.route),

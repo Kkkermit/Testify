@@ -20,7 +20,15 @@
 		"notSetUp": "Nicht eingerichtet",
 		"couldNotSave": "Das konnte nicht gespeichert werden.",
 		"memberCount_one": "{{count, number}} Mitglied",
-		"memberCount_other": "{{count, number}} Mitglieder"
+		"memberCount_other": "{{count, number}} Mitglieder",
+		"couldNotChange": "Das konnte nicht geändert werden.",
+		"couldNotRemove": "Das konnte nicht entfernt werden.",
+		"couldNotReset": "Das konnte nicht zurückgesetzt werden.",
+		"couldNotEnd": "Das konnte nicht beendet werden.",
+		"couldNotRun": "Das konnte nicht ausgeführt werden.",
+		"didNotWork": "Das hat nicht funktioniert.",
+		"discordRefused": "Discord hat das abgelehnt.",
+		"unknownAccount": "Unbekanntes Konto"
 	},
 	"nav": {
 		"servers": "Server",
@@ -155,11 +163,20 @@
 		"whatToBlock": "Was blockiert wird",
 		"wordOrPhrase": "Wort oder Wendung",
 		"mentionsToAllow": "Erlaubte Erwähnungen",
-		"mentionsHint": "Eine Nachricht mit mehr wird blockiert."
+		"mentionsHint": "Eine Nachricht mit mehr wird blockiert.",
+		"blocks": "Blockiert die Nachricht",
+		"alerts": "Benachrichtigt Moderatoren",
+		"timesOut": "Setzt das Mitglied in Auszeit",
+		"somethingElse": "Tut etwas anderes",
+		"nothingToShow": "Nichts zu zeigen",
+		"addOneBelow": "Füge unten eine hinzu, dann blockiert Discord passende Nachrichten, bevor sie jemand liest.",
+		"needsPermission": "Gib Testify die Berechtigung „Server verwalten“, um die Regeln dieses Servers zu sehen.",
+		"refusedRule": "Discord hat diese Regel abgelehnt."
 	},
 	"auth": {
 		"almostThere": "Fast geschafft",
-		"signIn": "Anmelden"
+		"signIn": "Anmelden",
+		"finishSetup": "Einrichtung abschließen"
 	},
 	"auditLog": {
 		"title": "Audit-Log",
@@ -171,7 +188,8 @@
 		"postTo": "Log posten in",
 		"postToHint": "Irgendwo, das nur Moderatoren lesen können — ein Audit-Log nennt, wer was getan hat.",
 		"whatTitle": "Was aufgezeichnet wird",
-		"whatBody": "Hake eine Überschrift an, um die ganze Gruppe zu nehmen."
+		"whatBody": "Hake eine Überschrift an, um die ganze Gruppe zu nehmen.",
+		"allSelected": "Es ist alles ausgewählt, also werden auch Ereignisse aus künftigen Updates protokolliert."
 	},
 	"treasure": {
 		"title": "Schätze",
@@ -184,7 +202,8 @@
 		"smallest": "Kleinster Fund",
 		"largest": "Größter Fund",
 		"cooldown": "Wartezeit",
-		"cooldownHint": "Minuten, bevor ein weiterer Fund erscheinen kann — egal wie voll der Chat ist."
+		"cooldownHint": "Minuten, bevor ein weiterer Fund erscheinen kann — egal wie voll der Chat ist.",
+		"notSetUpYet": "Noch nicht eingerichtet — die Zahlen unten sind die Vorgaben, bis du Schätze einschaltest."
 	},
 	"welcome": {
 		"title": "Begrüßungsnachrichten",
@@ -236,7 +255,11 @@
 		"switchedOffHere": "{{count}} hier ausgeschaltet.",
 		"subtitleGlobal": "Alles, was Testify kann. Ein hier ausgeschalteter Befehl ist auf jedem Server für alle aus.",
 		"subtitleGuild": "Alles, was Testify kann. Schalte einen aus, und niemand auf diesem Server kann ihn ausführen — auf keinem Weg.",
-		"subtitlePlain": "Alles, was Testify kann, sowohl per Slash- als auch per Präfixbefehl."
+		"subtitlePlain": "Alles, was Testify kann, sowohl per Slash- als auch per Präfixbefehl.",
+		"availableToAll": "Wer ihn nutzen darf, kann ihn ausführen",
+		"offHere": "Niemand auf diesem Server kann ihn ausführen",
+		"offEverywhere": "Der Bot-Betreiber hat ihn überall ausgeschaltet",
+		"locked": "Testify braucht diesen eingeschaltet"
 	},
 	"giveaways": {
 		"title": "Verlosungen",
@@ -271,7 +294,10 @@
 		"role": "Rolle",
 		"chooseRole": "Rolle wählen",
 		"rewardsFull": "Mehr Belohnungen kann Testify nicht halten. Entferne eine, um eine weitere hinzuzufügen.",
-		"hierarchyNote": "Rollen über Testify in der Hierarchie sind ausgeblendet, weil es sie nicht vergeben könnte."
+		"hierarchyNote": "Rollen über Testify in der Hierarchie sind ausgeblendet, weil es sie nicht vergeben könnte.",
+		"tabsLabel": "Level-Einstellungen",
+		"ignoresBody": "Weder was hier gesagt wird noch wer diese Rollen hat, verdient XP.",
+		"boostsBody": "Wer eine davon hat, verdient mehr XP. Bei mehreren zählt die höchste, nicht das Produkt."
 	},
 	"members": {
 		"title": "Mitglieder",
@@ -293,7 +319,9 @@
 		"leftServer": "Server verlassen",
 		"softbanned": "Softban",
 		"standing": "Status auf diesem Server",
-		"edited": "Bearbeitet"
+		"edited": "Bearbeitet",
+		"noXpYet": "Hier wurden noch keine XP verdient.",
+		"noAccountYet": "Hier gibt es noch kein Konto — Geld hinzuzufügen eröffnet eines."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -315,7 +343,11 @@
 		"panelSays": "Was das Panel sagt",
 		"message": "Nachricht",
 		"buttonLabel": "Beschriftung der Schaltfläche",
-		"turnOff": "Tickets ausschalten"
+		"turnOff": "Tickets ausschalten",
+		"postAgain": "Erneut posten bearbeitet das bereits vorhandene Panel, statt ein zweites zu hinterlassen.",
+		"nothingPosted": "Es wird nichts gepostet, bis du unten die Schaltfläche drückst.",
+		"updatePanel": "Panel aktualisieren",
+		"postPanel": "Panel posten"
 	},
 	"lottery": {
 		"title": "Lotterie",
@@ -340,7 +372,8 @@
 		"cannotUndo": "Das lässt sich nicht rückgängig machen.",
 		"pastDraws": "Frühere Ziehungen",
 		"noDraws": "Noch keine Ziehungen",
-		"noDrawsBody": "Die erste erscheint hier, sobald sie gelaufen ist."
+		"noDrawsBody": "Die erste erscheint hier, sobald sie gelaufen ist.",
+		"start": "Lotterie starten"
 	},
 	"settings": {
 		"title": "Servereinstellungen",
@@ -389,7 +422,9 @@
 		"verifyInHint": "Ein Kanal, den neue Mitglieder schon vor der Rolle sehen.",
 		"verifyRole": "Diese Rolle vergeben",
 		"verifyNoRole": "Keine Rolle gewählt",
-		"verifyPanel": "Was das Panel sagt"
+		"verifyPanel": "Was das Panel sagt",
+		"updatePanel": "Gepostetes Panel aktualisieren",
+		"postPanel": "Panel posten"
 	},
 	"owner": {
 		"title": "Betreiber-Konsole",
@@ -453,6 +488,40 @@
 		"configured": "Eingerichtet:",
 		"nothingSetUp": "Nichts eingerichtet",
 		"leaveServer": "Diesen Server verlassen",
-		"guildTableCaption": "Server, auf denen Testify ist — größte zuerst"
+		"guildTableCaption": "Server, auf denen Testify ist — größte zuerst",
+		"pausedBody": "Testify ist verbunden, lehnt aber alles ab. Keine Befehle, keine XP, keine Automoderation.",
+		"runningBody": "Testify beantwortet Befehle normal.",
+		"paused": "Pausiert",
+		"resume": "Testify fortsetzen",
+		"pause": "Testify pausieren",
+		"couldNotLeave": "Testify konnte den Server nicht verlassen.",
+		"nickname": "Testifys Spitzname",
+		"topRole": "Testifys höchste Rolle",
+		"noCommandRun": "Noch wurde kein Befehl ausgeführt.",
+		"noCommandsRegistered": "Es sind keine Befehle registriert.",
+		"noServerRun": "Noch hat kein Server einen Befehl ausgeführt.",
+		"nothingRecorded": "Noch nichts erfasst.",
+		"slashCommands": "Slash-Befehle",
+		"prefixCommands": "Präfixbefehle",
+		"noScreenOpened": "Noch wurde keine Seite geöffnet.",
+		"levelTrace": "Jede Zeile, die der Bot schreibt",
+		"levelDebug": "Debug und höher",
+		"levelInfo": "Start und Routinehinweise",
+		"levelWarn": "Warnungen und Schlimmeres",
+		"levelFatal": "Nur was den Bot gestoppt hat",
+		"readingBuffer": "Puffer wird gelesen…",
+		"refreshing": "Aktualisiert alle 5 Sekunden.",
+		"running": "Läuft",
+		"couldNotShutDown": "Testify konnte nicht heruntergefahren werden.",
+		"levelError": "Nur Fehler",
+		"levelAll": "Alle",
+		"levelDebugName": "Debug",
+		"levelInfoName": "Info",
+		"levelWarnName": "Warnungen",
+		"levelErrorName": "Fehler",
+		"levelFatalName": "Fatal",
+		"showing": "Zeigt {{shown}} von {{matched}} passenden Zeilen",
+		"held": "{{buffered}} von {{capacity}} vorgehalten",
+		"pausedFull": "Pausiert."
 	}
 }

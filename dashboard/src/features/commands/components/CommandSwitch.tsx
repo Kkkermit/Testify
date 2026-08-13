@@ -1,12 +1,15 @@
 import { type CommandAvailability } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-const DESCRIBES: Record<CommandAvailability, string> = {
-	on: "Anybody who may use it can run it",
-	"off-here": "Nobody in this server can run it",
-	"off-everywhere": "The bot owner switched this off everywhere",
-	locked: "Testify needs this one to stay on",
+/** Keys rather than text: a module-level map is built once, long before a locale is chosen. */
+const DESCRIBES: Record<CommandAvailability, TranslationKey> = {
+	on: "commands.availableToAll",
+	"off-here": "commands.offHere",
+	"off-everywhere": "commands.offEverywhere",
+	locked: "commands.locked",
 };
 
 /** Locked and bot-wide-off render disabled with the reason on the control, not in a footnote. */
@@ -19,12 +22,13 @@ export function CommandSwitch({
 	availability: CommandAvailability;
 	onChange: (on: boolean) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const on = availability === "on";
 	const fixed = availability === "locked" || availability === "off-everywhere";
 
 	return (
 		<label
-			title={DESCRIBES[availability]}
+			title={t(DESCRIBES[availability])}
 			className={cn(INLINE_TARGET, "shrink-0 gap-2", fixed ? "cursor-not-allowed opacity-60" : "cursor-pointer")}
 		>
 			<span className="text-muted-foreground text-xs">{on ? "On" : "Off"}</span>

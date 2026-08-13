@@ -3,7 +3,7 @@ import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { PageHeader, Skeleton, TabContent } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
-import { TABS_LABEL, Tabs } from "@/features/levelling/components/Tabs";
+import { Tabs } from "@/features/levelling/components/Tabs";
 import { tabFrom } from "@/features/levelling/levelling.utils";
 import { BoostsTab } from "@/features/levelling/tabs/BoostsTab";
 import { GeneralTab } from "@/features/levelling/tabs/GeneralTab";
@@ -42,7 +42,7 @@ export function LevellingPage(): React.JSX.Element {
 				}}
 			/>
 
-			<TabContent label={TABS_LABEL} active={tab}>
+			<TabContent label={t("levelling.tabsLabel")} active={tab}>
 				{tab === "general" && <GeneralTab {...shared} config={config.data} />}
 				{tab === "rewards" && <RewardsTab {...shared} rewards={config.data.rewards} />}
 				{tab === "boosts" && <BoostsTab {...shared} boosts={config.data.boosts} />}

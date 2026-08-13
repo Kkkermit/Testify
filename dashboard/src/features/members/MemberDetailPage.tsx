@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
@@ -17,6 +18,7 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function MemberDetailPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "", userId = "" } = useParams();
 
 	const overview = useGuildOverview(guildId);
@@ -94,7 +96,7 @@ export function MemberDetailPage(): React.JSX.Element {
 			/>
 
 			{failure !== null && (
-				<Warning>{failure instanceof ApiError ? failure.message : "That could not be saved."}</Warning>
+				<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
 			)}
 		</>
 	);

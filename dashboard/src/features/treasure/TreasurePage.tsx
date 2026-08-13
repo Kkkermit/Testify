@@ -30,7 +30,7 @@ export function TreasurePage(): React.JSX.Element {
 	const save = useSaveTreasure(guildId);
 	const reset = useResetTreasure(guildId);
 
-	usePageTitle("Treasure drops", overview.data?.name);
+	usePageTitle(t("treasure.title"), overview.data?.name);
 
 	const settings = treasure.data;
 	const [draft, setDraft] = useState<Draft | null>(null);
@@ -64,9 +64,7 @@ export function TreasurePage(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>{t("treasure.dropsHere")}</h2>
 					<p className="text-muted-foreground text-sm">
-						{settings.configured
-							? describeRate(draftOf(settings))
-							: "Not set up yet — the numbers below are the defaults until you turn drops on."}
+						{settings.configured ? describeRate(draftOf(settings)) : t("treasure.notSetUpYet")}
 					</p>
 				</div>
 
@@ -144,7 +142,7 @@ export function TreasurePage(): React.JSX.Element {
 
 				{problem !== null && <Warning>{problem}</Warning>}
 				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : "That could not be saved."}</Warning>
+					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
 				<div className="flex flex-wrap items-center gap-3">
@@ -176,7 +174,7 @@ export function TreasurePage(): React.JSX.Element {
 			</Card>
 
 			{reset.error !== null && (
-				<Warning>{reset.error instanceof ApiError ? reset.error.message : "That could not be reset."}</Warning>
+				<Warning>{reset.error instanceof ApiError ? reset.error.message : t("common.couldNotReset")}</Warning>
 			)}
 		</>
 	);

@@ -183,7 +183,7 @@ export function LotteryPage(): React.JSX.Element {
 				)}
 				{problem !== null && <Warning>{problem}</Warning>}
 				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : "That could not be saved."}</Warning>
+					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
 				<div>
@@ -199,7 +199,7 @@ export function LotteryPage(): React.JSX.Element {
 							});
 						}}
 					>
-						{settings.enabled ? "Save changes" : "Start the lottery"}
+						{settings.enabled ? "Save changes" : t("lottery.start")}
 					</Button>
 				</div>
 			</Card>
@@ -246,7 +246,7 @@ export function LotteryPage(): React.JSX.Element {
 			)}
 
 			{end.error !== null && (
-				<Warning>{end.error instanceof ApiError ? end.error.message : "That could not be ended."}</Warning>
+				<Warning>{end.error instanceof ApiError ? end.error.message : t("common.couldNotEnd")}</Warning>
 			)}
 		</>
 	);

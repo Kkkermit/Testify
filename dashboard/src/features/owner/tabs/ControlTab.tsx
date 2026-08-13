@@ -42,13 +42,9 @@ export function ControlTab(): React.JSX.Element {
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div>
 						<h2 className={CARD_HEADING}>{t("owner.runningState")}</h2>
-						<p className="text-muted-foreground text-sm">
-							{paused
-								? "Testify is connected but refusing everything. No commands, no XP, no automod."
-								: "Testify is answering commands normally."}
-						</p>
+						<p className="text-muted-foreground text-sm">{paused ? t("owner.pausedBody") : t("owner.runningBody")}</p>
 					</div>
-					<Badge tone={paused ? "warning" : "success"}>{paused ? "Paused" : "Running"}</Badge>
+					<Badge tone={paused ? "warning" : "success"}>{t(paused ? "owner.paused" : "owner.running")}</Badge>
 				</div>
 
 				<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
@@ -78,13 +74,13 @@ export function ControlTab(): React.JSX.Element {
 						}}
 					>
 						{paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
-						{paused ? "Resume Testify" : "Pause Testify"}
+						{t(paused ? "owner.resume" : "owner.pause")}
 					</Button>
 					<SavingIndicator state={savingStateOf(gateway.isPending, gateway.isSuccess)} />
 				</div>
 
 				{gateway.error !== null && (
-					<Warning>{gateway.error instanceof ApiError ? gateway.error.message : "That did not work."}</Warning>
+					<Warning>{gateway.error instanceof ApiError ? gateway.error.message : t("common.didNotWork")}</Warning>
 				)}
 			</Card>
 
@@ -125,7 +121,7 @@ export function ControlTab(): React.JSX.Element {
 				</Field>
 
 				{identity.error !== null && (
-					<Warning>{identity.error instanceof ApiError ? identity.error.message : "Discord refused that."}</Warning>
+					<Warning>{identity.error instanceof ApiError ? identity.error.message : t("common.discordRefused")}</Warning>
 				)}
 			</Card>
 
@@ -173,9 +169,7 @@ export function ControlTab(): React.JSX.Element {
 
 				{/* A refused shutdown otherwise looks exactly like a successful one: nothing on the page moves either way. */}
 				{shutdown.error !== null && (
-					<Warning>
-						{shutdown.error instanceof ApiError ? shutdown.error.message : "Testify could not be shut down."}
-					</Warning>
+					<Warning>{shutdown.error instanceof ApiError ? shutdown.error.message : t("owner.couldNotShutDown")}</Warning>
 				)}
 			</Card>
 		</div>

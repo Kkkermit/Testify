@@ -25,7 +25,7 @@ export function WelcomePage(): React.JSX.Element {
 	const overview = useGuildOverview(guildId);
 	const update = useUpdateWelcome(guildId);
 
-	usePageTitle("Welcome messages", overview.data?.name);
+	usePageTitle(t("welcome.title"), overview.data?.name);
 
 	const textarea = useRef<HTMLTextAreaElement>(null);
 	const [draft, setDraft] = useState("");
@@ -146,9 +146,7 @@ export function WelcomePage(): React.JSX.Element {
 				)}
 
 				{update.error !== null && (
-					<Warning>
-						{update.error instanceof ApiError ? update.error.message : "That change could not be saved."}
-					</Warning>
+					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
 				)}
 			</Card>
 

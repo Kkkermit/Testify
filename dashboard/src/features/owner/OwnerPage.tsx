@@ -15,8 +15,6 @@ import { UsageTab } from "@/features/owner/tabs/UsageTab";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 /** Each tab fetches its own data, so a failing endpoint takes out one tab rather than the console. */
-const TABS_LABEL = "Owner console";
-
 export function OwnerPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("owner.title"));
@@ -41,7 +39,7 @@ export function OwnerPage(): React.JSX.Element {
 			<PageHeader title={t("owner.title")} subtitle={t("owner.subtitle")} />
 
 			<TabBar
-				label={TABS_LABEL}
+				label={t("owner.title")}
 				tabs={OWNER_TABS}
 				active={tab}
 				onSelect={(next) => {
@@ -49,7 +47,7 @@ export function OwnerPage(): React.JSX.Element {
 				}}
 			/>
 
-			<TabContent label={TABS_LABEL} active={tab}>
+			<TabContent label={t("owner.title")} active={tab}>
 				{tab === "overview" && <OverviewTab />}
 				{tab === "usage" && (
 					<UsageTab

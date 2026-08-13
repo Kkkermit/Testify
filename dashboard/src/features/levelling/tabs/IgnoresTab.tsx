@@ -18,7 +18,7 @@ export function IgnoresTab({
 
 	return (
 		<TabPanel
-			description="Nothing said here, or by anyone holding these roles, earns XP."
+			description={t("levelling.ignoresBody")}
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 			className="gap-6"
 		>

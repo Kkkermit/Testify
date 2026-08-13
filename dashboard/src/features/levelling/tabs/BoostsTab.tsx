@@ -19,10 +19,7 @@ export function BoostsTab({
 	const update = useUpdateBoosts(guildId);
 
 	return (
-		<TabPanel
-			description="Members holding one of these earn more XP. Someone with several gets the highest, not the product."
-			saving={savingStateOf(update.isPending, update.isSuccess)}
-		>
+		<TabPanel description={t("levelling.boostsBody")} saving={savingStateOf(update.isPending, update.isSuccess)}>
 			<RoleChecklist
 				label={t("levelling.boostRoles")}
 				roles={roles}

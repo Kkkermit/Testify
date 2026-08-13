@@ -151,7 +151,7 @@ export function GiveawaysPage(): React.JSX.Element {
 				</div>
 
 				{failure !== null && (
-					<Warning>{failure instanceof ApiError ? failure.message : "That could not be saved."}</Warning>
+					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
 				)}
 			</Card>
 

@@ -1,5 +1,6 @@
 import { type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { SavingIndicator, type SavingState, Warning } from "@/components/form";
 import { Card } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -24,6 +25,7 @@ export function Section({
 	failure?: Error | null;
 	children: ReactNode;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	return (
 		<Card className="motion-pop flex flex-col gap-4">
 			<div className="flex items-start gap-3">
@@ -40,7 +42,7 @@ export function Section({
 			{children}
 
 			{failure !== null && (
-				<Warning>{failure instanceof ApiError ? failure.message : "That could not be saved."}</Warning>
+				<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
 			)}
 		</Card>
 	);

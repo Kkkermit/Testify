@@ -48,8 +48,8 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 					},
 					{ label: "Created", value: shortDate(guild.createdAt) },
 					{ label: "Server owner", value: guild.ownerId, mono: true },
-					{ label: "Testify’s nickname", value: guild.nickname ?? "None set" },
-					{ label: "Testify’s top role", value: guild.highestRole ?? "None" },
+					{ label: t("owner.nickname"), value: guild.nickname ?? "None set" },
+					{ label: t("owner.topRole"), value: guild.highestRole ?? "None" },
 				]}
 			/>
 
@@ -128,7 +128,7 @@ function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () =>
 			</Field>
 
 			{leave.error !== null && (
-				<Warning>{leave.error instanceof ApiError ? leave.error.message : "Testify could not leave."}</Warning>
+				<Warning>{leave.error instanceof ApiError ? leave.error.message : t("owner.couldNotLeave")}</Warning>
 			)}
 		</div>
 	);

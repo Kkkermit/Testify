@@ -89,7 +89,7 @@ export function BlacklistTab(): React.JSX.Element {
 				</div>
 
 				{failure !== null && (
-					<Warning>{failure instanceof ApiError ? failure.message : "That could not be saved."}</Warning>
+					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
 				)}
 			</Card>
 
@@ -132,7 +132,7 @@ export function BlacklistTab(): React.JSX.Element {
 									<Avatar name={row.tag ?? row.userId} url={row.avatarUrl} size={32} seed={row.userId} />
 									<div className="min-w-0">
 										{/* An account Discord no longer knows has no name, and the id is what identifies it anyway. */}
-										<p className="truncate text-sm font-medium">{row.tag ?? "Unknown account"}</p>
+										<p className="truncate text-sm font-medium">{row.tag ?? t("common.unknownAccount")}</p>
 										<p className="text-muted-foreground font-mono text-xs">{row.userId}</p>
 									</div>
 								</div>

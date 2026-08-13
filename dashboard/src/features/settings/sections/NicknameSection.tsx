@@ -87,7 +87,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 			{!allowed && current.data !== undefined && <Warning>{t("settings.nickNeedsPermission")}</Warning>}
 
 			{save.error !== null && (
-				<Warning>{save.error instanceof ApiError ? save.error.message : "That name could not be saved."}</Warning>
+				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 			)}
 		</Section>
 	);

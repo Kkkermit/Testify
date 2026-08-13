@@ -76,12 +76,8 @@ export function AutomodPage(): React.JSX.Element {
 					<Card>
 						<EmptyState
 							icon={<ShieldAlert size={28} />}
-							title={canManage ? "No AutoMod rules yet" : "Nothing to show"}
-							body={
-								canManage
-									? "Add one below, and Discord blocks matching messages before anyone reads them."
-									: "Grant Testify the Manage Server permission to see this server’s rules."
-							}
+							title={canManage ? "No AutoMod rules yet" : t("automod.nothingToShow")}
+							body={canManage ? t("automod.addOneBelow") : t("automod.needsPermission")}
 						/>
 					</Card>
 				) : (
@@ -164,7 +160,7 @@ export function AutomodPage(): React.JSX.Element {
 					{preset === "keyword" && markupWarning(word) !== null && <Warning>{markupWarning(word)}</Warning>}
 					{blocked !== null && word !== "" && <Warning>{blocked}</Warning>}
 					{add.error !== null && (
-						<Warning>{add.error instanceof ApiError ? add.error.message : "Discord refused that rule."}</Warning>
+						<Warning>{add.error instanceof ApiError ? add.error.message : t("automod.refusedRule")}</Warning>
 					)}
 
 					<div>
@@ -182,10 +178,10 @@ export function AutomodPage(): React.JSX.Element {
 			)}
 
 			{toggle.error !== null && (
-				<Warning>{toggle.error instanceof ApiError ? toggle.error.message : "That could not be changed."}</Warning>
+				<Warning>{toggle.error instanceof ApiError ? toggle.error.message : t("common.couldNotChange")}</Warning>
 			)}
 			{remove.error !== null && (
-				<Warning>{remove.error instanceof ApiError ? remove.error.message : "That could not be removed."}</Warning>
+				<Warning>{remove.error instanceof ApiError ? remove.error.message : t("common.couldNotRemove")}</Warning>
 			)}
 		</>
 	);

@@ -158,9 +158,7 @@ export function TicketsPage(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>{t("tickets.panelSays")}</h2>
 					<p className="text-muted-foreground text-sm">
-						{settings.posted
-							? "Posting again edits the panel already out there rather than leaving a second one."
-							: "Nothing is posted until you press the button below."}
+						{settings.posted ? t("tickets.postAgain") : t("tickets.nothingPosted")}
 					</p>
 				</div>
 
@@ -192,7 +190,7 @@ export function TicketsPage(): React.JSX.Element {
 				{markupWarning(draft.description) !== null && <Warning>{markupWarning(draft.description)}</Warning>}
 				{problem !== null && <Warning>{problem}</Warning>}
 				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : "That could not be saved."}</Warning>
+					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
 				<div className="flex flex-wrap items-center gap-3">
@@ -212,7 +210,7 @@ export function TicketsPage(): React.JSX.Element {
 							patch(true);
 						}}
 					>
-						<Send size={16} aria-hidden="true" /> {settings.posted ? "Update the panel" : "Post the panel"}
+						<Send size={16} aria-hidden="true" /> {settings.posted ? t("tickets.updatePanel") : t("tickets.postPanel")}
 					</Button>
 				</div>
 			</Card>
@@ -239,7 +237,7 @@ export function TicketsPage(): React.JSX.Element {
 			)}
 
 			{disable.error !== null && (
-				<Warning>{disable.error instanceof ApiError ? disable.error.message : "That could not be turned off."}</Warning>
+				<Warning>{disable.error instanceof ApiError ? disable.error.message : t("common.couldNotSave")}</Warning>
 			)}
 		</>
 	);

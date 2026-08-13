@@ -27,7 +27,7 @@ export function StickyPage(): React.JSX.Element {
 	const save = useSaveSticky(guildId);
 	const remove = useRemoveSticky(guildId);
 
-	usePageTitle("Sticky messages", overview.data?.name);
+	usePageTitle(t("sticky.title"), overview.data?.name);
 
 	const [channelId, setChannelId] = useState<string | null>(null);
 	const [message, setMessage] = useState("");
@@ -139,7 +139,7 @@ export function StickyPage(): React.JSX.Element {
 				{full && <Warning>{t("sticky.full")}</Warning>}
 				{blocked !== null && message !== "" && <Warning>{blocked}</Warning>}
 				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : "That could not be saved."}</Warning>
+					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
 				<div>
@@ -152,7 +152,7 @@ export function StickyPage(): React.JSX.Element {
 			{remove.error !== null && (
 				<Warning>
 					<Trash2 size={14} aria-hidden="true" className="mr-1 inline" />
-					{remove.error instanceof ApiError ? remove.error.message : "That could not be removed."}
+					{remove.error instanceof ApiError ? remove.error.message : t("common.couldNotRemove")}
 				</Warning>
 			)}
 		</>

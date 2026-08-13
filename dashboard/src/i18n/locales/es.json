@@ -21,7 +21,15 @@
 		"couldNotSave": "No se ha podido guardar.",
 		"memberCount_one": "{{count, number}} miembro",
 		"memberCount_many": "{{count, number}} miembros",
-		"memberCount_other": "{{count, number}} miembros"
+		"memberCount_other": "{{count, number}} miembros",
+		"couldNotChange": "No se ha podido cambiar.",
+		"couldNotRemove": "No se ha podido eliminar.",
+		"couldNotReset": "No se ha podido restablecer.",
+		"couldNotEnd": "No se ha podido terminar.",
+		"couldNotRun": "No se ha podido ejecutar.",
+		"didNotWork": "No ha funcionado.",
+		"discordRefused": "Discord lo ha rechazado.",
+		"unknownAccount": "Cuenta desconocida"
 	},
 	"nav": {
 		"servers": "Servidores",
@@ -156,11 +164,20 @@
 		"whatToBlock": "Qué bloquear",
 		"wordOrPhrase": "Palabra o frase",
 		"mentionsToAllow": "Menciones permitidas",
-		"mentionsHint": "Un mensaje con más se bloquea."
+		"mentionsHint": "Un mensaje con más se bloquea.",
+		"blocks": "Bloquea el mensaje",
+		"alerts": "Avisa a los moderadores",
+		"timesOut": "Silencia al miembro",
+		"somethingElse": "Hace otra cosa",
+		"nothingToShow": "No hay nada que mostrar",
+		"addOneBelow": "Añade una abajo y Discord bloqueará los mensajes que coincidan antes de que nadie los lea.",
+		"needsPermission": "Da a Testify el permiso Gestionar servidor para ver las reglas de este servidor.",
+		"refusedRule": "Discord ha rechazado esa regla."
 	},
 	"auth": {
 		"almostThere": "Ya casi está",
-		"signIn": "Iniciar sesión"
+		"signIn": "Iniciar sesión",
+		"finishSetup": "Terminar la configuración"
 	},
 	"auditLog": {
 		"title": "Registro de auditoría",
@@ -172,7 +189,8 @@
 		"postTo": "Publicar el registro en",
 		"postToHint": "Un sitio que solo puedan leer los moderadores: un registro de auditoría dice quién hizo qué.",
 		"whatTitle": "Qué se registra",
-		"whatBody": "Marca un encabezado para incluir todo el grupo."
+		"whatBody": "Marca un encabezado para incluir todo el grupo.",
+		"allSelected": "Está todo seleccionado, así que los eventos que se añadan en futuras versiones también se registrarán."
 	},
 	"treasure": {
 		"title": "Tesoros",
@@ -185,7 +203,8 @@
 		"smallest": "Cantidad mínima",
 		"largest": "Cantidad máxima",
 		"cooldown": "Espera",
-		"cooldownHint": "Minutos antes de que pueda aparecer otro, por muy activo que esté el chat."
+		"cooldownHint": "Minutos antes de que pueda aparecer otro, por muy activo que esté el chat.",
+		"notSetUpYet": "Sin configurar todavía: los números de abajo son los valores por defecto hasta que actives los tesoros."
 	},
 	"welcome": {
 		"title": "Mensajes de bienvenida",
@@ -237,7 +256,11 @@
 		"switchedOffHere": "{{count}} desactivados aquí.",
 		"subtitleGlobal": "Todo lo que Testify puede hacer. Un comando desactivado aquí queda desactivado en todos los servidores, para todo el mundo.",
 		"subtitleGuild": "Todo lo que Testify puede hacer. Desactiva uno y nadie de este servidor podrá usarlo, de ninguna forma.",
-		"subtitlePlain": "Todo lo que Testify puede hacer, tanto con barra como con prefijo."
+		"subtitlePlain": "Todo lo que Testify puede hacer, tanto con barra como con prefijo.",
+		"availableToAll": "Puede ejecutarlo quien tenga permiso para usarlo",
+		"offHere": "Nadie de este servidor puede ejecutarlo",
+		"offEverywhere": "El propietario del bot lo ha desactivado en todas partes",
+		"locked": "Testify necesita que este siga activo"
 	},
 	"giveaways": {
 		"title": "Sorteos",
@@ -272,7 +295,10 @@
 		"role": "Rol",
 		"chooseRole": "Elige un rol",
 		"rewardsFull": "Ese es el máximo de recompensas que Testify puede guardar. Quita una para añadir otra.",
-		"hierarchyNote": "Los roles por encima de Testify en la jerarquía se ocultan, porque no podría concederlos."
+		"hierarchyNote": "Los roles por encima de Testify en la jerarquía se ocultan, porque no podría concederlos.",
+		"tabsLabel": "Ajustes de niveles",
+		"ignoresBody": "Nada de lo que se diga aquí, ni de quien tenga estos roles, da XP.",
+		"boostsBody": "Quien tenga uno de estos gana más XP. Con varios se aplica el más alto, no el producto."
 	},
 	"members": {
 		"title": "Miembros",
@@ -294,7 +320,9 @@
 		"leftServer": "Salió del servidor",
 		"softbanned": "Con softban",
 		"standing": "Situación en este servidor",
-		"edited": "Editado"
+		"edited": "Editado",
+		"noXpYet": "Todavía no ha ganado XP aquí.",
+		"noAccountYet": "Todavía no tiene cuenta aquí; añadir dinero le abre una."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -316,7 +344,11 @@
 		"panelSays": "Lo que dice el panel",
 		"message": "Mensaje",
 		"buttonLabel": "Texto del botón",
-		"turnOff": "Desactivar los tickets"
+		"turnOff": "Desactivar los tickets",
+		"postAgain": "Volver a publicar edita el panel que ya existe en lugar de dejar un segundo.",
+		"nothingPosted": "No se publica nada hasta que pulses el botón de abajo.",
+		"updatePanel": "Actualizar el panel",
+		"postPanel": "Publicar el panel"
 	},
 	"lottery": {
 		"title": "Lotería",
@@ -341,7 +373,8 @@
 		"cannotUndo": "Esto no se puede deshacer.",
 		"pastDraws": "Sorteos anteriores",
 		"noDraws": "Todavía no hay sorteos",
-		"noDrawsBody": "El primero aparecerá aquí en cuanto se celebre."
+		"noDrawsBody": "El primero aparecerá aquí en cuanto se celebre.",
+		"start": "Empezar la lotería"
 	},
 	"settings": {
 		"title": "Ajustes del servidor",
@@ -390,7 +423,9 @@
 		"verifyInHint": "Un canal que los nuevos miembros puedan ver antes de tener el rol.",
 		"verifyRole": "Darles este rol",
 		"verifyNoRole": "Ningún rol elegido",
-		"verifyPanel": "Lo que dice el panel"
+		"verifyPanel": "Lo que dice el panel",
+		"updatePanel": "Actualizar el panel publicado",
+		"postPanel": "Publicar el panel"
 	},
 	"owner": {
 		"title": "Consola del propietario",
@@ -454,6 +489,40 @@
 		"configured": "Configurado:",
 		"nothingSetUp": "Nada configurado",
 		"leaveServer": "Salir de este servidor",
-		"guildTableCaption": "Servidores en los que está Testify, de mayor a menor"
+		"guildTableCaption": "Servidores en los que está Testify, de mayor a menor",
+		"pausedBody": "Testify está conectado pero lo rechaza todo. Ni comandos, ni XP, ni automoderación.",
+		"runningBody": "Testify responde a los comandos con normalidad.",
+		"paused": "En pausa",
+		"resume": "Reanudar Testify",
+		"pause": "Pausar Testify",
+		"couldNotLeave": "Testify no ha podido salir.",
+		"nickname": "Apodo de Testify",
+		"topRole": "Rol más alto de Testify",
+		"noCommandRun": "Todavía no se ha ejecutado ningún comando.",
+		"noCommandsRegistered": "No hay comandos registrados.",
+		"noServerRun": "Ningún servidor ha ejecutado un comando todavía.",
+		"nothingRecorded": "Todavía no hay nada registrado.",
+		"slashCommands": "Comandos de barra",
+		"prefixCommands": "Comandos con prefijo",
+		"noScreenOpened": "Todavía no se ha abierto ninguna pantalla.",
+		"levelTrace": "Cada línea que escribe el bot",
+		"levelDebug": "Depuración y superiores",
+		"levelInfo": "Arranque y avisos rutinarios",
+		"levelWarn": "Advertencias y peores",
+		"levelFatal": "Solo lo que detuvo el bot",
+		"readingBuffer": "Leyendo el búfer…",
+		"refreshing": "Se actualiza cada 5 segundos.",
+		"running": "En marcha",
+		"couldNotShutDown": "No se ha podido apagar Testify.",
+		"levelError": "Solo fallos",
+		"levelAll": "Todo",
+		"levelDebugName": "Depuración",
+		"levelInfoName": "Info",
+		"levelWarnName": "Advertencias",
+		"levelErrorName": "Errores",
+		"levelFatalName": "Graves",
+		"showing": "Mostrando {{shown}} de {{matched}} líneas coincidentes",
+		"held": "{{buffered}} de {{capacity}} guardadas",
+		"pausedFull": "En pausa."
 	}
 }

@@ -3,12 +3,14 @@ import { Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Toggle } from "@/components/form";
 import { Badge, cardClass, Button } from "@/components/primitives";
+import { type TranslationKey } from "@/i18n";
 
-const ACTION_LABEL: Record<AutomodAction, string> = {
-	block: "Blocks the message",
-	alert: "Alerts moderators",
-	timeout: "Times the member out",
-	other: "Does something else",
+/** Keys rather than text: a module-level map is built once, long before a locale is chosen. */
+const ACTION_KEY: Record<AutomodAction, TranslationKey> = {
+	block: "automod.blocks",
+	alert: "automod.alerts",
+	timeout: "automod.timesOut",
+	other: "automod.somethingElse",
 };
 
 export function RuleRow({
@@ -32,7 +34,7 @@ export function RuleRow({
 				</div>
 				<p className="text-muted-foreground text-xs">
 					{rule.trigger}
-					{rule.actions.length > 0 && ` — ${rule.actions.map((action) => ACTION_LABEL[action]).join(", ")}`}
+					{rule.actions.length > 0 && ` — ${rule.actions.map((action) => t(ACTION_KEY[action])).join(", ")}`}
 				</p>
 			</div>
 
