@@ -1,6 +1,7 @@
 import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
+import { OWNER_TABS } from "@/features/owner/owner.types";
 import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
@@ -138,6 +139,27 @@ describe("the owner console", () => {
 
 		expect(await screen.findByText(/something went wrong/i)).toBeInTheDocument();
 		expect(screen.queryByRole("table")).toBeNull();
+	});
+});
+
+/**
+ * `TabContent` is a bare `<div>`, so a tab inherits no vertical rhythm from the console the way a page inherits
+ * `AppShell`'s `gap-6` column. `CommandsPage` is mounted both ways and brought none of its own, which collapsed
+ * every gap on the commands tab to zero while the same component looked right at `/commands`.
+ *
+ * jsdom computes no styles, so this pins the class the browser check confirmed.
+ */
+describe("every owner console tab brings its own vertical rhythm", () => {
+	it.each(OWNER_TABS.map((tab) => tab.key))("%s", async (key) => {
+		useOwnerApi([row()]);
+		renderWithProviders(<OwnerPage />, { path: "/owner", route: `/owner?tab=${key}` });
+
+		const panel = await screen.findByRole("tabpanel");
+		await waitFor(() => {
+			const root = panel.firstElementChild;
+			expect(root?.className).toMatch(/\bflex-col\b/);
+			expect(root?.className).toMatch(/\bgap-\d\b/);
+		});
 	});
 });
 

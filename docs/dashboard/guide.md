@@ -631,6 +631,18 @@ request falls through to the SPA catch-all. `tests/api/server.test.ts` reads Hon
 **Prettier reflows what a script inserted.** When patching a file programmatically, re-read it afterwards —
 indentation you matched on may already have changed.
 
+**A component mounted in two parents inherits the rhythm of neither reliably.** A page returning a bare
+fragment gets its vertical spacing from `AppShell`'s `flex flex-col gap-6` content column. `TabContent` is a
+plain `<div>`, so the same component mounted as an owner console tab gets **zero** — `CommandsPage` shipped
+that way and every gap on the commands tab collapsed while `/commands` looked right, which is the confusing
+half: one component, two mounts, only one of them wrong. The seven hand-written tabs each open with their own
+`<div className="flex flex-col gap-…">` and so never showed it.
+
+The rule: **anything mounted in more than one place owns its own rhythm.** Wrapping the page's fragment in
+`flex flex-col gap-6` is invisible under `AppShell` — a single child of a gap column spaces identically — and
+supplies the gaps everywhere else. `OwnerPage.test.tsx` asserts every tab's panel root carries a `flex-col` and
+a gap; jsdom computes no styles, so it pins the class and a browser measurement confirmed the 24px.
+
 ---
 
 ## 17. Current screens

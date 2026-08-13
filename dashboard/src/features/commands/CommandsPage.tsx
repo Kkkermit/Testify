@@ -49,7 +49,8 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	}
 
 	return (
-		<>
+		// Its own rhythm rather than the shell's: mounted in an owner console tab there is no gap-6 column above it.
+		<div className="flex flex-col gap-6">
 			{global ? (
 				<p className="text-muted-foreground text-sm">
 					{subtitleFor(global, state !== undefined)} {switchedOff(state, global)}
@@ -152,7 +153,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					))}
 				</div>
 			)}
-		</>
+		</div>
 	);
 }
 
