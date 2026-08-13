@@ -19,11 +19,10 @@
 		"page": "Página {{page}} de {{total}}",
 		"notSetUp": "Sin configurar",
 		"couldNotSave": "No se ha podido guardar.",
-		"memberCount_one": "{{count}} miembro",
-		"memberCount_many": "{{count}} miembros",
-		"memberCount_other": "{{count}} miembros"
+		"memberCount_one": "{{count, number}} miembro",
+		"memberCount_many": "{{count, number}} miembros",
+		"memberCount_other": "{{count, number}} miembros"
 	},
-
 	"nav": {
 		"servers": "Servidores",
 		"serversHint": "Todos los servidores que puedes configurar",
@@ -69,24 +68,33 @@
 		"privacyHint": "Leer el aviso de privacidad",
 		"signOut": "Cerrar sesión",
 		"signOutHint": "Cerrar sesión en el panel",
-		"skipToContent": "Saltar al contenido"
+		"skipToContent": "Saltar al contenido",
+		"sections": "Secciones",
+		"menu": "Menú",
+		"closeMenu": "Cerrar el menú"
 	},
-
 	"error": {
-		"title": "Algo ha salido mal",
-		"body": "La solicitud no se ha completado. Inténtalo de nuevo en un momento.",
-		"notAllowed": "No puedes abrir esto",
-		"notAllowedBody": "Pide acceso a alguien que administre este servidor.",
-		"signedOut": "Se ha cerrado tu sesión",
-		"signedOutBody": "Vuelve a iniciar sesión para continuar."
+		"unreachableTitle": "Algo ha salido mal",
+		"unreachableBody": "El panel no ha podido conectar con el bot.",
+		"botLeftTitle": "Testify no está en ese servidor",
+		"botLeftBody": "Vuelve a invitarlo y esta página funcionará de nuevo.",
+		"cannotManageTitle": "No puedes administrar ese servidor",
+		"cannotManageBody": "Necesitas el permiso Gestionar servidor allí.",
+		"notAMemberTitle": "No estás en ese servidor",
+		"notAMemberBody": "Vuelve a unirte e inténtalo de nuevo.",
+		"rateLimitedTitle": "Demasiadas solicitudes",
+		"setupRequiredTitle": "El panel no está configurado",
+		"setupRequiredBody": "Completa los pasos de configuración en la página de inicio de sesión.",
+		"backToServers": "Volver a los servidores"
 	},
-
 	"notFound": {
-		"title": "No hay nada en esta dirección",
-		"body": "La página {{path}} no existe. Puede que se haya renombrado o que el enlace sea incorrecto.",
+		"backToDashboard": "Volver al panel",
+		"title": "Página no encontrada",
+		"subtitle": "Esa dirección no corresponde a ninguna pantalla de este panel.",
+		"emptyTitle": "Aquí no hay nada",
+		"emptyBody": "Comprueba si hay una errata en la dirección, o empieza de nuevo desde tus servidores. Si has llegado aquí desde un enlace del propio panel, merece la pena avisar.",
 		"toServers": "Ir a tus servidores"
 	},
-
 	"appearance": {
 		"title": "Apariencia",
 		"subtitle": "Cómo se ve este panel en tu navegador. No afecta a nadie más.",
@@ -109,5 +117,18 @@
 		"followsSystem": "Tu dispositivo ya pide menos animación, así que esto está activo de todos modos.",
 		"accent": "Color de acento",
 		"accentDescribes": "Se usa para el foco, los enlaces y el fondo. El contraste se comprueba en ambos temas."
+	},
+	"guilds": {
+		"title": "Servidores",
+		"subtitle": "Todos los sitios donde puedes cambiar los ajustes de Testify, o añadirlo.",
+		"search": "Buscar servidores",
+		"emptyTitle": "Todavía no hay nada que configurar",
+		"noMatchTitle": "Ningún servidor coincide",
+		"emptyBody": "Necesitas el permiso Gestionar servidor para que un servidor aparezca aquí. Pídeselo a su propietario, o invita a Testify a uno propio.",
+		"noMatchBody": "Prueba con una parte del nombre.",
+		"notHereYet": "Testify aún no está aquí",
+		"add": "Añadir",
+		"noPermission": "Sin permiso",
+		"noPermissionHint": "Añadir un bot requiere el permiso Gestionar servidor. Pídeselo a alguien que lo tenga."
 	}
 }

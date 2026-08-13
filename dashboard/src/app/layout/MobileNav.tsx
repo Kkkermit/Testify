@@ -1,6 +1,7 @@
 import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { BotMark } from "@/components/brand/BotMark";
 import { type NavAudience } from "@/config/navigation";
@@ -19,6 +20,7 @@ export function MobileNav({
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const openerRef = useRef<HTMLButtonElement>(null);
 	const panelRef = useRef<HTMLDivElement>(null);
 
@@ -56,7 +58,7 @@ export function MobileNav({
 					className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-card p-2 transition-colors duration-150"
 				>
 					<Menu size={20} aria-hidden="true" />
-					<span className="sr-only">Menu</span>
+					<span className="sr-only">{t("nav.menu")}</span>
 				</button>
 				<BotMark src={bot?.avatarUrl} size={20} />
 				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
@@ -77,7 +79,7 @@ export function MobileNav({
 						className="text-muted-foreground hover:text-foreground absolute top-4 right-4 p-2"
 					>
 						<X size={20} aria-hidden="true" />
-						<span className="sr-only">Close the menu</span>
+						<span className="sr-only">{t("nav.closeMenu")}</span>
 					</button>
 				</div>
 			)}

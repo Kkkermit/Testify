@@ -1,3 +1,5 @@
+import { type TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Button, Card } from "@/components/primitives";
 import { ApiError } from "@/lib/api";
@@ -13,7 +15,8 @@ export function ErrorState({
 	/** `h2` when it replaces one panel of a screen that still has its own `<h1>`, such as an owner console tab. */
 	as?: "h1" | "h2";
 }): React.JSX.Element {
-	const { title, body, retryable } = describe(error);
+	const { t } = useTranslation();
+	const { title, body, retryable } = describe(error, t);
 
 	return (
 		<Card className="flex flex-col items-start gap-3">
@@ -22,49 +25,42 @@ export function ErrorState({
 			<div className="flex gap-2">
 				{retryable && onRetry !== undefined && (
 					<Button onClick={onRetry} variant="secondary">
-						Try again
+						{t("common.retry")}
 					</Button>
 				)}
 				<Link
 					to="/guilds"
 					className="text-muted-foreground hover:text-foreground inline-flex items-center px-2 py-2 text-sm"
 				>
-					Back to servers
+					{t("error.backToServers")}
 				</Link>
 			</div>
 		</Card>
 	);
 }
 
-export function describe(error: unknown): { title: string; body: string; retryable: boolean } {
+/**
+ * Takes the translator rather than returning keys, so this stays one function whose output is what the reader
+ * sees — and its tests can keep asserting on the sentence rather than on a key nobody reads.
+ */
+export function describe(error: unknown, t: TFunction): { title: string; body: string; retryable: boolean } {
 	if (!(error instanceof ApiError)) {
-		return { title: "Something went wrong", body: "The dashboard could not reach the bot.", retryable: true };
+		return { title: t("error.unreachableTitle"), body: t("error.unreachableBody"), retryable: true };
 	}
 
 	switch (error.code) {
 		case "guild_not_found":
-			return {
-				title: "Testify is not in that server",
-				body: "Invite it back and this page will work again.",
-				retryable: false,
-			};
+			return { title: t("error.botLeftTitle"), body: t("error.botLeftBody"), retryable: false };
 		case "missing_manage_guild":
-			return {
-				title: "You cannot manage that server",
-				body: "You need the Manage Server permission there.",
-				retryable: false,
-			};
+			return { title: t("error.cannotManageTitle"), body: t("error.cannotManageBody"), retryable: false };
 		case "not_a_member":
-			return { title: "You are not in that server", body: "Rejoin it and try again.", retryable: false };
+			return { title: t("error.notAMemberTitle"), body: t("error.notAMemberBody"), retryable: false };
+		// The server's own wording says when to come back, and repeating it beats replacing it.
 		case "rate_limited":
-			return { title: "Too many requests", body: error.message, retryable: true };
+			return { title: t("error.rateLimitedTitle"), body: error.message, retryable: true };
 		case "setup_required":
-			return {
-				title: "The dashboard is not configured",
-				body: "Finish the setup steps on the sign-in page.",
-				retryable: false,
-			};
+			return { title: t("error.setupRequiredTitle"), body: t("error.setupRequiredBody"), retryable: false };
 		default:
-			return { title: "Something went wrong", body: error.message, retryable: error.status >= 500 };
+			return { title: t("error.unreachableTitle"), body: error.message, retryable: error.status >= 500 };
 	}
 }

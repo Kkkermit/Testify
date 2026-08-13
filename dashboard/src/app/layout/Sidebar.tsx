@@ -50,7 +50,7 @@ export function Sidebar({
 
 	return (
 		<nav
-			aria-label="Sections"
+			aria-label={t("nav.sections")}
 			onClick={onNavigate}
 			className={cnSidebar(expanded)}
 			data-testid={expanded ? "sidebar-drawer" : "sidebar"}

@@ -1,5 +1,6 @@
 import { inviteUrl, type ManageableGuild } from "@testify/shared";
 import { ChevronRight, Lock, Plus } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Card, cardClass, Avatar, Tooltip } from "@/components/primitives";
 import { type GuildGroupKey } from "@/features/guilds/guilds.utils";
@@ -13,13 +14,14 @@ export function GuildCard({
 	group: GuildGroupKey;
 	clientId: string | undefined;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const body = (
 		<>
 			<Avatar name={guild.name} url={guild.iconUrl} seed={guild.id} />
 			<span className="min-w-0 flex-1">
 				<span className="block truncate font-medium">{guild.name}</span>
 				<span className="text-muted-foreground block text-xs tabular-nums">
-					{guild.memberCount === null ? "Testify is not here yet" : `${guild.memberCount.toLocaleString()} members`}
+					{guild.memberCount === null ? t("guilds.notHereYet") : t("common.memberCount", { count: guild.memberCount })}
 				</span>
 			</span>
 		</>
@@ -52,7 +54,7 @@ export function GuildCard({
 				{body}
 				<span className="text-accent flex shrink-0 items-center gap-2 text-sm font-medium">
 					<Plus size={15} aria-hidden="true" />
-					Add
+					{t("guilds.add")}
 				</span>
 			</a>
 		);
@@ -61,10 +63,10 @@ export function GuildCard({
 	return (
 		<Card padding="compact" className={`${surface} opacity-70`}>
 			{body}
-			<Tooltip label="Adding a bot needs the Manage Server permission. Ask somebody who has it.">
+			<Tooltip label={t("guilds.noPermissionHint")}>
 				<span tabIndex={0} className="text-muted-foreground flex shrink-0 items-center gap-2 rounded-full text-xs">
 					<Lock size={14} aria-hidden="true" />
-					No permission
+					{t("guilds.noPermission")}
 				</span>
 			</Tooltip>
 		</Card>

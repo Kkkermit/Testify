@@ -1,5 +1,6 @@
 import { Search, ServerOff } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FIELD } from "@/components/form";
 import { Reveal } from "@/components/motion";
 import { EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
@@ -11,7 +12,8 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
 export function GuildPickerPage(): React.JSX.Element {
-	usePageTitle("Servers");
+	const { t } = useTranslation();
+	usePageTitle(t("guilds.title"));
 	const me = useMe();
 	const bot = useBot();
 	const [search, setSearch] = useState("");
@@ -23,10 +25,10 @@ export function GuildPickerPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title="Servers" subtitle="Everywhere you can change Testify’s settings, or add it." />
+			<PageHeader title={t("guilds.title")} subtitle={t("guilds.subtitle")} />
 
 			<label className="motion-reveal relative block">
-				<span className="sr-only">Search servers</span>
+				<span className="sr-only">{t("guilds.search")}</span>
 				<Search
 					size={18}
 					aria-hidden="true"
@@ -39,7 +41,7 @@ export function GuildPickerPage(): React.JSX.Element {
 					onChange={(event) => {
 						setSearch(event.target.value);
 					}}
-					placeholder="Search servers"
+					placeholder={t("guilds.search")}
 					className={cn(FIELD, "py-3 pr-4 pl-12 text-base")}
 				/>
 			</label>
@@ -47,12 +49,8 @@ export function GuildPickerPage(): React.JSX.Element {
 			{found === 0 ? (
 				<EmptyState
 					icon={<ServerOff size={28} />}
-					title={search === "" ? "Nothing to configure yet" : "No server matches that"}
-					body={
-						search === ""
-							? "You need Manage Server in a server before it shows up here. Ask its owner, or invite Testify to one of your own."
-							: "Try part of the name instead."
-					}
+					title={t(search === "" ? "guilds.emptyTitle" : "guilds.noMatchTitle")}
+					body={t(search === "" ? "guilds.emptyBody" : "guilds.noMatchBody")}
 				/>
 			) : (
 				groups.map((group) => (

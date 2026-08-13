@@ -1,4 +1,5 @@
 import { ArrowLeft, Compass } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router";
 import { Card, EmptyState, PageHeader } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
@@ -10,7 +11,8 @@ import { cn } from "@/lib/cn";
  * sign-in screen for a page that was never going to exist.
  */
 export function NotFoundPage(): React.JSX.Element {
-	usePageTitle("Page not found");
+	const { t } = useTranslation();
+	usePageTitle(t("notFound.title"));
 	const { pathname } = useLocation();
 
 	return (
@@ -20,19 +22,19 @@ export function NotFoundPage(): React.JSX.Element {
 				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}
 			>
 				<ArrowLeft size={15} aria-hidden="true" />
-				Back to the dashboard
+				{t("notFound.backToDashboard")}
 			</Link>
 
-			<PageHeader title="Page not found" subtitle="That address does not match any screen in this dashboard." />
+			<PageHeader title={t("notFound.title")} subtitle={t("notFound.subtitle")} />
 
 			<Card>
 				<EmptyState
 					icon={<Compass size={28} />}
-					title="Nothing lives here"
-					body="Check the address for a typo, or start again from your servers. If a link inside the dashboard brought you here, that is worth reporting."
+					title={t("notFound.emptyTitle")}
+					body={t("notFound.emptyBody")}
 					action={
 						<Link to="/guilds" className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}>
-							Go to your servers
+							{t("notFound.toServers")}
 						</Link>
 					}
 				/>

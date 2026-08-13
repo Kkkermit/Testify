@@ -19,10 +19,9 @@
 		"page": "Seite {{page}} von {{total}}",
 		"notSetUp": "Nicht eingerichtet",
 		"couldNotSave": "Das konnte nicht gespeichert werden.",
-		"memberCount_one": "{{count}} Mitglied",
-		"memberCount_other": "{{count}} Mitglieder"
+		"memberCount_one": "{{count, number}} Mitglied",
+		"memberCount_other": "{{count, number}} Mitglieder"
 	},
-
 	"nav": {
 		"servers": "Server",
 		"serversHint": "Alle Server, die du verwalten kannst",
@@ -68,24 +67,33 @@
 		"privacyHint": "Datenschutzhinweis lesen",
 		"signOut": "Abmelden",
 		"signOutHint": "Vom Dashboard abmelden",
-		"skipToContent": "Zum Inhalt springen"
+		"skipToContent": "Zum Inhalt springen",
+		"sections": "Bereiche",
+		"menu": "Menü",
+		"closeMenu": "Menü schließen"
 	},
-
 	"error": {
-		"title": "Etwas ist schiefgelaufen",
-		"body": "Die Anfrage ist nicht durchgegangen. Versuche es gleich noch einmal.",
-		"notAllowed": "Das kannst du nicht öffnen",
-		"notAllowedBody": "Bitte jemanden, der diesen Server verwaltet, dir Zugriff zu geben.",
-		"signedOut": "Du wurdest abgemeldet",
-		"signedOutBody": "Melde dich erneut an, um fortzufahren."
+		"unreachableTitle": "Etwas ist schiefgelaufen",
+		"unreachableBody": "Das Dashboard konnte den Bot nicht erreichen.",
+		"botLeftTitle": "Testify ist nicht auf diesem Server",
+		"botLeftBody": "Lade ihn wieder ein, dann funktioniert diese Seite erneut.",
+		"cannotManageTitle": "Du kannst diesen Server nicht verwalten",
+		"cannotManageBody": "Dort fehlt dir die Berechtigung „Server verwalten“.",
+		"notAMemberTitle": "Du bist nicht auf diesem Server",
+		"notAMemberBody": "Tritt ihm wieder bei und versuche es erneut.",
+		"rateLimitedTitle": "Zu viele Anfragen",
+		"setupRequiredTitle": "Das Dashboard ist nicht eingerichtet",
+		"setupRequiredBody": "Schließe die Einrichtungsschritte auf der Anmeldeseite ab.",
+		"backToServers": "Zurück zu den Servern"
 	},
-
 	"notFound": {
-		"title": "Unter dieser Adresse gibt es nichts",
-		"body": "Die Seite {{path}} existiert nicht. Vielleicht wurde sie umbenannt oder der Link ist falsch.",
+		"backToDashboard": "Zurück zum Dashboard",
+		"title": "Seite nicht gefunden",
+		"subtitle": "Diese Adresse gehört zu keiner Seite in diesem Dashboard.",
+		"emptyTitle": "Hier gibt es nichts",
+		"emptyBody": "Prüfe die Adresse auf einen Tippfehler oder fange bei deinen Servern neu an. Wenn dich ein Link im Dashboard hierher gebracht hat, ist das eine Meldung wert.",
 		"toServers": "Zu deinen Servern"
 	},
-
 	"appearance": {
 		"title": "Darstellung",
 		"subtitle": "Wie dieses Dashboard in deinem Browser aussieht. Für andere ändert sich nichts.",
@@ -108,5 +116,18 @@
 		"followsSystem": "Dein Gerät bittet bereits um weniger Bewegung, das ist also ohnehin aktiv.",
 		"accent": "Akzentfarbe",
 		"accentDescribes": "Für Fokusrahmen, Links und den Hintergrund. Der Kontrast wird in beiden Designs geprüft."
+	},
+	"guilds": {
+		"title": "Server",
+		"subtitle": "Überall, wo du Testifys Einstellungen ändern oder ihn hinzufügen kannst.",
+		"search": "Server suchen",
+		"emptyTitle": "Noch nichts einzurichten",
+		"noMatchTitle": "Kein Server passt dazu",
+		"emptyBody": "Du brauchst „Server verwalten“, damit ein Server hier auftaucht. Frage die Inhaberin oder den Inhaber, oder lade Testify auf einen eigenen Server ein.",
+		"noMatchBody": "Versuche es mit einem Teil des Namens.",
+		"notHereYet": "Testify ist hier noch nicht",
+		"add": "Hinzufügen",
+		"noPermission": "Keine Berechtigung",
+		"noPermissionHint": "Einen Bot hinzuzufügen erfordert „Server verwalten“. Frage jemanden, der die Berechtigung hat."
 	}
 }

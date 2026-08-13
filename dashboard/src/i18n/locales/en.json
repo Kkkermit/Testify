@@ -19,10 +19,9 @@
 		"page": "Page {{page}} of {{total}}",
 		"notSetUp": "Not set up",
 		"couldNotSave": "That could not be saved.",
-		"memberCount_one": "{{count}} member",
-		"memberCount_other": "{{count}} members"
+		"memberCount_one": "{{count, number}} member",
+		"memberCount_other": "{{count, number}} members"
 	},
-
 	"nav": {
 		"servers": "Servers",
 		"serversHint": "Every server you can configure",
@@ -68,24 +67,33 @@
 		"privacyHint": "Read the privacy notice",
 		"signOut": "Sign out",
 		"signOutHint": "Sign out of the dashboard",
-		"skipToContent": "Skip to content"
+		"skipToContent": "Skip to content",
+		"sections": "Sections",
+		"menu": "Menu",
+		"closeMenu": "Close the menu"
 	},
-
 	"error": {
-		"title": "Something went wrong",
-		"body": "The request did not go through. Try again in a moment.",
-		"notAllowed": "You cannot open this",
-		"notAllowedBody": "Ask somebody who manages this server to grant you access.",
-		"signedOut": "You have been signed out",
-		"signedOutBody": "Sign in again to carry on."
+		"unreachableTitle": "Something went wrong",
+		"unreachableBody": "The dashboard could not reach the bot.",
+		"botLeftTitle": "Testify is not in that server",
+		"botLeftBody": "Invite it back and this page will work again.",
+		"cannotManageTitle": "You cannot manage that server",
+		"cannotManageBody": "You need the Manage Server permission there.",
+		"notAMemberTitle": "You are not in that server",
+		"notAMemberBody": "Rejoin it and try again.",
+		"rateLimitedTitle": "Too many requests",
+		"setupRequiredTitle": "The dashboard is not configured",
+		"setupRequiredBody": "Finish the setup steps on the sign-in page.",
+		"backToServers": "Back to servers"
 	},
-
 	"notFound": {
-		"title": "There is nothing at this address",
-		"body": "The page {{path}} does not exist. It may have been renamed, or the link may be wrong.",
+		"backToDashboard": "Back to the dashboard",
+		"title": "Page not found",
+		"subtitle": "That address does not match any screen in this dashboard.",
+		"emptyTitle": "Nothing lives here",
+		"emptyBody": "Check the address for a typo, or start again from your servers. If a link inside the dashboard brought you here, that is worth reporting.",
 		"toServers": "Go to your servers"
 	},
-
 	"appearance": {
 		"title": "Appearance",
 		"subtitle": "How this dashboard looks in your browser. Nobody else is affected.",
@@ -108,5 +116,18 @@
 		"followsSystem": "Your device already asks for reduced motion, so this is on either way.",
 		"accent": "Accent colour",
 		"accentDescribes": "Used for the focus ring, links and the backdrop. Contrast is checked against both themes."
+	},
+	"guilds": {
+		"title": "Servers",
+		"subtitle": "Everywhere you can change Testify’s settings, or add it.",
+		"search": "Search servers",
+		"emptyTitle": "Nothing to configure yet",
+		"noMatchTitle": "No server matches that",
+		"emptyBody": "You need Manage Server in a server before it shows up here. Ask its owner, or invite Testify to one of your own.",
+		"noMatchBody": "Try part of the name instead.",
+		"notHereYet": "Testify is not here yet",
+		"add": "Add",
+		"noPermission": "No permission",
+		"noPermissionHint": "Adding a bot needs the Manage Server permission. Ask somebody who has it."
 	}
 }

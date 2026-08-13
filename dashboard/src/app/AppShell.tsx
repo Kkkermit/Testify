@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useParams } from "react-router";
 import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
@@ -14,6 +15,7 @@ export function AppShell(): React.JSX.Element {
 	const bot = useBot();
 	const { guildId } = useParams();
 	const location = useLocation();
+	const { t } = useTranslation();
 	const [menuOpen, setMenuOpen] = useState(false);
 
 	useScreenView();
@@ -37,7 +39,7 @@ export function AppShell(): React.JSX.Element {
 				href="#content"
 				className="bg-primary text-primary-foreground sr-only rounded px-3 py-2 focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-50"
 			>
-				Skip to content
+				{t("nav.skipToContent")}
 			</a>
 
 			<MobileNav {...audience} user={user} bot={bot.data} open={menuOpen} onOpenChange={setMenuOpen} />

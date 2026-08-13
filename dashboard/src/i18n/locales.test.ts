@@ -73,7 +73,8 @@ function lookup(node: Json, path: string): string | undefined {
 }
 
 function placeholders(message: string): string[] {
-	return [...message.matchAll(/\{\{(\w+)\}\}/g)].map((match) => match[1] ?? "");
+	// `{{count, number}}` carries a formatter after the name, and the name is the part that has to match.
+	return [...message.matchAll(/\{\{\s*(\w+)[^}]*\}\}/g)].map((match) => match[1] ?? "");
 }
 
 describe("the locale list", () => {

@@ -19,11 +19,10 @@
 		"page": "Page {{page}} sur {{total}}",
 		"notSetUp": "Non configuré",
 		"couldNotSave": "Impossible d’enregistrer.",
-		"memberCount_one": "{{count}} membre",
-		"memberCount_many": "{{count}} membres",
-		"memberCount_other": "{{count}} membres"
+		"memberCount_one": "{{count, number}} membre",
+		"memberCount_many": "{{count, number}} membres",
+		"memberCount_other": "{{count, number}} membres"
 	},
-
 	"nav": {
 		"servers": "Serveurs",
 		"serversHint": "Tous les serveurs que vous pouvez configurer",
@@ -69,24 +68,33 @@
 		"privacyHint": "Lire l’avis de confidentialité",
 		"signOut": "Se déconnecter",
 		"signOutHint": "Se déconnecter du tableau de bord",
-		"skipToContent": "Aller au contenu"
+		"skipToContent": "Aller au contenu",
+		"sections": "Sections",
+		"menu": "Menu",
+		"closeMenu": "Fermer le menu"
 	},
-
 	"error": {
-		"title": "Une erreur est survenue",
-		"body": "La requête n’a pas abouti. Réessayez dans un instant.",
-		"notAllowed": "Vous ne pouvez pas ouvrir ceci",
-		"notAllowedBody": "Demandez l’accès à une personne qui administre ce serveur.",
-		"signedOut": "Vous avez été déconnecté",
-		"signedOutBody": "Reconnectez-vous pour continuer."
+		"unreachableTitle": "Une erreur est survenue",
+		"unreachableBody": "Le tableau de bord n’a pas pu joindre le bot.",
+		"botLeftTitle": "Testify n’est pas sur ce serveur",
+		"botLeftBody": "Réinvitez-le et cette page fonctionnera de nouveau.",
+		"cannotManageTitle": "Vous ne pouvez pas administrer ce serveur",
+		"cannotManageBody": "Il vous faut la permission Gérer le serveur sur ce serveur.",
+		"notAMemberTitle": "Vous n’êtes pas sur ce serveur",
+		"notAMemberBody": "Rejoignez-le et réessayez.",
+		"rateLimitedTitle": "Trop de requêtes",
+		"setupRequiredTitle": "Le tableau de bord n’est pas configuré",
+		"setupRequiredBody": "Terminez les étapes de configuration sur la page de connexion.",
+		"backToServers": "Retour aux serveurs"
 	},
-
 	"notFound": {
-		"title": "Il n’y a rien à cette adresse",
-		"body": "La page {{path}} n’existe pas. Elle a peut-être été renommée, ou le lien est incorrect.",
+		"backToDashboard": "Retour au tableau de bord",
+		"title": "Page introuvable",
+		"subtitle": "Cette adresse ne correspond à aucun écran de ce tableau de bord.",
+		"emptyTitle": "Il n’y a rien ici",
+		"emptyBody": "Vérifiez l’adresse, ou repartez de vos serveurs. Si un lien du tableau de bord vous a amené ici, cela vaut la peine de le signaler.",
 		"toServers": "Aller à vos serveurs"
 	},
-
 	"appearance": {
 		"title": "Apparence",
 		"subtitle": "L’aspect de ce tableau de bord dans votre navigateur. Personne d’autre n’est affecté.",
@@ -109,5 +117,18 @@
 		"followsSystem": "Votre appareil demande déjà moins d’animation, ceci est donc actif de toute façon.",
 		"accent": "Couleur d’accent",
 		"accentDescribes": "Utilisée pour le focus, les liens et le fond. Le contraste est vérifié dans les deux thèmes."
+	},
+	"guilds": {
+		"title": "Serveurs",
+		"subtitle": "Tous les endroits où vous pouvez modifier les réglages de Testify, ou l’ajouter.",
+		"search": "Rechercher un serveur",
+		"emptyTitle": "Rien à configurer pour l’instant",
+		"noMatchTitle": "Aucun serveur ne correspond",
+		"emptyBody": "Il vous faut la permission Gérer le serveur pour qu’un serveur apparaisse ici. Demandez-la à son propriétaire, ou invitez Testify sur l’un des vôtres.",
+		"noMatchBody": "Essayez avec une partie du nom.",
+		"notHereYet": "Testify n’est pas encore ici",
+		"add": "Ajouter",
+		"noPermission": "Pas la permission",
+		"noPermissionHint": "Ajouter un bot demande la permission Gérer le serveur. Demandez à quelqu’un qui l’a."
 	}
 }
