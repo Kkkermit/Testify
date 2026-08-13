@@ -1391,6 +1391,34 @@ two can never drift into different sets. `color-scheme` on `:root` is the only t
 `useTheme` writes `data-theme` for an explicit choice and **removes** the attribute for `system`, which is what
 lets the CSS follow the device on its own.
 
+**Three preferences share one mechanism.** Theme, accent and motion are each a `Preference` in
+`hooks/rootPreference.ts`: an attribute on `document.documentElement`, a `localStorage` key, an option list and
+a fallback. The fallback **removes** the attribute rather than writing it, so an unmarked page is already
+correct before any script runs — which is the only option the CSP leaves, and is what makes all three
+flash-free. The element is the state, not a React store, so CSS and JavaScript cannot end up disagreeing:
+`usePrefersReducedMotion` reads `data-motion` first and the media query second, in the stylesheet's own order,
+and watches the attribute with a `MutationObserver` so a change reaches the WebGL backdrop without a reload.
+
+`applyStoredPreferences()` runs once in `main.tsx`, **before** the app mounts. Without it the choices were only
+applied while the appearance page itself was mounted, so a reader who picked light and then landed on `/guilds`
+got the system theme back — remembered, and never applied. `preferences.test.ts` pins it.
+
+**An accent is a block of three tokens, and every one is measured.** `--color-primary`, `--color-accent` and
+`--color-ring` move; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
+`contrast.test.ts` reads the blocks out of `index.css` and checks all six accents against both backgrounds — an
+accent nobody measured is worse than no accent, because a control invites everybody to try it. Three of them
+(cyan, teal, amber) take **one fill for both themes**: those hues only carry white at 4.5:1 down at the light
+theme's shade, and lightening the fill for dark would fail the button drawn on it.
+
+Two things about the blocks are load-bearing:
+
+- **The selector is `[data-accent="…"]`, not `:root[data-accent="…"]`.** A swatch carries its own attribute and
+  paints itself in that accent while the page wears another — the same trick `ThemePreview` plays with
+  `color-scheme`. Verified in a real browser: an amber swatch reads `rgb(180, 83, 9)` on a teal page.
+- **Violet restates the base palette instead of relying on it.** Choosing violet leaves the page unmarked, but
+  the swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a Violet
+  swatch drawn in amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
+
 That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
 no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
 flash, before any JavaScript loads. Lightning CSS polyfills `light-dark()` behind the scenes, including inside

@@ -2,7 +2,10 @@ import { Languages, type LucideIcon, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, PageHeader, SegmentedControl } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { AccentSwatch } from "@/features/appearance/components/AccentSwatch";
 import { ThemePreview } from "@/features/appearance/components/ThemePreview";
+import { ACCENTS, useAccent, type Accent } from "@/hooks/useAccent";
+import { MOTIONS, useMotion, type Motion } from "@/hooks/useMotion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { THEMES, useTheme, type Theme } from "@/hooks/useTheme";
 import { isLocale, LOCALE_NAMES, LOCALES, type Locale, type TranslationKey } from "@/i18n";
@@ -15,10 +18,27 @@ const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hi
 	dark: { icon: Moon, label: "appearance.dark", hint: "appearance.alwaysDark" },
 };
 
+const ACCENT_LABELS: Record<Accent, TranslationKey> = {
+	violet: "appearance.accentViolet",
+	blue: "appearance.accentBlue",
+	cyan: "appearance.accentCyan",
+	teal: "appearance.accentTeal",
+	amber: "appearance.accentAmber",
+	pink: "appearance.accentPink",
+};
+
+const MOTION_OPTIONS: Record<Motion, { label: TranslationKey; hint: TranslationKey }> = {
+	system: { label: "appearance.motionSystem", hint: "appearance.motionSystemHint" },
+	full: { label: "appearance.motionFull", hint: "appearance.motionFullHint" },
+	reduced: { label: "appearance.motionReduced", hint: "appearance.motionReducedHint" },
+};
+
 export function AppearancePage(): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	usePageTitle(t("appearance.title"));
 	const { theme, setTheme } = useTheme();
+	const { accent, setAccent } = useAccent();
+	const { motion, setMotion } = useMotion();
 
 	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
 
@@ -56,6 +76,46 @@ export function AppearancePage(): React.JSX.Element {
 							selected={theme === name}
 						/>
 					))}
+				</div>
+			</Card>
+
+			<Card className="flex flex-col gap-4">
+				<div>
+					<h2 className={CARD_HEADING}>{t("appearance.accent")}</h2>
+					<p className="text-muted-foreground text-sm">{t("appearance.accentDescribes")}</p>
+				</div>
+
+				<ul className="grid gap-2 sm:grid-cols-3">
+					{ACCENTS.map((name) => (
+						<li key={name}>
+							<AccentSwatch
+								accent={name}
+								label={t(ACCENT_LABELS[name])}
+								selected={accent === name}
+								onSelect={setAccent}
+							/>
+						</li>
+					))}
+				</ul>
+			</Card>
+
+			<Card className="flex flex-col gap-4">
+				<div>
+					<h2 className={CARD_HEADING}>{t("appearance.motion")}</h2>
+					<p className="text-muted-foreground text-sm">{t("appearance.motionDescribes")}</p>
+				</div>
+
+				<div className="flex">
+					<SegmentedControl
+						label={t("appearance.motion")}
+						value={motion}
+						onChange={setMotion}
+						segments={MOTIONS.map((name) => ({
+							value: name,
+							label: t(MOTION_OPTIONS[name].label),
+							hint: t(MOTION_OPTIONS[name].hint),
+						}))}
+					/>
 				</div>
 			</Card>
 

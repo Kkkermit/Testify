@@ -139,6 +139,58 @@
 		color-scheme: dark;
 	}
 
+	/**
+	 * The accent choices. Only the three violet-carrying tokens move: success, warning and destructive keep
+	 * their own meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair
+	 * is measured against both backgrounds by `contrast.test.ts`, which reads these blocks rather than keeping
+	 * a list of its own.
+	 *
+	 * The attribute is not pinned to `:root`, so the picker can put one on a swatch and have it paint itself
+	 * in that accent while the page around it stays on the chosen one — the same trick `ThemePreview` plays
+	 * with `color-scheme`. These sit in the `base` layer, which is what puts them ahead of `@theme`.
+	 *
+	 * Violet restates the base palette rather than relying on it: choosing violet leaves the page unmarked, but
+	 * a swatch still has to paint violet while the page around it wears something else. The test asserts the two
+	 * copies are identical.
+	 */
+	[data-accent="violet"] {
+		--color-primary: light-dark(#6d28d9, #7c3aed);
+		--color-accent: light-dark(#5b21b6, #a78bfa);
+		--color-ring: light-dark(#6d28d9, #a78bfa);
+	}
+
+	[data-accent="blue"] {
+		--color-primary: light-dark(#1d4ed8, #2563eb);
+		--color-accent: light-dark(#1e40af, #60a5fa);
+		--color-ring: light-dark(#1d4ed8, #60a5fa);
+	}
+
+	/* The next three take one fill for both themes: these hues only carry white text at 4.5:1 down at the shade
+	   the light theme uses, and a fill lightened for dark would fail the button drawn on it. */
+	[data-accent="cyan"] {
+		--color-primary: #0e7490;
+		--color-accent: light-dark(#155e75, #22d3ee);
+		--color-ring: light-dark(#0e7490, #22d3ee);
+	}
+
+	[data-accent="teal"] {
+		--color-primary: #0f766e;
+		--color-accent: light-dark(#115e59, #2dd4bf);
+		--color-ring: light-dark(#0f766e, #2dd4bf);
+	}
+
+	[data-accent="amber"] {
+		--color-primary: #b45309;
+		--color-accent: light-dark(#92400e, #fbbf24);
+		--color-ring: light-dark(#b45309, #fbbf24);
+	}
+
+	[data-accent="pink"] {
+		--color-primary: light-dark(#be185d, #db2777);
+		--color-accent: light-dark(#9d174d, #f472b6);
+		--color-ring: light-dark(#be185d, #f472b6);
+	}
+
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
 		/* A single wash behind the WebGL field, so the page still has depth when WebGL is unavailable. */
@@ -326,18 +378,38 @@
 	}
 }
 
-/* Motion here is feedback, not decoration, so removing it costs nothing and keeps the dashboard usable. */
+/**
+ * Motion here is feedback, not decoration, so removing it costs nothing and keeps the dashboard usable.
+ *
+ * The system preference is the default because it applies before any script runs — the CSP forbids the inline
+ * bootstrap that would set an attribute earlier — and the appearance page overrides it in both directions.
+ * Two selector lists rather than one because a media query and an attribute cannot be combined into a single
+ * condition; the declarations they gate are the same four either way.
+ */
 @media (prefers-reduced-motion: reduce) {
-	*,
-	*::before,
-	*::after {
+	:root:not([data-motion="full"]) *,
+	:root:not([data-motion="full"]) *::before,
+	:root:not([data-motion="full"]) *::after {
 		animation-duration: 0.01ms !important;
 		animation-iteration-count: 1 !important;
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}
 
-	.skeleton-sheen::after {
+	:root:not([data-motion="full"]) .skeleton-sheen::after {
 		display: none;
 	}
+}
+
+:root[data-motion="reduced"] *,
+:root[data-motion="reduced"] *::before,
+:root[data-motion="reduced"] *::after {
+	animation-duration: 0.01ms !important;
+	animation-iteration-count: 1 !important;
+	transition-duration: 0.01ms !important;
+	scroll-behavior: auto !important;
+}
+
+:root[data-motion="reduced"] .skeleton-sheen::after {
+	display: none;
 }

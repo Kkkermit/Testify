@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { contrast, luminance } from "./contrast";
+import { ACCENTS } from "@/hooks/useAccent";
 
 /**
  * The palette, checked against WCAG 2.2 on every run.
@@ -22,15 +23,27 @@ type Scheme = "light" | "dark";
  * theme under test actually renders. Reading both halves is the point: a light palette nobody measured is
  * worse than no light palette, and only one of the two used to be checked.
  */
-function token(name: string, scheme: Scheme): string {
+function pick(source: string, name: string, scheme: Scheme, where: string): string {
 	const pair = new RegExp(`--color-${name}:\\s*light-dark\\(\\s*(#[0-9a-f]{6})\\s*,\\s*(#[0-9a-f]{6})\\s*\\)`, "i");
-	const both = pair.exec(CSS);
+	const both = pair.exec(source);
 	if (both?.[1] !== undefined && both[2] !== undefined) return scheme === "light" ? both[1] : both[2];
 
-	const single = new RegExp(`--color-${name}:\\s*(#[0-9a-f]{6})`, "i").exec(CSS);
-	if (single?.[1] === undefined) throw new Error(`--color-${name} is not in index.css`);
+	const single = new RegExp(`--color-${name}:\\s*(#[0-9a-f]{6})`, "i").exec(source);
+	if (single?.[1] === undefined) throw new Error(`--color-${name} is not in ${where}`);
 
 	return single[1];
+}
+
+function token(name: string, scheme: Scheme): string {
+	return pick(CSS, name, scheme, "index.css");
+}
+
+/** An accent overrides three tokens in a block of its own, and every one of them is measured like the base. */
+function accentToken(accent: string, name: string, scheme: Scheme): string {
+	const block = new RegExp(`\\[data-accent="${accent}"\\]\\s*\\{([^}]*)\\}`).exec(CSS)?.[1];
+	if (block === undefined) throw new Error(`[data-accent="${accent}"] is not in index.css`);
+
+	return pick(block, name, scheme, `the ${accent} accent`);
 }
 
 /** 4.5:1 for text under 18.66px, 3:1 for a control boundary or a large heading. */
@@ -117,4 +130,46 @@ describe.each(["light", "dark"] as const)("the %s palette", (scheme) => {
  */
 it("keeps the dark fill violet out of reach as a text colour", () => {
 	expect(contrast(token("primary", "dark"), token("background", "dark"))).toBeLessThan(TEXT);
+});
+
+/**
+ * Every accent the picker offers, measured in both themes. An unverified accent is worse than no accent: it
+ * ships a palette nobody looked at behind a control that invites everybody to try it.
+ */
+describe.each(ACCENTS)("the %s accent", (accent) => {
+	describe.each(["light", "dark"] as const)("in %s", (scheme) => {
+		const of = (name: string): string => accentToken(accent, name, scheme);
+		const background = token("background", scheme);
+		const card = token("card", scheme);
+
+		it.each([
+			["a link on the page", "accent", () => background, TEXT],
+			["a link on a card", "accent", () => card, TEXT],
+			["a filled button against the page", "primary", () => background, NON_TEXT],
+			["the focus ring on the page", "ring", () => background, NON_TEXT],
+		])("%s meets its threshold", (_name, colour, against, need) => {
+			expect(contrast(of(colour), against())).toBeGreaterThanOrEqual(need);
+		});
+
+		/** The fill only ever wears white, so this is the pair a button actually draws. */
+		it("carries white on its fill", () => {
+			expect(contrast("#ffffff", of("primary"))).toBeGreaterThanOrEqual(TEXT);
+		});
+	});
+
+	/** The same hazard the base violet has: a fill that reads as legible text on near-black, and is not. */
+	it("keeps its dark fill out of reach as a text colour", () => {
+		expect(contrast(accentToken(accent, "primary", "dark"), token("background", "dark"))).toBeLessThan(TEXT);
+	});
+});
+
+/**
+ * Choosing violet leaves the page unmarked, so the base tokens are what it renders — but a swatch has to paint
+ * violet while the page wears another accent, and that needs a block. Two copies is a drift risk, and this is
+ * what makes the drift fail rather than ship a picker whose first swatch lies about what it selects.
+ */
+describe.each(["light", "dark"] as const)("the violet block in %s", (scheme) => {
+	it.each(["primary", "accent", "ring"])("matches the base %s token", (name) => {
+		expect(accentToken("violet", name, scheme)).toBe(token(name, scheme));
+	});
 });

@@ -25,6 +25,7 @@ function mockMedia(matches: boolean): { fire: (next: boolean) => void; removed: 
 // One of these deletes matchMedia outright, so the stub the harness installs is put back for the next test.
 afterEach(() => {
 	mockMedia(false);
+	document.documentElement.removeAttribute("data-motion");
 });
 
 describe("prefersReducedMotion", () => {
@@ -67,5 +68,46 @@ describe("usePrefersReducedMotion", () => {
 		renderHook(() => usePrefersReducedMotion()).unmount();
 
 		expect(media.removed()).toBe(true);
+	});
+});
+
+/**
+ * The stylesheet reads `data-motion` first and the media query second. Anything animating in JavaScript has to
+ * resolve them in the same order, or the backdrop keeps drifting behind a page that has been stilled.
+ */
+describe("the choice on the appearance page", () => {
+	it("stills the page on a device that asked for nothing", () => {
+		mockMedia(false);
+		document.documentElement.setAttribute("data-motion", "reduced");
+
+		expect(prefersReducedMotion()).toBe(true);
+	});
+
+	it("restores motion on a device that asked for less", () => {
+		mockMedia(true);
+		document.documentElement.setAttribute("data-motion", "full");
+
+		expect(prefersReducedMotion()).toBe(false);
+	});
+
+	it("hands back to the device when the choice is system", () => {
+		mockMedia(true);
+
+		expect(prefersReducedMotion()).toBe(true);
+	});
+
+	/** A mutation record is delivered on a microtask, so the assertion has to wait one out. */
+	it("reaches a mounted hook without a reload", async () => {
+		mockMedia(false);
+		const { result } = renderHook(() => usePrefersReducedMotion());
+
+		expect(result.current).toBe(false);
+
+		await act(async () => {
+			document.documentElement.setAttribute("data-motion", "reduced");
+			await Promise.resolve();
+		});
+
+		expect(result.current).toBe(true);
 	});
 });
