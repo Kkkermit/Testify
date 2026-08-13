@@ -126,7 +126,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					/>
 				</Card>
 			) : (
-				// Sections are nested one level deep, so §18.6's between-sections gap-6 applies here rather than the shell's.
+				// Sections are nested one level deep, so §19.6's between-sections gap-6 applies here rather than the shell's.
 				<div className="flex flex-col gap-6">
 					{groups.map(([name, group]) => (
 						<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">

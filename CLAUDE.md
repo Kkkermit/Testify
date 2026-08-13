@@ -1306,9 +1306,9 @@ would draw over the thing it scrolls — the tab underline is the case it exists
 baseline and checkable exit criteria. Start there rather than in a component.
 
 **The design skills in `.claude/skills` lead the visual direction.** They are vendored rather than installed so
-they load in every session, including the remote ones. `docs/dashboard/guide.md` §18 records the palette, type
+they load in every session, including the remote ones. `docs/dashboard/guide.md` §19 records the palette, type
 scale and spacing as they stand today, and is a baseline to rewrite against rather than a contract to defend —
-where a skill disagrees with it, the skill wins and §18 is updated. What does **not** move: tokens stay the
+where a skill disagrees with it, the skill wins and §19 is updated. What does **not** move: tokens stay the
 single source, the accessibility floor only rises, and the CSP is untouchable.
 
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
@@ -1383,6 +1383,60 @@ It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads 
 19, so the wrapper warns on every render and is one release from breaking. Popper positions with inline styles,
 which the CSP allows under `style-src 'unsafe-inline'`; that combination is verified against the real built
 page, not assumed.
+
+### Two themes, one token per line
+
+Every colour in `index.css` is `light-dark(light, dark)`, so a token is one line holding both schemes and the
+two can never drift into different sets. `color-scheme` on `:root` is the only thing the switch moves —
+`useTheme` writes `data-theme` for an explicit choice and **removes** the attribute for `system`, which is what
+lets the CSS follow the device on its own.
+
+That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
+no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
+flash, before any JavaScript loads. Lightning CSS polyfills `light-dark()` behind the scenes, including inside
+`--alpha()` and every opacity modifier — verified in the built stylesheet, not assumed.
+
+**Both palettes are measured.** `contrast.test.ts` reads each half out of the token and checks it against WCAG,
+so a light value nobody looked at fails the build rather than shipping. An unverified light theme is worse than
+none. Two things it caught that are worth keeping in mind:
+
+- **A pair can pass for the wrong reason.** The destructive button renders `text-white` literally, so checking
+  it against `foreground` only worked while `foreground` happened to be white. Check the colour the component
+  actually draws.
+- **Elevation cannot be recoloured.** On near-black a drop shadow reads as a smudge, so a card lifts by a 1px
+  inset highlight; on paper that highlight is invisible and only a real shadow separates card from ground.
+  `surface-edge` therefore switches technique by theme rather than switching colour.
+
+**`getComputedStyle` never resolves a custom property**, so anything reading a token in JavaScript receives
+`light-dark(…)` as source text. `lib/three/tokens.ts` splits it by the resolved `color-scheme`; before that the
+backdrop failed its hex check and silently fell back to one colour in both themes.
+
+### Every string comes from i18next
+
+`src/i18n/` holds the setup and four JSON dictionaries. English is the source; Spanish, German and French sit
+beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
+and `TranslationKey` is exported for the places that store a key rather than call `t` — `NavItem.labelKey` and
+every module-level lookup table.
+
+Rules that keep it from rotting, each with a test:
+
+- **A module-level map cannot call `t`.** It is built once, before a locale exists. Hold `TranslationKey`s in
+  the table and translate at the call site — the log levels, automod actions and command availability all do.
+- **No template-literal keys.** `t(\`appearance.${name}\`)` typechecks and then hides the key from every search,
+  including the unused-key check. Write a lookup table with the keys spelled out.
+- **A pure helper takes `t`, it does not return keys.** `describe()` in `ErrorState` stays one function whose
+  output is the sentence a reader sees, so its tests assert on prose rather than on a key nobody reads.
+- **`locales.test.ts` fails on drift**: a key English has and a locale does not, a stale key after a rename, a
+  changed `{{placeholder}}`, and any key nothing renders. Dead copy in one file is dead copy in four.
+- **`voice.test.ts` reads `en.json`**, so the British spelling, curly apostrophe and second-person rules now
+  apply to the dictionary rather than to scattered literals.
+
+**i18next does not touch the document.** `lang` is set from a `languageChanged` listener in `src/i18n/index.ts`
+— without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so
+grouping follows the chosen language rather than the browser.
+
+**Adding a language** is three steps: copy `en.json`, translate the values, and add the code to `LOCALES` and
+`LOCALE_NAMES` in `src/i18n/index.ts`. The parity test names anything missed.
 
 ### Responsiveness, and the label trap
 

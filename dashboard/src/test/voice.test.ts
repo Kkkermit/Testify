@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /**
- * The mechanical half of §19.11's voice, checked on every run.
+ * The mechanical half of §20.11's voice, checked on every run.
  *
  * Most of that section — "never blame", "say what a thing costs before it is done" — needs a reader. These
  * four do not, and they are the ones that drift silently: one American spelling in a screen nobody has looked

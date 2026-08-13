@@ -114,6 +114,21 @@ export default defineCommand({
 changes. It keeps its own name as a prefix alias, so `t?dad-joke` still works
 alongside `/fun dad-joke`, and the second argument adds more.
 
+## Translating the dashboard
+
+Every string the dashboard renders lives in `dashboard/src/i18n/locales/`. English is the source; the rest are
+translated from it.
+
+To add a language, copy `en.json`, translate the values, and add the code and its endonym — the word the
+language calls itself — to `LOCALES` and `LOCALE_NAMES` in `dashboard/src/i18n/index.ts`. The tests name
+anything missing: a key English has that yours does not, a stale key left by a rename, or a changed
+`{{placeholder}}`.
+
+To fix a wording rather than a language, edit `en.json` and the three beside it. `dashboard/src/test/voice.test.ts`
+holds the house style — British spelling, curly apostrophes, second person — and reads the dictionary directly.
+
+The bot's own replies inside Discord are **not** translated, and neither is anything a server has typed itself.
+
 ## Tests
 
 Tests live in `tests/` and mirror `src/`. Anything with real logic in it —

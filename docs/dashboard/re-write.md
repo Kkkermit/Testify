@@ -34,10 +34,10 @@ Four sources of design guidance now exist in this repository, and they will disa
 | Rank | Source                                                              | Governs                                                      |
 | ---- | ------------------------------------------------------------------- | ------------------------------------------------------------ |
 | 1    | [`../../CLAUDE.md`](../../CLAUDE.md) §16, §22, §24                  | Architecture, security, data. **Never overridden by taste**  |
-| 2    | [`dashboard.md`](guide.md) §9, §14                                  | The security boundary and the accessibility floor            |
+| 2    | [`dashboard.md`](guide.md) §9, §15                                  | The security boundary and the accessibility floor            |
 | 3    | The skills in [`../.claude/skills`](../../.claude/skills/README.md) | Aesthetic direction — palette, type, composition, motion     |
-| 4    | [`dashboard.md`](guide.md) §20 — the 58 rules                       | The worklist, and the tie-breaker when the skills are silent |
-| 5    | [`dashboard.md`](guide.md) §18                                      | **A baseline to rewrite against, not a contract to defend**  |
+| 4    | [`dashboard.md`](guide.md) §21 — the 58 rules                       | The worklist, and the tie-breaker when the skills are silent |
+| 5    | [`dashboard.md`](guide.md) §19                                      | **A baseline to rewrite against, not a contract to defend**  |
 
 So: a skill may change every value in `@theme`; it may not put a hex in a `.tsx`, because that is rank 1. A
 skill may propose a lighter muted text; it may not take it below 4.5:1, because that is rank 2.

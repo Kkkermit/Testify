@@ -43,14 +43,15 @@ checklist the rewrite is working through. Those three are the ones to edit.
 10. [Data fetching and writes](#10-data-fetching-and-writes)
 11. [Components](#11-components)
 12. [Styling](#12-styling)
-13. [Navigation](#13-navigation)
-14. [Accessibility](#14-accessibility)
-15. [Testing](#15-testing)
-16. [Traps that have bitten before](#16-traps-that-have-bitten-before)
-17. [Current screens](#17-current-screens)
-18. [The design system](#18-the-design-system)
-19. [User journeys](#19-user-journeys)
-20. [The 58 rules](#20-the-58-rules)
+13. [Copy and languages](#13-copy-and-languages)
+14. [Navigation](#14-navigation)
+15. [Accessibility](#15-accessibility)
+16. [Testing](#16-testing)
+17. [Traps that have bitten before](#17-traps-that-have-bitten-before)
+18. [Current screens](#18-current-screens)
+19. [The design system](#19-the-design-system)
+20. [User journeys](#20-user-journeys)
+21. [The 58 rules](#21-the-58-rules)
 
 ---
 
@@ -519,7 +520,46 @@ The canvas is `aria-hidden` and `pointer-events-none`. It carries no information
 
 ---
 
-## 13. Navigation
+## 13. Copy and languages
+
+Every string the dashboard renders comes from `src/i18n/locales/*.json`. English is the source; Spanish, German
+and French are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
+rendering `nav.serrvers`.
+
+Writing a screen:
+
+```tsx
+const { t } = useTranslation();
+…
+<PageHeader title={t("levelling.title")} subtitle={t("levelling.subtitle")} />
+```
+
+Four rules, each with a test behind it:
+
+1. **A module-level map holds keys, not text.** It is built once, before a locale exists, so `t` cannot be
+   called there. Type the table `Record<X, TranslationKey>` and translate where it is read.
+2. **Spell keys out.** `t(`section.${name}`)` compiles and then hides the key from every search — including the
+   check that finds keys nothing renders. A lookup table with literal keys costs three lines and stays greppable.
+3. **A helper outside a component takes `t`.** It stays one function whose output is the sentence a reader
+   sees, and its tests keep asserting on prose.
+4. **Counts use `{{count, number}}`**, and plurals are `_one` / `_other` keys — some languages need `_many`,
+   which is why the parity test compares messages rather than raw keys.
+
+**Adding a language** — three steps, and the tests name anything missed:
+
+```bash
+cp src/i18n/locales/en.json src/i18n/locales/it.json   # then translate the values
+```
+
+then add `"it"` to `LOCALES` and its endonym to `LOCALE_NAMES` in `src/i18n/index.ts`. `locales.test.ts` fails
+on any key English has that the new file does not, on a stale key left behind by a rename, and on a changed
+`{{placeholder}}`.
+
+**What is deliberately not translated:** anything a server has typed itself — a welcome message, a ticket panel,
+a role name — and the bot's own replies inside Discord. This is the dashboard only, and the language picker
+says so.
+
+## 14. Navigation
 
 `config/navigation.ts` is the sidebar **as data**. A new screen is one entry there and one route; the icon rail,
 tooltips, active marker and mobile drawer all follow.
@@ -557,7 +597,7 @@ A drawer below `md`, an icon-only rail from `md`, the full sidebar from `lg`.
 
 ---
 
-## 14. Accessibility
+## 15. Accessibility
 
 `jest-axe` runs on every page-level test through `src/test/axe.ts`, with `color-contrast` disabled — jsdom
 computes no styles, so that rule can only report false negatives there. It is a floor, roughly 40% of issues;
@@ -578,7 +618,7 @@ so installing it needs `--force` and breaks `npm ci`.
 
 ---
 
-## 15. Testing
+## 16. Testing
 
 Jest + Testing Library + MSW. Coverage thresholds **80/80/80/80**.
 
@@ -605,7 +645,7 @@ What good tests here look like:
 
 ---
 
-## 16. Traps that have bitten before
+## 17. Traps that have bitten before
 
 **React gets hoisted, and it breaks the browser silently.** `discord-html-transcripts` needs React 18, so npm
 puts **18** at the root and leaves the dashboard's **19** in `dashboard/node_modules`. `@tanstack/react-query`
@@ -645,7 +685,7 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 
 ---
 
-## 17. Current screens
+## 18. Current screens
 
 | Route                   | Screen                                                                               |
 | ----------------------- | ------------------------------------------------------------------------------------ |
@@ -731,7 +771,7 @@ back to `components/brand/Logo`; a brand mark is never worth a broken image icon
 
 ---
 
-## 18. The design system
+## 19. The design system
 
 §12 is the short rule — everything comes from `@theme` in `src/index.css`. This section is the reference behind
 it: every token that exists, what each one is for, and the order to change them in. **If you are re-skinning the
@@ -762,29 +802,33 @@ the wrong file.
 Names are **roles, not colours**. `--color-destructive` is red today; the name still reads correctly if a fork
 makes it orange. Renaming a token to its hue is how a palette stops being swappable.
 
-| Token                        | Value     | What it is for                                                          |
-| ---------------------------- | --------- | ----------------------------------------------------------------------- |
-| `--color-background`         | `#07070b` | The page. Everything else sits on it                                    |
-| `--color-foreground`         | `#ffffff` | Body text, headings, an active icon                                     |
-| `--color-muted`              | `#1c1c2a` | A recessed fill: secondary buttons, hover states, icon tiles            |
-| `--color-muted-foreground`   | `#a2a2ba` | Secondary text, meta lines, an inactive icon                            |
-| `--color-card`               | `#12121c` | Every card and panel surface                                            |
-| `--color-popover`            | `#171722` | Anything floating: tooltips, native `<option>` lists                    |
-| `--color-border`             | `#262639` | Card borders, dividers, table rules                                     |
-| `--color-input`              | `#7676a0` | Field borders — deliberately lighter, so a control looks touchable      |
-| `--color-primary`            | `#7c3aed` | The one action colour: primary buttons, the active nav marker           |
-| `--color-primary-foreground` | `#ffffff` | Text on primary                                                         |
-| `--color-accent`             | `#a78bfa` | **Every violet that is text**: links, the eyebrow rule, the WebGL field |
-| `--color-ring`               | `#a78bfa` | The focus ring, and nothing else                                        |
-| `--color-success`            | `#3ddc97` | Saved, connected, healthy                                               |
-| `--color-warning`            | `#fbbf24` | A missing permission, a hierarchy problem, "nothing set up"             |
-| `--color-destructive`        | `#dc2626` | Delete, leave, block — as a **fill**, always with white on it           |
-| `--color-destructive-text`   | `#f87171` | The same meaning as **text**. One token cannot be legible as both       |
+Every value is `light-dark(light, dark)`, so one line carries both themes and neither can be edited without the
+other in view. The dark half is listed first below because it is the theme the product was designed in.
+
+| Token                        | Dark      | Light     | What it is for                                                                     |
+| ---------------------------- | --------- | --------- | ---------------------------------------------------------------------------------- |
+| `--color-background`         | `#07070b` | `#f4f4f9` | The page. Everything else sits on it                                               |
+| `--color-foreground`         | `#ffffff` | `#15151f` | Body text, headings, an active icon                                                |
+| `--color-muted`              | `#1c1c2a` | `#e9e8f2` | A recessed fill: secondary buttons, hover states, icon tiles                       |
+| `--color-muted-foreground`   | `#a2a2ba` | `#55556e` | Secondary text, meta lines, an inactive icon                                       |
+| `--color-card`               | `#12121c` | `#ffffff` | Every card and panel surface                                                       |
+| `--color-popover`            | `#171722` | `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
+| `--color-border`             | `#262639` | `#dcdae8` | Card borders, dividers, table rules                                                |
+| `--color-input`              | `#7676a0` | `#6b6b8a` | Field borders — further from the page than a divider, so a control looks touchable |
+| `--color-primary`            | `#7c3aed` | `#6d28d9` | The one action colour: primary buttons, the active nav marker                      |
+| `--color-primary-foreground` | `#ffffff` | `#ffffff` | Text on primary                                                                    |
+| `--color-accent`             | `#a78bfa` | `#5b21b6` | **Every violet that is text**: links, the eyebrow rule, the WebGL field            |
+| `--color-ring`               | `#a78bfa` | `#6d28d9` | The focus ring, and nothing else                                                   |
+| `--color-success`            | `#3ddc97` | `#047857` | Saved, connected, healthy                                                          |
+| `--color-warning`            | `#fbbf24` | `#a16207` | A missing permission, a hierarchy problem, "nothing set up"                        |
+| `--color-destructive`        | `#dc2626` | `#b91c1c` | Delete, leave, block — as a **fill**, always with white on it                      |
+| `--color-destructive-text`   | `#f87171` | `#b91c1c` | The same meaning as **text**. One token cannot be legible as both                  |
 
 Two conventions worth keeping:
 
-- **`--color-input` is lighter than `--color-border` on purpose.** A field that borrows the divider colour reads
-  as a label. If the two converge in a rewrite, every form goes flat.
+- **`--color-input` is further from the page than `--color-border` on purpose** — lighter in dark, darker in
+  light. A field that borrows the divider colour reads as a label. If the two converge in a rewrite, every form
+  goes flat.
 - **`--color-ring` is used by exactly one rule** — `:focus-visible` in the base layer. Keeping it separate from
   `--color-accent` means a rebrand can make the focus ring louder than the brand without touching links.
 
@@ -981,7 +1025,7 @@ back clean.
 
 ---
 
-## 19. User journeys
+## 20. User journeys
 
 What somebody is actually trying to do, in order, and what the screen owes them at each step. **This is the
 section to rewrite when a flow feels wrong** — the components are §11, the styling is §18, and this is the shape
@@ -1226,7 +1270,7 @@ can be tested without rendering.
 
 ---
 
-## 20. The 58 rules
+## 21. The 58 rules
 
 Taras Bakusevych's [58 rules for beautiful UI design](https://uxdesign.cc/58-rules-for-stunning-and-effective-user-interface-design-ea4b93f931f6),
 carried here as a working checklist for the rewrite. Almost none of it is covered by the skills in

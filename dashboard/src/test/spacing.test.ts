@@ -2,7 +2,7 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /**
- * §18.6's spacing scale, enforced on every run.
+ * §19.6's spacing scale, enforced on every run.
  *
  * Five values do all the work — `gap-1` `gap-2` `gap-3` `gap-4` `gap-6` — and a screen reaching for a sixth is
  * usually solving a nesting problem instead. Before this existed the commands page had a `gap-8` between its
@@ -48,7 +48,7 @@ describe("the spacing scale", () => {
 		expect(everySource(SRC).length).toBeGreaterThan(50);
 	});
 
-	it("uses only the five gaps §18.6 records", () => {
+	it("uses only the five gaps §19.6 records", () => {
 		expect(offenders(OFF_SCALE)).toEqual([]);
 	});
 

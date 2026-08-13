@@ -361,6 +361,10 @@ and served **from inside the bot process**, so there is no second service to dep
 **It is off by default, and a bot-only install needs none of this.** Leave `DASHBOARD_ENABLED` unset and nothing
 below applies.
 
+It follows your device's light or dark setting out of the box, and speaks **English, Spanish, German and
+French** — picked from the browser's own language, and changeable from the Appearance screen. Both are per
+browser: nothing you choose there affects anybody else on the server.
+
 ### Turning it on
 
 Four settings. `npm run setup` handles all of them: it asks for the client secret and the base URL, sets
