@@ -1,4 +1,5 @@
 import { type OwnerGuildRow } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { Badge, Card, Avatar } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
@@ -11,10 +12,11 @@ export function OwnerGuildTable({
 	selected?: string | null;
 	onSelect?: (guildId: string) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	return (
 		<Card padding="none" className="overflow-x-auto">
 			<table className="w-full table-fixed text-sm">
-				<caption className="sr-only">Servers Testify is in, largest first</caption>
+				<caption className="sr-only">{t("owner.guildTableCaption")}</caption>
 				<thead className="text-muted-foreground border-border border-b">
 					<tr>
 						<th scope="col" className="px-3 py-3 text-left font-medium sm:px-6">
@@ -64,7 +66,7 @@ export function OwnerGuildTable({
 							</td>
 							<td className="hidden px-6 py-3 sm:table-cell">
 								{guild.configured.length === 0 ? (
-									<Badge tone="warning">Nothing set up</Badge>
+									<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>
 								) : (
 									<span className="flex flex-wrap gap-1">
 										{guild.configured.map((feature) => (

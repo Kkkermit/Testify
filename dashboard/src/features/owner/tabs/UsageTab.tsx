@@ -1,4 +1,5 @@
 import { ANALYTICS_WINDOWS, errorRate, type AnalyticsWindow } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Card, Figure, Avatar, SegmentedControl, Skeleton } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -17,6 +18,7 @@ export function UsageTab({
 	days: AnalyticsWindow;
 	onWindow: (days: AnalyticsWindow) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const usage = useUsage(days);
 
 	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
@@ -32,22 +34,22 @@ export function UsageTab({
 					{report.runs.toLocaleString()} commands run in the last {days} days, {percent(report.failures, report.runs)}{" "}
 					of them failing.
 				</p>
-				<SegmentedControl label="Reporting window" segments={WINDOWS} value={days} onChange={onWindow} />
+				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
 
 			<Card padding="none" className="divide-border divide-y">
 				<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
-					<Figure className="px-6 py-4" label="Commands run" value={report.runs.toLocaleString()} />
+					<Figure className="px-6 py-4" label={t("owner.commandsRun")} value={report.runs.toLocaleString()} />
 					<Figure
 						className="px-6 py-4"
-						label="Failed"
+						label={t("owner.failed")}
 						value={percent(report.failures, report.runs)}
 						{...(errorRate(report) > 0.05 ? { tone: "text-destructive-text" } : {})}
 					/>
-					<Figure className="px-6 py-4" label="Active servers" value={report.activeGuilds.toLocaleString()} />
+					<Figure className="px-6 py-4" label={t("owner.activeServers")} value={report.activeGuilds.toLocaleString()} />
 					<Figure
 						className="px-6 py-4"
-						label="Commands used"
+						label={t("owner.commandsUsed")}
 						value={`${String(report.commandsUsed)} of ${String(report.commandsTotal)}`}
 					/>
 				</dl>
@@ -59,7 +61,7 @@ export function UsageTab({
 
 			{/* `items-start` so a short panel ends where its list does, rather than stretching to its neighbour. */}
 			<div className="grid items-start gap-4 lg:grid-cols-2">
-				<Panel title="Most used" hint="Where the work goes, and where a regression would hurt most.">
+				<Panel title={t("owner.mostUsed")} hint={t("owner.mostUsedHint")}>
 					<UsageBars
 						empty="No command has been run yet."
 						rows={report.mostUsed.map((row) => ({
@@ -71,10 +73,7 @@ export function UsageTab({
 					/>
 				</Panel>
 
-				<Panel
-					title="Least used"
-					hint="Counted over every command the bot has, so a command nobody runs shows as zero."
-				>
+				<Panel title={t("owner.leastUsed")} hint={t("owner.leastUsedHint")}>
 					<UsageBars
 						tint="bg-muted"
 						empty="No commands are registered."
@@ -87,7 +86,7 @@ export function UsageTab({
 					/>
 				</Panel>
 
-				<Panel title="Busiest servers" hint="Ranked by commands run, not by how many members they have.">
+				<Panel title={t("owner.busiest")} hint={t("owner.busiestHint")}>
 					<UsageBars
 						tint="bg-feature-tickets/25"
 						empty="No server has run a command yet."
@@ -105,7 +104,7 @@ export function UsageTab({
 					/>
 				</Panel>
 
-				<Panel title="How they run them" hint="Whether the prefix is still worth maintaining.">
+				<Panel title={t("owner.howRun")} hint={t("owner.howRunHint")}>
 					<UsageBars
 						tint="bg-feature-levelling/25"
 						empty="Nothing recorded yet."
@@ -116,10 +115,7 @@ export function UsageTab({
 					/>
 				</Panel>
 
-				<Panel
-					title="Dashboard screens"
-					hint="Counted bot-wide by route, with no server or account attached — see the privacy notice."
-				>
+				<Panel title={t("owner.screens")} hint={t("owner.screensHint")}>
 					<UsageBars
 						tint="bg-feature-welcome/25"
 						empty="No screen has been opened yet."

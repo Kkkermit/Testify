@@ -1,4 +1,5 @@
 import { type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { PageHeader, TabBar, TabContent } from "@/components/primitives";
 import { CommandsPage } from "@/features/commands/CommandsPage";
@@ -17,7 +18,8 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 const TABS_LABEL = "Owner console";
 
 export function OwnerPage(): React.JSX.Element {
-	usePageTitle("Owner console");
+	const { t } = useTranslation();
+	usePageTitle(t("owner.title"));
 	// In the URL, so a link to the usage tab is a link to the usage tab and Back works.
 	const [params, setParams] = useSearchParams();
 	const tab = ownerTabFrom(params.get("tab"));
@@ -36,7 +38,7 @@ export function OwnerPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title="Owner console" subtitle="How Testify is running, and what it is being used for." />
+			<PageHeader title={t("owner.title")} subtitle={t("owner.subtitle")} />
 
 			<TabBar
 				label={TABS_LABEL}

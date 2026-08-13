@@ -1,5 +1,6 @@
 import { type CommandRunResult } from "@testify/shared";
 import { Info } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Card } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -15,6 +16,7 @@ import { clockTime } from "@/lib/datetime";
  * did.
  */
 export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.Element {
+	const { t } = useTranslation();
 	return (
 		<Card className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -30,7 +32,7 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 				</time>
 			</div>
 
-			{result.outputs.length === 0 && <p className="text-muted-foreground text-sm">It replied with nothing.</p>}
+			{result.outputs.length === 0 && <p className="text-muted-foreground text-sm">{t("owner.repliedNothing")}</p>}
 
 			{result.outputs.map((output, index) => {
 				if (output.kind === "text") {
@@ -77,9 +79,7 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 				);
 			})}
 
-			{result.degraded && (
-				<Warning>Part of this reply only works inside Discord. Run it there to use the controls it offered.</Warning>
-			)}
+			{result.degraded && <Warning>{t("owner.discordOnly")}</Warning>}
 		</Card>
 	);
 }

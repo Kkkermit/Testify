@@ -1,5 +1,6 @@
 import { type LogLine } from "@testify/shared";
 import { ScrollText } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { EmptyState } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 import { clockTime } from "@/lib/datetime";
@@ -13,12 +14,13 @@ const TONE: Record<string, string> = {
 
 /** The bot's own log, as the terminal would show it — monospaced, newest first, one line per record. */
 export function LogLines({ lines }: { lines: LogLine[] }): React.JSX.Element {
+	const { t } = useTranslation();
 	if (lines.length === 0) {
 		return (
 			<EmptyState
 				icon={<ScrollText size={20} />}
-				title="Nothing logged"
-				body="Nothing at this level since the bot last started."
+				title={t("owner.nothingLogged")}
+				body={t("owner.nothingLoggedBody")}
 			/>
 		);
 	}

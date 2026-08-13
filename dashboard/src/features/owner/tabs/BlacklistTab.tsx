@@ -1,5 +1,6 @@
 import { Ban, ShieldOff, UserX } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { FIELD, Field, Warning } from "@/components/form";
 import { Avatar, Button, Card, EmptyState, Skeleton } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
@@ -13,6 +14,7 @@ import { cn } from "@/lib/cn";
  * in a server the bot can still see, so there is no list to choose them from.
  */
 export function BlacklistTab(): React.JSX.Element {
+	const { t } = useTranslation();
 	const rows = useBlacklist();
 	const block = useBlockUser();
 	const unblock = useUnblockUser();
@@ -39,7 +41,7 @@ export function BlacklistTab(): React.JSX.Element {
 		<div className="flex flex-col gap-4">
 			<Card focal className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Block someone from Testify</h2>
+					<h2 className={CARD_HEADING}>{t("owner.blockSomeone")}</h2>
 					<p className="text-muted-foreground text-sm">
 						A blocked account cannot run any command, on either surface, in any server. Bot-wide — to stop one command
 						in one server, switch it off instead.
@@ -47,7 +49,7 @@ export function BlacklistTab(): React.JSX.Element {
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-[minmax(0,20rem)_1fr]">
-					<Field htmlFor="blacklist-user" label="User ID">
+					<Field htmlFor="blacklist-user" label={t("owner.userId")}>
 						<input
 							id="blacklist-user"
 							value={userId}
@@ -61,13 +63,13 @@ export function BlacklistTab(): React.JSX.Element {
 						/>
 					</Field>
 
-					<Field htmlFor="blacklist-reason" label="Reason (optional)">
+					<Field htmlFor="blacklist-reason" label={t("owner.reasonOptional")}>
 						<input
 							id="blacklist-reason"
 							value={reason}
 							autoComplete="off"
 							maxLength={200}
-							placeholder="Why they are being blocked"
+							placeholder={t("owner.reasonPlaceholder")}
 							onChange={(event) => {
 								setReason(event.target.value);
 							}}
@@ -109,8 +111,8 @@ export function BlacklistTab(): React.JSX.Element {
 				{rows.data?.length === 0 && (
 					<EmptyState
 						icon={<ShieldOff size={20} aria-hidden="true" />}
-						title="Nobody is blocked"
-						body="Anyone blocked here is refused before a command runs, in every server."
+						title={t("owner.nobodyBlocked")}
+						body={t("owner.nobodyBlockedBody")}
 					/>
 				)}
 

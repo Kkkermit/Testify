@@ -1,6 +1,7 @@
 import { type OwnerGuildDetail } from "@testify/shared";
 import { ExternalLink, LogOut, X } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { FIELD, Field, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
@@ -11,6 +12,7 @@ import { shortDate } from "@/lib/datetime";
 
 /** One server at a glance, opened from the fleet table rather than by hunting for its id. */
 export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: () => void }): React.JSX.Element {
+	const { t } = useTranslation();
 	const detail = useGuildDetail(guildId);
 
 	if (detail.isPending || detail.data === undefined) return <Skeleton className="h-64 w-full" />;
@@ -31,10 +33,10 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			</div>
 
 			<dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-				<Figure size="md" label="Members" value={guild.memberCount.toLocaleString()} />
-				<Figure size="md" label="Channels" value={String(guild.channelCount)} />
-				<Figure size="md" label="Roles" value={String(guild.roleCount)} />
-				<Figure size="md" label="Commands, 30d" value={guild.usage.toLocaleString()} />
+				<Figure size="md" label={t("owner.members")} value={guild.memberCount.toLocaleString()} />
+				<Figure size="md" label={t("overview.channels")} value={String(guild.channelCount)} />
+				<Figure size="md" label={t("overview.roles")} value={String(guild.roleCount)} />
+				<Figure size="md" label={t("owner.commands30d")} value={guild.usage.toLocaleString()} />
 			</dl>
 
 			<DataList
@@ -52,9 +54,9 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			/>
 
 			<div className="flex flex-wrap items-center gap-2">
-				<span className="text-muted-foreground text-sm">Configured:</span>
+				<span className="text-muted-foreground text-sm">{t("owner.configured")}</span>
 				{guild.configured.length === 0 ? (
-					<Badge tone="warning">Nothing set up</Badge>
+					<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>
 				) : (
 					guild.configured.map((feature) => <Badge key={feature}>{feature}</Badge>)
 				)}
@@ -79,6 +81,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
  * the name rather than a click. The server checks it too; this half is the warning, not the gate.
  */
 function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () => void }): React.JSX.Element {
+	const { t } = useTranslation();
 	const leave = useLeaveGuild(guild.id);
 	const [confirm, setConfirm] = useState("");
 	const inputId = `leave-${guild.id}`;
@@ -86,7 +89,7 @@ function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () =>
 	return (
 		<div className="border-border flex flex-col gap-3 border-t pt-4">
 			<div>
-				<h4 className="text-sm font-semibold">Leave this server</h4>
+				<h4 className="text-sm font-semibold">{t("owner.leaveServer")}</h4>
 				<p className="text-muted-foreground text-sm">
 					Testify stops answering there immediately. Getting back in needs a fresh invite from someone still inside, and
 					its settings are kept in case it returns.

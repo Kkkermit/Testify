@@ -1,6 +1,7 @@
 import { BOT_IDENTITY_LIMITS } from "@testify/shared";
 import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, Skeleton } from "@/components/primitives";
@@ -14,6 +15,7 @@ import { sanitiseInput } from "@/lib/sanitise";
 
 /** There is no Start: this API is served by the bot process, so a stopped bot has nothing left to answer with. */
 export function ControlTab(): React.JSX.Element {
+	const { t } = useTranslation();
 	const control = useBotControl();
 	const gateway = useGateway();
 	const shutdown = useShutdown();
@@ -39,7 +41,7 @@ export function ControlTab(): React.JSX.Element {
 			<Card className="flex flex-col gap-4">
 				<div className="flex flex-wrap items-start justify-between gap-3">
 					<div>
-						<h2 className={CARD_HEADING}>Running state</h2>
+						<h2 className={CARD_HEADING}>{t("owner.runningState")}</h2>
 						<p className="text-muted-foreground text-sm">
 							{paused
 								? "Testify is connected but refusing everything. No commands, no XP, no automod."
@@ -51,18 +53,18 @@ export function ControlTab(): React.JSX.Element {
 
 				<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
 					<div className="flex gap-2">
-						<dt>Servers</dt>
+						<dt>{t("owner.servers")}</dt>
 						<dd className="text-foreground font-mono tabular-nums">{state.guilds}</dd>
 					</div>
 					<div className="flex gap-2">
-						<dt>Gateway ping</dt>
+						<dt>{t("owner.gatewayPing")}</dt>
 						<dd className="text-foreground font-mono tabular-nums">
 							{state.pingMs === null ? "—" : `${String(state.pingMs)} ms`}
 						</dd>
 					</div>
 					{state.since !== null && (
 						<div className="flex gap-2">
-							<dt>Paused since</dt>
+							<dt>{t("owner.pausedSince")}</dt>
 							<dd className="text-foreground">{dateAndTime(state.since)}</dd>
 						</div>
 					)}
@@ -88,14 +90,14 @@ export function ControlTab(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Name and picture</h2>
+					<h2 className={CARD_HEADING}>{t("owner.nameAndPicture")}</h2>
 					<p className="text-muted-foreground text-sm">
 						The bot's global profile, in every server at once. Discord has no per-server picture for bots — a manager
 						gets a nickname and nothing more.
 					</p>
 				</div>
 
-				<Field label="Username" htmlFor="bot-name">
+				<Field label={t("owner.username")} htmlFor="bot-name">
 					<div className="flex flex-wrap items-center gap-2">
 						<input
 							id="bot-name"
@@ -129,7 +131,7 @@ export function ControlTab(): React.JSX.Element {
 
 			<Card className="border-destructive/40 flex flex-col gap-3">
 				<div>
-					<h2 className={CARD_HEADING}>Shut down</h2>
+					<h2 className={CARD_HEADING}>{t("owner.shutDown")}</h2>
 					<p className="text-muted-foreground text-sm">
 						Stops the whole process, and this dashboard with it — the bot serves it. Only your host can start it again:
 						systemd, Docker or a terminal.
@@ -167,7 +169,7 @@ export function ControlTab(): React.JSX.Element {
 					</div>
 				</Field>
 
-				{shutdown.isSuccess && <Warning>Testify is stopping. This page will stop responding in a moment.</Warning>}
+				{shutdown.isSuccess && <Warning>{t("owner.stopping")}</Warning>}
 
 				{/* A refused shutdown otherwise looks exactly like a successful one: nothing on the page moves either way. */}
 				{shutdown.error !== null && (

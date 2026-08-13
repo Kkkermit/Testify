@@ -1,4 +1,5 @@
 import { ExternalLink } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Card, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
@@ -10,6 +11,7 @@ import { dateAndTime } from "@/lib/datetime";
 
 /** What this bot is running as — the first thing to check before believing anything else on this screen. */
 export function RuntimeTab(): React.JSX.Element {
+	const { t } = useTranslation();
 	const runtime = useRuntime();
 
 	if (runtime.isPending) return <Skeleton className="h-64 w-full" />;
@@ -56,7 +58,7 @@ export function RuntimeTab(): React.JSX.Element {
 			</Card>
 
 			<Card className="flex flex-col gap-2">
-				<h2 className={CARD_HEADING}>Updates</h2>
+				<h2 className={CARD_HEADING}>{t("owner.updates")}</h2>
 				<p className="text-muted-foreground text-sm">
 					You are running <span className="font-mono">v{info.version}</span>. Testify never contacts a server to check
 					for a newer one — a self-hosted bot that phones home on a timer is not something to ship by default. Compare

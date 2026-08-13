@@ -1,6 +1,7 @@
 import { type CommandOptionSummary } from "@testify/shared";
 import { Play, Terminal } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Field, SELECT, Warning } from "@/components/form";
 import { Button, Card, EmptyState, Skeleton } from "@/components/primitives";
@@ -19,6 +20,7 @@ import { cn } from "@/lib/cn";
  * here, because a Components V2 tree serialised to JSON is not a settings page.
  */
 export function RunnerTab(): React.JSX.Element {
+	const { t } = useTranslation();
 	const catalogue = useRunnable();
 	const run = useRunCommand();
 
@@ -46,7 +48,7 @@ export function RunnerTab(): React.JSX.Element {
 		<div className="flex flex-col gap-4">
 			<Card focal className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Run a command</h2>
+					<h2 className={CARD_HEADING}>{t("owner.runCommand")}</h2>
 					<p className="text-muted-foreground text-sm">
 						Runs here rather than in a server: nothing is posted to Discord, and the reply comes back below. Only
 						read-only owner commands are listed.
@@ -54,7 +56,7 @@ export function RunnerTab(): React.JSX.Element {
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2">
-					<Field htmlFor="runner-command" label="Command">
+					<Field htmlFor="runner-command" label={t("owner.command")}>
 						<select
 							id="runner-command"
 							value={name}
@@ -63,7 +65,7 @@ export function RunnerTab(): React.JSX.Element {
 							}}
 							className={SELECT}
 						>
-							<option value="">Pick one</option>
+							<option value="">{t("owner.pickOne")}</option>
 							{commands.map((candidate) => (
 								<option key={candidate.name} value={candidate.name}>
 									/{candidate.name}
@@ -73,7 +75,7 @@ export function RunnerTab(): React.JSX.Element {
 					</Field>
 
 					{needsSubcommand(command) && (
-						<Field htmlFor="runner-subcommand" label="Part">
+						<Field htmlFor="runner-subcommand" label={t("owner.part")}>
 							<select
 								id="runner-subcommand"
 								value={subcommand ?? ""}
@@ -83,7 +85,7 @@ export function RunnerTab(): React.JSX.Element {
 								}}
 								className={SELECT}
 							>
-								<option value="">Pick one</option>
+								<option value="">{t("owner.pickOne")}</option>
 								{(command?.subcommands ?? []).map((part) => (
 									<option key={part.name} value={part.name}>
 										{part.name}
@@ -97,7 +99,7 @@ export function RunnerTab(): React.JSX.Element {
 				{command !== undefined && <p className="text-muted-foreground text-sm">{command.description}</p>}
 
 				{command?.guildOnly === true && (
-					<Field htmlFor="runner-guild" label="Server ID">
+					<Field htmlFor="runner-guild" label={t("owner.serverId")}>
 						<input
 							id="runner-guild"
 							value={guildId}
@@ -153,8 +155,8 @@ export function RunnerTab(): React.JSX.Element {
 				<Card>
 					<EmptyState
 						icon={<Terminal size={20} aria-hidden="true" />}
-						title="Nothing run yet"
-						body="Pick a command above. Its reply appears here rather than in a Discord channel."
+						title={t("owner.nothingRun")}
+						body={t("owner.nothingRunBody")}
 					/>
 				</Card>
 			) : (
@@ -173,6 +175,7 @@ function OptionField({
 	value: string;
 	onChange: (next: string) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const id = `runner-arg-${option.name}`;
 	const label = option.required ? option.name : `${option.name} (optional)`;
 	const kind = controlFor(option);
@@ -188,7 +191,7 @@ function OptionField({
 					}}
 					className={SELECT}
 				>
-					<option value="">Pick one</option>
+					<option value="">{t("owner.pickOne")}</option>
 					{option.choices.map((choice) => (
 						<option key={String(choice.value)} value={String(choice.value)}>
 							{choice.name}
@@ -206,7 +209,7 @@ function OptionField({
 					}}
 					className={SELECT}
 				>
-					<option value="">Not set</option>
+					<option value="">{t("owner.notSet")}</option>
 					<option value="true">Yes</option>
 					<option value="false">No</option>
 				</select>

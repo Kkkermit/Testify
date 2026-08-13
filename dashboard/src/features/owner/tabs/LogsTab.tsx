@@ -1,5 +1,6 @@
 import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
 import { Pause, Play, Search } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Warning } from "@/components/form";
 import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
@@ -36,6 +37,7 @@ export function LogsTab({
 	onSearch: (search: string) => void;
 	onPause: (paused: boolean) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
 	const logs = useLogs(level, useDebounced(search), paused);
 
@@ -43,7 +45,7 @@ export function LogsTab({
 		<div className="flex flex-col gap-4">
 			<Card padding="compact" className="flex flex-wrap items-center gap-3">
 				<label className="relative min-w-52 flex-1">
-					<span className="sr-only">Search the log</span>
+					<span className="sr-only">{t("owner.searchLog")}</span>
 					<Search
 						size={15}
 						aria-hidden="true"
@@ -52,7 +54,7 @@ export function LogsTab({
 					<input
 						type="search"
 						value={search}
-						placeholder="Search messages, guild ids, errors…"
+						placeholder={t("owner.searchLogPlaceholder")}
 						onChange={(event) => {
 							onSearch(event.target.value);
 						}}
@@ -60,7 +62,7 @@ export function LogsTab({
 					/>
 				</label>
 
-				<SegmentedControl label="Minimum level" segments={LEVEL_SEGMENTS} value={level} onChange={onLevel} />
+				<SegmentedControl label={t("owner.minimumLevel")} segments={LEVEL_SEGMENTS} value={level} onChange={onLevel} />
 
 				<Button
 					variant="ghost"

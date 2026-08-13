@@ -1,8 +1,10 @@
 import { type UsageDay } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { shortDay } from "@/features/owner/owner.utils";
 
 /** A `<table>` rather than a canvas, so a screen reader gets the numbers. No chart library — a bar is a div with a height. */
 export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
+	const { t } = useTranslation();
 	const max = Math.max(1, ...days.map((day) => day.count));
 
 	return (
@@ -25,12 +27,12 @@ export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
 
 			<figcaption className="sr-only">
 				<table>
-					<caption>Commands run per day</caption>
+					<caption>{t("owner.perDay")}</caption>
 					<thead>
 						<tr>
 							<th scope="col">Day</th>
-							<th scope="col">Commands</th>
-							<th scope="col">Failures</th>
+							<th scope="col">{t("owner.commands")}</th>
+							<th scope="col">{t("owner.failures")}</th>
 						</tr>
 					</thead>
 					<tbody>
