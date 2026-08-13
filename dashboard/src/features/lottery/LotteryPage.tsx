@@ -1,4 +1,4 @@
-import { LOTTERY_FREQUENCIES, LOTTERY_LIMITS, type LotteryFrequency } from "@testify/shared";
+import { LOTTERY_FREQUENCIES, LOTTERY_LIMITS } from "@testify/shared";
 import { Coins, Snowflake, Ticket, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,7 @@ import { useEndLottery, useLottery, useSaveLottery } from "@/features/lottery/us
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { oneOf } from "@/lib/oneOf";
 
 export function LotteryPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -119,7 +120,7 @@ export function LotteryPage(): React.JSX.Element {
 						className={cn(SELECT, "max-w-48")}
 						value={draft.frequency}
 						onChange={(event) => {
-							set("frequency", event.target.value as LotteryFrequency);
+							set("frequency", oneOf(LOTTERY_FREQUENCIES, event.target.value, "weekly"));
 						}}
 					>
 						{LOTTERY_FREQUENCIES.map((frequency) => (

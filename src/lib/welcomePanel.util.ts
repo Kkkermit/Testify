@@ -44,8 +44,15 @@ function summary(config: WelcomeConfig | null): string {
 	return (
 		"## 👋 Welcome messages\n" +
 		`New members are greeted in <#${config.channelId}> as a **${STYLE_LABELS[config.style].toLowerCase()}**.\n` +
-		`-# ${config.style === "card" ? (config.hasBackground ? "Using your background image." : "Using the default background.") : "Switch to the image card for a picture with their avatar."}`
+		`-# ${backgroundNote(config)}`
 	);
+}
+
+/** Only the image card has a background, so the other styles get told what they would gain by switching. */
+function backgroundNote(config: WelcomeConfig): string {
+	if (config.style !== "card") return "Switch to the image card for a picture with their avatar.";
+
+	return config.hasBackground ? "Using your background image." : "Using the default background.";
 }
 
 function placeholderHelp(): string {

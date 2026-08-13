@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Field, savingStateOf, SELECT, Toggle } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
+import { oneOf } from "@/lib/oneOf";
 
 export function AntiLinkSection({ guildId, value }: { guildId: string; value: AntiLinkSetting }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -33,7 +34,7 @@ export function AntiLinkSection({ guildId, value }: { guildId: string; value: An
 					value={value.bypassPermission}
 					disabled={!value.enabled}
 					onChange={(event) => {
-						save.mutate({ bypassPermission: event.target.value as AntiLinkSetting["bypassPermission"] });
+						save.mutate({ bypassPermission: oneOf(BYPASS_PERMISSIONS, event.target.value, "ManageMessages") });
 					}}
 				>
 					{BYPASS_PERMISSIONS.map((permission) => (

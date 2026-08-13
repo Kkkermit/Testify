@@ -20,6 +20,7 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { oneOf } from "@/lib/oneOf";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function AutomodPage(): React.JSX.Element {
@@ -114,7 +115,7 @@ export function AutomodPage(): React.JSX.Element {
 							className={SELECT}
 							value={preset}
 							onChange={(event) => {
-								setPreset(event.target.value as AutomodPreset);
+								setPreset(oneOf(AUTOMOD_PRESETS, event.target.value, "flagged-words"));
 							}}
 						>
 							{AUTOMOD_PRESETS.map((key) => (

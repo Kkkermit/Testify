@@ -1,3 +1,5 @@
+import { readdirSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { LOCALE_NAMES, LOCALES } from "@/i18n";
 import de from "@/i18n/locales/de.json";
 import en from "@/i18n/locales/en.json";
@@ -88,3 +90,32 @@ describe("the locale list", () => {
 		expect(LOCALES.filter((locale) => locale !== "en" && !(locale in DICTIONARIES))).toEqual([]);
 	});
 });
+
+/**
+ * A key nothing renders is dead weight in four files at once, and the next person to translate one has no way
+ * to tell it apart from a key that matters. Reading the source is what keeps the dictionary the size of the app.
+ */
+describe("the English dictionary", () => {
+	const used = sourceText();
+
+	it("has no key the dashboard never renders", () => {
+		const dead = [...english].filter((key) => !used.includes(`"${key}"`));
+
+		expect(dead).toEqual([]);
+	});
+});
+
+/** Every module the app ships, so a key used anywhere counts as used. Tests and the locales themselves do not. */
+function sourceText(): string {
+	const read = (dir: string): string =>
+		readdirSync(dir, { withFileTypes: true })
+			.map((entry) => {
+				const path = join(dir, entry.name);
+				if (entry.isDirectory()) return read(path);
+				const source = /\.tsx?$/.test(path) && !path.includes(".test.") && !path.includes("locales");
+				return source ? readFileSync(path, "utf8") : "";
+			})
+			.join("");
+
+	return read(resolve(__dirname, ".."));
+}

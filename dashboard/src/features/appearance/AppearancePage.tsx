@@ -1,14 +1,19 @@
-import { Languages, Monitor, Moon, Sun } from "lucide-react";
+import { Languages, type LucideIcon, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, PageHeader, SegmentedControl } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { ThemePreview } from "@/features/appearance/components/ThemePreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { THEMES, useTheme, type Theme } from "@/hooks/useTheme";
-import { isLocale, LOCALE_NAMES, LOCALES, type Locale } from "@/i18n";
+import { isLocale, LOCALE_NAMES, LOCALES, type Locale, type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-const THEME_ICON: Record<Theme, typeof Sun> = { system: Monitor, light: Sun, dark: Moon };
+/** One row per theme: the icon, its name and what it does. A template-literal key would hide these from a search. */
+const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hint: TranslationKey }> = {
+	system: { icon: Monitor, label: "appearance.system", hint: "appearance.systemHint" },
+	light: { icon: Sun, label: "appearance.light", hint: "appearance.alwaysLight" },
+	dark: { icon: Moon, label: "appearance.dark", hint: "appearance.alwaysDark" },
+};
 
 export function AppearancePage(): React.JSX.Element {
 	const { t, i18n } = useTranslation();
@@ -35,21 +40,21 @@ export function AppearancePage(): React.JSX.Element {
 						onChange={setTheme}
 						segments={THEMES.map((name) => ({
 							value: name,
-							label: t(`appearance.${name}`),
-							hint: t(
-								name === "system"
-									? "appearance.systemHint"
-									: name === "light"
-										? "appearance.alwaysLight"
-										: "appearance.alwaysDark",
-							),
+							label: t(THEME_OPTIONS[name].label),
+							hint: t(THEME_OPTIONS[name].hint),
 						}))}
 					/>
 				</div>
 
 				<div className="grid gap-3 sm:grid-cols-3">
 					{THEMES.map((name) => (
-						<ThemePreview key={name} theme={name} icon={THEME_ICON[name]} selected={theme === name} />
+						<ThemePreview
+							key={name}
+							theme={name}
+							icon={THEME_OPTIONS[name].icon}
+							label={t(THEME_OPTIONS[name].label)}
+							selected={theme === name}
+						/>
 					))}
 				</div>
 			</Card>

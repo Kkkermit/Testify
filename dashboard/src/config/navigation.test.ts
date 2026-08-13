@@ -63,7 +63,10 @@ describe("navigationFor", () => {
 	it("keeps the owner console in a group of its own", () => {
 		const groups = navigationFor({ guild, isOwner: true });
 
-		expect(groups.at(-1)).toMatchObject({ heading: "Bot", items: [expect.objectContaining({ to: "/owner" })] });
+		expect(groups.at(-1)).toMatchObject({
+			headingKey: "nav.bot",
+			items: [expect.objectContaining({ to: "/owner" })],
+		});
 	});
 
 	it("groups nothing under a server heading when no server is open", () => {

@@ -1,4 +1,5 @@
 import { ANALYTICS_WINDOWS, LOG_LEVELS, snowflake, type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
+import { oneOf } from "@/lib/oneOf";
 
 /** A page number out of a URL can be anything at all. */
 export function pageFrom(raw: string | null): number {
@@ -30,7 +31,7 @@ export function windowFrom(raw: string | null): AnalyticsWindow {
 
 /** Defaults to everything: the console exists to be looked through. */
 export function levelFrom(raw: string | null): ReportedLogLevel {
-	return LOG_LEVELS.find((option) => option === raw) ?? "trace";
+	return oneOf(LOG_LEVELS, raw, "trace");
 }
 
 /** A percentage of the busiest row, floored at 2 so a row with one use is still visibly a row. */

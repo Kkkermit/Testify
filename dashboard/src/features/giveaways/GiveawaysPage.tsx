@@ -26,6 +26,7 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { oneOf } from "@/lib/oneOf";
 import { sanitiseInput } from "@/lib/sanitise";
 
 export function GiveawaysPage(): React.JSX.Element {
@@ -129,7 +130,15 @@ export function GiveawaysPage(): React.JSX.Element {
 							<select
 								aria-label={t("giveaways.durationUnit")}
 								value={unit}
-								onChange={(event) => setUnit(event.target.value as DurationUnit)}
+								onChange={(event) =>
+									setUnit(
+										oneOf(
+											DURATION_UNITS.map((entry) => entry.value),
+											event.target.value,
+											"hours",
+										),
+									)
+								}
 								className={SELECT}
 							>
 								{DURATION_UNITS.map((entry) => (

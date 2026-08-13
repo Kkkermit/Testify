@@ -41,8 +41,10 @@ export interface NavSection {
 
 /** Groups put a server's own settings under its name, so it is always clear which server is being edited. */
 export interface NavGroup {
-	/** Absent for the first group, which needs no heading to be understood. A name, not a key, when present. */
+	/** A server's own name, shown exactly as typed. Absent for the first group, which needs no heading. */
 	heading?: string;
+	/** For a group that is not named after a server, so its heading is translated rather than a name. */
+	headingKey?: TranslationKey;
 	items: NavItem[];
 	/** Rendered after `items`, each behind its own toggle. */
 	sections?: NavSection[];
@@ -173,7 +175,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 
 	if (isOwner) {
 		groups.push({
-			heading: "Bot",
+			headingKey: "nav.bot",
 			items: [{ to: "/owner", labelKey: "nav.owner", icon: ShieldCheck, hintKey: "nav.ownerHint" }],
 		});
 	}

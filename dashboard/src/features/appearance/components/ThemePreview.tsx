@@ -1,5 +1,4 @@
 import { type LucideIcon } from "lucide-react";
-import { useTranslation } from "react-i18next";
 import { type Theme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
 
@@ -28,14 +27,14 @@ function Mock({ scheme }: { scheme: "light" | "dark" }): React.JSX.Element {
 export function ThemePreview({
 	theme,
 	icon: Icon,
+	label,
 	selected,
 }: {
 	theme: Theme;
 	icon: LucideIcon;
+	label: string;
 	selected: boolean;
 }): React.JSX.Element {
-	const { t } = useTranslation();
-
 	return (
 		<figure className="flex flex-col gap-2">
 			<div
@@ -60,7 +59,7 @@ export function ThemePreview({
 
 			<figcaption className="text-muted-foreground flex items-center gap-2 text-xs">
 				<Icon size={13} aria-hidden="true" />
-				{t(`appearance.${theme}`)}
+				{label}
 			</figcaption>
 		</figure>
 	);

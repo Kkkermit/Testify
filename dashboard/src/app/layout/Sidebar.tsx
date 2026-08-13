@@ -65,36 +65,41 @@ export function Sidebar({
 				</span>
 			</Link>
 
-			{navigationFor({ guild, isOwner }).map((group, index) => (
-				<div key={group.heading ?? "global"} className={index > 0 ? "mt-4" : undefined}>
-					{group.heading !== undefined && (
-						<>
-							{/* At the icon-only width the rule carries the grouping, where there is no room for the words. */}
-							<hr className="border-border mx-2 mb-2 lg:hidden" />
-							{/* Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's. */}
-							<p
-								aria-hidden="true"
-								className={cn(
-									"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
-									expanded ? "" : "hidden lg:block",
-								)}
-							>
-								{group.heading}
-							</p>
-						</>
-					)}
-					<ul className="flex flex-col gap-1" {...(group.heading === undefined ? {} : { "aria-label": group.heading })}>
-						{group.items.map((item) => (
-							<li key={item.to}>
-								<SidebarLink item={item} expanded={expanded} />
-							</li>
-						))}
-						{(group.sections ?? []).map((section) => (
-							<SidebarSection key={section.labelKey} section={section} expanded={expanded} />
-						))}
-					</ul>
-				</div>
-			))}
+			{navigationFor({ guild, isOwner }).map((group, index) => {
+				// A server group is headed by its name; every other group by a translated one.
+				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
+
+				return (
+					<div key={heading ?? "global"} className={index > 0 ? "mt-4" : undefined}>
+						{heading !== undefined && (
+							<>
+								{/* At the icon-only width the rule carries the grouping, where there is no room for the words. */}
+								<hr className="border-border mx-2 mb-2 lg:hidden" />
+								{/* Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's. */}
+								<p
+									aria-hidden="true"
+									className={cn(
+										"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
+										expanded ? "" : "hidden lg:block",
+									)}
+								>
+									{heading}
+								</p>
+							</>
+						)}
+						<ul className="flex flex-col gap-1" {...(heading === undefined ? {} : { "aria-label": heading })}>
+							{group.items.map((item) => (
+								<li key={item.to}>
+									<SidebarLink item={item} expanded={expanded} />
+								</li>
+							))}
+							{(group.sections ?? []).map((section) => (
+								<SidebarSection key={section.labelKey} section={section} expanded={expanded} />
+							))}
+						</ul>
+					</div>
+				);
+			})}
 
 			<div className="border-border mt-auto flex flex-col gap-1 border-t pt-3">
 				{user !== null && (

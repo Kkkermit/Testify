@@ -1,7 +1,8 @@
 import { type BoardPage, MEMBER_BOARDS, type MemberBoard } from "@testify/shared";
+import { oneOf } from "@/lib/oneOf";
 
 export function boardFrom(value: string | null): MemberBoard {
-	return (MEMBER_BOARDS as readonly string[]).includes(value ?? "") ? (value as MemberBoard) : "economy";
+	return oneOf(MEMBER_BOARDS, value, "economy");
 }
 
 /** A page out of range is a stale link, not an error — clamping beats an empty table with no way back. */

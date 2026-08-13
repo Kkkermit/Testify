@@ -43,8 +43,8 @@ function everySource(dir: string, found: string[] = []): string[] {
 }
 
 /**
- * The copy now lives in `en.json` rather than in the components, so that is where most of it is read from.
- * The `.tsx` sweep stays for anything not yet extracted — a screen half-translated must not fall out of scope.
+ * Most copy lives in `en.json`; the `.tsx` sweep catches anything a component still spells out itself, so a
+ * screen that is only half extracted does not fall out of scope.
  */
 function localeLines(): { where: string; text: string }[] {
 	const out: { where: string; text: string }[] = [];

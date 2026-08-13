@@ -23,7 +23,7 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 export const LOCALE_STORAGE_KEY = "testify:locale";
 
 export function isLocale(value: unknown): value is Locale {
-	return typeof value === "string" && LOCALES.includes(value as Locale);
+	return LOCALES.some((locale) => locale === value);
 }
 
 export const resources = {

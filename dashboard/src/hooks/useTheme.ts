@@ -1,13 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
+import { oneOf } from "@/lib/oneOf";
 
 export const THEMES = ["system", "light", "dark"] as const;
 export type Theme = (typeof THEMES)[number];
 
 const KEY = "testify:theme";
-
-export function isTheme(value: unknown): value is Theme {
-	return typeof value === "string" && THEMES.includes(value as Theme);
-}
 
 /**
  * Reading it back out of storage rather than from React state, because the attribute is applied to
@@ -15,8 +12,7 @@ export function isTheme(value: unknown): value is Theme {
  */
 export function storedTheme(): Theme {
 	try {
-		const raw = window.localStorage.getItem(KEY);
-		return isTheme(raw) ? raw : "system";
+		return oneOf(THEMES, window.localStorage.getItem(KEY), "system");
 	} catch {
 		// Storage throws rather than returning null when cookies are blocked entirely.
 		return "system";
