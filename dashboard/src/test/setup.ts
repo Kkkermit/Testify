@@ -1,6 +1,8 @@
 import "@testing-library/jest-dom";
 import { setupServer } from "msw/node";
 import { handlers } from "@/test/handlers";
+// Initialises the shared i18next instance, so every component under test resolves keys rather than rendering them.
+import "@/i18n";
 
 export const server = setupServer(...handlers);
 

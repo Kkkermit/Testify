@@ -1,5 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import { useEffect, useId, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { type NavSection, sectionHolds } from "@/config/navigation";
@@ -13,6 +14,7 @@ export function SidebarSection({
 	section: NavSection;
 	expanded?: boolean;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const { pathname } = useLocation();
 	const listId = useId();
 	const holdsCurrent = sectionHolds(section, pathname);
@@ -42,7 +44,7 @@ export function SidebarSection({
 				<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
 					<Icon size={18} />
 				</span>
-				<span className="flex-1 truncate text-left">{section.label}</span>
+				<span className="flex-1 truncate text-left">{t(section.labelKey)}</span>
 				<ChevronDown
 					size={14}
 					aria-hidden="true"

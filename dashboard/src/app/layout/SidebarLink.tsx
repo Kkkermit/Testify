@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router";
 import { Tooltip } from "@/components/primitives";
 import { type NavItem } from "@/config/navigation";
@@ -5,10 +6,12 @@ import { cn } from "@/lib/cn";
 
 /** `sr-only` rather than `hidden` at the icon-only width: `display: none` would leave the link named nothing. */
 export function SidebarLink({ item, expanded = false }: { item: NavItem; expanded?: boolean }): React.JSX.Element {
-	const { to, label, icon: Icon, hint, exact = true } = item;
+	const { t } = useTranslation();
+	const { to, labelKey, icon: Icon, hintKey, exact = true } = item;
+	const label = t(labelKey);
 
 	return (
-		<Tooltip label={hint ?? label} placement="right">
+		<Tooltip label={hintKey === undefined ? label : t(hintKey)} placement="right">
 			<NavLink
 				to={to}
 				end={exact}

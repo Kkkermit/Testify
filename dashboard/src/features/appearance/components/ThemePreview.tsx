@@ -1,8 +1,7 @@
 import { type LucideIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { type Theme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
-
-const LABEL: Record<Theme, string> = { system: "System", light: "Light", dark: "Dark" };
 
 /**
  * `color-scheme` on the preview itself makes every `light-dark()` token inside it resolve to that theme, so a
@@ -35,6 +34,8 @@ export function ThemePreview({
 	icon: LucideIcon;
 	selected: boolean;
 }): React.JSX.Element {
+	const { t } = useTranslation();
+
 	return (
 		<figure className="flex flex-col gap-2">
 			<div
@@ -59,7 +60,7 @@ export function ThemePreview({
 
 			<figcaption className="text-muted-foreground flex items-center gap-2 text-xs">
 				<Icon size={13} aria-hidden="true" />
-				{LABEL[theme]}
+				{t(`appearance.${theme}`)}
 			</figcaption>
 		</figure>
 	);

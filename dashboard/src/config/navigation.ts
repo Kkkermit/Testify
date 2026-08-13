@@ -18,28 +18,30 @@ import {
 	type LucideIcon,
 	Gift,
 } from "lucide-react";
+import { type TranslationKey } from "@/i18n";
 
 /** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips and active marker follow. */
 export interface NavItem {
 	to: string;
-	label: string;
+	/** A translation key, not text: this module is data and has no hook to translate with. */
+	labelKey: TranslationKey;
 	icon: LucideIcon;
 	/** What the tooltip adds beyond the label. Omitted when the label already says everything. */
-	hint?: string;
+	hintKey?: TranslationKey;
 	/** False when child routes should keep this item marked as current. */
 	exact?: boolean;
 }
 
 /** A collapsible run of related screens, so a server's settings stay one scan rather than ten rows. */
 export interface NavSection {
-	label: string;
+	labelKey: TranslationKey;
 	icon: LucideIcon;
 	items: NavItem[];
 }
 
 /** Groups put a server's own settings under its name, so it is always clear which server is being edited. */
 export interface NavGroup {
-	/** Absent for the first group, which needs no heading to be understood. */
+	/** Absent for the first group, which needs no heading to be understood. A name, not a key, when present. */
 	heading?: string;
 	items: NavItem[];
 	/** Rendered after `items`, each behind its own toggle. */
@@ -55,15 +57,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 	const groups: NavGroup[] = [
 		{
 			items: [
-				{ to: "/guilds", label: "Servers", icon: LayoutGrid, hint: "Every server you can configure" },
+				{ to: "/guilds", labelKey: "nav.servers", icon: LayoutGrid, hintKey: "nav.serversHint" },
 				{
 					to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
-					label: "Commands",
+					labelKey: "nav.commands",
 					icon: Terminal,
-					hint:
-						guild === undefined
-							? "Every command Testify has"
-							: "Every command Testify has, and which of them this server allows",
+					hintKey: guild === undefined ? "nav.commandsHintAll" : "nav.commandsHintGuild",
 				},
 			],
 		},
@@ -73,98 +72,98 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 		groups.push({
 			heading: guild.name,
 			items: [
-				{ to: `/guilds/${guild.id}`, label: "Overview", icon: Server, hint: "This server at a glance" },
+				{ to: `/guilds/${guild.id}`, labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
 				{
 					to: `/guilds/${guild.id}/settings`,
-					label: "Settings",
+					labelKey: "nav.settings",
 					icon: SlidersHorizontal,
-					hint: "Prefix, link filtering, joins and counting",
+					hintKey: "nav.settingsHint",
 				},
 			],
 			sections: [
 				{
-					label: "Members",
+					labelKey: "nav.members",
 					icon: Users,
 					items: [
 						{
 							to: `/guilds/${guild.id}/members`,
-							label: "Leaderboards",
+							labelKey: "nav.leaderboards",
 							icon: Trophy,
-							hint: "Who is ahead on money and levels",
+							hintKey: "nav.leaderboardsHint",
 							// A member's own page lives under this path, and it is still where you are in the sidebar.
 							exact: false,
 						},
 						{
 							to: `/guilds/${guild.id}/levelling`,
-							label: "Levelling",
+							labelKey: "nav.levelling",
 							icon: TrendingUp,
-							hint: "XP, rewards and boosts",
+							hintKey: "nav.levellingHint",
 						},
 						{
 							to: `/guilds/${guild.id}/welcome`,
-							label: "Welcome",
+							labelKey: "nav.welcome",
 							icon: UserPlus,
-							hint: "What Testify says when somebody joins",
+							hintKey: "nav.welcomeHint",
 						},
 					],
 				},
 				{
-					label: "Moderation",
+					labelKey: "nav.moderation",
 					icon: ShieldAlert,
 					items: [
 						{
 							to: `/guilds/${guild.id}/automod`,
-							label: "AutoMod",
+							labelKey: "nav.automod",
 							icon: ShieldAlert,
-							hint: "Discord's own message filters",
+							hintKey: "nav.automodHint",
 						},
 						{
 							to: `/guilds/${guild.id}/audit-log`,
-							label: "Audit log",
+							labelKey: "nav.auditLog",
 							icon: ScrollText,
-							hint: "Which server events Testify records",
+							hintKey: "nav.auditLogHint",
 						},
 					],
 				},
 				{
-					label: "Economy",
+					labelKey: "nav.economy",
 					icon: Coins,
 					items: [
 						{
 							to: `/guilds/${guild.id}/treasure`,
-							label: "Treasure",
+							labelKey: "nav.treasure",
 							icon: Coins,
-							hint: "Random money drops in chat",
+							hintKey: "nav.treasureHint",
 						},
 						{
 							to: `/guilds/${guild.id}/lottery`,
-							label: "Lottery",
+							labelKey: "nav.lottery",
 							icon: Ticket,
-							hint: "A pot members buy tickets into",
+							hintKey: "nav.lotteryHint",
 						},
 						{
 							to: `/guilds/${guild.id}/giveaways`,
-							label: "Giveaways",
+							labelKey: "nav.giveaways",
 							icon: Gift,
-							hint: "Prize draws members enter with a reaction",
+							hintKey: "nav.giveawaysHint",
 						},
 					],
 				},
 				{
-					label: "Channels",
+					labelKey: "nav.channels",
 					icon: MessagesSquare,
 					items: [
 						{
 							to: `/guilds/${guild.id}/sticky`,
-							label: "Sticky",
+							labelKey: "nav.sticky",
 							icon: Pin,
-							hint: "Messages Testify keeps at the bottom of a channel",
+							hintKey: "nav.stickyHint",
 						},
 						{
 							to: `/guilds/${guild.id}/tickets`,
-							label: "Tickets",
+							labelKey: "nav.tickets",
 							icon: LifeBuoy,
-							hint: "A button members press to reach your staff",
+							hintKey: "nav.ticketsHint",
 						},
 					],
 				},
@@ -175,7 +174,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 	if (isOwner) {
 		groups.push({
 			heading: "Bot",
-			items: [{ to: "/owner", label: "Owner console", icon: ShieldCheck, hint: "Every server Testify is in" }],
+			items: [{ to: "/owner", labelKey: "nav.owner", icon: ShieldCheck, hintKey: "nav.ownerHint" }],
 		});
 	}
 

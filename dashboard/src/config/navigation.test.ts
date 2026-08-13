@@ -76,7 +76,7 @@ describe("navigationFor", () => {
 	 */
 	it("opens the Members section for a page nested under one of its screens", () => {
 		const [, guildGroup] = navigationFor({ guild, isOwner: false });
-		const membersSection = (guildGroup?.sections ?? []).find((section) => section.label === "Members");
+		const membersSection = (guildGroup?.sections ?? []).find((section) => section.labelKey === "nav.members");
 
 		expect(membersSection).toBeDefined();
 		expect(sectionHolds(membersSection as never, `/guilds/${guild.id}/members/100000000000000002`)).toBe(true);
@@ -84,7 +84,7 @@ describe("navigationFor", () => {
 
 	it("names every entry, since the label is the accessible name at the icon-only width", () => {
 		for (const item of allNavItems(navigationFor({ guild, isOwner: true }))) {
-			expect(item.label.length).toBeGreaterThan(0);
+			expect(item.labelKey.length).toBeGreaterThan(0);
 		}
 	});
 });

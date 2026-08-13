@@ -1,6 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { FileText, LogOut, Palette, ShieldQuestion } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
@@ -15,9 +16,9 @@ import { hardRedirect } from "@/lib/redirect";
 const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
 
 const FOOTER_LINKS = [
-	{ to: "/appearance", label: "Appearance", describes: "Choose the theme and language" },
-	{ to: "/terms", label: "Terms", describes: "Read the terms" },
-	{ to: "/privacy", label: "Privacy", describes: "Read the privacy notice" },
+	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
+	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint" },
+	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint" },
 ] as const;
 
 const FOOTER_ICON = { "/appearance": Palette, "/terms": FileText, "/privacy": ShieldQuestion } as const;
@@ -37,6 +38,7 @@ export function Sidebar({
 	expanded?: boolean;
 	onNavigate?: () => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const queryClient = useQueryClient();
 	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
 
@@ -88,7 +90,7 @@ export function Sidebar({
 							</li>
 						))}
 						{(group.sections ?? []).map((section) => (
-							<SidebarSection key={section.label} section={section} expanded={expanded} />
+							<SidebarSection key={section.labelKey} section={section} expanded={expanded} />
 						))}
 					</ul>
 				</div>
@@ -105,10 +107,10 @@ export function Sidebar({
 				)}
 
 				{/* Rows rather than small links, because `hidden` at the icon-only width took these off the page entirely. */}
-				{FOOTER_LINKS.map(({ to, label: text, describes }) => {
+				{FOOTER_LINKS.map(({ to, labelKey, hintKey }) => {
 					const Icon = FOOTER_ICON[to];
 					return (
-						<Tooltip key={to} label={describes} placement="right">
+						<Tooltip key={to} label={t(hintKey)} placement="right">
 							<Link
 								to={to}
 								className={cn(
@@ -117,13 +119,13 @@ export function Sidebar({
 								)}
 							>
 								<Icon size={18} aria-hidden="true" className="shrink-0" />
-								<span className={label("truncate")}>{text}</span>
+								<span className={label("truncate")}>{t(labelKey)}</span>
 							</Link>
 						</Tooltip>
 					);
 				})}
 
-				<Tooltip label="Sign out of the dashboard" placement="right">
+				<Tooltip label={t("nav.signOutHint")} placement="right">
 					<button
 						type="button"
 						onClick={() => void signOut()}
@@ -133,7 +135,7 @@ export function Sidebar({
 						)}
 					>
 						<LogOut size={18} aria-hidden="true" className="shrink-0" />
-						<span className={label("truncate")}>Sign out</span>
+						<span className={label("truncate")}>{t("nav.signOut")}</span>
 					</button>
 				</Tooltip>
 			</div>
