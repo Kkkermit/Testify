@@ -1,6 +1,7 @@
 import { LOTTERY_FREQUENCIES, LOTTERY_LIMITS, type LotteryFrequency } from "@testify/shared";
 import { Coins, Snowflake, Ticket, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
@@ -23,6 +24,7 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 export function LotteryPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const lottery = useLottery(guildId);
@@ -58,17 +60,17 @@ export function LotteryPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="Lottery"
-				subtitle="A pot members buy tickets into, drawn on a schedule."
+				title={t("lottery.title")}
+				subtitle={t("lottery.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}
 			/>
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-3">
-					<h2 className={CARD_HEADING}>This server’s lottery</h2>
-					{!settings.enabled && <Badge>Not running</Badge>}
-					{settings.enabled && settings.frozen && <Badge tone="warning">Frozen</Badge>}
-					{settings.enabled && !settings.frozen && <Badge tone="success">Running</Badge>}
+					<h2 className={CARD_HEADING}>{t("lottery.here")}</h2>
+					{!settings.enabled && <Badge>{t("lottery.notRunning")}</Badge>}
+					{settings.enabled && settings.frozen && <Badge tone="warning">{t("lottery.frozen")}</Badge>}
+					{settings.enabled && !settings.frozen && <Badge tone="success">{t("lottery.running")}</Badge>}
 				</div>
 
 				{settings.enabled && (
@@ -86,23 +88,23 @@ export function LotteryPage(): React.JSX.Element {
 
 			{settings.enabled && (
 				<div className="grid gap-4 sm:grid-cols-3">
-					<StatTile icon={Coins} label="Prize pool" value={settings.prizePool} />
-					<StatTile icon={Ticket} label="Tickets sold" value={settings.ticketsSold} />
-					<StatTile icon={Users} label="Entrants" value={settings.entrants} />
+					<StatTile icon={Coins} label={t("lottery.prizePool")} value={settings.prizePool} />
+					<StatTile icon={Ticket} label={t("lottery.ticketsSold")} value={settings.ticketsSold} />
+					<StatTile icon={Users} label={t("lottery.entrants")} value={settings.entrants} />
 				</div>
 			)}
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>How the draw runs</h2>
+					<h2 className={CARD_HEADING}>{t("lottery.howTitle")}</h2>
 					<p className="text-muted-foreground text-sm">
 						Members buy tickets with <code>/lottery enter</code>. Every ticket adds its fee to the pot.
 					</p>
 				</div>
 
 				<ChannelPicker
-					label="Announcements"
-					hint="Where the winners are posted."
+					label={t("lottery.announcements")}
+					hint={t("lottery.announcementsHint")}
 					channels={channels.data ?? []}
 					value={draft.announcementChannelId}
 					allowNone={false}
@@ -111,7 +113,7 @@ export function LotteryPage(): React.JSX.Element {
 					}}
 				/>
 
-				<Field label="Draw" htmlFor="lottery-frequency" hint="Changing this restarts the countdown.">
+				<Field label={t("lottery.draw")} htmlFor="lottery-frequency" hint={t("lottery.drawHint")}>
 					<select
 						id="lottery-frequency"
 						className={cn(SELECT, "max-w-48")}
@@ -129,7 +131,7 @@ export function LotteryPage(): React.JSX.Element {
 				</Field>
 
 				<div className="grid gap-4 sm:grid-cols-3">
-					<Field label="Ticket price" htmlFor="lottery-fee">
+					<Field label={t("lottery.ticketPrice")} htmlFor="lottery-fee">
 						<input
 							id="lottery-fee"
 							type="number"
@@ -144,7 +146,7 @@ export function LotteryPage(): React.JSX.Element {
 						/>
 					</Field>
 
-					<Field label="Winners a draw" htmlFor="lottery-winners">
+					<Field label={t("lottery.winnersADraw")} htmlFor="lottery-winners">
 						<input
 							id="lottery-winners"
 							type="number"
@@ -159,7 +161,7 @@ export function LotteryPage(): React.JSX.Element {
 						/>
 					</Field>
 
-					<Field label="Starting pot" htmlFor="lottery-base" hint="Seeded into every round.">
+					<Field label={t("lottery.startingPot")} htmlFor="lottery-base" hint={t("lottery.startingPotHint")}>
 						<input
 							id="lottery-base"
 							type="number"
@@ -208,7 +210,7 @@ export function LotteryPage(): React.JSX.Element {
 				<Card className="flex flex-col gap-3">
 					<div className="flex flex-wrap items-center justify-between gap-4">
 						<div>
-							<h2 className={CARD_HEADING}>End the lottery</h2>
+							<h2 className={CARD_HEADING}>{t("lottery.endIt")}</h2>
 							<p className="text-muted-foreground text-sm">
 								The pot of {settings.prizePool.toLocaleString()} goes with it, and nobody is refunded.
 							</p>
@@ -227,7 +229,7 @@ export function LotteryPage(): React.JSX.Element {
 
 					{confirming && (
 						<div className="flex flex-wrap items-center gap-3">
-							<Warning>This cannot be undone.</Warning>
+							<Warning>{t("lottery.cannotUndo")}</Warning>
 							<Button
 								variant="destructive"
 								disabled={busy}

@@ -1,6 +1,7 @@
 import { TICKET_LIMITS } from "@testify/shared";
 import { Power, Send } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
@@ -23,6 +24,7 @@ import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function TicketsPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const tickets = useTickets(guildId);
@@ -71,29 +73,29 @@ export function TicketsPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="Tickets"
-				subtitle="A button members press to open a private channel with your staff."
+				title={t("tickets.title")}
+				subtitle={t("tickets.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}
 			/>
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-3">
-					<h2 className={CARD_HEADING}>Tickets in this server</h2>
+					<h2 className={CARD_HEADING}>{t("tickets.here")}</h2>
 					{settings.enabled ? <Badge tone="success">On</Badge> : <Badge>Off</Badge>}
-					{settings.posted && <Badge>Panel posted</Badge>}
+					{settings.posted && <Badge>{t("tickets.panelPosted")}</Badge>}
 				</div>
 				<p className="text-muted-foreground text-sm tabular-nums">{settings.openTickets} open right now</p>
 			</Card>
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Where tickets live</h2>
-					<p className="text-muted-foreground text-sm">All four are needed before the panel can be posted.</p>
+					<h2 className={CARD_HEADING}>{t("tickets.whereTitle")}</h2>
+					<p className="text-muted-foreground text-sm">{t("tickets.whereBody")}</p>
 				</div>
 
 				<ChannelPicker
-					label="Panel channel"
-					hint="Where members find the button."
+					label={t("tickets.panelChannel")}
+					hint={t("tickets.panelChannelHint")}
 					channels={channels.data ?? []}
 					value={draft.panelChannelId}
 					allowNone={false}
@@ -102,7 +104,7 @@ export function TicketsPage(): React.JSX.Element {
 					}}
 				/>
 
-				<Field label="Category" htmlFor="ticket-category" hint="New ticket channels are created under this.">
+				<Field label={t("tickets.category")} htmlFor="ticket-category" hint={t("tickets.categoryHint")}>
 					<select
 						id="ticket-category"
 						className={SELECT}
@@ -111,7 +113,7 @@ export function TicketsPage(): React.JSX.Element {
 							set("categoryId", event.target.value === "" ? null : event.target.value);
 						}}
 					>
-						<option value="">Choose a category</option>
+						<option value="">{t("tickets.chooseCategory")}</option>
 						{categoriesOf(channels.data ?? []).map((category) => (
 							<option key={category.id} value={category.id}>
 								{category.name}
@@ -121,8 +123,8 @@ export function TicketsPage(): React.JSX.Element {
 				</Field>
 
 				<ChannelPicker
-					label="Transcripts"
-					hint="Where a closed ticket’s transcript is sent."
+					label={t("tickets.transcripts")}
+					hint={t("tickets.transcriptsHint")}
 					channels={channels.data ?? []}
 					value={draft.transcriptChannelId}
 					allowNone={false}
@@ -131,7 +133,7 @@ export function TicketsPage(): React.JSX.Element {
 					}}
 				/>
 
-				<Field label="Staff role" htmlFor="ticket-staff" hint="The role that can see and handle every ticket.">
+				<Field label={t("tickets.staffRole")} htmlFor="ticket-staff" hint={t("tickets.staffRoleHint")}>
 					<select
 						id="ticket-staff"
 						className={SELECT}
@@ -140,7 +142,7 @@ export function TicketsPage(): React.JSX.Element {
 							set("staffRoleId", event.target.value === "" ? null : event.target.value);
 						}}
 					>
-						<option value="">Choose a role</option>
+						<option value="">{t("tickets.chooseRole")}</option>
 						{(roles.data ?? []).map((role) => (
 							<option key={role.id} value={role.id}>
 								{role.name}
@@ -154,7 +156,7 @@ export function TicketsPage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>What the panel says</h2>
+					<h2 className={CARD_HEADING}>{t("tickets.panelSays")}</h2>
 					<p className="text-muted-foreground text-sm">
 						{settings.posted
 							? "Posting again edits the panel already out there rather than leaving a second one."
@@ -162,7 +164,7 @@ export function TicketsPage(): React.JSX.Element {
 					</p>
 				</div>
 
-				<Field label="Message" htmlFor="ticket-description">
+				<Field label={t("tickets.message")} htmlFor="ticket-description">
 					<textarea
 						id="ticket-description"
 						rows={3}
@@ -175,7 +177,7 @@ export function TicketsPage(): React.JSX.Element {
 					/>
 				</Field>
 
-				<Field label="Button label" htmlFor="ticket-button">
+				<Field label={t("tickets.buttonLabel")} htmlFor="ticket-button">
 					<input
 						id="ticket-button"
 						value={draft.buttonLabel}
@@ -218,7 +220,7 @@ export function TicketsPage(): React.JSX.Element {
 			{settings.enabled && (
 				<Card className="flex flex-wrap items-center justify-between gap-4">
 					<div>
-						<h2 className={CARD_HEADING}>Turn tickets off</h2>
+						<h2 className={CARD_HEADING}>{t("tickets.turnOff")}</h2>
 						<p className="text-muted-foreground text-sm">
 							Open ticket channels are left alone. The panel message has to be deleted by hand.
 						</p>

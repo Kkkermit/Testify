@@ -1,6 +1,7 @@
 import { type ChannelSummary, type RoleSummary, VERIFY_LIMITS, verificationBlocked } from "@testify/shared";
 import { ShieldCheck } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
@@ -19,6 +20,7 @@ export function VerificationSection({
 	channels: ChannelSummary[];
 	roles: RoleSummary[];
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const config = useVerification(guildId);
 	const save = useSaveVerification(guildId);
 	const [draft, setDraft] = useState("");
@@ -35,18 +37,18 @@ export function VerificationSection({
 		<Section
 			icon={ShieldCheck}
 			tint="text-feature-moderation"
-			title="Verification"
-			describes="A button new members press to prove they are there, and the role it hands them."
+			title={t("settings.verifyTitle")}
+			describes={t("settings.verifyBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
 			{value === undefined ? (
-				<p className="text-muted-foreground text-sm">Reading the current configuration…</p>
+				<p className="text-muted-foreground text-sm">{t("settings.verifyReading")}</p>
 			) : (
 				<>
 					<Toggle
-						label="Verify new members"
-						hint="Off removes the configuration. The panel already posted stops working."
+						label={t("settings.verifyOn")}
+						hint={t("settings.verifyOnHint")}
 						checked={value.enabled}
 						disabled={!value.enabled && blocked !== null}
 						onChange={(enabled) => {
@@ -55,8 +57,8 @@ export function VerificationSection({
 					/>
 
 					<ChannelPicker
-						label="Show the Verify button in"
-						hint="A channel new members can see before they have the role."
+						label={t("settings.verifyIn")}
+						hint={t("settings.verifyInHint")}
 						channels={channels}
 						value={value.channelId}
 						allowNone={false}
@@ -65,7 +67,7 @@ export function VerificationSection({
 						}}
 					/>
 
-					<Field label="Give them this role">
+					<Field label={t("settings.verifyRole")}>
 						<select
 							className={SELECT}
 							value={value.roleId ?? ""}
@@ -73,7 +75,7 @@ export function VerificationSection({
 								save.mutate({ roleId: event.target.value === "" ? null : event.target.value });
 							}}
 						>
-							<option value="">No role chosen</option>
+							<option value="">{t("settings.verifyNoRole")}</option>
 							{roles.map((role) => (
 								<option key={role.id} value={role.id} disabled={!role.assignableByBot}>
 									{role.name}
@@ -83,7 +85,7 @@ export function VerificationSection({
 						</select>
 					</Field>
 
-					<Field label="What the panel says" htmlFor="verify-message">
+					<Field label={t("settings.verifyPanel")} htmlFor="verify-message">
 						<textarea
 							id="verify-message"
 							rows={3}

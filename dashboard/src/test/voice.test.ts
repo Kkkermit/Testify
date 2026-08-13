@@ -42,8 +42,27 @@ function everySource(dir: string, found: string[] = []): string[] {
 	return found;
 }
 
-function copyLines(): { where: string; text: string }[] {
+/**
+ * The copy now lives in `en.json` rather than in the components, so that is where most of it is read from.
+ * The `.tsx` sweep stays for anything not yet extracted — a screen half-translated must not fall out of scope.
+ */
+function localeLines(): { where: string; text: string }[] {
 	const out: { where: string; text: string }[] = [];
+	const walk = (node: unknown, path: string): void => {
+		if (typeof node === "string") {
+			out.push({ where: `en.json:${path}`, text: node });
+			return;
+		}
+		if (typeof node !== "object" || node === null) return;
+		for (const [key, value] of Object.entries(node)) walk(value, path === "" ? key : `${path}.${key}`);
+	};
+	walk(JSON.parse(readFileSync(resolve(SRC, "i18n/locales/en.json"), "utf8")), "");
+
+	return out;
+}
+
+function copyLines(): { where: string; text: string }[] {
+	const out: { where: string; text: string }[] = [...localeLines()];
 	for (const path of everySource(SRC)) {
 		const lines = readFileSync(path, "utf8").split("\n");
 		lines.forEach((line, index) => {

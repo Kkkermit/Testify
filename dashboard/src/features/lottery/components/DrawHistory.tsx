@@ -1,5 +1,6 @@
 import { type LotteryDrawSummary } from "@testify/shared";
 import { History } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, EmptyState } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { dateAndTime, shortDate } from "@/lib/datetime";
@@ -11,10 +12,11 @@ export function DrawHistory({
 	draws: LotteryDrawSummary[];
 	nextDrawAt: string | null;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	return (
 		<Card className="flex flex-col gap-3">
 			<div className="flex flex-wrap items-center justify-between gap-2">
-				<h2 className={CARD_HEADING}>Past draws</h2>
+				<h2 className={CARD_HEADING}>{t("lottery.pastDraws")}</h2>
 				{nextDrawAt !== null && (
 					<p className="text-muted-foreground text-sm">
 						Next draw <time dateTime={nextDrawAt}>{dateAndTime(nextDrawAt)}</time>
@@ -23,7 +25,7 @@ export function DrawHistory({
 			</div>
 
 			{draws.length === 0 ? (
-				<EmptyState icon={<History size={28} />} title="No draws yet" body="The first one appears here once it runs." />
+				<EmptyState icon={<History size={28} />} title={t("lottery.noDraws")} body={t("lottery.noDrawsBody")} />
 			) : (
 				<ul className="flex flex-col gap-3">
 					{draws.map((draw) => (

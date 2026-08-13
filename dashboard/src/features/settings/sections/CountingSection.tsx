@@ -1,6 +1,7 @@
 import { type ChannelSummary, type CountingPatch, type CountingSetting } from "@testify/shared";
 import { Hash } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
@@ -17,6 +18,7 @@ export function CountingSection({
 	value: CountingSetting;
 	channels: ChannelSummary[];
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const save = useSaveSection<CountingPatch>(guildId, "counting");
 	const [cap, setCap] = useState(String(value.maxCount));
 
@@ -36,14 +38,14 @@ export function CountingSection({
 		<Section
 			icon={Hash}
 			tint="text-feature-community"
-			title="Counting"
-			describes="One channel where members count upwards, one number each."
+			title={t("settings.countingTitle")}
+			describes={t("settings.countingBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
 			<Toggle
-				label="Run a counting channel"
-				hint="Off removes the configuration. The count is not kept."
+				label={t("settings.countingRun")}
+				hint={t("settings.countingRunHint")}
 				checked={value.enabled}
 				onChange={(enabled) => {
 					save.mutate({ enabled });
@@ -51,7 +53,7 @@ export function CountingSection({
 			/>
 
 			<ChannelPicker
-				label="Count in"
+				label={t("settings.countingIn")}
 				channels={channels}
 				value={value.channelId}
 				allowNone={false}
@@ -60,7 +62,7 @@ export function CountingSection({
 				}}
 			/>
 
-			<Field label="Count up to" htmlFor="counting-cap">
+			<Field label={t("settings.countingUpTo")} htmlFor="counting-cap">
 				<div className="flex flex-wrap items-center gap-2">
 					<input
 						id="counting-cap"
@@ -73,7 +75,7 @@ export function CountingSection({
 						onBlur={commit}
 						className={cn(FIELD, "max-w-40 font-mono tabular-nums", problem !== null && dirty && "border-destructive")}
 					/>
-					{dirty && problem === null && <Button onClick={commit}>Save target</Button>}
+					{dirty && problem === null && <Button onClick={commit}>{t("settings.countingSave")}</Button>}
 				</div>
 			</Field>
 

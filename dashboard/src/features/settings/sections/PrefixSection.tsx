@@ -1,6 +1,7 @@
 import { type PrefixPatch, type PrefixSetting } from "@testify/shared";
 import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
@@ -11,6 +12,7 @@ import { sanitiseInput } from "@/lib/sanitise";
 
 /** The one typed field on this page, so it is held locally and saved on blur rather than per keystroke. */
 export function PrefixSection({ guildId, value }: { guildId: string; value: PrefixSetting }): React.JSX.Element {
+	const { t } = useTranslation();
 	const save = useSaveSection<PrefixPatch>(guildId, "prefix");
 	const [draft, setDraft] = useState(value.prefix);
 
@@ -30,21 +32,21 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 		<Section
 			icon={Terminal}
 			tint="text-feature-levelling"
-			title="Command prefix"
-			describes="What people type before a command name. Slash commands are unaffected by anything here."
+			title={t("settings.prefixTitle")}
+			describes={t("settings.prefixBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
 			<Toggle
-				label="Allow prefix commands"
-				hint="Off means only slash commands work in this server."
+				label={t("settings.prefixAllow")}
+				hint={t("settings.prefixAllowHint")}
 				checked={value.enabled}
 				onChange={(enabled) => {
 					save.mutate({ enabled });
 				}}
 			/>
 
-			<Field label="Prefix" htmlFor="prefix">
+			<Field label={t("settings.prefix")} htmlFor="prefix">
 				<div className="flex flex-wrap items-center gap-2">
 					<input
 						id="prefix"
@@ -59,7 +61,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 					<p className="text-muted-foreground text-sm">
 						e.g. <span className="font-mono">{(problem === null ? draft.trim() : value.prefix) || "t?"}ban</span>
 					</p>
-					{dirty && problem === null && <Button onClick={commit}>Save prefix</Button>}
+					{dirty && problem === null && <Button onClick={commit}>{t("settings.prefixSave")}</Button>}
 				</div>
 			</Field>
 

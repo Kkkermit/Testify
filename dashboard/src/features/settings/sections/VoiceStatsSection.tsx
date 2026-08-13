@@ -1,5 +1,6 @@
 import { type ChannelSummary, type VoiceStatsPatch, type VoiceStatsSetting } from "@testify/shared";
 import { AudioLines } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Field, savingStateOf, SELECT } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
@@ -14,6 +15,7 @@ export function VoiceStatsSection({
 	value: VoiceStatsSetting;
 	channels: ChannelSummary[];
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const save = useSaveSection<VoiceStatsPatch>(guildId, "voice-stats");
 	const voice = channels.filter((channel) => channel.kind === "voice");
 
@@ -21,13 +23,13 @@ export function VoiceStatsSection({
 		<Section
 			icon={AudioLines}
 			tint="text-feature-tickets"
-			title="Member count channels"
-			describes="Voice channels renamed to show how many members and bots the server has."
+			title={t("settings.voiceTitle")}
+			describes={t("settings.voiceBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess)}
 			failure={save.error}
 		>
 			<VoicePicker
-				label="Members"
+				label={t("settings.voiceMembers")}
 				channels={voice}
 				value={value.memberChannelId}
 				onChange={(memberChannelId) => {
@@ -35,7 +37,7 @@ export function VoiceStatsSection({
 				}}
 			/>
 			<VoicePicker
-				label="Bots"
+				label={t("settings.voiceBots")}
 				channels={voice}
 				value={value.botChannelId}
 				onChange={(botChannelId) => {
@@ -57,6 +59,8 @@ function VoicePicker({
 	value: string | null;
 	onChange: (channelId: string | null) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
+
 	return (
 		<Field label={label}>
 			<select
@@ -66,7 +70,7 @@ function VoicePicker({
 					onChange(event.target.value === "" ? null : event.target.value);
 				}}
 			>
-				<option value="">Not shown</option>
+				<option value="">{t("settings.voiceNotShown")}</option>
 				{channels.map((channel) => (
 					<option key={channel.id} value={channel.id}>
 						{channel.name}

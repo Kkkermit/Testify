@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
@@ -11,6 +12,7 @@ import { hardRedirect } from "@/lib/redirect";
 
 /** One button, and the two scopes named — asking for less is a feature, so say what it is. */
 export function SignInPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	usePageTitle("Sign in");
 	const [params] = useSearchParams();
 	const setup = useSetup();
@@ -33,7 +35,7 @@ export function SignInPage(): React.JSX.Element {
 					<div className="-mt-14 flex items-end gap-3">
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-2xl ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
-							<Eyebrow>Sign in</Eyebrow>
+							<Eyebrow>{t("auth.signIn")}</Eyebrow>
 							<h1 className="font-display text-2xl leading-tight font-bold tracking-tight">
 								{bot.data?.username ?? "Testify"}
 							</h1>

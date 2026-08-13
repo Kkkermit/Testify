@@ -1,6 +1,7 @@
 import { WARNING_LIMITS, type MemberDetail, warningProblem } from "@testify/shared";
 import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card } from "@/components/primitives";
@@ -21,6 +22,7 @@ export function WarningsCard({
 	onRemove: (warnId: string) => void;
 	onClear: (done: () => void) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const [reason, setReason] = useState("");
 	const [confirming, setConfirming] = useState(false);
 	const [typed, setTyped] = useState("");
@@ -36,7 +38,7 @@ export function WarningsCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className={CARD_HEADING}>Warnings</h2>
+				<h2 className={CARD_HEADING}>{t("members.warnings")}</h2>
 				<p className="text-muted-foreground text-sm">{warningSummary(detail.warnings)}</p>
 			</div>
 
@@ -48,13 +50,13 @@ export function WarningsCard({
 
 			{canModerate && (
 				<>
-					<Field label="Issue a warning" hint="They are not notified from here." htmlFor="warn-reason">
+					<Field label={t("members.issue")} hint={t("members.issueHint")} htmlFor="warn-reason">
 						<input
 							id="warn-reason"
 							className={FIELD}
 							value={reason}
 							maxLength={WARNING_LIMITS.maxReason}
-							placeholder="Why are they being warned?"
+							placeholder={t("members.reasonPlaceholder")}
 							onChange={(event) => {
 								setReason(event.target.value);
 							}}
@@ -99,7 +101,7 @@ export function WarningsCard({
 									}}
 								/>
 							</Field>
-							<Warning>This deletes the whole record. It cannot be undone.</Warning>
+							<Warning>{t("members.deleteWarning")}</Warning>
 
 							<div className="flex flex-wrap gap-3">
 								<Button

@@ -1,5 +1,6 @@
 import { type LevelBody, MEMBER_LIMITS, type MemberDetail } from "@testify/shared";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card } from "@/components/primitives";
@@ -14,6 +15,7 @@ export function LevelCard({
 	busy: boolean;
 	onChange: (body: LevelBody) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const [level, setLevel] = useState("");
 	const [xp, setXp] = useState("");
 
@@ -26,7 +28,7 @@ export function LevelCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className={CARD_HEADING}>Level and XP</h2>
+				<h2 className={CARD_HEADING}>{t("members.levelAndXp")}</h2>
 				<p className="text-muted-foreground text-sm">
 					{detail.levels === null
 						? "They have earned no XP here yet."
@@ -35,7 +37,7 @@ export function LevelCard({
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2">
-				<Field label="Set the level to" hint={`0 to ${String(MEMBER_LIMITS.maxLevel)}`} htmlFor="member-level">
+				<Field label={t("members.setLevel")} hint={`0 to ${String(MEMBER_LIMITS.maxLevel)}`} htmlFor="member-level">
 					<input
 						id="member-level"
 						className={FIELD}
@@ -50,7 +52,7 @@ export function LevelCard({
 					/>
 				</Field>
 
-				<Field label="Or change their XP by" hint="Negative takes XP away." htmlFor="member-xp">
+				<Field label={t("members.changeXp")} hint={t("members.changeXpHint")} htmlFor="member-xp">
 					<input
 						id="member-xp"
 						className={FIELD}
@@ -66,7 +68,7 @@ export function LevelCard({
 				</Field>
 			</div>
 
-			{levelValid && xpValid && <Warning>Set a level or change the XP, not both at once.</Warning>}
+			{levelValid && xpValid && <Warning>{t("members.levelOrXp")}</Warning>}
 
 			<p className="text-muted-foreground text-xs">
 				Any role rewards the new level earns are handed out at the same time.

@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient, type UseQueryResult } from "@tan
 import { NICKNAME_MAX, type GuildNickname, type NicknamePatch } from "@testify/shared";
 import { UserPen } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
@@ -19,6 +20,7 @@ function useNickname(guildId: string): UseQueryResult<GuildNickname> {
 
 /** The only part of the bot's appearance a manager may change: Discord has no per-server avatar for bots. */
 export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Element {
+	const { t } = useTranslation();
 	const client = useQueryClient();
 	const current = useNickname(guildId);
 	const save = useMutation({
@@ -42,12 +44,12 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 		<Section
 			icon={UserPen}
 			tint="text-feature-community"
-			title="Testify’s name here"
-			describes="A nickname for this server only. The picture is the same everywhere and only the bot owner can change it."
+			title={t("settings.nickTitle")}
+			describes={t("settings.nickBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}
 			failure={save.error}
 		>
-			<Field label="Nickname" htmlFor="nickname">
+			<Field label={t("settings.nickLabel")} htmlFor="nickname">
 				<div className="flex flex-wrap items-center gap-2">
 					<input
 						id="nickname"
@@ -82,9 +84,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 				</div>
 			</Field>
 
-			{!allowed && current.data !== undefined && (
-				<Warning>Testify needs the Change Nickname permission in this server before it can be renamed.</Warning>
-			)}
+			{!allowed && current.data !== undefined && <Warning>{t("settings.nickNeedsPermission")}</Warning>}
 
 			{save.error !== null && (
 				<Warning>{save.error instanceof ApiError ? save.error.message : "That name could not be saved."}</Warning>

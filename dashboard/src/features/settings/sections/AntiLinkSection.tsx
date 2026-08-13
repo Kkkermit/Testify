@@ -1,31 +1,33 @@
 import { BYPASS_LABELS, BYPASS_PERMISSIONS, type AntiLinkPatch, type AntiLinkSetting } from "@testify/shared";
 import { LinkIcon } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Field, savingStateOf, SELECT, Toggle } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
 
 export function AntiLinkSection({ guildId, value }: { guildId: string; value: AntiLinkSetting }): React.JSX.Element {
+	const { t } = useTranslation();
 	const save = useSaveSection<AntiLinkPatch>(guildId, "anti-link");
 
 	return (
 		<Section
 			icon={LinkIcon}
 			tint="text-feature-moderation"
-			title="Link filtering"
-			describes="Deletes links posted by anybody without the bypass permission."
+			title={t("settings.linkTitle")}
+			describes={t("settings.linkBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess)}
 			failure={save.error}
 		>
 			<Toggle
-				label="Delete links"
-				hint="Testify needs Manage Messages in the channel for this to work."
+				label={t("settings.linkDelete")}
+				hint={t("settings.linkDeleteHint")}
 				checked={value.enabled}
 				onChange={(enabled) => {
 					save.mutate({ enabled });
 				}}
 			/>
 
-			<Field label="Who may still post links" hint="Anybody with this permission is never filtered.">
+			<Field label={t("settings.linkBypass")} hint={t("settings.linkBypassHint")}>
 				<select
 					className={SELECT}
 					value={value.bypassPermission}

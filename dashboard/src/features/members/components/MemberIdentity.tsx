@@ -1,4 +1,5 @@
 import { type MemberDetail } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { Avatar, Badge, Card, Figure } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { describeJoined, softbanActive, statsOf } from "@/features/members/memberDetail.utils";
@@ -7,6 +8,7 @@ import { describeJoined, softbanActive, statsOf } from "@/features/members/membe
 const ROLES_SHOWN = 12;
 
 export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.Element {
+	const { t } = useTranslation();
 	const extra = detail.roles.length - ROLES_SHOWN;
 
 	return (
@@ -17,8 +19,8 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 				<p className="flex flex-wrap items-center gap-2 text-sm font-medium">
 					{detail.displayName}
 					{detail.isBot && <Badge>Bot</Badge>}
-					{!detail.inGuild && <Badge tone="warning">Left the server</Badge>}
-					{softbanActive(detail) && <Badge tone="danger">Softbanned</Badge>}
+					{!detail.inGuild && <Badge tone="warning">{t("members.leftServer")}</Badge>}
+					{softbanActive(detail) && <Badge tone="danger">{t("members.softbanned")}</Badge>}
 				</p>
 				<p className="text-muted-foreground text-xs">{describeJoined(detail.joinedAt)}</p>
 
@@ -42,12 +44,13 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 }
 
 export function MemberStanding({ detail }: { detail: MemberDetail }): React.JSX.Element | null {
+	const { t } = useTranslation();
 	const rows = statsOf(detail);
 	if (rows.length === 0) return null;
 
 	return (
 		<Card>
-			<h2 className={CARD_HEADING}>Standing in this server</h2>
+			<h2 className={CARD_HEADING}>{t("members.standing")}</h2>
 			<dl className="mt-3 grid grid-cols-2 gap-4 sm:grid-cols-3">
 				{rows.map((row) => (
 					<Figure key={row.label} label={row.label} value={row.value} size="md" />

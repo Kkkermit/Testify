@@ -1,8 +1,10 @@
+import { useTranslation } from "react-i18next";
 import { Card, Eyebrow } from "@/components/primitives";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 /** Names each missing variable and the exact redirect URI to paste, because this is where most self-hosted dashboards lose people. */
 export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redirectUri: string }): React.JSX.Element {
+	const { t } = useTranslation();
 	usePageTitle("Finish setting up");
 
 	return (
@@ -10,7 +12,7 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 			<Card className="motion-pop flex flex-col gap-4">
 				<div className="flex flex-col gap-1">
 					<Eyebrow>Setup</Eyebrow>
-					<h1 className="font-display text-2xl leading-tight font-bold tracking-tight">Almost there</h1>
+					<h1 className="font-display text-2xl leading-tight font-bold tracking-tight">{t("auth.almostThere")}</h1>
 				</div>
 				<p className="text-muted-foreground text-sm">
 					The dashboard is switched on but cannot sign anybody in yet. Add these to your <code>.env</code> and restart

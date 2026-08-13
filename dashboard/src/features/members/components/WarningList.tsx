@@ -1,5 +1,6 @@
 import { type MemberWarning } from "@testify/shared";
 import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Badge, Button } from "@/components/primitives";
 import { shortDate } from "@/lib/datetime";
 
@@ -14,6 +15,7 @@ export function WarningList({
 	canModerate: boolean;
 	onRemove: (warnId: string) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	return (
 		<ul className="flex flex-col gap-3">
 			{warnings.map((warning) => (
@@ -27,7 +29,7 @@ export function WarningList({
 							<span>
 								by {warning.byTag} · <time dateTime={warning.at}>{shortDate(warning.at)}</time>
 							</span>
-							{warning.edited && <Badge tone="warning">Edited</Badge>}
+							{warning.edited && <Badge tone="warning">{t("members.edited")}</Badge>}
 						</p>
 					</div>
 

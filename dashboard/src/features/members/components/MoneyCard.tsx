@@ -1,5 +1,6 @@
 import { MEMBER_LIMITS, type MemberDetail, MONEY_PURSES, type MoneyPurse, moneyProblem } from "@testify/shared";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card, SegmentedControl } from "@/components/primitives";
@@ -16,6 +17,7 @@ export function MoneyCard({
 	busy: boolean;
 	onChange: (purse: MoneyPurse, delta: number) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const [purse, setPurse] = useState<MoneyPurse>("wallet");
 	const [amount, setAmount] = useState("");
 
@@ -39,13 +41,13 @@ export function MoneyCard({
 			</div>
 
 			<SegmentedControl
-				label="Which purse"
+				label={t("members.whichPurse")}
 				value={purse}
 				segments={MONEY_PURSES.map((one) => ({ value: one, label: LABELS[one] }))}
 				onChange={setPurse}
 			/>
 
-			<Field label="Amount" htmlFor="money-amount">
+			<Field label={t("members.amount")} htmlFor="money-amount">
 				<input
 					id="money-amount"
 					className={FIELD}

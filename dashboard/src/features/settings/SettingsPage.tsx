@@ -1,4 +1,5 @@
 import { type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Disclosure, PageHeader, Skeleton } from "@/components/primitives";
@@ -16,6 +17,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 
 /** Each section writes on change and has its own endpoint, so a refusal in one leaves the others alone. */
 export function SettingsPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const settings = useSettings(guildId);
@@ -33,33 +35,29 @@ export function SettingsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader
-				eyebrow={overview.data?.name}
-				title="Server settings"
-				subtitle="The switches that do not have a screen of their own."
-			/>
+			<PageHeader eyebrow={overview.data?.name} title={t("settings.title")} subtitle={t("settings.subtitle")} />
 
-			<Disclosure label="Testify in this server">
+			<Disclosure label={t("settings.groupTestify")}>
 				<Group>
 					<PrefixSection guildId={guildId} value={value.prefix} />
 					<NicknameSection guildId={guildId} />
 				</Group>
 			</Disclosure>
 
-			<Disclosure label="Joining">
+			<Disclosure label={t("settings.groupJoining")}>
 				<Group>
 					<AutoRoleSection guildId={guildId} value={value.autoRoles} roles={roles.data ?? []} />
 					<VerificationSection {...shared} roles={roles.data ?? []} />
 				</Group>
 			</Disclosure>
 
-			<Disclosure label="Moderation">
+			<Disclosure label={t("settings.groupModeration")}>
 				<Group>
 					<AntiLinkSection guildId={guildId} value={value.antiLink} />
 				</Group>
 			</Disclosure>
 
-			<Disclosure label="Channels">
+			<Disclosure label={t("settings.groupChannels")}>
 				<Group>
 					{/* Counting is twice the height of the other, and a column can only take a prefix of this order. */}
 					<VoiceStatsSection {...shared} value={value.voiceStats} />

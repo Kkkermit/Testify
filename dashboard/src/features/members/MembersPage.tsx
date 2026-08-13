@@ -1,5 +1,6 @@
 import { BOARD_LABELS, MEMBER_BOARDS } from "@testify/shared";
 import { Crosshair } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useSearchParams, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Button, EmptyState, PageHeader, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
@@ -11,6 +12,7 @@ import { useBoard } from "@/features/members/useMembers";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function MembersPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	const [params, setParams] = useSearchParams();
 
@@ -36,15 +38,11 @@ export function MembersPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader
-				eyebrow={overview.data?.name}
-				title="Members"
-				subtitle="Who is ahead on money and on levels. Both boards are the same ones Discord’s /leaderboard shows."
-			/>
+			<PageHeader eyebrow={overview.data?.name} title={t("members.title")} subtitle={t("members.subtitle")} />
 
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<SegmentedControl
-					label="Leaderboard"
+					label={t("members.leaderboard")}
 					value={board}
 					segments={MEMBER_BOARDS.map((kind) => ({ value: kind, label: BOARD_LABELS[kind].heading }))}
 					onChange={(next) => {
@@ -69,7 +67,7 @@ export function MembersPage(): React.JSX.Element {
 			) : data.data === undefined ? (
 				<Skeleton className="h-96 w-full" />
 			) : data.data.total === 0 ? (
-				<EmptyState icon={<Crosshair size={28} />} title="No rankings yet" body={emptyMessage(board)} />
+				<EmptyState icon={<Crosshair size={28} />} title={t("members.noRankings")} body={emptyMessage(board)} />
 			) : (
 				<>
 					<p className="text-muted-foreground text-sm" aria-live="polite">
