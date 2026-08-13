@@ -221,8 +221,11 @@ pinning the four claims the code has to keep true.
   - **Keyboard**: the skip link works, and the mobile drawer sets `aria-expanded`, moves focus inside itself,
     traps Tab and closes on Escape.
   - Still needs a human: a real screen reader, and greyscale judgement on the feature tints.
-- Bundle budget check (<200 kB gzipped first load). **Measured at 152 kB** — vendor is 136 kB of it, and three
-  is not in the first load at all.
+- Bundle budget check (<200 kB gzipped first load). **Measured at 200 kB**, against 152 kB before i18next.
+  three is not in the first load at all, and neither are the Spanish, German and French dictionaries —
+  `i18next-resources-to-backend` gives each its own chunk, so a session fetches the one language it reads
+  rather than all four. Bundling all four costs 19 kB and takes it over. The budget is now met exactly, so
+  the next addition to `vendor` needs a measurement rather than an assumption.
 - **Docker image and compose file — done**, with [`../../hosting.md`](../../hosting.md) as the guide. Two
   stages, running as `node`, no secret in a layer, and the dashboard's React tree installed at build time only.
   Two findings worth keeping: `fonts-dejavu-core` is **required**, because `@napi-rs/canvas` statically links

@@ -1,10 +1,8 @@
 import i18next, { type ParseKeys } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
+import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
-import de from "@/i18n/locales/de.json";
 import en from "@/i18n/locales/en.json";
-import es from "@/i18n/locales/es.json";
-import fr from "@/i18n/locales/fr.json";
 
 /** Every key English defines. A nav entry or a component naming one that is not there fails the build. */
 export type TranslationKey = ParseKeys<"translation">;
@@ -26,18 +24,23 @@ export function isLocale(value: unknown): value is Locale {
 	return LOCALES.some((locale) => locale === value);
 }
 
-export const resources = {
-	en: { translation: en },
-	es: { translation: es },
-	de: { translation: de },
-	fr: { translation: fr },
-} as const;
+/**
+ * English is bundled because every session needs it as the fallback; the other three are separate chunks the
+ * browser only fetches when somebody is actually reading in that language. Four dictionaries in the first load
+ * is 22 kB nobody's session uses more than a quarter of.
+ */
+const lazyDictionaries = resourcesToBackend(
+	async (language: string) => (await import(`./locales/${language}.json`)) as { default: Record<string, unknown> },
+);
 
 void i18next
+	.use(lazyDictionaries)
 	.use(LanguageDetector)
 	.use(initReactI18next)
 	.init({
-		resources,
+		resources: { en: { translation: en } },
+		// The bundled English stays authoritative while a lazy dictionary is still in flight.
+		partialBundledLanguages: true,
 		fallbackLng: "en",
 		supportedLngs: [...LOCALES],
 		// `es-419` and `de-AT` should get Spanish and German rather than falling through to English.
