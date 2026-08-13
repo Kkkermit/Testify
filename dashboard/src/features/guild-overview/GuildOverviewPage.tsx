@@ -1,4 +1,5 @@
 import { Hash, Shield, Sparkles, Users } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
@@ -10,6 +11,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function GuildOverviewPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
+	const { t } = useTranslation();
 	const overview = useGuildOverview(guildId);
 
 	usePageTitle(overview.data?.name ?? "Server");
@@ -21,18 +23,18 @@ export function GuildOverviewPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader title={guild.name} subtitle="What Testify is doing in this server." />
+			<PageHeader title={guild.name} subtitle={t("overview.subtitle")} />
 
-			<section aria-label="Server at a glance" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-				<StatTile label="Members" value={guild.memberCount} icon={Users} tint="text-feature-welcome" />
-				<StatTile label="Channels" value={guild.channelCount} icon={Hash} tint="text-feature-tickets" />
-				<StatTile label="Roles" value={guild.roleCount} icon={Shield} tint="text-feature-levelling" />
+			<section aria-label={t("overview.glance")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+				<StatTile label={t("overview.members")} value={guild.memberCount} icon={Users} tint="text-feature-welcome" />
+				<StatTile label={t("overview.channels")} value={guild.channelCount} icon={Hash} tint="text-feature-tickets" />
+				<StatTile label={t("overview.roles")} value={guild.roleCount} icon={Shield} tint="text-feature-levelling" />
 				<StatTile
-					label="Features on"
+					label={t("overview.featuresOn")}
 					value={guild.features.filter((feature) => feature.enabled).length}
 					icon={Sparkles}
 					tint="text-feature-economy"
-					hint="Features Testify is actively running here, out of everything it offers."
+					hint={t("overview.featuresHint")}
 				/>
 			</section>
 

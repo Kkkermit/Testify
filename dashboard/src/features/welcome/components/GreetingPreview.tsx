@@ -1,4 +1,5 @@
 import { fillTemplate, type WelcomeStyle } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { Avatar } from "@/components/primitives";
 import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
 import { cn } from "@/lib/cn";
@@ -15,6 +16,7 @@ export function GreetingPreview({
 	guildName: string;
 	memberCount: number;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const filled = fillTemplate(message, {
 		mention: "@newcomer",
 		username: "newcomer",
@@ -44,7 +46,7 @@ export function GreetingPreview({
 						</p>
 						{style === "card" && (
 							<div className="from-primary/30 to-card mt-2 flex h-24 items-center justify-center rounded-lg bg-gradient-to-br">
-								<span className="text-muted-foreground text-xs">Welcome card image</span>
+								<span className="text-muted-foreground text-xs">{t("welcome.cardAlt")}</span>
 							</div>
 						)}
 					</div>

@@ -1,5 +1,6 @@
 import { WELCOME_LIMITS, type WelcomeStyle } from "@testify/shared";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
@@ -16,6 +17,7 @@ import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function WelcomePage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const config = useWelcome(guildId);
@@ -49,21 +51,17 @@ export function WelcomePage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader
-				eyebrow={overview.data?.name}
-				title="Welcome messages"
-				subtitle="What Testify says when somebody joins, and where."
-			/>
+			<PageHeader eyebrow={overview.data?.name} title={t("welcome.title")} subtitle={t("welcome.subtitle")} />
 
 			<Card className="motion-pop flex flex-col gap-4">
 				<div className="flex items-center justify-between gap-3">
-					<Eyebrow as="h2">Greeting</Eyebrow>
+					<Eyebrow as="h2">{t("welcome.greeting")}</Eyebrow>
 					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
 				</div>
 
 				<ChannelPicker
-					label="Send the greeting to"
-					hint="Everything below is stored against this channel, so it has to be chosen first."
+					label={t("welcome.sendTo")}
+					hint={t("welcome.sendToHint")}
 					channels={channels.data ?? []}
 					value={welcome.channelId}
 					allowNone={false}
@@ -72,11 +70,11 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				/>
 
-				{needsChannel && <Warning>Pick a channel and the rest of this page turns on.</Warning>}
+				{needsChannel && <Warning>{t("welcome.pickFirst")}</Warning>}
 
 				<Toggle
-					label="Greet new members"
-					hint="Off means Testify says nothing when somebody joins. The message is kept."
+					label={t("welcome.greet")}
+					hint={t("welcome.greetHint")}
 					checked={welcome.enabled}
 					disabled={needsChannel}
 					onChange={(enabled) => {
@@ -86,7 +84,7 @@ export function WelcomePage(): React.JSX.Element {
 
 				{/* A `<legend>` is not a flex item, so the gap under it has to be a margin on the group itself. */}
 				<fieldset disabled={needsChannel}>
-					<legend className={LABEL}>Sent as</legend>
+					<legend className={LABEL}>{t("welcome.sentAs")}</legend>
 					<div className="mt-2 grid gap-2 sm:grid-cols-3">
 						{STYLE_ORDER.map((style) => (
 							<StyleChoice
@@ -103,7 +101,7 @@ export function WelcomePage(): React.JSX.Element {
 				</fieldset>
 
 				{/* The counter is a status, not part of the field's name, so it sits after the control. */}
-				<Field label="Message" htmlFor="welcome-message">
+				<Field label={t("welcome.message")} htmlFor="welcome-message">
 					<textarea
 						id="welcome-message"
 						ref={textarea}
@@ -130,7 +128,7 @@ export function WelcomePage(): React.JSX.Element {
 				/>
 
 				{markupWarning(draft) !== null && <Warning>{markupWarning(draft)}</Warning>}
-				{tooLong && <Warning>That message is longer than Discord will accept. Shorten it before saving.</Warning>}
+				{tooLong && <Warning>{t("welcome.tooLong")}</Warning>}
 				{dirty && !tooLong && (
 					<div className="flex items-center gap-3">
 						<Button onClick={saveMessage} disabled={draft.trim() === ""}>

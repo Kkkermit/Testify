@@ -1,4 +1,5 @@
 import { LEVEL_LIMITS, type XpBoostInput } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { SELECT, RoleChecklist, savingStateOf } from "@/components/form";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
@@ -14,6 +15,7 @@ export function BoostsTab({
 	roles,
 	boosts,
 }: Pick<TabProps, "guildId" | "roles"> & { boosts: XpBoostInput[] }): React.JSX.Element {
+	const { t } = useTranslation();
 	const update = useUpdateBoosts(guildId);
 
 	return (
@@ -22,7 +24,7 @@ export function BoostsTab({
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 		>
 			<RoleChecklist
-				label="Boost roles"
+				label={t("levelling.boostRoles")}
 				roles={roles}
 				value={boosts.map((boost) => boost.roleId)}
 				max={LEVEL_LIMITS.maxBoosts}
@@ -43,7 +45,7 @@ export function BoostsTab({
 						<li key={boost.roleId} className="flex items-center gap-3 px-3 py-2 text-sm">
 							<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, boost.roleId)}</span>
 							<label className="flex items-center gap-2">
-								<span className="text-muted-foreground text-xs">Multiplier</span>
+								<span className="text-muted-foreground text-xs">{t("levelling.multiplier")}</span>
 								<select
 									aria-label={`Multiplier for ${roleNameOf(roles, boost.roleId)}`}
 									value={boost.multiplier}

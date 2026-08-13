@@ -1,4 +1,5 @@
 import { LEVEL_LIMITS } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { CheckList, postableChannels, RoleChecklist, savingStateOf } from "@/components/form";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
@@ -12,6 +13,7 @@ export function IgnoresTab({
 	channelIds,
 	roleIds,
 }: TabProps & { channelIds: string[]; roleIds: string[] }): React.JSX.Element {
+	const { t } = useTranslation();
 	const update = useUpdateIgnores(guildId);
 
 	return (
@@ -21,7 +23,7 @@ export function IgnoresTab({
 			className="gap-6"
 		>
 			<CheckList
-				label="Ignored channels"
+				label={t("levelling.ignoredChannels")}
 				items={postableChannels(channels).map((channel) => ({ id: channel.id, label: `#${channel.name}` }))}
 				value={channelIds}
 				max={LEVEL_LIMITS.maxIgnoredChannels}
@@ -31,7 +33,7 @@ export function IgnoresTab({
 			/>
 
 			<RoleChecklist
-				label="Ignored roles"
+				label={t("levelling.ignoredRoles")}
 				roles={roles}
 				value={roleIds}
 				max={LEVEL_LIMITS.maxIgnoredRoles}

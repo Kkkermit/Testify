@@ -8,6 +8,7 @@ import {
 } from "@testify/shared";
 import { Plus, ShieldAlert } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
@@ -22,6 +23,7 @@ import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function AutomodPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const rules = useAutomod(guildId);
@@ -30,7 +32,7 @@ export function AutomodPage(): React.JSX.Element {
 	const toggle = useToggleRule(guildId);
 	const remove = useRemoveRule(guildId);
 
-	usePageTitle("AutoMod", overview.data?.name);
+	usePageTitle(t("automod.title"), overview.data?.name);
 
 	const [preset, setPreset] = useState<AutomodPreset>("flagged-words");
 	const [word, setWord] = useState("");
@@ -54,8 +56,8 @@ export function AutomodPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="AutoMod"
-				subtitle="Discord’s own message filters. Testify sets them up; Discord enforces them."
+				title={t("automod.title")}
+				subtitle={t("automod.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, add.isSuccess)} />}
 			/>
 
@@ -104,13 +106,13 @@ export function AutomodPage(): React.JSX.Element {
 			{canManage && (
 				<Card className="motion-pop flex flex-col gap-4">
 					<div>
-						<h2 className={CARD_HEADING}>Add a rule</h2>
+						<h2 className={CARD_HEADING}>{t("automod.addRule")}</h2>
 						<p className="text-muted-foreground text-sm">
 							Discord allows a handful of each kind. It refuses the rest, and this says so when it does.
 						</p>
 					</div>
 
-					<Field label="What to block" htmlFor="automod-preset">
+					<Field label={t("automod.whatToBlock")} htmlFor="automod-preset">
 						<select
 							id="automod-preset"
 							className={SELECT}
@@ -129,7 +131,7 @@ export function AutomodPage(): React.JSX.Element {
 					</Field>
 
 					{preset === "keyword" && (
-						<Field label="Word or phrase" htmlFor="automod-word">
+						<Field label={t("automod.wordOrPhrase")} htmlFor="automod-word">
 							<input
 								id="automod-word"
 								value={word}
@@ -143,7 +145,7 @@ export function AutomodPage(): React.JSX.Element {
 					)}
 
 					{preset === "mention-spam" && (
-						<Field label="Mentions to allow" htmlFor="automod-limit" hint="A message with more is blocked.">
+						<Field label={t("automod.mentionsToAllow")} htmlFor="automod-limit" hint={t("automod.mentionsHint")}>
 							<input
 								id="automod-limit"
 								type="number"

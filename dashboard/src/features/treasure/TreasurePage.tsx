@@ -1,6 +1,7 @@
 import { TREASURE_LIMITS } from "@testify/shared";
 import { RotateCcw } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
@@ -21,6 +22,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
 export function TreasurePage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const treasure = useTreasure(guildId);
@@ -53,14 +55,14 @@ export function TreasurePage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="Treasure drops"
-				subtitle="Testify drops money into chat now and then, for whoever claims it first."
+				title={t("treasure.title")}
+				subtitle={t("treasure.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess)} />}
 			/>
 
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Drops in this server</h2>
+					<h2 className={CARD_HEADING}>{t("treasure.dropsHere")}</h2>
 					<p className="text-muted-foreground text-sm">
 						{settings.configured
 							? describeRate(draftOf(settings))
@@ -69,7 +71,7 @@ export function TreasurePage(): React.JSX.Element {
 				</div>
 
 				<Toggle
-					label="Enable treasure drops"
+					label={t("treasure.enable")}
 					checked={settings.enabled}
 					disabled={busy}
 					onChange={(enabled) => {
@@ -80,7 +82,7 @@ export function TreasurePage(): React.JSX.Element {
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>How often, and how much</h2>
+					<h2 className={CARD_HEADING}>{t("treasure.howOften")}</h2>
 					<p className="text-muted-foreground text-sm">
 						Testify picks a number in each range, so drops do not land on a predictable beat.
 					</p>
@@ -89,7 +91,7 @@ export function TreasurePage(): React.JSX.Element {
 				<div className="grid gap-4 sm:grid-cols-2">
 					<NumberField
 						id="treasure-min-messages"
-						label="Fewest messages between drops"
+						label={t("treasure.fewest")}
 						value={draft.minMessages}
 						min={TREASURE_LIMITS.minMessages}
 						max={TREASURE_LIMITS.maxMessages}
@@ -99,7 +101,7 @@ export function TreasurePage(): React.JSX.Element {
 					/>
 					<NumberField
 						id="treasure-max-messages"
-						label="Most messages between drops"
+						label={t("treasure.most")}
 						value={draft.maxMessages}
 						min={TREASURE_LIMITS.minMessages}
 						max={TREASURE_LIMITS.maxMessages}
@@ -109,7 +111,7 @@ export function TreasurePage(): React.JSX.Element {
 					/>
 					<NumberField
 						id="treasure-min-amount"
-						label="Smallest drop"
+						label={t("treasure.smallest")}
 						value={draft.minAmount}
 						min={TREASURE_LIMITS.minAmount}
 						max={TREASURE_LIMITS.maxAmount}
@@ -119,7 +121,7 @@ export function TreasurePage(): React.JSX.Element {
 					/>
 					<NumberField
 						id="treasure-max-amount"
-						label="Largest drop"
+						label={t("treasure.largest")}
 						value={draft.maxAmount}
 						min={TREASURE_LIMITS.minAmount}
 						max={TREASURE_LIMITS.maxAmount}
@@ -129,8 +131,8 @@ export function TreasurePage(): React.JSX.Element {
 					/>
 					<NumberField
 						id="treasure-cooldown"
-						label="Cooldown"
-						hint="Minutes before another drop can appear, however busy the chat is."
+						label={t("treasure.cooldown")}
+						hint={t("treasure.cooldownHint")}
 						value={draft.cooldownMinutes}
 						min={TREASURE_LIMITS.minCooldownMinutes}
 						max={TREASURE_LIMITS.maxCooldownMinutes}

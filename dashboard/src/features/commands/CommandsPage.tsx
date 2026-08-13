@@ -1,6 +1,8 @@
 import { availabilityOf, countSubcommands, toggleName } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { Search, SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { FIELD, Warning } from "@/components/form";
@@ -17,7 +19,8 @@ import { cn } from "@/lib/cn";
 
 /** `scope` decides which list is edited. Neither scope is a permission — the API answers 404 or 403 regardless. */
 export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.Element {
-	usePageTitle("Commands");
+	const { t } = useTranslation();
+	usePageTitle(t("commands.title"));
 	// Present when the page is reached from inside a server, which is what makes a Configure link possible.
 	const { guildId = null } = useParams();
 
@@ -53,30 +56,30 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 		<div className="flex flex-col gap-6">
 			{global ? (
 				<p className="text-muted-foreground text-sm">
-					{subtitleFor(global, state !== undefined)} {switchedOff(state, global)}
+					{subtitleFor(global, state !== undefined, t)} {switchedOff(state, global, t)}
 				</p>
 			) : (
 				<PageHeader
 					eyebrow={overview.data?.name}
-					title="Commands"
-					subtitle={`${subtitleFor(global, state !== undefined)} ${switchedOff(state, global)}`}
+					title={t("commands.title")}
+					subtitle={`${subtitleFor(global, state !== undefined, t)} ${switchedOff(state, global, t)}`}
 				/>
 			)}
 
-			<section aria-label="Command surface" className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-				<StatTile label="Commands" value={total} />
-				<StatTile label="Subcommands" value={countSubcommands(commands)} />
-				<StatTile label="Categories" value={catalogue.data.categories.length} />
+			<section aria-label={t("commands.surface")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+				<StatTile label={t("commands.commands")} value={total} />
+				<StatTile label={t("commands.subcommands")} value={countSubcommands(commands)} />
+				<StatTile label={t("commands.categories")} value={catalogue.data.categories.length} />
 				<StatTile
-					label="On the dashboard"
+					label={t("commands.onDashboard")}
 					value={`${String(covered)} of ${String(total)}`}
-					hint="Commands with a settings screen here. The rest are still Discord-only."
+					hint={t("commands.onDashboardHint")}
 				/>
 			</section>
 
 			<div className="flex flex-col gap-3">
 				<label className="relative block">
-					<span className="sr-only">Search commands</span>
+					<span className="sr-only">{t("commands.search")}</span>
 					<Search
 						size={16}
 						aria-hidden="true"
@@ -89,13 +92,13 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 						onChange={(event) => {
 							setSearch(event.target.value);
 						}}
-						placeholder="Search by name, alias or description"
+						placeholder={t("commands.searchPlaceholder")}
 						className={cn(FIELD, "pl-9")}
 					/>
 				</label>
 
-				<div className="flex flex-wrap gap-2 py-1" role="group" aria-label="Filter by category">
-					<CategoryChip label="All" active={category === null} onSelect={() => setCategory(null)} />
+				<div className="flex flex-wrap gap-2 py-1" role="group" aria-label={t("commands.filterByCategory")}>
+					<CategoryChip label={t("commands.all")} active={category === null} onSelect={() => setCategory(null)} />
 					{catalogue.data.categories.map((name) => (
 						<CategoryChip
 							key={name}
@@ -110,7 +113,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 			{/* The API refuses a command `ALWAYS_ENABLED` covers, so a switch can bounce back with a reason. */}
 			{saveToggles.error !== null && (
 				<Warning>
-					{saveToggles.error instanceof ApiError ? saveToggles.error.message : "That switch could not be saved."}
+					{saveToggles.error instanceof ApiError ? saveToggles.error.message : t("commands.switchRefused")}
 				</Warning>
 			)}
 
@@ -118,8 +121,8 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 				<Card>
 					<EmptyState
 						icon={<SearchX size={28} />}
-						title="No command matches that"
-						body="Try part of a name, an alias like ban, or clear the category filter."
+						title={t("commands.noMatchTitle")}
+						body={t("commands.noMatchBody")}
 					/>
 				</Card>
 			) : (
@@ -158,19 +161,20 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 }
 
 /** Says what the switches do wherever there are any, because a row of them with no explanation is a guess. */
-function switchedOff(state: { disabled: string[] } | undefined, global: boolean): string {
+function switchedOff(state: { disabled: string[] } | undefined, global: boolean, t: TFunction): string {
 	if (state === undefined) return "";
-	if (state.disabled.length === 0)
-		return global ? "Every one is available everywhere." : "Every one is available here.";
+	if (state.disabled.length === 0) return t(global ? "commands.availableEverywhere" : "commands.availableHere");
 
-	return `${String(state.disabled.length)} switched off${global ? " everywhere" : " here"}.`;
+	return t(global ? "commands.switchedOffEverywhere" : "commands.switchedOffHere", {
+		count: state.disabled.length,
+	});
 }
 
-function subtitleFor(global: boolean, switchable: boolean): string {
-	if (global) return "Everything Testify can do. A command switched off here is off in every server, for everybody.";
-	if (switchable) return "Everything Testify can do. Switch one off and nobody in this server can run it, either way.";
+function subtitleFor(global: boolean, switchable: boolean, t: TFunction): string {
+	if (global) return t("commands.subtitleGlobal");
+	if (switchable) return t("commands.subtitleGuild");
 
-	return "Everything Testify can do, on both the slash and prefix surfaces.";
+	return t("commands.subtitlePlain");
 }
 
 function CategoryChip({

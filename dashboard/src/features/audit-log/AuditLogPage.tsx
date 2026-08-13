@@ -1,5 +1,6 @@
 import { AUDIT_EVENTS, AUDIT_GROUPS, type AuditLogPut, auditLogChanged } from "@testify/shared";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
@@ -14,6 +15,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
 export function AuditLogPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const config = useAuditLog(guildId);
@@ -49,8 +51,8 @@ export function AuditLogPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="Audit logging"
-				subtitle="Which server events Testify records, and where it posts them."
+				title={t("auditLog.title")}
+				subtitle={t("auditLog.subtitle")}
 				action={
 					<div className="flex items-center gap-3">
 						<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess && !dirty)} />
@@ -77,15 +79,10 @@ export function AuditLogPage(): React.JSX.Element {
 			/>
 
 			{/* Two numbered steps: the destination and the event list are different decisions. */}
-			<Step
-				number={1}
-				title="Where the log goes"
-				describes="One channel receives every event chosen below."
-				className="motion-pop"
-			>
+			<Step number={1} title={t("auditLog.whereTitle")} describes={t("auditLog.whereBody")} className="motion-pop">
 				<Toggle
-					label="Record server events"
-					hint="Off removes the configuration entirely. Nothing already posted is deleted."
+					label={t("auditLog.record")}
+					hint={t("auditLog.recordHint")}
 					checked={draft.enabled}
 					onChange={(enabled) => {
 						edit({ enabled });
@@ -93,8 +90,8 @@ export function AuditLogPage(): React.JSX.Element {
 				/>
 
 				<ChannelPicker
-					label="Post the log to"
-					hint="Somewhere only moderators can read — an audit log names who did what."
+					label={t("auditLog.postTo")}
+					hint={t("auditLog.postToHint")}
 					channels={channels.data ?? []}
 					value={draft.channelId}
 					allowNone={false}
@@ -106,8 +103,8 @@ export function AuditLogPage(): React.JSX.Element {
 
 			<Step
 				number={2}
-				title="What gets recorded"
-				describes="Tick a heading to take the whole group."
+				title={t("auditLog.whatTitle")}
+				describes={t("auditLog.whatBody")}
 				action={
 					<div className="flex items-center gap-2">
 						<p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">

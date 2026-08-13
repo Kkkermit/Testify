@@ -1,6 +1,7 @@
 import { STICKY_LIMITS, stickyBlocked, type StickyEntry } from "@testify/shared";
 import { Pin, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
@@ -17,6 +18,7 @@ import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 /** A list keyed by channel rather than a page of switches, which is why this is its own screen. */
 export function StickyPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const list = useSticky(guildId);
@@ -50,8 +52,8 @@ export function StickyPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="Sticky messages"
-				subtitle="A message Testify reposts to keep it at the bottom of a busy channel."
+				title={t("sticky.title")}
+				subtitle={t("sticky.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending || remove.isPending, save.isSuccess)} />}
 			/>
 
@@ -62,11 +64,7 @@ export function StickyPage(): React.JSX.Element {
 
 				{entries.length === 0 ? (
 					<Card>
-						<EmptyState
-							icon={<Pin size={28} />}
-							title="No sticky messages yet"
-							body="Pick a channel below and Testify will keep a message pinned to the bottom of it."
-						/>
+						<EmptyState icon={<Pin size={28} />} title={t("sticky.emptyTitle")} body={t("sticky.emptyBody")} />
 					</Card>
 				) : (
 					<ul className="flex flex-col gap-3">
@@ -90,20 +88,20 @@ export function StickyPage(): React.JSX.Element {
 
 			<Card className="motion-pop flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Add a sticky</h2>
-					<p className="text-muted-foreground text-sm">One per channel. Editing an existing one is done above.</p>
+					<h2 className={CARD_HEADING}>{t("sticky.add")}</h2>
+					<p className="text-muted-foreground text-sm">{t("sticky.addBody")}</p>
 				</div>
 
 				<ChannelPicker
-					label="Channel"
-					hint="Testify needs permission to post here, or the sticky will never appear."
+					label={t("sticky.channel")}
+					hint={t("sticky.channelHint")}
 					channels={(channels.data ?? []).filter((channel) => !taken.includes(channel.id))}
 					value={channelId}
 					allowNone={false}
 					onChange={setChannelId}
 				/>
 
-				<Field label="Message" htmlFor="sticky-message">
+				<Field label={t("sticky.message")} htmlFor="sticky-message">
 					<textarea
 						id="sticky-message"
 						rows={3}
@@ -119,7 +117,7 @@ export function StickyPage(): React.JSX.Element {
 					</span>
 				</Field>
 
-				<Field label="Repost after" htmlFor="sticky-cap" hint="How many messages pass before Testify posts it again.">
+				<Field label={t("sticky.repostAfter")} htmlFor="sticky-cap" hint={t("sticky.repostHint")}>
 					<div className="flex flex-wrap items-center gap-2">
 						<input
 							id="sticky-cap"
@@ -138,7 +136,7 @@ export function StickyPage(): React.JSX.Element {
 				</Field>
 
 				{markupWarning(message) !== null && <Warning>{markupWarning(message)}</Warning>}
-				{full && <Warning>That is the most stickies Testify can hold. Remove one to add another.</Warning>}
+				{full && <Warning>{t("sticky.full")}</Warning>}
 				{blocked !== null && message !== "" && <Warning>{blocked}</Warning>}
 				{save.error !== null && (
 					<Warning>{save.error instanceof ApiError ? save.error.message : "That could not be saved."}</Warning>

@@ -1,6 +1,7 @@
 import { GIVEAWAY_LIMITS, giveawayProblem } from "@testify/shared";
 import { Gift, Plus } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
@@ -28,6 +29,7 @@ import { ApiError } from "@/lib/api";
 import { sanitiseInput } from "@/lib/sanitise";
 
 export function GiveawaysPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	usePageTitle("Giveaways");
 
@@ -66,14 +68,14 @@ export function GiveawaysPage(): React.JSX.Element {
 		<>
 			<PageHeader
 				eyebrow={overview.data?.name}
-				title="Giveaways"
-				subtitle="Start one, end it early, or draw again — without reading a message ID out of Discord."
+				title={t("giveaways.title")}
+				subtitle={t("giveaways.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, start.isSuccess)} />}
 			/>
 
 			<Card className="flex flex-col gap-4">
 				<div>
-					<h2 className={CARD_HEADING}>Start a giveaway</h2>
+					<h2 className={CARD_HEADING}>{t("giveaways.start")}</h2>
 					<p className="text-muted-foreground text-sm">
 						Testify posts it and draws the winners when the time is up. Members enter with the 🎉 reaction.
 					</p>
@@ -81,26 +83,26 @@ export function GiveawaysPage(): React.JSX.Element {
 
 				<div className="grid gap-4 sm:grid-cols-2">
 					<ChannelPicker
-						label="Channel"
+						label={t("giveaways.channel")}
 						channels={channels.data ?? []}
 						value={channelId}
 						onChange={setChannelId}
 						allowNone={false}
 					/>
 
-					<Field htmlFor="giveaway-prize" label="Prize">
+					<Field htmlFor="giveaway-prize" label={t("giveaways.prize")}>
 						<input
 							id="giveaway-prize"
 							value={prize}
 							maxLength={GIVEAWAY_LIMITS.maxPrize}
 							autoComplete="off"
-							placeholder="What is being given away"
+							placeholder={t("giveaways.prizePlaceholder")}
 							onChange={(event) => setPrize(event.target.value)}
 							className={FIELD}
 						/>
 					</Field>
 
-					<Field htmlFor="giveaway-winners" label="Winners">
+					<Field htmlFor="giveaway-winners" label={t("giveaways.winners")}>
 						<input
 							id="giveaway-winners"
 							type="number"
@@ -113,7 +115,7 @@ export function GiveawaysPage(): React.JSX.Element {
 						/>
 					</Field>
 
-					<Field htmlFor="giveaway-amount" label="Runs for">
+					<Field htmlFor="giveaway-amount" label={t("giveaways.runsFor")}>
 						<div className="flex gap-2">
 							<input
 								id="giveaway-amount"
@@ -125,7 +127,7 @@ export function GiveawaysPage(): React.JSX.Element {
 								className={FIELD}
 							/>
 							<select
-								aria-label="Duration unit"
+								aria-label={t("giveaways.durationUnit")}
 								value={unit}
 								onChange={(event) => setUnit(event.target.value as DurationUnit)}
 								className={SELECT}
@@ -160,11 +162,7 @@ export function GiveawaysPage(): React.JSX.Element {
 
 				{rows.length === 0 ? (
 					<Card>
-						<EmptyState
-							icon={<Gift size={28} />}
-							title="No giveaways yet"
-							body="Start one above and it appears here, with the controls to end or redraw it."
-						/>
+						<EmptyState icon={<Gift size={28} />} title={t("giveaways.emptyTitle")} body={t("giveaways.emptyBody")} />
 					</Card>
 				) : (
 					<ul className="flex flex-col gap-3">

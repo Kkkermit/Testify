@@ -1,5 +1,6 @@
 import { type ChannelSummary, type GiveawayRow as Row } from "@testify/shared";
 import { Dices, Square, Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Badge, Button, cardClass } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { canReroll } from "@/features/giveaways/giveaways.utils";
@@ -21,6 +22,7 @@ export function GiveawayRow({
 	onReroll: () => void;
 	onDelete: () => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const channel = channels.find((entry) => entry.id === row.channelId)?.name ?? "a deleted channel";
 
 	return (
@@ -32,12 +34,12 @@ export function GiveawayRow({
 						#{channel} · {row.winnerCount} winner{row.winnerCount === 1 ? "" : "s"}
 					</p>
 				</div>
-				{row.ended ? <Badge>Ended</Badge> : <Badge tone="success">Running</Badge>}
+				{row.ended ? <Badge>Ended</Badge> : <Badge tone="success">{t("giveaways.running")}</Badge>}
 			</div>
 
 			<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-xs">
 				<div className="flex gap-2">
-					<dt>Started</dt>
+					<dt>{t("giveaways.started")}</dt>
 					<dd className="text-foreground">{since(row.startAt)}</dd>
 				</div>
 				<div className="flex gap-2">
@@ -46,7 +48,7 @@ export function GiveawayRow({
 				</div>
 				{row.ended && (
 					<div className="flex gap-2">
-						<dt>Winners</dt>
+						<dt>{t("giveaways.winners")}</dt>
 						<dd className="text-foreground">
 							{row.winners.length === 0
 								? "nobody entered"

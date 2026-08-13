@@ -1,6 +1,7 @@
 import { STICKY_LIMITS, type ChannelSummary, type StickyEntry, type StickyPut } from "@testify/shared";
 import { Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, FIELD, Warning } from "@/components/form";
 import { Button, cardClass } from "@/components/primitives";
 import { cn } from "@/lib/cn";
@@ -20,6 +21,7 @@ export function StickyRow({
 	onSave: (next: StickyPut) => void;
 	onRemove: () => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const [message, setMessage] = useState(entry.message);
 	const [cap, setCap] = useState(entry.cap);
 
@@ -41,7 +43,7 @@ export function StickyRow({
 				</span>
 			</div>
 
-			<Field label="Message" htmlFor={`sticky-${entry.channelId}`}>
+			<Field label={t("sticky.message")} htmlFor={`sticky-${entry.channelId}`}>
 				<textarea
 					id={`sticky-${entry.channelId}`}
 					rows={2}
@@ -55,7 +57,7 @@ export function StickyRow({
 			</Field>
 
 			<div className="flex flex-wrap items-end gap-3">
-				<Field label="Repost after" htmlFor={`cap-${entry.channelId}`} className="w-28">
+				<Field label={t("sticky.repostAfter")} htmlFor={`cap-${entry.channelId}`} className="w-28">
 					<input
 						id={`cap-${entry.channelId}`}
 						type="number"

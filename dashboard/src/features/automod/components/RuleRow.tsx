@@ -1,5 +1,6 @@
 import { type AutomodAction, type AutomodRuleSummary } from "@testify/shared";
 import { Trash2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Toggle } from "@/components/form";
 import { Badge, cardClass, Button } from "@/components/primitives";
 
@@ -21,12 +22,13 @@ export function RuleRow({
 	onToggle: (enabled: boolean) => void;
 	onRemove: () => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	return (
 		<li className={cardClass("compact", "flex flex-wrap items-center gap-3")}>
 			<div className="min-w-0 flex-1">
 				<div className="flex flex-wrap items-center gap-2">
 					<h3 className="truncate text-sm font-medium">{rule.name}</h3>
-					{rule.fromTestify && <Badge>Added by Testify</Badge>}
+					{rule.fromTestify && <Badge>{t("automod.addedByTestify")}</Badge>}
 				</div>
 				<p className="text-muted-foreground text-xs">
 					{rule.trigger}

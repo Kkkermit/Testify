@@ -1,6 +1,7 @@
 import { LEVEL_LIMITS, type LevelRewardInput } from "@testify/shared";
 import { Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Refusal } from "@/features/levelling/components/Refusal";
@@ -14,6 +15,7 @@ export function RewardsTab({
 	roles,
 	rewards,
 }: Pick<TabProps, "guildId" | "roles"> & { rewards: LevelRewardInput[] }): React.JSX.Element {
+	const { t } = useTranslation();
 	const update = useUpdateRewards(guildId);
 	const [level, setLevel] = useState(5);
 	const [roleId, setRoleId] = useState("");
@@ -28,7 +30,7 @@ export function RewardsTab({
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 		>
 			{rewards.length === 0 ? (
-				<p className="text-muted-foreground text-sm">No rewards yet.</p>
+				<p className="text-muted-foreground text-sm">{t("levelling.noRewards")}</p>
 			) : (
 				<ul className="divide-border border-border divide-y rounded-lg border">
 					{rewards.map((reward) => (
@@ -53,7 +55,7 @@ export function RewardsTab({
 			)}
 
 			<div className="flex flex-wrap items-end gap-3">
-				<Field label="Level" className="w-24">
+				<Field label={t("levelling.level")} className="w-24">
 					<input
 						type="number"
 						inputMode="numeric"
@@ -66,7 +68,7 @@ export function RewardsTab({
 						className={FIELD}
 					/>
 				</Field>
-				<Field label="Role" className="min-w-48 flex-1">
+				<Field label={t("levelling.role")} className="min-w-48 flex-1">
 					<select
 						value={roleId}
 						onChange={(event) => {
@@ -74,7 +76,7 @@ export function RewardsTab({
 						}}
 						className={SELECT}
 					>
-						<option value="">Choose a role</option>
+						<option value="">{t("levelling.chooseRole")}</option>
 						{assignable.map((role) => (
 							<option key={role.id} value={role.id}>
 								{role.name}
@@ -93,11 +95,9 @@ export function RewardsTab({
 				</Button>
 			</div>
 
-			{full && <Warning>That is the most rewards Testify can hold. Remove one to add another.</Warning>}
+			{full && <Warning>{t("levelling.rewardsFull")}</Warning>}
 			{taken && <Warning>Level {level} already has a reward. Remove it first, or pick another level.</Warning>}
-			{assignable.length < roles.length && (
-				<Warning>Roles above Testify in the hierarchy are hidden, because it could not grant them.</Warning>
-			)}
+			{assignable.length < roles.length && <Warning>{t("levelling.hierarchyNote")}</Warning>}
 			<Refusal error={update.error} />
 		</TabPanel>
 	);

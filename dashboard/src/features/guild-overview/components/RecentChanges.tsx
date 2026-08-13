@@ -1,16 +1,18 @@
 import { type GuildOverview } from "@testify/shared";
 import { History } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Card, EmptyState } from "@/components/primitives";
 import { dateAndTime, since } from "@/lib/datetime";
 
 export function RecentChanges({ changes }: { changes: GuildOverview["recentChanges"] }): React.JSX.Element {
+	const { t } = useTranslation();
 	if (changes.length === 0) {
 		return (
 			<Card>
 				<EmptyState
 					icon={<History size={28} />}
-					title="Nothing changed here yet"
-					body="Every change made from this dashboard is recorded, so you can see who turned what off and when."
+					title={t("overview.nothingChanged")}
+					body={t("overview.nothingChangedBody")}
 				/>
 			</Card>
 		);

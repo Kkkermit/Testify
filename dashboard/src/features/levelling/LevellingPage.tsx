@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { PageHeader, Skeleton, TabContent } from "@/components/primitives";
@@ -12,6 +13,7 @@ import { useChannels, useLevelling, useRoles } from "@/features/levelling/useLev
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function LevellingPage(): React.JSX.Element {
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 	// In the URL, so a link to the rewards tab is a link to the rewards tab and Back works.
 	const [params, setParams] = useSearchParams();
@@ -31,11 +33,7 @@ export function LevellingPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader
-				eyebrow={overview.data?.name}
-				title="Levelling"
-				subtitle="Who earns XP, what they get for it, and where it is announced."
-			/>
+			<PageHeader eyebrow={overview.data?.name} title={t("levelling.title")} subtitle={t("levelling.subtitle")} />
 
 			<Tabs
 				active={tab}
