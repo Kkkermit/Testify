@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type BotIdentity, type DashboardUser } from "@testify/shared";
-import { FileText, LogOut, ShieldQuestion } from "lucide-react";
+import { FileText, LogOut, Palette, ShieldQuestion } from "lucide-react";
 import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
@@ -14,10 +14,13 @@ import { hardRedirect } from "@/lib/redirect";
 /** Every row shares `ROW`, so all four icons sit on one vertical line and all four labels on another. */
 const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
 
-const LEGAL = [
-	{ to: "/terms", label: "Terms", icon: FileText },
-	{ to: "/privacy", label: "Privacy", icon: ShieldQuestion },
+const FOOTER_LINKS = [
+	{ to: "/appearance", label: "Appearance", describes: "Choose the theme and language" },
+	{ to: "/terms", label: "Terms", describes: "Read the terms" },
+	{ to: "/privacy", label: "Privacy", describes: "Read the privacy notice" },
 ] as const;
+
+const FOOTER_ICON = { "/appearance": Palette, "/terms": FileText, "/privacy": ShieldQuestion } as const;
 
 export function Sidebar({
 	user,
@@ -101,21 +104,24 @@ export function Sidebar({
 					</div>
 				)}
 
-				{/* Rows rather than small links, because `hidden` at the icon-only width took these two off the page entirely. */}
-				{LEGAL.map(({ to, label: text, icon: Icon }) => (
-					<Tooltip key={to} label={`Read the ${text.toLowerCase()}`} placement="right">
-						<Link
-							to={to}
-							className={cn(
-								ROW,
-								"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
-							)}
-						>
-							<Icon size={18} aria-hidden="true" className="shrink-0" />
-							<span className={label("truncate")}>{text}</span>
-						</Link>
-					</Tooltip>
-				))}
+				{/* Rows rather than small links, because `hidden` at the icon-only width took these off the page entirely. */}
+				{FOOTER_LINKS.map(({ to, label: text, describes }) => {
+					const Icon = FOOTER_ICON[to];
+					return (
+						<Tooltip key={to} label={describes} placement="right">
+							<Link
+								to={to}
+								className={cn(
+									ROW,
+									"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+								)}
+							>
+								<Icon size={18} aria-hidden="true" className="shrink-0" />
+								<span className={label("truncate")}>{text}</span>
+							</Link>
+						</Tooltip>
+					);
+				})}
 
 				<Tooltip label="Sign out of the dashboard" placement="right">
 					<button

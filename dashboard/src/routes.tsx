@@ -55,6 +55,9 @@ const CommandsPage = lazy(async () => ({
 	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
 }));
 const OwnerPage = lazy(async () => ({ default: (await import("@/features/owner/OwnerPage")).OwnerPage }));
+const AppearancePage = lazy(async () => ({
+	default: (await import("@/features/appearance/AppearancePage")).AppearancePage,
+}));
 const NotFoundPage = lazy(async () => ({
 	default: (await import("@/features/not-found/NotFoundPage")).NotFoundPage,
 }));
@@ -95,6 +98,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/members/:userId", element: lazily(<MemberDetailPage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },
+					{ path: "/appearance", element: lazily(<AppearancePage />) },
 					{ path: "/owner", element: lazily(<OwnerPage />) },
 				],
 			},

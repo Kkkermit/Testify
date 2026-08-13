@@ -36,31 +36,33 @@
  * 14px text measured 3.47:1 and failed AA in five real places.
  */
 @theme {
-	--color-background: #07070b;
-	--color-foreground: #ffffff;
-	--color-muted: #1c1c2a;
-	--color-muted-foreground: #a2a2ba;
-	--color-card: #12121c;
-	--color-popover: #171722;
-	--color-border: #262639;
-	--color-input: #7676a0;
-	--color-primary: #7c3aed;
+	/* Every colour is `light-dark(light, dark)`, so a token is one line holding both themes and the two can
+	   never drift to different sets. `contrast.test.ts` reads both halves and checks each against WCAG. */
+	--color-background: light-dark(#f4f4f9, #07070b);
+	--color-foreground: light-dark(#15151f, #ffffff);
+	--color-muted: light-dark(#e9e8f2, #1c1c2a);
+	--color-muted-foreground: light-dark(#55556e, #a2a2ba);
+	--color-card: light-dark(#ffffff, #12121c);
+	--color-popover: light-dark(#ffffff, #171722);
+	--color-border: light-dark(#dcdae8, #262639);
+	--color-input: light-dark(#6b6b8a, #7676a0);
+	--color-primary: light-dark(#6d28d9, #7c3aed);
 	--color-primary-foreground: #ffffff;
-	--color-accent: #a78bfa;
-	--color-ring: #a78bfa;
-	--color-success: #3ddc97;
-	--color-warning: #fbbf24;
-	--color-destructive: #dc2626;
-	/* Red is legible as a fill or as text, never as both: 4.83:1 with white on it, 6.72:1 as text on a card. */
-	--color-destructive-text: #f87171;
+	--color-accent: light-dark(#5b21b6, #a78bfa);
+	--color-ring: light-dark(#6d28d9, #a78bfa);
+	--color-success: light-dark(#047857, #3ddc97);
+	--color-warning: light-dark(#a16207, #fbbf24);
+	--color-destructive: light-dark(#b91c1c, #dc2626);
+	/* Red is legible as a fill or as text, never as both, so the text cut is its own token. */
+	--color-destructive-text: light-dark(#b91c1c, #f87171);
 
 	/* Feature tints. Text colours at AA on the card, used as icons and as 15% fills. */
-	--color-feature-levelling: #a78bfa;
-	--color-feature-economy: #fbbf24;
-	--color-feature-moderation: #f87171;
-	--color-feature-welcome: #3ddc97;
-	--color-feature-tickets: #60a5fa;
-	--color-feature-community: #f472b6;
+	--color-feature-levelling: light-dark(#6d28d9, #a78bfa);
+	--color-feature-economy: light-dark(#a16207, #fbbf24);
+	--color-feature-moderation: light-dark(#b91c1c, #f87171);
+	--color-feature-welcome: light-dark(#047857, #3ddc97);
+	--color-feature-tickets: light-dark(#1d4ed8, #60a5fa);
+	--color-feature-community: light-dark(#be185d, #f472b6);
 
 	--radius-card: 0.625rem;
 	--radius-field: 0.5rem;
@@ -123,6 +125,20 @@
 }
 
 @layer base {
+	/* The theme switch. `light-dark()` holds both values on one token, so `color-scheme` is the only thing that
+	   moves — and the system default needs no script, which the CSP could not have run inline anyway. */
+	:root {
+		color-scheme: light dark;
+	}
+
+	:root[data-theme="light"] {
+		color-scheme: light;
+	}
+
+	:root[data-theme="dark"] {
+		color-scheme: dark;
+	}
+
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
 		/* A single wash behind the WebGL field, so the page still has depth when WebGL is unavailable. */
@@ -263,9 +279,13 @@
 	background: linear-gradient(90deg, var(--color-accent), transparent 70%);
 }
 
-/** A 1px inset highlight: elevation without a drop shadow, which on near-black reads as a smudge. */
+/**
+ * Elevation is expressed differently by theme because the same trick cannot work in both: on near-black a drop
+ * shadow reads as a smudge, so a card lifts by a 1px inset highlight; on paper that highlight is invisible and
+ * a real shadow is what separates a white card from the ground.
+ */
 @utility surface-edge {
-	box-shadow: inset 0 1px 0 0 --alpha(var(--color-foreground) / 6%);
+	box-shadow: light-dark(0 1px 2px 0 rgb(21 21 31 / 6%), inset 0 1px 0 0 rgb(255 255 255 / 6%));
 }
 
 /* The pulse a skeleton uses is a brightness change; this is the highlight sweeping across it. */
@@ -291,14 +311,14 @@
 	font-size: 0.75rem;
 	line-height: 1.4;
 	padding: 0.125rem 0.25rem;
-	box-shadow: inset 0 1px 0 0 --alpha(var(--color-foreground) / 6%);
+	box-shadow: light-dark(0 2px 8px 0 rgb(21 21 31 / 12%), inset 0 1px 0 0 rgb(255 255 255 / 6%));
 }
 
 .tippy-box[data-theme~="testify"] > .tippy-arrow {
 	color: var(--color-popover);
 }
 
-/** `prefers-contrast: more` swaps dividers for the interactive border and muted text for white. */
+/** `prefers-contrast: more` swaps dividers for the interactive border and muted text for the full-contrast one. */
 @media (prefers-contrast: more) {
 	:root {
 		--color-border: var(--color-input);

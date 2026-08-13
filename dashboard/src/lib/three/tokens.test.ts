@@ -1,4 +1,4 @@
-import { accentColour, cssColour, isHexColour } from "@/lib/three/tokens";
+import { accentColour, cssColour, isHexColour, pickScheme } from "@/lib/three/tokens";
 
 function rootWith(properties: Record<string, string>): Element {
 	const element = document.createElement("div");
@@ -30,9 +30,34 @@ describe("isHexColour", () => {
 	});
 });
 
+describe("pickScheme", () => {
+	/**
+	 * `getComputedStyle` never resolves a custom property, so the backdrop receives the token's source text.
+	 * Before this existed a `light-dark()` token failed the hex check and every theme got the same fallback.
+	 */
+	it("takes the half the theme is painted with", () => {
+		expect(pickScheme("light-dark(#5b21b6, #a78bfa)", true)).toBe("#a78bfa");
+		expect(pickScheme("light-dark(#5b21b6, #a78bfa)", false)).toBe("#5b21b6");
+	});
+
+	it("passes a plain value straight through", () => {
+		expect(pickScheme("#112233", true)).toBe("#112233");
+	});
+
+	it("leaves anything it cannot split alone, rather than returning a fragment", () => {
+		expect(pickScheme("light-dark(#5b21b6)", true)).toBe("light-dark(#5b21b6)");
+	});
+});
+
 describe("accentColour", () => {
 	it("uses the token when it is a hex value", () => {
 		expect(accentColour(rootWith({ "--color-accent": "#112233" }))).toBe("#112233");
+	});
+
+	it("reads the theme's own half of a light-dark token", () => {
+		const root = rootWith({ "--color-accent": "light-dark(#5b21b6, #a78bfa)", "color-scheme": "light" });
+
+		expect(accentColour(root)).toBe("#5b21b6");
 	});
 
 	/** A palette moved to a wider colour space must not turn the backdrop black. */

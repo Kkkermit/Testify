@@ -15,11 +15,22 @@ import { contrast, luminance } from "./contrast";
 
 const CSS = readFileSync(resolve(__dirname, "../index.css"), "utf8");
 
-function token(name: string): string {
-	const found = new RegExp(`--color-${name}:\\s*(#[0-9a-f]{6})`, "i").exec(CSS);
-	if (found?.[1] === undefined) throw new Error(`--color-${name} is not in index.css`);
+type Scheme = "light" | "dark";
 
-	return found[1];
+/**
+ * A token is either `light-dark(a, b)` or a single value used by both themes, so this returns the half the
+ * theme under test actually renders. Reading both halves is the point: a light palette nobody measured is
+ * worse than no light palette, and only one of the two used to be checked.
+ */
+function token(name: string, scheme: Scheme): string {
+	const pair = new RegExp(`--color-${name}:\\s*light-dark\\(\\s*(#[0-9a-f]{6})\\s*,\\s*(#[0-9a-f]{6})\\s*\\)`, "i");
+	const both = pair.exec(CSS);
+	if (both?.[1] !== undefined && both[2] !== undefined) return scheme === "light" ? both[1] : both[2];
+
+	const single = new RegExp(`--color-${name}:\\s*(#[0-9a-f]{6})`, "i").exec(CSS);
+	if (single?.[1] === undefined) throw new Error(`--color-${name} is not in index.css`);
+
+	return single[1];
 }
 
 /** 4.5:1 for text under 18.66px, 3:1 for a control boundary or a large heading. */
@@ -48,9 +59,10 @@ describe("contrast", () => {
 	});
 });
 
-describe("the palette", () => {
-	const background = token("background");
-	const card = token("card");
+describe.each(["light", "dark"] as const)("the %s palette", (scheme) => {
+	const background = token("background", scheme);
+	const card = token("card", scheme);
+	const token_ = (name: string): string => token(name, scheme);
 
 	it.each([
 		["foreground on the page", "foreground", background, TEXT],
@@ -67,34 +79,42 @@ describe("the palette", () => {
 		["the focus ring on the page", "ring", background, NON_TEXT],
 		["a filled primary against the page", "primary", background, NON_TEXT],
 	])("%s meets its threshold", (_name, colour, against, need) => {
-		const other = against.startsWith("#") ? against : token(against);
+		const other = against.startsWith("#") ? against : token_(against);
 
-		expect(contrast(token(colour), other)).toBeGreaterThanOrEqual(need);
+		expect(contrast(token_(colour), other)).toBeGreaterThanOrEqual(need);
 	});
 
-	/** A filled button's own text is the pair that matters, not the fill against the page. */
+	/**
+	 * A filled button's own text is the pair that matters, not the fill against the page. Both of these render
+	 * white whatever the theme — the destructive variant is `text-white` literally — so checking against
+	 * `foreground` would pass in dark for the wrong reason and measure a colour nothing draws in light.
+	 */
 	it.each([
-		["white on primary", "primary-foreground", "primary"],
-		["white on destructive", "foreground", "destructive"],
-	])("%s is legible", (_name, text, fill) => {
-		expect(contrast(token(text), token(fill))).toBeGreaterThanOrEqual(TEXT);
+		["white on primary", "primary"],
+		["white on destructive", "destructive"],
+	])("%s is legible", (_name, fill) => {
+		expect(contrast("#ffffff", token_(fill))).toBeGreaterThanOrEqual(TEXT);
 	});
 
 	/** Each tint is used as an icon colour and as a 15% wash, so the icon has to survive on a card. */
 	it.each(["levelling", "economy", "moderation", "welcome", "tickets", "community"])(
 		"the %s tint is legible on a card",
 		(feature) => {
-			expect(contrast(token(`feature-${feature}`), card)).toBeGreaterThanOrEqual(TEXT);
+			expect(contrast(token_(`feature-${feature}`), card)).toBeGreaterThanOrEqual(TEXT);
 		},
 	);
 
-	/**
-	 * The fill violet is not a text colour — it measures 3.47:1 and this is the guard that stops it being used
-	 * as one again. If a rebrand makes it light enough to pass, delete this test rather than working around it.
-	 */
 	it("keeps the fill violet and the text violet as separate tokens", () => {
-		expect(token("primary")).not.toBe(token("accent"));
-		expect(contrast(token("primary"), background)).toBeLessThan(TEXT);
-		expect(contrast(token("accent"), background)).toBeGreaterThanOrEqual(TEXT);
+		expect(token_("primary")).not.toBe(token_("accent"));
+		expect(contrast(token_("accent"), background)).toBeGreaterThanOrEqual(TEXT);
 	});
+});
+
+/**
+ * On near-black the fill violet measures 3.47:1, and this is the guard that stops it being used as body text
+ * again. It is scoped to dark deliberately: the light fill is darker than its own page and legible as text, so
+ * asserting the same thing there would be asserting a hazard that does not exist.
+ */
+it("keeps the dark fill violet out of reach as a text colour", () => {
+	expect(contrast(token("primary", "dark"), token("background", "dark"))).toBeLessThan(TEXT);
 });
