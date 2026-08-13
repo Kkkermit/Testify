@@ -1,4 +1,5 @@
 import { type ChannelSummary } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { Field } from "@/components/form/Field";
 import { SELECT } from "@/components/form/fieldStyles";
 import { Warning } from "@/components/form/Warning";
@@ -15,7 +16,7 @@ export function ChannelPicker({
 	label,
 	hint,
 	allowNone = true,
-	noneLabel = "Where they were talking",
+	noneLabel,
 }: {
 	channels: ChannelSummary[];
 	value: string | null;
@@ -25,6 +26,7 @@ export function ChannelPicker({
 	allowNone?: boolean;
 	noneLabel?: string;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const postable = postableChannels(channels);
 	const chosen = postable.find((channel) => channel.id === value);
 
@@ -37,7 +39,7 @@ export function ChannelPicker({
 					onChange(event.target.value === "" ? null : event.target.value);
 				}}
 			>
-				{allowNone && <option value="">{noneLabel}</option>}
+				{allowNone && <option value="">{noneLabel ?? t("common.whereTalking")}</option>}
 				{postable.map((channel) => (
 					<option key={channel.id} value={channel.id} disabled={!channel.canSend}>
 						#{channel.name}

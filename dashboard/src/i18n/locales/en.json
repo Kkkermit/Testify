@@ -28,7 +28,10 @@
 		"couldNotRun": "That could not be run.",
 		"didNotWork": "That did not work.",
 		"discordRefused": "Discord refused that.",
-		"unknownAccount": "Unknown account"
+		"unknownAccount": "Unknown account",
+		"chosen": "{{count}} of {{max}} chosen",
+		"whereTalking": "Where they were talking",
+		"savingEllipsis": "Saving…"
 	},
 	"nav": {
 		"servers": "Servers",

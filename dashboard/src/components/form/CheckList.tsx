@@ -1,4 +1,5 @@
 import { useId, type ReactNode } from "react";
+import { useTranslation } from "react-i18next";
 import { CHECK_ROW, FIELD_GROUP, LABEL, SCROLL_LIST } from "@/components/form/fieldStyles";
 import { cn } from "@/lib/cn";
 
@@ -26,6 +27,7 @@ export function CheckList({
 	max: number;
 	onChange: (ids: string[]) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const atLimit = value.length >= max;
 	const nameId = `checklist-${useId()}`;
 
@@ -38,7 +40,7 @@ export function CheckList({
 				</span>
 				{hint !== undefined && <span className="text-muted-foreground text-xs">{hint}</span>}
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-					{value.length} of {max} chosen
+					{t("common.chosen", { count: value.length, max })}
 				</span>
 			</span>
 

@@ -29,7 +29,10 @@
 		"couldNotRun": "Impossible d’exécuter.",
 		"didNotWork": "Cela n’a pas fonctionné.",
 		"discordRefused": "Discord a refusé.",
-		"unknownAccount": "Compte inconnu"
+		"unknownAccount": "Compte inconnu",
+		"chosen": "{{count}} sur {{max}} sélectionnés",
+		"whereTalking": "Là où la conversation avait lieu",
+		"savingEllipsis": "Enregistrement…"
 	},
 	"nav": {
 		"servers": "Serveurs",

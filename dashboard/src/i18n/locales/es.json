@@ -29,7 +29,10 @@
 		"couldNotRun": "No se ha podido ejecutar.",
 		"didNotWork": "No ha funcionado.",
 		"discordRefused": "Discord lo ha rechazado.",
-		"unknownAccount": "Cuenta desconocida"
+		"unknownAccount": "Cuenta desconocida",
+		"chosen": "{{count}} de {{max}} elegidos",
+		"whereTalking": "Donde estaban hablando",
+		"savingEllipsis": "Guardando…"
 	},
 	"nav": {
 		"servers": "Servidores",
