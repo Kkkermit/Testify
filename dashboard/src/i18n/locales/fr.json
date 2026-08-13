@@ -129,6 +129,12 @@
 		"notHereYet": "Testify n’est pas encore ici",
 		"add": "Ajouter",
 		"noPermission": "Pas la permission",
-		"noPermissionHint": "Ajouter un bot demande la permission Gérer le serveur. Demandez à quelqu’un qui l’a."
+		"noPermissionHint": "Ajouter un bot demande la permission Gérer le serveur. Demandez à quelqu’un qui l’a.",
+		"configurableTitle": "Prêts à configurer",
+		"configurableBody": "Testify y est déjà, chaque réglage est à un clic.",
+		"invitableTitle": "Ajouter Testify",
+		"invitableBody": "Vous avez Gérer le serveur ici, vous pouvez donc inviter Testify vous-même.",
+		"lockedTitle": "Nécessite quelqu’un d’autre",
+		"lockedBody": "Ajouter un bot demande Gérer le serveur, ce que vous n’avez pas ici."
 	}
 }

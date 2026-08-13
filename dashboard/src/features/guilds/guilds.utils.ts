@@ -1,4 +1,5 @@
 import { type ManageableGuild } from "@testify/shared";
+import { type TranslationKey } from "@/i18n";
 
 export function filterGuilds(guilds: ManageableGuild[], search: string): ManageableGuild[] {
 	const term = search.trim().toLowerCase();
@@ -20,28 +21,33 @@ export type GuildGroupKey = "configurable" | "invitable" | "locked";
 
 export interface GuildGroup {
 	key: GuildGroupKey;
-	title: string;
-	describes: string;
+	titleKey: TranslationKey;
+	describesKey: TranslationKey;
 	guilds: ManageableGuild[];
 }
 
-const GROUPS: { key: GuildGroupKey; title: string; describes: string; holds: (guild: ManageableGuild) => boolean }[] = [
+const GROUPS: {
+	key: GuildGroupKey;
+	titleKey: TranslationKey;
+	describesKey: TranslationKey;
+	holds: (guild: ManageableGuild) => boolean;
+}[] = [
 	{
 		key: "configurable",
-		title: "Ready to configure",
-		describes: "Testify is in these, so every setting is one click away.",
+		titleKey: "guilds.configurableTitle",
+		describesKey: "guilds.configurableBody",
 		holds: (guild) => guild.botPresent,
 	},
 	{
 		key: "invitable",
-		title: "Add Testify",
-		describes: "You have Manage Server here, so you can invite Testify yourself.",
+		titleKey: "guilds.invitableTitle",
+		describesKey: "guilds.invitableBody",
 		holds: (guild) => !guild.botPresent && guild.canInvite,
 	},
 	{
 		key: "locked",
-		title: "Needs somebody else",
-		describes: "Adding a bot takes Manage Server, which you do not have in these.",
+		titleKey: "guilds.lockedTitle",
+		describesKey: "guilds.lockedBody",
 		holds: (guild) => !guild.botPresent && !guild.canInvite,
 	},
 ];
