@@ -52,6 +52,7 @@ tickets, giveaways and games. Every command works as <code>/ban</code> <strong>a
 - [Compatibility](#compatibility)
 - [Quick start](#quick-start)
 - [Full setup guide](#full-setup-guide)
+- [Running it in Docker](#running-it-in-docker)
 - [Slash and prefix](#slash-and-prefix)
 - [Command categories](#command-categories)
 - [Adding your own command](#adding-your-own-command)
@@ -248,6 +249,26 @@ npm start
 > Use **two bot applications** — one for development, one for production. `npm run setup -- --dev` writes
 > `.env.development`, which `npm run dev` reads instead of `.env`. That way testing can never touch your live
 > bot or its database.
+
+## Running it in Docker
+
+If you would rather not install Node at all, the repository ships a `Dockerfile` and a `docker-compose.yml`
+that bring up the bot and a MongoDB together:
+
+```bash
+cp .env.example .env     # fill it in, or run `npm run setup`
+docker compose up -d
+docker compose logs -f bot
+```
+
+`MONGODB_URI` defaults to the database in the compose file, so a fresh clone needs nothing else set up. Data
+lives in a named volume and survives a restart.
+
+**[`docs/hosting.md`](docs/hosting.md) is the full guide** — turning the dashboard on behind a reverse proxy,
+what is in the image and what is deliberately left out, and a troubleshooting table. One thing worth knowing
+before you start: `DASHBOARD_BIND` has to be `0.0.0.0` inside a container, because the bot's `127.0.0.1`
+default is the container's own loopback and a published port would reach nothing. The compose file already
+sets it, and publishes the port to the host's loopback only.
 
 ## Slash and prefix
 

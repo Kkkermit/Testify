@@ -1,0 +1,62 @@
+# Testify and a MongoDB to keep its data in.
+#
+#   cp .env.example .env    # fill it in, or run `npm run setup`
+#   docker compose up -d
+#   docker compose logs -f bot
+#
+# Everything below reads from .env. Nothing is hardcoded, and no secret is baked into the image.
+
+services:
+  bot:
+    build: .
+    image: testify:local
+    restart: unless-stopped
+    # Node as PID 1 reaps no orphans; the bot's own SIGTERM handler still runs either way.
+    init: true
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      # `mongo` is this compose network's hostname for the database below.
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo:27017/testify}
+      DISCORD_TOKEN: ${DISCORD_TOKEN:?set DISCORD_TOKEN in .env}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?set DISCORD_CLIENT_ID in .env}
+      DISCORD_OWNER_IDS: ${DISCORD_OWNER_IDS:?set DISCORD_OWNER_IDS in .env}
+      DISCORD_DEV_GUILD_ID: ${DISCORD_DEV_GUILD_ID:-}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      CHANNEL_ERROR_LOG: ${CHANNEL_ERROR_LOG:-}
+      CHANNEL_GUILD_LOG: ${CHANNEL_GUILD_LOG:-}
+      CHANNEL_DM_LOG: ${CHANNEL_DM_LOG:-}
+      CHANNEL_FEEDBACK_LOG: ${CHANNEL_FEEDBACK_LOG:-}
+
+      DASHBOARD_ENABLED: ${DASHBOARD_ENABLED:-false}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:-}
+      DASHBOARD_BASE_URL: ${DASHBOARD_BASE_URL:-}
+      DASHBOARD_SESSION_SECRET: ${DASHBOARD_SESSION_SECRET:-}
+      DASHBOARD_PORT: ${DASHBOARD_PORT:-3000}
+      # The default 127.0.0.1 is the container's own loopback, which a published port cannot reach.
+      # The container boundary is what keeps this private — publish the port only where you mean to.
+      DASHBOARD_BIND: 0.0.0.0
+      DASHBOARD_TRUST_PROXY: ${DASHBOARD_TRUST_PROXY:-false}
+      DASHBOARD_SESSION_TTL_DAYS: ${DASHBOARD_SESSION_TTL_DAYS:-7}
+    ports:
+      # Bound to the host's loopback: an admin panel reachable from the internet is not a default.
+      # Put a reverse proxy in front and set DASHBOARD_TRUST_PROXY=true to expose it deliberately.
+      - "127.0.0.1:${DASHBOARD_PORT:-3000}:${DASHBOARD_PORT:-3000}"
+
+  mongo:
+    image: mongo:8
+    restart: unless-stopped
+    # No published port: only the bot needs it, and reaching it from the host is not worth the exposure.
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  mongo-data:

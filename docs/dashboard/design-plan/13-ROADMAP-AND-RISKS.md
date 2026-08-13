@@ -223,7 +223,15 @@ pinning the four claims the code has to keep true.
   - Still needs a human: a real screen reader, and greyscale judgement on the feature tints.
 - Bundle budget check (<200 kB gzipped first load). **Measured at 152 kB** — vendor is 136 kB of it, and three
   is not in the first load at all.
-- Docker image and compose file; README screenshots; `CONTRIBUTING.md` section.
+- **Docker image and compose file — done**, with [`../../hosting.md`](../../hosting.md) as the guide. Two
+  stages, running as `node`, no secret in a layer, and the dashboard's React tree installed at build time only.
+  Two findings worth keeping: `fonts-dejavu-core` is **required**, because `@napi-rs/canvas` statically links
+  Skia but resolves font families through the OS, so a slim base renders every card's layout and none of its
+  text; and `DASHBOARD_BIND` must be `0.0.0.0` in a container, since the `127.0.0.1` default is the container's
+  own loopback and a published port reaches nothing. The image has **not been built** — the environment it was
+  written in has no Docker daemon — though the production-only install, the compiled layout and
+  `docker compose config` were each verified directly.
+- README screenshots; `CONTRIBUTING.md` section.
 - Light theme, if wanted — cheap now that everything is tokens, but re-verify every contrast ratio.
 
 Roughly eight to nine weeks of evenings. Phases 0–2 are the ones that must not be rushed; 3 is mechanical.

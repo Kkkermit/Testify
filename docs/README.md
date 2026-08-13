@@ -5,6 +5,7 @@ Everything written down about this project, in one place. Start with whichever r
 | You are…                                  | Read                                                                      |
 | ----------------------------------------- | ------------------------------------------------------------------------- |
 | Running the bot for the first time        | [`../README.md`](../README.md) — install, configure, start                |
+| Hosting it in Docker                      | [`hosting.md`](hosting.md) — the image, compose, and the traps            |
 | Looking for what a command does           | [`commands.md`](commands.md) — all 76, generated from the code            |
 | About to contribute a change              | [`contributing.md`](contributing.md), then [`../CLAUDE.md`](../CLAUDE.md) |
 | Reporting a security problem              | [`security.md`](security.md)                                              |
@@ -24,6 +25,7 @@ for changing this codebase, and it is the file both people and coding agents are
 | -------------------------------------- | ---------------------------------------------------------------------------- |
 | [`commands.md`](commands.md)           | Every command and subcommand. **Generated** — run `npm run docs:commands`    |
 | [`contributing.md`](contributing.md)   | How to propose a change: branches, commit format, what CI will check         |
+| [`hosting.md`](hosting.md)             | Running the bot and dashboard in Docker, and what is deliberately not there  |
 | [`security.md`](security.md)           | How to report a vulnerability, and what is in scope                          |
 | [`site-handover.md`](site-handover.md) | What the deleted `site/` static page contained, and what is worth rebuilding |
 
