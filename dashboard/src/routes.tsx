@@ -2,6 +2,7 @@ import { lazy, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppShell } from "@/app/AppShell";
 import { RequireAuth } from "@/app/RequireAuth";
+import { RequireOwner } from "@/app/RequireOwner";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
@@ -99,7 +100,8 @@ export const routes = [
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },
 					{ path: "/appearance", element: lazily(<AppearancePage />) },
-					{ path: "/owner", element: lazily(<OwnerPage />) },
+					// Behind its own guard, so the console's existence is not disclosed by rendering its shell.
+					{ element: <RequireOwner />, children: [{ path: "/owner", element: lazily(<OwnerPage />) }] },
 				],
 			},
 		],

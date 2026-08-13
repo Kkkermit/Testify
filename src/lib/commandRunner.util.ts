@@ -79,6 +79,10 @@ export class DashboardOptions implements CommandInputOptions {
 		args: CommandRunRequest["args"],
 	) {
 		for (const option of declared) {
+			// `hasOwn` rather than a truthiness check: an option named `toString` would otherwise read
+			// `Object.prototype`'s method rather than finding nothing.
+			if (!Object.hasOwn(args, option.name)) continue;
+
 			const given = args[option.name];
 			if (given !== undefined) this.values.set(option.name, given);
 		}
