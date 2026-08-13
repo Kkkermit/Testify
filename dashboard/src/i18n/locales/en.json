@@ -376,7 +376,8 @@
 		"pastDraws": "Past draws",
 		"noDraws": "No draws yet",
 		"noDrawsBody": "The first one appears here once it runs.",
-		"start": "Start the lottery"
+		"start": "Start the lottery",
+		"rolledOver": "No entries, rolled over"
 	},
 	"settings": {
 		"title": "Server settings",

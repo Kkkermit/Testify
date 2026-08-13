@@ -377,7 +377,8 @@
 		"pastDraws": "Tirages passés",
 		"noDraws": "Aucun tirage pour l’instant",
 		"noDrawsBody": "Le premier apparaîtra ici une fois effectué.",
-		"start": "Lancer la loterie"
+		"start": "Lancer la loterie",
+		"rolledOver": "Aucune participation, reportée"
 	},
 	"settings": {
 		"title": "Paramètres du serveur",

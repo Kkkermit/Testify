@@ -376,7 +376,8 @@
 		"pastDraws": "Frühere Ziehungen",
 		"noDraws": "Noch keine Ziehungen",
 		"noDrawsBody": "Die erste erscheint hier, sobald sie gelaufen ist.",
-		"start": "Lotterie starten"
+		"start": "Lotterie starten",
+		"rolledOver": "Keine Teilnahmen, übertragen"
 	},
 	"settings": {
 		"title": "Servereinstellungen",

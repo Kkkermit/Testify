@@ -377,7 +377,8 @@
 		"pastDraws": "Sorteos anteriores",
 		"noDraws": "Todavía no hay sorteos",
 		"noDrawsBody": "El primero aparecerá aquí en cuanto se celebre.",
-		"start": "Empezar la lotería"
+		"start": "Empezar la lotería",
+		"rolledOver": "Sin participantes, se acumula"
 	},
 	"settings": {
 		"title": "Ajustes del servidor",

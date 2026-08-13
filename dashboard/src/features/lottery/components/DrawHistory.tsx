@@ -43,7 +43,7 @@ export function DrawHistory({
 							</div>
 							<p className="text-muted-foreground text-sm">
 								{draw.winners.length === 0
-									? "No entries, rolled over"
+									? t("lottery.rolledOver")
 									: draw.winners
 											.map((winner) => `${winner.userTag} (${winner.prizeAmount.toLocaleString()})`)
 											.join(", ")}
