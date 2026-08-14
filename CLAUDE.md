@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 67                               |
 | Schemas/repositories | 13 / 13                          |
 | Scheduled jobs       | 4                                |
-| Tests                | 2,985 across 192 suites          |
+| Tests                | 3,234 across 205 suites          |
 
 **There is no music system.** It was removed deliberately — see
 [§21](#21-decisions-already-made--do-not-relitigate). Do not add one back without reading that section.

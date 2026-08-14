@@ -38,6 +38,7 @@ The web dashboard is a workspace of its own (`dashboard/`), with an API inside t
 | [`dashboard/guide.md`](dashboard/guide.md)                    | The practical guide: layout, components, the six edits a screen takes, the traps     |
 | [`dashboard/re-write.md`](dashboard/re-write.md)              | The UI rewrite plan — phases, invariants, exit criteria                              |
 | [`dashboard/design-plan/`](dashboard/design-plan/00-INDEX.md) | The original design documents: scope, auth, permissions, API, accessibility, roadmap |
+| [`dashboard/screenshots/`](dashboard/screenshots/README.md)   | The images the root README embeds, and how to retake one when a screen changes       |
 
 `CLAUDE.md` §24 wins wherever it and `dashboard/guide.md` disagree.
 

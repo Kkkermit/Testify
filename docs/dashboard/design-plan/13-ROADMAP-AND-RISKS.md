@@ -204,7 +204,7 @@ rather than a transport, which is a dozen lines. Three things it settled:
   shoulder than a terminal, and a line that was never stored with a connection string in it cannot leak one
   through a future endpoint.
 
-### Phase 6 — Polish (~1 week) — **partly done**
+### Phase 6 — Polish (~1 week) — **done, bar what needs a person or a Docker daemon**
 
 Terms and privacy pages are built, and they sit **outside** `RequireAuth`: somebody deciding whether to add the
 bot has to be able to read them before signing in. Both are written for a self-hosted bot — the operator is
@@ -234,8 +234,19 @@ pinning the four claims the code has to keep true.
   own loopback and a published port reaches nothing. The image has **not been built** — the environment it was
   written in has no Docker daemon — though the production-only install, the compiled layout and
   `docker compose config` were each verified directly.
-- README screenshots; `CONTRIBUTING.md` section.
-- Light theme, if wanted — cheap now that everything is tokens, but re-verify every contrast ratio.
+- **README screenshots — done.** Five, in [`../screenshots/`](../screenshots/README.md), captured from the
+  built bundle against stub responses so no real server or account is in one. Both themes appear deliberately.
+  `docs/contributing.md` already carries the dashboard section, including how to add a language.
+- **Light theme — done**, and it is not an afterthought: every colour in `index.css` is one `light-dark()` line
+  holding both schemes, and `contrast.test.ts` reads **both halves** and checks each against WCAG, so a light
+  value nobody looked at fails the build. The switch is `color-scheme` and nothing else.
+- **Appearance customisation — done**, beyond what this phase asked for: six accents, a motion override that
+  wins in both directions, and the language picker. All three are one `Preference` mechanism — an attribute on
+  the root element, a `localStorage` key, and a fallback that _removes_ the attribute so the CSS answers before
+  any script runs. Every accent is measured against both backgrounds.
+- **Narrow widths — done.** Ten routes at 390 and 820 CSS px carry no horizontal overflow and no page error.
+  Two defects that only exist on a phone were fixed there: the owner console's eight-tab strip cut with nothing
+  saying five tabs sat past the edge, and landing on a later tab left the strip at its start with none marked.
 
 Roughly eight to nine weeks of evenings. Phases 0–2 are the ones that must not be rushed; 3 is mechanical.
 
@@ -272,8 +283,12 @@ Worth deciding before phase 2, because each changes work later.
    "someone says it broke" and "here is the stack". Phase 5, or earlier if support load justifies it.
 4. **Kick and ban.** Deliberately excluded (`05-API.md`). Softban covers the reversible case. If you want them,
    they need a stronger confirmation than typing a name.
-5. **Light theme.** Phase 6 or never. Cheap to add, but every contrast ratio in `08-DESIGN.md` needs recomputing
-   against a light background, and an unverified light theme is worse than none.
+5. **Light theme.** ~~Phase 6 or never.~~ **Answered: built.** The worry was right — an unverified light theme
+   is worse than none — so `contrast.test.ts` reads both halves of every token out of `index.css` and checks
+   each against WCAG. Two things it caught are worth keeping in mind: a pair can pass for the wrong reason
+   (check the colour the component actually draws, not the token you assume it uses), and elevation cannot
+   simply be recoloured — a drop shadow reads as a smudge on near-black, an inset highlight is invisible on
+   paper, so `surface-edge` switches technique by theme.
 6. **Realtime.** Everything here is request/response. Live member counts or a live audit feed would want SSE
    (simpler than WebSockets, and one-directional is all this needs). Not in the POC; the polling in TanStack
    Query is enough.
