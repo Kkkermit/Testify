@@ -1,4 +1,5 @@
 import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
+import { LEVELLING } from "@config/constants";
 import {
 	addXp,
 	awardXp,
@@ -8,7 +9,6 @@ import {
 	levelFromXp,
 	resetGuildLevels,
 	setLevel,
-	xpForNextLevel,
 } from "@database/repositories/levelRepository";
 
 const GUILD = "111111111111111111";
@@ -21,11 +21,13 @@ describe("the levelling curve", () => {
 	});
 
 	it("gets harder as the level goes up", () => {
-		expect(xpForNextLevel(2) - xpForNextLevel(1)).toBeLessThan(xpForNextLevel(10) - xpForNextLevel(9));
+		const step = (level: number): number => LEVELLING.xpForLevel(level + 1) - LEVELLING.xpForLevel(level);
+
+		expect(step(1)).toBeLessThan(step(9));
 	});
 
 	it("agrees with itself in both directions", () => {
-		for (const level of [1, 5, 12, 30]) expect(levelFromXp(xpForNextLevel(level))).toBeGreaterThanOrEqual(level);
+		for (const level of [1, 5, 12, 30]) expect(levelFromXp(LEVELLING.xpForLevel(level))).toBeGreaterThanOrEqual(level);
 	});
 });
 

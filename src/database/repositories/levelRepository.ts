@@ -82,10 +82,6 @@ export function levelFromXp(xp: number): number {
 	return level;
 }
 
-export function xpForNextLevel(level: number): number {
-	return LEVELLING.xpForLevel(level + 1);
-}
-
 export async function setLevel(guildId: string, userId: string, level: number): Promise<UserLevelRecord> {
 	return UserLevel.findOneAndUpdate(
 		{ guildId, userId },

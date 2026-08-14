@@ -1,16 +1,13 @@
 import {
-	compactNumber,
 	discordTime,
 	escapeMarkdown,
 	formatBytes,
 	formatDuration,
 	formatDurationLong,
 	formatNumber,
-	formatTrackTime,
 	formatUptime,
 	humanisePermission,
 	ordinal,
-	pluralise,
 	progressBar,
 	titleCase,
 	truncate,
@@ -36,11 +33,6 @@ describe("numbers", () => {
 		expect(formatNumber(1234567)).toBe("1,234,567");
 	});
 
-	it("shortens large numbers", () => {
-		expect(compactNumber(1500)).toBe("1.5K");
-		expect(compactNumber(2_400_000)).toBe("2.4M");
-	});
-
 	it("handles the awkward ordinals", () => {
 		expect(ordinal(1)).toBe("1st");
 		expect(ordinal(11)).toBe("11th");
@@ -57,11 +49,6 @@ describe("text", () => {
 
 	it("title-cases a sentence", () => {
 		expect(titleCase("hello there world")).toBe("Hello There World");
-	});
-
-	it("pluralises only when it should", () => {
-		expect(pluralise(1, "command")).toBe("1 command");
-		expect(pluralise(2, "command")).toBe("2 commands");
 	});
 
 	it("turns a permission flag into something readable", () => {
@@ -125,29 +112,6 @@ describe("formatUptime", () => {
 	});
 });
 
-describe("formatTrackTime", () => {
-	it("uses clock style for a track under an hour", () => {
-		expect(formatTrackTime(187_000)).toBe("3:07");
-	});
-
-	it("adds an hours segment when the track is long enough", () => {
-		expect(formatTrackTime(3_753_000)).toBe("1:02:33");
-	});
-
-	it("pads seconds to two digits", () => {
-		expect(formatTrackTime(65_000)).toBe("1:05");
-	});
-
-	it("reads as 0:00 at the start of a track", () => {
-		expect(formatTrackTime(0)).toBe("0:00");
-	});
-
-	/** A negative position is a seek bug, not something to render as "-1:-3". */
-	it("clamps a negative position to zero", () => {
-		expect(formatTrackTime(-5_000)).toBe("0:00");
-	});
-});
-
 describe("discordTime", () => {
 	it("renders a Discord timestamp in seconds, not milliseconds", () => {
 		expect(discordTime(new Date(1_700_000_000_000))).toBe("<t:1700000000:f>");
@@ -203,31 +167,5 @@ describe("humanisePermission", () => {
 
 	it("leaves a single word as one word", () => {
 		expect(humanisePermission("Administrator")).toBe("administrator");
-	});
-});
-
-describe("pluralise", () => {
-	it("keeps the singular for one", () => {
-		expect(pluralise(1, "member")).toBe("1 member");
-	});
-
-	it("adds an s for anything else", () => {
-		expect(pluralise(0, "member")).toBe("0 members");
-		expect(pluralise(5, "member")).toBe("5 members");
-	});
-
-	it("takes an irregular plural", () => {
-		expect(pluralise(2, "person", "people")).toBe("2 people");
-	});
-});
-
-describe("compactNumber", () => {
-	it("shortens large numbers", () => {
-		expect(compactNumber(1_500)).toBe("1.5K");
-		expect(compactNumber(2_400_000)).toBe("2.4M");
-	});
-
-	it("leaves small numbers alone", () => {
-		expect(compactNumber(42)).toBe("42");
 	});
 });

@@ -1,20 +1,4 @@
-import {
-	boardTitle,
-	emptyMessage,
-	footerFor,
-	isBoardKind,
-	PAGE_SIZE,
-	pageCount,
-	pageOfRank,
-} from "@lib/leaderboardActions.util";
-
-describe("isBoardKind", () => {
-	it("accepts the two boards and nothing else", () => {
-		expect(isBoardKind("economy")).toBe(true);
-		expect(isBoardKind("levels")).toBe(true);
-		expect(isBoardKind("music")).toBe(false);
-	});
-});
+import { boardTitle, emptyMessage, footerFor, PAGE_SIZE, pageCount, pageOfRank } from "@lib/leaderboardActions.util";
 
 describe("boardTitle", () => {
 	it("names the server and the board", () => {

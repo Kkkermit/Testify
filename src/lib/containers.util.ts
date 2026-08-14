@@ -3,7 +3,6 @@ import {
 	type ButtonBuilder,
 	ContainerBuilder,
 	MediaGalleryBuilder,
-	MediaGalleryItemBuilder,
 	type MessageActionRowComponentBuilder,
 	MessageFlags,
 	SectionBuilder,
@@ -49,11 +48,6 @@ export function sectionWithThumbnail(markdown: string, imageUrl: string, descrip
 	if (description !== undefined) thumbnail.setDescription(description);
 
 	return new SectionBuilder().addTextDisplayComponents(text(markdown)).setThumbnailAccessory(thumbnail);
-}
-
-/** One or more full-width images. */
-export function gallery(...urls: string[]): MediaGalleryBuilder {
-	return new MediaGalleryBuilder().addItems(...urls.map((url) => new MediaGalleryItemBuilder().setURL(url)));
 }
 
 export type ContainerPart =

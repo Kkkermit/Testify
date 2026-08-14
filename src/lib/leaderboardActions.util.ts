@@ -13,10 +13,6 @@ export type BoardKind = (typeof BOARD_KINDS)[number];
 
 export const PAGE_SIZE = 10;
 
-export function isBoardKind(value: string): value is BoardKind {
-	return (BOARD_KINDS as readonly string[]).includes(value);
-}
-
 export function boardTitle(kind: BoardKind, guildName: string, page: number): string {
 	const heading = kind === "economy" ? `Richest in ${guildName}` : `Top levels in ${guildName}`;
 	return page === 0 ? heading : `${heading} — page ${page + 1}`;

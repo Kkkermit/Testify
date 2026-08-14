@@ -43,16 +43,6 @@ export function formatUptime(startedAt: number, now: number = Date.now()): strin
 	return formatDurationLong(now - startedAt);
 }
 
-/** Clock-style duration for track positions: "3:07" or "1:02:33". */
-export function formatTrackTime(ms: number): string {
-	const total = Math.max(0, Math.floor(ms / SECOND_MS));
-	const hours = Math.floor(total / 3_600);
-	const minutes = Math.floor((total % 3_600) / 60);
-	const seconds = total % 60;
-	const pad = (value: number): string => value.toString().padStart(2, "0");
-	return hours > 0 ? `${hours}:${pad(minutes)}:${pad(seconds)}` : `${minutes}:${pad(seconds)}`;
-}
-
 export function ordinal(n: number): string {
 	const abs = Math.abs(Math.trunc(n));
 	const lastTwo = abs % 100;
@@ -71,11 +61,6 @@ export function ordinal(n: number): string {
 
 export function formatNumber(n: number): string {
 	return n.toLocaleString("en-US");
-}
-
-/** "1.2K", "3.4M" — for leaderboards and tight embed fields. */
-export function compactNumber(n: number): string {
-	return new Intl.NumberFormat("en-US", { notation: "compact", maximumFractionDigits: 1 }).format(n);
 }
 
 export function formatBytes(bytes: number): string {
@@ -128,8 +113,4 @@ export function progressBar(value: number, total: number, size = 20): string {
 	const ratio = Math.min(1, Math.max(0, value / total));
 	const position = Math.min(size - 1, Math.floor(ratio * size));
 	return `${"▬".repeat(position)}🔘${"▬".repeat(size - position - 1)}`;
-}
-
-export function pluralise(count: number, singular: string, plural = `${singular}s`): string {
-	return `${formatNumber(count)} ${count === 1 ? singular : plural}`;
 }

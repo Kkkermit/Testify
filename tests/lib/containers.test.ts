@@ -4,7 +4,6 @@ import {
 	container,
 	containerMessage,
 	divider,
-	gallery,
 	sectionWithButton,
 	sectionWithThumbnail,
 	text,
@@ -81,13 +80,6 @@ describe("sectionWithThumbnail", () => {
 	it("adds alt text when given some", () => {
 		const built = json(sectionWithThumbnail("Track", "https://cdn.test/art.png", "Album art"));
 		expect((built.accessory as { description?: string }).description).toBe("Album art");
-	});
-});
-
-describe("gallery", () => {
-	it("holds every image it was given", () => {
-		const built = json(gallery("https://cdn.test/a.png", "https://cdn.test/b.png"));
-		expect((built.items as unknown[]).length).toBe(2);
 	});
 });
 
