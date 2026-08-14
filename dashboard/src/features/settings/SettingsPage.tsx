@@ -59,7 +59,6 @@ export function SettingsPage(): React.JSX.Element {
 
 			<Disclosure label={t("settings.groupChannels")}>
 				<Group>
-					{/* Counting is twice the height of the other, and a column can only take a prefix of this order. */}
 					<VoiceStatsSection {...shared} value={value.voiceStats} />
 					<CountingSection {...shared} value={value.counting} />
 				</Group>
@@ -68,7 +67,10 @@ export function SettingsPage(): React.JSX.Element {
 	);
 }
 
-/** Columns, because a grid row is as tall as its tallest cell; `gap` does not apply here, so each card carries its own margin. */
+/**
+ * One column, because every card is full width now. Two columns of cards this uneven could not balance: a
+ * group with one card left half the page empty, and a short card beside a tall one left a void under it.
+ */
 function Group({ children }: { children: ReactNode }): React.JSX.Element {
-	return <div className="-mb-4 gap-x-4 lg:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">{children}</div>;
+	return <div className="flex flex-col gap-4">{children}</div>;
 }

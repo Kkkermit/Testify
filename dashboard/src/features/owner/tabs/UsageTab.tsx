@@ -7,6 +7,7 @@ import { UsageBars } from "@/features/owner/components/UsageBars";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { percent, screenLabel } from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";
+import { cn } from "@/lib/cn";
 
 const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
 
@@ -115,7 +116,9 @@ export function UsageTab({
 					/>
 				</Panel>
 
-				<Panel title={t("owner.screens")} hint={t("owner.screensHint")}>
+				{/* Full width: it is the odd one out in kind as well as in count, and a fifth panel in a two-column
+				    grid would otherwise leave half a row empty under it. */}
+				<Panel wide title={t("owner.screens")} hint={t("owner.screensHint")}>
 					<UsageBars
 						tint="bg-feature-welcome/25"
 						empty={t("owner.noScreenOpened")}
@@ -135,14 +138,16 @@ export function UsageTab({
 function Panel({
 	title,
 	hint,
+	wide = false,
 	children,
 }: {
 	title: string;
 	hint: string;
+	wide?: boolean;
 	children: React.ReactNode;
 }): React.JSX.Element {
 	return (
-		<Card className="flex flex-col gap-3">
+		<Card className={cn("flex flex-col gap-3", wide && "lg:col-span-2")}>
 			<div>
 				<h2 className={CARD_HEADING}>{title}</h2>
 				<p className="text-muted-foreground text-xs">{hint}</p>

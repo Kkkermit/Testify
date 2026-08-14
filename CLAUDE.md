@@ -1327,10 +1327,22 @@ it cannot leave a stray margin behind when a sibling is conditionally absent. **
 dead space inside its border is the "massive gap" that keeps getting reported. The one legitimate margin is
 inside a CSS `columns` layout, where `gap` does not apply between items at all (`EventGroup`'s `mb-5`).
 
-**A `columns` balancer can only give a column a _prefix_ of the DOM order**, so with one card much taller than
-the rest, source order decides how big the void is. The settings page's third group balances to 590 against 640
-with the voice-stats card written before counting, and to 320 against 910 with it written after — the same
-three cards, 276px of page apart. Measure the rendered page rather than reasoning about it.
+**A two-column layout needs enough cards, of similar enough size, or it leaves holes.** Both mechanisms fail
+the same way and neither can be reasoned around:
+
+- **A `columns` balancer can only give a column a _prefix_ of the DOM order**, so with one card much taller than
+  the rest, source order decides how big the void is. It is the right tool with five panels of roughly one size
+  — the audit log's event groups balance to within 80px — and the wrong one with two.
+- **A `grid` with an odd number of cards orphans the last one**, leaving half a row empty under it. Give it
+  `col-span-2` when it is genuinely the odd one out, as the usage tab's screens panel is.
+
+**The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
+with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
+"massive gaps", and correctly. Two columns of cards was the wrong container for it. Each card is now full width
+and splits _inside_: what the setting is on the left in a fixed 288px column, the controls on the right at a
+readable measure. No arrangement of card heights can leave a hole, the descriptions all start on one column,
+and the page reads as the list of settings it is. Reach for that shape before a masonry whenever the cards are
+forms rather than tiles.
 
 **No two modules may differ only by case.** `Field.tsx` beside `field.ts` is two files on Linux and one on
 macOS or Windows, so `@/components/form/Field` resolves to the class strings there and the page dies at start-up
