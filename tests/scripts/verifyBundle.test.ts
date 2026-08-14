@@ -1,4 +1,4 @@
-import { reactVersionsIn } from "../../scripts/verifyBundle";
+import { reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
 
 /**
  * The guard that catches two React copies in one bundle. It has to stay narrow: a false positive fails a build
@@ -40,5 +40,26 @@ describe("reactVersionsIn", () => {
 
 	it("finds nothing in a bundle with no version strings at all", () => {
 		expect(reactVersionsIn("const a = 1;")).toEqual([]);
+	});
+});
+
+/**
+ * Both failures this catches are invisible until the CSS is built: development serves `light-dark()` untouched,
+ * so the theme samples and the backdrop's palette are correct locally and wrong in production.
+ */
+describe("schemeProblem", () => {
+	it("passes a stylesheet that left the function to the browser", () => {
+		expect(schemeProblem(":root{--color-card:light-dark(#ffffff,#12121c)}")).toBeNull();
+	});
+
+	/** A token substituted at `:root` cannot be changed by a nested `color-scheme`, which is the whole mechanism. */
+	it("fails a stylesheet where the function was compiled into variables", () => {
+		const css = ":root{--color-card:var(--lightningcss-light,#ffffff)var(--lightningcss-dark,#12121c)}";
+
+		expect(schemeProblem(css)).toMatch(/compiled into variables/);
+	});
+
+	it("fails a stylesheet that lost the function altogether", () => {
+		expect(schemeProblem(":root{--color-card:#12121c}")).toMatch(/one theme/);
 	});
 });

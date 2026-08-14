@@ -140,6 +140,22 @@
 	}
 
 	/**
+	 * A sample of one theme drawn on a page wearing the other, for the previews on the appearance screen.
+	 *
+	 * It has to be a rule in this file rather than an inline `style={{ colorScheme }}`: Lightning CSS polyfills
+	 * `light-dark()` into a pair of variables and only emits the flip for selectors where it saw a
+	 * `color-scheme` declaration, so an element that sets one inline keeps whichever half the root resolved and
+	 * every sample renders in the page's own theme.
+	 */
+	[data-scheme="light"] {
+		color-scheme: light;
+	}
+
+	[data-scheme="dark"] {
+		color-scheme: dark;
+	}
+
+	/**
 	 * The accent choices. Only the three violet-carrying tokens move: success, warning and destructive keep
 	 * their own meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair
 	 * is measured against both backgrounds by `contrast.test.ts`, which reads these blocks rather than keeping

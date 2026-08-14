@@ -71,6 +71,16 @@ export default defineConfig(({ mode }) => {
 		},
 		build: {
 			outDir: "dist",
+			/**
+			 * The floor is the first release of each browser that shipped `light-dark()` natively — Chrome 123,
+			 * Safari 17.5, Firefox 120, all 2024.
+			 *
+			 * Below it Lightning CSS polyfills the function into a pair of variables flipped by `color-scheme`,
+			 * and because a custom property is substituted where it is *declared*, every token resolves against
+			 * `:root` and no nested `color-scheme` can change it. The theme samples on the appearance page each
+			 * rendered in the page's own theme, which is the bug that named this line.
+			 */
+			cssTarget: ["chrome123", "safari17.5", "firefox120", "edge123"],
 			// three is over the default and is already split and loaded on demand.
 			chunkSizeWarningLimit: 600,
 			// Open source: a stack trace someone can read is worth the file size.

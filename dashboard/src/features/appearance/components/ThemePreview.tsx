@@ -3,12 +3,13 @@ import { type Theme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
 
 /**
- * `color-scheme` on the preview itself makes every `light-dark()` token inside it resolve to that theme, so a
- * light sample is genuinely light while the page around it stays dark. Nothing here restates a colour.
+ * `data-scheme` makes every `light-dark()` token inside resolve to that theme, so a light sample is genuinely
+ * light while the page around it stays dark. It is an attribute rather than an inline `color-scheme` because
+ * the `light-dark()` polyfill only follows a scheme the stylesheet declared — see `index.css`.
  */
 function Mock({ scheme }: { scheme: "light" | "dark" }): React.JSX.Element {
 	return (
-		<div style={{ colorScheme: scheme }} className="bg-background flex h-full w-full gap-1 p-1.5">
+		<div data-scheme={scheme} className="bg-background flex h-full w-full gap-1 p-1.5">
 			<div className="bg-card border-border flex w-1/4 flex-col gap-1 rounded-sm border p-1">
 				<span className="bg-primary h-1 w-full rounded-full" />
 				<span className="bg-muted h-1 w-3/4 rounded-full" />

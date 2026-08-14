@@ -1421,8 +1421,29 @@ Two things about the blocks are load-bearing:
 
 That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
 no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
-flash, before any JavaScript loads. Lightning CSS polyfills `light-dark()` behind the scenes, including inside
-`--alpha()` and every opacity modifier — verified in the built stylesheet, not assumed.
+flash, before any JavaScript loads.
+
+**`light-dark()` must reach the browser uncompiled, and `build.cssTarget` is what guarantees it.** Below
+Chrome 123 / Safari 17.5 / Firefox 120 — the releases that shipped the function — Lightning CSS rewrites it
+into a pair of variables flipped by `color-scheme`. A custom property is substituted **where it is declared**,
+so every token then resolves against `:root` and two things break, both only in a build and never in
+development:
+
+- **A nested `color-scheme` stops doing anything.** The theme samples on the appearance page each rendered in
+  the page's own theme, so the Light sample was black on a dark page. An element cannot opt into the other half
+  of a token that was already resolved above it.
+- **`pickScheme` can no longer read a token**, because `getComputedStyle` hands back
+  `var(--lightningcss-light,…)var(--lightningcss-dark,…)` rather than `light-dark(…)`. `accentColour()` fell
+  through to its hardcoded fallback, so the WebGL backdrop was the same violet in every theme and ignored the
+  accent entirely.
+
+`npm run verify:bundle` fails the build if the polyfill returns **or** if `light-dark()` vanishes altogether,
+and `build:dashboard` runs it. Proved both ways: removing `cssTarget` exits 1, restoring it exits 0.
+
+**A sample of one theme inside another is `data-scheme`, never an inline `style`.** `[data-scheme="light"]` and
+`[data-scheme="dark"]` are declared in `index.css` so the cascade knows about them; jsdom cannot tell an
+inline `color-scheme` apart from the attribute, so a unit test pins the attribute and a browser check confirms
+the sample actually renders in the other theme.
 
 **Both palettes are measured.** `contrast.test.ts` reads each half out of the token and checks it against WCAG,
 so a light value nobody looked at fails the build rather than shipping. An unverified light theme is worse than

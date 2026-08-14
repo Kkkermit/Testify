@@ -65,6 +65,19 @@ describe("choosing a theme", () => {
 		expect(samples).toHaveLength(3);
 		expect(samples.map((sample) => sample.textContent)).toEqual(["System", "Light", "Dark"]);
 	});
+
+	/**
+	 * The scheme has to come from an attribute the stylesheet declares, never an inline `style`: nothing in
+	 * jsdom can tell the two apart, and inline it silently renders every sample in the page's own theme.
+	 */
+	it("forces each sample's scheme with an attribute rather than an inline style", async () => {
+		const { container } = render();
+		await group("Theme");
+
+		const mocks = container.querySelectorAll("[data-scheme]");
+		expect([...mocks].map((mock) => mock.getAttribute("data-scheme"))).toEqual(["light", "dark", "light", "dark"]);
+		expect(container.querySelector('[style*="color-scheme"]')).toBeNull();
+	});
 });
 
 describe("choosing an accent", () => {
