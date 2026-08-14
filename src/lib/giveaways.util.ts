@@ -1,11 +1,13 @@
-import { GiveawaysManager } from "discord-giveaways";
+import { type Giveaway as LiveGiveaway, GiveawaysManager } from "discord-giveaways";
 import { type TestifyClient } from "@core/client";
 import { Giveaway, type GiveawayRecord } from "@database/models/giveaway.schema";
 
 /** Mongo-backed persistence for `discord-giveaways`. */
 class MongoGiveawaysManager extends GiveawaysManager {
-	protected override async getAllGiveaways(): Promise<never[]> {
-		return (await Giveaway.find().lean<GiveawayRecord[]>().exec()) as unknown as never[];
+	// The package's own JSDoc says this returns stored data, and its `_init` reads plain fields off it — but the
+	// bundled `.d.ts` types it as an array of `Giveaway` instances, which nothing here ever constructs.
+	protected override async getAllGiveaways(): Promise<LiveGiveaway[]> {
+		return (await Giveaway.find().lean<GiveawayRecord[]>().exec()) as unknown as LiveGiveaway[];
 	}
 
 	protected override async saveGiveaway(_messageId: string, data: unknown): Promise<boolean> {
