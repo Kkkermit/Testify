@@ -1515,6 +1515,13 @@ grouping follows the chosen language rather than the browser.
 
 Three widths: a drawer below `md`, an icon-only rail from `md`, the full sidebar from `lg`.
 
+**A tab strip wider than the screen has to say so, and has to show where you are.** The owner console's eight
+tabs are twice the width of a phone, and the strip did neither: it cut mid-word with nothing indicating the
+five tabs past the edge, and landing on `?tab=control` showed the strip at its start with no tab marked at all.
+`TabBar` now fades whichever end still has content (`edgesOf`, measured on scroll and on resize) and scrolls the
+active tab into view with `inline: "nearest"`, which cannot move the page itself. Both are verified in a real
+browser at 390px: landing on Control leaves the strip at `scrollLeft: 510` with the left end faded.
+
 **At the icon-only width the labels are `sr-only`, never `hidden`.** `hidden` is `display: none`, which removes
 them from the accessibility tree and leaves every navigation link named nothing — the exact bug this pattern
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the

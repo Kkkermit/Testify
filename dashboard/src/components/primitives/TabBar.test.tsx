@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Gift, Settings2, Zap } from "lucide-react";
 import { useState } from "react";
-import { TabBar, TabContent, type TabDefinition } from "@/components/primitives/TabBar";
+import { edgesOf, TabBar, TabContent, type TabDefinition } from "@/components/primitives/TabBar";
 
 const LABEL = "Levelling settings";
 const TABS: TabDefinition<"general" | "rewards" | "boosts">[] = [
@@ -97,5 +97,37 @@ describe("TabBar", () => {
 		await user.keyboard("{ArrowRight}");
 
 		expect(screen.getByRole("tab", { name: /role rewards/i })).toHaveFocus();
+	});
+});
+
+/**
+ * On a phone the owner console's eight tabs are twice the width of the screen. Both of these are about the
+ * five tabs past the right edge: nothing said they were there, and landing on one showed the strip at its
+ * start with the current tab off-screen.
+ */
+describe("a tab strip wider than its screen", () => {
+	it("knows which ends still have tabs past them", () => {
+		expect(edgesOf({ scrollLeft: 0, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: false, end: true });
+		expect(edgesOf({ scrollLeft: 300, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: true, end: true });
+		expect(edgesOf({ scrollLeft: 580, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: true, end: false });
+	});
+
+	/** A strip that fits must not fade either end, or every desktop tab bar wears a gradient for nothing. */
+	it("fades neither end when every tab fits", () => {
+		expect(edgesOf({ scrollLeft: 0, clientWidth: 900, scrollWidth: 900 })).toEqual({ start: false, end: false });
+	});
+
+	/** A fractional scrollLeft is what a trackpad leaves behind, and it must not read as "more to the right". */
+	it("does not report an end that is one subpixel away", () => {
+		expect(edgesOf({ scrollLeft: 579.6, clientWidth: 320.4, scrollWidth: 900 })).toEqual({ start: true, end: false });
+	});
+
+	it("brings the active tab into view rather than leaving it off the edge", () => {
+		const scrolled = jest.spyOn(Element.prototype, "scrollIntoView");
+
+		render(<TabBar label="Owner" tabs={TABS} active="boosts" onSelect={() => undefined} />);
+
+		expect(scrolled).toHaveBeenCalledWith({ block: "nearest", inline: "nearest" });
+		scrolled.mockRestore();
 	});
 });

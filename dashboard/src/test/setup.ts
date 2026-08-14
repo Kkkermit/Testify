@@ -29,6 +29,16 @@ window.matchMedia = jest.fn().mockImplementation((query: string) => ({
 	dispatchEvent: jest.fn(),
 }));
 
+// jsdom lays nothing out, so it implements neither of these and anything measuring an element gets zeroes
+// either way. Both are far below the build's browser target, so no component guards for their absence.
+globalThis.ResizeObserver = class {
+	observe = jest.fn();
+	unobserve = jest.fn();
+	disconnect = jest.fn();
+};
+
+Element.prototype.scrollIntoView = jest.fn();
+
 // Node's fetch demands an absolute URL where a browser resolves against the document, so the harness supplies the origin.
 const nodeFetch = globalThis.fetch;
 globalThis.fetch = (input: RequestInfo | URL, init?: RequestInit) =>
