@@ -46,6 +46,27 @@ export function Backdrop({ opacity }: { opacity?: number } = {}): React.JSX.Elem
 		fieldRef.current?.setRunning(visible);
 	}, [visible]);
 
+	useEffect(() => {
+		if (!wanted) return;
+
+		const repaint = (): void => {
+			fieldRef.current?.refresh();
+		};
+
+		// The palette is chosen on the appearance page and the device can change it underneath, so the field is
+		// told to re-read rather than holding the colour it happened to start with.
+		const observer = new MutationObserver(repaint);
+		observer.observe(document.documentElement, { attributeFilter: ["data-theme", "data-accent"] });
+
+		const media = window.matchMedia("(prefers-color-scheme: dark)");
+		media.addEventListener("change", repaint);
+
+		return () => {
+			observer.disconnect();
+			media.removeEventListener("change", repaint);
+		};
+	}, [wanted]);
+
 	if (!wanted) return null;
 
 	return (

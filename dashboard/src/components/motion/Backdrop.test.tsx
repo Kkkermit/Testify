@@ -1,5 +1,8 @@
-import { render } from "@testing-library/react";
+import { act, render } from "@testing-library/react";
 import { Backdrop, supportsWebgl } from "@/components/motion/Backdrop";
+import { createStarfield } from "@/lib/three/starfield";
+
+jest.mock("@/lib/three/starfield", () => ({ createStarfield: jest.fn() }));
 
 function withContext(context: unknown): jest.SpyInstance {
 	return jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(context as never);
@@ -65,5 +68,56 @@ describe("Backdrop", () => {
 
 		expect(canvas).toHaveAttribute("aria-hidden", "true");
 		expect(canvas).toHaveClass("pointer-events-none");
+	});
+});
+
+/**
+ * The palette is chosen on the appearance page while this is on screen, so a field holding the colour it
+ * started with is a backdrop that disagrees with every other surface until the next reload.
+ */
+describe("Backdrop following the palette", () => {
+	const field = { setRunning: jest.fn(), refresh: jest.fn(), dispose: jest.fn() };
+
+	async function mounted() {
+		withContext({});
+		reducedMotion(false);
+		(createStarfield as jest.Mock).mockReturnValue(field);
+
+		const view = render(<Backdrop />);
+		// The starfield is imported dynamically, so it arrives a microtask after the effect runs.
+		await act(async () => {
+			await Promise.resolve();
+		});
+
+		return view;
+	}
+
+	beforeEach(() => {
+		document.documentElement.removeAttribute("data-theme");
+		document.documentElement.removeAttribute("data-accent");
+		jest.clearAllMocks();
+	});
+
+	it.each(["data-theme", "data-accent"])("re-reads the palette when %s changes", async (attribute) => {
+		await mounted();
+
+		await act(async () => {
+			document.documentElement.setAttribute(attribute, attribute === "data-theme" ? "light" : "teal");
+			await Promise.resolve();
+		});
+
+		expect(field.refresh).toHaveBeenCalled();
+	});
+
+	it("stops watching once it is gone", async () => {
+		const { unmount } = await mounted();
+		unmount();
+
+		await act(async () => {
+			document.documentElement.setAttribute("data-theme", "light");
+			await Promise.resolve();
+		});
+
+		expect(field.refresh).not.toHaveBeenCalled();
 	});
 });

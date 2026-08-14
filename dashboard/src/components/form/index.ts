@@ -5,5 +5,6 @@ export { Field } from "@/components/form/Field";
 export { RoleChecklist } from "@/components/form/RoleChecklist";
 export { RoleSwatch } from "@/components/form/RoleSwatch";
 export { SavingIndicator, savingStateOf, type SavingState } from "@/components/form/SavingIndicator";
+export { SwitchTrack } from "@/components/form/SwitchTrack";
 export { Toggle } from "@/components/form/Toggle";
 export { Warning } from "@/components/form/Warning";

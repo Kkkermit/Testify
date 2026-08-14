@@ -11,7 +11,7 @@ import {
 } from "three";
 import { damp, fieldPositions, fieldSizes, parallaxTarget, renderScale } from "@/lib/three/field";
 import { STARFIELD_FRAGMENT, STARFIELD_VERTEX } from "@/lib/three/shaders";
-import { accentColour } from "@/lib/three/tokens";
+import { fieldPaint } from "@/lib/three/tokens";
 
 /** The part of the backdrop that needs a GPU; everything that can be reasoned about is in `field.ts` and unit tested. */
 
@@ -19,6 +19,7 @@ export interface StarfieldOptions {
 	count?: number;
 	spread?: number;
 	depth?: number;
+	/** Scales the theme's own strength rather than replacing it, so a screen can be quieter in both themes. */
 	opacity?: number;
 	/** How far the camera leans towards the pointer, in world units. */
 	parallax?: number;
@@ -27,6 +28,8 @@ export interface StarfieldOptions {
 export interface Starfield {
 	/** Pausing releases the frame loop entirely rather than rendering to a hidden tab. */
 	setRunning: (running: boolean) => void;
+	/** Re-reads the palette, for a theme or accent chosen while the page is open. */
+	refresh: () => void;
 	dispose: () => void;
 }
 
@@ -34,7 +37,7 @@ const DEFAULTS = {
 	count: 900,
 	spread: 34,
 	depth: 120,
-	opacity: 0.5,
+	opacity: 1,
 	parallax: 2.4,
 } satisfies Required<StarfieldOptions>;
 
@@ -54,19 +57,28 @@ export function createStarfield(canvas: HTMLCanvasElement, options: StarfieldOpt
 	geometry.setAttribute("position", new BufferAttribute(positions, 3));
 	geometry.setAttribute("aSize", new BufferAttribute(fieldSizes(positions, settings.depth), 1));
 
+	const paint = fieldPaint();
 	const material = new ShaderMaterial({
 		vertexShader: STARFIELD_VERTEX,
 		fragmentShader: STARFIELD_FRAGMENT,
 		uniforms: {
-			uColour: { value: new Color(accentColour()) },
-			uOpacity: { value: settings.opacity },
+			uColour: { value: new Color(paint.colour) },
+			uOpacity: { value: paint.opacity * settings.opacity },
 			uDepth: { value: settings.depth },
 			uScale: { value: 1 },
 		},
 		transparent: true,
 		depthWrite: false,
+		// Additive on near-black is what makes a point read as light; on paper it is the alpha that carries it,
+		// which is why the strength is a token rather than one number for both themes.
 		blending: AdditiveBlending,
 	});
+
+	function refresh(): void {
+		const next = fieldPaint();
+		material.uniforms.uColour = { value: new Color(next.colour) };
+		material.uniforms.uOpacity = { value: next.opacity * settings.opacity };
+	}
 
 	const points = new Points(geometry, material);
 	scene.add(points);
@@ -136,6 +148,7 @@ export function createStarfield(canvas: HTMLCanvasElement, options: StarfieldOpt
 
 	return {
 		setRunning,
+		refresh,
 		dispose: () => {
 			setRunning(false);
 			observer.disconnect();

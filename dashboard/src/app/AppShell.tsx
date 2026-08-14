@@ -32,7 +32,8 @@ export function AppShell(): React.JSX.Element {
 	return (
 		<div className="flex min-h-dvh flex-col md:flex-row">
 			{/* Dimmer than the sign-in screen: behind a settings form it is a texture, not the subject. */}
-			<Backdrop opacity={0.22} />
+			{/* Under half of what the sign-in screen wears: there is a page to read in front of this one. */}
+			<Backdrop opacity={0.45} />
 			<RouteAnnouncer />
 
 			<a

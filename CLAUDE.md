@@ -1349,6 +1349,18 @@ places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `T
 `LABEL` / `CHECK_ROW` class strings exist so a control's semantics and its type scale are each written once.
 Before writing a local `Row`, `Figure` or picker in a feature directory, check `components/primitives`.
 
+`SwitchTrack` is the worked example of why. `Toggle` and the per-command switch each had their own copy of the
+same track and knob, so one wrong colour was two bugs — and the copy had also drifted, rendering a raw
+translation key into the description a screen reader reads. Two things about it are load-bearing:
+
+- **It has to stay a sibling of the `<input>` that drives it.** The track colour is a `peer-checked:` rule, and
+  a general sibling combinator cannot reach a descendant — which is also why the knob takes the state as a prop
+  rather than a `peer-checked:` class of its own. Wrapping the track in a positioning `<span>` silently stops it
+  ever turning on; it takes a `className` instead.
+- **Neither half of the knob may be `foreground`.** That token inverts with the theme, so a knob using it is
+  white on the filled track in dark and near-black in light, where it reads as a hole punched through the
+  switch. White on the fill, the field-border colour on the card — both already measured by `contrast.test.ts`.
+
 ### The accessibility floor is automated, the rest is not
 
 `jest-axe` runs on every page-level test through `src/test/axe.ts`, with `color-contrast` disabled — jsdom
@@ -1726,9 +1738,18 @@ load-bearing, and all four are what keep an ornament from costing anything:
 - **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, the frame-rate
   independent easing and the parallax, all pure and unit tested; `starfield.ts` is the part that needs a GPU and
   is the one file excluded from coverage.
-- **It reads the palette rather than restating it.** `lib/three/tokens.ts` pulls `--color-accent` off `:root`,
-  so the design tokens in `index.css` stay the only place a colour is written, and a token three cannot parse
-  falls back instead of rendering a black field.
+- **It reads the palette rather than restating it, and re-reads it.** `lib/three/tokens.ts` pulls
+  `--color-accent` off `:root`, so the design tokens in `index.css` stay the only place a colour is written, and
+  a token three cannot parse falls back instead of rendering a black field. Theme and accent are both chosen on
+  a screen this is drawn behind, so `Backdrop` watches `data-theme` and `data-accent` and calls `refresh()`
+  rather than keeping whichever colour it started with.
+
+**Strength is a token too, and it is not the same in both themes.** The field is composited over the page rather
+than added to it, so the same points that read as stars on near-black read as dust on paper —
+`--backdrop-opacity` is `light-dark(0.14, 0.5)`, and `Backdrop`'s `opacity` prop scales that rather than
+replacing it, so a screen can be quieter in both themes at once. Measured in a browser rather than judged from
+the source: the brightest pixel in an empty strip goes `rgb(43, 30, 102)` on violet, `rgb(103, 57, 8)` on amber,
+and never exceeds the page's own `rgb(244, 244, 249)` in light.
 
 The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never be able to take
 a click meant for a control.

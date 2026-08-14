@@ -76,6 +76,10 @@
 	/* Tailwind's default for this size is 1.43, which is tight for prose — and `text-sm` is most of the app. */
 	--text-sm--line-height: 1.55;
 
+	/* The WebGL field is composited over the page, so on paper the same points that read as stars on near-black
+	   read as dust. Roughly the strength of the radial wash behind them, in each theme. */
+	--backdrop-opacity: light-dark(0.14, 0.5);
+
 	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
 	--animate-reveal: reveal 320ms var(--ease-out-soft) both;

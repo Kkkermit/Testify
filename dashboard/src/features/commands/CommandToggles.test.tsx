@@ -203,3 +203,17 @@ describe("switching commands off everywhere", () => {
 		expect(await screen.findByText(/off in every server/i)).toBeInTheDocument();
 	});
 });
+
+/**
+ * The switch's own description is the only place its state is explained to a screen reader, and it rendered
+ * the translation key — "commands.availableToAll" read out as those words.
+ */
+describe("what a switch tells a screen reader", () => {
+	it("describes itself in prose rather than in a key", async () => {
+		inGuild();
+
+		const note = await screen.findByText(/anybody who may use it can run it/i);
+		expect(note).toHaveClass("sr-only");
+		expect(note.textContent).not.toMatch(/^commands\./);
+	});
+});

@@ -1,5 +1,6 @@
 import { type CommandAvailability } from "@testify/shared";
 import { useTranslation } from "react-i18next";
+import { SwitchTrack } from "@/components/form/SwitchTrack";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -44,23 +45,9 @@ export function CommandSwitch({
 					onChange(event.target.checked);
 				}}
 			/>
-			<span
-				aria-hidden="true"
-				className={cn(
-					"border-input peer-checked:bg-primary peer-checked:border-primary flex h-5 w-9 shrink-0 items-center",
-					"rounded-full border p-0.5 transition-colors duration-150",
-					"peer-focus-visible:outline-ring peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2",
-				)}
-			>
-				<span
-					className={cn(
-						"bg-foreground h-3.5 w-3.5 rounded-full transition-transform duration-200 ease-out",
-						on ? "translate-x-4" : "translate-x-0",
-					)}
-				/>
-			</span>
+			<SwitchTrack on={on} />
 			<span id={`switch-note-${name}`} className="sr-only">
-				{DESCRIBES[availability]}
+				{t(DESCRIBES[availability])}
 			</span>
 		</label>
 	);
