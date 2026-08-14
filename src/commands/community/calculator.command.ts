@@ -1,4 +1,4 @@
-import { evaluate, format } from "mathjs";
+import { evaluate, format, type MathNode, parse } from "mathjs";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/embeds.util";
@@ -6,11 +6,75 @@ import { truncate } from "@lib/format.util";
 import { reply } from "@lib/reply.util";
 
 /**
- * `mathjs` can evaluate assignments and function definitions, which is more than a calculator needs, so the input is
- * restricted to arithmetic before evaluation.
+ * The functions a calculator needs, and only those.
+ *
+ * An allowlist rather than a list of banned names: `mathjs` ships matrix builders that allocate whatever they
+ * are asked for, so `zeros(100000, 100000)` exhausts the heap — and a V8 out-of-memory abort is not something
+ * `reportSurvivable` can catch, so it takes the whole bot down rather than failing one command.
  */
-const ALLOWED = /^[\d\s+\-*/^%().,!eEpiPI a-z]+$/;
-const BLOCKED = /\b(import|createUnit|evaluate|parse|simplify|derivative|config)\b|=/;
+export const CALCULATOR_FUNCTIONS = new Set([
+	"abs",
+	"acos",
+	"acosh",
+	"asin",
+	"asinh",
+	"atan",
+	"atan2",
+	"atanh",
+	"cbrt",
+	"ceil",
+	"combinations",
+	"cos",
+	"cosh",
+	"cube",
+	"exp",
+	"factorial",
+	"fix",
+	"floor",
+	"gcd",
+	"hypot",
+	"lcm",
+	"log",
+	"log10",
+	"log2",
+	"max",
+	"mean",
+	"median",
+	"min",
+	"mod",
+	"nthRoot",
+	"permutations",
+	"round",
+	"sign",
+	"sin",
+	"sinh",
+	"sqrt",
+	"square",
+	"tan",
+	"tanh",
+]);
+
+/** The first thing in the expression a calculator will not evaluate, or null when there is nothing. */
+export function unsupportedPart(node: MathNode): string | null {
+	let found: string | null = null;
+
+	node.traverse((child) => {
+		if (found !== null) return;
+
+		// Assignment is how `mathjs` defines names and functions, which is more than arithmetic.
+		if (child.type === "AssignmentNode" || child.type === "FunctionAssignmentNode") {
+			found = "assignment";
+			return;
+		}
+
+		if (child.type === "FunctionNode") {
+			const name = (child as unknown as { fn: { name?: string } }).fn.name ?? "";
+			if (!CALCULATOR_FUNCTIONS.has(name)) found = name === "" ? "that function" : name;
+		}
+	});
+
+	return found;
+}
 
 export default defineCommand({
 	name: "calculate",
@@ -22,8 +86,18 @@ export default defineCommand({
 		const expression = interaction.options.getString("expression", true).trim();
 
 		if (expression.length > 200) throw new UserFacingError("That expression is too long.");
-		if (!ALLOWED.test(expression) || BLOCKED.test(expression)) {
-			throw new UserFacingError("That expression contains characters or functions I will not evaluate.");
+
+		// Parsing builds a tree without running anything, so the check happens before any of it is evaluated.
+		let tree: MathNode;
+		try {
+			tree = parse(expression);
+		} catch {
+			throw new UserFacingError("I could not work that out. Check the syntax and try again.");
+		}
+
+		const unsupported = unsupportedPart(tree);
+		if (unsupported !== null) {
+			throw new UserFacingError(`I will not evaluate \`${truncate(unsupported, 40)}\` — this is a calculator.`);
 		}
 
 		let result: unknown;
