@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /**
- * Fails on the two things that only go wrong in the built dashboard.
+ * Fails on the three things that only go wrong in the built dashboard.
  *
  *   npm run verify:bundle
  *
@@ -16,9 +16,16 @@ import { join, resolve } from "node:path";
  * substituted where it is declared, every token then resolves against `:root`. Two things break silently and
  * only in a build: a nested `color-scheme` stops working, so the theme samples all render in the page's own
  * theme, and `pickScheme` can no longer read a token, so the WebGL backdrop falls back to one hardcoded colour.
+ *
+ * **A missing file from `dashboard/public`.** Vite copies that tree into the build verbatim, and `robots.txt`
+ * and `.well-known/security.txt` are served from it — files nobody opens until a crawler or a reporter needs
+ * them, so a build that silently stopped emitting them would go unnoticed. The unit tests serve the source
+ * files over a fixture root, which proves the routing but not that the build carries them.
  */
 
-const ASSETS = resolve(process.cwd(), "dashboard", "dist", "assets");
+const DIST = resolve(process.cwd(), "dashboard", "dist");
+const ASSETS = join(DIST, "assets");
+const PUBLIC = resolve(process.cwd(), "dashboard", "public");
 
 /** React writes its own version into its bundle, once per copy. */
 const VERSION = /version\s*[=:]\s*[`"']([\d]+\.[\d]+\.[\d]+)[`"']/g;
@@ -59,6 +66,19 @@ export function schemeProblem(css: string): string | null {
 	return null;
 }
 
+/** Every file under a directory, relative to it, so adding one to `dashboard/public` is checked with no edit here. */
+export function filesUnder(root: string, prefix = ""): string[] {
+	if (!existsSync(root)) return [];
+
+	return readdirSync(root, { withFileTypes: true }).flatMap((entry) =>
+		entry.isDirectory() ? filesUnder(join(root, entry.name), join(prefix, entry.name)) : [join(prefix, entry.name)],
+	);
+}
+
+export function missingFrom(root: string, files: readonly string[]): string[] {
+	return files.filter((file) => !existsSync(join(root, file)));
+}
+
 function assetsMatching(extension: string): string {
 	return readdirSync(ASSETS)
 		.filter((file) => file.endsWith(extension))
@@ -88,8 +108,18 @@ function main(): void {
 		process.exit(1);
 	}
 
+	const publicFiles = filesUnder(PUBLIC);
+	const missing = missingFrom(DIST, publicFiles);
+
+	if (missing.length > 0) {
+		console.error(`The build left out ${missing.join(", ")} from dashboard/public.`);
+		console.error("Check publicDir in dashboard/vite.config.ts.");
+		process.exit(1);
+	}
+
 	console.log(`One copy of React in the bundle: ${versions[0] ?? "none found"}`);
 	console.log("`light-dark()` reaches the browser intact.");
+	console.log(`All ${String(publicFiles.length)} files from dashboard/public are in the build.`);
 }
 
 if (require.main === module) main();

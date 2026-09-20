@@ -1,4 +1,7 @@
-import { reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { filesUnder, missingFrom, reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
 
 /**
  * The guard that catches two React copies in one bundle. It has to stay narrow: a false positive fails a build
@@ -61,5 +64,48 @@ describe("schemeProblem", () => {
 
 	it("fails a stylesheet that lost the function altogether", () => {
 		expect(schemeProblem(":root{--color-card:#12121c}")).toMatch(/one theme/);
+	});
+});
+
+/**
+ * `robots.txt` and `.well-known/security.txt` are copied into the build rather than imported by anything, so
+ * nothing else notices if they stop arriving — and neither does anyone else until a crawler or a reporter
+ * looks for one.
+ */
+describe("the public tree", () => {
+	let source: string;
+	let build: string;
+
+	beforeEach(() => {
+		source = mkdtempSync(join(tmpdir(), "testify-public-"));
+		build = mkdtempSync(join(tmpdir(), "testify-built-"));
+
+		for (const root of [source, build]) {
+			mkdirSync(join(root, ".well-known"));
+			writeFileSync(join(root, "robots.txt"), "User-agent: *\n");
+			writeFileSync(join(root, ".well-known", "security.txt"), "Contact: mailto:a@b.c\n");
+		}
+	});
+
+	afterEach(() => {
+		for (const root of [source, build]) rmSync(root, { recursive: true, force: true });
+	});
+
+	it("lists every file, including the ones in a dotted directory", () => {
+		expect(filesUnder(source).sort()).toEqual([join(".well-known", "security.txt"), "robots.txt"]);
+	});
+
+	it("lists nothing for a directory that is not there", () => {
+		expect(filesUnder(join(source, "nope"))).toEqual([]);
+	});
+
+	it("reports nothing when the build carries them all", () => {
+		expect(missingFrom(build, filesUnder(source))).toEqual([]);
+	});
+
+	it("names the file a build left behind", () => {
+		rmSync(join(build, ".well-known", "security.txt"));
+
+		expect(missingFrom(build, filesUnder(source))).toEqual([join(".well-known", "security.txt")]);
 	});
 });
