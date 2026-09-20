@@ -1,4 +1,4 @@
-import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
+import { describeWithMongo } from "../helpers/mongo";
 import {
 	adjustWallet,
 	debitWallet,
@@ -17,8 +17,6 @@ const BOB = "333333333333333333";
 
 describeWithMongo("economyRepository", () => {
 	it("creates an account on first use and reuses it after", async () => {
-		if (!mongoAvailable()) return;
-
 		const first = await getOrCreateAccount(GUILD, ALICE);
 		const second = await getOrCreateAccount(GUILD, ALICE);
 
@@ -27,15 +25,11 @@ describeWithMongo("economyRepository", () => {
 	});
 
 	it("keeps accounts separate per server", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		expect(await findAccount("444444444444444444", ALICE)).toBeNull();
 	});
 
 	it("does not lose concurrent balance changes", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		await Promise.all(Array.from({ length: 20 }, () => adjustWallet(GUILD, ALICE, 10)));
 
@@ -44,16 +38,12 @@ describeWithMongo("economyRepository", () => {
 	});
 
 	it("refuses to overdraw a wallet", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		expect(await debitWallet(GUILD, ALICE, 10_000)).toBeNull();
 		expect((await findAccount(GUILD, ALICE))?.wallet).toBe(500);
 	});
 
 	it("moves money between wallet and bank without creating any", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		await deposit(GUILD, ALICE, 200);
 		await withdraw(GUILD, ALICE, 50);
@@ -64,8 +54,6 @@ describeWithMongo("economyRepository", () => {
 	});
 
 	it("transfers all-or-nothing", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		await getOrCreateAccount(GUILD, BOB);
 
@@ -77,8 +65,6 @@ describeWithMongo("economyRepository", () => {
 	});
 
 	it("ranks the leaderboard by the requested field", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		await getOrCreateAccount(GUILD, BOB);
 		await adjustWallet(GUILD, BOB, 1_000);
@@ -88,8 +74,6 @@ describeWithMongo("economyRepository", () => {
 	});
 
 	it("wipes a server without touching another", async () => {
-		if (!mongoAvailable()) return;
-
 		await getOrCreateAccount(GUILD, ALICE);
 		await getOrCreateAccount("444444444444444444", ALICE);
 

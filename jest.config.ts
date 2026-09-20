@@ -23,6 +23,9 @@ const config: Config = {
 	roots: ["<rootDir>/tests"],
 	testMatch: ["**/tests/**/*.test.ts"],
 	setupFilesAfterEnv: ["<rootDir>/tests/setup.ts"],
+	// One database for the run, started before any suite is built so a missing one skips rather than passes.
+	globalSetup: "<rootDir>/tests/helpers/mongoGlobal.ts",
+	globalTeardown: "<rootDir>/tests/helpers/mongoTeardown.ts",
 	moduleNameMapper: {
 		...aliasesFromTsconfig(),
 		// The workspace's own `main` is its build output. Tests read the source instead, so editing

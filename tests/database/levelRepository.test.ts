@@ -1,4 +1,4 @@
-import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
+import { describeWithMongo } from "../helpers/mongo";
 import { LEVELLING } from "@config/constants";
 import {
 	addXp,
@@ -33,8 +33,6 @@ describe("the levelling curve", () => {
 
 describeWithMongo("levelRepository", () => {
 	it("awards XP and reports when someone levels up", async () => {
-		if (!mongoAvailable()) return;
-
 		const first = await awardXp(GUILD, ALICE, 10);
 		expect(first?.levelledUp).toBe(false);
 
@@ -43,15 +41,11 @@ describeWithMongo("levelRepository", () => {
 	});
 
 	it("holds XP back until the cooldown has passed", async () => {
-		if (!mongoAvailable()) return;
-
 		await awardXp(GUILD, BOB, 10);
 		expect(await awardXp(GUILD, BOB, 10)).toBeNull();
 	});
 
 	it("ranks members by XP", async () => {
-		if (!mongoAvailable()) return;
-
 		await setLevel(GUILD, ALICE, 1);
 		await setLevel(GUILD, BOB, 10);
 
@@ -61,8 +55,6 @@ describeWithMongo("levelRepository", () => {
 	});
 
 	it("resets a server's levels", async () => {
-		if (!mongoAvailable()) return;
-
 		await setLevel(GUILD, ALICE, 5);
 		expect(await resetGuildLevels(GUILD)).toBeGreaterThan(0);
 		expect(await getUserLevel(GUILD, ALICE)).toBeNull();

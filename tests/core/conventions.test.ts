@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /** The file-naming rules from CLAUDE.md §3, enforced rather than asked for. */
@@ -110,4 +110,41 @@ describe("module names", () => {
 
 		expect(clashes).toEqual([]);
 	});
+});
+
+/**
+ * A suite that discovers at run time whether its dependency exists can only return early from each test, and
+ * an early return reports as a pass. Five database suites did exactly that: 41 tests reported green while
+ * asserting nothing, and a mutation replacing an atomic `$inc` with `$set` survived every one of them.
+ */
+describe("a suite whose dependency is missing", () => {
+	const TESTS = resolve(__dirname, "..");
+
+	function everyTestFile(directory: string, found: string[] = []): string[] {
+		for (const entry of readdirSync(directory)) {
+			const path = join(directory, entry);
+			if (statSync(path).isDirectory()) everyTestFile(path, found);
+			else if (entry.endsWith(".test.ts")) found.push(path);
+		}
+
+		return found;
+	}
+
+	// Every pattern below appears in this file as a string, so the checker cannot be its own subject.
+	const suites = everyTestFile(TESTS).filter((file) => file !== __filename);
+
+	it("has files to read, so this cannot pass vacuously", () => {
+		expect(suites.length).toBeGreaterThan(50);
+	});
+
+	it.each(["if (!mongoAvailable()) return", "if (!available) return", "if (!connected) return"])(
+		"reports as skipped rather than passed — no test bails out with `%s`",
+		(pattern) => {
+			const offenders = suites
+				.filter((file) => readFileSync(file, "utf8").includes(pattern))
+				.map((file) => file.slice(TESTS.length + 1));
+
+			expect(offenders).toEqual([]);
+		},
+	);
 });

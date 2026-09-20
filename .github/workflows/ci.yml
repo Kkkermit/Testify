@@ -53,6 +53,10 @@ jobs:
         run: npm ci
 
       - name: Run tests with coverage
+        # A run that could not start MongoDB would otherwise report every database suite as skipped and
+        # still pass. Here the data layer is not optional: no database means a failed build.
+        env:
+          REQUIRE_DB_TESTS: "1"
         run: npm run test:coverage
 
       - name: Upload coverage

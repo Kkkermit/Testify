@@ -31,6 +31,9 @@ jobs:
       - run: npm ci
 
       - name: Run tests with coverage
+        # The data layer is not optional here either: a skipped database suite is a failed build.
+        env:
+          REQUIRE_DB_TESTS: "1"
         run: npm run test:coverage
 
       # `if: always()` so a failing run still uploads the report that explains it.

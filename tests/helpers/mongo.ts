@@ -1,48 +1,44 @@
-import { MongoMemoryServer } from "mongodb-memory-server";
 import mongoose from "mongoose";
 
-let server: MongoMemoryServer | null = null;
-
-/** Repository suites need a real MongoDB. */
-export async function startMongo(): Promise<boolean> {
-	if (process.env["SKIP_DB_TESTS"] === "1") return false;
-
-	try {
-		server = await MongoMemoryServer.create();
-		await mongoose.connect(server.getUri(), { dbName: "testify-test" });
-		return true;
-	} catch {
-		server = null;
-		return false;
-	}
-}
-
-export async function stopMongo(): Promise<void> {
-	if (mongoose.connection.readyState !== mongoose.ConnectionStates.disconnected) await mongoose.disconnect();
-	await server?.stop();
-	server = null;
+/** Set by `tests/helpers/mongoGlobal.ts` before any suite is built, so the decision below can be synchronous. */
+function testUri(): string | undefined {
+	const uri = process.env["MONGO_TEST_URI"];
+	return uri === undefined || uri === "" ? undefined : uri;
 }
 
 export function mongoAvailable(): boolean {
-	return mongoose.connection.readyState === mongoose.ConnectionStates.connected;
+	return testUri() !== undefined;
 }
 
-/** `describe` that skips itself when no database could be started. */
+/**
+ * `describe` for a suite that needs a real database, and `describe.skip` when there is none.
+ *
+ * Skipping at the suite level is the whole point. The previous shape returned early from each test instead, so
+ * a run without MongoDB reported 41 passing tests that had asserted nothing — and a mutation replacing an
+ * atomic `$inc` with `$set` survived all of them. A skipped suite says so in the summary.
+ *
+ * Each worker connects to its own database, because Jest runs suites in parallel processes against this one
+ * server and the wipe below would otherwise clear a sibling's fixtures mid-test.
+ */
 export function describeWithMongo(name: string, suite: () => void): void {
-	describe(name, () => {
-		let available = false;
+	const uri = testUri();
 
+	if (uri === undefined) {
+		describe.skip(name, suite);
+		return;
+	}
+
+	describe(name, () => {
 		beforeAll(async () => {
-			available = await startMongo();
-			if (!available) console.warn(`Skipping "${name}": no MongoDB available here.`);
+			await mongoose.connect(uri, { dbName: `testify-test-${process.env["JEST_WORKER_ID"] ?? "1"}` });
 		});
 
 		afterAll(async () => {
-			if (available) await stopMongo();
+			await mongoose.connection.dropDatabase();
+			await mongoose.disconnect();
 		});
 
 		beforeEach(async () => {
-			if (!available) return;
 			const collections = await mongoose.connection.db?.collections();
 			for (const collection of collections ?? []) await collection.deleteMany({});
 		});

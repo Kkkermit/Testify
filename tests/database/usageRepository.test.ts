@@ -1,4 +1,4 @@
-import { describeWithMongo, mongoAvailable } from "../helpers/mongo";
+import { describeWithMongo } from "../helpers/mongo";
 import { CommandUsages } from "@database/models/analytics.schema";
 import {
 	commandTallies,
@@ -34,7 +34,6 @@ describeWithMongo("usageRepository", () => {
 	}
 
 	it("counts an invocation", async () => {
-		if (!mongoAvailable()) return;
 		await use();
 
 		expect(await usageTotals(7, TODAY)).toMatchObject({ runs: 1, failures: 0, activeGuilds: 1, commandsUsed: 1 });
@@ -42,7 +41,6 @@ describeWithMongo("usageRepository", () => {
 
 	/** One row per command per server per day: a row per invocation would grow without bound. */
 	it("increments the same row rather than adding another", async () => {
-		if (!mongoAvailable()) return;
 		await use();
 		await use();
 		await use();
@@ -52,7 +50,6 @@ describeWithMongo("usageRepository", () => {
 	});
 
 	it("counts failures separately from runs", async () => {
-		if (!mongoAvailable()) return;
 		await use();
 		await use({ failed: true });
 
@@ -60,7 +57,6 @@ describeWithMongo("usageRepository", () => {
 	});
 
 	it("keeps the two surfaces apart", async () => {
-		if (!mongoAvailable()) return;
 		await use({ surface: "slash" });
 		await use({ surface: "prefix" });
 		await use({ surface: "prefix" });
@@ -69,7 +65,6 @@ describeWithMongo("usageRepository", () => {
 	});
 
 	it("ranks commands by how often they ran", async () => {
-		if (!mongoAvailable()) return;
 		await use({ command: "ban" });
 		await use({ command: "rank" });
 		await use({ command: "rank" });
@@ -81,7 +76,6 @@ describeWithMongo("usageRepository", () => {
 	});
 
 	it("ranks servers by how much they use the bot", async () => {
-		if (!mongoAvailable()) return;
 		await use({ guildId: GUILD });
 		await use({ guildId: OTHER });
 		await use({ guildId: OTHER });
@@ -94,7 +88,6 @@ describeWithMongo("usageRepository", () => {
 
 	/** A direct message has no server, and counting it as one would inflate "servers using the bot". */
 	it("does not count a direct message as an active server", async () => {
-		if (!mongoAvailable()) return;
 		await use({ guildId: null });
 
 		expect((await usageTotals(7, TODAY)).activeGuilds).toBe(0);
@@ -103,7 +96,6 @@ describeWithMongo("usageRepository", () => {
 	});
 
 	it("groups by day, oldest first", async () => {
-		if (!mongoAvailable()) return;
 		await use({}, new Date("2026-07-30T09:00:00.000Z"));
 		await use({}, TODAY);
 		await use({}, TODAY);
@@ -115,7 +107,6 @@ describeWithMongo("usageRepository", () => {
 	});
 
 	it("leaves anything older than the window out", async () => {
-		if (!mongoAvailable()) return;
 		await use({}, new Date("2026-06-01T09:00:00.000Z"));
 		await use({}, TODAY);
 
@@ -125,7 +116,6 @@ describeWithMongo("usageRepository", () => {
 
 	/** The expiry is set when the row is created, so a busy day is not held for ninety days past its last use. */
 	it("stamps an expiry once rather than sliding it forward", async () => {
-		if (!mongoAvailable()) return;
 		await use({}, TODAY);
 		const first = await CommandUsages.findOne({}).lean();
 
