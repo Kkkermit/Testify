@@ -772,6 +772,17 @@ What good tests here look like:
 - **Cover the degenerate cases**: empty list, page past the end, stale id, zero quantity, someone else's data.
 - **Inject randomness** (`useItem(..., roll)`) rather than fighting it.
 - **A test must be able to fail.** If you add an enforcement test, prove it goes red.
+- **A suite whose dependency is missing must _skip_, not pass.** `describeWithMongo` decides between `describe`
+  and `describe.skip` **before the suite is built**, from a database started once in Jest's `globalSetup`. The
+  previous shape discovered it in `beforeAll` and returned early from each test instead — so a run without
+  MongoDB reported **41 passing tests that asserted nothing**, and a mutation replacing an atomic `$inc` with
+  `$set` survived all of them. `tests/core/conventions.test.ts` refuses the early-return pattern, and CI sets
+  `REQUIRE_DB_TESTS=1` so a runner that cannot start a database fails rather than going quietly green.
+
+**Mutation is how you find a test that cannot fail.** Coverage says a line ran, never that anything checked it.
+Changing one operator and re-running the suite that should care is the only cheap proof: it is what found the
+`$inc` gap above, and it cleared `checks.ts`, `csrf.ts`, the `returnTo` schema and the command runner's
+allowlist in the same pass.
 
 > [!NOTE]
 > When a test disagrees with the code, **the code is not automatically wrong.** Three times in this repo's
@@ -904,7 +915,9 @@ problem.
 `notify-on-failure` which opens a labelled issue. Permissions default to `contents: read` at the top and are
 escalated to `issues: write` on that one job only.
 
-**Suppressions expire.** `.nsprc` and `.snyk` each require three things: a written reason, the version that
+**Suppressions expire, and `tests/config/suppressions.test.ts` is what makes that true rather than a wish** —
+it fails on an active entry with no reason, no fixing version, a lapsed expiry, or one more than a year out.
+`.nsprc` and `.snyk` each require three things: a written reason, the version that
 fixes it, and a hard expiry — so a suppression cannot rot silently into a permanent blind spot. Every `overrides`
 pin in `package.json` needs the same treatment.
 
