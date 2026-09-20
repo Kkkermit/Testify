@@ -26,7 +26,6 @@ export function repoRoot(from: string = __dirname): string {
 	return from;
 }
 
-/** JSON data files live in `assets/jsons/`. */
-export function jsonPath(...segments: string[]): string {
-	return assetPath("jsons", ...segments);
+export function dataPath(...segments: string[]): string {
+	return assetPath("data", ...segments);
 }

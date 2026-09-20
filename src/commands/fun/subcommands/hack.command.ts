@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { setTimeout as wait } from "node:timers/promises";
 import { z } from "zod";
 import { defineCommand } from "@core/command";
-import { jsonPath } from "@core/paths";
+import { dataPath } from "@core/paths";
 import { embed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 
@@ -21,7 +21,7 @@ type HackData = z.infer<typeof hackDataSchema>;
 let cached: HackData | undefined;
 
 function hackData(): HackData {
-	cached ??= hackDataSchema.parse(JSON.parse(readFileSync(jsonPath("hackUsers.json"), "utf8")));
+	cached ??= hackDataSchema.parse(JSON.parse(readFileSync(dataPath("hackUsers.json"), "utf8")));
 	return cached;
 }
 

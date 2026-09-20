@@ -2,14 +2,14 @@ import { randomInt } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { defineCommand } from "@core/command";
-import { jsonPath } from "@core/paths";
+import { dataPath } from "@core/paths";
 import { embed } from "@lib/embeds.util";
 import { reply } from "@lib/reply.util";
 
 let questions: string[] | undefined;
 
 function pool(): string[] {
-	questions ??= z.array(z.string()).parse(JSON.parse(readFileSync(jsonPath("wouldYouRather.json"), "utf8")));
+	questions ??= z.array(z.string()).parse(JSON.parse(readFileSync(dataPath("wouldYouRather.json"), "utf8")));
 	return questions;
 }
 

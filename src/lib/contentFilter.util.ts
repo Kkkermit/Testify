@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { z } from "zod";
-import { jsonPath } from "@core/paths";
+import { dataPath } from "@core/paths";
 
 /** Replaces the thirteen hand-rolled profanity checks the audit found, each with its own matching rules. */
 
@@ -32,7 +32,7 @@ let blocked: Set<string> | undefined;
 
 function words(): Set<string> {
 	if (blocked) return blocked;
-	const raw: unknown = JSON.parse(readFileSync(jsonPath("filter.json"), "utf8"));
+	const raw: unknown = JSON.parse(readFileSync(dataPath("filter.json"), "utf8"));
 	const parsed = filterFileSchema.parse(raw);
 	blocked = new Set(parsed.words.map(normalise).filter((word) => word.length > 2));
 	return blocked;
