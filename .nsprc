@@ -1,7 +1,12 @@
 {
 	"//example": {
 		"active": false,
-		"notes": "TEMPLATE — copy this shape, do not activate it. Every real entry needs three things: why it cannot be fixed now, the version that fixes it, and a hard expiry, so a suppression cannot rot into a permanent blind spot. Wording to follow: reached only through <package>@<version>, which cannot be upgraded without a breaking change to <dependency>. Fixed in <package>@<version> — re-evaluate when <dependency> ships a compatible release.",
+		"notes": "TEMPLATE \u2014 copy this shape, do not activate it. Every real entry needs three things: why it cannot be fixed now, the version that fixes it, and a hard expiry, so a suppression cannot rot into a permanent blind spot. Wording to follow: reached only through <package>@<version>, which cannot be upgraded without a breaking change to <dependency>. Fixed in <package>@<version> \u2014 re-evaluate when <dependency> ships a compatible release.",
 		"expiry": 1789776000000
+	},
+	"1145093": {
+		"active": true,
+		"notes": "deepmerge-ts stack exhaustion on recursive object graphs (GHSA-ggr8-5vv4-36mx). Reached only through discord-giveaways@6.0.1, which pins deepmerge-ts@^4.2.1 and is already the latest release; npm's suggested remedy is a downgrade to discord-giveaways@5.1.1, which is a major regression rather than a fix. Nothing here merges attacker-supplied object graphs \u2014 giveaway options are built by this codebase and read back from records it wrote. Fixed in deepmerge-ts@8.0.0 \u2014 re-evaluate when discord-giveaways ships a release that depends on it.",
+		"expiry": 1805500800000
 	}
 }
