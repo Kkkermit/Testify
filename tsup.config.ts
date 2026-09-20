@@ -10,7 +10,8 @@ export default defineConfig({
 	entry: ["src/**/*.ts"],
 	outDir: "dist",
 	format: ["cjs"],
-	target: "node22",
+	// `engines` requires 24.11, so down-levelling to 22 only costs output nobody runs.
+	target: "node24",
 	platform: "node",
 	sourcemap: true,
 	clean: true,

@@ -1,11 +1,12 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<meta name="color-scheme" content="dark" />
-		<!-- Matches --color-background, so a phone's browser chrome does not sit in a different colour to the page. -->
-		<meta name="theme-color" content="#07070b" />
+		<meta name="color-scheme" content="light dark" />
+		<!-- Matches --color-background in each theme, so a phone's browser chrome is never a different colour to the page. -->
+		<meta name="theme-color" content="#f4f4f9" media="(prefers-color-scheme: light)" />
+		<meta name="theme-color" content="#07070b" media="(prefers-color-scheme: dark)" />
 
 		<!-- Self-hosted, so no preconnect is needed — but the CSS has to parse before these are discovered otherwise. -->
 		<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />

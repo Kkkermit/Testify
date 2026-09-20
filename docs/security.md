@@ -22,9 +22,10 @@ few days.
 database or to logs. The `/eval` output redacts any environment value whose key
 looks like a secret.
 
-**Third-party OAuth tokens** (Spotify) are encrypted at rest with AES-256-GCM
-using `TOKEN_ENCRYPTION_KEY`. Without that key set, the features that would
-store a token refuse to run rather than falling back to plaintext.
+**Discord OAuth tokens** — the ones a dashboard session holds — are encrypted
+at rest with AES-256-GCM, under a key derived by HKDF from
+`DASHBOARD_SESSION_SECRET`. Rotating that secret signs everybody out, because
+the sealed tokens no longer open; that is the intended response to a leak.
 
 **The OAuth `state` parameter** is HMAC-signed and expires after ten minutes, so
 a crafted callback cannot bind an account to someone else's Discord ID.

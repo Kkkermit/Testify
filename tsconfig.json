@@ -1,7 +1,7 @@
 {
 	"compilerOptions": {
-		"target": "ES2023",
-		"lib": ["ES2023"],
+		"target": "ES2024",
+		"lib": ["ES2024"],
 		// tsc only type-checks here — tsup/esbuild does the emit, so this models
 		// "a bundler resolves this" rather than Node's own algorithm. "Node" was
 		// deprecated and stops working in TypeScript 7; "Node16" would be right if
