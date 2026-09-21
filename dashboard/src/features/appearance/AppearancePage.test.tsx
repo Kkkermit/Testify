@@ -161,6 +161,26 @@ describe("applyTheme", () => {
 	});
 });
 
+describe("arriving from the sidebar's language button", () => {
+	/**
+	 * Language is the fourth card down, so landing at the top of the page leaves a reader scrolling for the
+	 * control the button they pressed is named after.
+	 */
+	it("lands focus on the language section rather than the top of the page", () => {
+		renderWithProviders(<AppearancePage />, { path: "/appearance", route: "/appearance#language" });
+
+		expect(screen.getByRole("region", { name: "Language" })).toHaveFocus();
+	});
+
+	it("names every setting as its own region, so each one can be linked to", () => {
+		render();
+
+		for (const name of ["Theme", "Accent colour", "Motion", "Language"]) {
+			expect(screen.getByRole("region", { name })).toBeInTheDocument();
+		}
+	});
+});
+
 describe("AppearancePage accessibility", () => {
 	it("has no automatically detectable violations", async () => {
 		const { container } = render();

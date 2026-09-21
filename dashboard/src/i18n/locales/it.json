@@ -66,6 +66,7 @@
 		"bot": "Bot",
 		"appearance": "Aspetto",
 		"appearanceHint": "Scegli il tema e la lingua",
+		"languageHint": "Cambiare la lingua",
 		"terms": "Termini",
 		"termsHint": "Leggi i termini",
 		"privacy": "Privacy",

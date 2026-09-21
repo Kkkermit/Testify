@@ -1,11 +1,12 @@
 import { type LucideIcon, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { LanguagePicker } from "@/components/form/LanguagePicker";
-import { Card, PageHeader, SegmentedControl } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { PageHeader, SegmentedControl } from "@/components/primitives";
 import { AccentSwatch } from "@/features/appearance/components/AccentSwatch";
+import { AppearanceCard } from "@/features/appearance/components/AppearanceCard";
 import { ThemePreview } from "@/features/appearance/components/ThemePreview";
 import { ACCENTS, useAccent, type Accent } from "@/hooks/useAccent";
+import { useHashTarget } from "@/hooks/useHashTarget";
 import { MOTIONS, useMotion, type Motion } from "@/hooks/useMotion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { THEMES, useTheme, type Theme } from "@/hooks/useTheme";
@@ -36,6 +37,7 @@ const MOTION_OPTIONS: Record<Motion, { label: TranslationKey; hint: TranslationK
 export function AppearancePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("appearance.title"));
+	useHashTarget();
 	const { theme, setTheme } = useTheme();
 	const { accent, setAccent } = useAccent();
 	const { motion, setMotion } = useMotion();
@@ -44,12 +46,7 @@ export function AppearancePage(): React.JSX.Element {
 		<div className="flex flex-col gap-6">
 			<PageHeader title={t("appearance.title")} subtitle={t("appearance.subtitle")} />
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("appearance.theme")}</h2>
-					<p className="text-muted-foreground text-sm">{t("appearance.themeDescribes")}</p>
-				</div>
-
+			<AppearanceCard id="theme" title={t("appearance.theme")} describes={t("appearance.themeDescribes")}>
 				{/* A group of three sits at its content width; stretched across the card it reads as a tab bar. */}
 				<div className="flex">
 					<SegmentedControl
@@ -75,14 +72,9 @@ export function AppearancePage(): React.JSX.Element {
 						/>
 					))}
 				</div>
-			</Card>
+			</AppearanceCard>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("appearance.accent")}</h2>
-					<p className="text-muted-foreground text-sm">{t("appearance.accentDescribes")}</p>
-				</div>
-
+			<AppearanceCard id="accent" title={t("appearance.accent")} describes={t("appearance.accentDescribes")}>
 				<ul className="grid gap-2 sm:grid-cols-3">
 					{ACCENTS.map((name) => (
 						<li key={name}>
@@ -95,14 +87,9 @@ export function AppearancePage(): React.JSX.Element {
 						</li>
 					))}
 				</ul>
-			</Card>
+			</AppearanceCard>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("appearance.motion")}</h2>
-					<p className="text-muted-foreground text-sm">{t("appearance.motionDescribes")}</p>
-				</div>
-
+			<AppearanceCard id="motion" title={t("appearance.motion")} describes={t("appearance.motionDescribes")}>
 				<div className="flex">
 					<SegmentedControl
 						label={t("appearance.motion")}
@@ -115,16 +102,11 @@ export function AppearancePage(): React.JSX.Element {
 						}))}
 					/>
 				</div>
-			</Card>
+			</AppearanceCard>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("appearance.language")}</h2>
-					<p className="text-muted-foreground text-sm">{t("appearance.languageDescribes")}</p>
-				</div>
-
+			<AppearanceCard id="language" title={t("appearance.language")} describes={t("appearance.languageDescribes")}>
 				<LanguagePicker />
-			</Card>
+			</AppearanceCard>
 		</div>
 	);
 }

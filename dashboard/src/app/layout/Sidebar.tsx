@@ -133,9 +133,9 @@ export function Sidebar({
 					);
 				})}
 
-				<Tooltip label={t("nav.appearanceHint")} placement="right">
+				<Tooltip label={t("nav.languageHint")} placement="right">
 					<Link
-						to="/appearance"
+						to="/appearance#language"
 						className={cn(
 							ROW,
 							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",

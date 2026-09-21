@@ -24,6 +24,13 @@ describe("the app shell", () => {
 		expect(screen.getByRole("link", { name: /skip to content/i })).toHaveAttribute("href", "#content");
 	});
 
+	/** Language is the fourth card on the appearance page, and `/appearance` alone opens it at the first. */
+	it("sends the language button to the language setting rather than the top of the page", () => {
+		renderWithProviders(<AppShell />, { path: "/guilds" });
+
+		expect(screen.getByRole("link", { name: "English" })).toHaveAttribute("href", "/appearance#language");
+	});
+
 	it("names the guild being configured once there is one", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 
