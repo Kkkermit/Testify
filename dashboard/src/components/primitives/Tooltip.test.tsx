@@ -85,4 +85,48 @@ describe("Tooltip", () => {
 			expect(first).not.toHaveAttribute("aria-describedby");
 		});
 	});
+
+	/**
+	 * WCAG 2.2 1.4.13 wants a tooltip dismissible without moving the pointer or the focus, and tippy binds no
+	 * key handler of its own — so a box covering the control underneath it had no way out but tabbing away.
+	 */
+	it("closes on Escape without moving focus", async () => {
+		render(
+			<Tooltip label="A description">
+				<button type="button">First</button>
+			</Tooltip>,
+		);
+
+		const trigger = screen.getByRole("button");
+
+		await userEvent.tab();
+		await waitFor(() => {
+			expect(trigger).toHaveAttribute("aria-describedby");
+		});
+
+		await userEvent.keyboard("{Escape}");
+
+		await waitFor(() => {
+			expect(trigger).not.toHaveAttribute("aria-describedby");
+		});
+		expect(trigger).toHaveFocus();
+	});
+
+	/** The same criterion's other half: the pointer has to be able to reach the box without it vanishing. */
+	it("lets the pointer reach the tooltip itself", async () => {
+		render(
+			<Tooltip label="A description">
+				<button type="button">First</button>
+			</Tooltip>,
+		);
+
+		await userEvent.hover(screen.getByRole("button"));
+		await waitFor(() => {
+			expect(screen.getByText("A description")).toBeInTheDocument();
+		});
+
+		await userEvent.hover(screen.getByText("A description"));
+
+		expect(screen.getByText("A description")).toBeInTheDocument();
+	});
 });

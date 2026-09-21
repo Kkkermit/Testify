@@ -56,6 +56,7 @@ const CommandsPage = lazy(async () => ({
 	default: (await import("@/features/commands/CommandsPage")).CommandsPage,
 }));
 const OwnerPage = lazy(async () => ({ default: (await import("@/features/owner/OwnerPage")).OwnerPage }));
+const HelpPage = lazy(async () => ({ default: (await import("@/features/help/HelpPage")).HelpPage }));
 const AppearancePage = lazy(async () => ({
 	default: (await import("@/features/appearance/AppearancePage")).AppearancePage,
 }));
@@ -99,6 +100,7 @@ export const routes = [
 					{ path: "/guilds/:guildId/members/:userId", element: lazily(<MemberDetailPage />) },
 					{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
 					{ path: "/commands", element: lazily(<CommandsPage />) },
+					{ path: "/help", element: lazily(<HelpPage />) },
 					{ path: "/appearance", element: lazily(<AppearancePage />) },
 					// Behind its own guard, so the console's existence is not disclosed by rendering its shell.
 					{ element: <RequireOwner />, children: [{ path: "/owner", element: lazily(<OwnerPage />) }] },

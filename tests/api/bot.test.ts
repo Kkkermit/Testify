@@ -55,7 +55,15 @@ describe("the bot profile endpoint", () => {
 	it("returns the public profile and nothing else", async () => {
 		const body = (await (await apiFor(clientWith()).request("/api/bot")).json()) as Record<string, unknown>;
 
-		expect(Object.keys(body).sort()).toEqual(["accentColour", "avatarUrl", "bannerUrl", "id", "username"]);
+		expect(Object.keys(body).sort()).toEqual([
+			"accentColour",
+			"avatarUrl",
+			"bannerUrl",
+			"id",
+			"repositoryUrl",
+			"supportUrl",
+			"username",
+		]);
 	});
 
 	it("passes a banner through when the application has one", async () => {

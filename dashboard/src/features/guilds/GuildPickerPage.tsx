@@ -1,9 +1,11 @@
 import { Search, ServerOff } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { FIELD } from "@/components/form";
 import { Reveal } from "@/components/motion";
 import { EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { GuildCard } from "@/features/guilds/GuildCard";
@@ -51,6 +53,13 @@ export function GuildPickerPage(): React.JSX.Element {
 					icon={<ServerOff size={28} />}
 					title={t(search === "" ? "guilds.emptyTitle" : "guilds.noMatchTitle")}
 					body={t(search === "" ? "guilds.emptyBody" : "guilds.noMatchBody")}
+					action={
+						search === "" ? (
+							<Link to="/help" className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}>
+								{t("help.title")}
+							</Link>
+						) : undefined
+					}
 				/>
 			) : (
 				groups.map((group) => (

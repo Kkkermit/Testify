@@ -26,6 +26,9 @@ export interface BotIdentity {
 	bannerUrl: string | null;
 	/** The profile accent as a CSS hex, when the application has set one. */
 	accentColour: string | null;
+	/** Where to ask for help, and where the code is. Both come from the bot's own theme, so a fork points at its own. */
+	supportUrl: string;
+	repositoryUrl: string;
 }
 
 export interface DashboardUser {

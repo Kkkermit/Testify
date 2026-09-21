@@ -24,8 +24,11 @@ export function Tooltip({
 			content: label,
 			theme: "testify",
 			placement,
-			// Long enough not to fire while the pointer crosses a row of icons on its way somewhere else.
-			delay: [350, 0],
+			// Long enough not to fire while the pointer crosses a row of icons on its way somewhere else, and
+			// slow enough to leave that the pointer can reach the box itself (WCAG 2.2 1.4.13, hoverable).
+			delay: [350, 120],
+			interactive: true,
+			interactiveBorder: 8,
 			duration: reduced ? 0 : 120,
 			// `focusin` is what carries focus through to the anchor, so a keyboard reaches this too.
 			trigger: "mouseenter focusin",
@@ -33,7 +36,16 @@ export function Tooltip({
 			appendTo: () => document.body,
 		});
 
+		// tippy binds no key handler of its own, so without this a tooltip covering the thing underneath it
+		// cannot be got rid of without moving the pointer or the focus (WCAG 2.2 1.4.13, dismissible).
+		const dismiss = (event: KeyboardEvent): void => {
+			if (event.key === "Escape") instance.hide();
+		};
+
+		document.addEventListener("keydown", dismiss);
+
 		return () => {
+			document.removeEventListener("keydown", dismiss);
 			instance.destroy();
 		};
 	}, [label, placement, reduced]);

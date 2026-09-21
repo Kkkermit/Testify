@@ -49,6 +49,8 @@ export const botProfile: BotIdentity = {
 	avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
 	bannerUrl: null,
 	accentColour: null,
+	supportUrl: "https://discord.gg/example",
+	repositoryUrl: "https://github.com/Kkkermit/Testify",
 };
 
 export const aGuild: ManageableGuild = {

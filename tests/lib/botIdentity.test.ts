@@ -1,3 +1,4 @@
+import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { botIdentity, forgetBotIdentity, identityOf } from "@lib/botIdentity.util";
 import { createMockClient } from "@tests/helpers/mocks";
@@ -30,6 +31,8 @@ describe("identityOf", () => {
 			avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
 			bannerUrl: "https://cdn.discordapp.com/banners/1/def.png",
 			accentColour: "#7c3aed",
+			supportUrl: theme.supportServer,
+			repositoryUrl: theme.repository,
 		});
 	});
 

@@ -66,6 +66,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					icon: Terminal,
 					hintKey: guild === undefined ? "nav.commandsHintAll" : "nav.commandsHintGuild",
 				},
+				{ to: "/help", labelKey: "nav.help", icon: LifeBuoy, hintKey: "nav.helpHint" },
 			],
 		},
 	];

@@ -65,7 +65,9 @@
 		"skipToContent": "Zum Inhalt springen",
 		"sections": "Bereiche",
 		"menu": "Menü",
-		"closeMenu": "Menü schließen"
+		"closeMenu": "Menü schließen",
+		"help": "Hilfe",
+		"helpHint": "Einrichtung, und wofür jeder Bildschirm da ist"
 	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
@@ -88,6 +90,35 @@
 		"emptyTitle": "Hier gibt es nichts",
 		"emptyBody": "Prüfe die Adresse auf einen Tippfehler oder fange bei deinen Servern neu an. Wenn dich ein Link im Dashboard hierher gebracht hat, ist das eine Meldung wert.",
 		"toServers": "Zu deinen Servern"
+	},
+	"help": {
+		"title": "Erste Schritte",
+		"subtitle": "Was {{name}} tut, wie du es einrichtest und wo alles liegt.",
+		"firstSteps": "Zum Anfangen",
+		"inviteTitle": "Den Bot zu deinem Server hinzufügen",
+		"inviteBody": "{{name}} muss auf einem Server sein, bevor es etwas einzurichten gibt. Die Serverseite markiert die, zu denen du ihn hinzufügen kannst.",
+		"toServers": "Zu deinen Servern",
+		"pickTitle": "Einen Server auswählen",
+		"pickBody": "Alles, was du änderst, gilt für den geöffneten Server, und sein Name steht über jedem Bildschirm.",
+		"configureTitle": "Einschalten, was du brauchst",
+		"configureBody": "Nichts ist von Haus aus aktiv. Öffne einen Bereich in der Seitenleiste, schalte ihn ein, und er arbeitet sofort.",
+		"tellTitle": "Sag es deinen Mitgliedern",
+		"tellBody": "Mitglieder nutzen den Bot in Discord, nicht hier. Die Befehlsliste sagt, was jeder Befehl tut und was er annimmt.",
+		"toCommands": "Befehle ansehen",
+		"commandsTitle": "Wie Befehle funktionieren",
+		"slashTerm": "Slash-Befehle",
+		"slashDetail": "Tippe einen Schrägstrich in einen Kanal, und Discord listet sie samt ihrer Optionen auf.",
+		"prefixTerm": "Präfix-Befehle",
+		"prefixDetail": "Dieselben Befehle als gewöhnlicher Text. Das Präfix ist t?, bis du es unter Einstellungen änderst.",
+		"switchTerm": "Einen abschalten",
+		"switchDetail": "Jeder Befehl lässt sich für einen Server oder für alle abschalten, ohne den Bot zu entfernen.",
+		"browseCommands": "Alle Befehle, durchsuchbar",
+		"tourTitle": "Wofür jeder Bereich da ist",
+		"tourSubtitle": "Dieselbe Liste wie die Seitenleiste, mit einer Zeile zu jedem.",
+		"stuckTitle": "Kommst du nicht weiter?",
+		"stuckBody": "Über den Support-Server erreichst du am schnellsten jemanden, und der Quelltext ist offen, falls du lieber liest.",
+		"supportServer": "Support-Server",
+		"sourceCode": "Quelltext"
 	},
 	"appearance": {
 		"title": "Darstellung",

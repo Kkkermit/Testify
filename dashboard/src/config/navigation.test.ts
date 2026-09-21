@@ -13,13 +13,14 @@ function sortedPathsFor(audience: NavAudience): string[] {
 
 describe("navigationFor", () => {
 	it("always offers the server picker and the command list", () => {
-		expect(pathsFor({ guild: undefined, isOwner: false })).toEqual(["/guilds", "/commands"]);
+		expect(pathsFor({ guild: undefined, isOwner: false })).toEqual(["/guilds", "/commands", "/help"]);
 	});
 
 	it("adds the current server's screens once one is open", () => {
 		expect(sortedPathsFor({ guild, isOwner: false })).toEqual(
 			[
 				"/guilds",
+				"/help",
 				`/guilds/${guild.id}/commands`,
 				`/guilds/${guild.id}`,
 				`/guilds/${guild.id}/levelling`,

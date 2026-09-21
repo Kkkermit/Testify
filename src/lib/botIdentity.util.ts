@@ -1,4 +1,5 @@
 import { type ClientUser } from "discord.js";
+import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type BotIdentity } from "@testify/shared";
@@ -30,6 +31,8 @@ export function identityOf(user: ClientUser): BotIdentity {
 		avatarUrl: user.displayAvatarURL({ size: SIZE }),
 		bannerUrl: user.bannerURL({ size: 1024 }) ?? null,
 		accentColour: typeof user.accentColor === "number" ? `#${user.accentColor.toString(16).padStart(6, "0")}` : null,
+		supportUrl: theme.supportServer,
+		repositoryUrl: theme.repository,
 	};
 }
 

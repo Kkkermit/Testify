@@ -66,7 +66,9 @@
 		"skipToContent": "Aller au contenu",
 		"sections": "Sections",
 		"menu": "Menu",
-		"closeMenu": "Fermer le menu"
+		"closeMenu": "Fermer le menu",
+		"help": "Aide",
+		"helpHint": "La configuration, et à quoi sert chaque écran"
 	},
 	"error": {
 		"unreachableTitle": "Une erreur est survenue",
@@ -89,6 +91,35 @@
 		"emptyTitle": "Il n’y a rien ici",
 		"emptyBody": "Vérifiez l’adresse, ou repartez de vos serveurs. Si un lien du tableau de bord vous a amené ici, cela vaut la peine de le signaler.",
 		"toServers": "Aller à vos serveurs"
+	},
+	"help": {
+		"title": "Pour commencer",
+		"subtitle": "Ce que fait {{name}}, comment le configurer et où se trouve chaque chose.",
+		"firstSteps": "Premiers pas",
+		"inviteTitle": "Ajoute le bot à ton serveur",
+		"inviteBody": "{{name}} doit être sur un serveur avant qu’il y ait quoi que ce soit à configurer. La page des serveurs indique ceux où tu peux l’ajouter.",
+		"toServers": "Voir tes serveurs",
+		"pickTitle": "Choisis un serveur",
+		"pickBody": "Tout ce que tu changes s’applique au serveur ouvert, et son nom figure au-dessus de chaque écran.",
+		"configureTitle": "Active ce dont tu as besoin",
+		"configureBody": "Rien n’est actif au départ. Ouvre une section dans la barre latérale, active-la, et elle fonctionne aussitôt.",
+		"tellTitle": "Préviens tes membres",
+		"tellBody": "Les membres utilisent le bot sur Discord, pas ici. La liste des commandes dit ce que fait chacune et ce qu’elle accepte.",
+		"toCommands": "Parcourir les commandes",
+		"commandsTitle": "Comment marchent les commandes",
+		"slashTerm": "Commandes slash",
+		"slashDetail": "Tape une barre oblique dans un salon et Discord les liste, avec les options de chacune.",
+		"prefixTerm": "Commandes à préfixe",
+		"prefixDetail": "Les mêmes commandes, écrites en texte ordinaire. Le préfixe est t? jusqu’à ce que tu le changes dans Réglages.",
+		"switchTerm": "En désactiver une",
+		"switchDetail": "Chaque commande peut être désactivée sur un serveur, ou sur tous, sans retirer le bot.",
+		"browseCommands": "Toutes les commandes, avec recherche",
+		"tourTitle": "À quoi sert chaque section",
+		"tourSubtitle": "La même liste que la barre latérale, avec une ligne sur chacune.",
+		"stuckTitle": "Toujours bloqué ?",
+		"stuckBody": "Le serveur d’assistance est le plus rapide pour joindre quelqu’un, et le code est public si tu préfères le lire.",
+		"supportServer": "Serveur d’assistance",
+		"sourceCode": "Code source"
 	},
 	"appearance": {
 		"title": "Apparence",

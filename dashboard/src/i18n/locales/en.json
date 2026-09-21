@@ -65,7 +65,9 @@
 		"skipToContent": "Skip to content",
 		"sections": "Sections",
 		"menu": "Menu",
-		"closeMenu": "Close the menu"
+		"closeMenu": "Close the menu",
+		"help": "Help",
+		"helpHint": "Setting up, and what every screen is for"
 	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
@@ -88,6 +90,35 @@
 		"emptyTitle": "Nothing lives here",
 		"emptyBody": "Check the address for a typo, or start again from your servers. If a link inside the dashboard brought you here, that is worth reporting.",
 		"toServers": "Go to your servers"
+	},
+	"help": {
+		"title": "Getting started",
+		"subtitle": "What {{name}} does, how to set it up, and where everything lives.",
+		"firstSteps": "First steps",
+		"inviteTitle": "Add the bot to your server",
+		"inviteBody": "{{name}} has to be in a server before there is anything to configure. The servers page marks the ones you can add it to.",
+		"toServers": "Go to your servers",
+		"pickTitle": "Pick a server",
+		"pickBody": "Everything you change applies to the one server you have open, and its name sits above every screen.",
+		"configureTitle": "Turn on what you need",
+		"configureBody": "Nothing is switched on by default. Open a section in the sidebar, turn it on, and it starts working straight away.",
+		"tellTitle": "Tell your members",
+		"tellBody": "Members use the bot in Discord rather than here. The command list says what each command does and what it takes.",
+		"toCommands": "Browse the commands",
+		"commandsTitle": "How commands work",
+		"slashTerm": "Slash commands",
+		"slashDetail": "Type a slash in any channel and Discord lists them, along with the options each one takes.",
+		"prefixTerm": "Prefix commands",
+		"prefixDetail": "The same commands, typed as ordinary text. The prefix is t? until you change it under Settings.",
+		"switchTerm": "Switching one off",
+		"switchDetail": "Any command can be turned off for one server, or for every server, without removing the bot.",
+		"browseCommands": "Every command, searchable",
+		"tourTitle": "What each section is for",
+		"tourSubtitle": "The same list as the sidebar, with a line on each.",
+		"stuckTitle": "Still stuck?",
+		"stuckBody": "The support server is the quickest way to reach somebody, and the source is public if you would rather read it.",
+		"supportServer": "Support server",
+		"sourceCode": "Source code"
 	},
 	"appearance": {
 		"title": "Appearance",

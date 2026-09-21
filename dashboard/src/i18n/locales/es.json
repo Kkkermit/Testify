@@ -66,7 +66,9 @@
 		"skipToContent": "Saltar al contenido",
 		"sections": "Secciones",
 		"menu": "Menú",
-		"closeMenu": "Cerrar el menú"
+		"closeMenu": "Cerrar el menú",
+		"help": "Ayuda",
+		"helpHint": "Cómo configurar y para qué sirve cada pantalla"
 	},
 	"error": {
 		"unreachableTitle": "Algo ha salido mal",
@@ -89,6 +91,35 @@
 		"emptyTitle": "Aquí no hay nada",
 		"emptyBody": "Comprueba si hay una errata en la dirección, o empieza de nuevo desde tus servidores. Si has llegado aquí desde un enlace del propio panel, merece la pena avisar.",
 		"toServers": "Ir a tus servidores"
+	},
+	"help": {
+		"title": "Primeros pasos",
+		"subtitle": "Qué hace {{name}}, cómo configurarlo y dónde está cada cosa.",
+		"firstSteps": "Para empezar",
+		"inviteTitle": "Añade el bot a tu servidor",
+		"inviteBody": "{{name}} tiene que estar en un servidor antes de que haya algo que configurar. La página de servidores señala aquellos a los que puedes añadirlo.",
+		"toServers": "Ir a tus servidores",
+		"pickTitle": "Elige un servidor",
+		"pickBody": "Todo lo que cambies se aplica al servidor que tengas abierto, y su nombre aparece sobre cada pantalla.",
+		"configureTitle": "Activa lo que necesites",
+		"configureBody": "Nada está activado de serie. Abre una sección en la barra lateral, actívala y empieza a funcionar al momento.",
+		"tellTitle": "Avisa a tus miembros",
+		"tellBody": "Los miembros usan el bot en Discord, no aquí. La lista de comandos explica qué hace cada uno y qué acepta.",
+		"toCommands": "Ver los comandos",
+		"commandsTitle": "Cómo funcionan los comandos",
+		"slashTerm": "Comandos de barra",
+		"slashDetail": "Escribe una barra en cualquier canal y Discord los lista, junto con las opciones de cada uno.",
+		"prefixTerm": "Comandos con prefijo",
+		"prefixDetail": "Los mismos comandos, escritos como texto normal. El prefijo es t? hasta que lo cambies en Ajustes.",
+		"switchTerm": "Desactivar uno",
+		"switchDetail": "Cualquier comando puede desactivarse en un servidor, o en todos, sin quitar el bot.",
+		"browseCommands": "Todos los comandos, con búsqueda",
+		"tourTitle": "Para qué sirve cada sección",
+		"tourSubtitle": "La misma lista que la barra lateral, con una línea sobre cada una.",
+		"stuckTitle": "¿Sigues atascado?",
+		"stuckBody": "El servidor de soporte es la forma más rápida de hablar con alguien, y el código es público si prefieres leerlo.",
+		"supportServer": "Servidor de soporte",
+		"sourceCode": "Código fuente"
 	},
 	"appearance": {
 		"title": "Apariencia",
