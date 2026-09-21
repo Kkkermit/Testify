@@ -21,7 +21,7 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 
 				<ul className="flex flex-col gap-2">
 					{missing.map((key) => (
-						<li key={key} className="bg-muted rounded-lg px-3 py-2 font-mono text-sm">
+						<li key={key} className="bg-muted rounded-field px-3 py-2 font-mono text-sm">
 							{key}
 						</li>
 					))}
@@ -37,7 +37,7 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 					<p className="text-muted-foreground text-sm">
 						Then add this under OAuth2 → Redirects in the Discord Developer Portal:
 					</p>
-					<p className="bg-muted mt-2 rounded-lg px-3 py-2 font-mono text-sm break-all">{redirectUri}</p>
+					<p className="bg-muted mt-2 rounded-field px-3 py-2 font-mono text-sm break-all">{redirectUri}</p>
 				</div>
 			</Card>
 		</main>

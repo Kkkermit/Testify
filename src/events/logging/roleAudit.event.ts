@@ -9,7 +9,7 @@ export default defineEvent({
 		await writeAuditLog(client, role.guild, {
 			event: "roleCreate",
 			title: "Role created",
-			colour: "Green",
+			tone: "created",
 			fields: [
 				{ name: "Role", value: `${role} (\`${role.name}\`)`, inline: true },
 				{ name: "Colour", value: role.hexColor, inline: true },

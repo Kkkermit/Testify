@@ -14,7 +14,7 @@ export default defineEvent({
 		await writeAuditLog(client, member.guild, {
 			event: "memberJoin",
 			title: "Member joined",
-			colour: "Green",
+			tone: "created",
 			fields: [
 				{ name: "Member", value: `${member} (\`${member.id}\`)`, inline: true },
 				{ name: "Member count", value: String(member.guild.memberCount), inline: true },

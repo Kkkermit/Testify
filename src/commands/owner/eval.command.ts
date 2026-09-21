@@ -1,6 +1,7 @@
 import { inspect } from "node:util";
 import { runInNewContext } from "node:vm";
 import { MessageFlags } from "discord.js";
+import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { toError } from "@core/errors";
 import { embed } from "@lib/embeds.util";
@@ -58,7 +59,7 @@ export default defineCommand({
 		await reply(interaction, {
 			embeds: [
 				embed({
-					colour: failed ? "Red" : "Green",
+					colour: failed ? theme.colours.error : theme.colours.success,
 					title: failed ? "Evaluation failed" : "Evaluation result",
 					fields: [
 						{ name: "Input", value: `\`\`\`js\n${truncate(code, 900)}\n\`\`\`` },

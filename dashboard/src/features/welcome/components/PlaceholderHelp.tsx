@@ -22,7 +22,7 @@ export function PlaceholderHelp({
 						onClick={() => {
 							onInsert(token);
 						}}
-						className="bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/70 rounded px-2 py-1 font-mono text-xs transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50"
+						className="bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/70 rounded-chip px-2 py-1 font-mono text-xs transition-colors duration-150 disabled:pointer-events-none disabled:opacity-50"
 					>
 						{token}
 					</button>

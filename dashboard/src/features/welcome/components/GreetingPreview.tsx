@@ -30,13 +30,13 @@ export function GreetingPreview({
 				<Avatar name="Testify" url={null} size={36} seed={guildName} />
 				<div className="min-w-0 flex-1">
 					<p className="text-sm font-medium">
-						Testify <span className="bg-primary/20 text-accent ml-1 rounded px-1 py-0.5 text-[0.625rem]">BOT</span>
+						Testify <span className="bg-primary/20 text-accent ml-1 rounded-chip px-1 py-0.5 text-[0.625rem]">BOT</span>
 					</p>
 
 					<div
 						className={cn(
 							"mt-1 text-sm break-words",
-							style === "embed" && "border-primary bg-card rounded-r border-l-4 p-3",
+							style === "embed" && "border-primary bg-card rounded-r-field border-l-4 p-3",
 						)}
 					>
 						<p className="whitespace-pre-wrap">
@@ -45,7 +45,7 @@ export function GreetingPreview({
 							))}
 						</p>
 						{style === "card" && (
-							<div className="from-primary/30 to-card mt-2 flex h-24 items-center justify-center rounded-lg bg-gradient-to-br">
+							<div className="from-primary/30 to-card mt-2 flex h-24 items-center justify-center rounded-field bg-gradient-to-br">
 								<span className="text-muted-foreground text-xs">{t("welcome.cardAlt")}</span>
 							</div>
 						)}
@@ -58,7 +58,8 @@ export function GreetingPreview({
 
 /** Discord's own marks, so the preview answers "what will this look like" rather than "what did I type". */
 function Marked({ span }: { span: MarkSpan }): React.JSX.Element {
-	if (span.marks.includes("code")) return <code className="bg-muted rounded px-1 py-0.5 font-mono">{span.text}</code>;
+	if (span.marks.includes("code"))
+		return <code className="bg-muted rounded-chip px-1 py-0.5 font-mono">{span.text}</code>;
 
 	return (
 		<span

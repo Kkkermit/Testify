@@ -1,9 +1,10 @@
-import { theme } from "@config/theme";
+import { categoryColour, theme } from "@config/theme";
 import { embed, errorEmbed, successEmbed, withPageFooter } from "@lib/embeds.util";
 
 describe("embed", () => {
+	/** Read from the registry rather than spelled out, so repainting a category is not also a test edit. */
 	it("colours by category", () => {
-		expect(embed({ category: "economy" }).data.color).toBe(embed({ colour: "DarkOrange" }).data.color);
+		expect(embed({ category: "economy" }).data.color).toBe(embed({ colour: categoryColour("economy") }).data.color);
 	});
 
 	it("prefers an explicit colour over the category", () => {

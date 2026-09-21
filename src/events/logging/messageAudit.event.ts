@@ -12,7 +12,7 @@ export default defineEvent({
 		await writeAuditLog(client, message.guild, {
 			event: "messageDelete",
 			title: "Message deleted",
-			colour: "Red",
+			tone: "deleted",
 			fields: [
 				{ name: "Author", value: message.author ? `${message.author}` : "Unknown", inline: true },
 				{ name: "Channel", value: `<#${message.channelId}>`, inline: true },

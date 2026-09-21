@@ -14,12 +14,28 @@ import { AUDIT_EVENTS, type AuditEvent } from "@testify/shared";
  */
 export { AUDIT_EVENTS, type AuditEvent };
 
+/**
+ * The log's colour language, so a reader tells what happened from the stripe before reading the title: green
+ * for something that appeared, red for something that went, amber for a change, and a darker red where a
+ * moderator acted rather than something merely happening.
+ */
+const TONES = {
+	created: theme.colours.success,
+	restored: theme.colours.success,
+	updated: theme.colours.warning,
+	deleted: theme.colours.error,
+	left: theme.colours.notice,
+	moderated: theme.colours.severe,
+} satisfies Record<string, ColorResolvable>;
+
+export type AuditTone = keyof typeof TONES;
+
 export interface AuditEntry {
 	event: AuditEvent;
 	title: string;
 	description?: string;
 	fields?: APIEmbedField[];
-	colour?: ColorResolvable;
+	tone?: AuditTone;
 	thumbnail?: string;
 }
 
@@ -39,7 +55,7 @@ export async function writeAuditLog(client: TestifyClient, guild: Guild, entry: 
 		await channel.send({
 			embeds: [
 				embed({
-					colour: entry.colour ?? theme.colours.audit,
+					colour: entry.tone === undefined ? theme.colours.audit : TONES[entry.tone],
 					title: `${theme.emoji.auditLog} ${entry.title}`,
 					...(entry.description !== undefined ? { description: entry.description } : {}),
 					...(entry.fields !== undefined ? { fields: entry.fields } : {}),

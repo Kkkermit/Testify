@@ -21,7 +21,7 @@ export function SegmentedControl<Value extends string | number>({
 	onChange: (value: Value) => void;
 }): React.JSX.Element {
 	return (
-		<div role="group" aria-label={label} className="border-border flex rounded-lg border p-0.5">
+		<div role="group" aria-label={label} className="border-border flex rounded-field border p-0.5">
 			{segments.map((segment) => {
 				const control = (
 					<button
@@ -32,7 +32,7 @@ export function SegmentedControl<Value extends string | number>({
 							onChange(segment.value);
 						}}
 						className={cn(
-							"rounded-md px-2.5 py-1 text-sm transition-colors duration-150",
+							"rounded-chip px-2.5 py-1 text-sm transition-colors duration-150",
 							"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
 							value === segment.value
 								? "bg-primary text-primary-foreground"

@@ -1,4 +1,5 @@
 import { type EmbedBuilder, type Guild } from "discord.js";
+import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { embed } from "@lib/embeds.util";
@@ -29,7 +30,7 @@ export async function buildGuildEmbed(
 	if (inviteUrl !== null) fields.push({ name: "Invite", value: inviteUrl });
 
 	const builder = embed({
-		colour: kind === "joined" ? "Green" : "Red",
+		colour: kind === "joined" ? theme.colours.success : theme.colours.error,
 		title: kind === "joined" ? "Joined a new server" : "Left a server",
 		description:
 			kind === "joined"

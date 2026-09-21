@@ -34,7 +34,7 @@ export function Section({
 		 */
 		<Card className="motion-pop flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
 			<div className="flex items-start gap-3 lg:w-72 lg:shrink-0">
-				<span aria-hidden="true" className={`bg-muted rounded-lg p-2 ${tint}`}>
+				<span aria-hidden="true" className={`bg-muted rounded-field p-2 ${tint}`}>
 					<Icon size={18} />
 				</span>
 				<div className="min-w-0 flex-1">

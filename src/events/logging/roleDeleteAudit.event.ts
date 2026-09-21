@@ -9,7 +9,7 @@ export default defineEvent({
 		await writeAuditLog(client, role.guild, {
 			event: "roleDelete",
 			title: "Role deleted",
-			colour: "Red",
+			tone: "deleted",
 			fields: [
 				{ name: "Role", value: `\`${role.name}\``, inline: true },
 				{ name: "Members", value: String(role.members.size), inline: true },

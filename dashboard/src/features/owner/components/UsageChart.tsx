@@ -14,7 +14,7 @@ export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
 					<span
 						key={day.day}
 						title={`${shortDay(day.day)}: ${day.count.toLocaleString()}`}
-						className="bg-primary/30 hover:bg-primary/60 min-h-px flex-1 rounded-t-sm transition-colors duration-150"
+						className="bg-primary/30 hover:bg-primary/60 min-h-px flex-1 rounded-t-chip transition-colors duration-150"
 						style={{ height: `${String(Math.round((day.count / max) * 100))}%` }}
 					/>
 				))}

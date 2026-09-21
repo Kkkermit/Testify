@@ -9,6 +9,7 @@ export const theme = {
 	repository: "https://github.com/Kkkermit/Testify",
 	supportServer: "https://discord.gg/xcMVwAVjSD",
 
+	/** The only place a colour is written. Everything else names one of these. */
 	colours: {
 		default: "Blurple",
 		error: "Red",
@@ -16,6 +17,10 @@ export const theme = {
 		warning: "Yellow",
 		info: "Blue",
 		audit: "DarkPurple",
+		/** A moderator acted, rather than something merely changing. */
+		severe: "DarkRed",
+		/** Something left or ran out, which is neither a success nor a failure. */
+		notice: "Orange",
 	} satisfies Record<string, ColorResolvable>,
 
 	/** Plain Unicode only. */

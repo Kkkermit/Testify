@@ -13,7 +13,7 @@ export default defineEvent({
 		await writeAuditLog(client, after.guild, {
 			event: "messageUpdate",
 			title: "Message edited",
-			colour: "Yellow",
+			tone: "updated",
 			fields: [
 				{ name: "Author", value: after.author ? `${after.author}` : "Unknown", inline: true },
 				{ name: "Channel", value: `<#${after.channelId}>`, inline: true },

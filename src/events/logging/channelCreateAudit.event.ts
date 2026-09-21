@@ -9,7 +9,7 @@ export default defineEvent({
 		await writeAuditLog(client, channel.guild, {
 			event: "channelCreate",
 			title: "Channel created",
-			colour: "Green",
+			tone: "created",
 			fields: [
 				{ name: "Channel", value: `${channel} (\`${channel.name}\`)`, inline: true },
 				{ name: "Type", value: ChannelType[channel.type], inline: true },

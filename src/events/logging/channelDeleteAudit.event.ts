@@ -11,7 +11,7 @@ export default defineEvent({
 		await writeAuditLog(client, channel.guild, {
 			event: "channelDelete",
 			title: "Channel deleted",
-			colour: "Red",
+			tone: "deleted",
 			fields: [
 				{ name: "Channel", value: `\`${channel.name}\``, inline: true },
 				{ name: "Type", value: ChannelType[channel.type], inline: true },

@@ -10,7 +10,7 @@ export default defineEvent({
 		await writeAuditLog(client, member.guild, {
 			event: "memberLeave",
 			title: "Member left",
-			colour: "Orange",
+			tone: "left",
 			fields: [
 				{ name: "Member", value: `${member.user.username} (\`${member.id}\`)`, inline: true },
 				{ name: "Member count", value: String(member.guild.memberCount), inline: true },

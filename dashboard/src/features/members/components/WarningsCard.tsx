@@ -89,7 +89,7 @@ export function WarningsCard({
 					</div>
 
 					{confirming && (
-						<div className="border-destructive/40 flex flex-col gap-3 rounded-lg border p-4">
+						<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
 							<Field label={`Type ${detail.username} to clear every warning`} htmlFor="clear-confirm">
 								<input
 									id="clear-confirm"

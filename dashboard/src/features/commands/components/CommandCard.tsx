@@ -37,7 +37,10 @@ export function CommandCard({
 						<code className="font-mono text-sm font-medium">/{command.name}</code>
 						{command.aliases.map((alias) => (
 							<Tooltip key={alias} label={`Also answers to ${prefix}${alias}`}>
-								<code tabIndex={0} className="bg-muted text-muted-foreground rounded px-2 py-0.5 font-mono text-xs">
+								<code
+									tabIndex={0}
+									className="bg-muted text-muted-foreground rounded-chip px-2 py-0.5 font-mono text-xs"
+								>
 									{prefix}
 									{alias}
 								</code>
@@ -82,7 +85,7 @@ export function CommandCard({
 			)}
 
 			{command.subcommands.length > 0 && (
-				<ul className="divide-border border-border divide-y rounded-lg border">
+				<ul className="divide-border border-border divide-y rounded-field border">
 					{command.subcommands.map((subcommand) => (
 						<li key={subcommand.name} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-3 py-2">
 							<code className="font-mono text-xs">
@@ -101,7 +104,7 @@ export function CommandCard({
 							<li
 								tabIndex={0}
 								className={cn(
-									"rounded px-2 py-0.5 font-mono text-xs",
+									"rounded-chip px-2 py-0.5 font-mono text-xs",
 									option.required ? "bg-primary/15 text-accent" : "bg-muted text-muted-foreground",
 								)}
 							>

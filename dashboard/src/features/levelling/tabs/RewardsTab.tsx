@@ -32,13 +32,15 @@ export function RewardsTab({
 			{rewards.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("levelling.noRewards")}</p>
 			) : (
-				<ul className="divide-border border-border divide-y rounded-lg border">
+				<ul className="divide-border border-border divide-y rounded-field border">
 					{rewards.map((reward) => (
 						<li
 							key={`${String(reward.level)}-${reward.roleId}`}
 							className="hover:bg-muted/40 flex items-center gap-3 px-3 py-2 text-sm transition-colors duration-150"
 						>
-							<span className="bg-muted rounded px-2 py-0.5 font-mono text-xs tabular-nums">Level {reward.level}</span>
+							<span className="bg-muted rounded-chip px-2 py-0.5 font-mono text-xs tabular-nums">
+								Level {reward.level}
+							</span>
 							<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId)}</span>
 							<Button
 								variant="ghost"

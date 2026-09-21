@@ -33,7 +33,7 @@ export function SignInPage(): React.JSX.Element {
 				<div className="relative flex flex-col gap-4 p-6">
 					{/* Lifted into the banner, the way a profile card reads. */}
 					<div className="-mt-14 flex items-end gap-3">
-						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-2xl ring-4" />
+						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-tile ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
 							<Eyebrow>{t("auth.signIn")}</Eyebrow>
 							<h1 className="font-display text-2xl leading-tight font-bold tracking-tight">

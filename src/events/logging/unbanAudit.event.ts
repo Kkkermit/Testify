@@ -9,7 +9,7 @@ export default defineEvent({
 		await writeAuditLog(client, ban.guild, {
 			event: "banRemove",
 			title: "Member unbanned",
-			colour: "Green",
+			tone: "restored",
 			fields: [{ name: "User", value: `${ban.user} (\`${ban.user.id}\`)`, inline: true }],
 			thumbnail: ban.user.displayAvatarURL(),
 		});

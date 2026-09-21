@@ -10,14 +10,14 @@ import { cn } from "@/lib/cn";
 function Mock({ scheme }: { scheme: "light" | "dark" }): React.JSX.Element {
 	return (
 		<div data-scheme={scheme} className="bg-background flex h-full w-full gap-1 p-1.5">
-			<div className="bg-card border-border flex w-1/4 flex-col gap-1 rounded-sm border p-1">
+			<div className="bg-card border-border flex w-1/4 flex-col gap-1 rounded-chip border p-1">
 				<span className="bg-primary h-1 w-full rounded-full" />
 				<span className="bg-muted h-1 w-3/4 rounded-full" />
 				<span className="bg-muted h-1 w-2/3 rounded-full" />
 			</div>
 			<div className="flex flex-1 flex-col gap-1">
 				<span className="bg-foreground/80 h-1.5 w-1/2 rounded-full" />
-				<div className="bg-card border-border flex-1 rounded-sm border p-1">
+				<div className="bg-card border-border flex-1 rounded-chip border p-1">
 					<span className="bg-accent block h-1 w-1/3 rounded-full" />
 				</div>
 			</div>
@@ -40,7 +40,7 @@ export function ThemePreview({
 		<figure className="flex flex-col gap-2">
 			<div
 				className={cn(
-					"h-20 overflow-hidden rounded-lg border transition-colors duration-200",
+					"h-20 overflow-hidden rounded-card border transition-colors duration-200",
 					selected ? "border-primary ring-primary/30 ring-2" : "border-border",
 				)}
 			>

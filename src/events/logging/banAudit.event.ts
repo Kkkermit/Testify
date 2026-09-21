@@ -9,7 +9,7 @@ export default defineEvent({
 		await writeAuditLog(client, ban.guild, {
 			event: "banAdd",
 			title: "Member banned",
-			colour: "DarkRed",
+			tone: "moderated",
 			fields: [
 				{ name: "User", value: `${ban.user} (\`${ban.user.id}\`)`, inline: true },
 				{ name: "Reason", value: ban.reason ?? "No reason recorded" },

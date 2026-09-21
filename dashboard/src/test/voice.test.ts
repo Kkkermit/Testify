@@ -1,5 +1,6 @@
-import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { everySource } from "./sourceFiles";
 
 /**
  * The mechanical half of §20.11's voice, checked on every run.
@@ -31,16 +32,6 @@ const AMERICAN: Record<string, string> = {
 	recognize: "recognise",
 	summarize: "summarise",
 };
-
-function everySource(dir: string, found: string[] = []): string[] {
-	for (const entry of readdirSync(dir)) {
-		const path = join(dir, entry);
-		if (statSync(path).isDirectory()) everySource(path, found);
-		else if (path.endsWith(".tsx") && !path.includes(".test.")) found.push(path);
-	}
-
-	return found;
-}
 
 /**
  * Most copy lives in `en.json`; the `.tsx` sweep catches anything a component still spells out itself, so a

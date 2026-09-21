@@ -1,15 +1,16 @@
+/** One colour each, and no two the same: the stripe down an embed is how a reader tells them apart. */
 export const CATEGORIES = {
 	community: { label: "Community", emoji: "👥", colour: "Green" },
-	economy: { label: "Economy", emoji: "💰", colour: "DarkOrange" },
+	economy: { label: "Economy", emoji: "💰", colour: "Gold" },
 	fun: { label: "Fun", emoji: "🎮", colour: "Yellow" },
 	games: { label: "Games", emoji: "🎯", colour: "Orange" },
 	info: { label: "Info", emoji: "📚", colour: "Blurple" },
 	levelling: { label: "Levelling", emoji: "📈", colour: "Fuchsia" },
 	moderation: { label: "Moderation", emoji: "🛡️", colour: "DarkRed" },
 	settings: { label: "Settings", emoji: "⚙️", colour: "Blue" },
-	tickets: { label: "Tickets", emoji: "🎫", colour: "Blurple" },
+	tickets: { label: "Tickets", emoji: "🎫", colour: "DarkAqua" },
 	giveaway: { label: "Giveaways", emoji: "🎁", colour: "Aqua" },
-	developer: { label: "Feedback", emoji: "💬", colour: "Aqua" },
+	developer: { label: "Feedback", emoji: "💬", colour: "Purple" },
 	owner: { label: "Owner", emoji: "👑", colour: "DarkGrey" },
 } as const;
 

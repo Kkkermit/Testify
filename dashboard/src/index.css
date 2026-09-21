@@ -64,8 +64,11 @@
 	--color-feature-tickets: light-dark(#1d4ed8, #60a5fa);
 	--color-feature-community: light-dark(#be185d, #f472b6);
 
-	--radius-card: 0.625rem;
+	/* One scale, so nothing is left to Tailwind's defaults and nothing reads as a corner that was missed. */
+	--radius-chip: 0.375rem;
 	--radius-field: 0.5rem;
+	--radius-card: 0.625rem;
+	--radius-tile: 1rem;
 
 	/* Three roles, three faces. Space Grotesk is the proportional cut of Space Mono, so a console's headings and
 	   its data are drawn from the same skeleton — the pairing is the concept rather than a taste. */
