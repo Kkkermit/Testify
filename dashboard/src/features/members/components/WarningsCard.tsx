@@ -72,7 +72,7 @@ export function WarningsCard({
 								});
 							}}
 						>
-							Add warning
+							{t("members.addWarning")}
 						</Button>
 
 						{detail.warnings.length > 0 && !confirming && (
@@ -83,14 +83,14 @@ export function WarningsCard({
 									setConfirming(true);
 								}}
 							>
-								<Trash2 size={16} aria-hidden="true" /> Clear every warning
+								<Trash2 size={16} aria-hidden="true" /> {t("members.clearEvery")}
 							</Button>
 						)}
 					</div>
 
 					{confirming && (
 						<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
-							<Field label={`Type ${detail.username} to clear every warning`} htmlFor="clear-confirm">
+							<Field label={t("members.typeToClear", { name: detail.username })} htmlFor="clear-confirm">
 								<input
 									id="clear-confirm"
 									className={FIELD}
@@ -111,10 +111,10 @@ export function WarningsCard({
 										onClear(cancel);
 									}}
 								>
-									Clear every warning
+									{t("members.clearEvery")}
 								</Button>
 								<Button variant="ghost" onClick={cancel}>
-									Cancel
+									{t("common.cancel")}
 								</Button>
 							</div>
 						</div>

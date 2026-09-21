@@ -80,7 +80,7 @@ export function OverviewTab(): React.JSX.Element {
 
 			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="servers-heading">
-					Servers
+					{t("owner.servers")}
 				</Eyebrow>
 
 				{selected !== null && (

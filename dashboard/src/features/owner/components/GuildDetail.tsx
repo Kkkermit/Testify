@@ -1,7 +1,7 @@
 import { type OwnerGuildDetail } from "@testify/shared";
 import { ExternalLink, LogOut, X } from "lucide-react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { FIELD, Field, Warning } from "@/components/form";
 import { Avatar, Badge, Button, Card, DataList, Figure, Skeleton } from "@/components/primitives";
@@ -63,11 +63,11 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			</div>
 
 			{guild.missingPermissions.length > 0 && (
-				<Warning>Missing in this server: {guild.missingPermissions.join(", ")}.</Warning>
+				<Warning>{t("owner.missingHere", { permissions: guild.missingPermissions.join(", ") })}</Warning>
 			)}
 
 			<Link to={`/guilds/${guild.id}`} className="text-accent inline-flex items-center gap-2 text-sm hover:underline">
-				Open its settings
+				{t("owner.openSettings")}
 				<ExternalLink size={14} aria-hidden="true" />
 			</Link>
 
@@ -90,18 +90,17 @@ function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () =>
 		<div className="border-border flex flex-col gap-3 border-t pt-4">
 			<div>
 				<h4 className="text-sm font-semibold">{t("owner.leaveServer")}</h4>
-				<p className="text-muted-foreground text-sm">
-					Testify stops answering there immediately. Getting back in needs a fresh invite from someone still inside, and
-					its settings are kept in case it returns.
-				</p>
+				<p className="text-muted-foreground text-sm">{t("owner.leaveBody")}</p>
 			</div>
 
 			<Field
 				htmlFor={inputId}
 				label={
-					<>
-						Type <span className="text-foreground font-mono">{guild.name}</span> to confirm
-					</>
+					<Trans
+						i18nKey="owner.typeToConfirm"
+						values={{ name: guild.name }}
+						components={{ name: <span className="text-foreground font-mono" /> }}
+					/>
 				}
 			>
 				<div className="flex flex-wrap items-center gap-2">
@@ -122,7 +121,7 @@ function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () =>
 						}}
 					>
 						<LogOut size={15} aria-hidden="true" />
-						Leave
+						{t("owner.leave")}
 					</Button>
 				</div>
 			</Field>

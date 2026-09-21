@@ -1,7 +1,7 @@
 import { LOTTERY_FREQUENCIES, LOTTERY_LIMITS } from "@testify/shared";
 import { Coins, Snowflake, Ticket, Trash2, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
@@ -99,7 +99,7 @@ export function LotteryPage(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>{t("lottery.howTitle")}</h2>
 					<p className="text-muted-foreground text-sm">
-						Members buy tickets with <code>/lottery enter</code>. Every ticket adds its fee to the pot.
+						<Trans i18nKey="lottery.howBody" components={{ command: <code /> }} />
 					</p>
 				</div>
 
@@ -224,7 +224,7 @@ export function LotteryPage(): React.JSX.Element {
 								setConfirming((was) => !was);
 							}}
 						>
-							<Trash2 size={16} aria-hidden="true" /> End it
+							<Trash2 size={16} aria-hidden="true" /> {t("lottery.endIt")}
 						</Button>
 					</div>
 
@@ -239,7 +239,7 @@ export function LotteryPage(): React.JSX.Element {
 									setConfirming(false);
 								}}
 							>
-								Yes, end it
+								{t("lottery.yesEndIt")}
 							</Button>
 						</div>
 					)}

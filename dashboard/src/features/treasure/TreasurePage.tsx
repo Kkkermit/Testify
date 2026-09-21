@@ -81,9 +81,7 @@ export function TreasurePage(): React.JSX.Element {
 			<Card className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("treasure.howOften")}</h2>
-					<p className="text-muted-foreground text-sm">
-						Testify picks a number in each range, so drops do not land on a predictable beat.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("treasure.howBody")}</p>
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2">
@@ -158,7 +156,7 @@ export function TreasurePage(): React.JSX.Element {
 							});
 						}}
 					>
-						Save changes
+						{t("common.saveChanges")}
 					</Button>
 
 					<Button
@@ -168,7 +166,7 @@ export function TreasurePage(): React.JSX.Element {
 							reset.mutate();
 						}}
 					>
-						<RotateCcw size={16} aria-hidden="true" /> Reset to defaults
+						<RotateCcw size={16} aria-hidden="true" /> {t("treasure.resetDefaults")}
 					</Button>
 				</div>
 			</Card>

@@ -62,15 +62,11 @@ export function AutomodPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, add.isSuccess)} />}
 			/>
 
-			{!canManage && (
-				<Warning>
-					Testify needs the Manage Server permission before it can read or change AutoMod rules in this server.
-				</Warning>
-			)}
+			{!canManage && <Warning>{t("automod.needsManageServer")}</Warning>}
 
 			<section aria-labelledby="rules-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="rules-heading" count={list.length}>
-					Rules
+					{t("automod.rules")}
 				</Eyebrow>
 
 				{list.length === 0 ? (
@@ -104,9 +100,7 @@ export function AutomodPage(): React.JSX.Element {
 				<Card className="motion-pop flex flex-col gap-4">
 					<div>
 						<h2 className={CARD_HEADING}>{t("automod.addRule")}</h2>
-						<p className="text-muted-foreground text-sm">
-							Discord allows a handful of each kind. It refuses the rest, and this says so when it does.
-						</p>
+						<p className="text-muted-foreground text-sm">{t("automod.limitsBody")}</p>
 					</div>
 
 					<Field label={t("automod.whatToBlock")} htmlFor="automod-preset">
@@ -172,7 +166,7 @@ export function AutomodPage(): React.JSX.Element {
 								setWord("");
 							}}
 						>
-							<Plus size={16} aria-hidden="true" /> Add rule
+							<Plus size={16} aria-hidden="true" /> {t("automod.addRuleAction")}
 						</Button>
 					</div>
 				</Card>

@@ -1,5 +1,5 @@
 import { ExternalLink } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Card, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
@@ -60,9 +60,11 @@ export function RuntimeTab(): React.JSX.Element {
 			<Card className="flex flex-col gap-2">
 				<h2 className={CARD_HEADING}>{t("owner.updates")}</h2>
 				<p className="text-muted-foreground text-sm">
-					You are running <span className="font-mono">v{info.version}</span>. Testify never contacts a server to check
-					for a newer one — a self-hosted bot that phones home on a timer is not something to ship by default. Compare
-					it against the releases page when you want to.
+					<Trans
+						i18nKey="owner.versionBody"
+						values={{ version: info.version }}
+						components={{ version: <span className="font-mono" /> }}
+					/>
 				</p>
 				<a
 					href={`${info.repositoryUrl}/releases`}
@@ -70,7 +72,7 @@ export function RuntimeTab(): React.JSX.Element {
 					rel="noreferrer"
 					className={cn(INLINE_TARGET, "text-accent gap-2 text-sm hover:underline")}
 				>
-					Releases on GitHub
+					{t("owner.releases")}
 					<ExternalLink size={14} aria-hidden="true" />
 				</a>
 			</Card>

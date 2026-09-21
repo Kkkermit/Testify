@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/primitives";
 
 export function Pager({
@@ -9,10 +10,11 @@ export function Pager({
 	pages: number;
 	onChange: (page: number) => void;
 }): React.JSX.Element | null {
+	const { t } = useTranslation();
 	if (pages <= 1) return null;
 
 	return (
-		<nav aria-label="Pages" className="flex items-center justify-between">
+		<nav aria-label={t("common.pages")} className="flex items-center justify-between">
 			<Button
 				variant="secondary"
 				disabled={page <= 1}
@@ -20,10 +22,10 @@ export function Pager({
 					onChange(page - 1);
 				}}
 			>
-				Previous
+				{t("common.previous")}
 			</Button>
 			<span className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
-				Page {page} of {pages}
+				{t("common.pageOf", { page, pages })}
 			</span>
 			<Button
 				variant="secondary"
@@ -32,7 +34,7 @@ export function Pager({
 					onChange(page + 1);
 				}}
 			>
-				Next
+				{t("common.next")}
 			</Button>
 		</nav>
 	);

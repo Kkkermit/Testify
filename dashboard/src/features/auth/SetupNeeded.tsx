@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Card, Eyebrow } from "@/components/primitives";
 import { PAGE_TITLE } from "@/components/primitives/textStyles";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -12,12 +12,11 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 		<main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 p-6">
 			<Card className="motion-pop flex flex-col gap-4">
 				<div className="flex flex-col gap-1">
-					<Eyebrow>Setup</Eyebrow>
+					<Eyebrow>{t("auth.setup")}</Eyebrow>
 					<h1 className={PAGE_TITLE}>{t("auth.almostThere")}</h1>
 				</div>
 				<p className="text-muted-foreground text-sm">
-					The dashboard is switched on but cannot sign anybody in yet. Add these to your <code>.env</code> and restart
-					the bot:
+					<Trans i18nKey="auth.envBody" components={{ code: <code /> }} />
 				</p>
 
 				<ul className="flex flex-col gap-2">
@@ -30,14 +29,12 @@ export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redir
 
 				{missing.includes("DASHBOARD_SESSION_SECRET") && (
 					<p className="text-muted-foreground text-sm">
-						Run <code className="text-foreground">npm run secret -- --write</code> to generate that one.
+						<Trans i18nKey="auth.secretBody" components={{ code: <code className="text-foreground" /> }} />
 					</p>
 				)}
 
 				<div>
-					<p className="text-muted-foreground text-sm">
-						Then add this under OAuth2 → Redirects in the Discord Developer Portal:
-					</p>
+					<p className="text-muted-foreground text-sm">{t("auth.redirectBody")}</p>
 					<p className="bg-muted mt-2 rounded-field px-3 py-2 font-mono text-sm break-all">{redirectUri}</p>
 				</div>
 			</Card>

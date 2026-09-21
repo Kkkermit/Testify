@@ -1,5 +1,6 @@
 import { type CommandAvailability, type CommandSummary } from "@testify/shared";
 import { ChevronRight, Lock, Shield } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Badge, Card, Tooltip } from "@/components/primitives";
 import { DividedList } from "@/components/primitives/DividedList";
@@ -22,6 +23,7 @@ export function CommandCard({
 	availability?: CommandAvailability;
 	onToggle?: (on: boolean) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const { icon: Icon, tint, wash } = featureLook(command.category);
 
 	const off = availability === "off-here" || availability === "off-everywhere";
@@ -50,10 +52,10 @@ export function CommandCard({
 						{command.ownerOnly && (
 							<Badge tone="warning">
 								<Lock size={11} aria-hidden="true" className="mr-1 inline" />
-								Owner
+								{t("commands.owner")}
 							</Badge>
 						)}
-						{command.nsfw && <Badge tone="warning">NSFW</Badge>}
+						{command.nsfw && <Badge tone="warning">{t("commands.nsfw")}</Badge>}
 					</div>
 
 					<p className="text-muted-foreground mt-1 text-sm">{command.description}</p>
@@ -68,7 +70,7 @@ export function CommandCard({
 						to={place.path}
 						className="text-accent hover:bg-muted rounded-card group flex shrink-0 items-center gap-1 px-2 py-1 text-xs font-medium transition-colors duration-150"
 					>
-						Configure
+						{t("commands.configure")}
 						<ChevronRight
 							size={13}
 							aria-hidden="true"

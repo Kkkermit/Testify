@@ -1,7 +1,7 @@
 import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { Pause, Play } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { SearchField, Warning } from "@/components/form";
 import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
@@ -78,8 +78,11 @@ export function LogsTab({
 
 			{logs.data !== undefined && LOG_LEVEL_RANK[logs.data.loggerLevel] > LOG_LEVEL_RANK[level] && (
 				<Warning>
-					Testify is running at <span className="font-mono">LOG_LEVEL={logs.data.loggerLevel}</span>, so nothing below
-					that is written at all. Restart it with a lower level to capture more.
+					<Trans
+						i18nKey="owner.levelFloor"
+						values={{ level: `LOG_LEVEL=${logs.data.loggerLevel}` }}
+						components={{ level: <span className="font-mono" /> }}
+					/>
 				</Warning>
 			)}
 
@@ -92,9 +95,7 @@ export function LogsTab({
 				</Card>
 			)}
 
-			<p className="text-muted-foreground text-xs">
-				Anything that looked like a token, a password or a connection string was removed before the line was stored.
-			</p>
+			<p className="text-muted-foreground text-xs">{t("owner.redactedNote")}</p>
 		</div>
 	);
 }

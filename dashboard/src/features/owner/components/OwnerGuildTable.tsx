@@ -20,14 +20,14 @@ export function OwnerGuildTable({
 			head={
 				<>
 					<th scope="col" className={TH}>
-						Server
+						{t("owner.server")}
 					</th>
 					<th scope="col" className={TH_NUM}>
-						Members
+						{t("owner.members")}
 					</th>
 					{/* Which features are on is the least urgent column, so it is the one a phone loses. */}
 					<th scope="col" className={cn(TH, WIDE_ONLY)}>
-						Configured
+						{t("owner.configured")}
 					</th>
 				</>
 			}

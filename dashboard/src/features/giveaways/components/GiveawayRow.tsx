@@ -31,10 +31,10 @@ export function GiveawayRow({
 				<div className="min-w-0">
 					<h3 className={CARD_HEADING}>{row.prize}</h3>
 					<p className="text-muted-foreground text-xs">
-						#{channel} · {row.winnerCount} winner{row.winnerCount === 1 ? "" : "s"}
+						#{channel} · {t("giveaways.winnerCount", { count: row.winnerCount })}
 					</p>
 				</div>
-				{row.ended ? <Badge>Ended</Badge> : <Badge tone="success">{t("giveaways.running")}</Badge>}
+				{row.ended ? <Badge>{t("giveaways.ended")}</Badge> : <Badge tone="success">{t("giveaways.running")}</Badge>}
 			</div>
 
 			<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-xs">
@@ -43,7 +43,7 @@ export function GiveawayRow({
 					<dd className="text-foreground">{since(row.startAt)}</dd>
 				</div>
 				<div className="flex gap-2">
-					<dt>{row.ended ? "Drew" : "Draws"}</dt>
+					<dt>{t(row.ended ? "giveaways.drew" : "giveaways.draws")}</dt>
 					<dd className="text-foreground">{dateAndTime(row.endAt)}</dd>
 				</div>
 				{row.ended && (
@@ -51,7 +51,7 @@ export function GiveawayRow({
 						<dt>{t("giveaways.winners")}</dt>
 						<dd className="text-foreground">
 							{row.winners.length === 0
-								? "nobody entered"
+								? t("giveaways.nobodyEntered")
 								: row.winners.map((winner) => winner.tag ?? winner.id).join(", ")}
 						</dd>
 					</div>
@@ -62,13 +62,13 @@ export function GiveawayRow({
 				{!row.ended && (
 					<Button variant="secondary" disabled={busy} onClick={onEnd}>
 						<Square size={15} aria-hidden="true" />
-						End now
+						{t("giveaways.endNow")}
 					</Button>
 				)}
 				{canReroll(row) && (
 					<Button variant="secondary" disabled={busy} onClick={onReroll}>
 						<Dices size={15} aria-hidden="true" />
-						Reroll
+						{t("giveaways.reroll")}
 					</Button>
 				)}
 				<Button variant="ghost" disabled={busy} onClick={onDelete}>

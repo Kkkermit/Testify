@@ -1,5 +1,6 @@
-import { Languages, type LucideIcon, Monitor, Moon, Sun } from "lucide-react";
+import { type LucideIcon, Monitor, Moon, Sun } from "lucide-react";
 import { useTranslation } from "react-i18next";
+import { LanguagePicker } from "@/components/form/LanguagePicker";
 import { Card, PageHeader, SegmentedControl } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { AccentSwatch } from "@/features/appearance/components/AccentSwatch";
@@ -8,8 +9,7 @@ import { ACCENTS, useAccent, type Accent } from "@/hooks/useAccent";
 import { MOTIONS, useMotion, type Motion } from "@/hooks/useMotion";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { THEMES, useTheme, type Theme } from "@/hooks/useTheme";
-import { isLocale, LOCALE_NAMES, LOCALES, type Locale, type TranslationKey } from "@/i18n";
-import { cn } from "@/lib/cn";
+import { type TranslationKey } from "@/i18n";
 
 /** One row per theme: the icon, its name and what it does. A template-literal key would hide these from a search. */
 const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hint: TranslationKey }> = {
@@ -34,13 +34,11 @@ const MOTION_OPTIONS: Record<Motion, { label: TranslationKey; hint: TranslationK
 };
 
 export function AppearancePage(): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 	usePageTitle(t("appearance.title"));
 	const { theme, setTheme } = useTheme();
 	const { accent, setAccent } = useAccent();
 	const { motion, setMotion } = useMotion();
-
-	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
 
 	return (
 		<div className="flex flex-col gap-6">
@@ -125,28 +123,7 @@ export function AppearancePage(): React.JSX.Element {
 					<p className="text-muted-foreground text-sm">{t("appearance.languageDescribes")}</p>
 				</div>
 
-				<ul className="grid gap-2 sm:grid-cols-2">
-					{LOCALES.map((locale) => (
-						<li key={locale}>
-							<button
-								type="button"
-								aria-pressed={active === locale}
-								onClick={() => void i18n.changeLanguage(locale)}
-								className={cn(
-									"rounded-card flex w-full items-center gap-3 border px-3 py-2 text-sm transition-colors duration-150",
-									"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
-									active === locale
-										? "border-primary bg-primary/10 text-foreground"
-										: "border-border text-muted-foreground hover:text-foreground hover:bg-muted",
-								)}
-							>
-								<Languages size={16} aria-hidden="true" className="shrink-0" />
-								{/* `lang` on the name itself, so a screen reader pronounces "Français" in French. */}
-								<span lang={locale}>{LOCALE_NAMES[locale]}</span>
-							</button>
-						</li>
-					))}
-				</ul>
+				<LanguagePicker />
 			</Card>
 		</div>
 	);

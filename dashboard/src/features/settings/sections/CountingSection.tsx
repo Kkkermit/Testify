@@ -1,7 +1,7 @@
 import { type ChannelSummary, type CountingPatch, type CountingSetting } from "@testify/shared";
 import { Hash } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { ChannelPicker, Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
@@ -83,7 +83,11 @@ export function CountingSection({
 				<div className="flex flex-col gap-2">
 					<div className="flex items-baseline justify-between gap-3">
 						<p className="text-muted-foreground text-sm">
-							Currently at <span className="text-foreground font-mono">{value.count.toLocaleString()}</span>
+							<Trans
+								i18nKey="settings.currentlyAt"
+								values={{ count: value.count.toLocaleString() }}
+								components={{ count: <span className="text-foreground font-mono" /> }}
+							/>
 						</p>
 						<Button
 							variant="ghost"
@@ -91,7 +95,7 @@ export function CountingSection({
 								save.mutate({ reset: true });
 							}}
 						>
-							Reset to zero
+							{t("settings.resetToZero")}
 						</Button>
 					</div>
 					<div aria-hidden="true" className="bg-muted h-1.5 overflow-hidden rounded-full">

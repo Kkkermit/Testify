@@ -81,10 +81,12 @@ export function TicketsPage(): React.JSX.Element {
 			<Card className="flex flex-wrap items-center justify-between gap-4">
 				<div className="flex flex-wrap items-center gap-3">
 					<h2 className={CARD_HEADING}>{t("tickets.here")}</h2>
-					{settings.enabled ? <Badge tone="success">On</Badge> : <Badge>Off</Badge>}
+					{settings.enabled ? <Badge tone="success">{t("tickets.on")}</Badge> : <Badge>{t("tickets.off")}</Badge>}
 					{settings.posted && <Badge>{t("tickets.panelPosted")}</Badge>}
 				</div>
-				<p className="text-muted-foreground text-sm tabular-nums">{settings.openTickets} open right now</p>
+				<p className="text-muted-foreground text-sm tabular-nums">
+					{t("tickets.openNow", { count: settings.openTickets })}
+				</p>
 			</Card>
 
 			<Card className="flex flex-col gap-4">
@@ -200,7 +202,7 @@ export function TicketsPage(): React.JSX.Element {
 							patch();
 						}}
 					>
-						Save changes
+						{t("common.saveChanges")}
 					</Button>
 
 					<Button
@@ -219,9 +221,7 @@ export function TicketsPage(): React.JSX.Element {
 				<Card className="flex flex-wrap items-center justify-between gap-4">
 					<div>
 						<h2 className={CARD_HEADING}>{t("tickets.turnOff")}</h2>
-						<p className="text-muted-foreground text-sm">
-							Open ticket channels are left alone. The panel message has to be deleted by hand.
-						</p>
+						<p className="text-muted-foreground text-sm">{t("tickets.turnOffBody")}</p>
 					</div>
 
 					<Button
@@ -231,7 +231,7 @@ export function TicketsPage(): React.JSX.Element {
 							disable.mutate();
 						}}
 					>
-						<Power size={16} aria-hidden="true" /> Turn off
+						<Power size={16} aria-hidden="true" /> {t("tickets.turnOffAction")}
 					</Button>
 				</Card>
 			)}

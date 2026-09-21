@@ -19,7 +19,7 @@ export function DrawHistory({
 				<h2 className={CARD_HEADING}>{t("lottery.pastDraws")}</h2>
 				{nextDrawAt !== null && (
 					<p className="text-muted-foreground text-sm">
-						Next draw <time dateTime={nextDrawAt}>{dateAndTime(nextDrawAt)}</time>
+						{t("lottery.nextDraw")} <time dateTime={nextDrawAt}>{dateAndTime(nextDrawAt)}</time>
 					</p>
 				)}
 			</div>
@@ -38,7 +38,10 @@ export function DrawHistory({
 									{shortDate(draw.at)}
 								</time>
 								<p className="text-muted-foreground text-xs tabular-nums">
-									{draw.prizePool.toLocaleString()} across {draw.tickets.toLocaleString()} tickets
+									{t("lottery.drawSummary", {
+										pot: draw.prizePool.toLocaleString(),
+										tickets: draw.tickets.toLocaleString(),
+									})}
 								</p>
 							</div>
 							<p className="text-muted-foreground text-sm">

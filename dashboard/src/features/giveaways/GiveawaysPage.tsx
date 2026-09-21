@@ -77,9 +77,7 @@ export function GiveawaysPage(): React.JSX.Element {
 			<Card className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("giveaways.start")}</h2>
-					<p className="text-muted-foreground text-sm">
-						Testify posts it and draws the winners when the time is up. Members enter with the 🎉 reaction.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("giveaways.startBody")}</p>
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2">
@@ -154,7 +152,7 @@ export function GiveawaysPage(): React.JSX.Element {
 				<div className="flex flex-wrap items-center gap-3">
 					<Button disabled={blocked !== null || busy} onClick={create}>
 						<Plus size={15} aria-hidden="true" />
-						Start it
+						{t("giveaways.startIt")}
 					</Button>
 					{blocked !== null && prize !== "" && <Warning>{blocked}</Warning>}
 				</div>
@@ -166,7 +164,7 @@ export function GiveawaysPage(): React.JSX.Element {
 
 			<section aria-labelledby="giveaways-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="giveaways-heading" count={`${String(runningCount(rows))} running`}>
-					In this server
+					{t("giveaways.inThisServer")}
 				</Eyebrow>
 
 				{rows.length === 0 ? (

@@ -58,8 +58,12 @@ export function StickyPage(): React.JSX.Element {
 			/>
 
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="current-heading" count={`${String(entries.length)} of ${String(list.data.limit)}`}>
-					In use
+				<Eyebrow
+					as="h2"
+					id="current-heading"
+					count={t("sticky.countOf", { used: entries.length, limit: list.data.limit })}
+				>
+					{t("sticky.inUse")}
 				</Eyebrow>
 
 				{entries.length === 0 ? (
@@ -131,7 +135,7 @@ export function StickyPage(): React.JSX.Element {
 							}}
 							className={cn(FIELD, "w-24")}
 						/>
-						<span className="text-muted-foreground text-sm">messages</span>
+						<span className="text-muted-foreground text-sm">{t("sticky.messages")}</span>
 					</div>
 				</Field>
 
@@ -144,7 +148,7 @@ export function StickyPage(): React.JSX.Element {
 
 				<div>
 					<Button disabled={blocked !== null || full || save.isPending} onClick={add}>
-						<Plus size={16} aria-hidden="true" /> Add sticky
+						<Plus size={16} aria-hidden="true" /> {t("sticky.addSticky")}
 					</Button>
 				</div>
 			</Card>

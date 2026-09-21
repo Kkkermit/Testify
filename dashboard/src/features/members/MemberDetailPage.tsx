@@ -46,7 +46,7 @@ export function MemberDetailPage(): React.JSX.Element {
 				to={`/guilds/${guildId}/members`}
 				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground -mt-3 w-fit gap-1 text-sm")}
 			>
-				<ArrowLeft size={16} aria-hidden="true" /> Back to the leaderboards
+				<ArrowLeft size={16} aria-hidden="true" /> {t("members.backToLeaderboards")}
 			</Link>
 
 			<MemberIdentity detail={detail} />

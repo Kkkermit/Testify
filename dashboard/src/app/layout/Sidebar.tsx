@@ -7,8 +7,10 @@ import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
 import { ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
 import { BotMark } from "@/components/brand/BotMark";
+import { FlagIcon } from "@/components/brand/FlagIcon";
 import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
+import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
 import { api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
@@ -38,7 +40,8 @@ export function Sidebar({
 	expanded?: boolean;
 	onNavigate?: () => void;
 }): React.JSX.Element {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
+	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
 	const queryClient = useQueryClient();
 	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
 
@@ -129,6 +132,23 @@ export function Sidebar({
 						</Tooltip>
 					);
 				})}
+
+				<Tooltip label={t("nav.appearanceHint")} placement="right">
+					<Link
+						to="/appearance"
+						className={cn(
+							ROW,
+							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+						)}
+					>
+						<span aria-hidden="true" className={ICON_SLOT}>
+							<FlagIcon locale={active} />
+						</span>
+						<span className={label("truncate")} lang={active}>
+							{LOCALE_NAMES[active]}
+						</span>
+					</Link>
+				</Tooltip>
 
 				<Tooltip label={t("nav.signOutHint")} placement="right">
 					<button

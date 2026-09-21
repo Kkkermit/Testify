@@ -60,7 +60,7 @@ export function AuditLogPage(): React.JSX.Element {
 									setDraft(draftFrom(saved));
 								}}
 							>
-								Discard
+								{t("common.discard")}
 							</Button>
 						)}
 						<Button
@@ -69,7 +69,7 @@ export function AuditLogPage(): React.JSX.Element {
 								save.mutate(draft);
 							}}
 						>
-							Save changes
+							{t("common.saveChanges")}
 						</Button>
 					</div>
 				}

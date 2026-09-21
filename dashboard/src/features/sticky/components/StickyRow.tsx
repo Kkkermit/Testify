@@ -79,11 +79,16 @@ export function StickyRow({
 							onSave({ channelId: entry.channelId, message, cap });
 						}}
 					>
-						Save
+						{t("common.save")}
 					</Button>
 				)}
 
-				<Button variant="ghost" aria-label={`Remove the sticky in ${name}`} onClick={onRemove} disabled={saving}>
+				<Button
+					variant="ghost"
+					aria-label={t("sticky.removeIn", { channel: name })}
+					onClick={onRemove}
+					disabled={saving}
+				>
 					<Trash2 size={16} aria-hidden="true" />
 				</Button>
 			</div>

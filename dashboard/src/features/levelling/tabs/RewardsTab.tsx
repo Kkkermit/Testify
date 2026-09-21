@@ -94,7 +94,7 @@ export function RewardsTab({
 						setRoleId("");
 					}}
 				>
-					<Plus size={16} aria-hidden="true" /> Add
+					<Plus size={16} aria-hidden="true" /> {t("levelling.add")}
 				</Button>
 			</div>
 

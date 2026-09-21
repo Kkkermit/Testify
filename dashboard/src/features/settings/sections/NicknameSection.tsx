@@ -69,7 +69,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 									save.mutate({ nickname: draft.trim() === "" ? null : sanitiseInput(draft) });
 								}}
 							>
-								Save name
+								{t("settings.saveName")}
 							</Button>
 							<Button
 								variant="ghost"
@@ -77,7 +77,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 									setDraft(saved);
 								}}
 							>
-								Discard
+								{t("common.discard")}
 							</Button>
 						</>
 					)}

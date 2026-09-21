@@ -1,8 +1,14 @@
 import { screen } from "@testing-library/react";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
 import { LegalPage } from "@/features/legal/LegalPage";
+import en from "@/i18n/locales/en.json";
 import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
+
+/** The documents are keys now, so the prose a reader sees is what English resolves them to. */
+function english(key: string): string {
+	return (en.legal as Record<string, string>)[key.replace("legal.", "")] ?? key;
+}
 
 describe("the legal pages", () => {
 	it.each([
@@ -11,15 +17,18 @@ describe("the legal pages", () => {
 	])("renders every section of the %s", (path, document) => {
 		renderWithProviders(<LegalPage document={document} />, { path: `/${path}` });
 
-		expect(screen.getByRole("heading", { level: 1, name: document.title })).toBeInTheDocument();
+		expect(screen.getByRole("heading", { level: 1, name: english(document.title) })).toBeInTheDocument();
 		for (const section of document.sections) {
-			expect(screen.getByRole("heading", { level: 2, name: section.heading })).toBeInTheDocument();
+			expect(screen.getByRole("heading", { level: 2, name: english(section.heading) })).toBeInTheDocument();
 		}
 	});
 
 	/** The claims the code has to keep true, so a change that breaks one breaks a test. */
 	it("says what the code actually does", () => {
-		const text = PRIVACY.sections.flatMap((section) => [...section.paragraphs, ...(section.list ?? [])]).join(" ");
+		const text = PRIVACY.sections
+			.flatMap((section) => [...section.paragraphs, ...(section.list ?? [])])
+			.map(english)
+			.join(" ");
 
 		expect(text).toMatch(/does not read or keep your message history/i);
 		expect(text).toMatch(/No user ids are stored/i);

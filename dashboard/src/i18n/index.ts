@@ -7,15 +7,17 @@ import en from "@/i18n/locales/en.json";
 /** Every key English defines. A nav entry or a component naming one that is not there fails the build. */
 export type TranslationKey = ParseKeys<"translation">;
 
-export const LOCALES = ["en", "es", "de", "fr"] as const;
+export const LOCALES = ["en", "de", "es", "fr", "it", "ru"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 /** Endonyms: somebody looking for their own language is looking for the word they call it by. */
 export const LOCALE_NAMES: Record<Locale, string> = {
 	en: "English",
-	es: "Español",
 	de: "Deutsch",
+	es: "Español",
 	fr: "Français",
+	it: "Italiano",
+	ru: "Русский",
 };
 
 export const LOCALE_STORAGE_KEY = "testify:locale";
@@ -25,9 +27,9 @@ export function isLocale(value: unknown): value is Locale {
 }
 
 /**
- * English is bundled because every session needs it as the fallback; the other three are separate chunks the
- * browser only fetches when somebody is actually reading in that language. Four dictionaries in the first load
- * is 22 kB nobody's session uses more than a quarter of.
+ * English is bundled because every session needs it as the fallback; the rest are separate chunks the browser
+ * only fetches when somebody is actually reading in that language. Six dictionaries in the first load would be
+ * weight nobody's session uses more than a sixth of.
  */
 const lazyDictionaries = resourcesToBackend(
 	async (language: string) => (await import(`./locales/${language}.json`)) as { default: Record<string, unknown> },

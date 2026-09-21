@@ -1,7 +1,7 @@
 import { type PrefixPatch, type PrefixSetting } from "@testify/shared";
 import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
@@ -59,7 +59,11 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 						className={cn(FIELD, "max-w-40 font-mono", problem !== null && dirty && "border-destructive")}
 					/>
 					<p className="text-muted-foreground text-sm">
-						e.g. <span className="font-mono">{(problem === null ? draft.trim() : value.prefix) || "t?"}ban</span>
+						<Trans
+							i18nKey="settings.prefixExample"
+							values={{ example: `${(problem === null ? draft.trim() : value.prefix) || "t?"}ban` }}
+							components={{ example: <span className="font-mono" /> }}
+						/>
 					</p>
 					{dirty && problem === null && <Button onClick={commit}>{t("settings.prefixSave")}</Button>}
 				</div>

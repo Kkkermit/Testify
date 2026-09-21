@@ -28,7 +28,10 @@ export type GatewayAction = z.infer<typeof gatewayAction>;
  * Shutting the process down ends the dashboard with it, so it is typed rather than clicked — the same shape as
  * every other confirmation that cannot be undone from the screen that started it.
  */
-export const shutdownRequest = z.object({ confirm: z.literal("shut down") });
+/** Typed to confirm, and compared by the API — so it is a protocol value rather than copy, and never translated. */
+export const SHUTDOWN_PHRASE = "shut down";
+
+export const shutdownRequest = z.object({ confirm: z.literal(SHUTDOWN_PHRASE) });
 
 export const BOT_IDENTITY_LIMITS = { minUsername: 2, maxUsername: 32, maxAvatarBytes: 8 * 1024 * 1024 } as const;
 

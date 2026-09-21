@@ -1,4 +1,5 @@
 import { BOARD_LABELS, type BoardPage } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Avatar, Badge } from "@/components/primitives";
 import { CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives/DataTable";
@@ -13,6 +14,7 @@ export function BoardTable({
 	youId: string | null;
 	guildId: string;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const labels = BOARD_LABELS[data.board];
 
 	return (
@@ -24,7 +26,7 @@ export function BoardTable({
 						#
 					</th>
 					<th scope="col" className={TH}>
-						Member
+						{t("members.member")}
 					</th>
 					<th scope="col" className={TH_NUM}>
 						{labels.primary}
@@ -46,8 +48,8 @@ export function BoardTable({
 						>
 							<Avatar name={row.displayName} url={row.avatarUrl} size={24} seed={row.userId} />
 							<span className="truncate">{row.displayName}</span>
-							{row.userId === youId && <Badge>You</Badge>}
-							{!row.inGuild && <Badge tone="warning">Left</Badge>}
+							{row.userId === youId && <Badge>{t("members.you")}</Badge>}
+							{!row.inGuild && <Badge tone="warning">{t("members.left")}</Badge>}
 						</Link>
 					</th>
 					<td className={CELL_NUM}>{row.primary.toLocaleString()}</td>

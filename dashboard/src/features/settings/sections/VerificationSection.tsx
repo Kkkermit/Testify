@@ -103,12 +103,7 @@ export function VerificationSection({
 
 					{markupWarning(draft) !== null && <Warning>{markupWarning(draft)}</Warning>}
 
-					{value.roleTooHigh && (
-						<Warning>
-							That role sits at or above Testify&apos;s own, so Testify cannot give it to anybody. Move Testify&apos;s
-							role higher in Server Settings → Roles, or pick a lower one.
-						</Warning>
-					)}
+					{value.roleTooHigh && <Warning>{t("settings.roleTooHigh")}</Warning>}
 
 					{blocked !== null && <Warning>{blocked}</Warning>}
 

@@ -1,7 +1,7 @@
-import { BOT_IDENTITY_LIMITS } from "@testify/shared";
+import { BOT_IDENTITY_LIMITS, SHUTDOWN_PHRASE } from "@testify/shared";
 import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, Skeleton } from "@/components/primitives";
@@ -87,10 +87,7 @@ export function ControlTab(): React.JSX.Element {
 			<Card className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("owner.nameAndPicture")}</h2>
-					<p className="text-muted-foreground text-sm">
-						The bot's global profile, in every server at once. Discord has no per-server picture for bots — a manager
-						gets a nickname and nothing more.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("owner.identityBody")}</p>
 				</div>
 
 				<Field label={t("owner.username")} htmlFor="bot-name">
@@ -111,13 +108,11 @@ export function ControlTab(): React.JSX.Element {
 								identity.mutate({ username: sanitiseInput(draft) });
 							}}
 						>
-							Rename
+							{t("owner.rename")}
 						</Button>
 						<SavingIndicator state={savingStateOf(identity.isPending, identity.isSuccess)} />
 					</div>
-					<p className="text-muted-foreground text-xs">
-						Discord allows two username changes an hour, and refuses the rest — the message below is theirs, not ours.
-					</p>
+					<p className="text-muted-foreground text-xs">{t("owner.renameLimit")}</p>
 				</Field>
 
 				{identity.error !== null && (
@@ -128,18 +123,17 @@ export function ControlTab(): React.JSX.Element {
 			<Card className="border-destructive/40 flex flex-col gap-3">
 				<div>
 					<h2 className={CARD_HEADING}>{t("owner.shutDown")}</h2>
-					<p className="text-muted-foreground text-sm">
-						Stops the whole process, and this dashboard with it — the bot serves it. Only your host can start it again:
-						systemd, Docker or a terminal.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("owner.shutDownBody")}</p>
 				</div>
 
 				<Field
 					htmlFor="shutdown-confirm"
 					label={
-						<>
-							Type <span className="text-foreground font-mono">shut down</span> to confirm
-						</>
+						<Trans
+							i18nKey="owner.typeToConfirm"
+							values={{ name: SHUTDOWN_PHRASE }}
+							components={{ name: <span className="text-foreground font-mono" /> }}
+						/>
 					}
 				>
 					<div className="flex flex-wrap items-center gap-2">
@@ -154,13 +148,13 @@ export function ControlTab(): React.JSX.Element {
 						/>
 						<Button
 							variant="destructive"
-							disabled={confirm !== "shut down" || shutdown.isPending}
+							disabled={confirm !== SHUTDOWN_PHRASE || shutdown.isPending}
 							onClick={() => {
 								shutdown.mutate();
 							}}
 						>
 							<Power size={15} aria-hidden="true" />
-							Shut down
+							{t("owner.shutDown")}
 						</Button>
 					</div>
 				</Field>

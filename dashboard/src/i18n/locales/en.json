@@ -15,7 +15,17 @@
 		"unknownAccount": "Unknown account",
 		"chosen": "{{count}} of {{max}} chosen",
 		"whereTalking": "Where they were talking",
-		"savingEllipsis": "Saving…"
+		"savingEllipsis": "Saving…",
+		"pages": "Pages",
+		"previous": "Previous",
+		"next": "Next",
+		"pageOf": "Page {{page}} of {{pages}}",
+		"cancel": "Cancel",
+		"save": "Save",
+		"discard": "Discard",
+		"saveChanges": "Save changes",
+		"tryAgain": "Try again",
+		"yes": "Yes"
 	},
 	"nav": {
 		"servers": "Servers",
@@ -178,7 +188,11 @@
 		"featuresOn": "Features on",
 		"featuresHint": "Features Testify is actively running here, out of everything it offers.",
 		"nothingChanged": "Nothing changed here yet",
-		"nothingChangedBody": "Every change made from this dashboard is recorded, so you can see who turned what off and when."
+		"nothingChangedBody": "Every change made from this dashboard is recorded, so you can see who turned what off and when.",
+		"features": "Features",
+		"recentChanges": "Recent changes",
+		"missingTitle": "Testify is missing permissions",
+		"missingBody": "These features are configured but will quietly do nothing until Testify is granted them."
 	},
 	"automod": {
 		"title": "AutoMod",
@@ -196,12 +210,26 @@
 		"nothingToShow": "Nothing to show",
 		"addOneBelow": "Add one below, and Discord blocks matching messages before anyone reads them.",
 		"needsPermission": "Grant Testify the Manage Server permission to see this server’s rules.",
-		"refusedRule": "Discord refused that rule."
+		"refusedRule": "Discord refused that rule.",
+		"needsManageServer": "Testify needs the Manage Server permission before it can read or change AutoMod rules in this server.",
+		"rules": "Rules",
+		"limitsBody": "Discord allows a handful of each kind. It refuses the rest, and this says so when it does.",
+		"addRuleAction": "Add rule"
 	},
 	"auth": {
 		"almostThere": "Almost there",
 		"signIn": "Sign in",
-		"finishSetup": "Finish setting up"
+		"finishSetup": "Finish setting up",
+		"setup": "Setup",
+		"envBody": "The dashboard is switched on but cannot sign anybody in yet. Add these to your <code>.env</code> and restart the bot:",
+		"secretBody": "Run <code>npm run secret -- --write</code> to generate that one.",
+		"redirectBody": "Then add this under OAuth2 → Redirects in the Discord Developer Portal:",
+		"configureBody": "Configure {{name}} in any server where you have Manage Server, without opening Discord.",
+		"cancelled": "You cancelled the Discord sign-in. Nothing was shared.",
+		"signInWith": "Sign in with Discord",
+		"scopes": "{{name}} asks for <scope>identify</scope> to know who you are and <scope>guilds</scope> to list your servers. It never asks for your email, and it cannot read your messages through this.",
+		"agree": "By signing in you agree to the <terms>terms of use</terms>. What {{name}} stores is set out in the <privacy>privacy notice</privacy>.",
+		"title": "Sign in"
 	},
 	"auditLog": {
 		"title": "Audit logging",
@@ -228,7 +256,9 @@
 		"largest": "Largest drop",
 		"cooldown": "Cooldown",
 		"cooldownHint": "Minutes before another drop can appear, however busy the chat is.",
-		"notSetUpYet": "Not set up yet — the numbers below are the defaults until you turn drops on."
+		"notSetUpYet": "Not set up yet — the numbers below are the defaults until you turn drops on.",
+		"howBody": "Testify picks a number in each range, so drops do not land on a predictable beat.",
+		"resetDefaults": "Reset to defaults"
 	},
 	"welcome": {
 		"title": "Welcome messages",
@@ -243,7 +273,10 @@
 		"message": "Message",
 		"tooLong": "That message is longer than Discord will accept. Shorten it before saving.",
 		"cardAlt": "Welcome card image",
-		"insert": "Insert:"
+		"insert": "Insert:",
+		"saveMessage": "Save message",
+		"preview": "Preview",
+		"thisServer": "this server"
 	},
 	"sticky": {
 		"title": "Sticky messages",
@@ -257,7 +290,12 @@
 		"message": "Message",
 		"repostAfter": "Repost after",
 		"repostHint": "How many messages pass before Testify posts it again.",
-		"full": "That is the most stickies Testify can hold. Remove one to add another."
+		"full": "That is the most stickies Testify can hold. Remove one to add another.",
+		"inUse": "In use",
+		"messages": "messages",
+		"addSticky": "Add sticky",
+		"countOf": "{{used}} of {{limit}}",
+		"removeIn": "Remove the sticky in {{channel}}"
 	},
 	"commands": {
 		"title": "Commands",
@@ -284,7 +322,10 @@
 		"availableToAll": "Anybody who may use it can run it",
 		"offHere": "Nobody in this server can run it",
 		"offEverywhere": "The bot owner switched this off everywhere",
-		"locked": "Testify needs this one to stay on"
+		"locked": "Testify needs this one to stay on",
+		"owner": "Owner",
+		"nsfw": "NSFW",
+		"configure": "Configure"
 	},
 	"giveaways": {
 		"title": "Giveaways",
@@ -299,7 +340,18 @@
 		"emptyTitle": "No giveaways yet",
 		"emptyBody": "Start one above and it appears here, with the controls to end or redraw it.",
 		"running": "Running",
-		"started": "Started"
+		"started": "Started",
+		"ended": "Ended",
+		"endNow": "End now",
+		"reroll": "Reroll",
+		"drew": "Drew",
+		"draws": "Draws",
+		"nobodyEntered": "nobody entered",
+		"winnerCount_one": "{{count}} winner",
+		"winnerCount_other": "{{count}} winners",
+		"startIt": "Start it",
+		"inThisServer": "In this server",
+		"startBody": "Testify posts it and draws the winners when the time is up. Members enter with the 🎉 reaction."
 	},
 	"levelling": {
 		"title": "Levelling",
@@ -322,7 +374,8 @@
 		"hierarchyNote": "Roles above Testify in the hierarchy are hidden, because it could not grant them.",
 		"tabsLabel": "Levelling settings",
 		"ignoresBody": "Nothing said here, or by anyone holding these roles, earns XP.",
-		"boostsBody": "Members holding one of these earn more XP. Someone with several gets the highest, not the product."
+		"boostsBody": "Members holding one of these earn more XP. Someone with several gets the highest, not the product.",
+		"add": "Add"
 	},
 	"members": {
 		"title": "Members",
@@ -346,7 +399,29 @@
 		"standing": "Standing in this server",
 		"edited": "Edited",
 		"noXpYet": "They have earned no XP here yet.",
-		"noAccountYet": "They have no account here yet — adding money opens one."
+		"noAccountYet": "They have no account here yet — adding money opens one.",
+		"activeSoftban": "Active softban",
+		"lifts": "Lifts",
+		"liftNow": "Lift it now",
+		"backToLeaderboards": "Back to the leaderboards",
+		"findMe": "Find me",
+		"bot": "Bot",
+		"moreRoles": "+{{count}} more",
+		"member": "Member",
+		"you": "You",
+		"left": "Left",
+		"money": "Money",
+		"levelRewardNote": "Any role rewards the new level earns are handed out at the same time.",
+		"addWarning": "Add warning",
+		"clearEvery": "Clear every warning",
+		"wallet": "Wallet",
+		"bank": "Bank",
+		"holds": "They hold {{amount}} in their {{purse}}.",
+		"addTo": "Add to {{purse}}",
+		"takeFrom": "Take from {{purse}}",
+		"typeToClear": "Type {{name}} to clear every warning",
+		"setLevelAction": "Set level",
+		"changeXpAction": "Change XP"
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -372,7 +447,12 @@
 		"postAgain": "Posting again edits the panel already out there rather than leaving a second one.",
 		"nothingPosted": "Nothing is posted until you press the button below.",
 		"updatePanel": "Update the panel",
-		"postPanel": "Post the panel"
+		"postPanel": "Post the panel",
+		"on": "On",
+		"off": "Off",
+		"openNow": "{{count}} open right now",
+		"turnOffBody": "Open ticket channels are left alone. The panel message has to be deleted by hand.",
+		"turnOffAction": "Turn off"
 	},
 	"lottery": {
 		"title": "Lottery",
@@ -393,13 +473,17 @@
 		"winnersADraw": "Winners a draw",
 		"startingPot": "Starting pot",
 		"startingPotHint": "Seeded into every round.",
-		"endIt": "End the lottery",
+		"endIt": "End it",
 		"cannotUndo": "This cannot be undone.",
 		"pastDraws": "Past draws",
 		"noDraws": "No draws yet",
 		"noDrawsBody": "The first one appears here once it runs.",
 		"start": "Start the lottery",
-		"rolledOver": "No entries, rolled over"
+		"rolledOver": "No entries, rolled over",
+		"nextDraw": "Next draw",
+		"drawSummary": "{{pot}} across {{tickets}} tickets",
+		"howBody": "Members buy tickets with <command>/lottery enter</command>. Every ticket adds its fee to the pot.",
+		"yesEndIt": "Yes, end it"
 	},
 	"settings": {
 		"title": "Server settings",
@@ -450,7 +534,12 @@
 		"verifyNoRole": "No role chosen",
 		"verifyPanel": "What the panel says",
 		"updatePanel": "Update the posted panel",
-		"postPanel": "Post the panel"
+		"postPanel": "Post the panel",
+		"currentlyAt": "Currently at <count>{{count}}</count>",
+		"resetToZero": "Reset to zero",
+		"saveName": "Save name",
+		"prefixExample": "e.g. <example>{{example}}</example>",
+		"roleTooHigh": "That role sits at or above Testify’s own, so Testify cannot give it to anybody. Move Testify’s role higher in Server Settings → Roles, or pick a lower one."
 	},
 	"owner": {
 		"title": "Owner console",
@@ -548,6 +637,80 @@
 		"levelFatalName": "Fatal",
 		"showing": "Showing {{shown}} of {{matched}} matching lines",
 		"held": "{{buffered}} of {{capacity}} held",
-		"pausedFull": "Paused."
+		"pausedFull": "Paused.",
+		"missingHere": "Missing in this server: {{permissions}}.",
+		"openSettings": "Open its settings",
+		"leaveBody": "Testify stops answering there immediately. Getting back in needs a fresh invite from someone still inside, and its settings are kept in case it returns.",
+		"typeToConfirm": "Type <name>{{name}}</name> to confirm",
+		"leave": "Leave",
+		"day": "Day",
+		"server": "Server",
+		"blacklistBody": "A blocked account cannot run any command, on either surface, in any server. Bot-wide — to stop one command in one server, switch it off instead.",
+		"blockThem": "Block them",
+		"idShape": "A user ID is 17 to 20 digits.",
+		"identityBody": "The bot’s global profile, in every server at once. Discord has no per-server picture for bots — a manager gets a nickname and nothing more.",
+		"rename": "Rename",
+		"renameLimit": "Discord allows two username changes an hour and refuses the rest — the message below is Discord’s, not Testify’s.",
+		"shutDownBody": "Stops the whole process, and this dashboard with it — the bot serves it. Only your host can start it again: systemd, Docker or a terminal.",
+		"levelFloor": "Testify is running at <level>{{level}}</level>, so nothing below that is written at all. Restart it with a lower level to capture more.",
+		"redactedNote": "Anything that looked like a token, a password or a connection string was removed before the line was stored.",
+		"runnerBody": "Runs here rather than in a server: nothing is posted to Discord, and the reply comes back below. Only read-only owner commands are listed.",
+		"runIt": "Run it",
+		"versionBody": "You are running <version>v{{version}}</version>. Testify never contacts a server to check for a newer one — a self-hosted bot that phones home on a timer is not something to ship by default. Compare it against the releases page when you want to.",
+		"releases": "Releases on GitHub",
+		"blockedAccounts": "Blocked accounts",
+		"blockListFailed": "The block list could not be loaded, so this is not a list of who is blocked.",
+		"no": "No"
+	},
+	"legal": {
+		"backToDashboard": "Back to the dashboard",
+		"englishGoverns": "Translated for convenience. Where a translation and the English text disagree, the English text is the one that governs.",
+		"termsTitle": "Terms of use",
+		"termsSummary": "Testify is open-source software you or somebody you know is running. These terms cover using this instance of it.",
+		"whoRuns": "Who runs this",
+		"whoRunsP1": "Testify is self-hosted. Whoever deployed this instance — the operator — decides what it does, what it stores and who can reach it. They are responsible for it, not the project’s authors.",
+		"whoRunsP2": "The software is provided as-is, without warranty of any kind. Nobody promises it will be available, correct, or free of defects.",
+		"usingBot": "Using the bot",
+		"usingBotP1": "By adding Testify to a server or using its commands you agree to the following.",
+		"usingBotL1": "Follow Discord’s Terms of Service and Community Guidelines. Nothing here overrides them.",
+		"usingBotL2": "Do not use the bot to harass anybody, to break the law, or to evade a moderation action.",
+		"usingBotL3": "Do not try to break, overload or extract data from the bot or the machine it runs on.",
+		"usingBotL4": "A server’s moderators, not the bot, are responsible for what happens in that server.",
+		"usingDashboard": "Using the dashboard",
+		"usingDashboardP1": "You can only configure a server you already have Manage Server in. That permission is checked live on every request, so losing it takes effect immediately.",
+		"usingDashboardP2": "Every change made here is written to an audit log with your Discord account attached, so the server’s other managers can see who changed what.",
+		"inBot": "Economy, levels and other in-bot things",
+		"inBotP1": "Coins, levels, items and anything else the bot tracks have no monetary value, cannot be exchanged for anything, and may be reset at any time by a server’s moderators or by the operator.",
+		"ending": "Ending it",
+		"endingP1": "You can stop using Testify at any time by removing it from your server. When it is removed, the settings it stored for that server are deleted.",
+		"endingP2": "The operator may remove the bot from a server, or block an account from using it, at their discretion.",
+		"changes": "Changes",
+		"changesP1": "These terms may change as the software does. The current text is always the one on this page, and the project’s history is public.",
+		"privacyTitle": "Privacy",
+		"privacySummary": "What Testify stores, why, and for how long. It is a short list on purpose — the bot collects the minimum it needs to work.",
+		"stored": "What is stored",
+		"storedP1": "Testify keeps only what a feature needs to function.",
+		"storedL1": "Server settings: the prefix, which features are on, which channels and roles they use.",
+		"storedL2": "Per-server, per-member records for features you turn on: levels and XP, economy balances and items, warnings, and verification status.",
+		"storedL3": "A dashboard session when you sign in: your Discord user id, your username, and your OAuth tokens, encrypted at rest.",
+		"storedL4": "An audit record for every change made from the dashboard: who made it, what changed, and when.",
+		"storedL5": "Command usage counts: which command, in which server, on which day. No user ids are stored with these.",
+		"storedL6": "Dashboard screen counts: which screen was opened and on which day. Counted bot-wide — no user id and no server id is stored with these, so they say which screens get used and nothing about who used them.",
+		"notStored": "What is not stored",
+		"notStoredP1": "Testify does not read or keep your message history. Message content is processed in memory for features you enable — automod, counting, XP — and is never written to the database.",
+		"notStoredP2": "Your Discord password and email are never seen by this bot: signing in goes through Discord’s own OAuth, and Testify only receives your id, username, avatar and the servers you are in.",
+		"notStoredP3": "The bot does not sell, share or transmit anything to a third party. It talks to Discord and to its own database, and nothing else.",
+		"logConsole": "The log console",
+		"logConsoleP1": "The operator can see the bot’s recent log lines from the owner console. Anything that looks like a token, password or connection string is removed before a line is stored, and the buffer holds only the last few hundred lines in memory — a restart clears it.",
+		"retention": "How long it is kept",
+		"retentionP1": "Nothing is kept longer than it is useful.",
+		"retentionL1": "Server settings: until the bot is removed from that server, then deleted.",
+		"retentionL2": "Dashboard sessions: expire on their own, and signing out deletes them immediately.",
+		"retentionL3": "Audit records and usage counts: 90 days, then deleted automatically.",
+		"retentionL4": "Levels, balances and other member records: until the server’s moderators reset them, or the bot is removed.",
+		"removal": "Getting your data removed",
+		"removalP1": "Removing the bot from a server deletes that server’s settings. For anything about you personally, ask the operator of this instance — they run the database and can delete it.",
+		"cookies": "Cookies",
+		"cookiesP1": "One cookie, set when you sign in, holding a signed session identifier. It is httpOnly, same-site, and marked Secure when the dashboard is served over HTTPS. There is no third-party cookie, no advertising identifier, and nothing that follows you between sites. Your IP address is not stored, and neither is your location, your browser or your device."
 	}
 }

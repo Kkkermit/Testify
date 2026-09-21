@@ -30,7 +30,7 @@ export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
 					<caption>{t("owner.perDay")}</caption>
 					<thead>
 						<tr>
-							<th scope="col">Day</th>
+							<th scope="col">{t("owner.day")}</th>
 							<th scope="col">{t("owner.commands")}</th>
 							<th scope="col">{t("owner.failures")}</th>
 						</tr>

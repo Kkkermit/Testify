@@ -42,10 +42,7 @@ export function BlacklistTab(): React.JSX.Element {
 			<Card focal className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("owner.blockSomeone")}</h2>
-					<p className="text-muted-foreground text-sm">
-						A blocked account cannot run any command, on either surface, in any server. Bot-wide — to stop one command
-						in one server, switch it off instead.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("owner.blacklistBody")}</p>
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-[minmax(0,20rem)_1fr]">
@@ -81,10 +78,10 @@ export function BlacklistTab(): React.JSX.Element {
 				<div className="flex items-center gap-3">
 					<Button variant="destructive" disabled={!isSnowflake(userId) || busy} onClick={submit}>
 						<Ban size={15} aria-hidden="true" />
-						Block them
+						{t("owner.blockThem")}
 					</Button>
 					{userId !== "" && !isSnowflake(userId) && (
-						<p className="text-muted-foreground text-sm">A user ID is 17 to 20 digits.</p>
+						<p className="text-muted-foreground text-sm">{t("owner.idShape")}</p>
 					)}
 				</div>
 
@@ -94,16 +91,18 @@ export function BlacklistTab(): React.JSX.Element {
 			</Card>
 
 			<Card className="flex flex-col gap-4">
-				<h2 className={CARD_HEADING}>Blocked accounts {rows.data && `(${String(rows.data.length)})`}</h2>
+				<h2 className={CARD_HEADING}>
+					{t("owner.blockedAccounts")} {rows.data && `(${String(rows.data.length)})`}
+				</h2>
 
 				{rows.isPending && <Skeleton className="h-24 w-full" />}
 
 				{/* "Nobody is blocked" and "the list would not load" are opposite answers on a security screen. */}
 				{rows.isError && (
 					<Warning>
-						The block list could not be loaded, so this is not a list of who is blocked.{" "}
+						{t("owner.blockListFailed")}{" "}
 						<button type="button" className="underline" onClick={() => void rows.refetch()}>
-							Try again
+							{t("common.tryAgain")}
 						</button>
 					</Warning>
 				)}

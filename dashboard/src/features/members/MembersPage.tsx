@@ -57,7 +57,7 @@ export function MembersPage(): React.JSX.Element {
 							put({ page: String(jump) });
 						}}
 					>
-						<Crosshair size={16} aria-hidden="true" /> Find me
+						<Crosshair size={16} aria-hidden="true" /> {t("members.findMe")}
 					</Button>
 				)}
 			</div>

@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
@@ -14,11 +14,12 @@ import { hardRedirect } from "@/lib/redirect";
 /** One button, and the two scopes named — asking for less is a feature, so say what it is. */
 export function SignInPage(): React.JSX.Element {
 	const { t } = useTranslation();
-	usePageTitle("Sign in");
+	usePageTitle(t("auth.title"));
 	const [params] = useSearchParams();
 	const setup = useSetup();
 	const bot = useBot();
 	const returnTo = params.get("returnTo") ?? "/guilds";
+	const name = bot.data?.username ?? "Testify";
 
 	if (setup.data?.configured === false)
 		return <SetupNeeded missing={setup.data.missing} redirectUri={setup.data.redirectUri} />;
@@ -37,18 +38,15 @@ export function SignInPage(): React.JSX.Element {
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-tile ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
 							<Eyebrow>{t("auth.signIn")}</Eyebrow>
-							<h1 className={PAGE_TITLE}>{bot.data?.username ?? "Testify"}</h1>
+							<h1 className={PAGE_TITLE}>{name}</h1>
 						</div>
 					</div>
 
-					<p className="text-muted-foreground text-sm">
-						Configure {bot.data?.username ?? "Testify"} in any server where you have Manage Server, without opening
-						Discord.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("auth.configureBody", { name })}</p>
 
 					{params.get("denied") !== null && (
 						<p className="text-warning text-sm" role="status">
-							You cancelled the Discord sign-in. Nothing was shared.
+							{t("auth.cancelled")}
 						</p>
 					)}
 
@@ -58,27 +56,28 @@ export function SignInPage(): React.JSX.Element {
 							hardRedirect(`/api/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
 						}}
 					>
-						Sign in with Discord
+						{t("auth.signInWith")}
 					</Button>
 
 					<p className="text-muted-foreground text-xs">
-						Testify asks for <strong className="text-foreground">identify</strong> to know who you are and{" "}
-						<strong className="text-foreground">guilds</strong> to list your servers. It never asks for your email, and
-						it cannot read your messages through this.
+						<Trans
+							i18nKey="auth.scopes"
+							values={{ name }}
+							components={{ scope: <strong className="text-foreground" /> }}
+						/>
 					</p>
 				</div>
 			</Card>
 
 			<p className="text-muted-foreground text-xs">
-				By signing in you agree to the{" "}
-				<Link to="/terms" className="hover:text-foreground underline">
-					terms of use
-				</Link>
-				. What Testify stores is set out in the{" "}
-				<Link to="/privacy" className="hover:text-foreground underline">
-					privacy notice
-				</Link>
-				.
+				<Trans
+					i18nKey="auth.agree"
+					values={{ name }}
+					components={{
+						terms: <Link to="/terms" className="hover:text-foreground underline" />,
+						privacy: <Link to="/privacy" className="hover:text-foreground underline" />,
+					}}
+				/>
 			</p>
 		</main>
 	);

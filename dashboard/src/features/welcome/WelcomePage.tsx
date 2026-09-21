@@ -132,7 +132,7 @@ export function WelcomePage(): React.JSX.Element {
 				{dirty && !tooLong && (
 					<div className="flex items-center gap-3">
 						<Button onClick={saveMessage} disabled={draft.trim() === ""}>
-							Save message
+							{t("welcome.saveMessage")}
 						</Button>
 						<Button
 							variant="ghost"
@@ -140,7 +140,7 @@ export function WelcomePage(): React.JSX.Element {
 								setDraft(welcome.message);
 							}}
 						>
-							Discard
+							{t("common.discard")}
 						</Button>
 					</div>
 				)}
@@ -152,12 +152,12 @@ export function WelcomePage(): React.JSX.Element {
 
 			<section aria-labelledby="preview-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="preview-heading">
-					Preview
+					{t("welcome.preview")}
 				</Eyebrow>
 				<GreetingPreview
 					message={draft}
 					style={welcome.style}
-					guildName={overview.data?.name ?? "this server"}
+					guildName={overview.data?.name ?? t("welcome.thisServer")}
 					memberCount={overview.data?.memberCount ?? 0}
 				/>
 			</section>

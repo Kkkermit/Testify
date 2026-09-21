@@ -70,9 +70,7 @@ export function LevelCard({
 
 			{levelValid && xpValid && <Warning>{t("members.levelOrXp")}</Warning>}
 
-			<p className="text-muted-foreground text-xs">
-				Any role rewards the new level earns are handed out at the same time.
-			</p>
+			<p className="text-muted-foreground text-xs">{t("members.levelRewardNote")}</p>
 
 			<div className="flex flex-wrap gap-3">
 				<Button
@@ -83,7 +81,7 @@ export function LevelCard({
 						setLevel("");
 					}}
 				>
-					Set level
+					{t("members.setLevelAction")}
 				</Button>
 				<Button
 					variant="secondary"
@@ -93,7 +91,7 @@ export function LevelCard({
 						setXp("");
 					}}
 				>
-					Change XP
+					{t("members.changeXpAction")}
 				</Button>
 			</div>
 		</Card>

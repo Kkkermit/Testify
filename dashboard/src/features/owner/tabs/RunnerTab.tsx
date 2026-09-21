@@ -49,10 +49,7 @@ export function RunnerTab(): React.JSX.Element {
 			<Card focal className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("owner.runCommand")}</h2>
-					<p className="text-muted-foreground text-sm">
-						Runs here rather than in a server: nothing is posted to Discord, and the reply comes back below. Only
-						read-only owner commands are listed.
-					</p>
+					<p className="text-muted-foreground text-sm">{t("owner.runnerBody")}</p>
 				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2">
@@ -142,7 +139,7 @@ export function RunnerTab(): React.JSX.Element {
 						}}
 					>
 						<Play size={15} aria-hidden="true" />
-						Run it
+						{t("owner.runIt")}
 					</Button>
 				</div>
 
@@ -210,8 +207,8 @@ function OptionField({
 					className={SELECT}
 				>
 					<option value="">{t("owner.notSet")}</option>
-					<option value="true">Yes</option>
-					<option value="false">No</option>
+					<option value="true">{t("common.yes")}</option>
+					<option value="false">{t("owner.no")}</option>
 				</select>
 			)}
 

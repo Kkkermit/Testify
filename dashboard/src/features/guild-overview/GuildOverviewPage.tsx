@@ -42,14 +42,14 @@ export function GuildOverviewPage(): React.JSX.Element {
 
 			<section aria-labelledby="features-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="features-heading">
-					Features
+					{t("overview.features")}
 				</Eyebrow>
 				<FeatureGrid features={guild.features} guildId={guildId} />
 			</section>
 
 			<section aria-labelledby="changes-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="changes-heading">
-					Recent changes
+					{t("overview.recentChanges")}
 				</Eyebrow>
 				<RecentChanges changes={guild.recentChanges} />
 			</section>

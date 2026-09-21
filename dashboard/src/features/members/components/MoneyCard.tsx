@@ -5,8 +5,9 @@ import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card, SegmentedControl } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { type TranslationKey } from "@/i18n";
 
-const LABELS: Record<MoneyPurse, string> = { wallet: "Wallet", bank: "Bank" };
+const LABELS: Record<MoneyPurse, TranslationKey> = { wallet: "members.wallet", bank: "members.bank" };
 
 export function MoneyCard({
 	detail,
@@ -32,18 +33,18 @@ export function MoneyCard({
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
-				<h2 className={CARD_HEADING}>Money</h2>
+				<h2 className={CARD_HEADING}>{t("members.money")}</h2>
 				<p className="text-muted-foreground text-sm">
 					{detail.economy === null
 						? t("members.noAccountYet")
-						: `They hold ${held.toLocaleString()} in their ${purse}.`}
+						: t("members.holds", { amount: held.toLocaleString(), purse: t(LABELS[purse]).toLowerCase() })}
 				</p>
 			</div>
 
 			<SegmentedControl
 				label={t("members.whichPurse")}
 				value={purse}
-				segments={MONEY_PURSES.map((one) => ({ value: one, label: LABELS[one] }))}
+				segments={MONEY_PURSES.map((one) => ({ value: one, label: t(LABELS[one]) }))}
 				onChange={setPurse}
 			/>
 
@@ -73,7 +74,7 @@ export function MoneyCard({
 						setAmount("");
 					}}
 				>
-					Add to {LABELS[purse].toLowerCase()}
+					{t("members.addTo", { purse: t(LABELS[purse]).toLowerCase() })}
 				</Button>
 				<Button
 					variant="secondary"
@@ -83,7 +84,7 @@ export function MoneyCard({
 						setAmount("");
 					}}
 				>
-					Take from {LABELS[purse].toLowerCase()}
+					{t("members.takeFrom", { purse: t(LABELS[purse]).toLowerCase() })}
 				</Button>
 			</div>
 		</Card>

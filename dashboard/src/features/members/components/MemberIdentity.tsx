@@ -18,7 +18,7 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 			<div className="min-w-0 flex-1">
 				<p className="flex flex-wrap items-center gap-2 text-sm font-medium">
 					{detail.displayName}
-					{detail.isBot && <Badge>Bot</Badge>}
+					{detail.isBot && <Badge>{t("members.bot")}</Badge>}
 					{!detail.inGuild && <Badge tone="warning">{t("members.leftServer")}</Badge>}
 					{softbanActive(detail) && <Badge tone="danger">{t("members.softbanned")}</Badge>}
 				</p>
@@ -33,7 +33,7 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 						))}
 						{extra > 0 && (
 							<li>
-								<Badge>+{extra} more</Badge>
+								<Badge>{t("members.moreRoles", { count: extra })}</Badge>
 							</li>
 						)}
 					</ul>
