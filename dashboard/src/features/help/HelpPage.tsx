@@ -1,7 +1,7 @@
 import { BookOpen, Code2, ExternalLink, MessageCircleQuestion, Terminal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Card, CARD_HEADING, DividedList, PageHeader } from "@/components/primitives";
+import { Card, CARD_HEADING, DataList, DividedList, PageHeader } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
@@ -50,11 +50,15 @@ export function HelpPage(): React.JSX.Element {
 					<h2 className={CARD_HEADING}>{t("help.commandsTitle")}</h2>
 				</div>
 
-				<dl className="flex flex-col gap-3">
-					<Pair term={t("help.slashTerm")} detail={t("help.slashDetail")} />
-					<Pair term={t("help.prefixTerm")} detail={t("help.prefixDetail")} />
-					<Pair term={t("help.switchTerm")} detail={t("help.switchDetail")} />
-				</dl>
+				<DataList
+					dense
+					rows={[
+						{ label: t("help.slashTerm"), value: t("help.slashDetail") },
+						{ label: t("help.prefixTerm"), value: t("help.prefixDetail") },
+						{ label: t("help.switchTerm"), value: t("help.switchDetail") },
+					]}
+					className="gap-3"
+				/>
 
 				<Link to="/commands" className={LINK}>
 					{t("help.browseCommands")}
@@ -137,14 +141,5 @@ function Step({
 				{children}
 			</span>
 		</li>
-	);
-}
-
-function Pair({ term, detail }: { term: string; detail: string }): React.JSX.Element {
-	return (
-		<div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:gap-4">
-			<dt className="w-44 shrink-0 text-sm font-medium">{term}</dt>
-			<dd className="text-muted-foreground min-w-0 text-sm">{detail}</dd>
-		</div>
 	);
 }
