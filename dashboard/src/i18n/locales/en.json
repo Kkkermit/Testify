@@ -242,7 +242,9 @@
 		"postToHint": "Somewhere only moderators can read — an audit log names who did what.",
 		"whatTitle": "What gets recorded",
 		"whatBody": "Tick a heading to take the whole group.",
-		"allSelected": "Everything is selected, so events added in a future update are logged too."
+		"allSelected": "Everything is selected, so events added in a future update are logged too.",
+		"pickChannel": "Choose a channel for the log before turning it on.",
+		"pickEvent": "Pick at least one event, or turn audit logging off."
 	},
 	"treasure": {
 		"title": "Treasure drops",
@@ -258,7 +260,10 @@
 		"cooldownHint": "Minutes before another drop can appear, however busy the chat is.",
 		"notSetUpYet": "Not set up yet — the numbers below are the defaults until you turn drops on.",
 		"howBody": "Testify picks a number in each range, so drops do not land on a predictable beat.",
-		"resetDefaults": "Reset to defaults"
+		"resetDefaults": "Reset to defaults",
+		"messagesBetween": "Messages must be between {{min}} and {{max}}.",
+		"dropBetween": "A drop must be between {{min}} and {{max}}.",
+		"cooldownBetween": "The cooldown must be between {{min}} and {{max}} minutes."
 	},
 	"welcome": {
 		"title": "Welcome messages",
@@ -276,7 +281,13 @@
 		"insert": "Insert:",
 		"saveMessage": "Save message",
 		"preview": "Preview",
-		"thisServer": "this server"
+		"thisServer": "this server",
+		"styleText": "Plain text",
+		"styleTextHint": "A normal message in the channel.",
+		"styleEmbed": "Embed",
+		"styleEmbedHint": "A coloured panel, easier to spot in a busy channel.",
+		"styleCard": "Image card",
+		"styleCardHint": "A drawn card with their avatar, plus the message."
 	},
 	"sticky": {
 		"title": "Sticky messages",
@@ -375,7 +386,11 @@
 		"tabsLabel": "Levelling settings",
 		"ignoresBody": "Nothing said here, or by anyone holding these roles, earns XP.",
 		"boostsBody": "Members holding one of these earn more XP. Someone with several gets the highest, not the product.",
-		"add": "Add"
+		"add": "Add",
+		"tabGeneral": "General",
+		"tabRewards": "Role rewards",
+		"tabBoosts": "XP boosts",
+		"tabIgnores": "Ignored"
 	},
 	"members": {
 		"title": "Members",
@@ -421,7 +436,23 @@
 		"takeFrom": "Take from {{purse}}",
 		"typeToClear": "Type {{name}} to clear every warning",
 		"setLevelAction": "Set level",
-		"changeXpAction": "Change XP"
+		"changeXpAction": "Change XP",
+		"noAccounts": "Nobody has an account here yet.",
+		"noXp": "Nobody has earned any XP here yet.",
+		"ranked_one": "{{count, number}} account ranked.",
+		"ranked_other": "{{count, number}} accounts ranked.",
+		"rankedMembers_one": "{{count, number}} member ranked.",
+		"rankedMembers_other": "{{count, number}} members ranked.",
+		"joinUnknown": "Join date unknown",
+		"joined": "Joined {{date}}",
+		"noWarnings": "No warnings on record.",
+		"warningCount_one": "{{count}} warning on record.",
+		"warningCount_other": "{{count}} warnings on record.",
+		"moneyRank": "Money rank",
+		"levelRank": "Level rank",
+		"unranked": "Unranked",
+		"xp": "XP",
+		"level": "Level"
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -452,7 +483,11 @@
 		"off": "Off",
 		"openNow": "{{count}} open right now",
 		"turnOffBody": "Open ticket channels are left alone. The panel message has to be deleted by hand.",
-		"turnOffAction": "Turn off"
+		"turnOffAction": "Turn off",
+		"needsMessage": "The panel needs something to say.",
+		"needsLabel": "The button needs a label.",
+		"roleGone": "That role no longer exists. Pick another one.",
+		"roleManaged": "{{role}} is managed by an integration, so Testify cannot use it here."
 	},
 	"lottery": {
 		"title": "Lottery",
@@ -483,7 +518,11 @@
 		"nextDraw": "Next draw",
 		"drawSummary": "{{pot}} across {{tickets}} tickets",
 		"howBody": "Members buy tickets with <command>/lottery enter</command>. Every ticket adds its fee to the pot.",
-		"yesEndIt": "Yes, end it"
+		"yesEndIt": "Yes, end it",
+		"winnersBetween": "Between {{min}} and {{max}} winners.",
+		"potTooBig": "The starting pot cannot be more than {{max}}.",
+		"ticketTooDear": "A ticket cannot cost more than {{max}}.",
+		"moreWinnersThanTickets": "Only {{tickets}} tickets have been sold, so a draw for {{winners}} winners would leave some empty-handed."
 	},
 	"settings": {
 		"title": "Server settings",
@@ -539,7 +578,13 @@
 		"resetToZero": "Reset to zero",
 		"saveName": "Save name",
 		"prefixExample": "e.g. <example>{{example}}</example>",
-		"roleTooHigh": "That role sits at or above Testify’s own, so Testify cannot give it to anybody. Move Testify’s role higher in Server Settings → Roles, or pick a lower one."
+		"roleTooHigh": "That role sits at or above Testify’s own, so Testify cannot give it to anybody. Move Testify’s role higher in Server Settings → Roles, or pick a lower one.",
+		"prefixEmpty": "The prefix cannot be empty.",
+		"prefixSpace": "The prefix cannot contain a space.",
+		"prefixLong": "The prefix cannot be longer than {{max}} characters.",
+		"prefixSlash": "A prefix starting with / collides with Discord’s own commands.",
+		"countWhole": "The target has to be a whole number of at least 1.",
+		"countHigh": "The target cannot be higher than {{max}}."
 	},
 	"owner": {
 		"title": "Owner console",
@@ -660,7 +705,15 @@
 		"releases": "Releases on GitHub",
 		"blockedAccounts": "Blocked accounts",
 		"blockListFailed": "The block list could not be loaded, so this is not a list of who is blocked.",
-		"no": "No"
+		"no": "No",
+		"tabOverview": "Overview",
+		"tabUsage": "Usage",
+		"tabCommands": "Commands",
+		"tabLogs": "Logs",
+		"tabRun": "Run",
+		"tabBlacklist": "Blacklist",
+		"tabRuntime": "Runtime",
+		"tabControl": "Control"
 	},
 	"legal": {
 		"backToDashboard": "Back to the dashboard",

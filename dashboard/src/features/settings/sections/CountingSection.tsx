@@ -26,7 +26,7 @@ export function CountingSection({
 		setCap(String(value.maxCount));
 	}, [value.maxCount]);
 
-	const problem = countCapProblem(cap);
+	const problem = countCapProblem(cap, t);
 	const dirty = cap !== String(value.maxCount);
 
 	function commit(): void {

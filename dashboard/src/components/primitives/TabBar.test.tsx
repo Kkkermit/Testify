@@ -6,9 +6,9 @@ import { edgesOf, TabBar, TabContent, type TabDefinition } from "@/components/pr
 
 const LABEL = "Levelling settings";
 const TABS: TabDefinition<"general" | "rewards" | "boosts">[] = [
-	{ key: "general", label: "General", icon: Settings2 },
-	{ key: "rewards", label: "Role rewards", icon: Gift },
-	{ key: "boosts", label: "XP boosts", icon: Zap },
+	{ key: "general", label: "levelling.tabGeneral", icon: Settings2 },
+	{ key: "rewards", label: "levelling.tabRewards", icon: Gift },
+	{ key: "boosts", label: "levelling.tabBoosts", icon: Zap },
 ];
 
 function Harness(): React.JSX.Element {

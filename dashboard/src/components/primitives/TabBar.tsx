@@ -1,5 +1,7 @@
 import { type LucideIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
 export interface StripEdges {
@@ -17,7 +19,7 @@ export function edgesOf(node: { scrollLeft: number; clientWidth: number; scrollW
 
 export interface TabDefinition<Key extends string = string> {
 	key: Key;
-	label: string;
+	label: TranslationKey;
 	icon: LucideIcon;
 }
 
@@ -39,6 +41,7 @@ export function TabBar<Key extends string>({
 	active: Key;
 	onSelect: (tab: Key) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const strip = useRef<HTMLDivElement>(null);
 	const [edges, setEdges] = useState<StripEdges>({ start: false, end: false });
 
@@ -98,7 +101,7 @@ export function TabBar<Key extends string>({
 					edges.start && "mask-l-from-[calc(100%-2rem)]",
 				)}
 			>
-				{tabs.map(({ key, label: text, icon: Icon }) => {
+				{tabs.map(({ key, label: labelKey, icon: Icon }) => {
 					const { tabId, panelId } = tabIds(label, key);
 
 					return (
@@ -122,7 +125,7 @@ export function TabBar<Key extends string>({
 							)}
 						>
 							<Icon size={15} aria-hidden="true" />
-							{text}
+							{t(labelKey)}
 							{active === key && (
 								<span aria-hidden="true" className="bg-primary motion-fade absolute inset-x-0 bottom-0 h-0.5" />
 							)}

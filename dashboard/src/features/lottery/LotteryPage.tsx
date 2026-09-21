@@ -48,10 +48,10 @@ export function LotteryPage(): React.JSX.Element {
 	if (lottery.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
 
-	const problem = draftProblem(draft);
+	const problem = draftProblem(draft, t);
 	const dirty = isDirty(draft, settings);
 	const busy = save.isPending || end.isPending;
-	const warning = winnersWarning(draft, settings);
+	const warning = winnersWarning(draft, settings, t);
 
 	function set<K extends keyof Draft>(field: K, value: Draft[K]): void {
 		setDraft((current) => (current === null ? current : { ...current, [field]: value }));

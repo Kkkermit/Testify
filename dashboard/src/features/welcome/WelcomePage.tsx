@@ -176,6 +176,7 @@ function StyleChoice({
 	disabled: boolean;
 	onChange: () => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const { label, describes } = STYLE_LABELS[style];
 
 	return (
@@ -188,9 +189,9 @@ function StyleChoice({
 		>
 			<span className="flex items-center gap-2">
 				<input type="radio" name="welcome-style" checked={checked} disabled={disabled} onChange={onChange} />
-				<span className="text-sm font-medium">{label}</span>
+				<span className="text-sm font-medium">{t(label)}</span>
 			</span>
-			<span className="text-muted-foreground text-xs">{describes}</span>
+			<span className="text-muted-foreground text-xs">{t(describes)}</span>
 		</label>
 	);
 }

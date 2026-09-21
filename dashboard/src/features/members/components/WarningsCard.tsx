@@ -39,7 +39,7 @@ export function WarningsCard({
 		<Card className="flex flex-col gap-4">
 			<div>
 				<h2 className={CARD_HEADING}>{t("members.warnings")}</h2>
-				<p className="text-muted-foreground text-sm">{warningSummary(detail.warnings)}</p>
+				<p className="text-muted-foreground text-sm">{warningSummary(detail.warnings, t)}</p>
 			</div>
 
 			{!canModerate && <Warning>{detail.moderationProblem}</Warning>}

@@ -1,5 +1,6 @@
 import { type BoardPage } from "@testify/shared";
 import { boardFrom, emptyMessage, jumpTarget, pageFrom, summarise } from "@/features/members/members.utils";
+import { t } from "@/test/english";
 
 function page(overrides: Partial<BoardPage> = {}): BoardPage {
 	return { board: "economy", page: 1, pages: 2, total: 30, rows: [], you: null, ...overrides };
@@ -43,14 +44,14 @@ describe("jumpTarget", () => {
 
 describe("summarise", () => {
 	it("counts accounts on the economy board", () => {
-		expect(summarise(page({ total: 30 }))).toBe("30 accounts ranked.");
+		expect(summarise(page({ total: 30 }), t)).toBe("30 accounts ranked.");
 	});
 
 	it("counts members on the levels board", () => {
-		expect(summarise(page({ board: "levels", total: 1 }))).toBe("1 member ranked.");
+		expect(summarise(page({ board: "levels", total: 1 }), t)).toBe("1 member ranked.");
 	});
 
 	it("explains an empty board rather than saying zero", () => {
-		expect(summarise(page({ total: 0 }))).toBe(emptyMessage("economy"));
+		expect(summarise(page({ total: 0 }), t)).toBe(emptyMessage("economy", t));
 	});
 });

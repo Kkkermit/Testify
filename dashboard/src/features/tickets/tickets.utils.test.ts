@@ -1,5 +1,6 @@
 import { type ChannelSummary, type RoleSummary, type TicketSettings } from "@testify/shared";
 import { categoriesOf, draftOf, draftProblem, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
+import { t } from "@/test/english";
 
 const SETTINGS: TicketSettings = {
 	enabled: true,
@@ -17,20 +18,20 @@ describe("draftProblem", () => {
 	const draft = draftOf(SETTINGS);
 
 	it("says nothing about a complete draft", () => {
-		expect(draftProblem(draft)).toBeNull();
+		expect(draftProblem(draft, t)).toBeNull();
 	});
 
 	it.each(["panelChannelId", "categoryId", "transcriptChannelId", "staffRoleId"] as const)(
 		"asks for %s when it is missing",
 		(field) => {
-			expect(draftProblem({ ...draft, [field]: null })).not.toBeNull();
+			expect(draftProblem({ ...draft, [field]: null }, t)).not.toBeNull();
 		},
 	);
 
 	/** An emptied message would post a panel with nothing on it. */
 	it("refuses an empty message or button label", () => {
-		expect(draftProblem({ ...draft, description: "   " })).toMatch(/something to say/i);
-		expect(draftProblem({ ...draft, buttonLabel: "" })).toMatch(/label/i);
+		expect(draftProblem({ ...draft, description: "   " }, t)).toMatch(/something to say/i);
+		expect(draftProblem({ ...draft, buttonLabel: "" }, t)).toMatch(/label/i);
 	});
 });
 
@@ -65,20 +66,20 @@ describe("staffRoleWarning", () => {
 	];
 
 	it("says nothing about an ordinary role", () => {
-		expect(staffRoleWarning(roles, "1")).toBeNull();
+		expect(staffRoleWarning(roles, "1", t)).toBeNull();
 	});
 
 	it("says nothing when no role is chosen yet", () => {
-		expect(staffRoleWarning(roles, null)).toBeNull();
+		expect(staffRoleWarning(roles, null, t)).toBeNull();
 	});
 
 	/** Discord will not let anybody be given a managed role, so a ticket's overwrites would silently do nothing. */
 	it("refuses a role an integration owns", () => {
-		expect(staffRoleWarning(roles, "2")).toMatch(/managed by an integration/i);
+		expect(staffRoleWarning(roles, "2", t)).toMatch(/managed by an integration/i);
 	});
 
 	/** A role deleted since the page loaded would otherwise fail at the moment a ticket is opened. */
 	it("says so when the stored role has been deleted", () => {
-		expect(staffRoleWarning(roles, "999")).toMatch(/no longer exists/i);
+		expect(staffRoleWarning(roles, "999", t)).toMatch(/no longer exists/i);
 	});
 });

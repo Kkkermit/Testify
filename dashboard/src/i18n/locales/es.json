@@ -242,7 +242,9 @@
 		"postToHint": "Un sitio que solo puedan leer los moderadores: un registro de auditoría dice quién hizo qué.",
 		"whatTitle": "Qué se registra",
 		"whatBody": "Marca un encabezado para llevarte el grupo entero.",
-		"allSelected": "Está todo seleccionado, así que los eventos que se añadan en el futuro también se registrarán."
+		"allSelected": "Está todo seleccionado, así que los eventos que se añadan en el futuro también se registrarán.",
+		"pickChannel": "Elige un canal para el registro antes de activarlo.",
+		"pickEvent": "Elige al menos un evento, o desactiva el registro de auditoría."
 	},
 	"treasure": {
 		"title": "Tesoros",
@@ -258,7 +260,10 @@
 		"cooldownHint": "Minutos antes de que pueda aparecer otro tesoro, por movido que esté el chat.",
 		"notSetUpYet": "Aún sin configurar: los números de abajo son los valores por defecto hasta que los actives.",
 		"howBody": "Testify elige un número dentro de cada rango, así los tesoros no caen a un ritmo previsible.",
-		"resetDefaults": "Restablecer los valores por defecto"
+		"resetDefaults": "Restablecer los valores por defecto",
+		"messagesBetween": "Los mensajes deben estar entre {{min}} y {{max}}.",
+		"dropBetween": "Un tesoro debe estar entre {{min}} y {{max}}.",
+		"cooldownBetween": "La espera debe estar entre {{min}} y {{max}} minutos."
 	},
 	"welcome": {
 		"title": "Mensajes de bienvenida",
@@ -276,7 +281,13 @@
 		"insert": "Insertar:",
 		"saveMessage": "Guardar el mensaje",
 		"preview": "Vista previa",
-		"thisServer": "este servidor"
+		"thisServer": "este servidor",
+		"styleText": "Texto sencillo",
+		"styleTextHint": "Un mensaje normal en el canal.",
+		"styleEmbed": "Embed",
+		"styleEmbedHint": "Un panel de color, más fácil de ver en un canal con movimiento.",
+		"styleCard": "Tarjeta con imagen",
+		"styleCardHint": "Una tarjeta dibujada con su avatar, además del mensaje."
 	},
 	"sticky": {
 		"title": "Mensajes fijos",
@@ -375,7 +386,11 @@
 		"tabsLabel": "Ajustes de niveles",
 		"ignoresBody": "Nada de lo que se diga aquí, ni por quien tenga estos roles, gana XP.",
 		"boostsBody": "Quien tenga uno de estos gana más XP. Con varios se aplica el más alto, no el producto.",
-		"add": "Añadir"
+		"add": "Añadir",
+		"tabGeneral": "General",
+		"tabRewards": "Recompensas de rol",
+		"tabBoosts": "Bonificaciones de XP",
+		"tabIgnores": "Ignorados"
 	},
 	"members": {
 		"title": "Miembros",
@@ -421,7 +436,23 @@
 		"takeFrom": "Quitar de la {{purse}}",
 		"typeToClear": "Escribe {{name}} para borrar todos los avisos",
 		"setLevelAction": "Fijar nivel",
-		"changeXpAction": "Cambiar XP"
+		"changeXpAction": "Cambiar XP",
+		"noAccounts": "Aquí todavía no tiene cuenta nadie.",
+		"noXp": "Aquí todavía no ha ganado XP nadie.",
+		"ranked_one": "{{count, number}} cuenta clasificada.",
+		"ranked_other": "{{count, number}} cuentas clasificadas.",
+		"rankedMembers_one": "{{count, number}} miembro clasificado.",
+		"rankedMembers_other": "{{count, number}} miembros clasificados.",
+		"joinUnknown": "Fecha de entrada desconocida",
+		"joined": "Entró el {{date}}",
+		"noWarnings": "Sin avisos registrados.",
+		"warningCount_one": "{{count}} aviso registrado.",
+		"warningCount_other": "{{count}} avisos registrados.",
+		"moneyRank": "Puesto por dinero",
+		"levelRank": "Puesto por nivel",
+		"unranked": "Sin clasificar",
+		"xp": "XP",
+		"level": "Nivel"
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -452,7 +483,11 @@
 		"off": "Desactivado",
 		"openNow": "{{count}} abiertos ahora mismo",
 		"turnOffBody": "Los canales de ticket abiertos se dejan como están. El mensaje del panel hay que borrarlo a mano.",
-		"turnOffAction": "Desactivar"
+		"turnOffAction": "Desactivar",
+		"needsMessage": "El panel necesita algo que decir.",
+		"needsLabel": "El botón necesita un texto.",
+		"roleGone": "Ese rol ya no existe. Elige otro.",
+		"roleManaged": "{{role}} lo gestiona una integración, así que Testify no puede usarlo aquí."
 	},
 	"lottery": {
 		"title": "Lotería",
@@ -483,7 +518,11 @@
 		"nextDraw": "Próximo sorteo",
 		"drawSummary": "{{pot}} entre {{tickets}} boletos",
 		"howBody": "Los miembros compran boletos con <command>/lottery enter</command>. Cada boleto suma su precio al bote.",
-		"yesEndIt": "Sí, terminarla"
+		"yesEndIt": "Sí, terminarla",
+		"winnersBetween": "Entre {{min}} y {{max}} ganadores.",
+		"potTooBig": "El bote inicial no puede ser mayor que {{max}}.",
+		"ticketTooDear": "Un boleto no puede costar más de {{max}}.",
+		"moreWinnersThanTickets": "Solo se han vendido {{tickets}} boletos, así que un sorteo con {{winners}} ganadores dejaría a algunos con las manos vacías."
 	},
 	"settings": {
 		"title": "Ajustes del servidor",
@@ -539,7 +578,13 @@
 		"resetToZero": "Volver a cero",
 		"saveName": "Guardar el nombre",
 		"prefixExample": "p. ej. <example>{{example}}</example>",
-		"roleTooHigh": "Ese rol está al mismo nivel que el de Testify o por encima, así que Testify no puede dárselo a nadie. Sube el rol de Testify en Ajustes del servidor → Roles, o elige uno más bajo."
+		"roleTooHigh": "Ese rol está al mismo nivel que el de Testify o por encima, así que Testify no puede dárselo a nadie. Sube el rol de Testify en Ajustes del servidor → Roles, o elige uno más bajo.",
+		"prefixEmpty": "El prefijo no puede estar vacío.",
+		"prefixSpace": "El prefijo no puede contener un espacio.",
+		"prefixLong": "El prefijo no puede tener más de {{max}} caracteres.",
+		"prefixSlash": "Un prefijo que empiece por / choca con los comandos del propio Discord.",
+		"countWhole": "El objetivo tiene que ser un número entero de al menos 1.",
+		"countHigh": "El objetivo no puede ser mayor que {{max}}."
 	},
 	"owner": {
 		"title": "Consola del propietario",
@@ -660,7 +705,15 @@
 		"releases": "Versiones en GitHub",
 		"blockedAccounts": "Cuentas bloqueadas",
 		"blockListFailed": "No se ha podido cargar la lista de bloqueados, así que esto no es una lista de quién está bloqueado.",
-		"no": "No"
+		"no": "No",
+		"tabOverview": "Resumen",
+		"tabUsage": "Uso",
+		"tabCommands": "Comandos",
+		"tabLogs": "Registros",
+		"tabRun": "Ejecutar",
+		"tabBlacklist": "Bloqueos",
+		"tabRuntime": "Entorno",
+		"tabControl": "Control"
 	},
 	"legal": {
 		"backToDashboard": "Volver al panel",

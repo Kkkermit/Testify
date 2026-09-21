@@ -3,14 +3,14 @@ import { type TabDefinition } from "@/components/primitives";
 
 /** Adding a section of the console is an entry here and a branch in the page; the tab bar and `?tab=` follow. */
 export const OWNER_TABS = [
-	{ key: "overview", label: "Overview", icon: Activity },
-	{ key: "usage", label: "Usage", icon: Server },
-	{ key: "commands", label: "Commands", icon: Terminal },
-	{ key: "logs", label: "Logs", icon: ScrollText },
-	{ key: "run", label: "Run", icon: Play },
-	{ key: "blacklist", label: "Blacklist", icon: Ban },
-	{ key: "runtime", label: "Runtime", icon: Wrench },
-	{ key: "control", label: "Control", icon: Power },
+	{ key: "overview", label: "owner.tabOverview", icon: Activity },
+	{ key: "usage", label: "owner.tabUsage", icon: Server },
+	{ key: "commands", label: "owner.tabCommands", icon: Terminal },
+	{ key: "logs", label: "owner.tabLogs", icon: ScrollText },
+	{ key: "run", label: "owner.tabRun", icon: Play },
+	{ key: "blacklist", label: "owner.tabBlacklist", icon: Ban },
+	{ key: "runtime", label: "owner.tabRuntime", icon: Wrench },
+	{ key: "control", label: "owner.tabControl", icon: Power },
 ] as const satisfies readonly TabDefinition[];
 
 export type OwnerTab = (typeof OWNER_TABS)[number]["key"];

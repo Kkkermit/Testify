@@ -37,7 +37,7 @@ export function AuditLogPage(): React.JSX.Element {
 
 	const saved = config.data;
 	const dirty = auditLogChanged(saved, draft);
-	const blocked = saveBlocked(draft);
+	const blocked = saveBlocked(draft, t);
 	const notice = draft.events.length === AUDIT_EVENTS.length ? t("auditLog.allSelected") : null;
 
 	function edit(change: Partial<AuditLogPut>): void {

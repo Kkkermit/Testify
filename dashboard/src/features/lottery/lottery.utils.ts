@@ -1,4 +1,5 @@
 import { LOTTERY_LIMITS, type LotteryFrequency, type LotterySettings, lotteryBlocked } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 export interface Draft {
 	entryFee: number;
@@ -24,7 +25,7 @@ export function isDirty(draft: Draft, settings: LotterySettings): boolean {
 	return (Object.keys(saved) as (keyof Draft)[]).some((field) => draft[field] !== saved[field]);
 }
 
-export function draftProblem(draft: Draft): string | null {
+export function draftProblem(draft: Draft, t: TFunction): string | null {
 	const { entryFee, basePrizePool, maxWinners } = draft;
 
 	if (
@@ -32,13 +33,13 @@ export function draftProblem(draft: Draft): string | null {
 		maxWinners < LOTTERY_LIMITS.minWinners ||
 		maxWinners > LOTTERY_LIMITS.maxWinners
 	) {
-		return `Between ${String(LOTTERY_LIMITS.minWinners)} and ${String(LOTTERY_LIMITS.maxWinners)} winners.`;
+		return t("lottery.winnersBetween", { min: LOTTERY_LIMITS.minWinners, max: LOTTERY_LIMITS.maxWinners });
 	}
 	if (!Number.isInteger(basePrizePool) || basePrizePool < 0 || basePrizePool > LOTTERY_LIMITS.maxBasePool) {
-		return `The starting pot cannot be more than ${LOTTERY_LIMITS.maxBasePool.toLocaleString()}.`;
+		return t("lottery.potTooBig", { max: LOTTERY_LIMITS.maxBasePool.toLocaleString() });
 	}
 	if (Number.isInteger(entryFee) && entryFee > LOTTERY_LIMITS.maxEntryFee) {
-		return `A ticket cannot cost more than ${LOTTERY_LIMITS.maxEntryFee.toLocaleString()}.`;
+		return t("lottery.ticketTooDear", { max: LOTTERY_LIMITS.maxEntryFee.toLocaleString() });
 	}
 
 	return lotteryBlocked(draft);
@@ -50,8 +51,8 @@ export function reschedules(draft: Draft, settings: LotterySettings): boolean {
 }
 
 /** More winners than tickets sold means somebody wins nothing, which reads as the draw having failed. */
-export function winnersWarning(draft: Draft, settings: LotterySettings): string | null {
+export function winnersWarning(draft: Draft, settings: LotterySettings, t: TFunction): string | null {
 	if (settings.ticketsSold === 0 || draft.maxWinners <= settings.ticketsSold) return null;
 
-	return `Only ${String(settings.ticketsSold)} tickets have been sold, so a draw for ${String(draft.maxWinners)} winners would leave some empty-handed.`;
+	return t("lottery.moreWinnersThanTickets", { tickets: settings.ticketsSold, winners: draft.maxWinners });
 }

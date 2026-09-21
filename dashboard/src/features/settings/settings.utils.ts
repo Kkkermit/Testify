@@ -1,26 +1,27 @@
 import { SETTINGS_LIMITS } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 /** The three rules the API enforces: whitespace matches every message, a space inside can never be typed, and `/` collides with Discord's own. */
-export function prefixProblem(value: string): string | null {
+export function prefixProblem(value: string, t: TFunction): string | null {
 	const trimmed = value.trim();
 
-	if (trimmed === "") return "The prefix cannot be empty.";
-	if (/\s/.test(trimmed)) return "The prefix cannot contain a space.";
+	if (trimmed === "") return t("settings.prefixEmpty");
+	if (/\s/.test(trimmed)) return t("settings.prefixSpace");
 	if (trimmed.length > SETTINGS_LIMITS.maxPrefix) {
-		return `The prefix cannot be longer than ${String(SETTINGS_LIMITS.maxPrefix)} characters.`;
+		return t("settings.prefixLong", { max: SETTINGS_LIMITS.maxPrefix });
 	}
-	if (trimmed.startsWith("/")) return "A prefix starting with / collides with Discord's own commands.";
+	if (trimmed.startsWith("/")) return t("settings.prefixSlash");
 
 	return null;
 }
 
 /** A typed number out of an input can be anything, including nothing. */
-export function countCapProblem(value: string): string | null {
+export function countCapProblem(value: string, t: TFunction): string | null {
 	const parsed = Number(value);
 
-	if (!Number.isInteger(parsed) || parsed < 1) return "The target has to be a whole number of at least 1.";
+	if (!Number.isInteger(parsed) || parsed < 1) return t("settings.countWhole");
 	if (parsed > SETTINGS_LIMITS.maxCount) {
-		return `The target cannot be higher than ${SETTINGS_LIMITS.maxCount.toLocaleString()}.`;
+		return t("settings.countHigh", { max: SETTINGS_LIMITS.maxCount.toLocaleString() });
 	}
 
 	return null;

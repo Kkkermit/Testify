@@ -22,7 +22,7 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 					{!detail.inGuild && <Badge tone="warning">{t("members.leftServer")}</Badge>}
 					{softbanActive(detail) && <Badge tone="danger">{t("members.softbanned")}</Badge>}
 				</p>
-				<p className="text-muted-foreground text-xs">{describeJoined(detail.joinedAt)}</p>
+				<p className="text-muted-foreground text-xs">{describeJoined(detail.joinedAt, t)}</p>
 
 				{detail.roles.length > 0 && (
 					<ul className="mt-2 flex flex-wrap gap-1">
@@ -45,7 +45,7 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 
 export function MemberStanding({ detail }: { detail: MemberDetail }): React.JSX.Element | null {
 	const { t } = useTranslation();
-	const rows = statsOf(detail);
+	const rows = statsOf(detail, t);
 	if (rows.length === 0) return null;
 
 	return (

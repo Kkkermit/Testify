@@ -1,4 +1,5 @@
 import { TREASURE_LIMITS, type TreasureSettings, treasureProblem } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 const MINUTE = 60_000;
 
@@ -33,23 +34,26 @@ function outOfRange(value: number, min: number, max: number): boolean {
 }
 
 /** Why a draft would be refused, in the words the form shows, so nobody saves and gets a 400 back. */
-export function draftProblem(draft: Draft): string | null {
+export function draftProblem(draft: Draft, t: TFunction): string | null {
 	const { minMessages, maxMessages, minAmount, maxAmount, cooldownMinutes } = draft;
 
 	if (outOfRange(minMessages, TREASURE_LIMITS.minMessages, TREASURE_LIMITS.maxMessages)) {
-		return `Messages must be between ${String(TREASURE_LIMITS.minMessages)} and ${String(TREASURE_LIMITS.maxMessages)}.`;
+		return t("treasure.messagesBetween", { min: TREASURE_LIMITS.minMessages, max: TREASURE_LIMITS.maxMessages });
 	}
 	if (outOfRange(maxMessages, TREASURE_LIMITS.minMessages, TREASURE_LIMITS.maxMessages)) {
-		return `Messages must be between ${String(TREASURE_LIMITS.minMessages)} and ${String(TREASURE_LIMITS.maxMessages)}.`;
+		return t("treasure.messagesBetween", { min: TREASURE_LIMITS.minMessages, max: TREASURE_LIMITS.maxMessages });
 	}
 	if (outOfRange(minAmount, TREASURE_LIMITS.minAmount, TREASURE_LIMITS.maxAmount)) {
-		return `A drop must be between ${String(TREASURE_LIMITS.minAmount)} and ${String(TREASURE_LIMITS.maxAmount)}.`;
+		return t("treasure.dropBetween", { min: TREASURE_LIMITS.minAmount, max: TREASURE_LIMITS.maxAmount });
 	}
 	if (outOfRange(maxAmount, TREASURE_LIMITS.minAmount, TREASURE_LIMITS.maxAmount)) {
-		return `A drop must be between ${String(TREASURE_LIMITS.minAmount)} and ${String(TREASURE_LIMITS.maxAmount)}.`;
+		return t("treasure.dropBetween", { min: TREASURE_LIMITS.minAmount, max: TREASURE_LIMITS.maxAmount });
 	}
 	if (outOfRange(cooldownMinutes, TREASURE_LIMITS.minCooldownMinutes, TREASURE_LIMITS.maxCooldownMinutes)) {
-		return `The cooldown must be between ${String(TREASURE_LIMITS.minCooldownMinutes)} and ${String(TREASURE_LIMITS.maxCooldownMinutes)} minutes.`;
+		return t("treasure.cooldownBetween", {
+			min: TREASURE_LIMITS.minCooldownMinutes,
+			max: TREASURE_LIMITS.maxCooldownMinutes,
+		});
 	}
 
 	return treasureProblem({ minMessages, maxMessages, minAmount, maxAmount });

@@ -1,5 +1,6 @@
 import { AUDIT_EVENTS } from "@testify/shared";
 import { draftFrom, groupState, saveBlocked, setGroup, toggleEvent } from "@/features/audit-log/auditLog.utils";
+import { t } from "@/test/english";
 import { auditLogConfig } from "@/test/handlers";
 
 describe("toggleEvent", () => {
@@ -47,20 +48,20 @@ describe("groupState", () => {
 
 describe("saveBlocked", () => {
 	it("allows an ordinary configuration", () => {
-		expect(saveBlocked({ enabled: true, channelId: "400000000000000001", events: ["banAdd"] })).toBeNull();
+		expect(saveBlocked({ enabled: true, channelId: "400000000000000001", events: ["banAdd"] }, t)).toBeNull();
 	});
 
 	/** Turning it off deletes the record, so neither a channel nor an event is needed to do it. */
 	it("allows turning it off with nothing chosen", () => {
-		expect(saveBlocked({ enabled: false, channelId: null, events: [] })).toBeNull();
+		expect(saveBlocked({ enabled: false, channelId: null, events: [] }, t)).toBeNull();
 	});
 
 	it("refuses a log with nowhere to post", () => {
-		expect(saveBlocked({ enabled: true, channelId: null, events: ["banAdd"] })).toMatch(/channel/i);
+		expect(saveBlocked({ enabled: true, channelId: null, events: ["banAdd"] }, t)).toMatch(/channel/i);
 	});
 
 	it("refuses a log that would record nothing", () => {
-		expect(saveBlocked({ enabled: true, channelId: "400000000000000001", events: [] })).toMatch(/at least one/i);
+		expect(saveBlocked({ enabled: true, channelId: "400000000000000001", events: [] }, t)).toMatch(/at least one/i);
 	});
 });
 

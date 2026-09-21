@@ -1,9 +1,10 @@
 import { WELCOME_LIMITS, WELCOME_STYLES, type WelcomeStyle } from "@testify/shared";
+import { type TranslationKey } from "@/i18n";
 
-export const STYLE_LABELS: Record<WelcomeStyle, { label: string; describes: string }> = {
-	text: { label: "Plain text", describes: "A normal message in the channel." },
-	embed: { label: "Embed", describes: "A coloured panel, easier to spot in a busy channel." },
-	card: { label: "Image card", describes: "A drawn card with their avatar, plus the message." },
+export const STYLE_LABELS: Record<WelcomeStyle, { label: TranslationKey; describes: TranslationKey }> = {
+	text: { label: "welcome.styleText", describes: "welcome.styleTextHint" },
+	embed: { label: "welcome.styleEmbed", describes: "welcome.styleEmbedHint" },
+	card: { label: "welcome.styleCard", describes: "welcome.styleCardHint" },
 };
 
 export const STYLE_ORDER = WELCOME_STYLES;

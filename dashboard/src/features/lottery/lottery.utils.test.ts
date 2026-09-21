@@ -1,5 +1,6 @@
 import { type LotterySettings } from "@testify/shared";
 import { draftOf, draftProblem, isDirty, reschedules, winnersWarning } from "@/features/lottery/lottery.utils";
+import { t } from "@/test/english";
 
 const SETTINGS: LotterySettings = {
 	enabled: true,
@@ -20,25 +21,25 @@ describe("draftProblem", () => {
 	const draft = draftOf(SETTINGS);
 
 	it("says nothing about a complete draft", () => {
-		expect(draftProblem(draft)).toBeNull();
+		expect(draftProblem(draft, t)).toBeNull();
 	});
 
 	it("asks for the announcement channel", () => {
-		expect(draftProblem({ ...draft, announcementChannelId: null })).toMatch(/announced/i);
+		expect(draftProblem({ ...draft, announcementChannelId: null }, t)).toMatch(/announced/i);
 	});
 
 	it("refuses a free ticket", () => {
-		expect(draftProblem({ ...draft, entryFee: 0 })).toMatch(/at least/i);
+		expect(draftProblem({ ...draft, entryFee: 0 }, t)).toMatch(/at least/i);
 	});
 
 	it("refuses more winners than a draw can pay", () => {
-		expect(draftProblem({ ...draft, maxWinners: 99 })).toMatch(/winners/i);
+		expect(draftProblem({ ...draft, maxWinners: 99 }, t)).toMatch(/winners/i);
 	});
 
 	/** An emptied number input reads as NaN, which is not a bound failure and must not save. */
 	it("refuses a field that has been emptied", () => {
-		expect(draftProblem({ ...draft, basePrizePool: Number.NaN })).not.toBeNull();
-		expect(draftProblem({ ...draft, maxWinners: Number.NaN })).not.toBeNull();
+		expect(draftProblem({ ...draft, basePrizePool: Number.NaN }, t)).not.toBeNull();
+		expect(draftProblem({ ...draft, maxWinners: Number.NaN }, t)).not.toBeNull();
 	});
 });
 
@@ -64,17 +65,17 @@ describe("reschedules", () => {
 
 describe("winnersWarning", () => {
 	it("says nothing when there are more tickets than winners", () => {
-		expect(winnersWarning(draftOf(SETTINGS), SETTINGS)).toBeNull();
+		expect(winnersWarning(draftOf(SETTINGS), SETTINGS, t)).toBeNull();
 	});
 
 	/** A draw for more winners than tickets sold leaves somebody with nothing, which reads as a broken draw. */
 	it("warns when the winners outnumber the tickets sold", () => {
-		expect(winnersWarning({ ...draftOf(SETTINGS), maxWinners: 5 }, { ...SETTINGS, ticketsSold: 3 })).toMatch(
+		expect(winnersWarning({ ...draftOf(SETTINGS), maxWinners: 5 }, { ...SETTINGS, ticketsSold: 3 }, t)).toMatch(
 			/empty-handed/i,
 		);
 	});
 
 	it("says nothing before any tickets are sold, when the comparison means nothing", () => {
-		expect(winnersWarning({ ...draftOf(SETTINGS), maxWinners: 5 }, { ...SETTINGS, ticketsSold: 0 })).toBeNull();
+		expect(winnersWarning({ ...draftOf(SETTINGS), maxWinners: 5 }, { ...SETTINGS, ticketsSold: 0 }, t)).toBeNull();
 	});
 });

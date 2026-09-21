@@ -67,11 +67,11 @@ export function MembersPage(): React.JSX.Element {
 			) : data.data === undefined ? (
 				<Skeleton className="h-96 w-full" />
 			) : data.data.total === 0 ? (
-				<EmptyState icon={<Crosshair size={28} />} title={t("members.noRankings")} body={emptyMessage(board)} />
+				<EmptyState icon={<Crosshair size={28} />} title={t("members.noRankings")} body={emptyMessage(board, t)} />
 			) : (
 				<>
 					<p className="text-muted-foreground text-sm" aria-live="polite">
-						{summarise(data.data)}
+						{summarise(data.data, t)}
 					</p>
 
 					<BoardTable data={data.data} youId={me.data?.user.id ?? null} guildId={guildId} />

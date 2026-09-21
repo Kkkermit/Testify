@@ -20,7 +20,7 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 		setDraft(value.prefix);
 	}, [value.prefix]);
 
-	const problem = prefixProblem(draft);
+	const problem = prefixProblem(draft, t);
 	const dirty = draft.trim() !== value.prefix;
 
 	function commit(): void {

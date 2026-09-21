@@ -6,6 +6,7 @@ import {
 	type AuditLogPut,
 	auditEventsIn,
 } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 /** How much of one group is ticked, which is what the group's own checkbox has to show. */
 export type GroupState = "none" | "some" | "all";
@@ -39,10 +40,10 @@ export function groupState(events: AuditEvent[], group: AuditGroup): GroupState 
 }
 
 /** Why Save is unavailable, in the words shown beside it, so nobody discovers it after pressing the button. */
-export function saveBlocked(draft: AuditLogPut): string | null {
+export function saveBlocked(draft: AuditLogPut, t: TFunction): string | null {
 	if (!draft.enabled) return null;
-	if (draft.channelId === null) return "Choose a channel for the log before turning it on.";
-	if (draft.events.length === 0) return "Pick at least one event, or turn audit logging off.";
+	if (draft.channelId === null) return t("auditLog.pickChannel");
+	if (draft.events.length === 0) return t("auditLog.pickEvent");
 
 	return null;
 }

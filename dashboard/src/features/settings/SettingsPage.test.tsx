@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { countCapProblem, countProgress, prefixProblem } from "@/features/settings/settings.utils";
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { expectNoViolations } from "@/test/axe";
+import { t } from "@/test/english";
 import { serverSettings } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -34,31 +35,31 @@ function capture(section: string, method: "patch" | "put" = "patch"): { body: un
 
 describe("prefixProblem", () => {
 	it("accepts an ordinary prefix", () => {
-		expect(prefixProblem("t?")).toBeNull();
-		expect(prefixProblem("!!")).toBeNull();
+		expect(prefixProblem("t?", t)).toBeNull();
+		expect(prefixProblem("!!", t)).toBeNull();
 	});
 
 	/** All three rules the API enforces, so the form refuses before the request rather than after it. */
 	it("refuses one that cannot be typed or would match everything", () => {
-		expect(prefixProblem("")).toMatch(/empty/i);
-		expect(prefixProblem("   ")).toMatch(/empty/i);
-		expect(prefixProblem("a b")).toMatch(/space/i);
-		expect(prefixProblem("waytoolongprefix")).toMatch(/longer/i);
+		expect(prefixProblem("", t)).toMatch(/empty/i);
+		expect(prefixProblem("   ", t)).toMatch(/empty/i);
+		expect(prefixProblem("a b", t)).toMatch(/space/i);
+		expect(prefixProblem("waytoolongprefix", t)).toMatch(/longer/i);
 	});
 
 	/** A `/` prefix would put every command next to Discord's own picker. */
 	it("refuses one that collides with slash commands", () => {
-		expect(prefixProblem("/")).toMatch(/collides/i);
+		expect(prefixProblem("/", t)).toMatch(/collides/i);
 	});
 });
 
 describe("countCapProblem", () => {
 	it("accepts a whole number in range", () => {
-		expect(countCapProblem("100")).toBeNull();
+		expect(countCapProblem("100", t)).toBeNull();
 	});
 
 	it("refuses anything that is not one", () => {
-		for (const value of ["", "0", "-5", "1.5", "abc", "2000000"]) expect(countCapProblem(value)).not.toBeNull();
+		for (const value of ["", "0", "-5", "1.5", "abc", "2000000"]) expect(countCapProblem(value, t)).not.toBeNull();
 	});
 });
 

@@ -1,4 +1,5 @@
 import { type ChannelSummary, type RoleSummary, type TicketSettings, ticketBlocked } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 export interface Draft {
 	panelChannelId: string | null;
@@ -27,9 +28,9 @@ export function isDirty(draft: Draft, settings: TicketSettings): boolean {
 }
 
 /** Why the panel cannot be posted yet, in the words the form shows. */
-export function draftProblem(draft: Draft): string | null {
-	if (draft.description.trim() === "") return "The panel needs something to say.";
-	if (draft.buttonLabel.trim() === "") return "The button needs a label.";
+export function draftProblem(draft: Draft, t: TFunction): string | null {
+	if (draft.description.trim() === "") return t("tickets.needsMessage");
+	if (draft.buttonLabel.trim() === "") return t("tickets.needsLabel");
 
 	return ticketBlocked(draft);
 }
@@ -39,12 +40,12 @@ export function categoriesOf(channels: ChannelSummary[]): ChannelSummary[] {
 }
 
 /** A ticket channel is created under the category and its permissions are overwritten, so the bot needs the role beneath its own. */
-export function staffRoleWarning(roles: RoleSummary[], staffRoleId: string | null): string | null {
+export function staffRoleWarning(roles: RoleSummary[], staffRoleId: string | null, t: TFunction): string | null {
 	if (staffRoleId === null) return null;
 
 	const role = roles.find((candidate) => candidate.id === staffRoleId);
-	if (role === undefined) return "That role no longer exists. Pick another one.";
-	if (role.managed) return `${role.name} is managed by an integration, so Testify cannot use it here.`;
+	if (role === undefined) return t("tickets.roleGone");
+	if (role.managed) return t("tickets.roleManaged", { role: role.name });
 
 	return null;
 }

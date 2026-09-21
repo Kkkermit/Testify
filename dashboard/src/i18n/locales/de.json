@@ -242,7 +242,9 @@
 		"postToHint": "Irgendwo, wo nur Moderatoren mitlesen — ein Audit-Log nennt, wer was getan hat.",
 		"whatTitle": "Was aufgezeichnet wird",
 		"whatBody": "Hake eine Überschrift an, um die ganze Gruppe zu nehmen.",
-		"allSelected": "Alles ist ausgewählt, damit auch künftig hinzukommende Ereignisse mitgeschrieben werden."
+		"allSelected": "Alles ist ausgewählt, damit auch künftig hinzukommende Ereignisse mitgeschrieben werden.",
+		"pickChannel": "Wähle einen Kanal für das Log, bevor du es einschaltest.",
+		"pickEvent": "Wähle mindestens ein Ereignis, oder schalte das Audit-Log ab."
 	},
 	"treasure": {
 		"title": "Schatzfunde",
@@ -258,7 +260,10 @@
 		"cooldownHint": "Minuten, bevor ein weiterer Fund erscheinen kann — wie voll der Chat auch ist.",
 		"notSetUpYet": "Noch nicht eingerichtet — die Zahlen unten sind die Standardwerte, bis du die Funde einschaltest.",
 		"howBody": "Testify wählt in jedem Bereich eine Zahl, damit die Funde keinem vorhersehbaren Takt folgen.",
-		"resetDefaults": "Auf Standard zurücksetzen"
+		"resetDefaults": "Auf Standard zurücksetzen",
+		"messagesBetween": "Die Nachrichten müssen zwischen {{min}} und {{max}} liegen.",
+		"dropBetween": "Ein Fund muss zwischen {{min}} und {{max}} liegen.",
+		"cooldownBetween": "Die Abklingzeit muss zwischen {{min}} und {{max}} Minuten liegen."
 	},
 	"welcome": {
 		"title": "Willkommensnachrichten",
@@ -276,7 +281,13 @@
 		"insert": "Einfügen:",
 		"saveMessage": "Nachricht speichern",
 		"preview": "Vorschau",
-		"thisServer": "dieser Server"
+		"thisServer": "dieser Server",
+		"styleText": "Einfacher Text",
+		"styleTextHint": "Eine gewöhnliche Nachricht im Kanal.",
+		"styleEmbed": "Embed",
+		"styleEmbedHint": "Ein farbiges Panel, das in einem belebten Kanal leichter auffällt.",
+		"styleCard": "Bildkarte",
+		"styleCardHint": "Eine gezeichnete Karte mit ihrem Avatar, dazu die Nachricht."
 	},
 	"sticky": {
 		"title": "Sticky-Nachrichten",
@@ -375,7 +386,11 @@
 		"tabsLabel": "Level-Einstellungen",
 		"ignoresBody": "Was hier gesagt wird — oder von Trägern dieser Rollen — bringt keine XP.",
 		"boostsBody": "Wer eine davon trägt, verdient mehr XP. Bei mehreren zählt die höchste, nicht das Produkt.",
-		"add": "Hinzufügen"
+		"add": "Hinzufügen",
+		"tabGeneral": "Allgemein",
+		"tabRewards": "Rollenbelohnungen",
+		"tabBoosts": "XP-Boosts",
+		"tabIgnores": "Ignoriert"
 	},
 	"members": {
 		"title": "Mitglieder",
@@ -421,7 +436,23 @@
 		"takeFrom": "Von der {{purse}} abziehen",
 		"typeToClear": "Tippe {{name}}, um alle Verwarnungen zu löschen",
 		"setLevelAction": "Level setzen",
-		"changeXpAction": "XP ändern"
+		"changeXpAction": "XP ändern",
+		"noAccounts": "Hier hat noch niemand ein Konto.",
+		"noXp": "Hier hat noch niemand XP verdient.",
+		"ranked_one": "{{count, number}} Konto in der Wertung.",
+		"ranked_other": "{{count, number}} Konten in der Wertung.",
+		"rankedMembers_one": "{{count, number}} Mitglied in der Wertung.",
+		"rankedMembers_other": "{{count, number}} Mitglieder in der Wertung.",
+		"joinUnknown": "Beitrittsdatum unbekannt",
+		"joined": "Beigetreten am {{date}}",
+		"noWarnings": "Keine Verwarnungen vermerkt.",
+		"warningCount_one": "{{count}} Verwarnung vermerkt.",
+		"warningCount_other": "{{count}} Verwarnungen vermerkt.",
+		"moneyRank": "Geld-Platzierung",
+		"levelRank": "Level-Platzierung",
+		"unranked": "Ohne Platzierung",
+		"xp": "XP",
+		"level": "Level"
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -452,7 +483,11 @@
 		"off": "Aus",
 		"openNow": "{{count}} gerade offen",
 		"turnOffBody": "Offene Ticket-Kanäle bleiben unangetastet. Die Panel-Nachricht muss von Hand gelöscht werden.",
-		"turnOffAction": "Abschalten"
+		"turnOffAction": "Abschalten",
+		"needsMessage": "Das Panel braucht einen Text.",
+		"needsLabel": "Der Knopf braucht eine Beschriftung.",
+		"roleGone": "Diese Rolle gibt es nicht mehr. Wähle eine andere.",
+		"roleManaged": "{{role}} wird von einer Integration verwaltet, Testify kann sie hier also nicht nutzen."
 	},
 	"lottery": {
 		"title": "Lotterie",
@@ -483,7 +518,11 @@
 		"nextDraw": "Nächste Ziehung",
 		"drawSummary": "{{pot}} auf {{tickets}} Lose",
 		"howBody": "Mitglieder kaufen Lose mit <command>/lottery enter</command>. Jedes Los legt seinen Preis in den Topf.",
-		"yesEndIt": "Ja, beenden"
+		"yesEndIt": "Ja, beenden",
+		"winnersBetween": "Zwischen {{min}} und {{max}} Gewinnern.",
+		"potTooBig": "Der Grundtopf darf nicht größer als {{max}} sein.",
+		"ticketTooDear": "Ein Los darf nicht mehr als {{max}} kosten.",
+		"moreWinnersThanTickets": "Es wurden nur {{tickets}} Lose verkauft, eine Ziehung mit {{winners}} Gewinnern ließe also einige leer ausgehen."
 	},
 	"settings": {
 		"title": "Servereinstellungen",
@@ -539,7 +578,13 @@
 		"resetToZero": "Auf null zurücksetzen",
 		"saveName": "Namen speichern",
 		"prefixExample": "z. B. <example>{{example}}</example>",
-		"roleTooHigh": "Diese Rolle liegt auf oder über Testifys eigener, er kann sie also niemandem geben. Schiebe Testifys Rolle in den Servereinstellungen → Rollen höher oder wähle eine niedrigere."
+		"roleTooHigh": "Diese Rolle liegt auf oder über Testifys eigener, er kann sie also niemandem geben. Schiebe Testifys Rolle in den Servereinstellungen → Rollen höher oder wähle eine niedrigere.",
+		"prefixEmpty": "Das Präfix darf nicht leer sein.",
+		"prefixSpace": "Das Präfix darf kein Leerzeichen enthalten.",
+		"prefixLong": "Das Präfix darf nicht länger als {{max}} Zeichen sein.",
+		"prefixSlash": "Ein Präfix, das mit / beginnt, kollidiert mit Discords eigenen Befehlen.",
+		"countWhole": "Das Ziel muss eine ganze Zahl von mindestens 1 sein.",
+		"countHigh": "Das Ziel darf nicht höher als {{max}} sein."
 	},
 	"owner": {
 		"title": "Inhaber-Konsole",
@@ -660,7 +705,15 @@
 		"releases": "Releases auf GitHub",
 		"blockedAccounts": "Gesperrte Konten",
 		"blockListFailed": "Die Sperrliste konnte nicht geladen werden — das hier ist also keine Liste der Gesperrten.",
-		"no": "Nein"
+		"no": "Nein",
+		"tabOverview": "Übersicht",
+		"tabUsage": "Nutzung",
+		"tabCommands": "Befehle",
+		"tabLogs": "Logs",
+		"tabRun": "Ausführen",
+		"tabBlacklist": "Sperrliste",
+		"tabRuntime": "Laufzeit",
+		"tabControl": "Steuerung"
 	},
 	"legal": {
 		"backToDashboard": "Zurück zum Dashboard",

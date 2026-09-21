@@ -43,7 +43,7 @@ export function TreasurePage(): React.JSX.Element {
 	if (treasure.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
 
-	const problem = draftProblem(draft);
+	const problem = draftProblem(draft, t);
 	const dirty = isDirty(draft, settings);
 	const busy = save.isPending || reset.isPending;
 

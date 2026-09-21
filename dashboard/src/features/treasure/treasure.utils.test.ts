@@ -7,6 +7,7 @@ import {
 	toMilliseconds,
 	toMinutes,
 } from "@/features/treasure/treasure.utils";
+import { t } from "@/test/english";
 
 const SETTINGS: TreasureSettings = {
 	enabled: true,
@@ -39,28 +40,28 @@ describe("draftProblem", () => {
 	const draft = draftOf(SETTINGS);
 
 	it("says nothing about a draft straight off the defaults", () => {
-		expect(draftProblem(draft)).toBeNull();
+		expect(draftProblem(draft, t)).toBeNull();
 	});
 
 	/** A range whose floor is above its ceiling picks no number at all, so the drop would never fire. */
 	it("refuses a range the wrong way round", () => {
-		expect(draftProblem({ ...draft, minMessages: 90 })).toMatch(/fewest messages/i);
-		expect(draftProblem({ ...draft, minAmount: 900 })).toMatch(/smallest drop/i);
+		expect(draftProblem({ ...draft, minMessages: 90 }, t)).toMatch(/fewest messages/i);
+		expect(draftProblem({ ...draft, minAmount: 900 }, t)).toMatch(/smallest drop/i);
 	});
 
 	it("refuses a number outside its bounds", () => {
-		expect(draftProblem({ ...draft, minMessages: 0 })).toMatch(/messages must be between/i);
-		expect(draftProblem({ ...draft, maxAmount: 1_000_000 })).toMatch(/drop must be between/i);
-		expect(draftProblem({ ...draft, cooldownMinutes: 0 })).toMatch(/cooldown must be between/i);
+		expect(draftProblem({ ...draft, minMessages: 0 }, t)).toMatch(/messages must be between/i);
+		expect(draftProblem({ ...draft, maxAmount: 1_000_000 }, t)).toMatch(/drop must be between/i);
+		expect(draftProblem({ ...draft, cooldownMinutes: 0 }, t)).toMatch(/cooldown must be between/i);
 	});
 
 	/** An emptied number input reads as NaN, which is not a bound failure and must not save. */
 	it("refuses a field that has been emptied", () => {
-		expect(draftProblem({ ...draft, minAmount: Number.NaN })).not.toBeNull();
+		expect(draftProblem({ ...draft, minAmount: Number.NaN }, t)).not.toBeNull();
 	});
 
 	it("refuses a fractional value", () => {
-		expect(draftProblem({ ...draft, cooldownMinutes: 2.5 })).not.toBeNull();
+		expect(draftProblem({ ...draft, cooldownMinutes: 2.5 }, t)).not.toBeNull();
 	});
 });
 

@@ -6,6 +6,7 @@ import {
 	statsOf,
 	warningSummary,
 } from "@/features/members/memberDetail.utils";
+import { t } from "@/test/english";
 
 function detail(overrides: Partial<MemberDetail> = {}): MemberDetail {
 	return {
@@ -28,7 +29,7 @@ function detail(overrides: Partial<MemberDetail> = {}): MemberDetail {
 
 describe("describeJoined", () => {
 	it("says when the date is not known rather than rendering Invalid Date", () => {
-		expect(describeJoined(null)).toBe("Join date unknown");
+		expect(describeJoined(null, t)).toBe("Join date unknown");
 	});
 });
 
@@ -51,7 +52,7 @@ describe("softbanActive", () => {
 
 describe("warningSummary", () => {
 	it("says none rather than zero", () => {
-		expect(warningSummary([])).toBe("No warnings on record.");
+		expect(warningSummary([], t)).toBe("No warnings on record.");
 	});
 
 	it.each([
@@ -67,7 +68,7 @@ describe("warningSummary", () => {
 			edited: false,
 		}));
 
-		expect(warningSummary(warnings)).toBe(expected);
+		expect(warningSummary(warnings, t)).toBe(expected);
 	});
 });
 
@@ -88,11 +89,11 @@ describe("clearConfirmed", () => {
 
 describe("statsOf", () => {
 	it("shows nothing for somebody with neither an account nor XP", () => {
-		expect(statsOf(detail())).toEqual([]);
+		expect(statsOf(detail(), t)).toEqual([]);
 	});
 
 	it("reports an unranked account rather than a missing row", () => {
-		const rows = statsOf(detail({ economy: { wallet: 10, bank: 0, total: 10, rank: null } }));
+		const rows = statsOf(detail({ economy: { wallet: 10, bank: 0, total: 10, rank: null } }), t);
 
 		expect(rows).toContainEqual({ label: "Money rank", value: "Unranked" });
 	});
@@ -103,6 +104,7 @@ describe("statsOf", () => {
 				economy: { wallet: 5_000, bank: 120, total: 5_120, rank: 2 },
 				levels: { level: 12, xp: 4_800, rank: 3 },
 			}),
+			t,
 		);
 
 		expect(rows.map((row) => row.label)).toEqual(["Wallet", "Bank", "Money rank", "Level", "XP", "Level rank"]);
