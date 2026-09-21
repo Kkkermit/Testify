@@ -6,6 +6,7 @@ import {
 	isWelcomeStyle,
 	WELCOME_LIMITS,
 	WELCOME_PLACEHOLDERS,
+	type WelcomePlaceholder,
 	WELCOME_STYLES,
 } from "@testify/shared";
 
@@ -21,6 +22,14 @@ export {
 	WELCOME_LIMITS,
 	WELCOME_PLACEHOLDERS,
 	WELCOME_STYLES,
+};
+
+/** What each placeholder stands for, in the words the Discord panel prints beside it. */
+export const PLACEHOLDER_HELP: Record<WelcomePlaceholder, string> = {
+	"{user}": "Mentions them",
+	"{username}": "Their name, unlinked",
+	"{server}": "This server's name",
+	"{count}": "How many members there are now",
 };
 
 export interface WelcomeConfig {

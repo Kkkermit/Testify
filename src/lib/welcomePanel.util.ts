@@ -9,7 +9,7 @@ import {
 	divider,
 	text,
 } from "@lib/containers.util";
-import { type WelcomeConfig, WELCOME_PLACEHOLDERS } from "@lib/welcome.util";
+import { PLACEHOLDER_HELP, type WelcomeConfig, WELCOME_PLACEHOLDERS } from "@lib/welcome.util";
 
 /** Setting up the welcome system, as one screen you read and press. */
 
@@ -56,7 +56,7 @@ function backgroundNote(config: WelcomeConfig): string {
 }
 
 function placeholderHelp(): string {
-	const rows = WELCOME_PLACEHOLDERS.map((entry) => `\`${entry.token}\` — ${entry.describes}`).join("\n");
+	const rows = WELCOME_PLACEHOLDERS.map((token) => `\`${token}\` — ${PLACEHOLDER_HELP[token]}`).join("\n");
 	return `**Placeholders**\n${rows}`;
 }
 

@@ -15,16 +15,6 @@ export const AUTOMOD_LIMITS = {
 	maxRules: 6,
 } as const;
 
-export const AUTOMOD_PRESET_LABELS: Record<AutomodPreset, { label: string; describes: string }> = {
-	"flagged-words": {
-		label: "Flagged words",
-		describes: "Discord's own profanity, sexual content and slur lists.",
-	},
-	spam: { label: "Spam", describes: "Messages Discord identifies as spam." },
-	"mention-spam": { label: "Mention spam", describes: "A message mentioning more people than you allow." },
-	keyword: { label: "A word you choose", describes: "One word or phrase, blocked outright." },
-};
-
 export type AutomodAction = "block" | "alert" | "timeout" | "other";
 
 export interface AutomodRuleSummary {

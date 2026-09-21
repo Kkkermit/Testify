@@ -1,5 +1,6 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
+import { AUDIT_EVENT_LABELS } from "@lib/auditLabels.util";
 import { button, channelSelect, option, row, select, selectRow } from "@lib/components.util";
 import {
 	container,
@@ -9,14 +10,7 @@ import {
 	divider,
 	text,
 } from "@lib/containers.util";
-import {
-	AUDIT_EVENT_LABELS,
-	AUDIT_EVENTS,
-	type AuditEvent,
-	collapseEnabled,
-	isAuditEvent,
-	resolveEnabled,
-} from "@testify/shared";
+import { AUDIT_EVENTS, type AuditEvent, collapseEnabled, isAuditEvent, resolveEnabled } from "@testify/shared";
 
 /** Audit logging, as a panel you click rather than a list you type. */
 

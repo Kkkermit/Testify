@@ -1,6 +1,7 @@
 import { WELCOME_PLACEHOLDERS } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/primitives";
+import { PLACEHOLDER_LABELS } from "@/features/welcome/welcome.labels";
 
 /** Clicking a token inserts it, because retyping `{username}` exactly is the sort of thing people get wrong. */
 export function PlaceholderHelp({
@@ -14,8 +15,8 @@ export function PlaceholderHelp({
 	return (
 		<div className="flex flex-wrap items-center gap-2">
 			<span className="text-muted-foreground text-xs">{t("welcome.insert")}</span>
-			{WELCOME_PLACEHOLDERS.map(({ token, describes }) => (
-				<Tooltip key={token} label={describes}>
+			{WELCOME_PLACEHOLDERS.map((token) => (
+				<Tooltip key={token} label={t(PLACEHOLDER_LABELS[token])}>
 					<button
 						type="button"
 						disabled={disabled}

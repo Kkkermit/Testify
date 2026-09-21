@@ -1547,6 +1547,11 @@ Rules that keep it from rotting, each with a test:
   `src/lib/` writes the English the bot has always shown, and the one in `dashboard/src/lib/` maps the same code
   to a `TranslationKey`. Both maps are `Record<ProblemCode, …>`, so a code with no sentence or no key is a
   compile error. `shared/` stays zod-only and neither surface reimplements the rule.
+- **The same split holds for labels.** `shared/` says which audit events, automod presets and greeting
+  placeholders exist and how they group; `src/lib/auditLabels.util.ts` and `welcome.util.ts`'s
+  `PLACEHOLDER_HELP` write the Discord panel's English, and `auditLog.labels.ts`, `automod.labels.ts` and
+  `welcome.labels.ts` hold the dashboard's keys. `labels.test.ts` renders every one, so a key with nothing
+  behind it fails rather than printing itself on the page.
 
 **i18next does not touch the document.** `lang` is set from a `languageChanged` listener in `src/i18n/index.ts`
 — without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so

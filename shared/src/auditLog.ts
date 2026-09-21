@@ -35,32 +35,26 @@ export const AUDIT_GROUPS = ["Messages", "Channels", "Roles", "Members", "Server
 
 export type AuditGroup = (typeof AUDIT_GROUPS)[number];
 
-export interface AuditEventLook {
-	label: string;
-	describes: string;
-	group: AuditGroup;
-}
-
-/** Human labels, so neither surface reads like a list of gateway constants. */
-export const AUDIT_EVENT_LABELS: Record<AuditEvent, AuditEventLook> = {
-	messageDelete: { label: "Message deleted", describes: "Someone's message was removed", group: "Messages" },
-	messageUpdate: { label: "Message edited", describes: "A message was changed", group: "Messages" },
-	channelCreate: { label: "Channel created", describes: "A new channel appeared", group: "Channels" },
-	channelDelete: { label: "Channel deleted", describes: "A channel was removed", group: "Channels" },
-	channelUpdate: { label: "Channel updated", describes: "A channel was renamed or reconfigured", group: "Channels" },
-	roleCreate: { label: "Role created", describes: "A new role was added", group: "Roles" },
-	roleDelete: { label: "Role deleted", describes: "A role was removed", group: "Roles" },
-	roleUpdate: { label: "Role updated", describes: "A role's name, colour or permissions changed", group: "Roles" },
-	memberJoin: { label: "Member joined", describes: "Someone joined the server", group: "Members" },
-	memberLeave: { label: "Member left", describes: "Someone left or was removed", group: "Members" },
-	memberUpdate: { label: "Member updated", describes: "Nickname or roles changed", group: "Members" },
-	banAdd: { label: "Member banned", describes: "Someone was banned", group: "Members" },
-	banRemove: { label: "Member unbanned", describes: "A ban was lifted", group: "Members" },
-	emojiUpdate: { label: "Emoji changed", describes: "Server emoji were added or removed", group: "Server" },
-	guildUpdate: { label: "Server updated", describes: "Server settings changed", group: "Server" },
-	inviteUpdate: { label: "Invites changed", describes: "An invite was created or deleted", group: "Server" },
-	threadUpdate: { label: "Threads changed", describes: "A thread was created, archived or deleted", group: "Channels" },
-	voiceUpdate: { label: "Voice activity", describes: "Members joining or leaving voice channels", group: "Members" },
+/** Which part of a server each event is about; the wording for it belongs to whichever surface shows it. */
+export const AUDIT_EVENT_GROUP: Record<AuditEvent, AuditGroup> = {
+	messageDelete: "Messages",
+	messageUpdate: "Messages",
+	channelCreate: "Channels",
+	channelDelete: "Channels",
+	channelUpdate: "Channels",
+	roleCreate: "Roles",
+	roleDelete: "Roles",
+	roleUpdate: "Roles",
+	memberJoin: "Members",
+	memberLeave: "Members",
+	memberUpdate: "Members",
+	banAdd: "Members",
+	banRemove: "Members",
+	emojiUpdate: "Server",
+	guildUpdate: "Server",
+	inviteUpdate: "Server",
+	threadUpdate: "Channels",
+	voiceUpdate: "Members",
 };
 
 export function isAuditEvent(value: string): value is AuditEvent {
@@ -68,7 +62,7 @@ export function isAuditEvent(value: string): value is AuditEvent {
 }
 
 export function auditEventsIn(group: AuditGroup): AuditEvent[] {
-	return AUDIT_EVENTS.filter((event) => AUDIT_EVENT_LABELS[event].group === group);
+	return AUDIT_EVENTS.filter((event) => AUDIT_EVENT_GROUP[event] === group);
 }
 
 /** Expands the stored `all` shorthand so a menu or a checklist can tick each option. */

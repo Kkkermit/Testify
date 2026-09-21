@@ -21,13 +21,10 @@ export function isWelcomeStyle(value: string): value is WelcomeStyle {
 	return (WELCOME_STYLES as readonly string[]).includes(value);
 }
 
-/** What a greeting can say about the member who just joined. */
-export const WELCOME_PLACEHOLDERS = [
-	{ token: "{user}", describes: "Mentions them" },
-	{ token: "{username}", describes: "Their name, unlinked" },
-	{ token: "{server}", describes: "This server's name" },
-	{ token: "{count}", describes: "How many members there are now" },
-] as const;
+/** What a greeting can say about the member who just joined; each surface describes them in its own words. */
+export const WELCOME_PLACEHOLDERS = ["{user}", "{username}", "{server}", "{count}"] as const;
+
+export type WelcomePlaceholder = (typeof WELCOME_PLACEHOLDERS)[number];
 
 export const DEFAULT_WELCOME_MESSAGE = "Welcome to **{server}**, {user}! You are member **{count}**.";
 

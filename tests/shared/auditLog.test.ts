@@ -1,5 +1,6 @@
+import { AUDIT_EVENT_LABELS } from "@lib/auditLabels.util";
 import {
-	AUDIT_EVENT_LABELS,
+	AUDIT_EVENT_GROUP,
 	AUDIT_EVENTS,
 	AUDIT_GROUPS,
 	type AuditLogConfigResponse,
@@ -19,11 +20,11 @@ const saved: AuditLogConfigResponse = {
 };
 
 describe("the event list", () => {
-	/** A missing label renders as an empty checkbox, so the map has to cover the list exactly. */
+	/** A missing label renders as an empty option in the panel's select, so the map has to cover the list exactly. */
 	it("labels every event", () => {
 		for (const event of AUDIT_EVENTS) {
 			expect(AUDIT_EVENT_LABELS[event].label).not.toBe("");
-			expect(AUDIT_GROUPS).toContain(AUDIT_EVENT_LABELS[event].group);
+			expect(AUDIT_GROUPS).toContain(AUDIT_EVENT_GROUP[event]);
 		}
 	});
 

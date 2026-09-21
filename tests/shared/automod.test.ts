@@ -1,5 +1,5 @@
 import { problemText } from "@lib/problemText.util";
-import { AUTOMOD_LIMITS, AUTOMOD_PRESET_LABELS, AUTOMOD_PRESETS, automodBlocked, automodCreate } from "@testify/shared";
+import { AUTOMOD_LIMITS, automodBlocked, automodCreate } from "@testify/shared";
 
 describe("automodCreate", () => {
 	it("takes each preset that needs nothing else", () => {
@@ -67,15 +67,5 @@ describe("automodBlocked", () => {
 	it("says nothing once the draft is complete", () => {
 		expect(problemText(automodBlocked({ preset: "keyword", word: "rude", limit: 5 }))).toBeNull();
 		expect(problemText(automodBlocked({ preset: "mention-spam", word: "", limit: 7 }))).toBeNull();
-	});
-});
-
-/** A preset with no copy renders a blank option in the form. */
-describe("AUTOMOD_PRESET_LABELS", () => {
-	it("describes every preset the form offers", () => {
-		for (const preset of AUTOMOD_PRESETS) {
-			expect(AUTOMOD_PRESET_LABELS[preset].label.length).toBeGreaterThan(0);
-			expect(AUTOMOD_PRESET_LABELS[preset].describes.length).toBeGreaterThan(0);
-		}
 	});
 });

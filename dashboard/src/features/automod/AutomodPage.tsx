@@ -1,6 +1,5 @@
 import {
 	AUTOMOD_LIMITS,
-	AUTOMOD_PRESET_LABELS,
 	AUTOMOD_PRESETS,
 	automodBlocked,
 	type AutomodCreate,
@@ -14,6 +13,7 @@ import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button, Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { PRESET_LABELS } from "@/features/automod/automod.labels";
 import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -115,11 +115,11 @@ export function AutomodPage(): React.JSX.Element {
 						>
 							{AUTOMOD_PRESETS.map((key) => (
 								<option key={key} value={key}>
-									{AUTOMOD_PRESET_LABELS[key].label}
+									{t(PRESET_LABELS[key].label)}
 								</option>
 							))}
 						</select>
-						<p className="text-muted-foreground text-xs">{AUTOMOD_PRESET_LABELS[preset].describes}</p>
+						<p className="text-muted-foreground text-xs">{t(PRESET_LABELS[preset].describes)}</p>
 					</Field>
 
 					{preset === "keyword" && (

@@ -95,8 +95,8 @@ describe("fillTemplate", () => {
 	});
 
 	it("documents every placeholder it supports", () => {
-		for (const entry of WELCOME_PLACEHOLDERS) {
-			expect(fillTemplate(entry.token, context)).not.toBe(entry.token);
+		for (const token of WELCOME_PLACEHOLDERS) {
+			expect(fillTemplate(token, context)).not.toBe(token);
 		}
 	});
 });
@@ -190,7 +190,7 @@ describe("the welcome panel", () => {
 
 	it("lists the placeholders, so nobody has to guess them", () => {
 		const text = textOf(configured);
-		for (const entry of WELCOME_PLACEHOLDERS) expect(text).toContain(entry.token);
+		for (const token of WELCOME_PLACEHOLDERS) expect(text).toContain(token);
 	});
 
 	it("greys out the style already in use", () => {

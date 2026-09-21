@@ -1,7 +1,9 @@
-import { AUDIT_EVENT_LABELS, type AuditEvent, type AuditGroup, auditEventsIn } from "@testify/shared";
+import { type AuditEvent, type AuditGroup, auditEventsIn } from "@testify/shared";
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import { CHECK_ROW } from "@/components/form";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { EVENT_LABELS, GROUP_LABELS } from "@/features/audit-log/auditLog.labels";
 import { type GroupState } from "@/features/audit-log/auditLog.utils";
 import { cn } from "@/lib/cn";
 
@@ -19,6 +21,7 @@ export function EventGroup({
 	onToggleGroup: (on: boolean) => void;
 	onToggleEvent: (event: AuditEvent) => void;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const heading = useRef<HTMLInputElement>(null);
 
 	// `indeterminate` is a property, not an attribute, so React cannot set it from JSX.
@@ -31,7 +34,7 @@ export function EventGroup({
 
 	return (
 		<fieldset className="border-border bg-background/40 rounded-card min-w-0 border">
-			<legend className="sr-only">{group}</legend>
+			<legend className="sr-only">{t(GROUP_LABELS[group])}</legend>
 
 			{/* The count is beside the label rather than inside it: it is a status, not part of the tickbox's name. */}
 			<div className="border-border flex items-center gap-2 border-b px-3 py-2.5 text-sm font-semibold">
@@ -49,7 +52,7 @@ export function EventGroup({
 							onToggleGroup(event.target.checked);
 						}}
 					/>
-					<span className="min-w-0 truncate">{group}</span>
+					<span className="min-w-0 truncate">{t(GROUP_LABELS[group])}</span>
 				</label>
 				<span className="text-muted-foreground text-xs font-normal tabular-nums">
 					{chosen}/{inGroup.length}
@@ -58,7 +61,7 @@ export function EventGroup({
 
 			<div className="flex flex-col p-1">
 				{inGroup.map((event) => {
-					const look = AUDIT_EVENT_LABELS[event];
+					const look = EVENT_LABELS[event];
 					const checked = events.includes(event);
 
 					return (
@@ -71,8 +74,8 @@ export function EventGroup({
 								}}
 							/>
 							<span className="min-w-0">
-								<span className="block truncate font-medium">{look.label}</span>
-								<span className="text-muted-foreground block truncate text-xs">{look.describes}</span>
+								<span className="block truncate font-medium">{t(look.label)}</span>
+								<span className="text-muted-foreground block truncate text-xs">{t(look.describes)}</span>
 							</span>
 						</label>
 					);
