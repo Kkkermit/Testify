@@ -1,7 +1,8 @@
-import { ArrowLeft, Compass } from "lucide-react";
+import { Compass } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router";
 import { Card, EmptyState, PageHeader } from "@/components/primitives";
+import { BackLink, PublicPage } from "@/components/primitives/PublicPage";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -18,13 +19,7 @@ export function NotFoundContent(): React.JSX.Element {
 
 	return (
 		<>
-			<Link
-				to="/guilds"
-				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}
-			>
-				<ArrowLeft size={15} aria-hidden="true" />
-				{t("notFound.backToDashboard")}
-			</Link>
+			<BackLink to="/guilds">{t("notFound.backToDashboard")}</BackLink>
 
 			<PageHeader title={t("notFound.title")} subtitle={t("notFound.subtitle")} />
 
@@ -53,8 +48,8 @@ export function NotFoundContent(): React.JSX.Element {
  */
 export function NotFoundPage(): React.JSX.Element {
 	return (
-		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
+		<PublicPage>
 			<NotFoundContent />
-		</main>
+		</PublicPage>
 	);
 }

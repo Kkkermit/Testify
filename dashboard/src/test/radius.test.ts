@@ -1,4 +1,4 @@
-import { everySource, offenders } from "./sourceFiles";
+import { everyModule, offenders } from "./sourceFiles";
 
 /**
  * One radius scale, and nothing outside it.
@@ -14,10 +14,10 @@ const OFF_SCALE =
 
 describe("the radius scale", () => {
 	it("has files to check, so a broken pattern cannot pass vacuously", () => {
-		expect(everySource().length).toBeGreaterThan(50);
+		expect(everyModule().length).toBeGreaterThan(50);
 	});
 
 	it("rounds every corner from a token", () => {
-		expect(offenders(OFF_SCALE)).toEqual([]);
+		expect(offenders(OFF_SCALE, undefined, everyModule())).toEqual([]);
 	});
 });

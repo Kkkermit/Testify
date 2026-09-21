@@ -1,5 +1,6 @@
 import { type ReactNode } from "react";
 import { Eyebrow } from "@/components/primitives/Eyebrow";
+import { PAGE_TITLE } from "@/components/primitives/textStyles";
 
 export function PageHeader({
 	title,
@@ -17,7 +18,7 @@ export function PageHeader({
 		<header className="motion-reveal flex flex-wrap items-start justify-between gap-4">
 			<div className="flex flex-col gap-2">
 				{eyebrow !== undefined && <Eyebrow>{eyebrow}</Eyebrow>}
-				<h1 className="font-display text-[1.75rem] leading-tight font-bold tracking-tight">{title}</h1>
+				<h1 className={PAGE_TITLE}>{title}</h1>
 				{subtitle !== undefined && <p className="text-muted-foreground max-w-prose text-sm">{subtitle}</p>}
 			</div>
 			{action}

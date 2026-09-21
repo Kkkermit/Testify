@@ -54,7 +54,7 @@ function localeLines(): { where: string; text: string }[] {
 
 function copyLines(): { where: string; text: string }[] {
 	const out: { where: string; text: string }[] = [...localeLines()];
-	for (const path of everySource(SRC)) {
+	for (const path of everySource()) {
 		const lines = readFileSync(path, "utf8").split("\n");
 		lines.forEach((line, index) => {
 			for (const match of line.matchAll(VISIBLE)) {

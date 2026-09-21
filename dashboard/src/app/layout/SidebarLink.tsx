@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { NavLink } from "react-router";
+import { ICON_SLOT } from "@/app/layout/sidebarStyles";
 import { Tooltip } from "@/components/primitives";
 import { type NavItem } from "@/config/navigation";
 import { cn } from "@/lib/cn";
@@ -33,7 +34,7 @@ export function SidebarLink({ item, expanded = false }: { item: NavItem; expande
 								isActive ? "h-5 opacity-100" : "h-0 opacity-0",
 							)}
 						/>
-						<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+						<span aria-hidden="true" className={ICON_SLOT}>
 							<Icon size={18} />
 						</span>
 						<span className={expanded ? "truncate" : "sr-only truncate lg:not-sr-only"}>{label}</span>

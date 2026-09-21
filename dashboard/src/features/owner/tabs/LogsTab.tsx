@@ -1,15 +1,14 @@
 import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
 import { type TFunction } from "i18next";
-import { Pause, Play, Search } from "lucide-react";
+import { Pause, Play } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { FIELD, Warning } from "@/components/form";
+import { SearchField, Warning } from "@/components/form";
 import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
 import { LogLines } from "@/features/owner/components/LogLines";
 import { useLogs } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { type TranslationKey } from "@/i18n";
-import { cn } from "@/lib/cn";
 
 /**
  * Keys rather than text: a module-level map is built before a locale is chosen. Written out rather than
@@ -52,23 +51,13 @@ export function LogsTab({
 	return (
 		<div className="flex flex-col gap-4">
 			<Card padding="compact" className="flex flex-wrap items-center gap-3">
-				<label className="relative min-w-52 flex-1">
-					<span className="sr-only">{t("owner.searchLog")}</span>
-					<Search
-						size={15}
-						aria-hidden="true"
-						className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
-					/>
-					<input
-						type="search"
-						value={search}
-						placeholder={t("owner.searchLogPlaceholder")}
-						onChange={(event) => {
-							onSearch(event.target.value);
-						}}
-						className={cn(FIELD, "pl-9")}
-					/>
-				</label>
+				<SearchField
+					className="min-w-52 flex-1"
+					label={t("owner.searchLog")}
+					placeholder={t("owner.searchLogPlaceholder")}
+					value={search}
+					onChange={onSearch}
+				/>
 
 				<SegmentedControl label={t("owner.minimumLevel")} segments={levelSegments} value={level} onChange={onLevel} />
 

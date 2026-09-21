@@ -1,6 +1,7 @@
 import { LEVEL_LIMITS, type XpBoostInput } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { SELECT, RoleChecklist, savingStateOf } from "@/components/form";
+import { DividedList } from "@/components/primitives/DividedList";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
@@ -37,7 +38,7 @@ export function BoostsTab({
 			/>
 
 			{boosts.length > 0 && (
-				<ul className="divide-border border-border divide-y rounded-field border">
+				<DividedList>
 					{boosts.map((boost) => (
 						<li key={boost.roleId} className="flex items-center gap-3 px-3 py-2 text-sm">
 							<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, boost.roleId)}</span>
@@ -66,7 +67,7 @@ export function BoostsTab({
 							</label>
 						</li>
 					))}
-				</ul>
+				</DividedList>
 			)}
 
 			<Refusal error={update.error} />

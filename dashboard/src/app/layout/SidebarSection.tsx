@@ -3,6 +3,7 @@ import { useEffect, useId, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
+import { ICON_SLOT } from "@/app/layout/sidebarStyles";
 import { type NavSection, sectionHolds } from "@/config/navigation";
 import { cn } from "@/lib/cn";
 
@@ -41,7 +42,7 @@ export function SidebarSection({
 					expanded ? "flex" : "hidden lg:flex",
 				)}
 			>
-				<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+				<span aria-hidden="true" className={ICON_SLOT}>
 					<Icon size={18} />
 				</span>
 				<span className="flex-1 truncate text-left">{t(section.labelKey)}</span>

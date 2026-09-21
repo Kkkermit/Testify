@@ -1,13 +1,14 @@
 import { availabilityOf, countSubcommands, toggleName } from "@testify/shared";
 import { type TFunction } from "i18next";
-import { Search, SearchX } from "lucide-react";
+import { SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { FIELD, Warning } from "@/components/form";
+import { SearchField, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
 import { Card, EmptyState, Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import { SELECTED, UNSELECTED } from "@/components/primitives/stateStyles";
 import { configurableAt, coverage, filterCommands, groupByCategory } from "@/features/commands/commands.utils";
 import { CommandCard } from "@/features/commands/components/CommandCard";
 import { useCommands } from "@/features/commands/useCommands";
@@ -78,24 +79,13 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 			</section>
 
 			<div className="flex flex-col gap-3">
-				<label className="relative block">
-					<span className="sr-only">{t("commands.search")}</span>
-					<Search
-						size={16}
-						aria-hidden="true"
-						className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 -translate-y-1/2"
-					/>
-					<input
-						type="search"
-						autoFocus
-						value={search}
-						onChange={(event) => {
-							setSearch(event.target.value);
-						}}
-						placeholder={t("commands.searchPlaceholder")}
-						className={cn(FIELD, "pl-9")}
-					/>
-				</label>
+				<SearchField
+					autoFocus
+					label={t("commands.search")}
+					placeholder={t("commands.searchPlaceholder")}
+					value={search}
+					onChange={setSearch}
+				/>
 
 				<div className="flex flex-wrap gap-2 py-1" role="group" aria-label={t("commands.filterByCategory")}>
 					<CategoryChip label={t("commands.all")} active={category === null} onSelect={() => setCategory(null)} />
@@ -194,7 +184,7 @@ function CategoryChip({
 			className={cn(
 				"rounded-full px-3 py-1 text-xs font-medium capitalize transition-colors duration-150",
 				"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
-				active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:text-foreground",
+				active ? SELECTED : cn(UNSELECTED, "hover:text-foreground"),
 			)}
 		>
 			{label}

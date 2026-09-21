@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
+import { ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
 import { BotMark } from "@/components/brand/BotMark";
 import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
@@ -13,7 +14,6 @@ import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
 /** Every row shares `ROW`, so all four icons sit on one vertical line and all four labels on another. */
-const ROW = "flex items-center gap-3 rounded-card px-2 py-2";
 
 const FOOTER_LINKS = [
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
@@ -57,7 +57,7 @@ export function Sidebar({
 		>
 			<Link to="/guilds" className={cn(ROW, "mb-4")}>
 				{/* Boxed to 18px like every other row icon, so the wordmark starts on the label column too. */}
-				<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+				<span aria-hidden="true" className={ICON_SLOT}>
 					<BotMark src={bot?.avatarUrl} size={22} />
 				</span>
 				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
@@ -104,7 +104,7 @@ export function Sidebar({
 			<div className="border-border mt-auto flex flex-col gap-1 border-t pt-3">
 				{user !== null && (
 					<div className={ROW}>
-						<span aria-hidden="true" className="flex w-[18px] shrink-0 justify-center">
+						<span aria-hidden="true" className={ICON_SLOT}>
 							<Avatar name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
 						</span>
 						<span className={label("truncate text-sm")}>{user.username}</span>

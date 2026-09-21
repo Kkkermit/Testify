@@ -2,6 +2,7 @@ import { type CommandAvailability, type CommandSummary } from "@testify/shared";
 import { ChevronRight, Lock, Shield } from "lucide-react";
 import { Link } from "react-router";
 import { Badge, Card, Tooltip } from "@/components/primitives";
+import { DividedList } from "@/components/primitives/DividedList";
 import { featureLook } from "@/config/features";
 import { type CommandPlace } from "@/features/commands/commands.utils";
 import { CommandSwitch } from "@/features/commands/components/CommandSwitch";
@@ -85,7 +86,7 @@ export function CommandCard({
 			)}
 
 			{command.subcommands.length > 0 && (
-				<ul className="divide-border border-border divide-y rounded-field border">
+				<DividedList>
 					{command.subcommands.map((subcommand) => (
 						<li key={subcommand.name} className="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-3 py-2">
 							<code className="font-mono text-xs">
@@ -94,7 +95,7 @@ export function CommandCard({
 							<span className="text-muted-foreground min-w-0 flex-1 text-xs">{subcommand.description}</span>
 						</li>
 					))}
-				</ul>
+				</DividedList>
 			)}
 
 			{command.options.length > 0 && (

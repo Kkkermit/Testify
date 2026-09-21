@@ -1,3 +1,4 @@
+import { SELECTED } from "@/components/primitives/stateStyles";
 import { Tooltip } from "@/components/primitives/Tooltip";
 import { cn } from "@/lib/cn";
 
@@ -34,9 +35,7 @@ export function SegmentedControl<Value extends string | number>({
 						className={cn(
 							"rounded-chip px-2.5 py-1 text-sm transition-colors duration-150",
 							"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
-							value === segment.value
-								? "bg-primary text-primary-foreground"
-								: "text-muted-foreground hover:text-foreground",
+							value === segment.value ? SELECTED : "text-muted-foreground hover:text-foreground",
 						)}
 					>
 						{segment.label}

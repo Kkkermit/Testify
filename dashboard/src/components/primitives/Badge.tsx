@@ -1,8 +1,9 @@
 import { type ReactNode } from "react";
+import { UNSELECTED } from "@/components/primitives/stateStyles";
 import { cn } from "@/lib/cn";
 
 const TONES = {
-	muted: "bg-muted text-muted-foreground",
+	muted: UNSELECTED,
 	success: "bg-success/15 text-success",
 	warning: "bg-warning/15 text-warning",
 	danger: "bg-destructive/15 text-destructive-text",

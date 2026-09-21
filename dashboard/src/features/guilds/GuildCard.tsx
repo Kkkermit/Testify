@@ -1,8 +1,9 @@
 import { inviteUrl, type ManageableGuild } from "@testify/shared";
-import { ChevronRight, Lock, Plus } from "lucide-react";
+import { Lock, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { Card, cardClass, Avatar, Tooltip } from "@/components/primitives";
+import { CARD_ROW, HoverChevron } from "@/components/primitives/CardRow";
 import { type GuildGroupKey } from "@/features/guilds/guilds.utils";
 
 export function GuildCard({
@@ -27,17 +28,11 @@ export function GuildCard({
 		</>
 	);
 
-	const surface = "flex items-center gap-3 transition-colors duration-150";
-
 	if (group === "configurable") {
 		return (
-			<Link to={`/guilds/${guild.id}`} className={cardClass("compact", surface, "hover:border-input group")}>
+			<Link to={`/guilds/${guild.id}`} className={cardClass("compact", CARD_ROW, "hover:border-input group")}>
 				{body}
-				<ChevronRight
-					size={16}
-					aria-hidden="true"
-					className="text-muted-foreground shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
-				/>
+				<HoverChevron />
 			</Link>
 		);
 	}
@@ -49,7 +44,7 @@ export function GuildCard({
 				href={inviteUrl(clientId, guild.id)}
 				target="_blank"
 				rel="noreferrer"
-				className={cardClass("compact", surface, "hover:border-primary group")}
+				className={cardClass("compact", CARD_ROW, "hover:border-primary group")}
 			>
 				{body}
 				<span className="text-accent flex shrink-0 items-center gap-2 text-sm font-medium">
@@ -61,7 +56,7 @@ export function GuildCard({
 	}
 
 	return (
-		<Card padding="compact" className={`${surface} opacity-70`}>
+		<Card padding="compact" className={`${CARD_ROW} opacity-70`}>
 			{body}
 			<Tooltip label={t("guilds.noPermissionHint")}>
 				<span tabIndex={0} className="text-muted-foreground flex shrink-0 items-center gap-2 rounded-full text-xs">

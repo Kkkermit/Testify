@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
+import { DividedList } from "@/components/primitives/DividedList";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
@@ -32,7 +33,7 @@ export function RewardsTab({
 			{rewards.length === 0 ? (
 				<p className="text-muted-foreground text-sm">{t("levelling.noRewards")}</p>
 			) : (
-				<ul className="divide-border border-border divide-y rounded-field border">
+				<DividedList>
 					{rewards.map((reward) => (
 						<li
 							key={`${String(reward.level)}-${reward.roleId}`}
@@ -53,7 +54,7 @@ export function RewardsTab({
 							</Button>
 						</li>
 					))}
-				</ul>
+				</DividedList>
 			)}
 
 			<div className="flex flex-wrap items-end gap-3">

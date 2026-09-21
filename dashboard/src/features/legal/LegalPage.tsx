@@ -1,25 +1,16 @@
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router";
 import { Card, PageHeader } from "@/components/primitives";
-import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { BackLink, PublicPage } from "@/components/primitives/PublicPage";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { type LegalDocument } from "@/features/legal/legal.content";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { cn } from "@/lib/cn";
 
 /** Both documents are public — read before signing in — which is why these routes sit outside `RequireAuth`. */
 export function LegalPage({ document }: { document: LegalDocument }): React.JSX.Element {
 	usePageTitle(document.title);
 
 	return (
-		<main className="mx-auto flex w-full max-w-3xl flex-col gap-6 p-4 sm:p-6">
-			<Link
-				to="/guilds"
-				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}
-			>
-				<ArrowLeft size={15} aria-hidden="true" />
-				Back to the dashboard
-			</Link>
+		<PublicPage>
+			<BackLink to="/guilds">Back to the dashboard</BackLink>
 
 			<PageHeader title={document.title} subtitle={document.summary} />
 
@@ -40,6 +31,6 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 					)}
 				</Card>
 			))}
-		</main>
+		</PublicPage>
 	);
 }

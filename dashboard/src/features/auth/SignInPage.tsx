@@ -4,6 +4,7 @@ import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
 import { Backdrop } from "@/components/motion";
 import { Button, Card, Eyebrow } from "@/components/primitives";
+import { PAGE_TITLE } from "@/components/primitives/textStyles";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
 import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
@@ -36,9 +37,7 @@ export function SignInPage(): React.JSX.Element {
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-tile ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
 							<Eyebrow>{t("auth.signIn")}</Eyebrow>
-							<h1 className="font-display text-2xl leading-tight font-bold tracking-tight">
-								{bot.data?.username ?? "Testify"}
-							</h1>
+							<h1 className={PAGE_TITLE}>{bot.data?.username ?? "Testify"}</h1>
 						</div>
 					</div>
 

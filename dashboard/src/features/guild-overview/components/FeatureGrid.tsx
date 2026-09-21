@@ -1,9 +1,9 @@
 import { type GuildOverview } from "@testify/shared";
-import { ChevronRight } from "lucide-react";
 import { type ReactNode } from "react";
 import { Link } from "react-router";
 import { Reveal } from "@/components/motion";
 import { Badge, cardClass } from "@/components/primitives";
+import { CARD_ROW, HoverChevron } from "@/components/primitives/CardRow";
 import { featureLook } from "@/config/features";
 import { cn } from "@/lib/cn";
 
@@ -34,7 +34,7 @@ export function FeatureGrid({
 					</>
 				);
 
-				const surface = cardClass("compact", "flex items-center gap-3 transition-colors duration-150");
+				const surface = cardClass("compact", CARD_ROW);
 
 				return (
 					<Reveal as="li" key={feature.key} index={index}>
@@ -43,11 +43,7 @@ export function FeatureGrid({
 						) : (
 							<Link to={path(guildId)} className={cn(surface, "hover:border-input group")}>
 								{body}
-								<ChevronRight
-									size={16}
-									aria-hidden="true"
-									className="text-muted-foreground shrink-0 transition-transform duration-200 ease-out group-hover:translate-x-0.5"
-								/>
+								<HoverChevron />
 							</Link>
 						)}
 					</Reveal>
