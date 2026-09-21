@@ -20,7 +20,7 @@ const FIELDS: Field[] = [
 	{ key: "DISCORD_CLIENT_ID", message: "Application ID", required: true },
 	{ key: "DISCORD_OWNER_IDS", message: "Your Discord user ID (comma separated for more)", required: true },
 	{ key: "MONGODB_URI", message: "MongoDB connection string", required: true },
-	{ key: "DISCORD_DEV_GUILD_ID", message: "Test server ID (commands appear instantly there)", required: false },
+	{ key: "DISCORD_DEV_GUILD_ID", message: "Test server ID (commands register there only)", required: false },
 	{ key: "LOG_LEVEL", message: "Log level: trace, debug, info, warn, error or fatal", required: false },
 	{ key: "CHANNEL_ERROR_LOG", message: "Channel ID for command errors", required: false },
 	{ key: "CHANNEL_GUILD_LOG", message: "Channel ID for server join and leave notices", required: false },

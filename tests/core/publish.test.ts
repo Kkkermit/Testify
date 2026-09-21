@@ -55,7 +55,7 @@ describe("publishCommands", () => {
 		expect(String(put.mock.calls[0]?.[0])).toBe("/applications/123456789012345678/commands");
 	});
 
-	/** Guild commands appear at once; global ones can take an hour to propagate. */
+	/** Guild registration keeps a half-built command off every server but the one you are testing in. */
 	it("publishes to the dev guild when one is set", async () => {
 		await publishCommands(clientWith(1, GUILD_ID));
 		expect(String(put.mock.calls[0]?.[0])).toContain(`/guilds/${GUILD_ID}/commands`);

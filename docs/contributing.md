@@ -11,7 +11,7 @@ npm run dev
 ```
 
 You need Node 24.11 or newer and a MongoDB you can connect to. Set
-`DISCORD_DEV_GUILD_ID` to a test server so your commands appear immediately.
+`DISCORD_DEV_GUILD_ID` to a test server so what you are halfway through building is not live everywhere.
 
 ## Before you open a pull request
 

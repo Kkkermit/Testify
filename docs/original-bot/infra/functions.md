@@ -22,7 +22,7 @@ Attaches `client.handleCommands(commandFolders, path)`.
 |---|---|
 | **Two path schemes for the same files** | Reads via `fs.readdirSync(\`${path}/${folder}\`)` where `path` is the CWD-relative `"./src/commands"`, but requires via the `__dirname`-relative `\`../commands/${folder}/${file}\``. **Finding 79.** |
 | **Top-level `return`** | Guards on `process.env.clientid`; on failure `module.exports` is never assigned, so the caller gets `TypeError: require(...) is not a function` — a loud failure for the wrong reason. **Finding 76.** |
-| **Dead `guildId`** | `const guildId = process.env.guildid` is assigned and never read. Only global registration exists, so **command changes take up to an hour to propagate** — guild-scoped instant registration was intended but never wired. |
+| **Dead `guildId`** | `const guildId = process.env.guildid` is assigned and never read. Only global registration exists, so **every change is live in every server at once** — guild-scoped registration was intended but never wired. |
 | **No validation** | `command.data.name` is dereferenced with no guard; one malformed file crashes the entire boot with an opaque error. |
 | **Dead alias branch** | `if (command.name) { … command.aliases … }` — **no slash command declares a top-level `name`**, so this branch never runs, and both branches do the same thing anyway. |
 | **Implicit global** | `for (folder of commandFolders)` — no `const`. |

@@ -80,7 +80,8 @@ REST.put(Routes.applicationCommands(clientId), { body: client.commandArray })
 ```
 
 Registration is **global only**. `process.env.guildid` is read into a variable that is never used, so
-guild-scoped (instant) registration does not exist — every command change takes up to an hour to propagate.
+guild-scoped registration does not exist — every change is live in every server the moment it publishes, with no
+test server to try it in first.
 
 The loader reads files via a **CWD-relative** path but `require`s them via a **`__dirname`-relative** path —
 two independent path schemes for the same files.

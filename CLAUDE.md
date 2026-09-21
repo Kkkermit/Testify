@@ -317,8 +317,12 @@ async function main(): Promise<void> {
 
 **Command registration scope** — this is the single-guild vs multi-guild switch:
 
-- `DISCORD_DEV_GUILD_ID` **set** → commands register to that guild only, and appear instantly.
-- `DISCORD_DEV_GUILD_ID` **blank** → commands register globally, and take up to an hour to roll out.
+- `DISCORD_DEV_GUILD_ID` **set** → commands register to that guild only, so a half-built one is not live everywhere.
+- `DISCORD_DEV_GUILD_ID` **blank** → commands register globally.
+
+**Neither takes an hour.** Registration is immediate on both paths; it is the Discord _client_ that caches the
+list it was last handed, so a command that has not turned up needs a client reload (Ctrl+R, Cmd+R on macOS)
+rather than a wait. Do not write the old "up to an hour to propagate" line back into the docs.
 
 **Dispatch:**
 

@@ -211,18 +211,18 @@ npm run setup
 It asks for each value and writes `.env` for you. Required fields are marked and it will not let you skip
 them. Prefer doing it by hand? Copy `.env.example` to `.env` and fill it in.
 
-| Variable               | Required | What it is                                                                        |
-| ---------------------- | :------: | --------------------------------------------------------------------------------- |
-| `DISCORD_TOKEN`        |    ✅    | The token from step 2                                                             |
-| `DISCORD_CLIENT_ID`    |    ✅    | **OAuth2 → Client ID** in the Developer Portal                                    |
-| `DISCORD_OWNER_IDS`    |    ✅    | Your Discord user ID. Comma-separate for several owners                           |
-| `MONGODB_URI`          |    ✅    | The connection string from step 4                                                 |
-| `DISCORD_DEV_GUILD_ID` |    —     | A test server ID. Commands appear there instantly instead of taking up to an hour |
-| `LOG_LEVEL`            |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                    |
-| `CHANNEL_ERROR_LOG`    |    —     | Where command failures are reported                                               |
-| `CHANNEL_GUILD_LOG`    |    —     | Where server joins and leaves are reported                                        |
-| `CHANNEL_DM_LOG`       |    —     | Where DMs to the bot are logged                                                   |
-| `CHANNEL_FEEDBACK_LOG` |    —     | Where `/suggest` and `/bug-report` land                                           |
+| Variable               | Required | What it is                                                                                       |
+| ---------------------- | :------: | ------------------------------------------------------------------------------------------------ |
+| `DISCORD_TOKEN`        |    ✅    | The token from step 2                                                                            |
+| `DISCORD_CLIENT_ID`    |    ✅    | **OAuth2 → Client ID** in the Developer Portal                                                   |
+| `DISCORD_OWNER_IDS`    |    ✅    | Your Discord user ID. Comma-separate for several owners                                          |
+| `MONGODB_URI`          |    ✅    | The connection string from step 4                                                                |
+| `DISCORD_DEV_GUILD_ID` |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
+| `LOG_LEVEL`            |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
+| `CHANNEL_ERROR_LOG`    |    —     | Where command failures are reported                                                              |
+| `CHANNEL_GUILD_LOG`    |    —     | Where server joins and leaves are reported                                                       |
+| `CHANNEL_DM_LOG`       |    —     | Where DMs to the bot are logged                                                                  |
+| `CHANNEL_FEEDBACK_LOG` |    —     | Where `/suggest` and `/bug-report` land                                                          |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks.
 
@@ -471,8 +471,9 @@ file in `src/commands/` and change it.
 
 Almost always one of three things:
 
-1. **You are waiting on a global deploy.** Without `DISCORD_DEV_GUILD_ID` set, Discord can take up to an hour
-   to show new commands. Set it to your test server and they appear instantly.
+1. **Your Discord client is showing a cached list.** Registration is immediate — global commands do **not**
+   take an hour to roll out — but the client caches what it was last told. Reload it with Ctrl+R (Cmd+R on macOS) and
+   they appear.
 2. **The bot was invited without `applications.commands`.** Re-invite it with both `bot` and
    `applications.commands` ticked in the URL Generator.
 3. **Start-up failed before publishing.** Commands are published before login, so check the console.

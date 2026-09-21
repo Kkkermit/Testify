@@ -123,14 +123,14 @@ to reap orphaned processes.
 
 ## Troubleshooting
 
-| What you see                                         | What it is                                                               |
-| ---------------------------------------------------- | ------------------------------------------------------------------------ |
-| `required variable DISCORD_TOKEN is missing a value` | No `.env`, or the variable is blank in it                                |
-| Cards render with no text on them                    | The font package is missing — you are not using this repo's Dockerfile   |
-| Dashboard refuses the connection                     | `DASHBOARD_BIND` is `127.0.0.1`; in a container it must be `0.0.0.0`     |
-| `Your .env file needs attention`                     | The bot's own validation. It names every problem at once — read them all |
-| Signing in bounces back to the sign-in screen        | The OAuth2 redirect URI does not match `DASHBOARD_BASE_URL`              |
-| Commands do not appear in Discord                    | Global registration takes up to an hour. Set `DISCORD_DEV_GUILD_ID`      |
+| What you see                                         | What it is                                                                   |
+| ---------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `required variable DISCORD_TOKEN is missing a value` | No `.env`, or the variable is blank in it                                    |
+| Cards render with no text on them                    | The font package is missing — you are not using this repo's Dockerfile       |
+| Dashboard refuses the connection                     | `DASHBOARD_BIND` is `127.0.0.1`; in a container it must be `0.0.0.0`         |
+| `Your .env file needs attention`                     | The bot's own validation. It names every problem at once — read them all     |
+| Signing in bounces back to the sign-in screen        | The OAuth2 redirect URI does not match `DASHBOARD_BASE_URL`                  |
+| Commands do not appear in Discord                    | The client is showing a cached list — reload it with Ctrl+R (Cmd+R on macOS) |
 
 ---
 
