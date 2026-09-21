@@ -1,5 +1,6 @@
 import { type LotteryRecord } from "@database/models/lottery.schema";
 import { getLottery, intervalFor, saveLottery } from "@database/repositories/lotteryRepository";
+import { problemText } from "@lib/problemText.util";
 import { type LotteryPatch, type LotterySettings, lotteryBlocked } from "@testify/shared";
 
 const DEFAULTS = { entryFee: 100, basePrizePool: 0, maxWinners: 1, frequency: "weekly" } as const;
@@ -56,7 +57,7 @@ export async function applyLottery(
 	};
 
 	const problem = lotteryBlocked(next);
-	if (problem !== null) return { problem };
+	if (problem !== null) return { problem: problemText(problem) };
 
 	const rescheduled = patch.frequency !== undefined && patch.frequency !== current.frequency;
 	const nextDrawTime =

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Problem, problem } from "./problems";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
@@ -58,20 +59,20 @@ export function giveawayProblem(draft: {
 	prize: string;
 	winnerCount: number;
 	durationMs: number;
-}): string | null {
-	if (draft.channelId === null) return "Pick a channel to post it in.";
-	if (draft.prize.trim() === "") return "Say what is being given away.";
+}): Problem | null {
+	if (draft.channelId === null) return problem("giveaway.channel");
+	if (draft.prize.trim() === "") return problem("giveaway.prize");
 	if (draft.prize.length > GIVEAWAY_LIMITS.maxPrize) {
-		return `The prize cannot be longer than ${String(GIVEAWAY_LIMITS.maxPrize)} characters.`;
+		return problem("giveaway.prizeLength", { max: GIVEAWAY_LIMITS.maxPrize });
 	}
 	if (!Number.isInteger(draft.winnerCount) || draft.winnerCount < GIVEAWAY_LIMITS.minWinners) {
-		return "There has to be at least one winner.";
+		return problem("giveaway.winners");
 	}
 	if (draft.winnerCount > GIVEAWAY_LIMITS.maxWinners) {
-		return `Discord will not let one giveaway have more than ${String(GIVEAWAY_LIMITS.maxWinners)} winners.`;
+		return problem("giveaway.maxWinners", { max: GIVEAWAY_LIMITS.maxWinners });
 	}
-	if (draft.durationMs < GIVEAWAY_LIMITS.minDurationMs) return "A giveaway has to run for at least a minute.";
-	if (draft.durationMs > GIVEAWAY_LIMITS.maxDurationMs) return "A giveaway cannot run for longer than 30 days.";
+	if (draft.durationMs < GIVEAWAY_LIMITS.minDurationMs) return problem("giveaway.tooShort");
+	if (draft.durationMs > GIVEAWAY_LIMITS.maxDurationMs) return problem("giveaway.tooLong");
 
 	return null;
 }

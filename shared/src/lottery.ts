@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Problem, problem } from "./problems";
 
 export const LOTTERY_FREQUENCIES = ["hourly", "daily", "weekly"] as const;
 
@@ -51,10 +52,10 @@ export const lotteryPatch = z
 export type LotteryPatch = z.infer<typeof lotteryPatch>;
 
 /** What is still missing before a lottery can run, in the words the form shows. */
-export function lotteryBlocked(draft: { announcementChannelId: string | null; entryFee: number }): string | null {
-	if (draft.announcementChannelId === null) return "Choose where draws are announced.";
+export function lotteryBlocked(draft: { announcementChannelId: string | null; entryFee: number }): Problem | null {
+	if (draft.announcementChannelId === null) return problem("lottery.channel");
 	if (!Number.isInteger(draft.entryFee) || draft.entryFee < LOTTERY_LIMITS.minEntryFee) {
-		return `A ticket has to cost at least ${String(LOTTERY_LIMITS.minEntryFee)}.`;
+		return problem("lottery.entryFee", { min: LOTTERY_LIMITS.minEntryFee });
 	}
 
 	return null;

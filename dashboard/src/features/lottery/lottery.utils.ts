@@ -1,5 +1,6 @@
 import { LOTTERY_LIMITS, type LotteryFrequency, type LotterySettings, lotteryBlocked } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { problemText } from "@/lib/problemText";
 
 export interface Draft {
 	entryFee: number;
@@ -42,7 +43,7 @@ export function draftProblem(draft: Draft, t: TFunction): string | null {
 		return t("lottery.ticketTooDear", { max: LOTTERY_LIMITS.maxEntryFee.toLocaleString() });
 	}
 
-	return lotteryBlocked(draft);
+	return problemText(lotteryBlocked(draft), t);
 }
 
 /** Changing how often the draw runs moves the next one, so the form says that before the admin presses Save. */

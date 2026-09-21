@@ -1,3 +1,4 @@
+import { problemText } from "@lib/problemText.util";
 import { GIVEAWAY_LIMITS, giveawayProblem, giveawayStart } from "@testify/shared";
 
 /**
@@ -51,18 +52,22 @@ describe("giveawayProblem", () => {
 	const draft = { channelId, prize: "A copy of the game", winnerCount: 1, durationMs: 3_600_000 };
 
 	it("passes a draft the API would accept", () => {
-		expect(giveawayProblem(draft)).toBeNull();
+		expect(problemText(giveawayProblem(draft))).toBeNull();
 	});
 
 	it("names the missing channel before anything else", () => {
-		expect(giveawayProblem({ ...draft, channelId: null })).toMatch(/channel/i);
+		expect(problemText(giveawayProblem({ ...draft, channelId: null }))).toMatch(/channel/i);
 	});
 
 	it("refuses what the schema refuses", () => {
-		expect(giveawayProblem({ ...draft, prize: "  " })).toMatch(/what is being given away/i);
-		expect(giveawayProblem({ ...draft, winnerCount: 0 })).toMatch(/at least one winner/i);
-		expect(giveawayProblem({ ...draft, winnerCount: GIVEAWAY_LIMITS.maxWinners + 1 })).toMatch(/more than/i);
-		expect(giveawayProblem({ ...draft, durationMs: 1_000 })).toMatch(/at least a minute/i);
-		expect(giveawayProblem({ ...draft, durationMs: GIVEAWAY_LIMITS.maxDurationMs + 1 })).toMatch(/30 days/i);
+		expect(problemText(giveawayProblem({ ...draft, prize: "  " }))).toMatch(/what is being given away/i);
+		expect(problemText(giveawayProblem({ ...draft, winnerCount: 0 }))).toMatch(/at least one winner/i);
+		expect(problemText(giveawayProblem({ ...draft, winnerCount: GIVEAWAY_LIMITS.maxWinners + 1 }))).toMatch(
+			/more than/i,
+		);
+		expect(problemText(giveawayProblem({ ...draft, durationMs: 1_000 }))).toMatch(/at least a minute/i);
+		expect(problemText(giveawayProblem({ ...draft, durationMs: GIVEAWAY_LIMITS.maxDurationMs + 1 }))).toMatch(
+			/30 days/i,
+		);
 	});
 });

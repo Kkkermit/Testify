@@ -1,3 +1,4 @@
+import { problemText } from "@lib/problemText.util";
 import { TREASURE_LIMITS, treasurePatch, treasureProblem } from "@testify/shared";
 
 describe("treasurePatch", () => {
@@ -39,19 +40,19 @@ describe("treasureProblem", () => {
 	const fine = { minMessages: 10, maxMessages: 50, minAmount: 10, maxAmount: 500 };
 
 	it("says nothing when both pairs are the right way round", () => {
-		expect(treasureProblem(fine)).toBeNull();
+		expect(problemText(treasureProblem(fine))).toBeNull();
 	});
 
 	/** A range whose floor is above its ceiling picks no number at all, so the drop would never fire. */
 	it("refuses a message range the wrong way round", () => {
-		expect(treasureProblem({ ...fine, minMessages: 60 })).toMatch(/fewest messages/i);
+		expect(problemText(treasureProblem({ ...fine, minMessages: 60 }))).toMatch(/fewest messages/i);
 	});
 
 	it("refuses a drop size the wrong way round", () => {
-		expect(treasureProblem({ ...fine, minAmount: 900 })).toMatch(/smallest drop/i);
+		expect(problemText(treasureProblem({ ...fine, minAmount: 900 }))).toMatch(/smallest drop/i);
 	});
 
 	it("allows a range that is a single value", () => {
-		expect(treasureProblem({ minMessages: 20, maxMessages: 20, minAmount: 5, maxAmount: 5 })).toBeNull();
+		expect(problemText(treasureProblem({ minMessages: 20, maxMessages: 20, minAmount: 5, maxAmount: 5 }))).toBeNull();
 	});
 });

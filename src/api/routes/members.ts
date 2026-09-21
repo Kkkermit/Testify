@@ -7,6 +7,7 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { addWarning, clearWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/memberActions.util";
+import { problemText } from "@lib/problemText.util";
 import {
 	boardQuery,
 	levelBody,
@@ -154,7 +155,7 @@ members.patch("/:userId/money", async (context) => {
 
 	const held = purse === "wallet" ? (current.economy?.wallet ?? 0) : (current.economy?.bank ?? 0);
 	const problem = moneyProblem(delta, purse, held);
-	if (problem !== null) throw badRequest(problem);
+	if (problem !== null) throw badRequest(problemText(problem));
 
 	await changeMoney(guildOf(context).id, member.id, purse, delta);
 	await auditChange(context, {

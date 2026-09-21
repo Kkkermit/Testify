@@ -1,5 +1,6 @@
 import { type ChannelSummary, type RoleSummary, type TicketSettings, ticketBlocked } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { problemText } from "@/lib/problemText";
 
 export interface Draft {
 	panelChannelId: string | null;
@@ -32,7 +33,7 @@ export function draftProblem(draft: Draft, t: TFunction): string | null {
 	if (draft.description.trim() === "") return t("tickets.needsMessage");
 	if (draft.buttonLabel.trim() === "") return t("tickets.needsLabel");
 
-	return ticketBlocked(draft);
+	return problemText(ticketBlocked(draft), t);
 }
 
 export function categoriesOf(channels: ChannelSummary[]): ChannelSummary[] {

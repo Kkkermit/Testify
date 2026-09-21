@@ -1,5 +1,6 @@
 import { type TreasureConfigSettings } from "@database/models/guildSettings.schema";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { problemText } from "@lib/problemText.util";
 import { TREASURE_DEFAULTS, type TreasurePatch, type TreasureSettings, treasureProblem } from "@testify/shared";
 
 export { TREASURE_LIMITS, treasureProblem } from "@testify/shared";
@@ -39,7 +40,7 @@ export async function applyTreasure(
 	};
 
 	const problem = treasureProblem(next);
-	if (problem !== null) return { problem };
+	if (problem !== null) return { problem: problemText(problem) };
 
 	await saveTreasureConfig(guildId, {
 		isEnabled: next.enabled,

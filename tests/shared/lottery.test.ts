@@ -1,3 +1,4 @@
+import { problemText } from "@lib/problemText.util";
 import { LOTTERY_LIMITS, lotteryBlocked, lotteryPatch } from "@testify/shared";
 
 const CHANNEL = "400000000000000001";
@@ -44,15 +45,15 @@ describe("lotteryPatch", () => {
 
 describe("lotteryBlocked", () => {
 	it("says nothing once a channel and a price are set", () => {
-		expect(lotteryBlocked({ announcementChannelId: CHANNEL, entryFee: 100 })).toBeNull();
+		expect(problemText(lotteryBlocked({ announcementChannelId: CHANNEL, entryFee: 100 }))).toBeNull();
 	});
 
 	/** The draw posts its winners publicly, so a lottery with nowhere to announce cannot run. */
 	it("asks for the announcement channel first", () => {
-		expect(lotteryBlocked({ announcementChannelId: null, entryFee: 100 })).toMatch(/announced/i);
+		expect(problemText(lotteryBlocked({ announcementChannelId: null, entryFee: 100 }))).toMatch(/announced/i);
 	});
 
 	it("asks for a ticket price above nothing", () => {
-		expect(lotteryBlocked({ announcementChannelId: CHANNEL, entryFee: 0 })).toMatch(/at least/i);
+		expect(problemText(lotteryBlocked({ announcementChannelId: CHANNEL, entryFee: 0 }))).toMatch(/at least/i);
 	});
 });

@@ -1,33 +1,34 @@
+import { problemText } from "@lib/problemText.util";
 import { levelBody, MEMBER_LIMITS, moneyBody, moneyProblem } from "@testify/shared";
 
 describe("moneyProblem", () => {
 	it("accepts an amount they can afford to lose", () => {
-		expect(moneyProblem(-100, "wallet", 500)).toBeNull();
+		expect(problemText(moneyProblem(-100, "wallet", 500))).toBeNull();
 	});
 
 	it("accepts any addition inside the cap", () => {
-		expect(moneyProblem(MEMBER_LIMITS.maxMoneyChange, "bank", 0)).toBeNull();
+		expect(problemText(moneyProblem(MEMBER_LIMITS.maxMoneyChange, "bank", 0))).toBeNull();
 	});
 
 	/** Nothing else in the economy can produce a negative balance, so a manager must not be able to either. */
 	it("refuses taking more than they hold", () => {
-		expect(moneyProblem(-501, "wallet", 500)).toMatch(/only have 500/i);
+		expect(problemText(moneyProblem(-501, "wallet", 500))).toMatch(/only have 500/i);
 	});
 
 	it("allows taking exactly what they hold", () => {
-		expect(moneyProblem(-500, "wallet", 500)).toBeNull();
+		expect(problemText(moneyProblem(-500, "wallet", 500))).toBeNull();
 	});
 
 	it.each([0, 1.5, Number.NaN])("refuses %p as an amount", (delta) => {
-		expect(moneyProblem(delta, "wallet", 500)).toMatch(/enter an amount/i);
+		expect(problemText(moneyProblem(delta, "wallet", 500))).toMatch(/enter an amount/i);
 	});
 
 	it("refuses a change past the cap", () => {
-		expect(moneyProblem(MEMBER_LIMITS.maxMoneyChange + 1, "wallet", 0)).toMatch(/cannot be more than/i);
+		expect(problemText(moneyProblem(MEMBER_LIMITS.maxMoneyChange + 1, "wallet", 0))).toMatch(/cannot be more than/i);
 	});
 
 	it("names the purse it is talking about", () => {
-		expect(moneyProblem(-10, "bank", 0)).toContain("bank");
+		expect(problemText(moneyProblem(-10, "bank", 0))).toContain("bank");
 	});
 });
 

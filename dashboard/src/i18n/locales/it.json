@@ -765,5 +765,33 @@
 		"removalP1": "Rimuovere il bot da un server cancella le impostazioni di quel server. Per qualsiasi cosa riguardi te personalmente, chiedi all’operatore di questa istanza: gestisce lui il database e può cancellarlo.",
 		"cookies": "Cookie",
 		"cookiesP1": "Un solo cookie, impostato all’accesso, con un identificatore di sessione firmato. È httpOnly, same-site, e marcato Secure quando la dashboard è servita via HTTPS. Non c’è alcun cookie di terze parti, nessun identificatore pubblicitario e nulla che ti segua tra i siti. Il tuo indirizzo IP non viene conservato, e nemmeno la tua posizione, il tuo browser o il tuo dispositivo."
+	},
+	"problem": {
+		"automodMentionLimit": "Scegli quante menzioni consentire.",
+		"automodWord": "Digita la parola o la frase da bloccare.",
+		"giveawayChannel": "Scegli un canale in cui pubblicarlo.",
+		"giveawayMaxWinners": "Discord non consente più di {{max}} vincitori per un giveaway.",
+		"giveawayPrize": "Indica che cosa viene messo in palio.",
+		"giveawayPrizeLength": "Il premio non può superare i {{max}} caratteri.",
+		"giveawayTooLong": "Un giveaway non può durare più di 30 giorni.",
+		"giveawayTooShort": "Un giveaway deve durare almeno un minuto.",
+		"giveawayWinners": "Ci deve essere almeno un vincitore.",
+		"lotteryChannel": "Scegli dove vengono annunciate le estrazioni.",
+		"lotteryEntryFee": "Un biglietto deve costare almeno {{min}}.",
+		"moneyAmount": "Inserisci un importo da aggiungere o togliere.",
+		"moneyBankShort": "Ha solo {{held, number}} in banca.",
+		"moneyTooLarge": "Una singola modifica non può superare {{max, number}}.",
+		"moneyWalletShort": "Ha solo {{held, number}} nel portafoglio.",
+		"stickyChannel": "Scegli un canale per questo messaggio fisso.",
+		"stickyDuplicate": "Quel canale ha già un messaggio fisso. Modifica quello esistente.",
+		"stickyMessage": "Un messaggio fisso deve dire qualcosa.",
+		"ticketCategory": "Scegli la categoria in cui creare i nuovi ticket.",
+		"ticketPanelChannel": "Scegli dove pubblicare il pannello.",
+		"ticketStaffRole": "Scegli il ruolo che gestisce i ticket.",
+		"ticketTranscriptChannel": "Scegli dove inviare le trascrizioni.",
+		"treasureAmountRange": "La ricompensa minima non può superare quella massima.",
+		"treasureMessageRange": "Il minimo di messaggi non può superare il massimo.",
+		"warningReason": "Indica il motivo dell’avvertimento.",
+		"warningReasonLength": "Un motivo non può superare i {{max}} caratteri."
 	}
 }

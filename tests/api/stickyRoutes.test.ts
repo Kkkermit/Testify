@@ -1,3 +1,4 @@
+import { problemText } from "@lib/problemText.util";
 import { STICKY_LIMITS, stickyBlocked, stickyPut } from "@testify/shared";
 
 /**
@@ -36,19 +37,19 @@ describe("stickyPut", () => {
 
 describe("stickyBlocked", () => {
 	it("asks for a channel before anything else", () => {
-		expect(stickyBlocked({ channelId: null, message: "hi" }, [])).toMatch(/channel/i);
+		expect(problemText(stickyBlocked({ channelId: null, message: "hi" }, []))).toMatch(/channel/i);
 	});
 
 	/** One sticky per channel is a unique index underneath, so the form has to say so rather than 500. */
 	it("refuses a channel that already has one", () => {
-		expect(stickyBlocked({ channelId: "1", message: "hi" }, ["1"])).toMatch(/already has a sticky/i);
+		expect(problemText(stickyBlocked({ channelId: "1", message: "hi" }, ["1"]))).toMatch(/already has a sticky/i);
 	});
 
 	it("refuses an empty message", () => {
-		expect(stickyBlocked({ channelId: "1", message: "  " }, [])).toMatch(/something to say/i);
+		expect(problemText(stickyBlocked({ channelId: "1", message: "  " }, []))).toMatch(/something to say/i);
 	});
 
 	it("says nothing when the entry is complete", () => {
-		expect(stickyBlocked({ channelId: "1", message: "hi" }, ["2"])).toBeNull();
+		expect(problemText(stickyBlocked({ channelId: "1", message: "hi" }, ["2"]))).toBeNull();
 	});
 });

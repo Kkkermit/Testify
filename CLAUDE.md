@@ -1525,8 +1525,8 @@ backdrop failed its hex check and silently fell back to one colour in both theme
 
 ### Every string comes from i18next
 
-`src/i18n/` holds the setup and four JSON dictionaries. English is the source; Spanish, German and French sit
-beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
+`src/i18n/` holds the setup and six JSON dictionaries. English is the source; Spanish, German, French, Italian
+and Russian sit beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
 and `TranslationKey` is exported for the places that store a key rather than call `t` — `NavItem.labelKey` and
 every module-level lookup table.
 
@@ -1542,6 +1542,11 @@ Rules that keep it from rotting, each with a test:
   changed `{{placeholder}}`, and any key nothing renders. Dead copy in one file is dead copy in four.
 - **`voice.test.ts` reads `en.json`**, so the British spelling, curly apostrophe and second-person rules now
   apply to the dictionary rather than to scattered literals.
+- **`@testify/shared` names a refusal, it does not write one.** A validator there returns a `Problem` — a
+  `ProblemCode` and the raw numbers its sentence interpolates — and each surface renders it: `problemText` in
+  `src/lib/` writes the English the bot has always shown, and the one in `dashboard/src/lib/` maps the same code
+  to a `TranslationKey`. Both maps are `Record<ProblemCode, …>`, so a code with no sentence or no key is a
+  compile error. `shared/` stays zod-only and neither surface reimplements the rule.
 
 **i18next does not touch the document.** `lang` is set from a `languageChanged` listener in `src/i18n/index.ts`
 — without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so

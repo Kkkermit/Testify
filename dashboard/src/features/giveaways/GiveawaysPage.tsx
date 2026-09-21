@@ -27,6 +27,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { oneOf } from "@/lib/oneOf";
+import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
 export function GiveawaysPage(): React.JSX.Element {
@@ -53,7 +54,7 @@ export function GiveawaysPage(): React.JSX.Element {
 
 	const rows = ordered(list.data.giveaways);
 	const durationMs = durationMsOf(amount, unit);
-	const blocked = giveawayProblem({ channelId, prize, winnerCount: winners, durationMs });
+	const blocked = problemText(giveawayProblem({ channelId, prize, winnerCount: winners, durationMs }), t);
 	const busy = start.isPending || end.isPending || reroll.isPending || remove.isPending;
 	const failure = start.error ?? end.error ?? reroll.error ?? remove.error;
 

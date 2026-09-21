@@ -1,3 +1,4 @@
+import { problemText } from "@lib/problemText.util";
 import { TICKET_LIMITS, ticketBlocked, ticketPatch } from "@testify/shared";
 
 const ID = "400000000000000001";
@@ -48,7 +49,7 @@ describe("ticketBlocked", () => {
 	};
 
 	it("says nothing once all four are chosen", () => {
-		expect(ticketBlocked(complete)).toBeNull();
+		expect(problemText(ticketBlocked(complete))).toBeNull();
 	});
 
 	it.each([
@@ -57,6 +58,6 @@ describe("ticketBlocked", () => {
 		["transcriptChannelId", /transcripts/i],
 		["staffRoleId", /role/i],
 	] as const)("asks for %s when it is missing", (field, expected) => {
-		expect(ticketBlocked({ ...complete, [field]: null })).toMatch(expected);
+		expect(problemText(ticketBlocked({ ...complete, [field]: null }))).toMatch(expected);
 	});
 });

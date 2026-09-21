@@ -765,5 +765,33 @@
 		"removalP1": "Den Bot von einem Server zu entfernen löscht dessen Einstellungen. Für alles, was dich persönlich betrifft, wende dich an die Betreiberin dieser Instanz — sie führt die Datenbank und kann es löschen.",
 		"cookies": "Cookies",
 		"cookiesP1": "Ein Cookie, gesetzt bei der Anmeldung, mit einer signierten Sitzungskennung. Es ist httpOnly, same-site und wird als Secure markiert, wenn das Dashboard über HTTPS ausgeliefert wird. Es gibt kein Drittanbieter-Cookie, keine Werbe-ID und nichts, was dir zwischen Seiten folgt. Deine IP-Adresse wird nicht gespeichert, ebenso wenig dein Standort, dein Browser oder dein Gerät."
+	},
+	"problem": {
+		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
+		"automodWord": "Gib das Wort oder den Ausdruck ein, der blockiert werden soll.",
+		"giveawayChannel": "Wähle einen Kanal, in dem es gepostet wird.",
+		"giveawayMaxWinners": "Discord erlaubt pro Verlosung höchstens {{max}} Gewinner.",
+		"giveawayPrize": "Sag, was verlost wird.",
+		"giveawayPrizeLength": "Der Preis darf nicht länger als {{max}} Zeichen sein.",
+		"giveawayTooLong": "Eine Verlosung darf nicht länger als 30 Tage laufen.",
+		"giveawayTooShort": "Eine Verlosung muss mindestens eine Minute laufen.",
+		"giveawayWinners": "Es muss mindestens einen Gewinner geben.",
+		"lotteryChannel": "Wähle, wo die Ziehungen angekündigt werden.",
+		"lotteryEntryFee": "Ein Los muss mindestens {{min}} kosten.",
+		"moneyAmount": "Gib einen Betrag zum Hinzufügen oder Abziehen ein.",
+		"moneyBankShort": "Sie haben nur {{held, number}} auf der Bank.",
+		"moneyTooLarge": "Eine Änderung darf nicht mehr als {{max, number}} betragen.",
+		"moneyWalletShort": "Sie haben nur {{held, number}} in ihrer Geldbörse.",
+		"stickyChannel": "Wähle einen Kanal für diese Dauernachricht.",
+		"stickyDuplicate": "Dieser Kanal hat bereits eine Dauernachricht. Bearbeite die vorhandene.",
+		"stickyMessage": "Eine Dauernachricht braucht einen Inhalt.",
+		"ticketCategory": "Wähle die Kategorie, in der neue Tickets entstehen.",
+		"ticketPanelChannel": "Wähle, wo das Panel gepostet wird.",
+		"ticketStaffRole": "Wähle die Rolle, die Tickets bearbeitet.",
+		"ticketTranscriptChannel": "Wähle, wohin die Protokolle gesendet werden.",
+		"treasureAmountRange": "Der kleinste Fund darf nicht größer als der größte sein.",
+		"treasureMessageRange": "Die kleinste Anzahl Nachrichten darf nicht größer als die größte sein.",
+		"warningReason": "Gib an, warum die Verwarnung erfolgt.",
+		"warningReasonLength": "Ein Grund darf nicht länger als {{max}} Zeichen sein."
 	}
 }

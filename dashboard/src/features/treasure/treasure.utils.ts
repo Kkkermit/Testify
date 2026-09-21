@@ -1,5 +1,6 @@
 import { TREASURE_LIMITS, type TreasureSettings, treasureProblem } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { problemText } from "@/lib/problemText";
 
 const MINUTE = 60_000;
 
@@ -56,7 +57,7 @@ export function draftProblem(draft: Draft, t: TFunction): string | null {
 		});
 	}
 
-	return treasureProblem({ minMessages, maxMessages, minAmount, maxAmount });
+	return problemText(treasureProblem({ minMessages, maxMessages, minAmount, maxAmount }), t);
 }
 
 export function isDirty(draft: Draft, settings: TreasureSettings): boolean {

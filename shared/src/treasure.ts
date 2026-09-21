@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Problem, problem } from "./problems";
 
 export const TREASURE_LIMITS = {
 	minMessages: 5,
@@ -51,9 +52,9 @@ export type TreasurePatch = z.infer<typeof treasurePatch>;
 /** The pair rules, checked against the merged record because a patch can carry one half of a pair. */
 export function treasureProblem(
 	settings: Pick<TreasureSettings, "minMessages" | "maxMessages" | "minAmount" | "maxAmount">,
-): string | null {
-	if (settings.minMessages > settings.maxMessages) return "The fewest messages cannot be more than the most.";
-	if (settings.minAmount > settings.maxAmount) return "The smallest drop cannot be more than the largest.";
+): Problem | null {
+	if (settings.minMessages > settings.maxMessages) return problem("treasure.messageRange");
+	if (settings.minAmount > settings.maxAmount) return problem("treasure.amountRange");
 
 	return null;
 }

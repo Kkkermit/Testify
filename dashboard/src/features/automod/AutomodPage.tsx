@@ -21,6 +21,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { oneOf } from "@/lib/oneOf";
+import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 export function AutomodPage(): React.JSX.Element {
@@ -43,7 +44,7 @@ export function AutomodPage(): React.JSX.Element {
 	if (rules.isError) return <ErrorState error={rules.error} onRetry={() => void rules.refetch()} />;
 
 	const { rules: list, canManage } = rules.data;
-	const blocked = automodBlocked({ preset, word, limit });
+	const blocked = problemText(automodBlocked({ preset, word, limit }), t);
 	const busy = add.isPending || toggle.isPending || remove.isPending;
 
 	function draftFor(): AutomodCreate {

@@ -765,5 +765,33 @@
 		"removalP1": "Removing the bot from a server deletes that server’s settings. For anything about you personally, ask the operator of this instance — they run the database and can delete it.",
 		"cookies": "Cookies",
 		"cookiesP1": "One cookie, set when you sign in, holding a signed session identifier. It is httpOnly, same-site, and marked Secure when the dashboard is served over HTTPS. There is no third-party cookie, no advertising identifier, and nothing that follows you between sites. Your IP address is not stored, and neither is your location, your browser or your device."
+	},
+	"problem": {
+		"automodMentionLimit": "Choose how many mentions to allow.",
+		"automodWord": "Type the word or phrase to block.",
+		"giveawayChannel": "Pick a channel to post it in.",
+		"giveawayMaxWinners": "Discord will not let one giveaway have more than {{max}} winners.",
+		"giveawayPrize": "Say what is being given away.",
+		"giveawayPrizeLength": "The prize cannot be longer than {{max}} characters.",
+		"giveawayTooLong": "A giveaway cannot run for longer than 30 days.",
+		"giveawayTooShort": "A giveaway has to run for at least a minute.",
+		"giveawayWinners": "There has to be at least one winner.",
+		"lotteryChannel": "Choose where draws are announced.",
+		"lotteryEntryFee": "A ticket has to cost at least {{min}}.",
+		"moneyAmount": "Enter an amount to add or take away.",
+		"moneyBankShort": "They only have {{held, number}} in their bank.",
+		"moneyTooLarge": "One change cannot be more than {{max, number}}.",
+		"moneyWalletShort": "They only have {{held, number}} in their wallet.",
+		"stickyChannel": "Pick a channel for this sticky.",
+		"stickyDuplicate": "That channel already has a sticky. Edit the existing one instead.",
+		"stickyMessage": "A sticky needs something to say.",
+		"ticketCategory": "Choose the category new tickets are created in.",
+		"ticketPanelChannel": "Choose where the panel is posted.",
+		"ticketStaffRole": "Choose the role that handles tickets.",
+		"ticketTranscriptChannel": "Choose where transcripts are sent.",
+		"treasureAmountRange": "The smallest drop cannot be more than the largest.",
+		"treasureMessageRange": "The fewest messages cannot be more than the most.",
+		"warningReason": "Say why they are being warned.",
+		"warningReasonLength": "A reason cannot be longer than {{max}} characters."
 	}
 }

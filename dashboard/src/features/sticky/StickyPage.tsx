@@ -14,6 +14,7 @@ import { useRemoveSticky, useSaveSticky, useSticky } from "@/features/sticky/use
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 /** A list keyed by channel rather than a page of switches, which is why this is its own screen. */
@@ -38,7 +39,7 @@ export function StickyPage(): React.JSX.Element {
 
 	const entries = list.data.entries;
 	const taken = entries.map((entry) => entry.channelId);
-	const blocked = stickyBlocked({ channelId, message }, taken);
+	const blocked = problemText(stickyBlocked({ channelId, message }, taken), t);
 	const full = entries.length >= list.data.limit;
 
 	function add(): void {

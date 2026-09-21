@@ -765,5 +765,33 @@
 		"removalP1": "Retirer le bot d’un serveur supprime les réglages de ce serveur. Pour tout ce qui vous concerne personnellement, demandez à l’exploitant de cette instance : c’est lui qui tient la base et peut l’effacer.",
 		"cookies": "Cookies",
 		"cookiesP1": "Un seul cookie, posé à la connexion, contenant un identifiant de session signé. Il est httpOnly, same-site, et marqué Secure quand le tableau de bord est servi en HTTPS. Aucun cookie tiers, aucun identifiant publicitaire, rien qui vous suive d’un site à l’autre. Votre adresse IP n’est pas conservée, ni votre localisation, ni votre navigateur, ni votre appareil."
+	},
+	"problem": {
+		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
+		"automodWord": "Saisis le mot ou l’expression à bloquer.",
+		"giveawayChannel": "Choisis un salon où le publier.",
+		"giveawayMaxWinners": "Discord n’autorise pas plus de {{max}} gagnants par tirage.",
+		"giveawayPrize": "Indique ce qui est mis en jeu.",
+		"giveawayPrizeLength": "Le lot ne peut pas dépasser {{max}} caractères.",
+		"giveawayTooLong": "Un tirage ne peut pas durer plus de 30 jours.",
+		"giveawayTooShort": "Un tirage doit durer au moins une minute.",
+		"giveawayWinners": "Il doit y avoir au moins un gagnant.",
+		"lotteryChannel": "Choisis où les tirages sont annoncés.",
+		"lotteryEntryFee": "Un ticket doit coûter au moins {{min}}.",
+		"moneyAmount": "Saisis un montant à ajouter ou à retirer.",
+		"moneyBankShort": "Il n’y a que {{held, number}} sur son compte.",
+		"moneyTooLarge": "Une seule modification ne peut pas dépasser {{max, number}}.",
+		"moneyWalletShort": "Il n’y a que {{held, number}} dans son porte-monnaie.",
+		"stickyChannel": "Choisis un salon pour ce message épinglé.",
+		"stickyDuplicate": "Ce salon a déjà un message épinglé. Modifie celui qui existe.",
+		"stickyMessage": "Un message épinglé doit dire quelque chose.",
+		"ticketCategory": "Choisis la catégorie où les nouveaux tickets sont créés.",
+		"ticketPanelChannel": "Choisis où le panneau est publié.",
+		"ticketStaffRole": "Choisis le rôle qui gère les tickets.",
+		"ticketTranscriptChannel": "Choisis où les transcriptions sont envoyées.",
+		"treasureAmountRange": "Le plus petit gain ne peut pas dépasser le plus grand.",
+		"treasureMessageRange": "Le minimum de messages ne peut pas dépasser le maximum.",
+		"warningReason": "Indique la raison de l’avertissement.",
+		"warningReasonLength": "Une raison ne peut pas dépasser {{max}} caractères."
 	}
 }

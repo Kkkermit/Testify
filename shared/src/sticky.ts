@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Problem, problem } from "./problems";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
@@ -38,10 +39,10 @@ export type StickyPut = z.infer<typeof stickyPut>;
 export const stickyChannelParam = z.object({ channelId: snowflake });
 
 /** Why a sticky cannot be saved, in the words the form shows — the same rules the API enforces. */
-export function stickyBlocked(entry: { channelId: string | null; message: string }, taken: string[]): string | null {
-	if (entry.channelId === null) return "Pick a channel for this sticky.";
-	if (taken.includes(entry.channelId)) return "That channel already has a sticky. Edit the existing one instead.";
-	if (entry.message.trim() === "") return "A sticky needs something to say.";
+export function stickyBlocked(entry: { channelId: string | null; message: string }, taken: string[]): Problem | null {
+	if (entry.channelId === null) return problem("sticky.channel");
+	if (taken.includes(entry.channelId)) return problem("sticky.duplicate");
+	if (entry.message.trim() === "") return problem("sticky.message");
 
 	return null;
 }

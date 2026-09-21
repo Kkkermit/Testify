@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Problem, problem } from "./problems";
 import { plainLine, plainText } from "./text";
 
 export const TICKET_LIMITS = { maxDescription: 1_000, maxButtonLabel: 40 } as const;
@@ -38,11 +39,11 @@ export function ticketBlocked(draft: {
 	categoryId: string | null;
 	transcriptChannelId: string | null;
 	staffRoleId: string | null;
-}): string | null {
-	if (draft.panelChannelId === null) return "Choose where the panel is posted.";
-	if (draft.categoryId === null) return "Choose the category new tickets are created in.";
-	if (draft.transcriptChannelId === null) return "Choose where transcripts are sent.";
-	if (draft.staffRoleId === null) return "Choose the role that handles tickets.";
+}): Problem | null {
+	if (draft.panelChannelId === null) return problem("ticket.panelChannel");
+	if (draft.categoryId === null) return problem("ticket.category");
+	if (draft.transcriptChannelId === null) return problem("ticket.transcriptChannel");
+	if (draft.staffRoleId === null) return problem("ticket.staffRole");
 
 	return null;
 }

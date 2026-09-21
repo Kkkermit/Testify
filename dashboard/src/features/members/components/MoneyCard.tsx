@@ -6,6 +6,7 @@ import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card, SegmentedControl } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { type TranslationKey } from "@/i18n";
+import { problemText } from "@/lib/problemText";
 
 const LABELS: Record<MoneyPurse, TranslationKey> = { wallet: "members.wallet", bank: "members.bank" };
 
@@ -27,8 +28,8 @@ export function MoneyCard({
 	const valid = amount.trim() !== "" && Number.isInteger(parsed);
 
 	// Both directions are checked against the same amount, so Take can be refused while Add is still offered.
-	const addProblem = valid ? moneyProblem(Math.abs(parsed), purse, held) : null;
-	const takeProblem = valid ? moneyProblem(-Math.abs(parsed), purse, held) : null;
+	const addProblem = valid ? problemText(moneyProblem(Math.abs(parsed), purse, held), t) : null;
+	const takeProblem = valid ? problemText(moneyProblem(-Math.abs(parsed), purse, held), t) : null;
 
 	return (
 		<Card className="flex flex-col gap-4">

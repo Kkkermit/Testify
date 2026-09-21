@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { type Problem, problem } from "./problems";
 import { plainLine } from "./text";
 
 /** Discord holds more trigger types than these; the rest are listed but not offered. */
@@ -59,9 +60,9 @@ export const automodPatch = z.object({ enabled: z.boolean() });
 export const automodRuleParam = z.object({ ruleId: z.string().regex(/^\d{17,20}$/, "is not a rule id") });
 
 /** Why a create would be refused, in the words the form shows. */
-export function automodBlocked(draft: { preset: AutomodPreset; word: string; limit: number }): string | null {
-	if (draft.preset === "keyword" && draft.word.trim() === "") return "Type the word or phrase to block.";
-	if (draft.preset === "mention-spam" && !Number.isInteger(draft.limit)) return "Choose how many mentions to allow.";
+export function automodBlocked(draft: { preset: AutomodPreset; word: string; limit: number }): Problem | null {
+	if (draft.preset === "keyword" && draft.word.trim() === "") return problem("automod.word");
+	if (draft.preset === "mention-spam" && !Number.isInteger(draft.limit)) return problem("automod.mentionLimit");
 
 	return null;
 }

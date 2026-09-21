@@ -5,6 +5,7 @@ import { type TicketSetupRecord } from "@database/models/tickets.schema";
 import { countOpenTickets, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
 import { button, row } from "@lib/components.util";
 import { embed } from "@lib/embeds.util";
+import { problemText } from "@lib/problemText.util";
 import { type TicketPatch, type TicketSettings, ticketBlocked } from "@testify/shared";
 
 const DEFAULT_DESCRIPTION = "Press the button below and we will be with you shortly.";
@@ -89,7 +90,7 @@ export async function applyTickets(
 	};
 
 	const problem = ticketBlocked(next);
-	if (problem !== null) return { problem };
+	if (problem !== null) return { problem: problemText(problem) };
 
 	// A panel posted in the old channel is not the panel in the new one, so its id cannot carry over.
 	const moved = patch.panelChannelId !== undefined && patch.panelChannelId !== current.panelChannelId;

@@ -8,6 +8,7 @@ import { Button, Card } from "@/components/primitives";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { WarningList } from "@/features/members/components/WarningList";
 import { clearConfirmed, warningSummary } from "@/features/members/memberDetail.utils";
+import { problemText } from "@/lib/problemText";
 
 export function WarningsCard({
 	detail,
@@ -28,7 +29,7 @@ export function WarningsCard({
 	const [typed, setTyped] = useState("");
 
 	const canModerate = detail.moderationProblem === null;
-	const problem = warningProblem(reason);
+	const problem = problemText(warningProblem(reason), t);
 
 	function cancel(): void {
 		setConfirming(false);
