@@ -665,6 +665,12 @@ IDs) and its default.
 - **The constants modules read zero environment variables.** `constants.ts` / `theme.ts` / `strings.ts` /
   `categories.ts` hold only values identical for every deployment, exported `as const` so `embedColor` is the
   literal `"Blurple"` and not `string`.
+- **`theme.colours` is the only place a colour name is written, and every category has its own.** Two
+  categories shared Blurple and two more shared Aqua, so for four of the twelve the stripe down the embed said
+  nothing — and ten audit handlers each spelled out their own `colour: "Green"`. The audit log now names a
+  **tone** (`created`, `restored`, `updated`, `deleted`, `left`, `moderated`) which `auditLog.util.ts` maps to
+  `theme.colours`, so its colour language is one table. `tests/config/palette.test.ts` fails on a duplicated
+  category colour or on a colour name written outside `src/config/`; both halves were proved able to fail.
 - **No committed snowflakes.** Every ID goes through `env.ts`.
 
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
@@ -1117,6 +1123,7 @@ the same shape —
 | `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting    |
 | `/guilds/:id/commands`  | Per-command switches for this server                                       |
 | `/commands`             | Every command, searchable, with the coverage tile                          |
+| `/help`                 | Getting started: first steps, how commands work, what each section is for  |
 | `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                            |
 | `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
 
@@ -1325,8 +1332,16 @@ where a skill disagrees with it, the skill wins and §19 is updated. What does *
 single source, the accessibility floor only rises, and the CSP is untouchable.
 
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
-`--color-feature-*` tints and `--radius-card` — which is what makes a fork's rebrand one file. A hex value in a
+`--color-feature-*` tints and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
 `.tsx` is a review comment.
+
+**The radius scale is four tokens and nothing else**: `--radius-chip` (6px) for inline chips, bars and the
+segmented control's buttons, `--radius-field` (8px) for inputs, list shells and rows, `--radius-card` (10px) for
+cards and panels, `--radius-tile` (16px) for the brand tile. `rounded-full` stays, because a pill is a shape
+rather than a size. Seventeen call sites reached for Tailwind's own `rounded`, `rounded-sm`, `rounded-md`,
+`rounded-lg` and `rounded-2xl` — 4px, 2px, 6px, 8px and 16px, so the page carried five corner sizes nobody
+chose, two of them barely rounded at all. `src/test/radius.test.ts` sweeps `.ts` **and** `.tsx`, because
+`fieldStyles.ts` is a class string on every input in the app and a `.tsx`-only sweep missed it.
 
 **Nor does one write its own padding.** `Card` takes `padding="none" | "compact" | "default"`, and all three use
 the same 24px inline padding so every card's content starts on the same column whatever its density — a card
@@ -1348,6 +1363,12 @@ the same way and neither can be reasoned around:
   — the audit log's event groups balance to within 80px — and the wrong one with two.
 - **A `grid` with an odd number of cards orphans the last one**, leaving half a row empty under it. Give it
   `col-span-2` when it is genuinely the odd one out, as the usage tab's screens panel is.
+- **A grid item defaults to `min-width: auto`, so the widest card sets the whole track.** One guild card in the
+  picker carried a `shrink-0` "No permission" badge, and its min-content pinned the page at 391px: at a 320px
+  viewport every other card shrank and that one did not, so a phone got a horizontal scrollbar on the first
+  screen after signing in. `[&>li]:min-w-0` on the `<ul>` is the fix, and `FeatureGrid` already had it.
+  Measured in a real browser at 320px and 390px across all seventeen routes, because nothing in jsdom can see
+  a layout.
 
 **The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
 with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
@@ -1411,10 +1432,15 @@ so installing it needs `--force` and breaks `npm ci`.
 **anything a tooltip says must be an addition to a control that already has its own accessible name.** A tooltip
 is a pointer affordance; a control labelled only by one is unreachable to anybody arriving another way.
 
-Two things follow, and both have tests:
+Four things follow, and all four have tests proved able to fail:
 
 - It opens on `focusin` as well as hover, so a keyboard reaches it.
 - It sets `aria-describedby`, never `aria-labelledby`.
+- **Escape closes it without moving focus.** tippy binds no key handler of its own — read out of
+  `tippy.cjs.js`, not assumed — so a box covering the control underneath it had no way out but tabbing away.
+  That is WCAG 2.2 1.4.13, dismissible.
+- **`interactive: true` and a 120ms hide delay** let the pointer reach the box, which is the same criterion's
+  other half. With the default `[350, 0]` it vanished before a pointer could arrive.
 
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in React
 19, so the wrapper warns on every render and is one release from breaking. Popper positions with inline styles,

@@ -71,7 +71,9 @@ export function GuildPickerPage(): React.JSX.Element {
 							<p className="text-muted-foreground text-sm">{t(group.describesKey)}</p>
 						</div>
 
-						<ul className="grid gap-4 sm:grid-cols-2">
+						{/* A grid item defaults to `min-width: auto`, so the widest card sets the row and a phone gets a
+						    horizontal scrollbar. */}
+						<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
 							{group.guilds.map((guild, index) => (
 								<Reveal as="li" key={guild.id} index={index}>
 									<GuildCard guild={guild} group={group.key} clientId={bot.data?.id} />
