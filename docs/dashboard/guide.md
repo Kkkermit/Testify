@@ -572,9 +572,12 @@ export interface NavGroup {
 }
 ```
 
-A server's screens are grouped into collapsible sections (**Members**, **Moderation**, **Messages**), because a
-flat list grew past what one glance takes. `items` stays for the screens that are not a category — Overview and
-Settings. Three things are load-bearing:
+A server's screens are grouped into collapsible sections — **Community**, **Moderation**, **Economy**,
+**Entertainment**, **Channels** — because a flat list grew past what one glance takes. `items` stays for the
+screens that are not a category — Overview and Settings. A screen goes in the section it is decided alongside,
+not the one its command happens to be filed under: automod and audit logging are `settings` commands and still
+sit in Moderation, and Music was once in Economy, which it has nothing to do with. `navigation.test.ts` refuses a
+section of one screen and two screens in one section sharing an icon. Three things are load-bearing:
 
 - **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
   toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed

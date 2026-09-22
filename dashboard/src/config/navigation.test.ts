@@ -79,12 +79,31 @@ describe("navigationFor", () => {
 	 * A member's own page is nested under the leaderboards, so a section that only matched exactly would
 	 * collapse itself the moment somebody clicked a row and leave nothing in the sidebar marked as current.
 	 */
-	it("opens the Members section for a page nested under one of its screens", () => {
+	it("opens the Community section for a page nested under one of its screens", () => {
 		const [, guildGroup] = navigationFor({ guild, isOwner: false });
-		const membersSection = (guildGroup?.sections ?? []).find((section) => section.labelKey === "nav.members");
+		const membersSection = (guildGroup?.sections ?? []).find((section) => section.labelKey === "nav.community");
 
 		expect(membersSection).toBeDefined();
 		expect(sectionHolds(membersSection as never, `/guilds/${guild.id}/members/100000000000000002`)).toBe(true);
+	});
+
+	/** A heading over a single screen is a click that leads nowhere new, and says the grouping has gone wrong. */
+	it("gives every section more than one screen", () => {
+		const [, guildGroup] = navigationFor({ guild, isOwner: false });
+
+		for (const section of guildGroup?.sections ?? []) {
+			expect(section.items.length).toBeGreaterThan(1);
+		}
+	});
+
+	/** Within a section a repeated icon is the only thing telling two rows apart at the icon-only width. */
+	it("never gives two screens in one section the same icon", () => {
+		const [, guildGroup] = navigationFor({ guild, isOwner: false });
+
+		for (const section of guildGroup?.sections ?? []) {
+			const icons = section.items.map((item) => item.icon);
+			expect(new Set(icons).size).toBe(icons.length);
+		}
 	});
 
 	it("names every entry, since the label is the accessible name at the icon-only width", () => {

@@ -1720,8 +1720,9 @@ names any screen that stopped passing it, because the prop existed unused on all
 existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
 
-**A server's screens are grouped into collapsible sections**, because a flat list grew past what one glance
-takes. `NavGroup.sections` in `config/navigation.ts` holds them, `SidebarSection` renders one, and adding a
+**A server's screens are grouped into collapsible sections** — Community, Moderation, Economy, Entertainment,
+Channels — because a flat list grew past what one glance takes. A screen goes where it is decided alongside, not
+where its command is filed: automod is a `settings` command and still sits in Moderation. `NavGroup.sections` in `config/navigation.ts` holds them, `SidebarSection` renders one, and adding a
 screen now means choosing which section it belongs in — `items` stays for the screens that are not a category
 (Overview and Settings). Three things about it are load-bearing:
 

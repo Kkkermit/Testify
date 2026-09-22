@@ -18,6 +18,8 @@ import {
 	Ticket,
 	type LucideIcon,
 	Gift,
+	Gem,
+	Sparkles,
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
@@ -84,18 +86,17 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					hintKey: "nav.settingsHint",
 				},
 			],
+			// Grouped by what the person is trying to do, so a screen sits beside the ones it is decided alongside.
 			sections: [
 				{
-					labelKey: "nav.members",
+					labelKey: "nav.community",
 					icon: Users,
 					items: [
 						{
-							to: `/guilds/${guild.id}/members`,
-							labelKey: "nav.leaderboards",
-							icon: Trophy,
-							hintKey: "nav.leaderboardsHint",
-							// A member's own page lives under this path, and it is still where you are in the sidebar.
-							exact: false,
+							to: `/guilds/${guild.id}/welcome`,
+							labelKey: "nav.welcome",
+							icon: UserPlus,
+							hintKey: "nav.welcomeHint",
 						},
 						{
 							to: `/guilds/${guild.id}/levelling`,
@@ -104,10 +105,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							hintKey: "nav.levellingHint",
 						},
 						{
-							to: `/guilds/${guild.id}/welcome`,
-							labelKey: "nav.welcome",
-							icon: UserPlus,
-							hintKey: "nav.welcomeHint",
+							to: `/guilds/${guild.id}/members`,
+							labelKey: "nav.leaderboards",
+							icon: Trophy,
+							hintKey: "nav.leaderboardsHint",
+							// A member's own page lives under this path, and it is still where you are in the sidebar.
+							exact: false,
 						},
 					],
 				},
@@ -136,20 +139,26 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 						{
 							to: `/guilds/${guild.id}/treasure`,
 							labelKey: "nav.treasure",
-							icon: Coins,
+							icon: Gem,
 							hintKey: "nav.treasureHint",
-						},
-						{
-							to: `/guilds/${guild.id}/music`,
-							labelKey: "nav.music",
-							icon: Music,
-							hintKey: "nav.musicHint",
 						},
 						{
 							to: `/guilds/${guild.id}/lottery`,
 							labelKey: "nav.lottery",
 							icon: Ticket,
 							hintKey: "nav.lotteryHint",
+						},
+					],
+				},
+				{
+					labelKey: "nav.entertainment",
+					icon: Sparkles,
+					items: [
+						{
+							to: `/guilds/${guild.id}/music`,
+							labelKey: "nav.music",
+							icon: Music,
+							hintKey: "nav.musicHint",
 						},
 						{
 							to: `/guilds/${guild.id}/giveaways`,

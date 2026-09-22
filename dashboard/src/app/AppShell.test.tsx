@@ -43,9 +43,10 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });
 
-		expect(screen.getByRole("button", { name: "Members" })).toHaveAttribute("aria-expanded", "false");
+		expect(screen.getByRole("button", { name: "Community" })).toHaveAttribute("aria-expanded", "false");
 		expect(screen.getByRole("button", { name: "Moderation" })).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Economy" })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Entertainment" })).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: "Channels" })).toBeInTheDocument();
 	});
 
@@ -54,7 +55,7 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });
 
-		const members = screen.getByRole("button", { name: "Members" });
+		const members = screen.getByRole("button", { name: "Community" });
 		await user.click(members);
 
 		expect(members).toHaveAttribute("aria-expanded", "true");
@@ -69,7 +70,7 @@ describe("the app shell", () => {
 		await screen.findByRole("link", { name: "Overview" });
 
 		expect(screen.getByRole("button", { name: "Economy" })).toHaveAttribute("aria-expanded", "true");
-		expect(screen.getByRole("button", { name: "Members" })).toHaveAttribute("aria-expanded", "false");
+		expect(screen.getByRole("button", { name: "Community" })).toHaveAttribute("aria-expanded", "false");
 	});
 
 	/**
@@ -80,7 +81,7 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });
 
-		const controls = screen.getByRole("button", { name: "Members" }).getAttribute("aria-controls");
+		const controls = screen.getByRole("button", { name: "Community" }).getAttribute("aria-controls");
 
 		expect(controls).not.toBeNull();
 		expect(document.getElementById(controls ?? "")).not.toBeNull();
@@ -91,7 +92,7 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });
 
-		for (const name of ["Levelling", "Welcome", "AutoMod", "Audit log", "Sticky", "Treasure", "Settings"]) {
+		for (const name of ["Levelling", "Welcome", "AutoMod", "Audit log", "Sticky", "Treasure", "Music", "Settings"]) {
 			expect(screen.getByRole("link", { name })).toBeInTheDocument();
 		}
 	});
