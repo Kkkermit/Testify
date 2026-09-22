@@ -189,7 +189,16 @@ export function openStream(url: string, plan: StreamPlan, binaries: MusicBinarie
 	);
 
 	if (plan.shape !== "transcode") {
-		return { stream: source.stdout, plan, close: () => void source.kill("SIGKILL") };
+		return {
+			stream: source.stdout,
+			plan,
+			// Killing the process is not enough on its own: anything it spawned survives the signal and keeps the
+			// pipe open, so the reader would wait for an end that never comes.
+			close: () => {
+				source.kill("SIGKILL");
+				source.stdout.destroy();
+			},
+		};
 	}
 
 	if (binaries.ffmpeg === null) throw new UserFacingError("That track needs FFmpeg to play, and it is not installed.");
@@ -229,6 +238,8 @@ export function openStream(url: string, plan: StreamPlan, binaries: MusicBinarie
 		close: () => {
 			source.kill("SIGKILL");
 			transcoder.kill("SIGKILL");
+			source.stdout.destroy();
+			transcoder.stdout.destroy();
 		},
 	};
 }

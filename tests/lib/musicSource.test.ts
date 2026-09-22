@@ -203,15 +203,19 @@ describe("openStream", () => {
 	 */
 	it("closing it stops the process it started", async () => {
 		const slow = join(directory, "slow-yt-dlp");
-		writeFileSync(slow, "#!/bin/sh\nsleep 30\n", { mode: 0o755 });
+		// Writes a byte, then holds the pipe open from a forked child. Both halves matter: the byte proves the
+		// process is really running before it is closed, and the fork is what survives a signal to the parent.
+		writeFileSync(slow, "#!/bin/sh\nprintf 'X'\nsleep 30 &\nwait\n", { mode: 0o755 });
 
 		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: slow, ffmpeg: null });
-		// Waiting for the event rather than a fixed delay: under coverage the kill lands later, and a sleep long
-		// enough to be safe on a slow runner is a sleep long enough to slow every run.
 		const closed = new Promise<void>((resolve) => opened.stream.once("close", () => resolve()));
+		// Closing before the process has started proves nothing — it is abandoning a track mid-play that has to work.
+		await new Promise<void>((resolve) => opened.stream.once("data", () => resolve()));
 
 		opened.close();
 
+		// Waiting on the event rather than a fixed delay: a sleep long enough to be safe on a slow runner is a
+		// sleep long enough to slow every run.
 		await expect(Promise.race([closed, deadline(5_000)])).resolves.toBeUndefined();
 	});
 
