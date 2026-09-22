@@ -116,3 +116,73 @@ export class SearchCache {
 		this.#entries.clear();
 	}
 }
+
+/** Discord closes an autocomplete interaction after three seconds, so an answer has to beat that. */
+export const SEARCH_BUDGET_MS = 2_000;
+
+/** Resolves to `null` when the work has not finished in time, leaving it running rather than cancelling it. */
+export async function within<T>(work: Promise<T>, ms: number): Promise<T | null> {
+	let timer: NodeJS.Timeout | undefined;
+	const deadline = new Promise<null>((resolve) => {
+		timer = setTimeout(() => resolve(null), ms);
+	});
+
+	try {
+		return await Promise.race([work, deadline]);
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
+/**
+ * Autocomplete answers that land inside Discord's window whatever the search does.
+ *
+ * A search spawns yt-dlp and can take longer than the three seconds the interaction stays open, and replying
+ * after that fails with "Unknown interaction" — so a slow one is left running to fill the cache for the next
+ * keystroke and this one is answered with the literal row.
+ */
+export class Suggester {
+	readonly #cache: SearchCache;
+	readonly #running = new Map<string, Promise<Choice[]>>();
+	readonly #budgetMs: number;
+
+	constructor(budgetMs = SEARCH_BUDGET_MS, cache = new SearchCache()) {
+		this.#budgetMs = budgetMs;
+		this.#cache = cache;
+	}
+
+	/** How many searches are still running, which is what proves a burst of keystrokes is one process. */
+	get pending(): number {
+		return this.#running.size;
+	}
+
+	async suggest(query: string, search: () => Promise<Choice[]>): Promise<Choice[]> {
+		const cached = this.#cache.get(query);
+		if (cached !== null) return cached.length === 0 ? [literalChoice(query)] : cached.slice(0, MAX_CHOICES);
+
+		const key = SearchCache.key(query);
+		const finished = await within(this.#running.get(key) ?? this.#start(key, query, search), this.#budgetMs);
+
+		return finished === null || finished.length === 0 ? [literalChoice(query)] : finished.slice(0, MAX_CHOICES);
+	}
+
+	#start(key: string, query: string, search: () => Promise<Choice[]>): Promise<Choice[]> {
+		const running = search()
+			.then((choices) => {
+				this.#cache.set(query, choices);
+				return choices;
+			})
+			// A failure is deliberately not cached, so the next keystroke is free to try again.
+			.catch((): Choice[] => [])
+			.finally(() => this.#running.delete(key));
+
+		this.#running.set(key, running);
+
+		return running;
+	}
+
+	clear(): void {
+		this.#cache.clear();
+		this.#running.clear();
+	}
+}

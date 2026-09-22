@@ -1,10 +1,11 @@
 import { type Guild, type GuildMember, type VoiceBasedChannel } from "discord.js";
 import { type TestifyClient } from "@core/client";
+import { type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { type ContainerMessage } from "@lib/containers.util";
 import { findBinaries, type MusicBinaries } from "@lib/musicBinaries.util";
-import { musicPanel } from "@lib/musicPanel.util";
 import { findSession, type MusicSession, sessionFor } from "@lib/musicSession.util";
+import { reply } from "@lib/reply.util";
 
 /** What `/play`, the `/music` subcommands and the panel buttons all need, written once. */
 
@@ -50,6 +51,52 @@ export function requireSession(guild: Guild): MusicSession {
 	return session;
 }
 
+/**
+ * The one sentence that refuses a volume change, so the command and the button cannot come to disagree.
+ *
+ * Changing the level means decoding and re-encoding, and FFmpeg is the only thing here that can do it.
+ */
+export function requireVolumeControl(session: MusicSession): void {
+	if (session.canSetVolume) return;
+
+	throw new UserFacingError(
+		"Changing the volume needs FFmpeg, which is not installed on this host. Run `npm run music:setup` to check.",
+	);
+}
+
 export function panelFor(session: MusicSession, userId: string, note?: string, page = 0): ContainerMessage {
-	return musicPanel({ queue: session.queue, playedMs: session.playedMs, paused: session.paused, page, note }, userId);
+	return session.render(userId, note, page);
+}
+
+/**
+ * Answers with the panel and leaves it live, so the bar keeps moving after the reply has been sent.
+ *
+ * The message is edited through the channel rather than the interaction: an interaction token only lasts
+ * fifteen minutes, which is shorter than plenty of queues.
+ */
+export async function showPanel(
+	interaction: CommandInput,
+	session: MusicSession,
+	note?: string,
+	page = 0,
+): Promise<void> {
+	await reply(interaction, panelFor(session, interaction.user.id, note, page));
+	await watchReply(interaction, session, page);
+}
+
+async function watchReply(interaction: CommandInput, session: MusicSession, page: number): Promise<void> {
+	const channel = interaction.channel;
+	if (channel === null || !("messages" in channel)) return;
+
+	try {
+		const { id } = await interaction.fetchReply();
+		session.watchPanel({
+			userId: interaction.user.id,
+			page,
+			edit: async (payload) => channel.messages.edit(id, payload),
+		});
+	} catch (error) {
+		// A panel that cannot be found again is simply not live; the reply the person can see is unaffected.
+		session.logger.debug({ err: error, guildId: session.guildId }, "[MUSIC] Could not attach the live panel.");
+	}
 }

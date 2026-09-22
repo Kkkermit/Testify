@@ -1,4 +1,11 @@
-import { planStream, type RemoteFormat } from "@lib/musicFormat.util";
+import {
+	clampVolume,
+	DEFAULT_VOLUME,
+	MAX_VOLUME,
+	MIN_VOLUME,
+	planStream,
+	type RemoteFormat,
+} from "@lib/musicFormat.util";
 
 function format(overrides: Partial<RemoteFormat> & { format_id: string }): RemoteFormat {
 	return { acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160, ...overrides };
@@ -85,4 +92,49 @@ describe("planStream", () => {
 			expect(planStream(formats, WITH_FFMPEG)).toBeNull();
 		},
 	);
+});
+
+describe("clampVolume", () => {
+	it("keeps a sensible level as it is", () => {
+		expect(clampVolume(80)).toBe(80);
+	});
+
+	it("holds the ends rather than letting a press run past them", () => {
+		expect(clampVolume(MAX_VOLUME + 50)).toBe(MAX_VOLUME);
+		expect(clampVolume(MIN_VOLUME - 50)).toBe(MIN_VOLUME);
+	});
+
+	/** A custom ID is text, so a hand-written one can arrive as NaN and must not become a NaN filter. */
+	it("falls back to the track's own level for a number that is not one", () => {
+		expect(clampVolume(Number.NaN)).toBe(DEFAULT_VOLUME);
+	});
+
+	it("rounds, because FFmpeg is handed a percentage rather than a fraction", () => {
+		expect(clampVolume(80.6)).toBe(81);
+	});
+});
+
+describe("planStream when the audio has to be filtered", () => {
+	const OPUS = { format_id: "251", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160 };
+
+	/** Passthrough is bytes moved untouched, so a volume filter cannot be applied to it. */
+	it("refuses to pass Opus through, because a filter needs a transcoder", () => {
+		expect(planStream([OPUS], { ffmpeg: true, filtered: true })).toEqual({ formatId: "251", shape: "transcode" });
+	});
+
+	it("passes the same format through untouched when nothing has to be filtered", () => {
+		expect(planStream([OPUS], { ffmpeg: true })).toEqual({ formatId: "251", shape: "webm-opus" });
+	});
+
+	it("has nothing to offer without FFmpeg", () => {
+		expect(planStream([OPUS], { ffmpeg: false, filtered: true })).toBeNull();
+	});
+
+	/** FFmpeg reads a pipe rather than the network, so a segmented format it would have to fetch itself is worse. */
+	it("prefers a plain file over a segmented one even when the segmented one is louder", () => {
+		const hls = { format_id: "hls", acodec: "aac", vcodec: "none", ext: "m4a", protocol: "m3u8_native", abr: 256 };
+		const file = { format_id: "file", acodec: "aac", vcodec: "none", ext: "m4a", protocol: "https", abr: 128 };
+
+		expect(planStream([hls, file], { ffmpeg: true, filtered: true })?.formatId).toBe("file");
+	});
 });

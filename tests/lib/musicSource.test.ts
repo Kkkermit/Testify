@@ -4,6 +4,7 @@ import { join } from "node:path";
 import {
 	argumentsFor,
 	describeTrack,
+	ffmpegArgs,
 	openStream,
 	parseJsonLines,
 	resolveTracks,
@@ -338,5 +339,40 @@ describe("resolveTracks", () => {
 
 	it("describes nothing when there is no downloader", async () => {
 		await expect(describeTrack("https://youtu.be/a", { ytDlp: null, ffmpeg: null })).resolves.toBeNull();
+	});
+});
+
+describe("ffmpegArgs", () => {
+	it("reads the pipe and writes Opus at the rate Discord wants", () => {
+		const args = ffmpegArgs();
+
+		expect(args).toContain("pipe:0");
+		expect(args.join(" ")).toContain("-c:a libopus");
+		expect(args.join(" ")).toContain("-ar 48000");
+	});
+
+	/** An untouched level must add no filter at all, so the common case is not re-levelled for nothing. */
+	it("adds no filter at the track's own level", () => {
+		expect(ffmpegArgs({ volume: 100 })).not.toContain("-af");
+	});
+
+	it("scales the level as a fraction of the track's own", () => {
+		expect(ffmpegArgs({ volume: 50 }).join(" ")).toContain("-af volume=0.500");
+	});
+
+	it("cannot be asked for a level past either end", () => {
+		expect(ffmpegArgs({ volume: 10_000 }).join(" ")).toContain("volume=2.000");
+	});
+
+	it("starts at the beginning when no position is given", () => {
+		expect(ffmpegArgs()).not.toContain("-ss");
+	});
+
+	/** `-ss` after `-i` would decode everything before the position rather than discarding it. */
+	it("seeks before the input rather than after it", () => {
+		const args = ffmpegArgs({ seekMs: 90_000 });
+
+		expect(args.indexOf("-ss")).toBeLessThan(args.indexOf("-i"));
+		expect(args[args.indexOf("-ss") + 1]).toBe("90.000");
 	});
 });

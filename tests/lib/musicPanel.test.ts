@@ -1,5 +1,16 @@
 import { parseCustomId } from "@core/button";
-import { musicPanel, type PanelState, progressLine, queueSummary, trackLine } from "@lib/musicPanel.util";
+import { MAX_VOLUME, MIN_VOLUME } from "@lib/musicFormat.util";
+import {
+	headlineFor,
+	link,
+	musicPanel,
+	type PanelState,
+	progressLine,
+	queueSummary,
+	statusLine,
+	trackLine,
+	volumeStep,
+} from "@lib/musicPanel.util";
 import { type QueueState, type Track } from "@lib/musicQueue.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
@@ -26,6 +37,32 @@ function state(overrides: Partial<PanelState> = {}): PanelState {
 
 function labels(panel: ReturnType<typeof musicPanel>): string[] {
 	return buttonsOf(panel).map((entry) => String(entry.label));
+}
+
+function longQueue(): PanelState {
+	const long = state();
+	long.queue = { ...long.queue, tracks: Array.from({ length: 14 }, (_, at) => track(`t${String(at)}`)) };
+
+	return long;
+}
+
+/** Discord counts everything in the tree, not just the rows. */
+function componentCount(panel: ReturnType<typeof musicPanel>): number {
+	let total = 0;
+	const descend = (node: unknown): void => {
+		if (node === null || typeof node !== "object") return;
+		const record = node as Record<string, unknown>;
+
+		if (typeof record.type === "number") total += 1;
+		for (const value of Object.values(record)) {
+			if (Array.isArray(value)) value.forEach(descend);
+			else if (typeof value === "object") descend(value);
+		}
+	};
+
+	panel.components.forEach((component) => descend(component.toJSON()));
+
+	return total;
 }
 
 describe("musicPanel", () => {
@@ -73,16 +110,58 @@ describe("musicPanel", () => {
 	});
 
 	it("pages the queue only when there is more than one page", () => {
-		expect(labels(musicPanel(state(), OWNER))).not.toContain("Next");
+		expect(labels(musicPanel(state(), OWNER))).not.toContain("Next page");
 
-		const long = state();
-		long.queue = { ...long.queue, tracks: Array.from({ length: 14 }, (_, at) => track(`t${String(at)}`)) };
+		expect(labels(musicPanel(longQueue(), OWNER))).toContain("Next page");
+	});
 
-		expect(labels(musicPanel(long, OWNER))).toContain("Next");
+	/** Discord refuses a message carrying more than forty components, which is a rejection rather than a warning. */
+	it("stays inside Discord's component budget with a full page and a thumbnail", () => {
+		const long = longQueue();
+		long.queue = {
+			...long.queue,
+			tracks: long.queue.tracks.map((queued) => ({ ...queued, thumbnail: "https://cdn.test/a.jpg" })),
+		};
+
+		expect(componentCount(musicPanel({ ...long, canSetVolume: true }, OWNER))).toBeLessThanOrEqual(40);
 	});
 
 	it("numbers upcoming tracks from the one playing, so the numbers match what Remove takes", () => {
 		expect(textOf(musicPanel(state(), OWNER))).toContain("`1.`");
+	});
+
+	it("says it is paused in the heading as well as on the button", () => {
+		expect(textOf(musicPanel(state({ paused: true }), OWNER))).toContain("Paused");
+	});
+
+	/** Without FFmpeg nothing can re-encode, so offering the control would be a button that cannot work. */
+	it("disables the volume controls when the host cannot change the level", () => {
+		const buttons = buttonsOf(musicPanel(state(), OWNER));
+
+		expect(buttons.find((entry) => entry.label === "-10%")?.disabled).toBe(true);
+		expect(buttons.find((entry) => entry.label === "+10%")?.disabled).toBe(true);
+	});
+
+	it("offers the volume controls when the host can change the level", () => {
+		const buttons = buttonsOf(musicPanel(state({ canSetVolume: true, volume: 100 }), OWNER));
+
+		expect(buttons.find((entry) => entry.label === "-10%")?.disabled).toBe(false);
+		expect(buttons.find((entry) => entry.label === "+10%")?.disabled).toBe(false);
+	});
+
+	it("disables whichever end of the volume range it is already at", () => {
+		const loudest = buttonsOf(musicPanel(state({ canSetVolume: true, volume: MAX_VOLUME }), OWNER));
+		const quietest = buttonsOf(musicPanel(state({ canSetVolume: true, volume: MIN_VOLUME }), OWNER));
+
+		expect(loudest.find((entry) => entry.label === "+10%")?.disabled).toBe(true);
+		expect(quietest.find((entry) => entry.label === "-10%")?.disabled).toBe(true);
+	});
+
+	it("carries the level it is moving to in the custom ID", () => {
+		const ids = idsOf(musicPanel(state({ canSetVolume: true, volume: 100 }), OWNER));
+
+		expect(ids).toContain(`music:volume:90:${OWNER}`);
+		expect(ids).toContain(`music:volume:110:${OWNER}`);
 	});
 
 	it("shows a note from the last press when there is one", () => {
@@ -145,5 +224,49 @@ describe("queueSummary", () => {
 		const queue: QueueState = { tracks: [track("a"), track("b", { durationMs: null })], index: 0, loop: "off" };
 
 		expect(queueSummary(queue)).toContain("live");
+	});
+});
+
+describe("statusLine", () => {
+	it("prints the level when the host can change it", () => {
+		expect(statusLine(state({ canSetVolume: true, volume: 80 }), track("a"))).toContain("80%");
+	});
+
+	/** Showing "100%" on a host that cannot re-encode promises a control that does not exist. */
+	it("says the track's own level when the host cannot change it", () => {
+		expect(statusLine(state(), track("a"))).toContain("track level");
+	});
+
+	it("names who asked for the track", () => {
+		expect(statusLine(state(), track("a"))).toContain(`<@${OWNER}>`);
+	});
+});
+
+describe("headlineFor", () => {
+	it("links the title to the track", () => {
+		expect(headlineFor(track("a"))).toContain("(https://youtu.be/a)");
+	});
+});
+
+describe("link", () => {
+	/** A title like "[Official Video]" would otherwise close the link early and print the address as text. */
+	it("escapes brackets in the label", () => {
+		expect(link("[Official Video]", "https://youtu.be/a")).toBe("[\\[Official Video\\]](https://youtu.be/a)");
+	});
+
+	it("gives up on an address Discord could not parse rather than printing a broken link", () => {
+		expect(link("a", "https://example.test/a b")).toBe("a");
+	});
+});
+
+describe("volumeStep", () => {
+	it("moves by one step", () => {
+		expect(volumeStep(100, 1)).toBe(110);
+		expect(volumeStep(100, -1)).toBe(90);
+	});
+
+	it("cannot step past either end", () => {
+		expect(volumeStep(MAX_VOLUME, 1)).toBe(MAX_VOLUME);
+		expect(volumeStep(MIN_VOLUME, -1)).toBe(MIN_VOLUME);
 	});
 });

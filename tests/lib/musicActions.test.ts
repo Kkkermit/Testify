@@ -1,6 +1,13 @@
 import { type Guild, type GuildMember } from "discord.js";
 import { UserFacingError } from "@core/errors";
-import { panelFor, requireSession, sameChannelAs, voiceChannelOf } from "@lib/musicActions.util";
+import {
+	panelFor,
+	requireSession,
+	requireVolumeControl,
+	sameChannelAs,
+	showPanel,
+	voiceChannelOf,
+} from "@lib/musicActions.util";
 import { type QueueState, type Track } from "@lib/musicQueue.util";
 import { destroyAllSessions, type MusicSession, sessionFor } from "@lib/musicSession.util";
 import { textOf } from "@tests/helpers/containers";
@@ -92,5 +99,72 @@ describe("panelFor", () => {
 		const session = sessionFor({ id: "guild-4" } as Guild, BINARIES, LOGGER as never);
 
 		expect(textOf(panelFor(session, USER, "Skipped."))).toContain("Skipped.");
+	});
+});
+
+describe("requireVolumeControl", () => {
+	/** Both `/music volume` and the panel's buttons ask this, so the refusal cannot come to be worded twice. */
+	it("refuses on a host with no FFmpeg, naming what to run", () => {
+		const session = sessionFor({ id: "guild-5" } as Guild, BINARIES, LOGGER as never);
+
+		expect(() => requireVolumeControl(session)).toThrow(UserFacingError);
+		expect(() => requireVolumeControl(session)).toThrow(/FFmpeg/);
+		expect(() => requireVolumeControl(session)).toThrow(/music:setup/);
+	});
+
+	it("allows it on a host that has one", () => {
+		const session = sessionFor(
+			{ id: "guild-6" } as Guild,
+			{ ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg" },
+			LOGGER as never,
+		);
+
+		expect(() => requireVolumeControl(session)).not.toThrow();
+	});
+});
+
+describe("showPanel", () => {
+	function interaction(overrides: Record<string, unknown> = {}): never {
+		return {
+			user: { id: USER },
+			deferred: false,
+			replied: false,
+			reply: jest.fn(() => Promise.resolve(undefined)),
+			editReply: jest.fn(() => Promise.resolve(undefined)),
+			fetchReply: jest.fn(() => Promise.resolve({ id: "message-1" })),
+			channel: { id: "chan-1", messages: { edit: jest.fn(() => Promise.resolve(undefined)) } },
+			...overrides,
+		} as never;
+	}
+
+	/**
+	 * An interaction token dies after fifteen minutes, which is shorter than plenty of queues — so the live
+	 * panel edits the message through the channel rather than through the reply it came from.
+	 */
+	it("leaves the panel live, editing through the channel", async () => {
+		const session = sessionFor({ id: "guild-7" } as Guild, BINARIES, LOGGER as never);
+		const input = interaction();
+
+		await showPanel(input, session);
+		await session.refreshPanel();
+
+		expect(
+			(input as unknown as { channel: { messages: { edit: jest.Mock } } }).channel.messages.edit,
+		).toHaveBeenCalledWith("message-1", expect.objectContaining({ components: expect.any(Array) }));
+	});
+
+	it("still answers when the reply cannot be found again", async () => {
+		const session = sessionFor({ id: "guild-8" } as Guild, BINARIES, LOGGER as never);
+		const input = interaction({ fetchReply: jest.fn(() => Promise.reject(new Error("Unknown Message"))) });
+
+		await expect(showPanel(input, session)).resolves.toBeUndefined();
+		expect((input as unknown as { reply: jest.Mock }).reply).toHaveBeenCalled();
+	});
+
+	it("does not try to follow a panel sent somewhere with no message history", async () => {
+		const session = sessionFor({ id: "guild-9" } as Guild, BINARIES, LOGGER as never);
+		const input = interaction({ channel: null });
+
+		await expect(showPanel(input, session)).resolves.toBeUndefined();
 	});
 });

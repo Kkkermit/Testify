@@ -62,14 +62,14 @@ numbers, which drift):
 | -------------------- | -------------------------------- |
 | Commands             | 78, across 13 categories         |
 | Command files        | 98 (incl. folded-in subcommands) |
-| Subcommands          | 108                              |
-| Prefix aliases       | 75                               |
+| Subcommands          | 109                              |
+| Prefix aliases       | 82                               |
 | Button handlers      | 24                               |
 | Events               | 24, in 5 groups                  |
-| `src/lib` helpers    | 67                               |
+| `src/lib` helpers    | 78                               |
 | Schemas/repositories | 13 / 13                          |
 | Scheduled jobs       | 4                                |
-| Tests                | 3,234 across 205 suites          |
+| Tests                | 3,601 across 228 suites          |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -986,10 +986,43 @@ than `EARLY_TOLERANCE_MS` means it came apart, so it retries up to `MAX_TRACK_AT
 Skip and Stop set flags that beat the check, and a live stream reports no duration so it can never be judged
 short. It is pure arithmetic, so every branch is a test rather than a live stall.
 
+**The volume is an FFmpeg filter, and it is not `inlineVolume`.** That option decodes Opus to PCM, scales it
+and encodes it again, which needs `@discordjs/opus`, `node-opus` or `opusscript` — read out of `prism-media`'s
+`opus/Opus.js`, none of which is installed — and it would undo the passthrough on every track whether or not
+anybody touched the level. So `/music volume` and the panel's two buttons instead re-open the current track
+with `-af volume=`, and FFmpeg is the only thing in the stack that can do it. Four things follow:
+
+- **Passthrough is kept while the level is the track's own.** `planStream` takes `filtered`, and only a level
+  other than 100 or a seek sets it — so the ordinary case still costs no CPU at all, and a host with no FFmpeg
+  keeps playing and is told plainly that the control needs one (`requireVolumeControl`, written once because
+  both the command and the button ask it).
+- **The re-open seeks, and the seek has to be added back.** `-ss` sits before `-i` so packets are discarded
+  rather than decoded, and `MusicSession` carries the offset in `playedMs` — without it a resource that starts
+  counting from zero makes every changed track look like it came apart, and `decideOnIdle` replays it.
+- **Nothing waits for it.** yt-dlp takes longer than the three seconds Discord gives a button, so `setVolume`
+  records the level, answers, and re-opens in the background.
+- **The player falling idle mid-swap is not the track ending.** `play` marks itself as re-opening before it
+  yields, and `#onIdle` returns while that is set.
+
+**A queue where nothing opens ends rather than walking itself.** Each failure to open steps past the track, and
+under `loop: "queue"` that is a circle — so `#failures` bounds it at one pass and then ends the queue. Without
+it the loop is microtasks, which starves the event loop rather than merely spinning.
+
+**The panel is live: `PANEL_REFRESH_MS` rewrites it while a track plays**, so the bar moves on its own. It
+edits through `channel.messages.edit` rather than the interaction, because an interaction token dies after
+fifteen minutes and queues outlive that. An edit that fails drops the panel instead of retrying a message that
+will 404 for ever, and the ticker stops when the queue does.
+
 Things that are deliberately **not** there: DisTube and its plugins (the yt-dlp and SoundCloud ones were two
-years stale), a `/volume` command (inline volume forces a PCM transcode and an Opus encoder, which would undo
-the passthrough — Discord's own per-user volume slider covers it), and Spotify playback. `open.spotify.com` is
-on yt-dlp's `KnownDRMIE` list beside Disney+; a Spotify link is refused with an explanation rather than played.
+years stale), and Spotify playback. `open.spotify.com` is on yt-dlp's `KnownDRMIE` list beside Disney+; a
+Spotify link is refused with an explanation rather than played.
+
+**Autocomplete answers inside three seconds or not at all.** A `/play` search spawns yt-dlp, which regularly
+runs past the window Discord keeps the interaction open — and replying after that is `DiscordAPIError[10062]`,
+logged as an error with nothing offered to pick. `Suggester` in `musicSearch.util.ts` races the search against
+`SEARCH_BUDGET_MS`, answers a slow one with the literal "search for what I typed" row, and lets it finish into
+the cache for the next keystroke; a burst of keystrokes on the same text is one process. The dispatcher notes
+10062 at `debug` rather than `error`, because an expired interaction is somebody typing fast.
 
 **The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
 before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries

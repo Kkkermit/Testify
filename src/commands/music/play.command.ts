@@ -1,14 +1,14 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { musicBinaries, openSession, panelFor, voiceChannelOf } from "@lib/musicActions.util";
+import { musicBinaries, openSession, showPanel, voiceChannelOf } from "@lib/musicActions.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/musicQuery.util";
 import { currentTrack, enqueue, enqueueNext } from "@lib/musicQueue.util";
-import { choicesFor, literalChoice, MAX_CHOICES, SearchCache, shouldSearch } from "@lib/musicSearch.util";
+import { CHOICE_MAX, choicesFor, shouldSearch, Suggester } from "@lib/musicSearch.util";
 import { resolveTracks, SEARCH_RESULTS } from "@lib/musicSource.util";
 
 /** Autocomplete fires on every keystroke, so a typed title must not become a search per letter. */
-const suggestions = new SearchCache();
+const suggestions = new Suggester();
 
 export default defineCommand({
 	name: "play",
@@ -67,7 +67,7 @@ export default defineCommand({
 		const note =
 			tracks.length > 1 ? `Added **${String(tracks.length)}** tracks.` : `Added **${tracks[0]?.title ?? "a track"}**.`;
 
-		await interaction.editReply(panelFor(session, interaction.user.id, note));
+		await showPanel(interaction, session, note);
 	},
 
 	async autocomplete(interaction, client) {
@@ -76,7 +76,8 @@ export default defineCommand({
 		const query = resolveQuery(typed);
 		// A pasted link needs no lookup, and offering one row makes it obvious the paste was understood.
 		if (query?.kind === "url") {
-			await interaction.respond([{ name: "Play this link", value: typed.slice(0, 100) }]);
+			// A link Discord would refuse as a value is worse than no row at all: picking a cut-off one plays nothing.
+			await interaction.respond(typed.length > CHOICE_MAX ? [] : [{ name: "Play this link", value: typed }]);
 			return;
 		}
 
@@ -85,26 +86,17 @@ export default defineCommand({
 			return;
 		}
 
-		const cachedChoices = suggestions.get(typed);
-		if (cachedChoices !== null) {
-			await interaction.respond(cachedChoices.slice(0, MAX_CHOICES));
-			return;
-		}
-
-		try {
+		const choices = await suggestions.suggest(typed, async () => {
 			const found = await resolveTracks(
 				{ kind: "search", terms: typed, source: query?.source ?? "youtube" },
 				interaction.user.id,
 				musicBinaries(client),
 				{ flat: true },
 			);
-			const choices = choicesFor(found.slice(0, SEARCH_RESULTS));
 
-			suggestions.set(typed, choices);
-			await interaction.respond(choices.length === 0 ? [literalChoice(typed)] : choices);
-		} catch {
-			// A slow or broken search must still leave a way to press enter.
-			await interaction.respond([literalChoice(typed)]);
-		}
+			return choicesFor(found.slice(0, SEARCH_RESULTS));
+		});
+
+		await interaction.respond(choices);
 	},
 });

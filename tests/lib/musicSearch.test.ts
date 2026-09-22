@@ -1,5 +1,6 @@
 import { type Track } from "@lib/musicQueue.util";
 import {
+	type Choice,
 	CHOICE_MAX,
 	choiceFor,
 	choicesFor,
@@ -7,6 +8,8 @@ import {
 	MAX_CHOICES,
 	SearchCache,
 	shouldSearch,
+	Suggester,
+	within,
 } from "@lib/musicSearch.util";
 
 function track(overrides: Partial<Track> = {}): Track {
@@ -137,5 +140,99 @@ describe("SearchCache", () => {
 
 		expect(cache.get("first", 20)).toEqual(choices);
 		expect(cache.get("second", 20)).toBeNull();
+	});
+});
+
+describe("within", () => {
+	it("hands back the answer when it arrives in time", async () => {
+		await expect(within(Promise.resolve("done"), 200)).resolves.toBe("done");
+	});
+
+	it("gives up rather than waiting for a slow answer", async () => {
+		const slow = new Promise((resolve) => setTimeout(() => resolve("late"), 200));
+
+		await expect(within(slow, 20)).resolves.toBeNull();
+	});
+});
+
+describe("Suggester", () => {
+	const choice = (name: string): Choice => ({ name, value: `https://youtu.be/${name}` });
+
+	/**
+	 * The bug this exists for: Discord closes an autocomplete interaction after three seconds, so a search that
+	 * runs longer threw DiscordAPIError 10062 on every keystroke.
+	 */
+	it("answers inside its budget even when the search never finishes", async () => {
+		const suggester = new Suggester(20);
+		const never = new Promise<Choice[]>(() => undefined);
+
+		const answered = await suggester.suggest("something", () => never);
+
+		expect(answered).toEqual([literalChoice("something")]);
+	});
+
+	it("uses the results when the search beats the budget", async () => {
+		const suggester = new Suggester(500);
+
+		await expect(suggester.suggest("song", () => Promise.resolve([choice("a")]))).resolves.toEqual([choice("a")]);
+	});
+
+	/** A slow search still pays for itself: it is what the next keystroke reads instead of searching again. */
+	it("fills the cache from a search that finished too late to be used", async () => {
+		const suggester = new Suggester(20);
+		let settle: (choices: Choice[]) => void = () => undefined;
+		const slow = new Promise<Choice[]>((resolve) => (settle = resolve));
+
+		expect(await suggester.suggest("song", () => slow)).toEqual([literalChoice("song")]);
+
+		settle([choice("a")]);
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(await suggester.suggest("song", () => Promise.reject(new Error("must not run")))).toEqual([choice("a")]);
+	});
+
+	it("runs one search for a burst of keystrokes on the same text", async () => {
+		const suggester = new Suggester(20);
+		const search = jest.fn(() => new Promise<Choice[]>(() => undefined));
+
+		await Promise.all([suggester.suggest("song", search), suggester.suggest("SONG ", search)]);
+
+		expect(search).toHaveBeenCalledTimes(1);
+		expect(suggester.pending).toBe(1);
+	});
+
+	it("still offers a way to press enter when the search fails", async () => {
+		const suggester = new Suggester(200);
+
+		await expect(suggester.suggest("song", () => Promise.reject(new Error("yt-dlp died")))).resolves.toEqual([
+			literalChoice("song"),
+		]);
+	});
+
+	/** Caching a failure would leave a broken answer in place for the whole five minutes. */
+	it("does not cache a failed search", async () => {
+		const suggester = new Suggester(200);
+
+		await suggester.suggest("song", () => Promise.reject(new Error("yt-dlp died")));
+
+		await expect(suggester.suggest("song", () => Promise.resolve([choice("a")]))).resolves.toEqual([choice("a")]);
+	});
+
+	/** An empty answer is worth caching, but it must not leave the reader with no row to pick. */
+	it("offers the literal row for a cached search that found nothing", async () => {
+		const suggester = new Suggester(200);
+
+		await suggester.suggest("song", () => Promise.resolve([]));
+
+		await expect(suggester.suggest("song", () => Promise.reject(new Error("must not run")))).resolves.toEqual([
+			literalChoice("song"),
+		]);
+	});
+
+	it("never offers more rows than Discord accepts", async () => {
+		const suggester = new Suggester(200);
+		const many = Array.from({ length: 40 }, (_, at) => choice(`t${String(at)}`));
+
+		await expect(suggester.suggest("song", () => Promise.resolve(many))).resolves.toHaveLength(MAX_CHOICES);
 	});
 });

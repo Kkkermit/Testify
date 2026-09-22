@@ -1,4 +1,4 @@
-import { Events, type Interaction, MessageFlags } from "discord.js";
+import { DiscordAPIError, Events, type Interaction, MessageFlags, RESTJSONErrorCodes } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { runChecks } from "@core/checks";
 import { runButton, runCommand, toError } from "@core/errors";
@@ -17,7 +17,14 @@ export default defineEvent({
 			try {
 				await command.autocomplete(interaction, client);
 			} catch (error) {
-				client.logger.error({ err: toError(error), command: interaction.commandName }, "Autocomplete failed");
+				const context = { err: toError(error), command: interaction.commandName };
+
+				// An interaction that expired before the answer landed is somebody typing fast, not a bug to chase.
+				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownInteraction) {
+					client.logger.debug(context, "Autocomplete answered an interaction that had already expired");
+				} else {
+					client.logger.error(context, "Autocomplete failed");
+				}
 			}
 			return;
 		}

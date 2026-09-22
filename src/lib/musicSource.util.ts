@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { type Readable } from "node:stream";
 import { UserFacingError } from "@core/errors";
 import { type MusicBinaries } from "@lib/musicBinaries.util";
-import { planStream, type RemoteFormat, type StreamPlan } from "@lib/musicFormat.util";
+import { clampVolume, DEFAULT_VOLUME, planStream, type RemoteFormat, type StreamPlan } from "@lib/musicFormat.util";
 import { type Query } from "@lib/musicQuery.util";
 import { type Track } from "@lib/musicQueue.util";
 
@@ -173,13 +173,58 @@ export interface OpenStream {
 	close: () => void;
 }
 
+export interface StreamOptions {
+	/** A percentage of the track's own level; only the transcoding path can change it. */
+	volume?: number;
+	/** Where in the track to start, which is how a setting changed mid-track picks up where it was. */
+	seekMs?: number;
+}
+
+/**
+ * What FFmpeg is asked to do, kept pure because the arguments are the whole of what can be wrong here.
+ *
+ * `-ss` sits before `-i` so the packets are discarded rather than decoded, and the output is Opus at 48 kHz —
+ * what Discord wants — so nothing downstream has to convert again.
+ */
+export function ffmpegArgs(options: StreamOptions = {}): string[] {
+	const seekMs = Math.max(0, Math.round(options.seekMs ?? 0));
+	const volume = clampVolume(options.volume ?? DEFAULT_VOLUME);
+
+	return [
+		"-hide_banner",
+		"-loglevel",
+		"error",
+		...(seekMs > 0 ? ["-ss", (seekMs / 1_000).toFixed(3)] : []),
+		"-i",
+		"pipe:0",
+		"-vn",
+		...(volume === DEFAULT_VOLUME ? [] : ["-af", `volume=${(volume / 100).toFixed(3)}`]),
+		"-c:a",
+		"libopus",
+		"-b:a",
+		"128k",
+		"-ar",
+		"48000",
+		"-ac",
+		"2",
+		"-f",
+		"opus",
+		"pipe:1",
+	];
+}
+
 /**
  * Opens a playable byte stream.
  *
  * yt-dlp does every HTTP request, which is what keeps FFmpeg off the network entirely — its bundled static
  * build segfaults on any hostname, and reading a pipe cannot trigger that.
  */
-export function openStream(url: string, plan: StreamPlan, binaries: MusicBinaries): OpenStream {
+export function openStream(
+	url: string,
+	plan: StreamPlan,
+	binaries: MusicBinaries,
+	options: StreamOptions = {},
+): OpenStream {
 	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
 
 	const source = spawn(
@@ -203,29 +248,10 @@ export function openStream(url: string, plan: StreamPlan, binaries: MusicBinarie
 
 	if (binaries.ffmpeg === null) throw new UserFacingError("That track needs FFmpeg to play, and it is not installed.");
 
-	const transcoder = spawn(
-		binaries.ffmpeg,
-		[
-			"-hide_banner",
-			"-loglevel",
-			"error",
-			"-i",
-			"pipe:0",
-			"-vn",
-			"-c:a",
-			"libopus",
-			"-b:a",
-			"128k",
-			"-ar",
-			"48000",
-			"-ac",
-			"2",
-			"-f",
-			"opus",
-			"pipe:1",
-		],
-		{ stdio: ["pipe", "pipe", "ignore"], windowsHide: true },
-	);
+	const transcoder = spawn(binaries.ffmpeg, ffmpegArgs(options), {
+		stdio: ["pipe", "pipe", "ignore"],
+		windowsHide: true,
+	});
 
 	source.stdout.pipe(transcoder.stdin);
 	// A dead transcoder must not leave yt-dlp writing into a closed pipe for the rest of the process's life.

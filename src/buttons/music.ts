@@ -1,7 +1,8 @@
 import { type GuildMember } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { panelFor, requireSession, sameChannelAs } from "@lib/musicActions.util";
+import { panelFor, requireSession, requireVolumeControl, sameChannelAs } from "@lib/musicActions.util";
+import { clampVolume } from "@lib/musicFormat.util";
 import { MUSIC_ID } from "@lib/musicPanel.util";
 import { currentTrack, type LoopMode, shuffleUpcoming } from "@lib/musicQueue.util";
 
@@ -37,6 +38,12 @@ export default defineButton({
 				note = "Resumed.";
 				break;
 			}
+			case "previous": {
+				if (track === null) throw new UserFacingError("Nothing is playing.");
+				session.previous();
+				note = session.queue.index === 0 ? "Started this one again." : "Back a track.";
+				break;
+			}
 			case "skip": {
 				if (track === null) throw new UserFacingError("Nothing is playing.");
 				session.skip();
@@ -59,6 +66,16 @@ export default defineButton({
 				note = "Shuffled the rest of the queue.";
 				break;
 			}
+			case "volume": {
+				requireVolumeControl(session);
+
+				const wanted = clampVolume(Number(context.args.at(0)));
+				note = `Volume set to **${String(session.setVolume(wanted))}%**. It takes a moment to take effect.`;
+				break;
+			}
+			case "refresh": {
+				break;
+			}
 			case "page": {
 				page = Number(context.args.at(0) ?? 0);
 				break;
@@ -67,6 +84,13 @@ export default defineButton({
 				return;
 		}
 
-		await interaction.update(panelFor(session, interaction.user.id, note, Number.isFinite(page) ? page : 0));
+		const shown = Number.isFinite(page) ? page : 0;
+		await interaction.update(panelFor(session, interaction.user.id, note, shown));
+		// The live panel follows whichever page was last looked at, so a tick cannot snap it back.
+		session.watchPanel({
+			userId: interaction.user.id,
+			page: shown,
+			edit: async (payload) => interaction.message.edit(payload),
+		});
 	},
 });

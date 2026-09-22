@@ -1,8 +1,16 @@
 import { EventEmitter } from "node:events";
 import { Readable } from "node:stream";
 import { type Guild } from "discord.js";
+import { type MusicBinaries } from "@lib/musicBinaries.util";
 import { type Track } from "@lib/musicQueue.util";
-import { destroyAllSessions, findSession, MusicSession, type SessionEvent, sessionFor } from "@lib/musicSession.util";
+import {
+	destroyAllSessions,
+	findSession,
+	MusicSession,
+	PANEL_REFRESH_MS,
+	type SessionEvent,
+	sessionFor,
+} from "@lib/musicSession.util";
 
 /** A stand-in player, so the idle wiring can be driven without a voice connection. */
 class FakePlayer extends EventEmitter {
@@ -54,21 +62,16 @@ jest.mock("@discordjs/voice", () => ({
 	entersState: jest.fn(() => Promise.resolve(undefined)),
 }));
 
-jest.mock("@lib/musicSource.util", () => ({
-	describeTrack: jest.fn(() =>
-		Promise.resolve({
-			formats: [{ format_id: "251", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160 }],
-		}),
-	),
-	openStream: jest.fn(() => ({
-		stream: Readable.from([Buffer.from("x")]),
-		plan: { formatId: "251", shape: "webm-opus" },
-		close: jest.fn(),
-	})),
-}));
+jest.mock("@lib/musicSource.util", () => ({ describeTrack: jest.fn(), openStream: jest.fn() }));
+
+const DESCRIBED = {
+	formats: [{ format_id: "251", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160 }],
+};
 
 const LOGGER = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), trace: jest.fn() };
-const BINARIES = { ytDlp: "/bin/yt-dlp", ffmpeg: null };
+const BINARIES: MusicBinaries = { ytDlp: "/bin/yt-dlp", ffmpeg: null };
+/** Only a host with FFmpeg can re-encode, which is what every level and seek below depends on. */
+const WITH_FFMPEG: MusicBinaries = { ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg" };
 
 function track(title: string, durationMs: number | null = 180_000): Track {
 	return {
@@ -82,8 +85,8 @@ function track(title: string, durationMs: number | null = 180_000): Track {
 	};
 }
 
-function sessionWith(titles: string[]): { session: MusicSession; events: SessionEvent[] } {
-	const session = new MusicSession("guild-1", BINARIES, LOGGER as never);
+function sessionWith(titles: string[], binaries = BINARIES): { session: MusicSession; events: SessionEvent[] } {
+	const session = new MusicSession("guild-1", binaries, LOGGER as never);
 	session.queue = { tracks: titles.map((title) => track(title)), index: 0, loop: "off" };
 
 	const events: SessionEvent[] = [];
@@ -96,6 +99,15 @@ beforeEach(() => {
 	player = new FakePlayer();
 	resource = { playbackDuration: 0 };
 	jest.clearAllMocks();
+
+	// `clearAllMocks` forgets the calls and keeps the implementation, so one test's stub would otherwise leak into the next.
+	const { describeTrack, openStream } = jest.requireMock("@lib/musicSource.util");
+	describeTrack.mockImplementation(() => Promise.resolve(DESCRIBED));
+	openStream.mockImplementation(() => ({
+		stream: Readable.from([Buffer.from("x")]),
+		plan: { formatId: "251", shape: "webm-opus" },
+		close: jest.fn(),
+	}));
 });
 
 afterEach(() => {
@@ -234,5 +246,207 @@ describe("the registry", () => {
 		});
 
 		await expect(session.play(0)).resolves.toBeUndefined();
+	});
+});
+
+describe("the volume", () => {
+	it("starts at the track's own level", () => {
+		expect(sessionWith(["a"], WITH_FFMPEG).session.volume).toBe(100);
+	});
+
+	it("cannot be set past either end", () => {
+		const { session } = sessionWith(["a"], WITH_FFMPEG);
+
+		expect(session.setVolume(10_000)).toBe(200);
+		expect(session.setVolume(-10)).toBe(0);
+	});
+
+	it("is only offered where something can re-encode", () => {
+		expect(sessionWith(["a"], WITH_FFMPEG).session.canSetVolume).toBe(true);
+		expect(sessionWith(["a"]).session.canSetVolume).toBe(false);
+	});
+
+	it("re-opens the current track through FFmpeg, from where it had got to", async () => {
+		const { openStream } = jest.requireMock("@lib/musicSource.util");
+		const { session } = sessionWith(["a"], WITH_FFMPEG);
+
+		await session.play(0);
+		resource.playbackDuration = 45_000;
+		session.setVolume(60);
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(openStream).toHaveBeenLastCalledWith(
+			expect.any(String),
+			expect.objectContaining({ shape: "transcode" }),
+			WITH_FFMPEG,
+			{
+				volume: 60,
+				seekMs: 45_000,
+			},
+		);
+	});
+
+	/**
+	 * The bug this pins: a re-opened stream counts from zero again, so without the offset every volume change
+	 * made the track look like it had come apart and it was replayed from the start.
+	 */
+	it("does not make a track that then finishes look like one that came apart", async () => {
+		const { session, events } = sessionWith(["a", "b"], WITH_FFMPEG);
+
+		await session.play(0);
+		resource.playbackDuration = 100_000;
+		session.setVolume(60);
+		await new Promise((resolve) => setImmediate(resolve));
+
+		resource.playbackDuration = 80_000;
+		await player.goIdle();
+
+		expect(events.filter((event) => event.kind === "retrying")).toEqual([]);
+		expect(session.queue.index).toBe(1);
+	});
+
+	/**
+	 * Swapping the stream leaves the player idle for as long as yt-dlp takes to answer, and treating that as
+	 * the track ending would retry a track that is perfectly fine.
+	 */
+	it("does not act on the player falling idle while the new stream is being opened", async () => {
+		const { describeTrack } = jest.requireMock("@lib/musicSource.util");
+		const { session, events } = sessionWith(["a", "b"], WITH_FFMPEG);
+
+		await session.play(0);
+
+		let release: (info: unknown) => void = () => undefined;
+		describeTrack.mockImplementationOnce(() => new Promise((resolve) => (release = resolve)));
+		session.setVolume(60);
+		await player.goIdle();
+
+		expect(events.filter((event) => event.kind === "retrying")).toEqual([]);
+		expect(describeTrack).toHaveBeenCalledTimes(2);
+		expect(session.queue.index).toBe(0);
+
+		release(DESCRIBED);
+		await new Promise((resolve) => setImmediate(resolve));
+	});
+
+	it("leaves a host with no FFmpeg passing the bytes through untouched", async () => {
+		const { openStream } = jest.requireMock("@lib/musicSource.util");
+		const { session } = sessionWith(["a"]);
+
+		session.setVolume(60);
+		await session.play(0);
+
+		expect(openStream).toHaveBeenLastCalledWith(expect.any(String), { formatId: "251", shape: "webm-opus" }, BINARIES, {
+			volume: 60,
+			seekMs: 0,
+		});
+	});
+});
+
+describe("previous", () => {
+	it("goes back a track", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(1);
+
+		session.previous();
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(session.queue.index).toBe(0);
+	});
+
+	it("starts the first track again rather than falling off the front of the queue", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(0);
+
+		session.previous();
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(session.queue.index).toBe(0);
+	});
+});
+
+describe("a queue where nothing can be opened", () => {
+	/** Under a queue loop, stepping past every broken track would otherwise walk the queue for ever. */
+	it("ends rather than looping for ever", async () => {
+		const { describeTrack } = jest.requireMock("@lib/musicSource.util");
+		describeTrack.mockResolvedValue({ formats: [] });
+
+		const { session, events } = sessionWith(["a", "b"]);
+		session.queue = { ...session.queue, loop: "queue" };
+
+		await session.play(0);
+
+		expect(events.filter((event) => event.kind === "failed")).toHaveLength(3);
+		expect(events.at(-1)?.kind).toBe("queue-ended");
+	});
+
+	it("steps past a track yt-dlp could not describe at all", async () => {
+		const { describeTrack } = jest.requireMock("@lib/musicSource.util");
+		describeTrack.mockRejectedValueOnce(new Error("yt-dlp exited 1"));
+
+		const { session, events } = sessionWith(["broken", "fine"]);
+		await session.play(0);
+
+		expect(events).toContainEqual(expect.objectContaining({ kind: "failed" }));
+		expect(session.queue.index).toBe(1);
+	});
+});
+
+describe("the live panel", () => {
+	beforeEach(() => {
+		jest.useFakeTimers();
+	});
+
+	afterEach(() => {
+		jest.useRealTimers();
+	});
+
+	/** A progress bar that only moves when somebody presses something is not a progress bar. */
+	it("rewrites the message as the track plays", async () => {
+		const edit = jest.fn(() => Promise.resolve(undefined));
+		const { session } = sessionWith(["a"]);
+
+		await session.play(0);
+		session.watchPanel({ userId: "100000000000000001", page: 0, edit });
+		edit.mockClear();
+
+		jest.advanceTimersByTime(PANEL_REFRESH_MS);
+
+		expect(edit).toHaveBeenCalledTimes(1);
+	});
+
+	it("stops rewriting once the queue has ended", async () => {
+		const edit = jest.fn(() => Promise.resolve(undefined));
+		const { session } = sessionWith(["a"]);
+
+		await session.play(0);
+		session.watchPanel({ userId: "100000000000000001", page: 0, edit });
+
+		session.stop();
+		player.state = { status: "idle" };
+		player.emit("idle");
+		await Promise.resolve();
+		edit.mockClear();
+
+		jest.advanceTimersByTime(PANEL_REFRESH_MS * 3);
+
+		expect(edit).not.toHaveBeenCalled();
+	});
+
+	/** A deleted message answers with a 404 for ever, so retrying it every ten seconds is pure noise. */
+	it("drops a panel that cannot be edited rather than retrying it", async () => {
+		const edit = jest.fn(() => Promise.reject(new Error("Unknown Message")));
+		const { session } = sessionWith(["a"]);
+
+		await session.play(0);
+		session.watchPanel({ userId: "100000000000000001", page: 0, edit });
+
+		jest.advanceTimersByTime(PANEL_REFRESH_MS);
+		await Promise.resolve();
+		await Promise.resolve();
+		edit.mockClear();
+
+		jest.advanceTimersByTime(PANEL_REFRESH_MS * 3);
+
+		expect(edit).not.toHaveBeenCalled();
 	});
 });

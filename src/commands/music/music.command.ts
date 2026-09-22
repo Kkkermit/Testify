@@ -1,6 +1,7 @@
 import { asMember, type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { musicBinaries, panelFor, requireSession, sameChannelAs } from "@lib/musicActions.util";
+import { musicBinaries, requireSession, requireVolumeControl, sameChannelAs, showPanel } from "@lib/musicActions.util";
+import { MAX_VOLUME, MIN_VOLUME } from "@lib/musicFormat.util";
 import {
 	clearUpcoming,
 	currentTrack,
@@ -38,7 +39,7 @@ export default defineCommand({
 				const session = sessionOf(interaction);
 				const page = (interaction.options.getInteger("page") ?? 1) - 1;
 
-				await reply(interaction, panelFor(session, interaction.user.id, undefined, page));
+				await showPanel(interaction, session, undefined, page);
 			},
 		},
 		{
@@ -50,7 +51,7 @@ export default defineCommand({
 				const track = currentTrack(session.queue);
 				if (track === null) throw new UserFacingError("Nothing is playing.");
 
-				await reply(interaction, panelFor(session, interaction.user.id));
+				await showPanel(interaction, session);
 			},
 		},
 		{
@@ -63,7 +64,7 @@ export default defineCommand({
 				if (track === null) throw new UserFacingError("Nothing is playing.");
 
 				session.skip();
-				await reply(interaction, panelFor(session, interaction.user.id, `Skipped **${track.title}**.`));
+				await showPanel(interaction, session, `Skipped **${track.title}**.`);
 			},
 		},
 		{
@@ -73,7 +74,7 @@ export default defineCommand({
 				const session = sessionOf(interaction);
 				if (!session.pause()) throw new UserFacingError("Nothing is playing.");
 
-				await reply(interaction, panelFor(session, interaction.user.id, "Paused."));
+				await showPanel(interaction, session, "Paused.");
 			},
 		},
 		{
@@ -83,7 +84,7 @@ export default defineCommand({
 				const session = sessionOf(interaction);
 				if (!session.resume()) throw new UserFacingError("Nothing is paused.");
 
-				await reply(interaction, panelFor(session, interaction.user.id, "Resumed."));
+				await showPanel(interaction, session, "Resumed.");
 			},
 		},
 		{
@@ -93,7 +94,7 @@ export default defineCommand({
 				const session = sessionOf(interaction);
 				session.stop();
 
-				await reply(interaction, panelFor(session, interaction.user.id, "Stopped."));
+				await showPanel(interaction, session, "Stopped.");
 			},
 		},
 		{
@@ -113,7 +114,7 @@ export default defineCommand({
 				const mode = interaction.options.getString("mode", true) as LoopMode;
 
 				session.setLoop(mode);
-				await reply(interaction, panelFor(session, interaction.user.id, `Loop set to **${mode}**.`));
+				await showPanel(interaction, session, `Loop set to **${mode}**.`);
 			},
 		},
 		{
@@ -123,7 +124,7 @@ export default defineCommand({
 				const session = sessionOf(interaction);
 				session.queue = shuffleUpcoming(session.queue);
 
-				await reply(interaction, panelFor(session, interaction.user.id, "Shuffled the rest of the queue."));
+				await showPanel(interaction, session, "Shuffled the rest of the queue.");
 			},
 		},
 		{
@@ -139,7 +140,7 @@ export default defineCommand({
 				if (track === undefined) throw new UserFacingError("There is no track at that position.");
 
 				session.queue = removeAt(session.queue, at);
-				await reply(interaction, panelFor(session, interaction.user.id, `Removed **${track.title}**.`));
+				await showPanel(interaction, session, `Removed **${track.title}**.`);
 			},
 		},
 		{
@@ -150,9 +151,38 @@ export default defineCommand({
 				const removed = upcomingPage(session.queue, 0, Number.MAX_SAFE_INTEGER).entries.length;
 
 				session.queue = clearUpcoming(session.queue);
-				await reply(
+				await showPanel(interaction, session, `Cleared **${String(removed)}** queued tracks.`);
+			},
+		},
+		{
+			name: "volume",
+			description: "Sets how loud the player is.",
+			aliases: ["vol"],
+			options: [
+				{
+					name: "percent",
+					description: "0 to 200, where 100 is the track's own level.",
+					type: "integer",
+					min: MIN_VOLUME,
+					max: MAX_VOLUME,
+				},
+			],
+			async run(interaction) {
+				const session = sessionOf(interaction);
+				const wanted = interaction.options.getInteger("percent");
+
+				if (wanted === null) {
+					await showPanel(interaction, session, `Volume is **${String(session.volume)}%**.`);
+					return;
+				}
+
+				requireVolumeControl(session);
+
+				const applied = session.setVolume(wanted);
+				await showPanel(
 					interaction,
-					panelFor(session, interaction.user.id, `Cleared **${String(removed)}** queued tracks.`),
+					session,
+					`Volume set to **${String(applied)}%**. It takes a moment to take effect.`,
 				);
 			},
 		},
@@ -179,7 +209,9 @@ export default defineCommand({
 					content: [
 						line("yt-dlp", found.ytDlp),
 						line("FFmpeg", found.ffmpeg),
-						found.ffmpeg === null ? "-# Without FFmpeg, tracks not already in Opus cannot play." : "",
+						found.ffmpeg === null
+							? "-# Without FFmpeg, tracks not already in Opus cannot play and the volume cannot be changed."
+							: "",
 					]
 						.filter((part) => part !== "")
 						.join("\n"),

@@ -12,8 +12,10 @@ import {
 } from "@discordjs/voice";
 import { type Guild, type VoiceBasedChannel } from "discord.js";
 import { type Logger } from "@core/logger";
+import { type ContainerMessage } from "@lib/containers.util";
 import { type MusicBinaries } from "@lib/musicBinaries.util";
-import { planStream, type StreamShape } from "@lib/musicFormat.util";
+import { clampVolume, DEFAULT_VOLUME, planStream, type StreamShape } from "@lib/musicFormat.util";
+import { musicPanel } from "@lib/musicPanel.util";
 import {
 	currentTrack,
 	decideOnIdle,
@@ -34,6 +36,14 @@ const RECONNECT_GRACE_MS = 5_000;
 /** How long an idle player keeps the channel before the bot leaves on its own. */
 export const LEAVE_AFTER_IDLE_MS = 120_000;
 
+/**
+ * How often the "now playing" message is rewritten while a track runs.
+ *
+ * One edit per guild at this rate is nothing against Discord's limits, and it is fast enough that the bar and
+ * the clock are visibly moving rather than frozen.
+ */
+export const PANEL_REFRESH_MS = 10_000;
+
 const STREAM_TYPES: Record<StreamShape, StreamType> = {
 	"webm-opus": StreamType.WebmOpus,
 	"ogg-opus": StreamType.OggOpus,
@@ -47,6 +57,13 @@ export type SessionEvent =
 	| { kind: "retrying"; track: Track; attempt: number };
 
 export type SessionListener = (event: SessionEvent) => void;
+
+/** The message the live panel rewrites, narrowed to the one call it makes so a test needs no Discord. */
+export interface PanelTarget {
+	userId: string;
+	page: number;
+	edit(payload: ContainerMessage): Promise<unknown>;
+}
 
 export class MusicSession {
 	readonly guildId: string;
@@ -65,6 +82,12 @@ export class MusicSession {
 	#attempts = 0;
 	#stopping = false;
 	#skipped = false;
+	#failures = 0;
+	#volume = DEFAULT_VOLUME;
+	#offsetMs = 0;
+	#reopening = false;
+	#panel: PanelTarget | null = null;
+	#ticker: NodeJS.Timeout | null = null;
 	#leaveTimer: NodeJS.Timeout | null = null;
 	#destroyed = false;
 
@@ -107,9 +130,28 @@ export class MusicSession {
 		return this.#connection?.joinConfig.channelId ?? null;
 	}
 
-	/** How far into the current track the player has actually got, which is what tells a stall from an ending. */
+	get volume(): number {
+		return this.#volume;
+	}
+
+	/** The session owns the guild's player, so anything wiring a panel to it reports through the same log. */
+	get logger(): Logger {
+		return this.#logger;
+	}
+
+	/** Changing the level means re-encoding, and only FFmpeg can do that. */
+	get canSetVolume(): boolean {
+		return this.#binaries.ffmpeg !== null;
+	}
+
+	/**
+	 * How far into the current track the player has actually got, which is what tells a stall from an ending.
+	 *
+	 * A stream re-opened part-way through starts counting from zero again, so the offset it was opened at has
+	 * to be added back or a volume change would make every track look like it came apart.
+	 */
 	get playedMs(): number {
-		return this.#resource?.playbackDuration ?? 0;
+		return this.#offsetMs + (this.#resource?.playbackDuration ?? 0);
 	}
 
 	async connect(channel: VoiceBasedChannel): Promise<void> {
@@ -143,42 +185,63 @@ export class MusicSession {
 	}
 
 	/** Starts the track at `index`, replacing whatever was playing. */
-	async play(index: number): Promise<void> {
+	async play(index: number, options: { seekMs?: number } = {}): Promise<void> {
 		const track = this.queue.tracks[index];
 		if (track === undefined) return;
 
+		const seekMs = this.canSetVolume ? Math.max(0, Math.round(options.seekMs ?? 0)) : 0;
+		const filtered = this.canSetVolume && (this.#volume !== DEFAULT_VOLUME || seekMs > 0);
+
 		this.queue = { ...this.queue, index };
-		this.#closeStream();
 
-		const info = await describeTrack(track.url, this.#binaries);
-		const plan = info === null ? null : planStream(info.formats ?? [], { ffmpeg: this.#binaries.ffmpeg !== null });
+		let failure: string | null = null;
 
-		if (plan === null) {
-			this.#emit({
-				kind: "failed",
-				track,
-				reason:
-					this.#binaries.ffmpeg === null
-						? "it is not offered in a format Discord can play, and FFmpeg is not installed"
-						: "no playable audio was offered for it",
-			});
+		try {
+			// Closing leaves the player idle for as long as yt-dlp takes to answer, which must not advance the queue.
+			this.#reopening = true;
+			this.#closeStream();
+
+			const info = await describeTrack(track.url, this.#binaries);
+			const plan = info === null ? null : planStream(info.formats ?? [], { ffmpeg: this.canSetVolume, filtered });
+
+			if (plan === null) {
+				failure = this.canSetVolume
+					? "no playable audio was offered for it"
+					: "it is not offered in a format Discord can play, and FFmpeg is not installed";
+			} else {
+				const stream = openStream(track.url, plan, this.#binaries, { volume: this.#volume, seekMs });
+				const resource = createAudioResource(stream.stream, { inputType: STREAM_TYPES[plan.shape] });
+
+				this.#stream = stream;
+				this.#resource = resource;
+				this.#offsetMs = seekMs;
+				this.#skipped = false;
+				this.#failures = 0;
+				this.#clearLeaveTimer();
+				this.#player.play(resource);
+			}
+		} catch (error) {
+			// One track that will not open is not the end of the queue, so it is reported and stepped over.
+			this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A track could not be opened. Moving on.");
+			failure = "it could not be opened";
+		} finally {
+			this.#reopening = false;
+		}
+
+		if (failure !== null) {
+			this.#emit({ kind: "failed", track, reason: failure });
 			await this.#advancePast();
 			return;
 		}
 
-		const stream = openStream(track.url, plan, this.#binaries);
-		const resource = createAudioResource(stream.stream, { inputType: STREAM_TYPES[plan.shape] });
-
-		this.#stream = stream;
-		this.#resource = resource;
-		this.#skipped = false;
-		this.#clearLeaveTimer();
-		this.#player.play(resource);
+		this.#startTicker();
 		this.#emit({ kind: "track", track });
+		void this.refreshPanel();
 	}
 
 	async #onIdle(): Promise<void> {
-		if (this.#destroyed) return;
+		// A stream being swapped out under the player is not the track ending.
+		if (this.#destroyed || this.#reopening) return;
 
 		const track = currentTrack(this.queue);
 		const decision = decideOnIdle({
@@ -190,12 +253,13 @@ export class MusicSession {
 			skipped: this.#skipped,
 		});
 
+		const resumeAt = this.#offsetMs;
 		this.#closeStream();
 
 		if (decision.action === "retry" && track !== null) {
 			this.#attempts = decision.attempt;
 			this.#emit({ kind: "retrying", track, attempt: decision.attempt });
-			await this.play(this.queue.index);
+			await this.play(this.queue.index, { seekMs: resumeAt });
 			return;
 		}
 
@@ -207,15 +271,34 @@ export class MusicSession {
 		}
 
 		this.#stopping = false;
-		this.#emit({ kind: "queue-ended" });
-		this.#startLeaveTimer();
+		this.#endQueue();
 	}
 
-	/** Moves past a track that could not be opened at all, without counting it as a break worth retrying. */
+	/**
+	 * Moves past a track that could not be opened at all, without counting it as a break worth retrying.
+	 *
+	 * Once every track has been tried the queue ends, because a looping queue of broken links would otherwise
+	 * walk itself for ever.
+	 */
 	async #advancePast(): Promise<void> {
 		this.#skipped = true;
 		this.#attempts = 0;
+		this.#failures += 1;
+
+		if (this.#failures > this.queue.tracks.length) {
+			this.#failures = 0;
+			this.#endQueue();
+			return;
+		}
+
 		await this.#onIdle();
+	}
+
+	#endQueue(): void {
+		this.#stopTicker();
+		this.#emit({ kind: "queue-ended" });
+		void this.refreshPanel();
+		this.#startLeaveTimer();
 	}
 
 	skip(): void {
@@ -241,10 +324,95 @@ export class MusicSession {
 		this.queue = { ...this.queue, loop };
 	}
 
+	/**
+	 * Sets the level, and re-opens the current track where it had got to.
+	 *
+	 * The re-open is not awaited: a button has three seconds to answer and yt-dlp takes longer than that, so
+	 * the panel shows the new level straight away and the audio catches up a moment later.
+	 */
+	setVolume(volume: number): number {
+		this.#volume = clampVolume(volume);
+
+		if (currentTrack(this.queue) !== null && (this.playing || this.paused)) {
+			this.#playSoon(this.queue.index, { seekMs: this.playedMs });
+		}
+
+		return this.#volume;
+	}
+
+	/** Back one track, or to the start of this one when there is nothing before it. */
+	previous(): void {
+		if (currentTrack(this.queue) === null) return;
+
+		this.#playSoon(Math.max(0, this.queue.index - 1));
+	}
+
+	/**
+	 * Starts a track without waiting for it.
+	 *
+	 * `play` marks itself as re-opening before it yields, so the player falling idle in the meantime cannot be
+	 * mistaken for the track ending — and the caller keeps the three seconds Discord gives it to answer.
+	 */
+	#playSoon(index: number, options: { seekMs?: number } = {}): void {
+		void this.play(index, options).catch((error: unknown) => {
+			this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] Could not start a track.");
+		});
+	}
+
+	render(userId: string, note?: string, page = 0): ContainerMessage {
+		return musicPanel(
+			{
+				queue: this.queue,
+				playedMs: this.playedMs,
+				paused: this.paused,
+				volume: this.#volume,
+				canSetVolume: this.canSetVolume,
+				page,
+				note,
+			},
+			userId,
+		);
+	}
+
+	/** Points the live panel at a message, so the progress bar keeps up with what is actually playing. */
+	watchPanel(target: PanelTarget): void {
+		this.#panel = target;
+		if (this.playing) this.#startTicker();
+	}
+
+	async refreshPanel(): Promise<void> {
+		const panel = this.#panel;
+		if (panel === null) return;
+
+		try {
+			await panel.edit(this.render(panel.userId, undefined, panel.page));
+		} catch (error) {
+			// A deleted or unreachable message is the ordinary end of a panel, not something to keep retrying.
+			this.#logger.debug({ err: error, guildId: this.guildId }, "[MUSIC] Dropped a panel that could not be edited.");
+			this.#panel = null;
+			this.#stopTicker();
+		}
+	}
+
+	#startTicker(): void {
+		if (this.#ticker !== null || this.#panel === null) return;
+
+		this.#ticker = setInterval(() => {
+			if (this.playing) void this.refreshPanel();
+		}, PANEL_REFRESH_MS);
+		this.#ticker.unref();
+	}
+
+	#stopTicker(): void {
+		if (this.#ticker !== null) clearInterval(this.#ticker);
+		this.#ticker = null;
+	}
+
 	#closeStream(): void {
 		this.#stream?.close();
 		this.#stream = null;
 		this.#resource = null;
+		this.#offsetMs = 0;
 	}
 
 	#clearLeaveTimer(): void {
@@ -263,10 +431,12 @@ export class MusicSession {
 		this.#destroyed = true;
 
 		this.#clearLeaveTimer();
+		this.#stopTicker();
 		this.#closeStream();
 		this.#player.stop(true);
 		this.#connection?.destroy();
 		this.#connection = null;
+		this.#panel = null;
 		this.#listeners.clear();
 		sessions.delete(this.guildId);
 	}
