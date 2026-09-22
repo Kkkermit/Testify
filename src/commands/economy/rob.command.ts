@@ -12,9 +12,8 @@ import {
 	removeInventoryItem,
 	setCooldown,
 } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds.util";
-import { formatDuration, formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { formatDuration, formatNumber } from "@lib/format";
 
 export default defineCommand({
 	name: "rob",

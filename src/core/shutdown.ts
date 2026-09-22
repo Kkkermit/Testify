@@ -2,8 +2,8 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 import { disconnectDatabase } from "@database/connection";
-import { printReloading } from "@lib/banner.util";
-import { destroyAllSessions } from "@lib/musicSession.util";
+import { printReloading } from "@lib/bot/banner.util";
+import { destroyAllSessions } from "@lib/music/musicSession.util";
 
 let stopping = false;
 

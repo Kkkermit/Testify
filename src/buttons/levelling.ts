@@ -2,18 +2,21 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import { pickedChannelId } from "@lib/channelPick.util";
-import { modalForm } from "@lib/components.util";
+import { modalForm, pickedChannelId } from "@lib/discord";
 import {
+	isLevelTab,
 	LEVEL_LIMITS,
+	LEVEL_PANEL_ID,
 	type LevelConfig,
+	levelPanel,
+	type LevelPanelState,
+	type LevelTab,
 	nextMultiplier,
 	normaliseSettings,
 	withBoost,
 	withReward,
-} from "@lib/levelling.util";
-import { isLevelTab, LEVEL_PANEL_ID, type LevelPanelState, levelPanel, type LevelTab } from "@lib/levelPanel.util";
-import { parseWholeNumber } from "@lib/settingsPanel.util";
+} from "@lib/levelling";
+import { parseWholeNumber } from "@lib/settings";
 
 /** Every control on the levelling panel. */
 async function currentConfig(guildId: string): Promise<LevelConfig> {

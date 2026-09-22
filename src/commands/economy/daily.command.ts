@@ -1,9 +1,8 @@
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { balancePanel } from "@lib/balancePanel.util";
-import { claimDaily, dailyReady } from "@lib/economyActions.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { balancePanel, claimDaily, dailyReady } from "@lib/economy";
 
 export default defineCommand({
 	name: "daily",

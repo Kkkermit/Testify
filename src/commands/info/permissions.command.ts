@@ -1,9 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { humanisePermission } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { humanisePermission } from "@lib/format";
 
 export default defineCommand({
 	name: "permissions",

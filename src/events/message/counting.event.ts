@@ -1,9 +1,8 @@
 import { theme } from "@config/theme";
 import { defineMessageHandler } from "@core/message";
 import { advanceCount, getCounting, resetCount } from "@database/repositories/settingsRepository";
-import { embed, errorEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { replyTemporarily } from "@lib/tidyReply.util";
+import { embed, errorEmbed, replyTemporarily } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 /**
  * The expected number and the "not twice in a row" rule are both enforced inside the update filter, so two messages

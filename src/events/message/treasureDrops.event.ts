@@ -2,8 +2,8 @@ import { randomInt } from "node:crypto";
 import { defineMessageHandler } from "@core/message";
 import { adjustWallet } from "@database/repositories/economyRepository";
 import { getTreasureConfig } from "@database/repositories/settingsRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { embed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 interface DropState {
 	messagesUntilDrop: number;

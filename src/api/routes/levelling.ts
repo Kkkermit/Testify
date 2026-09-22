@@ -5,7 +5,7 @@ import { notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import { normaliseSettings, sortRewards } from "@lib/levelling.util";
+import { normaliseSettings, sortRewards } from "@lib/levelling";
 import {
 	boostsSchema,
 	ignoresSchema,

@@ -9,10 +9,9 @@ import {
 	getWarnings,
 	removeWarning,
 } from "@database/repositories/moderationRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { discordTime, truncate } from "@lib/format.util";
-import { assertModeratable, dmEmbed, notifyTarget } from "@lib/moderationActions.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { discordTime, truncate } from "@lib/format";
+import { assertModeratable, dmEmbed, notifyTarget } from "@lib/moderation";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
 /** Autocompleted rather than typed. */

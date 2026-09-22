@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { currentRoles, unusableRoles } from "@buttons/autoRole";
 import { defineCommand, inGuild } from "@core/command";
-import { autoRolePanel } from "@lib/autoRolePanel.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { autoRolePanel } from "@lib/settings";
 
 /** One panel instead of `add`, `remove` and `list`. */
 export default defineCommand({

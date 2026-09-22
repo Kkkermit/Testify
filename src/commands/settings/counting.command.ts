@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { countingState } from "@buttons/counting";
 import { defineCommand, inGuild } from "@core/command";
-import { countingPanel } from "@lib/countingPanel.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { countingPanel } from "@lib/settings";
 
 /** One panel instead of `setup`, `disable`, `reset` and `status`. */
 export default defineCommand({

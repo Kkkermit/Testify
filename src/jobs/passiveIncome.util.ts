@@ -1,6 +1,6 @@
 import { type TestifyClient } from "@core/client";
 import { Economy } from "@database/models/economy.schema";
-import { findBusiness, findHouse } from "@lib/shop.util";
+import { findBusiness, findHouse } from "@lib/economy";
 
 /** Pays out house and business income. */
 export async function payPassiveIncome(client: TestifyClient): Promise<void> {

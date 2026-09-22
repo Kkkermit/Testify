@@ -1,7 +1,7 @@
 import { type Context } from "hono";
 import { ApiProblem } from "@api/errors";
 import { type Env } from "@config/env";
-import { createSecretBox, type SecretBox } from "@lib/secretBox.util";
+import { createSecretBox, type SecretBox } from "@lib/infra";
 
 /**
  * A self-hoster's first run is `DASHBOARD_ENABLED=true` with nothing else filled in. That must show them what to

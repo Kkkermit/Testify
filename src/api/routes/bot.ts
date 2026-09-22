@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem } from "@api/errors";
-import { botIdentity } from "@lib/botIdentity.util";
+import { botIdentity } from "@lib/bot";
 
 /**
  * Unauthenticated on purpose: this is the bot's public Discord profile, which anyone can see by clicking it in

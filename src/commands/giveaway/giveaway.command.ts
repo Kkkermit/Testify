@@ -1,11 +1,9 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { parseDuration } from "@lib/duration.util";
-import { successEmbed } from "@lib/embeds.util";
-import { formatDurationLong } from "@lib/format.util";
-import { deleteGiveaway, endGiveaway, rerollGiveaway, startGiveaway } from "@lib/giveawayActions.util";
-import { reply } from "@lib/reply.util";
+import { reply, successEmbed } from "@lib/discord";
+import { formatDurationLong, parseDuration } from "@lib/format";
+import { deleteGiveaway, endGiveaway, rerollGiveaway, startGiveaway } from "@lib/giveaways";
 
 export default defineCommand({
 	name: "giveaway",

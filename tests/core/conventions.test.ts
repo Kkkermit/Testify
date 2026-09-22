@@ -35,8 +35,10 @@ describe("file naming", () => {
 		expect(wrong).toEqual([]);
 	});
 
-	it("gives every shared helper the .util.ts suffix, apart from the barrel", () => {
-		const wrong = filesIn("lib", /\.ts$/).filter((file) => !file.endsWith(".util.ts") && !file.endsWith("index.ts"));
+	it("gives every shared helper a lib suffix, apart from the barrels", () => {
+		const wrong = filesIn("lib", /\.ts$/).filter(
+			(file) => !/\.(util|constants|types)\.ts$/.test(file) && !file.endsWith("index.ts"),
+		);
 		expect(wrong).toEqual([]);
 	});
 
@@ -147,4 +149,54 @@ describe("a suite whose dependency is missing", () => {
 			expect(offenders).toEqual([]);
 		},
 	);
+});
+
+/**
+ * `src/lib` is grouped by domain, and each domain's barrel is what everything outside it imports. A module that
+ * sits loose, or that its folder's barrel forgot, is one no command can reach the way the lint rules require.
+ */
+describe("the src/lib layout", () => {
+	const LIB = join(SRC, "lib");
+	const folders = readdirSync(LIB).filter((entry) => statSync(join(LIB, entry)).isDirectory());
+
+	it("keeps nothing loose at the top but the root barrel", () => {
+		const loose = readdirSync(LIB).filter((entry) => statSync(join(LIB, entry)).isFile() && entry !== "index.ts");
+
+		expect(loose).toEqual([]);
+	});
+
+	it("gives every domain folder a barrel", () => {
+		const bare = folders.filter((folder) => !readdirSync(join(LIB, folder)).includes("index.ts"));
+
+		expect(bare).toEqual([]);
+	});
+
+	it("re-exports every module a folder holds from its barrel", () => {
+		const forgotten = folders.flatMap((folder) => {
+			const barrel = readFileSync(join(LIB, folder, "index.ts"), "utf8");
+
+			return readdirSync(join(LIB, folder))
+				.filter((file) => file !== "index.ts" && file.endsWith(".ts"))
+				.map((file) => file.replace(/\.ts$/, ""))
+				.filter((module) => !barrel.includes(`"./${module}"`))
+				.map((module) => `${folder}/${module}`);
+		});
+
+		expect(forgotten).toEqual([]);
+	});
+
+	it("names every folder in the root barrel", () => {
+		const root = readFileSync(join(LIB, "index.ts"), "utf8");
+
+		expect(folders.filter((folder) => !root.includes(`"./${folder}"`))).toEqual([]);
+	});
+
+	/** Deeper nesting is where a barrel starts re-exporting a barrel, and the two lint rules stop meaning anything. */
+	it("goes one level deep and no further", () => {
+		const nested = folders.filter((folder) =>
+			readdirSync(join(LIB, folder)).some((entry) => statSync(join(LIB, folder, entry)).isDirectory()),
+		);
+
+		expect(nested).toEqual([]);
+	});
 });

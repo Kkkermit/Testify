@@ -1,6 +1,6 @@
 import { type TestifyClient } from "@core/client";
 import { listFixedStats, removeFixedStats } from "@database/repositories/settingsRepository";
-import { botStatsEmbed } from "@lib/statsEmbed.util";
+import { botStatsEmbed } from "@lib/info";
 
 /** Refreshes every configured statistics message, pruning ones that have gone. */
 export async function refreshBotStats(client: TestifyClient): Promise<void> {

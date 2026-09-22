@@ -357,8 +357,7 @@ straight away.
 ```ts
 // src/commands/fun/coinflip.command.ts
 import { defineCommand } from "@core/command";
-import { successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { reply, successEmbed } from "@lib/discord";
 
 export default defineCommand({
 	name: "coinflip",
@@ -381,7 +380,7 @@ nothing to import by hand.
    test enforces the naming.
 2. **`category` must be a key from `src/config/categories.ts`.** A typo is a compile error, not a runtime
    surprise.
-3. **Build embeds with `embed()` from `@lib/embeds.util`.** The linter blocks bare `new EmbedBuilder()`, so
+3. **Build embeds with `embed()` from `@lib/discord`.** The linter blocks bare `new EmbedBuilder()`, so
    every embed gets consistent colours and footers for free.
 
 Options, subcommands and buttons are all covered in [`docs/contributing.md`](docs/contributing.md).

@@ -66,10 +66,10 @@ numbers, which drift):
 | Prefix aliases       | 82                               |
 | Button handlers      | 24                               |
 | Events               | 24, in 5 groups                  |
-| `src/lib` helpers    | 81                               |
+| `src/lib` helpers    | 81, in 15 domain folders         |
 | Schemas/repositories | 14 / 14                          |
 | Scheduled jobs       | 4                                |
-| Tests                | 3,694 across 234 suites          |
+| Tests                | 3,702 across 234 suites          |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -215,7 +215,13 @@ src/
 ├── commands/<category>/  98 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               24 handlers in command, create, logging, ready and message
 ├── buttons/              23 component handlers, keyed by custom-ID prefix
-├── lib/                  67 domain helpers, formatters and panel renderers
+├── lib/                  81 helpers in 15 domain folders, each behind its own index.ts barrel
+│   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
+│   ├── format/           numbers, durations, amounts, and the English for a shared refusal
+│   ├── canvas/           the drawing primitives and every image card
+│   ├── bot/              runtime, identity, pause/shut down, usage, command catalogue and runner
+│   ├── infra/            outbound HTTP and the secret box
+│   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 ├── database/
 │   ├── connection.ts
 │   ├── models/           13 Mongoose schemas
@@ -241,26 +247,26 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 ### Where to look for a given job
 
-| I want to…                                 | Go to                                                              |
-| ------------------------------------------ | ------------------------------------------------------------------ |
-| Add or change a command                    | `src/commands/<category>/*.command.ts`                             |
-| Change how commands are found              | `src/core/loader.ts` (the globs)                                   |
-| Change a permission or cooldown gate       | `src/core/checks.ts`                                               |
-| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist         |
-| Build a button/select/modal                | `src/lib/components.util.ts`                                       |
-| Read a channel a select menu picked        | `src/lib/channelPick.util.ts` — one rule for "can the bot post"    |
-| Build a Components V2 message              | `src/lib/containers.util.ts`                                       |
-| Build an embed                             | `src/lib/embeds.util.ts` (nothing else may `new EmbedBuilder()`)   |
-| Draw an image card                         | `src/lib/canvas.util.ts`, then a `*Card.util.ts` beside it         |
-| Change how XP or level rewards work        | `src/lib/levelling.util.ts` — pure rules, no database              |
-| Reply to an interaction                    | `src/lib/reply.util.ts`                                            |
-| Format a number, duration, time            | `src/lib/format.util.ts`                                           |
-| Query the database                         | `src/database/repositories/*.ts` — never a model directly          |
-| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts` |
-| Change user-facing copy                    | `src/config/strings.ts`                                            |
-| Change a colour or emoji                   | `src/config/theme.ts`                                              |
-| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`        |
-| Share logic between a command and a button | `src/lib/*Actions.util.ts` (e.g. `economyActions.util.ts`)         |
+| I want to…                                 | Go to                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                                   |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                         |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                                     |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist               |
+| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                     |
+| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"  |
+| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                     |
+| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`) |
+| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it        |
+| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database          |
+| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                          |
+| Format a number, duration, time            | `src/lib/format/format.util.ts`                                          |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly                |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`       |
+| Change user-facing copy                    | `src/config/strings.ts`                                                  |
+| Change a colour or emoji                   | `src/config/theme.ts`                                                    |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
+| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)      |
 
 ### The panel renderers in `src/lib`
 
@@ -372,7 +378,7 @@ Always import by alias. Never a relative path that climbs (`../../`).
 
 ```ts
 import { theme } from "@config/theme";
-import { embed } from "@lib/embeds.util";
+import { embed } from "@lib/discord";
 import { defineCommand, type CommandInput } from "@core/command";
 ```
 
@@ -381,6 +387,7 @@ import { defineCommand, type CommandInput } from "@core/command";
 | `@core`                                                                    | `src/core/index.ts`     | yes     |
 | `@config`                                                                  | `src/config/index.ts`   | yes     |
 | `@lib`                                                                     | `src/lib/index.ts`      | yes     |
+| `@lib/<domain>` — `@lib/music`, `@lib/discord`, …                          | `src/lib/*/index.ts`    | yes     |
 | `@database`                                                                | `src/database/index.ts` | yes     |
 | `@commands/*`, `@events/*`, `@buttons/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
 
@@ -399,11 +406,26 @@ does the emit. `Node` is deprecated, and `Node16` would be right if `tsc` emitte
 that ship a single `.d.ts` (`mathjs`) even though `require()` of them works. That was verified against the real
 build, not assumed.
 
+**`src/lib` has one import rule on each side of its barrels, and `no-restricted-imports` enforces both.**
+
+- **Commands, buttons, events, API routes and jobs import a domain's barrel** — `@lib/music`, never
+  `@lib/music/musicQueue.util`. That is what lets a module move or split inside its folder without touching a
+  single command.
+- **`src/lib`, `src/core` and `src/database` import the module itself**, never a barrel. A barrel loads every
+  module behind it, so inside the layers the barrels are built from, a barrel import is how a harmless dependency
+  becomes a cycle.
+- **Tests import the module under test by its own path**, because `jest.mock` of a module is what a test
+  controls, and a barrel over a partial mock hands the rest of the folder `undefined`.
+
+`tests/core/conventions.test.ts` pins the layout: nothing loose in `src/lib` but the root barrel, a barrel in
+every folder, every module in its folder's barrel, one level deep and no further. The move itself surfaced two
+different types both called `PetRarity` and two `pageCount` functions — neither had been in the old root barrel,
+so nothing had ever put them side by side.
+
 > [!WARNING]
-> Barrels plus `import-x/no-cycle` need care — `src/lib/` and `src/core/` already reference each other, and
-> adding a barrel export can turn a fine dependency into a cycle. Add exports leaf-first and let the lint rule
-> (configured at `maxDepth: 6`) be the check. Do **not** work around a cycle with a `require()` inside a
-> function body; that is a smell, not a pattern.
+> Barrels plus `import-x/no-cycle` still need care — `src/lib/` and `src/core/` reference each other. Let the
+> lint rule (configured at `maxDepth: 6`) be the check. Do **not** work around a cycle with a `require()` inside
+> a function body; that is a smell, not a pattern.
 
 ---
 
@@ -414,8 +436,7 @@ Create **one file**. The loader finds it, `/help` lists it, and it works as both
 ```ts
 // src/commands/fun/coinflip.command.ts
 import { defineCommand } from "@core/command";
-import { successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { reply, successEmbed } from "@lib/discord";
 
 export default defineCommand({
 	name: "coinflip",
@@ -437,10 +458,10 @@ Rules:
 
 1. **`export default defineCommand({ … })`.** The loader fails start-up and names the file otherwise.
 2. **`category` must be a key of `CATEGORIES`.** A typo is a compile error.
-3. **Use `reply()` from `@lib/reply.util`**, never `interaction.reply` directly — it picks `reply` vs
+3. **Use `reply()` from `@lib/discord`**, never `interaction.reply` directly — it picks `reply` vs
    `editReply` vs `followUp` based on `deferred`/`replied`. Calling reply twice throws
    `InteractionAlreadyReplied`.
-4. **Build embeds with `embed()` / `successEmbed()` / `errorEmbed()` from `@lib/embeds.util`.** A
+4. **Build embeds with `embed()` / `successEmbed()` / `errorEmbed()` from `@lib/discord`.** A
    `no-restricted-syntax` lint rule blocks bare `new EmbedBuilder()` outside the three files allowed to build
    them.
 5. **Throw `UserFacingError` for anything the user did wrong.** See [§16](#16-errors).
@@ -502,7 +523,7 @@ did, so every signal fired twice.
 
 This is the dominant UI pattern in the repo. Every panel is **two pieces**:
 
-**1. A pure renderer in `src/lib/<name>Panel.util.ts` or `<name>Screen.util.ts`** — state in, message out. No
+**1. A pure renderer in `src/lib/<domain>/<name>Panel.util.ts` or `<name>Screen.util.ts`** — state in, message out. No
 database calls, no interaction object. This is what makes it unit-testable.
 
 **2. A handler in `src/buttons/<name>.ts`** — `defineButton({ id, ownerOnly, run })`.
@@ -556,12 +577,12 @@ pinning it now.
 
 ## 11. Components V2
 
-`src/lib/containers.util.ts` is the helper layer. Prefer V2 whenever a control belongs **beside** the thing it
+`src/lib/discord/containers.util.ts` is the helper layer. Prefer V2 whenever a control belongs **beside** the thing it
 acts on — a Buy button next to an item, a Use button next to an inventory row — instead of a row of buttons under
 a list where the reader has to count to match them up.
 
 ```ts
-import { button, row } from "@lib/components.util";
+import { button, row } from "@lib/discord/components.util";
 import {
 	container,
 	containerMessage,
@@ -569,7 +590,7 @@ import {
 	divider,
 	sectionWithButton,
 	text,
-} from "@lib/containers.util";
+} from "@lib/discord/containers.util";
 
 const parts: ContainerPart[] = [text("## 🛒 Shop"), divider()];
 parts.push(sectionWithButton("**🎣 Fishing Rod** — 2,500", button({ id, label: "Buy" })));
@@ -650,7 +671,7 @@ Rules:
 6. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
    not appear on records written yesterday, however `required: true` it is — so the type the schema declares is a
    promise about new writes, not a description of what a `find()` returns. When you add a field, normalise on
-   read and type the input for what can actually arrive: `normaliseSettings` in `src/lib/levelling.util.ts` does
+   read and type the input for what can actually arrive: `normaliseSettings` in `src/lib/levelling/levelling.util.ts` does
    this, and its `StoredLevelSettings` marks the fields added later as optional. That function is also where the
    levelling system's old single `roleId`/`multiplier` pair is folded into the `boosts` array, so no other file
    knows the old shape existed. **Migrate on read, in one place, with a test per field.**
@@ -708,7 +729,7 @@ Two separate jobs. Keep them apart.
   `warn` buried the single line naming the cause under hundreds of duplicates. Warn on decisive failures; leave
   the rest at `debug`.
 
-**Presentation — `src/lib/banner.util.ts`.** The boot banner is for a human watching a terminal and is
+**Presentation — `src/lib/bot/banner.util.ts`.** The boot banner is for a human watching a terminal and is
 `process.stdout.write`-n directly, **never through the logger**. `bannerLines()` is pure and unit-tested,
 `printBanner()` writes once, colour is dropped when not a TTY.
 
@@ -1684,7 +1705,7 @@ Rules that keep it from rotting, each with a test:
   to a `TranslationKey`. Both maps are `Record<ProblemCode, …>`, so a code with no sentence or no key is a
   compile error. `shared/` stays zod-only and neither surface reimplements the rule.
 - **The same split holds for labels.** `shared/` says which audit events, automod presets and greeting
-  placeholders exist and how they group; `src/lib/auditLabels.util.ts` and `welcome.util.ts`'s
+  placeholders exist and how they group; `src/lib/moderation/auditLabels.util.ts` and `welcome.util.ts`'s
   `PLACEHOLDER_HELP` write the Discord panel's English, and `auditLog.labels.ts`, `automod.labels.ts` and
   `welcome.labels.ts` hold the dashboard's keys. `labels.test.ts` renders every one, so a key with nothing
   behind it fails rather than printing itself on the page.
@@ -1854,7 +1875,7 @@ Four things about it are load-bearing:
   out, so a hand-written request cannot make one visible or switch one off.
 
 **The command runner is the one place a `CommandInput` adapter is right, and it runs over an allowlist.**
-`DashboardInteraction` in `src/lib/commandRunner.util.ts` captures replies instead of sending them, and the form
+`DashboardInteraction` in `src/lib/bot/commandRunner.util.ts` captures replies instead of sending them, and the form
 is generated from the same metadata `buildSlashCommand` registers — so a command gaining an option gains a field
 with no frontend work. Four things about it are load-bearing:
 
@@ -1868,7 +1889,7 @@ with no frontend work. Four things about it are load-bearing:
 - **A switched-off command is off here too**, and every run is audit-logged with the arguments it was given.
 
 **The blacklist is bot-wide, and the rule about who may be on it lives in one place.**
-`src/lib/blacklistActions.util.ts` holds `blacklistProblem`, which both `/blacklist add` and the route call — an
+`src/lib/moderation/blacklistActions.util.ts` holds `blacklistProblem`, which both `/blacklist add` and the route call — an
 owner able to blacklist another owner could lock every one of them out of their own bot, and a rule written
 twice is a rule that will eventually be written differently. The list is an id field rather than a picker
 because somebody worth blocking is usually in no server the bot can still see, and a row whose account Discord

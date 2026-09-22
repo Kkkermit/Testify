@@ -3,10 +3,9 @@ import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteProfile, getProfile, saveProfile } from "@database/repositories/profileRepository";
-import { containsProfanity } from "@lib/contentFilter.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { discordTime } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { discordTime } from "@lib/format";
+import { containsProfanity } from "@lib/moderation";
 
 const DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})$/;
 

@@ -4,7 +4,7 @@ import { type ApiBindings } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { applyTreasure, readTreasure, resetTreasure } from "@lib/treasureActions.util";
+import { applyTreasure, readTreasure, resetTreasure } from "@lib/economy";
 import { treasurePatch } from "@testify/shared";
 
 export const treasure = new Hono<ApiBindings>();

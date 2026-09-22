@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { antiLinkState } from "@buttons/antiLink";
 import { defineCommand, inGuild } from "@core/command";
-import { antiLinkPanel } from "@lib/antiLinkPanel.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { antiLinkPanel } from "@lib/moderation";
 
 /** One panel instead of `enable`, `disable` and `status`. */
 export default defineCommand({

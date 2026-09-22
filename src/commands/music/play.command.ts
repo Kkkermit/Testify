@@ -1,19 +1,26 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { musicBinaries, openSession, showPanel, voiceChannelOf } from "@lib/musicActions.util";
-import { isPlaylistUrl, resolveQuery } from "@lib/musicQuery.util";
-import { currentTrack, enqueue, enqueueNext } from "@lib/musicQueue.util";
 import {
 	CHOICE_MAX,
 	choicesFor,
+	currentTrack,
+	enqueue,
+	enqueueNext,
 	interactionAge,
+	isPlaylistUrl,
+	musicBinaries,
+	openSession,
+	resolveQuery,
+	resolveTracks,
+	SEARCH_RESULTS,
 	searchBudget,
 	shouldSearch,
+	showPanel,
 	stillOpen,
 	Suggester,
-} from "@lib/musicSearch.util";
-import { resolveTracks, SEARCH_RESULTS } from "@lib/musicSource.util";
+	voiceChannelOf,
+} from "@lib/music";
 
 /** Autocomplete fires on every keystroke, so a typed title must not become a search per letter. */
 const suggestions = new Suggester();

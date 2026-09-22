@@ -2,9 +2,8 @@ import { ECONOMY_COOLDOWNS, type EconomyCooldownKey } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { type EconomyAccount } from "@database/models/economy.schema";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds.util";
-import { formatDuration } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { formatDuration } from "@lib/format";
 
 const TRACKED: {
 	key: EconomyCooldownKey;

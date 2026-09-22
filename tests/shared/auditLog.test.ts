@@ -1,4 +1,4 @@
-import { AUDIT_EVENT_LABELS } from "@lib/auditLabels.util";
+import { AUDIT_EVENT_LABELS } from "@lib/moderation/auditLabels.util";
 import {
 	AUDIT_EVENT_GROUP,
 	AUDIT_EVENTS,

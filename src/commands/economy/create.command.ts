@@ -2,9 +2,8 @@ import { ECONOMY } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { createAccount, deleteAccount, findAccount } from "@database/repositories/economyRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 export default defineCommand({
 	name: "economy",

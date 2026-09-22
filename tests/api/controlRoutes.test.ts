@@ -21,7 +21,7 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/usageRepository", () => ({ guildTallies: jest.fn(() => Promise.resolve([])) }));
-jest.mock("@lib/botIdentity.util", () => ({
+jest.mock("@lib/bot/botIdentity.util", () => ({
 	botIdentity: jest.fn(() => Promise.resolve({ id: "1", username: "Renamed", avatarUrl: null, bannerUrl: null })),
 	forgetBotIdentity: jest.fn(),
 }));

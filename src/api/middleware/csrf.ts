@@ -2,7 +2,7 @@ import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
 import { CSRF_COOKIE, readCookie } from "@api/cookies";
 import { forbidden } from "@api/errors";
-import { secretsMatch } from "@lib/secretBox.util";
+import { secretsMatch } from "@lib/infra";
 
 const CSRF_HEADER = "x-csrf-token";
 

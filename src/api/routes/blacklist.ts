@@ -12,7 +12,7 @@ import {
 	listBlacklist,
 	removeFromBlacklist,
 } from "@database/repositories/blacklistRepository";
-import { blacklistProblem } from "@lib/blacklistActions.util";
+import { blacklistProblem } from "@lib/moderation";
 import { blacklistAdd, type BlacklistRow, blacklistUserParam } from "@testify/shared";
 
 /** The bot-wide block list, owner-only. `/blacklist` in Discord is the same three actions on the same store. */

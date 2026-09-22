@@ -2,10 +2,16 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
-import { pickedChannelId } from "@lib/channelPick.util";
-import { modalForm } from "@lib/components.util";
-import { publishVerifyPanel, roleTooHigh } from "@lib/verifyActions.util";
-import { isReady, normaliseVerify, type VerifyConfig, verifyPanel, VERIFY_PANEL_ID } from "@lib/verifyPanel.util";
+import { modalForm, pickedChannelId } from "@lib/discord";
+import {
+	isReady,
+	normaliseVerify,
+	publishVerifyPanel,
+	roleTooHigh,
+	VERIFY_PANEL_ID,
+	type VerifyConfig,
+	verifyPanel,
+} from "@lib/settings";
 
 /** Every control on the verification setup panel. */
 async function currentConfig(guildId: string): Promise<VerifyConfig> {

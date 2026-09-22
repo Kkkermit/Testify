@@ -1,8 +1,8 @@
 import { ButtonStyle } from "discord.js";
 import { customId, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { button, row } from "@lib/components.util";
-import { avatarEmbed, bannerEmbed, userInfoEmbed } from "@lib/userCards.util";
+import { button, row } from "@lib/discord";
+import { avatarEmbed, bannerEmbed, userInfoEmbed } from "@lib/info";
 
 /** One handler for the whole `userinfo` namespace. */
 export default defineButton({

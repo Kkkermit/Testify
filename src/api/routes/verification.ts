@@ -6,8 +6,7 @@ import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
-import { publishVerifyPanel, roleTooHigh } from "@lib/verifyActions.util";
-import { isReady, normaliseVerify, type VerifyConfig } from "@lib/verifyPanel.util";
+import { isReady, normaliseVerify, publishVerifyPanel, roleTooHigh, type VerifyConfig } from "@lib/settings";
 import { type VerificationConfigResponse, type VerificationPatch, verificationPatchSchema } from "@testify/shared";
 
 export const verification = new Hono<ApiBindings>();

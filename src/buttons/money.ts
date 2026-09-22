@@ -1,9 +1,8 @@
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deposit, withdraw } from "@database/repositories/economyRepository";
-import { modalForm, quickAmountRow, type RenderedScreen } from "@lib/components.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { embed, modalForm, quickAmountRow, type RenderedScreen, successEmbed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 /** Quick-amount buttons for moving money between wallet and bank. */
 

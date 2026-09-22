@@ -2,11 +2,10 @@ import { ButtonStyle, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
-import { confirmRow, modalForm, type RenderedScreen } from "@lib/components.util";
-import { errorEmbed } from "@lib/embeds.util";
-import { formatDuration, formatNumber } from "@lib/format.util";
-import { parseWholeNumber, settingsPanel, statusValue } from "@lib/settingsPanel.util";
-import { normaliseTreasure } from "@lib/treasureActions.util";
+import { confirmRow, errorEmbed, modalForm, type RenderedScreen } from "@lib/discord";
+import { normaliseTreasure } from "@lib/economy";
+import { formatDuration, formatNumber } from "@lib/format";
+import { parseWholeNumber, settingsPanel, statusValue } from "@lib/settings";
 import { TREASURE_DEFAULTS, TREASURE_LIMITS, type TreasureSettings } from "@testify/shared";
 
 export const TREASURE_PANEL_ID = "treasure";

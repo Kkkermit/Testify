@@ -1,9 +1,8 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { defineCommand } from "@core/command";
-import { button, row } from "@lib/components.util";
-import { reply } from "@lib/reply.util";
-import { avatarEmbed } from "@lib/userCards.util";
+import { button, reply, row } from "@lib/discord";
+import { avatarEmbed } from "@lib/info";
 
 export default defineCommand({
 	name: "avatar",

@@ -24,8 +24,7 @@ import {
 	removeTicketMember,
 	setTicketLocked,
 } from "@database/repositories/ticketRepository";
-import { button, row, select, selectRow } from "@lib/components.util";
-import { embed, successEmbed } from "@lib/embeds.util";
+import { button, embed, row, select, selectRow, successEmbed } from "@lib/discord";
 
 function controlRow() {
 	return row(

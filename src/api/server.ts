@@ -22,7 +22,7 @@ import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
-import { dashboardUrl } from "@lib/dashboard.util";
+import { dashboardUrl } from "@lib/bot";
 
 /** Config patches, not uploads. Anything larger than this is a mistake or an attempt. */
 const MAX_BODY_BYTES = 128 * 1024;

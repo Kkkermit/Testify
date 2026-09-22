@@ -8,11 +8,9 @@ import {
 	getActiveSoftban,
 	listActiveSoftbans,
 } from "@database/repositories/moderationRepository";
-import { parseDuration } from "@lib/duration.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { discordTime, formatDurationLong } from "@lib/format.util";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { discordTime, formatDurationLong, parseDuration } from "@lib/format";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderation";
 
 export default defineCommand({
 	name: "softban",

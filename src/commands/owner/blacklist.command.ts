@@ -2,10 +2,9 @@ import { MessageFlags } from "discord.js";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { addToBlacklist, listBlacklist, removeFromBlacklist } from "@database/repositories/blacklistRepository";
-import { assertBlacklistable } from "@lib/blacklistActions.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { discordTime } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { discordTime } from "@lib/format";
+import { assertBlacklistable } from "@lib/moderation";
 
 export default defineCommand({
 	name: "blacklist",

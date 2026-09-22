@@ -4,9 +4,8 @@ import { MessageFlags } from "discord.js";
 import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { toError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { truncate } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { truncate } from "@lib/format";
 
 const SECRET_PATTERN = /(token|secret|password|mongodb(_|-)?uri|api(_|-)?key)/i;
 

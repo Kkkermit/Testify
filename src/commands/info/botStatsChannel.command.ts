@@ -2,9 +2,8 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/settingsRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
-import { botStatsEmbed } from "@lib/statsEmbed.util";
+import { reply, successEmbed } from "@lib/discord";
+import { botStatsEmbed } from "@lib/info";
 
 export default defineCommand({
 	name: "bot-stats-channel",

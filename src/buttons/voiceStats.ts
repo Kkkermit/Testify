@@ -2,8 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getVoiceCounter, setVoiceCounter } from "@database/repositories/settingsRepository";
-import { syncVoiceCounters } from "@lib/voiceCounters.util";
-import { VOICESTATS_PANEL_ID, type VoiceStatsPanelState, voiceStatsPanel } from "@lib/voiceStatsPanel.util";
+import { syncVoiceCounters, VOICESTATS_PANEL_ID, voiceStatsPanel, type VoiceStatsPanelState } from "@lib/settings";
 
 /** Every control on the voice-counter panel. */
 export async function voiceStatsState(guildId: string): Promise<VoiceStatsPanelState> {

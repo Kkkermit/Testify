@@ -6,7 +6,7 @@ import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteTicketSetup } from "@database/repositories/ticketRepository";
-import { applyTickets, normaliseTicketSetup, readTickets } from "@lib/ticketActions.util";
+import { applyTickets, normaliseTicketSetup, readTickets } from "@lib/tickets";
 import { ticketPatch } from "@testify/shared";
 
 export const tickets = new Hono<ApiBindings>();

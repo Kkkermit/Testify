@@ -214,7 +214,7 @@ Take treasure as the shape to copy.
 ```
 shared/src/treasure.ts          TREASURE_LIMITS, TreasureSettings, treasurePatch, treasureProblem
         ↓ imported by both
-src/lib/treasureActions.util.ts normaliseTreasure, readTreasure, applyTreasure, resetTreasure
+src/lib/economy/treasureActions.util.ts normaliseTreasure, readTreasure, applyTreasure, resetTreasure
         ↑ also called by src/buttons/treasure.ts (the Discord panel)
 src/api/routes/treasure.ts      GET / PATCH / POST /reset — thin, no rules of its own
 src/api/routes/guilds.ts        guilds.route("/:guildId/treasure", treasure)
@@ -1190,7 +1190,7 @@ Three things shape these:
   see, so there is no list to choose from. A row whose account Discord no longer knows still renders with its
   ID — an entry nobody can read is an entry nobody can lift.
 - **The runner is an allowlist, and the list is the whole of what it can reach.** `ALLOWED_IN_DASHBOARD` in
-  `src/lib/commandRunner.util.ts` opts a command in; `NEVER_IN_DASHBOARD` refuses one even if it somehow reaches
+  `src/lib/bot/commandRunner.util.ts` opts a command in; `NEVER_IN_DASHBOARD` refuses one even if it somehow reaches
   the first list. The panel commands are not on it and will not be — a Components V2 tree serialised to JSON is
   not a settings page, which is why every other feature has its own screen instead.
 - **There is no "start the bot".** The HTTP server is inside the bot process, so a stopped bot cannot serve the

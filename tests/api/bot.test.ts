@@ -1,7 +1,7 @@
 import { createApi } from "@api/server";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { forgetBotIdentity } from "@lib/botIdentity.util";
+import { forgetBotIdentity } from "@lib/bot/botIdentity.util";
 import { type BotIdentity } from "@testify/shared";
 import { createMockClient } from "@tests/helpers/mocks";
 

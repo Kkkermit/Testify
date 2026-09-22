@@ -1,9 +1,9 @@
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getLevelSettings, getRank, getUserLevel } from "@database/repositories/levelRepository";
-import { multiplierFor, normaliseSettings, progressOf } from "@lib/levelling.util";
-import { renderRankCard } from "@lib/rankCard.util";
-import { reply } from "@lib/reply.util";
+import { renderRankCard } from "@lib/canvas";
+import { reply } from "@lib/discord";
+import { multiplierFor, normaliseSettings, progressOf } from "@lib/levelling";
 
 export default defineCommand({
 	name: "rank",

@@ -10,7 +10,7 @@ import {
 	touchSession,
 	updateTokens,
 } from "@database/repositories/dashboardSessionRepository";
-import { createSecretBox } from "@lib/secretBox.util";
+import { createSecretBox } from "@lib/infra/secretBox.util";
 import { describeWithMongo } from "@tests/helpers/mongo";
 
 const box = createSecretBox("a-long-enough-dashboard-session-secret");

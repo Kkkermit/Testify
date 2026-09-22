@@ -10,8 +10,7 @@ import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
-import { buildCatalogue } from "@lib/commandCatalogue.util";
-import { DashboardInteraction, runnableInDashboard, serialiseReply } from "@lib/commandRunner.util";
+import { buildCatalogue, DashboardInteraction, runnableInDashboard, serialiseReply } from "@lib/bot";
 import {
 	type CommandRunResult,
 	commandNameParam,

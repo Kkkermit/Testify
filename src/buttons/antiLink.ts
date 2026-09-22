@@ -2,14 +2,14 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/settingsRepository";
+import { humanisePermission } from "@lib/format";
 import {
 	ANTILINK_PANEL_ID,
-	type AntiLinkPanelState,
 	antiLinkPanel,
+	type AntiLinkPanelState,
 	DEFAULT_BYPASS,
 	isBypassPermission,
-} from "@lib/antiLinkPanel.util";
-import { humanisePermission } from "@lib/format.util";
+} from "@lib/moderation";
 
 /** Every control on the link-removal panel. */
 export async function antiLinkState(guildId: string): Promise<AntiLinkPanelState> {

@@ -2,6 +2,7 @@ import { DEFAULT_PREFIX } from "@config/constants";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getPrefix } from "@database/repositories/settingsRepository";
+import { reply } from "@lib/discord";
 import {
 	categoryControls,
 	categoryMenu,
@@ -11,8 +12,7 @@ import {
 	helpLinks,
 	pagesOf,
 	resolveCategory,
-} from "@lib/helpPages.util";
-import { reply } from "@lib/reply.util";
+} from "@lib/info";
 
 export default defineCommand({
 	name: "help",

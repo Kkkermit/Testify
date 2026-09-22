@@ -6,8 +6,8 @@ import { badRequest, forbidden, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { addWarning, clearWarnings, removeWarning } from "@database/repositories/moderationRepository";
-import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/memberActions.util";
-import { problemText } from "@lib/problemText.util";
+import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
+import { problemText } from "@lib/format";
 import {
 	boardQuery,
 	levelBody,

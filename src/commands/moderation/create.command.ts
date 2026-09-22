@@ -2,9 +2,7 @@ import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { LIMITS } from "@config/constants";
 import { defineCommand, inTextChannel, type CommandOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { COLOUR_CHOICES, resolveColour } from "@lib/colours.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { COLOUR_CHOICES, embed, reply, resolveColour, successEmbed } from "@lib/discord";
 
 /** Three pairs, generated, covers the same ground without the copy-paste. */
 const FIELD_OPTIONS: CommandOption[] = [1, 2, 3].flatMap((index) => [

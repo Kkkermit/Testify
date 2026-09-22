@@ -2,9 +2,9 @@ import { ECONOMY } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { findAccount } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { activeHeists } from "@lib/heistState.util";
+import { embed } from "@lib/discord";
+import { activeHeists } from "@lib/economy";
+import { formatNumber } from "@lib/format";
 
 export default defineButton({
 	id: "heist",

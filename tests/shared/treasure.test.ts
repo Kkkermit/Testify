@@ -1,4 +1,4 @@
-import { problemText } from "@lib/problemText.util";
+import { problemText } from "@lib/format/problemText.util";
 import { TREASURE_LIMITS, treasurePatch, treasureProblem } from "@testify/shared";
 
 describe("treasurePatch", () => {

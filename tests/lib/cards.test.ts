@@ -1,6 +1,6 @@
 import { AttachmentBuilder } from "discord.js";
-import { boardHeight, medalColour, renderBoardImage } from "@lib/boardCard.util";
-import { barFill, type RankCardData, rankCardText, renderRankCard } from "@lib/rankCard.util";
+import { boardHeight, medalColour, renderBoardImage } from "@lib/canvas/boardCard.util";
+import { barFill, type RankCardData, rankCardText, renderRankCard } from "@lib/canvas/rankCard.util";
 
 /** The avatar fetch is deliberately pointed at a closed local port. */
 const UNREACHABLE = "http://127.0.0.1:1/avatar.png";

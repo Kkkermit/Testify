@@ -1,9 +1,8 @@
 import { evaluate, format, type MathNode, parse } from "mathjs";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { truncate } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { truncate } from "@lib/format";
 
 /**
  * The functions a calculator needs, and only those.

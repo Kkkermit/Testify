@@ -11,9 +11,8 @@ import {
 	intervalFor,
 	saveLottery,
 } from "@database/repositories/lotteryRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { discordTime, formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { discordTime, formatNumber } from "@lib/format";
 
 const FREQUENCIES: LotteryFrequency[] = ["hourly", "daily", "weekly"];
 

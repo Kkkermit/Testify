@@ -1,4 +1,4 @@
-import { problemText } from "@lib/problemText.util";
+import { problemText } from "@lib/format/problemText.util";
 import { STICKY_LIMITS, stickyBlocked, stickyPut } from "@testify/shared";
 
 /**

@@ -2,10 +2,7 @@ import { amountPanel, MONEY_PANEL_ID } from "@buttons/money";
 import { balancesOf } from "@buttons/shop";
 import { defineButton } from "@core/button";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { BALANCE_PANEL_ID, balancePanel } from "@lib/balancePanel.util";
-import { claimDaily, dailyReady } from "@lib/economyActions.util";
-import { inventoryScreen } from "@lib/inventoryScreen.util";
-import { shopScreen } from "@lib/shopScreen.util";
+import { BALANCE_PANEL_ID, balancePanel, claimDaily, dailyReady, inventoryScreen, shopScreen } from "@lib/economy";
 
 /** The quick actions on the balance panel. */
 export default defineButton({

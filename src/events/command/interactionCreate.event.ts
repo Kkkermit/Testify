@@ -3,8 +3,8 @@ import { parseCustomId } from "@core/button";
 import { runChecks } from "@core/checks";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
-import { errorEmbed } from "@lib/embeds.util";
-import { countCommandUse } from "@lib/usage.util";
+import { countCommandUse } from "@lib/bot";
+import { errorEmbed } from "@lib/discord";
 
 /** The only `interactionCreate` listener. */
 export default defineEvent({

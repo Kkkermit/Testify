@@ -1,6 +1,6 @@
 import { Events, type Guild } from "discord.js";
 import { defineEvent } from "@core/event";
-import { announceGuildChange } from "@lib/guildLifecycle.util";
+import { announceGuildChange } from "@lib/bot";
 
 export default defineEvent({
 	name: Events.GuildCreate,

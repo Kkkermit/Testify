@@ -129,7 +129,7 @@ round, and never only the frontend — hiding a button is not access control.
 
 The dashboard cannot grant powers the bot does not have. A manager pressing "ban" on someone above the bot in the
 role list gets the same failure the slash command gets, and the API must surface it as a clear message rather
-than a 500. `applyLevelRewards` in `src/lib/levellingActions.util.ts` is the model: check `role.position` against
+than a 500. `applyLevelRewards` in `src/lib/levelling/levellingActions.util.ts` is the model: check `role.position` against
 `me.roles.highest.position`, check `role.managed`, report what was skipped rather than throwing.
 
 Two rules the API adds on top, which the Discord commands get for free from Discord itself:
@@ -140,7 +140,7 @@ Two rules the API adds on top, which the Discord commands get for free from Disc
   could ban the guild owner through the dashboard.
 - **Nobody can act on the guild owner.** Special-case `guild.ownerId`.
 
-Both belong in `src/lib/moderationActions.util.ts` next to the existing logic, so the Discord surface gets them
+Both belong in `src/lib/moderation/moderationActions.util.ts` next to the existing logic, so the Discord surface gets them
 too — the same "one implementation, every surface" rule the bot is built on.
 
 ## Rate limiting

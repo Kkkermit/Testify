@@ -3,6 +3,8 @@ import { defineButton } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { adjustWallet } from "@database/repositories/economyRepository";
+import { embed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 import {
 	type BlackjackGame,
 	blackjackGames,
@@ -12,9 +14,7 @@ import {
 	playDealer,
 	renderHand,
 	settle,
-} from "@lib/blackjack.util";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+} from "@lib/games";
 
 export default defineButton({
 	id: "blackjack",

@@ -5,7 +5,7 @@ import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteLottery } from "@database/repositories/lotteryRepository";
-import { applyLottery, normaliseLottery, readLottery } from "@lib/lotteryActions.util";
+import { applyLottery, normaliseLottery, readLottery } from "@lib/economy";
 import { lotteryPatch } from "@testify/shared";
 
 export const lottery = new Hono<ApiBindings>();

@@ -3,8 +3,8 @@ import { type TestifyClient } from "@core/client";
 import { type LotteryWinner } from "@database/models/lottery.schema";
 import { adjustWallet } from "@database/repositories/economyRepository";
 import { claimDueDraw, recordDraw } from "@database/repositories/lotteryRepository";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { embed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 /**
  * The draw is claimed by pushing `nextDrawTime` forward inside the same query that selects it, so a slow draw can no

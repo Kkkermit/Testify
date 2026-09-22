@@ -2,8 +2,8 @@ import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { resetGuild } from "@database/repositories/economyRepository";
 import { resetGuildLevels } from "@database/repositories/levelRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
+import { successEmbed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 export default defineButton({
 	id: "reset",

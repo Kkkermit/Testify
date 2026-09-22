@@ -1,9 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { channelOption, defineCommand, inGuild, inTextChannel } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { DEFAULT_REASON } from "@lib/moderationActions.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { DEFAULT_REASON } from "@lib/moderation";
 
 export default defineCommand({
 	name: "lock",

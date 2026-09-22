@@ -4,12 +4,9 @@ import { customId } from "@core/button";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { debitWallet, requireAccount } from "@database/repositories/economyRepository";
-import { resolveAmount } from "@lib/amount.util";
-import { blackjackGames, draw, gameKey, handValue, renderHand, shuffledDeck } from "@lib/blackjack.util";
-import { button, row } from "@lib/components.util";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { button, embed, reply, row } from "@lib/discord";
+import { formatNumber, resolveAmount } from "@lib/format";
+import { blackjackGames, draw, gameKey, handValue, renderHand, shuffledDeck } from "@lib/games";
 
 export default defineCommand({
 	name: "blackjack",

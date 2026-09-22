@@ -1,7 +1,7 @@
 import { ChannelType, Events, type NonThreadGuildBasedChannel } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { defineEvent } from "@core/event";
-import { writeAuditLog } from "@lib/auditLog.util";
+import { writeAuditLog } from "@lib/moderation";
 
 export default defineEvent({
 	name: Events.ChannelCreate,

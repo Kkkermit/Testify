@@ -1,13 +1,13 @@
 import { MessageFlags } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { parseCustomId } from "@core/button";
-import { ANTILINK_PANEL_ID, antiLinkPanel, isBypassPermission } from "@lib/antiLinkPanel.util";
-import { autoRolePanel, AUTOROLE_PANEL_ID, MAX_AUTO_ROLES } from "@lib/autoRolePanel.util";
-import { type ContainerMessage, text } from "@lib/containers.util";
-import { COUNTING_LIMITS, COUNTING_PANEL_ID, countingPanel } from "@lib/countingPanel.util";
-import { checkPrefix, PREFIX_LIMITS, PREFIX_PANEL_ID, prefixPanel } from "@lib/prefixPanel.util";
-import { channelValue, roleValue, settingsScreen, statusDot } from "@lib/settingsScreen.util";
-import { VOICESTATS_PANEL_ID, voiceStatsPanel } from "@lib/voiceStatsPanel.util";
+import { type ContainerMessage, text } from "@lib/discord/containers.util";
+import { ANTILINK_PANEL_ID, antiLinkPanel, isBypassPermission } from "@lib/moderation/antiLinkPanel.util";
+import { autoRolePanel, AUTOROLE_PANEL_ID, MAX_AUTO_ROLES } from "@lib/settings/autoRolePanel.util";
+import { COUNTING_LIMITS, COUNTING_PANEL_ID, countingPanel } from "@lib/settings/countingPanel.util";
+import { checkPrefix, PREFIX_LIMITS, PREFIX_PANEL_ID, prefixPanel } from "@lib/settings/prefixPanel.util";
+import { channelValue, roleValue, settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
+import { VOICESTATS_PANEL_ID, voiceStatsPanel } from "@lib/settings/voiceStatsPanel.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

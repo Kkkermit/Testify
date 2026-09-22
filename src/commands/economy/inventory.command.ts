@@ -1,7 +1,7 @@
 import { defineCommand, inGuild } from "@core/command";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { inventoryScreen } from "@lib/inventoryScreen.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { inventoryScreen } from "@lib/economy";
 
 /** `use` is an alias rather than its own command. */
 export default defineCommand({

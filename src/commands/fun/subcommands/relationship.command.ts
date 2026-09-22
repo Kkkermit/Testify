@@ -1,9 +1,8 @@
 import { createHash } from "node:crypto";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { progressBar } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { progressBar } from "@lib/format";
 
 function compatibility(firstId: string, secondId: string): number {
 	const key = [firstId, secondId].sort().join(":");

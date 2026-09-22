@@ -1,4 +1,4 @@
-import { problemText } from "@lib/problemText.util";
+import { problemText } from "@lib/format/problemText.util";
 import { GIVEAWAY_LIMITS, giveawayProblem, giveawayStart } from "@testify/shared";
 
 /**

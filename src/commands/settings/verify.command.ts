@@ -2,9 +2,8 @@ import { PermissionFlagsBits } from "discord.js";
 import { type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteVerifyConfig, getVerifyConfig } from "@database/repositories/verificationRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
-import { normaliseVerify, verifyPanel } from "@lib/verifyPanel.util";
+import { reply, successEmbed } from "@lib/discord";
+import { normaliseVerify, verifyPanel } from "@lib/settings";
 
 /** One panel instead of three subcommands. */
 async function openPanel(interaction: CommandInput): Promise<void> {

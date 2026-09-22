@@ -1,6 +1,6 @@
 import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { findBinaries } from "../src/lib/musicBinaries.util";
+import { findBinaries } from "../src/lib/music/musicBinaries.util";
 
 /**
  * Fetches the yt-dlp the music player streams through.

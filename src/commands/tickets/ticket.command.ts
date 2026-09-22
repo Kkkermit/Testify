@@ -2,9 +2,8 @@ import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
-import { normaliseTicketSetup, publishTicketPanel } from "@lib/ticketActions.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { normaliseTicketSetup, publishTicketPanel } from "@lib/tickets";
 
 export default defineCommand({
 	name: "ticket",

@@ -1,22 +1,29 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { musicBinaries, requireSession, requireVolumeControl, sameChannelAs, showPanel } from "@lib/musicActions.util";
-import { statusLines } from "@lib/musicBinaries.util";
-import { MAX_VOLUME, MIN_VOLUME } from "@lib/musicFormat.util";
+import { reply } from "@lib/discord";
 import {
+	applyMusicSettings,
 	clearUpcoming,
 	currentTrack,
 	LOOP_MODES,
 	type LoopMode,
+	MAX_VOLUME,
+	MIN_VOLUME,
+	MUSIC_SYSTEM_SUBCOMMAND,
+	musicBinaries,
+	type MusicSession,
+	musicSystemPanel,
+	readMusicSettings,
 	removeAt,
+	requireSession,
+	requireVolumeControl,
+	sameChannelAs,
+	showPanel,
 	shuffleUpcoming,
+	statusLines,
 	upcomingPage,
-} from "@lib/musicQueue.util";
-import { type MusicSession } from "@lib/musicSession.util";
-import { applyMusicSettings, MUSIC_SYSTEM_SUBCOMMAND, readMusicSettings } from "@lib/musicSettings.util";
-import { musicSystemPanel } from "@lib/musicSystemPanel.util";
-import { reply } from "@lib/reply.util";
+} from "@lib/music";
 
 /** Everything about the player that is not "start something", which `/play` owns. */
 

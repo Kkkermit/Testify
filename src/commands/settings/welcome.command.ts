@@ -2,11 +2,8 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
-import { checkBackground, normaliseWelcome } from "@lib/welcome.util";
-import { greetingFor } from "@lib/welcomeActions.util";
-import { welcomePanel } from "@lib/welcomePanel.util";
+import { reply, successEmbed } from "@lib/discord";
+import { checkBackground, greetingFor, normaliseWelcome, welcomePanel } from "@lib/welcome";
 
 /** One panel, plus the two things a panel cannot do: take a file upload, and post a real greeting. */
 export default defineCommand({

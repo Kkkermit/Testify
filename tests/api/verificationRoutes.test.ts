@@ -7,7 +7,7 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
-import { publishVerifyPanel } from "@lib/verifyActions.util";
+import { publishVerifyPanel } from "@lib/settings/verifyActions.util";
 import { type VerificationConfigResponse } from "@testify/shared";
 
 jest.mock("@database/repositories/verificationRepository", () => ({
@@ -16,7 +16,7 @@ jest.mock("@database/repositories/verificationRepository", () => ({
 	saveVerifyConfig: jest.fn(() => Promise.resolve({})),
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
-jest.mock("@lib/verifyActions.util", () => ({
+jest.mock("@lib/settings/verifyActions.util", () => ({
 	publishVerifyPanel: jest.fn(() => Promise.resolve("500000000000000001")),
 	roleTooHigh: jest.fn(() => false),
 }));

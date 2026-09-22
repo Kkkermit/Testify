@@ -2,10 +2,8 @@ import { PermissionFlagsBits } from "discord.js";
 import { type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteLevelSettings, getLevelSettings } from "@database/repositories/levelRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { normaliseSettings } from "@lib/levelling.util";
-import { levelPanel, type LevelTab } from "@lib/levelPanel.util";
-import { reply } from "@lib/reply.util";
+import { reply, successEmbed } from "@lib/discord";
+import { levelPanel, type LevelTab, normaliseSettings } from "@lib/levelling";
 
 /** One panel, opened on whichever tab was asked for. */
 async function openPanel(interaction: CommandInput, tab: LevelTab): Promise<void> {

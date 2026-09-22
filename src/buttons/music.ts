@@ -1,12 +1,21 @@
 import { type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type ComponentInteraction, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { panelFor, requireSession, requireVolumeControl, sameChannelAs } from "@lib/musicActions.util";
-import { clampVolume } from "@lib/musicFormat.util";
-import { MUSIC_ID } from "@lib/musicPanel.util";
-import { currentTrack, type LoopMode, shuffleUpcoming } from "@lib/musicQueue.util";
-import { applyMusicSettings, MUSIC_LIMITS, readMusicSettings } from "@lib/musicSettings.util";
-import { musicSystemPanel } from "@lib/musicSystemPanel.util";
+import {
+	applyMusicSettings,
+	clampVolume,
+	currentTrack,
+	type LoopMode,
+	MUSIC_ID,
+	MUSIC_LIMITS,
+	musicSystemPanel,
+	panelFor,
+	readMusicSettings,
+	requireSession,
+	requireVolumeControl,
+	sameChannelAs,
+	shuffleUpcoming,
+} from "@lib/music";
 
 /** The controls under the player, acting on the same session `/music` does. */
 

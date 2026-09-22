@@ -3,9 +3,7 @@ import { customId } from "@core/button";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteAccount } from "@database/repositories/economyRepository";
-import { button, row } from "@lib/components.util";
-import { successEmbed, warningEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { button, reply, row, successEmbed, warningEmbed } from "@lib/discord";
 
 export default defineCommand({
 	name: "reset",

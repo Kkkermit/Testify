@@ -1,10 +1,8 @@
 import { MessageFlags } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { defineCommand } from "@core/command";
-import { embed } from "@lib/embeds.util";
-import { discordTime, formatNumber } from "@lib/format.util";
-import { buildPage } from "@lib/pagination.util";
-import { reply } from "@lib/reply.util";
+import { buildPage, embed, reply } from "@lib/discord";
+import { discordTime, formatNumber } from "@lib/format";
 
 export const GUILD_PAGE_SIZE = 10;
 

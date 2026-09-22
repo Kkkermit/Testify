@@ -16,7 +16,7 @@ import {
 	surfaceTallies,
 	usageTotals,
 } from "@database/repositories/usageRepository";
-import { runtimeInfo } from "@lib/runtime.util";
+import { runtimeInfo } from "@lib/bot";
 import {
 	analyticsQuery,
 	type CommandUsageRow,

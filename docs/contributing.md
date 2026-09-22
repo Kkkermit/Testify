@@ -32,7 +32,7 @@ what CI runs. The pre-commit and pre-push hooks run most of it for you.
   `levelling`). discord.js spellings stay as discord.js writes them.
 - **Throw, do not reply, on failure.** `UserFacingError` is shown to the user;
   anything else is logged and they get a generic apology.
-- **Build embeds with `embed()`** from `src/lib/embeds.ts` so everything matches.
+- **Build embeds with `embed()`** from `@lib/discord` so everything matches.
   The linter enforces this.
 
 ## Where things go
@@ -44,7 +44,7 @@ what CI runs. The pre-commit and pre-push hooks run most of it for you.
 | A gateway event            | `src/events/`              |
 | Something on every message | `src/events/message/`      |
 | Repeating background work  | `src/jobs/`                |
-| A shared helper            | `src/lib/`                 |
+| A shared helper            | `src/lib/<domain>/`        |
 | A database model or query  | `src/database/`            |
 
 Nothing needs registering — the loader picks files up from these folders at
@@ -56,7 +56,7 @@ Modules are imported by alias, never by a relative path that climbs:
 
 ```ts
 import { theme } from "@config/theme";
-import { embed } from "@lib/embeds";
+import { embed } from "@lib/discord";
 import { type CommandInput } from "@core/command";
 ```
 
@@ -64,9 +64,12 @@ The map lives in `tsconfig.json` and nowhere else — `jest.config.ts` reads it,
 and the build rewrites the aliases to relative paths with `tsc-alias` so `dist/`
 runs under plain Node. Adding an alias means editing one file.
 
-Each aliased directory also has a barrel, so `import { embed, reply } from "@lib"`
-works when you want several things at once. They use `export *` and maintain
-themselves; a new file needs no edit.
+`src/lib` is split into domain folders — `discord`, `music`, `economy` and so
+on — and each has an `index.ts` barrel. Commands, buttons, events and routes
+import the barrel (`@lib/music`); code inside `src/lib` and `src/core` imports
+the module itself (`@lib/music/musicQueue.util`), because a barrel there is how a
+cycle starts. The linter enforces both. A new module needs one line in its
+folder's `index.ts`, and a test names it if that line is missing.
 
 ## Slash and prefix
 

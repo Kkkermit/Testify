@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
-import { ffmpegArgs } from "@lib/musicSource.util";
+import { ffmpegArgs } from "@lib/music/musicSource.util";
 
 /**
  * What `-af volume=` actually does to the audio, measured rather than assumed.

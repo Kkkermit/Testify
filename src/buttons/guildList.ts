@@ -1,5 +1,5 @@
 import { GUILD_PAGE_SIZE, guildSummaries, type GuildSummary, renderGuildPage } from "@commands/owner/guildList.command";
-import { paginatedButton } from "@lib/pagination.util";
+import { paginatedButton } from "@lib/discord";
 
 export default paginatedButton<GuildSummary>({
 	id: "guilds",

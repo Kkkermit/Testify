@@ -2,9 +2,8 @@ import { MessageFlags, WebhookClient } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { SetupError, UserFacingError } from "@core/errors";
-import { containsProfanity } from "@lib/contentFilter.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { containsProfanity } from "@lib/moderation";
 
 export default defineCommand({
 	name: "suggest",

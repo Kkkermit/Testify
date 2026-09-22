@@ -1,9 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { getAuditLogConfig } from "@database/repositories/settingsRepository";
-import { auditPanel } from "@lib/auditPanel.util";
-import { dashboardHint } from "@lib/dashboard.util";
-import { reply } from "@lib/reply.util";
+import { dashboardHint } from "@lib/bot";
+import { reply } from "@lib/discord";
+import { auditPanel } from "@lib/moderation";
 
 /** One panel instead of three subcommands. */
 export default defineCommand({

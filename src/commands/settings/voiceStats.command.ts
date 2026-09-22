@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { voiceStatsState } from "@buttons/voiceStats";
 import { defineCommand, inGuild } from "@core/command";
-import { reply } from "@lib/reply.util";
-import { voiceStatsPanel } from "@lib/voiceStatsPanel.util";
+import { reply } from "@lib/discord";
+import { voiceStatsPanel } from "@lib/settings";
 
 /** One panel instead of `setup`, `refresh` and `status`. */
 export default defineCommand({

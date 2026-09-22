@@ -16,13 +16,13 @@ function loadShutdown(): {
 
 	jest.isolateModules(() => {
 		jest.doMock("@database/connection", () => ({ disconnectDatabase: jest.fn(() => Promise.resolve()) }));
-		jest.doMock("@lib/banner.util", () => ({ printReloading: jest.fn() }));
+		jest.doMock("@lib/bot/banner.util", () => ({ printReloading: jest.fn() }));
 
 		const shutdownModule = jest.requireActual<typeof shutdownModuleType>("@core/shutdown");
 		module = {
 			...shutdownModule,
 			disconnectDatabase: jest.requireMock("@database/connection").disconnectDatabase,
-			printReloading: jest.requireMock("@lib/banner.util").printReloading,
+			printReloading: jest.requireMock("@lib/bot/banner.util").printReloading,
 		};
 	});
 

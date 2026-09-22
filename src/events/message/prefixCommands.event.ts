@@ -4,8 +4,8 @@ import { runCommand } from "@core/errors";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/settingsRepository";
-import { errorEmbed } from "@lib/embeds.util";
-import { countCommandUse } from "@lib/usage.util";
+import { countCommandUse } from "@lib/bot";
+import { errorEmbed } from "@lib/discord";
 
 /**
  * Runs `t?ban @someone` through exactly the same code as `/ban`, including the permission, cooldown and blacklist

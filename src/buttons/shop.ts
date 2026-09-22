@@ -8,18 +8,21 @@ import {
 	requireAccount,
 	setFields,
 } from "@database/repositories/economyRepository";
-import { formatNumber } from "@lib/format.util";
-import { findPet } from "@lib/pets.util";
-import { findBusiness, findHouse, findJob, findShopItem } from "@lib/shop.util";
 import {
 	type Balances,
 	decodeShopState,
+	findBusiness,
 	findEntry,
+	findHouse,
+	findJob,
+	findPet,
+	findShopItem,
 	sellConfirmScreen,
 	SHOP_ID,
 	shopScreen,
 	type ShopState,
-} from "@lib/shopScreen.util";
+} from "@lib/economy";
+import { formatNumber } from "@lib/format";
 
 /** What the screen needs to know about the buyer, derived from their account. */
 export function balancesOf(account: EconomyAccount): Balances {

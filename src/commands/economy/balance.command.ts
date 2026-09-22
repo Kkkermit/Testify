@@ -2,9 +2,8 @@ import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { findAccount } from "@database/repositories/economyRepository";
-import { balancePanel } from "@lib/balancePanel.util";
-import { dailyReady } from "@lib/economyActions.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { balancePanel, dailyReady } from "@lib/economy";
 
 export default defineCommand({
 	name: "balance",

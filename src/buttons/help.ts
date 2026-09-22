@@ -11,7 +11,7 @@ import {
 	pagesOf,
 	resolveCategory,
 	resolveSurface,
-} from "@lib/helpPages.util";
+} from "@lib/info";
 
 /** Drives the help menu. */
 export default defineButton({

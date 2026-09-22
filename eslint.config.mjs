@@ -61,12 +61,12 @@ export default ts.config(
 			"@typescript-eslint/restrict-template-expressions": "off",
 			"@typescript-eslint/no-base-to-string": "error",
 
-			// Build embeds with `embed()` from src/lib/embeds.ts so they all look the same.
+			// Build embeds with `embed()` from src/lib/discord/embeds.util.ts so they all look the same.
 			"no-restricted-syntax": [
 				"error",
 				{
 					selector: "NewExpression[callee.name='EmbedBuilder']",
-					message: "Use embed() from src/lib/embeds.util.ts instead of building an embed by hand.",
+					message: "Use embed() from src/lib/discord/embeds.util.ts instead of building an embed by hand.",
 				},
 				// The dashboard renders text a guild manager typed. React escapes it; these four undo that,
 				// and the CSP is the last line of defence rather than the only one.
@@ -96,8 +96,45 @@ export default ts.config(
 	},
 	{
 		// Where embeds are actually built.
-		files: ["src/lib/embeds.util.ts", "src/core/errors.ts", "src/buttons/errorTriage.ts"],
+		files: ["src/lib/discord/embeds.util.ts", "src/core/errors.ts", "src/buttons/errorTriage.ts"],
 		rules: { "no-restricted-syntax": "off" },
+	},
+	{
+		// A barrel loads every module behind it, so inside the layers the barrels are built from a barrel import is
+		// how a harmless dependency becomes a cycle. These name the module itself.
+		files: ["src/lib/**/*.ts", "src/core/**/*.ts", "src/database/**/*.ts"],
+		ignores: ["src/lib/index.ts", "src/lib/*/index.ts"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					patterns: [
+						{
+							regex: "^@lib(/[^/]+)?$",
+							message: "Import the module itself, e.g. @lib/music/musicQueue.util — a barrel here invites a cycle.",
+						},
+					],
+				},
+			],
+		},
+	},
+	{
+		// Everything that uses the helpers goes through a domain's barrel, so a module can move inside its folder
+		// without touching a single command.
+		files: ["src/commands/**/*.ts", "src/buttons/**/*.ts", "src/events/**/*.ts", "src/api/**/*.ts", "src/jobs/**/*.ts"],
+		rules: {
+			"no-restricted-imports": [
+				"error",
+				{
+					patterns: [
+						{
+							regex: "^@lib/[^/]+/.+",
+							message: "Import from the domain's barrel, e.g. @lib/music, rather than from a module inside it.",
+						},
+					],
+				},
+			],
+		},
 	},
 	{
 		files: ["scripts/**/*.ts", "**/*.config.ts"],

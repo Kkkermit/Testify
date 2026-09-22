@@ -16,7 +16,7 @@ import {
 	getWarnings,
 	removeWarning,
 } from "@database/repositories/moderationRepository";
-import { applyLevelRewards } from "@lib/levellingActions.util";
+import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 import { type BoardPage, type MemberDetail } from "@testify/shared";
 
 jest.mock("@database/repositories/economyRepository", () => ({
@@ -44,7 +44,7 @@ jest.mock("@database/repositories/moderationRepository", () => ({
 	clearWarnings: jest.fn(() => Promise.resolve(true)),
 	deactivateSoftban: jest.fn(() => Promise.resolve(true)),
 }));
-jest.mock("@lib/levellingActions.util", () => ({
+jest.mock("@lib/levelling/levellingActions.util", () => ({
 	applyLevelRewards: jest.fn(() => Promise.resolve({ added: [], removed: [], skipped: [] })),
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));

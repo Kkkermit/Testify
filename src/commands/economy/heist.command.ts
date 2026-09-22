@@ -11,11 +11,9 @@ import {
 	incrementCounters,
 	setCooldown,
 } from "@database/repositories/economyRepository";
-import { button, row } from "@lib/components.util";
-import { embed } from "@lib/embeds.util";
-import { formatDuration, formatNumber } from "@lib/format.util";
-import { activeHeists, type HeistState } from "@lib/heistState.util";
-import { reply } from "@lib/reply.util";
+import { button, embed, reply, row } from "@lib/discord";
+import { activeHeists, type HeistState } from "@lib/economy";
+import { formatDuration, formatNumber } from "@lib/format";
 
 export default defineCommand({
 	name: "heist",

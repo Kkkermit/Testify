@@ -8,10 +8,9 @@ import {
 	incrementCounters,
 	setCooldown,
 } from "@database/repositories/economyRepository";
-import { embed } from "@lib/embeds.util";
-import { formatDuration, formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
-import { findJob } from "@lib/shop.util";
+import { embed, reply } from "@lib/discord";
+import { findJob } from "@lib/economy";
+import { formatDuration, formatNumber } from "@lib/format";
 
 const SCENARIOS = [
 	"You covered a shift and nobody noticed you were on your phone.",

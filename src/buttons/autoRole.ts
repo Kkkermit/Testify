@@ -2,7 +2,7 @@ import { type Guild, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getAutoRoles, setAutoRoles } from "@database/repositories/settingsRepository";
-import { AUTOROLE_PANEL_ID, autoRolePanel, MAX_AUTO_ROLES } from "@lib/autoRolePanel.util";
+import { AUTOROLE_PANEL_ID, autoRolePanel, MAX_AUTO_ROLES } from "@lib/settings";
 
 /** Every control on the auto-role panel. */
 export function unusableRoles(guild: Guild, roleIds: readonly string[]): string[] {

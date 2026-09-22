@@ -3,10 +3,8 @@ import { version as djsVersion } from "discord.js";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { defineCommand, type CommandInput } from "@core/command";
-import { linkButton, row } from "@lib/components.util";
-import { embed } from "@lib/embeds.util";
-import { discordTime, formatBytes, formatNumber, formatUptime } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, linkButton, reply, row } from "@lib/discord";
+import { discordTime, formatBytes, formatNumber, formatUptime } from "@lib/format";
 
 async function showUptime(interaction: CommandInput, client: TestifyClient): Promise<void> {
 	await reply(interaction, {

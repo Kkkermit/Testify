@@ -2,9 +2,8 @@ import QuickChart from "quickchart-js";
 import { DAY_MS, WEEK_MS } from "@config/constants";
 import { defineCommand } from "@core/command";
 import { ServiceError, UserFacingError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 export default defineCommand({
 	name: "member-count",

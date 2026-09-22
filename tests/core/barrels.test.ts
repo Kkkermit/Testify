@@ -2,7 +2,9 @@ import * as configBarrel from "@config";
 import * as coreBarrel from "@core";
 import * as databaseBarrel from "@database";
 import * as libBarrel from "@lib";
-import { embed } from "@lib/embeds.util";
+import { embed } from "@lib/discord/embeds.util";
+import * as musicBarrel from "@lib/music";
+import { musicPanel } from "@lib/music/musicPanel.util";
 
 /**
  * Importing a barrel pulls in every module behind it, so this catches both a broken re-export and an import cycle
@@ -20,6 +22,12 @@ describe("the directory barrels", () => {
 
 	it("re-exports the same binding the module does", () => {
 		expect(libBarrel.embed).toBe(embed);
+	});
+
+	/** A domain barrel and the module behind it must hand out one object, or a mock of one misses the other. */
+	it("hands out the module's own binding from a domain barrel", () => {
+		expect(musicBarrel.musicPanel).toBe(musicPanel);
+		expect(libBarrel.musicPanel).toBe(musicPanel);
 	});
 
 	it("exposes the framework pieces from @core", () => {

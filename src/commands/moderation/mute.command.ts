@@ -3,10 +3,9 @@ import { strings } from "@config/strings";
 import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { parseDuration } from "@lib/duration.util";
-import { formatDurationLong } from "@lib/format.util";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderationActions.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { formatDurationLong, parseDuration } from "@lib/format";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderation";
 
 /** Discord's timeout ceiling. */
 const MAX_TIMEOUT_MS = 28 * 24 * 60 * 60 * 1_000;

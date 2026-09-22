@@ -1,8 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { prefixState } from "@buttons/prefixSetup";
 import { defineCommand, inGuild } from "@core/command";
-import { prefixPanel } from "@lib/prefixPanel.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { prefixPanel } from "@lib/settings";
 
 /** One panel instead of `show`, `set`, `enable` and `disable`. */
 export default defineCommand({

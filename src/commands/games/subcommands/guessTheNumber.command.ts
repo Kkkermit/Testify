@@ -1,7 +1,6 @@
 import { randomInt } from "node:crypto";
 import { defineCommand, inTextChannel } from "@core/command";
-import { embed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
 
 export default defineCommand({
 	name: "guess-the-number",

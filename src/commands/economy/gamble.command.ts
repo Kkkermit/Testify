@@ -3,10 +3,8 @@ import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { adjustWallet, debitWallet, incrementCounters, requireAccount } from "@database/repositories/economyRepository";
-import { resolveAmount } from "@lib/amount.util";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { formatNumber, resolveAmount } from "@lib/format";
 
 type GameKind = "coinflip" | "dice" | "slots";
 

@@ -30,11 +30,10 @@ import {
 	listSticky,
 } from "@database/repositories/settingsRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
-import { canPostInChannel } from "@lib/channels.util";
-import { normaliseSettings } from "@lib/levelling.util";
-import { readLottery } from "@lib/lotteryActions.util";
-import { readTickets } from "@lib/ticketActions.util";
-import { readTreasure } from "@lib/treasureActions.util";
+import { canPostInChannel } from "@lib/discord";
+import { readLottery, readTreasure } from "@lib/economy";
+import { normaliseSettings } from "@lib/levelling";
+import { readTickets } from "@lib/tickets";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,

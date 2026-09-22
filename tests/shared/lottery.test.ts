@@ -1,4 +1,4 @@
-import { problemText } from "@lib/problemText.util";
+import { problemText } from "@lib/format/problemText.util";
 import { LOTTERY_LIMITS, lotteryBlocked, lotteryPatch } from "@testify/shared";
 
 const CHANNEL = "400000000000000001";

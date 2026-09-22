@@ -2,9 +2,8 @@ import figlet from "figlet";
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { containsProfanity } from "@lib/contentFilter.util";
-import { embed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { containsProfanity } from "@lib/moderation";
 
 export default defineCommand({
 	name: "ascii",

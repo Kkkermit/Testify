@@ -1,20 +1,20 @@
 import play from "@commands/music/play.command";
-import type * as MusicActions from "@lib/musicActions.util";
-import { type Track } from "@lib/musicQueue.util";
-import { CHOICE_MAX, MAX_CHOICES } from "@lib/musicSearch.util";
-import type * as MusicSource from "@lib/musicSource.util";
+import type * as MusicActions from "@lib/music/musicActions.util";
+import { type Track } from "@lib/music/musicQueue.util";
+import { CHOICE_MAX, MAX_CHOICES } from "@lib/music/musicSearch.util";
+import type * as MusicSource from "@lib/music/musicSource.util";
 
-jest.mock("@lib/musicActions.util", () => ({
-	...jest.requireActual<typeof MusicActions>("@lib/musicActions.util"),
+jest.mock("@lib/music/musicActions.util", () => ({
+	...jest.requireActual<typeof MusicActions>("@lib/music/musicActions.util"),
 	musicBinaries: () => ({ ytDlp: "/bin/yt-dlp", ffmpeg: null }),
 }));
 
-jest.mock("@lib/musicSource.util", () => ({
-	...jest.requireActual<typeof MusicSource>("@lib/musicSource.util"),
+jest.mock("@lib/music/musicSource.util", () => ({
+	...jest.requireActual<typeof MusicSource>("@lib/music/musicSource.util"),
 	resolveTracks: jest.fn(),
 }));
 
-const { resolveTracks } = jest.requireMock("@lib/musicSource.util");
+const { resolveTracks } = jest.requireMock("@lib/music/musicSource.util");
 
 function track(title: string, url = `https://youtu.be/${title}`): Track {
 	return {

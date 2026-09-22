@@ -1,4 +1,4 @@
-import { problemText } from "@lib/problemText.util";
+import { problemText } from "@lib/format/problemText.util";
 import { TICKET_LIMITS, ticketBlocked, ticketPatch } from "@testify/shared";
 
 const ID = "400000000000000001";

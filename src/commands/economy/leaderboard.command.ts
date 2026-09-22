@@ -1,6 +1,6 @@
 import { type CommandInput, defineCommand, inGuild } from "@core/command";
-import { type BoardKind, boardMessage } from "@lib/leaderboardActions.util";
-import { reply } from "@lib/reply.util";
+import { reply } from "@lib/discord";
+import { type BoardKind, boardMessage } from "@lib/economy";
 
 /** Both boards, one command, and no buttons. */
 const pageOption = {

@@ -2,17 +2,17 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
-import { pickedChannelId } from "@lib/channelPick.util";
-import { modalForm } from "@lib/components.util";
+import { modalForm, pickedChannelId } from "@lib/discord";
 import {
 	DEFAULT_WELCOME_MESSAGE,
+	greetingFor,
 	isWelcomeStyle,
 	normaliseWelcome,
 	WELCOME_LIMITS,
+	WELCOME_PANEL_ID,
 	type WelcomeConfig,
-} from "@lib/welcome.util";
-import { greetingFor } from "@lib/welcomeActions.util";
-import { welcomePanel, WELCOME_PANEL_ID } from "@lib/welcomePanel.util";
+	welcomePanel,
+} from "@lib/welcome";
 
 /** Every control on the welcome panel. */
 async function currentConfig(guildId: string): Promise<WelcomeConfig | null> {

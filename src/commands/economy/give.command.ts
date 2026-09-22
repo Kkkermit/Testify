@@ -4,9 +4,8 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { adjustBank, adjustWallet } from "@database/repositories/economyRepository";
 import { addXp } from "@database/repositories/levelRepository";
-import { successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { reply, successEmbed } from "@lib/discord";
+import { formatNumber } from "@lib/format";
 
 export default defineCommand({
 	name: "give",

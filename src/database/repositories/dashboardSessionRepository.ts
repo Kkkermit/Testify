@@ -1,6 +1,6 @@
 import { randomBytes } from "node:crypto";
 import { type DashboardSession, DashboardSessions } from "@database/models/dashboardSession.schema";
-import { type SecretBox } from "@lib/secretBox.util";
+import { type SecretBox } from "@lib/infra/secretBox.util";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 

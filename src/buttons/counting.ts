@@ -2,11 +2,15 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/settingsRepository";
-import { pickedChannelId } from "@lib/channelPick.util";
-import { modalForm } from "@lib/components.util";
-import { COUNTING_LIMITS, COUNTING_PANEL_ID, countingPanel, type CountingPanelState } from "@lib/countingPanel.util";
-import { formatNumber } from "@lib/format.util";
-import { parseWholeNumber } from "@lib/settingsPanel.util";
+import { modalForm, pickedChannelId } from "@lib/discord";
+import { formatNumber } from "@lib/format";
+import {
+	COUNTING_LIMITS,
+	COUNTING_PANEL_ID,
+	countingPanel,
+	type CountingPanelState,
+	parseWholeNumber,
+} from "@lib/settings";
 
 /** Every control on the counting panel. */
 export async function countingState(guildId: string): Promise<CountingPanelState> {

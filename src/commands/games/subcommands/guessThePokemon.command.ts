@@ -1,10 +1,9 @@
 import { randomInt } from "node:crypto";
 import { z } from "zod";
 import { defineCommand, inTextChannel } from "@core/command";
-import { embed } from "@lib/embeds.util";
-import { titleCase } from "@lib/format.util";
-import { fetchJson } from "@lib/http.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { titleCase } from "@lib/format";
+import { fetchJson } from "@lib/infra";
 
 const speciesSchema = z.object({
 	name: z.string(),

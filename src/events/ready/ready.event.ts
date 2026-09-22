@@ -3,7 +3,7 @@ import { DEFAULT_PREFIX, INTERVALS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
 import { defineEvent } from "@core/event";
 import { publishScope } from "@core/loader";
-import { printBanner } from "@lib/banner.util";
+import { printBanner } from "@lib/bot";
 
 export default defineEvent({
 	name: Events.ClientReady,

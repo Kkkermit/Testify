@@ -3,10 +3,9 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { getAutoRoles, getWelcome } from "@database/repositories/settingsRepository";
-import { writeAuditLog } from "@lib/auditLog.util";
-import { syncVoiceCounters } from "@lib/voiceCounters.util";
-import { normaliseWelcome } from "@lib/welcome.util";
-import { greetingFor } from "@lib/welcomeActions.util";
+import { writeAuditLog } from "@lib/moderation";
+import { syncVoiceCounters } from "@lib/settings";
+import { greetingFor, normaliseWelcome } from "@lib/welcome";
 
 export default defineEvent({
 	name: Events.GuildMemberAdd,

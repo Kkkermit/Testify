@@ -4,9 +4,8 @@ import { TREASURE_DEFAULTS } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { formatDuration, formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { formatDuration, formatNumber } from "@lib/format";
 
 export default defineCommand({
 	name: "treasure",

@@ -60,7 +60,7 @@ Written against the bot as it stands on `claude/testify-bot-typescript-rewrite-f
 - 9 Mongoose schemas with 9 repositories in front of them. **Commands never touch a model directly** — which is
   exactly why an API can reuse them.
 - `src/config/env.ts` is the only file that reads `process.env`, zod-validated once at startup.
-- No inbound HTTP server exists yet. `src/lib/http.util.ts` is outbound only.
+- No inbound HTTP server exists yet. `src/lib/infra/http.util.ts` is outbound only.
 - Conventions in [`../../../CLAUDE.md`](../../../CLAUDE.md) apply to any dashboard code that lands in `src/`.
 
 The single most important thing this plan leans on: **the bot's repositories and `*Actions.util.ts` modules are

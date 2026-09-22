@@ -10,9 +10,8 @@ import { shutdown } from "@core/shutdown";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
 import { guildTallies } from "@database/repositories/usageRepository";
-import { controlState, pause, resume } from "@lib/botControl.util";
-import { botIdentity, forgetBotIdentity } from "@lib/botIdentity.util";
-import { normaliseSettings } from "@lib/levelling.util";
+import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
+import { normaliseSettings } from "@lib/levelling";
 import {
 	botIdentityPatch,
 	gatewayAction,

@@ -3,8 +3,7 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { defineCommand } from "@core/command";
 import { dataPath } from "@core/paths";
-import { embed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
 
 let questions: string[] | undefined;
 

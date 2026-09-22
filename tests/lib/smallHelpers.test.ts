@@ -1,6 +1,6 @@
 import { type TestifyClient } from "@core/client";
-import { activeHeists } from "@lib/heistState.util";
-import { botStatsEmbed } from "@lib/statsEmbed.util";
+import { activeHeists } from "@lib/economy/heistState.util";
+import { botStatsEmbed } from "@lib/info/statsEmbed.util";
 import { createMockClient, mockCollection } from "@tests/helpers/mocks";
 
 describe("activeHeists", () => {

@@ -5,7 +5,7 @@ import { type ApiBindings } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
-import { canManageAutomod, createAutomodRule, listAutomodRules } from "@lib/automodActions.util";
+import { canManageAutomod, createAutomodRule, listAutomodRules } from "@lib/moderation";
 import { type AutomodRules, automodCreate, automodPatch, automodRuleParam } from "@testify/shared";
 
 export const automod = new Hono<ApiBindings>();

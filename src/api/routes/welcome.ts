@@ -5,7 +5,7 @@ import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
-import { normaliseWelcome } from "@lib/welcome.util";
+import { normaliseWelcome } from "@lib/welcome";
 import {
 	DEFAULT_WELCOME_MESSAGE,
 	type WelcomeConfigResponse,

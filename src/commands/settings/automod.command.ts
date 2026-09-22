@@ -1,9 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { createAutomodRule, listAutomodRules } from "@lib/automodActions.util";
-import { embed, successEmbed } from "@lib/embeds.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply, successEmbed } from "@lib/discord";
+import { createAutomodRule, listAutomodRules } from "@lib/moderation";
 import { AUTOMOD_LIMITS } from "@testify/shared";
 
 export default defineCommand({

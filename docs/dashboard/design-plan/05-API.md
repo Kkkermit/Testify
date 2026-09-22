@@ -69,7 +69,7 @@ One route group per feature, each mirroring an existing repository. Levelling in
 
 `GET /levelling` returning the output of `normaliseSettings` is the point. The migration from the old
 single-`roleId` shape, the `"current"` channel sentinel, the clamping — all of it already happens in
-`src/lib/levelling.util.ts` and the API inherits it for free. If the dashboard reimplemented that normalisation
+`src/lib/levelling/levelling.util.ts` and the API inherits it for free. If the dashboard reimplemented that normalisation
 it would drift, and a guild would see different settings on the web than in `/levelling edit`.
 
 `PUT` for the lists rather than add/remove endpoints, because the UI is a multi-select whose value _is_ the whole
@@ -80,7 +80,7 @@ The same shape repeats for: `/audit-logging`, `/welcome`, `/anti-link`, `/automo
 `/prefix`, `/treasure`, `/voice-stats`, `/verification`, `/tickets`, `/lottery`. Each is a thin wrapper over the
 matching functions in `settingsRepository.ts` — there are already 36 of them, and they all take a `guildId` first.
 
-**Validate against the same limits the panels use.** `LEVEL_LIMITS` is exported from `src/lib/levelling.util.ts`;
+**Validate against the same limits the panels use.** `LEVEL_LIMITS` is exported from `src/lib/levelling/levelling.util.ts`;
 the zod schema in `shared/` imports those numbers rather than repeating `max(5)`. Two sources of truth for "how
 many boost roles" is how the web UI ends up accepting a sixth that the panel then cannot render.
 
@@ -116,7 +116,7 @@ web's. Rendering a PNG here would be copying a workaround into a place that does
 | DELETE | `/moderation/softban/:userId`     |                                  |
 | POST   | `/moderation/unban`               | `{ userId, reason }`             |
 
-Every one goes through `src/lib/moderationActions.util.ts` so the audit-log embed, the DM to the member, and the
+Every one goes through `src/lib/moderation/moderationActions.util.ts` so the audit-log embed, the DM to the member, and the
 warning record all still happen. The hierarchy checks from `04-PERMISSIONS.md` live there too.
 
 Deliberately **not** here: kick and ban. They are irreversible, they are one mis-click, and Discord's own UI does

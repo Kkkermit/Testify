@@ -1,10 +1,9 @@
 import { z } from "zod";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { embed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { fetchJson } from "@lib/http.util";
-import { reply } from "@lib/reply.util";
+import { embed, reply } from "@lib/discord";
+import { formatNumber } from "@lib/format";
+import { fetchJson } from "@lib/infra";
 
 const listingSchema = z.object({
 	data: z.object({

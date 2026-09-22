@@ -16,7 +16,7 @@ import {
 	isVerified,
 	markVerified,
 } from "@database/repositories/verificationRepository";
-import { successEmbed } from "@lib/embeds.util";
+import { successEmbed } from "@lib/discord";
 
 export default defineButton({
 	id: "verify",

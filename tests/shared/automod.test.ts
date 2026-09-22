@@ -1,4 +1,4 @@
-import { problemText } from "@lib/problemText.util";
+import { problemText } from "@lib/format/problemText.util";
 import { AUTOMOD_LIMITS, automodBlocked, automodCreate } from "@testify/shared";
 
 describe("automodCreate", () => {

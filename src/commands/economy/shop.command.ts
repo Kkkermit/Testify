@@ -1,8 +1,8 @@
 import { balancesOf } from "@buttons/shop";
 import { defineCommand, inGuild } from "@core/command";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { reply } from "@lib/reply.util";
-import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/shopScreen.util";
+import { reply } from "@lib/discord";
+import { isShopSection, SHOP_SECTIONS, shopScreen } from "@lib/economy";
 
 /** The whole shop is one browsable panel. */
 export default defineCommand({

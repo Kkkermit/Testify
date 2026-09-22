@@ -3,8 +3,7 @@ import { LEVELLING } from "@config/constants";
 import { theme } from "@config/theme";
 import { defineMessageHandler } from "@core/message";
 import { awardXp, getLevelSettings } from "@database/repositories/levelRepository";
-import { earnsXp, multiplierFor, normaliseSettings } from "@lib/levelling.util";
-import { applyLevelRewards } from "@lib/levellingActions.util";
+import { applyLevelRewards, earnsXp, multiplierFor, normaliseSettings } from "@lib/levelling";
 
 const CONGRATULATIONS = [
 	"Congratulations {user}, you reached level **{level}**!",

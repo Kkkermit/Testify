@@ -1,9 +1,9 @@
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { createCanvas, drawAvatar, toAttachment, wrapText } from "@lib/canvas.util";
-import { containsProfanity } from "@lib/contentFilter.util";
-import { reply } from "@lib/reply.util";
+import { createCanvas, drawAvatar, toAttachment, wrapText } from "@lib/canvas";
+import { reply } from "@lib/discord";
+import { containsProfanity } from "@lib/moderation";
 
 const WIDTH = 700;
 const PADDING = 28;

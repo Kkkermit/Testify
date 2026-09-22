@@ -1,20 +1,20 @@
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
-import { AUDIT_EVENTS } from "@lib/auditLog.util";
+import { requireSendable } from "@lib/discord";
 import {
+	AUDIT_EVENTS,
 	AUDIT_PANEL_ID,
 	type AuditDraft,
-	type AuditPanelState,
 	auditPanel,
+	type AuditPanelState,
 	auditSavedPanel,
 	collapseEnabled,
 	decodeDraft,
 	hasUnsavedChanges,
 	isAuditEvent,
 	resolveEnabled,
-} from "@lib/auditPanel.util";
-import { requireSendable } from "@lib/channelPick.util";
+} from "@lib/moderation";
 
 /** Every control on the audit logging panel. */
 async function currentState(guildId: string): Promise<AuditPanelState> {

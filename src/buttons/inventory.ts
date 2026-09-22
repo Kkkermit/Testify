@@ -2,10 +2,15 @@ import { randomInt } from "node:crypto";
 import { balancesOf } from "@buttons/shop";
 import { defineButton } from "@core/button";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { BALANCE_PANEL_ID, balancePanel } from "@lib/balancePanel.util";
-import { dailyReady, useItem } from "@lib/economyActions.util";
-import { INVENTORY_PANEL_ID, inventoryScreen } from "@lib/inventoryScreen.util";
-import { shopScreen } from "@lib/shopScreen.util";
+import {
+	BALANCE_PANEL_ID,
+	balancePanel,
+	dailyReady,
+	INVENTORY_PANEL_ID,
+	inventoryScreen,
+	shopScreen,
+	useItem,
+} from "@lib/economy";
 
 /** Using an item, and moving between the economy panels. */
 export default defineButton({

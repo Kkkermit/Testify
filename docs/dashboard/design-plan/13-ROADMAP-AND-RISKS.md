@@ -59,7 +59,7 @@ middleware. What this phase turned up, beyond the plan:
 ### Phase 2 — Guild overview and levelling (~1½ weeks) — **done**
 
 The vertical slice that proves the architecture. Levelling first because it is the freshest, richest config and
-its rules already live in `src/lib/levelling.util.ts`.
+its rules already live in `src/lib/levelling/levelling.util.ts`.
 
 - `/overview`, `/channels`, `/roles` with `canSend` and `assignableByBot`.
 - Full levelling routes and page: four tabs, role and channel pickers, hierarchy warnings at configuration time.
@@ -98,7 +98,7 @@ Two shapes worth copying from it:
 holds a draft and writes once, mirroring the panel's Save button. Three things it settled:
 
 - **The event list, its labels and the `all` shorthand moved into `@testify/shared`.** They were declared in
-  `src/lib/auditLog.util.ts` and again inside `auditPanel.util.ts`; a third copy in the browser would have been
+  `src/lib/moderation/auditLog.util.ts` and again inside `auditPanel.util.ts`; a third copy in the browser would have been
   the moment the two surfaces started disagreeing about which events a guild logs. `src/lib/` re-exports, so no
   caller changed.
 - **`all` has to survive a round trip.** The API expands it for the checklist and collapses a full selection back
@@ -128,7 +128,7 @@ owner can turn one off everywhere. `checks.ts` is the gate — hiding a switch i
 have to: a write can have a side effect in a public channel. Posting the panel is its own explicit action rather
 than something a channel change implies, and that section alone is not optimistic — a control that moved before
 the server agreed would be claiming a message had been sent that may not have been. `publishVerifyPanel` moved
-into `src/lib/verifyActions.util.ts` so the button and the route post the identical panel.
+into `src/lib/settings/verifyActions.util.ts` so the button and the route post the identical panel.
 
 **Sticky is done**, and it is the first screen here that is a list rather than a form. Two things it settled:
 

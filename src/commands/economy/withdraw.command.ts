@@ -3,10 +3,8 @@ import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { requireAccount, withdraw } from "@database/repositories/economyRepository";
-import { resolveAmount } from "@lib/amount.util";
-import { successEmbed } from "@lib/embeds.util";
-import { formatNumber } from "@lib/format.util";
-import { reply } from "@lib/reply.util";
+import { reply, successEmbed } from "@lib/discord";
+import { formatNumber, resolveAmount } from "@lib/format";
 
 export default defineCommand({
 	name: "withdraw",
