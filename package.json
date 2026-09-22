@@ -97,6 +97,10 @@
 		"quickchart-js": "4.0.0",
 		"zod": "4.4.3"
 	},
+	"optionalDependencies": {
+		"ffmpeg-static": "5.3.0",
+		"youtube-dl-exec": "3.1.15"
+	},
 	"devDependencies": {
 		"@commitlint/cli": "21.2.1",
 		"@commitlint/config-conventional": "21.2.0",

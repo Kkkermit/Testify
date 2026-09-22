@@ -77,12 +77,38 @@ only what runs.
   looks like a code bug and is not one.
 - **Install scripts are skipped.** `prepare` runs husky, which needs a `.git` the build context does not carry;
   `build:shared` is invoked explicitly instead.
+- **FFmpeg and yt-dlp are installed by the image, not by npm.** They have to be: the skipped install scripts
+  are exactly what the optional `ffmpeg-static` and `youtube-dl-exec` packages use to fetch their binaries, so
+  in a container they would install and stay empty. FFmpeg comes from apt; yt-dlp is downloaded from its
+  releases because Debian's build is far too old to track YouTube, and the build runs `yt-dlp --version` so a
+  bad download fails the image rather than the first `/play`. This adds roughly 100 MB.
 - **It runs as the `node` user**, not root.
 - **No secret is baked in.** `.env` is excluded from the build context and configuration arrives through the
   environment, so the image is safe to push to a registry.
 
 The layout of the final image matters: the API resolves the SPA at `../../dashboard/dist` relative to
 `dist/api`, so `dist/` and `dashboard/dist/` have to keep their positions beside each other.
+
+---
+
+## Hosting it somewhere other than your own machine
+
+**It has to be a host that runs a container or a long-lived process.** A Discord bot holds a gateway WebSocket
+open for its whole life, and a voice connection on top of that — so anything serverless is structurally out:
+
+| Host                                    | Works | Why                                                         |
+| --------------------------------------- | :---: | ----------------------------------------------------------- |
+| Railway, Fly.io, Render, a VPS, Docker  |  yes  | Long-running container; the Dockerfile brings both binaries |
+| **Vercel, Netlify, Cloudflare Workers** |  no   | Serverless. No persistent socket, and no voice at all       |
+
+On **Railway** and anything else that builds from a `Dockerfile`, point it at this repository and there is
+nothing else to do — FFmpeg and yt-dlp are in the image, so `MUSIC_YTDLP_PATH` and `MUSIC_FFMPEG_PATH` stay
+blank. If a host builds with Nixpacks instead of the `Dockerfile`, add `ffmpeg` to its packages and set
+`MUSIC_YTDLP_PATH` to wherever you put yt-dlp, or just force the Dockerfile build.
+
+Vercel is worth being explicit about, because people ask: it can host Discord _HTTP interaction_ endpoints —
+webhook-delivered slash commands — but not a gateway client, and a serverless function cannot hold a voice
+connection open. There is no configuration that makes this bot run there.
 
 ---
 

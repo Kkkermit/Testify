@@ -957,11 +957,28 @@ library** — `@discordjs/opus` and `opusscript` are both unnecessary — and **
 `@discordjs/voice` reaches Node's own `aes-256-gcm`. One new dependency, `@discordjs/voice`, and no native
 modules.
 
-**Both binaries are resolved at runtime, not installed by npm.** A postinstall that downloads a binary makes
-`npm ci` depend on GitHub, and every CI job runs one. `npm run music:setup` fetches yt-dlp into `bin/` instead,
-and `MUSIC_YTDLP_PATH` / `MUSIC_FFMPEG_PATH` override the lookup. **FFmpeg is optional**: without it, a track
-that is not already Opus is refused by name rather than played as silence, which is exactly how the old system
-failed.
+**Both binaries are optional dependencies, resolved at runtime.** `ffmpeg-static` and `youtube-dl-exec` are in
+`optionalDependencies`, which is the whole trick: npm installs them on a normal machine and **skips them
+without failing** when the download cannot happen, so `npm ci` in CI is never hostage to GitHub being
+reachable. Proved rather than assumed — with them as ordinary dependencies a blocked download aborts the whole
+install; as optional ones the install succeeds and the packages are simply absent.
+
+Lookup order is `MUSIC_*_PATH` → `PATH` → the npm package → `bin/`, resolved from `repoRoot()` rather than the
+working directory. PATH beats the bundled copy deliberately: somebody who installed yt-dlp themselves keeps it
+current. `npm run music:setup` is the fallback, and `/music status` reports what was found.
+
+> [!WARNING]
+> **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
+> `yt-dlp --version` exits 0 and `yt-dlp -version` exits 2. One hardcoded flag in the probe hid FFmpeg on every
+> machine, and it looks exactly like the binary being absent. `VERSION_FLAG` holds the pair, with a test.
+
+**The container installs them itself**, because both npm installs in the `Dockerfile` run `--ignore-scripts` —
+so the optional packages would install there and stay empty. FFmpeg comes from apt, yt-dlp from its releases.
+That is also the answer for Railway and anything else building the `Dockerfile`: nothing to configure. Vercel
+and other serverless hosts cannot run this bot at all — a gateway client needs a persistent socket.
+
+**FFmpeg is optional**: without it, a track that is not already Opus is refused by name rather than played as
+silence, which is exactly how the old system failed.
 
 **A stall and an ending arrive as the same event, and that distinction is the whole design.** `decideOnIdle` in
 `musicQueue.util.ts` compares `AudioResource.playbackDuration` against the track's stated length: short by more

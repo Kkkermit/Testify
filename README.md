@@ -251,22 +251,28 @@ npm run build
 npm start
 ```
 
-### 7. Turn on music (optional)
+### 7. Music (usually nothing to do)
 
-Music needs `yt-dlp`, which is fetched on demand rather than installed by npm — a postinstall that downloads a
-binary would make `npm ci` depend on GitHub being reachable:
+Music needs two binaries, and `npm install` normally supplies both — `ffmpeg-static` and `youtube-dl-exec` are
+**optional dependencies**, so they install themselves on a normal machine and are _skipped_ rather than
+failing the install when a network cannot reach them.
+
+If one is missing, `/music status` says which, and:
 
 ```bash
 npm run music:setup
 ```
 
-That writes `yt-dlp` into `bin/` and reports whether FFmpeg is on your `PATH` too. **FFmpeg is optional.**
-YouTube and most of SoundCloud already serve Opus, which Discord takes as-is, so the usual track needs no
-transcoding at all; without FFmpeg the handful that are not Opus are refused by name rather than played as
-silence. `/music status` shows what the host actually has, and `MUSIC_YTDLP_PATH` / `MUSIC_FFMPEG_PATH`
-override the lookup.
+fetches yt-dlp into `bin/`. Testify looks in this order: `MUSIC_YTDLP_PATH` / `MUSIC_FFMPEG_PATH`, then your
+`PATH`, then the npm package, then `bin/`. **Set the env vars only if you want a specific build** — one you
+installed yourself on `PATH` wins over the bundled copy on purpose, because you keep it current and a stale
+extractor is the commonest way music breaks.
 
-Spotify links cannot be played by anything: the audio is DRM-protected. Search for the track by name instead.
+**FFmpeg is optional.** YouTube and most of SoundCloud already serve Opus, which Discord takes as-is, so the
+usual track is never transcoded; without FFmpeg the few that are not Opus are refused by name rather than
+played as silence.
+
+Spotify links cannot be played by anything — the audio is DRM-protected. Search for the track by name instead.
 
 > [!TIP]
 > Use **two bot applications** — one for development, one for production. `npm run setup -- --dev` writes
