@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { clearCooldowns, runChecks } from "@core/checks";
 import { defineCommand } from "@core/command";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
@@ -20,16 +20,49 @@ jest.mock("@database/repositories/commandToggleRepository", () => ({
 	clearCommandToggleCache: jest.fn(),
 }));
 
+const musicSettings = jest.fn<Promise<{ enabled: boolean; djRoleIds: string[] } | null>, []>(() =>
+	Promise.resolve(null),
+);
+
+jest.mock("@database/repositories/musicSettingsRepository", () => ({
+	getMusicSettings: () => musicSettings(),
+	saveMusicSettings: jest.fn(),
+	clearMusicSettingsCache: jest.fn(),
+	purgeMusicSettings: jest.fn(),
+}));
+
 const plain = defineCommand({ name: "ping", description: "Pings.", category: "info", run: jest.fn() });
 
-describe("runChecks", () => {
-	beforeEach(() => {
-		clearCooldowns();
-		findBlacklistEntry.mockResolvedValue(null);
-		offGlobally.mockResolvedValue([]);
-		offInGuild.mockResolvedValue([]);
-	});
+const music = defineCommand({
+	name: "music",
+	description: "Controls the player.",
+	category: "music",
+	subcommands: [
+		{ name: "skip", description: "Skips.", run: jest.fn() },
+		{
+			name: "system",
+			description: "Settings.",
+			permissions: [PermissionFlagsBits.ManageGuild],
+			run: jest.fn(),
+		},
+	],
+});
 
+/** `permissions` as a bitfield string is the shape an uncached member arrives in. */
+function memberWith(permissions: bigint, roles: string[] = []): { member: never } {
+	return { member: { permissions: permissions.toString(), roles } as never };
+}
+
+// `mockResolvedValue` outlives the test that set it, so every suite below starts from the same answers.
+beforeEach(() => {
+	clearCooldowns();
+	findBlacklistEntry.mockResolvedValue(null);
+	offGlobally.mockResolvedValue([]);
+	offInGuild.mockResolvedValue([]);
+	musicSettings.mockResolvedValue(null);
+});
+
+describe("runChecks", () => {
 	it("lets an ordinary command through", async () => {
 		expect(await runChecks(createMockInteraction(), plain, createMockClient())).toBeNull();
 	});
@@ -116,6 +149,7 @@ describe("commands that have been switched off", () => {
 		findBlacklistEntry.mockResolvedValue(null);
 		offGlobally.mockResolvedValue([]);
 		offInGuild.mockResolvedValue([]);
+		musicSettings.mockResolvedValue(null);
 	});
 
 	it("refuses one the owner switched off everywhere", async () => {
@@ -168,5 +202,67 @@ describe("commands that have been switched off", () => {
 
 		expect(await runChecks(interaction, plain, createMockClient())).toBeNull();
 		expect(offInGuild).not.toHaveBeenCalled();
+	});
+});
+
+describe("the music system's own switch", () => {
+	const skipping = { subcommand: "skip" } as const;
+
+	it("lets music through in a server that has never configured it", async () => {
+		expect(await runChecks(createMockInteraction(skipping), music, createMockClient())).toBeNull();
+	});
+
+	it("refuses every music command while the system is off", async () => {
+		musicSettings.mockResolvedValue({ enabled: false, djRoleIds: [] });
+
+		const refusal = await runChecks(createMockInteraction(skipping), music, createMockClient());
+
+		expect(refusal).toContain("switched off");
+	});
+
+	/** Turning it off has to be reversible from inside Discord, or the server has no way back. */
+	it("still lets `/music system` through while the system is off", async () => {
+		musicSettings.mockResolvedValue({ enabled: false, djRoleIds: [] });
+		const interaction = createMockInteraction({
+			subcommand: "system",
+			overrides: memberWith(PermissionsBitField.All),
+		});
+
+		expect(await runChecks(interaction, music, createMockClient())).toBeNull();
+	});
+
+	it("refuses somebody holding none of the DJ roles", async () => {
+		musicSettings.mockResolvedValue({ enabled: true, djRoleIds: ["dj-role"] });
+		const interaction = createMockInteraction({ ...skipping, overrides: memberWith(0n, ["other-role"]) });
+
+		expect(await runChecks(interaction, music, createMockClient())).toContain("DJ role");
+	});
+
+	it("lets somebody holding one of them through", async () => {
+		musicSettings.mockResolvedValue({ enabled: true, djRoleIds: ["dj-role"] });
+		const interaction = createMockInteraction({ ...skipping, overrides: memberWith(0n, ["dj-role"]) });
+
+		expect(await runChecks(interaction, music, createMockClient())).toBeNull();
+	});
+
+	it("never applies the gate to a command outside the music category", async () => {
+		musicSettings.mockResolvedValue({ enabled: false, djRoleIds: [] });
+
+		expect(await runChecks(createMockInteraction(), plain, createMockClient())).toBeNull();
+	});
+});
+
+describe("a subcommand that needs its own permissions", () => {
+	/** `/music` is open to everybody, so the permission belongs to the one subcommand rather than the command. */
+	it("refuses somebody who cannot manage the server", async () => {
+		const interaction = createMockInteraction({ subcommand: "system", overrides: memberWith(0n) });
+
+		expect(await runChecks(interaction, music, createMockClient())).toContain("manage guild");
+	});
+
+	it("leaves the command's other subcommands open", async () => {
+		const interaction = createMockInteraction({ subcommand: "skip", overrides: memberWith(0n) });
+
+		expect(await runChecks(interaction, music, createMockClient())).toBeNull();
 	});
 });

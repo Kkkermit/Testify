@@ -4,7 +4,15 @@ import { UserFacingError } from "@core/errors";
 import { musicBinaries, openSession, showPanel, voiceChannelOf } from "@lib/musicActions.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/musicQuery.util";
 import { currentTrack, enqueue, enqueueNext } from "@lib/musicQueue.util";
-import { CHOICE_MAX, choicesFor, shouldSearch, Suggester } from "@lib/musicSearch.util";
+import {
+	CHOICE_MAX,
+	choicesFor,
+	interactionAge,
+	searchBudget,
+	shouldSearch,
+	stillOpen,
+	Suggester,
+} from "@lib/musicSearch.util";
 import { resolveTracks, SEARCH_RESULTS } from "@lib/musicSource.util";
 
 /** Autocomplete fires on every keystroke, so a typed title must not become a search per letter. */
@@ -71,6 +79,8 @@ export default defineCommand({
 	},
 
 	async autocomplete(interaction, client) {
+		const receivedAt = Date.now();
+		const age = (): number => interactionAge(interaction.createdTimestamp, receivedAt);
 		const typed = interaction.options.getFocused();
 
 		const query = resolveQuery(typed);
@@ -86,16 +96,22 @@ export default defineCommand({
 			return;
 		}
 
-		const choices = await suggestions.suggest(typed, async () => {
-			const found = await resolveTracks(
-				{ kind: "search", terms: typed, source: query?.source ?? "youtube" },
-				interaction.user.id,
-				musicBinaries(client),
-				{ flat: true },
-			);
+		const choices = await suggestions.suggest(
+			typed,
+			async () => {
+				const found = await resolveTracks(
+					{ kind: "search", terms: typed, source: query?.source ?? "youtube" },
+					interaction.user.id,
+					musicBinaries(client),
+					{ flat: true },
+				);
 
-			return choicesFor(found.slice(0, SEARCH_RESULTS));
-		});
+				return choicesFor(found.slice(0, SEARCH_RESULTS));
+			},
+			searchBudget(age()),
+		);
+
+		if (!stillOpen(age())) return;
 
 		await interaction.respond(choices);
 	},

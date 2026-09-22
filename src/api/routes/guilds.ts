@@ -10,6 +10,7 @@ import { giveaways } from "@api/routes/giveaways";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
 import { members } from "@api/routes/members";
+import { music } from "@api/routes/music";
 import { settings } from "@api/routes/settings";
 import { sticky } from "@api/routes/sticky";
 import { tickets } from "@api/routes/tickets";
@@ -64,6 +65,7 @@ guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/giveaways", giveaways);
 guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
+guilds.route("/:guildId/music", music);
 
 function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
 	const guild = context.get("guild");

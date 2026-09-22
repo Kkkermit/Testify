@@ -78,7 +78,9 @@
 		"menu": "Menü",
 		"closeMenu": "Menü schließen",
 		"help": "Hilfe",
-		"helpHint": "Einrichtung, und wofür jeder Bildschirm da ist"
+		"helpHint": "Einrichtung, und wofür jeder Bildschirm da ist",
+		"music": "Musik",
+		"musicHint": "Der Player und wer ihn nutzen darf"
 	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
@@ -577,6 +579,20 @@
 		"potTooBig": "Der Grundtopf darf nicht größer als {{max}} sein.",
 		"ticketTooDear": "Ein Los darf nicht mehr als {{max}} kosten.",
 		"moreWinnersThanTickets": "Es wurden nur {{tickets}} Lose verkauft, eine Ziehung mit {{winners}} Gewinnern ließe also einige leer ausgehen."
+	},
+	"music": {
+		"title": "Musik",
+		"subtitle": "Ob Testify auf diesem Server Musik abspielt und wer den Player bedienen darf.",
+		"system": "Musiksystem",
+		"enable": "Musiksystem aktivieren",
+		"stateOff": "Aus – jeder Musikbefehl wird auf diesem Server abgelehnt.",
+		"stateEverybody": "An und für alle auf dem Server offen.",
+		"stateDjs": "An, beschränkt auf {{count, number}} DJ-Rollen.",
+		"djRoles": "DJ-Rollen",
+		"djBody": "Lass alle Rollen ungesetzt, damit jeder den Player nutzen kann. Wer Server verwalten hat, kann ihn immer nutzen.",
+		"djPick": "Rollen, die den Player nutzen dürfen",
+		"djHint": "Für einen Musikbefehl wird eine dieser Rollen gebraucht.",
+		"staleRoles": "{{count, number}} gewählte Rollen gibt es auf diesem Server nicht mehr. Beim nächsten Speichern fallen sie weg."
 	},
 	"settings": {
 		"title": "Servereinstellungen",

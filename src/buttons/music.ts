@@ -1,15 +1,52 @@
-import { type GuildMember } from "discord.js";
-import { defineButton } from "@core/button";
+import { type GuildMember, PermissionFlagsBits } from "discord.js";
+import { type ComponentInteraction, defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { panelFor, requireSession, requireVolumeControl, sameChannelAs } from "@lib/musicActions.util";
 import { clampVolume } from "@lib/musicFormat.util";
 import { MUSIC_ID } from "@lib/musicPanel.util";
 import { currentTrack, type LoopMode, shuffleUpcoming } from "@lib/musicQueue.util";
+import { applyMusicSettings, MUSIC_LIMITS, readMusicSettings } from "@lib/musicSettings.util";
+import { musicSystemPanel } from "@lib/musicSystemPanel.util";
 
 /** The controls under the player, acting on the same session `/music` does. */
 
 /** Pressing Loop walks the modes rather than opening a menu for three options. */
 const NEXT_LOOP: Record<LoopMode, LoopMode> = { off: "track", track: "queue", queue: "off" };
+
+const SYSTEM_ACTIONS = new Set(["system-on", "system-off", "djroles"]);
+
+/**
+ * The panel is an ordinary message, so a member demoted since it was opened would still be holding the
+ * controls — the permission is re-read on every press rather than trusted from when it was rendered.
+ */
+function requireManager(member: GuildMember): void {
+	if (member.permissions.has(PermissionFlagsBits.ManageGuild)) return;
+
+	throw new UserFacingError("You need the Manage Server permission to change the music system.");
+}
+
+async function runSystemAction(interaction: ComponentInteraction, action: string): Promise<void> {
+	const guild = interaction.guild;
+	if (guild === null || !interaction.isMessageComponent()) return;
+
+	requireManager(interaction.member as GuildMember);
+
+	let note: string;
+
+	if (action === "djroles") {
+		if (!interaction.isRoleSelectMenu()) return;
+
+		const djRoleIds = interaction.values.slice(0, MUSIC_LIMITS.maxDjRoles);
+		await applyMusicSettings(guild.id, { djRoleIds }, interaction.user.id);
+		note = djRoleIds.length === 0 ? "Opened the player up to everybody." : "Updated the DJ roles.";
+	} else {
+		const enabled = action === "system-on";
+		await applyMusicSettings(guild.id, { enabled }, interaction.user.id);
+		note = enabled ? "Music is on." : "Music is off.";
+	}
+
+	await interaction.update(musicSystemPanel(await readMusicSettings(guild.id), interaction.user.id, note));
+}
 
 export default defineButton({
 	id: MUSIC_ID,
@@ -17,7 +54,15 @@ export default defineButton({
 
 	async run(interaction, context) {
 		const guild = interaction.guild;
-		if (guild === null || !interaction.isButton()) return;
+		if (guild === null) return;
+
+		// The system settings do not need a player, and refusing them for want of one would be a trap.
+		if (SYSTEM_ACTIONS.has(context.action)) {
+			await runSystemAction(interaction, context.action);
+			return;
+		}
+
+		if (!interaction.isButton()) return;
 
 		const session = requireSession(guild);
 		sameChannelAs(session, interaction.member as GuildMember);

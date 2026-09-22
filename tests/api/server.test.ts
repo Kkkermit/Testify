@@ -113,6 +113,8 @@ describe("the guild settings sub-routes", () => {
 		["GET", "/api/guilds/:guildId/treasure"],
 		["PATCH", "/api/guilds/:guildId/treasure"],
 		["POST", "/api/guilds/:guildId/treasure/reset"],
+		["GET", "/api/guilds/:guildId/music"],
+		["PATCH", "/api/guilds/:guildId/music"],
 		["GET", "/api/guilds/:guildId/giveaways"],
 		["POST", "/api/guilds/:guildId/giveaways"],
 		["POST", "/api/guilds/:guildId/giveaways/:messageId/end"],

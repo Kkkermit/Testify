@@ -10,6 +10,7 @@ import {
 	Link as LinkIcon,
 	MessageSquareWarning,
 	MessagesSquare,
+	Music,
 	Ticket,
 	ScrollText,
 	Settings,
@@ -64,6 +65,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-economy",
 		wash: "bg-feature-economy/15",
 		path: (guildId) => `/guilds/${guildId}/treasure`,
+	},
+	music: {
+		icon: Music,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/music`,
 	},
 	"anti-link": {
 		icon: LinkIcon,

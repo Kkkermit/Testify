@@ -23,6 +23,7 @@ export const keys = {
 		nickname: () => ["guild", id, "nickname"] as const,
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
+		music: () => ["guild", id, "music"] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,
 		board: (board: string, page: number) => ["guild", id, "board", board, page] as const,
 		member: (userId: string) => ["guild", id, "member", userId] as const,

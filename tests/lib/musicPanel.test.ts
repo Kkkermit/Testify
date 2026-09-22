@@ -5,6 +5,7 @@ import {
 	link,
 	musicPanel,
 	type PanelState,
+	musicBar,
 	progressLine,
 	queueSummary,
 	statusLine,
@@ -196,6 +197,28 @@ describe("trackLine", () => {
 	});
 });
 
+describe("musicBar", () => {
+	it("starts at the beginning and ends at the end", () => {
+		expect(musicBar(0, 100, 10).indexOf("●")).toBe(0);
+		expect(musicBar(100, 100, 10).indexOf("●")).toBe(9);
+	});
+
+	it("keeps the same width whatever it shows, so the line cannot twitch as it moves", () => {
+		const widths = [0, 25, 50, 99, 100].map((played) => [...musicBar(played, 100, 12)].length);
+
+		expect(new Set(widths)).toEqual(new Set([12]));
+	});
+
+	/** A head past the end would render a bar longer than itself, which reads as nonsense. */
+	it("never runs past its own end", () => {
+		expect(musicBar(999, 100, 8).indexOf("●")).toBe(7);
+	});
+
+	it("draws an empty bar rather than dividing by a length it does not have", () => {
+		expect(musicBar(10, 0, 5).indexOf("●")).toBe(0);
+	});
+});
+
 describe("progressLine", () => {
 	it("draws where the track has got to", () => {
 		expect(progressLine(track("a"), 90_000)).toContain("1:30");
@@ -208,6 +231,16 @@ describe("progressLine", () => {
 
 	it("says live for a stream with no end", () => {
 		expect(progressLine(track("a", { durationMs: null }), 5_000)).toContain("live");
+	});
+
+	/**
+	 * A relative timestamp is counted down by the reader's own client, so the panel keeps moving between the
+	 * edits rather than only at them.
+	 */
+	it("carries a countdown Discord animates on its own", () => {
+		const now = 1_700_000_000_000;
+
+		expect(progressLine(track("a"), 60_000, now)).toContain(`<t:${String(now / 1_000 + 120)}:R>`);
 	});
 });
 

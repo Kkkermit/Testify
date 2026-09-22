@@ -1,5 +1,5 @@
 import { spawn } from "node:child_process";
-import { type Readable } from "node:stream";
+import { PassThrough, type Readable } from "node:stream";
 import { UserFacingError } from "@core/errors";
 import { type MusicBinaries } from "@lib/musicBinaries.util";
 import { clampVolume, DEFAULT_VOLUME, planStream, type RemoteFormat, type StreamPlan } from "@lib/musicFormat.util";
@@ -178,6 +178,63 @@ export interface StreamOptions {
 	volume?: number;
 	/** Where in the track to start, which is how a setting changed mid-track picks up where it was. */
 	seekMs?: number;
+	/** Told what a dying downloader said, which is the only place the reason is written down. */
+	onProblem?: (message: string) => void;
+}
+
+/**
+ * How far ahead of the player the download is allowed to get.
+ *
+ * Discord consumes at real time, so without somewhere to put the rest yt-dlp spends the whole track blocked on
+ * a full 64 KB pipe — and a downloader that has stopped reading its own socket gets the connection dropped
+ * under it, which arrives here as `ERR_STREAM_PREMATURE_CLOSE` a few seconds in. Sixteen megabytes is over a
+ * quarter of an hour of Opus, so an ordinary track is downloaded once and played out of memory.
+ */
+export const BUFFER_BYTES = 1 << 24;
+
+/** The last of stderr, which is all that is worth keeping and all that can be logged safely. */
+const PROBLEM_TAIL = 500;
+
+/**
+ * What yt-dlp is asked for when it is streaming rather than describing.
+ *
+ * `--no-playlist` matters: a YouTube link copied from a playlist carries `&list=`, and without it the
+ * downloader would work through the whole list into one pipe.
+ */
+export function ytDlpStreamArgs(formatId: string, url: string): string[] {
+	return [
+		"--quiet",
+		"--no-warnings",
+		"--no-progress",
+		"--ignore-config",
+		"--no-playlist",
+		"--retries",
+		"10",
+		"--fragment-retries",
+		"10",
+		"--socket-timeout",
+		"30",
+		"-f",
+		formatId,
+		"-o",
+		"-",
+		url,
+	];
+}
+
+/**
+ * Reads `source` as fast as it will go into a buffer the player drains at its own pace.
+ *
+ * `pipe` does not carry an error across, so a broken source has to be pushed through by hand or the reader
+ * waits for an end that never comes.
+ */
+function buffer(source: Readable): PassThrough {
+	const sink = new PassThrough({ highWaterMark: BUFFER_BYTES });
+
+	source.on("error", (error: Error) => sink.destroy(error));
+	source.pipe(sink);
+
+	return sink;
 }
 
 /**
@@ -227,21 +284,31 @@ export function openStream(
 ): OpenStream {
 	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
 
-	const source = spawn(
-		binaries.ytDlp,
-		["--quiet", "--no-warnings", "--no-progress", "--ignore-config", "-f", plan.formatId, "-o", "-", url],
-		{ stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
-	);
+	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url), {
+		stdio: ["ignore", "pipe", "pipe"],
+		windowsHide: true,
+	});
+
+	let complaint = "";
+	source.stderr.setEncoding("utf8");
+	source.stderr.on("data", (chunk: string) => (complaint = `${complaint}${chunk}`.slice(-PROBLEM_TAIL)));
+	source.once("close", (code) => {
+		if (code !== 0 && code !== null)
+			options.onProblem?.(complaint.trim() === "" ? `yt-dlp exited ${String(code)}` : complaint.trim());
+	});
 
 	if (plan.shape !== "transcode") {
+		const stream = buffer(source.stdout);
+
 		return {
-			stream: source.stdout,
+			stream,
 			plan,
 			// Killing the process is not enough on its own: anything it spawned survives the signal and keeps the
 			// pipe open, so the reader would wait for an end that never comes.
 			close: () => {
 				source.kill("SIGKILL");
 				source.stdout.destroy();
+				stream.destroy();
 			},
 		};
 	}
@@ -258,14 +325,18 @@ export function openStream(
 	source.stdout.on("error", () => transcoder.kill("SIGKILL"));
 	transcoder.stdin.on("error", () => source.kill("SIGKILL"));
 
+	// The buffer goes after FFmpeg: it reads eagerly, so it is what keeps yt-dlp off a full pipe.
+	const stream = buffer(transcoder.stdout);
+
 	return {
-		stream: transcoder.stdout,
+		stream,
 		plan,
 		close: () => {
 			source.kill("SIGKILL");
 			transcoder.kill("SIGKILL");
 			source.stdout.destroy();
 			transcoder.stdout.destroy();
+			stream.destroy();
 		},
 	};
 }

@@ -62,14 +62,14 @@ numbers, which drift):
 | -------------------- | -------------------------------- |
 | Commands             | 78, across 13 categories         |
 | Command files        | 98 (incl. folded-in subcommands) |
-| Subcommands          | 109                              |
+| Subcommands          | 110                              |
 | Prefix aliases       | 82                               |
 | Button handlers      | 24                               |
 | Events               | 24, in 5 groups                  |
-| `src/lib` helpers    | 78                               |
-| Schemas/repositories | 13 / 13                          |
+| `src/lib` helpers    | 80                               |
+| Schemas/repositories | 14 / 14                          |
 | Scheduled jobs       | 4                                |
-| Tests                | 3,601 across 228 suites          |
+| Tests                | 3,657 across 232 suites          |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -266,15 +266,16 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
 
-| Renderer                  | Handler                | Pattern it demonstrates                                    |
-| ------------------------- | ---------------------- | ---------------------------------------------------------- |
-| `shopScreen.util.ts`      | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step            |
-| `auditPanel.util.ts`      | `buttons/auditLog.ts`  | Draft edits in a bit-packed custom ID, then Save           |
-| `levelPanel.util.ts`      | `buttons/levelling.ts` | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
-| `balancePanel.util.ts`    | `buttons/balance.ts`   | Hub panel, read-only mode for other users                  |
-| `inventoryScreen.util.ts` | `buttons/inventory.ts` | Per-row action button, paging in the custom ID             |
-| `settingsPanel.util.ts`   | —                      | Generic settings rows + pre-filled modal editors           |
-| `musicPanel.util.ts`      | `buttons/music.ts`     | Live state: re-reads the session on every press            |
+| Renderer                   | Handler                | Pattern it demonstrates                                    |
+| -------------------------- | ---------------------- | ---------------------------------------------------------- |
+| `shopScreen.util.ts`       | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step            |
+| `auditPanel.util.ts`       | `buttons/auditLog.ts`  | Draft edits in a bit-packed custom ID, then Save           |
+| `levelPanel.util.ts`       | `buttons/levelling.ts` | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
+| `balancePanel.util.ts`     | `buttons/balance.ts`   | Hub panel, read-only mode for other users                  |
+| `inventoryScreen.util.ts`  | `buttons/inventory.ts` | Per-row action button, paging in the custom ID             |
+| `settingsPanel.util.ts`    | —                      | Generic settings rows + pre-filled modal editors           |
+| `musicPanel.util.ts`       | `buttons/music.ts`     | Live state: re-reads the session on every press            |
+| `musicSystemPanel.util.ts` | `buttons/music.ts`     | A switch and a pre-ticked role select, applied immediately |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -980,6 +981,21 @@ and other serverless hosts cannot run this bot at all — a gateway client needs
 **FFmpeg is optional**: without it, a track that is not already Opus is refused by name rather than played as
 silence, which is exactly how the old system failed.
 
+**The download is buffered, and without that nothing plays for more than a few seconds.** Discord consumes at
+real time, so with only a 64 KB pipe to write into, yt-dlp spends the whole track blocked on a full pipe — and a
+downloader that has stopped reading its own socket gets the connection dropped under it, which arrives as
+`ERR_STREAM_PREMATURE_CLOSE` three to five seconds in, every track, on every source. `BUFFER_BYTES` (16 MB, over
+a quarter of an hour of Opus) is a `PassThrough` between the last process and the player, so an ordinary track is
+downloaded once and played out of memory. On the transcoding path it goes **after** FFmpeg, because FFmpeg reads
+eagerly and is what keeps yt-dlp off the pipe. `tests/lib/musicSource.test.ts` proves it with a downloader that
+writes a megabyte and then touches a file: without the buffer the file never appears.
+
+Two things go with it. `ytDlpStreamArgs` passes `--no-playlist` — a YouTube link copied out of a playlist carries
+`&list=`, and the whole list would otherwise go down one pipe — plus `--retries` and `--socket-timeout`, so one
+dropped connection costs a retry rather than the track. And **stderr is captured rather than discarded**: a
+downloader that dies now says why through `onProblem`, which is the difference between a log line naming
+"Sign in to confirm you are not a bot" and one saying a stream closed.
+
 **A stall and an ending arrive as the same event, and that distinction is the whole design.** `decideOnIdle` in
 `musicQueue.util.ts` compares `AudioResource.playbackDuration` against the track's stated length: short by more
 than `EARLY_TOLERANCE_MS` means it came apart, so it retries up to `MAX_TRACK_ATTEMPTS` rather than advancing.
@@ -1008,10 +1024,15 @@ with `-af volume=`, and FFmpeg is the only thing in the stack that can do it. Fo
 under `loop: "queue"` that is a circle — so `#failures` bounds it at one pass and then ends the queue. Without
 it the loop is microtasks, which starves the event loop rather than merely spinning.
 
-**The panel is live: `PANEL_REFRESH_MS` rewrites it while a track plays**, so the bar moves on its own. It
-edits through `channel.messages.edit` rather than the interaction, because an interaction token dies after
-fifteen minutes and queues outlive that. An edit that fails drops the panel instead of retrying a message that
-will 404 for ever, and the ticker stops when the queue does.
+**The panel is live: `PANEL_REFRESH_MS` rewrites it while a track plays**, so the bar moves on its own. Five
+seconds is a fifth of what Discord allows a channel, and it edits through `channel.messages.edit` rather than the
+interaction, because an interaction token dies after fifteen minutes and queues outlive that. An edit that fails
+drops the panel instead of retrying a message that will 404 for ever, and the ticker stops when the queue does.
+
+**Between the edits the panel still moves, because `<t:…:R>` is counted down by the reader's own client.** That
+is the only animation a Discord message has, and it costs nothing. The bar beside it is drawn in box characters
+inside a code span rather than in emoji: an emoji bar reflows as the head moves through it, so the whole line
+appears to twitch rather than to progress.
 
 Things that are deliberately **not** there: DisTube and its plugins (the yt-dlp and SoundCloud ones were two
 years stale), and Spotify playback. `open.spotify.com` is on yt-dlp's `KnownDRMIE` list beside Disney+; a
@@ -1020,9 +1041,35 @@ Spotify link is refused with an explanation rather than played.
 **Autocomplete answers inside three seconds or not at all.** A `/play` search spawns yt-dlp, which regularly
 runs past the window Discord keeps the interaction open — and replying after that is `DiscordAPIError[10062]`,
 logged as an error with nothing offered to pick. `Suggester` in `musicSearch.util.ts` races the search against
-`SEARCH_BUDGET_MS`, answers a slow one with the literal "search for what I typed" row, and lets it finish into
-the cache for the next keystroke; a burst of keystrokes on the same text is one process. The dispatcher notes
-10062 at `debug` rather than `error`, because an expired interaction is somebody typing fast.
+the budget left on **that** interaction, answers a slow one with the literal "search for what I typed" row, and
+lets it finish into the cache for the next keystroke; a burst of keystrokes on the same text is one process. The
+dispatcher notes 10062 at `debug` rather than `error`, because an expired interaction is somebody typing fast.
+
+A fixed budget was not enough, because it ignores how long the interaction had already been open before the
+handler ran. `interactionAge` measures from the snowflake — Discord's clock — **and** from the moment this
+process received it, and takes the longer: a host whose clock is behind Discord's reads every interaction as
+brand new and searches straight past the window. The snowflake is dropped altogether when the two disagree by
+more than the window it is measuring. When nothing is left, the answer is skipped rather than sent, because a
+refused request and a log line buy nothing the reader can see.
+
+**The music system has a switch and a guest list, and `checks.ts` is the gate for both.** `musicsettings` holds
+one row per server — `enabled`, and `djRoleIds` — read before every music command and cached exactly like the
+prefix. Four things about it are load-bearing:
+
+- **A server with no record is on and open**, so a fresh install plays music without anybody finding a switch.
+- **`/music system` is exempt from the gate**, by name, because it is the way back in for a server that turned
+  the system off. Renaming the subcommand without `MUSIC_SYSTEM_SUBCOMMAND` would lock that server out, which is
+  what the test on the constant pins.
+- **Manage Server always reaches the player**, whatever the DJ roles say — a server could otherwise pick a role
+  nobody holds and lock itself out. The switch is not like that: off is off, for the manager too, because a
+  switch that quietly still works for one person is a worse thing to debug.
+- **`Subcommand.permissions` exists for this.** `/music` is open to everybody and `/music system` is not, and a
+  permission on the whole command would have locked the player to managers. `runChecks` merges the two lists.
+
+`/music system` takes an autocompleted `action`, and the autocomplete reads the current settings so the rows say
+what they will do **and** where things stand — "Turn the music system off (it is on)", "Choose who may use it
+(2 roles)". Static choices could not do that. The roles themselves are a pre-ticked role select on the panel
+rather than anything typed, which is anti-pattern 19.
 
 **The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
 before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
@@ -1191,6 +1238,7 @@ the same shape —
 | `/guilds/:id/automod`   | Discord's own filters — no database behind it                              |
 | `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                              |
+| `/guilds/:id/music`     | The music kill switch and the DJ roles                                     |
 | `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                              |
 | `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                 |
 | `/guilds/:id/giveaways` | Start, end early, reroll and delete — each keyed to its own row            |

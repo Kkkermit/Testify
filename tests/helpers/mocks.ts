@@ -4,6 +4,7 @@ import {
 	type Guild,
 	type GuildMember,
 	type Message,
+	PermissionsBitField,
 	type Role,
 	type TextChannel,
 	type User,
@@ -100,7 +101,9 @@ export function createMockMember(overrides: Overrides<GuildMember> = {}): GuildM
 			kickable: true,
 			moderatable: true,
 			roles: { cache: mockCollection(), add: jest.fn(), remove: jest.fn() },
-			permissions: { has: jest.fn(() => true), missing: jest.fn(() => []) },
+			// A real bitfield rather than a pair of stubs: anything reading it as one would otherwise throw here
+			// and nowhere else.
+			permissions: new PermissionsBitField(PermissionsBitField.All),
 			voice: { channel: null },
 			toString: () => `<@${user.id}>`,
 		} as unknown as GuildMember,

@@ -117,6 +117,7 @@ Everything the old bot did is still here, apart from the integrations that neede
 - Queue, loop, shuffle, skip, previous and remove, all from one Components V2 panel whose progress bar keeps up
   with the track
 - Volume from 0 to 200%, on the panel and on `/music volume` — it needs FFmpeg, and says so when the host has none
+- A kill switch and DJ roles per server, from `/music system` or the dashboard
 - Opus is passed straight through where a source offers it, so the usual track costs no transcoding
 
 ### 🎉 Community and utility
@@ -343,7 +344,7 @@ list.
 | 🎯 Games      |     1     | Blackjack, guess the number, Pokémon, fast type, RPS                        |
 | 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                  |
 | 🎫 Tickets    |     1     | Setup, status, disable                                                      |
-| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume                  |
+| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume, DJ roles        |
 
 Some categories look small but hold a lot: `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.

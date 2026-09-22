@@ -279,10 +279,7 @@ describe("the volume", () => {
 			expect.any(String),
 			expect.objectContaining({ shape: "transcode" }),
 			WITH_FFMPEG,
-			{
-				volume: 60,
-				seekMs: 45_000,
-			},
+			expect.objectContaining({ volume: 60, seekMs: 45_000 }),
 		);
 	});
 
@@ -335,10 +332,12 @@ describe("the volume", () => {
 		session.setVolume(60);
 		await session.play(0);
 
-		expect(openStream).toHaveBeenLastCalledWith(expect.any(String), { formatId: "251", shape: "webm-opus" }, BINARIES, {
-			volume: 60,
-			seekMs: 0,
-		});
+		expect(openStream).toHaveBeenLastCalledWith(
+			expect.any(String),
+			{ formatId: "251", shape: "webm-opus" },
+			BINARIES,
+			expect.objectContaining({ volume: 60, seekMs: 0 }),
+		);
 	});
 });
 

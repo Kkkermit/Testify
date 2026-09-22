@@ -78,7 +78,9 @@
 		"menu": "Menú",
 		"closeMenu": "Cerrar el menú",
 		"help": "Ayuda",
-		"helpHint": "Cómo configurar y para qué sirve cada pantalla"
+		"helpHint": "Cómo configurar y para qué sirve cada pantalla",
+		"music": "Música",
+		"musicHint": "El reproductor y quién puede usarlo"
 	},
 	"error": {
 		"unreachableTitle": "Algo ha salido mal",
@@ -577,6 +579,20 @@
 		"potTooBig": "El bote inicial no puede ser mayor que {{max}}.",
 		"ticketTooDear": "Un boleto no puede costar más de {{max}}.",
 		"moreWinnersThanTickets": "Solo se han vendido {{tickets}} boletos, así que un sorteo con {{winners}} ganadores dejaría a algunos con las manos vacías."
+	},
+	"music": {
+		"title": "Música",
+		"subtitle": "Si Testify reproduce música en este servidor y quién puede manejar el reproductor.",
+		"system": "Sistema de música",
+		"enable": "Activar el sistema de música",
+		"stateOff": "Desactivado: se rechaza cualquier comando de música en este servidor.",
+		"stateEverybody": "Activado y abierto a todo el mundo en el servidor.",
+		"stateDjs": "Activado, limitado a {{count, number}} roles de DJ.",
+		"djRoles": "Roles de DJ",
+		"djBody": "Deja todos los roles sin marcar para que cualquiera pueda usar el reproductor. Quien tenga Gestionar servidor siempre podrá usarlo.",
+		"djPick": "Roles que pueden usar el reproductor",
+		"djHint": "Hace falta uno de estos roles para ejecutar un comando de música.",
+		"staleRoles": "{{count, number}} roles elegidos ya no existen en este servidor. Al guardar de nuevo se eliminarán."
 	},
 	"settings": {
 		"title": "Ajustes del servidor",

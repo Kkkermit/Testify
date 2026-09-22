@@ -117,8 +117,38 @@ export class SearchCache {
 	}
 }
 
-/** Discord closes an autocomplete interaction after three seconds, so an answer has to beat that. */
-export const SEARCH_BUDGET_MS = 2_000;
+/** Discord closes an autocomplete interaction three seconds after it was created. */
+export const INTERACTION_WINDOW_MS = 3_000;
+
+/** Room for the answer itself to reach Discord, which is a round trip rather than a local call. */
+export const RESPONSE_MARGIN_MS = 800;
+
+/** What is left of the window when nothing is known about the interaction's own age. */
+export const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
+
+/**
+ * How long the interaction has been open.
+ *
+ * The snowflake carries Discord's clock and the receipt carries this host's, so a machine set wrong reads its
+ * interactions as either already dead or brand new. The larger of the two is the safe answer, and the
+ * snowflake is dropped altogether when the gap between them is bigger than the window it is measuring.
+ */
+export function interactionAge(createdTimestamp: number, receivedAt: number, now = Date.now()): number {
+	const sinceReceipt = Math.max(0, now - receivedAt);
+	const sinceCreated = now - createdTimestamp;
+	const plausible = sinceCreated >= 0 && sinceCreated - sinceReceipt < INTERACTION_WINDOW_MS;
+
+	return plausible ? Math.max(sinceReceipt, sinceCreated) : sinceReceipt;
+}
+
+export function searchBudget(age: number): number {
+	return Math.max(0, INTERACTION_WINDOW_MS - age - RESPONSE_MARGIN_MS);
+}
+
+/** Answering a window Discord has already closed is a refused request and a line in the log, for nothing. */
+export function stillOpen(age: number): boolean {
+	return age < INTERACTION_WINDOW_MS;
+}
 
 /** Resolves to `null` when the work has not finished in time, leaving it running rather than cancelling it. */
 export async function within<T>(work: Promise<T>, ms: number): Promise<T | null> {
@@ -156,12 +186,12 @@ export class Suggester {
 		return this.#running.size;
 	}
 
-	async suggest(query: string, search: () => Promise<Choice[]>): Promise<Choice[]> {
+	async suggest(query: string, search: () => Promise<Choice[]>, budgetMs = this.#budgetMs): Promise<Choice[]> {
 		const cached = this.#cache.get(query);
 		if (cached !== null) return cached.length === 0 ? [literalChoice(query)] : cached.slice(0, MAX_CHOICES);
 
 		const key = SearchCache.key(query);
-		const finished = await within(this.#running.get(key) ?? this.#start(key, query, search), this.#budgetMs);
+		const finished = await within(this.#running.get(key) ?? this.#start(key, query, search), budgetMs);
 
 		return finished === null || finished.length === 0 ? [literalChoice(query)] : finished.slice(0, MAX_CHOICES);
 	}

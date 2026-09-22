@@ -10,7 +10,7 @@ import {
 	sectionWithThumbnail,
 	text,
 } from "@lib/containers.util";
-import { formatClock, formatDuration, progressBar, truncate } from "@lib/format.util";
+import { formatClock, formatDuration, truncate } from "@lib/format.util";
 import { clampVolume, DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_STEP } from "@lib/musicFormat.util";
 import { type MusicSource } from "@lib/musicQuery.util";
 import { currentTrack, type QueueState, totalDurationMs, type Track, upcomingPage } from "@lib/musicQueue.util";
@@ -25,8 +25,8 @@ export const QUEUE_PAGE_SIZE = 5;
 /** Discord's own cap on a title is generous; this is what stays readable in a container row. */
 const TITLE_MAX = 60;
 
-/** How wide the bar under the current track is drawn. */
-const BAR_CELLS = 18;
+/** How wide the bar under the current track is drawn; more cells is a finer step per refresh. */
+export const BAR_CELLS = 24;
 
 const SOURCE_EMOJI: Record<MusicSource, string> = {
 	youtube: "📺",
@@ -69,13 +69,35 @@ export function headlineFor(track: Track): string {
 	return `${SOURCE_EMOJI[track.source]} ${link(`**${truncate(track.title, TITLE_MAX)}**`, track.url)}${author}`;
 }
 
-/** The elapsed/total line under the current track, or nothing at all for a stream that has no end. */
-export function progressLine(track: Track, playedMs: number): string {
+/**
+ * The bar itself, drawn in box characters rather than emoji.
+ *
+ * It sits inside a code span so every cell is the same width — an emoji bar reflows as the head moves through
+ * it, which reads as the whole line twitching rather than as progress.
+ */
+export function musicBar(playedMs: number, durationMs: number, cells = BAR_CELLS): string {
+	const ratio = durationMs <= 0 ? 0 : Math.min(1, Math.max(0, playedMs / durationMs));
+	const head = Math.min(cells - 1, Math.floor(ratio * cells));
+
+	return `${"━".repeat(head)}●${"─".repeat(cells - head - 1)}`;
+}
+
+/**
+ * The elapsed/total line under the current track, or nothing at all for a stream that has no end.
+ *
+ * The bar is the only part a refresh has to move; `<t:…:R>` beside it is rendered by the reader's own client
+ * and counts down on its own between edits.
+ */
+export function progressLine(track: Track, playedMs: number, now = Date.now()): string {
 	if (track.durationMs === null) return "`🔴 live`";
 
 	const played = Math.min(playedMs, track.durationMs);
+	const endsAt = Math.round((now + track.durationMs - played) / 1_000);
 
-	return `\`${formatClock(played)}\` ${progressBar(played, track.durationMs, BAR_CELLS)} \`${formatClock(track.durationMs)}\``;
+	return [
+		`\`${formatClock(played)} ${musicBar(played, track.durationMs)} ${formatClock(track.durationMs)}\``,
+		`-# Ends <t:${String(endsAt)}:R>`,
+	].join("\n");
 }
 
 const LOOP_WORDS = { off: "off", track: "track", queue: "queue" } as const;

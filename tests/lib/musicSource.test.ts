@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
@@ -12,6 +12,7 @@ import {
 	type TrackInfo,
 	trackFromInfo,
 	tracksFromInfo,
+	ytDlpStreamArgs,
 } from "@lib/musicSource.util";
 
 const USER = "100000000000000001";
@@ -165,6 +166,15 @@ async function readAll(stream: NodeJS.ReadableStream, timeoutMs = 3_000): Promis
 }
 
 /** Rejects rather than resolving, so a race against it fails the test instead of passing quietly. */
+/** Polls rather than sleeping a fixed span, so a slow runner is not a flake and a fast one is not a wait. */
+async function waitUntil(done: () => boolean, timeoutMs: number): Promise<void> {
+	const until = Date.now() + timeoutMs;
+
+	while (!done() && Date.now() < until) {
+		await new Promise((resolve) => setTimeout(resolve, 25));
+	}
+}
+
 async function deadline(ms: number): Promise<never> {
 	return new Promise<never>((_, reject) => {
 		setTimeout(() => reject(new Error("the process was still running after the deadline")), ms).unref();
@@ -218,6 +228,56 @@ describe("openStream", () => {
 		// Waiting on the event rather than a fixed delay: a sleep long enough to be safe on a slow runner is a
 		// sleep long enough to slow every run.
 		await expect(Promise.race([closed, deadline(5_000)])).resolves.toBeUndefined();
+	});
+
+	/**
+	 * The bug this pins: Discord consumes at real time, so with only a 64 KB pipe to write into the downloader
+	 * spends the whole track blocked — and a downloader that has stopped reading its own socket gets the
+	 * connection dropped, which arrives as `ERR_STREAM_PREMATURE_CLOSE` a few seconds in.
+	 */
+	it("lets the downloader finish without waiting for the player to catch up", async () => {
+		const marker = join(directory, "finished");
+		const bulky = join(directory, "bulky-yt-dlp");
+		writeFileSync(bulky, `#!/bin/sh\ndd if=/dev/zero bs=1024 count=1024 2>/dev/null\nprintf 'done' > ${marker}\n`, {
+			mode: 0o755,
+		});
+
+		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: bulky, ffmpeg: null });
+
+		try {
+			// Deliberately never reading: a megabyte is far more than the pipe holds, so only a buffer downstream
+			// of it lets the process get to its last line.
+			await waitUntil(() => existsSync(marker), 5_000);
+		} finally {
+			opened.close();
+		}
+
+		expect(existsSync(marker)).toBe(true);
+	});
+
+	it("reports what a dying downloader said rather than leaving it in a closed pipe", async () => {
+		const broken = join(directory, "broken-stream-yt-dlp");
+		writeFileSync(broken, "#!/bin/sh\necho 'ERROR: Sign in to confirm you are not a bot' >&2\nexit 1\n", {
+			mode: 0o755,
+		});
+
+		const said: string[] = [];
+		const opened = openStream(
+			"https://youtu.be/abc",
+			plan,
+			{ ytDlp: broken, ffmpeg: null },
+			{
+				onProblem: (message) => said.push(message),
+			},
+		);
+
+		try {
+			await waitUntil(() => said.length > 0, 5_000);
+		} finally {
+			opened.close();
+		}
+
+		expect(said.at(0)).toContain("not a bot");
 	});
 
 	it("can be closed twice without throwing", () => {
@@ -374,5 +434,32 @@ describe("ffmpegArgs", () => {
 
 		expect(args.indexOf("-ss")).toBeLessThan(args.indexOf("-i"));
 		expect(args[args.indexOf("-ss") + 1]).toBe("90.000");
+	});
+});
+
+describe("ytDlpStreamArgs", () => {
+	/** A YouTube link copied from a playlist carries `&list=`, and the whole list would go down one pipe. */
+	it("refuses to follow a playlist", () => {
+		expect(ytDlpStreamArgs("251", "https://youtu.be/abc?list=PL1")).toContain("--no-playlist");
+	});
+
+	it("writes to standard output, which is what keeps FFmpeg off the network", () => {
+		const args = ytDlpStreamArgs("251", "https://youtu.be/abc");
+
+		expect(args[args.indexOf("-o") + 1]).toBe("-");
+		expect(args.at(-1)).toBe("https://youtu.be/abc");
+	});
+
+	it("asks for the format the plan chose", () => {
+		const args = ytDlpStreamArgs("251", "https://youtu.be/abc");
+
+		expect(args[args.indexOf("-f") + 1]).toBe("251");
+	});
+
+	/** A dropped connection part-way through a track should cost a retry, not the track. */
+	it("retries rather than giving up on the first hiccup", () => {
+		expect(ytDlpStreamArgs("251", "https://youtu.be/abc")).toEqual(
+			expect.arrayContaining(["--retries", "--fragment-retries"]),
+		);
 	});
 });

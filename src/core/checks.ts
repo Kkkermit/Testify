@@ -1,9 +1,11 @@
-import { PermissionsBitField } from "discord.js";
+import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { type TestifyClient } from "@core/client";
-import { type Command, type CommandInput } from "@core/command";
+import { type Command, type CommandInput, type Subcommand } from "@core/command";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
+import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { formatDuration, humanisePermission } from "@lib/format.util";
+import { MUSIC_SYSTEM_SUBCOMMAND, musicRefusal, normaliseMusicSettings } from "@lib/musicSettings.util";
 import { isAlwaysEnabled } from "@testify/shared";
 
 /** Why a command was refused, or null if it may run. */
@@ -27,6 +29,9 @@ export async function runChecks(
 	const switchedOff = await checkSwitchedOff(interaction, command);
 	if (switchedOff !== null) return switchedOff;
 
+	const musicOff = await checkMusicSystem(interaction, command);
+	if (musicOff !== null) return musicOff;
+
 	if (command.ownerOnly && !client.isOwner(interaction.user.id)) {
 		return "This command is only for the bot owner.";
 	}
@@ -42,13 +47,10 @@ export async function runChecks(
 	}
 
 	const member = interaction.member;
+	const needed = [...(command.permissions ?? []), ...(chosenSubcommand(interaction, command)?.permissions ?? [])];
 
-	if (command.permissions?.length && member !== null) {
-		const held =
-			typeof member.permissions === "string"
-				? new PermissionsBitField(BigInt(member.permissions))
-				: new PermissionsBitField(member.permissions);
-		const missing = held.missing(new PermissionsBitField(command.permissions));
+	if (needed.length > 0 && member !== null) {
+		const missing = permissionsOf(member).missing(new PermissionsBitField(needed));
 		if (missing.length > 0) {
 			return `You need these permissions: ${missing.map((p) => `\`${humanisePermission(p)}\``).join(", ")}`;
 		}
@@ -80,6 +82,50 @@ async function checkSwitchedOff(interaction: CommandInput, command: Command): Pr
 	}
 
 	return null;
+}
+
+/** Which subcommand was used, or null — a command with no subcommands answers null the contract cannot express. */
+export function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null {
+	if (command.subcommands === undefined) return null;
+
+	const chosen: string | null = interaction.options.getSubcommand(false);
+
+	return command.subcommands.find((subcommand) => subcommand.name === chosen) ?? null;
+}
+
+/** Both shapes a member arrives in carry permissions, and only one of them is already a bitfield. */
+function permissionsOf(member: NonNullable<CommandInput["member"]>): PermissionsBitField {
+	return typeof member.permissions === "string"
+		? new PermissionsBitField(BigInt(member.permissions))
+		: new PermissionsBitField(member.permissions);
+}
+
+/** A slash interaction hands roles back as a manager; a raw API member hands back the ids themselves. */
+function roleIdsOf(member: CommandInput["member"]): string[] {
+	if (member === null) return [];
+	if (Array.isArray(member.roles)) return member.roles;
+
+	return [...member.roles.cache.keys()];
+}
+
+/**
+ * The music system's own switch and its DJ roles.
+ *
+ * It sits here rather than in the music commands so a command added later cannot forget it, and `/music system`
+ * is exempt because it is the way back in for a server that switched the system off.
+ */
+async function checkMusicSystem(interaction: CommandInput, command: Command): Promise<CheckFailure> {
+	if (command.category !== "music" || interaction.guildId === null) return null;
+
+	if (chosenSubcommand(interaction, command)?.name === MUSIC_SYSTEM_SUBCOMMAND) return null;
+
+	const settings = normaliseMusicSettings(await getMusicSettings(interaction.guildId));
+	const member = interaction.member;
+
+	return musicRefusal(settings, {
+		roleIds: roleIdsOf(member),
+		manager: member !== null && permissionsOf(member).has(PermissionFlagsBits.ManageGuild),
+	});
 }
 
 function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {

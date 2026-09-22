@@ -78,7 +78,9 @@
 		"menu": "Menu",
 		"closeMenu": "Chiudi il menu",
 		"help": "Guida",
-		"helpHint": "Come configurare, e a cosa serve ogni schermata"
+		"helpHint": "Come configurare, e a cosa serve ogni schermata",
+		"music": "Musica",
+		"musicHint": "Il lettore e chi può usarlo"
 	},
 	"error": {
 		"unreachableTitle": "Qualcosa è andato storto",
@@ -577,6 +579,20 @@
 		"potTooBig": "Il montepremi iniziale non può superare {{max}}.",
 		"ticketTooDear": "Un biglietto non può costare più di {{max}}.",
 		"moreWinnersThanTickets": "Sono stati venduti solo {{tickets}} biglietti, quindi un’estrazione con {{winners}} vincitori ne lascerebbe alcuni a mani vuote."
+	},
+	"music": {
+		"title": "Musica",
+		"subtitle": "Se Testify riproduce musica in questo server e chi può comandare il lettore.",
+		"system": "Sistema musicale",
+		"enable": "Attiva il sistema musicale",
+		"stateOff": "Spento: ogni comando musicale viene rifiutato in questo server.",
+		"stateEverybody": "Acceso e aperto a tutti nel server.",
+		"stateDjs": "Acceso, limitato a {{count, number}} ruoli DJ.",
+		"djRoles": "Ruoli DJ",
+		"djBody": "Lascia tutti i ruoli deselezionati per far usare il lettore a chiunque. Chi ha Gestisci server può sempre usarlo.",
+		"djPick": "Ruoli che possono usare il lettore",
+		"djHint": "Serve uno di questi ruoli per eseguire un comando musicale.",
+		"staleRoles": "{{count, number}} ruoli scelti non esistono più in questo server. Salvando di nuovo verranno rimossi."
 	},
 	"settings": {
 		"title": "Impostazioni del server",

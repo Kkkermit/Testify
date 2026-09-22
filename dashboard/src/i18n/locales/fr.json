@@ -78,7 +78,9 @@
 		"menu": "Menu",
 		"closeMenu": "Fermer le menu",
 		"help": "Aide",
-		"helpHint": "La configuration, et à quoi sert chaque écran"
+		"helpHint": "La configuration, et à quoi sert chaque écran",
+		"music": "Musique",
+		"musicHint": "Le lecteur, et qui peut s’en servir"
 	},
 	"error": {
 		"unreachableTitle": "Une erreur est survenue",
@@ -577,6 +579,20 @@
 		"potTooBig": "La cagnotte de départ ne peut pas dépasser {{max}}.",
 		"ticketTooDear": "Un ticket ne peut pas coûter plus de {{max}}.",
 		"moreWinnersThanTickets": "Seulement {{tickets}} tickets ont été vendus : un tirage à {{winners}} gagnants en laisserait certains les mains vides."
+	},
+	"music": {
+		"title": "Musique",
+		"subtitle": "Si Testify joue de la musique sur ce serveur, et qui peut piloter le lecteur.",
+		"system": "Système de musique",
+		"enable": "Activer le système de musique",
+		"stateOff": "Désactivé : toute commande de musique est refusée sur ce serveur.",
+		"stateEverybody": "Activé et ouvert à tout le monde sur le serveur.",
+		"stateDjs": "Activé, limité à {{count, number}} rôles DJ.",
+		"djRoles": "Rôles DJ",
+		"djBody": "Ne cochez aucun rôle pour laisser tout le monde utiliser le lecteur. Quiconque a Gérer le serveur peut toujours s’en servir.",
+		"djPick": "Rôles autorisés à utiliser le lecteur",
+		"djHint": "Il faut l’un de ces rôles pour lancer une commande de musique.",
+		"staleRoles": "{{count, number}} rôles choisis n’existent plus sur ce serveur. Un nouvel enregistrement les retirera."
 	},
 	"settings": {
 		"title": "Réglages du serveur",

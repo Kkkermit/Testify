@@ -1,3 +1,4 @@
+import { PermissionFlagsBits } from "discord.js";
 import { asMember, type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { musicBinaries, requireSession, requireVolumeControl, sameChannelAs, showPanel } from "@lib/musicActions.util";
@@ -12,9 +13,13 @@ import {
 	upcomingPage,
 } from "@lib/musicQueue.util";
 import { type MusicSession } from "@lib/musicSession.util";
+import { applyMusicSettings, MUSIC_SYSTEM_SUBCOMMAND, readMusicSettings } from "@lib/musicSettings.util";
+import { musicSystemPanel } from "@lib/musicSystemPanel.util";
 import { reply } from "@lib/reply.util";
 
 /** Everything about the player that is not "start something", which `/play` owns. */
+
+const SYSTEM_ACTIONS = { enable: "enable", disable: "disable", roles: "roles" } as const;
 
 function sessionOf(interaction: CommandInput): MusicSession {
 	const guild = inGuild(interaction);
@@ -29,6 +34,28 @@ export default defineCommand({
 	description: "Controls the player.",
 	category: "music",
 	guildOnly: true,
+
+	async autocomplete(interaction) {
+		const typed = interaction.options.getFocused().trim().toLowerCase();
+		const guildId = interaction.guildId;
+		const settings = guildId === null ? null : await readMusicSettings(guildId);
+
+		const state = settings === null ? "" : settings.enabled ? " (it is on)" : " (it is off)";
+		const chosen = settings === null ? 0 : settings.djRoleIds.length;
+
+		const offered = [
+			{ name: `Turn the music system on${state}`, value: SYSTEM_ACTIONS.enable },
+			{ name: `Turn the music system off${state}`, value: SYSTEM_ACTIONS.disable },
+			{
+				name:
+					chosen === 0 ? "Choose who may use it (anybody can now)" : `Choose who may use it (${String(chosen)} roles)`,
+				value: SYSTEM_ACTIONS.roles,
+			},
+		];
+
+		await interaction.respond(offered.filter((choice) => choice.value.startsWith(typed)));
+	},
+
 	subcommands: [
 		{
 			name: "queue",
@@ -183,6 +210,40 @@ export default defineCommand({
 					interaction,
 					session,
 					`Volume set to **${String(applied)}%**. It takes a moment to take effect.`,
+				);
+			},
+		},
+		{
+			name: MUSIC_SYSTEM_SUBCOMMAND,
+			description: "Turns the music system on or off, and picks who may use it.",
+			permissions: [PermissionFlagsBits.ManageGuild],
+			options: [
+				{
+					name: "action",
+					description: "Leave it out to open the settings panel.",
+					type: "string",
+					autocomplete: true,
+				},
+			],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				const action = interaction.options.getString("action");
+
+				if (action === null || action === SYSTEM_ACTIONS.roles) {
+					await reply(interaction, musicSystemPanel(await readMusicSettings(guild.id), interaction.user.id));
+					return;
+				}
+
+				if (action !== SYSTEM_ACTIONS.enable && action !== SYSTEM_ACTIONS.disable) {
+					throw new UserFacingError("Pick one of the options the box offers — `enable`, `disable` or `roles`.");
+				}
+
+				const enabled = action === SYSTEM_ACTIONS.enable;
+				const settings = await applyMusicSettings(guild.id, { enabled }, interaction.user.id);
+
+				await reply(
+					interaction,
+					musicSystemPanel(settings, interaction.user.id, enabled ? "Music is on." : "Music is off."),
 				);
 			},
 		},

@@ -102,6 +102,8 @@ export interface Subcommand {
 	name: string;
 	description: string;
 	options?: CommandOption[];
+	/** Extra permissions this one subcommand needs, for a command whose other subcommands anybody may run. */
+	permissions?: PermissionResolvable[];
 	/** Prefix-only short forms, so `t?meme` still works after `/lookup meme`. */
 	aliases?: string[];
 	run(interaction: CommandInput, client: TestifyClient): Promise<void>;

@@ -16,6 +16,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	sticky: { path: (guildId) => `/guilds/${guildId}/sticky`, screen: "Sticky messages" },
 	automod: { path: (guildId) => `/guilds/${guildId}/automod`, screen: "AutoMod" },
 	treasure: { path: (guildId) => `/guilds/${guildId}/treasure`, screen: "Treasure drops" },
+	music: { path: (guildId) => `/guilds/${guildId}/music`, screen: "Music system" },
 	ticket: { path: (guildId) => `/guilds/${guildId}/tickets`, screen: "Tickets" },
 	lottery: { path: (guildId) => `/guilds/${guildId}/lottery`, screen: "Lottery" },
 	giveaway: { path: (guildId) => `/guilds/${guildId}/giveaways`, screen: "Giveaways" },

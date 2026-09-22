@@ -26,6 +26,7 @@ import {
 	type StickyList,
 	type LotterySettings,
 	type TicketSettings,
+	type MusicSettings,
 	type TreasureSettings,
 	type AutomodRules,
 	type BoardPage,
@@ -262,6 +263,12 @@ export const treasureSettings: TreasureSettings = {
 	minAmount: 10,
 	maxAmount: 500,
 	cooldownMs: 300_000,
+	configured: true,
+};
+
+export const musicSettings: MusicSettings = {
+	enabled: true,
+	djRoleIds: [],
 	configured: true,
 };
 
@@ -561,6 +568,7 @@ export const handlers = [
 	http.post("/api/guilds/:guildId/giveaways/:messageId/reroll", () => HttpResponse.json(giveawayList)),
 	http.delete("/api/guilds/:guildId/giveaways/:messageId", () => HttpResponse.json({ giveaways: [] })),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
 		const board = new URL(request.url).searchParams.get("board") ?? "economy";
@@ -583,6 +591,7 @@ export const handlers = [
 	http.patch("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.delete("/api/guilds/:guildId/tickets", () => HttpResponse.json({ ...ticketSettings, enabled: false })),
 	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.patch("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
 	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),

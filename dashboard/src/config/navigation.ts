@@ -13,6 +13,7 @@ import {
 	Users,
 	UserPlus,
 	MessagesSquare,
+	Music,
 	LifeBuoy,
 	Ticket,
 	type LucideIcon,
@@ -137,6 +138,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.treasure",
 							icon: Coins,
 							hintKey: "nav.treasureHint",
+						},
+						{
+							to: `/guilds/${guild.id}/music`,
+							labelKey: "nav.music",
+							icon: Music,
+							hintKey: "nav.musicHint",
 						},
 						{
 							to: `/guilds/${guild.id}/lottery`,

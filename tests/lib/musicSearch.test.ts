@@ -2,12 +2,17 @@ import { type Track } from "@lib/musicQueue.util";
 import {
 	type Choice,
 	CHOICE_MAX,
+	INTERACTION_WINDOW_MS,
+	interactionAge,
 	choiceFor,
 	choicesFor,
 	literalChoice,
 	MAX_CHOICES,
+	RESPONSE_MARGIN_MS,
+	searchBudget,
 	SearchCache,
 	shouldSearch,
+	stillOpen,
 	Suggester,
 	within,
 } from "@lib/musicSearch.util";
@@ -234,5 +239,40 @@ describe("Suggester", () => {
 		const many = Array.from({ length: 40 }, (_, at) => choice(`t${String(at)}`));
 
 		await expect(suggester.suggest("song", () => Promise.resolve(many))).resolves.toHaveLength(MAX_CHOICES);
+	});
+});
+
+describe("the interaction's own clock", () => {
+	const CREATED = 1_000_000;
+
+	it("measures from the snowflake when the two clocks agree", () => {
+		expect(interactionAge(CREATED, CREATED + 200, CREATED + 900)).toBe(900);
+	});
+
+	/**
+	 * The bug this pins: a host whose clock is behind Discord's reads every interaction as brand new and keeps
+	 * searching past the window, which is `DiscordAPIError[10062]` on every keystroke.
+	 */
+	it("falls back to its own receipt when the host clock is wrong", () => {
+		const skewed = CREATED + 60_000;
+
+		expect(interactionAge(skewed, CREATED, CREATED + 400)).toBe(400);
+	});
+
+	it("takes the longer of the two rather than the flattering one", () => {
+		expect(interactionAge(CREATED, CREATED + 1_500, CREATED + 2_000)).toBe(2_000);
+	});
+
+	it("leaves room for the answer to travel", () => {
+		expect(searchBudget(0)).toBe(INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS);
+	});
+
+	it("gives a search nothing at all once the window is nearly gone", () => {
+		expect(searchBudget(INTERACTION_WINDOW_MS)).toBe(0);
+	});
+
+	it("knows when there is no point answering", () => {
+		expect(stillOpen(INTERACTION_WINDOW_MS - 1)).toBe(true);
+		expect(stillOpen(INTERACTION_WINDOW_MS)).toBe(false);
 	});
 });

@@ -78,7 +78,9 @@
 		"menu": "Menu",
 		"closeMenu": "Close the menu",
 		"help": "Help",
-		"helpHint": "Setting up, and what every screen is for"
+		"helpHint": "Setting up, and what every screen is for",
+		"music": "Music",
+		"musicHint": "The player, and who may use it"
 	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
@@ -577,6 +579,20 @@
 		"potTooBig": "The starting pot cannot be more than {{max}}.",
 		"ticketTooDear": "A ticket cannot cost more than {{max}}.",
 		"moreWinnersThanTickets": "Only {{tickets}} tickets have been sold, so a draw for {{winners}} winners would leave some empty-handed."
+	},
+	"music": {
+		"title": "Music",
+		"subtitle": "Whether Testify plays music in this server, and who is allowed to drive the player.",
+		"system": "Music system",
+		"enable": "Enable the music system",
+		"stateOff": "Off — every music command is refused in this server.",
+		"stateEverybody": "On, and open to everybody in the server.",
+		"stateDjs": "On, limited to {{count, number}} DJ roles.",
+		"djRoles": "DJ roles",
+		"djBody": "Leave every role unticked to let anybody use the player. Anybody with Manage Server can always use it.",
+		"djPick": "Roles that may use the player",
+		"djHint": "Someone needs one of these roles to run a music command.",
+		"staleRoles": "{{count, number}} chosen roles no longer exist in this server. Saving again will drop them."
 	},
 	"settings": {
 		"title": "Server settings",

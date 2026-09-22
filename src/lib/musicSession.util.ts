@@ -39,10 +39,10 @@ export const LEAVE_AFTER_IDLE_MS = 120_000;
 /**
  * How often the "now playing" message is rewritten while a track runs.
  *
- * One edit per guild at this rate is nothing against Discord's limits, and it is fast enough that the bar and
- * the clock are visibly moving rather than frozen.
+ * Discord allows five message edits per five seconds in a channel, so one guild at this rate uses a fifth of
+ * it — and the bar moves often enough to read as progress rather than as a frozen picture of it.
  */
-export const PANEL_REFRESH_MS = 10_000;
+export const PANEL_REFRESH_MS = 5_000;
 
 const STREAM_TYPES: Record<StreamShape, StreamType> = {
 	"webm-opus": StreamType.WebmOpus,
@@ -98,8 +98,12 @@ export class MusicSession {
 
 		this.#player.on(AudioPlayerStatus.Idle, () => void this.#onIdle());
 		this.#player.on("error", (error) => {
-			// Never fatal: an unhandled player error would take the whole bot down with it.
-			this.#logger.warn({ err: error, guildId }, "[MUSIC] The player reported an error. Treating it as a break.");
+			// Never fatal, and never the whole error: an `AudioPlayerError` carries the resource, which stringifies
+			// to kilobytes of stream internals and buries the one line that says what broke.
+			this.#logger.warn(
+				{ guildId, reason: error.message, track: currentTrack(this.queue)?.url ?? null },
+				"[MUSIC] The stream came apart. Treating it as a break.",
+			);
 		});
 	}
 
@@ -209,7 +213,12 @@ export class MusicSession {
 					? "no playable audio was offered for it"
 					: "it is not offered in a format Discord can play, and FFmpeg is not installed";
 			} else {
-				const stream = openStream(track.url, plan, this.#binaries, { volume: this.#volume, seekMs });
+				const stream = openStream(track.url, plan, this.#binaries, {
+					volume: this.#volume,
+					seekMs,
+					onProblem: (reason) =>
+						this.#logger.warn({ guildId: this.guildId, reason, track: track.url }, "[MUSIC] The downloader gave up."),
+				});
 				const resource = createAudioResource(stream.stream, { inputType: STREAM_TYPES[plan.shape] });
 
 				this.#stream = stream;
