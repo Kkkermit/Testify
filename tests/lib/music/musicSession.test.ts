@@ -1,8 +1,7 @@
 import { EventEmitter } from "node:events";
 import { Readable } from "node:stream";
 import { type Guild } from "discord.js";
-import { type MusicBinaries } from "@lib/music/musicBinaries.util";
-import { type Track } from "@lib/music/musicQueue.util";
+import { type MusicBinaries, type Track } from "@lib/music/music.types";
 import {
 	destroyAllSessions,
 	findSession,

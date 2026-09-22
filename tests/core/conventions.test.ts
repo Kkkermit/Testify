@@ -191,6 +191,28 @@ describe("the src/lib layout", () => {
 		expect(folders.filter((folder) => !root.includes(`"./${folder}"`))).toEqual([]);
 	});
 
+	/** A types file that emits JavaScript is not a types file, and importing it for a type would load code. */
+	it("keeps every .types.ts file free of runtime code", () => {
+		const leaking = filesIn("lib", /\.types\.ts$/).filter((file) => {
+			const source = readFileSync(join(SRC, file), "utf8");
+			const valueImport =
+				/^import \{(?![^}]*\btype\b)[^}]*\}/m.test(source) || /^import \{[^}]*,\s*(?!type\b)[A-Za-z]/m.test(source);
+
+			return valueImport || /^export (const|let|function|class|enum)\b/m.test(source);
+		});
+
+		expect(leaking).toEqual([]);
+	});
+
+	/** Behaviour lives beside the code that owns it; a constants file that grows a function has become a module. */
+	it("keeps every .constants.ts file to values", () => {
+		const behaving = filesIn("lib", /\.constants\.ts$/).filter((file) =>
+			/^export (async )?(function|class)\b/m.test(readFileSync(join(SRC, file), "utf8")),
+		);
+
+		expect(behaving).toEqual([]);
+	});
+
 	/** Deeper nesting is where a barrel starts re-exporting a barrel, and the two lint rules stop meaning anything. */
 	it("goes one level deep and no further", () => {
 		const nested = folders.filter((folder) =>

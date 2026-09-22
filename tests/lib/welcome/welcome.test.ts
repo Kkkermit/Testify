@@ -1,6 +1,7 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { type WelcomeSettings } from "@database/models/guildSettings.schema";
+import { WELCOME_PANEL_ID } from "@lib/welcome/welcome.constants";
 import {
 	checkBackground,
 	DEFAULT_WELCOME_MESSAGE,
@@ -11,7 +12,7 @@ import {
 	WELCOME_LIMITS,
 	WELCOME_PLACEHOLDERS,
 } from "@lib/welcome/welcome.util";
-import { WELCOME_PANEL_ID, welcomePanel } from "@lib/welcome/welcomePanel.util";
+import { welcomePanel } from "@lib/welcome/welcomePanel.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

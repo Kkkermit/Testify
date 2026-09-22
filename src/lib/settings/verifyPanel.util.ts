@@ -2,29 +2,15 @@ import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { type VerifySettings } from "@database/models/verification.schema";
 import { button, channelSelect, roleSelect, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	text,
-} from "@lib/discord/containers.util";
+import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { formatNumber } from "@lib/format/format.util";
+import { VERIFY_PANEL_ID } from "@lib/settings/settings.constants";
+import { type VerifyConfig } from "@lib/settings/settings.types";
 
 /** Setting up verification, as one screen rather than a command with three required options. */
 
-export const VERIFY_PANEL_ID = "verifysetup";
-
 export const DEFAULT_VERIFY_MESSAGE = "Press the button below to verify yourself and unlock the rest of the server.";
-
-export interface VerifyConfig {
-	channelId: string | null;
-	roleId: string | null;
-	messageId: string | null;
-	message: string;
-	verifiedCount: number;
-}
 
 export type StoredVerifySettings = Omit<VerifySettings, "message"> & Partial<Pick<VerifySettings, "message">>;
 

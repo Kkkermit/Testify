@@ -1,6 +1,8 @@
 import { type AttachmentBuilder, type Guild } from "discord.js";
-import { type BoardRow, renderBoardImage } from "@lib/canvas/boardCard.util";
+import { renderBoardImage } from "@lib/canvas/boardCard.util";
+import { type BoardRow } from "@lib/canvas/canvas.types";
 import { pageCount } from "@lib/discord/pagination.util";
+import { type BoardKind } from "@lib/economy/economy.types";
 import { boardEntries, rankOnBoard } from "@lib/economy/memberActions.util";
 import { formatNumber, ordinal } from "@lib/format/format.util";
 
@@ -8,9 +10,6 @@ import { formatNumber, ordinal } from "@lib/format/format.util";
  * The leaderboards, shared by `/leaderboard` and by its paging buttons so the first page and every later one are
  * drawn by the same code.
  */
-
-export const BOARD_KINDS = ["economy", "levels"] as const;
-export type BoardKind = (typeof BOARD_KINDS)[number];
 
 export const PAGE_SIZE = 10;
 

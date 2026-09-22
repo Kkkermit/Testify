@@ -1,15 +1,14 @@
 import {
 	blackjackGames,
-	type Card,
 	draw,
 	gameKey,
 	handValue,
 	playDealer,
-	type Rank,
 	renderHand,
 	settle,
 	shuffledDeck,
 } from "@lib/games/blackjack.util";
+import { type Card, type Rank } from "@lib/games/games.types";
 
 const card = (rank: Rank): Card => ({ rank, suit: "♠" });
 const hand = (...ranks: Rank[]): Card[] => ranks.map(card);

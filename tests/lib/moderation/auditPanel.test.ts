@@ -2,7 +2,6 @@ import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { AUDIT_EVENTS } from "@lib/moderation/auditLog.util";
 import {
-	AUDIT_PANEL_ID,
 	auditPanel,
 	auditSavedPanel,
 	collapseEnabled,
@@ -13,6 +12,7 @@ import {
 	isAuditEvent,
 	resolveEnabled,
 } from "@lib/moderation/auditPanel.util";
+import { AUDIT_PANEL_ID } from "@lib/moderation/moderation.constants";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

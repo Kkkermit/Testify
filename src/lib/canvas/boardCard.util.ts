@@ -1,4 +1,5 @@
 import { type AttachmentBuilder } from "discord.js";
+import { type BoardRow } from "@lib/canvas/canvas.types";
 import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas/canvas.util";
 
 /** A leaderboard, drawn rather than listed. */
@@ -19,16 +20,6 @@ const PALETTE = {
 
 /** Gold, silver and bronze for the top three, then the plain rank number. */
 const MEDALS = ["#fee75c", "#c9ccd1", "#cd7f32"] as const;
-
-export interface BoardRow {
-	rank: number;
-	displayName: string;
-	avatarUrl: string;
-	/** The headline figure — `Level 12`, or a balance. */
-	primary: string;
-	/** The supporting figure, in smaller grey text. */
-	secondary: string;
-}
 
 export function boardHeight(rows: number): number {
 	return HEADER + Math.max(1, rows) * ROW_HEIGHT + PADDING;

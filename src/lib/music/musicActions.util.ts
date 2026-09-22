@@ -2,9 +2,10 @@ import { type Guild, type GuildMember, type VoiceBasedChannel } from "discord.js
 import { type TestifyClient } from "@core/client";
 import { type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
 import { reply } from "@lib/discord/reply.util";
-import { findBinaries, type MusicBinaries } from "@lib/music/musicBinaries.util";
+import { type MusicBinaries } from "@lib/music/music.types";
+import { findBinaries } from "@lib/music/musicBinaries.util";
 import { findSession, type MusicSession, sessionFor } from "@lib/music/musicSession.util";
 
 /** What `/play`, the `/music` subcommands and the panel buttons all need, written once. */

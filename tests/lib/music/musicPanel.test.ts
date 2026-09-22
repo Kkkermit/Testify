@@ -1,5 +1,6 @@
 import { parseCustomId } from "@core/button";
-import { MAX_VOLUME, MIN_VOLUME } from "@lib/music/musicFormat.util";
+import { MAX_VOLUME, MIN_VOLUME } from "@lib/music/music.constants";
+import { type QueueState, type Track } from "@lib/music/music.types";
 import {
 	headlineFor,
 	link,
@@ -12,7 +13,6 @@ import {
 	trackLine,
 	volumeStep,
 } from "@lib/music/musicPanel.util";
-import { type QueueState, type Track } from "@lib/music/musicQueue.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

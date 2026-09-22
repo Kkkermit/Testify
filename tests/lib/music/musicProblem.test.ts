@@ -1,4 +1,5 @@
-import { classifyProblem, RETRIES_AFTER } from "@lib/music/musicProblem.util";
+import { RETRIES_AFTER } from "@lib/music/music.constants";
+import { classifyProblem } from "@lib/music/musicProblem.util";
 
 describe("classifyProblem", () => {
 	/** Verbatim from a real log: this is the line that has to turn into advice somebody can act on. */

@@ -15,13 +15,12 @@ import { dashboardUrl } from "@lib/bot/dashboard.util";
 import { button, linkButton, row, select, selectRow } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
 import { truncate } from "@lib/format/format.util";
+import { HELP_HOME } from "@lib/info/info.constants";
 
 /** How the help pages are laid out. */
 export type Surface = "slash" | "prefix";
 
 export const HELP_PAGE_SIZE = 6;
-export const HELP_HOME = "home";
-
 export function visibleCommands(client: TestifyClient): Command[] {
 	return [...client.commands.values()].filter((command) => !HIDDEN_CATEGORIES.includes(command.category));
 }

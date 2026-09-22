@@ -1,23 +1,21 @@
 import { spawn } from "node:child_process";
 import { PassThrough, type Readable } from "node:stream";
 import { UserFacingError } from "@core/errors";
-import { type MusicBinaries } from "@lib/music/musicBinaries.util";
+import { SEARCH_RESULTS, DEFAULT_VOLUME } from "@lib/music/music.constants";
 import {
-	clampVolume,
-	DEFAULT_VOLUME,
-	planStream,
+	type OpenStream,
+	type MusicBinaries,
 	type RemoteFormat,
 	type StreamPlan,
-} from "@lib/music/musicFormat.util";
-import { type Query } from "@lib/music/musicQuery.util";
-import { type Track } from "@lib/music/musicQueue.util";
+	type Query,
+	type Track,
+} from "@lib/music/music.types";
+import { clampVolume, planStream } from "@lib/music/musicFormat.util";
 
 /** Everything that shells out to yt-dlp, with the parsing kept pure beside it. */
 
 const RESOLVE_TIMEOUT_MS = 30_000;
 
-/** Enough for a search to be worth scrolling, few enough that a playlist does not flood a queue. */
-export const SEARCH_RESULTS = 8;
 export const PLAYLIST_LIMIT = 100;
 
 /** The subset of yt-dlp's JSON this needs; it emits far more, and none of the rest is depended on. */
@@ -205,13 +203,6 @@ export async function describeTrack(url: string, binaries: MusicBinaries, now = 
 	}
 
 	return info;
-}
-
-export interface OpenStream {
-	stream: Readable;
-	plan: StreamPlan;
-	/** Kills the processes this opened; safe to call more than once. */
-	close: () => void;
 }
 
 export interface StreamOptions {

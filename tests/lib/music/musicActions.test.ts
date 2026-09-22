@@ -1,5 +1,6 @@
 import { type Guild, type GuildMember } from "discord.js";
 import { UserFacingError } from "@core/errors";
+import { type QueueState, type Track } from "@lib/music/music.types";
 import {
 	panelFor,
 	requireSession,
@@ -8,7 +9,6 @@ import {
 	showPanel,
 	voiceChannelOf,
 } from "@lib/music/musicActions.util";
-import { type QueueState, type Track } from "@lib/music/musicQueue.util";
 import { destroyAllSessions, type MusicSession, sessionFor } from "@lib/music/musicSession.util";
 import { textOf } from "@tests/helpers/containers";
 

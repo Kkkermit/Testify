@@ -5,7 +5,8 @@ import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { formatDuration, humanisePermission } from "@lib/format/format.util";
-import { MUSIC_SYSTEM_SUBCOMMAND, musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
+import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
+import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { isAlwaysEnabled } from "@testify/shared";
 
 /** Why a command was refused, or null if it may run. */

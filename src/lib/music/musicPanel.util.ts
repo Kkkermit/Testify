@@ -1,23 +1,15 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	sectionWithThumbnail,
-	text,
-} from "@lib/discord/containers.util";
+import { container, containerMessage, divider, sectionWithThumbnail, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { formatClock, formatDuration, truncate } from "@lib/format/format.util";
-import { clampVolume, DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_STEP } from "@lib/music/musicFormat.util";
-import { type MusicSource } from "@lib/music/musicQuery.util";
-import { currentTrack, type QueueState, totalDurationMs, type Track, upcomingPage } from "@lib/music/musicQueue.util";
+import { MUSIC_ID, DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_STEP } from "@lib/music/music.constants";
+import { type MusicSource, type QueueState, type Track } from "@lib/music/music.types";
+import { clampVolume } from "@lib/music/musicFormat.util";
+import { currentTrack, totalDurationMs, upcomingPage } from "@lib/music/musicQueue.util";
 
 /** The player as one screen: what is on, what is next, and the controls beside them. */
-
-export const MUSIC_ID = "music";
 
 /** Five upcoming rows is what fits before the container stops being glanceable. */
 export const QUEUE_PAGE_SIZE = 5;

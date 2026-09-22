@@ -1,19 +1,13 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, channelSelect, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	text,
-} from "@lib/discord/containers.util";
-import { PLACEHOLDER_HELP, type WelcomeConfig, WELCOME_PLACEHOLDERS } from "@lib/welcome/welcome.util";
+import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { WELCOME_PANEL_ID } from "@lib/welcome/welcome.constants";
+import { type WelcomeConfig } from "@lib/welcome/welcome.types";
+import { PLACEHOLDER_HELP, WELCOME_PLACEHOLDERS } from "@lib/welcome/welcome.util";
 
 /** Setting up the welcome system, as one screen you read and press. */
-
-export const WELCOME_PANEL_ID = "welcome";
 
 export interface WelcomePanelState {
 	/** `null` before anything is configured. */

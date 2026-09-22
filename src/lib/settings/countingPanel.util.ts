@@ -1,23 +1,13 @@
 import { ButtonStyle } from "discord.js";
-import { COUNTING_DEFAULT_MAX } from "@config/constants";
 import { customId } from "@core/button";
 import { channelSelect, row } from "@lib/discord/components.util";
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
 import { formatNumber } from "@lib/format/format.util";
+import { COUNTING_PANEL_ID } from "@lib/settings/settings.constants";
+import { type CountingPanelState } from "@lib/settings/settings.types";
 import { channelValue, settingsScreen } from "@lib/settings/settingsScreen.util";
 
 /** The counting game, configured from one screen rather than four subcommands. */
-
-export const COUNTING_PANEL_ID = "counting";
-
-export const COUNTING_LIMITS = { minGoal: 10, maxGoal: COUNTING_DEFAULT_MAX } as const;
-
-export interface CountingPanelState {
-	channelId: string | null;
-	count: number;
-	goal: number;
-	note?: string;
-}
 
 export function countingPanel(state: CountingPanelState, ownerId: string): ContainerMessage {
 	const off = state.channelId === null;

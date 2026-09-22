@@ -3,6 +3,8 @@ export * from "./channels.util";
 export * from "./colours.util";
 export * from "./components.util";
 export * from "./containers.util";
+export * from "./discord.constants";
+export * from "./discord.types";
 export * from "./embeds.util";
 export * from "./pagination.util";
 export * from "./reply.util";

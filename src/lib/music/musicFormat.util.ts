@@ -1,34 +1,11 @@
+import { DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME } from "@lib/music/music.constants";
+import { type RemoteFormat, type StreamShape, type StreamPlan } from "@lib/music/music.types";
 /** Choosing which of a track's formats to play, and whether that choice needs a transcoder. */
-
-/** The track's own level, which is the one setting that costs nothing to serve. */
-export const DEFAULT_VOLUME = 100;
-export const MIN_VOLUME = 0;
-/** Past this the filter clips rather than getting louder, so it is a ceiling rather than a preference. */
-export const MAX_VOLUME = 200;
-/** What one press of the panel's louder or quieter button moves. */
-export const VOLUME_STEP = 10;
 
 export function clampVolume(volume: number): number {
 	if (!Number.isFinite(volume)) return DEFAULT_VOLUME;
 
 	return Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, Math.round(volume)));
-}
-
-export interface RemoteFormat {
-	format_id: string;
-	acodec?: string | null;
-	vcodec?: string | null;
-	ext?: string | null;
-	protocol?: string | null;
-	abr?: number | null;
-}
-
-/** How the bytes reach Discord: the first two are passed through untouched, the third is re-encoded. */
-export type StreamShape = "webm-opus" | "ogg-opus" | "transcode";
-
-export interface StreamPlan {
-	formatId: string;
-	shape: StreamShape;
 }
 
 function isAudioOnly(format: RemoteFormat): boolean {

@@ -4,8 +4,6 @@ import { asMember, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
 
-export const DEFAULT_REASON = "No reason provided";
-
 /**
  * Why this moderator may not act on this target, in the words the refusal shows — or null when they may.
  *

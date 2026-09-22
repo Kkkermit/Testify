@@ -69,7 +69,7 @@ numbers, which drift):
 | `src/lib` helpers    | 81, in 15 domain folders         |
 | Schemas/repositories | 14 / 14                          |
 | Scheduled jobs       | 4                                |
-| Tests                | 3,702 across 234 suites          |
+| Tests                | 3,704 across 234 suites          |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -349,13 +349,15 @@ There is **exactly one** `interactionCreate` listener. The original had 27.
 trace and a `git log` line — and for commands and events it is **load-bearing**, because the loader globs on it.
 A file that misses its suffix is silently never registered.
 
-| Suffix        | For                              | Example                              |
-| ------------- | -------------------------------- | ------------------------------------ |
-| `.command.ts` | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
-| `.event.ts`   | a gateway event handler          | `events/ready/ready.event.ts`        |
-| `.util.ts`    | a shared helper                  | `lib/duration.util.ts`               |
-| `.schema.ts`  | a Mongoose model                 | `database/models/economy.schema.ts`  |
-| `.test.ts`    | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
+| Suffix          | For                              | Example                              |
+| --------------- | -------------------------------- | ------------------------------------ |
+| `.command.ts`   | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
+| `.event.ts`     | a gateway event handler          | `events/ready/ready.event.ts`        |
+| `.util.ts`      | a shared helper                  | `lib/format/duration.util.ts`        |
+| `.types.ts`     | a domain's shared types          | `lib/music/music.types.ts`           |
+| `.constants.ts` | a domain's shared constants      | `lib/music/music.constants.ts`       |
+| `.schema.ts`    | a Mongoose model                 | `database/models/economy.schema.ts`  |
+| `.test.ts`      | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
 
 Loader globs: `commands/*/*.command.{js,ts}` and `events/**/*.event.{js,ts}`.
 `tests/core/conventions.test.ts` enforces the suffixes.
@@ -1120,10 +1122,20 @@ exists to achieve.
 Two casing regimes inside one tree is a rule to remember rather than a distinction the reader gains anything
 from — and the event groups were the last holdout, PascalCase beside a lowercase `message/` sibling.
 
-### No dedicated `types/` directory
+### No dedicated `types/` directory — and what a domain's `.types.ts` is for
 
 Measured rather than assumed: 46% of exported types never leave the file that declares them. Types live beside
 the code that owns them.
+
+A `src/lib` domain folder has a `<domain>.types.ts` and a `<domain>.constants.ts` **only for what more than one
+module uses** — `Track`, `QueueState`, `DEFAULT_VOLUME`, every `*_PANEL_ID` a renderer and its button handler
+share. That is the domain's vocabulary, and one place to read it. Anything only its own module reads stays in
+that module, which is the measurement above still being respected. The split was made with the type checker
+rather than by eye: every exported type and constant, attributed through the barrels to the file declaring it,
+counted by the other files that import it. Catalogues (`SHOP_ITEMS`, `PETS_BY_RARITY`) and label tables
+(`AUDIT_EVENT_LABELS`, `COLOUR_CHOICES`) are content rather than vocabulary and stay with the functions that
+look them up. A `.types.ts` file emits no JavaScript and a `.constants.ts` file holds no functions; the
+conventions test fails on either, and both halves were proved to go red.
 
 ### One leaderboard command, and no command that only forwards to another
 

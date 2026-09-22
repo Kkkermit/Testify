@@ -1,9 +1,8 @@
 import { type EmbedBuilder, type Message } from "discord.js";
 import { type TestifyClient } from "@core/client";
+import { TIDY_AFTER_MS } from "@lib/discord/discord.constants";
 
 /** Replies that clean up after themselves. */
-
-export const TIDY_AFTER_MS = 8_000;
 
 export function cleanupFooter(afterMs: number = TIDY_AFTER_MS): string {
 	const seconds = Math.max(1, Math.round(afterMs / 1_000));

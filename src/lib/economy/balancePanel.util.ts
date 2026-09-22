@@ -2,20 +2,12 @@ import { ButtonStyle } from "discord.js";
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	sectionWithThumbnail,
-	text,
-} from "@lib/discord/containers.util";
+import { container, containerMessage, divider, sectionWithThumbnail, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { BALANCE_PANEL_ID } from "@lib/economy/economy.constants";
 import { formatNumber } from "@lib/format/format.util";
 
 /** The wallet, and the things you would do next. */
-
-export const BALANCE_PANEL_ID = "balance";
 
 export interface BalanceView {
 	wallet: number;

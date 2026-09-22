@@ -9,9 +9,6 @@ import { MUSIC_LIMITS, type MusicPatch, type MusicSettings } from "@testify/shar
 
 export { MUSIC_LIMITS };
 
-/** The one subcommand the gate can never close over, or a server that switched music off could not switch it on. */
-export const MUSIC_SYSTEM_SUBCOMMAND = "system";
-
 /** A server with no record gets the system on and open to everybody, which is what a fresh install expects. */
 export function normaliseMusicSettings(stored: StoredMusicSettings): MusicSettings {
 	return {

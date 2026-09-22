@@ -1,4 +1,5 @@
-import { type WelcomeSettings, type WelcomeStyle } from "@database/models/guildSettings.schema";
+import { type WelcomeSettings } from "@database/models/guildSettings.schema";
+import { type WelcomeConfig } from "@lib/welcome/welcome.types";
 import {
 	DEFAULT_WELCOME_MESSAGE,
 	fillTemplate,
@@ -31,13 +32,6 @@ export const PLACEHOLDER_HELP: Record<WelcomePlaceholder, string> = {
 	"{server}": "This server's name",
 	"{count}": "How many members there are now",
 };
-
-export interface WelcomeConfig {
-	channelId: string;
-	message: string;
-	style: WelcomeStyle;
-	hasBackground: boolean;
-}
 
 type AddedLater = "style" | "background";
 export type StoredWelcomeSettings = Omit<WelcomeSettings, AddedLater> & Partial<Pick<WelcomeSettings, AddedLater>>;

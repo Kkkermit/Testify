@@ -1,10 +1,10 @@
 import { type LevelSettings } from "@database/models/guildSettings.schema";
+import { type LevelConfig } from "@lib/levelling/levelling.types";
 import {
 	clampMultiplier,
 	DEFAULT_LEVEL_CONFIG,
 	earnsXp,
 	LEVEL_LIMITS,
-	type LevelConfig,
 	multiplierFor,
 	nextMultiplier,
 	normaliseSettings,

@@ -1,13 +1,13 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { type VerifySettings } from "@database/models/verification.schema";
+import { VERIFY_PANEL_ID } from "@lib/settings/settings.constants";
+import { type VerifyConfig } from "@lib/settings/settings.types";
 import {
 	DEFAULT_VERIFY_MESSAGE,
 	isReady,
 	normaliseVerify,
 	type StoredVerifySettings,
-	type VerifyConfig,
-	VERIFY_PANEL_ID,
 	verifyPanel,
 } from "@lib/settings/verifyPanel.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";

@@ -1,10 +1,8 @@
 import { formatClock, truncate } from "@lib/format/format.util";
-import { type Track } from "@lib/music/musicQueue.util";
+import { CHOICE_MAX } from "@lib/music/music.constants";
+import { type Track } from "@lib/music/music.types";
 
 /** Feeding `/play`'s autocomplete without spawning a process for every keystroke. */
-
-/** Discord refuses a choice whose name or value is longer than this. */
-export const CHOICE_MAX = 100;
 
 /** Below this, a search is mostly noise and costs a round trip per letter. */
 export const MIN_SEARCH_LENGTH = 3;

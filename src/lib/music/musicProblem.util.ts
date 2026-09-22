@@ -1,25 +1,5 @@
+import { type ProblemKind, type DownloadProblem } from "@lib/music/music.types";
 /** What a dying downloader said, sorted into the few answers that change what the player should do next. */
-
-export type ProblemKind = "forbidden" | "bot-check" | "unavailable";
-
-export interface DownloadProblem {
-	kind: ProblemKind;
-	/** One sentence for the panel, written as advice rather than as an error. */
-	advice: string;
-}
-
-/**
- * How many more goes a track gets after each kind of refusal.
- *
- * A 403 is sometimes a signed address that expired between asking and downloading, so it earns one fresh try;
- * the other two are YouTube's decision about the video or the host, and asking again only adds to the count
- * that got the host flagged in the first place.
- */
-export const RETRIES_AFTER: Record<ProblemKind, number> = {
-	forbidden: 1,
-	"bot-check": 0,
-	unavailable: 0,
-};
 
 const PATTERNS: { kind: ProblemKind; pattern: RegExp; advice: string }[] = [
 	{

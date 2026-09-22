@@ -1,19 +1,11 @@
 import { ButtonStyle } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
+import { PREFIX_LIMITS, PREFIX_PANEL_ID } from "@lib/settings/settings.constants";
+import { type PrefixPanelState } from "@lib/settings/settings.types";
 import { settingsScreen, statusDot } from "@lib/settings/settingsScreen.util";
 
 /** The prefix for text commands, from one screen rather than four subcommands. */
-
-export const PREFIX_PANEL_ID = "prefixsetup";
-
-export const PREFIX_LIMITS = { maxLength: 5 } as const;
-
-export interface PrefixPanelState {
-	prefix: string;
-	isEnabled: boolean;
-	note?: string;
-}
 
 /** A prefix with a space in it can never match, and one that is only whitespace would match every message. */
 export function checkPrefix(raw: string): { ok: true; value: string } | { ok: false; reason: string } {

@@ -18,8 +18,9 @@ import {
 	setLevel,
 } from "@database/repositories/levelRepository";
 import { deactivateSoftban, getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
+import { type RewardOutcome } from "@lib/levelling/levelling.types";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
-import { applyLevelRewards, type RewardOutcome } from "@lib/levelling/levellingActions.util";
+import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 import { moderationProblem } from "@lib/moderation/moderationActions.util";
 import {
 	BOARD_PAGE_SIZE,

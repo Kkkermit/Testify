@@ -2,15 +2,8 @@ import { type ButtonStyle } from "discord.js";
 import { type Category } from "@config/categories";
 import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	sectionWithButton,
-	text,
-} from "@lib/discord/containers.util";
+import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 
 /**
  * The house style for a Components V2 settings panel: title, status, an optional note, rows with their own control

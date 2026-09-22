@@ -1,13 +1,8 @@
 import { type GuildMember } from "discord.js";
 import { type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import {
-	actionEmbed,
-	assertModeratable,
-	DEFAULT_REASON,
-	dmEmbed,
-	notifyTarget,
-} from "@lib/moderation/moderationActions.util";
+import { DEFAULT_REASON } from "@lib/moderation/moderation.constants";
+import { actionEmbed, assertModeratable, dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 import {
 	BOT_ID,
 	createMockGuild,

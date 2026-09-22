@@ -2,21 +2,14 @@ import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { type EconomyAccount } from "@database/models/economy.schema";
 import { button, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	sectionWithButton,
-	text,
-} from "@lib/discord/containers.util";
+import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { INVENTORY_PANEL_ID } from "@lib/economy/economy.constants";
 import { findShopItem } from "@lib/economy/shop.util";
 import { formatNumber } from "@lib/format/format.util";
 
 /** What you own, with the thing you would do to each item beside it. */
 
-export const INVENTORY_PANEL_ID = "inv";
 export const INVENTORY_PAGE = 5;
 
 export interface InventoryEntry {

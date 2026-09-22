@@ -1,25 +1,15 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, channelSelect, roleSelect, row } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	sectionWithButton,
-	text,
-} from "@lib/discord/containers.util";
-import { LEVEL_LIMITS, type LevelConfig } from "@lib/levelling/levelling.util";
+import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { LEVEL_TABS, LEVEL_PANEL_ID } from "@lib/levelling/levelling.constants";
+import { type LevelPanelState, type LevelTab } from "@lib/levelling/levelling.types";
+import { LEVEL_LIMITS } from "@lib/levelling/levelling.util";
 
 /**
  * The levelling configuration, as four tabs of controls rather than a command with eleven options nobody discovers.
  */
-
-export const LEVEL_PANEL_ID = "levelling";
-
-export const LEVEL_TABS = ["overview", "boosts", "rewards", "ignores"] as const;
-export type LevelTab = (typeof LEVEL_TABS)[number];
 
 const TAB_LABELS: Record<LevelTab, string> = {
 	overview: "Overview",
@@ -30,13 +20,6 @@ const TAB_LABELS: Record<LevelTab, string> = {
 
 export function isLevelTab(value: string): value is LevelTab {
 	return (LEVEL_TABS as readonly string[]).includes(value);
-}
-
-export interface LevelPanelState {
-	tab: LevelTab;
-	config: LevelConfig;
-	/** A one-line result from the last press, shown above the controls. */
-	note?: string;
 }
 
 /**

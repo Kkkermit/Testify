@@ -1,4 +1,4 @@
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
 
 /** Reading a Components V2 payload back out. */
 

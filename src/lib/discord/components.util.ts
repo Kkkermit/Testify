@@ -4,7 +4,6 @@ import {
 	ButtonStyle,
 	ChannelSelectMenuBuilder,
 	ChannelType,
-	type EmbedBuilder,
 	type MessageActionRowComponentBuilder,
 	ModalBuilder,
 	RoleSelectMenuBuilder,
@@ -15,12 +14,6 @@ import {
 } from "discord.js";
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
-
-/** What every panel returns: one embed set and its controls. */
-export interface RenderedScreen {
-	embeds: EmbedBuilder[];
-	components: ActionRowBuilder<MessageActionRowComponentBuilder>[];
-}
 
 export interface ButtonOptions {
 	id: string;

@@ -1,7 +1,7 @@
 import { type Guild } from "discord.js";
 import { UserFacingError } from "@core/errors";
+import { type VerifyConfig } from "@lib/settings/settings.types";
 import { publishVerifyPanel, roleTooHigh } from "@lib/settings/verifyActions.util";
-import { type VerifyConfig } from "@lib/settings/verifyPanel.util";
 
 const CHANNEL = "400000000000000001";
 

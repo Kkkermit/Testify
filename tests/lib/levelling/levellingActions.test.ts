@@ -1,6 +1,7 @@
 import { type GuildMember, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { type Logger } from "@core/logger";
-import { DEFAULT_LEVEL_CONFIG, type LevelConfig } from "@lib/levelling/levelling.util";
+import { type LevelConfig } from "@lib/levelling/levelling.types";
+import { DEFAULT_LEVEL_CONFIG } from "@lib/levelling/levelling.util";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 
 const BRONZE = "400000000000000001";

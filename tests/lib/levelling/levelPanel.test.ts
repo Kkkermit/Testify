@@ -1,14 +1,9 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { DEFAULT_LEVEL_CONFIG, LEVEL_LIMITS, type LevelConfig } from "@lib/levelling/levelling.util";
-import {
-	isLevelTab,
-	LEVEL_PANEL_ID,
-	LEVEL_TABS,
-	levelPanel,
-	type LevelPanelState,
-	type LevelTab,
-} from "@lib/levelling/levelPanel.util";
+import { LEVEL_PANEL_ID, LEVEL_TABS } from "@lib/levelling/levelling.constants";
+import { type LevelConfig, type LevelPanelState, type LevelTab } from "@lib/levelling/levelling.types";
+import { DEFAULT_LEVEL_CONFIG, LEVEL_LIMITS } from "@lib/levelling/levelling.util";
+import { isLevelTab, levelPanel } from "@lib/levelling/levelPanel.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

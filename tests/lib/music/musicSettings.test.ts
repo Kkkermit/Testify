@@ -1,4 +1,5 @@
-import { isDj, MUSIC_SYSTEM_SUBCOMMAND, musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
+import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
+import { isDj, musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { type MusicSettings } from "@testify/shared";
 
 function settings(overrides: Partial<MusicSettings> = {}): MusicSettings {

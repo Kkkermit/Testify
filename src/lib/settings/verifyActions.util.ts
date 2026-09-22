@@ -4,7 +4,7 @@ import { customId } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { button, row } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
-import { type VerifyConfig } from "@lib/settings/verifyPanel.util";
+import { type VerifyConfig } from "@lib/settings/settings.types";
 
 /** What the Discord panel and the dashboard both do to verification, so neither can drift from the other. */
 

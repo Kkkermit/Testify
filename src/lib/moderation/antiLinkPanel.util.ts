@@ -1,23 +1,17 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { option, select, selectRow } from "@lib/discord/components.util";
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
 import { humanisePermission } from "@lib/format/format.util";
+import { ANTILINK_PANEL_ID } from "@lib/moderation/moderation.constants";
+import { type AntiLinkPanelState } from "@lib/moderation/moderation.types";
 import { settingsScreen } from "@lib/settings/settingsScreen.util";
 import { BYPASS_PERMISSIONS, type BypassPermission, DEFAULT_BYPASS, isBypassPermission } from "@testify/shared";
 
 /** Link removal, configured from one screen rather than `enable`/`disable`/`status`. */
 
-export const ANTILINK_PANEL_ID = "antilink";
-
 /** The permissions worth offering as a bypass live in `@testify/shared`, so the web form offers the same four. */
 export { BYPASS_PERMISSIONS, type BypassPermission, DEFAULT_BYPASS, isBypassPermission };
-
-export interface AntiLinkPanelState {
-	enabled: boolean;
-	bypass: BypassPermission;
-	note?: string;
-}
 
 export function antiLinkPanel(state: AntiLinkPanelState, ownerId: string): ContainerMessage {
 	return settingsScreen({

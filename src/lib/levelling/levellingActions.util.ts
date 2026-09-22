@@ -1,18 +1,12 @@
 import { type GuildMember, PermissionFlagsBits, type Role } from "discord.js";
 import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
-import { type LevelConfig, rewardChangeFor } from "@lib/levelling/levelling.util";
+import { type RewardOutcome, type LevelConfig } from "@lib/levelling/levelling.types";
+import { rewardChangeFor } from "@lib/levelling/levelling.util";
 
 /**
  * Handing out level reward roles, shared by the message handler and by the admin commands that set a level directly.
  */
-
-export interface RewardOutcome {
-	added: string[];
-	removed: string[];
-	/** Roles that could not be touched — deleted, managed, or above the bot. */
-	skipped: string[];
-}
 
 const EMPTY: RewardOutcome = { added: [], removed: [], skipped: [] };
 

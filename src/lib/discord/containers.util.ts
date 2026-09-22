@@ -1,9 +1,7 @@
 import {
-	type ActionRowBuilder,
 	type ButtonBuilder,
 	ContainerBuilder,
 	MediaGalleryBuilder,
-	type MessageActionRowComponentBuilder,
 	MessageFlags,
 	SectionBuilder,
 	SeparatorBuilder,
@@ -13,13 +11,9 @@ import {
 } from "discord.js";
 import { type Category } from "@config/categories";
 import { categoryColour } from "@config/theme";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 
 /** Components V2 — layout built from components rather than an embed. */
-
-export interface ContainerMessage {
-	components: ContainerBuilder[];
-	flags: MessageFlags.IsComponentsV2;
-}
 
 /** Wraps a container into a payload that is safe to `reply()`, `update()` or `send()`. */
 export function containerMessage(container: ContainerBuilder): ContainerMessage {
@@ -49,13 +43,6 @@ export function sectionWithThumbnail(markdown: string, imageUrl: string, descrip
 
 	return new SectionBuilder().addTextDisplayComponents(text(markdown)).setThumbnailAccessory(thumbnail);
 }
-
-export type ContainerPart =
-	| TextDisplayBuilder
-	| SectionBuilder
-	| SeparatorBuilder
-	| MediaGalleryBuilder
-	| ActionRowBuilder<MessageActionRowComponentBuilder>;
 
 /**
  * Builds a container, colour-coded by category so V2 messages stay visually consistent with the embeds they sit

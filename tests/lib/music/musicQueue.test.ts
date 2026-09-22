@@ -1,19 +1,17 @@
+import { EMPTY_QUEUE, MAX_TRACK_ATTEMPTS } from "@lib/music/music.constants";
+import { type QueueState, type Track } from "@lib/music/music.types";
 import {
 	clearUpcoming,
 	currentTrack,
 	decideOnIdle,
 	EARLY_TOLERANCE_MS,
-	EMPTY_QUEUE,
 	endedEarly,
 	enqueue,
 	enqueueNext,
-	MAX_TRACK_ATTEMPTS,
 	nextIndex,
-	type QueueState,
 	removeAt,
 	shuffleUpcoming,
 	totalDurationMs,
-	type Track,
 	upcomingPage,
 	withLoop,
 } from "@lib/music/musicQueue.util";

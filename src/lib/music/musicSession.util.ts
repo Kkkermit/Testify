@@ -12,22 +12,22 @@ import {
 } from "@discordjs/voice";
 import { type Guild, type VoiceBasedChannel } from "discord.js";
 import { type Logger } from "@core/logger";
-import { type ContainerMessage } from "@lib/discord/containers.util";
-import { type MusicBinaries } from "@lib/music/musicBinaries.util";
-import { clampVolume, DEFAULT_VOLUME, planStream, type StreamShape } from "@lib/music/musicFormat.util";
-import { musicPanel } from "@lib/music/musicPanel.util";
-import { classifyProblem, type DownloadProblem, RETRIES_AFTER } from "@lib/music/musicProblem.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
+import { DEFAULT_VOLUME, RETRIES_AFTER, EMPTY_QUEUE, MAX_TRACK_ATTEMPTS } from "@lib/music/music.constants";
 import {
-	currentTrack,
-	decideOnIdle,
-	EMPTY_QUEUE,
-	endedEarly,
-	MAX_TRACK_ATTEMPTS,
+	type MusicBinaries,
+	type StreamShape,
+	type DownloadProblem,
 	type LoopMode,
 	type QueueState,
 	type Track,
-} from "@lib/music/musicQueue.util";
-import { describeTrack, forgetDescription, type OpenStream, openStream } from "@lib/music/musicSource.util";
+	type OpenStream,
+} from "@lib/music/music.types";
+import { clampVolume, planStream } from "@lib/music/musicFormat.util";
+import { musicPanel } from "@lib/music/musicPanel.util";
+import { classifyProblem } from "@lib/music/musicProblem.util";
+import { currentTrack, decideOnIdle, endedEarly } from "@lib/music/musicQueue.util";
+import { describeTrack, forgetDescription, openStream } from "@lib/music/musicSource.util";
 
 /** One guild's voice connection, player and queue, and the rules for moving between tracks. */
 

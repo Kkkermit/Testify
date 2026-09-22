@@ -1,11 +1,5 @@
+import { type MusicSource, type Query } from "@lib/music/music.types";
 /** What a `/play` argument turns out to be, before anything touches the network. */
-
-export const MUSIC_SOURCES = ["youtube", "soundcloud", "spotify", "other"] as const;
-
-export type MusicSource = (typeof MUSIC_SOURCES)[number];
-
-export type Query =
-	{ kind: "url"; url: string; source: MusicSource } | { kind: "search"; terms: string; source: MusicSource };
 
 const HOSTS: { pattern: RegExp; source: MusicSource }[] = [
 	{ pattern: /(^|\.)(youtube\.com|youtu\.be|youtube-nocookie\.com)$/i, source: "youtube" },

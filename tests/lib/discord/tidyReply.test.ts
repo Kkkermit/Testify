@@ -1,7 +1,8 @@
 import { type EmbedBuilder, type Message } from "discord.js";
 import { type TestifyClient } from "@core/client";
+import { TIDY_AFTER_MS } from "@lib/discord/discord.constants";
 import { errorEmbed } from "@lib/discord/embeds.util";
-import { cleanupFooter, replyTemporarily, TIDY_AFTER_MS } from "@lib/discord/tidyReply.util";
+import { cleanupFooter, replyTemporarily } from "@lib/discord/tidyReply.util";
 
 /** These notices clean themselves up, and say so — a message that vanishes unannounced reads as a glitch. */
 function harness(): { client: TestifyClient; message: Message; deleted: jest.Mock; after: jest.Mock } {

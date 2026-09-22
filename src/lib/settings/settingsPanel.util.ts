@@ -1,7 +1,8 @@
 import { type ActionRowBuilder, ButtonStyle, type MessageActionRowComponentBuilder } from "discord.js";
 import { type Category } from "@config/categories";
 import { customId } from "@core/button";
-import { button, disableAll, type RenderedScreen, row } from "@lib/discord/components.util";
+import { button, disableAll, row } from "@lib/discord/components.util";
+import { type RenderedScreen } from "@lib/discord/discord.types";
 import { embed } from "@lib/discord/embeds.util";
 
 /** A config screen: current values on the left, one button per editable field. */

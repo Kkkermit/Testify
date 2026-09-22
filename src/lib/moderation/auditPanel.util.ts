@@ -1,41 +1,19 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, channelSelect, option, row, select, selectRow } from "@lib/discord/components.util";
-import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	text,
-} from "@lib/discord/containers.util";
+import { container, containerMessage, divider, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { AUDIT_EVENT_LABELS } from "@lib/moderation/auditLabels.util";
+import { AUDIT_PANEL_ID } from "@lib/moderation/moderation.constants";
+import { type AuditDraft, type AuditPanelState } from "@lib/moderation/moderation.types";
 import { AUDIT_EVENTS, type AuditEvent, collapseEnabled, isAuditEvent, resolveEnabled } from "@testify/shared";
 
 /** Audit logging, as a panel you click rather than a list you type. */
-
-export const AUDIT_PANEL_ID = "audit";
 
 /** Stands in for "no channel yet", because a custom ID part cannot be empty. */
 const NO_CHANNEL = "-";
 
 export { collapseEnabled, isAuditEvent, resolveEnabled };
-
-export interface AuditPanelState {
-	channelId: string | null;
-	/** `["all"]` means every event, which is how the config has always stored it. */
-	enabled: string[];
-	/** True when the panel is showing edits that are not in the database yet. */
-	dirty?: boolean;
-	/** Where the same thing can be configured in a browser, when the dashboard is switched on. */
-	hint?: string | null;
-}
-
-/** What the admin has picked in one message, before Save writes it. */
-export interface AuditDraft {
-	channelId: string | null;
-	events: AuditEvent[];
-}
 
 /**
  * Eighteen event names do not fit in Discord's 100 characters, but eighteen bits do: one bit per event at its index

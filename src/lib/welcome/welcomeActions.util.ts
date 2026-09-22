@@ -2,7 +2,8 @@ import { type AttachmentBuilder, type EmbedBuilder, type GuildMember } from "dis
 import { type WelcomeSettings } from "@database/models/guildSettings.schema";
 import { renderWelcomeCard } from "@lib/canvas/welcomeCard.util";
 import { embed } from "@lib/discord/embeds.util";
-import { fillTemplate, type WelcomeConfig } from "@lib/welcome/welcome.util";
+import { type WelcomeConfig } from "@lib/welcome/welcome.types";
+import { fillTemplate } from "@lib/welcome/welcome.util";
 
 /**
  * Builds the greeting, once, for every surface that sends one: the join event, the panel's Preview button and

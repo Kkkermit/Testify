@@ -1,9 +1,10 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { type EconomyAccount } from "@database/models/economy.schema";
-import { BALANCE_PANEL_ID, balancePanel } from "@lib/economy/balancePanel.util";
+import { balancePanel } from "@lib/economy/balancePanel.util";
+import { BALANCE_PANEL_ID, INVENTORY_PANEL_ID } from "@lib/economy/economy.constants";
 import { dailyReady, USE_OUTCOMES } from "@lib/economy/economyActions.util";
-import { heldItems, INVENTORY_PANEL_ID, inventoryScreen } from "@lib/economy/inventoryScreen.util";
+import { heldItems, inventoryScreen } from "@lib/economy/inventoryScreen.util";
 import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";

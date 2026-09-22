@@ -1,7 +1,8 @@
 import play from "@commands/music/play.command";
+import { CHOICE_MAX } from "@lib/music/music.constants";
+import { type Track } from "@lib/music/music.types";
 import type * as MusicActions from "@lib/music/musicActions.util";
-import { type Track } from "@lib/music/musicQueue.util";
-import { CHOICE_MAX, MAX_CHOICES } from "@lib/music/musicSearch.util";
+import { MAX_CHOICES } from "@lib/music/musicSearch.util";
 import type * as MusicSource from "@lib/music/musicSource.util";
 
 jest.mock("@lib/music/musicActions.util", () => ({

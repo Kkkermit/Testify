@@ -1,15 +1,11 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { roleSelect, row } from "@lib/discord/components.util";
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
+import { AUTOROLE_PANEL_ID, MAX_AUTO_ROLES } from "@lib/settings/settings.constants";
 import { roleValue, settingsScreen } from "@lib/settings/settingsScreen.util";
 
 /** Auto-roles, as a pre-ticked menu rather than `add` and `remove` subcommands. */
-
-export const AUTOROLE_PANEL_ID = "autorole";
-
-/** Discord's cap on a role select, and plenty for a join list. */
-export const MAX_AUTO_ROLES = 10;
 
 export interface AutoRolePanelState {
 	roleIds: string[];

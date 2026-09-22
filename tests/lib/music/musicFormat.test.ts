@@ -1,11 +1,6 @@
-import {
-	clampVolume,
-	DEFAULT_VOLUME,
-	MAX_VOLUME,
-	MIN_VOLUME,
-	planStream,
-	type RemoteFormat,
-} from "@lib/music/musicFormat.util";
+import { DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME } from "@lib/music/music.constants";
+import { type RemoteFormat } from "@lib/music/music.types";
+import { clampVolume, planStream } from "@lib/music/musicFormat.util";
 
 function format(overrides: Partial<RemoteFormat> & { format_id: string }): RemoteFormat {
 	return { acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160, ...overrides };

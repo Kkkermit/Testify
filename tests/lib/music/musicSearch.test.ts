@@ -1,7 +1,7 @@
-import { type Track } from "@lib/music/musicQueue.util";
+import { CHOICE_MAX } from "@lib/music/music.constants";
+import { type Track } from "@lib/music/music.types";
 import {
 	type Choice,
-	CHOICE_MAX,
 	INTERACTION_WINDOW_MS,
 	interactionAge,
 	choiceFor,

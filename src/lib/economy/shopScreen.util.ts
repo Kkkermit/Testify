@@ -1,32 +1,24 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
+import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
+import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
+import { SHOP_SECTIONS, PET_RARITIES, SHOP_ID } from "@lib/economy/economy.constants";
 import {
-	container,
-	type ContainerMessage,
-	containerMessage,
-	type ContainerPart,
-	divider,
-	sectionWithButton,
-	text,
-} from "@lib/discord/containers.util";
-import { ALL_PETS, type PetSpecies, PETS_BY_RARITY } from "@lib/economy/pets.util";
+	type ShopSection,
+	type PetRarityKey,
+	type ShopState,
+	type Balances,
+	type PetSpecies,
+} from "@lib/economy/economy.types";
+import { ALL_PETS, PETS_BY_RARITY } from "@lib/economy/pets.util";
 import { BUSINESSES, HOUSES, JOBS, SHOP_ITEMS } from "@lib/economy/shop.util";
 import { formatNumber } from "@lib/format/format.util";
 
 /** The shop, as a drill-down rather than a list of IDs to copy. */
 
-export const SHOP_ID = "shop";
-
 /** How many entries get their own row with a buy button before it pages. */
 export const SHOP_PAGE_SIZE = 5;
-
-export const SHOP_SECTIONS = ["items", "houses", "businesses", "jobs", "pets"] as const;
-export type ShopSection = (typeof SHOP_SECTIONS)[number];
-
-export const PET_RARITIES = ["common", "uncommon", "rare", "epic", "legendary"] as const;
-/** The shop's filter key: `pets.util`'s `PetRarity`, lowercased, as it travels in a custom ID. */
-export type PetRarityKey = (typeof PET_RARITIES)[number];
 
 const SECTION_LABELS: Record<ShopSection, string> = {
 	items: "Items",
@@ -38,16 +30,6 @@ const SECTION_LABELS: Record<ShopSection, string> = {
 
 /** `-` stands in for an absent part, because a custom ID cannot hold an empty one. */
 const NONE = "-";
-
-export interface ShopState {
-	section: ShopSection;
-	/** One level deeper, pets only. */
-	rarity?: PetRarityKey;
-	/** Set on the detail view. */
-	selectedId?: string;
-	/** Which page of the catalogue. */
-	page?: number;
-}
 
 export function isShopSection(value: string): value is ShopSection {
 	return (SHOP_SECTIONS as readonly string[]).includes(value);
@@ -108,17 +90,6 @@ export interface Entry {
 	owned?: boolean;
 	/** What selling it back would pay. */
 	refund?: number;
-}
-
-export interface Balances {
-	wallet: number;
-	ownsHouse: boolean;
-	/** Which house, so it can offer to sell that one specifically. */
-	houseId?: string;
-	ownedBusinessIds: string[];
-	ownedItemIds: string[];
-	job: string;
-	hasPet: boolean;
 }
 
 function petEntry(pet: PetSpecies, balances: Balances): Entry {

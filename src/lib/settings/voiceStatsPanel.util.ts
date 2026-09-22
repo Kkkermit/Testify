@@ -1,18 +1,12 @@
 import { ButtonStyle, ChannelType } from "discord.js";
 import { customId } from "@core/button";
 import { channelSelect, row } from "@lib/discord/components.util";
-import { type ContainerMessage } from "@lib/discord/containers.util";
+import { type ContainerMessage } from "@lib/discord/discord.types";
+import { VOICESTATS_PANEL_ID } from "@lib/settings/settings.constants";
+import { type VoiceStatsPanelState } from "@lib/settings/settings.types";
 import { channelValue, settingsScreen } from "@lib/settings/settingsScreen.util";
 
 /** Live member and bot counts in voice channel names, from one screen. */
-
-export const VOICESTATS_PANEL_ID = "voicestats";
-
-export interface VoiceStatsPanelState {
-	memberChannelId: string | null;
-	botChannelId: string | null;
-	note?: string;
-}
 
 /** Voice channels only: the count is the channel's name, and text names cannot show it. */
 const VOICE_TYPES = [ChannelType.GuildVoice, ChannelType.GuildStageVoice];

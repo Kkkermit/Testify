@@ -1,17 +1,9 @@
 import { spawnSync } from "node:child_process";
 import { delimiter, join } from "node:path";
 import { repoRoot } from "@core/paths";
+import { type MusicBinaries } from "@lib/music/music.types";
 
 /** Finding the two executables the player spawns, and saying plainly when one is missing. */
-
-export interface MusicBinaries {
-	/** Required: nothing can be resolved or streamed without it. */
-	ytDlp: string | null;
-	/** Optional: only a source that is not already Opus needs transcoding. */
-	ffmpeg: string | null;
-	/** What the chosen yt-dlp reports, which is a release date and so also its age. */
-	ytDlpVersion?: string | null;
-}
 
 export type Probe = (path: string, args: string[]) => boolean;
 

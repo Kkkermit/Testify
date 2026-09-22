@@ -1,36 +1,10 @@
-import { type MusicSource } from "@lib/music/musicQuery.util";
+import { MAX_TRACK_ATTEMPTS } from "@lib/music/music.constants";
+import { type LoopMode, type QueueState, type Track } from "@lib/music/music.types";
 
 /** The queue and the rules for moving through it, with no voice connection and no network in sight. */
 
-export interface Track {
-	/** Stable across a restart, so a panel left open still names the right thing. */
-	url: string;
-	title: string;
-	author: string | null;
-	durationMs: number | null;
-	thumbnail: string | null;
-	source: MusicSource;
-	requestedBy: string;
-}
-
-export const LOOP_MODES = ["off", "track", "queue"] as const;
-
-export type LoopMode = (typeof LOOP_MODES)[number];
-
-export interface QueueState {
-	tracks: Track[];
-	/** Which track is playing; -1 before anything has started. */
-	index: number;
-	loop: LoopMode;
-}
-
-export const EMPTY_QUEUE: QueueState = { tracks: [], index: -1, loop: "off" };
-
 /** A track shorter than this much of its stated length came apart rather than finished. */
 export const EARLY_TOLERANCE_MS = 2_000;
-
-/** Past this many goes at one track, the queue moves on rather than stalling on it for ever. */
-export const MAX_TRACK_ATTEMPTS = 3;
 
 export function currentTrack(state: QueueState): Track | null {
 	return state.tracks[state.index] ?? null;

@@ -1,5 +1,6 @@
 import { LEVELLING } from "@config/constants";
 import { type LevelReward, type LevelSettings, type XpBoost } from "@database/models/guildSettings.schema";
+import { type LevelConfig } from "@lib/levelling/levelling.types";
 import { LEVEL_LIMITS } from "@testify/shared";
 
 /**
@@ -10,19 +11,6 @@ import { LEVEL_LIMITS } from "@testify/shared";
 // Declared in `@testify/shared` so the dashboard's forms validate against the same numbers, and re-exported
 // here because every caller in the bot already imports it from this module.
 export { LEVEL_LIMITS };
-
-/** Level settings with every optional field resolved. */
-export interface LevelConfig {
-	enabled: boolean;
-	boosts: XpBoost[];
-	rewards: LevelReward[];
-	stackRewards: boolean;
-	/** `null` means "reply wherever the message was sent". */
-	levelUpChannelId: string | null;
-	announce: boolean;
-	ignoredChannelIds: string[];
-	ignoredRoleIds: string[];
-}
 
 /** What a guild gets before anyone configures anything. */
 export const DEFAULT_LEVEL_CONFIG: LevelConfig = {

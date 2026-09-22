@@ -1,19 +1,17 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
+import { SHOP_ID, SHOP_SECTIONS } from "@lib/economy/economy.constants";
+import { type Balances, type ShopState } from "@lib/economy/economy.types";
 import { ALL_PETS } from "@lib/economy/pets.util";
 import { HOUSES, JOBS, SHOP_ITEMS } from "@lib/economy/shop.util";
 import {
-	type Balances,
 	decodeShopState,
 	encodeShopState,
 	entriesFor,
 	isPetRarity,
 	isShopSection,
-	SHOP_ID,
 	SHOP_PAGE_SIZE,
-	SHOP_SECTIONS,
 	shopScreen,
-	type ShopState,
 } from "@lib/economy/shopScreen.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
