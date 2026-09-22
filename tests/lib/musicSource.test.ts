@@ -1,10 +1,11 @@
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import {
 	argumentsFor,
 	describeTrack,
 	ffmpegArgs,
+	forgetDescription,
 	openStream,
 	parseJsonLines,
 	resolveTracks,
@@ -461,5 +462,66 @@ describe("ytDlpStreamArgs", () => {
 		expect(ytDlpStreamArgs("251", "https://youtu.be/abc")).toEqual(
 			expect.arrayContaining(["--retries", "--fragment-retries"]),
 		);
+	});
+});
+
+describe("describeTrack's memory", () => {
+	let directory: string;
+	let counter: string;
+	let binary: string;
+
+	beforeAll(() => {
+		directory = mkdtempSync(join(tmpdir(), "testify-describe-"));
+		counter = join(directory, "runs");
+		binary = join(directory, "counting-yt-dlp");
+		// Appends a line per run, so the test can count how often YouTube would have been asked.
+		writeFileSync(
+			binary,
+			`#!/bin/sh\necho run >> ${counter}\nprintf '{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251"}]}\\n'\n`,
+			{ mode: 0o755 },
+		);
+	});
+
+	afterAll(() => {
+		rmSync(directory, { recursive: true, force: true });
+	});
+
+	function runs(): number {
+		return existsSync(counter) ? readFileSync(counter, "utf8").trim().split("\n").length : 0;
+	}
+
+	/**
+	 * A volume change, a Previous and every retry re-open the track; each used to cost an extraction on top of
+	 * the download, and request volume is part of what gets a host flagged by YouTube.
+	 */
+	it("asks the downloader once for a track it has just described", async () => {
+		const binaries = { ytDlp: binary, ffmpeg: null };
+		const before = runs();
+
+		await describeTrack("https://youtu.be/cached", binaries);
+		await describeTrack("https://youtu.be/cached", binaries);
+
+		expect(runs() - before).toBe(1);
+	});
+
+	it("asks again once the description has been forgotten", async () => {
+		const binaries = { ytDlp: binary, ffmpeg: null };
+		await describeTrack("https://youtu.be/forgotten", binaries);
+		const before = runs();
+
+		forgetDescription("https://youtu.be/forgotten", binaries);
+		await describeTrack("https://youtu.be/forgotten", binaries);
+
+		expect(runs() - before).toBe(1);
+	});
+
+	it("asks again once the description is stale", async () => {
+		const binaries = { ytDlp: binary, ffmpeg: null };
+		await describeTrack("https://youtu.be/stale", binaries, 0);
+		const before = runs();
+
+		await describeTrack("https://youtu.be/stale", binaries, 3_600_000);
+
+		expect(runs() - before).toBe(1);
 	});
 });

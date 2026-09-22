@@ -16,15 +16,18 @@ import { type ContainerMessage } from "@lib/containers.util";
 import { type MusicBinaries } from "@lib/musicBinaries.util";
 import { clampVolume, DEFAULT_VOLUME, planStream, type StreamShape } from "@lib/musicFormat.util";
 import { musicPanel } from "@lib/musicPanel.util";
+import { classifyProblem, type DownloadProblem, RETRIES_AFTER } from "@lib/musicProblem.util";
 import {
 	currentTrack,
 	decideOnIdle,
 	EMPTY_QUEUE,
+	endedEarly,
+	MAX_TRACK_ATTEMPTS,
 	type LoopMode,
 	type QueueState,
 	type Track,
 } from "@lib/musicQueue.util";
-import { describeTrack, type OpenStream, openStream } from "@lib/musicSource.util";
+import { describeTrack, forgetDescription, type OpenStream, openStream } from "@lib/musicSource.util";
 
 /** One guild's voice connection, player and queue, and the rules for moving between tracks. */
 
@@ -43,6 +46,9 @@ export const LEAVE_AFTER_IDLE_MS = 120_000;
  * it — and the bar moves often enough to read as progress rather than as a frozen picture of it.
  */
 export const PANEL_REFRESH_MS = 5_000;
+
+/** How long a "skipped because…" line stays on the panel, which is long enough to be read after the next refresh. */
+export const NOTICE_MS = 60_000;
 
 const STREAM_TYPES: Record<StreamShape, StreamType> = {
 	"webm-opus": StreamType.WebmOpus,
@@ -83,6 +89,11 @@ export class MusicSession {
 	#stopping = false;
 	#skipped = false;
 	#failures = 0;
+	/** What the downloader of the current stream said before it died, when it said something that matters. */
+	#problem: DownloadProblem | null = null;
+	/** Bumped per stream, so a stream closed on purpose cannot report into the one that replaced it. */
+	#generation = 0;
+	#notice: { text: string; at: number } | null = null;
 	#volume = DEFAULT_VOLUME;
 	#offsetMs = 0;
 	#reopening = false;
@@ -205,6 +216,9 @@ export class MusicSession {
 			this.#reopening = true;
 			this.#closeStream();
 
+			this.#problem = null;
+			const generation = ++this.#generation;
+
 			const info = await describeTrack(track.url, this.#binaries);
 			const plan = info === null ? null : planStream(info.formats ?? [], { ffmpeg: this.canSetVolume, filtered });
 
@@ -216,8 +230,7 @@ export class MusicSession {
 				const stream = openStream(track.url, plan, this.#binaries, {
 					volume: this.#volume,
 					seekMs,
-					onProblem: (reason) =>
-						this.#logger.warn({ guildId: this.guildId, reason, track: track.url }, "[MUSIC] The downloader gave up."),
+					onProblem: (reason) => this.#onProblem(generation, track, reason),
 				});
 				const resource = createAudioResource(stream.stream, { inputType: STREAM_TYPES[plan.shape] });
 
@@ -238,6 +251,7 @@ export class MusicSession {
 		}
 
 		if (failure !== null) {
+			this.#notify(`Skipped **${track.title}** — ${failure}.`);
 			this.#emit({ kind: "failed", track, reason: failure });
 			await this.#advancePast();
 			return;
@@ -253,6 +267,8 @@ export class MusicSession {
 		if (this.#destroyed || this.#reopening) return;
 
 		const track = currentTrack(this.queue);
+		const problem = this.#problem;
+		const brokeEarly = !this.#skipped && !this.#stopping && endedEarly(this.playedMs, track?.durationMs ?? null);
 		const decision = decideOnIdle({
 			state: this.queue,
 			playedMs: this.playedMs,
@@ -260,6 +276,7 @@ export class MusicSession {
 			attempts: this.#attempts,
 			stopping: this.#stopping,
 			skipped: this.#skipped,
+			attemptsAllowed: problem === null ? MAX_TRACK_ATTEMPTS : RETRIES_AFTER[problem.kind],
 		});
 
 		const resumeAt = this.#offsetMs;
@@ -272,6 +289,12 @@ export class MusicSession {
 			return;
 		}
 
+		// Given up on: the panel is the only place anybody in the channel would find out why.
+		if (brokeEarly && track !== null) {
+			this.#notify(`Skipped **${track.title}** — ${problem?.advice ?? "the stream kept breaking."}`);
+			this.#emit({ kind: "failed", track, reason: problem?.advice ?? "the stream kept breaking" });
+		}
+
 		this.#attempts = 0;
 
 		if (decision.action === "play") {
@@ -281,6 +304,31 @@ export class MusicSession {
 
 		this.#stopping = false;
 		this.#endQueue();
+	}
+
+	#onProblem(generation: number, track: Track, reason: string): void {
+		if (generation !== this.#generation) return;
+
+		const problem = classifyProblem(reason);
+		this.#problem = problem;
+		// A refused track is described afresh next time, in case what it was refused for has changed.
+		if (problem !== null) forgetDescription(track.url, this.#binaries);
+
+		this.#logger.warn(
+			{ guildId: this.guildId, reason, track: track.url, ytDlp: this.#binaries.ytDlpVersion ?? null },
+			problem === null ? "[MUSIC] The downloader gave up." : `[MUSIC] ${problem.advice.replaceAll("`", "")}`,
+		);
+	}
+
+	#notify(text: string, now = Date.now()): void {
+		this.#notice = { text, at: now };
+	}
+
+	/** The last thing that went wrong, while it is still recent enough to be the thing somebody is wondering about. */
+	notice(now = Date.now()): string | undefined {
+		if (this.#notice === null || now - this.#notice.at > NOTICE_MS) return undefined;
+
+		return this.#notice.text;
 	}
 
 	/**
@@ -377,7 +425,7 @@ export class MusicSession {
 				volume: this.#volume,
 				canSetVolume: this.canSetVolume,
 				page,
-				note,
+				note: note ?? this.notice(),
 			},
 			userId,
 		);

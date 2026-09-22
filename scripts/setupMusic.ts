@@ -42,8 +42,20 @@ async function main(): Promise<void> {
 
 	process.stdout.write(`Saved ${target}\n`);
 
-	const found = findBinaries({ MUSIC_YTDLP_PATH: target });
-	process.stdout.write(found.ytDlp === null ? "Downloaded, but it would not run.\n" : "Verified: it runs.\n");
+	const fetched = findBinaries({ MUSIC_YTDLP_PATH: target });
+	process.stdout.write(
+		fetched.ytDlp === null
+			? "Downloaded, but it would not run.\n"
+			: `Verified: it runs (${String(fetched.ytDlpVersion)}).\n`,
+	);
+
+	// The bot runs the newest copy it can find, so say which one that is now rather than assume it is this one.
+	const found = findBinaries({});
+	process.stdout.write(
+		found.ytDlp === null
+			? ""
+			: `The bot will use ${found.ytDlp} (${String(found.ytDlpVersion)}). Restart it to pick this up.\n`,
+	);
 	process.stdout.write(
 		found.ffmpeg === null
 			? "\nFFmpeg was not found. Most tracks still play; ones not already in Opus will not.\nInstall it with your package manager, or set MUSIC_FFMPEG_PATH.\n"

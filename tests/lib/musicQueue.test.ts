@@ -238,3 +238,28 @@ describe("totalDurationMs", () => {
 		expect(totalDurationMs([])).toBe(0);
 	});
 });
+
+describe("decideOnIdle with fewer attempts allowed", () => {
+	const two: QueueState = {
+		tracks: [
+			{ url: "a", title: "a", author: null, durationMs: 180_000, thumbnail: null, source: "youtube", requestedBy: "u" },
+			{ url: "b", title: "b", author: null, durationMs: 180_000, thumbnail: null, source: "youtube", requestedBy: "u" },
+		],
+		index: 0,
+		loop: "off",
+	};
+
+	it("moves on at once when no retry is allowed", () => {
+		expect(decideOnIdle({ state: two, playedMs: 0, expectedMs: 180_000, attempts: 0, attemptsAllowed: 0 })).toEqual({
+			action: "play",
+			index: 1,
+		});
+	});
+
+	it("still retries up to the number allowed", () => {
+		expect(decideOnIdle({ state: two, playedMs: 0, expectedMs: 180_000, attempts: 0, attemptsAllowed: 1 })).toEqual({
+			action: "retry",
+			attempt: 1,
+		});
+	});
+});

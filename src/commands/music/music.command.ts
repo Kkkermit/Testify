@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { asMember, type CommandInput, defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { musicBinaries, requireSession, requireVolumeControl, sameChannelAs, showPanel } from "@lib/musicActions.util";
+import { statusLines } from "@lib/musicBinaries.util";
 import { MAX_VOLUME, MIN_VOLUME } from "@lib/musicFormat.util";
 import {
 	clearUpcoming,
@@ -260,23 +261,9 @@ export default defineCommand({
 		},
 		{
 			name: "status",
-			description: "Shows which players the host has installed.",
+			description: "Shows which players the host has installed, and how old they are.",
 			async run(interaction, client) {
-				const found = musicBinaries(client);
-				const line = (name: string, path: string | null): string =>
-					path === null ? `✗ **${name}** — not found` : `✓ **${name}** — \`${path}\``;
-
-				await reply(interaction, {
-					content: [
-						line("yt-dlp", found.ytDlp),
-						line("FFmpeg", found.ffmpeg),
-						found.ffmpeg === null
-							? "-# Without FFmpeg, tracks not already in Opus cannot play and the volume cannot be changed."
-							: "",
-					]
-						.filter((part) => part !== "")
-						.join("\n"),
-				});
+				await reply(interaction, { content: statusLines(musicBinaries(client)).join("\n") });
 			},
 		},
 	],

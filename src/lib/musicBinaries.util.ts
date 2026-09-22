@@ -9,9 +9,17 @@ export interface MusicBinaries {
 	ytDlp: string | null;
 	/** Optional: only a source that is not already Opus needs transcoding. */
 	ffmpeg: string | null;
+	/** What the chosen yt-dlp reports, which is a release date and so also its age. */
+	ytDlpVersion?: string | null;
 }
 
 export type Probe = (path: string, args: string[]) => boolean;
+
+/** The first line a binary prints for its version, or null when it would not run. */
+export type VersionProbe = (path: string) => string | null;
+
+/** YouTube changes often enough that an extractor older than this is the likeliest cause of a 403. */
+export const STALE_AFTER_DAYS = 30;
 
 /**
  * The flag each binary answers to.
@@ -46,8 +54,8 @@ function packaged(name: string, executable: string, root: string): string[] {
 /**
  * Every place a binary might be, in the order a self-hoster would expect them to win.
  *
- * PATH beats the bundled copy deliberately: somebody who installed yt-dlp themselves keeps it current, and a
- * stale extractor is the commonest way music breaks.
+ * For yt-dlp this is only the tie-break — `locateYtDlp` runs the newest — so PATH beating the bundled copy
+ * matters when the two are the same release.
  */
 export function candidatesFor(
 	name: string,
@@ -76,12 +84,126 @@ export function locate(name: string, configured: string | undefined, probe: Prob
 	return candidatesFor(name, configured).find((candidate) => probe(candidate, args)) ?? null;
 }
 
+export const readVersion: VersionProbe = (path) => {
+	const attempt = spawnSync(path, [VERSION_FLAG["yt-dlp"] ?? "--version"], {
+		encoding: "utf8",
+		timeout: 10_000,
+		windowsHide: true,
+	});
+	if (attempt.error !== undefined || attempt.status !== 0) return null;
+
+	const first = attempt.stdout.trim().split("\n")[0]?.trim() ?? "";
+
+	return first === "" ? null : first;
+};
+
+/** yt-dlp versions are release dates — `2026.09.15`, sometimes with a fourth part — so they sort as dates do. */
+export function releaseDateOf(version: string): Date | null {
+	const match = /^(\d{4})\.(\d{1,2})\.(\d{1,2})/.exec(version.trim());
+	if (match === null) return null;
+
+	const [, year = "", month = "", day = ""] = match;
+	const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+
+	return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function versionKey(version: string): string {
+	const parts = version
+		.trim()
+		.split(".")
+		.map((part) => part.padStart(6, "0"));
+
+	return parts.join(".");
+}
+
+/** Whole days since the release, or null for a version that is not a date. */
+export function ageInDays(version: string, now = Date.now()): number | null {
+	const released = releaseDateOf(version);
+	if (released === null) return null;
+
+	return Math.max(0, Math.floor((now - released.getTime()) / 86_400_000));
+}
+
+export interface Found {
+	path: string;
+	version: string;
+}
+
+/** The newest that runs; on a tie the earlier candidate keeps its place, so the lookup order still means something. */
+export function pickNewest(found: Found[]): Found | null {
+	let best: Found | null = null;
+
+	for (const candidate of found) {
+		if (best === null || versionKey(candidate.version) > versionKey(best.version)) best = candidate;
+	}
+
+	return best;
+}
+
+/**
+ * The yt-dlp to run.
+ *
+ * A configured path is an explicit choice and wins outright. Otherwise the freshest copy wins wherever it lives,
+ * because a stale extractor is the commonest way YouTube breaks — and `npm run music:setup` writes to `bin/`,
+ * which under a plain first-found order would never run while the npm package's copy exists.
+ */
+export function locateYtDlp(
+	configured: string | undefined,
+	version: VersionProbe = readVersion,
+	pathVar = process.env.PATH ?? "",
+	root = repoRoot(),
+): Found | null {
+	if (configured !== undefined) {
+		const own = version(configured);
+		if (own !== null) return { path: configured, version: own };
+	}
+
+	const found = candidatesFor("yt-dlp", undefined, pathVar, root).flatMap((path) => {
+		const reported = version(path);
+		return reported === null ? [] : [{ path, version: reported }];
+	});
+
+	return pickNewest(found);
+}
+
 export function findBinaries(
 	env: { MUSIC_YTDLP_PATH?: string | undefined; MUSIC_FFMPEG_PATH?: string | undefined },
-	probe: Probe = runs,
+	probes: { runs?: Probe; version?: VersionProbe } = {},
 ): MusicBinaries {
+	const ytDlp = locateYtDlp(env.MUSIC_YTDLP_PATH, probes.version);
+
 	return {
-		ytDlp: locate("yt-dlp", env.MUSIC_YTDLP_PATH, probe),
-		ffmpeg: locate("ffmpeg", env.MUSIC_FFMPEG_PATH, probe),
+		ytDlp: ytDlp?.path ?? null,
+		ffmpeg: locate("ffmpeg", env.MUSIC_FFMPEG_PATH, probes.runs),
+		ytDlpVersion: ytDlp?.version ?? null,
 	};
+}
+
+/** What `/music status` says: where each binary is, how old the extractor is, and what to do about it. */
+export function statusLines(found: MusicBinaries, now = Date.now()): string[] {
+	const lines: string[] = [];
+	const version = found.ytDlpVersion ?? null;
+	const age = version === null ? null : ageInDays(version, now);
+
+	if (found.ytDlp === null) {
+		lines.push("✗ **yt-dlp** — not found. Run `npm run music:setup` on the host.");
+	} else {
+		const aged = version === null ? "" : ` ${version}${age === null ? "" : ` (${String(age)} days old)`}`;
+		lines.push(`✓ **yt-dlp**${aged} — \`${found.ytDlp}\``);
+	}
+
+	lines.push(found.ffmpeg === null ? "✗ **FFmpeg** — not found" : `✓ **FFmpeg** — \`${found.ffmpeg}\``);
+
+	if (age !== null && age > STALE_AFTER_DAYS) {
+		lines.push(
+			"-# ⚠️ YouTube changes often, and an extractor this old is the usual cause of `HTTP Error 403`. Run `npm run music:setup` on the host, then restart the bot.",
+		);
+	}
+
+	if (found.ffmpeg === null) {
+		lines.push("-# Without FFmpeg, tracks not already in Opus cannot play and the volume cannot be changed.");
+	}
+
+	return lines;
 }

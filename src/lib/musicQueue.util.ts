@@ -124,12 +124,22 @@ export function decideOnIdle(input: {
 	stopping?: boolean;
 	/** Set when a person pressed Skip, so a deliberately shortened track is not mistaken for a broken one. */
 	skipped?: boolean;
+	/** Fewer than the usual when the downloader said why it stopped, and the reason is not one a retry fixes. */
+	attemptsAllowed?: number;
 }): IdleAction {
-	const { state, playedMs, expectedMs, attempts, stopping = false, skipped = false } = input;
+	const {
+		state,
+		playedMs,
+		expectedMs,
+		attempts,
+		stopping = false,
+		skipped = false,
+		attemptsAllowed = MAX_TRACK_ATTEMPTS,
+	} = input;
 
 	if (stopping) return { action: "stop", reason: "requested" };
 
-	if (!skipped && endedEarly(playedMs, expectedMs) && attempts < MAX_TRACK_ATTEMPTS) {
+	if (!skipped && endedEarly(playedMs, expectedMs) && attempts < attemptsAllowed) {
 		return { action: "retry", attempt: attempts + 1 };
 	}
 

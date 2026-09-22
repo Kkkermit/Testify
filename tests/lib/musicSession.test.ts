@@ -7,6 +7,7 @@ import {
 	destroyAllSessions,
 	findSession,
 	MusicSession,
+	NOTICE_MS,
 	PANEL_REFRESH_MS,
 	type SessionEvent,
 	sessionFor,
@@ -62,7 +63,11 @@ jest.mock("@discordjs/voice", () => ({
 	entersState: jest.fn(() => Promise.resolve(undefined)),
 }));
 
-jest.mock("@lib/musicSource.util", () => ({ describeTrack: jest.fn(), openStream: jest.fn() }));
+jest.mock("@lib/musicSource.util", () => ({
+	describeTrack: jest.fn(),
+	openStream: jest.fn(),
+	forgetDescription: jest.fn(),
+}));
 
 const DESCRIBED = {
 	formats: [{ format_id: "251", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160 }],
@@ -447,5 +452,113 @@ describe("the live panel", () => {
 		jest.advanceTimersByTime(PANEL_REFRESH_MS * 3);
 
 		expect(edit).not.toHaveBeenCalled();
+	});
+});
+
+describe("a downloader that says why it stopped", () => {
+	/** The options the session handed its most recent stream, which is where it listens for the downloader. */
+	function lastProblemHandler(): (reason: string) => void {
+		const { openStream } = jest.requireMock("@lib/musicSource.util");
+		const calls = (openStream as jest.Mock).mock.calls;
+		const options = calls.at(-1)?.[3] as { onProblem?: (reason: string) => void };
+
+		return options.onProblem ?? (() => undefined);
+	}
+
+	/**
+	 * The bug this pins: a 403 was retried three times like any stall — six more requests to YouTube, which is
+	 * exactly the volume that gets a host flagged — and the panel never said why the track vanished.
+	 */
+	it("gives a 403 one fresh try, then moves on and says why", async () => {
+		const { session, events } = sessionWith(["a", "b"]);
+		await session.play(0);
+
+		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
+		await player.goIdle();
+		expect(events.filter((event) => event.kind === "retrying")).toHaveLength(1);
+
+		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
+		await player.goIdle();
+
+		expect(session.queue.index).toBe(1);
+		expect(session.notice()).toContain("music:setup");
+	});
+
+	it("does not retry a video YouTube will not serve to anybody", async () => {
+		const { session, events } = sessionWith(["a", "b"]);
+		await session.play(0);
+
+		lastProblemHandler()("ERROR: [youtube] abc: Video unavailable");
+		await player.goIdle();
+
+		expect(events.filter((event) => event.kind === "retrying")).toEqual([]);
+		expect(session.queue.index).toBe(1);
+	});
+
+	/** Looking afresh is the point of the one retry, so the cached description must not be reused for it. */
+	it("forgets the cached description of a refused track", async () => {
+		const { forgetDescription } = jest.requireMock("@lib/musicSource.util");
+		const { session } = sessionWith(["a"]);
+		await session.play(0);
+
+		lastProblemHandler()("HTTP Error 403: Forbidden");
+
+		expect(forgetDescription).toHaveBeenCalledWith("https://youtu.be/a", BINARIES);
+	});
+
+	/** A stream the session closed on purpose — a skip, a volume change — can still report as it dies. */
+	it("ignores a complaint from a stream that has already been replaced", async () => {
+		const { session, events } = sessionWith(["a", "b"]);
+		await session.play(0);
+		const stale = lastProblemHandler();
+
+		await session.play(0);
+		stale("ERROR: [youtube] abc: Video unavailable");
+		await player.goIdle();
+
+		expect(events.filter((event) => event.kind === "retrying")).toHaveLength(1);
+	});
+
+	it("keeps the usual retries for a break the downloader said nothing about", async () => {
+		const { session, events } = sessionWith(["a", "b"]);
+		await session.play(0);
+
+		for (let attempt = 0; attempt < 4; attempt++) await player.goIdle();
+
+		expect(events.filter((event) => event.kind === "retrying")).toHaveLength(3);
+	});
+});
+
+describe("the notice", () => {
+	it("shows on the panel when a press brought no line of its own", async () => {
+		const { describeTrack } = jest.requireMock("@lib/musicSource.util");
+		describeTrack.mockResolvedValueOnce({ formats: [{ format_id: "1", acodec: "mp3", vcodec: "none", ext: "mp3" }] });
+		const { session } = sessionWith(["broken", "fine"]);
+
+		await session.play(0);
+
+		expect(JSON.stringify(session.render("100000000000000001").components[0]?.toJSON())).toContain("Skipped");
+	});
+
+	it("gives way to what a press says", async () => {
+		const { describeTrack } = jest.requireMock("@lib/musicSource.util");
+		describeTrack.mockResolvedValueOnce({ formats: [] });
+		const { session } = sessionWith(["broken", "fine"]);
+
+		await session.play(0);
+
+		const rendered = JSON.stringify(session.render("100000000000000001", "Paused.").components[0]?.toJSON());
+		expect(rendered).toContain("Paused.");
+		expect(rendered).not.toContain("Skipped");
+	});
+
+	it("stops being shown once it is old news", async () => {
+		const { describeTrack } = jest.requireMock("@lib/musicSource.util");
+		describeTrack.mockResolvedValueOnce({ formats: [] });
+		const { session } = sessionWith(["broken", "fine"]);
+
+		await session.play(0);
+
+		expect(session.notice(Date.now() + NOTICE_MS + 1)).toBeUndefined();
 	});
 });

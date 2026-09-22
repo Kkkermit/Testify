@@ -150,9 +150,34 @@ export async function resolveTracks(
 	return documents.flatMap((info) => tracksFromInfo(info, requestedBy, query.source));
 }
 
+/** Format ids are stable for a video, so ten minutes of reuse is safe and saves an extraction per re-open. */
+const DESCRIBED_TTL_MS = 600_000;
+const DESCRIBED_MAX = 100;
+
+/**
+ * Descriptions already fetched, keyed by binary and address.
+ *
+ * A volume change, a Previous and every retry re-open the track, and each of those used to cost two requests to
+ * YouTube rather than one — which matters, because request volume is part of what gets a host flagged.
+ */
+const described = new Map<string, { info: TrackInfo; at: number }>();
+
+function describedKey(url: string, binary: string): string {
+	return `${binary}\n${url}`;
+}
+
+/** Drops a cached description, so a track the downloader refused is looked at afresh on its next go. */
+export function forgetDescription(url: string, binaries: MusicBinaries): void {
+	if (binaries.ytDlp !== null) described.delete(describedKey(url, binaries.ytDlp));
+}
+
 /** The full record for one track, which is what carries the format list the plan is chosen from. */
-export async function describeTrack(url: string, binaries: MusicBinaries): Promise<TrackInfo | null> {
+export async function describeTrack(url: string, binaries: MusicBinaries, now = Date.now()): Promise<TrackInfo | null> {
 	if (binaries.ytDlp === null) return null;
+
+	const key = describedKey(url, binaries.ytDlp);
+	const cached = described.get(key);
+	if (cached !== undefined && now - cached.at < DESCRIBED_TTL_MS) return cached.info;
 
 	const stdout = await runYtDlp(binaries.ytDlp, [
 		"--dump-single-json",
@@ -163,7 +188,17 @@ export async function describeTrack(url: string, binaries: MusicBinaries): Promi
 		url,
 	]);
 
-	return parseJsonLines(stdout).at(0) ?? null;
+	const info = parseJsonLines(stdout).at(0) ?? null;
+	if (info === null) return null;
+
+	described.delete(key);
+	described.set(key, { info, at: now });
+	if (described.size > DESCRIBED_MAX) {
+		const oldest = described.keys().next();
+		if (oldest.done !== true) described.delete(oldest.value);
+	}
+
+	return info;
 }
 
 export interface OpenStream {

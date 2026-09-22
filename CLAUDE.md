@@ -66,10 +66,10 @@ numbers, which drift):
 | Prefix aliases       | 82                               |
 | Button handlers      | 24                               |
 | Events               | 24, in 5 groups                  |
-| `src/lib` helpers    | 80                               |
+| `src/lib` helpers    | 81                               |
 | Schemas/repositories | 14 / 14                          |
 | Scheduled jobs       | 4                                |
-| Tests                | 3,660 across 233 suites          |
+| Tests                | 3,694 across 234 suites          |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -965,8 +965,20 @@ reachable. Proved rather than assumed — with them as ordinary dependencies a b
 install; as optional ones the install succeeds and the packages are simply absent.
 
 Lookup order is `MUSIC_*_PATH` → `PATH` → the npm package → `bin/`, resolved from `repoRoot()` rather than the
-working directory. PATH beats the bundled copy deliberately: somebody who installed yt-dlp themselves keeps it
-current. `npm run music:setup` is the fallback, and `/music status` reports what was found.
+working directory. **For yt-dlp that order is only the tie-break: the newest copy that runs wins, wherever it
+lives.** A first-found order made `npm run music:setup` useless — it writes to `bin/`, which came last, so while
+`youtube-dl-exec`'s copy existed the fresh one never ran. That package downloads the latest yt-dlp once, in its
+`postinstall`, and never again — read out of its `scripts/postinstall.js`, not assumed — so its copy is exactly as
+old as the last `npm ci`. A configured `MUSIC_YTDLP_PATH` still wins outright, because it is an explicit choice.
+`/music status` prints the version and its age, and warns past `STALE_AFTER_DAYS`.
+
+**A refusal from YouTube is not a stall, and is not retried like one.** `classifyProblem` reads what the dying
+downloader said: a 403 earns one fresh try (it is sometimes an address that expired between asking and
+downloading), a bot check or an unavailable video earns none. Retrying either three times meant six more requests
+to YouTube, and request volume is part of what gets a host flagged in the first place. Descriptions are cached for
+ten minutes for the same reason — a volume change used to cost two extractions — and a refused track's entry is
+dropped so its one retry looks afresh. The reason lands on the panel for a minute (`NOTICE_MS`), because the log
+is not where anybody in the voice channel looks.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
