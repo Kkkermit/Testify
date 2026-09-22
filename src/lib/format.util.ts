@@ -18,6 +18,19 @@ export function formatDuration(ms: number): string {
 	return parts.join(" ");
 }
 
+/** Clock duration: "3:07", "1:02:03" — a position within a track rather than a span of time. */
+export function formatClock(ms: number): string {
+	if (!Number.isFinite(ms) || ms <= 0) return "0:00";
+
+	const total = Math.floor(ms / SECOND_MS);
+	const hours = Math.floor(total / (HOUR_MS / SECOND_MS));
+	const minutes = Math.floor((total % (HOUR_MS / SECOND_MS)) / (MINUTE_MS / SECOND_MS));
+	const seconds = total % (MINUTE_MS / SECOND_MS);
+	const pad = (value: number): string => String(value).padStart(2, "0");
+
+	return hours > 0 ? `${String(hours)}:${pad(minutes)}:${pad(seconds)}` : `${String(minutes)}:${pad(seconds)}`;
+}
+
 /** Prose duration: "2 hours, 5 minutes". */
 export function formatDurationLong(ms: number): string {
 	if (!Number.isFinite(ms) || ms <= 0) return "0 seconds";

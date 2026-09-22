@@ -1,0 +1,338 @@
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import {
+	argumentsFor,
+	describeTrack,
+	openStream,
+	parseJsonLines,
+	resolveTracks,
+	PLAYLIST_LIMIT,
+	type TrackInfo,
+	trackFromInfo,
+	tracksFromInfo,
+} from "@lib/musicSource.util";
+
+const USER = "100000000000000001";
+
+describe("trackFromInfo", () => {
+	it("keeps the page address rather than the expiring media one", () => {
+		const track = trackFromInfo(
+			{ webpage_url: "https://youtu.be/abc", url: "https://googlevideo.test/expires-in-6h", title: "Song" },
+			USER,
+			"youtube",
+		);
+
+		expect(track).toMatchObject({ url: "https://youtu.be/abc", title: "Song" });
+	});
+
+	it("converts seconds to milliseconds", () => {
+		expect(trackFromInfo({ webpage_url: "u", duration: 212 }, USER, "youtube")).toMatchObject({
+			durationMs: 212_000,
+		});
+	});
+
+	/**
+	 * A live stream has no end, and reporting one would make the player treat an ended broadcast as a track
+	 * that broke and retry it for ever.
+	 */
+	it("gives a live stream no duration even when one is reported", () => {
+		expect(trackFromInfo({ webpage_url: "u", duration: 60, is_live: true }, USER, "youtube")).toMatchObject({
+			durationMs: null,
+		});
+	});
+
+	it.each([0, -5, null])("treats a duration of %p as unknown", (duration) => {
+		expect(trackFromInfo({ webpage_url: "u", duration }, USER, "youtube")).toMatchObject({ durationMs: null });
+	});
+
+	it("falls back to the channel when there is no uploader", () => {
+		expect(trackFromInfo({ webpage_url: "u", channel: "A Channel" }, USER, "youtube")).toMatchObject({
+			author: "A Channel",
+		});
+	});
+
+	it("names an untitled track rather than rendering nothing", () => {
+		expect(trackFromInfo({ webpage_url: "u" }, USER, "youtube")).toMatchObject({ title: "Unknown track" });
+	});
+
+	/** An entry with no address is not playable, and queueing it would break the queue one track later. */
+	it.each([{}, { webpage_url: "" }, { title: "No address" }])("refuses %p", (info) => {
+		expect(trackFromInfo(info as TrackInfo, USER, "youtube")).toBeNull();
+	});
+
+	it("records who asked for it", () => {
+		expect(trackFromInfo({ webpage_url: "u" }, USER, "youtube")).toMatchObject({ requestedBy: USER });
+	});
+});
+
+describe("tracksFromInfo", () => {
+	it("reads a single track as a queue of one", () => {
+		expect(tracksFromInfo({ webpage_url: "u", title: "One" }, USER, "youtube")).toHaveLength(1);
+	});
+
+	it("reads a playlist as all of its entries", () => {
+		const info = { entries: [{ webpage_url: "a" }, { webpage_url: "b" }] };
+
+		expect(tracksFromInfo(info, USER, "youtube").map((track) => track.url)).toEqual(["a", "b"]);
+	});
+
+	/** A 5,000-track playlist must not become a 5,000-track queue in somebody's server. */
+	it("caps a very long playlist", () => {
+		const entries = Array.from({ length: PLAYLIST_LIMIT + 50 }, (_, at) => ({ webpage_url: `track-${String(at)}` }));
+
+		expect(tracksFromInfo({ entries }, USER, "youtube")).toHaveLength(PLAYLIST_LIMIT);
+	});
+
+	it("drops unplayable entries instead of failing the whole playlist", () => {
+		const info = { entries: [{ webpage_url: "a" }, {}, { webpage_url: "c" }] };
+
+		expect(tracksFromInfo(info, USER, "youtube").map((track) => track.url)).toEqual(["a", "c"]);
+	});
+
+	it("returns nothing for an empty playlist", () => {
+		expect(tracksFromInfo({ entries: [] }, USER, "youtube")).toEqual([]);
+	});
+});
+
+describe("argumentsFor", () => {
+	it("passes a link through untouched", () => {
+		expect(argumentsFor({ kind: "url", url: "https://youtu.be/abc", source: "youtube" })).toEqual([
+			"https://youtu.be/abc",
+		]);
+	});
+
+	it("asks YouTube for a search", () => {
+		expect(argumentsFor({ kind: "search", terms: "lofi", source: "youtube" }, 5)).toEqual(["ytsearch5:lofi"]);
+	});
+
+	it("asks SoundCloud when the search was aimed there", () => {
+		expect(argumentsFor({ kind: "search", terms: "lofi", source: "soundcloud" }, 3)).toEqual(["scsearch3:lofi"]);
+	});
+
+	/**
+	 * The terms are one argv entry, never interpolated into a shell string, so a title carrying a quote or a
+	 * semicolon is a search rather than a command.
+	 */
+	it("keeps an awkward title in a single argument", () => {
+		const args = argumentsFor({ kind: "search", terms: '"; rm -rf /', source: "youtube" }, 1);
+
+		expect(args).toHaveLength(1);
+		expect(args[0]).toBe('ytsearch1:"; rm -rf /');
+	});
+});
+
+describe("parseJsonLines", () => {
+	it("reads one document per line", () => {
+		expect(parseJsonLines('{"id":"a"}\n{"id":"b"}\n')).toEqual([{ id: "a" }, { id: "b" }]);
+	});
+
+	/** yt-dlp prints notices among the JSON, and one of them must not lose the whole answer. */
+	it("ignores lines that are not JSON", () => {
+		expect(parseJsonLines('[youtube] Extracting URL\n{"id":"a"}\nWARNING: something\n')).toEqual([{ id: "a" }]);
+	});
+
+	it("skips a truncated document rather than throwing", () => {
+		expect(parseJsonLines('{"id":"a"}\n{"id":"b"\n')).toEqual([{ id: "a" }]);
+	});
+
+	it("returns nothing for empty output", () => {
+		expect(parseJsonLines("")).toEqual([]);
+	});
+});
+
+/**
+ * Reads a stream against a deadline.
+ *
+ * A pipeline that is wired up wrongly delivers nothing rather than erroring, and awaiting that forever turns
+ * a failing test into a hanging CI job.
+ */
+async function readAll(stream: NodeJS.ReadableStream, timeoutMs = 3_000): Promise<string> {
+	const chunks: Buffer[] = [];
+
+	return new Promise<string>((resolve, reject) => {
+		const timer = setTimeout(() => reject(new Error("the stream delivered nothing before the deadline")), timeoutMs);
+		const finish = (outcome: () => void): void => {
+			clearTimeout(timer);
+			outcome();
+		};
+
+		stream.on("data", (chunk) => chunks.push(chunk as Buffer));
+		stream.once("end", () => finish(() => resolve(Buffer.concat(chunks).toString())));
+		stream.once("error", (error: Error) => finish(() => reject(error)));
+	});
+}
+
+/** Rejects rather than resolving, so a race against it fails the test instead of passing quietly. */
+async function deadline(ms: number): Promise<never> {
+	return new Promise<never>((_, reject) => {
+		setTimeout(() => reject(new Error("the process was still running after the deadline")), ms).unref();
+	});
+}
+
+describe("openStream", () => {
+	let directory: string;
+	let fakeYtDlp: string;
+
+	/** A stand-in binary, so the spawning and piping are exercised without a network or a real downloader. */
+	beforeAll(() => {
+		directory = mkdtempSync(join(tmpdir(), "testify-music-"));
+		fakeYtDlp = join(directory, "fake-yt-dlp");
+		writeFileSync(fakeYtDlp, "#!/bin/sh\nprintf 'OPUSBYTES'\n", { mode: 0o755 });
+	});
+
+	afterAll(() => {
+		rmSync(directory, { recursive: true, force: true });
+	});
+
+	const plan = { formatId: "251", shape: "webm-opus" } as const;
+
+	it("hands back what the downloader wrote, with no transcoder in the way", async () => {
+		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: fakeYtDlp, ffmpeg: null });
+
+		try {
+			await expect(readAll(opened.stream)).resolves.toBe("OPUSBYTES");
+		} finally {
+			opened.close();
+		}
+	});
+
+	/**
+	 * A stream abandoned mid-track must take its processes with it, or a busy guild leaves one downloader
+	 * per skipped song running until the bot restarts.
+	 */
+	it("closing it stops the process it started", async () => {
+		const slow = join(directory, "slow-yt-dlp");
+		writeFileSync(slow, "#!/bin/sh\nsleep 30\n", { mode: 0o755 });
+
+		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: slow, ffmpeg: null });
+		// Waiting for the event rather than a fixed delay: under coverage the kill lands later, and a sleep long
+		// enough to be safe on a slow runner is a sleep long enough to slow every run.
+		const closed = new Promise<void>((resolve) => opened.stream.once("close", () => resolve()));
+
+		opened.close();
+
+		await expect(Promise.race([closed, deadline(5_000)])).resolves.toBeUndefined();
+	});
+
+	it("can be closed twice without throwing", () => {
+		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: fakeYtDlp, ffmpeg: null });
+
+		expect(() => {
+			opened.close();
+			opened.close();
+		}).not.toThrow();
+	});
+
+	/** Refusing by name beats playing silence, which is exactly how the original system failed. */
+	it("refuses a track needing a transcoder when FFmpeg is missing", () => {
+		expect(() =>
+			openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
+		).toThrow(/FFmpeg/);
+	});
+
+	it("says so plainly when there is no downloader at all", () => {
+		expect(() => openStream("https://youtu.be/abc", plan, { ytDlp: null, ffmpeg: null })).toThrow(/yt-dlp/);
+	});
+
+	it("pipes the downloader through the transcoder when one is needed", async () => {
+		const fakeFfmpeg = join(directory, "fake-ffmpeg");
+		// Reads stdin and marks it, which is what proves the two processes were actually joined up.
+		writeFileSync(fakeFfmpeg, "#!/bin/sh\nprintf 'OGG:'\ncat\n", { mode: 0o755 });
+
+		const opened = openStream(
+			"https://youtu.be/abc",
+			{ formatId: "mp3", shape: "transcode" },
+			{ ytDlp: fakeYtDlp, ffmpeg: fakeFfmpeg },
+		);
+
+		try {
+			await expect(readAll(opened.stream)).resolves.toBe("OGG:OPUSBYTES");
+		} finally {
+			opened.close();
+		}
+	});
+});
+
+describe("resolveTracks", () => {
+	let directory: string;
+
+	beforeAll(() => {
+		directory = mkdtempSync(join(tmpdir(), "testify-resolve-"));
+	});
+
+	afterAll(() => {
+		rmSync(directory, { recursive: true, force: true });
+	});
+
+	/** A stand-in downloader printing exactly what yt-dlp prints, so the JSON round trip is real. */
+	function fakeYtDlp(name: string, script: string): string {
+		const path = join(directory, name);
+		writeFileSync(path, `#!/bin/sh\n${script}\n`, { mode: 0o755 });
+
+		return path;
+	}
+
+	const query = { kind: "search", terms: "lofi", source: "youtube" } as const;
+
+	it("turns the downloader's output into queue tracks", async () => {
+		const binary = fakeYtDlp(
+			"ok",
+			`printf '{"webpage_url":"https://youtu.be/a","title":"First","duration":100}\\n{"webpage_url":"https://youtu.be/b","title":"Second","duration":200}\\n'`,
+		);
+
+		const tracks = await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
+
+		expect(tracks.map((track) => track.title)).toEqual(["First", "Second"]);
+		expect(tracks[0]?.durationMs).toBe(100_000);
+	});
+
+	it("returns nothing when the search found nothing", async () => {
+		const binary = fakeYtDlp("empty", "printf ''");
+
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).resolves.toEqual([]);
+	});
+
+	/** yt-dlp's own message is the useful one — "exited 1" tells nobody why a track would not play. */
+	it("surfaces what the downloader complained about", async () => {
+		const binary = fakeYtDlp("broken", "echo 'ERROR: Video unavailable' >&2\nexit 1");
+
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/Video unavailable/);
+	});
+
+	it("still fails usefully when the downloader says nothing at all", async () => {
+		const binary = fakeYtDlp("silent", "exit 2");
+
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/2/);
+	});
+
+	it("says what to do when there is no downloader installed", async () => {
+		await expect(resolveTracks(query, USER, { ytDlp: null, ffmpeg: null })).rejects.toThrow(/music:setup/);
+	});
+
+	it("reads a playlist as all of its entries", async () => {
+		const binary = fakeYtDlp(
+			"playlist",
+			`printf '{"entries":[{"webpage_url":"https://youtu.be/a"},{"webpage_url":"https://youtu.be/b"}]}\\n'`,
+		);
+
+		const tracks = await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null }, { flat: true });
+
+		expect(tracks).toHaveLength(2);
+	});
+
+	it("describes one track, formats and all", async () => {
+		const binary = fakeYtDlp(
+			"describe",
+			`printf '{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251","acodec":"opus","vcodec":"none","ext":"webm"}]}\\n'`,
+		);
+
+		const info = await describeTrack("https://youtu.be/a", { ytDlp: binary, ffmpeg: null });
+
+		expect(info?.formats).toHaveLength(1);
+	});
+
+	it("describes nothing when there is no downloader", async () => {
+		await expect(describeTrack("https://youtu.be/a", { ytDlp: null, ffmpeg: null })).resolves.toBeNull();
+	});
+});

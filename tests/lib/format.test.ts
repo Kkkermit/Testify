@@ -1,4 +1,5 @@
 import {
+	formatClock,
 	discordTime,
 	escapeMarkdown,
 	formatBytes,
@@ -167,5 +168,25 @@ describe("humanisePermission", () => {
 
 	it("leaves a single word as one word", () => {
 		expect(humanisePermission("Administrator")).toBe("administrator");
+	});
+});
+
+describe("formatClock", () => {
+	it("renders a track position the way a player does", () => {
+		expect(formatClock(187_000)).toBe("3:07");
+	});
+
+	it("pads the seconds, so 3:07 never renders as 3:7", () => {
+		expect(formatClock(3 * 60_000 + 7_000)).toBe("3:07");
+	});
+
+	it("adds an hour field only when there is one", () => {
+		expect(formatClock(59 * 60_000)).toBe("59:00");
+		expect(formatClock(3_723_000)).toBe("1:02:03");
+	});
+
+	/** A track that has not started is at the beginning, not at "0s" or "NaN". */
+	it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])("renders %p as the start", (ms) => {
+		expect(formatClock(ms)).toBe("0:00");
 	});
 });

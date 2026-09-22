@@ -111,6 +111,12 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 - **Games** — blackjack, guess the number, guess the Pokémon, fast type, rock paper scissors, 8ball
 
+### 🎵 Music
+
+- **Music** — YouTube and SoundCloud, by link or by search, with autocomplete on `/play`
+- Queue, loop, shuffle, skip and remove, all from one Components V2 panel
+- Opus is passed straight through where a source offers it, so the usual track costs no transcoding
+
 ### 🎉 Community and utility
 
 - **Giveaways** — start, end, reroll and delete, persisted so they survive a restart
@@ -245,6 +251,23 @@ npm run build
 npm start
 ```
 
+### 7. Turn on music (optional)
+
+Music needs `yt-dlp`, which is fetched on demand rather than installed by npm — a postinstall that downloads a
+binary would make `npm ci` depend on GitHub being reachable:
+
+```bash
+npm run music:setup
+```
+
+That writes `yt-dlp` into `bin/` and reports whether FFmpeg is on your `PATH` too. **FFmpeg is optional.**
+YouTube and most of SoundCloud already serve Opus, which Discord takes as-is, so the usual track needs no
+transcoding at all; without FFmpeg the handful that are not Opus are refused by name rather than played as
+silence. `/music status` shows what the host actually has, and `MUSIC_YTDLP_PATH` / `MUSIC_FFMPEG_PATH`
+override the lookup.
+
+Spotify links cannot be played by anything: the audio is DRM-protected. Search for the track by name instead.
+
 > [!TIP]
 > Use **two bot applications** — one for development, one for production. `npm run setup -- --dev` writes
 > `.env.development`, which `npm run dev` reads instead of `.env`. That way testing can never touch your live
@@ -312,6 +335,7 @@ list.
 | 🎯 Games      |     1     | Blackjack, guess the number, Pokémon, fast type, RPS                        |
 | 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                  |
 | 🎫 Tickets    |     1     | Setup, status, disable                                                      |
+| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip                          |
 
 Some categories look small but hold a lot: `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.

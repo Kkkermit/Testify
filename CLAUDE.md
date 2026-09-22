@@ -60,19 +60,19 @@ numbers, which drift):
 
 | Thing                | Count                            |
 | -------------------- | -------------------------------- |
-| Commands             | 76, across 12 categories         |
+| Commands             | 78, across 13 categories         |
 | Command files        | 98 (incl. folded-in subcommands) |
 | Subcommands          | 108                              |
 | Prefix aliases       | 75                               |
-| Button handlers      | 23                               |
+| Button handlers      | 24                               |
 | Events               | 24, in 5 groups                  |
 | `src/lib` helpers    | 67                               |
 | Schemas/repositories | 13 / 13                          |
 | Scheduled jobs       | 4                                |
 | Tests                | 3,234 across 205 suites          |
 
-**There is no music system.** It was removed deliberately — see
-[§21](#21-decisions-already-made--do-not-relitigate). Do not add one back without reading that section.
+**The music system was removed and later rebuilt** on a different architecture — see
+[§21](#21-decisions-already-made--do-not-relitigate) before changing it.
 
 ---
 
@@ -128,6 +128,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run test:coverage`  | Jest with the 80/80/80/80 thresholds enforced                        |
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
+| `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
 | `npm run commit`         | Guided commit wizard (enforces the message format)                   |
 | `npm run commands:clear` | Deregister all application commands                                  |
@@ -234,7 +235,7 @@ docs/                     Every document except this one. Start at docs/README.m
 ```
 
 **Categories:** `community`, `economy`, `fun`, `games`, `info`, `levelling`, `moderation`, `settings`,
-`tickets`, `giveaway`, `developer`, `owner`. Defined `as const` in `src/config/categories.ts` with a derived
+`music`, `tickets`, `giveaway`, `developer`, `owner`. Defined `as const` in `src/config/categories.ts` with a derived
 union type, so a mistyped category is a **compile error**. Adding a category there is all that is needed for
 `/help` to pick it up.
 
@@ -273,7 +274,7 @@ Each is a pure state→message function paired with a handler in `src/buttons/`.
 | `balancePanel.util.ts`    | `buttons/balance.ts`   | Hub panel, read-only mode for other users                  |
 | `inventoryScreen.util.ts` | `buttons/inventory.ts` | Per-row action button, paging in the custom ID             |
 | `settingsPanel.util.ts`   | —                      | Generic settings rows + pre-filled modal editors           |
-| `musicPanel` — **gone**   | —                      | Removed with the music system. Do not resurrect.           |
+| `musicPanel.util.ts`      | `buttons/music.ts`     | Live state: re-reads the session on every press            |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -935,26 +936,47 @@ pin in `package.json` needs the same treatment.
 
 ## 21. Decisions already made — do not relitigate
 
-### The music system was removed
+### The music system, and why the removal notice is gone
 
-Deleted in `9541ec6` — 27 command files, 7 lib modules, 6 test files, 7 dependencies, 3,452 lines. **Do not add
-it back without reading this.**
+It was deleted in `9541ec6` and rebuilt in September 2026 on a different architecture. The old conclusion —
+"SoundCloud serves DRM, so this cannot work" — was **not right**, and the reasoning is worth keeping so it is
+not reached again:
 
-Five rounds of debugging established:
+- **yt-dlp refuses DRM formats by design.** Its SoundCloud extractor marks only `ctr-`/`cbc-` protocols as
+  protected and skips them, keeping `progressive`, `hls` and `hls-aes`. Nothing is decrypted, and nothing here
+  ever will be. The old stack simply asked for the wrong transcoding.
+- **The FFmpeg segfault is real and now irrelevant.** `ffmpeg-static` still dies with SIGSEGV on any hostname
+  (re-verified on 5.3.0, glibc 2.39: loopback exits 183, a hostname exits 139). It only fires on DNS, so
+  **yt-dlp owns every HTTP request and FFmpeg only ever reads `pipe:0`**. The old loopback `StreamRelay` is
+  gone with the bug it worked around.
 
-- **SoundCloud now serves DRM-protected streams.** The URL contains `/cbcs/` — Common Encryption, as used by
-  FairPlay and Widevine. FFmpeg downloads the segments and decodes ciphertext as AAC, which produces
-  `Reserved bit set`, `Number of bands exceeds limit`, `channel element is not allocated` while output stays at
-  0 kB. **Decrypting it is not an option** — it is illegal and will not be implemented here.
-- **`ffmpeg-static` ships a statically-linked-glibc binary** whose `getaddrinfo` segfaults on modern glibc: exit
-  139, no stderr, every hostname dead while local input works. `@ffmpeg-installer/ffmpeg` is the same
-  johnvansickle build and fails identically. There is no npm package that avoids it.
-- **The whole approach is a treadmill.** DisTube + yt-dlp + scraped SoundCloud endpoints break whenever a
-  platform ships a change.
+**Opus passes straight through, which is what makes this small.** Discord wants Opus at 48 kHz and both
+sources already offer it, so the normal path decodes nothing: YouTube's WebM/Opus goes to
+`StreamType.WebmOpus`, SoundCloud's progressive Opus to `StreamType.OggOpus`. That is why there is **no Opus
+library** — `@discordjs/opus` and `opusscript` are both unnecessary — and **no sodium**, because
+`@discordjs/voice` reaches Node's own `aes-256-gcm`. One new dependency, `@discordjs/voice`, and no native
+modules.
 
-If music is ever wanted again: `git revert 9541ec6` restores everything, and the honest path forward is
-[Lavalink](https://lavalink.dev/) — a separate audio server that absorbs this churn — not another round of
-patching extractors. It costs a Java daemon, which is why it was not done.
+**Both binaries are resolved at runtime, not installed by npm.** A postinstall that downloads a binary makes
+`npm ci` depend on GitHub, and every CI job runs one. `npm run music:setup` fetches yt-dlp into `bin/` instead,
+and `MUSIC_YTDLP_PATH` / `MUSIC_FFMPEG_PATH` override the lookup. **FFmpeg is optional**: without it, a track
+that is not already Opus is refused by name rather than played as silence, which is exactly how the old system
+failed.
+
+**A stall and an ending arrive as the same event, and that distinction is the whole design.** `decideOnIdle` in
+`musicQueue.util.ts` compares `AudioResource.playbackDuration` against the track's stated length: short by more
+than `EARLY_TOLERANCE_MS` means it came apart, so it retries up to `MAX_TRACK_ATTEMPTS` rather than advancing.
+Skip and Stop set flags that beat the check, and a live stream reports no duration so it can never be judged
+short. It is pure arithmetic, so every branch is a test rather than a live stall.
+
+Things that are deliberately **not** there: DisTube and its plugins (the yt-dlp and SoundCloud ones were two
+years stale), a `/volume` command (inline volume forces a PCM transcode and an Opus encoder, which would undo
+the passthrough — Discord's own per-user volume slider covers it), and Spotify playback. `open.spotify.com` is
+on yt-dlp's `KnownDRMIE` list beside Disney+; a Spotify link is refused with an explanation rather than played.
+
+**The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
+before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
+the host actually has.
 
 ### One command object, both surfaces
 

@@ -42,6 +42,7 @@
 		"format:check": "prettier --check .",
 		"lint": "tsx scripts/lintRunner.ts",
 		"lint:fix": "tsx scripts/lintRunner.ts --fix",
+		"music:setup": "tsx scripts/setupMusic.ts",
 		"prepare": "husky && npm run build:shared",
 		"secret": "tsx scripts/createSecret.ts",
 		"setup": "tsx scripts/setupEnv.ts",
@@ -78,6 +79,7 @@
 		}
 	},
 	"dependencies": {
+		"@discordjs/voice": "0.19.2",
 		"@hono/node-server": "2.0.12",
 		"@napi-rs/canvas": "1.0.2",
 		"discord-giveaways": "6.0.1",

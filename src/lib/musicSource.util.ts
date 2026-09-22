@@ -1,0 +1,236 @@
+import { spawn } from "node:child_process";
+import { type Readable } from "node:stream";
+import { UserFacingError } from "@core/errors";
+import { type MusicBinaries } from "@lib/musicBinaries.util";
+import { planStream, type RemoteFormat, type StreamPlan } from "@lib/musicFormat.util";
+import { type Query } from "@lib/musicQuery.util";
+import { type Track } from "@lib/musicQueue.util";
+
+/** Everything that shells out to yt-dlp, with the parsing kept pure beside it. */
+
+const RESOLVE_TIMEOUT_MS = 30_000;
+
+/** Enough for a search to be worth scrolling, few enough that a playlist does not flood a queue. */
+export const SEARCH_RESULTS = 8;
+export const PLAYLIST_LIMIT = 100;
+
+/** The subset of yt-dlp's JSON this needs; it emits far more, and none of the rest is depended on. */
+export interface TrackInfo {
+	id?: string | null;
+	title?: string | null;
+	uploader?: string | null;
+	channel?: string | null;
+	duration?: number | null;
+	thumbnail?: string | null;
+	webpage_url?: string | null;
+	url?: string | null;
+	original_url?: string | null;
+	is_live?: boolean | null;
+	formats?: RemoteFormat[] | null;
+	entries?: TrackInfo[] | null;
+	extractor_key?: string | null;
+}
+
+function addressOf(info: TrackInfo): string | null {
+	return info.webpage_url ?? info.original_url ?? info.url ?? null;
+}
+
+/**
+ * One entry of yt-dlp's answer as a queue track, or `null` when it carries nothing playable.
+ *
+ * A live stream reports no duration, which is meaningful rather than missing: it is what stops the player
+ * treating an ended broadcast as a track that broke.
+ */
+export function trackFromInfo(info: TrackInfo, requestedBy: string, source: Track["source"]): Track | null {
+	const url = addressOf(info);
+	if (url === null || url === "") return null;
+
+	const title = info.title ?? "Unknown track";
+	const durationSeconds = info.is_live === true ? null : (info.duration ?? null);
+
+	return {
+		url,
+		title,
+		author: info.uploader ?? info.channel ?? null,
+		durationMs: durationSeconds === null || durationSeconds <= 0 ? null : Math.round(durationSeconds * 1_000),
+		thumbnail: info.thumbnail ?? null,
+		source,
+		requestedBy,
+	};
+}
+
+/** Flattens the single-track and playlist shapes into one list, capped so a huge playlist cannot flood a guild. */
+export function tracksFromInfo(
+	info: TrackInfo,
+	requestedBy: string,
+	source: Track["source"],
+	limit = PLAYLIST_LIMIT,
+): Track[] {
+	const entries = info.entries ?? null;
+	const list = entries === null ? [info] : entries.slice(0, limit);
+
+	return list
+		.map((entry) => trackFromInfo(entry, requestedBy, source))
+		.filter((track): track is Track => track !== null);
+}
+
+/** What yt-dlp is asked for, given what the person typed. */
+export function argumentsFor(query: Query, results = SEARCH_RESULTS): string[] {
+	if (query.kind === "url") return [query.url];
+
+	const prefix = query.source === "soundcloud" ? "scsearch" : "ytsearch";
+
+	return [`${prefix}${String(results)}:${query.terms}`];
+}
+
+async function runYtDlp(binary: string, args: string[], timeoutMs = RESOLVE_TIMEOUT_MS): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const child = spawn(binary, args, { stdio: ["ignore", "pipe", "pipe"], windowsHide: true });
+		const timer = setTimeout(() => {
+			child.kill("SIGKILL");
+			reject(new Error(`yt-dlp timed out after ${String(timeoutMs)}ms`));
+		}, timeoutMs);
+
+		let out = "";
+		let err = "";
+		child.stdout.setEncoding("utf8");
+		child.stdout.on("data", (chunk: string) => (out += chunk));
+		child.stderr.setEncoding("utf8");
+		child.stderr.on("data", (chunk: string) => (err += chunk));
+
+		child.once("error", (error) => {
+			clearTimeout(timer);
+			reject(error);
+		});
+		child.once("close", (code) => {
+			clearTimeout(timer);
+			if (code === 0) resolve(out);
+			else reject(new Error(err.trim() === "" ? `yt-dlp exited ${String(code)}` : err.trim()));
+		});
+	});
+}
+
+/** yt-dlp prints one JSON document per result, so a search comes back as several lines rather than an array. */
+export function parseJsonLines(stdout: string): TrackInfo[] {
+	return stdout
+		.split("\n")
+		.map((line) => line.trim())
+		.filter((line) => line.startsWith("{"))
+		.flatMap((line) => {
+			try {
+				return [JSON.parse(line) as TrackInfo];
+			} catch {
+				return [];
+			}
+		});
+}
+
+export async function resolveTracks(
+	query: Query,
+	requestedBy: string,
+	binaries: MusicBinaries,
+	options: { flat?: boolean } = {},
+): Promise<Track[]> {
+	if (binaries.ytDlp === null) {
+		throw new UserFacingError("Music needs `yt-dlp`, which is not installed. Run `npm run music:setup` on the host.");
+	}
+
+	const args = [
+		"--dump-json",
+		"--no-warnings",
+		"--no-progress",
+		"--ignore-config",
+		...(options.flat === true ? ["--flat-playlist"] : ["--no-playlist"]),
+		...argumentsFor(query),
+	];
+
+	const stdout = await runYtDlp(binaries.ytDlp, args);
+	const documents = parseJsonLines(stdout);
+
+	return documents.flatMap((info) => tracksFromInfo(info, requestedBy, query.source));
+}
+
+/** The full record for one track, which is what carries the format list the plan is chosen from. */
+export async function describeTrack(url: string, binaries: MusicBinaries): Promise<TrackInfo | null> {
+	if (binaries.ytDlp === null) return null;
+
+	const stdout = await runYtDlp(binaries.ytDlp, [
+		"--dump-single-json",
+		"--no-warnings",
+		"--no-progress",
+		"--ignore-config",
+		"--no-playlist",
+		url,
+	]);
+
+	return parseJsonLines(stdout).at(0) ?? null;
+}
+
+export interface OpenStream {
+	stream: Readable;
+	plan: StreamPlan;
+	/** Kills the processes this opened; safe to call more than once. */
+	close: () => void;
+}
+
+/**
+ * Opens a playable byte stream.
+ *
+ * yt-dlp does every HTTP request, which is what keeps FFmpeg off the network entirely — its bundled static
+ * build segfaults on any hostname, and reading a pipe cannot trigger that.
+ */
+export function openStream(url: string, plan: StreamPlan, binaries: MusicBinaries): OpenStream {
+	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
+
+	const source = spawn(
+		binaries.ytDlp,
+		["--quiet", "--no-warnings", "--no-progress", "--ignore-config", "-f", plan.formatId, "-o", "-", url],
+		{ stdio: ["ignore", "pipe", "ignore"], windowsHide: true },
+	);
+
+	if (plan.shape !== "transcode") {
+		return { stream: source.stdout, plan, close: () => void source.kill("SIGKILL") };
+	}
+
+	if (binaries.ffmpeg === null) throw new UserFacingError("That track needs FFmpeg to play, and it is not installed.");
+
+	const transcoder = spawn(
+		binaries.ffmpeg,
+		[
+			"-hide_banner",
+			"-loglevel",
+			"error",
+			"-i",
+			"pipe:0",
+			"-vn",
+			"-c:a",
+			"libopus",
+			"-b:a",
+			"128k",
+			"-ar",
+			"48000",
+			"-ac",
+			"2",
+			"-f",
+			"opus",
+			"pipe:1",
+		],
+		{ stdio: ["pipe", "pipe", "ignore"], windowsHide: true },
+	);
+
+	source.stdout.pipe(transcoder.stdin);
+	// A dead transcoder must not leave yt-dlp writing into a closed pipe for the rest of the process's life.
+	source.stdout.on("error", () => transcoder.kill("SIGKILL"));
+	transcoder.stdin.on("error", () => source.kill("SIGKILL"));
+
+	return {
+		stream: transcoder.stdout,
+		plan,
+		close: () => {
+			source.kill("SIGKILL");
+			transcoder.kill("SIGKILL");
+		},
+	};
+}
+
+export { planStream };

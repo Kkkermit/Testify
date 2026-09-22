@@ -7,6 +7,7 @@ export const CATEGORIES = {
 	info: { label: "Info", emoji: "📚", colour: "Blurple" },
 	levelling: { label: "Levelling", emoji: "📈", colour: "Fuchsia" },
 	moderation: { label: "Moderation", emoji: "🛡️", colour: "DarkRed" },
+	music: { label: "Music", emoji: "🎵", colour: "LuminousVividPink" },
 	settings: { label: "Settings", emoji: "⚙️", colour: "Blue" },
 	tickets: { label: "Tickets", emoji: "🎫", colour: "DarkAqua" },
 	giveaway: { label: "Giveaways", emoji: "🎁", colour: "Aqua" },

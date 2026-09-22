@@ -33,3 +33,6 @@ Thumbs.db
 .tsbuildinfo
 *.tsbuildinfo
 .swc/
+
+# Binaries `npm run music:setup` fetches. Platform-specific and ~30MB, so never committed.
+bin/

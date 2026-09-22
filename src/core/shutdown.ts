@@ -3,6 +3,7 @@ import { toError } from "@core/errors";
 import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 import { disconnectDatabase } from "@database/connection";
 import { printReloading } from "@lib/banner.util";
+import { destroyAllSessions } from "@lib/musicSession.util";
 
 let stopping = false;
 
@@ -15,6 +16,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 
 	try {
 		client.timers.stopAll();
+		destroyAllSessions();
 		await client.api?.close();
 		await disconnectDatabase();
 		await client.destroy();

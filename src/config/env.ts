@@ -44,6 +44,10 @@ const schema = z
 		DASHBOARD_BIND: z.string().min(1).default("127.0.0.1"),
 		DASHBOARD_TRUST_PROXY: flag.default(false),
 		DASHBOARD_SESSION_TTL_DAYS: z.coerce.number().int().min(1).max(90).default(7),
+
+		// Music. Both are paths to binaries the bot spawns; blank means "look on PATH".
+		MUSIC_YTDLP_PATH: z.string().min(1).optional(),
+		MUSIC_FFMPEG_PATH: z.string().min(1).optional(),
 	})
 	.superRefine((env, ctx) => {
 		if (!env.DASHBOARD_ENABLED) return;
