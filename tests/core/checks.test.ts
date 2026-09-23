@@ -1,4 +1,5 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import lottery from "@commands/economy/lottery.command";
 import { clearCooldowns, runChecks } from "@core/checks";
 import { defineCommand } from "@core/command";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
@@ -258,5 +259,20 @@ describe("a subcommand that needs its own permissions", () => {
 		const interaction = createMockInteraction({ subcommand: "skip", overrides: memberWith(0n) });
 
 		expect(await runChecks(interaction, music, createMockClient())).toBeNull();
+	});
+});
+
+/** A member could once delete the server's lottery, pot and all, because only the dashboard checked. */
+describe("the lottery", () => {
+	it.each(["setup", "freeze", "delete"])("refuses %s to somebody who cannot manage the server", async (name) => {
+		const interaction = createMockInteraction({ subcommand: name, overrides: memberWith(0n) });
+
+		expect(await runChecks(interaction, lottery, createMockClient())).toContain("manage guild");
+	});
+
+	it.each(["info", "enter"])("leaves %s open to every member", async (name) => {
+		const interaction = createMockInteraction({ subcommand: name, overrides: memberWith(0n) });
+
+		expect(await runChecks(interaction, lottery, createMockClient())).toBeNull();
 	});
 });

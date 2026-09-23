@@ -1,4 +1,4 @@
-import { MessageFlags } from "discord.js";
+import { PermissionFlagsBits, MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -89,6 +89,7 @@ export default defineCommand({
 		},
 		{
 			name: "setup",
+			permissions: [PermissionFlagsBits.ManageGuild],
 			description: "Create or reconfigure the lottery.",
 			options: [
 				{ name: "entry-fee", description: "Cost of one ticket.", type: "integer", required: true, min: 1 },
@@ -132,6 +133,7 @@ export default defineCommand({
 		},
 		{
 			name: "freeze",
+			permissions: [PermissionFlagsBits.ManageGuild],
 			description: "Pause or resume the lottery.",
 			options: [{ name: "frozen", description: "Whether the lottery is frozen.", type: "boolean", required: true }],
 			async run(interaction) {
@@ -149,6 +151,7 @@ export default defineCommand({
 		},
 		{
 			name: "delete",
+			permissions: [PermissionFlagsBits.ManageGuild],
 			description: "Remove the lottery entirely.",
 			async run(interaction) {
 				const guild = inGuild(interaction);
