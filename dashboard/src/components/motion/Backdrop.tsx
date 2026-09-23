@@ -53,8 +53,7 @@ export function Backdrop({ opacity }: { opacity?: number } = {}): React.JSX.Elem
 			fieldRef.current?.refresh();
 		};
 
-		// The palette is chosen on the appearance page and the device can change it underneath, so the field is
-		// told to re-read rather than holding the colour it happened to start with.
+		// Re-read the palette, which the appearance page or the device can change underneath.
 		const observer = new MutationObserver(repaint);
 		observer.observe(document.documentElement, { attributeFilter: ["data-theme", "data-accent"] });
 

@@ -25,10 +25,7 @@ export interface UseRecord {
 	failed: boolean;
 }
 
-/**
- * One atomic upsert per invocation. `$setOnInsert` puts the expiry on the row when it is created, so the TTL
- * index reaps a whole day at once rather than sliding forward every time the day is used again.
- */
+/** One atomic upsert per invocation; `$setOnInsert` sets the expiry once, so a whole day is reaped together. */
 export async function recordCommandUse(use: UseRecord, now: Date = new Date()): Promise<void> {
 	const expiresAt = new Date(now.getTime() + ANALYTICS.retentionDays * 24 * 60 * 60 * 1000);
 
@@ -138,10 +135,7 @@ export async function surfaceTallies(days: number, now?: Date): Promise<Record<S
 	return totals;
 }
 
-/**
- * Dashboard screen views, counted the same way commands are but without a guild id — see the note on
- * `screenViews.schema.ts` for why that one field is the difference between an aggregate and a browsing history.
- */
+/** Dashboard screen views, counted like commands but without a guild id. */
 export async function recordScreenView(route: string, now: Date = new Date()): Promise<void> {
 	const expiresAt = new Date(now.getTime() + ANALYTICS.retentionDays * 24 * 60 * 60 * 1000);
 

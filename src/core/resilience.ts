@@ -2,12 +2,8 @@ import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
 
 /**
- * The bot stays up. Nothing below a deliberate shutdown is allowed to end the process, so every unexpected
- * failure lands here instead of terminating.
- *
- * The cost of never exiting is noise: one broken handler on a busy gateway can throw hundreds of times a second,
- * and a log that repeats the same line that often buries the one thing worth reading. So a repeated failure is
- * logged once, then collapsed into a periodic summary that says how many were swallowed.
+ * Every failure nothing else handled lands here instead of ending the process; a repeated one is logged once, then
+ * summarised.
  */
 
 /** How long a signature stays collapsed before it is worth another line. */
@@ -74,11 +70,7 @@ export function signatureOf(error: Error, scope: string): string {
 	return `${scope}:${error.name}:${error.message}`;
 }
 
-/**
- * Records a failure nothing else handled, and returns rather than throwing.
- *
- * Callers must not act on the result: the point is that there is nothing left to do but write it down.
- */
+/** Records a failure nothing else handled, and returns rather than throwing. */
 export function reportSurvivable(
 	logger: Logger,
 	throttle: ErrorThrottle,

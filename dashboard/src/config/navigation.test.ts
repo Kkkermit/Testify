@@ -76,10 +76,7 @@ describe("navigationFor", () => {
 		expect(navigationFor({ guild: undefined, isOwner: false })).toHaveLength(1);
 	});
 
-	/**
-	 * A member's own page is nested under the leaderboards, so a section that only matched exactly would
-	 * collapse itself the moment somebody clicked a row and leave nothing in the sidebar marked as current.
-	 */
+	/** A page nested under a section's screen still opens that section. */
 	it("opens the Community section for a page nested under one of its screens", () => {
 		const [, guildGroup] = navigationFor({ guild, isOwner: false });
 		const membersSection = (guildGroup?.sections ?? []).find((section) => section.labelKey === "nav.community");

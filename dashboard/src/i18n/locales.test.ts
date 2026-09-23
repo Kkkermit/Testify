@@ -9,13 +9,7 @@ import fr from "@/i18n/locales/fr.json";
 import italian from "@/i18n/locales/it.json";
 import russian from "@/i18n/locales/ru.json";
 
-/**
- * English is the source; the other three are checked against it here.
- *
- * A missing key is invisible at runtime — i18next falls back to English and the screen still reads — so
- * nothing but a test notices a locale drifting behind. That fallback is the right behaviour and this is what
- * stops it becoming the normal state.
- */
+/** Every locale against English, because a missing key falls back silently at runtime. */
 
 interface Json {
 	[key: string]: string | Json;
@@ -94,10 +88,7 @@ describe("the locale list", () => {
 	});
 });
 
-/**
- * A key nothing renders is dead weight in four files at once, and the next person to translate one has no way
- * to tell it apart from a key that matters. Reading the source is what keeps the dictionary the size of the app.
- */
+/** Every English key has to be rendered somewhere, or it is dead weight in six files. */
 describe("the English dictionary", () => {
 	const used = sourceText();
 

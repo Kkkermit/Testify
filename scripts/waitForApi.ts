@@ -2,16 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 
-/**
- * Holds the dashboard back until the bot's API answers.
- *
- * `startApi` runs after `client.login()`, so the API is not listening for the twenty-odd seconds the bot spends
- * connecting to Discord — and Vite's proxy answers every request in that window with a wall of ECONNREFUSED
- * that reads like a broken install rather than a slow start.
- *
- * Deliberately not `wait-on` or another dependency: this is a `fetch` in a loop, and an open-source bot should
- * not need one more install to run its own dev script.
- */
+/** Holds the dashboard back until the bot's API answers, so Vite's proxy does not fail while the bot connects. */
 
 const POLL_MS = 500;
 

@@ -76,10 +76,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 	);
 }
 
-/**
- * Leaving needs a fresh invite to undo, and only somebody still in that server can issue one — so this asks for
- * the name rather than a click. The server checks it too; this half is the warning, not the gate.
- */
+/** Leaving needs a fresh invite to undo, so this asks for the name; the server checks it too. */
 function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () => void }): React.JSX.Element {
 	const { t } = useTranslation();
 	const leave = useLeaveGuild(guild.id);

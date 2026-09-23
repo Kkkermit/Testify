@@ -220,8 +220,7 @@ export default defineCommand({
 	/** Offers the chosen member's warnings, newest first, described not just listed. */
 	async autocomplete(interaction) {
 		const guildId = interaction.guildId;
-		// Discord does not resolve user objects during autocomplete, so the option
-		// comes back as a raw snowflake.
+		// Autocomplete does not resolve users, so the option arrives as a snowflake.
 		const targetId = interaction.options.get("user")?.value;
 		if (guildId === null || typeof targetId !== "string") {
 			await interaction.respond([]);

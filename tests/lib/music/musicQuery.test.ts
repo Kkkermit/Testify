@@ -30,10 +30,7 @@ describe("resolveQuery", () => {
 		expect(resolveQuery(raw)).toBeNull();
 	});
 
-	/**
-	 * `file:///etc/passwd` must never reach a downloader as an address. Anything that is not http(s) is text
-	 * somebody typed, and it gets searched for like any other text.
-	 */
+	/** Anything that is not http(s) is searched for as text, never handed to a downloader. */
 	it.each(["file:///etc/passwd", "data:audio/mp3;base64,AAAA", "ftp://host/song.mp3"])(
 		"does not treat %p as a link",
 		(raw) => {

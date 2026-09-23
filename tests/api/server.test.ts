@@ -76,11 +76,8 @@ describe("the error boundary", () => {
 });
 
 /**
- * Each settings screen adds one `guilds.route(…)` line, and forgetting it fails silently: the request falls
- * through to the SPA catch-all and the browser lands back on the guild picker with nothing to explain why.
- *
- * A request cannot tell the two apart, because `requireGuild` refuses an anonymous caller before the router
- * decides there is no handler — so this reads the route table instead.
+ * Each settings screen's `guilds.route(…)` line is mounted; a missing one falls through to the SPA silently, so this
+ * reads the route table.
  */
 describe("the guild settings sub-routes", () => {
 	function pathsOf(method: string): string[] {
@@ -151,10 +148,7 @@ describe("the guild settings sub-routes", () => {
 });
 
 describe("startApi", () => {
-	/**
-	 * Port 0 asks the operating system for a free one, so this cannot collide with a real bot or with another
-	 * test run on the same machine.
-	 */
+	/** Port 0, so the operating system picks a free one. */
 	function listen(client: TestifyClient): ReturnType<typeof startApi> {
 		return startApi(client, { DASHBOARD_PORT: 0, DASHBOARD_BIND: "127.0.0.1" } as Env);
 	}
@@ -221,10 +215,7 @@ async function waitFor(condition: () => boolean, timeoutMs = 2_000): Promise<voi
 }
 
 describe("a port that cannot be listened on", () => {
-	/**
-	 * An unhandled `error` event on a Node server throws, so a busy port used to reach `uncaughtException` and
-	 * take the whole bot down — for the optional half of it, and with a message that never named the port.
-	 */
+	/** A busy port rejects `ready` with advice rather than throwing an unhandled `error` event. */
 	it("rejects `ready` and logs advice rather than throwing", async () => {
 		const held = startApi(readyClient(), { DASHBOARD_PORT: 0, DASHBOARD_BIND: "127.0.0.1" } as Env);
 		const port = await held.ready;
@@ -242,10 +233,7 @@ describe("a port that cannot be listened on", () => {
 		}
 	});
 
-	/**
-	 * `tsx watch` starts the new bot before the old one has released the port, so the dashboard used to stay
-	 * down for the rest of the run over a clash that resolves itself in a second.
-	 */
+	/** The dashboard retries until a port held by the previous `tsx watch` process is released. */
 	it("comes up on its own once the port is released", async () => {
 		const held = startApi(readyClient(), { DASHBOARD_PORT: 0, DASHBOARD_BIND: "127.0.0.1" } as Env);
 		const port = await held.ready;

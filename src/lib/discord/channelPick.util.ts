@@ -2,12 +2,7 @@ import { type Guild } from "discord.js";
 import { type ComponentInteraction } from "@core/button";
 import { UserFacingError } from "@core/errors";
 
-/**
- * Reads the channel a select menu just picked, refusing one the bot cannot post in.
- *
- * Returns null when the interaction is not a channel select or carries no value, which a handler should treat
- * as nothing to do rather than as an error.
- */
+/** The channel a select menu picked, refusing one the bot cannot post in; null when there is nothing to do. */
 export async function pickedChannelId(interaction: ComponentInteraction, guild: Guild): Promise<string | null> {
 	if (!interaction.isChannelSelectMenu()) return null;
 

@@ -20,8 +20,7 @@ export default defineCommand({
 		const record = await getUserLevel(guild.id, target.id);
 		if (!record) throw new UserFacingError(`${target.username} has not earned any XP here yet.`);
 
-		// Drawing the card and fetching the avatar together take longer than the three
-		// seconds Discord allows before the interaction expires.
+		// Drawing the card and fetching the avatar outlasts Discord's three-second window.
 		await interaction.deferReply();
 
 		const [rank, settings, member] = await Promise.all([

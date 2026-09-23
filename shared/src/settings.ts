@@ -2,10 +2,7 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/**
- * The guild settings that are only ever configuration — a prefix, a filter, a list of roles. Each is a small
- * independent decision, so each has its own endpoint and each writes on change.
- */
+/** Guild settings that are only configuration; each is independent, so each has its own endpoint. */
 
 export const SETTINGS_LIMITS = {
 	/** Long enough for `!!` or `testify ` and short enough that it cannot swallow a sentence. */

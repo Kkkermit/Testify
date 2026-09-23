@@ -78,10 +78,7 @@ describe("the guild overview", () => {
 		expect(screen.getByText("someone")).toBeInTheDocument();
 	});
 
-	/**
-	 * What changed identifies the row; the stamp does not. Leading with the stamp spent the most scannable
-	 * column on the least identifying thing.
-	 */
+	/** Each change leads with what happened, which identifies the row better than when. */
 	it("leads each change with what happened, not when", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/overview", () =>

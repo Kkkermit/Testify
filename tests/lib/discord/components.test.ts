@@ -51,10 +51,7 @@ describe("navRow", () => {
 		}
 	});
 
-	/**
-	 * Discord rejects the whole message with COMPONENT_CUSTOM_ID_DUPLICATED when two components share an ID — disabled
-	 * ones included.
-	 */
+	/** Discord rejects a message where two components share a custom ID, disabled ones included. */
 	it.each([
 		["one page", 0, 1],
 		["two pages, first", 0, 2],

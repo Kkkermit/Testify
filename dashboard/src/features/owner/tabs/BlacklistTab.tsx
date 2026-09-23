@@ -10,8 +10,7 @@ import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 /**
- * The bot-wide block list. It is an id rather than a picker on purpose: somebody worth blocking is usually not
- * in a server the bot can still see, so there is no list to choose them from.
+ * The bot-wide block list; an id rather than a picker, because a blocked account is rarely in a server the bot can see.
  */
 export function BlacklistTab(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -117,11 +116,7 @@ export function BlacklistTab(): React.JSX.Element {
 
 				{rows.data !== undefined && rows.data.length > 0 && (
 					<ul className="flex flex-col gap-3">
-						{/*
-						 * The reason takes a whole line of its own below `sm` and shares the row above it. Sharing at
-						 * every width truncated it to "Spam…" on a phone, which is narrower than the word it is
-						 * hiding.
-						 */}
+						{/* The reason takes its own line below `sm`, where sharing the row truncated it. */}
 						{rows.data.map((row) => (
 							<li
 								key={row.userId}

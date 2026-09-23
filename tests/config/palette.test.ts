@@ -17,10 +17,7 @@ function everySourceFile(directory: string, found: string[] = []): string[] {
 }
 
 describe("the category palette", () => {
-	/**
-	 * The stripe down the side of an embed is how a reader tells a levelling reply from a moderation one. Two
-	 * categories shared Blurple and two more shared Aqua, so for four of the twelve it said nothing at all.
-	 */
+	/** Every category has its own embed colour. */
 	it("gives every category its own colour", () => {
 		const byColour = new Map<number, string[]>();
 
@@ -46,10 +43,7 @@ describe("the semantic palette", () => {
 		}
 	});
 
-	/**
-	 * Ten audit handlers each wrote their own `colour: "Green"`, so the log's colour language lived in ten
-	 * files and could be changed in nine of them. `theme.colours` is meant to be the only place one is written.
-	 */
+	/** `theme.colours` is the only place a colour name is written. */
 	it("is the only place a colour name is written", () => {
 		const names = Object.keys(Colors).join("|");
 		const literal = new RegExp(`colou?r:\\s*"(${names})"`);

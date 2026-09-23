@@ -11,8 +11,8 @@ import { useDebounced } from "@/hooks/useDebounced";
 import { type TranslationKey } from "@/i18n";
 
 /**
- * Keys rather than text: a module-level map is built before a locale is chosen. Written out rather than
- * `text-transform: capitalize`, because engines disagree about whether a CSS transform changes an accessible name.
+ * Keys rather than text, and written out because engines disagree on whether `text-transform` changes an accessible
+ * name.
  */
 const LEVELS: Record<ReportedLogLevel, { label: TranslationKey; hint: TranslationKey }> = {
 	trace: { label: "owner.levelAll", hint: "owner.levelTrace" },

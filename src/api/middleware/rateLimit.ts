@@ -18,11 +18,7 @@ interface Window {
 	resetAt: number;
 }
 
-/**
- * Fixed-window counting in memory. It is deliberately not shared across processes: a bot runs as one process,
- * and reaching for Redis to rate-limit a self-hosted dashboard would cost the "one process, one command"
- * promise the whole design is built on.
- */
+/** Fixed-window counting in memory; the bot is one process, so nothing is shared. */
 export class RateLimiter {
 	private readonly windows = new Map<string, Window>();
 	private readonly limit: number;
@@ -70,11 +66,8 @@ export class RateLimiter {
 }
 
 /**
- * Every key a request is counted against.
- *
- * The address is always one of them, because the session cookie is attacker-controlled: keyed on the cookie
- * alone, a flood mints a fresh allowance per request by rotating one header. The session narrows the bucket so
- * a household sharing one address does not share one allowance — it can never widen it.
+ * Every key a request is counted against. The address is always one, because the session cookie is attacker-controlled
+ * and can only narrow the bucket.
  */
 export function callerKeys(context: Context, trustProxy: boolean): string[] {
 	const keys = [`i:${clientAddress(context, trustProxy)}`];
@@ -87,8 +80,7 @@ export function callerKeys(context: Context, trustProxy: boolean): string[] {
 
 export function clientAddress(context: Context, trustProxy: boolean): string {
 	if (trustProxy) {
-		// Only meaningful behind a proxy that overwrites this. Trusting it without one lets anyone forge it,
-		// which is why DASHBOARD_TRUST_PROXY defaults to false.
+		// Only meaningful behind a proxy that overwrites it, hence DASHBOARD_TRUST_PROXY defaulting to false.
 		const forwarded = context.req.header("x-forwarded-for");
 		const first = forwarded?.split(",")[0]?.trim();
 		if (first !== undefined && first !== "") return first;
@@ -103,8 +95,8 @@ export function clientAddress(context: Context, trustProxy: boolean): string {
 }
 
 /**
- * `perAddress` is the ceiling nobody can forge their way past; `perCaller` is the tighter per-session bucket.
- * Both are checked, and the longest wait wins.
+ * `perAddress` is the ceiling nobody can forge past and `perCaller` the tighter per-session bucket; the longest wait
+ * wins.
  */
 export function rateLimit(
 	limiters: { perCaller: RateLimiter; perAddress: RateLimiter },

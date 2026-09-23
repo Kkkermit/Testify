@@ -2,11 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { oneOf } from "@/lib/oneOf";
 
 /**
- * A reader's appearance choice lives on `document.documentElement`, never in React state alone, so the
- * stylesheet and anything reading it in JavaScript cannot disagree about what is in force.
- *
- * The default is the *absence* of the attribute, which is what lets CSS answer before a script runs — the CSP
- * forbids the inline bootstrap that would otherwise set it, and an unmarked page is already correct.
+ * An appearance choice lives on `document.documentElement`; its absence is the default, so CSS is correct before any
+ * script runs.
  */
 export interface Preference<T extends string> {
 	readonly attribute: string;

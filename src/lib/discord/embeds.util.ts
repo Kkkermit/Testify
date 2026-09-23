@@ -19,10 +19,7 @@ export interface EmbedOptions {
 	timestamp?: boolean | undefined;
 }
 
-/**
- * Every embed in the bot comes from here, so restyling the whole thing is a change to `theme.ts` rather than a
- * search across two hundred files.
- */
+/** Every embed comes from here, so restyling the bot is a change to `theme.ts`. */
 export function embed(options: EmbedOptions): EmbedBuilder {
 	const builder = new EmbedBuilder().setColor(pickColour(options));
 

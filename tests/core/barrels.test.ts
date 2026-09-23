@@ -6,10 +6,7 @@ import { embed } from "@lib/discord/embeds.util";
 import * as musicBarrel from "@lib/music";
 import { musicPanel } from "@lib/music/musicPanel.util";
 
-/**
- * Importing a barrel pulls in every module behind it, so this catches both a broken re-export and an import cycle
- * that only shows up at runtime.
- */
+/** Importing each barrel catches a broken re-export and a cycle that only shows at runtime. */
 describe("the directory barrels", () => {
 	it.each([
 		["@config", configBarrel],

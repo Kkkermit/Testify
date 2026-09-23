@@ -40,10 +40,7 @@ export function welcomeCardText(data: WelcomeCardData): WelcomeCardText {
 	};
 }
 
-/**
- * Where to draw a background so it covers the card without distorting it — the same maths as CSS `object-fit:
- * cover`, cropping the overflowing axis.
- */
+/** A background rect that covers the card without distortion, like CSS `object-fit: cover`. */
 export function coverRect(
 	source: { width: number; height: number },
 	target: { width: number; height: number },
@@ -71,8 +68,7 @@ export async function renderWelcomeCard(data: WelcomeCardData): Promise<Attachme
 			const rect = coverRect(image, { width: WIDTH, height: HEIGHT });
 			draw.drawImage(image, rect.x, rect.y, rect.width, rect.height);
 
-			// A scrim over whatever they uploaded, so white text stays readable on a
-			// bright photo. Without it the card is unreadable half the time.
+			// A scrim over the uploaded image, so white text stays readable on a bright one.
 			draw.fillStyle = PALETTE.scrim;
 			draw.fillRect(0, 0, WIDTH, HEIGHT);
 			painted = true;

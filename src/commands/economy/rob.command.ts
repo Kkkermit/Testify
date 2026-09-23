@@ -47,8 +47,7 @@ export default defineCommand({
 
 		await setCooldown(guild.id, interaction.user.id, "rob", new Date(now));
 
-		// A padlock is consumed atomically, so it cannot be spent twice by two
-		// simultaneous robbery attempts.
+		// Consumed atomically, so two simultaneous robberies cannot both spend one padlock.
 		const padlocked = await removeInventoryItem(guild.id, target.id, "padlock", 1);
 		if (padlocked) {
 			await reply(interaction, {

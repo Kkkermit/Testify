@@ -28,9 +28,8 @@ function guildIdOf(context: ApiContext): string {
 }
 
 /**
- * The bot stores "off" as no record at all, so an absent one becomes a disabled config carrying the defaults a
- * form needs to render. `normaliseWelcome` supplies the migration off the old `isEmbed` flag, so the web
- * inherits it rather than reimplementing it.
+ * No record means off, so an absent one becomes a disabled config with defaults; `normaliseWelcome` migrates old
+ * records.
  */
 async function configOf(guildId: string): Promise<WelcomeConfigResponse> {
 	const stored = normaliseWelcome(await getWelcome(guildId));

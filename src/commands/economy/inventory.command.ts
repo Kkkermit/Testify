@@ -17,8 +17,7 @@ export default defineCommand({
 		const target = interaction.options.getUser("user") ?? interaction.user;
 		const account = await requireAccount(guild.id, target.id);
 
-		// Someone else's inventory is a read-only card: the Use buttons would
-		// otherwise show their items while spending yours.
+		// Someone else's inventory is read-only, or Use would spend yours.
 		const own = target.id === interaction.user.id;
 		await reply(interaction, inventoryScreen(account, target.username, interaction.user.id, 0, undefined, own));
 	},

@@ -4,8 +4,7 @@ import { Giveaway, type GiveawayRecord } from "@database/models/giveaway.schema"
 
 /** Mongo-backed persistence for `discord-giveaways`. */
 class MongoGiveawaysManager extends GiveawaysManager {
-	// The package's own JSDoc says this returns stored data, and its `_init` reads plain fields off it — but the
-	// bundled `.d.ts` types it as an array of `Giveaway` instances, which nothing here ever constructs.
+	// The bundled `.d.ts` types this as `Giveaway` instances, but it returns stored data, as the package's JSDoc says.
 	protected override async getAllGiveaways(): Promise<LiveGiveaway[]> {
 		return (await Giveaway.find().lean<GiveawayRecord[]>().exec()) as unknown as LiveGiveaway[];
 	}

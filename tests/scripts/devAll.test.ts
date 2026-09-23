@@ -1,12 +1,7 @@
 import { type ChildProcess } from "node:child_process";
 import { prefixLines, stopTree } from "../../scripts/devAll";
 
-/**
- * The supervisor exists because `concurrently` spawns every command through a shell — `cmd.exe /s /c` on
- * Windows — and each of those batch layers stops to ask "Terminate batch job (Y/N)?" when the console is
- * interrupted. Two children meant two prompts. These pin the parts that can be tested without spawning
- * anything; the Windows behaviour itself needs a Windows terminal.
- */
+/** How a child's output is prefixed; the Windows interrupt behaviour itself needs a Windows terminal. */
 
 describe("prefixing a child's output", () => {
 	it("labels every line", () => {
@@ -54,10 +49,7 @@ describe("stopping a child", () => {
 		expect(child.kill).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * The group, not the child: `tsx watch` runs the bot in a grandchild and the web half runs Vite in one, so
-	 * signalling only what we hold leaves the process actually holding the port alive.
-	 */
+	/** The whole process group is signalled, since the real work runs in a grandchild. */
 	it("signals the whole process group, and falls back to the child when there is none", () => {
 		const killSpy = jest.spyOn(process, "kill").mockImplementation(() => {
 			throw new Error("ESRCH");

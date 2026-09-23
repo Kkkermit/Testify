@@ -3,12 +3,7 @@ import { SavingIndicator, type SavingState } from "@/components/form";
 import { Card } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
-/**
- * The card and its saving indicator, which all four tabs had written out identically.
- *
- * No heading: the tab above it already names the panel, and `TabContent` gives a screen reader the same name
- * through `aria-labelledby`. A second copy 40px below the tab bar was the label twice over.
- */
+/** The card and its saving indicator; no heading, because the tab above already names the panel. */
 export function TabPanel({
 	description,
 	saving,

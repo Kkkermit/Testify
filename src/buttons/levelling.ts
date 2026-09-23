@@ -108,8 +108,7 @@ export default defineButton({
 			case "boost-roles": {
 				if (!interaction.isRoleSelectMenu()) return;
 
-				// Roles already boosting keep their multiplier; new ones start at ×2, since
-				// ×1 would be a boost that does nothing.
+				// New boost roles start at ×2, since ×1 would do nothing.
 				const chosen = interaction.values;
 				const boosts = chosen.map(
 					(roleId) => config.boosts.find((boost) => boost.roleId === roleId) ?? { roleId, multiplier: 2 },

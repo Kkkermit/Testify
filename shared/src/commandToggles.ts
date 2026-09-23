@@ -1,18 +1,8 @@
 import { z } from "zod";
 
-/**
- * Which commands are switched off, and the rules about what may be.
- *
- * Shared because the browser has to grey out the same switches the API refuses — a form that offers to disable
- * `/help` and then gets a 400 is worse than one that explains why it cannot.
- */
+/** Which commands are switched off, shared so the browser greys out what the API refuses. */
 
-/**
- * Commands that can never be switched off anywhere.
- *
- * `/help` is how somebody finds out what is left, and a server that disabled it would have no way back except
- * the dashboard. Everything else is fair game.
- */
+/** Commands that can never be switched off; `/help` is how somebody finds out what is left. */
 export const ALWAYS_ENABLED = ["help"] as const;
 
 export function isAlwaysEnabled(name: string): boolean {
@@ -34,10 +24,7 @@ export type CommandTogglePut = z.infer<typeof commandTogglePut>;
 export interface CommandToggleState {
 	/** Off in this scope. */
 	disabled: string[];
-	/**
-	 * Off bot-wide, which a server cannot change. Only sent on the guild view, where it explains a switch that
-	 * is on the server's list but still shows as unavailable.
-	 */
+	/** Off bot-wide, which a server cannot change; only sent on the guild view. */
 	disabledGlobally: string[];
 	/** Names that may never be switched off, so the form can disable those switches rather than refuse later. */
 	locked: string[];

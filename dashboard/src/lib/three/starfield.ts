@@ -69,8 +69,7 @@ export function createStarfield(canvas: HTMLCanvasElement, options: StarfieldOpt
 		},
 		transparent: true,
 		depthWrite: false,
-		// Additive on near-black is what makes a point read as light; on paper it is the alpha that carries it,
-		// which is why the strength is a token rather than one number for both themes.
+		// Additive blending reads as light on near-black, while on paper the alpha carries it, hence a per-theme token.
 		blending: AdditiveBlending,
 	});
 

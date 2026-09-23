@@ -45,19 +45,12 @@ export class TestifyClient extends Client {
 	readonly timers: TimerRegistry;
 	readonly startedAt = Date.now();
 
-	/**
-	 * The dashboard listener, once `startApi()` has opened one. Typed structurally rather than as `RunningApi`
-	 * because `src/api` imports this file, and shutdown only ever needs to close it.
-	 */
+	/** The dashboard listener once `startApi()` opens one; typed structurally because `src/api` imports this file. */
 	api: { close(): Promise<void> } | null = null;
 
 	/**
-	 * True while the owner has paused the bot from the dashboard.
-	 *
-	 * A flag rather than a gateway disconnect: `Client#destroy()` nulls the token and tears down the websocket
-	 * workers, and whether the same instance can be logged back in is not something to find out on a live bot.
-	 * Paused refuses every command, skips every message handler and shows the bot as invisible, which is what
-	 * "stopped" means to a server — and it is reversible from the same screen that set it.
+	 * True while the owner has paused the bot: commands are refused, message handlers skipped and the bot shown
+	 * invisible. A flag rather than `destroy()`, which nulls the token.
 	 */
 	paused = false;
 

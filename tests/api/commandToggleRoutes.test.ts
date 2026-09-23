@@ -106,10 +106,7 @@ describe("a server's own switches", () => {
 		expect(saved).toHaveBeenCalledWith(GUILD, [], OWNER);
 	});
 
-	/**
-	 * `/help` is how somebody finds out what is left. A server that switched it off would have no way back
-	 * except this dashboard, so the API refuses rather than trusting the form to have greyed the switch out.
-	 */
+	/** `/help` cannot be switched off, whatever the form sends. */
 	it("refuses to switch off a command the bot needs", async () => {
 		const response = await send(GUILD_PATH, "PUT", { disabled: ["help"] });
 
@@ -117,10 +114,7 @@ describe("a server's own switches", () => {
 		expect(saved).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * A manager never sees owner commands in the catalogue, so one arriving in a body is a hand-written request.
-	 * It is dropped rather than refused, because refusing would confirm the command exists.
-	 */
+	/** An owner-only name in a manager's request is dropped rather than refused, so its existence is not confirmed. */
 	it("drops an owner-only command from a server's list rather than storing it", async () => {
 		await send(GUILD_PATH, "PUT", { disabled: ["ban", "eval"] });
 

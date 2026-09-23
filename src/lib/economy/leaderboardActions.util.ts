@@ -6,10 +6,7 @@ import { type BoardKind } from "@lib/economy/economy.types";
 import { boardEntries, rankOnBoard } from "@lib/economy/memberActions.util";
 import { formatNumber, ordinal } from "@lib/format/format.util";
 
-/**
- * The leaderboards, shared by `/leaderboard` and by its paging buttons so the first page and every later one are
- * drawn by the same code.
- */
+/** The leaderboards, drawn by the same code for `/leaderboard` and its paging buttons. */
 
 export const PAGE_SIZE = 10;
 
@@ -43,9 +40,7 @@ async function entriesFor(guild: Guild, kind: BoardKind, page: number): Promise<
 
 /** Names and avatars come from one bulk member fetch rather than one request each. */
 async function decorate(guild: Guild, entries: Entry[], page: number): Promise<BoardRow[]> {
-	// Cache first, and only fetch what is genuinely missing: the handler answers the
-	// interaction directly rather than deferring, so this has to stay well inside
-	// Discord's three-second window.
+	// Cache first, fetching only what is missing, since the handler answers without deferring.
 	const missing = entries.map((entry) => entry.userId).filter((id) => !guild.members.cache.has(id));
 	if (missing.length > 0) await guild.members.fetch({ user: missing }).catch(() => null);
 

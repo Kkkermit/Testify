@@ -73,10 +73,7 @@ export interface CommandInputOptions {
 	getAttachment(name: string, required?: boolean): CommandAttachment | null;
 }
 
-/**
- * What both surfaces really hand back for an attachment — the shape of discord.js's `Attachment`, narrowed to the
- * fields a command can rely on.
- */
+/** The fields of discord.js's `Attachment` both surfaces can supply. */
 export interface CommandAttachment {
 	url: string;
 	name: string;
@@ -163,8 +160,7 @@ export function asSubcommand(command: Command, aliases: string[] = []): Subcomma
 		name: command.name,
 		description: command.description,
 		...(command.options ? { options: command.options } : {}),
-		// The command keeps its old name as a prefix alias, so folding `/meme` into
-		// `/lookup meme` does not break `t?meme`.
+		// The command keeps its own name as a prefix alias, so `t?meme` still works.
 		aliases: [command.name, ...(command.aliases ?? []), ...aliases],
 		run: async (interaction, client) => command.run?.(interaction, client),
 	};

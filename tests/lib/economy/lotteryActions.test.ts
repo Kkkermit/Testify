@@ -107,10 +107,7 @@ describe("applyLottery", () => {
 		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ entryFee: 250, maxWinners: 2 }));
 	});
 
-	/**
-	 * The stored time was computed from the old interval, so leaving it would have a weekly lottery drawing in
-	 * an hour — or an hourly one waiting a week.
-	 */
+	/** Changing the frequency moves the next draw, which was computed from the old interval. */
 	it("moves the next draw when the frequency changes", async () => {
 		running();
 		const before = Date.now();

@@ -16,15 +16,12 @@ export function controlState(client: TestifyClient): BotControlState {
 		gateway: gatewayStateOf(client),
 		since: client.pausedAt === null ? null : new Date(client.pausedAt).toISOString(),
 		guilds: client.guilds.cache.size,
-		// -1 is discord.js's "not measured yet", which is not a number worth showing.
+		// -1 is discord.js's not-measured-yet.
 		pingMs: client.isReady() && client.ws.ping >= 0 ? Math.round(client.ws.ping) : null,
 	};
 }
 
-/**
- * Invisible rather than offline: a bot cannot appear offline while connected, and invisible is the closest
- * Discord has. The presence is cosmetic — the refusal in `runChecks` is what actually stops it working.
- */
+/** Invisible is the closest Discord has to offline; the refusal in `runChecks` is what actually stops the bot. */
 export function pause(client: TestifyClient, now = Date.now()): BotControlState {
 	client.paused = true;
 	client.pausedAt = now;

@@ -123,10 +123,7 @@ describe("requireGuild", () => {
 		expect(response.status).toBe(401);
 	});
 
-	/**
-	 * The OAuth guild list is a login-time snapshot. Someone demoted five minutes ago still has it in their
-	 * session, so the member has to be fetched live on every request or the dashboard fails open.
-	 */
+	/** The member is fetched live, because the OAuth guild list is a login-time snapshot. */
 	it("fetches the member live rather than trusting the session", async () => {
 		const state = fake();
 		await appFor(state, MANAGER).request(`/guilds/${GUILD}/thing`);
@@ -152,10 +149,7 @@ describe("requireGuild", () => {
 		expect(state.fetched).toEqual([]);
 	});
 
-	/**
-	 * An id straight out of a URL reaches a Mongo filter if nothing checks it first. The assertion is on the
-	 * code and not the status, because a cache miss produces a 404 too — only the shape check produces this.
-	 */
+	/** The shape check produces its own code, which a cache miss's 404 cannot. */
 	it("rejects a guild id that is not a snowflake before it is used to look anything up", async () => {
 		for (const id of ["nope", "1", "abc123", "12345678901234567890123", "9007199254740993x"]) {
 			const response = await appFor(fake(), MANAGER).request(`/guilds/${id}/thing`);
@@ -171,10 +165,7 @@ describe("requireOwner", () => {
 		expect((await appFor(fake(), OWNER).request("/owner/thing")).status).toBe(200);
 	});
 
-	/**
-	 * 404 rather than 403: a server manager has no business learning that an owner console exists here, and the
-	 * console can leave guilds and blacklist people.
-	 */
+	/** 404 rather than 403, so a manager does not learn the console exists. */
 	it("does not confirm to a manager that the console exists", async () => {
 		const response = await appFor(fake(), MANAGER).request("/owner/thing");
 
@@ -187,11 +178,7 @@ describe("requireOwner", () => {
 	});
 });
 
-/**
- * The tests above stub `isOwner`. These run the real one, because the whole guarantee of the owner console is
- * that the Discord account signing in is one of the IDs in `DISCORD_OWNER_IDS` — nothing else grants it, and
- * the answer is read from the environment on every request rather than stored on the session.
- */
+/** The real `isOwner`: only an id in `DISCORD_OWNER_IDS`, read on every request, grants the console. */
 describe("who counts as the bot owner", () => {
 	function ownerApp(ownerIds: string[], userId: string) {
 		const env = { DISCORD_OWNER_IDS: ownerIds } as Env;
@@ -231,10 +218,7 @@ describe("who counts as the bot owner", () => {
 		expect((await ownerApp([OWNER], MANAGER).app.request("/owner/thing")).status).toBe(404);
 	});
 
-	/**
-	 * Ownership is re-read per request, so removing someone from the env takes effect on their next click
-	 * rather than the next time they sign in. Their session stays valid; it just stops being an owner's.
-	 */
+	/** Removing an id from the env revokes the console on that person's next request. */
 	it("revokes access on the next request when the ID is taken out of the env", async () => {
 		const { app, env } = ownerApp([OWNER, MANAGER], MANAGER);
 		expect((await app.request("/owner/thing")).status).toBe(200);

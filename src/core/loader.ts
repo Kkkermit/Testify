@@ -22,8 +22,7 @@ function find(pattern: string): string[] {
 }
 
 function importFile(file: string): unknown {
-	// The one dynamic require in the codebase: it is how dropping a file into a
-	// folder is enough to register a command.
+	// The one dynamic require, which is what lets a dropped-in file register itself.
 
 	const loaded: unknown = require(file);
 	if (typeof loaded === "object" && loaded !== null && "default" in loaded) {
@@ -80,8 +79,7 @@ function loadCommands(client: TestifyClient): number {
 		const loadedCommand = command as unknown as Command;
 		const named: [string, string][] = [
 			...(loadedCommand.aliases ?? []).map((alias): [string, string] => [alias, loadedCommand.name]),
-			// Only aliases a subcommand asks for by name. Registering every
-			// subcommand name would collide — plenty of commands have a `delete`.
+			// Only aliases a subcommand asks for; registering every subcommand name would collide.
 			...subcommandsOf(loadedCommand).flatMap((sub) =>
 				(sub.aliases ?? []).map((alias): [string, string] => [alias, `${loadedCommand.name} ${sub.name}`]),
 			),
@@ -128,8 +126,7 @@ function loadMessageHandlers(client: TestifyClient): number {
 }
 
 function loadEvents(client: TestifyClient): number {
-	// The trailing separator matters: without it this also excluded
-	// `events/messageCreate.ts`, which is the file that runs every message handler.
+	// The trailing separator stops a sibling whose name starts with `message` being excluded too.
 	const messageFolder = resolve(ROOT, "events", "message") + sep;
 	const files = find("events/**/*.event.{js,ts}").filter((file) => !file.startsWith(messageFolder));
 	let count = 0;

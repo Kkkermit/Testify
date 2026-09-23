@@ -1,9 +1,4 @@
-/**
- * The bot's command registry, as the dashboard sees it.
- *
- * This is the same metadata `buildSlashCommand` registers with Discord, so a screen built from it cannot drift
- * from what `/help` lists — and it is what a generated form per command would be built from later.
- */
+/** The command registry as the dashboard sees it, from the same metadata registered with Discord. */
 
 export const OPTION_TYPES = [
 	"string",

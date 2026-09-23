@@ -100,8 +100,7 @@ export default defineCommand({
 				const name = interaction.options.getString("name") ?? `Thread by ${interaction.user.username}`;
 				const reason = `Created by ${interaction.user.username}`;
 
-				// Announcement channels only accept announcement threads, so the type is
-				// only narrowed for the channels that actually support the choice.
+				// Announcement channels only take announcement threads.
 				const thread =
 					channel.type === ChannelType.GuildAnnouncement
 						? await channel.threads.create({ name, reason })

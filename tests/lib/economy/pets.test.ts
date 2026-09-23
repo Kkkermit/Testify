@@ -22,10 +22,7 @@ describe("the pet catalogue", () => {
 		for (const pet of ALL_PETS) expect(pet.price).toBeGreaterThan(0);
 	});
 
-	/**
-	 * Pets are a money sink by design — nearly all of them cost more to feed than they return, and `happinessBoost` is
-	 * the reason to own one.
-	 */
+	/** Pets are a money sink by design; `happinessBoost` is the reason to own one. */
 	it("charges to feed every pet and gives every pet a happiness boost", () => {
 		for (const pet of ALL_PETS) {
 			expect(pet.feedCost).toBeGreaterThan(0);

@@ -22,11 +22,8 @@ import {
 } from "@testify/shared";
 
 /**
- * What the bot owner can do to the running bot. Everything here is behind `requireOwner`.
- *
- * There is deliberately no "start": the HTTP server this responds on lives inside the bot process, so a stopped
- * bot has nothing left to serve the request. Pausing is the reversible half, and shutting down says plainly
- * that only the host can bring it back.
+ * What the owner can do to the running bot, behind `requireOwner`; there is no start, because this API runs inside the
+ * bot.
  */
 
 export const control = new Hono<ApiBindings>();
@@ -49,10 +46,7 @@ control.post("/gateway", async (context) => {
 	return context.json(state);
 });
 
-/**
- * Ends the process, and with it this API. Answered before exiting so the browser is told rather than left with
- * a dropped connection, and the exit is deferred a tick for the same reason.
- */
+/** Answers before exiting, a tick later, so the browser is told rather than dropped. */
 control.post("/shutdown", async (context) => {
 	const client = context.get("client");
 	await parseBody(context, shutdownRequest);
@@ -126,12 +120,7 @@ control.get("/guilds/:guildId", async (context) => {
 	return context.json(body);
 });
 
-/**
- * Leaving is one way: the bot needs a fresh invite to come back, and only somebody still in that server can
- * issue one. So the server compares the typed name itself rather than trusting the browser to have asked, and
- * the audit record is written before the guild is gone — afterwards its name is no longer readable from the
- * cache.
- */
+/** The server compares the typed name itself, and the audit record is written before the name leaves the cache. */
 control.post("/guilds/:guildId/leave", async (context) => {
 	const client = context.get("client");
 	const { guildId } = parseParams(context, guildIdParam);

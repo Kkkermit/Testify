@@ -74,10 +74,7 @@ async function contextFor(headers: Record<string, string> = {}): Promise<Context
 }
 
 describe("callerKeys", () => {
-	/**
-	 * The session cookie is attacker-controlled. Counted on it alone, a flood mints a fresh allowance per
-	 * request by rotating one header — 400 requests once passed a 300-per-minute limit without a single refusal.
-	 */
+	/** The address is always counted, because the session cookie is attacker-controlled. */
 	it("always counts against the address, even when a session cookie is present", async () => {
 		const context = await contextFor({ cookie: "dash_session=abc123" });
 
@@ -99,10 +96,7 @@ describe("callerKeys", () => {
 });
 
 describe("clientAddress", () => {
-	/**
-	 * Trusting `x-forwarded-for` without a proxy in front lets anyone forge their address and so their whole
-	 * rate-limit bucket. That is why DASHBOARD_TRUST_PROXY defaults to false.
-	 */
+	/** `x-forwarded-for` is ignored unless a proxy is trusted, or anyone could forge their bucket. */
 	it("ignores a forwarded header when no proxy is trusted", async () => {
 		const context = await contextFor({ "x-forwarded-for": "1.2.3.4" });
 
@@ -135,10 +129,7 @@ describe("the middleware, against a caller who forges cookies", () => {
 		return instance;
 	}
 
-	/**
-	 * Rotating the session cookie once bought a fresh allowance per request: 400 requests passed a 300-per-minute
-	 * limit with none refused. The address is now always one of the keys, so the ceiling cannot be forged past.
-	 */
+	/** Rotating cookies cannot get past the address ceiling. */
 	it("still refuses once the address ceiling is spent, however many cookies are used", async () => {
 		const instance = app();
 		const statuses: number[] = [];

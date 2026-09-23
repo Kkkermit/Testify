@@ -228,8 +228,7 @@ export default defineButton({
 
 		const account = await requireAccount(guildId, userId);
 
-		// Re-checked here rather than trusting the button: the screen may have been
-		// rendered before the money was spent somewhere else.
+		// Re-checked, since the money may have been spent after the screen rendered.
 		const entry = findEntry(state, balancesOf(account), state.selectedId ?? "");
 		if (entry?.blocked !== undefined) throw new UserFacingError(entry.blocked);
 

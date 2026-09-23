@@ -5,13 +5,7 @@ import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
 
-/**
- * A blanket guard over the whole surface rather than one assertion per route: a key added to a response next
- * year is checked by this without anybody remembering to check it.
- *
- * The same shape as `logRing`'s redaction list, so a field that would be scrubbed out of a log line cannot be
- * served in full from a route.
- */
+/** No response anywhere may carry a key the log ring would redact. */
 const SECRET_KEY = /token|secret|password|credential|authorization|cookie|csrf|uri|dsn|key$/i;
 
 /** Values the environment holds that must never appear in a body, whatever they are called. */
@@ -76,10 +70,7 @@ describe("no route serves a secret", () => {
 		for (const secret of Object.values(SECRETS)) expect(text).not.toContain(secret);
 	});
 
-	/**
-	 * Everything else answers 401 without a session, and a refusal must not describe what it is refusing —
-	 * a stack, a path or a config value in an error body is the other way this leaks.
-	 */
+	/** A refusal must not carry a stack, a path or a config value. */
 	it.each([
 		"/api/auth/me",
 		"/api/commands",

@@ -149,10 +149,7 @@ describe("GET /auth/login", () => {
 		expect((await app().request("/auth/login?returnTo=//evil.example")).status).toBe(400);
 	});
 
-	/**
-	 * `RequireAuth` sends `pathname + search`, so signing in from any tabbed or searched page carried a query
-	 * string. Refusing it answered 400 and left no way in at all from the owner console or a levelling tab.
-	 */
+	/** `RequireAuth` carries the query string through sign-in, so it has to be accepted. */
 	it("accepts the query string a tabbed page signs in from", async () => {
 		const path = encodeURIComponent("/owner?tab=logs");
 		const response = await app().request(`/auth/login?returnTo=${path}`);
@@ -179,10 +176,7 @@ describe("GET /auth/callback", () => {
 		expect(response.headers.get("set-cookie")).toContain("dash_session=new-session-id");
 	});
 
-	/**
-	 * The state is the whole defence against a forged callback. Without the cookie there is nothing to compare
-	 * against, and accepting it would let anyone hand a victim a signed-in session.
-	 */
+	/** A state with no pending flow behind it is a forged callback. */
 	it("refuses a state with no pending flow behind it", async () => {
 		const response = await callback("?code=abc&state=whatever");
 
@@ -264,10 +258,7 @@ describe("GET /auth/me", () => {
 		expect((await app().request("/auth/me")).status).toBe(401);
 	});
 
-	/**
-	 * Ownership is read from the env per request, never off the session document — so removing an ID revokes
-	 * the console on that person's next click rather than at their next sign-in.
-	 */
+	/** Ownership is read from the env on every request, so removing an id revokes it on the next click. */
 	it("reads ownership from the client rather than the session", async () => {
 		const stale = {
 			_id: "sid",

@@ -403,10 +403,7 @@ describe("PATCH /members/:userId/level", () => {
 		expect(levelSet).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * Writing the number alone would leave somebody at level 10 without the level-10 role, and nothing would
-	 * fix it until their next message.
-	 */
+	/** Setting a level hands out its role rewards too. */
 	it("hands out the role rewards the new level earns", async () => {
 		await request("PATCH", "/level", { level: 10 });
 
@@ -459,10 +456,7 @@ describe("DELETE /members/:userId/softban", () => {
 		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.softban.revoke" }));
 	});
 
-	/**
-	 * A softbanned user is banned, so they are not a member and have no roles to compare — running the
-	 * hierarchy check here would refuse every lift.
-	 */
+	/** A softbanned user is not a member, so the hierarchy check would refuse every lift. */
 	it("works for somebody who is not in the server, which every softbanned user is", async () => {
 		softbanned();
 

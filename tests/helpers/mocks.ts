@@ -15,9 +15,7 @@ import { createLogger } from "@core/logger";
 /** Mock factories, one per surface, with every method already stubbed. */
 
 /** Applies overrides so that an explicit `null`, `0` or `false` wins. */
-/**
- * `User`, `Role` and `GuildMember` type `toString()` as a template literal, which an object literal cannot satisfy.
- */
+/** `User`, `Role` and `GuildMember` type `toString()` as a template literal, which an object literal cannot satisfy. */
 export type Overrides<T> = Partial<Omit<T, "toString" | "valueOf">>;
 
 function merge<T extends object>(defaults: T, overrides: Overrides<T> = {}): T {
@@ -101,8 +99,7 @@ export function createMockMember(overrides: Overrides<GuildMember> = {}): GuildM
 			kickable: true,
 			moderatable: true,
 			roles: { cache: mockCollection(), add: jest.fn(), remove: jest.fn() },
-			// A real bitfield rather than a pair of stubs: anything reading it as one would otherwise throw here
-			// and nowhere else.
+			// A real bitfield, since anything reading it as one would throw here.
 			permissions: new PermissionsBitField(PermissionsBitField.All),
 			voice: { channel: null },
 			toString: () => `<@${user.id}>`,

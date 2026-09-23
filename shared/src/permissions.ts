@@ -10,10 +10,7 @@ export interface AccessInput {
 	hasManageGuild: boolean;
 }
 
-/**
- * The frontend uses this to decide what to show; the API uses it to decide what to serve. Hiding a control is
- * never access control, so the backend's answer is the gate and the frontend's is a hint.
- */
+/** What a caller may see and do; the API's answer is the gate, the frontend's only a hint. */
 export function accessFor(input: AccessInput): Access {
 	if (input.ownerIds.includes(input.userId)) return "owner";
 	if (!input.botInGuild || !input.isMember) return "stranger";

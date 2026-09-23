@@ -41,11 +41,7 @@ describe("the members page", () => {
 		expect(table.querySelector("caption")?.textContent).toContain("Richest");
 	});
 
-	/**
-	 * On a phone the figures sat off the end of a scroller with no affordance, so a leaderboard read as a list
-	 * of names. jsdom loads no stylesheet, so this pins the classes; the widths themselves are checked in a
-	 * real browser.
-	 */
+	/** The figure a board is named after stays visible at every width. */
 	it("keeps the figure the board is named after at every width", async () => {
 		renderPage();
 

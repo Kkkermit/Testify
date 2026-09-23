@@ -52,11 +52,7 @@ export function requireSession(guild: Guild): MusicSession {
 	return session;
 }
 
-/**
- * The one sentence that refuses a volume change, so the command and the button cannot come to disagree.
- *
- * Changing the level means decoding and re-encoding, and FFmpeg is the only thing here that can do it.
- */
+/** The one refusal of a volume change, since only FFmpeg can re-encode. */
 export function requireVolumeControl(session: MusicSession): void {
 	if (session.canSetVolume) return;
 
@@ -70,10 +66,8 @@ export function panelFor(session: MusicSession, userId: string, note?: string, p
 }
 
 /**
- * Answers with the panel and leaves it live, so the bar keeps moving after the reply has been sent.
- *
- * The message is edited through the channel rather than the interaction: an interaction token only lasts
- * fifteen minutes, which is shorter than plenty of queues.
+ * Answers with the panel and keeps it live, editing through the channel because an interaction token dies after fifteen
+ * minutes.
  */
 export async function showPanel(
 	interaction: CommandInput,

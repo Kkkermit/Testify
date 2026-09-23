@@ -77,8 +77,7 @@ export function verifyPanel(state: VerifyPanelState, ownerId: string): Container
 	const parts: ContainerPart[] = [text(summary(state))];
 	if (state.note !== undefined) parts.push(text(`-# ${state.note}`));
 
-	// Worth shouting about: the setup looks complete but every verification would
-	// fail at the last step, and Discord gives no warning until it does.
+	// The setup would look complete while every verification failed at the last step.
 	if (state.roleTooHigh === true) {
 		parts.push(
 			text(
@@ -92,8 +91,7 @@ export function verifyPanel(state: VerifyPanelState, ownerId: string): Container
 		divider(),
 		text(`**The panel says**\n>>> ${config.message}`),
 		divider(),
-		// Captioned because two stacked menus look identical once something is chosen:
-		// the placeholder that told them apart is replaced by the selection.
+		// Captioned, because two stacked menus look identical once something is chosen.
 		text("**Panel channel**\n-# Where members find the Verify button."),
 		row(
 			channelSelect({

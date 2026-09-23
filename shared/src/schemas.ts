@@ -10,16 +10,8 @@ const RETURN_PATH = /^\/[a-zA-Z0-9/_-]*$/;
 const RETURN_QUERY = /^[a-zA-Z0-9=&%+.,_~-]*$/;
 
 /**
- * A relative path on this origin, with an optional query string, and nothing else.
- *
- * `//evil.example` is a protocol-relative URL: a browser reads it as `https://evil.example`, so a pattern that
- * only checks for a leading `/` is an open redirect. Backslashes are rejected for the same reason — browsers
- * normalise `/\evil.example` to `//evil.example`.
- *
- * The query half has to be allowed because the dashboard keeps tabs, pages and searches in the URL, so
- * `RequireAuth` carries `?tab=logs` through the sign-in. Refusing it made signing in impossible from any such
- * page. It is checked separately from the path rather than by widening one pattern, so the open-redirect rules
- * above still apply to the only part a browser resolves against the origin.
+ * A relative path on this origin with an optional query, and nothing else. `//host` and backslashes are refused because
+ * a browser resolves them to another origin, and the query is checked separately so a tabbed page survives sign-in.
  */
 export const returnTo = z
 	.string()
@@ -45,11 +37,7 @@ export const pagination = z.object({
 
 export type Pagination = z.infer<typeof pagination>;
 
-/**
- * Anything a manager types that ends up in a Discord message. The cap is Discord's own, and control characters
- * are stripped because they render as nothing and are how a hidden payload is smuggled past a human reviewing
- * a config.
- */
+/** Text that ends up in a Discord message, capped at Discord's limit with control characters stripped. */
 export function boundedText(max: number, label = "text"): z.ZodType<string> {
 	return z
 		.string()

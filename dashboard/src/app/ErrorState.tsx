@@ -39,10 +39,7 @@ export function ErrorState({
 	);
 }
 
-/**
- * Takes the translator rather than returning keys, so this stays one function whose output is what the reader
- * sees — and its tests can keep asserting on the sentence rather than on a key nobody reads.
- */
+/** Takes the translator, so its output is the sentence the reader sees. */
 export function describe(error: unknown, t: TFunction): { title: string; body: string; retryable: boolean } {
 	if (!(error instanceof ApiError)) {
 		return { title: t("error.unreachableTitle"), body: t("error.unreachableBody"), retryable: true };

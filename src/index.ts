@@ -22,20 +22,16 @@ async function main(): Promise<void> {
 	await publishCommands(client);
 	await client.login(env.DISCORD_TOKEN);
 
-	// After login, so the dashboard can never read a cache that is not filled yet. The bot outlives it: a busy
-	// port is the operator's to fix, and is no reason to take the commands down with it.
+	// After login, so the cache is filled; a dashboard that fails to start does not stop the bot.
 	if (env.DASHBOARD_ENABLED) {
 		startApi(client, env).ready.catch(() => undefined);
 	}
 }
 
-// The one place that still exits on a failure. Everything after startup is contained and logged instead, but a
-// bot that never connected has nothing left to keep alive, and staying up would look healthy to a supervisor
-// while answering nobody.
+// Startup is the one place a failure still exits: a bot that never connected has nothing to keep alive.
 main().catch((error: unknown) => {
 	const problem = toError(error);
-	// The logger may not exist yet if reading the environment is what failed, so this goes straight to stderr —
-	// with the stack, because a message alone rarely says which of the startup steps gave up.
+	// Straight to stderr with the stack, since the logger may not exist yet.
 	process.stderr.write(`\nThe bot could not start:\n\n${problem.message}\n\n${problem.stack ?? ""}\n`);
 	process.exit(1);
 });

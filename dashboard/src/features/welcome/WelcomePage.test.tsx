@@ -102,10 +102,7 @@ describe("the welcome page", () => {
 		expect(within(preview).queryByText(/\{user\}/)).toBeNull();
 	});
 
-	/**
-	 * Discord renders `**bold**` as bold, so a preview showing the asterisks answers a question nobody asked
-	 * and invites somebody to delete them.
-	 */
+	/** The preview renders Discord's marks rather than showing the asterisks. */
 	it("renders Discord's marks rather than showing the asterisks", async () => {
 		renderPage();
 

@@ -56,8 +56,7 @@ export default defineButton({
 				if (channelId === undefined) return;
 				await requireSendable(guild, channelId);
 
-				// A first-time setup starts with everything ticked, which is what someone
-				// enabling audit logging almost always wants.
+				// A first setup starts with everything ticked.
 				const fresh = saved.channelId === null && saved.enabled.length === 0 && draft.events.length === 0;
 				await showEditor({ channelId, events: fresh ? [...AUDIT_EVENTS] : draft.events });
 				return;
@@ -97,8 +96,7 @@ export default defineButton({
 			}
 
 			case "edit": {
-				// Starts from what is stored rather than from whatever the confirmation
-				// happened to be rendered with.
+				// Starts from what is stored, not from what the confirmation was rendered with.
 				await showEditor({ channelId: saved.channelId, events: resolveEnabled(saved.enabled) });
 				return;
 			}

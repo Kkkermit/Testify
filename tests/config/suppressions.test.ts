@@ -1,11 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-/**
- * `.nsprc` silences a vulnerability that cannot be fixed yet, which is only safe while somebody is still
- * looking at it. The template has always said an entry needs a reason, the version that fixes it and a hard
- * expiry; this is the part that makes that true rather than aspirational.
- */
+/** Every suppression carries a reason, a fixing version and an expiry that has not lapsed. */
 interface Suppression {
 	active?: boolean;
 	notes?: string;

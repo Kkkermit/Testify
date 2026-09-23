@@ -66,10 +66,7 @@ describeWithMongo("the dashboard session repository", () => {
 		expect(await findSession("not-a-real-session")).toBeNull();
 	});
 
-	/**
-	 * Mongo's TTL sweep runs about once a minute, so an expired document is still readable for a while. The
-	 * repository has to decide, not the index.
-	 */
+	/** An expired session is refused before Mongo's TTL sweep removes it. */
 	it("refuses a session that has expired but not yet been swept", async () => {
 		const issued = await createSession(box, details(), 7);
 		await DashboardSessions.updateOne({ _id: issued.id }, { $set: { expiresAt: new Date(Date.now() - 1_000) } }).exec();

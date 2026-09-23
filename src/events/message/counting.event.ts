@@ -4,10 +4,7 @@ import { advanceCount, getCounting, resetCount } from "@database/repositories/se
 import { embed, errorEmbed, replyTemporarily } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 
-/**
- * The expected number and the "not twice in a row" rule are both enforced inside the update filter, so two messages
- * arriving together can no longer both count.
- */
+/** The expected number and the not-twice-in-a-row rule are in the update filter, so two messages cannot both count. */
 export default defineMessageHandler({
 	name: "counting",
 	order: 20,

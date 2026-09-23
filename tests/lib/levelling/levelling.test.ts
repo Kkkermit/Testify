@@ -83,8 +83,7 @@ describe("normaliseSettings", () => {
 	});
 
 	/**
-	 * Mongoose applies defaults on write, not to documents already on disk, so a record written before these fields
-	 * existed arrives without them.
+	 * A document written before these fields existed arrives without them, since Mongoose applies defaults only on write.
 	 */
 	it("fills in fields a document written by the first version does not have", () => {
 		const partial = stored();
@@ -154,10 +153,7 @@ describe("multiplierFor", () => {
 		expect(multiplierFor(boosted, [BOOSTER])).toBe(2);
 	});
 
-	/**
-	 * Highest wins rather than the product: three stacked ×5 roles would be ×125, which is not what anyone setting up
-	 * "×5 for boosters" is asking for.
-	 */
+	/** The best multiplier wins rather than their product. */
 	it("takes the best multiplier rather than multiplying them together", () => {
 		expect(multiplierFor(boosted, [BOOSTER, VIP])).toBe(4);
 	});

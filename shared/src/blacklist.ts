@@ -2,10 +2,7 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/**
- * The bot-wide block list. Global by design rather than per guild — it is the bot owner's answer to somebody
- * abusing the bot itself, so it cannot be scoped to one server (AGENTS.md §12).
- */
+/** The bot-wide block list, global by design (AGENTS.md §12). */
 
 export const BLACKLIST_LIMITS = { maxReason: 200 } as const;
 
@@ -27,11 +24,7 @@ export type BlacklistAdd = z.infer<typeof blacklistAdd>;
 
 export const blacklistUserParam = z.object({ userId: snowflake });
 
-/**
- * Leaving a server is not reversible from this screen — the bot needs a fresh invite to get back in, and only
- * somebody in that server can issue one. So the name is typed rather than clicked, and the server compares it
- * rather than trusting the browser to have asked.
- */
+/** The server's name, typed to confirm and compared by the server, since leaving cannot be undone from here. */
 export const leaveGuildRequest = z.object({ confirm: z.string().min(1).max(100) });
 
 export type LeaveGuildRequest = z.infer<typeof leaveGuildRequest>;

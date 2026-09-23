@@ -2,13 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { everySource } from "./sourceFiles";
 
-/**
- * The mechanical half of §20.11's voice, checked on every run.
- *
- * Most of that section — "never blame", "say what a thing costs before it is done" — needs a reader. These
- * four do not, and they are the ones that drift silently: one American spelling in a screen nobody has looked
- * at in a month reads as a different product from the bot's own copy.
- */
+/** The mechanical half of the guide's §20.11 voice: spelling, person, ellipses and apostrophes. */
 
 const SRC = resolve(__dirname, "..");
 
@@ -33,10 +27,7 @@ const AMERICAN: Record<string, string> = {
 	summarize: "summarise",
 };
 
-/**
- * Most copy lives in `en.json`; the `.tsx` sweep catches anything a component still spells out itself, so a
- * screen that is only half extracted does not fall out of scope.
- */
+/** Copy lives in `en.json`; the `.tsx` sweep catches any a component still spells out. */
 function localeLines(): { where: string; text: string }[] {
 	const out: { where: string; text: string }[] = [];
 	const walk = (node: unknown, path: string): void => {

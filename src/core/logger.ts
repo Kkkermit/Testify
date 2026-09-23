@@ -19,12 +19,8 @@ export function splitLogArgs(args: unknown[]): Pick<LogRecord, "message" | "cont
 }
 
 /**
- * Pretty, colourised output when you are watching a terminal, and plain JSON when you are not — which is what a
- * hosting platform wants in its log drain.
- *
- * Every line is copied into `ring` as well, which is what the owner console reads. A hook rather than a second
- * transport, so the copy cannot change what is printed — and pino never calls the hook for a level below the
- * configured one, so `LOG_LEVEL` still decides what exists at all.
+ * Pretty output on a terminal, JSON otherwise. Every line is also copied into `ring` through a hook, so `LOG_LEVEL`
+ * still decides what exists.
  */
 export function createLogger(
 	level: LogLevel,
@@ -35,8 +31,7 @@ export function createLogger(
 		level,
 		hooks: {
 			logMethod(args, method, methodLevel) {
-				// Everything the logger emits, whatever the level — the console filters, and a line that was never
-				// captured cannot be filtered back into existence.
+				// Every level is captured, so the console can filter after the fact.
 				ring.push({ at: Date.now(), level: LEVELS[methodLevel] ?? "info", ...splitLogArgs([...args]) });
 
 				return method.apply(this, args);

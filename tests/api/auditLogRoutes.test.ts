@@ -100,7 +100,7 @@ describe("reading the configuration", () => {
 		expect(config.all).toBe(false);
 	});
 
-	/** A stored name that no longer exists must not reach the browser as an unknown checkbox. */
+	/** A stored event the bot no longer has does not reach the browser. */
 	it("drops an event the bot no longer has", async () => {
 		configured(["banAdd", "somethingRemoved"]);
 

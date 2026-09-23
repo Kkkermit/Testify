@@ -40,8 +40,7 @@ describe("loadEverything", () => {
 
 		const count = (directory: string): number =>
 			readdirSync(directory, { withFileTypes: true }).reduce((total, entry) => {
-				// `events/message/` holds message handlers, which the loader registers
-				// separately — they are not gateway listeners.
+				// `events/message/` holds message handlers, which are not gateway listeners.
 				if (entry.isDirectory()) return entry.name === "message" ? total : total + count(join(directory, entry.name));
 				return entry.name.endsWith(".event.ts") ? total + 1 : total;
 			}, 0);
@@ -111,9 +110,7 @@ describe("prefix aliases", () => {
 describe("every command's options", () => {
 	const commands = [...client.commands.values()];
 
-	/**
-	 * A prefix command fills options by position, and only the last string option can swallow the rest of the message.
-	 */
+	/** Prefix commands fill options by position, so no required option follows an optional one. */
 	it("never puts a required option after an optional one", () => {
 		const offenders: string[] = [];
 
@@ -138,10 +135,7 @@ describe("every command's options", () => {
 });
 
 describe("the command count", () => {
-	/**
-	 * Discord refuses to publish more than this, and refuses the whole batch — so going over does not break one
-	 * command, it breaks the bot.
-	 */
+	/** Discord refuses the whole batch over this limit. */
 	it(`is within Discord's limit of ${MAX_COMMANDS}`, () => {
 		expect(client.commands.size).toBeLessThanOrEqual(MAX_COMMANDS);
 	});
@@ -154,11 +148,7 @@ describe("every button", () => {
 	});
 });
 
-/**
- * The runner's allowlist is a list of names, and nothing else checks them against the registry — a typo or a
- * command since renamed would leave a dead entry that silently offers nothing, which is exactly the failure a
- * list of strings invites.
- */
+/** Every name on the runner's allowlist is a real command. */
 describe("the dashboard command allowlist", () => {
 	it.each([...ALLOWED_IN_DASHBOARD])("%s is a real command", (name) => {
 		expect(client.commands.has(name)).toBe(true);

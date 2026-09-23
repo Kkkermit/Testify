@@ -6,10 +6,7 @@ function record(level: "info" | "warn" | "error" = "info", message = "hello", co
 }
 
 describe("redact", () => {
-	/**
-	 * The buffer ends up on a web page, which is a much easier thing to read over someone's shoulder than a
-	 * terminal. One careless `logger.error({ uri }, …)` would otherwise publish a database password.
-	 */
+	/** Anything that looks like a secret is redacted before the line is kept. */
 	it("removes anything that looks like a secret", () => {
 		const cleaned = redact({
 			DISCORD_TOKEN: "abc.def.ghi",
@@ -168,10 +165,7 @@ describe("the logger's ring hook", () => {
 		});
 	});
 
-	/**
-	 * Every level, not just info and above: the console filters, and a debug line that was never captured cannot
-	 * be filtered back into existence when somebody goes looking for it.
-	 */
+	/** Every level is captured, so the console can filter to debug after the fact. */
 	it("captures debug and trace as well", () => {
 		const ring = new LogRing(10);
 		const logger = createLogger("trace", false, ring);

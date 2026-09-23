@@ -22,10 +22,7 @@ beforeEach(() => {
 	jest.clearAllMocks();
 });
 
-/**
- * 10062 is an interaction Discord had already closed, which is somebody typing faster than a search can
- * answer. Logging it at error filled the console with stack traces for a condition nothing can fix.
- */
+/** 10062 is an interaction Discord already closed, which is somebody typing fast rather than a failure. */
 it("notes an expired autocomplete interaction rather than reporting it as a failure", async () => {
 	const expired = new DiscordAPIError({ message: "Unknown interaction", code: 10062 }, 10062, 404, "POST", "u", {});
 

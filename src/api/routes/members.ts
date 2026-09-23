@@ -61,12 +61,7 @@ async function detail(context: Context<ApiBindings>): Promise<MemberDetail> {
 	return readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
 }
 
-/**
- * The same check the moderation commands run, asked before every write.
- *
- * `readMemberDetail` answers it for the page too, so a greyed-out button and a refused request can never
- * disagree — but the greying is a courtesy and this is the gate.
- */
+/** The moderation commands' own hierarchy check, run before every write; the greyed button is only a courtesy. */
 async function actOn(context: Context<ApiBindings>): Promise<{ current: MemberDetail; member: GuildMember }> {
 	const { guild, userId, member, moderator } = await scene(context);
 	const current = await readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
@@ -167,10 +162,7 @@ members.patch("/:userId/money", async (context) => {
 	return context.json(await detail(context));
 });
 
-/**
- * Lifting a softban skips the hierarchy check, and has to: a softbanned user is banned, so they are not a member
- * and have no roles to compare. `requireGuild` is the gate here.
- */
+/** Skips the hierarchy check: a softbanned user is not a member and has no roles to compare. */
 members.delete("/:userId/softban", async (context) => {
 	const guild = guildOf(context);
 	const { userId } = parseParams(context, memberParams);

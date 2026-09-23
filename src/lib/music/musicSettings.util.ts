@@ -25,12 +25,7 @@ export function isDj(settings: Pick<MusicSettings, "djRoleIds">, roleIds: readon
 	return settings.djRoleIds.some((roleId) => roleIds.includes(roleId));
 }
 
-/**
- * Why the music system refused, or null when it did not.
- *
- * `manager` is what keeps a server from locking itself out: whoever can configure the bot can always reach the
- * player, however the roles are set.
- */
+/** Why the music system refused, or null; a manager can always reach the player, so a server cannot lock itself out. */
 export function musicRefusal(
 	settings: MusicSettings,
 	member: { roleIds: readonly string[]; manager: boolean },

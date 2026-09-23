@@ -1,9 +1,6 @@
 import { strings } from "@config/strings";
 
-/**
- * Every string is user-visible copy, so the risk is a template that silently renders `undefined` or `[object
- * Object]` into chat.
- */
+/** No template renders `undefined` or `[object Object]` into chat. */
 type Leaf = string | ((...args: never[]) => string);
 
 function walk(value: unknown, path: string[] = []): [string, Leaf][] {

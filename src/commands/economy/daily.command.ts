@@ -15,8 +15,7 @@ export default defineCommand({
 		const result = await claimDaily(guild.id, interaction.user.id);
 		if (!result.claimed) throw new UserFacingError(result.message);
 
-		// Lands on the balance panel so the new total and the next action are both
-		// right there, rather than a dead-end confirmation embed.
+		// Lands on the balance panel, with the new total and the next action.
 		const account = await requireAccount(guild.id, interaction.user.id);
 		await reply(
 			interaction,

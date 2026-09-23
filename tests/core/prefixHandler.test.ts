@@ -9,8 +9,7 @@ const prefixConfig = { prefix: "t?", isEnabled: true };
 jest.mock("@database/repositories/settingsRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
 }));
-// The checks themselves have their own tests; this is about routing a message
-// to the right command, which is what broke.
+// Routing a message to the right command; the checks have their own tests.
 jest.mock("@core/checks", () => ({
 	runChecks: jest.fn(() => Promise.resolve(null)),
 	clearCooldowns: jest.fn(),

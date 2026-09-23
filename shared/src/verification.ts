@@ -2,11 +2,7 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/**
- * Verification: a button in a public channel that hands out a role once somebody types a short code back. The
- * dashboard and the Discord panel write the same three fields, so neither can configure something the other
- * cannot render.
- */
+/** Verification: a public button that grants a role once somebody types a short code back. */
 
 export const VERIFY_LIMITS = {
 	maxMessage: 1_000,

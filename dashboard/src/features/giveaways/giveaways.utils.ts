@@ -21,12 +21,7 @@ export function statusOf(row: GiveawayRow): GiveawayStatus {
 	return row.ended ? "ended" : "running";
 }
 
-/**
- * Running first, then most recently started.
- *
- * The API already sorts by start time, but a finished giveaway from this morning is not what somebody opening
- * the screen came to act on, and the actions differ by status.
- */
+/** Running first, then most recently started, since the actions differ by status. */
 export function ordered(rows: GiveawayRow[]): GiveawayRow[] {
 	return [...rows].sort((a, b) => {
 		if (a.ended !== b.ended) return a.ended ? 1 : -1;

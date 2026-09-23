@@ -136,10 +136,7 @@ describe("the verification panel", () => {
 		expect(text).toContain("1,234");
 	});
 
-	/**
-	 * Setup can look complete while every verification fails at the last step, and Discord gives no warning until it
-	 * does.
-	 */
+	/** A role above the bot's is warned about, since every verification would fail at the last step. */
 	it("warns when the chosen role sits above the bot", () => {
 		expect(textOf(verifyPanel({ config: config(), roleTooHigh: true }, OWNER))).toMatch(/above mine/i);
 		expect(textOf(ready)).not.toMatch(/above mine/i);

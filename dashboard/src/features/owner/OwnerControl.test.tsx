@@ -53,10 +53,7 @@ describe("the control tab", () => {
 		expect(button).toBeEnabled();
 	});
 
-	/**
-	 * A working shutdown and a refused one both leave the page sitting there, so silence on failure reads as success
-	 * on the one control where being wrong means believing the bot is off while it is still serving.
-	 */
+	/** A refused shutdown has to say so, because success and failure otherwise look identical. */
 	it("says so when the shutdown is refused", async () => {
 		const user = userEvent.setup();
 		server.use(

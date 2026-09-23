@@ -32,10 +32,7 @@ describe("accessFor", () => {
 		expect(accessFor(input({ hasManageGuild: false }))).toBe("member");
 	});
 
-	/**
-	 * The OAuth guild list is a snapshot of what Discord said at login. Someone who has left, or whose guild the
-	 * bot was removed from, has to fall all the way out — not merely down to "member".
-	 */
+	/** A non-member is a stranger whatever the login snapshot claims. */
 	it("makes a non-member a stranger however many permissions the snapshot claims", () => {
 		expect(accessFor(input({ isMember: false }))).toBe("stranger");
 		expect(accessFor(input({ botInGuild: false }))).toBe("stranger");

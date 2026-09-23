@@ -9,15 +9,12 @@ export function useHashTarget(): void {
 	useEffect(() => {
 		if (hash === "") return;
 
-		// The target needs `tabIndex={-1}`; without it focus stays in the sidebar and only the page moves, so a
-		// screen reader is still reading the top of the page while the setting is on screen.
+		// The target needs `tabIndex={-1}`, or focus stays in the sidebar while the page scrolls.
 		const target = document.getElementById(hash.slice(1));
 		if (target === null) return;
 
 		target.scrollIntoView({ behavior: prefersReducedMotion() ? "auto" : "smooth", block: "start" });
 		target.focus({ preventScroll: true });
-		// `key` is in the dependencies rather than the body: React Router mints a fresh one on every navigation,
-		// including a repeat click of the link already in the address bar, which is the only way that click moves
-		// anybody anywhere.
+		// `key` changes on every navigation, including a repeat click of the current link.
 	}, [hash, key]);
 }

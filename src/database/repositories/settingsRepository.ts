@@ -141,8 +141,7 @@ export async function disableCounting(guildId: string): Promise<boolean> {
 }
 
 /**
- * Conditional increment: the expected count and "not the same user twice" rule are both in the filter, so two
- * concurrent messages cannot double-count.
+ * The expected count and the not-the-same-user rule are in the filter, so two concurrent messages cannot double-count.
  */
 export async function advanceCount(
 	guildId: string,

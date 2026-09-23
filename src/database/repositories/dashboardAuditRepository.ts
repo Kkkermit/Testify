@@ -6,12 +6,7 @@ export async function recordAudit(entry: NewAudit): Promise<void> {
 	await DashboardAudits.create({ ...entry, at: new Date() });
 }
 
-/**
- * `_id` breaks the tie on every sort here. Two changes saved in the same millisecond share an `at`, and the
- * order Mongo returns tied documents in is unspecified — which for a paged read means one record can appear on
- * two pages while another is skipped entirely. An ObjectId is unique and rises with insertion, so adding it
- * makes the order total, and total is what `skip` needs to be correct.
- */
+/** `_id` breaks ties so the order is total, or a paged read can repeat one record and skip another. */
 export async function recentAudits(guildId: string, limit = 20): Promise<DashboardAudit[]> {
 	return DashboardAudits.find({ guildId }).sort({ at: -1, _id: -1 }).limit(limit).lean<DashboardAudit[]>().exec();
 }

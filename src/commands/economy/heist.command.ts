@@ -93,8 +93,7 @@ export default defineCommand({
 		const posted = await interaction.fetchReply();
 		state.messageId = posted.id;
 
-		// The window is registered so shutdown clears it rather than leaving a
-		// dangling timer, and the state is always cleaned up.
+		// Registered so shutdown clears it.
 		client.timers.after(`heist:${guild.id}`, ECONOMY.heistJoinWindowMs, async () => {
 			const pending = heists.get(guild.id);
 			if (!pending) return;

@@ -10,8 +10,7 @@ export default defineEvent({
 	async run(client, message: Message) {
 		if (message.system || message.webhookId !== null) return;
 
-		// Without the Message Content intent every message arrives blank, so nothing
-		// matches a prefix and the bot looks broken with no error to go on.
+		// Without the Message Content intent every message arrives blank.
 		if (!warnedAboutContent && message.content === "" && message.attachments.size === 0 && !message.author.bot) {
 			warnedAboutContent = true;
 			client.logger.warn(

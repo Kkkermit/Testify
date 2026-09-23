@@ -4,13 +4,7 @@ import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
 
-/**
- * The one test that a new route cannot slip past.
- *
- * Hiding a control in the browser is never access control — anybody can edit a class name, call the endpoint
- * directly, or read the JavaScript bundle. This walks the real route table and asserts that every path is
- * either deliberately public or answers an anonymous caller with a refusal.
- */
+/** Every route is either deliberately public or refuses an anonymous caller. */
 
 /** Reachable without a session, on purpose. Each entry says why, because that is the thing worth reviewing. */
 const PUBLIC = new Map<string, string>([

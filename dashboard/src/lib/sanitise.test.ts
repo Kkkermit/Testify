@@ -1,10 +1,6 @@
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/**
- * A sanitiser run over a raw Discord message destroys it: `<@123>` comes back entity-encoded, `<a:name:id>`
- * parses as an anchor and `<t:…>` as an unknown tag, so both are deleted outright. Each of these was measured
- * against `dompurify` before the placeholder pass was written, and each is a bug if it regresses.
- */
+/** Discord's own markup survives: mentions, custom emoji and timestamps. */
 describe("sanitiseInput", () => {
 	it.each([
 		["a user mention", "Welcome <@123456789012345678>!"],

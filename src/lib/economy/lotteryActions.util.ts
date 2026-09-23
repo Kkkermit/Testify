@@ -36,10 +36,7 @@ export async function readLottery(guildId: string): Promise<LotterySettings> {
 	return normaliseLottery(await getLottery(guildId));
 }
 
-/**
- * Changing the frequency moves the next draw, because the stored time was computed from the old interval and
- * would otherwise leave a weekly lottery drawing in an hour.
- */
+/** Changing the frequency moves the next draw, which was computed from the old interval. */
 export async function applyLottery(
 	guildId: string,
 	patch: LotteryPatch,

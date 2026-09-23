@@ -54,10 +54,7 @@ beforeEach(() => {
 });
 
 describe("/play autocomplete", () => {
-	/**
-	 * The bug this pins: Discord closes an autocomplete interaction after three seconds, and a search that ran
-	 * past it threw DiscordAPIError 10062 on every keystroke — logged as an error, with nothing offered to pick.
-	 */
+	/** A search that outruns the three-second window is answered anyway, rather than failing with 10062. */
 	it("answers a search that never finishes rather than letting the interaction expire", async () => {
 		resolveTracks.mockImplementation(() => new Promise(() => undefined));
 

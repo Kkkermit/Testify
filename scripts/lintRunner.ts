@@ -1,13 +1,6 @@
 import { ESLint } from "eslint";
 
-/**
- * `npm run lint` — a per-file report, and one rule that matters:
- * **errors fail the build, warnings never do.**
- *
- * A warning exists to be seen, not to stop work. Plain `eslint .` exits
- * non-zero on either unless you remember `--max-warnings`, which turns every
- * new advisory rule into a broken pipeline.
- */
+/** `npm run lint`: a per-file report where errors fail and warnings never do. */
 
 const colour = {
 	reset: "\u001b[0m",

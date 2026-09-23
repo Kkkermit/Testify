@@ -12,10 +12,7 @@ describe("readDashboardEnv", () => {
 		expect(readDashboardEnv({ DASHBOARD_PORT: "4100" }).port).toBe(4_100);
 	});
 
-	/**
-	 * The same 3000 `env.ts` defaults to. This script running against a different port than the bot would wait
-	 * forever on a bot that came up perfectly.
-	 */
+	/** Falls back to the same port `env.ts` defaults to. */
 	it("falls back to 3000 when the port is absent or unusable", () => {
 		expect(readDashboardEnv({}).port).toBe(3_000);
 		expect(readDashboardEnv({ DASHBOARD_PORT: "" }).port).toBe(3_000);

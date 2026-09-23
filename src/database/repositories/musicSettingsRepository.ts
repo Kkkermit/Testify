@@ -1,12 +1,7 @@
 import { CACHE } from "@config/constants";
 import { MusicSettingsConfig, type MusicSettingsRecord } from "@database/models/musicSettings.schema";
 
-/**
- * Whether the music system runs in a server, and who may drive it.
- *
- * Read before every music command, so it is cached exactly like the prefix is — and every write clears the
- * entry it touched, so a change takes effect on the next command rather than in five minutes.
- */
+/** Whether music runs in a server and who may drive it; cached like the prefix, and each write clears its entry. */
 
 /** What a server that has never been configured gets: on, and open to everybody. */
 export type StoredMusicSettings = Pick<MusicSettingsRecord, "enabled" | "djRoleIds"> | null;

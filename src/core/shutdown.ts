@@ -33,14 +33,12 @@ export function handleProcessSignals(client: TestifyClient): void {
 	process.once("SIGINT", () => void shutdown(client, "SIGINT"));
 
 	process.once("SIGTERM", () => {
-		// Under `npm run dev` tsx restarts the bot by killing it with SIGTERM, so
-		// in development this signal means "a file was saved", not "stop".
+		// `tsx watch` restarts the bot with SIGTERM, so in development it means a file was saved.
 		if (client.env.NODE_ENV === "development") printReloading();
 		void shutdown(client, "SIGTERM");
 	});
 
-	// Nothing here exits. A bot serving many servers must not go dark because one handler threw, so an
-	// unexpected failure is recorded and the process carries on. Only a signal or the owner console stops it.
+	// Nothing here exits: an unexpected failure is recorded and the process carries on.
 	const throttle = new ErrorThrottle();
 
 	process.on("uncaughtException", (error) => {
@@ -51,8 +49,7 @@ export function handleProcessSignals(client: TestifyClient): void {
 		reportSurvivable(client.logger, throttle, "UNHANDLED_REJECTION", reason);
 	});
 
-	// discord.js emits these on the client, and an unhandled `error` event on an EventEmitter throws — which is
-	// the likeliest way a gateway hiccup would otherwise have become a fatal exception.
+	// An unhandled `error` event on an EventEmitter throws, so the client's are caught here.
 	client.on("error", (error) => {
 		reportSurvivable(client.logger, throttle, "GATEWAY", error);
 	});

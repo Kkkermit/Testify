@@ -52,8 +52,7 @@ export default defineCommand({
 				const response = await fetch(file.url).catch(() => null);
 				if (!response?.ok) throw new UserFacingError("I could not download that image. Try uploading it again.");
 
-				// Stored as bytes rather than as a link: Discord's attachment URLs are
-				// signed and expire within hours, so a stored URL would break by tomorrow.
+				// Stored as bytes, because Discord's signed attachment URLs expire within hours.
 				await saveWelcome(guild.id, {
 					background: {
 						data: Buffer.from(await response.arrayBuffer()),

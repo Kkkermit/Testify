@@ -274,10 +274,7 @@ describe("the voice stat channels", () => {
 });
 
 describe("every write", () => {
-	/**
-	 * One response keeps the screen consistent: a section that refuses cannot leave the rest of the page
-	 * showing a value the bot does not have.
-	 */
+	/** Every write answers with the whole settings document. */
 	it("answers with the whole settings document", async () => {
 		const body = (await (await send("PATCH", "/prefix", { prefix: "!" })).json()) as ServerSettings;
 
@@ -321,10 +318,7 @@ describe("the bot's nickname in this server", () => {
 		expect(setNickname).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * Surfaced rather than left to fail at Discord, so the message names the permission to grant rather than
-	 * repeating a gateway error nobody can act on.
-	 */
+	/** A nickname the bot cannot change is refused with the permission to grant. */
 	it("refuses when the bot cannot change its own nickname there", async () => {
 		const response = await app(false).request(`/guilds/${GUILD}/settings/nickname`, {
 			method: "PATCH",

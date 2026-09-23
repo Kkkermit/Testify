@@ -47,10 +47,7 @@ describe("candidatesFor", () => {
 		expect(candidatesFor(name, undefined, "", "/repo")).toContain(expected);
 	});
 
-	/**
-	 * Somebody who installed yt-dlp themselves keeps it current; the bundled copy is pinned at install time,
-	 * and a stale extractor is the commonest way music breaks.
-	 */
+	/** A copy on PATH beats the bundled one when both are the same release. */
 	it("prefers one on PATH over the bundled copy", () => {
 		const candidates = candidatesFor("yt-dlp", undefined, "/usr/bin", "/repo");
 
@@ -71,10 +68,7 @@ describe("locate", () => {
 		expect(found).toBe("/usr/bin/yt-dlp");
 	});
 
-	/**
-	 * A file that exists and will not execute is worse than a missing one: it fails later, in a voice channel,
-	 * with nothing to point at. The probe runs the candidate rather than stat-ing it.
-	 */
+	/** A candidate that exists but will not run counts as missing. */
 	it("reports nothing when no candidate runs", () => {
 		expect(locate("yt-dlp", "/opt/broken", () => false)).toBeNull();
 	});
@@ -100,10 +94,7 @@ describe("findBinaries", () => {
 });
 
 describe("locateYtDlp", () => {
-	/**
-	 * The bug this pins: `npm run music:setup` downloads the latest yt-dlp into `bin/`, which came last in the
-	 * lookup — so while the npm package's copy existed, the fresh one never ran and a 403 could not be fixed.
-	 */
+	/** The newest copy runs wherever it lives, so `npm run music:setup` takes effect. */
 	it("runs the newest copy wherever it lives", () => {
 		const versions: Record<string, string> = {
 			[join("/repo", "node_modules", "youtube-dl-exec", "bin", "yt-dlp")]: "2026.05.01",
@@ -174,10 +165,7 @@ describe("ageInDays", () => {
 });
 
 describe("the version probe", () => {
-	/**
-	 * The two binaries disagree about the flag, and getting it wrong is indistinguishable from the binary being
-	 * absent: `ffmpeg --version` exits 8 and `yt-dlp -version` exits 2. One hardcoded flag hid FFmpeg entirely.
-	 */
+	/** Each binary is asked for its version with its own flag. */
 	it("asks each binary for its version the way that binary expects", () => {
 		const asked: Record<string, string[]> = {};
 		const probe = (path: string, args: string[]): boolean => {
@@ -202,8 +190,7 @@ describe("the version probe", () => {
 			expect(runs(picky, ["-version"])).toBe(true);
 			expect(runs(picky, ["--version"])).toBe(false);
 			expect(locate("ffmpeg", picky)).toBe(picky);
-			// Not null: a configured path that fails the probe correctly falls through to PATH, where a real
-			// yt-dlp may well be. What matters is that this one was rejected.
+			// A configured path that fails the probe falls through to PATH; this one was rejected.
 			expect(locate("yt-dlp", picky)).not.toBe(picky);
 		} finally {
 			rmSync(directory, { recursive: true, force: true });

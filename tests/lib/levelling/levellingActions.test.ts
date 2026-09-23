@@ -110,10 +110,7 @@ describe("applyLevelRewards", () => {
 		expect(remove).toHaveBeenCalledTimes(1);
 	});
 
-	/**
-	 * A member sending a message must not see an error because the bot was set up without Manage Roles — the reward is
-	 * reported as skipped and logged once.
-	 */
+	/** Without Manage Roles, rewards are skipped and warned about once, never shown to the member as an error. */
 	it("skips everything and warns when the bot cannot manage roles", async () => {
 		const { member, add } = memberStub({ canManageRoles: false });
 		const logger = silentLogger();

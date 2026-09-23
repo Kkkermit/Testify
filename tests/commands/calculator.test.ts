@@ -20,11 +20,7 @@ describe("what the calculator will evaluate", () => {
 	});
 });
 
-/**
- * `mathjs` allocates whatever a matrix builder is asked for, so `zeros(100000, 100000)` exhausts the heap —
- * and a V8 out-of-memory abort is not something `reportSurvivable` can catch, so any user in any server could
- * end the process with one command. Each of these was verified to kill a real Node process before the fix.
- */
+/** Expressions that would exhaust the heap, which an out-of-memory abort would turn into the whole bot going down. */
 describe("expressions that could take the bot down", () => {
 	it.each(["zeros(100000, 100000)", "ones(50000, 50000)", "range(0, 1e9)", "concat([1], [2])", "matrix([1, 2, 3])"])(
 		"refuses %s",

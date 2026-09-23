@@ -12,12 +12,7 @@ import {
 } from "@database/repositories/commandToggleRepository";
 import { ALWAYS_ENABLED, type CommandToggleState, commandTogglePut } from "@testify/shared";
 
-/**
- * Which commands are switched off, in one server or everywhere.
- *
- * Two mounts, one file: the shape is identical and only the scope and the gate differ. The bot-wide one hangs
- * off `/owner`, so it inherits `requireOwner` and 404s for anybody else.
- */
+/** Which commands are switched off, per server or bot-wide; the bot-wide mount sits under `/owner`. */
 
 type ApiContext = Context<ApiBindings>;
 
@@ -29,11 +24,7 @@ function guildIdOf(context: ApiContext): string {
 	return guild.id;
 }
 
-/**
- * A manager can only see and change ordinary commands. Owner-only names are filtered out of the stored list on
- * the way out and cannot be added on the way in, so a hand-written request cannot make one visible or switch
- * one off — the same rule `GET /api/commands` follows.
- */
+/** Owner-only names are filtered out on the way out and refused on the way in. */
 function ordinary(context: ApiContext, names: string[]): string[] {
 	const commands = context.get("client").commands;
 

@@ -8,10 +8,7 @@ import {
 	welcomePatchSchema,
 } from "@testify/shared";
 
-/**
- * The sanitiser every free-text field runs through. These are not HTML defences — nothing renders these as
- * HTML — they are defences against a stored string reading as something other than what was typed.
- */
+/** Every free-text field's sanitiser, which guards against a stored string reading differently from what was typed. */
 describe("sanitiseText", () => {
 	it("leaves ordinary text alone, including the angle brackets Discord needs", () => {
 		expect(sanitiseText("Welcome <@123>, you are member <#456>!")).toBe("Welcome <@123>, you are member <#456>!");

@@ -17,11 +17,7 @@ export function sourceOfHost(hostname: string): MusicSource {
 	return HOSTS.find((entry) => entry.pattern.test(hostname))?.source ?? "other";
 }
 
-/**
- * Splits a raw argument into "fetch this address" and "go and look for this".
- *
- * Pure so every shape a person can paste is a unit test rather than a live request.
- */
+/** Splits a raw argument into an address to fetch or terms to search for. */
 export function resolveQuery(raw: string): Query | null {
 	const trimmed = raw.trim();
 	if (trimmed === "") return null;

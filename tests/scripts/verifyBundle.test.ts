@@ -3,10 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { filesUnder, missingFrom, reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
 
-/**
- * The guard that catches two React copies in one bundle. It has to stay narrow: a false positive fails a build
- * with no bug behind it, and a false negative ships a dashboard that cannot mount.
- */
+/** Two React copies in one bundle are caught, and nothing else is mistaken for one. */
 describe("reactVersionsIn", () => {
 	it("finds the version React exports beside its hooks", () => {
 		const code = "e.useTransition=function(){return w.H.useTransition()},e.version=`19.2.8`";
@@ -46,10 +43,7 @@ describe("reactVersionsIn", () => {
 	});
 });
 
-/**
- * Both failures this catches are invisible until the CSS is built: development serves `light-dark()` untouched,
- * so the theme samples and the backdrop's palette are correct locally and wrong in production.
- */
+/** A polyfilled or missing `light-dark()` in the built CSS is caught. */
 describe("schemeProblem", () => {
 	it("passes a stylesheet that left the function to the browser", () => {
 		expect(schemeProblem(":root{--color-card:light-dark(#ffffff,#12121c)}")).toBeNull();
@@ -67,11 +61,7 @@ describe("schemeProblem", () => {
 	});
 });
 
-/**
- * `robots.txt` and `.well-known/security.txt` are copied into the build rather than imported by anything, so
- * nothing else notices if they stop arriving — and neither does anyone else until a crawler or a reporter
- * looks for one.
- */
+/** Files copied from `dashboard/public` are all present in the build. */
 describe("the public tree", () => {
 	let source: string;
 	let build: string;

@@ -9,11 +9,7 @@ function signedInAs(isOwner: boolean): void {
 	server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, isOwner })));
 }
 
-/**
- * `requireOwner` answers 404 rather than 403 so a server manager never learns the console is there. Rendering
- * the console shell to anybody who types the address undoes that — the data never arrives, but the title and
- * all eight tab names do, which names the whole feature set.
- */
+/** The console shell must not render for a non-owner, or its tab names give away what the API's 404 hides. */
 describe("reaching /owner without being an owner", () => {
 	it("shows the same 404 a mistyped address gets", async () => {
 		signedInAs(false);

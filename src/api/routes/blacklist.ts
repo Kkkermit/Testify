@@ -62,11 +62,7 @@ blacklist.delete("/:userId", async (context) => {
 	return context.json({ userId });
 });
 
-/**
- * A blacklisted account is usually in no server the bot can see, so the cache rarely has it and a REST lookup
- * is what puts a name beside the id. It is allowed to fail: an account that has since been deleted is still a
- * row worth showing, and an entry nobody can read is an entry nobody can lift.
- */
+/** Looks the account up over REST, since the cache rarely has it; a deleted account still gets a row. */
 async function toRow(
 	client: TestifyClient,
 	entry: { userId: string; reason: string; createdAt: Date },

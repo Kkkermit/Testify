@@ -16,10 +16,7 @@ export function useSticky(guildId: string): UseQueryResult<StickyList> {
 	});
 }
 
-/**
- * Not optimistic: a sticky is a message the bot posts into a channel, and a row that appeared before the server
- * agreed would be claiming something is running that may not be. The answer is the whole list, so it replaces.
- */
+/** Not optimistic: a sticky is a message the bot posts, and the answer is the whole list. */
 export function useSaveSticky(guildId: string): UseMutationResult<StickyList, Error, StickyPut> {
 	return useListMutation(guildId, (body) => api.put<StickyList>(`/guilds/${guildId}/sticky`, body));
 }

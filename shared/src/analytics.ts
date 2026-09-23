@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-/**
- * What the owner console reports, shared so the page and the API describe the same numbers.
- *
- * Nothing here identifies a person. Usage is counted per command, per server and per day, which answers "what
- * is this bot actually used for" without turning a self-hoster's dashboard into a record of who did what.
- */
+/** What the owner console reports; usage is counted per command, server and day, never per person. */
 
 export const ANALYTICS_WINDOWS = [7, 30, 90] as const;
 
@@ -99,10 +94,7 @@ export interface LogFeed {
 	/** How many the buffer is holding, so the page can say "the last 250" honestly. */
 	buffered: number;
 	capacity: number;
-	/**
-	 * The level the bot's logger is running at. Nothing below it is ever written, so the console has to say so
-	 * rather than showing an empty list and letting somebody conclude the bot is idle.
-	 */
+	/** The logger's level, so the console can say why nothing below it appears. */
 	loggerLevel: ReportedLogLevel;
 	/** How many lines matched, before `limit` cut the list down. */
 	matched: number;
@@ -129,12 +121,7 @@ export interface RuntimeInfo {
 	cachedChannels: number;
 }
 
-/**
- * Which dashboard screens get opened, bot-wide and by route pattern.
- *
- * No guild id and no user id: a server has one or two people who can open this dashboard, so a per-server count
- * would describe one identifiable person’s browsing rather than an aggregate.
- */
+/** Screens opened, by route pattern and bot-wide; no guild or user id, since a server's managers are identifiable. */
 export interface ScreenTally {
 	route: string;
 	count: number;

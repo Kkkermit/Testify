@@ -5,11 +5,8 @@ import { embed, reply } from "@lib/discord";
 import { truncate } from "@lib/format";
 
 /**
- * The functions a calculator needs, and only those.
- *
- * An allowlist rather than a list of banned names: `mathjs` ships matrix builders that allocate whatever they
- * are asked for, so `zeros(100000, 100000)` exhausts the heap — and a V8 out-of-memory abort is not something
- * `reportSurvivable` can catch, so it takes the whole bot down rather than failing one command.
+ * An allowlist, because `mathjs` matrix builders can exhaust the heap, and an out-of-memory abort takes the whole bot
+ * down.
  */
 export const CALCULATOR_FUNCTIONS = new Set([
 	"abs",
@@ -110,8 +107,7 @@ export default defineCommand({
 			throw new UserFacingError("That expression did not produce a value.");
 		}
 
-		// mathjs returns matrices, units and complex numbers as objects, so its own
-		// formatter is used rather than string coercion.
+		// mathjs returns objects for matrices, units and complex numbers, so its own formatter is used.
 		const rendered = format(result, { precision: 14 });
 
 		await reply(interaction, {

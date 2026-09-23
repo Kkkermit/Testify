@@ -44,10 +44,7 @@ function addressOf(info: TrackInfo): string | null {
 }
 
 /**
- * One entry of yt-dlp's answer as a queue track, or `null` when it carries nothing playable.
- *
- * A live stream reports no duration, which is meaningful rather than missing: it is what stops the player
- * treating an ended broadcast as a track that broke.
+ * One yt-dlp entry as a track, or null; a live stream has no duration, which stops an ended broadcast looking broken.
  */
 export function trackFromInfo(info: TrackInfo, requestedBy: string, source: Track["source"]): Track | null {
 	const url = addressOf(info);
@@ -185,12 +182,7 @@ export async function resolveTracks(
 const DESCRIBED_TTL_MS = 600_000;
 const DESCRIBED_MAX = 100;
 
-/**
- * Descriptions already fetched, keyed by binary and address.
- *
- * A volume change, a Previous and every retry re-open the track, and each of those used to cost two requests to
- * YouTube rather than one — which matters, because request volume is part of what gets a host flagged.
- */
+/** Descriptions already fetched, keyed by binary and address, so a re-open does not ask YouTube twice. */
 const described = new Map<string, { info: TrackInfo; at: number }>();
 
 function describedKey(url: string, binary: string): string {
@@ -242,24 +234,15 @@ export interface StreamOptions {
 }
 
 /**
- * How far ahead of the player the download is allowed to get.
- *
- * Discord consumes at real time, so without somewhere to put the rest yt-dlp spends the whole track blocked on
- * a full 64 KB pipe — and a downloader that has stopped reading its own socket gets the connection dropped
- * under it, which arrives here as `ERR_STREAM_PREMATURE_CLOSE` a few seconds in. Sixteen megabytes is over a
- * quarter of an hour of Opus, so an ordinary track is downloaded once and played out of memory.
+ * How far ahead of the player the download may get; without room, yt-dlp blocks on a full pipe and its connection is
+ * dropped.
  */
 export const BUFFER_BYTES = 1 << 24;
 
 /** The last of stderr, which is all that is worth keeping and all that can be logged safely. */
 const PROBLEM_TAIL = 500;
 
-/**
- * What yt-dlp is asked for when it is streaming rather than describing.
- *
- * `--no-playlist` matters: a YouTube link copied from a playlist carries `&list=`, and without it the
- * downloader would work through the whole list into one pipe.
- */
+/** `--no-playlist`, or a link copied out of a playlist streams the whole list down one pipe. */
 export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 	return [
 		"--quiet",
@@ -282,10 +265,8 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 }
 
 /**
- * Reads `source` as fast as it will go into a buffer the player drains at its own pace.
- *
- * `pipe` does not carry an error across, so a broken source has to be pushed through by hand or the reader
- * waits for an end that never comes.
+ * Reads `source` into a buffer the player drains at its own pace; `pipe` does not carry errors, so they are forwarded
+ * by hand.
  */
 function buffer(source: Readable): PassThrough {
 	const sink = new PassThrough({ highWaterMark: BUFFER_BYTES });
@@ -296,12 +277,7 @@ function buffer(source: Readable): PassThrough {
 	return sink;
 }
 
-/**
- * What FFmpeg is asked to do, kept pure because the arguments are the whole of what can be wrong here.
- *
- * `-ss` sits before `-i` so the packets are discarded rather than decoded, and the output is Opus at 48 kHz —
- * what Discord wants — so nothing downstream has to convert again.
- */
+/** `-ss` before `-i` discards packets rather than decoding them, and the output is 48 kHz Opus. */
 export function ffmpegArgs(options: StreamOptions = {}): string[] {
 	const seekMs = Math.max(0, Math.round(options.seekMs ?? 0));
 	const volume = clampVolume(options.volume ?? UNITY_VOLUME);
@@ -330,10 +306,7 @@ export function ffmpegArgs(options: StreamOptions = {}): string[] {
 }
 
 /**
- * Opens a playable byte stream.
- *
- * yt-dlp does every HTTP request, which is what keeps FFmpeg off the network entirely — its bundled static
- * build segfaults on any hostname, and reading a pipe cannot trigger that.
+ * Opens a playable stream; yt-dlp does every HTTP request, because the static FFmpeg build segfaults on any hostname.
  */
 export function openStream(
 	url: string,
@@ -362,8 +335,7 @@ export function openStream(
 		return {
 			stream,
 			plan,
-			// Killing the process is not enough on its own: anything it spawned survives the signal and keeps the
-			// pipe open, so the reader would wait for an end that never comes.
+			// Kill the whole tree, since a surviving child keeps the pipe open.
 			close: () => {
 				source.kill("SIGKILL");
 				source.stdout.destroy();

@@ -18,8 +18,7 @@ export async function antiLinkState(guildId: string): Promise<AntiLinkPanelState
 
 	return {
 		enabled: settings !== null,
-		// A permission stored before the list was fixed could be anything, and an
-		// unknown one would silently let nobody bypass.
+		// A stored permission may be anything, and an unknown one would let nobody bypass.
 		bypass: isBypassPermission(stored) ? stored : DEFAULT_BYPASS,
 	};
 }

@@ -3,11 +3,7 @@ import { ApiProblem } from "@api/errors";
 import { type Env } from "@config/env";
 import { createSecretBox, type SecretBox } from "@lib/infra";
 
-/**
- * A self-hoster's first run is `DASHBOARD_ENABLED=true` with nothing else filled in. That must show them what to
- * add rather than crash, so the API starts either way and this is how the rest of it asks whether it can sign
- * anyone in.
- */
+/** Whether the API can sign anyone in; a half-configured install starts anyway and shows what is missing. */
 export interface OauthConfig {
 	clientId: string;
 	clientSecret: string;

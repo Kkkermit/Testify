@@ -15,11 +15,7 @@ function everySource(dir: string, found: string[] = []): string[] {
 }
 
 describe("CARD_HEADING", () => {
-	/**
-	 * A Tailwind size utility carries its own `line-height` and beats both `@theme` and the base layer — the
-	 * same trap as the select's chevron room. Without an explicit `leading-*` here a card heading sits at 1.5,
-	 * which is body spacing, and only the size tells it apart from a paragraph.
-	 */
+	/** A size utility carries its own line height, so the heading has to set `leading-*` itself. */
 	it("sets its own line height, because the size utility would otherwise win", () => {
 		expect(CARD_HEADING).toMatch(/\bleading-\w+/);
 	});

@@ -5,10 +5,7 @@ import { toError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
 import { formatNumber } from "@lib/format/format.util";
 
-/**
- * `guildCreate` and `guildDelete` shared roughly eighty percent of their code and the delete handler still logged a
- * `[GUILD_CREATE]` tag.
- */
+/** The embed `guildCreate` and `guildDelete` both post to the guild log. */
 export async function buildGuildEmbed(
 	client: TestifyClient,
 	guild: Guild,

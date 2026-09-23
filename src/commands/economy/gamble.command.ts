@@ -83,8 +83,7 @@ export default defineCommand({
 		const bet = resolveAmount(interaction.options.getString("amount", true), account.wallet);
 		const game = (interaction.options.getString("game") ?? "coinflip") as GameKind;
 
-		// The debit is conditional, so two simultaneous bets cannot both be paid
-		// out against the same starting balance.
+		// The debit is conditional, so two simultaneous bets cannot both be paid out.
 		const debited = await debitWallet(guild.id, interaction.user.id, bet);
 		if (!debited) throw new UserFacingError(strings.economy.insufficientWallet(bet - account.wallet));
 

@@ -1,12 +1,7 @@
 import { type ReactNode } from "react";
 import { Card } from "@/components/primitives/Card";
 
-/**
- * The table shell both boards are drawn with, so a padding or a divider is written once.
- *
- * The cell classes are exported rather than wrapped in `<Td>` components because a table's semantics are the
- * point — `scope`, `<th scope="row">` and the cells a narrow screen drops all belong to the call site.
- */
+/** Cell classes rather than `<Td>` components, so `scope` and the columns a phone drops stay at the call site. */
 
 export const TH = "px-3 py-3 text-left font-medium sm:px-6";
 export const TH_NUM = "w-24 px-3 py-3 text-right font-medium sm:w-32 sm:px-6";

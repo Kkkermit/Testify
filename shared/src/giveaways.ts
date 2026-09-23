@@ -4,10 +4,7 @@ import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
 /**
- * Running giveaways, shared so the browser form and the API agree on the same bounds.
- *
- * The duration crosses as milliseconds rather than as `3d`: the bot parses that shorthand for Discord, and a
- * second parser in the browser is a second set of rules to keep in step.
+ * Giveaway bounds shared by the form and the API; the duration crosses as milliseconds, so only the bot parses `3d`.
  */
 
 export const GIVEAWAY_LIMITS = {

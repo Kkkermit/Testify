@@ -137,10 +137,7 @@ describe("showPanel", () => {
 		} as never;
 	}
 
-	/**
-	 * An interaction token dies after fifteen minutes, which is shorter than plenty of queues — so the live
-	 * panel edits the message through the channel rather than through the reply it came from.
-	 */
+	/** The live panel edits through the channel, because an interaction token dies after fifteen minutes. */
 	it("leaves the panel live, editing through the channel", async () => {
 		const session = sessionFor({ id: "guild-7" } as Guild, BINARIES, LOGGER as never);
 		const input = interaction();

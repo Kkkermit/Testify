@@ -10,10 +10,7 @@ export function useRunnable(): UseQueryResult<CommandCatalogue> {
 	});
 }
 
-/**
- * Nothing is cached: a run is an action, not a resource, and the same arguments twice are two runs. The result
- * lives in the mutation itself, which is also what makes "run again" mean run again.
- */
+/** Not cached: a run is an action, and the same arguments twice are two runs. */
 export function useRunCommand(): UseMutationResult<CommandRunResult, Error, { name: string } & CommandRunRequest> {
 	return useMutation({
 		mutationFn: ({ name, ...body }) => api.post<CommandRunResult>(`/owner/runner/${name}`, body),

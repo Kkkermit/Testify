@@ -16,11 +16,7 @@ export function useBlacklist(): UseQueryResult<BlacklistRow[]> {
 	});
 }
 
-/**
- * Both writes invalidate rather than patching the cached list: adding answers with one row and removing with an
- * id, so neither knows what the whole list should now be — and a name resolved from Discord only exists in the
- * server's answer.
- */
+/** Both writes invalidate rather than patch, because neither answer is the whole list. */
 export function useBlockUser(): UseMutationResult<BlacklistRow, Error, BlacklistAdd> {
 	const client = useQueryClient();
 

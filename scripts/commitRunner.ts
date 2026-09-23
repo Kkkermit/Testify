@@ -4,13 +4,7 @@ import prompts from "prompts";
 
 const run = promisify(execFile);
 
-/**
- * `npm run commit` — the guided way to write a commit in the house format.
- *
- * The commit-msg hook is what enforces the convention; this just makes it
- * pleasant. The message is passed to git as an argv element, never interpolated
- * into a shell string, so a quote or a backtick in the subject is harmless.
- */
+/** `npm run commit`: a guided commit in the house format, passed to git as an argv element. */
 
 const TYPES = [
 	{ value: "feat", title: "feat", description: "A new feature" },

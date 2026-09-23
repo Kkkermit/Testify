@@ -38,10 +38,7 @@ describe("the economy catalogues", () => {
 		for (const job of JOBS) expect(job.basePay).toBeGreaterThan(0);
 	});
 
-	/**
-	 * A job gated behind an item nobody can buy is unreachable, which is exactly the kind of dead content the audit
-	 * found in the JavaScript economy.
-	 */
+	/** No job requires an item nobody can buy. */
 	it("only requires items that are actually purchasable", () => {
 		for (const job of JOBS) {
 			for (const requirement of job.requirements) {

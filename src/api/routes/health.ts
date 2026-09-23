@@ -3,10 +3,7 @@ import { type ApiBindings } from "@api/context";
 import { databaseConnected } from "@database/connection";
 import { type HealthResponse } from "@testify/shared";
 
-/**
- * Unauthenticated on purpose, for a reverse proxy or an uptime monitor. It reports nothing an outsider could
- * use — no guild counts, no names.
- */
+/** Unauthenticated, for a reverse proxy or uptime monitor, and carries nothing an outsider could use. */
 export const health = new Hono<ApiBindings>().get("/", (context) => {
 	const client = context.get("client");
 	const connected = databaseConnected();

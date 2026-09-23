@@ -1,10 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-/**
- * RFC 9116 requires an `Expires`, and a lapsed one makes the file invalid rather than merely stale — so it
- * needs the same treatment as `.nsprc`: a date nobody can forget, because forgetting fails the build.
- */
+/** RFC 9116's `Expires` has to stay in the future, or the file is invalid. */
 const FILE = resolve(__dirname, "../..", "dashboard/public/.well-known/security.txt");
 const text = readFileSync(FILE, "utf8");
 

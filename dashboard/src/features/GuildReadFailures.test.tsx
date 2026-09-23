@@ -9,14 +9,7 @@ import { TreasurePage } from "@/features/treasure/TreasurePage";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
-/**
- * Every guild screen says so when its read fails, and keeps one `<h1>` while doing it.
- *
- * Four of these returned a skeleton for ever instead: the draft they render from is derived from the answer,
- * so it stays null when the read fails, and `isPending || draft === null` was checked **before** `isError` —
- * which made the error branch unreachable. The members page had the opposite problem and rendered a second
- * `<h1>` beside its own header.
- */
+/** Every guild screen reports a failed read with a retry, and keeps a single `<h1>`. */
 
 const GUILD = "900000000000000001";
 

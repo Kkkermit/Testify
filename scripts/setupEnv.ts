@@ -3,10 +3,7 @@ import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import prompts from "prompts";
 
-/**
- * Asks for the settings the bot needs and writes them to `.env`, or to
- * `.env.development` with `--dev`.
- */
+/** Asks for the settings the bot needs and writes `.env`, or `.env.development` with `--dev`. */
 
 interface Field {
 	key: string;
@@ -28,10 +25,7 @@ const FIELDS: Field[] = [
 	{ key: "CHANNEL_FEEDBACK_LOG", message: "Channel ID for bug reports and suggestions", required: false },
 ];
 
-/**
- * Asked only if the dashboard is wanted, so a bot-only install answers four questions rather than twelve.
- * `DASHBOARD_SESSION_SECRET` is not among them — nobody should be inventing 32 characters of randomness by hand.
- */
+/** Asked only when the dashboard is wanted; the session secret is generated rather than typed. */
 function dashboardFields(isDev: boolean): Field[] {
 	return [
 		{
@@ -68,8 +62,7 @@ function missingFrom(fields: Field[], answers: Record<string, string>): string[]
 }
 
 async function main(): Promise<void> {
-	// `npm run setup -- --dev` writes the file `npm run dev` reads, so a
-	// development bot can be set up without touching the production one.
+	// `--dev` writes the file `npm run dev` reads.
 	const isDev = process.argv.includes("--dev");
 	const filename = isDev ? ".env.development" : ".env";
 	const target = resolve(process.cwd(), filename);

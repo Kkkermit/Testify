@@ -32,8 +32,7 @@ function scene(options: {
 		guildOwnerId = OWNER_ID,
 	} = options;
 
-	// `asMember()` identifies a guild member by the presence of `guild`, so every
-	// member here needs one or the hierarchy checks are never reached.
+	// `asMember()` needs `guild`, or the hierarchy checks are never reached.
 	const at = (position: number, id: string, guild: unknown): GuildMember =>
 		createMockMember({ id, guild, roles: { highest: { position } } } as never);
 

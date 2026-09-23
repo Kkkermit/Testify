@@ -114,8 +114,7 @@ export const routes = [
 			},
 		],
 	},
-	// A real 404 rather than a redirect: bouncing an unknown address to the picker hides both a typo and a
-	// dashboard link that points at nothing.
+	// A real 404 rather than a redirect, which would hide a typo or a dead link.
 	{ path: "*", element: lazily(<NotFoundPage />) },
 ];
 

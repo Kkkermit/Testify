@@ -30,10 +30,7 @@ export function needsSubcommand(command: CommandSummary | undefined): boolean {
 	return command !== undefined && command.subcommands.length > 0;
 }
 
-/**
- * Empty is "not given" rather than an empty string, so an optional field left alone is absent from the request
- * instead of arriving as `""` — which a command reading `getString(name)` would treat as an answer.
- */
+/** An empty field is left out rather than sent as `""`, which a command would read as an answer. */
 export function buildArgs(options: CommandOptionSummary[], raw: Record<string, string>): Record<string, ArgValue> {
 	const args: Record<string, ArgValue> = {};
 

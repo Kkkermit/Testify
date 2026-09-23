@@ -1,10 +1,7 @@
 import { problemText } from "@lib/format/problemText.util";
 import { GIVEAWAY_LIMITS, giveawayProblem, giveawayStart } from "@testify/shared";
 
-/**
- * The rules the form and the API share. Mounting is covered by `server.test.ts`, which reads Hono's route
- * table — a missing `guilds.route(…)` line looks exactly like a permission refusal from the outside.
- */
+/** The rules the form and the API share; mounting is covered by `server.test.ts`. */
 
 const channelId = "400000000000000001";
 const valid = { channelId, prize: "A copy of the game", winnerCount: 1, durationMs: 3_600_000 };

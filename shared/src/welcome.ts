@@ -2,10 +2,7 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/**
- * The rules of the welcome greeting, shared so the browser form, the API and the Discord panel all enforce the
- * same ones. A template the web accepts and the bot then truncates is the drift this prevents.
- */
+/** The greeting's rules, shared so the form, the API and the Discord panel all enforce the same ones. */
 
 export const WELCOME_LIMITS = {
 	maxMessage: 1_500,

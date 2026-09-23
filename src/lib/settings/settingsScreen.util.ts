@@ -5,10 +5,7 @@ import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 
-/**
- * The house style for a Components V2 settings panel: title, status, an optional note, rows with their own control
- * beside them, captioned pickers, then actions.
- */
+/** The house style for a V2 settings panel: title, status, note, rows with their controls, pickers, then actions. */
 
 export interface ScreenAction {
 	/** Becomes the action part of the custom ID. */

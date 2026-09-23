@@ -61,12 +61,7 @@ export function headlineFor(track: Track): string {
 	return `${SOURCE_EMOJI[track.source]} ${link(`**${truncate(track.title, TITLE_MAX)}**`, track.url)}${author}`;
 }
 
-/**
- * The bar itself, drawn in box characters rather than emoji.
- *
- * It sits inside a code span so every cell is the same width — an emoji bar reflows as the head moves through
- * it, which reads as the whole line twitching rather than as progress.
- */
+/** The bar in box characters inside a code span, so every cell is the same width as the head moves. */
 export function musicBar(playedMs: number, durationMs: number, cells = BAR_CELLS): string {
 	const ratio = durationMs <= 0 ? 0 : Math.min(1, Math.max(0, playedMs / durationMs));
 	const head = Math.min(cells - 1, Math.floor(ratio * cells));
@@ -75,10 +70,8 @@ export function musicBar(playedMs: number, durationMs: number, cells = BAR_CELLS
 }
 
 /**
- * The elapsed/total line under the current track, or nothing at all for a stream that has no end.
- *
- * The bar is the only part a refresh has to move; `<t:…:R>` beside it is rendered by the reader's own client
- * and counts down on its own between edits.
+ * The elapsed/total line, or nothing for a stream with no end; `<t:…:R>` counts down in the reader's client between
+ * edits.
  */
 export function progressLine(track: Track, playedMs: number, now = Date.now()): string {
 	if (track.durationMs === null) return "`🔴 live`";

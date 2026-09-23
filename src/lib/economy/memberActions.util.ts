@@ -108,12 +108,7 @@ function toWarning(entry: {
 	};
 }
 
-/**
- * Everything one member's page shows, in one read.
- *
- * `member` is null once somebody leaves, and every section survives that: warnings, balance and XP all outlive
- * the membership, so the page names them rather than answering 404.
- */
+/** Everything one member's page shows, in one read; `member` is null once they leave, and every section survives it. */
 export async function readMemberDetail(options: {
 	guild: Guild;
 	userId: string;
@@ -195,12 +190,7 @@ export interface LevelChange {
 	rewards: RewardOutcome;
 }
 
-/**
- * Sets a level outright or moves XP, then hands out whatever role rewards the new level earns.
- *
- * The reward pass is what makes this different from writing the number: a level set that skipped it would leave
- * somebody at level 10 without the level-10 role, and nothing would fix it until their next message.
- */
+/** Sets a level or moves XP, then hands out whatever role rewards the new level earns. */
 export async function changeLevel(
 	guild: Guild,
 	member: GuildMember,

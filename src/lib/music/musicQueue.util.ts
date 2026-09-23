@@ -34,11 +34,7 @@ export function clearUpcoming(state: QueueState): QueueState {
 	return { ...state, tracks: state.tracks.slice(0, state.index + 1) };
 }
 
-/**
- * Shuffles only what has not played yet, so the history stays in the order it happened.
- *
- * `random` is a parameter because a shuffle nobody can pin down is a shuffle nobody can test.
- */
+/** Shuffles only what has not played yet; `random` is injectable for tests. */
 export function shuffleUpcoming(state: QueueState, random: () => number = Math.random): QueueState {
 	const played = state.tracks.slice(0, state.index + 1);
 	const upcoming = [...state.tracks.slice(state.index + 1)];
@@ -66,11 +62,7 @@ export function nextIndex(state: QueueState): number | null {
 	return state.loop === "queue" ? 0 : null;
 }
 
-/**
- * Whether a track stopped before it had played what it promised.
- *
- * An unknown length — a live stream — can never be judged, so it is always taken at its word.
- */
+/** Whether a track stopped short of its length; a live stream, with no length, never is. */
 export function endedEarly(playedMs: number, expectedMs: number | null, tolerance = EARLY_TOLERANCE_MS): boolean {
 	if (expectedMs === null || expectedMs <= 0) return false;
 
@@ -82,13 +74,7 @@ export type IdleAction =
 	| { action: "play"; index: number }
 	| { action: "stop"; reason: "empty" | "requested" };
 
-/**
- * What to do when the player falls idle.
- *
- * A stalled stream and a finished track both arrive as the same event, and treating them the same is what
- * makes a queue skip three songs in a row on a bad connection. Everything here is arithmetic so each branch is
- * a test rather than a live stall.
- */
+/** What to do when the player falls idle, since a stall and an ending arrive as the same event. */
 export function decideOnIdle(input: {
 	state: QueueState;
 	playedMs: number;

@@ -2,17 +2,7 @@ import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-/**
- * Generates `DASHBOARD_SESSION_SECRET`.
- *
- *   npm run secret                  print one
- *   npm run secret -- --write       put it in .env, replacing what is there
- *   npm run secret -- --write --dev put it in .env.development
- *
- * 32 bytes from the CSPRNG, base64url so it survives a .env file without quoting. It signs sessions and derives
- * the key the Discord OAuth tokens are encrypted with, so replacing it signs everybody out — which is exactly
- * what you want it to do after a leak.
- */
+/** Generates `DASHBOARD_SESSION_SECRET`; `-- --write` puts it in .env, and `--dev` in .env.development. */
 
 const KEY = "DASHBOARD_SESSION_SECRET";
 

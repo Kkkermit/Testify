@@ -31,10 +31,7 @@ describe("the not-found page", () => {
 });
 
 describe("where the not-found page sits", () => {
-	/**
-	 * The catch-all used to `Navigate` to `/guilds`, which hid both a typo and a dashboard link pointing at
-	 * nothing — and `AGENTS.md` names that redirect as how an unmounted sub-app disappears without a trace.
-	 */
+	/** An unknown address shows a 404 rather than redirecting, and does so outside the sign-in gate. */
 	it("is the catch-all, and is outside the sign-in gate", async () => {
 		const { routes } = await import("@/routes");
 		const catchAll = routes.find((route) => "path" in route && route.path === "*");

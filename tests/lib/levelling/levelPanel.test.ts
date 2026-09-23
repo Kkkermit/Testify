@@ -64,10 +64,7 @@ describe("the levelling panel", () => {
 		}
 	});
 
-	/**
-	 * The tab is the first argument of every control, which is how a press knows which screen to redraw without
-	 * anything being remembered between presses.
-	 */
+	/** Every control carries its tab as the first argument. */
 	it.each(LEVEL_TABS)("carries the %s tab in the controls it draws", (tab) => {
 		const ids = idsOf(panel(tab)).map((id) => parseCustomId(id));
 		const controls = ids.filter((id) => id.action !== "tab");

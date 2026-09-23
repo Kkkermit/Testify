@@ -2,11 +2,7 @@ import { type Context } from "hono";
 import { type ZodType } from "zod";
 import { type ApiIssue, badRequest } from "@api/errors";
 
-/**
- * Every value that reaches a handler goes through one of these. Nothing reads `c.req.param()` or a parsed body
- * directly — an unvalidated snowflake becomes a Mongo query, and an unvalidated page number becomes a negative
- * skip.
- */
+/** Every value that reaches a handler goes through one of these; nothing reads `c.req.param()` or a raw body. */
 
 function issuesOf(error: { issues: { path: PropertyKey[]; message: string }[] }): ApiIssue[] {
 	return error.issues.map((issue) => ({ path: issue.path.map(String).join("."), message: issue.message }));
@@ -27,10 +23,7 @@ export function parseQuery<T>(context: Context, schema: ZodType<T>): T {
 	return parse(schema, context.req.query(), "query parameters");
 }
 
-/**
- * A body that is not JSON throws inside Hono rather than returning, so it is caught here and reported as the
- * 400 it is instead of becoming a 500 that looks like a bug.
- */
+/** A body that is not JSON becomes the 400 it is, not a 500. */
 export async function parseBody<T>(context: Context, schema: ZodType<T>): Promise<T> {
 	let body: unknown;
 

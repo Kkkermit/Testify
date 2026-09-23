@@ -45,10 +45,7 @@ describe("the member detail page", () => {
 		expect(within(standing!).getByText("Level rank")).toBeInTheDocument();
 	});
 
-	/**
-	 * Three filled buttons said three things were the recommended one. Add and Take are the same decision in
-	 * two directions, and Set level and Change XP are driven by different fields — neither pair has a winner.
-	 */
+	/** The screen offers one recommended action; neither Add/Take nor Set level/Change XP has a winner. */
 	it("offers one recommended action, on the densest screen in the app", async () => {
 		const { container } = renderPage();
 		await screen.findByRole("heading", { name: "kate", level: 1 });
@@ -87,10 +84,7 @@ describe("the member detail page", () => {
 		expect(screen.getByRole("button", { name: "Add warning" })).toBeDisabled();
 	});
 
-	/**
-	 * Hiding the controls is a courtesy rather than the gate, but showing an Add button beside a refusal the
-	 * server will issue anyway is the worst of both.
-	 */
+	/** No moderation controls for a caller the server would refuse anyway. */
 	it("offers no moderation controls when the caller may not act", async () => {
 		serve({ moderationProblem: "You cannot moderate somebody above you." });
 		renderPage();
@@ -288,10 +282,7 @@ describe("the member detail page", () => {
 	describe("the softban", () => {
 		const softban = { reason: "Repeated spam", moderatorId: "1", expiresAt: "2099-01-01T00:00:00.000Z" };
 
-		/**
-		 * A softbanned user is banned, so they are not a member — a Lift button hidden behind the hierarchy
-		 * check would never appear for anybody who needs it.
-		 */
+		/** A softbanned user is not a member, so Lift cannot sit behind the hierarchy check. */
 		it("offers to lift it even though they are not in the server", async () => {
 			serve({ softban, inGuild: false, moderationProblem: "They are no longer in this server." });
 			renderPage();
@@ -321,11 +312,7 @@ describe("the member detail page", () => {
 		});
 	});
 
-	/**
-	 * WCAG 2.2 AA wants 24px on a target, and this link measured 196x20 in a real browser — the inline-text
-	 * exception does not cover a standalone navigational link. jsdom computes no layout, so the class is what
-	 * this can pin; the browser sweep is what measured it.
-	 */
+	/** The back link needs a 24px target (WCAG 2.2, 2.5.8); jsdom has no layout, so this pins the class. */
 	it("gives the back link enough height to be a target", async () => {
 		renderPage();
 

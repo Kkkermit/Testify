@@ -192,8 +192,7 @@ describe("quickAmountRow", () => {
 	it("puts the amount and owner in the custom ID", () => {
 		const parsed = parseCustomId(buttons[0]?.custom_id as string);
 
-		// The slot name between them keeps the three buttons distinct on a balance
-		// small enough that 25%, 50% and all resolve to the same figure.
+		// The slot name keeps the three buttons distinct when the amounts coincide.
 		expect(parsed.action).toBe("dep");
 		expect(parsed.args[0]).toBe("250");
 		expect(parsed.args.at(-1)).toBe("user-1");

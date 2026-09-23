@@ -1,13 +1,7 @@
 import { z } from "zod";
 import { plainLine } from "./text";
 
-/**
- * What the bot owner can do to the running bot from a browser.
- *
- * There is no "start", and that is a property of the design rather than an omission: the dashboard's HTTP
- * server runs *inside* the bot process, so a stopped bot has nothing left to serve a start button. What is
- * possible is disconnecting from Discord while the process keeps running, which is what `paused` means here.
- */
+/** What the owner can do to the running bot; there is no start, because the dashboard runs inside the bot. */
 
 export type GatewayState = "online" | "paused" | "connecting";
 
@@ -24,10 +18,6 @@ export const gatewayAction = z.object({ action: z.enum(["pause", "resume"]) });
 
 export type GatewayAction = z.infer<typeof gatewayAction>;
 
-/**
- * Shutting the process down ends the dashboard with it, so it is typed rather than clicked — the same shape as
- * every other confirmation that cannot be undone from the screen that started it.
- */
 /** Typed to confirm, and compared by the API — so it is a protocol value rather than copy, and never translated. */
 export const SHUTDOWN_PHRASE = "shut down";
 
@@ -35,10 +25,7 @@ export const shutdownRequest = z.object({ confirm: z.literal(SHUTDOWN_PHRASE) })
 
 export const BOT_IDENTITY_LIMITS = { minUsername: 2, maxUsername: 32, maxAvatarBytes: 8 * 1024 * 1024 } as const;
 
-/**
- * The bot's global profile. Discord has no per-guild avatar for bots, so this is application-wide and belongs
- * to the owner rather than to a server manager.
- */
+/** The bot's global profile; Discord has no per-guild avatar for bots. */
 export const botIdentityPatch = z
 	.object({
 		username: plainLine(BOT_IDENTITY_LIMITS.minUsername, BOT_IDENTITY_LIMITS.maxUsername),
@@ -78,7 +65,7 @@ export interface OwnerGuildDetail {
 	memberCount: number;
 	channelCount: number;
 	roleCount: number;
-	/** Null when Discord has not told us, which happens for a guild joined before this process started. */
+	/** Null when Discord has not said, as for a guild joined before this process started. */
 	joinedAt: string | null;
 	createdAt: string;
 	ownerId: string;

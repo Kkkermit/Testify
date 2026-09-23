@@ -4,11 +4,7 @@ import { asMember, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
 
-/**
- * Why this moderator may not act on this target, in the words the refusal shows — or null when they may.
- *
- * Every surface asks the same question, so the answer lives here rather than in a command or a route handler.
- */
+/** Why this moderator may not act on this target, or null; every surface asks here. */
 export function moderationProblem(moderator: GuildMember, target: GuildMember, botId?: string): string | null {
 	const guild = target.guild;
 

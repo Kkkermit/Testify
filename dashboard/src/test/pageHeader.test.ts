@@ -1,13 +1,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-/**
- * Every guild-scoped screen names the server it is about.
- *
- * The sidebar is a drawer below `md`, so with it closed a phone shows nothing that says which server is being
- * configured — and "turn levelling off" is a different decision in each of them. `PageHeader`'s `eyebrow` is
- * where that goes, and it went unpassed on all twelve screens for as long as the prop existed.
- */
+/** Every guild-scoped screen names its server in `PageHeader`'s `eyebrow`, since a phone hides the sidebar. */
 
 const FEATURES = resolve(__dirname, "..", "features");
 const ROUTES = readFileSync(resolve(__dirname, "..", "routes.tsx"), "utf8");

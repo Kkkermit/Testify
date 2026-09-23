@@ -12,13 +12,7 @@ import { useRunCommand, useRunnable } from "@/features/owner/useRunner";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/**
- * Runs an owner command and shows what it replied with.
- *
- * The form is generated from the same metadata Discord registers, so a command gaining an option gains a field
- * here with no work. Only the allowlist in `commandRunner.util.ts` is reachable — the panel commands are not
- * here, because a Components V2 tree serialised to JSON is not a settings page.
- */
+/** Runs an allowlisted owner command, with a form generated from the metadata Discord registers. */
 export function RunnerTab(): React.JSX.Element {
 	const { t } = useTranslation();
 	const catalogue = useRunnable();

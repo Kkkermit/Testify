@@ -2,12 +2,7 @@ import { spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { ffmpegArgs } from "@lib/music/musicSource.util";
 
-/**
- * What `-af volume=` actually does to the audio, measured rather than assumed.
- *
- * `ffmpeg-static` is an optional dependency, so the whole suite skips where it could not be installed — the
- * decision is made here, before the suite is built, so a runner without it reports skipped rather than green.
- */
+/** What `-af volume=` does to real audio; skipped where `ffmpeg-static` could not install. */
 const ffmpeg = resolveFfmpeg();
 const describeWithFfmpeg = ffmpeg === null ? describe.skip : describe;
 
@@ -86,10 +81,7 @@ describeWithFfmpeg("the volume filter, against a real FFmpeg", () => {
 		expect(loudnessOf(run(ffmpegArgs({ volume: 150 }), source)) / base).toBeCloseTo(1.5, 2);
 	});
 
-	/**
-	 * Pins that a re-opened track resumes where it was rather than restarting, which is what a volume change
-	 * mid-song does. Where `-ss` sits relative to `-i` decides how expensive that is, not whether it happens.
-	 */
+	/** A re-opened track starts where it was told to. */
 	it("really starts where it was told to, rather than from the beginning", () => {
 		const whole = run(ffmpegArgs({}), source).length;
 		const skipped = run(ffmpegArgs({ seekMs: 6_000 }), source).length;

@@ -15,10 +15,7 @@ const NO_CHANNEL = "-";
 
 export { collapseEnabled, isAuditEvent, resolveEnabled };
 
-/**
- * Eighteen event names do not fit in Discord's 100 characters, but eighteen bits do: one bit per event at its index
- * in `AUDIT_EVENTS`, written in base 36.
- */
+/** Eighteen event names do not fit in a custom ID, but eighteen bits do: one per event, in base 36. */
 export function encodeEvents(events: AuditEvent[]): string {
 	let mask = 0;
 	for (const event of events) mask |= 1 << AUDIT_EVENTS.indexOf(event);
@@ -104,8 +101,7 @@ export function auditPanel(state: AuditPanelState, ownerId: string): ContainerMe
 					select({
 						id: controlId("events", state, ownerId),
 						placeholder: "Choose which events to log…",
-						// Zero is a legitimate choice — it means "log nothing for now"
-						// without losing the configured channel.
+						// Zero logs nothing without losing the configured channel.
 						minValues: 0,
 						maxValues: AUDIT_EVENTS.length,
 						disabled: noChannel,

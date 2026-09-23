@@ -2,13 +2,7 @@ import { chmodSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { findBinaries } from "../src/lib/music/musicBinaries.util";
 
-/**
- * Fetches the yt-dlp the music player streams through.
- *
- * It is not an npm dependency on purpose: a postinstall that downloads a binary makes `npm ci` depend on
- * GitHub being reachable, and every job in CI runs one. This is opt-in instead, so a bot-only install never
- * pays for music and a broken download costs music rather than the whole bot.
- */
+/** Fetches yt-dlp into `bin/`; opt-in, so `npm ci` never depends on GitHub being reachable. */
 
 const RELEASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 

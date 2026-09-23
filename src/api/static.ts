@@ -3,10 +3,7 @@ import { extname, isAbsolute, join, normalize, relative, resolve } from "node:pa
 import { type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 
-/**
- * Serves the built SPA from the same origin as the API in production, which is what makes cookies work with no
- * CORS, no `SameSite=None` and one URL to put behind a reverse proxy.
- */
+/** Serves the built SPA from the API's own origin, so cookies work with no CORS and one URL sits behind a proxy. */
 
 const TYPES: Record<string, string> = {
 	".html": "text/html; charset=utf-8",
@@ -23,11 +20,7 @@ const TYPES: Record<string, string> = {
 	".woff2": "font/woff2",
 };
 
-/**
- * `__dirname` is `src/api` while developing and `dist/api` after a build, and both sit two levels under the
- * repository root — so this finds `dashboard/dist` either way, and never the working directory, which a start
- * script can change.
- */
+/** Two levels above `__dirname` in both `src/api` and `dist/api`, never the working directory. */
 export function dashboardRoot(): string {
 	return resolve(__dirname, "..", "..", "dashboard", "dist");
 }
@@ -37,8 +30,8 @@ export function dashboardBuilt(root = dashboardRoot()): boolean {
 }
 
 /**
- * Refuses anything that escapes the build directory. `..%2f` survives one decode, so the check is on the
- * resolved path rather than on the text of the request.
+ * Refuses anything that resolves outside the build directory; the check is on the resolved path, because `..%2f`
+ * survives one decode.
  */
 export function resolveAsset(root: string, pathname: string): string | null {
 	const decoded = safeDecode(pathname);
@@ -46,8 +39,7 @@ export function resolveAsset(root: string, pathname: string): string | null {
 
 	const candidate = resolve(root, `.${normalize(decoded)}`);
 
-	// Compared with `relative` rather than a string prefix: the separator is `\` on Windows, so a check written
-	// with `/` refuses every real asset there and serves the SPA shell in place of the bundle.
+	// `relative` rather than a string prefix, since the separator is `\` on Windows.
 	const inside = relative(root, candidate);
 	if (inside.startsWith("..") || isAbsolute(inside)) return null;
 

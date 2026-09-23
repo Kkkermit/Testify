@@ -46,10 +46,7 @@ describe("the allowlist", () => {
 		for (const name of ALLOWED_IN_DASHBOARD) expect(runnableInDashboard(name)).toBe(true);
 	});
 
-	/**
-	 * `/eval` over HTTP turns a stolen session cookie into a shell on the host. The second list exists so that
-	 * adding a name to the first one by mistake still cannot reach it.
-	 */
+	/** The never-list still refuses `/eval` if something adds it to the allowlist. */
 	it("refuses the never-list even if something puts it on the allowlist", () => {
 		for (const name of NEVER_IN_DASHBOARD) expect(runnableInDashboard(name)).toBe(false);
 	});
@@ -82,10 +79,7 @@ describe("reading arguments", () => {
 		expect(() => optionsFrom({}).getString("text", true)).toThrow(UserFacingError);
 	});
 
-	/**
-	 * The declared list is the filter. A hand-written request naming an option the command never declared must
-	 * not reach a getter — the form would never have shown it, and neither would Discord.
-	 */
+	/** An argument the command never declared cannot reach a getter. */
 	it("drops an argument the command never declared", () => {
 		const options = optionsFrom({ text: "fine", sneaky: "not declared" });
 
@@ -253,10 +247,7 @@ describe("serialising what a command replied with", () => {
 		]);
 	});
 
-	/**
-	 * A button posts back to Discord's interaction endpoint and is meaningless in a browser — but a reader who
-	 * cannot see that the reply had controls would think the command did less than it did.
-	 */
+	/** Dropped buttons are named, so the reply does not look like less than it was. */
 	it("names dropped buttons rather than hiding them", () => {
 		const outputs = serialiseReply({ content: "pick one", components: [{ type: 1 }] });
 

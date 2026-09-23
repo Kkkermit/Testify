@@ -233,10 +233,7 @@ describe("progressLine", () => {
 		expect(progressLine(track("a", { durationMs: null }), 5_000)).toContain("live");
 	});
 
-	/**
-	 * A relative timestamp is counted down by the reader's own client, so the panel keeps moving between the
-	 * edits rather than only at them.
-	 */
+	/** A relative timestamp keeps the panel moving between edits. */
 	it("carries a countdown Discord animates on its own", () => {
 		const now = 1_700_000_000_000;
 

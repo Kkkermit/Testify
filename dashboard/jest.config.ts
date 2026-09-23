@@ -3,16 +3,14 @@ import { type Config } from "jest";
 const config: Config = {
 	displayName: "dashboard",
 	rootDir: ".",
-	// jsdom deletes Node's fetch, Request, Response and streams, which MSW needs. This is plain
-	// jest-environment-jsdom with those globals put back — MSW's own recommendation.
+	// `jest-fixed-jsdom` keeps the fetch and stream globals MSW needs, which plain jsdom deletes.
 	testEnvironment: "jest-fixed-jsdom",
 	setupFilesAfterEnv: ["<rootDir>/src/test/setup.ts"],
 	transform: {
 		// "automatic" or every test file would have to import React itself.
 		"^.+\\.[mc]?[tj]sx?$": ["@swc/jest", { jsc: { transform: { react: { runtime: "automatic" } } } }],
 	},
-	// Jest runs CommonJS, and each of these ships ESM only — react-router since v8, the rest because MSW's
-	// own CommonJS build requires them. So they are transformed rather than skipped with the node_modules.
+	// These ship ESM only, so they are transformed rather than skipped with the rest of node_modules.
 	transformIgnorePatterns: [
 		`/node_modules/(?!(${[
 			"react-router",
@@ -26,9 +24,7 @@ const config: Config = {
 		].join("|")})/)`,
 	],
 	moduleNameMapper: {
-		// discord-html-transcripts drags React 18 into the root node_modules, and the hoisted
-		// @testing-library/react resolves to it from there — so elements built by 19 get rendered by 18,
-		// which fails with "Objects are not valid as a React child". Pin both to the workspace's copy.
+		// discord-html-transcripts hoists React 18 to the root, so both are pinned to the workspace's React 19.
 		"^react$": "<rootDir>/node_modules/react",
 		"^react/(.*)$": "<rootDir>/node_modules/react/$1",
 		"^react-dom$": "<rootDir>/node_modules/react-dom",
@@ -38,9 +34,7 @@ const config: Config = {
 		"^@testify/shared/(.*)$": "<rootDir>/../shared/src/$1",
 		"\\.css$": "<rootDir>/src/test/styleMock.ts",
 	},
-	// Vendored shadcn source is someone else's library; testing it would pad the number, not the confidence.
-	// starfield.ts is the same argument from the other direction: it needs a real WebGL context, which jsdom
-	// has none of. Everything in it that can be reasoned about was extracted to lib/three/field.ts.
+	// Vendored shadcn is not ours to test, and starfield.ts needs a WebGL context jsdom does not have.
 	collectCoverageFrom: [
 		"src/**/*.{ts,tsx}",
 		"!src/components/ui/**",

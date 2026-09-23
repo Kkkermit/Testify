@@ -1,14 +1,7 @@
 import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 
-/**
- * Runs the bot and the dashboard together, and stops both on one Ctrl+C.
- *
- * `concurrently "npm:dev" "npm:dashboard:dev"` did this until Windows made it two Ctrl+Cs and a pair of
- * "Terminate batch job (Y/N)?" prompts: every `npm run` there is a `cmd.exe` running `npm.cmd`, the console
- * sends its interrupt to the whole process group, and each batch layer stops to ask. Spawning the real
- * binaries with no shell removes the batch layer, so there is nothing left to ask.
- */
+/** Runs the bot and the dashboard without a shell between them, so one Ctrl+C stops both on Windows too. */
 
 const BOT = "bot";
 const WEB = "web";
@@ -46,13 +39,7 @@ function pipe(name: string, process_: ChildProcess): void {
 	process_.stderr?.on("data", (chunk: Buffer) => process.stderr.write(prefixLines(name, chunk.toString())));
 }
 
-/**
- * Signals the whole tree, not just the process we spawned.
- *
- * Both halves start something else — `tsx watch` runs the bot in a grandchild, and the web child runs Vite in
- * one — so signalling only the child we hold leaves the thing actually holding the port alive. A Windows
- * process has no group to signal, which is what `taskkill /T` is for.
- */
+/** Signals the whole process tree, since both halves run their real work in a grandchild. */
 export function stopTree(target: ChildProcess, signal: NodeJS.Signals = "SIGTERM"): void {
 	if (target.pid === undefined || target.exitCode !== null || target.signalCode !== null) return;
 
@@ -73,8 +60,7 @@ export function stopTree(target: ChildProcess, signal: NodeJS.Signals = "SIGTERM
 function main(): void {
 	const root = process.cwd();
 
-	// Built before anything starts: `tsx` resolves `@testify/shared` to its `dist`, so a stale one turns every
-	// route that validates into a 500 naming only `safeParse`. It takes about 40ms.
+	// Build shared first: `tsx` resolves it to its `dist`, and a stale one breaks every validating route.
 	const shared = spawnSync(process.execPath, [resolve(root, "node_modules/tsup/dist/cli-default.js")], {
 		cwd: resolve(root, "shared"),
 		stdio: "inherit",
@@ -102,7 +88,7 @@ function main(): void {
 
 		for (const [, process_] of children) stopTree(process_);
 
-		// Nothing may hang the terminal: whatever has not gone by now is killed and we leave.
+		// Whatever has not exited by now is killed.
 		setTimeout(() => {
 			for (const [, process_] of children) stopTree(process_, "SIGKILL");
 			process.exit(process.exitCode ?? 0);

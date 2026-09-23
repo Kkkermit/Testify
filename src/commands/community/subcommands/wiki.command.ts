@@ -13,10 +13,6 @@ const summarySchema = z.object({
 	thumbnail: z.object({ source: z.string() }).optional(),
 });
 
-/**
- * The `wikijs` dependency has been dropped in favour of Wikipedia's own REST summary endpoint, which is typed at the
- * boundary like every other API call.
- */
 export default defineCommand({
 	name: "wiki",
 	description: "Looks something up on Wikipedia.",

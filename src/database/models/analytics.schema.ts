@@ -1,14 +1,6 @@
 import { model, Schema } from "mongoose";
 
-/**
- * One row per command per server per day per surface, incremented in place.
- *
- * A row per invocation would be the obvious shape and would grow without bound on a busy bot; this answers
- * every question the owner console asks with one aggregation over a few thousand documents.
- *
- * No user IDs are stored. "Which commands are used" is the question; "who used them" is not, and a
- * self-hoster's analytics should not quietly become a per-person activity log.
- */
+/** One row per command, server, day and surface, incremented in place; no user ids. */
 export interface CommandUsage {
 	/** `YYYY-MM-DD`, UTC — a string so a day is one exact-match key rather than a range scan. */
 	day: string;

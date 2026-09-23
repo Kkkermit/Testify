@@ -2,10 +2,7 @@ import { spawn } from "node:child_process";
 import { resolve } from "node:path";
 import { main as waitForApi } from "./waitForApi";
 
-/**
- * Waits for the bot's API, then starts Vite — as one process, so the supervisor has one child to stop rather
- * than a shell holding another shell.
- */
+/** Waits for the bot's API, then starts Vite in the same process. */
 
 async function main(): Promise<void> {
 	await waitForApi();

@@ -102,10 +102,7 @@ function toCommandRow(client: TestifyClient, tally: CommandTally): CommandUsageR
 	};
 }
 
-/**
- * Ranked over every command the bot has rather than every command that ran, because a command nobody has
- * touched is exactly the answer this list exists to give — and it never appears in the usage rows at all.
- */
+/** Ranked over every command the bot has, because a command nobody has run has no usage row. */
 function leastUsed(client: TestifyClient, tallies: CommandTally[]): CommandUsageRow[] {
 	const counted = new Map(tallies.map((tally) => [tally.command, tally]));
 

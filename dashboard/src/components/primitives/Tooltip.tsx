@@ -24,8 +24,8 @@ export function Tooltip({
 			content: label,
 			theme: "testify",
 			placement,
-			// Long enough not to fire while the pointer crosses a row of icons on its way somewhere else, and
-			// slow enough to leave that the pointer can reach the box itself (WCAG 2.2 1.4.13, hoverable).
+			// Slow to open so a passing pointer does not fire it, and slow to close so the pointer can reach the box (WCAG
+			// 2.2, 1.4.13).
 			delay: [350, 120],
 			interactive: true,
 			interactiveBorder: 8,
@@ -36,8 +36,7 @@ export function Tooltip({
 			appendTo: () => document.body,
 		});
 
-		// tippy binds no key handler of its own, so without this a tooltip covering the thing underneath it
-		// cannot be got rid of without moving the pointer or the focus (WCAG 2.2 1.4.13, dismissible).
+		// tippy binds no key handler, so Escape is handled here (WCAG 2.2, 1.4.13).
 		const dismiss = (event: KeyboardEvent): void => {
 			if (event.key === "Escape") instance.hide();
 		};

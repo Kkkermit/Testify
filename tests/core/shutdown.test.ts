@@ -2,10 +2,7 @@ import { type TestifyClient } from "@core/client";
 import type * as shutdownModuleType from "@core/shutdown";
 import { createMockClient } from "@tests/helpers/mocks";
 
-/**
- * `shutdown()` keeps a module-level `stopping` flag so a second signal cannot start a second teardown, which means
- * every test needs a fresh module registry.
- */
+/** `shutdown()` keeps a module-level flag, so every test needs a fresh module registry. */
 function loadShutdown(): {
 	shutdown: (client: TestifyClient, reason: string, code?: number) => Promise<void>;
 	handleProcessSignals: (client: TestifyClient) => void;
@@ -170,10 +167,7 @@ describe("handleProcessSignals", () => {
 		expect(printReloading).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * One broken handler must not take every server's bot offline with it, so the failure is recorded and the
-	 * process carries on. Only a signal or the owner console stops it.
-	 */
+	/** An uncaught exception is recorded and the process carries on. */
 	it("records an uncaught exception and keeps running", () => {
 		const { handleProcessSignals } = loadShutdown();
 		const client = clientFor();

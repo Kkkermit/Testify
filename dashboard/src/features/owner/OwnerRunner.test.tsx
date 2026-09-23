@@ -182,10 +182,7 @@ describe("the command runner", () => {
 			expect(screen.getByText("4,200")).toBeInTheDocument();
 		});
 
-		/**
-		 * A button posts back to Discord's interaction endpoint and cannot work here — but a reader who could not
-		 * see that the reply had controls would think the command had done less than it did.
-		 */
+		/** A reply's buttons cannot work here, so the result says they were there. */
 		it("names what could not cross the gap rather than hiding it", async () => {
 			server.use(
 				http.post("/api/owner/runner/:name", () =>

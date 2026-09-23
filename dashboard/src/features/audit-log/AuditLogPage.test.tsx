@@ -41,7 +41,7 @@ describe("the audit log page", () => {
 		expect(screen.getByRole("checkbox", { name: /message edited/i })).not.toBeChecked();
 	});
 
-	/** Nothing may be written until Save: the mistake this pins is a control that saves per click and leaves half a configuration applied. */
+	/** Nothing is written until Save, or half a configuration ends up applied. */
 	it("writes nothing until Save is pressed", async () => {
 		const user = userEvent.setup();
 		const captured = capturePut();

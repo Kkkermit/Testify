@@ -1,10 +1,7 @@
 import { problemText } from "@lib/format/problemText.util";
 import { STICKY_LIMITS, stickyBlocked, stickyPut } from "@testify/shared";
 
-/**
- * The rules the form and the API share. Mounting is covered by `server.test.ts`, which reads Hono's route
- * table — a missing `guilds.route(…)` line looks exactly like a permission refusal from the outside.
- */
+/** The rules the form and the API share; mounting is covered by `server.test.ts`. */
 describe("stickyPut", () => {
 	const channelId = "400000000000000001";
 

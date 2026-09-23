@@ -62,10 +62,7 @@ function sessionOf(context: ApiContext): DashboardSession {
 
 export const auth = new Hono<ApiBindings>();
 
-/**
- * Unauthenticated on purpose: it is how the sign-in page knows to show setup instructions rather than a button.
- * It names which variables are missing and never what any of them hold.
- */
+/** Unauthenticated: tells the sign-in page which variables are missing, never their values. */
 auth.get("/setup", (context) => {
 	const env = context.get("env");
 	const missing = missingSettings(env);
@@ -83,8 +80,7 @@ auth.get("/login", (context) => {
 	const oauth = requireOauth(context);
 	const { returnTo } = parseQuery(context, loginQuery);
 
-	// A cookie rather than server memory, so the flow survives a restart, and rather than a database write, so
-	// an unauthenticated endpoint cannot be used to fill the collection.
+	// A cookie, so the flow survives a restart and an anonymous caller cannot fill a collection.
 	const pending = startLogin(returnTo ?? "/guilds");
 	setOauthCookie(context, context.get("env"), JSON.stringify(pending));
 
@@ -104,9 +100,7 @@ auth.get("/callback", async (context) => {
 	if (query.error !== undefined) return context.redirect("/sign-in?denied=1", 302);
 	if (query.code === undefined || query.state === undefined) throw badRequest("That sign-in link is incomplete.");
 
-	// Returned rather than thrown: `onError` builds a fresh response, which would drop the cleared cookies above
-	// and leave a still-valid state in the browser. This is also only ever reached by a browser navigation, so a
-	// page it can read beats a JSON problem in the address bar.
+	// Returned rather than thrown, because `onError` would drop the cleared cookies.
 	if (pending === null || !statesMatch(query.state, pending.state)) {
 		return context.redirect("/sign-in?error=state", 302);
 	}
@@ -151,10 +145,7 @@ auth.post("/logout-all", requireAuth, async (context) => {
 	return context.body(null, 204);
 });
 
-/**
- * The SPA's bootstrap call. 401 here is the signal to render the sign-in screen rather than an error, which is
- * why it is a normal answer and not a failure.
- */
+/** The SPA's bootstrap call; a 401 here means show the sign-in screen. */
 auth.get("/me", requireAuth, async (context) => {
 	const oauth = requireOauth(context);
 	const client = context.get("client");
@@ -181,10 +172,7 @@ function readPending(context: ApiContext): Pending | null {
 	}
 }
 
-/**
- * The intersection of what Discord says the user is in and what the bot is actually in, so the picker can also
- * offer an invite for the rest — a real conversion path that costs nothing.
- */
+/** Guilds the user and the bot share, plus the rest so the picker can offer an invite. */
 async function guildsFor(
 	context: ApiContext,
 	oauth: OauthConfig,

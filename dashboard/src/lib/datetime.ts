@@ -1,10 +1,4 @@
-/**
- * Every date the dashboard renders, in one place.
- *
- * The locale is pinned rather than left to the browser: a bare `toLocaleString()` shows `7/30/2026` to one
- * admin and `30/07/2026` to another, and the two are unreadable as each other. `30 Jul 2026` cannot be
- * misread whoever is looking, which matters most on an audit trail.
- */
+/** Every date the dashboard renders, in a pinned locale so `30 Jul 2026` reads the same for every admin. */
 
 const LOCALE = "en-GB";
 
@@ -45,10 +39,7 @@ export function clockTime(iso: string): string {
 	return format(iso, TIME);
 }
 
-/**
- * How long ago, for a list read newest-first. Past a week the elapsed time stops being the useful fact and the
- * date takes over, so a year-old record does not read as "53 weeks ago".
- */
+/** How long ago, switching to the date past a week. */
 export function since(iso: string, now = Date.now()): string {
 	const at = parse(iso);
 	if (at === null) return iso;

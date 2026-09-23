@@ -2,25 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /**
- * Fails on the three things that only go wrong in the built dashboard.
- *
- *   npm run verify:bundle
- *
- * **More than one copy of React.** `discord-html-transcripts` depends on React 18, which npm hoists to the root
- * and leaves the dashboard's React 19 nested, so anything hoisted beside it — react-query, react-router — binds
- * to the wrong copy. The page then mounts against one React while its hooks read another's null dispatcher, and
- * every screen is blank. Nothing else catches it: it type-checks, it lints, and the tests pin React themselves.
- *
- * **A polyfilled `light-dark()`.** Below the `cssTarget` in `dashboard/vite.config.ts`, Lightning CSS rewrites
- * the function into a pair of variables flipped by `color-scheme` — and because a custom property is
- * substituted where it is declared, every token then resolves against `:root`. Two things break silently and
- * only in a build: a nested `color-scheme` stops working, so the theme samples all render in the page's own
- * theme, and `pickScheme` can no longer read a token, so the WebGL backdrop falls back to one hardcoded colour.
- *
- * **A missing file from `dashboard/public`.** Vite copies that tree into the build verbatim, and `robots.txt`
- * and `.well-known/security.txt` are served from it — files nobody opens until a crawler or a reporter needs
- * them, so a build that silently stopped emitting them would go unnoticed. The unit tests serve the source
- * files over a fixture root, which proves the routing but not that the build carries them.
+ * Fails on what only goes wrong in the built dashboard: a second copy of React, a polyfilled `light-dark()`, or a
+ * missing file from `dashboard/public`.
  */
 
 const DIST = resolve(process.cwd(), "dashboard", "dist");
@@ -31,11 +14,7 @@ const PUBLIC = resolve(process.cwd(), "dashboard", "public");
 const VERSION = /version\s*[=:]\s*[`"']([\d]+\.[\d]+\.[\d]+)[`"']/g;
 
 /**
- * Identifiers React ships beside that version and nothing else does.
- *
- * The bare pattern matches any package that exports a semver string — `dompurify` writes `t.version = "3.4.13"`
- * next to `t.removed = []` — and one of those reported as a second React is a build failure with no bug behind
- * it. Minified names change every release; these are export names and payload keys, which do not.
+ * Identifiers only React ships beside its version, so another package's semver string is not taken for a second React.
  */
 const REACT_NEIGHBOUR =
 	/useTransition|useFormStatus|useSyncExternalStore|rendererPackageName|react-dom|react\.transitional/;

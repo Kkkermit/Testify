@@ -1,9 +1,4 @@
-/**
- * WCAG relative luminance and contrast, so the palette can be checked without a browser.
- *
- * `jest-axe` runs with `color-contrast` disabled — jsdom computes no styles, so that rule can only report false
- * negatives there. This is what closes the gap: a pure function over the token values, run in Jest.
- */
+/** WCAG relative luminance and contrast, so the palette can be checked without a browser. */
 
 function channel(value: number): number {
 	return value <= 0.03928 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;

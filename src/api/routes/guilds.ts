@@ -94,8 +94,8 @@ guilds.get("/:guildId/overview", async (context) => {
 });
 
 /**
- * `canSend` is computed from the live client, which is the single biggest reason this API lives in the bot
- * process: the picker can grey out a channel before anyone saves a configuration that cannot work.
+ * `canSend` comes from the live client, so the picker can grey out a channel before a configuration that cannot work is
+ * saved.
  */
 guilds.get("/:guildId/channels", (context) => {
 	const guild = guildOf(context);
@@ -267,10 +267,7 @@ function count(value: number, noun: string): string {
 	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
 }
 
-/**
- * Named in words a person can act on. Discord grants these silently and revokes them silently, so a feature can
- * be configured perfectly and still do nothing.
- */
+/** Permissions Discord can revoke silently, named so a manager can act on them. */
 const WATCHED = [
 	[PermissionFlagsBits.ManageRoles, "Manage Roles — needed for level rewards, auto roles and verification"],
 	[PermissionFlagsBits.ManageMessages, "Manage Messages — needed for counting and sticky messages"],

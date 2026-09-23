@@ -64,8 +64,7 @@ export function TabBar<Key extends string>({
 		};
 	}, [tabs.length]);
 
-	// On a phone the strip is wider than the screen, so landing on a later tab would show the first one marked
-	// as nothing and the current one off the edge. `nearest` cannot move the page itself.
+	// Scroll the current tab into view; `nearest` cannot move the page itself.
 	useEffect(() => {
 		document.getElementById(tabIds(label, active).tabId)?.scrollIntoView({ block: "nearest", inline: "nearest" });
 	}, [label, active]);
@@ -95,8 +94,7 @@ export function TabBar<Key extends string>({
 				onKeyDown={onKeyDown}
 				className={cn(
 					"scrollbar-none flex gap-1 overflow-x-auto",
-					// A strip cut mid-word says nothing about the tabs past it; a fade at the end that still has
-					// content does. Both ends, because it scrolls both ways once you have moved.
+					// Fade whichever end still has content, so a clipped strip says there is more.
 					edges.end && "mask-r-from-[calc(100%-2rem)]",
 					edges.start && "mask-l-from-[calc(100%-2rem)]",
 				)}

@@ -19,11 +19,8 @@ export const VOLUME_STEP = 10;
 export const MUSIC_ID = "music";
 
 /**
- * How many more goes a track gets after each kind of refusal.
- *
- * A 403 is sometimes a signed address that expired between asking and downloading, so it earns one fresh try;
- * the other two are YouTube's decision about the video or the host, and asking again only adds to the count
- * that got the host flagged in the first place.
+ * How many more tries a track gets after each refusal: a 403 can be an expired address, the rest are YouTube's
+ * decision.
  */
 export const RETRIES_AFTER: Record<ProblemKind, number> = {
 	forbidden: 1,

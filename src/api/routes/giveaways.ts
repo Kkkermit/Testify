@@ -44,10 +44,7 @@ giveaways.post("/", async (context) => {
 	return context.json(await listFor(context, guild));
 });
 
-/**
- * Every action is keyed by the message id from the list, so nobody has to read one out of Discord and retype
- * it — which is what `/giveaway end` still makes them do.
- */
+/** Keyed by the message id from the list, so nobody has to retype one. */
 giveaways.post("/:messageId/end", async (context) => {
 	const guild = guildOf(context);
 	const { messageId } = parseParams(context, giveawayParams);
@@ -81,10 +78,7 @@ giveaways.delete("/:messageId", async (context) => {
 	return context.json(await listFor(context, guild));
 });
 
-/**
- * The id comes from the path, and `discord-giveaways` looks it up globally — so without this check a manager of
- * one server could end a giveaway running in another.
- */
+/** `discord-giveaways` looks a message up globally, so this keeps a manager inside their own server. */
 async function requireInGuild(context: Context<ApiBindings>, guild: Guild, messageId: string): Promise<void> {
 	const rows = await listGiveaways(context.get("client"), guild.id);
 	if (!rows.some((row) => row.messageId === messageId)) {

@@ -69,10 +69,7 @@ describe("category coverage", () => {
 });
 
 describe("the feature grid's links", () => {
-	/**
-	 * Tickets had a screen at `/guilds/:id/tickets` and no `path` here, so its tile on the overview rendered
-	 * as an inert `<div>` — the feature was built, reachable from the sidebar, and dead from the grid.
-	 */
+	/** Every feature with a screen links its overview tile to it. */
 	it("links every feature whose screen exists", () => {
 		const routed: Record<string, string> = {
 			levelling: "levelling",

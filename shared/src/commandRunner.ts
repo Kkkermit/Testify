@@ -1,14 +1,7 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/**
- * Running an owner command from the browser.
- *
- * This is the one place a `CommandInput` adapter is the right answer — owner commands are one-shot and
- * embed-based, so capturing what they reply with and rendering it as a card loses nothing. The panel commands
- * are not here and never will be: a Components V2 tree serialised to JSON is not a settings page, which is why
- * every other feature is promoted to its own screen instead.
- */
+/** Running an owner command from the browser; embed-based owner commands only, never the panel commands. */
 
 export const RUN_LIMITS = { maxStringArg: 2_000, maxArgs: 25 } as const;
 

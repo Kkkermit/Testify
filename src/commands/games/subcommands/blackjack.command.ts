@@ -43,8 +43,7 @@ export default defineCommand({
 			startedAt: Date.now(),
 		});
 
-		// Abandoned hands are cleaned up rather than leaking, and the timer is
-		// registered so shutdown can clear it.
+		// Abandoned hands are cleaned up on a registered timer that shutdown can clear.
 		client.timers.after(`blackjack:${key}`, 300_000, () => {
 			games.delete(key);
 		});

@@ -3,26 +3,13 @@ import { resolve } from "node:path";
 import { contrast, luminance } from "./contrast";
 import { ACCENTS } from "@/hooks/useAccent";
 
-/**
- * The palette, checked against WCAG 2.2 on every run.
- *
- * `jest-axe` cannot do this — jsdom computes no styles, so `color-contrast` is disabled there and the rule can
- * only report false negatives. Before this existed, `text-primary` was used as 14px body text in five places at
- * 3.47:1, which fails AA, and nothing in the repository noticed.
- *
- * The values are read out of `index.css` rather than restated here, so a token edited without checking it fails
- * this file rather than quietly shipping.
- */
+/** The palette against WCAG 2.2, read from `index.css`, because jsdom cannot measure contrast. */
 
 const CSS = readFileSync(resolve(__dirname, "../index.css"), "utf8");
 
 type Scheme = "light" | "dark";
 
-/**
- * A token is either `light-dark(a, b)` or a single value used by both themes, so this returns the half the
- * theme under test actually renders. Reading both halves is the point: a light palette nobody measured is
- * worse than no light palette, and only one of the two used to be checked.
- */
+/** The half of a token the theme under test renders. */
 function pick(source: string, name: string, scheme: Scheme, where: string): string {
 	const pair = new RegExp(`--color-${name}:\\s*light-dark\\(\\s*(#[0-9a-f]{6})\\s*,\\s*(#[0-9a-f]{6})\\s*\\)`, "i");
 	const both = pair.exec(source);
@@ -97,11 +84,7 @@ describe.each(["light", "dark"] as const)("the %s palette", (scheme) => {
 		expect(contrast(token_(colour), other)).toBeGreaterThanOrEqual(need);
 	});
 
-	/**
-	 * A filled button's own text is the pair that matters, not the fill against the page. Both of these render
-	 * white whatever the theme — the destructive variant is `text-white` literally — so checking against
-	 * `foreground` would pass in dark for the wrong reason and measure a colour nothing draws in light.
-	 */
+	/** A filled button is measured with the text colour it actually draws, not `foreground`. */
 	it.each([
 		["white on primary", "primary"],
 		["white on destructive", "destructive"],
@@ -123,19 +106,12 @@ describe.each(["light", "dark"] as const)("the %s palette", (scheme) => {
 	});
 });
 
-/**
- * On near-black the fill violet measures 3.47:1, and this is the guard that stops it being used as body text
- * again. It is scoped to dark deliberately: the light fill is darker than its own page and legible as text, so
- * asserting the same thing there would be asserting a hazard that does not exist.
- */
+/** The dark fill violet (3.47:1) stays out of use as body text. */
 it("keeps the dark fill violet out of reach as a text colour", () => {
 	expect(contrast(token("primary", "dark"), token("background", "dark"))).toBeLessThan(TEXT);
 });
 
-/**
- * Every accent the picker offers, measured in both themes. An unverified accent is worse than no accent: it
- * ships a palette nobody looked at behind a control that invites everybody to try it.
- */
+/** Every accent the picker offers, in both themes. */
 describe.each(ACCENTS)("the %s accent", (accent) => {
 	describe.each(["light", "dark"] as const)("in %s", (scheme) => {
 		const of = (name: string): string => accentToken(accent, name, scheme);
@@ -163,11 +139,7 @@ describe.each(ACCENTS)("the %s accent", (accent) => {
 	});
 });
 
-/**
- * Choosing violet leaves the page unmarked, so the base tokens are what it renders — but a swatch has to paint
- * violet while the page wears another accent, and that needs a block. Two copies is a drift risk, and this is
- * what makes the drift fail rather than ship a picker whose first swatch lies about what it selects.
- */
+/** The violet block has to match the base tokens, or its swatch shows a colour it does not select. */
 describe.each(["light", "dark"] as const)("the violet block in %s", (scheme) => {
 	it.each(["primary", "accent", "ring"])("matches the base %s token", (name) => {
 		expect(accentToken("violet", name, scheme)).toBe(token(name, scheme));

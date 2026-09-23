@@ -24,10 +24,7 @@ function token(): string {
 	return randomBytes(32).toString("base64url");
 }
 
-/**
- * The Discord tokens are sealed here rather than by the caller, so no route can write one in plaintext by
- * forgetting to.
- */
+/** Tokens are sealed here, so no route can write one in plaintext. */
 export async function createSession(box: SecretBox, session: NewSession, ttlDays: number): Promise<IssuedSession> {
 	const id = token();
 	const csrfSecret = token();

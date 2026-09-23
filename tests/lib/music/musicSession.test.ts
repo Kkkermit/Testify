@@ -142,10 +142,7 @@ describe("a track that finishes", () => {
 });
 
 describe("a track that comes apart", () => {
-	/**
-	 * The bug the whole design exists for: a stalled stream arrives as the same idle event a finished track
-	 * does, and advancing on both is what skipped three songs in a row on a bad connection.
-	 */
+	/** A stalled track is retried rather than skipped. */
 	it("is retried rather than skipped", async () => {
 		const { session, events } = sessionWith(["a", "b"]);
 		await session.play(0);
@@ -308,10 +305,7 @@ describe("the volume", () => {
 		);
 	});
 
-	/**
-	 * The bug this pins: a re-opened stream counts from zero again, so without the offset every volume change
-	 * made the track look like it had come apart and it was replayed from the start.
-	 */
+	/** A re-opened stream keeps its offset, so a volume change does not make the track look broken. */
 	it("does not make a track that then finishes look like one that came apart", async () => {
 		const { session, events } = sessionWith(["a", "b"], WITH_FFMPEG);
 
@@ -327,10 +321,7 @@ describe("the volume", () => {
 		expect(session.queue.index).toBe(1);
 	});
 
-	/**
-	 * Swapping the stream leaves the player idle for as long as yt-dlp takes to answer, and treating that as
-	 * the track ending would retry a track that is perfectly fine.
-	 */
+	/** The player falling idle while a new stream opens is not the track ending. */
 	it("does not act on the player falling idle while the new stream is being opened", async () => {
 		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
 		const { session, events } = sessionWith(["a", "b"], WITH_FFMPEG);
@@ -485,10 +476,7 @@ describe("a downloader that says why it stopped", () => {
 		return options.onProblem ?? (() => undefined);
 	}
 
-	/**
-	 * The bug this pins: a 403 was retried three times like any stall — six more requests to YouTube, which is
-	 * exactly the volume that gets a host flagged — and the panel never said why the track vanished.
-	 */
+	/** A 403 gets one fresh try, then the queue moves on and says why. */
 	it("gives a 403 one fresh try, then moves on and says why", async () => {
 		const { session, events } = sessionWith(["a", "b"]);
 		await session.play(0);

@@ -1,9 +1,6 @@
 import { containsMarkup, welcomePatchSchema, withoutDiscordTokens } from "@testify/shared";
 
-/**
- * The server-side half of the DOMPurify pass: the browser strips markup, and this refuses it, so a request
- * that never touches the page is refused just the same. Discord's own syntax has to survive both.
- */
+/** The API refuses markup the browser would strip, while Discord's own syntax survives both. */
 describe("containsMarkup", () => {
 	it.each([
 		["a user mention", "Welcome <@123456789012345678>"],

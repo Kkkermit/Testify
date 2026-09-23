@@ -114,10 +114,7 @@ describe("reading the blacklist", () => {
 		expect(rows[0]).toMatchObject({ tag: "spammer", avatarUrl: "https://cdn.example/avatar.png" });
 	});
 
-	/**
-	 * A deleted account cannot be looked up, and an entry nobody can read is an entry nobody can lift — so the
-	 * row still comes back, with the id and no name.
-	 */
+	/** An account Discord no longer knows still lists, so its entry can be lifted. */
 	it("still lists an account Discord no longer knows", async () => {
 		jest.mocked(listBlacklist).mockResolvedValue([entryFor()] as never);
 
@@ -142,10 +139,7 @@ describe("adding to the blacklist", () => {
 		expect(addToBlacklist).toHaveBeenCalledWith(TARGET, "No reason provided");
 	});
 
-	/**
-	 * The gate lives in `blacklistActions.util.ts` so `/blacklist add` and this route cannot disagree — an owner
-	 * who could block another owner could lock every one of them out of their own bot.
-	 */
+	/** No owner may blacklist another owner. */
 	it("refuses to blacklist a bot owner", async () => {
 		const response = await send("", { method: "POST", body: { userId: OWNER, reason: "oops" } });
 

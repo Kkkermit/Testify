@@ -191,9 +191,7 @@ export function quickAmountRow(
 	const quarter = Math.floor(max * 0.25);
 	const half = Math.floor(max * 0.5);
 
-	// The slot goes after the amount — the handler reads args[0] — because the
-	// three amounts collide on a small balance (0 gives 0, 0, 0) and Discord
-	// rejects a message carrying two identical custom IDs.
+	// The slot goes after the amount because equal amounts on a small balance would give duplicate custom IDs.
 	const amount = (slot: string, value: number): string => customId(id, action, value, slot, ownerId);
 
 	return row(
@@ -221,10 +219,7 @@ export interface ModalField {
 	value?: string;
 }
 
-/**
- * Builds a modal whose custom ID carries its own state, so the submit handler knows what it is editing without
- * anything being held in memory.
- */
+/** A modal whose custom ID carries its own state, so the submit handler knows what it is editing. */
 export function modalForm(options: {
 	id: string;
 	action: string;

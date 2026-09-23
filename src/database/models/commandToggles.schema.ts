@@ -1,10 +1,8 @@
 import { model, Schema } from "mongoose";
 
 /**
- * Which commands are switched off, and where.
- *
- * One row per scope: a server's row is keyed by its own id, and the bot-wide row uses the `GLOBAL` sentinel.
- * A Discord id is always 17-20 digits, so the sentinel can never collide with a real guild.
+ * Which commands are switched off: one row per guild, and `GLOBAL` for bot-wide, which no 17–20 digit id can collide
+ * with.
  */
 export interface CommandToggles {
 	guildId: string;

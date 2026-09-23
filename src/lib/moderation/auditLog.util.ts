@@ -6,19 +6,10 @@ import { getAuditLogConfig } from "@database/repositories/settingsRepository";
 import { embed } from "@lib/discord/embeds.util";
 import { AUDIT_EVENTS, type AuditEvent } from "@testify/shared";
 
-/**
- * Replaces `discord-logs` and the script that overwrote that package's source inside `node_modules` — a patch every
- * install destroyed.
- *
- * The event list lives in `@testify/shared` so the dashboard's checklist and this file's dispatch cannot drift.
- */
+/** The event list lives in `@testify/shared`, so the dashboard's checklist and this dispatch cannot drift. */
 export { AUDIT_EVENTS, type AuditEvent };
 
-/**
- * The log's colour language, so a reader tells what happened from the stripe before reading the title: green
- * for something that appeared, red for something that went, amber for a change, and a darker red where a
- * moderator acted rather than something merely happening.
- */
+/** The log's colour language: green appeared, red went, amber changed, dark red a moderator acted. */
 const TONES = {
 	created: theme.colours.success,
 	restored: theme.colours.success,

@@ -86,10 +86,7 @@ describe("Tooltip", () => {
 		});
 	});
 
-	/**
-	 * WCAG 2.2 1.4.13 wants a tooltip dismissible without moving the pointer or the focus, and tippy binds no
-	 * key handler of its own — so a box covering the control underneath it had no way out but tabbing away.
-	 */
+	/** Escape closes the tooltip without moving focus (WCAG 2.2, 1.4.13). */
 	it("closes on Escape without moving focus", async () => {
 		render(
 			<Tooltip label="A description">

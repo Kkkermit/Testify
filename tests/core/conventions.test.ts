@@ -59,9 +59,7 @@ describe("event grouping", () => {
 		const expected = ["command", "create", "logging", "message", "ready"];
 		const stray = groups.filter((group) => !expected.includes(group));
 
-		// Cloud sync and editors leave ` 2` copies behind. Naming them beats an array
-		// diff, because the copy is invisible in an editor sidebar sorted next to the
-		// original and the loader would register its handlers as gateway events.
+		// Name stray ` 2` copies that cloud sync leaves, since the loader would register them.
 		if (stray.length > 0) {
 			throw new Error(
 				`Unexpected ${stray.length === 1 ? "directory" : "directories"} in src/events/: ${stray.join(", ")}.\n` +
@@ -78,10 +76,7 @@ describe("event grouping", () => {
 	});
 });
 
-/**
- * `Field.tsx` beside `field.ts` resolves to two different modules on Linux and one on macOS or Windows, so an
- * import of the component silently lands on the other file and the page dies at start-up with a missing export.
- */
+/** No two modules may differ only by case, which is one file on macOS and Windows. */
 describe("module names", () => {
 	const ROOT = resolve(__dirname, "../..");
 	const MODULE = /\.(?:[cm]?js|tsx?|jsx)$/;
@@ -114,11 +109,7 @@ describe("module names", () => {
 	});
 });
 
-/**
- * A suite that discovers at run time whether its dependency exists can only return early from each test, and
- * an early return reports as a pass. Five database suites did exactly that: 41 tests reported green while
- * asserting nothing, and a mutation replacing an atomic `$inc` with `$set` survived every one of them.
- */
+/** A suite with a missing dependency skips rather than returning early, which would report as a pass. */
 describe("a suite whose dependency is missing", () => {
 	const TESTS = resolve(__dirname, "..");
 
@@ -151,10 +142,7 @@ describe("a suite whose dependency is missing", () => {
 	);
 });
 
-/**
- * `src/lib` is grouped by domain, and each domain's barrel is what everything outside it imports. A module that
- * sits loose, or that its folder's barrel forgot, is one no command can reach the way the lint rules require.
- */
+/** Every module in `src/lib` sits in a domain folder and is exported from its barrel. */
 describe("the src/lib layout", () => {
 	const LIB = join(SRC, "lib");
 	const folders = readdirSync(LIB).filter((entry) => statSync(join(LIB, entry)).isDirectory());

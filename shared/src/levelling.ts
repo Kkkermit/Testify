@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/**
- * The limits both surfaces enforce. They live here rather than in `src/lib/` so the browser form and the API
- * validate against the same numbers — two sources of truth for "how many boost roles" is how the web UI ends up
- * accepting a sixth that the Discord panel then cannot render.
- */
+/** The limits both surfaces enforce, so the browser and the Discord panel accept the same values. */
 export const LEVEL_LIMITS = {
 	maxBoosts: 5,
 	maxRewards: 10,
@@ -41,10 +37,7 @@ export const levellingPatchSchema = z
 
 export type LevellingPatch = z.infer<typeof levellingPatchSchema>;
 
-/**
- * Whole lists rather than add/remove endpoints, because the control is a multi-select whose value *is* the list.
- * One request, and no add-then-remove race between two open tabs.
- */
+/** Whole lists, because the control is a multi-select whose value is the list. */
 export const boostsSchema = z
 	.array(xpBoostSchema)
 	.max(LEVEL_LIMITS.maxBoosts, `at most ${String(LEVEL_LIMITS.maxBoosts)} boost roles`)

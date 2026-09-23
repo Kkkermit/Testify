@@ -132,7 +132,7 @@ describe("reportSurvivable", () => {
 		);
 	});
 
-	/** A rejection can carry anything at all, and a string one used to lose its context entirely. */
+	/** A thrown non-error is turned into one, keeping its context. */
 	it("turns a thrown non-error into one", () => {
 		const logger = loggerSpy();
 

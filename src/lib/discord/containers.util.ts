@@ -44,10 +44,7 @@ export function sectionWithThumbnail(markdown: string, imageUrl: string, descrip
 	return new SectionBuilder().addTextDisplayComponents(text(markdown)).setThumbnailAccessory(thumbnail);
 }
 
-/**
- * Builds a container, colour-coded by category so V2 messages stay visually consistent with the embeds they sit
- * alongside.
- */
+/** A container coloured by category, to match the embeds beside it. */
 export function container(options: { category?: Category; parts: ContainerPart[] }): ContainerBuilder {
 	const built = new ContainerBuilder();
 

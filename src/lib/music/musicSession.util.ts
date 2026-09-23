@@ -45,12 +45,7 @@ const RECONNECT_GRACE_MS = 5_000;
 /** How long an idle player keeps the channel before the bot leaves on its own. */
 export const LEAVE_AFTER_IDLE_MS = 120_000;
 
-/**
- * How often the "now playing" message is rewritten while a track runs.
- *
- * Discord allows five message edits per five seconds in a channel, so one guild at this rate uses a fifth of
- * it — and the bar moves often enough to read as progress rather than as a frozen picture of it.
- */
+/** Discord allows five edits per five seconds in a channel, so this uses a fifth. */
 export const PANEL_REFRESH_MS = 5_000;
 
 /** How long a "skipped because…" line stays on the panel, which is long enough to be read after the next refresh. */
@@ -116,8 +111,7 @@ export class MusicSession {
 
 		this.#player.on(AudioPlayerStatus.Idle, () => void this.#onIdle());
 		this.#player.on("error", (error) => {
-			// Never fatal, and never the whole error: an `AudioPlayerError` carries the resource, which stringifies
-			// to kilobytes of stream internals and buries the one line that says what broke.
+			// Never fatal, and never the whole error, which stringifies kilobytes of stream internals.
 			this.#logger.warn(
 				{ guildId, reason: error.message, track: currentTrack(this.queue)?.url ?? null },
 				"[MUSIC] The stream came apart. Treating it as a break.",
@@ -166,12 +160,7 @@ export class MusicSession {
 		return this.#binaries.ffmpeg !== null;
 	}
 
-	/**
-	 * How far into the current track the player has actually got, which is what tells a stall from an ending.
-	 *
-	 * A stream re-opened part-way through starts counting from zero again, so the offset it was opened at has
-	 * to be added back or a volume change would make every track look like it came apart.
-	 */
+	/** How far into the track the player has got, including the offset a re-opened stream started at. */
 	get playedMs(): number {
 		return this.#offsetMs + (this.#resource?.playbackDuration ?? 0);
 	}
@@ -338,12 +327,7 @@ export class MusicSession {
 		return this.#notice.text;
 	}
 
-	/**
-	 * Moves past a track that could not be opened at all, without counting it as a break worth retrying.
-	 *
-	 * Once every track has been tried the queue ends, because a looping queue of broken links would otherwise
-	 * walk itself for ever.
-	 */
+	/** Moves past a track that would not open; once every track has been tried the queue ends rather than looping. */
 	async #advancePast(): Promise<void> {
 		this.#skipped = true;
 		this.#attempts = 0;
@@ -388,12 +372,7 @@ export class MusicSession {
 		this.queue = { ...this.queue, loop };
 	}
 
-	/**
-	 * Sets the level, and re-opens the current track where it had got to.
-	 *
-	 * The re-open is not awaited: a button has three seconds to answer and yt-dlp takes longer than that, so
-	 * the panel shows the new level straight away and the audio catches up a moment later.
-	 */
+	/** Sets the level and re-opens the track where it was, unawaited because yt-dlp takes longer than a button may. */
 	setVolume(volume: number): number {
 		this.#volume = clampVolume(volume);
 
@@ -412,10 +391,7 @@ export class MusicSession {
 	}
 
 	/**
-	 * Starts a track without waiting for it.
-	 *
-	 * `play` marks itself as re-opening before it yields, so the player falling idle in the meantime cannot be
-	 * mistaken for the track ending — and the caller keeps the three seconds Discord gives it to answer.
+	 * Starts a track without waiting; `play` marks itself as re-opening first, so the idle in between is not an ending.
 	 */
 	#playSoon(index: number, options: { seekMs?: number } = {}): void {
 		void this.play(index, options).catch((error: unknown) => {

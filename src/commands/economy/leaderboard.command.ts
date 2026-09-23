@@ -15,8 +15,7 @@ async function show(interaction: CommandInput, kind: BoardKind): Promise<void> {
 	const guild = inGuild(interaction);
 	const page = Math.max(0, (interaction.options.getInteger("page") ?? 1) - 1);
 
-	// Drawing the board and fetching avatars takes longer than the three seconds
-	// Discord allows before the interaction expires.
+	// Drawing the board and fetching avatars outlasts Discord's three-second window.
 	await interaction.deferReply();
 	await reply(interaction, await boardMessage(guild, kind, page, interaction.user.id));
 }

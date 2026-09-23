@@ -67,10 +67,7 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
-/**
- * Nobody bypasses a switch, the bot owner included: "off" that quietly still runs for one person is a worse
- * thing to debug than one that is simply off, and the dashboard is one click away for whoever turned it off.
- */
+/** Nobody bypasses a switch, the bot owner included. */
 async function checkSwitchedOff(interaction: CommandInput, command: Command): Promise<CheckFailure> {
 	if (isAlwaysEnabled(command.name)) return null;
 
@@ -110,10 +107,8 @@ function roleIdsOf(member: CommandInput["member"]): string[] {
 }
 
 /**
- * The music system's own switch and its DJ roles.
- *
- * It sits here rather than in the music commands so a command added later cannot forget it, and `/music system`
- * is exempt because it is the way back in for a server that switched the system off.
+ * The music system's switch and DJ roles, gated here so no music command can forget them; `/music system` is the way
+ * back in.
  */
 async function checkMusicSystem(interaction: CommandInput, command: Command): Promise<CheckFailure> {
 	if (command.category !== "music" || interaction.guildId === null) return null;
@@ -132,9 +127,7 @@ async function checkMusicSystem(interaction: CommandInput, command: Command): Pr
 function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {
 	if (!command.cooldown || client.isOwner(interaction.user.id)) return null;
 
-	// Scoped per guild: economy, levelling and every other stateful feature is
-	// per-guild, so a global key would let a cooldown earned in one server block
-	// the same command in another.
+	// Per guild, because the features a cooldown protects are per guild.
 	const key = `${interaction.guildId ?? "dm"}:${command.name}:${interaction.user.id}`;
 	const now = Date.now();
 	const readyAt = cooldowns.get(key) ?? 0;

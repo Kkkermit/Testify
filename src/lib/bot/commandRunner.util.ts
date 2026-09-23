@@ -22,18 +22,9 @@ import {
 import { UserFacingError } from "@core/errors";
 import { type CommandRunRequest, type RunOutput } from "@testify/shared";
 
-/**
- * Running a command from the dashboard.
- *
- * The adapter exists for owner commands only, and the allowlist below is the whole of what it may reach. Opting
- * in rather than out is the point: a command added six months from now must not become web-reachable by
- * accident.
- */
+/** Running a command from the dashboard, for owner commands on an opt-in allowlist only. */
 
-/**
- * Every command the runner may execute. Add a name only after checking it renders sensibly here — anything
- * whose real work is a Components V2 panel belongs on its own screen instead.
- */
+/** Every command the runner may execute; a command whose real work is a panel belongs on its own screen. */
 export const ALLOWED_IN_DASHBOARD: readonly string[] = [
 	"bot",
 	"guild-list",
@@ -62,12 +53,7 @@ export function optionsFor(command: Command, subcommand: string | null): Command
 	return found.options ?? [];
 }
 
-/**
- * Reads arguments out of a JSON body, coercing each against the type the command itself declared.
- *
- * Nothing here trusts the browser: an argument the command never declared is dropped rather than passed
- * through, so a hand-written request cannot smuggle a value into a getter the form never showed.
- */
+/** Arguments from a JSON body, coerced to the declared types; anything the command did not declare is dropped. */
 export class DashboardOptions implements CommandInputOptions {
 	private readonly values = new Map<string, string | number | boolean>();
 
@@ -79,8 +65,7 @@ export class DashboardOptions implements CommandInputOptions {
 		args: CommandRunRequest["args"],
 	) {
 		for (const option of declared) {
-			// `hasOwn` rather than a truthiness check: an option named `toString` would otherwise read
-			// `Object.prototype`'s method rather than finding nothing.
+			// `hasOwn`, so an option named `toString` does not find `Object.prototype`'s method.
 			if (!Object.hasOwn(args, option.name)) continue;
 
 			const given = args[option.name];
@@ -194,10 +179,7 @@ export class DashboardOptions implements CommandInputOptions {
 	}
 }
 
-/**
- * A browser request pretending to be a slash interaction, closely enough that a command cannot tell — except
- * that nothing it replies with is sent anywhere. Every reply is captured for the response instead.
- */
+/** A browser request standing in for a slash interaction, with every reply captured rather than sent. */
 export class DashboardInteraction implements CommandInput {
 	readonly captured: (InteractionReplyOptions | InteractionEditReplyOptions | string)[] = [];
 	readonly options: DashboardOptions;
@@ -268,13 +250,7 @@ function asEmbed(value: unknown): APIEmbed | null {
 	return typeof candidate.toJSON === "function" ? candidate.toJSON() : value;
 }
 
-/**
- * Flattens what a command replied with into blocks a browser can draw.
- *
- * What cannot cross the gap is **named** rather than quietly missing: a button posts back to Discord's
- * interaction endpoint and is meaningless here, and a reader who cannot see that a reply had controls would
- * think the command had simply done less than it did.
- */
+/** Flattens a reply into blocks a browser can draw, naming anything that could not cross the gap. */
 export function serialiseReply(reply: InteractionReplyOptions | InteractionEditReplyOptions | string): RunOutput[] {
 	if (typeof reply === "string") return [{ kind: "text", content: reply }];
 

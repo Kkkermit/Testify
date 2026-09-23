@@ -12,8 +12,7 @@ export function assetPath(...segments: string[]): string {
 }
 
 /**
- * The repository root, found by walking up for the `package.json` — `src/core` and `dist/core` sit at different
- * depths under it depending on how the bot was started, so counting `..` gets it wrong in one of the two.
+ * The repository root, found by walking up to `package.json`, since `src/core` and `dist/core` sit at different depths.
  */
 export function repoRoot(from: string = __dirname): string {
 	let directory = from;

@@ -30,10 +30,7 @@ describe("summariseCommand", () => {
 		});
 	});
 
-	/**
-	 * A raw bit flag means nothing to a reader. `humanisePermission` lowercases on purpose, so the name reads as
-	 * part of a sentence — "Needs ban members" — rather than as a shouted proper noun.
-	 */
+	/** `humanisePermission` lowercases, so a permission reads as part of a sentence. */
 	it("resolves permission bits to readable names", () => {
 		const summary = summariseCommand(aCommand({ permissions: [PermissionFlagsBits.BanMembers] }));
 
@@ -92,10 +89,7 @@ describe("buildCatalogue", () => {
 		aCommand({ name: "eval", category: "owner", ownerOnly: true }),
 	];
 
-	/**
-	 * The list of what a bot's owner can do is not something a server manager needs, and naming the commands
-	 * invites probing at them.
-	 */
+	/** Owner commands are hidden from everybody else. */
 	it("hides owner commands from everybody else", () => {
 		const catalogue = buildCatalogue(commands, { prefix: "t?", includeOwnerOnly: false });
 

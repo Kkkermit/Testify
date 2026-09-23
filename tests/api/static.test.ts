@@ -20,11 +20,7 @@ afterEach(() => {
 });
 
 describe("dashboardRoot", () => {
-	/**
-	 * It once resolved through the assets directory, which lands inside `dist/` after a build — so the built bot
-	 * looked for `dist/dashboard/dist`, found nothing, and served a 404 for every page. Nothing caught it but a
-	 * real request.
-	 */
+	/** The root resolves outside the bot's own build output, so the built bot finds `dashboard/dist`. */
 	it("points outside the bot's own build output", () => {
 		const root = dashboardRoot();
 
@@ -38,21 +34,14 @@ describe("resolveAsset", () => {
 		expect(resolveAsset(root, "/assets/index-abc123.js")).toBe(join(root, "assets", "index-abc123.js"));
 	});
 
-	/**
-	 * The check is on the resolved path rather than on the text of the request, because `..%2f` survives one
-	 * decode and a string check on the raw path would let it through.
-	 */
+	/** The check is on the resolved path, because `..%2f` survives one decode. */
 	it("refuses anything that climbs out of the build directory", () => {
 		for (const path of ["/../.env", "/..%2f.env", "/assets/../../.env", "/%2e%2e/%2e%2e/.env"]) {
 			expect(resolveAsset(root, path)).toBeNull();
 		}
 	});
 
-	/**
-	 * Containment is checked with `relative` rather than a string prefix. A prefix check has to spell the
-	 * separator, which is `\` on Windows — and it also breaks on a root that already ends in one, which is the
-	 * half of that bug this can prove without a Windows machine.
-	 */
+	/** Containment uses `relative` rather than a string prefix, which breaks on a root ending in a separator. */
 	it("finds a built file whatever shape the root arrives in", () => {
 		expect(resolveAsset(`${root}/`, "/assets/index-abc123.js")).toBe(join(root, "assets", "index-abc123.js"));
 	});

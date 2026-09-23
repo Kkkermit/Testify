@@ -48,10 +48,8 @@ function limiterPair(window: { limit: number; windowMs: number }): {
 }
 
 /**
- * The dashboard's HTTP API, inside the bot process so it can read the live client cache.
- *
- * Every route runs behind an error boundary, so a throw becomes a response rather than an open request that
- * never answers.
+ * The dashboard's HTTP API, inside the bot process so it reads the live cache; every route runs behind an error
+ * boundary.
  */
 export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
@@ -118,8 +116,8 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 }
 
 /**
- * A refusal keeps its status and its wording; a `UserFacingError` is the bot's own "you did something wrong",
- * which is exactly a 400. Anything else is a bug, and the caller is told nothing about it.
+ * A refusal keeps its status and wording, a `UserFacingError` is a 400, and anything else is a bug the caller learns
+ * nothing about.
  */
 function asProblem(error: unknown): ApiProblem {
 	if (error instanceof ApiProblem) return error;
@@ -149,10 +147,7 @@ export function listenAdvice(error: NodeJS.ErrnoException, port: number): string
 export const LISTEN_RETRIES = 5;
 export const LISTEN_RETRY_MS = 3_000;
 
-/**
- * Waiting only helps for a port somebody else still holds — a restart releasing its old listener is the usual
- * case, and by the third attempt it has. A permission it does not have will never arrive.
- */
+/** Only a port somebody else still holds is worth waiting for; a missing permission will never arrive. */
 export function worthRetrying(error: NodeJS.ErrnoException): boolean {
 	return error.code === "EADDRINUSE" || error.code === "EAGAIN";
 }
@@ -200,8 +195,7 @@ export function startApi(client: TestifyClient, env: Env, options: ListenOptions
 			listening(info.port);
 		}) as Server;
 
-		// An unhandled `error` event on a Node server throws, so a busy port needs a listener here rather than a
-		// trip through the process handlers.
+		// A Node server throws on an unhandled `error` event, so a busy port needs a listener here.
 		server.on("error", (error: NodeJS.ErrnoException) => {
 			if (remaining > 0 && worthRetrying(error)) {
 				client.logger.warn(

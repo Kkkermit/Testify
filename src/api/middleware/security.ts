@@ -3,12 +3,8 @@ import { type ApiBindings } from "@api/context";
 import { type Env } from "@config/env";
 
 /**
- * The Content-Security-Policy that makes an XSS bug in a dependency cost a defaced page rather than the bot.
- *
- * `script-src 'self'` with no `'unsafe-inline'` and no `'unsafe-eval'` is the line that matters: an injected
- * `<script>` or an `onerror=` attribute will not execute. Vite's production build emits external modules only,
- * so nothing here needs loosening — in development the page is served by Vite, not by this, so its HMR client
- * is unaffected.
+ * The Content-Security-Policy; `script-src 'self'` with no `'unsafe-inline'` or `'unsafe-eval'` is what stops injected
+ * script running.
  */
 const CSP = [
 	"default-src 'self'",
@@ -42,8 +38,7 @@ export function securityHeaders(env: Env): ReturnType<typeof createMiddleware<Ap
 		context.header("Cross-Origin-Opener-Policy", "same-origin");
 		context.header("Cross-Origin-Resource-Policy", "same-origin");
 		context.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
-		// This is an admin panel. robots.txt asks a crawler not to look; this tells one that ignored it not to keep
-		// what it found, and covers the links a search engine finds without ever fetching robots.txt.
+		// robots.txt asks a crawler not to look; this asks one that looked not to keep what it found.
 		context.header("X-Robots-Tag", "noindex, nofollow, noarchive");
 
 		// Sending HSTS over plain HTTP would pin a self-hoster's localhost to a scheme it cannot serve.

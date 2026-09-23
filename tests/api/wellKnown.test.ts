@@ -5,11 +5,7 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { serveDashboard } from "@api/static";
 
-/**
- * The real files, over a stub index.html. Pointing this at `dashboard/dist` instead passed only on a machine
- * that had just run the build: CI's test job never does, so `serveDashboard` registered no routes at all and
- * every request 404'd.
- */
+/** The real files over a stub index.html, since CI's test job never builds `dashboard/dist`. */
 const PUBLIC = resolve(__dirname, "../..", "dashboard/public");
 
 let root: string;
@@ -30,11 +26,7 @@ afterAll(() => {
 });
 
 describe("well-known paths", () => {
-	/**
-	 * A leading dot segment is exactly what `normalize` folds away, and folding this one hands the security
-	 * contact to the SPA catch-all instead: a 200 carrying HTML, which every scanner reads as the file being
-	 * absent.
-	 */
+	/** A leading dot segment must not be normalised away, or the file is served as the SPA shell. */
 	it.each(["/.well-known/security.txt", "/robots.txt"])("serves %s as a file, not the SPA shell", async (path) => {
 		const response = await app.request(path);
 		const body = await response.text();

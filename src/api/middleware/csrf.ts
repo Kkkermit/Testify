@@ -10,11 +10,8 @@ const CSRF_HEADER = "x-csrf-token";
 const READ_ONLY = new Set(["GET", "HEAD", "OPTIONS"]);
 
 /**
- * Double-submit: the SPA reads the readable `dash_csrf` cookie and echoes it in a header. Another site can make
- * the browser send the cookie, but it cannot read it to set the header, and it cannot set the header
- * cross-origin without a preflight this API never approves.
- *
- * `SameSite=Lax` already blocks most of this. Both are here because `Lax` has exceptions and browsers change.
+ * Double-submit: the SPA echoes the readable `dash_csrf` cookie in a header another site cannot set. `SameSite=Lax`
+ * alone has exceptions.
  */
 export const verifyCsrf = createMiddleware<ApiBindings>(async (context, next) => {
 	if (READ_ONLY.has(context.req.method)) {

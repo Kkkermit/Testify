@@ -18,10 +18,7 @@ describe("reply", () => {
 		expect(interaction.reply).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * Calling `reply()` twice is what produced unhandled `InteractionAlreadyReplied` rejections in the JavaScript
-	 * codebase — finding 8.
-	 */
+	/** A second `reply()` edits instead, which avoids `InteractionAlreadyReplied`. */
 	it("edits instead when something already replied", async () => {
 		const interaction = createMockInteraction({ overrides: { replied: true } });
 		await reply(interaction, { content: "second" });

@@ -6,13 +6,7 @@ export function filterGuilds(guilds: ManageableGuild[], search: string): Managea
 	return term === "" ? guilds : guilds.filter((guild) => guild.name.toLowerCase().includes(term));
 }
 
-/**
- * Whether the search box should take focus on load.
- *
- * Autofocus costs a phone user the keyboard over the list they came to read, and a screen-reader user the page
- * heading. It only pays back on a list long enough that typing beats scrolling, which most self-hosted
- * installs never reach.
- */
+/** Autofocus costs a phone its list and a screen reader its heading, so only a long list earns it. */
 export function searchIsWorthFocusing(count: number): boolean {
 	return count >= 8;
 }

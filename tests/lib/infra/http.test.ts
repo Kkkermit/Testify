@@ -140,8 +140,7 @@ describe("fetchJson", () => {
 
 		const error = await fetchJson("svc", "https://example.test/a", schema).catch((problem: unknown) => problem);
 
-		// The user-facing message stays generic; the detail lives on `cause`, so a
-		// schema mismatch never reaches chat as a raw zod dump.
+		// The detail lives on `cause`, so a schema mismatch never reaches chat.
 		expect(error).toBeInstanceOf(ServiceError);
 		expect((error as ServiceError).message).toBe("svc is not responding");
 		expect(String((error as ServiceError).cause)).toMatch(/Unexpected response shape/);

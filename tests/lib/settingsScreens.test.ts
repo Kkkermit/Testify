@@ -100,10 +100,7 @@ describe("settingsScreen", () => {
 		expect(labels).toEqual(["Change", "Turn off"]);
 	});
 
-	/**
-	 * Two bare menus stacked together look identical once something is chosen — the placeholder that told them apart is
-	 * replaced by the selection.
-	 */
+	/** Each picker is captioned, since two chosen menus look identical. */
 	it("captions each picker so the reader knows which is which", () => {
 		const twoPickers = settingsScreen({
 			id: "demo",

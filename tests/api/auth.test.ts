@@ -67,10 +67,7 @@ describe("authoriseUrl", () => {
 });
 
 describe("statesMatch", () => {
-	/**
-	 * Without this an attacker hands a victim a callback URL carrying the attacker's code, logging the victim
-	 * into the attacker's account — and any guild they then configure is configured on the attacker's behalf.
-	 */
+	/** A callback carrying somebody else's code must not sign the victim into the attacker's account. */
 	it("accepts only the exact state that was issued", () => {
 		expect(statesMatch("abc123", "abc123")).toBe(true);
 		expect(statesMatch("abc123", "abc124")).toBe(false);

@@ -4,13 +4,7 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type BotIdentity } from "@testify/shared";
 
-/**
- * The bot's own public profile, for the dashboard's sign-in screen and sidebar.
- *
- * The banner is the reason this is not a one-liner: it never arrives in the gateway's READY payload, so
- * `client.user` has no banner until the user is fetched over REST. That is a rate-limited call for a value that
- * changes when somebody edits the application, hence the cache.
- */
+/** The bot's public profile; the banner only arrives over REST, so the fetch is cached. */
 
 /** Long enough that a busy dashboard makes one call an hour; short enough that a rebrand shows up the same day. */
 const TTL_MS = 60 * 60 * 1000;

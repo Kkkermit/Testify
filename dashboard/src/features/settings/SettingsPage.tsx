@@ -67,10 +67,7 @@ export function SettingsPage(): React.JSX.Element {
 	);
 }
 
-/**
- * One column, because every card is full width now. Two columns of cards this uneven could not balance: a
- * group with one card left half the page empty, and a short card beside a tall one left a void under it.
- */
+/** One column, because every card is full width. */
 function Group({ children }: { children: ReactNode }): React.JSX.Element {
 	return <div className="flex flex-col gap-4">{children}</div>;
 }

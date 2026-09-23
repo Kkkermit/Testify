@@ -26,11 +26,7 @@ export function isLocale(value: unknown): value is Locale {
 	return LOCALES.some((locale) => locale === value);
 }
 
-/**
- * English is bundled because every session needs it as the fallback; the rest are separate chunks the browser
- * only fetches when somebody is actually reading in that language. Six dictionaries in the first load would be
- * weight nobody's session uses more than a sixth of.
- */
+/** English is bundled as the fallback; the other languages load only when chosen. */
 const lazyDictionaries = resourcesToBackend(
 	async (language: string) => (await import(`./locales/${language}.json`)) as { default: Record<string, unknown> },
 );
@@ -58,11 +54,7 @@ void i18next
 		},
 	});
 
-/**
- * i18next does not touch the document, and nothing else can be trusted to: a screen reader picks its voice from
- * `lang`, so French copy left marked `en` is read aloud in an English accent. Wired to the instance rather than
- * to a component, because it has to hold whatever renders.
- */
+/** Sets `lang`, which i18next does not, so a screen reader reads each language in its own voice. */
 function markDocumentLanguage(language: string): void {
 	document.documentElement.lang = language;
 }

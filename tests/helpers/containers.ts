@@ -54,7 +54,6 @@ export function customIdsOf(rendered: Rendered): string[] {
 	return found;
 }
 
-/** Custom IDs that appear more than once. */
 export function duplicateIds(rendered: Rendered): string[] {
 	const seen = new Set<string>();
 	const repeated = new Set<string>();

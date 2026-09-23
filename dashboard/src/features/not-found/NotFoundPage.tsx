@@ -7,11 +7,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-/**
- * The same screen in two places, so it carries no landmark of its own: at the catch-all route it is wrapped in
- * `<main>` below, and inside the app shell it renders into the shell’s. Two `<main>` elements on one page is
- * invalid, and gives a screen reader two "main" landmarks to choose between.
- */
+/** Carries no landmark of its own: the catch-all wraps it in `<main>`, and inside the shell it uses the shell's. */
 export function NotFoundContent(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("notFound.title"));
@@ -43,8 +39,7 @@ export function NotFoundContent(): React.JSX.Element {
 }
 
 /**
- * Outside `RequireAuth`, so a mistyped address says what is wrong rather than sending a signed-out reader to a
- * sign-in screen for a page that was never going to exist.
+ * Outside `RequireAuth`, so a mistyped address says what is wrong rather than asking a signed-out reader to sign in.
  */
 export function NotFoundPage(): React.JSX.Element {
 	return (

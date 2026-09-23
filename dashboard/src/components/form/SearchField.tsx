@@ -2,12 +2,7 @@ import { Search } from "lucide-react";
 import { FIELD } from "@/components/form/fieldStyles";
 import { cn } from "@/lib/cn";
 
-/**
- * A search box with the magnifier inside it.
- *
- * The name is `sr-only` rather than absent: the icon is decoration, and a box labelled only by a placeholder
- * loses its name the moment somebody types in it.
- */
+/** The label is `sr-only` rather than absent, because a placeholder stops naming the box once somebody types. */
 export function SearchField({
 	label,
 	placeholder,

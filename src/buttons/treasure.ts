@@ -198,8 +198,7 @@ export default defineButton({
 			return;
 		}
 
-		// Reported against the panel rather than as a failed command, so the values
-		// the user just typed are still on screen behind the message.
+		// Reported on the panel, so the values just typed stay on screen.
 		if (problems.length > 0) {
 			await interaction.reply({ embeds: [errorEmbed(problems.join("\n"))], flags: 64 });
 			return;
@@ -207,8 +206,7 @@ export default defineButton({
 
 		await saveTreasureConfig(guildId, { ...toStored(next), lastModifiedBy: interaction.user.id });
 
-		// A modal can only edit the message it was opened from; if it somehow was not,
-		// answering privately still beats leaving the interaction hanging.
+		// A modal opened elsewhere cannot edit this message, so answer privately.
 		if (interaction.isFromMessage()) await interaction.update(await render(guildId));
 		else await interaction.reply({ ...(await render(guildId)), flags: 64 });
 	},

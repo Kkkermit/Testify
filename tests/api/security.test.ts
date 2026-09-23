@@ -228,11 +228,7 @@ describe("rate limiting", () => {
 	});
 });
 
-/**
- * `verifyCsrf` prefers the session's stored secret over the readable cookie, which is what makes the
- * double-submit resistant to an attacker who can write cookies. Registered before `loadSession` the session was
- * always undefined there, so the stronger half never ran and only the forgeable half was left.
- */
+/** `verifyCsrf` reads the session's stored secret, so it has to run after `loadSession`. */
 describe("the CSRF check and the session it reads", () => {
 	const SESSION_SECRET = "the-secret-stored-on-the-session";
 

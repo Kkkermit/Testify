@@ -181,10 +181,7 @@ describe("the channel list", () => {
 		expect(channels.map((channel) => channel.kind).sort()).toEqual(["category", "text", "text", "voice"]);
 	});
 
-	/**
-	 * The single biggest reason this API lives in the bot process: the picker can grey out a channel before
-	 * anyone saves a configuration that cannot work.
-	 */
+	/** A channel the bot cannot post in is marked before anybody saves a configuration that cannot work. */
 	it("marks a channel the bot cannot post in", async () => {
 		const channels = await channelsOf({ canSendIn: new Set(["1"]) });
 

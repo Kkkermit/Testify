@@ -39,13 +39,7 @@ export interface PlanOptions {
 	filtered?: boolean;
 }
 
-/**
- * The best format that can actually be played here.
- *
- * Opus at 48 kHz is what Discord wants, so a source that already offers it is passed straight through and
- * costs no CPU at all. Everything else needs FFmpeg, which is optional — without it those tracks are refused
- * by name rather than played as silence.
- */
+/** The best playable format: Opus passes straight through, and anything else needs FFmpeg or is refused by name. */
 export function planStream(formats: RemoteFormat[], options: PlanOptions): StreamPlan | null {
 	const audio = formats.filter(isAudioOnly);
 

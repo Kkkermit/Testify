@@ -1,12 +1,7 @@
 import { CACHE } from "@config/constants";
 import { CommandToggleConfig, type CommandToggles } from "@database/models/commandToggles.schema";
 
-/**
- * Which commands are switched off.
- *
- * Read before every single invocation, so it is cached exactly like the prefix is — and every write clears the
- * entry it touched, so a toggle takes effect on the next command rather than in five minutes.
- */
+/** Which commands are switched off; cached like the prefix, and each write clears the entry it touched. */
 
 /** The bot-wide row's key. A Discord id is 17-20 digits, so this cannot collide with a real guild. */
 export const GLOBAL_SCOPE = "GLOBAL";

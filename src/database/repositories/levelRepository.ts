@@ -42,10 +42,7 @@ export interface XpResult {
 	previousLevel: number;
 }
 
-/**
- * Atomic XP award with a per-user message cooldown enforced in the query filter, which is what stops XP being farmed
- * by message spam.
- */
+/** The per-user message cooldown is in the query filter, so spam cannot farm XP. */
 export async function awardXp(
 	guildId: string,
 	userId: string,

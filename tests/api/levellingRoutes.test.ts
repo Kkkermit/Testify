@@ -64,10 +64,7 @@ async function bodyOf(response: Response): Promise<LevelConfigResponse> {
 }
 
 describe("reading the configuration", () => {
-	/**
-	 * The whole point of returning `normaliseSettings`: the migration off the old single-`roleId` shape happens
-	 * in one place, and the web inherits it rather than reimplementing it and drifting.
-	 */
+	/** The migration off the old single-`roleId` shape happens in one place, and the web inherits it. */
 	it("migrates an old document exactly as the Discord panel does", async () => {
 		stored.mockResolvedValue({ guildId: GUILD, isDisabled: false, roleId: ROLE, multiplier: 3 } as never);
 

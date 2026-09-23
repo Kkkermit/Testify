@@ -1,16 +1,7 @@
 import { containsMarkup, discordTokens } from "@testify/shared";
 import DOMPurify from "dompurify";
 
-/**
- * DOMPurify over a free-text box, run on the value before it is sent.
- *
- * Discord's own syntax is lifted out first and put back after: `<a:name:id>` parses as an anchor, `<t:…>` as an
- * unknown tag and `<@id>` comes back entity-encoded, so a sanitiser run over a raw message eats custom emoji,
- * timestamps and mentions alike. Measured against `dompurify`, not assumed — `sanitise.test.ts` pins each form.
- *
- * This is a convenience, not the boundary. The API refuses the same values through `plainText` / `plainLine`,
- * so a request that never touches this page is refused just the same.
- */
+/** DOMPurify over a free-text box, with Discord's own markup lifted out and put back; the API is the real boundary. */
 
 /** Private-use characters, so a placeholder cannot collide with anything a person can type. */
 const OPEN = "\ue000";
@@ -29,13 +20,7 @@ export function sanitiseInput(value: string): string {
 	);
 }
 
-/**
- * The fragment's `textContent`, not DOMPurify's HTML string: the string form escapes the `<` and `&` it read as
- * text, and hand-decoding those turns a typed `&lt;script&gt;` into a live tag — which is what the test named
- * for it caught. `textContent` is decoded exactly once by the parser and cannot carry markup.
- *
- * Run to a fixed point, because one pass over `&lt;script&gt;` yields the tag as text and a second removes it.
- */
+/** The fragment's `textContent`, run to a fixed point, so an escaped tag can never come back live. */
 function strip(value: string): string {
 	let current = value;
 

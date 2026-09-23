@@ -7,10 +7,7 @@ beforeEach(() => {
 	}
 });
 
-/**
- * The appearance page is the only screen holding these hooks, so without this call a reader who chose light and
- * then landed on `/guilds` got the system theme back — the choice was remembered and never applied.
- */
+/** Stored choices apply before the app mounts, not only once the appearance page is opened. */
 describe("applying stored preferences before the app mounts", () => {
 	it("marks the page with every choice that was remembered", () => {
 		window.localStorage.setItem("testify:theme", "light");

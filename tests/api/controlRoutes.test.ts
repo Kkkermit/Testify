@@ -158,10 +158,7 @@ describe("pausing and resuming", () => {
 });
 
 describe("shutting down", () => {
-	/**
-	 * This ends the process the dashboard is served from, so it is typed rather than clicked — the same shape
-	 * as every other confirmation that cannot be undone from the screen that started it.
-	 */
+	/** Shutting down is typed rather than clicked. */
 	it("refuses without the typed confirmation", async () => {
 		expect((await send("/shutdown", { method: "POST", body: {} })).status).toBe(400);
 		expect((await send("/shutdown", { method: "POST", body: { confirm: "yes" } })).status).toBe(400);
@@ -277,10 +274,7 @@ describe("leaving a server", () => {
 		expect(leave).toHaveBeenCalled();
 	});
 
-	/**
-	 * The browser asking for the name is a courtesy; this check is the gate. A hand-written request with an
-	 * empty body must not be able to remove the bot from a server.
-	 */
+	/** The server compares the name itself; a hand-written request cannot remove the bot. */
 	it("refuses a name that does not match, and does not leave", async () => {
 		const { client, leave } = clientThatCanLeave();
 

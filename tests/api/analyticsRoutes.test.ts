@@ -115,10 +115,7 @@ describe("the usage report", () => {
 		expect((await usage()).mostUsed).toEqual([{ command: "ban", category: "moderation", count: 10, failures: 1 }]);
 	});
 
-	/**
-	 * The least-used list is ranked over every command the bot has, not every command that ran — a command
-	 * nobody has ever touched has no usage row at all, and it is exactly what this list is for.
-	 */
+	/** A command nobody has run has no usage row, and still ranks as least used. */
 	it("ranks a never-used command below one that ran once", async () => {
 		byCommand.mockResolvedValue([{ command: "ban", count: 1, failures: 0 }]);
 
@@ -237,10 +234,7 @@ describe("the log feed", () => {
 		expect(byContext.lines.map((line) => line.message)).toEqual(["[BAN] failed"]);
 	});
 
-	/**
-	 * An empty list at the lowest level would otherwise read as "the bot is idle" when it really means the bot
-	 * was started at a level that never writes those lines.
-	 */
+	/** The console reports the logger's level, so an empty list is not mistaken for an idle bot. */
 	it("reports the level the bot's own logger is running at", async () => {
 		const feed = (await (await appFor().request("/analytics/logs")).json()) as LogFeed;
 

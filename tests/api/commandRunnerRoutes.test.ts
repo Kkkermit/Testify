@@ -119,10 +119,7 @@ describe("what can be run", () => {
 		expect(body.commands.map((command) => command.name)).toEqual(["ping"]);
 	});
 
-	/**
-	 * The list and the gate read the same predicate, so a command missing from the list cannot be run by
-	 * guessing its URL — and the refusal says nothing about whether it exists.
-	 */
+	/** A command off the list cannot be run by guessing its URL, and the refusal does not say whether it exists. */
 	it("refuses to run a command that is not on the list", async () => {
 		const client = clientFor([pingCommand(), { ...pingCommand(), name: "ban" }]);
 

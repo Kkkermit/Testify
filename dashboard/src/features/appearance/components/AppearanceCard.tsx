@@ -19,8 +19,7 @@ export function AppearanceCard({
 			id={id}
 			tabIndex={-1}
 			aria-labelledby={`${id}-heading`}
-			// Matching the `scroll-margin-top` `:focus-visible` already carries, or the sticky header on a phone
-			// covers whichever setting was just scrolled to.
+			// Matches `:focus-visible`'s `scroll-margin-top`, or the sticky header covers the setting on a phone.
 			className={cardClass("default", "scroll-mt-20 flex flex-col gap-4")}
 		>
 			<div>

@@ -2,11 +2,7 @@ import { type LucideIcon } from "lucide-react";
 import { type Theme } from "@/hooks/useTheme";
 import { cn } from "@/lib/cn";
 
-/**
- * `data-scheme` makes every `light-dark()` token inside resolve to that theme, so a light sample is genuinely
- * light while the page around it stays dark. It is an attribute rather than an inline `color-scheme` because
- * the `light-dark()` polyfill only follows a scheme the stylesheet declared — see `index.css`.
- */
+/** `data-scheme` resolves every token inside to that theme, so a light sample stays light on a dark page. */
 function Mock({ scheme }: { scheme: "light" | "dark" }): React.JSX.Element {
 	return (
 		<div data-scheme={scheme} className="bg-background flex h-full w-full gap-1 p-1.5">
@@ -45,8 +41,7 @@ export function ThemePreview({
 				)}
 			>
 				{theme === "system" ? (
-					// One mock with the other laid over it on a diagonal: "system" is not a look of its own, it is
-					// whichever of the two the device is already asking for.
+					// `system` is whichever look the device asks for, so it shows both on a diagonal.
 					<div className="relative h-full">
 						<Mock scheme="light" />
 						<div className="absolute inset-0 [clip-path:polygon(100%_0,100%_100%,35%_100%)]">

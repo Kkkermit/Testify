@@ -102,8 +102,7 @@ export async function renderRankCard(data: RankCardData): Promise<AttachmentBuil
 	draw.font = "bold 30px sans-serif";
 	draw.fillText(copy.level, WIDTH - 56, 112);
 
-	// The track first, then the fill on top of it, so a zero-progress bar still
-	// shows where the level ends.
+	// The track first, so a zero-progress bar still shows where the level ends.
 	const trackY = 168;
 	const trackHeight = 34;
 

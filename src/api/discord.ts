@@ -2,10 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
 import { ApiProblem } from "@api/errors";
 import { type DashboardUser } from "@testify/shared";
 
-/**
- * Everything that talks to Discord's OAuth2 endpoints. The browser never gets a token and never calls Discord
- * itself — it talks to this API, which holds the client secret.
- */
+/** Discord's OAuth2 endpoints; the browser never holds a token or the client secret. */
 
 const API = "https://discord.com/api/v10";
 const SCOPES = "identify guilds";
@@ -34,10 +31,7 @@ export function callbackUrl(baseUrl: string): string {
 	return `${baseUrl.replace(/\/+$/, "")}/api/auth/callback`;
 }
 
-/**
- * PKCE closes authorization-code interception if the redirect ever leaks through a referrer or a proxy log. It
- * is belt-and-braces for a client that has a secret anyway, and it costs nothing.
- */
+/** PKCE, so an authorization code leaked through a referrer or a log cannot be redeemed. */
 export function startLogin(returnTo: string): PendingLogin {
 	return {
 		state: randomBytes(32).toString("base64url"),
@@ -64,10 +58,7 @@ export function authoriseUrl(clientId: string, baseUrl: string, pending: Pending
 	return `https://discord.com/oauth2/authorize?${query.toString()}`;
 }
 
-/**
- * Without this an attacker can hand a victim a callback URL carrying the attacker's code, logging the victim
- * into the attacker's account — and any guild they then configure is configured on the attacker's behalf.
- */
+/** Refuses a callback carrying somebody else's code, which would sign the victim into the attacker's account. */
 export function statesMatch(fromDiscord: string, fromCookie: string): boolean {
 	const left = Buffer.from(fromDiscord);
 	const right = Buffer.from(fromCookie);
@@ -173,10 +164,7 @@ export function guildIconUrl(guildId: string, icon: string | null): string | nul
 
 const MANAGE_GUILD = 1n << 5n;
 
-/**
- * Good enough to decide what to *show* in the picker. It is a login-time snapshot of a different system, so it
- * is never what authorises a write — `requireGuild` fetches the member live for that.
- */
+/** A login-time snapshot, good enough for what to show; `requireGuild` checks live before any write. */
 export function canManage(permissions: string): boolean {
 	try {
 		return (BigInt(permissions) & MANAGE_GUILD) === MANAGE_GUILD;

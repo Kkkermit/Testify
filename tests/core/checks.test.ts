@@ -139,10 +139,7 @@ describe("runChecks", () => {
 	});
 });
 
-/**
- * Hiding a switch is not access control and neither is a greyed-out button — this is the gate, and it runs
- * before the command body on both surfaces.
- */
+/** This is the gate, and it runs before the command body on both surfaces. */
 describe("commands that have been switched off", () => {
 	beforeEach(() => {
 		clearCooldowns();
@@ -168,10 +165,7 @@ describe("commands that have been switched off", () => {
 		expect(refusal).toContain("this server");
 	});
 
-	/**
-	 * Nobody bypasses a switch, the bot owner included: "off" that quietly still runs for one person is a much
-	 * worse thing to debug than one that is simply off.
-	 */
+	/** Nobody bypasses a switch, the bot owner included. */
 	it("refuses the bot owner too", async () => {
 		offGlobally.mockResolvedValue(["ping"]);
 		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });

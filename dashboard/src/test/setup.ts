@@ -29,8 +29,7 @@ window.matchMedia = jest.fn().mockImplementation((query: string) => ({
 	dispatchEvent: jest.fn(),
 }));
 
-// jsdom lays nothing out, so it implements neither of these and anything measuring an element gets zeroes
-// either way. Both are far below the build's browser target, so no component guards for their absence.
+// jsdom lays nothing out, so these are stubbed; every browser the build targets has both.
 globalThis.ResizeObserver = class {
 	observe = jest.fn();
 	unobserve = jest.fn();

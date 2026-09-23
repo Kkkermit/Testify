@@ -1,15 +1,6 @@
 import { model, Schema } from "mongoose";
 
-/**
- * One row per dashboard screen per day, incremented in place.
- *
- * Deliberately narrower than `commandusage`, which carries a guild id: a server usually has one or two people
- * who can open this dashboard, so a per-guild view count would be a record of what one identifiable person
- * looked at rather than an aggregate. Bot-wide is enough to answer the question the count exists for — which
- * screens are worth investing in — without becoming a browsing history.
- *
- * The route is the **pattern** (`/guilds/:guildId/levelling`), never the address, so no id is stored at all.
- */
+/** One row per dashboard route pattern per day; no guild id, because a server's few managers are identifiable. */
 export interface ScreenView {
 	/** `YYYY-MM-DD`, UTC — a string so a day is one exact-match key rather than a range scan. */
 	day: string;

@@ -7,14 +7,7 @@ import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { hexColour } from "@/features/owner/runner.utils";
 import { clockTime } from "@/lib/datetime";
 
-/**
- * What the command replied with, drawn as cards.
- *
- * An embed becomes a card with its accent down the left edge — close enough to read like the Discord message it
- * would have been, without pretending to be one. Anything that could not cross the gap is named rather than
- * missing, because a reader who cannot see that a reply had buttons would think the command did less than it
- * did.
- */
+/** The command's reply as cards; anything that could not cross the gap is named rather than dropped. */
 export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.Element {
 	const { t } = useTranslation();
 	return (

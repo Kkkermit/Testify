@@ -30,10 +30,7 @@ describe("choosing a theme", () => {
 		expect((await group("Theme")).getByRole("button", { name: "System" })).toHaveAttribute("aria-pressed", "true");
 	});
 
-	/**
-	 * `system` has to remove the attribute rather than set one: `color-scheme: light dark` on `:root` is what
-	 * follows the device, and any value at all would override it.
-	 */
+	/** `system` removes the attribute, because any value overrides `color-scheme: light dark`. */
 	it("marks the page with an explicit choice, and unmarks it for system", async () => {
 		const user = userEvent.setup();
 		render();
@@ -66,10 +63,7 @@ describe("choosing a theme", () => {
 		expect(samples.map((sample) => sample.textContent)).toEqual(["System", "Light", "Dark"]);
 	});
 
-	/**
-	 * The scheme has to come from an attribute the stylesheet declares, never an inline `style`: nothing in
-	 * jsdom can tell the two apart, and inline it silently renders every sample in the page's own theme.
-	 */
+	/** Each sample's scheme comes from an attribute the stylesheet declares, never an inline style. */
 	it("forces each sample's scheme with an attribute rather than an inline style", async () => {
 		const { container } = render();
 		await group("Theme");
@@ -99,10 +93,7 @@ describe("choosing an accent", () => {
 		expect(document.documentElement.hasAttribute("data-accent")).toBe(false);
 	});
 
-	/**
-	 * Each swatch carries its own `data-accent`, which is what makes it paint itself in that accent rather than
-	 * in whichever one the page is currently wearing.
-	 */
+	/** Each swatch paints itself in its own accent, whatever the page is wearing. */
 	it("shows every swatch in its own colours", async () => {
 		render();
 		const violet = await screen.findByRole("button", { name: "Violet" });
@@ -162,10 +153,7 @@ describe("applyTheme", () => {
 });
 
 describe("arriving from the sidebar's language button", () => {
-	/**
-	 * Language is the fourth card down, so landing at the top of the page leaves a reader scrolling for the
-	 * control the button they pressed is named after.
-	 */
+	/** Opening the language section focuses it rather than the top of the page. */
 	it("lands focus on the language section rather than the top of the page", () => {
 		renderWithProviders(<AppearancePage />, { path: "/appearance", route: "/appearance#language" });
 

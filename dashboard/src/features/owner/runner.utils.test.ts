@@ -89,10 +89,7 @@ describe("which options a form shows", () => {
 });
 
 describe("building the request", () => {
-	/**
-	 * An untouched optional field must be absent rather than an empty string — a command reading
-	 * `getString(name)` would treat `""` as an answer it was given.
-	 */
+	/** An untouched optional field is left out, because a command would read `""` as an answer. */
 	it("leaves an empty field out entirely", () => {
 		expect(buildArgs([option()], { text: "" })).toEqual({});
 	});

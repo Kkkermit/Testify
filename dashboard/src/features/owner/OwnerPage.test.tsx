@@ -143,11 +143,8 @@ describe("the owner console", () => {
 });
 
 /**
- * `TabContent` is a bare `<div>`, so a tab inherits no vertical rhythm from the console the way a page inherits
- * `AppShell`'s `gap-6` column. `CommandsPage` is mounted both ways and brought none of its own, which collapsed
- * every gap on the commands tab to zero while the same component looked right at `/commands`.
- *
- * jsdom computes no styles, so this pins the class the browser check confirmed.
+ * `TabContent` is a bare `<div>`, so every tab brings its own vertical rhythm; jsdom has no styles, so this pins the
+ * class.
  */
 describe("every owner console tab brings its own vertical rhythm", () => {
 	it.each(OWNER_TABS.map((tab) => tab.key))("%s", async (key) => {

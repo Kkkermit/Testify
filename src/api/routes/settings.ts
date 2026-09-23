@@ -40,10 +40,7 @@ import {
 	voiceStatsPatch,
 } from "@testify/shared";
 
-/**
- * The settings that are only ever configuration. Each section is its own endpoint and writes on change, because
- * each is an independent decision — there is nothing here to batch behind a Save button.
- */
+/** Configuration-only settings; each section has its own endpoint and writes on change. */
 
 type ApiContext = Context<ApiBindings>;
 
@@ -71,8 +68,7 @@ async function settingsOf(guildId: string): Promise<ServerSettings> {
 	return {
 		prefix: { prefix: prefix.prefix, enabled: prefix.isEnabled },
 		antiLink: {
-			// No record is how the bot stores "off"; the stored flag name is normalised so an old value cannot
-			// reach the browser as an option the form has no button for.
+			// No record means off, and the stored flag is normalised so an old value cannot reach the form.
 			enabled: antiLink !== null,
 			bypassPermission:
 				antiLink !== null && isBypassPermission(antiLink.bypassPermission) ? antiLink.bypassPermission : DEFAULT_BYPASS,
@@ -100,10 +96,7 @@ function guildOf(context: ApiContext) {
 	return guild;
 }
 
-/**
- * The bot's nickname in this server — the only part of its appearance a manager may change, because Discord
- * has no per-guild avatar for bots. The global name and picture belong to the owner console.
- */
+/** The bot's nickname here; Discord has no per-guild avatar, so the rest is the owner's. */
 settings.get("/nickname", (context) => {
 	const me = guildOf(context).members.me;
 
@@ -209,10 +202,7 @@ settings.patch("/voice-stats", async (context) => {
 	return answer(context, guildId, "settings.voice-stats", "Changed the voice stat channels");
 });
 
-/**
- * Every write answers with the whole settings document rather than its own section, so one response keeps the
- * screen consistent — a section that refuses cannot leave the rest of the page showing a value it does not have.
- */
+/** Every write answers with the whole document, so the page never shows a value the server does not have. */
 async function answer(context: ApiContext, guildId: string, action: string, summary: string): Promise<Response> {
 	const after = await settingsOf(guildId);
 	await auditChange(context, { action, summary, after });

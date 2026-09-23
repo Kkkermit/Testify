@@ -55,10 +55,7 @@ export function summariseCommand(command: Command): CommandSummary {
 	};
 }
 
-/**
- * Owner commands are filtered out for everybody else rather than shown and disabled: the list of what a bot's
- * owner can do is not something a server manager needs, and naming them invites probing.
- */
+/** Owner commands are left out for everybody else rather than shown disabled. */
 export function buildCatalogue(
 	commands: Iterable<Command>,
 	options: { prefix: string; includeOwnerOnly: boolean },

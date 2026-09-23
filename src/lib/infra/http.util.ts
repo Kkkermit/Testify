@@ -3,10 +3,7 @@ import { LIMITS } from "@config/constants";
 import { ServiceError } from "@core/errors";
 import { recordOutcome } from "@lib/infra/serviceHealth.util";
 
-/**
- * Every outbound HTTP call goes through here: one timeout policy, one error type, and schema validation at the
- * boundary.
- */
+/** Every outbound HTTP call goes through here: one timeout, one error type, schema validation at the boundary. */
 
 export interface RequestOptions {
 	method?: string;

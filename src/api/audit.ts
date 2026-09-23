@@ -4,11 +4,8 @@ import { toError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 
 /**
- * Written **after** the change succeeds, so a failed write cannot leave a lie in the log. If the audit write
- * itself fails, that is logged and the request still succeeds — the change did happen, and failing the request
- * over the bookkeeping would be worse.
- *
- * Keep `before`/`after` to the field that changed. Storing whole documents outgrows the data they describe.
+ * Written after the change succeeds; a failed audit write is logged and the request still succeeds. Keep `before` and
+ * `after` to the field that changed.
  */
 export async function auditChange(
 	context: Context<ApiBindings>,

@@ -60,10 +60,7 @@ export async function adjustBank(guildId: string, userId: string, delta: number)
 	).exec() as Promise<EconomyAccount>;
 }
 
-/**
- * Conditional debit: the filter itself requires sufficient funds, so two concurrent spends cannot both succeed
- * against the same balance.
- */
+/** The filter requires sufficient funds, so two concurrent spends cannot both succeed. */
 export async function debitWallet(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	return Economy.findOneAndUpdate({ guildId, userId, wallet: { $gte: amount } }, { $inc: { wallet: -amount } }, LEAN)
 		.lean<EconomyAccount>()
@@ -89,7 +86,7 @@ export async function withdraw(guildId: string, userId: string, amount: number):
 	return adjustWallet(guildId, userId, amount);
 }
 
-/** Atomic pair: the credit only happens once the debit has provably landed. */
+/** The credit only happens once the debit has landed. */
 export async function transfer(guildId: string, fromId: string, toId: string, amount: number): Promise<boolean> {
 	await getOrCreateAccount(guildId, toId);
 	const debited = await debitWallet(guildId, fromId, amount);
@@ -133,10 +130,7 @@ export async function incrementCounters(
 
 export type LeaderboardField = "wallet" | "bank" | "total";
 
-/**
- * `_id` last so the order is total. Money ties are the normal case — everybody starts on the same number — and
- * `skip` over a partial order shows one account twice and hides another.
- */
+/** `_id` last so the order is total, since equal balances are the normal case. */
 export async function getLeaderboard(
 	guildId: string,
 	limit: number,

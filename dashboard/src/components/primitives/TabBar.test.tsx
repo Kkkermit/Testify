@@ -100,11 +100,7 @@ describe("TabBar", () => {
 	});
 });
 
-/**
- * On a phone the owner console's eight tabs are twice the width of the screen. Both of these are about the
- * five tabs past the right edge: nothing said they were there, and landing on one showed the strip at its
- * start with the current tab off-screen.
- */
+/** A tab strip wider than the screen has to show there is more, and keep the current tab in view. */
 describe("a tab strip wider than its screen", () => {
 	it("knows which ends still have tabs past them", () => {
 		expect(edgesOf({ scrollLeft: 0, clientWidth: 320, scrollWidth: 900 })).toEqual({ start: false, end: true });

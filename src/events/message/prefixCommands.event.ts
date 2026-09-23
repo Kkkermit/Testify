@@ -7,10 +7,7 @@ import { getPrefixConfig } from "@database/repositories/settingsRepository";
 import { countCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed } from "@lib/discord";
 
-/**
- * Runs `t?ban @someone` through exactly the same code as `/ban`, including the permission, cooldown and blacklist
- * checks.
- */
+/** Runs `t?ban @someone` through the same code and checks as `/ban`. */
 export default defineMessageHandler({
 	name: "prefixCommands",
 	order: 10,
@@ -28,8 +25,7 @@ export default defineMessageHandler({
 		const parsed = parseMessage(message.content, prefix, botId);
 		if (parsed === null) return;
 
-		// An alias can point at a subcommand — "meme" means "lookup meme" — in which
-		// case the subcommand name goes back on the front of the arguments.
+		// An alias can point at a subcommand, whose name goes back on the front of the arguments.
 		const [name = parsed.name, subcommand] = (client.aliases.get(parsed.name) ?? parsed.name).split(" ");
 		const args = subcommand === undefined ? parsed.args : [subcommand, ...parsed.args];
 

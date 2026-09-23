@@ -28,11 +28,7 @@ function guildIdOf(context: ApiContext): string {
 	return guild.id;
 }
 
-/**
- * Literally the output of `normaliseSettings`. The migration off the old single-`roleId` shape, the `"current"`
- * channel sentinel and the clamping all already happen there, so the web inherits them — and cannot drift from
- * what `/levelling edit` shows in Discord.
- */
+/** Exactly `normaliseSettings`, so the web shows what `/levelling edit` shows. */
 async function configOf(guildId: string): Promise<LevelConfigResponse> {
 	return normaliseSettings(await getLevelSettings(guildId));
 }

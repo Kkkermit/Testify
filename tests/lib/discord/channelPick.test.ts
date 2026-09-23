@@ -3,12 +3,7 @@ import { type ComponentInteraction } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { pickedChannelId, requireSendable } from "@lib/discord/channelPick.util";
 
-/**
- * The one place four panels agree on what a postable channel is.
- *
- * Each of them carried its own copy of this, refusal message included, so a change to the rule in one panel
- * left the other three disagreeing about which channels a server could choose.
- */
+/** The one rule for what a postable channel is, shared by every panel. */
 
 function guildWith(channel: unknown): Guild {
 	return { channels: { fetch: jest.fn().mockResolvedValue(channel) } } as unknown as Guild;

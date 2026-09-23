@@ -49,8 +49,7 @@ export function paginatedButton<T>(config: {
 		async run(interaction, context) {
 			if (context.action !== "goto" || !interaction.isMessageComponent()) return;
 
-			// The owner is read from the end, not by position: `navRow` appends a slot
-			// name after the page to keep its five buttons' custom IDs distinct.
+			// The owner is read from the end, because `navRow` appends a slot after the page.
 			const [key = "-", rawPage = "0"] = context.args;
 			const ownerId = context.args.at(-1) ?? interaction.user.id;
 			const items = await config.resolve(key, {

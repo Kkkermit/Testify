@@ -1,13 +1,7 @@
 import { ANALYTICS } from "@config/constants";
 import { type LogLevel } from "@core/logger";
 
-/**
- * The last few hundred log lines, kept in memory so the owner console can answer "what broke" without anybody
- * SSH-ing into the host to read a file.
- *
- * In memory and nowhere else, deliberately: a restart clears it, which is the right trade for a buffer that
- * would otherwise need a collection, a retention policy and a way to stop it filling a disk.
- */
+/** The latest log lines in memory, for the owner console; a restart clears them. */
 
 export interface LogRecord {
 	at: number;
@@ -27,9 +21,8 @@ function matches(record: LogRecord, needle: string): boolean {
 }
 
 /**
- * Keys whose values never leave the process. A dashboard page is a much easier thing to read over someone's
- * shoulder than a terminal, and one careless `logger.error({ uri }, …)` would otherwise put a database password
- * on a web page.
+ * Context keys whose values are redacted before a line is kept, so a careless log call cannot put a secret on a web
+ * page.
  */
 const SECRET_KEY = /token|secret|password|passwd|credential|authorization|cookie|session|uri|url|dsn|key$/i;
 
@@ -66,12 +59,7 @@ export class LogRing {
 		if (this.records.length > this.capacity) this.records.splice(0, this.records.length - this.capacity);
 	}
 
-	/**
-	 * Newest first, which is the order anybody reads a log in when they are looking for what just broke.
-	 *
-	 * `matched` is counted before `limit` cuts the list, so the console can say "showing 200 of 640" rather than
-	 * letting somebody believe the search found exactly what fits on screen.
-	 */
+	/** Newest first; `matched` is counted before `limit` cuts the list. */
 	recent({ limit = 200, minLevel = "trace", search }: { limit?: number; minLevel?: LogLevel; search?: string } = {}): {
 		lines: LogRecord[];
 		matched: number;

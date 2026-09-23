@@ -9,11 +9,7 @@ export function isHexColour(value: string): boolean {
 	return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
 }
 
-/**
- * A custom property is never resolved by `getComputedStyle`, so a `light-dark()` token arrives here as its own
- * source text rather than as the colour the page is painted with. Picking the half by hand is what keeps the
- * backdrop on the same palette as everything else instead of silently falling back.
- */
+/** `getComputedStyle` returns a `light-dark()` token as source text, so the half is picked by hand. */
 export function pickScheme(value: string, dark: boolean): string {
 	const both = /^light-dark\(\s*([^,]+?)\s*,\s*(.+?)\s*\)$/i.exec(value);
 	if (both?.[1] === undefined || both[2] === undefined) return value;

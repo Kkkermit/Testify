@@ -16,10 +16,7 @@ export function useGiveaways(guildId: string): UseQueryResult<GiveawayList> {
 	});
 }
 
-/**
- * None of these are optimistic: every one posts to or edits a real Discord message, and a row that changed
- * before the server agreed would be claiming something happened in a channel that it did not.
- */
+/** Not optimistic: each one posts to or edits a real Discord message. */
 export function useStartGiveaway(guildId: string): UseMutationResult<GiveawayList, Error, GiveawayStart> {
 	return useListMutation(guildId, (body) => api.post<GiveawayList>(`/guilds/${guildId}/giveaways`, body));
 }

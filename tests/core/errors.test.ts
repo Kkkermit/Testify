@@ -162,8 +162,7 @@ describe("runCommand", () => {
 
 	/** An expired interaction must not turn one failure into an unhandled rejection on top of it. */
 	it("swallows a failure to deliver the apology", async () => {
-		// Replaced after construction: `reply` is overloaded three ways in discord.js
-		// and a rejecting stub cannot satisfy every overload.
+		// Replaced after construction, since a rejecting stub cannot satisfy every overload of `reply`.
 		const interaction = createMockInteraction();
 		(interaction as { reply: unknown }).reply = jest.fn(() => Promise.reject(new Error("Unknown interaction")));
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);

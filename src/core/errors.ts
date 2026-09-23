@@ -41,12 +41,7 @@ function failureEmbed(message: string): EmbedBuilder {
 	return new EmbedBuilder().setColor(theme.colours.error).setDescription(`${theme.emoji.error} ${message}`);
 }
 
-/**
- * Runs a command and makes sure the user always gets an answer, whatever happens.
- *
- * Returns whether it finished cleanly, which is the only way a caller can count a failure without catching the
- * error itself and breaking that guarantee.
- */
+/** Runs a command so the user always gets an answer, and returns whether it finished cleanly. */
 export async function runCommand(interaction: CommandInput, command: Command, client: TestifyClient): Promise<boolean> {
 	try {
 		await dispatch(interaction, command, client);

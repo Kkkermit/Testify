@@ -4,13 +4,7 @@ import { OwnerPage } from "@/features/owner/OwnerPage";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
-/**
- * Every owner tab says so when its read fails, and offers a way to retry.
- *
- * Each of these hid it differently: runtime and control sat on a skeleton for ever, the usage tab reported a
- * 500 as "No usage yet" — telling an owner their bot is unused — the runner showed an empty picker, and the
- * blacklist showed a bare "Blocked accounts" heading, which on a security screen reads as nobody being blocked.
- */
+/** Every owner tab reports a failed read with a retry rather than an empty or loading state. */
 
 const TABS: { tab: string; endpoint: string }[] = [
 	{ tab: "overview", endpoint: "/api/owner/stats" },

@@ -38,11 +38,7 @@ const MARKS: { open: string; mark: Mark }[] = [
 ];
 
 /**
- * Discord's inline marks, as spans a preview can render.
- *
- * Only the five a greeting realistically uses, and only inline — this approximates what Discord will do with
- * the string, and an approximation that shows bold is far closer than one that shows `**`. Anything unclosed
- * stays literal, which is also what Discord does.
+ * The five inline marks a greeting uses, as spans a preview can render; anything unclosed stays literal, as in Discord.
  */
 export function markSpans(text: string): MarkSpan[] {
 	const spans: MarkSpan[] = [];

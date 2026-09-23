@@ -186,7 +186,7 @@ describe("uptimeDays", () => {
 		expect(days.at(-1)?.uptime).toBeCloseTo(1, 5);
 	});
 
-	/** The gap is the whole point: a bot that was off could not say so at the time. */
+	/** A bot that is off cannot report it, so the gap is the evidence. */
 	it("counts a stretch with no heartbeats as time the bot was off", () => {
 		const start = NOON - 12 * 3_600_000;
 		const gapFrom = NOON - 6 * 3_600_000;

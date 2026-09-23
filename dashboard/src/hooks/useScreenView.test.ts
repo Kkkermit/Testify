@@ -1,9 +1,6 @@
 import { routePattern } from "@/hooks/useScreenView";
 
-/**
- * The one thing that keeps a screen count from becoming a browsing history: what is sent is the pattern, so no
- * server id and no member id ever reaches the database.
- */
+/** Only the route pattern is sent, so no server or member id reaches the database. */
 describe("routePattern", () => {
 	it("leaves a path with no parameters alone", () => {
 		expect(routePattern("/commands", {})).toBe("/commands");

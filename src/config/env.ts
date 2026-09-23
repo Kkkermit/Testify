@@ -61,10 +61,7 @@ const schema = z
 
 export type Env = z.infer<typeof schema>;
 
-/**
- * `KEY=` in a .env file is an empty string, not an absent one, and the optional settings are meant to be left blank
- * — so a blank line has to mean "not set" rather than "set to nothing".
- */
+/** `KEY=` is an empty string, so a blank value has to mean not set. */
 function withoutBlanks(source: NodeJS.ProcessEnv): Record<string, string> {
 	return Object.fromEntries(
 		Object.entries(source).filter((entry): entry is [string, string] => (entry[1] ?? "").trim() !== ""),

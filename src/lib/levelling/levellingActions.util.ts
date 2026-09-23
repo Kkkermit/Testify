@@ -4,9 +4,7 @@ import { type Logger } from "@core/logger";
 import { type RewardOutcome, type LevelConfig } from "@lib/levelling/levelling.types";
 import { rewardChangeFor } from "@lib/levelling/levelling.util";
 
-/**
- * Handing out level reward roles, shared by the message handler and by the admin commands that set a level directly.
- */
+/** Handing out level reward roles, for the message handler and the commands that set a level. */
 
 const EMPTY: RewardOutcome = { added: [], removed: [], skipped: [] };
 

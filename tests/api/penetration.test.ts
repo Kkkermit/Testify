@@ -8,14 +8,7 @@ import { type TestifyClient } from "@core/client";
 import { commandRunRequest, plainLine, plainText, returnTo as returnToSchema } from "@testify/shared";
 import { createMockClient } from "@tests/helpers/mocks";
 
-/**
- * The attacks, rather than the happy paths.
- *
- * Every case here is something an authenticated manager could actually send — a hand-written `fetch`, a
- * modified request in the browser's dev tools, a link from another site. The client-side half of the dashboard
- * is not a control at all: hiding a button changes nothing about what the server will accept, so each of these
- * goes at the server.
- */
+/** Attacks an authenticated manager could send by hand, each aimed at the server rather than the page. */
 
 const GUILD = "900000000000000001";
 const OTHER_GUILD = "900000000000000002";

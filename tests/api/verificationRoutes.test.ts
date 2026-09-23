@@ -112,10 +112,7 @@ describe("PATCH /verification", () => {
 		expect(saved).not.toHaveBeenCalled();
 	});
 
-	/**
-	 * The panel is a message in a public channel, so it is posted only when asked for. Choosing a channel must
-	 * not drop one into it before the wording has been looked at.
-	 */
+	/** Choosing a channel does not post the panel; publishing does. */
 	it("does not post the panel just because a channel was chosen", async () => {
 		configured();
 

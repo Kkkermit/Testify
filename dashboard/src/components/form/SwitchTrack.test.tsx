@@ -8,11 +8,7 @@ function knobOf(container: HTMLElement): Element {
 	return knob;
 }
 
-/**
- * The knob used to be `bg-foreground`, which is white on near-black and near-black on paper — so in the light
- * theme it read as a hole punched in the filled track rather than as a handle sitting on it. Each half is a
- * colour measured against what it actually sits on.
- */
+/** A knob in `foreground` reads as a hole on the light theme's filled track. */
 describe("SwitchTrack", () => {
 	it("wears white on the filled track when it is on", () => {
 		const { container } = render(<SwitchTrack on={true} />);

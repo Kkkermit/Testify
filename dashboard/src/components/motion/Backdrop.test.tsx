@@ -71,10 +71,7 @@ describe("Backdrop", () => {
 	});
 });
 
-/**
- * The palette is chosen on the appearance page while this is on screen, so a field holding the colour it
- * started with is a backdrop that disagrees with every other surface until the next reload.
- */
+/** The backdrop has to follow a palette changed while it is on screen. */
 describe("Backdrop following the palette", () => {
 	const field = { setRunning: jest.fn(), refresh: jest.fn(), dispose: jest.fn() };
 

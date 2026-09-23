@@ -109,8 +109,7 @@ export function entriesFor(state: ShopState, balances: Balances): Entry[] {
 	switch (state.section) {
 		case "houses":
 			return HOUSES.map((house) => {
-				// The one you own turns into a Sell button rather than a dead
-				// that took no confirmation.
+				// The one you own becomes a Sell button.
 				const isMine = balances.ownsHouse && balances.houseId === house.id;
 
 				return {
@@ -197,8 +196,7 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 
 	if (note !== undefined) parts.push(text(`✅ ${note}`), divider());
 
-	// One row per entry, with its buy button beside it rather than in a row
-	// underneath — so nobody has to count buttons to match them to items.
+	// Each entry's Buy button sits beside it.
 	for (const entry of shown) {
 		const owned = entry.owned === true;
 		const note = owned
@@ -232,9 +230,7 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 	if (pages > 1) {
 		parts.push(
 			text(`-# Page ${page + 1} of ${pages}`),
-			// "page" rather than "nav" so Previous on page 1 cannot collide with the
-			// current section's own tab, which also encodes page 0. Discord rejects the
-			// whole message when two custom IDs match, disabled or not.
+			// `page` rather than `nav`, so Previous on page 1 cannot share a custom ID with the section's own tab.
 			row(
 				button({
 					id: encodeShopState("page", { ...state, page: page - 1 }, ownerId),

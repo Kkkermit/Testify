@@ -147,10 +147,7 @@ describe("endedEarly", () => {
 describe("decideOnIdle", () => {
 	const base = { state: queueOf(["a", "b"], 0), expectedMs: 180_000, attempts: 0 };
 
-	/**
-	 * The bug this whole function exists for: a stalled stream and a finished track arrive as the same event,
-	 * and advancing on both is what makes a queue skip three songs on a bad connection.
-	 */
+	/** A track that came apart is retried rather than skipped. */
 	it("retries a track that came apart rather than moving on", () => {
 		expect(decideOnIdle({ ...base, playedMs: 30_000 })).toEqual({ action: "retry", attempt: 1 });
 	});

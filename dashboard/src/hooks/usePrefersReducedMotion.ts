@@ -2,12 +2,7 @@ import { useEffect, useState } from "react";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 
-/**
- * Reads the preference without assuming `matchMedia` exists, which jsdom and older embedded browsers lack.
- *
- * The attribute is checked first and the media query second, in the same order the stylesheet resolves them,
- * so JavaScript-driven motion and CSS motion can never end up in different states.
- */
+/** Checks the attribute before the media query, as the stylesheet does, and survives a missing `matchMedia`. */
 export function prefersReducedMotion(): boolean {
 	if (typeof document !== "undefined") {
 		const chosen = document.documentElement.getAttribute("data-motion");
@@ -33,8 +28,7 @@ export function usePrefersReducedMotion(): boolean {
 		const media = typeof window.matchMedia === "function" ? window.matchMedia(QUERY) : null;
 		media?.addEventListener("change", onChange);
 
-		// The choice is watched on the element itself rather than through a store, so a reader changing it on
-		// the appearance page reaches the backdrop without either side holding its own copy of the answer.
+		// Watched on the element, so a change on the appearance page reaches the backdrop.
 		const observer = new MutationObserver(onChange);
 		observer.observe(document.documentElement, { attributeFilter: ["data-motion"] });
 

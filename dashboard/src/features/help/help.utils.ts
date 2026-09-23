@@ -9,12 +9,7 @@ export interface HelpArea {
 	icon: LucideIcon;
 }
 
-/**
- * The tour reads the sidebar's own registry, so a screen added there is explained here with no second edit.
- *
- * `navigationFor` builds guild-scoped paths, and the tour has no server in scope — the rows describe rather
- * than link, and the id below is never read.
- */
+/** The tour reads the sidebar's registry; it has no server in scope, so this id is never read. */
 const UNUSED_GUILD = { id: "0", name: "" };
 
 export function helpAreas(isOwner: boolean): HelpArea[] {

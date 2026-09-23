@@ -51,10 +51,7 @@ describe("replyTemporarily", () => {
 		expect(sent.embeds[0]?.toJSON().footer?.text).toBe(cleanupFooter());
 	});
 
-	/**
-	 * Scheduled through the client's registry rather than a bare `setTimeout`, so a shutdown cancels it instead of
-	 * holding the process open.
-	 */
+	/** The delete is scheduled on the client's timers, so a shutdown cancels it. */
 	it("schedules the delete on the client's timers", async () => {
 		const { client, message, after } = harness();
 		await replyTemporarily(client, message, errorEmbed("Nope."));

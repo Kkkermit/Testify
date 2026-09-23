@@ -3,11 +3,8 @@ import { deleteCookie, getCookie, setCookie } from "hono/cookie";
 import { type Env } from "@config/env";
 
 /**
- * Every cookie the dashboard sets goes through here, so none can be written without its flags.
- *
- * `Secure` has to be conditional or nothing works on `http://localhost`, which is the single most common
- * self-hosting trip-up. `SameSite=Lax` rather than `Strict`: `Strict` drops the cookie on the redirect back
- * from Discord, and the sign-in silently fails.
+ * Every cookie is set here, so none is written without its flags. `Secure` only outside development, or
+ * `http://localhost` breaks, and `Lax` because `Strict` drops the cookie on the redirect back from Discord.
  */
 
 export const SESSION_COOKIE = "dash_session";

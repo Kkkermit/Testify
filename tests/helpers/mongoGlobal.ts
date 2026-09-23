@@ -1,14 +1,8 @@
 import { MongoMemoryServer } from "mongodb-memory-server";
 
 /**
- * One in-memory MongoDB for the whole run, started before any suite is defined.
- *
- * It has to happen here rather than in a `beforeAll`: whether the database exists decides between `describe`
- * and `describe.skip`, and Jest needs that answer synchronously, while the suite is being built. A suite that
- * only discovers it at run time can do nothing but return early from each test — which reports as passing.
- *
- * The handle lives on `globalThis` because Jest loads setup and teardown through separate module registries,
- * so a module-level variable would be a different one by the time teardown looks for it.
+ * One in-memory MongoDB for the run, started before suites are built so `describeWithMongo` can decide synchronously;
+ * the handle is on `globalThis` because teardown loads in a separate registry.
  */
 const HANDLE = Symbol.for("testify.test.mongo");
 

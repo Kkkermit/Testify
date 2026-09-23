@@ -20,12 +20,7 @@ export interface Choice {
 	value: string;
 }
 
-/**
- * One track as an autocomplete row.
- *
- * The value is the address, so picking a result skips searching for it again — and a track whose address will
- * not fit is dropped, because a truncated URL is a broken one.
- */
+/** One track as an autocomplete row whose value is its address; a track whose address will not fit is dropped. */
 export function choiceFor(track: Track): Choice | null {
 	if (track.url.length > CHOICE_MAX) return null;
 
@@ -57,12 +52,7 @@ interface Entry {
 	at: number;
 }
 
-/**
- * A bounded, expiring cache keyed on the typed text.
- *
- * Autocomplete fires on every keystroke, so without this a ten-letter title is ten searches. Insertion order
- * is the eviction order, which is what `Map` already gives.
- */
+/** A bounded, expiring cache keyed on the typed text; `Map` insertion order is the eviction order. */
 export class SearchCache {
 	readonly #entries = new Map<string, Entry>();
 	readonly #ttlMs: number;
@@ -125,11 +115,8 @@ export const RESPONSE_MARGIN_MS = 800;
 export const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
 
 /**
- * How long the interaction has been open.
- *
- * The snowflake carries Discord's clock and the receipt carries this host's, so a machine set wrong reads its
- * interactions as either already dead or brand new. The larger of the two is the safe answer, and the
- * snowflake is dropped altogether when the gap between them is bigger than the window it is measuring.
+ * How long the interaction has been open: the larger of Discord's clock and this host's, ignoring the snowflake when
+ * the two disagree by more than the window.
  */
 export function interactionAge(createdTimestamp: number, receivedAt: number, now = Date.now()): number {
 	const sinceReceipt = Math.max(0, now - receivedAt);
@@ -163,11 +150,7 @@ export async function within<T>(work: Promise<T>, ms: number): Promise<T | null>
 }
 
 /**
- * Autocomplete answers that land inside Discord's window whatever the search does.
- *
- * A search spawns yt-dlp and can take longer than the three seconds the interaction stays open, and replying
- * after that fails with "Unknown interaction" — so a slow one is left running to fill the cache for the next
- * keystroke and this one is answered with the literal row.
+ * Answers autocomplete inside Discord's window; a slow search keeps running to fill the cache for the next keystroke.
  */
 export class Suggester {
 	readonly #cache: SearchCache;

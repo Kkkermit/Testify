@@ -1,11 +1,7 @@
 import { REST, Routes } from "discord.js";
 import { loadEnv } from "@config/env";
 
-/**
- * Removes every slash command this application has registered, both globally and
- * in the development server. Use it when Discord is still showing commands that
- * no longer exist — start the bot afterwards and it republishes the current set.
- */
+/** Removes every slash command this application registered, globally and in the development server. */
 async function main(): Promise<void> {
 	const env = loadEnv();
 	const rest = new REST({ version: "10" }).setToken(env.DISCORD_TOKEN);

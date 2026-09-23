@@ -23,8 +23,7 @@ const auditSchema = new Schema<DashboardAudit>({
 	at: { type: Date, required: true, default: Date.now },
 });
 
-// `_id` is in the key because every read sorts by it to break the tie on `at`; without it the tiebreak costs a
-// blocking in-memory sort.
+// `_id` is in the key because every read sorts by it to break ties.
 auditSchema.index({ guildId: 1, at: -1, _id: -1 });
 // Ninety days, so a busy bot cannot grow this collection without bound.
 auditSchema.index({ at: 1 }, { expireAfterSeconds: 90 * 24 * 60 * 60 });

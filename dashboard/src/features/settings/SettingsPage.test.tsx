@@ -87,8 +87,7 @@ describe("the settings page", () => {
 	});
 
 	/**
-	 * Seven flat cards was more than one glance takes, so they are grouped by the question each answers. jsdom
-	 * renders a closed `<details>` in full, so this pins the state rather than the visibility.
+	 * The sections are grouped, and each folds away alone; jsdom renders a closed `<details>`, so this pins the state.
 	 */
 	it("groups the sections, and folds one away without touching the rest", async () => {
 		const user = userEvent.setup();
@@ -202,10 +201,7 @@ describe("the settings page", () => {
 		expect(screen.queryByRole("option", { name: "general" })).toBeNull();
 	});
 
-	/**
-	 * This asserted only that the switch was still on the page, which passes with no error handling at all — and
-	 * it did, for as long as a refused section write said nothing a reader could see.
-	 */
+	/** A refused section write is explained beside the control that caused it. */
 	it("explains a refusal from the API, beside the control that caused it", async () => {
 		const user = userEvent.setup();
 		server.use(

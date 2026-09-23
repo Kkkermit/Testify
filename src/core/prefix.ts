@@ -68,10 +68,7 @@ class PrefixOptions implements CommandInputOptions {
 		this.args = args;
 	}
 
-	/**
-	 * Parsing is deferred to the first question asked, so a message that names no subcommand fails inside the command's
-	 * error boundary and the user gets a proper answer, rather than throwing while the object is being built.
-	 */
+	/** Parsed on first use, so a missing subcommand fails inside the command's error boundary. */
 	private get state(): { values: Map<string, string>; subcommand: string | null } {
 		if (this.parsed !== null) return this.parsed;
 
@@ -259,7 +256,7 @@ export class PrefixInteraction implements CommandInput {
 		this.commandName = command.name;
 	}
 
-	/** There is no "thinking" state on a message, so we show typing instead. */
+	/** A message has no thinking state, so the channel shows typing instead. */
 	async deferReply(): Promise<void> {
 		this.deferred = true;
 		if (this.channel !== null && "sendTyping" in this.channel) await this.channel.sendTyping();
@@ -283,10 +280,7 @@ export class PrefixInteraction implements CommandInput {
 		return Promise.resolve(this.sent);
 	}
 
-	/**
-	 * The first answer replies to the user's message; every one after it edits that reply, which is how a slash command
-	 * behaves.
-	 */
+	/** The first answer replies to the message and later ones edit that reply, as a slash command does. */
 	private async send(options: InteractionReplyOptions | InteractionEditReplyOptions | string): Promise<Message> {
 		const payload = withoutInteractionFlags(options);
 
@@ -303,10 +297,7 @@ export class PrefixInteraction implements CommandInput {
 	}
 }
 
-/**
- * `flags: MessageFlags.Ephemeral` only means something to an interaction, and Discord rejects it on a normal message
- * — so a reply that would have been private is simply sent in the channel instead.
- */
+/** Discord rejects the ephemeral flag on a message, so a private reply is sent in the channel. */
 function withoutInteractionFlags(options: InteractionReplyOptions | InteractionEditReplyOptions | string): never {
 	if (typeof options === "string") return { content: options } as never;
 

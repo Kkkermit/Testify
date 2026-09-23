@@ -39,11 +39,7 @@ async function configOf(guild: Guild): Promise<VerificationConfigResponse> {
 
 verification.get("/", async (context) => context.json(await configOf(guildOf(context))));
 
-/**
- * The panel is not re-posted by a save. Editing the wording of a panel already in a channel does update it —
- * the message is out there saying the old thing — but a first post is always the explicit `publish` action, so
- * choosing a channel cannot drop a message into it before the wording has been looked at.
- */
+/** A save edits a panel already posted, but a first post is always the explicit publish. */
 verification.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, verificationPatchSchema);

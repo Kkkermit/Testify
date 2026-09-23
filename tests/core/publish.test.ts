@@ -69,10 +69,7 @@ describe("publishCommands", () => {
 		await expect(publishCommands(clientWith(MAX_COMMANDS))).resolves.toBe(MAX_COMMANDS);
 	});
 
-	/**
-	 * Discord rejects the entire batch when it is over the limit, so failing here with an explanation beats a 400 that
-	 * names no command.
-	 */
+	/** Over the limit, publishing refuses with an explanation rather than Discord's unnamed 400. */
 	it("refuses to publish over the limit, and says how to fix it", async () => {
 		const failing = publishCommands(clientWith(MAX_COMMANDS + 1));
 

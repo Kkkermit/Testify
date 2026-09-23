@@ -31,10 +31,7 @@ describe("isHexColour", () => {
 });
 
 describe("pickScheme", () => {
-	/**
-	 * `getComputedStyle` never resolves a custom property, so the backdrop receives the token's source text.
-	 * Before this existed a `light-dark()` token failed the hex check and every theme got the same fallback.
-	 */
+	/** A `light-dark()` token arrives as source text, so the theme's half has to be picked. */
 	it("takes the half the theme is painted with", () => {
 		expect(pickScheme("light-dark(#5b21b6, #a78bfa)", true)).toBe("#a78bfa");
 		expect(pickScheme("light-dark(#5b21b6, #a78bfa)", false)).toBe("#5b21b6");

@@ -2,10 +2,7 @@ import { Check } from "lucide-react";
 import { type Accent } from "@/hooks/useAccent";
 import { cn } from "@/lib/cn";
 
-/**
- * `data-accent` on the tile makes every token inside it resolve to that accent, so each swatch paints itself
- * from `index.css` — including its own focus ring — and nothing here names a colour.
- */
+/** `data-accent` makes every token inside resolve to that accent, so nothing here names a colour. */
 export function AccentSwatch({
 	accent,
 	label,

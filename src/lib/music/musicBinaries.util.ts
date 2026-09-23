@@ -13,12 +13,7 @@ export type VersionProbe = (path: string) => string | null;
 /** YouTube changes often enough that an extractor older than this is the likeliest cause of a 403. */
 export const STALE_AFTER_DAYS = 30;
 
-/**
- * The flag each binary answers to.
- *
- * They disagree, and getting it wrong looks exactly like the binary being absent: `ffmpeg --version` exits 8
- * and `yt-dlp -version` exits 2, so one hardcoded flag silently hides one of the two on every machine.
- */
+/** The flags differ: `ffmpeg --version` exits 8 and `yt-dlp -version` exits 2. */
 const VERSION_FLAG: Record<string, string> = { "yt-dlp": "--version", ffmpeg: "-version" };
 
 /** Runs the candidate rather than stat-ing it, because a file that exists and will not execute is worse. */
@@ -28,12 +23,7 @@ export const runs: Probe = (path, args) => {
 	return attempt.error === undefined && attempt.status === 0;
 };
 
-/**
- * Where the optional npm packages put their binaries.
- *
- * Both are `optionalDependencies`, so a machine that could not download one still installs everything else —
- * and this finds nothing rather than throwing.
- */
+/** Where the optional npm packages put their binaries; nothing is found when one could not install. */
 function packaged(name: string, executable: string, root: string): string[] {
 	const inModules = (...segments: string[]): string => join(root, "node_modules", ...segments);
 
@@ -43,12 +33,7 @@ function packaged(name: string, executable: string, root: string): string[] {
 	return [];
 }
 
-/**
- * Every place a binary might be, in the order a self-hoster would expect them to win.
- *
- * For yt-dlp this is only the tie-break — `locateYtDlp` runs the newest — so PATH beating the bundled copy
- * matters when the two are the same release.
- */
+/** Every place a binary might be, in precedence order; for yt-dlp only the tie-break, since the newest runs. */
 export function candidatesFor(
 	name: string,
 	configured: string | undefined,
@@ -133,13 +118,7 @@ export function pickNewest(found: Found[]): Found | null {
 	return best;
 }
 
-/**
- * The yt-dlp to run.
- *
- * A configured path is an explicit choice and wins outright. Otherwise the freshest copy wins wherever it lives,
- * because a stale extractor is the commonest way YouTube breaks — and `npm run music:setup` writes to `bin/`,
- * which under a plain first-found order would never run while the npm package's copy exists.
- */
+/** A configured path wins outright; otherwise the newest copy that runs, wherever it lives. */
 export function locateYtDlp(
 	configured: string | undefined,
 	version: VersionProbe = readVersion,

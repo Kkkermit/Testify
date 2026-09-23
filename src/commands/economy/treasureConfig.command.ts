@@ -107,9 +107,7 @@ export default defineCommand({
 		},
 	],
 
-	// The panel is the discoverable path: every setting visible at once with its
-	// current value, instead of eleven options nobody finds. `configure` stays for
-	// anyone who would rather type it in one go.
+	// The panel shows every setting with its current value; `configure` stays for typing it in one go.
 	async run(interaction) {
 		const guild = inGuild(interaction);
 		const config = await getTreasureConfig(guild.id);

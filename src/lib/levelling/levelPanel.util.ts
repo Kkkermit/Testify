@@ -7,9 +7,7 @@ import { LEVEL_TABS, LEVEL_PANEL_ID } from "@lib/levelling/levelling.constants";
 import { type LevelPanelState, type LevelTab } from "@lib/levelling/levelling.types";
 import { LEVEL_LIMITS } from "@lib/levelling/levelling.util";
 
-/**
- * The levelling configuration, as four tabs of controls rather than a command with eleven options nobody discovers.
- */
+/** The levelling configuration as four tabs of controls. */
 
 const TAB_LABELS: Record<LevelTab, string> = {
 	overview: "Overview",
@@ -22,10 +20,7 @@ export function isLevelTab(value: string): value is LevelTab {
 	return (LEVEL_TABS as readonly string[]).includes(value);
 }
 
-/**
- * The tab is always the first argument, so every control knows which screen to re-render without anything being
- * remembered between presses.
- */
+/** The tab is always the first argument, so every control knows which screen to re-render. */
 function control(action: string, state: LevelPanelState, ownerId: string, ...args: (string | number)[]): string {
 	return customId(LEVEL_PANEL_ID, action, state.tab, ...args, ownerId);
 }

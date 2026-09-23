@@ -19,12 +19,7 @@ import {
 	type CommandCatalogue,
 } from "@testify/shared";
 
-/**
- * Running an owner command from the browser, over an allowlist.
- *
- * The list of what may be run lives in `commandRunner.util.ts` beside the adapter, so adding a name is one edit
- * and is visible in a diff. Everything here is behind `requireOwner`, which answers 404.
- */
+/** Runs an owner command over the allowlist in `commandRunner.util.ts`; behind `requireOwner`. */
 
 export const commandRunner = new Hono<ApiBindings>();
 
@@ -82,10 +77,7 @@ commandRunner.post("/:name", async (context) => {
 	return context.json(body);
 });
 
-/**
- * A command with subcommands usually has no top-level `run`, and one without them has no subcommand to pick —
- * so a request naming the wrong one gets a sentence rather than a crash inside the command body.
- */
+/** Refuses a request naming the wrong runner with a sentence rather than crashing in the command body. */
 function pickRunner(command: Command, subcommand: string | null): Runner {
 	if (subcommand !== null) {
 		const found = (command.subcommands ?? []).find((candidate) => candidate.name === subcommand);

@@ -4,8 +4,7 @@ import importX from "eslint-plugin-import-x";
 import ts from "typescript-eslint";
 
 export default ts.config(
-	// Globbed at any depth, because the workspaces build into their own dist/ and coverage/.
-	// `.claude/skills` is vendored third-party content — linting somebody else's scripts fails on their style, not ours.
+	// Build output at any depth, and `.claude/skills`, which is vendored.
 	{
 		ignores: [
 			"**/dist/**",
@@ -55,9 +54,7 @@ export default ts.config(
 			"@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
 			"@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }],
 
-			// discord.js entities define their own `toString()`, so interpolating a
-			// User or Role is intentional. `no-base-to-string` still catches the real
-			// bug this guards against: interpolating a plain object as "[object Object]".
+			// discord.js entities define `toString()`; `no-base-to-string` still catches a plain object.
 			"@typescript-eslint/restrict-template-expressions": "off",
 			"@typescript-eslint/no-base-to-string": "error",
 
@@ -68,8 +65,7 @@ export default ts.config(
 					selector: "NewExpression[callee.name='EmbedBuilder']",
 					message: "Use embed() from src/lib/discord/embeds.util.ts instead of building an embed by hand.",
 				},
-				// The dashboard renders text a guild manager typed. React escapes it; these four undo that,
-				// and the CSP is the last line of defence rather than the only one.
+				// The dashboard renders text a manager typed, and these four undo React's escaping.
 				{
 					selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
 					message: "React escapes text for a reason. Render it as a child instead.",
@@ -100,8 +96,7 @@ export default ts.config(
 		rules: { "no-restricted-syntax": "off" },
 	},
 	{
-		// A barrel loads every module behind it, so inside the layers the barrels are built from a barrel import is
-		// how a harmless dependency becomes a cycle. These name the module itself.
+		// Inside the layers the barrels are built from, a barrel import invites a cycle, so these import the module.
 		files: ["src/lib/**/*.ts", "src/core/**/*.ts", "src/database/**/*.ts"],
 		ignores: ["src/lib/index.ts", "src/lib/*/index.ts"],
 		rules: {
@@ -119,8 +114,7 @@ export default ts.config(
 		},
 	},
 	{
-		// Everything that uses the helpers goes through a domain's barrel, so a module can move inside its folder
-		// without touching a single command.
+		// Everything else imports a domain's barrel, so a module can move inside its folder.
 		files: ["src/commands/**/*.ts", "src/buttons/**/*.ts", "src/events/**/*.ts", "src/api/**/*.ts", "src/jobs/**/*.ts"],
 		rules: {
 			"no-restricted-imports": [

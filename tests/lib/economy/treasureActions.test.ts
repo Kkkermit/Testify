@@ -67,10 +67,7 @@ describe("applyTreasure", () => {
 		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ minAmount: 75, maxAmount: 900 }));
 	});
 
-	/**
-	 * A patch can carry one half of a pair, so the refusal has to run against the merged record — checking the
-	 * patch alone would store a floor above its own ceiling.
-	 */
+	/** A half-pair is checked against the merged record, so a floor cannot land above its ceiling. */
 	it("refuses a half-pair that makes the merged range impossible", async () => {
 		configured();
 

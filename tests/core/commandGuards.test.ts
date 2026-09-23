@@ -48,7 +48,7 @@ describe("asMember", () => {
 		expect(() => asMember(interaction as unknown as CommandInput)).toThrow(UserFacingError);
 	});
 
-	/** An API partial has no `guild`, so it is not a member we can act on. */
+	/** An API partial has no `guild`, so it is not a member that can be acted on. */
 	it("refuses a partial member object", () => {
 		const interaction = createMockInteraction({ overrides: { member: { id: "1" } } as never });
 		expect(() => asMember(interaction as unknown as CommandInput)).toThrow(UserFacingError);

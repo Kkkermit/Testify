@@ -42,10 +42,7 @@ describe("choiceFor", () => {
 		expect(choice?.name.length).toBeLessThanOrEqual(CHOICE_MAX);
 	});
 
-	/**
-	 * The value is an address, and a truncated address is a broken one — so an over-long URL is dropped
-	 * rather than offered as something that cannot be played.
-	 */
+	/** A track whose address will not fit is dropped rather than offered truncated. */
 	it("drops a track whose address will not fit", () => {
 		expect(choiceFor(track({ url: `https://example.com/${"x".repeat(CHOICE_MAX)}` }))).toBeNull();
 	});
@@ -163,10 +160,7 @@ describe("within", () => {
 describe("Suggester", () => {
 	const choice = (name: string): Choice => ({ name, value: `https://youtu.be/${name}` });
 
-	/**
-	 * The bug this exists for: Discord closes an autocomplete interaction after three seconds, so a search that
-	 * runs longer threw DiscordAPIError 10062 on every keystroke.
-	 */
+	/** Autocomplete answers inside its budget even when the search never finishes. */
 	it("answers inside its budget even when the search never finishes", async () => {
 		const suggester = new Suggester(20);
 		const never = new Promise<Choice[]>(() => undefined);
@@ -249,10 +243,7 @@ describe("the interaction's own clock", () => {
 		expect(interactionAge(CREATED, CREATED + 200, CREATED + 900)).toBe(900);
 	});
 
-	/**
-	 * The bug this pins: a host whose clock is behind Discord's reads every interaction as brand new and keeps
-	 * searching past the window, which is `DiscordAPIError[10062]` on every keystroke.
-	 */
+	/** A host clock behind Discord's falls back to the receipt time, so the window is not overrun. */
 	it("falls back to its own receipt when the host clock is wrong", () => {
 		const skewed = CREATED + 60_000;
 

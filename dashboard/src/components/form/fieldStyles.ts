@@ -8,13 +8,7 @@ export const FIELD_GROUP = "flex min-w-0 flex-col gap-2";
 export const FIELD =
 	"bg-card border-border focus-visible:border-ring w-full rounded-field border px-3 py-2 text-sm outline-none transition-colors duration-150";
 
-/**
- * A `<select>`, complete. It carries `FIELD` itself rather than expecting a caller to combine the two — every
- * select on the command runner was styled with the chevron room and nothing else, so four of them rendered
- * with no border, no background and no padding.
- *
- * The `pr-9` is a utility because a base-layer `padding-right` loses to one.
- */
+/** A complete `<select>`; the chevron room is a utility because base-layer padding loses to one. */
 export const SELECT = `${FIELD} pr-9`;
 
 /** The list boxes both pickers scroll; capped so a server with 200 roles cannot push the page off-screen. */

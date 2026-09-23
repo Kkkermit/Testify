@@ -1,18 +1,11 @@
 import { type Locale } from "@/i18n";
 
-/**
- * The flag of the place a language is named after, drawn inline.
- *
- * Emoji flags would be one character, and Windows renders none of them — a browser there shows the two letters
- * instead, which is not a flag. These are plain rectangles and paths, so every platform draws the same thing
- * and nothing is fetched.
- */
+/** Flags drawn inline, because Windows renders no emoji flags. */
 
 const RATIO = { width: 21, height: 15 } as const;
 
 const FLAGS: Record<Locale, React.JSX.Element> = {
-	// At 21px the saltire's pinwheel offset is under a pixel, so the diagonals are drawn centred and no
-	// clip path is needed — which also keeps the icon free of an `id` that could collide on the page.
+	// At 21px the saltire's offset is under a pixel, so the diagonals are centred and no clip path is needed.
 	en: (
 		<>
 			<rect width="21" height="15" fill="#012169" />

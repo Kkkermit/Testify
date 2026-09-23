@@ -35,10 +35,7 @@ describe("trackFromInfo", () => {
 		});
 	});
 
-	/**
-	 * A live stream has no end, and reporting one would make the player treat an ended broadcast as a track
-	 * that broke and retry it for ever.
-	 */
+	/** A live stream gets no duration, so an ended broadcast is not retried as broken. */
 	it("gives a live stream no duration even when one is reported", () => {
 		expect(trackFromInfo({ webpage_url: "u", duration: 60, is_live: true }, USER, "youtube")).toMatchObject({
 			durationMs: null,
@@ -113,10 +110,7 @@ describe("argumentsFor", () => {
 		expect(argumentsFor({ kind: "search", terms: "lofi", source: "soundcloud" }, 3)).toEqual(["scsearch3:lofi"]);
 	});
 
-	/**
-	 * The terms are one argv entry, never interpolated into a shell string, so a title carrying a quote or a
-	 * semicolon is a search rather than a command.
-	 */
+	/** The terms are one argv entry, so a quote or a semicolon stays a search. */
 	it("keeps an awkward title in a single argument", () => {
 		const args = argumentsFor({ kind: "search", terms: '"; rm -rf /', source: "youtube" }, 1);
 
@@ -144,12 +138,7 @@ describe("parseJsonLines", () => {
 	});
 });
 
-/**
- * Reads a stream against a deadline.
- *
- * A pipeline that is wired up wrongly delivers nothing rather than erroring, and awaiting that forever turns
- * a failing test into a hanging CI job.
- */
+/** Reads a stream against a deadline, so a miswired pipeline fails rather than hanging CI. */
 async function readAll(stream: NodeJS.ReadableStream, timeoutMs = 3_000): Promise<string> {
 	const chunks: Buffer[] = [];
 
@@ -209,14 +198,10 @@ describe("openStream", () => {
 		}
 	});
 
-	/**
-	 * A stream abandoned mid-track must take its processes with it, or a busy guild leaves one downloader
-	 * per skipped song running until the bot restarts.
-	 */
+	/** Closing a stream stops the processes it started. */
 	it("closing it stops the process it started", async () => {
 		const slow = join(directory, "slow-yt-dlp");
-		// Writes a byte, then holds the pipe open from a forked child. Both halves matter: the byte proves the
-		// process is really running before it is closed, and the fork is what survives a signal to the parent.
+		// The byte proves the process runs; the fork is what survives a signal to the parent.
 		writeFileSync(slow, "#!/bin/sh\nprintf 'X'\nsleep 30 &\nwait\n", { mode: 0o755 });
 
 		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: slow, ffmpeg: null });
@@ -226,16 +211,11 @@ describe("openStream", () => {
 
 		opened.close();
 
-		// Waiting on the event rather than a fixed delay: a sleep long enough to be safe on a slow runner is a
-		// sleep long enough to slow every run.
+		// Wait on the event, not a fixed delay.
 		await expect(Promise.race([closed, deadline(5_000)])).resolves.toBeUndefined();
 	});
 
-	/**
-	 * The bug this pins: Discord consumes at real time, so with only a 64 KB pipe to write into the downloader
-	 * spends the whole track blocked — and a downloader that has stopped reading its own socket gets the
-	 * connection dropped, which arrives as `ERR_STREAM_PREMATURE_CLOSE` a few seconds in.
-	 */
+	/** The downloader finishes into the buffer without waiting for the player. */
 	it("lets the downloader finish without waiting for the player to catch up", async () => {
 		const marker = join(directory, "finished");
 		const bulky = join(directory, "bulky-yt-dlp");
@@ -246,8 +226,7 @@ describe("openStream", () => {
 		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: bulky, ffmpeg: null });
 
 		try {
-			// Deliberately never reading: a megabyte is far more than the pipe holds, so only a buffer downstream
-			// of it lets the process get to its last line.
+			// Never read: only a buffer downstream lets the process reach its last line.
 			await waitUntil(() => existsSync(marker), 5_000);
 		} finally {
 			opened.close();
@@ -290,7 +269,7 @@ describe("openStream", () => {
 		}).not.toThrow();
 	});
 
-	/** Refusing by name beats playing silence, which is exactly how the original system failed. */
+	/** A track that needs a transcoder is refused by name when FFmpeg is missing. */
 	it("refuses a track needing a transcoder when FFmpeg is missing", () => {
 		expect(() =>
 			openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
@@ -490,10 +469,7 @@ describe("describeTrack's memory", () => {
 		return existsSync(counter) ? readFileSync(counter, "utf8").trim().split("\n").length : 0;
 	}
 
-	/**
-	 * A volume change, a Previous and every retry re-open the track; each used to cost an extraction on top of
-	 * the download, and request volume is part of what gets a host flagged by YouTube.
-	 */
+	/** A track just described is not described again when it re-opens. */
 	it("asks the downloader once for a track it has just described", async () => {
 		const binaries = { ytDlp: binary, ffmpeg: null };
 		const before = runs();

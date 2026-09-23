@@ -138,10 +138,7 @@ describe("switching commands off in a server", () => {
 		expect(await screen.findByRole("switch", { name: "/help" })).toBeDisabled();
 	});
 
-	/**
-	 * The switch rolls back on a refusal, which on its own is indistinguishable from the click not registering.
-	 * Saying why is the difference between a bug report and a reader who knows what to do next.
-	 */
+	/** A refused switch rolls back, so the page has to say why. */
 	it("says why a refused switch went back", async () => {
 		const user = userEvent.setup();
 		server.use(
@@ -204,10 +201,7 @@ describe("switching commands off everywhere", () => {
 	});
 });
 
-/**
- * The switch's own description is the only place its state is explained to a screen reader, and it rendered
- * the translation key — "commands.availableToAll" read out as those words.
- */
+/** A switch's description has to be translated text, not its key. */
 describe("what a switch tells a screen reader", () => {
 	it("describes itself in prose rather than in a key", async () => {
 		inGuild();

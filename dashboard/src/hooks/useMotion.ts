@@ -3,10 +3,7 @@ import { applyPreference, type Preference, storedPreference, useRootPreference }
 export const MOTIONS = ["system", "full", "reduced"] as const;
 export type Motion = (typeof MOTIONS)[number];
 
-/**
- * The choice wins in both directions: `reduced` stills the page on a machine whose system says nothing, and
- * `full` restores it for somebody who set the system preference for a different application.
- */
+/** The choice wins in both directions over the system preference. */
 export const MOTION: Preference<Motion> = {
 	attribute: "data-motion",
 	storageKey: "testify:motion",

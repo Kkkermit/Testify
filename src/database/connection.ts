@@ -90,7 +90,7 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 	mongoose.set("strictQuery", true);
 
 	mongoose.connection.on("disconnected", () => {
-		// Only worth saying once we have had a connection to lose.
+		// Only worth saying after a connection has been lost.
 		if (everConnected) options.logger.warn("Lost connection to MongoDB");
 	});
 	mongoose.connection.on("reconnected", () => {

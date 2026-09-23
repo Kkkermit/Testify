@@ -1,17 +1,6 @@
 import { createMockModel, type MockQuery } from "@tests/helpers/mocks";
 
-/**
- * Every paged read has to sort on a total order.
- *
- * `skip`/`limit` ask the database for a window of an ordered result, and MongoDB does not promise any particular
- * order for documents that tie on the sort key — so a leaderboard where two people hold the same amount, or an
- * audit log where two changes land in the same millisecond, can show one row on both pages and drop another.
- * Adding the unique `_id` last makes the order total, which is what makes the window well defined.
- *
- * This lives beside the repository tests rather than inside them because it has to hold without a database: the
- * repository suites skip themselves when no MongoDB is available, and a rule nothing checks on a normal run is
- * one that comes back.
- */
+/** Every paged read sorts on a total order, checked without a database so it holds on every run. */
 
 const auditModel = createMockModel();
 const levelModel = createMockModel();

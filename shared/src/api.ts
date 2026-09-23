@@ -14,10 +14,7 @@ export interface HealthResponse {
 	database: "connected" | "disconnected";
 }
 
-/**
- * The bot's own public profile, as anybody sees it in Discord. Unauthenticated: it lets the sign-in screen and
- * the sidebar carry the bot's identity, so a self-hoster's fork looks like their bot without editing any CSS.
- */
+/** The bot's public profile, unauthenticated so the sign-in screen can carry the bot's identity. */
 export interface BotIdentity {
 	id: string;
 	username: string;
@@ -43,19 +40,11 @@ export interface ManageableGuild {
 	iconUrl: string | null;
 	memberCount: number | null;
 	botPresent: boolean;
-	/**
-	 * Whether this person could add Testify. Discord requires Manage Server to invite a bot, so a server the
-	 * owner console lists but the viewer cannot manage is neither configurable nor invitable — a third state the
-	 * picker has to be able to say out loud rather than showing a button that would fail.
-	 */
+	/** Whether this person could add Testify, which needs Manage Server. */
 	canInvite: boolean;
 }
 
-/**
- * Everything Testify asks for on the invite, as one bitfield: view/send/embed/attach/history/react/emoji,
- * manage messages, roles, channels, nicknames and server, view audit log, and kick/ban/timeout/mute/deafen/move.
- * Asking for exactly what the features need beats asking for Administrator.
- */
+/** Everything Testify asks for on the invite, as one bitfield, rather than Administrator. */
 export const INVITE_PERMISSIONS = "1374821936374";
 
 export function inviteUrl(clientId: string, guildId?: string): string {
@@ -80,10 +69,7 @@ export interface MeResponse {
 	guilds: ManageableGuild[];
 }
 
-/**
- * Told to an unauthenticated caller so a half-configured install shows instructions rather than a 500. It names
- * which variables are missing and never what any of them are set to.
- */
+/** Told to an unauthenticated caller: which variables are missing, never their values. */
 export interface SetupStatus {
 	configured: boolean;
 	missing: string[];

@@ -71,10 +71,7 @@ describe("usePrefersReducedMotion", () => {
 	});
 });
 
-/**
- * The stylesheet reads `data-motion` first and the media query second. Anything animating in JavaScript has to
- * resolve them in the same order, or the backdrop keeps drifting behind a page that has been stilled.
- */
+/** JavaScript reads `data-motion` before the media query, in the stylesheet's own order. */
 describe("the choice on the appearance page", () => {
 	it("stills the page on a device that asked for nothing", () => {
 		mockMedia(false);

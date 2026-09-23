@@ -7,8 +7,8 @@ import { embed } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 
 /**
- * The draw is claimed by pushing `nextDrawTime` forward inside the same query that selects it, so a slow draw can no
- * longer overlap the next tick and pay out twice.
+ * The draw is claimed by pushing `nextDrawTime` forward in the query that selects it, so a slow draw cannot pay out
+ * twice.
  */
 export async function runLotteryDraws(client: TestifyClient): Promise<void> {
 	for (let processed = 0; processed < 10; processed += 1) {

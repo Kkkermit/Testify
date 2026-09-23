@@ -3,13 +3,9 @@ import { type LevelReward, type LevelSettings, type XpBoost } from "@database/mo
 import { type LevelConfig } from "@lib/levelling/levelling.types";
 import { LEVEL_LIMITS } from "@testify/shared";
 
-/**
- * The rules of the levelling system, with no database or Discord objects in sight, so every decision it makes is
- * unit-testable.
- */
+/** The levelling rules, with no database or Discord objects, so every decision is unit-testable. */
 
-// Declared in `@testify/shared` so the dashboard's forms validate against the same numbers, and re-exported
-// here because every caller in the bot already imports it from this module.
+// Declared in `@testify/shared` so the dashboard validates against the same numbers.
 export { LEVEL_LIMITS };
 
 /** What a guild gets before anyone configures anything. */
@@ -65,10 +61,7 @@ export function sortRewards(rewards: LevelReward[]): LevelReward[] {
 	return [...rewards].sort((a, b) => a.level - b.level);
 }
 
-/**
- * The best multiplier the member qualifies for, rather than the product of all of them: three stacked ×5 roles would
- * be ×125, which nobody configuring "×5 for boosters" is asking for.
- */
+/** The best multiplier the member qualifies for, not the product of them all. */
 export function multiplierFor(config: LevelConfig, roleIds: readonly string[]): number {
 	const held = config.boosts.filter((boost) => roleIds.includes(boost.roleId));
 	if (held.length === 0) return 1;
@@ -133,10 +126,7 @@ export function progressOf(xp: number, level: number): LevelProgress {
 	return { level, xp, progress, needed, fraction: progress / needed };
 }
 
-/**
- * Adding a boost role that is already boosting replaces its multiplier rather than adding a second entry, so the
- * list cannot end up with two answers for one role.
- */
+/** A role already boosting has its multiplier replaced rather than gaining a second entry. */
 export function withBoost(boosts: XpBoost[], roleId: string, multiplier: number): XpBoost[] {
 	const without = boosts.filter((boost) => boost.roleId !== roleId);
 	if (without.length >= LEVEL_LIMITS.maxBoosts) return boosts;

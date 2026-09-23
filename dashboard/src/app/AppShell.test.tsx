@@ -73,10 +73,7 @@ describe("the app shell", () => {
 		expect(screen.getByRole("button", { name: "Community" })).toHaveAttribute("aria-expanded", "false");
 	});
 
-	/**
-	 * The toggle controls a list that must still be findable: `aria-controls` pointing at nothing is a dead
-	 * reference for anyone navigating by relationship.
-	 */
+	/** `aria-controls` has to point at a list that exists. */
 	it("points each toggle at the list it opens", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });

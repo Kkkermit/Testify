@@ -7,9 +7,8 @@ export interface ApiIssue {
 }
 
 /**
- * A refusal with a status attached. The `code` is what the SPA branches on, so it must stay stable even when
- * the wording changes; the `message` is shown to a person and must never carry a stack, a path or an internal
- * identifier.
+ * A refusal with a status. `code` is what the SPA branches on and stays stable; `message` is shown to a person and
+ * never carries a stack or a path.
  */
 export class ApiProblem extends Error {
 	readonly status: ContentfulStatusCode;

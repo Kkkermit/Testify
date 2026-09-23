@@ -46,10 +46,7 @@ describe("the session cookie", () => {
 		expect(cookie).toContain("Secure");
 	});
 
-	/**
-	 * `Secure` on `http://localhost` means the browser silently drops it and the sign-in loops. That single
-	 * line is the most common self-hosting trip-up there is.
-	 */
+	/** `Secure` on `http://localhost` makes the browser drop the cookie and the sign-in loop. */
 	it("is not Secure in development, or nothing works on localhost", async () => {
 		const [cookie = ""] = await headersFrom((context) => {
 			setSessionCookie(context, DEVELOPMENT, "id", 60);

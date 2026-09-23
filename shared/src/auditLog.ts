@@ -1,11 +1,7 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/**
- * What audit logging can watch, and the one interpretation of how it is stored. Shared because the Discord
- * panel, the API and the browser form all have to agree on the `all` shorthand — a surface that expanded it
- * differently would quietly change which events a guild logs.
- */
+/** What audit logging can watch, and how the `all` shorthand is stored, shared by every surface. */
 
 export const AUDIT_EVENTS = [
 	"messageDelete",
@@ -72,10 +68,7 @@ export function resolveEnabled(enabled: string[]): AuditEvent[] {
 	return enabled.filter(isAuditEvent);
 }
 
-/**
- * Collapses a full selection back to `all`, so a guild that ticks everything keeps logging events added in a
- * later release rather than being frozen at today's list.
- */
+/** Collapses a full selection to `all`, so events added later are logged too. */
 export function collapseEnabled(events: AuditEvent[]): string[] {
 	return events.length === AUDIT_EVENTS.length ? ["all"] : events;
 }
@@ -89,10 +82,7 @@ export interface AuditLogConfigResponse {
 	all: boolean;
 }
 
-/**
- * The whole configuration in one request, because the panel it mirrors saves once: a channel and a set of
- * events are one decision, and half of it applied is not a state anyone wants.
- */
+/** The whole configuration in one request, because a channel and its events are one decision. */
 export const auditLogPutSchema = z.object({
 	enabled: z.boolean(),
 	channelId: snowflake.nullable(),

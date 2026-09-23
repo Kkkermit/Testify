@@ -48,10 +48,7 @@ describe("the bot profile endpoint", () => {
 		expect(((await response.json()) as { error: { code: string } }).error.code).toBe("bot_connecting");
 	});
 
-	/**
-	 * Nothing here may leak beyond the public profile — this endpoint takes no session, so anything extra is
-	 * readable by anyone who can reach the port.
-	 */
+	/** This endpoint takes no session, so nothing beyond the public profile may leak into it. */
 	it("returns the public profile and nothing else", async () => {
 		const body = (await (await apiFor(clientWith()).request("/api/bot")).json()) as Record<string, unknown>;
 

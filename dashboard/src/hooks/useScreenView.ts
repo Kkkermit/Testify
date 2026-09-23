@@ -2,12 +2,7 @@ import { useEffect } from "react";
 import { useLocation, useParams } from "react-router";
 import { api } from "@/lib/api";
 
-/**
- * Reports which screen was opened, once per navigation.
- *
- * It sends the route **pattern** — `/guilds/:guildId/levelling` — never the address, so no server id and no
- * member id ever reaches the count. A failure is swallowed: an analytics write must not break a navigation.
- */
+/** Reports the route pattern of each screen opened, never the address; a failure is swallowed. */
 export function useScreenView(): void {
 	const { pathname } = useLocation();
 	const params = useParams();
@@ -18,12 +13,7 @@ export function useScreenView(): void {
 	}, [route]);
 }
 
-/**
- * Puts each matched parameter back as its name, so two admins configuring two servers land on one row.
- *
- * Longest value first: a shorter id that happens to be a substring of a longer one would otherwise be replaced
- * inside it and leave a fragment behind.
- */
+/** Puts each parameter back as its name, longest value first so a shorter id cannot leave a fragment. */
 export function routePattern(pathname: string, params: Readonly<Record<string, string | undefined>>): string {
 	const named = Object.entries(params)
 		.flatMap(([name, value]) => (value === undefined || value === "" ? [] : [{ name, value }]))

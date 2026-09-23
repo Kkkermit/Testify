@@ -108,10 +108,7 @@ describe("the dashboard settings", () => {
 		expect(env.DISCORD_CLIENT_SECRET).toBeUndefined();
 	});
 
-	/**
-	 * Binding to every interface would put an admin panel on the open internet on a VPS, and trusting
-	 * `x-forwarded-for` with no proxy in front lets anyone forge their address.
-	 */
+	/** Both network defaults sit on the safe side: bound to loopback, and no proxy trusted. */
 	it("defaults to the safe side of both choices that are silent when wrong", () => {
 		setEnv(VALID);
 		const env = loadEnv();
@@ -161,10 +158,7 @@ describe("the dashboard settings", () => {
 	});
 });
 
-/**
- * The dev/prod split is only as good as the script that triggers it: `loadEnv()` picks `.env.development` off
- * `NODE_ENV`, so a `dev` script that forgets to set it starts the production bot against the production database.
- */
+/** The `dev` script sets `NODE_ENV`, or it starts the production bot. */
 describe("the dev script", () => {
 	const { scripts } = JSON.parse(readFileSync(resolve(__dirname, "../../package.json"), "utf8")) as {
 		scripts: Record<string, string>;

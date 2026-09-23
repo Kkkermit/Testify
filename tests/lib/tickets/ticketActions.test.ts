@@ -155,10 +155,7 @@ describe("applyTickets", () => {
 		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ buttonLabel: "Get help", channelId: PANEL }));
 	});
 
-	/**
-	 * Choosing a channel must not drop a panel into it: the message is public and posting is a separate
-	 * decision the admin makes once the wording is right.
-	 */
+	/** Choosing a channel does not post the panel. */
 	it("does not post the panel just because a channel was chosen", async () => {
 		await applyTickets(guildWith(), complete, EVERYONE);
 

@@ -45,10 +45,7 @@ describe("planStream", () => {
 		expect(planStream([format({ format_id: "x", acodec: "none" })], WITHOUT_FFMPEG)).toBeNull();
 	});
 
-	/**
-	 * A segmented stream is a playlist of parts, not a file. Passing its address off as one plays nothing,
-	 * which is the shape of the original bug: a resolved track and a silent voice channel.
-	 */
+	/** A segmented stream is not passed off as a plain file. */
 	it("does not pass a segmented stream off as a plain file", () => {
 		const plan = planStream([format({ format_id: "hls-160", protocol: "m3u8_native" })], WITHOUT_FFMPEG);
 
@@ -61,7 +58,7 @@ describe("planStream", () => {
 		expect(plan).toEqual({ formatId: "mp3_0", shape: "transcode" });
 	});
 
-	/** Refusing by name beats playing silence, which is what the old system did. */
+	/** Refusing by name beats playing silence. */
 	it("refuses an mp3-only track when FFmpeg is missing", () => {
 		expect(planStream([format({ format_id: "mp3_0", acodec: "mp3", ext: "mp3" })], WITHOUT_FFMPEG)).toBeNull();
 	});

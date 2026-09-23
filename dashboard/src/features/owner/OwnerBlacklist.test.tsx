@@ -47,10 +47,7 @@ describe("the blacklist tab", () => {
 		});
 	});
 
-	/**
-	 * The API refuses anything that is not 17-20 digits, so offering the button would only produce a 400 the
-	 * form could have explained first.
-	 */
+	/** The form refuses anything that is not 17–20 digits before the API has to. */
 	it("will not submit something that is not a user ID", async () => {
 		const user = userEvent.setup();
 		renderTab();

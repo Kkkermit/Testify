@@ -6,10 +6,7 @@ import { forbidden, notFound, unauthorised } from "@api/errors";
 import { requireOauth } from "@api/oauth";
 import { findSession, touchSession } from "@database/repositories/dashboardSessionRepository";
 
-/**
- * Attaches the session when there is one and says nothing when there is not — `requireAuth` is what refuses.
- * Splitting them is what lets `/api/auth/me` answer 401 cleanly while the sign-in page stays reachable.
- */
+/** Attaches the session when there is one; `requireAuth` is what refuses. */
 export const loadSession = createMiddleware<ApiBindings>(async (context, next) => {
 	const id = readCookie(context, SESSION_COOKIE);
 
@@ -31,12 +28,7 @@ export const requireAuth = createMiddleware<ApiBindings>(async (context, next) =
 	await next();
 });
 
-/**
- * The security boundary. Everything behind it assumes it ran.
- *
- * The guild id comes from the path parameter and nowhere else — a body field is attacker-controlled, and this
- * is the one place it is checked before anything reads it.
- */
+/** The security boundary: the guild id comes from the path parameter and nowhere else. */
 export const requireGuild = createMiddleware<ApiBindings>(async (context, next) => {
 	const session = context.get("session");
 	if (session === undefined) throw unauthorised();
@@ -51,9 +43,7 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 	const isOwner = context.get("client").isOwner(session.userId);
 
 	if (!isOwner) {
-		// Live, every request. The OAuth guild list is a login-time snapshot, so someone demoted five minutes
-		// ago still has it in their session. This is the difference between losing access on their next click
-		// and losing it next time they sign in.
+		// Live on every request, so somebody demoted since signing in loses access on their next click.
 		const member = await guild.members.fetch(session.userId).catch(() => null);
 		if (member === null) throw forbidden("not_a_member", "You are not in that server.");
 

@@ -96,11 +96,7 @@ export const ANALYTICS = {
 	/** What the owner console asks for unless a window is chosen. */
 	defaultWindowDays: 30,
 	maxWindowDays: 90,
-	/**
-	 * Recent log lines held in memory for the owner console. Every level is captured now, so this is larger
-	 * than it needs to be for errors alone — roughly 200 kB at the worst case, which is worth it for being able
-	 * to search a debug line after the fact.
-	 */
+	/** Log lines kept in memory for the owner console, at every level; roughly 200 kB at worst. */
 	logRingCapacity: 1_000,
 } as const;
 

@@ -25,10 +25,7 @@ describe("resolveAmount", () => {
 		expect(Number.isInteger(resolveAmount("half", 999))).toBe(true);
 	});
 
-	/**
-	 * A plain number is passed through unchecked — whether it can be afforded is the caller's business, and the
-	 * repository decides atomically.
-	 */
+	/** A plain number passes through; the repository decides atomically whether it can be afforded. */
 	it("passes a plain number through without checking the balance", () => {
 		expect(resolveAmount("2000", 1_000)).toBe(2_000);
 	});

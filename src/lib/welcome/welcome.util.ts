@@ -13,8 +13,7 @@ import {
 
 /** The rules of the welcome system, with no Discord objects in sight. */
 
-// Declared in `@testify/shared` so the dashboard's form validates against the same rules, and re-exported here
-// because every caller in the bot already imports them from this module.
+// Declared in `@testify/shared` so the dashboard's form validates against the same rules.
 export {
 	DEFAULT_WELCOME_MESSAGE,
 	fillTemplate,
@@ -36,10 +35,7 @@ export const PLACEHOLDER_HELP: Record<WelcomePlaceholder, string> = {
 type AddedLater = "style" | "background";
 export type StoredWelcomeSettings = Omit<WelcomeSettings, AddedLater> & Partial<Pick<WelcomeSettings, AddedLater>>;
 
-/**
- * The old `isEmbed` boolean becomes the three-way style, so a guild that turned embeds on keeps them and nothing
- * else in the codebase knows the flag existed.
- */
+/** Folds the old `isEmbed` flag into the three-way style, so no other file knows it existed. */
 export function normaliseWelcome(settings: StoredWelcomeSettings | null): WelcomeConfig | null {
 	if (settings === null) return null;
 

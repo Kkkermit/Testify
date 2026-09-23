@@ -27,11 +27,7 @@ export function Section({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	return (
-		/**
-		 * What it is on the left, what you can change on the right. A settings card is a small form beside a
-		 * sentence explaining it, and stacking those two into a narrow column is what left the page packing
-		 * cards of wildly different heights into columns that could not balance.
-		 */
+		/** What it is on the left, what can change on the right. */
 		<Card className="motion-pop flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
 			<div className="flex items-start gap-3 lg:w-72 lg:shrink-0">
 				<span aria-hidden="true" className={`bg-muted rounded-field p-2 ${tint}`}>

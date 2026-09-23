@@ -24,10 +24,7 @@ const NEXT_LOOP: Record<LoopMode, LoopMode> = { off: "track", track: "queue", qu
 
 const SYSTEM_ACTIONS = new Set(["system-on", "system-off", "djroles"]);
 
-/**
- * The panel is an ordinary message, so a member demoted since it was opened would still be holding the
- * controls — the permission is re-read on every press rather than trusted from when it was rendered.
- */
+/** Re-read on every press, because the panel outlives the permission it was rendered with. */
 function requireManager(member: GuildMember): void {
 	if (member.permissions.has(PermissionFlagsBits.ManageGuild)) return;
 

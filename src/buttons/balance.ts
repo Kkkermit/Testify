@@ -61,8 +61,7 @@ export default defineButton({
 				await interaction.update(balancePanel(view(), userId));
 				return;
 
-			// Hands off to the existing quick-amount chooser, which already knows how
-			// to move money and validate the figure.
+			// Hands off to the quick-amount chooser, which already validates the figure.
 			case "dep":
 			case "wit": {
 				const panel = amountPanel(context.action === "dep" ? "dep" : "wit", account, userId);
