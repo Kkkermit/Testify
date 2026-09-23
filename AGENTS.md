@@ -1,0 +1,2035 @@
+# AGENTS.md — working on Testify
+
+Everything needed to work on this repo: how the bot is built, how to run and test it, the conventions, and the
+rules that have been agreed over time. Read this first. It is written so that anyone — a person or a coding agent —
+arriving with no memory of previous sessions can make a correct change and commit it. `CLAUDE.md` only points
+here, so every agent reads the same rules.
+
+> [!IMPORTANT]
+> Two companion documents, both authoritative in their own area:
+>
+> - [`docs/original-bot/`](docs/original-bot/00-INDEX.md) — the architecture, data model and the 100-finding audit
+>   of the original JavaScript bot. Read it for _what the code does and why_.
+>   [`docs/original-bot/migration/17-CODING-STANDARDS.md`](docs/original-bot/migration/17-CODING-STANDARDS.md) is the deeper
+>   treatment of naming and error handling; **where it and this file overlap, it wins**.
+> - [`docs/commands.md`](docs/commands.md) — the command list. **Generated. Never hand-edit it**; run
+>   `npm run docs:commands`.
+
+---
+
+## Contents
+
+1. [What this project is](#1-what-this-project-is)
+2. [Getting set up](#2-getting-set-up)
+3. [Running, testing, verifying](#3-running-testing-verifying)
+4. [Project structure](#4-project-structure)
+5. [How a command runs, end to end](#5-how-a-command-runs-end-to-end)
+6. [Naming conventions](#6-naming-conventions)
+7. [Import aliases and barrels](#7-import-aliases-and-barrels)
+8. [Adding a command](#8-adding-a-command)
+9. [Adding an event](#9-adding-an-event)
+10. [Adding an interactive panel](#10-adding-an-interactive-panel)
+11. [Components V2](#11-components-v2)
+12. [Multi-guild rules](#12-multi-guild-rules)
+13. [Data layer](#13-data-layer)
+14. [Config and environment](#14-config-and-environment)
+15. [Logging](#15-logging)
+16. [Errors](#16-errors)
+17. [Testing](#17-testing)
+18. [Lint, format, style](#18-lint-format-style)
+19. [Committing and branching](#19-committing-and-branching)
+20. [CI](#20-ci)
+21. [Decisions already made — do not relitigate](#21-decisions-already-made--do-not-relitigate)
+22. [Anti-patterns that must not come back](#22-anti-patterns-that-must-not-come-back)
+23. [Working style expected here](#23-working-style-expected-here)
+24. [The dashboard](#24-the-dashboard)
+
+---
+
+## 1. What this project is
+
+**Testify v2** — a multi-purpose Discord bot, written as a full TypeScript rewrite of the original JavaScript
+bot. discord.js v14, MongoDB via Mongoose, Node ≥ 24.11.
+
+The defining architectural decision: **one command object serves both the slash and the prefix surface.** The
+original had two near-duplicate implementations of every command; here a command is written once against the
+`CommandInput` contract, and `src/core/prefix.ts` is the only file that knows prefix commands exist. Keep it
+that way — it is the reason the rewrite exists.
+
+Current size (verify with the commands in [§3](#3-running-testing-verifying) rather than trusting these
+numbers, which drift):
+
+| Thing                | Count                             |
+| -------------------- | --------------------------------- |
+| Commands             | 78, across 13 categories          |
+| Command files        | 100 (incl. folded-in subcommands) |
+| Subcommands          | 110                               |
+| Prefix aliases       | 82                                |
+| Button handlers      | 24                                |
+| Events               | 24, in 5 groups                   |
+| `src/lib` helpers    | 84, in 15 domain folders          |
+| Schemas/repositories | 16 / 15                           |
+| Scheduled jobs       | 5                                 |
+| Tests                | 3,791 across 241 suites           |
+
+**The music system was removed and later rebuilt** on a different architecture — see
+[§21](#21-decisions-already-made--do-not-relitigate) before changing it.
+
+---
+
+## 2. Getting set up
+
+```bash
+nvm use                 # or install Node >= 24.11
+npm ci                  # ALWAYS ci, never install, unless changing dependencies
+npm run setup           # interactive: writes .env
+npm run setup -- --dev  # writes .env.development instead
+```
+
+`npm run setup` asks for each value and retries on the required ones. To do it by hand, copy `.env.example` to
+`.env` (or `.env.development.example` to `.env.development`) and fill it in.
+
+**Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
+**Optional:** `NODE_ENV`, `LOG_LEVEL`, `DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
+`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, and the `DASHBOARD_*` block — off unless you want the web dashboard,
+and covered in [§24](#24-the-dashboard).
+
+Then:
+
+```bash
+npm run dev     # development bot, hot reload, reads .env.development
+npm run build   # compile to dist/
+npm start       # production bot from dist/, reads .env
+```
+
+> [!WARNING]
+> **`npm run dev` must never start the production bot.** It sets `NODE_ENV=development` via `cross-env`, which
+> is what makes `loadEnv()` read `.env.development`. This was a real bug once — the script had no `cross-env`,
+> so `dev` silently ran production. There is a regression test for it. Do not remove `cross-env`.
+
+Never commit real tokens, snowflakes, database passwords or cluster hostnames. `.gitignore` covers `.env*`
+except the `.example` templates. Use `cluster0.example.mongodb.net` in any documentation.
+
+---
+
+## 3. Running, testing, verifying
+
+| Command                  | What it does                                                         |
+| ------------------------ | -------------------------------------------------------------------- |
+| `npm run dev`            | Development bot with hot reload                                      |
+| `npm run dev:all`        | Bot and dashboard together — see [§24](#24-the-dashboard)            |
+| `npm start`              | Production bot from `dist/`                                          |
+| `npm run build`          | shared → `tsup` to `dist/` → dashboard. `tsc-alias` rewrites `@`s    |
+| **`npm run check`**      | **typecheck → lint → format:check → test. Run before every commit.** |
+| `npm run typecheck`      | `tsc --noEmit`                                                       |
+| `npm run lint`           | ESLint via `scripts/lintRunner.ts` (errors fail, warnings never do)  |
+| `npm run lint:fix`       | Same, with `--fix`                                                   |
+| `npm run format`         | Prettier write                                                       |
+| `npm test`               | Jest                                                                 |
+| `npm run test:coverage`  | Jest with the 80/80/80/80 thresholds enforced                        |
+| `npm run test:watch`     | Jest watch                                                           |
+| `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
+| `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
+| `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
+| `npm run commit`         | Guided commit wizard (enforces the message format)                   |
+| `npm run commands:clear` | Deregister all application commands                                  |
+| `npm run db:wipe`        | Destructive. Wipes the database                                      |
+| `npm run audit`          | `better-npm-audit --level high`, reading `.nsprc`                    |
+
+### The verification discipline — this part matters
+
+`npm run check` passing is **necessary but not sufficient**. A broken loader glob compiles perfectly, passes
+every test, and registers nothing. Several real bugs in this repo's history were invisible to the type checker.
+So after any change to the loader, the build, file names, or a `define*` contract, also:
+
+**1. Build and smoke-test the loader against the real `dist/`:**
+
+```bash
+rm -rf dist && npm run build
+cat > loadcheck.cjs <<'EOF'
+const { loadEverything } = require("./dist/core/loader.js");
+const { Collection } = require("discord.js");
+const stub = { commands:new Collection(), prefixCommands:new Collection(), aliases:new Collection(),
+ buttons:new Collection(), modals:new Collection(), selects:new Collection(), contextMenus:new Collection(),
+ messageHandlers:[], on:()=>stub, once:()=>stub,
+ logger:{debug(){},info(){},warn(){},error(){},trace(){}} };
+console.log(loadEverything(stub));
+console.log("buttons:", [...stub.buttons.keys()].sort().join(", "));
+console.log("aliases:", stub.aliases.size);
+EOF
+node loadcheck.cjs; rm -f loadcheck.cjs
+```
+
+Expect counts that match what you expect, and no missing handler. This has caught more real breakage than the
+test suite has.
+
+**2. Check `dist/` has no unrewritten aliases.** `tsup` runs with `bundle: false`, so esbuild does **not**
+rewrite `@core/…` specifiers; `tsc-alias` does, in `onSuccess`. If that breaks, `dist/` will not start.
+
+```bash
+grep -rl 'require("@core\|require("@lib\|require("@commands' dist   # must find nothing
+```
+
+`@napi-rs/canvas` and other real scoped packages will still show up in a looser grep — that is fine.
+
+**3. If you touched dependencies, prove a clean install works:**
+
+```bash
+rm -rf node_modules && npm ci
+```
+
+`npm install` and `npm ci` disagree about lockfiles in ways that only show up in CI. A malformed lockfile once
+broke CI with `EUSAGE` while local `npm install` was perfectly happy.
+
+**4. If you added an enforcement test, prove it can fail.** Introduce the violation, watch the test go red,
+then revert. A convention test that passes vacuously is worse than none, because it grants false confidence.
+
+---
+
+## 4. Project structure
+
+Grouped by **technical role first, then domain**. One feature is spread across layers; that is intended.
+
+```
+src/
+├── index.ts              Entry point. One async main() that awaits each step in order.
+├── core/                 The framework. 15 files, no domain logic.
+│   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
+│   ├── loader.ts         Finds and registers everything from disk. Globs live here.
+│   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
+│   ├── prefix.ts         The ONLY file that knows prefix commands exist
+│   ├── button.ts         Button contract, defineButton, customId / parseCustomId
+│   ├── event.ts          defineEvent
+│   ├── message.ts        Message-handler contract (automod, counting, levelling XP …)
+│   ├── checks.ts         Gates: permissions, cooldowns, guildOnly, ownerOnly, nsfw
+│   ├── errors.ts         UserFacingError, toError, runCommand wrapper
+│   ├── logger.ts         pino transport
+│   ├── shutdown.ts       Graceful shutdown + signal handlers
+│   ├── paths.ts          Path resolution from __dirname (never the CWD)
+│   └── index.ts          Barrel
+├── config/               Constants. Zero runtime logic.
+│   ├── env.ts            EVERYTHING from process.env, zod-validated. Nothing else reads env.
+│   ├── categories.ts     The category union — single source of truth
+│   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
+│   ├── theme.ts          Colours, emoji, repo URL
+│   └── strings.ts        User-facing copy
+├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               24 handlers in command, create, logging, ready and message
+├── buttons/              24 component handlers, keyed by custom-ID prefix
+├── lib/                  84 helpers in 15 domain folders, each behind its own index.ts barrel
+│   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
+│   ├── format/           numbers, durations, amounts, and the English for a shared refusal
+│   ├── canvas/           the drawing primitives and every image card
+│   ├── bot/              runtime, identity, pause/shut down, usage, status, command catalogue and runner
+│   ├── infra/            outbound HTTP, what it learns about each service, and the secret box
+│   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
+├── database/
+│   ├── connection.ts
+│   ├── models/           16 Mongoose schemas
+│   └── repositories/     15 query layers. Commands never touch a model directly.
+├── jobs/                 5 scheduled jobs (lottery draw, passive income, bot stats, softban expiry, heartbeat)
+└── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
+
+tests/                    Mirrors src/. 155 suites.
+└── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
+scripts/                  One-off tooling. `no-console` is off here.
+shared/                   npm workspace @testify/shared — types and zod both surfaces import
+dashboard/                npm workspace — the Vite + React SPA
+docs/                     Every document except this one. Start at docs/README.md
+├── commands.md           Generated by `npm run docs:commands`. Never hand-edited
+├── dashboard/            The dashboard's guide, rewrite plan and design documents (§24)
+└── original-bot/         Audit of the JavaScript bot this replaced. History, not current
+```
+
+**Categories:** `community`, `economy`, `fun`, `games`, `info`, `levelling`, `moderation`, `settings`,
+`music`, `tickets`, `giveaway`, `developer`, `owner`. Defined `as const` in `src/config/categories.ts` with a derived
+union type, so a mistyped category is a **compile error**. Adding a category there is all that is needed for
+`/help` to pick it up.
+
+### Where to look for a given job
+
+| I want to…                                 | Go to                                                                    |
+| ------------------------------------------ | ------------------------------------------------------------------------ |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                                   |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                         |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                                     |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist               |
+| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                     |
+| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"  |
+| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                     |
+| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`) |
+| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it        |
+| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database          |
+| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                          |
+| Format a number, duration, time            | `src/lib/format/format.util.ts`                                          |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly                |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`       |
+| Change user-facing copy                    | `src/config/strings.ts`                                                  |
+| Change a colour or emoji                   | `src/config/theme.ts`                                                    |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
+| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`       |
+| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)      |
+
+### The panel renderers in `src/lib`
+
+Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
+
+| Renderer                   | Handler                | Pattern it demonstrates                                    |
+| -------------------------- | ---------------------- | ---------------------------------------------------------- |
+| `shopScreen.util.ts`       | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step            |
+| `auditPanel.util.ts`       | `buttons/auditLog.ts`  | Draft edits in a bit-packed custom ID, then Save           |
+| `levelPanel.util.ts`       | `buttons/levelling.ts` | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
+| `balancePanel.util.ts`     | `buttons/balance.ts`   | Hub panel, read-only mode for other users                  |
+| `inventoryScreen.util.ts`  | `buttons/inventory.ts` | Per-row action button, paging in the custom ID             |
+| `settingsPanel.util.ts`    | —                      | Generic settings rows + pre-filled modal editors           |
+| `musicPanel.util.ts`       | `buttons/music.ts`     | Live state: re-reads the session on every press            |
+| `musicSystemPanel.util.ts` | `buttons/music.ts`     | A switch and a pre-ticked role select, applied immediately |
+
+Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
+`/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
+layout maths in pure exported functions (`rankCardText`, `barFill`, `boardHeight`) so the parts that can be
+wrong are tested without a canvas or a network. `drawAvatarOrInitial` falls back to a lettered circle, so a card
+still renders when Discord's CDN is unreachable.
+
+**Two panels, two different answers about when to write.** Copy whichever fits:
+
+- **Save-button panels** (`auditPanel`) batch edits into a draft carried in the custom ID and write once. Use
+  this when the settings are one decision — the audit picker is "which events, where", and half of it applied is
+  not a state anyone wants.
+- **Apply-immediately panels** (`levelPanel`, `settingsPanel`) write on every press and re-read before each one.
+  Use this when each control is independent, which is most config: there is nothing to batch, and a Save button
+  would just be a step between the admin and the thing they already decided.
+
+Two exceptions worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler
+file rather than a separate renderer (it composes `settingsPanel.util.ts` instead), and `buttons/money.ts` still
+returns an embed-based `RenderedScreen`. Both are fine; new panels should prefer the split.
+
+---
+
+## 5. How a command runs, end to end
+
+Worth understanding before changing anything in `core/`.
+
+**Startup** (`src/index.ts`) — the order is load-bearing, and every step of it fixes a real bug in the original:
+
+```ts
+async function main(): Promise<void> {
+	const env = loadEnv(); // 1. env first, validated, fail-fast
+	const logger = createLogger(env.LOG_LEVEL); // 2. then the logger
+	const client = new TestifyClient(env, logger);
+	handleProcessSignals(client); // registered exactly once
+	await connectDatabase({ uri: env.MONGODB_URI, logger });
+	const counts = loadEverything(client); // globs the tree, registers everything
+	await publishCommands(client); // AWAITED, before login
+	await client.login(env.DISCORD_TOKEN);
+}
+```
+
+**Command registration scope** — this is the single-guild vs multi-guild switch:
+
+- `DISCORD_DEV_GUILD_ID` **set** → commands register to that guild only, so a half-built one is not live everywhere.
+- `DISCORD_DEV_GUILD_ID` **blank** → commands register globally.
+
+**Neither takes an hour.** Registration is immediate on both paths; it is the Discord _client_ that caches the
+list it was last handed, so a command that has not turned up needs a client reload (Ctrl+R, Cmd+R on macOS)
+rather than a wait. Do not write the old "up to an hour to propagate" line back into the docs.
+
+**Dispatch:**
+
+- Slash → `events/command/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
+- Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`
+- Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
+  `button.run(interaction, { client, action, args })`
+
+There is **exactly one** `interactionCreate` listener. The original had 27.
+
+---
+
+## 6. Naming conventions
+
+**camelCase basename + a domain suffix.** The suffix makes the kind of module visible in an editor tab, a stack
+trace and a `git log` line — and for commands and events it is **load-bearing**, because the loader globs on it.
+A file that misses its suffix is silently never registered.
+
+| Suffix          | For                              | Example                              |
+| --------------- | -------------------------------- | ------------------------------------ |
+| `.command.ts`   | a command, on both surfaces      | `commands/moderation/ban.command.ts` |
+| `.event.ts`     | a gateway event handler          | `events/ready/ready.event.ts`        |
+| `.util.ts`      | a shared helper                  | `lib/format/duration.util.ts`        |
+| `.types.ts`     | a domain's shared types          | `lib/music/music.types.ts`           |
+| `.constants.ts` | a domain's shared constants      | `lib/music/music.constants.ts`       |
+| `.schema.ts`    | a Mongoose model                 | `database/models/economy.schema.ts`  |
+| `.test.ts`      | a test (drops the source suffix) | `tests/core/loader.test.ts`          |
+
+Loader globs: `commands/*/*.command.{js,ts}` and `events/**/*.event.{js,ts}`.
+`tests/core/conventions.test.ts` enforces the suffixes.
+
+**Unsuffixed, deliberately:** `src/index.ts`, everything in `src/core/` and `src/config/`, everything in
+`src/buttons/`, everything in `scripts/`, and `*.config.ts` at the root.
+
+**There is no `.slash.ts` or `.prefix.ts`, and reintroducing either would be a mistake.** Commands were renamed
+from `.slash.ts` to `.command.ts` precisely because one object serves both surfaces — a suffix naming one surface
+describes an architecture this codebase does not have. There has never been a single `.prefix.ts` file.
+
+The original's `.function.js` layer has **no counterpart here and must not be introduced** — that job is
+`core/loader.ts`, and a typed loader beats a set of files that mutate the client.
+
+---
+
+## 7. Import aliases and barrels
+
+Always import by alias. Never a relative path that climbs (`../../`).
+
+```ts
+import { theme } from "@config/theme";
+import { embed } from "@lib/discord";
+import { defineCommand, type CommandInput } from "@core/command";
+```
+
+| Alias                                                                      | Points at               | Barrel? |
+| -------------------------------------------------------------------------- | ----------------------- | ------- |
+| `@core`                                                                    | `src/core/index.ts`     | yes     |
+| `@config`                                                                  | `src/config/index.ts`   | yes     |
+| `@lib`                                                                     | `src/lib/index.ts`      | yes     |
+| `@lib/<domain>` — `@lib/music`, `@lib/discord`, …                          | `src/lib/*/index.ts`    | yes     |
+| `@database`                                                                | `src/database/index.ts` | yes     |
+| `@commands/*`, `@events/*`, `@buttons/*`, `@jobs/*`, `@root/*`, `@tests/*` | direct                  | no      |
+
+**One alias map only** — `tsconfig.json` `compilerOptions.paths`. `jest.config.ts` derives its mapper from it;
+`tsup` reads it and `tsc-alias` rewrites the build from it. Never write a second literal copy. Each aliased
+directory is declared twice: bare for the barrel, wildcard for a single module, because a bare specifier does
+not match a wildcard path.
+
+**Every target starts `./`.** There is no `baseUrl` — it is deprecated in TypeScript 6 and gone in 7 — so path
+targets resolve relative to `tsconfig.json` itself and a bare `src/…` is a compile error. Only `//` line
+comments may be added to that file: `jest.config.ts` strips those before `JSON.parse`, and a `/* */` block would
+break the test run.
+
+`module` is `Preserve` and `moduleResolution` is `Bundler`, because `tsc` only type-checks here — `tsup`/esbuild
+does the emit. `Node` is deprecated, and `Node16` would be right if `tsc` emitted, but it rejects dual packages
+that ship a single `.d.ts` (`mathjs`) even though `require()` of them works. That was verified against the real
+build, not assumed.
+
+**`src/lib` has one import rule on each side of its barrels, and `no-restricted-imports` enforces both.**
+
+- **Commands, buttons, events, API routes and jobs import a domain's barrel** — `@lib/music`, never
+  `@lib/music/musicQueue.util`. That is what lets a module move or split inside its folder without touching a
+  single command.
+- **`src/lib`, `src/core` and `src/database` import the module itself**, never a barrel. A barrel loads every
+  module behind it, so inside the layers the barrels are built from, a barrel import is how a harmless dependency
+  becomes a cycle.
+- **Tests import the module under test by its own path**, because `jest.mock` of a module is what a test
+  controls, and a barrel over a partial mock hands the rest of the folder `undefined`.
+
+`tests/core/conventions.test.ts` pins the layout: nothing loose in `src/lib` but the root barrel, a barrel in
+every folder, every module in its folder's barrel, one level deep and no further. The move itself surfaced two
+different types both called `PetRarity` and two `pageCount` functions — neither had been in the old root barrel,
+so nothing had ever put them side by side.
+
+> [!WARNING]
+> Barrels plus `import-x/no-cycle` still need care — `src/lib/` and `src/core/` reference each other. Let the
+> lint rule (configured at `maxDepth: 6`) be the check. Do **not** work around a cycle with a `require()` inside
+> a function body; that is a smell, not a pattern.
+
+---
+
+## 8. Adding a command
+
+Create **one file**. The loader finds it, `/help` lists it, and it works as both `/name` and `t?name`.
+
+```ts
+// src/commands/fun/coinflip.command.ts
+import { defineCommand } from "@core/command";
+import { reply, successEmbed } from "@lib/discord";
+
+export default defineCommand({
+	name: "coinflip",
+	description: "Flips a coin.",
+	category: "fun",
+	aliases: ["flip", "cf"],
+	async run(interaction) {
+		const side = Math.random() < 0.5 ? "Heads" : "Tails";
+		await reply(interaction, { embeds: [successEmbed(`🪙 ${side}!`)] });
+	},
+});
+```
+
+Full `Command` shape: `name`, `description`, `category` (required); then optional `options`, `subcommands`,
+`aliases`, `permissions`, `botPermissions`, `cooldown` (ms), `guildOnly`, `ownerOnly`, `nsfw`, `run`,
+`autocomplete`. `run` is optional when the command is nothing but subcommands.
+
+Rules:
+
+1. **`export default defineCommand({ … })`.** The loader fails start-up and names the file otherwise.
+2. **`category` must be a key of `CATEGORIES`.** A typo is a compile error.
+3. **Use `reply()` from `@lib/discord`**, never `interaction.reply` directly — it picks `reply` vs
+   `editReply` vs `followUp` based on `deferred`/`replied`. Calling reply twice throws
+   `InteractionAlreadyReplied`.
+4. **Build embeds with `embed()` / `successEmbed()` / `errorEmbed()` from `@lib/discord`.** A
+   `no-restricted-syntax` lint rule blocks bare `new EmbedBuilder()` outside the three files allowed to build
+   them.
+5. **Throw `UserFacingError` for anything the user did wrong.** See [§16](#16-errors).
+6. **Guard with the declarative fields** (`guildOnly`, `permissions`, …) rather than hand-rolled checks in
+   `run`. `checks.ts` handles them uniformly and the failure messages stay consistent.
+7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
+   to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
+8. Run `npm run docs:commands` afterwards.
+
+**Discord caps top-level commands at 100.** When close to it, group: move the file into a `subcommands/` folder
+(which the loader does **not** scan) and expose it from a parent with `asSubcommand`:
+
+```ts
+// src/commands/fun/fun.command.ts
+import { asSubcommand, defineCommand } from "@core/command";
+import dadJoke from "@commands/fun/subcommands/dadJoke.command";
+
+export default defineCommand({
+	name: "fun",
+	description: "Jokes, generators and other nonsense.",
+	category: "fun",
+	subcommands: [asSubcommand(dadJoke, ["dadjoke"])],
+});
+```
+
+The folded-in file stays an ordinary command file — nothing inside it changes, and it keeps its own name as a
+prefix alias, so `t?dad-joke` still works alongside `/fun dad-joke`.
+
+---
+
+## 9. Adding an event
+
+```ts
+// src/events/create/guildCreate.event.ts
+import { defineEvent } from "@core/event";
+
+export default defineEvent({
+	name: "guildCreate",
+	once: false,
+	async run(client, guild) {
+		client.logger.info({ guildId: guild.id }, "[GUILD] Joined a new server");
+	},
+});
+```
+
+**The client comes first, then the event payload.** `defineEvent` is generic over the event name, so the payload
+is correctly typed for whichever event you named — and a handler whose parameters are in the wrong order is a
+compile error. In the original JS bot two features were silently dead for exactly that reason.
+
+Group it into `ready/`, `command/`, `create/`, `logging/` or `message/`. Any depth under
+`src/events/` is scanned.
+
+`once: true` for start-up work. Never register a handler both in a file and by hand elsewhere — the original
+did, so every signal fired twice.
+
+---
+
+## 10. Adding an interactive panel
+
+This is the dominant UI pattern in the repo. Every panel is **two pieces**:
+
+**1. A pure renderer in `src/lib/<domain>/<name>Panel.util.ts` or `<name>Screen.util.ts`** — state in, message out. No
+database calls, no interaction object. This is what makes it unit-testable.
+
+**2. A handler in `src/buttons/<name>.ts`** — `defineButton({ id, ownerOnly, run })`.
+
+Both call the same renderer, so the first render and every re-render cannot drift. Examples to copy:
+`shopScreen.util.ts` + `buttons/shop.ts`, `auditPanel.util.ts` + `buttons/auditLog.ts`,
+`balancePanel.util.ts` + `buttons/balance.ts`, `inventoryScreen.util.ts` + `buttons/inventory.ts`.
+
+### Custom IDs
+
+`customId(id, action, ...args)` builds `id:action:arg1:arg2`. `parseCustomId` splits it back. `id` selects the
+handler and must be unique bot-wide; `action` and `args` arrive in the handler's `context`.
+
+`customId()` **throws** if a part contains `:` or the result exceeds Discord's 100 characters — deliberately, so
+you find out while writing rather than when Discord rejects the whole message.
+
+### Two absolute rules about state
+
+- **Never store per-interaction state on the client or in a module-level variable.** The original had
+  `client.helpData` — global, single-slot, shared across every guild and user, so two people using `/help` at
+  once corrupted each other's session.
+- **Either encode the state in the custom ID, or re-read it from the database.** Encode small things (page
+  number, selected id, section, tab). Re-read anything that will not fit — and re-read the stored config
+  regardless before a write, so two admins with the panel open cannot overwrite each other.
+
+  **100 characters goes further than it looks.** The audit panel needs a draft of up to 18 chosen event names,
+  which will not fit as names — but it fits as 18 bits: one per event at its index in `AUDIT_EVENTS`, written in
+  base 36, four characters for the lot (`encodeEvents` / `decodeEvents`). That is what makes a Save button
+  possible there. The rule when you pack state this way: **the database still stores names.** A mask only ever
+  travels inside a live message, so reordering the source array can at worst misread a panel left open across a
+  deploy, rather than silently corrupting a stored config.
+
+### `ownerOnly`
+
+Set `ownerOnly: true` on the handler and **put the invoking user's ID last** in every custom ID it builds. The
+router compares the last argument. This is a convention the router depends on; test it
+(`expect(parseCustomId(id).args.at(-1)).toBe(OWNER)`).
+
+### Re-read before you write
+
+Every handler branch that changes data must re-read the record rather than trusting what the message was
+rendered with. A balance shown 30 seconds ago may already be spent.
+
+### Never offer someone else's data as actionable
+
+If a panel can display another user (`/balance @someone`, `/inventory @someone`), render it **read-only**. A Use
+or Buy button beside their items that spends _your_ balance is a real bug — it happened, and there are tests
+pinning it now.
+
+---
+
+## 11. Components V2
+
+`src/lib/discord/containers.util.ts` is the helper layer. Prefer V2 whenever a control belongs **beside** the thing it
+acts on — a Buy button next to an item, a Use button next to an inventory row — instead of a row of buttons under
+a list where the reader has to count to match them up.
+
+```ts
+import { button, row } from "@lib/discord/components.util";
+import {
+	container,
+	containerMessage,
+	type ContainerPart,
+	divider,
+	sectionWithButton,
+	text,
+} from "@lib/discord/containers.util";
+
+const parts: ContainerPart[] = [text("## 🛒 Shop"), divider()];
+parts.push(sectionWithButton("**🎣 Fishing Rod** — 2,500", button({ id, label: "Buy" })));
+
+return containerMessage(container({ category: "economy", parts }));
+```
+
+Helpers: `text`, `divider({ large?, spacer? })`, `sectionWithButton`, `sectionWithThumbnail`, `gallery`,
+`container({ category?, parts })`, `containerMessage`.
+Also in `components.util.ts`: `button`, `row`, `select`, `selectRow`, `option`, `channelSelect`, `roleSelect`,
+`confirmRow`, `navRow`, `quickAmountRow`, `modalForm`, `disableAll`.
+
+**Pre-tick a select and it becomes the list, not just an add box.** `roleSelect({ defaultRoleIds })` and
+`channelSelect({ defaultChannelIds })` render the current selection as already chosen, so removing something is
+deselecting it — no second "remove" control to build, and no way for the menu and the list above it to disagree.
+Pair it with `minValues: 0`, or emptying the list is impossible. The levelling panel's boost roles and ignore
+lists both work this way.
+
+**Two rules Discord enforces, both easy to get wrong:**
+
+1. A V2 message **must** set `MessageFlags.IsComponentsV2`.
+2. That flag makes `content` and `embeds` **illegal** on the same message.
+
+`containerMessage()` handles both, so a caller cannot send a half-converted payload. The practical consequence:
+**you cannot attach a loose action row next to a container.** A confirm step has to be rendered _inside_ the
+container — see `sellConfirmScreen` in `shopScreen.util.ts`.
+
+Gotchas found the hard way:
+
+- **Type `parts` as `ContainerPart[]` explicitly.** TypeScript otherwise narrows the array from its initial
+  literal and rejects sections and rows appended later.
+- `container()` colours itself from `categoryColour`, which returns named colours for embeds; `setAccentColor`
+  needs a number, so anything non-numeric falls back rather than throwing. A colour is never worth failing a
+  message over.
+- Discord caps a V2 message at 40 components. Page long lists (the shop uses 5 entries per page).
+
+Embeds are still correct for one-shot results — `/beg`, `/rob`, `/work` — where buttons would add noise. Do not
+convert something just to convert it.
+
+---
+
+## 12. Multi-guild rules
+
+**The bot is multi-guild.** The only single-guild behaviour is command _registration_ when
+`DISCORD_DEV_GUILD_ID` is set, which is a development convenience.
+
+Rules:
+
+1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
+   `userId` alone for per-guild data.
+2. **Two deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design) and the user
+   profile (about the person, not the server). Do not "fix" these.
+3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
+   `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
+   server blocked `/beg` in another.
+4. **Never cache a guild-specific setting in a module-level variable.** Read it per interaction.
+5. **A job that scans across guilds is correct** — `lotteryDraw` finding every due draw is the intended shape.
+
+---
+
+## 13. Data layer
+
+`src/database/models/*.schema.ts` define Mongoose schemas. `src/database/repositories/*.ts` hold every query.
+**Commands and handlers use repositories, never models directly.**
+
+Rules:
+
+1. **Money is atomic.** `$inc`, `findOneAndUpdate`, and `debitWallet()` returning a boolean you must check.
+   Never read-modify-`save()` a balance — the original could duplicate money that way.
+2. **Debit before you deliver.** Every purchase branch takes payment first and only writes the goods on success,
+   so a failed payment can never hand out the item.
+3. **`getOrCreate*` never returns null.** Use it when absence should mean "start them off"; use `find*` when
+   absence is meaningful.
+4. **One collection per shape.** Two models sharing a collection with different shapes was the single worst
+   finding in the audit of the original.
+5. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
+   model when it is not.
+6. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
+   not appear on records written yesterday, however `required: true` it is — so the type the schema declares is a
+   promise about new writes, not a description of what a `find()` returns. When you add a field, normalise on
+   read and type the input for what can actually arrive: `normaliseSettings` in `src/lib/levelling/levelling.util.ts` does
+   this, and its `StoredLevelSettings` marks the fields added later as optional. That function is also where the
+   levelling system's old single `roleId`/`multiplier` pair is folded into the `boosts` array, so no other file
+   knows the old shape existed. **Migrate on read, in one place, with a test per field.**
+
+---
+
+## 14. Config and environment
+
+**`src/config/env.ts` is the only file that reads `process.env`.** Everything else takes `client.env` or a
+parameter. The zod schema is the single declaration of every variable, its format (`/^\d{17,20}$/` for Discord
+IDs) and its default.
+
+- **Validate once, at startup, and fail with a list** of everything wrong — not one error at a time.
+- **`SCREAMING_SNAKE`, `DISCORD_` prefix** for Discord-owned values.
+- **Blank means absent.** `KEY=` is an empty string, not an absent one; optional settings are meant to be left
+  blank, and `withoutBlanks()` handles it.
+- **One source of truth for ownership:** `DISCORD_OWNER_IDS`. The original had two competing ones.
+- **The constants modules read zero environment variables.** `constants.ts` / `theme.ts` / `strings.ts` /
+  `categories.ts` hold only values identical for every deployment, exported `as const` so `embedColor` is the
+  literal `"Blurple"` and not `string`.
+- **`theme.colours` is the only place a colour name is written, and every category has its own.** Two
+  categories shared Blurple and two more shared Aqua, so for four of the twelve the stripe down the embed said
+  nothing — and ten audit handlers each spelled out their own `colour: "Green"`. The audit log now names a
+  **tone** (`created`, `restored`, `updated`, `deleted`, `left`, `moderated`) which `auditLog.util.ts` maps to
+  `theme.colours`, so its colour language is one table. `tests/config/palette.test.ts` fails on a duplicated
+  category colour or on a colour name written outside `src/config/`; both halves were proved able to fail.
+- **No committed snowflakes.** Every ID goes through `env.ts`.
+
+Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
+comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
+
+---
+
+## 15. Logging
+
+Two separate jobs. Keep them apart.
+
+**Transport — `src/core/logger.ts`.** `pino`, level from `LOG_LEVEL`, pretty and colourised when
+`process.stdout.isTTY`, structured JSON when it is not.
+
+- **`no-console: "error"`** in application code (off in `scripts/` and tests). Use `client.logger`.
+- **Pass the error as structured context, never as a second string:**
+  `logger.error({ err: toError(error) }, "[BAN] Failed to ban member")`. The original's logger took one argument
+  and silently discarded the error object at five call sites, losing every stack trace.
+- **Message convention:** `[SCREAMING_SNAKE_TAG]` then a sentence-case sentence that usually ends with
+  remediation advice. `[X]` a notice, `[X_ERROR]` a failure, `[X_SUCCESS]` a completion.
+
+  ```
+  [DATABASE] No MongoDB URL has been provided. Skipping database connection.
+  [BAN] Failed to DM user. This can happen when their DM's are off, or the user is a bot.
+  ```
+
+- **Never log a token, a connection string, or a full env dump.**
+- **Do not put per-frame noise at `warn`.** A broken stream once emitted an error per frame, and matching it at
+  `warn` buried the single line naming the cause under hundreds of duplicates. Warn on decisive failures; leave
+  the rest at `debug`.
+
+**Presentation — `src/lib/bot/banner.util.ts`.** The boot banner is for a human watching a terminal and is
+`process.stdout.write`-n directly, **never through the logger**. `bannerLines()` is pure and unit-tested,
+`printBanner()` writes once, colour is dropped when not a TTY.
+
+Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
+`"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is
+text-presentation and 1 column, which is why it was swapped for 📂. There is an `ICONS` map and a test.
+
+---
+
+## 16. Errors
+
+```ts
+import { UserFacingError } from "@core/errors";
+
+if (!account) throw new UserFacingError("You do not have an account yet. Use `/economy create`.");
+```
+
+- **`UserFacingError`** — the message is shown to the user verbatim. Use it for anything they did wrong or can
+  fix. Write it as advice, not an accusation.
+- **Any other throw** is a bug: caught by `runCommand`, logged with its stack, and the user gets a generic
+  apology.
+- **Never interpolate a raw error into a user-visible embed.** It leaks internal paths and can exceed the
+  4096-character description limit.
+- **Never swallow an error into a `.catch()` that only logs** and then continue on a possibly-undefined value.
+
+### The process stays up
+
+**Nothing after startup may end the process.** A bot serving many servers must not go dark because one handler
+threw, and the dashboard must not disappear because one request did. `uncaughtException`, `unhandledRejection`,
+the client's own `error` and `shardError` events, and every scheduled job all route into
+`reportSurvivable()` in `src/core/resilience.ts`, which writes the failure down and returns. Only a signal, or
+the owner console's Shut down, calls `shutdown()`.
+
+Node's warning about `uncaughtException` — that the process may be left holding state nothing can vouch for —
+is real, and this is a deliberate trade: for a bot, an instance that is mostly working beats one that is off.
+
+Four things follow, and they are what keep this from being the anti-pattern it looks like:
+
+- **Contained is not unnoticed.** Anything caught here is logged at `error` with its stack and a scope, and the
+  line says the bot is still running so a reader knows the state they are in. A background job that catches and
+  says nothing is still wrong — `TimerRegistry` reports every failure under `JOB_<NAME>`.
+- **Repeats collapse.** A broken gateway handler can throw hundreds of times a second, and the same line that
+  often buries the cause. `ErrorThrottle` logs the first occurrence, then one summary a minute carrying how many
+  were swallowed. It is bounded, so a message embedding a unique id cannot grow it forever.
+- **Startup is the exception.** `main().catch()` in `src/index.ts` still exits. A bot that never connected has
+  nothing to keep alive, and a process that stays up looks healthy to a supervisor while answering nobody.
+- **Optional things retry rather than give up.** A busy port takes the dashboard down for one restart, not for
+  the rest of the run: `startApi` retries `EADDRINUSE` five times before it reports the advice.
+
+---
+
+## 17. Testing
+
+`tests/` mirrors `src/`. Tests drop the source suffix (`shopScreen.util.ts` → `shopScreen.test.ts`).
+`tests/setup.ts` runs via `setupFilesAfterEnv`. Coverage thresholds are **80% statements / lines / functions /
+branches**, enforced by `npm run test:coverage` and by the pre-push hook.
+
+Shared harness in `tests/helpers/` (these are not tests):
+
+- **`mocks.ts`** — `createMockInteraction()`, `createMockMessage()`, `createMockClient()`, `createMockModel()`.
+  Every method is already a `jest.fn()`, `overrides` spread last, and the factories are typed so a mock that
+  drifts from the real Discord shape is a compile error. `createMockModel` is `hasOwnProperty`-aware so an
+  override of `null`/`0`/`false` is honoured rather than falling through to the default.
+- **`mongo.ts`** — `mongodb-memory-server` setup.
+- **`containers.ts`** — `idsOf()`, `buttonsOf()`, `textOf()` for walking a Components V2 tree. A container nests
+  sections inside containers and buttons inside sections, so asserting on one means walking it.
+
+What good tests here look like:
+
+- **Test the pure renderer, not the handler.** That is the whole reason panels are split in two.
+- **Name the behaviour, not the implementation** — `"disables Use on an item that cannot be used"`.
+- **A comment above a test should explain _why it matters_**, ideally naming the bug it prevents.
+- **Cover the degenerate cases**: empty list, page past the end, stale id, zero quantity, someone else's data.
+- **Inject randomness** (`useItem(..., roll)`) rather than fighting it.
+- **A test must be able to fail.** If you add an enforcement test, prove it goes red.
+- **A suite whose dependency is missing must _skip_, not pass.** `describeWithMongo` decides between `describe`
+  and `describe.skip` **before the suite is built**, from a database started once in Jest's `globalSetup`. The
+  previous shape discovered it in `beforeAll` and returned early from each test instead — so a run without
+  MongoDB reported **41 passing tests that asserted nothing**, and a mutation replacing an atomic `$inc` with
+  `$set` survived all of them. `tests/core/conventions.test.ts` refuses the early-return pattern, and CI sets
+  `REQUIRE_DB_TESTS=1` so a runner that cannot start a database fails rather than going quietly green.
+
+**Mutation is how you find a test that cannot fail.** Coverage says a line ran, never that anything checked it.
+Changing one operator and re-running the suite that should care is the only cheap proof: it is what found the
+`$inc` gap above, and it cleared `checks.ts`, `csrf.ts`, the `returnTo` schema and the command runner's
+allowlist in the same pass.
+
+> [!NOTE]
+> When a test disagrees with the code, **the code is not automatically wrong.** Three times in this repo's
+> history the test was the thing at fault: `humanisePermission` lowercases deliberately,
+> `buildSlashCommand` does not reorder required options, and pets deliberately cost more to feed than they earn.
+> Read the code and decide which is right before changing either.
+
+---
+
+## 18. Lint, format, style
+
+**Prettier is fully decoupled from ESLint** — `eslint-config-prettier` last, no `eslint-plugin-prettier`.
+`.prettierrc` is exactly:
+
+```json
+{ "useTabs": true, "printWidth": 120, "trailingComma": "all", "arrowParens": "always" }
+```
+
+`eslint.config.mjs` is a flat config with type-aware rules via `projectService`. The ones that shape the code:
+
+| Rule                                          | Why                                                          |
+| --------------------------------------------- | ------------------------------------------------------------ |
+| `no-console: "error"`                         | Use `client.logger`. Off in `scripts/` and tests.            |
+| `no-floating-promises`, `no-misused-promises` | An un-awaited registration once raced `client.login()`       |
+| `import-x/order`                              | Node builtins → packages → aliases, alphabetical             |
+| `import-x/no-cycle` (`maxDepth: 6`)           | Barrels plus cross-references make cycles easy               |
+| `switch-exhaustiveness-check`                 | Adding a shop section becomes a compile error, not a bug     |
+| `no-restricted-syntax`                        | Bans bare `new EmbedBuilder()` outside the three embed files |
+| `no-extraneous-dependencies`                  | The original resolved packages through transitive hoisting   |
+
+**Every override in that config carries a comment explaining why.** Keep that — an unexplained override rots.
+
+`scripts/lintRunner.ts` drives the ESLint Node API: colourised per-file report, and **exits non-zero on errors
+only — warnings never fail the build.**
+
+### Comments
+
+**This is a standing instruction for the repo: do not write AI-flavoured commentary.** The default is no comment.
+Fewer, shorter, and only where the code genuinely cannot speak for itself.
+
+Hard rules:
+
+- **One sentence.** A doc comment is `/** … */` on a single line unless a second sentence is truly load-bearing.
+  Multi-paragraph blocks are for `AGENTS.md`, not for source files.
+- **Never narrate the change.** No "the original did X", "this used to be Y", "three fixes failed before this".
+  That is what `git log` is for, and it rots the moment the code moves on.
+- **Never restate the identifier.** `/** Formats a number. */` above `formatNumber` earns nothing and is deleted
+  on sight.
+- **Never explain your own reasoning to the reader.** "The panel is an ordinary message, so the permission is the
+  gate" is a note to a reviewer, not a comment.
+
+What still earns one:
+
+- A constraint a reader could not infer, stated flatly:
+  `// A V2 message cannot carry an embed, so the confirm row goes inside the container.`
+- A magic value or an API quirk: `// 10026 is "unknown ban" — already unbanned, which is not a failure.`
+- A one-line file header saying what the module is for.
+- A `/** */` above a test naming the bug it pins.
+
+Match the surrounding density. Measured rather than guessed: `dashboard/src` sits at **3.8%** comment lines and
+`src/` at **5.7%**, and the gap is deliberate — `src/api/` and `shared/` both run far higher, because a security
+constraint and a two-surface contract are exactly the things a reader cannot infer. Outside those, a new file
+well above the local figure is a signal to cut rather than a sign of thoroughness. `npm run check` will not catch a comment that only restates its
+identifier; read it back and ask what the signature already said.
+
+---
+
+## 19. Committing and branching
+
+**Format: `type: Capitalized subject`.** No scopes, no bodies, no `!`, no trailers. Enforced by a `commit-msg`
+hook running commitlint — not by asking nicely. Eleven types:
+
+| Type       | Meaning                             |
+| ---------- | ----------------------------------- |
+| `feat`     | A new feature                       |
+| `fix`      | A bug fix                           |
+| `docs`     | Documentation changes               |
+| `style`    | Code style (formatting, etc)        |
+| `refactor` | Refactoring with no feature change  |
+| `perf`     | Performance improvements            |
+| `test`     | Adding or updating tests            |
+| `chore`    | Maintenance, dependency updates     |
+| `add`      | Adding new features or files        |
+| `update`   | Updating existing features or files |
+| `remove`   | Removing features or files          |
+
+`add`, `update` and `remove` are house-style extensions beyond Conventional Commits.
+
+```
+feat: Added Components V2 panels for economy and audit logging
+fix: Try every unencrypted SoundCloud transcoding before failing
+remove: Removed the music system
+refactor: Renamed command files from slash to command
+```
+
+`npm run commit` is a guided wizard. It uses `execFile("git", ["commit", "-m", msg])` with an argv array — never
+interpolate a message into a shell string, or a `"`, backtick or `$` breaks or injects.
+
+**Hooks:**
+
+| Hook         | Runs                                |
+| ------------ | ----------------------------------- |
+| `pre-commit` | `npm run typecheck` + `lint-staged` |
+| `commit-msg` | `commitlint`                        |
+| `pre-push`   | `npm run lint` + `test:coverage`    |
+
+`typecheck` is in `pre-commit` because staged-only linting cannot see a type error introduced in an unstaged
+file.
+
+**Branches:** `feature/your-feature-name` for normal work. Push with `git push -u origin <branch>`; on a network
+failure retry up to four times with exponential backoff (2s, 4s, 8s, 16s).
+
+**Do not open a pull request unless explicitly asked.**
+
+**Before committing:** `npm run check`, plus the loader smoke test from [§3](#3-running-testing-verifying) if you
+touched loading, naming or the build. Regenerate `docs/commands.md` if the command surface changed. Commit related
+work together — a rename sweep is one mechanical commit, not 100.
+
+---
+
+## 20. CI
+
+`.github/workflows/ci.yml` — four jobs (`check`, `test`, `build`, `audit`), triggered on `branches: ["**"]` for
+push and pull_request so a feature branch is verified before a PR exists. Node version comes from `.nvmrc`, not a
+hardcoded string. The `build` job **verifies the `dist/` artifact**, which is what catches the unrewritten alias
+problem.
+
+`.github/workflows/nightly.yml` — `cron: "0 0 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests`,
+`npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false alarm), and
+`notify-on-failure` which opens a labelled issue. Permissions default to `contents: read` at the top and are
+escalated to `issues: write` on that one job only.
+
+**Suppressions expire, and `tests/config/suppressions.test.ts` is what makes that true rather than a wish** —
+it fails on an active entry with no reason, no fixing version, a lapsed expiry, or one more than a year out.
+`.nsprc` and `.snyk` each require three things: a written reason, the version that
+fixes it, and a hard expiry — so a suppression cannot rot silently into a permanent blind spot. Every `overrides`
+pin in `package.json` needs the same treatment.
+
+---
+
+## 21. Decisions already made — do not relitigate
+
+### The music system, and why the removal notice is gone
+
+It was deleted in `9541ec6` and rebuilt in September 2026 on a different architecture. The old conclusion —
+"SoundCloud serves DRM, so this cannot work" — was **not right**, and the reasoning is worth keeping so it is
+not reached again:
+
+- **yt-dlp refuses DRM formats by design.** Its SoundCloud extractor marks only `ctr-`/`cbc-` protocols as
+  protected and skips them, keeping `progressive`, `hls` and `hls-aes`. Nothing is decrypted, and nothing here
+  ever will be. The old stack simply asked for the wrong transcoding.
+- **The FFmpeg segfault is real and now irrelevant.** `ffmpeg-static` still dies with SIGSEGV on any hostname
+  (re-verified on 5.3.0, glibc 2.39: loopback exits 183, a hostname exits 139). It only fires on DNS, so
+  **yt-dlp owns every HTTP request and FFmpeg only ever reads `pipe:0`**. The old loopback `StreamRelay` is
+  gone with the bug it worked around.
+
+**Opus can pass straight through, which is what makes this small.** Discord wants Opus at 48 kHz and both
+sources already offer it, so at the track's own level nothing is decoded: YouTube's WebM/Opus goes to
+`StreamType.WebmOpus`, SoundCloud's progressive Opus to `StreamType.OggOpus`. That is why there is **no Opus
+library** — `@discordjs/opus` and `opusscript` are both unnecessary — and **no sodium**, because
+`@discordjs/voice` reaches Node's own `aes-256-gcm`. One new dependency, `@discordjs/voice`, and no native
+modules.
+
+**Both binaries are optional dependencies, resolved at runtime.** `ffmpeg-static` and `youtube-dl-exec` are in
+`optionalDependencies`, which is the whole trick: npm installs them on a normal machine and **skips them
+without failing** when the download cannot happen, so `npm ci` in CI is never hostage to GitHub being
+reachable. Proved rather than assumed — with them as ordinary dependencies a blocked download aborts the whole
+install; as optional ones the install succeeds and the packages are simply absent.
+
+Lookup order is `MUSIC_*_PATH` → `PATH` → the npm package → `bin/`, resolved from `repoRoot()` rather than the
+working directory. **For yt-dlp that order is only the tie-break: the newest copy that runs wins, wherever it
+lives.** A first-found order made `npm run music:setup` useless — it writes to `bin/`, which came last, so while
+`youtube-dl-exec`'s copy existed the fresh one never ran. That package downloads the latest yt-dlp once, in its
+`postinstall`, and never again — read out of its `scripts/postinstall.js`, not assumed — so its copy is exactly as
+old as the last `npm ci`. A configured `MUSIC_YTDLP_PATH` still wins outright, because it is an explicit choice.
+`/music status` prints the version and its age, and warns past `STALE_AFTER_DAYS`.
+
+**A refusal from YouTube is not a stall, and is not retried like one.** `classifyProblem` reads what the dying
+downloader said: a 403 earns one fresh try (it is sometimes an address that expired between asking and
+downloading), a bot check or an unavailable video earns none. Retrying either three times meant six more requests
+to YouTube, and request volume is part of what gets a host flagged in the first place. Descriptions are cached for
+ten minutes for the same reason — a volume change used to cost two extractions — and a refused track's entry is
+dropped so its one retry looks afresh. The reason lands on the panel for a minute (`NOTICE_MS`), because the log
+is not where anybody in the voice channel looks.
+
+> [!WARNING]
+> **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
+> `yt-dlp --version` exits 0 and `yt-dlp -version` exits 2. One hardcoded flag in the probe hid FFmpeg on every
+> machine, and it looks exactly like the binary being absent. `VERSION_FLAG` holds the pair, with a test.
+
+**The container installs them itself**, because both npm installs in the `Dockerfile` run `--ignore-scripts` —
+so the optional packages would install there and stay empty. FFmpeg comes from apt, yt-dlp from its releases.
+That is also the answer for Railway and anything else building the `Dockerfile`: nothing to configure. Vercel
+and other serverless hosts cannot run this bot at all — a gateway client needs a persistent socket.
+
+**FFmpeg is optional**: without it, a track that is not already Opus is refused by name rather than played as
+silence, which is exactly how the old system failed.
+
+**The download is buffered, and without that nothing plays for more than a few seconds.** Discord consumes at
+real time, so with only a 64 KB pipe to write into, yt-dlp spends the whole track blocked on a full pipe — and a
+downloader that has stopped reading its own socket gets the connection dropped under it, which arrives as
+`ERR_STREAM_PREMATURE_CLOSE` three to five seconds in, every track, on every source. `BUFFER_BYTES` (16 MB, over
+a quarter of an hour of Opus) is a `PassThrough` between the last process and the player, so an ordinary track is
+downloaded once and played out of memory. On the transcoding path it goes **after** FFmpeg, because FFmpeg reads
+eagerly and is what keeps yt-dlp off the pipe. `tests/lib/musicSource.test.ts` proves it with a downloader that
+writes a megabyte and then touches a file: without the buffer the file never appears.
+
+Two things go with it. `ytDlpStreamArgs` passes `--no-playlist` — a YouTube link copied out of a playlist carries
+`&list=`, and the whole list would otherwise go down one pipe — plus `--retries` and `--socket-timeout`, so one
+dropped connection costs a retry rather than the track. And **stderr is captured rather than discarded**: a
+downloader that dies now says why through `onProblem`, which is the difference between a log line naming
+"Sign in to confirm you are not a bot" and one saying a stream closed.
+
+**A stall and an ending arrive as the same event, and that distinction is the whole design.** `decideOnIdle` in
+`musicQueue.util.ts` compares `AudioResource.playbackDuration` against the track's stated length: short by more
+than `EARLY_TOLERANCE_MS` means it came apart, so it retries up to `MAX_TRACK_ATTEMPTS` rather than advancing.
+Skip and Stop set flags that beat the check, and a live stream reports no duration so it can never be judged
+short. It is pure arithmetic, so every branch is a test rather than a live stall.
+
+**The volume is an FFmpeg filter, and it is not `inlineVolume`.** That option decodes Opus to PCM, scales it
+and encodes it again, which needs `@discordjs/opus`, `node-opus` or `opusscript` — read out of `prism-media`'s
+`opus/Opus.js`, none of which is installed — and it would undo the passthrough on every track whether or not
+anybody touched the level. So `/music volume` and the panel's two buttons instead re-open the current track
+with `-af volume=`, and FFmpeg is the only thing in the stack that can do it. Four things follow:
+
+- **The player starts at 50%, so FFmpeg is on the normal path wherever it is installed.** `DEFAULT_VOLUME` (50)
+  is where a session starts and `UNITY_VOLUME` (100) is the track's own level. `planStream` takes `filtered`,
+  and only a level other than `UNITY_VOLUME` or a seek sets it — so a player turned up to 100 still passes Opus
+  straight through. A host with no FFmpeg starts at 100 rather than claiming a level it cannot apply, keeps
+  playing, and is told plainly that the control needs one (`requireVolumeControl`, written once because both
+  the command and the button ask it).
+- **The re-open seeks, and the seek has to be added back.** `-ss` sits before `-i` so packets are discarded
+  rather than decoded, and `MusicSession` carries the offset in `playedMs` — without it a resource that starts
+  counting from zero makes every changed track look like it came apart, and `decideOnIdle` replays it.
+- **Nothing waits for it.** yt-dlp takes longer than the three seconds Discord gives a button, so `setVolume`
+  records the level, answers, and re-opens in the background.
+- **The player falling idle mid-swap is not the track ending.** `play` marks itself as re-opening before it
+  yields, and `#onIdle` returns while that is set.
+
+**A queue where nothing opens ends rather than walking itself.** Each failure to open steps past the track, and
+under `loop: "queue"` that is a circle — so `#failures` bounds it at one pass and then ends the queue. Without
+it the loop is microtasks, which starves the event loop rather than merely spinning.
+
+**The panel is live: `PANEL_REFRESH_MS` rewrites it while a track plays**, so the bar moves on its own. Five
+seconds is a fifth of what Discord allows a channel, and it edits through `channel.messages.edit` rather than the
+interaction, because an interaction token dies after fifteen minutes and queues outlive that. An edit that fails
+drops the panel instead of retrying a message that will 404 for ever, and the ticker stops when the queue does.
+
+**Between the edits the panel still moves, because `<t:…:R>` is counted down by the reader's own client.** That
+is the only animation a Discord message has, and it costs nothing. The bar beside it is drawn in box characters
+inside a code span rather than in emoji: an emoji bar reflows as the head moves through it, so the whole line
+appears to twitch rather than to progress.
+
+Things that are deliberately **not** there: DisTube and its plugins (the yt-dlp and SoundCloud ones were two
+years stale), and Spotify playback. `open.spotify.com` is on yt-dlp's `KnownDRMIE` list beside Disney+; a
+Spotify link is refused with an explanation rather than played.
+
+**Autocomplete answers inside three seconds or not at all.** A `/play` search spawns yt-dlp, which regularly
+runs past the window Discord keeps the interaction open — and replying after that is `DiscordAPIError[10062]`,
+logged as an error with nothing offered to pick. `Suggester` in `musicSearch.util.ts` races the search against
+the budget left on **that** interaction, answers a slow one with the literal "search for what I typed" row, and
+lets it finish into the cache for the next keystroke; a burst of keystrokes on the same text is one process. The
+dispatcher notes 10062 at `debug` rather than `error`, because an expired interaction is somebody typing fast.
+
+A fixed budget was not enough, because it ignores how long the interaction had already been open before the
+handler ran. `interactionAge` measures from the snowflake — Discord's clock — **and** from the moment this
+process received it, and takes the longer: a host whose clock is behind Discord's reads every interaction as
+brand new and searches straight past the window. The snowflake is dropped altogether when the two disagree by
+more than the window it is measuring. When nothing is left, the answer is skipped rather than sent, because a
+refused request and a log line buy nothing the reader can see.
+
+**The music system has a switch and a guest list, and `checks.ts` is the gate for both.** `musicsettings` holds
+one row per server — `enabled`, and `djRoleIds` — read before every music command and cached exactly like the
+prefix. Four things about it are load-bearing:
+
+- **A server with no record is on and open**, so a fresh install plays music without anybody finding a switch.
+- **`/music system` is exempt from the gate**, by name, because it is the way back in for a server that turned
+  the system off. Renaming the subcommand without `MUSIC_SYSTEM_SUBCOMMAND` would lock that server out, which is
+  what the test on the constant pins.
+- **Manage Server always reaches the player**, whatever the DJ roles say — a server could otherwise pick a role
+  nobody holds and lock itself out. The switch is not like that: off is off, for the manager too, because a
+  switch that quietly still works for one person is a worse thing to debug.
+- **`Subcommand.permissions` exists for this.** `/music` is open to everybody and `/music system` is not, and a
+  permission on the whole command would have locked the player to managers. `runChecks` merges the two lists.
+
+`/music system` takes an autocompleted `action`, and the autocomplete reads the current settings so the rows say
+what they will do **and** where things stand — "Turn the music system off (it is on)", "Choose who may use it
+(2 roles)". Static choices could not do that. The roles themselves are a pre-ticked role select on the panel
+rather than anything typed, which is anti-pattern 19.
+
+**The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
+before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
+the host actually has.
+
+### One command object, both surfaces
+
+No `SlashCommands/` / `PrefixCommands/` folder split, and no `.slash.ts` / `.prefix.ts` suffixes. Both would
+describe an architecture this codebase deliberately does not have, and would undo the deduplication the rewrite
+exists to achieve.
+
+### Every folder under `src/` is lowercase
+
+`commands/<category>/` and `events/<group>/` both, matching the rest of `src/`, which is uniformly camelCase.
+Two casing regimes inside one tree is a rule to remember rather than a distinction the reader gains anything
+from — and the event groups were the last holdout, PascalCase beside a lowercase `message/` sibling.
+
+### No dedicated `types/` directory — and what a domain's `.types.ts` is for
+
+Measured rather than assumed: 46% of exported types never leave the file that declares them. Types live beside
+the code that owns them.
+
+A `src/lib` domain folder has a `<domain>.types.ts` and a `<domain>.constants.ts` **only for what more than one
+module uses** — `Track`, `QueueState`, `DEFAULT_VOLUME`, every `*_PANEL_ID` a renderer and its button handler
+share. That is the domain's vocabulary, and one place to read it. Anything only its own module reads stays in
+that module, which is the measurement above still being respected. The split was made with the type checker
+rather than by eye: every exported type and constant, attributed through the barrels to the file declaring it,
+counted by the other files that import it. Catalogues (`SHOP_ITEMS`, `PETS_BY_RARITY`) and label tables
+(`AUDIT_EVENT_LABELS`, `COLOUR_CHOICES`) are content rather than vocabulary and stay with the functions that
+look them up. A `.types.ts` file emits no JavaScript and a `.constants.ts` file holds no functions; the
+conventions test fails on either, and both halves were proved to go red.
+
+### One leaderboard command, and no command that only forwards to another
+
+`/leaderboard` serves both the economy and the levelling board, with a button to swap and a **Find me** button
+that jumps to the page you are on. There is deliberately no `/levelling leaderboard` — a second name for the same
+screen is the overlap this pass removed, not a convenience.
+
+The same reasoning deleted `/use` (the inventory panel's per-row Use buttons do it better), `/rehome` (now
+`/pet rehome`, with `t?rehome` kept as a prefix alias) and `/pet buy` (the shop sells pets with a button; `/pet
+rename` covers the one thing `/pet buy` could do that the shop could not). A command whose whole body is
+"do what that other command does" should be an alias or a subcommand, not a command.
+
+**`/levelling setup` and `/levelling edit` are the exception, and it is deliberate.** They open the same panel
+because the panel shows the current configuration — setting up and changing it are one gesture — and people look
+for both names. One line each, delegating to one function; not two implementations.
+
+### Global by design
+
+The blacklist and the user profile are intentionally not guild-scoped. See [§12](#12-multi-guild-rules).
+
+---
+
+## 22. Anti-patterns that must not come back
+
+The full numbered list is [`docs/original-bot/04-AUDIT-FINDINGS.md`](docs/original-bot/04-AUDIT-FINDINGS.md) (100 findings). The
+short version — the classes of defect the conventions above exist to prevent:
+
+1. Reading `process.env` before the env file loads, and trusting `dotenv` to override an already-loaded value
+   (it does not). One validated `loadEnv()` first, always.
+2. Un-awaited async registration, so login races the command deploy.
+3. Handlers registered twice because a directory scan re-invokes a module that was already called directly.
+4. A circular import back into the entry point, resolving to `{}` and being used as a client.
+5. Properties bolted onto the client at runtime — 20 of them in the original. Declare fields on `TestifyClient`.
+6. Global single-slot state for per-interaction data (`client.helpData`).
+7. A handler whose parameters are in the wrong order, so its first guard always returns and the feature is
+   silently dead. Two features in the original never ran once.
+8. `catch` blocks calling `interaction.reply()` with no `replied`/`deferred` guard.
+9. Raw errors interpolated into user-visible embeds.
+10. Swallowing an error into a `.catch()` that only logs, then continuing on a possibly-undefined value.
+11. Read-modify-`save()` on balances with no atomic operation — money can be duplicated.
+12. Two models sharing one collection with different shapes.
+13. Directory scans resolved against the CWD (`readdirSync("./src/…")`), which breaks `dist/` and any start from
+    another directory. Use `core/paths.ts`.
+14. `console.*` as the log path, and a logger that drops the error object it was handed.
+15. Undeclared dependencies resolving through transitive hoisting.
+16. An alias map duplicated across several files, and a category enum whose values drift from the folder names.
+17. A commit convention with nothing enforcing it.
+18. A README describing features and scripts that do not exist. Regenerate `docs/commands.md`.
+19. **A user-facing flow that requires typing an ID.** `/shop buy <id>` made people read an ID out of one message
+    and retype it. If the bot knows the catalogue, the user should be picking from it. `/use <item>` and
+    `/pet buy <species>` were both deleted for this — the inventory panel and the shop already put a button
+    beside each thing, and `/use`'s autocomplete was a hardcoded list of three items that did not even match the
+    real catalogue.
+20. **A control that acts on data it is not showing.** A Use button beside someone else's item that spends yours.
+21. **Two commands that do one job.** `/leaderboard`'s top-level `run` was a verbatim copy of its `economy`
+    subcommand, and the levelling board was hidden as a second subcommand of an economy command. One command,
+    one implementation, and a button to swap boards.
+
+---
+
+## 23. Working style expected here
+
+Behaviour that has been asked for repeatedly in this repo, recorded so it does not need asking again.
+
+**Verify, do not assume.** Read the actual source of a dependency before theorising about it. Twice in this repo
+a confident diagnosis was wrong in a way five minutes of reading `node_modules` would have caught: the yt-dlp
+plugin's `update` option already defaulted to `true`, and its `getStreamURL` hardcoded a format that could not be
+overridden.
+
+**Say what you could not verify.** If a fix cannot be tested in the current environment — no network, no live
+Discord, no database — say so plainly and name which part is proven and which is inference. Do not present a
+plausible fix as a confirmed one.
+
+**Own mistakes plainly and move on.** State the correction in a sentence, fix it, continue. No ceremony, no
+re-litigating.
+
+**Do the whole task.** If part of it is blocked, finish everything else and say explicitly what was left and why.
+Scaling the work down is the user's call.
+
+**Prefer the fix with no setup cost.** This is an open-source bot that has to work on macOS, Windows and Linux
+with minimal installs. "Install this system-wide" is a last resort, and if it is genuinely needed, it should
+degrade automatically rather than fail.
+
+**Read the log the user pasted, all of it.** The line that mattered in a 900-line FFmpeg dump was the last one.
+
+**Regenerate, do not hand-edit.** `docs/commands.md` comes from `npm run docs:commands`.
+
+---
+
+## 24. The dashboard
+
+A web dashboard for controlling the bot, built to the plan in [`docs/dashboard/design-plan/`](docs/dashboard/design-plan/00-INDEX.md).
+**Read the relevant document there before changing anything in this section** — it holds the reasoning, the
+threat model and the phase order. `13-ROADMAP-AND-RISKS.md` says what is built and what is next.
+[`docs/dashboard/guide.md`](docs/dashboard/guide.md) is the practical detail — the layout, the six edits a screen
+takes, the components and the traps; **this section wins where the two overlap.**
+
+**It is off by default.** `DASHBOARD_ENABLED` is the switch, and while it is false a bot-only install needs none
+of the other dashboard variables. Enabling it without `DISCORD_CLIENT_SECRET`, `DASHBOARD_BASE_URL` and
+`DASHBOARD_SESSION_SECRET` fails at startup naming all three at once.
+
+### Three workspaces, one repository
+
+```
+src/api/       Hono routes, inside the bot process so they can read the live client cache
+shared/        @testify/shared — types and zod schemas the API and the SPA both import
+dashboard/     Vite + React + Tailwind SPA
+```
+
+Inside `dashboard/src`, the same rule as the bot: technical role first, then domain.
+
+```
+app/            AppShell, RequireAuth, ErrorState, and layout/ for the sidebar
+components/
+  brand/        Logo and LogoTile — the mark, inline, inheriting currentColor
+  primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
+                SegmentedControl, DataList/Figure, Tooltip
+  form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
+  motion/       Backdrop (three.js), Reveal, AnimatedNumber
+  ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
+config/         navigation and feature registries — see "Adding to the dashboard" below
+features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
+hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible, useDebounced
+lib/            api, cn, queries, redirect, tint, and three/ for the backdrop's maths and shaders
+```
+
+A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL
+means, what a page count is, which channels can be posted in — belongs in a `.utils.ts` beside it where it can
+be tested without rendering. `features/levelling/` is the worked example: a 416-line file became a 45-line page,
+four tabs, three shared components and two testable modules.
+
+**What is built:** health, the OAuth2 sign-in flow with sessions, the guild picker, a guild overview, the owner
+console, the status page, giveaways, and the levelling, welcome, audit-logging and server settings. The rest of the settings screens follow
+the same shape —
+`docs/dashboard/design-plan/13-ROADMAP-AND-RISKS.md` is the running order.
+
+| Route                   | Screen                                                                     |
+| ----------------------- | -------------------------------------------------------------------------- |
+| `/sign-in`              | One button; also the setup screen for a half-install                       |
+| `/guilds`               | Picker, with an invite card for guilds without the bot                     |
+| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes              |
+| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings                           |
+| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                             |
+| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save                         |
+| `/guilds/:id/automod`   | Discord's own filters — no database behind it                              |
+| `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                     |
+| `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                              |
+| `/guilds/:id/music`     | The music kill switch and the DJ roles                                     |
+| `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                              |
+| `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                 |
+| `/guilds/:id/giveaways` | Start, end early, reroll and delete — each keyed to its own row            |
+| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page       |
+| `…/members/:userId`     | One member: standing, roles, warnings, softban, moderation controls        |
+| `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting    |
+| `/guilds/:id/commands`  | Per-command switches for this server                                       |
+| `/commands`             | Every command, searchable, with the coverage tile                          |
+| `/status`               | Online or not, uptime, speed, packages and outside services, 30 days back  |
+| `/help`                 | Getting started: first steps, how commands work, what each section is for  |
+| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                            |
+| `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
+
+| Command                 | What it does                                                  |
+| ----------------------- | ------------------------------------------------------------- |
+| `npm run dev:all`       | Bot and Vite together. The page is on :5174, the API on :3000 |
+| `npm run dashboard:dev` | Just Vite                                                     |
+| `npm run build`         | shared → bot → dashboard, in that order                       |
+| `npm run build:shared`  | Only needed by hand after editing `shared/src`                |
+| `npm run test:coverage` | Both projects, each against its own thresholds                |
+
+In development Vite proxies `/api` to the bot, so the browser only ever talks to one origin and session cookies
+work with no CORS configuration at all. In production the API serves `dashboard/dist` from the same port.
+
+**`dev:all` starts Vite only once the API answers.** `startApi` runs after `client.login()`, so for the twenty-odd
+seconds the bot spends connecting there is nothing on the port — and the proxy answers every poll in that window
+with a stack trace that reads like a broken install. `scripts/waitForApi.ts` polls `/api/health` first (no
+`wait-on`; it is a `fetch` in a loop, and one fewer install matters for a self-hosted bot), and refuses with a
+sentence naming the cause when `DASHBOARD_ENABLED` is false or the bot never comes up. `tsx watch` restarts the
+bot on every save, which the ordering cannot help with, so the proxy's own error handler is replaced with one
+line per outage — Vite registers its handler immediately **after** calling `configure`, so the replacement waits
+a tick, and that ordering was read out of `vite/dist/node/chunks/node.js` rather than guessed.
+
+### `@testify/shared` is a real package, not an alias
+
+**It is deliberately absent from `tsconfig.json`'s `paths`, and adding it there would break the build in a way
+nothing catches.** `tsc-alias` rewrites every alias in that map to a relative path inside `dist/`, and nothing
+outside `src/` is emitted there — with the alias present it resolved `@testify/shared` to `dist/index.js`, which
+is the bot's own entry point. That is anti-pattern 4 in [§22](#22-anti-patterns-that-must-not-come-back), it
+type-checks, and the only symptom is an empty object at runtime.
+
+So the workspace resolves like any other package, and each consumer reads what suits it:
+
+| Consumer          | Reads                     | Needs a build? |
+| ----------------- | ------------------------- | -------------- |
+| `tsc`             | `types: "src/index.ts"`   | No             |
+| Jest              | an explicit source mapper | No             |
+| Vite              | an alias to source        | No             |
+| The bot's `dist/` | `main: "dist/index.js"`   | **Yes**        |
+
+`prepare` builds it after any install, so a fresh clone works. Editing `shared/src` and then running the built
+bot is the one case that needs `npm run build:shared` by hand.
+
+> [!WARNING]
+> **`tsx` reads the built `dist`, not the source — and `shared/dist` is gitignored.** So does the dev bot, not
+> just the production one. Pull a commit that adds an export to `shared/src`, run the bot without reinstalling,
+> and that export is `undefined` at runtime: every route validating with it dies on
+> `Cannot read properties of undefined (reading 'safeParse')`, naming nothing that points at the cause. `dev`
+> and `dev:all` now build shared first — about 40ms — so the state cannot happen.
+
+`shared/` stays dependency-light: zod and nothing else. No discord.js, no React.
+
+### The security layer
+
+Built before the first screen, deliberately: retrofitting a guard into fifteen routes is much harder than
+writing it once. Every piece has a test proven able to fail.
+
+| Where                     | What it does                                                                   |
+| ------------------------- | ------------------------------------------------------------------------------ |
+| `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS      |
+| `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
+| `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
+| `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
+| `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
+| `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
+| `lib/secretBox.util.ts`   | AES-256-GCM over the OAuth tokens, keyed by HKDF from the session secret       |
+
+Rules that are easy to break and silent when broken:
+
+- **Nothing reads `c.req.param()` or a raw body.** Everything goes through `validate.ts`, so an unvalidated
+  snowflake can never reach a Mongo filter and a page number can never become a negative skip.
+- **`script-src` has no `'unsafe-inline'` and no `'unsafe-eval'`.** That single directive is what makes an
+  injected `<script>` or `onerror=` inert. A lint rule bans `dangerouslySetInnerHTML`, `innerHTML`, `eval()`
+  and `new Function()` so the CSP is the last line rather than the only one.
+- **`returnTo` rejects `//evil.example`.** A protocol-relative URL is an absolute one to a browser, so a check
+  that only looks for a leading `/` is an open redirect. Backslashes go too — browsers normalise them. The
+  **path and the query are checked separately**, because `RequireAuth` carries `pathname + search` through the
+  sign-in and a single pattern that refused `?` made signing in impossible from every tabbed page. A `//` inside
+  a query _value_ is data — the browser still resolves the path to this origin — and the one place a value
+  becomes a redirect target is `returnTo` itself, which is parsed by the same schema on the way through.
+- **`Secure` on cookies is conditional on `NODE_ENV`.** Setting it unconditionally breaks every
+  `http://localhost` install, which is the most common self-hosting trip-up there is.
+- **`DASHBOARD_BIND` defaults to `127.0.0.1` and `DASHBOARD_TRUST_PROXY` to false.** Binding everywhere puts an
+  admin panel on the internet; trusting `x-forwarded-for` with no proxy in front lets anyone forge their
+  rate-limit bucket.
+- **Rotating `DASHBOARD_SESSION_SECRET` signs everybody out**, because the sealed tokens no longer open. That
+  is the intended behaviour after a leak, and `npm run secret -- --write` is the whole procedure.
+
+### `requireGuild` is the security boundary
+
+Everything behind it assumes it ran, so five things in it are load-bearing:
+
+1. **The guild id comes from the path parameter only**, and is shape-checked before it is used to look anything
+   up. A handler reads `c.get("guild").id`, never a guild id from a body. This is the most likely way one
+   guild's data leaks into another's — make it a review rule.
+2. **`guild.members.fetch()` is live, every request.** The OAuth guild list is a login-time snapshot, so
+   someone demoted five minutes ago still has it in their session. This is the difference between losing access
+   on their next click and losing it next time they sign in.
+3. **404 before 403.** The bot not being in a guild is not a secret, and "here is an invite" is the right answer.
+   A 403 for a guild the caller cannot manage carries a code and nothing else — no name, no icon.
+4. **Owners skip the member fetch.** They may not be in the guild at all, and `requireOwner` answers **404**
+   rather than 403, so a manager never learns the owner console is there.
+5. **`.catch(() => null)` on the fetch.** An unknown member throws, and an unhandled throw would be a 500 that
+   looks like a bug rather than a 403 that looks like a denial.
+
+`serveDashboard()` is registered in `startApi`, **after** every route, because it is a catch-all — anything
+registered behind it silently never runs.
+
+### Rules that carry over
+
+- **The dashboard owns no logic.** It is a third surface onto the same domain — repositories and
+  `*Actions.util.ts` — exactly as commands and buttons are. A validation rule that exists only in a route
+  handler is how the two surfaces start disagreeing. `GET /levelling` is literally
+  `normaliseSettings(await getLevelSettings())`, so the web inherits the migration off the old `roleId` shape
+  rather than reimplementing it.
+- **Limits live in `@testify/shared`, not in `src/lib/`.** `LEVEL_LIMITS` moved there and `levelling.util.ts`
+  re-exports it, because the browser form and the API have to validate against the same numbers — the web
+  accepting a sixth boost role the Discord panel cannot render is exactly the drift this prevents.
+- **A list is replaced whole, not patched.** `PUT /boosts` takes the entire array, because the control is a
+  multi-select whose value _is_ the list: one request, and no add-then-remove race between two open tabs.
+- **A whole-document answer is only trusted while it is the only write in flight.** The settings sections and the
+  command toggles each answer with the entire list, and the order those answers arrive in says nothing about the
+  order the server applied them — a slow one carries a snapshot taken before a later click and would put that
+  click's control back where it was. Every mutation that writes a shared cache key therefore declares the same
+  `mutationKey` and guards `setQueryData` with `client.isMutating({ mutationKey }) === 1`, ending the burst in an
+  `invalidateQueries` so a read decides. A mutation is counted as pending across `onMutate`, `onSuccess` and
+  `onSettled` — verified in `@tanstack/query-core`'s `mutation.ts`, not assumed. Both are pinned by tests that
+  were proved to go red without the guard.
+- **A control that is typed into does not write the URL per keystroke.** `?q=` is written with `replace: true`,
+  or Back walks the user back through every character, and the request behind it is debounced (`useDebounced`) so
+  a five-character search is one query rather than five. Confirmed in a real browser, not in jsdom.
+- **Every mutation writes an audit record, after the change succeeds.** If the audit write itself fails it is
+  logged and the request still succeeds — the change did happen, and failing over the bookkeeping is worse.
+- **The API starts after `client.login()`** and closes in `src/core/shutdown.ts`. Both matter: before login the
+  cache is empty, and a listener left open holds the port against a restart.
+- **Every route runs behind an error boundary**, so a throw becomes a 500 with a code rather than a request that
+  never answers. A busy port retries before it gives up, and giving up costs the dashboard rather than the bot.
+- **No `GET` may mutate anything.** CSRF protection exempts them.
+- **`/eval` is never exposed.** It turns a stolen session cookie into a remote shell.
+- **`DISCORD_CLIENT_SECRET` never reaches a browser.** The API holds it and nothing else does.
+- **Every free-text field goes through `plainText` / `plainLine` in `@testify/shared`.** Not an HTML sanitiser —
+  nothing renders these as HTML, and stripping tags would break the `<@123>` and `<#456>` Discord itself needs.
+  What it strips is what a markup sanitiser would miss: control characters, and the bidi overrides and
+  zero-width characters that make a stored string read as something other than what was typed. The length bound
+  runs **after** the strip, so a value padded to the minimum with zero-width spaces is refused rather than
+  stored short.
+
+### The dashboard's Jest config earns its comments
+
+Three things there are load-bearing and non-obvious, all commented in place:
+`jest-fixed-jsdom` (plain jsdom deletes the `fetch`/`Request`/stream globals MSW needs), a
+`transformIgnorePatterns` allowlist (MSW's CommonJS build requires several ESM-only packages), and a
+`moduleNameMapper` pinning React to the workspace copy (`discord-html-transcripts` drags React 18 into the root
+`node_modules`, and elements built by 19 rendered by 18 fail with "Objects are not valid as a React child").
+
+### Adding to the dashboard
+
+Three registries exist so the common changes are data rather than edits to a screen. Reach for these first — a
+new `if` in the shell is nearly always the wrong answer.
+
+| To add…              | Edit                                    | And nothing else changes                                |
+| -------------------- | --------------------------------------- | ------------------------------------------------------- |
+| a sidebar section    | `config/navigation.ts`                  | icon rail, tooltips, active marker, mobile drawer       |
+| a bot feature's look | `config/features.ts`                    | the overview grid, and anywhere else a feature is shown |
+| a levelling tab      | `features/levelling/levelling.types.ts` | the tab bar, its icon, and `?tab=` in the URL           |
+
+`featureLook` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before the
+dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
+
+**A whole settings screen is six edits, in this order.** Audit logging is the most recent worked example — copy
+it rather than starting from a page.
+
+1. `shared/src/<name>.ts` — the limits, the response shape and the zod schema, exported from `shared/src/index.ts`.
+   Anything the bot already knows (an event list, a label map, a shorthand like audit logging's `all`) **moves**
+   here and is re-exported from `src/lib/`, rather than being copied.
+2. `src/api/routes/<name>.ts` — read and write through the repository, `auditChange` after the write succeeds.
+3. `src/api/routes/guilds.ts` — one `guilds.route("/:guildId/<name>", …)` line, so it inherits `requireGuild`.
+4. `dashboard/src/features/<name>/` — `use<Name>.ts`, `<name>.utils.ts` for the rules, then the page.
+5. `dashboard/src/routes.tsx` and `config/navigation.ts` — one lazy import and one nav entry.
+6. `config/features.ts` and `features/commands/commands.utils.ts` — the overview tile links to it, and the
+   command it replaces stops counting as Discord-only.
+
+Step 3 is the one that fails silently: an unmounted sub-app falls through to the SPA catch-all and lands the
+browser back on the guild picker. A request cannot tell that apart from a refusal, because `requireGuild`
+answers first — so `tests/api/server.test.ts` reads Hono's route table instead.
+
+**Two write shapes, the same split as the Discord panels ([§4](#the-panel-renderers-in-srclib)).** Levelling and
+welcome write on every control and re-read before each one, because each control is an independent decision.
+Audit logging holds a whole draft and writes once, because a channel and a set of events are one decision and
+half of it applied is not a state anyone wants. Pick by that test, not by which is less code.
+
+**Native controls are restyled once, in `index.css`'s base layer, never per call site.** The scrollbars
+(`scrollbar-width` for Firefox _and_ `::-webkit-scrollbar` for WebKit — both, or a dark page gets a bright strip
+down the side of every list), the checkbox and radio metrics, and the select's chevron all live there. Two
+consequences worth knowing: a Tailwind utility beats a base-layer rule, so the room for the chevron is the
+`SELECT` class rather than the base `padding-right`; and `scrollbar-none` is a utility for a scroller whose bar
+would draw over the thing it scrolls — the tab underline is the case it exists for.
+
+**The rewrite has a plan: [`docs/dashboard/re-write.md`](docs/dashboard/re-write.md).** Phases, invariants, a measured
+baseline and checkable exit criteria. Start there rather than in a component.
+
+**The design skills in `.claude/skills` lead the visual direction.** They are vendored rather than installed so
+they load in every session, including the remote ones. `docs/dashboard/guide.md` §19 records the palette, type
+scale and spacing as they stand today, and is a baseline to rewrite against rather than a contract to defend —
+where a skill disagrees with it, the skill wins and §19 is updated. What does **not** move: tokens stay the
+single source, the accessibility floor only rises, and the CSP is untouchable.
+
+**No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
+`--color-feature-*` tints and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
+`.tsx` is a review comment.
+
+**The radius scale is four tokens and nothing else**: `--radius-chip` (6px) for inline chips, bars and the
+segmented control's buttons, `--radius-field` (8px) for inputs, list shells and rows, `--radius-card` (10px) for
+cards and panels, `--radius-tile` (16px) for the brand tile. `rounded-full` stays, because a pill is a shape
+rather than a size. Seventeen call sites reached for Tailwind's own `rounded`, `rounded-sm`, `rounded-md`,
+`rounded-lg` and `rounded-2xl` — 4px, 2px, 6px, 8px and 16px, so the page carried five corner sizes nobody
+chose, two of them barely rounded at all. `src/test/radius.test.ts` sweeps `.ts` **and** `.tsx`, because
+`fieldStyles.ts` is a class string on every input in the app and a `.tsx`-only sweep missed it.
+
+**Nor does one write its own padding.** `Card` takes `padding="none" | "compact" | "default"`, and all three use
+the same 24px inline padding so every card's content starts on the same column whatever its density — a card
+that reaches for `p-4` puts its text 8px left of the rest of the page. Vertical rhythm is one `gap-6` on the
+content column in `AppShell`, not a margin per section. Both are pinned by tests, and both were found by
+measuring the rendered page rather than by looking at it.
+
+A margin between siblings is nearly always the wrong tool — a flex column with a `gap` is the right one, because
+it cannot leave a stray margin behind when a sibling is conditionally absent. **A grid of panels wants
+`items-start`** unless the cards genuinely should match heights: without it the shorter card stretches, and the
+dead space inside its border is the "massive gap" that keeps getting reported. The one legitimate margin is
+inside a CSS `columns` layout, where `gap` does not apply between items at all (`EventGroup`'s `mb-5`).
+
+**A two-column layout needs enough cards, of similar enough size, or it leaves holes.** Both mechanisms fail
+the same way and neither can be reasoned around:
+
+- **A `columns` balancer can only give a column a _prefix_ of the DOM order**, so with one card much taller than
+  the rest, source order decides how big the void is. It is the right tool with five panels of roughly one size
+  — the audit log's event groups balance to within 80px — and the wrong one with two.
+- **A `grid` with an odd number of cards orphans the last one**, leaving half a row empty under it. Give it
+  `col-span-2` when it is genuinely the odd one out, as the usage tab's screens panel is.
+- **A grid item defaults to `min-width: auto`, so the widest card sets the whole track.** One guild card in the
+  picker carried a `shrink-0` "No permission" badge, and its min-content pinned the page at 391px: at a 320px
+  viewport every other card shrank and that one did not, so a phone got a horizontal scrollbar on the first
+  screen after signing in. `[&>li]:min-w-0` on the `<ul>` is the fix, and `FeatureGrid` already had it.
+  Measured in a real browser at 320px and 390px across all seventeen routes, because nothing in jsdom can see
+  a layout.
+
+**The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
+with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
+"massive gaps", and correctly. Two columns of cards was the wrong container for it. Each card is now full width
+and splits _inside_: what the setting is on the left in a fixed 288px column, the controls on the right at a
+readable measure. No arrangement of card heights can leave a hole, the descriptions all start on one column,
+and the page reads as the list of settings it is. Reach for that shape before a masonry whenever the cards are
+forms rather than tiles.
+
+**No two modules may differ only by case.** `Field.tsx` beside `field.ts` is two files on Linux and one on
+macOS or Windows, so `@/components/form/Field` resolves to the class strings there and the page dies at start-up
+with `does not provide an export named 'Field'`. Nothing local catches it — Linux is case-sensitive and so is
+CI — so `tests/core/conventions.test.ts` walks `src`, `shared/src` and `dashboard/src` and names the pair. The
+class strings are `fieldStyles.ts` for exactly this reason.
+
+**Nor does one format its own dates.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`, `clockTime` and
+`since`, and the locale is pinned rather than left to the browser: a bare `toLocaleString()` renders `7/30/2026`
+for one admin and `30/07/2026` for another, and the two are unreadable as each other. `30 Jul 2026` cannot be
+misread by anybody, which matters most on an audit trail. Eleven call sites each had their own answer before
+this existed.
+
+**Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
+places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
+`LABEL` / `CHECK_ROW` class strings exist so a control's semantics and its type scale are each written once.
+Before writing a local `Row`, `Figure` or picker in a feature directory, check `components/primitives`.
+
+`SwitchTrack` is the worked example of why. `Toggle` and the per-command switch each had their own copy of the
+same track and knob, so one wrong colour was two bugs — and the copy had also drifted, rendering a raw
+translation key into the description a screen reader reads. Two things about it are load-bearing:
+
+- **It has to stay a sibling of the `<input>` that drives it.** The track colour is a `peer-checked:` rule, and
+  a general sibling combinator cannot reach a descendant — which is also why the knob takes the state as a prop
+  rather than a `peer-checked:` class of its own. Wrapping the track in a positioning `<span>` silently stops it
+  ever turning on; it takes a `className` instead.
+- **Neither half of the knob may be `foreground`.** That token inverts with the theme, so a knob using it is
+  white on the filled track in dark and near-black in light, where it reads as a hole punched through the
+  switch. White on the fill, the field-border colour on the card — both already measured by `contrast.test.ts`.
+
+### The accessibility floor is automated, the rest is not
+
+`jest-axe` runs on every page-level test through `src/test/axe.ts`, with `color-contrast` disabled — jsdom
+computes no styles, so that one rule can only report false negatives there. It is a floor, roughly 40% of
+issues; `docs/dashboard/design-plan/10-ACCESSIBILITY.md` lists the manual passes for the rest.
+
+Four things it does not catch, all built deliberately:
+
+- **`RouteAnnouncer`** reads the new `document.title` into a polite live region after a navigation. Without it a
+  screen reader gets no signal that an SPA changed page at all.
+- **Role colours are swatches.** `RoleSwatch` puts the colour on a bordered dot and leaves the name at full
+  contrast — a role set to `#1a1a1a` as text is invisible on this background.
+- **Sidebar groups are labelled lists, not headings.** A heading there would put "Testify HQ" into the page's
+  heading outline twice; the `<ul aria-label>` names the group without competing with the page.
+- **`prefers-contrast: more`** swaps dividers for the interactive border and muted text for white.
+
+`eslint-plugin-jsx-a11y` is deliberately absent: its latest release peers on ESLint ≤9 and this repo is on 10,
+so installing it needs `--force` and breaks `npm ci`.
+
+### Tooltips describe, they never name
+
+`components/primitives/Tooltip.tsx` is the only place tooltips are configured. The rule it exists to enforce:
+**anything a tooltip says must be an addition to a control that already has its own accessible name.** A tooltip
+is a pointer affordance; a control labelled only by one is unreachable to anybody arriving another way.
+
+Four things follow, and all four have tests proved able to fail:
+
+- It opens on `focusin` as well as hover, so a keyboard reaches it.
+- It sets `aria-describedby`, never `aria-labelledby`.
+- **Escape closes it without moving focus.** tippy binds no key handler of its own — read out of
+  `tippy.cjs.js`, not assumed — so a box covering the control underneath it had no way out but tabbing away.
+  That is WCAG 2.2 1.4.13, dismissible.
+- **`interactive: true` and a 120ms hide delay** let the pointer reach the box, which is the same criterion's
+  other half. With the default `[350, 0]` it vanished before a pointer could arrive.
+
+It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in React
+19, so the wrapper warns on every render and is one release from breaking. Popper positions with inline styles,
+which the CSP allows under `style-src 'unsafe-inline'`; that combination is verified against the real built
+page, not assumed.
+
+### Two themes, one token per line
+
+Every colour in `index.css` is `light-dark(light, dark)`, so a token is one line holding both schemes and the
+two can never drift into different sets. `color-scheme` on `:root` is the only thing the switch moves —
+`useTheme` writes `data-theme` for an explicit choice and **removes** the attribute for `system`, which is what
+lets the CSS follow the device on its own.
+
+**Three preferences share one mechanism.** Theme, accent and motion are each a `Preference` in
+`hooks/rootPreference.ts`: an attribute on `document.documentElement`, a `localStorage` key, an option list and
+a fallback. The fallback **removes** the attribute rather than writing it, so an unmarked page is already
+correct before any script runs — which is the only option the CSP leaves, and is what makes all three
+flash-free. The element is the state, not a React store, so CSS and JavaScript cannot end up disagreeing:
+`usePrefersReducedMotion` reads `data-motion` first and the media query second, in the stylesheet's own order,
+and watches the attribute with a `MutationObserver` so a change reaches the WebGL backdrop without a reload.
+
+`applyStoredPreferences()` runs once in `main.tsx`, **before** the app mounts. Without it the choices were only
+applied while the appearance page itself was mounted, so a reader who picked light and then landed on `/guilds`
+got the system theme back — remembered, and never applied. `preferences.test.ts` pins it.
+
+**An accent is a block of three tokens, and every one is measured.** `--color-primary`, `--color-accent` and
+`--color-ring` move; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
+`contrast.test.ts` reads the blocks out of `index.css` and checks all six accents against both backgrounds — an
+accent nobody measured is worse than no accent, because a control invites everybody to try it. Three of them
+(cyan, teal, amber) take **one fill for both themes**: those hues only carry white at 4.5:1 down at the light
+theme's shade, and lightening the fill for dark would fail the button drawn on it.
+
+Two things about the blocks are load-bearing:
+
+- **The selector is `[data-accent="…"]`, not `:root[data-accent="…"]`.** A swatch carries its own attribute and
+  paints itself in that accent while the page wears another — the same trick `ThemePreview` plays with
+  `color-scheme`. Verified in a real browser: an amber swatch reads `rgb(180, 83, 9)` on a teal page.
+- **Violet restates the base palette instead of relying on it.** Choosing violet leaves the page unmarked, but
+  the swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a Violet
+  swatch drawn in amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
+
+That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
+no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
+flash, before any JavaScript loads.
+
+**`light-dark()` must reach the browser uncompiled, and `build.cssTarget` is what guarantees it.** Below
+Chrome 123 / Safari 17.5 / Firefox 120 — the releases that shipped the function — Lightning CSS rewrites it
+into a pair of variables flipped by `color-scheme`. A custom property is substituted **where it is declared**,
+so every token then resolves against `:root` and two things break, both only in a build and never in
+development:
+
+- **A nested `color-scheme` stops doing anything.** The theme samples on the appearance page each rendered in
+  the page's own theme, so the Light sample was black on a dark page. An element cannot opt into the other half
+  of a token that was already resolved above it.
+- **`pickScheme` can no longer read a token**, because `getComputedStyle` hands back
+  `var(--lightningcss-light,…)var(--lightningcss-dark,…)` rather than `light-dark(…)`. `accentColour()` fell
+  through to its hardcoded fallback, so the WebGL backdrop was the same violet in every theme and ignored the
+  accent entirely.
+
+`npm run verify:bundle` fails the build if the polyfill returns **or** if `light-dark()` vanishes altogether,
+and `build:dashboard` runs it. Proved both ways: removing `cssTarget` exits 1, restoring it exits 0.
+
+**A sample of one theme inside another is `data-scheme`, never an inline `style`.** `[data-scheme="light"]` and
+`[data-scheme="dark"]` are declared in `index.css` so the cascade knows about them; jsdom cannot tell an
+inline `color-scheme` apart from the attribute, so a unit test pins the attribute and a browser check confirms
+the sample actually renders in the other theme.
+
+**Both palettes are measured.** `contrast.test.ts` reads each half out of the token and checks it against WCAG,
+so a light value nobody looked at fails the build rather than shipping. An unverified light theme is worse than
+none. Two things it caught that are worth keeping in mind:
+
+- **A pair can pass for the wrong reason.** The destructive button renders `text-white` literally, so checking
+  it against `foreground` only worked while `foreground` happened to be white. Check the colour the component
+  actually draws.
+- **Elevation cannot be recoloured.** On near-black a drop shadow reads as a smudge, so a card lifts by a 1px
+  inset highlight; on paper that highlight is invisible and only a real shadow separates card from ground.
+  `surface-edge` therefore switches technique by theme rather than switching colour.
+
+**`getComputedStyle` never resolves a custom property**, so anything reading a token in JavaScript receives
+`light-dark(…)` as source text. `lib/three/tokens.ts` splits it by the resolved `color-scheme`; before that the
+backdrop failed its hex check and silently fell back to one colour in both themes.
+
+### Every string comes from i18next
+
+`src/i18n/` holds the setup and six JSON dictionaries. English is the source; Spanish, German, French, Italian
+and Russian sit beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
+and `TranslationKey` is exported for the places that store a key rather than call `t` — `NavItem.labelKey` and
+every module-level lookup table.
+
+Rules that keep it from rotting, each with a test:
+
+- **A module-level map cannot call `t`.** It is built once, before a locale exists. Hold `TranslationKey`s in
+  the table and translate at the call site — the log levels, automod actions and command availability all do.
+- **No template-literal keys.** `t(\`appearance.${name}\`)` typechecks and then hides the key from every search,
+  including the unused-key check. Write a lookup table with the keys spelled out.
+- **A pure helper takes `t`, it does not return keys.** `describe()` in `ErrorState` stays one function whose
+  output is the sentence a reader sees, so its tests assert on prose rather than on a key nobody reads.
+- **`locales.test.ts` fails on drift**: a key English has and a locale does not, a stale key after a rename, a
+  changed `{{placeholder}}`, and any key nothing renders. Dead copy in one file is dead copy in four.
+- **`voice.test.ts` reads `en.json`**, so the British spelling, curly apostrophe and second-person rules now
+  apply to the dictionary rather than to scattered literals.
+- **`@testify/shared` names a refusal, it does not write one.** A validator there returns a `Problem` — a
+  `ProblemCode` and the raw numbers its sentence interpolates — and each surface renders it: `problemText` in
+  `src/lib/` writes the English the bot has always shown, and the one in `dashboard/src/lib/` maps the same code
+  to a `TranslationKey`. Both maps are `Record<ProblemCode, …>`, so a code with no sentence or no key is a
+  compile error. `shared/` stays zod-only and neither surface reimplements the rule.
+- **The same split holds for labels.** `shared/` says which audit events, automod presets and greeting
+  placeholders exist and how they group; `src/lib/moderation/auditLabels.util.ts` and `welcome.util.ts`'s
+  `PLACEHOLDER_HELP` write the Discord panel's English, and `auditLog.labels.ts`, `automod.labels.ts` and
+  `welcome.labels.ts` hold the dashboard's keys. `labels.test.ts` renders every one, so a key with nothing
+  behind it fails rather than printing itself on the page.
+
+**i18next does not touch the document.** `lang` is set from a `languageChanged` listener in `src/i18n/index.ts`
+— without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so
+grouping follows the chosen language rather than the browser.
+
+**Adding a language** is three steps: copy `en.json`, translate the values, and add the code to `LOCALES` and
+`LOCALE_NAMES` in `src/i18n/index.ts`. The parity test names anything missed.
+
+### Responsiveness, and the label trap
+
+Three widths: a drawer below `md`, an icon-only rail from `md`, the full sidebar from `lg`.
+
+**A tab strip wider than the screen has to say so, and has to show where you are.** The owner console's eight
+tabs are twice the width of a phone, and the strip did neither: it cut mid-word with nothing indicating the
+five tabs past the edge, and landing on `?tab=control` showed the strip at its start with no tab marked at all.
+`TabBar` now fades whichever end still has content (`edgesOf`, measured on scroll and on resize) and scrolls the
+active tab into view with `inline: "nearest"`, which cannot move the page itself. Both are verified in a real
+browser at 390px: landing on Control leaves the strip at `scrollLeft: 510` with the left end faded.
+
+**At the icon-only width the labels are `sr-only`, never `hidden`.** `hidden` is `display: none`, which removes
+them from the accessibility tree and leaves every navigation link named nothing — the exact bug this pattern
+exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
+unit test pins the class and a real browser check confirms the accessible name survives.
+
+**Every guild-scoped screen names its server, in `PageHeader`'s `eyebrow`.** Below `md` the sidebar is a drawer,
+so with it closed nothing else on the page says which server is being configured — and "turn levelling off" is a
+different decision in each of them. The overview is the one exception: its `<h1>` _is_ the name, so an eyebrow
+there would say it twice. `src/test/pageHeader.test.ts` reads the guild-scoped routes out of `routes.tsx` and
+names any screen that stopped passing it, because the prop existed unused on all twelve for as long as it
+existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
+(`/commands` is both), so neither has to invent an id to satisfy the hook.
+
+**A server's screens are grouped into collapsible sections** — Community, Moderation, Economy, Entertainment,
+Channels — because a flat list grew past what one glance takes. A screen goes where it is decided alongside, not
+where its command is filed: automod is a `settings` command and still sits in Moderation. `NavGroup.sections` in `config/navigation.ts` holds them, `SidebarSection` renders one, and adding a
+screen now means choosing which section it belongs in — `items` stays for the screens that are not a category
+(Overview and Settings). Three things about it are load-bearing:
+
+- **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
+  toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed
+  section at that width would hide the icons and leave nothing to click. The button being `display: none` is
+  what keeps `aria-expanded="false"` from contradicting a list the rail is still showing.
+- **The section holding the current page opens itself** (`sectionHolds`), so a collapsed section can never hide
+  where you are, and it re-opens when a navigation lands inside it.
+- **`allNavItems` reaches into sections.** It is what the tests and every flat consumer read; a screen reachable
+  only from a section would otherwise look like it had left the navigation entirely.
+
+`navigation.test.ts` asserts the **sorted** set of paths rather than their order, because which section a screen
+sits in is a grouping choice and reachability is the rule.
+
+### Getting every command onto the dashboard
+
+The goal is that everything the bot does is reachable from the web. `docs/dashboard/design-plan/06-COMMAND-CONTROL.md` is the
+authoritative plan and its conclusion is the thing to hold onto: **the dashboard is a third surface onto the
+domain, not onto the presentation.** A `DashboardInteraction implements CommandInput` adapter looks like it
+would give all 76 commands for free, and it does not — the most useful commands open a Components V2 panel whose
+work lives in `src/buttons/`, and a panel serialised to JSON is not a settings page.
+
+So each feature is promoted rather than proxied: route → repository or `*Actions.util.ts`, the same layer the
+command and the button already call.
+
+`GET /api/commands` is the map of that work. It reads `client.commands` — the same metadata `buildSlashCommand`
+registers with Discord — so the page cannot drift from `/help`, and `commands.utils.ts` holds the one list of
+which commands have a screen here. The coverage tile on `/commands` is that list counted, which makes the
+remaining work visible rather than a note in a document.
+
+Two rules it enforces:
+
+- **Owner commands are filtered out for everyone else**, not shown and disabled. The list of what a bot owner
+  can do is not something a server manager needs, and naming them invites probing. There is a test that the
+  response does not contain them at all.
+- **Metadata only.** The registry holds `run` functions; a test pins the exact key set of a serialised command.
+
+### The owner console, and what it is allowed to know
+
+Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so a manager never
+learns the console is there. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
+the whole console, and the logs tab is precisely the screen you want when something is wrong.
+
+**A tab whose read fails says so, and offers a retry.** Isolating the tabs is only half of it — every one of
+them then found its own way to hide the failure: runtime and control returned a skeleton whenever `data` was
+undefined, which is indistinguishable from still loading and never resolves; usage reported a 500 as **"No usage
+yet"**, telling an owner their bot is unused; the runner showed an empty command picker; and the blacklist
+showed a bare "Blocked accounts" heading, which on a security screen reads as nobody being blocked. The rule
+that falls out: **`isPending` and `data === undefined` are not the same condition**, and a fallback like
+`data?.lines ?? []` is where an unread answer becomes an empty one. `ErrorState` takes `as="h2"` for this, because
+the console owns the page's `<h1>` and a tab that brought its own would make two — which is also why
+`CommandsPage` picks its heading level from `scope`. `OwnerReadFailures.test.tsx` fails one endpoint per tab and
+was proved to go red for each of the nine branches separately.
+
+**The same class bit four guild screens, through ordering rather than a fallback.** Audit logging, treasure,
+tickets and lottery each edit a draft held in `useState` and filled from the answer by a `useEffect`, and each
+checked `isPending || draft === null` **above** `isError`. The draft never fills when the read fails, so the
+skeleton returned and the error branch under it could not be reached — a blank page, for ever. Branch on
+`isError` first. The members page had the mirror image: an `ErrorState` rendered _beside_ its `PageHeader`
+rather than instead of it, so the page carried two `<h1>`s. An early `return` keeps the default `h1`; an
+inline one takes `as="h2"`. `GuildReadFailures.test.tsx` pins both halves, and all five were proved to go red.
+
+**A refused write has to say so too, and beside the control that caused it.** The read audits above have a
+mirror: a mutation whose `.error` nothing renders. Three screens had one. The settings page rendered a `Warning`
+only for its own local validation, so a 400 from the API said nothing at all — and the page has seven
+independent sections, which is why `Section` now takes a `failure` prop rather than each section growing its own
+block: the refusal lands inside the card whose switch caused it, and the six that saved are left alone. The
+command switches roll back optimistically on a refusal, which on its own is indistinguishable from the click not
+registering. **Shut down was the worst of the three**, because success and failure look identical there — the
+page just sits — and an owner who believes the bot is off while it is still serving is the one wrong belief that
+control can produce.
+
+The rule: **`onError` rollback is not a message.** Reverting a control tells the reader what the state is, never
+why it moved. Every `useMutation` handle a component holds should have its `.error` read somewhere in that
+component, and a probe that fails one write endpoint per screen and looks for the message in the rendered page
+is what finds the gaps — `npm run check` cannot, because a mutation with no error branch type-checks perfectly.
+
+**Ownership is `DISCORD_OWNER_IDS` and nothing else.** `requireOwner` calls `client.isOwner(session.userId)`,
+which reads the env array on every request — so removing an ID revokes the console on that person's next click
+rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the
+whole shape of that, including that a near-miss ID cannot match.
+
+**Usage is counted, not logged.** `commandusage` holds one row per command per server per day per surface,
+`$inc`-ed in place by `countCommandUse` at the two dispatch sites, with a TTL that reaps a row 90 days after it
+was created. Three things about it are load-bearing:
+
+- **No user IDs, anywhere.** "What is this bot used for" is the question; "who used it" is not, and a
+  self-hoster's analytics must not quietly become a per-person activity log. Say so when adding a field.
+- **A row per invocation would grow without bound.** The aggregate shape is what lets one query answer a
+  90-day window on a busy bot.
+- **`runCommand` returns whether it succeeded** so a failure can be counted without catching the error and
+  breaking the guarantee that the user always gets an answer. `countCommandUse` is not awaited and drops its
+  own error after a debug line — the count is the least important thing that happened, and nothing reads a
+  result from it.
+
+**Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
+dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
+`useScreenView.ts` puts every matched parameter back as its name before the request leaves the browser, so no
+server id and no member id is ever sent. It carries **no guild id either**, which is the one field that makes it
+different from `commandusage`: a server has one or two people who can open this dashboard, so a per-server view
+count would describe one identifiable person's browsing rather than an aggregate. Bot-wide answers the question
+the count exists for — which screens are worth investing in — and nothing else.
+
+Two things follow. The write lives in its own `/api/screens` route rather than in the owner-only `analytics`
+app, because every signed-in manager generates one while only the owner reads them back. And the privacy notice
+names it, with `LegalPage.test.tsx` pinning both the "no user id and no server id" and "IP address is not
+stored" claims — a change that starts storing either breaks a test.
+
+**No IP address, no geolocation, no device or browser string.** Not an oversight: an admin panel that records
+where its users connect from is keeping personal data, and this bot's privacy notice promises it does not. If a
+self-hoster ever needs that, it belongs in their reverse proxy's access log where they own the retention
+decision, not in the bot's database.
+
+**Least-used is ranked over `client.commands`, not over the usage rows.** A command nobody has ever run has no
+row at all, and it is exactly what that list exists to surface.
+
+**Commands can be switched off, in one server or everywhere.** `commandtoggles` holds one row per scope, keyed
+by guild id with `GLOBAL` as the bot-wide row — a Discord id is 17-20 digits, so the sentinel cannot collide.
+Four things about it are load-bearing:
+
+- **`checks.ts` is the gate.** Hiding a switch is not access control and neither is a greyed-out control; the
+  refusal runs before the command body on both surfaces, and there are tests proved able to fail.
+- **Nobody bypasses it, the bot owner included.** "Off" that quietly still runs for one person is a much worse
+  thing to debug than one that is simply off, and the dashboard is one click away for whoever turned it off.
+- **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
+  that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
+- **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
+  out, so a hand-written request cannot make one visible or switch one off.
+
+**The command runner is the one place a `CommandInput` adapter is right, and it runs over an allowlist.**
+`DashboardInteraction` in `src/lib/bot/commandRunner.util.ts` captures replies instead of sending them, and the form
+is generated from the same metadata `buildSlashCommand` registers — so a command gaining an option gains a field
+with no frontend work. Four things about it are load-bearing:
+
+- **`ALLOWED_IN_DASHBOARD` is opt-in, and `NEVER_IN_DASHBOARD` is the backstop.** A command added six months
+  from now must not become web-reachable by accident, and `/eval` must stay unreachable even if somebody adds it
+  to the first list by mistake. A test walks the real registry so a name that is not a command fails the build.
+- **A getter can only read an option the command declared.** Arguments are filtered against the command's own
+  option list before `run()` is called, so a hand-written request cannot smuggle a value the form never showed.
+- **What cannot cross the gap is named, not dropped.** A button posts back to Discord's interaction endpoint and
+  is meaningless in a browser; the response says the reply carried one rather than quietly showing less.
+- **A switched-off command is off here too**, and every run is audit-logged with the arguments it was given.
+
+**The blacklist is bot-wide, and the rule about who may be on it lives in one place.**
+`src/lib/moderation/blacklistActions.util.ts` holds `blacklistProblem`, which both `/blacklist add` and the route call — an
+owner able to blacklist another owner could lock every one of them out of their own bot, and a rule written
+twice is a rule that will eventually be written differently. The list is an id field rather than a picker
+because somebody worth blocking is usually in no server the bot can still see, and a row whose account Discord
+no longer knows still renders: an entry nobody can read is an entry nobody can lift.
+
+**Leaving a server is confirmed by name, and the server is what compares it.** Rejoining needs a fresh invite
+from somebody still inside, so the browser asking for the name is the warning and `confirm !== guild.name` is
+the gate. The audit record is written **before** `guild.leave()`, because afterwards the name is no longer
+readable from the cache and the record would say only that something was left.
+
+**There is no "start the bot", and that is structural.** The HTTP server lives inside the bot process, so a
+stopped bot has nothing left to serve a start button. What exists instead:
+
+- **Pause** sets `client.paused`, which `runChecks` and `runMessageHandlers` both honour, and drops the presence
+  to invisible. Reversible from the same screen. A flag rather than `client.destroy()`, because destroy nulls
+  the token and tears down the websocket workers, and whether the same instance can log back in is not a thing
+  to find out on somebody's live bot.
+- **Shut down** really ends the process, behind a typed confirmation, and says on screen that only the host can
+  start it again.
+
+**The bot's picture is global; only its nickname is per-server.** Discord has no per-guild avatar for bots, so
+`PATCH /api/control/identity` is owner-only and application-wide, while `PATCH /guilds/:id/settings/nickname`
+is what a manager gets. Do not add a per-guild avatar control — it cannot work.
+
+**The log ring is in memory and redacts on the way in.** `src/core/logRing.ts` keeps the last 1,000 lines at
+**every** level, fed by a pino `logMethod` hook rather than a second transport — pino never calls the hook below
+its own level, so `LOG_LEVEL` still decides what exists at all, and the console says so rather than showing an
+empty list. Search matches the message _and_ the stringified context, so a guild id finds every line about it. A dashboard page is a much easier
+thing to read over someone's shoulder than a terminal, so any context key matching
+`token|secret|password|credential|authorization|cookie|session|uri|url|dsn|key$` is replaced before the record
+is stored — not before it is served. A restart clears the buffer, which is the trade for something that needs
+no collection, no retention policy and cannot fill a disk.
+
+**Testify never phones home.** The runtime tab reports the version it is running and links the releases page; it
+does not check for a newer one. A self-hosted bot that contacts a server on a timer is not something to ship by
+default, and the tab says so in as many words.
+
+**No chart library.** `UsageChart` is a `<span>` per day with a height, and the numbers behind it are a real
+`<table>` in a `sr-only` `<figcaption>`. The bundle budget in `docs/dashboard/design-plan/13-ROADMAP-AND-RISKS.md` is the
+reason, and a bar is a div with a width.
+
+`UsageBars` puts its bar **behind** the row rather than beside it, so a long label is never squeezed by the
+value — but a proportional fill then ends wherever the number says, which on a short bar is the middle of a
+word: "Prefix commands" read as "Prefix" being highlighted and the rest clipped. The bar's last 24px are masked
+to transparent (`mask-r-from-[calc(100%-1.5rem)]`), so it fades out instead of cutting. The length still encodes
+the value; the ranking and the printed number are what carry it precisely.
+
+### The status page
+
+`/status` is open to anybody signed in, because it names no server and no member — only how the bot itself is
+doing. `GET /api/status` builds it from `statusReport` in `src/lib/bot/status.util.ts`, and every threshold
+that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Four things about it are load-bearing:
+
+- **Downtime is known by its gaps.** The dashboard lives inside the bot, so nothing can report the bot being off
+  while it is off. `recordHeartbeat` writes one `statussamples` row every five minutes (30-day TTL), and a
+  stretch with none is how an outage shows afterwards. Each heartbeat vouches for `HEARTBEAT_GRACE_MS` after it
+  and no longer, so the last one before a crash cannot keep the bot "up" for ever. A status request that fails
+  is itself the outage, and the page says so rather than showing an error.
+- **Outside services are recorded, never probed.** `fetchRaw` records every call it makes, `watchDiscordApi`
+  listens to discord.js's own REST responses, and yt-dlp's requests are recorded against YouTube or SoundCloud.
+  Nothing is contacted just to check, which keeps "Testify never phones home" true. A 4xx, or a video that is
+  private or removed, is the service answering, so it does not count against it.
+- **Core and peripheral are different.** The gateway, the database, the event loop, memory and the Discord API
+  can make the bot "down". A joke API, a stale yt-dlp or a missing FFmpeg can only make it "degraded", because
+  they cost features, not the bot.
+- **The event-loop window is per heartbeat.** `recordHeartbeat` resets the histogram after reading it, so each
+  sample covers its own five minutes rather than everything since start-up.
+
+### The dashboard wears the bot's face
+
+`GET /api/bot` returns the application's own profile and every brand surface reads it, so a fork looks like its
+own bot without a line of CSS. Two things about it are easy to get wrong:
+
+- **The banner is not in the READY payload.** `client.user.banner` is undefined until the user is fetched over
+  REST, so `botIdentity()` fetches once and caches for an hour. A failed fetch still yields the avatar.
+- **Everything falls back to `components/brand/Logo`** — no profile yet, no avatar, or a CDN that will not load.
+  A brand mark is never worth a broken image icon, and `BotMark` handles all three the same way.
+
+The endpoint takes no session because the sign-in screen needs it before one exists; it carries nothing beyond
+the public profile, and a test pins the exact key set so nothing private drifts into it.
+
+### The WebGL backdrop
+
+`components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things about it are
+load-bearing, and all four are what keep an ornament from costing anything:
+
+- **three is imported dynamically and chunked on its own.** `manualChunks` in `dashboard/vite.config.ts` gives
+  it its own 513 kB chunk — left in `vendor` it would be in the initial load, which is the opposite of lazy.
+  `vendor` is the same size with the backdrop as without it.
+- **`prefers-reduced-motion` skips the import entirely**, rather than loading three and then sitting still. So
+  does a machine with no WebGL, and `createStarfield` returns null rather than throwing if the context is
+  refused. Verified in a real browser: with the preference set, no canvas and no chunk fetched.
+- **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, the frame-rate
+  independent easing and the parallax, all pure and unit tested; `starfield.ts` is the part that needs a GPU and
+  is the one file excluded from coverage.
+- **It reads the palette rather than restating it, and re-reads it.** `lib/three/tokens.ts` pulls
+  `--color-accent` off `:root`, so the design tokens in `index.css` stay the only place a colour is written, and
+  a token three cannot parse falls back instead of rendering a black field. Theme and accent are both chosen on
+  a screen this is drawn behind, so `Backdrop` watches `data-theme` and `data-accent` and calls `refresh()`
+  rather than keeping whichever colour it started with.
+
+**Strength is a token too, and it is not the same in both themes.** The field is composited over the page rather
+than added to it, so the same points that read as stars on near-black read as dust on paper —
+`--backdrop-opacity` is `light-dark(0.14, 0.5)`, and `Backdrop`'s `opacity` prop scales that rather than
+replacing it, so a screen can be quieter in both themes at once. Measured in a browser rather than judged from
+the source: the brightest pixel in an empty strip goes `rgb(43, 30, 102)` on violet, `rgb(103, 57, 8)` on amber,
+and never exceeds the page's own `rgb(244, 244, 249)` in light.
+
+The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never be able to take
+a click meant for a control.
+
+### Vite has to pin React too, and for a worse symptom
+
+The same hoisting breaks the browser. `discord-html-transcripts` needs React 18, so npm puts **18** at the root
+and leaves the dashboard's **19** in `dashboard/node_modules` — and `@tanstack/react-query` and `react-router`,
+hoisted to the root beside it, then resolve React 18 while the app renders with 19. Every hook in those packages
+reads a null dispatcher: `Cannot read properties of null (reading 'useEffect')`, an "Invalid hook call" warning,
+and a blank page. It afflicted `npm run dev:all` and the production bundle alike.
+
+`dashboard/vite.config.ts` fixes it with `resolve.dedupe` plus explicit `react` / `react-dom` aliases resolved
+through `createRequire(import.meta.url)`, so they find whichever copy the app itself imports rather than a
+hardcoded path that breaks the day the hoisting changes.
+
+**Nothing else catches this.** It type-checks, it lints, and the tests pin React themselves, so all 1567 pass
+against a page that cannot mount. `npm run verify:bundle` is the guard: it reads `dashboard/dist/assets` and
+fails if more than one React version is in there. `build:dashboard` runs it, so `npm run build` and CI both do.

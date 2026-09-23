@@ -16,7 +16,7 @@ It is also the answer that matches "easy to setup": one process, one port, one `
 alive. A self-hoster does not have to run and reverse-proxy two services.
 
 **What it costs, and the mitigation.** One process means one failure is two outages unless each layer contains
-its own. `src/core/shutdown.ts` keeps the process alive through anything unexpected (CLAUDE.md §16), and on top
+its own. `src/core/shutdown.ts` keeps the process alive through anything unexpected (AGENTS.md §16), and on top
 of that:
 
 - Every route body is wrapped in a top-level error boundary that converts a throw into a 500 and logs it. The
@@ -115,7 +115,7 @@ its own build output — simplest is `"main": "src/index.ts"` with both sides tr
 - Root `jest.config.ts` stays `node`; the dashboard gets its own with `testEnvironment: "jsdom"`. `npm test` at
   the root should run both projects (Jest's `projects` option, or two scripts and a `&&`).
 - `eslint.config.mjs` needs a dashboard block with the React and jsx-a11y plugins, scoped by files glob. Per
-  `CLAUDE.md`, every override in that file carries a comment saying why.
+  `AGENTS.md`, every override in that file carries a comment saying why.
 - `.github/workflows/ci.yml`'s `build` job must build the dashboard too, and the `dist/` alias grep must not
   trip over the SPA bundle.
 - `tsup` must not try to compile `dashboard/`. Its entry globs are explicit, so check them.
@@ -185,5 +185,5 @@ session, which a signed stateless token cannot offer.
 feature (a "recent changes" card on the guild overview). Cap it — a TTL of 90 days, or a `capped` collection —
 so it cannot grow without bound on a busy bot.
 
-Per `CLAUDE.md` §13: one collection per shape, both carry `guildId` where they are guild data, and both get a
+Per `AGENTS.md` §13: one collection per shape, both carry `guildId` where they are guild data, and both get a
 repository in `src/database/repositories/` rather than being queried from a route.

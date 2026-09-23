@@ -18,7 +18,7 @@ server validates with the same definition the form validates with (`02-ARCHITECT
 - **Status codes.** 400 malformed, 401 no/expired session, 403 authenticated but not allowed, 404 not found or
   bot not in guild, 409 Discord refused (role hierarchy, missing bot permission), 429 rate limited, 500 bug.
 - **`UserFacingError` maps to 400** with its message verbatim — the bot already distinguishes "the user did
-  something wrong" from "this is a bug" (`CLAUDE.md` §16), and that distinction is exactly what an HTTP status
+  something wrong" from "this is a bug" (`AGENTS.md` §16), and that distinction is exactly what an HTTP status
   code is for. Anything else becomes a 500 with a generic message and a logged stack.
 - **Snowflakes are strings.** Always. A Discord ID does not survive `JSON.parse` as a number.
 - **Every mutation writes a `dashboardAudit` record** before responding.
@@ -73,7 +73,7 @@ single-`roleId` shape, the `"current"` channel sentinel, the clamping — all of
 it would drift, and a guild would see different settings on the web than in `/levelling edit`.
 
 `PUT` for the lists rather than add/remove endpoints, because the UI is a multi-select whose value _is_ the whole
-list — the same reasoning that made the panel's role menus pre-ticked (`CLAUDE.md` §11). One request, no
+list — the same reasoning that made the panel's role menus pre-ticked (`AGENTS.md` §11). One request, no
 add-then-remove race.
 
 The same shape repeats for: `/audit-logging`, `/welcome`, `/anti-link`, `/automod`, `/counting`, `/sticky`,

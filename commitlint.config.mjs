@@ -3,7 +3,7 @@
  *
  * No scopes, no bodies required, no `!` markers. `add`, `update` and `remove`
  * are extensions beyond Conventional Commits and are part of the style — see
- * CLAUDE.md §14.
+ * AGENTS.md §19.
  *
  * The wizard (`npm run commit`) helps whoever uses it; this hook is what makes
  * the convention true for everyone else.

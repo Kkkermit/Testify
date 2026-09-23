@@ -99,7 +99,7 @@ expect(response.status).toBe(403);
 Cover every row of the threat table in `03-AUTH.md`: missing CSRF, bad state, expired session, guild id in the
 body being ignored, a demoted user getting 403 on their next request.
 
-**Prove these can fail.** `CLAUDE.md` §17 — introduce the hole, watch the test go red, revert. A permission test
+**Prove these can fail.** `AGENTS.md` §17 — introduce the hole, watch the test go red, revert. A permission test
 that passes vacuously is worse than none.
 
 ### 3. Screen states
@@ -210,7 +210,7 @@ Extend `.github/workflows/ci.yml` rather than adding a workflow:
 
 - `check` runs typecheck, lint, format and **both** Jest projects.
 - `build` builds the bot _and_ the dashboard, and keeps verifying the `dist/` artifact — the alias grep from
-  `CLAUDE.md` §3 must be scoped so it does not walk the SPA bundle.
+  `AGENTS.md` §3 must be scoped so it does not walk the SPA bundle.
 - Coverage thresholds enforced on both, both at 80/80/80/80.
 
 The `dist/` smoke test also needs extending: after `npm run build`, assert `dashboard/dist/index.html` exists and

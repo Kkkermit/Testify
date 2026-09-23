@@ -33,7 +33,7 @@ describe("the not-found page", () => {
 describe("where the not-found page sits", () => {
 	/**
 	 * The catch-all used to `Navigate` to `/guilds`, which hid both a typo and a dashboard link pointing at
-	 * nothing — and `CLAUDE.md` names that redirect as how an unmounted sub-app disappears without a trace.
+	 * nothing — and `AGENTS.md` names that redirect as how an unmounted sub-app disappears without a trace.
 	 */
 	it("is the catch-all, and is outside the sign-in gate", async () => {
 		const { routes } = await import("@/routes");

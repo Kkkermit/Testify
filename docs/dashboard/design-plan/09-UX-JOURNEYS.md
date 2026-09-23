@@ -3,7 +3,7 @@
 ## The principle
 
 The bot's panels already got this right and the dashboard should inherit it: **show the current state, and make
-changing it the same gesture as reading it.** `CLAUDE.md` records why `/levelling setup` and `/levelling edit`
+changing it the same gesture as reading it.** `AGENTS.md` records why `/levelling setup` and `/levelling edit`
 are one screen — the panel shows the configuration, so setting up and changing it are not two activities. The web
 UI has more room, which means fewer excuses for hiding a setting behind a second click.
 
@@ -38,7 +38,7 @@ The journey the whole dashboard is justified by. Target: under 90 seconds, no do
    with a tooltip explaining why — this is the check `applyLevelRewards` already does at runtime, surfaced at
    configuration time instead of failing silently later. That is a genuine improvement on the Discord panel.
 9. **Done.** No Save button; each control applied as it was pressed, matching the panel's behaviour and the
-   reasoning in `CLAUDE.md`.
+   reasoning in `AGENTS.md`.
 
 Failure branches worth designing rather than discovering:
 
@@ -58,7 +58,7 @@ Failure branches worth designing rather than discovering:
 3. **Click through to any guild's normal pages** — the owner sees the manager UI for that guild, no separate
    read-only mode to maintain.
 4. **Leave a guild** from the row menu. `AlertDialog` requiring the guild's name typed exactly.
-5. **`/owner/blacklist`.** Add by user ID with a reason, list, remove. Global by design (`CLAUDE.md` §12), and the
+5. **`/owner/blacklist`.** Add by user ID with a reason, list, remove. Global by design (`AGENTS.md` §12), and the
    UI should say so — a manager could otherwise assume it is guild-scoped.
 
 ## Journey 3 — dealing with a member
@@ -99,7 +99,7 @@ line to add. Getting this wrong is where most self-hosted dashboards lose people
 
 Deliberate, and it mirrors the Discord panel exactly. The bot's audit panel batches edits into a draft and writes
 once, because "which events, where" is a single decision and half of it applied is not a state anyone wants —
-whereas levelling applies immediately because each control is independent (`CLAUDE.md`). The web UI keeps the
+whereas levelling applies immediately because each control is independent (`AGENTS.md`). The web UI keeps the
 same split, so someone who uses both surfaces is never surprised.
 
 That means the web audit page needs the same affordances: a dirty indicator, a disabled Save when nothing has

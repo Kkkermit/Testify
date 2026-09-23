@@ -33,7 +33,7 @@ Four sources of design guidance now exist in this repository, and they will disa
 
 | Rank | Source                                                              | Governs                                                      |
 | ---- | ------------------------------------------------------------------- | ------------------------------------------------------------ |
-| 1    | [`../../CLAUDE.md`](../../CLAUDE.md) §16, §22, §24                  | Architecture, security, data. **Never overridden by taste**  |
+| 1    | [`../../AGENTS.md`](../../AGENTS.md) §16, §22, §24                  | Architecture, security, data. **Never overridden by taste**  |
 | 2    | [`dashboard.md`](guide.md) §9, §15                                  | The security boundary and the accessibility floor            |
 | 3    | The skills in [`../.claude/skills`](../../.claude/skills/README.md) | Aesthetic direction — palette, type, composition, motion     |
 | 4    | [`dashboard.md`](guide.md) §21 — the 58 rules                       | The worklist, and the tie-breaker when the skills are silent |

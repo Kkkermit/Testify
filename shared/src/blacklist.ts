@@ -4,7 +4,7 @@ import { plainLine } from "./text";
 
 /**
  * The bot-wide block list. Global by design rather than per guild — it is the bot owner's answer to somebody
- * abusing the bot itself, so it cannot be scoped to one server (CLAUDE.md §12).
+ * abusing the bot itself, so it cannot be scoped to one server (AGENTS.md §12).
  */
 
 export const BLACKLIST_LIMITS = { maxReason: 200 } as const;

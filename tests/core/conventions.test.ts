@@ -1,7 +1,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-/** The file-naming rules from CLAUDE.md §3, enforced rather than asked for. */
+/** The file-naming rules from AGENTS.md §6, enforced rather than asked for. */
 const SRC = resolve(__dirname, "../../src");
 
 function filesIn(folder: string, pattern: RegExp): string[] {

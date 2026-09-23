@@ -20,7 +20,7 @@ Nothing user-visible. Get the plumbing right or every later phase pays for it.
 **Done when:** `npm run dev:all` gives a React page calling `/api/health` through the proxy, and `npm run check`
 passes for both projects.
 
-Two things this phase found that were not in the plan, both recorded in `CLAUDE.md` §24:
+Two things this phase found that were not in the plan, both recorded in `AGENTS.md` §24:
 
 - **`@testify/shared` cannot be a `tsconfig.json` path.** `tsc-alias` rewrites every alias in that map to a
   relative path inside `dist/`, and nothing outside `src/` is emitted there — it resolved the package to

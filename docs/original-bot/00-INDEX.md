@@ -3,7 +3,7 @@
 > [!IMPORTANT]
 > **This tree is history, not a description of the code in this repository.** It documents the JavaScript bot
 > that Testify v2 replaced, and the plan that produced the rewrite. Every file, path and count below refers to
-> that codebase. For how Testify works today, read [`../../CLAUDE.md`](../../CLAUDE.md) and
+> that codebase. For how Testify works today, read [`../../AGENTS.md`](../../AGENTS.md) and
 > [`../commands.md`](../commands.md).
 >
 > It is kept for two reasons: [`04-AUDIT-FINDINGS.md`](04-AUDIT-FINDINGS.md) is the list of 100 defects the

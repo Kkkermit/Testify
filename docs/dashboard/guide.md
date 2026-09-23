@@ -22,7 +22,7 @@ checklist the rewrite is working through. Those three are the ones to edit.
 > [!IMPORTANT]
 > Two companion documents:
 >
-> - [`../../CLAUDE.md`](../../CLAUDE.md) §24 — the repo-wide rules. **Where it and this file disagree, it wins.**
+> - [`../../AGENTS.md`](../../AGENTS.md) §24 — the repo-wide rules. **Where it and this file disagree, it wins.**
 >   This file is the practical detail; that one is the contract.
 > - [`design-plan/`](design-plan/00-INDEX.md) — the design plan, threat model and phase order.
 >   `13-ROADMAP-AND-RISKS.md` says what is built and what is next.

@@ -13,7 +13,7 @@ session document.
 **Can:** everything a server manager can, in every guild the bot is in, plus the owner console — guild list,
 leave guild, blacklist, bot-wide counters, recent errors, the command runner.
 
-The bot already has exactly one source of truth for this (`DISCORD_OWNER_IDS`, `CLAUDE.md` §14) and the dashboard
+The bot already has exactly one source of truth for this (`DISCORD_OWNER_IDS`, `AGENTS.md` §14) and the dashboard
 must not introduce a second. No `isAdmin` flag in Mongo, no allowlist collection. Editing the env and restarting
 is the entire administration story, and it is the right one for a self-hosted bot.
 
@@ -120,7 +120,7 @@ round, and never only the frontend — hiding a button is not access control.
 | Wipe the guild's economy or levels |   ✓   |    ✓    | Confirmation dialog, typed guild name                                                  |
 | Leave the guild                    |   ✓   |    ✗    | Owner only — a manager doing this is not recoverable from the dashboard                |
 | Guild list across all servers      |   ✓   |    ✗    |                                                                                        |
-| Blacklist                          |   ✓   |    ✗    | Global by design (`CLAUDE.md` §12)                                                     |
+| Blacklist                          |   ✓   |    ✗    | Global by design (`AGENTS.md` §12)                                                     |
 | Bot-wide counters, recent errors   |   ✓   |    ✗    |                                                                                        |
 | Command runner                     |   ✓   |    ✗    | `06-COMMAND-CONTROL.md`                                                                |
 | `/eval`                            |   ✗   |    ✗    | Not exposed to anyone                                                                  |
@@ -168,5 +168,5 @@ The permission layer is where tests earn their keep, and all of it is testable w
 - `requireGuild` — bot not in guild → 404; member fetch fails → 403; has `ManageGuild` → passes; owner not in
   guild → passes; a guild id from the body being ignored in favour of the path.
 - Hierarchy — manager below target → 403; target is guild owner → 403; bot below target → a clear 409, not a 500.
-- **A test that proves the gate can fail.** Per `CLAUDE.md` §17: temporarily grant the wrong user access and watch
+- **A test that proves the gate can fail.** Per `AGENTS.md` §17: temporarily grant the wrong user access and watch
   the test go red. A permission test that passes vacuously is worse than no test.

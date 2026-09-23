@@ -6,7 +6,7 @@ two very different ways to read that, and only one of them survives contact with
 ## The tempting approach, and why it is mostly wrong
 
 The bot's defining decision is that **one command object serves both the slash and the prefix surface**
-(`CLAUDE.md` §1). `src/core/prefix.ts` is a `PrefixInteraction` class implementing the `CommandInput` contract,
+(`AGENTS.md` §1). `src/core/prefix.ts` is a `PrefixInteraction` class implementing the `CommandInput` contract,
 so `t?ban` runs the same `run()` body as `/ban`.
 
 So the obvious move is a third implementation — `DashboardInteraction implements CommandInput` — and suddenly
@@ -38,7 +38,7 @@ repositories +        └─ src/api/routes/**      (the dashboard)     ← new
 *Actions.util.ts
 ```
 
-This works because the bot is already built this way. `CLAUDE.md` §13 forbids commands from touching a model
+This works because the bot is already built this way. `AGENTS.md` §13 forbids commands from touching a model
 directly, so every write already goes through a repository that takes `(guildId, userId, data)` and knows
 nothing about interactions. And the `*Actions.util.ts` convention already exists for logic shared between a
 command and a button — `economyActions.util.ts`, `moderationActions.util.ts`, `levellingActions.util.ts`. The

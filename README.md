@@ -621,7 +621,7 @@ what you are doing.
 | [`docs/contributing.md`](docs/contributing.md)       | Proposing a change                        |
 | [`docs/security.md`](docs/security.md)               | Reporting a vulnerability                 |
 | [`docs/dashboard/guide.md`](docs/dashboard/guide.md) | Working on the web dashboard              |
-| [`CLAUDE.md`](CLAUDE.md)                             | The conventions every change here follows |
+| [`AGENTS.md`](AGENTS.md)                             | The conventions every change here follows |
 
 ## Contributing
 

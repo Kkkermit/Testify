@@ -7,7 +7,7 @@ ten minutes on a cheap VPS, without a second service or a paid tier.
 
 `DASHBOARD_ENABLED` defaults to `false`. A self-hoster who only wants the bot gets exactly the bot — no port
 bound, no OAuth needed, no new required environment variables. `src/config/env.ts` validates once at startup and
-fails with a list (`CLAUDE.md` §14), so the dashboard's variables must be **optional at the schema level** and
+fails with a list (`AGENTS.md` §14), so the dashboard's variables must be **optional at the schema level** and
 only required _together_, when the feature is on.
 
 Zod expresses that as a `superRefine` on the whole object rather than per-field `.optional()` guesswork:
@@ -47,7 +47,7 @@ is a deliberate speed bump with a comment next to it explaining the risk.
 Redirect URI is derived, never configured separately: `${DASHBOARD_BASE_URL}/api/auth/callback`. Two sources for
 one URL is how people end up with a redirect mismatch they cannot debug, since Discord requires an exact match.
 
-Per `CLAUDE.md` §14, each of these lands in **three** places: the zod schema, both `.env.example` files with a
+Per `AGENTS.md` §14, each of these lands in **three** places: the zod schema, both `.env.example` files with a
 comment, and `scripts/setupEnv.ts` so the interactive setup prompts for them — conditionally, only if the user
 says yes to the dashboard.
 
@@ -199,8 +199,8 @@ Put this in the README, not buried here:
   already required by the bot; the dashboard adds nothing new to the bill.
 - **Works on macOS, Windows and Linux.** Node and npm only. Any script that lands in `package.json` uses
   `cross-env` for environment variables, matching the existing `dev` script — and the reason that rule exists is
-  written down in `CLAUDE.md` §2.
-- **The lockfile is committed** and `npm ci` is the documented install. `CLAUDE.md` §3 records a real CI break
+  written down in `AGENTS.md` §2.
+- **The lockfile is committed** and `npm ci` is the documented install. `AGENTS.md` §3 records a real CI break
   caused by `npm install` and `npm ci` disagreeing.
 - **A contributor can run the dashboard against a real bot in one command** — `npm run dev:all`, with HMR. If
   that stops being true, the contribution rate drops.

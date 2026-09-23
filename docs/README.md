@@ -7,13 +7,14 @@ Everything written down about this project, in one place. Start with whichever r
 | Running the bot for the first time        | [`../README.md`](../README.md) — install, configure, start                |
 | Hosting it in Docker                      | [`hosting.md`](hosting.md) — the image, compose, and the traps            |
 | Looking for what a command does           | [`commands.md`](commands.md) — all 76, generated from the code            |
-| About to contribute a change              | [`contributing.md`](contributing.md), then [`../CLAUDE.md`](../CLAUDE.md) |
+| About to contribute a change              | [`contributing.md`](contributing.md), then [`../AGENTS.md`](../AGENTS.md) |
 | Reporting a security problem              | [`security.md`](security.md)                                              |
 | Working on the web dashboard              | [`dashboard/guide.md`](dashboard/guide.md)                                |
 | Wondering why the code is shaped this way | [`original-bot/04-AUDIT-FINDINGS.md`](original-bot/04-AUDIT-FINDINGS.md)  |
 
-[`../CLAUDE.md`](../CLAUDE.md) stays in the repository root deliberately: it is the single set of conventions
+[`../AGENTS.md`](../AGENTS.md) stays in the repository root deliberately: it is the single set of conventions
 for changing this codebase, and it is the file both people and coding agents are expected to find first.
+[`../AGENTS.md`](../AGENTS.md) only points at it.
 
 ---
 
@@ -40,7 +41,7 @@ The web dashboard is a workspace of its own (`dashboard/`), with an API inside t
 | [`dashboard/design-plan/`](dashboard/design-plan/00-INDEX.md) | The original design documents: scope, auth, permissions, API, accessibility, roadmap |
 | [`dashboard/screenshots/`](dashboard/screenshots/README.md)   | The images the root README embeds, and how to retake one when a screen changes       |
 
-`CLAUDE.md` §24 wins wherever it and `dashboard/guide.md` disagree.
+`AGENTS.md` §24 wins wherever it and `dashboard/guide.md` disagree.
 
 ### The original bot
 
@@ -49,9 +50,9 @@ plan that produced the rewrite. It is history — nothing in it describes the co
 still carry weight:
 
 - [`04-AUDIT-FINDINGS.md`](original-bot/04-AUDIT-FINDINGS.md) — 100 defects found in the original. The
-  conventions in `CLAUDE.md` exist to stop each of them coming back.
+  conventions in `AGENTS.md` exist to stop each of them coming back.
 - [`migration/17-CODING-STANDARDS.md`](original-bot/migration/17-CODING-STANDARDS.md) — the authoritative
-  naming and error-handling standard, which beats `CLAUDE.md` where the two overlap.
+  naming and error-handling standard, which beats `AGENTS.md` where the two overlap.
 
 ---
 
