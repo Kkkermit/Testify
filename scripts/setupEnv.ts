@@ -23,6 +23,11 @@ const FIELDS: Field[] = [
 	{ key: "CHANNEL_GUILD_LOG", message: "Channel ID for server join and leave notices", required: false },
 	{ key: "CHANNEL_DM_LOG", message: "Channel ID for direct messages sent to the bot", required: false },
 	{ key: "CHANNEL_FEEDBACK_LOG", message: "Channel ID for bug reports and suggestions", required: false },
+	{
+		key: "SUPPORT_AI_API_KEY",
+		message: "Anthropic API key for the support assistant (blank answers by search alone)",
+		required: false,
+	},
 ];
 
 /** Asked only when the dashboard is wanted; the session secret is generated rather than typed. */

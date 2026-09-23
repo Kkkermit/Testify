@@ -5,6 +5,7 @@ import { Card, CARD_HEADING, DataList, DividedList, PageHeader } from "@/compone
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { AskCard } from "@/features/help/components/AskCard";
 import { helpAreas } from "@/features/help/help.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -25,7 +26,9 @@ export function HelpPage(): React.JSX.Element {
 		<>
 			<PageHeader title={t("help.title")} subtitle={t("help.subtitle", { name })} />
 
-			<Card focal className="flex flex-col gap-4">
+			<AskCard name={name} />
+
+			<Card className="flex flex-col gap-4">
 				<h2 className={CARD_HEADING}>{t("help.firstSteps")}</h2>
 
 				<ol className="flex flex-col gap-4">

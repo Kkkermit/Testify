@@ -10,6 +10,9 @@ import {
 	type CommandToggleState,
 	type LogFeed,
 	type RuntimeInfo,
+	type SupportArticle,
+	type SupportIndex,
+	type SupportReply,
 	type ServerSettings,
 	type UsageReport,
 	type VerificationConfigResponse,
@@ -583,8 +586,35 @@ export const someRoles: RoleSummary[] = [
 	{ id: "300000000000000003", name: "Admin", colour: null, position: 9, managed: false, assignableByBot: false },
 ];
 
+export const supportIndex: SupportIndex = {
+	suggested: [
+		{ id: "add-the-bot", title: "Adding Testify to your server" },
+		{ id: "levelling", title: "Setting up levelling" },
+	],
+};
+
+export const levellingArticle: SupportArticle = {
+	id: "levelling",
+	title: "Setting up levelling",
+	body: "Members earn XP by chatting.\n\n- Run `/levelling setup` in Discord.\n- Or open **Levelling** on the [dashboard](/guilds).",
+};
+
+export const supportReply: SupportReply = {
+	answer: levellingArticle,
+	related: [{ id: "role-order", title: "The bot cannot give or remove a role" }],
+};
+
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
+	http.get("/api/support", () => HttpResponse.json(supportIndex)),
+	http.post("/api/support/ask", () => HttpResponse.json(supportReply)),
+	http.get("/api/support/articles/:articleId", ({ params }) =>
+		HttpResponse.json({
+			...levellingArticle,
+			id: String(params.articleId),
+			title: `Article ${String(params.articleId)}`,
+		}),
+	),
 	http.get("/api/status", () => HttpResponse.json(botStatus)),
 	http.get("/api/auth/setup", () => HttpResponse.json(configured)),
 	http.get("/api/bot", () => HttpResponse.json(botProfile)),

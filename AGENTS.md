@@ -61,16 +61,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 78, across 13 categories          |
-| Command files        | 100 (incl. folded-in subcommands) |
+| Commands             | 79, across 13 categories          |
+| Command files        | 101 (incl. folded-in subcommands) |
 | Subcommands          | 110                               |
-| Prefix aliases       | 82                                |
-| Button handlers      | 24                                |
+| Prefix aliases       | 84                                |
+| Button handlers      | 25                                |
 | Events               | 24, in 5 groups                   |
-| `src/lib` helpers    | 84, in 15 domain folders          |
+| `src/lib` helpers    | 90, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 3,791 across 241 suites           |
+| Tests                | 4,101 across 252 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -91,8 +91,9 @@ npm run setup -- --dev  # writes .env.development instead
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
 **Optional:** `NODE_ENV`, `LOG_LEVEL`, `DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
-`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, and the `DASHBOARD_*` block — off unless you want the web dashboard,
-and covered in [§24](#24-the-dashboard).
+`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
+optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
+`DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
 
 Then:
 
@@ -222,6 +223,7 @@ src/
 │   ├── canvas/           the drawing primitives and every image card
 │   ├── bot/              runtime, identity, pause/shut down, usage, status, command catalogue and runner
 │   ├── infra/            outbound HTTP, what it learns about each service, and the secret box
+│   ├── support/          the help desk: articles, search, the leak guard and the optional model picker
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 ├── database/
 │   ├── connection.ts
@@ -265,6 +267,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Query the database                         | `src/database/repositories/*.ts` — never a model directly                |
 | Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`       |
 | Change user-facing copy                    | `src/config/strings.ts`                                                  |
+| Add or change a help article               | `assets/support/*.md` — then run the suite, which scans it for leaks     |
 | Change a colour or emoji                   | `src/config/theme.ts`                                                    |
 | Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
 | Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`       |
@@ -1157,6 +1160,42 @@ rename` covers the one thing `/pet buy` could do that the shop could not). A com
 because the panel shows the current configuration — setting up and changing it are one gesture — and people look
 for both names. One line each, delegating to one function; not two implementations.
 
+### The support assistant answers with articles, never with generated text
+
+`/ask` and the Help page's **Ask a question** card are one desk, `SupportDesk` in `src/lib/support/`. It exists to
+answer questions about the dashboard, adding the bot, setting it up and its commands, and nothing else. The design
+is what makes it safe, so four things about it are load-bearing:
+
+- **Every answer is a written article or nothing.** The reply is one of the Markdown files in `assets/support/`, or
+  a page generated from a command's own metadata, looked up by id. No model writes a word the reader sees, so a
+  prompt injection has nothing to steer: the worst any question can do is choose the wrong article. Do not add a
+  mode that lets a model compose or summarise — that is the one change that turns this into an injection target.
+- **The model only picks an id, and the server checks it.** With `SUPPORT_AI_API_KEY` set, Claude receives the
+  question fenced in `<question>` tags and the list of article ids and titles — nothing else, and nothing secret —
+  and returns `{ article }` under a JSON schema whose `enum` is exactly those ids plus `none`. `readPick` refuses
+  anything else, and any failure, refusal or unknown id falls back to search. The default model gets Anthropic's
+  server-side fallbacks; another one gets a plain request. At most `MODEL_CALLS_PER_HOUR` (120) questions reach
+  it, identical questions are answered from a ten-minute cache, and each call is recorded against the Anthropic
+  API on the status page. Without a key it answers by BM25 search alone and contacts nobody, which keeps "Testify
+  never phones home" true by default.
+- **Nothing secret can leave, checked three times.** `findLeak` refuses a text holding any configured secret
+  value, the password inside `MONGODB_URI`, a token or key shape, an email, a Discord id, an IP address, an
+  environment variable name, `.env` or an absolute path. It runs on every article and command page at load,
+  on every answer on the way out, and over the real corpus in `supportGuard.test.ts` — so an article that mentions
+  a variable name fails the suite before it can reach anybody. Owner commands never become pages, and the
+  question itself is never logged or stored; the privacy notice says so, and `LegalPage.test.tsx` pins it.
+- **Search refuses what it cannot place.** Coverage — the share of the question's weight any article matched —
+  is what turns away "what is the capital of France". The thresholds in `CONFIDENT` were tuned against the
+  paraphrase set in `supportEval.test.ts`, which also holds the off-topic and injection questions that must come
+  back empty. On phrasings it was never tuned for, search alone found 21 of 29 before the general fixes that took
+  it to 25; the misses need understanding rather than vocabulary, which is what the model is for.
+
+**Adding an article** is one file: frontmatter with an `id` matching the file name, a `title`, comma-separated
+`keywords` and optionally `featured: true`, then a body in the subset `articleBlocks` in `@testify/shared` reads —
+paragraphs, `###` headings, `-` and `1.` lists, `**bold**`, `` `code` `` and links. A link is followed only if it
+is a dashboard path or `https` to a host in `SUPPORT_LINK_HOSTS`; anything else is drawn as its text. `{bot}`,
+`{prefix}` and `{repository}` are filled per reader. Add a paraphrase for it to the eval, then run the suite.
+
 ### Global by design
 
 The blacklist and the user profile are intentionally not guild-scoped. See [§12](#12-multi-guild-rules).
@@ -1298,7 +1337,7 @@ the same shape —
 | `/guilds/:id/commands`  | Per-command switches for this server                                       |
 | `/commands`             | Every command, searchable, with the coverage tile                          |
 | `/status`               | Online or not, uptime, speed, packages and outside services, 30 days back  |
-| `/help`                 | Getting started: first steps, how commands work, what each section is for  |
+| `/help`                 | Getting started, and the support assistant that answers from help articles |
 | `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                            |
 | `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
 

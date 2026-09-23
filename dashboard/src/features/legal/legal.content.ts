@@ -52,6 +52,7 @@ export const PRIVACY: LegalDocument = {
 			paragraphs: ["legal.notStoredP1", "legal.notStoredP2", "legal.notStoredP3"],
 		},
 		{ heading: "legal.logConsole", paragraphs: ["legal.logConsoleP1"] },
+		{ heading: "legal.helpQuestions", paragraphs: ["legal.helpQuestionsP1"] },
 		{
 			heading: "legal.retention",
 			paragraphs: ["legal.retentionP1"],

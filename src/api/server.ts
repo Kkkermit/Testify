@@ -19,6 +19,7 @@ import { health } from "@api/routes/health";
 import { owner } from "@api/routes/owner";
 import { screens } from "@api/routes/screens";
 import { status } from "@api/routes/status";
+import { support } from "@api/routes/support";
 import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -33,6 +34,9 @@ const GENERAL_LIMIT = { limit: 300, windowMs: 60_000 };
 
 /** Tighter, and counted separately so a spent sign-in allowance does not also block reading a page. */
 const SIGN_IN_LIMIT = { limit: 20, windowMs: 60_000 };
+
+/** A question may cost the owner a model call, so it is counted apart and far tighter than reading a page. */
+const SUPPORT_LIMIT = { limit: 10, windowMs: 60_000 };
 
 /** One address can be a household, an office or a school, so its ceiling is a multiple of one person's. */
 const ADDRESS_MULTIPLIER = 6;
@@ -55,6 +59,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
 	const general = limiterPair(GENERAL_LIMIT);
 	const signIn = limiterPair(SIGN_IN_LIMIT);
+	const asking = limiterPair(SUPPORT_LIMIT);
 	const oauth = oauthConfigFrom(env);
 
 	app.use("*", async (context, next) => {
@@ -70,6 +75,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	// The one flow an unauthenticated caller can reach that costs a Discord round trip.
 	app.use("/api/auth/login", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("/api/support/ask", rateLimit(asking, { name: "support", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	// Before `verifyCsrf`, which compares against the session's stored secret when there is one.
 	app.use("/api/*", loadSession);
 	app.use("*", verifyCsrf);
@@ -110,6 +116,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.route("/api/analytics", analytics);
 	app.route("/api/screens", screens);
 	app.route("/api/status", status);
+	app.route("/api/support", support);
 	app.route("/api/control", control);
 
 	return app;

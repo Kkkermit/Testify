@@ -20,6 +20,7 @@ export * from "./schemas";
 export * from "./settings";
 export * from "./status";
 export * from "./sticky";
+export * from "./support";
 export * from "./text";
 export * from "./tickets";
 export * from "./treasure";

@@ -13,5 +13,6 @@ export * from "./levelling";
 export * from "./moderation";
 export * from "./music";
 export * from "./settings";
+export * from "./support";
 export * from "./tickets";
 export * from "./welcome";

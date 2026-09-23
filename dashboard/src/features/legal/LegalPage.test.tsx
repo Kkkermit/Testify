@@ -37,6 +37,9 @@ describe("the legal pages", () => {
 		// Screen counts carry neither, which is the whole reason they are safe to keep.
 		expect(text).toMatch(/no user id and no server id is stored/i);
 		expect(text).toMatch(/IP address is not stored/i);
+		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
+		expect(text).toMatch(/It is not stored, and it is not written to the log/);
+		expect(text).toMatch(/sent to Anthropic/);
 	});
 
 	it("offers a way back to the dashboard", () => {

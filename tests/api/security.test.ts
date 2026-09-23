@@ -226,6 +226,21 @@ describe("rate limiting", () => {
 		expect(Number(last.headers.get("retry-after"))).toBeGreaterThan(0);
 		expect(((await last.json()) as { error: { code: string } }).error.code).toBe("rate_limited");
 	});
+
+	/** A question can cost the owner a model call, so ten a minute is the allowance, and reading pages is unaffected. */
+	it("counts questions to the support assistant apart, and far more tightly", async () => {
+		const app = apiFor();
+		const headers = { cookie: "dash_session=asker" };
+
+		const statuses: number[] = [];
+		for (let attempt = 0; attempt < 11; attempt += 1) {
+			statuses.push((await app.request("/api/support/ask", { method: "POST", headers })).status);
+		}
+
+		expect(statuses.slice(0, 10)).not.toContain(429);
+		expect(statuses[10]).toBe(429);
+		expect((await app.request("/api/health", { headers })).status).toBe(200);
+	});
 });
 
 /** `verifyCsrf` reads the session's stored secret, so it has to run after `loadSession`. */
