@@ -1,4 +1,4 @@
-import { type BotIdentity, type DashboardUser } from "@testify/shared";
+import { BOT_NAME, type BotIdentity, type DashboardUser } from "@testify/shared";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
@@ -62,7 +62,7 @@ export function MobileNav({
 				</button>
 				<BotMark src={bot?.avatarUrl} size={20} />
 				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
-					{bot?.username ?? "Testify"}
+					{bot?.username ?? BOT_NAME}
 				</span>
 			</header>
 

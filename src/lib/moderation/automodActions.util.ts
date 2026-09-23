@@ -44,7 +44,7 @@ export function toRuleSummary(rule: AutoModerationRule, botId: string): AutomodR
 		preset: TRIGGER_PRESET.get(rule.triggerType) ?? null,
 		trigger: TRIGGER_LABEL.get(rule.triggerType) ?? "Something else",
 		actions: [...new Set(rule.actions.map((action) => ACTION[action.type] ?? "other"))],
-		fromTestify: rule.creatorId === botId,
+		fromBot: rule.creatorId === botId,
 	};
 }
 

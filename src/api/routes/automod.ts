@@ -2,9 +2,10 @@ import { type AutoModerationRule, type Guild } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notFound } from "@api/errors";
+import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
+import { botName } from "@core/client";
 import { canManageAutomod, createAutomodRule, listAutomodRules } from "@lib/moderation";
 import { type AutomodRules, automodCreate, automodPatch, automodRuleParam } from "@testify/shared";
 
@@ -14,7 +15,7 @@ automod.use("*", requireGuild);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	return guild;
 }
@@ -34,7 +35,8 @@ automod.get("/", async (context) => context.json(await rulesFor(guildOf(context)
 
 automod.post("/", async (context) => {
 	const guild = guildOf(context);
-	if (!canManageAutomod(guild)) throw badRequest("Testify needs the Manage Server permission to add a rule.");
+	if (!canManageAutomod(guild))
+		throw badRequest(`${botName(context.get("client"))} needs the Manage Server permission to add a rule.`);
 
 	const body = await parseBody(context, automodCreate);
 	const session = context.get("session");
@@ -50,7 +52,7 @@ automod.patch("/:ruleId", async (context) => {
 	const { ruleId } = parseParams(context, automodRuleParam);
 	const { enabled } = await parseBody(context, automodPatch);
 
-	const rule = await ruleIn(guild, ruleId);
+	const rule = await ruleIn(guild, ruleId, botName(context.get("client")));
 	await rule.setEnabled(enabled, "Changed from the dashboard");
 	await auditChange(context, {
 		action: "automod.update",
@@ -64,7 +66,7 @@ automod.delete("/:ruleId", async (context) => {
 	const guild = guildOf(context);
 	const { ruleId } = parseParams(context, automodRuleParam);
 
-	const rule = await ruleIn(guild, ruleId);
+	const rule = await ruleIn(guild, ruleId, botName(context.get("client")));
 	const name = rule.name;
 
 	await rule.delete("Removed from the dashboard");
@@ -73,8 +75,8 @@ automod.delete("/:ruleId", async (context) => {
 	return context.json(await rulesFor(guild, botIdOf(context)));
 });
 
-async function ruleIn(guild: Guild, ruleId: string): Promise<AutoModerationRule> {
-	if (!canManageAutomod(guild)) throw badRequest("Testify needs the Manage Server permission to change a rule.");
+async function ruleIn(guild: Guild, ruleId: string, bot: string): Promise<AutoModerationRule> {
+	if (!canManageAutomod(guild)) throw badRequest(`${bot} needs the Manage Server permission to change a rule.`);
 
 	const rule = await guild.autoModerationRules.fetch(ruleId).catch(() => null);
 	if (rule === null) throw notFound("rule_not_found", "There is no AutoMod rule with that id in this server.");

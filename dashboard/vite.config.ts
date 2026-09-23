@@ -3,12 +3,16 @@ import { dirname } from "node:path";
 import { fileURLToPath, URL } from "node:url";
 import tailwind from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig, loadEnv, type Plugin } from "vite";
+import { BOT_NAME } from "../shared/src/brand";
 
 const resolver = createRequire(import.meta.url);
 
 /** Resolved from this file, so it finds the copy the app itself imports whether npm hoisted it or nested it. */
 const packageRoot = (name: string): string => dirname(resolver.resolve(`${name}/package.json`));
+
+/** The tab's title before any script runs, from the same constant the rest of the dashboard falls back to. */
+const botName: Plugin = { name: "bot-name", transformIndexHtml: (html) => html.replaceAll("%BOT_NAME%", BOT_NAME) };
 
 // The proxy reads the bot's own port variable, so changing DASHBOARD_PORT does not break development.
 export default defineConfig(({ mode }) => {
@@ -16,7 +20,7 @@ export default defineConfig(({ mode }) => {
 	const port = env.DASHBOARD_PORT ?? "3000";
 
 	return {
-		plugins: [react(), tailwind()],
+		plugins: [react(), tailwind(), botName],
 		resolve: {
 			// discord-html-transcripts hoists React 18, so hoisted packages must resolve this workspace's React 19.
 			dedupe: ["react", "react-dom"],

@@ -2,7 +2,7 @@ import { type Guild, type GuildMember } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, forbidden, notFound } from "@api/errors";
+import { badRequest, forbidden, notFound, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { addWarning, clearWarnings, removeWarning } from "@database/repositories/moderationRepository";
@@ -25,7 +25,7 @@ members.use("*", requireGuild);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	return guild;
 }

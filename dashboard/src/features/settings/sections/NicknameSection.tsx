@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { Section } from "@/features/settings/components/Section";
+import { currentBotName } from "@/i18n";
 import { ApiError, api } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { keys } from "@/lib/queries";
@@ -56,7 +57,7 @@ export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Ele
 						value={draft}
 						disabled={!allowed}
 						maxLength={NICKNAME_MAX}
-						placeholder="Testify"
+						placeholder={currentBotName()}
 						onChange={(event) => {
 							setDraft(event.target.value);
 						}}

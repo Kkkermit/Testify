@@ -11,7 +11,7 @@ You need the **Manage Server** permission in a server to add a bot to it.
 
 ### Steps
 1. Sign in to the dashboard and open the [servers page](/guilds).
-2. Find the server under **Add Testify**. Servers where you do not have Manage Server are under **Needs somebody else**.
+2. Find the server under **Add {bot}**. Servers where you do not have Manage Server are under **Needs somebody else**.
 3. Press **Add**. Discord opens its own consent screen with that server already picked.
 4. Check the permissions and press **Authorise**.
 

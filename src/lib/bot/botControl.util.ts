@@ -27,7 +27,7 @@ export function pause(client: TestifyClient, now = Date.now()): BotControlState 
 	client.pausedAt = now;
 
 	setPresence(client, "invisible", "paused from the dashboard");
-	client.logger.warn("[CONTROL] Testify was paused from the dashboard. No commands will run until it is resumed.");
+	client.logger.warn("[CONTROL] The bot was paused from the dashboard. No commands will run until it is resumed.");
 
 	return controlState(client);
 }
@@ -37,7 +37,7 @@ export function resume(client: TestifyClient): BotControlState {
 	client.pausedAt = null;
 
 	setPresence(client, "online", "/help");
-	client.logger.info("[CONTROL] Testify was resumed from the dashboard.");
+	client.logger.info("[CONTROL] The bot was resumed from the dashboard.");
 
 	return controlState(client);
 }

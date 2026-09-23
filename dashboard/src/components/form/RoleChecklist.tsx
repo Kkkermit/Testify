@@ -1,4 +1,5 @@
 import { type RoleSummary } from "@testify/shared";
+import { useTranslation } from "react-i18next";
 import { CheckList, type CheckItem } from "@/components/form/CheckList";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
 
@@ -20,11 +21,12 @@ export function RoleChecklist({
 	max: number;
 	requireAssignable?: boolean;
 }): React.JSX.Element {
+	const { t } = useTranslation();
 	const items: CheckItem[] = roles.map((role) => ({
 		id: role.id,
 		label: <RoleSwatch name={role.name} colour={role.colour} />,
 		blocked: requireAssignable && !role.assignableByBot,
-		blockedNote: "above Testify",
+		blockedNote: t("common.aboveBot"),
 	}));
 
 	return (

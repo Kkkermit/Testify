@@ -1,6 +1,6 @@
 import { type Guild, type GuildBasedChannel, PermissionFlagsBits } from "discord.js";
 
-/** Whether Testify could actually post in a channel, which is what lets a picker grey one out before a save. */
+/** Whether the bot could actually post in a channel, which is what lets a picker grey one out before a save. */
 export function canPostIn(guild: Guild, channelId: string): boolean {
 	const channel = guild.channels.cache.get(channelId);
 

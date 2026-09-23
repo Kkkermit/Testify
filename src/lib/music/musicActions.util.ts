@@ -37,7 +37,7 @@ export function sameChannelAs(session: MusicSession, member: GuildMember): void 
 	if (listening === null) return;
 
 	if (member.voice.channelId !== listening) {
-		throw new UserFacingError("You need to be in the voice channel Testify is playing in.");
+		throw new UserFacingError("You need to be in the voice channel I am playing in.");
 	}
 }
 

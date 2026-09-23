@@ -1,3 +1,4 @@
+import { BOT_NAME } from "@testify/shared";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
@@ -19,7 +20,7 @@ export function SignInPage(): React.JSX.Element {
 	const setup = useSetup();
 	const bot = useBot();
 	const returnTo = params.get("returnTo") ?? "/guilds";
-	const name = bot.data?.username ?? "Testify";
+	const name = bot.data?.username ?? BOT_NAME;
 
 	if (setup.data?.configured === false)
 		return <SetupNeeded missing={setup.data.missing} redirectUri={setup.data.redirectUri} />;

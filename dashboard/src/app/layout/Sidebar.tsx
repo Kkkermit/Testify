@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type BotIdentity, type DashboardUser } from "@testify/shared";
+import { BOT_NAME, type BotIdentity, type DashboardUser } from "@testify/shared";
 import { FileText, LogOut, Palette, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -34,7 +34,7 @@ export function Sidebar({
 	onNavigate,
 }: NavAudience & {
 	user: DashboardUser | null;
-	/** The bot's own profile, so a fork's sidebar carries its identity rather than Testify's. */
+	/** The bot's own profile, so a fork's sidebar carries its identity rather than the original's. */
 	bot?: BotIdentity | undefined;
 	/** True inside the mobile drawer, where there is room for the labels. */
 	expanded?: boolean;
@@ -64,7 +64,7 @@ export function Sidebar({
 					<BotMark src={bot?.avatarUrl} size={22} />
 				</span>
 				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
-					{bot?.username ?? "Testify"}
+					{bot?.username ?? BOT_NAME}
 				</span>
 			</Link>
 

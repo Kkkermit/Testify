@@ -1,4 +1,5 @@
 import { PermissionsBitField } from "discord.js";
+import { botName } from "@core/client";
 import { defineMessageHandler } from "@core/message";
 import { addWarning } from "@database/repositories/moderationRepository";
 import { getAntiLink } from "@database/repositories/settingsRepository";
@@ -28,7 +29,7 @@ export default defineMessageHandler({
 			message.guild.id,
 			message.author.id,
 			message.author.username,
-			{ id: client.user?.id ?? "0", tag: client.user?.username ?? "Testify" },
+			{ id: client.user?.id ?? "0", tag: botName(client) },
 			"Posted a forbidden link",
 		);
 

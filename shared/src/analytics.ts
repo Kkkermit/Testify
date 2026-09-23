@@ -109,7 +109,7 @@ export interface RuntimeInfo {
 	startedAt: string;
 	uptimeMs: number;
 	memoryMb: { heapUsed: number; heapTotal: number; rss: number };
-	/** Where to look for a newer release. Testify never phones home to check. */
+	/** Where to look for a newer release. The bot never phones home to check. */
 	repositoryUrl: string;
 	commands: number;
 	events: number;

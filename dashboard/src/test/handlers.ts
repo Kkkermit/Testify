@@ -151,7 +151,7 @@ export const automodRules: AutomodRules = {
 			preset: "spam",
 			trigger: "Spam",
 			actions: ["block"],
-			fromTestify: true,
+			fromBot: true,
 		},
 		{
 			id: "500000000000000002",
@@ -160,7 +160,7 @@ export const automodRules: AutomodRules = {
 			preset: null,
 			trigger: "Something else",
 			actions: ["alert"],
-			fromTestify: false,
+			fromBot: false,
 		},
 	],
 };

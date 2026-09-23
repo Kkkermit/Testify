@@ -70,7 +70,7 @@ numbers, which drift):
 | `src/lib` helpers    | 90, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,580 across 254 suites           |
+| Tests                | 4,593 across 257 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -706,6 +706,13 @@ IDs) and its default.
   `theme.colours`, so its colour language is one table. `tests/config/palette.test.ts` fails on a duplicated
   category colour or on a colour name written outside `src/config/`; both halves were proved able to fail.
 - **No committed snowflakes.** Every ID goes through `env.ts`.
+- **The bot's name is written once: `BOT_NAME` in `shared/src/brand.ts`.** It is only the fallback. What a reader
+  sees is the bot's own Discord username wherever there is one to read, so a fork renamed in the Developer Portal
+  needs no code change at all, and one that wants a different built-in name changes one line. The bot calls
+  `botName(client)` from `@core/client` (and `notInGuild(client)` in the API); a help article writes `{bot}`; the
+  dashboard writes `{{bot}}`, which i18next fills from `defaultVariables` and `useBot()` updates once `/api/bot`
+  answers, so no call site passes it. `tests/config/brand.test.ts` fails on the name written anywhere else in
+  `src`, `shared/src`, `dashboard/src`, the articles or `index.html`, and was proved to go red.
 
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
 comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
@@ -1631,6 +1638,13 @@ macOS or Windows, so `@/components/form/Field` resolves to the class strings the
 with `does not provide an export named 'Field'`. Nothing local catches it — Linux is case-sensitive and so is
 CI — so `tests/core/conventions.test.ts` walks `src`, `shared/src` and `dashboard/src` and names the pair. The
 class strings are `fieldStyles.ts` for exactly this reason.
+
+**A required picker shows a placeholder, never its first option.** A `<select>` whose value matches no option
+displays the first one anyway, so a `ChannelPicker` with `allowNone={false}` and nothing saved looked filled in
+while holding `null` — and choosing the channel it showed fired no change, so the ticket form refused what it
+displayed until every picker was changed away and back. It now renders a disabled "Choose a channel" for `null`
+and names a deleted channel rather than showing another. A form with several required fields names every one
+still missing (`ticketMissing`), not only the first, so they can be filled in any order.
 
 **Nor does one format its own dates.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`, `clockTime` and
 `since`, and the locale is pinned rather than left to the browser: a bare `toLocaleString()` renders `7/30/2026`

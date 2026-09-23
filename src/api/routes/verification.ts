@@ -2,9 +2,10 @@ import { type Guild } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notFound } from "@api/errors";
+import { badRequest, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
+import { botName } from "@core/client";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
 import { isReady, normaliseVerify, publishVerifyPanel, roleTooHigh, type VerifyConfig } from "@lib/settings";
 import { type VerificationConfigResponse, type VerificationPatch, verificationPatchSchema } from "@testify/shared";
@@ -15,7 +16,7 @@ verification.use("*", requireGuild);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	return guild;
 }
@@ -65,7 +66,8 @@ verification.patch("/", async (context) => {
 	}
 
 	if (roleTooHigh(guild, next.roleId)) {
-		throw badRequest("That role sits at or above Testify's own, so Testify cannot give it to anybody.");
+		const name = botName(context.get("client"));
+		throw badRequest(`That role sits at or above ${name}'s own, so ${name} cannot give it to anybody.`);
 	}
 
 	const shouldPublish = patch.publish === true || (next.messageId !== null && patch.message !== undefined);

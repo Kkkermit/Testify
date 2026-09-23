@@ -1,5 +1,6 @@
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 import { type Env } from "@config/env";
+import { theme } from "@config/theme";
 import { type Button } from "@core/button";
 import { type Command } from "@core/command";
 import { type Logger } from "@core/logger";
@@ -18,6 +19,11 @@ export const intents = [
 	GatewayIntentBits.MessageContent,
 	GatewayIntentBits.AutoModerationConfiguration,
 ];
+
+/** What the bot is called in Discord, or the built-in name before it has logged in. */
+export function botName(client: Pick<Client, "user">): string {
+	return client.user?.username ?? theme.name;
+}
 
 export const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 

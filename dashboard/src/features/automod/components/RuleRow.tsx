@@ -30,7 +30,7 @@ export function RuleRow({
 			<div className="min-w-0 flex-1">
 				<div className="flex flex-wrap items-center gap-2">
 					<h3 className="truncate text-sm font-medium">{rule.name}</h3>
-					{rule.fromTestify && <Badge>{t("automod.addedByTestify")}</Badge>}
+					{rule.fromBot && <Badge>{t("automod.addedByBot")}</Badge>}
 				</div>
 				<p className="text-muted-foreground text-xs">
 					{rule.trigger}

@@ -79,7 +79,7 @@ export function VerificationSection({
 							{roles.map((role) => (
 								<option key={role.id} value={role.id} disabled={!role.assignableByBot}>
 									{role.name}
-									{role.assignableByBot ? "" : " — Testify cannot give this out"}
+									{role.assignableByBot ? "" : t("settings.cannotGiveThis")}
 								</option>
 							))}
 						</select>

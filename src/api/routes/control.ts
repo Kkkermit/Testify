@@ -2,10 +2,11 @@ import { type Guild, PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notFound } from "@api/errors";
+import { badRequest, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
+import { botName } from "@core/client";
 import { shutdown } from "@core/shutdown";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
@@ -39,7 +40,7 @@ control.post("/gateway", async (context) => {
 
 	await auditChange(context, {
 		action: `bot.${action}`,
-		summary: action === "pause" ? "Paused Testify" : "Resumed Testify",
+		summary: action === "pause" ? "Paused the bot" : "Resumed the bot",
 		after: { gateway: state.gateway },
 	});
 
@@ -53,7 +54,7 @@ control.post("/shutdown", async (context) => {
 
 	await auditChange(context, {
 		action: "bot.shutdown",
-		summary: "Shut Testify down from the dashboard",
+		summary: "Shut the bot down from the dashboard",
 		after: { gateway: "stopped" },
 	});
 
@@ -67,7 +68,7 @@ control.patch("/identity", async (context) => {
 	const client = context.get("client");
 	const patch = await parseBody(context, botIdentityPatch);
 
-	if (!client.isReady()) throw badRequest("Testify is still connecting. Try again in a moment.");
+	if (!client.isReady()) throw badRequest(`${botName(client)} is still connecting. Try again in a moment.`);
 
 	try {
 		if (patch.username !== undefined) await client.user.setUsername(patch.username);
@@ -95,7 +96,7 @@ control.get("/guilds/:guildId", async (context) => {
 	const { guildId } = parseParams(context, guildIdParam);
 	const guild = client.guilds.cache.get(guildId);
 
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	const [configured, tallies] = await Promise.all([configuredIn(guild), guildTallies(ANALYTICS.defaultWindowDays, 0)]);
 
@@ -127,7 +128,7 @@ control.post("/guilds/:guildId/leave", async (context) => {
 	const { confirm } = await parseBody(context, leaveGuildRequest);
 	const guild = client.guilds.cache.get(guildId);
 
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 	if (confirm !== guild.name) throw badRequest("That is not the server's name, so nothing was changed.");
 
 	await auditChange(context, {

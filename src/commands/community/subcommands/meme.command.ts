@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
@@ -47,7 +48,7 @@ export default defineCommand({
 			interaction.options.getString("subreddit") ?? SUBREDDITS[Math.floor(Math.random() * SUBREDDITS.length)]!;
 		const listing = await fetchJson("reddit", `https://www.reddit.com/r/${subreddit}/hot.json`, listingSchema, {
 			query: { limit: 60 },
-			headers: { "User-Agent": "Testify Discord bot" },
+			headers: { "User-Agent": `${theme.name} Discord bot` },
 		});
 
 		const nsfwAllowed = interaction.channel !== null && "nsfw" in interaction.channel && interaction.channel.nsfw;

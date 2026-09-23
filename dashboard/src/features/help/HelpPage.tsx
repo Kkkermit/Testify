@@ -1,3 +1,4 @@
+import { BOT_NAME } from "@testify/shared";
 import { BookOpen, Code2, ExternalLink, MessageCircleQuestion, Terminal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -20,7 +21,7 @@ export function HelpPage(): React.JSX.Element {
 	const me = useMe();
 	const bot = useBot();
 	const areas = helpAreas(me.data?.isOwner === true);
-	const name = bot.data?.username ?? "Testify";
+	const name = bot.data?.username ?? BOT_NAME;
 
 	return (
 		<>

@@ -40,11 +40,11 @@ export interface ManageableGuild {
 	iconUrl: string | null;
 	memberCount: number | null;
 	botPresent: boolean;
-	/** Whether this person could add Testify, which needs Manage Server. */
+	/** Whether this person could add the bot, which needs Manage Server. */
 	canInvite: boolean;
 }
 
-/** Everything Testify asks for on the invite, as one bitfield, rather than Administrator. */
+/** Everything the bot asks for on the invite, as one bitfield, rather than Administrator. */
 export const INVITE_PERMISSIONS = "1374821936374";
 
 export function inviteUrl(clientId: string, guildId?: string): string {

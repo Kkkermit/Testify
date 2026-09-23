@@ -1,7 +1,7 @@
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notFound } from "@api/errors";
+import { badRequest, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
@@ -22,7 +22,7 @@ welcome.use("*", requireGuild);
 function guildIdOf(context: ApiContext): string {
 	const guild = context.get("guild");
 	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	return guild.id;
 }

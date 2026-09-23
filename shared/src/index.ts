@@ -3,6 +3,7 @@ export * from "./api";
 export * from "./auditLog";
 export * from "./automod";
 export * from "./blacklist";
+export * from "./brand";
 export * from "./commandRunner";
 export * from "./commandToggles";
 export * from "./commands";

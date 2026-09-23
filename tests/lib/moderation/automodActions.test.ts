@@ -84,8 +84,8 @@ describe("toRuleSummary", () => {
 
 	/** A rule somebody made in Discord's own UI must not look like one Testify is responsible for. */
 	it("marks only the rules the bot itself created", () => {
-		expect(toRuleSummary(rule as never, BOT).fromTestify).toBe(true);
-		expect(toRuleSummary(rule as never, "200000000000000002").fromTestify).toBe(false);
+		expect(toRuleSummary(rule as never, BOT).fromBot).toBe(true);
+		expect(toRuleSummary(rule as never, "200000000000000002").fromBot).toBe(false);
 	});
 
 	/** Discord has trigger types Testify does not build; the list still has to render them. */

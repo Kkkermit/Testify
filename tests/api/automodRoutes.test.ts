@@ -92,7 +92,7 @@ describe("GET /automod", () => {
 
 		expect(body.canManage).toBe(true);
 		expect(body.rules).toHaveLength(1);
-		expect(body.rules[0]).toMatchObject({ id: RULE, name: "Block spam", preset: "spam", fromTestify: true });
+		expect(body.rules[0]).toMatchObject({ id: RULE, name: "Block spam", preset: "spam", fromBot: true });
 	});
 
 	/** Without Manage Server the fetch throws, and a 500 reads as a broken dashboard rather than a permission. */
@@ -111,7 +111,7 @@ describe("GET /automod", () => {
 
 		const body = (await (await send("GET")).json()) as AutomodRules;
 
-		expect(body.rules[0]?.fromTestify).toBe(false);
+		expect(body.rules[0]?.fromBot).toBe(false);
 	});
 });
 

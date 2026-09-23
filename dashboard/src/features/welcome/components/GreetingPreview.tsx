@@ -1,6 +1,7 @@
-import { fillTemplate, type WelcomeStyle } from "@testify/shared";
+import { BOT_NAME, fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "@/components/primitives";
+import { useBot } from "@/features/auth/useBot";
 import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
 import { cn } from "@/lib/cn";
 
@@ -17,6 +18,8 @@ export function GreetingPreview({
 	memberCount: number;
 }): React.JSX.Element {
 	const { t } = useTranslation();
+	const bot = useBot();
+	const name = bot.data?.username ?? BOT_NAME;
 	const filled = fillTemplate(message, {
 		mention: "@newcomer",
 		username: "newcomer",
@@ -27,10 +30,10 @@ export function GreetingPreview({
 	return (
 		<div className="bg-background border-border rounded-card border p-4">
 			<div className="flex gap-3">
-				<Avatar name="Testify" url={null} size={36} seed={guildName} />
+				<Avatar name={name} url={bot.data?.avatarUrl ?? null} size={36} seed={guildName} />
 				<div className="min-w-0 flex-1">
 					<p className="text-sm font-medium">
-						Testify <span className="bg-primary/20 text-accent ml-1 rounded-chip px-1 py-0.5 text-[0.625rem]">BOT</span>
+						{name} <span className="bg-primary/20 text-accent ml-1 rounded-chip px-1 py-0.5 text-[0.625rem]">BOT</span>
 					</p>
 
 					<div

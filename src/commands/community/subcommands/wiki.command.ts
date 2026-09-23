@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
@@ -30,7 +31,7 @@ export default defineCommand({
 			"wikipedia",
 			`https://en.wikipedia.org/api/rest_v1/page/summary/${slug}`,
 			summarySchema,
-			{ headers: { "User-Agent": "Testify Discord bot" } },
+			{ headers: { "User-Agent": `${theme.name} Discord bot` } },
 		).catch(() => null);
 
 		if (!summary || summary.extract.length === 0) {

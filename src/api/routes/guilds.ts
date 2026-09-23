@@ -1,7 +1,7 @@
 import { ChannelType, type Guild, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
-import { Hono } from "hono";
+import { type Context, Hono } from "hono";
 import { type ApiBindings } from "@api/context";
-import { notFound } from "@api/errors";
+import { notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
@@ -66,10 +66,10 @@ guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
 guilds.route("/:guildId/music", music);
 
-function guildOf(context: { get: (key: "guild") => Guild | undefined }): Guild {
+function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
 	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	return guild;
 }

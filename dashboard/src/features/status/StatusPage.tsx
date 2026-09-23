@@ -1,4 +1,4 @@
-import { type StatusLevel, type StatusResponse } from "@testify/shared";
+import { BOT_NAME, type StatusLevel, type StatusResponse } from "@testify/shared";
 import { AlertTriangle, CheckCircle2, CircleHelp, Clock, Database, Gauge, Radio, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -43,7 +43,7 @@ export function StatusPage(): React.JSX.Element {
 
 	const bot = useBot();
 	const status = useStatus();
-	const name = bot.data?.username ?? "Testify";
+	const name = bot.data?.username ?? BOT_NAME;
 
 	const header = <PageHeader title={t("status.title")} subtitle={t("status.subtitle", { name })} />;
 

@@ -1,11 +1,11 @@
 import { type ColorResolvable } from "discord.js";
 import { CATEGORIES, type Category } from "@config/categories";
+import { BOT_NAME } from "@testify/shared";
 
 /** Colours, emoji and branding. */
 export const theme = {
-	name: "Testify",
+	name: BOT_NAME,
 	author: "Kkermit",
-	credit: "Testify",
 	repository: "https://github.com/Kkkermit/Testify",
 	supportServer: "https://discord.gg/xcMVwAVjSD",
 

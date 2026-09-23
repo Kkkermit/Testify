@@ -6,6 +6,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { formatUptime } from "@/features/owner/owner.utils";
 import { useRuntime } from "@/features/owner/useOwner";
+import { currentBotName } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 
@@ -27,7 +28,7 @@ export function RuntimeTab(): React.JSX.Element {
 				<DataList
 					mono
 					rows={[
-						{ label: "Testify", value: `v${info.version}` },
+						{ label: currentBotName(), value: `v${info.version}` },
 						{ label: "Environment", value: info.environment },
 						{ label: "Node", value: info.nodeVersion },
 						{ label: "discord.js", value: `v${info.discordVersion}` },

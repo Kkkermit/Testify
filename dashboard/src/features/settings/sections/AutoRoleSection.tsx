@@ -39,10 +39,7 @@ export function AutoRoleSection({
 			/>
 
 			{unassignable.length > 0 && (
-				<Warning>
-					Testify cannot give {unassignable.map((role) => role.name).join(", ")} — move its own role above them in the
-					server settings.
-				</Warning>
+				<Warning>{t("settings.cannotGiveRoles", { roles: unassignable.map((role) => role.name).join(", ") })}</Warning>
 			)}
 		</Section>
 	);

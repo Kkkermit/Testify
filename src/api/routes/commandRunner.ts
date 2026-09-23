@@ -2,7 +2,7 @@ import { type Guild } from "discord.js";
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { badRequest, notFound } from "@api/errors";
+import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireOwner } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
@@ -105,7 +105,7 @@ function resolveGuild(client: TestifyClient, command: Command, guildId: string |
 	}
 
 	const guild = client.guilds.cache.get(guildId);
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(client);
 
 	return guild;
 }

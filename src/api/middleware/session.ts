@@ -2,7 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
 import { readCookie, SESSION_COOKIE } from "@api/cookies";
-import { forbidden, notFound, unauthorised } from "@api/errors";
+import { forbidden, notFound, notInGuild, unauthorised } from "@api/errors";
 import { requireOauth } from "@api/oauth";
 import { findSession, touchSession } from "@database/repositories/dashboardSessionRepository";
 
@@ -38,7 +38,7 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 
 	// Not being in the guild is not a secret, and "here is an invite" is the right answer to it.
 	const guild = context.get("client").guilds.cache.get(guildId);
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	const isOwner = context.get("client").isOwner(session.userId);
 

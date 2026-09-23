@@ -94,7 +94,7 @@ export function StickyRow({
 			</div>
 
 			{blocked !== null && <Warning>{blocked}</Warning>}
-			{!entry.canSend && <Warning>Testify cannot post in #{name}, so this sticky will never appear.</Warning>}
+			{!entry.canSend && <Warning>{t("sticky.cannotPost", { channel: name })}</Warning>}
 		</li>
 	);
 }

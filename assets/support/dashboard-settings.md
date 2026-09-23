@@ -9,7 +9,7 @@ related: change-prefix, link-filter, auto-role, verification, counting, voice-st
 Open your server, then **Settings**. It holds the switches that do not have a screen of their own.
 
 - **Command prefix**: change it, or switch prefix commands off so only slash commands work.
-- **Testify's name here**: the bot's nickname in this server.
+- **{bot}’s name here**: the bot's nickname in this server.
 - **Link filtering**: delete links from anyone without the bypass permission.
 - **Roles on join**: roles every new member gets.
 - **Verification**: make new members pass a check before they get a role.

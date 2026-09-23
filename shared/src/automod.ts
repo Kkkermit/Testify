@@ -24,12 +24,12 @@ export interface AutomodRuleSummary {
 	preset: AutomodPreset | null;
 	trigger: string;
 	actions: AutomodAction[];
-	fromTestify: boolean;
+	fromBot: boolean;
 }
 
 export interface AutomodRules {
 	rules: AutomodRuleSummary[];
-	/** False when Testify lacks Manage Server. */
+	/** False when the bot lacks Manage Server. */
 	canManage: boolean;
 }
 

@@ -1,7 +1,7 @@
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
-import { notFound } from "@api/errors";
+import { notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
@@ -23,7 +23,7 @@ levelling.use("*", requireGuild);
 function guildIdOf(context: ApiContext): string {
 	const guild = context.get("guild");
 	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notFound("guild_not_found", "Testify is not in that server.");
+	if (guild === undefined) throw notInGuild(context.get("client"));
 
 	return guild.id;
 }

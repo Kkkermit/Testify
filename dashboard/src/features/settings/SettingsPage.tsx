@@ -37,7 +37,7 @@ export function SettingsPage(): React.JSX.Element {
 		<>
 			<PageHeader eyebrow={overview.data?.name} title={t("settings.title")} subtitle={t("settings.subtitle")} />
 
-			<Disclosure label={t("settings.groupTestify")}>
+			<Disclosure label={t("settings.groupBot")}>
 				<Group>
 					<PrefixSection guildId={guildId} value={value.prefix} />
 					<NicknameSection guildId={guildId} />
