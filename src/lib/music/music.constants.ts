@@ -2,8 +2,11 @@ import { type ProblemKind, type QueueState } from "@lib/music/music.types";
 
 /** The identifiers, limits and defaults more than one module in this domain reads. */
 
-/** The track's own level, which is the one setting that costs nothing to serve. */
-export const DEFAULT_VOLUME = 100;
+/** The track's own level, and the only one that plays without passing through FFmpeg. */
+export const UNITY_VOLUME = 100;
+
+/** Where a new player starts when the host can change the level. */
+export const DEFAULT_VOLUME = 50;
 
 export const MIN_VOLUME = 0;
 

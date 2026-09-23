@@ -1,9 +1,9 @@
-import { DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME } from "@lib/music/music.constants";
+import { MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME } from "@lib/music/music.constants";
 import { type RemoteFormat, type StreamShape, type StreamPlan } from "@lib/music/music.types";
 /** Choosing which of a track's formats to play, and whether that choice needs a transcoder. */
 
 export function clampVolume(volume: number): number {
-	if (!Number.isFinite(volume)) return DEFAULT_VOLUME;
+	if (!Number.isFinite(volume)) return UNITY_VOLUME;
 
 	return Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, Math.round(volume)));
 }

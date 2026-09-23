@@ -196,7 +196,7 @@ export default defineCommand({
 			options: [
 				{
 					name: "percent",
-					description: "0 to 200, where 100 is the track's own level.",
+					description: "0 to 200. 100 is the track's own level; the player starts at 50.",
 					type: "integer",
 					min: MIN_VOLUME,
 					max: MAX_VOLUME,

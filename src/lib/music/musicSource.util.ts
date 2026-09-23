@@ -1,7 +1,7 @@
 import { spawn } from "node:child_process";
 import { PassThrough, type Readable } from "node:stream";
 import { UserFacingError } from "@core/errors";
-import { SEARCH_RESULTS, DEFAULT_VOLUME } from "@lib/music/music.constants";
+import { SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
 import {
 	type OpenStream,
 	type MusicBinaries,
@@ -277,7 +277,7 @@ function buffer(source: Readable): PassThrough {
  */
 export function ffmpegArgs(options: StreamOptions = {}): string[] {
 	const seekMs = Math.max(0, Math.round(options.seekMs ?? 0));
-	const volume = clampVolume(options.volume ?? DEFAULT_VOLUME);
+	const volume = clampVolume(options.volume ?? UNITY_VOLUME);
 
 	return [
 		"-hide_banner",
@@ -287,7 +287,7 @@ export function ffmpegArgs(options: StreamOptions = {}): string[] {
 		"-i",
 		"pipe:0",
 		"-vn",
-		...(volume === DEFAULT_VOLUME ? [] : ["-af", `volume=${(volume / 100).toFixed(3)}`]),
+		...(volume === UNITY_VOLUME ? [] : ["-af", `volume=${(volume / 100).toFixed(3)}`]),
 		"-c:a",
 		"libopus",
 		"-b:a",

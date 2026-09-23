@@ -4,7 +4,7 @@ import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, sectionWithThumbnail, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { formatClock, formatDuration, truncate } from "@lib/format/format.util";
-import { MUSIC_ID, DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME, VOLUME_STEP } from "@lib/music/music.constants";
+import { MUSIC_ID, MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME, VOLUME_STEP } from "@lib/music/music.constants";
 import { type MusicSource, type QueueState, type Track } from "@lib/music/music.types";
 import { clampVolume } from "@lib/music/musicFormat.util";
 import { currentTrack, totalDurationMs, upcomingPage } from "@lib/music/musicQueue.util";
@@ -96,7 +96,7 @@ const LOOP_WORDS = { off: "off", track: "track", queue: "queue" } as const;
 
 /** Level, repeat and who asked for it, on one line so the bar above it stays uncluttered. */
 export function statusLine(state: PanelState, track: Track): string {
-	const volume = clampVolume(state.volume ?? DEFAULT_VOLUME);
+	const volume = clampVolume(state.volume ?? UNITY_VOLUME);
 	const parts = [
 		state.canSetVolume === true ? `🔊 ${String(volume)}%` : "🔊 track level",
 		`🔁 ${LOOP_WORDS[state.queue.loop]}`,
@@ -158,7 +158,7 @@ export function volumeStep(current: number, direction: -1 | 1): number {
 }
 
 function extras(state: PanelState, userId: string): ContainerPart {
-	const volume = clampVolume(state.volume ?? DEFAULT_VOLUME);
+	const volume = clampVolume(state.volume ?? UNITY_VOLUME);
 	const adjustable = state.canSetVolume === true && currentTrack(state.queue) !== null;
 
 	return row(

@@ -1,4 +1,4 @@
-import { DEFAULT_VOLUME, MAX_VOLUME, MIN_VOLUME } from "@lib/music/music.constants";
+import { MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME } from "@lib/music/music.constants";
 import { type RemoteFormat } from "@lib/music/music.types";
 import { clampVolume, planStream } from "@lib/music/musicFormat.util";
 
@@ -101,7 +101,7 @@ describe("clampVolume", () => {
 
 	/** A custom ID is text, so a hand-written one can arrive as NaN and must not become a NaN filter. */
 	it("falls back to the track's own level for a number that is not one", () => {
-		expect(clampVolume(Number.NaN)).toBe(DEFAULT_VOLUME);
+		expect(clampVolume(Number.NaN)).toBe(UNITY_VOLUME);
 	});
 
 	it("rounds, because FFmpeg is handed a percentage rather than a fraction", () => {

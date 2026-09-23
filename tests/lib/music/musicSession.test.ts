@@ -1,6 +1,7 @@
 import { EventEmitter } from "node:events";
 import { Readable } from "node:stream";
 import { type Guild } from "discord.js";
+import { DEFAULT_VOLUME, UNITY_VOLUME } from "@lib/music/music.constants";
 import { type MusicBinaries, type Track } from "@lib/music/music.types";
 import {
 	destroyAllSessions,
@@ -254,8 +255,28 @@ describe("the registry", () => {
 });
 
 describe("the volume", () => {
-	it("starts at the track's own level", () => {
-		expect(sessionWith(["a"], WITH_FFMPEG).session.volume).toBe(100);
+	it("starts at half the track's level where FFmpeg can apply it", () => {
+		expect(sessionWith(["a"], WITH_FFMPEG).session.volume).toBe(DEFAULT_VOLUME);
+		expect(DEFAULT_VOLUME).toBe(50);
+	});
+
+	/** A host with no FFmpeg plays at the track's own level, so the panel must not claim otherwise. */
+	it("reports the track's own level where nothing can change it", () => {
+		expect(sessionWith(["a"]).session.volume).toBe(UNITY_VOLUME);
+	});
+
+	it("filters the first track through FFmpeg, because the starting level is not the track's own", async () => {
+		const { openStream } = jest.requireMock("@lib/music/musicSource.util");
+		const { session } = sessionWith(["a"], WITH_FFMPEG);
+
+		await session.play(0);
+
+		expect(openStream).toHaveBeenCalledWith(
+			expect.any(String),
+			expect.objectContaining({ shape: "transcode" }),
+			WITH_FFMPEG,
+			expect.objectContaining({ volume: DEFAULT_VOLUME }),
+		);
 	});
 
 	it("cannot be set past either end", () => {

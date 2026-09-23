@@ -13,7 +13,13 @@ import {
 import { type Guild, type VoiceBasedChannel } from "discord.js";
 import { type Logger } from "@core/logger";
 import { type ContainerMessage } from "@lib/discord/discord.types";
-import { DEFAULT_VOLUME, RETRIES_AFTER, EMPTY_QUEUE, MAX_TRACK_ATTEMPTS } from "@lib/music/music.constants";
+import {
+	DEFAULT_VOLUME,
+	EMPTY_QUEUE,
+	MAX_TRACK_ATTEMPTS,
+	RETRIES_AFTER,
+	UNITY_VOLUME,
+} from "@lib/music/music.constants";
 import {
 	type MusicBinaries,
 	type StreamShape,
@@ -94,7 +100,7 @@ export class MusicSession {
 	/** Bumped per stream, so a stream closed on purpose cannot report into the one that replaced it. */
 	#generation = 0;
 	#notice: { text: string; at: number } | null = null;
-	#volume = DEFAULT_VOLUME;
+	#volume: number;
 	#offsetMs = 0;
 	#reopening = false;
 	#panel: PanelTarget | null = null;
@@ -106,6 +112,7 @@ export class MusicSession {
 		this.guildId = guildId;
 		this.#binaries = binaries;
 		this.#logger = logger;
+		this.#volume = binaries.ffmpeg === null ? UNITY_VOLUME : DEFAULT_VOLUME;
 
 		this.#player.on(AudioPlayerStatus.Idle, () => void this.#onIdle());
 		this.#player.on("error", (error) => {
@@ -205,7 +212,7 @@ export class MusicSession {
 		if (track === undefined) return;
 
 		const seekMs = this.canSetVolume ? Math.max(0, Math.round(options.seekMs ?? 0)) : 0;
-		const filtered = this.canSetVolume && (this.#volume !== DEFAULT_VOLUME || seekMs > 0);
+		const filtered = this.canSetVolume && (this.#volume !== UNITY_VOLUME || seekMs > 0);
 
 		this.queue = { ...this.queue, index };
 
