@@ -5,13 +5,7 @@ import { requireAuth } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { supportContext, supportDesk } from "@lib/support";
-import {
-	type SupportArticle,
-	supportArticleParams,
-	type SupportIndex,
-	supportQuestion,
-	type SupportReply,
-} from "@testify/shared";
+import { supportArticleParams, type SupportIndex, supportQuestion, type SupportReply } from "@testify/shared";
 
 /** The Help page's assistant; every answer is a written article, and the question is neither stored nor logged. */
 export const support = new Hono<ApiBindings>();
@@ -20,7 +14,7 @@ support.use("*", requireAuth);
 
 support.get("/", (context) => {
 	const client = context.get("client");
-	const body: SupportIndex = { suggested: supportDesk(client).suggested(supportContext(client, DEFAULT_PREFIX)) };
+	const body: SupportIndex = { articles: supportDesk(client).catalogue(supportContext(client, DEFAULT_PREFIX)) };
 
 	return context.json(body);
 });
@@ -36,8 +30,12 @@ support.post("/ask", async (context) => {
 support.get("/articles/:articleId", (context) => {
 	const client = context.get("client");
 	const { articleId } = parseParams(context, supportArticleParams);
-	const article: SupportArticle | null = supportDesk(client).article(articleId, supportContext(client, DEFAULT_PREFIX));
-	if (article === null) throw notFound("unknown_article", "There is no help article with that id.");
+	const help = supportContext(client, DEFAULT_PREFIX);
+	const desk = supportDesk(client);
 
-	return context.json(article);
+	const answer = desk.article(articleId, help);
+	if (answer === null) throw notFound("unknown_article", "There is no help article with that id.");
+
+	const body: SupportReply = { answer, related: desk.relatedTo(articleId, help) };
+	return context.json(body);
 });

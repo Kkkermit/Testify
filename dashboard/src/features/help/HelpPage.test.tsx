@@ -1,8 +1,10 @@
+import { SupportSearch } from "@testify/shared";
 import { screen } from "@testing-library/react";
 import { allNavItems, navigationFor } from "@/config/navigation";
-import { helpAreas } from "@/features/help/help.utils";
+import { articlesByTopic, helpAreas, suggestionsFor } from "@/features/help/help.utils";
 import { HelpPage } from "@/features/help/HelpPage";
 import { expectNoViolations } from "@/test/axe";
+import { supportIndex } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
 function renderPage() {
@@ -20,6 +22,37 @@ describe("helpAreas", () => {
 	it("includes the owner console only for an owner", () => {
 		expect(helpAreas(false).some((area) => area.labelKey === "nav.owner")).toBe(false);
 		expect(helpAreas(true).some((area) => area.labelKey === "nav.owner")).toBe(true);
+	});
+});
+
+describe("suggestionsFor", () => {
+	const entries = supportIndex.articles;
+	const search = new SupportSearch(entries);
+
+	it("offers the featured articles before anything is typed", () => {
+		expect(suggestionsFor(search, entries, "  ").map((entry) => entry.id)).toEqual(["add-the-bot", "levelling"]);
+	});
+
+	it("completes the word being typed", () => {
+		expect(suggestionsFor(search, entries, "tick").map((entry) => entry.id)).toContain("tickets");
+	});
+
+	it("offers nothing while the articles have not loaded", () => {
+		expect(suggestionsFor(null, [], "tick")).toEqual([]);
+	});
+});
+
+describe("articlesByTopic", () => {
+	/** Every command already has a row on the command list, so browsing leaves them to it. */
+	it("groups the written articles in reading order, alphabetised, and leaves command pages out", () => {
+		expect(articlesByTopic(supportIndex.articles)).toEqual([
+			{ topic: "getting-started", articles: [expect.objectContaining({ id: "add-the-bot" })] },
+			{
+				topic: "setup",
+				articles: [expect.objectContaining({ id: "levelling" }), expect.objectContaining({ id: "tickets" })],
+			},
+			{ topic: "troubleshooting", articles: [expect.objectContaining({ id: "role-order" })] },
+		]);
 	});
 });
 

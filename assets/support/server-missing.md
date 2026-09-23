@@ -1,12 +1,18 @@
 ---
 id: server-missing
 title: A server is missing from the servers page
-keywords: server missing, not listed, not showing, cannot see server, no permission, manage server, where is my server, guild missing, doesn't show up, cannot find my server, server list, servers page, missing from the dashboard
+topic: dashboard
+keywords: server missing, not listed, not showing, cannot see server, no permission, manage server, where is my server, guild missing, doesn't show up, server list, servers page, missing from the dashboard
+questions: Why is my server not on the dashboard? | Why can't I see my server? | My server doesn't show up
+related: add-the-bot, permissions, sign-in
 ---
-The servers page only lists servers where you have the **Manage Server** permission. If a server is missing, you do not have that permission there.
+The servers page lists only the servers where you have **Manage Server**.
 
-- Ask the server’s owner, or an admin, to give you a role with Manage Server.
-- Once you have it, reload the servers page. The list comes from Discord and refreshes within a minute.
-- A server marked **No permission** is one where somebody else would have to add the bot.
+### If a server is missing
+1. Ask the server's owner or an admin to give you a role with Manage Server.
+2. Reload the [servers page](/guilds). The list comes from Discord and refreshes within a minute.
 
-Being able to see a server does not change anything in it. Only people with Manage Server can open its settings.
+### Other labels you might see
+- **Add** means you can invite the bot to that server yourself.
+- **No permission** means somebody with Manage Server has to add it.
+- A server where the bot has been removed shows an invite rather than its settings.

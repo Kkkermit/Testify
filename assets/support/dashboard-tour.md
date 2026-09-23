@@ -1,19 +1,26 @@
 ---
 id: dashboard-tour
 title: Finding your way around the dashboard
-keywords: dashboard, website, web, panel, site, sidebar, navigate, sections, screens, menu, where, find, layout, tour, settings page, find settings
+topic: dashboard
+keywords: dashboard, website, web, panel, site, sidebar, navigate, sections, screens, menu, where, find, layout, tour, settings page, find settings, explainer
+questions: Where are the settings on the dashboard? | How do I use the dashboard? | What is on the dashboard?
+related: dashboard-overview, dashboard-settings, dashboard-on-phone
 featured: true
 ---
 Everything you change applies to the one server you have open, and its name sits above every screen.
 
-- **Servers** lists every server you can configure, or add the bot to.
-- **Overview** shows the open server at a glance, with a tile for each feature.
-- **Settings** holds the prefix, nickname, link filtering, roles on join, verification and counting.
-- **Community**: welcome messages, levelling and leaderboards.
-- **Moderation**: AutoMod filters and the audit log.
-- **Economy**: treasure drops and the lottery.
-- **Entertainment**: the music player and giveaways.
-- **Channels**: sticky messages and tickets.
-- **Commands** lists every command, and lets you switch any of them off for this server.
+### The sidebar
+- **Servers**: every server you can configure, or add the bot to.
+- **Commands**: every command, and the switches that turn them off for a server.
+- **Status**: whether the bot is online and how quickly it answers.
+- **Help**: this assistant and a tour of every screen.
 
-On a phone the sidebar opens from the menu button at the top of the screen. The [Help page](/help) describes each section in a line.
+### Inside a server
+- **Overview** and **Settings** sit at the top.
+- **Community**: Welcome, Levelling and Leaderboards.
+- **Moderation**: AutoMod and Audit log.
+- **Economy**: Treasure and Lottery.
+- **Entertainment**: Music and Giveaways.
+- **Channels**: Sticky and Tickets.
+
+> **Tip:** Sections fold away. The one holding the page you are on always opens itself.

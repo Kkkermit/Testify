@@ -1,4 +1,11 @@
-import { articleBlocks, articleSpans, linkTarget, supportArticleParams, supportQuestion } from "@testify/shared";
+import {
+	articleBlocks,
+	articleSpans,
+	isSupportTopic,
+	linkTarget,
+	supportArticleParams,
+	supportQuestion,
+} from "@testify/shared";
 
 describe("linkTarget", () => {
 	it("keeps a dashboard path as an internal link", () => {
@@ -63,8 +70,24 @@ describe("articleBlocks", () => {
 		expect(blocks[3]).toMatchObject({ kind: "list", ordered: false });
 	});
 
-	it("reads a mixed block as a paragraph rather than half a list", () => {
-		expect(articleBlocks("- one\nnot a bullet")[0]?.kind).toBe("paragraph");
+	it("reads a quoted block as a tip", () => {
+		expect(articleBlocks("> **Tip:** Reload\n> Discord.")).toEqual([
+			{
+				kind: "tip",
+				spans: [
+					{ kind: "strong", text: "Tip:" },
+					{ kind: "text", text: " Reload Discord." },
+				],
+			},
+		]);
+	});
+
+	/** Articles put a heading straight above its text, as Markdown allows; it once rendered as "### In Discord Run …". */
+	it("needs no blank line between a heading, its text and a list", () => {
+		const blocks = articleBlocks("### In Discord\nRun it, which asks for:\n1. A channel\n2. A role\nThen press Save.");
+
+		expect(blocks.map((block) => block.kind)).toEqual(["heading", "paragraph", "list", "paragraph"]);
+		expect(blocks[2]).toMatchObject({ kind: "list", ordered: true });
 	});
 
 	it("returns nothing for an empty body", () => {
@@ -99,5 +122,12 @@ describe("supportArticleParams", () => {
 		expect(supportArticleParams.safeParse({ articleId: "add-the-bot" }).success).toBe(true);
 		expect(supportArticleParams.safeParse({ articleId: "../../etc/passwd" }).success).toBe(false);
 		expect(supportArticleParams.safeParse({ articleId: "Add-The-Bot" }).success).toBe(false);
+	});
+});
+
+describe("isSupportTopic", () => {
+	it("knows the topics and nothing else", () => {
+		expect(isSupportTopic("setup")).toBe(true);
+		expect(isSupportTopic("gossip")).toBe(false);
 	});
 });

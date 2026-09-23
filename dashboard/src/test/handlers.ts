@@ -11,6 +11,7 @@ import {
 	type LogFeed,
 	type RuntimeInfo,
 	type SupportArticle,
+	type SupportCatalogueEntry,
 	type SupportIndex,
 	type SupportReply,
 	type ServerSettings,
@@ -586,22 +587,36 @@ export const someRoles: RoleSummary[] = [
 	{ id: "300000000000000003", name: "Admin", colour: null, position: 9, managed: false, assignableByBot: false },
 ];
 
+function catalogueEntry(
+	id: string,
+	title: string,
+	topic: SupportCatalogueEntry["topic"],
+	featured = false,
+	keywords: string[] = [],
+): SupportCatalogueEntry {
+	return { id, title, topic, kind: "article", featured, keywords, questions: [] };
+}
+
 export const supportIndex: SupportIndex = {
-	suggested: [
-		{ id: "add-the-bot", title: "Adding Testify to your server" },
-		{ id: "levelling", title: "Setting up levelling" },
+	articles: [
+		catalogueEntry("add-the-bot", "Adding Testify to your server", "getting-started", true, ["invite", "add"]),
+		catalogueEntry("levelling", "Setting up levelling", "setup", true, ["xp", "level"]),
+		catalogueEntry("tickets", "Setting up tickets", "setup", false, ["ticket panel", "support ticket"]),
+		catalogueEntry("role-order", "The bot cannot give or remove a role", "troubleshooting", false, ["role hierarchy"]),
+		{ ...catalogueEntry("command-ban", "The /ban command", "commands"), kind: "command" },
 	],
 };
 
 export const levellingArticle: SupportArticle = {
 	id: "levelling",
 	title: "Setting up levelling",
-	body: "Members earn XP by chatting.\n\n- Run `/levelling setup` in Discord.\n- Or open **Levelling** on the [dashboard](/guilds).",
+	topic: "setup",
+	body: "Members earn XP by chatting.\n\n- Run `/levelling setup` in Discord.\n- Or open **Levelling** on the [dashboard](/guilds).\n\n> **Tip:** Nobody loses XP when it is off.",
 };
 
 export const supportReply: SupportReply = {
 	answer: levellingArticle,
-	related: [{ id: "role-order", title: "The bot cannot give or remove a role" }],
+	related: [{ id: "role-order", title: "The bot cannot give or remove a role", topic: "troubleshooting" }],
 };
 
 export const handlers = [
@@ -610,10 +625,9 @@ export const handlers = [
 	http.post("/api/support/ask", () => HttpResponse.json(supportReply)),
 	http.get("/api/support/articles/:articleId", ({ params }) =>
 		HttpResponse.json({
-			...levellingArticle,
-			id: String(params.articleId),
-			title: `Article ${String(params.articleId)}`,
-		}),
+			answer: { ...levellingArticle, id: String(params.articleId), title: `Article ${String(params.articleId)}` },
+			related: [],
+		} satisfies SupportReply),
 	),
 	http.get("/api/status", () => HttpResponse.json(botStatus)),
 	http.get("/api/auth/setup", () => HttpResponse.json(configured)),

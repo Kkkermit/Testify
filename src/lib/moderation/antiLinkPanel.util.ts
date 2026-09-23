@@ -51,6 +51,6 @@ export function antiLinkPanel(state: AntiLinkPanelState, ownerId: string): Conta
 				style: state.enabled ? ButtonStyle.Danger : ButtonStyle.Success,
 			},
 		],
-		footer: "Every removal is recorded as a warning, so repeat offenders are visible in `/warn-id list`.",
+		footer: "Every removal is recorded as a warning, so repeat offenders are visible in `/warn list`.",
 	});
 }

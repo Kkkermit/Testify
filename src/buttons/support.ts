@@ -1,4 +1,5 @@
 import { DEFAULT_PREFIX } from "@config/constants";
+import { theme } from "@config/theme";
 import { defineButton } from "@core/button";
 import { getPrefix } from "@database/repositories/settingsRepository";
 import { dashboardUrl } from "@lib/bot";
@@ -20,7 +21,12 @@ export default defineButton({
 		await interaction.update(
 			supportScreen(
 				{ answer: desk.article(articleId, help), related: desk.relatedTo(articleId, help) },
-				{ bot: help.bot, ownerId: interaction.user.id, dashboard: dashboardUrl(context.client.env) },
+				{
+					bot: help.bot,
+					ownerId: interaction.user.id,
+					dashboard: dashboardUrl(context.client.env),
+					supportServer: theme.supportServer,
+				},
 			),
 		);
 	},

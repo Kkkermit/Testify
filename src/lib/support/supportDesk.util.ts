@@ -3,17 +3,28 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
 import { type SupportContext, type SupportEntry, type SupportPicker } from "@lib/support/support.types";
-import { commandEntries, fillPlaceholders, loadArticles } from "@lib/support/supportArticles.util";
+import { commandEntries, fillPlaceholders, linkEntries, loadArticles } from "@lib/support/supportArticles.util";
 import { findLeak, secretsOf } from "@lib/support/supportGuard.util";
 import { createClaudePicker } from "@lib/support/supportModel.util";
-import { isConfident, isRelated, type SearchHit, SupportSearch } from "@lib/support/supportSearch.util";
-import { type SupportArticle, type SupportArticleLink, SUPPORT_LIMITS, type SupportReply } from "@testify/shared";
+import {
+	isConfident,
+	isRelated,
+	isSuggested,
+	type SearchHit,
+	type SupportArticle,
+	type SupportArticleLink,
+	type SupportCatalogueEntry,
+	SUPPORT_LIMITS,
+	type SupportReply,
+	SupportSearch,
+} from "@testify/shared";
 
 /** Answers a question with a vetted article or with nothing, and checks every answer for secrets on the way out. */
 
 const MODEL_CALLS_PER_HOUR = 120;
 const CACHE_MS = 10 * 60_000;
 const CACHE_SIZE = 500;
+const SUGGESTIONS = 10;
 
 /** A fixed hour, so a flood of questions costs the owner at most this many model calls before search takes over. */
 export class HourlyBudget {
@@ -49,7 +60,7 @@ export interface DeskOptions {
 
 export class SupportDesk {
 	readonly #entries: Map<string, SupportEntry>;
-	readonly #search: SupportSearch;
+	readonly #search: SupportSearch<SupportEntry>;
 	readonly #picker: SupportPicker | null;
 	readonly #secrets: readonly string[];
 	readonly #logger: Logger;
@@ -71,12 +82,11 @@ export class SupportDesk {
 	async ask(question: string, context: SupportContext): Promise<SupportReply> {
 		const hits = this.#search.search(question);
 		const chosen = await this.#choose(question, hits);
-		const related = hits
-			.filter((hit) => hit.entry.id !== chosen?.id && isRelated(hit))
-			.flatMap((hit) => this.#link(hit.entry, context))
-			.slice(0, SUPPORT_LIMITS.related);
 
-		return { answer: chosen === null ? null : this.#render(chosen, context), related };
+		return {
+			answer: chosen === null ? null : this.#render(chosen, context),
+			related: this.#related(chosen, hits, context),
+		};
 	}
 
 	article(id: string, context: SupportContext): SupportArticle | null {
@@ -84,23 +94,40 @@ export class SupportDesk {
 		return entry === undefined ? null : this.#render(entry, context);
 	}
 
-	/** Opening a related article from Discord offers the next few, found by searching on its own title. */
+	/** Opening an article offers the ones it links to first, then whatever its own title finds. */
 	relatedTo(id: string, context: SupportContext): SupportArticleLink[] {
 		const entry = this.#entries.get(id);
-		if (entry === undefined) return [];
-
-		return this.#search
-			.search(entry.title)
-			.filter((hit) => hit.entry.id !== id && isRelated(hit))
-			.flatMap((hit) => this.#link(hit.entry, context))
-			.slice(0, SUPPORT_LIMITS.related);
+		return entry === undefined ? [] : this.#related(entry, this.#search.search(entry.title), context);
 	}
 
-	suggested(context: SupportContext): SupportArticleLink[] {
-		return [...this.#entries.values()].filter((entry) => entry.featured).flatMap((entry) => this.#link(entry, context));
+	/** What to offer while somebody is still typing; with nothing typed yet, the articles most people start from. */
+	suggest(partial: string, context: SupportContext, limit = SUGGESTIONS): SupportArticleLink[] {
+		const entries =
+			partial.trim() === ""
+				? [...this.#entries.values()].filter((entry) => entry.featured)
+				: this.#search
+						.search(partial, { partial: true })
+						.filter(isSuggested)
+						.map((hit) => hit.entry);
+
+		return entries.flatMap((entry) => this.#link(entry, context)).slice(0, limit);
 	}
 
-	async #choose(question: string, hits: SearchHit[]): Promise<SupportEntry | null> {
+	/** Everything but the bodies, which is what the dashboard's typeahead searches in the browser. */
+	catalogue(context: SupportContext): SupportCatalogueEntry[] {
+		return [...this.#entries.values()].flatMap((entry) => {
+			const [link] = this.#link(entry, context);
+			if (link === undefined) return [];
+
+			const keywords = [...entry.keywords];
+			const questions = entry.questions.map((question) => fillPlaceholders(question, context));
+			if (findLeak([...keywords, ...questions].join("\n"), this.#secrets) !== null) return [];
+
+			return [{ ...link, kind: entry.kind, featured: entry.featured, keywords, questions }];
+		});
+	}
+
+	async #choose(question: string, hits: SearchHit<SupportEntry>[]): Promise<SupportEntry | null> {
 		const now = this.#now();
 		const key = question.toLowerCase().replace(/\s+/g, " ").trim();
 		const cached = this.#cache.get(key);
@@ -134,10 +161,33 @@ export class SupportDesk {
 		return chosen;
 	}
 
+	#related(
+		chosen: SupportEntry | null,
+		hits: SearchHit<SupportEntry>[],
+		context: SupportContext,
+	): SupportArticleLink[] {
+		const linked = (chosen?.links ?? []).flatMap((id) => {
+			const entry = this.#entries.get(id);
+			return entry === undefined ? [] : [entry];
+		});
+		const found = hits.filter((hit) => isRelated(hit)).map((hit) => hit.entry);
+		const seen = new Set(chosen === null ? [] : [chosen.id]);
+
+		return [...linked, ...found]
+			.filter((entry) => {
+				if (seen.has(entry.id)) return false;
+				seen.add(entry.id);
+				return true;
+			})
+			.flatMap((entry) => this.#link(entry, context))
+			.slice(0, SUPPORT_LIMITS.related);
+	}
+
 	#render(entry: SupportEntry, context: SupportContext): SupportArticle | null {
 		const article = {
 			id: entry.id,
 			title: fillPlaceholders(entry.title, context),
+			topic: entry.topic,
 			body: fillPlaceholders(entry.body, context),
 		};
 
@@ -153,27 +203,40 @@ export class SupportDesk {
 
 	#link(entry: SupportEntry, context: SupportContext): SupportArticleLink[] {
 		const article = this.#render(entry, context);
-		return article === null ? [] : [{ id: article.id, title: article.title }];
+		return article === null ? [] : [{ id: article.id, title: article.title, topic: article.topic }];
 	}
 }
 
 /** Every entry the desk may answer with, minus any that could leak before a single question is asked. */
 export function buildEntries(client: TestifyClient, secrets: readonly string[]): SupportEntry[] {
-	const entries: SupportEntry[] = [];
+	const articles = loadArticles().flatMap((result) => {
+		if (result.ok) return [result.article];
 
-	for (const result of loadArticles()) {
-		if (!result.ok) {
-			client.logger.warn(
-				{ file: result.file, reason: result.reason },
-				"[SUPPORT] A help article was skipped. Fix its frontmatter.",
-			);
-			continue;
-		}
-		entries.push(result.entry);
+		client.logger.warn(
+			{ file: result.file, reason: result.reason },
+			"[SUPPORT] A help article was skipped. Fix its frontmatter.",
+		);
+		return [];
+	});
+
+	const { entries, problems } = linkEntries(articles, commandEntries(client.commands.values()));
+	for (const problem of problems) {
+		client.logger.warn(
+			problem,
+			"[SUPPORT] A help article links to something that does not exist. Fix its frontmatter.",
+		);
 	}
 
-	return [...entries, ...commandEntries(client.commands.values())].filter((entry) => {
-		const leak = findLeak(`${entry.title}\n${entry.keywords.join(" ")}\n${entry.body}`, secrets);
+	return entries.filter((entry) => {
+		const leak = findLeak(
+			[
+				entry.title,
+				...entry.keywords,
+				...entry.questions,
+				fillPlaceholders(entry.body, { bot: "", prefix: "", repository: "" }),
+			].join("\n"),
+			secrets,
+		);
 		if (leak !== null) {
 			client.logger.warn(
 				{ article: entry.id, rule: leak },

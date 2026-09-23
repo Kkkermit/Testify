@@ -16,6 +16,13 @@ describe("ArticleBody", () => {
 		expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(["First", "Second", "A", "B"]);
 	});
 
+	it("draws a quoted block as a tip", () => {
+		renderBody("> **Tip:** Reload Discord.");
+
+		expect(screen.getByText("Tip:").tagName).toBe("STRONG");
+		expect(screen.getByText(/Reload Discord/).closest("p")).toHaveClass("border-l-2");
+	});
+
 	it("opens an outside link in a new tab without handing it this page", () => {
 		renderBody("See [the source](https://github.com/Kkkermit/Testify).");
 

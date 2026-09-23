@@ -23,7 +23,7 @@ export function pickSchema(ids: readonly string[]): Record<string, unknown> {
 }
 
 export function systemPrompt(
-	entries: readonly { id: string; title: string; keywords: string[] }[],
+	entries: readonly { id: string; title: string; keywords: readonly string[] }[],
 	bot: string,
 ): string {
 	const catalogue = entries.map((entry) => `- ${entry.id}: ${entry.title} (${entry.keywords.slice(0, 8).join(", ")})`);

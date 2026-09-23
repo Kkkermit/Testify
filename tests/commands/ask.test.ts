@@ -23,11 +23,53 @@ describe("/ask", () => {
 		expect(textOf(sent!)).toContain("`!help`");
 	});
 
+	it("opens a suggestion that was picked, rather than searching for its id", async () => {
+		const interaction = createMockInteraction({ options: { question: "article:tickets" } });
+
+		await ask.run?.(interaction, createMockClient());
+
+		const [sent] = interaction.sent as unknown as ContainerMessage[];
+		expect(textOf(sent!)).toContain("## Setting up tickets");
+	});
+
 	it("refuses markup before anything is searched or sent", async () => {
 		const interaction = createMockInteraction({ options: { question: "<script>alert(1)</script>" } });
 
 		await expect(ask.run?.(interaction, createMockClient())).rejects.toBeInstanceOf(UserFacingError);
 		expect(interaction.deferReply).not.toHaveBeenCalled();
+	});
+});
+
+describe("/ask's autocomplete", () => {
+	interface Choice {
+		name: string;
+		value: string;
+	}
+
+	async function choicesFor(typed: string): Promise<Choice[]> {
+		const respond = jest.fn((_choices: Choice[]) => Promise.resolve(undefined));
+		await ask.autocomplete?.({ options: { getFocused: () => typed }, respond } as never, createMockClient());
+
+		return respond.mock.calls[0]?.[0] ?? [];
+	}
+
+	it("offers the articles most people start from before anything is typed", async () => {
+		const choices = await choicesFor("");
+
+		expect(choices.map((choice) => choice.value)).toEqual(expect.arrayContaining(["article:add-the-bot"]));
+		expect(choices.every((choice) => choice.name.length <= 100 && choice.value.length <= 100)).toBe(true);
+	});
+
+	/** Enter picks the first row, so it has to be what was typed, or a question would open the top suggestion instead. */
+	it("puts what was typed first, then the articles it matches", async () => {
+		const choices = await choicesFor("how do I set up tick");
+
+		expect(choices[0]).toEqual({ name: "🔎 Ask: how do I set up tick", value: "how do I set up tick" });
+		expect(choices.map((choice) => choice.value)).toContain("article:tickets");
+	});
+
+	it("never offers more than Discord accepts", async () => {
+		expect((await choicesFor("the bot")).length).toBeLessThanOrEqual(25);
 	});
 });
 

@@ -1,12 +1,19 @@
 import { MessageFlags } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
+import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getPrefix } from "@database/repositories/settingsRepository";
 import { dashboardUrl } from "@lib/bot";
 import { reply } from "@lib/discord";
-import { supportContext, supportDesk, supportScreen } from "@lib/support";
-import { SUPPORT_LIMITS, supportQuestion } from "@testify/shared";
+import { choiceName, suggestionName, supportContext, supportDesk, supportScreen } from "@lib/support";
+import { SUPPORT_LIMITS, supportQuestion, type SupportReply } from "@testify/shared";
+
+/** An autocomplete choice's value is capped at 100 characters, so a longer question could not survive being picked. */
+const QUESTION_MAX = 100;
+/** A picked suggestion arrives as this plus the article's id, rather than as a question to search. */
+const ARTICLE_CHOICE = "article:";
+const CHOICES_MAX = 25;
 
 export default defineCommand({
 	name: "ask",
@@ -17,10 +24,11 @@ export default defineCommand({
 	options: [
 		{
 			name: "question",
-			description: "What you want to know.",
+			description: "What you want to know. Pick a suggestion or type your own.",
 			type: "string",
 			required: true,
-			maxLength: SUPPORT_LIMITS.questionMax,
+			maxLength: QUESTION_MAX,
+			autocomplete: true,
 		},
 	],
 
@@ -28,7 +36,7 @@ export default defineCommand({
 		const parsed = supportQuestion.safeParse({ question: interaction.options.getString("question", true) });
 		if (!parsed.success) {
 			throw new UserFacingError(
-				`Ask in ${String(SUPPORT_LIMITS.questionMin)} to ${String(SUPPORT_LIMITS.questionMax)} characters of plain text.`,
+				`Ask in ${String(SUPPORT_LIMITS.questionMin)} to ${String(QUESTION_MAX)} characters of plain text.`,
 			);
 		}
 
@@ -37,11 +45,37 @@ export default defineCommand({
 
 		const prefix = interaction.guild === null ? DEFAULT_PREFIX : await getPrefix(interaction.guild.id);
 		const help = supportContext(client, prefix);
-		const answer = await supportDesk(client).ask(parsed.data.question, help);
+		const desk = supportDesk(client);
+		const { question } = parsed.data;
+
+		const answer: SupportReply = question.startsWith(ARTICLE_CHOICE)
+			? {
+					answer: desk.article(question.slice(ARTICLE_CHOICE.length), help),
+					related: desk.relatedTo(question.slice(ARTICLE_CHOICE.length), help),
+				}
+			: await desk.ask(question, help);
 
 		await reply(
 			interaction,
-			supportScreen(answer, { bot: help.bot, ownerId: interaction.user.id, dashboard: dashboardUrl(client.env) }),
+			supportScreen(answer, {
+				bot: help.bot,
+				ownerId: interaction.user.id,
+				dashboard: dashboardUrl(client.env),
+				supportServer: theme.supportServer,
+			}),
 		);
+	},
+
+	async autocomplete(interaction, client) {
+		const typed = interaction.options.getFocused().slice(0, QUESTION_MAX);
+		const links = supportDesk(client).suggest(typed, supportContext(client, DEFAULT_PREFIX), CHOICES_MAX);
+		const choices = links.map((link) => ({ name: suggestionName(link), value: `${ARTICLE_CHOICE}${link.id}` }));
+
+		// First, so pressing Enter asks exactly what was typed rather than opening the top suggestion.
+		if (typed.trim().length >= SUPPORT_LIMITS.questionMin) {
+			choices.unshift({ name: choiceName(`🔎 Ask: ${typed.trim()}`), value: typed.trim() });
+		}
+
+		await interaction.respond(choices.slice(0, CHOICES_MAX));
 	},
 });

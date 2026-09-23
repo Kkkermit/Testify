@@ -1,8 +1,22 @@
 ---
 id: privacy
-title: What the bot stores about you
+title: What {bot} stores about you
+topic: getting-started
 keywords: privacy, data, stored, gdpr, delete my data, personal data, information collected, tracking, safe, secure, security
+questions: What data does the bot store? | Is my data safe? | How do I delete my data?
+commands: profile, economy
+related: sign-in
 ---
-The bot keeps only what a feature needs: server settings, and per-server records for features that are switched on, such as levels, balances and warnings. It does not keep message history.
+{bot} keeps only what a feature needs, and it does not keep message history.
 
-The [privacy notice](/privacy) lists everything that is stored and for how long. `/profile delete` removes your public profile, and `/economy delete` removes your economy account in a server.
+### What is stored
+- Server settings, such as the prefix and which features are on.
+- Per-server records for features that are switched on: levels, balances, items and warnings.
+- A dashboard session while you are signed in.
+- Counts of which commands and screens get used, with no user attached.
+
+### Removing your data
+- `/profile delete` removes your public profile.
+- `/economy delete` closes your economy account in a server and erases its balance.
+
+The [privacy notice](/privacy) lists everything that is stored and for how long.

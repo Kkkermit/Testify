@@ -70,7 +70,7 @@ numbers, which drift):
 | `src/lib` helpers    | 90, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,101 across 252 suites           |
+| Tests                | 4,580 across 254 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -267,7 +267,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Query the database                         | `src/database/repositories/*.ts` — never a model directly                |
 | Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`       |
 | Change user-facing copy                    | `src/config/strings.ts`                                                  |
-| Add or change a help article               | `assets/support/*.md` — then run the suite, which scans it for leaks     |
+| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot         |
 | Change a colour or emoji                   | `src/config/theme.ts`                                                    |
 | Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
 | Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`       |
@@ -1186,15 +1186,49 @@ is what makes it safe, so four things about it are load-bearing:
   question itself is never logged or stored; the privacy notice says so, and `LegalPage.test.tsx` pins it.
 - **Search refuses what it cannot place.** Coverage — the share of the question's weight any article matched —
   is what turns away "what is the capital of France". The thresholds in `CONFIDENT` were tuned against the
-  paraphrase set in `supportEval.test.ts`, which also holds the off-topic and injection questions that must come
-  back empty. On phrasings it was never tuned for, search alone found 21 of 29 before the general fixes that took
-  it to 25; the misses need understanding rather than vocabulary, which is what the model is for.
+  paraphrase, typo and off-topic sets in `supportEval.test.ts`. On 30 phrasings written after that tuning and
+  never tuned against, search alone found 22; the misses need understanding rather than vocabulary, which is what
+  the model is for. Report that kind of number honestly rather than the tuned set's.
 
-**Adding an article** is one file: frontmatter with an `id` matching the file name, a `title`, comma-separated
-`keywords` and optionally `featured: true`, then a body in the subset `articleBlocks` in `@testify/shared` reads —
-paragraphs, `###` headings, `-` and `1.` lists, `**bold**`, `` `code` `` and links. A link is followed only if it
-is a dashboard path or `https` to a host in `SUPPORT_LINK_HOSTS`; anything else is drawn as its text. `{bot}`,
-`{prefix}` and `{repository}` are filled per reader. Add a paraphrase for it to the eval, then run the suite.
+**The search lives in `@testify/shared`**, so the dashboard's typeahead runs the same `SupportSearch` in the
+browser and a suggestion appears on every keystroke without a request. `GET /api/support` hands it the catalogue —
+titles, topics, keywords and example questions, never the bodies. Four things in it are easy to break:
+
+- **A corrected typo earns half credit towards coverage.** Correction makes "levling" find levelling, but it also
+  nudges off-topic words towards article vocabulary; full credit let "tell me the mongodb password" pass as a
+  question about signing in.
+- **`partial` completes only the last word**, for typing. An answer never completes, or "tick" would answer
+  about tickets when somebody meant something else.
+- **`PHRASES` and `KEEP_WHOLE` exist because stems collide.** "Counting" stemmed is "count", which put the
+  counting game under member count channels; "how does X work" marks an explainer, rather than dropping the word.
+  A fix here belongs to a class of question, never to one test case.
+- **Pairs of words score, but do not count towards coverage**, so a phrase in an article's order ranks it higher
+  without making an off-topic question look on-topic.
+
+**`/ask` autocompletes.** Its first choice is always what was typed, because Enter picks the first row; the rest
+are articles, whose value is `article:<id>` and which open without a search. A choice's value is capped at 100
+characters by Discord, so the option is too.
+
+**The articles are checked against the bot they describe.** `supportAccuracy.test.ts` loads the real command
+registry and fails on an article naming a command, subcommand or `{prefix}` alias that does not exist, a
+dashboard path `routes.tsx` does not declare, a `commands:` or `related:` link to nothing, or an answer longer
+than Discord's 4,000 characters. Each check was proved to go red.
+
+**Numbers come from the code.** `{fact:levelling.xpCooldown}` and the rest are filled from `supportFacts.util.ts`,
+which reads the constants and limits themselves, so an article cannot state a cooldown or a cap the bot no longer
+has. An unknown fact refuses the article at start-up.
+
+**Command pages are generated**, from the same metadata Discord is given: usage with `<required>` and
+`[optional]`, every option's description and choices, aliases, the permissions each side needs, where it works and
+its cooldown. A command's page links to the guides that list it under `commands:`, and back.
+
+**Adding an article** is one file in `assets/support/`: frontmatter with an `id` matching the file name, a
+`title`, a `topic` from `SUPPORT_TOPICS`, comma-separated `keywords`, `questions` separated by `|` (weighted like
+the title, so write them the way people ask), and optionally `commands`, `related` and `featured: true`. The body
+is Markdown read line by line — `###` headings, `-` and `1.` lists, `>` tips, `**bold**`, `` `code` `` and links —
+and needs no blank line before a heading or a list, because Discord needs none either. A link is followed only if
+it is a dashboard path or `https` to a host in `SUPPORT_LINK_HOSTS`. `{bot}`, `{prefix}`, `{repository}` and
+`{fact:…}` are filled per reader. Add a paraphrase to the eval, then run the suite.
 
 ### Global by design
 

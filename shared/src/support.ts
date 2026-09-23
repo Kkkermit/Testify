@@ -6,11 +6,30 @@ import { plainText } from "./text";
 export const SUPPORT_LIMITS = {
 	questionMin: 3,
 	questionMax: 300,
-	related: 3,
+	related: 4,
 	articleIdMax: 48,
 	titleMax: 80,
-	bodyMax: 2_000,
+	/** Discord allows 4,000 characters across a Components V2 message, and the title and related list need room. */
+	bodyMax: 3_000,
 } as const;
+
+/** Where an article is filed, in the order a newcomer would read them. */
+export const SUPPORT_TOPICS = [
+	"getting-started",
+	"dashboard",
+	"setup",
+	"moderation",
+	"community",
+	"music",
+	"troubleshooting",
+	"commands",
+] as const;
+
+export type SupportTopic = (typeof SUPPORT_TOPICS)[number];
+
+export function isSupportTopic(value: string): value is SupportTopic {
+	return (SUPPORT_TOPICS as readonly string[]).includes(value);
+}
 
 export const SUPPORT_ARTICLE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -25,6 +44,7 @@ export const supportArticleParams = z.object({
 export interface SupportArticleLink {
 	id: string;
 	title: string;
+	topic: SupportTopic;
 }
 
 export interface SupportArticle extends SupportArticleLink {
@@ -38,8 +58,16 @@ export interface SupportReply {
 	related: SupportArticleLink[];
 }
 
+/** What the dashboard's typeahead searches: everything but the body, which is fetched when an article is opened. */
+export interface SupportCatalogueEntry extends SupportArticleLink {
+	kind: "article" | "command";
+	featured: boolean;
+	keywords: string[];
+	questions: string[];
+}
+
 export interface SupportIndex {
-	suggested: SupportArticleLink[];
+	articles: SupportCatalogueEntry[];
 }
 
 /** Outside hosts an article may link to; any other link is drawn as its text. */
@@ -77,6 +105,7 @@ export type ArticleSpan =
 export type ArticleBlock =
 	| { kind: "paragraph"; spans: ArticleSpan[] }
 	| { kind: "heading"; spans: ArticleSpan[] }
+	| { kind: "tip"; spans: ArticleSpan[] }
 	| { kind: "list"; ordered: boolean; items: ArticleSpan[][] };
 
 const INLINE = /\*\*([^*]+)\*\*|`([^`]+)`|\[([^\]]+)\]\(([^)\s]+)\)/g;
@@ -106,34 +135,62 @@ export function articleSpans(line: string): ArticleSpan[] {
 
 const BULLET = /^- /;
 const NUMBERED = /^\d+\. /;
+const QUOTE = /^> ?/;
+const HEADING = /^### /;
 
-/** Headings, paragraphs and lists, separated by blank lines: everything an article is allowed to be. */
-export function articleBlocks(markdown: string): ArticleBlock[] {
-	return markdown
-		.split(/\n\s*\n/)
-		.map((chunk) =>
-			chunk
-				.split("\n")
-				.map((line) => line.trim())
-				.filter((line) => line !== ""),
-		)
-		.filter((lines) => lines.length > 0)
-		.map((lines): ArticleBlock => {
-			const [first = ""] = lines;
+type LineKind = "heading" | "bullet" | "numbered" | "tip" | "text";
 
-			if (lines.length === 1 && first.startsWith("### ")) {
-				return { kind: "heading", spans: articleSpans(first.slice(4)) };
-			}
+function kindOf(line: string): LineKind {
+	if (line.startsWith("### ")) return "heading";
+	if (line.startsWith("- ")) return "bullet";
+	if (NUMBERED.test(line)) return "numbered";
+	if (QUOTE.test(line)) return "tip";
+	return "text";
+}
 
-			for (const [pattern, ordered] of [
-				[BULLET, false],
-				[NUMBERED, true],
-			] as const) {
-				if (lines.every((line) => pattern.test(line))) {
-					return { kind: "list", ordered, items: lines.map((line) => articleSpans(line.replace(pattern, ""))) };
-				}
-			}
+interface Run {
+	kind: LineKind;
+	lines: string[];
+}
 
+function blockOf({ kind, lines }: Run): ArticleBlock {
+	switch (kind) {
+		case "heading":
+			return { kind: "heading", spans: articleSpans(lines.join(" ").replace(HEADING, "")) };
+		case "bullet":
+		case "numbered": {
+			const pattern = kind === "bullet" ? BULLET : NUMBERED;
+			return {
+				kind: "list",
+				ordered: kind === "numbered",
+				items: lines.map((line) => articleSpans(line.replace(pattern, ""))),
+			};
+		}
+		case "tip":
+			return { kind: "tip", spans: articleSpans(lines.map((line) => line.replace(QUOTE, "")).join(" ")) };
+		case "text":
 			return { kind: "paragraph", spans: articleSpans(lines.join(" ")) };
-		});
+	}
+}
+
+/** Read line by line, as Markdown is, so a heading or a list needs no blank line before it. */
+export function articleBlocks(markdown: string): ArticleBlock[] {
+	const runs: Run[] = [];
+	let continues = false;
+
+	for (const raw of markdown.split("\n")) {
+		const line = raw.trim();
+		if (line === "") {
+			continues = false;
+			continue;
+		}
+
+		const kind = kindOf(line);
+		const last = runs.at(-1);
+		if (continues && kind !== "heading" && last?.kind === kind) last.lines.push(line);
+		else runs.push({ kind, lines: [line] });
+		continues = kind !== "heading";
+	}
+
+	return runs.map(blockOf);
 }

@@ -1,7 +1,7 @@
 import { type Env } from "@config/env";
 import { loadEverything } from "@core/loader";
 import { type SupportEntry } from "@lib/support/support.types";
-import { commandEntries, loadArticles } from "@lib/support/supportArticles.util";
+import { commandEntries, linkEntries, loadArticles } from "@lib/support/supportArticles.util";
 import { createMockClient } from "@tests/helpers/mocks";
 
 /** Every entry the real bot would answer with: the written articles and a page per command, loaded from disk. */
@@ -9,10 +9,8 @@ export function realEntries(): SupportEntry[] {
 	const client = createMockClient();
 	loadEverything(client);
 
-	return [
-		...loadArticles().flatMap((result) => (result.ok ? [result.entry] : [])),
-		...commandEntries(client.commands.values()),
-	];
+	const articles = loadArticles().flatMap((result) => (result.ok ? [result.article] : []));
+	return linkEntries(articles, commandEntries(client.commands.values())).entries;
 }
 
 /** Credential-shaped values assembled at runtime, so no literal in the repository reads as a secret to a scanner. */

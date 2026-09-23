@@ -1,9 +1,19 @@
 ---
 id: counting
 title: The counting game
-keywords: counting, count, counting channel, numbers game
+topic: setup
+keywords: counting, count, counting channel, counting game, numbers game, count up
+questions: How do I set up counting? | How does the counting game work? | How do I make a counting channel?
+commands: counting
+related: dashboard-settings
 ---
-In a counting channel, members count up one number at a time. Nobody may count twice in a row, and a wrong number puts everyone back to 1.
+In the counting channel, members count upwards, one number per message.
 
-- In Discord, run `/counting`.
-- On the dashboard, open your server’s **Settings** and find **Counting**.
+- Nobody may count twice in a row.
+- A wrong number puts everyone back to 1.
+
+### Setting it up
+- **In Discord:** run `/counting`. The panel shows the next number and the goal, with buttons to reset or change them.
+- **On the dashboard:** open your server's **Settings** and find **Counting**.
+
+> **Tip:** Moving the game to another channel keeps the current number. Turning it off does not.

@@ -1,11 +1,12 @@
+import { type SearchableEntry, type SupportTopic } from "@testify/shared";
+
 /** One thing the assistant can answer with: a written article, or a page generated from a command. */
-export interface SupportEntry {
-	id: string;
-	title: string;
-	keywords: string[];
+export interface SupportEntry extends SearchableEntry {
+	topic: SupportTopic;
 	body: string;
 	featured: boolean;
-	kind: "article" | "command";
+	/** Ids of the entries that belong beside this one: a guide's command pages, or a command's guides. */
+	links: string[];
 }
 
 export type SupportPick = { kind: "article"; id: string } | { kind: "none" };

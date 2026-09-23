@@ -1,4 +1,5 @@
 import { type ArticleBlock, articleBlocks, type ArticleSpan } from "@testify/shared";
+import { Lightbulb } from "lucide-react";
 import { useMemo } from "react";
 import { Link } from "react-router";
 import { cn } from "@/lib/cn";
@@ -25,6 +26,15 @@ function Block({ block }: { block: ArticleBlock }): React.JSX.Element {
 				<h4 className="font-semibold">
 					<Spans spans={block.spans} />
 				</h4>
+			);
+		case "tip":
+			return (
+				<p className="border-accent bg-muted/60 rounded-field flex gap-2 border-l-2 px-3 py-2">
+					<Lightbulb size={16} aria-hidden="true" className="text-accent mt-0.5 shrink-0" />
+					<span className="text-muted-foreground">
+						<Spans spans={block.spans} />
+					</span>
+				</p>
 			);
 		case "paragraph":
 			return (

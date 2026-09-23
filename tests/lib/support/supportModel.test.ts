@@ -12,8 +12,28 @@ import {
 } from "@lib/support/supportModel.util";
 
 const ENTRIES: SupportEntry[] = [
-	{ id: "add-the-bot", title: "Adding {bot}", keywords: ["add"], body: "Press Add.", featured: true, kind: "article" },
-	{ id: "levelling", title: "Levelling", keywords: ["xp"], body: "Run it.", featured: false, kind: "article" },
+	{
+		id: "add-the-bot",
+		title: "Adding {bot}",
+		topic: "getting-started",
+		keywords: ["add"],
+		questions: [],
+		body: "Press Add.",
+		featured: true,
+		kind: "article",
+		links: [],
+	},
+	{
+		id: "levelling",
+		title: "Levelling",
+		topic: "setup",
+		keywords: ["xp"],
+		questions: [],
+		body: "Run it.",
+		featured: false,
+		kind: "article",
+		links: [],
+	},
 ];
 const IDS = new Set(ENTRIES.map((entry) => entry.id));
 

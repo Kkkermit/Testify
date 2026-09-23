@@ -1,6 +1,7 @@
-import { AUDIT_EVENTS, AUDIT_GROUPS, AUTOMOD_PRESETS, WELCOME_PLACEHOLDERS } from "@testify/shared";
+import { AUDIT_EVENTS, AUDIT_GROUPS, AUTOMOD_PRESETS, SUPPORT_TOPICS, WELCOME_PLACEHOLDERS } from "@testify/shared";
 import { EVENT_LABELS, GROUP_LABELS } from "@/features/audit-log/auditLog.labels";
 import { PRESET_LABELS } from "@/features/automod/automod.labels";
+import { TOPIC_LABELS } from "@/features/help/help.labels";
 import { PLACEHOLDER_LABELS } from "@/features/welcome/welcome.labels";
 import { t } from "@/test/english";
 
@@ -22,6 +23,10 @@ describe("the label registries", () => {
 			expect(t(PRESET_LABELS[preset].label)).not.toContain("automod.");
 			expect(t(PRESET_LABELS[preset].describes)).not.toContain("automod.");
 		}
+	});
+
+	it("names every help topic", () => {
+		for (const topic of SUPPORT_TOPICS) expect(t(TOPIC_LABELS[topic])).not.toContain("help.");
 	});
 
 	it("describes every greeting placeholder", () => {

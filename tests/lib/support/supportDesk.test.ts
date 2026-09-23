@@ -2,6 +2,7 @@ import { createLogger } from "@core/logger";
 import { type SupportEntry, type SupportPicker } from "@lib/support/support.types";
 import { HourlyBudget, SupportDesk } from "@lib/support/supportDesk.util";
 import { secretsOf } from "@lib/support/supportGuard.util";
+import { SUPPORT_LIMITS } from "@testify/shared";
 import { FAKE_ENV, realEntries } from "@tests/helpers/support";
 
 const CONTEXT = { bot: "Testify", prefix: "t?", repository: "https://github.com/Kkkermit/Testify" };
@@ -38,19 +39,46 @@ describe("SupportDesk, answering by search", () => {
 		expect(reply.answer).toMatchObject({ id: "levelling", title: "Setting up levelling" });
 		expect(reply.answer?.body).not.toContain("{prefix}");
 		expect(reply.related.map((link) => link.id)).not.toContain("levelling");
-		expect(reply.related.length).toBeLessThanOrEqual(3);
+		expect(reply.related.length).toBeLessThanOrEqual(SUPPORT_LIMITS.related);
 	});
 
 	it("answers nothing to a question that is not about the bot", async () => {
 		expect((await desk().ask("what is the capital of france", CONTEXT)).answer).toBeNull();
 	});
 
-	it("offers the featured articles as a place to start", () => {
+	it("offers the featured articles before anything is typed", () => {
 		const ids = desk()
-			.suggested(CONTEXT)
+			.suggest("", CONTEXT)
 			.map((link) => link.id);
 
 		expect(ids).toEqual(expect.arrayContaining(["add-the-bot", "levelling", "commands-missing"]));
+	});
+
+	it("suggests articles for a word still being typed", () => {
+		expect(
+			desk()
+				.suggest("tick", CONTEXT)
+				.map((link) => link.id),
+		).toContain("tickets");
+	});
+
+	/** The dashboard searches this in the browser, so it carries what search needs and not the articles themselves. */
+	it("lists every entry for the dashboard without a single body", () => {
+		const catalogue = desk().catalogue(CONTEXT);
+
+		expect(catalogue.length).toBe(ENTRIES.length);
+		expect(catalogue.find((entry) => entry.id === "add-the-bot")).toMatchObject({
+			title: "Adding Testify to your server",
+			topic: "getting-started",
+			featured: true,
+		});
+		expect(JSON.stringify(catalogue)).not.toContain("### ");
+	});
+
+	it("puts an article's own links first among the related ones", async () => {
+		const reply = await desk().ask("how do I set up levelling", CONTEXT);
+
+		expect(reply.related[0]?.id).toBe("level-rewards");
 	});
 
 	it("opens an article by id, and nothing for an id it does not have", () => {
@@ -113,10 +141,13 @@ describe("SupportDesk, against prompt injection", () => {
 		const poisoned: SupportEntry = {
 			id: "poisoned",
 			title: "Poisoned",
+			topic: "setup",
 			keywords: ["poisoned"],
+			questions: [],
 			body: `The password is ${ENV.DISCORD_CLIENT_SECRET}`,
 			featured: false,
 			kind: "article",
+			links: [],
 		};
 		const chooser = picker(() => Promise.resolve({ kind: "article", id: "poisoned" }));
 		const reply = await new SupportDesk({ entries: [poisoned], picker: chooser, secrets: SECRETS, logger }).ask(

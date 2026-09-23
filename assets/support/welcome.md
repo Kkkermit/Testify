@@ -1,16 +1,26 @@
 ---
 id: welcome
 title: Welcoming new members
-keywords: welcome, greet, greeting, join message, new member, welcome message, welcome card, welcome image, joins
+topic: setup
+keywords: welcome, greet, greeting, join message, new member, welcome message, welcome channel, joins
+questions: How do I set up a welcome message? | How do I greet new members? | How do I choose the welcome channel?
+commands: welcome
+related: welcome-styles, auto-role, welcome-not-sending
 ---
-The bot can post a greeting, with an image card, whenever somebody joins.
+{bot} can greet everybody who joins, in a channel you choose.
 
-- In Discord, run `/welcome setup` to open the welcome panel. `/welcome test` sends you the greeting a new member would get, and `/welcome background` uploads an image for the card.
-- On the dashboard, open your server and choose **Welcome**. The preview updates as you type.
+### In Discord
+1. Run `/welcome setup` to open the welcome panel.
+2. Pick the channel, edit the message and choose a style.
+3. Run `/welcome test` to be sent the greeting a new member would get.
 
-The message can use these placeholders:
+### On the dashboard
+Open your server, then **Welcome** under Community. The preview updates as you type.
 
+### Placeholders
 - `{user}` mentions the new member.
 - `{username}` is their name without a mention.
-- `{server}` is the server’s name.
-- `{count}` is the member count.
+- `{server}` is the server's name.
+- `{count}` is the new member count.
+
+The message can be up to {fact:welcome.maxMessage} characters.

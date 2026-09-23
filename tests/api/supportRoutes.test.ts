@@ -40,7 +40,7 @@ describe("POST /support/ask", () => {
 
 		expect(response.status).toBe(200);
 		expect(Object.keys(body).sort()).toEqual(["answer", "related"]);
-		expect(Object.keys(body.answer as object).sort()).toEqual(["body", "id", "title"]);
+		expect(Object.keys(body.answer as object).sort()).toEqual(["body", "id", "title", "topic"]);
 		expect(body.answer).toMatchObject({ id: "add-the-bot" });
 	});
 
@@ -72,19 +72,30 @@ describe("POST /support/ask", () => {
 });
 
 describe("GET /support", () => {
-	it("lists the articles to start from", async () => {
-		const body = (await (await appFor(true).request("/support")).json()) as { suggested: { id: string }[] };
+	/** The typeahead searches this in the browser, so it has to hold every entry and none of the article bodies. */
+	it("lists every article for the typeahead, without their bodies", async () => {
+		const body = (await (await appFor(true).request("/support")).json()) as {
+			articles: { id: string; featured: boolean; body?: string }[];
+		};
 
-		expect(body.suggested.map((link) => link.id)).toContain("add-the-bot");
+		expect(body.articles.map((entry) => entry.id)).toEqual(expect.arrayContaining(["add-the-bot", "music"]));
+		expect(body.articles.find((entry) => entry.id === "add-the-bot")?.featured).toBe(true);
+		expect(body.articles.some((entry) => entry.body !== undefined)).toBe(false);
+	});
+
+	it("refuses an anonymous caller", async () => {
+		expect((await appFor(false).request("/support")).status).toBe(401);
 	});
 });
 
 describe("GET /support/articles/:articleId", () => {
-	it("returns one article", async () => {
+	it("returns one article and the ones that belong beside it", async () => {
 		const response = await appFor(true).request("/support/articles/music");
 
 		expect(response.status).toBe(200);
-		expect(await response.json()).toMatchObject({ id: "music", title: "Playing music" });
+		const body = (await response.json()) as { answer: { id: string; title: string }; related: { id: string }[] };
+		expect(body.answer).toMatchObject({ id: "music", title: "Playing music" });
+		expect(body.related.map((link) => link.id)).toContain("music-queue");
 	});
 
 	it("answers 404 for an id with no article, and 400 for one that is not an id", async () => {

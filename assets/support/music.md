@@ -1,13 +1,25 @@
 ---
 id: music
 title: Playing music
-keywords: music, play, song, songs, queue, skip, pause, volume, youtube, soundcloud, player, dj, voice, spotify
+topic: music
+keywords: music, play, song, songs, youtube, soundcloud, player, voice, listen, play music, spotify, playlist, explainer
+questions: How do I play music? | How do I play a song from YouTube? | Can I use Spotify links?
+commands: play, music
+related: music-queue, music-access, music-not-playing
 featured: true
 ---
-Join a voice channel, then run `/play` with a link or a search. The bot joins your channel and starts the queue.
+### Playing something
+1. Join a voice channel.
+2. Run `/play` with a YouTube or SoundCloud link, or just a search.
+3. The bot joins your channel and starts playing. Anything else you add joins the queue.
 
-- `/music` controls the player: `queue`, `skip`, `pause`, `resume`, `stop`, `loop`, `shuffle`, `volume` and more.
-- The player panel has buttons for the common controls.
-- YouTube and SoundCloud links work. Spotify links are refused, because Spotify’s audio is protected.
+Add `next` to `/play` to put a track straight after the current one. A playlist link adds every track in it.
 
-You need to be in the same voice channel as the bot to control it. If nothing plays, `/music status` shows what the host has installed for music.
+### The player
+The bot posts a player panel that updates while the track plays, with buttons for the common controls. `/music` has the rest.
+
+### What works
+- **YouTube** and **SoundCloud** links and searches.
+- **Spotify links are refused**, because Spotify's audio is protected. Search for the track by name instead.
+
+> **Tip:** You need to be in the same voice channel as the bot to control it.

@@ -1,19 +1,24 @@
 ---
 id: levelling
 title: Setting up levelling
-keywords: levelling, leveling, level, levels, xp, experience, rank, level up, rewards, boosts, level roles
+topic: setup
+keywords: levelling, leveling, level, levels, xp, experience, rank, level up, level-up messages, announcements, turn on levelling, explainer
+questions: How do I set up levelling? | How does XP work? | How do I turn on levels? | Where are level-ups announced?
+commands: levelling, rank, leaderboard
+related: level-rewards, leaderboards, levels-not-counting
 featured: true
 ---
-Members earn XP by chatting, and level up as it adds up.
+Members earn XP by chatting and level up as it adds up.
 
-- In Discord, run `/levelling setup` to open the levelling panel and switch it on. This needs **Manage Server**.
-- On the dashboard, open your server and choose **Levelling**.
+### How XP works
+- Each message earns {fact:levelling.xpMin} to {fact:levelling.xpMax} XP. After earning some, a member waits {fact:levelling.xpCooldown} before their messages count again.
+- Level 1 takes {fact:levelling.xpForLevel1} XP, level 5 takes {fact:levelling.xpForLevel5} and level 10 takes {fact:levelling.xpForLevel10}, so each level takes longer than the last.
 
-From there you can:
+### Turning it on
+- **In Discord:** run `/levelling setup`. It opens the levelling panel and switches it on.
+- **On the dashboard:** open your server, then **Levelling** under Community.
 
-- **Rewards**: roles handed out when somebody reaches a level.
-- **Boosts**: roles that earn bonus XP.
-- **Ignored**: channels and roles that earn no XP.
-- Choose where level-up messages are sent.
+### Level-up messages
+Choose a channel for them, or leave it empty and they are posted where the member was chatting. You can also silence them completely.
 
-Members check their progress with `/rank`, and `/leaderboard` shows who is ahead. `/levelling reset` removes the configuration but keeps the XP people have earned.
+> **Tip:** Turning levelling off stops new XP, but nobody loses what they have already earned.

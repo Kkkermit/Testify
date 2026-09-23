@@ -1,8 +1,17 @@
 ---
 id: leaderboards
 title: Leaderboards and ranks
-keywords: leaderboard, leaderboards, top, rank, ranking, richest, highest level, scores
+topic: community
+keywords: leaderboard, leaderboards, top, rank, ranking, richest, highest level, scores, lb
+questions: Where is the leaderboard? | How do I see the richest members? | How do I see who has the highest level?
+commands: leaderboard, rank
+related: levelling, dashboard-members
 ---
-`/leaderboard` shows who is ahead in this server, with a button to swap between money and levels and a **Find me** button that jumps to your own page. `/rank` shows your own level.
+`/leaderboard` shows who is ahead in this server.
 
-On the dashboard, open your server and choose **Leaderboards** under Community to see both as tables.
+- Buttons swap between the **money** board and the **levels** board.
+- **Find me** jumps to the page you are on.
+
+`/rank` shows your own level, XP and position as an image card, or someone else's if you name them.
+
+On the dashboard, open your server, then **Leaderboards** under Community to see both as tables.
