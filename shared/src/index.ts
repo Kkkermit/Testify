@@ -18,6 +18,7 @@ export * from "./permissions";
 export * from "./problems";
 export * from "./schemas";
 export * from "./settings";
+export * from "./status";
 export * from "./sticky";
 export * from "./text";
 export * from "./tickets";

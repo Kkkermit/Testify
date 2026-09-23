@@ -1,5 +1,6 @@
 import { getServers } from "node:dns";
-import { explainConnectionFailure } from "@database/connection";
+import mongoose from "mongoose";
+import { explainConnectionFailure, pingDatabase } from "@database/connection";
 
 const SECRET = "sup3rs3cr3tw0rd";
 const URI = `mongodb+srv://user:${SECRET}@cluster0.example.mongodb.net/testify`;
@@ -70,5 +71,42 @@ describe("explainConnectionFailure", () => {
 		]) {
 			expect(explainConnectionFailure(error, URI)).not.toContain(SECRET);
 		}
+	});
+});
+
+describe("pingDatabase", () => {
+	const connection = mongoose.connection as unknown as { readyState: number; db: unknown };
+	const original = { readyState: connection.readyState, db: connection.db };
+
+	afterEach(() => {
+		Object.defineProperty(connection, "readyState", { value: original.readyState, configurable: true });
+		Object.defineProperty(connection, "db", { value: original.db, configurable: true });
+	});
+
+	function connectedWith(command: () => Promise<unknown>): void {
+		Object.defineProperty(connection, "readyState", { value: mongoose.ConnectionStates.connected, configurable: true });
+		Object.defineProperty(connection, "db", { value: { command }, configurable: true });
+	}
+
+	it("answers null without a connection rather than waiting on one", async () => {
+		await expect(pingDatabase()).resolves.toBeNull();
+	});
+
+	it("times one round trip", async () => {
+		connectedWith(() => Promise.resolve({ ok: 1 }));
+
+		await expect(pingDatabase()).resolves.toEqual(expect.any(Number));
+	});
+
+	it("gives up on a ping that never answers", async () => {
+		connectedWith(() => new Promise(() => undefined));
+
+		await expect(pingDatabase(20)).resolves.toBeNull();
+	});
+
+	it("treats a refused ping as no answer", async () => {
+		connectedWith(() => Promise.reject(new Error("not primary")));
+
+		await expect(pingDatabase()).resolves.toBeNull();
 	});
 });

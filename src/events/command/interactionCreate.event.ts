@@ -3,7 +3,7 @@ import { parseCustomId } from "@core/button";
 import { runChecks } from "@core/checks";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
-import { countCommandUse } from "@lib/bot";
+import { countCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed } from "@lib/discord";
 
 /** The only `interactionCreate` listener. */
@@ -42,7 +42,9 @@ export default defineEvent({
 				return;
 			}
 
+			const started = Date.now();
 			const ok = await runCommand(interaction, command, client);
+			recordCommandTime(Date.now() - started, ok);
 			countCommandUse(client, {
 				command: command.name,
 				guildId: interaction.guildId,

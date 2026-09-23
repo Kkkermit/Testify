@@ -122,6 +122,27 @@ export function databaseConnected(): boolean {
 	return mongoose.connection.readyState === mongoose.ConnectionStates.connected;
 }
 
+/** Round-trip time of one `ping`, or null when there is no connection or it did not answer in time. */
+export async function pingDatabase(timeoutMs = 2_000): Promise<number | null> {
+	const db = mongoose.connection.db;
+	if (!databaseConnected() || db === undefined) return null;
+
+	const started = performance.now();
+	let timer: NodeJS.Timeout | undefined;
+	const expired = new Promise<"timeout">((resolve) => {
+		timer = setTimeout(() => resolve("timeout"), timeoutMs);
+	});
+
+	try {
+		const answer = await Promise.race([db.command({ ping: 1 }), expired]);
+		return answer === "timeout" ? null : Math.round(performance.now() - started);
+	} catch {
+		return null;
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
 export async function disconnectDatabase(): Promise<void> {
 	if (mongoose.connection.readyState === mongoose.ConnectionStates.disconnected) return;
 	await mongoose.disconnect();

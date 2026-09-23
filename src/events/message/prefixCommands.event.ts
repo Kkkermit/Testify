@@ -4,7 +4,7 @@ import { runCommand } from "@core/errors";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/settingsRepository";
-import { countCommandUse } from "@lib/bot";
+import { countCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed } from "@lib/discord";
 
 /**
@@ -46,7 +46,9 @@ export default defineMessageHandler({
 			return true;
 		}
 
+		const started = Date.now();
 		const ok = await runCommand(interaction, command, client);
+		recordCommandTime(Date.now() - started, ok);
 		countCommandUse(client, {
 			command: command.name,
 			guildId: message.guildId,

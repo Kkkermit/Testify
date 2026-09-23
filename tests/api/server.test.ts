@@ -144,6 +144,7 @@ describe("the guild settings sub-routes", () => {
 		["GET", "/api/analytics/logs"],
 		["GET", "/api/analytics/runtime"],
 		["POST", "/api/screens"],
+		["GET", "/api/status"],
 	])("mounts %s %s", (method, path) => {
 		expect(pathsOf(method)).toContain(path);
 	});

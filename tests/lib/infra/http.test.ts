@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { ServiceError } from "@core/errors";
 import { fetchJson, fetchRaw } from "@lib/infra/http.util";
+import { resetServiceHealth, serviceChecks } from "@lib/infra/serviceHealth.util";
 
 const ORIGINAL_FETCH = globalThis.fetch;
 
@@ -21,6 +22,38 @@ function response(body: unknown, init: { ok?: boolean; status?: number; json?: (
 
 afterEach(() => {
 	globalThis.fetch = ORIGINAL_FETCH;
+	resetServiceHealth();
+});
+
+describe("what the status page learns from each call", () => {
+	it("counts an answered call as the service being up", async () => {
+		stubFetch(() => response("ok"));
+		await fetchRaw("svc", "https://example.test/a");
+
+		expect(serviceChecks()[0]).toMatchObject({ name: "svc", lastOk: true, failures: 0 });
+	});
+
+	/** A 404 for an article that does not exist is the service working, not the service down. */
+	it("does not count a refusal of the request against the service", async () => {
+		stubFetch(() => response("nope", { ok: false, status: 404 }));
+		await expect(fetchRaw("svc", "https://example.test/a")).rejects.toBeInstanceOf(ServiceError);
+
+		expect(serviceChecks()[0]).toMatchObject({ lastOk: true, failures: 0 });
+	});
+
+	it("counts a server error against the service", async () => {
+		stubFetch(() => response("boom", { ok: false, status: 503 }));
+		await expect(fetchRaw("svc", "https://example.test/a")).rejects.toBeInstanceOf(ServiceError);
+
+		expect(serviceChecks()[0]).toMatchObject({ lastOk: false, failures: 1 });
+	});
+
+	it("counts a call that never connected against the service", async () => {
+		globalThis.fetch = jest.fn(() => Promise.reject(new Error("ECONNRESET")));
+		await expect(fetchRaw("svc", "https://example.test/a")).rejects.toBeInstanceOf(ServiceError);
+
+		expect(serviceChecks()[0]).toMatchObject({ lastOk: false, failures: 1 });
+	});
 });
 
 describe("fetchRaw", () => {

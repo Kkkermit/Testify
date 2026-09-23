@@ -4,6 +4,7 @@ export const keys = {
 	me: () => ["me"] as const,
 	bot: () => ["bot"] as const,
 	commands: () => ["commands"] as const,
+	status: () => ["status"] as const,
 	/** Null is the bot-wide scope, which only the owner can read. */
 	commandToggles: (guildId: string | null) => ["command-toggles", guildId ?? "global"] as const,
 	guild: (id: string) => ({

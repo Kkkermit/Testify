@@ -18,6 +18,7 @@ import { guilds } from "@api/routes/guilds";
 import { health } from "@api/routes/health";
 import { owner } from "@api/routes/owner";
 import { screens } from "@api/routes/screens";
+import { status } from "@api/routes/status";
 import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -110,6 +111,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.route("/api/owner", owner);
 	app.route("/api/analytics", analytics);
 	app.route("/api/screens", screens);
+	app.route("/api/status", status);
 	app.route("/api/control", control);
 
 	return app;

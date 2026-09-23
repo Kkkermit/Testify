@@ -5,5 +5,7 @@ export * from "./commandCatalogue.util";
 export * from "./commandRunner.util";
 export * from "./dashboard.util";
 export * from "./guildLifecycle.util";
+export * from "./performance.util";
 export * from "./runtime.util";
+export * from "./status.util";
 export * from "./usage.util";

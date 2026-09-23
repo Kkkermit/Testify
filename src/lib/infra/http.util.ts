@@ -1,6 +1,7 @@
 import { type ZodType } from "zod";
 import { LIMITS } from "@config/constants";
 import { ServiceError } from "@core/errors";
+import { recordOutcome } from "@lib/infra/serviceHealth.util";
 
 /**
  * Every outbound HTTP call goes through here: one timeout policy, one error type, and schema validation at the
@@ -28,6 +29,8 @@ function withQuery(url: string, query: RequestOptions["query"]): string {
 export async function fetchRaw(service: string, url: string, options: RequestOptions = {}): Promise<Response> {
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? LIMITS.externalApiTimeoutMs);
+	const started = Date.now();
+	const settle = (ok: boolean): void => recordOutcome(service, { ok, at: Date.now(), latencyMs: Date.now() - started });
 
 	try {
 		const response = await fetch(withQuery(url, options.query), {
@@ -37,6 +40,9 @@ export async function fetchRaw(service: string, url: string, options: RequestOpt
 			signal: controller.signal,
 		});
 
+		// A 4xx is an answer about the request, so the service still counts as up.
+		settle(response.status < 500);
+
 		if (!response.ok) {
 			throw new ServiceError(service, new Error(`HTTP ${response.status} from ${url}`));
 		}
@@ -44,6 +50,7 @@ export async function fetchRaw(service: string, url: string, options: RequestOpt
 		return response;
 	} catch (error) {
 		if (error instanceof ServiceError) throw error;
+		settle(false);
 		throw new ServiceError(service, error);
 	} finally {
 		clearTimeout(timeout);

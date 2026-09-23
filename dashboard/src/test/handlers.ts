@@ -31,6 +31,7 @@ import {
 	type AutomodRules,
 	type BoardPage,
 	type MemberDetail,
+	type StatusResponse,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -469,6 +470,46 @@ export const logFeed: LogFeed = {
 	matched: 2,
 };
 
+const CHECKED_AT = "2026-09-23T12:00:00.000Z";
+
+export const botStatus: StatusResponse = {
+	level: "operational",
+	checkedAt: CHECKED_AT,
+	startedAt: "2026-09-21T09:00:00.000Z",
+	uptimeMs: 183_600_000,
+	paused: false,
+	gateway: { level: "operational", pingMs: 42, shards: 1 },
+	database: { level: "operational", pingMs: 6 },
+	eventLoop: { level: "operational", p50Ms: 10.2, p99Ms: 21.4, maxMs: 40 },
+	memory: { level: "operational", heapUsedMb: 120, heapLimitMb: 4_096, rssMb: 260 },
+	commands: { level: "operational", runs: 14, failures: 1, p50Ms: 180, p95Ms: 1_240 },
+	packages: [
+		{ key: "ytDlp", level: "operational", installed: true, version: "2026.09.01", ageDays: 22 },
+		{ key: "ffmpeg", level: "operational", installed: true, version: null, ageDays: null },
+	],
+	services: [
+		{
+			name: "Discord API",
+			level: "operational",
+			calls: 20,
+			failures: 0,
+			lastAt: CHECKED_AT,
+			lastOk: true,
+			latencyMs: null,
+		},
+		{ name: "reddit", level: "degraded", calls: 4, failures: 1, lastAt: CHECKED_AT, lastOk: true, latencyMs: 310 },
+	],
+	days: Array.from({ length: 30 }, (_, index) => ({
+		day: new Date(Date.UTC(2026, 7, 25 + index)).toISOString().slice(0, 10),
+		uptime: index < 27 ? null : index === 28 ? 0.9 : 1,
+	})),
+	recent: Array.from({ length: 48 }, (_, index) => ({
+		start: new Date(Date.UTC(2026, 8, 22, 12, 30) + index * 1_800_000).toISOString(),
+		level: index < 10 ? "none" : index === 20 ? "offline" : "operational",
+		gatewayPingMs: index < 10 || index === 20 ? null : 40 + index,
+	})),
+};
+
 export const runtimeInfo: RuntimeInfo = {
 	version: "2.0.0",
 	nodeVersion: "v24.19.0",
@@ -544,6 +585,7 @@ export const someRoles: RoleSummary[] = [
 
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
+	http.get("/api/status", () => HttpResponse.json(botStatus)),
 	http.get("/api/auth/setup", () => HttpResponse.json(configured)),
 	http.get("/api/bot", () => HttpResponse.json(botProfile)),
 	http.get("/api/commands", () => HttpResponse.json(catalogue)),

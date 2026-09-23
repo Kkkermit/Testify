@@ -1,16 +1,20 @@
 import { spawn } from "node:child_process";
 import { PassThrough, type Readable } from "node:stream";
-import { UserFacingError } from "@core/errors";
+import { toError, UserFacingError } from "@core/errors";
+import { observe } from "@lib/infra/serviceHealth.util";
 import { SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
 import {
 	type OpenStream,
 	type MusicBinaries,
+	type MusicSource,
 	type RemoteFormat,
 	type StreamPlan,
 	type Query,
 	type Track,
 } from "@lib/music/music.types";
 import { clampVolume, planStream } from "@lib/music/musicFormat.util";
+import { classifyProblem } from "@lib/music/musicProblem.util";
+import { sourceOfHost } from "@lib/music/musicQuery.util";
 
 /** Everything that shells out to yt-dlp, with the parsing kept pure beside it. */
 
@@ -114,6 +118,29 @@ async function runYtDlp(binary: string, args: string[], timeoutMs = RESOLVE_TIME
 	});
 }
 
+/** The name each source goes by on the status page. */
+const SOURCE_NAMES: Partial<Record<MusicSource, string>> = { youtube: "YouTube", soundcloud: "SoundCloud" };
+
+/** A video that is private or removed is an answer from the source, not a sign that it is down. */
+function blamesSource(error: unknown): boolean {
+	return classifyProblem(toError(error).message)?.kind !== "unavailable";
+}
+
+function askSource(source: MusicSource, binary: string, args: string[]): Promise<string> {
+	const name = SOURCE_NAMES[source];
+	if (name === undefined) return runYtDlp(binary, args);
+
+	return observe(name, () => runYtDlp(binary, args), { blame: blamesSource });
+}
+
+function sourceOfUrl(url: string): MusicSource {
+	try {
+		return sourceOfHost(new URL(url).hostname);
+	} catch {
+		return "other";
+	}
+}
+
 /** yt-dlp prints one JSON document per result, so a search comes back as several lines rather than an array. */
 export function parseJsonLines(stdout: string): TrackInfo[] {
 	return stdout
@@ -148,7 +175,7 @@ export async function resolveTracks(
 		...argumentsFor(query),
 	];
 
-	const stdout = await runYtDlp(binaries.ytDlp, args);
+	const stdout = await askSource(query.source, binaries.ytDlp, args);
 	const documents = parseJsonLines(stdout);
 
 	return documents.flatMap((info) => tracksFromInfo(info, requestedBy, query.source));
@@ -183,7 +210,7 @@ export async function describeTrack(url: string, binaries: MusicBinaries, now = 
 	const cached = described.get(key);
 	if (cached !== undefined && now - cached.at < DESCRIBED_TTL_MS) return cached.info;
 
-	const stdout = await runYtDlp(binaries.ytDlp, [
+	const stdout = await askSource(sourceOfUrl(url), binaries.ytDlp, [
 		"--dump-single-json",
 		"--no-warnings",
 		"--no-progress",
