@@ -1,4 +1,4 @@
-import { type ChannelSummary, type RoleSummary, type TicketSettings, ticketBlocked } from "@testify/shared";
+import { type ChannelSummary, type RoleSummary, type TicketSettings, ticketMissing } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { problemText } from "@/lib/problemText";
 
@@ -28,12 +28,13 @@ export function isDirty(draft: Draft, settings: TicketSettings): boolean {
 	return (Object.keys(saved) as (keyof Draft)[]).some((field) => draft[field] !== saved[field]);
 }
 
-/** Why the panel cannot be posted yet, in the words the form shows. */
-export function draftProblem(draft: Draft, t: TFunction): string | null {
-	if (draft.description.trim() === "") return t("tickets.needsMessage");
-	if (draft.buttonLabel.trim() === "") return t("tickets.needsLabel");
-
-	return problemText(ticketBlocked(draft), t);
+/** Everything stopping the panel being posted, all at once, so the fields can be filled in any order. */
+export function draftProblems(draft: Draft, t: TFunction): string[] {
+	return [
+		...ticketMissing(draft).map((missing) => problemText(missing, t)),
+		...(draft.description.trim() === "" ? [t("tickets.needsMessage")] : []),
+		...(draft.buttonLabel.trim() === "" ? [t("tickets.needsLabel")] : []),
+	];
 }
 
 export function categoriesOf(channels: ChannelSummary[]): ChannelSummary[] {

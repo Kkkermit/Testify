@@ -40,6 +40,26 @@ describe("the tickets page", () => {
 		expect(options).toEqual(["Choose a category", "Support"]);
 	});
 
+	/** A required picker used to show its first channel while holding nothing, so the form refused what it displayed. */
+	it("lets the destinations be chosen in any order, and counts the ones already saved", async () => {
+		const user = userEvent.setup();
+		serve({ panelChannelId: null, transcriptChannelId: null });
+		renderPage();
+		const panel = await screen.findByRole("combobox", { name: /Panel channel/ });
+
+		expect(panel).toHaveValue("");
+		expect(
+			screen.getByText(/Choose where the panel is posted\. Choose where transcripts are sent\./),
+		).toBeInTheDocument();
+
+		await user.selectOptions(screen.getByRole("combobox", { name: /Transcripts/ }), "400000000000000001");
+		expect(screen.getByText("Choose where the panel is posted.")).toBeInTheDocument();
+
+		await user.selectOptions(panel, "400000000000000001");
+		expect(screen.queryByText(/Choose where/)).not.toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /save changes/i })).toBeEnabled();
+	});
+
 	it("sends every destination together when saved", async () => {
 		const user = userEvent.setup();
 		let sent: Record<string, unknown> | null = null;

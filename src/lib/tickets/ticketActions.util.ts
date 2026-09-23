@@ -14,13 +14,16 @@ const DEFAULT_LABEL = "Create ticket";
 /** `messageId` was added after the first records were written, so it is absent rather than null on those. */
 export type StoredTicketSetup = Omit<TicketSetupRecord, "messageId"> & { messageId?: string | null };
 
+/** An unset destination was once stored as an empty string, which would otherwise count as chosen. */
+const chosen = (id: string | undefined): string | null => (id === undefined || id === "" ? null : id);
+
 export function normaliseTicketSetup(setup: StoredTicketSetup | null, openTickets = 0): TicketSettings {
 	return {
 		enabled: setup !== null,
-		panelChannelId: setup?.channelId ?? null,
-		categoryId: setup?.categoryId ?? null,
-		transcriptChannelId: setup?.transcriptChannelId ?? null,
-		staffRoleId: setup?.handlerRoleId ?? null,
+		panelChannelId: chosen(setup?.channelId),
+		categoryId: chosen(setup?.categoryId),
+		transcriptChannelId: chosen(setup?.transcriptChannelId),
+		staffRoleId: chosen(setup?.handlerRoleId),
 		description: setup?.description ?? DEFAULT_DESCRIPTION,
 		buttonLabel: setup?.buttonLabel ?? DEFAULT_LABEL,
 		posted: (setup?.messageId ?? null) !== null,

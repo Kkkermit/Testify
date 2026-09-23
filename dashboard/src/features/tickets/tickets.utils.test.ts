@@ -1,5 +1,5 @@
 import { type ChannelSummary, type RoleSummary, type TicketSettings } from "@testify/shared";
-import { categoriesOf, draftOf, draftProblem, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
+import { categoriesOf, draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
 import { t } from "@/test/english";
 
 const SETTINGS: TicketSettings = {
@@ -14,24 +14,31 @@ const SETTINGS: TicketSettings = {
 	openTickets: 3,
 };
 
-describe("draftProblem", () => {
+describe("draftProblems", () => {
 	const draft = draftOf(SETTINGS);
 
 	it("says nothing about a complete draft", () => {
-		expect(draftProblem(draft, t)).toBeNull();
+		expect(draftProblems(draft, t)).toEqual([]);
 	});
 
 	it.each(["panelChannelId", "categoryId", "transcriptChannelId", "staffRoleId"] as const)(
 		"asks for %s when it is missing",
 		(field) => {
-			expect(draftProblem({ ...draft, [field]: null }, t)).not.toBeNull();
+			expect(draftProblems({ ...draft, [field]: null }, t)).toHaveLength(1);
 		},
 	);
 
+	/** Naming only the first gap made it look as though the fields had to be filled from the top down. */
+	it("names every missing destination at once, whichever was filled first", () => {
+		const problems = draftProblems({ ...draft, panelChannelId: null, staffRoleId: null }, t);
+
+		expect(problems).toEqual(["Choose where the panel is posted.", "Choose the role that handles tickets."]);
+	});
+
 	/** An emptied message would post a panel with nothing on it. */
 	it("refuses an empty message or button label", () => {
-		expect(draftProblem({ ...draft, description: "   " }, t)).toMatch(/something to say/i);
-		expect(draftProblem({ ...draft, buttonLabel: "" }, t)).toMatch(/label/i);
+		expect(draftProblems({ ...draft, description: "   " }, t).join(" ")).toMatch(/something to say/i);
+		expect(draftProblems({ ...draft, buttonLabel: "" }, t).join(" ")).toMatch(/label/i);
 	});
 });
 

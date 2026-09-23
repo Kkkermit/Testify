@@ -33,17 +33,23 @@ export const ticketPatch = z
 
 export type TicketPatch = z.infer<typeof ticketPatch>;
 
-/** What is still missing before a panel can be posted, in the words the form shows. */
-export function ticketBlocked(draft: {
+interface TicketDestinations {
 	panelChannelId: string | null;
 	categoryId: string | null;
 	transcriptChannelId: string | null;
 	staffRoleId: string | null;
-}): Problem | null {
-	if (draft.panelChannelId === null) return problem("ticket.panelChannel");
-	if (draft.categoryId === null) return problem("ticket.category");
-	if (draft.transcriptChannelId === null) return problem("ticket.transcriptChannel");
-	if (draft.staffRoleId === null) return problem("ticket.staffRole");
+}
 
-	return null;
+/** Everything still missing before a panel can be posted, in the order the form lists it. */
+export function ticketMissing(draft: TicketDestinations): Problem[] {
+	return [
+		draft.panelChannelId === null ? problem("ticket.panelChannel") : null,
+		draft.categoryId === null ? problem("ticket.category") : null,
+		draft.transcriptChannelId === null ? problem("ticket.transcriptChannel") : null,
+		draft.staffRoleId === null ? problem("ticket.staffRole") : null,
+	].filter((missing) => missing !== null);
+}
+
+export function ticketBlocked(draft: TicketDestinations): Problem | null {
+	return ticketMissing(draft)[0] ?? null;
 }

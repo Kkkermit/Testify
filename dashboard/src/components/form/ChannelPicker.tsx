@@ -29,6 +29,7 @@ export function ChannelPicker({
 	const { t } = useTranslation();
 	const postable = postableChannels(channels);
 	const chosen = postable.find((channel) => channel.id === value);
+	const gone = value !== null && chosen === undefined && channels.length > 0;
 
 	return (
 		<Field label={label} {...(hint === undefined ? {} : { hint })}>
@@ -39,18 +40,31 @@ export function ChannelPicker({
 					onChange(event.target.value === "" ? null : event.target.value);
 				}}
 			>
-				{allowNone && <option value="">{noneLabel ?? t("common.whereTalking")}</option>}
+				{/* Without an option matching the value, a browser shows the first channel as if it were chosen. */}
+				{allowNone ? (
+					<option value="">{noneLabel ?? t("common.whereTalking")}</option>
+				) : (
+					value === null && (
+						<option value="" disabled>
+							{t("common.chooseChannel")}
+						</option>
+					)
+				)}
+				{gone && (
+					<option value={value} disabled>
+						{t("common.channelGone")}
+					</option>
+				)}
 				{postable.map((channel) => (
 					<option key={channel.id} value={channel.id} disabled={!channel.canSend}>
 						#{channel.name}
-						{channel.canSend ? "" : " — Testify cannot post here"}
+						{channel.canSend ? "" : t("common.cannotPostHere")}
 					</option>
 				))}
 			</select>
 
-			{chosen?.canSend === false && (
-				<Warning>Testify cannot post in #{chosen.name}. Level-ups will not appear until that is fixed.</Warning>
-			)}
+			{gone && <Warning>{t("common.channelGoneWarning")}</Warning>}
+			{chosen?.canSend === false && <Warning>{t("common.cannotPostIn", { channel: chosen.name })}</Warning>}
 		</Field>
 	);
 }

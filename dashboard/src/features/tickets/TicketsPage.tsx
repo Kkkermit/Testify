@@ -13,7 +13,7 @@ import {
 	categoriesOf,
 	type Draft,
 	draftOf,
-	draftProblem,
+	draftProblems,
 	isDirty,
 	staffRoleWarning,
 } from "@/features/tickets/tickets.utils";
@@ -47,7 +47,8 @@ export function TicketsPage(): React.JSX.Element {
 	if (tickets.isPending || draft === null) return <Skeleton className="h-96 w-full" />;
 	if (settings === undefined) return <Skeleton className="h-96 w-full" />;
 
-	const problem = draftProblem(draft, t);
+	const problems = draftProblems(draft, t);
+	const blocked = problems.length > 0;
 	const dirty = isDirty(draft, settings);
 	const busy = save.isPending || disable.isPending;
 	const roleProblem = staffRoleWarning(roles.data ?? [], draft.staffRoleId, t);
@@ -190,14 +191,14 @@ export function TicketsPage(): React.JSX.Element {
 				</Field>
 
 				{markupWarning(draft.description) !== null && <Warning>{markupWarning(draft.description)}</Warning>}
-				{problem !== null && <Warning>{problem}</Warning>}
+				{blocked && <Warning>{problems.join(" ")}</Warning>}
 				{save.error !== null && (
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
 				<div className="flex flex-wrap items-center gap-3">
 					<Button
-						disabled={!dirty || problem !== null || busy}
+						disabled={!dirty || blocked || busy}
 						onClick={() => {
 							patch();
 						}}
@@ -207,7 +208,7 @@ export function TicketsPage(): React.JSX.Element {
 
 					<Button
 						variant="secondary"
-						disabled={problem !== null || busy}
+						disabled={blocked || busy}
 						onClick={() => {
 							patch(true);
 						}}

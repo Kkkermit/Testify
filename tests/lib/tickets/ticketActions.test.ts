@@ -76,6 +76,13 @@ describe("normaliseTicketSetup", () => {
 		expect(settings.enabled).toBe(true);
 	});
 
+	/** An empty id reached the form as a choice, so a blank picker still counted as filled in. */
+	it("reads an empty stored id as nothing chosen", () => {
+		const settings = normaliseTicketSetup({ channelId: "", categoryId: "", transcriptChannelId: PANEL } as never);
+
+		expect(settings).toMatchObject({ panelChannelId: null, categoryId: null, transcriptChannelId: PANEL });
+	});
+
 	it("says a panel is posted once there is a message id", () => {
 		expect(normaliseTicketSetup({ messageId: "5" } as never).posted).toBe(true);
 	});

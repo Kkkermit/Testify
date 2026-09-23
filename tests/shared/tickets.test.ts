@@ -1,5 +1,5 @@
 import { problemText } from "@lib/format/problemText.util";
-import { TICKET_LIMITS, ticketBlocked, ticketPatch } from "@testify/shared";
+import { TICKET_LIMITS, ticketBlocked, ticketMissing, ticketPatch } from "@testify/shared";
 
 const ID = "400000000000000001";
 
@@ -59,5 +59,18 @@ describe("ticketBlocked", () => {
 		["staffRoleId", /role/i],
 	] as const)("asks for %s when it is missing", (field, expected) => {
 		expect(problemText(ticketBlocked({ ...complete, [field]: null }))).toMatch(expected);
+	});
+});
+
+describe("ticketMissing", () => {
+	it("lists every gap in the form's order, not only the first", () => {
+		const codes = ticketMissing({
+			panelChannelId: null,
+			categoryId: "400000000000000005",
+			transcriptChannelId: null,
+			staffRoleId: null,
+		}).map((missing) => missing.code);
+
+		expect(codes).toEqual(["ticket.panelChannel", "ticket.transcriptChannel", "ticket.staffRole"]);
 	});
 });
