@@ -1,0 +1,14 @@
+# Every text file is LF in the working tree on every OS. Git for Windows defaults to CRLF on checkout, which
+# fails Prettier on every file and breaks the husky hooks, whose first line then ends in a carriage return.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary

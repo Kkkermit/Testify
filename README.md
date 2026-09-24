@@ -155,7 +155,7 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 ### What is tested
 
-Every push runs typecheck, lint, formatting, **829 unit tests**, a coverage gate and a real build — then
+Every push runs typecheck, lint, formatting, the full test suite, a coverage gate and a real build — then
 verifies the compiled `dist/` actually starts. A nightly workflow re-runs the tests and scans dependencies for
 newly published vulnerabilities.
 
@@ -166,13 +166,16 @@ Already have Node 24 and a MongoDB connection string? You are five commands away
 ```bash
 git clone https://github.com/Kkkermit/Testify.git
 cd Testify
-npm install
-npm run setup      # asks for your token, client ID, owner ID and database URL
-npm run dev        # starts the bot, restarting whenever you save a file
+npm ci                   # installs exactly what the lockfile says
+npm run setup -- --dev   # asks for your token, client ID, owner ID and database URL
+npm run dev              # starts the bot, restarting whenever you save a file
 ```
 
-That is the whole setup. `npm run setup` writes the `.env` for you, so there is no file to hand-edit and
-nothing to paste in the wrong place.
+That is the whole setup. `npm run setup -- --dev` writes `.env.development`, the file `npm run dev` reads, so
+there is nothing to hand-edit and nothing to paste in the wrong place. Each answer is checked as you type it.
+
+Running it for real rather than developing it? Use `npm run setup` (which writes `.env`), then `npm run build`
+and `npm start`.
 
 No token or database yet? The next section walks through both from scratch.
 
@@ -214,18 +217,21 @@ Testify keeps everything in MongoDB. The free tier is plenty.
 ### 5. Fill in your settings
 
 ```bash
-npm run setup
+npm run setup -- --dev   # a development bot: writes .env.development, which `npm run dev` reads
+npm run setup            # the bot people invite: writes .env, which `npm start` reads
 ```
 
-It asks for each value and writes `.env` for you. Required fields are marked and it will not let you skip
-them. Prefer doing it by hand? Copy `.env.example` to `.env` and fill it in.
+It asks for each value, checks it as you type, and writes the file for you. Required fields are marked and it
+will not let you skip them. Prefer doing it by hand? Copy `.env.development.example` to `.env.development` (or
+`.env.example` to `.env`) and fill it in.
 
 | Variable               | Required | What it is                                                                                       |
 | ---------------------- | :------: | ------------------------------------------------------------------------------------------------ |
 | `DISCORD_TOKEN`        |    ✅    | The token from step 2                                                                            |
-| `DISCORD_CLIENT_ID`    |    ✅    | **OAuth2 → Client ID** in the Developer Portal                                                   |
+| `DISCORD_CLIENT_ID`    |    ✅    | **General Information → Application ID** in the Developer Portal                                 |
 | `DISCORD_OWNER_IDS`    |    ✅    | Your Discord user ID. Comma-separate for several owners                                          |
 | `MONGODB_URI`          |    ✅    | The connection string from step 4                                                                |
+| `BOT_NAME`             |    —     | What to call the bot everywhere. Blank uses its Discord username                                 |
 | `DISCORD_DEV_GUILD_ID` |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
 | `LOG_LEVEL`            |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
 | `CHANNEL_ERROR_LOG`    |    —     | Where command failures are reported                                                              |
@@ -244,8 +250,13 @@ Leave any optional value blank and that feature simply stays off. Nothing breaks
 npm run dev
 ```
 
-You should see the Testify banner, a count of everything that loaded, and your commands appearing in Discord.
-Save any file and the bot restarts itself.
+The terminal shows each step of start-up as it finishes — settings, database, modules, commands, Discord — and
+then the bot's name in block capitals with its servers, members and commands. Save any file and the bot restarts
+itself.
+
+If something is wrong, start-up stops at that step and says what to change, in a box rather than a stack trace:
+a value missing from `.env`, a token Discord rejected, the two privileged intents left off, or a database it
+cannot reach. Set `NO_COLOR=1` for plain output, or `FORCE_COLOR=1` to keep colour through a pipe.
 
 For production:
 
@@ -571,7 +582,7 @@ restarts itself if it crashes.
 
 ```bash
 git pull
-npm install
+npm ci
 npm run build
 ```
 

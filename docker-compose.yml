@@ -13,6 +13,9 @@ services:
     restart: unless-stopped
     # Node as PID 1 reaps no orphans; the bot's own SIGTERM handler still runs either way.
     init: true
+    # `docker compose logs` is read by a person, so the bot prints its banner and readable, coloured lines.
+    # Remove this if a log collector reads the output instead; without a terminal it writes JSON.
+    tty: true
     depends_on:
       mongo:
         condition: service_healthy
@@ -24,6 +27,7 @@ services:
       DISCORD_OWNER_IDS: ${DISCORD_OWNER_IDS:?set DISCORD_OWNER_IDS in .env}
       DISCORD_DEV_GUILD_ID: ${DISCORD_DEV_GUILD_ID:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
+      BOT_NAME: ${BOT_NAME:-}
 
       CHANNEL_ERROR_LOG: ${CHANNEL_ERROR_LOG:-}
       CHANNEL_GUILD_LOG: ${CHANNEL_GUILD_LOG:-}
@@ -40,6 +44,9 @@ services:
       DASHBOARD_BIND: 0.0.0.0
       DASHBOARD_TRUST_PROXY: ${DASHBOARD_TRUST_PROXY:-false}
       DASHBOARD_SESSION_TTL_DAYS: ${DASHBOARD_SESSION_TTL_DAYS:-7}
+
+      SUPPORT_AI_API_KEY: ${SUPPORT_AI_API_KEY:-}
+      SUPPORT_AI_MODEL: ${SUPPORT_AI_MODEL:-}
     ports:
       # Bound to the host's loopback: an admin panel reachable from the internet is not a default.
       # Put a reverse proxy in front and set DASHBOARD_TRUST_PROXY=true to expose it deliberately.

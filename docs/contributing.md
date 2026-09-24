@@ -5,8 +5,8 @@ Thanks for taking a look. Issues and pull requests are both welcome.
 ## Getting set up
 
 ```bash
-npm install
-npm run setup   # writes a .env
+npm ci
+npm run setup -- --dev   # writes .env.development, the file `npm run dev` reads
 npm run dev
 ```
 
