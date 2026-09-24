@@ -1,19 +1,24 @@
 import { type ChildProcess, spawn, spawnSync } from "node:child_process";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { parse } from "dotenv";
+import { resolveBotName } from "../shared/src/brand";
+import { box, colourEnabled, painter } from "@core/terminal";
 
 /** Runs the bot and the dashboard without a shell between them, so one Ctrl+C stops both on Windows too. */
 
 const BOT = "bot";
 const WEB = "web";
-const COLOURS: Record<string, string> = { [BOT]: "[35m", [WEB]: "[36m" };
-const RESET = "[0m";
+const COLOURS: Record<string, "magenta" | "cyan"> = { [BOT]: "magenta", [WEB]: "cyan" };
+const paint = painter();
 
 /** How long a child gets to stop politely before it is killed outright. */
 const GRACE_MS = 5_000;
 
 /** Colour is dropped when the output is being piped, the same rule the boot banner follows. */
 function label(name: string): string {
-	return process.stdout.isTTY ? `${COLOURS[name] ?? ""}[${name}]${RESET} ` : `[${name}] `;
+	const colour = COLOURS[name];
+	return colour === undefined || !colourEnabled() ? `[${name}] ` : `${paint.bold(paint[colour](`[${name}]`))} `;
 }
 
 export function prefixLines(name: string, chunk: string): string {
@@ -30,7 +35,7 @@ function child(script: string, args: string[]): ChildProcess {
 		// Its own process group on POSIX, so one signal reaches the grandchildren `tsx watch` and Vite spawn.
 		detached: process.platform !== "win32",
 		stdio: ["ignore", "pipe", "pipe"],
-		env: { ...process.env, NODE_ENV: "development", FORCE_COLOR: process.stdout.isTTY ? "1" : "0" },
+		env: { ...process.env, NODE_ENV: "development", FORCE_COLOR: colourEnabled() ? "1" : "0" },
 	});
 }
 
@@ -57,18 +62,74 @@ export function stopTree(target: ChildProcess, signal: NodeJS.Signals = "SIGTERM
 	}
 }
 
+function print(lines: string[], tone: "info" | "warning" | "error", title: string): void {
+	process.stdout.write(
+		`\n${box(title, lines, tone, paint)
+			.map((line) => `  ${line}`)
+			.join("\n")}\n\n`,
+	);
+}
+
+/** Both halves read this file, so a missing one or a dashboard switched off is said once here rather than twice. */
+function readyToStart(file: string): Record<string, string> | null {
+	if (!existsSync(file)) {
+		print(
+			[
+				"There is no .env.development yet, which is what both halves read.",
+				"",
+				`${paint.cyan("➜")} ${paint.bold("npm run setup -- --dev")} asks for each value and writes it.`,
+			],
+			"warning",
+			"Not set up yet",
+		);
+		return null;
+	}
+
+	const values = parse(readFileSync(file));
+	if (values.DASHBOARD_ENABLED !== "true") {
+		print(
+			[
+				"DASHBOARD_ENABLED is not true in .env.development, so the bot starts",
+				"no API for the dashboard to talk to.",
+				"",
+				`${paint.cyan("➜")} Set ${paint.bold("DASHBOARD_ENABLED=true")}, or run ${paint.bold("npm run dev")} for the bot alone.`,
+			],
+			"warning",
+			"The dashboard is switched off",
+		);
+		return null;
+	}
+
+	return values;
+}
+
 function main(): void {
 	const root = process.cwd();
+	const values = readyToStart(resolve(root, ".env.development"));
+	if (values === null) process.exit(1);
 
 	// Build shared first: `tsx` resolves it to its `dist`, and a stale one breaks every validating route.
 	const shared = spawnSync(process.execPath, [resolve(root, "node_modules/tsup/dist/cli-default.js")], {
 		cwd: resolve(root, "shared"),
-		stdio: "inherit",
+		stdio: "pipe",
 	});
 	if (shared.status !== 0) {
-		process.stderr.write("\nCould not build @testify/shared. Run `npm run build:shared` to see why.\n");
+		process.stderr.write(`${shared.stdout.toString()}${shared.stderr.toString()}`);
+		print(["Run `npm run build:shared` on its own to see why."], "error", "Could not build @testify/shared");
 		process.exit(1);
 	}
+
+	print(
+		[
+			`${label(BOT)}the Discord bot, restarting whenever a file under src/ is saved`,
+			`${label(WEB)}the dashboard, started once the bot's API answers`,
+			"",
+			`The page opens at ${paint.bold(values.DASHBOARD_BASE_URL ?? "http://localhost:5174")}`,
+			`${paint.bold("Ctrl+C")} stops both.`,
+		],
+		"info",
+		`${resolveBotName(values.BOT_NAME)} · bot and dashboard`,
+	);
 
 	const tsx = resolve(root, "node_modules/tsx/dist/cli.mjs");
 	const children = [
@@ -86,7 +147,8 @@ function main(): void {
 		if (stopping) return;
 		stopping = true;
 
-		for (const [, process_] of children) stopTree(process_);
+		// SIGINT, as a Ctrl+C in either half's own terminal would be; a SIGTERM reads as a save to the bot.
+		for (const [, process_] of children) stopTree(process_, "SIGINT");
 
 		// Whatever has not exited by now is killed.
 		setTimeout(() => {
@@ -100,7 +162,8 @@ function main(): void {
 
 	for (const [name, process_] of children) {
 		process_.on("exit", (code) => {
-			if (!stopping) process.stdout.write(`${label(name)}stopped, so the other half is stopping too.\n`);
+			if (!stopping)
+				process.stdout.write(`${label(name)}${paint.yellow("stopped, so the other half is stopping too.")}\n`);
 			if (process.exitCode === undefined && code !== null && code !== 0) process.exitCode = code;
 
 			stopAll();

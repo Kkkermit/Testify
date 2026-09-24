@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { defineCommand } from "@core/command";
 import { embed, reply } from "@lib/discord";
 import { fetchJson } from "@lib/infra";
@@ -16,7 +16,7 @@ export default defineCommand({
 		await interaction.deferReply();
 
 		const joke = await fetchJson("icanhazdadjoke", "https://icanhazdadjoke.com/", jokeSchema, {
-			headers: { Accept: "application/json", "User-Agent": `${theme.name} Discord bot` },
+			headers: { Accept: "application/json", "User-Agent": `${botName()} Discord bot` },
 		});
 
 		await reply(interaction, {

@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { z } from "zod";
+import { BOT_NAME_MAX } from "@testify/shared";
 
 /** Everything the bot reads from the environment, in one list. */
 
@@ -26,6 +27,12 @@ const fields = z.object({
 	MONGODB_URI: z.string().min(1, "is required — a MongoDB connection string"),
 
 	// Optional.
+	BOT_NAME: z
+		.string()
+		.trim()
+		.min(1)
+		.max(BOT_NAME_MAX, `is at most ${String(BOT_NAME_MAX)} characters, like a Discord username`)
+		.optional(),
 	NODE_ENV: z.enum(["development", "production", "test"]).default("production"),
 	LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
 	DISCORD_DEV_GUILD_ID: id.optional(),
@@ -75,21 +82,59 @@ function withoutBlanks(source: NodeJS.ProcessEnv): Record<string, string> {
 	);
 }
 
+export interface EnvFile {
+	name: ".env" | ".env.development";
+	path: string;
+	exists: boolean;
+}
+
+/** `npm run dev` sets NODE_ENV=development, which is the only thing that picks `.env.development`. */
+export function envFile(): EnvFile {
+	const name = process.env.NODE_ENV === "development" ? ".env.development" : ".env";
+	const path = resolve(process.cwd(), name);
+
+	return { name, path, exists: existsSync(path) };
+}
+
+export interface EnvProblem {
+	key: string;
+	/** True when the variable was blank or absent, rather than set to something it cannot be. */
+	missing: boolean;
+	message: string;
+}
+
+/** Carries each problem apart, so start-up can say where to find every missing value. */
+export class EnvError extends Error {
+	readonly file: EnvFile;
+	readonly problems: EnvProblem[];
+
+	constructor(file: EnvFile, problems: EnvProblem[]) {
+		const lines = problems.map((problem) => `  ${problem.key} ${problem.message}`).join("\n");
+		super(`Your ${file.name} file needs attention:\n\n${lines}\n\nRun \`npm run setup\` to build one.`);
+		this.name = "EnvError";
+		this.file = file;
+		this.problems = problems;
+	}
+}
+
 let cached: Env | undefined;
 
 export function loadEnv(): Env {
 	if (cached) return cached;
 
-	if (process.env.JEST_WORKER_ID === undefined) {
-		const file = resolve(process.cwd(), process.env.NODE_ENV === "development" ? ".env.development" : ".env");
-		if (existsSync(file)) loadDotenv({ path: file, quiet: true });
-	}
+	const file = envFile();
+	if (process.env.JEST_WORKER_ID === undefined && file.exists) loadDotenv({ path: file.path, quiet: true });
 
-	const result = schema.safeParse(withoutBlanks(process.env));
+	const source = withoutBlanks(process.env);
+	const result = schema.safeParse(source);
 
 	if (!result.success) {
-		const problems = result.error.issues.map((issue) => `  ${issue.path.join(".")} ${issue.message}`).join("\n");
-		throw new Error(`Your .env file needs attention:\n\n${problems}\n\nRun \`npm run setup\` to build one.`);
+		const problems = result.error.issues.map((issue): EnvProblem => {
+			const key = issue.path.join(".");
+			const missing = !(key in source);
+			return { key, missing, message: missing && issue.code !== "custom" ? "is not set" : issue.message };
+		});
+		throw new EnvError(file, problems);
 	}
 
 	cached = Object.freeze(result.data);

@@ -105,7 +105,7 @@ function resolveGuild(client: TestifyClient, command: Command, guildId: string |
 	}
 
 	const guild = client.guilds.cache.get(guildId);
-	if (guild === undefined) throw notInGuild(client);
+	if (guild === undefined) throw notInGuild();
 
 	return guild;
 }

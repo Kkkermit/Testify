@@ -1,6 +1,7 @@
 import { arch, type as osType, cpus, freemem, platform, totalmem } from "node:os";
 import { version as djsVersion } from "discord.js";
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { defineCommand, type CommandInput } from "@core/command";
 import { embed, linkButton, reply, row } from "@lib/discord";
@@ -61,7 +62,7 @@ async function showInfo(interaction: CommandInput, client: TestifyClient): Promi
 		embeds: [
 			embed({
 				category: "info",
-				title: `About ${theme.name}`,
+				title: `About ${botName()}`,
 				description: "An open source, multipurpose Discord bot written in TypeScript.",
 				fields: [
 					{ name: "Servers", value: formatNumber(client.guilds.cache.size), inline: true },

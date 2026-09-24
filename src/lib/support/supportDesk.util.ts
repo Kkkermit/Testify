@@ -1,4 +1,5 @@
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
@@ -247,8 +248,8 @@ export function buildEntries(client: TestifyClient, secrets: readonly string[]):
 	});
 }
 
-export function supportContext(client: TestifyClient, prefix: string): SupportContext {
-	return { bot: client.user?.username ?? theme.name, prefix, repository: theme.repository };
+export function supportContext(prefix: string): SupportContext {
+	return { bot: botName(), prefix, repository: theme.repository };
 }
 
 let desk: SupportDesk | null = null;
@@ -259,7 +260,7 @@ export function supportDesk(client: TestifyClient): SupportDesk {
 
 	const secrets = secretsOf(client.env);
 	const entries = buildEntries(client, secrets);
-	const bot = client.user?.username ?? theme.name;
+	const bot = botName();
 	const apiKey = client.env.SUPPORT_AI_API_KEY;
 
 	desk = new SupportDesk({

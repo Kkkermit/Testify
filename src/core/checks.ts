@@ -1,5 +1,6 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
-import { botName, type TestifyClient } from "@core/client";
+import { botName } from "@core/brand";
+import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, type Subcommand } from "@core/command";
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
@@ -21,7 +22,7 @@ export async function runChecks(
 	client: TestifyClient,
 ): Promise<CheckFailure> {
 	if (client.paused) {
-		return `${botName(client)} is paused right now. The bot owner can resume it from the dashboard.`;
+		return `${botName()} is paused right now. The bot owner can resume it from the dashboard.`;
 	}
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);

@@ -14,7 +14,7 @@ support.use("*", requireAuth);
 
 support.get("/", (context) => {
 	const client = context.get("client");
-	const body: SupportIndex = { articles: supportDesk(client).catalogue(supportContext(client, DEFAULT_PREFIX)) };
+	const body: SupportIndex = { articles: supportDesk(client).catalogue(supportContext(DEFAULT_PREFIX)) };
 
 	return context.json(body);
 });
@@ -22,7 +22,7 @@ support.get("/", (context) => {
 support.post("/ask", async (context) => {
 	const client = context.get("client");
 	const { question } = await parseBody(context, supportQuestion);
-	const body: SupportReply = await supportDesk(client).ask(question, supportContext(client, DEFAULT_PREFIX));
+	const body: SupportReply = await supportDesk(client).ask(question, supportContext(DEFAULT_PREFIX));
 
 	return context.json(body);
 });
@@ -30,7 +30,7 @@ support.post("/ask", async (context) => {
 support.get("/articles/:articleId", (context) => {
 	const client = context.get("client");
 	const { articleId } = parseParams(context, supportArticleParams);
-	const help = supportContext(client, DEFAULT_PREFIX);
+	const help = supportContext(DEFAULT_PREFIX);
 	const desk = supportDesk(client);
 
 	const answer = desk.article(articleId, help);

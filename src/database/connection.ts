@@ -53,7 +53,7 @@ export function explainConnectionFailure(error: unknown, uri: string): string {
 			"That database hostname does not exist.",
 			"",
 			"Check MONGODB_URI for a typo, and that the cluster has not been deleted.",
-			"A paused Atlas cluster also looks like this — resume it from the Atlas dashboard.",
+			"A paused Atlas cluster looks like this too — resume it in Atlas.",
 		].join("\n");
 	}
 
@@ -76,6 +76,11 @@ export function explainConnectionFailure(error: unknown, uri: string): string {
 	}
 
 	return `Could not connect to MongoDB: ${text}`;
+}
+
+/** The host alone, since a connection string can carry a password and this is printed. */
+function hostOf(uri: string): string {
+	return /^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^/?,]+)/.exec(uri)?.[1] ?? "the configured address";
 }
 
 function srvHostOf(uri: string): string {
@@ -110,8 +115,12 @@ export async function connectDatabase(options: ConnectOptions): Promise<typeof m
 		} catch (error) {
 			if (attempt === retries) throw new SetupError(explainConnectionFailure(error, options.uri));
 
-			options.logger.warn({ attempt, of: retries }, "Cannot reach MongoDB yet, retrying");
-			await new Promise((done) => setTimeout(done, retryDelayMs * attempt));
+			const delay = retryDelayMs * attempt;
+			options.logger.warn(
+				`[DATABASE] Cannot reach MongoDB at ${hostOf(options.uri)} yet (try ${String(attempt)} of ${String(retries)}). ` +
+					`Trying again in ${String(delay / 1000)}s — is it running?`,
+			);
+			await new Promise((done) => setTimeout(done, delay));
 		}
 	}
 

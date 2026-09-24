@@ -1,4 +1,5 @@
 import { categoryColour, theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { embed, errorEmbed, successEmbed, withPageFooter } from "@lib/discord/embeds.util";
 
 describe("embed", () => {
@@ -13,8 +14,8 @@ describe("embed", () => {
 	});
 
 	it("always sets a footer, because Discord rejects an empty one", () => {
-		expect(embed({}).data.footer?.text).toBe(theme.name);
-		expect(embed({ footer: "" }).data.footer?.text).toBe(theme.name);
+		expect(embed({}).data.footer?.text).toBe(botName());
+		expect(embed({ footer: "" }).data.footer?.text).toBe(botName());
 		expect(embed({ footer: "Page 1" }).data.footer?.text).toBe("Page 1");
 	});
 

@@ -1,9 +1,9 @@
-import { BOT_NAME } from "@testify/shared";
 import i18next, { type ParseKeys } from "i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
 import en from "@/i18n/locales/en.json";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 
 /** Every key English defines. A nav entry or a component naming one that is not there fails the build. */
 export type TranslationKey = ParseKeys<"translation">;
@@ -55,15 +55,15 @@ void i18next
 			// React escapes before anything reaches the DOM, and escaping twice mangles an apostrophe.
 			escapeValue: false,
 			// `{{bot}}` in any string is the bot's own name, so a renamed or forked bot is always called by its own name.
-			defaultVariables: { bot: BOT_NAME },
+			defaultVariables: { bot: BUILT_IN_BOT_NAME },
 		},
 		react: { bindI18n: `languageChanged ${BOT_NAMED}` },
 	});
 
-/** The name `{{bot}}` fills in: Discord's own once `/api/bot` has answered, the built-in one before. */
+/** The name `{{bot}}` fills in: the one `/api/bot` reports once it has answered, the one built in from `.env` before. */
 export function currentBotName(): string {
 	const name: unknown = i18next.options.interpolation?.defaultVariables?.bot;
-	return typeof name === "string" ? name : BOT_NAME;
+	return typeof name === "string" ? name : BUILT_IN_BOT_NAME;
 }
 
 /** Every `useTranslation` listens for `BOT_NAMED`, so each string naming the bot re-renders with the new name. */

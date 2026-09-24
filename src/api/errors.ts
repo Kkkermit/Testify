@@ -1,6 +1,5 @@
-import { type Client } from "discord.js";
 import { type ContentfulStatusCode } from "hono/utils/http-status";
-import { botName } from "@core/client";
+import { botName } from "@core/brand";
 import { type ApiErrorBody } from "@testify/shared";
 
 export interface ApiIssue {
@@ -56,8 +55,7 @@ export const forbidden = (code: string, message: string): ApiProblem => new ApiP
 export const notFound = (code = "not_found", message = "No such endpoint."): ApiProblem =>
 	new ApiProblem(404, code, message);
 
-export const notInGuild = (client: Pick<Client, "user">): ApiProblem =>
-	notFound("guild_not_found", `${botName(client)} is not in that server.`);
+export const notInGuild = (): ApiProblem => notFound("guild_not_found", `${botName()} is not in that server.`);
 
 export const tooManyRequests = (retryAfterSeconds: number): ApiProblem =>
 	new ApiProblem(

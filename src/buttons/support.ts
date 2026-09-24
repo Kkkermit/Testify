@@ -15,7 +15,7 @@ export default defineButton({
 
 		const [articleId = ""] = context.args;
 		const prefix = interaction.guild === null ? DEFAULT_PREFIX : await getPrefix(interaction.guild.id);
-		const help = supportContext(context.client, prefix);
+		const help = supportContext(prefix);
 		const desk = supportDesk(context.client);
 
 		await interaction.update(

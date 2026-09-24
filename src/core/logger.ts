@@ -1,5 +1,6 @@
 import pino from "pino";
 import { type LogRecord, type LogRing, logRing } from "@core/logRing";
+import { colourEnabled } from "@core/terminal";
 
 export type LogLevel = "trace" | "debug" | "info" | "warn" | "error" | "fatal";
 
@@ -19,12 +20,12 @@ export function splitLogArgs(args: unknown[]): Pick<LogRecord, "message" | "cont
 }
 
 /**
- * Pretty output on a terminal, JSON otherwise. Every line is also copied into `ring` through a hook, so `LOG_LEVEL`
- * still decides what exists.
+ * Pretty output on a terminal, or through `npm run dev:all`'s pipe, and JSON for a log collector otherwise. Every
+ * line is also copied into `ring` through a hook, so `LOG_LEVEL` still decides what exists.
  */
 export function createLogger(
 	level: LogLevel,
-	pretty: boolean = process.stdout.isTTY === true,
+	pretty: boolean = process.stdout.isTTY === true || colourEnabled(),
 	ring: LogRing = logRing,
 ): Logger {
 	const options: pino.LoggerOptions = {
@@ -45,7 +46,7 @@ export function createLogger(
 		...options,
 		transport: {
 			target: "pino-pretty",
-			options: { colorize: true, translateTime: "HH:MM:ss", ignore: "pid,hostname" },
+			options: { colorize: colourEnabled(), translateTime: "HH:MM:ss", ignore: "pid,hostname" },
 		},
 	});
 }

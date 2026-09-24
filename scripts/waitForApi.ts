@@ -1,10 +1,17 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
+import { box, painter, stepLine } from "@core/terminal";
 
 /** Holds the dashboard back until the bot's API answers, so Vite's proxy does not fail while the bot connects. */
 
 const POLL_MS = 500;
+
+const paint = painter();
+
+function say(line: string): void {
+	process.stdout.write(`${line}\n`);
+}
 
 /** Generous, because a first run compiles the whole bot before it even reaches `client.login()`. */
 export function timeoutMs(argv: string[], fallback = 180_000): number {
@@ -50,10 +57,11 @@ export async function main(): Promise<void> {
 	const { enabled, port } = fromEnvFile();
 
 	if (!enabled) {
-		process.stderr.write(
-			"\nDASHBOARD_ENABLED is false, so the bot never starts an API for the dashboard to talk to.\n" +
-				"Set DASHBOARD_ENABLED=true in .env.development, or run `npm run dev` for the bot on its own.\n\n",
-		);
+		const lines = [
+			"DASHBOARD_ENABLED is not true, so the bot starts no API for the dashboard.",
+			"Set DASHBOARD_ENABLED=true in .env.development, or run `npm run dev` for the bot alone.",
+		];
+		process.stderr.write(`\n${box("The dashboard is switched off", lines, "warning", paint).join("\n")}\n\n`);
 		process.exitCode = 1;
 		return;
 	}
@@ -65,22 +73,23 @@ export async function main(): Promise<void> {
 
 	while (Date.now() < deadline) {
 		if (await answering(url)) {
-			process.stdout.write(`API is up on port ${String(port)}. Starting Vite.\n`);
+			say(stepLine("done", "API", `answering on port ${String(port)} — starting the dashboard`, undefined, paint));
 			return;
 		}
 
 		if (!announced) {
-			process.stdout.write(`Waiting for the bot's API on port ${String(port)} before starting Vite…\n`);
+			say(stepLine("working", "API", `waiting for the bot on port ${String(port)}…`, undefined, paint));
 			announced = true;
 		}
 
 		await new Promise((sleep) => setTimeout(sleep, POLL_MS));
 	}
 
-	process.stderr.write(
-		`\nThe bot's API never came up on port ${String(port)} within ${String(Math.round(limit / 1000))}s.\n` +
-			"Look at the [bot] output above — it usually says what stopped it.\n\n",
-	);
+	const lines = [
+		`Nothing answered on port ${String(port)} within ${String(Math.round(limit / 1000))}s.`,
+		"The [bot] lines above usually say what stopped it.",
+	];
+	process.stderr.write(`\n${box("The bot's API never came up", lines, "error", paint).join("\n")}\n\n`);
 	process.exitCode = 1;
 }
 

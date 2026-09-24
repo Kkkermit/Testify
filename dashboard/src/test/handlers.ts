@@ -51,6 +51,7 @@ export const configured: SetupStatus = {
 
 export const botProfile: BotIdentity = {
 	id: "100000000000000001",
+	name: "Testify",
 	username: "Testify",
 	avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
 	bannerUrl: null,

@@ -1,6 +1,8 @@
 import { type Client } from "discord.js";
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
+import { colourEnabled } from "@core/terminal";
 import { dashboardUrl } from "@lib/bot/dashboard.util";
 import { formatNumber } from "@lib/format/format.util";
 
@@ -62,6 +64,17 @@ const LETTERS: Record<string, string[]> = {
 	X: ["██╗  ██╗", "╚██╗██╔╝", " ╚███╔╝ ", " ██╔██╗ ", "██╔╝ ██╗", "╚═╝  ╚═╝"],
 	Y: ["██╗   ██╗", "╚██╗ ██╔╝", " ╚████╔╝ ", "  ╚██╔╝  ", "   ██║   ", "   ╚═╝   "],
 	Z: ["███████╗", "╚══███╔╝", "  ███╔╝ ", " ███╔╝  ", "███████╗", "╚══════╝"],
+	"0": [" ██████╗ ", "██╔═████╗", "██║██╔██║", "████╔╝██║", "╚██████╔╝", " ╚═════╝ "],
+	"1": [" ██╗", "███║", "╚██║", " ██║", " ██║", " ╚═╝"],
+	"2": ["██████╗ ", "╚════██╗", " █████╔╝", "██╔═══╝ ", "███████╗", "╚══════╝"],
+	"3": ["██████╗ ", "╚════██╗", " █████╔╝", " ╚═══██╗", "██████╔╝", "╚═════╝ "],
+	"4": ["██╗  ██╗", "██║  ██║", "███████║", "╚════██║", "     ██║", "     ╚═╝"],
+	"5": ["███████╗", "██╔════╝", "███████╗", "╚════██║", "███████║", "╚══════╝"],
+	"6": [" ██████╗ ", "██╔════╝ ", "███████╗ ", "██╔═══██╗", "╚██████╔╝", " ╚═════╝ "],
+	"7": ["███████╗", "╚════██║", "    ██╔╝", "   ██╔╝ ", "   ██║  ", "   ╚═╝  "],
+	"8": [" █████╗ ", "██╔══██╗", "╚█████╔╝", "██╔══██╗", "╚█████╔╝", " ╚════╝ "],
+	"9": [" █████╗ ", "██╔══██╗", "╚██████║", " ╚═══██║", " █████╔╝", " ╚════╝ "],
+	"-": ["      ", "      ", "█████╗", "╚════╝", "      ", "      "],
 	" ": ["   ", "   ", "   ", "   ", "   ", "   "],
 };
 
@@ -141,7 +154,7 @@ export function printBanner(
 ): void {
 	const lines = bannerLines(
 		{
-			name: ready.user.username,
+			name: botName(),
 			servers: ready.guilds.cache.size,
 			members: ready.guilds.cache.reduce((total, guild) => total + guild.memberCount, 0),
 			commands: client.commands.size,
@@ -152,7 +165,7 @@ export function printBanner(
 			watching: client.env.NODE_ENV === "development",
 			dashboardUrl: dashboardUrl(client.env),
 		},
-		process.stdout.isTTY === true,
+		colourEnabled(),
 	);
 
 	process.stdout.write(`${lines.join("\n")}\n`);
@@ -160,6 +173,6 @@ export function printBanner(
 
 /** Printed when tsx tears the process down to restart it. */
 export function printReloading(): void {
-	const glyph = process.stdout.isTTY === true ? `${ansi.yellow}${RELOAD_GLYPH}${ansi.reset}` : RELOAD_GLYPH;
+	const glyph = colourEnabled() ? `${ansi.yellow}${RELOAD_GLYPH}${ansi.reset}` : RELOAD_GLYPH;
 	process.stdout.write(`\n  ${glyph} Change detected \u2014 reloading\u2026\n\n`);
 }

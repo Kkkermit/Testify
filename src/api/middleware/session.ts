@@ -38,7 +38,7 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 
 	// Not being in the guild is not a secret, and "here is an invite" is the right answer to it.
 	const guild = context.get("client").guilds.cache.get(guildId);
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	const isOwner = context.get("client").isOwner(session.userId);
 

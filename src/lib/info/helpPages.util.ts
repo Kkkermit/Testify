@@ -8,6 +8,7 @@ import {
 	isCategory,
 } from "@config/categories";
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { customId } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { type Command, subcommandsOf } from "@core/command";
@@ -59,7 +60,7 @@ export function helpHome(client: TestifyClient, surface: Surface, prefix: string
 
 	return embed({
 		category: "info",
-		title: `${client.user?.username ?? theme.name} help centre`,
+		title: `${botName()} help centre`,
 		description: [
 			`Everything here works as a slash command **and** with the \`${prefix}\` prefix.`,
 			"",

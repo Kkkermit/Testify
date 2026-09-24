@@ -57,6 +57,7 @@ describe("the bot profile endpoint", () => {
 			"avatarUrl",
 			"bannerUrl",
 			"id",
+			"name",
 			"repositoryUrl",
 			"supportUrl",
 			"username",

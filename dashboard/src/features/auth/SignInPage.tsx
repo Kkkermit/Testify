@@ -1,4 +1,3 @@
-import { BOT_NAME } from "@testify/shared";
 import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
@@ -10,6 +9,7 @@ import { SetupNeeded } from "@/features/auth/SetupNeeded";
 import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { hardRedirect } from "@/lib/redirect";
 
 /** One button, and the two scopes named — asking for less is a feature, so say what it is. */
@@ -20,7 +20,7 @@ export function SignInPage(): React.JSX.Element {
 	const setup = useSetup();
 	const bot = useBot();
 	const returnTo = params.get("returnTo") ?? "/guilds";
-	const name = bot.data?.username ?? BOT_NAME;
+	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
 
 	if (setup.data?.configured === false)
 		return <SetupNeeded missing={setup.data.missing} redirectUri={setup.data.redirectUri} />;

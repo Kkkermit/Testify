@@ -1,5 +1,6 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
 import { getPrefix } from "@database/repositories/settingsRepository";
 import { embed, linkButton, row } from "@lib/discord";
@@ -19,7 +20,7 @@ export default defineMessageHandler({
 			embeds: [
 				embed({
 					category: "info",
-					title: `Hello, I am ${client.user?.username ?? theme.name}`,
+					title: `Hello, I am ${botName()}`,
 					description: `My prefix here is \`${prefix}\`.\n\nUse \`/help\` or \`${prefix}help\` to see everything I can do.`,
 					thumbnail: client.user?.displayAvatarURL(),
 				}),

@@ -6,7 +6,7 @@ import { badRequest, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
-import { botName } from "@core/client";
+import { botName } from "@core/brand";
 import {
 	disableAntiLink,
 	disableCounting,
@@ -52,7 +52,7 @@ settings.use("*", requireGuild);
 function guildIdOf(context: ApiContext): string {
 	const guild = context.get("guild");
 	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild.id;
 }
@@ -92,7 +92,7 @@ settings.get("/", async (context) => context.json(await settingsOf(guildIdOf(con
 
 function guildOf(context: ApiContext) {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild;
 }
@@ -114,11 +114,11 @@ settings.patch("/nickname", async (context) => {
 	const { nickname } = await parseBody(context, nicknamePatch);
 	const me = guild.members.me;
 
-	if (me === null) throw notInGuild(context.get("client"));
+	if (me === null) throw notInGuild();
 
 	// Surfaced rather than left to fail at Discord, so the message names the permission to grant.
 	if (!me.permissions.has(PermissionFlagsBits.ChangeNickname)) {
-		throw badRequest(`${botName(context.get("client"))} needs the Change Nickname permission in this server.`);
+		throw badRequest(`${botName()} needs the Change Nickname permission in this server.`);
 	}
 
 	try {

@@ -1,10 +1,11 @@
-import { BOT_NAME, type BotIdentity, type DashboardUser } from "@testify/shared";
+import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { BotMark } from "@/components/brand/BotMark";
 import { type NavAudience } from "@/config/navigation";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 
 /** A drawer below `md`, closing on Escape, on a link, and returning focus to its button. */
 export function MobileNav({
@@ -62,7 +63,7 @@ export function MobileNav({
 				</button>
 				<BotMark src={bot?.avatarUrl} size={20} />
 				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
-					{bot?.username ?? BOT_NAME}
+					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>
 			</header>
 

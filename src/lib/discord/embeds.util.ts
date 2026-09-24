@@ -2,6 +2,7 @@ import { type APIEmbedField, type ColorResolvable, EmbedBuilder } from "discord.
 import { type Category } from "@config/categories";
 import { LIMITS } from "@config/constants";
 import { categoryColour, theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { truncate } from "@lib/format/format.util";
 
 export interface EmbedOptions {
@@ -41,7 +42,7 @@ export function embed(options: EmbedOptions): EmbedBuilder {
 	builder.setFooter({
 		// Discord rejects an empty footer, so a blank string falls back to the name.
 		text: truncate(
-			options.footer !== undefined && options.footer !== "" ? options.footer : theme.name,
+			options.footer !== undefined && options.footer !== "" ? options.footer : botName(),
 			LIMITS.embedTitle,
 		),
 		...(options.footerIcon !== undefined ? { iconURL: options.footerIcon } : {}),

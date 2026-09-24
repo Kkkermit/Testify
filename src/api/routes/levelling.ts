@@ -23,7 +23,7 @@ levelling.use("*", requireGuild);
 function guildIdOf(context: ApiContext): string {
 	const guild = context.get("guild");
 	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild.id;
 }

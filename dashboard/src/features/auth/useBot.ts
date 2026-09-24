@@ -13,7 +13,7 @@ export function useBot(): UseQueryResult<BotIdentity> {
 		staleTime: 15 * 60 * 1000,
 	});
 
-	const name = bot.data?.username;
+	const name = bot.data?.name;
 	useEffect(() => {
 		if (name !== undefined) nameTheBot(name);
 	}, [name]);

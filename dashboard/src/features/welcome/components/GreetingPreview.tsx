@@ -1,8 +1,9 @@
-import { BOT_NAME, fillTemplate, type WelcomeStyle } from "@testify/shared";
+import { fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
 import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 
 /** Filled by the same function the bot posts with, so nobody has to save a template and join with an alt to find out what `{count}` does. */
@@ -19,7 +20,7 @@ export function GreetingPreview({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const bot = useBot();
-	const name = bot.data?.username ?? BOT_NAME;
+	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
 	const filled = fillTemplate(message, {
 		mention: "@newcomer",
 		username: "newcomer",

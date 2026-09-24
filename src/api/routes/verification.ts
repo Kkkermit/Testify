@@ -5,7 +5,7 @@ import { type ApiBindings } from "@api/context";
 import { badRequest, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { botName } from "@core/client";
+import { botName } from "@core/brand";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
 import { isReady, normaliseVerify, publishVerifyPanel, roleTooHigh, type VerifyConfig } from "@lib/settings";
 import { type VerificationConfigResponse, type VerificationPatch, verificationPatchSchema } from "@testify/shared";
@@ -16,7 +16,7 @@ verification.use("*", requireGuild);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild;
 }
@@ -66,7 +66,7 @@ verification.patch("/", async (context) => {
 	}
 
 	if (roleTooHigh(guild, next.roleId)) {
-		const name = botName(context.get("client"));
+		const name = botName();
 		throw badRequest(`That role sits at or above ${name}'s own, so ${name} cannot give it to anybody.`);
 	}
 

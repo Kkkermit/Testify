@@ -13,7 +13,7 @@ music.use("*", requireGuild);
 
 function guildIdOf(context: Context<ApiBindings>): string {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild.id;
 }

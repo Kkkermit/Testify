@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
-import { theme } from "@config/theme";
-import { BOT_NAME } from "@testify/shared";
+import { DEFAULT_BOT_NAME, resolveBotName } from "@testify/shared";
 
 const ROOT = resolve(__dirname, "../..");
 const SWEPT = ["src", "shared/src", "dashboard/src", "assets/support", "dashboard/index.html"];
@@ -18,12 +17,16 @@ function filesUnder(path: string): string[] {
 }
 
 describe("the bot's name", () => {
-	it("is one constant, which the bot's theme reads", () => {
-		expect(theme.name).toBe(BOT_NAME);
+	/** `BOT_NAME` is somebody's explicit choice, so it beats the username their Discord application happens to have. */
+	it("is BOT_NAME first, then the Discord username, then the built-in name", () => {
+		expect(resolveBotName("Helper", "Helper#app")).toBe("Helper");
+		expect(resolveBotName(undefined, "Helper#app")).toBe("Helper#app");
+		expect(resolveBotName("  ", null)).toBe(DEFAULT_BOT_NAME);
+		expect(resolveBotName(undefined, undefined)).toBe(DEFAULT_BOT_NAME);
 	});
 
 	/** Forks had to find and replace the name across 200 strings, and missed the ones that mattered. */
-	it("is written nowhere else, so a fork renames the bot in one place", () => {
+	it("is written nowhere but its default, so a fork renames the bot in .env", () => {
 		const offenders = SWEPT.flatMap((part) => filesUnder(join(ROOT, part)))
 			.filter((file) => !file.endsWith(join("shared", "src", "brand.ts")))
 			.flatMap((file) =>

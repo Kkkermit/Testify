@@ -1,4 +1,4 @@
-import { BOT_NAME, type StatusLevel, type StatusResponse } from "@testify/shared";
+import { type StatusLevel, type StatusResponse } from "@testify/shared";
 import { AlertTriangle, CheckCircle2, CircleHelp, Clock, Database, Gauge, Radio, XCircle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
@@ -26,6 +26,7 @@ import {
 } from "@/features/status/status.utils";
 import { useStatus } from "@/features/status/useStatus";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { clockTime, dateAndTime, since } from "@/lib/datetime";
 
@@ -43,7 +44,7 @@ export function StatusPage(): React.JSX.Element {
 
 	const bot = useBot();
 	const status = useStatus();
-	const name = bot.data?.username ?? BOT_NAME;
+	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
 
 	const header = <PageHeader title={t("status.title")} subtitle={t("status.subtitle", { name })} />;
 

@@ -1,5 +1,6 @@
 import { type ClientUser } from "discord.js";
 import { theme } from "@config/theme";
+import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { type BotIdentity } from "@testify/shared";
@@ -21,6 +22,7 @@ export function forgetBotIdentity(): void {
 export function identityOf(user: ClientUser): BotIdentity {
 	return {
 		id: user.id,
+		name: botName(),
 		username: user.username,
 		avatarUrl: user.displayAvatarURL({ size: SIZE }),
 		bannerUrl: user.bannerURL({ size: 1024 }) ?? null,

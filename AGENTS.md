@@ -70,7 +70,7 @@ numbers, which drift):
 | `src/lib` helpers    | 90, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,593 across 257 suites           |
+| Tests                | 4,624 across 263 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -86,11 +86,13 @@ npm run setup           # interactive: writes .env
 npm run setup -- --dev  # writes .env.development instead
 ```
 
-`npm run setup` asks for each value and retries on the required ones. To do it by hand, copy `.env.example` to
+`npm run setup` asks for each value and checks each answer as it is typed, so a malformed ID is caught on its
+own question rather than after the last one. To do it by hand, copy `.env.example` to
 `.env` (or `.env.development.example` to `.env.development`) and fill it in.
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
-**Optional:** `NODE_ENV`, `LOG_LEVEL`, `DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
+**Optional:** `BOT_NAME` (what to call the bot; blank uses its Discord username), `NODE_ENV`, `LOG_LEVEL`,
+`DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
 `CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
 `DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
@@ -706,13 +708,20 @@ IDs) and its default.
   `theme.colours`, so its colour language is one table. `tests/config/palette.test.ts` fails on a duplicated
   category colour or on a colour name written outside `src/config/`; both halves were proved able to fail.
 - **No committed snowflakes.** Every ID goes through `env.ts`.
-- **The bot's name is written once: `BOT_NAME` in `shared/src/brand.ts`.** It is only the fallback. What a reader
-  sees is the bot's own Discord username wherever there is one to read, so a fork renamed in the Developer Portal
-  needs no code change at all, and one that wants a different built-in name changes one line. The bot calls
-  `botName(client)` from `@core/client` (and `notInGuild(client)` in the API); a help article writes `{bot}`; the
-  dashboard writes `{{bot}}`, which i18next fills from `defaultVariables` and `useBot()` updates once `/api/bot`
-  answers, so no call site passes it. `tests/config/brand.test.ts` fails on the name written anywhere else in
-  `src`, `shared/src`, `dashboard/src`, the articles or `index.html`, and was proved to go red.
+- **The bot's name comes from `.env`.** `resolveBotName` in `shared/src/brand.ts` is the one rule: `BOT_NAME`
+  wins because it is an explicit choice, then the bot's Discord username, then `DEFAULT_BOT_NAME` — the only place
+  the word "Testify" is written as a name. So a fork renamed in the Developer Portal needs nothing, and one that
+  wants a different name sets one variable. The bot calls `botName()` from `@core/brand`, which the client primes
+  in its constructor and which reads the username live, so an embed footer with no client to ask still gets it
+  right. `/api/bot` hands the resolved `name` to the dashboard, whose strings write `{{bot}}` — i18next fills it
+  from `defaultVariables`, and `useBot()` updates it once the answer lands. Before that, the dashboard shows the
+  `BOT_NAME` Vite read out of the same `.env` at build time (`__BOT_NAME__`, also the `<title>` in
+  `index.html`), so a changed name in a built dashboard is right from the first `/api/bot` answer, and right from
+  the first paint after the next build. A help article writes `{bot}`. `tests/config/brand.test.ts` fails on the
+  name written anywhere else in `src`, `shared/src`, `dashboard/src`, the articles or `index.html`.
+- **Every variable reaches every way of running the bot.** `tests/config/setupFiles.test.ts` fails on a variable
+  missing from either `.env*.example` or from `docker-compose.yml`, where one missing is set in `.env` and
+  silently ignored by `docker compose up` — which is exactly how `BOT_NAME` and the support key went missing.
 
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
 comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
@@ -743,9 +752,26 @@ Two separate jobs. Keep them apart.
   `warn` buried the single line naming the cause under hundreds of duplicates. Warn on decisive failures; leave
   the rest at `debug`.
 
-**Presentation — `src/lib/bot/banner.util.ts`.** The boot banner is for a human watching a terminal and is
-`process.stdout.write`-n directly, **never through the logger**. `bannerLines()` is pure and unit-tested,
-`printBanner()` writes once, colour is dropped when not a TTY.
+**Presentation — `src/core/terminal.ts`, `src/lib/bot/startup.util.ts` and `src/lib/bot/banner.util.ts`.** What
+a person reads while the bot starts is `process.stdout.write`-n directly, **never through the logger**, and every
+script draws with the same `painter`, `box`, `badge` and `stepLine`. Three things about it are load-bearing:
+
+- **`colourEnabled()` is the one colour decision.** `NO_COLOR` wins, then `FORCE_COLOR`, then whether the stream
+  is a terminal. `npm run dev:all` reads each half through a pipe and sets `FORCE_COLOR`, which is the only reason
+  its banner is coloured — and a development bot always prints pretty log lines rather than JSON, whatever the
+  colour, while production without a terminal writes JSON for a collector. `docker-compose.yml` sets `tty: true`
+  because `docker compose logs` is read by a person.
+- **Start-up is a list of steps, and a failure is a box, not a stack.** `BootReport` prints a line per step as it
+  finishes — settings, database, modules, commands, dashboard, Discord — so a slow or failing one shows where it
+  happens. `explainStartupFailure` turns `EnvError` (each unset variable with where to find it), `SetupError`, and
+  Discord's 401, 10002 and 50001 into advice; only an error it does not recognise keeps its stack, because that is
+  a bug. `exitOnFatalClose` catches gateway close codes 4004 and 4014: without it a bot missing the privileged
+  intents logged one line and then waited for ever, never becoming ready.
+- **Boxes are measured, not guessed.** `visibleWidth` strips colour codes and counts `\p{Emoji_Presentation}` as
+  two columns and everything else as one; counting a range of code points put `➜` at two, which pushed the right
+  edge of one line out. Keep every box line under 80 columns, which is why the hints are short.
+
+`bannerLines()` is pure and unit-tested, `printBanner()` writes once.
 
 Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
 `"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is
@@ -859,6 +885,10 @@ allowlist in the same pass.
 | `switch-exhaustiveness-check`                 | Adding a shop section becomes a compile error, not a bug     |
 | `no-restricted-syntax`                        | Bans bare `new EmbedBuilder()` outside the three embed files |
 | `no-extraneous-dependencies`                  | The original resolved packages through transitive hoisting   |
+
+**Every text file is LF on every OS**, which `.gitattributes` enforces rather than `.editorconfig` requests. Git
+for Windows checks files out as CRLF by default, and a CRLF clone fails `format:check` on every file and breaks
+the husky hooks, whose shebang line then ends in a carriage return.
 
 **Every override in that config carries a comment explaining why.** Keep that — an unexplained override rots.
 

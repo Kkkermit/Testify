@@ -5,7 +5,7 @@ import { type ApiBindings } from "@api/context";
 import { badRequest, notFound, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
-import { botName } from "@core/client";
+import { botName } from "@core/brand";
 import { canManageAutomod, createAutomodRule, listAutomodRules } from "@lib/moderation";
 import { type AutomodRules, automodCreate, automodPatch, automodRuleParam } from "@testify/shared";
 
@@ -15,7 +15,7 @@ automod.use("*", requireGuild);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild;
 }
@@ -35,8 +35,7 @@ automod.get("/", async (context) => context.json(await rulesFor(guildOf(context)
 
 automod.post("/", async (context) => {
 	const guild = guildOf(context);
-	if (!canManageAutomod(guild))
-		throw badRequest(`${botName(context.get("client"))} needs the Manage Server permission to add a rule.`);
+	if (!canManageAutomod(guild)) throw badRequest(`${botName()} needs the Manage Server permission to add a rule.`);
 
 	const body = await parseBody(context, automodCreate);
 	const session = context.get("session");
@@ -52,7 +51,7 @@ automod.patch("/:ruleId", async (context) => {
 	const { ruleId } = parseParams(context, automodRuleParam);
 	const { enabled } = await parseBody(context, automodPatch);
 
-	const rule = await ruleIn(guild, ruleId, botName(context.get("client")));
+	const rule = await ruleIn(guild, ruleId, botName());
 	await rule.setEnabled(enabled, "Changed from the dashboard");
 	await auditChange(context, {
 		action: "automod.update",
@@ -66,7 +65,7 @@ automod.delete("/:ruleId", async (context) => {
 	const guild = guildOf(context);
 	const { ruleId } = parseParams(context, automodRuleParam);
 
-	const rule = await ruleIn(guild, ruleId, botName(context.get("client")));
+	const rule = await ruleIn(guild, ruleId, botName());
 	const name = rule.name;
 
 	await rule.delete("Removed from the dashboard");

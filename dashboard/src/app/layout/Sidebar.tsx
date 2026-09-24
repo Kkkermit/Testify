@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { BOT_NAME, type BotIdentity, type DashboardUser } from "@testify/shared";
+import { type BotIdentity, type DashboardUser } from "@testify/shared";
 import { FileText, LogOut, Palette, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -12,6 +12,7 @@ import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
 import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
 import { api } from "@/lib/api";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
@@ -64,7 +65,7 @@ export function Sidebar({
 					<BotMark src={bot?.avatarUrl} size={22} />
 				</span>
 				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
-					{bot?.username ?? BOT_NAME}
+					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>
 			</Link>
 

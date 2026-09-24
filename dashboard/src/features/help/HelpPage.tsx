@@ -1,4 +1,3 @@
-import { BOT_NAME } from "@testify/shared";
 import { BookOpen, Code2, ExternalLink, MessageCircleQuestion, Terminal } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -9,6 +8,7 @@ import { useMe } from "@/features/auth/useMe";
 import { AskCard } from "@/features/help/components/AskCard";
 import { helpAreas } from "@/features/help/help.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 
 const LINK = cn(INLINE_TARGET, "text-accent hover:text-foreground gap-1 text-sm");
@@ -21,7 +21,7 @@ export function HelpPage(): React.JSX.Element {
 	const me = useMe();
 	const bot = useBot();
 	const areas = helpAreas(me.data?.isOwner === true);
-	const name = bot.data?.username ?? BOT_NAME;
+	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
 
 	return (
 		<>

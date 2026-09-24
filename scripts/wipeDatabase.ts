@@ -2,7 +2,11 @@ import mongoose from "mongoose";
 import prompts from "prompts";
 import { loadEnv } from "@config/env";
 import { createLogger } from "@core/logger";
+import { badge, painter, stepLine } from "@core/terminal";
 import { connectDatabase, disconnectDatabase } from "@database/connection";
+import { printStartupFailure } from "@lib/bot/startup.util";
+
+const paint = painter();
 
 /** Drops every collection. Requires typing the database name to confirm. */
 async function main(): Promise<void> {
@@ -20,8 +24,10 @@ async function main(): Promise<void> {
 		return;
 	}
 
-	console.log(`Database: ${name}`);
-	console.log(`Collections: ${collections.map((collection) => collection.collectionName).join(", ")}`);
+	console.log(
+		`\n  ${badge("DESTRUCTIVE", "error", paint)} ${paint.bold(`This empties every collection in ${name}.`)}\n`,
+	);
+	console.log(`  ${paint.dim(collections.map((collection) => collection.collectionName).join(", "))}\n`);
 
 	const { confirmation } = await prompts({
 		type: "text",
@@ -30,21 +36,21 @@ async function main(): Promise<void> {
 	});
 
 	if (confirmation !== name) {
-		console.log("Cancelled. Nothing was deleted.");
+		console.log(`  ${paint.green("Cancelled.")} Nothing was deleted.`);
 		await disconnectDatabase();
 		return;
 	}
 
 	for (const collection of collections) {
 		await collection.deleteMany({});
-		console.log(`Cleared ${collection.collectionName}`);
+		console.log(stepLine("done", "Cleared", collection.collectionName, undefined, paint));
 	}
 
 	await disconnectDatabase();
-	console.log("Done.");
+	console.log(`\n  ${paint.bold("Done.")}`);
 }
 
 main().catch((error: unknown) => {
-	console.error(error);
+	printStartupFailure(error);
 	process.exitCode = 1;
 });

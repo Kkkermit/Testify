@@ -1,4 +1,5 @@
 import { theme } from "@config/theme";
+import { nameBot } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { botIdentity, forgetBotIdentity, identityOf } from "@lib/bot/botIdentity.util";
 import { createMockClient } from "@tests/helpers/mocks";
@@ -27,6 +28,7 @@ describe("identityOf", () => {
 	it("reads the profile Discord gives it", () => {
 		expect(identityOf(userLike() as never)).toEqual({
 			id: "100000000000000001",
+			name: "Testify",
 			username: "Testify",
 			avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
 			bannerUrl: "https://cdn.discordapp.com/banners/1/def.png",
@@ -34,6 +36,15 @@ describe("identityOf", () => {
 			supportUrl: theme.supportServer,
 			repositoryUrl: theme.repository,
 		});
+	});
+
+	/** The dashboard names the bot from this, so BOT_NAME has to reach it rather than the Discord username. */
+	it("names the bot by BOT_NAME when one is set, and keeps the username beside it", () => {
+		nameBot("Helper", () => "helper-app");
+		const identity = identityOf(userLike({ username: "helper-app" }) as never);
+		nameBot(undefined, () => undefined);
+
+		expect(identity).toMatchObject({ name: "Helper", username: "helper-app" });
 	});
 
 	/** Most applications have neither, so the empty case is the common one rather than the exception. */

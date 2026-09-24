@@ -1,4 +1,4 @@
-import { BOT_NAME } from "@testify/shared";
+import { DEFAULT_BOT_NAME } from "@testify/shared";
 import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { useTranslation } from "react-i18next";
@@ -18,17 +18,19 @@ function Named(): React.JSX.Element {
 }
 
 afterEach(() => {
-	nameTheBot(BOT_NAME);
+	nameTheBot(DEFAULT_BOT_NAME);
 });
 
 describe("the bot's name", () => {
 	it("is the built-in one until Discord says otherwise", () => {
-		expect(currentBotName()).toBe(BOT_NAME);
+		expect(currentBotName()).toBe(DEFAULT_BOT_NAME);
 	});
 
 	/** A fork renamed in Discord kept reading as the original everywhere the dashboard names the bot. */
 	it("follows the bot's own username into every string and the page title", async () => {
-		server.use(http.get("/api/bot", () => HttpResponse.json({ ...botProfile, username: "Helper" })));
+		server.use(
+			http.get("/api/bot", () => HttpResponse.json({ ...botProfile, name: "Helper", username: "helper-app" })),
+		);
 		renderWithProviders(<Named />);
 
 		expect(await screen.findByText("Add Helper")).toBeInTheDocument();

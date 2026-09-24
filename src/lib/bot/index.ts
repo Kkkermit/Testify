@@ -7,5 +7,6 @@ export * from "./dashboard.util";
 export * from "./guildLifecycle.util";
 export * from "./performance.util";
 export * from "./runtime.util";
+export * from "./startup.util";
 export * from "./status.util";
 export * from "./usage.util";

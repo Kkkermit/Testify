@@ -1,6 +1,6 @@
 import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
 import { type Env } from "@config/env";
-import { theme } from "@config/theme";
+import { nameBot } from "@core/brand";
 import { type Button } from "@core/button";
 import { type Command } from "@core/command";
 import { type Logger } from "@core/logger";
@@ -19,11 +19,6 @@ export const intents = [
 	GatewayIntentBits.MessageContent,
 	GatewayIntentBits.AutoModerationConfiguration,
 ];
-
-/** What the bot is called in Discord, or the built-in name before it has logged in. */
-export function botName(client: Pick<Client, "user">): string {
-	return client.user?.username ?? theme.name;
-}
 
 export const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 
@@ -67,6 +62,7 @@ export class TestifyClient extends Client {
 		this.env = env;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);
+		nameBot(env.BOT_NAME, () => this.user?.username);
 	}
 
 	isOwner(userId: string): boolean {

@@ -1,6 +1,9 @@
 import { randomBytes } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { painter, stepLine } from "@core/terminal";
+
+const paint = painter();
 
 /** Generates `DASHBOARD_SESSION_SECRET`; `-- --write` puts it in .env, and `--dev` in .env.development. */
 
@@ -25,8 +28,10 @@ function main(): void {
 	const secret = generateSecret();
 
 	if (!process.argv.includes("--write")) {
-		console.log(`\n${KEY}=${secret}\n`);
-		console.log("Copy that into your .env file, or re-run with --write to have it put there for you.");
+		console.log(`\n  ${paint.bold(`${KEY}=${secret}`)}\n`);
+		console.log(
+			`  Copy that into your .env, or run ${paint.bold("npm run secret -- --write")} to have it put there.\n`,
+		);
 		return;
 	}
 
@@ -34,7 +39,9 @@ function main(): void {
 	const target = resolve(process.cwd(), filename);
 
 	if (!existsSync(target)) {
-		console.error(`There is no ${filename} yet. Run \`npm run setup\` first, or use this without --write.`);
+		console.error(
+			stepLine("failed", "Secret", `there is no ${filename} yet — run npm run setup first`, undefined, paint),
+		);
 		process.exitCode = 1;
 		return;
 	}
@@ -42,9 +49,11 @@ function main(): void {
 	const before = readFileSync(target, "utf8");
 	writeFileSync(target, withSecret(before, secret), "utf8");
 
-	console.log(`Wrote a new ${KEY} to ${filename}.`);
+	console.log(stepLine("done", "Secret", `a new ${KEY} is in ${filename}`, undefined, paint));
 	if (new RegExp(`^${KEY}=.+$`, "m").test(before)) {
-		console.log("The old one is gone, so anyone signed in to the dashboard has been signed out.");
+		console.log(
+			stepLine("warning", "Signed out", "the old one is gone, so everybody signs in again", undefined, paint),
+		);
 	}
 }
 

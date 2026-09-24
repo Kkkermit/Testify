@@ -69,7 +69,7 @@ guilds.route("/:guildId/music", music);
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
 	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild(context.get("client"));
+	if (guild === undefined) throw notInGuild();
 
 	return guild;
 }
