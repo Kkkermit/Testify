@@ -211,7 +211,8 @@
 		"invitableTitle": "Add {{bot}}",
 		"invitableBody": "You have Manage Server here, so you can invite {{bot}} yourself.",
 		"lockedTitle": "Needs somebody else",
-		"lockedBody": "Adding a bot takes Manage Server, which you do not have in these."
+		"lockedBody": "Adding a bot takes Manage Server, which you do not have in these.",
+		"pagesOf": "Pages of {{group}}"
 	},
 	"overview": {
 		"subtitle": "What {{bot}} is doing in this server.",

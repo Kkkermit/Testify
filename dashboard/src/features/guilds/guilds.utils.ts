@@ -6,6 +6,9 @@ export function filterGuilds(guilds: ManageableGuild[], search: string): Managea
 	return term === "" ? guilds : guilds.filter((guild) => guild.name.toLowerCase().includes(term));
 }
 
+/** Ten to a section, so a manager of dozens of servers reaches the next heading without scrolling past them all. */
+export const GUILDS_PER_PAGE = 10;
+
 /** Autofocus costs a phone its list and a screen reader its heading, so only a long list earns it. */
 export function searchIsWorthFocusing(count: number): boolean {
 	return count >= 8;

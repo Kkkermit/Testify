@@ -5,8 +5,9 @@ import { ErrorState } from "@/app/ErrorState";
 import { Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
-import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
+import { formatUptime } from "@/features/owner/owner.utils";
 import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
+import { pageCount, pageFrom } from "@/lib/paging";
 
 /** Answers "which of my servers is misconfigured", which is the reason the console exists at all. */
 export function OverviewTab(): React.JSX.Element {

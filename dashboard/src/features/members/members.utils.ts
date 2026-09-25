@@ -7,12 +7,6 @@ export function boardFrom(value: string | null): MemberBoard {
 }
 
 /** A page out of range is a stale link, not an error — clamping beats an empty table with no way back. */
-export function pageFrom(value: string | null): number {
-	const page = Number(value);
-
-	return Number.isInteger(page) && page > 0 ? page : 1;
-}
-
 /** The jump button only earns its place when it would actually move you. */
 export function jumpTarget(data: BoardPage): number | null {
 	return data.you === null || data.you.page === data.page ? null : data.you.page;

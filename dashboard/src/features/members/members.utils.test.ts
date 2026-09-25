@@ -1,5 +1,5 @@
 import { type BoardPage } from "@testify/shared";
-import { boardFrom, emptyMessage, jumpTarget, pageFrom, summarise } from "@/features/members/members.utils";
+import { boardFrom, emptyMessage, jumpTarget, summarise } from "@/features/members/members.utils";
 import { t } from "@/test/english";
 
 function page(overrides: Partial<BoardPage> = {}): BoardPage {
@@ -14,16 +14,6 @@ describe("boardFrom", () => {
 	/** `?board=` is user input, and an unknown value has to land somewhere rather than render nothing. */
 	it.each([null, "", "warnings"])("falls back to economy for %p", (value) => {
 		expect(boardFrom(value)).toBe("economy");
-	});
-});
-
-describe("pageFrom", () => {
-	it("reads a page out of the URL", () => {
-		expect(pageFrom("4")).toBe(4);
-	});
-
-	it.each([null, "0", "-2", "two", "1.5"])("falls back to the first page for %p", (value) => {
-		expect(pageFrom(value)).toBe(1);
 	});
 });
 

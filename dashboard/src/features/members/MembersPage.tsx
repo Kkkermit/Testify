@@ -7,9 +7,10 @@ import { Button, EmptyState, PageHeader, Pager, SegmentedControl, Skeleton } fro
 import { useMe } from "@/features/auth/useMe";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { BoardTable } from "@/features/members/components/BoardTable";
-import { boardFrom, emptyMessage, jumpTarget, pageFrom, summarise } from "@/features/members/members.utils";
+import { boardFrom, emptyMessage, jumpTarget, summarise } from "@/features/members/members.utils";
 import { useBoard } from "@/features/members/useMembers";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { pageFrom } from "@/lib/paging";
 
 export function MembersPage(): React.JSX.Element {
 	const { t } = useTranslation();

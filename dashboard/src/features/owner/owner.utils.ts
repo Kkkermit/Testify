@@ -1,12 +1,6 @@
 import { ANALYTICS_WINDOWS, LOG_LEVELS, snowflake, type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
 import { oneOf } from "@/lib/oneOf";
 
-/** A page number out of a URL can be anything at all. */
-export function pageFrom(raw: string | null): number {
-	const parsed = Number(raw);
-	return Number.isInteger(parsed) && parsed >= 1 ? parsed : 1;
-}
-
 export function formatUptime(ms: number): string {
 	const minutes = Math.floor(ms / 60_000);
 	const hours = Math.floor(minutes / 60);
@@ -16,11 +10,6 @@ export function formatUptime(ms: number): string {
 	if (hours > 0) return `${String(hours)}h ${String(minutes % 60)}m`;
 
 	return `${String(minutes)}m`;
-}
-
-export function pageCount(total: number, perPage: number): number {
-	if (perPage <= 0) return 1;
-	return Math.max(1, Math.ceil(total / perPage));
 }
 
 /** The API only accepts the three windows it aggregates for, so anything else falls back rather than 400s. */

@@ -212,7 +212,8 @@
 		"invitableTitle": "Añadir {{bot}}",
 		"invitableBody": "Aquí tienes Gestionar servidor, así que puedes invitar a {{bot}} tú mismo.",
 		"lockedTitle": "Hace falta otra persona",
-		"lockedBody": "Añadir un bot requiere Gestionar servidor, y en estos no lo tienes."
+		"lockedBody": "Añadir un bot requiere Gestionar servidor, y en estos no lo tienes.",
+		"pagesOf": "Páginas de {{group}}"
 	},
 	"overview": {
 		"subtitle": "Lo que {{bot}} está haciendo en este servidor.",

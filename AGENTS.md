@@ -70,7 +70,7 @@ numbers, which drift):
 | `src/lib` helpers    | 90, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,624 across 263 suites           |
+| Tests                | 4,632 across 264 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -1374,7 +1374,7 @@ components/
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
 hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible, useDebounced
-lib/            api, cn, queries, redirect, tint, and three/ for the backdrop's maths and shaders
+lib/            api, cn, paging, queries, redirect, tint, and three/ for the backdrop's maths and shaders
 ```
 
 A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL

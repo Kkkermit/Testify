@@ -211,7 +211,8 @@
 		"invitableTitle": "{{bot}} hinzufügen",
 		"invitableBody": "Hier hast du Server verwalten, du kannst {{bot}} also selbst einladen.",
 		"lockedTitle": "Braucht jemand anderen",
-		"lockedBody": "Einen Bot hinzuzufügen braucht Server verwalten — das hast du auf diesen nicht."
+		"lockedBody": "Einen Bot hinzuzufügen braucht Server verwalten — das hast du auf diesen nicht.",
+		"pagesOf": "Seiten von {{group}}"
 	},
 	"overview": {
 		"subtitle": "Was {{bot}} auf diesem Server tut.",

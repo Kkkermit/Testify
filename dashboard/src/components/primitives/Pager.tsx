@@ -1,20 +1,23 @@
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/primitives";
 
+/** `label` names the list being paged, which a screen needs when it holds more than one pager. */
 export function Pager({
 	page,
 	pages,
 	onChange,
+	label,
 }: {
 	page: number;
 	pages: number;
 	onChange: (page: number) => void;
+	label?: string;
 }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	if (pages <= 1) return null;
 
 	return (
-		<nav aria-label={t("common.pages")} className="flex items-center justify-between">
+		<nav aria-label={label ?? t("common.pages")} className="flex items-center justify-between">
 			<Button
 				variant="secondary"
 				disabled={page <= 1}

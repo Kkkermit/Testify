@@ -1,4 +1,5 @@
-import { screen, waitFor } from "@testing-library/react";
+import { type ManageableGuild } from "@testify/shared";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
@@ -133,6 +134,95 @@ describe("the guild picker", () => {
 		renderWithProviders(<GuildPickerPage />);
 
 		expect(screen.queryByText("Test Server")).toBeNull();
+	});
+});
+
+function many(count: number, template: ManageableGuild, prefix: string, from = 0): ManageableGuild[] {
+	return Array.from({ length: count }, (_, index) => ({
+		...template,
+		id: `9${String(from + index).padStart(17, "0")}`,
+		name: `${prefix} ${String(index + 1).padStart(2, "0")}`,
+	}));
+}
+
+function serve(guilds: ManageableGuild[]): void {
+	server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, guilds })));
+}
+
+function section(name: RegExp): HTMLElement {
+	const heading = screen.getByRole("heading", { name });
+	const found = heading.closest("section");
+	if (found === null) throw new Error("heading is not inside a section");
+	return found;
+}
+
+describe("the guild picker's pages", () => {
+	/** Somebody who manages dozens of servers scrolled past all of them to reach the next heading. */
+	it("shows ten servers to a section, and the rest a page at a time", async () => {
+		const user = userEvent.setup();
+		serve(many(23, aGuild, "Ready"));
+		const { search } = renderWithProviders(<GuildPickerPage />);
+		await screen.findByText("Ready 01");
+
+		const ready = section(/ready to configure/i);
+		expect(within(ready).getAllByRole("listitem")).toHaveLength(10);
+		expect(within(ready).getByText("Page 1 of 3")).toBeInTheDocument();
+
+		await user.click(within(ready).getByRole("button", { name: "Next" }));
+
+		expect(await within(ready).findByText("Ready 11")).toBeInTheDocument();
+		expect(within(ready).queryByText("Ready 01")).toBeNull();
+		expect(search()).toBe("?configurable=2");
+	});
+
+	it("pages each section on its own", async () => {
+		const user = userEvent.setup();
+		serve([...many(12, aGuild, "Ready"), ...many(12, withoutBot, "Invite", 100)]);
+		renderWithProviders(<GuildPickerPage />);
+		await screen.findByText("Ready 01");
+
+		await user.click(within(section(/add testify/i)).getByRole("button", { name: "Next" }));
+
+		expect(await screen.findByText("Invite 11")).toBeInTheDocument();
+		expect(screen.getByText("Ready 01")).toBeInTheDocument();
+	});
+
+	it("opens on the page the URL names, and the last page when the URL overshoots", async () => {
+		serve(many(23, aGuild, "Ready"));
+		renderWithProviders(<GuildPickerPage />, { route: "/?configurable=9", path: "/" });
+
+		expect(await screen.findByText("Ready 21")).toBeInTheDocument();
+		expect(screen.getByText("Page 3 of 3")).toBeInTheDocument();
+	});
+
+	it("starts every section again from its first page when the search changes", async () => {
+		const user = userEvent.setup();
+		serve(many(23, aGuild, "Ready"));
+		const { search } = renderWithProviders(<GuildPickerPage />, { route: "/?configurable=3", path: "/" });
+		await screen.findByText("Ready 21");
+
+		await user.type(screen.getByRole("searchbox"), "Ready");
+
+		expect(await screen.findByText("Ready 01")).toBeInTheDocument();
+		expect(search()).toBe("");
+	});
+
+	/** Two navigation landmarks both called "Pages" cannot be told apart in a screen reader's list of them. */
+	it("names each section's pager after the section", async () => {
+		serve([...many(12, aGuild, "Ready"), ...many(12, withoutBot, "Invite", 100)]);
+		const { container } = renderWithProviders(<GuildPickerPage />);
+		await screen.findByText("Ready 01");
+
+		expect(screen.getByRole("navigation", { name: "Pages of Ready to configure" })).toBeInTheDocument();
+		expect(screen.getByRole("navigation", { name: "Pages of Add Testify" })).toBeInTheDocument();
+		await expectNoViolations(container);
+	});
+
+	it("shows no pager for a section that fits on one page", async () => {
+		renderWithProviders(<GuildPickerPage />);
+		await screen.findByText("Test Server");
+
+		expect(screen.queryByRole("navigation")).toBeNull();
 	});
 });
 

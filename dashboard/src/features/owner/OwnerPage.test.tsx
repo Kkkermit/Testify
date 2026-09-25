@@ -2,7 +2,7 @@ import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared
 import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { OWNER_TABS } from "@/features/owner/owner.types";
-import { formatUptime, pageCount, pageFrom } from "@/features/owner/owner.utils";
+import { formatUptime } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
@@ -40,36 +40,11 @@ function useOwnerApi(items: OwnerGuildRow[], total?: number): void {
 	);
 }
 
-describe("pageFrom", () => {
-	/** A page number out of a URL can be anything at all. */
-	it("falls back to the first page for anything that is not one", () => {
-		for (const raw of [null, "", "0", "-3", "abc", "1.5", "1e9999"]) {
-			expect(pageFrom(raw)).toBe(1);
-		}
-	});
-
-	it("reads a real page number", () => {
-		expect(pageFrom("4")).toBe(4);
-	});
-});
-
 describe("formatUptime", () => {
 	it("reads at the scale it is at", () => {
 		expect(formatUptime(90_000_000)).toBe("1d 1h");
 		expect(formatUptime(3_900_000)).toBe("1h 5m");
 		expect(formatUptime(120_000)).toBe("2m");
-	});
-});
-
-describe("pageCount", () => {
-	it("rounds a part-full last page up", () => {
-		expect(pageCount(51, 25)).toBe(3);
-	});
-
-	/** Zero servers is still one page, or the pager renders "Page 1 of 0". */
-	it("is never less than one", () => {
-		expect(pageCount(0, 25)).toBe(1);
-		expect(pageCount(10, 0)).toBe(1);
 	});
 });
 
