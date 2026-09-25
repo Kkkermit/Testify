@@ -31,7 +31,10 @@
 		"channelGoneWarning": "The channel chosen before has been deleted. Pick another one.",
 		"cannotPostHere": " — {{bot}} cannot post here",
 		"cannotPostIn": "{{bot}} cannot post in #{{channel}}. Give it Send Messages there, or pick another channel.",
-		"aboveBot": "above {{bot}}"
+		"aboveBot": "above {{bot}}",
+		"first": "First",
+		"last": "Last",
+		"pageNumber": "Page {{page}}"
 	},
 	"nav": {
 		"servers": "Servers",

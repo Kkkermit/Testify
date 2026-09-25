@@ -31,7 +31,10 @@
 		"channelGoneWarning": "Le salon choisi auparavant a été supprimé. Choisis-en un autre.",
 		"cannotPostHere": " — {{bot}} ne peut pas publier ici",
 		"cannotPostIn": "{{bot}} ne peut pas publier dans #{{channel}}. Donne-lui « Envoyer des messages » là-bas, ou choisis un autre salon.",
-		"aboveBot": "au-dessus de {{bot}}"
+		"aboveBot": "au-dessus de {{bot}}",
+		"first": "Première",
+		"last": "Dernière",
+		"pageNumber": "Page {{page}}"
 	},
 	"nav": {
 		"servers": "Serveurs",

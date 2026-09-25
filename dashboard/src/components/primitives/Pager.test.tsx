@@ -33,4 +33,35 @@ describe("Pager", () => {
 		const status = screen.getByText("Page 2 of 5");
 		expect(status).toHaveAttribute("aria-live", "polite");
 	});
+
+	/** Stepping one page at a time was the only way through a long list. */
+	it("jumps straight to a page two either side, and to either end", async () => {
+		const onChange = jest.fn();
+		render(<Pager page={6} pages={12} onChange={onChange} />);
+
+		await userEvent.click(screen.getByRole("button", { name: "Page 8" }));
+		expect(onChange).toHaveBeenLastCalledWith(8);
+		await userEvent.click(screen.getByRole("button", { name: "Page 4" }));
+		expect(onChange).toHaveBeenLastCalledWith(4);
+		await userEvent.click(screen.getByRole("button", { name: "Last" }));
+		expect(onChange).toHaveBeenLastCalledWith(12);
+		await userEvent.click(screen.getByRole("button", { name: "First" }));
+		expect(onChange).toHaveBeenLastCalledWith(1);
+	});
+
+	it("marks the current page rather than offering it as a button", () => {
+		render(<Pager page={6} pages={12} onChange={jest.fn()} />);
+
+		expect(screen.queryByRole("button", { name: "Page 6" })).toBeNull();
+		expect(screen.getByText("Page 6").parentElement).toHaveAttribute("aria-current", "page");
+	});
+
+	it("disables First at the start and Last at the end", () => {
+		const { rerender } = render(<Pager page={1} pages={12} onChange={jest.fn()} />);
+		expect(screen.getByRole("button", { name: "First" })).toBeDisabled();
+		expect(screen.getByRole("button", { name: "Last" })).toBeEnabled();
+
+		rerender(<Pager page={12} pages={12} onChange={jest.fn()} />);
+		expect(screen.getByRole("button", { name: "Last" })).toBeDisabled();
+	});
 });

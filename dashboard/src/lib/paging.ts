@@ -22,3 +22,11 @@ export function pageOf<T>(items: readonly T[], requested: number, perPage: numbe
 
 	return { items: items.slice((page - 1) * perPage, page * perPage), page, pages };
 }
+
+/** The page numbers a pager offers: `reach` either side of the current one, slid in from an end so the count holds. */
+export function pageWindow(page: number, pages: number, reach = 2): number[] {
+	const width = Math.min(pages, reach * 2 + 1);
+	const first = Math.min(Math.max(1, page - reach), pages - width + 1);
+
+	return Array.from({ length: width }, (_unused, index) => first + index);
+}

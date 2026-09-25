@@ -165,7 +165,7 @@ describe("the guild picker's pages", () => {
 		await screen.findByText("Ready 01");
 
 		const ready = section(/ready to configure/i);
-		expect(within(ready).getAllByRole("listitem")).toHaveLength(10);
+		expect(within(ready).getAllByRole("link")).toHaveLength(10);
 		expect(within(ready).getByText("Page 1 of 3")).toBeInTheDocument();
 
 		await user.click(within(ready).getByRole("button", { name: "Next" }));

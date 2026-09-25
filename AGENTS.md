@@ -70,7 +70,7 @@ numbers, which drift):
 | `src/lib` helpers    | 90, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,632 across 264 suites           |
+| Tests                | 4,638 across 264 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.

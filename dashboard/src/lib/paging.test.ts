@@ -1,4 +1,4 @@
-import { pageCount, pageFrom, pageOf } from "@/lib/paging";
+import { pageCount, pageFrom, pageOf, pageWindow } from "@/lib/paging";
 
 describe("pageFrom", () => {
 	/** A page number out of a URL can be anything at all. */
@@ -34,5 +34,23 @@ describe("pageOf", () => {
 	it("clamps a page past the end to the last one", () => {
 		expect(pageOf(numbers, 9, 10).page).toBe(3);
 		expect(pageOf([], 4, 10)).toEqual({ items: [], page: 1, pages: 1 });
+	});
+});
+
+describe("pageWindow", () => {
+	/** Two either side is what lets a reader skip ahead without stepping one page at a time. */
+	it("offers two pages either side of the current one", () => {
+		expect(pageWindow(6, 12)).toEqual([4, 5, 6, 7, 8]);
+	});
+
+	it("slides in from an end rather than offering fewer", () => {
+		expect(pageWindow(1, 12)).toEqual([1, 2, 3, 4, 5]);
+		expect(pageWindow(2, 12)).toEqual([1, 2, 3, 4, 5]);
+		expect(pageWindow(12, 12)).toEqual([8, 9, 10, 11, 12]);
+	});
+
+	it("offers every page when there are fewer than five", () => {
+		expect(pageWindow(2, 3)).toEqual([1, 2, 3]);
+		expect(pageWindow(1, 1)).toEqual([1]);
 	});
 });

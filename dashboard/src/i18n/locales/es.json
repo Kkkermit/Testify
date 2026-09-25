@@ -31,7 +31,10 @@
 		"channelGoneWarning": "El canal elegido antes se ha eliminado. Elige otro.",
 		"cannotPostHere": " — {{bot}} no puede publicar aquí",
 		"cannotPostIn": "{{bot}} no puede publicar en #{{channel}}. Dale «Enviar mensajes» allí o elige otro canal.",
-		"aboveBot": "por encima de {{bot}}"
+		"aboveBot": "por encima de {{bot}}",
+		"first": "Primera",
+		"last": "Última",
+		"pageNumber": "Página {{page}}"
 	},
 	"nav": {
 		"servers": "Servidores",

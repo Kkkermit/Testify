@@ -31,7 +31,10 @@
 		"channelGoneWarning": "Der zuvor gewählte Kanal wurde gelöscht. Wähle einen anderen.",
 		"cannotPostHere": " — {{bot}} kann hier nicht posten",
 		"cannotPostIn": "{{bot}} kann in #{{channel}} nicht posten. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen Kanal.",
-		"aboveBot": "über {{bot}}"
+		"aboveBot": "über {{bot}}",
+		"first": "Erste",
+		"last": "Letzte",
+		"pageNumber": "Seite {{page}}"
 	},
 	"nav": {
 		"servers": "Server",
