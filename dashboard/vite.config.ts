@@ -1,15 +1,23 @@
+import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname } from "node:path";
 import { fileURLToPath, URL } from "node:url";
 import tailwind from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv, type Plugin } from "vite";
-import { resolveBotName } from "../shared/src/brand";
 
 const resolver = createRequire(import.meta.url);
 
 /** Resolved from this file, so it finds the copy the app itself imports whether npm hoisted it or nested it. */
 const packageRoot = (name: string): string => dirname(resolver.resolve(`${name}/package.json`));
+
+/** Read as text, because importing TypeScript from `shared/` is what Vite's native config loader refuses. */
+function defaultBotName(): string {
+	const source = readFileSync(new URL("../shared/src/brand.ts", import.meta.url), "utf8");
+	const found = /DEFAULT_BOT_NAME = "([^"]+)"/.exec(source)?.[1];
+	if (found === undefined) throw new Error("shared/src/brand.ts no longer declares DEFAULT_BOT_NAME as a string.");
+	return found;
+}
 
 /** The tab's title before any script runs; escaped, because the name is whatever `.env` says. */
 function botNamePlugin(name: string): Plugin {
@@ -22,7 +30,8 @@ export default defineConfig(({ mode }) => {
 	// The bot's own `.env`, so BOT_NAME is written once for both halves.
 	const env = loadEnv(mode, fileURLToPath(new URL("..", import.meta.url)), ["DASHBOARD_", "BOT_NAME"]);
 	const port = env.DASHBOARD_PORT ?? "3000";
-	const botName = resolveBotName(env.BOT_NAME);
+	const configured = env.BOT_NAME?.trim() ?? "";
+	const botName = configured === "" ? defaultBotName() : configured;
 
 	return {
 		plugins: [react(), tailwind(), botNamePlugin(botName)],
