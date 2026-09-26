@@ -28,7 +28,7 @@ export function BotMark({
 			onError={() => {
 				setBroken(true);
 			}}
-			className={cn("shrink-0 rounded-full", className)}
+			className={cn("max-w-none shrink-0 rounded-full object-cover", className)}
 			style={{ width: size, height: size }}
 		/>
 	);

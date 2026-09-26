@@ -32,7 +32,16 @@ export function Avatar({
 		);
 	}
 
+	// `max-w-none`, because preflight caps an image at its container's width and a narrow slot then squashed it.
 	return (
-		<img src={url} alt="" width={size} height={size} className="shrink-0 rounded-full" style={style} loading="lazy" />
+		<img
+			src={url}
+			alt=""
+			width={size}
+			height={size}
+			className="max-w-none shrink-0 rounded-full object-cover"
+			style={style}
+			loading="lazy"
+		/>
 	);
 }
