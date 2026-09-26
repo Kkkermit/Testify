@@ -8,14 +8,7 @@ import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
 import { addXp, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
-import {
-	addWarning,
-	clearWarnings,
-	deactivateSoftban,
-	getActiveSoftban,
-	getWarnings,
-	removeWarning,
-} from "@database/repositories/moderationRepository";
+import { deactivateSoftban, getActiveSoftban, getWarnings } from "@database/repositories/moderationRepository";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 import { type BoardPage, type MemberDetail } from "@testify/shared";
 
@@ -39,9 +32,6 @@ jest.mock("@database/repositories/levelRepository", () => ({
 jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnings: jest.fn(() => Promise.resolve(null)),
 	getActiveSoftban: jest.fn(() => Promise.resolve(null)),
-	addWarning: jest.fn(() => Promise.resolve({})),
-	removeWarning: jest.fn(() => Promise.resolve(true)),
-	clearWarnings: jest.fn(() => Promise.resolve(true)),
 	deactivateSoftban: jest.fn(() => Promise.resolve(true)),
 }));
 jest.mock("@lib/levelling/levellingActions.util", () => ({
@@ -60,9 +50,9 @@ const level = jest.mocked(getUserLevel);
 const levelRank = jest.mocked(getRank);
 const warnings = jest.mocked(getWarnings);
 const softban = jest.mocked(getActiveSoftban);
-const warned = jest.mocked(addWarning);
-const unwarned = jest.mocked(removeWarning);
-const cleared = jest.mocked(clearWarnings);
+const kicked = jest.fn((_reason: string) => Promise.resolve());
+const banned = jest.fn((_id: string, _options: unknown) => Promise.resolve());
+const searched = jest.fn((_options: unknown) => Promise.resolve(new Collection<string, unknown>()));
 const audited = jest.mocked(recordAudit);
 const walletChange = jest.mocked(adjustWallet);
 const bankChange = jest.mocked(adjustBank);
@@ -92,7 +82,10 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 		({
 			id,
 			displayName: name,
-			user: { username: name, bot: false },
+			user: { id, username: name, bot: false, send: () => Promise.resolve() },
+			kickable: true,
+			bannable: true,
+			kick: kicked,
 			joinedAt: new Date("2026-01-04T00:00:00.000Z"),
 			roles: { highest: { position }, cache: new Collection() },
 			// `requireGuild` reads this before any handler runs, so a member without it never reaches one.
@@ -104,16 +97,26 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 		id: GUILD,
 		name: "Test Server",
 		ownerId: guildOwnerId,
-		bans: { remove: jest.fn(() => Promise.resolve({})) },
+		bans: { remove: jest.fn(() => Promise.resolve({})), fetch: jest.fn(() => Promise.reject(new Error("none"))) },
 	} as unknown as Guild;
 
 	const me = member(BOT, botPosition, "Testify");
 	const target = member(TARGET, targetPosition, "kate");
 	const actor = member(ACTOR, actorPosition, "someone");
 
+	const lookalikeBot = { ...member("100000000000000003", 1, "kat-bot"), user: { username: "kat-bot", bot: true } };
+	searched.mockResolvedValue(
+		new Collection<string, unknown>([
+			[TARGET, target],
+			["100000000000000003", lookalikeBot],
+		]),
+	);
+
 	(guild as { members: unknown }).members = {
 		me,
 		cache: new Collection(),
+		ban: banned,
+		search: searched,
 		fetch: jest.fn((id: string) => {
 			if (id === ACTOR) return Promise.resolve(actor);
 			if (id === TARGET && !targetMissing) return Promise.resolve(target);
@@ -125,6 +128,7 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 
 	const client = {
 		user: { id: BOT },
+		users: { fetch: jest.fn(() => Promise.resolve(target.user)) },
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
 		isOwner: () => false,
 		logger: { error: jest.fn() },
@@ -181,8 +185,6 @@ beforeEach(() => {
 	levelRank.mockResolvedValue(null);
 	warnings.mockResolvedValue(null);
 	softban.mockResolvedValue(null);
-	unwarned.mockResolvedValue(true);
-	cleared.mockResolvedValue(true);
 	walletChange.mockResolvedValue({ wallet: 0, bank: 0 } as never);
 	bankChange.mockResolvedValue({ wallet: 0, bank: 0 } as never);
 	levelSet.mockResolvedValue({ level: 10, xp: 5_000 } as never);
@@ -258,89 +260,79 @@ describe("GET /members/:userId", () => {
 	});
 });
 
-describe("POST /members/:userId/warnings", () => {
-	it("records the warning and audits it", async () => {
-		await request("POST", "/warnings", { reason: "Spamming in general" });
+describe("POST /members/:userId/kick", () => {
+	it("kicks once the username is typed back, and audits it", async () => {
+		const response = await request("POST", "/kick", { reason: "Spamming", confirm: "Kate" });
 
-		expect(warned).toHaveBeenCalledWith(GUILD, TARGET, "kate", { id: ACTOR, tag: "someone" }, "Spamming in general");
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.warn" }));
+		expect(response.status).toBe(200);
+		expect(kicked).toHaveBeenCalledWith("someone: Spamming");
+		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.kick" }));
 	});
 
-	it("answers with the member's whole page, so the list is never stale", async () => {
-		withWarnings(2);
+	/** The typed name is the confirmation, and the server is what compares it. */
+	it("refuses without the username typed back", async () => {
+		const response = await request("POST", "/kick", { reason: "Spamming", confirm: "kat" });
 
-		const body = (await (await request("POST", "/warnings", { reason: "Spamming" })).json()) as MemberDetail;
-
-		expect(body.warnings).toHaveLength(2);
+		expect(response.status).toBe(400);
+		expect(kicked).not.toHaveBeenCalled();
 	});
 
-	/** Hiding a button is not access control; the refusal has to run before the write. */
 	it("refuses a moderator who sits below the target", async () => {
-		const response = await request("POST", "/warnings", { reason: "Spamming" }, { actorPosition: 1 });
+		const response = await request("POST", "/kick", { reason: "Spamming", confirm: "kate" }, { actorPosition: 1 });
 
 		expect(response.status).toBe(403);
-		expect(warned).not.toHaveBeenCalled();
-	});
-
-	it("refuses a warning on somebody who has left", async () => {
-		const response = await request("POST", "/warnings", { reason: "Spamming" }, { targetMissing: true });
-
-		expect(response.status).toBe(403);
-		expect(warned).not.toHaveBeenCalled();
+		expect(kicked).not.toHaveBeenCalled();
 	});
 
 	it("refuses an empty reason", async () => {
-		expect((await request("POST", "/warnings", { reason: "   " })).status).toBe(400);
-		expect(warned).not.toHaveBeenCalled();
-	});
-
-	it("refuses a reason past the cap", async () => {
-		expect((await request("POST", "/warnings", { reason: "x".repeat(501) })).status).toBe(400);
+		expect((await request("POST", "/kick", { reason: " ", confirm: "kate" })).status).toBe(400);
 	});
 });
 
-describe("DELETE /members/:userId/warnings/:warnId", () => {
-	it("removes one warning and audits it", async () => {
-		await request("DELETE", "/warnings/a1b2c3d4");
+describe("POST /members/:userId/ban", () => {
+	it("bans, deleting the days of messages asked for", async () => {
+		await request("POST", "/ban", { reason: "Raiding", confirm: "kate", deleteDays: 1 });
 
-		expect(unwarned).toHaveBeenCalledWith(GUILD, TARGET, "a1b2c3d4");
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.warn.remove" }));
+		expect(banned).toHaveBeenCalledWith(TARGET, { reason: "someone: Raiding", deleteMessageSeconds: 86_400 });
+		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.ban" }));
 	});
 
-	it("says so when the warning has already gone", async () => {
-		unwarned.mockResolvedValue(false);
+	/** Somebody who left to dodge a ban can still be banned, which a kick cannot reach. */
+	it("bans somebody who has already left", async () => {
+		const response = await request("POST", "/ban", { reason: "Raiding", confirm: "kate" }, { targetMissing: true });
 
-		expect((await request("DELETE", "/warnings/a1b2c3d4")).status).toBe(404);
+		expect(response.status).toBe(200);
+		expect(banned).toHaveBeenCalled();
 	});
 
-	/** An unvalidated id would reach a Mongo filter untouched. */
-	it("refuses a warning ID that is not one", async () => {
-		expect((await request("DELETE", "/warnings/..%2Fetc")).status).toBe(400);
-		expect(unwarned).not.toHaveBeenCalled();
-	});
-});
-
-describe("DELETE /members/:userId/warnings", () => {
-	it("clears the record and counts what went in the audit line", async () => {
-		withWarnings(3);
-
-		await request("DELETE", "/warnings");
-
-		expect(cleared).toHaveBeenCalledWith(GUILD, TARGET);
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ summary: expect.stringContaining("3 warnings") }));
-	});
-
-	it("says so when there was nothing to clear", async () => {
-		cleared.mockResolvedValue(false);
-
-		expect((await request("DELETE", "/warnings")).status).toBe(404);
-	});
-
-	it("refuses a moderator who sits below the target", async () => {
-		const response = await request("DELETE", "/warnings", undefined, { actorPosition: 1 });
+	it("refuses a moderator who sits below a target still in the server", async () => {
+		const response = await request("POST", "/ban", { reason: "Raiding", confirm: "kate" }, { actorPosition: 1 });
 
 		expect(response.status).toBe(403);
-		expect(cleared).not.toHaveBeenCalled();
+		expect(banned).not.toHaveBeenCalled();
+	});
+
+	it("refuses without the username typed back", async () => {
+		expect((await request("POST", "/ban", { reason: "Raiding", confirm: "" })).status).toBe(400);
+		expect(banned).not.toHaveBeenCalled();
+	});
+
+	it("keeps message deletion within Discord's seven days", async () => {
+		expect((await request("POST", "/ban", { reason: "Raiding", confirm: "kate", deleteDays: 8 })).status).toBe(400);
+	});
+});
+
+describe("GET /members/search", () => {
+	it("offers matching people and leaves bots out", async () => {
+		const response = await app().request(`/guilds/${GUILD}/members/search?q=ka`);
+		const body = (await response.json()) as { userId: string }[];
+
+		expect(body.map((match) => match.userId)).toEqual([TARGET]);
+		expect(searched).toHaveBeenCalledWith({ query: "ka", limit: 10 });
+	});
+
+	it("refuses an empty search", async () => {
+		expect((await app().request(`/guilds/${GUILD}/members/search?q=`)).status).toBe(400);
 	});
 });
 

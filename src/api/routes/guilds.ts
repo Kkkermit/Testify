@@ -18,6 +18,7 @@ import { sticky } from "@api/routes/sticky";
 import { tickets } from "@api/routes/tickets";
 import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
+import { warnings } from "@api/routes/warnings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
@@ -70,6 +71,7 @@ guilds.route("/:guildId/members", members);
 guilds.route("/:guildId/music", music);
 guilds.route("/:guildId/bot-stats", botStats);
 guilds.route("/:guildId/member-count", memberCount);
+guilds.route("/:guildId/warnings", warnings);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");

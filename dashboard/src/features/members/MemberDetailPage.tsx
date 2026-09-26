@@ -1,4 +1,5 @@
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -9,10 +10,12 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { LevelCard } from "@/features/members/components/LevelCard";
 import { MemberIdentity, MemberStanding } from "@/features/members/components/MemberIdentity";
 import { MoneyCard } from "@/features/members/components/MoneyCard";
+import { SanctionCard } from "@/features/members/components/SanctionCard";
 import { SoftbanCard } from "@/features/members/components/SoftbanCard";
 import { WarningsCard } from "@/features/members/components/WarningsCard";
 import { softbanActive } from "@/features/members/memberDetail.utils";
 import { useMemberActions } from "@/features/members/useMemberActions";
+import { outcomeText } from "@/features/warnings/warnings.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -22,7 +25,11 @@ export function MemberDetailPage(): React.JSX.Element {
 	const { guildId = "", userId = "" } = useParams();
 
 	const overview = useGuildOverview(guildId);
-	const { member, warn, remove, clear, money, level, lift, busy, failure } = useMemberActions(guildId, userId);
+	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = useMemberActions(
+		guildId,
+		userId,
+	);
+	const [result, setResult] = useState<string | null>(null);
 
 	usePageTitle(member.data?.displayName ?? "Member", overview.data?.name);
 
@@ -38,7 +45,7 @@ export function MemberDetailPage(): React.JSX.Element {
 				eyebrow={overview.data?.name}
 				title={detail.displayName}
 				subtitle={`@${detail.username}`}
-				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess)} />}
+				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess || edit.isSuccess)} />}
 			/>
 
 			{/* `py-1` carries it past the 24px WCAG 2.2 target minimum; the margin absorbs the padding it adds. */}
@@ -84,16 +91,41 @@ export function MemberDetailPage(): React.JSX.Element {
 			<WarningsCard
 				detail={detail}
 				busy={busy}
+				result={result}
 				onWarn={(reason, done) => {
-					warn.mutate(reason, { onSuccess: done });
+					warn.mutate(
+						{ userId, reason },
+						{
+							onSuccess: (added) => {
+								setResult(outcomeText(added.outcome, t));
+								done();
+							},
+						},
+					);
+				}}
+				onEdit={(warnId, reason, done) => {
+					edit.mutate({ userId, warnId, reason }, { onSuccess: done });
 				}}
 				onRemove={(warnId) => {
-					remove.mutate(warnId);
+					remove.mutate({ userId, warnId });
 				}}
 				onClear={(done) => {
-					clear.mutate(undefined, { onSuccess: done });
+					clear.mutate({ userId }, { onSuccess: done });
 				}}
 			/>
+
+			{(canModerate || !detail.inGuild) && (
+				<SanctionCard
+					detail={detail}
+					busy={busy}
+					onKick={(reason, confirm) => {
+						kick.mutate({ reason, confirm });
+					}}
+					onBan={(reason, confirm, deleteDays) => {
+						ban.mutate({ reason, confirm, deleteDays });
+					}}
+				/>
+			)}
 
 			{failure !== null && (
 				<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>

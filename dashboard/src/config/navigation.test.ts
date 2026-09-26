@@ -28,6 +28,7 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/welcome`,
 				`/guilds/${guild.id}/audit-log`,
 				`/guilds/${guild.id}/automod`,
+				`/guilds/${guild.id}/warnings`,
 				`/guilds/${guild.id}/sticky`,
 				`/guilds/${guild.id}/treasure`,
 				`/guilds/${guild.id}/music`,

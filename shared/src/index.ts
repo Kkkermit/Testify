@@ -28,4 +28,5 @@ export * from "./text";
 export * from "./tickets";
 export * from "./treasure";
 export * from "./verification";
+export * from "./warnings";
 export * from "./welcome";

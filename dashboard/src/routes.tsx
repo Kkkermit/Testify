@@ -23,6 +23,7 @@ const StickyPage = page(async () => import("@/features/sticky/StickyPage"), "Sti
 const TreasurePage = page(async () => import("@/features/treasure/TreasurePage"), "TreasurePage");
 const MusicPage = page(async () => import("@/features/music/MusicPage"), "MusicPage");
 const TicketsPage = page(async () => import("@/features/tickets/TicketsPage"), "TicketsPage");
+const WarningsPage = page(async () => import("@/features/warnings/WarningsPage"), "WarningsPage");
 const BotStatsPage = page(async () => import("@/features/bot-stats/BotStatsPage"), "BotStatsPage");
 const MemberCountPage = page(async () => import("@/features/member-count/MemberCountPage"), "MemberCountPage");
 const GiveawaysPage = page(async () => import("@/features/giveaways/GiveawaysPage"), "GiveawaysPage");
@@ -78,6 +79,7 @@ export const routes = [
 							{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 							{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
 							{ path: "/guilds/:guildId/tickets", element: lazily(<TicketsPage />) },
+							{ path: "/guilds/:guildId/warnings", element: lazily(<WarningsPage />) },
 							{ path: "/guilds/:guildId/bot-stats", element: lazily(<BotStatsPage />) },
 							{ path: "/guilds/:guildId/member-count", element: lazily(<MemberCountPage />) },
 							{ path: "/guilds/:guildId/lottery", element: lazily(<LotteryPage />) },

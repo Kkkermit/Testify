@@ -5,7 +5,7 @@ import {
 	type UseMutationResult,
 	type UseQueryResult,
 } from "@tanstack/react-query";
-import { type LevelBody, type MemberDetail, type MoneyBody } from "@testify/shared";
+import { type BanBody, type KickBody, type LevelBody, type MemberDetail, type MoneyBody } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -16,21 +16,15 @@ export function useMemberDetail(guildId: string, userId: string): UseQueryResult
 	});
 }
 
-export function useWarn(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, string> {
-	return useMemberMutation(guildId, userId, (reason: string) =>
-		api.post<MemberDetail>(`/guilds/${guildId}/members/${userId}/warnings`, { reason }),
+export function useKick(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, KickBody> {
+	return useMemberMutation(guildId, userId, (body: KickBody) =>
+		api.post<MemberDetail>(`/guilds/${guildId}/members/${userId}/kick`, body),
 	);
 }
 
-export function useRemoveWarning(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, string> {
-	return useMemberMutation(guildId, userId, (warnId: string) =>
-		api.delete<MemberDetail>(`/guilds/${guildId}/members/${userId}/warnings/${warnId}`),
-	);
-}
-
-export function useClearWarnings(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, void> {
-	return useMemberMutation(guildId, userId, () =>
-		api.delete<MemberDetail>(`/guilds/${guildId}/members/${userId}/warnings`),
+export function useBan(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, BanBody> {
+	return useMemberMutation(guildId, userId, (body: BanBody) =>
+		api.post<MemberDetail>(`/guilds/${guildId}/members/${userId}/ban`, body),
 	);
 }
 

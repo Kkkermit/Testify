@@ -1,4 +1,4 @@
-import { type MemberDetail, type MemberWarning } from "@testify/shared";
+import { confirmsName, type MemberDetail, type MemberWarning } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { shortDate } from "@/lib/datetime";
 
@@ -19,7 +19,12 @@ export function warningSummary(warnings: MemberWarning[], t: TFunction): string 
 
 /** Clearing wipes a record that cannot be recovered, so the confirmation asks for the name rather than a click. */
 export function clearConfirmed(typed: string, detail: MemberDetail): boolean {
-	return typed.trim().toLowerCase() === detail.username.trim().toLowerCase();
+	return confirmsName(typed, detail.username);
+}
+
+/** Warnings can still be tidied up once somebody has left, when there are no roles left to compare. */
+export function canChangeWarnings(detail: MemberDetail): boolean {
+	return detail.moderationProblem === null || !detail.inGuild;
 }
 
 export function statsOf(detail: MemberDetail, t: TFunction): { label: string; value: string }[] {

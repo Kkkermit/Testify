@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { MemberDetailPage } from "@/features/members/MemberDetailPage";
 import { expectNoViolations } from "@/test/axe";
-import { memberDetail } from "@/test/handlers";
+import { memberDetail, warningAdded } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -25,9 +25,9 @@ function serve(detail: Partial<typeof memberDetail>): void {
 function captureWarn(): { body: Record<string, unknown> | null } {
 	const captured: { body: Record<string, unknown> | null } = { body: null };
 	server.use(
-		http.post(`/api/guilds/${GUILD}/members/${USER}/warnings`, async ({ request }) => {
+		http.post(`/api/guilds/${GUILD}/warnings`, async ({ request }) => {
 			captured.body = (await request.json()) as Record<string, unknown>;
-			return HttpResponse.json(memberDetail);
+			return HttpResponse.json(warningAdded);
 		}),
 	);
 	return captured;
@@ -73,7 +73,40 @@ describe("the member detail page", () => {
 		await userEvent.click(screen.getByRole("button", { name: "Add warning" }));
 
 		await waitFor(() => {
-			expect(captured.body).toEqual({ reason: "Being rude" });
+			expect(captured.body).toEqual({ userId: USER, reason: "Being rude" });
+		});
+	});
+
+	/** A warning can now mute, kick or ban, so whoever issued it is told what it actually did. */
+	it("says what the warning did to the member", async () => {
+		renderPage();
+		await screen.findByText("Spamming in general");
+
+		await userEvent.type(screen.getByLabelText(/Issue a warning/), "Being rude");
+		await userEvent.click(screen.getByRole("button", { name: "Add warning" }));
+
+		expect(await screen.findByText("Warning 2 recorded: Time out for 10 minutes.")).toBeInTheDocument();
+	});
+
+	it("rewrites a warning's reason in place", async () => {
+		let body: unknown;
+		server.use(
+			http.patch(`/api/guilds/${GUILD}/warnings/${USER}/a1b2c3d4`, async ({ request }) => {
+				body = await request.json();
+				return HttpResponse.json({ ...warningAdded.warning, reason: "Rude", edited: true });
+			}),
+		);
+		renderPage();
+		await screen.findByText("Spamming in general");
+
+		await userEvent.click(screen.getByRole("button", { name: /Edit/ }));
+		const field = screen.getByLabelText("New reason");
+		await userEvent.clear(field);
+		await userEvent.type(field, "Rude");
+		await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => {
+			expect(body).toEqual({ reason: "Rude" });
 		});
 	});
 
@@ -111,9 +144,9 @@ describe("the member detail page", () => {
 
 		let deleted = false;
 		server.use(
-			http.delete(`/api/guilds/${GUILD}/members/${USER}/warnings`, () => {
+			http.delete(`/api/guilds/${GUILD}/warnings/${USER}`, () => {
 				deleted = true;
-				return HttpResponse.json({ ...memberDetail, warnings: [] });
+				return new HttpResponse(null, { status: 204 });
 			}),
 		);
 
@@ -132,16 +165,82 @@ describe("the member detail page", () => {
 
 		let removed: string | null = null;
 		server.use(
-			http.delete(`/api/guilds/${GUILD}/members/${USER}/warnings/:warnId`, ({ params }) => {
+			http.delete(`/api/guilds/${GUILD}/warnings/${USER}/:warnId`, ({ params }) => {
 				removed = params.warnId as string;
-				return HttpResponse.json({ ...memberDetail, warnings: [] });
+				return new HttpResponse(null, { status: 204 });
 			}),
 		);
 
-		await userEvent.click(screen.getByRole("button", { name: /Remove the warning/ }));
+		await userEvent.click(screen.getByRole("button", { name: /^Remove$/ }));
 
 		await waitFor(() => {
 			expect(removed).toBe("a1b2c3d4");
+		});
+	});
+
+	describe("kicking and banning", () => {
+		/** A kick or a ban cannot be undone from here, so a stray click must not be enough to send one. */
+		it("asks for the username before kicking, and sends it with the reason", async () => {
+			let body: unknown;
+			server.use(
+				http.post(`/api/guilds/${GUILD}/members/${USER}/kick`, async ({ request }) => {
+					body = await request.json();
+					return HttpResponse.json({ ...memberDetail, inGuild: false });
+				}),
+			);
+			renderPage();
+			await screen.findByText("Spamming in general");
+
+			await userEvent.click(screen.getByRole("button", { name: /^Kick$/ }));
+			await userEvent.type(screen.getByLabelText("Reason"), "Raiding");
+			expect(screen.getByRole("button", { name: "Kick them" })).toBeDisabled();
+
+			await userEvent.type(screen.getByLabelText(/Type kate to confirm/), "kate");
+			await userEvent.click(screen.getByRole("button", { name: "Kick them" }));
+
+			await waitFor(() => {
+				expect(body).toEqual({ reason: "Raiding", confirm: "kate" });
+			});
+		});
+
+		it("sends the days of messages to delete with a ban", async () => {
+			let body: unknown;
+			server.use(
+				http.post(`/api/guilds/${GUILD}/members/${USER}/ban`, async ({ request }) => {
+					body = await request.json();
+					return HttpResponse.json({ ...memberDetail, inGuild: false });
+				}),
+			);
+			renderPage();
+			await screen.findByText("Spamming in general");
+
+			await userEvent.click(screen.getByRole("button", { name: /^Ban$/ }));
+			await userEvent.type(screen.getByLabelText("Reason"), "Raiding");
+			await userEvent.selectOptions(screen.getByLabelText(/Delete their recent messages/), "2");
+			await userEvent.type(screen.getByLabelText(/Type kate to confirm/), "kate");
+			await userEvent.click(screen.getByRole("button", { name: "Ban them" }));
+
+			await waitFor(() => {
+				expect(body).toEqual({ reason: "Raiding", confirm: "kate", deleteDays: 2 });
+			});
+		});
+
+		/** Somebody who left to dodge a ban can still be banned; a kick has nobody to reach. */
+		it("offers only a ban for somebody who has left", async () => {
+			serve({ inGuild: false, moderationProblem: "They are no longer in this server." });
+			renderPage();
+			await screen.findByText("Spamming in general");
+
+			expect(screen.getByRole("button", { name: /^Ban$/ })).toBeInTheDocument();
+			expect(screen.queryByRole("button", { name: /^Kick$/ })).not.toBeInTheDocument();
+		});
+
+		it("offers neither to somebody the caller sits below", async () => {
+			serve({ moderationProblem: "You cannot moderate somebody above you." });
+			renderPage();
+			await screen.findByText("Spamming in general");
+
+			expect(screen.queryByRole("button", { name: /^Ban$/ })).not.toBeInTheDocument();
 		});
 	});
 

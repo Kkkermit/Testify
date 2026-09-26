@@ -3,6 +3,8 @@ import {
 	Softban,
 	type SoftbanEntry,
 	type WarnEntry,
+	WarnLadderConfig,
+	type WarnLadderRecord,
 	Warnings,
 	type WarnRecord,
 } from "@database/models/moderation.schema";
@@ -46,6 +48,37 @@ export async function removeWarning(guildId: string, userId: string, warnId: str
 export async function clearWarnings(guildId: string, userId: string): Promise<boolean> {
 	const result = await Warnings.deleteOne({ guildId, userId }).exec();
 	return result.deletedCount > 0;
+}
+
+/** Every record in a server; a warning lives inside its member's record, so the list is flattened by the caller. */
+export async function listGuildWarnings(guildId: string): Promise<WarnRecord[]> {
+	return Warnings.find({ guildId, "warnings.0": { $exists: true } })
+		.lean<WarnRecord[]>()
+		.exec();
+}
+
+export async function countWarnings(guildId: string, userId: string): Promise<number> {
+	return (await getWarnings(guildId, userId))?.warnings.length ?? 0;
+}
+
+export async function getWarnLadder(guildId: string): Promise<WarnLadderRecord | null> {
+	return WarnLadderConfig.findOne({ guildId }).lean<WarnLadderRecord>().exec();
+}
+
+export async function saveWarnLadder(
+	guildId: string,
+	steps: WarnLadderRecord["steps"],
+	userId: string,
+): Promise<WarnLadderRecord> {
+	return WarnLadderConfig.findOneAndUpdate(
+		{ guildId },
+		{ $set: { steps, lastModifiedBy: userId }, $setOnInsert: { guildId } },
+		{ upsert: true, new: true, lean: true },
+	).exec() as Promise<WarnLadderRecord>;
+}
+
+export async function purgeWarnLadder(guildId: string): Promise<void> {
+	await WarnLadderConfig.deleteMany({ guildId }).exec();
 }
 
 export async function editWarning(

@@ -288,8 +288,10 @@ Worth deciding before phase 2, because each changes work later.
    multi-tenant deployment would need per-instance secrets and a very different threat model.
 3. **The error ring buffer.** It is new bot code (a pino transport or wrapper) and it is the difference between
    "someone says it broke" and "here is the stack". Phase 5, or earlier if support load justifies it.
-4. **Kick and ban.** Deliberately excluded (`05-API.md`). Softban covers the reversible case. If you want them,
-   they need a stronger confirmation than typing a name.
+4. **Kick and ban.** ~~Deliberately excluded.~~ **Answered: built**, on the member page. Each needs a reason and
+   the member's username typed back, which the server compares rather than trusting the form, and both run
+   through the same `kickMember` / `banUser` as the Discord commands. Warnings gained punishment steps at the
+   same time, set on the new Warnings screen or with `/warn punishments`.
 5. **Light theme.** ~~Phase 6 or never.~~ **Answered: built.** The worry was right — an unverified light theme
    is worse than none — so `contrast.test.ts` reads both halves of every token out of `index.css` and checks
    each against WCAG. Two things it caught are worth keeping in mind: a pair can pass for the wrong reason

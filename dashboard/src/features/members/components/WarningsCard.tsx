@@ -4,21 +4,27 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
-import { Button, Card, CARD_HEADING } from "@/components/primitives";
-import { WarningList } from "@/features/members/components/WarningList";
-import { clearConfirmed, warningSummary } from "@/features/members/memberDetail.utils";
+import { Button, Card, CARD_HEADING, DividedList } from "@/components/primitives";
+import { canChangeWarnings, clearConfirmed, warningSummary } from "@/features/members/memberDetail.utils";
+import { WarningRow } from "@/features/warnings/components/WarningRow";
 import { problemText } from "@/lib/problemText";
+import { sanitiseInput } from "@/lib/sanitise";
 
 export function WarningsCard({
 	detail,
 	busy,
+	result,
 	onWarn,
+	onEdit,
 	onRemove,
 	onClear,
 }: {
 	detail: MemberDetail;
 	busy: boolean;
+	/** What the last warning issued here did to the member, once it has come back. */
+	result: string | null;
 	onWarn: (reason: string, done: () => void) => void;
+	onEdit: (warnId: string, reason: string, done: () => void) => void;
 	onRemove: (warnId: string) => void;
 	onClear: (done: () => void) => void;
 }): React.JSX.Element {
@@ -28,6 +34,7 @@ export function WarningsCard({
 	const [typed, setTyped] = useState("");
 
 	const canModerate = detail.moderationProblem === null;
+	const canChange = canChangeWarnings(detail);
 	const problem = problemText(warningProblem(reason), t);
 
 	function cancel(): void {
@@ -45,7 +52,22 @@ export function WarningsCard({
 			{!canModerate && <Warning>{detail.moderationProblem}</Warning>}
 
 			{detail.warnings.length > 0 && (
-				<WarningList warnings={detail.warnings} busy={busy} canModerate={canModerate} onRemove={onRemove} />
+				<DividedList>
+					{detail.warnings.map((warning) => (
+						<WarningRow
+							key={warning.id}
+							warning={warning}
+							canChange={canChange}
+							busy={busy}
+							onEdit={(next, done) => {
+								onEdit(warning.id, next, done);
+							}}
+							onRemove={() => {
+								onRemove(warning.id);
+							}}
+						/>
+					))}
+				</DividedList>
 			)}
 
 			{canModerate && (
@@ -67,59 +89,64 @@ export function WarningsCard({
 						<Button
 							disabled={problem !== null || busy}
 							onClick={() => {
-								onWarn(reason, () => {
+								onWarn(sanitiseInput(reason), () => {
 									setReason("");
 								});
 							}}
 						>
 							{t("members.addWarning")}
 						</Button>
-
-						{detail.warnings.length > 0 && !confirming && (
-							<Button
-								variant="ghost"
-								disabled={busy}
-								onClick={() => {
-									setConfirming(true);
-								}}
-							>
-								<Trash2 size={16} aria-hidden="true" /> {t("members.clearEvery")}
-							</Button>
-						)}
+						<p role="status" className="text-sm">
+							{result}
+						</p>
 					</div>
-
-					{confirming && (
-						<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
-							<Field label={t("members.typeToClear", { name: detail.username })} htmlFor="clear-confirm">
-								<input
-									id="clear-confirm"
-									className={FIELD}
-									value={typed}
-									autoComplete="off"
-									onChange={(event) => {
-										setTyped(event.target.value);
-									}}
-								/>
-							</Field>
-							<Warning>{t("members.deleteWarning")}</Warning>
-
-							<div className="flex flex-wrap gap-3">
-								<Button
-									variant="destructive"
-									disabled={!clearConfirmed(typed, detail) || busy}
-									onClick={() => {
-										onClear(cancel);
-									}}
-								>
-									{t("members.clearEvery")}
-								</Button>
-								<Button variant="ghost" onClick={cancel}>
-									{t("common.cancel")}
-								</Button>
-							</div>
-						</div>
-					)}
 				</>
+			)}
+
+			{canChange && detail.warnings.length > 0 && !confirming && (
+				<div>
+					<Button
+						variant="ghost"
+						disabled={busy}
+						onClick={() => {
+							setConfirming(true);
+						}}
+					>
+						<Trash2 size={16} aria-hidden="true" /> {t("members.clearEvery")}
+					</Button>
+				</div>
+			)}
+
+			{confirming && (
+				<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
+					<Field label={t("members.typeToClear", { name: detail.username })} htmlFor="clear-confirm">
+						<input
+							id="clear-confirm"
+							className={FIELD}
+							value={typed}
+							autoComplete="off"
+							onChange={(event) => {
+								setTyped(event.target.value);
+							}}
+						/>
+					</Field>
+					<Warning>{t("members.deleteWarning")}</Warning>
+
+					<div className="flex flex-wrap gap-3">
+						<Button
+							variant="destructive"
+							disabled={!clearConfirmed(typed, detail) || busy}
+							onClick={() => {
+								onClear(cancel);
+							}}
+						>
+							{t("members.clearEvery")}
+						</Button>
+						<Button variant="ghost" onClick={cancel}>
+							{t("common.cancel")}
+						</Button>
+					</div>
+				</div>
 			)}
 		</Card>
 	);

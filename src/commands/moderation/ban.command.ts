@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderation";
+import { actionEmbed, assertModeratable, banUser, DEFAULT_REASON } from "@lib/moderation";
 
 export default defineCommand({
 	name: "ban",
@@ -37,26 +37,7 @@ export default defineCommand({
 		const member = await guild.members.fetch(target.id).catch(() => null);
 		if (member) assertModeratable(interaction, member);
 
-		const existing = await guild.bans.fetch(target.id).catch(() => null);
-		if (existing) throw new UserFacingError(`${target.username} is already banned.`);
-
-		const delivered = member
-			? await notifyTarget(
-					target,
-					dmEmbed({
-						action: `banned from ${guild.name}`,
-						emoji: theme.emoji.moderation,
-						guild,
-						moderator: interaction.user,
-						reason,
-					}),
-				)
-			: false;
-
-		await guild.members.ban(target.id, {
-			reason: `${interaction.user.username}: ${reason}`,
-			deleteMessageSeconds: deleteDays * 86_400,
-		});
+		const { notified: delivered } = await banUser(guild, target, member, interaction.user.username, reason, deleteDays);
 
 		await reply(interaction, {
 			embeds: [

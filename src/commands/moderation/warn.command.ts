@@ -2,16 +2,18 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import {
-	addWarning,
-	clearWarnings,
-	editWarning,
-	getWarnings,
-	removeWarning,
-} from "@database/repositories/moderationRepository";
+import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { discordTime, truncate } from "@lib/format";
-import { assertModeratable, dmEmbed, notifyTarget } from "@lib/moderation";
+import {
+	assertModeratable,
+	issueWarning,
+	readWarnLadder,
+	stepLabel,
+	warnLadderPanel,
+	warnProblemText,
+} from "@lib/moderation";
+import { type WarnOutcome } from "@testify/shared";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
 /** Autocompleted rather than typed. */
@@ -22,6 +24,16 @@ const WARN_ID_OPTION = {
 	required: true,
 	autocomplete: true,
 } as const;
+
+/** What the warning's number did to the member, including when the bot could not do it. */
+function consequenceLine(outcome: WarnOutcome): string {
+	if (outcome.step === null) return "No punishment is set for warnings here. `/warn punishments` sets them up.";
+	if (outcome.problem !== null) {
+		return `${stepLabel(outcome.step)} was due, but ${warnProblemText(outcome.problem, outcome.step)}`;
+	}
+
+	return outcome.step.action === "warn" ? "Warning only." : `${stepLabel(outcome.step)}: done.`;
+}
 
 export default defineCommand({
 	name: "warn",
@@ -47,25 +59,13 @@ export default defineCommand({
 				const member = await guild.members.fetch(target.id).catch(() => null);
 				if (member) assertModeratable(interaction, member);
 
-				const entry = await addWarning(
-					guild.id,
-					target.id,
-					target.username,
-					{ id: interaction.user.id, tag: interaction.user.username },
+				const { entry, outcome, notified } = await issueWarning({
+					guild,
+					user: target,
+					member,
+					moderator: { id: interaction.user.id, tag: interaction.user.username },
 					reason,
-				);
-
-				const delivered = await notifyTarget(
-					target,
-					dmEmbed({
-						action: `warned in ${guild.name}`,
-						emoji: theme.emoji.warning,
-						guild,
-						moderator: interaction.user,
-						reason,
-						extra: [{ name: "Warning ID", value: `\`${entry.warnId}\``, inline: true }],
-					}),
-				);
+				});
 
 				await reply(interaction, {
 					embeds: [
@@ -75,12 +75,23 @@ export default defineCommand({
 							fields: [
 								{ name: "User", value: `${target}`, inline: true },
 								{ name: "Warning ID", value: `\`${entry.warnId}\``, inline: true },
-								{ name: "Notified", value: delivered ? "Yes" : "No", inline: true },
+								{ name: "Notified", value: notified ? "Yes" : "No", inline: true },
 								{ name: "Reason", value: reason },
+								{ name: `Warning ${String(outcome.count)}`, value: consequenceLine(outcome) },
 							],
 						}),
 					],
 				});
+			},
+		},
+		{
+			name: "punishments",
+			description: "Choose what each warning does: a timeout, a kick or a ban.",
+			permissions: [PermissionFlagsBits.ManageGuild],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+
+				await reply(interaction, warnLadderPanel(await readWarnLadder(guild.id), interaction.user.id));
 			},
 		},
 		{
@@ -212,7 +223,7 @@ export default defineCommand({
 
 	async run(interaction) {
 		await reply(interaction, {
-			content: "Pick a subcommand: `create`, `list`, `info`, `edit`, `remove` or `clear`.",
+			content: "Pick a subcommand: `create`, `list`, `info`, `edit`, `remove`, `clear` or `punishments`.",
 			flags: MessageFlags.Ephemeral,
 		});
 	},

@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderation";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, kickMember } from "@lib/moderation";
 
 export default defineCommand({
 	name: "kick",
@@ -20,7 +20,6 @@ export default defineCommand({
 
 	async run(interaction) {
 		const guild = inGuild(interaction);
-		// whenever an ID was supplied instead of a mention.
 		const target = interaction.options.getUser("user", true);
 		const reason = interaction.options.getString("reason") ?? DEFAULT_REASON;
 
@@ -28,20 +27,7 @@ export default defineCommand({
 		if (!member) throw new UserFacingError(strings.moderation.memberNotFound);
 
 		assertModeratable(interaction, member);
-		if (!member.kickable) throw new UserFacingError(strings.moderation.notModeratable);
-
-		const delivered = await notifyTarget(
-			target,
-			dmEmbed({
-				action: `kicked from ${guild.name}`,
-				emoji: theme.emoji.moderation,
-				guild,
-				moderator: interaction.user,
-				reason,
-			}),
-		);
-
-		await member.kick(`${interaction.user.username}: ${reason}`);
+		const { notified: delivered } = await kickMember(guild, member, interaction.user.username, reason);
 
 		await reply(interaction, {
 			embeds: [

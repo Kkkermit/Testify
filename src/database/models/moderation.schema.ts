@@ -80,6 +80,30 @@ warnRecordSchema.index({ guildId: 1, userId: 1 }, { unique: true });
 
 export const Warnings = model<WarnRecord>("warnTutorial", warnRecordSchema);
 
+/** One per server: what its first, second and later warnings do, in order. */
+export interface WarnLadderRecord {
+	guildId: string;
+	steps: { action: string; minutes?: number | null }[];
+	lastModifiedBy: string;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+const warnLadderSchema = new Schema<WarnLadderRecord>(
+	{
+		guildId: { type: String, required: true, unique: true },
+		steps: {
+			type: [new Schema({ action: { type: String, required: true }, minutes: { type: Number } }, { _id: false })],
+			required: true,
+			default: [],
+		},
+		lastModifiedBy: { type: String, required: true },
+	},
+	{ timestamps: true },
+);
+
+export const WarnLadderConfig = model<WarnLadderRecord>("warnpunishments", warnLadderSchema);
+
 export interface SoftbanEntry {
 	guildId: string;
 	userId: string;

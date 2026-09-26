@@ -2,8 +2,8 @@
 id: warnings
 title: Warnings
 topic: moderation
-keywords: warn, warning, warnings, strike, infraction, warn list, clear warnings, delete warning, edit warning
-questions: How do I warn someone? | How do I see someone's warnings? | How do I remove a warning?
+keywords: warn, warning, warnings, strike, infraction, warn list, clear warnings, delete warning, edit warning, punishment, punishments, escalate, auto mute, auto kick, auto ban
+questions: How do I warn someone? | How do I see someone's warnings? | How do I remove a warning? | Can a warning mute, kick or ban someone automatically? | How do I set punishments for warnings?
 commands: warn
 related: moderation, dashboard-members, link-filter
 ---
@@ -15,10 +15,16 @@ Warnings are a record of what a member did, kept per server. They need **Moderat
 - `/warn info` shows one warning in full, with its edit history.
 - `/warn edit` changes a warning's reason.
 - `/warn remove` deletes one warning, and `/warn clear` deletes them all.
+- `/warn punishments` sets what each warning does. It needs **Manage Server**.
 
 When a command needs a particular warning, start typing and pick it from the list, so there is no ID to copy.
 
-### On the dashboard
-A member's page, reached through **Leaderboards**, lists their warnings and can issue, delete or clear them. The member is not notified from there.
+### Punishments
+Each warning number can do something on top of being recorded: nothing more, a timeout from five minutes to a week, a kick, or a ban. For example, the first warning could be only a warning, the second a ten-minute timeout, the third a kick and the fourth a ban. Past the last step, the last one repeats.
 
-> **Tip:** Link filtering records every link it removes as a warning.
+The member is told the reason and what happens next before it happens. If the bot cannot carry out a step, because its role is not above the member's or it lacks the permission, the warning is still recorded and whoever issued it is told why.
+
+### On the dashboard
+**Warnings**, under Moderation, lists every warning in the server with its reason, who gave it and when, and each one can be edited or removed. You can warn somebody by finding them by name, and set the punishments there too. A member's page, reached through **Leaderboards**, has the same controls for that one person.
+
+> **Tip:** Link filtering records every link it removes as a warning, so its warnings count towards the punishments too.

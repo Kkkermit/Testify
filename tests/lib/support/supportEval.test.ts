@@ -53,6 +53,8 @@ const PARAPHRASES: [string, string[]][] = [
 	["block links in chat", ["link-filter"]],
 	["how do I ban someone", ["bans", "command-ban"]],
 	["warn a member", ["warnings", "command-warn"]],
+	["make a third warning kick people automatically", ["warnings", "command-warn"]],
+	["can i ban someone from the dashboard", ["dashboard-members", "bans", "command-ban"]],
 	["the bot can't give roles", ["role-order"]],
 	["missing permissions error when giving a role", ["role-order", "missing-permissions"]],
 	["who can change the settings", ["permissions"]],

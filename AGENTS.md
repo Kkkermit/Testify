@@ -65,7 +65,7 @@ numbers, which drift):
 | Command files        | 101 (incl. folded-in subcommands) |
 | Subcommands          | 110                               |
 | Prefix aliases       | 84                                |
-| Button handlers      | 26                                |
+| Button handlers      | 27                                |
 | Events               | 24, in 5 groups                   |
 | `src/lib` helpers    | 93, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
@@ -1196,6 +1196,31 @@ rather than anything typed, which is anti-pattern 19.
 before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
 the host actually has.
 
+### Warnings escalate, and every surface escalates the same way
+
+A server can say what each warning does: `WarnStep` in `shared/src/warnings.ts` is a plain warning, a timeout
+from a fixed list of lengths, a kick or a ban, and the list is stored per server in `warnpunishments`.
+`issueWarning` in `src/lib/moderation/warnActions.util.ts` is the **one path** a warning takes — `/warn create`,
+the dashboard and the link filter all call it — so a second warning mutes whichever surface gave it. Four things
+about it are load-bearing:
+
+- **The Nth warning takes the Nth step, and past the end the last step repeats** (`stepFor`). A fifth warning on
+  a four-step list is not a free pass.
+- **The DM goes before the step**, because a member who has been kicked or banned can no longer be messaged.
+- **A step that cannot be carried out does not fail the warning.** The warning is recorded, and `applyWarnStep`
+  answers with a `WarnProblem` code — `left`, `outranked` or `refused` — that each surface words for itself:
+  `warnProblemText` in English for Discord, a translation key on the dashboard.
+- **The panel puts the warning number in every option's label**, so a step costs two components rather than
+  three and ten of them fit Discord's 40 with room to spare. The test counts them.
+
+Kick and ban reach the dashboard through `kickMember` and `banUser` in `sanctions.util.ts`, the same functions
+`/kick` and `/ban` call. **The username typed back is the confirmation, and the server compares it**
+(`confirmsName`), so a hand-written request cannot skip it. A ban reaches somebody who has already left, which a
+kick cannot. Editing, removing and clearing warnings on the web keep the role hierarchy check while the member is
+still in the server — stricter than `/warn`, deliberately — and drop it once they have left, when there are no
+roles to compare and the record still needs tidying. Warning somebody from the dashboard is a search by name
+(`GET /members/search`, registered before `/:userId` so "search" is never read as a member id), never an ID.
+
 ### One command object, both surfaces
 
 No `SlashCommands/` / `PrefixCommands/` folder split, and no `.slash.ts` / `.prefix.ts` suffixes. Both would
@@ -1436,6 +1461,7 @@ the same shape —
 | `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
 | `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
 | `/guilds/:id/audit-log`    | Grouped event checklist held as a draft until Save                         |
+| `/guilds/:id/warnings`     | Every warning, the punishment steps, warning a member found by name        |
 | `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
 | `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
@@ -1446,7 +1472,7 @@ the same shape —
 | `/guilds/:id/lottery`      | Pot, schedule, freeze, and a confirmed end                                 |
 | `/guilds/:id/giveaways`    | Start, end early, reroll and delete — each keyed to its own row            |
 | `/guilds/:id/members`      | Money and levels, each as a real table, with a jump to your own page       |
-| `…/members/:userId`        | One member: standing, roles, warnings, softban, moderation controls        |
+| `…/members/:userId`        | One member: standing, roles, warnings, softban, kick and ban               |
 | `/guilds/:id/settings`     | Prefix, nickname, link filtering, roles on join, verification, counting    |
 | `/guilds/:id/commands`     | Per-command switches for this server                                       |
 | `/commands`                | Every command, searchable, with the coverage tile                          |

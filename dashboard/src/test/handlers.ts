@@ -32,6 +32,10 @@ import {
 	type TicketSettings,
 	type MusicSettings,
 	type BotStatsSettings,
+	type GuildWarningsPage,
+	type MemberMatch,
+	type WarningAdded,
+	type WarnLadder,
 	type MemberCounts,
 	type TreasureSettings,
 	type AutomodRules,
@@ -279,6 +283,37 @@ export const musicSettings: MusicSettings = {
 	djRoleIds: [],
 	configured: true,
 };
+
+export const warnLadder: WarnLadder = {
+	steps: [{ action: "warn" }, { action: "timeout", minutes: 10 }, { action: "kick" }, { action: "ban" }],
+};
+
+export const guildWarnings: GuildWarningsPage = {
+	items: [
+		{
+			id: "a1b2c3d4",
+			userId: "100000000000000002",
+			username: "kate",
+			reason: "Spamming in general",
+			byId: "100000000000000001",
+			byTag: "someone",
+			at: "2026-08-01T12:00:00.000Z",
+			edited: false,
+		},
+	],
+	total: 1,
+	page: 1,
+	perPage: 20,
+};
+
+export const warningAdded: WarningAdded = {
+	warning: guildWarnings.items[0]!,
+	outcome: { count: 2, step: { action: "timeout", minutes: 10 }, problem: null },
+};
+
+export const memberMatches: MemberMatch[] = [
+	{ userId: "100000000000000002", displayName: "kate", username: "kate", avatarUrl: null },
+];
 
 export const botStatsSettings: BotStatsSettings = { channelId: null };
 
@@ -667,12 +702,22 @@ export const handlers = [
 		const board = new URL(request.url).searchParams.get("board") ?? "economy";
 		return HttpResponse.json({ ...economyBoard, board });
 	}),
+	// Before `:userId`, which MSW would otherwise match first, exactly as the real router would.
+	http.get("/api/guilds/:guildId/members/search", () => HttpResponse.json(memberMatches)),
 	http.get("/api/guilds/:guildId/members/:userId", () => HttpResponse.json(memberDetail)),
-	http.post("/api/guilds/:guildId/members/:userId/warnings", () => HttpResponse.json(memberDetail)),
-	http.delete("/api/guilds/:guildId/members/:userId/warnings/:warnId", () => HttpResponse.json(memberDetail)),
-	http.delete("/api/guilds/:guildId/members/:userId/warnings", () =>
-		HttpResponse.json({ ...memberDetail, warnings: [] }),
+	http.post("/api/guilds/:guildId/members/:userId/kick", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
+	http.post("/api/guilds/:guildId/members/:userId/ban", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
+	http.get("/api/guilds/:guildId/warnings", () => HttpResponse.json(guildWarnings)),
+	http.get("/api/guilds/:guildId/warnings/punishments", () => HttpResponse.json(warnLadder)),
+	http.put("/api/guilds/:guildId/warnings/punishments", async ({ request }) =>
+		HttpResponse.json((await request.json()) as WarnLadder),
 	),
+	http.post("/api/guilds/:guildId/warnings", () => HttpResponse.json(warningAdded)),
+	http.patch("/api/guilds/:guildId/warnings/:userId/:warnId", async ({ request }) =>
+		HttpResponse.json({ ...guildWarnings.items[0], ...((await request.json()) as object), edited: true }),
+	),
+	http.delete("/api/guilds/:guildId/warnings/:userId/:warnId", () => new HttpResponse(null, { status: 204 })),
+	http.delete("/api/guilds/:guildId/warnings/:userId", () => new HttpResponse(null, { status: 204 })),
 	http.patch("/api/guilds/:guildId/members/:userId/level", () => HttpResponse.json(memberDetail)),
 	http.patch("/api/guilds/:guildId/members/:userId/money", () => HttpResponse.json(memberDetail)),
 	http.delete("/api/guilds/:guildId/members/:userId/softban", () =>

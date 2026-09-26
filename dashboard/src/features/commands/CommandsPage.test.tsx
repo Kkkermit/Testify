@@ -1,5 +1,6 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { http, HttpResponse } from "msw";
 import {
 	configurableAt,
 	coverage,
@@ -11,6 +12,7 @@ import { CommandsPage } from "@/features/commands/CommandsPage";
 import { expectNoViolations } from "@/test/axe";
 import { catalogue } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
+import { server } from "@/test/setup";
 
 const GUILD = "900000000000000001";
 
@@ -24,6 +26,9 @@ function renderPage(inGuild = true) {
 }
 
 const commands = catalogue.commands;
+
+/** A command with no screen, now that the fixture's own `/ban` has one on the member page. */
+const discordOnly = { ...commands[0]!, name: "slowmode", aliases: [] };
 
 describe("filterCommands", () => {
 	it("finds a command by name", () => {
@@ -75,12 +80,7 @@ describe("configurableAt", () => {
 	});
 
 	it("gives nothing for a command the dashboard cannot configure", () => {
-		expect(
-			configurableAt(
-				commands.find((c) => c.name === "ban")!,
-				GUILD,
-			),
-		).toBeNull();
+		expect(configurableAt(discordOnly, GUILD)).toBeNull();
 	});
 
 	/** Outside a server there is nothing to configure, so the link would have no guild to point at. */
@@ -96,7 +96,7 @@ describe("configurableAt", () => {
 
 describe("coverage", () => {
 	it("counts how much of the command surface the dashboard reaches", () => {
-		expect(coverage(commands)).toEqual({ covered: 1, total: 2 });
+		expect(coverage([...commands, discordOnly])).toEqual({ covered: 2, total: 3 });
 	});
 
 	it("agrees with isConfigurable", () => {
@@ -167,16 +167,20 @@ describe("the commands page", () => {
 
 	/** The whole point of the coverage tile: it is the visible progress toward covering every command. */
 	it("says how much of the command surface the dashboard covers", async () => {
+		server.use(
+			http.get("/api/commands", () => HttpResponse.json({ ...catalogue, commands: [...commands, discordOnly] })),
+		);
 		renderPage();
 
-		expect(await screen.findByText("1 of 2")).toBeInTheDocument();
+		expect(await screen.findByText("2 of 3")).toBeInTheDocument();
 	});
 
 	it("links a covered command to the screen that replaces it", async () => {
 		renderPage();
 		await screen.findByText("/levelling");
 
-		expect(screen.getByRole("link", { name: /configure/i })).toHaveAttribute("href", `/guilds/${GUILD}/levelling`);
+		const links = screen.getAllByRole("link", { name: /configure/i }).map((link) => link.getAttribute("href"));
+		expect(links).toContain(`/guilds/${GUILD}/levelling`);
 	});
 
 	it("offers no Configure link outside a server", async () => {

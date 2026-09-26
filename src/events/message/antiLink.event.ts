@@ -1,9 +1,9 @@
 import { PermissionsBitField } from "discord.js";
 import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
-import { addWarning } from "@database/repositories/moderationRepository";
 import { getAntiLink } from "@database/repositories/settingsRepository";
 import { cleanupFooter, embed, TIDY_AFTER_MS } from "@lib/discord";
+import { issueWarning } from "@lib/moderation";
 
 const LINK_PATTERN = /(https?:\/\/|www\.|discord\.gg\/|\b[a-z0-9-]+\.(com|net|org|io|gg|xyz|co)\b)/i;
 
@@ -24,14 +24,15 @@ export default defineMessageHandler({
 
 		await message.delete().catch(() => null);
 
-		// The warning is attributed to the bot rather than a hardcoded user ID and
-		await addWarning(
-			message.guild.id,
-			message.author.id,
-			message.author.username,
-			{ id: client.user?.id ?? "0", tag: botName() },
-			"Posted a forbidden link",
-		);
+		// Counted like any other warning, so a server's punishment steps apply to repeated links too.
+		await issueWarning({
+			guild: message.guild,
+			user: message.author,
+			member: message.member,
+			moderator: { id: client.user?.id ?? "0", tag: botName() },
+			reason: "Posted a forbidden link",
+			notify: false,
+		});
 
 		if (!message.channel.isSendable()) return true;
 

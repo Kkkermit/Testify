@@ -21,6 +21,9 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	lottery: { path: (guildId) => `/guilds/${guildId}/lottery`, screen: "Lottery" },
 	giveaway: { path: (guildId) => `/guilds/${guildId}/giveaways`, screen: "Giveaways" },
 	"bot-stats-channel": { path: (guildId) => `/guilds/${guildId}/bot-stats`, screen: "Bot statistics" },
+	warn: { path: (guildId) => `/guilds/${guildId}/warnings`, screen: "Warnings" },
+	kick: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	ban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
 	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 };
 

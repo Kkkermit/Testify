@@ -5,23 +5,30 @@ import { type ApiBindings } from "@api/context";
 import { badRequest, forbidden, notFound, notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
-import { addWarning, clearWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
 import { problemText } from "@lib/format";
+import { banUser, kickMember, moderationProblem } from "@lib/moderation";
 import {
+	banBody,
 	boardQuery,
+	confirmsName,
+	kickBody,
 	levelBody,
 	type MemberDetail,
+	type MemberMatch,
 	memberParams,
+	memberSearchQuery,
 	moneyBody,
 	moneyProblem,
-	warningBody,
-	warningParams,
 } from "@testify/shared";
 
 export const members = new Hono<ApiBindings>();
 
 members.use("*", requireGuild);
+
+function actorName(context: Context<ApiBindings>): string {
+	return context.get("session")?.username ?? "a server manager";
+}
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
@@ -73,56 +80,26 @@ async function actOn(context: Context<ApiBindings>): Promise<{ current: MemberDe
 	return { current, member };
 }
 
+/** Registered before `/:userId`, which would otherwise read "search" as a member id and refuse it. */
+members.get("/search", async (context) => {
+	const { q } = parseQuery(context, memberSearchQuery);
+	const found = await guildOf(context)
+		.members.search({ query: q, limit: 10 })
+		.catch(() => null);
+
+	const matches: MemberMatch[] = [...(found?.values() ?? [])]
+		.filter((member) => !member.user.bot)
+		.map((member) => ({
+			userId: member.id,
+			displayName: member.displayName,
+			username: member.user.username,
+			avatarUrl: member.displayAvatarURL({ size: 64 }),
+		}));
+
+	return context.json(matches);
+});
+
 members.get("/:userId", async (context) => context.json(await detail(context)));
-
-members.post("/:userId/warnings", async (context) => {
-	const { current } = await actOn(context);
-	const { reason } = await parseBody(context, warningBody);
-	const guild = guildOf(context);
-	const session = context.get("session");
-
-	await addWarning(
-		guild.id,
-		current.userId,
-		current.username,
-		{ id: session?.userId ?? "", tag: session?.username ?? "" },
-		reason,
-	);
-	await auditChange(context, {
-		action: "member.warn",
-		summary: `Warned ${current.username}`,
-		after: { reason },
-	});
-
-	return context.json(await detail(context));
-});
-
-members.delete("/:userId/warnings/:warnId", async (context) => {
-	const { current } = await actOn(context);
-	const { warnId } = parseParams(context, warningParams);
-
-	if (!(await removeWarning(guildOf(context).id, current.userId, warnId))) {
-		throw notFound("warning_not_found", "That warning has already gone.");
-	}
-	await auditChange(context, { action: "member.warn.remove", summary: `Removed a warning from ${current.username}` });
-
-	return context.json(await detail(context));
-});
-
-members.delete("/:userId/warnings", async (context) => {
-	const { current } = await actOn(context);
-	const count = current.warnings.length;
-
-	if (!(await clearWarnings(guildOf(context).id, current.userId))) {
-		throw notFound("warnings_not_found", "They have no warnings to clear.");
-	}
-	await auditChange(context, {
-		action: "member.warn.clear",
-		summary: `Cleared ${String(count)} warning${count === 1 ? "" : "s"} from ${current.username}`,
-	});
-
-	return context.json(await detail(context));
-});
 
 members.patch("/:userId/level", async (context) => {
 	const { current, member } = await actOn(context);
@@ -157,6 +134,51 @@ members.patch("/:userId/money", async (context) => {
 		action: "member.money",
 		summary: `${delta > 0 ? "Added" : "Took"} ${Math.abs(delta).toLocaleString()} ${delta > 0 ? "to" : "from"} ${current.username}'s ${purse}`,
 		before: { [purse]: held },
+	});
+
+	return context.json(await detail(context));
+});
+
+const CONFIRM_REFUSED = "Type their username exactly to confirm.";
+
+members.post("/:userId/kick", async (context) => {
+	const { current, member } = await actOn(context);
+	const body = await parseBody(context, kickBody);
+	if (!confirmsName(body.confirm, current.username)) throw badRequest(CONFIRM_REFUSED);
+
+	const { notified } = await kickMember(guildOf(context), member, actorName(context), body.reason);
+	await auditChange(context, {
+		action: "member.kick",
+		summary: `Kicked ${current.username}`,
+		after: { reason: body.reason, notified },
+	});
+
+	return context.json(await detail(context));
+});
+
+/** Unlike a kick, this reaches somebody who has already left, so the hierarchy check only applies to a member. */
+members.post("/:userId/ban", async (context) => {
+	const { guild, userId, member, moderator } = await scene(context);
+	const body = await parseBody(context, banBody);
+	const client = context.get("client");
+
+	if (member !== null) {
+		const problem =
+			moderator === null
+				? "Only somebody in this server can moderate its members."
+				: moderationProblem(moderator, member, client.user?.id);
+		if (problem !== null) throw forbidden("cannot_moderate", problem);
+	}
+
+	const user = member?.user ?? (await client.users.fetch(userId).catch(() => null));
+	if (user === null) throw notFound("user_not_found", "Discord does not know that account.");
+	if (!confirmsName(body.confirm, user.username)) throw badRequest(CONFIRM_REFUSED);
+
+	const { notified } = await banUser(guild, user, member, actorName(context), body.reason, body.deleteDays);
+	await auditChange(context, {
+		action: "member.ban",
+		summary: `Banned ${user.username}`,
+		after: { reason: body.reason, deleteDays: body.deleteDays, notified },
 	});
 
 	return context.json(await detail(context));

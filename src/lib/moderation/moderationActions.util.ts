@@ -65,7 +65,7 @@ export function dmEmbed(options: {
 	action: string;
 	emoji: string;
 	guild: Guild;
-	moderator: User;
+	moderator: Pick<User, "username">;
 	reason: string;
 	extra?: { name: string; value: string; inline?: boolean }[];
 }): EmbedBuilder {
