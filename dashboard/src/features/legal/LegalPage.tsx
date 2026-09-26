@@ -34,6 +34,11 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 							))}
 						</ul>
 					)}
+					{section.after?.map((paragraph) => (
+						<p key={paragraph} className="text-muted-foreground text-sm leading-relaxed">
+							{t(paragraph)}
+						</p>
+					))}
 				</Card>
 			))}
 		</PublicPage>
