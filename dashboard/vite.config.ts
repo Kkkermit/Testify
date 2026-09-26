@@ -26,7 +26,7 @@ function botNamePlugin(name: string): Plugin {
 }
 
 // The proxy reads the bot's own port variable, so changing DASHBOARD_PORT does not break development.
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
 	// The bot's own `.env`, so BOT_NAME is written once for both halves.
 	const env = loadEnv(mode, fileURLToPath(new URL("..", import.meta.url)), ["DASHBOARD_", "BOT_NAME"]);
 	const port = env.DASHBOARD_PORT ?? "3000";
@@ -35,7 +35,8 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		plugins: [react(), tailwind(), botNamePlugin(botName)],
-		define: { __BOT_NAME__: JSON.stringify(botName) },
+		// The error screen prints a stack only on the dev server, never in a build somebody deploys.
+		define: { __BOT_NAME__: JSON.stringify(botName), __DEV_ERRORS__: JSON.stringify(command === "serve") },
 		resolve: {
 			// discord-html-transcripts hoists React 18, so hoisted packages must resolve this workspace's React 19.
 			dedupe: ["react", "react-dom"],

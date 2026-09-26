@@ -108,6 +108,16 @@
 		"setupRequiredBody": "Completa la configurazione nella schermata di accesso.",
 		"backToServers": "Torna ai server"
 	},
+	"routeError": {
+		"staleTitle": "È disponibile una versione più recente",
+		"staleHeading": "Questa pagina è cambiata mentre era aperta",
+		"staleBody": "La dashboard è stata aggiornata dopo che l’hai aperta, quindi questa pagina non è riuscita a caricarsi. Ricaricando ottieni la versione più recente.",
+		"crashTitle": "Qualcosa è andato storto",
+		"crashHeading": "Impossibile mostrare questa pagina",
+		"crashBody": "Ricaricare di solito risolve. Se continua a succedere, segnalalo con /bug-report indicando di quale pagina si tratta.",
+		"reload": "Ricarica la pagina",
+		"details": "Dettagli tecnici"
+	},
 	"notFound": {
 		"backToDashboard": "Torna alla dashboard",
 		"title": "Pagina non trovata",

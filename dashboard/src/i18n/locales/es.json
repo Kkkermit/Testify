@@ -108,6 +108,16 @@
 		"setupRequiredBody": "Completa los pasos de configuración en la pantalla de inicio de sesión.",
 		"backToServers": "Volver a los servidores"
 	},
+	"routeError": {
+		"staleTitle": "Hay una versión más reciente",
+		"staleHeading": "Esta página cambió mientras estaba abierta",
+		"staleBody": "El panel se actualizó después de que lo abrieras, así que esta página no pudo cargarse. Al recargar se obtiene la versión más reciente.",
+		"crashTitle": "Algo salió mal",
+		"crashHeading": "No se pudo mostrar esta página",
+		"crashBody": "Recargar suele arreglarlo. Si sigue pasando, infórmalo con /bug-report e indica qué página era.",
+		"reload": "Recargar página",
+		"details": "Detalles técnicos"
+	},
 	"notFound": {
 		"backToDashboard": "Volver al panel",
 		"title": "Página no encontrada",

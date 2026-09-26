@@ -108,6 +108,16 @@
 		"setupRequiredBody": "Terminez la configuration sur la page de connexion.",
 		"backToServers": "Retour aux serveurs"
 	},
+	"routeError": {
+		"staleTitle": "Une version plus récente est disponible",
+		"staleHeading": "Cette page a changé pendant qu’elle était ouverte",
+		"staleBody": "Le tableau de bord a été mis à jour après son ouverture, donc cette page n’a pas pu se charger. Recharger récupère la dernière version.",
+		"crashTitle": "Un problème est survenu",
+		"crashHeading": "Cette page n’a pas pu s’afficher",
+		"crashBody": "Recharger règle généralement le problème. S’il se reproduit, signalez-le avec /bug-report en précisant la page.",
+		"reload": "Recharger la page",
+		"details": "Détails techniques"
+	},
 	"notFound": {
 		"backToDashboard": "Retour au tableau de bord",
 		"title": "Page introuvable",

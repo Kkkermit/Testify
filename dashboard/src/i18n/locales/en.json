@@ -108,6 +108,16 @@
 		"setupRequiredBody": "Finish the setup steps on the sign-in page.",
 		"backToServers": "Back to servers"
 	},
+	"routeError": {
+		"staleTitle": "A newer version is available",
+		"staleHeading": "This page changed while it was open",
+		"staleBody": "The dashboard was updated after you opened it, so this page could not load. Reloading fetches the latest version.",
+		"crashTitle": "Something went wrong",
+		"crashHeading": "This page could not be shown",
+		"crashBody": "Reloading usually fixes it. If it keeps happening, report it with /bug-report and say which page it was.",
+		"reload": "Reload page",
+		"details": "Technical details"
+	},
 	"notFound": {
 		"backToDashboard": "Back to the dashboard",
 		"title": "Page not found",

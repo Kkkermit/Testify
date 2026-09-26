@@ -108,6 +108,16 @@
 		"setupRequiredBody": "Schließe die Einrichtung auf der Anmeldeseite ab.",
 		"backToServers": "Zurück zu den Servern"
 	},
+	"routeError": {
+		"staleTitle": "Eine neuere Version ist verfügbar",
+		"staleHeading": "Diese Seite hat sich geändert, während sie offen war",
+		"staleBody": "Das Dashboard wurde aktualisiert, nachdem du es geöffnet hast, deshalb konnte diese Seite nicht laden. Neu laden holt die aktuelle Version.",
+		"crashTitle": "Etwas ist schiefgelaufen",
+		"crashHeading": "Diese Seite konnte nicht angezeigt werden",
+		"crashBody": "Neu laden behebt es meistens. Passiert es immer wieder, melde es mit /bug-report und nenne die Seite.",
+		"reload": "Seite neu laden",
+		"details": "Technische Details"
+	},
 	"notFound": {
 		"backToDashboard": "Zurück zum Dashboard",
 		"title": "Seite nicht gefunden",
