@@ -117,6 +117,7 @@ export class MusicSession {
 	#failures = 0;
 	/** What the downloader of the current stream said before it died, when it said something that matters. */
 	#problem: DownloadProblem | null = null;
+	#problemReason: string | null = null;
 	/** Bumped per stream, so a stream closed on purpose cannot report into the one that replaced it. */
 	#generation = 0;
 	#notice: { text: string; at: number } | null = null;
@@ -244,6 +245,7 @@ export class MusicSession {
 			this.#closeStream();
 
 			this.#problem = null;
+			this.#problemReason = null;
 			const generation = ++this.#generation;
 
 			const info = await describeTrack(track.url, this.#binaries);
@@ -311,6 +313,12 @@ export class MusicSession {
 		this.#closeStream();
 
 		if (decision.action === "retry" && track !== null) {
+			if (this.#problemReason !== null) {
+				this.#logger.debug(
+					{ guildId: this.guildId, reason: this.#problemReason, track: track.url, attempt: decision.attempt },
+					"[MUSIC] The download stopped, so the track is being opened again.",
+				);
+			}
 			this.#attempts = decision.attempt;
 			this.#emit({ kind: "retrying", track, attempt: decision.attempt });
 			await this.play(this.queue.index, { seekMs: resumeAt });
@@ -319,6 +327,7 @@ export class MusicSession {
 
 		// Given up on: the panel is the only place anybody in the channel would find out why.
 		if (brokeEarly && track !== null) {
+			this.#warnGaveUp(track, problem);
 			this.#notify(`Skipped **${track.title}** — ${problem?.advice ?? "the stream kept breaking."}`);
 			this.#emit({ kind: "failed", track, reason: problem?.advice ?? "the stream kept breaking" });
 		}
@@ -339,11 +348,22 @@ export class MusicSession {
 
 		const problem = classifyProblem(reason);
 		this.#problem = problem;
+		this.#problemReason = reason;
 		// A refused track is described afresh next time, in case what it was refused for has changed.
 		if (problem !== null) forgetDescription(track.url, this.#binaries);
+	}
+
+	/** Only a track given up on is worth a warning; a 403 the fresh try gets past cost the listener nothing. */
+	#warnGaveUp(track: Track, problem: DownloadProblem | null): void {
+		if (this.#problemReason === null) return;
 
 		this.#logger.warn(
-			{ guildId: this.guildId, reason, track: track.url, ytDlp: this.#binaries.ytDlpVersion ?? null },
+			{
+				guildId: this.guildId,
+				reason: this.#problemReason,
+				track: track.url,
+				ytDlp: this.#binaries.ytDlpVersion ?? null,
+			},
 			problem === null ? "[MUSIC] The downloader gave up." : `[MUSIC] ${problem.advice.replaceAll("`", "")}`,
 		);
 	}

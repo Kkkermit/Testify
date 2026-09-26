@@ -615,6 +615,37 @@ describe("a downloader that says why it stopped", () => {
 		expect(session.notice()).toContain("music:setup");
 	});
 
+	/** YouTube refuses a first download now and then, and the fresh try plays it; warning then was a false alarm. */
+	it("stays quiet about a 403 that the fresh try gets past", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(0);
+
+		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
+		await player.goIdle();
+
+		expect(LOGGER.warn).not.toHaveBeenCalled();
+		expect(LOGGER.debug).toHaveBeenCalledWith(
+			expect.objectContaining({ reason: expect.stringContaining("403"), attempt: 1 }),
+			expect.any(String),
+		);
+	});
+
+	it("warns once, with the advice, when the track is given up on", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(0);
+
+		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
+		await player.goIdle();
+		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
+		await player.goIdle();
+
+		expect(LOGGER.warn).toHaveBeenCalledTimes(1);
+		expect(LOGGER.warn).toHaveBeenCalledWith(
+			expect.objectContaining({ reason: expect.stringContaining("403"), track: "https://youtu.be/a" }),
+			expect.stringContaining("music:setup"),
+		);
+	});
+
 	it("does not retry a video YouTube will not serve to anybody", async () => {
 		const { session, events } = sessionWith(["a", "b"]);
 		await session.play(0);

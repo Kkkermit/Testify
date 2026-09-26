@@ -1044,7 +1044,9 @@ downloading), a bot check or an unavailable video earns none. Retrying either th
 to YouTube, and request volume is part of what gets a host flagged in the first place. Descriptions are cached for
 ten minutes for the same reason — a volume change used to cost two extractions — and a refused track's entry is
 dropped so its one retry looks afresh. The reason lands on the panel for a minute (`NOTICE_MS`), because the log
-is not where anybody in the voice channel looks.
+is not where anybody in the voice channel looks. **The warning waits for the give-up.** YouTube refuses a first
+download now and then and the fresh try plays it, so a refusal is noted at `debug` and only a track actually
+skipped is logged at `warn` — warning on every 403 told the host to update a yt-dlp that was working.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
