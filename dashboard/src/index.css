@@ -182,14 +182,26 @@
 		--color-ring: light-dark(#6d28d9, #a78bfa);
 	}
 
+	[data-accent="indigo"] {
+		--color-primary: light-dark(#4338ca, #4f46e5);
+		--color-accent: light-dark(#3730a3, #818cf8);
+		--color-ring: light-dark(#4338ca, #818cf8);
+	}
+
 	[data-accent="blue"] {
 		--color-primary: light-dark(#1d4ed8, #2563eb);
 		--color-accent: light-dark(#1e40af, #60a5fa);
 		--color-ring: light-dark(#1d4ed8, #60a5fa);
 	}
 
-	/* The next three take one fill for both themes: these hues only carry white text at 4.5:1 down at the shade
-	   the light theme uses, and a fill lightened for dark would fail the button drawn on it. */
+	/* Sky, cyan, teal, emerald, amber and orange take one fill for both themes: these hues only carry white text at
+	   4.5:1 down at the shade the light theme uses, and a fill lightened for dark would fail the button drawn on it. */
+	[data-accent="sky"] {
+		--color-primary: #0369a1;
+		--color-accent: light-dark(#075985, #38bdf8);
+		--color-ring: light-dark(#0369a1, #38bdf8);
+	}
+
 	[data-accent="cyan"] {
 		--color-primary: #0e7490;
 		--color-accent: light-dark(#155e75, #22d3ee);
@@ -202,16 +214,40 @@
 		--color-ring: light-dark(#0f766e, #2dd4bf);
 	}
 
+	[data-accent="emerald"] {
+		--color-primary: #047857;
+		--color-accent: light-dark(#065f46, #34d399);
+		--color-ring: light-dark(#047857, #34d399);
+	}
+
 	[data-accent="amber"] {
 		--color-primary: #b45309;
 		--color-accent: light-dark(#92400e, #fbbf24);
 		--color-ring: light-dark(#b45309, #fbbf24);
 	}
 
+	[data-accent="orange"] {
+		--color-primary: #c2410c;
+		--color-accent: light-dark(#9a3412, #fb923c);
+		--color-ring: light-dark(#c2410c, #fb923c);
+	}
+
+	[data-accent="rose"] {
+		--color-primary: light-dark(#be123c, #e11d48);
+		--color-accent: light-dark(#9f1239, #fb7185);
+		--color-ring: light-dark(#be123c, #fb7185);
+	}
+
 	[data-accent="pink"] {
 		--color-primary: light-dark(#be185d, #db2777);
 		--color-accent: light-dark(#9d174d, #f472b6);
 		--color-ring: light-dark(#be185d, #f472b6);
+	}
+
+	[data-accent="slate"] {
+		--color-primary: light-dark(#475569, #64748b);
+		--color-accent: light-dark(#334155, #94a3b8);
+		--color-ring: light-dark(#475569, #94a3b8);
 	}
 
 	body {

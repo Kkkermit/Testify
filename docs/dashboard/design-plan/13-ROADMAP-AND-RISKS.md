@@ -240,7 +240,7 @@ pinning the four claims the code has to keep true.
 - **Light theme — done**, and it is not an afterthought: every colour in `index.css` is one `light-dark()` line
   holding both schemes, and `contrast.test.ts` reads **both halves** and checks each against WCAG, so a light
   value nobody looked at fails the build. The switch is `color-scheme` and nothing else.
-- **Appearance customisation — done**, beyond what this phase asked for: six accents, a motion override that
+- **Appearance customisation — done**, beyond what this phase asked for: twelve accents, a motion override that
   wins in both directions, and the language picker. All three are one `Preference` mechanism — an attribute on
   the root element, a `localStorage` key, and a fallback that _removes_ the attribute so the CSS answers before
   any script runs. Every accent is measured against both backgrounds.

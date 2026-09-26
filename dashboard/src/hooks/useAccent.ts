@@ -1,6 +1,19 @@
 import { type Preference, useRootPreference } from "@/hooks/rootPreference";
 
-export const ACCENTS = ["violet", "blue", "cyan", "teal", "amber", "pink"] as const;
+export const ACCENTS = [
+	"violet",
+	"indigo",
+	"blue",
+	"sky",
+	"cyan",
+	"teal",
+	"emerald",
+	"amber",
+	"orange",
+	"rose",
+	"pink",
+	"slate",
+] as const;
 export type Accent = (typeof ACCENTS)[number];
 
 /** Violet is the base palette in `index.css`, so choosing it removes the attribute rather than restating it. */

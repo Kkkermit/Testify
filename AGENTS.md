@@ -70,7 +70,7 @@ numbers, which drift):
 | `src/lib` helpers    | 92, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,660 across 266 suites           |
+| Tests                | 4,731 across 267 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -1760,10 +1760,11 @@ got the system theme back — remembered, and never applied. `preferences.test.t
 
 **An accent is a block of three tokens, and every one is measured.** `--color-primary`, `--color-accent` and
 `--color-ring` move; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
-`contrast.test.ts` reads the blocks out of `index.css` and checks all six accents against both backgrounds — an
-accent nobody measured is worse than no accent, because a control invites everybody to try it. Three of them
-(cyan, teal, amber) take **one fill for both themes**: those hues only carry white at 4.5:1 down at the light
-theme's shade, and lightening the fill for dark would fail the button drawn on it.
+`contrast.test.ts` reads the blocks out of `index.css` and checks all twelve accents against both backgrounds — an
+accent nobody measured is worse than no accent, because a control invites everybody to try it. Six of them
+(sky, cyan, teal, emerald, amber, orange) take **one fill for both themes**: those hues only carry white at 4.5:1
+down at the light theme's shade, and lightening the fill for dark would fail the button drawn on it. A new accent
+is a block in `index.css`, a name in `ACCENTS` and a label in every locale; the test tells you if its colours fail.
 
 Two things about the blocks are load-bearing:
 

@@ -21,11 +21,17 @@ const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hi
 
 const ACCENT_LABELS: Record<Accent, TranslationKey> = {
 	violet: "appearance.accentViolet",
+	indigo: "appearance.accentIndigo",
 	blue: "appearance.accentBlue",
+	sky: "appearance.accentSky",
 	cyan: "appearance.accentCyan",
 	teal: "appearance.accentTeal",
+	emerald: "appearance.accentEmerald",
 	amber: "appearance.accentAmber",
+	orange: "appearance.accentOrange",
+	rose: "appearance.accentRose",
 	pink: "appearance.accentPink",
+	slate: "appearance.accentSlate",
 };
 
 const MOTION_OPTIONS: Record<Motion, { label: TranslationKey; hint: TranslationKey }> = {
@@ -75,7 +81,7 @@ export function AppearancePage(): React.JSX.Element {
 			</AppearanceCard>
 
 			<AppearanceCard id="accent" title={t("appearance.accent")} describes={t("appearance.accentDescribes")}>
-				<ul className="grid gap-2 sm:grid-cols-3">
+				<ul className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
 					{ACCENTS.map((name) => (
 						<li key={name}>
 							<AccentSwatch
