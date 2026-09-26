@@ -3,7 +3,7 @@
 	"version": "2.0.0",
 	"private": true,
 	"description": "Types and zod schemas shared by the bot's API and the dashboard.",
-	"license": "MIT",
+	"license": "SEE LICENSE IN ../LICENSE",
 	"main": "dist/index.js",
 	"module": "dist/index.mjs",
 	"types": "src/index.ts",

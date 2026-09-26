@@ -3,7 +3,7 @@
 	"version": "2.0.0",
 	"description": "Open source, multipurpose Discord bot written in TypeScript",
 	"main": "dist/index.js",
-	"license": "MIT",
+	"license": "SEE LICENSE IN LICENSE",
 	"author": "Kkermit",
 	"repository": {
 		"type": "git",

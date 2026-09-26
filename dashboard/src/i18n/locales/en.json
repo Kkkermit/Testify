@@ -831,6 +831,7 @@
 		"whoRuns": "Who runs this",
 		"whoRunsP1": "{{bot}} is self-hosted. Whoever deployed this instance — the operator — decides what it does, what it stores and who can reach it. They are responsible for it, not the project’s authors.",
 		"whoRunsP2": "The software is provided as-is, without warranty of any kind. Nobody promises it will be available, correct, or free of defects.",
+		"whoRunsP3": "The code is published under the Apache 2.0 licence with the Commons Clause. Anyone may use, change and share it, but not sell it or a paid service built mainly on it, and the credit to its original author in the NOTICE file must be kept.",
 		"usingBot": "Using the bot",
 		"usingBotP1": "Wherever you use {{bot}} — in a server or in a direct message — you agree to the following.",
 		"usingBotL1": "Follow Discord’s Terms of Service and Community Guidelines. They apply on top of these terms, and nothing here overrides them.",

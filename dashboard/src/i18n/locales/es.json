@@ -832,6 +832,7 @@
 		"whoRuns": "Quién lo gestiona",
 		"whoRunsP1": "{{bot}} es autoalojado. Quien haya desplegado esta instancia —el operador— decide qué hace, qué almacena y quién puede acceder. La responsabilidad es suya, no de los autores del proyecto.",
 		"whoRunsP2": "El software se entrega tal cual, sin garantía de ningún tipo. Nadie promete que esté disponible, que sea correcto ni que carezca de defectos.",
+		"whoRunsP3": "El código se publica bajo la licencia Apache 2.0 con la Commons Clause. Cualquiera puede usarlo, modificarlo y compartirlo, pero no venderlo ni vender un servicio de pago basado principalmente en él, y debe conservarse el crédito a su autor original que figura en el archivo NOTICE.",
 		"usingBot": "Uso del bot",
 		"usingBotP1": "Dondequiera que uses {{bot}} —en un servidor o en un mensaje directo—, aceptas lo siguiente.",
 		"usingBotL1": "Cumple los Términos de servicio y las Directrices de la comunidad de Discord. Se aplican además de estos términos, y nada de lo que hay aquí los anula.",

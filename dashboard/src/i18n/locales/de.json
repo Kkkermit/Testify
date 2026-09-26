@@ -831,6 +831,7 @@
 		"whoRuns": "Wer das betreibt",
 		"whoRunsP1": "{{bot}} wird selbst gehostet. Wer diese Instanz aufgesetzt hat — die Betreiberin — entscheidet, was sie tut, was sie speichert und wer sie erreicht. Verantwortlich ist sie, nicht die Autoren des Projekts.",
 		"whoRunsP2": "Die Software wird wie besehen bereitgestellt, ohne jede Gewährleistung. Niemand verspricht Verfügbarkeit, Richtigkeit oder Fehlerfreiheit.",
+		"whoRunsP3": "Der Code ist unter der Apache-2.0-Lizenz mit der Commons Clause veröffentlicht. Alle dürfen ihn nutzen, ändern und weitergeben, aber weder ihn noch einen kostenpflichtigen Dienst verkaufen, der im Wesentlichen auf ihm beruht, und der Hinweis auf den ursprünglichen Autor in der NOTICE-Datei muss erhalten bleiben.",
 		"usingBot": "Den Bot nutzen",
 		"usingBotP1": "Wo immer du {{bot}} nutzt – auf einem Server oder in einer Direktnachricht –, stimmst du Folgendem zu.",
 		"usingBotL1": "Halte dich an die Nutzungsbedingungen und Community-Richtlinien von Discord. Sie gelten zusätzlich zu diesen Bedingungen, und nichts hier setzt sie außer Kraft.",

@@ -90,6 +90,17 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/Blacklisting your account\. A blacklisted account is refused every command/);
 	});
 
+	/** The terms repeat what LICENSE grants, so a change of licence has to change them too. */
+	it("names the licence the code is published under", () => {
+		const licence = botSource("LICENSE");
+
+		expect(licence).toContain('"Commons Clause" License Condition v1.0');
+		expect(licence).toContain("Apache License\n                           Version 2.0");
+		expect(prose(TERMS)).toMatch(/Apache 2\.0 licence with the Commons Clause/);
+		expect(prose(TERMS)).toMatch(/credit to its original author in the NOTICE file/);
+		expect(botSource("NOTICE")).toMatch(/Kkermit/);
+	});
+
 	/** A paragraph that sums up a list has to come after it, or it reads as introducing the wrong thing. */
 	it("renders a closing paragraph after its list", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });

@@ -9,7 +9,7 @@
 
 <p align="center">
 <img align="center" alt="GitHub Issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge">
-<img align="center" alt="GitHub license" src="https://img.shields.io/github/license/Kkkermit/Testify?style=for-the-badge">
+<img align="center" alt="License: Apache 2.0 with Commons Clause" src="https://img.shields.io/badge/license-Apache_2.0_%2B_Commons_Clause-blue?style=for-the-badge">
 <img align="center" alt="GitHub Stars" src="https://img.shields.io/github/stars/Kkkermit/Testify?style=for-the-badge">
 <img align="center" alt="GitHub Forks" src="https://img.shields.io/github/forks/Kkkermit/Testify?style=for-the-badge">
 <img align="center" alt="GitHub Contributors" src="https://img.shields.io/github/contributors/Kkkermit/Testify.svg?style=for-the-badge">
@@ -602,8 +602,15 @@ enough — treat anything ever pushed to GitHub as public forever.
 <details>
 <summary><strong>Can I use this for my own bot, or rename it?</strong></summary>
 
-Yes. It is MIT licensed — use it, change it, rebrand it, run it commercially. A credit back is appreciated but
-not required. The name, colours and links live in `src/config/theme.ts`.
+Yes, with two conditions. It is licensed under Apache 2.0 with the Commons Clause, so you can use it, change it,
+rebrand it and run it for your own servers, but:
+
+- **Keep the credit.** The [`NOTICE`](NOTICE) file names the original author, and it has to stay with any copy
+  or fork you share.
+- **Do not sell it.** You may not charge for the bot, or for hosting, support or a service whose value comes mainly
+  from it.
+
+Set `BOT_NAME` in `.env` to rename it; the colours and links live in `src/config/theme.ts`.
 
 </details>
 
@@ -680,6 +687,10 @@ If Testify has been useful to you, a [coffee](https://buymeacoffee.com/kkermit) 
 
 ## License
 
-Released under the terms of the [MIT License](LICENSE) [2026].
+Copyright 2026 Kkermit (Kkermit on Discord, [Kkkermit](https://github.com/Kkkermit) on GitHub).
+
+Released under the [Apache License 2.0](LICENSE) with the [Commons Clause](https://commonsclause.com) License
+Condition v1.0. You may use, modify and share it, but you may not sell it, and the attribution in [`NOTICE`](NOTICE)
+must be kept in every copy and derived work.
 
 **Thanks to [TheLegendDev](https://github.com/TheLegenDev) for the readme template from [Nub Bot](https://github.com/TheLegenDev/Nub-Bot)** 💛

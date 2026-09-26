@@ -22,7 +22,7 @@ export const TERMS: LegalDocument = {
 	sections: [
 		{
 			heading: "legal.whoRuns",
-			paragraphs: ["legal.whoRunsP1", "legal.whoRunsP2"],
+			paragraphs: ["legal.whoRunsP1", "legal.whoRunsP2", "legal.whoRunsP3"],
 		},
 		{
 			heading: "legal.usingBot",
