@@ -12,13 +12,13 @@ import { currentTrack, totalDurationMs, upcomingPage } from "@lib/music/musicQue
 /** The player as one screen: what is on, what is next, and the controls beside them. */
 
 /** Five upcoming rows is what fits before the container stops being glanceable. */
-export const QUEUE_PAGE_SIZE = 5;
+const QUEUE_PAGE_SIZE = 5;
 
 /** Discord's own cap on a title is generous; this is what stays readable in a container row. */
 const TITLE_MAX = 60;
 
 /** How wide the bar under the current track is drawn; more cells is a finer step per refresh. */
-export const BAR_CELLS = 24;
+const BAR_CELLS = 24;
 
 const SOURCE_EMOJI: Record<MusicSource, string> = {
 	youtube: "📺",

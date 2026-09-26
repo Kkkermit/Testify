@@ -209,7 +209,7 @@ export class SupportDesk {
 }
 
 /** Every entry the desk may answer with, minus any that could leak before a single question is asked. */
-export function buildEntries(client: TestifyClient, secrets: readonly string[]): SupportEntry[] {
+function buildEntries(client: TestifyClient, secrets: readonly string[]): SupportEntry[] {
 	const articles = loadArticles().flatMap((result) => {
 		if (result.ok) return [result.article];
 

@@ -26,7 +26,7 @@ export function visibleCommands(client: TestifyClient): Command[] {
 	return [...client.commands.values()].filter((command) => !HIDDEN_CATEGORIES.includes(command.category));
 }
 
-export function commandsInCategory(client: TestifyClient, category: Category): Command[] {
+function commandsInCategory(client: TestifyClient, category: Category): Command[] {
 	return visibleCommands(client)
 		.filter((command) => command.category === category)
 		.sort((a, b) => a.name.localeCompare(b.name));

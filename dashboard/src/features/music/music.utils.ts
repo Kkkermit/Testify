@@ -9,7 +9,7 @@ export function missingRoleIds(settings: Pick<MusicSettings, "djRoleIds">, roles
 	return settings.djRoleIds.filter((roleId) => !known.has(roleId));
 }
 
-export type Access = "everybody" | "djs" | "off";
+type Access = "everybody" | "djs" | "off";
 
 export function accessOf(settings: MusicSettings): Access {
 	if (!settings.enabled) return "off";

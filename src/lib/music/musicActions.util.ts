@@ -19,10 +19,6 @@ export function musicBinaries(client: TestifyClient): MusicBinaries {
 	return cached;
 }
 
-export function resetMusicBinaries(): void {
-	cached = null;
-}
-
 /** The voice channel the person is in, or advice on what to do about not being in one. */
 export function voiceChannelOf(member: GuildMember): VoiceBasedChannel {
 	const channel = member.voice.channel;

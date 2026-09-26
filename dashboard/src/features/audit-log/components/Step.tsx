@@ -1,6 +1,5 @@
 import { type ReactNode } from "react";
-import { Card } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Card, CARD_HEADING } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
 /** The number is decorative — the heading names the section — so it is hidden rather than read out before every title. */

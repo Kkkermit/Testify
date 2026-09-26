@@ -15,7 +15,7 @@ function remember(guildId: string, record: StoredMusicSettings): StoredMusicSett
 	return record;
 }
 
-export function clearMusicSettingsCache(guildId?: string): void {
+function clearMusicSettingsCache(guildId?: string): void {
 	if (guildId === undefined) cache.clear();
 	else cache.delete(guildId);
 }

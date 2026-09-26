@@ -7,7 +7,7 @@ import { ServiceError } from "@core/errors";
 export { createCanvas };
 export type { Canvas, SKRSContext2D };
 
-export async function fetchImage(url: string): Promise<Image> {
+async function fetchImage(url: string): Promise<Image> {
 	try {
 		const response = await fetch(url);
 		if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -68,7 +68,7 @@ export function roundedRect(
 	ctx.closePath();
 }
 
-export function circleClip(ctx: SKRSContext2D, x: number, y: number, radius: number): void {
+function circleClip(ctx: SKRSContext2D, x: number, y: number, radius: number): void {
 	ctx.save();
 	ctx.beginPath();
 	ctx.arc(x, y, radius, 0, Math.PI * 2);

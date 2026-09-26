@@ -1,7 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { Card, PageHeader } from "@/components/primitives";
-import { BackLink, PublicPage } from "@/components/primitives/PublicPage";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { BackLink, Card, CARD_HEADING, PageHeader, PublicPage } from "@/components/primitives";
 import { type LegalDocument } from "@/features/legal/legal.content";
 import { usePageTitle } from "@/hooks/usePageTitle";
 

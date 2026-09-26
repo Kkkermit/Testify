@@ -15,7 +15,7 @@ export function durationMsOf(amount: number, unit: DurationUnit): number {
 	return found === undefined ? 0 : Math.round(amount * found.ms);
 }
 
-export type GiveawayStatus = "running" | "ended";
+type GiveawayStatus = "running" | "ended";
 
 export function statusOf(row: GiveawayRow): GiveawayStatus {
 	return row.ended ? "ended" : "running";

@@ -1,7 +1,7 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-export interface DataRow {
+interface DataRow {
 	label: string;
 	value: ReactNode;
 	mono?: boolean;

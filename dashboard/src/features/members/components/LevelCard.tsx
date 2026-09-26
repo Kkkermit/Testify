@@ -3,8 +3,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
-import { Button, Card } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Button, Card, CARD_HEADING } from "@/components/primitives";
 
 export function LevelCard({
 	detail,

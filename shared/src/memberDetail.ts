@@ -51,8 +51,6 @@ export const warningBody = z.object({
 	reason: plainLine(WARNING_LIMITS.minReason, WARNING_LIMITS.maxReason),
 });
 
-export type WarningBody = z.infer<typeof warningBody>;
-
 export const MEMBER_LIMITS = {
 	maxLevel: 500,
 	maxXpGrant: 1_000_000,

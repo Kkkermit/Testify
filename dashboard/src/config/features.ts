@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 
 /** An unknown key falls back rather than rendering a hole, so the API can ship a feature before this knows about it. */
-export interface FeatureLook {
+interface FeatureLook {
 	icon: LucideIcon;
 	tint: string;
 	wash: string;

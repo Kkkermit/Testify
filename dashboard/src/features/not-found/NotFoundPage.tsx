@@ -1,8 +1,7 @@
 import { Compass } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router";
-import { Card, EmptyState, PageHeader } from "@/components/primitives";
-import { BackLink, PublicPage } from "@/components/primitives/PublicPage";
+import { BackLink, Card, EmptyState, PageHeader, PublicPage } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";

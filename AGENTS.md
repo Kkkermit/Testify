@@ -67,10 +67,10 @@ numbers, which drift):
 | Prefix aliases       | 84                                |
 | Button handlers      | 25                                |
 | Events               | 24, in 5 groups                   |
-| `src/lib` helpers    | 90, in 16 domain folders          |
+| `src/lib` helpers    | 92, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,638 across 264 suites           |
+| Tests                | 4,660 across 266 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.

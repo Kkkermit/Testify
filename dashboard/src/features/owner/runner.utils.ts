@@ -2,10 +2,10 @@ import { type CommandOptionSummary, type CommandSummary } from "@testify/shared"
 
 /** The rules behind the generated form, kept out of the component so they can be tested without rendering. */
 
-export type ArgValue = string | number | boolean;
+type ArgValue = string | number | boolean;
 
 /** What kind of control an option's declared type earns. */
-export type ControlKind = "text" | "number" | "boolean" | "choice" | "id";
+type ControlKind = "text" | "number" | "boolean" | "choice" | "id";
 
 export function controlFor(option: CommandOptionSummary): ControlKind {
 	if (option.choices.length > 0) return "choice";

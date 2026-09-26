@@ -15,7 +15,7 @@ import { fieldPaint } from "@/lib/three/tokens";
 
 /** The part of the backdrop that needs a GPU; everything that can be reasoned about is in `field.ts` and unit tested. */
 
-export interface StarfieldOptions {
+interface StarfieldOptions {
 	count?: number;
 	spread?: number;
 	depth?: number;

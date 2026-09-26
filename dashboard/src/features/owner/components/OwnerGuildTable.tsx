@@ -1,7 +1,6 @@
 import { type OwnerGuildRow } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Avatar, Badge } from "@/components/primitives";
-import { CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives/DataTable";
+import { Avatar, Badge, CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
 export function OwnerGuildTable({

@@ -84,7 +84,7 @@ async function checkSwitchedOff(interaction: CommandInput, command: Command): Pr
 }
 
 /** Which subcommand was used, or null — a command with no subcommands answers null the contract cannot express. */
-export function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null {
+function chosenSubcommand(interaction: CommandInput, command: Command): Subcommand | null {
 	if (command.subcommands === undefined) return null;
 
 	const chosen: string | null = interaction.options.getSubcommand(false);

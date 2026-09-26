@@ -2,8 +2,7 @@ import { type GuildOverview } from "@testify/shared";
 import { type ReactNode } from "react";
 import { Link } from "react-router";
 import { Reveal } from "@/components/motion";
-import { Badge, cardClass } from "@/components/primitives";
-import { CARD_ROW, HoverChevron } from "@/components/primitives/CardRow";
+import { Badge, CARD_ROW, cardClass, HoverChevron } from "@/components/primitives";
 import { featureLook } from "@/config/features";
 import { cn } from "@/lib/cn";
 

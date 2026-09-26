@@ -1,4 +1,4 @@
-import { applyPreference, type Preference, storedPreference, useRootPreference } from "@/hooks/rootPreference";
+import { type Preference, useRootPreference } from "@/hooks/rootPreference";
 
 export const THEMES = ["system", "light", "dark"] as const;
 export type Theme = (typeof THEMES)[number];
@@ -10,14 +10,6 @@ export const THEME: Preference<Theme> = {
 	options: THEMES,
 	fallback: "system",
 };
-
-export function storedTheme(): Theme {
-	return storedPreference(THEME);
-}
-
-export function applyTheme(theme: Theme): void {
-	applyPreference(THEME, theme);
-}
 
 export function useTheme(): { theme: Theme; setTheme: (next: Theme) => void } {
 	const { value, choose } = useRootPreference(THEME);

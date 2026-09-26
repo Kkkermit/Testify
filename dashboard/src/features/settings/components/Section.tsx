@@ -2,8 +2,7 @@ import { type LucideIcon } from "lucide-react";
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { SavingIndicator, type SavingState, Warning } from "@/components/form";
-import { Card } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Card, CARD_HEADING } from "@/components/primitives";
 import { ApiError } from "@/lib/api";
 
 /** One setting, one card, all the same shape — so adding one is a component rather than a layout decision. */

@@ -1,8 +1,7 @@
 import { type LotteryDrawSummary } from "@testify/shared";
 import { History } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Card, EmptyState } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Card, CARD_HEADING, EmptyState } from "@/components/primitives";
 import { dateAndTime, shortDate } from "@/lib/datetime";
 
 export function DrawHistory({

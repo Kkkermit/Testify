@@ -1,9 +1,10 @@
 import { screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { AppearancePage } from "@/features/appearance/AppearancePage";
-import { storedAccent } from "@/hooks/useAccent";
-import { storedMotion } from "@/hooks/useMotion";
-import { applyTheme, storedTheme } from "@/hooks/useTheme";
+import { applyPreference, storedPreference } from "@/hooks/rootPreference";
+import { ACCENT } from "@/hooks/useAccent";
+import { MOTION } from "@/hooks/useMotion";
+import { THEME } from "@/hooks/useTheme";
 import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
@@ -50,7 +51,7 @@ describe("choosing a theme", () => {
 
 		await user.click((await group("Theme")).getByRole("button", { name: "Dark" }));
 
-		expect(storedTheme()).toBe("dark");
+		expect(storedPreference(THEME)).toBe("dark");
 	});
 
 	/** Each sample forces its own `color-scheme`, which is what makes a light preview light on a dark page. */
@@ -108,7 +109,7 @@ describe("choosing an accent", () => {
 
 		await user.click(await screen.findByRole("button", { name: "Pink" }));
 
-		expect(storedAccent()).toBe("pink");
+		expect(storedPreference(ACCENT)).toBe("pink");
 	});
 });
 
@@ -131,22 +132,22 @@ describe("choosing how much motion to allow", () => {
 		await user.click((await group("Motion")).getByRole("button", { name: label }));
 
 		expect(document.documentElement).toHaveAttribute("data-motion", attribute);
-		expect(storedMotion()).toBe(attribute);
+		expect(storedPreference(MOTION)).toBe(attribute);
 	});
 });
 
-describe("storedTheme", () => {
+describe("the stored theme", () => {
 	it("falls back to system for anything that is not a theme", () => {
 		window.localStorage.setItem("testify:theme", "aubergine");
 
-		expect(storedTheme()).toBe("system");
+		expect(storedPreference(THEME)).toBe("system");
 	});
 });
 
-describe("applyTheme", () => {
+describe("applying a theme", () => {
 	it("replaces a previous choice rather than adding to it", () => {
-		applyTheme("dark");
-		applyTheme("light");
+		applyPreference(THEME, "dark");
+		applyPreference(THEME, "light");
 
 		expect(document.documentElement.getAttribute("data-theme")).toBe("light");
 	});

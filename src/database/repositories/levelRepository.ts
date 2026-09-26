@@ -28,7 +28,7 @@ export async function getUserLevel(guildId: string, userId: string): Promise<Use
 	return UserLevel.findOne({ guildId, userId }).lean<UserLevelRecord>().exec();
 }
 
-export async function getOrCreateUserLevel(guildId: string, userId: string): Promise<UserLevelRecord> {
+async function getOrCreateUserLevel(guildId: string, userId: string): Promise<UserLevelRecord> {
 	return UserLevel.findOneAndUpdate(
 		{ guildId, userId },
 		{ $setOnInsert: { guildId, userId } },

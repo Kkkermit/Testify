@@ -5,15 +5,15 @@ import { type Track } from "@lib/music/music.types";
 /** Feeding `/play`'s autocomplete without spawning a process for every keystroke. */
 
 /** Below this, a search is mostly noise and costs a round trip per letter. */
-export const MIN_SEARCH_LENGTH = 3;
+const MIN_SEARCH_LENGTH = 3;
 
 export const MAX_CHOICES = 25;
 
 /** Long enough to cover somebody typing a title, short enough that a new upload still turns up. */
-export const CACHE_TTL_MS = 300_000;
+const CACHE_TTL_MS = 300_000;
 
 /** Bounded, so a busy guild cannot grow this until the process runs out of memory. */
-export const CACHE_MAX_ENTRIES = 200;
+const CACHE_MAX_ENTRIES = 200;
 
 export interface Choice {
 	name: string;
@@ -112,7 +112,7 @@ export const INTERACTION_WINDOW_MS = 3_000;
 export const RESPONSE_MARGIN_MS = 800;
 
 /** What is left of the window when nothing is known about the interaction's own age. */
-export const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
+const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
 
 /**
  * How long the interaction has been open: the larger of Discord's clock and this host's, ignoring the snowflake when

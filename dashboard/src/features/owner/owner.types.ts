@@ -13,7 +13,7 @@ export const OWNER_TABS = [
 	{ key: "control", label: "owner.tabControl", icon: Power },
 ] as const satisfies readonly TabDefinition[];
 
-export type OwnerTab = (typeof OWNER_TABS)[number]["key"];
+type OwnerTab = (typeof OWNER_TABS)[number]["key"];
 
 export function ownerTabFrom(raw: string | null): OwnerTab {
 	const found = OWNER_TABS.find((tab) => tab.key === raw);

@@ -16,7 +16,7 @@ export function searchIsWorthFocusing(count: number): boolean {
 
 export type GuildGroupKey = "configurable" | "invitable" | "locked";
 
-export interface GuildGroup {
+interface GuildGroup {
 	key: GuildGroupKey;
 	titleKey: TranslationKey;
 	describesKey: TranslationKey;

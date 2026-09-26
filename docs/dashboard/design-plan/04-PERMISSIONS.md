@@ -86,26 +86,16 @@ Five things in there are load-bearing:
 5. **`.catch(() => null)`** on the fetch: an unknown member throws, and an unhandled throw here would be a 500
    that looks like a bug rather than a 403 that looks like a denial.
 
-## The permission logic worth extracting
+## Where the decision lives
 
-Put the decision itself in `shared/src/permissions.ts` as a pure function so it can be tested exhaustively and
-reused by the frontend for _rendering_ (not for gating):
+In `requireGuild` and `requireOwner` (`src/api/middleware/session.ts`), and nowhere else. A pure `accessFor`
+function in `shared/` was planned here and written, but reducing the answer to one of four roles throws away what
+the gate needs: an owner skips the member fetch, and "not a member" and "missing Manage Server" are different
+answers with different codes. Nothing used it, so it was deleted rather than left as a second copy of the rule.
 
-```ts
-export type Access = "owner" | "manager" | "member" | "stranger";
-
-export function accessFor(input: {
-	userId: string;
-	ownerIds: readonly string[];
-	botInGuild: boolean;
-	isMember: boolean;
-	hasManageGuild: boolean;
-}): Access;
-```
-
-The frontend uses it to decide whether to _show_ the owner console link. The backend uses it to decide whether to
-_serve_ the owner console. **The frontend's answer is a hint; the backend's is the gate.** Never the other way
-round, and never only the frontend — hiding a button is not access control.
+The frontend decides whether to _show_ the owner console link from `/auth/me`'s `isOwner`. The backend decides
+whether to _serve_ it. **The frontend's answer is a hint; the backend's is the gate.** Never the other way round,
+and never only the frontend — hiding a button is not access control.
 
 ## What each role sees
 
@@ -164,7 +154,8 @@ to the IP for anonymous routes, and take the IP from a configurable trusted-prox
 
 The permission layer is where tests earn their keep, and all of it is testable without a browser:
 
-- `accessFor` — exhaustive table test over the input combinations.
+- `requireOwner` — a manager gets 404, an owner passes, and removing an id from `DISCORD_OWNER_IDS` revokes it on
+  the next request.
 - `requireGuild` — bot not in guild → 404; member fetch fails → 403; has `ManageGuild` → passes; owner not in
   guild → passes; a guild id from the body being ignored in favour of the path.
 - Hierarchy — manager below target → 403; target is guild owner → 403; bot below target → a clear 409, not a 500.

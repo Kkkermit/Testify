@@ -18,7 +18,7 @@ export function pickScheme(value: string, dark: boolean): string {
 }
 
 /** `color-scheme` is `light dark` until somebody chooses, and then the browser's own preference decides. */
-export function prefersDark(root: Element = document.documentElement): boolean {
+function prefersDark(root: Element = document.documentElement): boolean {
 	const scheme = getComputedStyle(root).colorScheme.trim();
 	if (scheme === "dark") return true;
 	if (scheme === "light") return false;
@@ -37,7 +37,7 @@ export function backdropOpacity(root?: Element): number {
 	return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0.5;
 }
 
-export interface FieldPaint {
+interface FieldPaint {
 	colour: string;
 	opacity: number;
 }

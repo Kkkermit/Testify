@@ -2,8 +2,7 @@ import { inviteUrl, type ManageableGuild } from "@testify/shared";
 import { Lock, Plus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Card, cardClass, Avatar, Tooltip } from "@/components/primitives";
-import { CARD_ROW, HoverChevron } from "@/components/primitives/CardRow";
+import { Avatar, Card, CARD_ROW, cardClass, HoverChevron, Tooltip } from "@/components/primitives";
 import { type GuildGroupKey } from "@/features/guilds/guilds.utils";
 
 export function GuildCard({

@@ -28,7 +28,7 @@ export async function requireAccount(guildId: string, userId: string): Promise<E
 	return account;
 }
 
-export async function accountExists(guildId: string, userId: string): Promise<boolean> {
+async function accountExists(guildId: string, userId: string): Promise<boolean> {
 	return (await Economy.exists({ guildId, userId })) !== null;
 }
 
@@ -67,7 +67,7 @@ export async function debitWallet(guildId: string, userId: string, amount: numbe
 		.exec();
 }
 
-export async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
+async function debitBank(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	return Economy.findOneAndUpdate({ guildId, userId, bank: { $gte: amount } }, { $inc: { bank: -amount } }, LEAN)
 		.lean<EconomyAccount>()
 		.exec();

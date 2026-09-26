@@ -81,8 +81,8 @@ Ranked by how much a failure would cost.
 
 ### 1. Permission logic — exhaustive
 
-`shared/src/permissions.ts` is a pure function; test the whole truth table. Owner not in the guild, manager
-without `ManageGuild`, member of a guild the bot is not in, and so on. This is the code that stops someone
+`requireGuild` and `requireOwner` hold the whole decision; test every combination against them. Owner not in the
+guild, manager without `ManageGuild`, member of a guild the bot is not in, and so on. This is the code that stops someone
 configuring a server they do not own.
 
 ### 2. The API's guard middleware — integration, no browser

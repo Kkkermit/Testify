@@ -1,7 +1,7 @@
 import { LEVEL_LIMITS, type XpBoostInput } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { SELECT, RoleChecklist, savingStateOf } from "@/components/form";
-import { DividedList } from "@/components/primitives/DividedList";
+import { DividedList } from "@/components/primitives";
 import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";

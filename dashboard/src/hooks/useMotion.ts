@@ -1,4 +1,4 @@
-import { applyPreference, type Preference, storedPreference, useRootPreference } from "@/hooks/rootPreference";
+import { type Preference, useRootPreference } from "@/hooks/rootPreference";
 
 export const MOTIONS = ["system", "full", "reduced"] as const;
 export type Motion = (typeof MOTIONS)[number];
@@ -10,14 +10,6 @@ export const MOTION: Preference<Motion> = {
 	options: MOTIONS,
 	fallback: "system",
 };
-
-export function storedMotion(): Motion {
-	return storedPreference(MOTION);
-}
-
-export function applyMotion(motion: Motion): void {
-	applyPreference(MOTION, motion);
-}
 
 export function useMotion(): { motion: Motion; setMotion: (next: Motion) => void } {
 	const { value, choose } = useRootPreference(MOTION);

@@ -10,7 +10,7 @@ import { formatNumber } from "@lib/format/format.util";
 
 /** What you own, with the thing you would do to each item beside it. */
 
-export const INVENTORY_PAGE = 5;
+const INVENTORY_PAGE = 5;
 
 export interface InventoryEntry {
 	itemId: string;

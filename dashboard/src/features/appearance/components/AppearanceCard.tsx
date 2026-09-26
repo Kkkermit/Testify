@@ -1,6 +1,5 @@
 import { type ReactNode } from "react";
-import { cardClass } from "@/components/primitives/Card";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { CARD_HEADING, cardClass } from "@/components/primitives";
 
 /** A named region rather than a plain card, so a fragment link can carry focus to one setting out of four. */
 export function AppearanceCard({

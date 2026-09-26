@@ -8,7 +8,7 @@ const VARIANTS = {
 	destructive: "bg-destructive text-white hover:bg-destructive/90",
 } as const;
 
-export type ButtonVariant = keyof typeof VARIANTS;
+type ButtonVariant = keyof typeof VARIANTS;
 
 export function Button({
 	variant = "primary",

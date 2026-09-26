@@ -10,7 +10,7 @@ import {
 	useWarn,
 } from "@/features/members/useMemberDetail";
 
-export interface MemberActions {
+interface MemberActions {
 	member: UseQueryResult<MemberDetail>;
 	warn: UseMutationResult<MemberDetail, Error, string>;
 	remove: UseMutationResult<MemberDetail, Error, string>;

@@ -7,8 +7,16 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SearchField, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
-import { Card, EmptyState, Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
-import { SELECTED, UNSELECTED } from "@/components/primitives/stateStyles";
+import {
+	Card,
+	EmptyState,
+	Eyebrow,
+	PageHeader,
+	SELECTED,
+	Skeleton,
+	StatTile,
+	UNSELECTED,
+} from "@/components/primitives";
 import { configurableAt, coverage, filterCommands, groupByCategory } from "@/features/commands/commands.utils";
 import { CommandCard } from "@/features/commands/components/CommandCard";
 import { useCommands } from "@/features/commands/useCommands";

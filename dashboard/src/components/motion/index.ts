@@ -1,3 +1,2 @@
-export { AnimatedNumber } from "@/components/motion/AnimatedNumber";
-export { Backdrop, supportsWebgl } from "@/components/motion/Backdrop";
-export { Reveal, revealDelay } from "@/components/motion/Reveal";
+export { Backdrop } from "@/components/motion/Backdrop";
+export { Reveal } from "@/components/motion/Reveal";

@@ -1,5 +1,5 @@
 import { type HistoryLevel, type StatusDay, type StatusLevel } from "@testify/shared";
-import { type BadgeTone } from "@/components/primitives/Badge";
+import { type BadgeTone } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 
 export const LEVEL_TONE: Record<StatusLevel, BadgeTone> = {

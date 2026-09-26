@@ -15,7 +15,6 @@ export * from "./markup";
 export * from "./memberDetail";
 export * from "./members";
 export * from "./music";
-export * from "./permissions";
 export * from "./problems";
 export * from "./schemas";
 export * from "./settings";

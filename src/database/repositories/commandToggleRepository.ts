@@ -15,7 +15,7 @@ function remember(scope: string, disabled: string[]): string[] {
 	return disabled;
 }
 
-export function clearCommandToggleCache(scope?: string): void {
+function clearCommandToggleCache(scope?: string): void {
 	if (scope === undefined) cache.clear();
 	else cache.delete(scope);
 }

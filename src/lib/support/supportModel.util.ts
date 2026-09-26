@@ -6,7 +6,7 @@ import { type SupportEntry, type SupportPick, type SupportPicker } from "@lib/su
 /** Claude as a classifier: it reads the question and names one article id, and never writes a word the reader sees. */
 
 export const ANTHROPIC_API = "Anthropic API";
-export const DEFAULT_SUPPORT_MODEL = "claude-opus-5";
+const DEFAULT_SUPPORT_MODEL = "claude-opus-5";
 
 const NONE = "none";
 const TIMEOUT_MS = 10_000;

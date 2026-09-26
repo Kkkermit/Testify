@@ -1,9 +1,8 @@
 import { ExternalLink } from "lucide-react";
 import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Card, DataList, Skeleton } from "@/components/primitives";
+import { Card, CARD_HEADING, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
 import { formatUptime } from "@/features/owner/owner.utils";
 import { useRuntime } from "@/features/owner/useOwner";
 import { currentBotName } from "@/i18n";

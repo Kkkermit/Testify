@@ -5,8 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Button, Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { GiveawayRow } from "@/features/giveaways/components/GiveawayRow";
 import {
 	DURATION_UNITS,

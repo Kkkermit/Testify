@@ -2,8 +2,7 @@ import { type CommandRunResult } from "@testify/shared";
 import { Info } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
-import { Card } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Card, CARD_HEADING } from "@/components/primitives";
 import { hexColour } from "@/features/owner/runner.utils";
 import { clockTime } from "@/lib/datetime";
 

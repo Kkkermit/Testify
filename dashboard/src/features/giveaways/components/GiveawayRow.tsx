@@ -1,8 +1,7 @@
 import { type ChannelSummary, type GiveawayRow as Row } from "@testify/shared";
 import { Dices, Square, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Badge, Button, cardClass } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Badge, Button, CARD_HEADING, cardClass } from "@/components/primitives";
 import { canReroll } from "@/features/giveaways/giveaways.utils";
 import { dateAndTime, since } from "@/lib/datetime";
 

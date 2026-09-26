@@ -26,5 +26,3 @@ export const blacklistUserParam = z.object({ userId: snowflake });
 
 /** The server's name, typed to confirm and compared by the server, since leaving cannot be undone from here. */
 export const leaveGuildRequest = z.object({ confirm: z.string().min(1).max(100) });
-
-export type LeaveGuildRequest = z.infer<typeof leaveGuildRequest>;

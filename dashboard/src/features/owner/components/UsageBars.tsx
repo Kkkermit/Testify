@@ -2,7 +2,7 @@ import { BarChart3 } from "lucide-react";
 import { type ReactNode } from "react";
 import { barWidth } from "@/features/owner/owner.utils";
 
-export interface BarRow {
+interface BarRow {
 	id: string;
 	label: ReactNode;
 	/** Sits under the label — a category, a member count, whatever names the row further. */

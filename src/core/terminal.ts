@@ -116,6 +116,6 @@ export function stepLine(state: StepState, label: string, detail: string, ms?: n
 	return `  ${paint[style](glyph)} ${paint.bold(label.padEnd(12))}${detail}${timing}`;
 }
 
-export function formatMs(ms: number): string {
+function formatMs(ms: number): string {
 	return ms < 1_000 ? `${String(Math.round(ms))}ms` : `${(ms / 1_000).toFixed(1)}s`;
 }

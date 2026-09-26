@@ -129,7 +129,7 @@ nothing had ever checked these. Computed from the real tokens:
 The palette was in far better shape than "unverified" suggested — but the last two rows were a live conformance
 failure. **Phase 0 fixed both** by splitting fill from text: `--color-primary` stays the button fill and
 `--color-accent` carries every violet that is read as text, with `--color-destructive-text` doing the same for
-red. `lib/contrast.ts` now computes these in the test suite, reading the tokens straight out of `index.css`, so
+red. `src/test/contrast.ts` now computes these in the test suite, reading the tokens straight out of `index.css`, so
 the table above cannot drift from the palette again.
 
 ---
@@ -157,7 +157,7 @@ A rewrite with no exit criteria is churn. These are the criteria. **All of them 
 ## 5. Phase 0 — fix what is broken — **done**
 
 > Links and inline red now read `--color-accent` and `--color-destructive-text`; the fill violet is a fill only.
-> `src/lib/contrast.test.ts` reads the tokens out of `index.css` and fails if any pair drops below its
+> `src/test/contrast.test.ts` reads the tokens out of `index.css` and fails if any pair drops below its
 > threshold — proved by setting `--color-accent` back to the fill violet and watching three tests go red.
 
 Do this before any restyling. It is a bug fix, not a taste decision, and it is covered by "the accessibility

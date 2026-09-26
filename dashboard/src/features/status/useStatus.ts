@@ -3,7 +3,7 @@ import { type StatusResponse } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export const STATUS_REFRESH_MS = 30_000;
+const STATUS_REFRESH_MS = 30_000;
 
 /** Polls while the tab is visible; React Query stops the interval in a background tab on its own. */
 export function useStatus(): UseQueryResult<StatusResponse> {

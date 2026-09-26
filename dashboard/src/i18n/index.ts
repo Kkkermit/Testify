@@ -21,7 +21,7 @@ export const LOCALE_NAMES: Record<Locale, string> = {
 	ru: "Русский",
 };
 
-export const LOCALE_STORAGE_KEY = "testify:locale";
+const LOCALE_STORAGE_KEY = "testify:locale";
 
 const BOT_NAMED = "botNamed";
 

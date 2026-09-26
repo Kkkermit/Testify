@@ -75,6 +75,6 @@ export async function applyLottery(
 	return { settings: { ...next, enabled: true, nextDrawAt: nextDrawTime.toISOString() } };
 }
 
-export function nextDraw(frequency: LotterySettings["frequency"], from = Date.now()): Date {
+function nextDraw(frequency: LotterySettings["frequency"], from = Date.now()): Date {
 	return new Date(from + intervalFor(frequency));
 }

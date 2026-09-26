@@ -97,6 +97,6 @@ export function pageOfRank(rank: number): number {
 }
 
 /** Where the viewer sits, so "Find me" can jump straight there. */
-export async function rankOf(guild: Guild, kind: BoardKind, userId: string): Promise<number | null> {
+async function rankOf(guild: Guild, kind: BoardKind, userId: string): Promise<number | null> {
 	return rankOnBoard(guild.id, kind, userId);
 }

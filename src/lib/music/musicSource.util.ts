@@ -237,7 +237,7 @@ export interface StreamOptions {
  * How far ahead of the player the download may get; without room, yt-dlp blocks on a full pipe and its connection is
  * dropped.
  */
-export const BUFFER_BYTES = 1 << 24;
+const BUFFER_BYTES = 1 << 24;
 
 /** The last of stderr, which is all that is worth keeping and all that can be logged safely. */
 const PROBLEM_TAIL = 500;

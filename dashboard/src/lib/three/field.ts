@@ -1,6 +1,6 @@
 /** The geometry and easing behind the backdrop, kept away from three.js so it can be tested without a GPU. */
 
-export interface FieldShape {
+interface FieldShape {
 	count: number;
 	spread: number;
 	depth: number;

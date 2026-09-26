@@ -76,7 +76,7 @@ export async function listGiveaways(client: TestifyClient, guildId: string): Pro
 	return rows.map((record) => toRow(record, client));
 }
 
-export function toRow(record: GiveawayRecord, client: TestifyClient): GiveawayRow {
+function toRow(record: GiveawayRecord, client: TestifyClient): GiveawayRow {
 	return {
 		messageId: record.messageId,
 		channelId: record.channelId,

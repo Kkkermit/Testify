@@ -43,7 +43,7 @@ const READY_TIMEOUT_MS = 20_000;
 const RECONNECT_GRACE_MS = 5_000;
 
 /** How long an idle player keeps the channel before the bot leaves on its own. */
-export const LEAVE_AFTER_IDLE_MS = 120_000;
+const LEAVE_AFTER_IDLE_MS = 120_000;
 
 /** Discord allows five edits per five seconds in a channel, so this uses a fifth. */
 export const PANEL_REFRESH_MS = 5_000;
@@ -497,10 +497,6 @@ export function sessionFor(guild: Guild, binaries: MusicBinaries, logger: Logger
 
 export function findSession(guildId: string): MusicSession | null {
 	return sessions.get(guildId) ?? null;
-}
-
-export function activeSessionCount(): number {
-	return sessions.size;
 }
 
 /** Called from shutdown, so a restart does not leave the bot sitting silently in voice channels. */

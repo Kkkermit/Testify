@@ -5,7 +5,7 @@ import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
 /** The articles never change while the bot runs, so one read lasts the session. */
-export function useSupportIndex(): UseQueryResult<SupportIndex> {
+function useSupportIndex(): UseQueryResult<SupportIndex> {
 	return useQuery({ queryKey: keys.support(), queryFn: () => api.get<SupportIndex>("/support"), staleTime: Infinity });
 }
 

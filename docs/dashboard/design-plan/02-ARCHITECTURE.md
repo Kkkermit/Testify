@@ -90,8 +90,7 @@ Testify/
 │   ├── package.json          name: "@testify/shared"
 │   └── src/
 │       ├── api.ts            request/response types per endpoint
-│       ├── schemas.ts        zod schemas — validated server-side, reused in forms
-│       └── permissions.ts    pure role logic, tested once, used by both
+│       └── schemas.ts        zod schemas — validated server-side, reused in forms
 └── dashboard/                NEW — the Vite SPA
     ├── package.json
     ├── vite.config.ts

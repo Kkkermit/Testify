@@ -3,7 +3,9 @@ beforeEach(() => {
 	const reset = (module: string, name: string): void => {
 		const loaded = jest.requireActual(module);
 		const fn = loaded[name];
-		if (typeof fn === "function") (fn as () => void)();
+		// A renamed reset would otherwise stop running without anybody noticing, and suites would share state.
+		if (typeof fn !== "function") throw new Error(`${module} no longer exports ${name}; update tests/setup.ts.`);
+		(fn as () => void)();
 	};
 
 	reset("@config/env", "resetEnv");

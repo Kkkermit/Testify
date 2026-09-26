@@ -8,7 +8,7 @@ const PADDING = {
 	default: "p-6",
 } as const;
 
-export type CardPadding = keyof typeof PADDING;
+type CardPadding = keyof typeof PADDING;
 
 /** No drop shadow anywhere: on near-black they read as smudges. Elevation is surface colour and a 1px border. */
 const SURFACE = "bg-card border-border surface-edge rounded-card border";

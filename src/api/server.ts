@@ -151,8 +151,8 @@ export function listenAdvice(error: NodeJS.ErrnoException, port: number): string
 }
 
 /** How many times a listen is worth retrying, and how long to wait between attempts. */
-export const LISTEN_RETRIES = 5;
-export const LISTEN_RETRY_MS = 3_000;
+const LISTEN_RETRIES = 5;
+const LISTEN_RETRY_MS = 3_000;
 
 /** Only a port somebody else still holds is worth waiting for; a missing permission will never arrive. */
 export function worthRetrying(error: NodeJS.ErrnoException): boolean {

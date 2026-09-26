@@ -34,13 +34,3 @@ export const pagination = z.object({
 	page: z.coerce.number().int().min(1).max(10_000).default(1),
 	perPage: z.coerce.number().int().min(1).max(100).default(25),
 });
-
-export type Pagination = z.infer<typeof pagination>;
-
-/** Text that ends up in a Discord message, capped at Discord's limit with control characters stripped. */
-export function boundedText(max: number, label = "text"): z.ZodType<string> {
-	return z
-		.string()
-		.max(max, `${label} cannot be longer than ${String(max)} characters`)
-		.transform((value) => value.replaceAll(/[\p{Cc}\p{Cf}]/gu, (match) => (match === "\n" ? match : "")));
-}

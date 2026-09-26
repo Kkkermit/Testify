@@ -7,7 +7,7 @@ import { type Logger } from "@core/logger";
 import { type MessageHandler } from "@core/message";
 import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 
-export const intents = [
+const intents = [
 	GatewayIntentBits.Guilds,
 	GatewayIntentBits.GuildMembers,
 	GatewayIntentBits.GuildModeration,
@@ -20,7 +20,7 @@ export const intents = [
 	GatewayIntentBits.AutoModerationConfiguration,
 ];
 
-export const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
+const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 
 /** The bot. */
 export class TestifyClient extends Client {

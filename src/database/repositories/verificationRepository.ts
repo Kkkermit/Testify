@@ -10,7 +10,7 @@ const UPSERT = { upsert: true as const, new: true as const, lean: true as const,
 
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 
-export function generateCode(length = 6): string {
+function generateCode(length = 6): string {
 	let code = "";
 	for (let index = 0; index < length; index += 1) {
 		code += CODE_ALPHABET[randomInt(CODE_ALPHABET.length)];

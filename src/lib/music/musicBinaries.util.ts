@@ -61,7 +61,7 @@ export function locate(name: string, configured: string | undefined, probe: Prob
 	return candidatesFor(name, configured).find((candidate) => probe(candidate, args)) ?? null;
 }
 
-export const readVersion: VersionProbe = (path) => {
+const readVersion: VersionProbe = (path) => {
 	const attempt = spawnSync(path, [VERSION_FLAG["yt-dlp"] ?? "--version"], {
 		encoding: "utf8",
 		timeout: 10_000,
@@ -75,7 +75,7 @@ export const readVersion: VersionProbe = (path) => {
 };
 
 /** yt-dlp versions are release dates — `2026.09.15`, sometimes with a fourth part — so they sort as dates do. */
-export function releaseDateOf(version: string): Date | null {
+function releaseDateOf(version: string): Date | null {
 	const match = /^(\d{4})\.(\d{1,2})\.(\d{1,2})/.exec(version.trim());
 	if (match === null) return null;
 

@@ -33,8 +33,6 @@ export const boardQuery = z.object({
 	page: z.coerce.number().int().min(1).default(1),
 });
 
-export type BoardQuery = z.infer<typeof boardQuery>;
-
 export const BOARD_LABELS: Record<MemberBoard, { heading: string; primary: string; secondary: string }> = {
 	economy: { heading: "Richest", primary: "Total", secondary: "Banked" },
 	levels: { heading: "Top levels", primary: "Level", secondary: "XP" },

@@ -1,12 +1,6 @@
 import { type ChannelSummary, type RoleSummary } from "@testify/shared";
-import { EyeOff, Gift, Settings2, Zap, type LucideIcon } from "lucide-react";
-import { type TranslationKey } from "@/i18n";
-
-export interface TabDefinition {
-	key: string;
-	label: TranslationKey;
-	icon: LucideIcon;
-}
+import { EyeOff, Gift, Settings2, Zap } from "lucide-react";
+import { type TabDefinition } from "@/components/primitives";
 
 /** Adding a tab is an entry here and a branch in the page; the tab bar and the URL handling follow. */
 export const TABS = [

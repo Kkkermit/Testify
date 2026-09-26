@@ -10,7 +10,7 @@ import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
 /** A spread would let an absent field overwrite a present one with `undefined`. */
-export function applyPatch(current: WelcomeConfigResponse, patch: WelcomePatch): WelcomeConfigResponse {
+function applyPatch(current: WelcomeConfigResponse, patch: WelcomePatch): WelcomeConfigResponse {
 	return {
 		...current,
 		...(patch.enabled === undefined ? {} : { enabled: patch.enabled }),

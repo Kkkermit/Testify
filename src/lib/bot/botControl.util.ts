@@ -5,7 +5,7 @@ import { type BotControlState, type GatewayState } from "@testify/shared";
 
 /** Pausing and resuming the bot without ending the process the dashboard is served from. */
 
-export function gatewayStateOf(client: TestifyClient): GatewayState {
+function gatewayStateOf(client: TestifyClient): GatewayState {
 	if (client.paused) return "paused";
 
 	return client.isReady() ? "online" : "connecting";

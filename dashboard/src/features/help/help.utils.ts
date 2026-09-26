@@ -10,7 +10,7 @@ import { allNavItems, navigationFor, type NavGroup } from "@/config/navigation";
 import { type TranslationKey } from "@/i18n";
 
 /** One area of the dashboard, as the tour describes it. */
-export interface HelpArea {
+interface HelpArea {
 	labelKey: TranslationKey;
 	hintKey: TranslationKey | undefined;
 	icon: LucideIcon;
@@ -46,7 +46,7 @@ export function suggestionsFor(
 		.map((hit) => hit.entry);
 }
 
-export interface TopicGroup {
+interface TopicGroup {
 	topic: SupportTopic;
 	articles: SupportCatalogueEntry[];
 }

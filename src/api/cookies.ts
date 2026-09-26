@@ -11,7 +11,7 @@ export const SESSION_COOKIE = "dash_session";
 export const CSRF_COOKIE = "dash_csrf";
 export const OAUTH_COOKIE = "dash_oauth";
 
-export const OAUTH_COOKIE_MAX_AGE = 600;
+const OAUTH_COOKIE_MAX_AGE = 600;
 
 function secureFor(env: Env): boolean {
 	return env.NODE_ENV !== "development";

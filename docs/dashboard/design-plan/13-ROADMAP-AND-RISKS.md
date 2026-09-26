@@ -9,7 +9,7 @@ flag. Estimates assume one person working in evenings; halve them for full days.
 
 Nothing user-visible. Get the plumbing right or every later phase pays for it.
 
-- npm workspaces; `shared/` with zod schemas and `permissions.ts`.
+- npm workspaces; `shared/` with zod schemas.
 - Hono server in `src/api/`, started after login, closed in the existing shutdown path, with `runRoute` catching
   everything so a route bug cannot kill the bot.
 - `dashboardSession` and `dashboardAudit` schemas plus repositories.

@@ -1,4 +1,4 @@
-import { applyPreference, type Preference, storedPreference, useRootPreference } from "@/hooks/rootPreference";
+import { type Preference, useRootPreference } from "@/hooks/rootPreference";
 
 export const ACCENTS = ["violet", "blue", "cyan", "teal", "amber", "pink"] as const;
 export type Accent = (typeof ACCENTS)[number];
@@ -10,14 +10,6 @@ export const ACCENT: Preference<Accent> = {
 	options: ACCENTS,
 	fallback: "violet",
 };
-
-export function storedAccent(): Accent {
-	return storedPreference(ACCENT);
-}
-
-export function applyAccent(accent: Accent): void {
-	applyPreference(ACCENT, accent);
-}
 
 export function useAccent(): { accent: Accent; setAccent: (next: Accent) => void } {
 	const { value, choose } = useRootPreference(ACCENT);

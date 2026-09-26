@@ -1,7 +1,6 @@
 import { type MemberDetail } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Avatar, Badge, Card, Figure } from "@/components/primitives";
-import { CARD_HEADING } from "@/components/primitives/textStyles";
+import { Avatar, Badge, Card, CARD_HEADING, Figure } from "@/components/primitives";
 import { describeJoined, softbanActive, statsOf } from "@/features/members/memberDetail.utils";
 
 /** How many roles fit before the header stops being a glance. */

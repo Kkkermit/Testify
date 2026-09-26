@@ -1,6 +1,5 @@
 import { Trans, useTranslation } from "react-i18next";
-import { Card, Eyebrow } from "@/components/primitives";
-import { PAGE_TITLE } from "@/components/primitives/textStyles";
+import { Card, Eyebrow, PAGE_TITLE } from "@/components/primitives";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 /** Names each missing variable and the exact redirect URI to paste, because this is where most self-hosted dashboards lose people. */

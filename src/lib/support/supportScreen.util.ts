@@ -8,7 +8,7 @@ import { linkTarget, type SupportArticleLink, type SupportReply, type SupportTop
 
 /** The support answer as a Discord message: the article, then a button beside each related one. */
 
-export const TOPIC_LABELS: Record<SupportTopic, string> = {
+const TOPIC_LABELS: Record<SupportTopic, string> = {
 	"getting-started": "Getting started",
 	dashboard: "Using the dashboard",
 	setup: "Setting up features",
@@ -19,7 +19,7 @@ export const TOPIC_LABELS: Record<SupportTopic, string> = {
 	commands: "Command reference",
 };
 
-export const TOPIC_EMOJI: Record<SupportTopic, string> = {
+const TOPIC_EMOJI: Record<SupportTopic, string> = {
 	"getting-started": "🚀",
 	dashboard: "🖥️",
 	setup: "⚙️",

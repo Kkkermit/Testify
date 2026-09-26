@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-export interface StripEdges {
+interface StripEdges {
 	start: boolean;
 	end: boolean;
 }
@@ -24,7 +24,7 @@ export interface TabDefinition<Key extends string = string> {
 }
 
 /** Stable ids so a tab can point at its panel and the panel can borrow the tab's name. */
-export function tabIds(label: string, key: string): { tabId: string; panelId: string } {
+function tabIds(label: string, key: string): { tabId: string; panelId: string } {
 	const group = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 	return { tabId: `${group}-tab-${key}`, panelId: `${group}-panel-${key}` };
 }
