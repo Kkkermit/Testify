@@ -1,56 +1,39 @@
 {
-    "id": [
-        "1234567890",
-        "0987654321",
-        "5432167890",
-        "4673456783",
-        "1295674377",
-        "2364784236",
-        "7985644738"
-    ],
-    "wifiName": [
-        "SKY485hd3",
-        "TFGS36H75",
-        "SKY295GH9",
-        "EE23HGD64",
-        "TG67J5G43",
-        "SKY11LLS4",
-        "EEKF45H54"
-    ],
-    "wifiPassword": [
-        "Tgs35Jf4",
-        "Jg5Hf4J5",
-        "Hltg567h",
-        "FFjj3j36",
-        "Pp5Jg5J5",
-        "34PoImmf",
-        "Qgr34671"
-    ],
-    "location": [
-        "12 Pretty Dr \nScole \nDiss \nIP21 4DG",
-        "23 Green Rd \nHalesworth \nIP19 8JH",
-        "45 Blue St \nEye \\nIP23 7JG",
-        "67 Red Rd \nHarleston \nIP20 9JF",
-        "89 Yellow St \nBeccles \nNR34 9JG",
-        "90 Orange Rd \nLowestoft \nNR32 9JH",
-        "11 Purple St \nBungay \nNR35 9JF"
-    ],
-    "dob": [
-        "31/02/2005",
-        "12/04/2001",
-        "23/05/2000",
-        "01/01/2001",
-        "21/05/2005",
-        "05/05/2005",
-        "01/01/2005"
-    ],
-    "creditCard": [
-        "Credit Card: 1234 5678 9101 1121 \nExpiry Date: 12/23 \nCVV: 123",
-        "Credit Card: 4321 8765 1098 2111 \nExpiry Date: 11/22 \nCVV: 321",
-        "Credit Card: 5678 1234 2111 1098 \nExpiry Date: 10/21 \nCVV: 456",
-        "Credit Card: 8765 4321 1211 9876 \nExpiry Date: 09/20 \nCVV: 789",
-        "Credit Card: 9876 5432 2111 8765 \nExpiry Date: 08/19 \nCVV: 654",
-        "Credit Card: 6543 2109 1112 5432 \nExpiry Date: 07/18 \nCVV: 987",
-        "Credit Card: 3210 9876 2111 2345 \nExpiry Date: 06/17 \nCVV: 321"
-    ]
+	"passwords": ["{name}845!!", "password", "Password123", "{name}IsTheBest", "letmein", "hunter2", "correct horse battery staple"],
+	"ipAddresses": ["127.0.0.1", "192.168.0.1", "0.0.0.0", "10.0.0.42", "::1", "999.999.999.999"],
+	"wifi": [
+		{ "name": "FBI Surveillance Van 3", "password": "notthefbi" },
+		{ "name": "Pretty Fly for a WiFi", "password": "flyingsohigh" },
+		{ "name": "Bill Wi the Science Fi", "password": "inertia" },
+		{ "name": "Abraham Linksys", "password": "fourscore" },
+		{ "name": "The LAN Before Time", "password": "dinosaurs" },
+		{ "name": "Hide Yo Kids, Hide Yo WiFi", "password": "hideyowifi" },
+		{ "name": "Loading…", "password": "stillloading" }
+	],
+	"addresses": [
+		"221B Baker Street, London",
+		"742 Evergreen Terrace, Springfield",
+		"4 Privet Drive, Little Whinging",
+		"124 Conch Street, Bikini Bottom",
+		"P. Sherman, 42 Wallaby Way, Sydney",
+		"12 Grimmauld Place, London",
+		"A cardboard box behind the chip shop"
+	],
+	"birthdays": ["30 February 2005", "31 April 2001", "0 January 2000", "32 December 1999", "Tomorrow", "Yes"],
+	"cards": [
+		{ "number": "0000 0000 0000 0000", "expiry": "13/99", "cvv": "abc" },
+		{ "number": "1234 5678 9012 3456", "expiry": "00/00", "cvv": "000" },
+		{ "number": "A library card", "expiry": "Overdue", "cvv": "n/a" },
+		{ "number": "Monopoly money", "expiry": "Game over", "cvv": "🎲" },
+		{ "number": "An expired Tesco Clubcard", "expiry": "2009", "cvv": "12p" }
+	],
+	"searches": [
+		"how to hack a discord account",
+		"can you download more ram",
+		"why is my wifi called fbi van",
+		"how to delete search history",
+		"am i being hacked right now",
+		"how to become a discord mod",
+		"can dogs eat pizza"
+	]
 }
