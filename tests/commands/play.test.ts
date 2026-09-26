@@ -34,13 +34,24 @@ interface Answer {
 	value: string;
 }
 
-async function autocompleteFor(typed: string): Promise<Answer[]> {
-	const respond = jest.fn((_choices: Answer[]) => Promise.resolve(undefined));
-	const interaction = {
+let nextId = 0;
+
+function typing(typed: string, userId = "100000000000000001") {
+	nextId += 1;
+
+	return {
+		id: String(nextId),
+		guildId: "200000000000000001",
+		createdTimestamp: Date.now(),
 		options: { getFocused: () => typed },
-		user: { id: "100000000000000001" },
-		respond,
+		user: { id: userId },
+		respond: jest.fn((_choices: Answer[]) => Promise.resolve(undefined)),
 	};
+}
+
+async function autocompleteFor(typed: string): Promise<Answer[]> {
+	const interaction = typing(typed);
+	const respond = interaction.respond;
 
 	await play.autocomplete?.(interaction as never, {} as never);
 
@@ -110,5 +121,38 @@ describe("/play autocomplete", () => {
 			expect(row.name.length).toBeLessThanOrEqual(CHOICE_MAX);
 			expect(row.value.length).toBeLessThanOrEqual(CHOICE_MAX);
 		}
+	});
+
+	/** Discord's client shows only the newest keystroke's answer, and answering an older one was a refused request. */
+	it("does not answer a keystroke somebody has already typed past", async () => {
+		let finish: (tracks: Track[]) => void = () => undefined;
+		resolveTracks.mockImplementationOnce(() => new Promise<Track[]>((resolve) => (finish = resolve)));
+		resolveTracks.mockResolvedValueOnce([track("bushido")]);
+
+		const first = typing("bushi");
+		const second = typing("bushid");
+		const firstDone = play.autocomplete?.(first as never, {} as never);
+		await play.autocomplete?.(second as never, {} as never);
+		finish([track("bushi")]);
+		await firstDone;
+
+		expect(first.respond).not.toHaveBeenCalled();
+		expect(second.respond).toHaveBeenCalledTimes(1);
+	});
+
+	it("answers two people typing at once, because one person's keystroke never supersedes another's", async () => {
+		let finish: (tracks: Track[]) => void = () => undefined;
+		resolveTracks.mockImplementationOnce(() => new Promise<Track[]>((resolve) => (finish = resolve)));
+		resolveTracks.mockResolvedValueOnce([track("other")]);
+
+		const first = typing("first person", "100000000000000001");
+		const second = typing("second person", "100000000000000002");
+		const firstDone = play.autocomplete?.(first as never, {} as never);
+		await play.autocomplete?.(second as never, {} as never);
+		finish([track("first")]);
+		await firstDone;
+
+		expect(first.respond).toHaveBeenCalledTimes(1);
+		expect(second.respond).toHaveBeenCalledTimes(1);
 	});
 });

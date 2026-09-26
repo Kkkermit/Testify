@@ -15,7 +15,11 @@ function clientWith(autocomplete: () => Promise<void>): TestifyClient {
 }
 
 function typing(): Interaction {
-	return { isAutocomplete: () => true, commandName: "play" } as unknown as Interaction;
+	return {
+		isAutocomplete: () => true,
+		commandName: "play",
+		createdTimestamp: Date.now() - 2_500,
+	} as unknown as Interaction;
 }
 
 beforeEach(() => {
@@ -33,6 +37,21 @@ it("notes an expired autocomplete interaction rather than reporting it as a fail
 
 	expect(logger.error).not.toHaveBeenCalled();
 	expect(logger.debug).toHaveBeenCalledTimes(1);
+});
+
+/** One per keystroke, and a stack each ran to forty lines that pointed at nothing wrong. */
+it("notes an expired interaction in one line, with its age rather than its stack", async () => {
+	const expired = new DiscordAPIError({ message: "Unknown interaction", code: 10062 }, 10062, 404, "POST", "u", {});
+
+	await interactionCreate.run(
+		clientWith(() => Promise.reject(expired)),
+		typing(),
+	);
+
+	const [context] = logger.debug.mock.calls[0] as [Record<string, unknown>];
+	expect(context).not.toHaveProperty("err");
+	expect(context).toEqual({ command: "play", ageMs: expect.any(Number) });
+	expect(context.ageMs).toBeGreaterThanOrEqual(2_500);
 });
 
 it("still reports anything else as a failure, with its stack", async () => {

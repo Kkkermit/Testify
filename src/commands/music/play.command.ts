@@ -4,6 +4,7 @@ import {
 	CHOICE_MAX,
 	choicesFor,
 	interactionAge,
+	Keystrokes,
 	musicBinaries,
 	queueRequest,
 	requestedQuery,
@@ -20,6 +21,7 @@ import {
 
 /** Autocomplete fires on every keystroke, so a typed title must not become a search per letter. */
 const suggestions = new Suggester();
+const keystrokes = new Keystrokes();
 
 export default defineCommand({
 	name: "play",
@@ -79,23 +81,30 @@ export default defineCommand({
 			return;
 		}
 
-		const choices = await suggestions.suggest(
-			typed,
-			async () => {
-				const found = await resolveTracks(
-					{ kind: "search", terms: typed, source: query?.source ?? "youtube" },
-					interaction.user.id,
-					musicBinaries(client),
-					{ flat: true },
-				);
+		const typist = `${interaction.guildId ?? "dm"}:${interaction.user.id}`;
+		keystrokes.begin(typist, interaction.id);
 
-				return choicesFor(found.slice(0, SEARCH_RESULTS));
-			},
-			searchBudget(age()),
-		);
+		try {
+			const choices = await suggestions.suggest(
+				typed,
+				async () => {
+					const found = await resolveTracks(
+						{ kind: "search", terms: typed, source: query?.source ?? "youtube" },
+						interaction.user.id,
+						musicBinaries(client),
+						{ flat: true },
+					);
 
-		if (!stillOpen(age())) return;
+					return choicesFor(found.slice(0, SEARCH_RESULTS));
+				},
+				searchBudget(age()),
+			);
 
-		await interaction.respond(choices);
+			if (!stillOpen(age()) || !keystrokes.isLatest(typist, interaction.id)) return;
+
+			await interaction.respond(choices);
+		} finally {
+			keystrokes.end(typist, interaction.id);
+		}
 	},
 });

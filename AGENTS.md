@@ -1138,7 +1138,9 @@ drawn falls back to the thumbnail layout with `attachments: []`, so no stale pic
 **The re-encode is 160 kbps, and that was measured, not guessed.** Every level but 100% decodes and re-encodes.
 Through the real FFmpeg arguments, against a 160 kbps Opus source at the same level, 128 kbps scored 28.1 dB SNR,
 160 kbps 31.3 and 256 kbps 31.7; adding `-vbr on -compression_level 10 -application audio` gave a byte-identical
-file, so libopus's defaults already are those. 100% remains the only path that loses nothing. `bestFirst` breaks a
+file, so libopus's defaults already are those. 100% remains the only path that loses nothing. **The voice is chosen before the bitrate:** a dubbed video lists
+every language at every bitrate, and yt-dlp's `language_preference` (10 for the original, 5 for the default, lower
+for a dub) decides first, so a machine-translated track can never win on quality. `bestFirst` breaks a
 bitrate tie by yt-dlp's own order, which lists formats worst to best — a stable sort over missing bitrates used to
 pick the worst format on offer.
 
@@ -1159,6 +1161,11 @@ process received it, and takes the longer: a host whose clock is behind Discord'
 brand new and searches straight past the window. The snowflake is dropped altogether when the two disagree by
 more than the window it is measuring. When nothing is left, the answer is skipped rather than sent, because a
 refused request and a log line buy nothing the reader can see.
+
+**Only the newest keystroke is answered.** Discord's client shows the answer to the latest keystroke and drops the
+rest, so `Keystrokes` remembers each person's newest interaction and an older search that finishes late stays
+quiet. `RESPONSE_MARGIN_MS` is 1.5 seconds, because answers sent 2.2 seconds in were refused from a home
+connection. A 10062 that still gets through is logged as one line with its age, without a stack.
 
 **The music system has a switch and a guest list, and `checks.ts` is the gate for both.** `musicsettings` holds
 one row per server — `enabled`, and `djRoleIds` — read before every music command and cached exactly like the

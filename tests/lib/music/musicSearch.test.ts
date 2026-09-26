@@ -4,6 +4,7 @@ import {
 	type Choice,
 	INTERACTION_WINDOW_MS,
 	interactionAge,
+	Keystrokes,
 	choiceFor,
 	choicesFor,
 	literalChoice,
@@ -265,5 +266,29 @@ describe("the interaction's own clock", () => {
 	it("knows when there is no point answering", () => {
 		expect(stillOpen(INTERACTION_WINDOW_MS - 1)).toBe(true);
 		expect(stillOpen(INTERACTION_WINDOW_MS)).toBe(false);
+	});
+});
+
+describe("Keystrokes", () => {
+	it("knows only the newest keystroke is worth answering", () => {
+		const keys = new Keystrokes();
+		keys.begin("guild:user", "1");
+		keys.begin("guild:user", "2");
+
+		expect(keys.isLatest("guild:user", "1")).toBe(false);
+		expect(keys.isLatest("guild:user", "2")).toBe(true);
+	});
+
+	/** An older keystroke finishing late must not clear the one still waiting on its answer. */
+	it("forgets somebody only when their newest keystroke is answered", () => {
+		const keys = new Keystrokes();
+		keys.begin("guild:user", "1");
+		keys.begin("guild:user", "2");
+
+		keys.end("guild:user", "1");
+		expect(keys.isLatest("guild:user", "2")).toBe(true);
+
+		keys.end("guild:user", "2");
+		expect(keys.size).toBe(0);
 	});
 });

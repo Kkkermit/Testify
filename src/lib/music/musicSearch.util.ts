@@ -108,8 +108,8 @@ export class SearchCache {
 /** Discord closes an autocomplete interaction three seconds after it was created. */
 export const INTERACTION_WINDOW_MS = 3_000;
 
-/** Room for the answer itself to reach Discord, which is a round trip rather than a local call. */
-export const RESPONSE_MARGIN_MS = 800;
+/** Room for the answer to reach Discord; answers sent 2.2 seconds in were refused from a home connection. */
+export const RESPONSE_MARGIN_MS = 1_500;
 
 /** What is left of the window when nothing is known about the interaction's own age. */
 const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
@@ -133,6 +133,28 @@ export function searchBudget(age: number): number {
 /** Answering a window Discord has already closed is a refused request and a line in the log, for nothing. */
 export function stillOpen(age: number): boolean {
 	return age < INTERACTION_WINDOW_MS;
+}
+
+/** Which autocomplete each person is typing into now; Discord's client drops the answer to any keystroke before it. */
+export class Keystrokes {
+	readonly #latest = new Map<string, string>();
+
+	/** How many people are mid-keystroke, which is what proves an answered keystroke is forgotten. */
+	get size(): number {
+		return this.#latest.size;
+	}
+
+	begin(typist: string, interactionId: string): void {
+		this.#latest.set(typist, interactionId);
+	}
+
+	isLatest(typist: string, interactionId: string): boolean {
+		return this.#latest.get(typist) === interactionId;
+	}
+
+	end(typist: string, interactionId: string): void {
+		if (this.isLatest(typist, interactionId)) this.#latest.delete(typist);
+	}
 }
 
 /** Resolves to `null` when the work has not finished in time, leaving it running rather than cancelling it. */

@@ -17,13 +17,14 @@ export default defineEvent({
 			try {
 				await command.autocomplete(interaction, client);
 			} catch (error) {
-				const context = { err: toError(error), command: interaction.commandName };
+				const command = interaction.commandName;
 
-				// An interaction that expired before the answer landed is somebody typing fast, not a bug to chase.
+				// An interaction that expired before the answer landed is somebody typing fast, so its stack says nothing.
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownInteraction) {
-					client.logger.debug(context, "Autocomplete answered an interaction that had already expired");
+					const ageMs = Date.now() - interaction.createdTimestamp;
+					client.logger.debug({ command, ageMs }, "Autocomplete answered an interaction that had already expired");
 				} else {
-					client.logger.error(context, "Autocomplete failed");
+					client.logger.error({ err: toError(error), command }, "Autocomplete failed");
 				}
 			}
 			return;
