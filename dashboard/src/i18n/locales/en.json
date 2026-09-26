@@ -92,7 +92,11 @@
 		"music": "Music",
 		"musicHint": "The player, and who may use it",
 		"status": "Status",
-		"statusHint": "Whether the bot is online, and how quickly it answers"
+		"statusHint": "Whether the bot is online, and how quickly it answers",
+		"botStats": "Bot statistics",
+		"botStatsHint": "A message {{bot}} keeps up to date",
+		"memberCount": "Member count",
+		"memberCountHint": "Who is here, and who joined lately"
 	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
@@ -1037,5 +1041,36 @@
 		"lastCall": "Last call {{when}}",
 		"failedOf_one": "{{failures}} of {{count}} call failed",
 		"failedOf_other": "{{failures}} of {{count}} calls failed"
+	},
+	"botStats": {
+		"title": "Bot statistics",
+		"subtitle": "A message {{bot}} keeps in one channel with its servers, members, uptime and speed, refreshed every five minutes.",
+		"where": "Where it is posted",
+		"posted": "Posted",
+		"notPosted": "Not posted",
+		"noneBody": "Nothing is posted yet. Choose a channel below.",
+		"goneBody": "The channel it was in has been deleted. Post it somewhere else, or remove it.",
+		"postedBody": "Posted in #{{channel}}.",
+		"remove": "Remove the message",
+		"chooseTitle": "Choose a channel",
+		"chooseBody": "Posting sends a new message and takes down the old one, so there is only ever one.",
+		"channel": "Channel",
+		"channelHint": "{{bot}} needs to be able to send messages there.",
+		"postAction": "Post it here",
+		"moveAction": "Move it here",
+		"repostAction": "Post it again"
+	},
+	"memberCount": {
+		"title": "Member count",
+		"subtitle": "Who is in this server, and how many joined lately.",
+		"breakdown": "Member breakdown",
+		"total": "Members",
+		"people": "People",
+		"bots": "Bots",
+		"joinedWeek": "New this week",
+		"splitTitle": "People and bots",
+		"split": "{{people}}% people, {{bots}}% bots",
+		"joinedDay": "Joined in the last 24 hours: {{count, number}}",
+		"note": "The count refreshes at most once a minute. The /member-count command posts the same numbers as a chart in Discord."
 	}
 }

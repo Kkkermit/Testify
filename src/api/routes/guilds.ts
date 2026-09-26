@@ -5,10 +5,12 @@ import { notInGuild } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
+import { botStats } from "@api/routes/botStats";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { giveaways } from "@api/routes/giveaways";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
+import { memberCount } from "@api/routes/memberCount";
 import { members } from "@api/routes/members";
 import { music } from "@api/routes/music";
 import { settings } from "@api/routes/settings";
@@ -25,6 +27,7 @@ import {
 	getAuditLogConfig,
 	getAutoRoles,
 	getCounting,
+	getFixedStats,
 	getVoiceCounter,
 	getWelcome,
 	listSticky,
@@ -65,6 +68,8 @@ guilds.route("/:guildId/giveaways", giveaways);
 guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
 guilds.route("/:guildId/music", music);
+guilds.route("/:guildId/bot-stats", botStats);
+guilds.route("/:guildId/member-count", memberCount);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
@@ -167,21 +172,35 @@ function colourOf(role: Role): string | null {
 
 /** One line per feature, read through the repositories so the web and the Discord panels cannot disagree. */
 async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	const [levels, audit, welcome, antiLink, counting, autoRoles, verify, voice, stickies, treasure, ticketing, draw] =
-		await Promise.all([
-			getLevelSettings(guild.id),
-			getAuditLogConfig(guild.id),
-			getWelcome(guild.id),
-			getAntiLink(guild.id),
-			getCounting(guild.id),
-			getAutoRoles(guild.id),
-			getVerifyConfig(guild.id),
-			getVoiceCounter(guild.id),
-			listSticky(guild.id),
-			readTreasure(guild.id),
-			readTickets(guild),
-			readLottery(guild.id),
-		]);
+	const [
+		levels,
+		audit,
+		welcome,
+		antiLink,
+		counting,
+		autoRoles,
+		verify,
+		voice,
+		stickies,
+		treasure,
+		ticketing,
+		draw,
+		stats,
+	] = await Promise.all([
+		getLevelSettings(guild.id),
+		getAuditLogConfig(guild.id),
+		getWelcome(guild.id),
+		getAntiLink(guild.id),
+		getCounting(guild.id),
+		getAutoRoles(guild.id),
+		getVerifyConfig(guild.id),
+		getVoiceCounter(guild.id),
+		listSticky(guild.id),
+		readTreasure(guild.id),
+		readTickets(guild),
+		readLottery(guild.id),
+		getFixedStats(guild.id),
+	]);
 
 	const level = normaliseSettings(levels);
 
@@ -259,6 +278,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Lottery",
 			enabled: draw.enabled && !draw.frozen,
 			detail: draw.enabled ? count(draw.ticketsSold, "ticket sold") : null,
+		},
+		{
+			key: "bot-stats",
+			label: "Bot statistics",
+			enabled: stats !== null,
+			detail: stats === null ? null : `Posting in <#${stats.channelId}>`,
 		},
 	];
 }

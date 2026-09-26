@@ -1,9 +1,9 @@
 import QuickChart from "quickchart-js";
-import { DAY_MS, WEEK_MS } from "@config/constants";
 import { defineCommand } from "@core/command";
 import { ServiceError, UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
 import { formatNumber } from "@lib/format";
+import { readMemberCounts } from "@lib/info";
 
 export default defineCommand({
 	name: "member-count",
@@ -29,19 +29,9 @@ export default defineCommand({
 		if (!guild) throw new UserFacingError("This command only works inside a server.");
 
 		await interaction.deferReply();
-		await guild.members.fetch().catch(() => null);
 
 		const chartType = interaction.options.getString("chart-type") ?? "bar";
-		const now = Date.now();
-		const total = guild.memberCount;
-		const bots = guild.members.cache.filter((member) => member.user.bot).size;
-		const humans = total - bots;
-		const joinedIn = (window: number): number =>
-			guild.members.cache.filter((member) => member.joinedTimestamp !== null && now - member.joinedTimestamp < window)
-				.size;
-
-		const last24h = joinedIn(DAY_MS);
-		const last7d = joinedIn(WEEK_MS);
+		const { total, people, bots, joinedDay, joinedWeek } = await readMemberCounts(guild);
 
 		const chart = new QuickChart()
 			.setConfig({
@@ -51,7 +41,7 @@ export default defineCommand({
 					datasets: [
 						{
 							label: "Members",
-							data: [total, humans, bots, last24h, last7d],
+							data: [total, people, bots, joinedDay, joinedWeek],
 							backgroundColor: ["#36a2eb", "#ffce56", "#ff6384", "#cc65fe", "#66ff99"],
 						},
 					],
@@ -76,10 +66,10 @@ export default defineCommand({
 					title: `Member count for ${guild.name}`,
 					description: [
 						`**Total** ${formatNumber(total)}`,
-						`**People** ${formatNumber(humans)}`,
+						`**People** ${formatNumber(people)}`,
 						`**Bots** ${formatNumber(bots)}`,
-						`**Joined in the last 24h** ${formatNumber(last24h)}`,
-						`**Joined in the last 7 days** ${formatNumber(last7d)}`,
+						`**Joined in the last 24h** ${formatNumber(joinedDay)}`,
+						`**Joined in the last 7 days** ${formatNumber(joinedWeek)}`,
 					].join("\n"),
 					image: url,
 				}),

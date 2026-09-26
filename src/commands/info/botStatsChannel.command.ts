@@ -1,9 +1,8 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/settingsRepository";
 import { reply, successEmbed } from "@lib/discord";
-import { botStatsEmbed } from "@lib/info";
+import { postBotStats, removeBotStats } from "@lib/info";
 
 export default defineCommand({
 	name: "bot-stats-channel",
@@ -26,21 +25,9 @@ export default defineCommand({
 			],
 			async run(interaction, client) {
 				const channel = textChannelOption(interaction, "channel");
-				if (!channel?.isTextBased() || !channel.isSendable()) {
-					throw new UserFacingError("Pick a text channel I can send messages in.");
-				}
+				if (channel === null) throw new UserFacingError("Pick a text channel I can send messages in.");
 
-				const guild = inGuild(interaction);
-				const existing = await getFixedStats(guild.id);
-				if (existing) {
-					const previous = await client.channels.fetch(existing.channelId).catch(() => null);
-					if (previous?.isTextBased()) {
-						await previous.messages.delete(existing.messageId).catch(() => null);
-					}
-				}
-
-				const message = await channel.send({ embeds: [botStatsEmbed(client)] });
-				await setFixedStats(guild.id, channel.id, message.id, interaction.user.id);
+				await postBotStats(client, inGuild(interaction), channel.id, interaction.user.id);
 
 				await reply(interaction, {
 					embeds: [successEmbed(`Bot statistics will now be posted in ${channel}.`)],
@@ -52,14 +39,10 @@ export default defineCommand({
 			name: "remove",
 			description: "Stop posting the statistics message.",
 			async run(interaction, client) {
-				const guild = inGuild(interaction);
-				const existing = await getFixedStats(guild.id);
-				if (!existing) throw new UserFacingError("There is no statistics message configured here.");
+				if (!(await removeBotStats(client, inGuild(interaction).id))) {
+					throw new UserFacingError("There is no statistics message configured here.");
+				}
 
-				const channel = await client.channels.fetch(existing.channelId).catch(() => null);
-				if (channel?.isTextBased()) await channel.messages.delete(existing.messageId).catch(() => null);
-
-				await removeFixedStats(guild.id);
 				await reply(interaction, {
 					embeds: [successEmbed("The statistics message has been removed.")],
 					flags: MessageFlags.Ephemeral,

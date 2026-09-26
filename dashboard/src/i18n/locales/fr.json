@@ -92,7 +92,11 @@
 		"music": "Musique",
 		"musicHint": "Le lecteur, et qui peut s’en servir",
 		"status": "État",
-		"statusHint": "Si le bot est en ligne et sa rapidité de réponse"
+		"statusHint": "Si le bot est en ligne et sa rapidité de réponse",
+		"botStats": "Statistiques du bot",
+		"botStatsHint": "Un message que {{bot}} tient à jour",
+		"memberCount": "Nombre de membres",
+		"memberCountHint": "Qui est là, et qui vient d’arriver"
 	},
 	"error": {
 		"unreachableTitle": "Une erreur est survenue",
@@ -1038,5 +1042,36 @@
 		"lastCall": "Dernier appel {{when}}",
 		"failedOf_one": "{{failures}} appel sur {{count}} en échec",
 		"failedOf_other": "{{failures}} appels sur {{count}} en échec"
+	},
+	"botStats": {
+		"title": "Statistiques du bot",
+		"subtitle": "Un message que {{bot}} garde dans un salon avec ses serveurs, membres, temps de fonctionnement et vitesse, actualisé toutes les cinq minutes.",
+		"where": "Où il est publié",
+		"posted": "Publié",
+		"notPosted": "Non publié",
+		"noneBody": "Rien n’est encore publié. Choisissez un salon ci-dessous.",
+		"goneBody": "Le salon où il se trouvait a été supprimé. Publiez-le ailleurs ou retirez-le.",
+		"postedBody": "Publié dans #{{channel}}.",
+		"remove": "Retirer le message",
+		"chooseTitle": "Choisir un salon",
+		"chooseBody": "Publier envoie un nouveau message et retire l’ancien, il n’y en a donc jamais qu’un.",
+		"channel": "Salon",
+		"channelHint": "{{bot}} doit pouvoir y envoyer des messages.",
+		"postAction": "Le publier ici",
+		"moveAction": "Le déplacer ici",
+		"repostAction": "Le republier"
+	},
+	"memberCount": {
+		"title": "Nombre de membres",
+		"subtitle": "Qui est sur ce serveur, et combien l’ont rejoint récemment.",
+		"breakdown": "Répartition des membres",
+		"total": "Membres",
+		"people": "Personnes",
+		"bots": "Bots",
+		"joinedWeek": "Nouveaux cette semaine",
+		"splitTitle": "Personnes et bots",
+		"split": "{{people}} % de personnes, {{bots}} % de bots",
+		"joinedDay": "Arrivés ces dernières 24 heures : {{count, number}}",
+		"note": "Le nombre est actualisé au plus une fois par minute. La commande /member-count publie les mêmes chiffres sous forme de graphique dans Discord."
 	}
 }

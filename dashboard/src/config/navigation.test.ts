@@ -32,6 +32,8 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/treasure`,
 				`/guilds/${guild.id}/music`,
 				`/guilds/${guild.id}/tickets`,
+				`/guilds/${guild.id}/bot-stats`,
+				`/guilds/${guild.id}/member-count`,
 				`/guilds/${guild.id}/giveaways`,
 				`/guilds/${guild.id}/lottery`,
 				`/guilds/${guild.id}/members`,

@@ -1428,30 +1428,32 @@ console, the status page, giveaways, and the levelling, welcome, audit-logging a
 the same shape —
 `docs/dashboard/design-plan/13-ROADMAP-AND-RISKS.md` is the running order.
 
-| Route                   | Screen                                                                     |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `/sign-in`              | One button; also the setup screen for a half-install                       |
-| `/guilds`               | Picker, with an invite card for guilds without the bot                     |
-| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes              |
-| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings                           |
-| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                             |
-| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save                         |
-| `/guilds/:id/automod`   | Discord's own filters — no database behind it                              |
-| `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                     |
-| `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                              |
-| `/guilds/:id/music`     | The music kill switch and the DJ roles                                     |
-| `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                              |
-| `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                 |
-| `/guilds/:id/giveaways` | Start, end early, reroll and delete — each keyed to its own row            |
-| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page       |
-| `…/members/:userId`     | One member: standing, roles, warnings, softban, moderation controls        |
-| `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting    |
-| `/guilds/:id/commands`  | Per-command switches for this server                                       |
-| `/commands`             | Every command, searchable, with the coverage tile                          |
-| `/status`               | Online or not, uptime, speed, packages and outside services, 30 days back  |
-| `/help`                 | Getting started, and the support assistant that answers from help articles |
-| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                            |
-| `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
+| Route                      | Screen                                                                     |
+| -------------------------- | -------------------------------------------------------------------------- |
+| `/sign-in`                 | One button; also the setup screen for a half-install                       |
+| `/guilds`                  | Picker, with an invite card for guilds without the bot                     |
+| `/guilds/:id`              | Stat tiles, feature grid, permission warnings, recent changes              |
+| `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
+| `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
+| `/guilds/:id/audit-log`    | Grouped event checklist held as a draft until Save                         |
+| `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
+| `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
+| `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
+| `/guilds/:id/music`        | The music kill switch and the DJ roles                                     |
+| `/guilds/:id/tickets`      | Destinations, panel wording, explicit publish                              |
+| `/guilds/:id/bot-stats`    | The self-updating statistics message: post, move, remove                   |
+| `/guilds/:id/member-count` | People, bots and recent joins, counted at most once a minute               |
+| `/guilds/:id/lottery`      | Pot, schedule, freeze, and a confirmed end                                 |
+| `/guilds/:id/giveaways`    | Start, end early, reroll and delete — each keyed to its own row            |
+| `/guilds/:id/members`      | Money and levels, each as a real table, with a jump to your own page       |
+| `…/members/:userId`        | One member: standing, roles, warnings, softban, moderation controls        |
+| `/guilds/:id/settings`     | Prefix, nickname, link filtering, roles on join, verification, counting    |
+| `/guilds/:id/commands`     | Per-command switches for this server                                       |
+| `/commands`                | Every command, searchable, with the coverage tile                          |
+| `/status`                  | Online or not, uptime, speed, packages and outside services, 30 days back  |
+| `/help`                    | Getting started, and the support assistant that answers from help articles |
+| `/terms`, `/privacy`       | Public — outside the sign-in gate, deliberately                            |
+| `/owner`                   | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |

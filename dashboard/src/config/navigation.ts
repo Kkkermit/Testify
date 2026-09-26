@@ -1,5 +1,6 @@
 import {
 	Activity,
+	ChartColumn,
 	LayoutGrid,
 	ScrollText,
 	ShieldAlert,
@@ -18,6 +19,7 @@ import {
 	LifeBuoy,
 	Ticket,
 	type LucideIcon,
+	Gauge,
 	Gift,
 	Gem,
 	Sparkles,
@@ -185,6 +187,18 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.tickets",
 							icon: LifeBuoy,
 							hintKey: "nav.ticketsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/bot-stats`,
+							labelKey: "nav.botStats",
+							icon: Gauge,
+							hintKey: "nav.botStatsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/member-count`,
+							labelKey: "nav.memberCount",
+							icon: ChartColumn,
+							hintKey: "nav.memberCountHint",
 						},
 					],
 				},

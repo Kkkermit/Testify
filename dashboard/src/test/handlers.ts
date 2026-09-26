@@ -31,6 +31,8 @@ import {
 	type LotterySettings,
 	type TicketSettings,
 	type MusicSettings,
+	type BotStatsSettings,
+	type MemberCounts,
 	type TreasureSettings,
 	type AutomodRules,
 	type BoardPage,
@@ -277,6 +279,10 @@ export const musicSettings: MusicSettings = {
 	djRoleIds: [],
 	configured: true,
 };
+
+export const botStatsSettings: BotStatsSettings = { channelId: null };
+
+export const memberCounts: MemberCounts = { total: 120, people: 108, bots: 12, joinedDay: 3, joinedWeek: 11 };
 
 export const giveawayList: GiveawayList = {
 	giveaways: [
@@ -679,6 +685,13 @@ export const handlers = [
 	http.delete("/api/guilds/:guildId/tickets", () => HttpResponse.json({ ...ticketSettings, enabled: false })),
 	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.patch("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
+	http.get("/api/guilds/:guildId/bot-stats", () => HttpResponse.json(botStatsSettings)),
+	http.put("/api/guilds/:guildId/bot-stats", async ({ request }) => {
+		const { channelId } = (await request.json()) as { channelId: string };
+		return HttpResponse.json({ channelId });
+	}),
+	http.delete("/api/guilds/:guildId/bot-stats", () => HttpResponse.json({ channelId: null })),
+	http.get("/api/guilds/:guildId/member-count", () => HttpResponse.json(memberCounts)),
 	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
 	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),

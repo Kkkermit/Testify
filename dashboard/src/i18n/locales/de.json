@@ -92,7 +92,11 @@
 		"music": "Musik",
 		"musicHint": "Der Player und wer ihn nutzen darf",
 		"status": "Status",
-		"statusHint": "Ob der Bot online ist und wie schnell er antwortet"
+		"statusHint": "Ob der Bot online ist und wie schnell er antwortet",
+		"botStats": "Bot-Statistiken",
+		"botStatsHint": "Eine Nachricht, die {{bot}} aktuell hält",
+		"memberCount": "Mitgliederzahl",
+		"memberCountHint": "Wer hier ist und wer neu dazukam"
 	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
@@ -1037,5 +1041,36 @@
 		"lastCall": "Letzter Aufruf {{when}}",
 		"failedOf_one": "{{failures}} von {{count}} Aufruf fehlgeschlagen",
 		"failedOf_other": "{{failures}} von {{count}} Aufrufen fehlgeschlagen"
+	},
+	"botStats": {
+		"title": "Bot-Statistiken",
+		"subtitle": "Eine Nachricht, die {{bot}} in einem Kanal mit seinen Servern, Mitgliedern, Laufzeit und Geschwindigkeit führt und alle fünf Minuten aktualisiert.",
+		"where": "Wo sie steht",
+		"posted": "Gepostet",
+		"notPosted": "Nicht gepostet",
+		"noneBody": "Noch ist nichts gepostet. Wähle unten einen Kanal.",
+		"goneBody": "Der Kanal, in dem sie stand, wurde gelöscht. Poste sie woanders oder entferne sie.",
+		"postedBody": "Gepostet in #{{channel}}.",
+		"remove": "Nachricht entfernen",
+		"chooseTitle": "Kanal wählen",
+		"chooseBody": "Beim Posten wird eine neue Nachricht gesendet und die alte entfernt, es gibt also immer nur eine.",
+		"channel": "Kanal",
+		"channelHint": "{{bot}} muss dort Nachrichten senden dürfen.",
+		"postAction": "Hier posten",
+		"moveAction": "Hierher verschieben",
+		"repostAction": "Erneut posten"
+	},
+	"memberCount": {
+		"title": "Mitgliederzahl",
+		"subtitle": "Wer auf diesem Server ist und wie viele kürzlich beigetreten sind.",
+		"breakdown": "Aufschlüsselung der Mitglieder",
+		"total": "Mitglieder",
+		"people": "Menschen",
+		"bots": "Bots",
+		"joinedWeek": "Neu diese Woche",
+		"splitTitle": "Menschen und Bots",
+		"split": "{{people}} % Menschen, {{bots}} % Bots",
+		"joinedDay": "In den letzten 24 Stunden beigetreten: {{count, number}}",
+		"note": "Die Zahl wird höchstens einmal pro Minute aktualisiert. Der Befehl /member-count postet dieselben Zahlen als Diagramm in Discord."
 	}
 }

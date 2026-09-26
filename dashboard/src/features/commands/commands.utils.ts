@@ -20,6 +20,8 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	ticket: { path: (guildId) => `/guilds/${guildId}/tickets`, screen: "Tickets" },
 	lottery: { path: (guildId) => `/guilds/${guildId}/lottery`, screen: "Lottery" },
 	giveaway: { path: (guildId) => `/guilds/${guildId}/giveaways`, screen: "Giveaways" },
+	"bot-stats-channel": { path: (guildId) => `/guilds/${guildId}/bot-stats`, screen: "Bot statistics" },
+	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 };
 
 export interface CommandPlace {

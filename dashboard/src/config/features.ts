@@ -3,6 +3,7 @@ import {
 	Code2,
 	Coins,
 	Dices,
+	Gauge,
 	Gift,
 	Hash,
 	Info,
@@ -35,6 +36,12 @@ interface FeatureLook {
 }
 
 const LOOKS: Record<string, FeatureLook> = {
+	"bot-stats": {
+		icon: Gauge,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/bot-stats`,
+	},
 	sticky: {
 		icon: Pin,
 		tint: "text-feature-community",

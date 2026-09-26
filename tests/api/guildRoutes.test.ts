@@ -13,6 +13,7 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
 	getAutoRoles: jest.fn(() => Promise.resolve(null)),
 	getCounting: jest.fn(() => Promise.resolve(null)),
+	getFixedStats: jest.fn(() => Promise.resolve(null)),
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 	listSticky: jest.fn(() => Promise.resolve([])),

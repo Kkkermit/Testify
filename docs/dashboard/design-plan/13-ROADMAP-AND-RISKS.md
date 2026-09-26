@@ -141,6 +141,13 @@ into `src/lib/settings/verifyActions.util.ts` so the button and the route post t
 **Automod, treasure, tickets and lottery are done** too, each extracting what still lived inside a command
 `run()` into a `*Actions.util.ts` on the way (`06-COMMAND-CONTROL.md`). Phase 3 is complete.
 
+**Bot statistics and member count closed the last gap**, and both sit in the Channels section. The statistics
+message follows verification's rule — posting is an explicit action and not optimistic — and moving it sends the
+new message before taking down the old, so a refused send leaves the server with the one it had. Member count is
+the first read-only screen here: the count fetches every member over the gateway, so the route keeps each answer
+for a minute rather than asking again on every reload. Both extracted their command's body into `src/lib/info/`,
+so the command and the route cannot drift.
+
 **Done when:** every guild-scoped setting the bot has is editable on the web. — **done**
 
 ### Phase 4 — Members, moderation, economy (~1½ weeks) — **done**
