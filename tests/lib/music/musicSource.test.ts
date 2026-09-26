@@ -5,6 +5,7 @@ import {
 	argumentsFor,
 	describeTrack,
 	ffmpegArgs,
+	TRANSCODE_BITRATE,
 	forgetDescription,
 	openStream,
 	parseJsonLines,
@@ -383,6 +384,12 @@ describe("resolveTracks", () => {
 });
 
 describe("ffmpegArgs", () => {
+	/** Every level but 100% re-encodes, so the re-encode is what most tracks are heard through. */
+	it("re-encodes at YouTube's own best Opus rate rather than below it", () => {
+		expect(ffmpegArgs().join(" ")).toContain(`-b:a ${TRANSCODE_BITRATE}`);
+		expect(TRANSCODE_BITRATE).toBe("160k");
+	});
+
 	it("reads the pipe and writes Opus at the rate Discord wants", () => {
 		const args = ffmpegArgs();
 

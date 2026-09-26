@@ -29,8 +29,19 @@ function shapeOf(format: RemoteFormat): StreamShape | null {
 	return null;
 }
 
-function byBitrate(a: RemoteFormat, b: RemoteFormat): number {
-	return (b.abr ?? 0) - (a.abr ?? 0);
+function bitrateOf(format: RemoteFormat): number {
+	return format.abr ?? format.tbr ?? 0;
+}
+
+/**
+ * Highest bitrate first; where none is stated, yt-dlp's own order decides, and it lists formats worst to best, so the
+ * later one wins rather than the first — which would be the lowest quality on offer.
+ */
+function bestFirst(formats: RemoteFormat[]): RemoteFormat[] {
+	return formats
+		.map((format, position) => ({ format, position }))
+		.sort((a, b) => bitrateOf(b.format) - bitrateOf(a.format) || b.position - a.position)
+		.map(({ format }) => format);
 }
 
 export interface PlanOptions {
@@ -44,10 +55,7 @@ export function planStream(formats: RemoteFormat[], options: PlanOptions): Strea
 	const audio = formats.filter(isAudioOnly);
 
 	if (options.filtered !== true) {
-		const passthrough = audio
-			.filter((format) => isProgressive(format) && shapeOf(format) !== null)
-			.sort(byBitrate)
-			.at(0);
+		const passthrough = bestFirst(audio.filter((format) => isProgressive(format) && shapeOf(format) !== null)).at(0);
 
 		if (passthrough !== undefined) {
 			return { formatId: passthrough.format_id, shape: shapeOf(passthrough)! };
@@ -57,8 +65,8 @@ export function planStream(formats: RemoteFormat[], options: PlanOptions): Strea
 	if (!options.ffmpeg) return null;
 
 	// FFmpeg reads a pipe rather than the network, so a segmented format it would have to fetch itself is a last resort.
-	const progressive = audio.filter(isProgressive).sort(byBitrate).at(0);
-	const best = progressive ?? audio.sort(byBitrate).at(0);
+	const progressive = bestFirst(audio.filter(isProgressive)).at(0);
+	const best = progressive ?? bestFirst(audio).at(0);
 
 	return best === undefined ? null : { formatId: best.format_id, shape: "transcode" };
 }

@@ -19,6 +19,8 @@ export interface RemoteFormat {
 	ext?: string | null;
 	protocol?: string | null;
 	abr?: number | null;
+	/** The total bitrate, which is the audio's own for an audio-only format; some sources state only this. */
+	tbr?: number | null;
 }
 
 /** How the bytes reach Discord: the first two are passed through untouched, the third is re-encoded. */

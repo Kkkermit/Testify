@@ -86,6 +86,36 @@ describe("planStream", () => {
 	);
 });
 
+describe("planStream with no bitrate stated", () => {
+	/** yt-dlp lists formats worst first, so a stable sort over missing bitrates used to take the worst one on offer. */
+	it("takes the last listed rather than the first when no format says its bitrate", () => {
+		const formats = [
+			{ format_id: "worst", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https" },
+			{ format_id: "best", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https" },
+		];
+
+		expect(planStream(formats, { ffmpeg: false })?.formatId).toBe("best");
+	});
+
+	it("reads the total bitrate when the audio bitrate is missing", () => {
+		const formats = [
+			{ format_id: "high", acodec: "mp3", vcodec: "none", ext: "mp3", protocol: "https", tbr: 256 },
+			{ format_id: "low", acodec: "mp3", vcodec: "none", ext: "mp3", protocol: "https", tbr: 64 },
+		];
+
+		expect(planStream(formats, { ffmpeg: true })?.formatId).toBe("high");
+	});
+
+	it("still lets a stated bitrate beat the listing order", () => {
+		const formats = [
+			{ format_id: "stated-high", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 160 },
+			{ format_id: "stated-low", acodec: "opus", vcodec: "none", ext: "webm", protocol: "https", abr: 50 },
+		];
+
+		expect(planStream(formats, { ffmpeg: false })?.formatId).toBe("stated-high");
+	});
+});
+
 describe("clampVolume", () => {
 	it("keeps a sensible level as it is", () => {
 		expect(clampVolume(80)).toBe(80);

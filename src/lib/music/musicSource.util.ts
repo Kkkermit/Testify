@@ -278,6 +278,9 @@ function buffer(source: Readable): PassThrough {
 }
 
 /** `-ss` before `-i` discards packets rather than decoding them, and the output is 48 kHz Opus. */
+/** YouTube's best Opus is about this, so a re-encode loses as little as it can without inflating the stream. */
+export const TRANSCODE_BITRATE = "160k";
+
 export function ffmpegArgs(options: StreamOptions = {}): string[] {
 	const seekMs = Math.max(0, Math.round(options.seekMs ?? 0));
 	const volume = clampVolume(options.volume ?? UNITY_VOLUME);
@@ -294,7 +297,7 @@ export function ffmpegArgs(options: StreamOptions = {}): string[] {
 		"-c:a",
 		"libopus",
 		"-b:a",
-		"128k",
+		TRANSCODE_BITRATE,
 		"-ar",
 		"48000",
 		"-ac",
