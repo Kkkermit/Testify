@@ -21,6 +21,8 @@ export interface RemoteFormat {
 	abr?: number | null;
 	/** The total bitrate, which is the audio's own for an audio-only format; some sources state only this. */
 	tbr?: number | null;
+	/** yt-dlp's rank for the audio's language: 10 for the video's original voice, 5 for its default, lower for a dub. */
+	language_preference?: number | null;
 }
 
 /** How the bytes reach Discord: the first two are passed through untouched, the third is re-encoded. */

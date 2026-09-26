@@ -160,3 +160,32 @@ describe("planStream when the audio has to be filtered", () => {
 		expect(planStream([hls, file], { ffmpeg: true, filtered: true })?.formatId).toBe("file");
 	});
 });
+
+describe("planStream with dubbed audio", () => {
+	// yt-dlp ranks the voices: 10 for the original, 5 for the default, -1 for another dub and -10 for a described one.
+	const DUB = format({ format_id: "251-0", abr: 140, language_preference: 5 });
+	const LOUDER_DUB = format({ format_id: "251-2", abr: 170, language_preference: -1 });
+	const ORIGINAL = format({ format_id: "251-1", abr: 128, language_preference: 10 });
+
+	/** A dubbed video lists every voice, and the highest bitrate was a machine-translated one. */
+	it("plays the original voice even when a dub is a higher bitrate", () => {
+		expect(planStream([DUB, LOUDER_DUB, ORIGINAL], WITHOUT_FFMPEG)?.formatId).toBe("251-1");
+	});
+
+	it("keeps the original voice when the volume means transcoding", () => {
+		const original = format({ format_id: "140-1", acodec: "mp4a.40.2", ext: "m4a", language_preference: 10 });
+
+		expect(planStream([LOUDER_DUB, original], { ffmpeg: true, filtered: true })?.formatId).toBe("140-1");
+	});
+
+	it("takes the default voice when none is marked as the original", () => {
+		expect(planStream([LOUDER_DUB, DUB], WITHOUT_FFMPEG)?.formatId).toBe("251-0");
+	});
+
+	/** Playing the dub beats playing nothing, when the original is only offered in a shape this host cannot play. */
+	it("falls back to another voice rather than refusing the track", () => {
+		const original = format({ format_id: "140-1", acodec: "mp4a.40.2", ext: "m4a", language_preference: 10 });
+
+		expect(planStream([original, DUB], WITHOUT_FFMPEG)?.formatId).toBe("251-0");
+	});
+});

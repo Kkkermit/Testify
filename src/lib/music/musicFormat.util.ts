@@ -50,10 +50,15 @@ export interface PlanOptions {
 	filtered?: boolean;
 }
 
-/** The best playable format: Opus passes straight through, and anything else needs FFmpeg or is refused by name. */
-export function planStream(formats: RemoteFormat[], options: PlanOptions): StreamPlan | null {
-	const audio = formats.filter(isAudioOnly);
+/** A video with dubbed audio offers every voice at every bitrate, so the language is chosen before the quality is. */
+function inOriginalVoice(formats: RemoteFormat[]): RemoteFormat[] {
+	const rank = (format: RemoteFormat): number => format.language_preference ?? -1;
+	const best = Math.max(...formats.map(rank));
 
+	return formats.filter((format) => rank(format) === best);
+}
+
+function planWithin(audio: RemoteFormat[], options: PlanOptions): StreamPlan | null {
 	if (options.filtered !== true) {
 		const passthrough = bestFirst(audio.filter((format) => isProgressive(format) && shapeOf(format) !== null)).at(0);
 
@@ -69,4 +74,11 @@ export function planStream(formats: RemoteFormat[], options: PlanOptions): Strea
 	const best = progressive ?? bestFirst(audio).at(0);
 
 	return best === undefined ? null : { formatId: best.format_id, shape: "transcode" };
+}
+
+/** The best playable format in the video's own voice, falling back to any voice rather than playing nothing. */
+export function planStream(formats: RemoteFormat[], options: PlanOptions): StreamPlan | null {
+	const audio = formats.filter(isAudioOnly);
+
+	return planWithin(inOriginalVoice(audio), options) ?? planWithin(audio, options);
 }
