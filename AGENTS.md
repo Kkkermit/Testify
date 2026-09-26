@@ -1162,10 +1162,14 @@ brand new and searches straight past the window. The snowflake is dropped altoge
 more than the window it is measuring. When nothing is left, the answer is skipped rather than sent, because a
 refused request and a log line buy nothing the reader can see.
 
-**Only the newest keystroke is answered.** Discord's client shows the answer to the latest keystroke and drops the
-rest, so `Keystrokes` remembers each person's newest interaction and an older search that finishes late stays
-quiet. `RESPONSE_MARGIN_MS` is 1.5 seconds, because answers sent 2.2 seconds in were refused from a home
-connection. A 10062 that still gets through is logged as one line with its age, without a stack.
+**Only the newest keystroke is answered.** Discord drops a keystroke's interaction once the next one arrives, so
+`Keystrokes` remembers each person's newest interaction and an older search that finishes late stays quiet. An
+answer already on its way when the next key lands still meets 10062, which cannot be prevented from this side, so
+it is logged at `trace` as one line with its age. **Do not widen `RESPONSE_MARGIN_MS` to chase those.** Raising
+it to 1.5 seconds left a Windows host's yt-dlp no time to finish any search, so the menu only ever offered the
+literal row. What makes a slow host usable instead is `SearchCache.nearest`: a search that misses the window
+answers with the literal row first and the results for the longest earlier text this one extends under it, so
+songs appear while somebody is still typing.
 
 **The music system has a switch and a guest list, and `checks.ts` is the gate for both.** `musicsettings` holds
 one row per server — `enabled`, and `djRoleIds` — read before every music command and cached exactly like the

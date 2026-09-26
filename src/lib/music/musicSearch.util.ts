@@ -88,6 +88,20 @@ export class SearchCache {
 		return entry.choices;
 	}
 
+	/** The results for the longest earlier text this one extends, so a slow search still shows songs while typing. */
+	nearest(query: string, now = Date.now()): Choice[] | null {
+		const key = SearchCache.key(query);
+		let best: { key: string; entry: Entry } | null = null;
+
+		for (const [cached, entry] of this.#entries) {
+			if (now - entry.at > this.#ttlMs || entry.choices.length === 0) continue;
+			if (cached.length < MIN_SEARCH_LENGTH || !key.startsWith(cached) || cached === key) continue;
+			if (best === null || cached.length > best.key.length) best = { key: cached, entry };
+		}
+
+		return best?.entry.choices ?? null;
+	}
+
 	set(query: string, choices: Choice[], now = Date.now()): void {
 		const key = SearchCache.key(query);
 		this.#entries.delete(key);
@@ -108,8 +122,8 @@ export class SearchCache {
 /** Discord closes an autocomplete interaction three seconds after it was created. */
 export const INTERACTION_WINDOW_MS = 3_000;
 
-/** Room for the answer to reach Discord; answers sent 2.2 seconds in were refused from a home connection. */
-export const RESPONSE_MARGIN_MS = 1_500;
+/** Room for the answer itself to reach Discord, which is a round trip rather than a local call. */
+export const RESPONSE_MARGIN_MS = 800;
 
 /** What is left of the window when nothing is known about the interaction's own age. */
 const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
@@ -196,7 +210,10 @@ export class Suggester {
 		const key = SearchCache.key(query);
 		const finished = await within(this.#running.get(key) ?? this.#start(key, query, search), budgetMs);
 
-		return finished === null || finished.length === 0 ? [literalChoice(query)] : finished.slice(0, MAX_CHOICES);
+		if (finished !== null && finished.length > 0) return finished.slice(0, MAX_CHOICES);
+
+		// Enter picks the first row, so what was typed stays first and the earlier results sit under it.
+		return [literalChoice(query), ...(this.#cache.nearest(query) ?? [])].slice(0, MAX_CHOICES);
 	}
 
 	#start(key: string, query: string, search: () => Promise<Choice[]>): Promise<Choice[]> {

@@ -229,6 +229,35 @@ describe("Suggester", () => {
 		]);
 	});
 
+	/** On a host where every search outruns the window, songs only ever appeared if the typing stopped dead. */
+	it("shows what the shorter text found while the longer search is still running", async () => {
+		const suggester = new Suggester(20);
+		await suggester.suggest("bush", () => Promise.resolve([choice("bush-song")]));
+
+		const answered = await suggester.suggest("bushido", () => new Promise<Choice[]>(() => undefined));
+
+		expect(answered).toEqual([literalChoice("bushido"), choice("bush-song")]);
+	});
+
+	it("takes the longest earlier text, not the first one cached", async () => {
+		const suggester = new Suggester(20);
+		await suggester.suggest("bus", () => Promise.resolve([choice("bus")]));
+		await suggester.suggest("bushi", () => Promise.resolve([choice("bushi")]));
+
+		const answered = await suggester.suggest("bushido", () => new Promise<Choice[]>(() => undefined));
+
+		expect(answered).toEqual([literalChoice("bushido"), choice("bushi")]);
+	});
+
+	it("never borrows results from text this one does not extend", async () => {
+		const suggester = new Suggester(20);
+		await suggester.suggest("drake", () => Promise.resolve([choice("drake")]));
+
+		expect(await suggester.suggest("bushido", () => new Promise<Choice[]>(() => undefined))).toEqual([
+			literalChoice("bushido"),
+		]);
+	});
+
 	it("never offers more rows than Discord accepts", async () => {
 		const suggester = new Suggester(200);
 		const many = Array.from({ length: 40 }, (_, at) => choice(`t${String(at)}`));

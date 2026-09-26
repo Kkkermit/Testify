@@ -19,10 +19,10 @@ export default defineEvent({
 			} catch (error) {
 				const command = interaction.commandName;
 
-				// An interaction that expired before the answer landed is somebody typing fast, so its stack says nothing.
+				// Discord drops a keystroke's interaction when the next one arrives, so an answer crossing it is routine.
 				if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.UnknownInteraction) {
 					const ageMs = Date.now() - interaction.createdTimestamp;
-					client.logger.debug({ command, ageMs }, "Autocomplete answered an interaction that had already expired");
+					client.logger.trace({ command, ageMs }, "Autocomplete answered an interaction that had already expired");
 				} else {
 					client.logger.error({ err: toError(error), command }, "Autocomplete failed");
 				}

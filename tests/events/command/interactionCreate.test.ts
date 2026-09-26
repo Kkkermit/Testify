@@ -36,7 +36,9 @@ it("notes an expired autocomplete interaction rather than reporting it as a fail
 	);
 
 	expect(logger.error).not.toHaveBeenCalled();
-	expect(logger.debug).toHaveBeenCalledTimes(1);
+	expect(logger.trace).toHaveBeenCalledTimes(1);
+	// Every keystroke typed over an answer produces one, so a development bot at debug must stay quiet about it.
+	expect(logger.debug).not.toHaveBeenCalled();
 });
 
 /** One per keystroke, and a stack each ran to forty lines that pointed at nothing wrong. */
@@ -48,7 +50,7 @@ it("notes an expired interaction in one line, with its age rather than its stack
 		typing(),
 	);
 
-	const [context] = logger.debug.mock.calls[0] as [Record<string, unknown>];
+	const [context] = logger.trace.mock.calls[0] as [Record<string, unknown>];
 	expect(context).not.toHaveProperty("err");
 	expect(context).toEqual({ command: "play", ageMs: expect.any(Number) });
 	expect(context.ageMs).toBeGreaterThanOrEqual(2_500);
@@ -74,4 +76,5 @@ it("says nothing at all when the autocomplete answers", async () => {
 
 	expect(logger.error).not.toHaveBeenCalled();
 	expect(logger.debug).not.toHaveBeenCalled();
+	expect(logger.trace).not.toHaveBeenCalled();
 });
