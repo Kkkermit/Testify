@@ -2,8 +2,11 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { SignInPage } from "@/features/auth/SignInPage";
+import { botRetryDelay, retryBot } from "@/features/auth/useBot";
+import { ApiError } from "@/lib/api";
 import { hardRedirect } from "@/lib/redirect";
 import { expectNoViolations } from "@/test/axe";
+import { botProfile } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -102,6 +105,29 @@ describe("the bot's own identity", () => {
 		});
 	});
 
+	/** The bot answers "connecting" for the first twenty-odd seconds; giving up after two retries left the fallback up for good. */
+	it("keeps asking while the bot connects, then shows its avatar", async () => {
+		let asked = 0;
+		server.use(
+			http.get("/api/bot", () => {
+				asked += 1;
+				return asked === 1
+					? HttpResponse.json({ error: { code: "bot_connecting", message: "Connecting." } }, { status: 503 })
+					: HttpResponse.json(botProfile);
+			}),
+		);
+
+		const { container } = renderWithProviders(<SignInPage />, { path: "/sign-in" });
+
+		await waitFor(
+			() => {
+				expect(container.querySelector('img[src*="cdn.discordapp.com"]')).toBeInTheDocument();
+			},
+			{ timeout: 5_000 },
+		);
+		expect(asked).toBe(2);
+	});
+
 	/** The profile is a separate request; the page must be usable whether or not it ever answers. */
 	it("still offers the sign-in button when the profile cannot be fetched", async () => {
 		server.use(
@@ -114,6 +140,23 @@ describe("the bot's own identity", () => {
 
 		expect(await screen.findByRole("button", { name: /sign in with discord/i })).toBeInTheDocument();
 		expect(screen.getByRole("heading", { name: "Testify" })).toBeInTheDocument();
+	});
+});
+
+describe("how long the profile is waited for", () => {
+	const connecting = new ApiError(503, { error: { code: "bot_connecting", message: "Connecting." } });
+	const broken = new ApiError(500, { error: { code: "internal", message: "Broken." } });
+
+	it("waits about a minute for a bot that is still connecting", () => {
+		expect(retryBot(29, connecting)).toBe(true);
+		expect(retryBot(30, connecting)).toBe(false);
+		expect(botRetryDelay(5, connecting)).toBe(2_000);
+	});
+
+	it("gives up quickly on anything else", () => {
+		expect(retryBot(1, broken)).toBe(true);
+		expect(retryBot(2, broken)).toBe(false);
+		expect(retryBot(1, new TypeError("offline"))).toBe(true);
 	});
 });
 
