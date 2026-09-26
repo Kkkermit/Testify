@@ -65,12 +65,12 @@ numbers, which drift):
 | Command files        | 101 (incl. folded-in subcommands) |
 | Subcommands          | 110                               |
 | Prefix aliases       | 84                                |
-| Button handlers      | 25                                |
+| Button handlers      | 26                                |
 | Events               | 24, in 5 groups                   |
-| `src/lib` helpers    | 92, in 16 domain folders          |
+| `src/lib` helpers    | 93, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,731 across 267 suites           |
+| Tests                | 4,785 across 270 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -1113,6 +1113,34 @@ drops the panel instead of retrying a message that will 404 for ever, and the ti
 is the only animation a Discord message has, and it costs nothing. The bar beside it is drawn in box characters
 inside a code span rather than in emoji: an emoji bar reflows as the head moves through it, so the whole line
 appears to twitch rather than to progress.
+
+**A finished queue sits past its end.** `#endQueue` moves the index to `tracks.length` (`finished`), where Stop
+already left it, and a new request asks `session.active` — playing, paused or opening a track — rather than whether
+a track is current. A queue that ended on its own used to keep its last song as the current one, so the next `/play`
+queued behind a song that had already finished while the panel kept counting it down. `addTracks` is the one rule
+for where new tracks go, and `queueRequest` is the one path to it, shared by `/play` and the panel's Add to queue.
+
+**A paused track shows "Paused · 2:13 left", never `<t:…:R>`**, because a relative timestamp keeps counting in every
+reader's client whatever the player is doing.
+
+**Add to queue is its own handler, `musicadd`, and is not `ownerOnly`**, because anybody in the channel may add a
+song. The panel's owner having passed the gates says nothing about the person pressing, so `checkMusicControl` in
+`checks.ts` applies what `/play` would — pause, blacklist, the `play` switch, the music switch and the DJ roles — on
+the press and again on the submit, since a form can sit open while a role changes.
+
+**The now-playing card is drawn once per track and uploaded once.** `musicCard.util.ts` draws it, as a JPEG because
+the blurred artwork behind the text is a photograph. `panelMessage` attaches it the first time a message shows the
+track, and `rememberCard` reads back the address Discord stored it at, so the five-second refresh refers to that
+address rather than sending the picture again. An edit with no `files` leaves a message's attachments alone —
+discord.js's `MessagePayload` sends no `attachments` field then, read rather than assumed. A card that cannot be
+drawn falls back to the thumbnail layout with `attachments: []`, so no stale picture lingers on the message.
+
+**The re-encode is 160 kbps, and that was measured, not guessed.** Every level but 100% decodes and re-encodes.
+Through the real FFmpeg arguments, against a 160 kbps Opus source at the same level, 128 kbps scored 28.1 dB SNR,
+160 kbps 31.3 and 256 kbps 31.7; adding `-vbr on -compression_level 10 -application audio` gave a byte-identical
+file, so libopus's defaults already are those. 100% remains the only path that loses nothing. `bestFirst` breaks a
+bitrate tie by yt-dlp's own order, which lists formats worst to best — a stable sort over missing bitrates used to
+pick the worst format on offer.
 
 Things that are deliberately **not** there: DisTube and its plugins (the yt-dlp and SoundCloud ones were two
 years stale), and Spotify playback. `open.spotify.com` is on yt-dlp's `KnownDRMIE` list beside Disney+; a

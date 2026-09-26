@@ -18,6 +18,9 @@ export const VOLUME_STEP = 10;
 
 export const MUSIC_ID = "music";
 
+/** Its own handler rather than one of the player's buttons, because anybody in the channel may add a song. */
+export const MUSIC_ADD_ID = "musicadd";
+
 /**
  * How many more tries a track gets after each refusal: a 403 can be an expired address, the rest are YouTube's
  * decision.

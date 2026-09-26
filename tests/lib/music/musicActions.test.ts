@@ -2,7 +2,6 @@ import { type Guild, type GuildMember } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { type QueueState, type Track } from "@lib/music/music.types";
 import {
-	panelFor,
 	requireSession,
 	requireVolumeControl,
 	sameChannelAs,
@@ -74,7 +73,7 @@ describe("requireSession", () => {
 	});
 });
 
-describe("panelFor", () => {
+describe("the panel message", () => {
 	function track(title: string): Track {
 		return {
 			url: `https://youtu.be/${title}`,
@@ -87,18 +86,18 @@ describe("panelFor", () => {
 		};
 	}
 
-	it("renders the session's own queue rather than a copy that can drift", () => {
+	it("renders the session's own queue rather than a copy that can drift", async () => {
 		const session = sessionFor({ id: "guild-3" } as Guild, BINARIES, LOGGER as never);
 		const queue: QueueState = { tracks: [track("live-one")], index: 0, loop: "off" };
 		session.queue = queue;
 
-		expect(textOf(panelFor(session, USER))).toContain("live-one");
+		expect(JSON.stringify((await session.panelMessage(USER)).payload.components[0]?.toJSON())).toContain("live-one");
 	});
 
-	it("carries a note through to the panel", () => {
+	it("carries a note through to the panel", async () => {
 		const session = sessionFor({ id: "guild-4" } as Guild, BINARIES, LOGGER as never);
 
-		expect(textOf(panelFor(session, USER, "Skipped."))).toContain("Skipped.");
+		expect(textOf((await session.panelMessage(USER, "Skipped.")).payload)).toContain("Skipped.");
 	});
 });
 

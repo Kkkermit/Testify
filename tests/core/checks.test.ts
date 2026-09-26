@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import lottery from "@commands/economy/lottery.command";
-import { clearCooldowns, runChecks } from "@core/checks";
+import { checkMusicControl, clearCooldowns, runChecks } from "@core/checks";
 import { defineCommand } from "@core/command";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
@@ -274,5 +274,52 @@ describe("the lottery", () => {
 		const interaction = createMockInteraction({ subcommand: name, overrides: memberWith(0n) });
 
 		expect(await runChecks(interaction, lottery, createMockClient())).toBeNull();
+	});
+});
+
+/** The Add to queue button can be pressed by anybody, so it has to pass what `/play` itself would have to. */
+describe("checkMusicControl", () => {
+	const guildId = "300000000000000001";
+	const plainMember = { roles: ["role-listener"], permissions: "0" };
+	const manager = { roles: [], permissions: String(PermissionFlagsBits.ManageGuild) };
+
+	const ask = (member: object, client = createMockClient()) =>
+		checkMusicControl(client, { userId: USER_ID, guildId, member: member as never });
+
+	it("lets a member through where music is on and open", async () => {
+		await expect(ask(plainMember)).resolves.toBeNull();
+	});
+
+	it("refuses while the bot is paused", async () => {
+		const client = createMockClient();
+		client.paused = true;
+
+		await expect(ask(plainMember, client)).resolves.toMatch(/paused/);
+	});
+
+	it("refuses a blacklisted account", async () => {
+		findBlacklistEntry.mockResolvedValueOnce({ reason: "spam" });
+
+		await expect(ask(plainMember)).resolves.toMatch(/blocked/);
+	});
+
+	it("refuses when /play is switched off in the server", async () => {
+		offInGuild.mockResolvedValueOnce(["play"]);
+
+		await expect(ask(plainMember)).resolves.toMatch(/switched off/);
+	});
+
+	it("refuses when the music system is off, for a manager too", async () => {
+		musicSettings.mockResolvedValue({ enabled: false, djRoleIds: [] });
+
+		await expect(ask(manager)).resolves.toMatch(/music system is switched off/);
+	});
+
+	it("holds a member without a DJ role back, and lets a manager through", async () => {
+		musicSettings.mockResolvedValue({ enabled: true, djRoleIds: ["role-dj"] });
+
+		await expect(ask(plainMember)).resolves.toMatch(/DJ role/);
+		await expect(ask(manager)).resolves.toBeNull();
+		await expect(ask({ roles: ["role-dj"], permissions: "0" })).resolves.toBeNull();
 	});
 });

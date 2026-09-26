@@ -2,6 +2,7 @@ import {
 	type ButtonBuilder,
 	ContainerBuilder,
 	MediaGalleryBuilder,
+	MediaGalleryItemBuilder,
 	MessageFlags,
 	SectionBuilder,
 	SeparatorBuilder,
@@ -42,6 +43,14 @@ export function sectionWithThumbnail(markdown: string, imageUrl: string, descrip
 	if (description !== undefined) thumbnail.setDescription(description);
 
 	return new SectionBuilder().addTextDisplayComponents(text(markdown)).setThumbnailAccessory(thumbnail);
+}
+
+/** One full-width image, for a drawn card; the description is what a screen reader says instead. */
+export function gallery(imageUrl: string, description?: string): MediaGalleryBuilder {
+	const item = new MediaGalleryItemBuilder().setURL(imageUrl);
+	if (description !== undefined) item.setDescription(description.slice(0, 1_024));
+
+	return new MediaGalleryBuilder().addItems(item);
 }
 
 /** A container coloured by category, to match the embeds beside it. */

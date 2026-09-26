@@ -21,14 +21,12 @@ export async function runChecks(
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
-	if (client.paused) {
-		return `${botName()} is paused right now. The bot owner can resume it from the dashboard.`;
-	}
+	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
 	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
 
-	const switchedOff = await checkSwitchedOff(interaction, command);
+	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId);
 	if (switchedOff !== null) return switchedOff;
 
 	const musicOff = await checkMusicSystem(interaction, command);
@@ -68,15 +66,43 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
-/** Nobody bypasses a switch, the bot owner included. */
-async function checkSwitchedOff(interaction: CommandInput, command: Command): Promise<CheckFailure> {
-	if (isAlwaysEnabled(command.name)) return null;
+function pausedRefusal(): string {
+	return `${botName()} is paused right now. The bot owner can resume it from the dashboard.`;
+}
 
-	if ((await disabledGlobally()).includes(command.name)) {
+/**
+ * The gates `/play` passes, for a control that queues music without running the command — anybody may press it, so the
+ * panel's owner having passed them says nothing about the person pressing.
+ */
+export async function checkMusicControl(
+	client: TestifyClient,
+	who: { userId: string; guildId: string; member: CommandInput["member"] },
+): Promise<CheckFailure> {
+	if (client.paused) return pausedRefusal();
+
+	const blacklisted = await findBlacklistEntry(who.userId);
+	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
+
+	const switchedOff = await checkSwitchedOff("play", who.guildId);
+	if (switchedOff !== null) return switchedOff;
+
+	const settings = normaliseMusicSettings(await getMusicSettings(who.guildId));
+
+	return musicRefusal(settings, {
+		roleIds: roleIdsOf(who.member),
+		manager: who.member !== null && permissionsOf(who.member).has(PermissionFlagsBits.ManageGuild),
+	});
+}
+
+/** Nobody bypasses a switch, the bot owner included. */
+async function checkSwitchedOff(name: string, guildId: string | null): Promise<CheckFailure> {
+	if (isAlwaysEnabled(name)) return null;
+
+	if ((await disabledGlobally()).includes(name)) {
 		return "That command is switched off. The bot owner can turn it back on from the dashboard.";
 	}
 
-	if (interaction.guildId !== null && (await disabledInGuild(interaction.guildId)).includes(command.name)) {
+	if (guildId !== null && (await disabledInGuild(guildId)).includes(name)) {
 		return "That command is switched off in this server. Anybody with Manage Server can turn it back on.";
 	}
 

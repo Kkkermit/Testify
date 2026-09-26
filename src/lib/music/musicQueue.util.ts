@@ -20,6 +20,22 @@ export function enqueueNext(state: QueueState, tracks: Track[]): QueueState {
 	return { ...state, tracks: [...state.tracks.slice(0, at), ...tracks, ...state.tracks.slice(at)] };
 }
 
+/** Where new tracks go, and which to start: an idle player starts the first of them rather than queueing behind nothing. */
+export function addTracks(
+	state: QueueState,
+	tracks: Track[],
+	options: { next: boolean; idle: boolean },
+): { state: QueueState; start: number | null } {
+	if (options.idle) return { state: enqueue(state, tracks), start: state.tracks.length };
+
+	return { state: options.next ? enqueueNext(state, tracks) : enqueue(state, tracks), start: null };
+}
+
+/** A queue that has run out sits past its end, so its last track no longer reads as the one playing. */
+export function finished(state: QueueState): QueueState {
+	return { ...state, index: state.tracks.length };
+}
+
 export function removeAt(state: QueueState, position: number): QueueState {
 	if (position < 0 || position >= state.tracks.length) return state;
 

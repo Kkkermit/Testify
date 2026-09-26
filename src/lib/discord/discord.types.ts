@@ -1,4 +1,5 @@
 import {
+	type AttachmentBuilder,
 	type EmbedBuilder,
 	type ActionRowBuilder,
 	type MessageActionRowComponentBuilder,
@@ -21,6 +22,12 @@ export interface RenderedScreen {
 export interface ContainerMessage {
 	components: ContainerBuilder[];
 	flags: MessageFlags.IsComponentsV2;
+}
+
+/** A container message that uploads a file its components refer to, or drops the one it had with an empty list. */
+export interface ContainerMessageWithFiles extends ContainerMessage {
+	files?: AttachmentBuilder[];
+	attachments?: [];
 }
 
 export type ContainerPart =

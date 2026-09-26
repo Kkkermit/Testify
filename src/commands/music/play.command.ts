@@ -1,16 +1,12 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, defineCommand, inGuild } from "@core/command";
-import { UserFacingError } from "@core/errors";
 import {
 	CHOICE_MAX,
 	choicesFor,
-	currentTrack,
-	enqueue,
-	enqueueNext,
 	interactionAge,
-	isPlaylistUrl,
 	musicBinaries,
-	openSession,
+	queueRequest,
+	requestedQuery,
 	resolveQuery,
 	resolveTracks,
 	SEARCH_RESULTS,
@@ -47,40 +43,20 @@ export default defineCommand({
 	async run(interaction, client) {
 		const guild = inGuild(interaction);
 		const channel = voiceChannelOf(asMember(interaction));
-		const raw = interaction.options.getString("query", true);
-
-		const query = resolveQuery(raw);
-		if (query === null) throw new UserFacingError("Say what to play — a link, or a few words to search for.");
-		if (query.source === "spotify") {
-			throw new UserFacingError(
-				"Spotify streams are DRM-protected, so nothing can play them. Search for the track by name instead.",
-			);
-		}
+		const query = requestedQuery(interaction.options.getString("query", true));
 
 		// Resolving spawns yt-dlp and can take seconds, which is well past Discord's reply window.
 		await interaction.deferReply();
 
-		const session = openSession(guild, client);
-		const flat = query.kind === "url" && isPlaylistUrl(query.url);
-		const found = await resolveTracks(query, interaction.user.id, musicBinaries(client), { flat });
-
-		if (found.length === 0) throw new UserFacingError("Nothing turned up for that.");
-
-		// A search offers several; only the first is wanted unless a playlist was asked for by name.
-		const tracks = query.kind === "search" ? found.slice(0, 1) : found;
-		const wasIdle = currentTrack(session.queue) === null;
-
-		session.queue =
-			interaction.options.getBoolean("next") === true
-				? enqueueNext(session.queue, tracks)
-				: enqueue(session.queue, tracks);
-		session.textChannelId = interaction.channel?.id ?? null;
-
-		await session.connect(channel);
-		if (wasIdle) await session.play(session.queue.index < 0 ? 0 : session.queue.index);
-
-		const note =
-			tracks.length > 1 ? `Added **${String(tracks.length)}** tracks.` : `Added **${tracks[0]?.title ?? "a track"}**.`;
+		const { session, note } = await queueRequest({
+			guild,
+			client,
+			channel,
+			query,
+			requestedBy: interaction.user.id,
+			next: interaction.options.getBoolean("next") === true,
+			textChannelId: interaction.channel?.id ?? null,
+		});
 
 		await showPanel(interaction, session, note);
 	},

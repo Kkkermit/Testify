@@ -2,12 +2,15 @@
 id: music-queue
 title: Managing the queue
 topic: music
-keywords: queue, skip, pause, resume, stop, loop, repeat, shuffle, remove track, clear queue, now playing, leave, disconnect
-questions: How do I skip a song? | How do I loop a song? | How do I see the queue? | How do I make the bot leave?
+keywords: queue, skip, pause, resume, stop, loop, repeat, shuffle, remove track, clear queue, now playing, leave, disconnect, add to queue
+questions: How do I skip a song? | How do I loop a song? | How do I see the queue? | How do I make the bot leave? | How do I add a song to the queue?
 commands: music
 related: music, music-volume
 ---
 All of these are under `/music`, and most have a button on the player panel too.
+
+### Adding to it
+- `/play` adds a song. So does **Add to queue** on the player panel, which anybody allowed to use the music system can press.
 
 ### Moving through it
 - `/music queue` shows what is playing and what is next. `/music nowplaying` shows only the current track.

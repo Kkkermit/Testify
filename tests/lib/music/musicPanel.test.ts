@@ -1,5 +1,5 @@
 import { parseCustomId } from "@core/button";
-import { MAX_VOLUME, MIN_VOLUME } from "@lib/music/music.constants";
+import { MAX_VOLUME, MIN_VOLUME, MUSIC_ADD_ID, MUSIC_ID } from "@lib/music/music.constants";
 import { type QueueState, type Track } from "@lib/music/music.types";
 import {
 	headlineFor,
@@ -71,18 +71,36 @@ describe("musicPanel", () => {
 		expect(textOf(musicPanel(state(), OWNER))).toContain("a");
 	});
 
-	it("says so plainly when nothing is playing", () => {
+	it("says so plainly when nothing is playing, and offers a way to start", () => {
 		const empty = musicPanel(state({ queue: { tracks: [], index: -1, loop: "off" } }), OWNER);
 
 		expect(textOf(empty)).toContain("Nothing is playing");
-		expect(buttonsOf(empty)).toEqual([]);
+		expect(labels(empty)).toEqual(["Add to queue"]);
+	});
+
+	/** A finished queue used to keep its last song on show as though it were still playing. */
+	it("says the queue has finished, and offers the last song again", () => {
+		const done = musicPanel(state({ queue: { tracks: [track("a")], index: 1, loop: "off" } }), OWNER);
+
+		expect(textOf(done)).toContain("The queue has finished");
+		expect(labels(done)).toEqual(["Add to queue", "Play the last one again"]);
 	});
 
 	/** The router compares the last argument, so a missing owner would let anybody drive somebody else's panel. */
-	it("puts the invoking user last in every custom ID", () => {
-		for (const id of idsOf(musicPanel(state(), OWNER))) {
+	it("puts the invoking user last in every player control's custom ID", () => {
+		const player = idsOf(musicPanel(state(), OWNER)).filter((id) => parseCustomId(id).id === MUSIC_ID);
+
+		expect(player.length).toBeGreaterThan(5);
+		for (const id of player) {
 			expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
 		}
+	});
+
+	/** Anybody in the channel may add a song, so the button carries no owner for the router to hold them to. */
+	it("offers Add to queue to everybody, not only the panel's owner", () => {
+		const add = idsOf(musicPanel(state(), OWNER)).find((id) => parseCustomId(id).id === MUSIC_ADD_ID);
+
+		expect(add).toBe(`${MUSIC_ADD_ID}:open`);
 	});
 
 	it("gives every control its own custom ID", () => {
@@ -220,6 +238,26 @@ describe("musicBar", () => {
 });
 
 describe("progressLine", () => {
+	/** A relative timestamp keeps counting down in every reader's client, so while paused it said the track was ending. */
+	it("says paused rather than counting down while paused", () => {
+		const line = progressLine(track("a"), 60_000, 1_700_000_000_000, true);
+
+		expect(line).toContain("Paused");
+		expect(line).toContain("2:00 left");
+		expect(line).not.toContain("<t:");
+	});
+
+	it("marks a paused live stream as paused too", () => {
+		expect(progressLine(track("a", { durationMs: null }), 5_000, Date.now(), true)).toContain("Paused");
+	});
+
+	it("puts the paused line on the panel itself", () => {
+		const shown = textOf(musicPanel(state({ paused: true }), OWNER));
+
+		expect(shown).not.toContain("<t:");
+		expect(shown).toContain("left");
+	});
+
 	it("draws where the track has got to", () => {
 		expect(progressLine(track("a"), 90_000)).toContain("1:30");
 	});

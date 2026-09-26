@@ -10,9 +10,10 @@ import {
 	type VoiceConnection,
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
-import { type Guild, type VoiceBasedChannel } from "discord.js";
+import { AttachmentBuilder, type Guild, type VoiceBasedChannel } from "discord.js";
 import { type Logger } from "@core/logger";
-import { type ContainerMessage } from "@lib/discord/discord.types";
+import { fetchArtwork, MUSIC_CARD_NAME, renderMusicCard } from "@lib/canvas/musicCard.util";
+import { type ContainerMessageWithFiles } from "@lib/discord/discord.types";
 import {
 	DEFAULT_VOLUME,
 	EMPTY_QUEUE,
@@ -30,9 +31,9 @@ import {
 	type OpenStream,
 } from "@lib/music/music.types";
 import { clampVolume, planStream } from "@lib/music/musicFormat.util";
-import { musicPanel } from "@lib/music/musicPanel.util";
+import { musicPanel, type PanelState } from "@lib/music/musicPanel.util";
 import { classifyProblem } from "@lib/music/musicProblem.util";
-import { currentTrack, decideOnIdle, endedEarly } from "@lib/music/musicQueue.util";
+import { currentTrack, decideOnIdle, endedEarly, finished } from "@lib/music/musicQueue.util";
 import { describeTrack, forgetDescription, openStream } from "@lib/music/musicSource.util";
 
 /** One guild's voice connection, player and queue, and the rules for moving between tracks. */
@@ -69,7 +70,31 @@ export type SessionListener = (event: SessionEvent) => void;
 export interface PanelTarget {
 	userId: string;
 	page: number;
-	edit(payload: ContainerMessage): Promise<unknown>;
+	/** Resolves to the edited message, which is where an uploaded card's address is read from. */
+	edit(payload: ContainerMessageWithFiles): Promise<unknown>;
+}
+
+/** A panel to send, and the track whose card it uploads, so the sender can say where Discord put it. */
+export interface PanelMessage {
+	payload: ContainerMessageWithFiles;
+	cardFor: string | null;
+}
+
+/** The current track's drawn card, and its address once a message has uploaded it. */
+interface Card {
+	trackUrl: string;
+	image: Promise<Buffer | null>;
+	uploaded: string | null;
+}
+
+function uploadedUrl(message: unknown, name: string): string | null {
+	if (typeof message !== "object" || message === null || !("attachments" in message)) return null;
+
+	const { attachments } = message as {
+		attachments: { find(match: (attachment: { name: string }) => boolean): { url: string } | undefined };
+	};
+
+	return attachments.find((attachment) => attachment.name === name)?.url ?? null;
 }
 
 export class MusicSession {
@@ -102,6 +127,7 @@ export class MusicSession {
 	#ticker: NodeJS.Timeout | null = null;
 	#leaveTimer: NodeJS.Timeout | null = null;
 	#destroyed = false;
+	#card: Card | null = null;
 
 	constructor(guildId: string, binaries: MusicBinaries, logger: Logger) {
 		this.guildId = guildId;
@@ -140,6 +166,11 @@ export class MusicSession {
 
 	get paused(): boolean {
 		return this.#player.state.status === AudioPlayerStatus.Paused;
+	}
+
+	/** Playing, paused, or opening a track; a queue that has run out is not, even with its last track still listed. */
+	get active(): boolean {
+		return this.#reopening || this.#player.state.status !== AudioPlayerStatus.Idle;
 	}
 
 	get channelId(): string | null {
@@ -253,6 +284,7 @@ export class MusicSession {
 			return;
 		}
 
+		this.#cardFor(track);
 		this.#startTicker();
 		this.#emit({ kind: "track", track });
 		void this.refreshPanel();
@@ -343,6 +375,7 @@ export class MusicSession {
 	}
 
 	#endQueue(): void {
+		this.queue = finished(this.queue);
 		this.#stopTicker();
 		this.#emit({ kind: "queue-ended" });
 		void this.refreshPanel();
@@ -356,7 +389,7 @@ export class MusicSession {
 
 	stop(): void {
 		this.#stopping = true;
-		this.queue = { ...this.queue, index: this.queue.tracks.length };
+		this.queue = finished(this.queue);
 		this.#player.stop(true);
 	}
 
@@ -383,11 +416,12 @@ export class MusicSession {
 		return this.#volume;
 	}
 
-	/** Back one track, or to the start of this one when there is nothing before it. */
+	/** Back one track, or to the start of this one when there is nothing before it; after the end, the last one again. */
 	previous(): void {
-		if (currentTrack(this.queue) === null) return;
+		const { tracks, index } = this.queue;
+		if (tracks.length === 0) return;
 
-		this.#playSoon(Math.max(0, this.queue.index - 1));
+		this.#playSoon(Math.max(0, Math.min(index, tracks.length) - 1));
 	}
 
 	/**
@@ -399,19 +433,65 @@ export class MusicSession {
 		});
 	}
 
-	render(userId: string, note?: string, page = 0): ContainerMessage {
-		return musicPanel(
-			{
-				queue: this.queue,
-				playedMs: this.playedMs,
-				paused: this.paused,
-				volume: this.#volume,
-				canSetVolume: this.canSetVolume,
-				page,
-				note: note ?? this.notice(),
+	/** Drawn once per track and started as the track starts, so a refresh rarely has to wait for it. */
+	#cardFor(track: Track): Card {
+		if (this.#card?.trackUrl !== track.url) {
+			this.#card = { trackUrl: track.url, image: this.#drawCard(track), uploaded: null };
+		}
+
+		return this.#card;
+	}
+
+	async #drawCard(track: Track): Promise<Buffer | null> {
+		try {
+			return await renderMusicCard(track, await fetchArtwork(track.thumbnail));
+		} catch (error) {
+			// Without a card the panel falls back to the thumbnail beside the title, which is still a working player.
+			this.#logger.debug({ err: error, guildId: this.guildId }, "[MUSIC] Could not draw the now-playing card.");
+			return null;
+		}
+	}
+
+	/**
+	 * The panel for a message: the card is uploaded with the first message that shows a track and referred to by its
+	 * address after that, so a refresh every few seconds never sends the picture again.
+	 */
+	async panelMessage(userId: string, note?: string, page = 0): Promise<PanelMessage> {
+		const state: PanelState = {
+			queue: this.queue,
+			playedMs: this.playedMs,
+			paused: this.paused,
+			volume: this.#volume,
+			canSetVolume: this.canSetVolume,
+			page,
+			note: note ?? this.notice(),
+		};
+		const track = currentTrack(this.queue);
+		const plain: PanelMessage = { payload: { ...musicPanel(state, userId), attachments: [] }, cardFor: null };
+		if (track === null) return plain;
+
+		const card = this.#cardFor(track);
+		if (card.uploaded !== null)
+			return { payload: musicPanel({ ...state, card: card.uploaded }, userId), cardFor: null };
+
+		const image = await card.image;
+		if (image === null) return plain;
+
+		return {
+			payload: {
+				...musicPanel({ ...state, card: `attachment://${MUSIC_CARD_NAME}` }, userId),
+				files: [new AttachmentBuilder(image, { name: MUSIC_CARD_NAME })],
 			},
-			userId,
-		);
+			cardFor: track.url,
+		};
+	}
+
+	/** Reads where Discord stored a card a message just uploaded, so later edits refer to it rather than send it again. */
+	rememberCard(cardFor: string | null, message: unknown): void {
+		if (cardFor === null || this.#card?.trackUrl !== cardFor) return;
+
+		const url = uploadedUrl(message, MUSIC_CARD_NAME);
+		if (url !== null) this.#card.uploaded = url;
 	}
 
 	/** Points the live panel at a message, so the progress bar keeps up with what is actually playing. */
@@ -425,7 +505,8 @@ export class MusicSession {
 		if (panel === null) return;
 
 		try {
-			await panel.edit(this.render(panel.userId, undefined, panel.page));
+			const { payload, cardFor } = await this.panelMessage(panel.userId, undefined, panel.page);
+			this.rememberCard(cardFor, await panel.edit(payload));
 		} catch (error) {
 			// A deleted or unreachable message is the ordinary end of a panel, not something to keep retrying.
 			this.#logger.debug({ err: error, guildId: this.guildId }, "[MUSIC] Dropped a panel that could not be edited.");

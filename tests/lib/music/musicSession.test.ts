@@ -63,6 +63,12 @@ jest.mock("@discordjs/voice", () => ({
 	entersState: jest.fn(() => Promise.resolve(undefined)),
 }));
 
+jest.mock("@lib/canvas/musicCard.util", () => ({
+	MUSIC_CARD_NAME: "now-playing.jpg",
+	fetchArtwork: jest.fn(() => Promise.resolve(null)),
+	renderMusicCard: jest.fn(() => Promise.resolve(Buffer.from("card"))),
+}));
+
 jest.mock("@lib/music/musicSource.util", () => ({
 	describeTrack: jest.fn(),
 	openStream: jest.fn(),
@@ -138,6 +144,42 @@ describe("a track that finishes", () => {
 		await player.goIdle();
 
 		expect(events.map((event) => event.kind)).toContain("queue-ended");
+	});
+});
+
+describe("a queue that runs out", () => {
+	/** A finished queue that still pointed at its last song made the next /play queue behind it instead of playing. */
+	it("stops pointing at the song that finished", async () => {
+		const { session } = sessionWith(["only"]);
+		await session.play(0);
+
+		resource.playbackDuration = 180_000;
+		await player.goIdle();
+
+		expect(session.queue.index).toBe(1);
+		expect(session.active).toBe(false);
+	});
+
+	it("is active while a track plays or is paused", async () => {
+		const { session } = sessionWith(["a"]);
+		await session.play(0);
+
+		expect(session.active).toBe(true);
+		session.pause();
+		expect(session.active).toBe(true);
+	});
+
+	it("can go back to the song that finished", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(1);
+
+		resource.playbackDuration = 180_000;
+		await player.goIdle();
+		session.previous();
+		await new Promise((resolve) => setImmediate(resolve));
+
+		expect(session.queue.index).toBe(1);
+		expect(player.play).toHaveBeenCalledTimes(2);
 	});
 });
 
@@ -422,9 +464,10 @@ describe("the live panel", () => {
 
 		await session.play(0);
 		session.watchPanel({ userId: "100000000000000001", page: 0, edit });
+		await jest.advanceTimersByTimeAsync(0);
 		edit.mockClear();
 
-		jest.advanceTimersByTime(PANEL_REFRESH_MS);
+		await jest.advanceTimersByTimeAsync(PANEL_REFRESH_MS);
 
 		expect(edit).toHaveBeenCalledTimes(1);
 	});
@@ -463,6 +506,86 @@ describe("the live panel", () => {
 		jest.advanceTimersByTime(PANEL_REFRESH_MS * 3);
 
 		expect(edit).not.toHaveBeenCalled();
+	});
+});
+
+describe("the now-playing card", () => {
+	const OWNER = "100000000000000001";
+	const uploaded = (url: string) => ({ attachments: [{ name: "now-playing.jpg", url }] });
+
+	it("uploads the card with the first message that shows the track", async () => {
+		const { session } = sessionWith(["a"]);
+		await session.play(0);
+
+		const { payload, cardFor } = await session.panelMessage(OWNER);
+
+		expect(payload.files).toHaveLength(1);
+		expect(cardFor).toBe("https://youtu.be/a");
+		expect(JSON.stringify(payload.components[0]?.toJSON())).toContain("attachment://now-playing.jpg");
+	});
+
+	/** Re-sending the picture on every five-second refresh would be a steady upload for a static image. */
+	it("refers to the uploaded card afterwards instead of sending it again", async () => {
+		const { session } = sessionWith(["a"]);
+		await session.play(0);
+
+		const first = await session.panelMessage(OWNER);
+		session.rememberCard(first.cardFor, uploaded("https://cdn.discordapp.com/attachments/1/2/now-playing.jpg"));
+		const next = await session.panelMessage(OWNER);
+
+		expect(next.payload.files).toBeUndefined();
+		expect(JSON.stringify(next.payload.components[0]?.toJSON())).toContain("cdn.discordapp.com/attachments/1/2");
+	});
+
+	it("draws a new card when the track changes", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(0);
+		const first = await session.panelMessage(OWNER);
+		session.rememberCard(first.cardFor, uploaded("https://cdn.discordapp.com/attachments/1/2/now-playing.jpg"));
+
+		await session.play(1);
+
+		expect((await session.panelMessage(OWNER)).cardFor).toBe("https://youtu.be/b");
+	});
+
+	/** An address remembered for one track must never end up under the next one. */
+	it("ignores an upload that belongs to a track no longer playing", async () => {
+		const { session } = sessionWith(["a", "b"]);
+		await session.play(0);
+		const stale = await session.panelMessage(OWNER);
+
+		await session.play(1);
+		session.rememberCard(stale.cardFor, uploaded("https://cdn.discordapp.com/attachments/old/now-playing.jpg"));
+
+		expect(JSON.stringify((await session.panelMessage(OWNER)).payload.components[0]?.toJSON())).not.toContain(
+			"attachments/old",
+		);
+	});
+
+	it("falls back to the thumbnail layout, and drops any old picture, when the card cannot be drawn", async () => {
+		const { renderMusicCard } = jest.requireMock("@lib/canvas/musicCard.util");
+		renderMusicCard.mockRejectedValueOnce(new Error("no fonts"));
+		const { session } = sessionWith(["a"]);
+		await session.play(0);
+
+		const { payload } = await session.panelMessage(OWNER);
+
+		expect(payload.files).toBeUndefined();
+		expect(payload.attachments).toEqual([]);
+	});
+
+	it("learns the card's address from the message the live panel edited", async () => {
+		const edit = jest.fn(() => Promise.resolve(uploaded("https://cdn.discordapp.com/attachments/9/9/now-playing.jpg")));
+		const { session } = sessionWith(["a"]);
+		await session.play(0);
+		session.watchPanel({ userId: OWNER, page: 0, edit });
+
+		await session.refreshPanel();
+		await session.refreshPanel();
+
+		const calls = edit.mock.calls as unknown as [{ files?: unknown[] }][];
+		expect(calls.at(-2)?.[0].files).toHaveLength(1);
+		expect(calls.at(-1)?.[0].files).toBeUndefined();
 	});
 });
 
@@ -545,7 +668,9 @@ describe("the notice", () => {
 
 		await session.play(0);
 
-		expect(JSON.stringify(session.render("100000000000000001").components[0]?.toJSON())).toContain("Skipped");
+		expect(
+			JSON.stringify((await session.panelMessage("100000000000000001")).payload.components[0]?.toJSON()),
+		).toContain("Skipped");
 	});
 
 	it("gives way to what a press says", async () => {
@@ -555,7 +680,9 @@ describe("the notice", () => {
 
 		await session.play(0);
 
-		const rendered = JSON.stringify(session.render("100000000000000001", "Paused.").components[0]?.toJSON());
+		const rendered = JSON.stringify(
+			(await session.panelMessage("100000000000000001", "Paused.")).payload.components[0]?.toJSON(),
+		);
 		expect(rendered).toContain("Paused.");
 		expect(rendered).not.toContain("Skipped");
 	});

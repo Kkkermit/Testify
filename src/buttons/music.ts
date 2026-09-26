@@ -9,7 +9,6 @@ import {
 	MUSIC_ID,
 	MUSIC_LIMITS,
 	musicSystemPanel,
-	panelFor,
 	readMusicSettings,
 	requireSession,
 	requireVolumeControl,
@@ -90,7 +89,7 @@ export default defineButton({
 				break;
 			}
 			case "previous": {
-				if (track === null) throw new UserFacingError("Nothing is playing.");
+				if (session.queue.tracks.length === 0) throw new UserFacingError("Nothing has been played yet.");
 				session.previous();
 				note = session.queue.index === 0 ? "Started this one again." : "Back a track.";
 				break;
@@ -136,7 +135,10 @@ export default defineButton({
 		}
 
 		const shown = Number.isFinite(page) ? page : 0;
-		await interaction.update(panelFor(session, interaction.user.id, note, shown));
+		// Deferred, because a track that has just changed may still be drawing its card when the three seconds run out.
+		await interaction.deferUpdate();
+		const { payload, cardFor } = await session.panelMessage(interaction.user.id, note, shown);
+		session.rememberCard(cardFor, await interaction.editReply(payload));
 		// The live panel follows whichever page was last looked at, so a tick cannot snap it back.
 		session.watchPanel({
 			userId: interaction.user.id,

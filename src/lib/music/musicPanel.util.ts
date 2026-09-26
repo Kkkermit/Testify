@@ -1,10 +1,17 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
-import { container, containerMessage, divider, sectionWithThumbnail, text } from "@lib/discord/containers.util";
+import {
+	container,
+	containerMessage,
+	divider,
+	gallery,
+	sectionWithThumbnail,
+	text,
+} from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { formatClock, formatDuration, truncate } from "@lib/format/format.util";
-import { MUSIC_ID, MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME, VOLUME_STEP } from "@lib/music/music.constants";
+import { MUSIC_ADD_ID, MUSIC_ID, MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME, VOLUME_STEP } from "@lib/music/music.constants";
 import { type MusicSource, type QueueState, type Track } from "@lib/music/music.types";
 import { clampVolume } from "@lib/music/musicFormat.util";
 import { currentTrack, totalDurationMs, upcomingPage } from "@lib/music/musicQueue.util";
@@ -27,6 +34,13 @@ const SOURCE_EMOJI: Record<MusicSource, string> = {
 	other: "🎧",
 };
 
+const SOURCE_NAMES: Record<MusicSource, string> = {
+	youtube: "YouTube",
+	soundcloud: "SoundCloud",
+	spotify: "Spotify",
+	other: "the web",
+};
+
 export interface PanelState {
 	queue: QueueState;
 	playedMs: number;
@@ -38,6 +52,8 @@ export interface PanelState {
 	canSetVolume?: boolean;
 	/** A one-line result from the last press, shown under the heading. */
 	note?: string | undefined;
+	/** The drawn now-playing card, as an uploaded image's address or an `attachment://` reference to one. */
+	card?: string | undefined;
 }
 
 /** Discord's link syntax breaks on a bracket in the label and on whitespace in the address. */
@@ -71,17 +87,20 @@ export function musicBar(playedMs: number, durationMs: number, cells = BAR_CELLS
 
 /**
  * The elapsed/total line, or nothing for a stream with no end; `<t:…:R>` counts down in the reader's client between
- * edits.
+ * edits, which is why a paused track says so instead of offering a countdown that would keep running.
  */
-export function progressLine(track: Track, playedMs: number, now = Date.now()): string {
-	if (track.durationMs === null) return "`🔴 live`";
+export function progressLine(track: Track, playedMs: number, now = Date.now(), paused = false): string {
+	if (track.durationMs === null) return paused ? "`🔴 live`\n-# ⏸️ Paused" : "`🔴 live`";
 
 	const played = Math.min(playedMs, track.durationMs);
 	const endsAt = Math.round((now + track.durationMs - played) / 1_000);
+	const when = paused
+		? `-# ⏸️ Paused · ${formatClock(track.durationMs - played)} left`
+		: `-# Ends <t:${String(endsAt)}:R>`;
 
 	return [
 		`\`${formatClock(played)} ${musicBar(played, track.durationMs)} ${formatClock(track.durationMs)}\``,
-		`-# Ends <t:${String(endsAt)}:R>`,
+		when,
 	].join("\n");
 }
 
@@ -111,6 +130,16 @@ export function queueSummary(state: QueueState): string {
 
 const LOOP_LABELS = { off: "Loop: off", track: "Loop: track", queue: "Loop: queue" } as const;
 
+/** Carries no owner, because anybody the music system lets in may add a song; its handler checks who pressed it. */
+export function addButton(): ReturnType<typeof button> {
+	return button({
+		id: customId(MUSIC_ADD_ID, "open"),
+		label: "Add to queue",
+		emoji: "➕",
+		style: ButtonStyle.Primary,
+	});
+}
+
 function transport(state: PanelState, userId: string): ContainerPart {
 	const playing = currentTrack(state.queue) !== null;
 
@@ -119,7 +148,7 @@ function transport(state: PanelState, userId: string): ContainerPart {
 			id: customId(MUSIC_ID, "previous", userId),
 			label: "Previous",
 			emoji: "⏮️",
-			disabled: !playing,
+			disabled: state.queue.tracks.length === 0,
 		}),
 		button({
 			id: customId(MUSIC_ID, state.paused ? "resume" : "pause", userId),
@@ -155,6 +184,7 @@ function extras(state: PanelState, userId: string): ContainerPart {
 	const adjustable = state.canSetVolume === true && currentTrack(state.queue) !== null;
 
 	return row(
+		addButton(),
 		button({
 			id: customId(MUSIC_ID, "shuffle", userId),
 			label: "Shuffle",
@@ -209,17 +239,44 @@ export function musicPanel(state: PanelState, userId: string): ContainerMessage 
 	if (state.note !== undefined) parts.push(text(`-# ${state.note}`));
 
 	if (track === null) {
-		parts.push(text("Nothing is playing. Use `/play` to start something."));
+		const finished = state.queue.tracks.length > 0;
+		parts.push(
+			text(
+				finished
+					? "The queue has finished. Add a song to keep going."
+					: "Nothing is playing. Add a song, or use `/play`.",
+			),
+			row(
+				addButton(),
+				...(finished
+					? [
+							button({
+								id: customId(MUSIC_ID, "previous", userId),
+								label: "Play the last one again",
+								emoji: "⏮️",
+							}),
+						]
+					: []),
+			),
+		);
 		return containerMessage(container({ category: "music", parts }));
 	}
 
-	const headline = `${headlineFor(track)}\n${progressLine(track, state.playedMs)}\n${statusLine(state, track)}`;
+	const progress = `${progressLine(track, state.playedMs, Date.now(), state.paused)}\n${statusLine(state, track)}`;
 
-	parts.push(
-		track.thumbnail === null ? text(headline) : sectionWithThumbnail(headline, track.thumbnail),
-		divider(),
-		text(queueSummary(state.queue)),
-	);
+	if (state.card === undefined) {
+		const headline = `${headlineFor(track)}\n${progress}`;
+		parts.push(track.thumbnail === null ? text(headline) : sectionWithThumbnail(headline, track.thumbnail));
+	} else {
+		// The card carries the title and artist, so the text under it keeps only the live parts and the way out.
+		const author = track.author === null ? "" : ` by ${track.author}`;
+		parts.push(
+			gallery(state.card, `Now playing: ${track.title}${author}`),
+			text(`${progress}\n-# ${SOURCE_EMOJI[track.source]} ${link(`Open on ${SOURCE_NAMES[track.source]}`, track.url)}`),
+		);
+	}
+
+	parts.push(divider(), text(queueSummary(state.queue)));
 
 	const page = upcomingPage(state.queue, state.page, QUEUE_PAGE_SIZE);
 	for (const { position, track: queued } of page.entries) {

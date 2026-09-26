@@ -1,6 +1,7 @@
 import { EMPTY_QUEUE, MAX_TRACK_ATTEMPTS } from "@lib/music/music.constants";
 import { type QueueState, type Track } from "@lib/music/music.types";
 import {
+	addTracks,
 	clearUpcoming,
 	currentTrack,
 	decideOnIdle,
@@ -8,6 +9,7 @@ import {
 	endedEarly,
 	enqueue,
 	enqueueNext,
+	finished,
 	nextIndex,
 	removeAt,
 	shuffleUpcoming,
@@ -31,6 +33,45 @@ function track(title: string, durationMs: number | null = 180_000): Track {
 function queueOf(titles: string[], index = 0, loop: QueueState["loop"] = "off"): QueueState {
 	return { tracks: titles.map((title) => track(title)), index, loop };
 }
+
+describe("addTracks", () => {
+	/** A request after the last song ended used to queue behind it rather than play, because it still read as current. */
+	it("starts the first new track when the player is idle, even after a finished queue", () => {
+		const added = addTracks(finished(queueOf(["done"])), [track("new")], { next: false, idle: true });
+
+		expect(added.start).toBe(1);
+		expect(added.state.tracks[added.start ?? -1]?.title).toBe("new");
+	});
+
+	it("starts at the front of an empty queue", () => {
+		expect(addTracks(EMPTY_QUEUE, [track("first")], { next: false, idle: true }).start).toBe(0);
+	});
+
+	it("queues behind a playing track without starting anything", () => {
+		const added = addTracks(queueOf(["a", "b"]), [track("c")], { next: false, idle: false });
+
+		expect(added.start).toBeNull();
+		expect(added.state.tracks.map((entry) => entry.title)).toEqual(["a", "b", "c"]);
+	});
+
+	it("puts a next-up request straight after the playing track", () => {
+		const added = addTracks(queueOf(["a", "b"]), [track("c")], { next: true, idle: false });
+
+		expect(added.state.tracks.map((entry) => entry.title)).toEqual(["a", "c", "b"]);
+	});
+
+	it("still plays straight away when next was asked for but nothing is playing", () => {
+		const added = addTracks(finished(queueOf(["a"])), [track("b")], { next: true, idle: true });
+
+		expect(added.start).toBe(1);
+	});
+});
+
+describe("finished", () => {
+	it("leaves no track reading as the current one", () => {
+		expect(currentTrack(finished(queueOf(["a", "b"], 1)))).toBeNull();
+	});
+});
 
 describe("enqueue", () => {
 	it("adds to the end without moving what is playing", () => {
