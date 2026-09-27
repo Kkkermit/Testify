@@ -59,10 +59,15 @@ describe("eventLoopDelay", () => {
 		expect(eventLoopDelay()).toEqual({ p50Ms: null, p99Ms: null, maxMs: null });
 	});
 
+	/** A fixed 120ms wait failed on CI when a runner stall let it end before the monitor's second tick, its first sample. */
 	it("reports the delay once the monitor has had time to sample", async () => {
 		startEventLoopMonitor();
 		startEventLoopMonitor();
-		await new Promise((resolve) => setTimeout(resolve, 120));
+
+		const deadline = Date.now() + 3_000;
+		while (eventLoopDelay().p99Ms === null && Date.now() < deadline) {
+			await new Promise((resolve) => setTimeout(resolve, 25));
+		}
 
 		const delay = eventLoopDelay();
 		expect(delay.p99Ms).toEqual(expect.any(Number));
