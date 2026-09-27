@@ -28,8 +28,8 @@
 }
 
 /**
- * The console palette. Every value is verified against WCAG before it lands — see `re-write.md` §3, and the
- * check in `tests/tokens.test.ts` that fails if one drops below its threshold.
+ * The console palette. Every value is verified against WCAG before it lands, by `src/test/contrast.test.ts`,
+ * which fails if one drops below its threshold.
  *
  * Two colours carry the violet because one cannot: `--color-primary` is a **fill** and only ever wears white
  * text on it, while `--color-accent` is the **text** violet for links and live state. Using the fill colour as

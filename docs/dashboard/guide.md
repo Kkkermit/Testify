@@ -4,28 +4,21 @@ Everything needed to work on the web dashboard: how it is put together, how a sc
 and components work, how the API is reached, how it is built and tested. Written so somebody arriving with no
 memory of previous sessions can make a correct change.
 
-**Re-skinning it or reworking a flow?** [§18](#18-the-design-system) is the full token reference and the order
-to change things in, [§19](#19-user-journeys) is every journey end to end, and [§20](#20-the-58-rules) is the
-checklist the rewrite is working through. Those three are the ones to edit.
+**Re-skinning it or reworking a flow?** [§19](#19-the-design-system) is the full token reference and the order
+to change things in, [§20](#20-user-journeys) is every journey end to end, and [§21](#21-the-58-rules) is the
+checklist a screen is measured against. Those three are the ones to edit, and [§22](#22-checking-a-screen) is how a
+changed screen is proved.
 
 > [!IMPORTANT]
-> **Doing the rewrite? [`re-write.md`](re-write.md) is the plan** — the order to work in, what must not change,
-> the measured baseline, and what "better" has to prove before it counts.
-
-> [!IMPORTANT]
-> **§18 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../../.claude/skills/README.md)
-> now lead the dashboard's visual direction — where their guidance and the values recorded in §18 disagree, the
-> skill wins and §18 is updated to describe what was built. Three things are architecture rather than aesthetics
-> and do not move: tokens stay the single source (no hex in a `.tsx`), the accessibility floor in §14 only ever
+> **§19 is a baseline, not a contract.** The design skills vendored in [`.claude/skills`](../../.claude/skills/README.md)
+> now lead the dashboard's visual direction — where their guidance and the values recorded in §19 disagree, the
+> skill wins and §19 is updated to describe what was built. Three things are architecture rather than aesthetics
+> and do not move: tokens stay the single source (no hex in a `.tsx`), the accessibility floor in §15 only ever
 > rises, and the CSP and security boundary in §9 are untouchable.
 
 > [!IMPORTANT]
-> Two companion documents:
->
-> - [`../../AGENTS.md`](../../AGENTS.md) §24 — the repo-wide rules. **Where it and this file disagree, it wins.**
->   This file is the practical detail; that one is the contract.
-> - [`design-plan/`](design-plan/00-INDEX.md) — the design plan, threat model and phase order.
->   `13-ROADMAP-AND-RISKS.md` says what is built and what is next.
+> [`../../AGENTS.md`](../../AGENTS.md) §24 holds the repo-wide rules, the security model and the reasoning behind
+> them. **Where it and this file disagree, it wins.** This file is the practical detail; that one is the contract.
 
 ---
 
@@ -52,6 +45,7 @@ checklist the rewrite is working through. Those three are the ones to edit.
 19. [The design system](#19-the-design-system)
 20. [User journeys](#20-user-journeys)
 21. [The 58 rules](#21-the-58-rules)
+22. [Checking a screen](#22-checking-a-screen)
 
 ---
 
@@ -156,7 +150,7 @@ npm run build
 ```
 
 **`npm run verify:bundle` is not optional.** It reads `dashboard/dist/assets` and fails if more than one React
-version is in there — see [§16](#16-traps-that-have-bitten-before). `build:dashboard` runs it, so `npm run build`
+version is in there — see [§17](#17-traps-that-have-bitten-before). `build:dashboard` runs it, so `npm run build`
 and CI both do.
 
 `vite.config.ts` does three things worth knowing:
@@ -604,7 +598,7 @@ A drawer below `md`, an icon-only rail from `md`, the full sidebar from `lg`.
 
 `jest-axe` runs on every page-level test through `src/test/axe.ts`, with `color-contrast` disabled — jsdom
 computes no styles, so that rule can only report false negatives there. It is a floor, roughly 40% of issues;
-`design-plan/10-ACCESSIBILITY.md` lists the manual passes.
+the manual passes that cover the rest are in [§22](#22-checking-a-screen).
 
 Four things it does not catch, all built deliberately:
 
@@ -780,7 +774,7 @@ back to `components/brand/Logo`; a brand mark is never worth a broken image icon
 it: every token that exists, what each one is for, and the order to change them in. **If you are re-skinning the
 dashboard, work through [18.10](#1810-re-skinning-the-order-to-do-it-in) rather than grepping for hex values.**
 
-### 18.1 Where each visual decision lives
+### 19.1 Where each visual decision lives
 
 One place per decision. If you find yourself editing a screen to change how something looks, you are probably in
 the wrong file.
@@ -800,7 +794,7 @@ the wrong file.
 | Sidebar shape and grouping      | `config/navigation.ts`                                | Sidebar, rail, drawer                   |
 | Native control appearance       | `@layer base` in `src/index.css`                      | Selects, checkboxes, scrollbars         |
 
-### 18.2 The palette
+### 19.2 The palette
 
 Names are **roles, not colours**. `--color-destructive` is red today; the name still reads correctly if a fork
 makes it orange. Renaming a token to its hue is how a palette stops being swappable.
@@ -835,7 +829,7 @@ Two conventions worth keeping:
 - **`--color-ring` is used by exactly one rule** — `:focus-visible` in the base layer. Keeping it separate from
   `--color-accent` means a rebrand can make the focus ring louder than the brand without touching links.
 
-### 18.3 Feature tints
+### 19.3 Feature tints
 
 Six hues, used as an icon colour and as a 15% wash behind it. The grouping is by **feel rather than by
 subsystem** — audit logging reads the tickets blue because it is an operational screen, not because it is a
@@ -856,7 +850,7 @@ at full strength will not pass contrast for the icon sitting on it — check bot
 `featureLook()` falls back to a neutral icon for a key it has never seen, so the API can ship a feature before
 the dashboard knows about it and the grid renders a row rather than a hole. There is a test pinning that.
 
-### 18.4 Type
+### 19.4 Type
 
 **Three faces, all self-hosted, 104 kB for the lot.** Before the rewrite `@theme` named `"Inter var"` with no
 `@font-face` behind it, so every install had silently been rendering in `system-ui` — the scale below meant
@@ -910,7 +904,7 @@ Rules that hold today and are worth keeping:
 - **Headings carry `text-wrap: balance`** from the base layer, so a title never leaves one word on its own line.
 - **`text-xl` appears once** in the whole app. If a rewrite wants it, use it deliberately or delete it.
 
-### 18.5 Surfaces and elevation
+### 19.5 Surfaces and elevation
 
 **There are no drop shadows anywhere.** On a near-black background a shadow reads as a smudge, not as height.
 Depth comes from three things instead:
@@ -923,7 +917,7 @@ Depth comes from three things instead:
 The body also carries a fixed radial wash of `--color-primary` at 14%, top-left, so the page still has depth
 when WebGL is unavailable and the backdrop never loads.
 
-### 18.6 Spacing and rhythm
+### 19.6 Spacing and rhythm
 
 | Level             | Value                                        | Set in                |
 | ----------------- | -------------------------------------------- | --------------------- |
@@ -954,7 +948,7 @@ Three rules that came from real complaints:
 - **A grid of panels wants `items-start`** unless the cards genuinely should match heights. Without it the
   shorter card stretches and the dead space inside its border is the "massive gap" that keeps getting reported.
 
-### 18.7 Radius
+### 19.7 Radius
 
 `--radius-card` (10px) for cards, buttons and anything the eye reads as a surface. `--radius-field` (8px) for
 inputs, selects and tooltips. `rounded-full` for avatars, dots and the scrollbar thumb.
@@ -962,7 +956,7 @@ inputs, selects and tooltips. `rounded-full` for avatars, dots and the scrollbar
 **Buttons use `--radius-card`, not `--radius-field`.** They are surfaces you press, not boxes you type in — and
 a button beside an input with a tighter radius looks like part of the input.
 
-### 18.8 Motion
+### 19.8 Motion
 
 Four animations, all short, all built from one easing token.
 
@@ -984,7 +978,7 @@ Three rules:
 - **Transitions are property-scoped** — `transition-[background-color,color,transform]`, never `transition-all`,
   which animates layout properties nobody asked it to.
 
-### 18.9 Iconography
+### 19.9 Iconography
 
 `lucide-react`, imported per icon so the bundle only carries what is used.
 
@@ -998,7 +992,7 @@ Three rules:
 **An icon is never the only label.** An icon-only button carries an `sr-only` span or an `aria-label`; the
 browser sweep counts controls whose accessible name is empty and fails on any.
 
-### 18.10 Re-skinning: the order to do it in
+### 19.10 Re-skinning: the order to do it in
 
 Tokens cover almost everything, but not quite. Work in this order and the browser check at the end should come
 back clean.
@@ -1017,8 +1011,8 @@ back clean.
 4. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
    automated axe pass has `color-contrast` **disabled** — jsdom computes no styles, so it can only report false
    negatives. This step is manual and there is no substitute.
-5. **Run a real browser sweep** at 1440 / 820 / 390. `design-plan/10-ACCESSIBILITY.md` lists the manual passes;
-   the practical script is in §15.
+5. **Run a real browser sweep** at 1440 / 820 / 390. [§22](#22-checking-a-screen) lists what to check and the
+   manual passes.
 6. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
 
 > [!WARNING]
@@ -1031,10 +1025,10 @@ back clean.
 ## 20. User journeys
 
 What somebody is actually trying to do, in order, and what the screen owes them at each step. **This is the
-section to rewrite when a flow feels wrong** — the components are §11, the styling is §18, and this is the shape
+section to rewrite when a flow feels wrong** — the components are §11, the styling is §19, and this is the shape
 of the path between them.
 
-### 19.1 The states every screen owes
+### 20.1 The states every screen owes
 
 Before any specific journey: a screen is not finished until all six exist. Most of the rough edges ever reported
 here have been a missing one of these rather than a wrong layout.
@@ -1091,7 +1085,7 @@ Two checks:
   test. A browser probe that fails one write endpoint per screen, clicks the first control, and looks for the
   message in the rendered page is what finds them.
 
-### 19.2 First run, and the half-install
+### 20.2 First run, and the half-install
 
 **Who:** whoever just turned `DASHBOARD_ENABLED` on.
 
@@ -1104,7 +1098,7 @@ Two checks:
 **Why it is a screen rather than a startup crash:** the value most likely to be wrong is the redirect URI, and
 the only place that can show the exact string to paste is a page served at the URL in question.
 
-### 19.3 Signing in
+### 20.3 Signing in
 
 **Who:** anybody with Manage Server somewhere the bot is.
 
@@ -1117,7 +1111,7 @@ the only place that can show the exact string to paste is a page served at the U
 **Exits:** the session expires, or `DASHBOARD_SESSION_SECRET` is rotated, and they are back at step 1 with the
 page they wanted preserved in `returnTo`.
 
-### 19.4 Choosing a server
+### 20.4 Choosing a server
 
 **Who:** a signed-in manager.
 
@@ -1132,7 +1126,7 @@ page they wanted preserved in `returnTo`.
 missing until the next sign-in. The **permission** check is live per request (`guild.members.fetch()`), so this
 is a staleness problem in the picker only, never a security one.
 
-### 19.5 Configuring a feature
+### 20.5 Configuring a feature
 
 **Who:** a manager who has picked a server. This is the dominant journey — most screens are this shape.
 
@@ -1149,7 +1143,7 @@ is a staleness problem in the picker only, never a security one.
 _before_ anybody saves a configuration that would silently do nothing, and a role above the bot's own is warned
 about at configuration time rather than at the moment it fails to be assigned.
 
-### 19.6 Handling a problem member
+### 20.6 Handling a problem member
 
 **Who:** a manager dealing with somebody specific. The first journey that writes to a **person** rather than to
 a setting.
@@ -1167,7 +1161,7 @@ a setting.
 
 **The greying is a courtesy; `actOn()` is the gate**, asked again before every write.
 
-### 19.7 The owner journeys
+### 20.7 The owner journeys
 
 All behind `requireOwner`, which answers **404** so a manager never learns the console is there.
 
@@ -1196,7 +1190,7 @@ Three things shape these:
 - **There is no "start the bot".** The HTTP server is inside the bot process, so a stopped bot cannot serve the
   button that would start it. The Control tab says so in as many words.
 
-### 19.8 When a control writes — the three shapes
+### 20.8 When a control writes — the three shapes
 
 Pick by the question being asked, not by which is less code. Getting this wrong is the most common way a screen
 feels wrong without looking wrong.
@@ -1214,7 +1208,7 @@ Two corollaries:
 - **A whole-document answer is only trusted while it is the only write in flight** — see §10's write-race guard,
   and copy it exactly.
 
-### 19.9 Confirmations — three tiers
+### 20.9 Confirmations — three tiers
 
 | Tier              | Cost of a misclick                     | Examples                           |
 | ----------------- | -------------------------------------- | ---------------------------------- |
@@ -1226,7 +1220,7 @@ Two corollaries:
 route is what makes a hand-written request with an empty body impossible. A confirmation that exists only in the
 form is decoration.
 
-### 19.10 Navigation after an action
+### 20.10 Navigation after an action
 
 - **A destructive action that removes the thing you were looking at closes the card** and refetches the list it
   came from. Leaving a server does this.
@@ -1238,7 +1232,7 @@ form is decoration.
   `?tab=` that got you there — there is a test pinning it.
 - **A tab is `?tab=`**, so a link to a tab is a link to a tab and Back works between them.
 
-### 19.11 Voice
+### 20.11 Voice
 
 - **Sentence case everywhere.** Headings, buttons, labels. Not Title Case.
 - **A refusal says what to do next**, not what went wrong internally: "A user ID is 17 to 20 digits", not
@@ -1256,7 +1250,7 @@ apostrophe. The rest — never blame, say what a thing costs, sentence case — 
 so rather than pretending otherwise. It also asserts it found copy at all, so a matcher that stops matching
 cannot pass vacuously.
 
-### 19.12 Where to rewrite a journey
+### 20.12 Where to rewrite a journey
 
 | To change…                       | Edit                                                           |
 | -------------------------------- | -------------------------------------------------------------- |
@@ -1282,7 +1276,7 @@ additional, not a restatement.
 
 Each rule gets a verdict, because a checklist where everything is "todo" is not a checklist:
 
-- **Held** — the dashboard already does this. Do not undo it; §18 or §19 records how.
+- **Held** — the dashboard already does this. Do not undo it; §19 or §20 records how.
 - **Apply** — a real gap. This is the rewrite's actual worklist.
 - **N/A** — deliberately not applicable to a self-hosted admin dashboard, with the reason. Ignoring these is a
   decision, not an oversight; a bot's settings panel is not a consumer app competing for attention, and several
@@ -1295,15 +1289,15 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | 1   | Cultural and societal influence | Held    | Sentence case, British spelling, no idiom, no flags-as-languages. Colour is never the only signal                         |
 | 2   | Industry and context of use     | Held    | The context is a Discord server admin at a desk with the bot open in another window                                       |
 | 3   | User demographics               | Apply   | The audience is one narrow group — a self-hoster who runs a bot. Write for them specifically, not for a generic "user"    |
-| 4   | Tech-savviness                  | Held    | It already assumes somebody who can read an ID and edit a `.env`. §19.2's setup screen is the one place that assumes less |
+| 4   | Tech-savviness                  | Held    | It already assumes somebody who can read an ID and edit a `.env`. §20.2's setup screen is the one place that assumes less |
 
 ### 🖼️ Layout (5–10)
 
 | #   | Rule                              | Verdict | Note                                                                                                                                                                         |
 | --- | --------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 5   | Negative space                    | Held    | The settings page's dead space was measured, not eyeballed: 48px above a tab with no description, and 276px of page from one card's source order inside a `columns` balancer |
-| 6   | Golden ratio or rule of thirds    | N/A     | A settings form is a single column of cards; proportion here is the spacing ladder in §18.6, not a ratio                                                                     |
-| 7   | Hierarchy via size, colour, space | Held    | §18.4 — four type sizes, and muted vs foreground carries the rest                                                                                                            |
+| 6   | Golden ratio or rule of thirds    | N/A     | A settings form is a single column of cards; proportion here is the spacing ladder in §19.6, not a ratio                                                                     |
+| 7   | Hierarchy via size, colour, space | Held    | §19.4 — four type sizes, and muted vs foreground carries the rest                                                                                                            |
 | 8   | Grid systems                      | Held    | `max-w-[1100px]`, one `gap-6` column, `sm:grid-cols-2` inside cards                                                                                                          |
 | 9   | A clear focal point               | Held    | `Card focal` puts an accent hairline on the one card that is the point of a screen, and a browser sweep counts `[data-variant="primary"]` on every route                     |
 | 10  | Rhythm to direct attention        | Held    | The F-pattern now holds on every list: recent changes lead with what changed rather than when, and both tables put the identifier left and the figures right                 |
@@ -1312,7 +1306,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 | #   | Rule                               | Verdict | Note                                                                                            |
 | --- | ---------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
-| 11  | Simplicity by reduction            | Held    | §21's "two commands that do one job" is the same instinct applied to the bot                    |
+| 11  | Simplicity by reduction            | Held    | `AGENTS.md`'s "two commands that do one job" is the same instinct applied to the bot            |
 | 12  | Organisation makes many look fewer | Held    | Collapsible sidebar sections, the eight-tab owner console, seven settings sections on one page  |
 | 13  | Don't make users think             | Held    | A channel the bot cannot post in is disabled **before** saving, not refused after               |
 | 14  | As little design as possible       | Held    | No drop shadows, no chart library, one accent colour                                            |
@@ -1323,25 +1317,25 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 | #   | Rule                       | Verdict | Note                                                                                                                                                                      |
 | --- | -------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 17  | Engaging onboarding        | Apply   | §19.2 covers the half-install. A first-run tour of what the dashboard can do does not exist                                                                               |
-| 18  | Intuitive flow             | Held    | §19.5 — overview grid to feature screen, and the grid is the navigation                                                                                                   |
+| 17  | Engaging onboarding        | Apply   | §20.2 covers the half-install. A first-run tour of what the dashboard can do does not exist                                                                               |
+| 18  | Intuitive flow             | Held    | §20.5 — overview grid to feature screen, and the grid is the navigation                                                                                                   |
 | 19  | Contextual hints and tips  | Held    | `Field`'s `hint`, hierarchy warnings, `Tooltip` — which describes, never names (§11)                                                                                      |
 | 20  | Progressive disclosure     | Held    | `Disclosure` groups the settings page's seven cards under three questions. A `<details>`, so the fold is keyboard-operable and announced without an `aria-*` to get wrong |
 | 21  | Design to encourage action | Held    | Settled with 9 — exactly one primary action per route, verified in a browser rather than by reading                                                                       |
-| 22  | Feedback for every action  | Held    | `SavingIndicator`, optimistic writes, a refusal beside its control (§19.1)                                                                                                |
+| 22  | Feedback for every action  | Held    | `SavingIndicator`, optimistic writes, a refusal beside its control (§20.1)                                                                                                |
 
 ### 💎 Typography and colour (23–34)
 
 | #   | Rule                            | Verdict | Note                                                                                                                                                                                                                                                                                                    |
 | --- | ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 23  | Typography hierarchy            | Held    | §18.4                                                                                                                                                                                                                                                                                                   |
+| 23  | Typography hierarchy            | Held    | §19.4                                                                                                                                                                                                                                                                                                   |
 | 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                                                                                                                                                                          |
 | 25  | Reflect brand mood              | Held    | Three self-hosted faces where there had been none, and the section label is the bot's own boot banner in HTML. The type is no longer anonymous                                                                                                                                                          |
 | 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                                                                                                                                                                        |
-| 27  | Limit font and style variations | Held    | §18.4 — four sizes carry 96% of the app                                                                                                                                                                                                                                                                 |
+| 27  | Limit font and style variations | Held    | §19.4 — four sizes carry 96% of the app                                                                                                                                                                                                                                                                 |
 | 28  | Line spacing, kerning, height   | Held    | Body is 1.55, headings 1.2, card headings `leading-tight` on `CARD_HEADING` because a size utility beats both `@theme` and the base layer. Measured, not assumed                                                                                                                                        |
 | 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `src/test/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette                                                                     |
-| 30  | Consistent palette              | Held    | §18.2, and no component may write a colour                                                                                                                                                                                                                                                              |
+| 30  | Consistent palette              | Held    | §19.2, and no component may write a colour                                                                                                                                                                                                                                                              |
 | 31  | The 60–30–10 rule               | Held    | **Measured** across six screens: 67% ground, 33% surface, 0.2% accent by area. The first two are the rule; the third is deliberately far below 10%, because accent _area_ on an admin tool would be a toy. It appears on every screen — 10 to 26 elements each, as text, borders, icons and small fills |
 | 32  | Colour psychology and culture   | Held    | Green/amber/red carry success, warning and destructive, and never alone                                                                                                                                                                                                                                 |
 | 33  | Semantic colours for status     | Held    | `Badge` tones, `Warning`, the destructive button variant                                                                                                                                                                                                                                                |
@@ -1354,7 +1348,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | 35  | Content over UI styling    | Held    | The reason there are no shadows and no chart library                                                                                                                                                     |
 | 36  | Purposeful imagery         | Held    | The only images are real Discord avatars and icons; `Avatar` falls back to a lettered tile                                                                                                               |
 | 37  | Concise text               | Held    | **Measured**: nothing runs to three lines at 1440px, and the four owner-console paragraphs that ran to four at 390px are down to three at 24–26 words. The rest each carry two facts a self-hoster needs |
-| 38  | Micro-interactions         | Held    | §18.8 — four short animations, and `prefers-reduced-motion` removes them all                                                                                                                             |
+| 38  | Micro-interactions         | Held    | §19.8 — four short animations, and `prefers-reduced-motion` removes them all                                                                                                                             |
 | 39  | Video for storytelling     | N/A     | An admin panel has nothing to narrate, and a video is a dependency and a bundle cost                                                                                                                     |
 | 40  | High-quality product shots | N/A     | There is no product to photograph                                                                                                                                                                        |
 
@@ -1373,11 +1367,11 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 | #   | Rule                            | Verdict | Note                                                                                                                                                 |
 | --- | ------------------------------- | ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 47  | A comprehensive design system   | Held    | §18 is that document, and `@theme` is its single source                                                                                              |
-| 48  | Limit design patterns           | Held    | §19.8 — three write shapes, and you pick by the question rather than inventing a fourth                                                              |
+| 47  | A comprehensive design system   | Held    | §19 is that document, and `@theme` is its single source                                                                                              |
+| 48  | Limit design patterns           | Held    | §20.8 — three write shapes, and you pick by the question rather than inventing a fourth                                                              |
 | 49  | Predictable element behaviour   | Held    | One `Field`, one `Button`, one `Card`; `components/primitives` before a local copy                                                                   |
 | 50  | Standardised templates          | Held    | §7's six edits, and every page opens with a `PageHeader`                                                                                             |
-| 51  | Cross-device consistency        | Held    | §13's three widths, and `sr-only` rather than `hidden` at the rail                                                                                   |
+| 51  | Cross-device consistency        | Held    | §14's three widths, and `sr-only` rather than `hidden` at the rail                                                                                   |
 | 52  | Standardised content guidelines | Held    | `src/test/voice.test.ts` enforces the four mechanical rules on every run. The judgement calls stay judgement calls, and the file says which is which |
 
 ### 🕹 Engagement (53–58)
@@ -1385,7 +1379,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | #   | Rule                      | Verdict | Note                                                                                                                                   |
 | --- | ------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | 53  | Gamification              | N/A     | Points and badges belong in the bot's levelling feature, which the dashboard **configures**. Gamifying the admin panel would be absurd |
-| 54  | Personalisation           | N/A     | The panel is already scoped to your servers. A theme picker is §21's open question, not engagement                                     |
+| 54  | Personalisation           | N/A     | The panel is already scoped to your servers. The theme picker is a preference, not engagement                                          |
 | 55  | Storytelling              | N/A     | An admin changing a prefix wants the control, not a narrative                                                                          |
 | 56  | Visually display progress | Held    | `SavingIndicator`, `Pager`, the `/commands` coverage tile                                                                              |
 | 57  | Variable rewards          | N/A     | Deliberately not. Unpredictable reinforcement in a tool somebody has to use for work is a dark pattern                                 |
@@ -1393,8 +1387,8 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### What this adds up to
 
-**Forty-five held, four to apply, nine deliberately not applicable** — the rewrite in
-[`re-write.md`](re-write.md) closed thirteen, and the three clusters it was aimed at are all shut:
+**Forty-five held, four to apply, nine deliberately not applicable** — the rewrite
+closed thirteen, and the three clusters it was aimed at are all shut:
 
 1. **No focal point** (9, 10, 21, 34) — closed. `Card focal` marks the one card that is the point of a screen,
    and a browser sweep counts primary buttons on every route so the rule cannot quietly drift back.
@@ -1415,20 +1409,81 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ---
 
-## What is left
+## 22. Checking a screen
 
-`design-plan/13-ROADMAP-AND-RISKS.md` is authoritative. As of the last commit, **phases 3 and 4 are
-complete** — every guild-scoped setting is editable on the web, and a manager can handle a problem member
-without opening Discord. Phase 5 is all but done: leaving a server and the bot-wide blacklist are built.
+A screen is done when all of this is true:
 
-**Phase 5 is complete** too: the owner console now carries the command runner, the blacklist and leaving a
-server. `design-plan/06-COMMAND-CONTROL.md`'s conclusion still governs everything after it — the dashboard is
-a third surface onto the **domain**, not onto the presentation, and the runner is the one place an adapter is
-right because owner commands are one-shot and embed-based. `/eval` is never exposed.
+- [ ] Reads only tokens — no hex, no arbitrary radius, no bare `duration-*`
+- [ ] Exactly one primary action; everything else is secondary or ghost
+- [ ] All six states exist: loading, empty, error, refused, saving, busy
+- [ ] A refusal renders **beside its control**, not at the top of the page
+- [ ] `PageHeader` with one `<h1>`; headings descend without skipping
+- [ ] Every control has an accessible name; every input has a real `<label>`
+- [ ] Targets ≥ 24px; no sideways scroll at 390px
+- [ ] `jest-axe` clean; existing tests still pass unchanged
+- [ ] Motion is feedback only, and the screen loses nothing under `prefers-reduced-motion`
+- [ ] Copy is sentence case, British spelling, and says what to do next
 
-Still open:
+### The commands
 
-- **Phase 6** — a Docker image and compose file, README screenshots, and a light theme if wanted. §18.10 is the
-  order to do the last one in. The manual half of the accessibility pass is **done**: reflow at 320px, a visible
-  focus indicator on every keyboard stop, `prefers-reduced-motion`, and a tab walk for traps, all run in a real
-  browser. [`re-write.md`](re-write.md) §9 records what they found and the exemptions worth keeping.
+```bash
+npm run check           # typecheck, lint, format and every test in both projects
+npm run test:coverage   # the 80/80/80/80 gates
+npm run build           # includes verify:bundle — fails on a second React copy or a compiled light-dark()
+```
+
+The first load's budget is **200 kB gzipped, and it is met exactly**, so anything added to `vendor` needs a
+measurement rather than an assumption:
+
+```bash
+for f in dashboard/dist/assets/*.js dashboard/dist/assets/*.css; do
+  printf "%s %s\n" "$(basename "$f")" "$(gzip -c "$f" | wc -c | awk '{printf "%.1f kB", $1/1024}')"
+done
+```
+
+### The manual passes
+
+`jest-axe` catches perhaps 40% of accessibility issues. The rest need a person:
+
+1. A keyboard walk: every control reachable, focus always visible, no trap, Escape closes what it opened.
+2. A screen reader — NVDA on Windows, VoiceOver on macOS — over the changed screen and one dialog.
+3. Zoom to 200% and 400%.
+4. The operating system set to reduce motion.
+5. The page in greyscale, where every state must still be told apart.
+
+### The browser sweep
+
+jsdom computes no layout, so a real browser is the only thing that measures a page. The sweep is deliberately
+**not** in the repository — it needs Playwright, and a self-hosted bot should not carry a browser download for a
+design check. Rebuild it per session: start Vite, route `**/api/**` to fixtures, and walk every route at 1440 and
+390 checking:
+
+- exactly one `<h1>`, and no heading level skipped
+- `documentElement.scrollWidth` against the viewport
+- every `button`, `a[href]`, `input`, `select` and `textarea` has an accessible name
+- every target is at least 24×24 (WCAG 2.2 AA, 2.5.8)
+- no `<table>` wider than the card that holds it
+
+The script is quick to rewrite; **the exemptions are the part worth keeping**, because each one cost a round of
+chasing a finding that was not a defect:
+
+| Looks like a failure             | Why it is not                                                     |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Skip link at 24×16               | `sr-only` until focus. It has no pointer target to be too small   |
+| Checkbox at 1×1 or 16×16         | The effective target is the `<label>` around it — measure that    |
+| "terms of use" at 71×15          | 2.5.8 exempts a link inside a sentence; line-height sets its size |
+| `UsageChart`'s table overflowing | It lives in an `sr-only` `<figcaption>`, which clips to 1px       |
+
+### Which skill to reach for
+
+| Situation                                  | Skill                                                                |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| Deciding what it should feel like          | `frontend-design`, `bencium-innovative-ux-designer`                  |
+| Token architecture and scales              | `uiux-design-system`                                                 |
+| Type: quotes, dashes, spacing, hierarchy   | `typography`                                                         |
+| Auditing a screen that exists              | `design-audit`, `web-design-guidelines`                              |
+| Component structure                        | `composition-patterns`                                               |
+| Rendering or re-render trouble             | `react-best-practices`                                               |
+| Contrast, focus order, screen-reader names | `accessibility-scan` → `accessibility-inspect` → `accessibility-fix` |
+| Did this change break accessibility        | `accessibility-diff`                                                 |
+| The whole-product conformance pass         | `accessibility-audit`                                                |

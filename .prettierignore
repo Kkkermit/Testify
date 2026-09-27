@@ -4,8 +4,5 @@ node_modules
 assets
 package-lock.json
 
-# A record of the bot this replaced, kept as it was written. Reformatting it would only churn history.
-docs/original-bot
-
 # Third-party skills, vendored verbatim. Reformatting them would make every upstream update a conflict.
 .claude/skills
