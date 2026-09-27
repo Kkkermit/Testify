@@ -1,5 +1,6 @@
 import {
 	type AuditLogConfigResponse,
+	type ServerChangesPage,
 	type BlacklistRow,
 	type BotControlState,
 	type BotIdentity,
@@ -665,6 +666,40 @@ export const supportReply: SupportReply = {
 	related: [{ id: "role-order", title: "The bot cannot give or remove a role", topic: "troubleshooting" }],
 };
 
+export const serverChanges: ServerChangesPage = {
+	items: [
+		{
+			id: "a1",
+			source: "discord",
+			at: "2026-09-27T11:00:00.000Z",
+			actorId: "100000000000000002",
+			actorTag: "mod",
+			kind: "member",
+			verb: "banned",
+			summary: null,
+			target: "marcus",
+			reason: "Spamming invites",
+		},
+		{
+			id: "d1",
+			source: "dashboard",
+			at: "2026-09-27T10:00:00.000Z",
+			actorId: "100000000000000001",
+			actorTag: "kate",
+			kind: "settings",
+			verb: "updated",
+			summary: "Turned levelling on",
+			target: null,
+			reason: null,
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 25,
+	discordReadable: true,
+	truncated: false,
+};
+
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
 	http.get("/api/support", () => HttpResponse.json(supportIndex)),
@@ -711,6 +746,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/members/:userId", () => HttpResponse.json(memberDetail)),
 	http.post("/api/guilds/:guildId/members/:userId/kick", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.post("/api/guilds/:guildId/members/:userId/ban", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
+	http.get("/api/guilds/:guildId/changes", () => HttpResponse.json(serverChanges)),
 	http.get("/api/guilds/:guildId/warnings", () => HttpResponse.json(guildWarnings)),
 	http.get("/api/guilds/:guildId/warnings/punishments", () => HttpResponse.json(warnLadder)),
 	http.put("/api/guilds/:guildId/warnings/punishments", async ({ request }) =>

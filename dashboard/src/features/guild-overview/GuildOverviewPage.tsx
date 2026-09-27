@@ -1,13 +1,15 @@
 import { Hash, Shield, Sparkles, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router";
+import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Eyebrow, PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { FeatureGrid } from "@/features/guild-overview/components/FeatureGrid";
 import { MissingPermissions } from "@/features/guild-overview/components/MissingPermissions";
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { cn } from "@/lib/cn";
 
 export function GuildOverviewPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
@@ -48,9 +50,17 @@ export function GuildOverviewPage(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="changes-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="changes-heading">
-					{t("overview.recentChanges")}
-				</Eyebrow>
+				<div className="flex flex-wrap items-baseline justify-between gap-2">
+					<Eyebrow as="h2" id="changes-heading">
+						{t("overview.recentChanges")}
+					</Eyebrow>
+					<Link
+						to={`/guilds/${guildId}/changes`}
+						className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}
+					>
+						{t("overview.seeAllChanges")}
+					</Link>
+				</div>
 				<RecentChanges changes={guild.recentChanges} />
 			</section>
 		</>

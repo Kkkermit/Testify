@@ -55,6 +55,15 @@ describe("the guild overview", () => {
 		expect(await screen.findByText(/nothing changed here yet/i)).toBeInTheDocument();
 	});
 
+	it("links to every change in the last fortnight", async () => {
+		renderPage();
+
+		expect(await screen.findByRole("link", { name: "See every change" })).toHaveAttribute(
+			"href",
+			`/guilds/${aGuild.id}/changes`,
+		);
+	});
+
 	it("lists recent changes when there are some", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/overview", () =>

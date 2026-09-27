@@ -1,11 +1,11 @@
-import { ChannelType, Collection, PermissionFlagsBits } from "discord.js";
+import { AuditLogEvent, ChannelType, Collection, PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, problemBody } from "@api/errors";
 import { guilds } from "@api/routes/guilds";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { type ChannelSummary, type GuildOverview, type RoleSummary } from "@testify/shared";
+import { type ChannelSummary, type GuildOverview, type RoleSummary, type ServerChangesPage } from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/settingsRepository", () => ({
@@ -34,6 +34,18 @@ jest.mock("@database/repositories/dashboardAuditRepository", () => ({
 	auditPage: jest.fn(() => Promise.resolve([])),
 	countAudits: jest.fn(() => Promise.resolve(0)),
 	recentAudits: jest.fn(() => Promise.resolve([])),
+	auditsSince: jest.fn(() =>
+		Promise.resolve([
+			{
+				actorId: "100000000000000001",
+				actorTag: "kate",
+				guildId: "900000000000000001",
+				action: "levelling.update",
+				summary: "Turned levelling on",
+				at: new Date(Date.now() - 60_000),
+			},
+		]),
+	),
 }));
 
 const GUILD = "900000000000000001";
@@ -106,6 +118,27 @@ function fakeGuild(options: Options = {}) {
 		channels: { cache: channels },
 		roles: { cache: roles },
 		members: { me, fetch: () => Promise.reject(new Error("Unknown Member")) },
+		fetchAuditLogs: jest.fn(() =>
+			Promise.resolve({
+				entries: new Collection([
+					[
+						"a1",
+						{
+							id: "a1",
+							action: AuditLogEvent.MemberBanAdd,
+							actionType: "Delete",
+							targetType: "User",
+							target: { username: "marcus" },
+							executorId: "100000000000000002",
+							executor: { username: "mod" },
+							reason: "Spam",
+							createdTimestamp: Date.now() - 1_000,
+							changes: [],
+						},
+					],
+				]),
+			}),
+		),
 	};
 }
 
@@ -248,5 +281,33 @@ describe("the audit list", () => {
 	it("refuses a page number that is not one", async () => {
 		expect((await appFor().request(`/guilds/${GUILD}/audit?page=0`)).status).toBe(400);
 		expect((await appFor().request(`/guilds/${GUILD}/audit?perPage=9999`)).status).toBe(400);
+	});
+});
+
+describe("the changes list", () => {
+	it("puts dashboard and Discord changes in one list, newest first", async () => {
+		const response = await appFor().request(`/guilds/${GUILD}/changes?days=1`);
+		const body = (await response.json()) as ServerChangesPage;
+
+		expect(response.status).toBe(200);
+		expect(body.items.map((change) => [change.source, change.verb])).toEqual([
+			["discord", "banned"],
+			["dashboard", "updated"],
+		]);
+		expect(body.discordReadable).toBe(true);
+	});
+
+	/** Without View Audit Log the page still shows what it can, and says why the rest is missing. */
+	it("says Discord's side cannot be read rather than failing without View Audit Log", async () => {
+		const response = await appFor({ botPermissions: [] }).request(`/guilds/${GUILD}/changes`);
+		const body = (await response.json()) as ServerChangesPage;
+
+		expect(response.status).toBe(200);
+		expect(body.discordReadable).toBe(false);
+		expect(body.items.map((change) => change.source)).toEqual(["dashboard"]);
+	});
+
+	it("refuses a window it does not offer", async () => {
+		expect((await appFor().request(`/guilds/${GUILD}/changes?days=30`)).status).toBe(400);
 	});
 });

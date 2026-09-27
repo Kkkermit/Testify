@@ -1473,6 +1473,7 @@ the same shape —
 | `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
 | `/guilds/:id/audit-log`    | Grouped event checklist held as a draft until Save                         |
 | `/guilds/:id/warnings`     | The five latest warnings and a search, the steps, warning a member by name |
+| `/guilds/:id/changes`      | Two weeks of changes, from the dashboard and Discord's audit log, searched |
 | `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
 | `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
@@ -2157,6 +2158,20 @@ value — but a proportional fill then ends wherever the number says, which on a
 word: "Prefix commands" read as "Prefix" being highlighted and the rest clipped. The bar's last 24px are masked
 to transparent (`mask-r-from-[calc(100%-1.5rem)]`), so it fades out instead of cutting. The length still encodes
 the value; the ranking and the printed number are what carry it precisely.
+
+### The changes page
+
+`/guilds/:id/changes` puts two records in one list: what managers did here (`dashboardaudit`) and what Discord's own
+audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
+and three things about it are load-bearing:
+
+- **Discord's side is read, never stored.** `readAuditWindow` pages back a hundred entries at a time until it passes
+  fourteen days or reaches `CHANGE_LIMITS.maxDiscordEntries`, and the result is kept in memory for a minute so a
+  search is not five requests to Discord per keystroke. The page says when the cap cut the list short.
+- **Without View Audit Log the page says so** (`discordReadable`) rather than showing a Discord that looks quiet.
+- **A Discord entry carries a kind and a verb, not a sentence**, because each surface words it: `discordChange`
+  maps discord.js's target and action types, and reads a timeout out of a member update, where Discord hides it.
+  The dashboard's `KIND_LABELS` and `VERB_LABELS` are the translated tables.
 
 ### The status page
 

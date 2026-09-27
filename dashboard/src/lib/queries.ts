@@ -32,6 +32,8 @@ export const keys = {
 		warnings: (page: number, perPage: number, query: string) =>
 			["guild", id, "warnings", page, perPage, query] as const,
 		allWarnings: () => ["guild", id, "warnings"] as const,
+		changes: (days: number, source: string, query: string, page: number) =>
+			["guild", id, "changes", days, source, query, page] as const,
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,

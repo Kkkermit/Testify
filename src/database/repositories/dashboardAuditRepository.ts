@@ -23,3 +23,12 @@ export async function auditPage(guildId: string, page: number, perPage = 25): Pr
 export async function countAudits(guildId: string): Promise<number> {
 	return DashboardAudits.countDocuments({ guildId }).exec();
 }
+
+/** A server's records since a moment, newest first, capped so a busy fortnight cannot come back whole. */
+export async function auditsSince(guildId: string, since: Date, limit = 500): Promise<DashboardAudit[]> {
+	return DashboardAudits.find({ guildId, at: { $gte: since } })
+		.sort({ at: -1, _id: -1 })
+		.limit(limit)
+		.lean<DashboardAudit[]>()
+		.exec();
+}

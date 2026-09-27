@@ -37,10 +37,12 @@ import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { canPostInChannel } from "@lib/discord";
 import { readLottery, readTreasure } from "@lib/economy";
 import { normaliseSettings } from "@lib/levelling";
+import { readServerChanges } from "@lib/moderation";
 import { readTickets } from "@lib/tickets";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
+	changesQuery,
 	type ChannelSummary,
 	type FeatureStatus,
 	type GuildOverview,
@@ -149,6 +151,13 @@ guilds.get("/:guildId/audit", async (context) => {
 
 	const body: Paged<AuditEntrySummary> = { items: rows.map(toAuditSummary), total, page, perPage };
 	return context.json(body);
+});
+
+/** The last fortnight's changes, from the dashboard and from Discord's own audit log, newest first. */
+guilds.get("/:guildId/changes", async (context) => {
+	const query = parseQuery(context, changesQuery);
+
+	return context.json(await readServerChanges(guildOf(context), query));
 });
 
 function toAuditSummary(record: { actorTag: string; action: string; summary: string; at: Date }): AuditEntrySummary {

@@ -4,6 +4,7 @@ export * from "./auditLog";
 export * from "./automod";
 export * from "./blacklist";
 export * from "./botStats";
+export * from "./changes";
 export * from "./brand";
 export * from "./commandRunner";
 export * from "./commandToggles";

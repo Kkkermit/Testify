@@ -9,5 +9,6 @@ export * from "./moderation.constants";
 export * from "./moderation.types";
 export * from "./moderationActions.util";
 export * from "./sanctions.util";
+export * from "./serverChanges.util";
 export * from "./warnActions.util";
 export * from "./warnLadderPanel.util";
