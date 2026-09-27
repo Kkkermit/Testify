@@ -7,6 +7,7 @@ import {
 	getWarnLadder,
 	listGuildWarnings,
 	saveWarnLadder,
+	setWarningStep,
 } from "@database/repositories/moderationRepository";
 import { formatDurationLong } from "@lib/format/format.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
@@ -14,11 +15,14 @@ import {
 	type GuildWarning,
 	type GuildWarningsPage,
 	stepFor,
+	storedStep,
+	stepValue,
 	WARN_LIMITS,
 	type WarnLadder,
 	type WarnOutcome,
 	type WarnProblem,
 	type WarnStep,
+	warningMatches,
 	warnStep,
 } from "@testify/shared";
 
@@ -56,6 +60,14 @@ export function stepLabel(step: WarnStep): string {
 		case "ban":
 			return "Ban";
 	}
+}
+
+/** What a stored warning did, in the words `/warn list` and `/warn info` show. */
+export function warningActionText(entry: Pick<WarnEntry, "step" | "stepProblem">): string {
+	const { step, stepProblem } = storedStep(entry.step, entry.stepProblem);
+	if (step === null) return "Warning only";
+
+	return stepProblem === null ? stepLabel(step) : `${stepLabel(step)} (not carried out)`;
 }
 
 /** Why the step could not be carried out, or null when it was, or when there was nothing to do. */
@@ -157,17 +169,30 @@ export async function issueWarning(options: {
 		`${moderator.tag}: ${reason} (warning ${String(count)})`,
 	);
 
+	// A plain warning with no punishments set has nothing to record, and reads back as plain without it.
+	if (step !== null) {
+		await setWarningStep(guild.id, user.id, entry.warnId, stepValue(step), problem);
+		entry.step = stepValue(step);
+		entry.stepProblem = problem;
+	}
+
 	return { entry, outcome: { count, step, problem }, notified };
 }
 
 /** Every warning in a server, newest first, flattened out of the per-member records they are stored in. */
-export async function readGuildWarnings(guildId: string, page: number): Promise<GuildWarningsPage> {
+export async function readGuildWarnings(
+	guildId: string,
+	page: number,
+	options: { perPage?: number; query?: string } = {},
+): Promise<GuildWarningsPage> {
 	const records = await listGuildWarnings(guildId);
+	const query = options.query?.trim() ?? "";
 	const all = records
+		.filter((record) => query === "" || warningMatches({ userId: record.userId, username: record.userTag }, query))
 		.flatMap((record) => record.warnings.map((warning) => toGuildWarning(record.userId, record.userTag, warning)))
 		.sort((a, b) => b.at.localeCompare(a.at));
 
-	const perPage = WARN_LIMITS.perPage;
+	const perPage = options.perPage ?? WARN_LIMITS.perPage;
 	const pages = Math.max(1, Math.ceil(all.length / perPage));
 	const current = Math.min(page, pages);
 
@@ -189,5 +214,6 @@ export function toGuildWarning(userId: string, username: string, warning: WarnEn
 		byTag: warning.executorTag,
 		at: new Date(warning.timestamp).toISOString(),
 		edited: warning.edits.length > 0,
+		...storedStep(warning.step, warning.stepProblem),
 	};
 }

@@ -18,10 +18,18 @@ import {
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export function useGuildWarnings(guildId: string, page: number): UseQueryResult<GuildWarningsPage> {
+export function useGuildWarnings(
+	guildId: string,
+	options: { page: number; perPage: number; query: string },
+): UseQueryResult<GuildWarningsPage> {
+	const { page, perPage } = options;
+	const query = options.query.trim();
+	const search = new URLSearchParams({ page: String(page), perPage: String(perPage) });
+	if (query !== "") search.set("q", query);
+
 	return useQuery({
-		queryKey: keys.guild(guildId).warnings(page),
-		queryFn: () => api.get<GuildWarningsPage>(`/guilds/${guildId}/warnings?page=${String(page)}`),
+		queryKey: keys.guild(guildId).warnings(page, perPage, query),
+		queryFn: () => api.get<GuildWarningsPage>(`/guilds/${guildId}/warnings?${search.toString()}`),
 		placeholderData: keepPreviousData,
 	});
 }

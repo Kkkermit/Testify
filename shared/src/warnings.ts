@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { WARNING_LIMITS } from "./memberDetail";
+import { type MemberWarning, WARNING_LIMITS } from "./memberDetail";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
@@ -16,6 +16,8 @@ export const WARN_LIMITS = {
 	/** Discord allows 40 components a message, and each step on the panel costs two. */
 	maxSteps: 10,
 	perPage: 20,
+	/** How many the list shows before anybody searches. */
+	recent: 5,
 	/** Discord's own window for deleting a banned member's messages. */
 	maxDeleteDays: 7,
 } as const;
@@ -72,16 +74,21 @@ export const WARN_STEP_CHOICES: readonly WarnStep[] = [
 	{ action: "ban" },
 ];
 
-export interface GuildWarning {
-	id: string;
+export interface GuildWarning extends MemberWarning {
 	userId: string;
 	/** The name stored when they were last warned, so somebody who has left still reads as a person. */
 	username: string;
-	reason: string;
-	byId: string;
-	byTag: string;
-	at: string;
-	edited: boolean;
+}
+
+/** Reads a stored step back, dropping anything that is not one, so an old or hand-edited record reads as plain. */
+export function storedStep(
+	step: string | null | undefined,
+	problem: string | null | undefined,
+): { step: WarnStep | null; stepProblem: WarnProblem | null } {
+	const parsed = step === null || step === undefined ? null : stepFromValue(step);
+	const known = WARN_PROBLEMS.find((candidate) => candidate === problem) ?? null;
+
+	return { step: parsed, stepProblem: parsed === null ? null : known };
 }
 
 export interface GuildWarningsPage {
@@ -93,7 +100,18 @@ export interface GuildWarningsPage {
 
 export const warningsQuery = z.object({
 	page: z.coerce.number().int().min(1).max(10_000).default(1),
+	perPage: z.coerce.number().int().min(1).max(50).default(WARN_LIMITS.perPage),
+	/** A name, a Discord ID or a mention; the list then holds only that person's warnings. */
+	q: plainLine(1, 32).optional(),
 });
+
+/** An ID matches exactly and a name matches anywhere in the username stored with the warnings. */
+export function warningMatches(record: { userId: string; username: string }, query: string): boolean {
+	const id = idFromQuery(query);
+	if (id !== null) return record.userId === id;
+
+	return record.username.toLowerCase().includes(query.trim().toLowerCase());
+}
 
 export const warningAdd = z.object({
 	userId: snowflake,

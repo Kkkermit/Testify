@@ -1130,14 +1130,18 @@
 		"problemLeft": "Das Mitglied ist nicht mehr auf dem Server.",
 		"problemOutranked": "Seine höchste Rolle liegt nicht unter der des Bots, oder dem Bot fehlt die Berechtigung.",
 		"problemRefused": "Discord hat es abgelehnt.",
-		"listTitle": "Alle Verwarnungen",
-		"listCount_one": "{{count, number}} Verwarnung, die neueste zuerst.",
-		"listCount_other": "{{count, number}} Verwarnungen, die neuesten zuerst.",
-		"emptyTitle": "Keine Verwarnungen",
-		"emptyBody": "Auf diesem Server wurde noch niemand verwarnt.",
 		"givenBy": "Von {{name}}",
 		"edit": "Bearbeiten",
 		"remove": "Entfernen",
-		"newReason": "Neuer Grund"
+		"newReason": "Neuer Grund",
+		"notCarriedOut": "{{step}} (nicht ausgeführt)",
+		"recentTitle": "Neueste Verwarnungen",
+		"recentCount": "{{shown, number}} von {{count, number}} angezeigt.",
+		"searchTitle": "Suchergebnisse",
+		"searchCount_one": "{{count, number}} Verwarnung für diesen Namen oder diese ID.",
+		"searchCount_other": "{{count, number}} Verwarnungen für diesen Namen oder diese ID.",
+		"searchLabel": "Verwarnungen eines Mitglieds finden",
+		"searchHint": "Suche nach Namen oder füge eine Discord-ID ein.",
+		"searchNone": "Keine Verwarnungen für diesen Namen oder diese ID."
 	}
 }

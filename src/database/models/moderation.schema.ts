@@ -32,6 +32,10 @@ export interface WarnEntry {
 	reason: string;
 	timestamp: Date;
 	edits: WarnEdit[];
+	/** The punishment step this warning triggered, absent on warnings from before punishments existed. */
+	step?: string | null;
+	/** Why that step could not be carried out, when it could not. */
+	stepProblem?: string | null;
 }
 
 export interface WarnRecord {
@@ -62,6 +66,8 @@ const warnEntrySchema = new Schema<WarnEntry>(
 		reason: { type: String, required: true, default: "No reason provided" },
 		timestamp: { type: Date, required: true, default: Date.now },
 		edits: { type: [warnEditSchema], required: true, default: [] },
+		step: { type: String, default: null },
+		stepProblem: { type: String, default: null },
 	},
 	{ _id: false },
 );

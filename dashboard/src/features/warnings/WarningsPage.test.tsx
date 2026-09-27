@@ -149,13 +149,68 @@ describe("the warnings page", () => {
 		});
 	});
 
-	it("says there are none rather than showing an empty list", async () => {
+	/** A card that could only say "nothing here" is noise on a page with two other jobs. */
+	it("leaves the list out altogether while the server has no warnings", async () => {
 		server.use(
-			http.get(`/api/guilds/${GUILD}/warnings`, () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 20 })),
+			http.get(`/api/guilds/${GUILD}/warnings`, () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 5 })),
+		);
+		renderPage();
+		await screen.findByLabelText("Warning 1");
+
+		await waitFor(() => {
+			expect(screen.queryByLabelText(/Find a member’s warnings/)).not.toBeInTheDocument();
+		});
+		expect(screen.queryByRole("heading", { name: "Recent warnings" })).not.toBeInTheDocument();
+	});
+
+	it("asks for only the five most recent until somebody searches", async () => {
+		const asked: string[] = [];
+		server.use(
+			http.get(`/api/guilds/${GUILD}/warnings`, ({ request }) => {
+				asked.push(new URL(request.url).search);
+				return HttpResponse.json(guildWarnings);
+			}),
 		);
 		renderPage();
 
-		expect(await screen.findByText("Nobody in this server has been warned.")).toBeInTheDocument();
+		expect(await screen.findByRole("heading", { name: "Recent warnings" })).toBeInTheDocument();
+		expect(asked[0]).toBe("?page=1&perPage=5");
+	});
+
+	it("searches a member's warnings by name or pasted ID", async () => {
+		const asked: string[] = [];
+		server.use(
+			http.get(`/api/guilds/${GUILD}/warnings`, ({ request }) => {
+				asked.push(new URL(request.url).searchParams.get("q") ?? "");
+				return HttpResponse.json(guildWarnings);
+			}),
+		);
+		renderPage();
+
+		await userEvent.type(await screen.findByLabelText(/Find a member’s warnings/), KATE);
+
+		expect(await screen.findByRole("heading", { name: "Search results" })).toBeInTheDocument();
+		expect(asked).toContain(KATE);
+	});
+
+	it("says so when a search finds nothing, and keeps the box to try again", async () => {
+		renderPage();
+		const box = await screen.findByLabelText(/Find a member’s warnings/);
+		server.use(
+			http.get(`/api/guilds/${GUILD}/warnings`, () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 20 })),
+		);
+
+		await userEvent.type(box, "nobody");
+
+		expect(await screen.findByText("No warnings for that name or ID.")).toBeInTheDocument();
+		expect(screen.getByLabelText(/Find a member’s warnings/)).toBeInTheDocument();
+	});
+
+	/** The row said who and why but not what happened, which is the thing a moderator reviewing it needs. */
+	it("says what each warning did", async () => {
+		renderPage();
+
+		expect(await screen.findByText("Time out for 10 minutes", { selector: "span" })).toBeInTheDocument();
 	});
 
 	it("offers a retry rather than an empty page when the list cannot be read", async () => {

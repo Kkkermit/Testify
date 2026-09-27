@@ -66,6 +66,8 @@ describe("warningSummary", () => {
 			byTag: "a",
 			at: "2026-08-01T00:00:00.000Z",
 			edited: false,
+			step: null,
+			stepProblem: null,
 		}));
 
 		expect(warningSummary(warnings, t)).toBe(expected);

@@ -1213,6 +1213,13 @@ about it are load-bearing:
 - **The panel puts the warning number in every option's label**, so a step costs two components rather than
   three and ten of them fit Discord's 40 with room to spare. The test counts them.
 
+**Each warning stores the step it took**, as `step` and `stepProblem` on the entry, written after the step runs, so
+`/warn list`, `/warn info` and the dashboard say what a warning did rather than guessing from today's list, which
+may have changed since. Records written before the field existed read as a plain warning (`storedStep`), and a step
+that was refused reads as not carried out rather than as done. The dashboard's list shows the five most recent
+and hides itself when there are none; a search by name, ID or `<@mention>` (`warningMatches`, ID exact and name
+anywhere in the stored username) pages through one person's warnings instead.
+
 Kick and ban reach the dashboard through `kickMember` and `banUser` in `sanctions.util.ts`, the same functions
 `/kick` and `/ban` call. **The username or Discord ID typed back is the confirmation, and the server compares it**
 (`confirmsName`), so a hand-written request cannot skip it. A ban reaches somebody who has already left, which a
@@ -1465,7 +1472,7 @@ the same shape —
 | `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
 | `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
 | `/guilds/:id/audit-log`    | Grouped event checklist held as a draft until Save                         |
-| `/guilds/:id/warnings`     | Every warning, the punishment steps, warning a member found by name        |
+| `/guilds/:id/warnings`     | The five latest warnings and a search, the steps, warning a member by name |
 | `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
 | `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |

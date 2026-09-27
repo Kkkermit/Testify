@@ -1131,14 +1131,18 @@
 		"problemLeft": "ya no está en el servidor.",
 		"problemOutranked": "su rol más alto no está por debajo del bot, o al bot le falta el permiso.",
 		"problemRefused": "Discord lo rechazó.",
-		"listTitle": "Todas las advertencias",
-		"listCount_one": "{{count, number}} advertencia, la más reciente primero.",
-		"listCount_other": "{{count, number}} advertencias, las más recientes primero.",
-		"emptyTitle": "No hay advertencias",
-		"emptyBody": "Nadie en este servidor ha sido advertido.",
 		"givenBy": "Por {{name}}",
 		"edit": "Editar",
 		"remove": "Quitar",
-		"newReason": "Nuevo motivo"
+		"newReason": "Nuevo motivo",
+		"notCarriedOut": "{{step}} (no se aplicó)",
+		"recentTitle": "Advertencias recientes",
+		"recentCount": "Se muestran {{shown, number}} de {{count, number}}.",
+		"searchTitle": "Resultados de la búsqueda",
+		"searchCount_one": "{{count, number}} advertencia para ese nombre o ID.",
+		"searchCount_other": "{{count, number}} advertencias para ese nombre o ID.",
+		"searchLabel": "Buscar las advertencias de un miembro",
+		"searchHint": "Busca por nombre o pega un ID de Discord.",
+		"searchNone": "No hay advertencias para ese nombre o ID."
 	}
 }

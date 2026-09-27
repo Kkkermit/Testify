@@ -58,9 +58,11 @@ async function mayChange(context: Context<ApiBindings>, userId: string): Promise
 }
 
 warnings.get("/", async (context) => {
-	const { page } = parseQuery(context, warningsQuery);
+	const { page, perPage, q } = parseQuery(context, warningsQuery);
 
-	return context.json(await readGuildWarnings(guildOf(context).id, page));
+	return context.json(
+		await readGuildWarnings(guildOf(context).id, page, { perPage, ...(q === undefined ? {} : { query: q }) }),
+	);
 });
 
 warnings.get("/punishments", async (context) => context.json(await readWarnLadder(guildOf(context).id)));

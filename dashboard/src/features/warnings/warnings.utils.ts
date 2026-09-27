@@ -1,4 +1,5 @@
 import {
+	type MemberWarning,
 	stepValue,
 	WARN_LIMITS,
 	WARN_STEP_CHOICES,
@@ -7,6 +8,7 @@ import {
 	type WarnStep,
 } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { type BadgeTone } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 
 /** The rules behind the warnings screen, kept out of the page so they can be tested without rendering. */
@@ -41,6 +43,19 @@ export function stepText(step: WarnStep, t: TFunction): string {
 }
 
 export const STEP_OPTIONS = WARN_STEP_CHOICES.map((step) => ({ step, value: stepValue(step) }));
+
+/** What a stored warning did, and how loudly to say it: a kick or a ban reads as more serious than a timeout. */
+export function actionOf(
+	warning: Pick<MemberWarning, "step" | "stepProblem">,
+	t: TFunction,
+): { label: string; tone: BadgeTone } {
+	const step = warning.step;
+	if (step === null || step.action === "warn") return { label: t("warnings.stepWarn"), tone: "muted" };
+	if (warning.stepProblem !== null)
+		return { label: t("warnings.notCarriedOut", { step: stepText(step, t) }), tone: "warning" };
+
+	return { label: stepText(step, t), tone: step.action === "timeout" ? "warning" : "danger" };
+}
 
 /** What happened to the member, in the sentence shown under the form that issued the warning. */
 export function outcomeText(outcome: WarnOutcome, t: TFunction): string {

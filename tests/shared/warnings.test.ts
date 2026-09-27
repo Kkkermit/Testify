@@ -5,9 +5,11 @@ import {
 	stepFor,
 	stepFromValue,
 	stepValue,
+	storedStep,
 	WARN_LIMITS,
 	WARN_STEP_CHOICES,
 	type WarnStep,
+	warningMatches,
 	warnLadderPut,
 } from "@testify/shared";
 
@@ -91,6 +93,19 @@ describe("confirmsName", () => {
 	});
 });
 
+describe("storedStep", () => {
+	it("reads a stored step and its problem back", () => {
+		expect(storedStep("timeout-10", "left")).toEqual({ step: { action: "timeout", minutes: 10 }, stepProblem: "left" });
+	});
+
+	/** Migrate on read: a record from before punishments has neither field, and one edited by hand can hold anything. */
+	it("reads a missing or unknown step as a plain warning", () => {
+		expect(storedStep(undefined, undefined)).toEqual({ step: null, stepProblem: null });
+		expect(storedStep("explode", "left")).toEqual({ step: null, stepProblem: null });
+		expect(storedStep("kick", "gremlins")).toEqual({ step: { action: "kick" }, stepProblem: null });
+	});
+});
+
 describe("idFromQuery", () => {
 	it("reads a pasted ID and a copied mention as the ID they name", () => {
 		expect(idFromQuery("100000000000000002")).toBe("100000000000000002");
@@ -102,6 +117,25 @@ describe("idFromQuery", () => {
 		expect(idFromQuery("kate")).toBeNull();
 		expect(idFromQuery("12345")).toBeNull();
 		expect(idFromQuery("<@&100000000000000002>")).toBeNull();
+	});
+});
+
+describe("warningMatches", () => {
+	const record = { userId: "123456789012345678", username: "KateBush" };
+
+	it("finds a name anywhere in it, whatever the case", () => {
+		expect(warningMatches(record, "bush")).toBe(true);
+		expect(warningMatches(record, "prince")).toBe(false);
+	});
+
+	it("finds an ID or a mention exactly", () => {
+		expect(warningMatches(record, "123456789012345678")).toBe(true);
+		expect(warningMatches(record, "<@!123456789012345678>")).toBe(true);
+	});
+
+	/** A username full of digits must not answer for somebody else's ID. */
+	it("never matches an ID against the name", () => {
+		expect(warningMatches({ userId: "1", username: "fan987654321098765432" }, "987654321098765432")).toBe(false);
 	});
 });
 

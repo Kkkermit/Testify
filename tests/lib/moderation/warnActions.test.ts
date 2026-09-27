@@ -3,6 +3,7 @@ import {
 	countWarnings,
 	getWarnLadder,
 	listGuildWarnings,
+	setWarningStep,
 } from "@database/repositories/moderationRepository";
 import {
 	applyWarnStep,
@@ -10,6 +11,7 @@ import {
 	ladderOf,
 	readGuildWarnings,
 	stepLabel,
+	warningActionText,
 	warnProblemText,
 } from "@lib/moderation/warnActions.util";
 
@@ -19,6 +21,7 @@ jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnLadder: jest.fn(() => Promise.resolve(null)),
 	listGuildWarnings: jest.fn(() => Promise.resolve([])),
 	saveWarnLadder: jest.fn(),
+	setWarningStep: jest.fn(() => Promise.resolve()),
 }));
 
 const GUILD = "900000000000000001";
@@ -28,6 +31,7 @@ const added = jest.mocked(addWarning);
 const counted = jest.mocked(countWarnings);
 const ladder = jest.mocked(getWarnLadder);
 const listed = jest.mocked(listGuildWarnings);
+const recorded = jest.mocked(setWarningStep);
 
 function world(options: { inServer?: boolean; outranked?: boolean } = {}) {
 	const reachable = options.outranked !== true;
@@ -123,6 +127,31 @@ describe("issueWarning", () => {
 
 		expect(member?.timeout).toHaveBeenCalledWith(600_000, expect.stringContaining("warning 2"));
 		expect(issued.outcome.problem).toBeNull();
+	});
+
+	/** The list shows what each warning did, which only a record written at the time can say. */
+	it("records the step on the warning, and whether it happened", async () => {
+		steps({ action: "kick" });
+		const { user, member, guild } = world({ outranked: true });
+
+		const issued = await issueWarning({
+			guild: guild as never,
+			user: user as never,
+			member: member as never,
+			moderator,
+			reason: "x",
+		});
+
+		expect(recorded).toHaveBeenCalledWith(GUILD, USER, "abcd1234", "kick", "outranked");
+		expect(issued.entry).toMatchObject({ step: "kick", stepProblem: "outranked" });
+	});
+
+	it("records nothing more for a server with no punishments", async () => {
+		const { user, member, guild } = world();
+
+		await issueWarning({ guild: guild as never, user: user as never, member: member as never, moderator, reason: "x" });
+
+		expect(recorded).not.toHaveBeenCalled();
 	});
 
 	it("kicks on the third and bans on the fourth", async () => {
@@ -225,6 +254,19 @@ describe("applyWarnStep", () => {
 		await expect(
 			applyWarnStep(guild as never, user as never, member as never, { action: "timeout", minutes: 5 }, "r"),
 		).resolves.toBe("refused");
+	});
+});
+
+describe("warningActionText", () => {
+	it("says what a warning did, and when it could not be done", () => {
+		expect(warningActionText({ step: "timeout-10", stepProblem: null })).toBe("Time out for 10 minutes");
+		expect(warningActionText({ step: "ban", stepProblem: "refused" })).toBe("Ban (not carried out)");
+	});
+
+	/** Every warning from before punishments existed was only ever a warning. */
+	it("reads a warning with no step as a plain warning", () => {
+		expect(warningActionText({})).toBe("Warning only");
+		expect(warningActionText({ step: "nonsense", stepProblem: "left" })).toBe("Warning only");
 	});
 });
 

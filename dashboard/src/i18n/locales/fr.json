@@ -1131,14 +1131,18 @@
 		"problemLeft": "il n’est plus sur le serveur.",
 		"problemOutranked": "son rôle le plus haut n’est pas sous celui du bot, ou le bot n’a pas la permission.",
 		"problemRefused": "Discord l’a refusé.",
-		"listTitle": "Tous les avertissements",
-		"listCount_one": "{{count, number}} avertissement, le plus récent d’abord.",
-		"listCount_other": "{{count, number}} avertissements, les plus récents d’abord.",
-		"emptyTitle": "Aucun avertissement",
-		"emptyBody": "Personne sur ce serveur n’a été averti.",
 		"givenBy": "Par {{name}}",
 		"edit": "Modifier",
 		"remove": "Retirer",
-		"newReason": "Nouveau motif"
+		"newReason": "Nouveau motif",
+		"notCarriedOut": "{{step}} (non appliqué)",
+		"recentTitle": "Avertissements récents",
+		"recentCount": "{{shown, number}} affichés sur {{count, number}}.",
+		"searchTitle": "Résultats de la recherche",
+		"searchCount_one": "{{count, number}} avertissement pour ce nom ou cet identifiant.",
+		"searchCount_other": "{{count, number}} avertissements pour ce nom ou cet identifiant.",
+		"searchLabel": "Trouver les avertissements d’un membre",
+		"searchHint": "Cherchez par nom, ou collez un identifiant Discord.",
+		"searchNone": "Aucun avertissement pour ce nom ou cet identifiant."
 	}
 }

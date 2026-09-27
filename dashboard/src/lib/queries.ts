@@ -29,7 +29,8 @@ export const keys = {
 		music: () => ["guild", id, "music"] as const,
 		botStats: () => ["guild", id, "bot-stats"] as const,
 		memberCount: () => ["guild", id, "member-count"] as const,
-		warnings: (page: number) => ["guild", id, "warnings", page] as const,
+		warnings: (page: number, perPage: number, query: string) =>
+			["guild", id, "warnings", page, perPage, query] as const,
 		allWarnings: () => ["guild", id, "warnings"] as const,
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,

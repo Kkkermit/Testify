@@ -11,6 +11,7 @@ import {
 	readWarnLadder,
 	stepLabel,
 	warnLadderPanel,
+	warningActionText,
 	warnProblemText,
 } from "@lib/moderation";
 import { type WarnOutcome } from "@testify/shared";
@@ -118,7 +119,7 @@ export default defineCommand({
 								.map(
 									(warning) =>
 										`\`${warning.warnId}\` — ${truncate(warning.reason, 80)}\n` +
-										`> by <@${warning.executorId}> ${discordTime(warning.timestamp, "R")}`,
+										`> by <@${warning.executorId}> ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}`,
 								)
 								.join("\n\n"),
 							thumbnail: target.displayAvatarURL(),
@@ -148,7 +149,8 @@ export default defineCommand({
 							fields: [
 								{ name: "User", value: `${target}`, inline: true },
 								{ name: "Moderator", value: `<@${warning.executorId}>`, inline: true },
-								{ name: "Issued", value: discordTime(warning.timestamp, "F") },
+								{ name: "Issued", value: discordTime(warning.timestamp, "F"), inline: true },
+								{ name: "Action", value: warningActionText(warning), inline: true },
 								{ name: "Reason", value: warning.reason },
 								{
 									name: `Edits (${warning.edits.length})`,

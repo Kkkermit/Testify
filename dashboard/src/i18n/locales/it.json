@@ -1131,14 +1131,18 @@
 		"problemLeft": "non è più nel server.",
 		"problemOutranked": "il suo ruolo più alto non è sotto quello del bot, oppure al bot manca il permesso.",
 		"problemRefused": "Discord l’ha rifiutato.",
-		"listTitle": "Tutti gli avvisi",
-		"listCount_one": "{{count, number}} avviso, dal più recente.",
-		"listCount_other": "{{count, number}} avvisi, dal più recente.",
-		"emptyTitle": "Nessun avviso",
-		"emptyBody": "Nessuno in questo server è stato avvisato.",
 		"givenBy": "Da {{name}}",
 		"edit": "Modifica",
 		"remove": "Rimuovi",
-		"newReason": "Nuovo motivo"
+		"newReason": "Nuovo motivo",
+		"notCarriedOut": "{{step}} (non applicato)",
+		"recentTitle": "Avvisi recenti",
+		"recentCount": "{{shown, number}} mostrati su {{count, number}}.",
+		"searchTitle": "Risultati della ricerca",
+		"searchCount_one": "{{count, number}} avviso per quel nome o ID.",
+		"searchCount_other": "{{count, number}} avvisi per quel nome o ID.",
+		"searchLabel": "Trova gli avvisi di un membro",
+		"searchHint": "Cerca per nome oppure incolla un ID Discord.",
+		"searchNone": "Nessun avviso per quel nome o ID."
 	}
 }

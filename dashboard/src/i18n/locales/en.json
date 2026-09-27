@@ -1130,14 +1130,18 @@
 		"problemLeft": "they are no longer in the server.",
 		"problemOutranked": "their highest role is not below the bot’s, or the bot lacks the permission.",
 		"problemRefused": "Discord refused it.",
-		"listTitle": "Every warning",
-		"listCount_one": "{{count, number}} warning, newest first.",
-		"listCount_other": "{{count, number}} warnings, newest first.",
-		"emptyTitle": "No warnings",
-		"emptyBody": "Nobody in this server has been warned.",
 		"givenBy": "By {{name}}",
 		"edit": "Edit",
 		"remove": "Remove",
-		"newReason": "New reason"
+		"newReason": "New reason",
+		"notCarriedOut": "{{step}} (not carried out)",
+		"recentTitle": "Recent warnings",
+		"recentCount": "Showing {{shown, number}} of {{count, number}}.",
+		"searchTitle": "Search results",
+		"searchCount_one": "{{count, number}} warning for that name or ID.",
+		"searchCount_other": "{{count, number}} warnings for that name or ID.",
+		"searchLabel": "Find a member’s warnings",
+		"searchHint": "Search by name, or paste a Discord ID.",
+		"searchNone": "No warnings for that name or ID."
 	}
 }

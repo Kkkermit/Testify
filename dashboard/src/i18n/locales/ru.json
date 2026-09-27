@@ -1140,14 +1140,18 @@
 		"problemLeft": "участника больше нет на сервере.",
 		"problemOutranked": "его высшая роль не ниже роли бота, или у бота нет нужного права.",
 		"problemRefused": "Discord отказал.",
-		"listTitle": "Все предупреждения",
-		"listCount_one": "{{count, number}} предупреждение, сначала новые.",
-		"listCount_other": "Предупреждений: {{count, number}}, сначала новые.",
-		"emptyTitle": "Предупреждений нет",
-		"emptyBody": "На этом сервере ещё никого не предупреждали.",
 		"givenBy": "Выдал {{name}}",
 		"edit": "Изменить",
 		"remove": "Убрать",
-		"newReason": "Новая причина"
+		"newReason": "Новая причина",
+		"notCarriedOut": "{{step}} (не выполнено)",
+		"recentTitle": "Недавние предупреждения",
+		"recentCount": "Показано {{shown, number}} из {{count, number}}.",
+		"searchTitle": "Результаты поиска",
+		"searchCount_one": "{{count, number}} предупреждение для этого имени или ID.",
+		"searchCount_other": "Предупреждений для этого имени или ID: {{count, number}}.",
+		"searchLabel": "Найти предупреждения участника",
+		"searchHint": "Ищите по имени или вставьте Discord ID.",
+		"searchNone": "Для этого имени или ID предупреждений нет."
 	}
 }

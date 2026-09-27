@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { type Problem, problem } from "./problems";
 import { plainLine } from "./text";
+import { type WarnProblem, type WarnStep } from "./warnings";
 
 export const WARNING_LIMITS = { minReason: 1, maxReason: 500 } as const;
 
@@ -12,6 +13,10 @@ export interface MemberWarning {
 	at: string;
 	/** True once the reason has been rewritten, so the page can say the record is not the original. */
 	edited: boolean;
+	/** What the warning did; null for a plain warning, including every one from before punishments existed. */
+	step: WarnStep | null;
+	/** Set when the step was due but could not be carried out. */
+	stepProblem: WarnProblem | null;
 }
 
 export interface MemberSoftban {

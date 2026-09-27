@@ -29,6 +29,7 @@ jest.mock("@database/repositories/moderationRepository", () => ({
 	listGuildWarnings: jest.fn(() => Promise.resolve([])),
 	removeWarning: jest.fn(() => Promise.resolve(true)),
 	saveWarnLadder: jest.fn((_guildId: string, steps: unknown) => Promise.resolve({ steps })),
+	setWarningStep: jest.fn(() => Promise.resolve()),
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
 
@@ -147,6 +148,46 @@ describe("GET /warnings", () => {
 
 		expect(body.items).toEqual([expect.objectContaining({ id: "abcd1234", userId: TARGET, username: "kate" })]);
 		expect(body.total).toBe(1);
+	});
+
+	describe("searching", () => {
+		beforeEach(() => {
+			listed.mockResolvedValue([
+				{ userId: TARGET, userTag: "kkermits.alt", warnings: [entry("aaaa1111")] },
+				{ userId: "100000000000000005", userTag: "marcus", warnings: [entry("bbbb2222"), entry("cccc3333")] },
+			] as never);
+		});
+
+		it("finds a member's warnings by part of their name, whatever its case", async () => {
+			const body = (await (await send("GET", "?q=Kkermit")).json()) as GuildWarningsPage;
+
+			expect(body.items.map((warning) => warning.id)).toEqual(["aaaa1111"]);
+		});
+
+		it("finds a member's warnings by a pasted ID or mention", async () => {
+			for (const q of ["100000000000000005", "<@100000000000000005>"]) {
+				const body = (await (await send("GET", `?q=${encodeURIComponent(q)}`)).json()) as GuildWarningsPage;
+				expect(body.items.map((warning) => warning.id).sort()).toEqual(["bbbb2222", "cccc3333"]);
+			}
+		});
+
+		/** An ID matches exactly, or searching one person's ID would list everybody whose ID shares its digits. */
+		it("does not treat an ID as part of a name", async () => {
+			const body = (await (await send("GET", "?q=100000000000000009")).json()) as GuildWarningsPage;
+
+			expect(body.total).toBe(0);
+		});
+
+		it("answers with only as many as were asked for, counting them all", async () => {
+			const body = (await (await send("GET", "?perPage=1")).json()) as GuildWarningsPage;
+
+			expect(body.items).toHaveLength(1);
+			expect(body.total).toBe(3);
+		});
+
+		it("refuses a page size past the cap", async () => {
+			expect((await send("GET", "?perPage=500")).status).toBe(400);
+		});
 	});
 
 	it("refuses a page that is not a number", async () => {

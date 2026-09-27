@@ -50,6 +50,20 @@ export async function clearWarnings(guildId: string, userId: string): Promise<bo
 	return result.deletedCount > 0;
 }
 
+/** What the warning's step was and whether it happened, written once the step has been tried. */
+export async function setWarningStep(
+	guildId: string,
+	userId: string,
+	warnId: string,
+	step: string,
+	stepProblem: string | null,
+): Promise<void> {
+	await Warnings.updateOne(
+		{ guildId, userId, "warnings.warnId": warnId },
+		{ $set: { "warnings.$.step": step, "warnings.$.stepProblem": stepProblem } },
+	).exec();
+}
+
 /** Every record in a server; a warning lives inside its member's record, so the list is flattened by the caller. */
 export async function listGuildWarnings(guildId: string): Promise<WarnRecord[]> {
 	return Warnings.find({ guildId, "warnings.0": { $exists: true } })

@@ -32,6 +32,7 @@ import {
 	type MemberWarning,
 	type MoneyPurse,
 	pageOfRank,
+	storedStep,
 } from "@testify/shared";
 
 export interface BoardEntry {
@@ -97,6 +98,8 @@ function toWarning(entry: {
 	executorTag: string;
 	timestamp: Date;
 	edits?: unknown[];
+	step?: string | null;
+	stepProblem?: string | null;
 }): MemberWarning {
 	return {
 		id: entry.warnId,
@@ -105,6 +108,7 @@ function toWarning(entry: {
 		byTag: entry.executorTag,
 		at: entry.timestamp.toISOString(),
 		edited: (entry.edits ?? []).length > 0,
+		...storedStep(entry.step, entry.stepProblem),
 	};
 }
 

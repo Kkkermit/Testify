@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Badge, Button } from "@/components/primitives";
+import { actionOf } from "@/features/warnings/warnings.utils";
 import { shortDate } from "@/lib/datetime";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
@@ -30,6 +31,7 @@ export function WarningRow({
 	const [draft, setDraft] = useState<string | null>(null);
 	const problem = draft === null ? null : problemText(warningProblem(draft), t);
 	const fieldId = `warning-${warning.id}`;
+	const action = actionOf(warning, t);
 
 	return (
 		<li className="flex flex-col gap-3 px-4 py-3 sm:flex-row sm:items-start sm:justify-between">
@@ -65,6 +67,7 @@ export function WarningRow({
 						{t("warnings.givenBy", { name: warning.byTag })} ·{" "}
 						<time dateTime={warning.at}>{shortDate(warning.at)}</time>
 					</span>
+					<Badge tone={action.tone}>{action.label}</Badge>
 					{warning.edited && <Badge tone="warning">{t("members.edited")}</Badge>}
 				</p>
 			</div>
