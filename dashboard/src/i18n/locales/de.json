@@ -226,6 +226,7 @@
 	"guilds": {
 		"title": "Server",
 		"subtitle": "Überall, wo du {{bot}}s Einstellungen ändern oder ihn hinzufügen kannst.",
+		"ownerOnly": "Du hast keine Berechtigung für diese Seite, deshalb bist du wieder hier gelandet.",
 		"search": "Server suchen",
 		"emptyTitle": "Noch nichts einzurichten",
 		"noMatchTitle": "Kein Server passt dazu",

@@ -7,7 +7,7 @@ import { RouteError } from "@/app/RouteError";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
-// Eager: the shell already needs it for the owner console's disguise, so a chunk of its own would save nothing.
+// Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 import { NotFoundPage } from "@/features/not-found/NotFoundPage";
 
 // Lazy per route, so a server manager never downloads the owner console.
