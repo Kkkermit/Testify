@@ -1844,9 +1844,12 @@ so installing it needs `--force` and breaks `npm ci`.
 **anything a tooltip says must be an addition to a control that already has its own accessible name.** A tooltip
 is a pointer affordance; a control labelled only by one is unreachable to anybody arriving another way.
 
-Four things follow, and all four have tests proved able to fail:
+Five things follow, and all five have tests proved able to fail:
 
 - It opens on `focusin` as well as hover, so a keyboard reaches it.
+- **It never opens for touch input** (`touch: false`). A tap already follows the link, and a box that appeared
+  under a finger stopped the mobile drawer scrolling mid-swipe — measured with real touch events, where three swipes
+  in fourteen died exactly when a tooltip was showing.
 - It sets `aria-describedby`, never `aria-labelledby`.
 - **Escape closes it without moving focus.** tippy binds no key handler of its own — read out of
   `tippy.cjs.js`, not assumed — so a box covering the control underneath it had no way out but tabbing away.

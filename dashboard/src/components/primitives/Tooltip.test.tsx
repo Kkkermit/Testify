@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { Tooltip } from "@/components/primitives/Tooltip";
 
@@ -125,5 +125,24 @@ describe("Tooltip", () => {
 		await userEvent.hover(screen.getByText("A description"));
 
 		expect(screen.getByText("A description")).toBeInTheDocument();
+	});
+
+	/** Shown under a finger, the box stopped the mobile drawer scrolling mid-swipe; a tap already follows the link. */
+	it("stays shut for touch input", async () => {
+		render(
+			<Tooltip label="Every server you can configure">
+				<button type="button">Servers</button>
+			</Tooltip>,
+		);
+
+		fireEvent.touchStart(document);
+		screen.getByRole("button").focus();
+		await new Promise((resolve) => setTimeout(resolve, 500));
+
+		expect(screen.queryByText("Every server you can configure")).toBeNull();
+
+		// tippy remembers touch input module-wide until two mouse moves land close together.
+		fireEvent.mouseMove(document);
+		fireEvent.mouseMove(document);
 	});
 });
