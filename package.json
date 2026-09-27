@@ -106,7 +106,7 @@
 	"devDependencies": {
 		"@commitlint/cli": "21.2.3",
 		"@eslint/js": "10.0.1",
-		"@swc/core": "1.15.46",
+		"@swc/core": "1.16.2",
 		"@swc/jest": "0.2.39",
 		"@types/jest": "30.0.0",
 		"@types/node": "22.20.1",
