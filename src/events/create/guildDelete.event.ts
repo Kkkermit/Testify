@@ -1,0 +1,12 @@
+import { Events, type Guild } from "discord.js";
+import { defineEvent } from "@core/event";
+import { purgeGuild } from "@database/repositories/settingsRepository";
+import { announceGuildChange } from "@lib/bot";
+
+export default defineEvent({
+	name: Events.GuildDelete,
+	async run(client, guild: Guild) {
+		await purgeGuild(guild.id);
+		await announceGuildChange(client, guild, "left");
+	},
+});

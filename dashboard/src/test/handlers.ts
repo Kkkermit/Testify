@@ -1,0 +1,846 @@
+import {
+	type AuditLogConfigResponse,
+	type ServerChangesPage,
+	type InsightsReport,
+	type BlacklistRow,
+	type BotControlState,
+	type BotIdentity,
+	type OwnerGuildDetail,
+	type ChannelSummary,
+	type CommandCatalogue,
+	type CommandRunResult,
+	type CommandToggleState,
+	type LogFeed,
+	type RuntimeInfo,
+	type SupportArticle,
+	type SupportCatalogueEntry,
+	type SupportIndex,
+	type SupportReply,
+	type ServerSettings,
+	type UsageReport,
+	type VerificationConfigResponse,
+	type GuildNickname,
+	type GuildOverview,
+	type LevelConfigResponse,
+	type HealthResponse,
+	type ManageableGuild,
+	type MeResponse,
+	type RoleSummary,
+	type SetupStatus,
+	type WelcomeConfigResponse,
+	type GiveawayList,
+	type StickyList,
+	type LotterySettings,
+	type TicketSettings,
+	type MusicSettings,
+	type BotStatsSettings,
+	type GuildWarningsPage,
+	type MemberMatch,
+	type WarningAdded,
+	type WarnLadder,
+	type MemberCounts,
+	type TreasureSettings,
+	type AutomodRules,
+	type BoardPage,
+	type MemberDetail,
+	type StatusResponse,
+} from "@testify/shared";
+import { http, HttpResponse } from "msw";
+
+/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
+
+export const healthy: HealthResponse = { ok: true, uptimeMs: 65_000, discord: "ready", database: "connected" };
+
+export const configured: SetupStatus = {
+	configured: true,
+	missing: [],
+	redirectUri: "http://localhost:5174/api/auth/callback",
+};
+
+export const botProfile: BotIdentity = {
+	id: "100000000000000001",
+	name: "Testify",
+	username: "Testify",
+	avatarUrl: "https://cdn.discordapp.com/avatars/1/abc.png",
+	bannerUrl: null,
+	accentColour: null,
+	supportUrl: "https://discord.gg/example",
+	repositoryUrl: "https://github.com/Kkkermit/Testify",
+};
+
+export const aGuild: ManageableGuild = {
+	id: "900000000000000001",
+	name: "Test Server",
+	iconUrl: null,
+	memberCount: 1_234,
+	botPresent: true,
+	canInvite: true,
+};
+
+export const withoutBot: ManageableGuild = {
+	id: "900000000000000002",
+	name: "Somewhere Else",
+	iconUrl: null,
+	memberCount: null,
+	botPresent: false,
+	canInvite: true,
+};
+
+export const cannotAdd: ManageableGuild = {
+	id: "900000000000000003",
+	name: "Someone Else's Server",
+	iconUrl: null,
+	memberCount: null,
+	botPresent: false,
+	canInvite: false,
+};
+
+export const me: MeResponse = {
+	user: { id: "100000000000000001", username: "someone", avatarUrl: null },
+	isOwner: false,
+	guilds: [aGuild, withoutBot, cannotAdd],
+};
+
+export const overview: GuildOverview = {
+	id: aGuild.id,
+	name: aGuild.name,
+	iconUrl: null,
+	memberCount: 1_234,
+	channelCount: 20,
+	roleCount: 8,
+	features: [
+		{ key: "levelling", label: "Levelling", enabled: true, detail: "2 role rewards, 1 boost" },
+		{ key: "welcome", label: "Welcome messages", enabled: false, detail: null },
+	],
+	missingPermissions: [],
+	recentChanges: [],
+};
+
+export const levelConfig: LevelConfigResponse = {
+	enabled: true,
+	boosts: [{ roleId: "300000000000000002", multiplier: 2 }],
+	rewards: [{ level: 5, roleId: "300000000000000001" }],
+	stackRewards: true,
+	levelUpChannelId: null,
+	announce: true,
+	ignoredChannelIds: [],
+	ignoredRoleIds: [],
+};
+
+export const welcomeConfig: WelcomeConfigResponse = {
+	enabled: true,
+	channelId: "400000000000000001",
+	message: "Welcome to **{server}**, {user}! You are member **{count}**.",
+	style: "card",
+	hasBackground: false,
+};
+
+export const auditLogConfig: AuditLogConfigResponse = {
+	enabled: true,
+	channelId: "400000000000000001",
+	events: ["messageDelete", "banAdd"],
+	all: false,
+};
+
+export const serverSettings: ServerSettings = {
+	prefix: { prefix: "t?", enabled: true },
+	antiLink: { enabled: false, bypassPermission: "ManageMessages" },
+	autoRoles: { roleIds: ["300000000000000001"] },
+	counting: { enabled: true, channelId: "400000000000000001", maxCount: 1_000, count: 412 },
+	voiceStats: { memberChannelId: null, botChannelId: null },
+};
+
+export const automodRules: AutomodRules = {
+	canManage: true,
+	rules: [
+		{
+			id: "500000000000000001",
+			name: "Block spam",
+			enabled: true,
+			preset: "spam",
+			trigger: "Spam",
+			actions: ["block"],
+			fromBot: true,
+		},
+		{
+			id: "500000000000000002",
+			name: "Server rules",
+			enabled: false,
+			preset: null,
+			trigger: "Something else",
+			actions: ["alert"],
+			fromBot: false,
+		},
+	],
+};
+
+export const lotterySettings: LotterySettings = {
+	enabled: true,
+	frozen: false,
+	entryFee: 100,
+	basePrizePool: 500,
+	maxWinners: 2,
+	frequency: "weekly",
+	announcementChannelId: "400000000000000001",
+	prizePool: 2500,
+	ticketsSold: 20,
+	entrants: 7,
+	nextDrawAt: "2026-08-14T12:00:00.000Z",
+	history: [
+		{
+			at: "2026-08-07T12:00:00.000Z",
+			prizePool: 1800,
+			tickets: 12,
+			winners: [{ userTag: "kate", prizeAmount: 1800 }],
+		},
+	],
+};
+
+export const economyBoard: BoardPage = {
+	board: "economy",
+	page: 1,
+	pages: 2,
+	total: 30,
+	rows: [
+		{
+			userId: "100000000000000001",
+			rank: 1,
+			displayName: "someone",
+			avatarUrl: null,
+			primary: 9_400,
+			secondary: 6_000,
+			inGuild: true,
+		},
+		{
+			userId: "100000000000000002",
+			rank: 2,
+			displayName: "kate",
+			avatarUrl: null,
+			primary: 5_120,
+			secondary: 120,
+			inGuild: true,
+		},
+		{
+			userId: "100000000000000003",
+			rank: 3,
+			displayName: "Left the server",
+			avatarUrl: null,
+			primary: 800,
+			secondary: 0,
+			inGuild: false,
+		},
+	],
+	you: { rank: 1, page: 1 },
+};
+
+export const memberDetail: MemberDetail = {
+	userId: "100000000000000002",
+	displayName: "kate",
+	username: "kate",
+	avatarUrl: null,
+	inGuild: true,
+	isBot: false,
+	joinedAt: "2026-01-04T00:00:00.000Z",
+	roles: [{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff" }],
+	economy: { wallet: 5_000, bank: 120, total: 5_120, rank: 2 },
+	levels: { level: 12, xp: 4_800, rank: 3 },
+	warnings: [
+		{
+			id: "a1b2c3d4",
+			reason: "Spamming in general",
+			byId: "100000000000000001",
+			byTag: "someone",
+			at: "2026-08-01T12:00:00.000Z",
+			edited: false,
+			step: { action: "timeout", minutes: 10 },
+			stepProblem: null,
+		},
+	],
+	softban: null,
+	moderationProblem: null,
+};
+
+export const ticketSettings: TicketSettings = {
+	enabled: true,
+	panelChannelId: "400000000000000001",
+	categoryId: "400000000000000005",
+	transcriptChannelId: "400000000000000002",
+	staffRoleId: "300000000000000003",
+	description: "Press the button below and we will be with you shortly.",
+	buttonLabel: "Create ticket",
+	posted: true,
+	openTickets: 3,
+};
+
+export const treasureSettings: TreasureSettings = {
+	enabled: true,
+	minMessages: 15,
+	maxMessages: 50,
+	minAmount: 10,
+	maxAmount: 500,
+	cooldownMs: 300_000,
+	configured: true,
+};
+
+export const musicSettings: MusicSettings = {
+	enabled: true,
+	djRoleIds: [],
+	configured: true,
+};
+
+export const warnLadder: WarnLadder = {
+	steps: [{ action: "warn" }, { action: "timeout", minutes: 10 }, { action: "kick" }, { action: "ban" }],
+};
+
+export const guildWarnings: GuildWarningsPage = {
+	items: [
+		{
+			id: "a1b2c3d4",
+			userId: "100000000000000002",
+			username: "kate",
+			reason: "Spamming in general",
+			byId: "100000000000000001",
+			byTag: "someone",
+			at: "2026-08-01T12:00:00.000Z",
+			edited: false,
+			step: { action: "timeout", minutes: 10 },
+			stepProblem: null,
+		},
+	],
+	total: 1,
+	page: 1,
+	perPage: 20,
+};
+
+export const warningAdded: WarningAdded = {
+	warning: guildWarnings.items[0]!,
+	outcome: { count: 2, step: { action: "timeout", minutes: 10 }, problem: null },
+};
+
+export const memberMatches: MemberMatch[] = [
+	{ userId: "100000000000000002", displayName: "kate", username: "kate", avatarUrl: null },
+];
+
+export const botStatsSettings: BotStatsSettings = { channelId: null };
+
+export const memberCounts: MemberCounts = { total: 120, people: 108, bots: 12, joinedDay: 3, joinedWeek: 11 };
+
+export const giveawayList: GiveawayList = {
+	giveaways: [
+		{
+			messageId: "700000000000000001",
+			channelId: "400000000000000001",
+			prize: "A copy of the game",
+			winnerCount: 2,
+			startAt: "2026-08-09T10:00:00.000Z",
+			endAt: "2026-08-11T10:00:00.000Z",
+			ended: false,
+			winners: [],
+			hostedBy: "100000000000000001",
+		},
+		{
+			messageId: "700000000000000002",
+			channelId: "400000000000000001",
+			prize: "Server boost",
+			winnerCount: 1,
+			startAt: "2026-08-01T10:00:00.000Z",
+			endAt: "2026-08-02T10:00:00.000Z",
+			ended: true,
+			winners: [{ id: "100000000000000002", tag: "winner#0001" }],
+			hostedBy: "100000000000000001",
+		},
+	],
+};
+
+export const stickyList: StickyList = {
+	limit: 25,
+	entries: [
+		{ channelId: "400000000000000001", message: "Read the rules", cap: 5, count: 3, posted: true, canSend: true },
+	],
+};
+
+export const verificationConfig: VerificationConfigResponse = {
+	enabled: true,
+	channelId: "400000000000000001",
+	roleId: "300000000000000001",
+	message: "Press the button below to verify yourself.",
+	posted: true,
+	verifiedCount: 42,
+	roleTooHigh: false,
+};
+
+export const botControl: BotControlState = { gateway: "online", since: null, guilds: 3, pingMs: 42 };
+
+export const guildDetail: OwnerGuildDetail = {
+	id: aGuild.id,
+	name: aGuild.name,
+	iconUrl: null,
+	memberCount: 1_234,
+	channelCount: 20,
+	roleCount: 8,
+	joinedAt: "2026-01-01T00:00:00.000Z",
+	createdAt: "2025-01-01T00:00:00.000Z",
+	ownerId: "700000000000000001",
+	nickname: "Testy",
+	highestRole: "Bots",
+	missingPermissions: ["Manage Roles"],
+	configured: ["levelling"],
+	usage: 900,
+};
+
+export const guildNickname: GuildNickname = { nickname: "Testy", canChange: true };
+
+/** What the runner offers: one plain command, one with subcommands, one needing a server. */
+export const runnable: CommandCatalogue = {
+	prefix: "t?",
+	categories: ["info"],
+	commands: [
+		{
+			name: "ping",
+			description: "Checks the bot is awake.",
+			category: "info",
+			aliases: [],
+			subcommands: [],
+			options: [],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: false,
+			ownerOnly: false,
+			nsfw: false,
+		},
+		{
+			name: "bot",
+			description: "Information about the bot itself.",
+			category: "info",
+			aliases: [],
+			subcommands: [
+				{ name: "info", description: "General information.", aliases: [], options: [] },
+				{ name: "uptime", description: "How long it has been running.", aliases: [], options: [] },
+			],
+			options: [],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: false,
+			ownerOnly: false,
+			nsfw: false,
+		},
+		{
+			name: "role-info",
+			description: "Details about a role.",
+			category: "info",
+			aliases: [],
+			subcommands: [],
+			options: [
+				{ name: "role", description: "Which role.", type: "role", required: true, choices: [], min: null, max: null },
+				{
+					name: "detail",
+					description: "How much.",
+					type: "string",
+					required: false,
+					choices: [
+						{ name: "Full", value: "full" },
+						{ name: "Short", value: "short" },
+					],
+					min: null,
+					max: null,
+				},
+			],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: true,
+			ownerOnly: false,
+			nsfw: false,
+		},
+	],
+};
+
+export const runResult: CommandRunResult = {
+	command: "ping",
+	subcommand: null,
+	ranAt: "2026-08-09T12:00:00.000Z",
+	outputs: [{ kind: "text", content: "Pong! 42ms" }],
+	degraded: false,
+};
+
+export const blacklistRows: BlacklistRow[] = [
+	{
+		userId: "100000000000000007",
+		tag: "spammer",
+		avatarUrl: null,
+		reason: "Spamming commands in three servers",
+		createdAt: "2026-06-01T00:00:00.000Z",
+	},
+	{
+		userId: "100000000000000008",
+		tag: null,
+		avatarUrl: null,
+		reason: "No reason provided",
+		createdAt: "2026-06-02T00:00:00.000Z",
+	},
+];
+
+export const usageReport: UsageReport = {
+	days: 30,
+	runs: 1_240,
+	failures: 12,
+	activeGuilds: 3,
+	commandsUsed: 2,
+	commandsTotal: 76,
+	surfaces: { slash: 1_100, prefix: 140 },
+	daily: [
+		{ day: "2026-07-31", count: 500, failures: 4 },
+		{ day: "2026-08-01", count: 740, failures: 8 },
+	],
+	mostUsed: [
+		{ command: "rank", category: "levelling", count: 800, failures: 2 },
+		{ command: "ban", category: "moderation", count: 440, failures: 10 },
+	],
+	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
+	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
+	screens: [
+		{ route: "/guilds/:guildId/levelling", count: 42 },
+		{ route: "/guilds/:guildId/settings", count: 18 },
+	],
+};
+
+export const logFeed: LogFeed = {
+	lines: [
+		{
+			at: "2026-08-01T12:00:00.000Z",
+			level: "error",
+			message: "[BAN] Failed to ban member",
+			context: { guildId: aGuild.id },
+		},
+		{ at: "2026-08-01T11:59:00.000Z", level: "info", message: "[READY] Logged in", context: {} },
+	],
+	buffered: 2,
+	capacity: 1_000,
+	loggerLevel: "info",
+	matched: 2,
+};
+
+const CHECKED_AT = "2026-09-23T12:00:00.000Z";
+
+export const botStatus: StatusResponse = {
+	level: "operational",
+	checkedAt: CHECKED_AT,
+	startedAt: "2026-09-21T09:00:00.000Z",
+	uptimeMs: 183_600_000,
+	paused: false,
+	gateway: { level: "operational", pingMs: 42, shards: 1 },
+	database: { level: "operational", pingMs: 6 },
+	eventLoop: { level: "operational", p50Ms: 10.2, p99Ms: 21.4, maxMs: 40 },
+	memory: { level: "operational", heapUsedMb: 120, heapLimitMb: 4_096, rssMb: 260 },
+	commands: { level: "operational", runs: 14, failures: 1, p50Ms: 180, p95Ms: 1_240 },
+	packages: [
+		{ key: "ytDlp", level: "operational", installed: true, version: "2026.09.01", ageDays: 22 },
+		{ key: "ffmpeg", level: "operational", installed: true, version: null, ageDays: null },
+	],
+	services: [
+		{
+			name: "Discord API",
+			level: "operational",
+			calls: 20,
+			failures: 0,
+			lastAt: CHECKED_AT,
+			lastOk: true,
+			latencyMs: null,
+		},
+		{ name: "reddit", level: "degraded", calls: 4, failures: 1, lastAt: CHECKED_AT, lastOk: true, latencyMs: 310 },
+	],
+	days: Array.from({ length: 30 }, (_, index) => ({
+		day: new Date(Date.UTC(2026, 7, 25 + index)).toISOString().slice(0, 10),
+		uptime: index < 27 ? null : index === 28 ? 0.9 : 1,
+	})),
+	recent: Array.from({ length: 48 }, (_, index) => ({
+		start: new Date(Date.UTC(2026, 8, 22, 12, 30) + index * 1_800_000).toISOString(),
+		level: index < 10 ? "none" : index === 20 ? "offline" : "operational",
+		gatewayPingMs: index < 10 || index === 20 ? null : 40 + index,
+	})),
+};
+
+export const runtimeInfo: RuntimeInfo = {
+	version: "2.0.0",
+	nodeVersion: "v24.19.0",
+	discordVersion: "14.27.0",
+	platform: "linux x64",
+	environment: "production",
+	startedAt: "2026-07-31T12:00:00.000Z",
+	uptimeMs: 90_000_000,
+	memoryMb: { heapUsed: 128, heapTotal: 256, rss: 320 },
+	repositoryUrl: "https://github.com/Kkkermit/Testify",
+	commands: 76,
+	events: 16,
+	guilds: 3,
+	gatewayPingMs: 48,
+	shards: 1,
+	cachedUsers: 4200,
+	cachedChannels: 120,
+};
+
+export const catalogue: CommandCatalogue = {
+	prefix: "t?",
+	categories: ["info", "moderation"],
+	commands: [
+		{
+			name: "ban",
+			description: "Bans a member.",
+			category: "moderation",
+			aliases: ["b"],
+			subcommands: [],
+			options: [{ name: "user", description: "Who.", type: "user", required: true, choices: [], min: null, max: null }],
+			permissions: ["ban members"],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: true,
+			ownerOnly: false,
+			nsfw: false,
+		},
+		{
+			name: "levelling",
+			description: "Sets up levelling.",
+			category: "info",
+			aliases: [],
+			subcommands: [{ name: "setup", description: "Opens the panel.", aliases: [], options: [] }],
+			options: [],
+			permissions: [],
+			botPermissions: [],
+			cooldownMs: null,
+			guildOnly: true,
+			ownerOnly: false,
+			nsfw: false,
+		},
+	],
+};
+
+export const commandToggles: CommandToggleState = {
+	disabled: ["ban"],
+	disabledGlobally: [],
+	locked: ["help"],
+};
+
+export const someChannels: ChannelSummary[] = [
+	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
+	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
+	{ id: "400000000000000003", name: "Voice", kind: "voice", position: 3, canSend: false },
+	{ id: "400000000000000005", name: "Support", kind: "category", position: 4, canSend: false },
+];
+
+export const someRoles: RoleSummary[] = [
+	{ id: "300000000000000001", name: "Member", colour: null, position: 1, managed: false, assignableByBot: true },
+	{ id: "300000000000000002", name: "Booster", colour: "#7c3aed", position: 3, managed: false, assignableByBot: true },
+	{ id: "300000000000000003", name: "Admin", colour: null, position: 9, managed: false, assignableByBot: false },
+];
+
+function catalogueEntry(
+	id: string,
+	title: string,
+	topic: SupportCatalogueEntry["topic"],
+	featured = false,
+	keywords: string[] = [],
+): SupportCatalogueEntry {
+	return { id, title, topic, kind: "article", featured, keywords, questions: [] };
+}
+
+export const supportIndex: SupportIndex = {
+	articles: [
+		catalogueEntry("add-the-bot", "Adding Testify to your server", "getting-started", true, ["invite", "add"]),
+		catalogueEntry("levelling", "Setting up levelling", "setup", true, ["xp", "level"]),
+		catalogueEntry("tickets", "Setting up tickets", "setup", false, ["ticket panel", "support ticket"]),
+		catalogueEntry("role-order", "The bot cannot give or remove a role", "troubleshooting", false, ["role hierarchy"]),
+		{ ...catalogueEntry("command-ban", "The /ban command", "commands"), kind: "command" },
+	],
+};
+
+export const levellingArticle: SupportArticle = {
+	id: "levelling",
+	title: "Setting up levelling",
+	topic: "setup",
+	body: "Members earn XP by chatting.\n\n- Run `/levelling setup` in Discord.\n- Or open **Levelling** on the [dashboard](/guilds).\n\n> **Tip:** Nobody loses XP when it is off.",
+};
+
+export const supportReply: SupportReply = {
+	answer: levellingArticle,
+	related: [{ id: "role-order", title: "The bot cannot give or remove a role", topic: "troubleshooting" }],
+};
+
+export const insightsReport: InsightsReport = {
+	days: 7,
+	server: {
+		createdAt: "2020-01-01T00:00:00.000Z",
+		ownerId: "100000000000000001",
+		ownerName: "kermit",
+		members: 1234,
+		people: 1187,
+		bots: 47,
+		textChannels: 12,
+		voiceChannels: 4,
+		categories: 3,
+		roles: 9,
+		emojis: 20,
+		stickers: 2,
+		boostTier: 1,
+		boosts: 3,
+		verification: "medium",
+	},
+	countingSince: "2026-09-21",
+	totals: { messages: 70, activeMembers: 5, joins: 3, leaves: 1 },
+	daily: Array.from({ length: 7 }, (_, index) => ({
+		day: `2026-09-${String(21 + index)}`,
+		messages: 10,
+		joins: index === 6 ? 3 : 0,
+		leaves: index === 6 ? 1 : 0,
+	})),
+	hours: Array.from({ length: 24 }, (_, hour) => (hour === 20 ? 30 : hour === 9 ? 10 : 0)),
+	topChannels: [
+		{ channelId: "400000000000000001", name: "general", messages: 50 },
+		{ channelId: "400000000000000009", name: null, messages: 5 },
+	],
+	topMembers: [{ userId: "100000000000000002", name: "kate", avatarUrl: null, messages: 40 }],
+	recentJoins: [{ userId: "100000000000000002", name: "kate", at: "2026-09-27T10:00:00.000Z" }],
+	recentLeaves: [],
+};
+
+export const serverChanges: ServerChangesPage = {
+	items: [
+		{
+			id: "a1",
+			source: "discord",
+			at: "2026-09-27T11:00:00.000Z",
+			actorId: "100000000000000002",
+			actorTag: "mod",
+			kind: "member",
+			verb: "banned",
+			summary: null,
+			target: "marcus",
+			reason: "Spamming invites",
+		},
+		{
+			id: "d1",
+			source: "dashboard",
+			at: "2026-09-27T10:00:00.000Z",
+			actorId: "100000000000000001",
+			actorTag: "kate",
+			kind: "settings",
+			verb: "updated",
+			summary: "Turned levelling on",
+			target: null,
+			reason: null,
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 25,
+	discordReadable: true,
+	truncated: false,
+};
+
+export const handlers = [
+	http.get("/api/health", () => HttpResponse.json(healthy)),
+	http.get("/api/support", () => HttpResponse.json(supportIndex)),
+	http.post("/api/support/ask", () => HttpResponse.json(supportReply)),
+	http.get("/api/support/articles/:articleId", ({ params }) =>
+		HttpResponse.json({
+			answer: { ...levellingArticle, id: String(params.articleId), title: `Article ${String(params.articleId)}` },
+			related: [],
+		} satisfies SupportReply),
+	),
+	http.get("/api/status", () => HttpResponse.json(botStatus)),
+	http.get("/api/auth/setup", () => HttpResponse.json(configured)),
+	http.get("/api/bot", () => HttpResponse.json(botProfile)),
+	http.get("/api/commands", () => HttpResponse.json(catalogue)),
+	http.get("/api/auth/me", () => HttpResponse.json(me)),
+	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
+	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
+	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
+	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
+	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
+	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),
+	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
+	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
+	http.get("/api/guilds/:guildId/verification", () => HttpResponse.json(verificationConfig)),
+	http.get("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),
+	http.post("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),
+	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
+	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
+	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
+	http.post("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
+	http.post("/api/guilds/:guildId/giveaways/:messageId/end", () => HttpResponse.json(giveawayList)),
+	http.post("/api/guilds/:guildId/giveaways/:messageId/reroll", () => HttpResponse.json(giveawayList)),
+	http.delete("/api/guilds/:guildId/giveaways/:messageId", () => HttpResponse.json({ giveaways: [] })),
+	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
+	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
+		const board = new URL(request.url).searchParams.get("board") ?? "economy";
+		return HttpResponse.json({ ...economyBoard, board });
+	}),
+	// Before `:userId`, which MSW would otherwise match first, exactly as the real router would.
+	http.get("/api/guilds/:guildId/members/search", () => HttpResponse.json(memberMatches)),
+	http.get("/api/guilds/:guildId/members/:userId", () => HttpResponse.json(memberDetail)),
+	http.post("/api/guilds/:guildId/members/:userId/kick", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
+	http.post("/api/guilds/:guildId/members/:userId/ban", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
+	http.get("/api/guilds/:guildId/changes", () => HttpResponse.json(serverChanges)),
+	http.get("/api/guilds/:guildId/insights", () => HttpResponse.json(insightsReport)),
+	http.get("/api/guilds/:guildId/warnings", () => HttpResponse.json(guildWarnings)),
+	http.get("/api/guilds/:guildId/warnings/punishments", () => HttpResponse.json(warnLadder)),
+	http.put("/api/guilds/:guildId/warnings/punishments", async ({ request }) =>
+		HttpResponse.json((await request.json()) as WarnLadder),
+	),
+	http.post("/api/guilds/:guildId/warnings", () => HttpResponse.json(warningAdded)),
+	http.patch("/api/guilds/:guildId/warnings/:userId/:warnId", async ({ request }) =>
+		HttpResponse.json({ ...guildWarnings.items[0], ...((await request.json()) as object), edited: true }),
+	),
+	http.delete("/api/guilds/:guildId/warnings/:userId/:warnId", () => new HttpResponse(null, { status: 204 })),
+	http.delete("/api/guilds/:guildId/warnings/:userId", () => new HttpResponse(null, { status: 204 })),
+	http.patch("/api/guilds/:guildId/members/:userId/level", () => HttpResponse.json(memberDetail)),
+	http.patch("/api/guilds/:guildId/members/:userId/money", () => HttpResponse.json(memberDetail)),
+	http.delete("/api/guilds/:guildId/members/:userId/softban", () =>
+		HttpResponse.json({ ...memberDetail, softban: null }),
+	),
+	http.get("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
+	http.patch("/api/guilds/:guildId/lottery", () => HttpResponse.json(lotterySettings)),
+	http.delete("/api/guilds/:guildId/lottery", () => HttpResponse.json({ ...lotterySettings, enabled: false })),
+	http.patch("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.delete("/api/guilds/:guildId/tickets", () => HttpResponse.json({ ...ticketSettings, enabled: false })),
+	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
+	http.patch("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
+	http.get("/api/guilds/:guildId/bot-stats", () => HttpResponse.json(botStatsSettings)),
+	http.put("/api/guilds/:guildId/bot-stats", async ({ request }) => {
+		const { channelId } = (await request.json()) as { channelId: string };
+		return HttpResponse.json({ channelId });
+	}),
+	http.delete("/api/guilds/:guildId/bot-stats", () => HttpResponse.json({ channelId: null })),
+	http.get("/api/guilds/:guildId/member-count", () => HttpResponse.json(memberCounts)),
+	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
+	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),
+	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
+	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
+	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
+	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
+	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
+	http.get("/api/control", () => HttpResponse.json(botControl)),
+	http.get("/api/control/guilds/:guildId", () => HttpResponse.json(guildDetail)),
+	http.get("/api/owner/stats", () =>
+		HttpResponse.json({
+			guilds: 3,
+			users: 4_200,
+			uptimeMs: 90_000_000,
+			memoryMb: 128,
+			commands: 76,
+			database: "connected",
+		}),
+	),
+	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
+	http.get("/api/owner/blacklist", () => HttpResponse.json(blacklistRows)),
+	http.get("/api/owner/runner", () => HttpResponse.json(runnable)),
+	http.post("/api/owner/runner/:name", () => HttpResponse.json(runResult)),
+	http.post("/api/owner/blacklist", () => HttpResponse.json(blacklistRows[0])),
+	http.delete("/api/owner/blacklist/:userId", () => HttpResponse.json({ userId: "100000000000000007" })),
+	http.post("/api/control/guilds/:guildId/leave", () => HttpResponse.json({ left: aGuild.id })),
+];

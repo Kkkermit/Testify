@@ -1,0 +1,53 @@
+import { DEFAULT_BOT_NAME } from "@testify/shared";
+import { screen, waitFor } from "@testing-library/react";
+import { http, HttpResponse } from "msw";
+import { useTranslation } from "react-i18next";
+import { useBot } from "@/features/auth/useBot";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { currentBotName, nameTheBot } from "@/i18n";
+import { rememberedBotName } from "@/lib/brand";
+import { botProfile } from "@/test/handlers";
+import { renderWithProviders } from "@/test/renderWithProviders";
+import { server } from "@/test/setup";
+
+function Named(): React.JSX.Element {
+	useBot();
+	usePageTitle("Servers");
+	const { t } = useTranslation();
+
+	return <p>{t("guilds.invitableTitle")}</p>;
+}
+
+afterEach(() => {
+	nameTheBot(DEFAULT_BOT_NAME);
+});
+
+describe("the bot's name", () => {
+	it("is the built-in one until Discord says otherwise", () => {
+		expect(currentBotName()).toBe(DEFAULT_BOT_NAME);
+	});
+
+	/** A fork renamed in Discord kept reading as the original everywhere the dashboard names the bot. */
+	it("follows the bot's own username into every string and the page title", async () => {
+		server.use(
+			http.get("/api/bot", () => HttpResponse.json({ ...botProfile, name: "Helper", username: "helper-app" })),
+		);
+		renderWithProviders(<Named />);
+
+		expect(await screen.findByText("Add Helper")).toBeInTheDocument();
+		await waitFor(() => {
+			expect(document.title).toBe("Servers · Helper");
+		});
+	});
+
+	/** The next visit names the bot before the API has answered, rather than showing a name it does not have. */
+	it("is remembered for the next visit", async () => {
+		server.use(http.get("/api/bot", () => HttpResponse.json({ ...botProfile, name: "Helper" })));
+		renderWithProviders(<Named />);
+
+		await waitFor(() => {
+			expect(rememberedBotName()).toBe("Helper");
+		});
+		localStorage.removeItem("testify:botName");
+	});
+});

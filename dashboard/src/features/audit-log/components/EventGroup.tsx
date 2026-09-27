@@ -1,0 +1,86 @@
+import { type AuditEvent, type AuditGroup, auditEventsIn } from "@testify/shared";
+import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { CHECK_ROW } from "@/components/form";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { EVENT_LABELS, GROUP_LABELS } from "@/features/audit-log/auditLog.labels";
+import { type GroupState } from "@/features/audit-log/auditLog.utils";
+import { cn } from "@/lib/cn";
+
+/** One part of a server as its own panel: eighteen flat checkboxes are a wall, five bordered groups are a decision. */
+export function EventGroup({
+	group,
+	state,
+	events,
+	onToggleGroup,
+	onToggleEvent,
+}: {
+	group: AuditGroup;
+	state: GroupState;
+	events: AuditEvent[];
+	onToggleGroup: (on: boolean) => void;
+	onToggleEvent: (event: AuditEvent) => void;
+}): React.JSX.Element {
+	const { t } = useTranslation();
+	const heading = useRef<HTMLInputElement>(null);
+
+	// `indeterminate` is a property, not an attribute, so React cannot set it from JSX.
+	useEffect(() => {
+		if (heading.current !== null) heading.current.indeterminate = state === "some";
+	}, [state]);
+
+	const inGroup = auditEventsIn(group);
+	const chosen = inGroup.filter((event) => events.includes(event)).length;
+
+	return (
+		<fieldset className="border-border bg-background/40 rounded-card min-w-0 border">
+			<legend className="sr-only">{t(GROUP_LABELS[group])}</legend>
+
+			{/* The count is beside the label rather than inside it: it is a status, not part of the tickbox's name. */}
+			<div className="border-border flex items-center gap-2 border-b px-3 py-2.5 text-sm font-semibold">
+				<label
+					className={cn(
+						INLINE_TARGET,
+						"hover:text-accent min-w-0 flex-1 cursor-pointer gap-2 transition-colors duration-150",
+					)}
+				>
+					<input
+						ref={heading}
+						type="checkbox"
+						checked={state === "all"}
+						onChange={(event) => {
+							onToggleGroup(event.target.checked);
+						}}
+					/>
+					<span className="min-w-0 truncate">{t(GROUP_LABELS[group])}</span>
+				</label>
+				<span className="text-muted-foreground text-xs font-normal tabular-nums">
+					{chosen}/{inGroup.length}
+				</span>
+			</div>
+
+			<div className="flex flex-col p-1">
+				{inGroup.map((event) => {
+					const look = EVENT_LABELS[event];
+					const checked = events.includes(event);
+
+					return (
+						<label key={event} className={cn(CHECK_ROW, "hover:bg-muted cursor-pointer rounded-field py-2")}>
+							<input
+								type="checkbox"
+								checked={checked}
+								onChange={() => {
+									onToggleEvent(event);
+								}}
+							/>
+							<span className="min-w-0">
+								<span className="block truncate font-medium">{t(look.label)}</span>
+								<span className="text-muted-foreground block truncate text-xs">{t(look.describes)}</span>
+							</span>
+						</label>
+					);
+				})}
+			</div>
+		</fieldset>
+	);
+}

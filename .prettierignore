@@ -1,2 +1,8 @@
-package.json
-node_modules/
+dist
+coverage
+node_modules
+assets
+package-lock.json
+
+# Third-party skills, vendored verbatim. Reformatting them would make every upstream update a conflict.
+.claude/skills

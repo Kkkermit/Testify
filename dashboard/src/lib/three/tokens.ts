@@ -1,0 +1,48 @@
+/** WebGL takes numbers, not class names, so this is the one place a token is read rather than applied — and it is read off `:root`. */
+export function cssColour(name: string, fallback: string, root: Element = document.documentElement): string {
+	const value = getComputedStyle(root).getPropertyValue(name).trim();
+	return value === "" ? fallback : value;
+}
+
+/** three's Color parses `#rgb` and `#rrggbb`, so anything else from a token is refused before it reaches it. */
+export function isHexColour(value: string): boolean {
+	return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
+}
+
+/** `getComputedStyle` returns a `light-dark()` token as source text, so the half is picked by hand. */
+export function pickScheme(value: string, dark: boolean): string {
+	const both = /^light-dark\(\s*([^,]+?)\s*,\s*(.+?)\s*\)$/i.exec(value);
+	if (both?.[1] === undefined || both[2] === undefined) return value;
+
+	return dark ? both[2] : both[1];
+}
+
+/** `color-scheme` is `light dark` until somebody chooses, and then the browser's own preference decides. */
+function prefersDark(root: Element = document.documentElement): boolean {
+	const scheme = getComputedStyle(root).colorScheme.trim();
+	if (scheme === "dark") return true;
+	if (scheme === "light") return false;
+
+	return window.matchMedia("(prefers-color-scheme: dark)").matches;
+}
+
+export function accentColour(root?: Element): string {
+	const value = pickScheme(cssColour("--color-accent", "#a78bfa", root), prefersDark(root));
+	return isHexColour(value) ? value : "#a78bfa";
+}
+
+/** The field is composited over the page rather than added to it, so paper needs a far weaker one than near-black. */
+export function backdropOpacity(root?: Element): number {
+	const value = Number.parseFloat(pickScheme(cssColour("--backdrop-opacity", "0.5", root), prefersDark(root)));
+	return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0.5;
+}
+
+interface FieldPaint {
+	colour: string;
+	opacity: number;
+}
+
+/** Read together, because the two only make sense as a pair: the same colour at the other theme's strength is dust. */
+export function fieldPaint(root?: Element): FieldPaint {
+	return { colour: accentColour(root), opacity: backdropOpacity(root) };
+}

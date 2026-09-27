@@ -1,0 +1,247 @@
+import {
+	Activity,
+	ChartColumn,
+	ChartLine,
+	LayoutGrid,
+	ScrollText,
+	ShieldAlert,
+	Server,
+	ShieldCheck,
+	Pin,
+	SlidersHorizontal,
+	Coins,
+	Terminal,
+	TrendingUp,
+	TriangleAlert,
+	Trophy,
+	Users,
+	UserPlus,
+	MessagesSquare,
+	Music,
+	LifeBuoy,
+	Ticket,
+	type LucideIcon,
+	Gauge,
+	History,
+	Gift,
+	Gem,
+	Sparkles,
+} from "lucide-react";
+import { type TranslationKey } from "@/i18n";
+
+/** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips and active marker follow. */
+export interface NavItem {
+	to: string;
+	/** A translation key, not text: this module is data and has no hook to translate with. */
+	labelKey: TranslationKey;
+	icon: LucideIcon;
+	/** What the tooltip adds beyond the label. Omitted when the label already says everything. */
+	hintKey?: TranslationKey;
+	/** False when child routes should keep this item marked as current. */
+	exact?: boolean;
+}
+
+/** A collapsible run of related screens, so a server's settings stay one scan rather than ten rows. */
+export interface NavSection {
+	labelKey: TranslationKey;
+	icon: LucideIcon;
+	items: NavItem[];
+}
+
+/** Groups put a server's own settings under its name, so it is always clear which server is being edited. */
+export interface NavGroup {
+	/** A server's own name, shown exactly as typed. Absent for the first group, which needs no heading. */
+	heading?: string;
+	/** For a group that is not named after a server, so its heading is translated rather than a name. */
+	headingKey?: TranslationKey;
+	items: NavItem[];
+	/** Rendered after `items`, each behind its own toggle. */
+	sections?: NavSection[];
+}
+
+export interface NavAudience {
+	guild: { id: string; name: string } | undefined;
+	isOwner: boolean;
+}
+
+export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
+	const groups: NavGroup[] = [
+		{
+			items: [
+				{ to: "/guilds", labelKey: "nav.servers", icon: LayoutGrid, hintKey: "nav.serversHint" },
+				{
+					to: guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`,
+					labelKey: "nav.commands",
+					icon: Terminal,
+					hintKey: guild === undefined ? "nav.commandsHintAll" : "nav.commandsHintGuild",
+				},
+				{ to: "/status", labelKey: "nav.status", icon: Activity, hintKey: "nav.statusHint" },
+				{ to: "/help", labelKey: "nav.help", icon: LifeBuoy, hintKey: "nav.helpHint" },
+			],
+		},
+	];
+
+	if (guild !== undefined) {
+		groups.push({
+			heading: guild.name,
+			items: [
+				{ to: `/guilds/${guild.id}`, labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
+				{
+					to: `/guilds/${guild.id}/insights`,
+					labelKey: "nav.insights",
+					icon: ChartLine,
+					hintKey: "nav.insightsHint",
+				},
+				{
+					to: `/guilds/${guild.id}/settings`,
+					labelKey: "nav.settings",
+					icon: SlidersHorizontal,
+					hintKey: "nav.settingsHint",
+				},
+			],
+			// Grouped by what the person is trying to do, so a screen sits beside the ones it is decided alongside.
+			sections: [
+				{
+					labelKey: "nav.community",
+					icon: Users,
+					items: [
+						{
+							to: `/guilds/${guild.id}/welcome`,
+							labelKey: "nav.welcome",
+							icon: UserPlus,
+							hintKey: "nav.welcomeHint",
+						},
+						{
+							to: `/guilds/${guild.id}/levelling`,
+							labelKey: "nav.levelling",
+							icon: TrendingUp,
+							hintKey: "nav.levellingHint",
+						},
+						{
+							to: `/guilds/${guild.id}/members`,
+							labelKey: "nav.leaderboards",
+							icon: Trophy,
+							hintKey: "nav.leaderboardsHint",
+							// A member's own page lives under this path, and it is still where you are in the sidebar.
+							exact: false,
+						},
+					],
+				},
+				{
+					labelKey: "nav.moderation",
+					icon: ShieldAlert,
+					items: [
+						{
+							to: `/guilds/${guild.id}/automod`,
+							labelKey: "nav.automod",
+							icon: ShieldAlert,
+							hintKey: "nav.automodHint",
+						},
+						{
+							to: `/guilds/${guild.id}/audit-log`,
+							labelKey: "nav.auditLog",
+							icon: ScrollText,
+							hintKey: "nav.auditLogHint",
+						},
+						{
+							to: `/guilds/${guild.id}/warnings`,
+							labelKey: "nav.warnings",
+							icon: TriangleAlert,
+							hintKey: "nav.warningsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/changes`,
+							labelKey: "nav.changes",
+							icon: History,
+							hintKey: "nav.changesHint",
+						},
+					],
+				},
+				{
+					labelKey: "nav.economy",
+					icon: Coins,
+					items: [
+						{
+							to: `/guilds/${guild.id}/treasure`,
+							labelKey: "nav.treasure",
+							icon: Gem,
+							hintKey: "nav.treasureHint",
+						},
+						{
+							to: `/guilds/${guild.id}/lottery`,
+							labelKey: "nav.lottery",
+							icon: Ticket,
+							hintKey: "nav.lotteryHint",
+						},
+					],
+				},
+				{
+					labelKey: "nav.entertainment",
+					icon: Sparkles,
+					items: [
+						{
+							to: `/guilds/${guild.id}/music`,
+							labelKey: "nav.music",
+							icon: Music,
+							hintKey: "nav.musicHint",
+						},
+						{
+							to: `/guilds/${guild.id}/giveaways`,
+							labelKey: "nav.giveaways",
+							icon: Gift,
+							hintKey: "nav.giveawaysHint",
+						},
+					],
+				},
+				{
+					labelKey: "nav.channels",
+					icon: MessagesSquare,
+					items: [
+						{
+							to: `/guilds/${guild.id}/sticky`,
+							labelKey: "nav.sticky",
+							icon: Pin,
+							hintKey: "nav.stickyHint",
+						},
+						{
+							to: `/guilds/${guild.id}/tickets`,
+							labelKey: "nav.tickets",
+							icon: LifeBuoy,
+							hintKey: "nav.ticketsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/bot-stats`,
+							labelKey: "nav.botStats",
+							icon: Gauge,
+							hintKey: "nav.botStatsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/member-count`,
+							labelKey: "nav.memberCount",
+							icon: ChartColumn,
+							hintKey: "nav.memberCountHint",
+						},
+					],
+				},
+			],
+		});
+	}
+
+	if (isOwner) {
+		groups.push({
+			headingKey: "nav.bot",
+			items: [{ to: "/owner", labelKey: "nav.owner", icon: ShieldCheck, hintKey: "nav.ownerHint" }],
+		});
+	}
+
+	return groups;
+}
+
+export function allNavItems(groups: NavGroup[]): NavItem[] {
+	return groups.flatMap((group) => [...group.items, ...(group.sections ?? []).flatMap((section) => section.items)]);
+}
+
+/** Open on arrival when the current page is inside it, so a collapsed section never hides where you are. */
+export function sectionHolds(section: NavSection, pathname: string): boolean {
+	return section.items.some((item) => pathname === item.to || (item.exact === false && pathname.startsWith(item.to)));
+}

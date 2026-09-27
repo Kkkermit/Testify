@@ -1,0 +1,23 @@
+version: 2
+
+updates:
+  # One workspace root: npm resolves the whole tree from the root lockfile, so a per-workspace entry would open
+  # pull requests that cannot change the lockfile they need to.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # A patch bump per package is noise on a repo this size, and each one costs a full CI run.
+      patches:
+        update-types: ["patch"]
+      types:
+        patterns: ["@types/*"]
+      eslint:
+        patterns: ["eslint", "eslint-*", "@eslint/*", "typescript-eslint"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

@@ -1,0 +1,58 @@
+import { z } from "zod";
+import { type Problem, problem } from "./problems";
+import { plainLine } from "./text";
+
+/** Discord holds more trigger types than these; the rest are listed but not offered. */
+export const AUTOMOD_PRESETS = ["flagged-words", "spam", "mention-spam", "keyword"] as const;
+
+export type AutomodPreset = (typeof AUTOMOD_PRESETS)[number];
+
+export const AUTOMOD_LIMITS = {
+	minMentions: 1,
+	maxMentions: 50,
+	maxKeyword: 60,
+	/** Discord's own cap per trigger type. */
+	maxRules: 6,
+} as const;
+
+export type AutomodAction = "block" | "alert" | "timeout" | "other";
+
+export interface AutomodRuleSummary {
+	id: string;
+	name: string;
+	enabled: boolean;
+	preset: AutomodPreset | null;
+	trigger: string;
+	actions: AutomodAction[];
+	fromBot: boolean;
+}
+
+export interface AutomodRules {
+	rules: AutomodRuleSummary[];
+	/** False when the bot lacks Manage Server. */
+	canManage: boolean;
+}
+
+export const automodCreate = z.discriminatedUnion("preset", [
+	z.object({ preset: z.literal("flagged-words") }),
+	z.object({ preset: z.literal("spam") }),
+	z.object({
+		preset: z.literal("mention-spam"),
+		limit: z.coerce.number().int().min(AUTOMOD_LIMITS.minMentions).max(AUTOMOD_LIMITS.maxMentions),
+	}),
+	z.object({ preset: z.literal("keyword"), word: plainLine(1, AUTOMOD_LIMITS.maxKeyword) }),
+]);
+
+export type AutomodCreate = z.infer<typeof automodCreate>;
+
+export const automodPatch = z.object({ enabled: z.boolean() });
+
+export const automodRuleParam = z.object({ ruleId: z.string().regex(/^\d{17,20}$/, "is not a rule id") });
+
+/** Why a create would be refused, in the words the form shows. */
+export function automodBlocked(draft: { preset: AutomodPreset; word: string; limit: number }): Problem | null {
+	if (draft.preset === "keyword" && draft.word.trim() === "") return problem("automod.word");
+	if (draft.preset === "mention-spam" && !Number.isInteger(draft.limit)) return problem("automod.mentionLimit");
+
+	return null;
+}

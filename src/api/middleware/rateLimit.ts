@@ -1,0 +1,120 @@
+import { getConnInfo } from "@hono/node-server/conninfo";
+import { type Context } from "hono";
+import { createMiddleware } from "hono/factory";
+import { type ApiBindings } from "@api/context";
+import { SESSION_COOKIE, readCookie } from "@api/cookies";
+import { tooManyRequests } from "@api/errors";
+
+export interface RateLimitOptions {
+	/** How many requests one caller may make inside the window. */
+	limit: number;
+	windowMs: number;
+	/** Distinguishes buckets, so a spent sign-in allowance does not also block reading a page. */
+	name: string;
+}
+
+interface Window {
+	count: number;
+	resetAt: number;
+}
+
+/** Fixed-window counting in memory; the bot is one process, so nothing is shared. */
+export class RateLimiter {
+	private readonly windows = new Map<string, Window>();
+	private readonly limit: number;
+	private readonly windowMs: number;
+
+	/** Without a bound, a flood of one-off keys is a memory leak with a rate limiter's name on it. */
+	private readonly maxKeys: number;
+
+	constructor(options: { limit: number; windowMs: number; maxKeys?: number }) {
+		this.limit = options.limit;
+		this.windowMs = options.windowMs;
+		this.maxKeys = options.maxKeys ?? 10_000;
+	}
+
+	check(key: string, now = Date.now()): { allowed: boolean; retryAfterMs: number } {
+		const existing = this.windows.get(key);
+
+		if (existing === undefined || existing.resetAt <= now) {
+			if (this.windows.size >= this.maxKeys) this.sweep(now);
+			this.windows.set(key, { count: 1, resetAt: now + this.windowMs });
+			return { allowed: true, retryAfterMs: 0 };
+		}
+
+		existing.count += 1;
+		if (existing.count <= this.limit) return { allowed: true, retryAfterMs: 0 };
+
+		return { allowed: false, retryAfterMs: existing.resetAt - now };
+	}
+
+	sweep(now = Date.now()): void {
+		for (const [key, window] of this.windows) {
+			if (window.resetAt <= now) this.windows.delete(key);
+		}
+
+		// Everything is still live, so the bound is real traffic rather than stale keys. Drop the oldest.
+		if (this.windows.size >= this.maxKeys) {
+			const oldest = [...this.windows.entries()].sort((a, b) => a[1].resetAt - b[1].resetAt);
+			for (const [key] of oldest.slice(0, Math.ceil(this.maxKeys / 4))) this.windows.delete(key);
+		}
+	}
+
+	get size(): number {
+		return this.windows.size;
+	}
+}
+
+/**
+ * Every key a request is counted against. The address is always one, because the session cookie is attacker-controlled
+ * and can only narrow the bucket.
+ */
+export function callerKeys(context: Context, trustProxy: boolean): string[] {
+	const keys = [`i:${clientAddress(context, trustProxy)}`];
+	const session = readCookie(context, SESSION_COOKIE);
+
+	if (session !== null && session !== "") keys.push(`s:${session}`);
+
+	return keys;
+}
+
+export function clientAddress(context: Context, trustProxy: boolean): string {
+	if (trustProxy) {
+		// Only meaningful behind a proxy that overwrites it, hence DASHBOARD_TRUST_PROXY defaulting to false.
+		const forwarded = context.req.header("x-forwarded-for");
+		const first = forwarded?.split(",")[0]?.trim();
+		if (first !== undefined && first !== "") return first;
+	}
+
+	try {
+		return getConnInfo(context).remote.address ?? "unknown";
+	} catch {
+		// `app.request()` in a test has no socket behind it.
+		return "unknown";
+	}
+}
+
+/**
+ * `perAddress` is the ceiling nobody can forge past and `perCaller` the tighter per-session bucket; the longest wait
+ * wins.
+ */
+export function rateLimit(
+	limiters: { perCaller: RateLimiter; perAddress: RateLimiter },
+	options: Pick<RateLimitOptions, "name"> & { trustProxy: boolean },
+): ReturnType<typeof createMiddleware<ApiBindings>> {
+	return createMiddleware<ApiBindings>(async (context, next) => {
+		const [address, ...rest] = callerKeys(context, options.trustProxy);
+
+		const results = [
+			limiters.perAddress.check(`${options.name}:${address ?? "unknown"}`),
+			...rest.map((key) => limiters.perCaller.check(`${options.name}:${key}`)),
+		];
+
+		const refused = results.filter((result) => !result.allowed);
+		if (refused.length > 0) {
+			throw tooManyRequests(Math.max(1, Math.ceil(Math.max(...refused.map((one) => one.retryAfterMs)) / 1_000)));
+		}
+
+		await next();
+	});
+}

@@ -1,0 +1,36 @@
+import { defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { requireAccount } from "@database/repositories/economyRepository";
+import { reply } from "@lib/discord";
+import { balancePanel, claimDaily, dailyReady } from "@lib/economy";
+
+export default defineCommand({
+	name: "daily",
+	description: "Claims your daily reward.",
+	category: "economy",
+	guildOnly: true,
+
+	async run(interaction) {
+		const guild = inGuild(interaction);
+		const result = await claimDaily(guild.id, interaction.user.id);
+		if (!result.claimed) throw new UserFacingError(result.message);
+
+		// Lands on the balance panel, with the new total and the next action.
+		const account = await requireAccount(guild.id, interaction.user.id);
+		await reply(
+			interaction,
+			balancePanel(
+				{
+					wallet: account.wallet,
+					bank: account.bank,
+					username: interaction.user.username,
+					avatarUrl: interaction.user.displayAvatarURL(),
+					own: true,
+					dailyReady: dailyReady(account.lastDaily),
+					note: result.message,
+				},
+				interaction.user.id,
+			),
+		);
+	},
+});

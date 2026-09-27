@@ -1,0 +1,155 @@
+import { Ban, ShieldOff, UserX } from "lucide-react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import { FIELD, Field, Warning } from "@/components/form";
+import { Avatar, Button, Card, CARD_HEADING, EmptyState, Skeleton } from "@/components/primitives";
+import { isSnowflake } from "@/features/owner/owner.utils";
+import { useBlacklist, useBlockUser, useUnblockUser } from "@/features/owner/useBlacklist";
+import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/cn";
+
+/**
+ * The bot-wide block list; an id rather than a picker, because a blocked account is rarely in a server the bot can see.
+ */
+export function BlacklistTab(): React.JSX.Element {
+	const { t } = useTranslation();
+	const rows = useBlacklist();
+	const block = useBlockUser();
+	const unblock = useUnblockUser();
+
+	const [userId, setUserId] = useState("");
+	const [reason, setReason] = useState("");
+
+	const failure = block.error ?? unblock.error;
+	const busy = block.isPending || unblock.isPending;
+
+	function submit(): void {
+		block.mutate(
+			{ userId, reason },
+			{
+				onSuccess: () => {
+					setUserId("");
+					setReason("");
+				},
+			},
+		);
+	}
+
+	return (
+		<div className="flex flex-col gap-4">
+			<Card focal className="flex flex-col gap-4">
+				<div>
+					<h2 className={CARD_HEADING}>{t("owner.blockSomeone")}</h2>
+					<p className="text-muted-foreground text-sm">{t("owner.blacklistBody")}</p>
+				</div>
+
+				<div className="grid gap-4 sm:grid-cols-[minmax(0,20rem)_1fr]">
+					<Field htmlFor="blacklist-user" label={t("owner.userId")}>
+						<input
+							id="blacklist-user"
+							value={userId}
+							inputMode="numeric"
+							autoComplete="off"
+							placeholder="100000000000000000"
+							onChange={(event) => {
+								setUserId(event.target.value.trim());
+							}}
+							className={cn(FIELD, "font-mono")}
+						/>
+					</Field>
+
+					<Field htmlFor="blacklist-reason" label={t("owner.reasonOptional")}>
+						<input
+							id="blacklist-reason"
+							value={reason}
+							autoComplete="off"
+							maxLength={200}
+							placeholder={t("owner.reasonPlaceholder")}
+							onChange={(event) => {
+								setReason(event.target.value);
+							}}
+							className={FIELD}
+						/>
+					</Field>
+				</div>
+
+				<div className="flex items-center gap-3">
+					<Button variant="destructive" disabled={!isSnowflake(userId) || busy} onClick={submit}>
+						<Ban size={15} aria-hidden="true" />
+						{t("owner.blockThem")}
+					</Button>
+					{userId !== "" && !isSnowflake(userId) && (
+						<p className="text-muted-foreground text-sm">{t("owner.idShape")}</p>
+					)}
+				</div>
+
+				{failure !== null && (
+					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
+				)}
+			</Card>
+
+			<Card className="flex flex-col gap-4">
+				<h2 className={CARD_HEADING}>
+					{t("owner.blockedAccounts")} {rows.data && `(${String(rows.data.length)})`}
+				</h2>
+
+				{rows.isPending && <Skeleton className="h-24 w-full" />}
+
+				{/* "Nobody is blocked" and "the list would not load" are opposite answers on a security screen. */}
+				{rows.isError && (
+					<Warning>
+						{t("owner.blockListFailed")}{" "}
+						<button type="button" className="underline" onClick={() => void rows.refetch()}>
+							{t("common.tryAgain")}
+						</button>
+					</Warning>
+				)}
+
+				{rows.data?.length === 0 && (
+					<EmptyState
+						icon={<ShieldOff size={20} aria-hidden="true" />}
+						title={t("owner.nobodyBlocked")}
+						body={t("owner.nobodyBlockedBody")}
+					/>
+				)}
+
+				{rows.data !== undefined && rows.data.length > 0 && (
+					<ul className="flex flex-col gap-3">
+						{/* The reason takes its own line below `sm`, where sharing the row truncated it. */}
+						{rows.data.map((row) => (
+							<li
+								key={row.userId}
+								className="border-border flex flex-wrap items-center gap-x-3 gap-y-2 border-b pb-3 last:border-0 last:pb-0"
+							>
+								<div className="order-1 flex min-w-0 flex-1 items-center gap-3">
+									<Avatar name={row.tag ?? row.userId} url={row.avatarUrl} size={32} seed={row.userId} />
+									<div className="min-w-0">
+										{/* An account Discord no longer knows has no name, and the id is what identifies it anyway. */}
+										<p className="truncate text-sm font-medium">{row.tag ?? t("common.unknownAccount")}</p>
+										<p className="text-muted-foreground font-mono text-xs">{row.userId}</p>
+									</div>
+								</div>
+
+								<p className="text-muted-foreground order-3 w-full text-sm sm:order-2 sm:w-auto sm:flex-1 sm:truncate sm:text-right">
+									{row.reason}
+								</p>
+
+								<Button
+									className="order-2 sm:order-3"
+									variant="ghost"
+									disabled={busy}
+									onClick={() => {
+										unblock.mutate(row.userId);
+									}}
+								>
+									<UserX size={16} aria-hidden="true" />
+									<span className="sr-only">Unblock {row.tag ?? row.userId}</span>
+								</Button>
+							</li>
+						))}
+					</ul>
+				)}
+			</Card>
+		</div>
+	);
+}

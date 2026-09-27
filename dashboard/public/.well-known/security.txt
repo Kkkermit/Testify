@@ -1,0 +1,9 @@
+# How to report a security problem in Testify itself. Machine-readable per RFC 9116.
+#
+# This file describes the project, not any one deployment. If you are running an instance and want reports
+# about your server rather than about the bot's code, replace Contact with your own address.
+
+Contact: https://github.com/Kkkermit/Testify/security/advisories/new
+Policy: https://github.com/Kkkermit/Testify/blob/main/docs/security.md
+Preferred-Languages: en
+Expires: 2027-09-01T00:00:00.000Z

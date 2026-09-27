@@ -1,0 +1,56 @@
+import { PermissionsBitField } from "discord.js";
+import { botName } from "@core/brand";
+import { defineMessageHandler } from "@core/message";
+import { getAntiLink } from "@database/repositories/settingsRepository";
+import { cleanupFooter, embed, TIDY_AFTER_MS } from "@lib/discord";
+import { issueWarning } from "@lib/moderation";
+
+const LINK_PATTERN = /(https?:\/\/|www\.|discord\.gg\/|\b[a-z0-9-]+\.(com|net|org|io|gg|xyz|co)\b)/i;
+
+export default defineMessageHandler({
+	name: "antiLink",
+	order: 25,
+	async run(message, client) {
+		if (!message.guild || !message.member) return;
+		if (!LINK_PATTERN.test(message.content)) return;
+
+		const settings = await getAntiLink(message.guild.id);
+		if (!settings) return;
+
+		const bypass = Object.hasOwn(PermissionsBitField.Flags, settings.bypassPermission)
+			? PermissionsBitField.Flags[settings.bypassPermission as keyof typeof PermissionsBitField.Flags]
+			: null;
+		if (bypass !== null && message.member.permissions.has(bypass)) return;
+
+		await message.delete().catch(() => null);
+
+		// Counted like any other warning, so a server's punishment steps apply to repeated links too.
+		await issueWarning({
+			guild: message.guild,
+			user: message.author,
+			member: message.member,
+			moderator: { id: client.user?.id ?? "0", tag: botName() },
+			reason: "Posted a forbidden link",
+			notify: false,
+		});
+
+		if (!message.channel.isSendable()) return true;
+
+		const notice = await message.channel.send({
+			embeds: [
+				embed({
+					category: "moderation",
+					title: "Link removed",
+					description: `${message.author}, links are not allowed in **${message.guild.name}**.`,
+					footer: cleanupFooter(),
+				}),
+			],
+		});
+
+		client.timers.after(`tidy:${notice.id}`, TIDY_AFTER_MS, async () => {
+			await notice.delete().catch(() => null);
+		});
+
+		return true;
+	},
+});

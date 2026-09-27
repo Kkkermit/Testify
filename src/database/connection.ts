@@ -1,0 +1,158 @@
+import { getServers } from "node:dns";
+import mongoose from "mongoose";
+import { SetupError, toError } from "@core/errors";
+import { type Logger } from "@core/logger";
+
+/** The only place a Mongo connection is opened. */
+
+export interface ConnectOptions {
+	uri: string;
+	logger: Logger;
+	retries?: number;
+	retryDelayMs?: number;
+}
+
+let everConnected = false;
+
+/** Turns the driver's failure into something you can act on. */
+export function explainConnectionFailure(error: unknown, uri: string): string {
+	const { code, message } = error as { code?: string; message?: string };
+	const text = message ?? String(error);
+
+	if (code === "ECONNREFUSED" && text.includes("querySrv")) {
+		const servers = getServers();
+
+		return [
+			"Node could not look up the database's address.",
+			"",
+			"A `mongodb+srv://` string needs a DNS SRV lookup. Node does those with its",
+			"own resolver rather than the operating system's, and it could not reach the",
+			"servers it was told to use:",
+			"",
+			`  ${servers.join(", ")}`,
+			"",
+			"This is why `nslookup` can work while the bot still fails — they do not ask",
+			"the same resolver. An address starting `fe80::` above is the usual cause:",
+			"that is your router advertised over IPv6, and Node's resolver cannot use it.",
+			"",
+			"Either of these fixes it:",
+			"  1. Set real DNS servers — 1.1.1.1 and 8.8.8.8.",
+			"     macOS: System Settings → Network → your connection → Details → DNS.",
+			"     Then check `cat /etc/resolv.conf` shows them.",
+			"  2. Use a connection string with no SRV lookup in it. In Atlas:",
+			"     Connect → Drivers → Node.js 2.2.12 or earlier. It starts `mongodb://`",
+			"     and names the hosts directly.",
+			"",
+			`  Confirm the diagnosis with:  nslookup -type=SRV ${srvHostOf(uri)}`,
+			"  If that works but this does not, it is definitely the resolver above.",
+		].join("\n");
+	}
+
+	if (code === "ENOTFOUND" || code === "ENODATA") {
+		return [
+			"That database hostname does not exist.",
+			"",
+			"Check MONGODB_URI for a typo, and that the cluster has not been deleted.",
+			"A paused Atlas cluster looks like this too — resume it in Atlas.",
+		].join("\n");
+	}
+
+	if (text.includes("Authentication failed") || text.includes("bad auth")) {
+		return [
+			"The database rejected your username or password.",
+			"",
+			"Check them in Atlas under Database Access. If the password contains any of",
+			"@ : / ? # [ ] then it has to be percent-encoded in the connection string.",
+		].join("\n");
+	}
+
+	if (text.includes("timed out") || text.includes("ServerSelection")) {
+		return [
+			"The database did not answer in time.",
+			"",
+			"The usual cause is that your IP address is not allowed. In Atlas go to",
+			"Network Access and add your current IP, or 0.0.0.0/0 while you are testing.",
+		].join("\n");
+	}
+
+	return `Could not connect to MongoDB: ${text}`;
+}
+
+/** The host alone, since a connection string can carry a password and this is printed. */
+function hostOf(uri: string): string {
+	return /^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^/?,]+)/.exec(uri)?.[1] ?? "the configured address";
+}
+
+function srvHostOf(uri: string): string {
+	const host = /^mongodb\+srv:\/\/(?:[^@]*@)?([^/?]+)/.exec(uri)?.[1];
+	return host === undefined ? "your-cluster-host" : `_mongodb._tcp.${host}`;
+}
+
+export async function connectDatabase(options: ConnectOptions): Promise<typeof mongoose> {
+	const retries = options.retries ?? 5;
+	const retryDelayMs = options.retryDelayMs ?? 2_000;
+
+	mongoose.set("strictQuery", true);
+
+	mongoose.connection.on("disconnected", () => {
+		// Only worth saying after a connection has been lost.
+		if (everConnected) options.logger.warn("Lost connection to MongoDB");
+	});
+	mongoose.connection.on("reconnected", () => {
+		options.logger.info("Reconnected to MongoDB");
+	});
+	mongoose.connection.on("error", (error: unknown) => {
+		// The retry loop below reports a failure to connect, so this would only say the same thing twice.
+		if (everConnected) options.logger.error({ err: toError(error) }, "MongoDB connection error");
+	});
+
+	for (let attempt = 1; attempt <= retries; attempt += 1) {
+		try {
+			await mongoose.connect(options.uri, { serverSelectionTimeoutMS: 10_000 });
+			everConnected = true;
+			options.logger.debug({ database: mongoose.connection.name }, "Connected to MongoDB");
+			return mongoose;
+		} catch (error) {
+			if (attempt === retries) throw new SetupError(explainConnectionFailure(error, options.uri));
+
+			const delay = retryDelayMs * attempt;
+			options.logger.warn(
+				`[DATABASE] Cannot reach MongoDB at ${hostOf(options.uri)} yet (try ${String(attempt)} of ${String(retries)}). ` +
+					`Trying again in ${String(delay / 1000)}s — is it running?`,
+			);
+			await new Promise((done) => setTimeout(done, delay));
+		}
+	}
+
+	throw new Error("unreachable");
+}
+
+export function databaseConnected(): boolean {
+	return mongoose.connection.readyState === mongoose.ConnectionStates.connected;
+}
+
+/** Round-trip time of one `ping`, or null when there is no connection or it did not answer in time. */
+export async function pingDatabase(timeoutMs = 2_000): Promise<number | null> {
+	const db = mongoose.connection.db;
+	if (!databaseConnected() || db === undefined) return null;
+
+	const started = performance.now();
+	let timer: NodeJS.Timeout | undefined;
+	const expired = new Promise<"timeout">((resolve) => {
+		timer = setTimeout(() => resolve("timeout"), timeoutMs);
+	});
+
+	try {
+		const answer = await Promise.race([db.command({ ping: 1 }), expired]);
+		return answer === "timeout" ? null : Math.round(performance.now() - started);
+	} catch {
+		return null;
+	} finally {
+		clearTimeout(timer);
+	}
+}
+
+export async function disconnectDatabase(): Promise<void> {
+	if (mongoose.connection.readyState === mongoose.ConnectionStates.disconnected) return;
+	await mongoose.disconnect();
+}

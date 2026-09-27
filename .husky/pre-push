@@ -1,0 +1,3 @@
+# Coverage thresholds gate the push, not just CI.
+npm run lint
+npm run test:coverage

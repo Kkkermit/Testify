@@ -1,0 +1,144 @@
+import { Client, Collection, GatewayIntentBits, Partials } from "discord.js";
+import { type Env } from "@config/env";
+import { nameBot } from "@core/brand";
+import { type Button } from "@core/button";
+import { type Command } from "@core/command";
+import { type Logger } from "@core/logger";
+import { type MessageHandler } from "@core/message";
+import { ErrorThrottle, reportSurvivable } from "@core/resilience";
+
+const intents = [
+	GatewayIntentBits.Guilds,
+	GatewayIntentBits.GuildMembers,
+	GatewayIntentBits.GuildModeration,
+	GatewayIntentBits.GuildExpressions,
+	GatewayIntentBits.GuildVoiceStates,
+	GatewayIntentBits.GuildMessages,
+	GatewayIntentBits.GuildMessageReactions,
+	GatewayIntentBits.DirectMessages,
+	GatewayIntentBits.MessageContent,
+	GatewayIntentBits.AutoModerationConfiguration,
+];
+
+const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
+
+/** The bot. */
+export class TestifyClient extends Client {
+	/** Every loaded command, by name. */
+	readonly commands = new Collection<string, Command>();
+	/** Alternative prefix-command names, pointing at the command they belong to. */
+	readonly aliases = new Collection<string, string>();
+	/** Button, select-menu and modal handlers, by custom-ID prefix. */
+	readonly buttons = new Collection<string, Button>();
+	/** Things that run on every message, in order. */
+	readonly messageHandlers: MessageHandler[] = [];
+
+	/** What the loader found, filled in by `loadEverything()` and shown on the banner. */
+	loaded: { commands: number; buttons: number; events: number; messageHandlers: number } = {
+		commands: 0,
+		buttons: 0,
+		events: 0,
+		messageHandlers: 0,
+	};
+
+	readonly env: Env;
+	readonly logger: Logger;
+	readonly timers: TimerRegistry;
+	readonly startedAt = Date.now();
+	/** The username read over REST while the gateway is still connecting, so the bot is named from the start. */
+	restName: string | undefined;
+
+	/** The dashboard listener once `startApi()` opens one; typed structurally because `src/api` imports this file. */
+	api: { close(): Promise<void> } | null = null;
+
+	/**
+	 * True while the owner has paused the bot: commands are refused, message handlers skipped and the bot shown
+	 * invisible. A flag rather than `destroy()`, which nulls the token.
+	 */
+	paused = false;
+
+	pausedAt: number | null = null;
+
+	constructor(env: Env, logger: Logger) {
+		super({ intents, partials });
+		this.env = env;
+		this.logger = logger;
+		this.timers = new TimerRegistry(logger);
+		nameBot(() => this.user?.username ?? this.restName);
+	}
+
+	isOwner(userId: string): boolean {
+		return this.env.DISCORD_OWNER_IDS.includes(userId);
+	}
+}
+
+/** Every repeating or delayed task is registered here so shutdown can stop it. */
+export class TimerRegistry {
+	private readonly handles = new Map<string, NodeJS.Timeout>();
+	private readonly running = new Set<string>();
+	private readonly throttle = new ErrorThrottle();
+	private readonly logger: Logger | undefined;
+
+	constructor(logger?: Logger) {
+		this.logger = logger;
+	}
+
+	/** Repeats forever. */
+	every(name: string, ms: number, task: () => Promise<void> | void): void {
+		this.stop(name);
+
+		this.handles.set(
+			name,
+			setInterval(() => {
+				if (this.running.has(name)) return;
+				this.running.add(name);
+				void this.run(name, task).finally(() => this.running.delete(name));
+			}, ms),
+		);
+	}
+
+	/** Runs once, then forgets itself. */
+	after(name: string, ms: number, task: () => Promise<void> | void): void {
+		this.stop(name);
+
+		this.handles.set(
+			name,
+			setTimeout(() => {
+				this.handles.delete(name);
+				void this.run(name, task);
+			}, ms),
+		);
+	}
+
+	stop(name: string): void {
+		const handle = this.handles.get(name);
+		if (handle === undefined) return;
+
+		clearTimeout(handle);
+		clearInterval(handle);
+		this.handles.delete(name);
+	}
+
+	stopAll(): void {
+		for (const name of [...this.handles.keys()]) this.stop(name);
+	}
+
+	get size(): number {
+		return this.handles.size;
+	}
+
+	names(): string[] {
+		return [...this.handles.keys()];
+	}
+
+	/** A task that throws must never take the process down with it, and must never fail in silence either. */
+	private async run(name: string, task: () => Promise<void> | void): Promise<void> {
+		try {
+			await task();
+		} catch (error) {
+			if (this.logger !== undefined) {
+				reportSurvivable(this.logger, this.throttle, `JOB_${name.toUpperCase()}`, error);
+			}
+		}
+	}
+}

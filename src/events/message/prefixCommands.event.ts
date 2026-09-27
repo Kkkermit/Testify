@@ -1,0 +1,57 @@
+import { DEFAULT_PREFIX } from "@config/constants";
+import { runChecks } from "@core/checks";
+import { runCommand } from "@core/errors";
+import { defineMessageHandler } from "@core/message";
+import { parseMessage, PrefixInteraction } from "@core/prefix";
+import { getPrefixConfig } from "@database/repositories/settingsRepository";
+import { countCommandUse, recordCommandTime } from "@lib/bot";
+import { refusalEmbed } from "@lib/discord";
+
+/** Runs `t?ban @someone` through the same code and checks as `/ban`. */
+export default defineMessageHandler({
+	name: "prefixCommands",
+	order: 10,
+	async run(message, client) {
+		const botId = client.user?.id;
+		if (botId === undefined) return;
+
+		// A direct message has no server to have configured anything.
+		const config =
+			message.guild === null ? { prefix: DEFAULT_PREFIX, isEnabled: true } : await getPrefixConfig(message.guild.id);
+
+		if (!config.isEnabled) return;
+
+		const prefix = config.prefix;
+		const parsed = parseMessage(message.content, prefix, botId);
+		if (parsed === null) return;
+
+		// An alias can point at a subcommand, whose name goes back on the front of the arguments.
+		const [name = parsed.name, subcommand] = (client.aliases.get(parsed.name) ?? parsed.name).split(" ");
+		const args = subcommand === undefined ? parsed.args : [subcommand, ...parsed.args];
+
+		const command = client.commands.get(name);
+		if (!command) return;
+
+		client.logger.debug({ command: command.name, user: message.author.id }, "Running a prefix command");
+
+		const interaction = new PrefixInteraction(message, command, args);
+		await interaction.options.prepare();
+
+		const refusal = await runChecks(interaction, command, client);
+		if (refusal !== null) {
+			await message.reply({ embeds: [refusalEmbed(refusal)] });
+			return true;
+		}
+
+		const started = Date.now();
+		const ok = await runCommand(interaction, command, client);
+		recordCommandTime(Date.now() - started, ok);
+		countCommandUse(client, {
+			command: command.name,
+			guildId: message.guildId,
+			surface: "prefix",
+			failed: !ok,
+		});
+		return true;
+	},
+});

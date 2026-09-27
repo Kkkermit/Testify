@@ -1,0 +1,39 @@
+{
+	"passwords": ["{name}845!!", "password", "Password123", "{name}IsTheBest", "letmein", "hunter2", "correct horse battery staple"],
+	"ipAddresses": ["127.0.0.1", "192.168.0.1", "0.0.0.0", "10.0.0.42", "::1", "999.999.999.999"],
+	"wifi": [
+		{ "name": "FBI Surveillance Van 3", "password": "notthefbi" },
+		{ "name": "Pretty Fly for a WiFi", "password": "flyingsohigh" },
+		{ "name": "Bill Wi the Science Fi", "password": "inertia" },
+		{ "name": "Abraham Linksys", "password": "fourscore" },
+		{ "name": "The LAN Before Time", "password": "dinosaurs" },
+		{ "name": "Hide Yo Kids, Hide Yo WiFi", "password": "hideyowifi" },
+		{ "name": "Loading…", "password": "stillloading" }
+	],
+	"addresses": [
+		"221B Baker Street, London",
+		"742 Evergreen Terrace, Springfield",
+		"4 Privet Drive, Little Whinging",
+		"124 Conch Street, Bikini Bottom",
+		"P. Sherman, 42 Wallaby Way, Sydney",
+		"12 Grimmauld Place, London",
+		"A cardboard box behind the chip shop"
+	],
+	"birthdays": ["30 February 2005", "31 April 2001", "0 January 2000", "32 December 1999", "Tomorrow", "Yes"],
+	"cards": [
+		{ "number": "0000 0000 0000 0000", "expiry": "13/99", "cvv": "abc" },
+		{ "number": "1234 5678 9012 3456", "expiry": "00/00", "cvv": "000" },
+		{ "number": "A library card", "expiry": "Overdue", "cvv": "n/a" },
+		{ "number": "Monopoly money", "expiry": "Game over", "cvv": "🎲" },
+		{ "number": "An expired Tesco Clubcard", "expiry": "2009", "cvv": "12p" }
+	],
+	"searches": [
+		"how to hack a discord account",
+		"can you download more ram",
+		"why is my wifi called fbi van",
+		"how to delete search history",
+		"am i being hacked right now",
+		"how to become a discord mod",
+		"can dogs eat pizza"
+	]
+}

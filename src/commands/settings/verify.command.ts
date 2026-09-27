@@ -1,0 +1,67 @@
+import { PermissionFlagsBits } from "discord.js";
+import { type CommandInput, defineCommand, inGuild } from "@core/command";
+import { UserFacingError } from "@core/errors";
+import { deleteVerifyConfig, getVerifyConfig } from "@database/repositories/verificationRepository";
+import { reply, successEmbed } from "@lib/discord";
+import { normaliseVerify, verifyPanel } from "@lib/settings";
+
+/** One panel instead of three subcommands. */
+async function openPanel(interaction: CommandInput): Promise<void> {
+	const guild = inGuild(interaction);
+	const config = normaliseVerify(await getVerifyConfig(guild.id));
+
+	const role = config.roleId === null ? undefined : guild.roles.cache.get(config.roleId);
+	const me = guild.members.me;
+
+	await reply(
+		interaction,
+		verifyPanel(
+			{
+				config,
+				roleTooHigh: role !== undefined && me !== null && (role.managed || role.position >= me.roles.highest.position),
+			},
+			interaction.user.id,
+		),
+	);
+}
+
+export default defineCommand({
+	name: "verify",
+	description: "Configures the verification system.",
+	category: "settings",
+	aliases: ["verification"],
+	guildOnly: true,
+	permissions: [PermissionFlagsBits.ManageGuild],
+	botPermissions: [PermissionFlagsBits.ManageRoles, PermissionFlagsBits.SendMessages],
+	subcommands: [
+		{
+			name: "setup",
+			description: "Open the verification panel.",
+			async run(interaction) {
+				await openPanel(interaction);
+			},
+		},
+		{
+			name: "edit",
+			description: "Change the verification configuration.",
+			async run(interaction) {
+				await openPanel(interaction);
+			},
+		},
+		{
+			name: "disable",
+			description: "Turn verification off.",
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				const removed = await deleteVerifyConfig(guild.id);
+				if (!removed) throw new UserFacingError("Verification is not set up here.");
+
+				await reply(interaction, { embeds: [successEmbed("Verification has been turned off.")] });
+			},
+		},
+	],
+
+	async run(interaction) {
+		await openPanel(interaction);
+	},
+});

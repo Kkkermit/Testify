@@ -1,0 +1,96 @@
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { config as loadDotenv } from "dotenv";
+import { box, painter, stepLine } from "@core/terminal";
+
+/** Holds the dashboard back until the bot's API answers, so Vite's proxy does not fail while the bot connects. */
+
+const POLL_MS = 500;
+
+const paint = painter();
+
+function say(line: string): void {
+	process.stdout.write(`${line}\n`);
+}
+
+/** Generous, because a first run compiles the whole bot before it even reaches `client.login()`. */
+export function timeoutMs(argv: string[], fallback = 180_000): number {
+	const index = argv.indexOf("--timeout");
+	const given = index === -1 ? Number.NaN : Number(argv[index + 1]);
+
+	return Number.isFinite(given) && given > 0 ? given : fallback;
+}
+
+export interface DashboardEnv {
+	enabled: boolean;
+	port: number;
+}
+
+/** A blank or nonsense port is the env.ts default rather than a crash — this script must not be the thing that fails. */
+export function readDashboardEnv(source: Record<string, string | undefined>): DashboardEnv {
+	const port = Number(source.DASHBOARD_PORT);
+
+	return {
+		enabled: source.DASHBOARD_ENABLED === "true",
+		port: Number.isInteger(port) && port > 0 && port <= 65_535 ? port : 3_000,
+	};
+}
+
+/** The same file the bot reads. `loadEnv()` would fail over a token this script has no opinion about. */
+function fromEnvFile(): DashboardEnv {
+	const file = resolve(process.cwd(), process.env.NODE_ENV === "development" ? ".env.development" : ".env");
+	if (existsSync(file)) loadDotenv({ path: file, quiet: true });
+
+	return readDashboardEnv(process.env);
+}
+
+async function answering(url: string): Promise<boolean> {
+	try {
+		return (await fetch(url, { signal: AbortSignal.timeout(2_000) })).ok;
+	} catch {
+		// Refused, reset or timed out: the bot is still starting, which is the case this script exists for.
+		return false;
+	}
+}
+
+export async function main(): Promise<void> {
+	const { enabled, port } = fromEnvFile();
+
+	if (!enabled) {
+		const lines = [
+			"DASHBOARD_ENABLED is not true, so the bot starts no API for the dashboard.",
+			"Set DASHBOARD_ENABLED=true in .env.development, or run `npm run dev` for the bot alone.",
+		];
+		process.stderr.write(`\n${box("The dashboard is switched off", lines, "warning", paint).join("\n")}\n\n`);
+		process.exitCode = 1;
+		return;
+	}
+
+	const limit = timeoutMs(process.argv.slice(2));
+	const url = `http://127.0.0.1:${String(port)}/api/health`;
+	const deadline = Date.now() + limit;
+	let announced = false;
+
+	while (Date.now() < deadline) {
+		if (await answering(url)) {
+			say(stepLine("done", "API", `answering on port ${String(port)} — starting the dashboard`, undefined, paint));
+			return;
+		}
+
+		if (!announced) {
+			say(stepLine("working", "API", `waiting for the bot on port ${String(port)}…`, undefined, paint));
+			announced = true;
+		}
+
+		await new Promise((sleep) => setTimeout(sleep, POLL_MS));
+	}
+
+	const lines = [
+		`Nothing answered on port ${String(port)} within ${String(Math.round(limit / 1000))}s.`,
+		"The [bot] lines above usually say what stopped it.",
+	];
+	process.stderr.write(`\n${box("The bot's API never came up", lines, "error", paint).join("\n")}\n\n`);
+	process.exitCode = 1;
+}
+
+if (require.main === module) void main();

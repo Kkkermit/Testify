@@ -1,0 +1,111 @@
+import { LOG_LEVELS, LOG_LEVEL_RANK, type LogFeed, type ReportedLogLevel } from "@testify/shared";
+import { type TFunction } from "i18next";
+import { Pause, Play } from "lucide-react";
+import { Trans, useTranslation } from "react-i18next";
+import { ErrorState } from "@/app/ErrorState";
+import { SearchField, Warning } from "@/components/form";
+import { Button, Card, type Segment, SegmentedControl, Skeleton } from "@/components/primitives";
+import { LogLines } from "@/features/owner/components/LogLines";
+import { useLogs } from "@/features/owner/useOwner";
+import { useDebounced } from "@/hooks/useDebounced";
+import { type TranslationKey } from "@/i18n";
+
+/**
+ * Keys rather than text, and written out because engines disagree on whether `text-transform` changes an accessible
+ * name.
+ */
+const LEVELS: Record<ReportedLogLevel, { label: TranslationKey; hint: TranslationKey }> = {
+	trace: { label: "owner.levelAll", hint: "owner.levelTrace" },
+	debug: { label: "owner.levelDebugName", hint: "owner.levelDebug" },
+	info: { label: "owner.levelInfoName", hint: "owner.levelInfo" },
+	warn: { label: "owner.levelWarnName", hint: "owner.levelWarn" },
+	error: { label: "owner.levelErrorName", hint: "owner.levelError" },
+	fatal: { label: "owner.levelFatalName", hint: "owner.levelFatal" },
+};
+
+/** Held in memory rather than in the database, so a restart clears it. */
+export function LogsTab({
+	level,
+	search,
+	paused,
+	onLevel,
+	onSearch,
+	onPause,
+}: {
+	level: ReportedLogLevel;
+	search: string;
+	paused: boolean;
+	onLevel: (level: ReportedLogLevel) => void;
+	onSearch: (search: string) => void;
+	onPause: (paused: boolean) => void;
+}): React.JSX.Element {
+	const { t } = useTranslation();
+	const levelSegments: Segment<ReportedLogLevel>[] = LOG_LEVELS.map((level) => ({
+		value: level,
+		label: t(LEVELS[level].label),
+		hint: t(LEVELS[level].hint),
+	}));
+	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
+	const logs = useLogs(level, useDebounced(search), paused);
+
+	return (
+		<div className="flex flex-col gap-4">
+			<Card padding="compact" className="flex flex-wrap items-center gap-3">
+				<SearchField
+					className="min-w-52 flex-1"
+					label={t("owner.searchLog")}
+					placeholder={t("owner.searchLogPlaceholder")}
+					value={search}
+					onChange={onSearch}
+				/>
+
+				<SegmentedControl label={t("owner.minimumLevel")} segments={levelSegments} value={level} onChange={onLevel} />
+
+				<Button
+					variant="ghost"
+					onClick={() => {
+						onPause(!paused);
+					}}
+				>
+					{paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
+					{paused ? "Resume" : "Pause"}
+				</Button>
+			</Card>
+
+			<p className="text-muted-foreground text-sm" aria-live="polite">
+				{summarise(logs.data, paused, t)}
+			</p>
+
+			{logs.data !== undefined && LOG_LEVEL_RANK[logs.data.loggerLevel] > LOG_LEVEL_RANK[level] && (
+				<Warning>
+					<Trans
+						i18nKey="owner.levelFloor"
+						values={{ level: `LOG_LEVEL=${logs.data.loggerLevel}` }}
+						components={{ level: <span className="font-mono" /> }}
+					/>
+				</Warning>
+			)}
+
+			{/* An unreadable feed must not render as an empty one — this is the screen you open when things are wrong. */}
+			{logs.isError ? (
+				<ErrorState as="h2" error={logs.error} onRetry={() => void logs.refetch()} />
+			) : (
+				<Card padding="compact" aria-busy={logs.isPending}>
+					{logs.isPending ? <Skeleton className="h-64 w-full" /> : <LogLines lines={logs.data.lines} />}
+				</Card>
+			)}
+
+			<p className="text-muted-foreground text-xs">{t("owner.redactedNote")}</p>
+		</div>
+	);
+}
+
+/** Says what is on screen and what is behind it, so nobody reads a truncated list as the whole buffer. */
+function summarise(feed: LogFeed | undefined, paused: boolean, t: TFunction): string {
+	if (feed === undefined) return t("owner.readingBuffer");
+
+	const shown = t("owner.showing", { shown: feed.lines.length, matched: feed.matched });
+	const held = t("owner.held", { buffered: feed.buffered, capacity: feed.capacity });
+
+	return `${shown}, ${held}. ${paused ? t("owner.pausedFull") : t("owner.refreshing")}`;
+}

@@ -1,0 +1,26 @@
+# Anything the image builds for itself, plus anything that must never reach a layer.
+node_modules
+**/node_modules
+dist
+**/dist
+coverage
+**/coverage
+
+# The image is configured through the environment and reads no .env at all, so none of these — including the
+# templates — has any reason to reach a layer.
+.env
+.env.*
+
+.git
+.github
+.husky
+.vscode
+.claude
+docs
+tests
+**/*.test.ts
+**/*.test.tsx
+Dockerfile
+.dockerignore
+docker-compose.yml
+*.log

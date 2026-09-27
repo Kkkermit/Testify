@@ -1,0 +1,79 @@
+import { type ContentfulStatusCode } from "hono/utils/http-status";
+import { botName } from "@core/brand";
+import { type ApiErrorBody } from "@testify/shared";
+
+export interface ApiIssue {
+	path: string;
+	message: string;
+}
+
+/**
+ * A refusal with a status. `code` is what the SPA branches on and stays stable; `message` is shown to a person and
+ * never carries a stack or a path.
+ */
+export class ApiProblem extends Error {
+	readonly status: ContentfulStatusCode;
+	readonly code: string;
+	readonly issues: ApiIssue[];
+	/** Set on the response by the error boundary, which builds a fresh one and would otherwise drop them. */
+	readonly headers: Record<string, string>;
+
+	constructor(
+		status: ContentfulStatusCode,
+		code: string,
+		message: string,
+		issues: ApiIssue[] = [],
+		headers: Record<string, string> = {},
+	) {
+		super(message);
+		this.name = "ApiProblem";
+		this.status = status;
+		this.code = code;
+		this.issues = issues;
+		this.headers = headers;
+	}
+}
+
+/** Discord refusing or failing to answer: an outside service having a bad moment, not a bug in the bot. */
+export class UpstreamProblem extends ApiProblem {
+	/** What Discord answered, so a log line can tell a rate limit from an outage. */
+	readonly upstreamStatus: number;
+
+	constructor(upstreamStatus: number, message: string) {
+		super(502, "discord_unreachable", message);
+		this.name = "UpstreamProblem";
+		this.upstreamStatus = upstreamStatus;
+	}
+}
+
+export function problemBody(problem: ApiProblem): ApiErrorBody {
+	return {
+		error: {
+			code: problem.code,
+			message: problem.message,
+			...(problem.issues.length > 0 ? { issues: problem.issues } : {}),
+		},
+	};
+}
+
+export const badRequest = (message: string, issues: ApiIssue[] = []): ApiProblem =>
+	new ApiProblem(400, "invalid", message, issues);
+
+export const unauthorised = (): ApiProblem =>
+	new ApiProblem(401, "unauthenticated", "You are not signed in, or your session has expired.");
+
+export const forbidden = (code: string, message: string): ApiProblem => new ApiProblem(403, code, message);
+
+export const notFound = (code = "not_found", message = "No such endpoint."): ApiProblem =>
+	new ApiProblem(404, code, message);
+
+export const notInGuild = (): ApiProblem => notFound("guild_not_found", `${botName()} is not in that server.`);
+
+export const tooManyRequests = (retryAfterSeconds: number): ApiProblem =>
+	new ApiProblem(
+		429,
+		"rate_limited",
+		`Too many requests. Try again in ${String(retryAfterSeconds)} second${retryAfterSeconds === 1 ? "" : "s"}.`,
+		[],
+		{ "Retry-After": String(retryAfterSeconds) },
+	);

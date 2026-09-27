@@ -1,0 +1,235 @@
+import { Collection, PermissionFlagsBits } from "discord.js";
+import { Hono } from "hono";
+import { type ApiBindings } from "@api/context";
+import { ApiProblem, problemBody } from "@api/errors";
+import { requireGuild, requireOwner } from "@api/middleware/session";
+import { type Env } from "@config/env";
+import { TestifyClient } from "@core/client";
+
+const OWNER = "100000000000000001";
+const MANAGER = "100000000000000002";
+const MEMBER = "100000000000000003";
+const GUILD = "900000000000000001";
+
+interface Fake {
+	membersInGuild: Set<string>;
+	managers: Set<string>;
+	botInGuild: boolean;
+	fetched: string[];
+}
+
+function clientFor(fake: Fake): TestifyClient {
+	const guild = {
+		id: GUILD,
+		name: "Test Server",
+		members: {
+			fetch: (userId: string) => {
+				fake.fetched.push(userId);
+				if (!fake.membersInGuild.has(userId)) return Promise.reject(new Error("Unknown Member"));
+
+				return Promise.resolve({
+					id: userId,
+					permissions: { has: (flag: bigint) => flag === PermissionFlagsBits.ManageGuild && fake.managers.has(userId) },
+				});
+			},
+		},
+	};
+
+	const cache = new Collection<string, unknown>();
+	if (fake.botInGuild) cache.set(GUILD, guild);
+
+	return { guilds: { cache }, isOwner: (id: string) => id === OWNER } as unknown as TestifyClient;
+}
+
+/** Mirrors how `createApi` maps a thrown problem, so these exercise the real refusal path. */
+function appFor(fake: Fake, userId: string | null) {
+	const app = new Hono<ApiBindings>();
+
+	app.use("*", async (context, next) => {
+		context.set("client", clientFor(fake));
+		context.set("env", {} as Env);
+		context.set("oauth", null);
+		if (userId !== null) {
+			context.set("session", { _id: "s", userId } as never);
+		}
+		await next();
+	});
+
+	app.get("/guilds/:guildId/thing", requireGuild, (context) => context.json({ guild: context.get("guild")?.id }));
+	app.get("/owner/thing", requireOwner, (context) => context.json({ ok: true }));
+
+	app.onError((error) => {
+		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
+		return Response.json(problemBody(problem), { status: problem.status });
+	});
+
+	return app;
+}
+
+function fake(overrides: Partial<Fake> = {}): Fake {
+	return {
+		membersInGuild: new Set([MANAGER, MEMBER]),
+		managers: new Set([MANAGER]),
+		botInGuild: true,
+		fetched: [],
+		...overrides,
+	};
+}
+
+async function codeOf(response: Response): Promise<string> {
+	return ((await response.json()) as { error: { code: string } }).error.code;
+}
+
+describe("requireGuild", () => {
+	it("lets a manager through", async () => {
+		const response = await appFor(fake(), MANAGER).request(`/guilds/${GUILD}/thing`);
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ guild: GUILD });
+	});
+
+	it("refuses a member without Manage Server", async () => {
+		const response = await appFor(fake(), MEMBER).request(`/guilds/${GUILD}/thing`);
+
+		expect(response.status).toBe(403);
+		expect(await codeOf(response)).toBe("missing_manage_guild");
+	});
+
+	it("refuses someone who is not in the guild at all", async () => {
+		const response = await appFor(fake({ membersInGuild: new Set() }), MEMBER).request(`/guilds/${GUILD}/thing`);
+
+		expect(response.status).toBe(403);
+		expect(await codeOf(response)).toBe("not_a_member");
+	});
+
+	/** Not being in the guild is not a secret, and "here is an invite" is the right answer to it. */
+	it("says 404 when the bot is not in the guild, before checking anything about the user", async () => {
+		const response = await appFor(fake({ botInGuild: false }), MANAGER).request(`/guilds/${GUILD}/thing`);
+
+		expect(response.status).toBe(404);
+		expect(await codeOf(response)).toBe("guild_not_found");
+	});
+
+	/** 403 for a guild the user cannot manage must not leak its name or icon — a code and nothing else. */
+	it("leaks nothing about a guild it refuses", async () => {
+		const body = await (await appFor(fake(), MEMBER).request(`/guilds/${GUILD}/thing`)).text();
+
+		expect(body).not.toContain("Test Server");
+	});
+
+	it("refuses anyone who is not signed in", async () => {
+		const response = await appFor(fake(), null).request(`/guilds/${GUILD}/thing`);
+
+		expect(response.status).toBe(401);
+	});
+
+	/** The member is fetched live, because the OAuth guild list is a login-time snapshot. */
+	it("fetches the member live rather than trusting the session", async () => {
+		const state = fake();
+		await appFor(state, MANAGER).request(`/guilds/${GUILD}/thing`);
+		await appFor(state, MANAGER).request(`/guilds/${GUILD}/thing`);
+
+		expect(state.fetched).toEqual([MANAGER, MANAGER]);
+	});
+
+	it("refuses on the next request after a demotion", async () => {
+		const state = fake();
+		expect((await appFor(state, MANAGER).request(`/guilds/${GUILD}/thing`)).status).toBe(200);
+
+		state.managers.delete(MANAGER);
+		expect((await appFor(state, MANAGER).request(`/guilds/${GUILD}/thing`)).status).toBe(403);
+	});
+
+	/** Requiring the bot owner to join a server before they can support someone would be absurd. */
+	it("lets a bot owner through without being in the guild", async () => {
+		const state = fake({ membersInGuild: new Set(), managers: new Set() });
+		const response = await appFor(state, OWNER).request(`/guilds/${GUILD}/thing`);
+
+		expect(response.status).toBe(200);
+		expect(state.fetched).toEqual([]);
+	});
+
+	/** The shape check produces its own code, which a cache miss's 404 cannot. */
+	it("rejects a guild id that is not a snowflake before it is used to look anything up", async () => {
+		for (const id of ["nope", "1", "abc123", "12345678901234567890123", "9007199254740993x"]) {
+			const response = await appFor(fake(), MANAGER).request(`/guilds/${id}/thing`);
+
+			expect(response.status).toBe(404);
+			expect(await codeOf(response)).toBe("bad_guild_id");
+		}
+	});
+});
+
+describe("requireOwner", () => {
+	it("lets the bot owner in", async () => {
+		expect((await appFor(fake(), OWNER).request("/owner/thing")).status).toBe(200);
+	});
+
+	/** 404 rather than 403, so a manager does not learn the console exists. */
+	it("does not confirm to a manager that the console exists", async () => {
+		const response = await appFor(fake(), MANAGER).request("/owner/thing");
+
+		expect(response.status).toBe(404);
+		expect(await codeOf(response)).toBe("not_found");
+	});
+
+	it("refuses anyone who is not signed in", async () => {
+		expect((await appFor(fake(), null).request("/owner/thing")).status).toBe(401);
+	});
+});
+
+/** The real `isOwner`: only an id in `DISCORD_OWNER_IDS`, read on every request, grants the console. */
+describe("who counts as the bot owner", () => {
+	function ownerApp(ownerIds: string[], userId: string) {
+		const env = { DISCORD_OWNER_IDS: ownerIds } as Env;
+		// The real method, bound to the real env shape — a stub here would test nothing.
+		const client = { env, isOwner: TestifyClient.prototype.isOwner } as unknown as TestifyClient;
+
+		const app = new Hono<ApiBindings>();
+		app.use("*", async (context, next) => {
+			context.set("client", client);
+			context.set("env", env);
+			context.set("oauth", null);
+			context.set("session", { _id: "s", userId } as never);
+			await next();
+		});
+		app.get("/owner/thing", requireOwner, (context) => context.json({ ok: true }));
+		app.onError((error) => {
+			const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
+			return Response.json(problemBody(problem), { status: problem.status });
+		});
+
+		return { app, env };
+	}
+
+	it("admits an ID listed in DISCORD_OWNER_IDS", async () => {
+		const { app } = ownerApp([OWNER], OWNER);
+
+		expect((await app.request("/owner/thing")).status).toBe(200);
+	});
+
+	it("admits any of several listed IDs, and nobody else", async () => {
+		expect((await ownerApp([OWNER, MANAGER], MANAGER).app.request("/owner/thing")).status).toBe(200);
+		expect((await ownerApp([OWNER, MANAGER], MEMBER).app.request("/owner/thing")).status).toBe(404);
+	});
+
+	/** Managing every server in the fleet still is not ownership — the two are unrelated permissions. */
+	it("refuses an ID that is not listed, however privileged they are in Discord", async () => {
+		expect((await ownerApp([OWNER], MANAGER).app.request("/owner/thing")).status).toBe(404);
+	});
+
+	/** Removing an id from the env revokes the console on that person's next request. */
+	it("revokes access on the next request when the ID is taken out of the env", async () => {
+		const { app, env } = ownerApp([OWNER, MANAGER], MANAGER);
+		expect((await app.request("/owner/thing")).status).toBe(200);
+
+		env.DISCORD_OWNER_IDS = [OWNER];
+
+		expect((await app.request("/owner/thing")).status).toBe(404);
+	});
+
+	/** A near-miss ID must not match — `includes` on a joined string would let a substring through. */
+	it("matches the whole ID rather than part of one", async () => {
+		expect((await ownerApp([`${OWNER}9`], OWNER).app.request("/owner/thing")).status).toBe(404);
+	});
+});

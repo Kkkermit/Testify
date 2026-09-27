@@ -1,0 +1,178 @@
+import { useQueryClient } from "@tanstack/react-query";
+import { type BotIdentity, type DashboardUser } from "@testify/shared";
+import { FileText, LogOut, Palette, ShieldQuestion } from "lucide-react";
+import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
+import { SidebarLink } from "@/app/layout/SidebarLink";
+import { SidebarSection } from "@/app/layout/SidebarSection";
+import { ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
+import { BotMark } from "@/components/brand/BotMark";
+import { FlagIcon } from "@/components/brand/FlagIcon";
+import { Avatar, Tooltip } from "@/components/primitives";
+import { navigationFor, type NavAudience } from "@/config/navigation";
+import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
+import { api } from "@/lib/api";
+import { BUILT_IN_BOT_NAME } from "@/lib/brand";
+import { cn } from "@/lib/cn";
+import { hardRedirect } from "@/lib/redirect";
+
+/** Every row shares `ROW`, so all four icons sit on one vertical line and all four labels on another. */
+
+const FOOTER_LINKS = [
+	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
+	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint" },
+	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint" },
+] as const;
+
+const FOOTER_ICON = { "/appearance": Palette, "/terms": FileText, "/privacy": ShieldQuestion } as const;
+
+export function Sidebar({
+	user,
+	bot,
+	guild,
+	isOwner,
+	expanded = false,
+	onNavigate,
+}: NavAudience & {
+	user: DashboardUser | null;
+	/** The bot's own profile, so a fork's sidebar carries its identity rather than the original's. */
+	bot?: BotIdentity | undefined;
+	/** True inside the mobile drawer, where there is room for the labels. */
+	expanded?: boolean;
+	onNavigate?: () => void;
+}): React.JSX.Element {
+	const { t, i18n } = useTranslation();
+	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
+	const queryClient = useQueryClient();
+	const label = (extra = ""): string => cn(expanded ? "" : "sr-only lg:not-sr-only", extra);
+
+	async function signOut(): Promise<void> {
+		await api.post("/auth/logout");
+		queryClient.clear();
+		hardRedirect("/sign-in");
+	}
+
+	return (
+		<nav
+			aria-label={t("nav.sections")}
+			onClick={onNavigate}
+			className={cnSidebar(expanded)}
+			data-testid={expanded ? "sidebar-drawer" : "sidebar"}
+		>
+			<Link to="/guilds" className={cn(ROW, "mb-4")}>
+				{/* Boxed to 18px like every other row icon, so the wordmark starts on the label column too. */}
+				<span aria-hidden="true" className={ICON_SLOT}>
+					<BotMark src={bot?.avatarUrl} size={22} />
+				</span>
+				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
+					{bot?.name ?? BUILT_IN_BOT_NAME}
+				</span>
+			</Link>
+
+			{navigationFor({ guild, isOwner }).map((group, index) => {
+				// A server group is headed by its name; every other group by a translated one.
+				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
+
+				return (
+					<div key={heading ?? "global"} className={index > 0 ? "mt-4" : undefined}>
+						{heading !== undefined && (
+							<>
+								{/* At the icon-only width the rule carries the grouping, where there is no room for the words. */}
+								<hr className="border-border mx-2 mb-2 lg:hidden" />
+								{/* Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's. */}
+								<p
+									aria-hidden="true"
+									className={cn(
+										"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
+										expanded ? "" : "hidden lg:block",
+									)}
+								>
+									{heading}
+								</p>
+							</>
+						)}
+						<ul className="flex flex-col gap-1" {...(heading === undefined ? {} : { "aria-label": heading })}>
+							{group.items.map((item) => (
+								<li key={item.to}>
+									<SidebarLink item={item} expanded={expanded} />
+								</li>
+							))}
+							{(group.sections ?? []).map((section) => (
+								<SidebarSection key={section.labelKey} section={section} expanded={expanded} />
+							))}
+						</ul>
+					</div>
+				);
+			})}
+
+			<div className="border-border mt-auto flex flex-col gap-1 border-t pt-3">
+				{user !== null && (
+					<div className={ROW}>
+						<span aria-hidden="true" className={ICON_SLOT}>
+							<Avatar name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
+						</span>
+						<span className={label("truncate text-sm")}>{user.username}</span>
+					</div>
+				)}
+
+				{/* Rows rather than small links, because `hidden` at the icon-only width took these off the page entirely. */}
+				{FOOTER_LINKS.map(({ to, labelKey, hintKey }) => {
+					const Icon = FOOTER_ICON[to];
+					return (
+						<Tooltip key={to} label={t(hintKey)} placement="right">
+							<Link
+								to={to}
+								className={cn(
+									ROW,
+									"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+								)}
+							>
+								<Icon size={18} aria-hidden="true" className="shrink-0" />
+								<span className={label("truncate")}>{t(labelKey)}</span>
+							</Link>
+						</Tooltip>
+					);
+				})}
+
+				<Tooltip label={t("nav.languageHint")} placement="right">
+					<Link
+						to="/appearance#language"
+						className={cn(
+							ROW,
+							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+						)}
+					>
+						<span aria-hidden="true" className={ICON_SLOT}>
+							<FlagIcon locale={active} />
+						</span>
+						<span className={label("truncate")} lang={active}>
+							{LOCALE_NAMES[active]}
+						</span>
+					</Link>
+				</Tooltip>
+
+				<Tooltip label={t("nav.signOutHint")} placement="right">
+					<button
+						type="button"
+						onClick={() => void signOut()}
+						className={cn(
+							ROW,
+							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+						)}
+					>
+						<LogOut size={18} aria-hidden="true" className="shrink-0" />
+						<span className={label("truncate")}>{t("nav.signOut")}</span>
+					</button>
+				</Tooltip>
+			</div>
+		</nav>
+	);
+}
+
+/** Opaque in the drawer, and capped to the viewport in the rail — a flex child otherwise stretches to a container that grows with the page. */
+function cnSidebar(expanded: boolean): string {
+	const base = "border-border flex shrink-0 flex-col p-3";
+	return expanded
+		? `${base} bg-card h-full w-64 border-r`
+		: `${base} bg-card/80 scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r backdrop-blur-sm md:flex lg:w-60`;
+}

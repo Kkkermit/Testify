@@ -1,0 +1,22 @@
+import { PermissionFlagsBits } from "discord.js";
+import { antiLinkState } from "@buttons/antiLink";
+import { defineCommand, inGuild } from "@core/command";
+import { reply } from "@lib/discord";
+import { antiLinkPanel } from "@lib/moderation";
+
+/** One panel instead of `enable`, `disable` and `status`. */
+export default defineCommand({
+	name: "anti-link",
+	description: "Deletes links posted by members without the bypass permission.",
+	category: "settings",
+	aliases: ["antilink", "link-filter"],
+	guildOnly: true,
+	permissions: [PermissionFlagsBits.ManageGuild],
+	botPermissions: [PermissionFlagsBits.ManageMessages],
+
+	async run(interaction) {
+		const guild = inGuild(interaction);
+
+		await reply(interaction, antiLinkPanel(await antiLinkState(guild.id), interaction.user.id));
+	},
+});
