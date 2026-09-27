@@ -7,6 +7,7 @@ import { refreshBotStats } from "@jobs/refreshBotStats.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 import { recordHeartbeat } from "@jobs/statusHeartbeat.util";
 import { startEventLoopMonitor, watchDiscordApi } from "@lib/bot";
+import { flushActivity } from "@lib/info";
 import { STATUS_LIMITS } from "@testify/shared";
 
 /** Starts the repeating background jobs. */
@@ -18,6 +19,7 @@ export default defineEvent({
 		client.timers.every("softbans", INTERVALS.softbanCheckMs, () => processExpiredSoftbans(client));
 		client.timers.every("passive-income", INTERVALS.passiveIncomeMs, () => payPassiveIncome(client));
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
+		client.timers.every("insights", INTERVALS.insightsFlushMs, () => flushActivity(client.logger));
 
 		startEventLoopMonitor();
 		watchDiscordApi(client);

@@ -1469,6 +1469,7 @@ the same shape —
 | `/sign-in`                 | One button; also the setup screen for a half-install                       |
 | `/guilds`                  | Picker, with an invite card for guilds without the bot                     |
 | `/guilds/:id`              | Stat tiles, feature grid, permission warnings, recent changes              |
+| `/guilds/:id/insights`     | Server facts, messages a day, busiest hours, top channels and members      |
 | `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
 | `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
 | `/guilds/:id/audit-log`    | Grouped event checklist held as a draft until Save                         |
@@ -2158,6 +2159,24 @@ value — but a proportional fill then ends wherever the number says, which on a
 word: "Prefix commands" read as "Prefix" being highlighted and the rest clipped. The bar's last 24px are masked
 to transparent (`mask-r-from-[calc(100%-1.5rem)]`), so it fades out instead of cutting. The length still encodes
 the value; the ranking and the printed number are what carry it precisely.
+
+### Insights are counted, not logged
+
+`/guilds/:id/insights` answers "who talks, where, when, and who comes and goes" without the bot keeping a word anybody
+wrote. Four things about it are load-bearing:
+
+- **A message is a number, never text.** The `activity` message handler (order `0`, so a prefix command still
+  counts) calls `activity.count` with a server, a channel and an author — that is all it reads. The text is never
+  touched, and the privacy notice says so.
+- **Counting is in memory; writing is once a minute.** `ActivityCounter` folds messages into per-day rows and
+  `flushActivity` writes them as three `bulkWrite`s of upserted `$inc`s, so a busy server costs no write per message.
+  A failed flush is `restore`d and tried again, and `shutdown()` flushes before the database closes.
+- **Hours are a map, not an array.** An upsert's `$inc` cannot address an index in an array that does not exist
+  yet, so `ServerDay.hours` is keyed `"0"` to `"23"` and `hoursOf` reads it back, ignoring any key that is not an hour.
+- **Everything expires after `INSIGHTS_LIMITS.retentionDays`** through a TTL index, which is why the page offers 7
+  and 30 days and nothing longer. Joins and leaves keep the username, because somebody who has left can no longer be
+  looked up. Counting starts on deploy, so a fresh server says it has not counted anything yet rather than showing
+  unexplained zeros.
 
 ### The changes page
 

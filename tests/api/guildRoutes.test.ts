@@ -5,7 +5,13 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { guilds } from "@api/routes/guilds";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { type ChannelSummary, type GuildOverview, type RoleSummary, type ServerChangesPage } from "@testify/shared";
+import {
+	type ChannelSummary,
+	type GuildOverview,
+	type InsightsReport,
+	type RoleSummary,
+	type ServerChangesPage,
+} from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/settingsRepository", () => ({
@@ -18,6 +24,14 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 	listSticky: jest.fn(() => Promise.resolve([])),
 	getTreasureConfig: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/insightsRepository", () => ({
+	readInsightRows: jest.fn(() =>
+		Promise.resolve({ days: [], channels: [], members: [], activeMembers: 0, firstDay: null }),
+	),
+	recentMoves: jest.fn(() => Promise.resolve([])),
+	recordMove: jest.fn(),
+	saveActivity: jest.fn(),
 }));
 jest.mock("@database/repositories/verificationRepository", () => ({
 	getVerifyConfig: jest.fn(() => Promise.resolve(null)),
@@ -117,7 +131,14 @@ function fakeGuild(options: Options = {}) {
 		iconURL: () => null,
 		channels: { cache: channels },
 		roles: { cache: roles },
-		members: { me, fetch: () => Promise.reject(new Error("Unknown Member")) },
+		members: { me, cache: new Collection(), fetch: () => Promise.reject(new Error("Unknown Member")) },
+		ownerId: OWNER,
+		createdAt: new Date("2020-01-01T00:00:00.000Z"),
+		premiumTier: 0,
+		premiumSubscriptionCount: 0,
+		verificationLevel: 0,
+		emojis: { cache: new Collection() },
+		stickers: { cache: new Collection() },
 		fetchAuditLogs: jest.fn(() =>
 			Promise.resolve({
 				entries: new Collection([
@@ -309,5 +330,21 @@ describe("the changes list", () => {
 
 	it("refuses a window it does not offer", async () => {
 		expect((await appFor().request(`/guilds/${GUILD}/changes?days=30`)).status).toBe(400);
+	});
+});
+
+describe("the insights report", () => {
+	it("answers with every day of the window even before anything was counted", async () => {
+		const response = await appFor().request(`/guilds/${GUILD}/insights?days=30`);
+		const body = (await response.json()) as InsightsReport;
+
+		expect(response.status).toBe(200);
+		expect(body.daily).toHaveLength(30);
+		expect(body.countingSince).toBeNull();
+		expect(body.server).toMatchObject({ members: 1_234, textChannels: 2, verification: "none" });
+	});
+
+	it("refuses a window it does not keep", async () => {
+		expect((await appFor().request(`/guilds/${GUILD}/insights?days=90`)).status).toBe(400);
 	});
 });

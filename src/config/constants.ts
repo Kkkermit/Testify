@@ -50,6 +50,7 @@ export const LEVELLING = {
 export const INTERVALS = {
 	presenceRotationMs: 30 * SECOND_MS,
 	lotteryCheckMs: MINUTE_MS,
+	insightsFlushMs: MINUTE_MS,
 	softbanCheckMs: MINUTE_MS,
 	fixedStatsRefreshMs: 5 * MINUTE_MS,
 	passiveIncomeMs: HOUR_MS,

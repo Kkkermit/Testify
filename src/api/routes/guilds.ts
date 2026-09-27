@@ -36,6 +36,7 @@ import {
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { canPostInChannel } from "@lib/discord";
 import { readLottery, readTreasure } from "@lib/economy";
+import { readInsights } from "@lib/info";
 import { normaliseSettings } from "@lib/levelling";
 import { readServerChanges } from "@lib/moderation";
 import { readTickets } from "@lib/tickets";
@@ -43,6 +44,8 @@ import {
 	type AuditEntrySummary,
 	type ChannelKind,
 	changesQuery,
+	insightsQuery,
+	type InsightWindow,
 	type ChannelSummary,
 	type FeatureStatus,
 	type GuildOverview,
@@ -158,6 +161,12 @@ guilds.get("/:guildId/changes", async (context) => {
 	const query = parseQuery(context, changesQuery);
 
 	return context.json(await readServerChanges(guildOf(context), query));
+});
+
+guilds.get("/:guildId/insights", async (context) => {
+	const { days } = parseQuery(context, insightsQuery);
+
+	return context.json(await readInsights(guildOf(context), days as InsightWindow));
 });
 
 function toAuditSummary(record: { actorTag: string; action: string; summary: string; at: Date }): AuditEntrySummary {

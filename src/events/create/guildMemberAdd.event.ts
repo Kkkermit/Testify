@@ -3,6 +3,7 @@ import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { getAutoRoles, getWelcome } from "@database/repositories/settingsRepository";
+import { countMove } from "@lib/info";
 import { writeAuditLog } from "@lib/moderation";
 import { syncVoiceCounters } from "@lib/settings";
 import { greetingFor, normaliseWelcome } from "@lib/welcome";
@@ -10,6 +11,8 @@ import { greetingFor, normaliseWelcome } from "@lib/welcome";
 export default defineEvent({
 	name: Events.GuildMemberAdd,
 	async run(client: TestifyClient, member: GuildMember) {
+		countMove(client, member, "join");
+
 		await writeAuditLog(client, member.guild, {
 			event: "memberJoin",
 			title: "Member joined",

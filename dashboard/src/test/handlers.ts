@@ -1,6 +1,7 @@
 import {
 	type AuditLogConfigResponse,
 	type ServerChangesPage,
+	type InsightsReport,
 	type BlacklistRow,
 	type BotControlState,
 	type BotIdentity,
@@ -666,6 +667,43 @@ export const supportReply: SupportReply = {
 	related: [{ id: "role-order", title: "The bot cannot give or remove a role", topic: "troubleshooting" }],
 };
 
+export const insightsReport: InsightsReport = {
+	days: 7,
+	server: {
+		createdAt: "2020-01-01T00:00:00.000Z",
+		ownerId: "100000000000000001",
+		ownerName: "kermit",
+		members: 1234,
+		people: 1187,
+		bots: 47,
+		textChannels: 12,
+		voiceChannels: 4,
+		categories: 3,
+		roles: 9,
+		emojis: 20,
+		stickers: 2,
+		boostTier: 1,
+		boosts: 3,
+		verification: "medium",
+	},
+	countingSince: "2026-09-21",
+	totals: { messages: 70, activeMembers: 5, joins: 3, leaves: 1 },
+	daily: Array.from({ length: 7 }, (_, index) => ({
+		day: `2026-09-${String(21 + index)}`,
+		messages: 10,
+		joins: index === 6 ? 3 : 0,
+		leaves: index === 6 ? 1 : 0,
+	})),
+	hours: Array.from({ length: 24 }, (_, hour) => (hour === 20 ? 30 : hour === 9 ? 10 : 0)),
+	topChannels: [
+		{ channelId: "400000000000000001", name: "general", messages: 50 },
+		{ channelId: "400000000000000009", name: null, messages: 5 },
+	],
+	topMembers: [{ userId: "100000000000000002", name: "kate", avatarUrl: null, messages: 40 }],
+	recentJoins: [{ userId: "100000000000000002", name: "kate", at: "2026-09-27T10:00:00.000Z" }],
+	recentLeaves: [],
+};
+
 export const serverChanges: ServerChangesPage = {
 	items: [
 		{
@@ -747,6 +785,7 @@ export const handlers = [
 	http.post("/api/guilds/:guildId/members/:userId/kick", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.post("/api/guilds/:guildId/members/:userId/ban", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.get("/api/guilds/:guildId/changes", () => HttpResponse.json(serverChanges)),
+	http.get("/api/guilds/:guildId/insights", () => HttpResponse.json(insightsReport)),
 	http.get("/api/guilds/:guildId/warnings", () => HttpResponse.json(guildWarnings)),
 	http.get("/api/guilds/:guildId/warnings/punishments", () => HttpResponse.json(warnLadder)),
 	http.put("/api/guilds/:guildId/warnings/punishments", async ({ request }) =>

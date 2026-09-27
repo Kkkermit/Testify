@@ -11,6 +11,7 @@ export * from "./commandToggles";
 export * from "./commands";
 export * from "./control";
 export * from "./giveaways";
+export * from "./insights";
 export * from "./levelling";
 export * from "./lottery";
 export * from "./markup";

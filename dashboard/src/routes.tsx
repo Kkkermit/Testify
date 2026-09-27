@@ -25,6 +25,7 @@ const MusicPage = page(async () => import("@/features/music/MusicPage"), "MusicP
 const TicketsPage = page(async () => import("@/features/tickets/TicketsPage"), "TicketsPage");
 const WarningsPage = page(async () => import("@/features/warnings/WarningsPage"), "WarningsPage");
 const ChangesPage = page(async () => import("@/features/changes/ChangesPage"), "ChangesPage");
+const InsightsPage = page(async () => import("@/features/insights/InsightsPage"), "InsightsPage");
 const BotStatsPage = page(async () => import("@/features/bot-stats/BotStatsPage"), "BotStatsPage");
 const MemberCountPage = page(async () => import("@/features/member-count/MemberCountPage"), "MemberCountPage");
 const GiveawaysPage = page(async () => import("@/features/giveaways/GiveawaysPage"), "GiveawaysPage");
@@ -71,6 +72,7 @@ export const routes = [
 						children: [
 							{ path: "/guilds", element: lazily(<GuildPickerPage />) },
 							{ path: "/guilds/:guildId", element: lazily(<GuildOverviewPage />) },
+							{ path: "/guilds/:guildId/insights", element: lazily(<InsightsPage />) },
 							{ path: "/guilds/:guildId/levelling", element: lazily(<LevellingPage />) },
 							{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
 							{ path: "/guilds/:guildId/audit-log", element: lazily(<AuditLogPage />) },

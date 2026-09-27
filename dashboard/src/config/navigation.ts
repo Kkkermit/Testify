@@ -1,6 +1,7 @@
 import {
 	Activity,
 	ChartColumn,
+	ChartLine,
 	LayoutGrid,
 	ScrollText,
 	ShieldAlert,
@@ -85,6 +86,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 			heading: guild.name,
 			items: [
 				{ to: `/guilds/${guild.id}`, labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
+				{
+					to: `/guilds/${guild.id}/insights`,
+					labelKey: "nav.insights",
+					icon: ChartLine,
+					hintKey: "nav.insightsHint",
+				},
 				{
 					to: `/guilds/${guild.id}/settings`,
 					labelKey: "nav.settings",
