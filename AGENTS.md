@@ -63,14 +63,14 @@ numbers, which drift):
 | -------------------- | --------------------------------- |
 | Commands             | 79, across 13 categories          |
 | Command files        | 101 (incl. folded-in subcommands) |
-| Subcommands          | 110                               |
+| Subcommands          | 123                               |
 | Prefix aliases       | 84                                |
 | Button handlers      | 27                                |
 | Events               | 24, in 5 groups                   |
 | `src/lib` helpers    | 93, in 16 domain folders          |
 | Schemas/repositories | 16 / 15                           |
 | Scheduled jobs       | 5                                 |
-| Tests                | 4,785 across 270 suites           |
+| Tests                | 5,057 across 292 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.

@@ -238,9 +238,9 @@ pinning the four claims the code has to keep true.
   Two findings worth keeping: `fonts-dejavu-core` is **required**, because `@napi-rs/canvas` statically links
   Skia but resolves font families through the OS, so a slim base renders every card's layout and none of its
   text; and `DASHBOARD_BIND` must be `0.0.0.0` in a container, since the `127.0.0.1` default is the container's
-  own loopback and a published port reaches nothing. The image has **not been built** — the environment it was
-  written in has no Docker daemon — though the production-only install, the compiled layout and
-  `docker compose config` were each verified directly.
+  own loopback and a published port reaches nothing. The image **has been built and run**, on Docker Desktop for
+  Windows and in a Linux sandbox; what that proved, and the Windows set-up problems met on the way, are in the
+  hosting guide.
 - **README screenshots — done.** Five, in [`../screenshots/`](../screenshots/README.md), captured from the
   built bundle against stub responses so no real server or account is in one. Both themes appear deliberately.
   `docs/contributing.md` already carries the dashboard section, including how to add a language.

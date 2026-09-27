@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { DiscordAPIError } from "discord.js";
+import { DiscordAPIError, HTTPError } from "discord.js";
 import { EnvError } from "@config/env";
 import { SetupError } from "@core/errors";
-import { painter } from "@core/terminal";
+import { painter, visibleWidth } from "@core/terminal";
 import {
 	BootReport,
 	describeDatabase,
@@ -57,8 +57,54 @@ describe("explainStartupFailure", () => {
 		expect(explainStartupFailure(apiError(50001, 403), plain).lines.join(" ")).toContain("DISCORD_DEV_GUILD_ID");
 	});
 
+	/** A firewall answering in Discord's place was reported as a bug in the bot, with a stack. */
+	it("reads a reply that did not come from Discord as Discord being unreachable", () => {
+		const blocked = new DiscordAPIError(new ArrayBuffer(0) as never, undefined as never, 403, "PUT", "/x", {});
+		const failure = explainStartupFailure(blocked, plain);
+
+		expect(failure.title).toBe("Discord could not be reached");
+		expect(failure.lines.join(" ")).toContain("403");
+		expect(failure.stack).toBeUndefined();
+	});
+
+	it("names the failed connection, including one fetch wraps as its cause", () => {
+		const dns = Object.assign(new Error("getaddrinfo ENOTFOUND discord.com"), { code: "ENOTFOUND" });
+		const wrapped = new TypeError("fetch failed", { cause: dns });
+		const timeout = Object.assign(new Error("This operation was aborted"), { name: "AbortError" });
+
+		expect(explainStartupFailure(dns, plain).lines[0]).toContain("ENOTFOUND");
+		expect(explainStartupFailure(wrapped, plain).title).toBe("Discord could not be reached");
+		expect(explainStartupFailure(timeout, plain).lines[0]).toContain("timed out");
+	});
+
+	it("blames Discord for its own server errors", () => {
+		const failure = explainStartupFailure(new HTTPError(503, "Service Unavailable", "PUT", "/x", {}), plain);
+
+		expect(failure.title).toBe("Discord is having problems");
+		expect(failure.lines.join(" ")).toContain("503");
+	});
+
 	it("keeps the stack for anything it does not recognise, because that is a bug", () => {
 		expect(explainStartupFailure(new TypeError("boom"), plain).stack).toContain("TypeError: boom");
+	});
+});
+
+describe("every explanation", () => {
+	const known = [
+		apiError(0, 401),
+		apiError(10002, 404),
+		apiError(50001, 403),
+		new DiscordAPIError(new ArrayBuffer(0) as never, undefined as never, 403, "PUT", "/x", {}),
+		new HTTPError(503, "Service Unavailable", "PUT", "/x", {}),
+		Object.assign(new Error("connect"), { code: "UND_ERR_CONNECT_TIMEOUT" }),
+	];
+
+	it("fits an 80-column terminal once boxed", () => {
+		for (const error of known) {
+			for (const line of startupFailureLines(explainStartupFailure(error, plain), plain)) {
+				expect(visibleWidth(line)).toBeLessThan(80);
+			}
+		}
 	});
 });
 
