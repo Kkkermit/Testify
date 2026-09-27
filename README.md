@@ -33,8 +33,8 @@ The new and improved TypeScript rewrite of Testify — an all-in-one Discord bot
 </strong></p>
 
 <p align="center">
-79 commands, 123 subcommands and 202 things you can actually run: moderation, economy, levelling,
-tickets, giveaways and games. Every command works as <code>/ban</code> <strong>and</strong> as
+79 commands, 130 subcommands and 209 things you can actually run: moderation, economy, a casino,
+levelling, tickets, giveaways and games. Every command works as <code>/ban</code> <strong>and</strong> as
 <code>t?ban</code> — because underneath it is one command, not two copies.
 </p>
 
@@ -103,13 +103,21 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 ### 💰 Economy and levelling
 
-- **Economy** — wallet and bank, work, daily, beg, gamble, rob, heist, transfers and a server lottery
+- **Economy** — wallet and bank, work, daily, beg, rob, heist, transfers and a server lottery
 - **Shops, houses, businesses and jobs** — plus pets that need feeding and walking
 - **Levelling** — XP with configurable channels, boost roles and multipliers, and a leaderboard
 
+### 🎰 Casino
+
+- **Roulette** on an animated single-zero wheel, where the ball rolls, drops and settles in its pocket
+- **Blackjack** and **hi-lo** dealt on drawn card tables, **slots** with spinning reels, **coinflip** and **dice**
+- Every bet comes straight out of the wallet and every win goes straight back; a card hand is kept in the database,
+  so a restart never swallows a stake, and a hand left alone is played out and paid
+- Open or close it, switch single games off and set bet limits per server, from `/casino settings` or the dashboard
+
 ### 🎯 Games
 
-- **Games** — blackjack, guess the number, guess the Pokémon, fast type, rock paper scissors, 8ball
+- **Games** — guess the number, guess the Pokémon, fast type, rock paper scissors, 8ball
 
 ### 🎵 Music
 
@@ -342,21 +350,22 @@ list.
 
 | Category      | Top-level | What is in it                                                               |
 | ------------- | :-------: | --------------------------------------------------------------------------- |
-| 💰 Economy    |    23     | Balance, work, daily, gamble, rob, heist, shop, pets, lottery, leaderboards |
+| 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards         |
+| 🎰 Casino     |     1     | Roulette, blackjack, slots, hi-lo, coinflip, dice, bet limits               |
 | 🛡️ Moderation |    17     | Ban, kick, mute, warn, softban, lock, clear, roles, slowmode                |
-| 📚 Info       |    11     | User, server and role info, avatars, profiles, ping, help                   |
+| 📚 Info       |    12     | User, server and role info, avatars, profiles, ping, help                   |
 | ⚙️ Settings   |    10     | Automod, audit logging, auto roles, counting, welcome, verification, prefix |
 | 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                 |
 | 👥 Community  |     3     | Memes, translation, Minecraft lookups, advice, wiki                         |
 | 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                      |
 | 📈 Levelling  |     2     | Rank cards and the levelling settings                                       |
 | 💬 Feedback   |     2     | Suggestions and bug reports                                                 |
-| 🎯 Games      |     1     | Blackjack, guess the number, Pokémon, fast type, RPS                        |
+| 🎯 Games      |     1     | Guess the number, Pokémon, fast type, RPS, 8ball                            |
 | 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                  |
 | 🎫 Tickets    |     1     | Setup, status, disable                                                      |
 | 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume, DJ roles        |
 
-Some categories look small but hold a lot: `/game`, `/fun` and `/lookup` group many subcommands
+Some categories look small but hold a lot: `/casino`, `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.
 
 ## Adding your own command
