@@ -103,7 +103,8 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 ### 💰 Economy and levelling
 
-- **Economy** — wallet and bank, work, daily, beg, rob, heist, transfers and a server lottery
+- **Economy** — wallet and bank, work, daily, beg, rob, heist, transfers, a server lottery, and leaderboards by
+  total, wallet or bank for one server or every server the bot is in
 - **Shops, houses, businesses and jobs** — plus pets that need feeding and walking
 - **Levelling** — XP with configurable channels, boost roles and multipliers, and a leaderboard
 

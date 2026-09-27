@@ -117,6 +117,54 @@ describe("the members page", () => {
 		expect(screen.queryByRole("button", { name: /Find me/ })).not.toBeInTheDocument();
 	});
 
+	it("asks for the bot-wide board ranked by wallet when those segments are pressed", async () => {
+		renderPage(`/guilds/${GUILD}/members?page=2`);
+		await screen.findByRole("table");
+
+		const captured = captureQuery();
+		await userEvent.click(screen.getByRole("button", { name: "Every server" }));
+		await waitFor(() => {
+			expect(captured.url?.searchParams.get("scope")).toBe("global");
+		});
+		expect(captured.url?.searchParams.get("page")).toBe("1");
+
+		await userEvent.click(screen.getByRole("button", { name: "Wallet" }));
+		await waitFor(() => {
+			expect(captured.url?.searchParams.get("sort")).toBe("wallet");
+		});
+		expect(captured.url?.searchParams.get("scope")).toBe("global");
+	});
+
+	it("names the columns after the sort", async () => {
+		serve({ sort: "bank" });
+		renderPage(`/guilds/${GUILD}/members?sort=bank`);
+
+		const table = await screen.findByRole("table");
+		expect(within(table).getByRole("columnheader", { name: "Bank" })).toBeInTheDocument();
+		expect(within(table).getByRole("columnheader", { name: "Wallet" })).toBeInTheDocument();
+		expect(table.querySelector("caption")?.textContent).toContain("Biggest banks in this server");
+	});
+
+	/** The levels board has one figure and one server, so offering a sort or scope there would do nothing. */
+	it("offers the sort and scope only on the money board", async () => {
+		renderPage(`/guilds/${GUILD}/members?board=levels&sort=wallet&scope=global`);
+		await screen.findByRole("table");
+
+		expect(screen.queryByRole("button", { name: "Every server" })).not.toBeInTheDocument();
+	});
+
+	/** Somebody from another server has no page here, and is not somebody who left this one. */
+	it("neither links nor marks as left somebody on the bot-wide board from another server", async () => {
+		serve({ scope: "global" });
+		renderPage(`/guilds/${GUILD}/members?scope=global`);
+
+		const row = await screen.findByRole("rowheader", { name: /Left the server/ });
+		expect(within(row).queryByRole("link")).not.toBeInTheDocument();
+		expect(within(row).queryByText("Left")).not.toBeInTheDocument();
+		expect(within(await screen.findByRole("rowheader", { name: /kate/ })).getByRole("link")).toBeInTheDocument();
+		expect(screen.getByRole("table").querySelector("caption")?.textContent).toContain("across every server");
+	});
+
 	it("explains an empty board rather than showing a bare table", async () => {
 		serve({ total: 0, rows: [], you: null });
 		renderPage();

@@ -199,6 +199,8 @@ export const lotterySettings: LotterySettings = {
 
 export const economyBoard: BoardPage = {
 	board: "economy",
+	sort: "total",
+	scope: "server",
 	page: 1,
 	pages: 2,
 	total: 30,
@@ -786,8 +788,13 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
-		const board = new URL(request.url).searchParams.get("board") ?? "economy";
-		return HttpResponse.json({ ...economyBoard, board });
+		const query = new URL(request.url).searchParams;
+		return HttpResponse.json({
+			...economyBoard,
+			board: query.get("board") ?? "economy",
+			sort: query.get("sort") ?? "total",
+			scope: query.get("scope") ?? "server",
+		});
 	}),
 	// Before `:userId`, which MSW would otherwise match first, exactly as the real router would.
 	http.get("/api/guilds/:guildId/members/search", () => HttpResponse.json(memberMatches)),

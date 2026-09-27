@@ -39,7 +39,8 @@ export const keys = {
 		punishments: () => ["guild", id, "punishments"] as const,
 		memberSearch: (query: string) => ["guild", id, "member-search", query] as const,
 		audit: (page: number) => ["guild", id, "audit", page] as const,
-		board: (board: string, page: number) => ["guild", id, "board", board, page] as const,
+		board: (board: string, page: number, sort: string, scope: string) =>
+			["guild", id, "board", board, page, sort, scope] as const,
 		member: (userId: string) => ["guild", id, "member", userId] as const,
 	}),
 	owner: {

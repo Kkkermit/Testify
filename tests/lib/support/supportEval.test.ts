@@ -66,6 +66,8 @@ const PARAPHRASES: [string, string[]][] = [
 	["can I host my own version", ["self-hosting"]],
 	["what can this bot do", ["what-is-the-bot"]],
 	["where is the leaderboard", ["leaderboards"]],
+	["richest people across all servers", ["leaderboards", "command-leaderboard"]],
+	["who has the biggest wallet", ["leaderboards", "command-leaderboard"]],
 	["how do I see my rank", ["leaderboards", "levelling", "command-rank"]],
 	["what does 8ball do", ["games", "command-game"]],
 	["how do I use t?bal", ["command-balance", "bank-and-wallet", "economy"]],

@@ -1274,9 +1274,18 @@ conventions test fails on either, and both halves were proved to go red.
 
 ### One leaderboard command, and no command that only forwards to another
 
-`/leaderboard` serves both the economy and the levelling board, with a button to swap and a **Find me** button
-that jumps to the page you are on. There is deliberately no `/levelling leaderboard` — a second name for the same
-screen is the overlap this pass removed, not a convenience.
+`/leaderboard` serves both the economy and the levelling board as `economy` and `levels` subcommands. **It has no
+buttons, and that is deliberate:** re-rendering an image board in place stacked the old picture under the new one,
+so each request is its own message and the line under it says where the reader sits and what to type for the next
+page. There is deliberately no `/levelling leaderboard` — a second name for the same screen is the overlap this pass
+removed, not a convenience.
+
+**The money board takes a `sort` and a `scope`.** `sort` ranks by total, wallet or bank; `scope: global` adds each
+person's balances together across every server the bot is in **now**, which the caller passes from
+`client.guilds.cache` rather than the request naming any. `getGlobalLeaderboard` is one aggregation, and a server the
+bot has left stops counting on the next request with nothing to clean up. Somebody on that board who is not in this
+server is named through `client.users.fetch`, and on the dashboard has no member link and no "Left" badge — they
+never were here. The next-page hint repeats the sort and scope, or following it lands on a different board.
 
 The same reasoning deleted `/use` (the inventory panel's per-row Use buttons do it better), `/rehome` (now
 `/pet rehome`, with `t?rehome` kept as a prefix alias) and `/pet buy` (the shop sells pets with a button; `/pet

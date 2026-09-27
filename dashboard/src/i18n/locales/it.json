@@ -593,7 +593,22 @@
 		"banWarning": "Riceve un messaggio con il motivo e viene bannato. Non può rientrare finché il ban non viene revocato su Discord.",
 		"kickConfirm": "Espellilo",
 		"banConfirm": "Bannalo",
-		"confirmHint": "Va bene anche il suo ID Discord."
+		"confirmHint": "Va bene anche il suo ID Discord.",
+		"boardEconomy": "I più ricchi",
+		"boardLevels": "Livelli più alti",
+		"headingWallet": "Portafogli più pieni",
+		"headingBank": "Conti in banca più alti",
+		"total": "Totale",
+		"banked": "In banca",
+		"sortBy": "Ordina per",
+		"scope": "Dove",
+		"scopeServer": "Questo server",
+		"scopeGlobal": "Tutti i server",
+		"captionServer": "{{board}} in questo server, dal più alto — pagina {{page}} di {{pages}}",
+		"captionGlobal": "{{board}} in tutti i server del bot, dal più alto — pagina {{page}} di {{pages}}",
+		"noAccountsAnywhere": "Nessuno ha ancora un conto in alcun server.",
+		"rankedEverywhere_one": "{{count, number}} persona in classifica in tutti i server.",
+		"rankedEverywhere_other": "{{count, number}} persone in classifica in tutti i server."
 	},
 	"tickets": {
 		"title": "Ticket",

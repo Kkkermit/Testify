@@ -592,7 +592,22 @@
 		"banWarning": "Das Mitglied erhält eine Nachricht mit dem Grund und wird gebannt. Es kann erst zurück, wenn der Bann in Discord aufgehoben wird.",
 		"kickConfirm": "Kicken",
 		"banConfirm": "Bannen",
-		"confirmHint": "Die Discord-ID geht auch."
+		"confirmHint": "Die Discord-ID geht auch.",
+		"boardEconomy": "Die Reichsten",
+		"boardLevels": "Höchste Level",
+		"headingWallet": "Vollste Geldbeutel",
+		"headingBank": "Größte Bankguthaben",
+		"total": "Gesamt",
+		"banked": "Auf der Bank",
+		"sortBy": "Sortieren nach",
+		"scope": "Wo",
+		"scopeServer": "Dieser Server",
+		"scopeGlobal": "Alle Server",
+		"captionServer": "{{board}} auf diesem Server, absteigend — Seite {{page}} von {{pages}}",
+		"captionGlobal": "{{board}} auf allen Servern des Bots, absteigend — Seite {{page}} von {{pages}}",
+		"noAccountsAnywhere": "Noch hat niemand auf irgendeinem Server ein Konto.",
+		"rankedEverywhere_one": "{{count, number}} Person in der Wertung über alle Server.",
+		"rankedEverywhere_other": "{{count, number}} Personen in der Wertung über alle Server."
 	},
 	"tickets": {
 		"title": "Tickets",

@@ -594,7 +594,22 @@
 		"banWarning": "Участник получит сообщение с причиной и будет забанен. Он не сможет вернуться, пока бан не снимут в Discord.",
 		"kickConfirm": "Исключить",
 		"banConfirm": "Забанить",
-		"confirmHint": "Подойдёт и его Discord ID."
+		"confirmHint": "Подойдёт и его Discord ID.",
+		"boardEconomy": "Самые богатые",
+		"boardLevels": "Лучшие уровни",
+		"headingWallet": "Самые полные кошельки",
+		"headingBank": "Самые крупные вклады",
+		"total": "Всего",
+		"banked": "В банке",
+		"sortBy": "Сортировать по",
+		"scope": "Где",
+		"scopeServer": "Этот сервер",
+		"scopeGlobal": "Все серверы",
+		"captionServer": "{{board}} на этом сервере, по убыванию — страница {{page}} из {{pages}}",
+		"captionGlobal": "{{board}} на всех серверах бота, по убыванию — страница {{page}} из {{pages}}",
+		"noAccountsAnywhere": "Пока ни у кого нет счёта ни на одном сервере.",
+		"rankedEverywhere_one": "{{count, number}} человек в рейтинге по всем серверам.",
+		"rankedEverywhere_other": "{{count, number}} человек в рейтинге по всем серверам."
 	},
 	"tickets": {
 		"title": "Тикеты",

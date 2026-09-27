@@ -592,7 +592,22 @@
 		"banWarning": "They are sent a message saying why, then banned. They cannot rejoin until the ban is lifted in Discord.",
 		"kickConfirm": "Kick them",
 		"banConfirm": "Ban them",
-		"confirmHint": "Their Discord ID works too."
+		"confirmHint": "Their Discord ID works too.",
+		"boardEconomy": "Richest",
+		"boardLevels": "Top levels",
+		"headingWallet": "Biggest wallets",
+		"headingBank": "Biggest banks",
+		"total": "Total",
+		"banked": "Banked",
+		"sortBy": "Rank by",
+		"scope": "Where",
+		"scopeServer": "This server",
+		"scopeGlobal": "Every server",
+		"captionServer": "{{board}} in this server, highest first — page {{page}} of {{pages}}",
+		"captionGlobal": "{{board}} across every server the bot is in, highest first — page {{page}} of {{pages}}",
+		"noAccountsAnywhere": "Nobody has an account in any server yet.",
+		"rankedEverywhere_one": "{{count, number}} person ranked across every server.",
+		"rankedEverywhere_other": "{{count, number}} people ranked across every server."
 	},
 	"tickets": {
 		"title": "Tickets",

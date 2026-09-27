@@ -1,3 +1,4 @@
+import { type PipelineStage } from "mongoose";
 import { ECONOMY, type EconomyCooldownKey } from "@config/constants";
 import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
@@ -161,15 +162,79 @@ export async function countAccounts(guildId: string): Promise<number> {
 }
 
 /** Where one account sits on the leaderboard, counted in the database rather than by paging through it. */
-export async function getEconomyRank(guildId: string, userId: string): Promise<number | null> {
+export async function getEconomyRank(
+	guildId: string,
+	userId: string,
+	field: LeaderboardField = "total",
+): Promise<number | null> {
 	const account = await findAccount(guildId, userId);
 	if (!account) return null;
 
-	const total = account.wallet + account.bank;
+	const value = field === "total" ? account.wallet + account.bank : account[field];
 	const [result] = await Economy.aggregate<{ ahead: number }>([
 		{ $match: { guildId } },
 		{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
-		{ $match: { total: { $gt: total } } },
+		{ $match: { [field]: { $gt: value } } },
+		{ $count: "ahead" },
+	]).exec();
+
+	return (result?.ahead ?? 0) + 1;
+}
+
+/** One person's money across several servers, added together. */
+export interface MoneyStanding {
+	userId: string;
+	wallet: number;
+	bank: number;
+	total: number;
+}
+
+/** Each person's accounts in these servers folded into one row, so the bot-wide board ranks people rather than accounts. */
+function combined(guildIds: readonly string[]): PipelineStage[] {
+	return [
+		{ $match: { guildId: { $in: [...guildIds] } } },
+		{ $group: { _id: "$userId", wallet: { $sum: "$wallet" }, bank: { $sum: "$bank" } } },
+		{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
+	];
+}
+
+export async function getGlobalLeaderboard(
+	guildIds: readonly string[],
+	limit: number,
+	field: LeaderboardField = "total",
+	skip = 0,
+): Promise<MoneyStanding[]> {
+	return Economy.aggregate<MoneyStanding>([
+		...combined(guildIds),
+		// `_id` is the user id here, which still makes the order total between equal balances.
+		{ $sort: { [field]: -1, _id: 1 } },
+		{ $skip: skip },
+		{ $limit: limit },
+		{ $project: { _id: 0, userId: "$_id", wallet: 1, bank: 1, total: 1 } },
+	]).exec();
+}
+
+export async function countGlobalAccounts(guildIds: readonly string[]): Promise<number> {
+	const [result] = await Economy.aggregate<{ people: number }>([...combined(guildIds), { $count: "people" }]).exec();
+
+	return result?.people ?? 0;
+}
+
+export async function getGlobalRank(
+	guildIds: readonly string[],
+	userId: string,
+	field: LeaderboardField = "total",
+): Promise<number | null> {
+	const [mine] = await Economy.aggregate<MoneyStanding>([
+		{ $match: { guildId: { $in: [...guildIds] }, userId } },
+		{ $group: { _id: "$userId", wallet: { $sum: "$wallet" }, bank: { $sum: "$bank" } } },
+		{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
+	]).exec();
+	if (mine === undefined) return null;
+
+	const [result] = await Economy.aggregate<{ ahead: number }>([
+		...combined(guildIds),
+		{ $match: { [field]: { $gt: mine[field] } } },
 		{ $count: "ahead" },
 	]).exec();
 

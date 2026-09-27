@@ -593,7 +593,22 @@
 		"banWarning": "Il reçoit un message avec le motif, puis il est banni. Il ne peut pas revenir tant que le bannissement n’est pas levé dans Discord.",
 		"kickConfirm": "L’expulser",
 		"banConfirm": "Le bannir",
-		"confirmHint": "Son identifiant Discord fonctionne aussi."
+		"confirmHint": "Son identifiant Discord fonctionne aussi.",
+		"boardEconomy": "Les plus riches",
+		"boardLevels": "Meilleurs niveaux",
+		"headingWallet": "Portefeuilles les plus garnis",
+		"headingBank": "Plus gros comptes en banque",
+		"total": "Total",
+		"banked": "En banque",
+		"sortBy": "Classer par",
+		"scope": "Où",
+		"scopeServer": "Ce serveur",
+		"scopeGlobal": "Tous les serveurs",
+		"captionServer": "{{board}} sur ce serveur, du plus élevé au plus bas — page {{page}} sur {{pages}}",
+		"captionGlobal": "{{board}} sur tous les serveurs du bot, du plus élevé au plus bas — page {{page}} sur {{pages}}",
+		"noAccountsAnywhere": "Personne n’a encore de compte sur aucun serveur.",
+		"rankedEverywhere_one": "{{count, number}} personne classée sur tous les serveurs.",
+		"rankedEverywhere_other": "{{count, number}} personnes classées sur tous les serveurs."
 	},
 	"tickets": {
 		"title": "Tickets",
