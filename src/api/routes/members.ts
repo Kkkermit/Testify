@@ -1,4 +1,4 @@
-import { type Guild, type GuildMember } from "discord.js";
+import { Collection, type Guild, type GuildMember } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
@@ -12,6 +12,7 @@ import {
 	banBody,
 	boardQuery,
 	confirmsName,
+	idFromQuery,
 	kickBody,
 	levelBody,
 	type MemberDetail,
@@ -83,9 +84,16 @@ async function actOn(context: Context<ApiBindings>): Promise<{ current: MemberDe
 /** Registered before `/:userId`, which would otherwise read "search" as a member id and refuse it. */
 members.get("/search", async (context) => {
 	const { q } = parseQuery(context, memberSearchQuery);
-	const found = await guildOf(context)
-		.members.search({ query: q, limit: 10 })
-		.catch(() => null);
+	const guild = guildOf(context);
+	const id = idFromQuery(q);
+	// An ID names one member exactly, so it is fetched rather than searched as a name.
+	const found =
+		id === null
+			? await guild.members.search({ query: q, limit: 10 }).catch(() => null)
+			: await guild.members.fetch(id).then(
+					(member) => new Collection([[member.id, member]]),
+					() => null,
+				);
 
 	const matches: MemberMatch[] = [...(found?.values() ?? [])]
 		.filter((member) => !member.user.bot)
@@ -139,12 +147,12 @@ members.patch("/:userId/money", async (context) => {
 	return context.json(await detail(context));
 });
 
-const CONFIRM_REFUSED = "Type their username exactly to confirm.";
+const CONFIRM_REFUSED = "Type their username or their Discord ID exactly to confirm.";
 
 members.post("/:userId/kick", async (context) => {
 	const { current, member } = await actOn(context);
 	const body = await parseBody(context, kickBody);
-	if (!confirmsName(body.confirm, current.username)) throw badRequest(CONFIRM_REFUSED);
+	if (!confirmsName(body.confirm, current.username, current.userId)) throw badRequest(CONFIRM_REFUSED);
 
 	const { notified } = await kickMember(guildOf(context), member, actorName(context), body.reason);
 	await auditChange(context, {
@@ -172,7 +180,7 @@ members.post("/:userId/ban", async (context) => {
 
 	const user = member?.user ?? (await client.users.fetch(userId).catch(() => null));
 	if (user === null) throw notFound("user_not_found", "Discord does not know that account.");
-	if (!confirmsName(body.confirm, user.username)) throw badRequest(CONFIRM_REFUSED);
+	if (!confirmsName(body.confirm, user.username, user.id)) throw badRequest(CONFIRM_REFUSED);
 
 	const { notified } = await banUser(guild, user, member, actorName(context), body.reason, body.deleteDays);
 	await auditChange(context, {

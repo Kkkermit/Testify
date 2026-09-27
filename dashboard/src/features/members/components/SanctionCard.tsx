@@ -108,7 +108,11 @@ export function SanctionCard({
 						</Field>
 					)}
 
-					<Field label={t("members.typeToConfirm", { name: detail.username })} htmlFor="sanction-confirm">
+					<Field
+						label={t("members.typeToConfirm", { name: detail.username })}
+						hint={t("members.confirmHint")}
+						htmlFor="sanction-confirm"
+					>
 						<input
 							id="sanction-confirm"
 							className={FIELD}

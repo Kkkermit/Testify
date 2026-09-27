@@ -98,6 +98,23 @@ describe("the warnings page", () => {
 		expect(body).toEqual({ userId: KATE, reason: "Spamming again" });
 	});
 
+	/** A moderator often has an ID from a report rather than a name, and a pasted one should just work. */
+	it("finds somebody by a pasted Discord ID", async () => {
+		let asked = "";
+		server.use(
+			http.get(`/api/guilds/${GUILD}/members/search`, ({ request }) => {
+				asked = new URL(request.url).searchParams.get("q") ?? "";
+				return HttpResponse.json([{ userId: KATE, displayName: "kate", username: "kate", avatarUrl: null }]);
+			}),
+		);
+		renderPage();
+
+		await userEvent.type(await screen.findByLabelText(/Find a member/), KATE);
+
+		expect(await screen.findByRole("button", { name: /kate/ })).toBeInTheDocument();
+		expect(asked).toBe(KATE);
+	});
+
 	it("will not warn until somebody is chosen", async () => {
 		renderPage();
 

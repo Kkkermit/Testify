@@ -14,7 +14,7 @@ Money and levels each have a table, the same boards `/leaderboard` shows in Disc
 ### One member's page
 Choose a member to see their standing, roles and joining date, and to manage them:
 - **Warnings**: issue one, edit or delete one, or clear them all. A new warning is sent to them and applies the server's punishments, the same as `/warn`.
-- **Kick or ban**: give a reason and type their username to confirm. A ban can also delete up to seven days of their messages, and still works on somebody who has left.
+- **Kick or ban**: give a reason and type their username, or their Discord ID, to confirm. A ban can also delete up to seven days of their messages, and still works on somebody who has left.
 - **Level and XP**: set a level, or add or take away XP. Role rewards for the new level are handed out at the same time.
 - **Money**: add to or take from their wallet or bank.
 - **Active softban**: lift it early.

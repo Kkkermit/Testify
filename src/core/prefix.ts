@@ -60,7 +60,7 @@ class PrefixOptions implements CommandInputOptions {
 	private readonly message: Message;
 	private readonly command: Command;
 	private readonly args: string[];
-	private parsed: { values: Map<string, string>; subcommand: string | null } | null = null;
+	private parsed: { values: Map<string, string>; subcommand: string | null; declared: CommandOption[] } | null = null;
 
 	constructor(message: Message, command: Command, args: string[]) {
 		this.message = message;
@@ -69,7 +69,7 @@ class PrefixOptions implements CommandInputOptions {
 	}
 
 	/** Parsed on first use, so a missing subcommand fails inside the command's error boundary. */
-	private get state(): { values: Map<string, string>; subcommand: string | null } {
+	private get state(): { values: Map<string, string>; subcommand: string | null; declared: CommandOption[] } {
 		if (this.parsed !== null) return this.parsed;
 
 		const subcommands = subcommandsOf(this.command);
@@ -100,8 +100,37 @@ class PrefixOptions implements CommandInputOptions {
 			if (value !== undefined && value !== "") values.set(option.name, value);
 		});
 
-		this.parsed = { values, subcommand };
+		this.parsed = { values, subcommand, declared };
 		return this.parsed;
+	}
+
+	/**
+	 * Fetches anybody given by ID or mention that the cache does not hold, so `t?ban 123…` reaches somebody who has
+	 * left or has not spoken since the bot started, exactly as the slash command's user box does.
+	 */
+	async prepare(): Promise<void> {
+		let state: { values: Map<string, string>; declared: CommandOption[] };
+		try {
+			state = this.state;
+		} catch {
+			// A missing subcommand is the command's own error to report, inside its own error boundary.
+			return;
+		}
+
+		const guild = this.message.guild;
+		const ids = state.declared
+			.filter((option) => option.type === "user")
+			.map((option) => state.values.get(option.name) ?? "")
+			.map((raw) => MENTION.exec(raw)?.[1] ?? (SNOWFLAKE.test(raw) ? raw : null))
+			.filter((id): id is string => id !== null && !this.message.client.users.cache.has(id));
+
+		await Promise.all(
+			ids.map(async (id) => {
+				// A member fetch also fills the user cache, and is what `getMember` reads afterwards.
+				const member = guild === null ? null : await guild.members.fetch(id).catch(() => null);
+				if (member === null) await this.message.client.users.fetch(id).catch(() => null);
+			}),
+		);
 	}
 
 	private raw(name: string): string | undefined {

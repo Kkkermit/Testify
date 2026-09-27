@@ -19,7 +19,7 @@ export function warningSummary(warnings: MemberWarning[], t: TFunction): string 
 
 /** Clearing wipes a record that cannot be recovered, so the confirmation asks for the name rather than a click. */
 export function clearConfirmed(typed: string, detail: MemberDetail): boolean {
-	return confirmsName(typed, detail.username);
+	return confirmsName(typed, detail.username, detail.userId);
 }
 
 /** Warnings can still be tidied up once somebody has left, when there are no roles left to compare. */

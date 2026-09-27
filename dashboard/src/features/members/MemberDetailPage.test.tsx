@@ -203,6 +203,17 @@ describe("the member detail page", () => {
 			});
 		});
 
+		it("takes their Discord ID in place of the username", async () => {
+			renderPage();
+			await screen.findByText("Spamming in general");
+
+			await userEvent.click(screen.getByRole("button", { name: /^Kick$/ }));
+			await userEvent.type(screen.getByLabelText("Reason"), "Raiding");
+			await userEvent.type(screen.getByLabelText(/Type kate to confirm/), USER);
+
+			expect(screen.getByRole("button", { name: "Kick them" })).toBeEnabled();
+		});
+
 		it("sends the days of messages to delete with a ban", async () => {
 			let body: unknown;
 			server.use(

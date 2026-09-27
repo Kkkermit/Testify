@@ -582,7 +582,8 @@
 		"kickWarning": "Das Mitglied erhält eine Nachricht mit dem Grund und wird entfernt. Mit einer Einladung kann es zurückkommen.",
 		"banWarning": "Das Mitglied erhält eine Nachricht mit dem Grund und wird gebannt. Es kann erst zurück, wenn der Bann in Discord aufgehoben wird.",
 		"kickConfirm": "Kicken",
-		"banConfirm": "Bannen"
+		"banConfirm": "Bannen",
+		"confirmHint": "Die Discord-ID geht auch."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1115,7 +1116,7 @@
 		"warnTitle": "Mitglied verwarnen",
 		"warnBody": "Suche das Mitglied nach Namen, gib einen Grund an, und die nächste Strafstufe wird angewendet.",
 		"findMember": "Mitglied suchen",
-		"findHint": "Tippe einen Namen oder Benutzernamen.",
+		"findHint": "Tippe einen Namen oder Benutzernamen, oder füge eine Discord-ID oder Erwähnung ein.",
 		"searching": "Suche läuft…",
 		"searchFailed": "Die Suche hat nicht funktioniert. Versuch es noch einmal.",
 		"noMatches": "Niemand auf diesem Server passt dazu.",

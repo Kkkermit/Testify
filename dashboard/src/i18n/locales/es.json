@@ -583,7 +583,8 @@
 		"kickWarning": "Recibe un mensaje con el motivo y se le saca del servidor. Puede volver con una invitación.",
 		"banWarning": "Recibe un mensaje con el motivo y se le banea. No puede volver hasta que se retire el baneo en Discord.",
 		"kickConfirm": "Expulsarlo",
-		"banConfirm": "Banearlo"
+		"banConfirm": "Banearlo",
+		"confirmHint": "También sirve su ID de Discord."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1116,7 +1117,7 @@
 		"warnTitle": "Advertir a un miembro",
 		"warnBody": "Búscalo por su nombre, indica un motivo y se aplica su siguiente sanción.",
 		"findMember": "Buscar un miembro",
-		"findHint": "Empieza a escribir un nombre o un nombre de usuario.",
+		"findHint": "Escribe un nombre o un nombre de usuario, o pega un ID o una mención de Discord.",
 		"searching": "Buscando…",
 		"searchFailed": "La búsqueda no funcionó. Inténtalo de nuevo.",
 		"noMatches": "Nadie de este servidor coincide.",

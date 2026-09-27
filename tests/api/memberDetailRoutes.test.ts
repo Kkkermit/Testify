@@ -269,6 +269,11 @@ describe("POST /members/:userId/kick", () => {
 		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.kick" }));
 	});
 
+	it("takes their Discord ID as the confirmation too", async () => {
+		expect((await request("POST", "/kick", { reason: "Spamming", confirm: TARGET })).status).toBe(200);
+		expect(kicked).toHaveBeenCalled();
+	});
+
 	/** The typed name is the confirmation, and the server is what compares it. */
 	it("refuses without the username typed back", async () => {
 		const response = await request("POST", "/kick", { reason: "Spamming", confirm: "kat" });
@@ -329,6 +334,21 @@ describe("GET /members/search", () => {
 
 		expect(body.map((match) => match.userId)).toEqual([TARGET]);
 		expect(searched).toHaveBeenCalledWith({ query: "ka", limit: 10 });
+	});
+
+	/** A pasted ID names one person exactly, so it is fetched rather than searched as though it were a name. */
+	it("finds somebody by a pasted ID or mention", async () => {
+		for (const q of [TARGET, `<@${TARGET}>`]) {
+			const response = await app().request(`/guilds/${GUILD}/members/search?q=${encodeURIComponent(q)}`);
+			expect(((await response.json()) as { userId: string }[]).map((match) => match.userId)).toEqual([TARGET]);
+		}
+		expect(searched).not.toHaveBeenCalled();
+	});
+
+	it("finds nobody for an ID that is not a member", async () => {
+		const response = await app().request(`/guilds/${GUILD}/members/search?q=100000000000000004`);
+
+		expect(await response.json()).toEqual([]);
 	});
 
 	it("refuses an empty search", async () => {

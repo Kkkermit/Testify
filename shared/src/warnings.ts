@@ -143,7 +143,20 @@ export const banBody = kickBody.extend({
 
 export type BanBody = z.infer<typeof banBody>;
 
-/** Compared the same way on both sides, so the button the form enables is the request the server accepts. */
-export function confirmsName(typed: string, username: string): boolean {
-	return typed.trim().toLowerCase() === username.trim().toLowerCase() && username.trim() !== "";
+/**
+ * The username or the Discord ID typed back, compared the same way on both sides so the button the form enables is
+ * the request the server accepts.
+ */
+export function confirmsName(typed: string, username: string, userId?: string): boolean {
+	const answer = typed.trim();
+	if (userId !== undefined && userId !== "" && answer === userId) return true;
+
+	return answer.toLowerCase() === username.trim().toLowerCase() && username.trim() !== "";
+}
+
+/** A pasted ID or a copied `<@mention>`, read as the ID it names; anything else is a name to search for. */
+export function idFromQuery(query: string): string | null {
+	const trimmed = query.trim();
+
+	return /^<@!?(\d{17,20})>$/.exec(trimmed)?.[1] ?? (/^\d{17,20}$/.test(trimmed) ? trimmed : null);
 }

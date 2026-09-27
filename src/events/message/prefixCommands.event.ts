@@ -35,6 +35,7 @@ export default defineMessageHandler({
 		client.logger.debug({ command: command.name, user: message.author.id }, "Running a prefix command");
 
 		const interaction = new PrefixInteraction(message, command, args);
+		await interaction.options.prepare();
 
 		const refusal = await runChecks(interaction, command, client);
 		if (refusal !== null) {

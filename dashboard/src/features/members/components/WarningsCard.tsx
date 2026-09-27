@@ -119,7 +119,11 @@ export function WarningsCard({
 
 			{confirming && (
 				<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
-					<Field label={t("members.typeToClear", { name: detail.username })} htmlFor="clear-confirm">
+					<Field
+						label={t("members.typeToClear", { name: detail.username })}
+						hint={t("members.confirmHint")}
+						htmlFor="clear-confirm"
+					>
 						<input
 							id="clear-confirm"
 							className={FIELD}

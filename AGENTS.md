@@ -1214,12 +1214,16 @@ about it are load-bearing:
   three and ten of them fit Discord's 40 with room to spare. The test counts them.
 
 Kick and ban reach the dashboard through `kickMember` and `banUser` in `sanctions.util.ts`, the same functions
-`/kick` and `/ban` call. **The username typed back is the confirmation, and the server compares it**
+`/kick` and `/ban` call. **The username or Discord ID typed back is the confirmation, and the server compares it**
 (`confirmsName`), so a hand-written request cannot skip it. A ban reaches somebody who has already left, which a
 kick cannot. Editing, removing and clearing warnings on the web keep the role hierarchy check while the member is
 still in the server — stricter than `/warn`, deliberately — and drop it once they have left, when there are no
-roles to compare and the record still needs tidying. Warning somebody from the dashboard is a search by name
-(`GET /members/search`, registered before `/:userId` so "search" is never read as a member id), never an ID.
+roles to compare and the record still needs tidying. Warning somebody from the dashboard is a search
+(`GET /members/search`, registered before `/:userId` so "search" is never read as a member id): a name searches,
+and a pasted ID or `<@mention>` (`idFromQuery`) fetches that one member. **Prefix commands take IDs the same
+way:** `PrefixOptions.prepare()` fetches anybody given by ID or mention that the cache does not hold before the
+command runs, because `getUser` is synchronous and would otherwise miss everybody who has left or not spoken since
+start-up — `t?ban <id>` needs to reach exactly those people.
 
 ### One command object, both surfaces
 

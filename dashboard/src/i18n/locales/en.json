@@ -582,7 +582,8 @@
 		"kickWarning": "They are sent a message saying why, then removed. They can rejoin with an invite.",
 		"banWarning": "They are sent a message saying why, then banned. They cannot rejoin until the ban is lifted in Discord.",
 		"kickConfirm": "Kick them",
-		"banConfirm": "Ban them"
+		"banConfirm": "Ban them",
+		"confirmHint": "Their Discord ID works too."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1115,7 +1116,7 @@
 		"warnTitle": "Warn a member",
 		"warnBody": "Find them by name, give a reason, and their next punishment step is applied.",
 		"findMember": "Find a member",
-		"findHint": "Start typing a name or a username.",
+		"findHint": "Type a name or a username, or paste a Discord ID or mention.",
 		"searching": "Searching…",
 		"searchFailed": "That search did not work. Try again.",
 		"noMatches": "Nobody in this server matches that.",

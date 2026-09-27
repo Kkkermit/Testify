@@ -583,7 +583,8 @@
 		"kickWarning": "Il reçoit un message avec le motif, puis il est retiré. Il peut revenir avec une invitation.",
 		"banWarning": "Il reçoit un message avec le motif, puis il est banni. Il ne peut pas revenir tant que le bannissement n’est pas levé dans Discord.",
 		"kickConfirm": "L’expulser",
-		"banConfirm": "Le bannir"
+		"banConfirm": "Le bannir",
+		"confirmHint": "Son identifiant Discord fonctionne aussi."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1116,7 +1117,7 @@
 		"warnTitle": "Avertir un membre",
 		"warnBody": "Trouvez-le par son nom, donnez un motif, et sa prochaine sanction s’applique.",
 		"findMember": "Trouver un membre",
-		"findHint": "Commencez à taper un nom ou un nom d’utilisateur.",
+		"findHint": "Tapez un nom ou un nom d’utilisateur, ou collez un identifiant ou une mention Discord.",
 		"searching": "Recherche…",
 		"searchFailed": "La recherche n’a pas fonctionné. Réessayez.",
 		"noMatches": "Personne sur ce serveur ne correspond.",

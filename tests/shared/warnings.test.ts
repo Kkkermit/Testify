@@ -1,6 +1,7 @@
 import {
 	banBody,
 	confirmsName,
+	idFromQuery,
 	stepFor,
 	stepFromValue,
 	stepValue,
@@ -78,9 +79,29 @@ describe("confirmsName", () => {
 		expect(confirmsName("someon", "someone")).toBe(false);
 	});
 
+	it("accepts their Discord ID instead of the name", () => {
+		expect(confirmsName(" 100000000000000002 ", "someone", "100000000000000002")).toBe(true);
+		expect(confirmsName("100000000000000003", "someone", "100000000000000002")).toBe(false);
+	});
+
 	/** An empty name compared with an empty box would otherwise confirm a ban on nothing typed. */
 	it("refuses an empty name", () => {
 		expect(confirmsName("", "")).toBe(false);
+		expect(confirmsName("", "", "")).toBe(false);
+	});
+});
+
+describe("idFromQuery", () => {
+	it("reads a pasted ID and a copied mention as the ID they name", () => {
+		expect(idFromQuery("100000000000000002")).toBe("100000000000000002");
+		expect(idFromQuery(" <@100000000000000002> ")).toBe("100000000000000002");
+		expect(idFromQuery("<@!100000000000000002>")).toBe("100000000000000002");
+	});
+
+	it("leaves a name, or a number too short to be an ID, as a name", () => {
+		expect(idFromQuery("kate")).toBeNull();
+		expect(idFromQuery("12345")).toBeNull();
+		expect(idFromQuery("<@&100000000000000002>")).toBeNull();
 	});
 });
 

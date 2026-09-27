@@ -126,6 +126,58 @@ describe("options from a message", () => {
 		expect(input.options.getUser("user")?.id).toBe(BOB);
 	});
 
+	/** An ID worked only for somebody already cached, so `t?ban <id>` missed anybody who had left. */
+	it("fetches a user given by an ID the cache does not hold, before the command reads it", async () => {
+		const stranger = { id: "777777777777777777", username: "gone", bot: false };
+		const message = fakeMessage();
+		const users = message.client.users as unknown as { cache: Map<string, unknown>; fetch?: jest.Mock };
+		const members = message.guild!.members as unknown as { fetch?: jest.Mock };
+		members.fetch = jest.fn(() => Promise.reject(new Error("Unknown Member")));
+		users.fetch = jest.fn((id: string) => {
+			users.cache.set(id, stranger);
+			return Promise.resolve(stranger);
+		});
+		const input = new PrefixInteraction(message, ban, [stranger.id, "raiding"]);
+
+		expect(input.options.getUser("user")).toBeNull();
+		await input.options.prepare();
+
+		expect(users.fetch).toHaveBeenCalledWith(stranger.id);
+		expect(input.options.getUser("user", true).id).toBe(stranger.id);
+	});
+
+	it("does not ask Discord about somebody already cached, or about a name", async () => {
+		const message = fakeMessage();
+		const users = message.client.users as unknown as { fetch?: jest.Mock };
+		users.fetch = jest.fn();
+
+		await new PrefixInteraction(message, ban, [BOB]).options.prepare();
+		await new PrefixInteraction(message, ban, ["bob"]).options.prepare();
+
+		expect(users.fetch).not.toHaveBeenCalled();
+	});
+
+	/** A missing subcommand is reported by the command's error boundary, not by the lookup ahead of it. */
+	it("leaves a malformed command for the command itself to refuse", async () => {
+		const grouped = defineCommand({
+			name: "warn",
+			description: "Warns.",
+			category: "moderation",
+			subcommands: [
+				{
+					name: "create",
+					description: "Warn.",
+					options: [{ name: "user", description: "Who.", type: "user", required: true }],
+					run: jest.fn(),
+				},
+			],
+		});
+
+		await expect(
+			new PrefixInteraction(fakeMessage(), grouped, ["nonsense"]).options.prepare(),
+		).resolves.toBeUndefined();
+	});
+
 	it("resolves a user given by name", () => {
 		const input = new PrefixInteraction(fakeMessage(), ban, ["bob"]);
 		expect(input.options.getUser("user")?.id).toBe(BOB);
