@@ -39,7 +39,7 @@ jobs:
       # `if: always()` so a failing run still uploads the report that explains it.
       - name: Upload coverage
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: nightly-coverage
           path: coverage/
