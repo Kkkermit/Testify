@@ -15,14 +15,21 @@ export function SegmentedControl<Value extends string | number>({
 	segments,
 	value,
 	onChange,
+	className,
 }: {
 	label: string;
 	segments: readonly Segment<Value>[];
 	value: Value;
 	onChange: (value: Value) => void;
+	/** For a layout the caller needs, such as an even grid of segments on a phone. */
+	className?: string;
 }): React.JSX.Element {
 	return (
-		<div role="group" aria-label={label} className="border-border flex rounded-field border p-0.5">
+		<div
+			role="group"
+			aria-label={label}
+			className={cn("border-border flex max-w-full flex-wrap rounded-field border p-0.5", className)}
+		>
 			{segments.map((segment) => {
 				const control = (
 					<button

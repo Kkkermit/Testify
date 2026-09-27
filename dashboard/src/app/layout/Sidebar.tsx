@@ -55,7 +55,10 @@ export function Sidebar({
 	return (
 		<nav
 			aria-label={t("nav.sections")}
-			onClick={onNavigate}
+			onClick={(event) => {
+				// Only following a link leaves the drawer; a section toggle or the language picker keeps it open.
+				if (event.target instanceof Element && event.target.closest("a") !== null) onNavigate?.();
+			}}
 			className={cnSidebar(expanded)}
 			data-testid={expanded ? "sidebar-drawer" : "sidebar"}
 		>

@@ -190,6 +190,21 @@ describe("the mobile menu", () => {
 		});
 	});
 
+	/** Any tap inside the drawer used to close it, so a section could never be opened on a phone. */
+	it("stays open when a section toggle inside it is pressed", async () => {
+		const user = userEvent.setup();
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		await screen.findByRole("link", { name: "Overview" });
+
+		await user.click(screen.getByRole("button", { name: "Menu" }));
+		const drawer = screen.getByTestId("sidebar-drawer");
+		const community = within(drawer).getByRole("button", { name: "Community" });
+		await user.click(community);
+
+		expect(screen.getByTestId("sidebar-drawer")).toBeInTheDocument();
+		expect(community).toHaveAttribute("aria-expanded", "true");
+	});
+
 	it("puts focus back on the menu button when it is dismissed", async () => {
 		const user = userEvent.setup();
 		renderWithProviders(<AppShell />, { path: "/guilds" });
