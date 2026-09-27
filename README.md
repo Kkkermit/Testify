@@ -692,5 +692,3 @@ Copyright 2026 Kkermit (Kkermit on Discord, [Kkkermit](https://github.com/Kkkerm
 Released under the [Apache License 2.0](LICENSE) with the [Commons Clause](https://commonsclause.com) License
 Condition v1.0. You may use, modify and share it, but you may not sell it, and the attribution in [`NOTICE`](NOTICE)
 must be kept in every copy and derived work.
-
-**Thanks to [TheLegendDev](https://github.com/TheLegenDev) for the readme template from [Nub Bot](https://github.com/TheLegenDev/Nub-Bot)** 💛
