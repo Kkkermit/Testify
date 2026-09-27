@@ -109,7 +109,7 @@
 		"@swc/core": "1.15.46",
 		"@swc/jest": "0.2.39",
 		"@types/jest": "30.0.0",
-		"@types/node": "22.20.1",
+		"@types/node": "26.6.2",
 		"@types/prompts": "2.4.9",
 		"better-npm-audit": "3.11.0",
 		"cross-env": "10.1.0",
