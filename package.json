@@ -113,7 +113,7 @@
 		"@types/prompts": "2.4.9",
 		"better-npm-audit": "3.11.0",
 		"cross-env": "10.1.0",
-		"eslint": "10.8.0",
+		"eslint": "10.11.0",
 		"eslint-config-prettier": "10.1.8",
 		"eslint-import-resolver-typescript": "4.4.5",
 		"eslint-plugin-import-x": "4.17.1",
@@ -126,7 +126,7 @@
 		"tsup": "8.5.1",
 		"tsx": "4.23.15",
 		"typescript": "5.9.3",
-		"typescript-eslint": "8.65.0"
+		"typescript-eslint": "8.70.1"
 	},
 	"workspaces": [
 		"shared",
