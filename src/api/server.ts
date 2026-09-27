@@ -3,7 +3,7 @@ import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, badRequest, notFound, problemBody } from "@api/errors";
+import { ApiProblem, badRequest, notFound, problemBody, UpstreamProblem } from "@api/errors";
 import { verifyCsrf } from "@api/middleware/csrf";
 import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
@@ -83,7 +83,12 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.onError((error, context) => {
 		const problem = asProblem(error);
 
-		if (problem.status >= 500) {
+		if (error instanceof UpstreamProblem) {
+			client.logger.warn(
+				{ discordStatus: error.upstreamStatus, path: context.req.path, method: context.req.method },
+				"[API] Discord did not answer a dashboard request. The page offers a retry; nothing in the bot failed.",
+			);
+		} else if (problem.status >= 500) {
 			client.logger.error(
 				{ err: toError(error), path: context.req.path, method: context.req.method },
 				"[API_ERROR] A dashboard request failed",

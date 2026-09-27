@@ -23,7 +23,8 @@ import {
 	startLogin,
 	statesMatch,
 } from "@api/discord";
-import { badRequest, unauthorised } from "@api/errors";
+import { badRequest, unauthorised, UpstreamProblem } from "@api/errors";
+import { guildLists } from "@api/guildCache";
 import { requireAuth } from "@api/middleware/session";
 import { missingSettings, type OauthConfig, requireOauth } from "@api/oauth";
 import { parseQuery } from "@api/validate";
@@ -140,6 +141,7 @@ auth.post("/logout", requireAuth, async (context) => {
 /** The panic button after a leak: every browser this person is signed in on loses access at once. */
 auth.post("/logout-all", requireAuth, async (context) => {
 	await deleteSessionsFor(sessionOf(context).userId);
+	guildLists.forget(sessionOf(context).userId);
 	clearAuthCookies(context, context.get("env"));
 
 	return context.body(null, 204);
@@ -180,12 +182,28 @@ async function guildsFor(
 ): Promise<ManageableGuild[]> {
 	const client = context.get("client");
 	const owner = client.isOwner(session.userId);
-	const accessToken = await usableToken(oauth, session);
 
-	return (await fetchGuilds(accessToken))
+	return (await rawGuilds(oauth, session))
 		.filter((guild) => owner || canManage(guild.permissions))
 		.map((guild) => toManageable(guild, client.guilds.cache.get(guild.id)?.memberCount, canManage(guild.permissions)))
 		.sort((a, b) => Number(b.botPresent) - Number(a.botPresent) || a.name.localeCompare(b.name));
+}
+
+/** A recent list is reused, and one up to a quarter of an hour old stands in while Discord is refusing. */
+async function rawGuilds(oauth: OauthConfig, session: DashboardSession): Promise<OauthGuild[]> {
+	const fresh = guildLists.fresh(session.userId);
+	if (fresh !== null) return fresh;
+
+	const accessToken = await usableToken(oauth, session);
+	try {
+		const guilds = await fetchGuilds(accessToken);
+		guildLists.set(session.userId, guilds);
+		return guilds;
+	} catch (error) {
+		const stale = error instanceof UpstreamProblem ? guildLists.stale(session.userId) : null;
+		if (stale === null) throw error;
+		return stale;
+	}
 }
 
 async function usableToken(oauth: OauthConfig, session: DashboardSession): Promise<string> {

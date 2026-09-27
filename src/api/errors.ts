@@ -34,6 +34,18 @@ export class ApiProblem extends Error {
 	}
 }
 
+/** Discord refusing or failing to answer: an outside service having a bad moment, not a bug in the bot. */
+export class UpstreamProblem extends ApiProblem {
+	/** What Discord answered, so a log line can tell a rate limit from an outage. */
+	readonly upstreamStatus: number;
+
+	constructor(upstreamStatus: number, message: string) {
+		super(502, "discord_unreachable", message);
+		this.name = "UpstreamProblem";
+		this.upstreamStatus = upstreamStatus;
+	}
+}
+
 export function problemBody(problem: ApiProblem): ApiErrorBody {
 	return {
 		error: {

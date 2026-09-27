@@ -1,3 +1,4 @@
+import { UpstreamProblem } from "@api/errors";
 import { createApi, listenAdvice, startApi, worthRetrying } from "@api/server";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -64,6 +65,23 @@ describe("the error boundary", () => {
 		expect(body.error.code).toBe("internal");
 		expect(body.error.message).not.toContain("secret");
 		expect(logged).toHaveBeenCalled();
+	});
+
+	/** Discord rate-limiting a sign-in check logged a stack trace that read like the bot had broken. */
+	it("notes Discord failing as a warning with its status, not as an error", async () => {
+		const client = readyClient();
+		const errors = jest.spyOn(client.logger, "error");
+		const warnings = jest.spyOn(client.logger, "warn");
+		const app = apiFor(client);
+		app.get("/api/upstream", () => {
+			throw new UpstreamProblem(429, "Discord did not answer. Try again shortly.");
+		});
+
+		const response = await app.request("/api/upstream");
+
+		expect(response.status).toBe(502);
+		expect(errors).not.toHaveBeenCalled();
+		expect(warnings).toHaveBeenCalledWith(expect.objectContaining({ discordStatus: 429 }), expect.any(String));
 	});
 
 	it("answers an unknown path with the same error shape", async () => {

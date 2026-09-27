@@ -1,5 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from "node:crypto";
-import { ApiProblem } from "@api/errors";
+import { ApiProblem, UpstreamProblem } from "@api/errors";
 import { type DashboardUser } from "@testify/shared";
 
 /** Discord's OAuth2 endpoints; the browser never holds a token or the client secret. */
@@ -79,9 +79,7 @@ async function token(body: URLSearchParams): Promise<OauthTokens> {
 		body,
 	});
 
-	if (!response.ok) {
-		throw new ApiProblem(502, "discord_unreachable", "Discord would not complete the sign-in. Try again.");
-	}
+	if (!response.ok) throw new UpstreamProblem(response.status, "Discord would not complete the sign-in. Try again.");
 
 	const data = (await response.json()) as TokenResponse;
 
@@ -123,11 +121,28 @@ export async function refreshTokens(
 	);
 }
 
+/** A rate limit this short is waited out once rather than handed to the browser as a failure. */
+export const MAX_RETRY_WAIT_MS = 3_000;
+
+/** Seconds from Discord's `Retry-After` header, or null when it sent none that can be read. */
+export function retryAfterMs(response: Response): number | null {
+	const seconds = Number(response.headers.get("retry-after"));
+	return Number.isFinite(seconds) && seconds > 0 ? Math.ceil(seconds * 1_000) : null;
+}
+
 async function authed<T>(path: string, accessToken: string): Promise<T> {
-	const response = await fetch(`${API}${path}`, { headers: { authorization: `Bearer ${accessToken}` } });
+	const request = (): Promise<Response> =>
+		fetch(`${API}${path}`, { headers: { authorization: `Bearer ${accessToken}` } });
+	let response = await request();
+
+	const delay = response.status === 429 ? retryAfterMs(response) : null;
+	if (delay !== null && delay <= MAX_RETRY_WAIT_MS) {
+		await new Promise((resolve) => setTimeout(resolve, delay));
+		response = await request();
+	}
 
 	if (response.status === 401) throw new ApiProblem(401, "unauthenticated", "Discord no longer accepts that sign-in.");
-	if (!response.ok) throw new ApiProblem(502, "discord_unreachable", "Discord did not answer. Try again shortly.");
+	if (!response.ok) throw new UpstreamProblem(response.status, "Discord did not answer. Try again shortly.");
 
 	return (await response.json()) as T;
 }

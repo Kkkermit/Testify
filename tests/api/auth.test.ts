@@ -1,4 +1,13 @@
-import { authoriseUrl, callbackUrl, canManage, startLogin, statesMatch } from "@api/discord";
+import {
+	authoriseUrl,
+	callbackUrl,
+	canManage,
+	fetchGuilds,
+	MAX_RETRY_WAIT_MS,
+	startLogin,
+	statesMatch,
+} from "@api/discord";
+import { UpstreamProblem } from "@api/errors";
 import { missingSettings, oauthConfigFrom } from "@api/oauth";
 import { type Env } from "@config/env";
 
@@ -101,6 +110,48 @@ describe("canManage", () => {
 	it("refuses something that is not a bitfield rather than throwing", () => {
 		expect(canManage("not a number")).toBe(false);
 		expect(canManage("")).toBe(false);
+	});
+});
+
+describe("asking Discord on somebody's behalf", () => {
+	let fetched: jest.SpiedFunction<typeof fetch>;
+	const answer = (status: number, headers: Record<string, string> = {}): Response =>
+		new Response(status === 200 ? "[]" : "{}", { status, headers });
+
+	beforeEach(() => {
+		fetched = jest.spyOn(global, "fetch");
+	});
+	afterEach(() => fetched.mockRestore());
+
+	/** A short rate limit on the guild list was reported to the owner as Discord being down. */
+	it("waits out a short rate limit once and then answers", async () => {
+		fetched.mockResolvedValueOnce(answer(429, { "retry-after": "0.01" })).mockResolvedValueOnce(answer(200));
+
+		await expect(fetchGuilds("token")).resolves.toEqual([]);
+		expect(fetched).toHaveBeenCalledTimes(2);
+	});
+
+	it("does not sit on a long rate limit, and says what Discord answered", async () => {
+		const seconds = String(MAX_RETRY_WAIT_MS / 1_000 + 1);
+		fetched.mockResolvedValueOnce(answer(429, { "retry-after": seconds }));
+
+		const failure = await fetchGuilds("token").catch((error: unknown) => error);
+
+		expect(failure).toBeInstanceOf(UpstreamProblem);
+		expect((failure as UpstreamProblem).upstreamStatus).toBe(429);
+		expect(fetched).toHaveBeenCalledTimes(1);
+	});
+
+	it("reports an outage with Discord's own status", async () => {
+		fetched.mockResolvedValueOnce(answer(503));
+
+		await expect(fetchGuilds("token")).rejects.toMatchObject({ status: 502, upstreamStatus: 503 });
+	});
+
+	it("still treats a refused token as signed out rather than as an outage", async () => {
+		fetched.mockResolvedValueOnce(answer(401));
+
+		await expect(fetchGuilds("token")).rejects.toMatchObject({ status: 401, code: "unauthenticated" });
 	});
 });
 

@@ -1626,6 +1626,11 @@ registered behind it silently never runs.
   cache is empty, and a listener left open holds the port against a restart.
 - **Every route runs behind an error boundary**, so a throw becomes a 500 with a code rather than a request that
   never answers. A busy port retries before it gives up, and giving up costs the dashboard rather than the bot.
+- **Discord failing is not the bot failing.** `/me` asks Discord for the person's guild list, an endpoint Discord
+  limits tightly, so right after start-up and a fresh sign-in it can answer 429. `authed` in `src/api/discord.ts`
+  waits out a `Retry-After` of up to `MAX_RETRY_WAIT_MS` once; `GuildListCache` reuses a list for 30 seconds and
+  stands in with one up to 15 minutes old while Discord refuses; and whatever still fails is an `UpstreamProblem`,
+  logged as one `warn` line naming Discord's status rather than as an `[API_ERROR]` with a stack.
 - **No `GET` may mutate anything.** CSRF protection exempts them.
 - **`/eval` is never exposed.** It turns a stolen session cookie into a remote shell.
 - **`DISCORD_CLIENT_SECRET` never reaches a browser.** The API holds it and nothing else does.

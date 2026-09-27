@@ -2,7 +2,8 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import type * as discord from "@api/discord";
 import { exchangeCode, fetchGuilds } from "@api/discord";
-import { ApiProblem, problemBody } from "@api/errors";
+import { ApiProblem, problemBody, UpstreamProblem } from "@api/errors";
+import { guildLists } from "@api/guildCache";
 import { oauthConfigFrom } from "@api/oauth";
 import { auth } from "@api/routes/auth";
 import { type Env } from "@config/env";
@@ -54,7 +55,11 @@ function envFor(overrides: Partial<Env> = {}): Env {
 }
 
 function app(env: Env = envFor(), session: object | undefined = undefined): Hono<ApiBindings> {
-	const client = { isOwner: (id: string) => id === OWNER, logger: { error: jest.fn() } } as unknown as TestifyClient;
+	const client = {
+		isOwner: (id: string) => id === OWNER,
+		logger: { error: jest.fn() },
+		guilds: { cache: new Map() },
+	} as unknown as TestifyClient;
 
 	const instance = new Hono<ApiBindings>();
 	instance.use("*", async (context, next) => {
@@ -271,6 +276,44 @@ describe("GET /auth/me", () => {
 		const body = (await (await app(envFor(), stale).request("/auth/me")).json()) as { isOwner: boolean };
 
 		expect(body.isOwner).toBe(false);
+	});
+
+	const signedIn = (userId: string) => ({
+		_id: "sid",
+		userId,
+		username: "someone",
+		tokenExpiresAt: new Date(Date.now() + 604_800_000),
+	});
+	const guild = { id: "900000000000000001", name: "A server", icon: null, permissions: "32" };
+
+	/** Discord limits the guild list tightly, and a page that asks twice in a breath was refused the second time. */
+	it("asks Discord for the guild list once for a burst of requests", async () => {
+		guildsFetched.mockClear();
+		const session = signedIn("100000000000000011");
+
+		await app(envFor(), session).request("/auth/me");
+		await app(envFor(), session).request("/auth/me");
+
+		expect(guildsFetched).toHaveBeenCalledTimes(1);
+	});
+
+	it("answers with the last list it had while Discord is refusing", async () => {
+		const userId = "100000000000000012";
+		guildLists.set(userId, [guild], Date.now() - 60_000);
+		guildsFetched.mockRejectedValueOnce(new UpstreamProblem(429, "Discord did not answer. Try again shortly."));
+
+		const response = await app(envFor(), signedIn(userId)).request("/auth/me");
+
+		expect(response.status).toBe(200);
+		expect(((await response.json()) as { guilds: { id: string }[] }).guilds.map((g) => g.id)).toEqual([guild.id]);
+	});
+
+	it("still says Discord failed when there is no earlier list to fall back on", async () => {
+		guildsFetched.mockRejectedValueOnce(new UpstreamProblem(500, "Discord did not answer. Try again shortly."));
+
+		const response = await app(envFor(), signedIn("100000000000000013")).request("/auth/me");
+
+		expect(response.status).toBe(502);
 	});
 
 	it("carries no token, secret or refresh token", async () => {
