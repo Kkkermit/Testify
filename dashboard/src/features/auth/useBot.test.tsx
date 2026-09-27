@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useBot } from "@/features/auth/useBot";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { currentBotName, nameTheBot } from "@/i18n";
+import { rememberedBotName } from "@/lib/brand";
 import { botProfile } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -37,5 +38,16 @@ describe("the bot's name", () => {
 		await waitFor(() => {
 			expect(document.title).toBe("Servers · Helper");
 		});
+	});
+
+	/** The next visit names the bot before the API has answered, rather than showing a name it does not have. */
+	it("is remembered for the next visit", async () => {
+		server.use(http.get("/api/bot", () => HttpResponse.json({ ...botProfile, name: "Helper" })));
+		renderWithProviders(<Named />);
+
+		await waitFor(() => {
+			expect(rememberedBotName()).toBe("Helper");
+		});
+		localStorage.removeItem("testify:botName");
 	});
 });

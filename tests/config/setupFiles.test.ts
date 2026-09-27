@@ -16,7 +16,7 @@ describe("the files a new install starts from", () => {
 		expect(ENV_KEYS.filter((key) => !NOT_IN_TEMPLATES.includes(key) && !listed.has(key))).toEqual([]);
 	});
 
-	/** BOT_NAME and the support key were set in .env and silently ignored by `docker compose up`. */
+	/** The support key was set in .env and silently ignored by `docker compose up`. */
 	it("docker-compose.yml passes every variable through to the bot", () => {
 		const compose = read("docker-compose.yml");
 

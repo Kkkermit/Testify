@@ -3,6 +3,7 @@ import { type BotIdentity } from "@testify/shared";
 import { useEffect } from "react";
 import { nameTheBot } from "@/i18n";
 import { api, ApiError } from "@/lib/api";
+import { rememberBotName } from "@/lib/brand";
 import { keys } from "@/lib/queries";
 
 /** The API answers 503 until Discord says the bot is ready, which takes far longer than two quick retries. */
@@ -33,7 +34,9 @@ export function useBot(): UseQueryResult<BotIdentity> {
 
 	const name = bot.data?.name;
 	useEffect(() => {
-		if (name !== undefined) nameTheBot(name);
+		if (name === undefined) return;
+		nameTheBot(name);
+		rememberBotName(name);
 	}, [name]);
 
 	return bot;

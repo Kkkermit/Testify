@@ -2,19 +2,13 @@ import { botName, nameBot } from "@core/brand";
 
 describe("botName", () => {
 	afterEach(() => {
-		nameBot(undefined, () => undefined);
-	});
-
-	it("uses BOT_NAME from the environment over the Discord username", () => {
-		nameBot("Helper", () => "helper-app");
-
-		expect(botName()).toBe("Helper");
+		nameBot(() => undefined);
 	});
 
 	/** Read live, so renaming the bot from the owner console changes it without a restart. */
-	it("follows the Discord username when BOT_NAME is blank", () => {
+	it("follows the Discord username, and uses the built-in name only before login", () => {
 		const discord: { username?: string } = {};
-		nameBot(undefined, () => discord.username);
+		nameBot(() => discord.username);
 
 		expect(botName()).toBe("Testify");
 		discord.username = "helper-app";

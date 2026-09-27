@@ -45,6 +45,8 @@ export class TestifyClient extends Client {
 	readonly logger: Logger;
 	readonly timers: TimerRegistry;
 	readonly startedAt = Date.now();
+	/** The username read over REST while the gateway is still connecting, so the bot is named from the start. */
+	restName: string | undefined;
 
 	/** The dashboard listener once `startApi()` opens one; typed structurally because `src/api` imports this file. */
 	api: { close(): Promise<void> } | null = null;
@@ -62,7 +64,7 @@ export class TestifyClient extends Client {
 		this.env = env;
 		this.logger = logger;
 		this.timers = new TimerRegistry(logger);
-		nameBot(env.BOT_NAME, () => this.user?.username);
+		nameBot(() => this.user?.username ?? this.restName);
 	}
 
 	isOwner(userId: string): boolean {

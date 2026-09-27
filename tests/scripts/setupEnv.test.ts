@@ -16,7 +16,6 @@ describe("the setup questions", () => {
 		expect(field(questions, "DISCORD_OWNER_IDS").check?.("100000000000000001, 100000000000000002")).toBeNull();
 		expect(field(questions, "DISCORD_OWNER_IDS").check?.("100000000000000001, me")).not.toBeNull();
 		expect(field(questions, "MONGODB_URI").check?.("localhost:27017")).toMatch(/mongodb:\/\//);
-		expect(field(questions, "BOT_NAME").check?.("x".repeat(33))).not.toBeNull();
 		expect(field(dashboardFields(true), "DASHBOARD_BASE_URL").check?.("http://localhost:5174/")).not.toBeNull();
 	});
 

@@ -64,13 +64,6 @@ export function fields(isDev: boolean): Field[] {
 			check: (value) => (/^mongodb(\+srv)?:\/\//.test(value) ? null : "It starts with mongodb:// or mongodb+srv://"),
 		},
 		{
-			key: "BOT_NAME",
-			message: "What to call the bot",
-			hint: "Leave blank to use its Discord username",
-			required: false,
-			check: (value) => (value.length > 32 ? "At most 32 characters, like a Discord username." : null),
-		},
-		{
 			key: "DISCORD_DEV_GUILD_ID",
 			message: "Test server ID",
 			hint: isDev ? "Commands appear there only, which is what you want while building" : "Leave blank in production",

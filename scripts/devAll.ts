@@ -2,7 +2,6 @@ import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "dotenv";
-import { resolveBotName } from "../shared/src/brand";
 import { box, colourEnabled, painter } from "@core/terminal";
 
 /** Runs the bot and the dashboard without a shell between them, so one Ctrl+C stops both on Windows too. */
@@ -128,7 +127,7 @@ function main(): void {
 			`${paint.bold("Ctrl+C")} stops both.`,
 		],
 		"info",
-		`${resolveBotName(values.BOT_NAME)} · bot and dashboard`,
+		"Bot and dashboard",
 	);
 
 	const tsx = resolve(root, "node_modules/tsx/dist/cli.mjs");

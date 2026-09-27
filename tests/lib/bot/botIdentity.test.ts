@@ -38,13 +38,12 @@ describe("identityOf", () => {
 		});
 	});
 
-	/** The dashboard names the bot from this, so BOT_NAME has to reach it rather than the Discord username. */
-	it("names the bot by BOT_NAME when one is set, and keeps the username beside it", () => {
-		nameBot("Helper", () => "helper-app");
+	it("names the bot by its Discord username", () => {
+		nameBot(() => "helper-app");
 		const identity = identityOf(userLike({ username: "helper-app" }) as never);
-		nameBot(undefined, () => undefined);
+		nameBot(() => undefined);
 
-		expect(identity).toMatchObject({ name: "Helper", username: "helper-app" });
+		expect(identity).toMatchObject({ name: "helper-app", username: "helper-app" });
 	});
 
 	/** Most applications have neither, so the empty case is the common one rather than the exception. */
@@ -66,8 +65,54 @@ describe("identityOf", () => {
 });
 
 describe("botIdentity", () => {
-	it("says nothing before the gateway is ready", async () => {
-		await expect(botIdentity(clientWith(userLike(), false))).resolves.toBeNull();
+	function connectingClient(get: jest.Mock): TestifyClient {
+		const client = createMockClient({
+			isReady: () => false,
+			rest: {
+				get,
+				cdn: {
+					avatar: (id: string, hash: string) => `https://cdn.discordapp.com/avatars/${id}/${hash}.png`,
+					defaultAvatar: (index: number) => `https://cdn.discordapp.com/embed/avatars/${String(index)}.png`,
+					banner: (id: string, hash: string) => `https://cdn.discordapp.com/banners/${id}/${hash}.png`,
+				},
+			},
+		} as never);
+		nameBot(() => client.restName);
+		return client;
+	}
+
+	afterEach(() => {
+		nameBot(() => undefined);
+	});
+
+	/** The sign-in screen showed the built-in name for as long as the gateway took to connect. */
+	it("reads the bot's own profile over REST while the gateway is still connecting", async () => {
+		const get = jest.fn().mockResolvedValue({
+			id: "100000000000000001",
+			username: "helper-app",
+			avatar: null,
+			banner: null,
+			accent_color: null,
+		});
+
+		const identity = await botIdentity(connectingClient(get));
+
+		expect(identity).toMatchObject({ name: "helper-app", username: "helper-app", bannerUrl: null });
+		expect(identity?.avatarUrl).toMatch(/embed\/avatars\/\d\.png$/);
+	});
+
+	it("reads it once for a burst of polls, not once per poll", async () => {
+		const get = jest.fn().mockResolvedValue({ id: "100000000000000001", username: "helper-app", avatar: "abc" });
+		const client = connectingClient(get);
+
+		await botIdentity(client, 0);
+		await botIdentity(client, 2_000);
+
+		expect(get).toHaveBeenCalledTimes(1);
+	});
+
+	it("says nothing when even the REST read fails, so the page keeps waiting", async () => {
+		await expect(botIdentity(connectingClient(jest.fn().mockRejectedValue(new Error("401"))), 0)).resolves.toBeNull();
 	});
 
 	/** The banner never arrives in the READY payload, so without this fetch it is permanently absent. */

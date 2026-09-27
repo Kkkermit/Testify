@@ -2,16 +2,14 @@ import { resolveBotName } from "@testify/shared";
 
 /** The bot's display name, for every surface that has no client to ask, such as an embed's footer. */
 
-let configured: string | undefined;
-let discordName: () => string | undefined = () => undefined;
+let discordName: () => string | null | undefined = () => undefined;
 
-/** Called once by the client, which knows both `BOT_NAME` and, after login, its own username. */
-export function nameBot(fromEnv: string | undefined, fromDiscord: () => string | undefined): void {
-	configured = fromEnv;
+/** Called once by the client, which knows its own username after login. */
+export function nameBot(fromDiscord: () => string | null | undefined): void {
 	discordName = fromDiscord;
 }
 
-/** `BOT_NAME` from `.env`, else the Discord username, else the built-in name. */
+/** The Discord username, read live so a rename shows without a restart; the built-in name before login. */
 export function botName(): string {
-	return resolveBotName(configured, discordName());
+	return resolveBotName(discordName());
 }

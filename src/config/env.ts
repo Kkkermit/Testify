@@ -2,7 +2,6 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { z } from "zod";
-import { BOT_NAME_MAX } from "@testify/shared";
 
 /** Everything the bot reads from the environment, in one list. */
 
@@ -27,12 +26,6 @@ const fields = z.object({
 	MONGODB_URI: z.string().min(1, "is required — a MongoDB connection string"),
 
 	// Optional.
-	BOT_NAME: z
-		.string()
-		.trim()
-		.min(1)
-		.max(BOT_NAME_MAX, `is at most ${String(BOT_NAME_MAX)} characters, like a Discord username`)
-		.optional(),
 	NODE_ENV: z.enum(["development", "production", "test"]).default("production"),
 	LOG_LEVEL: z.enum(["trace", "debug", "info", "warn", "error", "fatal"]).default("info"),
 	DISCORD_DEV_GUILD_ID: id.optional(),

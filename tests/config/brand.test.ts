@@ -17,12 +17,12 @@ function filesUnder(path: string): string[] {
 }
 
 describe("the bot's name", () => {
-	/** `BOT_NAME` is somebody's explicit choice, so it beats the username their Discord application happens to have. */
-	it("is BOT_NAME first, then the Discord username, then the built-in name", () => {
-		expect(resolveBotName("Helper", "Helper#app")).toBe("Helper");
-		expect(resolveBotName(undefined, "Helper#app")).toBe("Helper#app");
-		expect(resolveBotName("  ", null)).toBe(DEFAULT_BOT_NAME);
-		expect(resolveBotName(undefined, undefined)).toBe(DEFAULT_BOT_NAME);
+	/** The name is whatever the token's own bot is called on Discord, so a renamed application needs no setting. */
+	it("is the Discord username, and the built-in name only until Discord has said", () => {
+		expect(resolveBotName("Helper")).toBe("Helper");
+		expect(resolveBotName("  ")).toBe(DEFAULT_BOT_NAME);
+		expect(resolveBotName(null)).toBe(DEFAULT_BOT_NAME);
+		expect(resolveBotName()).toBe(DEFAULT_BOT_NAME);
 	});
 
 	/** Forks had to find and replace the name across 200 strings, and missed the ones that mattered. */

@@ -95,11 +95,17 @@ describe("a half-configured install", () => {
 });
 
 describe("the bot's own identity", () => {
+	// Every answer is remembered for the next visit, so one case's bot must not name the next case's.
+	afterEach(() => {
+		localStorage.removeItem("testify:botName");
+	});
+
 	/** 08-DESIGN.md: a fork should look like their bot without anybody editing CSS. */
 	it("shows the bot's name and avatar rather than a hardcoded brand", async () => {
+		server.use(http.get("/api/bot", () => HttpResponse.json({ ...botProfile, name: "Helper Bot" })));
 		const { container } = renderWithProviders(<SignInPage />, { path: "/sign-in" });
 
-		expect(await screen.findByRole("heading", { name: "Testify" })).toBeInTheDocument();
+		expect(await screen.findByRole("heading", { name: "Helper Bot" })).toBeInTheDocument();
 		await waitFor(() => {
 			expect(container.querySelector('img[src*="cdn.discordapp.com"]')).toBeInTheDocument();
 		});
@@ -139,7 +145,22 @@ describe("the bot's own identity", () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in" });
 
 		expect(await screen.findByRole("button", { name: /sign in with discord/i })).toBeInTheDocument();
-		expect(screen.getByRole("heading", { name: "Testify" })).toBeInTheDocument();
+		expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeInTheDocument();
+		// A bot called something else was named "Testify" for as long as it took to connect.
+		expect(screen.queryByText(/Testify/)).not.toBeInTheDocument();
+	});
+
+	it("names the bot at once from the last visit while it connects", async () => {
+		localStorage.setItem("testify:botName", "Helper Bot");
+		server.use(
+			http.get("/api/bot", () =>
+				HttpResponse.json({ error: { code: "bot_connecting", message: "Connecting." } }, { status: 503 }),
+			),
+		);
+
+		renderWithProviders(<SignInPage />, { path: "/sign-in" });
+
+		expect(await screen.findByRole("heading", { name: "Helper Bot" })).toBeInTheDocument();
 	});
 });
 

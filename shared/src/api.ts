@@ -17,7 +17,7 @@ export interface HealthResponse {
 /** The bot's public profile, unauthenticated so the sign-in screen can carry the bot's identity. */
 export interface BotIdentity {
 	id: string;
-	/** What to call the bot: `BOT_NAME` from `.env` when set, otherwise the Discord username. */
+	/** What to call the bot: its Discord username. */
 	name: string;
 	username: string;
 	avatarUrl: string;

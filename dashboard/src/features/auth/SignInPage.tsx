@@ -3,12 +3,12 @@ import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
 import { Backdrop } from "@/components/motion";
-import { Button, Card, Eyebrow, PAGE_TITLE } from "@/components/primitives";
+import { Button, Card, Eyebrow, PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
 import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { BUILT_IN_BOT_NAME } from "@/lib/brand";
+import { rememberedBotName } from "@/lib/brand";
 import { hardRedirect } from "@/lib/redirect";
 
 /** One button, and the two scopes named — asking for less is a feature, so say what it is. */
@@ -19,7 +19,8 @@ export function SignInPage(): React.JSX.Element {
 	const setup = useSetup();
 	const bot = useBot();
 	const returnTo = params.get("returnTo") ?? "/guilds";
-	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
+	// Never the built-in name: a bot not called that is misnamed on the one screen everybody sees first.
+	const name = bot.data?.name ?? rememberedBotName();
 
 	if (setup.data?.configured === false)
 		return <SetupNeeded missing={setup.data.missing} redirectUri={setup.data.redirectUri} />;
@@ -38,11 +39,22 @@ export function SignInPage(): React.JSX.Element {
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-tile ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
 							<Eyebrow>{t("auth.signIn")}</Eyebrow>
-							<h1 className={PAGE_TITLE}>{name}</h1>
+							{name === null ? (
+								<>
+									<h1 className="sr-only">{t("auth.signIn")}</h1>
+									<Skeleton className="h-8 w-40" />
+								</>
+							) : (
+								<h1 className={PAGE_TITLE}>{name}</h1>
+							)}
 						</div>
 					</div>
 
-					<p className="text-muted-foreground text-sm">{t("auth.configureBody", { name })}</p>
+					{name === null ? (
+						<Skeleton className="h-10 w-full" />
+					) : (
+						<p className="text-muted-foreground text-sm">{t("auth.configureBody", { name })}</p>
+					)}
 
 					{params.get("denied") !== null && (
 						<p className="text-warning text-sm" role="status">

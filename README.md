@@ -231,7 +231,6 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `DISCORD_CLIENT_ID`    |    ✅    | **General Information → Application ID** in the Developer Portal                                 |
 | `DISCORD_OWNER_IDS`    |    ✅    | Your Discord user ID. Comma-separate for several owners                                          |
 | `MONGODB_URI`          |    ✅    | The connection string from step 4                                                                |
-| `BOT_NAME`             |    —     | What to call the bot everywhere. Blank uses its Discord username                                 |
 | `DISCORD_DEV_GUILD_ID` |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
 | `LOG_LEVEL`            |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
 | `CHANNEL_ERROR_LOG`    |    —     | Where command failures are reported                                                              |
@@ -610,7 +609,8 @@ rebrand it and run it for your own servers, but:
 - **Do not sell it.** You may not charge for the bot, or for hosting, support or a service whose value comes mainly
   from it.
 
-Set `BOT_NAME` in `.env` to rename it; the colours and links live in `src/config/theme.ts`.
+Rename it in the Discord Developer Portal and every surface follows; the colours and links live in
+`src/config/theme.ts`.
 
 </details>
 
