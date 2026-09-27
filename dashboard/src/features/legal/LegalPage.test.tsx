@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { screen } from "@testing-library/react";
-import { type LegalDocument, PRIVACY, TERMS } from "@/features/legal/legal.content";
+import { screen, within } from "@testing-library/react";
+import { type LegalDocument, PRIVACY, sectionId, TERMS } from "@/features/legal/legal.content";
 import { LegalPage } from "@/features/legal/LegalPage";
 import en from "@/i18n/locales/en.json";
 import { expectNoViolations } from "@/test/axe";
+import { t } from "@/test/english";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
 /** The documents are keys now, so the prose a reader sees is what English resolves them to. */
@@ -13,8 +14,14 @@ function english(key: string): string {
 }
 
 function prose(document: LegalDocument): string {
-	return document.sections
-		.flatMap((section) => [...section.paragraphs, ...(section.list ?? []), ...(section.after ?? [])])
+	return [
+		...document.glance.map((row) => row.value),
+		...document.sections.flatMap((section) => [
+			...section.paragraphs,
+			...(section.list ?? []),
+			...(section.after ?? []),
+		]),
+	]
 		.map(english)
 		.join(" ");
 }
@@ -32,9 +39,30 @@ describe("the legal pages", () => {
 		renderWithProviders(<LegalPage document={document} />, { path: `/${path}` });
 
 		expect(screen.getByRole("heading", { level: 1, name: english(document.title) })).toBeInTheDocument();
-		for (const section of document.sections) {
-			expect(screen.getByRole("heading", { level: 2, name: english(section.heading) })).toBeInTheDocument();
-		}
+		document.sections.forEach((section, index) => {
+			const name = `${String(index + 1)}. ${t(section.heading)}`;
+			expect(screen.getByRole("heading", { level: 2, name })).toBeInTheDocument();
+		});
+	});
+
+	/** One document with a contents list, rather than a card per section the reader has to scroll past. */
+	it("links every section from the contents", () => {
+		renderWithProviders(<LegalPage document={PRIVACY} />, { path: "/privacy" });
+
+		const contents = screen.getByRole("navigation", { name: "Contents" });
+		PRIVACY.sections.forEach((section, index) => {
+			const link = within(contents).getByRole("link", { name: `${String(index + 1)}. ${t(section.heading)}` });
+			expect(link).toHaveAttribute("href", `#${sectionId(section)}`);
+			expect(document.getElementById(sectionId(section))).not.toBeNull();
+		});
+	});
+
+	it("says when the text last changed, and sums it up before the detail", () => {
+		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
+
+		expect(screen.getByText("Last updated 27 Sept 2026")).toBeInTheDocument();
+		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
+		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
 
 	/** The claims the code has to keep true, so a change that breaks one breaks a test. */
@@ -63,6 +91,7 @@ describe("the legal pages", () => {
 
 		const retention = /retentionDays: (\d+)/.exec(constants)?.[1];
 		expect(text).toContain(`Audit records, command usage and screen counts: ${String(retention)} days`);
+		expect(text).toContain(`logs and counts for ${String(retention)} days`);
 		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain(`${String(retention)} * 24 * 60 * 60`);
 
 		const ring = Number(/logRingCapacity: ([\d_]+)/.exec(constants)?.[1]?.replace("_", ""));
@@ -88,6 +117,16 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/several accounts .* get round a cooldown/);
 		expect(text).toMatch(/Exploiting a bug/);
 		expect(text).toMatch(/Blacklisting your account\. A blacklisted account is refused every command/);
+	});
+
+	/** A self-hosted bot has no single company behind it, so every duty lands on whoever runs this instance. */
+	it("names the operator as the one to ask, and what they can be asked for", () => {
+		const privacy = prose(PRIVACY);
+
+		expect(privacy).toMatch(/the operator is the controller of this data/);
+		expect(privacy).toMatch(/A copy of what is stored about you/);
+		expect(privacy).toMatch(/Nothing is sold, shared for advertising/);
+		expect(prose(TERMS)).toMatch(/neither the operator nor the project’s authors are liable/);
 	});
 
 	/** The terms repeat what LICENSE grants, so a change of licence has to change them too. */
