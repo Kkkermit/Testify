@@ -1,6 +1,6 @@
 import { cn } from "@/lib/cn";
 
-/** Inline, so it inherits `currentColor` and needs no request; a fork replaces this file and the favicon to rebrand. */
+/** Inline, so it inherits `currentColor` and needs no request; a fork replaces this file and `src/assets/favicon.svg` to rebrand. */
 export function Logo({ size = 24, className }: { size?: number; className?: string }): React.JSX.Element {
 	return (
 		<svg
