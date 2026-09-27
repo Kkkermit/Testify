@@ -42,6 +42,7 @@ export const keys = {
 		member: (userId: string) => ["guild", id, "member", userId] as const,
 	}),
 	owner: {
+		access: () => ["owner", "access"] as const,
 		stats: () => ["owner", "stats"] as const,
 		guilds: (page: number) => ["owner", "guilds", page] as const,
 		usage: (days: number) => ["owner", "usage", days] as const,

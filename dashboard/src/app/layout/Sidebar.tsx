@@ -55,7 +55,10 @@ export function Sidebar({
 	return (
 		<nav
 			aria-label={t("nav.sections")}
-			onClick={onNavigate}
+			onClick={(event) => {
+				// Only following a link leaves the drawer; a section toggle or the language picker keeps it open.
+				if (event.target instanceof Element && event.target.closest("a") !== null) onNavigate?.();
+			}}
 			className={cnSidebar(expanded)}
 			data-testid={expanded ? "sidebar-drawer" : "sidebar"}
 		>
@@ -105,7 +108,8 @@ export function Sidebar({
 				);
 			})}
 
-			<div className="border-border mt-auto flex flex-col gap-1 border-t pt-3">
+			{/* Pinned to the foot of the desktop rail; in the drawer it follows on, or a tall phone leaves a band of nothing above it. */}
+			<div className={cn("border-border flex flex-col gap-1 border-t pt-3", expanded ? "mt-4" : "mt-auto")}>
 				{user !== null && (
 					<div className={ROW}>
 						<span aria-hidden="true" className={ICON_SLOT}>
@@ -173,6 +177,6 @@ export function Sidebar({
 function cnSidebar(expanded: boolean): string {
 	const base = "border-border flex shrink-0 flex-col p-3";
 	return expanded
-		? `${base} bg-card h-full w-64 border-r`
+		? `${base} bg-card h-full w-64 overflow-y-auto overscroll-contain border-r`
 		: `${base} bg-card/80 scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r backdrop-blur-sm md:flex lg:w-60`;
 }

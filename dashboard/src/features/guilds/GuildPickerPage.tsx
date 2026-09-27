@@ -1,8 +1,10 @@
 import { Search, ServerOff } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link, useSearchParams } from "react-router";
-import { FIELD } from "@/components/form";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
+import { GUILD_REFUSED_NOTICE } from "@/app/RequireGuild";
+import { OWNER_ONLY_NOTICE } from "@/app/RequireOwner";
+import { FIELD, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
 import { EmptyState, Eyebrow, PageHeader, Pager, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
@@ -28,6 +30,14 @@ export function GuildPickerPage(): React.JSX.Element {
 	const [search, setSearch] = useState("");
 	// One page number per section, in the URL, so Back and a refresh land where the reader was.
 	const [params, setParams] = useSearchParams();
+	const location = useLocation();
+	const navigate = useNavigate();
+	const [notice] = useState(() => (location.state as { notice?: string } | null)?.notice ?? null);
+
+	useEffect(() => {
+		// Taken out of history once read, so a refresh or Back does not say it again.
+		if (notice !== null) void navigate(".", { replace: true, state: null });
+	}, [notice, navigate]);
 
 	const groups = useMemo(() => groupGuilds(filterGuilds(me.data?.guilds ?? [], search)), [me.data, search]);
 	const found = groups.reduce((total, group) => total + group.guilds.length, 0);
@@ -61,6 +71,8 @@ export function GuildPickerPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader title={t("guilds.title")} subtitle={t("guilds.subtitle")} />
+			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
+			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused")}</Warning>}
 
 			<label className="motion-reveal relative block">
 				<span className="sr-only">{t("guilds.search")}</span>

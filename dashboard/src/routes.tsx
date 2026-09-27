@@ -2,12 +2,13 @@ import { type ComponentType, lazy, type LazyExoticComponent, Suspense } from "re
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppShell } from "@/app/AppShell";
 import { RequireAuth } from "@/app/RequireAuth";
+import { RequireGuild } from "@/app/RequireGuild";
 import { RequireOwner } from "@/app/RequireOwner";
 import { RouteError } from "@/app/RouteError";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
-// Eager: the shell already needs it for the owner console's disguise, so a chunk of its own would save nothing.
+// Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 import { NotFoundPage } from "@/features/not-found/NotFoundPage";
 
 // Lazy per route, so a server manager never downloads the owner console.
@@ -71,26 +72,32 @@ export const routes = [
 						errorElement: <RouteError />,
 						children: [
 							{ path: "/guilds", element: lazily(<GuildPickerPage />) },
-							{ path: "/guilds/:guildId", element: lazily(<GuildOverviewPage />) },
-							{ path: "/guilds/:guildId/insights", element: lazily(<InsightsPage />) },
-							{ path: "/guilds/:guildId/levelling", element: lazily(<LevellingPage />) },
-							{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
-							{ path: "/guilds/:guildId/audit-log", element: lazily(<AuditLogPage />) },
-							{ path: "/guilds/:guildId/settings", element: lazily(<SettingsPage />) },
-							{ path: "/guilds/:guildId/automod", element: lazily(<AutomodPage />) },
-							{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
-							{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
-							{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
-							{ path: "/guilds/:guildId/tickets", element: lazily(<TicketsPage />) },
-							{ path: "/guilds/:guildId/warnings", element: lazily(<WarningsPage />) },
-							{ path: "/guilds/:guildId/changes", element: lazily(<ChangesPage />) },
-							{ path: "/guilds/:guildId/bot-stats", element: lazily(<BotStatsPage />) },
-							{ path: "/guilds/:guildId/member-count", element: lazily(<MemberCountPage />) },
-							{ path: "/guilds/:guildId/lottery", element: lazily(<LotteryPage />) },
-							{ path: "/guilds/:guildId/giveaways", element: lazily(<GiveawaysPage />) },
-							{ path: "/guilds/:guildId/members", element: lazily(<MembersPage />) },
-							{ path: "/guilds/:guildId/members/:userId", element: lazily(<MemberDetailPage />) },
-							{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
+							// Drawn only once the server says this person may manage the guild in the path.
+							{
+								element: <RequireGuild />,
+								children: [
+									{ path: "/guilds/:guildId", element: lazily(<GuildOverviewPage />) },
+									{ path: "/guilds/:guildId/insights", element: lazily(<InsightsPage />) },
+									{ path: "/guilds/:guildId/levelling", element: lazily(<LevellingPage />) },
+									{ path: "/guilds/:guildId/welcome", element: lazily(<WelcomePage />) },
+									{ path: "/guilds/:guildId/audit-log", element: lazily(<AuditLogPage />) },
+									{ path: "/guilds/:guildId/settings", element: lazily(<SettingsPage />) },
+									{ path: "/guilds/:guildId/automod", element: lazily(<AutomodPage />) },
+									{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
+									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
+									{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
+									{ path: "/guilds/:guildId/tickets", element: lazily(<TicketsPage />) },
+									{ path: "/guilds/:guildId/warnings", element: lazily(<WarningsPage />) },
+									{ path: "/guilds/:guildId/changes", element: lazily(<ChangesPage />) },
+									{ path: "/guilds/:guildId/bot-stats", element: lazily(<BotStatsPage />) },
+									{ path: "/guilds/:guildId/member-count", element: lazily(<MemberCountPage />) },
+									{ path: "/guilds/:guildId/lottery", element: lazily(<LotteryPage />) },
+									{ path: "/guilds/:guildId/giveaways", element: lazily(<GiveawaysPage />) },
+									{ path: "/guilds/:guildId/members", element: lazily(<MembersPage />) },
+									{ path: "/guilds/:guildId/members/:userId", element: lazily(<MemberDetailPage />) },
+									{ path: "/guilds/:guildId/commands", element: lazily(<CommandsPage />) },
+								],
+							},
 							{ path: "/commands", element: lazily(<CommandsPage />) },
 							{ path: "/help", element: lazily(<HelpPage />) },
 							{ path: "/status", element: lazily(<StatusPage />) },

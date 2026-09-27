@@ -826,6 +826,7 @@ export const handlers = [
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 	http.get("/api/control", () => HttpResponse.json(botControl)),
 	http.get("/api/control/guilds/:guildId", () => HttpResponse.json(guildDetail)),
+	http.get("/api/owner/access", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/owner/stats", () =>
 		HttpResponse.json({
 			guilds: 3,

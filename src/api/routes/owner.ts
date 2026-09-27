@@ -20,6 +20,9 @@ owner.route("/commands", globalCommandToggles);
 owner.route("/blacklist", blacklist);
 owner.route("/runner", commandRunner);
 
+/** The page asks this before drawing anything, because the `isOwner` on `/auth/me` is only as honest as the browser. */
+owner.get("/access", (context) => context.body(null, 204));
+
 owner.get("/stats", (context) => {
 	const client = context.get("client");
 

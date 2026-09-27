@@ -46,7 +46,9 @@ export function BoardTable({
 							className="hover:text-accent flex min-w-0 items-center gap-2 transition-colors duration-150"
 						>
 							<Avatar name={row.displayName} url={row.avatarUrl} size={24} seed={row.userId} />
-							<span className="truncate">{row.displayName}</span>
+							<span className="min-w-0 truncate" title={row.displayName}>
+								{row.displayName}
+							</span>
 							{row.userId === youId && <Badge>{t("members.you")}</Badge>}
 							{!row.inGuild && <Badge tone="warning">{t("members.left")}</Badge>}
 						</Link>

@@ -1556,6 +1556,7 @@ writing it once. Every piece has a test proven able to fail.
 | `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS      |
 | `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
 | `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
+| `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach     |
 | `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
 | `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
 | `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
@@ -1601,6 +1602,38 @@ Everything behind it assumes it ran, so five things in it are load-bearing:
 
 `serveDashboard()` is registered in `startApi`, **after** every route, because it is a catch-all — anything
 registered behind it silently never runs.
+
+### Nothing on the web reaches further than Discord would
+
+Manage Server is what opens a server's screens, and it is not what Discord asks for most of what those screens do.
+The dashboard once let a Manage Server manager kick, ban, warn and hand out roles, because the bot has those rights
+and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and three things about it are load-bearing:
+
+- **An action asks what its command asks.** `requirePermission` sits on the route: Kick Members for a kick, Ban
+  Members for a ban or a lifted softban, Moderate Members for warnings, Manage Roles for roles on join, level
+  rewards and the verified role, Manage Nicknames for the bot's nickname, and Administrator for setting a balance,
+  which is what `/give` asks. A new write that does more than change the bot's own settings takes the permission
+  its command already declares.
+- **Every channel and role a write names is checked, whatever the route.** `requireReach` runs on every write under
+  `/guilds/:guildId/*` and walks the body for snowflakes under a key naming a channel, category or role: each must
+  be in this server, and a channel must be one its person can see — and post in, when the key is singular and the
+  bot will post there. Without it a manager could aim this server's welcome text at another server's channel by
+  id. Keying on names means a new field is covered with no edit, which is the point; a field whose name does not
+  say channel or role is not.
+- **A role the bot hands out sits below its person's own highest role** (`requireGrantable`), as Discord's own
+  Manage Roles rule does, unless they own the server — and never above the bot, never managed, never `@everyone`,
+  even for the bot's owner. Boost roles, ignore lists and DJ roles are never handed out, so they only need to exist.
+
+A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each of the
+three and `tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody
+in the server without Manage Server and somebody not in it; a route added without its gate fails the build. Both
+were proved to go red.
+
+**The page asks too, and never trusts the guild list it was given.** `RequireGuild` wraps every
+`/guilds/:guildId/*` screen and draws nothing until the overview answers; signed out, not a member or without
+Manage Server sends the reader to `/guilds` with a notice, and any refusal later re-asks, so losing the role
+mid-session ejects. A refusal about one action — `missing_permission` — re-asks and finds access intact, so a
+manager without Kick Members stays where they are. `useRecheckOnRefusal` is the one mechanism both gates share.
 
 ### Rules that carry over
 
@@ -1811,9 +1844,12 @@ so installing it needs `--force` and breaks `npm ci`.
 **anything a tooltip says must be an addition to a control that already has its own accessible name.** A tooltip
 is a pointer affordance; a control labelled only by one is unreachable to anybody arriving another way.
 
-Four things follow, and all four have tests proved able to fail:
+Five things follow, and all five have tests proved able to fail:
 
 - It opens on `focusin` as well as hover, so a keyboard reaches it.
+- **It never opens for touch input** (`touch: false`). A tap already follows the link, and a box that appeared
+  under a finger stopped the mobile drawer scrolling mid-swipe — measured with real touch events, where three swipes
+  in fourteen died exactly when a tooltip was showing.
 - It sets `aria-describedby`, never `aria-labelledby`.
 - **Escape closes it without moving focus.** tippy binds no key handler of its own — read out of
   `tippy.cjs.js`, not assumed — so a box covering the control underneath it had no way out but tabbing away.
@@ -1951,6 +1987,12 @@ five tabs past the edge, and landing on `?tab=control` showed the strip at its s
 active tab into view with `inline: "nearest"`, which cannot move the page itself. Both are verified in a real
 browser at 390px: landing on Control leaves the strip at `scrollLeft: 510` with the left end faded.
 
+**The drawer scrolls itself and holds the page still.** It is `overflow-y-auto` with `overscroll-contain`, and
+`MobileNav` sets `overflow: hidden` on the body while it is open: without both, a phone shorter than the drawer
+scrolled the page behind it, and Sign out was out of reach. The account block is pinned to the foot only on the
+desktop rail — in the drawer it follows the sections, or a tall phone opens a band of nothing above it. Measured
+in a real browser at 390×640 and 520×1100, and pinned by `AppShell.test.tsx`.
+
 **At the icon-only width the labels are `sr-only`, never `hidden`.** `hidden` is `display: none`, which removes
 them from the accessibility tree and leaves every navigation link named nothing — the exact bug this pattern
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
@@ -2006,9 +2048,18 @@ Two rules it enforces:
 
 ### The owner console, and what it is allowed to know
 
-Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so a manager never
-learns the console is there. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
+Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so the API
+confirms nothing to somebody probing it. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
 the whole console, and the logs tab is precisely the screen you want when something is wrong.
+
+**The page asks the server, never `/auth/me` alone.** `isOwner` on `/auth/me` is only as honest as the browser that
+received it: rewritten in DevTools, it once drew the console's frame for somebody who was not the owner, every tab
+refused. `RequireOwner` draws nothing until `GET /owner/access` answers 204, sends anybody refused to `/guilds` with a
+notice that they lack permission, and asks again whenever an owner query or any mutation is refused, so losing
+ownership mid-session ejects too. A check that fails without refusing — a restart, a 503 — offers the owner a retry
+rather than the door. None of that is the boundary; `requireOwner` is, and `tests/api/ownerGate.test.ts` walks every
+route the owner, analytics and control routers declare and fails on any that answers a signed-in non-owner with
+anything but 404. Both halves were proved to go red.
 
 **A tab whose read fails says so, and offers a retry.** Isolating the tabs is only half of it — every one of
 them then found its own way to hide the failure: runtime and control returned a skeleton whenever `data` was

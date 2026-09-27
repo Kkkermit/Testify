@@ -12,5 +12,9 @@ const TONES = {
 export type BadgeTone = keyof typeof TONES;
 
 export function Badge({ tone = "muted", children }: { tone?: BadgeTone; children: ReactNode }): React.JSX.Element {
-	return <span className={cn("rounded-full px-2 py-0.5 text-xs font-medium", TONES[tone])}>{children}</span>;
+	return (
+		<span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap", TONES[tone])}>
+			{children}
+		</span>
+	);
 }

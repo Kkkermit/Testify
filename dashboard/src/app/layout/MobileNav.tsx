@@ -30,6 +30,10 @@ export function MobileNav({
 
 		panelRef.current?.querySelector("a")?.focus();
 
+		// The page behind would otherwise take the swipe meant for the drawer.
+		const scrolling = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+
 		const onKeyDown = (event: KeyboardEvent): void => {
 			if (event.key === "Escape") onOpenChange(false);
 		};
@@ -37,6 +41,7 @@ export function MobileNav({
 		document.addEventListener("keydown", onKeyDown);
 		return () => {
 			document.removeEventListener("keydown", onKeyDown);
+			document.body.style.overflow = scrolling;
 		};
 	}, [open, onOpenChange]);
 

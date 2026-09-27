@@ -226,6 +226,8 @@
 	"guilds": {
 		"title": "Servers",
 		"subtitle": "Everywhere you can change {{bot}}’s settings, or add it.",
+		"ownerOnly": "You don’t have permission to view that page, so you’ve been brought back here.",
+		"guildRefused": "You don’t have permission to manage that server, so you’ve been brought back here.",
 		"search": "Search servers",
 		"emptyTitle": "Nothing to configure yet",
 		"noMatchTitle": "No server matches that",

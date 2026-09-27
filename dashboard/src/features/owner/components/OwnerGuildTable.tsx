@@ -38,9 +38,11 @@ export function OwnerGuildTable({
 				>
 					<td className={CELL}>
 						{onSelect === undefined ? (
-							<span className="flex items-center gap-2">
+							<span className="flex min-w-0 items-center gap-2">
 								<Avatar name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
-								<span className="truncate">{guild.name}</span>
+								<span className="min-w-0 truncate" title={guild.name}>
+									{guild.name}
+								</span>
 							</span>
 						) : (
 							// A button rather than a clickable row: a row is not focusable and announces nothing.
@@ -50,10 +52,12 @@ export function OwnerGuildTable({
 								onClick={() => {
 									onSelect(guild.id);
 								}}
-								className="hover:text-accent flex items-center gap-2 text-left transition-colors duration-150"
+								className="hover:text-accent flex w-full min-w-0 items-center gap-2 text-left transition-colors duration-150"
 							>
 								<Avatar name={guild.name} url={guild.iconUrl} size={24} seed={guild.id} />
-								<span className="truncate">{guild.name}</span>
+								<span className="min-w-0 truncate" title={guild.name}>
+									{guild.name}
+								</span>
 							</button>
 						)}
 					</td>

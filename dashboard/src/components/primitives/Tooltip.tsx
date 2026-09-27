@@ -33,6 +33,8 @@ export function Tooltip({
 			// `focusin` is what carries focus through to the anchor, so a keyboard reaches this too.
 			trigger: "mouseenter focusin",
 			aria: { content: "describedby", expanded: false },
+			// A tap already follows the link, and a box shown mid-swipe stops the drawer scrolling under the finger.
+			touch: false,
 			appendTo: () => document.body,
 		});
 

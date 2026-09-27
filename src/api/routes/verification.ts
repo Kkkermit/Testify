@@ -1,8 +1,9 @@
-import { type Guild } from "discord.js";
+import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { badRequest, notInGuild } from "@api/errors";
+import { demandPermission, requireGrantable } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { botName } from "@core/brand";
@@ -44,6 +45,11 @@ verification.get("/", async (context) => context.json(await configOf(guildOf(con
 verification.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, verificationPatchSchema);
+	// Refused before anything is read, so a request the caller may not make learns nothing about the stored config.
+	if (typeof patch.roleId === "string") {
+		demandPermission(context, PermissionFlagsBits.ManageRoles);
+		requireGrantable(context, [patch.roleId]);
+	}
 	const before = await configOf(guild);
 
 	if (patch.enabled === false) {

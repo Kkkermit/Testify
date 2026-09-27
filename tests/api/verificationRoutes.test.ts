@@ -9,6 +9,7 @@ import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
 import { publishVerifyPanel } from "@lib/settings/verifyActions.util";
 import { type VerificationConfigResponse } from "@testify/shared";
+import { BOT_ABOVE_ROLES, grantableRoles } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/verificationRepository", () => ({
 	deleteVerifyConfig: jest.fn(() => Promise.resolve(true)),
@@ -33,7 +34,12 @@ const published = jest.mocked(publishVerifyPanel);
 const audited = jest.mocked(recordAudit);
 
 function app(): Hono<ApiBindings> {
-	const guild = { id: GUILD, name: "Test Server", roles: { cache: new Collection() }, members: { me: null } };
+	const guild = {
+		id: GUILD,
+		name: "Test Server",
+		roles: { cache: grantableRoles() },
+		members: { me: BOT_ABOVE_ROLES },
+	};
 	const client = {
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
 		isOwner: (id: string) => id === OWNER,

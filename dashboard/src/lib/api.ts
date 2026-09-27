@@ -18,6 +18,11 @@ export class ApiError extends Error {
 	}
 }
 
+/** The server declining this person, as opposed to failing: signed out, not allowed, or not shown to them at all. */
+export function isRefusal(error: unknown): boolean {
+	return error instanceof ApiError && [401, 403, 404].includes(error.status);
+}
+
 function readCookie(name: string): string | null {
 	const match = document.cookie.split("; ").find((part) => part.startsWith(`${name}=`));
 	return match === undefined ? null : decodeURIComponent(match.slice(name.length + 1));

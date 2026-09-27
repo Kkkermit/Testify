@@ -1,7 +1,9 @@
+import { PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { notInGuild } from "@api/errors";
+import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
@@ -76,9 +78,14 @@ levelling.put("/boosts", async (context) => {
 	return context.json(await configOf(guildId));
 });
 
-levelling.put("/rewards", async (context) => {
+// The bot hands these roles out, so choosing them asks what `/autorole` asks.
+levelling.put("/rewards", requirePermission(PermissionFlagsBits.ManageRoles), async (context) => {
 	const guildId = guildIdOf(context);
 	const rewards = await parseBody(context, rewardsSchema);
+	requireGrantable(
+		context,
+		rewards.map((reward) => reward.roleId),
+	);
 	const before = await configOf(guildId);
 
 	// Stored sorted, so every reader gets them in order without sorting again.

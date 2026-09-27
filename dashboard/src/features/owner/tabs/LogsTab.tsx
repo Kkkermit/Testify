@@ -59,7 +59,14 @@ export function LogsTab({
 					onChange={onSearch}
 				/>
 
-				<SegmentedControl label={t("owner.minimumLevel")} segments={levelSegments} value={level} onChange={onLevel} />
+				{/* Six levels do not fit one row on a phone, so they sit as two even rows of three there. */}
+				<SegmentedControl
+					className="grid w-full grid-cols-3 sm:flex sm:w-auto"
+					label={t("owner.minimumLevel")}
+					segments={levelSegments}
+					value={level}
+					onChange={onLevel}
+				/>
 
 				<Button
 					variant="ghost"

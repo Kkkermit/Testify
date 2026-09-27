@@ -1,8 +1,9 @@
-import { Collection, type Guild, type GuildMember } from "discord.js";
+import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { badRequest, forbidden, notFound, notInGuild } from "@api/errors";
+import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
@@ -129,7 +130,8 @@ members.patch("/:userId/level", async (context) => {
 	return context.json(await detail(context));
 });
 
-members.patch("/:userId/money", async (context) => {
+// `/give` and `/reset` both ask for Administrator, so writing a balance by hand does too.
+members.patch("/:userId/money", requirePermission(PermissionFlagsBits.Administrator), async (context) => {
 	const { current, member } = await actOn(context);
 	const { purse, delta } = await parseBody(context, moneyBody);
 
@@ -149,7 +151,7 @@ members.patch("/:userId/money", async (context) => {
 
 const CONFIRM_REFUSED = "Type their username or their Discord ID exactly to confirm.";
 
-members.post("/:userId/kick", async (context) => {
+members.post("/:userId/kick", requirePermission(PermissionFlagsBits.KickMembers), async (context) => {
 	const { current, member } = await actOn(context);
 	const body = await parseBody(context, kickBody);
 	if (!confirmsName(body.confirm, current.username, current.userId)) throw badRequest(CONFIRM_REFUSED);
@@ -165,7 +167,7 @@ members.post("/:userId/kick", async (context) => {
 });
 
 /** Unlike a kick, this reaches somebody who has already left, so the hierarchy check only applies to a member. */
-members.post("/:userId/ban", async (context) => {
+members.post("/:userId/ban", requirePermission(PermissionFlagsBits.BanMembers), async (context) => {
 	const { guild, userId, member, moderator } = await scene(context);
 	const body = await parseBody(context, banBody);
 	const client = context.get("client");
@@ -193,7 +195,7 @@ members.post("/:userId/ban", async (context) => {
 });
 
 /** Skips the hierarchy check: a softbanned user is not a member and has no roles to compare. */
-members.delete("/:userId/softban", async (context) => {
+members.delete("/:userId/softban", requirePermission(PermissionFlagsBits.BanMembers), async (context) => {
 	const guild = guildOf(context);
 	const { userId } = parseParams(context, memberParams);
 	const session = context.get("session");
