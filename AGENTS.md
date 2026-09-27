@@ -2015,7 +2015,7 @@ received it: rewritten in DevTools, it once drew the console's frame for somebod
 refused. `RequireOwner` draws nothing until `GET /owner/access` answers 204, sends anybody refused to `/guilds` with a
 notice that they lack permission, and asks again whenever an owner query or any mutation is refused, so losing
 ownership mid-session ejects too. A check that fails without refusing — a restart, a 503 — offers the owner a retry
-rather than the door. None of that is the boundary; `requireOwner` is, and `tests/api/ownerRoutes.test.ts` walks every
+rather than the door. None of that is the boundary; `requireOwner` is, and `tests/api/ownerGate.test.ts` walks every
 route the owner, analytics and control routers declare and fails on any that answers a signed-in non-owner with
 anything but 404. Both halves were proved to go red.
 
