@@ -23,6 +23,7 @@ const AutomodPage = page(async () => import("@/features/automod/AutomodPage"), "
 const StickyPage = page(async () => import("@/features/sticky/StickyPage"), "StickyPage");
 const TreasurePage = page(async () => import("@/features/treasure/TreasurePage"), "TreasurePage");
 const MusicPage = page(async () => import("@/features/music/MusicPage"), "MusicPage");
+const CasinoPage = page(async () => import("@/features/casino/CasinoPage"), "CasinoPage");
 const TicketsPage = page(async () => import("@/features/tickets/TicketsPage"), "TicketsPage");
 const WarningsPage = page(async () => import("@/features/warnings/WarningsPage"), "WarningsPage");
 const ChangesPage = page(async () => import("@/features/changes/ChangesPage"), "ChangesPage");
@@ -86,6 +87,7 @@ export const routes = [
 									{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
 									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 									{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },
+									{ path: "/guilds/:guildId/casino", element: lazily(<CasinoPage />) },
 									{ path: "/guilds/:guildId/tickets", element: lazily(<TicketsPage />) },
 									{ path: "/guilds/:guildId/warnings", element: lazily(<WarningsPage />) },
 									{ path: "/guilds/:guildId/changes", element: lazily(<ChangesPage />) },

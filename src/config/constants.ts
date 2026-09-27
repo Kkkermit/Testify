@@ -12,7 +12,6 @@ export const ECONOMY_COOLDOWNS = {
 	rob: HOUR_MS,
 	heist: 3 * HOUR_MS,
 	beg: 5 * MINUTE_MS,
-	gamble: 10 * SECOND_MS,
 } as const;
 
 export type EconomyCooldownKey = keyof typeof ECONOMY_COOLDOWNS;

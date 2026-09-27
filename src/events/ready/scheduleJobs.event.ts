@@ -1,12 +1,14 @@
 import { Events } from "discord.js";
 import { INTERVALS } from "@config/constants";
 import { defineEvent } from "@core/event";
+import { settleIdleHands } from "@jobs/casinoSweep.util";
 import { runLotteryDraws } from "@jobs/lotteryDraw.util";
 import { payPassiveIncome } from "@jobs/passiveIncome.util";
 import { refreshBotStats } from "@jobs/refreshBotStats.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 import { recordHeartbeat } from "@jobs/statusHeartbeat.util";
 import { startEventLoopMonitor, watchDiscordApi } from "@lib/bot";
+import { CASINO_TIMING } from "@lib/casino";
 import { flushActivity } from "@lib/info";
 import { STATUS_LIMITS } from "@testify/shared";
 
@@ -20,6 +22,7 @@ export default defineEvent({
 		client.timers.every("passive-income", INTERVALS.passiveIncomeMs, () => payPassiveIncome(client));
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
 		client.timers.every("insights", INTERVALS.insightsFlushMs, () => flushActivity(client.logger));
+		client.timers.every("casino-hands", CASINO_TIMING.sweepEveryMs, () => settleIdleHands(client));
 
 		startEventLoopMonitor();
 		watchDiscordApi(client);

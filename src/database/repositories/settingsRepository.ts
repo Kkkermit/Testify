@@ -21,6 +21,7 @@ import {
 	GuildPrefix,
 	type PrefixSettings,
 } from "@database/models/guildSettings.schema";
+import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
@@ -291,6 +292,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		GuildPrefix.deleteMany({ guildId }).exec(),
 		purgeCommandToggles(guildId),
 		purgeMusicSettings(guildId),
+		purgeCasino(guildId),
 		purgeWarnLadder(guildId),
 	]);
 }

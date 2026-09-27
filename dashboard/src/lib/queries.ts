@@ -27,6 +27,7 @@ export const keys = {
 		channels: () => ["guild", id, "channels"] as const,
 		roles: () => ["guild", id, "roles"] as const,
 		music: () => ["guild", id, "music"] as const,
+		casino: () => ["guild", id, "casino"] as const,
 		botStats: () => ["guild", id, "bot-stats"] as const,
 		memberCount: () => ["guild", id, "member-count"] as const,
 		warnings: (page: number, perPage: number, query: string) =>

@@ -1,4 +1,3 @@
-import blackjack from "@commands/games/subcommands/blackjack.command";
 import eightBall from "@commands/games/subcommands/eightBall.command";
 import fastType from "@commands/games/subcommands/fastType.command";
 import guessTheNumber from "@commands/games/subcommands/guessTheNumber.command";
@@ -14,7 +13,6 @@ export default defineCommand({
 	category: "games",
 
 	subcommands: [
-		asSubcommand(blackjack, ["bj"]),
 		asSubcommand(eightBall),
 		asSubcommand(fastType, ["fasttype"]),
 		asSubcommand(guessTheNumber, ["guessnumber"]),

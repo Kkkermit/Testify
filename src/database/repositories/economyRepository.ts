@@ -108,7 +108,6 @@ const COOLDOWN_FIELDS = {
 	rob: "lastRobbed",
 	heist: "lastHeist",
 	beg: "lastBegged",
-	gamble: "lastBegged",
 } as const satisfies Record<EconomyCooldownKey, keyof EconomyAccount>;
 
 export async function setCooldown(
