@@ -118,7 +118,7 @@
 		"eslint-import-resolver-typescript": "4.4.5",
 		"eslint-plugin-import-x": "4.17.1",
 		"husky": "9.1.7",
-		"jest": "30.4.2",
+		"jest": "30.5.2",
 		"lint-staged": "17.2.0",
 		"mongodb-memory-server": "11.2.0",
 		"prettier": "3.9.9",
