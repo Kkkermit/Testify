@@ -149,34 +149,30 @@ to reap orphaned processes.
 
 ## Troubleshooting
 
-| What you see                                         | What it is                                                                   |
-| ---------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `required variable DISCORD_TOKEN is missing a value` | No `.env`, or the variable is blank in it                                    |
-| Cards render with no text on them                    | The font package is missing — you are not using this repo's Dockerfile       |
-| Dashboard refuses the connection                     | `DASHBOARD_BIND` is `127.0.0.1`; in a container it must be `0.0.0.0`         |
-| `Your .env file needs attention`                     | The bot's own validation. It names every problem at once — read them all     |
-| Signing in bounces back to the sign-in screen        | The OAuth2 redirect URI does not match `DASHBOARD_BASE_URL`                  |
-| Commands do not appear in Discord                    | The client is showing a cached list — reload it with Ctrl+R (Cmd+R on macOS) |
+| What you see                                         | What it is                                                                    |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `required variable DISCORD_TOKEN is missing a value` | No `.env`, or the variable is blank in it                                     |
+| Cards render with no text on them                    | The font package is missing — you are not using this repo's Dockerfile        |
+| Dashboard refuses the connection                     | `DASHBOARD_BIND` is `127.0.0.1`; in a container it must be `0.0.0.0`          |
+| `Your .env file needs attention`                     | The bot's own validation. It names every problem at once — read them all      |
+| Signing in bounces back to the sign-in screen        | The OAuth2 redirect URI does not match `DASHBOARD_BASE_URL`                   |
+| Commands do not appear in Discord                    | The client is showing a cached list — reload it with Ctrl+R (Cmd+R on macOS)  |
+| `open //./pipe/dockerDesktopLinuxEngine`             | Docker Desktop is not running. Start it and wait for "Engine running"         |
+| `HCS_E_HYPERV_NOT_INSTALLED`                         | Windows needs Virtual Machine Platform on and virtualisation on in the BIOS   |
+| `401 Unauthorized` fetching `docker/dockerfile:1`    | A stale Docker Hub login. `docker logout`, or sign in again in Docker Desktop |
+| `npm ci` … `Missing: … from lock file`               | `npm install` rewrote the lockfile. `git checkout -- package-lock.json`       |
+| `Database` fails with `localhost` in the address     | `localhost` is the bot's own container. Remove `MONGODB_URI` to use `mongo`   |
 
 ---
 
-## What has not been verified
+## What has been verified
 
-**The image has not been built or run**, because the environment this was written in has no Docker daemon. What
-was done instead was to reproduce each stage outside a container and check it directly:
+**The image has been built and run with Docker Desktop on Windows**, and the bot came up in it and served
+Discord. Separately, in a Linux sandbox:
 
-- **The build stage was run end to end** in a tree installed with `--ignore-scripts` and containing only the
-  files `.dockerignore` permits. `build:shared`, `build:bot` and `build:dashboard` all succeed, the emitted
-  `dist/` carries no unrewritten `@core/…` aliases, and `verify:bundle` reports one copy of React — so the
-  hoisting hazard survives this layering too.
-- **esbuild works without its `postinstall`.** It is the one build-critical package that has one, so
-  `--ignore-scripts` was worth checking rather than assuming: the shim resolves the platform package at run
-  time, and both the CLI and the JS API were exercised.
-- **The runtime install resolves everything the bot loads.** Against the production-only, dashboard-excluded
-  module set, the loader registers all 76 commands, 23 buttons, 16 events and 75 prefix aliases.
-- **The compiled layout resolves the SPA** — `dashboardRoot()` finds `dashboard/dist` from `dist/api`.
-- **`docker compose config` validates**, and refuses by name when a required variable is missing.
+- **The build stage runs end to end.** `npm ci --ignore-scripts`, then `build:shared`, `build:bot` and
+  `build:dashboard`, and `verify:bundle` reports one copy of React inside the image.
+- **The stack starts under compose.** The bot waits for MongoDB's health check, connects to it at `mongo:27017`,
+  and loads 79 commands, 27 buttons and 16 events from the runtime install.
 
-What that leaves genuinely untested is the container itself: the base image tag (not pinned to a digest),
-`fonts-dejavu-core` actually satisfying Skia's font lookup on that base, and the healthcheck sample above.
-Expect to iterate on the first `docker compose build`.
+Still untested: the healthcheck sample above, and the base image tag, which is not pinned to a digest.
