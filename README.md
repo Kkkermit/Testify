@@ -7,8 +7,6 @@
 
 <img align="center" alt="Testify banner" src="https://i.postimg.cc/v87R8PSx/test.png">
 
-<h1 align="center"><strong>There is a current re-wite of the codebase taking effect. changing this repo from JavaScript to TypeScript and introducing a dashboard, cleaning up the codebase, refiening commands and code and an overall uplift :) check the active branches to see what's going on!</strong></h1>
-
 <p align="center">
 <img align="center" alt="GitHub Issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge">
 <img align="center" alt="License: Apache 2.0 with Commons Clause" src="https://img.shields.io/badge/license-Apache_2.0_%2B_Commons_Clause-blue?style=for-the-badge">
