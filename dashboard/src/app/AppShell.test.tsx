@@ -205,6 +205,36 @@ describe("the mobile menu", () => {
 		expect(community).toHaveAttribute("aria-expanded", "true");
 	});
 
+	/** The drawer could not scroll, so a swipe moved the page behind it and the drawer's foot was out of reach. */
+	it("scrolls itself and holds the page behind still while open", async () => {
+		const user = userEvent.setup();
+		renderWithProviders(<AppShell />, { path: "/guilds" });
+		await screen.findByRole("link", { name: "Servers" });
+
+		await user.click(screen.getByRole("button", { name: "Menu" }));
+		expect(screen.getByTestId("sidebar-drawer")).toHaveClass("overflow-y-auto");
+		expect(document.body.style.overflow).toBe("hidden");
+
+		await user.keyboard("{Escape}");
+		await waitFor(() => {
+			expect(screen.queryByTestId("sidebar-drawer")).toBeNull();
+		});
+		expect(document.body.style.overflow).toBe("");
+	});
+
+	/** Pinned to the drawer's foot, the account block left a band of nothing above it on a tall phone. */
+	it("follows the sections with the account block in the drawer, and pins it only on the desktop rail", async () => {
+		const user = userEvent.setup();
+		renderWithProviders(<AppShell />, { path: "/guilds" });
+		await screen.findByRole("link", { name: "Servers" });
+		const footOf = (nav: HTMLElement) => nav.lastElementChild;
+
+		expect(footOf(screen.getByTestId("sidebar"))).toHaveClass("mt-auto");
+
+		await user.click(screen.getByRole("button", { name: "Menu" }));
+		expect(footOf(screen.getByTestId("sidebar-drawer"))).not.toHaveClass("mt-auto");
+	});
+
 	it("puts focus back on the menu button when it is dismissed", async () => {
 		const user = userEvent.setup();
 		renderWithProviders(<AppShell />, { path: "/guilds" });
