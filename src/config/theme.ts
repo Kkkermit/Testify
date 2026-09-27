@@ -41,6 +41,7 @@ export const theme = {
 		next: "▶️",
 		last: "⏭️",
 		tick: "✔️",
+		maintenance: "🛠️",
 	},
 } as const;
 

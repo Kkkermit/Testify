@@ -1,8 +1,12 @@
 import musicAdd from "@buttons/musicAdd";
+import type * as Checks from "@core/checks";
 import { UserFacingError } from "@core/errors";
 import type * as Music from "@lib/music";
 
-jest.mock("@core/checks", () => ({ checkMusicControl: jest.fn(() => Promise.resolve(null)) }));
+jest.mock("@core/checks", () => ({
+	...jest.requireActual<typeof Checks>("@core/checks"),
+	checkMusicControl: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@lib/music", () => ({
 	...jest.requireActual<typeof Music>("@lib/music"),
 	queueRequest: jest.fn(),

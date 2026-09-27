@@ -91,7 +91,7 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 `.env` (or `.env.development.example` to `.env.development`) and fill it in.
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
-**Optional:** `BOT_NAME` (what to call the bot; blank uses its Discord username), `NODE_ENV`, `LOG_LEVEL`,
+**Optional:** `NODE_ENV`, `LOG_LEVEL`,
 `DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
 `CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
@@ -708,20 +708,21 @@ IDs) and its default.
   `theme.colours`, so its colour language is one table. `tests/config/palette.test.ts` fails on a duplicated
   category colour or on a colour name written outside `src/config/`; both halves were proved able to fail.
 - **No committed snowflakes.** Every ID goes through `env.ts`.
-- **The bot's name comes from `.env`.** `resolveBotName` in `shared/src/brand.ts` is the one rule: `BOT_NAME`
-  wins because it is an explicit choice, then the bot's Discord username, then `DEFAULT_BOT_NAME` — the only place
-  the word "Testify" is written as a name. So a fork renamed in the Developer Portal needs nothing, and one that
-  wants a different name sets one variable. The bot calls `botName()` from `@core/brand`, which the client primes
-  in its constructor and which reads the username live, so an embed footer with no client to ask still gets it
-  right. `/api/bot` hands the resolved `name` to the dashboard, whose strings write `{{bot}}` — i18next fills it
-  from `defaultVariables`, and `useBot()` updates it once the answer lands. Before that, the dashboard shows the
-  `BOT_NAME` Vite read out of the same `.env` at build time (`__BOT_NAME__`, also the `<title>` in
-  `index.html`), so a changed name in a built dashboard is right from the first `/api/bot` answer, and right from
-  the first paint after the next build. A help article writes `{bot}`. `tests/config/brand.test.ts` fails on the
-  name written anywhere else in `src`, `shared/src`, `dashboard/src`, the articles or `index.html`.
+- **The bot's name is its Discord username, and nothing sets it.** There is no `BOT_NAME`: a name in `.env` was
+  a second place to rename the bot, and it drifted from the one Discord shows. `resolveBotName` in
+  `shared/src/brand.ts` takes the username and falls back to `DEFAULT_BOT_NAME` only before Discord has said — the
+  only place the word "Testify" is written as a name. The bot calls `botName()` from `@core/brand`, which reads the
+  username live, so an embed footer with no client to ask still gets it right. **The name is known before the
+  gateway is ready:** while it connects, `botIdentity` reads the bot's own user over REST with the token
+  (`client.restName`), so `/api/bot` answers from the start rather than 503-ing the sign-in screen into showing the
+  built-in name. The dashboard's strings write `{{bot}}`, which i18next fills from `defaultVariables` and
+  `useBot()` updates once the answer lands; the answer is also kept in `localStorage` (`rememberedBotName`), and
+  with nothing remembered the sign-in screen shows a placeholder rather than a name the bot may not have. A help
+  article writes `{bot}`. `tests/config/brand.test.ts` fails on the name written anywhere else in `src`,
+  `shared/src`, `dashboard/src`, the articles or `index.html`.
 - **Every variable reaches every way of running the bot.** `tests/config/setupFiles.test.ts` fails on a variable
   missing from either `.env*.example` or from `docker-compose.yml`, where one missing is set in `.env` and
-  silently ignored by `docker compose up` — which is exactly how `BOT_NAME` and the support key went missing.
+  silently ignored by `docker compose up` — which is exactly how the support key went missing.
 
 Adding a variable: add it to the zod schema, to **both** `.env.example` and `.env.development.example` with a
 comment explaining it, and to `scripts/setupEnv.ts` if it should be prompted for.
@@ -2092,6 +2093,9 @@ Four things about it are load-bearing:
   refusal runs before the command body on both surfaces, and there are tests proved able to fail.
 - **Nobody bypasses it, the bot owner included.** "Off" that quietly still runs for one person is a much worse
   thing to debug than one that is simply off, and the dashboard is one click away for whoever turned it off.
+- **Off everywhere reads as maintenance, not as a fault.** `checkSwitchedOff` answers a bot-wide switch with a
+  `TitledRefusal` — "under maintenance", and that the command may come back — which `refusalEmbed` shows as a
+  warning with its own heading; `refusalText` flattens it where a surface has no heading to give it.
 - **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
   that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way

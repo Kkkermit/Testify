@@ -1,4 +1,5 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput, type Subcommand } from "@core/command";
@@ -10,8 +11,19 @@ import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { isAlwaysEnabled } from "@testify/shared";
 
+/** A refusal with a heading of its own, for a state that is nobody's mistake. */
+export interface TitledRefusal {
+	title: string;
+	message: string;
+}
+
 /** Why a command was refused, or null if it may run. */
-export type CheckFailure = string | null;
+export type CheckFailure = string | TitledRefusal | null;
+
+/** The refusal as plain text, for a surface that cannot show a heading. */
+export function refusalText(refusal: string | TitledRefusal): string {
+	return typeof refusal === "string" ? refusal : `**${refusal.title}**\n${refusal.message}`;
+}
 
 const cooldowns = new Map<string, number>();
 
@@ -99,7 +111,10 @@ async function checkSwitchedOff(name: string, guildId: string | null): Promise<C
 	if (isAlwaysEnabled(name)) return null;
 
 	if ((await disabledGlobally()).includes(name)) {
-		return "That command is switched off. The bot owner can turn it back on from the dashboard.";
+		return {
+			title: `${theme.emoji.maintenance} This command is under maintenance`,
+			message: `The bot's owner has switched \`/${name}\` off for now. It may come back in the future, so try again later.`,
+		};
 	}
 
 	if (guildId !== null && (await disabledInGuild(guildId)).includes(name)) {

@@ -1,6 +1,6 @@
 import { categoryColour, theme } from "@config/theme";
 import { botName } from "@core/brand";
-import { embed, errorEmbed, successEmbed, withPageFooter } from "@lib/discord/embeds.util";
+import { embed, errorEmbed, refusalEmbed, successEmbed, withPageFooter } from "@lib/discord/embeds.util";
 
 describe("embed", () => {
 	/** Read from the registry rather than spelled out, so repainting a category is not also a test edit. */
@@ -58,5 +58,18 @@ describe("withPageFooter", () => {
 	it("keeps whatever footer was already there", () => {
 		const built = withPageFooter(embed({ footer: "12 items" }), 0, 3);
 		expect(built.data.footer?.text).toBe("Page 1 of 3 • 12 items");
+	});
+});
+
+describe("refusalEmbed", () => {
+	it("keeps a plain refusal as an error", () => {
+		expect(refusalEmbed("Nope.").data.description).toBe(`${theme.emoji.error} Nope.`);
+	});
+
+	it("gives a titled refusal its own heading and no error cross", () => {
+		const data = refusalEmbed({ title: "Under maintenance", message: "Back later." }).data;
+
+		expect(data.title).toBe("Under maintenance");
+		expect(data.description).toBe("Back later.");
 	});
 });

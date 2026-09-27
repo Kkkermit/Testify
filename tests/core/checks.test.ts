@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import lottery from "@commands/economy/lottery.command";
-import { checkMusicControl, clearCooldowns, runChecks } from "@core/checks";
+import { checkMusicControl, clearCooldowns, refusalText, runChecks } from "@core/checks";
 import { defineCommand } from "@core/command";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
@@ -150,12 +150,23 @@ describe("commands that have been switched off", () => {
 		musicSettings.mockResolvedValue(null);
 	});
 
-	it("refuses one the owner switched off everywhere", async () => {
+	/** "Switched off" read as a fault the reader could fix; it is a pause the owner chose, and it may end. */
+	it("says a command the owner switched off everywhere is under maintenance for now", async () => {
 		offGlobally.mockResolvedValue(["ping"]);
 
 		const refusal = await runChecks(createMockInteraction(), plain, createMockClient());
 
-		expect(refusal).toContain("switched off");
+		expect(refusal).toEqual({
+			title: expect.stringMatching(/under maintenance/) as string,
+			message: expect.stringMatching(/`\/ping` off for now\. It may come back/) as string,
+		});
+	});
+
+	it("words a titled refusal as one piece of text where no heading fits", () => {
+		expect(refusalText({ title: "Under maintenance", message: "Back later." })).toBe(
+			"**Under maintenance**\nBack later.",
+		);
+		expect(refusalText("Plain.")).toBe("Plain.");
 	});
 
 	it("refuses one this server switched off", async () => {
@@ -171,7 +182,9 @@ describe("commands that have been switched off", () => {
 		offGlobally.mockResolvedValue(["ping"]);
 		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });
 
-		expect(await runChecks(interaction, plain, createMockClient())).toContain("switched off");
+		expect(await runChecks(interaction, plain, createMockClient())).toMatchObject({
+			title: expect.stringMatching(/maintenance/) as string,
+		});
 	});
 
 	it("lets a command through when a different one is off", async () => {

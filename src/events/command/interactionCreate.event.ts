@@ -4,7 +4,7 @@ import { runChecks } from "@core/checks";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { countCommandUse, recordCommandTime } from "@lib/bot";
-import { errorEmbed } from "@lib/discord";
+import { errorEmbed, refusalEmbed } from "@lib/discord";
 
 /** The only `interactionCreate` listener. */
 export default defineEvent({
@@ -39,7 +39,7 @@ export default defineEvent({
 
 			const refusal = await runChecks(interaction, command, client);
 			if (refusal !== null) {
-				await interaction.reply({ embeds: [errorEmbed(refusal)], flags: MessageFlags.Ephemeral });
+				await interaction.reply({ embeds: [refusalEmbed(refusal)], flags: MessageFlags.Ephemeral });
 				return;
 			}
 

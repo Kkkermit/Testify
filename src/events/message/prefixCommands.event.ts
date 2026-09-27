@@ -5,7 +5,7 @@ import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/settingsRepository";
 import { countCommandUse, recordCommandTime } from "@lib/bot";
-import { errorEmbed } from "@lib/discord";
+import { refusalEmbed } from "@lib/discord";
 
 /** Runs `t?ban @someone` through the same code and checks as `/ban`. */
 export default defineMessageHandler({
@@ -39,7 +39,7 @@ export default defineMessageHandler({
 
 		const refusal = await runChecks(interaction, command, client);
 		if (refusal !== null) {
-			await message.reply({ embeds: [errorEmbed(refusal)] });
+			await message.reply({ embeds: [refusalEmbed(refusal)] });
 			return true;
 		}
 

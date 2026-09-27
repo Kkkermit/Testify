@@ -1,6 +1,6 @@
 import { type GuildMember, MessageFlags } from "discord.js";
 import { type ComponentInteraction, defineButton } from "@core/button";
-import { checkMusicControl } from "@core/checks";
+import { checkMusicControl, refusalText } from "@core/checks";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { modalForm, successEmbed } from "@lib/discord";
@@ -17,7 +17,7 @@ async function requireMusicAccess(interaction: ComponentInteraction, client: Tes
 
 	const member = interaction.member as GuildMember;
 	const refusal = await checkMusicControl(client, { userId: interaction.user.id, guildId: guild.id, member });
-	if (refusal !== null) throw new UserFacingError(refusal);
+	if (refusal !== null) throw new UserFacingError(refusalText(refusal));
 
 	voiceChannelOf(member);
 	const session = findSession(guild.id);
