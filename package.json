@@ -1,6 +1,6 @@
 {
 	"name": "testify",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "Open source, multipurpose Discord bot written in TypeScript",
 	"main": "dist/index.js",
 	"license": "SEE LICENSE IN LICENSE",
