@@ -2,6 +2,7 @@ import { Search, ServerOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
+import { GUILD_REFUSED_NOTICE } from "@/app/RequireGuild";
 import { OWNER_ONLY_NOTICE } from "@/app/RequireOwner";
 import { FIELD, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
@@ -31,12 +32,12 @@ export function GuildPickerPage(): React.JSX.Element {
 	const [params, setParams] = useSearchParams();
 	const location = useLocation();
 	const navigate = useNavigate();
-	const [ownerOnly] = useState(() => (location.state as { notice?: string } | null)?.notice === OWNER_ONLY_NOTICE);
+	const [notice] = useState(() => (location.state as { notice?: string } | null)?.notice ?? null);
 
 	useEffect(() => {
 		// Taken out of history once read, so a refresh or Back does not say it again.
-		if (ownerOnly) void navigate(".", { replace: true, state: null });
-	}, [ownerOnly, navigate]);
+		if (notice !== null) void navigate(".", { replace: true, state: null });
+	}, [notice, navigate]);
 
 	const groups = useMemo(() => groupGuilds(filterGuilds(me.data?.guilds ?? [], search)), [me.data, search]);
 	const found = groups.reduce((total, group) => total + group.guilds.length, 0);
@@ -70,7 +71,8 @@ export function GuildPickerPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader title={t("guilds.title")} subtitle={t("guilds.subtitle")} />
-			{ownerOnly && <Warning>{t("guilds.ownerOnly")}</Warning>}
+			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
+			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused")}</Warning>}
 
 			<label className="motion-reveal relative block">
 				<span className="sr-only">{t("guilds.search")}</span>

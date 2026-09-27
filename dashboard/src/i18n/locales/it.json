@@ -228,6 +228,7 @@
 		"title": "Server",
 		"subtitle": "Ovunque tu possa cambiare le impostazioni di {{bot}}, o aggiungerlo.",
 		"ownerOnly": "Non hai il permesso di vedere quella pagina, quindi sei stato riportato qui.",
+		"guildRefused": "Non hai il permesso di gestire quel server, quindi sei stato riportato qui.",
 		"search": "Cerca server",
 		"emptyTitle": "Ancora niente da configurare",
 		"noMatchTitle": "Nessun server corrisponde",

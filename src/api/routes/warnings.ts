@@ -1,8 +1,9 @@
-import { type Guild } from "discord.js";
+import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { forbidden, notFound, notInGuild } from "@api/errors";
+import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
@@ -83,7 +84,7 @@ warnings.put("/punishments", async (context) => {
 });
 
 /** The same checks `/warn create` makes, against a live fetch of both people. */
-warnings.post("/", async (context) => {
+warnings.post("/", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, warningAdd);
 	const by = actor(context);
@@ -118,7 +119,7 @@ warnings.post("/", async (context) => {
 	return context.json(answer);
 });
 
-warnings.patch("/:userId/:warnId", async (context) => {
+warnings.patch("/:userId/:warnId", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const guild = guildOf(context);
 	const { userId, warnId } = parseParams(context, warningParams);
 	const { reason } = await parseBody(context, warningBody);
@@ -136,7 +137,7 @@ warnings.patch("/:userId/:warnId", async (context) => {
 	return context.json(toGuildWarning(userId, record.userTag, edited));
 });
 
-warnings.delete("/:userId/:warnId", async (context) => {
+warnings.delete("/:userId/:warnId", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const guild = guildOf(context);
 	const { userId, warnId } = parseParams(context, warningParams);
 	await mayChange(context, userId);
@@ -149,7 +150,7 @@ warnings.delete("/:userId/:warnId", async (context) => {
 	return context.body(null, 204);
 });
 
-warnings.delete("/:userId", async (context) => {
+warnings.delete("/:userId", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const guild = guildOf(context);
 	const { userId } = parseParams(context, memberParams);
 	await mayChange(context, userId);

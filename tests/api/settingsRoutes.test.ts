@@ -23,6 +23,7 @@ import {
 	setVoiceCounter,
 } from "@database/repositories/settingsRepository";
 import { type ServerSettings } from "@testify/shared";
+import { BOT_ABOVE_ROLES, grantableRoles } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/settingsRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve({ prefix: "t?", isEnabled: true })),
@@ -53,7 +54,8 @@ function app(canRename = true): Hono<ApiBindings> {
 	const guild = {
 		id: GUILD,
 		name: "Test Server",
-		members: { me: { nickname: "Testy", permissions: { has: () => canRename }, setNickname } },
+		roles: { cache: grantableRoles() },
+		members: { me: { ...BOT_ABOVE_ROLES, nickname: "Testy", permissions: { has: () => canRename }, setNickname } },
 	};
 	const client = {
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },

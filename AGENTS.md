@@ -1556,6 +1556,7 @@ writing it once. Every piece has a test proven able to fail.
 | `middleware/security.ts`  | CSP, `frame-ancestors 'none'`, `nosniff`, `no-referrer`, `no-store`, HSTS      |
 | `middleware/csrf.ts`      | Double-submit on every mutating verb, compared with `timingSafeEqual`          |
 | `middleware/rateLimit.ts` | Fixed window per session, falling back to address. Bounded, so it cannot leak  |
+| `middleware/reach.ts`     | The command's own permission, and every channel and role kept within reach     |
 | `validate.ts`             | `parseParams` / `parseQuery` / `parseBody`, all zod, all 400 with field issues |
 | `cookies.ts`              | The only place a cookie is set, so none can be written without its flags       |
 | `errors.ts`               | `ApiProblem` — a status and a stable `code`, never a stack                     |
@@ -1601,6 +1602,38 @@ Everything behind it assumes it ran, so five things in it are load-bearing:
 
 `serveDashboard()` is registered in `startApi`, **after** every route, because it is a catch-all — anything
 registered behind it silently never runs.
+
+### Nothing on the web reaches further than Discord would
+
+Manage Server is what opens a server's screens, and it is not what Discord asks for most of what those screens do.
+The dashboard once let a Manage Server manager kick, ban, warn and hand out roles, because the bot has those rights
+and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and three things about it are load-bearing:
+
+- **An action asks what its command asks.** `requirePermission` sits on the route: Kick Members for a kick, Ban
+  Members for a ban or a lifted softban, Moderate Members for warnings, Manage Roles for roles on join, level
+  rewards and the verified role, Manage Nicknames for the bot's nickname, and Administrator for setting a balance,
+  which is what `/give` asks. A new write that does more than change the bot's own settings takes the permission
+  its command already declares.
+- **Every channel and role a write names is checked, whatever the route.** `requireReach` runs on every write under
+  `/guilds/:guildId/*` and walks the body for snowflakes under a key naming a channel, category or role: each must
+  be in this server, and a channel must be one its person can see — and post in, when the key is singular and the
+  bot will post there. Without it a manager could aim this server's welcome text at another server's channel by
+  id. Keying on names means a new field is covered with no edit, which is the point; a field whose name does not
+  say channel or role is not.
+- **A role the bot hands out sits below its person's own highest role** (`requireGrantable`), as Discord's own
+  Manage Roles rule does, unless they own the server — and never above the bot, never managed, never `@everyone`,
+  even for the bot's owner. Boost roles, ignore lists and DJ roles are never handed out, so they only need to exist.
+
+A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each of the
+three and `tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody
+in the server without Manage Server and somebody not in it; a route added without its gate fails the build. Both
+were proved to go red.
+
+**The page asks too, and never trusts the guild list it was given.** `RequireGuild` wraps every
+`/guilds/:guildId/*` screen and draws nothing until the overview answers; signed out, not a member or without
+Manage Server sends the reader to `/guilds` with a notice, and any refusal later re-asks, so losing the role
+mid-session ejects. A refusal about one action — `missing_permission` — re-asks and finds access intact, so a
+manager without Kick Members stays where they are. `useRecheckOnRefusal` is the one mechanism both gates share.
 
 ### Rules that carry over
 
@@ -1950,6 +1983,12 @@ five tabs past the edge, and landing on `?tab=control` showed the strip at its s
 `TabBar` now fades whichever end still has content (`edgesOf`, measured on scroll and on resize) and scrolls the
 active tab into view with `inline: "nearest"`, which cannot move the page itself. Both are verified in a real
 browser at 390px: landing on Control leaves the strip at `scrollLeft: 510` with the left end faded.
+
+**The drawer scrolls itself and holds the page still.** It is `overflow-y-auto` with `overscroll-contain`, and
+`MobileNav` sets `overflow: hidden` on the body while it is open: without both, a phone shorter than the drawer
+scrolled the page behind it, and Sign out was out of reach. The account block is pinned to the foot only on the
+desktop rail — in the drawer it follows the sections, or a tall phone opens a band of nothing above it. Measured
+in a real browser at 390×640 and 520×1100, and pinned by `AppShell.test.tsx`.
 
 **At the icon-only width the labels are `sr-only`, never `hidden`.** `hidden` is `display: none`, which removes
 them from the accessibility tree and leaves every navigation link named nothing — the exact bug this pattern

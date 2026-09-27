@@ -228,6 +228,7 @@
 		"title": "Servidores",
 		"subtitle": "Todo lugar donde puedes cambiar los ajustes de {{bot}}, o añadirlo.",
 		"ownerOnly": "No tienes permiso para ver esa página, así que te hemos traído de vuelta aquí.",
+		"guildRefused": "No tienes permiso para gestionar ese servidor, así que te hemos traído de vuelta aquí.",
 		"search": "Buscar servidores",
 		"emptyTitle": "Todavía no hay nada que configurar",
 		"noMatchTitle": "Ningún servidor coincide",

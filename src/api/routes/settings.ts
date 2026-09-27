@@ -3,6 +3,7 @@ import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings } from "@api/context";
 import { badRequest, notInGuild } from "@api/errors";
+import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
@@ -109,7 +110,7 @@ settings.get("/nickname", (context) => {
 	return context.json(body);
 });
 
-settings.patch("/nickname", async (context) => {
+settings.patch("/nickname", requirePermission(PermissionFlagsBits.ManageNicknames), async (context) => {
 	const guild = guildOf(context);
 	const { nickname } = await parseBody(context, nicknamePatch);
 	const me = guild.members.me;
@@ -161,9 +162,10 @@ settings.patch("/anti-link", async (context) => {
 	return answer(context, guildId, "settings.anti-link", summariseAntiLink(patch));
 });
 
-settings.put("/auto-roles", async (context) => {
+settings.put("/auto-roles", requirePermission(PermissionFlagsBits.ManageRoles), async (context) => {
 	const guildId = guildIdOf(context);
 	const body: AutoRolePut = await parseBody(context, autoRolePut);
+	requireGrantable(context, body.roleIds);
 
 	await setAutoRoles(guildId, body.roleIds);
 

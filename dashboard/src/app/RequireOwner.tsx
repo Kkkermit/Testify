@@ -1,7 +1,6 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useRecheckOnRefusal } from "@/app/useRecheckOnRefusal";
 import { Skeleton } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
 import { useOwnerAccess } from "@/features/owner/useOwner";
@@ -19,7 +18,7 @@ export function RequireOwner(): React.JSX.Element {
 	const me = useMe();
 	const claimsOwner = me.data?.isOwner === true;
 	const access = useOwnerAccess(claimsOwner);
-	useRecheckOnRefusal();
+	useRecheckOnRefusal((key) => key[0] === "owner", keys.owner.access());
 
 	if (me.isPending || (claimsOwner && access.isPending)) return <Skeleton className="h-64 w-full" />;
 	if (!claimsOwner || isRefusal(access.error)) {
@@ -29,28 +28,4 @@ export function RequireOwner(): React.JSX.Element {
 	if (access.isError) return <ErrorState error={access.error} onRetry={() => void access.refetch()} />;
 
 	return <Outlet />;
-}
-
-/** Any owner request the server refuses asks the access question again, so losing ownership mid-session ejects. */
-function useRecheckOnRefusal(): void {
-	const client = useQueryClient();
-
-	useEffect(() => {
-		const recheck = (): void => void client.invalidateQueries({ queryKey: keys.owner.access(), exact: true });
-		const [owner, access] = keys.owner.access();
-
-		const queries = client.getQueryCache().subscribe((event) => {
-			if (event.type !== "updated" || event.action.type !== "error" || !isRefusal(event.action.error)) return;
-			const key = event.query.queryKey as readonly unknown[];
-			if (key[0] === owner && key[1] !== access) recheck();
-		});
-		const mutations = client.getMutationCache().subscribe((event) => {
-			if (event.type === "updated" && event.action.type === "error" && isRefusal(event.action.error)) recheck();
-		});
-
-		return () => {
-			queries();
-			mutations();
-		};
-	}, [client]);
 }

@@ -68,6 +68,19 @@ export function createMockRole(overrides: Overrides<Role> = {}): Role {
 	);
 }
 
+/** Ten ordinary roles, `300000000000000000`–`…009` at positions 1–10, which a bot ranked above them may hand out. */
+export function grantableRoles(): Collection<string, Role> {
+	return mockCollection(
+		Array.from({ length: 10 }, (_, index) => {
+			const id = `30000000000000000${String(index)}`;
+			return [id, createMockRole({ id, name: `Role ${String(index)}`, position: index + 1, managed: false })];
+		}),
+	);
+}
+
+/** The bot's own member, ranked above every role `grantableRoles` makes. */
+export const BOT_ABOVE_ROLES = { roles: { highest: { position: 50 } } };
+
 export function createMockChannel(overrides: Overrides<TextChannel> = {}): TextChannel {
 	return merge(
 		{

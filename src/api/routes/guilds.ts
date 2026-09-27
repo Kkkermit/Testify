@@ -2,6 +2,7 @@ import { ChannelType, type Guild, type GuildBasedChannel, PermissionFlagsBits, t
 import { type Context, Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { notInGuild } from "@api/errors";
+import { requireReach } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
@@ -58,6 +59,7 @@ import {
 export const guilds = new Hono<ApiBindings>();
 
 guilds.use("/:guildId/*", requireGuild);
+guilds.use("/:guildId/*", requireReach);
 
 // Mounted here so they inherit `requireGuild` and read the guild from the path like everything else.
 guilds.route("/:guildId/levelling", levelling);
