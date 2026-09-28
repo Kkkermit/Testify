@@ -1471,8 +1471,9 @@ pressed, each naming the balance, because the buttons are the same for everybody
 the channel, but `openTable` refuses every bet but the host's, and its New round carries the host's id so it stays
 theirs. Its host also gets **Spin now** once a chip is down: `spinNow` stops the countdown's timer and spins through
 the same claim, so a timer that fired anyway would find the round already taken. Every message on the table says
-which it is (`accessLine`). The result lists winners by profit and then
-everybody who lost, each with their stake, what came back and a line per spot. Six things about it are load-bearing:
+which it is (`accessLine`). The result groups players by where they finished
+overall — winners, broke even, losers — so a player whose one winning bet was outweighed by the rest is a loser; each
+entry leads with the profit or loss, then the stake, what came back and a line per spot with its odds. Six things about it are load-bearing:
 
 - **A round lives in `rouletterounds`, because stakes leave the wallet as each chip lands.** A press takes the stake
   with `takeStake`, then `addBets` pushes it with the open status, the close and the player's room all in the
