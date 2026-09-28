@@ -189,9 +189,14 @@ const BET_ROWS: readonly (readonly { bet: RouletteBet; style: ButtonStyle }[])[]
 	],
 ];
 
-/** The chip sizes offered as buttons, scaled from the table's own chip. */
-export function chipSteps(chip: number): number[] {
-	return [1, 5, 10, 25].map((step) => chip * step);
+/** What a player hears after choosing a chip, so they know what their wallet covers before they bet. */
+export function chipChosenLine(chip: number, wallet: number): string {
+	const chips = Math.floor(wallet / chip);
+	return (
+		`Your chips are now worth **${formatNumber(chip)}** each on this round. ` +
+		`You have **${formatNumber(wallet)}** in your wallet, enough for **${formatNumber(chips)}** ` +
+		`${chips === 1 ? "chip" : "chips"}.`
+	);
 }
 
 function betButton(roundId: string, bet: RouletteBet, style: ButtonStyle) {
@@ -216,9 +221,10 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 	const parts: ContainerPart[] = [
 		text(`## ${CASINO_GAME_EMOJI.roulette} Place your bets!\n${accessLine(view)}`),
 		text(
-			view.closesAt === null
+			(view.closesAt === null
 				? `Waiting for the first bet. The wheel spins ${String(ROULETTE_ROUND.bettingMs / 1_000)} seconds after it lands.`
-				: `The wheel spins ${discordTime(view.closesAt, "R")}. **${formatNumber(total)}** on the table.`,
+				: `The wheel spins ${discordTime(view.closesAt, "R")}. **${formatNumber(total)}** on the table.`) +
+				(view.private ? " The host can press **Spin now** once a chip is down." : ""),
 		),
 		gallery("attachment://roulette-table.png", "The roulette table, with every chip placed so far."),
 		text(playersText(view)),
@@ -229,10 +235,16 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 		row(...bands!.map((choice) => betButton(view.id, choice.bet, choice.style))),
 		row(
 			...columns!.map((choice) => betButton(view.id, choice.bet, choice.style)),
+			button({
+				id: customId(ROULETTE_ID, "chip", view.id),
+				label: "Other…",
+				emoji: "🪙",
+				style: ButtonStyle.Secondary,
+			}),
 			button({ id: customId(ROULETTE_ID, "clear", view.id), label: "Clear mine", style: ButtonStyle.Danger }),
 		),
 		row(
-			...chipSteps(view.chip).map((amount) =>
+			...ROULETTE_ROUND.chips.map((amount) =>
 				button({
 					id: customId(ROULETTE_ID, "chipto", view.id, String(amount)),
 					label: formatNumber(amount),
@@ -240,13 +252,20 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 					style: ButtonStyle.Secondary,
 				}),
 			),
-			button({
-				id: customId(ROULETTE_ID, "chip", view.id),
-				label: "Other…",
-				emoji: "🪙",
-				style: ButtonStyle.Secondary,
-			}),
 		),
+		...(view.private
+			? [
+					row(
+						button({
+							id: customId(ROULETTE_ID, "spin", view.id),
+							label: "Spin now",
+							emoji: CASINO_GAME_EMOJI.roulette,
+							style: ButtonStyle.Success,
+							disabled: roundChips(view).length === 0,
+						}),
+					),
+				]
+			: []),
 		text(
 			`-# Each press puts one chip down, **${formatNumber(view.chip)}** unless you pick another size with the 🪙 ` +
 				`buttons, and takes it from your wallet as it lands. Up to ${String(ROULETTE_ROUND.maxBets)} bets each. ` +

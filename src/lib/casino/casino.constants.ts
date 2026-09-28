@@ -23,6 +23,8 @@ export const ROULETTE_ROUND = {
 	maxBets: 10,
 	/** What a chip is worth when a table opens, kept within the server's own bet limits. */
 	defaultChip: 100,
+	/** The chip sizes offered as buttons; Other… takes any amount. */
+	chips: [100, 500, 1_000, 2_500, 5_000],
 	/** A round still open this long past its close lost its timer to a restart, and the sweep spins it. */
 	overdueMs: 30 * SECOND_MS,
 	/** A round is removed this long after it was opened or last due, whichever is later. */

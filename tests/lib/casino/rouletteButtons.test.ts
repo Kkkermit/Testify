@@ -6,8 +6,9 @@ import type * as Casino from "@lib/casino";
 jest.mock("@lib/casino", () => ({
 	...jest.requireActual<typeof Casino>("@lib/casino"),
 	placeBets: jest.fn(),
-	changeChip: jest.fn(() => Promise.resolve(500)),
+	changeChip: jest.fn(() => Promise.resolve({ chip: 500, wallet: 1_200 })),
 	clearMyBets: jest.fn(),
+	spinNow: jest.fn(),
 	openRound: jest.fn(),
 }));
 jest.mock("@core/checks", () => ({
@@ -15,7 +16,7 @@ jest.mock("@core/checks", () => ({
 	checkCasinoPlay: jest.fn(() => Promise.resolve(null)),
 }));
 
-const { placeBets, changeChip, clearMyBets, openRound } = jest.requireMock("@lib/casino");
+const { placeBets, changeChip, clearMyBets, openRound, spinNow } = jest.requireMock("@lib/casino");
 
 const ROUND = "65f000000000000000000001";
 const GUILD = "111111111111111111";
@@ -52,6 +53,7 @@ function pressed(options: { modal?: Record<string, string> } = {}) {
 		reply: jest.fn(() => Promise.resolve()),
 		followUp: jest.fn(() => Promise.resolve()),
 		showModal: jest.fn(() => Promise.resolve()),
+		deferUpdate: jest.fn(() => Promise.resolve()),
 	};
 }
 
@@ -108,13 +110,13 @@ describe("the roulette table's buttons", () => {
 		expect(placeBets).not.toHaveBeenCalled();
 	});
 
-	it("changes the player's chip from a size button and tells only them", async () => {
+	it("changes the player's chip from a size button and tells only them what their wallet holds", async () => {
 		const interaction = pressed();
 		await run(interaction, "chipto", [ROUND, "500"]);
 
 		expect(changeChip).toHaveBeenCalledWith(seat, ROUND, "500");
 		expect(interaction.reply).toHaveBeenCalledWith(
-			expect.objectContaining({ content: expect.stringContaining("500") }),
+			expect.objectContaining({ content: expect.stringContaining("You have **1,200** in your wallet") }),
 		);
 	});
 
@@ -134,6 +136,14 @@ describe("the roulette table's buttons", () => {
 		expect(interaction.followUp).toHaveBeenCalledWith(
 			expect.objectContaining({ content: expect.stringContaining("300") }),
 		);
+	});
+
+	it("acknowledges Spin now and hands the spin to the table", async () => {
+		const interaction = pressed();
+		await run(interaction, "spin", [ROUND]);
+
+		expect(interaction.deferUpdate).toHaveBeenCalled();
+		expect(spinNow).toHaveBeenCalledWith(client, seat, ROUND);
 	});
 
 	/** A new round goes on the same message, so the channel keeps one table rather than a stack of them. */

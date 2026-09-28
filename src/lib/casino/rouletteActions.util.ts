@@ -19,6 +19,7 @@ import { rouletteSpin, rouletteStill } from "@lib/canvas/rouletteWheel.util";
 import { CASINO_TIMING, ROULETTE_ROUND } from "@lib/casino/casino.constants";
 import { type RouletteBet, type Roll } from "@lib/casino/casino.types";
 import { payOut, type Player, takeStake } from "@lib/casino/casinoActions.util";
+import { betLimitRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { spinRoulette, spotKey } from "@lib/casino/roulette.util";
 import {
 	roundResults,
@@ -129,6 +130,9 @@ export async function placeBets(
 	}
 
 	const chip = round.players[seat.userId]?.chip ?? round.chip;
+	const { wallet } = await requireAccount(seat.guildId, seat.userId);
+	if (wallet < chip * bets.length) throw shortOf(chip * bets.length, wallet);
+
 	const { bet: total } = await takeStake(seat, String(chip * bets.length));
 	if (round.closesAt === null) await startCountdown(client, roundId, now);
 
@@ -147,14 +151,36 @@ export async function placeBets(
 	return updated;
 }
 
-/** What each of this player's chips is worth from now on; bets already down keep their own amount. */
-export async function changeChip(seat: Seat, roundId: string, amount: string, now = Date.now()): Promise<number> {
+/** Names the stake and the wallet, so a refused bet says what the player can do instead. */
+function shortOf(needed: number, wallet: number): UserFacingError {
+	return new UserFacingError(
+		`That needs **${formatNumber(needed)}** and you have **${formatNumber(wallet)}** in your wallet. ` +
+			(wallet > 0 ? "Pick a smaller chip with the 🪙 buttons." : "Earn some first, then come back to the table."),
+	);
+}
+
+/** What each of this player's chips is worth from now on, refused when the wallet cannot cover even one. */
+export async function changeChip(
+	seat: Seat,
+	roundId: string,
+	amount: string,
+	now = Date.now(),
+): Promise<{ chip: number; wallet: number }> {
 	await openTable(roundId, seat.userId, now);
-	const account = await requireAccount(seat.guildId, seat.userId);
-	const chip = resolveAmount(amount, account.wallet);
+	const { wallet } = await requireAccount(seat.guildId, seat.userId);
+	const chip = resolveAmount(amount, wallet);
+
+	if (chip > wallet) {
+		throw new UserFacingError(
+			`A **${formatNumber(chip)}** chip is more than you have: your wallet holds **${formatNumber(wallet)}**. ` +
+				"Pick a smaller one.",
+		);
+	}
+	const refusal = betLimitRefusal(await readCasinoSettings(seat.guildId), chip);
+	if (refusal !== null) throw new UserFacingError(refusal);
 
 	if ((await setSeatChip(roundId, { userId: seat.userId, name: seat.name }, chip, now)) === null) throw closed();
-	return chip;
+	return { chip, wallet };
 }
 
 /** Takes this player's chips off an open table and hands them back. */
@@ -208,6 +234,22 @@ export async function spinRound(client: TestifyClient, roundId: string, roll?: R
 	client.timers.after(`roulette-reveal-${roundId}`, spin.durationMs + CASINO_TIMING.revealMarginMs, () =>
 		editRoundMessage(client, round, roundSettledMessage(view, rouletteStill(pocket))),
 	);
+	return view;
+}
+
+/** The host of a private table spins as soon as they are ready, rather than waiting out the countdown. */
+export async function spinNow(client: TestifyClient, seat: Seat, roundId: string, roll?: Roll): Promise<RoundView> {
+	const round = await findRound(roundId);
+	if (round?.status !== "betting") throw closed();
+	if (round.private !== true) throw new UserFacingError("Only a private table can be spun early.");
+	if (round.hostId !== seat.userId) throw new UserFacingError("Only whoever opened this table can spin it.");
+	if (Object.values(round.players).every((player) => player.bets.length === 0)) {
+		throw new UserFacingError("Put a chip down first, then spin.");
+	}
+
+	client.timers.stop(`roulette-${roundId}`);
+	const view = await spinRound(client, roundId, roll);
+	if (view === null) throw closed();
 	return view;
 }
 

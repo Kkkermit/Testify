@@ -7,6 +7,7 @@ import {
 	openingChip,
 	openRound,
 	placeBets,
+	spinNow,
 	spinOverdueRounds,
 	spinRound,
 } from "@lib/casino/rouletteActions.util";
@@ -31,6 +32,10 @@ jest.mock("@lib/casino/casinoActions.util", () => ({
 jest.mock("@database/repositories/economyRepository", () => ({
 	requireAccount: jest.fn(() => Promise.resolve({ wallet: 1_000 })),
 }));
+jest.mock("@lib/casino/casinoSettings.util", () => ({
+	...jest.requireActual<object>("@lib/casino/casinoSettings.util"),
+	readCasinoSettings: jest.fn(() => Promise.resolve({ minBet: 1, maxBet: 2_000 })),
+}));
 jest.mock("@lib/canvas/rouletteWheel.util", () => ({
 	rouletteSpin: jest.fn(() => ({ gif: Buffer.from("GIF"), durationMs: 3_000 })),
 	rouletteStill: jest.fn(() => Buffer.from("PNG")),
@@ -38,6 +43,7 @@ jest.mock("@lib/canvas/rouletteWheel.util", () => ({
 
 const repository = jest.requireMock("@database/repositories/rouletteRepository");
 const { takeStake, payOut } = jest.requireMock("@lib/casino/casinoActions.util");
+const { requireAccount } = jest.requireMock("@database/repositories/economyRepository");
 
 const ROUND = "65f000000000000000000001";
 const ALICE = { guildId: "111111111111111111", userId: "222222222222222222", name: "alice" };
@@ -181,6 +187,19 @@ describe("placing bets", () => {
 		expect(takeStake).not.toHaveBeenCalled();
 	});
 
+	/** The buttons are the same for everybody, so a bet the wallet cannot cover has to say what it holds. */
+	it("refuses a bet the wallet cannot cover, naming the balance, before taking anything", async () => {
+		repository.findRound.mockResolvedValue(
+			record({ players: { [ALICE.userId]: { name: "alice", joinedAt: 1, chip: 500, bets: [] } } }),
+		);
+		requireAccount.mockResolvedValueOnce({ wallet: 300 });
+
+		await expect(placeBets(client(), ALICE, ROUND, [{ kind: "red" }], NOW)).rejects.toThrow(
+			/needs \*\*500\*\* and you have \*\*300\*\* in your wallet/,
+		);
+		expect(takeStake).not.toHaveBeenCalled();
+	});
+
 	/** A private table is the host's alone; anybody else is refused before a coin moves. */
 	it("refuses anybody but the host at a private table", async () => {
 		const BOB = { ...ALICE, userId: "333333333333333333", name: "bob" };
@@ -209,8 +228,23 @@ describe("the chip and clearing", () => {
 		repository.findRound.mockResolvedValue(record());
 		repository.setSeatChip.mockResolvedValue(record());
 
-		expect(await changeChip(ALICE, ROUND, "half", NOW)).toBe(500);
+		expect(await changeChip(ALICE, ROUND, "half", NOW)).toEqual({ chip: 500, wallet: 1_000 });
 		expect(repository.setSeatChip).toHaveBeenCalledWith(ROUND, { userId: ALICE.userId, name: "alice" }, 500, NOW);
+	});
+
+	it("refuses a chip bigger than the wallet, saying what the wallet holds", async () => {
+		repository.findRound.mockResolvedValue(record());
+
+		await expect(changeChip(ALICE, ROUND, "5000", NOW)).rejects.toThrow(/wallet holds \*\*1,000\*\*/);
+		expect(repository.setSeatChip).not.toHaveBeenCalled();
+	});
+
+	it("refuses a chip outside the server's bet limits", async () => {
+		repository.findRound.mockResolvedValue(record());
+		requireAccount.mockResolvedValueOnce({ wallet: 10_000 });
+
+		await expect(changeChip(ALICE, ROUND, "5000", NOW)).rejects.toThrow(/2,000/);
+		expect(repository.setSeatChip).not.toHaveBeenCalled();
 	});
 
 	it("hands back exactly the chips it took off the table", async () => {
@@ -269,6 +303,33 @@ describe("the spin", () => {
 
 		expect(await spinRound(client(), ROUND, () => 0)).toBeNull();
 		expect(payOut).not.toHaveBeenCalled();
+	});
+
+	/** Spin now skips the countdown, so its timer has to go, or it would fire into a round already paid. */
+	it("lets a private table's host spin early, and stops the countdown", async () => {
+		repository.findRound.mockResolvedValue(record({ private: true, players: bets }));
+		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 0, private: true, players: bets }));
+		const bot = client();
+
+		await spinNow(bot, ALICE, ROUND, () => 0);
+
+		expect(bot.timers.stop).toHaveBeenCalledWith(`roulette-${ROUND}`);
+		expect(repository.claimRound).toHaveBeenCalledWith(ROUND, 0);
+	});
+
+	it("refuses to spin early for anybody but the host, at a public table, or with nothing bet", async () => {
+		repository.findRound.mockResolvedValue(record({ private: true, players: bets }));
+		await expect(spinNow(client(), { ...ALICE, userId: "333333333333333333" }, ROUND)).rejects.toThrow(
+			/whoever opened/,
+		);
+
+		repository.findRound.mockResolvedValue(record({ players: bets }));
+		await expect(spinNow(client(), ALICE, ROUND)).rejects.toThrow(/private table/);
+
+		repository.findRound.mockResolvedValue(record({ private: true }));
+		await expect(spinNow(client(), ALICE, ROUND)).rejects.toThrow(/chip down first/);
+
+		expect(repository.claimRound).not.toHaveBeenCalled();
 	});
 
 	it("spins every round a restart left open past its close", async () => {

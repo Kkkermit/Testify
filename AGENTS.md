@@ -1464,10 +1464,14 @@ every press through `checkCasinoPlay`. There is a button per outside bet, a **Nu
 several, chip-size buttons scaled from the table's chip (`chipSteps`) and **Clear mine**. The countdown starts on
 the first bet, not on the post: `startClock` sets `closesAt` only while it is null, so only the call that started it
 sets the spin's timer, and later bets never push it back. The command asks for no amount: the table opens at
-`openingChip` (100, moved inside the server's bet limits) and each player picks their own size. Its one option,
+`openingChip` (100, moved inside the server's bet limits) and each player picks their own size from
+`ROULETTE_ROUND.chips` or **Other…**. A chip the wallet cannot cover is refused as it is picked, and a bet as it is
+pressed, each naming the balance, because the buttons are the same for everybody. Its one option,
 `table`, is public by default; a **private** table is still posted in the channel, since the timers edit it through
 the channel, but `openTable` refuses every bet but the host's, and its New round carries the host's id so it stays
-theirs. Every message on the table says which it is (`accessLine`). The result lists winners by profit and then
+theirs. Its host also gets **Spin now** once a chip is down: `spinNow` stops the countdown's timer and spins through
+the same claim, so a timer that fired anyway would find the round already taken. Every message on the table says
+which it is (`accessLine`). The result lists winners by profit and then
 everybody who lost, each with their stake, what came back and a line per spot. Six things about it are load-bearing:
 
 - **A round lives in `rouletterounds`, because stakes leave the wallet as each chip lands.** A press takes the stake

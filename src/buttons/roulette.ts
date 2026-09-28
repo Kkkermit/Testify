@@ -5,6 +5,7 @@ import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import {
 	changeChip,
+	chipChosenLine,
 	clearMyBets,
 	openRound,
 	parseNumbers,
@@ -14,10 +15,10 @@ import {
 	roundBettingMessage,
 	roundView,
 	type Seat,
+	spinNow,
 	spotFromKey,
 } from "@lib/casino";
 import { modalForm } from "@lib/discord";
-import { formatNumber } from "@lib/format";
 
 /** A shared roulette round: anybody in the channel may bet, each through the same gates as the command. */
 
@@ -115,11 +116,16 @@ export default defineButton({
 							? interaction.fields.getTextInputValue("chip")
 							: undefined;
 				if (amount === undefined) return;
-				const chip = await changeChip(seat, roundId, amount);
-				await interaction.reply({
-					content: `Your chips are now worth **${formatNumber(chip)}** each on this round.`,
-					flags: MessageFlags.Ephemeral,
-				});
+				const { chip, wallet } = await changeChip(seat, roundId, amount);
+				await interaction.reply({ content: chipChosenLine(chip, wallet), flags: MessageFlags.Ephemeral });
+				return;
+			}
+
+			case "spin": {
+				if (!interaction.isButton()) return;
+				// The spin edits the message through the channel, so the press is only acknowledged here.
+				await interaction.deferUpdate();
+				await spinNow(context.client, seat, roundId);
 				return;
 			}
 

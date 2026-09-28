@@ -6,7 +6,7 @@ import { ROULETTE_ID, ROULETTE_ROUND, SEAT_COLOURS } from "@lib/casino/casino.co
 import { type RouletteBet } from "@lib/casino/casino.types";
 import { ROULETTE_SPOTS } from "@lib/casino/roulette.util";
 import {
-	chipSteps,
+	chipChosenLine,
 	parseNumbers,
 	roundBettingMessage,
 	roundChips,
@@ -177,10 +177,29 @@ describe("the open table", () => {
 		for (const id of customIdsOf(message)) expect(id.length).toBeLessThanOrEqual(100);
 	});
 
-	it("offers chip sizes scaled from the table's own chip", () => {
-		expect(chipSteps(100)).toEqual([100, 500, 1_000, 2_500]);
-		const labels = buttonsOf(roundBettingMessage(roundView(busy))).map((found) => found.label);
-		expect(labels).toEqual(expect.arrayContaining(["100", "500", "1,000", "2,500", "Other…"]));
+	it("offers the same chip sizes on every table, and any other amount", () => {
+		const chips = buttonsOf(roundBettingMessage(roundView(busy)))
+			.filter((found) => parseCustomId(String(found.custom_id)).action === "chipto")
+			.map((found) => found.label);
+		expect(chips).toEqual(["100", "500", "1,000", "2,500", "5,000"]);
+		expect(buttonsOf(roundBettingMessage(roundView(busy))).map((found) => found.label)).toContain("Other…");
+	});
+
+	it("tells a player what their wallet covers once they pick a chip", () => {
+		expect(chipChosenLine(500, 1_200)).toBe(
+			"Your chips are now worth **500** each on this round. You have **1,200** in your wallet, enough for **2** chips.",
+		);
+		expect(chipChosenLine(500, 700)).toContain("enough for **1** chip.");
+	});
+
+	it("gives only a private table a Spin now button, live once a chip is down", () => {
+		const spin = (view: ReturnType<typeof roundView>) =>
+			buttonsOf(roundBettingMessage(view)).find((found) => parseCustomId(String(found.custom_id)).action === "spin");
+
+		expect(spin(roundView(busy))).toBeUndefined();
+		expect(spin(roundView({ ...busy, private: true }))?.disabled).toBe(false);
+		expect(spin(roundView(record({ private: true })))?.disabled).toBe(true);
+		expect(textOf(roundBettingMessage(roundView(record({ private: true }))))).toContain("**Spin now**");
 	});
 
 	it("stays within Discord's 40-component limit", () => {
@@ -191,7 +210,7 @@ describe("the open table", () => {
 			if (typeof found.type === "number") count += 1;
 			for (const value of Object.values(found)) if (Array.isArray(value)) value.forEach(walk);
 		};
-		walk(roundBettingMessage(roundView(busy)).components[0]!.toJSON());
+		walk(roundBettingMessage(roundView({ ...busy, private: true })).components[0]!.toJSON());
 
 		expect(count).toBeLessThanOrEqual(40);
 	});
