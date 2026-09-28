@@ -2,6 +2,7 @@
 
 export const PROBLEM_CODES = [
 	"automod.word",
+	"casino.betRange",
 	"automod.mentionLimit",
 	"giveaway.channel",
 	"giveaway.prize",

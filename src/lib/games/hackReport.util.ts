@@ -35,7 +35,7 @@ export const HACK_STAGES = [
 ] as const;
 
 /** An upper bound, exclusive, like `crypto.randomInt`; injected so a test can choose each value. */
-export type Roll = (max: number) => number;
+type Roll = (max: number) => number;
 
 function pick<T>(values: readonly T[], roll: Roll): T {
 	return values[roll(values.length)]!;

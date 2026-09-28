@@ -2,6 +2,7 @@
 
 export * from "./bot";
 export * from "./canvas";
+export * from "./casino";
 export * from "./discord";
 export * from "./economy";
 export * from "./format";

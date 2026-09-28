@@ -73,6 +73,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		wash: "bg-feature-economy/15",
 		path: (guildId) => `/guilds/${guildId}/treasure`,
 	},
+	casino: {
+		icon: Dices,
+		tint: "text-feature-economy",
+		wash: "bg-feature-economy/15",
+		path: (guildId) => `/guilds/${guildId}/casino`,
+	},
 	music: {
 		icon: Music,
 		tint: "text-feature-community",

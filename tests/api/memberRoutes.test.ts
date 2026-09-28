@@ -5,7 +5,12 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { members } from "@api/routes/members";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { countAccounts, getLeaderboard } from "@database/repositories/economyRepository";
+import {
+	countAccounts,
+	countGlobalAccounts,
+	getGlobalLeaderboard,
+	getLeaderboard,
+} from "@database/repositories/economyRepository";
 import { countRanked, getLevelLeaderboard } from "@database/repositories/levelRepository";
 import { type BoardPage } from "@testify/shared";
 
@@ -13,6 +18,9 @@ jest.mock("@database/repositories/economyRepository", () => ({
 	getLeaderboard: jest.fn(() => Promise.resolve([])),
 	countAccounts: jest.fn(() => Promise.resolve(0)),
 	getEconomyRank: jest.fn(() => Promise.resolve(null)),
+	getGlobalLeaderboard: jest.fn(() => Promise.resolve([])),
+	countGlobalAccounts: jest.fn(() => Promise.resolve(0)),
+	getGlobalRank: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelLeaderboard: jest.fn(() => Promise.resolve([])),
@@ -25,6 +33,8 @@ const OWNER = "100000000000000001";
 
 const economyRows = jest.mocked(getLeaderboard);
 const economyTotal = jest.mocked(countAccounts);
+const globalRows = jest.mocked(getGlobalLeaderboard);
+const globalTotal = jest.mocked(countGlobalAccounts);
 const levelRows = jest.mocked(getLevelLeaderboard);
 const levelTotal = jest.mocked(countRanked);
 
@@ -33,6 +43,7 @@ function app(): Hono<ApiBindings> {
 		id: GUILD,
 		name: "Test Server",
 		members: { cache: new Collection<string, unknown>(), fetch: jest.fn(() => Promise.resolve(new Collection())) },
+		client: { users: { fetch: jest.fn(() => Promise.reject(new Error("Unknown User"))) } },
 	};
 	const client = {
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
@@ -66,6 +77,8 @@ beforeEach(() => {
 	jest.clearAllMocks();
 	economyRows.mockResolvedValue([]);
 	economyTotal.mockResolvedValue(0);
+	globalRows.mockResolvedValue([]);
+	globalTotal.mockResolvedValue(0);
 	levelRows.mockResolvedValue([]);
 	levelTotal.mockResolvedValue(0);
 });
@@ -104,5 +117,37 @@ describe("GET /members/leaderboard", () => {
 
 	it("refuses a board it does not have", async () => {
 		expect((await board("?board=warnings")).status).toBe(400);
+	});
+
+	it("ranks this server's money by wallet when asked", async () => {
+		economyRows.mockResolvedValue([{ userId: "1", wallet: 700, bank: 50, total: 750 }] as never);
+		economyTotal.mockResolvedValue(1);
+
+		const body = (await (await board("?sort=wallet")).json()) as BoardPage;
+
+		expect(body).toMatchObject({ sort: "wallet", scope: "server" });
+		expect(body.rows[0]).toMatchObject({ primary: 700, secondary: 50 });
+		expect(economyRows).toHaveBeenCalledWith(GUILD, 25, "wallet", 0);
+		expect(globalRows).not.toHaveBeenCalled();
+	});
+
+	/** The bot-wide board adds up the servers the bot is in now, taken from the client rather than the request. */
+	it("reads the bot-wide board over the client's own servers", async () => {
+		globalRows.mockResolvedValue([{ userId: "1", wallet: 10, bank: 990, total: 1_000 }] as never);
+		globalTotal.mockResolvedValue(1);
+
+		const body = (await (await board("?scope=global&sort=bank")).json()) as BoardPage;
+
+		expect(body).toMatchObject({ sort: "bank", scope: "global", total: 1 });
+		expect(body.rows[0]).toMatchObject({ primary: 990, secondary: 10 });
+		expect(globalRows).toHaveBeenCalledWith([GUILD], 25, "bank", 0);
+		expect(economyRows).not.toHaveBeenCalled();
+		// Somebody Discord no longer knows is still ranked, just not named.
+		expect(body.rows[0]).toMatchObject({ displayName: "Unknown user", inGuild: false });
+	});
+
+	it("refuses a sort or a scope it does not have", async () => {
+		expect((await board("?sort=pets")).status).toBe(400);
+		expect((await board("?scope=galaxy")).status).toBe(400);
 	});
 });

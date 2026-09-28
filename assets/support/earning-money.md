@@ -5,7 +5,7 @@ topic: community
 keywords: earn money, make money, daily, work, beg, income, get rich, rewards, streak, daily streak, explainer
 questions: How do I earn money? | How does the daily reward work? | How often can I work?
 commands: daily, work, beg
-related: jobs, gambling, robbing, heists, shop
+related: jobs, casino, robbing, heists, shop
 ---
 - `/daily`: {fact:economy.dailyBase} plus {fact:economy.dailyStreakBonus} for each day in your streak, up to {fact:economy.dailyMax}, then wait {fact:cooldown.daily}.
 - `/work`: your job's pay, or {fact:economy.workMin} to {fact:economy.workMax} for odd jobs without one, then wait {fact:cooldown.work}.

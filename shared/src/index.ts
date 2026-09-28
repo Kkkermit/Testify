@@ -6,6 +6,7 @@ export * from "./blacklist";
 export * from "./botStats";
 export * from "./changes";
 export * from "./brand";
+export * from "./casino";
 export * from "./commandRunner";
 export * from "./commandToggles";
 export * from "./commands";

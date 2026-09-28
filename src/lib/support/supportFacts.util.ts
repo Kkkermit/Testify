@@ -1,5 +1,9 @@
 import { PermissionsBitField } from "discord.js";
 import { DEFAULT_PREFIX, ECONOMY, ECONOMY_COOLDOWNS, LEVELLING, TICKET } from "@config/constants";
+import { CASINO_TIMING } from "@lib/casino/casino.constants";
+import { COINFLIP_RETURN, DICE_RETURNS } from "@lib/casino/chance.util";
+import { HILO_EDGE, HILO_MAX_MULTIPLIER } from "@lib/casino/hilo.util";
+import { SLOT_PAYTABLE, slotsReturnToPlayer } from "@lib/casino/slots.util";
 import { formatDurationLong, formatNumber, humanisePermission } from "@lib/format/format.util";
 import {
 	GIVEAWAY_LIMITS,
@@ -43,7 +47,14 @@ export const FACTS: Readonly<Record<string, string>> = {
 	"cooldown.rob": formatDurationLong(ECONOMY_COOLDOWNS.rob),
 	"cooldown.heist": formatDurationLong(ECONOMY_COOLDOWNS.heist),
 	"cooldown.beg": formatDurationLong(ECONOMY_COOLDOWNS.beg),
-	"cooldown.gamble": formatDurationLong(ECONOMY_COOLDOWNS.gamble),
+
+	"casino.slotsReturn": `${(slotsReturnToPlayer() * 100).toFixed(1)}%`,
+	"casino.slotsTop": `${formatNumber(SLOT_PAYTABLE.diamond)}×`,
+	"casino.coinflipReturn": `${String(COINFLIP_RETURN)}×`,
+	"casino.diceSeven": `${String(DICE_RETURNS.seven)}×`,
+	"casino.hiloCut": `${String(Math.round((1 - HILO_EDGE) * 100))}%`,
+	"casino.hiloCap": `${formatNumber(HILO_MAX_MULTIPLIER)}×`,
+	"casino.handIdle": formatDurationLong(CASINO_TIMING.handIdleMs),
 
 	"levelling.xpMin": formatNumber(LEVELLING.xpPerMessageMin),
 	"levelling.xpMax": formatNumber(LEVELLING.xpPerMessageMax),

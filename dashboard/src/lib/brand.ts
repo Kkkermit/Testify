@@ -22,3 +22,16 @@ export function rememberBotName(name: string): void {
 
 /** What to call the bot before `/api/bot` has answered: the name it last gave, else the built-in one. */
 export const BUILT_IN_BOT_NAME: string = rememberedBotName() ?? DEFAULT_BOT_NAME;
+
+/** The label a phone suggests for a home-screen shortcut, which is otherwise the page title of whichever screen is open. */
+export function nameHomeScreen(name: string, doc: Document = document): void {
+	for (const key of ["apple-mobile-web-app-title", "application-name"]) {
+		let meta = doc.head.querySelector<HTMLMetaElement>(`meta[name="${key}"]`);
+		if (meta === null) {
+			meta = doc.createElement("meta");
+			meta.name = key;
+			doc.head.append(meta);
+		}
+		meta.content = name;
+	}
+}

@@ -13,6 +13,8 @@ beforeEach(() => {
 	writeFileSync(join(root, "index.html"), "<!doctype html><div id=root></div>");
 	writeFileSync(join(root, "assets", "index-abc123.js"), "console.log(1)");
 	writeFileSync(join(root, "robots.txt"), "User-agent: *\nDisallow: /\n");
+	writeFileSync(join(root, "apple-touch-icon.png"), "png");
+	writeFileSync(join(root, "manifest.webmanifest"), "{}");
 });
 
 afterEach(() => {
@@ -88,6 +90,31 @@ describe("serveDashboard", () => {
 		expect(response.status).toBe(200);
 		expect(response.headers.get("cache-control")).toContain("immutable");
 		expect(response.headers.get("content-type")).toContain("text/javascript");
+	});
+
+	/** An icon keeps its name when its picture changes, so a year-long cache would pin the old one. */
+	it("caches an unhashed file for a day, not a year", async () => {
+		const response = await appFor().request("/apple-touch-icon.png");
+
+		expect(response.status).toBe(200);
+		expect(response.headers.get("content-type")).toBe("image/png");
+		expect(response.headers.get("cache-control")).toBe("public, max-age=86400");
+	});
+
+	it("serves the manifest as a manifest", async () => {
+		const response = await appFor().request("/manifest.webmanifest");
+
+		expect(response.headers.get("content-type")).toContain("application/manifest+json");
+	});
+
+	/** A home-screen icon fetched from `/favicon.ico` used to receive the page itself, with a 200. */
+	it("answers a missing file with a 404 rather than the page", async () => {
+		for (const path of ["/favicon.ico", "/apple-touch-icon-precomposed.png", "/assets/gone-abc123.js"]) {
+			const response = await appFor().request(path);
+
+			expect(response.status).toBe(404);
+			expect(await response.text()).not.toContain("id=root");
+		}
 	});
 
 	/** React Router owns every path the API does not, which is what makes a deep link work on a hard refresh. */

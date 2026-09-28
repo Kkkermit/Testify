@@ -9,7 +9,7 @@ related: leaderboards, warnings, bans
 Open your server, then **Leaderboards** under Community.
 
 ### The leaderboards
-Money and levels each have a table, the same boards `/leaderboard` shows in Discord. **Find me** jumps to the page you are on.
+Money and levels each have a table, the same boards `/leaderboard` shows in Discord. The money board can be ranked by total, wallet or bank, for this server or every server {bot} is in. **Find me** jumps to the page you are on.
 
 ### One member's page
 Choose a member to see their standing, roles and joining date, and to manage them:

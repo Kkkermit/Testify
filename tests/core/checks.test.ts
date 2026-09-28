@@ -1,6 +1,6 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import lottery from "@commands/economy/lottery.command";
-import { checkMusicControl, clearCooldowns, refusalText, runChecks } from "@core/checks";
+import { checkCasinoPlay, checkMusicControl, clearCooldowns, refusalText, runChecks } from "@core/checks";
 import { defineCommand } from "@core/command";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
@@ -32,6 +32,16 @@ jest.mock("@database/repositories/musicSettingsRepository", () => ({
 	purgeMusicSettings: jest.fn(),
 }));
 
+const casinoSettings = jest.fn<
+	Promise<{ enabled: boolean; disabledGames: string[]; minBet: number; maxBet: number | null } | null>,
+	[]
+>(() => Promise.resolve(null));
+
+jest.mock("@database/repositories/casinoRepository", () => ({
+	getCasinoSettings: () => casinoSettings(),
+	purgeCasino: jest.fn(),
+}));
+
 const plain = defineCommand({ name: "ping", description: "Pings.", category: "info", run: jest.fn() });
 
 const music = defineCommand({
@@ -61,6 +71,7 @@ beforeEach(() => {
 	offGlobally.mockResolvedValue([]);
 	offInGuild.mockResolvedValue([]);
 	musicSettings.mockResolvedValue(null);
+	casinoSettings.mockResolvedValue(null);
 });
 
 describe("runChecks", () => {
@@ -334,5 +345,85 @@ describe("checkMusicControl", () => {
 		await expect(ask(plainMember)).resolves.toMatch(/DJ role/);
 		await expect(ask(manager)).resolves.toBeNull();
 		await expect(ask({ roles: ["role-dj"], permissions: "0" })).resolves.toBeNull();
+	});
+});
+
+describe("the casino's switches", () => {
+	const casino = defineCommand({
+		name: "casino",
+		description: "Games.",
+		category: "casino",
+		subcommands: [
+			{ name: "roulette", description: "Spins.", run: jest.fn() },
+			{ name: "info", description: "Lists.", run: jest.fn() },
+			{ name: "settings", description: "Settings.", permissions: [PermissionFlagsBits.ManageGuild], run: jest.fn() },
+		],
+	});
+	const closed = { enabled: false, disabledGames: [], minBet: 1, maxBet: null };
+
+	it("lets a game through in a server that has never configured the casino", async () => {
+		expect(await runChecks(createMockInteraction({ subcommand: "roulette" }), casino, createMockClient())).toBeNull();
+	});
+
+	it("refuses every game while the casino is closed", async () => {
+		casinoSettings.mockResolvedValue(closed);
+
+		expect(await runChecks(createMockInteraction({ subcommand: "roulette" }), casino, createMockClient())).toMatch(
+			/closed/,
+		);
+		expect(await runChecks(createMockInteraction({ subcommand: "info" }), casino, createMockClient())).toMatch(
+			/closed/,
+		);
+	});
+
+	it("refuses a game switched off on its own, and leaves the rest open", async () => {
+		casinoSettings.mockResolvedValue({ ...closed, enabled: true, disabledGames: ["roulette"] });
+
+		expect(await runChecks(createMockInteraction({ subcommand: "roulette" }), casino, createMockClient())).toMatch(
+			/Roulette is switched off/,
+		);
+		expect(await runChecks(createMockInteraction({ subcommand: "info" }), casino, createMockClient())).toBeNull();
+	});
+
+	/** Closing it has to be reversible from inside Discord, or the server has no way back. */
+	it("still lets `/casino settings` through while the casino is closed", async () => {
+		casinoSettings.mockResolvedValue(closed);
+		const interaction = createMockInteraction({
+			subcommand: "settings",
+			overrides: memberWith(PermissionsBitField.All),
+		});
+
+		expect(await runChecks(interaction, casino, createMockClient())).toBeNull();
+	});
+
+	describe("for a Play again button", () => {
+		const who = { userId: USER_ID, guildId: "900000000000000001" };
+
+		it("lets a game through where the casino is open", async () => {
+			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toBeNull();
+		});
+
+		it("refuses while the bot is paused, or for a blacklisted account", async () => {
+			const client = createMockClient();
+			client.paused = true;
+			await expect(checkCasinoPlay(client, who, "slots")).resolves.toMatch(/paused/);
+
+			findBlacklistEntry.mockResolvedValueOnce({ reason: "spam" });
+			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/blocked/);
+		});
+
+		it("refuses when /casino is switched off in the server", async () => {
+			offInGuild.mockResolvedValueOnce(["casino"]);
+
+			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/switched off/);
+		});
+
+		it("refuses when the casino or that game is off", async () => {
+			casinoSettings.mockResolvedValue(closed);
+			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/closed/);
+
+			casinoSettings.mockResolvedValue({ ...closed, enabled: true, disabledGames: ["slots"] });
+			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/Slots is switched off/);
+		});
 	});
 });

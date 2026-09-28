@@ -1,9 +1,15 @@
 import { describeWithMongo } from "../helpers/mongo";
+import { ECONOMY } from "@config/constants";
 import {
+	adjustBank,
 	adjustWallet,
 	debitWallet,
 	deposit,
 	findAccount,
+	countGlobalAccounts,
+	getEconomyRank,
+	getGlobalLeaderboard,
+	getGlobalRank,
 	getLeaderboard,
 	getOrCreateAccount,
 	resetGuild,
@@ -79,5 +85,52 @@ describeWithMongo("economyRepository", () => {
 
 		expect(await resetGuild(GUILD)).toBe(1);
 		expect(await findAccount("444444444444444444", ALICE)).not.toBeNull();
+	});
+
+	describe("the bot-wide board", () => {
+		const OTHER = "555555555555555555";
+		const LEFT = "666666666666666666";
+		const CAROL = "777777777777777777";
+
+		beforeEach(async () => {
+			// Alice is middling in each server but first once they are added up; Bob is richest in one.
+			await adjustWallet(GUILD, ALICE, 400);
+			await adjustWallet(OTHER, ALICE, 400);
+			await adjustWallet(GUILD, BOB, 1_000);
+			await adjustBank(GUILD, BOB, 0);
+			await adjustWallet(LEFT, CAROL, 100_000);
+		});
+
+		it("adds each person's servers together and ranks the people", async () => {
+			const board = await getGlobalLeaderboard([GUILD, OTHER], 10, "total");
+
+			expect(board.map((row) => row.userId)).toEqual([ALICE, BOB]);
+			expect(board[0]).toMatchObject({ wallet: 800 + ECONOMY.startingWallet * 2, bank: 0 });
+		});
+
+		/** A server the bot has left is no longer part of the bot, so its money must not be either. */
+		it("leaves out servers it is not asked about", async () => {
+			const board = await getGlobalLeaderboard([GUILD, OTHER], 10, "total");
+
+			expect(board.map((row) => row.userId)).not.toContain(CAROL);
+			expect(await countGlobalAccounts([GUILD, OTHER])).toBe(2);
+		});
+
+		it("ranks by the purse asked for", async () => {
+			await adjustBank(OTHER, ALICE, 5_000);
+
+			expect((await getGlobalLeaderboard([GUILD, OTHER], 10, "bank"))[0]?.userId).toBe(ALICE);
+			expect(await getGlobalRank([GUILD, OTHER], ALICE, "bank")).toBe(1);
+			expect(await getGlobalRank([GUILD, OTHER], BOB, "bank")).toBe(2);
+		});
+
+		it("has no rank for somebody with no account in those servers", async () => {
+			expect(await getGlobalRank([GUILD, OTHER], CAROL, "total")).toBeNull();
+		});
+
+		it("ranks within one server by wallet too", async () => {
+			expect(await getEconomyRank(GUILD, BOB, "wallet")).toBe(1);
+			expect(await getEconomyRank(GUILD, ALICE, "wallet")).toBe(2);
+		});
 	});
 });

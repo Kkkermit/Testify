@@ -2,6 +2,7 @@
 export const CATEGORIES = {
 	community: { label: "Community", emoji: "👥", colour: "Green" },
 	economy: { label: "Economy", emoji: "💰", colour: "Gold" },
+	casino: { label: "Casino", emoji: "🎰", colour: "DarkGreen" },
 	fun: { label: "Fun", emoji: "🎮", colour: "Yellow" },
 	games: { label: "Games", emoji: "🎯", colour: "Orange" },
 	info: { label: "Info", emoji: "📚", colour: "Blurple" },

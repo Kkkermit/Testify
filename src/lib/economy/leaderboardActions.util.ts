@@ -1,60 +1,50 @@
 import { type AttachmentBuilder, type Guild } from "discord.js";
 import { renderBoardImage } from "@lib/canvas/boardCard.util";
-import { type BoardRow } from "@lib/canvas/canvas.types";
 import { pageCount } from "@lib/discord/pagination.util";
 import { type BoardKind } from "@lib/economy/economy.types";
-import { boardEntries, rankOnBoard } from "@lib/economy/memberActions.util";
+import {
+	type BoardEntry,
+	boardEntries,
+	type BoardView,
+	decorateRows,
+	rankOnBoard,
+	SERVER_TOTALS,
+} from "@lib/economy/memberActions.util";
 import { formatNumber, ordinal } from "@lib/format/format.util";
+import { type BoardScope, MONEY_SORT_LABELS, type MoneySort } from "@testify/shared";
 
-/** The leaderboards, drawn by the same code for `/leaderboard` and its paging buttons. */
+/** The leaderboards as an image and a line of text, one message per request. */
 
 export const PAGE_SIZE = 10;
 
-export function boardTitle(kind: BoardKind, guildName: string, page: number): string {
-	const heading = kind === "economy" ? `Richest in ${guildName}` : `Top levels in ${guildName}`;
-	return page === 0 ? heading : `${heading} — page ${page + 1}`;
+/** Which board, which page, and for money, ranked by what and over which servers. */
+export interface BoardState {
+	kind: BoardKind;
+	page: number;
+	sort: MoneySort;
+	scope: BoardScope;
 }
 
-export function emptyMessage(kind: BoardKind): string {
-	return kind === "economy" ? "Nobody has an account here yet." : "Nobody has earned any XP here yet.";
+export function boardTitle(state: BoardState, guildName: string): string {
+	const heading =
+		state.kind === "levels"
+			? `Top levels in ${guildName}`
+			: `${MONEY_SORT_LABELS[state.sort].heading} ${state.scope === "global" ? "across every server" : `in ${guildName}`}`;
+
+	return state.page === 0 ? heading : `${heading} — page ${state.page + 1}`;
 }
 
-interface Entry {
-	userId: string;
-	primary: string;
-	secondary: string;
+export function emptyMessage(kind: BoardKind, scope: BoardScope = "server"): string {
+	if (kind === "levels") return "Nobody has earned any XP here yet.";
+
+	return scope === "global" ? "Nobody has an account anywhere yet." : "Nobody has an account here yet.";
 }
 
-async function entriesFor(guild: Guild, kind: BoardKind, page: number): Promise<{ entries: Entry[]; total: number }> {
-	const { entries, total } = await boardEntries(guild.id, kind, { limit: PAGE_SIZE, skip: page * PAGE_SIZE });
-
+function describeMoney(entry: BoardEntry, sort: MoneySort): { primary: string; secondary: string } {
 	return {
-		total,
-		entries: entries.map((entry) => ({
-			userId: entry.userId,
-			primary: kind === "economy" ? formatNumber(entry.primary) : `Level ${formatNumber(entry.primary)}`,
-			secondary: kind === "economy" ? `${formatNumber(entry.secondary)} banked` : `${formatNumber(entry.secondary)} XP`,
-		})),
+		primary: formatNumber(entry.primary),
+		secondary: `${formatNumber(entry.secondary)} ${sort === "bank" ? "in wallet" : "banked"}`,
 	};
-}
-
-/** Names and avatars come from one bulk member fetch rather than one request each. */
-async function decorate(guild: Guild, entries: Entry[], page: number): Promise<BoardRow[]> {
-	// Cache first, fetching only what is missing, since the handler answers without deferring.
-	const missing = entries.map((entry) => entry.userId).filter((id) => !guild.members.cache.has(id));
-	if (missing.length > 0) await guild.members.fetch({ user: missing }).catch(() => null);
-
-	return entries.map((entry, index) => {
-		const member = guild.members.cache.get(entry.userId) ?? null;
-
-		return {
-			rank: page * PAGE_SIZE + index + 1,
-			displayName: member?.displayName ?? `Left the server (${entry.userId.slice(0, 6)}…)`,
-			avatarUrl: member?.displayAvatarURL({ extension: "png", size: 128 }) ?? "",
-			primary: entry.primary,
-			secondary: entry.secondary,
-		};
-	});
 }
 
 export interface BoardMessage {
@@ -62,41 +52,61 @@ export interface BoardMessage {
 	files: AttachmentBuilder[];
 }
 
-/** One board, as an image and a line of text. */
+/** One board, as an image and a line of text; the bot-wide board adds up the servers in `guildIds`. */
 export async function boardMessage(
 	guild: Guild,
-	kind: BoardKind,
-	page: number,
+	state: BoardState,
 	viewerId: string,
+	guildIds: readonly string[],
 ): Promise<BoardMessage> {
-	const { entries, total } = await entriesFor(guild, kind, page);
-	const rows = await decorate(guild, entries, page);
-	const image = await renderBoardImage(boardTitle(kind, guild.name, page), rows, emptyMessage(kind));
+	const view: BoardView = state.kind === "economy" ? { sort: state.sort, scope: state.scope, guildIds } : SERVER_TOTALS;
+	const [{ entries, total }, rank] = await Promise.all([
+		boardEntries(guild.id, state.kind, { limit: PAGE_SIZE, skip: state.page * PAGE_SIZE }, view),
+		rankOnBoard(guild.id, state.kind, viewerId, view),
+	]);
 
-	return {
-		content: footerFor(kind, page, pageCount(total, PAGE_SIZE), await rankOf(guild, kind, viewerId)),
-		files: [image],
-	};
+	const rows = await decorateRows(guild, entries, state.page * PAGE_SIZE + 1, view.scope);
+	const image = await renderBoardImage(
+		boardTitle(state, guild.name),
+		rows.map((row, index) => ({
+			rank: row.rank,
+			displayName: row.displayName,
+			avatarUrl: row.avatarUrl ?? "",
+			...(state.kind === "economy"
+				? describeMoney(entries[index]!, state.sort)
+				: { primary: `Level ${formatNumber(row.primary)}`, secondary: `${formatNumber(row.secondary)} XP` }),
+		})),
+		emptyMessage(state.kind, view.scope),
+	);
+
+	return { content: footerFor(state, pageCount(total, PAGE_SIZE), rank), files: [image] };
+}
+
+/** The options that reproduce this board, so the next-page hint keeps the reader's sort and scope. */
+function optionsOf(state: BoardState): string {
+	if (state.kind === "levels") return "";
+
+	return `${state.sort === "total" ? "" : ` sort:${state.sort}`}${state.scope === "global" ? " scope:global" : ""}`;
 }
 
 /** The line under the board: where the viewer sits, and how to reach the rest. */
-export function footerFor(kind: BoardKind, page: number, pages: number, rank: number | null): string {
+export function footerFor(state: BoardState, pages: number, rank: number | null): string {
 	const where =
 		rank === null
 			? "-# You are not on this board yet."
-			: `-# You are **${ordinal(rank)}**${pageOfRank(rank) === page ? " — on this page." : `, on page ${pageOfRank(rank) + 1}.`}`;
+			: `-# You are **${ordinal(rank)}**${pageOfRank(rank) === state.page ? " — on this page." : `, on page ${pageOfRank(rank) + 1}.`}`;
 
+	const next = state.page + 2;
 	const more =
-		pages > 1 ? `\n-# Page **${page + 1}** of **${pages}** — \`/leaderboard ${kind} page:2\` for the next.` : "";
+		pages <= 1
+			? ""
+			: next <= pages
+				? `\n-# Page **${state.page + 1}** of **${pages}** — \`/leaderboard ${state.kind}${optionsOf(state)} page:${next}\` for the next.`
+				: `\n-# Page **${state.page + 1}** of **${pages}**, the last.`;
 
 	return `${where}${more}`;
 }
 
 export function pageOfRank(rank: number): number {
 	return Math.max(0, Math.ceil(rank / PAGE_SIZE) - 1);
-}
-
-/** Where the viewer sits, so "Find me" can jump straight there. */
-async function rankOf(guild: Guild, kind: BoardKind, userId: string): Promise<number | null> {
-	return rankOnBoard(guild.id, kind, userId);
 }

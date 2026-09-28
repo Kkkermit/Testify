@@ -6,10 +6,12 @@ import { type Command, type CommandInput, type Subcommand } from "@core/command"
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
+import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND } from "@lib/casino/casino.constants";
+import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { formatDuration, humanisePermission } from "@lib/format/format.util";
 import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
-import { isAlwaysEnabled } from "@testify/shared";
+import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
 
 /** A refusal with a heading of its own, for a state that is nobody's mistake. */
 export interface TitledRefusal {
@@ -43,6 +45,9 @@ export async function runChecks(
 
 	const musicOff = await checkMusicSystem(interaction, command);
 	if (musicOff !== null) return musicOff;
+
+	const casinoClosed = await checkCasino(interaction, command);
+	if (casinoClosed !== null) return casinoClosed;
 
 	if (command.ownerOnly && !client.isOwner(interaction.user.id)) {
 		return "This command is only for the bot owner.";
@@ -106,6 +111,23 @@ export async function checkMusicControl(
 	});
 }
 
+/** The gates a new casino game passes, for a button that deals one without running the command. */
+export async function checkCasinoPlay(
+	client: TestifyClient,
+	who: { userId: string; guildId: string },
+	game: CasinoGame,
+): Promise<CheckFailure> {
+	if (client.paused) return pausedRefusal();
+
+	const blacklisted = await findBlacklistEntry(who.userId);
+	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
+
+	const switchedOff = await checkSwitchedOff(CASINO_COMMAND, who.guildId);
+	if (switchedOff !== null) return switchedOff;
+
+	return casinoRefusal(await readCasinoSettings(who.guildId), game);
+}
+
 /** Nobody bypasses a switch, the bot owner included. */
 async function checkSwitchedOff(name: string, guildId: string | null): Promise<CheckFailure> {
 	if (isAlwaysEnabled(name)) return null;
@@ -164,6 +186,19 @@ async function checkMusicSystem(interaction: CommandInput, command: Command): Pr
 		roleIds: roleIdsOf(member),
 		manager: member !== null && permissionsOf(member).has(PermissionFlagsBits.ManageGuild),
 	});
+}
+
+/** The casino's switch and its per-game switches; `/casino settings` stays reachable so a server can open it again. */
+async function checkCasino(interaction: CommandInput, command: Command): Promise<CheckFailure> {
+	if (command.name !== CASINO_COMMAND || interaction.guildId === null) return null;
+
+	const chosen = chosenSubcommand(interaction, command)?.name ?? null;
+	if (chosen === CASINO_SETTINGS_SUBCOMMAND) return null;
+
+	return casinoRefusal(
+		await readCasinoSettings(interaction.guildId),
+		chosen !== null && isCasinoGame(chosen) ? chosen : null,
+	);
 }
 
 function checkCooldown(interaction: CommandInput, command: Command, client: TestifyClient): CheckFailure {

@@ -33,6 +33,7 @@ import {
 	type LotterySettings,
 	type TicketSettings,
 	type MusicSettings,
+	type CasinoSettings,
 	type BotStatsSettings,
 	type GuildWarningsPage,
 	type MemberMatch,
@@ -198,6 +199,8 @@ export const lotterySettings: LotterySettings = {
 
 export const economyBoard: BoardPage = {
 	board: "economy",
+	sort: "total",
+	scope: "server",
 	page: 1,
 	pages: 2,
 	total: 30,
@@ -285,6 +288,14 @@ export const treasureSettings: TreasureSettings = {
 export const musicSettings: MusicSettings = {
 	enabled: true,
 	djRoleIds: [],
+	configured: true,
+};
+
+export const casinoSettings: CasinoSettings = {
+	enabled: true,
+	games: { roulette: true, blackjack: true, slots: false, hilo: true, coinflip: true, dice: true },
+	minBet: 10,
+	maxBet: null,
 	configured: true,
 };
 
@@ -774,10 +785,16 @@ export const handlers = [
 	http.delete("/api/guilds/:guildId/giveaways/:messageId", () => HttpResponse.json({ giveaways: [] })),
 	http.get("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
+	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
-		const board = new URL(request.url).searchParams.get("board") ?? "economy";
-		return HttpResponse.json({ ...economyBoard, board });
+		const query = new URL(request.url).searchParams;
+		return HttpResponse.json({
+			...economyBoard,
+			board: query.get("board") ?? "economy",
+			sort: query.get("sort") ?? "total",
+			scope: query.get("scope") ?? "server",
+		});
 	}),
 	// Before `:userId`, which MSW would otherwise match first, exactly as the real router would.
 	http.get("/api/guilds/:guildId/members/search", () => HttpResponse.json(memberMatches)),
@@ -809,6 +826,9 @@ export const handlers = [
 	http.delete("/api/guilds/:guildId/tickets", () => HttpResponse.json({ ...ticketSettings, enabled: false })),
 	http.patch("/api/guilds/:guildId/treasure", () => HttpResponse.json(treasureSettings)),
 	http.patch("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
+	http.patch("/api/guilds/:guildId/casino", async ({ request }) =>
+		HttpResponse.json({ ...casinoSettings, ...((await request.json()) as object) }),
+	),
 	http.get("/api/guilds/:guildId/bot-stats", () => HttpResponse.json(botStatsSettings)),
 	http.put("/api/guilds/:guildId/bot-stats", async ({ request }) => {
 		const { channelId } = (await request.json()) as { channelId: string };

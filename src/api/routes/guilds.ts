@@ -7,6 +7,7 @@ import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
 import { automod } from "@api/routes/automod";
 import { botStats } from "@api/routes/botStats";
+import { casino } from "@api/routes/casino";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { giveaways } from "@api/routes/giveaways";
 import { levelling } from "@api/routes/levelling";
@@ -35,6 +36,7 @@ import {
 	listSticky,
 } from "@database/repositories/settingsRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
+import { CASINO_GAMES, readCasinoSettings } from "@lib/casino";
 import { canPostInChannel } from "@lib/discord";
 import { readLottery, readTreasure } from "@lib/economy";
 import { readInsights } from "@lib/info";
@@ -71,6 +73,7 @@ guilds.route("/:guildId/automod", automod);
 guilds.route("/:guildId/sticky", sticky);
 guilds.route("/:guildId/tickets", tickets);
 guilds.route("/:guildId/lottery", lottery);
+guilds.route("/:guildId/casino", casino);
 guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/giveaways", giveaways);
 guilds.route("/:guildId/verification", verification);
@@ -208,6 +211,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		ticketing,
 		draw,
 		stats,
+		tables,
 	] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -222,6 +226,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		readTickets(guild),
 		readLottery(guild.id),
 		getFixedStats(guild.id),
+		readCasinoSettings(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -302,6 +307,14 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			detail: draw.enabled ? count(draw.ticketsSold, "ticket sold") : null,
 		},
 		{
+			key: "casino",
+			label: "Casino",
+			enabled: tables.enabled,
+			detail: tables.enabled
+				? `${String(CASINO_GAMES.filter((game) => tables.games[game]).length)} of ${String(CASINO_GAMES.length)} games open`
+				: null,
+		},
+		{
 			key: "bot-stats",
 			label: "Bot statistics",
 			enabled: stats !== null,
@@ -320,7 +333,7 @@ const WATCHED = [
 	[PermissionFlagsBits.ManageMessages, "Manage Messages — needed for counting and sticky messages"],
 	[PermissionFlagsBits.ViewAuditLog, "View Audit Log — needed for audit logging to name who did what"],
 	[PermissionFlagsBits.ManageChannels, "Manage Channels — needed for voice stats and tickets"],
-	[PermissionFlagsBits.AttachFiles, "Attach Files — needed for rank cards and welcome images"],
+	[PermissionFlagsBits.AttachFiles, "Attach Files — needed for rank cards, welcome images and the casino"],
 ] as const;
 
 function missingPermissions(guild: Guild): string[] {

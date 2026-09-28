@@ -1,5 +1,12 @@
 import { Collection, type Guild, type GuildMember } from "discord.js";
-import { countAccounts, getEconomyRank, getLeaderboard } from "@database/repositories/economyRepository";
+import {
+	countAccounts,
+	countGlobalAccounts,
+	getEconomyRank,
+	getGlobalLeaderboard,
+	getGlobalRank,
+	getLeaderboard,
+} from "@database/repositories/economyRepository";
 import { countRanked, getLevelLeaderboard, getRank } from "@database/repositories/levelRepository";
 import { boardEntries, decorateRows, readBoard } from "@lib/economy/memberActions.util";
 
@@ -7,6 +14,9 @@ jest.mock("@database/repositories/economyRepository", () => ({
 	getLeaderboard: jest.fn(() => Promise.resolve([])),
 	countAccounts: jest.fn(() => Promise.resolve(0)),
 	getEconomyRank: jest.fn(() => Promise.resolve(null)),
+	getGlobalLeaderboard: jest.fn(() => Promise.resolve([])),
+	countGlobalAccounts: jest.fn(() => Promise.resolve(0)),
+	getGlobalRank: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelLeaderboard: jest.fn(() => Promise.resolve([])),
@@ -50,6 +60,9 @@ beforeEach(() => {
 	levelRows.mockResolvedValue([]);
 	levelTotal.mockResolvedValue(0);
 	levelRank.mockResolvedValue(null);
+	jest.mocked(getGlobalLeaderboard).mockResolvedValue([]);
+	jest.mocked(countGlobalAccounts).mockResolvedValue(0);
+	jest.mocked(getGlobalRank).mockResolvedValue(null);
 });
 
 describe("boardEntries", () => {
@@ -150,5 +163,88 @@ describe("readBoard", () => {
 
 		expect(levelRank).toHaveBeenCalledWith(GUILD, VIEWER);
 		expect(page.you).toEqual({ rank: 4, page: 1 });
+	});
+});
+
+describe("the money board's sort and scope", () => {
+	const SERVERS = [GUILD, "900000000000000002"];
+	const row = { userId: "1", wallet: 300, bank: 700, total: 1_000 };
+
+	it("ranks by the figure asked for and shows the other purse beside it", async () => {
+		economyRows.mockResolvedValue([row] as never);
+
+		const byWallet = await boardEntries(
+			GUILD,
+			"economy",
+			{ limit: 25, skip: 0 },
+			{ sort: "wallet", scope: "server", guildIds: [] },
+		);
+		const byBank = await boardEntries(
+			GUILD,
+			"economy",
+			{ limit: 25, skip: 0 },
+			{ sort: "bank", scope: "server", guildIds: [] },
+		);
+
+		expect(economyRows).toHaveBeenCalledWith(GUILD, 25, "wallet", 0);
+		expect(byWallet.entries).toEqual([{ userId: "1", primary: 300, secondary: 700 }]);
+		expect(byBank.entries).toEqual([{ userId: "1", primary: 700, secondary: 300 }]);
+	});
+
+	/** The bot-wide board adds up the servers the bot is in, so it must ask with exactly those and nothing else. */
+	it("reads the bot-wide board across the servers it is given", async () => {
+		jest.mocked(getGlobalLeaderboard).mockResolvedValue([row]);
+		jest.mocked(countGlobalAccounts).mockResolvedValue(1);
+
+		const board = await boardEntries(
+			GUILD,
+			"economy",
+			{ limit: 10, skip: 20 },
+			{ sort: "total", scope: "global", guildIds: SERVERS },
+		);
+
+		expect(getGlobalLeaderboard).toHaveBeenCalledWith(SERVERS, 10, "total", 20);
+		expect(economyRows).not.toHaveBeenCalled();
+		expect(board).toEqual({ total: 1, entries: [{ userId: "1", primary: 1_000, secondary: 700 }] });
+	});
+
+	it("ranks the viewer on the board they are looking at", async () => {
+		await readBoard(guild(), "economy", 1, VIEWER, { sort: "bank", scope: "global", guildIds: SERVERS });
+
+		expect(getGlobalRank).toHaveBeenCalledWith(SERVERS, VIEWER, "bank");
+		expect(economyRank).not.toHaveBeenCalled();
+	});
+
+	/** The levels board has one figure and one server; a sort sent with it must not leak into the answer. */
+	it("ignores a sort or scope sent with the levels board", async () => {
+		const page = await readBoard(guild(), "levels", 1, VIEWER, { sort: "bank", scope: "global", guildIds: SERVERS });
+
+		expect(page).toMatchObject({ board: "levels", sort: "total", scope: "server" });
+		expect(getGlobalLeaderboard).not.toHaveBeenCalled();
+	});
+
+	it("names somebody who was never in this server from their Discord profile on the bot-wide board", async () => {
+		const target = guild();
+		(target as unknown as { client: unknown }).client = {
+			users: {
+				fetch: jest.fn(() =>
+					Promise.resolve({ displayName: "Faraway", displayAvatarURL: () => "https://cdn.example.test/far.png" }),
+				),
+			},
+		};
+
+		const [stranger] = await decorateRows(target, [{ userId: "7", primary: 1, secondary: 0 }], 1, "global");
+
+		expect(stranger).toMatchObject({
+			displayName: "Faraway",
+			avatarUrl: "https://cdn.example.test/far.png",
+			inGuild: false,
+		});
+	});
+
+	it("still calls somebody who left this server gone on the server board", async () => {
+		const [gone] = await decorateRows(guild(), [{ userId: "7", primary: 1, secondary: 0 }], 1, "server");
+
+		expect(gone?.displayName).toBe("Left the server");
 	});
 });

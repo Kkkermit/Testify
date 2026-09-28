@@ -11,8 +11,10 @@
 		<!-- Self-hosted, so no preconnect is needed — but the CSS has to parse before these are discovered otherwise. -->
 		<link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossorigin />
 		<link rel="preload" href="/fonts/space-grotesk-latin.woff2" as="font" type="font/woff2" crossorigin />
-		<link rel="icon" type="image/png" href="/src/assets/favicon.png" />
-		<link rel="apple-touch-icon" href="/src/assets/apple-touch-icon.png" />
+		<!-- Unhashed and at the root, where home-screen tools that ignore these links look for them anyway. -->
+		<link rel="icon" type="image/png" sizes="256x256" href="/favicon.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+		<link rel="manifest" href="/manifest.webmanifest" />
 		<title>Dashboard</title>
 	</head>
 	<body>

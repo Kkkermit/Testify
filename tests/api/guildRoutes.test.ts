@@ -14,6 +14,9 @@ import {
 } from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
+jest.mock("@database/repositories/casinoRepository", () => ({
+	getCasinoSettings: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/settingsRepository", () => ({
 	getAntiLink: jest.fn(() => Promise.resolve(null)),
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
@@ -195,9 +198,16 @@ describe("the guild overview", () => {
 	it("lists every feature, on or off, so nothing is invisible", async () => {
 		const body = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 
+		// The casino is the one feature a server gets without setting anything up, so its tile says it is open.
+		const configurable = body.features.filter((feature) => feature.key !== "casino");
+
 		expect(body.features.map((feature) => feature.key)).toContain("levelling");
-		expect(body.features.every((feature) => !feature.enabled)).toBe(true);
-		expect(body.features.every((feature) => feature.detail === null)).toBe(true);
+		expect(configurable.every((feature) => !feature.enabled)).toBe(true);
+		expect(configurable.every((feature) => feature.detail === null)).toBe(true);
+		expect(body.features.find((feature) => feature.key === "casino")).toMatchObject({
+			enabled: true,
+			detail: "6 of 6 games open",
+		});
 	});
 
 	/** A feature can be configured perfectly and do nothing, because Discord revokes permissions silently. */

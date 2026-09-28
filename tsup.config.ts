@@ -7,7 +7,8 @@ import { defineConfig } from "tsup";
 const run = promisify(execFile);
 
 export default defineConfig({
-	entry: ["src/**/*.ts"],
+	// A declaration file only describes types, so it has nothing to emit.
+	entry: ["src/**/*.ts", "!src/**/*.d.ts"],
 	outDir: "dist",
 	format: ["cjs"],
 	// `engines` requires 24.11, so down-levelling to 22 only costs output nobody runs.

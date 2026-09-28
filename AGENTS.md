@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 79, across 13 categories          |
-| Command files        | 101 (incl. folded-in subcommands) |
-| Subcommands          | 123                               |
-| Prefix aliases       | 84                                |
-| Button handlers      | 27                                |
-| Events               | 24, in 5 groups                   |
-| `src/lib` helpers    | 93, in 16 domain folders          |
-| Schemas/repositories | 16 / 15                           |
-| Scheduled jobs       | 5                                 |
-| Tests                | 5,057 across 292 suites           |
+| Commands             | 79, across 14 categories          |
+| Command files        | 100 (incl. folded-in subcommands) |
+| Subcommands          | 130                               |
+| Prefix aliases       | 90                                |
+| Button handlers      | 28                                |
+| Events               | 25, in 5 groups                   |
+| `src/lib` helpers    | 139, in 17 domain folders         |
+| Schemas/repositories | 19 / 17                           |
+| Scheduled jobs       | 6                                 |
+| Tests                | 5,545 across 306 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -194,7 +194,7 @@ Grouped by **technical role first, then domain**. One feature is spread across l
 ```
 src/
 ├── index.ts              Entry point. One async main() that awaits each step in order.
-├── core/                 The framework. 15 files, no domain logic.
+├── core/                 The framework. 18 files, no domain logic.
 │   ├── client.ts         TestifyClient — subclasses discord.js Client, declares its own fields
 │   ├── loader.ts         Finds and registers everything from disk. Globs live here.
 │   ├── command.ts        Command + CommandInput contract, defineCommand, asSubcommand
@@ -215,21 +215,22 @@ src/
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               24 handlers in command, create, logging, ready and message
-├── buttons/              24 component handlers, keyed by custom-ID prefix
-├── lib/                  84 helpers in 15 domain folders, each behind its own index.ts barrel
+├── events/               25 handlers in command, create, logging, ready and message
+├── buttons/              28 component handlers, keyed by custom-ID prefix
+├── lib/                  139 helpers in 17 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
 │   ├── bot/              runtime, identity, pause/shut down, usage, status, command catalogue and runner
 │   ├── infra/            outbound HTTP, what it learns about each service, and the secret box
 │   ├── support/          the help desk: articles, search, the leak guard and the optional model picker
+│   ├── casino/           the games' rules, the wallet flow, the card hands and every casino message
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           16 Mongoose schemas
-│   └── repositories/     15 query layers. Commands never touch a model directly.
-├── jobs/                 5 scheduled jobs (lottery draw, passive income, bot stats, softban expiry, heartbeat)
+│   ├── models/           19 Mongoose schemas
+│   └── repositories/     17 query layers. Commands never touch a model directly.
+├── jobs/                 6 scheduled jobs (lottery, passive income, bot stats, softbans, heartbeat, casino hands)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
 tests/                    Mirrors src/. 155 suites.
@@ -242,7 +243,7 @@ docs/                     Every document except this one. Start at docs/README.m
 └── dashboard/            The dashboard's guide and the README's screenshots (§24)
 ```
 
-**Categories:** `community`, `economy`, `fun`, `games`, `info`, `levelling`, `moderation`, `settings`,
+**Categories:** `community`, `economy`, `casino`, `fun`, `games`, `info`, `levelling`, `moderation`, `settings`,
 `music`, `tickets`, `giveaway`, `developer`, `owner`. Defined `as const` in `src/config/categories.ts` with a derived
 union type, so a mistyped category is a **compile error**. Adding a category there is all that is needed for
 `/help` to pick it up.
@@ -271,21 +272,25 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
 | Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`       |
 | Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)      |
+| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in       |
+| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                     |
 
 ### The panel renderers in `src/lib`
 
 Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
 
-| Renderer                   | Handler                | Pattern it demonstrates                                    |
-| -------------------------- | ---------------------- | ---------------------------------------------------------- |
-| `shopScreen.util.ts`       | `buttons/shop.ts`      | Paged catalogue, per-item buttons, confirm step            |
-| `auditPanel.util.ts`       | `buttons/auditLog.ts`  | Draft edits in a bit-packed custom ID, then Save           |
-| `levelPanel.util.ts`       | `buttons/levelling.ts` | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
-| `balancePanel.util.ts`     | `buttons/balance.ts`   | Hub panel, read-only mode for other users                  |
-| `inventoryScreen.util.ts`  | `buttons/inventory.ts` | Per-row action button, paging in the custom ID             |
-| `settingsPanel.util.ts`    | —                      | Generic settings rows + pre-filled modal editors           |
-| `musicPanel.util.ts`       | `buttons/music.ts`     | Live state: re-reads the session on every press            |
-| `musicSystemPanel.util.ts` | `buttons/music.ts`     | A switch and a pre-ticked role select, applied immediately |
+| Renderer                      | Handler                     | Pattern it demonstrates                                    |
+| ----------------------------- | --------------------------- | ---------------------------------------------------------- |
+| `shopScreen.util.ts`          | `buttons/shop.ts`           | Paged catalogue, per-item buttons, confirm step            |
+| `auditPanel.util.ts`          | `buttons/auditLog.ts`       | Draft edits in a bit-packed custom ID, then Save           |
+| `levelPanel.util.ts`          | `buttons/levelling.ts`      | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
+| `balancePanel.util.ts`        | `buttons/balance.ts`        | Hub panel, read-only mode for other users                  |
+| `inventoryScreen.util.ts`     | `buttons/inventory.ts`      | Per-row action button, paging in the custom ID             |
+| `settingsPanel.util.ts`       | —                           | Generic settings rows + pre-filled modal editors           |
+| `musicPanel.util.ts`          | `buttons/music.ts`          | Live state: re-reads the session on every press            |
+| `musicSystemPanel.util.ts`    | `buttons/music.ts`          | A switch and a pre-ticked role select, applied immediately |
+| `casinoPanel.util.ts`         | `buttons/casino.ts`         | A picture per state, re-read from the database every press |
+| `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts` | A switch, a toggle per game and a pre-filled modal         |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -1269,9 +1274,18 @@ conventions test fails on either, and both halves were proved to go red.
 
 ### One leaderboard command, and no command that only forwards to another
 
-`/leaderboard` serves both the economy and the levelling board, with a button to swap and a **Find me** button
-that jumps to the page you are on. There is deliberately no `/levelling leaderboard` — a second name for the same
-screen is the overlap this pass removed, not a convenience.
+`/leaderboard` serves both the economy and the levelling board as `economy` and `levels` subcommands. **It has no
+buttons, and that is deliberate:** re-rendering an image board in place stacked the old picture under the new one,
+so each request is its own message and the line under it says where the reader sits and what to type for the next
+page. There is deliberately no `/levelling leaderboard` — a second name for the same screen is the overlap this pass
+removed, not a convenience.
+
+**The money board takes a `sort` and a `scope`.** `sort` ranks by total, wallet or bank; `scope: global` adds each
+person's balances together across every server the bot is in **now**, which the caller passes from
+`client.guilds.cache` rather than the request naming any. `getGlobalLeaderboard` is one aggregation, and a server the
+bot has left stops counting on the next request with nothing to clean up. Somebody on that board who is not in this
+server is named through `client.users.fetch`, and on the dashboard has no member link and no "Left" badge — they
+never were here. The next-page hint repeats the sort and scope, or following it lands on a different board.
 
 The same reasoning deleted `/use` (the inventory panel's per-row Use buttons do it better), `/rehome` (now
 `/pet rehome`, with `t?rehome` kept as a prefix alias) and `/pet buy` (the shop sells pets with a button; `/pet
@@ -1351,6 +1365,42 @@ is Markdown read line by line — `###` headings, `-` and `1.` lists, `>` tips, 
 and needs no blank line before a heading or a list, because Discord needs none either. A link is followed only if
 it is a dashboard path or `https` to a host in `SUPPORT_LINK_HOSTS`. `{bot}`, `{prefix}`, `{repository}` and
 `{fact:…}` are filled per reader. Add a paraphrase to the eval, then run the suite.
+
+### The casino takes the stake first, and the picture shows what already happened
+
+`/casino` holds six games: roulette, blackjack, slots, hi-lo, coinflip and dice. It replaced `/gamble` and
+`/game blackjack` rather than sitting beside them, which is anti-pattern 21; `t?gamble` and `t?bj` are aliases into
+it. Five things about it are load-bearing:
+
+- **The money moves before anything is drawn.** `takeStake` checks the table's limits, then debits with the
+  conditional `debitWallet`, so a bet can never overdraw and a limit is refused before a coin moves. The game is
+  then settled and paid in the same request, and only after that is the animation rendered. A crash between the
+  payout and the picture costs a picture, never a stake.
+- **The animation is replaced by the result, not trusted to stop.** A GIF is written to play once (`repeat: -1`),
+  but a client that loops it would spin the wheel for ever, so `playInstant` edits the message to the settled
+  still once the animation has had `durationMs` plus `CASINO_TIMING.revealMarginMs` to run. The wheel is static and
+  only the ball and the turret move, and `gif.util.ts` sends each frame's unchanged pixels as the transparent slot:
+  that is what keeps a 66-frame spin near 220 KB and a second to render.
+- **A card hand lives in the database, not in memory.** `casinohands` holds one row per player per game, with a
+  unique index, so two starts cannot both open a hand and the loser is refunded. Every press moves the hand with
+  `advanceHand` from the version it read, and a hand is settled by `claimHand`, which deletes it; whoever gets the
+  row back is the one who pays, so a double click cannot pay twice. A double down takes its second stake first and
+  hands it back if the press loses the race.
+- **Nothing a player walks away from is lost.** `settleIdleHands` runs every minute and plays out anything idle past
+  `CASINO_TIMING.handIdleMs`: blackjack stands, hi-lo cashes out, and the table message is edited to say so.
+- **The odds are real and tested.** Roulette is single-zero; blackjack pays 3 to 2 and stands on every 17; the slot
+  machine's exact return is computed over every line it can show and pinned between 94% and 97%; hi-lo pays each
+  call's odds less 3% and caps the pot. Change a paytable and `rules.test.ts` says what it did to the edge.
+
+**The switch works like the music system's.** `casinosettings` stores `enabled`, the games switched off (so a game
+added later starts open) and the bet limits. `checks.ts` refuses every `/casino` subcommand while the casino is
+closed except `/casino settings`, the way back in, and a Play again button passes the same gates through
+`checkCasinoPlay`. A hand already dealt may always finish, closed or not, because its stake has already left the
+wallet. The dashboard's `/guilds/:id/casino` screen writes through the same `applyCasinoSettings`.
+
+**Everything is drawn, nothing is a glyph.** The container ships only DejaVu Sans, which has no card suits worth
+using and no star, so suits, slot symbols and the pips are paths. A `★` in a title rendered as a missing-glyph box
+and is why the slot machine draws its stars.
 
 ### Global by design
 
@@ -1486,6 +1536,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/bot-stats`    | The self-updating statistics message: post, move, remove                   |
 | `/guilds/:id/member-count` | People, bots and recent joins, counted at most once a minute               |
 | `/guilds/:id/lottery`      | Pot, schedule, freeze, and a confirmed end                                 |
+| `/guilds/:id/casino`       | Open or close it, switch single games off, and the bet limits              |
 | `/guilds/:id/giveaways`    | Start, end early, reroll and delete — each keyed to its own row            |
 | `/guilds/:id/members`      | Money and levels, each as a real table, with a jump to your own page       |
 | `…/members/:userId`        | One member: standing, roles, warnings, softban, kick and ban               |

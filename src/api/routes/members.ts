@@ -40,9 +40,12 @@ function guildOf(context: Context<ApiBindings>): Guild {
 }
 
 members.get("/leaderboard", async (context) => {
-	const { board, page } = parseQuery(context, boardQuery);
+	const { board, page, sort, scope } = parseQuery(context, boardQuery);
+	const guildIds = [...context.get("client").guilds.cache.keys()];
 
-	return context.json(await readBoard(guildOf(context), board, page, context.get("session")?.userId ?? ""));
+	return context.json(
+		await readBoard(guildOf(context), board, page, context.get("session")?.userId ?? "", { sort, scope, guildIds }),
+	);
 });
 
 /** One live fetch each, because a cached member says nothing about who was demoted five minutes ago. */
