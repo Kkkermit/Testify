@@ -72,9 +72,17 @@ export function errorEmbed(message: string): EmbedBuilder {
 }
 
 /** A refusal with a heading is a state rather than a mistake, so it reads as a warning rather than an error. */
-export function refusalEmbed(refusal: string | { title: string; message: string }): EmbedBuilder {
+export function refusalEmbed(
+	refusal:
+		string | { title: string; message: string; fields?: { name: string; value: string }[]; tone?: "notice" | "error" },
+): EmbedBuilder {
 	if (typeof refusal === "string") return errorEmbed(refusal);
-	return embed({ colour: theme.colours.warning, title: refusal.title, description: refusal.message });
+	return embed({
+		colour: refusal.tone === "error" ? theme.colours.error : theme.colours.warning,
+		title: refusal.title,
+		description: refusal.message,
+		...(refusal.fields === undefined ? {} : { fields: refusal.fields }),
+	});
 }
 
 export function successEmbed(message: string): EmbedBuilder {
