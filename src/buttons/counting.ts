@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/settingsRepository";
@@ -42,7 +42,7 @@ export default defineButton({
 			const payload = countingPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId);
 
 			if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-				await interaction.reply(payload);
+				await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
 				return;
 			}
 

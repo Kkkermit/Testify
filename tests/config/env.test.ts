@@ -61,7 +61,10 @@ describe("loadEnv", () => {
 			CHANNEL_ERROR_LOG: "",
 			CHANNEL_GUILD_LOG: "",
 			CHANNEL_DM_LOG: "",
-			CHANNEL_FEEDBACK_LOG: "",
+			CHANNEL_SLASH_COMMAND_LOG: "",
+			CHANNEL_PREFIX_COMMAND_LOG: "",
+			CHANNEL_BUG_REPORT_LOG: "",
+			CHANNEL_SUGGESTION_LOG: "",
 		});
 
 		const env = loadEnv();

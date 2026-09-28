@@ -11,6 +11,9 @@ import {
 	InteractionContextType,
 	type InteractionEditReplyOptions,
 	type InteractionReplyOptions,
+	MessageFlags,
+	MessageFlagsBitField,
+	type MessageFlagsResolvable,
 	type PermissionResolvable,
 	PermissionsBitField,
 	type Role,
@@ -57,6 +60,8 @@ export interface CommandInput {
 	deleteReply?(): Promise<unknown>;
 	/** A message cannot be private, so a prefix command's version of one deletes itself instead. */
 	replyBriefly?(embed: EmbedBuilder): Promise<unknown>;
+	/** Called on a prefix command marked private, whose replies then delete themselves. */
+	tidyAway?(): void;
 }
 
 /** The option getters, in both their "give me it or null" and "it must be there" forms. */
@@ -110,6 +115,8 @@ export interface Subcommand {
 	permissions?: PermissionResolvable[];
 	/** Prefix-only short forms, so `t?meme` still works after `/lookup meme`. */
 	aliases?: string[];
+	/** Only the person who ran it sees the answer. */
+	private?: boolean;
 	run(interaction: CommandInput, client: TestifyClient): Promise<void>;
 }
 
@@ -136,6 +143,8 @@ export interface Command {
 	ownerOnly?: boolean;
 	/** Only usable in age-restricted channels. */
 	nsfw?: boolean;
+	/** Only the person who ran it sees the answer, whichever subcommand it was. */
+	private?: boolean;
 
 	/** Optional when the command is nothing but subcommands. */
 	run?(interaction: CommandInput, client: TestifyClient): Promise<void>;
@@ -169,28 +178,54 @@ export function asSubcommand(command: Command, aliases: string[] = []): Subcomma
 		...(command.options ? { options: command.options } : {}),
 		// The command keeps its own name as a prefix alias, so `t?meme` still works.
 		aliases: [command.name, ...(command.aliases ?? []), ...aliases],
+		...(command.private === true ? { private: true } : {}),
 		run: async (interaction, client) => command.run?.(interaction, client),
 	};
+}
+
+function withEphemeral<T extends { flags?: unknown }>(options: T | undefined): T {
+	const flags = new MessageFlagsBitField((options?.flags ?? 0) as MessageFlagsResolvable);
+	return { ...options, flags: flags.add(MessageFlags.Ephemeral).bitfield } as T;
+}
+
+/** Every reply the command sends reaches only its runner. */
+export function privately(interaction: CommandInput): CommandInput {
+	if (interaction.tidyAway !== undefined) {
+		interaction.tidyAway();
+		return interaction;
+	}
+
+	return new Proxy(interaction, {
+		get(target, property) {
+			if (property === "reply") return (options: InteractionReplyOptions) => target.reply(withEphemeral(options));
+			if (property === "followUp") return (options: InteractionReplyOptions) => target.followUp(withEphemeral(options));
+			if (property === "deferReply") {
+				return (options?: { flags?: unknown }) => target.deferReply(withEphemeral(options));
+			}
+
+			const value: unknown = Reflect.get(target, property, target);
+			return typeof value === "function" ? (value as (...args: unknown[]) => unknown).bind(target) : value;
+		},
+	});
 }
 
 /** Sends the interaction to the right handler. */
 export async function dispatch(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	const subcommands = subcommandsOf(command);
+	const chosen = subcommands.length > 0 ? interaction.options.getSubcommand(false) : null;
+	const subcommand = subcommands.find((candidate) => candidate.name === chosen);
+	const input = command.private === true || subcommand?.private === true ? privately(interaction) : interaction;
 
-	if (subcommands.length > 0) {
-		const chosen = interaction.options.getSubcommand(false);
-		const subcommand = subcommands.find((candidate) => candidate.name === chosen);
-		if (subcommand) {
-			await subcommand.run(interaction, client);
-			return;
-		}
+	if (subcommand) {
+		await subcommand.run(input, client);
+		return;
 	}
 
 	if (!command.run) {
 		throw new UserFacingError(`Pick a subcommand: ${subcommands.map((sub) => `\`${sub.name}\``).join(", ")}.`);
 	}
 
-	await command.run(interaction, client);
+	await command.run(input, client);
 }
 
 /** Turns a command into the payload Discord expects. */

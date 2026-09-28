@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "anti-link",
 	description: "Deletes links posted by members without the bypass permission.",
 	category: "settings",
+	private: true,
 	aliases: ["antilink", "link-filter"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],

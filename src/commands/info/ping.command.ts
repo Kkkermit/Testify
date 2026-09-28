@@ -5,6 +5,7 @@ export default defineCommand({
 	name: "ping",
 	description: "Checks the bot's latency.",
 	category: "info",
+	private: true,
 	aliases: ["latency"],
 
 	async run(interaction, client) {

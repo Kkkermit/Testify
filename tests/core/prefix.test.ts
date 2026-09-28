@@ -327,6 +327,65 @@ describe("replying to a message", () => {
 		expect(message.reply).toHaveBeenCalledWith({ content: "Only for you." });
 	});
 
+	/** Stripping every flag took the V2 one too, so Discord refused every panel run with the prefix. */
+	it("keeps the Components V2 flag, which a panel cannot be sent without", async () => {
+		const message = fakeMessage();
+		const input = new PrefixInteraction(message, ping, []);
+
+		await input.reply({ components: [], flags: 64 | 32_768 });
+
+		expect(message.reply).toHaveBeenCalledWith({ components: [], flags: 32_768 });
+	});
+
+	/** A message cannot be private, so a private command run with the prefix cleans up after itself. */
+	it("deletes a private command's reply and the message that ran it, and says when", async () => {
+		const after = jest.fn();
+		const deleted: string[] = [];
+		const message = {
+			...fakeMessage(),
+			client: { timers: { after } },
+			delete: jest.fn(() => {
+				deleted.push("command");
+				return Promise.resolve();
+			}),
+			reply: jest.fn((payload: Record<string, unknown>) =>
+				Promise.resolve({
+					id: "999",
+					payload,
+					edit: jest.fn(),
+					delete: jest.fn(() => {
+						deleted.push("reply");
+						return Promise.resolve();
+					}),
+				}),
+			),
+		} as unknown as Message;
+		const input = new PrefixInteraction(message, ping, []);
+
+		input.tidyAway();
+		await input.reply({ content: "Collected 500." });
+
+		const sent = (message.reply as jest.Mock).mock.calls[0]?.[0] as { content: string };
+		expect(sent.content).toMatch(/^Collected 500\.\n-# This message will be deleted <t:\d+:R>\.$/);
+		expect(after).toHaveBeenCalledTimes(2);
+		for (const [, waitMs] of after.mock.calls as [string, number][]) {
+			expect(waitMs).toBeGreaterThan(19_000);
+			expect(waitMs).toBeLessThanOrEqual(20_000);
+		}
+
+		for (const [, , run] of after.mock.calls as [string, number, () => Promise<void>][]) await run();
+		expect(deleted.sort()).toEqual(["command", "reply"]);
+	});
+
+	it("leaves an ordinary command's reply where it is", async () => {
+		const message = fakeMessage();
+		const input = new PrefixInteraction(message, ping, []);
+
+		await input.reply({ content: "Pong." });
+
+		expect(message.reply).toHaveBeenCalledWith({ content: "Pong." });
+	});
+
 	it("turns deferReply into a typing indicator", async () => {
 		const message = fakeMessage();
 		const input = new PrefixInteraction(message, ping, []);

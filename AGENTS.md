@@ -90,8 +90,8 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
 **Optional:** `NODE_ENV`, `LOG_LEVEL`,
-`DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
-`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
+`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report
+and suggestion — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
 `DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
 
@@ -286,6 +286,7 @@ Each is a pure state→message function paired with a handler in `src/buttons/`.
 | `auditPanel.util.ts`          | `buttons/auditLog.ts`       | Draft edits in a bit-packed custom ID, then Save           |
 | `levelPanel.util.ts`          | `buttons/levelling.ts`      | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
 | `balancePanel.util.ts`        | `buttons/balance.ts`        | Hub panel, read-only mode for other users                  |
+| `moneyPanel.util.ts`          | `buttons/money.ts`          | A step that returns to the panel it was opened from        |
 | `inventoryScreen.util.ts`     | `buttons/inventory.ts`      | Per-row action button, paging in the custom ID             |
 | `settingsPanel.util.ts`       | —                           | Generic settings rows + pre-filled modal editors           |
 | `musicPanel.util.ts`          | `buttons/music.ts`          | Live state: re-reads the session on every press            |
@@ -308,9 +309,9 @@ still renders when Discord's CDN is unreachable.
   Use this when each control is independent, which is most config: there is nothing to batch, and a Save button
   would just be a step between the admin and the thing they already decided.
 
-Two exceptions worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler
-file rather than a separate renderer (it composes `settingsPanel.util.ts` instead), and `buttons/money.ts` still
-returns an embed-based `RenderedScreen`. Both are fine; new panels should prefer the split.
+One exception worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler file
+rather than a separate renderer (it composes `settingsPanel.util.ts` instead). It is fine; new panels should prefer
+the split.
 
 ---
 
@@ -463,7 +464,7 @@ export default defineCommand({
 ```
 
 Full `Command` shape: `name`, `description`, `category` (required); then optional `options`, `subcommands`,
-`aliases`, `permissions`, `botPermissions`, `cooldown` (ms), `guildOnly`, `ownerOnly`, `nsfw`, `run`,
+`aliases`, `permissions`, `botPermissions`, `cooldown` (ms), `guildOnly`, `ownerOnly`, `nsfw`, `private`, `run`,
 `autocomplete`. `run` is optional when the command is nothing but subcommands.
 
 Rules:
@@ -482,6 +483,15 @@ Rules:
 7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
    to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
 8. Run `npm run docs:commands` afterwards.
+
+**`private: true` is how a command answers only the person who ran it**, set on the command or on one
+subcommand and applied by `dispatch` — never a hand-written `MessageFlags.Ephemeral`. On a slash command every
+reply, deferral and follow-up goes out ephemeral. A message cannot be private, so a prefix run instead deletes its
+reply and the message that ran it after `PRIVATE_TIDY_MS` (20 seconds), with a `<t:…:R>` countdown saying so. The
+prefix side drops only the ephemeral flag: dropping every flag took Components V2 with it, and Discord refused every
+panel run with the prefix. `tests/core/privateCommands.test.ts` pins the list. Anything the bot edits through the
+channel later — the music panel, the casino's card tables — stays public, because a private message can only be
+edited through its own interaction.
 
 **Discord caps top-level commands at 100.** When close to it, group: move the file into a `subcommands/` folder
 (which the loader does **not** scan) and expose it from a parent with `asSubcommand`:
@@ -630,6 +640,12 @@ lists both work this way.
 **you cannot attach a loose action row next to a container.** A confirm step has to be rendered _inside_ the
 container — see `sellConfirmScreen` in `shopScreen.util.ts`.
 
+**A button can only turn a message into the same kind:** once a message is V2 it cannot be edited back into
+embeds, so every screen a V2 panel leads to has to be V2 too. Deposit on `/balance` swapped in an embed chooser and Discord refused the whole update;
+`balanceButtons.test.ts` now presses every button on that panel and fails on an update that is not V2. Where a step
+is opened from a hub, it carries that in its custom ID and offers a way back — the shop's `from: "balance"` and the
+money chooser's `-bal` action both lead to the balance panel's own `refresh`.
+
 Gotchas found the hard way:
 
 - **Type `parts` as `ContainerPart[]` explicitly.** TypeScript otherwise narrows the array from its initial
@@ -776,6 +792,19 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
   edge of one line out. Keep every box line under 80 columns, which is why the hints are short.
 
 `bannerLines()` is pure and unit-tested, `printBanner()` writes once.
+
+**Log channels are the third job: posts the operator reads in Discord.** Each `CHANNEL_*_LOG` is optional and off
+while blank. `CHANNEL_ERROR_LOG` gets command failures with their reference, `CHANNEL_GUILD_LOG` servers the bot
+joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_REPORT_LOG` and
+`CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
+`postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
+neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
+`CHANNEL_SLASH_COMMAND_LOG` and `CHANNEL_PREFIX_COMMAND_LOG` log every command run, one per surface.
+`logCommandUse` queues a line in memory — the command, who ran it, where and whether it worked, **never what was
+typed**, since `/ask` promises its question is not kept — and `flushCommandLog` posts each queue every five seconds,
+at most five messages a flush because that is what Discord allows a channel, and once more at shutdown. A backlog
+past `COMMAND_LOG_LIMITS.maxWaiting` drops its oldest lines and says how many. The privacy notice names the
+command logs (`legal.commandsL6`).
 
 Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
 `"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is

@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "economy-info",
 	description: "Detailed economy information.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 	subcommands: [
 		{

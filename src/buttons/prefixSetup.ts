@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
@@ -30,7 +30,7 @@ export default defineButton({
 			const payload = prefixPanel({ ...next, ...(note !== undefined ? { note } : {}) }, ownerId);
 
 			if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-				await interaction.reply(payload);
+				await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
 				return;
 			}
 

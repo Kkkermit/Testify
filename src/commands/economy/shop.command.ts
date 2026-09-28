@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "shop",
 	description: "Browses and buys from the shop.",
 	category: "economy",
+	private: true,
 	aliases: ["store", "buy"],
 	guildOnly: true,
 	options: [

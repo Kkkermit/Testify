@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "role",
 	description: "Adds or removes a role from a member.",
 	category: "moderation",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageRoles],
 	botPermissions: [PermissionFlagsBits.ManageRoles],

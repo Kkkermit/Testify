@@ -29,6 +29,7 @@ export default defineCommand({
 	name: "verify",
 	description: "Configures the verification system.",
 	category: "settings",
+	private: true,
 	aliases: ["verification"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],

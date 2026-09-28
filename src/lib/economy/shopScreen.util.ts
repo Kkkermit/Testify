@@ -3,7 +3,7 @@ import { customId } from "@core/button";
 import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, sectionWithButton, text } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-import { SHOP_SECTIONS, PET_RARITIES, SHOP_ID } from "@lib/economy/economy.constants";
+import { BALANCE_PANEL_ID, SHOP_SECTIONS, PET_RARITIES, SHOP_ID } from "@lib/economy/economy.constants";
 import {
 	type ShopSection,
 	type PetRarityKey,
@@ -30,6 +30,12 @@ const SECTION_LABELS: Record<ShopSection, string> = {
 
 /** `-` stands in for an absent part, because a custom ID cannot hold an empty one. */
 const NONE = "-";
+const FROM_BALANCE = "bal";
+
+/** The part of the state every screen passes on, so the way back to the balance panel survives each press. */
+function origin(state: ShopState): Pick<ShopState, "from"> {
+	return state.from === "balance" ? { from: "balance" } : {};
+}
 
 export function isShopSection(value: string): value is ShopSection {
 	return (SHOP_SECTIONS as readonly string[]).includes(value);
@@ -47,12 +53,13 @@ export function encodeShopState(action: string, state: ShopState, ownerId: strin
 		state.rarity ?? NONE,
 		state.selectedId ?? NONE,
 		state.page ?? 0,
+		state.from === "balance" ? FROM_BALANCE : NONE,
 		ownerId,
 	);
 }
 
 export function decodeShopState(args: string[]): ShopState {
-	const [section = "items", rarity = NONE, selectedId = NONE, page = "0"] = args;
+	const [section = "items", rarity = NONE, selectedId = NONE, page = "0", from = NONE] = args;
 	const parsed = Number.parseInt(page, 10);
 
 	return {
@@ -60,6 +67,7 @@ export function decodeShopState(args: string[]): ShopState {
 		...(rarity !== NONE && isPetRarity(rarity) ? { rarity } : {}),
 		...(selectedId !== NONE ? { selectedId } : {}),
 		...(Number.isInteger(parsed) && parsed > 0 ? { page: parsed } : {}),
+		...(from === FROM_BALANCE ? { from: "balance" as const } : {}),
 	};
 }
 
@@ -68,7 +76,7 @@ function sectionTabs(state: ShopState, ownerId: string): ReturnType<typeof row> 
 	return row(
 		...SHOP_SECTIONS.map((section) =>
 			button({
-				id: encodeShopState("nav", { section }, ownerId),
+				id: encodeShopState("nav", { section, ...origin(state) }, ownerId),
 				label: SECTION_LABELS[section],
 				disabled: section === state.section,
 			}),
@@ -253,11 +261,24 @@ function catalogue(state: ShopState, balances: Balances, ownerId: string, note?:
 			row(
 				...PET_RARITIES.map((rarity) =>
 					button({
-						id: encodeShopState("nav", { section: "pets", rarity }, ownerId),
+						id: encodeShopState("nav", { section: "pets", rarity, ...origin(state) }, ownerId),
 						label: rarity[0]!.toUpperCase() + rarity.slice(1),
 						disabled: rarity === state.rarity,
 					}),
 				),
+			),
+		);
+	}
+
+	if (state.from === "balance") {
+		parts.push(
+			row(
+				button({
+					id: customId(BALANCE_PANEL_ID, "refresh", ownerId),
+					label: "Back to balance",
+					emoji: "⬅️",
+					style: ButtonStyle.Secondary,
+				}),
 			),
 		);
 	}
@@ -291,7 +312,7 @@ function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: str
 						// Every screen needs a way back.
 						id: encodeShopState(
 							"nav",
-							{ section: state.section, ...(state.rarity ? { rarity: state.rarity } : {}) },
+							{ section: state.section, ...(state.rarity ? { rarity: state.rarity } : {}), ...origin(state) },
 							ownerId,
 						),
 						label: "Back",
@@ -304,7 +325,13 @@ function detail(state: ShopState, balances: Balances, entry: Entry, ownerId: str
 }
 
 /** Selling asks first, because it pays back half and cannot be undone. */
-export function sellConfirmScreen(entry: Entry, balances: Balances, ownerId: string): ContainerMessage {
+export function sellConfirmScreen(
+	entry: Entry,
+	balances: Balances,
+	ownerId: string,
+	state: ShopState = { section: "houses" },
+): ContainerMessage {
+	const houses: ShopState = { section: "houses", ...origin(state) };
 	const refund = entry.refund ?? 0;
 
 	return containerMessage(
@@ -319,11 +346,15 @@ export function sellConfirmScreen(entry: Entry, balances: Balances, ownerId: str
 				divider(),
 				row(
 					button({
-						id: customId(SHOP_ID, "sell-yes", ownerId),
+						id: encodeShopState("sell-yes", houses, ownerId),
 						label: `Sell for ${formatNumber(refund)}`,
 						style: ButtonStyle.Danger,
 					}),
-					button({ id: customId(SHOP_ID, "sell-no", ownerId), label: "Keep it", style: ButtonStyle.Secondary }),
+					button({
+						id: encodeShopState("sell-no", houses, ownerId),
+						label: "Keep it",
+						style: ButtonStyle.Secondary,
+					}),
 				),
 			],
 		}),

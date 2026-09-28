@@ -1,6 +1,5 @@
 import { inspect } from "node:util";
 import { runInNewContext } from "node:vm";
-import { MessageFlags } from "discord.js";
 import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { toError } from "@core/errors";
@@ -21,6 +20,7 @@ export default defineCommand({
 	name: "eval",
 	description: "Evaluates JavaScript. Owner only.",
 	category: "owner",
+	private: true,
 	ownerOnly: true,
 	options: [
 		{ name: "code", description: "The code to evaluate.", type: "string", required: true },
@@ -31,7 +31,7 @@ export default defineCommand({
 		const code = interaction.options.getString("code", true);
 		const depth = interaction.options.getInteger("depth") ?? 1;
 
-		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		await interaction.deferReply();
 
 		const startedAt = process.hrtime.bigint();
 		let output: string;
@@ -67,7 +67,6 @@ export default defineCommand({
 					],
 				}),
 			],
-			flags: MessageFlags.Ephemeral,
 		});
 	},
 });

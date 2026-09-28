@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "add",
 	description: "Adds an emoji or sticker to the server.",
 	category: "moderation",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuildExpressions],
 	botPermissions: [PermissionFlagsBits.ManageGuildExpressions],

@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "prefix",
 	description: "Shows and changes the prefix for text commands.",
 	category: "settings",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 

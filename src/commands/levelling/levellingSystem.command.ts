@@ -17,6 +17,7 @@ export default defineCommand({
 	name: "levelling",
 	description: "Configures the levelling system.",
 	category: "levelling",
+	private: true,
 	aliases: ["levels"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],

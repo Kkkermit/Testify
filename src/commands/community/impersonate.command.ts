@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inTextChannel } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "impersonate",
 	description: "Sends a message through a webhook that looks like another member.",
 	category: "community",
+	private: true,
 	guildOnly: true,
 	// exist, so the gate crashed on `undefined` instead of checking anything.
 	permissions: [PermissionFlagsBits.ManageWebhooks],
@@ -41,6 +42,6 @@ export default defineCommand({
 			await webhook.delete(`Impersonation cleanup`).catch(() => null);
 		}
 
-		await reply(interaction, { embeds: [successEmbed("Message sent.")], flags: MessageFlags.Ephemeral });
+		await reply(interaction, { embeds: [successEmbed("Message sent.")] });
 	},
 });

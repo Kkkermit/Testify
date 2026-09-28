@@ -3,6 +3,7 @@ import { toError } from "@core/errors";
 import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 import { disconnectDatabase } from "@database/connection";
 import { printReloading } from "@lib/bot/banner.util";
+import { flushCommandLog } from "@lib/bot/commandLog.util";
 import { flushActivity } from "@lib/info/insights.util";
 import { destroyAllSessions } from "@lib/music/musicSession.util";
 
@@ -21,6 +22,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 		await client.api?.close();
 		// Counted messages live in memory until a flush, so the last minute's are written before the database goes.
 		await flushActivity(client.logger);
+		await flushCommandLog(client);
 		await disconnectDatabase();
 		await client.destroy();
 	} catch (error) {

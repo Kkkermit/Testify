@@ -1,9 +1,10 @@
 import { DiscordAPIError, Events, type Interaction, MessageFlags, RESTJSONErrorCodes } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { runChecks } from "@core/checks";
+import { subcommandsOf } from "@core/command";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
-import { countCommandUse, recordCommandTime } from "@lib/bot";
+import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
 
 /** The only `interactionCreate` listener. */
@@ -51,6 +52,16 @@ export default defineEvent({
 				guildId: interaction.guildId,
 				surface: "slash",
 				failed: !ok,
+			});
+			logCommandUse(client, {
+				command: command.name,
+				subcommand: subcommandsOf(command).length > 0 ? interaction.options.getSubcommand(false) : null,
+				surface: "slash",
+				userId: interaction.user.id,
+				username: interaction.user.username,
+				guildName: interaction.guild?.name ?? null,
+				channelId: interaction.channelId,
+				ok,
 			});
 			return;
 		}

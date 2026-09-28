@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "balance",
 	description: "Shows a wallet and bank balance.",
 	category: "economy",
+	private: true,
 	aliases: ["bal", "money"],
 	guildOnly: true,
 	options: [{ name: "user", description: "Whose balance to check. Defaults to you.", type: "user" }],

@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "economy",
 	description: "Manages your economy account.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 	subcommands: [
 		{

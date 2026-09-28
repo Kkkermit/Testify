@@ -1,4 +1,3 @@
-import { MessageFlags } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -13,6 +12,7 @@ export default defineCommand({
 	name: "profile",
 	description: "Views and edits your public profile.",
 	category: "info",
+	private: true,
 	subcommands: [
 		{
 			name: "view",
@@ -84,7 +84,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("Your profile has been saved.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -97,7 +96,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("Your profile has been deleted.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

@@ -1,15 +1,16 @@
-import { amountPanel } from "@buttons/money";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deposit, requireAccount } from "@database/repositories/economyRepository";
 import { reply, successEmbed } from "@lib/discord";
+import { amountPanel } from "@lib/economy";
 import { formatNumber, resolveAmount } from "@lib/format";
 
 export default defineCommand({
 	name: "deposit",
 	description: "Moves money from your wallet into the bank.",
 	category: "economy",
+	private: true,
 	aliases: ["dep"],
 	guildOnly: true,
 	options: [{ name: "amount", description: "An amount, or `all`. Leave blank to pick from buttons.", type: "string" }],

@@ -15,6 +15,7 @@ export default defineCommand({
 	name: "beg",
 	description: "Asks strangers for spare change.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 
 	async run(interaction) {

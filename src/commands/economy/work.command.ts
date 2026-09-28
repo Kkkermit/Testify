@@ -24,6 +24,7 @@ export default defineCommand({
 	name: "work",
 	description: "Works a shift for money.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 
 	async run(interaction) {

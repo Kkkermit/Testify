@@ -7,6 +7,9 @@ import {
 	type InteractionEditReplyOptions,
 	type InteractionReplyOptions,
 	type Message,
+	MessageFlags,
+	MessageFlagsBitField,
+	type MessageFlagsResolvable,
 	type Role,
 	type TextBasedChannel,
 	type User,
@@ -20,7 +23,8 @@ import {
 	subcommandsOf,
 } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { replyTemporarily } from "@lib/discord/tidyReply.util";
+import { PRIVATE_TIDY_MS } from "@lib/discord/discord.constants";
+import { replyTemporarily, tidyNote, withTidyNote } from "@lib/discord/tidyReply.util";
 
 /** Lets `t?ban @someone spamming` run the exact same code as `/ban`. */
 
@@ -272,6 +276,8 @@ export class PrefixInteraction implements CommandInput {
 	replied = false;
 
 	private sent: Message | null = null;
+	/** When a private command's replies, and the message that ran it, are deleted. */
+	private deadline: number | null = null;
 
 	constructor(
 		private readonly message: Message,
@@ -304,7 +310,13 @@ export class PrefixInteraction implements CommandInput {
 
 	/** A follow-up is a second message, so it never edits the first. */
 	async followUp(options: InteractionReplyOptions | string): Promise<Message> {
-		return this.message.reply(withoutInteractionFlags(options));
+		const sent = await this.message.reply(this.tidied(withoutInteractionFlags(options)));
+		this.deleteLater(sent);
+		return sent;
+	}
+
+	tidyAway(): void {
+		this.deadline ??= Date.now() + PRIVATE_TIDY_MS;
 	}
 
 	async replyBriefly(embed: EmbedBuilder): Promise<void> {
@@ -318,13 +330,32 @@ export class PrefixInteraction implements CommandInput {
 
 	/** The first answer replies to the message and later ones edit that reply, as a slash command does. */
 	private async send(options: InteractionReplyOptions | InteractionEditReplyOptions | string): Promise<Message> {
-		const payload = withoutInteractionFlags(options);
+		const payload = this.tidied(withoutInteractionFlags(options));
+		const first = this.sent === null;
 
 		this.sent = this.sent === null ? await this.message.reply(payload) : await this.sent.edit(payload);
 		this.replied = true;
 		this.deferred = false;
 
+		if (first) {
+			this.deleteLater(this.sent);
+			this.deleteLater(this.message);
+		}
+
 		return this.sent;
+	}
+
+	private tidied<T extends Parameters<typeof withTidyNote>[0]>(payload: T): T {
+		return this.deadline === null ? payload : withTidyNote(payload, tidyNote(this.deadline));
+	}
+
+	private deleteLater(message: Message): void {
+		if (this.deadline === null) return;
+
+		const client = this.message.client as TestifyClient;
+		client.timers.after(`tidy:${message.id}`, Math.max(0, this.deadline - Date.now()), async () => {
+			await message.delete().catch(() => null);
+		});
 	}
 
 	/** Autocomplete never reaches a prefix command; this keeps the shape complete. */
@@ -333,10 +364,13 @@ export class PrefixInteraction implements CommandInput {
 	}
 }
 
-/** Discord rejects the ephemeral flag on a message, so a private reply is sent in the channel. */
+/** Discord rejects the ephemeral flag on a message, but a V2 message still needs its own flag. */
 function withoutInteractionFlags(options: InteractionReplyOptions | InteractionEditReplyOptions | string): never {
 	if (typeof options === "string") return { content: options } as never;
 
-	const { flags: _flags, ...rest } = options as InteractionReplyOptions;
-	return rest as never;
+	const { flags, ...rest } = options as InteractionReplyOptions;
+	if (flags === undefined) return rest as never;
+
+	const kept = new MessageFlagsBitField(flags as MessageFlagsResolvable).remove(MessageFlags.Ephemeral).bitfield;
+	return (kept === 0 ? rest : { ...rest, flags: kept }) as never;
 }

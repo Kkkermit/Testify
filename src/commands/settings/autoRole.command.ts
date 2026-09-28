@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "auto-role",
 	description: "Gives roles automatically to new members.",
 	category: "settings",
+	private: true,
 	aliases: ["autorole", "join-roles"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageRoles],

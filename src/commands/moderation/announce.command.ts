@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { COLOUR_CHOICES, embed, reply, resolveColour, successEmbed } from "@lib/discord";
@@ -7,6 +7,7 @@ export default defineCommand({
 	name: "announce",
 	description: "Posts an announcement embed in a channel.",
 	category: "moderation",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks],
@@ -46,7 +47,6 @@ export default defineCommand({
 
 		await reply(interaction, {
 			embeds: [successEmbed(`Announcement posted in ${channel}.`)],
-			flags: MessageFlags.Ephemeral,
 		});
 	},
 });

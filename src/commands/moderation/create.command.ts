@@ -1,4 +1,4 @@
-import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { ChannelType, PermissionFlagsBits } from "discord.js";
 import { LIMITS } from "@config/constants";
 import { defineCommand, inTextChannel, type CommandOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -24,6 +24,7 @@ export default defineCommand({
 	name: "create",
 	description: "Creates embeds and threads.",
 	category: "moderation",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageMessages],
 	subcommands: [
@@ -78,7 +79,7 @@ export default defineCommand({
 				});
 
 				await channel.send({ embeds: [built] });
-				await reply(interaction, { embeds: [successEmbed("Embed posted.")], flags: MessageFlags.Ephemeral });
+				await reply(interaction, { embeds: [successEmbed("Embed posted.")] });
 			},
 		},
 		{
@@ -112,7 +113,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed(`Thread created: ${thread}.`)],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

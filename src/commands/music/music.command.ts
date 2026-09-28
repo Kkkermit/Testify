@@ -223,6 +223,7 @@ export default defineCommand({
 		},
 		{
 			name: MUSIC_SYSTEM_SUBCOMMAND,
+			private: true,
 			description: "Turns the music system on or off, and picks who may use it.",
 			permissions: [PermissionFlagsBits.ManageGuild],
 			options: [
@@ -268,6 +269,7 @@ export default defineCommand({
 		},
 		{
 			name: "status",
+			private: true,
 			description: "Shows which players the host has installed, and how old they are.",
 			async run(interaction, client) {
 				await reply(interaction, { content: statusLines(musicBinaries(client)).join("\n") });

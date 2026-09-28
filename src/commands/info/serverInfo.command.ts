@@ -12,6 +12,7 @@ export default defineCommand({
 	name: "server-info",
 	description: "Displays information about this server.",
 	category: "info",
+	private: true,
 	aliases: ["server", "guildinfo"],
 	guildOnly: true,
 

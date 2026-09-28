@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "automod",
 	description: "Creates Discord AutoMod rules.",
 	category: "settings",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.ManageGuild],

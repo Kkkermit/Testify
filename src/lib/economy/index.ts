@@ -7,6 +7,7 @@ export * from "./inventoryScreen.util";
 export * from "./leaderboardActions.util";
 export * from "./lotteryActions.util";
 export * from "./memberActions.util";
+export * from "./moneyPanel.util";
 export * from "./pets.util";
 export * from "./shop.util";
 export * from "./shopScreen.util";

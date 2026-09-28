@@ -1,4 +1,3 @@
-import { MessageFlags } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
@@ -19,6 +18,7 @@ export default defineCommand({
 	name: "ask",
 	description: "Answers questions about the bot, its dashboard, and setting it up.",
 	category: "info",
+	private: true,
 	aliases: ["support", "faq"],
 	cooldown: 5_000,
 	options: [
@@ -41,7 +41,7 @@ export default defineCommand({
 		}
 
 		// Matching can call out to a model, which may take longer than Discord waits for a first reply.
-		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		await interaction.deferReply();
 
 		const prefix = interaction.guild === null ? DEFAULT_PREFIX : await getPrefix(interaction.guild.id);
 		const help = supportContext(prefix);

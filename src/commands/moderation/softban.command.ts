@@ -102,6 +102,7 @@ export default defineCommand({
 		},
 		{
 			name: "list",
+			private: true,
 			description: "List the active softbans in this server.",
 			async run(interaction) {
 				const guild = inGuild(interaction);

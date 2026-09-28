@@ -76,6 +76,7 @@ export default defineCommand({
 	name: "calculate",
 	description: "Evaluates a mathematical expression.",
 	category: "community",
+	private: true,
 	options: [{ name: "expression", description: "The expression to evaluate.", type: "string", required: true }],
 
 	async run(interaction) {

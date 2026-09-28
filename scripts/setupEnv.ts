@@ -82,7 +82,20 @@ export function fields(isDev: boolean): Field[] {
 		{ key: "CHANNEL_ERROR_LOG", message: "Channel ID for command errors", required: false, check: discordId },
 		{ key: "CHANNEL_GUILD_LOG", message: "Channel ID for servers joined and left", required: false, check: discordId },
 		{ key: "CHANNEL_DM_LOG", message: "Channel ID for DMs sent to the bot", required: false, check: discordId },
-		{ key: "CHANNEL_FEEDBACK_LOG", message: "Channel ID for bug reports", required: false, check: discordId },
+		{
+			key: "CHANNEL_SLASH_COMMAND_LOG",
+			message: "Channel ID for every slash command run",
+			required: false,
+			check: discordId,
+		},
+		{
+			key: "CHANNEL_PREFIX_COMMAND_LOG",
+			message: "Channel ID for every prefix command run",
+			required: false,
+			check: discordId,
+		},
+		{ key: "CHANNEL_BUG_REPORT_LOG", message: "Channel ID for bug reports", required: false, check: discordId },
+		{ key: "CHANNEL_SUGGESTION_LOG", message: "Channel ID for suggestions", required: false, check: discordId },
 		{
 			key: "SUPPORT_AI_API_KEY",
 			message: "Anthropic API key for the support assistant",

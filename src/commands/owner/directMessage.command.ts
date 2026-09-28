@@ -1,4 +1,3 @@
-import { MessageFlags } from "discord.js";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed, reply, successEmbed } from "@lib/discord";
@@ -7,6 +6,7 @@ export default defineCommand({
 	name: "dm",
 	description: "Sends a direct message through the bot.",
 	category: "owner",
+	private: true,
 	ownerOnly: true,
 	options: [
 		{ name: "user", description: "Who to message.", type: "user", required: true },
@@ -34,7 +34,6 @@ export default defineCommand({
 
 		await reply(interaction, {
 			embeds: [successEmbed(`Message delivered to ${target}.`)],
-			flags: MessageFlags.Ephemeral,
 		});
 	},
 });

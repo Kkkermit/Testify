@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "nickname",
 	description: "Changes or clears a member's nickname.",
 	category: "moderation",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageNicknames],
 	botPermissions: [PermissionFlagsBits.ManageNicknames],
