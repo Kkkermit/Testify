@@ -318,7 +318,9 @@ export function buildSlashCommand(
 	);
 
 	if (command.nsfw) builder.setNSFW(true);
-	if (command.permissions?.length) {
+	// Zero hides it from everybody but a server's administrators; `runChecks` refuses them too.
+	if (command.ownerOnly === true) builder.setDefaultMemberPermissions(0);
+	else if (command.permissions?.length) {
 		builder.setDefaultMemberPermissions(new PermissionsBitField(command.permissions).bitfield);
 	}
 

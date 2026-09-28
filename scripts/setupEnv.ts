@@ -97,6 +97,12 @@ export function fields(isDev: boolean): Field[] {
 		{ key: "CHANNEL_BUG_REPORT_LOG", message: "Channel ID for bug reports", required: false, check: discordId },
 		{ key: "CHANNEL_SUGGESTION_LOG", message: "Channel ID for suggestions", required: false, check: discordId },
 		{
+			key: "CHANNEL_EVAL_LOG",
+			message: "Channel ID for /eval runs and owner-command attempts",
+			required: false,
+			check: discordId,
+		},
+		{
 			key: "SUPPORT_AI_API_KEY",
 			message: "Anthropic API key for the support assistant",
 			hint: "Blank answers questions by search alone and contacts nobody",

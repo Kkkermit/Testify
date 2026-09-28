@@ -6,6 +6,7 @@ import { type Command, type CommandInput, type Subcommand } from "@core/command"
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
+import { reportOwnerAttempt } from "@lib/bot/ownerAudit.util";
 import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND } from "@lib/casino/casino.constants";
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { formatDuration, humanisePermission } from "@lib/format/format.util";
@@ -27,6 +28,8 @@ export function refusalText(refusal: string | TitledRefusal): string {
 	return typeof refusal === "string" ? refusal : `**${refusal.title}**\n${refusal.message}`;
 }
 
+export const OWNER_ONLY_REFUSAL = "This command is only for the bot owner. The attempt has been logged.";
+
 const cooldowns = new Map<string, number>();
 
 /** Everything that can stop a command before it runs, in one place and in order. */
@@ -35,6 +38,12 @@ export async function runChecks(
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
+	// First, so an attempt is recorded and refused whatever else would have stopped it.
+	if (command.ownerOnly === true && !client.isOwner(interaction.user.id)) {
+		await reportOwnerAttempt(client, interaction, command);
+		return OWNER_ONLY_REFUSAL;
+	}
+
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
@@ -48,10 +57,6 @@ export async function runChecks(
 
 	const casinoClosed = await checkCasino(interaction, command);
 	if (casinoClosed !== null) return casinoClosed;
-
-	if (command.ownerOnly && !client.isOwner(interaction.user.id)) {
-		return "This command is only for the bot owner.";
-	}
 
 	if (command.guildOnly && !interaction.guild) {
 		return "This command only works inside a server.";

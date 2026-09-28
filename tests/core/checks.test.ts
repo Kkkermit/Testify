@@ -1,6 +1,13 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import lottery from "@commands/economy/lottery.command";
-import { checkCasinoPlay, checkMusicControl, clearCooldowns, refusalText, runChecks } from "@core/checks";
+import {
+	checkCasinoPlay,
+	checkMusicControl,
+	clearCooldowns,
+	OWNER_ONLY_REFUSAL,
+	refusalText,
+	runChecks,
+} from "@core/checks";
 import { defineCommand } from "@core/command";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
@@ -91,6 +98,29 @@ describe("runChecks", () => {
 		const command = { ...plain, ownerOnly: true };
 
 		expect(await runChecks(createMockInteraction(), command, createMockClient())).toContain("owner");
+	});
+
+	/** A blacklisted or paused refusal used to come first, so an attempt at `/eval` went unrecorded. */
+	it("records every refused owner-only attempt, whatever else would have refused it", async () => {
+		const command = { ...plain, ownerOnly: true };
+		const warn = jest.fn();
+		findBlacklistEntry.mockResolvedValue({ reason: "Spamming" });
+		const client = createMockClient({ paused: true, logger: { warn } } as never);
+
+		expect(await runChecks(createMockInteraction(), command, client)).toBe(OWNER_ONLY_REFUSAL);
+		expect(warn).toHaveBeenCalledWith(
+			expect.objectContaining({ userId: USER_ID }),
+			expect.stringContaining("[OWNER_COMMAND]"),
+		);
+	});
+
+	it("records nothing when an owner runs an owner-only command", async () => {
+		const command = { ...plain, ownerOnly: true };
+		const warn = jest.fn();
+		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });
+
+		await runChecks(interaction, command, createMockClient({ logger: { warn } } as never));
+		expect(warn).not.toHaveBeenCalled();
 	});
 
 	it("allows an owner-only command for an owner", async () => {

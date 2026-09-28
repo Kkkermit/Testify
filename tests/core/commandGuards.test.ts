@@ -211,6 +211,12 @@ describe("buildSlashCommand", () => {
 		expect(build([])).toMatchObject({ name: "demo", description: "A demo command." });
 	});
 
+	/** An owner-only command such as `/eval` stays out of the slash menu for everybody but a server's administrators. */
+	it("hides an owner-only command from members", () => {
+		const json = buildSlashCommand({ ...base, ownerOnly: true }).toJSON();
+		expect(json.default_member_permissions).toBe("0");
+	});
+
 	it.each([
 		["string", 3],
 		["integer", 4],

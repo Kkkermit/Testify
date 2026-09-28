@@ -90,8 +90,8 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
 **Optional:** `NODE_ENV`, `LOG_LEVEL`,
-`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report
-and suggestion — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
+`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report,
+suggestion and eval — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
 `DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
 
@@ -810,9 +810,19 @@ username, id and account age, and the server and channel by name and id. The log
 server, where a mention renders as nobody, so the name is always written out beside it. A run's options are read by
 `givenOptions` in `src/core/command.ts` from the command's own declaration, on both surfaces, and appear in the
 command log and in an error post. **An option marked `unlogged: true` is named but its value never is** — `/ask`'s
-question, because the privacy notice promises it is not kept, and `/eval`'s code. The notice names both logs
+question, because the privacy notice promises it is not kept. The notice names both logs
 (`legal.commandsL3`, `legal.commandsL6`); change it with them. The error post carries the triage buttons
 (`triageRow`), which recolour it pending, solved or unsolved.
+
+**Owner-only commands refuse everybody else before anything else is asked, and say so.** `runChecks` tests
+`ownerOnly` first — ahead of the pause, the blacklist and the switches — so an attempt is always refused as that and
+always recorded: `reportOwnerAttempt` logs it at `warn` as `[OWNER_COMMAND]` with the options tried, and posts it to
+`CHANNEL_EVAL_LOG`, falling back to `CHANNEL_ERROR_LOG`, at most once a minute per person and command with a count of
+the tries held back. `/eval` checks `client.isOwner` again inside `run`, so nothing that reaches it by another road can
+run code, and every run it does make is logged as `[EVAL]` and posted with its full code — attached as a file when it
+is too long for the embed — the redacted output and the time taken. An owner-only command is registered with
+`default_member_permissions` of `0`, so only a server's administrators see it in the slash menu at all, and they are
+refused like anybody else. None of this is a bypassable layer: `DISCORD_OWNER_IDS` is the only thing that opens it.
 
 Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
 `"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is

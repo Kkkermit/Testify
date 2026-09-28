@@ -249,6 +249,7 @@ will not let you skip them. Prefer doing it by hand? Copy `.env.development.exam
 | `CHANNEL_PREFIX_COMMAND_LOG` |    —     | The same for every prefix command                                                                |
 | `CHANNEL_BUG_REPORT_LOG`     |    —     | Where `/bug-report` lands                                                                        |
 | `CHANNEL_SUGGESTION_LOG`     |    —     | Where `/suggest` lands                                                                           |
+| `CHANNEL_EVAL_LOG`           |    —     | Every `/eval` run with its code, and anyone else trying an owner command. Else the error channel |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks.
 
