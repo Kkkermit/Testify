@@ -1422,9 +1422,11 @@ type — a win congratulates by the profit, a loss names what it cost — and `c
 green, red, or yellow for a bet that came back even. Only a settled message is coloured; a spin or a live hand keeps
 the casino's own colour, because nothing has been decided yet.
 
-**Card text goes through `drawText` in `src/lib/canvas/text.util.ts`, never `fillText` with a family name.** Skia
-resolves a family through the host, which gave one host a serif board, and it never falls back per character, so a
-single character the font lacked — the `ツ` in a name — became a box. The helper draws in Inter and Space Grotesk from
+**Every piece of canvas text goes through `drawText` in `src/lib/canvas/text.util.ts`, never `fillText` with a
+family name.** Skia resolves a family through the host, which gave one host a serif board and a Windows host a
+blackjack table with grey digits and no letters at all, and it never falls back per character, so a single character
+the font lacked — the `ツ` in a name — became a box. `wrapLines` wraps with the same fonts it will draw in.
+`text.test.ts` fails on `fillText`, `strokeText`, a `.font =` or `sans-serif` anywhere else in `src`. The helper draws in Inter and Space Grotesk from
 `assets/fonts` (OFL, licences beside them) and hands any character they lack to an installed font that has it,
 emoji fonts first for pictographs and flags; a missing glyph is recognised by measuring exactly like U+FFFF.
 

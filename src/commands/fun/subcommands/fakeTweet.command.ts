@@ -1,12 +1,13 @@
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { createCanvas, drawAvatar, toAttachment, wrapText } from "@lib/canvas";
+import { createCanvas, drawAvatar, drawText, type TextStyle, toAttachment, wrapLines } from "@lib/canvas";
 import { reply } from "@lib/discord";
 import { containsProfanity } from "@lib/moderation";
 
 const WIDTH = 700;
 const PADDING = 28;
+const BODY: TextStyle = { size: 26, colour: "#ffffff" };
 
 export default defineCommand({
 	name: "fake-tweet",
@@ -27,8 +28,7 @@ export default defineCommand({
 		await interaction.deferReply();
 
 		const measuring = createCanvas(WIDTH, 10).getContext("2d");
-		measuring.font = "26px sans-serif";
-		const lines = wrapText(measuring, tweet, WIDTH - PADDING * 2);
+		const lines = wrapLines(measuring, tweet, BODY, WIDTH - PADDING * 2);
 		const height = 120 + lines.length * 36 + PADDING;
 
 		const canvas = createCanvas(WIDTH, height);
@@ -39,19 +39,16 @@ export default defineCommand({
 
 		await drawAvatar(draw, user.displayAvatarURL({ extension: "png", size: 128 }), PADDING, PADDING, 64);
 
-		draw.fillStyle = "#ffffff";
-		draw.font = "bold 24px sans-serif";
-		draw.textBaseline = "top";
-		draw.fillText(user.displayName, PADDING + 84, PADDING + 6);
-
-		draw.fillStyle = "#8899a6";
-		draw.font = "20px sans-serif";
-		draw.fillText(`@${user.username}`, PADDING + 84, PADDING + 36);
-
-		draw.fillStyle = "#ffffff";
-		draw.font = "26px sans-serif";
+		const nameX = PADDING + 84;
+		drawText(draw, user.displayName, nameX, PADDING + 18, {
+			size: 24,
+			weight: 700,
+			colour: "#ffffff",
+			maxWidth: WIDTH - nameX - PADDING,
+		});
+		drawText(draw, `@${user.username}`, nameX, PADDING + 46, { size: 20, colour: "#8899a6" });
 		lines.forEach((line, index) => {
-			draw.fillText(line, PADDING, 116 + index * 36);
+			drawText(draw, line, PADDING, 129 + index * 36, BODY);
 		});
 
 		await reply(interaction, { files: [toAttachment(canvas, "tweet.png")] });

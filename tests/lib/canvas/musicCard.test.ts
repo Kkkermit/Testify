@@ -1,5 +1,5 @@
 import { createCanvas } from "@napi-rs/canvas";
-import { clampLines, fetchArtwork, musicCardText, renderMusicCard } from "@lib/canvas/musicCard.util";
+import { fetchArtwork, musicCardText, renderMusicCard } from "@lib/canvas/musicCard.util";
 import { type Track } from "@lib/music/music.types";
 
 function track(overrides: Partial<Track> = {}): Track {
@@ -36,30 +36,6 @@ describe("musicCardText", () => {
 
 	it("never draws an empty title", () => {
 		expect(musicCardText(track({ title: "   " })).title).toBe("Untitled");
-	});
-});
-
-describe("clampLines", () => {
-	const ctx = createCanvas(10, 10).getContext("2d");
-	ctx.font = "20px sans-serif";
-
-	it("keeps a short title on one line", () => {
-		expect(clampLines(ctx, "Deli Girl", 400, 2)).toEqual(["Deli Girl"]);
-	});
-
-	/** A music-video title runs to a paragraph; the card holds two lines and says the rest was cut. */
-	it("stops at the line limit and ends with an ellipsis", () => {
-		const lines = clampLines(ctx, "word ".repeat(60).trim(), 200, 2);
-
-		expect(lines).toHaveLength(2);
-		expect(lines[1]?.endsWith("…")).toBe(true);
-	});
-
-	it("cuts a single word too long for the line rather than overflowing", () => {
-		const [line] = clampLines(ctx, "a".repeat(200), 120, 1);
-
-		expect(line?.endsWith("…")).toBe(true);
-		expect(ctx.measureText(line ?? "").width).toBeLessThanOrEqual(120);
 	});
 });
 

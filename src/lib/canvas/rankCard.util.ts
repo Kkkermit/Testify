@@ -1,5 +1,6 @@
 import { type AttachmentBuilder } from "discord.js";
-import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas/canvas.util";
+import { createCanvas, drawAvatarOrInitial, roundedRect, toAttachment } from "@lib/canvas/canvas.util";
+import { DISPLAY, drawText } from "@lib/canvas/text.util";
 import { formatNumber, ordinal } from "@lib/format/format.util";
 
 /** The `/rank` card. */
@@ -86,21 +87,22 @@ export async function renderRankCard(data: RankCardData): Promise<AttachmentBuil
 	const trackX = textX;
 	const trackWidth = WIDTH - textX - 56;
 
-	draw.textBaseline = "middle";
-	draw.textAlign = "left";
-
-	draw.fillStyle = PALETTE.text;
-	fitFont(draw, copy.name, trackWidth - 220, 44, "sans-serif");
-	draw.fillText(copy.name, textX, 104);
-
-	draw.textAlign = "right";
-	draw.fillStyle = PALETTE.muted;
-	draw.font = "26px sans-serif";
-	draw.fillText(copy.rank, WIDTH - 56, 76);
-
-	draw.fillStyle = PALETTE.fill;
-	draw.font = "bold 30px sans-serif";
-	draw.fillText(copy.level, WIDTH - 56, 112);
+	drawText(draw, copy.name, textX, 104, {
+		size: 44,
+		weight: 700,
+		family: DISPLAY,
+		colour: PALETTE.text,
+		maxWidth: trackWidth - 220,
+		minSize: 26,
+	});
+	drawText(draw, copy.rank, WIDTH - 56, 76, { size: 26, colour: PALETTE.muted, align: "right" });
+	drawText(draw, copy.level, WIDTH - 56, 112, {
+		size: 30,
+		weight: 700,
+		family: DISPLAY,
+		colour: PALETTE.fill,
+		align: "right",
+	});
 
 	// The track first, so a zero-progress bar still shows where the level ends.
 	const trackY = 168;
@@ -117,16 +119,14 @@ export async function renderRankCard(data: RankCardData): Promise<AttachmentBuil
 		draw.fill();
 	}
 
-	draw.textAlign = "left";
-	draw.fillStyle = PALETTE.muted;
-	draw.font = "22px sans-serif";
-	draw.fillText(copy.xp, trackX, trackY + trackHeight + 28);
-
+	drawText(draw, copy.xp, trackX, trackY + trackHeight + 28, { size: 22, colour: PALETTE.muted });
 	if (copy.badge !== null) {
-		draw.textAlign = "right";
-		draw.fillStyle = PALETTE.accent;
-		draw.font = "bold 22px sans-serif";
-		draw.fillText(copy.badge, WIDTH - 56, trackY + trackHeight + 28);
+		drawText(draw, copy.badge, WIDTH - 56, trackY + trackHeight + 28, {
+			size: 22,
+			weight: 700,
+			colour: PALETTE.accent,
+			align: "right",
+		});
 	}
 
 	return toAttachment(canvas, "rank.png");

@@ -2,6 +2,7 @@ import { type SKRSContext2D } from "@napi-rs/canvas";
 import { roundedRect } from "@lib/canvas/canvas.util";
 import { type AnimationFrame, encodeAnimation } from "@lib/canvas/gif.util";
 import { blankCanvas, drawFelt } from "@lib/canvas/playingCards.util";
+import { DISPLAY, drawText } from "@lib/canvas/text.util";
 import { type CoinSide } from "@lib/casino/casino.types";
 
 /** The coin toss and the dice, each a short animation that plays once and lands on the result. */
@@ -54,11 +55,13 @@ function drawCoin(ctx: SKRSContext2D, width: number, side: CoinSide, lift: numbe
 	if (width > 0.35) {
 		ctx.translate(centre, y);
 		ctx.scale(width, 1);
-		ctx.fillStyle = side === "heads" ? "#8a5e10" : "#4d505a";
-		ctx.font = "bold 58px sans-serif";
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText(side === "heads" ? "H" : "T", 0, 3);
+		drawText(ctx, side === "heads" ? "H" : "T", 0, 3, {
+			size: 58,
+			weight: 700,
+			family: DISPLAY,
+			colour: side === "heads" ? "#8a5e10" : "#4d505a",
+			align: "center",
+		});
 	}
 	ctx.restore();
 }

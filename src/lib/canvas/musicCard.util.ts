@@ -1,5 +1,6 @@
 import { type Image, loadImage } from "@napi-rs/canvas";
 import { createCanvas, roundedRect, type SKRSContext2D } from "@lib/canvas/canvas.util";
+import { DISPLAY, drawText, measureText, type TextStyle, wrapLines } from "@lib/canvas/text.util";
 import { coverRect } from "@lib/canvas/welcomeCard.util";
 import { formatClock } from "@lib/format/format.util";
 import { type MusicSource, type Track } from "@lib/music/music.types";
@@ -25,7 +26,12 @@ const PALETTE = {
 	shadeDeep: "rgba(8, 8, 14, 0.85)",
 	shadow: "rgba(0, 0, 0, 0.55)",
 } as const;
-const FONT = "sans-serif";
+const TYPE = {
+	eyebrow: { size: 19, weight: 700, colour: PALETTE.faint },
+	title: { size: 44, weight: 700, family: DISPLAY, colour: PALETTE.text },
+	author: { size: 28, colour: PALETTE.muted },
+	length: { size: 22, weight: 700, colour: PALETTE.text },
+} satisfies Record<string, TextStyle>;
 
 /** Long enough for a slow CDN, short enough that a panel is never held up waiting for a picture. */
 const ARTWORK_TIMEOUT_MS = 4_000;
@@ -56,42 +62,6 @@ export function musicCardText(track: Track): MusicCardText {
 		author: author === "" ? `From ${source}` : author,
 		length: track.durationMs === null ? "LIVE" : formatClock(track.durationMs),
 	};
-}
-
-/** Wraps to at most `maxLines`, ending the last with an ellipsis rather than running off the card. */
-export function clampLines(ctx: SKRSContext2D, text: string, maxWidth: number, maxLines: number): string[] {
-	const words = text.split(/\s+/).filter((word) => word !== "");
-	const lines: string[] = [];
-	let current = "";
-
-	for (const word of words) {
-		const candidate = current === "" ? word : `${current} ${word}`;
-		if (ctx.measureText(candidate).width <= maxWidth || current === "") {
-			current = candidate;
-			continue;
-		}
-
-		lines.push(current);
-		current = word;
-		if (lines.length === maxLines) break;
-	}
-
-	if (lines.length < maxLines && current !== "") lines.push(current);
-
-	const clipped = lines.length === maxLines && lines.join(" ").length < words.join(" ").length;
-	const last = lines.length - 1;
-	if (last >= 0 && (clipped || ctx.measureText(lines[last]!).width > maxWidth)) {
-		lines[last] = ellipsise(ctx, lines[last]!, maxWidth);
-	}
-
-	return lines;
-}
-
-function ellipsise(ctx: SKRSContext2D, text: string, maxWidth: number): string {
-	let cut = text;
-	while (cut.length > 1 && ctx.measureText(`${cut}…`).width > maxWidth) cut = cut.slice(0, -1);
-
-	return `${cut.trimEnd()}…`;
 }
 
 /** The artwork's bytes, or null; a picture is never worth failing the panel over. */
@@ -162,11 +132,12 @@ function paintArtwork(ctx: SKRSContext2D, art: Image | null): void {
 		ctx.fillStyle = gradient;
 		ctx.fillRect(PAD, PAD, ART, ART);
 
-		ctx.fillStyle = PALETTE.text;
-		ctx.font = `bold 120px ${FONT}`;
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText("♪", PAD + ART / 2, PAD + ART / 2 + 6);
+		drawText(ctx, "♪", PAD + ART / 2, PAD + ART / 2 + 6, {
+			size: 120,
+			weight: 700,
+			colour: PALETTE.text,
+			align: "center",
+		});
 	} else {
 		// A video thumbnail is 16:9, so the square is taken from its middle rather than squashed into it.
 		const rect = coverRect(art, { width: ART, height: ART });
@@ -177,33 +148,21 @@ function paintArtwork(ctx: SKRSContext2D, art: Image | null): void {
 }
 
 function paintText(ctx: SKRSContext2D, copy: MusicCardText): void {
-	ctx.textAlign = "left";
-	ctx.textBaseline = "alphabetic";
+	drawText(ctx, copy.eyebrow, TEXT_X, PAD + 27, { ...TYPE.eyebrow, maxWidth: TEXT_WIDTH });
 
-	ctx.fillStyle = PALETTE.faint;
-	ctx.font = `bold 19px ${FONT}`;
-	ctx.fillText(copy.eyebrow, TEXT_X, PAD + 34);
+	const titleLines = wrapLines(ctx, copy.title, TYPE.title, TEXT_WIDTH, 2);
+	titleLines.forEach((line, index) => drawText(ctx, line, TEXT_X, TITLE_Y - 15 + index * TITLE_LEADING, TYPE.title));
 
-	ctx.fillStyle = PALETTE.text;
-	ctx.font = `bold 44px ${FONT}`;
-	const titleLines = clampLines(ctx, copy.title, TEXT_WIDTH, 2);
-	titleLines.forEach((line, index) => ctx.fillText(line, TEXT_X, TITLE_Y + index * TITLE_LEADING));
-
-	ctx.fillStyle = PALETTE.muted;
-	ctx.font = `28px ${FONT}`;
-	const author = clampLines(ctx, copy.author, TEXT_WIDTH, 1)[0] ?? "";
-	ctx.fillText(author, TEXT_X, TITLE_Y + (Math.max(titleLines.length, 1) - 1) * TITLE_LEADING + 40);
+	const authorY = TITLE_Y + (Math.max(titleLines.length, 1) - 1) * TITLE_LEADING + 30;
+	drawText(ctx, copy.author, TEXT_X, authorY, { ...TYPE.author, maxWidth: TEXT_WIDTH });
 
 	// The length sits on the artwork's baseline, where a progress bar would be on a player.
-	ctx.font = `bold 22px ${FONT}`;
-	const pill = ctx.measureText(copy.length).width + 36;
+	const pill = measureText(ctx, copy.length, TYPE.length) + 36;
 	const pillY = PAD + ART - 40;
 	roundedRect(ctx, TEXT_X, pillY, pill, 40, 20);
 	ctx.fillStyle = PALETTE.accent;
 	ctx.fill();
-	ctx.fillStyle = PALETTE.text;
-	ctx.textBaseline = "middle";
-	ctx.fillText(copy.length, TEXT_X + 18, pillY + 21);
+	drawText(ctx, copy.length, TEXT_X + 18, pillY + 20, TYPE.length);
 }
 
 /** A JPEG, because the blurred artwork behind the text is a photograph and a PNG of it runs to megabytes. */

@@ -1,7 +1,7 @@
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { createCanvas, fitFont, roundedRect, toAttachment, wrapText } from "@lib/canvas";
+import { createCanvas, drawText, roundedRect, type TextStyle, toAttachment, wrapLines } from "@lib/canvas";
 import { reply } from "@lib/discord";
 import { containsProfanity } from "@lib/moderation";
 
@@ -43,17 +43,16 @@ export default defineCommand({
 		draw.strokeStyle = "#8b5a2b";
 		draw.stroke();
 
-		draw.fillStyle = "#1a1a1a";
-		draw.textAlign = "center";
-		draw.textBaseline = "middle";
-
-		const size = fitFont(draw, text, WIDTH - 120, 34, "sans-serif");
-		const lines = wrapText(draw, text, WIDTH - 120).slice(0, 4);
-		const lineHeight = size + 6;
+		// Shrink before wrapping past three lines, and never below a size that reads at a glance.
+		const room = WIDTH - 120;
+		let style: TextStyle = { size: 34, weight: 700, colour: "#1a1a1a" };
+		while (wrapLines(draw, text, style, room).length > 3 && style.size > 20) style = { ...style, size: style.size - 2 };
+		const lines = wrapLines(draw, text, style, room, 3);
+		const lineHeight = style.size + 6;
 		const startY = 120 - ((lines.length - 1) * lineHeight) / 2;
 
 		lines.forEach((line, index) => {
-			draw.fillText(line, WIDTH / 2, startY + index * lineHeight);
+			drawText(draw, line, WIDTH / 2, startY + index * lineHeight, { ...style, align: "center" });
 		});
 
 		await reply(interaction, { files: [toAttachment(canvas, "sign.png")] });

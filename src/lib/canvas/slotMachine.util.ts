@@ -1,6 +1,7 @@
 import { createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { roundedRect } from "@lib/canvas/canvas.util";
 import { type AnimationFrame, encodeAnimation } from "@lib/canvas/gif.util";
+import { DISPLAY, drawText } from "@lib/canvas/text.util";
 import { type Reels, type SlotSymbol } from "@lib/casino/casino.types";
 import { SLOT_SYMBOLS, slotsReturn } from "@lib/casino/slots.util";
 
@@ -122,11 +123,13 @@ function drawSymbol(ctx: SKRSContext2D, symbol: SlotSymbol, x: number, y: number
 			ctx.lineWidth = s * 0.07;
 			ctx.strokeStyle = "#d9b44a";
 			ctx.stroke();
-			ctx.fillStyle = "#ffffff";
-			ctx.font = `bold ${Math.round(s * 0.55)}px sans-serif`;
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
-			ctx.fillText("BAR", 0, s * 0.03);
+			drawText(ctx, "BAR", 0, s * 0.03, {
+				size: Math.round(s * 0.55),
+				weight: 700,
+				family: DISPLAY,
+				colour: "#ffffff",
+				align: "center",
+			});
 			break;
 		}
 		case "star": {
@@ -145,14 +148,14 @@ function drawSymbol(ctx: SKRSContext2D, symbol: SlotSymbol, x: number, y: number
 			break;
 		}
 		case "seven": {
-			ctx.font = `bold ${Math.round(s * 1.7)}px sans-serif`;
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
-			ctx.lineWidth = s * 0.14;
-			ctx.strokeStyle = "#5a0b10";
-			ctx.strokeText("7", 0, s * 0.05);
-			ctx.fillStyle = "#e3262f";
-			ctx.fillText("7", 0, s * 0.05);
+			drawText(ctx, "7", 0, s * 0.05, {
+				size: Math.round(s * 1.7),
+				weight: 700,
+				family: DISPLAY,
+				colour: "#e3262f",
+				align: "center",
+				outline: { colour: "#5a0b10", width: s * 0.14 },
+			});
 			break;
 		}
 		case "diamond": {
@@ -189,11 +192,13 @@ function drawCabinet(ctx: SKRSContext2D): void {
 	ctx.fillStyle = body;
 	ctx.fillRect(0, 0, SLOTS_WIDTH, SLOTS_HEIGHT);
 
-	ctx.fillStyle = "#ffd76a";
-	ctx.font = "bold 22px sans-serif";
-	ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
-	ctx.fillText("SLOTS", SLOTS_WIDTH / 2, 21);
+	drawText(ctx, "SLOTS", SLOTS_WIDTH / 2, 21, {
+		size: 22,
+		weight: 700,
+		family: DISPLAY,
+		colour: "#ffd76a",
+		align: "center",
+	});
 	drawSymbol(ctx, "star", SLOTS_WIDTH / 2 - 60, 21, 20);
 	drawSymbol(ctx, "star", SLOTS_WIDTH / 2 + 60, 21, 20);
 }

@@ -1,4 +1,4 @@
-import { blackjackTable, hiloTable } from "@lib/canvas/cardTable.util";
+import { blackjackTable, handLayout, hiloTable, TABLE_WIDTH } from "@lib/canvas/cardTable.util";
 import { coinAt, coinStill, coinToss, diceRoll, diceStill, PIPS } from "@lib/canvas/chanceArt.util";
 import { onlyChanged } from "@lib/canvas/gif.util";
 import { handSpacing } from "@lib/canvas/playingCards.util";
@@ -132,6 +132,17 @@ describe("the card tables", () => {
 		expect(92 + 7 * handSpacing(8, 320)).toBeLessThanOrEqual(320);
 	});
 
+	/** Hands were drawn from the left edge, so a short one sat off to the side of an empty table. */
+	it("centres every hand on the table, however many cards it holds", () => {
+		for (let count = 1; count <= 8; count += 1) {
+			const { x, spacing } = handLayout(count, TABLE_WIDTH - 80);
+			const right = x + spacing * (count - 1) + 92;
+
+			expect(x).toBeGreaterThanOrEqual(40);
+			expect(x).toBeCloseTo(TABLE_WIDTH - right);
+		}
+	});
+
 	it("renders blackjack and hi-lo, banner or not", () => {
 		expect(
 			blackjackTable({
@@ -144,6 +155,16 @@ describe("the card tables", () => {
 				.subarray(1, 4)
 				.toString(),
 		).toBe("PNG");
+		expect(
+			blackjackTable({
+				dealer: [card("K"), card("7"), card("2"), card("10", "spades")],
+				player: [card("A"), card("9")],
+				hideHole: false,
+				dealerTotal: "19",
+				playerTotal: "20",
+				banner: { text: "You win", tone: "win" },
+			}).length,
+		).toBeGreaterThan(0);
 		expect(
 			hiloTable({ current: card("Q"), history: [card("2")], multiplier: 1.8, banner: { text: "Correct", tone: "win" } })
 				.length,
