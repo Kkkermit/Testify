@@ -38,7 +38,7 @@ export default defineButton({
 			const payload = welcomePanel({ config: next, ...(note !== undefined ? { note } : {}) }, ownerId);
 
 			if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-				await interaction.reply(payload);
+				await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
 				return;
 			}
 

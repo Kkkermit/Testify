@@ -1,4 +1,3 @@
-import { MessageFlags } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { defineCommand } from "@core/command";
 import { buildPage, embed, reply } from "@lib/discord";
@@ -43,6 +42,7 @@ export default defineCommand({
 	name: "guild-list",
 	description: "Lists every server the bot is in.",
 	category: "owner",
+	private: true,
 	ownerOnly: true,
 
 	async run(interaction, client) {
@@ -57,6 +57,6 @@ export default defineCommand({
 			0,
 		);
 
-		await reply(interaction, { ...page, flags: MessageFlags.Ephemeral });
+		await reply(interaction, { ...page });
 	},
 });

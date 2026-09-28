@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
@@ -41,7 +41,8 @@ export default defineButton({
 			};
 
 			if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-				await interaction.reply(verifyPanel(state, ownerId));
+				const panel = verifyPanel(state, ownerId);
+				await interaction.reply({ ...panel, flags: panel.flags | MessageFlags.Ephemeral });
 				return;
 			}
 

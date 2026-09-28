@@ -11,6 +11,7 @@ export default defineCommand({
 	name: "treasure",
 	description: "Configures random money drops in chat.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	subcommands: [

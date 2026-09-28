@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { LIMITS } from "@config/constants";
 import { defineCommand, inTextChannel } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "clear",
 	description: "Bulk deletes recent messages in this channel.",
 	category: "moderation",
+	private: true,
 	aliases: ["purge", "prune"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageMessages],
@@ -33,7 +34,7 @@ export default defineCommand({
 			throw new UserFacingError(`Pick a number between ${LIMITS.bulkDeleteMin} and ${LIMITS.bulkDeleteMax}.`);
 		}
 
-		await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+		await interaction.deferReply();
 
 		const fetched = await channel.messages.fetch({ limit: LIMITS.bulkDeleteMax });
 		const candidates = [...fetched.values()]
@@ -53,7 +54,6 @@ export default defineCommand({
 						(deleted.size < candidates.length ? "\nMessages older than 14 days could not be removed." : ""),
 				),
 			],
-			flags: MessageFlags.Ephemeral,
 		});
 	},
 });

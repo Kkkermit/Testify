@@ -55,6 +55,7 @@ export default defineCommand({
 		},
 		{
 			name: "enter",
+			private: true,
 			description: "Buy lottery tickets.",
 			options: [{ name: "tickets", description: "How many tickets to buy.", type: "integer", min: 1, max: 100 }],
 			async run(interaction) {
@@ -89,6 +90,7 @@ export default defineCommand({
 		},
 		{
 			name: "setup",
+			private: true,
 			permissions: [PermissionFlagsBits.ManageGuild],
 			description: "Create or reconfigure the lottery.",
 			options: [
@@ -133,6 +135,7 @@ export default defineCommand({
 		},
 		{
 			name: "freeze",
+			private: true,
 			permissions: [PermissionFlagsBits.ManageGuild],
 			description: "Pause or resume the lottery.",
 			options: [{ name: "frozen", description: "Whether the lottery is frozen.", type: "boolean", required: true }],
@@ -151,6 +154,7 @@ export default defineCommand({
 		},
 		{
 			name: "delete",
+			private: true,
 			permissions: [PermissionFlagsBits.ManageGuild],
 			description: "Remove the lottery entirely.",
 			async run(interaction) {

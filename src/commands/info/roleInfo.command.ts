@@ -7,6 +7,7 @@ export default defineCommand({
 	name: "role-info",
 	description: "Shows information about a role.",
 	category: "info",
+	private: true,
 	guildOnly: true,
 	options: [{ name: "role", description: "The role to look up.", type: "role", required: true }],
 

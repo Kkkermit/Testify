@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "member-count",
 	description: "Charts the member breakdown for this server.",
 	category: "info",
+	private: true,
 	guildOnly: true,
 	cooldown: 10_000,
 	options: [

@@ -203,6 +203,7 @@ export default defineCommand({
 		},
 		{
 			name: "info",
+			private: true,
 			description: "Shows every game, what it pays, and this server's bet limits.",
 			async run(interaction) {
 				await reply(interaction, casinoLobby(await readCasinoSettings(inGuild(interaction).id)));
@@ -210,6 +211,7 @@ export default defineCommand({
 		},
 		{
 			name: CASINO_SETTINGS_SUBCOMMAND,
+			private: true,
 			description: "Opens or closes the casino, switches games on and off, and sets the bet limits.",
 			permissions: [PermissionFlagsBits.ManageGuild],
 			async run(interaction) {

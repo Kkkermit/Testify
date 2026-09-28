@@ -463,7 +463,7 @@ export default defineCommand({
 ```
 
 Full `Command` shape: `name`, `description`, `category` (required); then optional `options`, `subcommands`,
-`aliases`, `permissions`, `botPermissions`, `cooldown` (ms), `guildOnly`, `ownerOnly`, `nsfw`, `run`,
+`aliases`, `permissions`, `botPermissions`, `cooldown` (ms), `guildOnly`, `ownerOnly`, `nsfw`, `private`, `run`,
 `autocomplete`. `run` is optional when the command is nothing but subcommands.
 
 Rules:
@@ -482,6 +482,15 @@ Rules:
 7. **Use `inGuild(interaction)` / `asMember(interaction)` / `inTextChannel(interaction)`** from `@core/command`
    to narrow types after `guildOnly: true`. They throw a `UserFacingError` rather than returning null.
 8. Run `npm run docs:commands` afterwards.
+
+**`private: true` is how a command answers only the person who ran it**, set on the command or on one
+subcommand and applied by `dispatch` — never a hand-written `MessageFlags.Ephemeral`. On a slash command every
+reply, deferral and follow-up goes out ephemeral. A message cannot be private, so a prefix run instead deletes its
+reply and the message that ran it after `PRIVATE_TIDY_MS` (20 seconds), with a `<t:…:R>` countdown saying so. The
+prefix side drops only the ephemeral flag: dropping every flag took Components V2 with it, and Discord refused every
+panel run with the prefix. `tests/core/privateCommands.test.ts` pins the list. Anything the bot edits through the
+channel later — the music panel, the casino's card tables — stays public, because a private message can only be
+edited through its own interaction.
 
 **Discord caps top-level commands at 100.** When close to it, group: move the file into a `subcommands/` folder
 (which the loader does **not** scan) and expose it from a parent with `asSubcommand`:

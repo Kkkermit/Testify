@@ -18,6 +18,7 @@ export default defineCommand({
 	subcommands: [
 		{
 			name: "shop",
+			private: true,
 			description: "Browse the pets for sale.",
 			options: [
 				{
@@ -45,6 +46,7 @@ export default defineCommand({
 		},
 		{
 			name: "rename",
+			private: true,
 			description: "Give your pet a name of your own.",
 			options: [{ name: "name", description: "What to call it.", type: "string", required: true, maxLength: 32 }],
 			async run(interaction) {
@@ -62,6 +64,7 @@ export default defineCommand({
 		},
 		{
 			name: "rehome",
+			private: true,
 			description: "Rehome your pet for half of what you paid.",
 			aliases: ["rehome"],
 			async run(interaction) {
@@ -124,6 +127,7 @@ export default defineCommand({
 		},
 		{
 			name: "feed",
+			private: true,
 			description: "Feed your pet.",
 			async run(interaction) {
 				const guild = inGuild(interaction);
@@ -150,6 +154,7 @@ export default defineCommand({
 		},
 		{
 			name: "walk",
+			private: true,
 			description: "Take your pet out and cheer it up.",
 			async run(interaction) {
 				const guild = inGuild(interaction);

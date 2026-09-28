@@ -1,4 +1,4 @@
-import { ButtonStyle, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { ButtonStyle, PermissionFlagsBits } from "discord.js";
 import { customId } from "@core/button";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "reset",
 	description: "Resets economy or level data.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.Administrator],
 	subcommands: [
@@ -48,7 +49,6 @@ export default defineCommand({
 							}),
 						),
 					],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -72,7 +72,6 @@ export default defineCommand({
 							}),
 						),
 					],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

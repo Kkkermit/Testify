@@ -18,6 +18,7 @@ export default defineCommand({
 	name: "help",
 	description: "Everything the bot can do, category by category.",
 	category: "info",
+	private: true,
 	aliases: ["commands", "h"],
 	options: [{ name: "query", description: "A command or category name.", type: "string", autocomplete: true }],
 

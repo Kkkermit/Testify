@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand, inTextChannel, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "say",
 	description: "Sends a message through the bot.",
 	category: "moderation",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.SendMessages],
@@ -35,6 +36,6 @@ export default defineCommand({
 				: { content: message, allowedMentions: { parse: [] } },
 		);
 
-		await reply(interaction, { embeds: [successEmbed(`Message sent in ${target}.`)], flags: MessageFlags.Ephemeral });
+		await reply(interaction, { embeds: [successEmbed(`Message sent in ${target}.`)] });
 	},
 });

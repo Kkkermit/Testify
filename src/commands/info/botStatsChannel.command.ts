@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply, successEmbed } from "@lib/discord";
@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "bot-stats-channel",
 	description: "Posts a self-updating bot statistics message in a channel.",
 	category: "info",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks],
@@ -31,7 +32,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed(`Bot statistics will now be posted in ${channel}.`)],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -45,7 +45,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("The statistics message has been removed.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

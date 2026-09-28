@@ -1,4 +1,4 @@
-import { MessageFlags, WebhookClient } from "discord.js";
+import { WebhookClient } from "discord.js";
 import { strings } from "@config/strings";
 import { defineCommand } from "@core/command";
 import { SetupError, UserFacingError } from "@core/errors";
@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "suggest",
 	description: "Sends a suggestion to the developers.",
 	category: "developer",
+	private: true,
 	cooldown: 60_000,
 	options: [{ name: "suggestion", description: "Your idea.", type: "string", required: true, maxLength: 1_500 }],
 
@@ -44,7 +45,6 @@ export default defineCommand({
 
 		await reply(interaction, {
 			embeds: [successEmbed("Thanks. Your suggestion has been sent.")],
-			flags: MessageFlags.Ephemeral,
 		});
 	},
 });

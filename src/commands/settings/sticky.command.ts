@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "sticky-message",
 	description: "Keeps a message pinned to the bottom of a channel.",
 	category: "settings",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.ManageMessages],

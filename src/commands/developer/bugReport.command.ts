@@ -1,4 +1,4 @@
-import { MessageFlags, WebhookClient } from "discord.js";
+import { WebhookClient } from "discord.js";
 import { defineCommand } from "@core/command";
 import { SetupError } from "@core/errors";
 import { embed, reply, successEmbed } from "@lib/discord";
@@ -7,6 +7,7 @@ export default defineCommand({
 	name: "bug-report",
 	description: "Reports a bug to the developers.",
 	category: "developer",
+	private: true,
 	cooldown: 60_000,
 	options: [
 		{ name: "summary", description: "What went wrong.", type: "string", required: true, maxLength: 200 },
@@ -39,7 +40,6 @@ export default defineCommand({
 
 		await reply(interaction, {
 			embeds: [successEmbed("Thanks. Your report has been sent.")],
-			flags: MessageFlags.Ephemeral,
 		});
 	},
 });

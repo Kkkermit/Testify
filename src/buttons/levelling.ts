@@ -1,4 +1,4 @@
-import { PermissionFlagsBits } from "discord.js";
+import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
@@ -59,7 +59,7 @@ export default defineButton({
 			const payload = levelPanel(state, ownerId);
 
 			if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-				await interaction.reply(payload);
+				await interaction.reply({ ...payload, flags: payload.flags | MessageFlags.Ephemeral });
 				return;
 			}
 

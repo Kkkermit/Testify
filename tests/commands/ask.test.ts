@@ -1,6 +1,7 @@
 import { MessageFlags } from "discord.js";
 import supportButton from "@buttons/support";
 import ask from "@commands/info/ask.command";
+import { dispatch } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { type ContainerMessage } from "@lib/discord/discord.types";
 import { resetSupportDesk } from "@lib/support/supportDesk.util";
@@ -15,7 +16,7 @@ describe("/ask", () => {
 	it("answers privately with the article, using this server's prefix", async () => {
 		const interaction = createMockInteraction({ options: { question: "how do prefix commands work" } });
 
-		await ask.run?.(interaction, createMockClient());
+		await dispatch(interaction, ask, createMockClient());
 
 		expect(interaction.deferReply).toHaveBeenCalledWith({ flags: MessageFlags.Ephemeral });
 		const [sent] = interaction.sent as unknown as ContainerMessage[];

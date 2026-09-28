@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
@@ -10,6 +10,7 @@ export default defineCommand({
 	name: "welcome",
 	description: "Greets new members when they join.",
 	category: "settings",
+	private: true,
 	aliases: ["welcome-system", "greet"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
@@ -76,7 +77,7 @@ export default defineCommand({
 				const config = normaliseWelcome(settings);
 				if (config === null) throw new UserFacingError("The welcome system is not set up. Try `/welcome setup`.");
 
-				await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+				await interaction.deferReply();
 
 				const member = await guild.members.fetch(interaction.user.id).catch(() => null);
 				if (member === null) throw new UserFacingError("I could not read your member profile.");

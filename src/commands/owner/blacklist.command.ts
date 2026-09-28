@@ -1,4 +1,3 @@
-import { MessageFlags } from "discord.js";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { addToBlacklist, listBlacklist, removeFromBlacklist } from "@database/repositories/blacklistRepository";
@@ -10,6 +9,7 @@ export default defineCommand({
 	name: "blacklist",
 	description: "Blocks users from using the bot.",
 	category: "owner",
+	private: true,
 	ownerOnly: true,
 	subcommands: [
 		{
@@ -26,7 +26,6 @@ export default defineCommand({
 				await addToBlacklist(target.id, interaction.options.getString("reason") ?? "No reason provided");
 				await reply(interaction, {
 					embeds: [successEmbed(`${target} has been blacklisted.`)],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -41,7 +40,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed(`${target} has been removed from the blacklist.`)],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -62,7 +60,6 @@ export default defineCommand({
 									.join("\n") || "Nobody is blacklisted.",
 						}),
 					],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

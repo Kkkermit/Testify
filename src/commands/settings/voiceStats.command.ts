@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "voice-stats",
 	description: "Shows live member and bot counts in voice channel names.",
 	category: "settings",
+	private: true,
 	aliases: ["voicestats", "counters"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],

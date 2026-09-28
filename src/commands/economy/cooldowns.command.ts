@@ -23,6 +23,7 @@ export default defineCommand({
 	name: "cooldowns",
 	description: "Shows your active economy cooldowns.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 
 	async run(interaction) {

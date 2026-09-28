@@ -10,6 +10,7 @@ export default defineCommand({
 	name: "audit-logging",
 	description: "Chooses which server events get logged, and where.",
 	category: "settings",
+	private: true,
 	aliases: ["auditlog", "logging"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],

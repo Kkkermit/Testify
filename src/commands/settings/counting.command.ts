@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "counting",
 	description: "Runs the counting game in a channel.",
 	category: "settings",
+	private: true,
 	aliases: ["count"],
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],

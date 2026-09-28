@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "user-info",
 	description: "Shows information about a user.",
 	category: "info",
+	private: true,
 	aliases: ["whois", "ui"],
 	options: [{ name: "user", description: "The user to look up. Defaults to you.", type: "user" }],
 

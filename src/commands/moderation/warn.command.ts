@@ -87,6 +87,7 @@ export default defineCommand({
 		},
 		{
 			name: "punishments",
+			private: true,
 			description: "Choose what each warning does: a timeout, a kick or a ban.",
 			permissions: [PermissionFlagsBits.ManageGuild],
 			async run(interaction) {

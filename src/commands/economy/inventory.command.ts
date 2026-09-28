@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "inventory",
 	description: "Shows what you own, and uses it.",
 	category: "economy",
+	private: true,
 	aliases: ["inv", "use", "items"],
 	guildOnly: true,
 	options: [{ name: "user", description: "Whose inventory to view. Defaults to you.", type: "user" }],

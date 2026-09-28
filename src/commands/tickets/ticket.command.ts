@@ -1,4 +1,4 @@
-import { ChannelType, MessageFlags, PermissionFlagsBits } from "discord.js";
+import { ChannelType, PermissionFlagsBits } from "discord.js";
 import { channelOption, defineCommand, inGuild, roleOption, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { deleteTicketSetup, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "ticket",
 	description: "Sets up the ticket panel members use to contact your staff.",
 	category: "tickets",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.ManageChannels, PermissionFlagsBits.ManageRoles],
@@ -73,7 +74,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed(`Ticket panel posted in ${panelChannel}.`)],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -99,7 +99,6 @@ export default defineCommand({
 							],
 						}),
 					],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -115,7 +114,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("Tickets are off. The panel message can be deleted by hand.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

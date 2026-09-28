@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "permissions",
 	description: "Lists the permissions a member has in this server.",
 	category: "info",
+	private: true,
 	guildOnly: true,
 	options: [{ name: "user", description: "The member to inspect. Defaults to you.", type: "user" }],
 

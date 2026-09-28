@@ -8,6 +8,7 @@ export default defineCommand({
 	name: "daily",
 	description: "Claims your daily reward.",
 	category: "economy",
+	private: true,
 	guildOnly: true,
 
 	async run(interaction) {

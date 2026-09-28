@@ -1,4 +1,4 @@
-import { MessageFlags, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply, successEmbed } from "@lib/discord";
@@ -9,6 +9,7 @@ export default defineCommand({
 	name: "giveaway",
 	description: "Runs giveaways.",
 	category: "giveaway",
+	private: true,
 	guildOnly: true,
 	permissions: [PermissionFlagsBits.ManageGuild],
 	botPermissions: [PermissionFlagsBits.SendMessages, PermissionFlagsBits.EmbedLinks],
@@ -49,7 +50,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed(`Giveaway started in ${channel}. It runs for **${formatDurationLong(durationMs)}**.`)],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -64,7 +64,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("The giveaway has been ended.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -79,7 +78,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("New winners have been drawn.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},
@@ -94,7 +92,6 @@ export default defineCommand({
 
 				await reply(interaction, {
 					embeds: [successEmbed("The giveaway has been deleted.")],
-					flags: MessageFlags.Ephemeral,
 				});
 			},
 		},

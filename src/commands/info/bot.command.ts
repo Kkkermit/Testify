@@ -83,6 +83,7 @@ export default defineCommand({
 	name: "bot",
 	description: "Information about the bot itself.",
 	category: "info",
+	private: true,
 	subcommands: [
 		{ name: "info", description: "General information about the bot.", run: showInfo },
 		{ name: "uptime", description: "How long the bot has been running.", run: showUptime },
