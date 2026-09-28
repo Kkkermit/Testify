@@ -29,6 +29,8 @@ export default defineCommand({
 			required: true,
 			maxLength: QUESTION_MAX,
 			autocomplete: true,
+			// The privacy notice promises a question is never kept.
+			unlogged: true,
 		},
 	],
 

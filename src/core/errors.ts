@@ -4,7 +4,19 @@ import { strings } from "@config/strings";
 import { theme } from "@config/theme";
 import { type ComponentInteraction } from "@core/button";
 import { type TestifyClient } from "@core/client";
-import { type Command, type CommandInput, dispatch } from "@core/command";
+import { type Command, type CommandInput, chosenSubcommand, dispatch, givenOptions } from "@core/command";
+import { triageRow } from "@lib/bot/errorTriage.util";
+import {
+	logAuthor,
+	loggedChannel,
+	loggedChannelText,
+	loggedGuild,
+	loggedGuildText,
+	loggedOptionsText,
+	loggedUser,
+	loggedUserText,
+} from "@lib/bot/logFields.util";
+import { embed } from "@lib/discord/embeds.util";
 
 /** Throw this when the user needs to read the message — a bad argument, not enough money, a missing role. */
 export class UserFacingError extends Error {
@@ -57,7 +69,7 @@ export async function runCommand(interaction: CommandInput, command: Command, cl
 		await dispatch(interaction, command, client);
 		return true;
 	} catch (error) {
-		await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``);
+		await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
 		return false;
 	}
 }
@@ -81,6 +93,7 @@ async function reportFailure(
 	client: TestifyClient,
 	label: string,
 	what: string | null,
+	command?: Command,
 ): Promise<void> {
 	if (error instanceof UserFacingError || error instanceof SetupError) {
 		if (error instanceof SetupError) client.logger.error({ err: error, command: label }, "Command failed");
@@ -99,7 +112,7 @@ async function reportFailure(
 		{ err: toError(error), command: label, reference, user: interaction.user.id, guild: interaction.guildId },
 		"Command failed",
 	);
-	await postToErrorChannel(client, label, reference, interaction, toError(error));
+	await postToErrorChannel(client, { label, reference, interaction, error: toError(error), command });
 	await tell(interaction, failureEmbed(strings.generic.failure(what, reference), strings.generic.failureTitle));
 }
 
@@ -124,13 +137,61 @@ export async function tell(interaction: CommandInput | ComponentInteraction, emb
 	}
 }
 
-async function postToErrorChannel(
-	client: TestifyClient,
-	label: string,
-	reference: string,
-	interaction: CommandInput | ComponentInteraction,
-	error: Error,
-): Promise<void> {
+interface FailureReport {
+	label: string;
+	reference: string;
+	interaction: CommandInput | ComponentInteraction;
+	error: Error;
+	command: Command | undefined;
+}
+
+/** What the operator's error channel shows for one failure: what ran, for whom, where, and the stack. */
+export function errorLogEmbed(report: FailureReport): EmbedBuilder {
+	const { interaction, error, command } = report;
+	const user = loggedUser(interaction.user);
+
+	let title = `Button failed · ${report.label}`;
+	const fields = [
+		{ name: "Reference", value: `\`${report.reference}\``, inline: true },
+		{ name: "User", value: loggedUserText(user), inline: true },
+		{ name: "Server", value: loggedGuildText(loggedGuild(interaction.guild)), inline: true },
+		{
+			name: "Channel",
+			value: loggedChannelText(interaction.guild === null ? null : loggedChannel(interaction.channel, null)),
+			inline: true,
+		},
+	];
+
+	// Only `runCommand` passes a command, and it only ever has a command's input.
+	if (command !== undefined) {
+		const input = interaction as CommandInput;
+		const subcommand = chosenSubcommand(input, command);
+		title = `Command failed · /${command.name}${subcommand === null ? "" : ` ${subcommand}`}`;
+
+		const options = givenOptions(input, command);
+		if (options.length > 0) fields.push({ name: "Options", value: loggedOptionsText(options), inline: false });
+	} else if ("customId" in interaction) {
+		fields.push({ name: "Custom ID", value: `\`${interaction.customId}\``, inline: false });
+	}
+
+	fields.push({
+		name: "Stack",
+		value: `\`\`\`\n${(error.stack ?? error.message).slice(0, 1_000)}\n\`\`\``,
+		inline: false,
+	});
+
+	return embed({
+		colour: theme.colours.error,
+		author: logAuthor(user),
+		title: `${theme.emoji.error} ${title}`,
+		description: `**${error.name}:** ${error.message.slice(0, 500)}`,
+		fields,
+		thumbnail: user.avatarUrl,
+		footer: `Reference ${report.reference}`,
+	});
+}
+
+async function postToErrorChannel(client: TestifyClient, report: FailureReport): Promise<void> {
 	const channelId = client.env.CHANNEL_ERROR_LOG;
 	if (!channelId) return;
 
@@ -139,19 +200,9 @@ async function postToErrorChannel(
 		if (!channel?.isTextBased() || !channel.isSendable()) return;
 
 		await channel.send({
-			embeds: [
-				new EmbedBuilder()
-					.setColor(theme.colours.error)
-					.setTitle("Command failed")
-					.setTimestamp()
-					.addFields(
-						{ name: "Command", value: `\`${label}\``, inline: true },
-						{ name: "Reference", value: `\`${reference}\``, inline: true },
-						{ name: "User", value: `${interaction.user.username} (${interaction.user.id})`, inline: true },
-						{ name: "Server", value: interaction.guild?.name ?? "Direct message", inline: true },
-						{ name: "Error", value: `\`\`\`\n${(error.stack ?? error.message).slice(0, 1_000)}\n\`\`\`` },
-					),
-			],
+			embeds: [errorLogEmbed(report)],
+			components: [triageRow(null)],
+			allowedMentions: { parse: [] },
 		});
 	} catch (reportError) {
 		client.logger.warn({ err: toError(reportError) }, "Could not post to the error channel");

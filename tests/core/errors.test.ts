@@ -1,8 +1,8 @@
-import { MessageFlags } from "discord.js";
+import { type APIEmbed, MessageFlags } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
 import { runButton, runCommand, ServiceError, SetupError, toError, UserFacingError } from "@core/errors";
-import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
+import { createMockClient, createMockInteraction, USER_ID } from "@tests/helpers/mocks";
 
 describe("toError", () => {
 	it("passes an Error straight through", () => {
@@ -286,6 +286,55 @@ describe("the error channel", () => {
 		await runCommand(createMockInteraction(), command, clientWithChannel(send, "123"));
 
 		expect(send).toHaveBeenCalled();
+	});
+
+	it("names the command, its options, the person and the place, with triage buttons under it", async () => {
+		const send = jest.fn((_payload: unknown) => Promise.resolve({}));
+		const withOptions = {
+			...command,
+			options: [
+				{ name: "amount", description: "d", type: "integer" as const },
+				{ name: "secret", description: "d", type: "string" as const, unlogged: true },
+			],
+		};
+
+		await runCommand(
+			createMockInteraction({ options: { amount: 500, secret: "hunter2" } }),
+			withOptions,
+			clientWithChannel(send, "123"),
+		);
+
+		const payload = send.mock.calls[0]?.[0] as {
+			embeds: { toJSON(): APIEmbed }[];
+			components: { toJSON(): { components: { custom_id: string }[] } }[];
+		};
+		const built = payload.embeds[0]!.toJSON();
+		const byName = Object.fromEntries((built.fields ?? []).map((field) => [field.name, field.value]));
+
+		expect(built.title).toBe("❌ Command failed · /demo");
+		expect(built.description).toBe("**Error:** boom");
+		expect(byName.Reference).toMatch(/^`[0-9A-Z]{6}`$/);
+		expect(byName.User).toContain(USER_ID);
+		expect(byName.Server).toContain("Test Server");
+		expect(byName.Channel).toContain("#general");
+		expect(byName.Options).toBe("`amount` 500\n`secret` *not logged*");
+		expect(byName.Stack).toContain("boom");
+		expect(payload.components[0]!.toJSON().components.map((part) => part.custom_id)).toEqual([
+			"error:pending",
+			"error:solved",
+			"error:unsolved",
+		]);
+	});
+
+	it("names the button and its custom ID when a button failed", async () => {
+		const send = jest.fn((_payload: unknown) => Promise.resolve({}));
+		const interaction = createMockInteraction({ overrides: { customId: "shop:buy:1" } as never });
+
+		await runButton(interaction as never, boom, clientWithChannel(send, "123"), "shop");
+
+		const built = (send.mock.calls[0]?.[0] as { embeds: { toJSON(): APIEmbed }[] }).embeds[0]!.toJSON();
+		expect(built.title).toBe("❌ Button failed · shop");
+		expect(JSON.stringify(built.fields)).toContain("shop:buy:1");
 	});
 
 	it("stays quiet when no channel is configured", async () => {

@@ -1,7 +1,17 @@
 import { strings } from "@config/strings";
+import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { SetupError, UserFacingError } from "@core/errors";
-import { postToLogChannel } from "@lib/bot";
+import {
+	logAuthor,
+	loggedChannel,
+	loggedChannelText,
+	loggedGuild,
+	loggedGuildText,
+	loggedUser,
+	loggedUserText,
+	postToLogChannel,
+} from "@lib/bot";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { containsProfanity } from "@lib/moderation";
 
@@ -20,22 +30,27 @@ export default defineCommand({
 		const suggestion = interaction.options.getString("suggestion", true);
 		if (containsProfanity(suggestion)) throw new UserFacingError(strings.generic.profanity);
 
+		const user = loggedUser(interaction.user);
 		const landed = await postToLogChannel(client, channelId, {
 			embeds: [
 				embed({
-					category: "developer",
-					title: "Suggestion",
+					colour: theme.colours.info,
+					author: logAuthor(user),
+					title: "💡 Suggestion",
 					description: suggestion,
 					fields: [
+						{ name: "Suggested by", value: loggedUserText(user), inline: true },
+						{ name: "Server", value: loggedGuildText(loggedGuild(interaction.guild)), inline: true },
 						{
-							name: "Suggested by",
-							value: `${interaction.user.username} (\`${interaction.user.id}\`)`,
+							name: "Channel",
+							value: loggedChannelText(interaction.guild === null ? null : loggedChannel(interaction.channel, null)),
 							inline: true,
 						},
-						{ name: "Server", value: interaction.guild?.name ?? "Direct message", inline: true },
 					],
+					thumbnail: user.avatarUrl,
 				}),
 			],
+			allowedMentions: { parse: [] },
 		});
 		if (!landed) throw new SetupError("Suggestions are set up with a channel the bot cannot post in.");
 

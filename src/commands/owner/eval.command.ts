@@ -23,7 +23,7 @@ export default defineCommand({
 	private: true,
 	ownerOnly: true,
 	options: [
-		{ name: "code", description: "The code to evaluate.", type: "string", required: true },
+		{ name: "code", description: "The code to evaluate.", type: "string", required: true, unlogged: true },
 		{ name: "depth", description: "Inspection depth.", type: "integer", min: 0, max: 5 },
 	],
 

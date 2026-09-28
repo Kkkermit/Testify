@@ -346,7 +346,8 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
 **Dispatch:**
 
 - Slash → `events/command/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
-- Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`
+- Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`. The prefix matches in
+  any case, so `T?help` — what a phone's auto-capitalisation types — runs `t?help`
 - Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
   `button.run(interaction, { client, action, args })`
 
@@ -800,11 +801,18 @@ joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
 `CHANNEL_SLASH_COMMAND_LOG` and `CHANNEL_PREFIX_COMMAND_LOG` log every command run, one per surface.
-`logCommandUse` queues a line in memory — the command, who ran it, where and whether it worked, **never what was
-typed**, since `/ask` promises its question is not kept — and `flushCommandLog` posts each queue every five seconds,
-at most five messages a flush because that is what Discord allows a channel, and once more at shutdown. A backlog
-past `COMMAND_LOG_LIMITS.maxWaiting` drops its oldest lines and says how many. The privacy notice names the
-command logs (`legal.commandsL6`).
+`logCommandUse` queues an entry in memory and `flushCommandLog` posts each queue every five seconds, an embed per
+run, within Discord's limits of five messages a flush, ten embeds a message and 6,000 characters across them, and
+once more at shutdown. A backlog past `COMMAND_LOG_LIMITS.maxWaiting` drops its oldest entries and says how many.
+
+**Every log post says who and where the same way**, through `logFields.util.ts`: the person's avatar, mention,
+username, id and account age, and the server and channel by name and id. The log channel usually sits in another
+server, where a mention renders as nobody, so the name is always written out beside it. A run's options are read by
+`givenOptions` in `src/core/command.ts` from the command's own declaration, on both surfaces, and appear in the
+command log and in an error post. **An option marked `unlogged: true` is named but its value never is** — `/ask`'s
+question, because the privacy notice promises it is not kept, and `/eval`'s code. The notice names both logs
+(`legal.commandsL3`, `legal.commandsL6`); change it with them. The error post carries the triage buttons
+(`triageRow`), which recolour it pending, solved or unsolved.
 
 Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
 `"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is
