@@ -799,6 +799,19 @@ if (!account) throw new UserFacingError("You do not have an account yet. Use `/e
   4096-character description limit.
 - **Never swallow an error into a `.catch()` that only logs** and then continue on a possibly-undefined value.
 
+**Every error reaches only the person who ran the command.** `tell` in `src/core/errors.ts` is the one way a
+failure is answered, and it picks the private route for whatever has already happened: an ephemeral reply, an edit
+of a deferral that was already ephemeral, or — when a public "thinking…" is showing — deleting it and following up
+ephemerally, because editing it put the error in front of the channel. A button's deferred update is left alone
+and followed up privately, since editing it would replace the message the button sits on. `ephemeral` is null
+until a reply is deferred and stays null after `deferUpdate`, which is how the three are told apart — read out of
+discord.js's `InteractionResponses.js`, not assumed. A prefix command has no private reply at all, so its errors and
+refusals use `replyBriefly`, a reply that deletes itself.
+
+**An unexpected failure tells the reader it was not their doing and gives them a reference.** `errorReference()`
+is six characters, written into the log line and the error channel post beside the stack, and shown to the reader
+with a pointer to `/bug-report` — so a report can be matched to the failure it describes.
+
 ### The process stays up
 
 **Nothing after startup may end the process.** A bot serving many servers must not go dark because one handler

@@ -1,3 +1,4 @@
+import { MessageFlags } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
 import { runButton, runCommand, ServiceError, SetupError, toError, UserFacingError } from "@core/errors";
@@ -86,8 +87,25 @@ describe("runCommand", () => {
 		);
 
 		const sent = JSON.stringify(interaction.sent);
-		expect(sent).toContain("Something went wrong");
+		expect(sent).toContain("That did not work");
+		expect(sent).toContain("running `/demo`");
 		expect(sent).not.toContain("ECONNREFUSED");
+	});
+
+	/** "The problem has been logged" gave somebody reporting it nothing to point at. */
+	it("gives the reader a reference that finds the failure in the log", async () => {
+		const interaction = createMockInteraction();
+		const client = createMockClient({ logger: { error: jest.fn() } } as never);
+
+		await runCommand(
+			interaction,
+			command(() => Promise.reject(new Error("boom"))),
+			client,
+		);
+
+		const reference = /\*\*([0-9A-Z]{6})\*\*/.exec(JSON.stringify(interaction.sent))?.[1];
+		expect(reference).toBeDefined();
+		expect(client.logger.error).toHaveBeenCalledWith(expect.objectContaining({ reference }), expect.any(String));
 	});
 
 	it("logs the unexpected error with its context", async () => {
@@ -116,7 +134,7 @@ describe("runCommand", () => {
 		);
 
 		const sent = JSON.stringify(interaction.sent);
-		expect(sent).toContain("TMDB is not responding");
+		expect(sent).toContain("TMDB is not answering");
 		expect(sent).not.toContain("504");
 	});
 
@@ -133,17 +151,70 @@ describe("runCommand", () => {
 		expect(JSON.stringify(interaction.sent)).toContain("Set CHANNEL_ERROR_LOG first.");
 	});
 
-	it("edits rather than replies when the command already deferred", async () => {
-		const interaction = createMockInteraction({ overrides: { deferred: true } });
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
+	it("answers privately when nothing has been sent yet", async () => {
+		const interaction = createMockInteraction();
 
 		await runCommand(
 			interaction,
 			command(() => Promise.reject(new UserFacingError("nope"))),
-			client,
+			createMockClient(),
+		);
+
+		expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
+	});
+
+	it("edits a private deferral in place", async () => {
+		const interaction = createMockInteraction({ overrides: { deferred: true, ephemeral: true } });
+
+		await runCommand(
+			interaction,
+			command(() => Promise.reject(new UserFacingError("nope"))),
+			createMockClient(),
 		);
 
 		expect(interaction.editReply).toHaveBeenCalled();
+		expect(interaction.followUp).not.toHaveBeenCalled();
+	});
+
+	/** Editing a public "thinking…" put the error in front of the whole channel. */
+	it("swaps a public deferral for a private follow-up", async () => {
+		const deleteReply = jest.fn(() => Promise.resolve());
+		const interaction = createMockInteraction({ overrides: { deferred: true, ephemeral: false, deleteReply } });
+
+		await runCommand(
+			interaction,
+			command(() => Promise.reject(new UserFacingError("nope"))),
+			createMockClient(),
+		);
+
+		expect(deleteReply).toHaveBeenCalled();
+		expect(interaction.editReply).not.toHaveBeenCalled();
+		expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
+	});
+
+	/** A button's deferred update edits the message itself, so an edit would have put the error over the board. */
+	it("leaves a button's message alone and follows up privately", async () => {
+		const deleteReply = jest.fn(() => Promise.resolve());
+		const interaction = createMockInteraction({ overrides: { deferred: true, ephemeral: null, deleteReply } });
+
+		await runButton(interaction as never, () => Promise.reject(new Error("boom")), createMockClient(), "board");
+
+		expect(deleteReply).not.toHaveBeenCalled();
+		expect(interaction.editReply).not.toHaveBeenCalled();
+		expect(interaction.followUp).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
+	});
+
+	it("uses a prefix command's self-clearing reply, since a message cannot be private", async () => {
+		const replyBriefly = jest.fn(() => Promise.resolve());
+		const interaction = createMockInteraction({ overrides: { replyBriefly } as never });
+
+		await runCommand(
+			interaction,
+			command(() => Promise.reject(new UserFacingError("nope"))),
+			createMockClient(),
+		);
+
+		expect(replyBriefly).toHaveBeenCalled();
 		expect(interaction.reply).not.toHaveBeenCalled();
 	});
 

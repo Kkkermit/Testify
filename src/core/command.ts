@@ -3,6 +3,7 @@ import {
 	type ChatInputCommandInteraction,
 	type AutocompleteInteraction,
 	type Client,
+	type EmbedBuilder,
 	type Guild,
 	type GuildBasedChannel,
 	type GuildMember,
@@ -50,6 +51,12 @@ export interface CommandInput {
 	editReply(options: InteractionEditReplyOptions | string): Promise<unknown>;
 	followUp(options: InteractionReplyOptions): Promise<unknown>;
 	fetchReply(): Promise<{ id: string }>;
+
+	/** Null until a reply is deferred, and still null after a button's deferred update. */
+	readonly ephemeral?: boolean | null;
+	deleteReply?(): Promise<unknown>;
+	/** A message cannot be private, so a prefix command's version of one deletes itself instead. */
+	replyBriefly?(embed: EmbedBuilder): Promise<unknown>;
 }
 
 /** The option getters, in both their "give me it or null" and "it must be there" forms. */
