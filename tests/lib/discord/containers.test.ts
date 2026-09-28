@@ -1,4 +1,5 @@
-import { ButtonStyle, ComponentType, MessageFlags } from "discord.js";
+import { ButtonStyle, ComponentType, MessageFlags, resolveColor } from "discord.js";
+import { theme } from "@config/theme";
 import { button, row } from "@lib/discord/components.util";
 import {
 	container,
@@ -84,6 +85,17 @@ describe("sectionWithThumbnail", () => {
 });
 
 describe("container", () => {
+	it("takes an accent over its category's colour", () => {
+		const built = json(container({ category: "casino", accent: theme.colours.success, parts: [text("won")] }));
+
+		expect(built.accent_color).toBe(resolveColor(theme.colours.success));
+	});
+
+	/** A colour is never worth failing a message over. */
+	it("falls back rather than throwing on a colour it cannot read", () => {
+		expect(json(container({ accent: "NotAColour" as never, parts: [text("x")] })).accent_color).toBe(0x5865f2);
+	});
+
 	it("keeps its parts in the order they were passed", () => {
 		const built = json(
 			container({

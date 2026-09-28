@@ -1,3 +1,5 @@
+import { resolveColor } from "discord.js";
+import { theme } from "@config/theme";
 import { parseCustomId } from "@core/button";
 import { type BlackjackState, type Card, type Rank } from "@lib/casino/casino.types";
 import {
@@ -5,7 +7,9 @@ import {
 	hiloMessage,
 	instantSettledMessage,
 	instantSpinningMessage,
-	moneyLine,
+	payoutLine,
+	resultHeadline,
+	resultTone,
 } from "@lib/casino/casinoPanel.util";
 import {
 	betLimitRefusal,
@@ -19,6 +23,13 @@ import { coinflipOutcome, outcomeFor, rouletteOutcome } from "@lib/casino/instan
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
+const GREEN = resolveColor(theme.colours.success);
+const RED = resolveColor(theme.colours.error);
+
+function accentOf(message: { components?: unknown[] }): unknown {
+	const [box] = message.components ?? [];
+	return (box as { toJSON(): { accent_color?: number } }).toJSON().accent_color;
+}
 const card = (rank: Rank, suit: Card["suit"] = "spades"): Card => ({ rank, suit });
 
 function blackjack(player: Rank[], dealer: Rank[]): BlackjackState {
@@ -106,10 +117,35 @@ describe("the settings panel", () => {
 });
 
 describe("an instant game's messages", () => {
-	it("says what the money did", () => {
-		expect(moneyLine(100, 0)).toBe("Lost **100**.");
-		expect(moneyLine(100, 100)).toBe("Your **100** came back.");
-		expect(moneyLine(100, 350)).toBe("Won **350** · **+250**");
+	it("congratulates a win by what it made, and names a loss by what it cost", () => {
+		expect(resultHeadline(100, 350)).toBe("# 🎉 Congratulations, you won 250!");
+		expect(resultHeadline(100, 0)).toBe("# 💸 You lost 100");
+		expect(resultHeadline(100, 40)).toBe("# 💸 You lost 60");
+		expect(resultHeadline(100, 100)).toBe("# 🤝 Your 100 came back");
+	});
+
+	it("shows the arithmetic only when there is some", () => {
+		expect(payoutLine(100, 350)).toBe("**350** paid on a **100** bet.");
+		expect(payoutLine(100, 40)).toBe("**40** of your **100** came back.");
+		expect(payoutLine(100, 0)).toBeNull();
+		expect(payoutLine(100, 100)).toBeNull();
+	});
+
+	it("reads a partial return as a loss and an exact one as neither", () => {
+		expect(resultTone(100, 101)).toBe("win");
+		expect(resultTone(100, 100)).toBe("even");
+		expect(resultTone(100, 99)).toBe("lose");
+	});
+
+	/** The stripe down the message is the first thing anybody sees, before a word of it is read. */
+	it("colours a settled message green for a win and red for a loss, and leaves the spin alone", () => {
+		const win = coinflipOutcome("heads", 100, () => 0);
+		const loss = coinflipOutcome("tails", 100, () => 0);
+
+		expect(accentOf(instantSettledMessage(win, 100, null, OWNER, Buffer.from("PNG")))).toBe(GREEN);
+		expect(accentOf(instantSettledMessage(loss, 100, null, OWNER, Buffer.from("PNG")))).toBe(RED);
+		expect(accentOf(instantSpinningMessage(win, 100, Buffer.from("GIF")))).not.toBe(GREEN);
+		expect(textOf(instantSettledMessage(win, 100, null, OWNER, Buffer.from("PNG")))).toContain("Congratulations");
 	});
 
 	it("attaches the animation, and swaps it for the picture once settled", () => {
@@ -149,6 +185,8 @@ describe("the blackjack table", () => {
 	it("offers hit, stand and double while the hand is live, each only to its player", () => {
 		const message = blackjackMessage({ ...deciding, state: blackjack(["5", "6"], ["10", "7"]) }, OWNER);
 
+		expect(accentOf(message)).not.toBe(GREEN);
+		expect(accentOf(message)).not.toBe(RED);
 		expect(idsOf(message).map((id) => parseCustomId(id).action)).toEqual(["bj-hit", "bj-stand", "bj-double"]);
 		for (const id of idsOf(message)) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
 	});
@@ -173,7 +211,8 @@ describe("the blackjack table", () => {
 		);
 
 		expect(textOf(message)).toContain("You win");
-		expect(textOf(message)).toContain("+100");
+		expect(textOf(message)).toContain("Congratulations, you won 100!");
+		expect(accentOf(message)).toBe(GREEN);
 		expect(idsOf(message).map((id) => parseCustomId(id).action)).toEqual(["again"]);
 	});
 
@@ -228,6 +267,7 @@ describe("the hi-lo table", () => {
 		);
 
 		expect(textOf(message)).toContain("3♠");
-		expect(textOf(message)).toContain("Lost **100**");
+		expect(textOf(message)).toContain("You lost 100");
+		expect(accentOf(message)).toBe(RED);
 	});
 });

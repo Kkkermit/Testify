@@ -1,4 +1,5 @@
-import { AttachmentBuilder, ButtonStyle } from "discord.js";
+import { AttachmentBuilder, ButtonStyle, type ColorResolvable } from "discord.js";
+import { theme } from "@config/theme";
 import { customId } from "@core/button";
 import { blackjackTable, hiloTable, type TableBanner } from "@lib/canvas/cardTable.util";
 import { canDouble, handValue } from "@lib/casino/blackjack.util";
@@ -16,22 +17,58 @@ import { type CasinoGame } from "@testify/shared";
 
 /** Every casino message, as pure functions of the game's state, so the first render and every update match. */
 
-function withFile(parts: ContainerPart[], file: AttachmentBuilder): ContainerMessageWithFiles {
+type ResultTone = "win" | "even" | "lose";
+
+const TONE_COLOUR: Record<ResultTone, ColorResolvable> = {
+	win: theme.colours.success,
+	even: theme.colours.warning,
+	lose: theme.colours.error,
+};
+
+function withFile(parts: ContainerPart[], file: AttachmentBuilder, tone?: ResultTone): ContainerMessageWithFiles {
+	const box = container({ category: "casino", ...(tone === undefined ? {} : { accent: TONE_COLOUR[tone] }), parts });
+
 	// An empty list drops the picture the message carried before, so an edit never shows two.
-	return { ...containerMessage(container({ category: "casino", parts })), files: [file], attachments: [] };
+	return { ...containerMessage(box), files: [file], attachments: [] };
 }
 
 function heading(game: CasinoGame): string {
 	return `## ${CASINO_GAME_EMOJI[game]} ${CASINO_GAME_LABELS[game]}`;
 }
 
-/** What the money did, in one line. */
-export function moneyLine(staked: number, returned: number): string {
-	if (returned === 0) return `Lost **${formatNumber(staked)}**.`;
-	if (returned === staked) return `Your **${formatNumber(staked)}** came back.`;
-	if (returned < staked) return `Got back **${formatNumber(returned)}** of **${formatNumber(staked)}**.`;
+/** The game's name beside the bet, small, once the headline has taken the top of a settled message. */
+function gameLine(game: CasinoGame, bet: string): string {
+	return `${CASINO_GAME_EMOJI[game]} **${CASINO_GAME_LABELS[game]}** · ${bet}`;
+}
 
-	return `Won **${formatNumber(returned)}** · **+${formatNumber(returned - staked)}**`;
+export function resultTone(staked: number, returned: number): ResultTone {
+	if (returned > staked) return "win";
+	return returned === staked ? "even" : "lose";
+}
+
+/** The first thing a settled message says, in the largest type Discord has. */
+export function resultHeadline(staked: number, returned: number): string {
+	switch (resultTone(staked, returned)) {
+		case "win":
+			return `# ${theme.emoji.confetti} Congratulations, you won ${formatNumber(returned - staked)}!`;
+		case "even":
+			return `# 🤝 Your ${formatNumber(staked)} came back`;
+		case "lose":
+			return `# 💸 You lost ${formatNumber(staked - returned)}`;
+	}
+}
+
+/** The arithmetic behind the headline, or nothing when the whole bet went. */
+export function payoutLine(staked: number, returned: number): string | null {
+	if (returned === 0 || returned === staked) return null;
+	if (returned < staked) return `**${formatNumber(returned)}** of your **${formatNumber(staked)}** came back.`;
+
+	return `**${formatNumber(returned)}** paid on a **${formatNumber(staked)}** bet.`;
+}
+
+function detail(line: string, staked: number, returned: number): string {
+	const payout = payoutLine(staked, returned);
+	return payout === null ? line : `${line}\n${payout}`;
 }
 
 function walletLine(wallet: number | null): string | null {
@@ -72,17 +109,17 @@ export function instantSettledMessage(
 ): ContainerMessageWithFiles {
 	const file = new AttachmentBuilder(still, { name: `${outcome.file}.png` });
 	const parts: ContainerPart[] = [
-		text(heading(outcome.game)),
-		text(`Bet **${formatNumber(stake)}** on **${outcome.betLine}**`),
+		text(resultHeadline(stake, outcome.returned)),
+		text(gameLine(outcome.game, `Bet **${formatNumber(stake)}** on **${outcome.betLine}**`)),
 		gallery(`attachment://${outcome.file}.png`),
-		text(`${outcome.result}\n${moneyLine(stake, outcome.returned)}`),
+		text(detail(outcome.result, stake, outcome.returned)),
 	];
 
 	const walletText = walletLine(wallet);
 	if (walletText !== null) parts.push(text(walletText));
 	parts.push(againRow(outcome.game, outcome.again, stake, userId));
 
-	return withFile(parts, file);
+	return withFile(parts, file, resultTone(stake, outcome.returned));
 }
 
 const VERDICT_TEXT: Record<BlackjackVerdict, string> = {
@@ -126,13 +163,13 @@ export function blackjackMessage(view: BlackjackView, userId: string): Container
 		...(view.verdict === null ? {} : { banner: VERDICT_BANNER[view.verdict] }),
 	});
 
+	const bet = view.state.doubled
+		? `Bet **${formatNumber(view.bet)}**, doubled to **${formatNumber(view.staked)}**`
+		: `Bet **${formatNumber(view.staked)}**`;
 	const parts: ContainerPart[] = [
-		text(heading("blackjack")),
-		text(
-			view.state.doubled
-				? `Bet **${formatNumber(view.bet)}**, doubled to **${formatNumber(view.staked)}**`
-				: `Bet **${formatNumber(view.staked)}**`,
-		),
+		...(view.verdict === null
+			? [text(heading("blackjack")), text(bet)]
+			: [text(resultHeadline(view.staked, view.returned)), text(gameLine("blackjack", bet))]),
 		gallery("attachment://blackjack.png", `You hold ${view.state.player.map(cardLabel).join(" ")}.`),
 	];
 
@@ -153,14 +190,18 @@ export function blackjackMessage(view: BlackjackView, userId: string): Container
 			),
 		);
 	} else {
-		parts.push(divider(), text(`${VERDICT_TEXT[view.verdict]}\n${moneyLine(view.staked, view.returned)}`));
+		parts.push(divider(), text(detail(VERDICT_TEXT[view.verdict], view.staked, view.returned)));
 		if (view.auto === true) parts.push(text("-# You left the hand alone, so it stood for you."));
 		const walletText = walletLine(view.wallet);
 		if (walletText !== null) parts.push(text(walletText));
 		parts.push(againRow("blackjack", "deal", view.bet, userId));
 	}
 
-	return withFile(parts, new AttachmentBuilder(image, { name: "blackjack.png" }));
+	return withFile(
+		parts,
+		new AttachmentBuilder(image, { name: "blackjack.png" }),
+		view.verdict === null ? undefined : resultTone(view.staked, view.returned),
+	);
 }
 
 export interface HiLoView {
@@ -197,13 +238,16 @@ export function hiloMessage(view: HiLoView, userId: string): ContainerMessageWit
 		...(banner === undefined ? {} : { banner }),
 	});
 
+	const open = view.phase === "open";
+	const returned = view.phase === "lost" ? 0 : view.returned;
 	const parts: ContainerPart[] = [
-		text(heading("hilo")),
-		text(`Bet **${formatNumber(view.staked)}** · Pot **${formatNumber(pot)}**`),
+		...(open
+			? [text(heading("hilo")), text(`Bet **${formatNumber(view.staked)}** · Pot **${formatNumber(pot)}**`)]
+			: [text(resultHeadline(view.staked, returned)), text(gameLine("hilo", `Bet **${formatNumber(view.staked)}**`))]),
 		gallery("attachment://hilo.png", `The card showing is ${cardLabel(view.state.current)}.`),
 	];
 
-	if (view.phase === "open") {
+	if (open) {
 		const higher = hiloStep(view.state.current, "higher");
 		const lower = hiloStep(view.state.current, "lower");
 
@@ -238,8 +282,12 @@ export function hiloMessage(view: HiLoView, userId: string): ContainerMessageWit
 			divider(),
 			text(
 				view.phase === "lost"
-					? `The next card was **${cardLabel(view.state.current)}**. The pot is gone.\n${moneyLine(view.staked, 0)}`
-					: `You cashed out after **${view.state.rounds}** ${view.state.rounds === 1 ? "call" : "calls"}.\n${moneyLine(view.staked, view.returned)}`,
+					? `The next card was **${cardLabel(view.state.current)}**. The pot is gone.`
+					: detail(
+							`You cashed out after **${view.state.rounds}** ${view.state.rounds === 1 ? "call" : "calls"}.`,
+							view.staked,
+							view.returned,
+						),
 			),
 		);
 		if (view.auto === true) parts.push(text("-# You left the table, so the pot was cashed out for you."));
@@ -248,5 +296,9 @@ export function hiloMessage(view: HiLoView, userId: string): ContainerMessageWit
 		parts.push(againRow("hilo", "deal", view.staked, userId));
 	}
 
-	return withFile(parts, new AttachmentBuilder(image, { name: "hilo.png" }));
+	return withFile(
+		parts,
+		new AttachmentBuilder(image, { name: "hilo.png" }),
+		open ? undefined : resultTone(view.staked, returned),
+	);
 }

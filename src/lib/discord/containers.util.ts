@@ -1,9 +1,11 @@
 import {
 	type ButtonBuilder,
+	type ColorResolvable,
 	ContainerBuilder,
 	MediaGalleryBuilder,
 	MediaGalleryItemBuilder,
 	MessageFlags,
+	resolveColor,
 	SectionBuilder,
 	SeparatorBuilder,
 	SeparatorSpacingSize,
@@ -54,10 +56,16 @@ export function gallery(imageUrl: string, description?: string): MediaGalleryBui
 }
 
 /** A container coloured by category, to match the embeds beside it. */
-export function container(options: { category?: Category; parts: ContainerPart[] }): ContainerBuilder {
+/** `accent` beats the category's colour, for a message whose stripe says how something turned out. */
+export function container(options: {
+	category?: Category;
+	accent?: ColorResolvable;
+	parts: ContainerPart[];
+}): ContainerBuilder {
 	const built = new ContainerBuilder();
 
-	if (options.category !== undefined) built.setAccentColor(resolveAccent(options.category));
+	if (options.accent !== undefined) built.setAccentColor(resolveNamed(options.accent));
+	else if (options.category !== undefined) built.setAccentColor(resolveAccent(options.category));
 
 	for (const part of options.parts) {
 		if (part instanceof TextDisplayBuilder) built.addTextDisplayComponents(part);
@@ -74,4 +82,12 @@ export function container(options: { category?: Category; parts: ContainerPart[]
 function resolveAccent(category: Category): number {
 	const colour = categoryColour(category);
 	return typeof colour === "number" ? colour : 0x5865f2;
+}
+
+function resolveNamed(colour: ColorResolvable): number {
+	try {
+		return resolveColor(colour);
+	} catch {
+		return 0x5865f2;
+	}
 }
