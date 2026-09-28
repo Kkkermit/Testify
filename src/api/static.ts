@@ -17,6 +17,7 @@ const TYPES: Record<string, string> = {
 	".jpg": "image/jpeg",
 	".webp": "image/webp",
 	".ico": "image/x-icon",
+	".webmanifest": "application/manifest+json; charset=utf-8",
 	".woff2": "font/woff2",
 };
 
@@ -65,12 +66,18 @@ export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): 
 		const asset = resolveAsset(root, context.req.path);
 
 		if (asset !== null) {
-			// Vite hashes asset filenames, so a year is safe and index.html must never be cached.
-			context.header("Cache-Control", "public, max-age=31536000, immutable");
+			// Only Vite's hashed names can be cached for a year; an icon keeps its name when its picture changes.
+			context.header(
+				"Cache-Control",
+				context.req.path.startsWith("/assets/") ? "public, max-age=31536000, immutable" : "public, max-age=86400",
+			);
 			context.header("Content-Type", TYPES[extname(asset)] ?? "application/octet-stream");
 
 			return context.body(new Uint8Array(readFileSync(asset)));
 		}
+
+		// A missing file is a 404: answering `/favicon.ico` with the page hands a home-screen icon an HTML document.
+		if (extname(context.req.path) !== "") return context.notFound();
 
 		// Anything else is a client route: React Router takes it from here.
 		context.header("Cache-Control", "no-cache");
