@@ -7,8 +7,10 @@ import {
 	countGlobalAccounts,
 	findAccount,
 	getEconomyRank,
+	getEconomyStanding,
 	getGlobalLeaderboard,
 	getGlobalRank,
+	getGlobalStanding,
 	getLeaderboard,
 } from "@database/repositories/economyRepository";
 import {
@@ -16,6 +18,7 @@ import {
 	countRanked,
 	getLevelLeaderboard,
 	getLevelSettings,
+	getLevelStanding,
 	getRank,
 	getUserLevel,
 	setLevel,
@@ -105,6 +108,27 @@ export async function rankOnBoard(
 	return view.scope === "global"
 		? getGlobalRank(view.guildIds, userId, view.sort)
 		: getEconomyRank(guildId, userId, view.sort);
+}
+
+/** Somebody's own row on a board, with the rank that goes beside it; null when they are not on it. */
+export async function standingOnBoard(
+	guildId: string,
+	board: MemberBoard,
+	userId: string,
+	view: BoardView = SERVER_TOTALS,
+): Promise<{ rank: number; entry: BoardEntry } | null> {
+	if (board === "levels") {
+		const standing = await getLevelStanding(guildId, userId);
+		return standing === null
+			? null
+			: { rank: standing.rank, entry: { userId, primary: standing.level, secondary: standing.xp } };
+	}
+
+	const standing =
+		view.scope === "global"
+			? await getGlobalStanding(view.guildIds, userId, view.sort)
+			: await getEconomyStanding(guildId, userId, view.sort);
+	return standing === null ? null : { rank: standing.rank, entry: moneyEntry(standing, view.sort) };
 }
 
 /**

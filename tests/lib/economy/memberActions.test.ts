@@ -3,12 +3,14 @@ import {
 	countAccounts,
 	countGlobalAccounts,
 	getEconomyRank,
+	getEconomyStanding,
 	getGlobalLeaderboard,
 	getGlobalRank,
+	getGlobalStanding,
 	getLeaderboard,
 } from "@database/repositories/economyRepository";
-import { countRanked, getLevelLeaderboard, getRank } from "@database/repositories/levelRepository";
-import { boardEntries, decorateRows, readBoard } from "@lib/economy/memberActions.util";
+import { countRanked, getLevelLeaderboard, getLevelStanding, getRank } from "@database/repositories/levelRepository";
+import { boardEntries, decorateRows, readBoard, standingOnBoard } from "@lib/economy/memberActions.util";
 
 jest.mock("@database/repositories/economyRepository", () => ({
 	getLeaderboard: jest.fn(() => Promise.resolve([])),
@@ -17,11 +19,14 @@ jest.mock("@database/repositories/economyRepository", () => ({
 	getGlobalLeaderboard: jest.fn(() => Promise.resolve([])),
 	countGlobalAccounts: jest.fn(() => Promise.resolve(0)),
 	getGlobalRank: jest.fn(() => Promise.resolve(null)),
+	getEconomyStanding: jest.fn(() => Promise.resolve(null)),
+	getGlobalStanding: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelLeaderboard: jest.fn(() => Promise.resolve([])),
 	countRanked: jest.fn(() => Promise.resolve(0)),
 	getRank: jest.fn(() => Promise.resolve(null)),
+	getLevelStanding: jest.fn(() => Promise.resolve(null)),
 }));
 
 const GUILD = "900000000000000001";
@@ -246,5 +251,41 @@ describe("the money board's sort and scope", () => {
 		const [gone] = await decorateRows(guild(), [{ userId: "7", primary: 1, secondary: 0 }], 1, "server");
 
 		expect(gone?.displayName).toBe("Left the server");
+	});
+});
+
+describe("standingOnBoard", () => {
+	const money = { userId: VIEWER, wallet: 70, bank: 30, total: 100, rank: 27 };
+
+	it("reads the reader's own balances in this server, ranked by the board's sort", async () => {
+		jest.mocked(getEconomyStanding).mockResolvedValueOnce(money);
+
+		const standing = await standingOnBoard(GUILD, "economy", VIEWER, { sort: "wallet", scope: "server", guildIds: [] });
+
+		expect(standing).toEqual({ rank: 27, entry: { userId: VIEWER, primary: 70, secondary: 30 } });
+		expect(getEconomyStanding).toHaveBeenCalledWith(GUILD, VIEWER, "wallet");
+	});
+
+	it("adds up every server on the bot-wide board", async () => {
+		jest.mocked(getGlobalStanding).mockResolvedValueOnce(money);
+
+		const standing = await standingOnBoard(GUILD, "economy", VIEWER, {
+			sort: "bank",
+			scope: "global",
+			guildIds: [GUILD],
+		});
+
+		expect(standing?.entry).toEqual({ userId: VIEWER, primary: 30, secondary: 70 });
+		expect(getGlobalStanding).toHaveBeenCalledWith([GUILD], VIEWER, "bank");
+	});
+
+	it("reads a level and its XP on the levels board, and nothing for somebody with none", async () => {
+		jest.mocked(getLevelStanding).mockResolvedValueOnce({ level: 12, xp: 4_800, rank: 3 });
+
+		expect(await standingOnBoard(GUILD, "levels", VIEWER)).toEqual({
+			rank: 3,
+			entry: { userId: VIEWER, primary: 12, secondary: 4_800 },
+		});
+		expect(await standingOnBoard(GUILD, "levels", VIEWER)).toBeNull();
 	});
 });

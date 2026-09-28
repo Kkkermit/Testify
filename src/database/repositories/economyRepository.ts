@@ -167,18 +167,27 @@ export async function getEconomyRank(
 	userId: string,
 	field: LeaderboardField = "total",
 ): Promise<number | null> {
+	return (await getEconomyStanding(guildId, userId, field))?.rank ?? null;
+}
+
+/** Somebody's balances in one server and where they rank there, or null without an account. */
+export async function getEconomyStanding(
+	guildId: string,
+	userId: string,
+	field: LeaderboardField = "total",
+): Promise<(MoneyStanding & { rank: number }) | null> {
 	const account = await findAccount(guildId, userId);
 	if (!account) return null;
 
-	const value = field === "total" ? account.wallet + account.bank : account[field];
+	const standing = { userId, wallet: account.wallet, bank: account.bank, total: account.wallet + account.bank };
 	const [result] = await Economy.aggregate<{ ahead: number }>([
 		{ $match: { guildId } },
 		{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
-		{ $match: { [field]: { $gt: value } } },
+		{ $match: { [field]: { $gt: standing[field] } } },
 		{ $count: "ahead" },
 	]).exec();
 
-	return (result?.ahead ?? 0) + 1;
+	return { ...standing, rank: (result?.ahead ?? 0) + 1 };
 }
 
 /** One person's money across several servers, added together. */
@@ -225,7 +234,16 @@ export async function getGlobalRank(
 	userId: string,
 	field: LeaderboardField = "total",
 ): Promise<number | null> {
-	const [mine] = await Economy.aggregate<MoneyStanding>([
+	return (await getGlobalStanding(guildIds, userId, field))?.rank ?? null;
+}
+
+/** Somebody's balances added up across `guildIds` and where that ranks, or null with no account in any of them. */
+export async function getGlobalStanding(
+	guildIds: readonly string[],
+	userId: string,
+	field: LeaderboardField = "total",
+): Promise<(MoneyStanding & { rank: number }) | null> {
+	const [mine] = await Economy.aggregate<{ wallet: number; bank: number; total: number }>([
 		{ $match: { guildId: { $in: [...guildIds] }, userId } },
 		{ $group: { _id: "$userId", wallet: { $sum: "$wallet" }, bank: { $sum: "$bank" } } },
 		{ $addFields: { total: { $add: ["$wallet", "$bank"] } } },
@@ -238,7 +256,7 @@ export async function getGlobalRank(
 		{ $count: "ahead" },
 	]).exec();
 
-	return (result?.ahead ?? 0) + 1;
+	return { userId, wallet: mine.wallet, bank: mine.bank, total: mine.total, rank: (result?.ahead ?? 0) + 1 };
 }
 
 export async function getGuildTotals(

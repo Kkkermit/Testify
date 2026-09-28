@@ -1,5 +1,6 @@
 import {
 	type Attachment,
+	type EmbedBuilder,
 	type Guild,
 	type GuildBasedChannel,
 	type GuildMember,
@@ -10,6 +11,7 @@ import {
 	type TextBasedChannel,
 	type User,
 } from "discord.js";
+import { type TestifyClient } from "@core/client";
 import {
 	type Command,
 	type CommandInput,
@@ -18,6 +20,7 @@ import {
 	subcommandsOf,
 } from "@core/command";
 import { UserFacingError } from "@core/errors";
+import { replyTemporarily } from "@lib/discord/tidyReply.util";
 
 /** Lets `t?ban @someone spamming` run the exact same code as `/ban`. */
 
@@ -302,6 +305,10 @@ export class PrefixInteraction implements CommandInput {
 	/** A follow-up is a second message, so it never edits the first. */
 	async followUp(options: InteractionReplyOptions | string): Promise<Message> {
 		return this.message.reply(withoutInteractionFlags(options));
+	}
+
+	async replyBriefly(embed: EmbedBuilder): Promise<void> {
+		await replyTemporarily(this.message.client as TestifyClient, this.message, embed);
 	}
 
 	fetchReply(): Promise<Message> {

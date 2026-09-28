@@ -8,8 +8,10 @@ import {
 	findAccount,
 	countGlobalAccounts,
 	getEconomyRank,
+	getEconomyStanding,
 	getGlobalLeaderboard,
 	getGlobalRank,
+	getGlobalStanding,
 	getLeaderboard,
 	getOrCreateAccount,
 	resetGuild,
@@ -126,6 +128,25 @@ describeWithMongo("economyRepository", () => {
 
 		it("has no rank for somebody with no account in those servers", async () => {
 			expect(await getGlobalRank([GUILD, OTHER], CAROL, "total")).toBeNull();
+			expect(await getGlobalStanding([GUILD, OTHER], CAROL, "total")).toBeNull();
+		});
+
+		/** The reader's own row under the top ten shows these figures, so they must be the added-up ones. */
+		it("gives somebody's added-up balances beside their rank", async () => {
+			expect(await getGlobalStanding([GUILD, OTHER], ALICE, "total")).toEqual({
+				userId: ALICE,
+				wallet: 800 + ECONOMY.startingWallet * 2,
+				bank: 0,
+				total: 800 + ECONOMY.startingWallet * 2,
+				rank: 1,
+			});
+		});
+
+		it("gives somebody's balances in one server beside their rank there", async () => {
+			const standing = await getEconomyStanding(GUILD, ALICE, "wallet");
+
+			expect(standing).toMatchObject({ wallet: 400 + ECONOMY.startingWallet, rank: 2 });
+			expect(await getEconomyStanding(GUILD, CAROL, "wallet")).toBeNull();
 		});
 
 		it("ranks within one server by wallet too", async () => {

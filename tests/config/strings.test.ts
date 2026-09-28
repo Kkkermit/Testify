@@ -17,6 +17,8 @@ const ARGUMENTS: Record<string, unknown[]> = {
 	"generic.blacklisted": ["spamming"],
 	"generic.cooldown": ["3 seconds"],
 	"generic.externalApi": ["TMDB"],
+	"generic.failure": ["`/leaderboard`", "K7Q2XD"],
+	"generic.serviceDown": ["TMDB"],
 	"permissions.userMissing": [["BanMembers", "KickMembers"]],
 	"permissions.botMissing": [["ManageRoles"]],
 	"economy.targetNoAccount": ["alice"],

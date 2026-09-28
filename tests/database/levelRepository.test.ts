@@ -4,6 +4,7 @@ import {
 	addXp,
 	awardXp,
 	getLevelLeaderboard,
+	getLevelStanding,
 	getRank,
 	getUserLevel,
 	levelFromXp,
@@ -52,6 +53,8 @@ describeWithMongo("levelRepository", () => {
 		const [top] = await getLevelLeaderboard(GUILD, 10);
 		expect(top?.userId).toBe(BOB);
 		expect(await getRank(GUILD, BOB)).toBe(1);
+		expect(await getLevelStanding(GUILD, ALICE)).toMatchObject({ level: 1, rank: 2 });
+		expect(await getLevelStanding(GUILD, "444444444444444444")).toBeNull();
 	});
 
 	it("resets a server's levels", async () => {

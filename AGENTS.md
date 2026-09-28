@@ -261,6 +261,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                     |
 | Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`) |
 | Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it        |
+| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback    |
 | Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database          |
 | Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                          |
 | Format a number, duration, time            | `src/lib/format/format.util.ts`                                          |
@@ -798,6 +799,19 @@ if (!account) throw new UserFacingError("You do not have an account yet. Use `/e
   4096-character description limit.
 - **Never swallow an error into a `.catch()` that only logs** and then continue on a possibly-undefined value.
 
+**Every error reaches only the person who ran the command.** `tell` in `src/core/errors.ts` is the one way a
+failure is answered, and it picks the private route for whatever has already happened: an ephemeral reply, an edit
+of a deferral that was already ephemeral, or — when a public "thinking…" is showing — deleting it and following up
+ephemerally, because editing it put the error in front of the channel. A button's deferred update is left alone
+and followed up privately, since editing it would replace the message the button sits on. `ephemeral` is null
+until a reply is deferred and stays null after `deferUpdate`, which is how the three are told apart — read out of
+discord.js's `InteractionResponses.js`, not assumed. A prefix command has no private reply at all, so its errors and
+refusals use `replyBriefly`, a reply that deletes itself.
+
+**An unexpected failure tells the reader it was not their doing and gives them a reference.** `errorReference()`
+is six characters, written into the log line and the error channel post beside the stack, and shown to the reader
+with a pointer to `/bug-report` — so a report can be matched to the failure it describes.
+
 ### The process stays up
 
 **Nothing after startup may end the process.** A bot serving many servers must not go dark because one handler
@@ -1274,18 +1288,23 @@ conventions test fails on either, and both halves were proved to go red.
 
 ### One leaderboard command, and no command that only forwards to another
 
-`/leaderboard` serves both the economy and the levelling board as `economy` and `levels` subcommands. **It has no
-buttons, and that is deliberate:** re-rendering an image board in place stacked the old picture under the new one,
-so each request is its own message and the line under it says where the reader sits and what to type for the next
-page. There is deliberately no `/levelling leaderboard` — a second name for the same screen is the overlap this pass
-removed, not a convenience.
+`/leaderboard` serves both the economy and the levelling board as `economy` and `levels` subcommands. There is
+deliberately no `/levelling leaderboard` — a second name for the same screen is the overlap this pass removed, not a
+convenience.
 
-**The money board takes a `sort` and a `scope`.** `sort` ranks by total, wallet or bank; `scope: global` adds each
-person's balances together across every server the bot is in **now**, which the caller passes from
-`client.guilds.cache` rather than the request naming any. `getGlobalLeaderboard` is one aggregation, and a server the
-bot has left stops counting on the next request with nothing to clean up. Somebody on that board who is not in this
-server is named through `client.users.fetch`, and on the dashboard has no member link and no "Left" badge — they
-never were here. The next-page hint repeats the sort and scope, or following it lands on a different board.
+**Each board is the top ten and nothing else — there are no pages.** The reader's own row is drawn under the ten
+when they are further down (`standingOnBoard`, which reads their figures and their rank in one query), and a note
+takes its place when they are not ranked at all — except on an empty board, which already says so. The picture's
+alt text carries the same facts, since that is all a screen reader gets.
+
+**The money board has buttons; the levels board does not.** One row switches this server and every server, one
+switches total, wallet and bank, and each button carries the whole board it leads to plus the owner's id, so
+`buttons/leaderboard.ts` needs no state and only the person who asked can press them. The board showing is the
+disabled one. **The edit passes `attachments: []` beside the new file** — without it Discord keeps the old picture
+and stacks the new one under it, which is why an earlier version had no buttons at all. Every server means every
+server the bot is in **now**, passed from `client.guilds.cache` and never named by a request, so a server the bot has
+left stops counting with nothing to clean up. Somebody on that board who is not in this server is named through
+`client.users.fetch`, and on the dashboard has no member link and no "Left" badge — they never were here.
 
 The same reasoning deleted `/use` (the inventory panel's per-row Use buttons do it better), `/rehome` (now
 `/pet rehome`, with `t?rehome` kept as a prefix alias) and `/pet buy` (the shop sells pets with a button; `/pet
@@ -1402,6 +1421,12 @@ wallet. The dashboard's `/guilds/:id/casino` screen writes through the same `app
 type — a win congratulates by the profit, a loss names what it cost — and `container({ accent })` turns the stripe
 green, red, or yellow for a bet that came back even. Only a settled message is coloured; a spin or a live hand keeps
 the casino's own colour, because nothing has been decided yet.
+
+**Card text goes through `drawText` in `src/lib/canvas/text.util.ts`, never `fillText` with a family name.** Skia
+resolves a family through the host, which gave one host a serif board, and it never falls back per character, so a
+single character the font lacked — the `ツ` in a name — became a box. The helper draws in Inter and Space Grotesk from
+`assets/fonts` (OFL, licences beside them) and hands any character they lack to an installed font that has it,
+emoji fonts first for pictographs and flags; a missing glyph is recognised by measuring exactly like U+FFFF.
 
 **Everything is drawn, nothing is a glyph.** The container ships only DejaVu Sans, which has no card suits worth
 using and no star, so suits, slot symbols and the pips are paths. A `★` in a title rendered as a missing-glyph box
