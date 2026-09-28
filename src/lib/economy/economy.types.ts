@@ -40,6 +40,8 @@ export interface ShopState {
 	selectedId?: string;
 	/** Which page of the catalogue. */
 	page?: number;
+	/** Opened from the balance panel, which the catalogue then offers a way back to. */
+	from?: "balance";
 }
 
 export interface Balances {
@@ -52,3 +54,9 @@ export interface Balances {
 	job: string;
 	hasPet: boolean;
 }
+
+/** Moving money into the bank, or out of it. */
+export type MoneyAction = "dep" | "wit";
+
+/** A chooser opened from the balance panel goes back to it; one opened by `/deposit` has nowhere to go back to. */
+export type MoneyOrigin = "command" | "balance";

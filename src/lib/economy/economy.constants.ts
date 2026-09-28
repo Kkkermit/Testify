@@ -2,6 +2,8 @@
 
 export const BALANCE_PANEL_ID = "balance";
 
+export const MONEY_PANEL_ID = "money";
+
 export const INVENTORY_PANEL_ID = "inv";
 
 export const BOARD_KINDS = ["economy", "levels"] as const;

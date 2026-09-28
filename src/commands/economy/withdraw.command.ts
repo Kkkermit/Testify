@@ -1,9 +1,9 @@
-import { amountPanel } from "@buttons/money";
 import { strings } from "@config/strings";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { requireAccount, withdraw } from "@database/repositories/economyRepository";
 import { reply, successEmbed } from "@lib/discord";
+import { amountPanel } from "@lib/economy";
 import { formatNumber, resolveAmount } from "@lib/format";
 
 export default defineCommand({

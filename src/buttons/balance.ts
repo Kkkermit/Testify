@@ -1,8 +1,15 @@
-import { amountPanel, MONEY_PANEL_ID } from "@buttons/money";
 import { balancesOf } from "@buttons/shop";
 import { defineButton } from "@core/button";
 import { requireAccount } from "@database/repositories/economyRepository";
-import { BALANCE_PANEL_ID, balancePanel, claimDaily, dailyReady, inventoryScreen, shopScreen } from "@lib/economy";
+import {
+	amountPanel,
+	BALANCE_PANEL_ID,
+	balancePanel,
+	claimDaily,
+	dailyReady,
+	inventoryScreen,
+	shopScreen,
+} from "@lib/economy";
 
 /** The quick actions on the balance panel. */
 export default defineButton({
@@ -50,7 +57,7 @@ export default defineButton({
 			}
 
 			case "shop":
-				await interaction.update(shopScreen({ section: "items" }, balancesOf(account), userId));
+				await interaction.update(shopScreen({ section: "items", from: "balance" }, balancesOf(account), userId));
 				return;
 
 			case "inv":
@@ -61,18 +68,14 @@ export default defineButton({
 				await interaction.update(balancePanel(view(), userId));
 				return;
 
-			// Hands off to the quick-amount chooser, which already validates the figure.
+			// Hands off to the quick-amount chooser, which already validates the figure and comes back here.
 			case "dep":
-			case "wit": {
-				const panel = amountPanel(context.action === "dep" ? "dep" : "wit", account, userId);
-				await interaction.update({ embeds: panel.embeds, components: panel.components });
+			case "wit":
+				await interaction.update(amountPanel(context.action, account, userId, "balance"));
 				return;
-			}
 
 			default:
 				return;
 		}
 	},
 });
-
-export { MONEY_PANEL_ID };

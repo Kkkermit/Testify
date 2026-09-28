@@ -286,6 +286,7 @@ Each is a pure state→message function paired with a handler in `src/buttons/`.
 | `auditPanel.util.ts`          | `buttons/auditLog.ts`       | Draft edits in a bit-packed custom ID, then Save           |
 | `levelPanel.util.ts`          | `buttons/levelling.ts`      | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
 | `balancePanel.util.ts`        | `buttons/balance.ts`        | Hub panel, read-only mode for other users                  |
+| `moneyPanel.util.ts`          | `buttons/money.ts`          | A step that returns to the panel it was opened from        |
 | `inventoryScreen.util.ts`     | `buttons/inventory.ts`      | Per-row action button, paging in the custom ID             |
 | `settingsPanel.util.ts`       | —                           | Generic settings rows + pre-filled modal editors           |
 | `musicPanel.util.ts`          | `buttons/music.ts`          | Live state: re-reads the session on every press            |
@@ -308,9 +309,9 @@ still renders when Discord's CDN is unreachable.
   Use this when each control is independent, which is most config: there is nothing to batch, and a Save button
   would just be a step between the admin and the thing they already decided.
 
-Two exceptions worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler
-file rather than a separate renderer (it composes `settingsPanel.util.ts` instead), and `buttons/money.ts` still
-returns an embed-based `RenderedScreen`. Both are fine; new panels should prefer the split.
+One exception worth knowing: `buttons/treasure.ts` keeps its `treasurePanel` and `settingsOf` in the handler file
+rather than a separate renderer (it composes `settingsPanel.util.ts` instead). It is fine; new panels should prefer
+the split.
 
 ---
 
@@ -638,6 +639,12 @@ lists both work this way.
 `containerMessage()` handles both, so a caller cannot send a half-converted payload. The practical consequence:
 **you cannot attach a loose action row next to a container.** A confirm step has to be rendered _inside_ the
 container — see `sellConfirmScreen` in `shopScreen.util.ts`.
+
+**A button can only turn a message into the same kind:** once a message is V2 it cannot be edited back into
+embeds, so every screen a V2 panel leads to has to be V2 too. Deposit on `/balance` swapped in an embed chooser and Discord refused the whole update;
+`balanceButtons.test.ts` now presses every button on that panel and fails on an update that is not V2. Where a step
+is opened from a hub, it carries that in its custom ID and offers a way back — the shop's `from: "balance"` and the
+money chooser's `-bal` action both lead to the balance panel's own `refresh`.
 
 Gotchas found the hard way:
 

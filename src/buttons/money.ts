@@ -1,50 +1,22 @@
+import { MessageFlags } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { deposit, withdraw } from "@database/repositories/economyRepository";
-import { embed, modalForm, quickAmountRow, type RenderedScreen, successEmbed } from "@lib/discord";
+import { deposit, requireAccount, withdraw } from "@database/repositories/economyRepository";
+import { modalForm } from "@lib/discord";
+import {
+	balancePanel,
+	dailyReady,
+	MONEY_PANEL_ID,
+	type MoneyAction,
+	moneyAction,
+	moneyTitle,
+	movedNote,
+	movedPanel,
+	parseMoneyAction,
+} from "@lib/economy";
 import { formatNumber } from "@lib/format";
 
 /** Quick-amount buttons for moving money between wallet and bank. */
-
-export const MONEY_PANEL_ID = "money";
-
-export type MoneyAction = "dep" | "wit";
-
-const LABELS: Record<MoneyAction, { title: string; source: string }> = {
-	dep: { title: "Deposit", source: "wallet" },
-	wit: { title: "Withdraw", source: "bank" },
-};
-
-/** The chooser shown when no amount was given. */
-export function amountPanel(
-	action: MoneyAction,
-	balances: { wallet: number; bank: number },
-	ownerId: string,
-): RenderedScreen {
-	const available = action === "dep" ? balances.wallet : balances.bank;
-
-	return {
-		embeds: [
-			embed({
-				category: "economy",
-				title: `${LABELS[action].title}`,
-				description:
-					available > 0
-						? `How much would you like to move from your ${LABELS[action].source}?`
-						: `You have nothing in your ${LABELS[action].source} to move.`,
-				fields: [
-					{ name: "Wallet", value: formatNumber(balances.wallet), inline: true },
-					{ name: "Bank", value: formatNumber(balances.bank), inline: true },
-				],
-			}),
-		],
-		components: [quickAmountRow(MONEY_PANEL_ID, action, available, ownerId, formatNumber)],
-	};
-}
-
-function isMoneyAction(value: string): value is MoneyAction {
-	return value === "dep" || value === "wit";
-}
 
 async function move(
 	action: MoneyAction,
@@ -55,7 +27,11 @@ async function move(
 	if (amount <= 0) throw new UserFacingError("That works out to nothing.");
 
 	const updated = action === "dep" ? await deposit(guildId, userId, amount) : await withdraw(guildId, userId, amount);
-	if (!updated) throw new UserFacingError(`You do not have ${formatNumber(amount)} in your ${LABELS[action].source}.`);
+	if (!updated) {
+		throw new UserFacingError(
+			`You do not have ${formatNumber(amount)} in your ${action === "dep" ? "wallet" : "bank"}.`,
+		);
+	}
 
 	return updated;
 }
@@ -69,16 +45,16 @@ export default defineButton({
 		const guildId = interaction.guild.id;
 		const userId = interaction.user.id;
 
-		// `dep-custom` and `wit-custom` open the modal; `dep` and `wit` carry an amount.
-		const [base] = context.action.split("-");
-		if (base === undefined || !isMoneyAction(base)) return;
+		const parsed = parseMoneyAction(context.action);
+		if (parsed === null) return;
+		const { action, origin } = parsed;
 
-		if (interaction.isButton() && context.action.endsWith("-custom")) {
+		if (interaction.isButton() && parsed.step === "custom") {
 			await interaction.showModal(
 				modalForm({
 					id: MONEY_PANEL_ID,
-					action: `${base}-save`,
-					title: `${LABELS[base].title} an amount`,
+					action: `${moneyAction(action, origin)}-save`,
+					title: `${moneyTitle(action)} an amount`,
 					fields: [{ id: "amount", label: "How much?", placeholder: "e.g. 250" }],
 				}),
 			);
@@ -97,18 +73,35 @@ export default defineButton({
 			throw new UserFacingError("Enter a positive whole number.");
 		}
 
-		const updated = await move(base, guildId, userId, amount);
-		const done = successEmbed(
-			`${LABELS[base].title === "Deposit" ? "Deposited" : "Withdrew"} **${formatNumber(amount)}**.\n` +
-				`Wallet: **${formatNumber(updated.wallet)}** • Bank: **${formatNumber(updated.bank)}**`,
-		);
+		const updated = await move(action, guildId, userId, amount);
 
-		// Mutates the panel rather than posting another message under it.
 		if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
-			await interaction.reply({ embeds: [done], flags: 64 });
+			await interaction.reply({
+				...movedPanel(action, amount, updated),
+				flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
+			});
 			return;
 		}
 
-		await interaction.update({ embeds: [done], components: [] });
+		if (origin === "balance") {
+			const account = await requireAccount(guildId, userId);
+			await interaction.update(
+				balancePanel(
+					{
+						wallet: account.wallet,
+						bank: account.bank,
+						username: interaction.user.username,
+						avatarUrl: interaction.user.displayAvatarURL(),
+						own: true,
+						dailyReady: dailyReady(account.lastDaily),
+						note: movedNote(action, amount),
+					},
+					userId,
+				),
+			);
+			return;
+		}
+
+		await interaction.update(movedPanel(action, amount, updated));
 	},
 });

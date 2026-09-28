@@ -191,13 +191,17 @@ export default defineButton({
 			const entry = findEntry({ section: "houses" }, balances, state.selectedId ?? "");
 			if (!entry) throw new UserFacingError("That is not something you own.");
 
-			await interaction.update(sellConfirmScreen(entry, balances, userId));
+			await interaction.update(sellConfirmScreen(entry, balances, userId, state));
 			return;
 		}
 
 		if (context.action === "sell-no") {
 			await interaction.update(
-				shopScreen({ section: "houses" }, balancesOf(await requireAccount(guildId, userId)), userId),
+				shopScreen(
+					{ section: "houses", ...(state.from ? { from: state.from } : {}) },
+					balancesOf(await requireAccount(guildId, userId)),
+					userId,
+				),
 			);
 			return;
 		}
@@ -215,7 +219,7 @@ export default defineButton({
 			const updated = await requireAccount(guildId, userId);
 			await interaction.update(
 				shopScreen(
-					{ section: "houses" },
+					{ section: "houses", ...(state.from ? { from: state.from } : {}) },
 					balancesOf(updated),
 					userId,
 					`Sold **${name}** for **${formatNumber(refund)}**.`,
@@ -235,6 +239,13 @@ export default defineButton({
 		const message = await purchase(state, guildId, userId, account);
 		const updated = await requireAccount(guildId, userId);
 
-		await interaction.update(shopScreen({ section: state.section }, balancesOf(updated), userId, message));
+		await interaction.update(
+			shopScreen(
+				{ section: state.section, ...(state.from ? { from: state.from } : {}) },
+				balancesOf(updated),
+				userId,
+				message,
+			),
+		);
 	},
 });

@@ -1,6 +1,6 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { SHOP_ID, SHOP_SECTIONS } from "@lib/economy/economy.constants";
+import { BALANCE_PANEL_ID, SHOP_ID, SHOP_SECTIONS } from "@lib/economy/economy.constants";
 import { type Balances, type ShopState } from "@lib/economy/economy.types";
 import { ALL_PETS } from "@lib/economy/pets.util";
 import { HOUSES, JOBS, SHOP_ITEMS } from "@lib/economy/shop.util";
@@ -10,6 +10,7 @@ import {
 	entriesFor,
 	isPetRarity,
 	isShopSection,
+	sellConfirmScreen,
 	SHOP_PAGE_SIZE,
 	shopScreen,
 } from "@lib/economy/shopScreen.util";
@@ -280,5 +281,63 @@ describe("custom ID uniqueness", () => {
 	it("has no duplicate IDs when a house is owned", () => {
 		const owner: Balances = { ...RICH, ownsHouse: true, houseId: HOUSES[0]!.id };
 		expect(duplicateIds(shopScreen({ section: "houses" }, owner, OWNER))).toEqual([]);
+	});
+});
+
+describe("a shop opened from the balance panel", () => {
+	const fromBalance: ShopState = { section: "items", from: "balance" };
+	const backId = `${BALANCE_PANEL_ID}:refresh:${OWNER}`;
+
+	it("round-trips where it was opened from", () => {
+		const state: ShopState = { section: "pets", rarity: "rare", page: 2, from: "balance" };
+		expect(decodeShopState(parseCustomId(encodeShopState("page", state, OWNER)).args)).toEqual(state);
+	});
+
+	it("offers a way back to the balance panel, and only when it came from there", () => {
+		expect(idsOf(shopScreen(fromBalance, RICH, OWNER))).toContain(backId);
+		expect(idsOf(shopScreen({ section: "items" }, RICH, OWNER))).not.toContain(backId);
+	});
+
+	/** Every tab, page, rarity and Back press re-renders the shop, so each has to carry the way back with it. */
+	it("keeps the way back through every button the shop draws", () => {
+		for (const section of SHOP_SECTIONS) {
+			const screen = shopScreen({ section, from: "balance" }, RICH, OWNER);
+			const shopIds = idsOf(screen).filter((id) => parseCustomId(id).id === SHOP_ID);
+
+			expect(shopIds.length).toBeGreaterThan(0);
+			for (const id of shopIds) expect(decodeShopState(parseCustomId(id).args).from).toBe("balance");
+		}
+
+		const detail = shopScreen({ ...fromBalance, selectedId: SHOP_ITEMS[0]!.id }, BROKE, OWNER);
+		for (const id of idsOf(detail)) expect(decodeShopState(parseCustomId(id).args).from).toBe("balance");
+	});
+
+	it("keeps it through selling a house, whichever way the question is answered", () => {
+		const entry = { id: HOUSES[0]!.id, name: "Hut", emoji: "🛖", price: 100, refund: 50, description: "" };
+		const confirm = sellConfirmScreen(entry, RICH, OWNER, { section: "houses", from: "balance" });
+
+		for (const id of idsOf(confirm))
+			expect(decodeShopState(parseCustomId(id).args)).toEqual({
+				section: "houses",
+				from: "balance",
+			});
+	});
+
+	/** Discord caps a Components V2 message at 40 components, and the pets tab is the fullest screen. */
+	it("still fits Discord's component limit with the extra button", () => {
+		const pets = shopScreen({ section: "pets", from: "balance" }, RICH, OWNER);
+		let count = 0;
+		const walk = (node: unknown): void => {
+			if (node === null || typeof node !== "object") return;
+			const record = node as Record<string, unknown>;
+			if (typeof record.type === "number") count += 1;
+			for (const value of Object.values(record)) {
+				if (Array.isArray(value)) value.forEach(walk);
+				else if (value !== null && typeof value === "object") walk(value);
+			}
+		};
+		pets.components.forEach((component) => walk(component.toJSON()));
+
+		expect(count).toBeLessThanOrEqual(40);
 	});
 });
