@@ -1,9 +1,27 @@
 import { isValidObjectId } from "mongoose";
-import { type RouletteBetRecord, RouletteRound, type RouletteRoundRecord } from "@database/models/rouletteRound.schema";
+import {
+	type RouletteBetRecord,
+	RouletteRound,
+	type RouletteRoundRecord,
+	type RouletteSeat,
+} from "@database/models/rouletteRound.schema";
 
 /** Shared roulette rounds: every change is one conditional update, so presses from many players cannot race. */
 
 export type RoundRecord = RouletteRoundRecord;
+
+/** A player who picked a chip before betting is stored with no bets list at all. */
+type StoredRound = Omit<RouletteRoundRecord, "players"> & {
+	players: Record<string, Omit<RouletteSeat, "bets"> & { bets?: RouletteBetRecord[] }>;
+};
+
+function normalised(round: StoredRound | null): RoundRecord | null {
+	if (round === null) return null;
+	const players = Object.fromEntries(
+		Object.entries(round.players).map(([userId, seat]) => [userId, { ...seat, bets: seat.bets ?? [] }]),
+	);
+	return { ...round, players };
+}
 
 function isDuplicateKey(error: unknown): boolean {
 	return typeof error === "object" && error !== null && "code" in error && error.code === 11000;
@@ -31,7 +49,7 @@ export async function attachRoundMessage(roundId: string, messageId: string): Pr
 
 export async function findRound(roundId: string): Promise<RoundRecord | null> {
 	if (!isValidObjectId(roundId)) return null;
-	return RouletteRound.findById(roundId).lean<RoundRecord>().exec();
+	return normalised(await RouletteRound.findById(roundId).lean<StoredRound>().exec());
 }
 
 /**
@@ -48,7 +66,7 @@ export async function addBets(
 	if (!isValidObjectId(roundId) || bets.length === 0 || bets.length > maxBets) return null;
 	const seat = `players.${player.userId}`;
 
-	return RouletteRound.findOneAndUpdate(
+	const round = await RouletteRound.findOneAndUpdate(
 		{
 			_id: roundId,
 			status: "betting",
@@ -62,8 +80,9 @@ export async function addBets(
 		},
 		{ new: true },
 	)
-		.lean<RoundRecord>()
+		.lean<StoredRound>()
 		.exec();
+	return normalised(round);
 }
 
 /** Starts the countdown if nobody has yet; true only for the call that started it, which is the one to set a timer. */
@@ -86,39 +105,42 @@ export async function setSeatChip(
 	if (!isValidObjectId(roundId)) return null;
 	const seat = `players.${player.userId}`;
 
-	return RouletteRound.findOneAndUpdate(
+	const round = await RouletteRound.findOneAndUpdate(
 		{ _id: roundId, status: "betting" },
 		{ $set: { [`${seat}.chip`]: chip, [`${seat}.name`]: player.name }, $min: { [`${seat}.joinedAt`]: now } },
 		{ new: true },
 	)
-		.lean<RoundRecord>()
+		.lean<StoredRound>()
 		.exec();
+	return normalised(round);
 }
 
 /** Takes a player's chips off an open table; the round as it was before tells the caller what to hand back. */
 export async function clearBets(roundId: string, userId: string): Promise<RoundRecord | null> {
 	if (!isValidObjectId(roundId)) return null;
 
-	return RouletteRound.findOneAndUpdate(
+	const round = await RouletteRound.findOneAndUpdate(
 		{ _id: roundId, status: "betting", [`players.${userId}.bets.0`]: { $exists: true } },
 		{ $set: { [`players.${userId}.bets`]: [] } },
 		{ new: false },
 	)
-		.lean<RoundRecord>()
+		.lean<StoredRound>()
 		.exec();
+	return normalised(round);
 }
 
 /** Closes the table on one pocket; whoever gets the round back is the one that pays. */
 export async function claimRound(roundId: string, pocket: number): Promise<RoundRecord | null> {
 	if (!isValidObjectId(roundId)) return null;
 
-	return RouletteRound.findOneAndUpdate(
+	const round = await RouletteRound.findOneAndUpdate(
 		{ _id: roundId, status: "betting" },
 		{ $set: { status: "spinning", pocket } },
 		{ new: true },
 	)
-		.lean<RoundRecord>()
+		.lean<StoredRound>()
 		.exec();
+	return normalised(round);
 }
 
 export async function finishRound(roundId: string): Promise<void> {
@@ -127,11 +149,12 @@ export async function finishRound(roundId: string): Promise<void> {
 
 /** Rounds still open well past their close, which a restart left without a timer. */
 export async function overdueRounds(before: Date, limit: number): Promise<RoundRecord[]> {
-	return RouletteRound.find({ status: "betting", closesAt: { $lte: before } })
+	const rounds = await RouletteRound.find({ status: "betting", closesAt: { $lte: before } })
 		.sort({ closesAt: 1 })
 		.limit(limit)
-		.lean<RoundRecord[]>()
+		.lean<StoredRound[]>()
 		.exec();
+	return rounds.flatMap((round) => normalised(round) ?? []);
 }
 
 export async function purgeRounds(guildId: string): Promise<void> {

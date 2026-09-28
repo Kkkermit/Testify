@@ -145,6 +145,17 @@ describeWithMongo("rouletteRepository", () => {
 		expect((await findRound(id))?.players[BOB.userId]?.chip).toBe(250);
 	});
 
+	/** Choosing a chip before betting seats a player with no bets list, which broke every button on the table. */
+	it("reads a player who picked a chip before betting as having no bets, and still takes their first", async () => {
+		const id = await opened();
+		await setSeatChip(id, BOB, 500, Date.now());
+
+		expect((await findRound(id))?.players[BOB.userId]?.bets).toEqual([]);
+		const placed = await addBets(id, BOB, [{ spot: "red", amount: 500 }], 10, Date.now());
+		expect(placed?.players[BOB.userId]?.bets).toEqual([{ spot: "red", amount: 500 }]);
+		expect(placed?.players[BOB.userId]?.chip).toBe(500);
+	});
+
 	it("finds rounds a restart left open past their close", async () => {
 		const late = await opened(-120_000);
 		await opened(20_000);
