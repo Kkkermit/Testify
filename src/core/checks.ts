@@ -6,6 +6,7 @@ import { type Command, type CommandInput, type Subcommand } from "@core/command"
 import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
+import { reportOwnerAttempt } from "@lib/bot/ownerAudit.util";
 import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND } from "@lib/casino/casino.constants";
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { formatDuration, humanisePermission } from "@lib/format/format.util";
@@ -17,6 +18,9 @@ import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared"
 export interface TitledRefusal {
 	title: string;
 	message: string;
+	fields?: { name: string; value: string }[];
+	/** A refusal is a notice by default; `error` is for one that is final. */
+	tone?: "notice" | "error";
 }
 
 /** Why a command was refused, or null if it may run. */
@@ -24,8 +28,13 @@ export type CheckFailure = string | TitledRefusal | null;
 
 /** The refusal as plain text, for a surface that cannot show a heading. */
 export function refusalText(refusal: string | TitledRefusal): string {
-	return typeof refusal === "string" ? refusal : `**${refusal.title}**\n${refusal.message}`;
+	if (typeof refusal === "string") return refusal;
+
+	const fields = (refusal.fields ?? []).map((field) => `**${field.name}:** ${field.value}`);
+	return [`**${refusal.title}**`, refusal.message, ...fields].join("\n");
 }
+
+export const OWNER_ONLY_REFUSAL = "This command is only for the bot owner. The attempt has been logged.";
 
 const cooldowns = new Map<string, number>();
 
@@ -35,10 +44,16 @@ export async function runChecks(
 	command: Command,
 	client: TestifyClient,
 ): Promise<CheckFailure> {
+	// First, so an attempt is recorded and refused whatever else would have stopped it.
+	if (command.ownerOnly === true && !client.isOwner(interaction.user.id)) {
+		await reportOwnerAttempt(client, interaction, command);
+		return OWNER_ONLY_REFUSAL;
+	}
+
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
-	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
+	if (blacklisted) return blacklistRefusal(blacklisted);
 
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId);
 	if (switchedOff !== null) return switchedOff;
@@ -48,10 +63,6 @@ export async function runChecks(
 
 	const casinoClosed = await checkCasino(interaction, command);
 	if (casinoClosed !== null) return casinoClosed;
-
-	if (command.ownerOnly && !client.isOwner(interaction.user.id)) {
-		return "This command is only for the bot owner.";
-	}
 
 	if (command.guildOnly && !interaction.guild) {
 		return "This command only works inside a server.";
@@ -83,6 +94,30 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
+/** Final, so it says what the block covers, why, since when, and who can lift it. */
+export function blacklistRefusal(entry: { reason: string; createdAt: Date }): TitledRefusal {
+	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
+
+	return {
+		title: `🚫 You are blocked from ${botName()}`,
+		message:
+			`The bot's owner has blocked your account, so you can no longer use ${botName()}. None of its commands, ` +
+			"buttons or menus will work for you, in this server or any other.",
+		fields: [
+			{ name: "Reason", value: entry.reason.trim() === "" ? "No reason was given." : entry.reason.slice(0, 1_000) },
+			{
+				name: "Blocked since",
+				value: Number.isFinite(since) ? `<t:${String(since)}:D> (<t:${String(since)}:R>)` : "Unknown",
+			},
+			{
+				name: "Think this is a mistake?",
+				value: "Only the bot's owner can lift a block. Server moderators and admins cannot.",
+			},
+		],
+		tone: "error",
+	};
+}
+
 function pausedRefusal(): string {
 	return `${botName()} is paused right now. The bot owner can resume it from the dashboard.`;
 }
@@ -98,7 +133,7 @@ export async function checkMusicControl(
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(who.userId);
-	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
+	if (blacklisted) return blacklistRefusal(blacklisted);
 
 	const switchedOff = await checkSwitchedOff("play", who.guildId);
 	if (switchedOff !== null) return switchedOff;
@@ -120,7 +155,7 @@ export async function checkCasinoPlay(
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(who.userId);
-	if (blacklisted) return `You are blocked from using this bot.\nReason: ${blacklisted.reason}`;
+	if (blacklisted) return blacklistRefusal(blacklisted);
 
 	const switchedOff = await checkSwitchedOff(CASINO_COMMAND, who.guildId);
 	if (switchedOff !== null) return switchedOff;

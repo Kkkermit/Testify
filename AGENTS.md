@@ -90,8 +90,8 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
 **Optional:** `NODE_ENV`, `LOG_LEVEL`,
-`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report
-and suggestion — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
+`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report,
+suggestion and eval — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
 `DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
 
@@ -346,7 +346,8 @@ rather than a wait. Do not write the old "up to an hour to propagate" line back 
 **Dispatch:**
 
 - Slash → `events/command/interactionCreate.event.ts` → `checks.ts` gates → `command.run(input, client)`
-- Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`
+- Prefix → `events/message/…` → `core/prefix.ts` resolves name or alias → **the same** `command.run`. The prefix matches in
+  any case, so `T?help` — what a phone's auto-capitalisation types — runs `t?help`
 - Components → the one `interactionCreate` listener → `client.buttons` registry keyed by the custom-ID prefix →
   `button.run(interaction, { client, action, args })`
 
@@ -800,11 +801,28 @@ joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
 `CHANNEL_SLASH_COMMAND_LOG` and `CHANNEL_PREFIX_COMMAND_LOG` log every command run, one per surface.
-`logCommandUse` queues a line in memory — the command, who ran it, where and whether it worked, **never what was
-typed**, since `/ask` promises its question is not kept — and `flushCommandLog` posts each queue every five seconds,
-at most five messages a flush because that is what Discord allows a channel, and once more at shutdown. A backlog
-past `COMMAND_LOG_LIMITS.maxWaiting` drops its oldest lines and says how many. The privacy notice names the
-command logs (`legal.commandsL6`).
+`logCommandUse` queues an entry in memory and `flushCommandLog` posts each queue every five seconds, an embed per
+run, within Discord's limits of five messages a flush, ten embeds a message and 6,000 characters across them, and
+once more at shutdown. A backlog past `COMMAND_LOG_LIMITS.maxWaiting` drops its oldest entries and says how many.
+
+**Every log post says who and where the same way**, through `logFields.util.ts`: the person's avatar, mention,
+username, id and account age, and the server and channel by name and id. The log channel usually sits in another
+server, where a mention renders as nobody, so the name is always written out beside it. A run's options are read by
+`givenOptions` in `src/core/command.ts` from the command's own declaration, on both surfaces, and appear in the
+command log and in an error post. **An option marked `unlogged: true` is named but its value never is** — `/ask`'s
+question, because the privacy notice promises it is not kept. The notice names both logs
+(`legal.commandsL3`, `legal.commandsL6`); change it with them. The error post carries the triage buttons
+(`triageRow`), which recolour it pending, solved or unsolved.
+
+**Owner-only commands refuse everybody else before anything else is asked, and say so.** `runChecks` tests
+`ownerOnly` first — ahead of the pause, the blacklist and the switches — so an attempt is always refused as that and
+always recorded: `reportOwnerAttempt` logs it at `warn` as `[OWNER_COMMAND]` with the options tried, and posts it to
+`CHANNEL_EVAL_LOG`, falling back to `CHANNEL_ERROR_LOG`, at most once a minute per person and command with a count of
+the tries held back. `/eval` checks `client.isOwner` again inside `run`, so nothing that reaches it by another road can
+run code, and every run it does make is logged as `[EVAL]` and posted with its full code — attached as a file when it
+is too long for the embed — the redacted output and the time taken. An owner-only command is registered with
+`default_member_permissions` of `0`, so only a server's administrators see it in the slash menu at all, and they are
+refused like anybody else. None of this is a bypassable layer: `DISCORD_OWNER_IDS` is the only thing that opens it.
 
 Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
 `"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is
@@ -1439,6 +1457,17 @@ it. Five things about it are load-bearing:
 - **The odds are real and tested.** Roulette is single-zero; blackjack pays 3 to 2 and stands on every 17; the slot
   machine's exact return is computed over every line it can show and pinned between 94% and 97%; hi-lo pays each
   call's odds less 3% and caps the pot. Change a paytable and `rules.test.ts` says what it did to the edge.
+
+**Roulette takes several bets at once, on a table drawn with the chips on it.** `/casino roulette` with no `bet`
+opens it, and Play again on any spin reopens it with the same chips. The layout is one bit per spot — 37 numbers and
+twelve outside bets — packed into ten base-36 characters by `encodeSpots`, so the whole table rides in every custom ID
+and nothing half-placed is stored. Three multi-select menus cover the outside bets, 0–18 and 19–36, each pre-ticked,
+so unticking takes a chip off, and each answer replaces only its own part of the table. Every spot carries the same
+chip; **no money moves until Spin**, which takes chip × spots through `takeStake` in one go, so the bet limits apply to
+the whole spin. `rouletteBoard` draws the layout the way a real table sits, and `chipSpot` keeps each chip inside
+its own spot, lifting the number above it — both pinned by tests. A settled spin shows the wheel and the table
+stacked, not side by side, so neither is shrunk to half the width. **Play again edits the message it sits on** for
+every game, rather than stacking a new one under the old.
 
 **The switch works like the music system's.** `casinosettings` stores `enabled`, the games switched off (so a game
 added later starts open) and the bet limits. `checks.ts` refuses every `/casino` subcommand while the casino is

@@ -1,6 +1,21 @@
-import { type EmbedBuilder } from "discord.js";
+import { type EmbedBuilder, embedLength } from "discord.js";
+import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
+import { chosenSubcommand, type Command, type CommandInput, type GivenOption, givenOptions } from "@core/command";
 import { postToLogChannel } from "@lib/bot/logChannel.util";
+import {
+	loggedChannelText,
+	loggedGuildText,
+	logAuthor,
+	type LoggedGuild,
+	loggedChannel,
+	loggedGuild,
+	type LoggedPlace,
+	type LoggedUser,
+	loggedUser,
+	loggedOptionsText,
+	loggedUserText,
+} from "@lib/bot/logFields.util";
 import { embed } from "@lib/discord/embeds.util";
 
 /** Every command run, gathered in memory and posted a batch at a time: slash and prefix each to their own channel. */
@@ -8,15 +23,31 @@ import { embed } from "@lib/discord/embeds.util";
 export type CommandSurface = "slash" | "prefix";
 
 export interface CommandLogEntry {
-	command: string;
-	subcommand: string | null;
 	surface: CommandSurface;
-	userId: string;
-	username: string;
-	guildName: string | null;
-	channelId: string | null;
+	/** With its subcommand, e.g. `music play`. */
+	name: string;
+	/** `/` for slash, the server's own prefix for prefix. */
+	prefix: string;
+	/** What was actually typed, when it differs from the name: an alias, or `T?` for `t?`. */
+	typed: string | null;
+	options: GivenOption[];
+	user: LoggedUser;
+	guild: LoggedGuild | null;
+	channel: LoggedPlace | null;
 	ok: boolean;
+	durationMs: number;
 	at: number;
+}
+
+/** What the dispatcher knows about a run that the input does not. */
+export interface CommandRun {
+	surface: CommandSurface;
+	ok: boolean;
+	durationMs: number;
+	/** A slash interaction can arrive from a channel the cache does not hold. */
+	channelId: string | null;
+	prefix?: string;
+	typed?: string;
 }
 
 export const COMMAND_LOG_LIMITS = {
@@ -24,9 +55,60 @@ export const COMMAND_LOG_LIMITS = {
 	maxWaiting: 1_000,
 	/** Discord allows five messages every five seconds in a channel, so one flush never sends more. */
 	messagesPerFlush: 5,
-	/** Under Discord's 4,096-character embed description. */
-	charactersPerMessage: 3_900,
+	/** Discord's caps on one message: ten embeds, and 6,000 characters across them. */
+	embedsPerMessage: 10,
+	charactersPerMessage: 6_000,
 } as const;
+
+export function commandLogEntry(
+	input: CommandInput,
+	command: Command,
+	run: CommandRun,
+	at = Date.now(),
+): CommandLogEntry {
+	const subcommand = chosenSubcommand(input, command);
+	const name = subcommand === null ? command.name : `${command.name} ${subcommand}`;
+	const prefix = run.surface === "slash" ? "/" : (run.prefix ?? "");
+
+	return {
+		surface: run.surface,
+		name,
+		prefix,
+		typed: run.typed !== undefined && run.typed !== `${prefix}${name}` ? run.typed : null,
+		options: givenOptions(input, command),
+		user: loggedUser(input.user),
+		guild: loggedGuild(input.guild),
+		channel: input.guild === null ? null : loggedChannel(input.channel, run.channelId),
+		ok: run.ok,
+		durationMs: run.durationMs,
+		at,
+	};
+}
+
+export function commandLogEmbed(entry: CommandLogEntry): EmbedBuilder {
+	const fields = [
+		{ name: "User", value: loggedUserText(entry.user), inline: true },
+		{ name: "Server", value: loggedGuildText(entry.guild), inline: true },
+		{ name: "Channel", value: loggedChannelText(entry.channel), inline: true },
+	];
+	if (entry.options.length > 0)
+		fields.push({ name: "Options", value: loggedOptionsText(entry.options), inline: false });
+	fields.push(
+		{ name: "Result", value: entry.ok ? "Worked" : "Failed · see the error log", inline: true },
+		{ name: "Took", value: `${String(Math.round(entry.durationMs))} ms`, inline: true },
+	);
+	if (entry.typed !== null) fields.push({ name: "Typed as", value: `\`${entry.typed}\``, inline: true });
+
+	return embed({
+		colour: entry.ok ? theme.colours.success : theme.colours.error,
+		author: logAuthor(entry.user),
+		title: `${entry.ok ? theme.emoji.success : theme.emoji.error} ${entry.prefix}${entry.name}`,
+		fields,
+		thumbnail: entry.user.avatarUrl,
+		footer: `${entry.surface === "slash" ? "Slash" : "Prefix"} command · ${entry.guild?.name ?? "Direct message"}`,
+		footerIcon: entry.guild?.iconUrl ?? undefined,
+	}).setTimestamp(entry.at);
+}
 
 export class CommandLog {
 	#waiting: CommandLogEntry[] = [];
@@ -44,30 +126,37 @@ export class CommandLog {
 		return this.#waiting.length;
 	}
 
-	/** Takes what fits in one flush; anything left waits for the next. */
-	take(): { lines: string[][]; dropped: number } {
-		const messages: string[][] = [];
-		let current: string[] = [];
+	/** Takes what fits in one flush, an embed per run; anything left waits for the next. */
+	take(): { batches: EmbedBuilder[][]; dropped: number } {
+		const batches: EmbedBuilder[][] = [];
+		let current: EmbedBuilder[] = [];
 		let length = 0;
+		let taken = 0;
 
 		for (const entry of this.#waiting) {
-			const line = commandLogLine(entry);
-			if (length + line.length + 1 > COMMAND_LOG_LIMITS.charactersPerMessage && current.length > 0) {
-				messages.push(current);
-				if (messages.length === COMMAND_LOG_LIMITS.messagesPerFlush) break;
+			const built = commandLogEmbed(entry);
+			const size = embedLength(built.toJSON());
+
+			if (
+				current.length === COMMAND_LOG_LIMITS.embedsPerMessage ||
+				(current.length > 0 && length + size > COMMAND_LOG_LIMITS.charactersPerMessage)
+			) {
+				batches.push(current);
 				current = [];
 				length = 0;
+				if (batches.length === COMMAND_LOG_LIMITS.messagesPerFlush) break;
 			}
-			current.push(line);
-			length += line.length + 1;
+			current.push(built);
+			length += size;
+			taken += 1;
 		}
-		if (current.length > 0 && messages.length < COMMAND_LOG_LIMITS.messagesPerFlush) messages.push(current);
+		if (current.length > 0) batches.push(current);
 
-		this.#waiting = this.#waiting.slice(messages.reduce((sum, lines) => sum + lines.length, 0));
+		this.#waiting = this.#waiting.slice(taken);
 		const dropped = this.#dropped;
 		this.#dropped = 0;
 
-		return { lines: messages, dropped };
+		return { batches, dropped };
 	}
 }
 
@@ -82,35 +171,13 @@ export function commandLogChannel(client: TestifyClient, surface: CommandSurface
 /** Notes a command run, when the operator has a log channel for its surface to post it to. */
 export function logCommandUse(
 	client: TestifyClient,
-	entry: Omit<CommandLogEntry, "at">,
+	input: CommandInput,
+	command: Command,
+	run: CommandRun,
 	logs: CommandLogs = commandLogs,
 ): void {
-	if (commandLogChannel(client, entry.surface) === undefined) return;
-	logs[entry.surface].record({ ...entry, at: Date.now() });
-}
-
-/** One command run as one line; what was typed into it is never included. */
-export function commandLogLine(entry: CommandLogEntry): string {
-	const name = entry.subcommand === null ? entry.command : `${entry.command} ${entry.subcommand}`;
-	const where =
-		entry.guildName === null
-			? "Direct message"
-			: `${entry.guildName}${entry.channelId !== null ? ` · <#${entry.channelId}>` : ""}`;
-
-	return (
-		`<t:${String(Math.floor(entry.at / 1_000))}:T> ${entry.ok ? "✅" : "❌"} ` +
-		`\`${entry.surface === "slash" ? "/" : "prefix "}${name}\` · ` +
-		`**${entry.username}** (\`${entry.userId}\`) · ${where}`
-	);
-}
-
-export function commandLogEmbed(surface: CommandSurface, lines: string[], dropped: number): EmbedBuilder {
-	const note = dropped > 0 ? `\n-# ${String(dropped)} more were dropped while the log was backed up.` : "";
-	return embed({
-		category: "developer",
-		title: surface === "slash" ? "Slash commands" : "Prefix commands",
-		description: `${lines.join("\n")}${note}`,
-	});
+	if (commandLogChannel(client, run.surface) === undefined) return;
+	logs[run.surface].record(commandLogEntry(input, command, run));
 }
 
 /** Posts what has gathered since the last flush; a failed post is dropped rather than retried into a backlog. */
@@ -120,10 +187,13 @@ export async function flushCommandLog(client: TestifyClient, logs: CommandLogs =
 		const log = logs[surface];
 		if (channelId === undefined || log.size === 0) continue;
 
-		const { lines, dropped } = log.take();
-		for (const [index, batch] of lines.entries()) {
+		const { batches, dropped } = log.take();
+		for (const [index, embeds] of batches.entries()) {
 			const landed = await postToLogChannel(client, channelId, {
-				embeds: [commandLogEmbed(surface, batch, index === 0 ? dropped : 0)],
+				...(index === 0 && dropped > 0
+					? { content: `-# ${String(dropped)} more were dropped while the log was backed up.` }
+					: {}),
+				embeds,
 				allowedMentions: { parse: [] },
 			});
 			if (!landed) break;

@@ -7,6 +7,7 @@ export * from "./gif.util";
 export * from "./musicCard.util";
 export * from "./playingCards.util";
 export * from "./rankCard.util";
+export * from "./rouletteTable.util";
 export * from "./rouletteWheel.util";
 export * from "./slotMachine.util";
 export * from "./text.util";

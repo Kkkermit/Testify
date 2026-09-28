@@ -2,6 +2,7 @@ import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, type CommandInput, type CommandOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { attachHandMessage } from "@database/repositories/casinoRepository";
+import { requireAccount } from "@database/repositories/economyRepository";
 import {
 	blackjackMessage,
 	CASINO_COMMAND,
@@ -17,12 +18,14 @@ import {
 	ROULETTE_BET_LABELS,
 	ROULETTE_BETS,
 	rouletteOutcome,
+	rouletteTableMessage,
 	type RouletteBet,
 	slotsOutcome,
 	startBlackjack,
 	startHiLoHand,
 } from "@lib/casino";
 import { reply } from "@lib/discord";
+import { resolveAmount } from "@lib/format";
 
 const AMOUNT: CommandOption = {
 	name: "amount",
@@ -36,8 +39,8 @@ function playerOf(interaction: CommandInput): { guildId: string; userId: string 
 }
 
 /** A prefix player can name a number straight away, `t?casino roulette 100 17`, as well as `number 17`. */
-function rouletteBetOf(interaction: CommandInput): RouletteBet {
-	const raw = interaction.options.getString("bet", true).trim().toLowerCase();
+function rouletteBetOf(interaction: CommandInput, given: string): RouletteBet {
+	const raw = given.trim().toLowerCase();
 	const picked = interaction.options.getInteger("number");
 	const direct = /^\d{1,2}$/.test(raw) ? Number.parseInt(raw, 10) : null;
 
@@ -81,22 +84,25 @@ export default defineCommand({
 				AMOUNT,
 				{
 					name: "bet",
-					description: "What to bet on.",
+					description: "One bet to spin straight away. Leave it out to open the table and place several.",
 					type: "string",
-					required: true,
 					choices: ROULETTE_BETS.map((kind) => ({ name: ROULETTE_BET_LABELS[kind], value: kind })),
 				},
 				{ name: "number", description: "The number, for a single-number bet.", type: "integer", min: 0, max: 36 },
 			],
 			async run(interaction, client) {
-				const bet = rouletteBetOf(interaction);
-				await playInstant(
-					interaction,
-					client,
-					playerOf(interaction),
-					interaction.options.getString("amount", true),
-					(stake) => rouletteOutcome(bet, stake),
-				);
+				const player = playerOf(interaction);
+				const amount = interaction.options.getString("amount", true);
+				const given = interaction.options.getString("bet");
+
+				if (given === null) {
+					const chip = resolveAmount(amount, (await requireAccount(player.guildId, player.userId)).wallet);
+					await reply(interaction, rouletteTableMessage({ bets: [], chip }, player.userId));
+					return;
+				}
+
+				const bet = rouletteBetOf(interaction, given);
+				await playInstant(interaction, client, player, amount, (stake) => rouletteOutcome([bet], stake));
 			},
 		},
 		{

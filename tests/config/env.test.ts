@@ -65,6 +65,7 @@ describe("loadEnv", () => {
 			CHANNEL_PREFIX_COMMAND_LOG: "",
 			CHANNEL_BUG_REPORT_LOG: "",
 			CHANNEL_SUGGESTION_LOG: "",
+			CHANNEL_EVAL_LOG: "",
 		});
 
 		const env = loadEnv();

@@ -1,6 +1,5 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { runChecks } from "@core/checks";
-import { subcommandsOf } from "@core/command";
 import { runCommand } from "@core/errors";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
@@ -47,22 +46,21 @@ export default defineMessageHandler({
 
 		const started = Date.now();
 		const ok = await runCommand(interaction, command, client);
-		recordCommandTime(Date.now() - started, ok);
+		const durationMs = Date.now() - started;
+		recordCommandTime(durationMs, ok);
 		countCommandUse(client, {
 			command: command.name,
 			guildId: message.guildId,
 			surface: "prefix",
 			failed: !ok,
 		});
-		logCommandUse(client, {
-			command: command.name,
-			subcommand: subcommandsOf(command).length > 0 ? interaction.options.getSubcommand(false) || null : null,
+		logCommandUse(client, interaction, command, {
 			surface: "prefix",
-			userId: message.author.id,
-			username: message.author.username,
-			guildName: message.guild?.name ?? null,
-			channelId: message.guild === null ? null : message.channelId,
 			ok,
+			durationMs,
+			channelId: message.guild === null ? null : message.channelId,
+			prefix,
+			typed: `${parsed.prefix ?? `@${client.user?.username ?? "mention"} `}${parsed.name}`,
 		});
 		return true;
 	},

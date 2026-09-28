@@ -1,7 +1,6 @@
 import { DiscordAPIError, Events, type Interaction, MessageFlags, RESTJSONErrorCodes } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { runChecks } from "@core/checks";
-import { subcommandsOf } from "@core/command";
 import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
@@ -46,22 +45,19 @@ export default defineEvent({
 
 			const started = Date.now();
 			const ok = await runCommand(interaction, command, client);
-			recordCommandTime(Date.now() - started, ok);
+			const durationMs = Date.now() - started;
+			recordCommandTime(durationMs, ok);
 			countCommandUse(client, {
 				command: command.name,
 				guildId: interaction.guildId,
 				surface: "slash",
 				failed: !ok,
 			});
-			logCommandUse(client, {
-				command: command.name,
-				subcommand: subcommandsOf(command).length > 0 ? interaction.options.getSubcommand(false) : null,
+			logCommandUse(client, interaction, command, {
 				surface: "slash",
-				userId: interaction.user.id,
-				username: interaction.user.username,
-				guildName: interaction.guild?.name ?? null,
-				channelId: interaction.channelId,
 				ok,
+				durationMs,
+				channelId: interaction.channelId,
 			});
 			return;
 		}

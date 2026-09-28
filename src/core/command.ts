@@ -105,6 +105,8 @@ export interface CommandOption {
 	min?: number;
 	max?: number;
 	maxLength?: number;
+	/** Named in the operator's logs, but its value never is. */
+	unlogged?: boolean;
 }
 
 export interface Subcommand {
@@ -209,6 +211,81 @@ export function privately(interaction: CommandInput): CommandInput {
 	});
 }
 
+/** An option a run was given, in plain words; `value` is null for one marked `unlogged`. */
+export interface GivenOption {
+	name: string;
+	value: string | null;
+}
+
+function readOption(options: CommandInputOptions, option: CommandOption): string | null {
+	const { name } = option;
+
+	switch (option.type) {
+		case "string":
+			return options.getString(name);
+		case "integer": {
+			const value = options.getInteger(name);
+			return value === null ? null : String(value);
+		}
+		case "number": {
+			const value = options.getNumber(name);
+			return value === null ? null : String(value);
+		}
+		case "boolean": {
+			const value = options.getBoolean(name);
+			return value === null ? null : value ? "Yes" : "No";
+		}
+		case "user": {
+			const user = options.getUser(name);
+			return user === null ? null : `@${user.username} (${user.id})`;
+		}
+		case "channel": {
+			const channel = options.getChannel(name);
+			return channel === null ? null : `#${channel.name ?? "unknown"} (${channel.id})`;
+		}
+		case "role": {
+			const role = options.getRole(name);
+			return role === null ? null : `@${role.name} (${role.id})`;
+		}
+		case "attachment": {
+			const file = options.getAttachment(name);
+			return file === null ? null : `${file.name} (${file.url})`;
+		}
+	}
+}
+
+/** The subcommand a run chose, or null for a command without them or a prefix run that named none. */
+export function chosenSubcommand(input: CommandInput, command: Command): string | null {
+	if (subcommandsOf(command).length === 0) return null;
+	try {
+		return input.options.getSubcommand(false) || null;
+	} catch {
+		return null;
+	}
+}
+
+/** The options a run was given, for the operator's logs; one that cannot be read is left out. */
+export function givenOptions(input: CommandInput, command: Command): GivenOption[] {
+	const subcommands = subcommandsOf(command);
+	const chosen = chosenSubcommand(input, command);
+	const declared =
+		subcommands.length > 0
+			? (subcommands.find((candidate) => candidate.name === chosen)?.options ?? [])
+			: (command.options ?? []);
+
+	const given: GivenOption[] = [];
+	for (const option of declared) {
+		let value: string | null;
+		try {
+			value = readOption(input.options, option);
+		} catch {
+			continue;
+		}
+		if (value !== null) given.push({ name: option.name, value: option.unlogged === true ? null : value });
+	}
+	return given;
+}
+
 /** Sends the interaction to the right handler. */
 export async function dispatch(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	const subcommands = subcommandsOf(command);
@@ -241,7 +318,9 @@ export function buildSlashCommand(
 	);
 
 	if (command.nsfw) builder.setNSFW(true);
-	if (command.permissions?.length) {
+	// Zero hides it from everybody but a server's administrators; `runChecks` refuses them too.
+	if (command.ownerOnly === true) builder.setDefaultMemberPermissions(0);
+	else if (command.permissions?.length) {
 		builder.setDefaultMemberPermissions(new PermissionsBitField(command.permissions).bitfield);
 	}
 

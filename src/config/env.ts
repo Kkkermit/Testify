@@ -36,6 +36,7 @@ const fields = z.object({
 	CHANNEL_PREFIX_COMMAND_LOG: id.optional(),
 	CHANNEL_BUG_REPORT_LOG: id.optional(),
 	CHANNEL_SUGGESTION_LOG: id.optional(),
+	CHANNEL_EVAL_LOG: id.optional(),
 
 	// Dashboard. Off by default, so a bot-only install needs none of these.
 	DASHBOARD_ENABLED: flag.default(false),

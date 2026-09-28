@@ -1,10 +1,20 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import lottery from "@commands/economy/lottery.command";
-import { checkCasinoPlay, checkMusicControl, clearCooldowns, refusalText, runChecks } from "@core/checks";
+import {
+	checkCasinoPlay,
+	checkMusicControl,
+	clearCooldowns,
+	OWNER_ONLY_REFUSAL,
+	refusalText,
+	runChecks,
+} from "@core/checks";
 import { defineCommand } from "@core/command";
+import { refusalEmbed } from "@lib/discord/embeds.util";
 import { createMockClient, createMockInteraction, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
-const findBlacklistEntry = jest.fn<Promise<{ reason: string } | null>, []>(() => Promise.resolve(null));
+const findBlacklistEntry = jest.fn<Promise<{ reason: string; createdAt?: Date } | null>, []>(() =>
+	Promise.resolve(null),
+);
 
 jest.mock("@database/repositories/blacklistRepository", () => ({
 	findBlacklistEntry: () => findBlacklistEntry(),
@@ -79,18 +89,50 @@ describe("runChecks", () => {
 		expect(await runChecks(createMockInteraction(), plain, createMockClient())).toBeNull();
 	});
 
-	it("blocks a blacklisted user and says why", async () => {
-		findBlacklistEntry.mockResolvedValue({ reason: "Spamming" });
+	/** A bare "blocked, reason: x" line left people unsure whether the block was for one server or everywhere. */
+	it("blocks a blacklisted user and says why, since when, how far it reaches and who can lift it", async () => {
+		findBlacklistEntry.mockResolvedValue({ reason: "Spamming", createdAt: new Date(1_700_000_000_000) });
 
 		const refusal = await runChecks(createMockInteraction(), plain, createMockClient());
+		const built = refusalEmbed(refusal!).toJSON();
+		const byName = Object.fromEntries((built.fields ?? []).map((field) => [field.name, field.value]));
 
-		expect(refusal).toContain("Spamming");
+		expect(built.title).toContain("You are blocked from");
+		expect(built.description).toContain("any other");
+		expect(byName.Reason).toBe("Spamming");
+		expect(byName["Blocked since"]).toBe("<t:1700000000:D> (<t:1700000000:R>)");
+		expect(byName["Think this is a mistake?"]).toContain("owner");
+		expect(built.color).toBe(refusalEmbed("x").toJSON().color);
+		expect(refusalText(refusal!)).toContain("**Reason:** Spamming");
 	});
 
 	it("refuses an owner-only command to anyone else", async () => {
 		const command = { ...plain, ownerOnly: true };
 
 		expect(await runChecks(createMockInteraction(), command, createMockClient())).toContain("owner");
+	});
+
+	/** A blacklisted or paused refusal used to come first, so an attempt at `/eval` went unrecorded. */
+	it("records every refused owner-only attempt, whatever else would have refused it", async () => {
+		const command = { ...plain, ownerOnly: true };
+		const warn = jest.fn();
+		findBlacklistEntry.mockResolvedValue({ reason: "Spamming" });
+		const client = createMockClient({ paused: true, logger: { warn } } as never);
+
+		expect(await runChecks(createMockInteraction(), command, client)).toBe(OWNER_ONLY_REFUSAL);
+		expect(warn).toHaveBeenCalledWith(
+			expect.objectContaining({ userId: USER_ID }),
+			expect.stringContaining("[OWNER_COMMAND]"),
+		);
+	});
+
+	it("records nothing when an owner runs an owner-only command", async () => {
+		const command = { ...plain, ownerOnly: true };
+		const warn = jest.fn();
+		const interaction = createMockInteraction({ overrides: { user: { id: OWNER_ID } as never } });
+
+		await runChecks(interaction, command, createMockClient({ logger: { warn } } as never));
+		expect(warn).not.toHaveBeenCalled();
 	});
 
 	it("allows an owner-only command for an owner", async () => {
@@ -324,7 +366,7 @@ describe("checkMusicControl", () => {
 	it("refuses a blacklisted account", async () => {
 		findBlacklistEntry.mockResolvedValueOnce({ reason: "spam" });
 
-		await expect(ask(plainMember)).resolves.toMatch(/blocked/);
+		expect(refusalText((await ask(plainMember))!)).toMatch(/blocked/);
 	});
 
 	it("refuses when /play is switched off in the server", async () => {
@@ -409,7 +451,7 @@ describe("the casino's switches", () => {
 			await expect(checkCasinoPlay(client, who, "slots")).resolves.toMatch(/paused/);
 
 			findBlacklistEntry.mockResolvedValueOnce({ reason: "spam" });
-			await expect(checkCasinoPlay(createMockClient(), who, "slots")).resolves.toMatch(/blocked/);
+			expect(refusalText((await checkCasinoPlay(createMockClient(), who, "slots"))!)).toMatch(/blocked/);
 		});
 
 		it("refuses when /casino is switched off in the server", async () => {

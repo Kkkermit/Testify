@@ -1,19 +1,17 @@
-import { ButtonStyle, EmbedBuilder } from "discord.js";
-import { customId, defineButton } from "@core/button";
-import { button, row } from "@lib/discord";
+import { EmbedBuilder } from "discord.js";
+import { theme } from "@config/theme";
+import { defineButton } from "@core/button";
+import { ERROR_TRIAGE_ID, isTriageState, triageRow } from "@lib/bot";
 
-const COLORS = { pending: 0xfee75c, solved: 0x57f287, unsolved: 0xed4245 } as const;
-const LABELS = { pending: "Pending", solved: "Solved", unsolved: "Unsolved" } as const;
-
-type TriageState = keyof typeof COLORS;
-
-function isTriageState(value: string): value is TriageState {
-	return value === "pending" || value === "solved" || value === "unsolved";
-}
+const COLOURS = {
+	pending: theme.colours.warning,
+	solved: theme.colours.success,
+	unsolved: theme.colours.error,
+} as const;
 
 /** Recolours the error report in place. */
 export default defineButton({
-	id: "error",
+	id: ERROR_TRIAGE_ID,
 
 	async run(interaction, context) {
 		if (!interaction.isButton() || !isTriageState(context.action)) return;
@@ -22,33 +20,9 @@ export default defineButton({
 		if (!original) return;
 
 		const updated = EmbedBuilder.from(original)
-			.setColor(COLORS[context.action])
-			.setFooter({ text: `Marked as ${LABELS[context.action].toLowerCase()} by ${interaction.user.username}` });
+			.setColor(COLOURS[context.action])
+			.setFooter({ text: `Marked as ${context.action} by ${interaction.user.username}` });
 
-		await interaction.update({
-			embeds: [updated],
-			components: [
-				row(
-					button({
-						id: customId("error", "pending"),
-						label: "Mark as pending",
-						style: ButtonStyle.Primary,
-						disabled: context.action === "pending",
-					}),
-					button({
-						id: customId("error", "solved"),
-						label: "Mark as solved",
-						style: ButtonStyle.Success,
-						disabled: context.action === "solved",
-					}),
-					button({
-						id: customId("error", "unsolved"),
-						label: "Mark as unsolved",
-						style: ButtonStyle.Danger,
-						disabled: context.action === "unsolved",
-					}),
-				),
-			],
-		});
+		await interaction.update({ embeds: [updated], components: [triageRow(context.action)] });
 	},
 });

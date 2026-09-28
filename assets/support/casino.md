@@ -9,7 +9,7 @@ related: earning-money, games
 ---
 `/casino` holds the games. Every bet comes straight out of your wallet, and every win goes straight back in. `/casino info` shows what each game pays and the bet limits in your server.
 
-- `/casino roulette`: a single-zero wheel. Bet on a number for 35 to 1, a dozen or column for 2 to 1, or red, black, odd, even, low or high for evens.
+- `/casino roulette`: a single-zero wheel. Bet on a number for 35 to 1, a dozen or column for 2 to 1, or red, black, odd, even, low or high for evens. Leave `bet` out to open the table and put a chip on as many spots as you like, then spin. Play again brings the same table back.
 - `/casino blackjack`: beat the dealer without going over 21. A natural pays 3 to 2, and you can double down on your first two cards.
 - `/casino slots`: three reels. Three diamonds pay {fact:casino.slotsTop}, and the machine returns {fact:casino.slotsReturn} of what it takes over time.
 - `/casino hilo`: call each next card higher or lower. Every right call grows the pot, less a {fact:casino.hiloCut} cut, and you can cash out whenever you like, up to {fact:casino.hiloCap} your bet.

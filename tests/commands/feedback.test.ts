@@ -44,8 +44,8 @@ describe("/bug-report and /suggest", () => {
 		await suggest.run?.(createMockInteraction({ options: { suggestion: "Add a back button" } }), client);
 
 		expect(posted).toEqual([
-			{ channelId: BUG_CHANNEL, title: "Bug report" },
-			{ channelId: SUGGESTION_CHANNEL, title: "Suggestion" },
+			{ channelId: BUG_CHANNEL, title: "🐛 Bug report" },
+			{ channelId: SUGGESTION_CHANNEL, title: "💡 Suggestion" },
 		]);
 	});
 

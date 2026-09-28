@@ -1,9 +1,9 @@
-import { type EmbedBuilder, type Guild } from "discord.js";
+import { type EmbedBuilder, type Guild, SnowflakeUtil } from "discord.js";
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
-import { formatNumber } from "@lib/format/format.util";
+import { discordTime, escapeMarkdown, formatNumber } from "@lib/format/format.util";
 
 /** The embed `guildCreate` and `guildDelete` both post to the guild log. */
 export async function buildGuildEmbed(
@@ -13,33 +13,51 @@ export async function buildGuildEmbed(
 ): Promise<EmbedBuilder> {
 	const owner = await guild.fetchOwner().catch(() => null);
 	const inviteUrl = kind === "joined" ? await createInvite(guild) : null;
+	const total = client.guilds.cache.size;
+	const botName = client.user?.username ?? "the bot";
 
 	const fields = [
-		{ name: "Guild", value: `\`${guild.name}\` (${guild.id})` },
+		{
+			name: "Server",
+			value: `**${escapeMarkdown(guild.name)}**\n\`${guild.id}\`\n-# Made ${discordTime(Number(SnowflakeUtil.timestampFrom(guild.id)), "R")}`,
+			inline: true,
+		},
 		{
 			name: "Owner",
-			value: owner ? `\`${owner.user.username}\` (${owner.id})` : `Unknown (${guild.ownerId})`,
+			value: owner
+				? `<@${owner.id}>\n**@${escapeMarkdown(owner.user.username)}**\n\`${owner.id}\``
+				: `Unknown\n\`${guild.ownerId}\``,
+			inline: true,
 		},
 		{ name: "Members", value: formatNumber(guild.memberCount), inline: true },
-		{ name: "Server count", value: formatNumber(client.guilds.cache.size), inline: true },
+		{ name: "Channels", value: formatNumber(guild.channels.cache.size), inline: true },
+		{ name: "Roles", value: formatNumber(guild.roles.cache.size), inline: true },
+		{
+			name: "Boosts",
+			value: `Level ${String(guild.premiumTier)} · ${formatNumber(guild.premiumSubscriptionCount ?? 0)}`,
+			inline: true,
+		},
+		{ name: "Language", value: guild.preferredLocale, inline: true },
+		{ name: "Server count", value: formatNumber(total), inline: true },
 	];
 
-	if (inviteUrl !== null) fields.push({ name: "Invite", value: inviteUrl });
-
-	const builder = embed({
-		colour: kind === "joined" ? theme.colours.success : theme.colours.error,
-		title: kind === "joined" ? "Joined a new server" : "Left a server",
-		description:
-			kind === "joined"
-				? `**${guild.name}** invited ${client.user?.username ?? "the bot"} to their server.`
-				: `${client.user?.username ?? "The bot"} is no longer in **${guild.name}**.`,
-		fields,
-		footer: `${client.guilds.cache.size} servers`,
-	});
+	if (inviteUrl !== null) fields.push({ name: "Invite", value: inviteUrl, inline: false });
 
 	const icon = guild.iconURL();
-	if (icon !== null) builder.setThumbnail(icon);
-	return builder;
+	const banner = guild.bannerURL({ size: 1024 });
+
+	return embed({
+		colour: kind === "joined" ? theme.colours.success : theme.colours.error,
+		title: kind === "joined" ? "📥 Joined a new server" : "📤 Left a server",
+		description:
+			kind === "joined"
+				? `**${escapeMarkdown(guild.name)}** added ${botName} to their server.`
+				: `${botName} is no longer in **${escapeMarkdown(guild.name)}**.`,
+		fields,
+		...(icon !== null ? { thumbnail: icon } : {}),
+		...(banner !== null ? { image: banner } : {}),
+		footer: `Now in ${formatNumber(total)} ${total === 1 ? "server" : "servers"}`,
+	});
 }
 
 async function createInvite(guild: Guild): Promise<string | null> {
@@ -72,7 +90,7 @@ export async function announceGuildChange(client: TestifyClient, guild: Guild, k
 	try {
 		const channel = await client.channels.fetch(channelId);
 		if (!channel?.isTextBased() || !channel.isSendable()) return;
-		await channel.send({ embeds: [await buildGuildEmbed(client, guild, kind)] });
+		await channel.send({ embeds: [await buildGuildEmbed(client, guild, kind)], allowedMentions: { parse: [] } });
 	} catch (error) {
 		client.logger.warn({ err: toError(error) }, "Could not announce the guild change");
 	}

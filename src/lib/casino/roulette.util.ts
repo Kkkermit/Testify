@@ -99,3 +99,58 @@ export function betLabel(bet: RouletteBet): string {
 export function isRouletteBetKind(value: string): value is RouletteBetKind {
 	return (ROULETTE_BETS as readonly string[]).includes(value);
 }
+
+/** Every spot a chip can sit on: the 37 numbers, then the outside bets in `ROULETTE_BETS` order. */
+export const ROULETTE_SPOTS: readonly RouletteBet[] = [
+	...Array.from({ length: 37 }, (_, number): RouletteBet => ({ kind: "number", number })),
+	...ROULETTE_BETS.filter((kind) => kind !== "number").map((kind): RouletteBet => ({ kind })),
+];
+
+/** A bet's value in a select menu and its place in the mask: `n17`, or the outside bet's own name. */
+export function spotKey(bet: RouletteBet): string {
+	return bet.kind === "number" ? `n${String(bet.number ?? 0)}` : bet.kind;
+}
+
+export function spotFromKey(key: string): RouletteBet | null {
+	return ROULETTE_SPOTS.find((spot) => spotKey(spot) === key) ?? null;
+}
+
+/** The spots on the table as one bit each, in base 36, so a whole layout fits in a custom ID. */
+export function encodeSpots(bets: readonly RouletteBet[]): string {
+	let mask = 0n;
+	for (const bet of bets) {
+		const index = ROULETTE_SPOTS.findIndex((spot) => spotKey(spot) === spotKey(bet));
+		if (index !== -1) mask |= 1n << BigInt(index);
+	}
+	return mask.toString(36);
+}
+
+/** Null for anything a button could not have carried. */
+export function decodeSpots(text: string): RouletteBet[] | null {
+	if (!/^[0-9a-z]{1,10}$/.test(text)) return null;
+
+	let mask = 0n;
+	for (const character of text) mask = mask * 36n + BigInt(Number.parseInt(character, 36));
+	if (mask >> BigInt(ROULETTE_SPOTS.length) !== 0n) return null;
+
+	return ROULETTE_SPOTS.filter((_, index) => (mask >> BigInt(index)) & 1n);
+}
+
+/** Each winning spot hands back its chip times its return; the rest are lost. */
+export function settleSpots(
+	bets: readonly RouletteBet[],
+	chip: number,
+	pocket: number,
+): { returned: number; winners: RouletteBet[] } {
+	const winners = bets.filter((bet) => betWins(bet, pocket));
+	return { returned: winners.reduce((sum, bet) => sum + chip * rouletteReturn(bet.kind), 0), winners };
+}
+
+/** "Red, 17 and 1st dozen", or a count once the list would be too long to read. */
+export function spotsLine(bets: readonly RouletteBet[]): string {
+	if (bets.length === 0) return "Nothing yet";
+	if (bets.length > 6) return `${String(bets.length)} spots`;
+
+	const names = bets.map((bet) => (bet.kind === "number" ? String(bet.number ?? 0) : ROULETTE_BET_LABELS[bet.kind]));
+	return names.length === 1 ? names[0]! : `${names.slice(0, -1).join(", ")} and ${names.at(-1)!}`;
+}

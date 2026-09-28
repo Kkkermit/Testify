@@ -17,6 +17,10 @@ function guildWith(overrides: Record<string, unknown> = {}): Guild {
 		channels: { cache: mockCollection([["chan", inviteChannel]]) },
 		invites: { create: jest.fn(() => Promise.resolve({ url: "https://discord.gg/abc" })) },
 		iconURL: jest.fn(() => "https://cdn.discord/icon.png"),
+		bannerURL: jest.fn(() => null),
+		premiumTier: 2,
+		premiumSubscriptionCount: 9,
+		preferredLocale: "en-GB",
 		...overrides,
 	} as never);
 }
@@ -35,14 +39,14 @@ describe("buildGuildEmbed", () => {
 	it("describes a join, in green", async () => {
 		const data = (await buildGuildEmbed(clientWith(12), guildWith(), "joined")).toJSON();
 
-		expect(data.title).toBe("Joined a new server");
+		expect(data.title).toBe("📥 Joined a new server");
 		expect(data.description).toContain("Test Server");
 	});
 
 	it("describes a leave differently from a join", async () => {
 		const data = (await buildGuildEmbed(clientWith(12), guildWith(), "left")).toJSON();
 
-		expect(data.title).toBe("Left a server");
+		expect(data.title).toBe("📤 Left a server");
 		expect(data.description).toContain("no longer in");
 	});
 
@@ -53,6 +57,26 @@ describe("buildGuildEmbed", () => {
 		expect(rendered).toContain("owner");
 		expect(rendered).toContain("250");
 		expect(rendered).toContain("12");
+	});
+
+	it("describes the server: when it was made, its channels, roles, boosts and language", async () => {
+		const data = (await buildGuildEmbed(clientWith(12), guildWith(), "joined")).toJSON();
+		const byName = Object.fromEntries((data.fields ?? []).map((field) => [field.name, field.value]));
+
+		expect(byName.Server).toContain("Made <t:");
+		expect(byName.Owner).toContain(`<@${OWNER_ID}>`);
+		expect(byName.Channels).toBe("1");
+		expect(byName.Roles).toBe("1");
+		expect(byName.Boosts).toBe("Level 2 · 9");
+		expect(byName.Language).toBe("en-GB");
+		expect(data.footer?.text).toBe("Now in 12 servers");
+	});
+
+	it("shows the server's banner when it has one", async () => {
+		const guild = guildWith({ bannerURL: jest.fn(() => "https://cdn.discord/banner.png") });
+		const data = (await buildGuildEmbed(clientWith(1), guild, "joined")).toJSON();
+
+		expect(data.image?.url).toBe("https://cdn.discord/banner.png");
 	});
 
 	it("includes an invite when joining", async () => {
