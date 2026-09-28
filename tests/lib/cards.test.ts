@@ -1,5 +1,6 @@
 import { AttachmentBuilder } from "discord.js";
-import { boardHeight, medalColour, renderBoardImage } from "@lib/canvas/boardCard.util";
+import { boardLayout, medalColour, placeholderColour, renderBoardImage } from "@lib/canvas/boardCard.util";
+import { type BoardCard } from "@lib/canvas/canvas.types";
 import { barFill, type RankCardData, rankCardText, renderRankCard } from "@lib/canvas/rankCard.util";
 
 /** The avatar fetch is deliberately pointed at a closed local port. */
@@ -87,14 +88,31 @@ describe("renderRankCard", () => {
 	});
 });
 
-describe("boardHeight", () => {
+describe("boardLayout", () => {
+	const rows = (count: number) => Array.from({ length: count }, () => ({}) as BoardCard["rows"][number]);
+
 	it("grows with the number of rows", () => {
-		expect(boardHeight(10)).toBeGreaterThan(boardHeight(3));
+		expect(boardLayout({ rows: rows(10), viewer: null, unranked: null }).height).toBeGreaterThan(
+			boardLayout({ rows: rows(3), viewer: null, unranked: null }).height,
+		);
 	});
 
 	/** An empty board still needs somewhere to put "nobody is here yet". */
 	it("leaves room for one row when there are none", () => {
-		expect(boardHeight(0)).toBe(boardHeight(1));
+		expect(boardLayout({ rows: [], viewer: null, unranked: null }).height).toBe(
+			boardLayout({ rows: rows(1), viewer: null, unranked: null }).height,
+		);
+	});
+
+	it("makes room under the rows only for the reader's own row or note", () => {
+		const plain = boardLayout({ rows: rows(10), viewer: null, unranked: null });
+		const withViewer = boardLayout({ rows: rows(10), viewer: rows(1)[0]!, unranked: null });
+		const unranked = boardLayout({ rows: rows(10), viewer: null, unranked: "Not yet" });
+
+		expect(plain.viewer).toBeNull();
+		expect(withViewer.viewer).toBeGreaterThan(withViewer.rows.at(-1)!);
+		expect(unranked.height).toBe(withViewer.height);
+		expect(withViewer.footer).toBeGreaterThan(withViewer.viewer!);
 	});
 });
 
@@ -104,8 +122,16 @@ describe("medalColour", () => {
 		expect(new Set(top).size).toBe(3);
 	});
 
-	it("gives everyone below third the same colour", () => {
-		expect(medalColour(3)).toBe(medalColour(9));
+	it("gives nobody below third a medal", () => {
+		expect(medalColour(3)).toBeNull();
+	});
+});
+
+describe("placeholderColour", () => {
+	/** A person without an avatar should look the same on every board, not change colour between draws. */
+	it("gives a name the same colour every time, and different names different colours", () => {
+		expect(placeholderColour("Kkermit")).toBe(placeholderColour("Kkermit"));
+		expect(new Set(["Mia", "Oliver", "Noah", "Ava", "Zoe"].map(placeholderColour)).size).toBeGreaterThan(1);
 	});
 });
 
@@ -118,20 +144,29 @@ describe("renderBoardImage", () => {
 		secondary: `${1_000 - index} XP`,
 	}));
 
-	it("renders a full page", async () => {
-		const attachment = await renderBoardImage("Top levels", rows);
+	const board = (overrides: Partial<BoardCard> = {}): BoardCard => ({
+		theme: "levels",
+		title: "Top levels",
+		subtitle: "Testify HQ · Ranked by level",
+		rows,
+		viewer: null,
+		unranked: null,
+		empty: "Nobody yet.",
+		footer: "10 members ranked",
+		...overrides,
+	});
+
+	it("renders the top ten with the reader's own row under it", async () => {
+		const attachment = await renderBoardImage(
+			board({ viewer: { ...rows[0]!, rank: 27, displayName: "Kkermit ツ 🎉", you: true } }),
+		);
 
 		expect(attachment).toBeInstanceOf(AttachmentBuilder);
 		expect(attachment.name).toBe("leaderboard.png");
 	});
 
-	it("renders an empty board without failing", async () => {
-		const attachment = await renderBoardImage("Top levels", [], "Nobody yet.");
-		expect(attachment.name).toBe("leaderboard.png");
-	});
-
-	it("renders a single row", async () => {
-		const attachment = await renderBoardImage("Top levels", rows.slice(0, 1));
+	it("renders an empty money board without failing", async () => {
+		const attachment = await renderBoardImage(board({ theme: "money", rows: [], unranked: "Not yet." }));
 		expect(attachment.name).toBe("leaderboard.png");
 	});
 });

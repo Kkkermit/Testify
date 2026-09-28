@@ -4,18 +4,9 @@ import { reply } from "@lib/discord";
 import { type BoardKind, boardMessage } from "@lib/economy";
 import { type BoardScope, type MoneySort } from "@testify/shared";
 
-/** Both boards, one command, and no buttons: each request is its own message, so nothing can stack. */
-const pageOption = {
-	name: "page",
-	description: "Which page to show. Defaults to the first.",
-	type: "integer",
-	min: 1,
-	max: 1_000,
-} as const;
-
+/** Both boards as one picture of the top ten; the money board's buttons change what it ranks and where. */
 async function show(interaction: CommandInput, client: TestifyClient, kind: BoardKind): Promise<void> {
 	const guild = inGuild(interaction);
-	const page = Math.max(0, (interaction.options.getInteger("page") ?? 1) - 1);
 	// A prefix command can type anything here, so an unknown word falls back rather than failing.
 	const rawSort = interaction.options.getString("sort")?.toLowerCase();
 	const sort: MoneySort = rawSort === "wallet" || rawSort === "bank" ? rawSort : "total";
@@ -25,39 +16,38 @@ async function show(interaction: CommandInput, client: TestifyClient, kind: Boar
 	await interaction.deferReply();
 	await reply(
 		interaction,
-		await boardMessage(guild, { kind, page, sort, scope }, interaction.user.id, [...client.guilds.cache.keys()]),
+		await boardMessage(guild, { kind, sort, scope }, interaction.user.id, [...client.guilds.cache.keys()]),
 	);
 }
 
 export default defineCommand({
 	name: "leaderboard",
-	description: "Shows the leaderboards, for this server or every server.",
+	description: "Shows the top ten, by money or by level.",
 	category: "economy",
 	aliases: ["lb", "top"],
 	guildOnly: true,
 	subcommands: [
 		{
 			name: "economy",
-			description: "The richest people, in this server or across every server.",
+			description: "The ten richest people, in this server or across every server.",
 			options: [
-				pageOption,
+				{
+					name: "scope",
+					description: "Where to start: this server, or everybody's money across every server.",
+					type: "string",
+					choices: [
+						{ name: "This server", value: "server" },
+						{ name: "Every server", value: "global" },
+					],
+				},
 				{
 					name: "sort",
-					description: "Rank by wallet and bank together, or by one of them.",
+					description: "What to start ranked by: wallet and bank together, or one of them.",
 					type: "string",
 					choices: [
 						{ name: "Total", value: "total" },
 						{ name: "Wallet", value: "wallet" },
 						{ name: "Bank", value: "bank" },
-					],
-				},
-				{
-					name: "scope",
-					description: "This server, or everybody's money across every server the bot is in.",
-					type: "string",
-					choices: [
-						{ name: "This server", value: "server" },
-						{ name: "Every server", value: "global" },
 					],
 				},
 			],
@@ -67,8 +57,7 @@ export default defineCommand({
 		},
 		{
 			name: "levels",
-			description: "Highest levels in this server.",
-			options: [pageOption],
+			description: "The ten highest levels in this server.",
 			async run(interaction, client) {
 				await show(interaction, client, "levels");
 			},

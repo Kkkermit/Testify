@@ -9,4 +9,5 @@ export * from "./playingCards.util";
 export * from "./rankCard.util";
 export * from "./rouletteWheel.util";
 export * from "./slotMachine.util";
+export * from "./text.util";
 export * from "./welcomeCard.util";

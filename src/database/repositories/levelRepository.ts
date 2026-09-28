@@ -116,6 +116,14 @@ export async function countRanked(guildId: string): Promise<number> {
 }
 
 export async function getRank(guildId: string, userId: string): Promise<number | null> {
+	return (await getLevelStanding(guildId, userId))?.rank ?? null;
+}
+
+/** Somebody's level and XP and where they rank, or null before they have earned any. */
+export async function getLevelStanding(
+	guildId: string,
+	userId: string,
+): Promise<{ level: number; xp: number; rank: number } | null> {
 	const record = await getUserLevel(guildId, userId);
 	if (!record) return null;
 
@@ -124,7 +132,7 @@ export async function getRank(guildId: string, userId: string): Promise<number |
 		$or: [{ level: { $gt: record.level } }, { level: record.level, xp: { $gt: record.xp } }],
 	}).exec();
 
-	return ahead + 1;
+	return { level: record.level, xp: record.xp, rank: ahead + 1 };
 }
 
 export async function resetGuildLevels(guildId: string): Promise<number> {

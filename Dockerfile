@@ -35,13 +35,13 @@ WORKDIR /app
 ENV NODE_ENV=production
 
 # Three things the OS has to provide:
-#   fonts-dejavu-core — @napi-rs/canvas statically links Skia but resolves font families through the OS, and a
-#     slim image ships none, so the rank, leaderboard and welcome cards would render without text.
+#   fonts — the cards bring their own Latin and Cyrillic in assets/fonts, and fall back to these for anything else:
+#     DejaVu for symbols, Noto Color Emoji for emoji, and WenQuanYi Zen Hei for Chinese, Japanese and Korean names.
 #   ffmpeg — only for sources that are not already Opus; most tracks are passed through untouched.
 #   yt-dlp — downloaded rather than installed from apt, whose build is far too old to track YouTube. The
 #     optional npm packages cannot help here: the installs below run with --ignore-scripts.
 RUN apt-get update \
-	&& apt-get install --no-install-recommends -y fonts-dejavu-core ffmpeg ca-certificates curl \
+	&& apt-get install --no-install-recommends -y fonts-dejavu-core fonts-noto-color-emoji fonts-wqy-zenhei ffmpeg ca-certificates curl \
 	&& curl -fsSL https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp_linux -o /usr/local/bin/yt-dlp \
 	&& chmod 0755 /usr/local/bin/yt-dlp \
 	&& /usr/local/bin/yt-dlp --version \
