@@ -1398,6 +1398,11 @@ closed except `/casino settings`, the way back in, and a Play again button passe
 `checkCasinoPlay`. A hand already dealt may always finish, closed or not, because its stake has already left the
 wallet. The dashboard's `/guilds/:id/casino` screen writes through the same `applyCasinoSettings`.
 
+**A settled message leads with what the money did.** `resultHeadline` is its first line, in Discord's largest
+type — a win congratulates by the profit, a loss names what it cost — and `container({ accent })` turns the stripe
+green, red, or yellow for a bet that came back even. Only a settled message is coloured; a spin or a live hand keeps
+the casino's own colour, because nothing has been decided yet.
+
 **Everything is drawn, nothing is a glyph.** The container ships only DejaVu Sans, which has no card suits worth
 using and no star, so suits, slot symbols and the pips are paths. A `★` in a title rendered as a missing-glyph box
 and is why the slot machine draws its stars.

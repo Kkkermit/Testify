@@ -108,7 +108,7 @@ describe("an instant game", () => {
 		expect(reply.deferReply).toHaveBeenCalled();
 		expect(reply.edits).toHaveLength(2);
 		expect(textOf(reply.edits[0] as never)).toContain("Good luck");
-		expect(textOf(reply.edits[1] as never)).toContain("+95");
+		expect(textOf(reply.edits[1] as never)).toContain("you won 95");
 	});
 
 	it("keeps the stake on a loss", async () => {
