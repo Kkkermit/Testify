@@ -1,8 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, type CommandInput, type CommandOption } from "@core/command";
+import { asMember, defineCommand, inGuild, inTextChannel, type CommandInput, type CommandOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { attachHandMessage } from "@database/repositories/casinoRepository";
-import { requireAccount } from "@database/repositories/economyRepository";
 import {
 	blackjackMessage,
 	CASINO_COMMAND,
@@ -12,20 +11,18 @@ import {
 	coinflipOutcome,
 	diceOutcome,
 	hiloMessage,
-	isRouletteBetKind,
 	playInstant,
 	readCasinoSettings,
-	ROULETTE_BET_LABELS,
-	ROULETTE_BETS,
-	rouletteOutcome,
-	rouletteTableMessage,
-	type RouletteBet,
+	openingChip,
+	openRound,
+	rememberRoundMessage,
+	roundBettingMessage,
+	roundView,
 	slotsOutcome,
 	startBlackjack,
 	startHiLoHand,
 } from "@lib/casino";
 import { reply } from "@lib/discord";
-import { resolveAmount } from "@lib/format";
 
 const AMOUNT: CommandOption = {
 	name: "amount",
@@ -36,25 +33,6 @@ const AMOUNT: CommandOption = {
 
 function playerOf(interaction: CommandInput): { guildId: string; userId: string } {
 	return { guildId: inGuild(interaction).id, userId: interaction.user.id };
-}
-
-/** A prefix player can name a number straight away, `t?casino roulette 100 17`, as well as `number 17`. */
-function rouletteBetOf(interaction: CommandInput, given: string): RouletteBet {
-	const raw = given.trim().toLowerCase();
-	const picked = interaction.options.getInteger("number");
-	const direct = /^\d{1,2}$/.test(raw) ? Number.parseInt(raw, 10) : null;
-
-	if (direct !== null || raw === "number") {
-		const pocket = direct ?? picked;
-		if (pocket === null || pocket < 0 || pocket > 36) {
-			throw new UserFacingError("A single-number bet needs a `number` from 0 to 36.");
-		}
-		return { kind: "number", number: pocket };
-	}
-
-	if (!isRouletteBetKind(raw)) throw new UserFacingError("Pick a bet from the list, or a number from 0 to 36.");
-
-	return { kind: raw };
 }
 
 /** Remembers where a card hand is showing, so a hand left idle can be settled on the same message. */
@@ -78,31 +56,34 @@ export default defineCommand({
 	subcommands: [
 		{
 			name: "roulette",
-			description: "Bets on where the ball lands on a single-zero wheel.",
+			description: "Opens a roulette table. Public by default, so anybody in the channel can join.",
 			aliases: ["roulette"],
 			options: [
-				AMOUNT,
 				{
-					name: "bet",
-					description: "One bet to spin straight away. Leave it out to open the table and place several.",
+					name: "table",
+					description: "Public lets anybody in the channel bet; private keeps the table to you.",
 					type: "string",
-					choices: ROULETTE_BETS.map((kind) => ({ name: ROULETTE_BET_LABELS[kind], value: kind })),
+					choices: [
+						{ name: "Public: anybody can join", value: "public" },
+						{ name: "Private: only you", value: "private" },
+					],
 				},
-				{ name: "number", description: "The number, for a single-number bet.", type: "integer", min: 0, max: 36 },
 			],
-			async run(interaction, client) {
+			async run(interaction) {
 				const player = playerOf(interaction);
-				const amount = interaction.options.getString("amount", true);
-				const given = interaction.options.getString("bet");
+				const channel = inTextChannel(interaction);
+				const chip = openingChip(await readCasinoSettings(player.guildId));
+				const host = {
+					userId: player.userId,
+					name: asMember(interaction).displayName,
+					private: interaction.options.getString("table") === "private",
+				};
 
-				if (given === null) {
-					const chip = resolveAmount(amount, (await requireAccount(player.guildId, player.userId)).wallet);
-					await reply(interaction, rouletteTableMessage({ bets: [], chip }, player.userId));
-					return;
-				}
+				const round = await openRound({ guildId: player.guildId, channelId: channel.id, messageId: null }, host, chip);
+				if (round === null) throw new UserFacingError("Could not open a roulette table. Try again.");
 
-				const bet = rouletteBetOf(interaction, given);
-				await playInstant(interaction, client, player, amount, (stake) => rouletteOutcome([bet], stake));
+				await reply(interaction, roundBettingMessage(roundView(round)));
+				await rememberRoundMessage(String(round._id), (await interaction.fetchReply()).id);
 			},
 		},
 		{

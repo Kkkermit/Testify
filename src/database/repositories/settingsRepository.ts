@@ -25,6 +25,7 @@ import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
+import { purgeRounds } from "@database/repositories/rouletteRepository";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
@@ -293,6 +294,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeCommandToggles(guildId),
 		purgeMusicSettings(guildId),
 		purgeCasino(guildId),
+		purgeRounds(guildId),
 		purgeWarnLadder(guildId),
 	]);
 }

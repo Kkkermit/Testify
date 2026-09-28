@@ -8,7 +8,7 @@ import { refreshBotStats } from "@jobs/refreshBotStats.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 import { recordHeartbeat } from "@jobs/statusHeartbeat.util";
 import { flushCommandLog, startEventLoopMonitor, watchDiscordApi } from "@lib/bot";
-import { CASINO_TIMING } from "@lib/casino";
+import { CASINO_TIMING, spinOverdueRounds } from "@lib/casino";
 import { flushActivity } from "@lib/info";
 import { STATUS_LIMITS } from "@testify/shared";
 
@@ -23,6 +23,7 @@ export default defineEvent({
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
 		client.timers.every("insights", INTERVALS.insightsFlushMs, () => flushActivity(client.logger));
 		client.timers.every("casino-hands", CASINO_TIMING.sweepEveryMs, () => settleIdleHands(client));
+		client.timers.every("roulette-rounds", CASINO_TIMING.sweepEveryMs, () => spinOverdueRounds(client));
 		client.timers.every("command-log", INTERVALS.commandLogFlushMs, () => flushCommandLog(client));
 
 		startEventLoopMonitor();

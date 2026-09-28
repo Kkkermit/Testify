@@ -3,7 +3,6 @@ import casinoSettings from "@buttons/casinoSettings";
 import { checkCasinoPlay } from "@core/checks";
 import type * as Casino from "@lib/casino";
 import { normaliseCasinoSettings } from "@lib/casino/casinoSettings.util";
-import { decodeSpots, encodeSpots } from "@lib/casino/roulette.util";
 
 jest.mock("@lib/casino", () => ({
 	...jest.requireActual<typeof Casino>("@lib/casino"),
@@ -197,83 +196,5 @@ describe("the casino's game buttons", () => {
 
 		expect(playInstant).not.toHaveBeenCalled();
 		expect(checkCasinoPlay).not.toHaveBeenCalled();
-	});
-});
-
-describe("the roulette table", () => {
-	const run = (interaction: ReturnType<typeof pressed>, action: string, args: string[] = []) =>
-		casino.run(interaction as never, { client, action, args: [...args, OWNER] });
-	const n = (number: number) => ({ kind: "number" as const, number });
-
-	function tableShown(interaction: ReturnType<typeof pressed>): string {
-		return JSON.stringify(interaction.update.mock.calls[0]?.[0]);
-	}
-
-	/** Play again reopens the table with the last bets on it, so the player can change them before spinning. */
-	it("reopens the table from Play again with the same chips, without spinning", async () => {
-		const interaction = pressed();
-		await run(interaction, "again", ["roulette", `t${encodeSpots([n(17), { kind: "red" }])}`, "100"]);
-
-		expect(playInstant).not.toHaveBeenCalled();
-		expect(interaction.update).toHaveBeenCalled();
-		expect(tableShown(interaction)).toContain("Spin · 200");
-	});
-
-	it("changes only the part of the table its menu covers", async () => {
-		const interaction = pressed({ values: ["n5", "n6"] });
-		await run(interaction, "rt-pick", ["a", encodeSpots([n(17), n(30), { kind: "red" }]), "10"]);
-
-		// 17 was in this menu and is gone; 30 and red sit in other menus and stay.
-		const spin = /rt-spin:([0-9a-z]+):10/.exec(tableShown(interaction));
-		expect(decodeSpots(spin?.[1] ?? "")).toEqual([n(5), n(6), n(30), { kind: "red" }]);
-	});
-
-	it("will not let one menu place a spot from another", async () => {
-		const interaction = pressed({ values: ["n30", "red"] });
-		await run(interaction, "rt-pick", ["a", encodeSpots([]), "10"]);
-
-		expect(tableShown(interaction)).toContain("Pick where to put your chips");
-	});
-
-	it("spins for a chip on every spot, on the same message", async () => {
-		const interaction = pressed();
-		await run(interaction, "rt-spin", [encodeSpots([n(1), n(2), { kind: "odd" }]), "50"]);
-
-		expect(interaction.deferUpdate).toHaveBeenCalled();
-		expect(playInstant).toHaveBeenCalledWith(
-			interaction,
-			client,
-			{ guildId: GUILD, userId: OWNER },
-			"150",
-			expect.any(Function),
-		);
-	});
-
-	it("refuses to spin an empty table or while the casino is closed", async () => {
-		await expect(run(pressed(), "rt-spin", ["0", "50"])).rejects.toThrow(/chip on the table/);
-
-		jest.mocked(checkCasinoPlay).mockResolvedValueOnce("The casino is closed in this server.");
-		await expect(run(pressed(), "rt-spin", [encodeSpots([n(1)]), "50"])).rejects.toThrow(/closed/);
-		expect(playInstant).not.toHaveBeenCalled();
-	});
-
-	it("refuses a button whose layout or chip it cannot read", async () => {
-		await expect(run(pressed(), "rt-spin", ["NOPE", "50"])).rejects.toThrow(/no longer knows/);
-		await expect(run(pressed(), "rt-spin", [encodeSpots([n(1)]), "-5"])).rejects.toThrow(/no longer knows/);
-	});
-
-	it("changes the chip from the form, keeping the spots, and accepts half or all", async () => {
-		const interaction = pressed({ modal: { chip: "half" } });
-		await run(interaction, "rt-chipset", [encodeSpots([n(7)])]);
-
-		expect(tableShown(interaction)).toContain("Each chip is now 500.");
-		expect(tableShown(interaction)).toContain("Spin · 500");
-	});
-
-	it("clears the table but keeps the chip", async () => {
-		const interaction = pressed();
-		await run(interaction, "rt-clear", ["75"]);
-
-		expect(tableShown(interaction)).toContain("Chip **75** a spot");
 	});
 });
