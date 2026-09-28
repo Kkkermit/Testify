@@ -49,7 +49,7 @@ async function playAgain(
 		if (!Number.isSafeInteger(chip) || chip <= 0) throw stale();
 		const round = await openRound(
 			{ guildId: player.guildId, channelId: interaction.channelId, messageId: interaction.message.id },
-			player.userId,
+			{ userId: player.userId, name: interaction.user.globalName ?? interaction.user.username, private: false },
 			chip,
 		);
 		if (round === null) throw new UserFacingError("A new round is already starting here.");

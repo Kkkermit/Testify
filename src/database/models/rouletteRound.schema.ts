@@ -23,6 +23,10 @@ export interface RouletteRoundRecord {
 	channelId: string;
 	messageId: string | null;
 	hostId: string;
+	/** Absent on rounds written before tables could be private. */
+	hostName?: string;
+	/** Only the host may bet at a private table. */
+	private?: boolean;
 	/** The chip everybody starts with. */
 	chip: number;
 	status: "betting" | "spinning" | "settled";
@@ -43,6 +47,8 @@ const rouletteRoundSchema = new Schema<RouletteRoundRecord>(
 		channelId: { type: String, required: true },
 		messageId: { type: String, default: null },
 		hostId: { type: String, required: true },
+		hostName: { type: String, default: "" },
+		private: { type: Boolean, default: false },
 		chip: { type: Number, required: true, min: 1 },
 		status: { type: String, required: true, enum: ["betting", "spinning", "settled"], default: "betting" },
 		closesAt: { type: Date, default: null },

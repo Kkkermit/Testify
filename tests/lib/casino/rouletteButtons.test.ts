@@ -139,18 +139,27 @@ describe("the roulette table's buttons", () => {
 	/** A new round goes on the same message, so the channel keeps one table rather than a stack of them. */
 	it("starts a new round on the same message from Play again", async () => {
 		const interaction = pressed();
-		await run(interaction, "again", ["250"]);
+		await run(interaction, "again", ["250", "public"]);
 
 		expect(openRound).toHaveBeenCalledWith(
 			{ guildId: GUILD, channelId: "444444444444444444", messageId: "555555555555555555" },
-			PLAYER,
+			{ userId: PLAYER, name: "Alice", private: false },
 			250,
 		);
 		expect(interaction.update).toHaveBeenCalled();
 	});
 
+	/** A private table's New round must not hand the table to whoever presses it. */
+	it("keeps a private table's new round private, and with its host", async () => {
+		await expect(run(pressed(), "again", ["250", "private", "999999999999999999"])).rejects.toThrow(/private/);
+		expect(openRound).not.toHaveBeenCalled();
+
+		await run(pressed(), "again", ["250", "private", PLAYER]);
+		expect(openRound).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ private: true }), 250);
+	});
+
 	it("refuses a second new round on a message that already has one starting", async () => {
 		openRound.mockResolvedValue(null);
-		await expect(run(pressed(), "again", ["250"])).rejects.toThrow(/already starting/);
+		await expect(run(pressed(), "again", ["250", "public"])).rejects.toThrow(/already starting/);
 	});
 });

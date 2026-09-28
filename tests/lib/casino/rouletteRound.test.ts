@@ -14,6 +14,7 @@ import {
 	roundSettledMessage,
 	roundSpinningMessage,
 	roundView,
+	winningSpots,
 } from "@lib/casino/rouletteRound.util";
 import { buttonsOf, customIdsOf, duplicateIds, textOf } from "@tests/helpers/containers";
 
@@ -28,6 +29,7 @@ function record(overrides: Partial<RoundRecord> = {}): RoundRecord {
 		channelId: "444444444444444444",
 		messageId: "555555555555555555",
 		hostId: ALICE,
+		hostName: "alice",
 		chip: 100,
 		status: "betting",
 		closesAt: null,
@@ -125,6 +127,19 @@ describe("the open table", () => {
 		);
 	});
 
+	it("says whether anybody may join or only the host may bet", () => {
+		expect(textOf(roundBettingMessage(roundView(record())))).toContain("Public table");
+		const closed = textOf(roundBettingMessage(roundView(record({ private: true }))));
+		expect(closed).toContain("Private table");
+		expect(closed).toContain("only **alice** can bet");
+	});
+
+	it("reads a round written before tables could be private as public", () => {
+		const { hostName: _hostName, ...old } = record();
+		expect(roundView(old).private).toBe(false);
+		expect(roundView(old).hostName).toBe("");
+	});
+
 	it("counts down in the reader's own client once the first bet is down", () => {
 		const text = textOf(roundBettingMessage(roundView(busy)));
 
@@ -190,17 +205,108 @@ describe("the spin and the result", () => {
 		expect(buttonsOf(message)).toEqual([]);
 	});
 
-	it("says where the ball landed and what each player got, then offers a new round", () => {
+	it("says where the ball landed, what else it paid, and offers a new round", () => {
 		const view = { ...roundView(busy), pocket: 17 };
 		const message = roundSettledMessage(view, Buffer.from("PNG"));
 		const text = textOf(message);
 
 		expect(text).toContain("# 🎯 17 black");
-		expect(text).toContain("**alice** won **7,200** (+6,800)");
-		expect(text).toContain("**bob** won **1,800** (+1,750)");
+		expect(text).toContain("Also paid: Black · Odd · 1–18 · 2nd 12 · Col 2");
 		const again = buttonsOf(message).find((found) => parseCustomId(String(found.custom_id)).action === "again");
-		expect(parseCustomId(String(again?.custom_id)).args).toEqual(["100"]);
+		expect(parseCustomId(String(again?.custom_id)).args).toEqual(["100", "public"]);
 		expect(message.files?.map((file) => file.name)).toEqual(["roulette.png", "roulette-table.png"]);
+	});
+
+	/** A winner's line has to say who, what they bet, what came back and on which spots, not only the total. */
+	it("names every winner with their stake, their winnings, their profit and each bet", () => {
+		const text = textOf(roundSettledMessage({ ...roundView(busy), pocket: 17 }, null));
+
+		expect(text).toContain("### 🏆 Winners");
+		expect(text).toContain("**alice** · bet **400** · won **7,200** · **+6,800** 🎉");
+		expect(text).toContain("❌ Red: 200 · ✅ 17: 200 → 7,200");
+		expect(text).toContain("**bob** · bet **50** · won **1,800** · **+1,750** 🎉");
+		expect(text).toContain("2 players · 450 on the table · 9,000 paid out");
+		// Bigger profit first.
+		expect(text.indexOf("**alice**")).toBeLessThan(text.indexOf("**bob**"));
+	});
+
+	it("lists everybody the wheel went against, with what they lost", () => {
+		const text = textOf(roundSettledMessage({ ...roundView(busy), pocket: 2 }, null));
+
+		expect(text).toContain("Nobody this time");
+		expect(text).toContain("### 💸 No luck");
+		expect(text).toContain("**alice** · bet **400** · lost it");
+		expect(text).toContain("❌ 17: 50");
+	});
+
+	it("says when a player won something back but still came out behind", () => {
+		const mixed = record({
+			players: {
+				[ALICE]: {
+					name: "alice",
+					joinedAt: 1,
+					bets: [
+						{ spot: "red", amount: 100 },
+						{ spot: "n5", amount: 150 },
+					],
+				},
+			},
+		});
+		expect(textOf(roundSettledMessage({ ...roundView(mixed), pocket: 1 }, null))).toContain(
+			"won **200** · **−50** overall",
+		);
+	});
+
+	it("adds chips on the same spot together in the breakdown", () => {
+		const doubled = record({
+			players: {
+				[ALICE]: {
+					name: "alice",
+					joinedAt: 1,
+					bets: [
+						{ spot: "red", amount: 100 },
+						{ spot: "red", amount: 100 },
+					],
+				},
+			},
+		});
+		expect(textOf(roundSettledMessage({ ...roundView(doubled), pocket: 1 }, null))).toContain("✅ Red: 200 → 400");
+	});
+
+	it("keeps a crowded result inside Discord's limit for one text block", () => {
+		const crowd = record({
+			players: Object.fromEntries(
+				Array.from({ length: 60 }, (_, index) => [
+					`1000000000000000${String(index).padStart(2, "0")}`,
+					{
+						name: `player-with-a-long-name-${String(index)}`,
+						joinedAt: index,
+						bets: Array.from({ length: 10 }, (_unused, spot) => ({ spot: `n${String(spot)}`, amount: 1_000 })),
+					},
+				]),
+			),
+		});
+		const message = roundSettledMessage({ ...roundView(crowd), pocket: 3 }, null);
+		const texts = (message.components[0]!.toJSON() as { components: { type: number; content?: string }[] }).components
+			.map((part) => part.content ?? "")
+			.filter((content) => content !== "");
+
+		for (const content of texts) expect(content.length).toBeLessThanOrEqual(4_000);
+		expect(texts.join("\n")).toMatch(/…and \d+ more/);
+	});
+
+	it("names the outside bets a pocket pays, and none for zero", () => {
+		expect(winningSpots(30)).toEqual(["Red", "Even", "19–36", "3rd 12", "Col 3"]);
+		expect(winningSpots(0)).toEqual([]);
+		expect(textOf(roundSettledMessage({ ...roundView(busy), pocket: 0 }, null))).toContain("only a chip on 0 pays");
+	});
+
+	it("keeps a private table's new round with its host", () => {
+		const view = { ...roundView(record({ private: true })), pocket: null };
+		const again = buttonsOf(roundSettledMessage(view, null)).find(
+			(found) => parseCustomId(String(found.custom_id)).action === "again",
+		);
+		expect(parseCustomId(String(again?.custom_id)).args).toEqual(["100", "private", ALICE]);
 	});
 
 	it("says so, and offers a new round, when nobody bet", () => {

@@ -29,7 +29,8 @@ import {
 	staked,
 } from "@lib/casino/rouletteRound.util";
 import { resolveAmount } from "@lib/format/amount.util";
-import { formatNumber } from "@lib/format/format.util";
+import { escapeMarkdown, formatNumber } from "@lib/format/format.util";
+import { type CasinoSettings } from "@testify/shared";
 
 /** The shared roulette round's money and timing: stakes go as chips land, one spin, and everybody paid from it. */
 
@@ -51,20 +52,35 @@ async function editRoundMessage(client: TestifyClient, round: RoundRecord, messa
 	}
 }
 
+/** Who opened a table, and whether anybody else may bet at it. */
+export interface TableHost {
+	userId: string;
+	name: string;
+	private: boolean;
+}
+
 /** Opens a table that waits for its first bet; null when one is already open on that message. */
 export async function openRound(
 	where: { guildId: string; channelId: string; messageId: string | null },
-	hostId: string,
+	host: TableHost,
 	chip: number,
 	now = Date.now(),
 ): Promise<RoundRecord | null> {
 	return insertRound({
 		...where,
-		hostId,
+		hostId: host.userId,
+		hostName: host.name,
+		private: host.private,
 		chip,
 		closesAt: null,
 		expiresAt: new Date(now + ROULETTE_ROUND.keepMs),
 	});
+}
+
+/** The chip a new table starts with: the usual one, moved inside whatever limits the server set. */
+export function openingChip(settings: Pick<CasinoSettings, "minBet" | "maxBet">): number {
+	const chip = Math.max(ROULETTE_ROUND.defaultChip, settings.minBet);
+	return settings.maxBet === null ? chip : Math.min(chip, settings.maxBet);
 }
 
 /** The first bet starts the countdown; only the call that started it sets the timer, so one round spins once. */
@@ -83,10 +99,14 @@ export async function rememberRoundMessage(roundId: string, messageId: string): 
 	await attachRoundMessage(roundId, messageId);
 }
 
-/** The round, or a refusal that says why a bet cannot go down on it. */
-async function openTable(roundId: string, now: number): Promise<RoundRecord> {
+/** The round, or a refusal that says why this player cannot bet on it. */
+async function openTable(roundId: string, userId: string, now: number): Promise<RoundRecord> {
 	const round = await findRound(roundId);
 	if (round?.status !== "betting") throw closed();
+	if (round.private === true && round.hostId !== userId) {
+		const host = round.hostName ? `${escapeMarkdown(round.hostName)}'s` : "somebody else's";
+		throw new UserFacingError(`That is ${host} private table. Open your own with \`/casino roulette\`.`);
+	}
 	if (round.closesAt !== null && new Date(round.closesAt).getTime() <= now) throw closed();
 	return round;
 }
@@ -99,7 +119,7 @@ export async function placeBets(
 	bets: readonly RouletteBet[],
 	now = Date.now(),
 ): Promise<RoundRecord> {
-	const round = await openTable(roundId, now);
+	const round = await openTable(roundId, seat.userId, now);
 	const placed = round.players[seat.userId]?.bets.length ?? 0;
 	const room = ROULETTE_ROUND.maxBets - placed;
 
@@ -129,7 +149,7 @@ export async function placeBets(
 
 /** What each of this player's chips is worth from now on; bets already down keep their own amount. */
 export async function changeChip(seat: Seat, roundId: string, amount: string, now = Date.now()): Promise<number> {
-	await openTable(roundId, now);
+	await openTable(roundId, seat.userId, now);
 	const account = await requireAccount(seat.guildId, seat.userId);
 	const chip = resolveAmount(amount, account.wallet);
 

@@ -13,7 +13,7 @@ function isDuplicateKey(error: unknown): boolean {
 export async function openRound(
 	round: Pick<
 		RouletteRoundRecord,
-		"guildId" | "channelId" | "messageId" | "hostId" | "chip" | "closesAt" | "expiresAt"
+		"guildId" | "channelId" | "messageId" | "hostId" | "hostName" | "private" | "chip" | "closesAt" | "expiresAt"
 	>,
 ): Promise<RoundRecord | null> {
 	try {

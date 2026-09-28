@@ -21,6 +21,8 @@ export const CASINO_COMMAND = "casino";
 export const ROULETTE_ROUND = {
 	bettingMs: 30 * SECOND_MS,
 	maxBets: 10,
+	/** What a chip is worth when a table opens, kept within the server's own bet limits. */
+	defaultChip: 100,
 	/** A round still open this long past its close lost its timer to a restart, and the sweep spins it. */
 	overdueMs: 30 * SECOND_MS,
 	/** A round is removed this long after it was opened or last due, whichever is later. */

@@ -134,13 +134,18 @@ export default defineButton({
 			case "again": {
 				if (!interaction.isButton()) return;
 				const chip = Number(roundId);
+				const [, access, hostId] = context.args;
 				if (!Number.isSafeInteger(chip) || chip <= 0) return;
+				const isPrivate = access === "private";
+				if (isPrivate && hostId !== seat.userId) {
+					throw new UserFacingError("That was a private table. Open your own with `/casino roulette`.");
+				}
 
 				await admit(context.client, seat);
 				// On the message the button sits on, so the channel keeps one table rather than a stack of them.
 				const round = await openRound(
 					{ guildId: seat.guildId, channelId: interaction.channelId, messageId: interaction.message.id },
-					seat.userId,
+					{ userId: seat.userId, name: seat.name, private: isPrivate },
 					chip,
 				);
 				if (round === null) throw new UserFacingError("A new round is already starting here.");

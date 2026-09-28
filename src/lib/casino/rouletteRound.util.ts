@@ -5,7 +5,7 @@ import { type BoardChip, rouletteBoard } from "@lib/canvas/rouletteTable.util";
 import { ROULETTE_ID, ROULETTE_ROUND, SEAT_COLOURS } from "@lib/casino/casino.constants";
 import { type RouletteBet } from "@lib/casino/casino.types";
 import { CASINO_GAME_EMOJI } from "@lib/casino/casinoSettings.util";
-import { betWins, pocketColour, rouletteReturn, spotFromKey, spotKey } from "@lib/casino/roulette.util";
+import { betWins, pocketColour, ROULETTE_SPOTS, rouletteReturn, spotFromKey, spotKey } from "@lib/casino/roulette.util";
 import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, gallery, text } from "@lib/discord/containers.util";
 import { type ContainerMessageWithFiles, type ContainerPart } from "@lib/discord/discord.types";
@@ -29,6 +29,10 @@ export interface RoundPlayer {
 
 export interface RoundView {
 	id: string;
+	hostId: string;
+	hostName: string;
+	/** Only the host may bet at a private table. */
+	private: boolean;
 	/** The chip a newcomer starts with, and the one Play again carries on. */
 	chip: number;
 	/** Null until the first bet, which starts the countdown. */
@@ -59,6 +63,9 @@ export function roundView(record: RoundRecord): RoundView {
 
 	return {
 		id: String(record._id),
+		hostId: record.hostId,
+		hostName: record.hostName ?? "",
+		private: record.private === true,
 		chip: record.chip,
 		closesAt: record.closesAt === null ? null : new Date(record.closesAt).getTime(),
 		pocket: record.pocket,
@@ -150,6 +157,13 @@ function playersText(view: RoundView): string {
 	return betting.length === 0 ? "*No bets yet. Be the first to put a chip down.*" : betting.map(playerLine).join("\n");
 }
 
+/** Says who may bet, so a reader knows whether the buttons are for them. */
+export function accessLine(view: RoundView): string {
+	if (!view.private) return "🌐 **Public table** · anybody in the channel can join";
+	const host = view.hostName === "" ? "the host" : `**${escapeMarkdown(view.hostName)}**`;
+	return `🔒 **Private table** · only ${host} can bet`;
+}
+
 function tableTotal(view: RoundView): number {
 	return view.players.reduce((sum, player) => sum + staked(player), 0);
 }
@@ -200,7 +214,7 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 	const total = tableTotal(view);
 
 	const parts: ContainerPart[] = [
-		text(`## ${CASINO_GAME_EMOJI.roulette} Place your bets!`),
+		text(`## ${CASINO_GAME_EMOJI.roulette} Place your bets!\n${accessLine(view)}`),
 		text(
 			view.closesAt === null
 				? `Waiting for the first bet. The wheel spins ${String(ROULETTE_ROUND.bettingMs / 1_000)} seconds after it lands.`
@@ -246,7 +260,7 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 /** No more bets: the wheel turning over the table as it stood when betting closed. */
 export function roundSpinningMessage(view: RoundView, gif: Buffer): ContainerMessageWithFiles {
 	const parts: ContainerPart[] = [
-		text(`## ${CASINO_GAME_EMOJI.roulette} No more bets!`),
+		text(`## ${CASINO_GAME_EMOJI.roulette} No more bets!\n${accessLine(view)}`),
 		gallery("attachment://roulette.gif", "The wheel spinning."),
 		gallery("attachment://roulette-table.png", "The table as betting closed."),
 		text(playersText(view)),
@@ -256,21 +270,102 @@ export function roundSpinningMessage(view: RoundView, gif: Buffer): ContainerMes
 	return finish(parts, [new AttachmentBuilder(gif, { name: "roulette.gif" }), boardFile(view)]);
 }
 
-function resultLine(result: PlayerResult): string {
-	const { player, returned } = result;
-	const name = `${seatEmoji(player.seat)} **${escapeMarkdown(player.name)}**`;
-	const profit = returned - result.staked;
-
-	if (returned === 0) return `${name} lost **${formatNumber(result.staked)}**`;
-	if (profit > 0) return `${name} won **${formatNumber(returned)}** (+${formatNumber(profit)}) 🎉`;
-	return `${name} got **${formatNumber(returned)}** back of ${formatNumber(result.staked)}`;
+/** Every outside bet a pocket pays, so the headline says what won as well as the number. */
+export function winningSpots(pocket: number): string[] {
+	return ROULETTE_SPOTS.filter((spot) => spot.kind !== "number" && betWins(spot, pocket)).map(betName);
 }
 
-export function playAgainRow(chip: number): ContainerPart {
+/** One entry per spot a player covered, chips on the same spot added together. */
+function betLines(player: RoundPlayer, pocket: number): string {
+	const spots = new Map<string, { bet: RouletteBet; amount: number }>();
+	for (const placed of player.bets) {
+		const key = spotKey(placed.bet);
+		const found = spots.get(key);
+		spots.set(key, { bet: placed.bet, amount: (found?.amount ?? 0) + placed.amount });
+	}
+
+	return [...spots.values()]
+		.map(({ bet, amount }) =>
+			betWins(bet, pocket)
+				? `✅ ${betName(bet)}: ${formatNumber(amount)} → ${formatNumber(amount * rouletteReturn(bet.kind))}`
+				: `❌ ${betName(bet)}: ${formatNumber(amount)}`,
+		)
+		.join(" · ");
+}
+
+function net(result: PlayerResult): string {
+	const profit = result.returned - result.staked;
+	if (profit > 0) return `**+${formatNumber(profit)}** 🎉`;
+	if (profit === 0) return "broke even";
+	return `**−${formatNumber(-profit)}** overall`;
+}
+
+function resultLine(result: PlayerResult, pocket: number): string {
+	const { player } = result;
+	const name = `${seatEmoji(player.seat)} **${escapeMarkdown(player.name)}**`;
+	const summary =
+		result.returned === 0
+			? `${name} · bet **${formatNumber(result.staked)}** · lost it`
+			: `${name} · bet **${formatNumber(result.staked)}** · won **${formatNumber(result.returned)}** · ${net(result)}`;
+	return `${summary}\n-# ${betLines(player, pocket)}`;
+}
+
+/** Keeps a list inside one text block, naming how many were left off rather than failing the message. */
+function fitted(heading: string, lines: string[], limit = 3_900): string {
+	let body = heading;
+	for (const [index, line] of lines.entries()) {
+		const rest = lines.length - index;
+		if (body.length + line.length + 1 > limit - 40) return `${body}\n-# …and ${String(rest)} more`;
+		body += `\n${line}`;
+	}
+	return body;
+}
+
+/** Winners first, biggest profit on top, then everybody the wheel went against. */
+export function resultsText(view: RoundView, pocket: number): string[] {
+	const results = roundResults(view, pocket);
+	const winners = results
+		.filter((result) => result.returned > 0)
+		.sort((a, b) => b.returned - b.staked - (a.returned - a.staked));
+	const losers = results.filter((result) => result.returned === 0).sort((a, b) => b.staked - a.staked);
+
+	const blocks: string[] = [];
+	if (winners.length > 0) {
+		blocks.push(
+			fitted(
+				`### 🏆 Winners`,
+				winners.map((result) => resultLine(result, pocket)),
+			),
+		);
+	} else {
+		blocks.push("### 🏆 Winners\n*Nobody this time. The house takes the table.*");
+	}
+	if (losers.length > 0) {
+		blocks.push(
+			fitted(
+				`### 💸 No luck`,
+				losers.map((result) => resultLine(result, pocket)),
+			),
+		);
+	}
+
+	const paid = results.reduce((sum, result) => sum + result.returned, 0);
+	const players = results.length === 1 ? "1 player" : `${String(results.length)} players`;
+	blocks.push(
+		`-# ${accessLine(view)} · ${players} · ${formatNumber(tableTotal(view))} on the table · ` +
+			`${formatNumber(paid)} paid out. Winnings are already in your wallet.`,
+	);
+	return blocks;
+}
+
+/** A private table's New round stays private and stays with its host; a public one is open to whoever presses. */
+export function playAgainRow(view: Pick<RoundView, "chip" | "private" | "hostId">): ContainerPart {
 	return row(
 		button({
-			id: customId(ROULETTE_ID, "again", String(chip)),
-			label: `New round · ${formatNumber(chip)} chip`,
+			id: view.private
+				? customId(ROULETTE_ID, "again", String(view.chip), "private", view.hostId)
+				: customId(ROULETTE_ID, "again", String(view.chip), "public"),
+			label: `New round · ${formatNumber(view.chip)} chip`,
 			emoji: CASINO_GAME_EMOJI.roulette,
 			style: ButtonStyle.Primary,
 		}),
@@ -283,25 +378,30 @@ export function roundSettledMessage(view: RoundView, still: Buffer | null): Cont
 	if (pocket === null || roundChips(view).length === 0) {
 		return finish(
 			[
-				text(`## ${CASINO_GAME_EMOJI.roulette} Roulette`),
+				text(`## ${CASINO_GAME_EMOJI.roulette} Roulette\n${accessLine(view)}`),
 				text("Nobody placed a bet before the wheel was due, so it did not spin."),
-				playAgainRow(view.chip),
+				playAgainRow(view),
 			],
 			[],
 		);
 	}
 
 	const files = [boardFile(view, pocket)];
-	const parts: ContainerPart[] = [text(`# 🎯 ${String(pocket)} ${pocketColour(pocket)}`)];
+	const also = winningSpots(pocket);
+	const parts: ContainerPart[] = [
+		text(
+			`# 🎯 ${String(pocket)} ${pocketColour(pocket)}` +
+				(also.length === 0 ? "\n-# Zero: only a chip on 0 pays." : `\n-# Also paid: ${also.join(" · ")}`),
+		),
+	];
 	if (still !== null) {
 		files.unshift(new AttachmentBuilder(still, { name: "roulette.png" }));
 		parts.push(gallery("attachment://roulette.png", `The ball landed on ${String(pocket)}.`));
 	}
 	parts.push(
 		gallery("attachment://roulette-table.png", "The table, with the winning chips ringed in gold."),
-		text(roundResults(view, pocket).map(resultLine).join("\n")),
-		text("-# Winnings are already in your wallet."),
-		playAgainRow(view.chip),
+		...resultsText(view, pocket).map((block) => text(block)),
+		playAgainRow(view),
 	);
 
 	return finish(parts, files);

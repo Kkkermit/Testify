@@ -1463,7 +1463,12 @@ channel can bet on, through `buttons/roulette.ts` — a handler that is delibera
 every press through `checkCasinoPlay`. There is a button per outside bet, a **Number…** form that takes one number or
 several, chip-size buttons scaled from the table's chip (`chipSteps`) and **Clear mine**. The countdown starts on
 the first bet, not on the post: `startClock` sets `closesAt` only while it is null, so only the call that started it
-sets the spin's timer, and later bets never push it back. Six things about it are load-bearing:
+sets the spin's timer, and later bets never push it back. The command asks for no amount: the table opens at
+`openingChip` (100, moved inside the server's bet limits) and each player picks their own size. Its one option,
+`table`, is public by default; a **private** table is still posted in the channel, since the timers edit it through
+the channel, but `openTable` refuses every bet but the host's, and its New round carries the host's id so it stays
+theirs. Every message on the table says which it is (`accessLine`). The result lists winners by profit and then
+everybody who lost, each with their stake, what came back and a line per spot. Six things about it are load-bearing:
 
 - **A round lives in `rouletterounds`, because stakes leave the wallet as each chip lands.** A press takes the stake
   with `takeStake`, then `addBets` pushes it with the open status, the close and the player's room all in the

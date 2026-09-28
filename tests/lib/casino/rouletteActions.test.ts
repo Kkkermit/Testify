@@ -4,6 +4,7 @@ import { ROULETTE_ROUND } from "@lib/casino/casino.constants";
 import {
 	changeChip,
 	clearMyBets,
+	openingChip,
 	openRound,
 	placeBets,
 	spinOverdueRounds,
@@ -79,10 +80,24 @@ describe("opening a round", () => {
 		repository.openRound.mockResolvedValue(record());
 		const bot = client();
 
-		await openRound({ guildId: ALICE.guildId, channelId: "4", messageId: null }, ALICE.userId, 100, NOW);
+		await openRound(
+			{ guildId: ALICE.guildId, channelId: "4", messageId: null },
+			{ userId: ALICE.userId, name: "alice", private: true },
+			100,
+			NOW,
+		);
 
-		expect(repository.openRound).toHaveBeenCalledWith(expect.objectContaining({ closesAt: null }));
+		expect(repository.openRound).toHaveBeenCalledWith(
+			expect.objectContaining({ closesAt: null, hostId: ALICE.userId, hostName: "alice", private: true }),
+		);
 		expect(bot.timers.after).not.toHaveBeenCalled();
+	});
+
+	/** The command no longer asks for an amount, so the opening chip has to respect the server's own limits. */
+	it("opens with the usual chip, moved inside the server's bet limits", () => {
+		expect(openingChip({ minBet: 1, maxBet: null })).toBe(ROULETTE_ROUND.defaultChip);
+		expect(openingChip({ minBet: 500, maxBet: null })).toBe(500);
+		expect(openingChip({ minBet: 1, maxBet: 50 })).toBe(50);
 	});
 });
 
@@ -164,6 +179,19 @@ describe("placing bets", () => {
 
 		await expect(placeBets(client(), ALICE, ROUND, [{ kind: "red" }], NOW)).rejects.toThrow(/already have 10/);
 		expect(takeStake).not.toHaveBeenCalled();
+	});
+
+	/** A private table is the host's alone; anybody else is refused before a coin moves. */
+	it("refuses anybody but the host at a private table", async () => {
+		const BOB = { ...ALICE, userId: "333333333333333333", name: "bob" };
+		repository.findRound.mockResolvedValue(record({ private: true, hostName: "alice" }));
+		repository.addBets.mockResolvedValue(record());
+
+		await expect(placeBets(client(), BOB, ROUND, [{ kind: "red" }], NOW)).rejects.toThrow(/alice's private table/);
+		expect(takeStake).not.toHaveBeenCalled();
+
+		await placeBets(client(), ALICE, ROUND, [{ kind: "red" }], NOW);
+		expect(takeStake).toHaveBeenCalled();
 	});
 
 	it("refuses a table that has closed or been spun", async () => {
