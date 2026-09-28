@@ -1,6 +1,7 @@
-import { randomInt } from "node:crypto";
+import { type ColorResolvable, type User } from "discord.js";
 import { ECONOMY, ECONOMY_COOLDOWNS } from "@config/constants";
 import { strings } from "@config/strings";
+import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import {
@@ -13,7 +14,32 @@ import {
 	setCooldown,
 } from "@database/repositories/economyRepository";
 import { embed, reply } from "@lib/discord";
-import { formatDuration, formatNumber } from "@lib/format";
+import { planRobbery } from "@lib/economy";
+import { discordTime, escapeMarkdown, formatDuration, formatNumber } from "@lib/format";
+
+interface Told {
+	title: string;
+	line: string;
+	result: string;
+	colour: ColorResolvable;
+	wallet: number | null;
+}
+
+function robberyEmbed(robber: User, target: User, told: Told, nextTry: number) {
+	return embed({
+		colour: told.colour,
+		author: { name: robber.username, iconURL: robber.displayAvatarURL() },
+		title: told.title,
+		description: told.line,
+		thumbnail: target.displayAvatarURL(),
+		fields: [
+			{ name: "Target", value: `<@${target.id}> · **@${escapeMarkdown(target.username)}**`, inline: true },
+			{ name: "Result", value: told.result, inline: true },
+			...(told.wallet === null ? [] : [{ name: "Your wallet", value: formatNumber(told.wallet), inline: true }]),
+			{ name: "Next try", value: discordTime(nextTry, "R"), inline: true },
+		],
+	});
+}
 
 export default defineCommand({
 	name: "rob",
@@ -46,58 +72,67 @@ export default defineCommand({
 		}
 
 		await setCooldown(guild.id, interaction.user.id, "rob", new Date(now));
+		const nextTry = now + ECONOMY_COOLDOWNS.rob;
+		const name = `**${escapeMarkdown(target.displayName)}**`;
+		const send = async (told: Told): Promise<void> => {
+			await reply(interaction, {
+				embeds: [robberyEmbed(interaction.user, target, told, nextTry)],
+				allowedMentions: { parse: [] },
+			});
+		};
 
 		// Consumed atomically, so two simultaneous robberies cannot both spend one padlock.
 		const padlocked = await removeInventoryItem(guild.id, target.id, "padlock", 1);
 		if (padlocked) {
-			await reply(interaction, {
-				embeds: [
-					embed({
-						category: "economy",
-						title: "Robbery failed",
-						description: `${target}'s padlock held. It broke in the process, but your hands are empty.`,
-					}),
-				],
-			});
-			return;
-		}
-
-		const succeeded = Math.random() < ECONOMY.robSuccessChance;
-
-		if (!succeeded) {
-			const fine = Math.floor(account.wallet * ECONOMY.robFinePercent);
-			if (fine > 0) await debitWallet(guild.id, interaction.user.id, fine);
 			await incrementCounters(guild.id, interaction.user.id, { robberyFailed: 1 });
-
-			await reply(interaction, {
-				embeds: [
-					embed({
-						category: "economy",
-						title: "Robbery failed",
-						description: `You were caught and fined **${formatNumber(fine)}**.`,
-					}),
-				],
+			await send({
+				title: `🔒 ${target.displayName}'s padlock held`,
+				line: `You went for ${name}'s wallet, but their padlock held. It broke in the process, so next time it will not.`,
+				result: "Nothing taken, nothing lost",
+				colour: theme.colours.warning,
+				wallet: null,
 			});
 			return;
 		}
 
-		const maximum = Math.floor(victim.wallet * 0.3);
-		const stolen = randomInt(1, Math.max(2, maximum + 1));
+		const plan = planRobbery({ robber: account.wallet, target: victim.wallet });
+		const line = (amount: number): string =>
+			plan.line.replaceAll("{target}", name).replaceAll("{amount}", formatNumber(amount));
 
-		const taken = await debitWallet(guild.id, target.id, stolen);
-		if (!taken) throw new UserFacingError("They emptied their wallet before you got there.");
+		if (plan.rule.success) {
+			const taken = await debitWallet(guild.id, target.id, plan.amount);
+			if (!taken) throw new UserFacingError(`${target.username} emptied their wallet before you got there.`);
 
-		await adjustWallet(guild.id, interaction.user.id, stolen);
-		await incrementCounters(guild.id, interaction.user.id, { robberySuccess: 1 });
+			const after = await adjustWallet(guild.id, interaction.user.id, plan.amount);
+			await incrementCounters(guild.id, interaction.user.id, { robberySuccess: 1 });
+			await send({
+				title: `💰 You robbed ${target.displayName}`,
+				line: line(plan.amount),
+				result: `+${formatNumber(plan.amount)}`,
+				colour: theme.colours.success,
+				wallet: after.wallet,
+			});
+			return;
+		}
 
-		await reply(interaction, {
-			embeds: [
-				embed({
-					category: "economy",
-					title: "Robbery successful",
-					description: `You took **${formatNumber(stolen)}** from ${target}.`,
-				}),
-			],
+		// A fine is taken only if the wallet still holds it; one spent since the robbery began costs nothing.
+		const paid = plan.amount > 0 ? await debitWallet(guild.id, interaction.user.id, plan.amount) : null;
+		const lost = paid === null ? 0 : plan.amount;
+		if (lost > 0 && plan.rule.toTarget === true) await adjustWallet(guild.id, target.id, lost);
+		await incrementCounters(guild.id, interaction.user.id, { robberyFailed: 1 });
+
+		await send({
+			title: `🚨 Your robbery of ${target.displayName} failed`,
+			line:
+				lost > 0 || plan.amount === 0
+					? line(lost)
+					: `${line(0)}\n-# Your wallet was already empty, so it cost you nothing.`,
+			result:
+				lost > 0
+					? `−${formatNumber(lost)}${plan.rule.toTarget === true ? ` to ${target.displayName}` : ""}`
+					: "Nothing lost",
+			colour: lost > 0 ? theme.colours.error : theme.colours.warning,
+			wallet: paid?.wallet ?? null,
 		});
 	},
 });

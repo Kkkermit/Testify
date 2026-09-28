@@ -9,6 +9,7 @@ export * from "./lotteryActions.util";
 export * from "./memberActions.util";
 export * from "./moneyPanel.util";
 export * from "./pets.util";
+export * from "./robbery.util";
 export * from "./shop.util";
 export * from "./shopScreen.util";
 export * from "./treasureActions.util";

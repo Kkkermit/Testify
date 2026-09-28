@@ -10,7 +10,7 @@ related: bank-and-wallet, shop
 `/rob` tries to take money from another member's wallet. After a try, you wait {fact:cooldown.rob} before the next.
 
 - It succeeds {fact:economy.robChance} of the time and takes part of their wallet.
-- If you are caught, you are fined {fact:economy.robFine} of your own wallet.
+- If it goes wrong you might be fined up to {fact:economy.robFine} of your own wallet, lose some of it to the person you tried to rob, or just get away with nothing.
 - The target needs at least {fact:economy.robMinWallet} in their wallet.
 
 ### Staying safe
