@@ -1,10 +1,11 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { runChecks } from "@core/checks";
+import { subcommandsOf } from "@core/command";
 import { runCommand } from "@core/errors";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/settingsRepository";
-import { countCommandUse, recordCommandTime } from "@lib/bot";
+import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 
 /** Runs `t?ban @someone` through the same code and checks as `/ban`. */
@@ -52,6 +53,16 @@ export default defineMessageHandler({
 			guildId: message.guildId,
 			surface: "prefix",
 			failed: !ok,
+		});
+		logCommandUse(client, {
+			command: command.name,
+			subcommand: subcommandsOf(command).length > 0 ? interaction.options.getSubcommand(false) || null : null,
+			surface: "prefix",
+			userId: message.author.id,
+			username: message.author.username,
+			guildName: message.guild?.name ?? null,
+			channelId: message.guild === null ? null : message.channelId,
+			ok,
 		});
 		return true;
 	},

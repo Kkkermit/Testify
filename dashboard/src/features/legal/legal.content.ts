@@ -134,7 +134,14 @@ export const PRIVACY: LegalDocument = {
 		{
 			heading: "legal.commands",
 			paragraphs: ["legal.commandsP1"],
-			list: ["legal.commandsL1", "legal.commandsL2", "legal.commandsL3", "legal.commandsL4", "legal.commandsL5"],
+			list: [
+				"legal.commandsL1",
+				"legal.commandsL2",
+				"legal.commandsL3",
+				"legal.commandsL6",
+				"legal.commandsL4",
+				"legal.commandsL5",
+			],
 		},
 		{
 			heading: "legal.stored",

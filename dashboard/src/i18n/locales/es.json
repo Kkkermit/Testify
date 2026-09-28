@@ -972,6 +972,7 @@
 		"commandsL1": "Recuentos de uso de comandos: qué comando, en qué servidor, si fue con barra o con prefijo y si falló, por día. No se guardan IDs de usuario con ellos.",
 		"commandsL2": "Tiempos de espera: tu ID de usuario y cuándo usaste un comando por última vez, guardados en memoria mientras dura la espera y perdidos al reiniciar. Las recompensas diarias y temporizadores similares se guardan con tu registro de economía.",
 		"commandsL3": "Errores: cuando un comando falla, el comando, tu nombre de usuario e ID, el nombre del servidor y el error pueden publicarse en el canal de errores del operador para que pueda arreglarlo.",
+		"commandsL6": "Registros de comandos: si el operador los activa, cada comando que ejecutas se publica en su canal de registro de comandos de barra o de prefijo con el nombre del comando, tu nombre de usuario e ID, el servidor y el canal, y si funcionó. Lo que escribiste en él no se incluye.",
 		"commandsL4": "Informes: /bug-report y /suggest envían lo que escribiste al operador, junto con tu nombre de usuario, tu ID y el nombre del servidor.",
 		"commandsL5": "Lo que escribes en un comando se usa para ejecutarlo y después se descarta, salvo que guardarlo sea el propósito del comando: un perfil, el motivo de una advertencia, el premio de un sorteo.",
 		"stored": "Qué guardan las funciones",

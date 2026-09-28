@@ -234,18 +234,21 @@ It asks for each value, checks it as you type, and writes the file for you. Requ
 will not let you skip them. Prefer doing it by hand? Copy `.env.development.example` to `.env.development` (or
 `.env.example` to `.env`) and fill it in.
 
-| Variable               | Required | What it is                                                                                       |
-| ---------------------- | :------: | ------------------------------------------------------------------------------------------------ |
-| `DISCORD_TOKEN`        |    ✅    | The token from step 2                                                                            |
-| `DISCORD_CLIENT_ID`    |    ✅    | **General Information → Application ID** in the Developer Portal                                 |
-| `DISCORD_OWNER_IDS`    |    ✅    | Your Discord user ID. Comma-separate for several owners                                          |
-| `MONGODB_URI`          |    ✅    | The connection string from step 4                                                                |
-| `DISCORD_DEV_GUILD_ID` |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
-| `LOG_LEVEL`            |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
-| `CHANNEL_ERROR_LOG`    |    —     | Where command failures are reported                                                              |
-| `CHANNEL_GUILD_LOG`    |    —     | Where server joins and leaves are reported                                                       |
-| `CHANNEL_DM_LOG`       |    —     | Where DMs to the bot are logged                                                                  |
-| `CHANNEL_FEEDBACK_LOG` |    —     | Where `/suggest` and `/bug-report` land                                                          |
+| Variable                     | Required | What it is                                                                                       |
+| ---------------------------- | :------: | ------------------------------------------------------------------------------------------------ |
+| `DISCORD_TOKEN`              |    ✅    | The token from step 2                                                                            |
+| `DISCORD_CLIENT_ID`          |    ✅    | **General Information → Application ID** in the Developer Portal                                 |
+| `DISCORD_OWNER_IDS`          |    ✅    | Your Discord user ID. Comma-separate for several owners                                          |
+| `MONGODB_URI`                |    ✅    | The connection string from step 4                                                                |
+| `DISCORD_DEV_GUILD_ID`       |    —     | A test server ID. Commands register there only, so a half-built one stays off every other server |
+| `LOG_LEVEL`                  |    —     | `trace`, `debug`, `info` (default), `warn`, `error` or `fatal`                                   |
+| `CHANNEL_ERROR_LOG`          |    —     | Where command failures are reported                                                              |
+| `CHANNEL_GUILD_LOG`          |    —     | Where server joins and leaves are reported                                                       |
+| `CHANNEL_DM_LOG`             |    —     | Where DMs to the bot are logged                                                                  |
+| `CHANNEL_SLASH_COMMAND_LOG`  |    —     | Where every slash command is logged: which one, by whom, where, and whether it worked            |
+| `CHANNEL_PREFIX_COMMAND_LOG` |    —     | The same for every prefix command                                                                |
+| `CHANNEL_BUG_REPORT_LOG`     |    —     | Where `/bug-report` lands                                                                        |
+| `CHANNEL_SUGGESTION_LOG`     |    —     | Where `/suggest` lands                                                                           |
 
 Leave any optional value blank and that feature simply stays off. Nothing breaks.
 

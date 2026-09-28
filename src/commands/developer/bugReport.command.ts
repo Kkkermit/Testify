@@ -1,6 +1,6 @@
-import { WebhookClient } from "discord.js";
 import { defineCommand } from "@core/command";
 import { SetupError } from "@core/errors";
+import { postToLogChannel } from "@lib/bot";
 import { embed, reply, successEmbed } from "@lib/discord";
 
 export default defineCommand({
@@ -15,28 +15,24 @@ export default defineCommand({
 	],
 
 	async run(interaction, client) {
-		const url = client.env.CHANNEL_FEEDBACK_LOG;
-		if (url === undefined) throw new SetupError("Bug reporting is not configured on this instance.");
+		const channelId = client.env.CHANNEL_BUG_REPORT_LOG;
+		if (channelId === undefined) throw new SetupError("Bug reporting is not configured on this instance.");
 
-		const webhook = new WebhookClient({ url });
-		try {
-			await webhook.send({
-				embeds: [
-					embed({
-						category: "developer",
-						title: "Bug report",
-						description: interaction.options.getString("summary", true),
-						fields: [
-							{ name: "Details", value: interaction.options.getString("details", true) },
-							{ name: "Reported by", value: `${interaction.user.username} (\`${interaction.user.id}\`)`, inline: true },
-							{ name: "Server", value: interaction.guild?.name ?? "Direct message", inline: true },
-						],
-					}),
-				],
-			});
-		} finally {
-			webhook.destroy();
-		}
+		const landed = await postToLogChannel(client, channelId, {
+			embeds: [
+				embed({
+					category: "developer",
+					title: "Bug report",
+					description: interaction.options.getString("summary", true),
+					fields: [
+						{ name: "Details", value: interaction.options.getString("details", true) },
+						{ name: "Reported by", value: `${interaction.user.username} (\`${interaction.user.id}\`)`, inline: true },
+						{ name: "Server", value: interaction.guild?.name ?? "Direct message", inline: true },
+					],
+				}),
+			],
+		});
+		if (!landed) throw new SetupError("Bug reporting is set up with a channel the bot cannot post in.");
 
 		await reply(interaction, {
 			embeds: [successEmbed("Thanks. Your report has been sent.")],

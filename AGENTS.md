@@ -90,8 +90,8 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 
 **Required env:** `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, `DISCORD_OWNER_IDS` (comma-separated), `MONGODB_URI`.
 **Optional:** `NODE_ENV`, `LOG_LEVEL`,
-`DISCORD_DEV_GUILD_ID`, `CHANNEL_ERROR_LOG`, `CHANNEL_GUILD_LOG`,
-`CHANNEL_DM_LOG`, `CHANNEL_FEEDBACK_LOG`, `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
+`DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report
+and suggestion — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
 optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
 `DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
 
@@ -792,6 +792,19 @@ script draws with the same `painter`, `box`, `badge` and `stepLine`. Three thing
   edge of one line out. Keep every box line under 80 columns, which is why the hints are short.
 
 `bannerLines()` is pure and unit-tested, `printBanner()` writes once.
+
+**Log channels are the third job: posts the operator reads in Discord.** Each `CHANNEL_*_LOG` is optional and off
+while blank. `CHANNEL_ERROR_LOG` gets command failures with their reference, `CHANNEL_GUILD_LOG` servers the bot
+joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_REPORT_LOG` and
+`CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
+`postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
+neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
+`CHANNEL_SLASH_COMMAND_LOG` and `CHANNEL_PREFIX_COMMAND_LOG` log every command run, one per surface.
+`logCommandUse` queues a line in memory — the command, who ran it, where and whether it worked, **never what was
+typed**, since `/ask` promises its question is not kept — and `flushCommandLog` posts each queue every five seconds,
+at most five messages a flush because that is what Discord allows a channel, and once more at shutdown. A backlog
+past `COMMAND_LOG_LIMITS.maxWaiting` drops its oldest lines and says how many. The privacy notice names the
+command logs (`legal.commandsL6`).
 
 Glyphs: `✓` done, `↻` in progress, `⚠` warning, `➜` a measurement. Rules are `"═".repeat(n)` heavy,
 `"─".repeat(n)` thin. Emoji in the banner must be **2 columns wide** or the alignment breaks — 🗃 (U+1F5C3) is
