@@ -5,7 +5,7 @@
             ██║   ███████╗███████║   ██║   ██║██║        ██║
             ╚═╝   ╚══════╝╚══════╝   ╚═╝   ╚═╝╚═╝        ╚═╝    -->
 
-<img align="center" alt="Testify banner" src="https://i.postimg.cc/v87R8PSx/test.png">
+<img align="center" alt="Testify: the all-in-one Discord bot, shown with its web dashboard, music player and rank card" src="docs/banner.png">
 
 <p align="center">
 <img align="center" alt="GitHub Issues" src="https://img.shields.io/github/issues/Kkkermit/Testify?style=for-the-badge">
