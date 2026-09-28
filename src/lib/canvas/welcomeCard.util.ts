@@ -1,6 +1,7 @@
 import { loadImage } from "@napi-rs/canvas";
 import { type AttachmentBuilder } from "discord.js";
-import { createCanvas, drawAvatarOrInitial, fitFont, roundedRect, toAttachment } from "@lib/canvas/canvas.util";
+import { createCanvas, drawAvatarOrInitial, roundedRect, toAttachment } from "@lib/canvas/canvas.util";
+import { DISPLAY, drawText } from "@lib/canvas/text.util";
 import { formatNumber } from "@lib/format/format.util";
 
 /** The join card: avatar, name, and which member they are. */
@@ -101,20 +102,31 @@ export async function renderWelcomeCard(data: WelcomeCardData): Promise<Attachme
 
 	await drawAvatarOrInitial(draw, data.avatarUrl, avatarX, avatarY, avatarSize, data.displayName, PALETTE.accent);
 
-	draw.textAlign = "center";
-	draw.textBaseline = "middle";
-
-	draw.fillStyle = PALETTE.muted;
-	fitFont(draw, copy.heading, WIDTH - 120, 30, "sans-serif");
-	draw.fillText(copy.heading, WIDTH / 2, avatarY + avatarSize + 42);
-
-	draw.fillStyle = PALETTE.text;
-	fitFont(draw, copy.name, WIDTH - 120, 52, "sans-serif");
-	draw.fillText(copy.name, WIDTH / 2, avatarY + avatarSize + 92);
-
-	draw.fillStyle = PALETTE.muted;
-	draw.font = "26px sans-serif";
-	draw.fillText(copy.position, WIDTH / 2, avatarY + avatarSize + 136);
+	const centre = WIDTH / 2;
+	const room = WIDTH - 120;
+	drawText(draw, copy.heading, centre, avatarY + avatarSize + 42, {
+		size: 30,
+		weight: 600,
+		colour: PALETTE.muted,
+		align: "center",
+		maxWidth: room,
+		minSize: 18,
+	});
+	drawText(draw, copy.name, centre, avatarY + avatarSize + 92, {
+		size: 52,
+		weight: 700,
+		family: DISPLAY,
+		colour: PALETTE.text,
+		align: "center",
+		maxWidth: room,
+		minSize: 28,
+	});
+	drawText(draw, copy.position, centre, avatarY + avatarSize + 136, {
+		size: 26,
+		colour: PALETTE.muted,
+		align: "center",
+		maxWidth: room,
+	});
 
 	return toAttachment(canvas, "welcome.png");
 }

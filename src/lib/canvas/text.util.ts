@@ -22,6 +22,8 @@ export interface DrawOptions extends TextStyle {
 	/** Past this width the text shrinks towards `minSize`, then ends in an ellipsis. */
 	maxWidth?: number;
 	minSize?: number;
+	/** Drawn under the fill, so the text keeps its shape on a busy background. */
+	outline?: { colour: string; width: number };
 }
 
 /** Each bundled file covers one script, so a family is a chain of them. */
@@ -207,12 +209,49 @@ export function measureText(ctx: SKRSContext2D, text: string, style: TextStyle):
 function ellipsize(ctx: SKRSContext2D, text: string, style: TextStyle, size: number, maxWidth: number): string {
 	const parts = clusters(text);
 
-	for (let keep = parts.length - 1; keep > 0; keep -= 1) {
+	for (let keep = parts.length; keep > 0; keep -= 1) {
 		const candidate = `${parts.slice(0, keep).join("").trimEnd()}…`;
 		if (totalWidth(layout(ctx, candidate, style, size)) <= maxWidth) return candidate;
 	}
 
 	return "…";
+}
+
+/** Wraps at spaces to at most `maxLines`, ending the last line in an ellipsis when anything was left out. */
+export function wrapLines(
+	ctx: SKRSContext2D,
+	text: string,
+	style: TextStyle,
+	maxWidth: number,
+	maxLines = Number.POSITIVE_INFINITY,
+): string[] {
+	const words = text.split(/\s+/).filter((word) => word !== "");
+	const lines: string[] = [];
+	let current = "";
+
+	for (const word of words) {
+		const candidate = current === "" ? word : `${current} ${word}`;
+		if (current === "" || measureText(ctx, candidate, style) <= maxWidth) {
+			current = candidate;
+			continue;
+		}
+
+		lines.push(current);
+		current = word;
+		if (lines.length === maxLines) break;
+	}
+
+	if (lines.length < maxLines && current !== "") lines.push(current);
+
+	const clipped = lines.join(" ").length < words.join(" ").length;
+	const last = lines.length - 1;
+	if (last >= 0 && (clipped || measureText(ctx, lines[last]!, style) > maxWidth)) {
+		const shown = clipped ? `${lines[last]!}…` : lines[last]!;
+		lines[last] =
+			measureText(ctx, shown, style) <= maxWidth ? shown : ellipsize(ctx, lines[last]!, style, style.size, maxWidth);
+	}
+
+	return lines;
 }
 
 /** Draws text at a middle baseline and returns the width it took. */
@@ -241,6 +280,12 @@ export function drawText(ctx: SKRSContext2D, text: string, x: number, y: number,
 	ctx.fillStyle = options.colour;
 	for (const run of runs) {
 		ctx.font = fontString(run.family, size, weight);
+		if (options.outline !== undefined) {
+			ctx.lineJoin = "round";
+			ctx.lineWidth = options.outline.width;
+			ctx.strokeStyle = options.outline.colour;
+			ctx.strokeText(run.text, cursor, y);
+		}
 		ctx.fillText(run.text, cursor, y);
 		cursor += run.width;
 	}

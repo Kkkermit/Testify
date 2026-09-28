@@ -1,5 +1,6 @@
 import { type Canvas, createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { roundedRect } from "@lib/canvas/canvas.util";
+import { drawText, measureText, type TextStyle } from "@lib/canvas/text.util";
 import { isRed } from "@lib/casino/cards.util";
 import { type Card, type Suit } from "@lib/casino/casino.types";
 
@@ -128,11 +129,14 @@ export function drawCard(
 		} else {
 			ctx.translate(x, y);
 		}
-		ctx.fillStyle = colour;
-		ctx.font = `bold ${Math.round(22 * scale)}px sans-serif`;
-		ctx.textAlign = "center";
-		ctx.textBaseline = "top";
-		ctx.fillText(card.rank, 17 * scale, 8 * scale);
+		drawText(ctx, card.rank, 17 * scale, 21 * scale, {
+			size: Math.round(24 * scale),
+			weight: 700,
+			colour,
+			align: "center",
+			maxWidth: 30 * scale,
+			minSize: Math.round(16 * scale),
+		});
 		drawSuit(ctx, card.suit, 17 * scale, 42 * scale, 15 * scale);
 		ctx.restore();
 	};
@@ -141,11 +145,12 @@ export function drawCard(
 
 	const face = card.rank === "J" || card.rank === "Q" || card.rank === "K";
 	if (face) {
-		ctx.fillStyle = colour;
-		ctx.font = `bold ${Math.round(42 * scale)}px sans-serif`;
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText(card.rank, x + width / 2, y + height / 2 - 12 * scale);
+		drawText(ctx, card.rank, x + width / 2, y + height / 2 - 12 * scale, {
+			size: Math.round(44 * scale),
+			weight: 700,
+			colour,
+			align: "center",
+		});
 		drawSuit(ctx, card.suit, x + width / 2, y + height / 2 + 26 * scale, 22 * scale);
 	} else {
 		drawSuit(ctx, card.suit, x + width / 2, y + height / 2, (card.rank === "A" ? 46 : 38) * scale);
@@ -165,17 +170,41 @@ export function drawFelt(ctx: SKRSContext2D, width: number, height: number): voi
 	ctx.stroke();
 }
 
-/** A rounded label with a figure in it, used for totals and the pot. */
-export function drawPill(ctx: SKRSContext2D, label: string, x: number, y: number, fill = "rgba(0, 0, 0, 0.45)"): void {
-	ctx.font = "bold 16px sans-serif";
-	const width = ctx.measureText(label).width + 22;
-	roundedRect(ctx, x, y - 13, width, 26, 13);
-	ctx.fillStyle = fill;
+export interface PillOptions {
+	/** Whether `x` is the pill's left edge or its centre. */
+	align?: "left" | "center";
+	/** The figure's colour; the label is always a quieter white. */
+	accent?: string;
+}
+
+const PILL = { height: 32, padding: 14, gap: 8 } as const;
+const PILL_LABEL: TextStyle = { size: 14, weight: 600, colour: "rgba(255, 255, 255, 0.72)" };
+
+/** A dark rounded label with a figure beside it, used for totals and the pot; returns its width. */
+export function drawPill(
+	ctx: SKRSContext2D,
+	label: string,
+	value: string,
+	x: number,
+	y: number,
+	options: PillOptions = {},
+): number {
+	const figure: TextStyle = { size: 19, weight: 700, colour: options.accent ?? "#ffffff" };
+	const labelWidth = measureText(ctx, label, PILL_LABEL);
+	const width = PILL.padding * 2 + labelWidth + PILL.gap + measureText(ctx, value, figure);
+	const left = options.align === "center" ? x - width / 2 : x;
+
+	roundedRect(ctx, left, y - PILL.height / 2, width, PILL.height, PILL.height / 2);
+	ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 	ctx.fill();
-	ctx.fillStyle = "#ffffff";
-	ctx.textAlign = "left";
-	ctx.textBaseline = "middle";
-	ctx.fillText(label, x + 11, y + 1);
+	ctx.lineWidth = 1;
+	ctx.strokeStyle = "rgba(255, 255, 255, 0.14)";
+	ctx.stroke();
+
+	drawText(ctx, label, left + PILL.padding, y, PILL_LABEL);
+	drawText(ctx, value, left + PILL.padding + labelWidth + PILL.gap, y, figure);
+
+	return width;
 }
 
 /** Cards overlap once a hand grows past what fits, so a long hand never runs off the table. */

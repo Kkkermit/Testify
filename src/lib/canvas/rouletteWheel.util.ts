@@ -1,5 +1,6 @@
 import { type Canvas, createCanvas, type SKRSContext2D } from "@napi-rs/canvas";
 import { type AnimationFrame, encodeAnimation } from "@lib/canvas/gif.util";
+import { drawText } from "@lib/canvas/text.util";
 import { pocketColour, WHEEL_ORDER } from "@lib/casino/roulette.util";
 
 /** A single-zero wheel drawn from above, with the ball's path worked out as plain maths so it can be tested. */
@@ -106,11 +107,12 @@ function drawStaticWheel(ctx: SKRSContext2D): void {
 		ctx.save();
 		ctx.translate(CENTRE, CENTRE);
 		ctx.rotate(middle + Math.PI / 2);
-		ctx.fillStyle = "#f4efe3";
-		ctx.font = "bold 13px sans-serif";
-		ctx.textAlign = "center";
-		ctx.textBaseline = "middle";
-		ctx.fillText(String(pocket), 0, -(WHEEL_RADII.trackInner + WHEEL_RADII.numbersInner) / 2);
+		drawText(ctx, String(pocket), 0, -(WHEEL_RADII.trackInner + WHEEL_RADII.numbersInner) / 2, {
+			size: 13,
+			weight: 700,
+			colour: "#f4efe3",
+			align: "center",
+		});
 		ctx.restore();
 	});
 
@@ -205,11 +207,12 @@ function drawResult(ctx: SKRSContext2D, pocket: number): void {
 	ctx.strokeStyle = "#ffd76a";
 	ctx.stroke();
 
-	ctx.fillStyle = "#ffffff";
-	ctx.font = "bold 30px sans-serif";
-	ctx.textAlign = "center";
-	ctx.textBaseline = "middle";
-	ctx.fillText(String(pocket), CENTRE, CENTRE + 1);
+	drawText(ctx, String(pocket), CENTRE, CENTRE + 1, {
+		size: 30,
+		weight: 700,
+		colour: "#ffffff",
+		align: "center",
+	});
 }
 
 let wheelLayer: Canvas | null = null;

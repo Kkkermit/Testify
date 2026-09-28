@@ -22,35 +22,6 @@ export function toAttachment(canvas: Canvas, name: string): AttachmentBuilder {
 	return new AttachmentBuilder(canvas.toBuffer("image/png"), { name });
 }
 
-/** Wraps text to `maxWidth`, honouring the context's current font. */
-export function wrapText(ctx: SKRSContext2D, text: string, maxWidth: number): string[] {
-	const lines: string[] = [];
-	let current = "";
-
-	for (const word of text.split(/\s+/)) {
-		const candidate = current.length === 0 ? word : `${current} ${word}`;
-		if (ctx.measureText(candidate).width > maxWidth && current.length > 0) {
-			lines.push(current);
-			current = word;
-		} else {
-			current = candidate;
-		}
-	}
-
-	if (current.length > 0) lines.push(current);
-	return lines;
-}
-
-/** Shrinks the font size until the text fits, then returns the size that was used. */
-export function fitFont(ctx: SKRSContext2D, text: string, maxWidth: number, start: number, family: string): number {
-	let size = start;
-	do {
-		ctx.font = `${size}px ${family}`;
-		size -= 1;
-	} while (ctx.measureText(text).width > maxWidth && size > 8);
-	return size + 1;
-}
-
 export function roundedRect(
 	ctx: SKRSContext2D,
 	x: number,
