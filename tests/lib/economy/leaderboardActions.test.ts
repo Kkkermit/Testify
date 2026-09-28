@@ -14,6 +14,7 @@ import {
 	footerText,
 } from "@lib/economy/leaderboardActions.util";
 import { boardEntries, decorateRows, standingOnBoard } from "@lib/economy/memberActions.util";
+import { BOARD_SCOPES, MONEY_SORTS } from "@testify/shared";
 
 jest.mock("@lib/economy/memberActions.util", () => ({
 	SERVER_TOTALS: { sort: "total", scope: "server", guildIds: [] },
@@ -85,6 +86,19 @@ describe("boardControls", () => {
 			["wallet", "server", OWNER],
 			["bank", "server", OWNER],
 		]);
+	});
+
+	/** The current scope and the current sort both lead to this board, and Discord refused the whole reply. */
+	it("never gives two buttons the same id, on any board", () => {
+		for (const sort of MONEY_SORTS) {
+			for (const scope of BOARD_SCOPES) {
+				const ids = boardControls(board({ sort, scope }), OWNER).flatMap((built) =>
+					(built.toJSON().components as { custom_id: string }[]).map((part) => part.custom_id),
+				);
+
+				expect(new Set(ids).size).toBe(ids.length);
+			}
+		}
 	});
 
 	it("marks the board showing by making it the one that cannot be pressed", () => {

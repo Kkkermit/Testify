@@ -32,7 +32,7 @@ describe("the leaderboard buttons", () => {
 	/** The servers to add up come from the bot, never from anything a button carries. */
 	it("redraws the money board it names, over the bot's own servers", async () => {
 		const interaction = pressed();
-		await leaderboard.run(interaction as never, { client, action: "view", args: ["wallet", "global", OWNER] });
+		await leaderboard.run(interaction as never, { client, action: "scope", args: ["wallet", "global", OWNER] });
 
 		expect(interaction.deferUpdate).toHaveBeenCalled();
 		expect(boardMessage).toHaveBeenCalledWith(GUILD, { kind: "economy", sort: "wallet", scope: "global" }, OWNER, [
@@ -43,7 +43,7 @@ describe("the leaderboard buttons", () => {
 	/** Without the empty list the edit kept the old picture and stacked the new one under it. */
 	it("replaces the picture rather than adding another", async () => {
 		const interaction = pressed();
-		await leaderboard.run(interaction as never, { client, action: "view", args: ["total", "server", OWNER] });
+		await leaderboard.run(interaction as never, { client, action: "sort", args: ["total", "server", OWNER] });
 
 		expect(interaction.editReply).toHaveBeenCalledWith({
 			files: ["picture"],
@@ -54,7 +54,7 @@ describe("the leaderboard buttons", () => {
 
 	it("ignores a button carrying a board that does not exist", async () => {
 		const interaction = pressed();
-		await leaderboard.run(interaction as never, { client, action: "view", args: ["pets", "server", OWNER] });
+		await leaderboard.run(interaction as never, { client, action: "sort", args: ["pets", "server", OWNER] });
 
 		expect(interaction.deferUpdate).not.toHaveBeenCalled();
 		expect(boardMessage).not.toHaveBeenCalled();

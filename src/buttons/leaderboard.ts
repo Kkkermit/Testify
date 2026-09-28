@@ -8,7 +8,13 @@ export default defineButton({
 	ownerOnly: true,
 
 	async run(interaction, context) {
-		if (!interaction.isButton() || interaction.guild === null || context.action !== "view") return;
+		if (
+			!interaction.isButton() ||
+			interaction.guild === null ||
+			(context.action !== "scope" && context.action !== "sort")
+		) {
+			return;
+		}
 
 		const [sort, scope] = context.args;
 		const known = MONEY_SORTS.find((candidate) => candidate === sort);

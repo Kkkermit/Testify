@@ -90,9 +90,16 @@ const SORT_BUTTONS: Record<MoneySort, { label: string; emoji: string }> = {
 export function boardControls(state: BoardState, userId: string): ActionRowBuilder<MessageActionRowComponentBuilder>[] {
 	if (state.kind === "levels") return [];
 
-	const choice = (sort: MoneySort, scope: BoardScope, current: boolean, look: { label: string; emoji: string }) =>
+	// One action per row, since the current scope and sort both lead here and Discord refuses a repeated id.
+	const choice = (
+		action: "scope" | "sort",
+		sort: MoneySort,
+		scope: BoardScope,
+		current: boolean,
+		look: { label: string; emoji: string },
+	) =>
 		button({
-			id: customId(LEADERBOARD_ID, "view", sort, scope, userId),
+			id: customId(LEADERBOARD_ID, action, sort, scope, userId),
 			label: look.label,
 			emoji: look.emoji,
 			// The board already showing is marked by being the one that cannot be pressed.
@@ -101,8 +108,10 @@ export function boardControls(state: BoardState, userId: string): ActionRowBuild
 		});
 
 	return [
-		row(...BOARD_SCOPES.map((scope) => choice(state.sort, scope, scope === state.scope, SCOPE_BUTTONS[scope]))),
-		row(...MONEY_SORTS.map((sort) => choice(sort, state.scope, sort === state.sort, SORT_BUTTONS[sort]))),
+		row(
+			...BOARD_SCOPES.map((scope) => choice("scope", state.sort, scope, scope === state.scope, SCOPE_BUTTONS[scope])),
+		),
+		row(...MONEY_SORTS.map((sort) => choice("sort", sort, state.scope, sort === state.sort, SORT_BUTTONS[sort]))),
 	];
 }
 
