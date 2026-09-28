@@ -48,18 +48,23 @@ export function splitArgs(input: string): string[] {
 export interface ParsedMessage {
 	name: string;
 	args: string[];
+	/** The prefix as it was typed, or null when the bot was mentioned instead. */
+	prefix: string | null;
 }
 
 /** Finds the command name in a message. */
 export function parseMessage(content: string, prefix: string, botId: string): ParsedMessage | null {
 	const mention = new RegExp(`^<@!?${botId}>\\s+`);
-	const used = mention.exec(content)?.[0] ?? (content.startsWith(prefix) ? prefix : null);
+	// `T?help` reaches the same command as `t?help`, the way a phone's auto-capitalisation types it.
+	const mentioned = mention.exec(content)?.[0] ?? null;
+	const typed = content.slice(0, prefix.length);
+	const used = mentioned ?? (typed.toLowerCase() === prefix.toLowerCase() ? typed : null);
 	if (used === null) return null;
 
 	const [name, ...args] = splitArgs(content.slice(used.length).trim());
 	if (name === undefined || name === "") return null;
 
-	return { name: name.toLowerCase(), args };
+	return { name: name.toLowerCase(), args, prefix: mentioned === null ? used : null };
 }
 
 /** Answers the option questions a command asks. */

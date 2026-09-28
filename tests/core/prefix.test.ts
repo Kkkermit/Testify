@@ -74,16 +74,24 @@ describe("splitArgs", () => {
 
 describe("parseMessage", () => {
 	it("reads a command behind the prefix", () => {
-		expect(parseMessage("t?ban bob", "t?", BOT)).toEqual({ name: "ban", args: ["bob"] });
+		expect(parseMessage("t?ban bob", "t?", BOT)).toEqual({ name: "ban", args: ["bob"], prefix: "t?" });
 	});
 
 	it("lowercases the command name but leaves the arguments alone", () => {
-		expect(parseMessage("t?BaN Bob", "t?", BOT)).toEqual({ name: "ban", args: ["Bob"] });
+		expect(parseMessage("t?BaN Bob", "t?", BOT)).toEqual({ name: "ban", args: ["Bob"], prefix: "t?" });
+	});
+
+	/** A phone capitalises the first letter, so `T?help` was ignored while `t?help` worked. */
+	it("accepts the prefix in any case", () => {
+		expect(parseMessage("T?ban bob", "t?", BOT)).toEqual({ name: "ban", args: ["bob"], prefix: "T?" });
+		expect(parseMessage("tb!ping", "TB!", BOT)).toEqual({ name: "ping", args: [], prefix: "tb!" });
+		expect(parseMessage("TB!ping", "tb!", BOT)).toEqual({ name: "ping", args: [], prefix: "TB!" });
+		expect(parseMessage("r?ping", "t?", BOT)).toBeNull();
 	});
 
 	it("accepts a mention instead of the prefix", () => {
-		expect(parseMessage(`<@${BOT}> ping`, "t?", BOT)).toEqual({ name: "ping", args: [] });
-		expect(parseMessage(`<@!${BOT}> ping`, "t?", BOT)).toEqual({ name: "ping", args: [] });
+		expect(parseMessage(`<@${BOT}> ping`, "t?", BOT)).toEqual({ name: "ping", args: [], prefix: null });
+		expect(parseMessage(`<@!${BOT}> ping`, "t?", BOT)).toEqual({ name: "ping", args: [], prefix: null });
 	});
 
 	it("ignores anything not addressed to the bot", () => {
@@ -97,7 +105,7 @@ describe("parseMessage", () => {
 	});
 
 	it("honours a server's own prefix", () => {
-		expect(parseMessage("!ping", "!", BOT)).toEqual({ name: "ping", args: [] });
+		expect(parseMessage("!ping", "!", BOT)).toEqual({ name: "ping", args: [], prefix: "!" });
 		expect(parseMessage("t?ping", "!", BOT)).toBeNull();
 	});
 });
