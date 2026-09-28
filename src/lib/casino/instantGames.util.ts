@@ -1,5 +1,6 @@
 import { randomInt } from "node:crypto";
 import { coinStill, coinToss, diceRoll, diceStill } from "@lib/canvas/chanceArt.util";
+import { rouletteBoard } from "@lib/canvas/rouletteTable.util";
 import { rouletteSpin, rouletteStill } from "@lib/canvas/rouletteWheel.util";
 import { slotsSpin, slotsStill } from "@lib/canvas/slotMachine.util";
 import {
@@ -13,13 +14,16 @@ import {
 import { COINFLIP_RETURN, DICE_BET_LABELS, DICE_RETURNS, diceWins, flipCoin, rollDice } from "@lib/casino/chance.util";
 import {
 	betLabel,
-	betWins,
+	decodeSpots,
+	encodeSpots,
 	isRouletteBetKind,
 	pocketColour,
-	rouletteReturn,
+	settleSpots,
 	spinRoulette,
+	spotsLine,
 } from "@lib/casino/roulette.util";
 import { slotsReturn, spinSlots } from "@lib/casino/slots.util";
+import { formatNumber } from "@lib/format/format.util";
 import { type CasinoGame } from "@testify/shared";
 
 /** The games settled in one go: the result is decided and paid first, and the picture shows what already happened. */
@@ -36,10 +40,14 @@ export interface InstantOutcome {
 	result: string;
 	/** The call, packed small enough to ride in a Play again button. */
 	again: string;
+	/** What Play again stakes, when it is not the whole bet: roulette carries its chip, not the table's total. */
+	againStake?: number;
 	/** The file name the pictures are attached under. */
 	file: string;
 	animate(): { gif: Buffer; durationMs: number };
 	still(): Buffer;
+	/** A second picture under the first: roulette's layout, with every chip that was on it. */
+	board?(): Buffer;
 }
 
 const SYMBOL_NAMES: Record<SlotSymbol, string> = {
@@ -52,20 +60,43 @@ const SYMBOL_NAMES: Record<SlotSymbol, string> = {
 	diamond: "Diamond",
 };
 
-export function rouletteOutcome(bet: RouletteBet, stake: number, roll: Roll = randomInt): InstantOutcome {
+/** Every spot gets an equal share of the stake, so a table of five 100 chips is a stake of 500. */
+export function rouletteOutcome(bets: readonly RouletteBet[], stake: number, roll: Roll = randomInt): InstantOutcome {
+	const chip = Math.floor(stake / Math.max(1, bets.length));
 	const pocket = spinRoulette(roll);
-	const won = betWins(bet, pocket);
+	const { returned, winners } = settleSpots(bets, chip, pocket);
+	const many = bets.length > 1;
 
 	return {
 		game: "roulette",
-		betLine: betLabel(bet),
-		returned: won ? stake * rouletteReturn(bet.kind) : 0,
-		result: `The ball landed on **${pocket} ${pocketColour(pocket)}**.`,
-		again: bet.kind === "number" ? `n${bet.number ?? 0}` : bet.kind,
+		betLine: many ? `${spotsLine(bets)} · ${formatNumber(chip)} each` : betLabel(bets[0] ?? { kind: "red" }),
+		returned,
+		result:
+			`The ball landed on **${pocket} ${pocketColour(pocket)}**.` +
+			(many ? ` ${String(winners.length)} of your ${String(bets.length)} bets won.` : ""),
+		again: `t${encodeSpots(bets)}`,
+		againStake: chip,
 		file: "roulette",
 		animate: () => rouletteSpin(pocket),
 		still: () => rouletteStill(pocket),
+		board: () => rouletteBoard({ bets, chip, pocket }),
 	};
+}
+
+/** The bets a roulette Play again carries: `t` and a mask of spots, or one bet from a button made before tables. */
+export function rouletteAgainBets(again: string): RouletteBet[] | null {
+	if (again.startsWith("t")) {
+		const bets = decodeSpots(again.slice(1));
+		return bets === null || bets.length === 0 ? null : bets;
+	}
+
+	const number = /^n(\d{1,2})$/.exec(again);
+	if (number !== null) {
+		const pocket = Number.parseInt(number[1]!, 10);
+		return pocket <= 36 ? [{ kind: "number", number: pocket }] : null;
+	}
+
+	return isRouletteBetKind(again) && again !== "number" ? [{ kind: again }] : null;
 }
 
 export function slotsOutcome(stake: number, roll: Roll = randomInt): InstantOutcome {
@@ -126,12 +157,8 @@ export function outcomeFor(
 ): InstantOutcome | null {
 	switch (game) {
 		case "roulette": {
-			const number = /^n(\d{1,2})$/.exec(again);
-			if (number !== null) {
-				const pocket = Number.parseInt(number[1]!, 10);
-				return pocket <= 36 ? rouletteOutcome({ kind: "number", number: pocket }, stake, roll) : null;
-			}
-			return isRouletteBetKind(again) && again !== "number" ? rouletteOutcome({ kind: again }, stake, roll) : null;
+			const bets = rouletteAgainBets(again);
+			return bets === null ? null : rouletteOutcome(bets, stake * bets.length, roll);
 		}
 		case "slots":
 			return again === "line" ? slotsOutcome(stake, roll) : null;

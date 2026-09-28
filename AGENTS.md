@@ -1458,6 +1458,17 @@ it. Five things about it are load-bearing:
   machine's exact return is computed over every line it can show and pinned between 94% and 97%; hi-lo pays each
   call's odds less 3% and caps the pot. Change a paytable and `rules.test.ts` says what it did to the edge.
 
+**Roulette takes several bets at once, on a table drawn with the chips on it.** `/casino roulette` with no `bet`
+opens it, and Play again on any spin reopens it with the same chips. The layout is one bit per spot — 37 numbers and
+twelve outside bets — packed into ten base-36 characters by `encodeSpots`, so the whole table rides in every custom ID
+and nothing half-placed is stored. Three multi-select menus cover the outside bets, 0–18 and 19–36, each pre-ticked,
+so unticking takes a chip off, and each answer replaces only its own part of the table. Every spot carries the same
+chip; **no money moves until Spin**, which takes chip × spots through `takeStake` in one go, so the bet limits apply to
+the whole spin. `rouletteBoard` draws the layout the way a real table sits, and `chipSpot` keeps each chip inside
+its own spot, lifting the number above it — both pinned by tests. A settled spin shows the wheel and the table
+stacked, not side by side, so neither is shrunk to half the width. **Play again edits the message it sits on** for
+every game, rather than stacking a new one under the old.
+
 **The switch works like the music system's.** `casinosettings` stores `enabled`, the games switched off (so a game
 added later starts open) and the bet limits. `checks.ts` refuses every `/casino` subcommand while the casino is
 closed except `/casino settings`, the way back in, and a Play again button passes the same gates through

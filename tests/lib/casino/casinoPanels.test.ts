@@ -19,7 +19,8 @@ import {
 	normaliseCasinoSettings,
 } from "@lib/casino/casinoSettings.util";
 import { casinoLobby, casinoSettingsPanel, parseLimits } from "@lib/casino/casinoSettingsPanel.util";
-import { coinflipOutcome, outcomeFor, rouletteOutcome } from "@lib/casino/instantGames.util";
+import { coinflipOutcome, outcomeFor, rouletteAgainBets, rouletteOutcome } from "@lib/casino/instantGames.util";
+import { encodeSpots } from "@lib/casino/roulette.util";
 import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
@@ -160,18 +161,40 @@ describe("an instant game's messages", () => {
 		expect(textOf(settled)).toContain("Wallet: 1,095");
 	});
 
-	/** Play again has to replay the same call for the same stake, or a button could change a bet nobody chose. */
-	it("carries the same call and stake in Play again", () => {
-		const outcome = rouletteOutcome({ kind: "number", number: 17 }, 100, () => 0);
-		const again = button(instantSettledMessage(outcome, 100, null, OWNER, Buffer.from("PNG")), "again");
+	/** Play again reopens the same table, so it carries every spot and the chip rather than the table's total. */
+	it("carries the same spots and chip in roulette's Play again", () => {
+		const bets = [{ kind: "number" as const, number: 17 }, { kind: "red" as const }];
+		const outcome = rouletteOutcome(bets, 200, () => 0);
+		const again = button(instantSettledMessage(outcome, 200, null, OWNER, Buffer.from("PNG")), "again");
 		const parsed = parseCustomId(String(again?.custom_id));
 
-		expect(parsed.args).toEqual(["roulette", "n17", "100", OWNER]);
+		expect(parsed.args).toEqual(["roulette", `t${encodeSpots(bets)}`, "100", OWNER]);
+		expect(rouletteAgainBets(String(parsed.args[1]))).toEqual(bets);
+		expect(again?.label).toBe("Play again · 100 a chip");
+	});
+
+	it("still reads a single bet from a Play again button made before tables", () => {
 		expect(outcomeFor("roulette", "n17", 100, () => 0)?.betLine).toBe("Number 17");
+		expect(rouletteAgainBets("red")).toEqual([{ kind: "red" }]);
+	});
+
+	it("shows the table under the wheel once settled, stacked rather than side by side", () => {
+		const settled = instantSettledMessage(
+			rouletteOutcome([{ kind: "red" }], 100, () => 0),
+			100,
+			null,
+			OWNER,
+			Buffer.from("PNG"),
+		);
+
+		expect(settled.files?.map((file) => file.name)).toEqual(["roulette.png", "roulette-table.png"]);
 	});
 
 	it("reads back only calls a button could have carried", () => {
 		expect(outcomeFor("roulette", "n37", 100)).toBeNull();
+		expect(outcomeFor("roulette", "t", 100)).toBeNull();
+		expect(outcomeFor("roulette", "t0", 100)).toBeNull();
+		expect(outcomeFor("roulette", "tzzzzzzzzzz", 100)).toBeNull();
 		expect(outcomeFor("roulette", "number", 100)).toBeNull();
 		expect(outcomeFor("coinflip", "edge", 100)).toBeNull();
 		expect(outcomeFor("dice", "over", 100)?.betLine).toBe("Over 7");
