@@ -2,24 +2,14 @@ import { AttachmentBuilder, ButtonStyle, type ColorResolvable } from "discord.js
 import { theme } from "@config/theme";
 import { customId } from "@core/button";
 import { blackjackTable, hiloTable, type TableBanner } from "@lib/canvas/cardTable.util";
-import { rouletteBoard } from "@lib/canvas/rouletteTable.util";
 import { canDouble, handValue } from "@lib/casino/blackjack.util";
 import { cardLabel } from "@lib/casino/cards.util";
 import { CASINO_ID, CASINO_TIMING } from "@lib/casino/casino.constants";
-import { type BlackjackState, type BlackjackVerdict, type HiLoState, type RouletteBet } from "@lib/casino/casino.types";
+import { type BlackjackState, type BlackjackVerdict, type HiLoState } from "@lib/casino/casino.types";
 import { CASINO_GAME_EMOJI, CASINO_GAME_LABELS } from "@lib/casino/casinoSettings.util";
 import { hiloPayout, hiloStep } from "@lib/casino/hilo.util";
 import { type InstantOutcome } from "@lib/casino/instantGames.util";
-import {
-	encodeSpots,
-	pocketColour,
-	ROULETTE_BET_LABELS,
-	ROULETTE_SPOTS,
-	rouletteReturn,
-	spotKey,
-	spotsLine,
-} from "@lib/casino/roulette.util";
-import { button, option, row, select, selectRow } from "@lib/discord/components.util";
+import { button, row } from "@lib/discord/components.util";
 import { container, containerMessage, divider, gallery, text } from "@lib/discord/containers.util";
 import { type ContainerMessageWithFiles, type ContainerPart } from "@lib/discord/discord.types";
 import { formatDurationLong, formatNumber } from "@lib/format/format.util";
@@ -93,8 +83,7 @@ function againRow(game: CasinoGame, call: string, stake: number, userId: string)
 	return row(
 		button({
 			id: customId(CASINO_ID, "again", game, call, String(stake), userId),
-			// Roulette's button opens the table again rather than spinning, so the figure is the chip.
-			label: game === "roulette" ? `Play again · ${formatNumber(stake)} a chip` : `Play again · ${formatNumber(stake)}`,
+			label: `Play again · ${formatNumber(stake)}`,
 			emoji: CASINO_GAME_EMOJI[game],
 			style: ButtonStyle.Primary,
 		}),
@@ -109,7 +98,7 @@ export function instantSpinningMessage(outcome: InstantOutcome, stake: number, g
 			text(heading(outcome.game)),
 			text(`Bet **${formatNumber(stake)}** on **${outcome.betLine}**`),
 			gallery(`attachment://${outcome.file}.gif`),
-			text(outcome.game === "roulette" ? "-# The ball is rolling…" : "-# Good luck…"),
+			text("-# Good luck…"),
 		],
 		file,
 	);
@@ -129,17 +118,10 @@ export function instantSettledMessage(
 		gallery(`attachment://${outcome.file}.png`),
 	];
 
-	// Stacked rather than side by side, so neither picture is shrunk to half the width.
-	const board = outcome.board?.();
-	if (board !== undefined) {
-		files.push(new AttachmentBuilder(board, { name: `${outcome.file}-table.png` }));
-		parts.push(gallery(`attachment://${outcome.file}-table.png`, "The table, with every chip you placed."));
-	}
-
 	parts.push(text(detail(outcome.result, stake, outcome.returned)));
 	const walletText = walletLine(wallet);
 	if (walletText !== null) parts.push(text(walletText));
-	parts.push(againRow(outcome.game, outcome.again, outcome.againStake ?? stake, userId));
+	parts.push(againRow(outcome.game, outcome.again, stake, userId));
 
 	return withFile(parts, files, resultTone(stake, outcome.returned));
 }
@@ -323,110 +305,4 @@ export function hiloMessage(view: HiLoView, userId: string): ContainerMessageWit
 		new AttachmentBuilder(image, { name: "hilo.png" }),
 		open ? undefined : resultTone(view.staked, returned),
 	);
-}
-
-export interface RouletteTable {
-	bets: RouletteBet[];
-	/** What each spot carries. */
-	chip: number;
-}
-
-const NUMBER_GROUPS = { a: [0, 18], b: [19, 36] } as const;
-
-export type SpotGroup = "o" | keyof typeof NUMBER_GROUPS;
-
-/** Which of the three menus a spot is chosen from. */
-export function spotGroup(bet: RouletteBet): SpotGroup {
-	if (bet.kind !== "number") return "o";
-	return (bet.number ?? 0) <= NUMBER_GROUPS.a[1] ? "a" : "b";
-}
-
-const POCKET_EMOJI = { red: "🔴", black: "⚫", green: "🟢" } as const;
-
-function spotMenu(group: SpotGroup, table: RouletteTable, userId: string): ContainerPart {
-	const mask = encodeSpots(table.bets);
-	const chosen = new Set(table.bets.map(spotKey));
-	const spots = ROULETTE_SPOTS.filter((spot) => spotGroup(spot) === group);
-
-	const choices = spots.map((spot) =>
-		spot.kind === "number"
-			? option({
-					label: `${String(spot.number ?? 0)} ${pocketColour(spot.number ?? 0)}`,
-					value: spotKey(spot),
-					emoji: POCKET_EMOJI[pocketColour(spot.number ?? 0)],
-					selected: chosen.has(spotKey(spot)),
-				})
-			: option({
-					label: ROULETTE_BET_LABELS[spot.kind],
-					value: spotKey(spot),
-					description: rouletteReturn(spot.kind) === 3 ? "Pays 2 to 1" : "Pays evens",
-					selected: chosen.has(spotKey(spot)),
-				}),
-	);
-
-	const placeholder =
-		group === "o"
-			? "Red, black, odd, even, dozens, columns…"
-			: `Numbers ${String(NUMBER_GROUPS[group][0])} to ${String(NUMBER_GROUPS[group][1])}, 35 to 1`;
-
-	return selectRow(
-		select({
-			id: customId(CASINO_ID, "rt-pick", group, mask, String(table.chip), userId),
-			placeholder,
-			options: choices,
-			minValues: 0,
-			maxValues: choices.length,
-		}),
-	);
-}
-
-/**
- * Where the chips go before the wheel turns: a picture of the layout with a chip on every spot, and a menu per part
- * of it. The menus are pre-ticked, so taking a chip off is unticking it. No money moves until Spin.
- */
-export function rouletteTableMessage(table: RouletteTable, userId: string, notice?: string): ContainerMessageWithFiles {
-	const mask = encodeSpots(table.bets);
-	const total = table.chip * table.bets.length;
-	const image = rouletteBoard({ bets: table.bets, chip: table.chip });
-
-	const parts: ContainerPart[] = [
-		text(heading("roulette")),
-		text(
-			table.bets.length === 0
-				? `Chip **${formatNumber(table.chip)}** a spot. Pick where to put your chips below.`
-				: `Chip **${formatNumber(table.chip)}** a spot · **${String(table.bets.length)}** ${table.bets.length === 1 ? "spot" : "spots"} · **${formatNumber(total)}** on the table`,
-		),
-		gallery("attachment://roulette-table.png", `Chips on: ${spotsLine(table.bets)}.`),
-	];
-	if (notice !== undefined) parts.push(text(`-# ${notice}`));
-
-	parts.push(
-		spotMenu("o", table, userId),
-		spotMenu("a", table, userId),
-		spotMenu("b", table, userId),
-		row(
-			button({
-				id: customId(CASINO_ID, "rt-spin", mask, String(table.chip), userId),
-				label: table.bets.length === 0 ? "Spin" : `Spin · ${formatNumber(total)}`,
-				emoji: CASINO_GAME_EMOJI.roulette,
-				style: ButtonStyle.Success,
-				disabled: table.bets.length === 0,
-			}),
-			button({
-				id: customId(CASINO_ID, "rt-chip", mask, userId),
-				label: "Change chip",
-				emoji: "🪙",
-				style: ButtonStyle.Secondary,
-			}),
-			button({
-				id: customId(CASINO_ID, "rt-clear", String(table.chip), userId),
-				label: "Clear",
-				style: ButtonStyle.Danger,
-				disabled: table.bets.length === 0,
-			}),
-		),
-		text("-# A number pays 35 to 1, a dozen or column 2 to 1, and the rest evens. Nothing is taken until you spin."),
-	);
-
-	return withFile(parts, new AttachmentBuilder(image, { name: "roulette-table.png" }));
 }

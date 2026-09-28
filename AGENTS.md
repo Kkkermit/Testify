@@ -1458,16 +1458,28 @@ it. Five things about it are load-bearing:
   machine's exact return is computed over every line it can show and pinned between 94% and 97%; hi-lo pays each
   call's odds less 3% and caps the pot. Change a paytable and `rules.test.ts` says what it did to the edge.
 
-**Roulette takes several bets at once, on a table drawn with the chips on it.** `/casino roulette` with no `bet`
-opens it, and Play again on any spin reopens it with the same chips. The layout is one bit per spot — 37 numbers and
-twelve outside bets — packed into ten base-36 characters by `encodeSpots`, so the whole table rides in every custom ID
-and nothing half-placed is stored. Three multi-select menus cover the outside bets, 0–18 and 19–36, each pre-ticked,
-so unticking takes a chip off, and each answer replaces only its own part of the table. Every spot carries the same
-chip; **no money moves until Spin**, which takes chip × spots through `takeStake` in one go, so the bet limits apply to
-the whole spin. `rouletteBoard` draws the layout the way a real table sits, and `chipSpot` keeps each chip inside
-its own spot, lifting the number above it — both pinned by tests. A settled spin shows the wheel and the table
-stacked, not side by side, so neither is shrunk to half the width. **Play again edits the message it sits on** for
-every game, rather than stacking a new one under the old.
+**Roulette is a shared round, and the table waits for its first bet.** `/casino roulette` posts a board anybody in the
+channel can bet on, through `buttons/roulette.ts` — a handler that is deliberately **not** `ownerOnly`, and runs
+every press through `checkCasinoPlay`. There is a button per outside bet, a **Number…** form that takes one number or
+several, chip-size buttons scaled from the table's chip (`chipSteps`) and **Clear mine**. The countdown starts on
+the first bet, not on the post: `startClock` sets `closesAt` only while it is null, so only the call that started it
+sets the spin's timer, and later bets never push it back. Six things about it are load-bearing:
+
+- **A round lives in `rouletterounds`, because stakes leave the wallet as each chip lands.** A press takes the stake
+  with `takeStake`, then `addBets` pushes it with the open status, the close and the player's room all in the
+  update's filter, so ten presses cannot land eleven bets; a push that fails hands the stake straight back.
+- **One spin, one payout.** `claimRound` turns the round from betting to spinning with its pocket in the same update,
+  and only the call that gets the round back pays, so a timer and the sweep arriving together cannot both pay.
+- **A restart cannot strand a stake.** The timer is in memory, so `spinOverdueRounds` runs every minute and spins any
+  round still open `overdueMs` past its close.
+- **Play again opens a fresh round on the same message**, and a partial unique index on `messageId` for open rounds
+  means two presses cannot start two there.
+- **Every player's chips are drawn in their own colour** (`SEAT_COLOURS`, in the order they sat down), stacked with
+  the spot's total on top. Rows are 72px so a chip can be big enough to read at the width Discord shows it, and
+  `chipSpot` keeps each chip inside its own spot — pinned by tests.
+- **The wheel and the table are stacked, not side by side**, so neither is shrunk to half the width.
+
+**Play again edits the message it sits on** for every game, rather than stacking a new one under the old.
 
 **The switch works like the music system's.** `casinosettings` stores `enabled`, the games switched off (so a game
 added later starts open) and the bet limits. `checks.ts` refuses every `/casino` subcommand while the casino is

@@ -2,6 +2,7 @@ import { type SKRSContext2D } from "@napi-rs/canvas";
 import { roundedRect } from "@lib/canvas/canvas.util";
 import { blankCanvas, drawFelt } from "@lib/canvas/playingCards.util";
 import { DISPLAY, drawText } from "@lib/canvas/text.util";
+import { SEAT_COLOURS } from "@lib/casino/casino.constants";
 import { type RouletteBet } from "@lib/casino/casino.types";
 import { betWins, pocketColour, ROULETTE_SPOTS, spotKey } from "@lib/casino/roulette.util";
 
@@ -11,9 +12,9 @@ export const LAYOUT = {
 	margin: 24,
 	zeroWidth: 56,
 	cell: 54,
-	row: 58,
+	row: 72,
 	columnWidth: 64,
-	band: 46,
+	band: 50,
 } as const;
 
 const GRID_X = LAYOUT.margin + LAYOUT.zeroWidth;
@@ -141,23 +142,23 @@ export function chipSpot(bet: RouletteBet): { x: number; y: number; radius: numb
 	switch (bet.kind) {
 		case "number":
 			return (bet.number ?? 0) === 0
-				? { x: middle.x, y: middle.y + 40, radius: 16 }
-				: { x: middle.x, y: rect.y + rect.height - 15, radius: 13 };
+				? { x: middle.x, y: middle.y + 44, radius: 20 }
+				: { x: middle.x, y: rect.y + rect.height - 23, radius: 18 };
 		case "column1":
 		case "column2":
 		case "column3":
-			return { x: middle.x, y: rect.y + rect.height - 15, radius: 13 };
+			return { x: middle.x, y: rect.y + rect.height - 23, radius: 18 };
 		case "dozen1":
 		case "dozen2":
 		case "dozen3":
-			return { x: middle.x + 62, y: middle.y, radius: 16 };
+			return { x: middle.x + 66, y: middle.y, radius: 19 };
 		case "red":
 		case "black":
 		case "odd":
 		case "even":
 		case "low":
 		case "high":
-			return { x: middle.x + 36, y: middle.y, radius: 15 };
+			return { x: middle.x + 32, y: middle.y, radius: 19 };
 	}
 }
 
@@ -198,69 +199,94 @@ function drawSpot(ctx: SKRSContext2D, bet: RouletteBet, raised: boolean): void {
 	ctx.strokeRect(rect.x, rect.y, rect.width, rect.height);
 }
 
-type ChipState = "placed" | "won" | "lost";
+/** One chip on the table: whose it is, by seat, and what it is worth. */
+export interface BoardChip {
+	bet: RouletteBet;
+	amount: number;
+	seat: number;
+}
 
-const CHIP_FILL: Record<ChipState, string> = { placed: "#2f6fdc", won: "#e2a712", lost: "#5b6270" };
+export interface RouletteBoardView {
+	chips: readonly BoardChip[];
+	/** Where the ball landed; absent while bets are still going down. */
+	pocket?: number;
+}
+
+/** The most chips drawn on one spot; the figure on top is the whole spot's total. */
+const STACK_SHOWN = 3;
+
+function seatFill(seat: number): string {
+	return SEAT_COLOURS[seat % SEAT_COLOURS.length]!.fill;
+}
 
 function drawChip(
 	ctx: SKRSContext2D,
 	spot: { x: number; y: number; radius: number },
-	label: string,
-	state: ChipState,
+	fill: string,
+	label: string | null,
 ): void {
 	const { x, y, radius } = spot;
 
 	ctx.save();
-	ctx.shadowColor = "rgba(0, 0, 0, 0.55)";
+	ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
 	ctx.shadowBlur = 6;
 	ctx.shadowOffsetY = 2;
 	ctx.beginPath();
 	ctx.arc(x, y, radius, 0, Math.PI * 2);
-	ctx.fillStyle = CHIP_FILL[state];
+	ctx.fillStyle = fill;
 	ctx.fill();
 	ctx.restore();
 
 	// The six edge marks every casino chip carries.
 	ctx.strokeStyle = "rgba(255, 255, 255, 0.9)";
-	ctx.lineWidth = radius < 15 ? 2.5 : 3;
+	ctx.lineWidth = 3.5;
 	for (let mark = 0; mark < 6; mark += 1) {
 		const angle = (mark / 6) * Math.PI * 2;
 		ctx.beginPath();
-		ctx.arc(x, y, radius - 2, angle - 0.18, angle + 0.18);
+		ctx.arc(x, y, radius - 2, angle - 0.2, angle + 0.2);
 		ctx.stroke();
 	}
-
 	ctx.beginPath();
 	ctx.arc(x, y, radius - 6, 0, Math.PI * 2);
 	ctx.lineWidth = 1.2;
+	ctx.strokeStyle = "rgba(0, 0, 0, 0.35)";
 	ctx.stroke();
 
-	drawText(ctx, label, x, y + 1, {
-		size: radius < 15 ? (label.length > 3 ? 8 : 10) : label.length > 3 ? 10 : 12,
-		weight: 700,
-		colour: "#ffffff",
-		align: "center",
-	});
+	if (label !== null) {
+		drawText(ctx, label, x, y + 1, {
+			size: label.length > 3 ? 12 : 14,
+			weight: 700,
+			colour: "#ffffff",
+			align: "center",
+			outline: { colour: "rgba(0, 0, 0, 0.75)", width: 3 },
+		});
+	}
 }
 
-export interface RouletteBoardView {
-	bets: readonly RouletteBet[];
-	chip: number;
-	/** Where the ball landed; absent while the bets are still being placed. */
-	pocket?: number;
+/** The chips grouped by spot, in the order they went down. */
+export function chipStacks(chips: readonly BoardChip[]): { bet: RouletteBet; total: number; seats: number[] }[] {
+	const stacks = new Map<string, { bet: RouletteBet; total: number; seats: number[] }>();
+	for (const chip of chips) {
+		const key = spotKey(chip.bet);
+		const stack = stacks.get(key) ?? { bet: chip.bet, total: 0, seats: [] };
+		stack.total += chip.amount;
+		stack.seats.push(chip.seat);
+		stacks.set(key, stack);
+	}
+	return [...stacks.values()];
 }
 
 export function rouletteBoard(view: RouletteBoardView): Buffer {
 	const { canvas, ctx } = blankCanvas(BOARD_WIDTH, BOARD_HEIGHT);
 	drawFelt(ctx, BOARD_WIDTH, BOARD_HEIGHT);
 
-	const placed = [...new Map(view.bets.map((bet) => [spotKey(bet), bet])).values()];
-	const taken = new Set(placed.map(spotKey));
-
+	const stacks = chipStacks(view.chips);
+	const taken = new Set(stacks.map((stack) => spotKey(stack.bet)));
 	for (const spot of ROULETTE_SPOTS) drawSpot(ctx, spot, taken.has(spotKey(spot)));
 
-	if (view.pocket !== undefined) {
-		const landed = spotRect({ kind: "number", number: view.pocket });
+	const { pocket } = view;
+	if (pocket !== undefined) {
+		const landed = spotRect({ kind: "number", number: pocket });
 		ctx.save();
 		ctx.shadowColor = GOLD;
 		ctx.shadowBlur = 16;
@@ -271,11 +297,32 @@ export function rouletteBoard(view: RouletteBoardView): Buffer {
 		ctx.restore();
 	}
 
-	const label = chipLabel(view.chip);
-	for (const bet of placed) {
-		const pocket = view.pocket;
-		const state: ChipState = pocket === undefined ? "placed" : betWins(bet, pocket) ? "won" : "lost";
-		drawChip(ctx, chipSpot(bet), label, state);
+	for (const stack of stacks) {
+		const spot = chipSpot(stack.bet);
+		const won = pocket === undefined ? null : betWins(stack.bet, pocket);
+		const shown = stack.seats.slice(-STACK_SHOWN);
+
+		ctx.save();
+		if (won === false) ctx.globalAlpha = 0.4;
+		// Earlier chips peek out to the left of the one on top, which carries the spot's total.
+		shown.forEach((seat, index) => {
+			const depth = shown.length - 1 - index;
+			const top = depth === 0;
+			drawChip(ctx, { ...spot, x: spot.x - depth * 4 }, seatFill(seat), top ? chipLabel(stack.total) : null);
+		});
+		ctx.restore();
+
+		if (won === true) {
+			ctx.save();
+			ctx.shadowColor = GOLD;
+			ctx.shadowBlur = 12;
+			ctx.strokeStyle = GOLD;
+			ctx.lineWidth = 3;
+			ctx.beginPath();
+			ctx.arc(spot.x, spot.y, spot.radius + 3, 0, Math.PI * 2);
+			ctx.stroke();
+			ctx.restore();
+		}
 	}
 
 	return canvas.toBuffer("image/png");

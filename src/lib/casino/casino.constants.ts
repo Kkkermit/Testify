@@ -1,4 +1,4 @@
-import { MINUTE_MS } from "@config/constants";
+import { DAY_MS, MINUTE_MS, SECOND_MS } from "@config/constants";
 
 /** The custom-ID prefixes the casino's panels and their button handlers share. */
 export const CASINO_ID = "casino";
@@ -16,3 +16,26 @@ export const CASINO_TIMING = {
 } as const;
 
 export const CASINO_COMMAND = "casino";
+
+/** A shared roulette round: how long it takes bets once the first lands, and how many one player may place. */
+export const ROULETTE_ROUND = {
+	bettingMs: 30 * SECOND_MS,
+	maxBets: 10,
+	/** A round still open this long past its close lost its timer to a restart, and the sweep spins it. */
+	overdueMs: 30 * SECOND_MS,
+	/** A round is removed this long after it was opened or last due, whichever is later. */
+	keepMs: DAY_MS,
+} as const;
+
+export const ROULETTE_ID = "roulette";
+
+/** Each player's chips in the order they sat down, with the emoji the message names them by. */
+export const SEAT_COLOURS = [
+	{ fill: "#2f6fdc", emoji: "🔵" },
+	{ fill: "#1f9d55", emoji: "🟢" },
+	{ fill: "#8e44ad", emoji: "🟣" },
+	{ fill: "#e67e22", emoji: "🟠" },
+	{ fill: "#f1c40f", emoji: "🟡" },
+	{ fill: "#8d5a3b", emoji: "🟤" },
+	{ fill: "#ecf0f1", emoji: "⚪" },
+] as const;

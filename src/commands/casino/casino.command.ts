@@ -1,5 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, inGuild, type CommandInput, type CommandOption } from "@core/command";
+import { defineCommand, inGuild, inTextChannel, type CommandInput, type CommandOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { attachHandMessage } from "@database/repositories/casinoRepository";
 import { requireAccount } from "@database/repositories/economyRepository";
@@ -17,8 +17,11 @@ import {
 	readCasinoSettings,
 	ROULETTE_BET_LABELS,
 	ROULETTE_BETS,
-	rouletteOutcome,
-	rouletteTableMessage,
+	openRound,
+	placeBets,
+	rememberRoundMessage,
+	roundBettingMessage,
+	roundView,
 	type RouletteBet,
 	slotsOutcome,
 	startBlackjack,
@@ -78,13 +81,13 @@ export default defineCommand({
 	subcommands: [
 		{
 			name: "roulette",
-			description: "Bets on where the ball lands on a single-zero wheel.",
+			description: "Opens a roulette table anybody in the channel can bet on for 20 seconds.",
 			aliases: ["roulette"],
 			options: [
 				AMOUNT,
 				{
 					name: "bet",
-					description: "One bet to spin straight away. Leave it out to open the table and place several.",
+					description: "A first bet to put down as the table opens. Everybody gets buttons to bet with.",
 					type: "string",
 					choices: ROULETTE_BETS.map((kind) => ({ name: ROULETTE_BET_LABELS[kind], value: kind })),
 				},
@@ -92,17 +95,28 @@ export default defineCommand({
 			],
 			async run(interaction, client) {
 				const player = playerOf(interaction);
-				const amount = interaction.options.getString("amount", true);
+				const channel = inTextChannel(interaction);
+				const account = await requireAccount(player.guildId, player.userId);
+				const chip = resolveAmount(interaction.options.getString("amount", true), account.wallet);
 				const given = interaction.options.getString("bet");
+				const bet = given === null ? null : rouletteBetOf(interaction, given);
 
-				if (given === null) {
-					const chip = resolveAmount(amount, (await requireAccount(player.guildId, player.userId)).wallet);
-					await reply(interaction, rouletteTableMessage({ bets: [], chip }, player.userId));
-					return;
+				const round = await openRound(
+					{ guildId: player.guildId, channelId: channel.id, messageId: null },
+					player.userId,
+					chip,
+				);
+				if (round === null) throw new UserFacingError("Could not open a roulette table. Try again.");
+				const roundId = String(round._id);
+
+				await reply(interaction, roundBettingMessage(roundView(round)));
+				await rememberRoundMessage(roundId, (await interaction.fetchReply()).id);
+
+				// The table is already on screen, so a bet that cannot be paid for is refused privately and it stays open.
+				if (bet !== null) {
+					const seat = { ...player, name: interaction.user.globalName ?? interaction.user.username };
+					await interaction.editReply(roundBettingMessage(roundView(await placeBets(client, seat, roundId, [bet]))));
 				}
-
-				const bet = rouletteBetOf(interaction, given);
-				await playInstant(interaction, client, player, amount, (stake) => rouletteOutcome([bet], stake));
 			},
 		},
 		{
