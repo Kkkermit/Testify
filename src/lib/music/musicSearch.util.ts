@@ -1,6 +1,6 @@
 import { formatClock, truncate } from "@lib/format/format.util";
-import { CHOICE_MAX } from "@lib/music/music.constants";
-import { type MusicSource, type Track } from "@lib/music/music.types";
+import { CHOICE_MAX, MUSIC_SOURCE_NAMES } from "@lib/music/music.constants";
+import { type Track } from "@lib/music/music.types";
 
 /** Feeding `/play`'s autocomplete without spawning a process for every keystroke. */
 
@@ -20,8 +20,6 @@ export interface Choice {
 	value: string;
 }
 
-const SERVICE_TAGS: Partial<Record<MusicSource, string>> = { youtube: "YouTube", soundcloud: "SoundCloud" };
-
 /**
  * One track as an autocomplete row whose value is its address; a track whose address will not fit is dropped. The
  * service leads a labelled row, so a long title cannot truncate it away.
@@ -31,7 +29,7 @@ export function choiceFor(track: Track, labelled = false): Choice | null {
 
 	const length = track.durationMs === null ? "live" : formatClock(track.durationMs);
 	const author = track.author === null ? "" : ` · ${track.author}`;
-	const tag = labelled ? SERVICE_TAGS[track.source] : undefined;
+	const tag = labelled ? MUSIC_SOURCE_NAMES[track.source] : undefined;
 	const name = truncate(`${tag === undefined ? "" : `${tag} · `}${track.title}${author} (${length})`, CHOICE_MAX);
 
 	return { name, value: track.url };

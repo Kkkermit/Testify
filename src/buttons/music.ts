@@ -4,16 +4,20 @@ import { UserFacingError } from "@core/errors";
 import {
 	applyMusicSettings,
 	clampVolume,
-	currentTrack,
 	type LoopMode,
+	loopPlayer,
 	MUSIC_ID,
 	MUSIC_LIMITS,
 	musicSystemPanel,
+	pausePlayer,
 	readMusicSettings,
 	requireSession,
-	requireVolumeControl,
+	resumePlayer,
 	sameChannelAs,
-	shuffleUpcoming,
+	setPlayerVolume,
+	shufflePlayer,
+	skipTrack,
+	stopPlayer,
 } from "@lib/music";
 
 /** The controls under the player, acting on the same session `/music` does. */
@@ -72,57 +76,37 @@ export default defineButton({
 		const session = requireSession(guild);
 		sameChannelAs(session, interaction.member as GuildMember);
 
-		// Re-read rather than trusting the message: it may have been rendered several tracks ago.
-		const track = currentTrack(session.queue);
 		let note: string | undefined;
 		let page = 0;
 
 		switch (context.action) {
-			case "pause": {
-				if (!session.pause()) throw new UserFacingError("Nothing is playing.");
-				note = "Paused.";
+			case "pause":
+				note = pausePlayer(session);
 				break;
-			}
-			case "resume": {
-				if (!session.resume()) throw new UserFacingError("Nothing is paused.");
-				note = "Resumed.";
+			case "resume":
+				note = resumePlayer(session);
 				break;
-			}
 			case "previous": {
 				if (session.queue.tracks.length === 0) throw new UserFacingError("Nothing has been played yet.");
 				session.previous();
 				note = session.queue.index === 0 ? "Started this one again." : "Back a track.";
 				break;
 			}
-			case "skip": {
-				if (track === null) throw new UserFacingError("Nothing is playing.");
-				session.skip();
-				note = `Skipped **${track.title}**.`;
+			case "skip":
+				note = skipTrack(session);
 				break;
-			}
-			case "stop": {
-				session.stop();
-				note = "Stopped.";
+			case "stop":
+				note = stopPlayer(session);
 				break;
-			}
-			case "loop": {
-				const mode = NEXT_LOOP[session.queue.loop];
-				session.setLoop(mode);
-				note = `Loop set to **${mode}**.`;
+			case "loop":
+				note = loopPlayer(session, NEXT_LOOP[session.queue.loop]);
 				break;
-			}
-			case "shuffle": {
-				session.queue = shuffleUpcoming(session.queue);
-				note = "Shuffled the rest of the queue.";
+			case "shuffle":
+				note = shufflePlayer(session);
 				break;
-			}
-			case "volume": {
-				requireVolumeControl(session);
-
-				const wanted = clampVolume(Number(context.args.at(0)));
-				note = `Volume set to **${String(session.setVolume(wanted))}%**. It takes a moment to take effect.`;
+			case "volume":
+				note = setPlayerVolume(session, clampVolume(Number(context.args.at(0))));
 				break;
-			}
 			case "refresh": {
 				break;
 			}

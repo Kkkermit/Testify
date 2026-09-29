@@ -21,4 +21,4 @@ export { StatTile } from "@/components/primitives/StatTile";
 export { TabBar, TabContent, type TabDefinition } from "@/components/primitives/TabBar";
 export { CARD_HEADING, PAGE_TITLE } from "@/components/primitives/textStyles";
 export { Tooltip } from "@/components/primitives/Tooltip";
-export { barWidth, UsageBars } from "@/components/primitives/UsageBars";
+export { UsageBars } from "@/components/primitives/UsageBars";

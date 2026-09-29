@@ -251,31 +251,32 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 ### Where to look for a given job
 
-| I want to…                                 | Go to                                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------ |
-| Add or change a command                    | `src/commands/<category>/*.command.ts`                                   |
-| Change how commands are found              | `src/core/loader.ts` (the globs)                                         |
-| Change a permission or cooldown gate       | `src/core/checks.ts`                                                     |
-| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist               |
-| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                     |
-| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"  |
-| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                     |
-| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`) |
-| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it        |
-| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback    |
-| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database          |
-| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                          |
-| Format a number, duration, time            | `src/lib/format/format.util.ts`                                          |
-| Query the database                         | `src/database/repositories/*.ts` — never a model directly                |
-| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`       |
-| Change user-facing copy                    | `src/config/strings.ts`                                                  |
-| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot         |
-| Change a colour or emoji                   | `src/config/theme.ts`                                                    |
-| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
-| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`       |
-| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)      |
-| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in       |
-| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                     |
+| I want to…                                 | Go to                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                                    |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                          |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                                      |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                |
+| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                      |
+| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"   |
+| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                      |
+| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)  |
+| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it         |
+| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback     |
+| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database           |
+| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                           |
+| Format a number, duration, time            | `src/lib/format/format.util.ts`                                           |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly                 |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`        |
+| Change user-facing copy                    | `src/config/strings.ts`                                                   |
+| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot          |
+| Change a colour or emoji                   | `src/config/theme.ts`                                                     |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`               |
+| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
+| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
+| Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
+| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in        |
+| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                      |
 
 ### The panel renderers in `src/lib`
 

@@ -1,4 +1,4 @@
-import { type ProblemKind, type QueueState } from "@lib/music/music.types";
+import { type MusicSource, type ProblemKind, type QueueState } from "@lib/music/music.types";
 
 /** The identifiers, limits and defaults more than one module in this domain reads. */
 
@@ -33,6 +33,14 @@ export const RETRIES_AFTER: Record<ProblemKind, number> = {
 };
 
 export const MUSIC_SOURCES = ["youtube", "soundcloud", "spotify", "other"] as const;
+
+/** Each source by name, as the panel, the card, the typeahead and the status page all write it. */
+export const MUSIC_SOURCE_NAMES: Record<MusicSource, string> = {
+	youtube: "YouTube",
+	soundcloud: "SoundCloud",
+	spotify: "Spotify",
+	other: "the web",
+};
 
 export const LOOP_MODES = ["off", "track", "queue"] as const;
 

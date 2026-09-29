@@ -3,7 +3,8 @@ import { createCanvas, roundedRect, type SKRSContext2D } from "@lib/canvas/canva
 import { DISPLAY, drawText, measureText, type TextStyle, wrapLines } from "@lib/canvas/text.util";
 import { coverRect } from "@lib/canvas/welcomeCard.util";
 import { formatClock } from "@lib/format/format.util";
-import { type MusicSource, type Track } from "@lib/music/music.types";
+import { MUSIC_SOURCE_NAMES } from "@lib/music/music.constants";
+import { type Track } from "@lib/music/music.types";
 
 /** The now-playing card: the track's artwork, blurred behind itself, with its title and artist beside it. */
 
@@ -38,13 +39,6 @@ const ARTWORK_TIMEOUT_MS = 4_000;
 
 export const MUSIC_CARD_NAME = "now-playing.jpg";
 
-const SOURCE_NAMES: Record<MusicSource, string> = {
-	youtube: "YouTube",
-	soundcloud: "SoundCloud",
-	spotify: "Spotify",
-	other: "the web",
-};
-
 export interface MusicCardText {
 	eyebrow: string;
 	title: string;
@@ -53,7 +47,7 @@ export interface MusicCardText {
 }
 
 export function musicCardText(track: Track): MusicCardText {
-	const source = SOURCE_NAMES[track.source];
+	const source = MUSIC_SOURCE_NAMES[track.source];
 	const author = track.author?.trim() ?? "";
 
 	return {

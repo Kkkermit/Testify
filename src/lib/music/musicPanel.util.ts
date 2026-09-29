@@ -11,7 +11,15 @@ import {
 } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
 import { formatClock, formatDuration, truncate } from "@lib/format/format.util";
-import { MUSIC_ADD_ID, MUSIC_ID, MAX_VOLUME, MIN_VOLUME, UNITY_VOLUME, VOLUME_STEP } from "@lib/music/music.constants";
+import {
+	MAX_VOLUME,
+	MIN_VOLUME,
+	MUSIC_ADD_ID,
+	MUSIC_ID,
+	MUSIC_SOURCE_NAMES,
+	UNITY_VOLUME,
+	VOLUME_STEP,
+} from "@lib/music/music.constants";
 import { type MusicSource, type QueueState, type Track } from "@lib/music/music.types";
 import { clampVolume } from "@lib/music/musicFormat.util";
 import { currentTrack, totalDurationMs, upcomingPage } from "@lib/music/musicQueue.util";
@@ -32,13 +40,6 @@ const SOURCE_EMOJI: Record<MusicSource, string> = {
 	soundcloud: "🔊",
 	spotify: "🟢",
 	other: "🎧",
-};
-
-const SOURCE_NAMES: Record<MusicSource, string> = {
-	youtube: "YouTube",
-	soundcloud: "SoundCloud",
-	spotify: "Spotify",
-	other: "the web",
 };
 
 export interface PanelState {
@@ -272,7 +273,9 @@ export function musicPanel(state: PanelState, userId: string): ContainerMessage 
 		const author = track.author === null ? "" : ` by ${track.author}`;
 		parts.push(
 			gallery(state.card, `Now playing: ${track.title}${author}`),
-			text(`${progress}\n-# ${SOURCE_EMOJI[track.source]} ${link(`Open on ${SOURCE_NAMES[track.source]}`, track.url)}`),
+			text(
+				`${progress}\n-# ${SOURCE_EMOJI[track.source]} ${link(`Open on ${MUSIC_SOURCE_NAMES[track.source]}`, track.url)}`,
+			),
 		);
 	}
 

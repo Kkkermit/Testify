@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { PassThrough, type Readable } from "node:stream";
 import { toError, UserFacingError } from "@core/errors";
 import { observe } from "@lib/infra/serviceHealth.util";
-import { SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
+import { MUSIC_SOURCE_NAMES, SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
 import {
 	type DownloadProblem,
 	type OpenStream,
@@ -13,7 +13,7 @@ import {
 	type Query,
 	type Track,
 } from "@lib/music/music.types";
-import { clampVolume, planStream } from "@lib/music/musicFormat.util";
+import { clampVolume } from "@lib/music/musicFormat.util";
 import { aboutTheTrack, classifyProblem } from "@lib/music/musicProblem.util";
 import { sourceOfHost } from "@lib/music/musicQuery.util";
 
@@ -131,19 +131,16 @@ async function runYtDlp(binary: string, args: string[], timeoutMs = RESOLVE_TIME
 	});
 }
 
-/** The name each source goes by on the status page. */
-const SOURCE_NAMES: Partial<Record<MusicSource, string>> = { youtube: "YouTube", soundcloud: "SoundCloud" };
-
 /** A video that is private, removed or DRM-protected is an answer from the source, not a sign that it is down. */
 function blamesSource(error: unknown): boolean {
 	return !aboutTheTrack(classifyProblem(toError(error).message));
 }
 
 function askSource(source: MusicSource, binary: string, args: string[]): Promise<string> {
-	const name = SOURCE_NAMES[source];
-	if (name === undefined) return runYtDlp(binary, args);
+	// Only the two services the status page tracks are recorded; any other site is just a site.
+	if (source !== "youtube" && source !== "soundcloud") return runYtDlp(binary, args);
 
-	return observe(name, () => runYtDlp(binary, args), { blame: blamesSource });
+	return observe(MUSIC_SOURCE_NAMES[source], () => runYtDlp(binary, args), { blame: blamesSource });
 }
 
 function sourceOfUrl(url: string): MusicSource {
@@ -329,10 +326,10 @@ function buffer(source: Readable): PassThrough {
 	return sink;
 }
 
-/** `-ss` before `-i` discards packets rather than decoding them, and the output is 48 kHz Opus. */
 /** YouTube's best Opus is about this, so a re-encode loses as little as it can without inflating the stream. */
 export const TRANSCODE_BITRATE = "160k";
 
+/** `-ss` before `-i` discards packets rather than decoding them, and the output is 48 kHz Opus. */
 export function ffmpegArgs(options: StreamOptions = {}): string[] {
 	const seekMs = Math.max(0, Math.round(options.seekMs ?? 0));
 	const volume = clampVolume(options.volume ?? UNITY_VOLUME);
@@ -426,5 +423,3 @@ export function openStream(
 		},
 	};
 }
-
-export { planStream };

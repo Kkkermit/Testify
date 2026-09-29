@@ -274,15 +274,7 @@ export class MusicSession {
 			}
 		} catch (error) {
 			// One track that will not open is not the end of the queue, so it is stepped over with the reason.
-			const known = classifyProblem(toError(error).message);
-
-			if (known !== null && aboutTheTrack(known)) {
-				this.#logger.debug({ guildId: this.guildId, track: track.url }, `[MUSIC] Skipped a track: ${known.kind}.`);
-				failure = known.advice;
-			} else {
-				this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A track could not be opened. Moving on.");
-				failure = "it could not be opened.";
-			}
+			failure = this.#openFailure(track, error);
 		} finally {
 			this.#reopening = false;
 		}
@@ -374,6 +366,19 @@ export class MusicSession {
 			},
 			problem === null ? "[MUSIC] The downloader gave up." : `[MUSIC] ${problem.advice.replaceAll("`", "")}`,
 		);
+	}
+
+	/** Why a track would not open, as the panel words it; only a failure nothing recognises is worth a warning. */
+	#openFailure(track: Track, error: unknown): string {
+		const known = classifyProblem(toError(error).message);
+
+		if (known !== null && aboutTheTrack(known)) {
+			this.#logger.debug({ guildId: this.guildId, track: track.url }, `[MUSIC] Skipped a track: ${known.kind}.`);
+			return known.advice;
+		}
+
+		this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A track could not be opened. Moving on.");
+		return "it could not be opened.";
 	}
 
 	#notify(text: string, now = Date.now()): void {
