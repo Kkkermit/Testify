@@ -37,3 +37,12 @@ export async function logDirectMessage(entry: {
 		{ upsert: true, setDefaultsOnInsert: true },
 	).exec();
 }
+
+/** The direct message a log post was made from, looked up by the post. */
+export async function findDirectMessage(
+	messageId: string,
+): Promise<{ authorId: string; content: string; attachmentUrls: string[]; createdAt: Date } | null> {
+	return DmLog.findOne({ messageId }, { authorId: 1, content: 1, attachmentUrls: 1, createdAt: 1 })
+		.lean<{ authorId: string; content: string; attachmentUrls: string[]; createdAt: Date }>()
+		.exec();
+}

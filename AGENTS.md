@@ -800,6 +800,11 @@ joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_
 `CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
+**The DM log's buttons belong to the bot's owners.** `dmLogMessage` in `dmLog.util.ts` draws the post, and
+`buttons/dmLog.ts` swaps it for the sender's details and back — rebuilt from the stored message by the post's own id
+(`findDirectMessage`), so nothing rides in the custom ID — and sends **Reply** to the sender as the bot. The handler is
+not `ownerOnly`, whose last-argument rule would admit only the sender; it checks `client.isOwner` itself, since a
+reply speaks as the bot.
 `CHANNEL_SLASH_COMMAND_LOG` and `CHANNEL_PREFIX_COMMAND_LOG` log every command run, one per surface.
 `logCommandUse` queues an entry in memory and `flushCommandLog` posts each queue every five seconds, an embed per
 run, within Discord's limits of five messages a flush, ten embeds a message and 6,000 characters across them, and
