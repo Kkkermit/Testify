@@ -13,6 +13,7 @@ import {
 	SegmentedControl,
 	Skeleton,
 	StatTile,
+	UsageBars,
 } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { ActivityChart } from "@/features/insights/components/ActivityChart";
@@ -21,7 +22,6 @@ import { MoveList } from "@/features/insights/components/MoveList";
 import { ServerFactsCard } from "@/features/insights/components/ServerFactsCard";
 import { INSIGHT_WINDOW_LABELS } from "@/features/insights/insights.utils";
 import { useInsights } from "@/features/insights/useInsights";
-import { UsageBars } from "@/features/owner/components/UsageBars";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { shortDate } from "@/lib/datetime";
 

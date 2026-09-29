@@ -1,4 +1,5 @@
 import { PermissionFlagsBits } from "discord.js";
+import { type Context } from "hono";
 import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
 import { readCookie, SESSION_COOKIE } from "@api/cookies";
@@ -58,6 +59,15 @@ export const requireGuild = createMiddleware<ApiBindings>(async (context, next) 
 	context.set("isOwner", isOwner);
 	await next();
 });
+
+/** Whether the caller holds a live session belonging to a bot owner, for a path `loadSession` does not run on. */
+export async function signedInOwner(context: Context<ApiBindings>): Promise<boolean> {
+	const id = readCookie(context, SESSION_COOKIE);
+	if (id === null || id === "" || context.get("oauth") === null) return false;
+
+	const session = await findSession(id);
+	return session !== null && context.get("client").isOwner(session.userId);
+}
 
 /** Ownership is read from the env per request, never off the session document. */
 export const requireOwner = createMiddleware<ApiBindings>(async (context, next) => {

@@ -1,9 +1,9 @@
 import { Navigate, Outlet } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useOwnerAccess } from "@/app/useOwnerAccess";
 import { useRecheckOnRefusal } from "@/app/useRecheckOnRefusal";
 import { Skeleton } from "@/components/primitives";
 import { useMe } from "@/features/auth/useMe";
-import { useOwnerAccess } from "@/features/owner/useOwner";
 import { isRefusal } from "@/lib/api";
 import { keys } from "@/lib/queries";
 

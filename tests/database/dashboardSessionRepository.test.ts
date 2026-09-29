@@ -66,6 +66,16 @@ describeWithMongo("the dashboard session repository", () => {
 		expect(await findSession("not-a-real-session")).toBeNull();
 	});
 
+	/** The cookie is attacker-controlled text; nothing shaped like a query operator may match somebody's session. */
+	it("finds nothing for a cookie shaped like an injection, with sessions in the collection", async () => {
+		const issued = await createSession(box, details({ userId: "100000000000000009", isOwner: true }), 7);
+
+		for (const forged of ['{"$ne":null}', '{"$gt":""}', "[object Object]", ".*", "100000000000000009", " "]) {
+			expect(await findSession(forged)).toBeNull();
+		}
+		expect(await findSession(issued.id)).not.toBeNull();
+	});
+
 	/** An expired session is refused before Mongo's TTL sweep removes it. */
 	it("refuses a session that has expired but not yet been swept", async () => {
 		const issued = await createSession(box, details(), 7);

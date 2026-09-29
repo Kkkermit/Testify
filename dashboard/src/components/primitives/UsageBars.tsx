@@ -1,6 +1,11 @@
 import { BarChart3 } from "lucide-react";
 import { type ReactNode } from "react";
-import { barWidth } from "@/features/owner/owner.utils";
+
+/** A percentage of the busiest row, floored at 2 so a row with one use is still visibly a row. */
+export function barWidth(count: number, max: number): number {
+	if (max <= 0 || count <= 0) return 0;
+	return Math.max(2, Math.round((count / max) * 100));
+}
 
 interface BarRow {
 	id: string;

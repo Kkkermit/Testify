@@ -1,7 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
-import { extname, isAbsolute, join, normalize, relative, resolve } from "node:path";
+import { basename, dirname, extname, isAbsolute, join, normalize, relative, resolve } from "node:path";
 import { type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
+import { signedInOwner } from "@api/middleware/session";
 
 /** Serves the built SPA from the API's own origin, so cookies work with no CORS and one URL sits behind a proxy. */
 
@@ -55,15 +56,35 @@ function safeDecode(pathname: string): string | null {
 	}
 }
 
+/**
+ * The owner console's chunk, which Vite names after the lazily imported `OwnerPage`; checked on the resolved file, so
+ * no spelling of the address reaches it.
+ */
+export function isOwnerChunk(root: string, asset: string): boolean {
+	return (
+		relative(root, dirname(asset)) === "assets" && /^OwnerPage-[\w-]+\.(?:js|css)(?:\.map)?$/.test(basename(asset))
+	);
+}
+
 export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): void {
 	if (!dashboardBuilt(root)) return;
 
 	const index = readFileSync(join(root, "index.html"), "utf8");
 
-	app.get("*", (context) => {
+	app.get("*", async (context) => {
 		if (context.req.path.startsWith("/api/")) return context.notFound();
 
 		const asset = resolveAsset(root, context.req.path);
+
+		// Answered like any missing file, so somebody else learns neither that it exists nor what the console holds.
+		if (asset !== null && isOwnerChunk(root, asset)) {
+			if (!(await signedInOwner(context))) return context.notFound();
+			// Private and never stored, or a cache in front of the bot could hand the owner's copy to anybody.
+			context.header("Cache-Control", "private, no-store");
+			context.header("Vary", "Cookie");
+			context.header("Content-Type", TYPES[extname(asset)] ?? "application/octet-stream");
+			return context.body(new Uint8Array(readFileSync(asset)));
+		}
 
 		if (asset !== null) {
 			// Only Vite's hashed names can be cached for a year; an icon keeps its name when its picture changes.

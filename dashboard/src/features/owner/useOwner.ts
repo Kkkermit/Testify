@@ -13,18 +13,6 @@ import { keys } from "@/lib/queries";
 
 export const PER_PAGE = 25;
 
-/** Only the server can say who owns the bot; `enabled` spares everybody else the request. */
-export function useOwnerAccess(enabled: boolean): UseQueryResult<null> {
-	return useQuery({
-		queryKey: keys.owner.access(),
-		queryFn: async () => {
-			await api.get<undefined>("/owner/access");
-			return null;
-		},
-		enabled,
-	});
-}
-
 export function useOwnerStats(): UseQueryResult<OwnerStats> {
 	return useQuery({
 		queryKey: keys.owner.stats(),

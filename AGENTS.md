@@ -2255,6 +2255,21 @@ rather than the door. None of that is the boundary; `requireOwner` is, and `test
 route the owner, analytics and control routers declare and fails on any that answers a signed-in non-owner with
 anything but 404. Both halves were proved to go red.
 
+**The console's own code is served only to owners.** Everything the browser decides can be rewritten in the
+browser — an intercepted `/owner/access` answering 204 once drew the console's frame for somebody who was not an
+owner — so the page gate is a courtesy and two server-side things are the boundary. `requireOwner` refuses every owner,
+analytics and control route; and the console is Vite's lazy `OwnerPage-<hash>.js` chunk, which `serveDashboard` hands
+only to a request carrying an owner's session (`signedInOwner`), marked `private, no-store` with `Vary: Cookie` so a
+cache in front of the bot can never pass the owner's copy on. Somebody else gets a 404 for it, as for any missing
+file, and a faked answer then has no console to draw. It is judged on the **resolved** file (`isOwnerChunk`), so no
+spelling of the address reaches it. Two things keep it one chunk: nothing outside `features/owner` may import from it
+except `routes.tsx`'s lazy import (`ownerChunk.test.ts` — shared pieces live in `components/primitives`, `lib/` and
+`app/useOwnerAccess.ts`), and `verifyBundle` fails the build if the chunk is missing or anything imports it
+statically. A `manualChunks` rule for it is the wrong tool: Rollup pulls a manual chunk's dependencies into it, which
+put the shared primitives inside and made every page need the file. `tests/api/ownerPentest.test.ts` attacks all of this
+through the real app — forged and injected cookies, a former owner's session, spoofed headers, query and body fields,
+every other spelling and method, CSRF from a planted cookie — and each defence was removed in turn to watch it fail.
+
 **A tab whose read fails says so, and offers a retry.** Isolating the tabs is only half of it — every one of
 them then found its own way to hide the failure: runtime and control returned a skeleton whenever `data` was
 undefined, which is indistinguishable from still loading and never resolves; usage reported a 500 as **"No usage
