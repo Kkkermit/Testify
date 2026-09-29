@@ -20,10 +20,7 @@ export interface Choice {
 	value: string;
 }
 
-/**
- * One track as an autocomplete row whose value is its address; a track whose address will not fit is dropped. The
- * service leads a labelled row, so a long title cannot truncate it away.
- */
+/** One track as an autocomplete row, or null when its address will not fit; a label leads, so truncation spares it. */
 export function choiceFor(track: Track, labelled = false): Choice | null {
 	if (track.url.length > CHOICE_MAX) return null;
 
