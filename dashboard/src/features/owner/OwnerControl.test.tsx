@@ -12,6 +12,60 @@ function renderTab(tab: string, extra = "") {
 }
 
 describe("the control tab", () => {
+	it("shows which services /play takes music from, with the one in use pressed", async () => {
+		renderTab("control");
+
+		expect(await screen.findByRole("button", { name: "Both" })).toHaveAttribute("aria-pressed", "true");
+		expect(screen.getByRole("button", { name: "YouTube" })).toHaveAttribute("aria-pressed", "false");
+		expect(screen.getByRole("group", { name: "Music sources" })).toBeInTheDocument();
+	});
+
+	it("switches the music sources, and describes the new choice", async () => {
+		const user = userEvent.setup();
+		let sent: unknown;
+		server.use(
+			http.put("/api/control/music", async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json({ sources: "soundcloud", configured: true });
+			}),
+		);
+
+		renderTab("control");
+		await user.click(await screen.findByRole("button", { name: "SoundCloud" }));
+
+		await waitFor(() => {
+			expect(sent).toEqual({ sources: "soundcloud" });
+		});
+		expect(await screen.findByText(/YouTube links are refused/)).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "SoundCloud" })).toHaveAttribute("aria-pressed", "true");
+	});
+
+	/** A refusal that only reverted the control would read as the click not registering. */
+	it("says so when the change is refused, and leaves the old choice pressed", async () => {
+		const user = userEvent.setup();
+		server.use(
+			http.put("/api/control/music", () =>
+				HttpResponse.json({ error: { code: "bad_request", message: "Not today." } }, { status: 400 }),
+			),
+		);
+
+		renderTab("control");
+		await user.click(await screen.findByRole("button", { name: "YouTube" }));
+
+		expect(await screen.findByText("Not today.")).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: "Both" })).toHaveAttribute("aria-pressed", "true");
+	});
+
+	/** Its read is its own, so a failure here must not take pause or shut down with it. */
+	it("keeps the rest of the tab working when the sources cannot be read", async () => {
+		server.use(http.get("/api/control/music", () => HttpResponse.json({}, { status: 500 })));
+
+		renderTab("control");
+
+		expect(await screen.findByRole("button", { name: /pause testify/i })).toBeInTheDocument();
+		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
+	});
+
 	it("says whether the bot is running", async () => {
 		renderTab("control");
 

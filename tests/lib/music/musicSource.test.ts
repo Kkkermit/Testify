@@ -350,7 +350,7 @@ describe("resolveTracks", () => {
 	});
 
 	/** Every result of the old eight-result search was extracted, so one flagged host hit the bot check eight times. */
-	it("turns YouTube's bot check into advice, and points at SoundCloud", async () => {
+	it("turns YouTube's bot check into advice", async () => {
 		const binary = fakeYtDlp(
 			"botcheck",
 			'echo "ERROR: [youtube] abc: Sign in to confirm you\'re not a bot. Use --cookies-from-browser" >&2\nexit 1',
@@ -358,9 +358,7 @@ describe("resolveTracks", () => {
 
 		const refused = resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
 		await expect(refused).rejects.toBeInstanceOf(MusicProblemError);
-		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(
-			/prove it is not a bot.*`sc:`/,
-		);
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/prove it is not a bot/);
 	});
 
 	/** yt-dlp's own message is the useful one when nothing recognises it — "exited 1" tells nobody why. */

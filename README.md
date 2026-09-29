@@ -122,7 +122,8 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 ### 🎵 Music
 
-- **Music** — YouTube and SoundCloud, by link or by search, with autocomplete on `/play`
+- **Music** — YouTube and SoundCloud, by link or by search, with autocomplete on `/play` that suggests from
+  both; the owner console can limit it to either one
 - Queue, loop, shuffle, skip, previous and remove, all from one Components V2 panel whose progress bar keeps up
   with the track
 - Volume from 0 to 200%, on the panel and on `/music volume` — it needs FFmpeg, and says so when the host has none

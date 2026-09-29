@@ -24,3 +24,21 @@ export const musicPatch = z
 	.partial();
 
 export type MusicPatch = z.infer<typeof musicPatch>;
+
+/** Which services the player takes music from, set by the bot's owner for every server at once. */
+export const MUSIC_SOURCE_CHOICES = ["both", "youtube", "soundcloud"] as const;
+
+export type MusicSourceChoice = (typeof MUSIC_SOURCE_CHOICES)[number];
+
+/** Both until the owner chooses, which is what the player did before there was a choice. */
+export const DEFAULT_MUSIC_SOURCES: MusicSourceChoice = "both";
+
+export interface MusicSourceSetting {
+	sources: MusicSourceChoice;
+	/** False until the owner has chosen, so the console can say the one showing is the default. */
+	configured: boolean;
+}
+
+export const musicSourcesPatch = z.object({ sources: z.enum(MUSIC_SOURCE_CHOICES) });
+
+export type MusicSourcesPatch = z.infer<typeof musicSourcesPatch>;

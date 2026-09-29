@@ -1288,6 +1288,26 @@ what they will do **and** where things stand — "Turn the music system off (it 
 (2 roles)". Static choices could not do that. The roles themselves are a pre-ticked role select on the panel
 rather than anything typed, which is anti-pattern 19.
 
+**Which services feed `/play` is the owner's choice, bot-wide: both, YouTube only or SoundCloud only.** It is one
+row in `botsettings` (keyed `GLOBAL`, cached like the prefix), set from the owner console's control tab through
+`PUT /control/music`, and read by `queueRequest` — the one path every request takes, so the panel's Add to queue
+obeys it too. There is deliberately **no separate SoundCloud command**; `/play` is the only way in, and the
+setting decides what feeds it. Four things about it are load-bearing:
+
+- **`withinSources` runs before yt-dlp is spawned.** A plain search goes wherever the owner points, and a link or
+  a `yt:`/`sc:` search naming a switched-off service is refused by name. Turning YouTube off therefore also stops
+  every request to YouTube, which is the point on a host YouTube has flagged. Links to any other site are not the
+  owner's to switch and are never refused by it.
+- **Under "both", a plain search YouTube refuses or finds nothing for is asked of SoundCloud** (`findTracks`), and
+  the note on the panel says so. A link is never swapped for a search, because a different song from another
+  service is not what was asked for; the refusal points at `sc:` instead. An unavailable video does not fall
+  back, because YouTube answered.
+- **The typeahead asks both services at once and interleaves them**, each row led by its service
+  (`choiceFor(track, labelled)`), so the service survives truncation. `Promise.allSettled` is what keeps SoundCloud's
+  songs on screen when YouTube refuses: `Promise.all` loses both, and a test goes red for it.
+- **`TrackTypeahead` keeps a cache per set of services**, so switching the setting cannot offer the other service's
+  songs for the next five minutes.
+
 **The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
 before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
 the host actually has.
@@ -2247,7 +2267,8 @@ Two rules it enforces:
 
 Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so the API
 confirms nothing to somebody probing it. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
-the whole console, and the logs tab is precisely the screen you want when something is wrong.
+the whole console, and the logs tab is precisely the screen you want when something is wrong. Inside the control
+tab the music sources card reads on its own too, so a failure there leaves pause and shut down working.
 
 **The page asks the server, never `/auth/me` alone.** `isOwner` on `/auth/me` is only as honest as the browser that
 received it: rewritten in DevTools, it once drew the console's frame for somebody who was not the owner, every tab

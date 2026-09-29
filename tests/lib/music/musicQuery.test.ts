@@ -22,7 +22,12 @@ describe("resolveQuery", () => {
 	});
 
 	it("lets a prefix choose the service to search", () => {
-		expect(resolveQuery("sc:lofi beats")).toEqual({ kind: "search", terms: "lofi beats", source: "soundcloud" });
+		expect(resolveQuery("sc:lofi beats")).toEqual({
+			kind: "search",
+			terms: "lofi beats",
+			source: "soundcloud",
+			named: true,
+		});
 	});
 
 	/** A prefix with nothing after it is a typo, not a search for everything. */

@@ -20,7 +20,10 @@ The bot posts a player panel with the track's artwork, which updates while the t
 - **Add to queue** opens a box for a link or a search. Anybody allowed to use the music system can press it, not only the person who started the player.
 
 ### What works
-- **YouTube** and **SoundCloud** links and searches.
+- **YouTube** and **SoundCloud** links and searches. While you type, `/play` suggests songs from both, each marked with where it is from.
+- Put `yt:` or `sc:` before a search to use just one of them.
+- If YouTube will not answer, a search is tried on SoundCloud instead, and the player says so.
+- The bot's owner can limit the bot to one of the two. `/music status` says which it is using.
 - **Spotify links are refused**, because Spotify's audio is protected. Search for the track by name instead.
 
 > **Tip:** You need to be in the same voice channel as the bot to control it.

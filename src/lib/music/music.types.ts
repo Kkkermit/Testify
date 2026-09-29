@@ -46,7 +46,9 @@ export interface DownloadProblem {
 export type MusicSource = (typeof MUSIC_SOURCES)[number];
 
 export type Query =
-	{ kind: "url"; url: string; source: MusicSource } | { kind: "search"; terms: string; source: MusicSource };
+	| { kind: "url"; url: string; source: MusicSource }
+	/** `named` when the reader chose the service themselves, with `yt:` or `sc:`. */
+	| { kind: "search"; terms: string; source: MusicSource; named?: boolean };
 
 export interface Track {
 	/** Stable across a restart, so a panel left open still names the right thing. */

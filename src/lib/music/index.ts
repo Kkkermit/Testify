@@ -11,4 +11,5 @@ export * from "./musicSearch.util";
 export * from "./musicSession.util";
 export * from "./musicSettings.util";
 export * from "./musicSource.util";
+export * from "./musicSources.util";
 export * from "./musicSystemPanel.util";

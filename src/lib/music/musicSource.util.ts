@@ -87,12 +87,11 @@ export function cookieArgs(binaries: Pick<MusicBinaries, "cookies">): string[] {
 
 /** A download refused for a reason the player knows, which the reader is told rather than handed a stack. */
 export class MusicProblemError extends UserFacingError {
-	constructor(readonly problem: DownloadProblem) {
-		super(
-			problem.kind === "bot-check"
-				? `${problem.advice} Try SoundCloud instead: put \`sc:\` before your search.`
-				: problem.advice,
-		);
+	constructor(
+		readonly problem: DownloadProblem,
+		hint?: string,
+	) {
+		super(hint === undefined ? problem.advice : `${problem.advice} ${hint}`);
 	}
 }
 

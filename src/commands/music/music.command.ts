@@ -20,7 +20,9 @@ import {
 	requireVolumeControl,
 	sameChannelAs,
 	showPanel,
+	readMusicSources,
 	shuffleUpcoming,
+	sourcesLine,
 	statusLines,
 	upcomingPage,
 } from "@lib/music";
@@ -270,9 +272,10 @@ export default defineCommand({
 		{
 			name: "status",
 			private: true,
-			description: "Shows which players the host has installed, and how old they are.",
+			description: "Shows where music comes from, and which players the host has installed.",
 			async run(interaction, client) {
-				await reply(interaction, { content: statusLines(musicBinaries(client)).join("\n") });
+				const lines = statusLines(musicBinaries(client));
+				await reply(interaction, { content: [...lines, sourcesLine(await readMusicSources())].join("\n") });
 			},
 		},
 	],
