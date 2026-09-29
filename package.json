@@ -1,6 +1,6 @@
 {
 	"name": "testify",
-	"version": "2.0.1",
+	"version": "2.0.2",
 	"description": "Open source, multipurpose Discord bot written in TypeScript",
 	"main": "dist/index.js",
 	"license": "SEE LICENSE IN LICENSE",
@@ -73,7 +73,7 @@
 		"js-yaml": "^4.3.2",
 		"fast-uri": "^3.1.5",
 		"discord-html-transcripts": {
-			"undici": "^6.28.0"
+			"undici": "^6.28.1"
 		},
 		"@istanbuljs/load-nyc-config": {
 			"js-yaml": "^3.15.1"
