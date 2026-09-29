@@ -1127,6 +1127,20 @@ is not where anybody in the voice channel looks. **The warning waits for the giv
 download now and then and the fresh try plays it, so a refusal is noted at `debug` and only a track actually
 skipped is logged at `warn` — warning on every 403 told the host to update a yt-dlp that was working.
 
+**A search asks for one result, because only one is played.** `queueRequest` passes `results: 1`; the old
+`ytsearch8:` extracted all eight in full, so a host YouTube had flagged was bot-checked eight times per `/play`, and
+request volume is what gets a host flagged. The typeahead keeps its eight, but as a `--flat-playlist` search, which
+reads the results page and extracts nothing. A refusal `classifyProblem` recognises leaves `resolveTracks` as a
+`MusicProblemError` — a `UserFacingError` carrying the advice, not yt-dlp's text logged as a failure — and a bot check
+also logs one `warn` for the host, naming `MUSIC_YTDLP_COOKIES`.
+
+**`MUSIC_YTDLP_COOKIES` is yt-dlp's own answer to a flagged host**, and the only one that needs no extra install:
+`--cookies` goes on every call — search, description and stream alike, since a stream refused after a search that
+was not is the worse failure. It takes a path, resolved from the repository, or the file's contents pasted into the
+variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes pasted contents to a file
+only its own user can read. They are a signed-in session, so `secretsOf` treats every cookie value as a secret, and
+`/music status` says they are in use without saying where they are.
+
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
 > `yt-dlp --version` exits 0 and `yt-dlp -version` exits 2. One hardcoded flag in the probe hid FFmpeg on every

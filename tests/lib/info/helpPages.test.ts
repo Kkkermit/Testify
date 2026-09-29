@@ -1,7 +1,9 @@
 import { Collection } from "discord.js";
+import { parseCustomId } from "@core/button";
 import { type TestifyClient } from "@core/client";
 import { defineCommand } from "@core/command";
 import {
+	categoryControls,
 	categoryPage,
 	commandPage,
 	HELP_PAGE_SIZE,
@@ -53,6 +55,29 @@ describe("paging", () => {
 		const beyond = categoryPage(client, "fun", 99, "slash", "t?");
 
 		expect(beyond.data.fields?.length).toBe(2);
+	});
+});
+
+describe("the page controls", () => {
+	const OWNER = "100000000000000001";
+	const idsOf = (controls: ReturnType<typeof categoryControls>) =>
+		controls.toJSON().components.map((part) => (part as { custom_id: string }).custom_id);
+
+	/** On a one-page category Previous and Next both point at page 0, and Discord refused the whole reply. */
+	it("never gives two buttons the same id, however many pages there are", () => {
+		for (const total of [1, 2, 5]) {
+			for (let page = 0; page < total; page += 1) {
+				const ids = idsOf(categoryControls("fun", page, total, "slash", OWNER));
+				expect(new Set(ids).size).toBe(ids.length);
+			}
+		}
+	});
+
+	it("still reads the page to go to, and keeps the owner last", () => {
+		const [previous, , next] = idsOf(categoryControls("fun", 1, 3, "slash", OWNER)).map(parseCustomId);
+
+		expect(previous).toMatchObject({ action: "page", args: ["slash", "fun", "0", "prev", OWNER] });
+		expect(next).toMatchObject({ action: "page", args: ["slash", "fun", "2", "next", OWNER] });
 	});
 });
 

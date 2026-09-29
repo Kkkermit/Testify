@@ -10,6 +10,8 @@ export interface MusicBinaries {
 	ffmpeg: string | null;
 	/** What the chosen yt-dlp reports, which is a release date and so also its age. */
 	ytDlpVersion?: string | null;
+	/** A Netscape cookies file yt-dlp signs in to YouTube with, for a host YouTube has flagged. */
+	cookies?: string | null;
 }
 
 export interface RemoteFormat {

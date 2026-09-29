@@ -13,6 +13,13 @@ describe("secretsOf", () => {
 		);
 	});
 
+	/** A pasted cookies file is a signed-in YouTube session, so every cookie in it counts as a secret. */
+	it("holds each cookie's value from a pasted cookies file", () => {
+		const pasted = "# Netscape HTTP Cookie File\\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tcookie-value-123456";
+
+		expect(secretsOf({ ...ENV, MUSIC_YTDLP_COOKIES: pasted })).toContain("cookie-value-123456");
+	});
+
 	it("leaves out a value too short to be worth matching, so a short username cannot censor ordinary words", () => {
 		expect(secretsOf({ ...ENV, MONGODB_URI: "mongodb://bot:pw@localhost/testify" })).not.toContain("pw");
 	});

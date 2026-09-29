@@ -6,7 +6,9 @@ import {
 	candidatesFor,
 	findBinaries,
 	locate,
+	locateCookies,
 	locateYtDlp,
+	looksLikeCookies,
 	pickNewest,
 	runs,
 	statusLines,
@@ -81,7 +83,7 @@ describe("findBinaries", () => {
 			{ runs: () => false, version: (path) => (path === "/a/yt-dlp" ? "2026.09.01" : null) },
 		);
 
-		expect(found).toEqual({ ytDlp: "/a/yt-dlp", ffmpeg: null, ytDlpVersion: "2026.09.01" });
+		expect(found).toEqual({ ytDlp: "/a/yt-dlp", ffmpeg: null, ytDlpVersion: "2026.09.01", cookies: null });
 	});
 
 	/** FFmpeg being absent is a supported state, not a failure — most tracks still play without it. */
@@ -89,7 +91,42 @@ describe("findBinaries", () => {
 		const nothing = { runs: () => false, version: () => null };
 
 		expect(() => findBinaries({}, nothing)).not.toThrow();
-		expect(findBinaries({}, nothing)).toEqual({ ytDlp: null, ffmpeg: null, ytDlpVersion: null });
+		expect(findBinaries({}, nothing)).toEqual({ ytDlp: null, ffmpeg: null, ytDlpVersion: null, cookies: null });
+	});
+});
+
+describe("locateCookies", () => {
+	const PASTED = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tabc";
+
+	it("uses a path to a cookies file, resolved from the repository when it is relative", () => {
+		expect(locateCookies("/etc/cookies.txt", jest.fn(), () => true)).toBe("/etc/cookies.txt");
+		expect(locateCookies("cookies.txt", jest.fn(), (path) => path.endsWith("cookies.txt"))).toMatch(/cookies\.txt$/);
+	});
+
+	/** Pasting the file into the variable is the only easy way on a host where mounting a file is not. */
+	it("writes pasted contents to a file of their own, and uses that", () => {
+		const write = jest.fn(() => "/tmp/written.txt");
+
+		expect(locateCookies(PASTED, write, () => false)).toBe("/tmp/written.txt");
+		expect(write).toHaveBeenCalledWith(PASTED);
+	});
+
+	it("uses nothing when unset, or when the path names no file", () => {
+		expect(locateCookies(undefined)).toBeNull();
+		expect(locateCookies("/nowhere/cookies.txt", jest.fn(), () => false)).toBeNull();
+	});
+
+	it("tells a pasted file from a path", () => {
+		expect(looksLikeCookies(PASTED)).toBe(true);
+		expect(looksLikeCookies(".youtube.com\tTRUE\t/")).toBe(true);
+		expect(looksLikeCookies("/home/me/cookies.txt")).toBe(false);
+	});
+
+	it("says on /music status that yt-dlp signs in, without saying where the file is", () => {
+		const lines = statusLines({ ytDlp: "/a/yt-dlp", ffmpeg: "/a/ffmpeg", cookies: "/secret/cookies.txt" });
+
+		expect(lines).toContain("✓ **YouTube cookies** — yt-dlp signs in with them");
+		expect(lines.join("\n")).not.toContain("/secret");
 	});
 });
 

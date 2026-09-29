@@ -51,6 +51,7 @@ const fields = z.object({
 	// Music. Both are paths to binaries the bot spawns; blank means "look on PATH".
 	MUSIC_YTDLP_PATH: z.string().min(1).optional(),
 	MUSIC_FFMPEG_PATH: z.string().min(1).optional(),
+	MUSIC_YTDLP_COOKIES: z.string().min(1).optional(),
 
 	// Support assistant. Without a key it answers by search alone and never contacts anybody.
 	SUPPORT_AI_API_KEY: z.string().min(1).optional(),
