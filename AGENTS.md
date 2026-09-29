@@ -1308,6 +1308,15 @@ setting decides what feeds it. Four things about it are load-bearing:
 - **`TrackTypeahead` keeps a cache per set of services**, so switching the setting cannot offer the other service's
   songs for the next five minutes.
 
+**Some SoundCloud uploads are DRM-protected, and they are refused, never decrypted.** yt-dlp raises "This video is
+DRM protected" for a track offered only as encrypted streams — read out of `report_drm` in its `extractor/common.py`
+— so `classifyProblem` names it (`drm`) and `aboutTheTrack` treats it like an unavailable video: no retry, no
+fallback, not held against the service on the status page, and advice rather than a stack. A SoundCloud search
+therefore reads `SOUNDCLOUD_SEARCH_DEPTH` results with `--ignore-no-formats-error`, which makes yt-dlp return a
+protected result without formats instead of failing the whole search, and plays the first with formats
+(`isPlayable`). YouTube searches stay at one result, and a flat typeahead search is left alone because it reads no
+formats to judge by.
+
 **The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
 before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
 the host actually has.

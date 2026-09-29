@@ -11,6 +11,7 @@ import {
 	VoiceConnectionStatus,
 } from "@discordjs/voice";
 import { AttachmentBuilder, type Guild, type VoiceBasedChannel } from "discord.js";
+import { toError } from "@core/errors";
 import { type Logger } from "@core/logger";
 import { fetchArtwork, MUSIC_CARD_NAME, renderMusicCard } from "@lib/canvas/musicCard.util";
 import { type ContainerMessageWithFiles } from "@lib/discord/discord.types";
@@ -32,7 +33,7 @@ import {
 } from "@lib/music/music.types";
 import { clampVolume, planStream } from "@lib/music/musicFormat.util";
 import { musicPanel, type PanelState } from "@lib/music/musicPanel.util";
-import { classifyProblem } from "@lib/music/musicProblem.util";
+import { aboutTheTrack, classifyProblem } from "@lib/music/musicProblem.util";
 import { currentTrack, decideOnIdle, endedEarly, finished } from "@lib/music/musicQueue.util";
 import { describeTrack, forgetDescription, openStream } from "@lib/music/musicSource.util";
 
@@ -253,8 +254,8 @@ export class MusicSession {
 
 			if (plan === null) {
 				failure = this.canSetVolume
-					? "no playable audio was offered for it"
-					: "it is not offered in a format Discord can play, and FFmpeg is not installed";
+					? "no playable audio was offered for it."
+					: "it is not offered in a format Discord can play, and FFmpeg is not installed.";
 			} else {
 				const stream = openStream(track.url, plan, this.#binaries, {
 					volume: this.#volume,
@@ -272,15 +273,22 @@ export class MusicSession {
 				this.#player.play(resource);
 			}
 		} catch (error) {
-			// One track that will not open is not the end of the queue, so it is reported and stepped over.
-			this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A track could not be opened. Moving on.");
-			failure = "it could not be opened";
+			// One track that will not open is not the end of the queue, so it is stepped over with the reason.
+			const known = classifyProblem(toError(error).message);
+
+			if (known !== null && aboutTheTrack(known)) {
+				this.#logger.debug({ guildId: this.guildId, track: track.url }, `[MUSIC] Skipped a track: ${known.kind}.`);
+				failure = known.advice;
+			} else {
+				this.#logger.warn({ err: error, guildId: this.guildId }, "[MUSIC] A track could not be opened. Moving on.");
+				failure = "it could not be opened.";
+			}
 		} finally {
 			this.#reopening = false;
 		}
 
 		if (failure !== null) {
-			this.#notify(`Skipped **${track.title}** — ${failure}.`);
+			this.#notify(`Skipped **${track.title}** — ${failure}`);
 			this.#emit({ kind: "failed", track, reason: failure });
 			await this.#advancePast();
 			return;

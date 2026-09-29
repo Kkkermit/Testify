@@ -11,6 +11,7 @@ import {
 	parseJsonLines,
 	MusicProblemError,
 	resolveTracks,
+	SOUNDCLOUD_SEARCH_DEPTH,
 	PLAYLIST_LIMIT,
 	type TrackInfo,
 	trackFromInfo,
@@ -552,5 +553,79 @@ describe("describeTrack's memory", () => {
 		await describeTrack("https://youtu.be/stale", binaries, 3_600_000);
 
 		expect(runs() - before).toBe(1);
+	});
+});
+
+describe("resolveTracks on a SoundCloud search", () => {
+	let directory: string;
+
+	beforeAll(() => {
+		directory = mkdtempSync(join(tmpdir(), "testify-soundcloud-"));
+	});
+
+	afterAll(() => {
+		rmSync(directory, { recursive: true, force: true });
+	});
+
+	function fakeYtDlp(name: string, script: string): string {
+		const path = join(directory, name);
+		writeFileSync(path, `#!/bin/sh\n${script}\n`, { mode: 0o755 });
+
+		return path;
+	}
+
+	const search = { kind: "search", terms: "lofi", source: "soundcloud" } as const;
+	const locked = `{"webpage_url":"https://soundcloud.com/a/locked","title":"Locked","formats":[]}`;
+	const open = `{"webpage_url":"https://soundcloud.com/a/open","title":"Open","formats":[{"format_id":"opus"}]}`;
+
+	/** The bug from production: the first result was DRM-protected, and that one track failed the whole search. */
+	it("steps past a DRM-protected result to one that plays", async () => {
+		const record = join(directory, "args.txt");
+		const binary = fakeYtDlp("mixed", `printf '%s\\n' "$@" > '${record}'\nprintf '${locked}\\n${open}\\n'`);
+
+		const tracks = await resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
+
+		expect(tracks.map((track) => track.title)).toEqual(["Open"]);
+		const args = readFileSync(record, "utf8").split("\n");
+		expect(args).toContain(`scsearch${String(SOUNDCLOUD_SEARCH_DEPTH)}:lofi`);
+		expect(args).toContain("--ignore-no-formats-error");
+	});
+
+	it("says so, as advice, when every result is protected", async () => {
+		const binary = fakeYtDlp("all-locked", `printf '${locked}\\n'`);
+
+		await expect(resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/DRM-protected/);
+	});
+
+	/** A typeahead search reads no formats, so filtering on them would hide every suggestion. */
+	it("leaves a flat search alone", async () => {
+		const binary = fakeYtDlp("flat", `printf '{"url":"https://soundcloud.com/a/b","title":"Flat"}\\n'`);
+
+		const tracks = await resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null }, { flat: true });
+
+		expect(tracks.map((track) => track.title)).toEqual(["Flat"]);
+	});
+
+	/** YouTube is asked for one result on purpose, since request volume is what gets a host flagged. */
+	it("does not widen a YouTube search", async () => {
+		const record = join(directory, "yt-args.txt");
+		const binary = fakeYtDlp("yt", `printf '%s\\n' "$@" > '${record}'`);
+
+		await resolveTracks({ ...search, source: "youtube" }, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
+
+		expect(readFileSync(record, "utf8")).toContain("ytsearch1:lofi");
+		expect(readFileSync(record, "utf8")).not.toContain("--ignore-no-formats-error");
+	});
+
+	it("turns yt-dlp's DRM refusal of a link into advice rather than a crash", async () => {
+		const binary = fakeYtDlp(
+			"drm-link",
+			`echo 'ERROR: [soundcloud] 2398987035: This video is DRM protected' >&2\nexit 1`,
+		);
+		const link = { kind: "url", url: "https://soundcloud.com/a/locked", source: "soundcloud" } as const;
+
+		const refused = resolveTracks(link, USER, { ytDlp: binary, ffmpeg: null });
+		await expect(refused).rejects.toBeInstanceOf(MusicProblemError);
+		await expect(resolveTracks(link, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/no bot can play it/);
 	});
 });

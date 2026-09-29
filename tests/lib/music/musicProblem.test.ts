@@ -1,5 +1,5 @@
 import { RETRIES_AFTER } from "@lib/music/music.constants";
-import { classifyProblem } from "@lib/music/musicProblem.util";
+import { aboutTheTrack, classifyProblem } from "@lib/music/musicProblem.util";
 
 describe("classifyProblem", () => {
 	/** Verbatim from a real log: this is the line that has to turn into advice somebody can act on. */
@@ -21,6 +21,15 @@ describe("classifyProblem", () => {
 		},
 	);
 
+	/** Verbatim from production: a SoundCloud upload only offered encrypted, which nothing here will ever decrypt. */
+	it("reads a DRM-protected track as one that can never play, not as a crash", () => {
+		const problem = classifyProblem("ERROR: [soundcloud] 2398987035: This video is DRM protected");
+
+		expect(problem?.kind).toBe("drm");
+		expect(aboutTheTrack(problem)).toBe(true);
+		expect(aboutTheTrack(classifyProblem("HTTP Error 403: Forbidden"))).toBe(false);
+	});
+
 	/** Anything unrecognised keeps the ordinary retries rather than being given up on early. */
 	it("says nothing about a failure it does not recognise", () => {
 		expect(classifyProblem("yt-dlp exited 1")).toBeNull();
@@ -30,6 +39,6 @@ describe("classifyProblem", () => {
 describe("RETRIES_AFTER", () => {
 	/** A 403 is sometimes an address that expired between asking and downloading, so it earns exactly one. */
 	it("gives a 403 one more go and the others none", () => {
-		expect(RETRIES_AFTER).toEqual({ forbidden: 1, "bot-check": 0, unavailable: 0 });
+		expect(RETRIES_AFTER).toEqual({ forbidden: 1, "bot-check": 0, unavailable: 0, drm: 0 });
 	});
 });

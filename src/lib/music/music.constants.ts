@@ -29,6 +29,7 @@ export const RETRIES_AFTER: Record<ProblemKind, number> = {
 	forbidden: 1,
 	"bot-check": 0,
 	unavailable: 0,
+	drm: 0,
 };
 
 export const MUSIC_SOURCES = ["youtube", "soundcloud", "spotify", "other"] as const;

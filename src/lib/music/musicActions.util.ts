@@ -6,6 +6,7 @@ import { reply } from "@lib/discord/reply.util";
 import { CHOICE_MAX, SEARCH_RESULTS } from "@lib/music/music.constants";
 import { type MusicBinaries, type MusicSource, type Query, type Track } from "@lib/music/music.types";
 import { findBinaries } from "@lib/music/musicBinaries.util";
+import { aboutTheTrack } from "@lib/music/musicProblem.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/music/musicQuery.util";
 import { addTracks } from "@lib/music/musicQueue.util";
 import {
@@ -102,7 +103,7 @@ async function findTracks(
 		const found = await ask(query);
 		if (found.length > 0 || !fallsBackToSoundCloud(query, sources)) return { found, fellBack: false };
 	} catch (error) {
-		if (!(error instanceof MusicProblemError) || error.problem.kind === "unavailable") throw error;
+		if (!(error instanceof MusicProblemError) || aboutTheTrack(error.problem)) throw error;
 		if (error.problem.kind === "bot-check") warnHost(request, binaries);
 
 		if (!fallsBackToSoundCloud(query, sources)) {

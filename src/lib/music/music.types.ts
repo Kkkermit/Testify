@@ -35,7 +35,7 @@ export interface StreamPlan {
 	shape: StreamShape;
 }
 
-export type ProblemKind = "forbidden" | "bot-check" | "unavailable";
+export type ProblemKind = "forbidden" | "bot-check" | "unavailable" | "drm";
 
 export interface DownloadProblem {
 	kind: ProblemKind;
