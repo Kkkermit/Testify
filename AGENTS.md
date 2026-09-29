@@ -131,6 +131,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
 | `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
+| `npm run music:cookies`  | Turns an exported cookies.txt into the one line Railway can take     |
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
 | `npm run commit`         | Guided commit wizard (enforces the message format)                   |
 | `npm run commands:clear` | Deregister all application commands                                  |
@@ -1136,10 +1137,12 @@ also logs one `warn` for the host, naming `MUSIC_YTDLP_COOKIES`.
 
 **`MUSIC_YTDLP_COOKIES` is yt-dlp's own answer to a flagged host**, and the only one that needs no extra install:
 `--cookies` goes on every call — search, description and stream alike, since a stream refused after a search that
-was not is the worse failure. It takes a path, resolved from the repository, or the file's contents pasted into the
-variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes pasted contents to a file
-only its own user can read. They are a signed-in session, so `secretsOf` treats every cookie value as a secret, and
-`/music status` says they are in use without saying where they are.
+was not is the worse failure. It takes a path, resolved from the repository, or the file itself held in the
+variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes that to a file only its
+own user can read. **Railway's variables hold no line breaks**, so `cookieFileText` also reads the file as one base64
+line, which `npm run music:cookies -- cookies.txt` prints; a path can never decode into a cookies file, so the two
+cannot be confused. They are a signed-in session, so `secretsOf` treats every cookie value, and the base64 line
+itself, as a secret, and `/music status` says they are in use without saying where they are.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;

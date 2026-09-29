@@ -300,6 +300,16 @@ played as silence.
 
 Spotify links cannot be played by anything — the audio is DRM-protected. Search for the track by name instead.
 
+**"Sign in to confirm you're not a bot"** means YouTube has flagged the host, which is common on cloud hosts.
+Export `cookies.txt` for youtube.com from a private window signed in to a spare Google account, then either put
+its path in `MUSIC_YTDLP_COOKIES` or, on a host whose variables take one line (Railway), run:
+
+```bash
+npm run music:cookies -- cookies.txt
+```
+
+and paste the line it prints as the value. That line is a signed-in login, so never share it.
+
 > [!TIP]
 > Use **two bot applications** — one for development, one for production. `npm run setup -- --dev` writes
 > `.env.development`, which `npm run dev` reads instead of `.env`. That way testing can never touch your live
