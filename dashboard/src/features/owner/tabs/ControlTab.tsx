@@ -1,16 +1,75 @@
-import { BOT_IDENTITY_LIMITS, SHUTDOWN_PHRASE } from "@testify/shared";
+import { BOT_IDENTITY_LIMITS, MUSIC_SOURCE_CHOICES, type MusicSourceChoice, SHUTDOWN_PHRASE } from "@testify/shared";
 import { Pause, Play, Power } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Badge, Button, Card, CARD_HEADING, Skeleton } from "@/components/primitives";
+import { Badge, Button, Card, CARD_HEADING, SegmentedControl, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
-import { useBotControl, useBotIdentity, useGateway, useShutdown } from "@/features/owner/useControl";
+import {
+	useBotControl,
+	useBotIdentity,
+	useGateway,
+	useMusicSources,
+	useSetMusicSources,
+	useShutdown,
+} from "@/features/owner/useControl";
+import { type TranslationKey } from "@/i18n";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 import { sanitiseInput } from "@/lib/sanitise";
+
+const SOURCE_LABELS: Record<MusicSourceChoice, { label: TranslationKey; hint: TranslationKey }> = {
+	both: { label: "owner.sourceBoth", hint: "owner.sourceBothHint" },
+	youtube: { label: "owner.sourceYoutube", hint: "owner.sourceYoutubeHint" },
+	soundcloud: { label: "owner.sourceSoundcloud", hint: "owner.sourceSoundcloudHint" },
+};
+
+/** Its own read, so a failure here leaves the rest of the tab working. */
+function MusicSourcesCard(): React.JSX.Element {
+	const { t } = useTranslation();
+	const setting = useMusicSources();
+	const change = useSetMusicSources();
+
+	return (
+		<Card className="flex flex-col gap-4">
+			<div>
+				<h2 className={CARD_HEADING}>{t("owner.musicSources")}</h2>
+				<p className="text-muted-foreground text-sm">{t("owner.musicSourcesBody")}</p>
+			</div>
+
+			{setting.isPending ? (
+				<Skeleton className="h-9 w-72" />
+			) : setting.data === undefined ? (
+				<ErrorState as="h2" error={setting.error} onRetry={() => void setting.refetch()} />
+			) : (
+				<div className="flex flex-col gap-2">
+					<div className="flex flex-wrap items-center gap-3">
+						<SegmentedControl
+							label={t("owner.musicSources")}
+							segments={MUSIC_SOURCE_CHOICES.map((value) => ({
+								value,
+								label: t(SOURCE_LABELS[value].label),
+								hint: t(SOURCE_LABELS[value].hint),
+							}))}
+							value={change.isPending ? change.variables : setting.data.sources}
+							onChange={(sources) => {
+								if (sources !== setting.data.sources) change.mutate(sources);
+							}}
+						/>
+						<SavingIndicator state={savingStateOf(change.isPending, change.isSuccess)} />
+					</div>
+					<p className="text-muted-foreground text-sm">{t(SOURCE_LABELS[setting.data.sources].hint)}</p>
+				</div>
+			)}
+
+			{change.error !== null && (
+				<Warning>{change.error instanceof ApiError ? change.error.message : t("common.didNotWork")}</Warning>
+			)}
+		</Card>
+	);
+}
 
 /** There is no Start: this API is served by the bot process, so a stopped bot has nothing left to answer with. */
 export function ControlTab(): React.JSX.Element {
@@ -82,6 +141,8 @@ export function ControlTab(): React.JSX.Element {
 					<Warning>{gateway.error instanceof ApiError ? gateway.error.message : t("common.didNotWork")}</Warning>
 				)}
 			</Card>
+
+			<MusicSourcesCard />
 
 			<Card className="flex flex-col gap-4">
 				<div>

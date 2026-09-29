@@ -13,11 +13,13 @@ import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositori
 import { guildTallies } from "@database/repositories/usageRepository";
 import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
 import { normaliseSettings } from "@lib/levelling";
+import { applyMusicSources, readMusicSources, readMusicSourceSetting, sourcesName } from "@lib/music";
 import {
 	botIdentityPatch,
 	gatewayAction,
 	guildIdParam,
 	leaveGuildRequest,
+	musicSourcesPatch,
 	type OwnerGuildDetail,
 	shutdownRequest,
 } from "@testify/shared";
@@ -89,6 +91,23 @@ control.patch("/identity", async (context) => {
 
 	const identity = (await botIdentity(client))!;
 	return context.json(identity);
+});
+
+control.get("/music", async (context) => context.json(await readMusicSourceSetting()));
+
+control.put("/music", async (context) => {
+	const { sources } = await parseBody(context, musicSourcesPatch);
+	const before = await readMusicSources();
+	const setting = await applyMusicSources(sources, context.get("session")?.userId ?? null);
+
+	await auditChange(context, {
+		action: "bot.musicSources",
+		summary: `Set the music sources to ${sourcesName(sources)}`,
+		before: { sources: before },
+		after: { sources },
+	});
+
+	return context.json(setting);
 });
 
 control.get("/guilds/:guildId", async (context) => {

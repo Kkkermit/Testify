@@ -51,6 +51,7 @@ export const keys = {
 		logs: (level: string, search: string) => ["owner", "logs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,
 		control: () => ["owner", "control"] as const,
+		musicSources: () => ["owner", "musicSources"] as const,
 		guildDetail: (id: string) => ["owner", "guild", id] as const,
 		blacklist: () => ["owner", "blacklist"] as const,
 		runner: () => ["owner", "runner"] as const,

@@ -61,14 +61,14 @@ numbers, which drift):
 | -------------------- | --------------------------------- |
 | Commands             | 79, across 14 categories          |
 | Command files        | 100 (incl. folded-in subcommands) |
-| Subcommands          | 130                               |
+| Subcommands          | 131                               |
 | Prefix aliases       | 90                                |
-| Button handlers      | 28                                |
+| Button handlers      | 31                                |
 | Events               | 25, in 5 groups                   |
-| `src/lib` helpers    | 139, in 17 domain folders         |
-| Schemas/repositories | 19 / 17                           |
+| `src/lib` helpers    | 155, in 17 domain folders         |
+| Schemas/repositories | 22 / 20                           |
 | Scheduled jobs       | 6                                 |
-| Tests                | 5,545 across 306 suites           |
+| Tests                | 5,982 across 333 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -131,6 +131,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
 | `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
+| `npm run music:cookies`  | Turns an exported cookies.txt into the one line Railway can take     |
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
 | `npm run commit`         | Guided commit wizard (enforces the message format)                   |
 | `npm run commands:clear` | Deregister all application commands                                  |
@@ -216,8 +217,8 @@ src/
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               25 handlers in command, create, logging, ready and message
-├── buttons/              28 component handlers, keyed by custom-ID prefix
-├── lib/                  139 helpers in 17 domain folders, each behind its own index.ts barrel
+├── buttons/              31 component handlers, keyed by custom-ID prefix
+├── lib/                  155 helpers in 17 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -228,12 +229,12 @@ src/
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           19 Mongoose schemas
-│   └── repositories/     17 query layers. Commands never touch a model directly.
+│   ├── models/           22 Mongoose schemas
+│   └── repositories/     20 query layers. Commands never touch a model directly.
 ├── jobs/                 6 scheduled jobs (lottery, passive income, bot stats, softbans, heartbeat, casino hands)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 155 suites.
+tests/                    Mirrors src/. 225 suites; the dashboard's 108 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -250,31 +251,32 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 ### Where to look for a given job
 
-| I want to…                                 | Go to                                                                    |
-| ------------------------------------------ | ------------------------------------------------------------------------ |
-| Add or change a command                    | `src/commands/<category>/*.command.ts`                                   |
-| Change how commands are found              | `src/core/loader.ts` (the globs)                                         |
-| Change a permission or cooldown gate       | `src/core/checks.ts`                                                     |
-| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist               |
-| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                     |
-| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"  |
-| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                     |
-| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`) |
-| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it        |
-| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback    |
-| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database          |
-| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                          |
-| Format a number, duration, time            | `src/lib/format/format.util.ts`                                          |
-| Query the database                         | `src/database/repositories/*.ts` — never a model directly                |
-| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`       |
-| Change user-facing copy                    | `src/config/strings.ts`                                                  |
-| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot         |
-| Change a colour or emoji                   | `src/config/theme.ts`                                                    |
-| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`              |
-| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`       |
-| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)      |
-| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in       |
-| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                     |
+| I want to…                                 | Go to                                                                     |
+| ------------------------------------------ | ------------------------------------------------------------------------- |
+| Add or change a command                    | `src/commands/<category>/*.command.ts`                                    |
+| Change how commands are found              | `src/core/loader.ts` (the globs)                                          |
+| Change a permission or cooldown gate       | `src/core/checks.ts`                                                      |
+| Change how prefix commands parse           | `src/core/prefix.ts` — the only file that knows they exist                |
+| Build a button/select/modal                | `src/lib/discord/components.util.ts`                                      |
+| Read a channel a select menu picked        | `src/lib/discord/channelPick.util.ts` — one rule for "can the bot post"   |
+| Build a Components V2 message              | `src/lib/discord/containers.util.ts`                                      |
+| Build an embed                             | `src/lib/discord/embeds.util.ts` (nothing else may `new EmbedBuilder()`)  |
+| Draw an image card                         | `src/lib/canvas/canvas.util.ts`, then a `*Card.util.ts` beside it         |
+| Put text on a card                         | `src/lib/canvas/text.util.ts` — bundled fonts, per-character fallback     |
+| Change how XP or level rewards work        | `src/lib/levelling/levelling.util.ts` — pure rules, no database           |
+| Reply to an interaction                    | `src/lib/discord/reply.util.ts`                                           |
+| Format a number, duration, time            | `src/lib/format/format.util.ts`                                           |
+| Query the database                         | `src/database/repositories/*.ts` — never a model directly                 |
+| Add an env variable                        | `src/config/env.ts` + both `.env*.example` + `scripts/setupEnv.ts`        |
+| Change user-facing copy                    | `src/config/strings.ts`                                                   |
+| Add or change a help article               | `assets/support/*.md` — the suite checks it against the real bot          |
+| Change a colour or emoji                   | `src/config/theme.ts`                                                     |
+| Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`               |
+| Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
+| Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
+| Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
+| Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in        |
+| Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                      |
 
 ### The panel renderers in `src/lib`
 
@@ -1136,10 +1138,12 @@ also logs one `warn` for the host, naming `MUSIC_YTDLP_COOKIES`.
 
 **`MUSIC_YTDLP_COOKIES` is yt-dlp's own answer to a flagged host**, and the only one that needs no extra install:
 `--cookies` goes on every call — search, description and stream alike, since a stream refused after a search that
-was not is the worse failure. It takes a path, resolved from the repository, or the file's contents pasted into the
-variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes pasted contents to a file
-only its own user can read. They are a signed-in session, so `secretsOf` treats every cookie value as a secret, and
-`/music status` says they are in use without saying where they are.
+was not is the worse failure. It takes a path, resolved from the repository, or the file itself held in the
+variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes that to a file only its
+own user can read. **Railway's variables hold no line breaks**, so `cookieFileText` also reads the file as one base64
+line, which `npm run music:cookies -- cookies.txt` prints; a path can never decode into a cookies file, so the two
+cannot be confused. They are a signed-in session, so `secretsOf` treats every cookie value, and the base64 line
+itself, as a secret, and `/music status` says they are in use without saying where they are.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
@@ -1284,6 +1288,35 @@ prefix. Four things about it are load-bearing:
 what they will do **and** where things stand — "Turn the music system off (it is on)", "Choose who may use it
 (2 roles)". Static choices could not do that. The roles themselves are a pre-ticked role select on the panel
 rather than anything typed, which is anti-pattern 19.
+
+**Which services feed `/play` is the owner's choice, bot-wide: both, YouTube only or SoundCloud only.** It is one
+row in `botsettings` (keyed `GLOBAL`, cached like the prefix), set from the owner console's control tab through
+`PUT /control/music`, and read by `queueRequest` — the one path every request takes, so the panel's Add to queue
+obeys it too. There is deliberately **no separate SoundCloud command**; `/play` is the only way in, and the
+setting decides what feeds it. Four things about it are load-bearing:
+
+- **`withinSources` runs before yt-dlp is spawned.** A plain search goes wherever the owner points, and a link or
+  a `yt:`/`sc:` search naming a switched-off service is refused by name. Turning YouTube off therefore also stops
+  every request to YouTube, which is the point on a host YouTube has flagged. Links to any other site are not the
+  owner's to switch and are never refused by it.
+- **Under "both", a plain search YouTube refuses or finds nothing for is asked of SoundCloud** (`findTracks`), and
+  the note on the panel says so. A link is never swapped for a search, because a different song from another
+  service is not what was asked for; the refusal points at `sc:` instead. An unavailable video does not fall
+  back, because YouTube answered.
+- **The typeahead asks both services at once and interleaves them**, each row led by its service
+  (`choiceFor(track, labelled)`), so the service survives truncation. `Promise.allSettled` is what keeps SoundCloud's
+  songs on screen when YouTube refuses: `Promise.all` loses both, and a test goes red for it.
+- **`TrackTypeahead` keeps a cache per set of services**, so switching the setting cannot offer the other service's
+  songs for the next five minutes.
+
+**Some SoundCloud uploads are DRM-protected, and they are refused, never decrypted.** yt-dlp raises "This video is
+DRM protected" for a track offered only as encrypted streams — read out of `report_drm` in its `extractor/common.py`
+— so `classifyProblem` names it (`drm`) and `aboutTheTrack` treats it like an unavailable video: no retry, no
+fallback, not held against the service on the status page, and advice rather than a stack. A SoundCloud search
+therefore reads `SOUNDCLOUD_SEARCH_DEPTH` results with `--ignore-no-formats-error`, which makes yt-dlp return a
+protected result without formats instead of failing the whole search, and plays the first with formats
+(`isPlayable`). YouTube searches stay at one result, and a flat typeahead search is left alone because it reads no
+formats to judge by.
 
 **The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
 before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
@@ -2244,7 +2277,8 @@ Two rules it enforces:
 
 Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so the API
 confirms nothing to somebody probing it. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
-the whole console, and the logs tab is precisely the screen you want when something is wrong.
+the whole console, and the logs tab is precisely the screen you want when something is wrong. Inside the control
+tab the music sources card reads on its own too, so a failure there leaves pause and shut down working.
 
 **The page asks the server, never `/auth/me` alone.** `isOwner` on `/auth/me` is only as honest as the browser that
 received it: rewritten in DevTools, it once drew the console's frame for somebody who was not the owner, every tab

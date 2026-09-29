@@ -1,5 +1,5 @@
 import { formatClock, truncate } from "@lib/format/format.util";
-import { CHOICE_MAX } from "@lib/music/music.constants";
+import { CHOICE_MAX, MUSIC_SOURCE_NAMES } from "@lib/music/music.constants";
 import { type Track } from "@lib/music/music.types";
 
 /** Feeding `/play`'s autocomplete without spawning a process for every keystroke. */
@@ -20,22 +20,30 @@ export interface Choice {
 	value: string;
 }
 
-/** One track as an autocomplete row whose value is its address; a track whose address will not fit is dropped. */
-export function choiceFor(track: Track): Choice | null {
+/** One track as an autocomplete row, or null when its address will not fit; a label leads, so truncation spares it. */
+export function choiceFor(track: Track, labelled = false): Choice | null {
 	if (track.url.length > CHOICE_MAX) return null;
 
 	const length = track.durationMs === null ? "live" : formatClock(track.durationMs);
 	const author = track.author === null ? "" : ` · ${track.author}`;
-	const name = truncate(`${track.title}${author} (${length})`, CHOICE_MAX);
+	const tag = labelled ? MUSIC_SOURCE_NAMES[track.source] : undefined;
+	const name = truncate(`${tag === undefined ? "" : `${tag} · `}${track.title}${author} (${length})`, CHOICE_MAX);
 
 	return { name, value: track.url };
 }
 
-export function choicesFor(tracks: Track[]): Choice[] {
+export function choicesFor(tracks: Track[], options: { labelled?: boolean } = {}): Choice[] {
 	return tracks
-		.map(choiceFor)
+		.map((track) => choiceFor(track, options.labelled === true))
 		.filter((choice): choice is Choice => choice !== null)
 		.slice(0, MAX_CHOICES);
+}
+
+/** Takes one from each list in turn, so the best of every service sits near the top. */
+export function interleave<T>(lists: T[][]): T[] {
+	const longest = Math.max(0, ...lists.map((list) => list.length));
+
+	return Array.from({ length: longest }, (_, index) => lists.flatMap((list) => list.slice(index, index + 1))).flat();
 }
 
 /** The row offered when there is nothing better: pressing enter searches for exactly what was typed. */

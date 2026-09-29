@@ -3,12 +3,15 @@ import { type TestifyClient } from "@core/client";
 import { type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord/reply.util";
-import { type MusicBinaries, type Query } from "@lib/music/music.types";
+import { type MusicBinaries, type Query, type Track } from "@lib/music/music.types";
 import { findBinaries } from "@lib/music/musicBinaries.util";
+import { aboutTheTrack } from "@lib/music/musicProblem.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/music/musicQuery.util";
 import { addTracks } from "@lib/music/musicQueue.util";
 import { findSession, type MusicSession, sessionFor } from "@lib/music/musicSession.util";
 import { MusicProblemError, resolveTracks } from "@lib/music/musicSource.util";
+import { allowsSource, fallsBackToSoundCloud, readMusicSources, withinSources } from "@lib/music/musicSources.util";
+import { type MusicSourceChoice } from "@testify/shared";
 
 /** What `/play`, the `/music` subcommands and the panel buttons all need, written once. */
 
@@ -62,26 +65,51 @@ export interface TrackRequest {
 	textChannelId: string | null;
 }
 
+function warnHost(request: TrackRequest, binaries: MusicBinaries): void {
+	request.client.logger.warn(
+		binaries.cookies === null || binaries.cookies === undefined
+			? "[MUSIC] YouTube asked this host to prove it is not a bot. Give yt-dlp YouTube cookies with MUSIC_YTDLP_COOKIES; .env.example says how."
+			: "[MUSIC] YouTube asked this host to prove it is not a bot even with cookies. They have probably expired; export fresh ones into MUSIC_YTDLP_COOKIES.",
+	);
+}
+
+/** Resolves the query, moving a plain search to SoundCloud when YouTube refuses the host and the owner allows both. */
+async function findTracks(
+	request: TrackRequest,
+	query: Query,
+	sources: MusicSourceChoice,
+): Promise<{ found: Track[]; fellBack: boolean }> {
+	const binaries = musicBinaries(request.client);
+	// Only the first search result is played, so asking for more is requests YouTube can hold against the host.
+	const ask = (asked: Query): Promise<Track[]> =>
+		resolveTracks(asked, request.requestedBy, binaries, {
+			flat: asked.kind === "url" && isPlaylistUrl(asked.url),
+			...(asked.kind === "search" ? { results: 1 } : {}),
+		});
+
+	try {
+		const found = await ask(query);
+		if (found.length > 0 || !fallsBackToSoundCloud(query, sources)) return { found, fellBack: false };
+	} catch (error) {
+		if (!(error instanceof MusicProblemError) || aboutTheTrack(error.problem)) throw error;
+		if (error.problem.kind === "bot-check") warnHost(request, binaries);
+
+		if (!fallsBackToSoundCloud(query, sources)) {
+			throw query.source === "youtube" && allowsSource(sources, "soundcloud")
+				? new MusicProblemError(error.problem, "Put `sc:` before your search to use SoundCloud.")
+				: error;
+		}
+	}
+
+	return { found: await ask({ ...query, source: "soundcloud" }), fellBack: true };
+}
+
 /** Finds the tracks and adds them, starting the first at once when nothing is playing; `/play` and Add to queue share it. */
 export async function queueRequest(request: TrackRequest): Promise<{ session: MusicSession; note: string }> {
-	const { query } = request;
+	const sources = await readMusicSources();
+	const query = withinSources(request.query, sources);
 	const session = openSession(request.guild, request.client);
-	const flat = query.kind === "url" && isPlaylistUrl(query.url);
-	const binaries = musicBinaries(request.client);
-	// Only the first search result is played, so asking YouTube for more is requests it can hold against the host.
-	const found = await resolveTracks(query, request.requestedBy, binaries, {
-		flat,
-		...(query.kind === "search" ? { results: 1 } : {}),
-	}).catch((error: unknown) => {
-		if (error instanceof MusicProblemError && error.problem.kind === "bot-check") {
-			request.client.logger.warn(
-				binaries.cookies === null || binaries.cookies === undefined
-					? "[MUSIC] YouTube asked this host to prove it is not a bot. Give yt-dlp YouTube cookies with MUSIC_YTDLP_COOKIES; .env.example says how."
-					: "[MUSIC] YouTube asked this host to prove it is not a bot even with cookies. They have probably expired; export fresh ones into MUSIC_YTDLP_COOKIES.",
-			);
-		}
-		throw error;
-	});
+	const { found, fellBack } = await findTracks(request, query, sources);
 
 	if (found.length === 0) throw new UserFacingError("Nothing turned up for that.");
 
@@ -103,7 +131,7 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 				? `Added **${title}** to the queue.`
 				: `Playing **${title}**.`;
 
-	return { session, note };
+	return { session, note: fellBack ? `${note} YouTube would not answer, so it came from SoundCloud.` : note };
 }
 
 export function openSession(guild: Guild, client: TestifyClient): MusicSession {

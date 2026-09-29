@@ -4,6 +4,8 @@ import { join } from "node:path";
 import {
 	ageInDays,
 	candidatesFor,
+	cookieFileText,
+	cookiesAsLine,
 	findBinaries,
 	locate,
 	locateCookies,
@@ -108,7 +110,26 @@ describe("locateCookies", () => {
 		const write = jest.fn(() => "/tmp/written.txt");
 
 		expect(locateCookies(PASTED, write, () => false)).toBe("/tmp/written.txt");
-		expect(write).toHaveBeenCalledWith(PASTED);
+		expect(write).toHaveBeenCalledWith(`${PASTED}\n`);
+	});
+
+	/** Railway's variables hold no line breaks, so the file has to fit on one line to get there at all. */
+	it("reads the file from one base64 line", () => {
+		const write = jest.fn(() => "/tmp/written.txt");
+
+		expect(locateCookies(cookiesAsLine(PASTED), write, () => false)).toBe("/tmp/written.txt");
+		expect(write).toHaveBeenCalledWith(`${PASTED}\n`);
+	});
+
+	it("reads `\\n` written for each line break", () => {
+		expect(cookieFileText(PASTED.replaceAll("\n", "\\n"))).toBe(`${PASTED}\n`);
+	});
+
+	/** A path is base64 characters too, and must not be decoded into nonsense and used as the file. */
+	it("still treats a path as a path", () => {
+		expect(cookieFileText("cookies")).toBeNull();
+		expect(cookieFileText("/home/me/cookies.txt")).toBeNull();
+		expect(cookieFileText("C:\\Users\\me\\cookies.txt")).toBeNull();
 	});
 
 	it("uses nothing when unset, or when the path names no file", () => {
@@ -118,8 +139,14 @@ describe("locateCookies", () => {
 
 	it("tells a pasted file from a path", () => {
 		expect(looksLikeCookies(PASTED)).toBe(true);
-		expect(looksLikeCookies(".youtube.com\tTRUE\t/")).toBe(true);
+		expect(looksLikeCookies(".youtube.com\tTRUE\t/\tTRUE\t0\tSID\tabc")).toBe(true);
 		expect(looksLikeCookies("/home/me/cookies.txt")).toBe(false);
+	});
+
+	/** Any file indented with tabs has tabs, and one of those decoded from base64 would be handed to yt-dlp. */
+	it("does not take a file for cookies just because it holds tabs", () => {
+		expect(looksLikeCookies('{\n\t"name": "testify"\n}')).toBe(false);
+		expect(cookieFileText(Buffer.from('{\n\t"name": "testify"\n}').toString("base64"))).toBeNull();
 	});
 
 	it("says on /music status that yt-dlp signs in, without saying where the file is", () => {

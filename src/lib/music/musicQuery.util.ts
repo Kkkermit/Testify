@@ -28,7 +28,7 @@ export function resolveQuery(raw: string): Query | null {
 	for (const { prefix, source } of PREFIXES) {
 		if (trimmed.toLowerCase().startsWith(prefix)) {
 			const terms = trimmed.slice(prefix.length).trim();
-			return terms === "" ? null : { kind: "search", terms, source };
+			return terms === "" ? null : { kind: "search", terms, source, named: true };
 		}
 	}
 

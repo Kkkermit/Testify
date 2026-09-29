@@ -845,6 +845,7 @@ export const handlers = [
 	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 	http.get("/api/control", () => HttpResponse.json(botControl)),
+	http.get("/api/control/music", () => HttpResponse.json({ sources: "both", configured: false })),
 	http.get("/api/control/guilds/:guildId", () => HttpResponse.json(guildDetail)),
 	http.get("/api/owner/access", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/owner/stats", () =>

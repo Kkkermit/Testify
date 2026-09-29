@@ -187,7 +187,7 @@ export class DashboardInteraction implements CommandInput {
 	readonly member: GuildMember | null;
 	readonly guild: Guild | null;
 	readonly guildId: string | null;
-	/** Always null. There is no channel behind an HTTP request, and pretending otherwise would be a lie. */
+	/** Always null, because there is no channel behind an HTTP request. */
 	readonly channel: TextBasedChannel | null = null;
 	readonly client: TestifyClient;
 	readonly commandName: string;

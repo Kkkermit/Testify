@@ -7,6 +7,7 @@ import {
 	Keystrokes,
 	choiceFor,
 	choicesFor,
+	interleave,
 	literalChoice,
 	MAX_CHOICES,
 	RESPONSE_MARGIN_MS,
@@ -319,5 +320,12 @@ describe("Keystrokes", () => {
 
 		keys.end("guild:user", "2");
 		expect(keys.size).toBe(0);
+	});
+});
+
+describe("interleave", () => {
+	it("takes one from each list in turn, carrying on with whichever is longer", () => {
+		expect(interleave([["y1", "y2", "y3"], ["s1"]])).toEqual(["y1", "s1", "y2", "y3"]);
+		expect(interleave<string>([])).toEqual([]);
 	});
 });

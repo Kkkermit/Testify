@@ -6,6 +6,7 @@ import { control } from "@api/routes/control";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { shutdown } from "@core/shutdown";
+import { getBotSettings, saveBotSettings } from "@database/repositories/botSettingsRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
@@ -13,6 +14,10 @@ import { guildTallies } from "@database/repositories/usageRepository";
 import { type BotControlState, type OwnerGuildDetail } from "@testify/shared";
 
 jest.mock("@core/shutdown", () => ({ shutdown: jest.fn(() => Promise.resolve()) }));
+jest.mock("@database/repositories/botSettingsRepository", () => ({
+	getBotSettings: jest.fn(() => Promise.resolve(null)),
+	saveBotSettings: jest.fn(() => Promise.resolve()),
+}));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/settingsRepository", () => ({
@@ -96,6 +101,7 @@ beforeEach(() => {
 	jest.mocked(getCounting).mockResolvedValue(null);
 	jest.mocked(getWelcome).mockResolvedValue(null);
 	jest.mocked(guildTallies).mockResolvedValue([]);
+	jest.mocked(getBotSettings).mockResolvedValue(null);
 });
 
 describe("who can control the bot", () => {
@@ -106,6 +112,8 @@ describe("who can control the bot", () => {
 		["POST", "/shutdown"],
 		["PATCH", "/identity"],
 		["GET", `/guilds/${GUILD}`],
+		["GET", "/music"],
+		["PUT", "/music"],
 	])("hides %s %s from a manager", async (method, path) => {
 		const response = await send(path, { method, userId: MANAGER, body: {} });
 
@@ -336,5 +344,42 @@ describe("leaving a server", () => {
 
 		expect(response.status).toBe(400);
 		expect(client.logger.error).toHaveBeenCalled();
+	});
+});
+
+describe("music sources", () => {
+	it("reads both, marked as the default, before the owner has chosen", async () => {
+		const response = await send("/music");
+
+		expect(await response.json()).toEqual({ sources: "both", configured: false });
+	});
+
+	it("stores the owner's choice and records who made it, with what it was before", async () => {
+		const response = await send("/music", { method: "PUT", body: { sources: "soundcloud" } });
+
+		expect(response.status).toBe(200);
+		expect(await response.json()).toEqual({ sources: "soundcloud", configured: true });
+		expect(saveBotSettings).toHaveBeenCalledWith({ musicSources: "soundcloud" }, OWNER);
+		expect(recordAudit).toHaveBeenCalledWith(
+			expect.objectContaining({
+				action: "bot.musicSources",
+				before: { sources: "both" },
+				after: { sources: "soundcloud" },
+			}),
+		);
+	});
+
+	it.each([{}, { sources: "spotify" }, { sources: null }])("refuses %p", async (body) => {
+		const response = await send("/music", { method: "PUT", body });
+
+		expect(response.status).toBe(400);
+		expect(saveBotSettings).not.toHaveBeenCalled();
+	});
+
+	/** A manager must not be able to switch a service off for every server the bot is in. */
+	it("changes nothing when a manager tries", async () => {
+		await send("/music", { method: "PUT", userId: MANAGER, body: { sources: "youtube" } });
+
+		expect(saveBotSettings).not.toHaveBeenCalled();
 	});
 });

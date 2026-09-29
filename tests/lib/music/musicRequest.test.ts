@@ -11,9 +11,11 @@ jest.mock("@lib/music/musicSource.util", () => ({
 }));
 jest.mock("@lib/music/musicBinaries.util", () => ({ findBinaries: () => ({ ytDlp: "/bin/yt-dlp", ffmpeg: null }) }));
 jest.mock("@lib/music/musicSession.util", () => ({ sessionFor: jest.fn(), findSession: jest.fn() }));
+jest.mock("@database/repositories/botSettingsRepository", () => ({ getBotSettings: jest.fn() }));
 
 const { resolveTracks } = jest.requireMock("@lib/music/musicSource.util");
 const { sessionFor } = jest.requireMock("@lib/music/musicSession.util");
+const { getBotSettings } = jest.requireMock("@database/repositories/botSettingsRepository");
 
 function track(title: string): Track {
 	return {
@@ -51,6 +53,7 @@ function request(next = false) {
 
 beforeEach(() => {
 	jest.clearAllMocks();
+	getBotSettings.mockResolvedValue({ musicSources: "youtube" });
 	resolveTracks.mockResolvedValue([track("new"), track("second result")]);
 });
 
@@ -116,6 +119,81 @@ describe("queueRequest", () => {
 		resolveTracks.mockResolvedValue([]);
 
 		await expect(queueRequest(request())).rejects.toThrow(/nothing turned up/i);
+	});
+});
+
+describe("queueRequest with the owner's choice of sources", () => {
+	const { MusicProblemError } = jest.requireActual<typeof Source>("@lib/music/musicSource.util");
+	const botCheck = (): Error => new MusicProblemError({ kind: "bot-check", advice: "YouTube asked." });
+	const askedFor = (call: number): { source: string } => resolveTracks.mock.calls[call]?.[0] as { source: string };
+
+	beforeEach(() => {
+		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));
+	});
+
+	/** The point of "both": a host YouTube has flagged still plays what was asked for. */
+	it("tries SoundCloud when YouTube refuses a plain search, and says so", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks.mockRejectedValueOnce(botCheck()).mockResolvedValueOnce([track("from soundcloud")]);
+
+		const { note } = await queueRequest(request());
+
+		expect(askedFor(0).source).toBe("youtube");
+		expect(askedFor(1).source).toBe("soundcloud");
+		expect(note).toMatch(/Playing \*\*from soundcloud\*\*.*came from SoundCloud/);
+	});
+
+	it("tries SoundCloud when YouTube finds nothing", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks.mockResolvedValueOnce([]).mockResolvedValueOnce([track("found")]);
+
+		await queueRequest(request());
+
+		expect(askedFor(1).source).toBe("soundcloud");
+	});
+
+	/** A link names one video; a different song from another service is not what was asked for. */
+	it("does not swap a YouTube link for a SoundCloud search, but points at SoundCloud", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks.mockRejectedValue(botCheck());
+
+		await expect(queueRequest({ ...request(), query: requestedQuery("https://youtu.be/abc") })).rejects.toThrow(
+			/YouTube asked\. Put `sc:`/,
+		);
+		expect(resolveTracks).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not fall back, or suggest SoundCloud, when the owner has switched it off", async () => {
+		resolveTracks.mockRejectedValue(botCheck());
+
+		await expect(queueRequest(request())).rejects.toThrow(/^YouTube asked\.$/);
+		expect(resolveTracks).toHaveBeenCalledTimes(1);
+	});
+
+	it("does not fall back from a video that is simply unavailable", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks.mockRejectedValue(new MusicProblemError({ kind: "unavailable", advice: "Gone." }));
+
+		await expect(queueRequest(request())).rejects.toThrow(/Gone/);
+		expect(resolveTracks).toHaveBeenCalledTimes(1);
+	});
+
+	it("searches SoundCloud alone when the owner chose it", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "soundcloud" });
+
+		await queueRequest(request());
+
+		expect(askedFor(0).source).toBe("soundcloud");
+	});
+
+	/** Refused before yt-dlp is spawned, so turning YouTube off also stops every request to it. */
+	it("refuses a YouTube link without asking YouTube when only SoundCloud is on", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "soundcloud" });
+
+		await expect(queueRequest({ ...request(), query: requestedQuery("https://youtu.be/abc") })).rejects.toThrow(
+			/switched YouTube off/,
+		);
+		expect(resolveTracks).not.toHaveBeenCalled();
 	});
 });
 

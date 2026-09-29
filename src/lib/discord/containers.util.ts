@@ -55,8 +55,7 @@ export function gallery(imageUrl: string, description?: string): MediaGalleryBui
 	return new MediaGalleryBuilder().addItems(item);
 }
 
-/** A container coloured by category, to match the embeds beside it. */
-/** `accent` beats the category's colour, for a message whose stripe says how something turned out. */
+/** A container coloured by category, or by `accent` when its stripe says how something turned out. */
 export function container(options: {
 	category?: Category;
 	accent?: ColorResolvable;

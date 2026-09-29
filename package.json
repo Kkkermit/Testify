@@ -43,6 +43,7 @@
 		"lint": "tsx scripts/lintRunner.ts",
 		"lint:fix": "tsx scripts/lintRunner.ts --fix",
 		"music:setup": "tsx scripts/setupMusic.ts",
+		"music:cookies": "tsx scripts/cookiesLine.ts",
 		"prepare": "husky && npm run build:shared",
 		"secret": "tsx scripts/createSecret.ts",
 		"setup": "tsx scripts/setupEnv.ts",

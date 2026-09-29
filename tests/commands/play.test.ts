@@ -1,13 +1,13 @@
 import play from "@commands/music/play.command";
 import { CHOICE_MAX } from "@lib/music/music.constants";
 import { type Track } from "@lib/music/music.types";
-import type * as MusicActions from "@lib/music/musicActions.util";
+import type * as MusicBinaries from "@lib/music/musicBinaries.util";
 import { MAX_CHOICES } from "@lib/music/musicSearch.util";
 import type * as MusicSource from "@lib/music/musicSource.util";
 
-jest.mock("@lib/music/musicActions.util", () => ({
-	...jest.requireActual<typeof MusicActions>("@lib/music/musicActions.util"),
-	musicBinaries: () => ({ ytDlp: "/bin/yt-dlp", ffmpeg: null }),
+jest.mock("@lib/music/musicBinaries.util", () => ({
+	...jest.requireActual<typeof MusicBinaries>("@lib/music/musicBinaries.util"),
+	findBinaries: () => ({ ytDlp: "/bin/yt-dlp", ffmpeg: null }),
 }));
 
 jest.mock("@lib/music/musicSource.util", () => ({
@@ -15,7 +15,13 @@ jest.mock("@lib/music/musicSource.util", () => ({
 	resolveTracks: jest.fn(),
 }));
 
+// One service, so each search is one call; the mixed typeahead has its own tests below.
+jest.mock("@database/repositories/botSettingsRepository", () => ({
+	getBotSettings: jest.fn(() => Promise.resolve({ musicSources: "youtube" })),
+}));
+
 const { resolveTracks } = jest.requireMock("@lib/music/musicSource.util");
+const { getBotSettings } = jest.requireMock("@database/repositories/botSettingsRepository");
 
 function track(title: string, url = `https://youtu.be/${title}`): Track {
 	return {
@@ -154,5 +160,63 @@ describe("/play autocomplete", () => {
 
 		expect(first.respond).toHaveBeenCalledTimes(1);
 		expect(second.respond).toHaveBeenCalledTimes(1);
+	});
+});
+
+describe("/play autocomplete with the owner's choice of sources", () => {
+	const fromSoundCloud = (title: string): Track => ({
+		...track(title, `https://soundcloud.com/artist/${title}`),
+		source: "soundcloud",
+	});
+
+	/** What "both" means to the person typing: the two services' songs side by side, each saying where it is from. */
+	it("offers YouTube and SoundCloud together, one from each in turn, labelled", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks.mockImplementation((query: { source: string }) =>
+			Promise.resolve(
+				query.source === "soundcloud" ? [fromSoundCloud("sc-1"), fromSoundCloud("sc-2")] : [track("yt-1")],
+			),
+		);
+
+		const answered = await autocompleteFor("mixed search");
+
+		expect(answered.map((choice) => choice.value)).toEqual([
+			"https://youtu.be/yt-1",
+			"https://soundcloud.com/artist/sc-1",
+			"https://soundcloud.com/artist/sc-2",
+		]);
+		expect(answered[0]?.name).toMatch(/^YouTube · /);
+		expect(answered[1]?.name).toMatch(/^SoundCloud · /);
+	});
+
+	/** A flagged host is exactly when this matters: YouTube refusing must not take SoundCloud's songs with it. */
+	it("still offers SoundCloud's songs when YouTube refuses", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks.mockImplementation((query: { source: string }) =>
+			query.source === "soundcloud"
+				? Promise.resolve([fromSoundCloud("only-sc")])
+				: Promise.reject(new Error("Sign in to confirm you are not a bot")),
+		);
+
+		expect(await autocompleteFor("youtube refuses this")).toEqual([
+			expect.objectContaining({ value: "https://soundcloud.com/artist/only-sc" }),
+		]);
+	});
+
+	it("searches SoundCloud alone, unlabelled, when the owner chose it", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "soundcloud" });
+		resolveTracks.mockResolvedValue([fromSoundCloud("solo")]);
+
+		const answered = await autocompleteFor("soundcloud only search");
+
+		expect(resolveTracks).toHaveBeenCalledTimes(1);
+		expect(resolveTracks.mock.calls[0]?.[0]).toMatchObject({ source: "soundcloud" });
+		expect(answered[0]?.name).not.toMatch(/SoundCloud · /);
+	});
+
+	it("offers nothing for a link to a service the owner switched off", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "soundcloud" });
+
+		expect(await autocompleteFor("https://youtu.be/dQw4w9WgXcQ")).toEqual([]);
 	});
 });

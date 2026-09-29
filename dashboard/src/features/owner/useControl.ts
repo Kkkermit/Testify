@@ -10,6 +10,8 @@ import {
 	type BotIdentity,
 	type BotIdentityPatch,
 	type GatewayAction,
+	type MusicSourceChoice,
+	type MusicSourceSetting,
 	type OwnerGuildDetail,
 } from "@testify/shared";
 import { api } from "@/lib/api";
@@ -30,6 +32,24 @@ export function useGateway(): UseMutationResult<BotControlState, Error, GatewayA
 		mutationFn: (body: GatewayAction) => api.post<BotControlState>("/control/gateway", body),
 		onSuccess: (state) => {
 			client.setQueryData(keys.owner.control(), state);
+		},
+	});
+}
+
+export function useMusicSources(): UseQueryResult<MusicSourceSetting> {
+	return useQuery({
+		queryKey: keys.owner.musicSources(),
+		queryFn: () => api.get<MusicSourceSetting>("/control/music"),
+	});
+}
+
+export function useSetMusicSources(): UseMutationResult<MusicSourceSetting, Error, MusicSourceChoice> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: (sources: MusicSourceChoice) => api.put<MusicSourceSetting>("/control/music", { sources }),
+		onSuccess: (setting) => {
+			client.setQueryData(keys.owner.musicSources(), setting);
 		},
 	});
 }

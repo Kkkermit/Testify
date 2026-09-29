@@ -1,27 +1,9 @@
 import { PermissionFlagsBits } from "discord.js";
 import { asMember, defineCommand, inGuild } from "@core/command";
-import {
-	CHOICE_MAX,
-	choicesFor,
-	interactionAge,
-	Keystrokes,
-	musicBinaries,
-	queueRequest,
-	requestedQuery,
-	resolveQuery,
-	resolveTracks,
-	SEARCH_RESULTS,
-	searchBudget,
-	shouldSearch,
-	showPanel,
-	stillOpen,
-	Suggester,
-	voiceChannelOf,
-} from "@lib/music";
+import { queueRequest, requestedQuery, showPanel, TrackTypeahead, voiceChannelOf } from "@lib/music";
 
 /** Autocomplete fires on every keystroke, so a typed title must not become a search per letter. */
-const suggestions = new Suggester();
-const keystrokes = new Keystrokes();
+const typeahead = new TrackTypeahead();
 
 export default defineCommand({
 	name: "play",
@@ -64,47 +46,6 @@ export default defineCommand({
 	},
 
 	async autocomplete(interaction, client) {
-		const receivedAt = Date.now();
-		const age = (): number => interactionAge(interaction.createdTimestamp, receivedAt);
-		const typed = interaction.options.getFocused();
-
-		const query = resolveQuery(typed);
-		// A pasted link needs no lookup, and offering one row makes it obvious the paste was understood.
-		if (query?.kind === "url") {
-			// A link Discord would refuse as a value is worse than no row at all: picking a cut-off one plays nothing.
-			await interaction.respond(typed.length > CHOICE_MAX ? [] : [{ name: "Play this link", value: typed }]);
-			return;
-		}
-
-		if (!shouldSearch(typed)) {
-			await interaction.respond([]);
-			return;
-		}
-
-		const typist = `${interaction.guildId ?? "dm"}:${interaction.user.id}`;
-		keystrokes.begin(typist, interaction.id);
-
-		try {
-			const choices = await suggestions.suggest(
-				typed,
-				async () => {
-					const found = await resolveTracks(
-						{ kind: "search", terms: typed, source: query?.source ?? "youtube" },
-						interaction.user.id,
-						musicBinaries(client),
-						{ flat: true },
-					);
-
-					return choicesFor(found.slice(0, SEARCH_RESULTS));
-				},
-				searchBudget(age()),
-			);
-
-			if (!stillOpen(age()) || !keystrokes.isLatest(typist, interaction.id)) return;
-
-			await interaction.respond(choices);
-		} finally {
-			keystrokes.end(typist, interaction.id);
-		}
+		await typeahead.answer(interaction, client);
 	},
 });

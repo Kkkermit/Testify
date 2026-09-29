@@ -122,7 +122,8 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 ### 🎵 Music
 
-- **Music** — YouTube and SoundCloud, by link or by search, with autocomplete on `/play`
+- **Music** — YouTube and SoundCloud, by link or by search, with autocomplete on `/play` that suggests from
+  both; the owner console can limit it to either one
 - Queue, loop, shuffle, skip, previous and remove, all from one Components V2 panel whose progress bar keeps up
   with the track
 - Volume from 0 to 200%, on the panel and on `/music volume` — it needs FFmpeg, and says so when the host has none
@@ -299,6 +300,16 @@ usual track is never transcoded; without FFmpeg the few that are not Opus are re
 played as silence.
 
 Spotify links cannot be played by anything — the audio is DRM-protected. Search for the track by name instead.
+
+**"Sign in to confirm you're not a bot"** means YouTube has flagged the host, which is common on cloud hosts.
+Export `cookies.txt` for youtube.com from a private window signed in to a spare Google account, then either put
+its path in `MUSIC_YTDLP_COOKIES` or, on a host whose variables take one line (Railway), run:
+
+```bash
+npm run music:cookies -- cookies.txt
+```
+
+and paste the line it prints as the value. That line is a signed-in login, so never share it.
 
 > [!TIP]
 > Use **two bot applications** — one for development, one for production. `npm run setup -- --dev` writes

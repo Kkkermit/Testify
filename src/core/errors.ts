@@ -133,7 +133,7 @@ export async function tell(interaction: CommandInput | ComponentInteraction, emb
 			await interaction.followUp(privately);
 		}
 	} catch {
-		// The interaction expired or was already answered elsewhere. Nothing more
+		// The interaction expired or was already answered elsewhere, so there is nobody left to tell.
 	}
 }
 

@@ -2,7 +2,7 @@ import { spawn } from "node:child_process";
 import { PassThrough, type Readable } from "node:stream";
 import { toError, UserFacingError } from "@core/errors";
 import { observe } from "@lib/infra/serviceHealth.util";
-import { SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
+import { MUSIC_SOURCE_NAMES, SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
 import {
 	type DownloadProblem,
 	type OpenStream,
@@ -13,8 +13,8 @@ import {
 	type Query,
 	type Track,
 } from "@lib/music/music.types";
-import { clampVolume, planStream } from "@lib/music/musicFormat.util";
-import { classifyProblem } from "@lib/music/musicProblem.util";
+import { clampVolume } from "@lib/music/musicFormat.util";
+import { aboutTheTrack, classifyProblem } from "@lib/music/musicProblem.util";
 import { sourceOfHost } from "@lib/music/musicQuery.util";
 
 /** Everything that shells out to yt-dlp, with the parsing kept pure beside it. */
@@ -87,12 +87,11 @@ export function cookieArgs(binaries: Pick<MusicBinaries, "cookies">): string[] {
 
 /** A download refused for a reason the player knows, which the reader is told rather than handed a stack. */
 export class MusicProblemError extends UserFacingError {
-	constructor(readonly problem: DownloadProblem) {
-		super(
-			problem.kind === "bot-check"
-				? `${problem.advice} Try SoundCloud instead: put \`sc:\` before your search.`
-				: problem.advice,
-		);
+	constructor(
+		readonly problem: DownloadProblem,
+		hint?: string,
+	) {
+		super(hint === undefined ? problem.advice : `${problem.advice} ${hint}`);
 	}
 }
 
@@ -132,19 +131,16 @@ async function runYtDlp(binary: string, args: string[], timeoutMs = RESOLVE_TIME
 	});
 }
 
-/** The name each source goes by on the status page. */
-const SOURCE_NAMES: Partial<Record<MusicSource, string>> = { youtube: "YouTube", soundcloud: "SoundCloud" };
-
-/** A video that is private or removed is an answer from the source, not a sign that it is down. */
+/** A video that is private, removed or DRM-protected is an answer from the source, not a sign that it is down. */
 function blamesSource(error: unknown): boolean {
-	return classifyProblem(toError(error).message)?.kind !== "unavailable";
+	return !aboutTheTrack(classifyProblem(toError(error).message));
 }
 
 function askSource(source: MusicSource, binary: string, args: string[]): Promise<string> {
-	const name = SOURCE_NAMES[source];
-	if (name === undefined) return runYtDlp(binary, args);
+	// Only the two services the status page tracks are recorded; any other site is just a site.
+	if (source !== "youtube" && source !== "soundcloud") return runYtDlp(binary, args);
 
-	return observe(name, () => runYtDlp(binary, args), { blame: blamesSource });
+	return observe(MUSIC_SOURCE_NAMES[source], () => runYtDlp(binary, args), { blame: blamesSource });
 }
 
 function sourceOfUrl(url: string): MusicSource {
@@ -170,6 +166,24 @@ export function parseJsonLines(stdout: string): TrackInfo[] {
 		});
 }
 
+/** How many SoundCloud results a search reads to find one that plays, since a DRM-protected one first must not end it. */
+export const SOUNDCLOUD_SEARCH_DEPTH = 5;
+
+const NOTHING_PLAYABLE: DownloadProblem = {
+	kind: "drm",
+	advice: "Everything SoundCloud found for that is DRM-protected, so no bot can play it. Try a different search.",
+};
+
+/** A result with no formats is one the service would not hand over: DRM-protected, or blocked where the bot runs. */
+export function isPlayable(info: TrackInfo): boolean {
+	return Array.isArray(info.formats) && info.formats.length > 0;
+}
+
+/** Only a full SoundCloud search skips what cannot play; a flat search reads no formats to judge by. */
+function skipsLocked(query: Query, flat: boolean): boolean {
+	return query.kind === "search" && query.source === "soundcloud" && !flat;
+}
+
 export async function resolveTracks(
 	query: Query,
 	requestedBy: string,
@@ -180,14 +194,20 @@ export async function resolveTracks(
 		throw new UserFacingError("Music needs `yt-dlp`, which is not installed. Run `npm run music:setup` on the host.");
 	}
 
+	const flat = options.flat === true;
+	const skipping = skipsLocked(query, flat);
+	// With this flag yt-dlp returns a protected result without formats rather than failing the whole search.
+	const results = skipping ? Math.max(options.results ?? SEARCH_RESULTS, SOUNDCLOUD_SEARCH_DEPTH) : options.results;
+
 	const args = [
 		"--dump-json",
 		"--no-warnings",
 		"--no-progress",
 		"--ignore-config",
-		...(options.flat === true ? ["--flat-playlist"] : ["--no-playlist"]),
+		...(flat ? ["--flat-playlist"] : ["--no-playlist"]),
+		...(skipping ? ["--ignore-no-formats-error"] : []),
 		...cookieArgs(binaries),
-		...argumentsFor(query, options.results),
+		...argumentsFor(query, results),
 	];
 
 	let stdout: string;
@@ -199,8 +219,10 @@ export async function resolveTracks(
 		throw error;
 	}
 	const documents = parseJsonLines(stdout);
+	const usable = skipping ? documents.filter(isPlayable) : documents;
+	if (usable.length === 0 && documents.length > 0) throw new MusicProblemError(NOTHING_PLAYABLE);
 
-	return documents.flatMap((info) => tracksFromInfo(info, requestedBy, query.source));
+	return usable.flatMap((info) => tracksFromInfo(info, requestedBy, query.source));
 }
 
 /** Format ids are stable for a video, so ten minutes of reuse is safe and saves an extraction per re-open. */
@@ -304,10 +326,10 @@ function buffer(source: Readable): PassThrough {
 	return sink;
 }
 
-/** `-ss` before `-i` discards packets rather than decoding them, and the output is 48 kHz Opus. */
 /** YouTube's best Opus is about this, so a re-encode loses as little as it can without inflating the stream. */
 export const TRANSCODE_BITRATE = "160k";
 
+/** `-ss` before `-i` discards packets rather than decoding them, and the output is 48 kHz Opus. */
 export function ffmpegArgs(options: StreamOptions = {}): string[] {
 	const seekMs = Math.max(0, Math.round(options.seekMs ?? 0));
 	const volume = clampVolume(options.volume ?? UNITY_VOLUME);
@@ -401,5 +423,3 @@ export function openStream(
 		},
 	};
 }
-
-export { planStream };

@@ -8,19 +8,26 @@ import {
 	currentTrack,
 	LOOP_MODES,
 	type LoopMode,
+	loopPlayer,
 	MAX_VOLUME,
 	MIN_VOLUME,
 	MUSIC_SYSTEM_SUBCOMMAND,
 	musicBinaries,
 	type MusicSession,
 	musicSystemPanel,
+	pausePlayer,
 	readMusicSettings,
+	readMusicSources,
 	removeAt,
 	requireSession,
-	requireVolumeControl,
+	resumePlayer,
 	sameChannelAs,
+	setPlayerVolume,
 	showPanel,
-	shuffleUpcoming,
+	shufflePlayer,
+	skipTrack,
+	sourcesLine,
+	stopPlayer,
 	statusLines,
 	upcomingPage,
 } from "@lib/music";
@@ -95,11 +102,7 @@ export default defineCommand({
 			aliases: ["s"],
 			async run(interaction) {
 				const session = sessionOf(interaction);
-				const track = currentTrack(session.queue);
-				if (track === null) throw new UserFacingError("Nothing is playing.");
-
-				session.skip();
-				await showPanel(interaction, session, `Skipped **${track.title}**.`);
+				await showPanel(interaction, session, skipTrack(session));
 			},
 		},
 		{
@@ -107,9 +110,7 @@ export default defineCommand({
 			description: "Pauses playback.",
 			async run(interaction) {
 				const session = sessionOf(interaction);
-				if (!session.pause()) throw new UserFacingError("Nothing is playing.");
-
-				await showPanel(interaction, session, "Paused.");
+				await showPanel(interaction, session, pausePlayer(session));
 			},
 		},
 		{
@@ -117,9 +118,7 @@ export default defineCommand({
 			description: "Resumes playback.",
 			async run(interaction) {
 				const session = sessionOf(interaction);
-				if (!session.resume()) throw new UserFacingError("Nothing is paused.");
-
-				await showPanel(interaction, session, "Resumed.");
+				await showPanel(interaction, session, resumePlayer(session));
 			},
 		},
 		{
@@ -127,9 +126,7 @@ export default defineCommand({
 			description: "Stops playing and clears the queue.",
 			async run(interaction) {
 				const session = sessionOf(interaction);
-				session.stop();
-
-				await showPanel(interaction, session, "Stopped.");
+				await showPanel(interaction, session, stopPlayer(session));
 			},
 		},
 		{
@@ -148,8 +145,7 @@ export default defineCommand({
 				const session = sessionOf(interaction);
 				const mode = interaction.options.getString("mode", true) as LoopMode;
 
-				session.setLoop(mode);
-				await showPanel(interaction, session, `Loop set to **${mode}**.`);
+				await showPanel(interaction, session, loopPlayer(session, mode));
 			},
 		},
 		{
@@ -157,9 +153,7 @@ export default defineCommand({
 			description: "Shuffles what has not played yet.",
 			async run(interaction) {
 				const session = sessionOf(interaction);
-				session.queue = shuffleUpcoming(session.queue);
-
-				await showPanel(interaction, session, "Shuffled the rest of the queue.");
+				await showPanel(interaction, session, shufflePlayer(session));
 			},
 		},
 		{
@@ -211,14 +205,7 @@ export default defineCommand({
 					return;
 				}
 
-				requireVolumeControl(session);
-
-				const applied = session.setVolume(wanted);
-				await showPanel(
-					interaction,
-					session,
-					`Volume set to **${String(applied)}%**. It takes a moment to take effect.`,
-				);
+				await showPanel(interaction, session, setPlayerVolume(session, wanted));
 			},
 		},
 		{
@@ -270,9 +257,10 @@ export default defineCommand({
 		{
 			name: "status",
 			private: true,
-			description: "Shows which players the host has installed, and how old they are.",
+			description: "Shows where music comes from, and which players the host has installed.",
 			async run(interaction, client) {
-				await reply(interaction, { content: statusLines(musicBinaries(client)).join("\n") });
+				const lines = statusLines(musicBinaries(client));
+				await reply(interaction, { content: [...lines, sourcesLine(await readMusicSources())].join("\n") });
 			},
 		},
 	],
