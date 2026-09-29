@@ -85,7 +85,7 @@ comments there, so the reasons live here:
 | `fast-uri: ^3.1.5`                                 | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                         |
 | `js-yaml: ^4.3.1`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.              |
 | `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.     |
-| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible for the calls it makes.                             |
+| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible, and `^6.28.1` fixes GHSA-rfgv-xxqx-mfg5.           |
 
 Each one should be dropped the moment its parent updates — check when a
 dependency bump lands.
