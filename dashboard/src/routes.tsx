@@ -1,6 +1,7 @@
 import { type ComponentType, lazy, type LazyExoticComponent, Suspense } from "react";
 import { createBrowserRouter, Navigate } from "react-router";
 import { AppShell } from "@/app/AppShell";
+import { OwnerRouteError } from "@/app/OwnerRouteError";
 import { RequireAuth } from "@/app/RequireAuth";
 import { RequireGuild } from "@/app/RequireGuild";
 import { RequireOwner } from "@/app/RequireOwner";
@@ -105,7 +106,10 @@ export const routes = [
 							{ path: "/status", element: lazily(<StatusPage />) },
 							{ path: "/appearance", element: lazily(<AppearancePage />) },
 							// Behind its own guard, so the console's existence is not disclosed by rendering its shell.
-							{ element: <RequireOwner />, children: [{ path: "/owner", element: lazily(<OwnerPage />) }] },
+							{
+								element: <RequireOwner />,
+								children: [{ path: "/owner", element: lazily(<OwnerPage />), errorElement: <OwnerRouteError /> }],
+							},
 						],
 					},
 				],

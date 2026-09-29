@@ -2261,7 +2261,9 @@ owner — so the page gate is a courtesy and two server-side things are the boun
 analytics and control route; and the console is Vite's lazy `OwnerPage-<hash>.js` chunk, which `serveDashboard` hands
 only to a request carrying an owner's session (`signedInOwner`), marked `private, no-store` with `Vary: Cookie` so a
 cache in front of the bot can never pass the owner's copy on. Somebody else gets a 404 for it, as for any missing
-file, and a faked answer then has no console to draw. It is judged on the **resolved** file (`isOwnerChunk`), so no
+file, and a faked answer then has no console to draw. A session lookup that fails refuses the same way, so the file never answers
+with a status that sets it apart; and `OwnerRouteError` sends whoever cannot load it back to their servers with the
+owner-only notice, after one reload for a tab left open across a deploy. It is judged on the **resolved** file (`isOwnerChunk`), so no
 spelling of the address reaches it. Two things keep it one chunk: nothing outside `features/owner` may import from it
 except `routes.tsx`'s lazy import (`ownerChunk.test.ts` — shared pieces live in `components/primitives`, `lib/` and
 `app/useOwnerAccess.ts`), and `verifyBundle` fails the build if the chunk is missing or anything imports it

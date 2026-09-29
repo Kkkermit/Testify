@@ -65,7 +65,8 @@ export async function signedInOwner(context: Context<ApiBindings>): Promise<bool
 	const id = readCookie(context, SESSION_COOKIE);
 	if (id === null || id === "" || context.get("oauth") === null) return false;
 
-	const session = await findSession(id);
+	// A lookup that fails refuses like any other, so the file never answers differently from one that is missing.
+	const session = await findSession(id).catch(() => null);
 	return session !== null && context.get("client").isOwner(session.userId);
 }
 
