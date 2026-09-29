@@ -95,3 +95,20 @@ export function parseWholeNumber(
 
 	return { ok: true, value };
 }
+
+/** A pair of fields read as one range, with every problem named at once so the form can be fixed in one go. */
+export function parseRange(
+	raw: { min: string; max: string },
+	labels: { min: string; max: string; order: string },
+	bounds: { min: number; max: number },
+): { ok: true; min: number; max: number } | { ok: false; problems: string[] } {
+	const min = parseWholeNumber(raw.min, labels.min, bounds);
+	const max = parseWholeNumber(raw.max, labels.max, bounds);
+
+	if (!min.ok || !max.ok) {
+		return { ok: false, problems: [min, max].flatMap((part) => (part.ok ? [] : [part.reason])) };
+	}
+	if (min.value > max.value) return { ok: false, problems: [labels.order] };
+
+	return { ok: true, min: min.value, max: max.value };
+}

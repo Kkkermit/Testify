@@ -1,11 +1,11 @@
-import { ButtonStyle, PermissionFlagsBits } from "discord.js";
+import { ButtonStyle, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
 import { confirmRow, errorEmbed, modalForm, type RenderedScreen } from "@lib/discord";
 import { normaliseTreasure } from "@lib/economy";
 import { formatDuration, formatNumber } from "@lib/format";
-import { parseWholeNumber, settingsPanel, statusValue } from "@lib/settings";
+import { parseRange, parseWholeNumber, settingsPanel, statusValue } from "@lib/settings";
 import { TREASURE_DEFAULTS, TREASURE_LIMITS, type TreasureSettings } from "@testify/shared";
 
 export const TREASURE_PANEL_ID = "treasure";
@@ -158,34 +158,21 @@ export default defineButton({
 		const problems: string[] = [];
 		const next: Settings = { ...current };
 
-		if (context.action === "save-messages") {
-			const min = parseWholeNumber(fields.getTextInputValue("min"), "Fewest messages", {
-				min: TREASURE_LIMITS.minMessages,
-				max: TREASURE_LIMITS.maxMessages,
-			});
-			const max = parseWholeNumber(fields.getTextInputValue("max"), "Most messages", {
-				min: TREASURE_LIMITS.minMessages,
-				max: TREASURE_LIMITS.maxMessages,
-			});
+		if (context.action === "save-messages" || context.action === "save-amount") {
+			const messages = context.action === "save-messages";
+			const range = parseRange(
+				{ min: fields.getTextInputValue("min"), max: fields.getTextInputValue("max") },
+				messages
+					? { min: "Fewest messages", max: "Most messages", order: "The fewest cannot be more than the most." }
+					: { min: "Smallest drop", max: "Largest drop", order: "The smallest cannot be more than the largest." },
+				messages
+					? { min: TREASURE_LIMITS.minMessages, max: TREASURE_LIMITS.maxMessages }
+					: { min: TREASURE_LIMITS.minAmount, max: TREASURE_LIMITS.maxAmount },
+			);
 
-			if (!min.ok) problems.push(min.reason);
-			if (!max.ok) problems.push(max.reason);
-			if (min.ok && max.ok && min.value > max.value) problems.push("The fewest cannot be more than the most.");
-			if (min.ok && max.ok) Object.assign(next, { minMessages: min.value, maxMessages: max.value });
-		} else if (context.action === "save-amount") {
-			const min = parseWholeNumber(fields.getTextInputValue("min"), "Smallest drop", {
-				min: TREASURE_LIMITS.minAmount,
-				max: TREASURE_LIMITS.maxAmount,
-			});
-			const max = parseWholeNumber(fields.getTextInputValue("max"), "Largest drop", {
-				min: TREASURE_LIMITS.minAmount,
-				max: TREASURE_LIMITS.maxAmount,
-			});
-
-			if (!min.ok) problems.push(min.reason);
-			if (!max.ok) problems.push(max.reason);
-			if (min.ok && max.ok && min.value > max.value) problems.push("The smallest cannot be more than the largest.");
-			if (min.ok && max.ok) Object.assign(next, { minAmount: min.value, maxAmount: max.value });
+			if (!range.ok) problems.push(...range.problems);
+			else if (messages) Object.assign(next, { minMessages: range.min, maxMessages: range.max });
+			else Object.assign(next, { minAmount: range.min, maxAmount: range.max });
 		} else if (context.action === "save-cooldown") {
 			const minutes = parseWholeNumber(fields.getTextInputValue("minutes"), "Minutes", {
 				min: TREASURE_LIMITS.minCooldownMinutes,
@@ -200,7 +187,7 @@ export default defineButton({
 
 		// Reported on the panel, so the values just typed stay on screen.
 		if (problems.length > 0) {
-			await interaction.reply({ embeds: [errorEmbed(problems.join("\n"))], flags: 64 });
+			await interaction.reply({ embeds: [errorEmbed(problems.join("\n"))], flags: MessageFlags.Ephemeral });
 			return;
 		}
 
@@ -208,6 +195,6 @@ export default defineButton({
 
 		// A modal opened elsewhere cannot edit this message, so answer privately.
 		if (interaction.isFromMessage()) await interaction.update(await render(guildId));
-		else await interaction.reply({ ...(await render(guildId)), flags: 64 });
+		else await interaction.reply({ ...(await render(guildId)), flags: MessageFlags.Ephemeral });
 	},
 });

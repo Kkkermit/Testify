@@ -1,7 +1,7 @@
 import { ButtonStyle, TextInputStyle } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { modalForm, quickAmountRow } from "@lib/discord/components.util";
-import { parseWholeNumber, settingsPanel, statusValue } from "@lib/settings/settingsPanel.util";
+import { parseRange, parseWholeNumber, settingsPanel, statusValue } from "@lib/settings/settingsPanel.util";
 
 describe("settingsPanel", () => {
 	const panel = settingsPanel({
@@ -216,5 +216,27 @@ describe("quickAmountRow", () => {
 		const states = empty.components.map((component) => (component.toJSON() as { disabled?: boolean }).disabled);
 
 		expect(states.slice(0, 3)).toEqual([true, true, true]);
+	});
+});
+
+describe("parseRange", () => {
+	const labels = { min: "Smallest", max: "Largest", order: "The smallest cannot be more than the largest." };
+	const bounds = { min: 1, max: 100 };
+
+	it("reads a pair of whole numbers as a range", () => {
+		expect(parseRange({ min: "5", max: "1,0" }, labels, bounds)).toEqual({ ok: true, min: 5, max: 10 });
+	});
+
+	/** Both halves are named at once, so somebody fixing the form does not find the second mistake on the next try. */
+	it("names every field that is wrong, in order", () => {
+		expect(parseRange({ min: "x", max: "500" }, labels, bounds)).toEqual({
+			ok: false,
+			problems: ["**Smallest** has to be a whole number.", "**Largest** has to be between 1 and 100."],
+		});
+	});
+
+	it("refuses a range that runs backwards, with the caller's own words", () => {
+		expect(parseRange({ min: "9", max: "3" }, labels, bounds)).toEqual({ ok: false, problems: [labels.order] });
+		expect(parseRange({ min: "3", max: "3" }, labels, bounds)).toEqual({ ok: true, min: 3, max: 3 });
 	});
 });
