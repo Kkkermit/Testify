@@ -13,7 +13,7 @@ import {
 	refundLine,
 	ROULETTE_ID,
 	roundBettingMessage,
-	roundView,
+	tableView,
 	type Seat,
 	spinNow,
 	spotFromKey,
@@ -54,7 +54,7 @@ export default defineButton({
 
 				await admit(context.client, seat);
 				const round = await placeBets(context.client, seat, roundId, [bet]);
-				await interaction.update(roundBettingMessage(roundView(round)));
+				await interaction.update(roundBettingMessage(await tableView(round)));
 				return;
 			}
 
@@ -90,7 +90,7 @@ export default defineButton({
 					roundId,
 					numbers.map((number) => ({ kind: "number", number })),
 				);
-				await interaction.update(roundBettingMessage(roundView(round)));
+				await interaction.update(roundBettingMessage(await tableView(round)));
 				return;
 			}
 
@@ -132,7 +132,7 @@ export default defineButton({
 			case "clear": {
 				if (!interaction.isButton()) return;
 				const { round, refunded } = await clearMyBets(seat, roundId);
-				await interaction.update(roundBettingMessage(roundView(round)));
+				await interaction.update(roundBettingMessage(await tableView(round)));
 				await interaction.followUp({ content: refundLine(refunded), flags: MessageFlags.Ephemeral });
 				return;
 			}
@@ -155,7 +155,7 @@ export default defineButton({
 					chip,
 				);
 				if (round === null) throw new UserFacingError("A new round is already starting here.");
-				await interaction.update(roundBettingMessage(roundView(round)));
+				await interaction.update(roundBettingMessage(await tableView(round)));
 				return;
 			}
 

@@ -22,6 +22,7 @@ import {
 	type PrefixSettings,
 } from "@database/models/guildSettings.schema";
 import { purgeCasino } from "@database/repositories/casinoRepository";
+import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
@@ -294,6 +295,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeCommandToggles(guildId),
 		purgeMusicSettings(guildId),
 		purgeCasino(guildId),
+		purgeCasinoStats(guildId),
 		purgeRounds(guildId),
 		purgeWarnLadder(guildId),
 	]);

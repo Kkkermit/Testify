@@ -2,6 +2,7 @@ import { type InteractionEditReplyOptions } from "discord.js";
 import { strings } from "@config/strings";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError, toError } from "@core/errors";
+import { recordCasinoPlays } from "@database/repositories/casinoStatsRepository";
 import { adjustWallet, debitWallet, incrementCounters, requireAccount } from "@database/repositories/economyRepository";
 import { CASINO_TIMING } from "@lib/casino/casino.constants";
 import { instantSettledMessage, instantSpinningMessage } from "@lib/casino/casinoPanel.util";
@@ -80,6 +81,7 @@ export async function playInstant(
 
 		const outcome = settle(stake.bet);
 		const wallet = (await payOut(player, outcome.returned)) ?? stake.wallet;
+		await recordCasinoPlays([{ ...player, game: outcome.game, staked: stake.bet, returned: outcome.returned }]);
 
 		const spin = outcome.animate();
 		await responder.editReply(instantSpinningMessage(outcome, stake.bet, spin.gif));

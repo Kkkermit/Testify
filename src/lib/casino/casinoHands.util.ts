@@ -1,5 +1,6 @@
 import { UserFacingError } from "@core/errors";
 import { advanceHand, claimHand, findHand, type HandRecord, openHand } from "@database/repositories/casinoRepository";
+import { recordCasinoPlays } from "@database/repositories/casinoStatsRepository";
 import {
 	applyBlackjack,
 	blackjackReturn,
@@ -87,6 +88,7 @@ async function settleBlackjack(
 
 	const returned = blackjackReturn(finished.verdict, staked);
 	const wallet = await payOut(player, returned);
+	await recordCasinoPlays([{ ...player, game: "blackjack", staked, returned }]);
 
 	return { state: finished.state, bet: hand.bet, staked, verdict: finished.verdict, returned, wallet, auto };
 }
@@ -109,6 +111,7 @@ export async function startBlackjack(
 
 	const returned = blackjackReturn(opening, bet);
 	const wallet = await payOut(player, returned);
+	await recordCasinoPlays([{ ...player, game: "blackjack", staked: bet, returned }]);
 
 	return { hand: null, view: { state: dealt, bet, staked: bet, verdict: opening, returned, wallet } };
 }
@@ -157,6 +160,7 @@ async function cashOutHand(player: Player, hand: HandRecord, state: HiLoState, a
 
 	const returned = hiloPayout(state, hand.staked);
 	const wallet = await payOut(player, returned);
+	await recordCasinoPlays([{ ...player, game: "hilo", staked: hand.staked, returned }]);
 
 	return { state, staked: hand.staked, phase: "cashed", returned, wallet, lastCall: true, auto };
 }
@@ -173,6 +177,7 @@ export async function callHiLo(player: Player, guess: HiLoGuess, roll?: Roll): P
 
 	if (!result.won) {
 		if ((await claimHand(hand)) === null) throw alreadyPlayed();
+		await recordCasinoPlays([{ ...player, game: "hilo", staked: hand.staked, returned: 0 }]);
 		return { state: result.state, staked: hand.staked, phase: "lost", returned: 0, wallet: null, lastCall: false };
 	}
 

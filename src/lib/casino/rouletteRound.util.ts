@@ -39,6 +39,8 @@ export interface RoundView {
 	closesAt: number | null;
 	pocket: number | null;
 	players: RoundPlayer[];
+	/** Where the ball landed on this table before, newest first. */
+	history: readonly number[];
 }
 
 export interface PlayerResult {
@@ -47,7 +49,7 @@ export interface PlayerResult {
 	returned: number;
 }
 
-export function roundView(record: RoundRecord): RoundView {
+export function roundView(record: RoundRecord, history: readonly number[] = []): RoundView {
 	const players = Object.entries(record.players)
 		.sort(([, a], [, b]) => a.joinedAt - b.joinedAt)
 		.map(([userId, seat], index): RoundPlayer => ({
@@ -70,6 +72,7 @@ export function roundView(record: RoundRecord): RoundView {
 		closesAt: record.closesAt === null ? null : new Date(record.closesAt).getTime(),
 		pocket: record.pocket,
 		players,
+		history,
 	};
 }
 
@@ -203,8 +206,26 @@ function betButton(roundId: string, bet: RouletteBet, style: ButtonStyle) {
 	return button({ id: customId(ROULETTE_ID, "bet", roundId, spotKey(bet)), label: betName(bet), style });
 }
 
+const POCKET_EMOJI = { red: "🔴", black: "⚫", green: "🟢" } as const;
+
+/** The last spins in words, for the reader who cannot see the strip drawn on the table. */
+export function historyLine(history: readonly number[]): string | null {
+	if (history.length === 0) return null;
+	const spins = history.map((pocket) => `${POCKET_EMOJI[pocketColour(pocket)]} **${String(pocket)}**`);
+	return `-# Last spins, newest first: ${spins.join(" · ")}`;
+}
+
+function historyParts(view: RoundView): ContainerPart[] {
+	const line = historyLine(view.history);
+	return line === null ? [] : [text(line)];
+}
+
 function boardFile(view: RoundView, pocket?: number): AttachmentBuilder {
-	const image = rouletteBoard({ chips: roundChips(view), ...(pocket === undefined ? {} : { pocket }) });
+	const image = rouletteBoard({
+		chips: roundChips(view),
+		history: view.history,
+		...(pocket === undefined ? {} : { pocket }),
+	});
 	return new AttachmentBuilder(image, { name: "roulette-table.png" });
 }
 
@@ -227,6 +248,7 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 				(view.private ? " The host can press **Spin now** once a chip is down." : ""),
 		),
 		gallery("attachment://roulette-table.png", "The roulette table, with every chip placed so far."),
+		...historyParts(view),
 		text(playersText(view)),
 		row(
 			...outside!.map((choice) => betButton(view.id, choice.bet, choice.style)),
@@ -282,6 +304,7 @@ export function roundSpinningMessage(view: RoundView, gif: Buffer): ContainerMes
 		text(`## ${CASINO_GAME_EMOJI.roulette} No more bets!\n${accessLine(view)}`),
 		gallery("attachment://roulette.gif", "The wheel spinning."),
 		gallery("attachment://roulette-table.png", "The table as betting closed."),
+		...historyParts(view),
 		text(playersText(view)),
 		text("-# The ball is rolling…"),
 	];
@@ -416,6 +439,7 @@ export function roundSettledMessage(view: RoundView, still: Buffer | null): Cont
 	}
 	parts.push(
 		gallery("attachment://roulette-table.png", "The table, with the winning chips ringed in gold."),
+		...historyParts(view),
 		...resultsText(view, pocket).map((block) => text(block)),
 		playAgainRow(view),
 	);

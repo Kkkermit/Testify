@@ -7,7 +7,7 @@ import { findBlacklistEntry } from "@database/repositories/blacklistRepository";
 import { disabledGlobally, disabledInGuild } from "@database/repositories/commandToggleRepository";
 import { getMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { reportOwnerAttempt } from "@lib/bot/ownerAudit.util";
-import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND } from "@lib/casino/casino.constants";
+import { CASINO_COMMAND, CASINO_SETTINGS_SUBCOMMAND, CASINO_STATS_SUBCOMMAND } from "@lib/casino/casino.constants";
 import { casinoRefusal, readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { formatDuration, humanisePermission } from "@lib/format/format.util";
 import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
@@ -223,12 +223,12 @@ async function checkMusicSystem(interaction: CommandInput, command: Command): Pr
 	});
 }
 
-/** The casino's switch and its per-game switches; `/casino settings` stays reachable so a server can open it again. */
+/** The casino's switch and its per-game switches; settings and stats stay reachable while it is closed. */
 async function checkCasino(interaction: CommandInput, command: Command): Promise<CheckFailure> {
 	if (command.name !== CASINO_COMMAND || interaction.guildId === null) return null;
 
 	const chosen = chosenSubcommand(interaction, command)?.name ?? null;
-	if (chosen === CASINO_SETTINGS_SUBCOMMAND) return null;
+	if (chosen === CASINO_SETTINGS_SUBCOMMAND || chosen === CASINO_STATS_SUBCOMMAND) return null;
 
 	return casinoRefusal(
 		await readCasinoSettings(interaction.guildId),

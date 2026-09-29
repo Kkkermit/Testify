@@ -17,7 +17,7 @@ import {
 	playInstant,
 	type Player,
 	roundBettingMessage,
-	roundView,
+	tableView,
 	startBlackjack,
 	startHiLoHand,
 } from "@lib/casino";
@@ -53,7 +53,7 @@ async function playAgain(
 			chip,
 		);
 		if (round === null) throw new UserFacingError("A new round is already starting here.");
-		await interaction.update(roundBettingMessage(roundView(round)));
+		await interaction.update(roundBettingMessage(await tableView(round)));
 		return;
 	}
 

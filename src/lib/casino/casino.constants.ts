@@ -6,6 +6,8 @@ export const CASINO_SETTINGS_ID = "casinoset";
 
 /** The subcommand that stays reachable while the casino is switched off, so a server can turn it back on. */
 export const CASINO_SETTINGS_SUBCOMMAND = "settings";
+/** Readable while the casino is closed, since it only looks back. */
+export const CASINO_STATS_SUBCOMMAND = "stats";
 
 export const CASINO_TIMING = {
 	/** A card hand nobody touches for this long is played out for them and paid. */
@@ -21,6 +23,8 @@ export const CASINO_COMMAND = "casino";
 export const ROULETTE_ROUND = {
 	bettingMs: 30 * SECOND_MS,
 	maxBets: 10,
+	/** How many earlier spins the table shows. */
+	history: 5,
 	/** What a chip is worth when a table opens, kept within the server's own bet limits. */
 	defaultChip: 100,
 	/** The chip sizes offered as buttons; Other… takes any amount. */

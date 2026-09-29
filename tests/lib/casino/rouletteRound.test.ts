@@ -1,7 +1,18 @@
 import { Types } from "mongoose";
 import { parseCustomId } from "@core/button";
 import { type RoundRecord } from "@database/repositories/rouletteRepository";
-import { BOARD_HEIGHT, BOARD_WIDTH, chipLabel, chipSpot, chipStacks, spotRect } from "@lib/canvas/rouletteTable.util";
+import {
+	BOARD_HEIGHT,
+	BOARD_WIDTH,
+	boardHeight,
+	chipLabel,
+	chipSpot,
+	chipStacks,
+	HISTORY_BAND,
+	historySpots,
+	LAYOUT,
+	spotRect,
+} from "@lib/canvas/rouletteTable.util";
 import { ROULETTE_ID, ROULETTE_ROUND, SEAT_COLOURS } from "@lib/casino/casino.constants";
 import { type RouletteBet } from "@lib/casino/casino.types";
 import { ROULETTE_SPOTS } from "@lib/casino/roulette.util";
@@ -14,6 +25,7 @@ import {
 	roundSettledMessage,
 	roundSpinningMessage,
 	roundView,
+	historyLine,
 	winningSpots,
 } from "@lib/casino/rouletteRound.util";
 import { buttonsOf, customIdsOf, duplicateIds, textOf } from "@tests/helpers/containers";
@@ -359,6 +371,37 @@ describe("the spin and the result", () => {
 	it("says so, and offers a new round, when nobody bet", () => {
 		const text = textOf(roundSettledMessage(roundView(record()), null));
 		expect(text).toContain("Nobody placed a bet");
+	});
+});
+
+describe("the last spins", () => {
+	it("names each earlier spin by its colour, newest first", () => {
+		expect(historyLine([30, 17, 0])).toBe("-# Last spins, newest first: 🔴 **30** · ⚫ **17** · 🟢 **0**");
+		expect(historyLine([])).toBeNull();
+	});
+
+	it("shows them under the table while betting, and says nothing on a table with no history", () => {
+		expect(textOf(roundBettingMessage(roundView(busy, [30, 17])))).toContain("Last spins, newest first: 🔴 **30**");
+		expect(textOf(roundBettingMessage(roundView(busy)))).not.toContain("Last spins");
+	});
+
+	it("keeps the board its usual height until there is a spin to show", () => {
+		expect(boardHeight([])).toBe(BOARD_HEIGHT);
+		expect(boardHeight([5])).toBe(BOARD_HEIGHT + HISTORY_BAND);
+	});
+
+	/** The newest spin is drawn larger, and all five have to fit the strip without touching. */
+	it("fits every spin in the strip, the newest larger than the rest", () => {
+		const spots = historySpots(ROULETTE_ROUND.history);
+		expect(spots[0]!.radius).toBeGreaterThan(spots[1]!.radius);
+		for (const [index, spot] of spots.entries()) {
+			expect(spot.x + spot.radius).toBeLessThanOrEqual(BOARD_WIDTH);
+			// Clear of the picture's top edge, and of the first row of numbers below the strip.
+			expect(spot.y - spot.radius).toBeGreaterThan(0);
+			expect(spot.y + spot.radius).toBeLessThan(HISTORY_BAND + LAYOUT.margin);
+			const next = spots[index + 1];
+			if (next !== undefined) expect(next.x - next.radius).toBeGreaterThan(spot.x + spot.radius);
+		}
 	});
 });
 

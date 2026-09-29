@@ -1488,8 +1488,20 @@ entry leads with the profit or loss, then the stake, what came back and a line p
   the spot's total on top. Rows are 72px so a chip can be big enough to read at the width Discord shows it, and
   `chipSpot` keeps each chip inside its own spot — pinned by tests.
 - **The wheel and the table are stacked, not side by side**, so neither is shrunk to half the width.
+- **The last spins come from settled rounds in the same channel**, newest first (`recentPockets`), drawn as a strip
+  of coloured discs above the table and written under it for a screen reader. A round nobody bet on is settled
+  with its pocket cleared (`finishRound(id, false)`), so a table that never really spun never shows as a spin.
+  `spinRound` reads the history before it settles, so the result puts this spin first without a second query.
 
 **Play again edits the message it sits on** for every game, rather than stacking a new one under the old.
+
+**Every settled game is counted once, after it is paid.** `casinostats` holds one row per server, player and game,
+added to with `$inc` and `$max` through `recordCasinoPlays` wherever a game settles — `playInstant`, the blackjack and
+hi-lo settlements (a double down counts both stakes) and `spinRound`, one play per roulette player. A press that
+loses the race to settle plays nothing, so it records nothing. A win is a play that came out ahead, a push one that
+broke even. `/casino stats` reads it with one `$facet` aggregation (`readCasinoStats`) for the whole casino or one
+game, with the reader's own record beside the server's; like `/casino settings` it is reachable while the casino is
+closed, since it only looks back.
 
 **The switch works like the music system's.** `casinosettings` stores `enabled`, the games switched off (so a game
 added later starts open) and the bet limits. `checks.ts` refuses every `/casino` subcommand while the casino is

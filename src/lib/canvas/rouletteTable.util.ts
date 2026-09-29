@@ -23,6 +23,13 @@ const GRID_HEIGHT = LAYOUT.row * 3;
 
 export const BOARD_WIDTH = GRID_X + LAYOUT.cell * 12 + LAYOUT.columnWidth + LAYOUT.margin;
 export const BOARD_HEIGHT = GRID_Y + GRID_HEIGHT + LAYOUT.band * 2 + LAYOUT.margin;
+/** The strip above the table that shows the last spins, when there are any. */
+export const HISTORY_BAND = 64;
+
+/** The board is taller by the history strip only when it has spins to show. */
+export function boardHeight(history: readonly number[]): number {
+	return BOARD_HEIGHT + (history.length > 0 ? HISTORY_BAND : 0);
+}
 
 const FILL = { red: "#c0262d", black: "#17181c", green: "#16813d" } as const;
 const LINE = "rgba(255, 255, 255, 0.55)";
@@ -210,6 +217,52 @@ export interface RouletteBoardView {
 	chips: readonly BoardChip[];
 	/** Where the ball landed; absent while bets are still going down. */
 	pocket?: number;
+	/** Earlier spins at this table, newest first. */
+	history?: readonly number[];
+}
+
+const HISTORY_LABEL_WIDTH = 118;
+
+/** Where each earlier spin's disc sits in the strip, newest first and a little larger. */
+export function historySpots(count: number): { x: number; y: number; radius: number }[] {
+	const y = LAYOUT.margin / 2 + HISTORY_BAND / 2;
+	return Array.from({ length: count }, (_, index) => ({
+		x: LAYOUT.margin + HISTORY_LABEL_WIDTH + 26 + index * 54,
+		y,
+		radius: index === 0 ? 23 : 20,
+	}));
+}
+
+function drawHistory(ctx: SKRSContext2D, history: readonly number[]): void {
+	const spots = historySpots(history.length);
+	drawText(ctx, "LAST SPINS", LAYOUT.margin, spots[0]?.y ?? 0, {
+		size: 15,
+		weight: 700,
+		colour: "#f4efe3",
+	});
+
+	history.forEach((pocket, index) => {
+		const spot = spots[index]!;
+		ctx.save();
+		ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+		ctx.shadowBlur = 6;
+		ctx.beginPath();
+		ctx.arc(spot.x, spot.y, spot.radius, 0, Math.PI * 2);
+		ctx.fillStyle = FILL[pocketColour(pocket)];
+		ctx.fill();
+		ctx.restore();
+
+		ctx.lineWidth = index === 0 ? 3 : 1.5;
+		ctx.strokeStyle = index === 0 ? GOLD : LINE;
+		ctx.stroke();
+		drawText(ctx, String(pocket), spot.x, spot.y + 1, {
+			size: index === 0 ? 20 : 17,
+			weight: 700,
+			family: DISPLAY,
+			colour: "#ffffff",
+			align: "center",
+		});
+	});
 }
 
 /** The most chips drawn on one spot; the figure on top is the whole spot's total. */
@@ -277,8 +330,16 @@ export function chipStacks(chips: readonly BoardChip[]): { bet: RouletteBet; tot
 }
 
 export function rouletteBoard(view: RouletteBoardView): Buffer {
-	const { canvas, ctx } = blankCanvas(BOARD_WIDTH, BOARD_HEIGHT);
-	drawFelt(ctx, BOARD_WIDTH, BOARD_HEIGHT);
+	const history = view.history ?? [];
+	const height = boardHeight(history);
+	const { canvas, ctx } = blankCanvas(BOARD_WIDTH, height);
+	drawFelt(ctx, BOARD_WIDTH, height);
+
+	if (history.length > 0) {
+		drawHistory(ctx, history);
+		// Everything below keeps its own coordinates, moved down under the strip.
+		ctx.translate(0, HISTORY_BAND);
+	}
 
 	const stacks = chipStacks(view.chips);
 	const taken = new Set(stacks.map((stack) => spotKey(stack.bet)));
