@@ -58,6 +58,20 @@ export function missingFrom(root: string, files: readonly string[]): string[] {
 	return files.filter((file) => !existsSync(join(root, file)));
 }
 
+/** A static import of the owner console, which would make every visitor's page need a file only owners are served. */
+const STATIC_OWNER_IMPORT = /(?:from|import)\s*["']\.\/OwnerPage-[\w-]+\.js["']/;
+
+/** Null when the owner console is one chunk that nothing else imports statically; otherwise what is wrong. */
+export function ownerChunkProblem(files: Record<string, string>): string | null {
+	const chunks = Object.keys(files).filter((name) => /^OwnerPage-[\w-]+\.js$/.test(name));
+	if (chunks.length !== 1) return `Expected one owner console chunk, found ${String(chunks.length)}.`;
+
+	const importer = Object.entries(files).find(
+		([name, code]) => name.endsWith(".js") && !chunks.includes(name) && STATIC_OWNER_IMPORT.test(code),
+	);
+	return importer === undefined ? null : `${importer[0]} imports the owner console statically.`;
+}
+
 function assetsMatching(extension: string): string {
 	return readdirSync(ASSETS)
 		.filter((file) => file.endsWith(extension))
@@ -87,6 +101,20 @@ function main(): void {
 		process.exit(1);
 	}
 
+	const owner = ownerChunkProblem(
+		Object.fromEntries(
+			readdirSync(ASSETS)
+				.filter((file) => file.endsWith(".js"))
+				.map((file) => [file, readFileSync(join(ASSETS, file), "utf8")]),
+		),
+	);
+
+	if (owner !== null) {
+		console.error(owner);
+		console.error("Check manualChunks in dashboard/vite.config.ts, and that only routes.tsx imports features/owner.");
+		process.exit(1);
+	}
+
 	const publicFiles = filesUnder(PUBLIC);
 	const missing = missingFrom(DIST, publicFiles);
 
@@ -99,6 +127,7 @@ function main(): void {
 	console.log(`One copy of React in the bundle: ${versions[0] ?? "none found"}`);
 	console.log("`light-dark()` reaches the browser intact.");
 	console.log(`All ${String(publicFiles.length)} files from dashboard/public are in the build.`);
+	console.log("The owner console is its own chunk, loaded only on demand.");
 }
 
 if (require.main === module) main();

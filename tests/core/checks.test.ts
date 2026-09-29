@@ -398,6 +398,7 @@ describe("the casino's switches", () => {
 		subcommands: [
 			{ name: "roulette", description: "Spins.", run: jest.fn() },
 			{ name: "info", description: "Lists.", run: jest.fn() },
+			{ name: "stats", description: "Counts.", run: jest.fn() },
 			{ name: "settings", description: "Settings.", permissions: [PermissionFlagsBits.ManageGuild], run: jest.fn() },
 		],
 	});
@@ -425,6 +426,13 @@ describe("the casino's switches", () => {
 			/Roulette is switched off/,
 		);
 		expect(await runChecks(createMockInteraction({ subcommand: "info" }), casino, createMockClient())).toBeNull();
+	});
+
+	/** Stats only look back at games already played, so a closed casino can still show them. */
+	it("lets `/casino stats` through while the casino is closed", async () => {
+		casinoSettings.mockResolvedValue(closed);
+
+		expect(await runChecks(createMockInteraction({ subcommand: "stats" }), casino, createMockClient())).toBeNull();
 	});
 
 	/** Closing it has to be reversible from inside Discord, or the server has no way back. */

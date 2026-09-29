@@ -39,6 +39,8 @@ export interface RoundView {
 	closesAt: number | null;
 	pocket: number | null;
 	players: RoundPlayer[];
+	/** Where the ball landed on this table before, newest first. */
+	history: readonly number[];
 }
 
 export interface PlayerResult {
@@ -47,7 +49,7 @@ export interface PlayerResult {
 	returned: number;
 }
 
-export function roundView(record: RoundRecord): RoundView {
+export function roundView(record: RoundRecord, history: readonly number[] = []): RoundView {
 	const players = Object.entries(record.players)
 		.sort(([, a], [, b]) => a.joinedAt - b.joinedAt)
 		.map(([userId, seat], index): RoundPlayer => ({
@@ -70,6 +72,7 @@ export function roundView(record: RoundRecord): RoundView {
 		closesAt: record.closesAt === null ? null : new Date(record.closesAt).getTime(),
 		pocket: record.pocket,
 		players,
+		history,
 	};
 }
 
@@ -203,8 +206,26 @@ function betButton(roundId: string, bet: RouletteBet, style: ButtonStyle) {
 	return button({ id: customId(ROULETTE_ID, "bet", roundId, spotKey(bet)), label: betName(bet), style });
 }
 
+const POCKET_EMOJI = { red: "🔴", black: "⚫", green: "🟢" } as const;
+
+/** The last spins in words, for the reader who cannot see the strip drawn on the table. */
+export function historyLine(history: readonly number[]): string | null {
+	if (history.length === 0) return null;
+	const spins = history.map((pocket) => `${POCKET_EMOJI[pocketColour(pocket)]} **${String(pocket)}**`);
+	return `-# Last spins, newest first: ${spins.join(" · ")}`;
+}
+
+function historyParts(view: RoundView): ContainerPart[] {
+	const line = historyLine(view.history);
+	return line === null ? [] : [text(line)];
+}
+
 function boardFile(view: RoundView, pocket?: number): AttachmentBuilder {
-	const image = rouletteBoard({ chips: roundChips(view), ...(pocket === undefined ? {} : { pocket }) });
+	const image = rouletteBoard({
+		chips: roundChips(view),
+		history: view.history,
+		...(pocket === undefined ? {} : { pocket }),
+	});
 	return new AttachmentBuilder(image, { name: "roulette-table.png" });
 }
 
@@ -227,6 +248,7 @@ export function roundBettingMessage(view: RoundView): ContainerMessageWithFiles 
 				(view.private ? " The host can press **Spin now** once a chip is down." : ""),
 		),
 		gallery("attachment://roulette-table.png", "The roulette table, with every chip placed so far."),
+		...historyParts(view),
 		text(playersText(view)),
 		row(
 			...outside!.map((choice) => betButton(view.id, choice.bet, choice.style)),
@@ -282,6 +304,7 @@ export function roundSpinningMessage(view: RoundView, gif: Buffer): ContainerMes
 		text(`## ${CASINO_GAME_EMOJI.roulette} No more bets!\n${accessLine(view)}`),
 		gallery("attachment://roulette.gif", "The wheel spinning."),
 		gallery("attachment://roulette-table.png", "The table as betting closed."),
+		...historyParts(view),
 		text(playersText(view)),
 		text("-# The ball is rolling…"),
 	];
@@ -294,8 +317,8 @@ export function winningSpots(pocket: number): string[] {
 	return ROULETTE_SPOTS.filter((spot) => spot.kind !== "number" && betWins(spot, pocket)).map(betName);
 }
 
-/** One entry per spot a player covered, chips on the same spot added together. */
-function betLines(player: RoundPlayer, pocket: number): string {
+/** One line per spot a player covered, chips on the same spot added together. */
+function betLines(player: RoundPlayer, pocket: number): string[] {
 	const spots = new Map<string, { bet: RouletteBet; amount: number }>();
 	for (const placed of player.bets) {
 		const key = spotKey(placed.bet);
@@ -303,78 +326,75 @@ function betLines(player: RoundPlayer, pocket: number): string {
 		spots.set(key, { bet: placed.bet, amount: (found?.amount ?? 0) + placed.amount });
 	}
 
-	return [...spots.values()]
-		.map(({ bet, amount }) =>
-			betWins(bet, pocket)
-				? `✅ ${betName(bet)}: ${formatNumber(amount)} → ${formatNumber(amount * rouletteReturn(bet.kind))}`
-				: `❌ ${betName(bet)}: ${formatNumber(amount)}`,
-		)
-		.join(" · ");
+	return [...spots.values()].map(({ bet, amount }) => {
+		const pays = rouletteReturn(bet.kind);
+		const spot = `**${betName(bet)}** (${String(pays - 1)} to 1)`;
+		return betWins(bet, pocket)
+			? `> ✅ ${spot} · ${formatNumber(amount)} → **${formatNumber(amount * pays)}**`
+			: `> ❌ ${spot} · ${formatNumber(amount)} lost`;
+	});
 }
 
-function net(result: PlayerResult): string {
-	const profit = result.returned - result.staked;
-	if (profit > 0) return `**+${formatNumber(profit)}** 🎉`;
-	if (profit === 0) return "broke even";
-	return `**−${formatNumber(-profit)}** overall`;
+function profitOf(result: PlayerResult): number {
+	return result.returned - result.staked;
 }
 
-function resultLine(result: PlayerResult, pocket: number): string {
+/** What happened to a player's money first, then how they bet it. */
+function playerBlock(result: PlayerResult, pocket: number): string {
 	const { player } = result;
 	const name = `${seatEmoji(player.seat)} **${escapeMarkdown(player.name)}**`;
-	const summary =
-		result.returned === 0
-			? `${name} · bet **${formatNumber(result.staked)}** · lost it`
-			: `${name} · bet **${formatNumber(result.staked)}** · won **${formatNumber(result.returned)}** · ${net(result)}`;
-	return `${summary}\n-# ${betLines(player, pocket)}`;
+	const profit = profitOf(result);
+	const headline =
+		profit > 0
+			? `${name} won **${formatNumber(profit)}** 🎉`
+			: profit < 0
+				? `${name} lost **${formatNumber(-profit)}**`
+				: `${name} broke even`;
+	const spots = new Set(player.bets.map((placed) => spotKey(placed.bet))).size;
+	const collected = result.returned === 0 ? "nothing came back" : `**${formatNumber(result.returned)}** came back`;
+
+	return [
+		headline,
+		`-# Bet ${formatNumber(result.staked)} on ${String(spots)} ${spots === 1 ? "spot" : "spots"} · ${collected}`,
+		...betLines(player, pocket),
+	].join("\n");
 }
 
 /** Keeps a list inside one text block, naming how many were left off rather than failing the message. */
 function fitted(heading: string, lines: string[], limit = 3_900): string {
 	let body = heading;
 	for (const [index, line] of lines.entries()) {
+		const gap = index === 0 ? "\n" : "\n\n";
 		const rest = lines.length - index;
-		if (body.length + line.length + 1 > limit - 40) return `${body}\n-# …and ${String(rest)} more`;
-		body += `\n${line}`;
+		if (body.length + line.length + gap.length > limit - 40) return `${body}\n-# …and ${String(rest)} more`;
+		body += `${gap}${line}`;
 	}
 	return body;
 }
 
-/** Winners first, biggest profit on top, then everybody the wheel went against. */
+/** Grouped by where each player finished overall, biggest win and biggest loss first. */
 export function resultsText(view: RoundView, pocket: number): string[] {
 	const results = roundResults(view, pocket);
-	const winners = results
-		.filter((result) => result.returned > 0)
-		.sort((a, b) => b.returned - b.staked - (a.returned - a.staked));
-	const losers = results.filter((result) => result.returned === 0).sort((a, b) => b.staked - a.staked);
+	const winners = results.filter((result) => profitOf(result) > 0).sort((a, b) => profitOf(b) - profitOf(a));
+	const even = results.filter((result) => profitOf(result) === 0);
+	const losers = results.filter((result) => profitOf(result) < 0).sort((a, b) => profitOf(a) - profitOf(b));
+	const blocks = (list: PlayerResult[]) => list.map((result) => playerBlock(result, pocket));
 
-	const blocks: string[] = [];
-	if (winners.length > 0) {
-		blocks.push(
-			fitted(
-				`### 🏆 Winners`,
-				winners.map((result) => resultLine(result, pocket)),
-			),
-		);
-	} else {
-		blocks.push("### 🏆 Winners\n*Nobody this time. The house takes the table.*");
-	}
-	if (losers.length > 0) {
-		blocks.push(
-			fitted(
-				`### 💸 No luck`,
-				losers.map((result) => resultLine(result, pocket)),
-			),
-		);
-	}
+	const parts: string[] = [
+		winners.length > 0
+			? fitted("### 🏆 Winners", blocks(winners))
+			: "### 🏆 Winners\n*Nobody came out ahead this time. The house takes the table.*",
+	];
+	if (even.length > 0) parts.push(fitted("### 🤝 Broke even", blocks(even)));
+	if (losers.length > 0) parts.push(fitted("### 💸 Losers", blocks(losers)));
 
 	const paid = results.reduce((sum, result) => sum + result.returned, 0);
 	const players = results.length === 1 ? "1 player" : `${String(results.length)} players`;
-	blocks.push(
+	parts.push(
 		`-# ${accessLine(view)} · ${players} · ${formatNumber(tableTotal(view))} on the table · ` +
 			`${formatNumber(paid)} paid out. Winnings are already in your wallet.`,
 	);
-	return blocks;
+	return parts;
 }
 
 /** A private table's New round stays private and stays with its host; a public one is open to whoever presses. */
@@ -419,6 +439,7 @@ export function roundSettledMessage(view: RoundView, still: Buffer | null): Cont
 	}
 	parts.push(
 		gallery("attachment://roulette-table.png", "The table, with the winning chips ringed in gold."),
+		...historyParts(view),
 		...resultsText(view, pocket).map((block) => text(block)),
 		playAgainRow(view),
 	);

@@ -10,6 +10,9 @@ jest.mock("@lib/casino", () => ({
 	clearMyBets: jest.fn(),
 	spinNow: jest.fn(),
 	openRound: jest.fn(),
+	tableView: jest.fn((round: Parameters<typeof Casino.roundView>[0]) =>
+		Promise.resolve(jest.requireActual<typeof Casino>("@lib/casino").roundView(round, [17])),
+	),
 }));
 jest.mock("@core/checks", () => ({
 	...jest.requireActual<object>("@core/checks"),

@@ -8,7 +8,7 @@ import { findBinaries } from "@lib/music/musicBinaries.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/music/musicQuery.util";
 import { addTracks } from "@lib/music/musicQueue.util";
 import { findSession, type MusicSession, sessionFor } from "@lib/music/musicSession.util";
-import { resolveTracks } from "@lib/music/musicSource.util";
+import { MusicProblemError, resolveTracks } from "@lib/music/musicSource.util";
 
 /** What `/play`, the `/music` subcommands and the panel buttons all need, written once. */
 
@@ -67,7 +67,21 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 	const { query } = request;
 	const session = openSession(request.guild, request.client);
 	const flat = query.kind === "url" && isPlaylistUrl(query.url);
-	const found = await resolveTracks(query, request.requestedBy, musicBinaries(request.client), { flat });
+	const binaries = musicBinaries(request.client);
+	// Only the first search result is played, so asking YouTube for more is requests it can hold against the host.
+	const found = await resolveTracks(query, request.requestedBy, binaries, {
+		flat,
+		...(query.kind === "search" ? { results: 1 } : {}),
+	}).catch((error: unknown) => {
+		if (error instanceof MusicProblemError && error.problem.kind === "bot-check") {
+			request.client.logger.warn(
+				binaries.cookies === null || binaries.cookies === undefined
+					? "[MUSIC] YouTube asked this host to prove it is not a bot. Give yt-dlp YouTube cookies with MUSIC_YTDLP_COOKIES; .env.example says how."
+					: "[MUSIC] YouTube asked this host to prove it is not a bot even with cookies. They have probably expired; export fresh ones into MUSIC_YTDLP_COOKIES.",
+			);
+		}
+		throw error;
+	});
 
 	if (found.length === 0) throw new UserFacingError("Nothing turned up for that.");
 

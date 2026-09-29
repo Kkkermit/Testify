@@ -11,6 +11,7 @@ import {
 	spinOverdueRounds,
 	spinRound,
 } from "@lib/casino/rouletteActions.util";
+import { textOf } from "@tests/helpers/containers";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/rouletteRepository", () => ({
@@ -23,8 +24,10 @@ jest.mock("@database/repositories/rouletteRepository", () => ({
 	clearBets: jest.fn(),
 	claimRound: jest.fn(),
 	finishRound: jest.fn(),
+	recentPockets: jest.fn(() => Promise.resolve([])),
 	overdueRounds: jest.fn(() => Promise.resolve([])),
 }));
+jest.mock("@database/repositories/casinoStatsRepository", () => ({ recordCasinoPlays: jest.fn() }));
 jest.mock("@lib/casino/casinoActions.util", () => ({
 	takeStake: jest.fn((_player: unknown, amount: string) => Promise.resolve({ bet: Number(amount), wallet: 0 })),
 	payOut: jest.fn(() => Promise.resolve(0)),
@@ -42,6 +45,7 @@ jest.mock("@lib/canvas/rouletteWheel.util", () => ({
 }));
 
 const repository = jest.requireMock("@database/repositories/rouletteRepository");
+const { recordCasinoPlays } = jest.requireMock("@database/repositories/casinoStatsRepository");
 const { takeStake, payOut } = jest.requireMock("@lib/casino/casinoActions.util");
 const { requireAccount } = jest.requireMock("@database/repositories/economyRepository");
 
@@ -68,7 +72,7 @@ function record(overrides: Partial<RoundRecord> = {}): RoundRecord {
 	};
 }
 
-function client(edit = jest.fn(() => Promise.resolve())) {
+function client(edit: jest.Mock = jest.fn(() => Promise.resolve())) {
 	return createMockClient({
 		channels: { fetch: jest.fn(() => Promise.resolve({ isTextBased: () => true, messages: { edit } })) },
 		logger: { debug: jest.fn() },
@@ -292,9 +296,47 @@ describe("the spin", () => {
 		// Zero: alice's chip on 0 pays 36 times, every outside bet loses.
 		expect(payOut).toHaveBeenCalledWith({ guildId: ALICE.guildId, userId: ALICE.userId }, 3_600);
 		expect(payOut).toHaveBeenCalledWith({ guildId: ALICE.guildId, userId: "333333333333333333" }, 0);
-		expect(repository.finishRound).toHaveBeenCalledWith(ROUND);
+		expect(repository.finishRound).toHaveBeenCalledWith(ROUND, true);
 		expect(edit).toHaveBeenCalledTimes(1);
 		expect(bot.timers.after).toHaveBeenCalledWith(`roulette-reveal-${ROUND}`, expect.any(Number), expect.any(Function));
+	});
+
+	/** Each player's round counts once toward the casino's stats, with everything they staked and got back. */
+	it("records each player's round for the stats once everybody is paid", async () => {
+		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 0, players: bets }));
+
+		await spinRound(client(), ROUND, () => 0);
+
+		expect(recordCasinoPlays).toHaveBeenCalledWith([
+			{ guildId: ALICE.guildId, userId: ALICE.userId, game: "roulette", staked: 200, returned: 3_600 },
+			{ guildId: ALICE.guildId, userId: "333333333333333333", game: "roulette", staked: 50, returned: 0 },
+		]);
+	});
+
+	/** The result shows this spin first, then the ones before it at this table. */
+	it("puts this spin at the front of the table's last spins once the result shows", async () => {
+		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 0, players: bets }));
+		repository.recentPockets.mockResolvedValue([3, 26]);
+		const edit = jest.fn((_id: string, _message: unknown) => Promise.resolve());
+		const bot = client(edit);
+
+		await spinRound(bot, ROUND, () => 0);
+		expect(repository.recentPockets).toHaveBeenCalledWith(ALICE.guildId, "444444444444444444", ROULETTE_ROUND.history);
+		expect(textOf(edit.mock.calls[0]![1] as never)).toContain("🔴 **3** · ⚫ **26**");
+
+		const reveal = jest.mocked(bot.timers.after).mock.calls[0]![2];
+		await reveal();
+		expect(textOf(edit.mock.calls[1]![1] as never)).toContain("🟢 **0** · 🔴 **3** · ⚫ **26**");
+	});
+
+	/** A table nobody bet on did not really spin, so it must not appear among the last spins. */
+	it("settles a table nobody bet on as unspun, and records nothing", async () => {
+		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 7 }));
+
+		await spinRound(client(), ROUND, () => 0);
+
+		expect(repository.finishRound).toHaveBeenCalledWith(ROUND, false);
+		expect(recordCasinoPlays).toHaveBeenCalledWith([]);
 	});
 
 	/** The claim is the guard: a timer and the sweep arriving together must not both pay. */

@@ -1,7 +1,18 @@
 import { Types } from "mongoose";
 import { parseCustomId } from "@core/button";
 import { type RoundRecord } from "@database/repositories/rouletteRepository";
-import { BOARD_HEIGHT, BOARD_WIDTH, chipLabel, chipSpot, chipStacks, spotRect } from "@lib/canvas/rouletteTable.util";
+import {
+	BOARD_HEIGHT,
+	BOARD_WIDTH,
+	boardHeight,
+	chipLabel,
+	chipSpot,
+	chipStacks,
+	HISTORY_BAND,
+	historySpots,
+	LAYOUT,
+	spotRect,
+} from "@lib/canvas/rouletteTable.util";
 import { ROULETTE_ID, ROULETTE_ROUND, SEAT_COLOURS } from "@lib/casino/casino.constants";
 import { type RouletteBet } from "@lib/casino/casino.types";
 import { ROULETTE_SPOTS } from "@lib/casino/roulette.util";
@@ -14,6 +25,7 @@ import {
 	roundSettledMessage,
 	roundSpinningMessage,
 	roundView,
+	historyLine,
 	winningSpots,
 } from "@lib/casino/rouletteRound.util";
 import { buttonsOf, customIdsOf, duplicateIds, textOf } from "@tests/helpers/containers";
@@ -236,29 +248,32 @@ describe("the spin and the result", () => {
 		expect(message.files?.map((file) => file.name)).toEqual(["roulette.png", "roulette-table.png"]);
 	});
 
-	/** A winner's line has to say who, what they bet, what came back and on which spots, not only the total. */
-	it("names every winner with their stake, their winnings, their profit and each bet", () => {
+	/** A winner's entry has to say who, how much they came out ahead, what they bet and on which spots. */
+	it("names every winner by their profit, with their stake, what came back and each bet", () => {
 		const text = textOf(roundSettledMessage({ ...roundView(busy), pocket: 17 }, null));
 
 		expect(text).toContain("### 🏆 Winners");
-		expect(text).toContain("**alice** · bet **400** · won **7,200** · **+6,800** 🎉");
-		expect(text).toContain("❌ Red: 200 · ✅ 17: 200 → 7,200");
-		expect(text).toContain("**bob** · bet **50** · won **1,800** · **+1,750** 🎉");
+		expect(text).toContain("**alice** won **6,800** 🎉\n-# Bet 400 on 2 spots · **7,200** came back");
+		expect(text).toContain("> ❌ **Red** (1 to 1) · 200 lost\n> ✅ **17** (35 to 1) · 200 → **7,200**");
+		expect(text).toContain("**bob** won **1,750** 🎉");
 		expect(text).toContain("2 players · 450 on the table · 9,000 paid out");
-		// Bigger profit first.
+		expect(text.indexOf("**alice**")).toBeLessThan(text.indexOf("**bob**"));
+		expect(text).not.toContain("### 💸 Losers");
+	});
+
+	it("lists everybody the wheel went against under Losers, with what they lost", () => {
+		const text = textOf(roundSettledMessage({ ...roundView(busy), pocket: 2 }, null));
+
+		expect(text).toContain("Nobody came out ahead");
+		expect(text).toContain("### 💸 Losers");
+		expect(text).toContain("**alice** lost **400**\n-# Bet 400 on 2 spots · nothing came back");
+		expect(text).toContain("> ❌ **17** (35 to 1) · 50 lost");
+		// Biggest loss first.
 		expect(text.indexOf("**alice**")).toBeLessThan(text.indexOf("**bob**"));
 	});
 
-	it("lists everybody the wheel went against, with what they lost", () => {
-		const text = textOf(roundSettledMessage({ ...roundView(busy), pocket: 2 }, null));
-
-		expect(text).toContain("Nobody this time");
-		expect(text).toContain("### 💸 No luck");
-		expect(text).toContain("**alice** · bet **400** · lost it");
-		expect(text).toContain("❌ 17: 50");
-	});
-
-	it("says when a player won something back but still came out behind", () => {
+	/** A player whose one winning bet was outweighed by the rest lost money, so they belong with the losers. */
+	it("puts a player who won a bet but lost overall under Losers, showing what came back", () => {
 		const mixed = record({
 			players: {
 				[ALICE]: {
@@ -266,14 +281,37 @@ describe("the spin and the result", () => {
 					joinedAt: 1,
 					bets: [
 						{ spot: "red", amount: 100 },
-						{ spot: "n5", amount: 150 },
+						{ spot: "odd", amount: 100 },
+						{ spot: "n22", amount: 5_000 },
 					],
 				},
 			},
 		});
-		expect(textOf(roundSettledMessage({ ...roundView(mixed), pocket: 1 }, null))).toContain(
-			"won **200** · **−50** overall",
-		);
+		const text = textOf(roundSettledMessage({ ...roundView(mixed), pocket: 17 }, null));
+
+		expect(text).toContain("Nobody came out ahead");
+		expect(text.indexOf("### 💸 Losers")).toBeLessThan(text.indexOf("**alice**"));
+		expect(text).toContain("**alice** lost **5,000**\n-# Bet 5,200 on 3 spots · **200** came back");
+		expect(text).toContain("> ✅ **Odd** (1 to 1) · 100 → **200**");
+	});
+
+	it("gives anybody who broke even their own section", () => {
+		const even = record({
+			players: {
+				[ALICE]: {
+					name: "alice",
+					joinedAt: 1,
+					bets: [
+						{ spot: "red", amount: 100 },
+						{ spot: "black", amount: 100 },
+					],
+				},
+			},
+		});
+		const text = textOf(roundSettledMessage({ ...roundView(even), pocket: 1 }, null));
+
+		expect(text).toContain("### 🤝 Broke even\n");
+		expect(text).toContain("**alice** broke even");
 	});
 
 	it("adds chips on the same spot together in the breakdown", () => {
@@ -289,7 +327,9 @@ describe("the spin and the result", () => {
 				},
 			},
 		});
-		expect(textOf(roundSettledMessage({ ...roundView(doubled), pocket: 1 }, null))).toContain("✅ Red: 200 → 400");
+		const text = textOf(roundSettledMessage({ ...roundView(doubled), pocket: 1 }, null));
+		expect(text).toContain("-# Bet 200 on 1 spot");
+		expect(text).toContain("> ✅ **Red** (1 to 1) · 200 → **400**");
 	});
 
 	it("keeps a crowded result inside Discord's limit for one text block", () => {
@@ -331,6 +371,37 @@ describe("the spin and the result", () => {
 	it("says so, and offers a new round, when nobody bet", () => {
 		const text = textOf(roundSettledMessage(roundView(record()), null));
 		expect(text).toContain("Nobody placed a bet");
+	});
+});
+
+describe("the last spins", () => {
+	it("names each earlier spin by its colour, newest first", () => {
+		expect(historyLine([30, 17, 0])).toBe("-# Last spins, newest first: 🔴 **30** · ⚫ **17** · 🟢 **0**");
+		expect(historyLine([])).toBeNull();
+	});
+
+	it("shows them under the table while betting, and says nothing on a table with no history", () => {
+		expect(textOf(roundBettingMessage(roundView(busy, [30, 17])))).toContain("Last spins, newest first: 🔴 **30**");
+		expect(textOf(roundBettingMessage(roundView(busy)))).not.toContain("Last spins");
+	});
+
+	it("keeps the board its usual height until there is a spin to show", () => {
+		expect(boardHeight([])).toBe(BOARD_HEIGHT);
+		expect(boardHeight([5])).toBe(BOARD_HEIGHT + HISTORY_BAND);
+	});
+
+	/** The newest spin is drawn larger, and all five have to fit the strip without touching. */
+	it("fits every spin in the strip, the newest larger than the rest", () => {
+		const spots = historySpots(ROULETTE_ROUND.history);
+		expect(spots[0]!.radius).toBeGreaterThan(spots[1]!.radius);
+		for (const [index, spot] of spots.entries()) {
+			expect(spot.x + spot.radius).toBeLessThanOrEqual(BOARD_WIDTH);
+			// Clear of the picture's top edge, and of the first row of numbers below the strip.
+			expect(spot.y - spot.radius).toBeGreaterThan(0);
+			expect(spot.y + spot.radius).toBeLessThan(HISTORY_BAND + LAYOUT.margin);
+			const next = spots[index + 1];
+			if (next !== undefined) expect(next.x - next.radius).toBeGreaterThan(spot.x + spot.radius);
+		}
 	});
 });
 

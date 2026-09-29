@@ -1,6 +1,7 @@
 import { type MessageEditOptions } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
+import { recordCasinoPlays } from "@database/repositories/casinoStatsRepository";
 import { requireAccount } from "@database/repositories/economyRepository";
 import {
 	addBets,
@@ -11,6 +12,7 @@ import {
 	finishRound,
 	openRound as insertRound,
 	overdueRounds,
+	recentPockets,
 	type RoundRecord,
 	setSeatChip,
 	startClock,
@@ -94,6 +96,11 @@ async function startCountdown(client: TestifyClient, roundId: string, now: numbe
 			await spinRound(client, roundId);
 		});
 	}
+}
+
+/** A round as its table shows it, with the spins that came before it in this channel. */
+export async function tableView(round: RoundRecord): Promise<RoundView> {
+	return roundView(round, await recentPockets(round.guildId, round.channelId, ROULETTE_ROUND.history));
 }
 
 export async function rememberRoundMessage(roundId: string, messageId: string): Promise<void> {
@@ -204,11 +211,21 @@ export function refundLine(refunded: number): string {
 	return `Your ${formatNumber(refunded)} is back in your wallet.`;
 }
 
-/** Pays every player from one pocket, one at a time. */
+/** Pays every player from one pocket, one at a time, and only then counts the round. */
 async function payEveryone(round: RoundRecord, view: RoundView, pocket: number): Promise<void> {
-	for (const result of roundResults(view, pocket)) {
+	const results = roundResults(view, pocket);
+	for (const result of results) {
 		await payOut({ guildId: round.guildId, userId: result.player.userId }, result.returned);
 	}
+	await recordCasinoPlays(
+		results.map((result) => ({
+			guildId: round.guildId,
+			userId: result.player.userId,
+			game: "roulette" as const,
+			staked: result.staked,
+			returned: result.returned,
+		})),
+	);
 }
 
 /**
@@ -220,19 +237,23 @@ export async function spinRound(client: TestifyClient, roundId: string, roll?: R
 	const round = await claimRound(roundId, pocket);
 	if (round === null) return null;
 
-	const view = roundView(round);
+	// Read before this round settles, so it shows the spins before this one.
+	const history = await recentPockets(round.guildId, round.channelId, ROULETTE_ROUND.history);
+	const view = roundView(round, history);
 	await payEveryone(round, view, pocket);
-	await finishRound(roundId);
+	const spun = view.players.some((player) => staked(player) > 0);
+	await finishRound(roundId, spun);
 
-	if (view.players.every((player) => staked(player) === 0)) {
+	if (!spun) {
 		await editRoundMessage(client, round, roundSettledMessage(view, null));
 		return view;
 	}
 
 	const spin = rouletteSpin(pocket);
 	await editRoundMessage(client, round, roundSpinningMessage(view, spin.gif));
+	const landed = { ...view, history: [pocket, ...history].slice(0, ROULETTE_ROUND.history) };
 	client.timers.after(`roulette-reveal-${roundId}`, spin.durationMs + CASINO_TIMING.revealMarginMs, () =>
-		editRoundMessage(client, round, roundSettledMessage(view, rouletteStill(pocket))),
+		editRoundMessage(client, round, roundSettledMessage(landed, rouletteStill(pocket))),
 	);
 	return view;
 }

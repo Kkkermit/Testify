@@ -1,17 +1,6 @@
 import { ANALYTICS_WINDOWS, LOG_LEVELS, snowflake, type AnalyticsWindow, type ReportedLogLevel } from "@testify/shared";
 import { oneOf } from "@/lib/oneOf";
 
-export function formatUptime(ms: number): string {
-	const minutes = Math.floor(ms / 60_000);
-	const hours = Math.floor(minutes / 60);
-	const days = Math.floor(hours / 24);
-
-	if (days > 0) return `${String(days)}d ${String(hours % 24)}h`;
-	if (hours > 0) return `${String(hours)}h ${String(minutes % 60)}m`;
-
-	return `${String(minutes)}m`;
-}
-
 /** The API only accepts the three windows it aggregates for, so anything else falls back rather than 400s. */
 export function windowFrom(raw: string | null): AnalyticsWindow {
 	const parsed = Number(raw);
@@ -21,12 +10,6 @@ export function windowFrom(raw: string | null): AnalyticsWindow {
 /** Defaults to everything: the console exists to be looked through. */
 export function levelFrom(raw: string | null): ReportedLogLevel {
 	return oneOf(LOG_LEVELS, raw, "trace");
-}
-
-/** A percentage of the busiest row, floored at 2 so a row with one use is still visibly a row. */
-export function barWidth(count: number, max: number): number {
-	if (max <= 0 || count <= 0) return 0;
-	return Math.max(2, Math.round((count / max) * 100));
 }
 
 export function percent(part: number, whole: number): string {

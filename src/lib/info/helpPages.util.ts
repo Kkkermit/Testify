@@ -213,7 +213,8 @@ export function categoryControls(
 
 	return row(
 		button({
-			id: customId("help", "page", surface, category, Math.max(0, page - 1), ownerId),
+			// The slot keeps Previous and Next apart when both clamp to the same page, as on a one-page category.
+			id: customId("help", "page", surface, category, Math.max(0, page - 1), "prev", ownerId),
 			emoji: theme.emoji.previous,
 			disabled: page <= 0,
 		}),
@@ -223,7 +224,7 @@ export function categoryControls(
 			disabled: true,
 		}),
 		button({
-			id: customId("help", "page", surface, category, Math.min(totalPages - 1, page + 1), ownerId),
+			id: customId("help", "page", surface, category, Math.min(totalPages - 1, page + 1), "next", ownerId),
 			emoji: theme.emoji.next,
 			disabled: page >= totalPages - 1,
 		}),

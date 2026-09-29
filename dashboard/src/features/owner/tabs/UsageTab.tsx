@@ -1,8 +1,7 @@
 import { ANALYTICS_WINDOWS, errorRate, type AnalyticsWindow } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
-import { Avatar, Card, CARD_HEADING, Figure, SegmentedControl, Skeleton } from "@/components/primitives";
-import { UsageBars } from "@/features/owner/components/UsageBars";
+import { Avatar, Card, CARD_HEADING, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { percent, screenLabel } from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";

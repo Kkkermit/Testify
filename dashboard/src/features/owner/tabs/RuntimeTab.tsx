@@ -3,11 +3,10 @@ import { Trans, useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { Card, CARD_HEADING, DataList, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
-import { formatUptime } from "@/features/owner/owner.utils";
 import { useRuntime } from "@/features/owner/useOwner";
 import { currentBotName } from "@/i18n";
 import { cn } from "@/lib/cn";
-import { dateAndTime } from "@/lib/datetime";
+import { formatUptime, dateAndTime } from "@/lib/datetime";
 
 /** What this bot is running as — the first thing to check before believing anything else on this screen. */
 export function RuntimeTab(): React.JSX.Element {

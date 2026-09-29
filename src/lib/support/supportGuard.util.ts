@@ -12,9 +12,20 @@ export function secretsOf(env: Env): string[] {
 		env.MONGODB_URI,
 		env.SUPPORT_AI_API_KEY,
 		...credentialsIn(env.MONGODB_URI),
+		...cookieValues(env.MUSIC_YTDLP_COOKIES),
 	];
 
 	return values.filter((value): value is string => value !== undefined && value.length >= MIN_SECRET_LENGTH);
+}
+
+/** Each cookie's value in a pasted cookies file: the last of its tab-separated columns. */
+function cookieValues(pasted: string | undefined): string[] {
+	if (pasted === undefined) return [];
+	return pasted
+		.replaceAll("\\n", "\n")
+		.split("\n")
+		.filter((line) => !line.startsWith("#") && line.includes("\t"))
+		.map((line) => line.split("\t").at(-1)?.trim() ?? "");
 }
 
 function credentialsIn(uri: string): string[] {

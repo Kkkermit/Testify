@@ -800,6 +800,11 @@ joins and leaves, `CHANNEL_DM_LOG` direct messages to the bot, and `CHANNEL_BUG_
 `CHANNEL_SUGGESTION_LOG` what `/bug-report` and `/suggest` send. Each is a channel ID, posted to through
 `postToLogChannel`; both feedback commands once handed that ID to `WebhookClient` as a URL, which refused it, so
 neither had ever delivered, and `feedback.test.ts` now pins the channel each one uses.
+**The DM log's buttons belong to the bot's owners.** `dmLogMessage` in `dmLog.util.ts` draws the post, and
+`buttons/dmLog.ts` swaps it for the sender's details and back — rebuilt from the stored message by the post's own id
+(`findDirectMessage`), so nothing rides in the custom ID — and sends **Reply** to the sender as the bot. The handler is
+not `ownerOnly`, whose last-argument rule would admit only the sender; it checks `client.isOwner` itself, since a
+reply speaks as the bot.
 `CHANNEL_SLASH_COMMAND_LOG` and `CHANNEL_PREFIX_COMMAND_LOG` log every command run, one per surface.
 `logCommandUse` queues an entry in memory and `flushCommandLog` posts each queue every five seconds, an embed per
 run, within Discord's limits of five messages a flush, ten embeds a message and 6,000 characters across them, and
@@ -1121,6 +1126,20 @@ dropped so its one retry looks afresh. The reason lands on the panel for a minut
 is not where anybody in the voice channel looks. **The warning waits for the give-up.** YouTube refuses a first
 download now and then and the fresh try plays it, so a refusal is noted at `debug` and only a track actually
 skipped is logged at `warn` — warning on every 403 told the host to update a yt-dlp that was working.
+
+**A search asks for one result, because only one is played.** `queueRequest` passes `results: 1`; the old
+`ytsearch8:` extracted all eight in full, so a host YouTube had flagged was bot-checked eight times per `/play`, and
+request volume is what gets a host flagged. The typeahead keeps its eight, but as a `--flat-playlist` search, which
+reads the results page and extracts nothing. A refusal `classifyProblem` recognises leaves `resolveTracks` as a
+`MusicProblemError` — a `UserFacingError` carrying the advice, not yt-dlp's text logged as a failure — and a bot check
+also logs one `warn` for the host, naming `MUSIC_YTDLP_COOKIES`.
+
+**`MUSIC_YTDLP_COOKIES` is yt-dlp's own answer to a flagged host**, and the only one that needs no extra install:
+`--cookies` goes on every call — search, description and stream alike, since a stream refused after a search that
+was not is the worse failure. It takes a path, resolved from the repository, or the file's contents pasted into the
+variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes pasted contents to a file
+only its own user can read. They are a signed-in session, so `secretsOf` treats every cookie value as a secret, and
+`/music status` says they are in use without saying where they are.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
@@ -1471,8 +1490,9 @@ pressed, each naming the balance, because the buttons are the same for everybody
 the channel, but `openTable` refuses every bet but the host's, and its New round carries the host's id so it stays
 theirs. Its host also gets **Spin now** once a chip is down: `spinNow` stops the countdown's timer and spins through
 the same claim, so a timer that fired anyway would find the round already taken. Every message on the table says
-which it is (`accessLine`). The result lists winners by profit and then
-everybody who lost, each with their stake, what came back and a line per spot. Six things about it are load-bearing:
+which it is (`accessLine`). The result groups players by where they finished
+overall — winners, broke even, losers — so a player whose one winning bet was outweighed by the rest is a loser; each
+entry leads with the profit or loss, then the stake, what came back and a line per spot with its odds. Six things about it are load-bearing:
 
 - **A round lives in `rouletterounds`, because stakes leave the wallet as each chip lands.** A press takes the stake
   with `takeStake`, then `addBets` pushes it with the open status, the close and the player's room all in the
@@ -1487,8 +1507,20 @@ everybody who lost, each with their stake, what came back and a line per spot. S
   the spot's total on top. Rows are 72px so a chip can be big enough to read at the width Discord shows it, and
   `chipSpot` keeps each chip inside its own spot — pinned by tests.
 - **The wheel and the table are stacked, not side by side**, so neither is shrunk to half the width.
+- **The last spins come from settled rounds in the same channel**, newest first (`recentPockets`), drawn as a strip
+  of coloured discs above the table and written under it for a screen reader. A round nobody bet on is settled
+  with its pocket cleared (`finishRound(id, false)`), so a table that never really spun never shows as a spin.
+  `spinRound` reads the history before it settles, so the result puts this spin first without a second query.
 
 **Play again edits the message it sits on** for every game, rather than stacking a new one under the old.
+
+**Every settled game is counted once, after it is paid.** `casinostats` holds one row per server, player and game,
+added to with `$inc` and `$max` through `recordCasinoPlays` wherever a game settles — `playInstant`, the blackjack and
+hi-lo settlements (a double down counts both stakes) and `spinRound`, one play per roulette player. A press that
+loses the race to settle plays nothing, so it records nothing. A win is a play that came out ahead, a push one that
+broke even. `/casino stats` reads it with one `$facet` aggregation (`readCasinoStats`) for the whole casino or one
+game, with the reader's own record beside the server's; like `/casino settings` it is reachable while the casino is
+closed, since it only looks back.
 
 **The switch works like the music system's.** `casinosettings` stores `enabled`, the games switched off (so a game
 added later starts open) and the bet limits. `checks.ts` refuses every `/casino` subcommand while the casino is
@@ -2222,6 +2254,23 @@ ownership mid-session ejects too. A check that fails without refusing — a rest
 rather than the door. None of that is the boundary; `requireOwner` is, and `tests/api/ownerGate.test.ts` walks every
 route the owner, analytics and control routers declare and fails on any that answers a signed-in non-owner with
 anything but 404. Both halves were proved to go red.
+
+**The console's own code is served only to owners.** Everything the browser decides can be rewritten in the
+browser — an intercepted `/owner/access` answering 204 once drew the console's frame for somebody who was not an
+owner — so the page gate is a courtesy and two server-side things are the boundary. `requireOwner` refuses every owner,
+analytics and control route; and the console is Vite's lazy `OwnerPage-<hash>.js` chunk, which `serveDashboard` hands
+only to a request carrying an owner's session (`signedInOwner`), marked `private, no-store` with `Vary: Cookie` so a
+cache in front of the bot can never pass the owner's copy on. Somebody else gets a 404 for it, as for any missing
+file, and a faked answer then has no console to draw. A session lookup that fails refuses the same way, so the file never answers
+with a status that sets it apart; and `OwnerRouteError` sends whoever cannot load it back to their servers with the
+owner-only notice, after one reload for a tab left open across a deploy. It is judged on the **resolved** file (`isOwnerChunk`), so no
+spelling of the address reaches it. Two things keep it one chunk: nothing outside `features/owner` may import from it
+except `routes.tsx`'s lazy import (`ownerChunk.test.ts` — shared pieces live in `components/primitives`, `lib/` and
+`app/useOwnerAccess.ts`), and `verifyBundle` fails the build if the chunk is missing or anything imports it
+statically. A `manualChunks` rule for it is the wrong tool: Rollup pulls a manual chunk's dependencies into it, which
+put the shared primitives inside and made every page need the file. `tests/api/ownerPentest.test.ts` attacks all of this
+through the real app — forged and injected cookies, a former owner's session, spoofed headers, query and body fields,
+every other spelling and method, CSRF from a planted cookie — and each defence was removed in turn to watch it fail.
 
 **A tab whose read fails says so, and offers a retry.** Isolating the tabs is only half of it — every one of
 them then found its own way to hide the failure: runtime and control returned a skeleton whenever `data` was

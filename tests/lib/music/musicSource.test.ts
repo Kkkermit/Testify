@@ -9,6 +9,7 @@ import {
 	forgetDescription,
 	openStream,
 	parseJsonLines,
+	MusicProblemError,
 	resolveTracks,
 	PLAYLIST_LIMIT,
 	type TrackInfo,
@@ -339,11 +340,48 @@ describe("resolveTracks", () => {
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).resolves.toEqual([]);
 	});
 
-	/** yt-dlp's own message is the useful one — "exited 1" tells nobody why a track would not play. */
-	it("surfaces what the downloader complained about", async () => {
+	/** A known refusal reaches the reader as a sentence, not as yt-dlp's raw output logged as a failure. */
+	it("names a refusal it recognises, as advice the reader can act on", async () => {
 		const binary = fakeYtDlp("broken", "echo 'ERROR: Video unavailable' >&2\nexit 1");
 
-		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/Video unavailable/);
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(
+			/That video is unavailable/,
+		);
+	});
+
+	/** Every result of the old eight-result search was extracted, so one flagged host hit the bot check eight times. */
+	it("turns YouTube's bot check into advice, and points at SoundCloud", async () => {
+		const binary = fakeYtDlp(
+			"botcheck",
+			'echo "ERROR: [youtube] abc: Sign in to confirm you\'re not a bot. Use --cookies-from-browser" >&2\nexit 1',
+		);
+
+		const refused = resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
+		await expect(refused).rejects.toBeInstanceOf(MusicProblemError);
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(
+			/prove it is not a bot.*`sc:`/,
+		);
+	});
+
+	/** yt-dlp's own message is the useful one when nothing recognises it — "exited 1" tells nobody why. */
+	it("surfaces what the downloader complained about when it is nothing it knows", async () => {
+		const binary = fakeYtDlp("strange", "echo 'ERROR: something new' >&2\nexit 1");
+
+		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/something new/);
+	});
+
+	it("asks for as many results as it is told, and signs in with cookies when the host has them", async () => {
+		const record = join(directory, "args.txt");
+		const binary = fakeYtDlp("args", `printf '%s\\n' "$@" > '${record}'`);
+
+		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null, cookies: "/secret/cookies.txt" }, { results: 1 });
+		const args = readFileSync(record, "utf8").split("\n");
+
+		expect(args).toContain("ytsearch1:lofi");
+		expect(args[args.indexOf("--cookies") + 1]).toBe("/secret/cookies.txt");
+
+		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
+		expect(readFileSync(record, "utf8")).not.toContain("--cookies");
 	});
 
 	it("still fails usefully when the downloader says nothing at all", async () => {
@@ -448,6 +486,16 @@ describe("ytDlpStreamArgs", () => {
 		expect(ytDlpStreamArgs("251", "https://youtu.be/abc")).toEqual(
 			expect.arrayContaining(["--retries", "--fragment-retries"]),
 		);
+	});
+
+	it("hands the stream the host's cookies too, or it would be refused after a search that was not", () => {
+		const args = ytDlpStreamArgs("251", "https://youtu.be/abc", "/secret/cookies.txt");
+
+		expect(args.slice(args.indexOf("--cookies"), args.indexOf("--cookies") + 2)).toEqual([
+			"--cookies",
+			"/secret/cookies.txt",
+		]);
+		expect(args.at(-1)).toBe("https://youtu.be/abc");
 	});
 });
 

@@ -1,5 +1,6 @@
 import { type TestifyClient } from "@core/client";
 import { getCasinoSettings } from "@database/repositories/casinoRepository";
+import { recordCasinoPlays } from "@database/repositories/casinoStatsRepository";
 import { adjustWallet, debitWallet, incrementCounters, requireAccount } from "@database/repositories/economyRepository";
 import { playInstant, type Responder, takeStake } from "@lib/casino/casinoActions.util";
 import { type InstantOutcome } from "@lib/casino/instantGames.util";
@@ -7,6 +8,7 @@ import { textOf } from "@tests/helpers/containers";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/casinoRepository", () => ({ getCasinoSettings: jest.fn() }));
+jest.mock("@database/repositories/casinoStatsRepository", () => ({ recordCasinoPlays: jest.fn() }));
 jest.mock("@database/repositories/economyRepository", () => ({
 	requireAccount: jest.fn(),
 	debitWallet: jest.fn(),
@@ -105,6 +107,7 @@ describe("an instant game", () => {
 		await Promise.resolve();
 
 		expect(wallet).toBe(1_095);
+		expect(recordCasinoPlays).toHaveBeenCalledWith([{ ...PLAYER, game: "coinflip", staked: 100, returned: 195 }]);
 		expect(reply.deferReply).toHaveBeenCalled();
 		expect(reply.edits).toHaveLength(2);
 		expect(textOf(reply.edits[0] as never)).toContain("Good luck");

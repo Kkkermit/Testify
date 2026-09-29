@@ -4,6 +4,7 @@ import { toError, UserFacingError } from "@core/errors";
 import { observe } from "@lib/infra/serviceHealth.util";
 import { SEARCH_RESULTS, UNITY_VOLUME } from "@lib/music/music.constants";
 import {
+	type DownloadProblem,
 	type OpenStream,
 	type MusicBinaries,
 	type MusicSource,
@@ -77,6 +78,22 @@ export function tracksFromInfo(
 	return list
 		.map((entry) => trackFromInfo(entry, requestedBy, source))
 		.filter((track): track is Track => track !== null);
+}
+
+/** Signs yt-dlp in to YouTube when the host gave it cookies. */
+export function cookieArgs(binaries: Pick<MusicBinaries, "cookies">): string[] {
+	return binaries.cookies === undefined || binaries.cookies === null ? [] : ["--cookies", binaries.cookies];
+}
+
+/** A download refused for a reason the player knows, which the reader is told rather than handed a stack. */
+export class MusicProblemError extends UserFacingError {
+	constructor(readonly problem: DownloadProblem) {
+		super(
+			problem.kind === "bot-check"
+				? `${problem.advice} Try SoundCloud instead: put \`sc:\` before your search.`
+				: problem.advice,
+		);
+	}
 }
 
 /** What yt-dlp is asked for, given what the person typed. */
@@ -157,7 +174,7 @@ export async function resolveTracks(
 	query: Query,
 	requestedBy: string,
 	binaries: MusicBinaries,
-	options: { flat?: boolean } = {},
+	options: { flat?: boolean; results?: number } = {},
 ): Promise<Track[]> {
 	if (binaries.ytDlp === null) {
 		throw new UserFacingError("Music needs `yt-dlp`, which is not installed. Run `npm run music:setup` on the host.");
@@ -169,10 +186,18 @@ export async function resolveTracks(
 		"--no-progress",
 		"--ignore-config",
 		...(options.flat === true ? ["--flat-playlist"] : ["--no-playlist"]),
-		...argumentsFor(query),
+		...cookieArgs(binaries),
+		...argumentsFor(query, options.results),
 	];
 
-	const stdout = await askSource(query.source, binaries.ytDlp, args);
+	let stdout: string;
+	try {
+		stdout = await askSource(query.source, binaries.ytDlp, args);
+	} catch (error) {
+		const problem = classifyProblem(toError(error).message);
+		if (problem !== null) throw new MusicProblemError(problem);
+		throw error;
+	}
 	const documents = parseJsonLines(stdout);
 
 	return documents.flatMap((info) => tracksFromInfo(info, requestedBy, query.source));
@@ -208,6 +233,7 @@ export async function describeTrack(url: string, binaries: MusicBinaries, now = 
 		"--no-progress",
 		"--ignore-config",
 		"--no-playlist",
+		...cookieArgs(binaries),
 		url,
 	]);
 
@@ -243,7 +269,7 @@ const BUFFER_BYTES = 1 << 24;
 const PROBLEM_TAIL = 500;
 
 /** `--no-playlist`, or a link copied out of a playlist streams the whole list down one pipe. */
-export function ytDlpStreamArgs(formatId: string, url: string): string[] {
+export function ytDlpStreamArgs(formatId: string, url: string, cookies: string | null = null): string[] {
 	return [
 		"--quiet",
 		"--no-warnings",
@@ -260,6 +286,7 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 		formatId,
 		"-o",
 		"-",
+		...cookieArgs({ cookies }),
 		url,
 	];
 }
@@ -319,7 +346,7 @@ export function openStream(
 ): OpenStream {
 	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
 
-	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url), {
+	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url, binaries.cookies ?? null), {
 		stdio: ["ignore", "pipe", "pipe"],
 		windowsHide: true,
 	});

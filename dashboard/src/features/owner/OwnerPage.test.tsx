@@ -2,8 +2,8 @@ import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared
 import { screen, waitFor } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { OWNER_TABS } from "@/features/owner/owner.types";
-import { formatUptime } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
+import { formatUptime } from "@/lib/datetime";
 import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";

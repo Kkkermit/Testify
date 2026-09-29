@@ -105,6 +105,8 @@ const PARAPHRASES: [string, string[]][] = [
 	["what are the odds on slots", ["casino"]],
 	["how do i play roulette", ["casino"]],
 	["can i bet on blackjack", ["casino"]],
+	["how much has the server gambled at the casino", ["casino", "command-casino"]],
+	["whats the casino win rate", ["casino", "command-casino"]],
 	["start a heist", ["heists"]],
 	["translate something", ["lookup"]],
 	["set my birthday on my profile", ["profile"]],

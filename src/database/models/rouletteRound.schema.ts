@@ -60,6 +60,7 @@ const rouletteRoundSchema = new Schema<RouletteRoundRecord>(
 );
 
 rouletteRoundSchema.index({ status: 1, closesAt: 1 });
+rouletteRoundSchema.index({ channelId: 1, status: 1, updatedAt: -1 });
 rouletteRoundSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 // One open round per message, so two Play again presses cannot both start one there.
 rouletteRoundSchema.index(

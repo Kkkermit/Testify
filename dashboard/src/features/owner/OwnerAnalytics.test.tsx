@@ -1,7 +1,8 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
-import { barWidth, levelFrom, percent, shortDay, windowFrom } from "@/features/owner/owner.utils";
+import { barWidth } from "@/components/primitives/UsageBars";
+import { levelFrom, percent, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
 import { logFeed, usageReport } from "@/test/handlers";

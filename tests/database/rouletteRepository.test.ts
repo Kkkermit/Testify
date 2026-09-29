@@ -5,8 +5,10 @@ import {
 	claimRound,
 	clearBets,
 	findRound,
+	finishRound,
 	openRound,
 	overdueRounds,
+	recentPockets,
 	setSeatChip,
 	startClock,
 } from "@database/repositories/rouletteRepository";
@@ -163,6 +165,26 @@ describeWithMongo("rouletteRepository", () => {
 		const found = (await overdueRounds(new Date(Date.now() - 60_000), 10)).map((round) => String(round._id));
 		expect(found).toContain(late);
 		expect(found).toHaveLength(1);
+	});
+
+	/** The strip shows this table's spins, newest first, and never a round that did not really spin. */
+	it("lists the channel's last spins newest first, leaving out rounds nobody bet on", async () => {
+		const settle = async (pocket: number, spun: boolean, channelId = "444444444444444444") => {
+			const round = await openRound({ ...newRound(), channelId });
+			const id = String(round!._id);
+			await claimRound(id, pocket);
+			await finishRound(id, spun);
+			await new Promise((resolve) => setTimeout(resolve, 5));
+		};
+		await settle(1, true);
+		await settle(2, false);
+		await settle(3, true);
+		await settle(4, true, "555555555555555559");
+		await settle(5, true);
+
+		expect(await recentPockets(GUILD, "444444444444444444", 5)).toEqual([5, 3, 1]);
+		expect(await recentPockets(GUILD, "444444444444444444", 2)).toEqual([5, 3]);
+		expect(await recentPockets("888888888888888888", "444444444444444444", 5)).toEqual([]);
 	});
 
 	it("reads nothing for an id that is not one", async () => {

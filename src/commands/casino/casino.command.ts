@@ -2,10 +2,15 @@ import { PermissionFlagsBits } from "discord.js";
 import { asMember, defineCommand, inGuild, inTextChannel, type CommandInput, type CommandOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { attachHandMessage } from "@database/repositories/casinoRepository";
+import { readCasinoStats } from "@database/repositories/casinoStatsRepository";
 import {
 	blackjackMessage,
 	CASINO_COMMAND,
+	CASINO_GAME_LABELS,
+	CASINO_GAMES,
 	CASINO_SETTINGS_SUBCOMMAND,
+	CASINO_STATS_SUBCOMMAND,
+	casinoStatsEmbed,
 	casinoLobby,
 	casinoSettingsPanel,
 	coinflipOutcome,
@@ -17,12 +22,13 @@ import {
 	openRound,
 	rememberRoundMessage,
 	roundBettingMessage,
-	roundView,
+	tableView,
 	slotsOutcome,
 	startBlackjack,
 	startHiLoHand,
 } from "@lib/casino";
 import { reply } from "@lib/discord";
+import { isCasinoGame } from "@testify/shared";
 
 const AMOUNT: CommandOption = {
 	name: "amount",
@@ -82,7 +88,7 @@ export default defineCommand({
 				const round = await openRound({ guildId: player.guildId, channelId: channel.id, messageId: null }, host, chip);
 				if (round === null) throw new UserFacingError("Could not open a roulette table. Try again.");
 
-				await reply(interaction, roundBettingMessage(roundView(round)));
+				await reply(interaction, roundBettingMessage(await tableView(round)));
 				await rememberRoundMessage(String(round._id), (await interaction.fetchReply()).id);
 			},
 		},
@@ -194,6 +200,26 @@ export default defineCommand({
 			description: "Shows every game, what it pays, and this server's bet limits.",
 			async run(interaction) {
 				await reply(interaction, casinoLobby(await readCasinoSettings(inGuild(interaction).id)));
+			},
+		},
+		{
+			name: CASINO_STATS_SUBCOMMAND,
+			description: "Shows what this server has gambled, won and lost, for the whole casino or one game.",
+			options: [
+				{
+					name: "game",
+					description: "One game's stats instead of the whole casino.",
+					type: "string",
+					choices: CASINO_GAMES.map((game) => ({ name: CASINO_GAME_LABELS[game], value: game })),
+				},
+			],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+				const picked = interaction.options.getString("game");
+				const game = picked !== null && isCasinoGame(picked) ? picked : null;
+				const report = await readCasinoStats(guild.id, game, interaction.user.id);
+
+				await reply(interaction, { embeds: [casinoStatsEmbed(report, { game, guildName: guild.name })] });
 			},
 		},
 		{

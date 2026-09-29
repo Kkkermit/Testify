@@ -1,6 +1,7 @@
 import { Types } from "mongoose";
 import { UserFacingError } from "@core/errors";
 import { advanceHand, claimHand, findHand, type HandRecord, openHand } from "@database/repositories/casinoRepository";
+import { recordCasinoPlays } from "@database/repositories/casinoStatsRepository";
 import { adjustWallet, debitWallet, incrementCounters, requireAccount } from "@database/repositories/economyRepository";
 import { RANKS, SUITS } from "@lib/casino/cards.util";
 import { type BlackjackState, type Card, type HiLoState, type Rank, type Roll } from "@lib/casino/casino.types";
@@ -21,6 +22,7 @@ jest.mock("@database/repositories/casinoRepository", () => ({
 	claimHand: jest.fn(),
 	getCasinoSettings: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/casinoStatsRepository", () => ({ recordCasinoPlays: jest.fn() }));
 jest.mock("@database/repositories/economyRepository", () => ({
 	requireAccount: jest.fn(),
 	debitWallet: jest.fn(),
@@ -131,6 +133,7 @@ describe("starting a hand", () => {
 		expect(view).toMatchObject({ verdict: "blackjack", returned: 250 });
 		expect(hand).toBeNull();
 		expect(wallet).toBe(1_150);
+		expect(recordCasinoPlays).toHaveBeenCalledWith([{ ...PLAYER, game: "blackjack", staked: 100, returned: 250 }]);
 	});
 
 	it("settles the dealer's natural on the deal, before the player can act", async () => {
@@ -181,6 +184,8 @@ describe("blackjack", () => {
 
 		expect(view).toMatchObject({ verdict: "win", staked: 200, returned: 400 });
 		expect(wallet).toBe(1_000 - 100 + 400);
+		// The double down's second stake is part of what was wagered.
+		expect(recordCasinoPlays).toHaveBeenCalledWith([{ ...PLAYER, game: "blackjack", staked: 200, returned: 400 }]);
 	});
 
 	it("refuses to double when the wallet cannot cover it", async () => {
@@ -231,6 +236,7 @@ describe("hi-lo", () => {
 
 		expect(view).toMatchObject({ phase: "lost", returned: 0 });
 		expect(claimHand).toHaveBeenCalled();
+		expect(recordCasinoPlays).toHaveBeenCalledWith([{ ...PLAYER, game: "hilo", staked: 100, returned: 0 }]);
 		expect(adjustWallet).not.toHaveBeenCalled();
 	});
 
@@ -248,6 +254,7 @@ describe("hi-lo", () => {
 
 		expect(view).toMatchObject({ phase: "cashed", returned: 250 });
 		expect(wallet).toBe(1_250);
+		expect(recordCasinoPlays).toHaveBeenCalledWith([{ ...PLAYER, game: "hilo", staked: 100, returned: 250 }]);
 	});
 
 	it("banks the pot once it reaches the cap", async () => {
@@ -268,6 +275,8 @@ describe("hi-lo", () => {
 
 		await expect(cashOutHiLo(PLAYER)).rejects.toThrow(UserFacingError);
 		expect(adjustWallet).not.toHaveBeenCalled();
+		// A press that lost the race played nothing, so it must not count twice.
+		expect(recordCasinoPlays).not.toHaveBeenCalled();
 	});
 });
 

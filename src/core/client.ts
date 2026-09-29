@@ -68,7 +68,8 @@ export class TestifyClient extends Client {
 	}
 
 	isOwner(userId: string): boolean {
-		return this.env.DISCORD_OWNER_IDS.includes(userId);
+		// Exact and shape-checked, so nothing but a whole snowflake on the list can ever match.
+		return typeof userId === "string" && /^\d{17,20}$/.test(userId) && this.env.DISCORD_OWNER_IDS.includes(userId);
 	}
 }
 

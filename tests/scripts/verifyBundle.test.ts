@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { filesUnder, missingFrom, reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
+import { filesUnder, missingFrom, ownerChunkProblem, reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
 
 /** Two React copies in one bundle are caught, and nothing else is mistaken for one. */
 describe("reactVersionsIn", () => {
@@ -97,5 +97,29 @@ describe("the public tree", () => {
 		rmSync(join(build, ".well-known", "security.txt"));
 
 		expect(missingFrom(build, filesUnder(source))).toEqual([join(".well-known", "security.txt")]);
+	});
+});
+
+/** The owner console is served only to owners, so the build fails if any other file would need it to load. */
+describe("ownerChunkProblem", () => {
+	const lazy = 'const a=()=>import("./OwnerPage-Ab1.js")';
+
+	it("passes one owner chunk that everything else loads lazily", () => {
+		expect(ownerChunkProblem({ "index-1.js": lazy, "OwnerPage-Ab1.js": "export{}" })).toBeNull();
+	});
+
+	it("fails when another file imports it statically", () => {
+		expect(
+			ownerChunkProblem({
+				"AppearancePage-2.js": 'import{a as b}from"./OwnerPage-Ab1.js";',
+				"OwnerPage-Ab1.js": "export{}",
+			}),
+		).toMatch(/AppearancePage-2\.js imports the owner console statically/);
+		expect(ownerChunkProblem({ "x.js": 'import"./OwnerPage-Ab1.js";', "OwnerPage-Ab1.js": "" })).not.toBeNull();
+	});
+
+	it("fails when the console has no chunk of its own, or more than one", () => {
+		expect(ownerChunkProblem({ "index-1.js": lazy })).toMatch(/found 0/);
+		expect(ownerChunkProblem({ "OwnerPage-a.js": "", "OwnerPage-b.js": "" })).toMatch(/found 2/);
 	});
 });

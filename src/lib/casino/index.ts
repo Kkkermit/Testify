@@ -7,6 +7,7 @@ export * from "./casinoHands.util";
 export * from "./casinoPanel.util";
 export * from "./casinoSettings.util";
 export * from "./casinoSettingsPanel.util";
+export * from "./casinoStats.util";
 export * from "./chance.util";
 export * from "./hilo.util";
 export * from "./instantGames.util";

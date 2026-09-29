@@ -143,8 +143,25 @@ export async function claimRound(roundId: string, pocket: number): Promise<Round
 	return normalised(round);
 }
 
-export async function finishRound(roundId: string): Promise<void> {
-	await RouletteRound.updateOne({ _id: roundId }, { $set: { status: "settled" } }).exec();
+/** A round nobody bet on never really spun, so it keeps no pocket and never shows among the last spins. */
+export async function finishRound(roundId: string, spun: boolean): Promise<void> {
+	await RouletteRound.updateOne(
+		{ _id: roundId },
+		{ $set: { status: "settled", ...(spun ? {} : { pocket: null }) } },
+	).exec();
+}
+
+/** Where the ball landed on this channel's table, newest first. */
+export async function recentPockets(guildId: string, channelId: string, limit: number): Promise<number[]> {
+	const rounds = await RouletteRound.find(
+		{ guildId, channelId, status: "settled", pocket: { $ne: null } },
+		{ pocket: 1 },
+	)
+		.sort({ updatedAt: -1 })
+		.limit(limit)
+		.lean<{ pocket: number }[]>()
+		.exec();
+	return rounds.map((round) => round.pocket);
 }
 
 /** Rounds still open well past their close, which a restart left without a timer. */

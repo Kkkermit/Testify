@@ -1,5 +1,7 @@
 import { spawnSync } from "node:child_process";
-import { delimiter, join } from "node:path";
+import { existsSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { delimiter, isAbsolute, join } from "node:path";
 import { repoRoot } from "@core/paths";
 import { type MusicBinaries } from "@lib/music/music.types";
 
@@ -138,8 +140,37 @@ export function locateYtDlp(
 	return pickNewest(found);
 }
 
+/** A pasted cookies file rather than a path to one: yt-dlp's own header, or the tabs every cookie line has. */
+export function looksLikeCookies(value: string): boolean {
+	return /^# (?:Netscape )?HTTP Cookie File/i.test(value.trim()) || value.includes("\t");
+}
+
+/** Cookies are a signed-in session, so a pasted copy is written where only this process's user can read it. */
+function writePrivately(contents: string): string {
+	const path = join(tmpdir(), `testify-ytdlp-cookies-${String(process.pid)}.txt`);
+	writeFileSync(path, `${contents.replaceAll("\\n", "\n").trim()}\n`, { mode: 0o600 });
+	return path;
+}
+
+/** The file `--cookies` is given: a path, resolved from the repository, or the contents pasted into the variable. */
+export function locateCookies(
+	value: string | undefined,
+	write: (contents: string) => string = writePrivately,
+	exists: (path: string) => boolean = existsSync,
+): string | null {
+	if (value === undefined) return null;
+	if (looksLikeCookies(value)) return write(value);
+
+	const path = isAbsolute(value) ? value : join(repoRoot(), value);
+	return exists(path) ? path : null;
+}
+
 export function findBinaries(
-	env: { MUSIC_YTDLP_PATH?: string | undefined; MUSIC_FFMPEG_PATH?: string | undefined },
+	env: {
+		MUSIC_YTDLP_PATH?: string | undefined;
+		MUSIC_FFMPEG_PATH?: string | undefined;
+		MUSIC_YTDLP_COOKIES?: string | undefined;
+	},
 	probes: { runs?: Probe; version?: VersionProbe } = {},
 ): MusicBinaries {
 	const ytDlp = locateYtDlp(env.MUSIC_YTDLP_PATH, probes.version);
@@ -148,6 +179,7 @@ export function findBinaries(
 		ytDlp: ytDlp?.path ?? null,
 		ffmpeg: locate("ffmpeg", env.MUSIC_FFMPEG_PATH, probes.runs),
 		ytDlpVersion: ytDlp?.version ?? null,
+		cookies: locateCookies(env.MUSIC_YTDLP_COOKIES),
 	};
 }
 
@@ -165,6 +197,8 @@ export function statusLines(found: MusicBinaries, now = Date.now()): string[] {
 	}
 
 	lines.push(found.ffmpeg === null ? "✗ **FFmpeg** — not found" : `✓ **FFmpeg** — \`${found.ffmpeg}\``);
+	if (found.cookies !== undefined && found.cookies !== null)
+		lines.push("✓ **YouTube cookies** — yt-dlp signs in with them");
 
 	if (age !== null && age > STALE_AFTER_DAYS) {
 		lines.push(

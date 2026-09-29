@@ -12,7 +12,6 @@ import {
 	StatTile,
 } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
-import { formatUptime } from "@/features/owner/owner.utils";
 import { RecentStrip } from "@/features/status/components/RecentStrip";
 import { UptimeStrip } from "@/features/status/components/UptimeStrip";
 import {
@@ -28,7 +27,7 @@ import { useStatus } from "@/features/status/useStatus";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
-import { clockTime, dateAndTime, since } from "@/lib/datetime";
+import { formatUptime, clockTime, dateAndTime, since } from "@/lib/datetime";
 
 const HEADLINE_ICON = { operational: CheckCircle2, degraded: AlertTriangle, down: XCircle, unknown: CircleHelp };
 const HEADLINE_TINT = {
