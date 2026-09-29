@@ -61,14 +61,14 @@ numbers, which drift):
 | -------------------- | --------------------------------- |
 | Commands             | 79, across 14 categories          |
 | Command files        | 100 (incl. folded-in subcommands) |
-| Subcommands          | 130                               |
+| Subcommands          | 131                               |
 | Prefix aliases       | 90                                |
-| Button handlers      | 28                                |
+| Button handlers      | 31                                |
 | Events               | 25, in 5 groups                   |
-| `src/lib` helpers    | 139, in 17 domain folders         |
-| Schemas/repositories | 19 / 17                           |
+| `src/lib` helpers    | 155, in 17 domain folders         |
+| Schemas/repositories | 22 / 20                           |
 | Scheduled jobs       | 6                                 |
-| Tests                | 5,545 across 306 suites           |
+| Tests                | 5,982 across 333 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -217,8 +217,8 @@ src/
 │   └── strings.ts        User-facing copy
 ├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               25 handlers in command, create, logging, ready and message
-├── buttons/              28 component handlers, keyed by custom-ID prefix
-├── lib/                  139 helpers in 17 domain folders, each behind its own index.ts barrel
+├── buttons/              31 component handlers, keyed by custom-ID prefix
+├── lib/                  155 helpers in 17 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -229,12 +229,12 @@ src/
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           19 Mongoose schemas
-│   └── repositories/     17 query layers. Commands never touch a model directly.
+│   ├── models/           22 Mongoose schemas
+│   └── repositories/     20 query layers. Commands never touch a model directly.
 ├── jobs/                 6 scheduled jobs (lottery, passive income, bot stats, softbans, heartbeat, casino hands)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 155 suites.
+tests/                    Mirrors src/. 225 suites; the dashboard's 108 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
