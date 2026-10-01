@@ -1070,7 +1070,8 @@ hardcoded string. The `build` job **verifies the `dist/` artifact**, which is wh
 problem.
 
 `.github/workflows/nightly.yml` — `cron: "0 0 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests`,
-`npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false alarm), and
+`npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false alarm, and skipped with a
+notice while the `SNYK_TOKEN` secret is unset, since it can only answer 401 without one), and
 `notify-on-failure` which opens a labelled issue. Permissions default to `contents: read` at the top and are
 escalated to `issues: write` on that one job only.
 

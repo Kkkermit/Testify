@@ -69,12 +69,20 @@ jobs:
     # A Snyk token quota or an org permission change must not fail the pipeline
     # and raise a false alarm about this repository's dependencies.
     continue-on-error: true
+    # A secret cannot be read in `if:` directly, so it is lifted into the job's environment first.
+    env:
+      SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
     steps:
+      # Without a token Snyk can only answer 401, so a fork or a fresh clone skips it with a note instead.
+      - name: Skip without a Snyk token
+        if: env.SNYK_TOKEN == ''
+        run: echo "::notice title=Snyk skipped::Add a SNYK_TOKEN repository secret to run the Snyk scan."
+
       - uses: actions/checkout@v7
+        if: env.SNYK_TOKEN != ''
 
       - uses: snyk/actions/node@master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        if: env.SNYK_TOKEN != ''
         with:
           args: --severity-threshold=high --policy-path=.snyk
 
