@@ -1,13 +1,17 @@
 # Snyk policy. Same rule as .nsprc: a suppression states why, what fixes it, and
-# when it expires. Nothing is currently suppressed; the shape below is the one to
-# follow when something has to be.
+# when it expires. tests/config/suppressions.test.ts holds both files to it.
 version: v1.25.0
-ignore: {}
-# ignore:
-#   SNYK-JS-EXAMPLE-1234567:
-#     - "*":
-#         reason: >-
-#           Reached only through <package>, which cannot be upgraded without a
-#           breaking change to <dependency>. Fixed in <package>@<version>.
-#         expires: "2026-09-19T00:00:00.000Z"
+ignore:
+  # The same advisory .nsprc excepts as 1145093, under Snyk's own id.
+  SNYK-JS-DEEPMERGETS-18912249:
+    - "discord-giveaways > deepmerge-ts":
+        reason: >-
+          deepmerge-ts stack exhaustion on recursive object graphs
+          (GHSA-ggr8-5vv4-36mx). Reached only through discord-giveaways@6.0.1,
+          which pins deepmerge-ts@^4.2.1 and is already the latest release.
+          Nothing here merges attacker-supplied object graphs: giveaway options
+          are built by this codebase and read back from records it wrote. Fixed
+          in deepmerge-ts@8.0.0; re-evaluate when discord-giveaways ships a
+          release that depends on it.
+        expires: "2027-03-20T00:00:00.000Z"
 patch: {}

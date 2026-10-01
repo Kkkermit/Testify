@@ -63,29 +63,31 @@ entry needs three things, and an entry missing any of them should be removed:
 2. **The version that fixes it**, so there is something to wait for.
 3. **A hard expiry**, so the suppression cannot rot into a permanent blind spot.
 
-One advisory is suppressed: `GHSA-qwww-vcr4-c8h2`, React Router's RSC-mode CSRF
-bypass, which is reachable only through React Server Components. The dashboard
-is a browser-only SPA on `createBrowserRouter` with no loaders, no actions and
-nothing rendered on the server, so the affected path is not in this build. It
-expires on 1 November 2026. Both files also carry a commented example of the
-shape to follow.
+One advisory is suppressed, in both files under each tool's own id:
+`GHSA-ggr8-5vv4-36mx`, stack exhaustion in deepmerge-ts on recursive object
+graphs. It is reached only through discord-giveaways, whose latest release pins
+deepmerge-ts 4, and nothing here merges an object graph somebody else supplied.
+`.snyk` ignores it on that one path, so the same advisory arriving through any
+other package is still reported. Both entries expire on 20 March 2027.
+`tests/config/suppressions.test.ts` reads both files and fails on an entry
+missing any of the three.
 
 ### Version pins
 
 `overrides` in `package.json` pins transitive dependencies. npm does not allow
 comments there, so the reasons live here:
 
-| Pin                                                | Why                                                                                                                                                         |
-| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `glob: $glob`                                      | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses.                             |
-| `test-exclude: ^7.0.1`                             | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                                                  |
-| `esbuild: ^0.28.1`                                 | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                                                    |
-| `serialize-javascript: ^7.0.7`                     | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                                                           |
-| `brace-expansion: ^5.0.12`                         | Reached through eslint-plugin-import-x → minimatch, which asks for `^5.0.8`. 5.0.12 fixes GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p and GHSA-q2hr-2g5m-vwhr. |
-| `fast-uri: ^3.1.5`                                 | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                                                     |
-| `js-yaml: ^4.3.1`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.                                          |
-| `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.                                 |
-| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible, and `^6.28.1` fixes GHSA-rfgv-xxqx-mfg5.                                       |
+| Pin                                                | Why                                                                                                                                                                         |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `glob: $glob`                                      | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses.                                             |
+| `test-exclude: ^7.0.1`                             | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                                                                  |
+| `esbuild: ^0.28.1`                                 | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                                                                    |
+| `serialize-javascript: ^7.0.7`                     | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                                                                           |
+| `brace-expansion: ^5.0.12`                         | Reached through minimatch, which glob, ESLint and jest all load and which asks for `^5.0.8`. 5.0.12 fixes GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p and GHSA-q2hr-2g5m-vwhr. |
+| `fast-uri: ^3.1.5`                                 | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                                                                     |
+| `js-yaml: ^4.3.2`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.                                                          |
+| `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.                                                 |
+| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible, and `^6.28.1` fixes GHSA-rfgv-xxqx-mfg5.                                                       |
 
 Each one should be dropped the moment its parent updates — check when a
 dependency bump lands.

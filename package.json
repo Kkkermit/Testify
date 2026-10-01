@@ -128,7 +128,8 @@
 		"tsup": "8.5.1",
 		"tsx": "4.23.15",
 		"typescript": "5.9.3",
-		"typescript-eslint": "8.70.1"
+		"typescript-eslint": "8.70.1",
+		"yaml": "2.9.0"
 	},
 	"workspaces": [
 		"shared",
