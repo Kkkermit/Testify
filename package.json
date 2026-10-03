@@ -38,6 +38,7 @@
 		"dev": "npm run build:shared && cross-env NODE_ENV=development tsx watch --clear-screen=false src/index.ts",
 		"dev:all": "tsx scripts/devAll.ts",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
+		"docs:images": "tsx scripts/renderDocImages.ts",
 		"format": "prettier --write .",
 		"format:check": "prettier --check .",
 		"lint": "tsx scripts/lintRunner.ts",
