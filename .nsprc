@@ -8,5 +8,10 @@
 		"active": true,
 		"notes": "deepmerge-ts stack exhaustion on recursive object graphs (GHSA-ggr8-5vv4-36mx). Reached only through discord-giveaways@6.0.1, which pins deepmerge-ts@^4.2.1 and is already the latest release; npm's suggested remedy is a downgrade to discord-giveaways@5.1.1, which is a major regression rather than a fix. Nothing here merges attacker-supplied object graphs \u2014 giveaway options are built by this codebase and read back from records it wrote. Fixed in deepmerge-ts@8.0.0 \u2014 re-evaluate when discord-giveaways ships a release that depends on it.",
 		"expiry": 1805500800000
+	},
+	"1240992": {
+		"active": true,
+		"notes": "braces stack exhaustion on deeply nested patterns (GHSA-vfj7-8cjw-p6xm). Reached only through tsc-alias@1.8.16 (globby \u2192 fast-glob \u2192 micromatch, and chokidar), a build-time dev dependency that is not in the production tree. The patterns it expands are built from this repository's own tsconfig.json, so nothing outside the repository reaches them. Every release up to braces@3.0.3, the latest, is affected, so no fixed release yet \u2014 re-evaluate when braces or micromatch ships one, or drop tsc-alias.",
+		"expiry": 1798761600000
 	}
 }

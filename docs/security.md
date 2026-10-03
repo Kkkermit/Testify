@@ -60,15 +60,25 @@ waiting for someone to push. A failing nightly opens an issue labelled
 entry needs three things, and an entry missing any of them should be removed:
 
 1. **Why** it cannot be fixed now.
-2. **The version that fixes it**, so there is something to wait for.
+2. **The version that fixes it**, so there is something to wait for — or, when
+   no release fixes it yet, the words `no fixed release yet`, and an expiry
+   within 90 days instead of a year.
 3. **A hard expiry**, so the suppression cannot rot into a permanent blind spot.
 
-One advisory is suppressed, in both files under each tool's own id:
+Two advisories are suppressed. The first is in both files under each tool's own id:
 `GHSA-ggr8-5vv4-36mx`, stack exhaustion in deepmerge-ts on recursive object
 graphs. It is reached only through discord-giveaways, whose latest release pins
 deepmerge-ts 4, and nothing here merges an object graph somebody else supplied.
 `.snyk` ignores it on that one path, so the same advisory arriving through any
 other package is still reported. Both entries expire on 20 March 2027.
+
+The second is `GHSA-vfj7-8cjw-p6xm`, stack exhaustion in braces on deeply nested
+patterns, in `.nsprc`. Every braces release is affected, so there is no fix to
+take. It is reached only through tsc-alias, which rewrites the import aliases
+in `dist/` at build time and is not in the production tree, and the patterns it
+expands come from this repository's own `tsconfig.json`. It expires on
+1 January 2027.
+
 `tests/config/suppressions.test.ts` reads both files and fails on an entry
 missing any of the three.
 
