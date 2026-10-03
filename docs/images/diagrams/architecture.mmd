@@ -1,0 +1,11 @@
+flowchart TB
+    S["/ban user:@someone"] --> I["interactionCreate<br/>the one listener"]
+    P["t?ban @someone"] --> X["core/prefix.ts<br/>the only file that knows prefixes exist"]
+    I --> G{"checks.ts<br/>the same gates for both"}
+    X --> G
+    G --> C["command.run()"]
+    W["Web dashboard"] --> A["Hono API<br/>inside the bot process"]
+    C --> L["src/lib<br/>domain logic"]
+    A --> L
+    L --> R["repositories"]
+    R --> M[("MongoDB")]
