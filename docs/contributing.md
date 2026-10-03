@@ -37,22 +37,12 @@ through building is not live everywhere.
 `main` is the released code — what is deployed to the bot — and it is protected. `develop` is where work is
 merged. Every few days a release pull request from `develop` into `main` ships what has gathered there.
 
-```mermaid
-gitGraph
-    commit id: "release"
-    branch develop
-    checkout develop
-    branch "testify/feature-01"
-    commit id: "feat: Added the coinflip command"
-    checkout develop
-    merge "testify/feature-01"
-    branch "testify/bugfix-01"
-    commit id: "fix: Stopped losing XP"
-    checkout develop
-    merge "testify/bugfix-01"
-    checkout main
-    merge develop id: "next release"
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/diagrams/release-flow-dark.png">
+    <img alt="Work branches off develop as testify/feature-01 and testify/bugfix-01, merges back into develop, and develop merges into main as the next release" src="images/diagrams/release-flow-light.png" width="520">
+  </picture>
+</p>
 
 Cut every piece of work from the latest `develop`, named `testify/<type>-<nn>`:
 

@@ -1,0 +1,14 @@
+gitGraph
+    commit id: "release"
+    branch develop
+    checkout develop
+    branch "testify/feature-01"
+    commit id: "feat: Added the coinflip command"
+    checkout develop
+    merge "testify/feature-01"
+    branch "testify/bugfix-01"
+    commit id: "fix: Stopped losing XP"
+    checkout develop
+    merge "testify/bugfix-01"
+    checkout main
+    merge develop id: "next release"

@@ -67,11 +67,15 @@ sooner, in a release of their own, when the problem is serious.
 Slash and prefix commands run through one chain in `src/core/checks.ts`, in this order, before any command code
 runs:
 
-```mermaid
-flowchart LR
-    A[Owner only] --> B[Paused] --> C[Blacklist] --> D["Switched off<br/>command · music · casino"]
-    D --> E[Server only] --> F[NSFW] --> G[Member permissions] --> H[Bot permissions] --> I[Cooldown]
-```
+1. **Owner only** — refused first for anybody not in `DISCORD_OWNER_IDS`, and the attempt is recorded
+2. **Paused** — the owner console's pause stops everything
+3. **Blacklist** — a bot-wide block on an account
+4. **Switched off** — the command itself, the music system or the casino, in this server or everywhere
+5. **Server only** — commands that make no sense in a DM
+6. **NSFW** — commands kept to age-restricted channels
+7. **Member permissions** — what the command's own Discord permission asks of the person
+8. **Bot permissions** — what the bot needs to carry it out, named when missing
+9. **Cooldown** — keyed per server, command and person
 
 **Owner-only commands refuse everybody else first, and say so.** An attempt is logged and posted to the eval log
 channel. `/eval` checks ownership a second time inside the command, runs in a separate VM context with a

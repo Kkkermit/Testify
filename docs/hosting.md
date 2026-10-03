@@ -16,23 +16,14 @@
 
 > [!NOTE]
 > Docker is an option, not a requirement. Running from source is covered in
-> [the README](../README.md#-full-setup-guide), and the bot has no container-only behaviour.
+> [the README](../README.md#-quick-start), and the bot has no container-only behaviour.
 
-```mermaid
-flowchart LR
-    subgraph host["Your machine"]
-        direction LR
-        subgraph compose["docker compose"]
-            bot["🤖 bot<br/>node · FFmpeg · yt-dlp"]
-            mongo[("🍃 mongo:8<br/>volume: mongo-data")]
-        end
-        loop["127.0.0.1:3000"]
-    end
-    bot -- "gateway websocket" --> discord(["Discord"])
-    bot -- "mongodb://mongo:27017" --> mongo
-    loop -. "dashboard, when enabled" .-> bot
-    proxy(["Your reverse proxy<br/>(HTTPS)"]) -. optional .-> loop
-```
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/diagrams/docker-compose-dark.png">
+    <img alt="The bot and MongoDB run together under docker compose; the bot talks to Discord over the gateway and to mongo on its own network, and the dashboard is published only on the host's loopback, behind an optional reverse proxy" src="images/diagrams/docker-compose-light.png" width="560">
+  </picture>
+</p>
 
 ---
 

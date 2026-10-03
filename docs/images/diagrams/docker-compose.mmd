@@ -1,0 +1,9 @@
+flowchart TB
+    proxy(["Your reverse proxy, HTTPS<br/>optional"]) -.-> port["127.0.0.1:3000 on your machine"]
+    port -. "dashboard, when enabled" .-> bot
+    subgraph compose["docker compose"]
+        bot["bot<br/>Node · FFmpeg · yt-dlp"]
+        mongo[("mongo:8<br/>volume: mongo-data")]
+        bot -- "mongodb://mongo:27017" --> mongo
+    end
+    bot -- "gateway websocket" --> discord(["Discord"])

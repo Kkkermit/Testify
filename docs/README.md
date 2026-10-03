@@ -60,6 +60,7 @@ The web dashboard is a workspace of its own (`dashboard/`), with an API inside t
 | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | 🎨 [`images/bot/`](images/bot)                        | The bot's own cards — rank, leaderboard, welcome, now playing and the casino. **Generated** by `npm run docs:images` |
 | 📸 [`dashboard/screenshots/`](dashboard/screenshots/) | The dashboard, captured from the built bundle against stub data                                                      |
+| 🧭 [`images/diagrams/`](images/diagrams)              | The diagrams, each a `.mmd` source beside its dark and light render                                                  |
 | 🖼️ [`banner.png`](banner.png)                         | The banner at the top of the root README                                                                             |
 
 <p align="center">
@@ -72,12 +73,19 @@ The web dashboard is a workspace of its own (`dashboard/`), with an API inside t
 ## ✍️ Adding to these docs
 
 Keep each document in the tree that owns its subject, and link it from the tables above so it can be found.
-Four rules keep this from rotting:
+Six rules keep this from rotting:
 
 1. **Generated files are never hand-edited.** `commands.md` and the card images are regenerated, not edited.
 2. **A fact lives in one place.** If two documents would both state the Node floor, neither should — point at
    `.nvmrc`.
 3. **A picture never shows a real person.** Card images use invented members, and screenshots are taken against
    stub data, so no real account, server or snowflake appears in one.
-4. **Finished plans are deleted, not kept.** A plan whose work is done is history, and `git log` already keeps
+4. **A diagram is an image, not a Mermaid block.** GitHub's mobile app shows a Mermaid block as its source code,
+   so each diagram's source sits in `images/diagrams/` as a `.mmd` file beside a dark and a light render, and a
+   page shows them with `<picture>`. Redraw both after changing the source, for example with
+   `npx -y @mermaid-js/mermaid-cli -i name.mmd -o name-dark.png -t dark -b "#0d1117" -s 2` and the same with
+   `-t default -b white` for the light one.
+5. **An alert never sits inside HTML.** `> [!NOTE]` inside a `<details>`, a `<div>` or a table cell renders as a
+   plain quote with the marker showing; use an ordinary quote there instead.
+6. **Finished plans are deleted, not kept.** A plan whose work is done is history, and `git log` already keeps
    it; the rules it produced belong in `AGENTS.md` or the dashboard guide.
