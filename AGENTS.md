@@ -1078,7 +1078,9 @@ escalated to `issues: write` on that one job only.
 **Suppressions expire, and `tests/config/suppressions.test.ts` is what makes that true rather than a wish** —
 it fails on an active entry with no reason, no fixing version, a lapsed expiry, or one more than a year out.
 `.nsprc` and `.snyk` each require three things: a written reason, the version that
-fixes it, and a hard expiry — so a suppression cannot rot silently into a permanent blind spot. Every `overrides`
+fixes it, and a hard expiry — so a suppression cannot rot silently into a permanent blind spot. When no fixed
+release exists, the entry says `no fixed release yet` rather than inventing a version, and must then expire within
+90 days, because there is nothing else to prompt a second look. Every `overrides`
 pin in `package.json` needs the same treatment.
 
 ---

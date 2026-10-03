@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "yaml";
 
-/** Every suppression carries a reason, a fixing version and an expiry that has not lapsed. */
+/** Every suppression carries a reason, a fixing version or a short fuse without one, and an expiry that has not lapsed. */
 interface Suppression {
 	notes: string;
 	expiry: number;
@@ -49,8 +49,8 @@ describe("every active advisory suppression", () => {
 		expect(entry.notes).toMatch(/reached only through|cannot be upgraded|already the latest/i);
 	});
 
-	it.each(entries)("%s names the version that fixes it", (_id, entry) => {
-		expect(entry.notes).toMatch(/fixed in \S+@\d/i);
+	it.each(entries)("%s names the version that fixes it, or says there is none", (_id, entry) => {
+		expect(entry.notes).toMatch(/fixed in \S+@\d|no fixed release yet/i);
 	});
 
 	/** An expiry in the past is a suppression nobody renewed, which is the blind spot this exists to prevent. */
@@ -58,8 +58,9 @@ describe("every active advisory suppression", () => {
 		expect(entry.expiry).toBeGreaterThan(Date.now());
 	});
 
-	/** And one years away is the same blind spot with a longer fuse. */
-	it.each(entries)("%s expires within a year", (_id, entry) => {
-		expect(entry.expiry).toBeLessThan(Date.now() + 366 * 24 * 60 * 60 * 1000);
+	/** And one years away is the same blind spot with a longer fuse; with no fix to wait for, the fuse is shorter still. */
+	it.each(entries)("%s expires within a year, or 90 days when there is no fix yet", (_id, entry) => {
+		const days = /no fixed release yet/i.test(entry.notes) ? 90 : 366;
+		expect(entry.expiry).toBeLessThan(Date.now() + days * 24 * 60 * 60 * 1000);
 	});
 });
