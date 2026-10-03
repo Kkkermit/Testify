@@ -154,7 +154,16 @@ Eleven types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`,
 `npm run commit` walks you through it. A `commit-msg` hook runs commitlint
 either way, so the convention holds whether or not you use the wizard.
 
-Branches: `feature/your-feature-name`.
+## Branches
+
+`main` is the released code, deployed to the bot, and is protected. `develop` is
+where work is merged, and a release pull request from `develop` into `main`
+ships it every few days.
+
+Cut each piece of work from the latest `develop` as `testify/<type>-<nn>`:
+`feature`, `bugfix`, `chore` or `docs`, numbered up per type, so
+`testify/feature-01`, then `testify/feature-02`. Open the pull request against
+`develop`.
 
 ## Hooks
 
