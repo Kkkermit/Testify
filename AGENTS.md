@@ -1051,10 +1051,34 @@ interpolate a message into a shell string, or a `"`, backtick or `$` breaks or i
 `typecheck` is in `pre-commit` because staged-only linting cannot see a type error introduced in an unstaged
 file.
 
-**Branches:** `feature/your-feature-name` for normal work. Push with `git push -u origin <branch>`; on a network
-failure retry up to four times with exponential backoff (2s, 4s, 8s, 16s).
+**`main` is what runs; `develop` is where work lands.** `main` is protected and is the code deployed to the bot,
+so nothing is pushed to it directly. Every change is a pull request into `develop`, and every few days a release
+pull request from `develop` into `main` ships what has gathered there.
 
-**Do not open a pull request unless explicitly asked.**
+**Every piece of work gets its own branch, cut from the latest `develop`:** `testify/<type>-<nn>`, where the type
+says what the work is and the number counts up per type, two digits until it needs three.
+
+| Type      | For                                       | Example              |
+| --------- | ----------------------------------------- | -------------------- |
+| `feature` | A new feature, or a change to one         | `testify/feature-01` |
+| `bugfix`  | A bug fix                                 | `testify/bugfix-01`  |
+| `chore`   | Dependencies, CI, tooling and maintenance | `testify/chore-01`   |
+| `docs`    | Documentation only                        | `testify/docs-01`    |
+
+The next number is one past the highest that type has used, counting the pull requests as well as the remote
+branches, because a merged branch may since have been deleted. A branch is never reused once its pull request has
+merged; follow-up work takes the next number.
+
+```bash
+git fetch origin develop
+git checkout -b testify/bugfix-02 origin/develop
+```
+
+Push with `git push -u origin <branch>`; on a network failure retry up to four times with exponential backoff
+(2s, 4s, 8s, 16s).
+
+**Do not open a pull request unless explicitly asked**, and when asked, open it against `develop` — never `main`,
+which only takes the release pull request.
 
 **Before committing:** `npm run check`, plus the loader smoke test from [§3](#3-running-testing-verifying) if you
 touched loading, naming or the build. Regenerate `docs/commands.md` if the command surface changed. Commit related
