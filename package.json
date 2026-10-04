@@ -121,7 +121,7 @@
 		"eslint-plugin-import-x": "4.17.1",
 		"husky": "9.1.7",
 		"jest": "30.4.2",
-		"lint-staged": "17.2.0",
+		"lint-staged": "17.6.0",
 		"mongodb-memory-server": "11.2.0",
 		"prettier": "3.9.9",
 		"tsc-alias": "1.8.16",
