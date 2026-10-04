@@ -14,7 +14,7 @@
 		"build": "tsup"
 	},
 	"dependencies": {
-		"zod": "4.4.3"
+		"zod": "4.6.5"
 	},
 	"devDependencies": {
 		"tsup": "8.5.1"
