@@ -1,14 +1,33 @@
-# Running Testify in Docker
+<div align="center">
 
-The repository ships a `Dockerfile` and a `docker-compose.yml` that bring up the bot and a MongoDB together.
-This is the shortest path to a running instance on a server, and it works the same on Linux, macOS and Windows.
+# 🐳 Running Testify in Docker
 
-Running from source instead is covered in [the README](../README.md#full-setup-guide) — Docker is an option, not
-a requirement, and the bot has no container-only behaviour.
+**The bot and a MongoDB, brought up together with one command — the same on Linux, macOS and Windows.**
+
+[![Docker](https://img.shields.io/badge/Docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)](../Dockerfile)
+[![Compose](https://img.shields.io/badge/compose-bot_%2B_mongo-2496ED?style=for-the-badge&logo=docker&logoColor=white)](../docker-compose.yml)
+[![Base image](https://img.shields.io/badge/base-node_24_bookworm--slim-5FA04E?style=for-the-badge&logo=node.js&logoColor=white)](../Dockerfile)
+[![Railway](https://img.shields.io/badge/Railway-works-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](#️-hosting-it-somewhere-other-than-your-own-machine)
+
+[Quick start](#-quick-start) · [Dashboard](#️-the-dashboard) · [The image](#-what-is-in-the-image) ·
+[Where to host](#️-hosting-it-somewhere-other-than-your-own-machine) · [Troubleshooting](#-troubleshooting)
+
+</div>
+
+> [!NOTE]
+> Docker is an option, not a requirement. Running from source is covered in
+> [the README](../README.md#-quick-start), and the bot has no container-only behaviour.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="images/diagrams/docker-compose-dark.png">
+    <img alt="The bot and MongoDB run together under docker compose; the bot talks to Discord over the gateway and to mongo on its own network, and the dashboard is published only on the host's loopback, behind an optional reverse proxy" src="images/diagrams/docker-compose-light.png" width="560">
+  </picture>
+</p>
 
 ---
 
-## Quick start
+## 🚀 Quick start
 
 ```bash
 cp .env.example .env     # then fill it in, or run `npm run setup`
@@ -37,7 +56,7 @@ Data lives in the `mongo-data` volume and survives `docker compose down`. `docke
 
 ---
 
-## The dashboard
+## 🖥️ The dashboard
 
 It is off by default here exactly as it is elsewhere. Turning it on takes four variables:
 
@@ -51,11 +70,12 @@ DASHBOARD_SESSION_SECRET=…         # npm run secret
 Add `<DASHBOARD_BASE_URL>/api/auth/callback` to your application's OAuth2 redirect URIs, or signing in fails at
 Discord's end rather than yours.
 
-**`DASHBOARD_BIND` is set to `0.0.0.0` in the compose file, and that is not a loosening.** The bot's own default
-is `127.0.0.1`, which inside a container is the _container's_ loopback — a published port would reach nothing at
-all, and the symptom is a connection refused that looks like the bot never started. The container boundary is
-what keeps it private instead: the published port is bound to the host's `127.0.0.1`, so nothing is reachable
-from outside the machine until you put a reverse proxy in front and say so.
+> [!IMPORTANT]
+> **`DASHBOARD_BIND` is set to `0.0.0.0` in the compose file, and that is not a loosening.** The bot's own default
+> is `127.0.0.1`, which inside a container is the _container's_ loopback — a published port would reach nothing at
+> all, and the symptom is a connection refused that looks like the bot never started. The container boundary is
+> what keeps it private instead: the published port is bound to the host's `127.0.0.1`, so nothing is reachable
+> from outside the machine until you put a reverse proxy in front and say so.
 
 When you do put one in front, set `DASHBOARD_TRUST_PROXY=true` — without it every request looks like it comes
 from the proxy, and the rate limiter buckets them all together. With it and _no_ proxy, anyone can forge their
@@ -63,7 +83,7 @@ own bucket by setting a header. Set it if and only if something is genuinely ter
 
 ---
 
-## What is in the image
+## 📦 What is in the image
 
 Two stages. The first installs everything and builds the shared package, the bot and the SPA; the second keeps
 only what runs.
@@ -91,15 +111,15 @@ The layout of the final image matters: the API resolves the SPA at `../../dashbo
 
 ---
 
-## Hosting it somewhere other than your own machine
+## ☁️ Hosting it somewhere other than your own machine
 
 **It has to be a host that runs a container or a long-lived process.** A Discord bot holds a gateway WebSocket
 open for its whole life, and a voice connection on top of that — so anything serverless is structurally out:
 
 | Host                                    | Works | Why                                                         |
 | --------------------------------------- | :---: | ----------------------------------------------------------- |
-| Railway, Fly.io, Render, a VPS, Docker  |  yes  | Long-running container; the Dockerfile brings both binaries |
-| **Vercel, Netlify, Cloudflare Workers** |  no   | Serverless. No persistent socket, and no voice at all       |
+| Railway, Fly.io, Render, a VPS, Docker  |  ✅   | Long-running container; the Dockerfile brings both binaries |
+| **Vercel, Netlify, Cloudflare Workers** |  ❌   | Serverless. No persistent socket, and no voice at all       |
 
 On **Railway** and anything else that builds from a `Dockerfile`, point it at this repository and there is
 nothing else to do — FFmpeg and yt-dlp are in the image, so `MUSIC_YTDLP_PATH` and `MUSIC_FFMPEG_PATH` stay
@@ -112,7 +132,7 @@ connection open. There is no configuration that makes this bot run there.
 
 ---
 
-## There is deliberately no HEALTHCHECK
+## 🩺 There is deliberately no HEALTHCHECK
 
 The obvious probe is `/api/health`, and it only exists when `DASHBOARD_ENABLED` is true — so baking it into the
 image would mark every bot-only install permanently unhealthy. There is no HTTP surface to check on a bot whose
@@ -139,7 +159,7 @@ port for the twenty-odd seconds the bot spends connecting to Discord.
 
 ---
 
-## Stopping it
+## 🛑 Stopping it
 
 `docker compose stop` sends `SIGTERM`, which the bot handles: it closes the API listener, disconnects from
 Discord and closes the database connection before exiting. `init: true` is set so Node is not PID 1 with no one
@@ -147,7 +167,7 @@ to reap orphaned processes.
 
 ---
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
 | What you see                                         | What it is                                                                    |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------- |
@@ -165,7 +185,7 @@ to reap orphaned processes.
 
 ---
 
-## What has been verified
+## ✅ What has been verified
 
 **The image has been built and run with Docker Desktop on Windows**, and the bot came up in it and served
 Discord. Separately, in a Linux sandbox:
@@ -173,6 +193,6 @@ Discord. Separately, in a Linux sandbox:
 - **The build stage runs end to end.** `npm ci --ignore-scripts`, then `build:shared`, `build:bot` and
   `build:dashboard`, and `verify:bundle` reports one copy of React inside the image.
 - **The stack starts under compose.** The bot waits for MongoDB's health check, connects to it at `mongo:27017`,
-  and loads 79 commands, 27 buttons and 16 events from the runtime install.
+  and loads every command, button and event from the runtime install.
 
 Still untested: the healthcheck sample above, and the base image tag, which is not pinned to a digest.

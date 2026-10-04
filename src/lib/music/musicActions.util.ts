@@ -3,7 +3,7 @@ import { type TestifyClient } from "@core/client";
 import { type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord/reply.util";
-import { type MusicBinaries, type Query, type Track } from "@lib/music/music.types";
+import { type MusicBinaries, type ProblemKind, type Query, type Track } from "@lib/music/music.types";
 import { findBinaries } from "@lib/music/musicBinaries.util";
 import { aboutTheTrack } from "@lib/music/musicProblem.util";
 import { isPlaylistUrl, resolveQuery } from "@lib/music/musicQuery.util";
@@ -65,12 +65,30 @@ export interface TrackRequest {
 	textChannelId: string | null;
 }
 
-function warnHost(request: TrackRequest, binaries: MusicBinaries): void {
-	request.client.logger.warn(
-		binaries.cookies === null || binaries.cookies === undefined
-			? "[MUSIC] YouTube asked this host to prove it is not a bot. Give yt-dlp YouTube cookies with MUSIC_YTDLP_COOKIES; .env.example says how."
-			: "[MUSIC] YouTube asked this host to prove it is not a bot even with cookies. They have probably expired; export fresh ones into MUSIC_YTDLP_COOKIES.",
-	);
+const HOST_ADVICE: Partial<Record<ProblemKind, { without: string; with: string }>> = {
+	"bot-check": {
+		without:
+			"[MUSIC] YouTube asked this host to prove it is not a bot. Give yt-dlp YouTube cookies with MUSIC_YTDLP_COOKIES; .env.example says how.",
+		with: "[MUSIC] YouTube asked this host to prove it is not a bot even with cookies. They have probably expired; export fresh ones into MUSIC_YTDLP_COOKIES.",
+	},
+	session: {
+		without:
+			'[MUSIC] YouTube refused this host\'s session ("The page needs to be reloaded"). Update yt-dlp with npm run music:setup, and if it keeps happening give it cookies with MUSIC_YTDLP_COOKIES.',
+		with: '[MUSIC] YouTube refused this host\'s session ("The page needs to be reloaded") even with cookies. They have most likely been rotated: export fresh ones from a private window, close it straight away, and put them in MUSIC_YTDLP_COOKIES.',
+	},
+};
+
+/** What the host can do about a refusal that is about the host rather than the track, or null when there is nothing. */
+export function hostAdvice(kind: ProblemKind, hasCookies: boolean): string | null {
+	const advice = HOST_ADVICE[kind];
+	if (advice === undefined) return null;
+
+	return hasCookies ? advice.with : advice.without;
+}
+
+function warnHost(request: TrackRequest, binaries: MusicBinaries, kind: ProblemKind): void {
+	const advice = hostAdvice(kind, binaries.cookies !== null && binaries.cookies !== undefined);
+	if (advice !== null) request.client.logger.warn(advice);
 }
 
 /** Resolves the query, moving a plain search to SoundCloud when YouTube refuses the host and the owner allows both. */
@@ -92,7 +110,7 @@ async function findTracks(
 		if (found.length > 0 || !fallsBackToSoundCloud(query, sources)) return { found, fellBack: false };
 	} catch (error) {
 		if (!(error instanceof MusicProblemError) || aboutTheTrack(error.problem)) throw error;
-		if (error.problem.kind === "bot-check") warnHost(request, binaries);
+		warnHost(request, binaries, error.problem.kind);
 
 		if (!fallsBackToSoundCloud(query, sources)) {
 			throw query.source === "youtube" && allowsSource(sources, "soundcloud")

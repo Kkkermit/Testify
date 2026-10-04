@@ -1,4 +1,19 @@
-# The Testify dashboard
+<div align="center">
+
+# 🖥️ The Testify dashboard
+
+**How the web dashboard is put together, how a screen gets built, and how it is proved.**
+
+[![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev)
+[![Vite 8](https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vite.dev)
+[![Tailwind CSS 4](https://img.shields.io/badge/Tailwind-4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
+[![Hono](https://img.shields.io/badge/API-Hono-E36002?style=for-the-badge&logo=hono&logoColor=white)](https://hono.dev)
+[![Six languages](https://img.shields.io/badge/i18n-6_languages-8b5cf6?style=for-the-badge&logo=i18next&logoColor=white)](#13-copy-and-languages)
+[![WCAG 2.2, checked by axe](https://img.shields.io/badge/WCAG_2.2-axe_checked-16a34a?style=for-the-badge)](#15-accessibility)
+
+<img alt="The server overview in the dark theme" src="screenshots/overview.png" width="85%">
+
+</div>
 
 Everything needed to work on the web dashboard: how it is put together, how a screen gets built, how styling
 and components work, how the API is reached, how it is built and tested. Written so somebody arriving with no
@@ -772,7 +787,7 @@ back to `components/brand/Logo`; a brand mark is never worth a broken image icon
 
 §12 is the short rule — everything comes from `@theme` in `src/index.css`. This section is the reference behind
 it: every token that exists, what each one is for, and the order to change them in. **If you are re-skinning the
-dashboard, work through [18.10](#1810-re-skinning-the-order-to-do-it-in) rather than grepping for hex values.**
+dashboard, work through [19.10](#1910-re-skinning-the-order-to-do-it-in) rather than grepping for hex values.**
 
 ### 19.1 Where each visual decision lives
 
@@ -802,24 +817,24 @@ makes it orange. Renaming a token to its hue is how a palette stops being swappa
 Every value is `light-dark(light, dark)`, so one line carries both themes and neither can be edited without the
 other in view. The dark half is listed first below because it is the theme the product was designed in.
 
-| Token                        | Dark      | Light     | What it is for                                                                     |
-| ---------------------------- | --------- | --------- | ---------------------------------------------------------------------------------- |
-| `--color-background`         | `#07070b` | `#f4f4f9` | The page. Everything else sits on it                                               |
-| `--color-foreground`         | `#ffffff` | `#15151f` | Body text, headings, an active icon                                                |
-| `--color-muted`              | `#1c1c2a` | `#e9e8f2` | A recessed fill: secondary buttons, hover states, icon tiles                       |
-| `--color-muted-foreground`   | `#a2a2ba` | `#55556e` | Secondary text, meta lines, an inactive icon                                       |
-| `--color-card`               | `#12121c` | `#ffffff` | Every card and panel surface                                                       |
-| `--color-popover`            | `#171722` | `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
-| `--color-border`             | `#262639` | `#dcdae8` | Card borders, dividers, table rules                                                |
-| `--color-input`              | `#7676a0` | `#6b6b8a` | Field borders — further from the page than a divider, so a control looks touchable |
-| `--color-primary`            | `#7c3aed` | `#6d28d9` | The one action colour: primary buttons, the active nav marker                      |
-| `--color-primary-foreground` | `#ffffff` | `#ffffff` | Text on primary                                                                    |
-| `--color-accent`             | `#a78bfa` | `#5b21b6` | **Every violet that is text**: links, the eyebrow rule, the WebGL field            |
-| `--color-ring`               | `#a78bfa` | `#6d28d9` | The focus ring, and nothing else                                                   |
-| `--color-success`            | `#3ddc97` | `#047857` | Saved, connected, healthy                                                          |
-| `--color-warning`            | `#fbbf24` | `#a16207` | A missing permission, a hierarchy problem, "nothing set up"                        |
-| `--color-destructive`        | `#dc2626` | `#b91c1c` | Delete, leave, block — as a **fill**, always with white on it                      |
-| `--color-destructive-text`   | `#f87171` | `#b91c1c` | The same meaning as **text**. One token cannot be legible as both                  |
+| Token                        | Dark                                                                         | Light                                                                        | What it is for                                                                     |
+| ---------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `--color-background`         | ![](https://img.shields.io/badge/%20-%20-07070b?style=flat-square) `#07070b` | ![](https://img.shields.io/badge/%20-%20-f4f4f9?style=flat-square) `#f4f4f9` | The page. Everything else sits on it                                               |
+| `--color-foreground`         | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | ![](https://img.shields.io/badge/%20-%20-15151f?style=flat-square) `#15151f` | Body text, headings, an active icon                                                |
+| `--color-muted`              | ![](https://img.shields.io/badge/%20-%20-1c1c2a?style=flat-square) `#1c1c2a` | ![](https://img.shields.io/badge/%20-%20-e9e8f2?style=flat-square) `#e9e8f2` | A recessed fill: secondary buttons, hover states, icon tiles                       |
+| `--color-muted-foreground`   | ![](https://img.shields.io/badge/%20-%20-a2a2ba?style=flat-square) `#a2a2ba` | ![](https://img.shields.io/badge/%20-%20-55556e?style=flat-square) `#55556e` | Secondary text, meta lines, an inactive icon                                       |
+| `--color-card`               | ![](https://img.shields.io/badge/%20-%20-12121c?style=flat-square) `#12121c` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Every card and panel surface                                                       |
+| `--color-popover`            | ![](https://img.shields.io/badge/%20-%20-171722?style=flat-square) `#171722` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
+| `--color-border`             | ![](https://img.shields.io/badge/%20-%20-262639?style=flat-square) `#262639` | ![](https://img.shields.io/badge/%20-%20-dcdae8?style=flat-square) `#dcdae8` | Card borders, dividers, table rules                                                |
+| `--color-input`              | ![](https://img.shields.io/badge/%20-%20-7676a0?style=flat-square) `#7676a0` | ![](https://img.shields.io/badge/%20-%20-6b6b8a?style=flat-square) `#6b6b8a` | Field borders — further from the page than a divider, so a control looks touchable |
+| `--color-primary`            | ![](https://img.shields.io/badge/%20-%20-7c3aed?style=flat-square) `#7c3aed` | ![](https://img.shields.io/badge/%20-%20-6d28d9?style=flat-square) `#6d28d9` | The one action colour: primary buttons, the active nav marker                      |
+| `--color-primary-foreground` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Text on primary                                                                    |
+| `--color-accent`             | ![](https://img.shields.io/badge/%20-%20-a78bfa?style=flat-square) `#a78bfa` | ![](https://img.shields.io/badge/%20-%20-5b21b6?style=flat-square) `#5b21b6` | **Every violet that is text**: links, the eyebrow rule, the WebGL field            |
+| `--color-ring`               | ![](https://img.shields.io/badge/%20-%20-a78bfa?style=flat-square) `#a78bfa` | ![](https://img.shields.io/badge/%20-%20-6d28d9?style=flat-square) `#6d28d9` | The focus ring, and nothing else                                                   |
+| `--color-success`            | ![](https://img.shields.io/badge/%20-%20-3ddc97?style=flat-square) `#3ddc97` | ![](https://img.shields.io/badge/%20-%20-047857?style=flat-square) `#047857` | Saved, connected, healthy                                                          |
+| `--color-warning`            | ![](https://img.shields.io/badge/%20-%20-fbbf24?style=flat-square) `#fbbf24` | ![](https://img.shields.io/badge/%20-%20-a16207?style=flat-square) `#a16207` | A missing permission, a hierarchy problem, "nothing set up"                        |
+| `--color-destructive`        | ![](https://img.shields.io/badge/%20-%20-dc2626?style=flat-square) `#dc2626` | ![](https://img.shields.io/badge/%20-%20-b91c1c?style=flat-square) `#b91c1c` | Delete, leave, block — as a **fill**, always with white on it                      |
+| `--color-destructive-text`   | ![](https://img.shields.io/badge/%20-%20-f87171?style=flat-square) `#f87171` | ![](https://img.shields.io/badge/%20-%20-b91c1c?style=flat-square) `#b91c1c` | The same meaning as **text**. One token cannot be legible as both                  |
 
 Two conventions worth keeping:
 
