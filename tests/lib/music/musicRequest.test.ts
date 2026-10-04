@@ -1,7 +1,7 @@
 import { type Guild, type VoiceBasedChannel } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { type QueueState, type Track } from "@lib/music/music.types";
-import { queueRequest, requestedQuery } from "@lib/music/musicActions.util";
+import { hostAdvice, queueRequest, requestedQuery } from "@lib/music/musicActions.util";
 import { finished } from "@lib/music/musicQueue.util";
 import type * as Source from "@lib/music/musicSource.util";
 
@@ -104,6 +104,18 @@ describe("queueRequest", () => {
 			expect.stringContaining("MUSIC_YTDLP_COOKIES"),
 		);
 	});
+	/** "The page needs to be reloaded" used to escape as a crash; it is a refusal, and the host is told what fixes it. */
+	it("tells the host what to do when YouTube refuses its session, and still refuses the reader", async () => {
+		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));
+		const { MusicProblemError } = jest.requireActual<typeof Source>("@lib/music/musicSource.util");
+		resolveTracks.mockRejectedValue(new MusicProblemError({ kind: "session", advice: "YouTube stopped trusting." }));
+		const asked = request();
+
+		await expect(queueRequest(asked)).rejects.toThrow(/YouTube stopped trusting/);
+		expect((asked.client as unknown as { logger: { warn: jest.Mock } }).logger.warn).toHaveBeenCalledWith(
+			expect.stringContaining("npm run music:setup"),
+		);
+	});
 
 	it("takes only the first search result", async () => {
 		const session = fakeSession({ tracks: [], index: -1, loop: "off" }, false);
@@ -141,6 +153,16 @@ describe("queueRequest with the owner's choice of sources", () => {
 		expect(askedFor(0).source).toBe("youtube");
 		expect(askedFor(1).source).toBe("soundcloud");
 		expect(note).toMatch(/Playing \*\*from soundcloud\*\*.*came from SoundCloud/);
+	});
+	it("tries SoundCloud when YouTube refuses the host's session", async () => {
+		getBotSettings.mockResolvedValue({ musicSources: "both" });
+		resolveTracks
+			.mockRejectedValueOnce(new MusicProblemError({ kind: "session", advice: "YouTube stopped trusting." }))
+			.mockResolvedValueOnce([track("from soundcloud")]);
+
+		await queueRequest(request());
+
+		expect(askedFor(1).source).toBe("soundcloud");
 	});
 
 	it("tries SoundCloud when YouTube finds nothing", async () => {
@@ -204,5 +226,23 @@ describe("requestedQuery", () => {
 
 	it("refuses nothing at all", () => {
 		expect(() => requestedQuery("   ")).toThrow(UserFacingError);
+	});
+});
+
+describe("hostAdvice", () => {
+	/** With cookies already given, "add cookies" is no help: they have been rotated, and only a fresh export fixes it. */
+	it("tells a host with cookies to export fresh ones from a private window", () => {
+		expect(hostAdvice("session", true)).toMatch(/private window/);
+		expect(hostAdvice("session", false)).toMatch(/npm run music:setup/);
+	});
+
+	it("keeps the bot check's advice", () => {
+		expect(hostAdvice("bot-check", false)).toContain("MUSIC_YTDLP_COOKIES");
+		expect(hostAdvice("bot-check", true)).toMatch(/expired/);
+	});
+
+	it("says nothing for a refusal that is about the track", () => {
+		expect(hostAdvice("unavailable", true)).toBeNull();
+		expect(hostAdvice("drm", false)).toBeNull();
 	});
 });

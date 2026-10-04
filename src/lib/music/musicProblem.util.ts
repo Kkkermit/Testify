@@ -8,6 +8,12 @@ const PATTERNS: { kind: ProblemKind; pattern: RegExp; advice: string }[] = [
 		advice: "YouTube asked this host to prove it is not a bot, so it would not hand over the audio.",
 	},
 	{
+		// YouTube's own wording, passed through by yt-dlp, when it stops trusting the session a request came with.
+		kind: "session",
+		pattern: /page needs to be reloaded/i,
+		advice: "YouTube would not hand over the audio just now — it stopped trusting this host's session.",
+	},
+	{
 		kind: "drm",
 		pattern: /DRM protected/i,
 		advice: "That track is DRM-protected, so no bot can play it. Try another upload of the same song.",
