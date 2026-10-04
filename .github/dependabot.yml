@@ -1,10 +1,12 @@
 version: 2
 
+# Every update lands in develop with everything else, and reaches main through a release.
 updates:
   # One workspace root: npm resolves the whole tree from the root lockfile, so a per-workspace entry would open
   # pull requests that cannot change the lockfile they need to.
   - package-ecosystem: npm
     directory: /
+    target-branch: develop
     schedule:
       interval: weekly
     open-pull-requests-limit: 5
@@ -19,5 +21,6 @@ updates:
 
   - package-ecosystem: github-actions
     directory: /
+    target-branch: develop
     schedule:
       interval: monthly
