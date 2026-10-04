@@ -9,7 +9,7 @@
 		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
-		"@tanstack/react-query": "5.101.4",
+		"@tanstack/react-query": "5.104.0",
 		"@testify/shared": "*",
 		"clsx": "2.1.1",
 		"dompurify": "3.4.16",
