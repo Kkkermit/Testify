@@ -1150,13 +1150,19 @@ old as the last `npm ci`. A configured `MUSIC_YTDLP_PATH` still wins outright, b
 
 **A refusal from YouTube is not a stall, and is not retried like one.** `classifyProblem` reads what the dying
 downloader said: a 403 earns one fresh try (it is sometimes an address that expired between asking and
-downloading), a bot check or an unavailable video earns none. Retrying either three times meant six more requests
+downloading), a bot check, a refused session or an unavailable video earns none. Retrying either three times meant six more requests
 to YouTube, and request volume is part of what gets a host flagged in the first place. Descriptions are cached for
 ten minutes for the same reason — a volume change used to cost two extractions — and a refused track's entry is
 dropped so its one retry looks afresh. The reason lands on the panel for a minute (`NOTICE_MS`), because the log
 is not where anybody in the voice channel looks. **The warning waits for the give-up.** YouTube refuses a first
 download now and then and the fresh try plays it, so a refusal is noted at `debug` and only a track actually
 skipped is logged at `warn` — warning on every 403 told the host to update a yt-dlp that was working.
+
+**"The page needs to be reloaded" is YouTube refusing the host's session, not a crash** (`session`). It is YouTube's
+own `playabilityStatus` reason, which yt-dlp passes through untouched because it rewrites only the sign-in, captcha
+and rate-limit reasons — read out of `_video.py`, not assumed. It is handled like the bot check: no retry, a plain
+search falls back to SoundCloud under "both", and `hostAdvice` tells the host to update yt-dlp, or, when cookies are
+already set, to export fresh ones from a private window, since cookies from a browser left open are rotated.
 
 **A search asks for one result, because only one is played.** `queueRequest` passes `results: 1`; the old
 `ytsearch8:` extracted all eight in full, so a host YouTube had flagged was bot-checked eight times per `/play`, and

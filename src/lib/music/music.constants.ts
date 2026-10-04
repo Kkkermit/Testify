@@ -28,6 +28,7 @@ export const MUSIC_ADD_ID = "musicadd";
 export const RETRIES_AFTER: Record<ProblemKind, number> = {
 	forbidden: 1,
 	"bot-check": 0,
+	session: 0,
 	unavailable: 0,
 	drm: 0,
 };

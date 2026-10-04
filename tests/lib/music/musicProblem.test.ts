@@ -13,6 +13,13 @@ describe("classifyProblem", () => {
 	it("reads the bot check as its own thing, because updating yt-dlp does not fix it", () => {
 		expect(classifyProblem("ERROR: [youtube] abc: Sign in to confirm you’re not a bot.")?.kind).toBe("bot-check");
 	});
+	/** Verbatim from production: YouTube's own reason, passed through, which surfaced as a crash with a stack. */
+	it("reads YouTube asking for a reload as a refusal of the host's session", () => {
+		const problem = classifyProblem("ERROR: [youtube] Vhvepsf5ynQ: The page needs to be reloaded.");
+
+		expect(problem?.kind).toBe("session");
+		expect(aboutTheTrack(problem)).toBe(false);
+	});
 
 	it.each(["Video unavailable", "Private video", "This video has been removed by the uploader"])(
 		"reads %s as a video nobody can have",
@@ -39,6 +46,6 @@ describe("classifyProblem", () => {
 describe("RETRIES_AFTER", () => {
 	/** A 403 is sometimes an address that expired between asking and downloading, so it earns exactly one. */
 	it("gives a 403 one more go and the others none", () => {
-		expect(RETRIES_AFTER).toEqual({ forbidden: 1, "bot-check": 0, unavailable: 0, drm: 0 });
+		expect(RETRIES_AFTER).toEqual({ forbidden: 1, "bot-check": 0, session: 0, unavailable: 0, drm: 0 });
 	});
 });
