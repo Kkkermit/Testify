@@ -2,7 +2,6 @@ import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { requireAuth } from "@api/middleware/session";
 import { statusReport } from "@lib/bot";
-import { musicBinaries } from "@lib/music";
 import { type StatusResponse } from "@testify/shared";
 
 /** Reused briefly, so a page left open in several tabs costs one database ping rather than one each. */
@@ -24,7 +23,7 @@ status.get("/", async (context) => {
 	const now = Date.now();
 
 	if (cached === null || now - cached.at > FRESH_MS) {
-		cached = { at: now, body: await statusReport(client, { binaries: musicBinaries(client), now }) };
+		cached = { at: now, body: await statusReport(client, { now }) };
 	}
 
 	return context.json(cached.body);

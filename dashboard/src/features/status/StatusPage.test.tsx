@@ -47,10 +47,24 @@ describe("StatusPage", () => {
 		expect(screen.getByText("Degraded")).toBeInTheDocument();
 	});
 
-	it("reports the music binaries, including their age", async () => {
+	it("shows the version the bot is running, with a link to its releases", async () => {
 		renderPage();
 
-		expect(await screen.findByText("Version 2026.09.01, 22 days old")).toBeInTheDocument();
+		expect(await screen.findByText("Version 2.0.3")).toBeInTheDocument();
+		expect(await screen.findByRole("link", { name: /releases on github/i })).toHaveAttribute(
+			"href",
+			"https://github.com/Kkkermit/Testify/releases",
+		);
+	});
+
+	/** yt-dlp's age only matters to whoever hosts the bot, and marked the whole page degraded for everyone else. */
+	it("does not list the music binaries", async () => {
+		renderPage();
+
+		await screen.findByRole("heading", { name: "Health checks" });
+		expect(screen.queryByRole("heading", { name: "Packages" })).not.toBeInTheDocument();
+		expect(screen.queryByText("yt-dlp")).not.toBeInTheDocument();
+		expect(screen.queryByText("FFmpeg")).not.toBeInTheDocument();
 	});
 
 	/** A day before the first heartbeat is not an outage, so the average must not count it. */

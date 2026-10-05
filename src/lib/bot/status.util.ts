@@ -3,9 +3,8 @@ import { type TestifyClient } from "@core/client";
 import { pingDatabase } from "@database/connection";
 import { firstStatusSampleAt, type SampleInput, statusSamplesSince } from "@database/repositories/statusRepository";
 import { commandTimes, type CommandTimes, eventLoopDelay, type LoopDelay } from "@lib/bot/performance.util";
+import { botVersion } from "@lib/bot/runtime.util";
 import { recordOutcome, serviceChecks } from "@lib/infra/serviceHealth.util";
-import { type MusicBinaries } from "@lib/music/music.types";
-import { ageInDays, STALE_AFTER_DAYS } from "@lib/music/musicBinaries.util";
 import {
 	type CommandCheck,
 	type DatabaseCheck,
@@ -13,7 +12,6 @@ import {
 	type GatewayCheck,
 	type HistoryLevel,
 	type MemoryCheck,
-	type PackageCheck,
 	type ServiceCheck,
 	type StatusBucket,
 	type StatusDay,
@@ -99,28 +97,9 @@ export function commandCheck(times: CommandTimes): CommandCheck {
 	return { level: failing || slow ? "degraded" : "operational", ...times };
 }
 
-export function packageChecks(binaries: MusicBinaries, now = Date.now()): PackageCheck[] {
-	const version = binaries.ytDlpVersion ?? null;
-	const age = version === null ? null : ageInDays(version, now);
-	const ytDlpLevel: StatusLevel =
-		binaries.ytDlp === null ? "down" : age !== null && age > STALE_AFTER_DAYS ? "degraded" : "operational";
-
-	return [
-		{ key: "ytDlp", level: ytDlpLevel, installed: binaries.ytDlp !== null, version, ageDays: age },
-		{
-			key: "ffmpeg",
-			// Music still plays without it; only the volume and non-Opus sources need it.
-			level: binaries.ffmpeg === null ? "degraded" : "operational",
-			installed: binaries.ffmpeg !== null,
-			version: null,
-			ageDays: null,
-		},
-	];
-}
-
 export interface OverallInputs {
 	core: StatusLevel[];
-	/** Packages and third-party services: their outage costs features, not the bot. */
+	/** Commands and third-party services: their outage costs features, not the bot. */
 	peripheral: StatusLevel[];
 	paused: boolean;
 }
@@ -228,12 +207,11 @@ export function recentBuckets(samples: SampleInput[], firstAt: number | null, no
 export type LiveStatus = Omit<StatusResponse, "days" | "recent">;
 
 export interface StatusSources {
-	binaries: MusicBinaries;
 	now?: number;
 	pingDatabase?: () => Promise<number | null>;
 }
 
-export async function liveStatus(client: TestifyClient, sources: StatusSources): Promise<LiveStatus> {
+export async function liveStatus(client: TestifyClient, sources: StatusSources = {}): Promise<LiveStatus> {
 	const now = sources.now ?? Date.now();
 	const memory = process.memoryUsage();
 
@@ -242,7 +220,6 @@ export async function liveStatus(client: TestifyClient, sources: StatusSources):
 	const eventLoop = eventLoopCheck(eventLoopDelay());
 	const heap = memoryCheck(memory.heapUsed, getHeapStatistics().heap_size_limit, memory.rss);
 	const commands = commandCheck(commandTimes(now));
-	const packages = packageChecks(sources.binaries, now);
 	const services: ServiceCheck[] = serviceChecks(now);
 
 	const discord = services.filter((service) => service.name === DISCORD_API).map((service) => service.level);
@@ -251,9 +228,10 @@ export async function liveStatus(client: TestifyClient, sources: StatusSources):
 	return {
 		level: overallLevel({
 			core: [gateway.level, database.level, eventLoop.level, heap.level, ...discord],
-			peripheral: [commands.level, ...packages.map((check) => check.level), ...others],
+			peripheral: [commands.level, ...others],
 			paused: client.paused,
 		}),
+		version: botVersion(),
 		checkedAt: new Date(now).toISOString(),
 		startedAt: new Date(client.startedAt).toISOString(),
 		uptimeMs: now - client.startedAt,
@@ -263,12 +241,11 @@ export async function liveStatus(client: TestifyClient, sources: StatusSources):
 		eventLoop,
 		memory: heap,
 		commands,
-		packages,
 		services,
 	};
 }
 
-export async function statusReport(client: TestifyClient, sources: StatusSources): Promise<StatusResponse> {
+export async function statusReport(client: TestifyClient, sources: StatusSources = {}): Promise<StatusResponse> {
 	const now = sources.now ?? Date.now();
 	const live = await liveStatus(client, { ...sources, now });
 

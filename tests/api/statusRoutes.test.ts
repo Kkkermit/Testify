@@ -7,7 +7,6 @@ import { statusReport } from "@lib/bot";
 import { type StatusResponse } from "@testify/shared";
 
 jest.mock("@lib/bot", () => ({ statusReport: jest.fn() }));
-jest.mock("@lib/music", () => ({ musicBinaries: jest.fn(() => ({ ytDlp: null, ffmpeg: null })) }));
 
 const REPORT = { level: "operational" } as StatusResponse;
 
