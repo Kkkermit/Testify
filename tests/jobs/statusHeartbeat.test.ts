@@ -5,7 +5,6 @@ import { liveStatus, resetEventLoopDelay } from "@lib/bot";
 
 jest.mock("@database/repositories/statusRepository", () => ({ recordStatusSample: jest.fn() }));
 jest.mock("@lib/bot", () => ({ liveStatus: jest.fn(), resetEventLoopDelay: jest.fn() }));
-jest.mock("@lib/music", () => ({ musicBinaries: jest.fn(() => ({ ytDlp: null, ffmpeg: null })) }));
 
 const CLIENT = {} as TestifyClient;
 

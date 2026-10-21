@@ -537,6 +537,7 @@ const CHECKED_AT = "2026-09-23T12:00:00.000Z";
 
 export const botStatus: StatusResponse = {
 	level: "operational",
+	version: "2.0.3",
 	checkedAt: CHECKED_AT,
 	startedAt: "2026-09-21T09:00:00.000Z",
 	uptimeMs: 183_600_000,
@@ -546,10 +547,6 @@ export const botStatus: StatusResponse = {
 	eventLoop: { level: "operational", p50Ms: 10.2, p99Ms: 21.4, maxMs: 40 },
 	memory: { level: "operational", heapUsedMb: 120, heapLimitMb: 4_096, rssMb: 260 },
 	commands: { level: "operational", runs: 14, failures: 1, p50Ms: 180, p95Ms: 1_240 },
-	packages: [
-		{ key: "ytDlp", level: "operational", installed: true, version: "2026.09.01", ageDays: 22 },
-		{ key: "ffmpeg", level: "operational", installed: true, version: null, ageDays: null },
-	],
 	services: [
 		{
 			name: "Discord API",
