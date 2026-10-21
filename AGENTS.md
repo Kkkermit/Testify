@@ -2530,7 +2530,7 @@ and three things about it are load-bearing:
 
 `/status` is open to anybody signed in, because it names no server and no member — only how the bot itself is
 doing. `GET /api/status` builds it from `statusReport` in `src/lib/bot/status.util.ts`, and every threshold
-that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Four things about it are load-bearing:
+that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Seven things about it are load-bearing:
 
 - **Downtime is known by its gaps.** The dashboard lives inside the bot, so nothing can report the bot being off
   while it is off. `recordHeartbeat` writes one `statussamples` row every five minutes (30-day TTL), and a
@@ -2542,8 +2542,14 @@ that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Four thi
   Nothing is contacted just to check, which keeps "Testify never phones home" true. A 4xx, or a video that is
   private or removed, is the service answering, so it does not count against it.
 - **Core and peripheral are different.** The gateway, the database, the event loop, memory and the Discord API
-  can make the bot "down". A joke API, a stale yt-dlp or a missing FFmpeg can only make it "degraded", because
-  they cost features, not the bot.
+  can make the bot "down". A joke API or slow commands can only make it "degraded", because they cost features,
+  not the bot.
+- **The music binaries are not on it.** A yt-dlp past its staleness limit marked every heartbeat degraded, so the
+  whole history went amber for a reason only the host could act on. `/music status` is where the host reads them.
+- **Slow on the gateway starts past 150 ms** (`gatewaySlowMs`). This bot's gateway sits around 100 ms, and
+  the colour of each bar in the last day's strip is that heartbeat's level, so the threshold is what turns it amber.
+- **The version is the running `package.json`'s**, through the same `botVersion` the owner console reads, and the
+  page links the releases rather than asking GitHub for the latest one.
 - **The event-loop window is per heartbeat.** `recordHeartbeat` resets the histogram after reading it, so each
   sample covers its own five minutes rather than everything since start-up.
 

@@ -1,5 +1,15 @@
 import { type StatusLevel, type StatusResponse } from "@testify/shared";
-import { AlertTriangle, CheckCircle2, CircleHelp, Clock, Database, Gauge, Radio, XCircle } from "lucide-react";
+import {
+	AlertTriangle,
+	CheckCircle2,
+	CircleHelp,
+	Clock,
+	Database,
+	ExternalLink,
+	Gauge,
+	Radio,
+	XCircle,
+} from "lucide-react";
 import { useTranslation } from "react-i18next";
 import {
 	Badge,
@@ -11,6 +21,7 @@ import {
 	Skeleton,
 	StatTile,
 } from "@/components/primitives";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { RecentStrip } from "@/features/status/components/RecentStrip";
 import { UptimeStrip } from "@/features/status/components/UptimeStrip";
@@ -97,6 +108,20 @@ export function StatusPage(): React.JSX.Element {
 							})}
 				</p>
 				{report.paused && <p className="text-warning text-sm">{t("status.paused")}</p>}
+				<p className="text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+					<span>{t("status.version", { version: report.version })}</span>
+					{bot.data !== undefined && (
+						<a
+							href={`${bot.data.repositoryUrl}/releases`}
+							target="_blank"
+							rel="noreferrer"
+							className={cn(INLINE_TARGET, "text-accent gap-2 hover:underline")}
+						>
+							{t("owner.releases")}
+							<ExternalLink size={14} aria-hidden="true" />
+						</a>
+					)}
+				</p>
 				<p className="text-muted-foreground text-xs">{t("status.checkedAt", { time: clockTime(report.checkedAt) })}</p>
 			</Card>
 
@@ -124,7 +149,6 @@ export function StatusPage(): React.JSX.Element {
 
 			<History report={report} />
 			<Checks report={report} />
-			<Packages report={report} />
 			<Services report={report} />
 		</>
 	);
@@ -235,44 +259,6 @@ function Checks({ report }: { report: StatusResponse }): React.JSX.Element {
 					}
 					level={commands.level}
 				/>
-			</DividedList>
-		</Card>
-	);
-}
-
-function Packages({ report }: { report: StatusResponse }): React.JSX.Element {
-	const { t } = useTranslation();
-	const [ytDlp, ffmpeg] = [
-		report.packages.find((check) => check.key === "ytDlp"),
-		report.packages.find((check) => check.key === "ffmpeg"),
-	];
-
-	return (
-		<Card className="flex flex-col gap-4">
-			<h2 className={CARD_HEADING}>{t("status.packages")}</h2>
-			<DividedList>
-				{ytDlp !== undefined && (
-					<Row
-						label="yt-dlp"
-						detail={
-							!ytDlp.installed
-								? t("status.ytDlpMissing")
-								: ytDlp.version === null
-									? t("status.installed")
-									: ytDlp.ageDays === null
-										? t("status.version", { version: ytDlp.version })
-										: t("status.versionAge", { version: ytDlp.version, count: ytDlp.ageDays })
-						}
-						level={ytDlp.level}
-					/>
-				)}
-				{ffmpeg !== undefined && (
-					<Row
-						label="FFmpeg"
-						detail={ffmpeg.installed ? t("status.installed") : t("status.ffmpegMissing")}
-						level={ffmpeg.level}
-					/>
-				)}
 			</DividedList>
 		</Card>
 	);

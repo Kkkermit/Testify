@@ -12,7 +12,7 @@ export const STATUS_LIMITS = {
 	historyDays: 30,
 	recentBuckets: 48,
 	recentBucketMs: 1_800_000,
-	gatewaySlowMs: 400,
+	gatewaySlowMs: 150,
 	databaseSlowMs: 250,
 	eventLoopSlowMs: 100,
 	eventLoopStalledMs: 1_000,
@@ -62,18 +62,6 @@ export interface CommandCheck {
 	p95Ms: number | null;
 }
 
-export const STATUS_PACKAGES = ["ytDlp", "ffmpeg"] as const;
-
-export type StatusPackage = (typeof STATUS_PACKAGES)[number];
-
-export interface PackageCheck {
-	key: StatusPackage;
-	level: StatusLevel;
-	installed: boolean;
-	version: string | null;
-	ageDays: number | null;
-}
-
 export interface ServiceCheck {
 	name: string;
 	level: StatusLevel;
@@ -101,6 +89,8 @@ export interface StatusBucket {
 
 export interface StatusResponse {
 	level: StatusLevel;
+	/** The running bot's own `package.json` version. */
+	version: string;
 	checkedAt: string;
 	startedAt: string;
 	uptimeMs: number;
@@ -110,7 +100,6 @@ export interface StatusResponse {
 	eventLoop: EventLoopCheck;
 	memory: MemoryCheck;
 	commands: CommandCheck;
-	packages: PackageCheck[];
 	services: ServiceCheck[];
 	days: StatusDay[];
 	recent: StatusBucket[];

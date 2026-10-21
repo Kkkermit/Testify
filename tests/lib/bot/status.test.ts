@@ -2,6 +2,7 @@ import { Collection } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { firstStatusSampleAt, type SampleInput, statusSamplesSince } from "@database/repositories/statusRepository";
 import { recordCommandTime, resetCommandTimes } from "@lib/bot/performance.util";
+import { botVersion } from "@lib/bot/runtime.util";
 import {
 	commandCheck,
 	coverage,
@@ -13,7 +14,6 @@ import {
 	liveStatus,
 	memoryCheck,
 	overallLevel,
-	packageChecks,
 	recentBuckets,
 	statusReport,
 	uptimeDays,
@@ -34,7 +34,6 @@ const SAMPLE = STATUS_LIMITS.sampleEveryMs;
 /** Midday, so a day's worth of samples either side stays inside one UTC day. */
 const NOON = Date.UTC(2026, 8, 23, 12);
 const MB = 1024 * 1024;
-const BINARIES = { ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg", ytDlpVersion: "2026.09.01" };
 
 function sample(at: number, level: StatusLevel = "operational", gatewayPingMs: number | null = 50): SampleInput {
 	return { at: new Date(at), level, gatewayPingMs, databasePingMs: 5, eventLoopP99Ms: 10 };
@@ -70,6 +69,13 @@ describe("the individual checks", () => {
 		expect(gatewayCheck(false, 40, 1).level).toBe("down");
 		expect(gatewayCheck(true, 40, 1).level).toBe("operational");
 		expect(gatewayCheck(true, STATUS_LIMITS.gatewaySlowMs + 1, 1).level).toBe("degraded");
+	});
+
+	/** This bot's gateway sits around 100 ms, which used to be flagged; slow starts past 150 ms. */
+	it("counts a gateway ping up to 150 ms as healthy", () => {
+		expect(gatewayCheck(true, 100, 1).level).toBe("operational");
+		expect(gatewayCheck(true, 150, 1).level).toBe("operational");
+		expect(gatewayCheck(true, 151, 1).level).toBe("degraded");
 	});
 
 	/** discord.js reports -1 before the first heartbeat; that is not a latency of minus one millisecond. */
@@ -114,14 +120,6 @@ describe("the individual checks", () => {
 	/** Two runs and one failure is a coin toss, not a failure rate. */
 	it("does not call a failure rate from a handful of runs", () => {
 		expect(commandCheck({ runs: 2, failures: 1, p50Ms: 100, p95Ms: 200 }).level).toBe("operational");
-	});
-
-	it("reports the music binaries, and a stale yt-dlp as degraded", () => {
-		const now = Date.UTC(2026, 8, 5);
-
-		expect(packageChecks(BINARIES, now).map((check) => check.level)).toEqual(["operational", "operational"]);
-		expect(packageChecks({ ...BINARIES, ytDlpVersion: "2026.01.01" }, now)[0]?.level).toBe("degraded");
-		expect(packageChecks({ ytDlp: null, ffmpeg: null }, now).map((check) => check.level)).toEqual(["down", "degraded"]);
 	});
 });
 
@@ -243,7 +241,7 @@ describe("liveStatus", () => {
 	it("reports every check and the overall level", async () => {
 		recordCommandTime(120, true, NOON);
 
-		const status = await liveStatus(client(), { binaries: BINARIES, now: NOON });
+		const status = await liveStatus(client(), { now: NOON });
 
 		expect(status).toMatchObject({
 			level: "operational",
@@ -253,7 +251,8 @@ describe("liveStatus", () => {
 			database: { level: "operational", pingMs: 12 },
 			commands: { runs: 1, failures: 0 },
 		});
-		expect(status.packages.map((check) => check.key)).toEqual(["ytDlp", "ffmpeg"]);
+		expect(status.version).toBe(botVersion());
+		expect(status).not.toHaveProperty("packages");
 	});
 
 	/** Discord's own API failing is the bot failing; a joke API failing is not. */
@@ -261,15 +260,14 @@ describe("liveStatus", () => {
 		for (let index = 0; index < 3; index += 1) {
 			recordOutcome("icanhazdadjoke", { ok: false, at: NOON, latencyMs: null });
 		}
-		expect((await liveStatus(client(), { binaries: BINARIES, now: NOON })).level).toBe("degraded");
+		expect((await liveStatus(client(), { now: NOON })).level).toBe("degraded");
 
 		for (let index = 0; index < 3; index += 1) recordOutcome(DISCORD_API, { ok: false, at: NOON, latencyMs: null });
-		expect((await liveStatus(client(), { binaries: BINARIES, now: NOON })).level).toBe("down");
+		expect((await liveStatus(client(), { now: NOON })).level).toBe("down");
 	});
 
 	it("uses the ping it is given rather than a real database", async () => {
 		const status = await liveStatus(client(), {
-			binaries: BINARIES,
 			now: NOON,
 			pingDatabase: () => Promise.resolve(null),
 		});
@@ -285,7 +283,7 @@ describe("statusReport", () => {
 		jest.mocked(statusSamplesSince).mockResolvedValueOnce(heartbeats(start, NOON));
 		jest.mocked(firstStatusSampleAt).mockResolvedValueOnce(new Date(start));
 
-		const report = await statusReport(client(), { binaries: BINARIES, now: NOON });
+		const report = await statusReport(client(), { now: NOON });
 
 		expect(report.days.at(-1)?.uptime).toBeCloseTo(1, 5);
 		expect(report.recent.at(-1)?.level).toBe("operational");
@@ -293,7 +291,6 @@ describe("statusReport", () => {
 
 	it("does not ask a database that is down for its history", async () => {
 		const report = await statusReport(client(), {
-			binaries: BINARIES,
 			now: NOON,
 			pingDatabase: () => Promise.resolve(null),
 		});
@@ -306,7 +303,7 @@ describe("statusReport", () => {
 	it("still answers when the history cannot be read", async () => {
 		jest.mocked(statusSamplesSince).mockRejectedValueOnce(new Error("boom"));
 
-		const report = await statusReport(client(), { binaries: BINARIES, now: NOON });
+		const report = await statusReport(client(), { now: NOON });
 
 		expect(report.level).toBe("operational");
 		expect(report.days.every((day) => day.uptime === null)).toBe(true);
