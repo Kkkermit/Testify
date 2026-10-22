@@ -404,15 +404,9 @@ usual track is never transcoded. FFmpeg is what the volume control and seeking u
 
 Spotify links cannot be played by anything — the audio is DRM-protected. Search for the track by name instead.
 
-**"Sign in to confirm you're not a bot"** means YouTube has flagged the host, which is common on cloud hosts.
-Export `cookies.txt` for youtube.com from a private window signed in to a spare Google account, then either put
-its path in `MUSIC_YTDLP_COOKIES` or, on a host whose variables take one line (Railway), run:
-
-```bash
-npm run music:cookies -- cookies.txt
-```
-
-and paste the line it prints as the value. That line is a signed-in login, so never share it.
+**"Sign in to confirm you're not a bot"** means YouTube is refusing requests from the host, which is common on
+cloud hosts. Update yt-dlp with `npm run music:setup`, and if it keeps happening, set `/play` to SoundCloud only in
+the owner console's control tab.
 
 </details>
 
@@ -641,7 +635,6 @@ dashboard is in [`docs/dashboard/guide.md`](docs/dashboard/guide.md).
 | `npm run docs:commands`     | Regenerates `docs/commands.md` from the real commands                 |
 | `npm run docs:images`       | Redraws the card images in this README from the bot's renderers       |
 | `npm run music:setup`       | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there       |
-| `npm run music:cookies`     | Turns an exported `cookies.txt` into the one line Railway can take    |
 | `npm run secret`            | Generates a dashboard session secret (`-- --write` puts it in `.env`) |
 | `npm run commands:clear`    | Removes every registered slash command from Discord                   |
 | `npm run db:wipe`           | Asks development or production, then which collections to empty       |
@@ -786,7 +779,7 @@ The colours and links live in `src/config/theme.ts`.
 | `Used disallowed intents`                        | Turn the privileged intents on in the Developer Portal                                               |
 | `EBADENGINE` during install                      | Your Node is older than 24.11. Run `nvm use`                                                         |
 | Cards render with no text on them                | You are in a container without fonts — use this repository's `Dockerfile`                            |
-| `Sign in to confirm you're not a bot`            | YouTube flagged the host. Set `MUSIC_YTDLP_COOKIES` — see [Music](#-full-setup-guide), step 7        |
+| `Sign in to confirm you're not a bot`            | YouTube is refusing the host. Update yt-dlp, or set `/play` to SoundCloud only                       |
 
 Still stuck? [Ask in Discord](https://discord.gg/xcMVwAVjSD) or
 [open an issue](https://github.com/Kkkermit/Testify/issues/new/choose).

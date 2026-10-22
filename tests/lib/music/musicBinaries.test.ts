@@ -4,13 +4,9 @@ import { join } from "node:path";
 import {
 	ageInDays,
 	candidatesFor,
-	cookieFileText,
-	cookiesAsLine,
 	findBinaries,
 	locate,
-	locateCookies,
 	locateYtDlp,
-	looksLikeCookies,
 	pickNewest,
 	runs,
 	statusLines,
@@ -85,7 +81,7 @@ describe("findBinaries", () => {
 			{ runs: () => false, version: (path) => (path === "/a/yt-dlp" ? "2026.09.01" : null) },
 		);
 
-		expect(found).toEqual({ ytDlp: "/a/yt-dlp", ffmpeg: null, ytDlpVersion: "2026.09.01", cookies: null });
+		expect(found).toEqual({ ytDlp: "/a/yt-dlp", ffmpeg: null, ytDlpVersion: "2026.09.01" });
 	});
 
 	/** FFmpeg being absent is a supported state, not a failure — most tracks still play without it. */
@@ -93,67 +89,7 @@ describe("findBinaries", () => {
 		const nothing = { runs: () => false, version: () => null };
 
 		expect(() => findBinaries({}, nothing)).not.toThrow();
-		expect(findBinaries({}, nothing)).toEqual({ ytDlp: null, ffmpeg: null, ytDlpVersion: null, cookies: null });
-	});
-});
-
-describe("locateCookies", () => {
-	const PASTED = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tabc";
-
-	it("uses a path to a cookies file, resolved from the repository when it is relative", () => {
-		expect(locateCookies("/etc/cookies.txt", jest.fn(), () => true)).toBe("/etc/cookies.txt");
-		expect(locateCookies("cookies.txt", jest.fn(), (path) => path.endsWith("cookies.txt"))).toMatch(/cookies\.txt$/);
-	});
-
-	/** Pasting the file into the variable is the only easy way on a host where mounting a file is not. */
-	it("writes pasted contents to a file of their own, and uses that", () => {
-		const write = jest.fn(() => "/tmp/written.txt");
-
-		expect(locateCookies(PASTED, write, () => false)).toBe("/tmp/written.txt");
-		expect(write).toHaveBeenCalledWith(`${PASTED}\n`);
-	});
-
-	/** Railway's variables hold no line breaks, so the file has to fit on one line to get there at all. */
-	it("reads the file from one base64 line", () => {
-		const write = jest.fn(() => "/tmp/written.txt");
-
-		expect(locateCookies(cookiesAsLine(PASTED), write, () => false)).toBe("/tmp/written.txt");
-		expect(write).toHaveBeenCalledWith(`${PASTED}\n`);
-	});
-
-	it("reads `\\n` written for each line break", () => {
-		expect(cookieFileText(PASTED.replaceAll("\n", "\\n"))).toBe(`${PASTED}\n`);
-	});
-
-	/** A path is base64 characters too, and must not be decoded into nonsense and used as the file. */
-	it("still treats a path as a path", () => {
-		expect(cookieFileText("cookies")).toBeNull();
-		expect(cookieFileText("/home/me/cookies.txt")).toBeNull();
-		expect(cookieFileText("C:\\Users\\me\\cookies.txt")).toBeNull();
-	});
-
-	it("uses nothing when unset, or when the path names no file", () => {
-		expect(locateCookies(undefined)).toBeNull();
-		expect(locateCookies("/nowhere/cookies.txt", jest.fn(), () => false)).toBeNull();
-	});
-
-	it("tells a pasted file from a path", () => {
-		expect(looksLikeCookies(PASTED)).toBe(true);
-		expect(looksLikeCookies(".youtube.com\tTRUE\t/\tTRUE\t0\tSID\tabc")).toBe(true);
-		expect(looksLikeCookies("/home/me/cookies.txt")).toBe(false);
-	});
-
-	/** Any file indented with tabs has tabs, and one of those decoded from base64 would be handed to yt-dlp. */
-	it("does not take a file for cookies just because it holds tabs", () => {
-		expect(looksLikeCookies('{\n\t"name": "testify"\n}')).toBe(false);
-		expect(cookieFileText(Buffer.from('{\n\t"name": "testify"\n}').toString("base64"))).toBeNull();
-	});
-
-	it("says on /music status that yt-dlp signs in, without saying where the file is", () => {
-		const lines = statusLines({ ytDlp: "/a/yt-dlp", ffmpeg: "/a/ffmpeg", cookies: "/secret/cookies.txt" });
-
-		expect(lines).toContain("✓ **YouTube cookies** — yt-dlp signs in with them");
-		expect(lines.join("\n")).not.toContain("/secret");
+		expect(findBinaries({}, nothing)).toEqual({ ytDlp: null, ffmpeg: null, ytDlpVersion: null });
 	});
 });
 
