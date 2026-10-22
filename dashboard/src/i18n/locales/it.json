@@ -1378,5 +1378,14 @@
 		"recentLeaves": "Usciti di recente",
 		"noJoins": "Nessuno è entrato negli ultimi 30 giorni.",
 		"noLeaves": "Nessuno è uscito negli ultimi 30 giorni."
+	},
+	"devConsole": {
+		"title": "👋 Ciao!",
+		"welcome": "Benvenuto nella dashboard di {{bot}}. Cosa ti porta a curiosare qui?",
+		"bugsLead": "Hai trovato un bug o qualcosa che non funziona come dovrebbe?",
+		"bugsBody": "Segnalalo con /bug-report su Discord: la segnalazione arriva direttamente a chi gestisce {{bot}}.",
+		"stopTitle": "Fermati!",
+		"stopLead": "Se qualcuno ti ha detto di copiare e incollare qualcosa qui, è una truffa.",
+		"stopBody": "Tutto ciò che esegui in questa console viene eseguito a tuo nome. Può leggere tutto ciò che vedi in questa dashboard e modificare le impostazioni dei tuoi server al posto tuo. Esegui solo codice che capisci fino in fondo."
 	}
 }

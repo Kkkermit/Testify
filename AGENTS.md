@@ -2596,6 +2596,26 @@ and never exceeds the page's own `rgb(244, 244, 249)` in light.
 The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never be able to take
 a click meant for a control.
 
+### The browser is handed the minified bundle, and greeted when it looks
+
+**A build ships no source maps.** `build.sourcemap` is `false`: with maps on, DevTools rebuilt the dashboard's whole
+`src/` tree, file by file, from the `.map` beside every chunk. `npm run verify:bundle` fails the build on a `.map`
+file or a `sourceMappingURL` comment (proved both ways), and `serveDashboard` refuses any `.map` it is asked for,
+judged on the resolved file like the owner chunk. The repository is public, so this is tidiness rather than
+secrecy — nothing the browser holds is secret, and the boundary stays server-side in `requireGuild`, `requireOwner`
+and `reach.ts`.
+
+**The console greets, then warns.** `greetTheConsole` in `lib/consoleGreeting.ts` prints a welcome naming the bot, a
+pointer to `/bug-report`, and a self-XSS warning: code pasted into DevTools runs with the reader's session and can
+change their servers in their name. Three things about it are load-bearing:
+
+- **It waits for i18next's `initialized`**, so a German reader is warned in German rather than in the fallback.
+- **`%` is escaped**, because the console reads `%c` and `%s` as format codes and a bot's name is whatever its owner typed.
+- **Its labels are filled blocks** in `--color-primary` and `--color-destructive` with white text — pairs
+  `contrast.test.ts` already measures — because DevTools has its own light and dark themes that the page cannot see.
+
+It is the one file `no-console` is switched off for.
+
 ### Vite has to pin React too, and for a worse symptom
 
 The same hoisting breaks the browser. `discord-html-transcripts` needs React 18, so npm puts **18** at the root

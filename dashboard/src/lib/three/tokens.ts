@@ -26,8 +26,13 @@ function prefersDark(root: Element = document.documentElement): boolean {
 	return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
+/** A colour token's half for the scheme the page is showing, for the places that need a value rather than a class. */
+export function themeColour(name: string, fallback: string, root?: Element): string {
+	return pickScheme(cssColour(name, fallback, root), prefersDark(root));
+}
+
 export function accentColour(root?: Element): string {
-	const value = pickScheme(cssColour("--color-accent", "#a78bfa", root), prefersDark(root));
+	const value = themeColour("--color-accent", "#a78bfa", root);
 	return isHexColour(value) ? value : "#a78bfa";
 }
 

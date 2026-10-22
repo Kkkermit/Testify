@@ -1377,5 +1377,14 @@
 		"recentLeaves": "Recently left",
 		"noJoins": "Nobody has joined in the last 30 days.",
 		"noLeaves": "Nobody has left in the last 30 days."
+	},
+	"devConsole": {
+		"title": "👋 Hey there!",
+		"welcome": "Welcome to the {{bot}} dashboard. What brings you snooping around in here?",
+		"bugsLead": "Found a bug, or something that isn’t working as it should?",
+		"bugsBody": "Report it with /bug-report in Discord, and it goes straight to the people who run {{bot}}.",
+		"stopTitle": "Stop!",
+		"stopLead": "If somebody told you to copy and paste something here, it’s a scam.",
+		"stopBody": "Anything you run in this console runs as you. It can read everything you can see on this dashboard and change your servers’ settings in your name. Only run code you fully understand."
 	}
 }
