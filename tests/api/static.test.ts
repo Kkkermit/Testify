@@ -12,6 +12,7 @@ beforeEach(() => {
 	mkdirSync(join(root, "assets"));
 	writeFileSync(join(root, "index.html"), "<!doctype html><div id=root></div>");
 	writeFileSync(join(root, "assets", "index-abc123.js"), "console.log(1)");
+	writeFileSync(join(root, "assets", "index-abc123.js.map"), '{"sources":["../src/main.tsx"]}');
 	writeFileSync(join(root, "robots.txt"), "User-agent: *\nDisallow: /\n");
 	writeFileSync(join(root, "apple-touch-icon.png"), "png");
 	writeFileSync(join(root, "manifest.webmanifest"), "{}");
@@ -125,6 +126,17 @@ describe("serveDashboard", () => {
 		expect(await response.text()).toContain("id=root");
 		expect(response.headers.get("cache-control")).toBe("no-cache");
 	});
+
+	/** A source map left in a build once let anybody browse the dashboard's original source tree in DevTools. */
+	it.each(["/assets/index-abc123.js.map", "/assets/index-abc123.js%2Emap", "/assets/./index-abc123.js.map"])(
+		"refuses a source map however its address is spelt: %s",
+		async (path) => {
+			const response = await appFor().request(path);
+
+			expect(response.status).toBe(404);
+			expect(await response.text()).not.toContain("main.tsx");
+		},
+	);
 
 	/** Otherwise a typo in an API path silently returns HTML and the client parses it as JSON. */
 	it("never answers an /api path with the SPA", async () => {

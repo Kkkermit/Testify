@@ -1,7 +1,14 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { filesUnder, missingFrom, ownerChunkProblem, reactVersionsIn, schemeProblem } from "../../scripts/verifyBundle";
+import {
+	filesUnder,
+	missingFrom,
+	ownerChunkProblem,
+	reactVersionsIn,
+	schemeProblem,
+	sourceMapProblem,
+} from "../../scripts/verifyBundle";
 
 /** Two React copies in one bundle are caught, and nothing else is mistaken for one. */
 describe("reactVersionsIn", () => {
@@ -121,5 +128,27 @@ describe("ownerChunkProblem", () => {
 	it("fails when the console has no chunk of its own, or more than one", () => {
 		expect(ownerChunkProblem({ "index-1.js": lazy })).toMatch(/found 0/);
 		expect(ownerChunkProblem({ "OwnerPage-a.js": "", "OwnerPage-b.js": "" })).toMatch(/found 2/);
+	});
+});
+
+describe("sourceMapProblem", () => {
+	it("passes a build of minified files alone", () => {
+		expect(sourceMapProblem({ "assets/index-a1.js": "console.log(1)", "assets/index-a1.css": "a{}" })).toBeNull();
+	});
+
+	/** DevTools rebuilt the dashboard's whole source tree from the maps a build once shipped beside every file. */
+	it("refuses a build that ships a map file", () => {
+		expect(sourceMapProblem({ "assets/index-a1.js": "x", "assets/index-a1.js.map": "" })).toContain(
+			"assets/index-a1.js.map",
+		);
+	});
+
+	it("refuses a file that points the browser at a map", () => {
+		expect(sourceMapProblem({ "assets/index-a1.js": "x\n//# sourceMappingURL=index-a1.js.map" })).toContain(
+			"assets/index-a1.js",
+		);
+		expect(sourceMapProblem({ "assets/index-a1.css": "a{}\n/*# sourceMappingURL=index-a1.css.map */" })).toContain(
+			"assets/index-a1.css",
+		);
 	});
 });

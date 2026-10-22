@@ -1378,5 +1378,14 @@
 		"recentLeaves": "Partis récemment",
 		"noJoins": "Personne n’est arrivé ces 30 derniers jours.",
 		"noLeaves": "Personne n’est parti ces 30 derniers jours."
+	},
+	"devConsole": {
+		"title": "👋 Bonjour !",
+		"welcome": "Bienvenue sur le tableau de bord de {{bot}}. Qu’est-ce qui vous amène à fouiner par ici ?",
+		"bugsLead": "Vous avez trouvé un bug, ou quelque chose qui ne fonctionne pas comme prévu ?",
+		"bugsBody": "Signalez-le avec /bug-report sur Discord : le signalement arrive directement aux personnes qui gèrent {{bot}}.",
+		"stopTitle": "Stop !",
+		"stopLead": "Si quelqu’un vous a demandé de copier-coller quelque chose ici, c’est une arnaque.",
+		"stopBody": "Tout ce que vous exécutez dans cette console s’exécute en votre nom. Ce code peut lire tout ce que vous voyez sur ce tableau de bord et modifier les paramètres de vos serveurs à votre place. N’exécutez que du code que vous comprenez parfaitement."
 	}
 }

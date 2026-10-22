@@ -12,7 +12,6 @@ const TYPES: Record<string, string> = {
 	".css": "text/css; charset=utf-8",
 	".json": "application/json; charset=utf-8",
 	".txt": "text/plain; charset=utf-8",
-	".map": "application/json; charset=utf-8",
 	".svg": "image/svg+xml",
 	".png": "image/png",
 	".jpg": "image/jpeg",
@@ -61,9 +60,7 @@ function safeDecode(pathname: string): string | null {
  * no spelling of the address reaches it.
  */
 export function isOwnerChunk(root: string, asset: string): boolean {
-	return (
-		relative(root, dirname(asset)) === "assets" && /^OwnerPage-[\w-]+\.(?:js|css)(?:\.map)?$/.test(basename(asset))
-	);
+	return relative(root, dirname(asset)) === "assets" && /^OwnerPage-[\w-]+\.(?:js|css)$/.test(basename(asset));
 }
 
 export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): void {
@@ -75,6 +72,9 @@ export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): 
 		if (context.req.path.startsWith("/api/")) return context.notFound();
 
 		const asset = resolveAsset(root, context.req.path);
+
+		// A source map rebuilds the code it describes, so one left in a build is never handed out, however it is spelt.
+		if (asset !== null && extname(asset) === ".map") return context.notFound();
 
 		// Answered like any missing file, so somebody else learns neither that it exists nor what the console holds.
 		if (asset !== null && isOwnerChunk(root, asset)) {

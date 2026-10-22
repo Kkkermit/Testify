@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { loadEnv, resetEnv } from "@config/env";
+import { envFile, loadEnv, resetEnv } from "@config/env";
 
 const VALID = {
 	DISCORD_TOKEN: "a-token",
@@ -159,6 +159,32 @@ describe("the dashboard settings", () => {
 		});
 
 		expect(loadEnv().DASHBOARD_ENABLED).toBe(true);
+	});
+});
+
+describe("envFile", () => {
+	const original = process.env.NODE_ENV;
+
+	afterEach(() => {
+		process.env.NODE_ENV = original;
+	});
+
+	it("follows NODE_ENV when no file is named", () => {
+		process.env.NODE_ENV = "development";
+		expect(envFile().name).toBe(".env.development");
+
+		process.env.NODE_ENV = "production";
+		expect(envFile().name).toBe(".env");
+	});
+
+	/** `npm run db:wipe` picks a file by what was chosen, not by whatever NODE_ENV the shell happens to hold. */
+	it("returns the file it is asked for, whatever NODE_ENV says", () => {
+		process.env.NODE_ENV = "production";
+
+		expect(envFile(".env.development")).toMatchObject({
+			name: ".env.development",
+			path: resolve(process.cwd(), ".env.development"),
+		});
 	});
 });
 
