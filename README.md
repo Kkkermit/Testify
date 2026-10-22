@@ -644,7 +644,8 @@ dashboard is in [`docs/dashboard/guide.md`](docs/dashboard/guide.md).
 | `npm run music:cookies`     | Turns an exported `cookies.txt` into the one line Railway can take    |
 | `npm run secret`            | Generates a dashboard session secret (`-- --write` puts it in `.env`) |
 | `npm run commands:clear`    | Removes every registered slash command from Discord                   |
-| `npm run db:wipe`           | Wipes the database, or individual collections                         |
+| `npm run db:wipe`           | Asks development or production, then which collections to empty       |
+| `npm run db:wipe:dev`       | The same, straight to the database in `.env.development`              |
 | `npm run audit`             | Checks dependencies for known vulnerabilities                         |
 
 ## ❓ FAQ

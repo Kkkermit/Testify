@@ -35,6 +35,7 @@
 		"commit": "tsx scripts/commitRunner.ts",
 		"dashboard:dev": "npm run dev --workspace dashboard",
 		"db:wipe": "tsx scripts/wipeDatabase.ts",
+		"db:wipe:dev": "tsx scripts/wipeDatabase.ts --dev",
 		"dev": "npm run build:shared && cross-env NODE_ENV=development tsx watch --clear-screen=false src/index.ts",
 		"dev:all": "tsx scripts/devAll.ts",
 		"docs:commands": "tsx scripts/generateCommandDocs.ts",
