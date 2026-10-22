@@ -136,7 +136,8 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
 | `npm run commit`         | Guided commit wizard (enforces the message format)                   |
 | `npm run commands:clear` | Deregister all application commands                                  |
-| `npm run db:wipe`        | Destructive. Wipes the database                                      |
+| `npm run db:wipe`        | Destructive. Asks development or production, then which collections  |
+| `npm run db:wipe:dev`    | The same, against `.env.development`'s database without asking       |
 | `npm run audit`          | `better-npm-audit --level high`, reading `.nsprc`                    |
 
 ### The verification discipline — this part matters

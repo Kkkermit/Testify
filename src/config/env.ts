@@ -86,9 +86,10 @@ export interface EnvFile {
 	exists: boolean;
 }
 
-/** `npm run dev` sets NODE_ENV=development, which is the only thing that picks `.env.development`. */
-export function envFile(): EnvFile {
-	const name = process.env.NODE_ENV === "development" ? ".env.development" : ".env";
+/** Unnamed, `npm run dev` setting NODE_ENV=development is the only thing that picks `.env.development`. */
+export function envFile(
+	name: EnvFile["name"] = process.env.NODE_ENV === "development" ? ".env.development" : ".env",
+): EnvFile {
 	const path = resolve(process.cwd(), name);
 
 	return { name, path, exists: existsSync(path) };
