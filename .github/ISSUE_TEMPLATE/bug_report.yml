@@ -50,7 +50,7 @@ body:
     id: version
     attributes:
       label: Testify version or commit
-      placeholder: 2.0.4
+      placeholder: 2.0.5
     validations:
       required: true
 
