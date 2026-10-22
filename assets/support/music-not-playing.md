@@ -14,7 +14,7 @@ related: music-access, music, bot-permissions
 4. **Is the track available?** Private and removed videos cannot be played, and the player shows the reason for a minute.
 
 ### YouTube refuses but SoundCloud works
-When YouTube says it would not hand over the audio, it has stopped trusting the server the bot runs on — the song is fine. Put `sc:` before your search to use SoundCloud meanwhile, and tell whoever hosts the bot: they need to update its player or give it fresh YouTube cookies.
+When YouTube says it would not hand over the audio, it has stopped trusting the server the bot runs on — the song is fine. Put `sc:` before your search to use SoundCloud meanwhile, and tell whoever hosts the bot: they may need to update its player, or switch music to SoundCloud.
 
 ### Still nothing
 `/music status` shows which players the host has installed and how old they are. If it reports something missing, only the person who hosts the bot can fix it.

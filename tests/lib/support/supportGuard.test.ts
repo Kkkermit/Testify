@@ -1,4 +1,3 @@
-import { cookiesAsLine } from "@lib/music/musicBinaries.util";
 import { fillPlaceholders } from "@lib/support/supportArticles.util";
 import { findLeak, secretsOf } from "@lib/support/supportGuard.util";
 import { FAKE, FAKE_ENV, realEntries } from "@tests/helpers/support";
@@ -12,34 +11,6 @@ describe("secretsOf", () => {
 		expect(secrets).toEqual(
 			expect.arrayContaining([ENV.DISCORD_TOKEN, ENV.DISCORD_CLIENT_SECRET, ENV.MONGODB_URI, FAKE.databasePassword]),
 		);
-	});
-
-	/** A pasted cookies file is a signed-in YouTube session, so every cookie in it counts as a secret. */
-	it("holds each cookie's value from a pasted cookies file", () => {
-		const pasted = "# Netscape HTTP Cookie File\\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tcookie-value-123456";
-
-		expect(secretsOf({ ...ENV, MUSIC_YTDLP_COOKIES: pasted })).toContain("cookie-value-123456");
-	});
-
-	/** The base64 line decodes to the whole session, so the line itself is as secret as every cookie in it. */
-	it("holds each cookie's value and the line itself when the file is one base64 line", () => {
-		const line = cookiesAsLine("# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t0\tSID\tcookie-value-123456");
-
-		expect(secretsOf({ ...ENV, MUSIC_YTDLP_COOKIES: line })).toEqual(
-			expect.arrayContaining(["cookie-value-123456", line]),
-		);
-	});
-
-	/** Browsers export the session cookies behind a `#HttpOnly_` prefix, which reads like a comment line. */
-	it("holds the values of HttpOnly cookies too", () => {
-		const pasted =
-			"# Netscape HTTP Cookie File\n#HttpOnly_.youtube.com\tTRUE\t/\tTRUE\t0\t__Secure-3PSID\tsession-value-123456";
-
-		expect(secretsOf({ ...ENV, MUSIC_YTDLP_COOKIES: pasted })).toContain("session-value-123456");
-	});
-
-	it("holds nothing from a path to a cookies file", () => {
-		expect(secretsOf({ ...ENV, MUSIC_YTDLP_COOKIES: "cookies.txt" })).not.toContain("cookies.txt");
 	});
 
 	it("leaves out a value too short to be worth matching, so a short username cannot censor ordinary words", () => {

@@ -354,7 +354,7 @@ describe("resolveTracks", () => {
 	it("turns YouTube's bot check into advice", async () => {
 		const binary = fakeYtDlp(
 			"botcheck",
-			'echo "ERROR: [youtube] abc: Sign in to confirm you\'re not a bot. Use --cookies-from-browser" >&2\nexit 1',
+			'echo "ERROR: [youtube] abc: Sign in to confirm you\'re not a bot." >&2\nexit 1',
 		);
 
 		const refused = resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
@@ -369,18 +369,14 @@ describe("resolveTracks", () => {
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/something new/);
 	});
 
-	it("asks for as many results as it is told, and signs in with cookies when the host has them", async () => {
+	it("asks for as many results as it is told", async () => {
 		const record = join(directory, "args.txt");
 		const binary = fakeYtDlp("args", `printf '%s\\n' "$@" > '${record}'`);
 
-		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null, cookies: "/secret/cookies.txt" }, { results: 1 });
+		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
 		const args = readFileSync(record, "utf8").split("\n");
 
 		expect(args).toContain("ytsearch1:lofi");
-		expect(args[args.indexOf("--cookies") + 1]).toBe("/secret/cookies.txt");
-
-		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
-		expect(readFileSync(record, "utf8")).not.toContain("--cookies");
 	});
 
 	it("still fails usefully when the downloader says nothing at all", async () => {
@@ -485,16 +481,6 @@ describe("ytDlpStreamArgs", () => {
 		expect(ytDlpStreamArgs("251", "https://youtu.be/abc")).toEqual(
 			expect.arrayContaining(["--retries", "--fragment-retries"]),
 		);
-	});
-
-	it("hands the stream the host's cookies too, or it would be refused after a search that was not", () => {
-		const args = ytDlpStreamArgs("251", "https://youtu.be/abc", "/secret/cookies.txt");
-
-		expect(args.slice(args.indexOf("--cookies"), args.indexOf("--cookies") + 2)).toEqual([
-			"--cookies",
-			"/secret/cookies.txt",
-		]);
-		expect(args.at(-1)).toBe("https://youtu.be/abc");
 	});
 });
 

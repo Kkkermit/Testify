@@ -93,7 +93,7 @@ describe("queueRequest", () => {
 	});
 
 	/** The reader is told what happened; the host is told what to do about it, once, in the log. */
-	it("tells the host how to get past YouTube's bot check, and still refuses the reader", async () => {
+	it("tells the host what to do when YouTube refuses it, and still refuses the reader", async () => {
 		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));
 		const { MusicProblemError } = jest.requireActual<typeof Source>("@lib/music/musicSource.util");
 		resolveTracks.mockRejectedValue(new MusicProblemError({ kind: "bot-check", advice: "YouTube asked." }));
@@ -101,7 +101,7 @@ describe("queueRequest", () => {
 
 		await expect(queueRequest(asked)).rejects.toThrow(/YouTube asked/);
 		expect((asked.client as unknown as { logger: { warn: jest.Mock } }).logger.warn).toHaveBeenCalledWith(
-			expect.stringContaining("MUSIC_YTDLP_COOKIES"),
+			expect.stringContaining("SoundCloud only"),
 		);
 	});
 	/** "The page needs to be reloaded" used to escape as a crash; it is a refusal, and the host is told what fixes it. */
@@ -230,19 +230,15 @@ describe("requestedQuery", () => {
 });
 
 describe("hostAdvice", () => {
-	/** With cookies already given, "add cookies" is no help: they have been rotated, and only a fresh export fixes it. */
-	it("tells a host with cookies to export fresh ones from a private window", () => {
-		expect(hostAdvice("session", true)).toMatch(/private window/);
-		expect(hostAdvice("session", false)).toMatch(/npm run music:setup/);
-	});
-
-	it("keeps the bot check's advice", () => {
-		expect(hostAdvice("bot-check", false)).toContain("MUSIC_YTDLP_COOKIES");
-		expect(hostAdvice("bot-check", true)).toMatch(/expired/);
+	it("tells the host to update yt-dlp, or to stop asking YouTube", () => {
+		for (const kind of ["bot-check", "session"] as const) {
+			expect(hostAdvice(kind)).toMatch(/npm run music:setup/);
+			expect(hostAdvice(kind)).toMatch(/SoundCloud only/);
+		}
 	});
 
 	it("says nothing for a refusal that is about the track", () => {
-		expect(hostAdvice("unavailable", true)).toBeNull();
-		expect(hostAdvice("drm", false)).toBeNull();
+		expect(hostAdvice("unavailable")).toBeNull();
+		expect(hostAdvice("drm")).toBeNull();
 	});
 });

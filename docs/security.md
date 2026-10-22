@@ -110,7 +110,6 @@ The full model, and the rules that are easy to break silently, are in [`AGENTS.m
 - [ ] **Use `https://` in `DASHBOARD_BASE_URL`** once you have a certificate.
 - [ ] **Never commit `.env`.** If a token leaks, reset it in the Developer Portal straight away; deleting the commit
       is not enough.
-- [ ] **Treat a `MUSIC_YTDLP_COOKIES` value as a password.** It is a signed-in session.
 
 ## 🔍 Dependency scanning
 
