@@ -48,20 +48,16 @@ export default defineMessageHandler({
 		const ok = await runCommand(interaction, command, client);
 		const durationMs = Date.now() - started;
 		recordCommandTime(durationMs, ok);
-		countCommandUse(client, {
-			command: command.name,
-			guildId: message.guildId,
-			surface: "prefix",
-			failed: !ok,
-		});
-		logCommandUse(client, interaction, command, {
+		const run = {
 			surface: "prefix",
 			ok,
 			durationMs,
 			channelId: message.guild === null ? null : message.channelId,
 			prefix,
 			typed: `${parsed.prefix ?? `@${client.user?.username ?? "mention"} `}${parsed.name}`,
-		});
+		} as const;
+		countCommandUse(client, interaction, command, run);
+		logCommandUse(client, interaction, command, run);
 		return true;
 	},
 });

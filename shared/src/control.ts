@@ -76,4 +76,6 @@ export interface OwnerGuildDetail {
 	configured: string[];
 	/** Commands run there in the last 30 days. */
 	usage: number;
+	/** Dashboard screens its managers opened in the last 30 days. */
+	dashboardViews: number;
 }

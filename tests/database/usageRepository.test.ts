@@ -1,12 +1,15 @@
 import { describeWithMongo } from "../helpers/mongo";
 import { CommandUsages } from "@database/models/analytics.schema";
+import { DashboardViews } from "@database/models/dashboardViews.schema";
 import {
 	commandTallies,
 	dailyTallies,
+	dashboardTallies,
 	dayKey,
 	DIRECT_MESSAGE,
 	guildTallies,
 	recordCommandUse,
+	recordDashboardView,
 	since,
 	surfaceTallies,
 	usageTotals,
@@ -123,5 +126,48 @@ describeWithMongo("usageRepository", () => {
 		const second = await CommandUsages.findOne({}).lean();
 
 		expect(second?.expiresAt.getTime()).toBe(first?.expiresAt.getTime());
+	});
+
+	/** The owner's drill-down into one server reads the same rows, so another server's runs must never leak in. */
+	it("narrows every tally to one server when asked", async () => {
+		await use({ guildId: GUILD, command: "ban", surface: "prefix" });
+		await use({ guildId: OTHER, command: "rank" });
+		await use({ guildId: OTHER, command: "rank" });
+
+		expect(await commandTallies(7, 0, TODAY, GUILD)).toEqual([{ command: "ban", count: 1, failures: 0 }]);
+		expect(await dailyTallies(7, TODAY, GUILD)).toEqual([{ day: "2026-08-01", count: 1, failures: 0 }]);
+		expect(await surfaceTallies(7, TODAY, GUILD)).toEqual({ slash: 0, prefix: 1 });
+	});
+});
+
+describeWithMongo("dashboard use per server", () => {
+	it("ranks servers by how many screens were opened there", async () => {
+		await recordDashboardView(GUILD, TODAY);
+		await recordDashboardView(OTHER, TODAY);
+		await recordDashboardView(OTHER, new Date("2026-07-30T09:00:00.000Z"));
+
+		expect(await dashboardTallies(7, 0, TODAY)).toEqual([
+			{ guildId: OTHER, count: 2, lastDay: "2026-08-01" },
+			{ guildId: GUILD, count: 1, lastDay: "2026-08-01" },
+		]);
+	});
+
+	/** One row per server per day, holding a count and nothing else: no user, and not which screen. */
+	it("keeps one row a day that names nobody", async () => {
+		await recordDashboardView(GUILD, TODAY);
+		await recordDashboardView(GUILD, TODAY);
+
+		const rows = await DashboardViews.find({}).lean();
+		expect(rows).toHaveLength(1);
+		expect(Object.keys(rows[0] ?? {}).sort()).toEqual(["__v", "_id", "count", "day", "expiresAt", "guildId"]);
+	});
+
+	it("leaves out days past the window and other servers when narrowed", async () => {
+		await recordDashboardView(GUILD, new Date("2026-06-01T09:00:00.000Z"));
+		await recordDashboardView(GUILD, TODAY);
+		await recordDashboardView(OTHER, TODAY);
+
+		expect(await dashboardTallies(7, 0, TODAY, GUILD)).toEqual([{ guildId: GUILD, count: 1, lastDay: "2026-08-01" }]);
+		expect(await dashboardTallies(90, 1, TODAY)).toEqual([{ guildId: GUILD, count: 2, lastDay: "2026-08-01" }]);
 	});
 });

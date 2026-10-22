@@ -18,6 +18,9 @@ import {
 	type SupportReply,
 	type ServerSettings,
 	type UsageReport,
+	type GuildUsageReport,
+	type MemberUsageRow,
+	type CommandRunRow,
 	type VerificationConfigResponse,
 	type GuildNickname,
 	type GuildOverview,
@@ -397,6 +400,7 @@ export const guildDetail: OwnerGuildDetail = {
 	missingPermissions: ["Manage Roles"],
 	configured: ["levelling"],
 	usage: 900,
+	dashboardViews: 12,
 };
 
 export const guildNickname: GuildNickname = { nickname: "Testy", canChange: true };
@@ -511,11 +515,94 @@ export const usageReport: UsageReport = {
 	],
 	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
 	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
+	dashboardGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 12 }],
 	screens: [
 		{ route: "/guilds/:guildId/levelling", count: 42 },
 		{ route: "/guilds/:guildId/settings", count: 18 },
 	],
 };
+
+export const guildUsage: GuildUsageReport = {
+	guild: {
+		guildId: aGuild.id,
+		name: aGuild.name,
+		iconUrl: null,
+		memberCount: 1_234,
+		count: 900,
+		joinedAt: "2026-01-01T00:00:00.000Z",
+	},
+	days: 30,
+	memberDays: 30,
+	runs: 900,
+	failures: 9,
+	surfaces: { slash: 800, prefix: 100 },
+	daily: [
+		{ day: "2026-07-31", count: 400, failures: 4 },
+		{ day: "2026-08-01", count: 500, failures: 5 },
+	],
+	commands: [
+		{ command: "rank", category: "levelling", count: 600, failures: 1 },
+		{ command: "music", category: "music", count: 300, failures: 8 },
+	],
+	dashboardViews: 12,
+	members: 2,
+};
+
+export const memberUsage: MemberUsageRow[] = [
+	{
+		userId: "800000000000000001",
+		username: "alice",
+		avatarUrl: null,
+		runs: 700,
+		failures: 3,
+		prefix: 50,
+		commandCount: 4,
+		topCommands: [
+			{ command: "rank", count: 500 },
+			{ command: "music", count: 150 },
+			{ command: "balance", count: 40 },
+		],
+		lastAt: "2026-08-01T12:00:00.000Z",
+	},
+	{
+		userId: "800000000000000002",
+		username: "bob",
+		avatarUrl: null,
+		runs: 200,
+		failures: 0,
+		prefix: 0,
+		commandCount: 1,
+		topCommands: [{ command: "rank", count: 200 }],
+		lastAt: "2026-07-31T09:00:00.000Z",
+	},
+];
+
+export const commandRuns: CommandRunRow[] = [
+	{
+		at: "2026-08-01T12:00:00.000Z",
+		userId: "800000000000000001",
+		username: "alice",
+		command: "music",
+		subcommand: "play",
+		surface: "slash",
+		failed: true,
+		durationMs: 1_200,
+		channelId: "400000000000000001",
+		channelName: "general",
+	},
+	{
+		at: "2026-08-01T11:00:00.000Z",
+		userId: "800000000000000002",
+		username: "bob",
+		command: "rank",
+		subcommand: null,
+		surface: "prefix",
+		failed: false,
+		durationMs: 85,
+		channelId: null,
+		channelName: null,
+	},
+];
 
 export const logFeed: LogFeed = {
 	lines: [
@@ -839,6 +926,13 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/analytics/usage", () => HttpResponse.json(usageReport)),
+	http.get("/api/analytics/guilds/:guildId", () => HttpResponse.json(guildUsage)),
+	http.get("/api/analytics/guilds/:guildId/members", () =>
+		HttpResponse.json({ items: memberUsage, total: memberUsage.length, page: 1, perPage: 25 }),
+	),
+	http.get("/api/analytics/guilds/:guildId/runs", () =>
+		HttpResponse.json({ items: commandRuns, total: commandRuns.length, page: 1, perPage: 25 }),
+	),
 	http.get("/api/analytics/logs", () => HttpResponse.json(logFeed)),
 	http.get("/api/analytics/runtime", () => HttpResponse.json(runtimeInfo)),
 	http.get("/api/control", () => HttpResponse.json(botControl)),

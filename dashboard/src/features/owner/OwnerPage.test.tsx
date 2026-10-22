@@ -25,6 +25,8 @@ function row(overrides: Partial<OwnerGuildRow> = {}): OwnerGuildRow {
 		memberCount: 1_234,
 		joinedAt: null,
 		configured: ["levelling"],
+		commands: 0,
+		dashboardViews: 0,
 		...overrides,
 	};
 }

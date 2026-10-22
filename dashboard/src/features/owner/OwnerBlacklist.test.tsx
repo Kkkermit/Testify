@@ -131,6 +131,8 @@ describe("leaving a server", () => {
 							memberCount: 1_234,
 							joinedAt: "2026-01-01T00:00:00.000Z",
 							configured: ["levelling"],
+							commands: 900,
+							dashboardViews: 12,
 						},
 					],
 					total: 1,
