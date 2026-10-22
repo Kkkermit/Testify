@@ -4,11 +4,13 @@ import { createRoot } from "react-dom/client";
 import { RouterProvider } from "react-router";
 import { applyStoredPreferences } from "@/hooks/preferences";
 import { ApiError } from "@/lib/api";
+import { greetTheConsole } from "@/lib/consoleGreeting";
 import { router } from "@/routes";
 import "@/i18n";
 import "@/index.css";
 
 applyStoredPreferences();
+greetTheConsole();
 
 const queryClient = new QueryClient({
 	defaultOptions: {

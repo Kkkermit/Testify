@@ -131,6 +131,11 @@ export default ts.config(
 		},
 	},
 	{
+		// The dashboard's DevTools greeting and self-XSS warning exist to be read in the console.
+		files: ["dashboard/src/lib/consoleGreeting.ts"],
+		rules: { "no-console": "off" },
+	},
+	{
 		files: ["scripts/**/*.ts", "**/*.config.ts"],
 		rules: {
 			"no-console": "off",

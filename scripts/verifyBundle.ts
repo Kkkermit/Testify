@@ -2,8 +2,8 @@ import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 /**
- * Fails on what only goes wrong in the built dashboard: a second copy of React, a polyfilled `light-dark()`, or a
- * missing file from `dashboard/public`.
+ * Fails on what only goes wrong in the built dashboard: a second copy of React, a polyfilled `light-dark()`, a missing
+ * file from `dashboard/public`, or a source map that would hand out the original code.
  */
 
 const DIST = resolve(process.cwd(), "dashboard", "dist");
@@ -72,6 +72,18 @@ export function ownerChunkProblem(files: Record<string, string>): string | null 
 	return importer === undefined ? null : `${importer[0]} imports the owner console statically.`;
 }
 
+/** The comment that tells a browser where a file's source map is. */
+const MAP_POINTER = /[#@]\s*sourceMappingURL=/;
+
+/** Null when nothing in the build is or points at a source map; otherwise the first file that does. */
+export function sourceMapProblem(files: Record<string, string>): string | null {
+	const map = Object.keys(files).find((name) => name.endsWith(".map"));
+	if (map !== undefined) return `The build ships a source map, ${map}, which rebuilds the original code.`;
+
+	const pointer = Object.entries(files).find(([name, code]) => /\.(?:js|css)$/.test(name) && MAP_POINTER.test(code));
+	return pointer === undefined ? null : `${pointer[0]} points the browser at a source map.`;
+}
+
 function assetsMatching(extension: string): string {
 	return readdirSync(ASSETS)
 		.filter((file) => file.endsWith(extension))
@@ -115,6 +127,18 @@ function main(): void {
 		process.exit(1);
 	}
 
+	const maps = sourceMapProblem(
+		Object.fromEntries(
+			filesUnder(DIST).map((file) => [file, /\.(?:js|css)$/.test(file) ? readFileSync(join(DIST, file), "utf8") : ""]),
+		),
+	);
+
+	if (maps !== null) {
+		console.error(maps);
+		console.error("Check build.sourcemap in dashboard/vite.config.ts.");
+		process.exit(1);
+	}
+
 	const publicFiles = filesUnder(PUBLIC);
 	const missing = missingFrom(DIST, publicFiles);
 
@@ -128,6 +152,7 @@ function main(): void {
 	console.log("`light-dark()` reaches the browser intact.");
 	console.log(`All ${String(publicFiles.length)} files from dashboard/public are in the build.`);
 	console.log("The owner console is its own chunk, loaded only on demand.");
+	console.log("No source maps: the browser gets only the minified bundle.");
 }
 
 if (require.main === module) main();

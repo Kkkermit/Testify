@@ -76,8 +76,8 @@ export default defineConfig(({ command, mode }) => {
 			cssTarget: ["chrome123", "safari17.5", "firefox120", "edge123"],
 			// three is over the default and is already split and loaded on demand.
 			chunkSizeWarningLimit: 600,
-			// Open source: a stack trace someone can read is worth the file size.
-			sourcemap: true,
+			// A map hands anybody the source tree file by file in DevTools, so a build ships only the minified bundle.
+			sourcemap: false,
 			rollupOptions: {
 				output: {
 					manualChunks: (id) => {
