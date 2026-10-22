@@ -1,5 +1,4 @@
 import { type Env, ENV_KEYS } from "@config/env";
-import { cookieFileText, looksLikeCookies } from "@lib/music/musicBinaries.util";
 
 /** The last check before anything reaches a reader: names what in a text looks secret or personal, never the value. */
 
@@ -13,25 +12,9 @@ export function secretsOf(env: Env): string[] {
 		env.MONGODB_URI,
 		env.SUPPORT_AI_API_KEY,
 		...credentialsIn(env.MONGODB_URI),
-		...cookieValues(env.MUSIC_YTDLP_COOKIES),
 	];
 
 	return values.filter((value): value is string => value !== undefined && value.length >= MIN_SECRET_LENGTH);
-}
-
-/** Each cookie's value in a cookies file the variable holds, and the variable itself when it is one base64 line. */
-function cookieValues(held: string | undefined): string[] {
-	const text = held === undefined ? null : cookieFileText(held);
-	if (held === undefined || text === null) return [];
-
-	const values = text
-		.split("\n")
-		.map((line) => line.split("\t"))
-		// A row has seven columns; browsers write HttpOnly cookies, the session ones, as `#HttpOnly_.youtube.com`.
-		.filter((columns) => columns.length === 7)
-		.map((columns) => columns.at(-1)?.trim() ?? "");
-
-	return looksLikeCookies(held) ? values : [...values, held.trim()];
 }
 
 function credentialsIn(uri: string): string[] {

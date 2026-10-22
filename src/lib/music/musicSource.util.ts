@@ -80,11 +80,6 @@ export function tracksFromInfo(
 		.filter((track): track is Track => track !== null);
 }
 
-/** Signs yt-dlp in to YouTube when the host gave it cookies. */
-export function cookieArgs(binaries: Pick<MusicBinaries, "cookies">): string[] {
-	return binaries.cookies === undefined || binaries.cookies === null ? [] : ["--cookies", binaries.cookies];
-}
-
 /** A download refused for a reason the player knows, which the reader is told rather than handed a stack. */
 export class MusicProblemError extends UserFacingError {
 	constructor(
@@ -206,7 +201,6 @@ export async function resolveTracks(
 		"--ignore-config",
 		...(flat ? ["--flat-playlist"] : ["--no-playlist"]),
 		...(skipping ? ["--ignore-no-formats-error"] : []),
-		...cookieArgs(binaries),
 		...argumentsFor(query, results),
 	];
 
@@ -255,7 +249,6 @@ export async function describeTrack(url: string, binaries: MusicBinaries, now = 
 		"--no-progress",
 		"--ignore-config",
 		"--no-playlist",
-		...cookieArgs(binaries),
 		url,
 	]);
 
@@ -291,7 +284,7 @@ const BUFFER_BYTES = 1 << 24;
 const PROBLEM_TAIL = 500;
 
 /** `--no-playlist`, or a link copied out of a playlist streams the whole list down one pipe. */
-export function ytDlpStreamArgs(formatId: string, url: string, cookies: string | null = null): string[] {
+export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 	return [
 		"--quiet",
 		"--no-warnings",
@@ -308,7 +301,6 @@ export function ytDlpStreamArgs(formatId: string, url: string, cookies: string |
 		formatId,
 		"-o",
 		"-",
-		...cookieArgs({ cookies }),
 		url,
 	];
 }
@@ -368,7 +360,7 @@ export function openStream(
 ): OpenStream {
 	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
 
-	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url, binaries.cookies ?? null), {
+	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url), {
 		stdio: ["ignore", "pipe", "pipe"],
 		windowsHide: true,
 	});

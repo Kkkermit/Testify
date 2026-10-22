@@ -65,29 +65,20 @@ export interface TrackRequest {
 	textChannelId: string | null;
 }
 
-const HOST_ADVICE: Partial<Record<ProblemKind, { without: string; with: string }>> = {
-	"bot-check": {
-		without:
-			"[MUSIC] YouTube asked this host to prove it is not a bot. Give yt-dlp YouTube cookies with MUSIC_YTDLP_COOKIES; .env.example says how.",
-		with: "[MUSIC] YouTube asked this host to prove it is not a bot even with cookies. They have probably expired; export fresh ones into MUSIC_YTDLP_COOKIES.",
-	},
-	session: {
-		without:
-			'[MUSIC] YouTube refused this host\'s session ("The page needs to be reloaded"). Update yt-dlp with npm run music:setup, and if it keeps happening give it cookies with MUSIC_YTDLP_COOKIES.',
-		with: '[MUSIC] YouTube refused this host\'s session ("The page needs to be reloaded") even with cookies. They have most likely been rotated: export fresh ones from a private window, close it straight away, and put them in MUSIC_YTDLP_COOKIES.',
-	},
+const SWITCH_TO_SOUNDCLOUD = "or set /play to SoundCloud only in the owner console's control tab.";
+
+const HOST_ADVICE: Partial<Record<ProblemKind, string>> = {
+	"bot-check": `[MUSIC] YouTube is refusing requests from this host ("Sign in to confirm you're not a bot"). Update yt-dlp with npm run music:setup, ${SWITCH_TO_SOUNDCLOUD}`,
+	session: `[MUSIC] YouTube refused this host's session ("The page needs to be reloaded"). Update yt-dlp with npm run music:setup, ${SWITCH_TO_SOUNDCLOUD}`,
 };
 
 /** What the host can do about a refusal that is about the host rather than the track, or null when there is nothing. */
-export function hostAdvice(kind: ProblemKind, hasCookies: boolean): string | null {
-	const advice = HOST_ADVICE[kind];
-	if (advice === undefined) return null;
-
-	return hasCookies ? advice.with : advice.without;
+export function hostAdvice(kind: ProblemKind): string | null {
+	return HOST_ADVICE[kind] ?? null;
 }
 
-function warnHost(request: TrackRequest, binaries: MusicBinaries, kind: ProblemKind): void {
-	const advice = hostAdvice(kind, binaries.cookies !== null && binaries.cookies !== undefined);
+function warnHost(request: TrackRequest, kind: ProblemKind): void {
+	const advice = hostAdvice(kind);
 	if (advice !== null) request.client.logger.warn(advice);
 }
 
@@ -110,7 +101,7 @@ async function findTracks(
 		if (found.length > 0 || !fallsBackToSoundCloud(query, sources)) return { found, fellBack: false };
 	} catch (error) {
 		if (!(error instanceof MusicProblemError) || aboutTheTrack(error.problem)) throw error;
-		warnHost(request, binaries, error.problem.kind);
+		warnHost(request, error.problem.kind);
 
 		if (!fallsBackToSoundCloud(query, sources)) {
 			throw query.source === "youtube" && allowsSource(sources, "soundcloud")

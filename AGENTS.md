@@ -132,7 +132,6 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
 | `npm run docs:images`    | Redraw the card images in `docs/images/bot/` from the real renderers |
 | `npm run music:setup`    | Fetches yt-dlp into `bin/`, and reports whether FFmpeg is there      |
-| `npm run music:cookies`  | Turns an exported cookies.txt into the one line Railway can take     |
 | `npm run secret`         | Generate `DASHBOARD_SESSION_SECRET`. `-- --write` puts it in `.env`  |
 | `npm run commit`         | Guided commit wizard (enforces the message format)                   |
 | `npm run commands:clear` | Deregister all application commands                                  |
@@ -1162,24 +1161,20 @@ skipped is logged at `warn` — warning on every 403 told the host to update a y
 **"The page needs to be reloaded" is YouTube refusing the host's session, not a crash** (`session`). It is YouTube's
 own `playabilityStatus` reason, which yt-dlp passes through untouched because it rewrites only the sign-in, captcha
 and rate-limit reasons — read out of `_video.py`, not assumed. It is handled like the bot check: no retry, a plain
-search falls back to SoundCloud under "both", and `hostAdvice` tells the host to update yt-dlp, or, when cookies are
-already set, to export fresh ones from a private window, since cookies from a browser left open are rotated.
+search falls back to SoundCloud under "both", and `hostAdvice` tells the host to update yt-dlp or to set `/play` to
+SoundCloud only.
 
 **A search asks for one result, because only one is played.** `queueRequest` passes `results: 1`; the old
 `ytsearch8:` extracted all eight in full, so a host YouTube had flagged was bot-checked eight times per `/play`, and
 request volume is what gets a host flagged. The typeahead keeps its eight, but as a `--flat-playlist` search, which
 reads the results page and extracts nothing. A refusal `classifyProblem` recognises leaves `resolveTracks` as a
 `MusicProblemError` — a `UserFacingError` carrying the advice, not yt-dlp's text logged as a failure — and a bot check
-also logs one `warn` for the host, naming `MUSIC_YTDLP_COOKIES`.
+also logs one `warn` for the host with the same advice.
 
-**`MUSIC_YTDLP_COOKIES` is yt-dlp's own answer to a flagged host**, and the only one that needs no extra install:
-`--cookies` goes on every call — search, description and stream alike, since a stream refused after a search that
-was not is the worse failure. It takes a path, resolved from the repository, or the file itself held in the
-variable, because mounting a file is awkward on Docker and Railway; `locateCookies` writes that to a file only its
-own user can read. **Railway's variables hold no line breaks**, so `cookieFileText` also reads the file as one base64
-line, which `npm run music:cookies -- cookies.txt` prints; a path can never decode into a cookies file, so the two
-cannot be confused. They are a signed-in session, so `secretsOf` treats every cookie value, and the base64 line
-itself, as a secret, and `/music status` says they are in use without saying where they are.
+**The bot never signs in to YouTube, and nothing works around a refusal.** yt-dlp runs with no account and nothing
+that makes it look like a browser. A host YouTube refuses is told to update yt-dlp or to set `/play` to SoundCloud
+only, which the owner console does in one click. Do not add a way to sign the bot in: getting past YouTube's bot
+check is not this project's to do.
 
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
@@ -1354,9 +1349,8 @@ protected result without formats instead of failing the whole search, and plays 
 (`isPlayable`). YouTube searches stay at one result, and a flat typeahead search is left alone because it reads no
 formats to judge by.
 
-**The treadmill is the standing cost.** YouTube's no-PO-token path is the `tv` client today and has closed
-before. Never pin yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries
-the host actually has.
+**Keeping yt-dlp current is the standing cost.** YouTube changes often and yt-dlp's releases follow it. Never pin
+yt-dlp, keep `npm run music:setup` re-runnable, and `/music status` reports which binaries the host actually has.
 
 ### Warnings escalate, and every surface escalates the same way
 

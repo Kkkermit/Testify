@@ -1,7 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { existsSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { delimiter, isAbsolute, join } from "node:path";
+import { delimiter, join } from "node:path";
 import { repoRoot } from "@core/paths";
 import { type MusicBinaries } from "@lib/music/music.types";
 
@@ -140,57 +138,10 @@ export function locateYtDlp(
 	return pickNewest(found);
 }
 
-/** A cookies file rather than a path to one: yt-dlp's own header, or a row with the format's seven tab-separated columns. */
-export function looksLikeCookies(value: string): boolean {
-	if (/^# (?:Netscape )?HTTP Cookie File/i.test(value.trim())) return true;
-
-	return value
-		.replaceAll("\\n", "\n")
-		.split("\n")
-		.some((line) => line.replace(/\r$/, "").split("\t").length === 7);
-}
-
-/** A cookies file as one base64 line, which is what a host whose variables hold no line breaks can take. */
-export function cookiesAsLine(contents: string): string {
-	return Buffer.from(`${contents.replaceAll("\r\n", "\n").trim()}\n`, "utf8").toString("base64");
-}
-
-/** The cookies file a variable holds — pasted, with `\n` for its line breaks, or as one base64 line — or null for a path. */
-export function cookieFileText(value: string): string | null {
-	if (looksLikeCookies(value)) return `${value.replaceAll("\\n", "\n").replaceAll("\r\n", "\n").trim()}\n`;
-	if (!/^[\w+/=-]+$/.test(value.replaceAll(/\s/g, ""))) return null;
-
-	const decoded = Buffer.from(value.replaceAll(/\s/g, ""), "base64").toString("utf8");
-	return looksLikeCookies(decoded) ? `${decoded.replaceAll("\r\n", "\n").trim()}\n` : null;
-}
-
-/** Cookies are a signed-in session, so a pasted copy is written where only this process's user can read it. */
-function writePrivately(contents: string): string {
-	const path = join(tmpdir(), `testify-ytdlp-cookies-${String(process.pid)}.txt`);
-	writeFileSync(path, contents, { mode: 0o600 });
-	return path;
-}
-
-/** The file `--cookies` is given: a path, resolved from the repository, or the contents held in the variable. */
-export function locateCookies(
-	value: string | undefined,
-	write: (contents: string) => string = writePrivately,
-	exists: (path: string) => boolean = existsSync,
-): string | null {
-	if (value === undefined) return null;
-
-	const text = cookieFileText(value);
-	if (text !== null) return write(text);
-
-	const path = isAbsolute(value) ? value : join(repoRoot(), value);
-	return exists(path) ? path : null;
-}
-
 export function findBinaries(
 	env: {
 		MUSIC_YTDLP_PATH?: string | undefined;
 		MUSIC_FFMPEG_PATH?: string | undefined;
-		MUSIC_YTDLP_COOKIES?: string | undefined;
 	},
 	probes: { runs?: Probe; version?: VersionProbe } = {},
 ): MusicBinaries {
@@ -200,7 +151,6 @@ export function findBinaries(
 		ytDlp: ytDlp?.path ?? null,
 		ffmpeg: locate("ffmpeg", env.MUSIC_FFMPEG_PATH, probes.runs),
 		ytDlpVersion: ytDlp?.version ?? null,
-		cookies: locateCookies(env.MUSIC_YTDLP_COOKIES),
 	};
 }
 
@@ -218,8 +168,6 @@ export function statusLines(found: MusicBinaries, now = Date.now()): string[] {
 	}
 
 	lines.push(found.ffmpeg === null ? "✗ **FFmpeg** — not found" : `✓ **FFmpeg** — \`${found.ffmpeg}\``);
-	if (found.cookies !== undefined && found.cookies !== null)
-		lines.push("✓ **YouTube cookies** — yt-dlp signs in with them");
 
 	if (age !== null && age > STALE_AFTER_DAYS) {
 		lines.push(
