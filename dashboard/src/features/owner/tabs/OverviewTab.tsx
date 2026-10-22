@@ -1,11 +1,15 @@
+import { OWNER_GUILD_SORTS } from "@testify/shared";
 import { Clock, Cpu, Database, Server, Terminal, Users } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
+import { LABEL, SearchField, SELECT } from "@/components/form";
+import { Card, Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
+import { GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
 import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
+import { useDebounced } from "@/hooks/useDebounced";
 import { formatUptime } from "@/lib/datetime";
 import { pageCount, pageFrom } from "@/lib/paging";
 
@@ -15,8 +19,11 @@ export function OverviewTab(): React.JSX.Element {
 	// In the URL rather than in state, so a link to page 3 is a link to page 3.
 	const [params, setParams] = useSearchParams();
 	const page = pageFrom(params.get("page"));
+	const sort = guildSortFrom(params.get("sort"));
+	const search = params.get("search") ?? "";
 	const health = useOwnerStats();
-	const guilds = useOwnerGuilds(page);
+	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
+	const guilds = useOwnerGuilds(page, sort, useDebounced(search));
 
 	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
 
@@ -24,15 +31,18 @@ export function OverviewTab(): React.JSX.Element {
 	const stats = health.data;
 
 	// Merged rather than replaced, or paging would drop the `?tab=` that got you here.
-	function put(changes: Record<string, string | null>): void {
-		setParams((current) => {
-			const merged = new URLSearchParams(current);
-			for (const [key, value] of Object.entries(changes)) {
-				if (value === null) merged.delete(key);
-				else merged.set(key, value);
-			}
-			return merged;
-		});
+	function put(changes: Record<string, string | null>, replace = false): void {
+		setParams(
+			(current) => {
+				const merged = new URLSearchParams(current);
+				for (const [key, value] of Object.entries(changes)) {
+					if (value === null) merged.delete(key);
+					else merged.set(key, value);
+				}
+				return merged;
+			},
+			{ replace },
+		);
 	}
 
 	return (
@@ -84,6 +94,35 @@ export function OverviewTab(): React.JSX.Element {
 					{t("owner.servers")}
 				</Eyebrow>
 
+				{/* A new order or a new search starts again from the first page, which is where its answer is. */}
+				<Card padding="compact" className="flex flex-wrap items-end gap-3">
+					<SearchField
+						className="min-w-52 flex-1"
+						label={t("owner.searchServers")}
+						placeholder={t("owner.searchServersPlaceholder")}
+						value={search}
+						onChange={(next) => {
+							put({ search: next === "" ? null : next, page: null }, true);
+						}}
+					/>
+					<label className="flex w-full flex-col gap-1 sm:w-64">
+						<span className={LABEL}>{t("owner.sortBy")}</span>
+						<select
+							className={SELECT}
+							value={sort}
+							onChange={(event) => {
+								put({ sort: event.target.value, page: null });
+							}}
+						>
+							{OWNER_GUILD_SORTS.map((option) => (
+								<option key={option} value={option}>
+									{t(GUILD_SORT_LABELS[option])}
+								</option>
+							))}
+						</select>
+					</label>
+				</Card>
+
 				{selected !== null && (
 					<GuildDetail
 						guildId={selected}
@@ -100,6 +139,8 @@ export function OverviewTab(): React.JSX.Element {
 				) : (
 					<OwnerGuildTable
 						guilds={guilds.data.items}
+						sort={sort}
+						empty={search.trim() === "" ? null : t("owner.noServersMatch")}
 						selected={selected}
 						onSelect={(guildId) => {
 							put({ server: guildId });

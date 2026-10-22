@@ -8,6 +8,7 @@ import { type TestifyClient } from "@core/client";
 import { databaseConnected } from "@database/connection";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
+import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
@@ -17,28 +18,43 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/usageRepository", () => ({
+	guildTallies: jest.fn(() => Promise.resolve([])),
+	dashboardTallies: jest.fn(() => Promise.resolve([])),
+}));
 
 const OWNER = "100000000000000001";
 const MANAGER = "100000000000000002";
 
-function fleet(size: number): Collection<string, unknown> {
+interface Spec {
+	name: string;
+	memberCount: number;
+	joined: string;
+}
+
+function guildsOf(specs: Spec[]): Collection<string, unknown> {
 	return new Collection(
-		Array.from({ length: size }, (_, index) => [
-			`90000000000000000${String(index)}`,
-			{
-				id: `90000000000000000${String(index)}`,
-				name: `Server ${String(index)}`,
-				memberCount: (index + 1) * 100,
-				iconURL: () => null,
-				joinedAt: new Date("2026-01-01T00:00:00.000Z"),
-			},
-		]),
+		specs.map((spec, index) => {
+			const id = `90000000000000000${String(index)}`;
+			const joinedAt = new Date(spec.joined);
+			return [id, { id, ...spec, iconURL: () => null, joinedAt, joinedTimestamp: joinedAt.getTime() }];
+		}),
 	);
 }
 
-function appFor(size: number, userId = OWNER): Hono<ApiBindings> {
+function fleet(size: number): Collection<string, unknown> {
+	return guildsOf(
+		Array.from({ length: size }, (_, index) => ({
+			name: `Server ${String(index)}`,
+			memberCount: (index + 1) * 100,
+			joined: "2026-01-01T00:00:00.000Z",
+		})),
+	);
+}
+
+function appFor(size: number | Collection<string, unknown>, userId = OWNER): Hono<ApiBindings> {
 	const client = {
-		guilds: { cache: fleet(size) },
+		guilds: { cache: typeof size === "number" ? fleet(size) : size },
 		isOwner: (id: string) => id === OWNER,
 		commands: { size: 76 },
 		startedAt: Date.now() - 60_000,
@@ -67,6 +83,8 @@ beforeEach(() => {
 	jest.mocked(getAuditLogConfig).mockResolvedValue(null);
 	jest.mocked(getCounting).mockResolvedValue(null);
 	jest.mocked(getWelcome).mockResolvedValue(null);
+	jest.mocked(guildTallies).mockResolvedValue([]);
+	jest.mocked(dashboardTallies).mockResolvedValue([]);
 });
 
 describe("the owner stats", () => {
@@ -149,5 +167,77 @@ describe("the owner guild list", () => {
 
 	it("is a 404 for anyone who is not the bot owner", async () => {
 		expect((await appFor(1, MANAGER).request("/owner/guilds")).status).toBe(404);
+	});
+});
+
+describe("sorting and searching the owner guild list", () => {
+	// Joined, size and name each put these three in a different order, so every sort is told apart.
+	const three = (): Collection<string, unknown> =>
+		guildsOf([
+			{ name: "Bravo", memberCount: 50, joined: "2026-03-01T00:00:00.000Z" },
+			{ name: "alpha", memberCount: 900, joined: "2026-01-01T00:00:00.000Z" },
+			{ name: "Charlie", memberCount: 300, joined: "2026-05-01T00:00:00.000Z" },
+		]);
+
+	async function names(query: string, guilds = three()): Promise<string[]> {
+		const body = (await (await appFor(guilds).request(`/owner/guilds${query}`)).json()) as Paged<OwnerGuildRow>;
+		return body.items.map((guild) => guild.name);
+	}
+
+	it.each([
+		["members", ["alpha", "Charlie", "Bravo"]],
+		["fewest", ["Bravo", "Charlie", "alpha"]],
+		["newest", ["Charlie", "Bravo", "alpha"]],
+		["oldest", ["alpha", "Bravo", "Charlie"]],
+		["name", ["alpha", "Bravo", "Charlie"]],
+	])("sorts by %s", async (sort, expected) => {
+		expect(await names(`?sort=${sort}`)).toEqual(expected);
+	});
+
+	it("ranks by commands run, and by dashboard use, over the last 30 days", async () => {
+		jest.mocked(guildTallies).mockResolvedValue([
+			{ guildId: "900000000000000002", count: 40 },
+			{ guildId: "900000000000000000", count: 7 },
+		]);
+		jest
+			.mocked(dashboardTallies)
+			.mockResolvedValue([{ guildId: "900000000000000000", count: 3, lastDay: "2026-08-01" }]);
+
+		expect(await names("?sort=commands")).toEqual(["Charlie", "Bravo", "alpha"]);
+		expect(await names("?sort=dashboard")).toEqual(["Bravo", "alpha", "Charlie"]);
+		expect(guildTallies).toHaveBeenCalledWith(30);
+		expect(dashboardTallies).toHaveBeenCalledWith(30);
+	});
+
+	it("carries each server's command and dashboard counts, zero when it has none", async () => {
+		jest.mocked(guildTallies).mockResolvedValue([{ guildId: "900000000000000000", count: 7 }]);
+		jest
+			.mocked(dashboardTallies)
+			.mockResolvedValue([{ guildId: "900000000000000000", count: 3, lastDay: "2026-08-01" }]);
+
+		const body = (await (await appFor(three()).request("/owner/guilds?sort=fewest")).json()) as Paged<OwnerGuildRow>;
+
+		expect(body.items.map(({ commands, dashboardViews }) => [commands, dashboardViews])).toEqual([
+			[7, 3],
+			[0, 0],
+			[0, 0],
+		]);
+	});
+
+	it("searches by any part of a name, ignoring case, and totals only the matches", async () => {
+		const body = (await (await appFor(three()).request("/owner/guilds?q=AR")).json()) as Paged<OwnerGuildRow>;
+
+		expect(body.items.map((guild) => guild.name)).toEqual(["Charlie"]);
+		expect(body.total).toBe(1);
+	});
+
+	/** A pasted ID is that server and no other, even though its digits appear inside other IDs. */
+	it("finds a server by its exact ID", async () => {
+		expect(await names("?q=900000000000000001")).toEqual(["alpha"]);
+		expect(await names("?q=90000000000000000")).toEqual([]);
+	});
+
+	it("refuses a sort it does not offer", async () => {
+		expect((await appFor(three()).request("/owner/guilds?sort=random")).status).toBe(400);
 	});
 });

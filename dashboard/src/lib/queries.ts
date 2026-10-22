@@ -46,8 +46,13 @@ export const keys = {
 	owner: {
 		access: () => ["owner", "access"] as const,
 		stats: () => ["owner", "stats"] as const,
-		guilds: (page: number) => ["owner", "guilds", page] as const,
+		guilds: (page: number, sort: string, search: string) => ["owner", "guilds", page, sort, search] as const,
 		usage: (days: number) => ["owner", "usage", days] as const,
+		guildUsage: (id: string, days: number) => ["owner", "guild-usage", id, days] as const,
+		guildMembers: (id: string, days: number, page: number, search: string) =>
+			["owner", "guild-usage", id, days, "members", page, search] as const,
+		guildRuns: (id: string, days: number, page: number, userId: string | null, command: string | null) =>
+			["owner", "guild-usage", id, days, "runs", page, userId, command] as const,
 		logs: (level: string, search: string) => ["owner", "logs", level, search] as const,
 		runtime: () => ["owner", "runtime"] as const,
 		control: () => ["owner", "control"] as const,

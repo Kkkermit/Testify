@@ -143,6 +143,10 @@ export interface OwnerGuildRow {
 	memberCount: number;
 	joinedAt: string | null;
 	configured: string[];
+	/** Commands run there in the last 30 days. */
+	commands: number;
+	/** Dashboard screens its managers opened in the last 30 days. */
+	dashboardViews: number;
 }
 
 export interface Paged<T> {

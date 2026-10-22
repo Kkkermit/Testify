@@ -6,14 +6,24 @@ import { analytics, zeroFill } from "@api/routes/analytics";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
+import { activeMembers, memberTallies, recentRuns } from "@database/repositories/commandRunRepository";
 import {
 	commandTallies,
 	dailyTallies,
+	dashboardTallies,
 	guildTallies,
 	surfaceTallies,
 	usageTotals,
 } from "@database/repositories/usageRepository";
-import { type LogFeed, type RuntimeInfo, type UsageReport } from "@testify/shared";
+import {
+	type CommandRunRow,
+	type GuildUsageReport,
+	type LogFeed,
+	type MemberUsageRow,
+	type Paged,
+	type RuntimeInfo,
+	type UsageReport,
+} from "@testify/shared";
 
 jest.mock("@database/repositories/usageRepository", () => ({
 	usageTotals: jest.fn(() => Promise.resolve({ runs: 0, failures: 0, activeGuilds: 0, commandsUsed: 0 })),
@@ -22,23 +32,45 @@ jest.mock("@database/repositories/usageRepository", () => ({
 	dailyTallies: jest.fn(() => Promise.resolve([])),
 	surfaceTallies: jest.fn(() => Promise.resolve({ slash: 0, prefix: 0 })),
 	screenTallies: jest.fn(() => Promise.resolve([])),
+	dashboardTallies: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock("@database/repositories/commandRunRepository", () => ({
+	activeMembers: jest.fn(() => Promise.resolve(0)),
+	memberTallies: jest.fn(() => Promise.resolve([])),
+	recentRuns: jest.fn(() => Promise.resolve({ items: [], total: 0 })),
 }));
 
 const OWNER = "100000000000000001";
 const MANAGER = "100000000000000002";
 const GUILD = "900000000000000001";
+const ALICE = "800000000000000001";
+const BOB = "800000000000000002";
+const CHANNEL = "700000000000000001";
 
 const totals = jest.mocked(usageTotals);
 const byCommand = jest.mocked(commandTallies);
 const byGuild = jest.mocked(guildTallies);
 const byDay = jest.mocked(dailyTallies);
 const bySurface = jest.mocked(surfaceTallies);
+const byDashboard = jest.mocked(dashboardTallies);
+const members = jest.mocked(memberTallies);
+const runs = jest.mocked(recentRuns);
 
 function appFor(userId = OWNER): Hono<ApiBindings> {
 	const client = {
 		guilds: {
 			cache: new Collection<string, unknown>([
-				[GUILD, { id: GUILD, name: "Test Server", memberCount: 1_234, iconURL: () => null }],
+				[
+					GUILD,
+					{
+						id: GUILD,
+						name: "Test Server",
+						memberCount: 1_234,
+						iconURL: () => null,
+						joinedAt: new Date("2026-01-01T00:00:00.000Z"),
+						channels: { cache: new Collection([[CHANNEL, { name: "general" }]]) },
+					},
+				],
 			]),
 		},
 		commands: new Collection<string, unknown>([
@@ -49,7 +81,9 @@ function appFor(userId = OWNER): Hono<ApiBindings> {
 		isOwner: (id: string) => id === OWNER,
 		eventNames: () => ["ready", "interactionCreate"],
 		startedAt: Date.now() - 60_000,
-		users: { cache: new Collection<string, unknown>() },
+		users: {
+			cache: new Collection<string, unknown>([[ALICE, { displayAvatarURL: () => "https://cdn.example/alice.png" }]]),
+		},
 		channels: { cache: new Collection<string, unknown>() },
 		ws: { ping: 42, shards: new Collection<string, unknown>() },
 		env: { NODE_ENV: "test", LOG_LEVEL: "warn" } as Env,
@@ -83,14 +117,27 @@ beforeEach(() => {
 	byGuild.mockResolvedValue([]);
 	byDay.mockResolvedValue([]);
 	bySurface.mockResolvedValue({ slash: 0, prefix: 0 });
+	byDashboard.mockResolvedValue([]);
+	members.mockResolvedValue([]);
+	runs.mockResolvedValue({ items: [], total: 0 });
+	jest.mocked(activeMembers).mockResolvedValue(0);
 	logRing.clear();
 });
 
+const SERVER_PATHS = [
+	`/analytics/guilds/${GUILD}`,
+	`/analytics/guilds/${GUILD}/members`,
+	`/analytics/guilds/${GUILD}/runs`,
+];
+
 describe("who can read the analytics", () => {
 	/** These name every server the bot is in and how much each is used — owner-only, like the rest of it. */
-	it.each(["/analytics/usage", "/analytics/logs", "/analytics/runtime"])("hides %s from a manager", async (path) => {
-		expect((await appFor(MANAGER).request(path)).status).toBe(404);
-	});
+	it.each(["/analytics/usage", "/analytics/logs", "/analytics/runtime", ...SERVER_PATHS])(
+		"hides %s from a manager",
+		async (path) => {
+			expect((await appFor(MANAGER).request(path)).status).toBe(404);
+		},
+	);
 
 	it.each(["/analytics/usage", "/analytics/logs", "/analytics/runtime"])("serves %s to the owner", async (path) => {
 		expect((await appFor().request(path)).status).toBe(200);
@@ -146,6 +193,18 @@ describe("the usage report", () => {
 		expect((await usage()).busiestGuilds).toEqual([]);
 	});
 
+	it("names the servers whose managers open the dashboard most", async () => {
+		byDashboard.mockResolvedValue([
+			{ guildId: GUILD, count: 12, lastDay: "2026-08-01" },
+			{ guildId: "900000000000000009", count: 50, lastDay: "2026-08-01" },
+		]);
+
+		expect((await usage()).dashboardGuilds).toEqual([
+			{ guildId: GUILD, name: "Test Server", iconUrl: null, memberCount: 1_234, count: 12 },
+		]);
+		expect(byDashboard).toHaveBeenCalledWith(30, 10);
+	});
+
 	it("reports the split between slash and prefix", async () => {
 		bySurface.mockResolvedValue({ slash: 90, prefix: 10 });
 
@@ -154,6 +213,167 @@ describe("the usage report", () => {
 
 	it("returns one entry per day in the window", async () => {
 		expect((await usage("?days=7")).daily).toHaveLength(7);
+	});
+});
+
+describe("one server's usage", () => {
+	async function report(query = ""): Promise<GuildUsageReport> {
+		return (await (await appFor().request(`/analytics/guilds/${GUILD}${query}`)).json()) as GuildUsageReport;
+	}
+
+	it("totals that server's commands and names who ran them", async () => {
+		byCommand.mockResolvedValue([
+			{ command: "rank", count: 8, failures: 1 },
+			{ command: "ban", count: 2, failures: 0 },
+		]);
+		bySurface.mockResolvedValue({ slash: 7, prefix: 3 });
+		byDashboard.mockResolvedValue([{ guildId: GUILD, count: 5, lastDay: "2026-08-01" }]);
+		jest.mocked(activeMembers).mockResolvedValue(4);
+
+		const body = await report("?days=7");
+
+		expect(body).toMatchObject({
+			days: 7,
+			memberDays: 7,
+			runs: 10,
+			failures: 1,
+			surfaces: { slash: 7, prefix: 3 },
+			dashboardViews: 5,
+			members: 4,
+			guild: { guildId: GUILD, name: "Test Server", joinedAt: "2026-01-01T00:00:00.000Z" },
+		});
+		expect(body.commands.map((row) => [row.command, row.category])).toEqual([
+			["rank", "levelling"],
+			["ban", "moderation"],
+		]);
+		expect(body.daily).toHaveLength(7);
+	});
+
+	/** Every query is narrowed to the server in the path, or one server's drill-down would show the whole bot. */
+	it("asks for that server's rows and no other's", async () => {
+		await report();
+
+		expect(byCommand).toHaveBeenCalledWith(30, 0, undefined, GUILD);
+		expect(byDay).toHaveBeenCalledWith(30, undefined, GUILD);
+		expect(bySurface).toHaveBeenCalledWith(30, undefined, GUILD);
+		expect(byDashboard).toHaveBeenCalledWith(30, 0, undefined, GUILD);
+		expect(activeMembers).toHaveBeenCalledWith(GUILD, 30);
+	});
+
+	/** Who ran what is kept for 30 days, so a 90-day window says its member figures cover less. */
+	it("caps the member figures at what is kept", async () => {
+		expect((await report("?days=90")).memberDays).toBe(30);
+		expect(activeMembers).toHaveBeenCalledWith(GUILD, 30);
+	});
+
+	it("is a 404 for a server the bot is not in, and a 400 for something that is not an ID", async () => {
+		expect((await appFor().request("/analytics/guilds/900000000000000009")).status).toBe(404);
+		expect((await appFor().request("/analytics/guilds/nope")).status).toBe(400);
+	});
+});
+
+describe("who ran what in one server", () => {
+	const alice = {
+		userId: ALICE,
+		username: "alice",
+		runs: 6,
+		failures: 1,
+		prefix: 2,
+		commands: [
+			{ command: "rank", count: 3 },
+			{ command: "balance", count: 2 },
+			{ command: "beg", count: 1 },
+			{ command: "ban", count: 1 },
+		],
+		lastAt: new Date("2026-08-01T12:00:00.000Z"),
+	};
+	const bob = { ...alice, userId: BOB, username: "bob", runs: 1, commands: [{ command: "beg", count: 1 }] };
+
+	async function people(query = ""): Promise<Paged<MemberUsageRow>> {
+		return (await (
+			await appFor().request(`/analytics/guilds/${GUILD}/members${query}`)
+		).json()) as Paged<MemberUsageRow>;
+	}
+
+	it("lists each member with their busiest three commands and their picture when it is cached", async () => {
+		members.mockResolvedValue([alice, bob]);
+
+		const body = await people();
+
+		expect(body.total).toBe(2);
+		expect(body.items[0]).toEqual({
+			userId: ALICE,
+			username: "alice",
+			avatarUrl: "https://cdn.example/alice.png",
+			runs: 6,
+			failures: 1,
+			prefix: 2,
+			commandCount: 4,
+			topCommands: alice.commands.slice(0, 3),
+			lastAt: "2026-08-01T12:00:00.000Z",
+		});
+		expect(body.items[1]?.avatarUrl).toBeNull();
+	});
+
+	it("finds a member by name or by a pasted mention", async () => {
+		members.mockResolvedValue([alice, bob]);
+
+		expect((await people("?q=BO")).items.map((row) => row.username)).toEqual(["bob"]);
+		expect((await people(`?q=%3C%40${ALICE}%3E`)).items.map((row) => row.username)).toEqual(["alice"]);
+	});
+
+	it("pages the members", async () => {
+		members.mockResolvedValue([alice, bob]);
+
+		const body = await people("?page=2&perPage=1");
+
+		expect(body).toMatchObject({ total: 2, page: 2, perPage: 1 });
+		expect(body.items.map((row) => row.username)).toEqual(["bob"]);
+	});
+
+	it("lists runs with the channel's name, and passes the filters through", async () => {
+		runs.mockResolvedValue({
+			items: [
+				{
+					guildId: GUILD,
+					channelId: CHANNEL,
+					userId: ALICE,
+					username: "alice",
+					command: "music",
+					subcommand: "play",
+					surface: "slash",
+					failed: false,
+					durationMs: 120,
+					at: new Date("2026-08-01T12:00:00.000Z"),
+					expiresAt: new Date("2026-08-31T12:00:00.000Z"),
+				},
+			],
+			total: 1,
+		});
+
+		const response = await appFor().request(`/analytics/guilds/${GUILD}/runs?userId=${ALICE}&command=music&page=2`);
+		const body = (await response.json()) as Paged<CommandRunRow>;
+
+		expect(body.items).toEqual([
+			{
+				at: "2026-08-01T12:00:00.000Z",
+				userId: ALICE,
+				username: "alice",
+				command: "music",
+				subcommand: "play",
+				surface: "slash",
+				failed: false,
+				durationMs: 120,
+				channelId: CHANNEL,
+				channelName: "general",
+			},
+		]);
+		expect(runs).toHaveBeenCalledWith(GUILD, 30, { userId: ALICE, command: "music" }, { skip: 25, limit: 25 });
+	});
+
+	it("refuses a filter that is not an ID or a command name", async () => {
+		expect((await appFor().request(`/analytics/guilds/${GUILD}/runs?userId=alice`)).status).toBe(400);
+		expect((await appFor().request(`/analytics/guilds/${GUILD}/runs?command=%24where`)).status).toBe(400);
 	});
 });
 

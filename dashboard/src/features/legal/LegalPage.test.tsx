@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 28 Sept 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 22 Oct 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -77,6 +77,11 @@ describe("the legal pages", () => {
 		// Screen counts carry neither, which is the whole reason they are safe to keep.
 		expect(text).toMatch(/no user id and no server id is stored/i);
 		expect(text).toMatch(/IP address is not stored/i);
+		// `commandruns` holds who ran what, never the options; `countCommandUse` skips a direct message.
+		expect(text).toMatch(/Who ran a command: .* Never the options you gave it/);
+		expect(text).toMatch(/Commands run in a direct message are not recorded this way/);
+		// `dashboardviews` is a server and a count a day, with no account and no route.
+		expect(text).toMatch(/Server counts: .* No user id is stored with these, and not which screens were opened/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);
@@ -90,7 +95,10 @@ describe("the legal pages", () => {
 		const constants = botSource("src/config/constants.ts");
 
 		const retention = /retentionDays: (\d+)/.exec(constants)?.[1];
-		expect(text).toContain(`Audit records, command usage and screen counts: ${String(retention)} days`);
+		expect(text).toContain(`Audit records, command usage, screen counts and server counts: ${String(retention)} days`);
+
+		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
+		expect(text).toContain(`Who ran a command: ${String(runs)} days`);
 		expect(text).toContain(`logs and counts for ${String(retention)} days`);
 		expect(botSource("src/database/models/dashboardAudit.schema.ts")).toContain(`${String(retention)} * 24 * 60 * 60`);
 

@@ -48,6 +48,10 @@ describe("the owner console's routes", () => {
 		expect(routes.length).toBeGreaterThan(15);
 		expect(routes).toEqual(expect.arrayContaining([{ method: "POST", path: "/api/owner/runner/ping" }]));
 		expect(routes).toEqual(expect.arrayContaining([{ method: "POST", path: "/api/control/shutdown" }]));
+		// Who ran what names people, so the drill-down has to be inside the walk too.
+		expect(routes).toEqual(
+			expect.arrayContaining([{ method: "GET", path: "/api/analytics/guilds/900000000000000001/runs" }]),
+		);
 	});
 
 	it.each(routes)("refuse a signed-in non-owner on $method $path with a bare 404", async ({ method, path }) => {

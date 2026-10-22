@@ -10,7 +10,7 @@ import { getBotSettings, saveBotSettings } from "@database/repositories/botSetti
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
-import { guildTallies } from "@database/repositories/usageRepository";
+import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { type BotControlState, type OwnerGuildDetail } from "@testify/shared";
 
 jest.mock("@core/shutdown", () => ({ shutdown: jest.fn(() => Promise.resolve()) }));
@@ -25,7 +25,10 @@ jest.mock("@database/repositories/settingsRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
-jest.mock("@database/repositories/usageRepository", () => ({ guildTallies: jest.fn(() => Promise.resolve([])) }));
+jest.mock("@database/repositories/usageRepository", () => ({
+	guildTallies: jest.fn(() => Promise.resolve([])),
+	dashboardTallies: jest.fn(() => Promise.resolve([])),
+}));
 jest.mock("@lib/bot/botIdentity.util", () => ({
 	botIdentity: jest.fn(() => Promise.resolve({ id: "1", username: "Renamed", avatarUrl: null, bannerUrl: null })),
 	forgetBotIdentity: jest.fn(),
@@ -249,6 +252,13 @@ describe("a server's detail", () => {
 		jest.mocked(getWelcome).mockResolvedValue({ guildId: GUILD, channelId: "1" } as never);
 
 		expect(((await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail).configured).toContain("welcome");
+	});
+
+	it("counts the dashboard screens its managers opened in the last 30 days", async () => {
+		jest.mocked(dashboardTallies).mockResolvedValue([{ guildId: GUILD, count: 9, lastDay: "2026-08-01" }]);
+
+		expect(((await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail).dashboardViews).toBe(9);
+		expect(dashboardTallies).toHaveBeenCalledWith(30, 0, undefined, GUILD);
 	});
 
 	it("404s for a server the bot is not in", async () => {
