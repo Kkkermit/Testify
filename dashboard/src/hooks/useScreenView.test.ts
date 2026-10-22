@@ -1,4 +1,4 @@
-import { routePattern } from "@/hooks/useScreenView";
+import { routePattern, screenView } from "@/hooks/useScreenView";
 
 /** Only the route pattern is sent, so no server or member id reaches the database. */
 describe("routePattern", () => {
@@ -40,5 +40,24 @@ describe("routePattern", () => {
 		});
 
 		expect(pattern).not.toMatch(/\d{17,20}/);
+	});
+});
+
+describe("screenView", () => {
+	it("sends the server a screen belongs to beside its pattern", () => {
+		expect(screenView("/guilds/900000000000000001/levelling", { guildId: "900000000000000001" })).toEqual({
+			route: "/guilds/:guildId/levelling",
+			guildId: "900000000000000001",
+		});
+	});
+
+	/** A member's id is never sent on its own: only the server is counted, and only against its pattern. */
+	it("sends no server for a screen outside one, and never a member", () => {
+		expect(screenView("/commands", {})).toEqual({ route: "/commands" });
+		expect(screenView("/owner", { userId: "100000000000000002" })).toEqual({ route: "/owner" });
+	});
+
+	it("leaves out a server id the API would refuse, so the screen is still counted", () => {
+		expect(screenView("/guilds/abc", { guildId: "abc" })).toEqual({ route: "/guilds/:guildId" });
 	});
 });

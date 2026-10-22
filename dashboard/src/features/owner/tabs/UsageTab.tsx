@@ -1,15 +1,15 @@
-import { ANALYTICS_WINDOWS, errorRate, type AnalyticsWindow } from "@testify/shared";
+import { errorRate, type AnalyticsWindow, type GuildUsageRow } from "@testify/shared";
 import { useTranslation } from "react-i18next";
+import { Link, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Avatar, Card, CARD_HEADING, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
+import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
+import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { UsageChart } from "@/features/owner/components/UsageChart";
-import { percent, screenLabel } from "@/features/owner/owner.utils";
+import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
+import { percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";
-import { cn } from "@/lib/cn";
 
-const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
-
-/** What the bot is actually used for: which commands, by which servers, on which surface. */
+/** What the bot is actually used for, or, with `?guild=`, who in one server ran what. */
 export function UsageTab({
 	days,
 	onWindow,
@@ -17,7 +17,26 @@ export function UsageTab({
 	days: AnalyticsWindow;
 	onWindow: (days: AnalyticsWindow) => void;
 }): React.JSX.Element {
+	const [params] = useSearchParams();
+	const guildId = snowflakeFrom(params.get("guild"));
+
+	return guildId === null ? (
+		<FleetUsage days={days} onWindow={onWindow} />
+	) : (
+		<GuildUsage guildId={guildId} days={days} onWindow={onWindow} />
+	);
+}
+
+/** Which commands, by which servers, on which surface. */
+function FleetUsage({
+	days,
+	onWindow,
+}: {
+	days: AnalyticsWindow;
+	onWindow: (days: AnalyticsWindow) => void;
+}): React.JSX.Element {
 	const { t } = useTranslation();
+	const [params] = useSearchParams();
 	const usage = useUsage(days);
 
 	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
@@ -89,17 +108,15 @@ export function UsageTab({
 					<UsageBars
 						tint="bg-feature-tickets/25"
 						empty={t("owner.noServerRun")}
-						rows={report.busiestGuilds.map((row) => ({
-							id: row.guildId,
-							label: (
-								<span className="flex items-center gap-2">
-									<Avatar name={row.name} url={row.iconUrl} size={18} seed={row.guildId} />
-									<span className="truncate">{row.name}</span>
-								</span>
-							),
-							sub: `${row.memberCount.toLocaleString()} members`,
-							count: row.count,
-						}))}
+						rows={report.busiestGuilds.map((row) => guildBar(row, params))}
+					/>
+				</Panel>
+
+				<Panel title={t("owner.dashboardBusiest")} hint={t("owner.dashboardBusiestHint")}>
+					<UsageBars
+						tint="bg-feature-economy/25"
+						empty={t("owner.noServerDashboard")}
+						rows={report.dashboardGuilds.map((row) => guildBar(row, params))}
 					/>
 				</Panel>
 
@@ -114,9 +131,7 @@ export function UsageTab({
 					/>
 				</Panel>
 
-				{/* Full width: it is the odd one out in kind as well as in count, and a fifth panel in a two-column
-				    grid would otherwise leave half a row empty under it. */}
-				<Panel wide title={t("owner.screens")} hint={t("owner.screensHint")}>
+				<Panel title={t("owner.screens")} hint={t("owner.screensHint")}>
 					<UsageBars
 						tint="bg-feature-welcome/25"
 						empty={t("owner.noScreenOpened")}
@@ -133,24 +148,20 @@ export function UsageTab({
 	);
 }
 
-function Panel({
-	title,
-	hint,
-	wide = false,
-	children,
-}: {
-	title: string;
-	hint: string;
-	wide?: boolean;
-	children: React.ReactNode;
-}): React.JSX.Element {
-	return (
-		<Card className={cn("flex flex-col gap-3", wide && "lg:col-span-2")}>
-			<div>
-				<h2 className={CARD_HEADING}>{title}</h2>
-				<p className="text-muted-foreground text-xs">{hint}</p>
-			</div>
-			{children}
-		</Card>
-	);
+/** A server's row opens its own usage, keeping the window it was found in. */
+function guildBar(row: GuildUsageRow, params: URLSearchParams): React.ComponentProps<typeof UsageBars>["rows"][number] {
+	return {
+		id: row.guildId,
+		label: (
+			<Link
+				to={searchWith(params, { guild: row.guildId })}
+				className="hover:text-accent flex items-center gap-2 transition-colors duration-150"
+			>
+				<Avatar name={row.name} url={row.iconUrl} size={18} seed={row.guildId} />
+				<span className="truncate">{row.name}</span>
+			</Link>
+		),
+		sub: `${row.memberCount.toLocaleString()} members`,
+		count: row.count,
+	};
 }

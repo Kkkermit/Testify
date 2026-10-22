@@ -1,7 +1,11 @@
-import { useQuery, type UseQueryResult } from "@tanstack/react-query";
+import { keepPreviousData, useQuery, type UseQueryResult } from "@tanstack/react-query";
 import {
+	type CommandRunRow,
+	type GuildUsageReport,
 	type LogFeed,
+	type MemberUsageRow,
 	type OwnerGuildRow,
+	type OwnerGuildSort,
 	type OwnerStats,
 	type Paged,
 	type ReportedLogLevel,
@@ -21,10 +25,19 @@ export function useOwnerStats(): UseQueryResult<OwnerStats> {
 	});
 }
 
-export function useOwnerGuilds(page: number): UseQueryResult<Paged<OwnerGuildRow>> {
+export function useOwnerGuilds(
+	page: number,
+	sort: OwnerGuildSort,
+	search: string,
+): UseQueryResult<Paged<OwnerGuildRow>> {
+	const query = new URLSearchParams({ page: String(page), perPage: String(PER_PAGE), sort });
+	if (search.trim() !== "") query.set("q", search.trim());
+
 	return useQuery({
-		queryKey: keys.owner.guilds(page),
-		queryFn: () => api.get<Paged<OwnerGuildRow>>(`/owner/guilds?page=${String(page)}&perPage=${String(PER_PAGE)}`),
+		queryKey: keys.owner.guilds(page, sort, search.trim()),
+		queryFn: () => api.get<Paged<OwnerGuildRow>>(`/owner/guilds?${query.toString()}`),
+		// The last page stays on screen while the next loads, so a sort or a keystroke does not flash a skeleton.
+		placeholderData: keepPreviousData,
 	});
 }
 
@@ -33,6 +46,48 @@ export function useUsage(days: number): UseQueryResult<UsageReport> {
 		queryKey: keys.owner.usage(days),
 		queryFn: () => api.get<UsageReport>(`/analytics/usage?days=${String(days)}`),
 		staleTime: 60_000,
+	});
+}
+
+export function useGuildUsage(guildId: string, days: number): UseQueryResult<GuildUsageReport> {
+	return useQuery({
+		queryKey: keys.owner.guildUsage(guildId, days),
+		queryFn: () => api.get<GuildUsageReport>(`/analytics/guilds/${guildId}?days=${String(days)}`),
+		staleTime: 60_000,
+	});
+}
+
+export function useGuildMembers(
+	guildId: string,
+	days: number,
+	page: number,
+	search: string,
+): UseQueryResult<Paged<MemberUsageRow>> {
+	const query = new URLSearchParams({ days: String(days), page: String(page), perPage: String(PER_PAGE) });
+	if (search.trim() !== "") query.set("q", search.trim());
+
+	return useQuery({
+		queryKey: keys.owner.guildMembers(guildId, days, page, search.trim()),
+		queryFn: () => api.get<Paged<MemberUsageRow>>(`/analytics/guilds/${guildId}/members?${query.toString()}`),
+		placeholderData: keepPreviousData,
+	});
+}
+
+export function useGuildRuns(
+	guildId: string,
+	days: number,
+	page: number,
+	userId: string | null,
+	command: string | null,
+): UseQueryResult<Paged<CommandRunRow>> {
+	const query = new URLSearchParams({ days: String(days), page: String(page), perPage: String(PER_PAGE) });
+	if (userId !== null) query.set("userId", userId);
+	if (command !== null) query.set("command", command);
+
+	return useQuery({
+		queryKey: keys.owner.guildRuns(guildId, days, page, userId, command),
+		queryFn: () => api.get<Paged<CommandRunRow>>(`/analytics/guilds/${guildId}/runs?${query.toString()}`),
+		placeholderData: keepPreviousData,
 	});
 }
 

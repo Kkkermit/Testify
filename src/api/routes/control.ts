@@ -10,7 +10,7 @@ import { botName } from "@core/brand";
 import { shutdown } from "@core/shutdown";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
-import { guildTallies } from "@database/repositories/usageRepository";
+import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { botIdentity, controlState, forgetBotIdentity, pause, resume } from "@lib/bot";
 import { normaliseSettings } from "@lib/levelling";
 import { applyMusicSources, readMusicSources, readMusicSourceSetting, sourcesName } from "@lib/music";
@@ -117,7 +117,11 @@ control.get("/guilds/:guildId", async (context) => {
 
 	if (guild === undefined) throw notInGuild();
 
-	const [configured, tallies] = await Promise.all([configuredIn(guild), guildTallies(ANALYTICS.defaultWindowDays, 0)]);
+	const [configured, tallies, dashboard] = await Promise.all([
+		configuredIn(guild),
+		guildTallies(ANALYTICS.defaultWindowDays, 0),
+		dashboardTallies(ANALYTICS.defaultWindowDays, 0, undefined, guild.id),
+	]);
 
 	const me = guild.members.me;
 	const body: OwnerGuildDetail = {
@@ -135,6 +139,7 @@ control.get("/guilds/:guildId", async (context) => {
 		missingPermissions: missingIn(guild),
 		configured,
 		usage: tallies.find((row) => row.guildId === guild.id)?.count ?? 0,
+		dashboardViews: dashboard[0]?.count ?? 0,
 	};
 
 	return context.json(body);

@@ -94,11 +94,21 @@ describe("the usage tab", () => {
 		expect(await screen.findByText("/flush")).toBeInTheDocument();
 	});
 
-	it("names the busiest servers", async () => {
+	it("names the busiest servers, each opening who ran what there", async () => {
 		renderTab("usage");
 
-		expect(await screen.findByText("Test Server")).toBeInTheDocument();
+		const [busiest] = await screen.findAllByRole("link", { name: "Test Server" });
+		expect(busiest).toHaveAttribute("href", expect.stringMatching(/[?&]guild=900000000000000001\b/));
+		expect(busiest).toHaveAttribute("href", expect.stringMatching(/[?&]tab=usage\b/));
 		expect(screen.getByText("900")).toBeInTheDocument();
+	});
+
+	it("names the servers whose managers use the dashboard most", async () => {
+		renderTab("usage");
+
+		expect(await screen.findByRole("heading", { name: "Busiest on the dashboard" })).toBeInTheDocument();
+		expect(screen.getAllByRole("link", { name: "Test Server" })).toHaveLength(2);
+		expect(screen.getByText("12")).toBeInTheDocument();
 	});
 
 	it("splits slash from prefix, which is what decides if the prefix earns its keep", async () => {

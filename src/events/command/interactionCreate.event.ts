@@ -47,18 +47,9 @@ export default defineEvent({
 			const ok = await runCommand(interaction, command, client);
 			const durationMs = Date.now() - started;
 			recordCommandTime(durationMs, ok);
-			countCommandUse(client, {
-				command: command.name,
-				guildId: interaction.guildId,
-				surface: "slash",
-				failed: !ok,
-			});
-			logCommandUse(client, interaction, command, {
-				surface: "slash",
-				ok,
-				durationMs,
-				channelId: interaction.channelId,
-			});
+			const run = { surface: "slash", ok, durationMs, channelId: interaction.channelId } as const;
+			countCommandUse(client, interaction, command, run);
+			logCommandUse(client, interaction, command, run);
 			return;
 		}
 

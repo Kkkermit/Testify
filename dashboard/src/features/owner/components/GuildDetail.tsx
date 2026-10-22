@@ -1,5 +1,5 @@
 import { type OwnerGuildDetail } from "@testify/shared";
-import { ExternalLink, LogOut, X } from "lucide-react";
+import { BarChart3, ExternalLink, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
@@ -35,8 +35,8 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 			<dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 				<Figure size="md" label={t("owner.members")} value={guild.memberCount.toLocaleString()} />
 				<Figure size="md" label={t("overview.channels")} value={String(guild.channelCount)} />
-				<Figure size="md" label={t("overview.roles")} value={String(guild.roleCount)} />
 				<Figure size="md" label={t("owner.commands30d")} value={guild.usage.toLocaleString()} />
+				<Figure size="md" label={t("owner.dashboard30d")} value={guild.dashboardViews.toLocaleString()} />
 			</dl>
 
 			<DataList
@@ -47,6 +47,7 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 						value: guild.joinedAt === null ? "Unknown" : shortDate(guild.joinedAt),
 					},
 					{ label: "Created", value: shortDate(guild.createdAt) },
+					{ label: t("overview.roles"), value: String(guild.roleCount) },
 					{ label: "Server owner", value: guild.ownerId, mono: true },
 					{ label: t("owner.nickname"), value: guild.nickname ?? "None set" },
 					{ label: t("owner.topRole"), value: guild.highestRole ?? "None" },
@@ -66,10 +67,19 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 				<Warning>{t("owner.missingHere", { permissions: guild.missingPermissions.join(", ") })}</Warning>
 			)}
 
-			<Link to={`/guilds/${guild.id}`} className="text-accent inline-flex items-center gap-2 text-sm hover:underline">
-				{t("owner.openSettings")}
-				<ExternalLink size={14} aria-hidden="true" />
-			</Link>
+			<div className="flex flex-wrap gap-x-6 gap-y-2">
+				<Link
+					to={`?tab=usage&guild=${guild.id}`}
+					className="text-accent inline-flex items-center gap-2 text-sm hover:underline"
+				>
+					{t("owner.seeWhoRan")}
+					<BarChart3 size={14} aria-hidden="true" />
+				</Link>
+				<Link to={`/guilds/${guild.id}`} className="text-accent inline-flex items-center gap-2 text-sm hover:underline">
+					{t("owner.openSettings")}
+					<ExternalLink size={14} aria-hidden="true" />
+				</Link>
+			</div>
 
 			<LeaveServer guild={guild} onLeft={onClose} />
 		</Card>

@@ -1,18 +1,32 @@
-import { type OwnerGuildRow } from "@testify/shared";
+import { type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
 import { cn } from "@/lib/cn";
+import { shortDate } from "@/lib/datetime";
+
+/** Columns only a wide screen has room for, unless the list is sorted by them, when a phone keeps the one in use. */
+const LARGE_ONLY = "hidden lg:table-cell";
 
 export function OwnerGuildTable({
 	guilds,
+	sort = "members",
+	empty = null,
 	selected,
 	onSelect,
 }: {
 	guilds: OwnerGuildRow[];
+	sort?: OwnerGuildSort;
+	/** Said in place of an empty table, when a search is what emptied it. */
+	empty?: string | null;
 	selected?: string | null;
 	onSelect?: (guildId: string) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
+	const shown = (column: "joined" | "commands" | "dashboard"): string | false => {
+		const active = { joined: ["newest", "oldest"], commands: ["commands"], dashboard: ["dashboard"] }[column];
+		return !active.includes(sort) && LARGE_ONLY;
+	};
+
 	return (
 		<DataTable
 			caption={t("owner.guildTableCaption")}
@@ -24,6 +38,15 @@ export function OwnerGuildTable({
 					<th scope="col" className={TH_NUM}>
 						{t("owner.members")}
 					</th>
+					<th scope="col" className={cn(TH_NUM, "w-28 sm:w-36", shown("joined"))}>
+						{t("owner.joined")}
+					</th>
+					<th scope="col" className={cn(TH_NUM, shown("commands"))}>
+						{t("owner.commands30d")}
+					</th>
+					<th scope="col" className={cn(TH_NUM, shown("dashboard"))}>
+						{t("owner.dashboard30d")}
+					</th>
 					{/* Which features are on is the least urgent column, so it is the one a phone loses. */}
 					<th scope="col" className={cn(TH, WIDE_ONLY)}>
 						{t("owner.configured")}
@@ -31,6 +54,13 @@ export function OwnerGuildTable({
 				</>
 			}
 		>
+			{guilds.length === 0 && empty !== null && (
+				<tr>
+					<td colSpan={6} className={cn(CELL, "text-muted-foreground")}>
+						{empty}
+					</td>
+				</tr>
+			)}
 			{guilds.map((guild) => (
 				<tr
 					key={guild.id}
@@ -62,6 +92,11 @@ export function OwnerGuildTable({
 						)}
 					</td>
 					<td className={CELL_NUM}>{guild.memberCount.toLocaleString()}</td>
+					<td className={cn(CELL_NUM, "font-sans whitespace-nowrap", shown("joined"))}>
+						{guild.joinedAt === null ? "—" : shortDate(guild.joinedAt)}
+					</td>
+					<td className={cn(CELL_NUM, shown("commands"))}>{guild.commands.toLocaleString()}</td>
+					<td className={cn(CELL_NUM, shown("dashboard"))}>{guild.dashboardViews.toLocaleString()}</td>
 					<td className={cn(CELL, WIDE_ONLY)}>
 						{guild.configured.length === 0 ? (
 							<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>

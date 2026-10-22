@@ -1,5 +1,6 @@
 import { ANALYTICS } from "@config/constants";
 import { type CommandUsage, CommandUsages } from "@database/models/analytics.schema";
+import { DashboardViews } from "@database/models/dashboardViews.schema";
 import { ScreenViews } from "@database/models/screenViews.schema";
 
 /** Command usage, counted rather than logged. Every query here is scoped to a window of whole UTC days. */
@@ -16,6 +17,11 @@ export function dayKey(at: Date = new Date()): string {
 /** The oldest day still inside a window, inclusive, so `day >= since` selects it. */
 export function since(days: number, now: Date = new Date()): string {
 	return dayKey(new Date(now.getTime() - (days - 1) * 24 * 60 * 60 * 1000));
+}
+
+/** A window over every server, or over one when a guild id is given. */
+function inWindow(days: number, now?: Date, guildId?: string): Record<string, unknown> {
+	return { day: { $gte: since(days, now) }, ...(guildId === undefined ? {} : { guildId }) };
 }
 
 export interface UseRecord {
@@ -80,9 +86,9 @@ export interface CommandTally {
 }
 
 /** Every command that ran in the window, busiest first. `limit` of 0 means all of them. */
-export async function commandTallies(days: number, limit = 0, now?: Date): Promise<CommandTally[]> {
+export async function commandTallies(days: number, limit = 0, now?: Date, guildId?: string): Promise<CommandTally[]> {
 	return CommandUsages.aggregate<CommandTally>([
-		{ $match: { day: { $gte: since(days, now) } } },
+		{ $match: inWindow(days, now, guildId) },
 		{ $group: { _id: "$command", count: { $sum: "$count" }, failures: { $sum: "$failures" } } },
 		{ $sort: { count: -1, _id: 1 } },
 		...(limit > 0 ? [{ $limit: limit }] : []),
@@ -112,9 +118,9 @@ export interface DayTally {
 }
 
 /** Only days with activity come back; the caller fills the gaps, because a missing day is a zero. */
-export async function dailyTallies(days: number, now?: Date): Promise<DayTally[]> {
+export async function dailyTallies(days: number, now?: Date, guildId?: string): Promise<DayTally[]> {
 	return CommandUsages.aggregate<DayTally>([
-		{ $match: { day: { $gte: since(days, now) } } },
+		{ $match: inWindow(days, now, guildId) },
 		{ $group: { _id: "$day", count: { $sum: "$count" }, failures: { $sum: "$failures" } } },
 		{ $sort: { _id: 1 } },
 		{ $project: { _id: 0, day: "$_id", count: 1, failures: 1 } },
@@ -122,9 +128,9 @@ export async function dailyTallies(days: number, now?: Date): Promise<DayTally[]
 }
 
 /** Whether anybody still types the prefix, which is the one thing that decides if it is worth maintaining. */
-export async function surfaceTallies(days: number, now?: Date): Promise<Record<Surface, number>> {
+export async function surfaceTallies(days: number, now?: Date, guildId?: string): Promise<Record<Surface, number>> {
 	const rows = await CommandUsages.aggregate<{ surface: Surface; count: number }>([
-		{ $match: { day: { $gte: since(days, now) } } },
+		{ $match: inWindow(days, now, guildId) },
 		{ $group: { _id: "$surface", count: { $sum: "$count" } } },
 		{ $project: { _id: 0, surface: "$_id", count: 1 } },
 	]).exec();
@@ -160,4 +166,37 @@ export async function screenTallies(days: number, limit = 0, now?: Date): Promis
 	]).exec();
 
 	return rows.map((row) => ({ route: row._id, count: row.count }));
+}
+
+/** A screen opened in a server, counted against that server only; the caller has already checked who opened it. */
+export async function recordDashboardView(guildId: string, now: Date = new Date()): Promise<void> {
+	const expiresAt = new Date(now.getTime() + ANALYTICS.retentionDays * 24 * 60 * 60 * 1000);
+
+	await DashboardViews.updateOne(
+		{ day: dayKey(now), guildId },
+		{ $inc: { count: 1 }, $setOnInsert: { expiresAt } },
+		{ upsert: true },
+	).exec();
+}
+
+export interface DashboardTally {
+	guildId: string;
+	count: number;
+	/** `YYYY-MM-DD`, the most recent day a screen was opened there. */
+	lastDay: string;
+}
+
+export async function dashboardTallies(
+	days: number,
+	limit = 0,
+	now?: Date,
+	guildId?: string,
+): Promise<DashboardTally[]> {
+	return DashboardViews.aggregate<DashboardTally>([
+		{ $match: inWindow(days, now, guildId) },
+		{ $group: { _id: "$guildId", count: { $sum: "$count" }, lastDay: { $max: "$day" } } },
+		{ $sort: { count: -1, _id: 1 } },
+		...(limit > 0 ? [{ $limit: limit }] : []),
+		{ $project: { _id: 0, guildId: "$_id", count: 1, lastDay: 1 } },
+	]).exec();
 }

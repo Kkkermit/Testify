@@ -2376,14 +2376,21 @@ which reads the env array on every request — so removing an ID revokes the con
 rather than at their next sign-in, and no flag on the session document can grant it. There are tests for the
 whole shape of that, including that a near-miss ID cannot match.
 
-**Usage is counted, not logged.** `commandusage` holds one row per command per server per day per surface,
-`$inc`-ed in place by `countCommandUse` at the two dispatch sites, with a TTL that reaps a row 90 days after it
-was created. Three things about it are load-bearing:
+**Usage is counted, and who ran what is logged beside it for a month.** `commandusage` holds one row per command
+per server per day per surface, `$inc`-ed in place by `countCommandUse` at the two dispatch sites, with a TTL that
+reaps a row 90 days after it was created. Four things about it are load-bearing:
 
-- **No user IDs, anywhere.** "What is this bot used for" is the question; "who used it" is not, and a
-  self-hoster's analytics must not quietly become a per-person activity log. Say so when adding a field.
-- **A row per invocation would grow without bound.** The aggregate shape is what lets one query answer a
-  90-day window on a busy bot.
+- **The counts carry no user id, and `commandruns` is the one analytics record that does.** The owner asked to see
+  who in a server runs what, so each run in a server is written there too: the user id and the username it had,
+  the command and subcommand, the channel, the surface, whether it worked and how long it took. **Never an option
+  value** — what somebody typed is what the command log channels already treat as sensitive. It expires after
+  `RUN_RETENTION_DAYS` (30, in `@testify/shared`), a third as long as the counts, and a run in a direct message is
+  not written at all, since the drill-down is per server and would have nowhere to show it. The privacy notice
+  says all of this (`legal.commandsL7`, `legal.retentionL8`) and `LegalPage.test.tsx` pins it. Say so there when
+  adding a field.
+- **A row per invocation would grow without bound, which is why only the month-long log has one.** The aggregate
+  shape is what lets one query answer a 90-day window on a busy bot; the drill-down's member figures cover at most
+  the 30 days of runs, and the page says so when the window is longer (`memberDays`).
 - **`runCommand` returns whether it succeeded** so a failure can be counted without catching the error and
   breaking the guarantee that the user always gets an answer. `countCommandUse` is not awaited and drops its
   own error after a debug line — the count is the least important thing that happened, and nothing reads a
@@ -2391,16 +2398,23 @@ was created. Three things about it are load-bearing:
 
 **Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
 dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
-`useScreenView.ts` puts every matched parameter back as its name before the request leaves the browser, so no
-server id and no member id is ever sent. It carries **no guild id either**, which is the one field that makes it
-different from `commandusage`: a server has one or two people who can open this dashboard, so a per-server view
-count would describe one identifiable person's browsing rather than an aggregate. Bot-wide answers the question
-the count exists for — which screens are worth investing in — and nothing else.
+`useScreenView.ts` puts every matched parameter back as its name, so no member id is ever sent and the pattern
+names no server. It carries **no guild id**: a server has one or two people who can open this dashboard, so which
+screens one server opened would describe one identifiable person's browsing. Bot-wide answers the question the
+count exists for — which screens are worth investing in — and nothing else.
+
+**Which servers use the dashboard is a second count, narrower again.** The owner asked for it, and `dashboardview`
+answers it with a server, a day and a number — no user id and no route — so it says how much a server's managers
+use the dashboard and never what they looked at. The browser sends the server beside the pattern (`screenView`),
+and it counts only when the sender is a member with Manage Server there, checked live like `requireGuild`
+(`managesGuild` in `routes/screens.ts`): anybody signed in can post a guild id, and an owner browsing a server is
+not that server using the dashboard, so the owner is held to the same rule.
 
 Two things follow. The write lives in its own `/api/screens` route rather than in the owner-only `analytics`
 app, because every signed-in manager generates one while only the owner reads them back. And the privacy notice
-names it, with `LegalPage.test.tsx` pinning both the "no user id and no server id" and "IP address is not
-stored" claims — a change that starts storing either breaks a test.
+names both, with `LegalPage.test.tsx` pinning the "no user id and no server id" claim for screens, the "no user
+id, and not which screens" claim for servers, and "IP address is not stored" — a change that starts storing any
+of them breaks a test.
 
 **No IP address, no geolocation, no device or browser string.** Not an oversight: an admin panel that records
 where its users connect from is keeping personal data, and this bot's privacy notice promises it does not. If a

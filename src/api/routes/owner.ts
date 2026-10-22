@@ -6,10 +6,12 @@ import { blacklist } from "@api/routes/blacklist";
 import { commandRunner } from "@api/routes/commandRunner";
 import { globalCommandToggles } from "@api/routes/commandToggles";
 import { parseQuery } from "@api/validate";
+import { ANALYTICS } from "@config/constants";
 import { databaseConnected } from "@database/connection";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
-import { type OwnerGuildRow, type OwnerStats, type Paged, pagination } from "@testify/shared";
+import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
+import { ownerGuildQuery, type OwnerGuildRow, type OwnerGuildSort, type OwnerStats, type Paged } from "@testify/shared";
 
 export const owner = new Hono<ApiBindings>();
 
@@ -40,14 +42,27 @@ owner.get("/stats", (context) => {
 
 /** Answers "which of my servers has never configured anything", which is the reason this screen exists. */
 owner.get("/guilds", async (context) => {
-	const { page, perPage } = parseQuery(context, pagination);
+	const { page, perPage, sort, q = "" } = parseQuery(context, ownerGuildQuery);
 	const client = context.get("client");
 
-	const all = [...client.guilds.cache.values()].sort((a, b) => b.memberCount - a.memberCount);
+	const [commands, dashboard] = await Promise.all([
+		guildTallies(ANALYTICS.defaultWindowDays),
+		dashboardTallies(ANALYTICS.defaultWindowDays),
+	]);
+	const counts: GuildCounts = {
+		commands: new Map(commands.map((row) => [row.guildId, row.count])),
+		dashboard: new Map(dashboard.map((row) => [row.guildId, row.count])),
+	};
+
+	const all = sortGuilds(
+		[...client.guilds.cache.values()].filter((guild) => guildMatches(guild, q)),
+		sort,
+		counts,
+	);
 	const slice = all.slice((page - 1) * perPage, page * perPage);
 
 	const body: Paged<OwnerGuildRow> = {
-		items: await Promise.all(slice.map(toRow)),
+		items: await Promise.all(slice.map((guild) => toRow(guild, counts))),
 		total: all.length,
 		page,
 		perPage,
@@ -56,7 +71,41 @@ owner.get("/guilds", async (context) => {
 	return context.json(body);
 });
 
-async function toRow(guild: Guild): Promise<OwnerGuildRow> {
+export interface GuildCounts {
+	commands: Map<string, number>;
+	dashboard: Map<string, number>;
+}
+
+type Listed = Pick<Guild, "id" | "name" | "memberCount" | "joinedTimestamp">;
+
+/** An ID matches exactly and a name matches anywhere, ignoring case. */
+export function guildMatches(guild: Pick<Guild, "id" | "name">, query: string): boolean {
+	const wanted = query.trim().toLowerCase();
+	if (wanted === "") return true;
+
+	return /^\d{17,20}$/.test(wanted) ? guild.id === wanted : guild.name.toLowerCase().includes(wanted);
+}
+
+/** Ties fall back to the name, so a page never reshuffles between two requests for it. */
+export function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, counts: GuildCounts): T[] {
+	const count = (map: Map<string, number>, guild: T): number => map.get(guild.id) ?? 0;
+	const order: Record<OwnerGuildSort, (a: T, b: T) => number> = {
+		members: (a, b) => b.memberCount - a.memberCount,
+		fewest: (a, b) => a.memberCount - b.memberCount,
+		newest: (a, b) => b.joinedTimestamp - a.joinedTimestamp,
+		oldest: (a, b) => a.joinedTimestamp - b.joinedTimestamp,
+		commands: (a, b) => count(counts.commands, b) - count(counts.commands, a),
+		dashboard: (a, b) => count(counts.dashboard, b) - count(counts.dashboard, a),
+		name: () => 0,
+	};
+
+	return [...guilds].sort(
+		(a, b) =>
+			order[sort](a, b) || a.name.localeCompare(b.name, "en", { sensitivity: "base" }) || a.id.localeCompare(b.id),
+	);
+}
+
+async function toRow(guild: Guild, counts: GuildCounts): Promise<OwnerGuildRow> {
 	const [levels, audit, welcome, counting] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -77,5 +126,7 @@ async function toRow(guild: Guild): Promise<OwnerGuildRow> {
 		memberCount: guild.memberCount,
 		joinedAt: guild.joinedAt.toISOString(),
 		configured,
+		commands: counts.commands.get(guild.id) ?? 0,
+		dashboardViews: counts.dashboard.get(guild.id) ?? 0,
 	};
 }

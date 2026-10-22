@@ -563,7 +563,7 @@ from the Appearance screen. All of it is per browser: nothing you choose there a
 <td valign="top"><img alt="The appearance screen: theme, accent, motion and language" src="docs/dashboard/screenshots/appearance.png"><br><sub><b>Appearance</b> — theme, accent, motion and language</sub></td>
 </tr>
 <tr>
-<td colspan="2" align="center"><img alt="The owner console's usage tab" src="docs/dashboard/screenshots/owner-console.png" width="80%"><br><sub><b>Owner console</b> — usage counted, never logged; visible only to the bot's owners</sub></td>
+<td colspan="2" align="center"><img alt="The owner console's usage tab" src="docs/dashboard/screenshots/owner-console.png" width="80%"><br><sub><b>Owner console</b> — usage by command and server, and who ran what for 30 days; visible only to the bot's owners</sub></td>
 </tr>
 </table>
 
