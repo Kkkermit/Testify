@@ -62,6 +62,7 @@ export function createMockRole(overrides: Overrides<Role> = {}): Role {
 			position: 5,
 			hexColor: "#5865f2",
 			members: mockCollection(),
+			permissions: new PermissionsBitField(),
 			toString: () => `<@&${ROLE_ID}>`,
 		} as unknown as Role,
 		overrides,

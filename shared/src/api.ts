@@ -125,6 +125,8 @@ export interface RoleSummary {
 	managed: boolean;
 	/** False when the role sits at or above the bot's own highest, which is the check that fails at runtime. */
 	assignableByBot: boolean;
+	/** Carries a moderation or admin permission, so it can never go on a menu members pick from. */
+	powerful: boolean;
 }
 
 export interface OwnerStats {

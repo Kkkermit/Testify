@@ -12,6 +12,7 @@ export function RoleChecklist({
 	hint,
 	max,
 	requireAssignable = false,
+	forbidPowerful = false,
 }: {
 	roles: RoleSummary[];
 	value: string[];
@@ -20,14 +21,21 @@ export function RoleChecklist({
 	hint?: string;
 	max: number;
 	requireAssignable?: boolean;
+	/** For roles members hand themselves, where one that moderates or administers is never allowed. */
+	forbidPowerful?: boolean;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const items: CheckItem[] = roles.map((role) => ({
-		id: role.id,
-		label: <RoleSwatch name={role.name} colour={role.colour} />,
-		blocked: requireAssignable && !role.assignableByBot,
-		blockedNote: t("common.aboveBot"),
-	}));
+	const items: CheckItem[] = roles.map((role) => {
+		const aboveBot = requireAssignable && !role.assignableByBot;
+		const powerful = forbidPowerful && role.powerful;
+
+		return {
+			id: role.id,
+			label: <RoleSwatch name={role.name} colour={role.colour} />,
+			blocked: aboveBot || powerful,
+			blockedNote: aboveBot ? t("common.aboveBot") : t("common.tooPowerful"),
+		};
+	});
 
 	return (
 		<CheckList

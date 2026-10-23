@@ -5,11 +5,13 @@ import { COINFLIP_RETURN, DICE_RETURNS } from "@lib/casino/chance.util";
 import { HILO_EDGE, HILO_MAX_MULTIPLIER } from "@lib/casino/hilo.util";
 import { SLOT_PAYTABLE, slotsReturnToPlayer } from "@lib/casino/slots.util";
 import { formatDurationLong, formatNumber, humanisePermission } from "@lib/format/format.util";
+import { REMINDER_LIMITS } from "@lib/reminders/reminders.constants";
 import {
 	GIVEAWAY_LIMITS,
 	INVITE_PERMISSIONS,
 	LEVEL_LIMITS,
 	LOTTERY_LIMITS,
+	ROLE_MENU_LIMITS,
 	SETTINGS_LIMITS,
 	STICKY_LIMITS,
 	TREASURE_DEFAULTS,
@@ -81,6 +83,13 @@ export const FACTS: Readonly<Record<string, string>> = {
 	"giveaway.maxDuration": formatDurationLong(GIVEAWAY_LIMITS.maxDurationMs),
 
 	"lottery.maxWinners": formatNumber(LOTTERY_LIMITS.maxWinners),
+
+	"reminder.min": formatDurationLong(REMINDER_LIMITS.minMs),
+	"reminder.max": formatDurationLong(REMINDER_LIMITS.maxMs),
+	"reminder.maxActive": formatNumber(REMINDER_LIMITS.maxActive),
+
+	"roleMenu.maxPerServer": formatNumber(ROLE_MENU_LIMITS.maxPerGuild),
+	"roleMenu.maxRoles": formatNumber(ROLE_MENU_LIMITS.maxRoles),
 
 	"treasure.minMessages": formatNumber(TREASURE_DEFAULTS.minMessages),
 	"treasure.maxMessages": formatNumber(TREASURE_DEFAULTS.maxMessages),

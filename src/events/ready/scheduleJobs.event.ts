@@ -5,6 +5,7 @@ import { settleIdleHands } from "@jobs/casinoSweep.util";
 import { runLotteryDraws } from "@jobs/lotteryDraw.util";
 import { payPassiveIncome } from "@jobs/passiveIncome.util";
 import { refreshBotStats } from "@jobs/refreshBotStats.util";
+import { deliverDueReminders } from "@jobs/reminders.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 import { recordHeartbeat } from "@jobs/statusHeartbeat.util";
 import { flushCommandLog, startEventLoopMonitor, watchDiscordApi } from "@lib/bot";
@@ -19,6 +20,7 @@ export default defineEvent({
 	run(client) {
 		client.timers.every("lottery", INTERVALS.lotteryCheckMs, () => runLotteryDraws(client));
 		client.timers.every("softbans", INTERVALS.softbanCheckMs, () => processExpiredSoftbans(client));
+		client.timers.every("reminders", INTERVALS.reminderCheckMs, () => deliverDueReminders(client));
 		client.timers.every("passive-income", INTERVALS.passiveIncomeMs, () => payPassiveIncome(client));
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
 		client.timers.every("insights", INTERVALS.insightsFlushMs, () => flushActivity(client.logger));

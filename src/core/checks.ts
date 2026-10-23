@@ -122,6 +122,20 @@ function pausedRefusal(): string {
 	return `${botName()} is paused right now. The bot owner can resume it from the dashboard.`;
 }
 
+/** The gates a control anybody may press passes, since whoever posted it having passed them says nothing about them. */
+export async function checkOpenControl(
+	client: TestifyClient,
+	who: { userId: string; guildId: string },
+	command: string,
+): Promise<CheckFailure> {
+	if (client.paused) return pausedRefusal();
+
+	const blacklisted = await findBlacklistEntry(who.userId);
+	if (blacklisted) return blacklistRefusal(blacklisted);
+
+	return checkSwitchedOff(command, who.guildId);
+}
+
 /**
  * The gates `/play` passes, for a control that queues music without running the command — anybody may press it, so the
  * panel's owner having passed them says nothing about the person pressing.
@@ -130,13 +144,8 @@ export async function checkMusicControl(
 	client: TestifyClient,
 	who: { userId: string; guildId: string; member: CommandInput["member"] },
 ): Promise<CheckFailure> {
-	if (client.paused) return pausedRefusal();
-
-	const blacklisted = await findBlacklistEntry(who.userId);
-	if (blacklisted) return blacklistRefusal(blacklisted);
-
-	const switchedOff = await checkSwitchedOff("play", who.guildId);
-	if (switchedOff !== null) return switchedOff;
+	const refused = await checkOpenControl(client, who, "play");
+	if (refused !== null) return refused;
 
 	const settings = normaliseMusicSettings(await getMusicSettings(who.guildId));
 
@@ -152,13 +161,8 @@ export async function checkCasinoPlay(
 	who: { userId: string; guildId: string },
 	game: CasinoGame,
 ): Promise<CheckFailure> {
-	if (client.paused) return pausedRefusal();
-
-	const blacklisted = await findBlacklistEntry(who.userId);
-	if (blacklisted) return blacklistRefusal(blacklisted);
-
-	const switchedOff = await checkSwitchedOff(CASINO_COMMAND, who.guildId);
-	if (switchedOff !== null) return switchedOff;
+	const refused = await checkOpenControl(client, who, CASINO_COMMAND);
+	if (refused !== null) return refused;
 
 	return casinoRefusal(await readCasinoSettings(who.guildId), game);
 }

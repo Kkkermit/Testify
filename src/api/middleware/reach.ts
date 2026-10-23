@@ -1,9 +1,10 @@
-import { type GuildMember, PermissionFlagsBits, PermissionsBitField } from "discord.js";
+import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { type Context } from "hono";
 import { createMiddleware } from "hono/factory";
 import { type ApiBindings } from "@api/context";
 import { badRequest, forbidden, notInGuild } from "@api/errors";
 import { humanisePermission } from "@lib/format";
+import { grantProblem } from "@lib/roles";
 
 /** Nothing on the web may reach further than its person could in Discord itself, whatever a request says. */
 
@@ -102,37 +103,18 @@ export const requireReach = createMiddleware<ApiBindings>(async (context, next) 
 	await next();
 });
 
-/** Why the bot may not hand out this role on the caller's behalf, or null when it may. */
-export function grantProblem(
-	member: GuildMember | undefined,
-	roleId: string,
-	guild: NonNullable<ApiBindings["Variables"]["guild"]>,
-): string | null {
-	const role = guild.roles.cache.get(roleId);
-	if (role === undefined) return "That role is not in this server.";
-	if (role.id === guild.id || role.managed)
-		return `${role.name} is managed by Discord or an integration, so nobody can hand it out.`;
-
-	const ceiling = guild.members.me?.roles.highest.position ?? 0;
-	if (role.position >= ceiling)
-		return `${role.name} sits at or above the bot's own highest role, so it cannot give it.`;
-
-	// Discord's own rule for Manage Roles: only below your highest role, unless you own the server.
-	if (member !== undefined && member.id !== guild.ownerId && role.position >= member.roles.highest.position) {
-		return `${role.name} sits at or above your own highest role, so you cannot have the bot hand it out.`;
-	}
-
-	return null;
-}
-
 /** Refuses the whole write if any role in it is one the caller could not give out themselves. */
-export function requireGrantable(context: Context<ApiBindings>, roleIds: readonly string[]): void {
+export function requireGrantable(
+	context: Context<ApiBindings>,
+	roleIds: readonly string[],
+	rule: typeof grantProblem = grantProblem,
+): void {
 	const guild = context.get("guild");
 	if (guild === undefined) throw notInGuild();
 	const member = context.get("isOwner") === true ? undefined : context.get("member");
 
 	for (const roleId of roleIds) {
-		const problem = grantProblem(member, roleId, guild);
+		const problem = rule(member, roleId, guild);
 		if (problem !== null) throw forbidden("role_out_of_reach", problem);
 	}
 }

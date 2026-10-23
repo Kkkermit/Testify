@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 79, across 14 categories          |
-| Command files        | 100 (incl. folded-in subcommands) |
-| Subcommands          | 131                               |
-| Prefix aliases       | 90                                |
-| Button handlers      | 31                                |
+| Commands             | 82, across 14 categories          |
+| Command files        | 103 (incl. folded-in subcommands) |
+| Subcommands          | 135                               |
+| Prefix aliases       | 95                                |
+| Button handlers      | 36                                |
 | Events               | 25, in 5 groups                   |
-| `src/lib` helpers    | 155, in 17 domain folders         |
-| Schemas/repositories | 22 / 20                           |
-| Scheduled jobs       | 6                                 |
-| Tests                | 5,982 across 333 suites           |
+| `src/lib` helpers    | 165, in 20 domain folders         |
+| Schemas/repositories | 27 / 24                           |
+| Scheduled jobs       | 7                                 |
+| Tests                | 6,332 across 359 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -216,10 +216,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  103 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               25 handlers in command, create, logging, ready and message
-├── buttons/              31 component handlers, keyed by custom-ID prefix
-├── lib/                  155 helpers in 17 domain folders, each behind its own index.ts barrel
+├── buttons/              36 component handlers, keyed by custom-ID prefix
+├── lib/                  165 helpers in 20 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -227,15 +227,17 @@ src/
 │   ├── infra/            outbound HTTP, what it learns about each service, and the secret box
 │   ├── support/          the help desk: articles, search, the leak guard and the optional model picker
 │   ├── casino/           the games' rules, the wallet flow, the card hands and every casino message
+│   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
+│       reminders/ ideas/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           22 Mongoose schemas
-│   └── repositories/     20 query layers. Commands never touch a model directly.
-├── jobs/                 6 scheduled jobs (lottery, passive income, bot stats, softbans, heartbeat, casino hands)
+│   ├── models/           27 Mongoose schemas
+│   └── repositories/     24 query layers. Commands never touch a model directly.
+├── jobs/                 7 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 225 suites; the dashboard's 108 sit beside its code.
+tests/                    Mirrors src/. 245 suites; the dashboard's 114 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -297,6 +299,8 @@ Each is a pure state→message function paired with a handler in `src/buttons/`.
 | `musicSystemPanel.util.ts`    | `buttons/music.ts`          | A switch and a pre-ticked role select, applied immediately |
 | `casinoPanel.util.ts`         | `buttons/casino.ts`         | A picture per state, re-read from the database every press |
 | `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts` | A switch, a toggle per game and a pre-filled modal         |
+| `roleMenuPanel.util.ts`       | `buttons/roleMenuAdmin.ts`  | A list of records, each opening its own editor             |
+| `ideaPanel.util.ts`           | `buttons/idea.ts`           | A public post anybody presses, with staff-only buttons     |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -674,8 +678,9 @@ Rules:
 
 1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
    `userId` alone for per-guild data.
-2. **Two deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design) and the user
-   profile (about the person, not the server). Do not "fix" these.
+2. **Three deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
+   profile (about the person, not the server) and reminders (somebody's own, so `/remind list` shows every one
+   they have wherever they set it, and every lookup filters on `userId` instead). Do not "fix" these.
 3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
@@ -1608,9 +1613,67 @@ emoji fonts first for pictographs and flags; a missing glyph is recognised by me
 using and no star, so suits, slot symbols and the pips are paths. A `★` in a title rendered as a missing-glyph box
 and is why the slot machine draws its stars.
 
+### Role menus hand out only what the person making them could, and nothing that moderates
+
+`/role-menu` and the dashboard's **Role menus** screen make menus members pick their own roles from. The post is
+the same for everybody — one **Choose your roles** button — and pressing it opens a private string select
+pre-ticked with the roles that member already holds, so unticking is how a role is given back. Four things about it
+are load-bearing:
+
+- **The grant rule lives in one place.** `grantProblem` moved out of `src/api/middleware/reach.ts` into
+  `src/lib/roles/roleReach.util.ts`, so the dashboard's `requireGrantable` and the Discord editor ask the same
+  question: below the person's own highest role unless they own the server, below the bot, never managed, never
+  `@everyone`. `offerProblem` adds the one rule a menu needs on top: **no role carrying `POWERFUL_PERMISSIONS`**
+  (Administrator, Manage Server, Kick Members and the rest), even for the server's owner, because a self-assigned
+  role that kicks lets anybody kick. `RoleSummary.powerful` greys those out on the dashboard before a save.
+- **A pick is checked again on every press** (`pickProblem`): a role can be moved above the bot or given Kick
+  Members after the menu was made. A role that is not on offer right now is neither given nor taken away.
+- **Every post goes out with `allowedMentions: { parse: [] }`.** The role list is mentions, and pinging them would
+  ping every holder of every role on the menu.
+- **A change to a posted menu follows to its post, and a post that cannot follow is a note, not a failure**
+  (`changeRoleMenu`), because the change did happen. Moving the channel takes the old post down first, so two
+  copies never hand out roles side by side. Deleting a menu takes its post down and takes nobody's role away.
+
+### Reminders are delivered at least once
+
+`/remind me` stores a reminder in `reminders` and the `reminders` job delivers it. Three things about it are
+load-bearing:
+
+- **A reminder is claimed with a lease and deleted only once it is sent** (`claimDueReminder`,
+  `REMINDER_LIMITS.leaseMs`), so a restart mid-send sends it again rather than losing it, and two runs cannot both
+  send it. A failure that may pass is retried when the lease runs out; one still failing a day after it was due is
+  dropped, so a broken route cannot retry for ever.
+- **It pings where it was set, and falls back to a DM** when its owner has left the server or the bot can no
+  longer post there. The channel post mentions its owner and nobody else (`allowedMentions: { users: [...] }`),
+  since the text is whatever somebody typed. Discord's answers that mean a route will never work —
+  `CannotSendMessagesToThisUser`, `MissingPermissions` and the like — move on rather than retry.
+- **The text is `unlogged`**, so the operator's command logs name the option and never its value, and the privacy
+  notice says so (`legal.storedL8`).
+
+### The idea board is the server's own, and is not `/suggest`
+
+`/idea submit` posts to a channel a manager chose with `/idea settings`; members vote 👍 or 👎 on the post and
+staff with Manage Server accept, decline or reopen it with a reason, which is DMed to its author. `/suggest` is a
+different thing — it goes to the bot's developers — and the article and both panels say so. Four things about it
+are load-bearing:
+
+- **Votes are a set of user ids per side, toggled atomically** (`voteOnIdea`): a second press on the same side takes
+  the vote back and a press on the other side moves it. That list of who voted is the one personal record the
+  board keeps, and the privacy notice names it (`legal.storedL9`).
+- **An idea's number comes from one `$inc` counter** in `ideasettings`, with a unique index on `{ guildId, number }`,
+  so two ideas posted at once cannot share one.
+- **An idea that could not be posted is deleted again** (`submitIdea`), because an idea nobody can see is not one.
+- **The post carries no owner.** Anybody may vote, so every press goes through `checkOpenControl` — the pause, the
+  blacklist and `/idea`'s own switch — and the staff buttons check Manage Server on the press **and** on the reason
+  form, since a role can change while the form is open.
+
+`checkOpenControl` in `checks.ts` is the gate every control anybody may press passes; the role menu's button, the
+idea board's and `checkMusicControl` and `checkCasinoPlay` all start with it.
+
 ### Global by design
 
-The blacklist and the user profile are intentionally not guild-scoped. See [§12](#12-multi-guild-rules).
+The blacklist, the user profile and reminders are intentionally not guild-scoped. See
+[§12](#12-multi-guild-rules).
 
 ---
 
@@ -1736,6 +1799,8 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/warnings`     | The five latest warnings and a search, the steps, warning a member by name |
 | `/guilds/:id/changes`      | Two weeks of changes, from the dashboard and Discord's audit log, searched |
 | `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
+| `/guilds/:id/role-menus`   | Menus members pick roles from; nothing above you or that moderates         |
+| `/guilds/:id/ideas`        | The idea board's channel and switch, every idea, and the decision on it    |
 | `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
 | `/guilds/:id/music`        | The music kill switch and the DJ roles                                     |
