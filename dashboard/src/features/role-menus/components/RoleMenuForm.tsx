@@ -97,6 +97,7 @@ export function RoleMenuForm({
 				<span className={LABEL}>{t("roleMenus.mode")}</span>
 				<SegmentedControl
 					label={t("roleMenus.mode")}
+					className="self-start"
 					value={draft.mode}
 					segments={[
 						{ value: "many", label: t("roleMenus.modeMany") },
