@@ -13,6 +13,8 @@ interface BarRow {
 	/** Sits under the label — a category, a member count, whatever names the row further. */
 	sub?: string;
 	count: number;
+	/** Shown in place of the count, for a figure with a unit; the bar still follows `count`. */
+	value?: string;
 }
 
 /** The bar sits behind the row rather than beside it, so the label is never squeezed by the value. */
@@ -51,7 +53,7 @@ export function UsageBars({
 						<span className="block truncate text-sm font-medium">{row.label}</span>
 						{row.sub !== undefined && <span className="text-muted-foreground block truncate text-xs">{row.sub}</span>}
 					</span>
-					<span className="shrink-0 font-mono text-sm tabular-nums">{row.count.toLocaleString()}</span>
+					<span className="shrink-0 font-mono text-sm tabular-nums">{row.value ?? row.count.toLocaleString()}</span>
 				</li>
 			))}
 		</ol>

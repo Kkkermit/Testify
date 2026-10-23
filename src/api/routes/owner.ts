@@ -42,7 +42,7 @@ owner.get("/stats", (context) => {
 
 /** Answers "which of my servers has never configured anything", which is the reason this screen exists. */
 owner.get("/guilds", async (context) => {
-	const { page, perPage, sort, q = "" } = parseQuery(context, ownerGuildQuery);
+	const { page, perPage, sort, filter, q = "" } = parseQuery(context, ownerGuildQuery);
 	const client = context.get("client");
 
 	const [commands, dashboard] = await Promise.all([
@@ -55,7 +55,9 @@ owner.get("/guilds", async (context) => {
 	};
 
 	const all = sortGuilds(
-		[...client.guilds.cache.values()].filter((guild) => guildMatches(guild, q)),
+		[...client.guilds.cache.values()].filter(
+			(guild) => guildMatches(guild, q) && (filter === "all" || (counts.commands.get(guild.id) ?? 0) === 0),
+		),
 		sort,
 		counts,
 	);
@@ -95,6 +97,8 @@ export function sortGuilds<T extends Listed>(guilds: T[], sort: OwnerGuildSort, 
 		newest: (a, b) => b.joinedTimestamp - a.joinedTimestamp,
 		oldest: (a, b) => a.joinedTimestamp - b.joinedTimestamp,
 		commands: (a, b) => count(counts.commands, b) - count(counts.commands, a),
+		// Among equally quiet servers, the one that has had longest to start using the bot comes first.
+		quietest: (a, b) => count(counts.commands, a) - count(counts.commands, b) || a.joinedTimestamp - b.joinedTimestamp,
 		dashboard: (a, b) => count(counts.dashboard, b) - count(counts.dashboard, a),
 		name: () => 0,
 	};

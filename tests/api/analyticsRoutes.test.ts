@@ -6,7 +6,7 @@ import { analytics, zeroFill } from "@api/routes/analytics";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { logRing } from "@core/logRing";
-import { activeMembers, memberTallies, recentRuns } from "@database/repositories/commandRunRepository";
+import { activeMembers, memberTallies, recentRuns, slowestCommands } from "@database/repositories/commandRunRepository";
 import {
 	commandTallies,
 	dailyTallies,
@@ -38,6 +38,7 @@ jest.mock("@database/repositories/commandRunRepository", () => ({
 	activeMembers: jest.fn(() => Promise.resolve(0)),
 	memberTallies: jest.fn(() => Promise.resolve([])),
 	recentRuns: jest.fn(() => Promise.resolve({ items: [], total: 0 })),
+	slowestCommands: jest.fn(() => Promise.resolve([])),
 }));
 
 const OWNER = "100000000000000001";
@@ -121,6 +122,7 @@ beforeEach(() => {
 	members.mockResolvedValue([]);
 	runs.mockResolvedValue({ items: [], total: 0 });
 	jest.mocked(activeMembers).mockResolvedValue(0);
+	jest.mocked(slowestCommands).mockResolvedValue([]);
 	logRing.clear();
 });
 
@@ -203,6 +205,18 @@ describe("the usage report", () => {
 			{ guildId: GUILD, name: "Test Server", iconUrl: null, memberCount: 1_234, count: 12 },
 		]);
 		expect(byDashboard).toHaveBeenCalledWith(30, 10);
+	});
+
+	it("names the slowest commands with their category, measured over the runs that are kept", async () => {
+		jest.mocked(slowestCommands).mockResolvedValue([{ command: "ban", runs: 12, typicalMs: 80, slowMs: 2_400 }]);
+
+		const report = await usage("?days=90");
+
+		expect(report.slowest).toEqual([
+			{ command: "ban", category: "moderation", runs: 12, typicalMs: 80, slowMs: 2_400 },
+		]);
+		expect(report.runDays).toBe(30);
+		expect(slowestCommands).toHaveBeenCalledWith(30, 10);
 	});
 
 	it("reports the split between slash and prefix", async () => {
@@ -342,7 +356,8 @@ describe("who ran what in one server", () => {
 					command: "music",
 					subcommand: "play",
 					surface: "slash",
-					failed: false,
+					failed: true,
+					reference: "AB12CD",
 					durationMs: 120,
 					at: new Date("2026-08-01T12:00:00.000Z"),
 					expiresAt: new Date("2026-08-31T12:00:00.000Z"),
@@ -362,7 +377,8 @@ describe("who ran what in one server", () => {
 				command: "music",
 				subcommand: "play",
 				surface: "slash",
-				failed: false,
+				failed: true,
+				reference: "AB12CD",
 				durationMs: 120,
 				channelId: CHANNEL,
 				channelName: "general",

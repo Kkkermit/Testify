@@ -44,10 +44,10 @@ export default defineEvent({
 			}
 
 			const started = Date.now();
-			const ok = await runCommand(interaction, command, client);
+			const { ok, reference } = await runCommand(interaction, command, client);
 			const durationMs = Date.now() - started;
 			recordCommandTime(durationMs, ok);
-			const run = { surface: "slash", ok, durationMs, channelId: interaction.channelId } as const;
+			const run = { surface: "slash", ok, reference, durationMs, channelId: interaction.channelId } as const;
 			countCommandUse(client, interaction, command, run);
 			logCommandUse(client, interaction, command, run);
 			return;

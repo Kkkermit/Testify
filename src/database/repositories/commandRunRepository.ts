@@ -1,3 +1,4 @@
+import { type PipelineStage } from "mongoose";
 import { type CommandRunRecord, CommandRuns } from "@database/models/commandRuns.schema";
 import { since, type Surface } from "@database/repositories/usageRepository";
 import { RUN_RETENTION_DAYS } from "@testify/shared";
@@ -19,6 +20,7 @@ export interface RunRecord {
 	subcommand: string | null;
 	surface: Surface;
 	failed: boolean;
+	reference: string | null;
 	durationMs: number;
 }
 
@@ -87,6 +89,37 @@ export async function memberTallies(guildId: string, days: number, now?: Date): 
 /** How many different people ran a command there. */
 export async function activeMembers(guildId: string, days: number, now?: Date): Promise<number> {
 	return (await CommandRuns.distinct("userId", { guildId, at: { $gte: windowStart(days, now) } }).exec()).length;
+}
+
+export interface SlowTally {
+	command: string;
+	runs: number;
+	typicalMs: number;
+	slowMs: number;
+}
+
+/** Every command run in a server, slowest first by the time its slowest one in twenty took. Needs MongoDB 7.0. */
+export async function slowestCommands(days: number, limit: number, now?: Date): Promise<SlowTally[]> {
+	const rows = await CommandRuns.aggregate<{ _id: string; runs: number; times: [number, number] }>([
+		{ $match: { at: { $gte: windowStart(days, now) } } },
+		// Mongoose's types predate `$percentile`, which MongoDB added in 7.0.
+		{
+			$group: {
+				_id: "$command",
+				runs: { $sum: 1 },
+				times: { $percentile: { input: "$durationMs", p: [0.5, 0.95], method: "approximate" } },
+			},
+		} as unknown as PipelineStage,
+		{ $sort: { "times.1": -1, _id: 1 } },
+		{ $limit: limit },
+	]).exec();
+
+	return rows.map((row) => ({
+		command: row._id,
+		runs: row.runs,
+		typicalMs: Math.round(row.times[0]),
+		slowMs: Math.round(row.times[1]),
+	}));
 }
 
 export interface RunFilter {

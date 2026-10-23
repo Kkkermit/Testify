@@ -1,5 +1,5 @@
 import { errorRate, type AnalyticsWindow, type GuildUsageReport } from "@testify/shared";
-import { ArrowLeft, X } from "lucide-react";
+import { ArrowLeft, Ban, X } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
@@ -24,7 +24,15 @@ import {
 } from "@/components/primitives";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { UsagePanel } from "@/features/owner/components/UsagePanel";
-import { commandFrom, percent, runName, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
+import {
+	commandFrom,
+	formatMs,
+	percent,
+	runName,
+	searchWith,
+	snowflakeFrom,
+	WINDOWS,
+} from "@/features/owner/owner.utils";
 import { PER_PAGE, useGuildMembers, useGuildRuns, useGuildUsage } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { cn } from "@/lib/cn";
@@ -198,12 +206,15 @@ function Members({ guildId, report }: { guildId: string; report: GuildUsageRepor
 								<th scope="col" className={cn(TH_NUM, WIDE_ONLY)}>
 									{t("owner.lastRun")}
 								</th>
+								<th scope="col" className={cn(TH_NUM, "w-28 sm:w-32")}>
+									<span className="sr-only">{t("owner.actions")}</span>
+								</th>
 							</>
 						}
 					>
 						{members.data.items.length === 0 && (
 							<tr>
-								<td colSpan={4} className={cn(CELL, "text-muted-foreground")}>
+								<td colSpan={5} className={cn(CELL, "text-muted-foreground")}>
 									{search.trim() === "" ? t("owner.noMemberRan") : t("owner.noMemberMatches")}
 								</td>
 							</tr>
@@ -258,6 +269,20 @@ function Members({ guildId, report }: { guildId: string; report: GuildUsageRepor
 								</td>
 								<td className={cn(CELL_NUM, "font-sans", WIDE_ONLY)} title={dateAndTime(member.lastAt)}>
 									{since(member.lastAt)}
+								</td>
+								<td className={cn(CELL_NUM, "font-sans")}>
+									{/* Opens the blacklist with the ID filled in; the block itself still needs pressing there. */}
+									<Button
+										variant="ghost"
+										className="px-3"
+										aria-label={t("owner.blockMember", { name: member.username })}
+										onClick={() => {
+											put({ tab: "blacklist", block: member.userId });
+										}}
+									>
+										<Ban size={14} aria-hidden="true" />
+										{t("owner.block")}
+									</Button>
 								</td>
 							</tr>
 						))}
@@ -393,10 +418,21 @@ function Runs({ guildId, report }: { guildId: string; report: GuildUsageReport }
 								</td>
 								<td className={cn(CELL_NUM, WIDE_ONLY)}>
 									<span className="flex flex-col items-end gap-1">
-										<Badge tone={run.failed ? "danger" : "success"}>
-											{run.failed ? t("owner.failed") : t("owner.worked")}
-										</Badge>
-										<span className="text-muted-foreground text-xs">{`${run.durationMs.toLocaleString()} ms`}</span>
+										{run.failed && run.reference !== null ? (
+											<Link
+												to={searchWith(params, { tab: "logs", q: run.reference, level: null })}
+												className="hover:text-accent inline-flex items-center gap-2 transition-colors duration-150"
+											>
+												<Badge tone="danger">{t("owner.failed")}</Badge>
+												<span className="font-mono text-xs underline">{run.reference}</span>
+												<span className="sr-only">{t("owner.showInLog")}</span>
+											</Link>
+										) : (
+											<Badge tone={run.failed ? "danger" : "success"}>
+												{run.failed ? t("owner.failed") : t("owner.worked")}
+											</Badge>
+										)}
+										<span className="text-muted-foreground text-xs">{formatMs(run.durationMs)}</span>
 									</span>
 								</td>
 							</tr>

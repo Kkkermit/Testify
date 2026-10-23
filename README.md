@@ -308,7 +308,7 @@ and `npm start`. No token or database yet? The next section walks through both f
 <details open>
 <summary><strong>4. Get a database</strong></summary>
 
-Testify keeps everything in MongoDB. The free tier is plenty.
+Testify keeps everything in MongoDB 7.0 or newer. The free tier is plenty.
 
 1. Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register).
 2. Create a **free M0 cluster**.

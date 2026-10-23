@@ -4,6 +4,7 @@ import {
 	type GuildUsageReport,
 	type LogFeed,
 	type MemberUsageRow,
+	type OwnerGuildFilter,
 	type OwnerGuildRow,
 	type OwnerGuildSort,
 	type OwnerStats,
@@ -28,13 +29,14 @@ export function useOwnerStats(): UseQueryResult<OwnerStats> {
 export function useOwnerGuilds(
 	page: number,
 	sort: OwnerGuildSort,
+	filter: OwnerGuildFilter,
 	search: string,
 ): UseQueryResult<Paged<OwnerGuildRow>> {
-	const query = new URLSearchParams({ page: String(page), perPage: String(PER_PAGE), sort });
+	const query = new URLSearchParams({ page: String(page), perPage: String(PER_PAGE), sort, filter });
 	if (search.trim() !== "") query.set("q", search.trim());
 
 	return useQuery({
-		queryKey: keys.owner.guilds(page, sort, search.trim()),
+		queryKey: keys.owner.guilds(page, sort, filter, search.trim()),
 		queryFn: () => api.get<Paged<OwnerGuildRow>>(`/owner/guilds?${query.toString()}`),
 		// The last page stays on screen while the next loads, so a sort or a keystroke does not flash a skeleton.
 		placeholderData: keepPreviousData,

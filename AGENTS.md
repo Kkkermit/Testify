@@ -2390,11 +2390,17 @@ reaps a row 90 days after it was created. Four things about it are load-bearing:
   adding a field.
 - **A row per invocation would grow without bound, which is why only the month-long log has one.** The aggregate
   shape is what lets one query answer a 90-day window on a busy bot; the drill-down's member figures cover at most
-  the 30 days of runs, and the page says so when the window is longer (`memberDays`).
-- **`runCommand` returns whether it succeeded** so a failure can be counted without catching the error and
-  breaking the guarantee that the user always gets an answer. `countCommandUse` is not awaited and drops its
-  own error after a debug line — the count is the least important thing that happened, and nothing reads a
-  result from it.
+  the 30 days of runs, and the page says so when the window is longer (`memberDays`). The Usage tab's slowest
+  commands come from the same log (`slowestCommands`), ranked by the time the slowest run in twenty took rather
+  than the average, so one hung run reads differently from a slow command. That query uses `$percentile`, which is
+  why the bot needs **MongoDB 7.0 or newer**; Atlas and the compose file's `mongo:8` both are.
+- **`runCommand` returns a `RunOutcome`**, whether it succeeded and, for an unexpected failure, the reference it
+  was logged under, so a failure can be counted without catching the error and breaking the guarantee that the
+  user always gets an answer. The run log keeps that reference, and a failed run's badge links to the Logs tab
+  searching for it — the log ring holds only the last 1,000 lines and a restart clears it, so an old failure can
+  link to nothing, and the reference in the error channel post is the copy that lasts. `countCommandUse` is not
+  awaited and drops its own error after a debug line — the count is the least important thing that happened, and
+  nothing reads a result from it.
 
 **Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
 dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
@@ -2459,7 +2465,9 @@ with no frontend work. Four things about it are load-bearing:
 owner able to blacklist another owner could lock every one of them out of their own bot, and a rule written
 twice is a rule that will eventually be written differently. The list is an id field rather than a picker
 because somebody worth blocking is usually in no server the bot can still see, and a row whose account Discord
-no longer knows still renders: an entry nobody can read is an entry nobody can lift.
+no longer knows still renders: an entry nobody can read is an entry nobody can lift. A member row on a server's
+usage page offers **Block**, which opens this tab with `?block=<id>` filled in and the reason focused — it never
+blocks on its own, because the entry is bot-wide and the owner should say why.
 
 **Leaving a server is confirmed by name, and the server is what compares it.** Rejoining needs a fresh invite
 from somebody still inside, so the browser asking for the name is the warning and `confirm !== guild.name` is
