@@ -42,6 +42,8 @@ const PARAPHRASES: [string, string[]][] = [
 	["let members choose their own roles", ["role-menus"]],
 	["how do I set up reaction roles", ["role-menus"]],
 	["pronoun roles people can pick", ["role-menus"]],
+	["remind me to do something later", ["reminders"]],
+	["how do I cancel a reminder", ["reminders"]],
 	["how do I play music", ["music"]],
 	["play a song from youtube", ["music"]],
 	["can I use spotify links", ["music"]],

@@ -81,6 +81,8 @@ describe("which commands answer privately", () => {
 				"ping",
 				"prefix",
 				"profile",
+				"remind list",
+				"remind me",
 				"reset",
 				"role",
 				"role-menu",

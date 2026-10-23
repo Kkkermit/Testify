@@ -1190,7 +1190,9 @@
 		"retentionL7": "Activity counts, and who joined or left: 30 days, then deleted automatically.",
 		"commandsL7": "Who ran a command: when you run one in a server, your user id and username, the command and the part of it you chose, the channel, whether it worked and how long it took. Never the options you gave it. Only the operator can see it, in the owner console. Commands run in a direct message are not recorded this way.",
 		"dashboardP6": "Server counts: how many dashboard screens a server’s own managers opened there, per day, so the operator can see which servers use the dashboard. No user id is stored with these, and not which screens were opened.",
-		"retentionL8": "Who ran a command: 30 days, then deleted automatically."
+		"retentionL8": "Who ran a command: 30 days, then deleted automatically.",
+		"storedL8": "Reminders: what you asked to be reminded of, when, and where you set it, until it is delivered or you cancel it. A reminder’s text is never posted to the operator’s command logs.",
+		"retentionL9": "Reminders: deleted once delivered or cancelled. One that cannot reach you by any route is dropped."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",

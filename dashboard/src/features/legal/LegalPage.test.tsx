@@ -82,6 +82,9 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/Commands run in a direct message are not recorded this way/);
 		// `dashboardviews` is a server and a count a day, with no account and no route.
 		expect(text).toMatch(/Server counts: .* No user id is stored with these, and not which screens were opened/);
+		// `/remind me`'s `about` is `unlogged`, and `deliverDueReminders` deletes each one once it is sent.
+		expect(text).toMatch(/A reminder’s text is never posted to the operator’s command logs/);
+		expect(text).toMatch(/Reminders: deleted once delivered or cancelled/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);

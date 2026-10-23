@@ -1191,7 +1191,9 @@
 		"retentionL7": "Recuentos de actividad, y quién entró o salió: 30 días, y después se borran automáticamente.",
 		"commandsL7": "Quién ejecutó un comando: cuando ejecutas uno en un servidor, tu ID de usuario y tu nombre de usuario, el comando y la parte que elegiste, el canal, si funcionó y cuánto tardó. Nunca las opciones que le diste. Solo el operador puede verlo, en la consola del propietario. Los comandos ejecutados en un mensaje directo no se registran así.",
 		"dashboardP6": "Recuentos de servidores: cuántas pantallas del panel abrieron los propios administradores de un servidor allí, por día, para que el operador vea qué servidores usan el panel. No se guarda ningún ID de usuario con ellos, ni qué pantallas se abrieron.",
-		"retentionL8": "Quién ejecutó un comando: 30 días, y después se borra automáticamente."
+		"retentionL8": "Quién ejecutó un comando: 30 días, y después se borra automáticamente.",
+		"storedL8": "Recordatorios: lo que pediste que te recordara, cuándo y dónde lo pediste, hasta que se entrega o lo cancelas. El texto de un recordatorio nunca se publica en los registros de comandos del operador.",
+		"retentionL9": "Recordatorios: se eliminan al entregarse o cancelarse. Uno que no puede llegarte por ninguna vía se descarta."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",

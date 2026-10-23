@@ -1191,7 +1191,9 @@
 		"retentionL7": "Comptages d’activité, et qui a rejoint ou quitté : 30 jours, puis suppression automatique.",
 		"commandsL7": "Qui a exécuté une commande : quand vous en exécutez une sur un serveur, votre identifiant et votre nom d’utilisateur, la commande et la partie choisie, le salon, si elle a fonctionné et combien de temps elle a pris. Jamais les options que vous lui avez données. Seul l’opérateur peut le voir, dans la console du propriétaire. Les commandes exécutées en message privé ne sont pas enregistrées ainsi.",
 		"dashboardP6": "Comptages par serveur : combien d’écrans du tableau de bord les propres gestionnaires d’un serveur y ont ouverts, par jour, pour que l’opérateur voie quels serveurs utilisent le tableau de bord. Aucun identifiant d’utilisateur n’y est joint, ni les écrans ouverts.",
-		"retentionL8": "Qui a exécuté une commande : 30 jours, puis suppression automatique."
+		"retentionL8": "Qui a exécuté une commande : 30 jours, puis suppression automatique.",
+		"storedL8": "Rappels : ce dont vous avez demandé qu’on vous rappelle, quand et où vous l’avez demandé, jusqu’à ce qu’il soit envoyé ou que vous l’annuliez. Le texte d’un rappel n’est jamais publié dans les journaux de commandes de l’opérateur.",
+		"retentionL9": "Rappels : supprimés une fois envoyés ou annulés. Un rappel qui ne peut vous joindre d’aucune façon est abandonné."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",

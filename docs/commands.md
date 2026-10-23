@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 75](https://img.shields.io/badge/commands-75-8b5cf6?style=for-the-badge) ![subcommands: 128](https://img.shields.io/badge/subcommands-128-0ea5e9?style=for-the-badge) ![prefix aliases: 93](https://img.shields.io/badge/prefix%20aliases-93-16a34a?style=for-the-badge)
+![commands: 76](https://img.shields.io/badge/commands-76-8b5cf6?style=for-the-badge) ![subcommands: 130](https://img.shields.io/badge/subcommands-130-0ea5e9?style=for-the-badge) ![prefix aliases: 95](https://img.shields.io/badge/prefix%20aliases-95-16a34a?style=for-the-badge)
 
 </div>
 
@@ -14,7 +14,7 @@
 
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
-| [👥 Community](#-community)   |    3     |      6      |
+| [👥 Community](#-community)   |    4     |      8      |
 | [💰 Economy](#-economy)       |    20    |     25      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
@@ -35,6 +35,7 @@
 | `/calculate`   | Evaluates a mathematical expression.                              | —                                                                 | —                                                                                             | —               |
 | `/impersonate` | Sends a message through a webhook that looks like another member. | —                                                                 | —                                                                                             | Manage webhooks |
 | `/lookup`      | Looks something up for you.                                       | `advice`, `animal-fact`, `meme`, `minecraft`, `translate`, `wiki` | `t?advice`, `t?animal-fact`, `t?animalfact`, `t?meme`, `t?minecraft`, `t?translate`, `t?wiki` | —               |
+| `/remind`      | Reminds you of something later.                                   | `me`, `list`                                                      | `t?remindme`, `t?reminders`                                                                   | —               |
 
 ## 💰 Economy
 

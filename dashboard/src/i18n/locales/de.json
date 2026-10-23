@@ -1190,7 +1190,9 @@
 		"retentionL7": "Aktivitätszählungen, und wer beigetreten ist oder gegangen ist: 30 Tage, dann automatisch gelöscht.",
 		"commandsL7": "Wer einen Befehl ausgeführt hat: Wenn du einen auf einem Server ausführst, deine Benutzer-ID und dein Benutzername, der Befehl und der gewählte Teil davon, der Kanal, ob er funktioniert hat und wie lange er dauerte. Nie die Optionen, die du angegeben hast. Nur der Betreiber kann das sehen, in der Owner-Konsole. Befehle in einer Direktnachricht werden so nicht erfasst.",
 		"dashboardP6": "Serverzahlen: wie viele Dashboard-Bildschirme die eigenen Manager eines Servers dort geöffnet haben, pro Tag, damit der Betreiber sieht, welche Server das Dashboard nutzen. Dabei wird keine Benutzer-ID gespeichert, und auch nicht, welche Bildschirme geöffnet wurden.",
-		"retentionL8": "Wer einen Befehl ausgeführt hat: 30 Tage, dann automatisch gelöscht."
+		"retentionL8": "Wer einen Befehl ausgeführt hat: 30 Tage, dann automatisch gelöscht.",
+		"storedL8": "Erinnerungen: woran du erinnert werden wolltest, wann und wo du sie gesetzt hast, bis sie zugestellt oder von dir abgebrochen werden. Der Text einer Erinnerung wird nie in die Befehlsprotokolle des Betreibers gepostet.",
+		"retentionL9": "Erinnerungen: werden gelöscht, sobald sie zugestellt oder abgebrochen sind. Eine, die dich auf keinem Weg erreicht, wird verworfen."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
