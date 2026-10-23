@@ -8,6 +8,7 @@ export * from "./economy";
 export * from "./format";
 export * from "./games";
 export * from "./giveaways";
+export * from "./ideas";
 export * from "./info";
 export * from "./infra";
 export * from "./levelling";

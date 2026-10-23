@@ -61,6 +61,8 @@ describe("which commands answer privately", () => {
 				"giveaway",
 				"guild-list",
 				"help",
+				"idea settings",
+				"idea submit",
 				"impersonate",
 				"inventory",
 				"levelling",

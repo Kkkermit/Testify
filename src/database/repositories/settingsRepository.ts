@@ -24,6 +24,7 @@ import {
 import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
+import { purgeIdeas } from "@database/repositories/ideaRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
@@ -296,6 +297,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeCommandToggles(guildId),
 		purgeMusicSettings(guildId),
 		purgeRoleMenus(guildId),
+		purgeIdeas(guildId),
 		purgeCasino(guildId),
 		purgeCasinoStats(guildId),
 		purgeRounds(guildId),

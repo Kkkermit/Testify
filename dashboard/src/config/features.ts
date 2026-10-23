@@ -8,6 +8,7 @@ import {
 	Hash,
 	Info,
 	LifeBuoy,
+	Lightbulb,
 	Link as LinkIcon,
 	ListChecks,
 	MessageSquareWarning,
@@ -42,6 +43,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-community",
 		wash: "bg-feature-community/15",
 		path: (guildId) => `/guilds/${guildId}/bot-stats`,
+	},
+	ideas: {
+		icon: Lightbulb,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/ideas`,
 	},
 	"role-menus": {
 		icon: ListChecks,

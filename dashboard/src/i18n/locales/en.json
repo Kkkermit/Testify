@@ -107,7 +107,9 @@
 		"insights": "Insights",
 		"insightsHint": "Who talks, where and when, and who joins and leaves",
 		"roleMenus": "Role menus",
-		"roleMenusHint": "Menus members pick their own roles from"
+		"roleMenusHint": "Menus members pick their own roles from",
+		"ideas": "Idea board",
+		"ideasHint": "Ideas members post and vote on"
 	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
@@ -467,6 +469,41 @@
 		"updatePost": "Update post",
 		"deleteMenu": "Delete the menu {{title}}",
 		"full": "That is as many menus as a server can have. Delete one to make another."
+	},
+	"ideas": {
+		"title": "Idea board",
+		"subtitle": "Members post ideas with /idea submit and vote on them. This is the server’s own board; /suggest goes to {{bot}}’s developers instead.",
+		"board": "The board",
+		"boardBody": "Where ideas are posted, and whether members can post them.",
+		"enabled": "Members can post ideas",
+		"enabledHint": "With /idea submit, from any channel.",
+		"enabledHintNoChannel": "Pick a channel first.",
+		"channel": "Posted in",
+		"channelHint": "{{bot}} posts each idea here, with buttons to vote on it.",
+		"posted": "Ideas",
+		"filter": "Show",
+		"filterAll": "All ({{count, number}})",
+		"filterOpen": "Open ({{count, number}})",
+		"filterAccepted": "Accepted ({{count, number}})",
+		"filterDeclined": "Declined ({{count, number}})",
+		"emptyTitle": "No ideas yet",
+		"noneHere": "No ideas here",
+		"emptyBody": "Once the board is on, members post with /idea submit and their ideas appear here.",
+		"number": "Idea #{{number}}",
+		"statusOpen": "Open",
+		"statusAccepted": "Accepted",
+		"statusDeclined": "Declined",
+		"from": "From {{name}} · {{when}}",
+		"upVotes": "Votes for",
+		"downVotes": "Votes against",
+		"decidedBy": "By {{name}} · {{when}}",
+		"reason": "Reason",
+		"reasonHint": "You can leave it empty. The author is told it in a DM.",
+		"accept": "Accept",
+		"decline": "Decline",
+		"reopen": "Reopen",
+		"openInDiscord": "Open in Discord",
+		"deleteIdea": "Delete idea #{{number}}"
 	},
 	"commands": {
 		"title": "Commands",
@@ -1192,7 +1229,9 @@
 		"dashboardP6": "Server counts: how many dashboard screens a server’s own managers opened there, per day, so the operator can see which servers use the dashboard. No user id is stored with these, and not which screens were opened.",
 		"retentionL8": "Who ran a command: 30 days, then deleted automatically.",
 		"storedL8": "Reminders: what you asked to be reminded of, when, and where you set it, until it is delivered or you cancel it. A reminder’s text is never posted to the operator’s command logs.",
-		"retentionL9": "Reminders: deleted once delivered or cancelled. One that cannot reach you by any route is dropped."
+		"retentionL9": "Reminders: deleted once delivered or cancelled. One that cannot reach you by any route is dropped.",
+		"storedL9": "Ideas: what you posted with /idea submit and your username, who voted for and against it, and the decision staff made with its reason.",
+		"retentionL10": "Ideas and their votes: until a manager deletes them, or the bot is removed from the server."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",

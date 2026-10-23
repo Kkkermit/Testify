@@ -107,7 +107,9 @@
 		"insights": "Estadísticas",
 		"insightsHint": "Quién habla, dónde y cuándo, y quién entra y sale",
 		"roleMenus": "Menús de roles",
-		"roleMenusHint": "Menús en los que los miembros eligen sus propios roles"
+		"roleMenusHint": "Menús en los que los miembros eligen sus propios roles",
+		"ideas": "Tablón de ideas",
+		"ideasHint": "Ideas que los miembros publican y votan"
 	},
 	"error": {
 		"unreachableTitle": "Algo ha salido mal",
@@ -468,6 +470,41 @@
 		"updatePost": "Actualizar publicación",
 		"deleteMenu": "Eliminar el menú {{title}}",
 		"full": "Ese es el máximo de menús de un servidor. Elimina uno para crear otro."
+	},
+	"ideas": {
+		"title": "Tablón de ideas",
+		"subtitle": "Los miembros publican ideas con /idea submit y las votan. Es el tablón del propio servidor; /suggest va a los desarrolladores de {{bot}}.",
+		"board": "El tablón",
+		"boardBody": "Dónde se publican las ideas y si los miembros pueden publicarlas.",
+		"enabled": "Los miembros pueden publicar ideas",
+		"enabledHint": "Con /idea submit, desde cualquier canal.",
+		"enabledHintNoChannel": "Elige primero un canal.",
+		"channel": "Publicado en",
+		"channelHint": "{{bot}} publica aquí cada idea, con botones para votarla.",
+		"posted": "Ideas",
+		"filter": "Mostrar",
+		"filterAll": "Todas ({{count, number}})",
+		"filterOpen": "Abiertas ({{count, number}})",
+		"filterAccepted": "Aceptadas ({{count, number}})",
+		"filterDeclined": "Rechazadas ({{count, number}})",
+		"emptyTitle": "Aún no hay ideas",
+		"noneHere": "No hay ideas aquí",
+		"emptyBody": "Cuando el tablón esté activo, los miembros publican con /idea submit y sus ideas aparecen aquí.",
+		"number": "Idea n.º {{number}}",
+		"statusOpen": "Abierta",
+		"statusAccepted": "Aceptada",
+		"statusDeclined": "Rechazada",
+		"from": "De {{name}} · {{when}}",
+		"upVotes": "Votos a favor",
+		"downVotes": "Votos en contra",
+		"decidedBy": "Por {{name}} · {{when}}",
+		"reason": "Motivo",
+		"reasonHint": "Puedes dejarlo vacío. Se le comunica al autor por DM.",
+		"accept": "Aceptar",
+		"decline": "Rechazar",
+		"reopen": "Reabrir",
+		"openInDiscord": "Abrir en Discord",
+		"deleteIdea": "Eliminar la idea n.º {{number}}"
 	},
 	"commands": {
 		"title": "Comandos",
@@ -1193,7 +1230,9 @@
 		"dashboardP6": "Recuentos de servidores: cuántas pantallas del panel abrieron los propios administradores de un servidor allí, por día, para que el operador vea qué servidores usan el panel. No se guarda ningún ID de usuario con ellos, ni qué pantallas se abrieron.",
 		"retentionL8": "Quién ejecutó un comando: 30 días, y después se borra automáticamente.",
 		"storedL8": "Recordatorios: lo que pediste que te recordara, cuándo y dónde lo pediste, hasta que se entrega o lo cancelas. El texto de un recordatorio nunca se publica en los registros de comandos del operador.",
-		"retentionL9": "Recordatorios: se eliminan al entregarse o cancelarse. Uno que no puede llegarte por ninguna vía se descarta."
+		"retentionL9": "Recordatorios: se eliminan al entregarse o cancelarse. Uno que no puede llegarte por ninguna vía se descarta.",
+		"storedL9": "Ideas: lo que publicaste con /idea submit y tu nombre de usuario, quién votó a favor y en contra, y la decisión del equipo con su motivo.",
+		"retentionL10": "Las ideas y sus votos: hasta que un gestor las elimine o se quite el bot del servidor."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",

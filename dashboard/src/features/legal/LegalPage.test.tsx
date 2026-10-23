@@ -85,6 +85,9 @@ describe("the legal pages", () => {
 		// `/remind me`'s `about` is `unlogged`, and `deliverDueReminders` deletes each one once it is sent.
 		expect(text).toMatch(/A reminder’s text is never posted to the operator’s command logs/);
 		expect(text).toMatch(/Reminders: deleted once delivered or cancelled/);
+		// `voteOnIdea` keeps who voted which way, which is what stops a second vote; `purgeGuild` removes the board.
+		expect(text).toMatch(/Ideas: .* who voted for and against it/);
+		expect(text).toMatch(/Ideas and their votes: .* the bot is removed from the server/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);

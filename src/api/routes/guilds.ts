@@ -10,6 +10,7 @@ import { botStats } from "@api/routes/botStats";
 import { casino } from "@api/routes/casino";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { giveaways } from "@api/routes/giveaways";
+import { ideas } from "@api/routes/ideas";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
 import { memberCount } from "@api/routes/memberCount";
@@ -25,6 +26,7 @@ import { warnings } from "@api/routes/warnings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
+import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
 import {
@@ -79,6 +81,7 @@ guilds.route("/:guildId/lottery", lottery);
 guilds.route("/:guildId/casino", casino);
 guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/giveaways", giveaways);
+guilds.route("/:guildId/ideas", ideas);
 guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
 guilds.route("/:guildId/music", music);
@@ -218,6 +221,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		stats,
 		tables,
 		menus,
+		board,
 	] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -234,6 +238,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		getFixedStats(guild.id),
 		readCasinoSettings(guild.id),
 		countRoleMenus(guild.id),
+		getIdeaSettings(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -288,6 +293,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Role menus",
 			enabled: menus > 0,
 			detail: menus === 0 ? null : count(menus, "menu"),
+		},
+		{
+			key: "ideas",
+			label: "Idea board",
+			enabled: board?.enabled === true,
+			detail: board?.enabled === true && board.channelId !== null ? `Posting in <#${board.channelId}>` : null,
 		},
 		{
 			key: "voice-stats",

@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 76](https://img.shields.io/badge/commands-76-8b5cf6?style=for-the-badge) ![subcommands: 130](https://img.shields.io/badge/subcommands-130-0ea5e9?style=for-the-badge) ![prefix aliases: 95](https://img.shields.io/badge/prefix%20aliases-95-16a34a?style=for-the-badge)
+![commands: 77](https://img.shields.io/badge/commands-77-8b5cf6?style=for-the-badge) ![subcommands: 132](https://img.shields.io/badge/subcommands-132-0ea5e9?style=for-the-badge) ![prefix aliases: 95](https://img.shields.io/badge/prefix%20aliases-95-16a34a?style=for-the-badge)
 
 </div>
 
@@ -14,7 +14,7 @@
 
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
-| [👥 Community](#-community)   |    4     |      8      |
+| [👥 Community](#-community)   |    5     |     10      |
 | [💰 Economy](#-economy)       |    20    |     25      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
@@ -33,6 +33,7 @@
 | Command        | Description                                                       | Subcommands                                                       | Prefix aliases                                                                                | Needs           |
 | -------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------- |
 | `/calculate`   | Evaluates a mathematical expression.                              | —                                                                 | —                                                                                             | —               |
+| `/idea`        | Posts an idea for this server, for members to vote on.            | `submit`, `settings`                                              | —                                                                                             | Manage guild    |
 | `/impersonate` | Sends a message through a webhook that looks like another member. | —                                                                 | —                                                                                             | Manage webhooks |
 | `/lookup`      | Looks something up for you.                                       | `advice`, `animal-fact`, `meme`, `minecraft`, `translate`, `wiki` | `t?advice`, `t?animal-fact`, `t?animalfact`, `t?meme`, `t?minecraft`, `t?translate`, `t?wiki` | —               |
 | `/remind`      | Reminds you of something later.                                   | `me`, `list`                                                      | `t?remindme`, `t?reminders`                                                                   | —               |

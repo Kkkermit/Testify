@@ -156,6 +156,7 @@ export const PRIVACY: LegalDocument = {
 				"legal.storedL6",
 				"legal.storedL7",
 				"legal.storedL8",
+				"legal.storedL9",
 			],
 			after: ["legal.storedP2"],
 		},
@@ -218,6 +219,7 @@ export const PRIVACY: LegalDocument = {
 				"legal.retentionL6",
 				"legal.retentionL7",
 				"legal.retentionL9",
+				"legal.retentionL10",
 			],
 		},
 		{

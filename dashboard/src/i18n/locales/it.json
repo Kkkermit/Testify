@@ -107,7 +107,9 @@
 		"insights": "Statistiche",
 		"insightsHint": "Chi scrive, dove e quando, e chi entra ed esce",
 		"roleMenus": "Menu dei ruoli",
-		"roleMenusHint": "Menu in cui i membri scelgono i propri ruoli"
+		"roleMenusHint": "Menu in cui i membri scelgono i propri ruoli",
+		"ideas": "Bacheca delle idee",
+		"ideasHint": "Idee che i membri pubblicano e votano"
 	},
 	"error": {
 		"unreachableTitle": "Qualcosa è andato storto",
@@ -468,6 +470,41 @@
 		"updatePost": "Aggiorna la pubblicazione",
 		"deleteMenu": "Elimina il menu {{title}}",
 		"full": "Un server non può avere altri menu. Eliminane uno per crearne un altro."
+	},
+	"ideas": {
+		"title": "Bacheca delle idee",
+		"subtitle": "I membri pubblicano idee con /idea submit e le votano. È la bacheca del server stesso; /suggest va invece agli sviluppatori di {{bot}}.",
+		"board": "La bacheca",
+		"boardBody": "Dove vengono pubblicate le idee, e se i membri possono pubblicarne.",
+		"enabled": "I membri possono pubblicare idee",
+		"enabledHint": "Con /idea submit, da qualsiasi canale.",
+		"enabledHintNoChannel": "Scegli prima un canale.",
+		"channel": "Pubblicato in",
+		"channelHint": "{{bot}} pubblica qui ogni idea, con i pulsanti per votarla.",
+		"posted": "Idee",
+		"filter": "Mostra",
+		"filterAll": "Tutte ({{count, number}})",
+		"filterOpen": "Aperte ({{count, number}})",
+		"filterAccepted": "Accettate ({{count, number}})",
+		"filterDeclined": "Rifiutate ({{count, number}})",
+		"emptyTitle": "Ancora nessuna idea",
+		"noneHere": "Nessuna idea qui",
+		"emptyBody": "Quando la bacheca è attiva, i membri pubblicano con /idea submit e le loro idee compaiono qui.",
+		"number": "Idea n. {{number}}",
+		"statusOpen": "Aperta",
+		"statusAccepted": "Accettata",
+		"statusDeclined": "Rifiutata",
+		"from": "Da {{name}} · {{when}}",
+		"upVotes": "Voti a favore",
+		"downVotes": "Voti contro",
+		"decidedBy": "Da {{name}} · {{when}}",
+		"reason": "Motivo",
+		"reasonHint": "Puoi lasciarlo vuoto. L’autore lo riceve in DM.",
+		"accept": "Accetta",
+		"decline": "Rifiuta",
+		"reopen": "Riapri",
+		"openInDiscord": "Apri in Discord",
+		"deleteIdea": "Elimina l’idea n. {{number}}"
 	},
 	"commands": {
 		"title": "Comandi",
@@ -1193,7 +1230,9 @@
 		"dashboardP6": "Conteggi per server: quante schermate della dashboard hanno aperto lì i gestori di un server, per giorno, così che l’operatore veda quali server usano la dashboard. Con questi non viene conservato alcun ID utente, né quali schermate sono state aperte.",
 		"retentionL8": "Chi ha eseguito un comando: 30 giorni, poi cancellato automaticamente.",
 		"storedL8": "Promemoria: ciò che hai chiesto di ricordarti, quando e dove l’hai impostato, finché non viene consegnato o lo annulli. Il testo di un promemoria non viene mai pubblicato nei registri dei comandi dell’operatore.",
-		"retentionL9": "Promemoria: eliminati una volta consegnati o annullati. Uno che non può raggiungerti in alcun modo viene scartato."
+		"retentionL9": "Promemoria: eliminati una volta consegnati o annullati. Uno che non può raggiungerti in alcun modo viene scartato.",
+		"storedL9": "Idee: ciò che hai pubblicato con /idea submit e il tuo nome utente, chi ha votato a favore e contro, e la decisione dello staff con il suo motivo.",
+		"retentionL10": "Le idee e i loro voti: finché un gestore non le elimina, o il bot non viene rimosso dal server."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",

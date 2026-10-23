@@ -20,6 +20,7 @@ import {
 	MessagesSquare,
 	Music,
 	LifeBuoy,
+	Lightbulb,
 	ListChecks,
 	Ticket,
 	type LucideIcon,
@@ -124,6 +125,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.roleMenus",
 							icon: ListChecks,
 							hintKey: "nav.roleMenusHint",
+						},
+						{
+							to: `/guilds/${guild.id}/ideas`,
+							labelKey: "nav.ideas",
+							icon: Lightbulb,
+							hintKey: "nav.ideasHint",
 						},
 						{
 							to: `/guilds/${guild.id}/members`,

@@ -107,7 +107,9 @@
 		"insights": "Einblicke",
 		"insightsHint": "Wer schreibt, wo und wann, und wer kommt und geht",
 		"roleMenus": "Rollenmenüs",
-		"roleMenusHint": "Menüs, in denen Mitglieder ihre Rollen selbst wählen"
+		"roleMenusHint": "Menüs, in denen Mitglieder ihre Rollen selbst wählen",
+		"ideas": "Ideenbrett",
+		"ideasHint": "Ideen, die Mitglieder posten und bewerten"
 	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
@@ -467,6 +469,41 @@
 		"updatePost": "Beitrag aktualisieren",
 		"deleteMenu": "Das Menü {{title}} löschen",
 		"full": "Mehr Menüs kann ein Server nicht haben. Lösche eines, um ein neues zu erstellen."
+	},
+	"ideas": {
+		"title": "Ideenbrett",
+		"subtitle": "Mitglieder posten Ideen mit /idea submit und stimmen darüber ab. Das ist das eigene Brett des Servers; /suggest geht stattdessen an die Entwickler von {{bot}}.",
+		"board": "Das Brett",
+		"boardBody": "Wo Ideen gepostet werden und ob Mitglieder sie posten können.",
+		"enabled": "Mitglieder können Ideen posten",
+		"enabledHint": "Mit /idea submit, aus jedem Kanal.",
+		"enabledHintNoChannel": "Wähle zuerst einen Kanal.",
+		"channel": "Gepostet in",
+		"channelHint": "{{bot}} postet jede Idee hier, mit Knöpfen zum Abstimmen.",
+		"posted": "Ideen",
+		"filter": "Anzeigen",
+		"filterAll": "Alle ({{count, number}})",
+		"filterOpen": "Offen ({{count, number}})",
+		"filterAccepted": "Angenommen ({{count, number}})",
+		"filterDeclined": "Abgelehnt ({{count, number}})",
+		"emptyTitle": "Noch keine Ideen",
+		"noneHere": "Hier gibt es keine Ideen",
+		"emptyBody": "Sobald das Brett an ist, posten Mitglieder mit /idea submit, und ihre Ideen erscheinen hier.",
+		"number": "Idee Nr. {{number}}",
+		"statusOpen": "Offen",
+		"statusAccepted": "Angenommen",
+		"statusDeclined": "Abgelehnt",
+		"from": "Von {{name}} · {{when}}",
+		"upVotes": "Stimmen dafür",
+		"downVotes": "Stimmen dagegen",
+		"decidedBy": "Von {{name}} · {{when}}",
+		"reason": "Begründung",
+		"reasonHint": "Du kannst sie leer lassen. Die Person, die die Idee gepostet hat, erfährt sie per DM.",
+		"accept": "Annehmen",
+		"decline": "Ablehnen",
+		"reopen": "Wieder öffnen",
+		"openInDiscord": "In Discord öffnen",
+		"deleteIdea": "Idee Nr. {{number}} löschen"
 	},
 	"commands": {
 		"title": "Befehle",
@@ -1192,7 +1229,9 @@
 		"dashboardP6": "Serverzahlen: wie viele Dashboard-Bildschirme die eigenen Manager eines Servers dort geöffnet haben, pro Tag, damit der Betreiber sieht, welche Server das Dashboard nutzen. Dabei wird keine Benutzer-ID gespeichert, und auch nicht, welche Bildschirme geöffnet wurden.",
 		"retentionL8": "Wer einen Befehl ausgeführt hat: 30 Tage, dann automatisch gelöscht.",
 		"storedL8": "Erinnerungen: woran du erinnert werden wolltest, wann und wo du sie gesetzt hast, bis sie zugestellt oder von dir abgebrochen werden. Der Text einer Erinnerung wird nie in die Befehlsprotokolle des Betreibers gepostet.",
-		"retentionL9": "Erinnerungen: werden gelöscht, sobald sie zugestellt oder abgebrochen sind. Eine, die dich auf keinem Weg erreicht, wird verworfen."
+		"retentionL9": "Erinnerungen: werden gelöscht, sobald sie zugestellt oder abgebrochen sind. Eine, die dich auf keinem Weg erreicht, wird verworfen.",
+		"storedL9": "Ideen: was du mit /idea submit gepostet hast und dein Benutzername, wer dafür und dagegen gestimmt hat, und die Entscheidung des Teams mit ihrer Begründung.",
+		"retentionL10": "Ideen und ihre Stimmen: bis jemand mit Verwaltungsrechten sie löscht oder der Bot vom Server entfernt wird."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",

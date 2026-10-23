@@ -36,6 +36,9 @@ jest.mock("@database/repositories/insightsRepository", () => ({
 	recordMove: jest.fn(),
 	saveActivity: jest.fn(),
 }));
+jest.mock("@database/repositories/ideaRepository", () => ({
+	getIdeaSettings: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/roleMenuRepository", () => ({
 	countRoleMenus: jest.fn(() => Promise.resolve(0)),
 }));

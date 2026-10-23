@@ -107,7 +107,9 @@
 		"insights": "Statistiques",
 		"insightsHint": "Qui parle, où et quand, et qui arrive et part",
 		"roleMenus": "Menus de rôles",
-		"roleMenusHint": "Des menus où les membres choisissent leurs propres rôles"
+		"roleMenusHint": "Des menus où les membres choisissent leurs propres rôles",
+		"ideas": "Tableau d’idées",
+		"ideasHint": "Les idées que les membres publient et votent"
 	},
 	"error": {
 		"unreachableTitle": "Une erreur est survenue",
@@ -468,6 +470,41 @@
 		"updatePost": "Mettre à jour la publication",
 		"deleteMenu": "Supprimer le menu {{title}}",
 		"full": "Un serveur ne peut pas avoir plus de menus. Supprimez-en un pour en créer un autre."
+	},
+	"ideas": {
+		"title": "Tableau d’idées",
+		"subtitle": "Les membres publient des idées avec /idea submit et votent dessus. C’est le tableau du serveur lui-même ; /suggest va plutôt aux développeurs de {{bot}}.",
+		"board": "Le tableau",
+		"boardBody": "Où les idées sont publiées, et si les membres peuvent en publier.",
+		"enabled": "Les membres peuvent publier des idées",
+		"enabledHint": "Avec /idea submit, depuis n’importe quel salon.",
+		"enabledHintNoChannel": "Choisissez d’abord un salon.",
+		"channel": "Publié dans",
+		"channelHint": "{{bot}} publie chaque idée ici, avec des boutons pour voter.",
+		"posted": "Idées",
+		"filter": "Afficher",
+		"filterAll": "Toutes ({{count, number}})",
+		"filterOpen": "Ouvertes ({{count, number}})",
+		"filterAccepted": "Acceptées ({{count, number}})",
+		"filterDeclined": "Refusées ({{count, number}})",
+		"emptyTitle": "Aucune idée pour l’instant",
+		"noneHere": "Aucune idée ici",
+		"emptyBody": "Une fois le tableau activé, les membres publient avec /idea submit et leurs idées apparaissent ici.",
+		"number": "Idée n° {{number}}",
+		"statusOpen": "Ouverte",
+		"statusAccepted": "Acceptée",
+		"statusDeclined": "Refusée",
+		"from": "De {{name}} · {{when}}",
+		"upVotes": "Votes pour",
+		"downVotes": "Votes contre",
+		"decidedBy": "Par {{name}} · {{when}}",
+		"reason": "Motif",
+		"reasonHint": "Vous pouvez le laisser vide. L’auteur le reçoit en DM.",
+		"accept": "Accepter",
+		"decline": "Refuser",
+		"reopen": "Rouvrir",
+		"openInDiscord": "Ouvrir dans Discord",
+		"deleteIdea": "Supprimer l’idée n° {{number}}"
 	},
 	"commands": {
 		"title": "Commandes",
@@ -1193,7 +1230,9 @@
 		"dashboardP6": "Comptages par serveur : combien d’écrans du tableau de bord les propres gestionnaires d’un serveur y ont ouverts, par jour, pour que l’opérateur voie quels serveurs utilisent le tableau de bord. Aucun identifiant d’utilisateur n’y est joint, ni les écrans ouverts.",
 		"retentionL8": "Qui a exécuté une commande : 30 jours, puis suppression automatique.",
 		"storedL8": "Rappels : ce dont vous avez demandé qu’on vous rappelle, quand et où vous l’avez demandé, jusqu’à ce qu’il soit envoyé ou que vous l’annuliez. Le texte d’un rappel n’est jamais publié dans les journaux de commandes de l’opérateur.",
-		"retentionL9": "Rappels : supprimés une fois envoyés ou annulés. Un rappel qui ne peut vous joindre d’aucune façon est abandonné."
+		"retentionL9": "Rappels : supprimés une fois envoyés ou annulés. Un rappel qui ne peut vous joindre d’aucune façon est abandonné.",
+		"storedL9": "Idées : ce que vous avez publié avec /idea submit et votre nom d’utilisateur, qui a voté pour et contre, et la décision de l’équipe avec son motif.",
+		"retentionL10": "Les idées et leurs votes : jusqu’à ce qu’un gestionnaire les supprime, ou que le bot soit retiré du serveur."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
