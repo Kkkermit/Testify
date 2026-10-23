@@ -12,6 +12,7 @@ import {
 	type MemberTally,
 	memberTallies,
 	recentRuns,
+	slowestCommands,
 } from "@database/repositories/commandRunRepository";
 import {
 	type CommandTally,
@@ -56,7 +57,8 @@ analytics.get("/usage", async (context) => {
 	const { days } = parseQuery(context, analyticsQuery);
 	const client = context.get("client");
 
-	const [totals, tallies, guilds, daily, surfaces, screens, dashboard] = await Promise.all([
+	const runDays = Math.min(days, RUN_RETENTION_DAYS);
+	const [totals, tallies, guilds, daily, surfaces, screens, dashboard, slowest] = await Promise.all([
 		usageTotals(days),
 		commandTallies(days),
 		guildTallies(days, TOP),
@@ -64,6 +66,7 @@ analytics.get("/usage", async (context) => {
 		surfaceTallies(days),
 		screenTallies(days, TOP),
 		dashboardTallies(days, TOP),
+		slowestCommands(runDays, TOP),
 	]);
 
 	const body: UsageReport = {
@@ -80,6 +83,11 @@ analytics.get("/usage", async (context) => {
 		screens,
 		busiestGuilds: knownGuilds(client, guilds),
 		dashboardGuilds: knownGuilds(client, dashboard),
+		runDays,
+		slowest: slowest.map((row) => ({
+			...row,
+			category: client.commands.get(row.command)?.category ?? "unknown",
+		})),
 	};
 
 	return context.json(body);
@@ -154,6 +162,7 @@ analytics.get("/guilds/:guildId/runs", async (context) => {
 			subcommand: run.subcommand,
 			surface: run.surface,
 			failed: run.failed,
+			reference: run.reference ?? null,
 			durationMs: run.durationMs,
 			channelId: run.channelId,
 			channelName: run.channelId === null ? null : (guild.channels.cache.get(run.channelId)?.name ?? null),

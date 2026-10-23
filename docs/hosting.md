@@ -40,7 +40,7 @@ Three variables have no sensible default and compose refuses to start without th
 the bot uses when run from source.
 
 `MONGODB_URI` defaults to the `mongo` service in the compose file, so a fresh clone needs no database of its
-own. Point it at Atlas or an existing server if you would rather:
+own. Point it at Atlas or an existing server, MongoDB 7.0 or newer, if you would rather:
 
 ```bash
 MONGODB_URI=mongodb+srv://user:password@cluster0.example.mongodb.net/testify

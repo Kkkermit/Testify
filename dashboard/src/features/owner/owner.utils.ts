@@ -1,10 +1,12 @@
 import {
 	ANALYTICS_WINDOWS,
 	LOG_LEVELS,
+	OWNER_GUILD_FILTERS,
 	OWNER_GUILD_SORTS,
 	snowflake,
 	type AnalyticsWindow,
 	type CommandRunRow,
+	type OwnerGuildFilter,
 	type OwnerGuildSort,
 	type ReportedLogLevel,
 } from "@testify/shared";
@@ -63,9 +65,14 @@ export const GUILD_SORT_LABELS: Record<OwnerGuildSort, TranslationKey> = {
 	newest: "owner.sortNewest",
 	oldest: "owner.sortOldest",
 	commands: "owner.sortCommands",
+	quietest: "owner.sortQuietest",
 	dashboard: "owner.sortDashboard",
 	name: "owner.sortName",
 };
+
+export function guildFilterFrom(raw: string | null): OwnerGuildFilter {
+	return oneOf(OWNER_GUILD_FILTERS, raw, "all");
+}
 
 /** A filter out of the URL that the API would refuse is dropped, so a mangled link shows everything rather than a 400. */
 export function snowflakeFrom(raw: string | null): string | null {
@@ -74,6 +81,11 @@ export function snowflakeFrom(raw: string | null): string | null {
 
 export function commandFrom(raw: string | null): string | null {
 	return raw !== null && /^[\w-]{1,32}$/.test(raw) ? raw : null;
+}
+
+/** Milliseconds under a second, seconds to one place above it. */
+export function formatMs(ms: number): string {
+	return ms < 1_000 ? `${ms.toLocaleString("en-GB")} ms` : `${(ms / 1_000).toFixed(1)} s`;
 }
 
 /** `/music play`, the way it was typed. */

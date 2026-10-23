@@ -516,6 +516,11 @@ export const usageReport: UsageReport = {
 	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
 	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
 	dashboardGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 12 }],
+	runDays: 30,
+	slowest: [
+		{ command: "music", category: "music", runs: 40, typicalMs: 850, slowMs: 4_200 },
+		{ command: "rank", category: "levelling", runs: 1_300, typicalMs: 90, slowMs: 310 },
+	],
 	screens: [
 		{ route: "/guilds/:guildId/levelling", count: 42 },
 		{ route: "/guilds/:guildId/settings", count: 18 },
@@ -586,6 +591,7 @@ export const commandRuns: CommandRunRow[] = [
 		subcommand: "play",
 		surface: "slash",
 		failed: true,
+		reference: "AB12CD",
 		durationMs: 1_200,
 		channelId: "400000000000000001",
 		channelName: "general",
@@ -598,6 +604,7 @@ export const commandRuns: CommandRunRow[] = [
 		subcommand: null,
 		surface: "prefix",
 		failed: false,
+		reference: null,
 		durationMs: 85,
 		channelId: null,
 		channelName: null,

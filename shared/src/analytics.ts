@@ -32,6 +32,16 @@ export interface GuildUsageRow {
 	count: number;
 }
 
+/** How long a command kept somebody waiting, from every run in a server: half took `typicalMs` or less. */
+export interface SlowCommandRow {
+	command: string;
+	category: string;
+	runs: number;
+	typicalMs: number;
+	/** The slowest one in twenty took at least this long. */
+	slowMs: number;
+}
+
 export interface UsageDay {
 	/** `YYYY-MM-DD`, UTC. */
 	day: string;
@@ -56,6 +66,9 @@ export interface UsageReport {
 	busiestGuilds: GuildUsageRow[];
 	/** Servers whose managers opened the dashboard the most, each a count of screens opened there. */
 	dashboardGuilds: GuildUsageRow[];
+	/** Read from the run log, so it covers at most `RUN_RETENTION_DAYS`. */
+	runDays: number;
+	slowest: SlowCommandRow[];
 	/** Which dashboard screens were opened, bot-wide. */
 	screens: ScreenTally[];
 }
@@ -102,6 +115,8 @@ export interface CommandRunRow {
 	subcommand: string | null;
 	surface: "slash" | "prefix";
 	failed: boolean;
+	/** What an unexpected failure was logged under, which finds it on the Logs tab; null for a refusal. */
+	reference: string | null;
 	durationMs: number;
 	channelId: string | null;
 	/** Null when the channel has since gone, or it was never cached. */
@@ -124,14 +139,29 @@ export const guildRunsQuery = analyticsQuery.extend(pagination.shape).extend({
 });
 
 /** How the owner's server list can be ordered; `commands` and `dashboard` rank by the default window. */
-export const OWNER_GUILD_SORTS = ["members", "fewest", "newest", "oldest", "commands", "dashboard", "name"] as const;
+export const OWNER_GUILD_SORTS = [
+	"members",
+	"fewest",
+	"newest",
+	"oldest",
+	"commands",
+	"quietest",
+	"dashboard",
+	"name",
+] as const;
 
 export type OwnerGuildSort = (typeof OWNER_GUILD_SORTS)[number];
+
+/** `inactive` is a server that ran no command in the default window: a candidate for leaving. */
+export const OWNER_GUILD_FILTERS = ["all", "inactive"] as const;
+
+export type OwnerGuildFilter = (typeof OWNER_GUILD_FILTERS)[number];
 
 export const MAX_GUILD_SEARCH = 100;
 
 export const ownerGuildQuery = pagination.extend({
 	sort: z.enum(OWNER_GUILD_SORTS).default("members"),
+	filter: z.enum(OWNER_GUILD_FILTERS).default("all"),
 	/** A server's name, or its ID. */
 	q: z.string().trim().max(MAX_GUILD_SEARCH).optional(),
 });

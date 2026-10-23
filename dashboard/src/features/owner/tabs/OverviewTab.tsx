@@ -7,7 +7,7 @@ import { LABEL, SearchField, SELECT } from "@/components/form";
 import { Card, Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
-import { GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
+import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
 import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { formatUptime } from "@/lib/datetime";
@@ -20,10 +20,11 @@ export function OverviewTab(): React.JSX.Element {
 	const [params, setParams] = useSearchParams();
 	const page = pageFrom(params.get("page"));
 	const sort = guildSortFrom(params.get("sort"));
+	const filter = guildFilterFrom(params.get("filter"));
 	const search = params.get("search") ?? "";
 	const health = useOwnerStats();
 	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
-	const guilds = useOwnerGuilds(page, sort, useDebounced(search));
+	const guilds = useOwnerGuilds(page, sort, filter, useDebounced(search));
 
 	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
 
@@ -121,6 +122,16 @@ export function OverviewTab(): React.JSX.Element {
 							))}
 						</select>
 					</label>
+					<label className="flex w-full items-center gap-2 text-sm">
+						<input
+							type="checkbox"
+							checked={filter === "inactive"}
+							onChange={(event) => {
+								put({ filter: event.target.checked ? "inactive" : null, page: null });
+							}}
+						/>
+						{t("owner.onlyInactive")}
+					</label>
 				</Card>
 
 				{selected !== null && (
@@ -140,7 +151,10 @@ export function OverviewTab(): React.JSX.Element {
 					<OwnerGuildTable
 						guilds={guilds.data.items}
 						sort={sort}
-						empty={search.trim() === "" ? null : t("owner.noServersMatch")}
+						filter={filter}
+						empty={
+							search.trim() !== "" ? t("owner.noServersMatch") : filter === "inactive" ? t("owner.noInactive") : null
+						}
 						selected={selected}
 						onSelect={(guildId) => {
 							put({ server: guildId });

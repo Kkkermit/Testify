@@ -1,9 +1,10 @@
 import { Ban, ShieldOff, UserX } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useSearchParams } from "react-router";
 import { FIELD, Field, Warning } from "@/components/form";
 import { Avatar, Button, Card, CARD_HEADING, EmptyState, Skeleton } from "@/components/primitives";
-import { isSnowflake } from "@/features/owner/owner.utils";
+import { isSnowflake, snowflakeFrom } from "@/features/owner/owner.utils";
 import { useBlacklist, useBlockUser, useUnblockUser } from "@/features/owner/useBlacklist";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -16,8 +17,11 @@ export function BlacklistTab(): React.JSX.Element {
 	const rows = useBlacklist();
 	const block = useBlockUser();
 	const unblock = useUnblockUser();
+	const [params, setParams] = useSearchParams();
+	// `?block=` is how a member row on the usage tab sends somebody here; the owner still presses Block.
+	const [prefilled] = useState(() => snowflakeFrom(params.get("block")));
 
-	const [userId, setUserId] = useState("");
+	const [userId, setUserId] = useState(prefilled ?? "");
 	const [reason, setReason] = useState("");
 
 	const failure = block.error ?? unblock.error;
@@ -30,6 +34,14 @@ export function BlacklistTab(): React.JSX.Element {
 				onSuccess: () => {
 					setUserId("");
 					setReason("");
+					setParams(
+						(current) => {
+							const next = new URLSearchParams(current);
+							next.delete("block");
+							return next;
+						},
+						{ replace: true },
+					);
 				},
 			},
 		);
@@ -61,6 +73,8 @@ export function BlacklistTab(): React.JSX.Element {
 					<Field htmlFor="blacklist-reason" label={t("owner.reasonOptional")}>
 						<input
 							id="blacklist-reason"
+							// With the ID already filled in, the reason is the one thing left to type.
+							autoFocus={prefilled !== null}
 							value={reason}
 							autoComplete="off"
 							maxLength={200}

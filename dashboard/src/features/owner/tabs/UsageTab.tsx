@@ -6,7 +6,7 @@ import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/c
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
-import { percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
+import { formatMs, percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";
 
 /** What the bot is actually used for, or, with `?guild=`, who in one server ran what. */
@@ -120,6 +120,20 @@ function FleetUsage({
 					/>
 				</Panel>
 
+				<Panel title={t("owner.slowest")} hint={t("owner.slowestHint", { days: report.runDays })}>
+					<UsageBars
+						tint="bg-destructive/20"
+						empty={t("owner.noSlowRuns")}
+						rows={report.slowest.map((row) => ({
+							id: row.command,
+							label: `/${row.command}`,
+							sub: t("owner.slowSub", { count: row.runs, typical: formatMs(row.typicalMs) }),
+							count: row.slowMs,
+							value: formatMs(row.slowMs),
+						}))}
+					/>
+				</Panel>
+
 				<Panel title={t("owner.howRun")} hint={t("owner.howRunHint")}>
 					<UsageBars
 						tint="bg-feature-levelling/25"
@@ -131,7 +145,8 @@ function FleetUsage({
 					/>
 				</Panel>
 
-				<Panel title={t("owner.screens")} hint={t("owner.screensHint")}>
+				{/* The seventh panel, so it spans the row rather than leaving half of one empty. */}
+				<Panel wide title={t("owner.screens")} hint={t("owner.screensHint")}>
 					<UsageBars
 						tint="bg-feature-welcome/25"
 						empty={t("owner.noScreenOpened")}

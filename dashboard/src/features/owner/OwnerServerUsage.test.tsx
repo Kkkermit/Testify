@@ -2,10 +2,18 @@ import { type OwnerGuildRow, type Paged } from "@testify/shared";
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse, type JsonBodyType } from "msw";
-import { commandFrom, guildSortFrom, runName, searchWith, snowflakeFrom } from "@/features/owner/owner.utils";
+import {
+	commandFrom,
+	formatMs,
+	guildFilterFrom,
+	guildSortFrom,
+	runName,
+	searchWith,
+	snowflakeFrom,
+} from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild, guildUsage } from "@/test/handlers";
+import { aGuild, commandRuns, guildUsage } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -75,6 +83,7 @@ describe("the owner's server list", () => {
 			"Newly joined",
 			"Joined longest ago",
 			"Uses Testify the most",
+			"Uses Testify the least",
 			"Uses the dashboard the most",
 			"Name, A to Z",
 		]);
@@ -99,6 +108,28 @@ describe("the owner's server list", () => {
 		renderAt("/owner?tab=overview&search=zzz");
 
 		expect(await screen.findByText("No server matches that search.")).toBeInTheDocument();
+	});
+
+	/** A server that never ran a command is a candidate for leaving, as long as it has had time to try. */
+	it("asks only for servers with no commands when the box is ticked, and shows when each joined", async () => {
+		const seen = watch("/api/owner/guilds", onePage);
+		renderAt("/owner?tab=overview&page=2");
+		await screen.findByRole("table");
+
+		await userEvent.click(screen.getByLabelText("Only servers with no commands in the last 30 days"));
+
+		await waitFor(() => {
+			expect(seen.at(-1)?.get("filter")).toBe("inactive");
+		});
+		expect(seen.at(-1)?.get("page")).toBe("1");
+		expect(screen.getByRole("columnheader", { name: "Joined" }).className).not.toMatch(/\bhidden\b/);
+	});
+
+	it("says so when every server has run a command", async () => {
+		watch("/api/owner/guilds", { items: [], total: 0, page: 1, perPage: 25 });
+		renderAt("/owner?tab=overview&filter=inactive");
+
+		expect(await screen.findByText("Every server has run a command in the last 30 days.")).toBeInTheDocument();
 	});
 
 	it("links a server's detail to who ran what there", async () => {
@@ -146,19 +177,58 @@ describe("one server's usage", () => {
 		const seen = watch("/api/analytics/guilds/:guildId/runs", { items: [], total: 0, page: 1, perPage: 25 });
 		renderAt(DRILL_DOWN);
 
-		const alice = await screen.findByRole("button", { name: /alice/ });
+		const alice = await screen.findByRole("button", { name: /^alice/ });
 		await userEvent.click(alice);
 
 		await waitFor(() => {
 			expect(seen.at(-1)?.get("userId")).toBe(ALICE);
 		});
-		expect(screen.getByRole("button", { name: /alice/, pressed: true })).toBeInTheDocument();
+		expect(screen.getByRole("button", { name: /^alice/, pressed: true })).toBeInTheDocument();
 
 		await userEvent.click(screen.getByRole("button", { name: /Show everyone’s runs/ }));
 
 		await waitFor(() => {
 			expect(seen.at(-1)?.has("userId")).toBe(false);
 		});
+	});
+
+	/** The reference is what the error was logged under, so following it lands on that failure's lines. */
+	it("links a failed run to its lines on the Logs tab", async () => {
+		renderAt(DRILL_DOWN);
+
+		const link = await screen.findByRole("link", { name: /Failed AB12CD/ });
+		expect(link).toHaveAttribute("href", expect.stringMatching(/[?&]tab=logs\b/));
+		expect(link).toHaveAttribute("href", expect.stringMatching(/[?&]q=AB12CD\b/));
+
+		await userEvent.click(link);
+
+		expect(await screen.findByLabelText("Search the log")).toHaveValue("AB12CD");
+	});
+
+	/** A refusal was never logged as a bug, so there is nothing to link to. */
+	it("leaves a failure with no reference as a plain badge", async () => {
+		watch("/api/analytics/guilds/:guildId/runs", {
+			items: [{ ...commandRuns[0], reference: null }],
+			total: 1,
+			page: 1,
+			perPage: 25,
+		});
+		renderAt(DRILL_DOWN);
+
+		await screen.findByRole("table", { name: /Commands run in Test Server/ });
+		expect(screen.queryByRole("link", { name: /Failed/ })).toBeNull();
+		expect(screen.getAllByText("Failed").length).toBeGreaterThan(0);
+	});
+
+	it("opens the blacklist with the member's ID filled in, ready for a reason", async () => {
+		renderAt(DRILL_DOWN);
+
+		await userEvent.click(await screen.findByRole("button", { name: "Block alice from Testify" }));
+
+		expect(await screen.findByLabelText("User ID")).toHaveValue(ALICE);
+		expect(screen.getByLabelText("Reason (optional)")).toHaveFocus();
+		// Filling the form is not blocking: the owner still has to press it.
+		expect(screen.getByRole("button", { name: "Block them" })).toBeEnabled();
 	});
 
 	it("narrows the runs to one command", async () => {
@@ -237,6 +307,18 @@ describe("the owner console's URL readers", () => {
 		expect(commandFrom("bug-report")).toBe("bug-report");
 		expect(commandFrom("$where")).toBeNull();
 		expect(commandFrom(null)).toBeNull();
+	});
+
+	it("shows every server unless asked for the inactive ones", () => {
+		expect(guildFilterFrom(null)).toBe("all");
+		expect(guildFilterFrom("everything")).toBe("all");
+		expect(guildFilterFrom("inactive")).toBe("inactive");
+	});
+
+	it("reads a duration in milliseconds under a second and in seconds above it", () => {
+		expect(formatMs(85)).toBe("85 ms");
+		expect(formatMs(999)).toBe("999 ms");
+		expect(formatMs(4_200)).toBe("4.2 s");
 	});
 
 	it("writes a run the way it was typed", () => {

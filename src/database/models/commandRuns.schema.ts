@@ -12,6 +12,8 @@ export interface CommandRunRecord {
 	subcommand: string | null;
 	surface: "slash" | "prefix";
 	failed: boolean;
+	/** What an unexpected failure was logged under; absent on runs written before it was kept. */
+	reference?: string | null;
 	durationMs: number;
 	at: Date;
 	expiresAt: Date;
@@ -26,6 +28,7 @@ const runSchema = new Schema<CommandRunRecord>({
 	subcommand: { type: String, default: null },
 	surface: { type: String, required: true, enum: ["slash", "prefix"] },
 	failed: { type: Boolean, required: true, default: false },
+	reference: { type: String, default: null },
 	durationMs: { type: Number, required: true, default: 0 },
 	at: { type: Date, required: true },
 	expiresAt: { type: Date, required: true },
