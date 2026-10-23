@@ -21,6 +21,7 @@ export * from "./memberDetail";
 export * from "./members";
 export * from "./music";
 export * from "./problems";
+export * from "./roleMenus";
 export * from "./schemas";
 export * from "./settings";
 export * from "./status";

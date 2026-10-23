@@ -14,6 +14,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	"voice-stats": { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	verify: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	sticky: { path: (guildId) => `/guilds/${guildId}/sticky`, screen: "Sticky messages" },
+	"role-menu": { path: (guildId) => `/guilds/${guildId}/role-menus`, screen: "Role menus" },
 	automod: { path: (guildId) => `/guilds/${guildId}/automod`, screen: "AutoMod" },
 	treasure: { path: (guildId) => `/guilds/${guildId}/treasure`, screen: "Treasure drops" },
 	music: { path: (guildId) => `/guilds/${guildId}/music`, screen: "Music system" },

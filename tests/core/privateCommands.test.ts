@@ -83,6 +83,7 @@ describe("which commands answer privately", () => {
 				"profile",
 				"reset",
 				"role",
+				"role-menu",
 				"role-info",
 				"say",
 				"server-info",

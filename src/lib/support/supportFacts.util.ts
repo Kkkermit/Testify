@@ -10,6 +10,7 @@ import {
 	INVITE_PERMISSIONS,
 	LEVEL_LIMITS,
 	LOTTERY_LIMITS,
+	ROLE_MENU_LIMITS,
 	SETTINGS_LIMITS,
 	STICKY_LIMITS,
 	TREASURE_DEFAULTS,
@@ -81,6 +82,9 @@ export const FACTS: Readonly<Record<string, string>> = {
 	"giveaway.maxDuration": formatDurationLong(GIVEAWAY_LIMITS.maxDurationMs),
 
 	"lottery.maxWinners": formatNumber(LOTTERY_LIMITS.maxWinners),
+
+	"roleMenu.maxPerServer": formatNumber(ROLE_MENU_LIMITS.maxPerGuild),
+	"roleMenu.maxRoles": formatNumber(ROLE_MENU_LIMITS.maxRoles),
 
 	"treasure.minMessages": formatNumber(TREASURE_DEFAULTS.minMessages),
 	"treasure.maxMessages": formatNumber(TREASURE_DEFAULTS.maxMessages),

@@ -18,6 +18,7 @@ export const keys = {
 		settings: () => ["guild", id, "settings"] as const,
 		verification: () => ["guild", id, "verification"] as const,
 		sticky: () => ["guild", id, "sticky"] as const,
+		roleMenus: () => ["guild", id, "role-menus"] as const,
 		automod: () => ["guild", id, "automod"] as const,
 		treasure: () => ["guild", id, "treasure"] as const,
 		tickets: () => ["guild", id, "tickets"] as const,

@@ -15,6 +15,7 @@ import { lottery } from "@api/routes/lottery";
 import { memberCount } from "@api/routes/memberCount";
 import { members } from "@api/routes/members";
 import { music } from "@api/routes/music";
+import { roleMenus } from "@api/routes/roleMenus";
 import { settings } from "@api/routes/settings";
 import { sticky } from "@api/routes/sticky";
 import { tickets } from "@api/routes/tickets";
@@ -25,6 +26,7 @@ import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { countRoleMenus } from "@database/repositories/roleMenuRepository";
 import {
 	getAntiLink,
 	getAuditLogConfig,
@@ -42,6 +44,7 @@ import { readLottery, readTreasure } from "@lib/economy";
 import { readInsights } from "@lib/info";
 import { normaliseSettings } from "@lib/levelling";
 import { readServerChanges } from "@lib/moderation";
+import { isPowerful } from "@lib/roles";
 import { readTickets } from "@lib/tickets";
 import {
 	type AuditEntrySummary,
@@ -79,6 +82,7 @@ guilds.route("/:guildId/giveaways", giveaways);
 guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
 guilds.route("/:guildId/music", music);
+guilds.route("/:guildId/role-menus", roleMenus);
 guilds.route("/:guildId/bot-stats", botStats);
 guilds.route("/:guildId/member-count", memberCount);
 guilds.route("/:guildId/warnings", warnings);
@@ -145,6 +149,7 @@ guilds.get("/:guildId/roles", (context) => {
 			managed: role.managed,
 			// The check `applyLevelRewards` already does at runtime, surfaced at configuration time instead.
 			assignableByBot: !role.managed && role.position < highest,
+			powerful: isPowerful(role),
 		}))
 		.sort((a, b) => b.position - a.position);
 
@@ -212,6 +217,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		draw,
 		stats,
 		tables,
+		menus,
 	] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -227,6 +233,7 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		readLottery(guild.id),
 		getFixedStats(guild.id),
 		readCasinoSettings(guild.id),
+		countRoleMenus(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -275,6 +282,12 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Auto roles",
 			enabled: (autoRoles?.roleIds.length ?? 0) > 0,
 			detail: autoRoles === null ? null : count(autoRoles.roleIds.length, "role"),
+		},
+		{
+			key: "role-menus",
+			label: "Role menus",
+			enabled: menus > 0,
+			detail: menus === 0 ? null : count(menus, "menu"),
 		},
 		{
 			key: "voice-stats",

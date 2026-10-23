@@ -68,8 +68,16 @@ describe("categoriesOf", () => {
 
 describe("staffRoleWarning", () => {
 	const roles: RoleSummary[] = [
-		{ id: "1", name: "Staff", colour: null, position: 3, managed: false, assignableByBot: true },
-		{ id: "2", name: "Server Booster", colour: null, position: 4, managed: true, assignableByBot: false },
+		{ id: "1", name: "Staff", colour: null, position: 3, managed: false, assignableByBot: true, powerful: false },
+		{
+			id: "2",
+			name: "Server Booster",
+			colour: null,
+			position: 4,
+			managed: true,
+			assignableByBot: false,
+			powerful: false,
+		},
 	];
 
 	it("says nothing about an ordinary role", () => {

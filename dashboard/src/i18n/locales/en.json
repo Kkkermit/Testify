@@ -34,7 +34,8 @@
 		"aboveBot": "above {{bot}}",
 		"first": "First",
 		"last": "Last",
-		"pageNumber": "Page {{page}}"
+		"pageNumber": "Page {{page}}",
+		"tooPowerful": "moderates or administers"
 	},
 	"nav": {
 		"servers": "Servers",
@@ -104,7 +105,9 @@
 		"changes": "Changes",
 		"changesHint": "What changed in this server, here and in Discord",
 		"insights": "Insights",
-		"insightsHint": "Who talks, where and when, and who joins and leaves"
+		"insightsHint": "Who talks, where and when, and who joins and leaves",
+		"roleMenus": "Role menus",
+		"roleMenusHint": "Menus members pick their own roles from"
 	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
@@ -430,6 +433,40 @@
 		"countOf": "{{used}} of {{limit}}",
 		"removeIn": "Remove the sticky in {{channel}}",
 		"cannotPost": "{{bot}} cannot post in #{{channel}}, so this sticky will never appear."
+	},
+	"roleMenus": {
+		"title": "Role menus",
+		"subtitle": "Menus members pick their own roles from. {{bot}} only offers roles below yours and its own, and never one that moderates or administers.",
+		"inUse": "Menus",
+		"countOf": "{{used}} of {{limit}}",
+		"emptyTitle": "No role menus yet",
+		"emptyBody": "Make one below, then post it where members will see it.",
+		"newMenu": "New menu",
+		"editMenu": "Edit {{title}}",
+		"formBody": "Members press the menu’s button and tick the roles they want. A posted menu updates when you save.",
+		"channel": "Posted in",
+		"channelHint": "{{bot}} needs permission to post here.",
+		"menuTitle": "Title",
+		"titlePlaceholder": "Pick your roles",
+		"description": "Description",
+		"descriptionHint": "Shown above the roles. You can leave it empty.",
+		"mode": "Members may hold",
+		"modeMany": "Any number",
+		"modeOne": "Only one",
+		"roles": "Roles on offer",
+		"rolesHint": "Roles above yours or {{bot}}’s, and roles that moderate or administer, cannot be offered.",
+		"create": "Make menu",
+		"holdMany": "members may pick any number",
+		"holdOne": "members may hold one",
+		"posted": "Posted",
+		"notPosted": "Not posted",
+		"rolesIn": "Roles in {{title}}",
+		"deletedRole": "A deleted role",
+		"edit": "Edit",
+		"post": "Post",
+		"updatePost": "Update post",
+		"deleteMenu": "Delete the menu {{title}}",
+		"full": "That is as many menus as a server can have. Delete one to make another."
 	},
 	"commands": {
 		"title": "Commands",
@@ -1036,7 +1073,7 @@
 		"commandsL5": "What you type into a command is used to run it and then dropped, unless saving it is the command’s purpose — a profile, a warning’s reason, a giveaway’s prize.",
 		"stored": "What features store",
 		"storedP1": "Each feature a server turns on keeps its own records, tied to that server:",
-		"storedL1": "Settings: the prefix, which features and commands are on, the channels and roles they use, and the text of welcome, sticky and ticket panel messages.",
+		"storedL1": "Settings: the prefix, which features and commands are on, the channels and roles they use, and the text of welcome, sticky, ticket panel and role menu messages.",
 		"storedL2": "Levels: your XP, your level and when you last earned XP.",
 		"storedL3": "Economy: your balances, items, houses, businesses and pets, and when you last claimed each timed reward.",
 		"storedL4": "Moderation: warnings with their reasons and who gave them, and temporary bans until they expire.",
@@ -1182,7 +1219,11 @@
 		"casinoBetRange": "The smallest bet cannot be more than the largest.",
 		"treasureMessageRange": "The fewest messages cannot be more than the most.",
 		"warningReason": "Say why they are being warned.",
-		"warningReasonLength": "A reason cannot be longer than {{max}} characters."
+		"warningReasonLength": "A reason cannot be longer than {{max}} characters.",
+		"roleMenuChannel": "Choose where the menu is posted.",
+		"roleMenuTitle": "Give the menu a title.",
+		"roleMenuRoles": "Pick at least one role to offer.",
+		"roleMenuTooManyRoles": "One menu cannot offer more than {{max}} roles."
 	},
 	"status": {
 		"title": "Status",

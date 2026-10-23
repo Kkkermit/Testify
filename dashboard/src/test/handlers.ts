@@ -32,6 +32,7 @@ import {
 	type SetupStatus,
 	type WelcomeConfigResponse,
 	type GiveawayList,
+	type RoleMenuList,
 	type StickyList,
 	type LotterySettings,
 	type TicketSettings,
@@ -370,6 +371,22 @@ export const stickyList: StickyList = {
 	limit: 25,
 	entries: [
 		{ channelId: "400000000000000001", message: "Read the rules", cap: 5, count: 3, posted: true, canSend: true },
+	],
+};
+
+export const roleMenuList: RoleMenuList = {
+	limit: 10,
+	menus: [
+		{
+			id: "6650a1b2c3d4e5f6a7b8c9d0",
+			channelId: "400000000000000001",
+			title: "Pick your pings",
+			description: "Choose what you hear about.",
+			roleIds: ["300000000000000001", "300000000000000002"],
+			mode: "many",
+			posted: true,
+			canSend: true,
+		},
 	],
 };
 
@@ -725,9 +742,33 @@ export const someChannels: ChannelSummary[] = [
 ];
 
 export const someRoles: RoleSummary[] = [
-	{ id: "300000000000000001", name: "Member", colour: null, position: 1, managed: false, assignableByBot: true },
-	{ id: "300000000000000002", name: "Booster", colour: "#7c3aed", position: 3, managed: false, assignableByBot: true },
-	{ id: "300000000000000003", name: "Admin", colour: null, position: 9, managed: false, assignableByBot: false },
+	{
+		id: "300000000000000001",
+		name: "Member",
+		colour: null,
+		position: 1,
+		managed: false,
+		assignableByBot: true,
+		powerful: false,
+	},
+	{
+		id: "300000000000000002",
+		name: "Booster",
+		colour: "#7c3aed",
+		position: 3,
+		managed: false,
+		assignableByBot: true,
+		powerful: false,
+	},
+	{
+		id: "300000000000000003",
+		name: "Admin",
+		colour: null,
+		position: 9,
+		managed: false,
+		assignableByBot: false,
+		powerful: true,
+	},
 ];
 
 function catalogueEntry(
@@ -922,6 +963,11 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/member-count", () => HttpResponse.json(memberCounts)),
 	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/role-menus", () => HttpResponse.json(roleMenuList)),
+	http.post("/api/guilds/:guildId/role-menus", () => HttpResponse.json(roleMenuList)),
+	http.put("/api/guilds/:guildId/role-menus/:menuId", () => HttpResponse.json(roleMenuList)),
+	http.post("/api/guilds/:guildId/role-menus/:menuId/publish", () => HttpResponse.json(roleMenuList)),
+	http.delete("/api/guilds/:guildId/role-menus/:menuId", () => HttpResponse.json({ limit: 10, menus: [] })),
 	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),

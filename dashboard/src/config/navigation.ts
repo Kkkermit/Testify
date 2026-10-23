@@ -20,6 +20,7 @@ import {
 	MessagesSquare,
 	Music,
 	LifeBuoy,
+	ListChecks,
 	Ticket,
 	type LucideIcon,
 	Gauge,
@@ -117,6 +118,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.levelling",
 							icon: TrendingUp,
 							hintKey: "nav.levellingHint",
+						},
+						{
+							to: `/guilds/${guild.id}/role-menus`,
+							labelKey: "nav.roleMenus",
+							icon: ListChecks,
+							hintKey: "nav.roleMenusHint",
 						},
 						{
 							to: `/guilds/${guild.id}/members`,

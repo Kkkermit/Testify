@@ -9,6 +9,7 @@ import {
 	Info,
 	LifeBuoy,
 	Link as LinkIcon,
+	ListChecks,
 	MessageSquareWarning,
 	MessagesSquare,
 	Music,
@@ -41,6 +42,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-community",
 		wash: "bg-feature-community/15",
 		path: (guildId) => `/guilds/${guildId}/bot-stats`,
+	},
+	"role-menus": {
+		icon: ListChecks,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/role-menus`,
 	},
 	sticky: {
 		icon: Pin,

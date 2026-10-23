@@ -34,7 +34,8 @@
 		"aboveBot": "sopra {{bot}}",
 		"first": "Prima",
 		"last": "Ultima",
-		"pageNumber": "Pagina {{page}}"
+		"pageNumber": "Pagina {{page}}",
+		"tooPowerful": "modera o amministra"
 	},
 	"nav": {
 		"servers": "Server",
@@ -104,7 +105,9 @@
 		"changes": "Modifiche",
 		"changesHint": "Cosa è cambiato in questo server, qui e su Discord",
 		"insights": "Statistiche",
-		"insightsHint": "Chi scrive, dove e quando, e chi entra ed esce"
+		"insightsHint": "Chi scrive, dove e quando, e chi entra ed esce",
+		"roleMenus": "Menu dei ruoli",
+		"roleMenusHint": "Menu in cui i membri scelgono i propri ruoli"
 	},
 	"error": {
 		"unreachableTitle": "Qualcosa è andato storto",
@@ -431,6 +434,40 @@
 		"countOf": "{{used}} di {{limit}}",
 		"removeIn": "Rimuovi il messaggio fisso in {{channel}}",
 		"cannotPost": "{{bot}} non può scrivere in #{{channel}}, quindi questo messaggio fisso non apparirà mai."
+	},
+	"roleMenus": {
+		"title": "Menu dei ruoli",
+		"subtitle": "Menu in cui i membri scelgono i propri ruoli. {{bot}} offre solo ruoli sotto il tuo e il suo, e mai uno che modera o amministra.",
+		"inUse": "Menu",
+		"countOf": "{{used}} di {{limit}}",
+		"emptyTitle": "Ancora nessun menu dei ruoli",
+		"emptyBody": "Creane uno qui sotto, poi pubblicalo dove i membri lo vedranno.",
+		"newMenu": "Nuovo menu",
+		"editMenu": "Modifica {{title}}",
+		"formBody": "I membri premono il pulsante del menu e spuntano i ruoli che vogliono. Un menu pubblicato si aggiorna quando salvi.",
+		"channel": "Pubblicato in",
+		"channelHint": "{{bot}} deve avere il permesso di pubblicare qui.",
+		"menuTitle": "Titolo",
+		"titlePlaceholder": "Scegli i tuoi ruoli",
+		"description": "Descrizione",
+		"descriptionHint": "Mostrata sopra i ruoli. Puoi lasciarla vuota.",
+		"mode": "I membri possono avere",
+		"modeMany": "Quanti vogliono",
+		"modeOne": "Uno solo",
+		"roles": "Ruoli offerti",
+		"rolesHint": "Non si possono offrire ruoli sopra il tuo o quello di {{bot}}, né ruoli che moderano o amministrano.",
+		"create": "Crea il menu",
+		"holdMany": "i membri ne scelgono quanti vogliono",
+		"holdOne": "i membri possono averne uno",
+		"posted": "Pubblicato",
+		"notPosted": "Non pubblicato",
+		"rolesIn": "Ruoli in {{title}}",
+		"deletedRole": "Un ruolo eliminato",
+		"edit": "Modifica",
+		"post": "Pubblica",
+		"updatePost": "Aggiorna la pubblicazione",
+		"deleteMenu": "Elimina il menu {{title}}",
+		"full": "Un server non può avere altri menu. Eliminane uno per crearne un altro."
 	},
 	"commands": {
 		"title": "Comandi",
@@ -1037,7 +1074,7 @@
 		"commandsL5": "Ciò che scrivi in un comando serve a eseguirlo e poi viene scartato, a meno che salvarlo non sia lo scopo del comando: un profilo, il motivo di un’ammonizione, il premio di un giveaway.",
 		"stored": "Cosa salvano le funzioni",
 		"storedP1": "Ogni funzione che un server attiva tiene i propri dati, legati a quel server:",
-		"storedL1": "Impostazioni: il prefisso, quali funzioni e comandi sono attivi, i canali e ruoli che usano, e il testo dei messaggi di benvenuto, fissi e del pannello ticket.",
+		"storedL1": "Impostazioni: il prefisso, quali funzioni e comandi sono attivi, i canali e ruoli che usano, e il testo dei messaggi di benvenuto, fissi, del pannello ticket e dei menu dei ruoli.",
 		"storedL2": "Livelli: i tuoi XP, il tuo livello e quando hai guadagnato XP l’ultima volta.",
 		"storedL3": "Economia: i tuoi saldi, oggetti, case, attività e animali, e quando hai riscosso l’ultima volta ogni ricompensa periodica.",
 		"storedL4": "Moderazione: le ammonizioni con il motivo e chi le ha date, e i ban temporanei fino alla scadenza.",
@@ -1183,7 +1220,11 @@
 		"casinoBetRange": "La puntata minima non può superare quella massima.",
 		"treasureMessageRange": "Il minimo di messaggi non può superare il massimo.",
 		"warningReason": "Indica il motivo dell’avvertimento.",
-		"warningReasonLength": "Un motivo non può superare i {{max}} caratteri."
+		"warningReasonLength": "Un motivo non può superare i {{max}} caratteri.",
+		"roleMenuChannel": "Scegli dove pubblicare il menu.",
+		"roleMenuTitle": "Dai un titolo al menu.",
+		"roleMenuRoles": "Scegli almeno un ruolo da offrire.",
+		"roleMenuTooManyRoles": "Un menu non può offrire più di {{max}} ruoli."
 	},
 	"status": {
 		"title": "Stato",

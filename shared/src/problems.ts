@@ -28,6 +28,10 @@ export const PROBLEM_CODES = [
 	"ticket.staffRole",
 	"treasure.messageRange",
 	"treasure.amountRange",
+	"roleMenu.channel",
+	"roleMenu.title",
+	"roleMenu.roles",
+	"roleMenu.tooManyRoles",
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

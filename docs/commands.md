@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 74](https://img.shields.io/badge/commands-74-8b5cf6?style=for-the-badge) ![subcommands: 128](https://img.shields.io/badge/subcommands-128-0ea5e9?style=for-the-badge) ![prefix aliases: 90](https://img.shields.io/badge/prefix%20aliases-90-16a34a?style=for-the-badge)
+![commands: 75](https://img.shields.io/badge/commands-75-8b5cf6?style=for-the-badge) ![subcommands: 128](https://img.shields.io/badge/subcommands-128-0ea5e9?style=for-the-badge) ![prefix aliases: 93](https://img.shields.io/badge/prefix%20aliases-93-16a34a?style=for-the-badge)
 
 </div>
 
@@ -23,7 +23,7 @@
 | [📈 Levelling](#-levelling)   |    2     |      6      |
 | [🛡️ Moderation](#️-moderation) |    17    |     16      |
 | [🎵 Music](#-music)           |    2     |     14      |
-| [⚙️ Settings](#️-settings)     |    10    |     15      |
+| [⚙️ Settings](#️-settings)     |    11    |     15      |
 | [🎫 Tickets](#-tickets)       |    1     |      3      |
 | [🎁 Giveaways](#-giveaways)   |    1     |      4      |
 | [💬 Feedback](#-feedback)     |    2     |      0      |
@@ -135,18 +135,19 @@
 
 ## ⚙️ Settings
 
-| Command           | Description                                                    | Subcommands                                                          | Prefix aliases                | Needs        |
-| ----------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------- | ------------ |
-| `/anti-link`      | Deletes links posted by members without the bypass permission. | —                                                                    | `t?antilink`, `t?link-filter` | Manage guild |
-| `/audit-logging`  | Chooses which server events get logged, and where.             | —                                                                    | `t?auditlog`, `t?logging`     | Manage guild |
-| `/auto-role`      | Gives roles automatically to new members.                      | —                                                                    | `t?autorole`, `t?join-roles`  | Manage roles |
-| `/automod`        | Creates Discord AutoMod rules.                                 | `flagged-words`, `spam`, `mention-spam`, `keyword`, `list`, `delete` | —                             | Manage guild |
-| `/counting`       | Runs the counting game in a channel.                           | —                                                                    | `t?count`                     | Manage guild |
-| `/prefix`         | Shows and changes the prefix for text commands.                | —                                                                    | —                             | Manage guild |
-| `/sticky-message` | Keeps a message pinned to the bottom of a channel.             | `setup`, `disable`, `check`                                          | —                             | Manage guild |
-| `/verify`         | Configures the verification system.                            | `setup`, `edit`, `disable`                                           | `t?verification`              | Manage guild |
-| `/voice-stats`    | Shows live member and bot counts in voice channel names.       | —                                                                    | `t?voicestats`, `t?counters`  | Manage guild |
-| `/welcome`        | Greets new members when they join.                             | `setup`, `background`, `test`                                        | `t?welcome-system`, `t?greet` | Manage guild |
+| Command           | Description                                                    | Subcommands                                                          | Prefix aliases                              | Needs        |
+| ----------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- | ------------ |
+| `/anti-link`      | Deletes links posted by members without the bypass permission. | —                                                                    | `t?antilink`, `t?link-filter`               | Manage guild |
+| `/audit-logging`  | Chooses which server events get logged, and where.             | —                                                                    | `t?auditlog`, `t?logging`                   | Manage guild |
+| `/auto-role`      | Gives roles automatically to new members.                      | —                                                                    | `t?autorole`, `t?join-roles`                | Manage roles |
+| `/automod`        | Creates Discord AutoMod rules.                                 | `flagged-words`, `spam`, `mention-spam`, `keyword`, `list`, `delete` | —                                           | Manage guild |
+| `/counting`       | Runs the counting game in a channel.                           | —                                                                    | `t?count`                                   | Manage guild |
+| `/prefix`         | Shows and changes the prefix for text commands.                | —                                                                    | —                                           | Manage guild |
+| `/role-menu`      | Posts menus members pick their own roles from.                 | —                                                                    | `t?rolemenu`, `t?self-roles`, `t?selfroles` | Manage roles |
+| `/sticky-message` | Keeps a message pinned to the bottom of a channel.             | `setup`, `disable`, `check`                                          | —                                           | Manage guild |
+| `/verify`         | Configures the verification system.                            | `setup`, `edit`, `disable`                                           | `t?verification`                            | Manage guild |
+| `/voice-stats`    | Shows live member and bot counts in voice channel names.       | —                                                                    | `t?voicestats`, `t?counters`                | Manage guild |
+| `/welcome`        | Greets new members when they join.                             | `setup`, `background`, `test`                                        | `t?welcome-system`, `t?greet`               | Manage guild |
 
 ## 🎫 Tickets
 

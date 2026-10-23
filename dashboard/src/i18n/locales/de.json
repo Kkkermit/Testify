@@ -34,7 +34,8 @@
 		"aboveBot": "über {{bot}}",
 		"first": "Erste",
 		"last": "Letzte",
-		"pageNumber": "Seite {{page}}"
+		"pageNumber": "Seite {{page}}",
+		"tooPowerful": "moderiert oder verwaltet"
 	},
 	"nav": {
 		"servers": "Server",
@@ -104,7 +105,9 @@
 		"changes": "Änderungen",
 		"changesHint": "Was sich auf diesem Server geändert hat, hier und in Discord",
 		"insights": "Einblicke",
-		"insightsHint": "Wer schreibt, wo und wann, und wer kommt und geht"
+		"insightsHint": "Wer schreibt, wo und wann, und wer kommt und geht",
+		"roleMenus": "Rollenmenüs",
+		"roleMenusHint": "Menüs, in denen Mitglieder ihre Rollen selbst wählen"
 	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
@@ -430,6 +433,40 @@
 		"countOf": "{{used}} von {{limit}}",
 		"removeIn": "Sticky in {{channel}} entfernen",
 		"cannotPost": "{{bot}} kann in #{{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen."
+	},
+	"roleMenus": {
+		"title": "Rollenmenüs",
+		"subtitle": "Menüs, in denen Mitglieder ihre Rollen selbst wählen. {{bot}} bietet nur Rollen unter deiner und seiner eigenen an, und nie eine, die moderiert oder verwaltet.",
+		"inUse": "Menüs",
+		"countOf": "{{used}} von {{limit}}",
+		"emptyTitle": "Noch keine Rollenmenüs",
+		"emptyBody": "Erstelle unten eines und poste es dort, wo Mitglieder es sehen.",
+		"newMenu": "Neues Menü",
+		"editMenu": "{{title}} bearbeiten",
+		"formBody": "Mitglieder drücken den Knopf des Menüs und haken die gewünschten Rollen an. Ein gepostetes Menü wird beim Speichern aktualisiert.",
+		"channel": "Gepostet in",
+		"channelHint": "{{bot}} braucht die Berechtigung, hier zu posten.",
+		"menuTitle": "Titel",
+		"titlePlaceholder": "Wähle deine Rollen",
+		"description": "Beschreibung",
+		"descriptionHint": "Steht über den Rollen. Du kannst sie leer lassen.",
+		"mode": "Mitglieder dürfen haben",
+		"modeMany": "Beliebig viele",
+		"modeOne": "Nur eine",
+		"roles": "Angebotene Rollen",
+		"rolesHint": "Rollen über deiner oder der von {{bot}} und Rollen, die moderieren oder verwalten, können nicht angeboten werden.",
+		"create": "Menü erstellen",
+		"holdMany": "Mitglieder wählen beliebig viele",
+		"holdOne": "Mitglieder dürfen eine haben",
+		"posted": "Gepostet",
+		"notPosted": "Nicht gepostet",
+		"rolesIn": "Rollen in {{title}}",
+		"deletedRole": "Eine gelöschte Rolle",
+		"edit": "Bearbeiten",
+		"post": "Posten",
+		"updatePost": "Beitrag aktualisieren",
+		"deleteMenu": "Das Menü {{title}} löschen",
+		"full": "Mehr Menüs kann ein Server nicht haben. Lösche eines, um ein neues zu erstellen."
 	},
 	"commands": {
 		"title": "Befehle",
@@ -1036,7 +1073,7 @@
 		"commandsL5": "Was du in einen Befehl eingibst, wird zum Ausführen verwendet und danach verworfen – es sei denn, das Speichern ist der Zweck des Befehls: ein Profil, der Grund einer Verwarnung, der Preis eines Giveaways.",
 		"stored": "Was Funktionen speichern",
 		"storedP1": "Jede Funktion, die ein Server einschaltet, führt eigene Datensätze, die an diesen Server gebunden sind:",
-		"storedL1": "Einstellungen: das Präfix, welche Funktionen und Befehle an sind, die Kanäle und Rollen, die sie nutzen, und der Text von Willkommens-, Sticky- und Ticket-Panel-Nachrichten.",
+		"storedL1": "Einstellungen: das Präfix, welche Funktionen und Befehle an sind, die Kanäle und Rollen, die sie nutzen, und der Text von Willkommens-, Sticky-, Ticket-Panel- und Rollenmenü-Nachrichten.",
 		"storedL2": "Level: deine XP, dein Level und wann du zuletzt XP bekommen hast.",
 		"storedL3": "Wirtschaft: deine Guthaben, Gegenstände, Häuser, Unternehmen und Haustiere sowie wann du jede zeitgebundene Belohnung zuletzt abgeholt hast.",
 		"storedL4": "Moderation: Verwarnungen mit Grund und wer sie ausgesprochen hat, und befristete Banns bis zu ihrem Ablauf.",
@@ -1182,7 +1219,11 @@
 		"casinoBetRange": "Der kleinste Einsatz darf nicht größer als der größte sein.",
 		"treasureMessageRange": "Die kleinste Anzahl Nachrichten darf nicht größer als die größte sein.",
 		"warningReason": "Gib an, warum die Verwarnung erfolgt.",
-		"warningReasonLength": "Ein Grund darf nicht länger als {{max}} Zeichen sein."
+		"warningReasonLength": "Ein Grund darf nicht länger als {{max}} Zeichen sein.",
+		"roleMenuChannel": "Wähle, wo das Menü gepostet wird.",
+		"roleMenuTitle": "Gib dem Menü einen Titel.",
+		"roleMenuRoles": "Wähle mindestens eine Rolle zum Anbieten.",
+		"roleMenuTooManyRoles": "Ein Menü kann höchstens {{max}} Rollen anbieten."
 	},
 	"status": {
 		"title": "Status",

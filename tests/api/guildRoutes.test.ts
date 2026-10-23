@@ -1,4 +1,4 @@
-import { AuditLogEvent, ChannelType, Collection, PermissionFlagsBits } from "discord.js";
+import { AuditLogEvent, ChannelType, Collection, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, problemBody } from "@api/errors";
@@ -35,6 +35,9 @@ jest.mock("@database/repositories/insightsRepository", () => ({
 	recentMoves: jest.fn(() => Promise.resolve([])),
 	recordMove: jest.fn(),
 	saveActivity: jest.fn(),
+}));
+jest.mock("@database/repositories/roleMenuRepository", () => ({
+	countRoleMenus: jest.fn(() => Promise.resolve(0)),
 }));
 jest.mock("@database/repositories/verificationRepository", () => ({
 	getVerifyConfig: jest.fn(() => Promise.resolve(null)),
@@ -117,6 +120,7 @@ function fakeGuild(options: Options = {}) {
 		position,
 		color: colour,
 		managed,
+		permissions: new PermissionsBitField(name === "Admin" ? [PermissionFlagsBits.Administrator] : []),
 	});
 
 	const roles = new Collection<string, unknown>([
@@ -286,6 +290,14 @@ describe("the role list", () => {
 
 	it("marks an integration's own role as not assignable", async () => {
 		expect((await rolesOf()).find((role) => role.id === "r4")?.assignableByBot).toBe(false);
+	});
+
+	/** A self-assign menu offering one of these would let anybody moderate the server. */
+	it("marks a role that administers as powerful", async () => {
+		const roles = await rolesOf();
+
+		expect(roles.find((role) => role.id === "r3")?.powerful).toBe(true);
+		expect(roles.find((role) => role.id === "r1")?.powerful).toBe(false);
 	});
 
 	it("gives a colour only when the role has one", async () => {

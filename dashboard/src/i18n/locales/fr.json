@@ -34,7 +34,8 @@
 		"aboveBot": "au-dessus de {{bot}}",
 		"first": "Première",
 		"last": "Dernière",
-		"pageNumber": "Page {{page}}"
+		"pageNumber": "Page {{page}}",
+		"tooPowerful": "modère ou administre"
 	},
 	"nav": {
 		"servers": "Serveurs",
@@ -104,7 +105,9 @@
 		"changes": "Modifications",
 		"changesHint": "Ce qui a changé sur ce serveur, ici et dans Discord",
 		"insights": "Statistiques",
-		"insightsHint": "Qui parle, où et quand, et qui arrive et part"
+		"insightsHint": "Qui parle, où et quand, et qui arrive et part",
+		"roleMenus": "Menus de rôles",
+		"roleMenusHint": "Des menus où les membres choisissent leurs propres rôles"
 	},
 	"error": {
 		"unreachableTitle": "Une erreur est survenue",
@@ -431,6 +434,40 @@
 		"countOf": "{{used}} sur {{limit}}",
 		"removeIn": "Retirer le message épinglé dans {{channel}}",
 		"cannotPost": "{{bot}} ne peut pas publier dans #{{channel}}, donc ce message épinglé n’apparaîtra jamais."
+	},
+	"roleMenus": {
+		"title": "Menus de rôles",
+		"subtitle": "Des menus où les membres choisissent leurs propres rôles. {{bot}} ne propose que des rôles sous le vôtre et le sien, et jamais un rôle qui modère ou administre.",
+		"inUse": "Menus",
+		"countOf": "{{used}} sur {{limit}}",
+		"emptyTitle": "Aucun menu de rôles pour l’instant",
+		"emptyBody": "Créez-en un ci-dessous, puis publiez-le là où les membres le verront.",
+		"newMenu": "Nouveau menu",
+		"editMenu": "Modifier {{title}}",
+		"formBody": "Les membres appuient sur le bouton du menu et cochent les rôles qu’ils veulent. Un menu publié se met à jour quand vous enregistrez.",
+		"channel": "Publié dans",
+		"channelHint": "{{bot}} doit avoir le droit de publier ici.",
+		"menuTitle": "Titre",
+		"titlePlaceholder": "Choisissez vos rôles",
+		"description": "Description",
+		"descriptionHint": "Affichée au-dessus des rôles. Vous pouvez la laisser vide.",
+		"mode": "Les membres peuvent avoir",
+		"modeMany": "Autant qu’ils veulent",
+		"modeOne": "Un seul",
+		"roles": "Rôles proposés",
+		"rolesHint": "Les rôles au-dessus du vôtre ou de celui de {{bot}}, et ceux qui modèrent ou administrent, ne peuvent pas être proposés.",
+		"create": "Créer le menu",
+		"holdMany": "les membres en choisissent autant qu’ils veulent",
+		"holdOne": "les membres peuvent en avoir un",
+		"posted": "Publié",
+		"notPosted": "Non publié",
+		"rolesIn": "Rôles de {{title}}",
+		"deletedRole": "Un rôle supprimé",
+		"edit": "Modifier",
+		"post": "Publier",
+		"updatePost": "Mettre à jour la publication",
+		"deleteMenu": "Supprimer le menu {{title}}",
+		"full": "Un serveur ne peut pas avoir plus de menus. Supprimez-en un pour en créer un autre."
 	},
 	"commands": {
 		"title": "Commandes",
@@ -1037,7 +1074,7 @@
 		"commandsL5": "Ce que vous tapez dans une commande sert à l’exécuter puis est oublié, sauf si l’enregistrer est le but de la commande : un profil, le motif d’un avertissement, le lot d’un giveaway.",
 		"stored": "Ce que les fonctions enregistrent",
 		"storedP1": "Chaque fonction qu’un serveur active tient ses propres fiches, liées à ce serveur :",
-		"storedL1": "Réglages : le préfixe, les fonctions et commandes actives, les salons et rôles qu’elles utilisent, et le texte des messages de bienvenue, épinglés et du panneau de tickets.",
+		"storedL1": "Réglages : le préfixe, les fonctions et commandes actives, les salons et rôles qu’elles utilisent, et le texte des messages de bienvenue, épinglés, du panneau de tickets et des menus de rôles.",
 		"storedL2": "Niveaux : votre XP, votre niveau et le moment où vous avez gagné de l’XP pour la dernière fois.",
 		"storedL3": "Économie : vos soldes, objets, maisons, entreprises et animaux, et le moment où vous avez réclamé chaque récompense périodique pour la dernière fois.",
 		"storedL4": "Modération : les avertissements avec leur motif et leur auteur, et les bannissements temporaires jusqu’à leur expiration.",
@@ -1183,7 +1220,11 @@
 		"casinoBetRange": "La mise minimale ne peut pas dépasser la mise maximale.",
 		"treasureMessageRange": "Le minimum de messages ne peut pas dépasser le maximum.",
 		"warningReason": "Indique la raison de l’avertissement.",
-		"warningReasonLength": "Une raison ne peut pas dépasser {{max}} caractères."
+		"warningReasonLength": "Une raison ne peut pas dépasser {{max}} caractères.",
+		"roleMenuChannel": "Choisissez où le menu est publié.",
+		"roleMenuTitle": "Donnez un titre au menu.",
+		"roleMenuRoles": "Choisissez au moins un rôle à proposer.",
+		"roleMenuTooManyRoles": "Un menu ne peut pas proposer plus de {{max}} rôles."
 	},
 	"status": {
 		"title": "État",
