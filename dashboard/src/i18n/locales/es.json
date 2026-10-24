@@ -1295,7 +1295,11 @@
 		"storedL8": "Recordatorios: lo que pediste que te recordara, cuándo y dónde lo pediste, hasta que se entrega o lo cancelas. El texto de un recordatorio nunca se publica en los registros de comandos del operador.",
 		"retentionL9": "Recordatorios: se eliminan al entregarse o cancelarse. Uno que no puede llegarte por ninguna vía se descarta.",
 		"storedL9": "Ideas: lo que publicaste con /idea submit y tu nombre de usuario, quién votó a favor y en contra, y la decisión del equipo con su motivo.",
-		"retentionL10": "Las ideas y sus votos: hasta que un gestor las elimine o se quite el bot del servidor."
+		"retentionL10": "Las ideas y sus votos: hasta que un gestor las elimine o se quite el bot del servidor.",
+		"storedL10": "Starboard: por cada mensaje que llegó al tablero, su id, su canal, cuántas ⭐ tiene y el id de usuario de su autor, para que la copia siga al original. Nunca su texto, que está en la copia en Discord, ni quién le puso estrella.",
+		"storedL11": "Únete y crea: por cada canal de voz que {{bot}} creó, el canal y el id de usuario del miembro para quien se creó.",
+		"retentionL11": "Los registros del starboard: se eliminan con el mensaje original o cuando se quita el bot del servidor.",
+		"retentionL12": "Los canales de Únete y crea: se olvidan cuando se elimina el canal o cuando se quita el bot del servidor."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",

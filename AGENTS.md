@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 82, across 14 categories          |
-| Command files        | 103 (incl. folded-in subcommands) |
+| Commands             | 84, across 14 categories          |
+| Command files        | 105 (incl. folded-in subcommands) |
 | Subcommands          | 135                               |
 | Prefix aliases       | 95                                |
-| Button handlers      | 36                                |
-| Events               | 25, in 5 groups                   |
-| `src/lib` helpers    | 165, in 20 domain folders         |
-| Schemas/repositories | 27 / 24                           |
-| Scheduled jobs       | 7                                 |
-| Tests                | 6,332 across 359 suites           |
+| Button handlers      | 38                                |
+| Events               | 29, in 6 groups                   |
+| `src/lib` helpers    | 171, in 22 domain folders         |
+| Schemas/repositories | 29 / 26                           |
+| Scheduled jobs       | 8                                 |
+| Tests                | 6,485 across 373 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -216,10 +216,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  103 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               25 handlers in command, create, logging, ready and message
-├── buttons/              36 component handlers, keyed by custom-ID prefix
-├── lib/                  165 helpers in 20 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  105 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               29 handlers in command, community, create, logging, ready and message
+├── buttons/              38 component handlers, keyed by custom-ID prefix
+├── lib/                  171 helpers in 22 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -229,15 +229,16 @@ src/
 │   ├── casino/           the games' rules, the wallet flow, the card hands and every casino message
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
-│       reminders/ ideas/
+│       reminders/ ideas/ starboard/ tempVoice/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           27 Mongoose schemas
-│   └── repositories/     24 query layers. Commands never touch a model directly.
-├── jobs/                 7 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders)
+│   ├── models/           29 Mongoose schemas
+│   └── repositories/     26 query layers. Commands never touch a model directly.
+├── jobs/                 8 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
+│                         join-to-create channels)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 245 suites; the dashboard's 114 sit beside its code.
+tests/                    Mirrors src/. 254 suites; the dashboard's 119 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -286,21 +287,22 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
 
-| Renderer                      | Handler                     | Pattern it demonstrates                                    |
-| ----------------------------- | --------------------------- | ---------------------------------------------------------- |
-| `shopScreen.util.ts`          | `buttons/shop.ts`           | Paged catalogue, per-item buttons, confirm step            |
-| `auditPanel.util.ts`          | `buttons/auditLog.ts`       | Draft edits in a bit-packed custom ID, then Save           |
-| `levelPanel.util.ts`          | `buttons/levelling.ts`      | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
-| `balancePanel.util.ts`        | `buttons/balance.ts`        | Hub panel, read-only mode for other users                  |
-| `moneyPanel.util.ts`          | `buttons/money.ts`          | A step that returns to the panel it was opened from        |
-| `inventoryScreen.util.ts`     | `buttons/inventory.ts`      | Per-row action button, paging in the custom ID             |
-| `settingsPanel.util.ts`       | —                           | Generic settings rows + pre-filled modal editors           |
-| `musicPanel.util.ts`          | `buttons/music.ts`          | Live state: re-reads the session on every press            |
-| `musicSystemPanel.util.ts`    | `buttons/music.ts`          | A switch and a pre-ticked role select, applied immediately |
-| `casinoPanel.util.ts`         | `buttons/casino.ts`         | A picture per state, re-read from the database every press |
-| `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts` | A switch, a toggle per game and a pre-filled modal         |
-| `roleMenuPanel.util.ts`       | `buttons/roleMenuAdmin.ts`  | A list of records, each opening its own editor             |
-| `ideaPanel.util.ts`           | `buttons/idea.ts`           | A public post anybody presses, with staff-only buttons     |
+| Renderer                      | Handler                        | Pattern it demonstrates                                    |
+| ----------------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `shopScreen.util.ts`          | `buttons/shop.ts`              | Paged catalogue, per-item buttons, confirm step            |
+| `auditPanel.util.ts`          | `buttons/auditLog.ts`          | Draft edits in a bit-packed custom ID, then Save           |
+| `levelPanel.util.ts`          | `buttons/levelling.ts`         | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
+| `balancePanel.util.ts`        | `buttons/balance.ts`           | Hub panel, read-only mode for other users                  |
+| `moneyPanel.util.ts`          | `buttons/money.ts`             | A step that returns to the panel it was opened from        |
+| `inventoryScreen.util.ts`     | `buttons/inventory.ts`         | Per-row action button, paging in the custom ID             |
+| `settingsPanel.util.ts`       | —                              | Generic settings rows + pre-filled modal editors           |
+| `musicPanel.util.ts`          | `buttons/music.ts`             | Live state: re-reads the session on every press            |
+| `musicSystemPanel.util.ts`    | `buttons/music.ts`             | A switch and a pre-ticked role select, applied immediately |
+| `casinoPanel.util.ts`         | `buttons/casino.ts`            | A picture per state, re-read from the database every press |
+| `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts`    | A switch, a toggle per game and a pre-filled modal         |
+| `roleMenuPanel.util.ts`       | `buttons/roleMenuAdmin.ts`     | A list of records, each opening its own editor             |
+| `ideaPanel.util.ts`           | `buttons/idea.ts`              | A public post anybody presses, with staff-only buttons     |
+| `tempVoicePanel.util.ts`      | `buttons/tempVoiceSettings.ts` | A setting with a button that makes the thing it points at  |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -542,8 +544,9 @@ export default defineEvent({
 is correctly typed for whichever event you named — and a handler whose parameters are in the wrong order is a
 compile error. In the original JS bot two features were silently dead for exactly that reason.
 
-Group it into `ready/`, `command/`, `create/`, `logging/` or `message/`. Any depth under
-`src/events/` is scanned.
+Group it into `ready/`, `command/`, `community/`, `create/`, `logging/` or `message/`. Any depth under
+`src/events/` is scanned. `message/` holds only message handlers, which the loader registers differently, so an
+event about messages that is not one — the starboard's reactions and deletes — goes in `community/`.
 
 `once: true` for start-up work. Never register a handler both in a file and by hand elsewhere — the original
 did, so every signal fired twice.
@@ -1670,6 +1673,37 @@ are load-bearing:
 `checkOpenControl` in `checks.ts` is the gate every control anybody may press passes; the role menu's button, the
 idea board's and `checkMusicControl` and `checkCasinoPlay` all start with it.
 
+### The starboard reposts without pinging, and only once
+
+`/starboard` and the dashboard's **Starboard** screen choose a channel, a number of ⭐ and whether the author's own
+star counts; the `community` events do the rest. Four things about it are load-bearing:
+
+- **A repost is claimed, not checked for.** `claimStarPost` inserts the `starposts` row under a unique
+  `{ guildId, messageId }` index, and only the call that inserted it posts, so two stars landing together cannot
+  post twice. A board the bot cannot post in lets the claim go again, so the message can still make it later.
+- **Every repost goes out with `allowedMentions: { parse: [] }`**, because it quotes somebody's message and its
+  mentions would otherwise ping everybody again.
+- **A repost a moderator deletes stays off the board** (`removed`), and deleting the original deletes its repost
+  and its record. Nothing from an age-restricted channel reaches a board that is not one.
+- **Who starred is read, never kept.** The voters are fetched only for a message at or past the line, to leave out
+  bots and, unless it is allowed, the author; past `VOTER_PAGE` the raw count stands. Only the count is stored, and
+  the privacy notice says so (`legal.storedL10`).
+
+### Join to create deletes only what it made
+
+`/temp-voice` and the **Join to create** screen pick a lobby, or make one, and say what each new channel is called,
+where it goes and how many it holds. Four things about it are load-bearing:
+
+- **Only a channel in `tempvoicechannels` is ever deleted.** `closeIfEmpty` asks the record first, so a lobby, or
+  any voice channel somebody made by hand, is never touched however empty it is.
+- **One channel per member, and a pause between them.** Somebody who already has one is moved back into it, and
+  `MAKE_PAUSE_MS` is keyed `guildId:userId`, so hopping in and out of the lobby cannot fill a server.
+- **A new channel is made with no overwrites**, so it takes its category's; the owner's Manage Channels is added
+  after, and needs the bot's Manage Roles, so it fails quietly rather than failing the channel.
+- **A restart cannot strand a channel.** `tempVoiceSweep` runs thirty seconds after start-up and every ten minutes,
+  deleting recorded channels that emptied while the bot was away and forgetting those Discord no longer has.
+  Tidying runs while the bot is paused; making does not.
+
 ### Global by design
 
 The blacklist, the user profile and reminders are intentionally not guild-scoped. See
@@ -1801,6 +1835,8 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
 | `/guilds/:id/role-menus`   | Menus members pick roles from; nothing above you or that moderates         |
 | `/guilds/:id/ideas`        | The idea board's channel and switch, every idea, and the decision on it    |
+| `/guilds/:id/starboard`    | Where starred messages go, the stars it takes, and the author's own star   |
+| `/guilds/:id/temp-voice`   | The lobby, made here if need be, and what each new voice channel is like   |
 | `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
 | `/guilds/:id/music`        | The music kill switch and the DJ roles                                     |

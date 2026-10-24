@@ -1295,7 +1295,11 @@
 		"storedL8": "Promemoria: ciò che hai chiesto di ricordarti, quando e dove l’hai impostato, finché non viene consegnato o lo annulli. Il testo di un promemoria non viene mai pubblicato nei registri dei comandi dell’operatore.",
 		"retentionL9": "Promemoria: eliminati una volta consegnati o annullati. Uno che non può raggiungerti in alcun modo viene scartato.",
 		"storedL9": "Idee: ciò che hai pubblicato con /idea submit e il tuo nome utente, chi ha votato a favore e contro, e la decisione dello staff con il suo motivo.",
-		"retentionL10": "Le idee e i loro voti: finché un gestore non le elimina, o il bot non viene rimosso dal server."
+		"retentionL10": "Le idee e i loro voti: finché un gestore non le elimina, o il bot non viene rimosso dal server.",
+		"storedL10": "Starboard: per ogni messaggio arrivato sulla bacheca, il suo id, il suo canale, quante ⭐ ha e l’id utente del suo autore, così la copia può seguire l’originale. Mai il suo testo, che si trova nella copia su Discord, né chi gli ha dato una stella.",
+		"storedL11": "Entra per creare: per ogni canale vocale creato da {{bot}}, il canale e l’id utente del membro per cui è stato creato.",
+		"retentionL11": "I dati della starboard: eliminati con il messaggio originale, o quando il bot viene rimosso dal server.",
+		"retentionL12": "I canali di Entra per creare: dimenticati appena il canale viene eliminato, o quando il bot viene rimosso dal server."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",

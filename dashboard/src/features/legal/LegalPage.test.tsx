@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 22 Oct 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 24 Oct 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -88,6 +88,12 @@ describe("the legal pages", () => {
 		// `voteOnIdea` keeps who voted which way, which is what stops a second vote; `purgeGuild` removes the board.
 		expect(text).toMatch(/Ideas: .* who voted for and against it/);
 		expect(text).toMatch(/Ideas and their votes: .* the bot is removed from the server/);
+		// `claimStarPost` stores ids and a count, and `countStars` reads the voters without keeping them.
+		expect(text).toMatch(/Starboard: .* Never its text, .* and never who starred it/);
+		expect(text).toMatch(/Starboard records: deleted with the original message/);
+		// `recordTempChannel` keeps the channel and the member it was made for; `closeIfEmpty` forgets both.
+		expect(text).toMatch(/Join to create: .* the user id of the member it was made for/);
+		expect(text).toMatch(/Join-to-create channels: forgotten once the channel is deleted/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);

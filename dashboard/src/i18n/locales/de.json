@@ -1294,7 +1294,11 @@
 		"storedL8": "Erinnerungen: woran du erinnert werden wolltest, wann und wo du sie gesetzt hast, bis sie zugestellt oder von dir abgebrochen werden. Der Text einer Erinnerung wird nie in die Befehlsprotokolle des Betreibers gepostet.",
 		"retentionL9": "Erinnerungen: werden gelöscht, sobald sie zugestellt oder abgebrochen sind. Eine, die dich auf keinem Weg erreicht, wird verworfen.",
 		"storedL9": "Ideen: was du mit /idea submit gepostet hast und dein Benutzername, wer dafür und dagegen gestimmt hat, und die Entscheidung des Teams mit ihrer Begründung.",
-		"retentionL10": "Ideen und ihre Stimmen: bis jemand mit Verwaltungsrechten sie löscht oder der Bot vom Server entfernt wird."
+		"retentionL10": "Ideen und ihre Stimmen: bis jemand mit Verwaltungsrechten sie löscht oder der Bot vom Server entfernt wird.",
+		"storedL10": "Starboard: für jede Nachricht, die es aufs Board geschafft hat, ihre ID, ihr Kanal, wie viele ⭐ sie hat und die Benutzer-ID ihrer verfassenden Person, damit die Kopie dem Original folgen kann. Nie ihr Text, der in der Kopie auf Discord steht, und nie, wer einen Stern gegeben hat.",
+		"storedL11": "Beitreten und erstellen: für jeden Sprachkanal, den {{bot}} erstellt hat, der Kanal und die Benutzer-ID des Mitglieds, für das er erstellt wurde.",
+		"retentionL11": "Starboard-Einträge: werden mit der Originalnachricht gelöscht oder wenn der Bot vom Server entfernt wird.",
+		"retentionL12": "Kanäle von Beitreten und erstellen: werden vergessen, sobald der Kanal gelöscht ist oder der Bot vom Server entfernt wird."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
