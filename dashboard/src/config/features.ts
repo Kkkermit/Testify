@@ -21,7 +21,9 @@ import {
 	ShieldCheck,
 	Smile,
 	Sparkles,
+	Star,
 	TrendingUp,
+	Volume2,
 	Pin,
 	UserPlus,
 	Users,
@@ -61,6 +63,18 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-community",
 		wash: "bg-feature-community/15",
 		path: (guildId) => `/guilds/${guildId}/sticky`,
+	},
+	starboard: {
+		icon: Star,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/starboard`,
+	},
+	"temp-voice": {
+		icon: Volume2,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/temp-voice`,
 	},
 	levelling: {
 		icon: TrendingUp,

@@ -18,7 +18,9 @@ import { members } from "@api/routes/members";
 import { music } from "@api/routes/music";
 import { roleMenus } from "@api/routes/roleMenus";
 import { settings } from "@api/routes/settings";
+import { starboard } from "@api/routes/starboard";
 import { sticky } from "@api/routes/sticky";
+import { tempVoice } from "@api/routes/tempVoice";
 import { tickets } from "@api/routes/tickets";
 import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
@@ -39,6 +41,8 @@ import {
 	getWelcome,
 	listSticky,
 } from "@database/repositories/settingsRepository";
+import { getStarboardSettings } from "@database/repositories/starboardRepository";
+import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { CASINO_GAMES, readCasinoSettings } from "@lib/casino";
 import { canPostInChannel } from "@lib/discord";
@@ -89,6 +93,8 @@ guilds.route("/:guildId/role-menus", roleMenus);
 guilds.route("/:guildId/bot-stats", botStats);
 guilds.route("/:guildId/member-count", memberCount);
 guilds.route("/:guildId/warnings", warnings);
+guilds.route("/:guildId/starboard", starboard);
+guilds.route("/:guildId/temp-voice", tempVoice);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
@@ -222,6 +228,8 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		tables,
 		menus,
 		board,
+		stars,
+		lobby,
 	] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -239,6 +247,8 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		readCasinoSettings(guild.id),
 		countRoleMenus(guild.id),
 		getIdeaSettings(guild.id),
+		getStarboardSettings(guild.id),
+		getTempVoiceSettings(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -299,6 +309,21 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Idea board",
 			enabled: board?.enabled === true,
 			detail: board?.enabled === true && board.channelId !== null ? `Posting in <#${board.channelId}>` : null,
+		},
+		{
+			key: "starboard",
+			label: "Starboard",
+			enabled: stars?.enabled === true,
+			detail:
+				stars?.enabled === true && stars.channelId !== null
+					? `${String(stars.threshold)} ⭐ to reach <#${stars.channelId}>`
+					: null,
+		},
+		{
+			key: "temp-voice",
+			label: "Join to create",
+			enabled: lobby?.enabled === true,
+			detail: lobby?.enabled === true && lobby.lobbyChannelId !== null ? `Lobby: <#${lobby.lobbyChannelId}>` : null,
 		},
 		{
 			key: "voice-stats",

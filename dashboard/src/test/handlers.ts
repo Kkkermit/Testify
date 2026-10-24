@@ -52,6 +52,8 @@ import {
 	type BoardPage,
 	type MemberDetail,
 	type StatusResponse,
+	type StarboardSettings,
+	type TempVoiceSettings,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -398,6 +400,25 @@ export const ideaSettings: IdeaSettings = {
 	channelId: "400000000000000001",
 	canSend: true,
 	counts: { open: 1, accepted: 1, declined: 0 },
+};
+
+export const starboardSettings: StarboardSettings = {
+	enabled: true,
+	channelId: "400000000000000001",
+	threshold: 3,
+	selfStar: false,
+	canSend: true,
+	posts: 4,
+};
+
+export const tempVoiceSettings: TempVoiceSettings = {
+	enabled: true,
+	lobbyChannelId: "400000000000000003",
+	categoryId: null,
+	nameTemplate: "{user}'s channel",
+	userLimit: 0,
+	canManage: true,
+	active: 2,
 };
 
 export const ideaPage: Paged<IdeaRow> = {
@@ -1021,6 +1042,11 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/role-menus", () => HttpResponse.json(roleMenuList)),
 	http.get("/api/guilds/:guildId/ideas", () => HttpResponse.json(ideaSettings)),
 	http.patch("/api/guilds/:guildId/ideas", () => HttpResponse.json(ideaSettings)),
+	http.get("/api/guilds/:guildId/starboard", () => HttpResponse.json(starboardSettings)),
+	http.patch("/api/guilds/:guildId/starboard", () => HttpResponse.json(starboardSettings)),
+	http.get("/api/guilds/:guildId/temp-voice", () => HttpResponse.json(tempVoiceSettings)),
+	http.patch("/api/guilds/:guildId/temp-voice", () => HttpResponse.json(tempVoiceSettings)),
+	http.post("/api/guilds/:guildId/temp-voice/lobby", () => HttpResponse.json(tempVoiceSettings)),
 	http.get("/api/guilds/:guildId/ideas/list", () => HttpResponse.json(ideaPage)),
 	http.post("/api/guilds/:guildId/ideas/:ideaId/decision", () => HttpResponse.json(ideaPage.items[0])),
 	http.delete("/api/guilds/:guildId/ideas/:ideaId", () => new HttpResponse(null, { status: 204 })),

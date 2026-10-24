@@ -29,6 +29,8 @@ import {
 	Gift,
 	Gem,
 	Sparkles,
+	Star,
+	Volume2,
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
@@ -133,6 +135,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							hintKey: "nav.ideasHint",
 						},
 						{
+							to: `/guilds/${guild.id}/starboard`,
+							labelKey: "nav.starboard",
+							icon: Star,
+							hintKey: "nav.starboardHint",
+						},
+						{
 							to: `/guilds/${guild.id}/members`,
 							labelKey: "nav.leaderboards",
 							icon: Trophy,
@@ -229,6 +237,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.tickets",
 							icon: LifeBuoy,
 							hintKey: "nav.ticketsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/temp-voice`,
+							labelKey: "nav.tempVoice",
+							icon: Volume2,
+							hintKey: "nav.tempVoiceHint",
 						},
 						{
 							to: `/guilds/${guild.id}/bot-stats`,
