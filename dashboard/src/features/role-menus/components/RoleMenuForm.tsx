@@ -8,9 +8,10 @@ import {
 import { Save } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { LeaveGuard } from "@/app/LeaveGuard";
 import { ChannelPicker, Field, FIELD, LABEL, RoleChecklist, Warning } from "@/components/form";
 import { Button, Card, CARD_HEADING, SegmentedControl } from "@/components/primitives";
-import { bodyOf, type RoleMenuDraft } from "@/features/role-menus/roleMenus.utils";
+import { bodyOf, draftChanged, type RoleMenuDraft } from "@/features/role-menus/roleMenus.utils";
 import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
@@ -46,9 +47,11 @@ export function RoleMenuForm({
 	const blocked = problemText(roleMenuBlocked(draft), t);
 	const markup = markupWarning(draft.title) ?? markupWarning(draft.description);
 	const touched = draft.title !== "" || draft.roleIds.length > 0;
+	const dirty = draftChanged(initial, draft);
 
 	return (
 		<Card className="motion-pop flex flex-col gap-4">
+			<LeaveGuard when={dirty && !saving} />
 			<div>
 				<h2 className={CARD_HEADING}>
 					{editing === null ? t("roleMenus.newMenu") : t("roleMenus.editMenu", { title: editing })}

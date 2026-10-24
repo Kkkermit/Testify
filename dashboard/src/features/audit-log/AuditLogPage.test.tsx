@@ -32,6 +32,13 @@ function save(): HTMLElement {
 	return screen.getByRole("button", { name: /save changes/i });
 }
 
+/** True when the page would have the browser ask before a reload or a closed tab. */
+function asksBeforeUnload(): boolean {
+	const event = new Event("beforeunload", { cancelable: true });
+	window.dispatchEvent(event);
+	return event.defaultPrevented;
+}
+
 describe("the audit log page", () => {
 	it("shows what is configured", async () => {
 		renderPage();
@@ -83,6 +90,18 @@ describe("the audit log page", () => {
 
 		expect(screen.getByRole("checkbox", { name: /message edited/i })).not.toBeChecked();
 		expect(save()).toBeDisabled();
+	});
+
+	/** The draft is held until Save, so leaving with it unsaved has to be asked about. */
+	it("asks before leaving with changes unsaved, and not once they are discarded", async () => {
+		const user = userEvent.setup();
+		renderPage();
+
+		await user.click(await screen.findByRole("checkbox", { name: /message edited/i }));
+		expect(asksBeforeUnload()).toBe(true);
+
+		await user.click(screen.getByRole("button", { name: /discard/i }));
+		expect(asksBeforeUnload()).toBe(false);
 	});
 
 	/** One checkbox per part of the server, so eighteen events are five decisions rather than eighteen. */

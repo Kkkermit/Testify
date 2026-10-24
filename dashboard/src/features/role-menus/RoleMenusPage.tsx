@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -34,6 +35,7 @@ export function RoleMenusPage(): React.JSX.Element {
 	const update = useUpdateRoleMenu(guildId);
 	const publish = usePublishRoleMenu(guildId);
 	const remove = useRemoveRoleMenu(guildId);
+	const undo = useUndo();
 	const [editing, setEditing] = useState<string | null>(null);
 	const [made, setMade] = useState(0);
 
@@ -42,9 +44,11 @@ export function RoleMenusPage(): React.JSX.Element {
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 	if (list.isPending || roles.isPending) return <Skeleton className="h-96 w-full" />;
 
-	const menus = list.data.menus;
+	const keyOf = (menuId: string): string => `role-menu:${guildId}:${menuId}`;
+	const menus = list.data.menus.filter((menu) => !undo.isHidden(keyOf(menu.id)));
 	const editingMenu = menus.find((menu) => menu.id === editing) ?? null;
-	const full = menus.length >= list.data.limit;
+	// One waiting to be deleted still holds its place against the limit until it has gone.
+	const full = list.data.menus.length >= list.data.limit;
 	const busy = create.isPending || update.isPending || publish.isPending || remove.isPending;
 	const message = (error: Error | null, fallback: string): string | null =>
 		error === null ? null : error instanceof ApiError ? error.message : fallback;
@@ -86,7 +90,7 @@ export function RoleMenusPage(): React.JSX.Element {
 				<Eyebrow
 					as="h2"
 					id="menus-heading"
-					count={t("roleMenus.countOf", { used: menus.length, limit: list.data.limit })}
+					count={t("roleMenus.countOf", { used: list.data.menus.length, limit: list.data.limit })}
 				>
 					{t("roleMenus.inUse")}
 				</Eyebrow>
@@ -116,7 +120,11 @@ export function RoleMenusPage(): React.JSX.Element {
 								}}
 								onRemove={() => {
 									if (editing === menu.id) setEditing(null);
-									remove.mutate({ menuId: menu.id });
+									undo.schedule({
+										key: keyOf(menu.id),
+										label: t("undo.roleMenu", { title: menu.title }),
+										commit: () => remove.mutateAsync({ menuId: menu.id }),
+									});
 								}}
 							/>
 						))}

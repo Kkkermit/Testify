@@ -24,7 +24,7 @@ describe("the sticky page", () => {
 	it("shows how far through the repost count each one is", async () => {
 		renderPage();
 
-		expect(await screen.findByText(/3 of 5 messages since the last post/i)).toBeInTheDocument();
+		expect(await screen.findByText("Messages since the last post: 3 of 5")).toBeInTheDocument();
 	});
 
 	/** A configuration that cannot work should say so here rather than by silently never posting. */
@@ -80,6 +80,8 @@ describe("the sticky page", () => {
 		);
 
 		await user.click(screen.getByRole("button", { name: /remove the sticky in general/i }));
+		expect(screen.getByText("Deleted the sticky message in #general.")).toBeInTheDocument();
+		window.dispatchEvent(new Event("pagehide"));
 
 		await waitFor(() => {
 			expect(client.isMutating()).toBe(0);
@@ -88,6 +90,18 @@ describe("the sticky page", () => {
 		await waitFor(() => {
 			expect(screen.queryByRole("heading", { name: "#general" })).not.toBeInTheDocument();
 		});
+	});
+
+	/** Its channel stays taken while it waits, or a new sticky there would be deleted along with the old one. */
+	it("keeps a waiting delete's channel out of the add picker", async () => {
+		const user = userEvent.setup();
+		renderPage();
+		await screen.findByRole("heading", { name: "#general" });
+
+		await user.click(screen.getByRole("button", { name: /remove the sticky in general/i }));
+
+		expect(screen.queryByRole("heading", { name: "#general" })).not.toBeInTheDocument();
+		expect(screen.queryByRole("option", { name: "#general" })).not.toBeInTheDocument();
 	});
 
 	it("says so when there are none rather than showing an empty list", async () => {
@@ -278,6 +292,6 @@ describe("editing a sticky in place", () => {
 		server.use(http.get(`/api/guilds/${GUILD}/channels`, () => HttpResponse.json([])));
 		renderPage();
 
-		expect(await screen.findByRole("heading", { name: "#a deleted channel" })).toBeInTheDocument();
+		expect(await screen.findByRole("heading", { name: "A deleted channel" })).toBeInTheDocument();
 	});
 });

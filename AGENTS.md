@@ -65,10 +65,10 @@ numbers, which drift):
 | Prefix aliases       | 95                                |
 | Button handlers      | 36                                |
 | Events               | 25, in 5 groups                   |
-| `src/lib` helpers    | 165, in 20 domain folders         |
+| `src/lib` helpers    | 166, in 20 domain folders         |
 | Schemas/repositories | 27 / 24                           |
 | Scheduled jobs       | 7                                 |
-| Tests                | 6,332 across 359 suites           |
+| Tests                | 6,455 across 367 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -219,7 +219,7 @@ src/
 ├── commands/<category>/  103 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               25 handlers in command, create, logging, ready and message
 ├── buttons/              36 component handlers, keyed by custom-ID prefix
-├── lib/                  165 helpers in 20 domain folders, each behind its own index.ts barrel
+├── lib/                  166 helpers in 20 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -237,7 +237,7 @@ src/
 ├── jobs/                 7 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 245 suites; the dashboard's 114 sit beside its code.
+tests/                    Mirrors src/. 247 suites; the dashboard's 120 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -1793,7 +1793,7 @@ four tabs, three shared components and two testable modules.
 | -------------------------- | -------------------------------------------------------------------------- |
 | `/sign-in`                 | One button; also the setup screen for a half-install                       |
 | `/guilds`                  | Picker, with an invite card for guilds without the bot                     |
-| `/guilds/:id`              | Stat tiles, feature grid, permission warnings, recent changes              |
+| `/guilds/:id`              | Stat tiles, a setup checklist, feature grid, permission warnings, changes  |
 | `/guilds/:id/insights`     | Server facts, messages a day, busiest hours, top channels and members      |
 | `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
 | `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
@@ -2185,7 +2185,35 @@ Five things follow, and all five have tests proved able to fail:
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in React
 19, so the wrapper warns on every render and is one release from breaking. Popper positions with inline styles,
 which the CSP allows under `style-src 'unsafe-inline'`; that combination is verified against the real built
-page, not assumed.
+page, not assumed. **It hands its child's own `ref` the element too.** It once replaced it, so a button inside a
+tooltip that a caller focused by ref was never focused — the server switcher's Escape found nothing to return to.
+
+### Getting around, and not losing work
+
+Five pieces make the common journeys shorter, and four things in them are load-bearing:
+
+- **The server switcher keeps the screen and only the tab.** The server group's heading in the sidebar is a
+  disclosure listing every other server the bot is in, each linking to `switchedPath` — the same screen, with
+  `?tab=` kept and everything else dropped, because a search or a member id belongs to the server it was typed in.
+- **Quick search is built from the sidebar, not beside it.** `searchEntries` reads `navigationFor`, the servers
+  in `/auth/me` and the command catalogue, and a command with a screen goes to it through `configurableAt`, named
+  as the sidebar names that screen — so a new screen is searchable with no edit. Ctrl+K or ⌘K opens it from
+  anywhere; the sidebar and the phone header each have a button too, because a shortcut alone is undiscoverable
+  and a phone has no keyboard. A command with no screen opens `/commands?q=`, which the Commands page now keeps
+  in the address with `replace`.
+- **The setup checklist's defaults are the server's, and it never guesses.** `GET /guilds/:id/setup` says, before
+  anything is pressed, exactly where each start would post; `POST /setup/:step` does that and nothing else.
+  `setupChecklist.util.ts` only picks a channel its person could post in themselves, **never reuses a log
+  channel `@everyone` can read** (a log carries deleted messages), makes a private `#audit-log` only when both the
+  bot and the person hold Manage Channels, and refuses a step already done, so a stale page cannot overwrite a
+  choice somebody made. Hiding it is per browser, because it is advice rather than state.
+- **A delete waits in `UndoProvider`, and nothing is sent until the window closes.** The provider sits above the
+  `Outlet`, so the countdown survives moving to another screen; hovering or focusing the notice holds the clock
+  (WCAG 2.2.1), a keyboard delete hands focus to Undo, and closing the tab sends it at once — DELETEs go out with
+  `keepalive`, the one kind of request that outlives the page. A waiting delete still holds its channel and its
+  place against the limit, so nothing can be added into the gap and then deleted with it. `LeaveGuard` is the
+  other half: a screen that holds a draft until Save asks before a navigation to another path (`useBlocker`) and
+  before a reload or a closed tab (`beforeunload`); a tab on the same screen is not leaving it.
 
 ### Two themes, one token per line
 

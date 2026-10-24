@@ -7,6 +7,7 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { FeatureGrid } from "@/features/guild-overview/components/FeatureGrid";
 import { MissingPermissions } from "@/features/guild-overview/components/MissingPermissions";
 import { RecentChanges } from "@/features/guild-overview/components/RecentChanges";
+import { SetupChecklist } from "@/features/guild-overview/components/SetupChecklist";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -41,6 +42,7 @@ export function GuildOverviewPage(): React.JSX.Element {
 			</section>
 
 			<MissingPermissions permissions={guild.missingPermissions} />
+			<SetupChecklist guildId={guildId} />
 
 			<section aria-labelledby="features-heading" className="flex flex-col gap-3">
 				<Eyebrow as="h2" id="features-heading">

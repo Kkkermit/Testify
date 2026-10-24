@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useUndo } from "@/app/undo";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { GiveawayRow } from "@/features/giveaways/components/GiveawayRow";
@@ -32,15 +33,15 @@ import { sanitiseInput } from "@/lib/sanitise";
 export function GiveawaysPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
-	usePageTitle("Giveaways");
-
 	const overview = useGuildOverview(guildId);
+	usePageTitle(t("giveaways.title"), overview.data?.name);
 	const list = useGiveaways(guildId);
 	const channels = useChannels(guildId);
 	const start = useStartGiveaway(guildId);
 	const end = useEndGiveaway(guildId);
 	const reroll = useRerollGiveaway(guildId);
 	const remove = useDeleteGiveaway(guildId);
+	const undo = useUndo();
 
 	const [channelId, setChannelId] = useState<string | null>(null);
 	const [prize, setPrize] = useState("");
@@ -51,7 +52,8 @@ export function GiveawaysPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	const rows = ordered(list.data.giveaways);
+	const keyOf = (messageId: string): string => `giveaway:${guildId}:${messageId}`;
+	const rows = ordered(list.data.giveaways).filter((row) => !undo.isHidden(keyOf(row.messageId)));
 	const durationMs = durationMsOf(amount, unit);
 	const blocked = problemText(giveawayProblem({ channelId, prize, winnerCount: winners, durationMs }), t);
 	const busy = start.isPending || end.isPending || reroll.isPending || remove.isPending;
@@ -163,7 +165,7 @@ export function GiveawaysPage(): React.JSX.Element {
 			</Card>
 
 			<section aria-labelledby="giveaways-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="giveaways-heading" count={`${String(runningCount(rows))} running`}>
+				<Eyebrow as="h2" id="giveaways-heading" count={t("giveaways.runningCount", { count: runningCount(rows) })}>
 					{t("giveaways.inThisServer")}
 				</Eyebrow>
 
@@ -181,7 +183,13 @@ export function GiveawaysPage(): React.JSX.Element {
 								busy={busy}
 								onEnd={() => end.mutate(row.messageId)}
 								onReroll={() => reroll.mutate(row.messageId)}
-								onDelete={() => remove.mutate(row.messageId)}
+								onDelete={() => {
+									undo.schedule({
+										key: keyOf(row.messageId),
+										label: t("undo.giveaway", { prize: row.prize }),
+										commit: () => remove.mutateAsync(row.messageId),
+									});
+								}}
 							/>
 						))}
 					</ul>

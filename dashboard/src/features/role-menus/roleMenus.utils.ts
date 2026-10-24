@@ -18,6 +18,19 @@ export function emptyDraft(): RoleMenuDraft {
 	return { channelId: null, title: "", description: "", roleIds: [], mode: "many" };
 }
 
+/** Roles are a set, so ticking the same ones in another order is not a change. */
+export function draftChanged(from: RoleMenuDraft, to: RoleMenuDraft): boolean {
+	const roles = (draft: RoleMenuDraft): string => [...draft.roleIds].sort().join(",");
+
+	return (
+		from.channelId !== to.channelId ||
+		from.title !== to.title ||
+		from.description !== to.description ||
+		from.mode !== to.mode ||
+		roles(from) !== roles(to)
+	);
+}
+
 /** Roles nobody may pick for themselves, which the checklist shows greyed rather than hides. */
 export function offerBlocked(role: RoleSummary): boolean {
 	return !role.assignableByBot || role.powerful;

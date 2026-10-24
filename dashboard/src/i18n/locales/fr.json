@@ -109,7 +109,44 @@
 		"roleMenus": "Menus de rôles",
 		"roleMenusHint": "Des menus où les membres choisissent leurs propres rôles",
 		"ideas": "Tableau d’idées",
-		"ideasHint": "Les idées que les membres publient et votent"
+		"ideasHint": "Les idées que les membres publient et votent",
+		"switchServer": "{{name}}, changer de serveur",
+		"switchServerHint": "Le même écran, sur un autre de vos serveurs",
+		"otherServers": "Vos autres serveurs",
+		"noOtherServers": "{{bot}} n’est sur aucun autre serveur que vous gérez.",
+		"allServers": "Tous les serveurs"
+	},
+	"search": {
+		"open": "Rechercher",
+		"hint": "Allez à un écran, un serveur ou une commande ({{shortcut}})",
+		"title": "Recherche rapide",
+		"label": "Rechercher des écrans, des serveurs et des commandes",
+		"placeholder": "Rechercher des écrans, des serveurs et des commandes…",
+		"results": "Résultats",
+		"nothing": "Rien ne correspond à « {{query}} ».",
+		"count_one": "{{count, number}} résultat",
+		"count_other": "{{count, number}} résultats",
+		"kindScreen": "Écran",
+		"kindCommand": "Commande",
+		"kindServer": "Serveur",
+		"server": "Ouvrir sa vue d’ensemble",
+		"configuredIn": "Se règle dans {{screen}}"
+	},
+	"undo": {
+		"deleted": "Supprimé : {{what}}.",
+		"undo": "Annuler",
+		"failed": "Impossible de supprimer : {{what}}.",
+		"dismiss": "Fermer",
+		"roleMenu": "menu de rôles « {{title}} »",
+		"idea": "idée n° {{number}}",
+		"sticky": "message épinglé dans {{channel}}",
+		"giveaway": "tirage au sort pour {{prize}}"
+	},
+	"leave": {
+		"title": "Quitter sans enregistrer ?",
+		"body": "Vos modifications sur cet écran n’ont pas été enregistrées, et elles seront perdues si vous partez maintenant.",
+		"stay": "Continuer à modifier",
+		"leave": "Quitter sans enregistrer"
 	},
 	"error": {
 		"unreachableTitle": "Une erreur est survenue",
@@ -268,6 +305,32 @@
 		"missingTitle": "Il manque des permissions à {{bot}}",
 		"missingBody": "Ces fonctions sont configurées mais ne feront rien tant que {{bot}} n’aura pas ces permissions.",
 		"seeAllChanges": "Voir toutes les modifications"
+	},
+	"checklist": {
+		"title": "Pour commencer",
+		"body": "Trois choses que la plupart des serveurs activent en premier. Chacune se fait en un clic, et tout peut être modifié ensuite.",
+		"progress": "{{done}} sur {{total}} fait.",
+		"hide": "Masquer",
+		"on": "Activé",
+		"start": "Activer",
+		"create": "Créer et activer",
+		"starting": "Activation…",
+		"customise": "Personnaliser",
+		"open": "Ouvrir",
+		"choose": "Choisir un salon",
+		"levellingTitle": "Niveaux",
+		"levellingBody": "Les membres gagnent de l’XP en discutant et montent de niveau. Les rôles en récompense et les bonus peuvent venir ensuite.",
+		"levellingDone": "Les membres gagnent de l’XP en discutant.",
+		"welcomeTitle": "Messages de bienvenue",
+		"welcomeBody": "Accueillez chaque nouveau membre dans #{{channel}} avec une carte de bienvenue.",
+		"welcomeDone": "Les nouveaux membres sont accueillis à leur arrivée.",
+		"welcomeNoChannel": "Aucun salon ne permet à la fois à vous et à {{bot}} d’écrire, choisissez-en un sur l’écran Bienvenue.",
+		"auditTitle": "Journal d’audit",
+		"auditReuse": "Consignez les modifications, suppressions et sanctions dans #{{channel}}, que seule l’équipe peut lire.",
+		"auditCreate": "Créez un salon privé #{{channel}} et consignez-y les modifications, suppressions et sanctions.",
+		"auditDone": "Les changements du serveur sont consignés.",
+		"auditBotCannot": "{{bot}} a besoin de Gérer les salons pour créer un salon de journal privé, choisissez-en un sur l’écran Journal d’audit.",
+		"auditYouCannot": "Créer un salon demande Gérer les salons, choisissez-en un existant sur l’écran Journal d’audit."
 	},
 	"automod": {
 		"addOneBelow": "Ajoutez-en une ci-dessous et Discord bloquera les messages correspondants avant que quiconque les lise.",
@@ -435,7 +498,10 @@
 		"addSticky": "Ajouter",
 		"countOf": "{{used}} sur {{limit}}",
 		"removeIn": "Retirer le message épinglé dans {{channel}}",
-		"cannotPost": "{{bot}} ne peut pas publier dans #{{channel}}, donc ce message épinglé n’apparaîtra jamais."
+		"cannotPost": "{{bot}} ne peut pas publier dans #{{channel}}, donc ce message épinglé n’apparaîtra jamais.",
+		"deletedChannel": "un salon supprimé",
+		"deletedChannelTitle": "Un salon supprimé",
+		"sinceLast": "Messages depuis la dernière publication : {{done}} sur {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Menus de rôles",
@@ -560,7 +626,9 @@
 		"winnerCount_other": "{{count}} gagnants",
 		"startIt": "Lancer",
 		"inThisServer": "Sur ce serveur",
-		"startBody": "{{bot}} le publie et tire les gagnants à la fin du temps. On participe avec la réaction 🎉."
+		"startBody": "{{bot}} le publie et tire les gagnants à la fin du temps. On participe avec la réaction 🎉.",
+		"deleteFor": "Supprimer le tirage au sort pour {{prize}}",
+		"runningCount": "{{count, number}} en cours"
 	},
 	"levelling": {
 		"title": "Niveaux",

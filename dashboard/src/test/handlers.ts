@@ -1,6 +1,7 @@
 import {
 	type AuditLogConfigResponse,
 	type ServerChangesPage,
+	type SetupChecklist,
 	type InsightsReport,
 	type BlacklistRow,
 	type BotControlState,
@@ -122,6 +123,15 @@ export const overview: GuildOverview = {
 	],
 	missingPermissions: [],
 	recentChanges: [],
+};
+
+/** Everything done, so the checklist stays out of the way of tests about something else. */
+export const setupDone: SetupChecklist = {
+	steps: [
+		{ step: "levelling", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
+		{ step: "welcome", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
+		{ step: "audit-log", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
+	],
 };
 
 export const levelConfig: LevelConfigResponse = {
@@ -945,6 +955,7 @@ export const handlers = [
 	http.get("/api/commands", () => HttpResponse.json(catalogue)),
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
+	http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(setupDone)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),

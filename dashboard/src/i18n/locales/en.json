@@ -109,7 +109,44 @@
 		"roleMenus": "Role menus",
 		"roleMenusHint": "Menus members pick their own roles from",
 		"ideas": "Idea board",
-		"ideasHint": "Ideas members post and vote on"
+		"ideasHint": "Ideas members post and vote on",
+		"switchServer": "{{name}}, change server",
+		"switchServerHint": "The same screen, in another of your servers",
+		"otherServers": "Your other servers",
+		"noOtherServers": "{{bot}} is in no other server you manage.",
+		"allServers": "All servers"
+	},
+	"search": {
+		"open": "Search",
+		"hint": "Jump to a screen, a server or a command ({{shortcut}})",
+		"title": "Quick search",
+		"label": "Search screens, servers and commands",
+		"placeholder": "Search screens, servers and commands…",
+		"results": "Results",
+		"nothing": "Nothing matches “{{query}}”.",
+		"count_one": "{{count, number}} result",
+		"count_other": "{{count, number}} results",
+		"kindScreen": "Screen",
+		"kindCommand": "Command",
+		"kindServer": "Server",
+		"server": "Open its overview",
+		"configuredIn": "Set up on {{screen}}"
+	},
+	"undo": {
+		"deleted": "Deleted {{what}}.",
+		"undo": "Undo",
+		"failed": "Could not delete {{what}}.",
+		"dismiss": "Dismiss",
+		"roleMenu": "the role menu “{{title}}”",
+		"idea": "idea #{{number}}",
+		"sticky": "the sticky message in {{channel}}",
+		"giveaway": "the giveaway for {{prize}}"
+	},
+	"leave": {
+		"title": "Leave without saving?",
+		"body": "Your changes on this screen have not been saved, and leaving now loses them.",
+		"stay": "Keep editing",
+		"leave": "Leave without saving"
 	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
@@ -267,6 +304,32 @@
 		"missingTitle": "{{bot}} is missing permissions",
 		"missingBody": "These features are configured but will quietly do nothing until {{bot}} is granted them.",
 		"seeAllChanges": "See every change"
+	},
+	"checklist": {
+		"title": "Get started",
+		"body": "Three things most servers turn on first. Each is one click, and all of it can be changed later.",
+		"progress": "{{done}} of {{total}} done.",
+		"hide": "Hide",
+		"on": "On",
+		"start": "Turn on",
+		"create": "Create and turn on",
+		"starting": "Turning on…",
+		"customise": "Customise",
+		"open": "Open",
+		"choose": "Choose a channel",
+		"levellingTitle": "Levelling",
+		"levellingBody": "Members earn XP as they chat and level up. Role rewards and boosts can come later.",
+		"levellingDone": "Members are earning XP as they chat.",
+		"welcomeTitle": "Welcome messages",
+		"welcomeBody": "Greet each new member in #{{channel}} with a welcome card.",
+		"welcomeDone": "New members are greeted as they join.",
+		"welcomeNoChannel": "There is no channel both you and {{bot}} can post in, so choose one on the Welcome screen.",
+		"auditTitle": "Audit log",
+		"auditReuse": "Log edits, deletions and moderation to #{{channel}}, which only staff can read.",
+		"auditCreate": "Make a private #{{channel}} channel, and log edits, deletions and moderation there.",
+		"auditDone": "Changes in the server are being logged.",
+		"auditBotCannot": "{{bot}} needs Manage Channels to make a private log channel, so choose one on the Audit logging screen.",
+		"auditYouCannot": "Making a channel needs Manage Channels, so choose an existing one on the Audit logging screen."
 	},
 	"automod": {
 		"addOneBelow": "Add one below, and Discord blocks matching messages before anyone reads them.",
@@ -434,7 +497,10 @@
 		"addSticky": "Add sticky",
 		"countOf": "{{used}} of {{limit}}",
 		"removeIn": "Remove the sticky in {{channel}}",
-		"cannotPost": "{{bot}} cannot post in #{{channel}}, so this sticky will never appear."
+		"cannotPost": "{{bot}} cannot post in #{{channel}}, so this sticky will never appear.",
+		"deletedChannel": "a deleted channel",
+		"deletedChannelTitle": "A deleted channel",
+		"sinceLast": "Messages since the last post: {{done}} of {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Role menus",
@@ -559,7 +625,9 @@
 		"winnerCount_other": "{{count}} winners",
 		"startIt": "Start it",
 		"inThisServer": "In this server",
-		"startBody": "{{bot}} posts it and draws the winners when the time is up. Members enter with the 🎉 reaction."
+		"startBody": "{{bot}} posts it and draws the winners when the time is up. Members enter with the 🎉 reaction.",
+		"deleteFor": "Delete the giveaway for {{prize}}",
+		"runningCount": "{{count, number}} running"
 	},
 	"levelling": {
 		"title": "Levelling",

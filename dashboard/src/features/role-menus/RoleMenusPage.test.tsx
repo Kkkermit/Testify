@@ -30,6 +30,13 @@ function capture(method: "post" | "put", path: string): RoleMenuBody[] {
 	return seen;
 }
 
+/** True when the page would have the browser ask before a reload or a closed tab. */
+function asksBeforeUnload(): boolean {
+	const event = new Event("beforeunload", { cancelable: true });
+	window.dispatchEvent(event);
+	return event.defaultPrevented;
+}
+
 describe("the role menus page", () => {
 	it("lists each menu with its channel and the roles it offers", async () => {
 		renderPage();
@@ -70,6 +77,22 @@ describe("the role menus page", () => {
 					mode: "one",
 				},
 			]);
+		});
+	});
+
+	it("asks before leaving a half-made menu, and not after it is made", async () => {
+		capture("post", `/api/guilds/${GUILD}/role-menus`);
+		renderPage();
+
+		await userEvent.type(await screen.findByLabelText("Title"), "Regions");
+		expect(asksBeforeUnload()).toBe(true);
+
+		await userEvent.selectOptions(screen.getByLabelText(/^Posted in/), "#general");
+		await userEvent.click(screen.getByRole("checkbox", { name: /Member/ }));
+		await userEvent.click(screen.getByRole("button", { name: /Make menu/ }));
+
+		await waitFor(() => {
+			expect(asksBeforeUnload()).toBe(false);
 		});
 	});
 
@@ -146,9 +169,32 @@ describe("the role menus page", () => {
 
 		await userEvent.click(await screen.findByRole("button", { name: "Delete the menu Pick your pings" }));
 
+		// Gone from the list at once, and sent only when the undo window closes, which leaving the page does too.
+		expect(screen.queryByRole("button", { name: "Delete the menu Pick your pings" })).not.toBeInTheDocument();
+		expect(screen.getByText("Deleted the role menu “Pick your pings”.")).toBeInTheDocument();
+		expect(deleted).toEqual([]);
+		window.dispatchEvent(new Event("pagehide"));
 		await waitFor(() => {
 			expect(deleted).toEqual([MENU]);
 		});
+	});
+
+	it("puts a deleted menu back on Undo, and deletes nothing", async () => {
+		const deleted: string[] = [];
+		server.use(
+			http.delete(`/api/guilds/${GUILD}/role-menus/:menuId`, ({ params }) => {
+				deleted.push(String(params.menuId));
+				return HttpResponse.json({ limit: 10, menus: [] });
+			}),
+		);
+		renderPage();
+
+		await userEvent.click(await screen.findByRole("button", { name: "Delete the menu Pick your pings" }));
+		await userEvent.click(screen.getByRole("button", { name: "Undo" }));
+		window.dispatchEvent(new Event("pagehide"));
+
+		expect(screen.getByRole("button", { name: "Delete the menu Pick your pings" })).toBeInTheDocument();
+		expect(deleted).toEqual([]);
 	});
 
 	it("says so when there are no menus yet", async () => {

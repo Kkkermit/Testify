@@ -5,6 +5,7 @@ export * from "./settings.constants";
 export * from "./settings.types";
 export * from "./settingsPanel.util";
 export * from "./settingsScreen.util";
+export * from "./setupChecklist.util";
 export * from "./verifyActions.util";
 export * from "./verifyPanel.util";
 export * from "./voiceCounters.util";
