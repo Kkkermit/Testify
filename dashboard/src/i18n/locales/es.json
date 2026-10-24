@@ -110,10 +110,47 @@
 		"roleMenusHint": "Menús en los que los miembros eligen sus propios roles",
 		"ideas": "Tablón de ideas",
 		"ideasHint": "Ideas que los miembros publican y votan",
+		"switchServer": "{{name}}, cambiar de servidor",
+		"switchServerHint": "La misma pantalla, en otro de tus servidores",
+		"otherServers": "Tus otros servidores",
+		"noOtherServers": "{{bot}} no está en ningún otro servidor que gestiones.",
+		"allServers": "Todos los servidores",
 		"starboard": "Starboard",
 		"starboardHint": "Mensajes con suficientes ⭐ republicados en un canal de destacados",
 		"tempVoice": "Únete y crea",
 		"tempVoiceHint": "Un canal de voz propio para quien entre en la sala de espera"
+	},
+	"search": {
+		"open": "Buscar",
+		"hint": "Salta a una pantalla, un servidor o un comando ({{shortcut}})",
+		"title": "Búsqueda rápida",
+		"label": "Busca pantallas, servidores y comandos",
+		"placeholder": "Busca pantallas, servidores y comandos…",
+		"results": "Resultados",
+		"nothing": "Nada coincide con «{{query}}».",
+		"count_one": "{{count, number}} resultado",
+		"count_other": "{{count, number}} resultados",
+		"kindScreen": "Pantalla",
+		"kindCommand": "Comando",
+		"kindServer": "Servidor",
+		"server": "Abre su resumen",
+		"configuredIn": "Se configura en {{screen}}"
+	},
+	"undo": {
+		"deleted": "Se eliminó {{what}}.",
+		"undo": "Deshacer",
+		"failed": "No se pudo eliminar {{what}}.",
+		"dismiss": "Cerrar",
+		"roleMenu": "el menú de roles «{{title}}»",
+		"idea": "la idea n.º {{number}}",
+		"sticky": "el mensaje fijo de {{channel}}",
+		"giveaway": "el sorteo de {{prize}}"
+	},
+	"leave": {
+		"title": "¿Salir sin guardar?",
+		"body": "Tus cambios en esta pantalla no se han guardado, y si sales ahora se perderán.",
+		"stay": "Seguir editando",
+		"leave": "Salir sin guardar"
 	},
 	"error": {
 		"unreachableTitle": "Algo ha salido mal",
@@ -272,6 +309,32 @@
 		"missingTitle": "A {{bot}} le faltan permisos",
 		"missingBody": "Estas funciones están configuradas, pero no harán nada hasta que {{bot}} tenga esos permisos.",
 		"seeAllChanges": "Ver todos los cambios"
+	},
+	"checklist": {
+		"title": "Primeros pasos",
+		"body": "Tres cosas que la mayoría de servidores activan primero. Cada una es un clic, y todo se puede cambiar después.",
+		"progress": "{{done}} de {{total}} hechas.",
+		"hide": "Ocultar",
+		"on": "Activado",
+		"start": "Activar",
+		"create": "Crear y activar",
+		"starting": "Activando…",
+		"customise": "Personalizar",
+		"open": "Abrir",
+		"choose": "Elegir un canal",
+		"levellingTitle": "Niveles",
+		"levellingBody": "Los miembros ganan XP al chatear y suben de nivel. Las recompensas de rol y los multiplicadores pueden venir después.",
+		"levellingDone": "Los miembros ganan XP al chatear.",
+		"welcomeTitle": "Mensajes de bienvenida",
+		"welcomeBody": "Da la bienvenida a cada miembro nuevo en #{{channel}} con una tarjeta.",
+		"welcomeDone": "Los miembros nuevos reciben la bienvenida al unirse.",
+		"welcomeNoChannel": "No hay ningún canal en el que tú y {{bot}} podáis publicar, así que elige uno en la pantalla de Bienvenida.",
+		"auditTitle": "Registro de auditoría",
+		"auditReuse": "Registra ediciones, eliminaciones y moderación en #{{channel}}, que solo puede leer el staff.",
+		"auditCreate": "Crea un canal privado #{{channel}} y registra allí ediciones, eliminaciones y moderación.",
+		"auditDone": "Los cambios del servidor se están registrando.",
+		"auditBotCannot": "{{bot}} necesita Gestionar canales para crear un canal de registro privado, así que elige uno en la pantalla de Registro de auditoría.",
+		"auditYouCannot": "Crear un canal requiere Gestionar canales, así que elige uno existente en la pantalla de Registro de auditoría."
 	},
 	"automod": {
 		"addOneBelow": "Añade una abajo y Discord bloqueará los mensajes que coincidan antes de que nadie los lea.",
@@ -439,7 +502,10 @@
 		"addSticky": "Añadir",
 		"countOf": "{{used}} de {{limit}}",
 		"removeIn": "Quitar el mensaje fijo de {{channel}}",
-		"cannotPost": "{{bot}} no puede publicar en #{{channel}}, así que este mensaje fijo nunca aparecerá."
+		"cannotPost": "{{bot}} no puede publicar en #{{channel}}, así que este mensaje fijo nunca aparecerá.",
+		"deletedChannel": "un canal eliminado",
+		"deletedChannelTitle": "Un canal eliminado",
+		"sinceLast": "Mensajes desde la última publicación: {{done}} de {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Menús de roles",
@@ -611,7 +677,9 @@
 		"winnerCount_other": "{{count}} ganadores",
 		"startIt": "Empezarlo",
 		"inThisServer": "En este servidor",
-		"startBody": "{{bot}} lo publica y sortea los ganadores cuando se acaba el tiempo. Se participa con la reacción 🎉."
+		"startBody": "{{bot}} lo publica y sortea los ganadores cuando se acaba el tiempo. Se participa con la reacción 🎉.",
+		"deleteFor": "Eliminar el sorteo de {{prize}}",
+		"runningCount": "{{count, number}} en curso"
 	},
 	"levelling": {
 		"title": "Niveles",

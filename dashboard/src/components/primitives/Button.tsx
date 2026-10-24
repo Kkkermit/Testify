@@ -1,4 +1,4 @@
-import { type ComponentPropsWithoutRef } from "react";
+import { type ComponentPropsWithRef } from "react";
 import { cn } from "@/lib/cn";
 
 const VARIANTS = {
@@ -14,7 +14,7 @@ export function Button({
 	variant = "primary",
 	className,
 	...props
-}: ComponentPropsWithoutRef<"button"> & { variant?: ButtonVariant }): React.JSX.Element {
+}: ComponentPropsWithRef<"button"> & { variant?: ButtonVariant }): React.JSX.Element {
 	return (
 		<button
 			type="button"

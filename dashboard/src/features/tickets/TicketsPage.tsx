@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { LeaveGuard } from "@/app/LeaveGuard";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -71,6 +72,7 @@ export function TicketsPage(): React.JSX.Element {
 
 	return (
 		<>
+			<LeaveGuard when={dirty && !busy} />
 			<PageHeader
 				eyebrow={overview.data?.name}
 				title={t("tickets.title")}

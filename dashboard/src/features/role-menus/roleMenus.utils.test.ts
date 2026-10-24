@@ -1,5 +1,5 @@
 import { type RoleMenuEntry, type RoleSummary } from "@testify/shared";
-import { bodyOf, draftOf, emptyDraft, offerBlocked } from "@/features/role-menus/roleMenus.utils";
+import { bodyOf, draftChanged, draftOf, emptyDraft, offerBlocked } from "@/features/role-menus/roleMenus.utils";
 
 const role = (id: string, extra: Partial<RoleSummary> = {}): RoleSummary => ({
 	id,
@@ -49,5 +49,21 @@ describe("the role menu draft", () => {
 			roleIds: ["r"],
 			mode: "many",
 		});
+	});
+});
+
+describe("draftChanged", () => {
+	const base = { channelId: "1", title: "Regions", description: "", roleIds: ["a", "b"], mode: "many" as const };
+
+	it("is false for the same roles ticked in another order", () => {
+		expect(draftChanged(base, { ...base, roleIds: ["b", "a"] })).toBe(false);
+	});
+
+	it("is true for any field that differs", () => {
+		expect(draftChanged(base, { ...base, title: "Pings" })).toBe(true);
+		expect(draftChanged(base, { ...base, channelId: null })).toBe(true);
+		expect(draftChanged(base, { ...base, mode: "one" })).toBe(true);
+		expect(draftChanged(base, { ...base, roleIds: ["a"] })).toBe(true);
+		expect(draftChanged(base, { ...base, description: "x" })).toBe(true);
 	});
 });

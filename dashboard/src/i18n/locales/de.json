@@ -110,10 +110,47 @@
 		"roleMenusHint": "Menüs, in denen Mitglieder ihre Rollen selbst wählen",
 		"ideas": "Ideenbrett",
 		"ideasHint": "Ideen, die Mitglieder posten und bewerten",
+		"switchServer": "{{name}}, Server wechseln",
+		"switchServerHint": "Dieselbe Ansicht auf einem anderen deiner Server",
+		"otherServers": "Deine anderen Server",
+		"noOtherServers": "{{bot}} ist auf keinem anderen Server, den du verwaltest.",
+		"allServers": "Alle Server",
 		"starboard": "Starboard",
 		"starboardHint": "Nachrichten mit genug ⭐ in einem Highlight-Kanal erneut gepostet",
 		"tempVoice": "Beitreten und erstellen",
 		"tempVoiceHint": "Ein eigener Sprachkanal für alle, die der Lobby beitreten"
+	},
+	"search": {
+		"open": "Suchen",
+		"hint": "Spring zu einer Ansicht, einem Server oder einem Befehl ({{shortcut}})",
+		"title": "Schnellsuche",
+		"label": "Ansichten, Server und Befehle durchsuchen",
+		"placeholder": "Ansichten, Server und Befehle durchsuchen…",
+		"results": "Ergebnisse",
+		"nothing": "Nichts passt zu „{{query}}“.",
+		"count_one": "{{count, number}} Ergebnis",
+		"count_other": "{{count, number}} Ergebnisse",
+		"kindScreen": "Ansicht",
+		"kindCommand": "Befehl",
+		"kindServer": "Server",
+		"server": "Seine Übersicht öffnen",
+		"configuredIn": "Einstellbar unter {{screen}}"
+	},
+	"undo": {
+		"deleted": "{{what}} gelöscht.",
+		"undo": "Rückgängig",
+		"failed": "{{what}} konnte nicht gelöscht werden.",
+		"dismiss": "Schließen",
+		"roleMenu": "Rollenmenü „{{title}}“",
+		"idea": "Idee #{{number}}",
+		"sticky": "Sticky in {{channel}}",
+		"giveaway": "Verlosung um {{prize}}"
+	},
+	"leave": {
+		"title": "Ohne Speichern verlassen?",
+		"body": "Deine Änderungen auf dieser Seite sind nicht gespeichert und gehen verloren, wenn du sie jetzt verlässt.",
+		"stay": "Weiter bearbeiten",
+		"leave": "Ohne Speichern verlassen"
 	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
@@ -271,6 +308,32 @@
 		"missingTitle": "{{bot}} fehlen Berechtigungen",
 		"missingBody": "Diese Funktionen sind eingerichtet, tun aber stillschweigend nichts, solange {{bot}} sie nicht bekommt.",
 		"seeAllChanges": "Alle Änderungen ansehen"
+	},
+	"checklist": {
+		"title": "Erste Schritte",
+		"body": "Drei Dinge, die die meisten Server zuerst einschalten. Jedes ist ein Klick, und alles lässt sich später ändern.",
+		"progress": "{{done}} von {{total}} erledigt.",
+		"hide": "Ausblenden",
+		"on": "An",
+		"start": "Einschalten",
+		"create": "Erstellen und einschalten",
+		"starting": "Wird eingeschaltet…",
+		"customise": "Anpassen",
+		"open": "Öffnen",
+		"choose": "Kanal wählen",
+		"levellingTitle": "Level",
+		"levellingBody": "Mitglieder sammeln beim Chatten XP und steigen auf. Rollenbelohnungen und Boosts können später folgen.",
+		"levellingDone": "Mitglieder sammeln beim Chatten XP.",
+		"welcomeTitle": "Willkommensnachrichten",
+		"welcomeBody": "Begrüße jedes neue Mitglied in #{{channel}} mit einer Willkommenskarte.",
+		"welcomeDone": "Neue Mitglieder werden beim Beitritt begrüßt.",
+		"welcomeNoChannel": "Es gibt keinen Kanal, in dem du und {{bot}} schreiben könnt, also wähle einen in der Ansicht Willkommen.",
+		"auditTitle": "Audit-Log",
+		"auditReuse": "Bearbeitungen, Löschungen und Moderation werden in #{{channel}} protokolliert, den nur das Team lesen kann.",
+		"auditCreate": "Lege einen privaten Kanal #{{channel}} an und protokolliere dort Bearbeitungen, Löschungen und Moderation.",
+		"auditDone": "Änderungen im Server werden protokolliert.",
+		"auditBotCannot": "{{bot}} braucht „Kanäle verwalten“, um einen privaten Log-Kanal anzulegen, also wähle einen in der Ansicht Audit-Log.",
+		"auditYouCannot": "Einen Kanal anzulegen braucht „Kanäle verwalten“, also wähle einen vorhandenen in der Ansicht Audit-Log."
 	},
 	"automod": {
 		"addOneBelow": "Füge unten eine hinzu, dann blockiert Discord passende Nachrichten, bevor sie jemand liest.",
@@ -438,7 +501,10 @@
 		"addSticky": "Hinzufügen",
 		"countOf": "{{used}} von {{limit}}",
 		"removeIn": "Sticky in {{channel}} entfernen",
-		"cannotPost": "{{bot}} kann in #{{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen."
+		"cannotPost": "{{bot}} kann in #{{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen.",
+		"deletedChannel": "einem gelöschten Kanal",
+		"deletedChannelTitle": "Ein gelöschter Kanal",
+		"sinceLast": "Nachrichten seit dem letzten Post: {{done}} von {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Rollenmenüs",
@@ -610,7 +676,9 @@
 		"winnerCount_other": "{{count}} Gewinner",
 		"startIt": "Starten",
 		"inThisServer": "Auf diesem Server",
-		"startBody": "{{bot}} postet sie und lost die Gewinner aus, wenn die Zeit um ist. Teilgenommen wird mit der 🎉-Reaktion."
+		"startBody": "{{bot}} postet sie und lost die Gewinner aus, wenn die Zeit um ist. Teilgenommen wird mit der 🎉-Reaktion.",
+		"deleteFor": "Verlosung um {{prize}} löschen",
+		"runningCount": "{{count, number}} laufen"
 	},
 	"levelling": {
 		"title": "Level",

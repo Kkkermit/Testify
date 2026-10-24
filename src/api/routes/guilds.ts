@@ -18,6 +18,7 @@ import { members } from "@api/routes/members";
 import { music } from "@api/routes/music";
 import { roleMenus } from "@api/routes/roleMenus";
 import { settings } from "@api/routes/settings";
+import { setup } from "@api/routes/setup";
 import { starboard } from "@api/routes/starboard";
 import { sticky } from "@api/routes/sticky";
 import { tempVoice } from "@api/routes/tempVoice";
@@ -95,6 +96,7 @@ guilds.route("/:guildId/member-count", memberCount);
 guilds.route("/:guildId/warnings", warnings);
 guilds.route("/:guildId/starboard", starboard);
 guilds.route("/:guildId/temp-voice", tempVoice);
+guilds.route("/:guildId/setup", setup);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");

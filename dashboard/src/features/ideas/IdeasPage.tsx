@@ -3,6 +3,7 @@ import { Lightbulb } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Card, EmptyState, Eyebrow, PageHeader, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -43,6 +44,7 @@ export function IdeasPage(): React.JSX.Element {
 	const save = useSaveIdeaSettings(guildId);
 	const decide = useDecideIdea(guildId);
 	const remove = useRemoveIdea(guildId);
+	const undo = useUndo();
 
 	usePageTitle(t("ideas.title"), overview.data?.name);
 
@@ -117,19 +119,25 @@ export function IdeasPage(): React.JSX.Element {
 					</Card>
 				) : (
 					<ul className="flex flex-col gap-3">
-						{list.data.items.map((idea) => (
-							<IdeaItem
-								key={idea.id}
-								idea={idea}
-								busy={busy}
-								onDecide={(decision) => {
-									decide.mutate({ ideaId: idea.id, decision });
-								}}
-								onRemove={() => {
-									remove.mutate({ ideaId: idea.id });
-								}}
-							/>
-						))}
+						{list.data.items
+							.filter((idea) => !undo.isHidden(`idea:${guildId}:${idea.id}`))
+							.map((idea) => (
+								<IdeaItem
+									key={idea.id}
+									idea={idea}
+									busy={busy}
+									onDecide={(decision) => {
+										decide.mutate({ ideaId: idea.id, decision });
+									}}
+									onRemove={() => {
+										undo.schedule({
+											key: `idea:${guildId}:${idea.id}`,
+											label: t("undo.idea", { number: idea.number }),
+											commit: () => remove.mutateAsync({ ideaId: idea.id }),
+										});
+									}}
+								/>
+							))}
 					</ul>
 				)}
 

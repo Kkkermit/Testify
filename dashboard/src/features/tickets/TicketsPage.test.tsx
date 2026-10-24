@@ -17,6 +17,13 @@ function serve(settings: Partial<typeof ticketSettings>): void {
 	server.use(http.get(`/api/guilds/${GUILD}/tickets`, () => HttpResponse.json({ ...ticketSettings, ...settings })));
 }
 
+/** True when the page would have the browser ask before a reload or a closed tab. */
+function asksBeforeUnload(): boolean {
+	const event = new Event("beforeunload", { cancelable: true });
+	window.dispatchEvent(event);
+	return event.defaultPrevented;
+}
+
 describe("the tickets page", () => {
 	it("says how many tickets are open right now", async () => {
 		renderPage();
@@ -58,6 +65,18 @@ describe("the tickets page", () => {
 		await user.selectOptions(panel, "400000000000000001");
 		expect(screen.queryByText(/Choose where/)).not.toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /save changes/i })).toBeEnabled();
+	});
+
+	it("asks before leaving with changes unsaved", async () => {
+		const user = userEvent.setup();
+		serve({ panelChannelId: null, transcriptChannelId: null });
+		renderPage();
+		await screen.findByRole("combobox", { name: /Panel channel/ });
+		expect(asksBeforeUnload()).toBe(false);
+
+		await user.selectOptions(screen.getByRole("combobox", { name: /Transcripts/ }), "400000000000000001");
+
+		expect(asksBeforeUnload()).toBe(true);
 	});
 
 	it("sends every destination together when saved", async () => {

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { useUndo } from "@/app/undo";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -26,6 +27,7 @@ export function StickyPage(): React.JSX.Element {
 	const overview = useGuildOverview(guildId);
 	const save = useSaveSticky(guildId);
 	const remove = useRemoveSticky(guildId);
+	const undo = useUndo();
 
 	usePageTitle(t("sticky.title"), overview.data?.name);
 
@@ -36,10 +38,16 @@ export function StickyPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	const entries = list.data.entries;
-	const taken = entries.map((entry) => entry.channelId);
+	// One waiting to be deleted still holds its channel, so nothing new can be added there before it goes.
+	const taken = list.data.entries.map((entry) => entry.channelId);
+	const keyOf = (channel: string): string => `sticky:${guildId}:${channel}`;
+	const entries = list.data.entries.filter((entry) => !undo.isHidden(keyOf(entry.channelId)));
+	const channelName = (id: string): string => {
+		const found = channels.data?.find((channel) => channel.id === id)?.name;
+		return found === undefined ? t("sticky.deletedChannel") : `#${found}`;
+	};
 	const blocked = problemText(stickyBlocked({ channelId, message }, taken), t);
-	const full = entries.length >= list.data.limit;
+	const full = taken.length >= list.data.limit;
 
 	function add(): void {
 		if (blocked !== null || channelId === null || full) return;
@@ -61,7 +69,7 @@ export function StickyPage(): React.JSX.Element {
 				<Eyebrow
 					as="h2"
 					id="current-heading"
-					count={t("sticky.countOf", { used: entries.length, limit: list.data.limit })}
+					count={t("sticky.countOf", { used: taken.length, limit: list.data.limit })}
 				>
 					{t("sticky.inUse")}
 				</Eyebrow>
@@ -82,7 +90,11 @@ export function StickyPage(): React.JSX.Element {
 									save.mutate({ ...next, message: sanitiseInput(next.message) });
 								}}
 								onRemove={() => {
-									remove.mutate({ channelId: entry.channelId });
+									undo.schedule({
+										key: keyOf(entry.channelId),
+										label: t("undo.sticky", { channel: channelName(entry.channelId) }),
+										commit: () => remove.mutateAsync({ channelId: entry.channelId }),
+									});
 								}}
 							/>
 						))}
