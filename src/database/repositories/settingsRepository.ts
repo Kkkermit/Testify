@@ -30,6 +30,7 @@ import { purgeMusicSettings } from "@database/repositories/musicSettingsReposito
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
 import { purgeStarboard } from "@database/repositories/starboardRepository";
+import { purgeTempVoice } from "@database/repositories/tempVoiceRepository";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
@@ -300,6 +301,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeRoleMenus(guildId),
 		purgeIdeas(guildId),
 		purgeStarboard(guildId),
+		purgeTempVoice(guildId),
 		purgeCasino(guildId),
 		purgeCasinoStats(guildId),
 		purgeRounds(guildId),

@@ -96,6 +96,7 @@ describe("which commands answer privately", () => {
 				"starboard",
 				"sticky-message",
 				"suggest",
+				"temp-voice",
 				"ticket",
 				"treasure",
 				"user-info",

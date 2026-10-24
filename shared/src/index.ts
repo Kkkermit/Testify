@@ -30,6 +30,7 @@ export * from "./starboard";
 export * from "./sticky";
 export * from "./support";
 export * from "./supportSearch";
+export * from "./tempVoice";
 export * from "./text";
 export * from "./tickets";
 export * from "./treasure";
