@@ -26,6 +26,7 @@ export * from "./roleMenus";
 export * from "./schemas";
 export * from "./settings";
 export * from "./status";
+export * from "./starboard";
 export * from "./sticky";
 export * from "./support";
 export * from "./supportSearch";

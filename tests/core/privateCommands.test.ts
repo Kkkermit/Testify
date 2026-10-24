@@ -93,6 +93,7 @@ describe("which commands answer privately", () => {
 				"server-info",
 				"shop",
 				"softban list",
+				"starboard",
 				"sticky-message",
 				"suggest",
 				"ticket",

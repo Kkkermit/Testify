@@ -17,6 +17,7 @@ export * from "./music";
 export * from "./reminders";
 export * from "./roles";
 export * from "./settings";
+export * from "./starboard";
 export * from "./support";
 export * from "./tickets";
 export * from "./welcome";
