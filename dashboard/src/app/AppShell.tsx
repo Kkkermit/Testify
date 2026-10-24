@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Outlet, useLocation, useParams } from "react-router";
 import { MobileNav } from "@/app/layout/MobileNav";
@@ -7,6 +7,8 @@ import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { Backdrop } from "@/components/motion";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { QuickSearch } from "@/features/search/QuickSearch";
+import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
 import { useScreenView } from "@/hooks/useScreenView";
 
 /** Navigation, backdrop and the outlet. */
@@ -17,11 +19,25 @@ export function AppShell(): React.JSX.Element {
 	const location = useLocation();
 	const { t } = useTranslation();
 	const [menuOpen, setMenuOpen] = useState(false);
+	const [searching, setSearching] = useState(false);
+	const openSearch = useCallback(() => {
+		setMenuOpen(false);
+		setSearching(true);
+	}, []);
+	const closeSearch = useCallback(() => {
+		setSearching(false);
+	}, []);
 
 	useScreenView();
+	useQuickSearchShortcut(
+		useCallback(() => {
+			setMenuOpen(false);
+			setSearching((was) => !was);
+		}, []),
+	);
 
 	const guild = me.data?.guilds.find((candidate) => candidate.id === guildId);
-	const audience = { guild, isOwner: me.data?.isOwner === true };
+	const audience = { guild, guilds: me.data?.guilds ?? [], isOwner: me.data?.isOwner === true };
 	const user = me.data?.user ?? null;
 
 	// A drawer left open across a navigation covers the page it just moved to.
@@ -43,8 +59,16 @@ export function AppShell(): React.JSX.Element {
 				{t("nav.skipToContent")}
 			</a>
 
-			<MobileNav {...audience} user={user} bot={bot.data} open={menuOpen} onOpenChange={setMenuOpen} />
-			<Sidebar {...audience} user={user} bot={bot.data} />
+			<MobileNav
+				{...audience}
+				user={user}
+				bot={bot.data}
+				open={menuOpen}
+				onOpenChange={setMenuOpen}
+				onSearch={openSearch}
+			/>
+			<Sidebar {...audience} user={user} bot={bot.data} onSearch={openSearch} />
+			{searching && <QuickSearch {...audience} onClose={closeSearch} />}
 
 			{/* Keyed on the path so each screen fades in on arrival, and `min-w-0` because a flex item will not otherwise shrink below its content. */}
 			<main

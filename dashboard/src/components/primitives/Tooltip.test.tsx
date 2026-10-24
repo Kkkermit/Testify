@@ -1,5 +1,6 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { createRef } from "react";
 import { Tooltip } from "@/components/primitives/Tooltip";
 
 describe("Tooltip", () => {
@@ -11,6 +12,20 @@ describe("Tooltip", () => {
 		);
 
 		expect(screen.queryByText("Every server you can configure")).toBeNull();
+	});
+
+	/** The server switcher's Escape handed focus to a ref the tooltip had quietly replaced with its own. */
+	it("leaves the child's own ref pointing at it", () => {
+		const ref = createRef<HTMLButtonElement>();
+		render(
+			<Tooltip label="Every server you can configure">
+				<button ref={ref} type="button">
+					Servers
+				</button>
+			</Tooltip>,
+		);
+
+		expect(ref.current).toBe(screen.getByRole("button", { name: "Servers" }));
 	});
 
 	/** A tooltip only a mouse can reach is a tooltip most people never see. */

@@ -3,7 +3,7 @@ import { type TFunction } from "i18next";
 import { SearchX } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SearchField, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
@@ -40,7 +40,20 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 
 	const catalogue = useCommands();
 	const overview = useGuildOverview(guildId);
-	const [search, setSearch] = useState("");
+	// In the address, so quick search can open this page already filtered to one command.
+	const [params, setParams] = useSearchParams();
+	const search = params.get("q") ?? "";
+	const setSearch = (value: string): void => {
+		setParams(
+			(current) => {
+				const next = new URLSearchParams(current);
+				if (value === "") next.delete("q");
+				else next.set("q", value);
+				return next;
+			},
+			{ replace: true },
+		);
+	};
 	const [category, setCategory] = useState<string | null>(null);
 
 	const commands = catalogue.data?.commands ?? [];

@@ -1,8 +1,10 @@
-import { screen } from "@testing-library/react";
+import { type SetupChecklist } from "@testify/shared";
+import { screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { GuildOverviewPage } from "@/features/guild-overview/GuildOverviewPage";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild, overview } from "@/test/handlers";
+import { aGuild, overview, setupDone } from "@/test/handlers";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -206,6 +208,159 @@ describe("GuildOverviewPage accessibility", () => {
 	it("has no automatically detectable violations", async () => {
 		const { container } = renderPage();
 		await screen.findByText("Test Server");
+
+		await expectNoViolations(container);
+	});
+});
+
+describe("the setup checklist", () => {
+	const fresh: SetupChecklist = {
+		steps: [
+			{ step: "levelling", done: false, channelId: null, channelName: null, createsChannel: false, blocker: null },
+			{
+				step: "welcome",
+				done: false,
+				channelId: "400000000000000001",
+				channelName: "general",
+				createsChannel: false,
+				blocker: null,
+			},
+			{
+				step: "audit-log",
+				done: false,
+				channelId: null,
+				channelName: "audit-log",
+				createsChannel: true,
+				blocker: null,
+			},
+		],
+	};
+
+	function serve(checklist: SetupChecklist): void {
+		server.use(http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(checklist)));
+	}
+
+	beforeEach(() => {
+		localStorage.clear();
+	});
+
+	it("stays away once everything on it is on", async () => {
+		renderPage();
+		await screen.findByText("Test Server");
+
+		expect(screen.queryByRole("heading", { name: "Get started" })).not.toBeInTheDocument();
+	});
+
+	/** A button that does not say where it will post is a button nobody presses. */
+	it("says exactly what each click will do before it is pressed", async () => {
+		serve(fresh);
+		renderPage();
+
+		const steps = await screen.findByRole("list", { name: "Get started" });
+		expect(within(steps).getByText("Greet each new member in #general with a welcome card.")).toBeInTheDocument();
+		expect(within(steps).getByText(/Make a private #audit-log channel/)).toBeInTheDocument();
+		expect(within(steps).getByRole("button", { name: "Create and turn on" })).toBeInTheDocument();
+		expect(screen.getByText(/0 of 3 done/)).toBeInTheDocument();
+	});
+
+	it("has one primary action, on the first step left", async () => {
+		serve(fresh);
+		renderPage();
+
+		const steps = await screen.findByRole("list", { name: "Get started" });
+		const buttons = within(steps).getAllByRole("button");
+		expect(buttons.filter((button) => button.dataset.variant === "primary")).toEqual([buttons[0]]);
+	});
+
+	it("turns a step on and shows it done", async () => {
+		const user = userEvent.setup();
+		let started: string | null = null;
+		serve(fresh);
+		server.use(
+			http.post("/api/guilds/:guildId/setup/:step", ({ params }) => {
+				started = String(params.step);
+				const next: SetupChecklist = {
+					steps: fresh.steps.map((step) => (step.step === "levelling" ? { ...step, done: true } : step)),
+				};
+				serve(next);
+				return HttpResponse.json(next);
+			}),
+		);
+		renderPage();
+
+		const steps = await screen.findByRole("list", { name: "Get started" });
+		const [levelling] = within(steps).getAllByRole("button", { name: "Turn on" });
+		if (levelling === undefined) throw new Error("No Turn on button for levelling.");
+		await user.click(levelling);
+
+		expect(await within(steps).findByText("Members are earning XP as they chat.")).toBeInTheDocument();
+		expect(started).toBe("levelling");
+		expect(screen.getByText(/1 of 3 done/)).toBeInTheDocument();
+	});
+
+	/** A refused write has to say so beside the control, or the click looks as if it never landed. */
+	it("says why a step was refused, beside it", async () => {
+		const user = userEvent.setup();
+		serve(fresh);
+		server.use(
+			http.post("/api/guilds/:guildId/setup/:step", () =>
+				HttpResponse.json(
+					{ error: { code: "bad_request", message: "I need the Manage Channels permission." } },
+					{ status: 400 },
+				),
+			),
+		);
+		renderPage();
+
+		const steps = await screen.findByRole("list", { name: "Get started" });
+		await user.click(within(steps).getByRole("button", { name: "Create and turn on" }));
+
+		const row = (await within(steps).findByText("I need the Manage Channels permission.")).closest("li");
+		expect(row).toHaveTextContent("Audit log");
+	});
+
+	it("sends a step one click cannot do to its screen instead", async () => {
+		serve({
+			steps: [
+				...setupDone.steps.slice(0, 2),
+				{
+					step: "audit-log",
+					done: false,
+					channelId: null,
+					channelName: "audit-log",
+					createsChannel: true,
+					blocker: "you_cannot_create",
+				},
+			],
+		});
+		renderPage();
+
+		const steps = await screen.findByRole("list", { name: "Get started" });
+		expect(within(steps).queryByRole("button", { name: /turn on/i })).not.toBeInTheDocument();
+		expect(within(steps).getByRole("link", { name: "Choose a channel" })).toHaveAttribute(
+			"href",
+			`/guilds/${aGuild.id}/audit-log`,
+		);
+	});
+
+	it("can be hidden, and stays hidden in this browser", async () => {
+		const user = userEvent.setup();
+		serve(fresh);
+		const { unmount } = renderPage();
+
+		await user.click(await screen.findByRole("button", { name: "Hide" }));
+		expect(screen.queryByRole("heading", { name: "Get started" })).not.toBeInTheDocument();
+
+		unmount();
+		renderPage();
+		await screen.findByText("Test Server");
+		expect(screen.queryByRole("heading", { name: "Get started" })).not.toBeInTheDocument();
+	});
+
+	it("passes axe", async () => {
+		serve(fresh);
+		const { container } = renderPage();
+		await screen.findByRole("list", { name: "Get started" });
 
 		await expectNoViolations(container);
 	});

@@ -1,4 +1,4 @@
-import { cloneElement, useEffect, useRef, type ReactElement, type Ref } from "react";
+import { cloneElement, type RefCallback, useCallback, useEffect, useRef, type ReactElement, type Ref } from "react";
 import tippy, { type Instance, type Placement } from "tippy.js";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import "tippy.js/dist/tippy.css";
@@ -51,5 +51,16 @@ export function Tooltip({
 		};
 	}, [label, placement, reduced]);
 
-	return cloneElement(children, { ref: anchorRef });
+	// The child keeps its own ref too, or a caller that focuses its button finds nothing behind it.
+	const own = children.props.ref;
+	const ref = useCallback<RefCallback<HTMLElement>>(
+		(node) => {
+			anchorRef.current = node;
+			if (typeof own === "function") own(node);
+			else if (own !== null && own !== undefined) own.current = node;
+		},
+		[own],
+	);
+
+	return cloneElement(children, { ref });
 }
