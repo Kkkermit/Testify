@@ -70,6 +70,14 @@ export function signatureOf(error: Error, scope: string): string {
 	return `${scope}:${error.name}:${error.message}`;
 }
 
+/** The status of a gateway handshake Discord's side refused, which `ws` reports by that status alone. */
+export function gatewayRefusal(error: Error, scope: string): number | null {
+	if (!/^(GATEWAY|SHARD_\d+)$/.test(scope)) return null;
+
+	const match = /^Unexpected server response: (5\d\d)$/.exec(error.message);
+	return match === null ? null : Number(match[1]);
+}
+
 /** Records a failure nothing else handled, and returns rather than throwing. */
 export function reportSurvivable(
 	logger: Logger,
@@ -82,8 +90,21 @@ export function reportSurvivable(
 	const verdict = throttle.consider(signatureOf(error, scope), now);
 	if (verdict === null) return;
 
+	const repeated = verdict.suppressed > 0 ? { repeatedSince: verdict.suppressed } : {};
+	const refusal = gatewayRefusal(error, scope);
+
+	if (refusal !== null) {
+		logger.warn(
+			{ scope, status: refusal, ...repeated },
+			`[${scope}] Discord's gateway refused the connection (${String(refusal)})` +
+				(verdict.suppressed > 0 ? `, ${String(verdict.suppressed)} more times since the last line` : "") +
+				". The bot is retrying on its own; check https://discordstatus.com if this keeps repeating.",
+		);
+		return;
+	}
+
 	logger.error(
-		{ err: error, scope, ...(verdict.suppressed > 0 ? { repeatedSince: verdict.suppressed } : {}) },
+		{ err: error, scope, ...repeated },
 		verdict.suppressed > 0
 			? `[${scope}] Still failing — ${String(verdict.suppressed)} more since the last line. The bot is still running.`
 			: `[${scope}] Something failed and was contained. The bot is still running.`,
