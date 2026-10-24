@@ -1,8 +1,8 @@
-import { ErrorThrottle, reportSurvivable, signatureOf, SUMMARY_INTERVAL_MS } from "@core/resilience";
+import { ErrorThrottle, gatewayRefusal, reportSurvivable, signatureOf, SUMMARY_INTERVAL_MS } from "@core/resilience";
 import { createMockClient } from "@tests/helpers/mocks";
 
-function loggerSpy(): { error: jest.Mock } {
-	return { error: jest.fn() };
+function loggerSpy(): { error: jest.Mock; warn: jest.Mock } {
+	return { error: jest.fn(), warn: jest.fn() };
 }
 
 describe("ErrorThrottle", () => {
@@ -147,5 +147,65 @@ describe("reportSurvivable", () => {
 		expect(() => {
 			reportSurvivable(client.logger, new ErrorThrottle(), "UNCAUGHT", undefined, 0);
 		}).not.toThrow();
+	});
+});
+
+describe("gatewayRefusal", () => {
+	it("reads the status of a handshake Discord's gateway refused", () => {
+		expect(gatewayRefusal(new Error("Unexpected server response: 503"), "SHARD_0")).toBe(503);
+		expect(gatewayRefusal(new Error("Unexpected server response: 520"), "GATEWAY")).toBe(520);
+	});
+
+	/** A 4xx is the bot's request being wrong, which is worth an error line rather than a shrug. */
+	it("ignores a refusal that is not Discord's fault", () => {
+		expect(gatewayRefusal(new Error("Unexpected server response: 401"), "SHARD_0")).toBeNull();
+		expect(gatewayRefusal(new Error("Unexpected server response: 5030"), "SHARD_0")).toBeNull();
+		expect(gatewayRefusal(new Error("connect ECONNREFUSED"), "SHARD_0")).toBeNull();
+	});
+
+	it("only speaks for the gateway", () => {
+		expect(gatewayRefusal(new Error("Unexpected server response: 503"), "UNCAUGHT")).toBeNull();
+		expect(gatewayRefusal(new Error("Unexpected server response: 503"), "JOB_REMINDERS")).toBeNull();
+	});
+});
+
+describe("reportSurvivable on a refused gateway handshake", () => {
+	/** Discord's gateway answering 503 once logged a red line that read like the bot had crashed. */
+	it("warns that Discord refused and the bot is retrying, with no error line", () => {
+		const logger = loggerSpy();
+
+		reportSurvivable(logger as never, new ErrorThrottle(), "SHARD_0", new Error("Unexpected server response: 503"), 0);
+
+		expect(logger.error).not.toHaveBeenCalled();
+		expect(logger.warn).toHaveBeenCalledWith(
+			expect.objectContaining({ scope: "SHARD_0", status: 503 }),
+			expect.stringMatching(/\[SHARD_0\] Discord's gateway refused the connection \(503\).*retrying/),
+		);
+	});
+
+	it("collapses repeats like any other failure, and counts them", () => {
+		const logger = loggerSpy();
+		const throttle = new ErrorThrottle();
+		const refusal = (): Error => new Error("Unexpected server response: 503");
+
+		reportSurvivable(logger as never, throttle, "SHARD_0", refusal(), 0);
+		reportSurvivable(logger as never, throttle, "SHARD_0", refusal(), 1);
+		reportSurvivable(logger as never, throttle, "SHARD_0", refusal(), 2);
+		expect(logger.warn).toHaveBeenCalledTimes(1);
+
+		reportSurvivable(logger as never, throttle, "SHARD_0", refusal(), SUMMARY_INTERVAL_MS);
+		expect(logger.warn).toHaveBeenLastCalledWith(
+			expect.objectContaining({ repeatedSince: 2 }),
+			expect.stringContaining("2 more times"),
+		);
+	});
+
+	it("still logs a 4xx from the gateway as an error", () => {
+		const logger = loggerSpy();
+
+		reportSurvivable(logger as never, new ErrorThrottle(), "SHARD_0", new Error("Unexpected server response: 401"), 0);
+
+		expect(logger.warn).not.toHaveBeenCalled();
+		expect(logger.error).toHaveBeenCalledTimes(1);
 	});
 });

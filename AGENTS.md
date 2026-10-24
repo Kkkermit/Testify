@@ -888,7 +888,9 @@ Four things follow, and they are what keep this from being the anti-pattern it l
 
 - **Contained is not unnoticed.** Anything caught here is logged at `error` with its stack and a scope, and the
   line says the bot is still running so a reader knows the state they are in. A background job that catches and
-  says nothing is still wrong — `TimerRegistry` reports every failure under `JOB_<NAME>`.
+  says nothing is still wrong — `TimerRegistry` reports every failure under `JOB_<NAME>`. The one exception is a
+  gateway handshake Discord answers with a 5xx (`gatewayRefusal`): that is Discord's outage, discord.js reconnects
+  on its own, so it is one `warn` saying so, throttled like the rest. A 4xx stays an error, because it is ours.
 - **Repeats collapse.** A broken gateway handler can throw hundreds of times a second, and the same line that
   often buries the cause. `ErrorThrottle` logs the first occurrence, then one summary a minute carrying how many
   were swallowed. It is bounded, so a message embedding a unique id cannot grow it forever.
