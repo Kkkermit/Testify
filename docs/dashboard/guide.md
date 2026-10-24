@@ -720,6 +720,8 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/automod`    | Discord's own filters — no database behind it                                        |
 | `/guilds/:id/role-menus` | Menus members pick roles from; nothing above you or that moderates                   |
 | `/guilds/:id/ideas`      | The idea board's channel and switch, every idea, and the decision on it              |
+| `/guilds/:id/starboard`  | Where starred messages go, the stars it takes, and the author's own star             |
+| `/guilds/:id/temp-voice` | The lobby, made here if need be, and what each new voice channel is like             |
 | `/guilds/:id/sticky`     | A list keyed by channel; `PUT` upserts                                               |
 | `/guilds/:id/treasure`   | Random money drops; ranges validated as pairs                                        |
 | `/guilds/:id/tickets`    | Destinations, panel wording, explicit publish                                        |

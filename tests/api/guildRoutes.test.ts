@@ -42,6 +42,12 @@ jest.mock("@database/repositories/ideaRepository", () => ({
 jest.mock("@database/repositories/roleMenuRepository", () => ({
 	countRoleMenus: jest.fn(() => Promise.resolve(0)),
 }));
+jest.mock("@database/repositories/starboardRepository", () => ({
+	getStarboardSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/tempVoiceRepository", () => ({
+	getTempVoiceSettings: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/verificationRepository", () => ({
 	getVerifyConfig: jest.fn(() => Promise.resolve(null)),
 }));

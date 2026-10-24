@@ -6,6 +6,7 @@ import { HILO_EDGE, HILO_MAX_MULTIPLIER } from "@lib/casino/hilo.util";
 import { SLOT_PAYTABLE, slotsReturnToPlayer } from "@lib/casino/slots.util";
 import { formatDurationLong, formatNumber, humanisePermission } from "@lib/format/format.util";
 import { REMINDER_LIMITS } from "@lib/reminders/reminders.constants";
+import { MAKE_PAUSE_MS } from "@lib/tempVoice/tempVoice.constants";
 import {
 	GIVEAWAY_LIMITS,
 	INVITE_PERMISSIONS,
@@ -13,7 +14,9 @@ import {
 	LOTTERY_LIMITS,
 	ROLE_MENU_LIMITS,
 	SETTINGS_LIMITS,
+	STARBOARD_LIMITS,
 	STICKY_LIMITS,
+	TEMP_VOICE_LIMITS,
 	TREASURE_DEFAULTS,
 	TREASURE_LIMITS,
 	WELCOME_LIMITS,
@@ -90,6 +93,13 @@ export const FACTS: Readonly<Record<string, string>> = {
 
 	"roleMenu.maxPerServer": formatNumber(ROLE_MENU_LIMITS.maxPerGuild),
 	"roleMenu.maxRoles": formatNumber(ROLE_MENU_LIMITS.maxRoles),
+
+	"starboard.minStars": formatNumber(STARBOARD_LIMITS.minThreshold),
+	"starboard.maxStars": formatNumber(STARBOARD_LIMITS.maxThreshold),
+	"starboard.defaultStars": formatNumber(STARBOARD_LIMITS.defaultThreshold),
+
+	"tempVoice.maxPeople": formatNumber(TEMP_VOICE_LIMITS.maxUserLimit),
+	"tempVoice.makePause": formatDurationLong(MAKE_PAUSE_MS),
 
 	"treasure.minMessages": formatNumber(TREASURE_DEFAULTS.minMessages),
 	"treasure.maxMessages": formatNumber(TREASURE_DEFAULTS.maxMessages),

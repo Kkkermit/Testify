@@ -8,6 +8,7 @@ import { refreshBotStats } from "@jobs/refreshBotStats.util";
 import { deliverDueReminders } from "@jobs/reminders.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 import { recordHeartbeat } from "@jobs/statusHeartbeat.util";
+import { sweepTempVoice } from "@jobs/tempVoiceSweep.util";
 import { flushCommandLog, startEventLoopMonitor, watchDiscordApi } from "@lib/bot";
 import { CASINO_TIMING, spinOverdueRounds } from "@lib/casino";
 import { flushActivity } from "@lib/info";
@@ -27,6 +28,9 @@ export default defineEvent({
 		client.timers.every("casino-hands", CASINO_TIMING.sweepEveryMs, () => settleIdleHands(client));
 		client.timers.every("roulette-rounds", CASINO_TIMING.sweepEveryMs, () => spinOverdueRounds(client));
 		client.timers.every("command-log", INTERVALS.commandLogFlushMs, () => flushCommandLog(client));
+		// Once soon after start-up for what emptied while the bot was away, then as a backstop.
+		client.timers.after("temp-voice-first", 30_000, () => sweepTempVoice(client));
+		client.timers.every("temp-voice", INTERVALS.tempVoiceSweepMs, () => sweepTempVoice(client));
 
 		startEventLoopMonitor();
 		watchDiscordApi(client);
