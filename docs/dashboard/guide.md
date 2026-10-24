@@ -485,7 +485,17 @@ only by one is unreachable to anybody arriving another way. It opens on `focusin
 `aria-describedby`, never `aria-labelledby`.
 
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in
-React 19.
+React 19. The child keeps its own `ref`, so a button inside a tooltip can still be focused by its caller.
+
+### Deleting and leaving
+
+| Piece          | Use it for                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| `useUndo()`    | Any delete: `schedule({ key, label, commit })`, and filter rows by `isHidden(key)`. Never `mutate` |
+| `<LeaveGuard>` | Any screen that holds a draft until Save: `<LeaveGuard when={dirty && !saving} />`                 |
+
+A key is unique across the app — `role-menu:${guildId}:${id}` — and a waiting delete still counts against a limit
+or a taken channel until it has gone.
 
 ---
 
