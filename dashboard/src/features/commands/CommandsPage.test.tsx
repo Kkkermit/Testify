@@ -142,6 +142,20 @@ describe("the commands page", () => {
 		expect(screen.getByText("/levelling")).toBeInTheDocument();
 	});
 
+	/** Quick search sends a command with no screen of its own here, already filtered to it. */
+	it("starts filtered to the search in the address, and keeps the address in step", async () => {
+		const user = userEvent.setup();
+		const { search } = renderWithProviders(<CommandsPage />, { path: "/commands", route: "/commands?q=ban" });
+		await screen.findByText("/ban");
+
+		expect(screen.getByRole("searchbox")).toHaveValue("ban");
+		expect(screen.queryByText("/levelling")).toBeNull();
+
+		await user.clear(screen.getByRole("searchbox"));
+		expect(screen.getByText("/levelling")).toBeInTheDocument();
+		expect(search()).toBe("");
+	});
+
 	it("filters by category, and clears when the same chip is pressed again", async () => {
 		const user = userEvent.setup();
 		renderPage();

@@ -1,8 +1,9 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { type BotIdentity, type DashboardUser } from "@testify/shared";
-import { FileText, LogOut, Palette, ShieldQuestion } from "lucide-react";
+import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@testify/shared";
+import { FileText, LogOut, Palette, Search, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { GuildSwitcher } from "@/app/layout/GuildSwitcher";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
 import { ICON_SLOT, ROW } from "@/app/layout/sidebarStyles";
@@ -10,6 +11,7 @@ import { BotMark } from "@/components/brand/BotMark";
 import { FlagIcon } from "@/components/brand/FlagIcon";
 import { Avatar, Tooltip } from "@/components/primitives";
 import { navigationFor, type NavAudience } from "@/config/navigation";
+import { shortcutLabel } from "@/features/search/quickSearch.utils";
 import { isLocale, type Locale, LOCALE_NAMES } from "@/i18n";
 import { api } from "@/lib/api";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
@@ -30,16 +32,21 @@ export function Sidebar({
 	user,
 	bot,
 	guild,
+	guilds = [],
 	isOwner,
 	expanded = false,
 	onNavigate,
+	onSearch,
 }: NavAudience & {
 	user: DashboardUser | null;
+	/** Every server this person manages, for the switcher. */
+	guilds?: readonly ManageableGuild[];
 	/** The bot's own profile, so a fork's sidebar carries its identity rather than the original's. */
 	bot?: BotIdentity | undefined;
 	/** True inside the mobile drawer, where there is room for the labels. */
 	expanded?: boolean;
 	onNavigate?: () => void;
+	onSearch?: () => void;
 }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
@@ -72,6 +79,8 @@ export function Sidebar({
 				</span>
 			</Link>
 
+			{onSearch !== undefined && <SearchRow onSearch={onSearch} expanded={expanded} label={label} />}
+
 			{navigationFor({ guild, isOwner }).map((group, index) => {
 				// A server group is headed by its name; every other group by a translated one.
 				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
@@ -82,16 +91,20 @@ export function Sidebar({
 							<>
 								{/* At the icon-only width the rule carries the grouping, where there is no room for the words. */}
 								<hr className="border-border mx-2 mb-2 lg:hidden" />
-								{/* Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's. */}
-								<p
-									aria-hidden="true"
-									className={cn(
-										"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
-										expanded ? "" : "hidden lg:block",
-									)}
-								>
-									{heading}
-								</p>
+								{guild !== undefined && group.guildId === guild.id ? (
+									<GuildSwitcher guild={guild} guilds={guilds} expanded={expanded} />
+								) : (
+									// Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's.
+									<p
+										aria-hidden="true"
+										className={cn(
+											"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
+											expanded ? "" : "hidden lg:block",
+										)}
+									>
+										{heading}
+									</p>
+								)}
 							</>
 						)}
 						<ul className="flex flex-col gap-1" {...(heading === undefined ? {} : { "aria-label": heading })}>
@@ -170,6 +183,46 @@ export function Sidebar({
 				</Tooltip>
 			</div>
 		</nav>
+	);
+}
+
+function SearchRow({
+	onSearch,
+	expanded,
+	label,
+}: {
+	onSearch: () => void;
+	expanded: boolean;
+	label: (extra?: string) => string;
+}): React.JSX.Element {
+	const { t } = useTranslation();
+	const shortcut = shortcutLabel(navigator.userAgent);
+
+	return (
+		<Tooltip label={t("search.hint", { shortcut })} placement="right">
+			<button
+				type="button"
+				onClick={onSearch}
+				aria-keyshortcuts="Control+K Meta+K"
+				className={cn(
+					ROW,
+					"border-border text-muted-foreground hover:text-foreground hover:bg-muted mb-3 w-full border text-sm transition-colors duration-150",
+				)}
+			>
+				<Search size={18} aria-hidden="true" className="shrink-0" />
+				<span className={label("flex-1 truncate text-left")}>{t("search.open")}</span>
+				{/* A phone has no keyboard to press it on, so the drawer leaves it out. */}
+				<kbd
+					aria-hidden="true"
+					className={cn(
+						"border-border rounded-chip border px-1.5 font-mono text-[0.6875rem]",
+						expanded ? "hidden" : "hidden lg:inline",
+					)}
+				>
+					{shortcut}
+				</kbd>
+			</button>
+		</Tooltip>
 	);
 }
 

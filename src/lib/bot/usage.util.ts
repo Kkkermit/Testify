@@ -21,6 +21,7 @@ export function countCommandUse(client: TestifyClient, input: CommandInput, comm
 				subcommand: chosenSubcommand(input, command),
 				surface: run.surface,
 				failed,
+				reference: run.reference ?? null,
 				durationMs: run.durationMs,
 			}),
 		);

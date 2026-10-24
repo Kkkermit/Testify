@@ -56,7 +56,7 @@ describe("event grouping", () => {
 			statSync(join(SRC, "events", entry)).isDirectory(),
 		);
 
-		const expected = ["command", "create", "logging", "message", "ready"];
+		const expected = ["command", "community", "create", "logging", "message", "ready"];
 		const stray = groups.filter((group) => !expected.includes(group));
 
 		// Name stray ` 2` copies that cloud sync leaves, since the loader would register them.

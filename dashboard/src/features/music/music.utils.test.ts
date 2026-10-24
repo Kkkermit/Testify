@@ -6,7 +6,7 @@ function settings(overrides: Partial<MusicSettings> = {}): MusicSettings {
 }
 
 const roles: RoleSummary[] = [
-	{ id: "role-1", name: "DJ", colour: null, position: 1, managed: false, assignableByBot: true },
+	{ id: "role-1", name: "DJ", colour: null, position: 1, managed: false, assignableByBot: true, powerful: false },
 ];
 
 describe("accessOf", () => {

@@ -30,16 +30,19 @@ export function StickyRow({
 		setCap(entry.cap);
 	}, [entry.message, entry.cap]);
 
-	const name = channels.find((channel) => channel.id === entry.channelId)?.name ?? "a deleted channel";
+	const found = channels.find((channel) => channel.id === entry.channelId)?.name;
+	const name = found ?? t("sticky.deletedChannel");
 	const dirty = message !== entry.message || cap !== entry.cap;
 	const blocked = markupWarning(message);
 
 	return (
 		<li className={cardClass("compact", "flex flex-col gap-3")}>
 			<div className="flex flex-wrap items-center justify-between gap-2">
-				<h3 className="font-mono text-sm font-medium">#{name}</h3>
+				<h3 className="font-mono text-sm font-medium">
+					{found === undefined ? t("sticky.deletedChannelTitle") : `#${found}`}
+				</h3>
 				<span className="text-muted-foreground text-xs tabular-nums">
-					{entry.count} of {entry.cap} messages since the last post
+					{t("sticky.sinceLast", { done: entry.count, cap: entry.cap })}
 				</span>
 			</div>
 

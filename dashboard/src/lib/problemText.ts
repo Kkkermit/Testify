@@ -32,6 +32,10 @@ const KEYS: Record<ProblemCode, TranslationKey> = {
 	"treasure.messageRange": "problem.treasureMessageRange",
 	"treasure.amountRange": "problem.treasureAmountRange",
 	"casino.betRange": "problem.casinoBetRange",
+	"roleMenu.channel": "problem.roleMenuChannel",
+	"roleMenu.title": "problem.roleMenuTitle",
+	"roleMenu.roles": "problem.roleMenuRoles",
+	"roleMenu.tooManyRoles": "problem.roleMenuTooManyRoles",
 };
 
 export function problemText(problem: Problem, t: TFunction): string;

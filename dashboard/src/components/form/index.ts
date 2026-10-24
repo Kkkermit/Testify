@@ -1,3 +1,4 @@
+export { ChannelKindPicker } from "@/components/form/ChannelKindPicker";
 export { ChannelPicker, postableChannels } from "@/components/form/ChannelPicker";
 export { CheckList } from "@/components/form/CheckList";
 export { CHECK_ROW, FIELD, LABEL, SELECT } from "@/components/form/fieldStyles";

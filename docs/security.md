@@ -133,24 +133,23 @@ entry missing any of them should be removed:
 
 `tests/config/suppressions.test.ts` reads both files and fails on an entry missing any of the three.
 
-| Advisory                                                                 | Package      | Reached through                                 | Why it is safe                                                                                                                   | Expires        |
-| ------------------------------------------------------------------------ | ------------ | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| [GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx) | deepmerge-ts | discord-giveaways, whose latest release pins v4 | Nothing here merges an object graph somebody else supplied. Excepted in both files, and in `.snyk` on that one path only         | 20 March 2027  |
-| [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | braces       | tsc-alias, at build time only                   | Not in the production tree, and the patterns it expands come from this repository's own `tsconfig.json`. No release fixes it yet | 1 January 2027 |
+| Advisory                                                                 | Package      | Reached through                                 | Why it is safe                                                                                                           | Expires       |
+| ------------------------------------------------------------------------ | ------------ | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| [GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx) | deepmerge-ts | discord-giveaways, whose latest release pins v4 | Nothing here merges an object graph somebody else supplied. Excepted in both files, and in `.snyk` on that one path only | 20 March 2027 |
 
 ### Version pins
 
 `overrides` in `package.json` pins transitive dependencies. npm does not allow comments there, so the reasons live
 here. Each one should be dropped the moment its parent updates — check when a dependency bump lands.
 
-| Pin                                                | Why                                                                                                                                                                         |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `glob: $glob`                                      | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses.                                             |
-| `test-exclude: ^7.0.1`                             | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                                                                  |
-| `esbuild: ^0.28.1`                                 | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                                                                    |
-| `serialize-javascript: ^7.0.7`                     | Reached through jest-worker; older releases carry a prototype-pollution advisory.                                                                                           |
-| `brace-expansion: ^5.0.12`                         | Reached through minimatch, which glob, ESLint and jest all load and which asks for `^5.0.8`. 5.0.12 fixes GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p and GHSA-q2hr-2g5m-vwhr. |
-| `fast-uri: ^3.1.5`                                 | Reached through better-npm-audit → table → ajv. 3.1.5 fixes GHSA-7p8r-x3mc-p8w7; ajv asks for `^3.0.1`.                                                                     |
-| `js-yaml: ^4.3.2`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.                                                          |
-| `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.                                                 |
-| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible, and `^6.28.1` fixes GHSA-rfgv-xxqx-mfg5.                                                       |
+| Pin                                                | Why                                                                                                                                                                                              |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `glob: $glob`                                      | Several transitive dependencies still ask for glob v7, which warns on install. Pinned to the version this project already uses.                                                                  |
+| `test-exclude: ^7.0.1`                             | Reached through jest's coverage reporter; older releases depend on the deprecated glob v7.                                                                                                       |
+| `esbuild: ^0.28.1`                                 | tsup ships an older esbuild than the one with GHSA-67mh-4wv8-2f99 fixed.                                                                                                                         |
+| `serialize-javascript: ^7.1.3`                     | Reached through discord-giveaways, which asks for `^6.0.0`. 7.1.3 fixes GHSA-m5mm-p8h7-m29v; older releases also carry a prototype-pollution advisory.                                           |
+| `brace-expansion: ^5.0.12`                         | Reached through minimatch, which glob, ESLint and jest all load and which asks for `^5.0.8`. 5.0.12 fixes GHSA-qhr7-859c-m2p7, GHSA-6j4f-fj2g-mc7p and GHSA-q2hr-2g5m-vwhr.                      |
+| `fast-uri: ^3.1.9`                                 | Reached through better-npm-audit → table → ajv, which asks for `^3.0.1`. 3.1.9 fixes GHSA-7p8r-x3mc-p8w7, GHSA-w74x-v6f9-j3xg, GHSA-xhq7-xmqj-769h, GHSA-wjr9-j795-jxcr and GHSA-333x-w4r6-6crp. |
+| `js-yaml: ^4.3.2`                                  | Reached through commitlint → cosmiconfig. 4.3.1 fixes GHSA-5p4m-2wfm-xmqj, which the advisory's range ends before.                                                                               |
+| `@istanbuljs/load-nyc-config` → `js-yaml: ^3.15.1` | The same advisory on the 3.x line, reached through jest's coverage plugin. Scoped, because 3.x and 4.x have different APIs.                                                                      |
+| `discord-html-transcripts` → `undici`              | The package pins undici v5, which has open advisories. v6 is API-compatible, and `^6.29.1` fixes GHSA-rfgv-xxqx-mfg5, GHSA-4qv8-2p9j-2685 and GHSA-xjj6-f33q-929c.                               |

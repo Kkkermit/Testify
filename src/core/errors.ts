@@ -63,14 +63,24 @@ export function errorReference(): string {
 	return randomBytes(4).readUInt32BE(0).toString(36).toUpperCase().padStart(6, "0").slice(-6);
 }
 
-/** Runs a command so the user always gets an answer, and returns whether it finished cleanly. */
-export async function runCommand(interaction: CommandInput, command: Command, client: TestifyClient): Promise<boolean> {
+export interface RunOutcome {
+	ok: boolean;
+	/** Set only for an unexpected failure, which is the one kind written to the log with a reference. */
+	reference: string | null;
+}
+
+/** Runs a command so the user always gets an answer, and says whether it finished cleanly. */
+export async function runCommand(
+	interaction: CommandInput,
+	command: Command,
+	client: TestifyClient,
+): Promise<RunOutcome> {
 	try {
 		await dispatch(interaction, command, client);
-		return true;
+		return { ok: true, reference: null };
 	} catch (error) {
-		await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
-		return false;
+		const reference = await reportFailure(interaction, error, client, command.name, `\`/${command.name}\``, command);
+		return { ok: false, reference };
 	}
 }
 
@@ -94,17 +104,17 @@ async function reportFailure(
 	label: string,
 	what: string | null,
 	command?: Command,
-): Promise<void> {
+): Promise<string | null> {
 	if (error instanceof UserFacingError || error instanceof SetupError) {
 		if (error instanceof SetupError) client.logger.error({ err: error, command: label }, "Command failed");
 		await tell(interaction, failureEmbed(error.message));
-		return;
+		return null;
 	}
 
 	if (error instanceof ServiceError) {
 		client.logger.error({ err: error, command: label }, "Command failed");
 		await tell(interaction, failureEmbed(strings.generic.serviceDown(error.service)));
-		return;
+		return null;
 	}
 
 	const reference = errorReference();
@@ -114,6 +124,7 @@ async function reportFailure(
 	);
 	await postToErrorChannel(client, { label, reference, interaction, error: toError(error), command });
 	await tell(interaction, failureEmbed(strings.generic.failure(what, reference), strings.generic.failureTitle));
+	return reference;
 }
 
 /** Somewhere only the person who asked can see: never over a public reply, and never over a button's message. */

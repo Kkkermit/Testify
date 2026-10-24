@@ -1,4 +1,4 @@
-import { type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
+import { type OwnerGuildFilter, type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
 import { cn } from "@/lib/cn";
@@ -10,12 +10,14 @@ const LARGE_ONLY = "hidden lg:table-cell";
 export function OwnerGuildTable({
 	guilds,
 	sort = "members",
+	filter = "all",
 	empty = null,
 	selected,
 	onSelect,
 }: {
 	guilds: OwnerGuildRow[];
 	sort?: OwnerGuildSort;
+	filter?: OwnerGuildFilter;
 	/** Said in place of an empty table, when a search is what emptied it. */
 	empty?: string | null;
 	selected?: string | null;
@@ -23,7 +25,11 @@ export function OwnerGuildTable({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const shown = (column: "joined" | "commands" | "dashboard"): string | false => {
-		const active = { joined: ["newest", "oldest"], commands: ["commands"], dashboard: ["dashboard"] }[column];
+		const active = { joined: ["newest", "oldest"], commands: ["commands", "quietest"], dashboard: ["dashboard"] }[
+			column
+		];
+		// An inactive server is only worth leaving once it has had time to be used, so when it joined stays in view.
+		if (column === "joined" && filter === "inactive") return false;
 		return !active.includes(sort) && LARGE_ONLY;
 	};
 

@@ -42,6 +42,7 @@ it("counts the run and notes who ran it, with the subcommand", () => {
 		subcommand: "play",
 		surface: "slash",
 		failed: false,
+		reference: null,
 		durationMs: 42,
 	});
 });
@@ -52,6 +53,12 @@ it("never notes who ran a command in a direct message", () => {
 
 	expect(recordCommandUse).toHaveBeenCalledTimes(1);
 	expect(recordCommandRun).not.toHaveBeenCalled();
+});
+
+it("keeps the reference an unexpected failure was logged under", () => {
+	countCommandUse(createMockClient(), createMockInteraction(), music, { ...run, ok: false, reference: "AB12CD" });
+
+	expect(recordCommandRun).toHaveBeenCalledWith(expect.objectContaining({ failed: true, reference: "AB12CD" }));
 });
 
 it("marks a failed run as failed in both records", () => {

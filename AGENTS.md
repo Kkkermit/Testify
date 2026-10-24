@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 79, across 14 categories          |
-| Command files        | 100 (incl. folded-in subcommands) |
-| Subcommands          | 131                               |
-| Prefix aliases       | 90                                |
-| Button handlers      | 31                                |
-| Events               | 25, in 5 groups                   |
-| `src/lib` helpers    | 155, in 17 domain folders         |
-| Schemas/repositories | 22 / 20                           |
-| Scheduled jobs       | 6                                 |
-| Tests                | 5,982 across 333 suites           |
+| Commands             | 84, across 14 categories          |
+| Command files        | 105 (incl. folded-in subcommands) |
+| Subcommands          | 135                               |
+| Prefix aliases       | 95                                |
+| Button handlers      | 38                                |
+| Events               | 29, in 6 groups                   |
+| `src/lib` helpers    | 172, in 22 domain folders         |
+| Schemas/repositories | 29 / 26                           |
+| Scheduled jobs       | 8                                 |
+| Tests                | 6,600 across 382 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -216,10 +216,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  100 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               25 handlers in command, create, logging, ready and message
-├── buttons/              31 component handlers, keyed by custom-ID prefix
-├── lib/                  155 helpers in 17 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  105 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               29 handlers in command, community, create, logging, ready and message
+├── buttons/              38 component handlers, keyed by custom-ID prefix
+├── lib/                  172 helpers in 22 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -227,15 +227,18 @@ src/
 │   ├── infra/            outbound HTTP, what it learns about each service, and the secret box
 │   ├── support/          the help desk: articles, search, the leak guard and the optional model picker
 │   ├── casino/           the games' rules, the wallet flow, the card hands and every casino message
+│   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
+│       reminders/ ideas/ starboard/ tempVoice/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           22 Mongoose schemas
-│   └── repositories/     20 query layers. Commands never touch a model directly.
-├── jobs/                 6 scheduled jobs (lottery, passive income, bot stats, softbans, heartbeat, casino hands)
+│   ├── models/           29 Mongoose schemas
+│   └── repositories/     26 query layers. Commands never touch a model directly.
+├── jobs/                 8 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
+│                         join-to-create channels)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 225 suites; the dashboard's 108 sit beside its code.
+tests/                    Mirrors src/. 257 suites; the dashboard's 125 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -284,19 +287,22 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 
 Each is a pure state→message function paired with a handler in `src/buttons/`. Copy the closest one.
 
-| Renderer                      | Handler                     | Pattern it demonstrates                                    |
-| ----------------------------- | --------------------------- | ---------------------------------------------------------- |
-| `shopScreen.util.ts`          | `buttons/shop.ts`           | Paged catalogue, per-item buttons, confirm step            |
-| `auditPanel.util.ts`          | `buttons/auditLog.ts`       | Draft edits in a bit-packed custom ID, then Save           |
-| `levelPanel.util.ts`          | `buttons/levelling.ts`      | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
-| `balancePanel.util.ts`        | `buttons/balance.ts`        | Hub panel, read-only mode for other users                  |
-| `moneyPanel.util.ts`          | `buttons/money.ts`          | A step that returns to the panel it was opened from        |
-| `inventoryScreen.util.ts`     | `buttons/inventory.ts`      | Per-row action button, paging in the custom ID             |
-| `settingsPanel.util.ts`       | —                           | Generic settings rows + pre-filled modal editors           |
-| `musicPanel.util.ts`          | `buttons/music.ts`          | Live state: re-reads the session on every press            |
-| `musicSystemPanel.util.ts`    | `buttons/music.ts`          | A switch and a pre-ticked role select, applied immediately |
-| `casinoPanel.util.ts`         | `buttons/casino.ts`         | A picture per state, re-read from the database every press |
-| `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts` | A switch, a toggle per game and a pre-filled modal         |
+| Renderer                      | Handler                        | Pattern it demonstrates                                    |
+| ----------------------------- | ------------------------------ | ---------------------------------------------------------- |
+| `shopScreen.util.ts`          | `buttons/shop.ts`              | Paged catalogue, per-item buttons, confirm step            |
+| `auditPanel.util.ts`          | `buttons/auditLog.ts`          | Draft edits in a bit-packed custom ID, then Save           |
+| `levelPanel.util.ts`          | `buttons/levelling.ts`         | Tabs, per-row cycle buttons, pre-ticked role/channel menus |
+| `balancePanel.util.ts`        | `buttons/balance.ts`           | Hub panel, read-only mode for other users                  |
+| `moneyPanel.util.ts`          | `buttons/money.ts`             | A step that returns to the panel it was opened from        |
+| `inventoryScreen.util.ts`     | `buttons/inventory.ts`         | Per-row action button, paging in the custom ID             |
+| `settingsPanel.util.ts`       | —                              | Generic settings rows + pre-filled modal editors           |
+| `musicPanel.util.ts`          | `buttons/music.ts`             | Live state: re-reads the session on every press            |
+| `musicSystemPanel.util.ts`    | `buttons/music.ts`             | A switch and a pre-ticked role select, applied immediately |
+| `casinoPanel.util.ts`         | `buttons/casino.ts`            | A picture per state, re-read from the database every press |
+| `casinoSettingsPanel.util.ts` | `buttons/casinoSettings.ts`    | A switch, a toggle per game and a pre-filled modal         |
+| `roleMenuPanel.util.ts`       | `buttons/roleMenuAdmin.ts`     | A list of records, each opening its own editor             |
+| `ideaPanel.util.ts`           | `buttons/idea.ts`              | A public post anybody presses, with staff-only buttons     |
+| `tempVoicePanel.util.ts`      | `buttons/tempVoiceSettings.ts` | A setting with a button that makes the thing it points at  |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -538,8 +544,9 @@ export default defineEvent({
 is correctly typed for whichever event you named — and a handler whose parameters are in the wrong order is a
 compile error. In the original JS bot two features were silently dead for exactly that reason.
 
-Group it into `ready/`, `command/`, `create/`, `logging/` or `message/`. Any depth under
-`src/events/` is scanned.
+Group it into `ready/`, `command/`, `community/`, `create/`, `logging/` or `message/`. Any depth under
+`src/events/` is scanned. `message/` holds only message handlers, which the loader registers differently, so an
+event about messages that is not one — the starboard's reactions and deletes — goes in `community/`.
 
 `once: true` for start-up work. Never register a handler both in a file and by hand elsewhere — the original
 did, so every signal fired twice.
@@ -674,8 +681,9 @@ Rules:
 
 1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
    `userId` alone for per-guild data.
-2. **Two deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design) and the user
-   profile (about the person, not the server). Do not "fix" these.
+2. **Three deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
+   profile (about the person, not the server) and reminders (somebody's own, so `/remind list` shows every one
+   they have wherever they set it, and every lookup filters on `userId` instead). Do not "fix" these.
 3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
@@ -883,7 +891,9 @@ Four things follow, and they are what keep this from being the anti-pattern it l
 
 - **Contained is not unnoticed.** Anything caught here is logged at `error` with its stack and a scope, and the
   line says the bot is still running so a reader knows the state they are in. A background job that catches and
-  says nothing is still wrong — `TimerRegistry` reports every failure under `JOB_<NAME>`.
+  says nothing is still wrong — `TimerRegistry` reports every failure under `JOB_<NAME>`. The one exception is a
+  gateway handshake Discord answers with a 5xx (`gatewayRefusal`): that is Discord's outage, discord.js reconnects
+  on its own, so it is one `warn` saying so, throttled like the rest. A 4xx stays an error, because it is ours.
 - **Repeats collapse.** A broken gateway handler can throw hundreds of times a second, and the same line that
   often buries the cause. `ErrorThrottle` logs the first occurrence, then one summary a minute carrying how many
   were swallowed. It is bounded, so a message embedding a unique id cannot grow it forever.
@@ -1608,9 +1618,98 @@ emoji fonts first for pictographs and flags; a missing glyph is recognised by me
 using and no star, so suits, slot symbols and the pips are paths. A `★` in a title rendered as a missing-glyph box
 and is why the slot machine draws its stars.
 
+### Role menus hand out only what the person making them could, and nothing that moderates
+
+`/role-menu` and the dashboard's **Role menus** screen make menus members pick their own roles from. The post is
+the same for everybody — one **Choose your roles** button — and pressing it opens a private string select
+pre-ticked with the roles that member already holds, so unticking is how a role is given back. Four things about it
+are load-bearing:
+
+- **The grant rule lives in one place.** `grantProblem` moved out of `src/api/middleware/reach.ts` into
+  `src/lib/roles/roleReach.util.ts`, so the dashboard's `requireGrantable` and the Discord editor ask the same
+  question: below the person's own highest role unless they own the server, below the bot, never managed, never
+  `@everyone`. `offerProblem` adds the one rule a menu needs on top: **no role carrying `POWERFUL_PERMISSIONS`**
+  (Administrator, Manage Server, Kick Members and the rest), even for the server's owner, because a self-assigned
+  role that kicks lets anybody kick. `RoleSummary.powerful` greys those out on the dashboard before a save.
+- **A pick is checked again on every press** (`pickProblem`): a role can be moved above the bot or given Kick
+  Members after the menu was made. A role that is not on offer right now is neither given nor taken away.
+- **Every post goes out with `allowedMentions: { parse: [] }`.** The role list is mentions, and pinging them would
+  ping every holder of every role on the menu.
+- **A change to a posted menu follows to its post, and a post that cannot follow is a note, not a failure**
+  (`changeRoleMenu`), because the change did happen. Moving the channel takes the old post down first, so two
+  copies never hand out roles side by side. Deleting a menu takes its post down and takes nobody's role away.
+
+### Reminders are delivered at least once
+
+`/remind me` stores a reminder in `reminders` and the `reminders` job delivers it. Three things about it are
+load-bearing:
+
+- **A reminder is claimed with a lease and deleted only once it is sent** (`claimDueReminder`,
+  `REMINDER_LIMITS.leaseMs`), so a restart mid-send sends it again rather than losing it, and two runs cannot both
+  send it. A failure that may pass is retried when the lease runs out; one still failing a day after it was due is
+  dropped, so a broken route cannot retry for ever.
+- **It pings where it was set, and falls back to a DM** when its owner has left the server or the bot can no
+  longer post there. The channel post mentions its owner and nobody else (`allowedMentions: { users: [...] }`),
+  since the text is whatever somebody typed. Discord's answers that mean a route will never work —
+  `CannotSendMessagesToThisUser`, `MissingPermissions` and the like — move on rather than retry.
+- **The text is `unlogged`**, so the operator's command logs name the option and never its value, and the privacy
+  notice says so (`legal.storedL8`).
+
+### The idea board is the server's own, and is not `/suggest`
+
+`/idea submit` posts to a channel a manager chose with `/idea settings`; members vote 👍 or 👎 on the post and
+staff with Manage Server accept, decline or reopen it with a reason, which is DMed to its author. `/suggest` is a
+different thing — it goes to the bot's developers — and the article and both panels say so. Four things about it
+are load-bearing:
+
+- **Votes are a set of user ids per side, toggled atomically** (`voteOnIdea`): a second press on the same side takes
+  the vote back and a press on the other side moves it. That list of who voted is the one personal record the
+  board keeps, and the privacy notice names it (`legal.storedL9`).
+- **An idea's number comes from one `$inc` counter** in `ideasettings`, with a unique index on `{ guildId, number }`,
+  so two ideas posted at once cannot share one.
+- **An idea that could not be posted is deleted again** (`submitIdea`), because an idea nobody can see is not one.
+- **The post carries no owner.** Anybody may vote, so every press goes through `checkOpenControl` — the pause, the
+  blacklist and `/idea`'s own switch — and the staff buttons check Manage Server on the press **and** on the reason
+  form, since a role can change while the form is open.
+
+`checkOpenControl` in `checks.ts` is the gate every control anybody may press passes; the role menu's button, the
+idea board's and `checkMusicControl` and `checkCasinoPlay` all start with it.
+
+### The starboard reposts without pinging, and only once
+
+`/starboard` and the dashboard's **Starboard** screen choose a channel, a number of ⭐ and whether the author's own
+star counts; the `community` events do the rest. Four things about it are load-bearing:
+
+- **A repost is claimed, not checked for.** `claimStarPost` inserts the `starposts` row under a unique
+  `{ guildId, messageId }` index, and only the call that inserted it posts, so two stars landing together cannot
+  post twice. A board the bot cannot post in lets the claim go again, so the message can still make it later.
+- **Every repost goes out with `allowedMentions: { parse: [] }`**, because it quotes somebody's message and its
+  mentions would otherwise ping everybody again.
+- **A repost a moderator deletes stays off the board** (`removed`), and deleting the original deletes its repost
+  and its record. Nothing from an age-restricted channel reaches a board that is not one.
+- **Who starred is read, never kept.** The voters are fetched only for a message at or past the line, to leave out
+  bots and, unless it is allowed, the author; past `VOTER_PAGE` the raw count stands. Only the count is stored, and
+  the privacy notice says so (`legal.storedL10`).
+
+### Join to create deletes only what it made
+
+`/temp-voice` and the **Join to create** screen pick a lobby, or make one, and say what each new channel is called,
+where it goes and how many it holds. Four things about it are load-bearing:
+
+- **Only a channel in `tempvoicechannels` is ever deleted.** `closeIfEmpty` asks the record first, so a lobby, or
+  any voice channel somebody made by hand, is never touched however empty it is.
+- **One channel per member, and a pause between them.** Somebody who already has one is moved back into it, and
+  `MAKE_PAUSE_MS` is keyed `guildId:userId`, so hopping in and out of the lobby cannot fill a server.
+- **A new channel is made with no overwrites**, so it takes its category's; the owner's Manage Channels is added
+  after, and needs the bot's Manage Roles, so it fails quietly rather than failing the channel.
+- **A restart cannot strand a channel.** `tempVoiceSweep` runs thirty seconds after start-up and every ten minutes,
+  deleting recorded channels that emptied while the bot was away and forgetting those Discord no longer has.
+  Tidying runs while the bot is paused; making does not.
+
 ### Global by design
 
-The blacklist and the user profile are intentionally not guild-scoped. See [§12](#12-multi-guild-rules).
+The blacklist, the user profile and reminders are intentionally not guild-scoped. See
+[§12](#12-multi-guild-rules).
 
 ---
 
@@ -1728,7 +1827,7 @@ four tabs, three shared components and two testable modules.
 | -------------------------- | -------------------------------------------------------------------------- |
 | `/sign-in`                 | One button; also the setup screen for a half-install                       |
 | `/guilds`                  | Picker, with an invite card for guilds without the bot                     |
-| `/guilds/:id`              | Stat tiles, feature grid, permission warnings, recent changes              |
+| `/guilds/:id`              | Stat tiles, a setup checklist, feature grid, permission warnings, changes  |
 | `/guilds/:id/insights`     | Server facts, messages a day, busiest hours, top channels and members      |
 | `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
 | `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
@@ -1736,6 +1835,10 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/warnings`     | The five latest warnings and a search, the steps, warning a member by name |
 | `/guilds/:id/changes`      | Two weeks of changes, from the dashboard and Discord's audit log, searched |
 | `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
+| `/guilds/:id/role-menus`   | Menus members pick roles from; nothing above you or that moderates         |
+| `/guilds/:id/ideas`        | The idea board's channel and switch, every idea, and the decision on it    |
+| `/guilds/:id/starboard`    | Where starred messages go, the stars it takes, and the author's own star   |
+| `/guilds/:id/temp-voice`   | The lobby, made here if need be, and what each new voice channel is like   |
 | `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
 | `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
 | `/guilds/:id/music`        | The music kill switch and the DJ roles                                     |
@@ -2118,7 +2221,35 @@ Five things follow, and all five have tests proved able to fail:
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in React
 19, so the wrapper warns on every render and is one release from breaking. Popper positions with inline styles,
 which the CSP allows under `style-src 'unsafe-inline'`; that combination is verified against the real built
-page, not assumed.
+page, not assumed. **It hands its child's own `ref` the element too.** It once replaced it, so a button inside a
+tooltip that a caller focused by ref was never focused — the server switcher's Escape found nothing to return to.
+
+### Getting around, and not losing work
+
+Five pieces make the common journeys shorter, and four things in them are load-bearing:
+
+- **The server switcher keeps the screen and only the tab.** The server group's heading in the sidebar is a
+  disclosure listing every other server the bot is in, each linking to `switchedPath` — the same screen, with
+  `?tab=` kept and everything else dropped, because a search or a member id belongs to the server it was typed in.
+- **Quick search is built from the sidebar, not beside it.** `searchEntries` reads `navigationFor`, the servers
+  in `/auth/me` and the command catalogue, and a command with a screen goes to it through `configurableAt`, named
+  as the sidebar names that screen — so a new screen is searchable with no edit. Ctrl+K or ⌘K opens it from
+  anywhere; the sidebar and the phone header each have a button too, because a shortcut alone is undiscoverable
+  and a phone has no keyboard. A command with no screen opens `/commands?q=`, which the Commands page now keeps
+  in the address with `replace`.
+- **The setup checklist's defaults are the server's, and it never guesses.** `GET /guilds/:id/setup` says, before
+  anything is pressed, exactly where each start would post; `POST /setup/:step` does that and nothing else.
+  `setupChecklist.util.ts` only picks a channel its person could post in themselves, **never reuses a log
+  channel `@everyone` can read** (a log carries deleted messages), makes a private `#audit-log` only when both the
+  bot and the person hold Manage Channels, and refuses a step already done, so a stale page cannot overwrite a
+  choice somebody made. Hiding it is per browser, because it is advice rather than state.
+- **A delete waits in `UndoProvider`, and nothing is sent until the window closes.** The provider sits above the
+  `Outlet`, so the countdown survives moving to another screen; hovering or focusing the notice holds the clock
+  (WCAG 2.2.1), a keyboard delete hands focus to Undo, and closing the tab sends it at once — DELETEs go out with
+  `keepalive`, the one kind of request that outlives the page. A waiting delete still holds its channel and its
+  place against the limit, so nothing can be added into the gap and then deleted with it. `LeaveGuard` is the
+  other half: a screen that holds a draft until Save asks before a navigation to another path (`useBlocker`) and
+  before a reload or a closed tab (`beforeunload`); a tab on the same screen is not leaving it.
 
 ### Two themes, one token per line
 
@@ -2390,11 +2521,17 @@ reaps a row 90 days after it was created. Four things about it are load-bearing:
   adding a field.
 - **A row per invocation would grow without bound, which is why only the month-long log has one.** The aggregate
   shape is what lets one query answer a 90-day window on a busy bot; the drill-down's member figures cover at most
-  the 30 days of runs, and the page says so when the window is longer (`memberDays`).
-- **`runCommand` returns whether it succeeded** so a failure can be counted without catching the error and
-  breaking the guarantee that the user always gets an answer. `countCommandUse` is not awaited and drops its
-  own error after a debug line — the count is the least important thing that happened, and nothing reads a
-  result from it.
+  the 30 days of runs, and the page says so when the window is longer (`memberDays`). The Usage tab's slowest
+  commands come from the same log (`slowestCommands`), ranked by the time the slowest run in twenty took rather
+  than the average, so one hung run reads differently from a slow command. That query uses `$percentile`, which is
+  why the bot needs **MongoDB 7.0 or newer**; Atlas and the compose file's `mongo:8` both are.
+- **`runCommand` returns a `RunOutcome`**, whether it succeeded and, for an unexpected failure, the reference it
+  was logged under, so a failure can be counted without catching the error and breaking the guarantee that the
+  user always gets an answer. The run log keeps that reference, and a failed run's badge links to the Logs tab
+  searching for it — the log ring holds only the last 1,000 lines and a restart clears it, so an old failure can
+  link to nothing, and the reference in the error channel post is the copy that lasts. `countCommandUse` is not
+  awaited and drops its own error after a debug line — the count is the least important thing that happened, and
+  nothing reads a result from it.
 
 **Screen views are counted the same way, and are deliberately narrower.** `screenview` holds one row per
 dashboard route per day, keyed by the route **pattern** (`/guilds/:guildId/levelling`) — `routePattern` in
@@ -2459,7 +2596,9 @@ with no frontend work. Four things about it are load-bearing:
 owner able to blacklist another owner could lock every one of them out of their own bot, and a rule written
 twice is a rule that will eventually be written differently. The list is an id field rather than a picker
 because somebody worth blocking is usually in no server the bot can still see, and a row whose account Discord
-no longer knows still renders: an entry nobody can read is an entry nobody can lift.
+no longer knows still renders: an entry nobody can read is an entry nobody can lift. A member row on a server's
+usage page offers **Block**, which opens this tab with `?block=<id>` filled in and the reason focused — it never
+blocks on its own, because the entry is bot-wide and the owner should say why.
 
 **Leaving a server is confirmed by name, and the server is what compares it.** Rejoining needs a fresh invite
 from somebody still inside, so the browser asking for the name is the warning and `confirm !== guild.name` is

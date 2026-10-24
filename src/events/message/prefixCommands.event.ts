@@ -45,12 +45,13 @@ export default defineMessageHandler({
 		}
 
 		const started = Date.now();
-		const ok = await runCommand(interaction, command, client);
+		const { ok, reference } = await runCommand(interaction, command, client);
 		const durationMs = Date.now() - started;
 		recordCommandTime(durationMs, ok);
 		const run = {
 			surface: "prefix",
 			ok,
+			reference,
 			durationMs,
 			channelId: message.guild === null ? null : message.channelId,
 			prefix,

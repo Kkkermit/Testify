@@ -1,5 +1,5 @@
-import { type BotIdentity, type DashboardUser } from "@testify/shared";
-import { Menu, X } from "lucide-react";
+import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@testify/shared";
+import { Menu, Search, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Sidebar } from "@/app/layout/Sidebar";
@@ -12,14 +12,18 @@ export function MobileNav({
 	user,
 	bot,
 	guild,
+	guilds,
 	isOwner,
 	open,
 	onOpenChange,
+	onSearch,
 }: NavAudience & {
 	user: DashboardUser | null;
+	guilds: readonly ManageableGuild[];
 	bot?: BotIdentity | undefined;
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
+	onSearch: () => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const openerRef = useRef<HTMLButtonElement>(null);
@@ -70,6 +74,14 @@ export function MobileNav({
 				<span className="font-display text-[0.9375rem] leading-tight font-bold tracking-tight">
 					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>
+				<button
+					type="button"
+					onClick={onSearch}
+					className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-card ml-auto p-2 transition-colors duration-150"
+				>
+					<Search size={20} aria-hidden="true" />
+					<span className="sr-only">{t("search.open")}</span>
+				</button>
 			</header>
 
 			{open && (
@@ -77,7 +89,16 @@ export function MobileNav({
 					{/* Not a control: Escape and the close button already cover the keyboard, and a second one is only noise in the tab order. */}
 					<div aria-hidden="true" onClick={close} className="bg-background/70 motion-fade absolute inset-0" />
 					<div id="mobile-nav" ref={panelRef} className="motion-fade absolute inset-y-0 left-0 overscroll-contain">
-						<Sidebar user={user} bot={bot} guild={guild} isOwner={isOwner} expanded onNavigate={close} />
+						<Sidebar
+							user={user}
+							bot={bot}
+							guild={guild}
+							guilds={guilds}
+							isOwner={isOwner}
+							expanded
+							onNavigate={close}
+							onSearch={onSearch}
+						/>
 					</div>
 					<button
 						type="button"

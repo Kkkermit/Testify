@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 22 Oct 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 24 Oct 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -82,6 +82,18 @@ describe("the legal pages", () => {
 		expect(text).toMatch(/Commands run in a direct message are not recorded this way/);
 		// `dashboardviews` is a server and a count a day, with no account and no route.
 		expect(text).toMatch(/Server counts: .* No user id is stored with these, and not which screens were opened/);
+		// `/remind me`'s `about` is `unlogged`, and `deliverDueReminders` deletes each one once it is sent.
+		expect(text).toMatch(/A reminder’s text is never posted to the operator’s command logs/);
+		expect(text).toMatch(/Reminders: deleted once delivered or cancelled/);
+		// `voteOnIdea` keeps who voted which way, which is what stops a second vote; `purgeGuild` removes the board.
+		expect(text).toMatch(/Ideas: .* who voted for and against it/);
+		expect(text).toMatch(/Ideas and their votes: .* the bot is removed from the server/);
+		// `claimStarPost` stores ids and a count, and `countStars` reads the voters without keeping them.
+		expect(text).toMatch(/Starboard: .* Never its text, .* and never who starred it/);
+		expect(text).toMatch(/Starboard records: deleted with the original message/);
+		// `recordTempChannel` keeps the channel and the member it was made for; `closeIfEmpty` forgets both.
+		expect(text).toMatch(/Join to create: .* the user id of the member it was made for/);
+		expect(text).toMatch(/Join-to-create channels: forgotten once the channel is deleted/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);

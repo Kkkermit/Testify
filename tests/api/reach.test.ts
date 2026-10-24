@@ -1,4 +1,4 @@
-import { ChannelType, Collection, PermissionFlagsBits } from "discord.js";
+import { ChannelType, Collection, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import mongoose from "mongoose";
 import { createApi } from "@api/server";
 import { type TestifyClient } from "@core/client";
@@ -33,6 +33,9 @@ const ABOVE_YOU = "300000000000000007";
 const MANAGED = "300000000000000008";
 const ABOVE_BOT = "300000000000000099";
 const NOT_A_ROLE = "300000000000000055";
+const MODERATES = "300000000000000066";
+
+const MENU = { channelId: OPEN, title: "Pings", description: "", mode: "many" };
 
 function channel(id: string, type: ChannelType): unknown {
 	return {
@@ -74,6 +77,16 @@ function clientFor(): TestifyClient {
 	roles.set(GUILD, createMockRole({ id: GUILD, name: "@everyone", position: 0, managed: false }));
 	roles.set(MANAGED, createMockRole({ id: MANAGED, name: "Bot role", position: 8, managed: true }));
 	roles.set(ABOVE_BOT, createMockRole({ id: ABOVE_BOT, name: "Admin", position: 60, managed: false }));
+	roles.set(
+		MODERATES,
+		createMockRole({
+			id: MODERATES,
+			name: "Helpers",
+			position: 3,
+			managed: false,
+			permissions: new PermissionsBitField([PermissionFlagsBits.KickMembers]),
+		}),
+	);
 
 	const people: Record<string, unknown> = {
 		[MANAGER]: member(MANAGER, [PermissionFlagsBits.ManageGuild], 5),
@@ -138,6 +151,7 @@ describe("an action that needs more than Manage Server", () => {
 		["choosing level rewards", "PUT", "/levelling/rewards", [{ level: 5, roleId: BELOW_YOU }]],
 		["choosing the verified role", "PATCH", "/verification", { roleId: BELOW_YOU }],
 		["renaming the bot", "PATCH", "/settings/nickname", { nickname: "Robo" }],
+		["making a role menu", "POST", "/role-menus", { ...MENU, roleIds: [BELOW_YOU] }],
 	];
 
 	/** A Manage Server manager kicked, banned and warned from the web, which Discord itself would not have let them do. */
@@ -217,6 +231,21 @@ describe("a role a write names", () => {
 			status: 403,
 			code: "role_out_of_reach",
 		});
+	});
+
+	it("on a menu members pick from sits below its person's highest role", async () => {
+		expect(await asking(MODERATOR, "POST", "/role-menus", { ...MENU, roleIds: [ABOVE_YOU] })).toMatchObject({
+			status: 403,
+			code: "role_out_of_reach",
+		});
+	});
+
+	/** A self-assigned role that kicks would let anybody in the server kick, whoever made the menu. */
+	it("on a menu members pick from never moderates, even for the server's owner", async () => {
+		const answer = await asking(SERVER_OWNER, "POST", "/role-menus", { ...MENU, roleIds: [MODERATES] });
+
+		expect(answer).toMatchObject({ status: 403, code: "role_out_of_reach" });
+		expect(answer.message).toMatch(/moderation or admin permissions/);
 	});
 
 	it("only needs to exist when the bot never hands it out", async () => {

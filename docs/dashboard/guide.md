@@ -485,7 +485,17 @@ only by one is unreachable to anybody arriving another way. It opens on `focusin
 `aria-describedby`, never `aria-labelledby`.
 
 It drives `tippy.js` directly rather than through `@tippyjs/react`, which reads `element.ref` — removed in
-React 19.
+React 19. The child keeps its own `ref`, so a button inside a tooltip can still be focused by its caller.
+
+### Deleting and leaving
+
+| Piece          | Use it for                                                                                         |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| `useUndo()`    | Any delete: `schedule({ key, label, commit })`, and filter rows by `isHidden(key)`. Never `mutate` |
+| `<LeaveGuard>` | Any screen that holds a draft until Save: `<LeaveGuard when={dirty && !saving} />`                 |
+
+A key is unique across the app — `role-menu:${guildId}:${id}` — and a waiting delete still counts against a limit
+or a taken channel until it has gone.
 
 ---
 
@@ -699,27 +709,31 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 
 ## 18. Current screens
 
-| Route                   | Screen                                                                               |
-| ----------------------- | ------------------------------------------------------------------------------------ |
-| `/sign-in`              | One button; also the setup screen for a half-install                                 |
-| `/guilds`               | Picker, with an invite card for guilds without the bot                               |
-| `/guilds/:id`           | Stat tiles, feature grid, permission warnings, recent changes                        |
-| `/guilds/:id/levelling` | Four tabs, optimistic writes, hierarchy warnings                                     |
-| `/guilds/:id/welcome`   | Greeting template, live preview, saved on blur                                       |
-| `/guilds/:id/audit-log` | Grouped event checklist held as a draft until Save                                   |
-| `/guilds/:id/automod`   | Discord's own filters — no database behind it                                        |
-| `/guilds/:id/sticky`    | A list keyed by channel; `PUT` upserts                                               |
-| `/guilds/:id/treasure`  | Random money drops; ranges validated as pairs                                        |
-| `/guilds/:id/tickets`   | Destinations, panel wording, explicit publish                                        |
-| `/guilds/:id/lottery`   | Pot, schedule, freeze, and a confirmed end                                           |
-| `/guilds/:id/giveaways` | Start, end early, reroll and delete — each keyed to its own row                      |
-| `/guilds/:id/members`   | Money and levels, each as a real table, with a jump to your own page                 |
-| `…/members/:userId`     | One member: standing, roles, warnings, softban — and the moderation controls         |
-| `/guilds/:id/settings`  | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |
-| `/guilds/:id/commands`  | Per-command switches for this server                                                 |
-| `/commands`             | Every command, searchable, with the coverage tile                                    |
-| `/terms`, `/privacy`    | Public — outside the sign-in gate, deliberately                                      |
-| `/owner`                | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control           |
+| Route                    | Screen                                                                               |
+| ------------------------ | ------------------------------------------------------------------------------------ |
+| `/sign-in`               | One button; also the setup screen for a half-install                                 |
+| `/guilds`                | Picker, with an invite card for guilds without the bot                               |
+| `/guilds/:id`            | Stat tiles, feature grid, permission warnings, recent changes                        |
+| `/guilds/:id/levelling`  | Four tabs, optimistic writes, hierarchy warnings                                     |
+| `/guilds/:id/welcome`    | Greeting template, live preview, saved on blur                                       |
+| `/guilds/:id/audit-log`  | Grouped event checklist held as a draft until Save                                   |
+| `/guilds/:id/automod`    | Discord's own filters — no database behind it                                        |
+| `/guilds/:id/role-menus` | Menus members pick roles from; nothing above you or that moderates                   |
+| `/guilds/:id/ideas`      | The idea board's channel and switch, every idea, and the decision on it              |
+| `/guilds/:id/starboard`  | Where starred messages go, the stars it takes, and the author's own star             |
+| `/guilds/:id/temp-voice` | The lobby, made here if need be, and what each new voice channel is like             |
+| `/guilds/:id/sticky`     | A list keyed by channel; `PUT` upserts                                               |
+| `/guilds/:id/treasure`   | Random money drops; ranges validated as pairs                                        |
+| `/guilds/:id/tickets`    | Destinations, panel wording, explicit publish                                        |
+| `/guilds/:id/lottery`    | Pot, schedule, freeze, and a confirmed end                                           |
+| `/guilds/:id/giveaways`  | Start, end early, reroll and delete — each keyed to its own row                      |
+| `/guilds/:id/members`    | Money and levels, each as a real table, with a jump to your own page                 |
+| `…/members/:userId`      | One member: standing, roles, warnings, softban — and the moderation controls         |
+| `/guilds/:id/settings`   | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |
+| `/guilds/:id/commands`   | Per-command switches for this server                                                 |
+| `/commands`              | Every command, searchable, with the coverage tile                                    |
+| `/terms`, `/privacy`     | Public — outside the sign-in gate, deliberately                                      |
+| `/owner`                 | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control           |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the

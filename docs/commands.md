@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 74](https://img.shields.io/badge/commands-74-8b5cf6?style=for-the-badge) ![subcommands: 128](https://img.shields.io/badge/subcommands-128-0ea5e9?style=for-the-badge) ![prefix aliases: 90](https://img.shields.io/badge/prefix%20aliases-90-16a34a?style=for-the-badge)
+![commands: 79](https://img.shields.io/badge/commands-79-8b5cf6?style=for-the-badge) ![subcommands: 132](https://img.shields.io/badge/subcommands-132-0ea5e9?style=for-the-badge) ![prefix aliases: 95](https://img.shields.io/badge/prefix%20aliases-95-16a34a?style=for-the-badge)
 
 </div>
 
@@ -14,7 +14,7 @@
 
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
-| [👥 Community](#-community)   |    3     |      6      |
+| [👥 Community](#-community)   |    7     |     10      |
 | [💰 Economy](#-economy)       |    20    |     25      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
@@ -23,18 +23,22 @@
 | [📈 Levelling](#-levelling)   |    2     |      6      |
 | [🛡️ Moderation](#️-moderation) |    17    |     16      |
 | [🎵 Music](#-music)           |    2     |     14      |
-| [⚙️ Settings](#️-settings)     |    10    |     15      |
+| [⚙️ Settings](#️-settings)     |    11    |     15      |
 | [🎫 Tickets](#-tickets)       |    1     |      3      |
 | [🎁 Giveaways](#-giveaways)   |    1     |      4      |
 | [💬 Feedback](#-feedback)     |    2     |      0      |
 
 ## 👥 Community
 
-| Command        | Description                                                       | Subcommands                                                       | Prefix aliases                                                                                | Needs           |
-| -------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------- |
-| `/calculate`   | Evaluates a mathematical expression.                              | —                                                                 | —                                                                                             | —               |
-| `/impersonate` | Sends a message through a webhook that looks like another member. | —                                                                 | —                                                                                             | Manage webhooks |
-| `/lookup`      | Looks something up for you.                                       | `advice`, `animal-fact`, `meme`, `minecraft`, `translate`, `wiki` | `t?advice`, `t?animal-fact`, `t?animalfact`, `t?meme`, `t?minecraft`, `t?translate`, `t?wiki` | —               |
+| Command        | Description                                                        | Subcommands                                                       | Prefix aliases                                                                                | Needs           |
+| -------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------- |
+| `/calculate`   | Evaluates a mathematical expression.                               | —                                                                 | —                                                                                             | —               |
+| `/idea`        | Posts an idea for this server, for members to vote on.             | `submit`, `settings`                                              | —                                                                                             | Manage guild    |
+| `/impersonate` | Sends a message through a webhook that looks like another member.  | —                                                                 | —                                                                                             | Manage webhooks |
+| `/lookup`      | Looks something up for you.                                        | `advice`, `animal-fact`, `meme`, `minecraft`, `translate`, `wiki` | `t?advice`, `t?animal-fact`, `t?animalfact`, `t?meme`, `t?minecraft`, `t?translate`, `t?wiki` | —               |
+| `/remind`      | Reminds you of something later.                                    | `me`, `list`                                                      | `t?remindme`, `t?reminders`                                                                   | —               |
+| `/starboard`   | Sets up the starboard, where messages with enough ⭐ are reposted. | —                                                                 | —                                                                                             | Manage guild    |
+| `/temp-voice`  | Sets up join-to-create voice channels, deleted once they empty.    | —                                                                 | —                                                                                             | Manage guild    |
 
 ## 💰 Economy
 
@@ -135,18 +139,19 @@
 
 ## ⚙️ Settings
 
-| Command           | Description                                                    | Subcommands                                                          | Prefix aliases                | Needs        |
-| ----------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------------------- | ------------ |
-| `/anti-link`      | Deletes links posted by members without the bypass permission. | —                                                                    | `t?antilink`, `t?link-filter` | Manage guild |
-| `/audit-logging`  | Chooses which server events get logged, and where.             | —                                                                    | `t?auditlog`, `t?logging`     | Manage guild |
-| `/auto-role`      | Gives roles automatically to new members.                      | —                                                                    | `t?autorole`, `t?join-roles`  | Manage roles |
-| `/automod`        | Creates Discord AutoMod rules.                                 | `flagged-words`, `spam`, `mention-spam`, `keyword`, `list`, `delete` | —                             | Manage guild |
-| `/counting`       | Runs the counting game in a channel.                           | —                                                                    | `t?count`                     | Manage guild |
-| `/prefix`         | Shows and changes the prefix for text commands.                | —                                                                    | —                             | Manage guild |
-| `/sticky-message` | Keeps a message pinned to the bottom of a channel.             | `setup`, `disable`, `check`                                          | —                             | Manage guild |
-| `/verify`         | Configures the verification system.                            | `setup`, `edit`, `disable`                                           | `t?verification`              | Manage guild |
-| `/voice-stats`    | Shows live member and bot counts in voice channel names.       | —                                                                    | `t?voicestats`, `t?counters`  | Manage guild |
-| `/welcome`        | Greets new members when they join.                             | `setup`, `background`, `test`                                        | `t?welcome-system`, `t?greet` | Manage guild |
+| Command           | Description                                                    | Subcommands                                                          | Prefix aliases                              | Needs        |
+| ----------------- | -------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------- | ------------ |
+| `/anti-link`      | Deletes links posted by members without the bypass permission. | —                                                                    | `t?antilink`, `t?link-filter`               | Manage guild |
+| `/audit-logging`  | Chooses which server events get logged, and where.             | —                                                                    | `t?auditlog`, `t?logging`                   | Manage guild |
+| `/auto-role`      | Gives roles automatically to new members.                      | —                                                                    | `t?autorole`, `t?join-roles`                | Manage roles |
+| `/automod`        | Creates Discord AutoMod rules.                                 | `flagged-words`, `spam`, `mention-spam`, `keyword`, `list`, `delete` | —                                           | Manage guild |
+| `/counting`       | Runs the counting game in a channel.                           | —                                                                    | `t?count`                                   | Manage guild |
+| `/prefix`         | Shows and changes the prefix for text commands.                | —                                                                    | —                                           | Manage guild |
+| `/role-menu`      | Posts menus members pick their own roles from.                 | —                                                                    | `t?rolemenu`, `t?self-roles`, `t?selfroles` | Manage roles |
+| `/sticky-message` | Keeps a message pinned to the bottom of a channel.             | `setup`, `disable`, `check`                                          | —                                           | Manage guild |
+| `/verify`         | Configures the verification system.                            | `setup`, `edit`, `disable`                                           | `t?verification`                            | Manage guild |
+| `/voice-stats`    | Shows live member and bot counts in voice channel names.       | —                                                                    | `t?voicestats`, `t?counters`                | Manage guild |
+| `/welcome`        | Greets new members when they join.                             | `setup`, `background`, `test`                                        | `t?welcome-system`, `t?greet`               | Manage guild |
 
 ## 🎫 Tickets
 

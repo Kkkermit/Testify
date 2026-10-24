@@ -24,9 +24,13 @@ import {
 import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
+import { purgeIdeas } from "@database/repositories/ideaRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
+import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
+import { purgeStarboard } from "@database/repositories/starboardRepository";
+import { purgeTempVoice } from "@database/repositories/tempVoiceRepository";
 
 const UPSERT = { upsert: true as const, new: true as const, lean: true as const, setDefaultsOnInsert: true as const };
 
@@ -294,6 +298,10 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		GuildPrefix.deleteMany({ guildId }).exec(),
 		purgeCommandToggles(guildId),
 		purgeMusicSettings(guildId),
+		purgeRoleMenus(guildId),
+		purgeIdeas(guildId),
+		purgeStarboard(guildId),
+		purgeTempVoice(guildId),
 		purgeCasino(guildId),
 		purgeCasinoStats(guildId),
 		purgeRounds(guildId),

@@ -33,7 +33,7 @@
 <h3 align="center">An all-in-one Discord bot, written once for both slash <em>and</em> prefix commands.</h3>
 
 <p align="center">
-<strong>79 commands and 131 subcommands</strong> — moderation, economy, a casino, levelling, music, tickets, giveaways
+<strong>84 commands and 135 subcommands</strong> — moderation, economy, a casino, levelling, music, tickets, giveaways
 and games — plus an optional web dashboard. Every command works as <code>/ban</code> <strong>and</strong> as
 <code>t?ban</code>, because underneath it is one command, not two copies.
 </p>
@@ -165,6 +165,11 @@ Everything the old bot did is still here, apart from the integrations that neede
 ### 🎉 Community
 
 - **Giveaways** that survive a restart
+- **Role menus** members pick their own roles from, never one that moderates
+- **An idea board** members post to and vote on, and staff accept or decline
+- **A starboard** that reposts the messages with enough ⭐, without pinging anybody again
+- **Join-to-create voice channels**, one per member and deleted once they empty
+- **Reminders** that ping you where you set them, or by DM
 - **Welcome cards** drawn for every new member
 - **Counting, sticky messages, auto roles and verification**
 - **Voice-channel counters** and a self-updating bot statistics message
@@ -308,7 +313,7 @@ and `npm start`. No token or database yet? The next section walks through both f
 <details open>
 <summary><strong>4. Get a database</strong></summary>
 
-Testify keeps everything in MongoDB. The free tier is plenty.
+Testify keeps everything in MongoDB 7.0 or newer. The free tier is plenty.
 
 1. Sign up at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas/register).
 2. Create a **free M0 cluster**.
@@ -465,22 +470,22 @@ seconds**, with a countdown saying so.
 Run `/help` in Discord for the browsable version, or see [`docs/commands.md`](docs/commands.md) for the full
 generated list.
 
-| Category      | Top-level | What is in it                                                               |
-| ------------- | :-------: | --------------------------------------------------------------------------- |
-| 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards         |
-| 🛡️ Moderation |    17     | Ban, kick, mute, warn, softban, lock, clear, roles, slowmode                |
-| 📚 Info       |    12     | User, server and role info, avatars, profiles, ping, help, `/ask`           |
-| ⚙️ Settings   |    10     | Automod, audit logging, auto roles, counting, welcome, verification, prefix |
-| 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                 |
-| 👥 Community  |     3     | Memes, translation, Minecraft lookups, advice, wiki                         |
-| 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                      |
-| 📈 Levelling  |     2     | Rank cards and the levelling settings                                       |
-| 💬 Feedback   |     2     | Suggestions and bug reports                                                 |
-| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume, DJ roles        |
-| 🎰 Casino     |     1     | Roulette, blackjack, slots, hi-lo, coinflip, dice, stats, bet limits        |
-| 🎯 Games      |     1     | Guess the number, Pokémon, fast type, RPS, 8ball                            |
-| 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                  |
-| 🎫 Tickets    |     1     | Setup, status, disable                                                      |
+| Category      | Top-level | What is in it                                                                  |
+| ------------- | :-------: | ------------------------------------------------------------------------------ |
+| 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards            |
+| 🛡️ Moderation |    17     | Ban, kick, mute, warn, softban, lock, clear, roles, slowmode                   |
+| 📚 Info       |    12     | User, server and role info, avatars, profiles, ping, help, `/ask`              |
+| ⚙️ Settings   |    11     | Automod, audit logging, auto roles, role menus, counting, welcome, prefix      |
+| 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                    |
+| 👥 Community  |     7     | Reminders, the idea board, starboard, join to create, memes, translation, wiki |
+| 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                         |
+| 📈 Levelling  |     2     | Rank cards and the levelling settings                                          |
+| 💬 Feedback   |     2     | Suggestions and bug reports                                                    |
+| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume, DJ roles           |
+| 🎰 Casino     |     1     | Roulette, blackjack, slots, hi-lo, coinflip, dice, stats, bet limits           |
+| 🎯 Games      |     1     | Guess the number, Pokémon, fast type, RPS, 8ball                               |
+| 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                     |
+| 🎫 Tickets    |     1     | Setup, status, disable                                                         |
 
 Some categories look small but hold a lot: `/casino`, `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.

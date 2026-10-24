@@ -20,6 +20,8 @@ import {
 	MessagesSquare,
 	Music,
 	LifeBuoy,
+	Lightbulb,
+	ListChecks,
 	Ticket,
 	type LucideIcon,
 	Gauge,
@@ -27,6 +29,8 @@ import {
 	Gift,
 	Gem,
 	Sparkles,
+	Star,
+	Volume2,
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
@@ -55,6 +59,8 @@ export interface NavGroup {
 	heading?: string;
 	/** For a group that is not named after a server, so its heading is translated rather than a name. */
 	headingKey?: TranslationKey;
+	/** Set on a server's own group, whose heading is the switcher to the same screen in another server. */
+	guildId?: string;
 	items: NavItem[];
 	/** Rendered after `items`, each behind its own toggle. */
 	sections?: NavSection[];
@@ -85,6 +91,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 	if (guild !== undefined) {
 		groups.push({
 			heading: guild.name,
+			guildId: guild.id,
 			items: [
 				{ to: `/guilds/${guild.id}`, labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
 				{
@@ -117,6 +124,24 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.levelling",
 							icon: TrendingUp,
 							hintKey: "nav.levellingHint",
+						},
+						{
+							to: `/guilds/${guild.id}/role-menus`,
+							labelKey: "nav.roleMenus",
+							icon: ListChecks,
+							hintKey: "nav.roleMenusHint",
+						},
+						{
+							to: `/guilds/${guild.id}/ideas`,
+							labelKey: "nav.ideas",
+							icon: Lightbulb,
+							hintKey: "nav.ideasHint",
+						},
+						{
+							to: `/guilds/${guild.id}/starboard`,
+							labelKey: "nav.starboard",
+							icon: Star,
+							hintKey: "nav.starboardHint",
 						},
 						{
 							to: `/guilds/${guild.id}/members`,
@@ -215,6 +240,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.tickets",
 							icon: LifeBuoy,
 							hintKey: "nav.ticketsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/temp-voice`,
+							labelKey: "nav.tempVoice",
+							icon: Volume2,
+							hintKey: "nav.tempVoiceHint",
 						},
 						{
 							to: `/guilds/${guild.id}/bot-stats`,

@@ -10,13 +10,18 @@ import { botStats } from "@api/routes/botStats";
 import { casino } from "@api/routes/casino";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { giveaways } from "@api/routes/giveaways";
+import { ideas } from "@api/routes/ideas";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
 import { memberCount } from "@api/routes/memberCount";
 import { members } from "@api/routes/members";
 import { music } from "@api/routes/music";
+import { roleMenus } from "@api/routes/roleMenus";
 import { settings } from "@api/routes/settings";
+import { setup } from "@api/routes/setup";
+import { starboard } from "@api/routes/starboard";
 import { sticky } from "@api/routes/sticky";
+import { tempVoice } from "@api/routes/tempVoice";
 import { tickets } from "@api/routes/tickets";
 import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
@@ -24,7 +29,9 @@ import { warnings } from "@api/routes/warnings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
+import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { countRoleMenus } from "@database/repositories/roleMenuRepository";
 import {
 	getAntiLink,
 	getAuditLogConfig,
@@ -35,6 +42,8 @@ import {
 	getWelcome,
 	listSticky,
 } from "@database/repositories/settingsRepository";
+import { getStarboardSettings } from "@database/repositories/starboardRepository";
+import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
 import { CASINO_GAMES, readCasinoSettings } from "@lib/casino";
 import { canPostInChannel } from "@lib/discord";
@@ -42,6 +51,7 @@ import { readLottery, readTreasure } from "@lib/economy";
 import { readInsights } from "@lib/info";
 import { normaliseSettings } from "@lib/levelling";
 import { readServerChanges } from "@lib/moderation";
+import { isPowerful } from "@lib/roles";
 import { readTickets } from "@lib/tickets";
 import {
 	type AuditEntrySummary,
@@ -76,12 +86,17 @@ guilds.route("/:guildId/lottery", lottery);
 guilds.route("/:guildId/casino", casino);
 guilds.route("/:guildId/treasure", treasure);
 guilds.route("/:guildId/giveaways", giveaways);
+guilds.route("/:guildId/ideas", ideas);
 guilds.route("/:guildId/verification", verification);
 guilds.route("/:guildId/members", members);
 guilds.route("/:guildId/music", music);
+guilds.route("/:guildId/role-menus", roleMenus);
 guilds.route("/:guildId/bot-stats", botStats);
 guilds.route("/:guildId/member-count", memberCount);
 guilds.route("/:guildId/warnings", warnings);
+guilds.route("/:guildId/starboard", starboard);
+guilds.route("/:guildId/temp-voice", tempVoice);
+guilds.route("/:guildId/setup", setup);
 
 function guildOf(context: Context<ApiBindings>): Guild {
 	const guild = context.get("guild");
@@ -145,6 +160,7 @@ guilds.get("/:guildId/roles", (context) => {
 			managed: role.managed,
 			// The check `applyLevelRewards` already does at runtime, surfaced at configuration time instead.
 			assignableByBot: !role.managed && role.position < highest,
+			powerful: isPowerful(role),
 		}))
 		.sort((a, b) => b.position - a.position);
 
@@ -212,6 +228,10 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		draw,
 		stats,
 		tables,
+		menus,
+		board,
+		stars,
+		lobby,
 	] = await Promise.all([
 		getLevelSettings(guild.id),
 		getAuditLogConfig(guild.id),
@@ -227,6 +247,10 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 		readLottery(guild.id),
 		getFixedStats(guild.id),
 		readCasinoSettings(guild.id),
+		countRoleMenus(guild.id),
+		getIdeaSettings(guild.id),
+		getStarboardSettings(guild.id),
+		getTempVoiceSettings(guild.id),
 	]);
 
 	const level = normaliseSettings(levels);
@@ -275,6 +299,33 @@ async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
 			label: "Auto roles",
 			enabled: (autoRoles?.roleIds.length ?? 0) > 0,
 			detail: autoRoles === null ? null : count(autoRoles.roleIds.length, "role"),
+		},
+		{
+			key: "role-menus",
+			label: "Role menus",
+			enabled: menus > 0,
+			detail: menus === 0 ? null : count(menus, "menu"),
+		},
+		{
+			key: "ideas",
+			label: "Idea board",
+			enabled: board?.enabled === true,
+			detail: board?.enabled === true && board.channelId !== null ? `Posting in <#${board.channelId}>` : null,
+		},
+		{
+			key: "starboard",
+			label: "Starboard",
+			enabled: stars?.enabled === true,
+			detail:
+				stars?.enabled === true && stars.channelId !== null
+					? `${String(stars.threshold)} ⭐ to reach <#${stars.channelId}>`
+					: null,
+		},
+		{
+			key: "temp-voice",
+			label: "Join to create",
+			enabled: lobby?.enabled === true,
+			detail: lobby?.enabled === true && lobby.lobbyChannelId !== null ? `Lobby: <#${lobby.lobbyChannelId}>` : null,
 		},
 		{
 			key: "voice-stats",

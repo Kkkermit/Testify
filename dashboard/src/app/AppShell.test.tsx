@@ -39,6 +39,78 @@ describe("the app shell", () => {
 		expect(screen.getByRole("link", { name: "Overview" })).toHaveAttribute("href", `/guilds/${aGuild.id}`);
 	});
 
+	describe("the server switcher", () => {
+		const second = { ...aGuild, id: "900000000000000009", name: "Second Server" };
+
+		beforeEach(() => {
+			server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, guilds: [...me.guilds, second] })));
+		});
+
+		it("heads the server's screens and starts closed", async () => {
+			renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+
+			const switcher = await screen.findByRole("button", { name: "Test Server, change server" });
+			expect(switcher).toHaveAttribute("aria-expanded", "false");
+			expect(screen.queryByRole("list", { name: "Your other servers" })).not.toBeInTheDocument();
+		});
+
+		/** Going back to the picker to reach another server's Levelling was two clicks and a scroll too many. */
+		it("offers the same screen in every other server the bot is in", async () => {
+			const user = userEvent.setup();
+			renderWithProviders(<AppShell />, {
+				path: "/guilds/:guildId/levelling",
+				route: `/guilds/${aGuild.id}/levelling?tab=rewards`,
+			});
+
+			await user.click(await screen.findByRole("button", { name: "Test Server, change server" }));
+
+			const others = screen.getByRole("list", { name: "Your other servers" });
+			expect(within(others).getByRole("link", { name: "Second Server" })).toHaveAttribute(
+				"href",
+				`/guilds/${second.id}/levelling?tab=rewards`,
+			);
+			expect(within(others).queryByRole("link", { name: "Somewhere Else" })).not.toBeInTheDocument();
+			expect(screen.getByRole("link", { name: "All servers" })).toHaveAttribute("href", "/guilds");
+		});
+
+		it("moves to the other server and closes behind it", async () => {
+			const user = userEvent.setup();
+			renderWithProviders(<AppShell />, {
+				path: "/guilds/:guildId/levelling",
+				route: `/guilds/${aGuild.id}/levelling`,
+			});
+
+			await user.click(await screen.findByRole("button", { name: "Test Server, change server" }));
+			await user.click(screen.getByRole("link", { name: "Second Server" }));
+
+			const switcher = await screen.findByRole("button", { name: "Second Server, change server" });
+			expect(switcher).toHaveAttribute("aria-expanded", "false");
+		});
+
+		it("closes on Escape and hands focus back", async () => {
+			const user = userEvent.setup();
+			renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+
+			const switcher = await screen.findByRole("button", { name: "Test Server, change server" });
+			await user.click(switcher);
+			await user.tab();
+			await user.keyboard("{Escape}");
+
+			expect(switcher).toHaveAttribute("aria-expanded", "false");
+			expect(switcher).toHaveFocus();
+		});
+
+		it("says so when there is nowhere else to go", async () => {
+			server.use(http.get("/api/auth/me", () => HttpResponse.json(me)));
+			const user = userEvent.setup();
+			renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+
+			await user.click(await screen.findByRole("button", { name: "Test Server, change server" }));
+
+			expect(screen.getByText(/is in no other server you manage/)).toBeInTheDocument();
+		});
+	});
+
 	it("groups a server's screens behind a toggle rather than listing all ten", async () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });

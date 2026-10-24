@@ -1,6 +1,7 @@
 import {
 	type AuditLogConfigResponse,
 	type ServerChangesPage,
+	type SetupChecklist,
 	type InsightsReport,
 	type BlacklistRow,
 	type BotControlState,
@@ -32,6 +33,10 @@ import {
 	type SetupStatus,
 	type WelcomeConfigResponse,
 	type GiveawayList,
+	type IdeaRow,
+	type Paged,
+	type IdeaSettings,
+	type RoleMenuList,
 	type StickyList,
 	type LotterySettings,
 	type TicketSettings,
@@ -48,6 +53,8 @@ import {
 	type BoardPage,
 	type MemberDetail,
 	type StatusResponse,
+	type StarboardSettings,
+	type TempVoiceSettings,
 } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 
@@ -118,6 +125,15 @@ export const overview: GuildOverview = {
 	],
 	missingPermissions: [],
 	recentChanges: [],
+};
+
+/** Everything done, so the checklist stays out of the way of tests about something else. */
+export const setupDone: SetupChecklist = {
+	steps: [
+		{ step: "levelling", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
+		{ step: "welcome", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
+		{ step: "audit-log", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
+	],
 };
 
 export const levelConfig: LevelConfigResponse = {
@@ -373,6 +389,86 @@ export const stickyList: StickyList = {
 	],
 };
 
+export const roleMenuList: RoleMenuList = {
+	limit: 10,
+	menus: [
+		{
+			id: "6650a1b2c3d4e5f6a7b8c9d0",
+			channelId: "400000000000000001",
+			title: "Pick your pings",
+			description: "Choose what you hear about.",
+			roleIds: ["300000000000000001", "300000000000000002"],
+			mode: "many",
+			posted: true,
+			canSend: true,
+		},
+	],
+};
+
+export const ideaSettings: IdeaSettings = {
+	enabled: true,
+	channelId: "400000000000000001",
+	canSend: true,
+	counts: { open: 1, accepted: 1, declined: 0 },
+};
+
+export const starboardSettings: StarboardSettings = {
+	enabled: true,
+	channelId: "400000000000000001",
+	threshold: 3,
+	selfStar: false,
+	canSend: true,
+	posts: 4,
+};
+
+export const tempVoiceSettings: TempVoiceSettings = {
+	enabled: true,
+	lobbyChannelId: "400000000000000003",
+	categoryId: null,
+	nameTemplate: "{user}'s channel",
+	userLimit: 0,
+	canManage: true,
+	active: 2,
+};
+
+export const ideaPage: Paged<IdeaRow> = {
+	page: 1,
+	perPage: 10,
+	total: 2,
+	items: [
+		{
+			id: "6650a1b2c3d4e5f6a7b8c9d1",
+			number: 2,
+			authorId: "100000000000000002",
+			authorName: "alice",
+			text: "A channel for pets.",
+			status: "open",
+			reason: "",
+			decidedByName: null,
+			decidedAt: null,
+			up: 5,
+			down: 1,
+			createdAt: "2026-10-20T10:00:00.000Z",
+			messageUrl: "https://discord.com/channels/900000000000000001/400000000000000001/500000000000000002",
+		},
+		{
+			id: "6650a1b2c3d4e5f6a7b8c9d2",
+			number: 1,
+			authorId: "100000000000000003",
+			authorName: "bob",
+			text: "Weekly movie night.",
+			status: "accepted",
+			reason: "Starting Friday.",
+			decidedByName: "kate",
+			decidedAt: "2026-10-21T10:00:00.000Z",
+			up: 9,
+			down: 0,
+			createdAt: "2026-10-19T10:00:00.000Z",
+			messageUrl: null,
+		},
+	],
+};
+
 export const verificationConfig: VerificationConfigResponse = {
 	enabled: true,
 	channelId: "400000000000000001",
@@ -516,6 +612,11 @@ export const usageReport: UsageReport = {
 	leastUsed: [{ command: "flush", category: "developer", count: 0, failures: 0 }],
 	busiestGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 900 }],
 	dashboardGuilds: [{ guildId: aGuild.id, name: aGuild.name, iconUrl: null, memberCount: 1_234, count: 12 }],
+	runDays: 30,
+	slowest: [
+		{ command: "music", category: "music", runs: 40, typicalMs: 850, slowMs: 4_200 },
+		{ command: "rank", category: "levelling", runs: 1_300, typicalMs: 90, slowMs: 310 },
+	],
 	screens: [
 		{ route: "/guilds/:guildId/levelling", count: 42 },
 		{ route: "/guilds/:guildId/settings", count: 18 },
@@ -586,6 +687,7 @@ export const commandRuns: CommandRunRow[] = [
 		subcommand: "play",
 		surface: "slash",
 		failed: true,
+		reference: "AB12CD",
 		durationMs: 1_200,
 		channelId: "400000000000000001",
 		channelName: "general",
@@ -598,6 +700,7 @@ export const commandRuns: CommandRunRow[] = [
 		subcommand: null,
 		surface: "prefix",
 		failed: false,
+		reference: null,
 		durationMs: 85,
 		channelId: null,
 		channelName: null,
@@ -725,9 +828,33 @@ export const someChannels: ChannelSummary[] = [
 ];
 
 export const someRoles: RoleSummary[] = [
-	{ id: "300000000000000001", name: "Member", colour: null, position: 1, managed: false, assignableByBot: true },
-	{ id: "300000000000000002", name: "Booster", colour: "#7c3aed", position: 3, managed: false, assignableByBot: true },
-	{ id: "300000000000000003", name: "Admin", colour: null, position: 9, managed: false, assignableByBot: false },
+	{
+		id: "300000000000000001",
+		name: "Member",
+		colour: null,
+		position: 1,
+		managed: false,
+		assignableByBot: true,
+		powerful: false,
+	},
+	{
+		id: "300000000000000002",
+		name: "Booster",
+		colour: "#7c3aed",
+		position: 3,
+		managed: false,
+		assignableByBot: true,
+		powerful: false,
+	},
+	{
+		id: "300000000000000003",
+		name: "Admin",
+		colour: null,
+		position: 9,
+		managed: false,
+		assignableByBot: false,
+		powerful: true,
+	},
 ];
 
 function catalogueEntry(
@@ -849,6 +976,7 @@ export const handlers = [
 	http.get("/api/commands", () => HttpResponse.json(catalogue)),
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
+	http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(setupDone)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
@@ -922,6 +1050,21 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/member-count", () => HttpResponse.json(memberCounts)),
 	http.post("/api/guilds/:guildId/treasure/reset", () => HttpResponse.json(treasureSettings)),
 	http.put("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/role-menus", () => HttpResponse.json(roleMenuList)),
+	http.get("/api/guilds/:guildId/ideas", () => HttpResponse.json(ideaSettings)),
+	http.patch("/api/guilds/:guildId/ideas", () => HttpResponse.json(ideaSettings)),
+	http.get("/api/guilds/:guildId/starboard", () => HttpResponse.json(starboardSettings)),
+	http.patch("/api/guilds/:guildId/starboard", () => HttpResponse.json(starboardSettings)),
+	http.get("/api/guilds/:guildId/temp-voice", () => HttpResponse.json(tempVoiceSettings)),
+	http.patch("/api/guilds/:guildId/temp-voice", () => HttpResponse.json(tempVoiceSettings)),
+	http.post("/api/guilds/:guildId/temp-voice/lobby", () => HttpResponse.json(tempVoiceSettings)),
+	http.get("/api/guilds/:guildId/ideas/list", () => HttpResponse.json(ideaPage)),
+	http.post("/api/guilds/:guildId/ideas/:ideaId/decision", () => HttpResponse.json(ideaPage.items[0])),
+	http.delete("/api/guilds/:guildId/ideas/:ideaId", () => new HttpResponse(null, { status: 204 })),
+	http.post("/api/guilds/:guildId/role-menus", () => HttpResponse.json(roleMenuList)),
+	http.put("/api/guilds/:guildId/role-menus/:menuId", () => HttpResponse.json(roleMenuList)),
+	http.post("/api/guilds/:guildId/role-menus/:menuId/publish", () => HttpResponse.json(roleMenuList)),
+	http.delete("/api/guilds/:guildId/role-menus/:menuId", () => HttpResponse.json({ limit: 10, menus: [] })),
 	http.delete("/api/guilds/:guildId/sticky/:channelId", () => HttpResponse.json({ limit: 25, entries: [] })),
 	http.get("/api/guilds/:guildId/commands", () => HttpResponse.json(commandToggles)),
 	http.get("/api/owner/commands", () => HttpResponse.json(commandToggles)),

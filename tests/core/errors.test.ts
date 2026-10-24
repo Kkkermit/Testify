@@ -41,13 +41,14 @@ describe("runCommand", () => {
 
 	it("does nothing extra when the command succeeds", async () => {
 		const interaction = createMockInteraction();
-		await runCommand(
+		const outcome = await runCommand(
 			interaction,
 			command(() => Promise.resolve()),
 			createMockClient(),
 		);
 
 		expect(interaction.sent).toEqual([]);
+		expect(outcome).toEqual({ ok: true, reference: null });
 	});
 
 	it("shows a UserFacingError word for word", async () => {
@@ -97,7 +98,7 @@ describe("runCommand", () => {
 		const interaction = createMockInteraction();
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
-		await runCommand(
+		const outcome = await runCommand(
 			interaction,
 			command(() => Promise.reject(new Error("boom"))),
 			client,
@@ -106,6 +107,21 @@ describe("runCommand", () => {
 		const reference = /\*\*([0-9A-Z]{6})\*\*/.exec(JSON.stringify(interaction.sent))?.[1];
 		expect(reference).toBeDefined();
 		expect(client.logger.error).toHaveBeenCalledWith(expect.objectContaining({ reference }), expect.any(String));
+		// The run log keeps the same reference, which is what links a failed run to its log lines.
+		expect(outcome).toEqual({ ok: false, reference });
+	});
+
+	/** A refusal is the reader's to fix and is never logged as a failure, so it has no reference to follow. */
+	it("returns no reference for a failure that was not logged as a bug", async () => {
+		const client = createMockClient({ logger: { error: jest.fn() } } as never);
+
+		const outcome = await runCommand(
+			createMockInteraction(),
+			command(() => Promise.reject(new UserFacingError("You need 500 more coins."))),
+			client,
+		);
+
+		expect(outcome).toEqual({ ok: false, reference: null });
 	});
 
 	it("logs the unexpected error with its context", async () => {
@@ -238,14 +254,14 @@ describe("runCommand", () => {
 		(interaction as { reply: unknown }).reply = jest.fn(() => Promise.reject(new Error("Unknown interaction")));
 		const client = createMockClient({ logger: { error: jest.fn() } } as never);
 
-		// False rather than a throw: the command did fail, and saying so is what lets a caller count it.
+		// A failure rather than a throw: the command did fail, and saying so is what lets a caller count it.
 		await expect(
 			runCommand(
 				interaction as unknown as CommandInput,
 				command(() => Promise.reject(new Error("boom"))),
 				client,
 			),
-		).resolves.toBe(false);
+		).resolves.toMatchObject({ ok: false });
 	});
 });
 
@@ -348,7 +364,9 @@ describe("the error channel", () => {
 		const send = jest.fn(() => Promise.reject(new Error("Missing Access")));
 		const client = clientWithChannel(send, "123");
 
-		await expect(runCommand(createMockInteraction() as unknown as CommandInput, command, client)).resolves.toBe(false);
+		await expect(
+			runCommand(createMockInteraction() as unknown as CommandInput, command, client),
+		).resolves.toMatchObject({ ok: false });
 		expect(client.logger.warn).toHaveBeenCalled();
 	});
 

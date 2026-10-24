@@ -237,6 +237,33 @@ describe("sorting and searching the owner guild list", () => {
 		expect(await names("?q=90000000000000000")).toEqual([]);
 	});
 
+	/** Equally quiet servers come oldest first, since the bot has had longest to be used there. */
+	it("puts the server that ran the fewest commands first, and the oldest of equals", async () => {
+		expect(await names("?sort=quietest")).toEqual(["alpha", "Bravo", "Charlie"]);
+
+		jest.mocked(guildTallies).mockResolvedValue([{ guildId: "900000000000000001", count: 3 }]);
+
+		expect(await names("?sort=quietest")).toEqual(["Bravo", "Charlie", "alpha"]);
+	});
+
+	it("keeps only the servers that ran no command in the last 30 days", async () => {
+		jest.mocked(guildTallies).mockResolvedValue([
+			{ guildId: "900000000000000000", count: 7 },
+			{ guildId: "900000000000000002", count: 0 },
+		]);
+
+		const body = (await (
+			await appFor(three()).request("/owner/guilds?filter=inactive")
+		).json()) as Paged<OwnerGuildRow>;
+
+		expect(body.items.map((guild) => guild.name)).toEqual(["alpha", "Charlie"]);
+		expect(body.total).toBe(2);
+	});
+
+	it("refuses a filter it does not offer", async () => {
+		expect((await appFor(three()).request("/owner/guilds?filter=everything")).status).toBe(400);
+	});
+
 	it("refuses a sort it does not offer", async () => {
 		expect((await appFor(three()).request("/owner/guilds?sort=random")).status).toBe(400);
 	});

@@ -5,8 +5,10 @@ import { settleIdleHands } from "@jobs/casinoSweep.util";
 import { runLotteryDraws } from "@jobs/lotteryDraw.util";
 import { payPassiveIncome } from "@jobs/passiveIncome.util";
 import { refreshBotStats } from "@jobs/refreshBotStats.util";
+import { deliverDueReminders } from "@jobs/reminders.util";
 import { processExpiredSoftbans } from "@jobs/softbanExpiry.util";
 import { recordHeartbeat } from "@jobs/statusHeartbeat.util";
+import { sweepTempVoice } from "@jobs/tempVoiceSweep.util";
 import { flushCommandLog, startEventLoopMonitor, watchDiscordApi } from "@lib/bot";
 import { CASINO_TIMING, spinOverdueRounds } from "@lib/casino";
 import { flushActivity } from "@lib/info";
@@ -19,12 +21,16 @@ export default defineEvent({
 	run(client) {
 		client.timers.every("lottery", INTERVALS.lotteryCheckMs, () => runLotteryDraws(client));
 		client.timers.every("softbans", INTERVALS.softbanCheckMs, () => processExpiredSoftbans(client));
+		client.timers.every("reminders", INTERVALS.reminderCheckMs, () => deliverDueReminders(client));
 		client.timers.every("passive-income", INTERVALS.passiveIncomeMs, () => payPassiveIncome(client));
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
 		client.timers.every("insights", INTERVALS.insightsFlushMs, () => flushActivity(client.logger));
 		client.timers.every("casino-hands", CASINO_TIMING.sweepEveryMs, () => settleIdleHands(client));
 		client.timers.every("roulette-rounds", CASINO_TIMING.sweepEveryMs, () => spinOverdueRounds(client));
 		client.timers.every("command-log", INTERVALS.commandLogFlushMs, () => flushCommandLog(client));
+		// Once soon after start-up for what emptied while the bot was away, then as a backstop.
+		client.timers.after("temp-voice-first", 30_000, () => sweepTempVoice(client));
+		client.timers.every("temp-voice", INTERVALS.tempVoiceSweepMs, () => sweepTempVoice(client));
 
 		startEventLoopMonitor();
 		watchDiscordApi(client);

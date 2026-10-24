@@ -30,6 +30,10 @@ const SENTENCES: Record<ProblemCode, (values: Record<string, number>) => string>
 	"treasure.messageRange": () => "The fewest messages cannot be more than the most.",
 	"treasure.amountRange": () => "The smallest drop cannot be more than the largest.",
 	"casino.betRange": () => "The smallest bet cannot be more than the largest.",
+	"roleMenu.channel": () => "Choose where the menu is posted.",
+	"roleMenu.title": () => "Give the menu a title.",
+	"roleMenu.roles": () => "Pick at least one role to offer.",
+	"roleMenu.tooManyRoles": ({ max = 0 }) => `One menu cannot offer more than ${String(max)} roles.`,
 };
 
 export function problemText(problem: Problem): string;

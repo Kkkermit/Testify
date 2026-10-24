@@ -5,6 +5,7 @@ import {
 	recentRuns,
 	recordCommandRun,
 	type RunRecord,
+	slowestCommands,
 } from "@database/repositories/commandRunRepository";
 import { RUN_RETENTION_DAYS } from "@testify/shared";
 
@@ -27,6 +28,7 @@ describeWithMongo("commandRunRepository", () => {
 				subcommand: null,
 				surface: "slash",
 				failed: false,
+				reference: null,
 				durationMs: 10,
 				...overrides,
 			},
@@ -112,5 +114,37 @@ describeWithMongo("commandRunRepository", () => {
 		await ran({ guildId: OTHER });
 
 		expect(await recentRuns(GUILD, 7, {}, PAGE, TODAY)).toEqual({ items: [], total: 0 });
+	});
+
+	it("keeps the reference a failure was logged under, so the console can find it", async () => {
+		await ran({ failed: true, reference: "AB12CD" });
+
+		const { items } = await recentRuns(GUILD, 7, {}, PAGE, TODAY);
+		expect(items[0]?.reference).toBe("AB12CD");
+	});
+
+	/** Ranked by the slow tail rather than the average, because one hung command a day is what somebody notices. */
+	it("ranks commands by how long their slowest runs took", async () => {
+		for (const durationMs of [100, 110, 120, 130, 140, 150, 160, 170, 180, 190])
+			await ran({ command: "rank", durationMs });
+		for (const durationMs of [50, 50, 50, 50, 50, 50, 50, 50, 50, 9_000]) await ran({ command: "music", durationMs });
+
+		const [first, second] = await slowestCommands(7, 10, TODAY);
+
+		expect(first).toMatchObject({ command: "music", runs: 10 });
+		expect(first?.typicalMs).toBe(50);
+		expect(first?.slowMs).toBe(9_000);
+		expect(second).toMatchObject({ command: "rank", runs: 10 });
+		expect(second?.typicalMs).toBeGreaterThanOrEqual(140);
+		expect(second?.typicalMs).toBeLessThanOrEqual(150);
+	});
+
+	it("measures across every server, inside the window, up to the limit", async () => {
+		await ran({ guildId: OTHER, command: "rank", durationMs: 500 });
+		await ran({ command: "balance", durationMs: 200 });
+		await ran({ command: "help", durationMs: 9_000 }, new Date("2026-06-01T09:00:00.000Z"));
+
+		expect((await slowestCommands(7, 10, TODAY)).map((row) => row.command)).toEqual(["rank", "balance"]);
+		expect(await slowestCommands(7, 1, TODAY)).toHaveLength(1);
 	});
 });
