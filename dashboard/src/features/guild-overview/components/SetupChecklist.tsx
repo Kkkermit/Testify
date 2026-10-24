@@ -37,8 +37,8 @@ export function SetupChecklist({ guildId }: { guildId: string }): React.JSX.Elem
 
 	return (
 		<Card focal className="motion-reveal flex flex-col gap-4">
-			<div className="flex flex-wrap items-start justify-between gap-2">
-				<div className="flex flex-col gap-1">
+			<div className="flex items-start justify-between gap-2">
+				<div className="flex min-w-0 flex-1 flex-col gap-1">
 					<h2 id="checklist-heading" className="font-semibold">
 						{t("checklist.title")}
 					</h2>
@@ -101,7 +101,7 @@ function StepRow({
 	const screen = look.path?.(guildId) ?? `/guilds/${guildId}`;
 
 	return (
-		<li className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center">
+		<li className="flex items-start gap-3 py-4 first:pt-0 last:pb-0">
 			<span
 				aria-hidden="true"
 				className={cn(
@@ -112,24 +112,26 @@ function StepRow({
 				<Icon size={18} />
 			</span>
 
-			<div className="flex min-w-0 flex-1 flex-col gap-1">
-				<p className="flex flex-wrap items-center gap-2 text-sm font-medium">
-					{t(STEP_TITLE[step.step])}
-					{step.done && <Badge tone="success">{t("checklist.on")}</Badge>}
-				</p>
-				<p className="text-muted-foreground text-sm">{t(describeStep(step), { channel: step.channelName ?? "" })}</p>
-				{error !== null && <Warning>{error.message}</Warning>}
-			</div>
+			<div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
+				<div className="flex min-w-0 flex-1 flex-col gap-1">
+					<p className="flex flex-wrap items-center gap-2 text-sm font-medium">
+						{t(STEP_TITLE[step.step])}
+						{step.done && <Badge tone="success">{t("checklist.on")}</Badge>}
+					</p>
+					<p className="text-muted-foreground text-sm">{t(describeStep(step), { channel: step.channelName ?? "" })}</p>
+					{error !== null && <Warning>{error.message}</Warning>}
+				</div>
 
-			<div className="flex shrink-0 flex-wrap items-center gap-3">
-				{(action === "start" || action === "create") && (
-					<Button variant={primary ? "primary" : "secondary"} disabled={busy} onClick={onStart}>
-						{pending ? t("checklist.starting") : t(action === "create" ? "checklist.create" : "checklist.start")}
-					</Button>
-				)}
-				<Link to={screen} className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}>
-					{t(action === "choose" ? "checklist.choose" : step.done ? "checklist.open" : "checklist.customise")}
-				</Link>
+				<div className="flex shrink-0 flex-wrap items-center gap-3">
+					{(action === "start" || action === "create") && (
+						<Button variant={primary ? "primary" : "secondary"} disabled={busy} onClick={onStart}>
+							{pending ? t("checklist.starting") : t(action === "create" ? "checklist.create" : "checklist.start")}
+						</Button>
+					)}
+					<Link to={screen} className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}>
+						{t(action === "choose" ? "checklist.choose" : step.done ? "checklist.open" : "checklist.customise")}
+					</Link>
+				</div>
 			</div>
 		</li>
 	);
