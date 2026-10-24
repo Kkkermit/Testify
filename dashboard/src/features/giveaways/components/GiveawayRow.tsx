@@ -72,7 +72,7 @@ export function GiveawayRow({
 				)}
 				<Button variant="ghost" disabled={busy} onClick={onDelete}>
 					<Trash2 size={16} aria-hidden="true" />
-					<span className="sr-only">Delete the giveaway for {row.prize}</span>
+					<span className="sr-only">{t("giveaways.deleteFor", { prize: row.prize })}</span>
 				</Button>
 			</div>
 		</li>

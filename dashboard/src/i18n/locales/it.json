@@ -132,6 +132,22 @@
 		"server": "Apri la sua panoramica",
 		"configuredIn": "Si imposta in {{screen}}"
 	},
+	"undo": {
+		"deleted": "Hai eliminato {{what}}.",
+		"undo": "Annulla",
+		"failed": "Non è stato possibile eliminare {{what}}.",
+		"dismiss": "Chiudi",
+		"roleMenu": "il menu ruoli «{{title}}»",
+		"idea": "l’idea n. {{number}}",
+		"sticky": "il messaggio fisso in {{channel}}",
+		"giveaway": "il giveaway per {{prize}}"
+	},
+	"leave": {
+		"title": "Uscire senza salvare?",
+		"body": "Le modifiche in questa schermata non sono state salvate e andranno perse se esci ora.",
+		"stay": "Continua a modificare",
+		"leave": "Esci senza salvare"
+	},
 	"error": {
 		"unreachableTitle": "Qualcosa è andato storto",
 		"unreachableBody": "La dashboard non è riuscita a contattare il bot.",
@@ -482,7 +498,10 @@
 		"addSticky": "Aggiungi",
 		"countOf": "{{used}} di {{limit}}",
 		"removeIn": "Rimuovi il messaggio fisso in {{channel}}",
-		"cannotPost": "{{bot}} non può scrivere in #{{channel}}, quindi questo messaggio fisso non apparirà mai."
+		"cannotPost": "{{bot}} non può scrivere in #{{channel}}, quindi questo messaggio fisso non apparirà mai.",
+		"deletedChannel": "un canale eliminato",
+		"deletedChannelTitle": "Un canale eliminato",
+		"sinceLast": "Messaggi dall’ultima pubblicazione: {{done}} su {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Menu dei ruoli",
@@ -607,7 +626,9 @@
 		"winnerCount_other": "{{count}} vincitori",
 		"startIt": "Avvia",
 		"inThisServer": "In questo server",
-		"startBody": "{{bot}} lo pubblica ed estrae i vincitori allo scadere del tempo. Si partecipa con la reazione 🎉."
+		"startBody": "{{bot}} lo pubblica ed estrae i vincitori allo scadere del tempo. Si partecipa con la reazione 🎉.",
+		"deleteFor": "Elimina il giveaway per {{prize}}",
+		"runningCount": "{{count, number}} in corso"
 	},
 	"levelling": {
 		"title": "Livelli",

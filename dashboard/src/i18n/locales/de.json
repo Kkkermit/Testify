@@ -132,6 +132,22 @@
 		"server": "Seine Übersicht öffnen",
 		"configuredIn": "Einstellbar unter {{screen}}"
 	},
+	"undo": {
+		"deleted": "{{what}} gelöscht.",
+		"undo": "Rückgängig",
+		"failed": "{{what}} konnte nicht gelöscht werden.",
+		"dismiss": "Schließen",
+		"roleMenu": "Rollenmenü „{{title}}“",
+		"idea": "Idee #{{number}}",
+		"sticky": "Sticky in {{channel}}",
+		"giveaway": "Verlosung um {{prize}}"
+	},
+	"leave": {
+		"title": "Ohne Speichern verlassen?",
+		"body": "Deine Änderungen auf dieser Seite sind nicht gespeichert und gehen verloren, wenn du sie jetzt verlässt.",
+		"stay": "Weiter bearbeiten",
+		"leave": "Ohne Speichern verlassen"
+	},
 	"error": {
 		"unreachableTitle": "Etwas ist schiefgelaufen",
 		"unreachableBody": "Das Dashboard konnte den Bot nicht erreichen.",
@@ -481,7 +497,10 @@
 		"addSticky": "Hinzufügen",
 		"countOf": "{{used}} von {{limit}}",
 		"removeIn": "Sticky in {{channel}} entfernen",
-		"cannotPost": "{{bot}} kann in #{{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen."
+		"cannotPost": "{{bot}} kann in #{{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen.",
+		"deletedChannel": "einem gelöschten Kanal",
+		"deletedChannelTitle": "Ein gelöschter Kanal",
+		"sinceLast": "Nachrichten seit dem letzten Post: {{done}} von {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Rollenmenüs",
@@ -606,7 +625,9 @@
 		"winnerCount_other": "{{count}} Gewinner",
 		"startIt": "Starten",
 		"inThisServer": "Auf diesem Server",
-		"startBody": "{{bot}} postet sie und lost die Gewinner aus, wenn die Zeit um ist. Teilgenommen wird mit der 🎉-Reaktion."
+		"startBody": "{{bot}} postet sie und lost die Gewinner aus, wenn die Zeit um ist. Teilgenommen wird mit der 🎉-Reaktion.",
+		"deleteFor": "Verlosung um {{prize}} löschen",
+		"runningCount": "{{count, number}} laufen"
 	},
 	"levelling": {
 		"title": "Level",

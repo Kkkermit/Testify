@@ -42,6 +42,8 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 		method,
 		headers,
 		credentials: "same-origin",
+		// An undoable delete is sent as the page closes, and only a keepalive request outlives the page.
+		keepalive: method === "DELETE",
 		...(body === undefined ? {} : { body: JSON.stringify(body) }),
 	});
 

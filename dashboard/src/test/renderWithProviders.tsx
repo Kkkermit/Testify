@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, type RenderResult } from "@testing-library/react";
 import { type ReactElement } from "react";
 import { createMemoryRouter, RouterProvider } from "react-router";
+import { UndoProvider } from "@/app/UndoProvider";
 
 /** A fresh QueryClient per test, or one test's cached `/auth/me` answers the next one's question. */
 export function renderWithProviders(
@@ -10,7 +11,8 @@ export function renderWithProviders(
 ): RenderResult & { client: QueryClient; search: () => string } {
 	const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-	const router = createMemoryRouter([{ path: options.path ?? "/", element: ui }], {
+	// AppShell provides undo in the app, and a page rendered on its own still needs somewhere to wait.
+	const router = createMemoryRouter([{ path: options.path ?? "/", element: <UndoProvider>{ui}</UndoProvider> }], {
 		initialEntries: [options.route ?? options.path ?? "/"],
 	});
 

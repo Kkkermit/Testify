@@ -104,6 +104,26 @@ describe("the giveaways page", () => {
 		});
 	});
 
+	it("deletes a giveaway only once Undo has had its chance", async () => {
+		const user = userEvent.setup();
+		const captured = capture("/:messageId", "delete");
+
+		renderPage();
+		const running = (await screen.findByRole("heading", { name: "A copy of the game" })).closest("li");
+		await user.click(
+			within(running as HTMLElement).getByRole("button", { name: "Delete the giveaway for A copy of the game" }),
+		);
+
+		expect(screen.queryByRole("heading", { name: "A copy of the game" })).not.toBeInTheDocument();
+		expect(screen.getByText("Deleted the giveaway for A copy of the game.")).toBeInTheDocument();
+		expect(captured.hit).toBe(false);
+
+		window.dispatchEvent(new Event("pagehide"));
+		await waitFor(() => {
+			expect(captured.hit).toBe(true);
+		});
+	});
+
 	it("explains a refusal from the API", async () => {
 		const user = userEvent.setup();
 		server.use(

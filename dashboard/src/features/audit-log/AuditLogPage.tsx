@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
+import { LeaveGuard } from "@/app/LeaveGuard";
 import { ChannelPicker, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
 import { Button, PageHeader, Skeleton } from "@/components/primitives";
 import { draftFrom, groupState, saveBlocked, setGroup, toggleEvent } from "@/features/audit-log/auditLog.utils";
@@ -46,6 +47,7 @@ export function AuditLogPage(): React.JSX.Element {
 
 	return (
 		<>
+			<LeaveGuard when={dirty && !save.isPending} />
 			<PageHeader
 				eyebrow={overview.data?.name}
 				title={t("auditLog.title")}

@@ -135,6 +135,10 @@ describe("the idea board page", () => {
 
 		await userEvent.click(await screen.findByRole("button", { name: "Delete idea #2" }));
 
+		expect(screen.queryByRole("button", { name: "Delete idea #2" })).not.toBeInTheDocument();
+		expect(screen.getByText("Deleted idea #2.")).toBeInTheDocument();
+		expect(deleted).toEqual([]);
+		window.dispatchEvent(new Event("pagehide"));
 		await waitFor(() => {
 			expect(deleted).toEqual([OPEN_IDEA]);
 		});

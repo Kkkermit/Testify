@@ -132,6 +132,22 @@
 		"server": "Open its overview",
 		"configuredIn": "Set up on {{screen}}"
 	},
+	"undo": {
+		"deleted": "Deleted {{what}}.",
+		"undo": "Undo",
+		"failed": "Could not delete {{what}}.",
+		"dismiss": "Dismiss",
+		"roleMenu": "the role menu “{{title}}”",
+		"idea": "idea #{{number}}",
+		"sticky": "the sticky message in {{channel}}",
+		"giveaway": "the giveaway for {{prize}}"
+	},
+	"leave": {
+		"title": "Leave without saving?",
+		"body": "Your changes on this screen have not been saved, and leaving now loses them.",
+		"stay": "Keep editing",
+		"leave": "Leave without saving"
+	},
 	"error": {
 		"unreachableTitle": "Something went wrong",
 		"unreachableBody": "The dashboard could not reach the bot.",
@@ -481,7 +497,10 @@
 		"addSticky": "Add sticky",
 		"countOf": "{{used}} of {{limit}}",
 		"removeIn": "Remove the sticky in {{channel}}",
-		"cannotPost": "{{bot}} cannot post in #{{channel}}, so this sticky will never appear."
+		"cannotPost": "{{bot}} cannot post in #{{channel}}, so this sticky will never appear.",
+		"deletedChannel": "a deleted channel",
+		"deletedChannelTitle": "A deleted channel",
+		"sinceLast": "Messages since the last post: {{done}} of {{cap}}"
 	},
 	"roleMenus": {
 		"title": "Role menus",
@@ -606,7 +625,9 @@
 		"winnerCount_other": "{{count}} winners",
 		"startIt": "Start it",
 		"inThisServer": "In this server",
-		"startBody": "{{bot}} posts it and draws the winners when the time is up. Members enter with the 🎉 reaction."
+		"startBody": "{{bot}} posts it and draws the winners when the time is up. Members enter with the 🎉 reaction.",
+		"deleteFor": "Delete the giveaway for {{prize}}",
+		"runningCount": "{{count, number}} running"
 	},
 	"levelling": {
 		"title": "Levelling",
