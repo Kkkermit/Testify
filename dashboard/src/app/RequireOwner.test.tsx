@@ -6,7 +6,7 @@ import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import { OWNER_ONLY_NOTICE, RequireOwner } from "@/app/RequireOwner";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { useOwnerStats } from "@/features/owner/useOwner";
-import { me } from "@/test/handlers";
+import { me } from "@/test/fixtures/session";
 import { server } from "@/test/setup";
 
 function Console(): React.JSX.Element {

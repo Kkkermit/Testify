@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { runResult } from "@/test/handlers";
+import { runResult } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

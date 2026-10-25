@@ -4,7 +4,7 @@ import { delay, http, HttpResponse } from "msw";
 import { tabFrom } from "@/features/levelling/levelling.utils";
 import { LevellingPage } from "@/features/levelling/LevellingPage";
 import { expectNoViolations } from "@/test/axe";
-import { levelConfig } from "@/test/handlers";
+import { levelConfig } from "@/test/fixtures/community";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

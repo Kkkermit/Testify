@@ -206,7 +206,7 @@ src/
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
 ├── hooks/              usePageTitle usePrefersReducedMotion useCountUp useDocumentVisible useDebounced
 ├── lib/                api cn queries redirect sanitise tint + three/ for the backdrop maths
-└── test/               handlers.ts (MSW), setup.ts, renderWithProviders.tsx, axe.ts
+└── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
 
 **A page holds routing, loading and error branches and nothing else.** Anything with a rule in it — which tab a
@@ -277,7 +277,8 @@ Add the query key to `src/lib/queries.ts`.
 section), `config/features.ts` (the overview tile's path), and
 `features/commands/commands.utils.ts` (so the command stops counting as Discord-only on `/commands`).
 
-Then: MSW fixture in `src/test/handlers.ts`, a `.utils.test.ts`, a page test, and the API route test.
+Then: a fixture in `src/test/fixtures/`, its MSW handler in `src/test/handlers.ts`, a `.utils.test.ts`, a page
+test, and the API route test.
 
 ---
 
@@ -644,8 +645,10 @@ so installing it needs `--force` and breaks `npm ci`.
 
 Jest + Testing Library + MSW. Coverage thresholds **80/80/80/80**.
 
-- **`src/test/handlers.ts`** — the MSW fixtures and default handlers. Add yours here; page tests override with
-  `server.use(...)` for the case under test.
+- **`src/test/fixtures/`** — the fake answers, one file per section of the sidebar (`community.ts`,
+  `moderation.ts` …) plus `session.ts`, `owner.ts` and `bot.ts`, each typed against `@testify/shared`.
+- **`src/test/handlers.ts`** — the default MSW handlers that serve them. Add a screen's fixture and its handler;
+  page tests override with `server.use(...)` for the case under test.
 - **`src/test/renderWithProviders.tsx`** — `renderWithProviders(<Page />, { route, path })`, returning the
   query `client` so a test can await `client.isMutating()`.
 - **`src/test/axe.ts`** — `expectNoViolations(container)`.

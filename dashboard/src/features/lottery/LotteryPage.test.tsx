@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { LotteryPage } from "@/features/lottery/LotteryPage";
 import { expectNoViolations } from "@/test/axe";
-import { lotterySettings } from "@/test/handlers";
+import { lotterySettings } from "@/test/fixtures/economy";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

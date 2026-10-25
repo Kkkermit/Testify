@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { RoleMenusPage } from "@/features/role-menus/RoleMenusPage";
 import { expectNoViolations } from "@/test/axe";
-import { roleMenuList } from "@/test/handlers";
+import { roleMenuList } from "@/test/fixtures/community";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

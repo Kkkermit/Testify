@@ -1,11 +1,8 @@
 import { type OwnerGuildFilter, type OwnerGuildRow, type OwnerGuildSort } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { Avatar, Badge, CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
+import { Avatar, Badge, CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
-
-/** Columns only a wide screen has room for, unless the list is sorted by them, when a phone keeps the one in use. */
-const LARGE_ONLY = "hidden lg:table-cell";
 
 export function OwnerGuildTable({
 	guilds,
@@ -24,6 +21,7 @@ export function OwnerGuildTable({
 	onSelect?: (guildId: string) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
+	// A wide-screen column stays on a phone while the list is sorted by it.
 	const shown = (column: "joined" | "commands" | "dashboard"): string | false => {
 		const active = { joined: ["newest", "oldest"], commands: ["commands", "quietest"], dashboard: ["dashboard"] }[
 			column

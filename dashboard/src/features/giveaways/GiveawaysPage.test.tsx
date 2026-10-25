@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { GiveawaysPage } from "@/features/giveaways/GiveawaysPage";
 import { expectNoViolations } from "@/test/axe";
-import { giveawayList } from "@/test/handlers";
+import { giveawayList } from "@/test/fixtures/entertainment";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

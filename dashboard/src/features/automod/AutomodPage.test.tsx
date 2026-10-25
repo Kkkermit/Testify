@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { AutomodPage } from "@/features/automod/AutomodPage";
 import { expectNoViolations } from "@/test/axe";
-import { automodRules } from "@/test/handlers";
+import { automodRules } from "@/test/fixtures/moderation";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

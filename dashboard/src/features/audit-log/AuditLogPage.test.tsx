@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { AuditLogPage } from "@/features/audit-log/AuditLogPage";
 import { expectNoViolations } from "@/test/axe";
-import { auditLogConfig } from "@/test/handlers";
+import { auditLogConfig } from "@/test/fixtures/moderation";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

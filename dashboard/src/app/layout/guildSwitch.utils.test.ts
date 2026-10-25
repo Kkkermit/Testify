@@ -1,5 +1,5 @@
 import { switchableGuilds, switchedPath } from "@/app/layout/guildSwitch.utils";
-import { aGuild, cannotAdd, withoutBot } from "@/test/handlers";
+import { aGuild, cannotAdd, withoutBot } from "@/test/fixtures/session";
 
 const OTHER = "900000000000000009";
 
