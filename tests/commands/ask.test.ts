@@ -8,7 +8,7 @@ import { resetSupportDesk } from "@lib/support/supportDesk.util";
 import { textOf } from "@tests/helpers/containers";
 import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
-jest.mock("@database/repositories/settingsRepository", () => ({ getPrefix: jest.fn(() => Promise.resolve("!")) }));
+jest.mock("@database/repositories/prefixRepository", () => ({ getPrefix: jest.fn(() => Promise.resolve("!")) }));
 
 beforeEach(() => resetSupportDesk());
 

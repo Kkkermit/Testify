@@ -17,15 +17,31 @@ jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: j
 jest.mock("@database/repositories/casinoRepository", () => ({
 	getCasinoSettings: jest.fn(() => Promise.resolve(null)),
 }));
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/antiLinkRepository", () => ({
 	getAntiLink: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/countingRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/botStatsRepository", () => ({
 	getFixedStats: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/stickyRepository", () => ({
 	listSticky: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock("@database/repositories/treasureRepository", () => ({
 	getTreasureConfig: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/insightsRepository", () => ({

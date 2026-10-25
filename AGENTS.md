@@ -66,7 +66,7 @@ numbers, which drift):
 | Button handlers      | 38                                |
 | Events               | 29, in 6 groups                   |
 | `src/lib` helpers    | 172, in 22 domain folders         |
-| Schemas/repositories | 29 / 26                           |
+| Schemas/repositories | 38 / 36                           |
 | Scheduled jobs       | 8                                 |
 | Tests                | 6,600 across 382 suites           |
 
@@ -232,8 +232,8 @@ src/
 │       reminders/ ideas/ starboard/ tempVoice/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           29 Mongoose schemas
-│   └── repositories/     26 query layers. Commands never touch a model directly.
+│   ├── models/           38 Mongoose schemas, one file per feature
+│   └── repositories/     36 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 8 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         join-to-create channels)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
@@ -707,9 +707,13 @@ Rules:
    absence is meaningful.
 4. **One collection per shape.** Two models sharing a collection with different shapes was the single worst
    finding in the audit of the original.
-5. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
+5. **A feature's settings have their own schema and repository, and leaving a server forgets them.** Each
+   repository exports a `purge<Feature>(guildId)`, and `purgeGuild` in `guildRepository.ts` calls every one when
+   the bot is removed. A new feature adds its purge there, and a test that writes its settings, calls
+   `purgeGuild` and finds nothing left — `guildRepository.test.ts` does it for the smaller settings at once.
+6. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
    model when it is not.
-6. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
+7. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
    not appear on records written yesterday, however `required: true` it is — so the type the schema declares is a
    promise about new writes, not a description of what a `find()` returns. When you add a field, normalise on
    read and type the input for what can actually arrive: `normaliseSettings` in `src/lib/levelling/levelling.util.ts` does

@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { listSticky, removeSticky, setSticky } from "@database/repositories/settingsRepository";
+import { listSticky, removeSticky, setSticky } from "@database/repositories/stickyRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { truncate } from "@lib/format";
 

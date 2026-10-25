@@ -1,8 +1,8 @@
 import { type Guild } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
-import { type FixedStatsMessage } from "@database/models/guildSettings.schema";
-import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/settingsRepository";
+import { type FixedStatsMessage } from "@database/models/botStats.schema";
+import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
 import { botStatsEmbed } from "@lib/info/statsEmbed.util";
 import { type BotStatsSettings } from "@testify/shared";
 

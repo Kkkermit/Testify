@@ -1,20 +1,18 @@
 import { type Guild } from "discord.js";
+import { getAntiLink } from "@database/repositories/antiLinkRepository";
+import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
+import { getAutoRoles } from "@database/repositories/autoRoleRepository";
+import { getFixedStats } from "@database/repositories/botStatsRepository";
+import { getCounting } from "@database/repositories/countingRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
-import {
-	getAntiLink,
-	getAuditLogConfig,
-	getAutoRoles,
-	getCounting,
-	getFixedStats,
-	getVoiceCounter,
-	getWelcome,
-	listSticky,
-} from "@database/repositories/settingsRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
+import { listSticky } from "@database/repositories/stickyRepository";
 import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
 import { getVerifyConfig } from "@database/repositories/verificationRepository";
+import { getVoiceCounter } from "@database/repositories/voiceCounterRepository";
+import { getWelcome } from "@database/repositories/welcomeRepository";
 import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
 import { readTreasure } from "@lib/economy/treasureActions.util";

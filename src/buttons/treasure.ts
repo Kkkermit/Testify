@@ -1,7 +1,7 @@
 import { ButtonStyle, MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { confirmRow, errorEmbed, modalForm, type RenderedScreen } from "@lib/discord";
 import { normaliseTreasure } from "@lib/economy";
 import { formatDuration, formatNumber } from "@lib/format";

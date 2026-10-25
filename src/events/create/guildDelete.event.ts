@@ -1,6 +1,6 @@
 import { Events, type Guild } from "discord.js";
 import { defineEvent } from "@core/event";
-import { purgeGuild } from "@database/repositories/settingsRepository";
+import { purgeGuild } from "@database/repositories/guildRepository";
 import { announceGuildChange } from "@lib/bot";
 
 export default defineEvent({

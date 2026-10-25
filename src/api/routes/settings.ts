@@ -8,22 +8,11 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { botName } from "@core/brand";
-import {
-	disableAntiLink,
-	disableCounting,
-	getAntiLink,
-	getAutoRoles,
-	getCounting,
-	getPrefixConfig,
-	getVoiceCounter,
-	resetCount,
-	setAntiLink,
-	setAutoRoles,
-	setCounting,
-	setPrefix,
-	setPrefixEnabled,
-	setVoiceCounter,
-} from "@database/repositories/settingsRepository";
+import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
+import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
+import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
+import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
+import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import {
 	type AntiLinkPatch,
 	antiLinkPatch,

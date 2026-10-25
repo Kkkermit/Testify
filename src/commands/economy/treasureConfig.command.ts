@@ -3,7 +3,7 @@ import { settingsOf, treasurePanel } from "@buttons/treasure";
 import { TREASURE_DEFAULTS } from "@config/constants";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
 import { formatDuration, formatNumber } from "@lib/format";
 

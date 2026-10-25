@@ -3,7 +3,7 @@ import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 const config = { prefix: "t?", isEnabled: true };
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/prefixRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(config)),
 	setPrefix: jest.fn(),
 	setPrefixEnabled: jest.fn(),

@@ -1,7 +1,7 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { theme } from "@config/theme";
 import { defineButton } from "@core/button";
-import { getPrefix } from "@database/repositories/settingsRepository";
+import { getPrefix } from "@database/repositories/prefixRepository";
 import { dashboardUrl } from "@lib/bot";
 import { SUPPORT_PANEL_ID, supportContext, supportDesk, supportScreen } from "@lib/support";
 

@@ -1,9 +1,10 @@
 import { type Guild } from "discord.js";
+import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
-import { getAutoRoles, getWelcome } from "@database/repositories/settingsRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
 import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
+import { getWelcome } from "@database/repositories/welcomeRepository";
 import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
 import { countOf, FEATURE_SOURCES, featuresOf } from "@lib/settings/featureStatus.util";
@@ -11,14 +12,28 @@ import { countOf, FEATURE_SOURCES, featuresOf } from "@lib/settings/featureStatu
 jest.mock("@database/repositories/ideaRepository", () => ({ getIdeaSettings: jest.fn() }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/roleMenuRepository", () => ({ countRoleMenus: jest.fn() }));
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/antiLinkRepository", () => ({
 	getAntiLink: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(),
+}));
+jest.mock("@database/repositories/countingRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/botStatsRepository", () => ({
 	getFixedStats: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(),
+}));
+jest.mock("@database/repositories/stickyRepository", () => ({
 	listSticky: jest.fn(() => Promise.resolve([])),
 }));
 jest.mock("@database/repositories/starboardRepository", () => ({ getStarboardSettings: jest.fn() }));

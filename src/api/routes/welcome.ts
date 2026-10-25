@@ -4,7 +4,7 @@ import { type ApiBindings, guildIdOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
+import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { normaliseWelcome } from "@lib/welcome";
 import {
 	DEFAULT_WELCOME_MESSAGE,

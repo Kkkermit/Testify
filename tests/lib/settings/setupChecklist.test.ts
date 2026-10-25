@@ -1,7 +1,8 @@
 import { ChannelType, Collection, DiscordAPIError, PermissionFlagsBits, RESTJSONErrorCodes } from "discord.js";
 import { UserFacingError } from "@core/errors";
+import { setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import { getWelcome, saveWelcome, setAuditLogConfig } from "@database/repositories/settingsRepository";
+import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import {
 	privateLogChannel,
 	readSetupChecklist,
@@ -15,11 +16,13 @@ jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelSettings: jest.fn(() => Promise.resolve(null)),
 	saveLevelSettings: jest.fn(() => Promise.resolve({})),
 }));
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
+	setAuditLogConfig: jest.fn(() => Promise.resolve({})),
+}));
+jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 	saveWelcome: jest.fn(() => Promise.resolve({})),
-	setAuditLogConfig: jest.fn(() => Promise.resolve({})),
 }));
 
 const GUILD = "900000000000000001";

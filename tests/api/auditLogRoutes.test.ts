@@ -5,11 +5,11 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { auditLog } from "@api/routes/auditLog";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
 import { AUDIT_EVENTS, type AuditLogConfigResponse } from "@testify/shared";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/auditLogRepository", () => ({
 	disableAuditLog: jest.fn(() => Promise.resolve(true)),
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
 	setAuditLogConfig: jest.fn(() => Promise.resolve({})),

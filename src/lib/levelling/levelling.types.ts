@@ -1,4 +1,4 @@
-import { type XpBoost, type LevelReward } from "@database/models/guildSettings.schema";
+import { type XpBoost, type LevelReward } from "@database/models/levelling.schema";
 import { type LEVEL_TABS } from "@lib/levelling/levelling.constants";
 
 /** The types more than one module in this domain shares. */

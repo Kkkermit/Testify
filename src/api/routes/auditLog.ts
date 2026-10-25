@@ -4,7 +4,7 @@ import { type ApiBindings, guildIdOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
+import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import {
 	AUDIT_EVENTS,
 	type AuditLogConfigResponse,

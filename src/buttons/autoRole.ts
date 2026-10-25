@@ -1,7 +1,7 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { getAutoRoles, setAutoRoles } from "@database/repositories/settingsRepository";
+import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
 import { AUTOROLE_PANEL_ID, autoRolePanel, MAX_AUTO_ROLES } from "@lib/settings";
 
 /** Every control on the auto-role panel. */
