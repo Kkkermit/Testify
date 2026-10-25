@@ -1,5 +1,6 @@
 /** Shared helpers, by domain. Inside `src/lib` and `src/core`, import the module itself rather than a barrel. */
 
+export * from "./afk";
 export * from "./bot";
 export * from "./canvas";
 export * from "./casino";

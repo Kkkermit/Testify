@@ -1,3 +1,4 @@
+import { purgeAfk } from "@database/repositories/afkRepository";
 import { purgeAntiLink } from "@database/repositories/antiLinkRepository";
 import { purgeAuditLog } from "@database/repositories/auditLogRepository";
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
@@ -22,6 +23,7 @@ import { purgeWelcome } from "@database/repositories/welcomeRepository";
 /** Deletes every per-guild document when the bot is removed from a server. */
 export async function purgeGuild(guildId: string): Promise<void> {
 	await Promise.all([
+		purgeAfk(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),
