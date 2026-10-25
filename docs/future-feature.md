@@ -1,0 +1,132 @@
+<div align="center">
+
+# 🔭 Future features
+
+**What could come next: features the bot does not have, screens the dashboard is missing, checks nobody has run
+against a live Discord, and the upkeep waiting on dependencies.**
+
+</div>
+
+Nothing here is promised or scheduled. Each entry says what exists already to build on and what a change would have
+to respect, so whoever picks one up starts from the code rather than from a blank page. When an entry ships, delete
+it from this file in the same pull request.
+
+Checked against the code and the npm registry on **25 October 2026**.
+
+---
+
+## 🤖 New bot features
+
+None of these exist in any form today.
+
+| Feature               | What it would do                                                                                     | Build on                                                                                      |
+| --------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 🗳️ Polls              | `/poll` posts one of Discord's own polls, with a question, up to ten answers and a closing time      | discord.js sends native polls from `send({ poll })`, so there is nothing to count or store    |
+| 👋 Goodbye messages   | A message when somebody leaves, the mirror of the greeting                                           | `src/lib/welcome/` — the same template, placeholders and preview                              |
+| 💬 Auto-responders    | A server's own trigger words, each answered with a reply it wrote                                    | A message handler, like `sticky` and `counting`                                               |
+| ⏰ Scheduled messages | A message posted at a set time, once or every day or week                                            | The `reminders` job, which already claims with a lease and delivers at least once             |
+| 🎂 Birthdays          | A post on a member's birthday, in a server that switched it on                                       | `profile.schema.ts` already stores a `birthday`                                               |
+| 📁 Moderation cases   | One numbered case for every warning, timeout, kick, ban and softban, with a log channel and a reason | `issueWarning` already stores the step a warning took; the idea board numbers with one `$inc` |
+| 🛡️ Raid protection    | Hold back accounts younger than a server's minimum age, and tell staff when joins spike              | `/verify`, and the joins and leaves `insights.util.ts` already records                        |
+| 💤 AFK                | `/afk` sets a note that anybody mentioning you is shown, cleared when you next speak                 | A message handler, keyed `guildId:userId` like every other piece of state                     |
+
+What each would have to respect:
+
+- **Birthdays are opt-in twice.** The profile is bot-wide by design (AGENTS.md §12), so a server announcing birthdays
+  needs its own switch, and the member needs to agree to their server being told. Post the day and month only, never
+  the year: an age is not the server's business. The privacy notice says what is stored and must say this too.
+- **Auto-responders and scheduled messages post what somebody typed**, so every post goes out with
+  `allowedMentions: { parse: [] }` (the rule the role menus and starboard follow), a server has a cap on how many it
+  keeps, and a trigger cannot fire again on the bot's own reply.
+- **Raid protection warns before it acts.** Holding a new account back or alerting staff is reversible; kicking or
+  banning on a heuristic is not, so neither should be a default. It must not try to look like anything other than a
+  bot, and an account-age gate needs nothing beyond the snowflake.
+- **Moderation cases need a migration on read** for the warnings already stored (AGENTS.md §13 rule 7), and the
+  dashboard's warnings screen would become the case list rather than sitting beside it.
+- **AFK notes are typed by members**, so they are `unlogged` and go through the same leak rules as any other free
+  text.
+
+---
+
+## 🖥️ Dashboard screens still missing
+
+These commands do something the dashboard cannot yet do. `features/commands/commands.utils.ts` is the list that
+decides, and the coverage tile on `/commands` counts it.
+
+| Screen                 | Commands it would cover            | Permission the route takes     | Notes                                                                                |
+| ---------------------- | ---------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
+| 🚫 Bans                | `/unban`                           | Ban Members                    | A list of the server's bans with Unban beside each; lifting a softban already exists |
+| 🔇 Timeouts            | `/mute`, `/unmute`                 | Moderate Members               | On the member page, beside kick and ban, with the same typed confirmation            |
+| 🔒 Channel tools       | `/lock`, `/unlock`, `/slowmode`    | Manage Channels                | Per channel, from a picker, showing the current slowmode                             |
+| 📣 Announcements       | `/announce`, `/say`                | Manage Server                  | A composer with a live preview, a channel picker and an explicit mentions choice     |
+| 🎫 Open tickets        | `/ticket` (the tickets themselves) | Manage Server                  | Who opened each, who claimed it, and Close, which files the transcript               |
+| 🏷️ Roles and nicknames | `/role`, `/nickname`               | Manage Roles, Manage Nicknames | On the member page; a role given still has to pass `requireGrantable`                |
+
+What each would have to respect:
+
+- **Every action asks what its command asks** (AGENTS.md §24, "Nothing on the web reaches further than Discord
+  would"). The permission column above is what each command asks of the person, and `requirePermission` goes on
+  the route. Manage Server is what opens the dashboard at all, so those two need nothing more.
+- **Open tickets are now within reach.** The flow moved into `src/lib/tickets/ticketFlow.util.ts`, which takes plain
+  values rather than an interaction, so the route can call `closeTicket` itself. It wants the `User` who closed it
+  for the transcript, which `client.users.fetch` gives from the session's user id. Inside Discord a ticket is
+  closed by its owner or the handler role, so decide whether the web asks for that role as well.
+- **An announcement is posted as the bot**, so the composer must make mentions an explicit choice that defaults to
+  none, and run the text through `plainText` like every other free-text field.
+- `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in
+  the channel, where you can see them.
+
+---
+
+## 🧪 Checked by tests, never against a live Discord
+
+Each of these passes its tests against mocks or an in-memory database. None has been watched working in a real
+server, and each should be before it is relied on.
+
+- **The ticket flow, after its move into `src/lib/tickets/`.** Open, lock and unlock, claim, add and remove a member,
+  and close with a transcript. The behaviour was copied line for line and is covered by `ticketFlow.test.ts`, but
+  only against mocked channels.
+- **The settings split into one schema and repository per feature.** Every model keeps its old name, so it reads
+  the same collection, and the suite passes against `mongodb-memory-server`. Starting the bot on a database with
+  real records in it, and seeing each feature still show its settings, is the proof that is missing.
+- **Join to create:** a channel made in the right category, the member moved into it, the channel deleted once
+  empty, and the sweep after a restart.
+- **The setup checklist's private `#audit-log`**, made only when both the bot and the person hold Manage Channels.
+- **Role menus:** the post, the pre-ticked private select, and a role moved above the bot after the menu was made.
+- **Reminders:** the channel ping, and the fallback to a DM when the owner has left or the bot cannot post.
+- **The idea board:** the post, a vote moving from one side to the other, and the decision DMed to its author.
+
+---
+
+## 🔧 Upkeep
+
+### Dependencies behind their latest release
+
+| Package                    | Here    | Latest | What it takes                                                                                                                                     |
+| -------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `discord-html-transcripts` | 3.2.0   | 3.3.0  | It moves to undici 7, so the `undici` override in `package.json` can go. It pins React to exactly 19.1.1, so the React pins in Jest and Vite stay |
+| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                 |
+| `mongoose`                 | 8.24.1  | 9.11.4 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                          |
+| `react-router`             | 7.18.2  | 8.5.0  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                               |
+| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `dashboard/screenshots/README.md`                                               |
+| `jest-axe`                 | 10.0.0  | 11.0.0 | A major, test-only                                                                                                                                |
+| `tsup`                     | 8.5.1   | 9.0.0  | A major. The build's `dist/` checks in AGENTS.md §3 are the test                                                                                  |
+| `@anthropic-ai/sdk`        | 0.128.0 | 1.3.0  | Its first major. Only the support assistant's optional model picker uses it                                                                       |
+
+`discord-giveaways` is at its latest, 6.0.1, but that was published in **August 2022** and nothing since. Replacing it
+with a giveaway system of the bot's own — records in MongoDB, a job that ends them, entries counted from a button —
+would follow the shape the starboard and idea board already have, and drop a dependency nobody maintains.
+
+### Overrides to look at again
+
+Each `overrides` pin in `package.json` exists because a parent asked for a version with an advisory open. Every one
+is explained in [`security.md`](security.md); check whether each parent now asks for a fixed version by itself, and
+remove the pin when it does: `brace-expansion`, `js-yaml` (both lines), `fast-uri`, and `undici` under
+`discord-html-transcripts`.
+
+### Leaving a server forgets most settings, but not levelling's
+
+`purgeGuild` deletes every feature's settings when the bot is removed from a server, except the levelling setup in
+`levelsetup`. Members' levels and balances are kept as well, which may be deliberate, since a server that adds the
+bot back keeps its standings. The levelling setup is configuration like every other setting, so it most likely
+belongs in the purge. Decide, then either add `purgeLevelSettings` to `guildRepository.ts` or write down why not.

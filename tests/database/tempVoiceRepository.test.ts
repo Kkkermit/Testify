@@ -1,5 +1,5 @@
 import { describeWithMongo } from "../helpers/mongo";
-import { purgeGuild } from "@database/repositories/settingsRepository";
+import { purgeGuild } from "@database/repositories/guildRepository";
 import {
 	countTempChannels,
 	findOwnedTempChannel,

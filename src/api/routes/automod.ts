@@ -1,8 +1,8 @@
 import { type AutoModerationRule, type Guild } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { botName } from "@core/brand";
@@ -12,13 +12,6 @@ import { type AutomodRules, automodCreate, automodPatch, automodRuleParam } from
 export const automod = new Hono<ApiBindings>();
 
 automod.use("*", requireGuild);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 /** Without Manage Server the fetch throws, so the page is told rather than shown a broken list. */
 async function rulesFor(guild: Guild, botId: string): Promise<AutomodRules> {

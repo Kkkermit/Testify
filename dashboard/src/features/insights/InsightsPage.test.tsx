@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { InsightsPage } from "@/features/insights/InsightsPage";
 import { expectNoViolations } from "@/test/axe";
-import { insightsReport } from "@/test/handlers";
+import { insightsReport } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

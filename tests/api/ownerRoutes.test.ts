@@ -6,16 +6,22 @@ import { owner } from "@api/routes/owner";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { databaseConnected } from "@database/connection";
+import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
+import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
-import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
 import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
+import { getWelcome } from "@database/repositories/welcomeRepository";
 import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/countingRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/usageRepository", () => ({

@@ -6,10 +6,10 @@ import { treasure } from "@api/routes/treasure";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { TREASURE_DEFAULTS, type TreasureSettings } from "@testify/shared";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/treasureRepository", () => ({
 	getTreasureConfig: jest.fn(() => Promise.resolve(null)),
 	saveTreasureConfig: jest.fn(() => Promise.resolve({})),
 }));

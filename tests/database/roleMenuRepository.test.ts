@@ -1,4 +1,5 @@
 import { describeWithMongo } from "../helpers/mongo";
+import { purgeGuild } from "@database/repositories/guildRepository";
 import {
 	countRoleMenus,
 	createRoleMenu,
@@ -8,7 +9,6 @@ import {
 	setRoleMenuMessage,
 	updateRoleMenu,
 } from "@database/repositories/roleMenuRepository";
-import { purgeGuild } from "@database/repositories/settingsRepository";
 
 const GUILD = "900000000000000001";
 const OTHER = "900000000000000002";

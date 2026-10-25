@@ -2,9 +2,9 @@ import { type TestifyClient } from "@core/client";
 import { AUDIT_EVENTS, writeAuditLog } from "@lib/moderation/auditLog.util";
 import { createMockClient, createMockGuild } from "@tests/helpers/mocks";
 
-jest.mock("@database/repositories/settingsRepository", () => ({ getAuditLogConfig: jest.fn() }));
+jest.mock("@database/repositories/auditLogRepository", () => ({ getAuditLogConfig: jest.fn() }));
 
-const { getAuditLogConfig } = jest.requireMock("@database/repositories/settingsRepository");
+const { getAuditLogConfig } = jest.requireMock("@database/repositories/auditLogRepository");
 
 type SendMock = jest.Mock<Promise<unknown>, [{ embeds: { toJSON(): Record<string, unknown> }[] }]>;
 

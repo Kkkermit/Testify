@@ -1,7 +1,6 @@
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import {
@@ -15,14 +14,6 @@ import { ALWAYS_ENABLED, type CommandToggleState, commandTogglePut } from "@test
 /** Which commands are switched off, per server or bot-wide; the bot-wide mount sits under `/owner`. */
 
 type ApiContext = Context<ApiBindings>;
-
-function guildIdOf(context: ApiContext): string {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 /** Owner-only names are filtered out on the way out and refused on the way in. */
 function ordinary(context: ApiContext, names: string[]): string[] {

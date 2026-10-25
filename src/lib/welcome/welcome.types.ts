@@ -1,4 +1,4 @@
-import { type WelcomeStyle } from "@database/models/guildSettings.schema";
+import { type WelcomeStyle } from "@database/models/welcome.schema";
 
 /** The types more than one module in this domain shares. */
 

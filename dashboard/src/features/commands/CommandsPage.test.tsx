@@ -10,7 +10,7 @@ import {
 } from "@/features/commands/commands.utils";
 import { CommandsPage } from "@/features/commands/CommandsPage";
 import { expectNoViolations } from "@/test/axe";
-import { catalogue } from "@/test/handlers";
+import { catalogue } from "@/test/fixtures/bot";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

@@ -1,6 +1,6 @@
 import { theme } from "@config/theme";
 import { defineMessageHandler } from "@core/message";
-import { advanceCount, getCounting, resetCount } from "@database/repositories/settingsRepository";
+import { advanceCount, getCounting, resetCount } from "@database/repositories/countingRepository";
 import { embed, errorEmbed, replyTemporarily } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 

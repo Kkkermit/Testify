@@ -1,6 +1,6 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { defineButton } from "@core/button";
-import { getPrefix } from "@database/repositories/settingsRepository";
+import { getPrefix } from "@database/repositories/prefixRepository";
 import {
 	categoryControls,
 	categoryMenu,

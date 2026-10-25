@@ -1,7 +1,7 @@
 import { PermissionsBitField } from "discord.js";
 import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
-import { getAntiLink } from "@database/repositories/settingsRepository";
+import { getAntiLink } from "@database/repositories/antiLinkRepository";
 import { cleanupFooter, embed, TIDY_AFTER_MS } from "@lib/discord";
 import { issueWarning } from "@lib/moderation";
 

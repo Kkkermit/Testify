@@ -1,7 +1,7 @@
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
+import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { applyTreasure, readTreasure, resetTreasure } from "@lib/economy";
@@ -10,13 +10,6 @@ import { treasurePatch } from "@testify/shared";
 export const treasure = new Hono<ApiBindings>();
 
 treasure.use("*", requireGuild);
-
-function guildIdOf(context: Context<ApiBindings>): string {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 function actorOf(context: Context<ApiBindings>): string {
 	return context.get("session")?.userId ?? "";

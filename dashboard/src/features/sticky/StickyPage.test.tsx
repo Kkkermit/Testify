@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { StickyPage } from "@/features/sticky/StickyPage";
 import { expectNoViolations } from "@/test/axe";
-import { someChannels } from "@/test/handlers";
+import { someChannels } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

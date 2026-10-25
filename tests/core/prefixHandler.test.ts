@@ -6,7 +6,7 @@ import { runMessageHandlers } from "@core/message";
 
 const prefixConfig = { prefix: "t?", isEnabled: true };
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/prefixRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
 }));
 // A run is counted without being awaited, and with no database its write would land after the suite ends.

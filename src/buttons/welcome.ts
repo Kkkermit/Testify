@@ -1,7 +1,7 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
+import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { modalForm, pickedChannelId } from "@lib/discord";
 import {
 	DEFAULT_WELCOME_MESSAGE,

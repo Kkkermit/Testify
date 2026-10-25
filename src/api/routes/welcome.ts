@@ -1,10 +1,10 @@
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
+import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
+import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { normaliseWelcome } from "@lib/welcome";
 import {
 	DEFAULT_WELCOME_MESSAGE,
@@ -13,19 +13,9 @@ import {
 	welcomePatchSchema,
 } from "@testify/shared";
 
-type ApiContext = Context<ApiBindings>;
-
 export const welcome = new Hono<ApiBindings>();
 
 welcome.use("*", requireGuild);
-
-function guildIdOf(context: ApiContext): string {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 /**
  * No record means off, so an absent one becomes a disabled config with defaults; `normaliseWelcome` migrates old

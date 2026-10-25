@@ -6,10 +6,10 @@ import { welcome } from "@api/routes/welcome";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
+import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { DEFAULT_WELCOME_MESSAGE, type WelcomeConfigResponse } from "@testify/shared";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/welcomeRepository", () => ({
 	disableWelcome: jest.fn(() => Promise.resolve(true)),
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 	saveWelcome: jest.fn(() => Promise.resolve({})),

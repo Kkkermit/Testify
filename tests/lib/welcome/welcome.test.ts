@@ -1,6 +1,6 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { type WelcomeSettings } from "@database/models/guildSettings.schema";
+import { type WelcomeSettings } from "@database/models/welcome.schema";
 import { WELCOME_PANEL_ID } from "@lib/welcome/welcome.constants";
 import {
 	checkBackground,

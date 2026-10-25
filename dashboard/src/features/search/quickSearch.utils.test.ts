@@ -8,7 +8,8 @@ import {
 	shortcutLabel,
 } from "@/features/search/quickSearch.utils";
 import { i18next } from "@/i18n";
-import { aGuild, catalogue, cannotAdd, withoutBot } from "@/test/handlers";
+import { catalogue } from "@/test/fixtures/bot";
+import { aGuild, cannotAdd, withoutBot } from "@/test/fixtures/session";
 
 const t = i18next.t.bind(i18next) as TFunction;
 const second = { ...aGuild, id: "900000000000000009", name: "Café Crew" };

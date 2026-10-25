@@ -2,11 +2,11 @@ import { type Guild } from "discord.js";
 import { syncVoiceCounters } from "@lib/settings/voiceCounters.util";
 import { createMockClient, createMockGuild, mockCollection } from "@tests/helpers/mocks";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(),
 }));
 
-const { getVoiceCounter } = jest.requireMock("@database/repositories/settingsRepository");
+const { getVoiceCounter } = jest.requireMock("@database/repositories/voiceCounterRepository");
 
 interface FakeChannel {
 	name: string;

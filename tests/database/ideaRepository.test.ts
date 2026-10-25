@@ -1,4 +1,5 @@
 import { describeWithMongo } from "../helpers/mongo";
+import { purgeGuild } from "@database/repositories/guildRepository";
 import {
 	countIdeas,
 	createIdea,
@@ -12,7 +13,6 @@ import {
 	takeIdeaNumber,
 	voteOnIdea,
 } from "@database/repositories/ideaRepository";
-import { purgeGuild } from "@database/repositories/settingsRepository";
 
 const GUILD = "900000000000000001";
 const OTHER = "900000000000000002";

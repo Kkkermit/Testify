@@ -1,5 +1,5 @@
 import { MAX_TRACK_ATTEMPTS } from "@lib/music/music.constants";
-import { type LoopMode, type QueueState, type Track } from "@lib/music/music.types";
+import { type QueueState, type Track } from "@lib/music/music.types";
 
 /** The queue and the rules for moving through it, with no voice connection and no network in sight. */
 
@@ -61,10 +61,6 @@ export function shuffleUpcoming(state: QueueState, random: () => number = Math.r
 	}
 
 	return { ...state, tracks: [...played, ...upcoming] };
-}
-
-export function withLoop(state: QueueState, loop: LoopMode): QueueState {
-	return { ...state, loop };
 }
 
 /** Where the queue goes when the current track is genuinely over, or `null` when there is nowhere left. */

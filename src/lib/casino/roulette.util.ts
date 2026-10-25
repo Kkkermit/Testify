@@ -25,22 +25,6 @@ export const ROULETTE_BETS: readonly RouletteBetKind[] = [
 	"number",
 ];
 
-export const ROULETTE_BET_LABELS: Record<RouletteBetKind, string> = {
-	red: "Red",
-	black: "Black",
-	odd: "Odd",
-	even: "Even",
-	low: "Low (1–18)",
-	high: "High (19–36)",
-	dozen1: "1st dozen (1–12)",
-	dozen2: "2nd dozen (13–24)",
-	dozen3: "3rd dozen (25–36)",
-	column1: "Column 1",
-	column2: "Column 2",
-	column3: "Column 3",
-	number: "A single number",
-};
-
 export function pocketColour(pocket: number): PocketColour {
 	if (pocket === 0) return "green";
 
@@ -90,14 +74,6 @@ export function rouletteReturn(kind: RouletteBetKind): number {
 
 export function spinRoulette(roll: Roll = randomInt): number {
 	return WHEEL_ORDER[roll(WHEEL_ORDER.length)]!;
-}
-
-export function betLabel(bet: RouletteBet): string {
-	return bet.kind === "number" ? `Number ${bet.number ?? "?"}` : ROULETTE_BET_LABELS[bet.kind];
-}
-
-export function isRouletteBetKind(value: string): value is RouletteBetKind {
-	return (ROULETTE_BETS as readonly string[]).includes(value);
 }
 
 /** Every spot a chip can sit on: the 37 numbers, then the outside bets in `ROULETTE_BETS` order. */

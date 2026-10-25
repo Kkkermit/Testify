@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { MembersPage } from "@/features/members/MembersPage";
 import { expectNoViolations } from "@/test/axe";
-import { economyBoard } from "@/test/handlers";
+import { economyBoard } from "@/test/fixtures/community";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
