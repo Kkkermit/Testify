@@ -263,7 +263,8 @@ exercise is for.
 after the write succeeds.
 
 **4. `src/api/routes/guilds.ts`** — one `guilds.route("/:guildId/<name>", <name>)` line so it inherits
-`requireGuild`, plus a row in `featuresOf` if the overview grid should show it.
+`requireGuild`, plus an entry in `FEATURE_SOURCES` in `src/lib/settings/featureStatus.util.ts` if the overview
+grid should show it.
 
 > [!WARNING]
 > Step 4 is the one that **fails silently**. An unmounted sub-app falls through to the SPA catch-all and lands
@@ -329,7 +330,7 @@ writing it once. Every piece has a test proven able to fail.
 Five things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, shape-checked before it is used to look anything up. A
-   handler reads `c.get("guild").id`, **never** a guild id from a body. This is the most likely way one guild's
+   handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, **never** a guild id from a body. This is the most likely way one guild's
    data leaks into another's — make it a review rule.
 2. **`guild.members.fetch()` is live, every request.** The OAuth guild list is a login-time snapshot, so
    somebody demoted five minutes ago still has it in their session.

@@ -280,6 +280,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
 | Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
 | Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
+| Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers    |
 | Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in        |
 | Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                      |
 
@@ -1953,7 +1954,7 @@ Rules that are easy to break and silent when broken:
 Everything behind it assumes it ran, so five things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, and is shape-checked before it is used to look anything
-   up. A handler reads `c.get("guild").id`, never a guild id from a body. This is the most likely way one
+   up. A handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, never a guild id from a body. This is the most likely way one
    guild's data leaks into another's — make it a review rule.
 2. **`guild.members.fetch()` is live, every request.** The OAuth guild list is a login-time snapshot, so
    someone demoted five minutes ago still has it in their session. This is the difference between losing access
@@ -2076,8 +2077,9 @@ it rather than starting from a page.
 3. `src/api/routes/guilds.ts` — one `guilds.route("/:guildId/<name>", …)` line, so it inherits `requireGuild`.
 4. `dashboard/src/features/<name>/` — `use<Name>.ts`, `<name>.utils.ts` for the rules, then the page.
 5. `dashboard/src/routes.tsx` and `config/navigation.ts` — one lazy import and one nav entry.
-6. `config/features.ts` and `features/commands/commands.utils.ts` — the overview tile links to it, and the
-   command it replaces stops counting as Discord-only.
+6. `src/lib/settings/featureStatus.util.ts`, `config/features.ts` and `features/commands/commands.utils.ts` — one
+   entry in `FEATURE_SOURCES` says what the overview shows for it, the tile links to it, and the command it
+   replaces stops counting as Discord-only.
 
 Step 3 is the one that fails silently: an unmounted sub-app falls through to the SPA catch-all and lands the
 browser back on the guild picker. A request cannot tell that apart from a refusal, because `requireGuild`
