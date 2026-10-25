@@ -32,6 +32,7 @@ describe("which commands answer privately", () => {
 		expect(privateNames()).toEqual(
 			[
 				"add",
+				"afk",
 				"announce",
 				"anti-link",
 				"ask",
