@@ -19,32 +19,22 @@ Checked against the code and the npm registry on **25 October 2026**.
 
 None of these exist in any form today.
 
-| Feature               | What it would do                                                                                     | Build on                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 🗳️ Polls              | `/poll` posts one of Discord's own polls, with a question, up to ten answers and a closing time      | discord.js sends native polls from `send({ poll })`, so there is nothing to count or store    |
-| 👋 Goodbye messages   | A message when somebody leaves, the mirror of the greeting                                           | `src/lib/welcome/` — the same template, placeholders and preview                              |
-| 💬 Auto-responders    | A server's own trigger words, each answered with a reply it wrote                                    | A message handler, like `sticky` and `counting`                                               |
-| ⏰ Scheduled messages | A message posted at a set time, once or every day or week                                            | The `reminders` job, which already claims with a lease and delivers at least once             |
-| 🎂 Birthdays          | A post on a member's birthday, in a server that switched it on                                       | `profile.schema.ts` already stores a `birthday`                                               |
-| 📁 Moderation cases   | One numbered case for every warning, timeout, kick, ban and softban, with a log channel and a reason | `issueWarning` already stores the step a warning took; the idea board numbers with one `$inc` |
-| 🛡️ Raid protection    | Hold back accounts younger than a server's minimum age, and tell staff when joins spike              | `/verify`, and the joins and leaves `insights.util.ts` already records                        |
-| 💤 AFK                | `/afk` sets a note that anybody mentioning you is shown, cleared when you next speak                 | A message handler, keyed `guildId:userId` like every other piece of state                     |
+| Feature             | What it would do                                                                                     | Build on                                                                                      |
+| ------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| 🎂 Birthdays        | A post on a member's birthday, in a server that switched it on                                       | `profile.schema.ts` already stores a `birthday`                                               |
+| 📁 Moderation cases | One numbered case for every warning, timeout, kick, ban and softban, with a log channel and a reason | `issueWarning` already stores the step a warning took; the idea board numbers with one `$inc` |
+| 🛡️ Raid protection  | Hold back accounts younger than a server's minimum age, and tell staff when joins spike              | `/verify`, and the joins and leaves `insights.util.ts` already records                        |
 
 What each would have to respect:
 
 - **Birthdays are opt-in twice.** The profile is bot-wide by design (AGENTS.md §12), so a server announcing birthdays
   needs its own switch, and the member needs to agree to their server being told. Post the day and month only, never
   the year: an age is not the server's business. The privacy notice says what is stored and must say this too.
-- **Auto-responders and scheduled messages post what somebody typed**, so every post goes out with
-  `allowedMentions: { parse: [] }` (the rule the role menus and starboard follow), a server has a cap on how many it
-  keeps, and a trigger cannot fire again on the bot's own reply.
 - **Raid protection warns before it acts.** Holding a new account back or alerting staff is reversible; kicking or
   banning on a heuristic is not, so neither should be a default. It must not try to look like anything other than a
   bot, and an account-age gate needs nothing beyond the snowflake.
 - **Moderation cases need a migration on read** for the warnings already stored (AGENTS.md §13 rule 7), and the
   dashboard's warnings screen would become the case list rather than sitting beside it.
-- **AFK notes are typed by members**, so they are `unlogged` and go through the same leak rules as any other free
-  text.
 
 ---
 
@@ -95,6 +85,11 @@ server, and each should be before it is relied on.
 - **Role menus:** the post, the pre-ticked private select, and a role moved above the bot after the menu was made.
 - **Reminders:** the channel ping, and the fallback to a DM when the owner has left or the bot cannot post.
 - **The idea board:** the post, a vote moving from one side to the other, and the decision DMed to its author.
+- **Polls:** Discord's own poll from `/poll`, on both surfaces, including the `Send Polls` check.
+- **Away notes:** the notice on a mention and on a reply, and the welcome back on the next message.
+- **Goodbye messages:** the post when somebody leaves, as text and as an embed.
+- **Auto-responders:** a reply in a busy channel, the ten-second pause, and silence in a channel the bot cannot read.
+- **Scheduled messages:** a daily post across a restart, and a post skipped for being an hour late.
 
 ---
 
