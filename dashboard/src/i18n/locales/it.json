@@ -1509,10 +1509,15 @@
 		"storedL11": "Entra per creare: per ogni canale vocale creato da {{bot}}, il canale e l’id utente del membro per cui è stato creato.",
 		"storedL12": "Note di assenza: la nota che imposti con /afk e quando l’hai impostata, finché non scrivi di nuovo in quel server. La nota non viene mai pubblicata nei registri dei comandi dell’operatore.",
 		"storedL13": "Messaggi di addio, risposte automatiche e messaggi programmati: il testo che i gestori del server hanno scritto per ciascuno, i canali e gli orari che usano, e chi ha modificato ciascuno per ultimo.",
+		"storedL14": "Compleanni: il giorno e il mese che hai condiviso con /birthday set in un server — mai l’anno — e il nome utente che avevi allora. Lo sa solo quel server, e solo se i suoi gestori hanno attivato i messaggi di compleanno.",
+		"storedL15": "Casi di moderazione: ogni avvertimento, timeout, espulsione, ban, softban e revoca del ban, numerati, con l’id e il nome utente del membro, quelli del moderatore, il motivo e la durata.",
+		"storedL16": "Protezione anti-raid: solo le sue impostazioni. Chi è entrato negli ultimi minuti viene contato in memoria per riconoscere un picco, e mai salvato.",
 		"retentionL11": "I dati della starboard: eliminati con il messaggio originale, o quando il bot viene rimosso dal server.",
 		"retentionL12": "I canali di Entra per creare: dimenticati appena il canale viene eliminato, o quando il bot viene rimosso dal server.",
 		"retentionL13": "Note di assenza: eliminate quando scrivi di nuovo in quel server, o dopo 30 giorni.",
-		"retentionL14": "Messaggi di addio, risposte automatiche e messaggi programmati: eliminati quando il bot viene rimosso dal server. Un messaggio programmato che viene pubblicato una sola volta è eliminato dopo la pubblicazione."
+		"retentionL14": "Messaggi di addio, risposte automatiche e messaggi programmati: eliminati quando il bot viene rimosso dal server. Un messaggio programmato che viene pubblicato una sola volta è eliminato dopo la pubblicazione.",
+		"retentionL15": "Compleanni: finché non rimuovi il tuo con /birthday remove, non lasci quel server o il bot non viene rimosso.",
+		"retentionL16": "Casi di moderazione: conservati come gli avvertimenti dopo la rimozione del bot, finché l’operatore non li elimina. Il canale in cui vengono pubblicati viene dimenticato alla rimozione del bot."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",

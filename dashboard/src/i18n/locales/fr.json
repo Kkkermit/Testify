@@ -1509,10 +1509,15 @@
 		"storedL11": "Rejoindre pour créer : pour chaque salon vocal créé par {{bot}}, le salon et l’id utilisateur du membre pour qui il a été créé.",
 		"storedL12": "Notes d’absence : la note que vous définissez avec /afk et le moment où vous l’avez définie, jusqu’à votre prochain message dans ce serveur. La note n’est jamais publiée dans les journaux de commandes de l’opérateur.",
 		"storedL13": "Messages d’au revoir, réponses automatiques et messages programmés : le texte que les gestionnaires du serveur ont écrit pour chacun, les salons et horaires utilisés, et qui a modifié chacun en dernier.",
+		"storedL14": "Anniversaires : le jour et le mois que vous avez partagés avec /birthday set sur un serveur — jamais l’année — et votre nom d’utilisateur d’alors. Seul ce serveur le sait, et seulement si ses gestionnaires ont activé les messages d’anniversaire.",
+		"storedL15": "Cas de modération : chaque avertissement, exclusion temporaire, expulsion, bannissement, softban et débannissement, numérotés, avec l’id et le nom d’utilisateur du membre, ceux du modérateur, la raison et la durée.",
+		"storedL16": "Protection anti-raid : seulement ses réglages. Les arrivées des dernières minutes sont comptées en mémoire pour repérer un pic, et jamais enregistrées.",
 		"retentionL11": "Les données du starboard : supprimées avec le message original, ou quand le bot est retiré du serveur.",
 		"retentionL12": "Les salons de Rejoindre pour créer : oubliés dès que le salon est supprimé, ou quand le bot est retiré du serveur.",
 		"retentionL13": "Notes d’absence : supprimées à votre prochain message dans ce serveur, ou au bout de 30 jours.",
-		"retentionL14": "Messages d’au revoir, réponses automatiques et messages programmés : supprimés quand le bot est retiré du serveur. Un message programmé publié une seule fois est supprimé une fois publié."
+		"retentionL14": "Messages d’au revoir, réponses automatiques et messages programmés : supprimés quand le bot est retiré du serveur. Un message programmé publié une seule fois est supprimé une fois publié.",
+		"retentionL15": "Anniversaires : jusqu’à ce que vous retiriez le vôtre avec /birthday remove, que vous quittiez ce serveur ou que le bot en soit retiré.",
+		"retentionL16": "Cas de modération : conservés comme les avertissements après le retrait du bot, jusqu’à ce que l’opérateur les supprime. Le salon où ils sont publiés est oublié au retrait du bot."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",

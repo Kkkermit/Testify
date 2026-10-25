@@ -1,5 +1,15 @@
 import { PermissionsBitField } from "discord.js";
-import { AFK, DAY_MS, DEFAULT_PREFIX, ECONOMY, ECONOMY_COOLDOWNS, HOUR_MS, LEVELLING, TICKET } from "@config/constants";
+import {
+	AFK,
+	DAY_MS,
+	DEFAULT_PREFIX,
+	ECONOMY,
+	ECONOMY_COOLDOWNS,
+	HOUR_MS,
+	LEVELLING,
+	MINUTE_MS,
+	TICKET,
+} from "@config/constants";
 import { ANSWER_EVERY_MS } from "@lib/autoResponders/autoResponders.util";
 import { CASINO_TIMING } from "@lib/casino/casino.constants";
 import { COINFLIP_RETURN, DICE_RETURNS } from "@lib/casino/chance.util";
@@ -12,10 +22,12 @@ import { SCHEDULE_TIMING } from "@lib/scheduledMessages/scheduledMessages.consta
 import { MAKE_PAUSE_MS } from "@lib/tempVoice/tempVoice.constants";
 import {
 	AUTO_RESPONDER_LIMITS,
+	BIRTHDAY_LIMITS,
 	GIVEAWAY_LIMITS,
 	INVITE_PERMISSIONS,
 	LEVEL_LIMITS,
 	LOTTERY_LIMITS,
+	RAID_LIMITS,
 	ROLE_MENU_LIMITS,
 	SCHEDULE_LIMITS,
 	SETTINGS_LIMITS,
@@ -130,6 +142,11 @@ export const FACTS: Readonly<Record<string, string>> = {
 	"schedule.maxPerServer": formatNumber(SCHEDULE_LIMITS.maxPerGuild),
 	"schedule.lateBy": formatDurationLong(SCHEDULE_TIMING.lateByMs),
 	"schedule.maxAhead": formatDurationLong(SCHEDULE_LIMITS.maxAheadDays * DAY_MS),
+
+	"birthday.maxMessage": formatNumber(BIRTHDAY_LIMITS.maxMessage),
+
+	"raid.maxAccountAge": formatDurationLong(RAID_LIMITS.maxAccountAgeDays * DAY_MS),
+	"raid.alertEvery": formatDurationLong(RAID_LIMITS.alertEveryMinutes * MINUTE_MS),
 };
 
 const FACT = /\{fact:([a-zA-Z0-9.]+)\}/g;

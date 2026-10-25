@@ -145,6 +145,9 @@ const PARAPHRASES: [string, string[]][] = [
 	["post a message when somebody leaves", ["goodbye"]],
 	["make the bot reply when someone says a word", ["auto-responders", "command-auto-responder"]],
 	["post a message every week", ["scheduled-messages", "command-schedule"]],
+	["wish people happy birthday", ["birthdays", "command-birthday"]],
+	["see a member's punishment history", ["moderation-cases", "command-case"]],
+	["stop a raid of brand new accounts", ["raid-protection", "command-raid-protection"]],
 ];
 
 /** Typos and half-typed words: what people actually send, including the ones in the request that asked for this. */

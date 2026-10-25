@@ -1509,10 +1509,15 @@
 		"storedL11": "Únete y crea: por cada canal de voz que {{bot}} creó, el canal y el id de usuario del miembro para quien se creó.",
 		"storedL12": "Notas de ausencia: la nota que pones con /afk y cuándo la pusiste, hasta que vuelvas a escribir en ese servidor. La nota nunca se publica en los registros de comandos del operador.",
 		"storedL13": "Despedidas, respuestas automáticas y mensajes programados: el texto que escribieron los administradores del servidor para cada uno, los canales y horas que usan, y quién cambió cada uno por última vez.",
+		"storedL14": "Cumpleaños: el día y el mes que compartiste con /birthday set en un servidor —nunca el año— y el nombre de usuario que tenías entonces. Solo se entera ese servidor, y solo si sus administradores activaron las publicaciones de cumpleaños.",
+		"storedL15": "Casos de moderación: cada advertencia, aislamiento, expulsión, baneo, softban y desbaneo, numerados, con el id y el nombre de usuario del miembro, los del moderador, el motivo y cuánto dura.",
+		"storedL16": "Protección contra raids: solo su configuración. Quién entró en los últimos minutos se cuenta en memoria para detectar un pico, y nunca se guarda.",
 		"retentionL11": "Los registros del starboard: se eliminan con el mensaje original o cuando se quita el bot del servidor.",
 		"retentionL12": "Los canales de Únete y crea: se olvidan cuando se elimina el canal o cuando se quita el bot del servidor.",
 		"retentionL13": "Notas de ausencia: se eliminan cuando vuelves a escribir en ese servidor, o a los 30 días.",
-		"retentionL14": "Despedidas, respuestas automáticas y mensajes programados: se eliminan cuando el bot sale del servidor. Un mensaje programado que se publica una sola vez se elimina al publicarse."
+		"retentionL14": "Despedidas, respuestas automáticas y mensajes programados: se eliminan cuando el bot sale del servidor. Un mensaje programado que se publica una sola vez se elimina al publicarse.",
+		"retentionL15": "Cumpleaños: hasta que quites el tuyo con /birthday remove, salgas de ese servidor o el bot sea retirado de él.",
+		"retentionL16": "Casos de moderación: se conservan como las advertencias después de retirar el bot, hasta que el operador los borre. El canal donde se publican se olvida al retirar el bot."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",

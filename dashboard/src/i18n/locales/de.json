@@ -1508,10 +1508,15 @@
 		"storedL11": "Beitreten und erstellen: für jeden Sprachkanal, den {{bot}} erstellt hat, der Kanal und die Benutzer-ID des Mitglieds, für das er erstellt wurde.",
 		"storedL12": "Abwesenheitsnotizen: die Notiz, die du mit /afk setzt, und wann du sie gesetzt hast, bis du in diesem Server wieder eine Nachricht schreibst. Die Notiz wird nie in die Befehlsprotokolle des Betreibers gepostet.",
 		"storedL13": "Abschiede, Auto-Antworten und geplante Nachrichten: der Text, den die Verwaltung des Servers jeweils geschrieben hat, die Kanäle und Zeiten, die sie nutzen, und wer jeweils zuletzt etwas geändert hat.",
+		"storedL14": "Geburtstage: Tag und Monat, die du mit /birthday set auf einem Server geteilt hast – nie das Jahr – und dein damaliger Benutzername. Nur dieser Server erfährt ihn, und nur, wenn seine Verwaltung Geburtstagsbeiträge eingeschaltet hat.",
+		"storedL15": "Moderationsfälle: jede Verwarnung, jedes Timeout, jeder Kick, Bann, Softban und jede Entbannung, nummeriert, mit Benutzer-ID und Benutzername des Mitglieds und des Moderators, dem Grund und der Dauer.",
+		"storedL16": "Raid-Schutz: nur seine Einstellungen. Wer in den letzten Minuten beigetreten ist, wird nur im Speicher gezählt, um eine Welle zu erkennen, und nie gespeichert.",
 		"retentionL11": "Starboard-Einträge: werden mit der Originalnachricht gelöscht oder wenn der Bot vom Server entfernt wird.",
 		"retentionL12": "Kanäle von Beitreten und erstellen: werden vergessen, sobald der Kanal gelöscht ist oder der Bot vom Server entfernt wird.",
 		"retentionL13": "Abwesenheitsnotizen: werden gelöscht, sobald du in diesem Server wieder schreibst, spätestens nach 30 Tagen.",
-		"retentionL14": "Abschiede, Auto-Antworten und geplante Nachrichten: werden gelöscht, wenn der Bot vom Server entfernt wird. Eine geplante Nachricht, die nur einmal gepostet wird, wird danach gelöscht."
+		"retentionL14": "Abschiede, Auto-Antworten und geplante Nachrichten: werden gelöscht, wenn der Bot vom Server entfernt wird. Eine geplante Nachricht, die nur einmal gepostet wird, wird danach gelöscht.",
+		"retentionL15": "Geburtstage: bis du deinen mit /birthday remove entfernst, den Server verlässt oder der Bot daraus entfernt wird.",
+		"retentionL16": "Moderationsfälle: bleiben wie Verwarnungen erhalten, wenn der Bot entfernt wird, bis der Betreiber sie löscht. Wohin sie gepostet werden, wird beim Entfernen des Bots vergessen."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
