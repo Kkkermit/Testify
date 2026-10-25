@@ -3,7 +3,7 @@ import { type ChangeSource, type ChangeWindow, type ServerChangesPage } from "@t
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-export interface ChangesFilter {
+interface ChangesFilter {
 	days: ChangeWindow;
 	source: ChangeSource;
 	query: string;

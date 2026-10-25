@@ -114,7 +114,7 @@ export function scoreOf(entry: SearchEntry, query: string): number | null {
 
 const KIND_ORDER: Record<SearchKind, number> = { screen: 0, command: 1, server: 2 };
 
-export const RESULT_LIMIT = 8;
+const RESULT_LIMIT = 8;
 
 /** Best match first, then screens before commands before servers; an empty query offers the start of the list. */
 export function searchFor(entries: readonly SearchEntry[], query: string, limit = RESULT_LIMIT): SearchEntry[] {

@@ -14,10 +14,6 @@ export function cardLabel(card: Card): string {
 	return `${card.rank}${SUIT_GLYPHS[card.suit]}`;
 }
 
-export function handLabel(hand: readonly Card[]): string {
-	return hand.map((card) => `\`${cardLabel(card)}\``).join(" ");
-}
-
 /** A Fisher–Yates shuffle of one 52-card deck, dealt from the end. */
 export function shuffledDeck(roll: Roll = randomInt): Card[] {
 	const deck = SUITS.flatMap((suit) => RANKS.map((rank) => ({ rank, suit })));

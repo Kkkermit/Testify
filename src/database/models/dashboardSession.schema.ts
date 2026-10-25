@@ -12,7 +12,6 @@ export interface DashboardSession {
 	accessToken: string;
 	refreshToken: string;
 	tokenExpiresAt: Date;
-	guildsCachedAt: Date | null;
 	createdAt: Date;
 	lastSeenAt: Date;
 	expiresAt: Date;
@@ -29,7 +28,6 @@ const sessionSchema = new Schema<DashboardSession>(
 		accessToken: { type: String, required: true },
 		refreshToken: { type: String, required: true },
 		tokenExpiresAt: { type: Date, required: true },
-		guildsCachedAt: { type: Date, default: null },
 		lastSeenAt: { type: Date, required: true, default: Date.now },
 		expiresAt: { type: Date, required: true },
 	},
