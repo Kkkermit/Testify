@@ -1,6 +1,7 @@
 import {
 	type AuditLogConfigResponse,
 	type AutomodRules,
+	type BanPage,
 	type CasePage,
 	type CaseSettings,
 	type GuildWarningsPage,
@@ -140,6 +141,30 @@ export const serverChanges: ServerChangesPage = {
 };
 
 export const caseSettings: CaseSettings = { logChannelId: "400000000000000001", canSend: true };
+
+export const banPage: BanPage = {
+	readable: true,
+	items: [
+		{
+			userId: "100000000000000007",
+			username: "spammer",
+			avatarUrl: null,
+			reason: "Posting invite links",
+			softbanEndsAt: null,
+		},
+		{
+			userId: "100000000000000008",
+			username: "cooling-off",
+			avatarUrl: null,
+			reason: "Softban",
+			softbanEndsAt: "2026-11-01T12:00:00.000Z",
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 25,
+	truncated: false,
+};
 
 export const raidOverview: RaidOverview = {
 	enabled: true,

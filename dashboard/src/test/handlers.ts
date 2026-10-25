@@ -26,6 +26,7 @@ import { giveawayList, musicSettings } from "@/test/fixtures/entertainment";
 import {
 	auditLogConfig,
 	automodRules,
+	banPage,
 	casePage,
 	caseSettings,
 	raidOverview,
@@ -86,6 +87,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/cases/settings", () => HttpResponse.json(caseSettings)),
 	http.get("/api/guilds/:guildId/cases", () => HttpResponse.json(casePage)),
 	http.get("/api/guilds/:guildId/raid-protection", () => HttpResponse.json(raidOverview)),
+	http.get("/api/guilds/:guildId/bans", () => HttpResponse.json(banPage)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),

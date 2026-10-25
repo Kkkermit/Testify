@@ -3,6 +3,7 @@ export * from "./auditLabels.util";
 export * from "./auditLog.util";
 export * from "./auditPanel.util";
 export * from "./automodActions.util";
+export * from "./banList.util";
 export * from "./blacklistActions.util";
 export * from "./caseActions.util";
 export * from "./contentFilter.util";

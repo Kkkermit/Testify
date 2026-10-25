@@ -127,6 +127,8 @@
 		"birthdaysHint": "A post on the birthdays members share",
 		"cases": "Cases",
 		"casesHint": "Every moderation action, numbered",
+		"bans": "Bans",
+		"bansHint": "Everybody banned, and Unban",
 		"raid": "Raid protection",
 		"raidHint": "Hold back new accounts, hear about join spikes"
 	},
@@ -553,6 +555,28 @@
 		"ban": "Ban",
 		"softban": "Softban",
 		"unban": "Unban"
+	},
+	"bans": {
+		"title": "Bans",
+		"subtitle": "Everybody banned from this server, as Discord holds them. Lifting a ban is recorded as a case.",
+		"list": "Banned",
+		"count_one": "{{count, number}} ban",
+		"count_other": "{{count, number}} bans",
+		"search": "Search",
+		"searchHint": "A username, a Discord ID or words from the reason.",
+		"unreadable": "{{bot}} needs the Ban Members permission to see who is banned.",
+		"emptyTitle": "Nobody is banned",
+		"emptyBody": "Bans made in Discord or here show up in this list.",
+		"noMatchTitle": "No ban matches",
+		"noMatchBody": "Try part of the name, or paste their ID.",
+		"truncated": "Discord hands back {{max, number}} bans at a time, so this list may not be every one.",
+		"softban": "Softban · lifts {{when}}",
+		"noReason": "No reason given",
+		"unban": "Unban",
+		"unbanName": "Unban {{name}}",
+		"reason": "Reason",
+		"reasonHint": "Optional. It goes in the case and in Discord’s audit log.",
+		"confirm": "Unban {{name}}"
 	},
 	"raid": {
 		"title": "Raid protection",

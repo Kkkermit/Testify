@@ -1,5 +1,6 @@
 import {
 	Activity,
+	Ban,
 	Cake,
 	CalendarClock,
 	ChartColumn,
@@ -191,6 +192,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.cases",
 							icon: Gavel,
 							hintKey: "nav.casesHint",
+						},
+						{
+							to: `/guilds/${guild.id}/bans`,
+							labelKey: "nav.bans",
+							icon: Ban,
+							hintKey: "nav.bansHint",
 						},
 						{
 							to: `/guilds/${guild.id}/raid-protection`,

@@ -3,6 +3,7 @@ export * from "./api";
 export * from "./auditLog";
 export * from "./automod";
 export * from "./autoResponders";
+export * from "./bans";
 export * from "./birthdays";
 export * from "./blacklist";
 export * from "./botStats";

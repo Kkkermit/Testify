@@ -127,6 +127,8 @@
 		"birthdaysHint": "Una publicación en los cumpleaños que comparten los miembros",
 		"cases": "Casos",
 		"casesHint": "Cada acción de moderación, numerada",
+		"bans": "Baneos",
+		"bansHint": "Todos los baneados, y Desbanear",
 		"raid": "Protección contra raids",
 		"raidHint": "Retén cuentas nuevas y entérate de los picos de entradas"
 	},
@@ -554,6 +556,28 @@
 		"ban": "Baneo",
 		"softban": "Baneo temporal",
 		"unban": "Desbaneo"
+	},
+	"bans": {
+		"title": "Baneos",
+		"subtitle": "Todos los baneados de este servidor, tal como los tiene Discord. Levantar un baneo queda registrado como caso.",
+		"list": "Baneados",
+		"count_one": "{{count, number}} baneo",
+		"count_other": "{{count, number}} baneos",
+		"search": "Buscar",
+		"searchHint": "Un nombre de usuario, una ID de Discord o palabras del motivo.",
+		"unreadable": "{{bot}} necesita el permiso Banear miembros para ver quién está baneado.",
+		"emptyTitle": "No hay nadie baneado",
+		"emptyBody": "Los baneos hechos en Discord o aquí aparecen en esta lista.",
+		"noMatchTitle": "Ningún baneo coincide",
+		"noMatchBody": "Prueba con parte del nombre o pega su ID.",
+		"truncated": "Discord devuelve {{max, number}} baneos cada vez, así que puede que esta lista no los incluya todos.",
+		"softban": "Softban · se levanta {{when}}",
+		"noReason": "Sin motivo",
+		"unban": "Desbanear",
+		"unbanName": "Desbanear a {{name}}",
+		"reason": "Motivo",
+		"reasonHint": "Opcional. Va en el caso y en el registro de auditoría de Discord.",
+		"confirm": "Desbanear a {{name}}"
 	},
 	"raid": {
 		"title": "Protección contra raids",

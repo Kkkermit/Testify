@@ -34,6 +34,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	"raid-protection": { path: (guildId) => `/guilds/${guildId}/raid-protection`, screen: "Raid protection" },
 	kick: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
 	ban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
+	unban: { path: (guildId) => `/guilds/${guildId}/bans`, screen: "Bans" },
 	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 };
 

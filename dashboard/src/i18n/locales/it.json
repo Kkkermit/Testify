@@ -127,6 +127,8 @@
 		"birthdaysHint": "Un messaggio per i compleanni che i membri condividono",
 		"cases": "Casi",
 		"casesHint": "Ogni azione di moderazione, numerata",
+		"bans": "Ban",
+		"bansHint": "Tutti i bannati, e Revoca ban",
 		"raid": "Protezione anti-raid",
 		"raidHint": "Trattieni gli account nuovi e scopri i picchi di ingressi"
 	},
@@ -554,6 +556,28 @@
 		"ban": "Ban",
 		"softban": "Ban temporaneo",
 		"unban": "Revoca del ban"
+	},
+	"bans": {
+		"title": "Ban",
+		"subtitle": "Tutti i bannati da questo server, come li tiene Discord. Revocare un ban viene registrato come caso.",
+		"list": "Bannati",
+		"count_one": "{{count, number}} ban",
+		"count_other": "{{count, number}} ban",
+		"search": "Cerca",
+		"searchHint": "Un nome utente, un ID Discord o parole del motivo.",
+		"unreadable": "{{bot}} ha bisogno del permesso Banna membri per vedere chi è bannato.",
+		"emptyTitle": "Nessuno è bannato",
+		"emptyBody": "I ban fatti su Discord o qui compaiono in questo elenco.",
+		"noMatchTitle": "Nessun ban corrisponde",
+		"noMatchBody": "Prova con parte del nome, o incolla il suo ID.",
+		"truncated": "Discord restituisce {{max, number}} ban alla volta, quindi questo elenco potrebbe non contenerli tutti.",
+		"softban": "Softban · termina {{when}}",
+		"noReason": "Nessun motivo indicato",
+		"unban": "Revoca ban",
+		"unbanName": "Revoca il ban di {{name}}",
+		"reason": "Motivo",
+		"reasonHint": "Facoltativo. Finisce nel caso e nel registro di controllo di Discord.",
+		"confirm": "Revoca il ban di {{name}}"
 	},
 	"raid": {
 		"title": "Protezione anti-raid",

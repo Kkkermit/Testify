@@ -31,6 +31,7 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/automod`,
 				`/guilds/${guild.id}/warnings`,
 				`/guilds/${guild.id}/cases`,
+				`/guilds/${guild.id}/bans`,
 				`/guilds/${guild.id}/raid-protection`,
 				`/guilds/${guild.id}/changes`,
 				`/guilds/${guild.id}/insights`,

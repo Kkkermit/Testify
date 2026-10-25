@@ -127,6 +127,8 @@
 		"birthdaysHint": "Ein Beitrag zu den Geburtstagen, die Mitglieder teilen",
 		"cases": "Fälle",
 		"casesHint": "Jede Moderationsaktion, nummeriert",
+		"bans": "Banns",
+		"bansHint": "Alle Gebannten, mit Entbannen",
 		"raid": "Raid-Schutz",
 		"raidHint": "Neue Konten zurückhalten, bei Beitrittswellen Bescheid bekommen"
 	},
@@ -553,6 +555,28 @@
 		"ban": "Bann",
 		"softban": "Softbann",
 		"unban": "Entbannung"
+	},
+	"bans": {
+		"title": "Banns",
+		"subtitle": "Alle, die von diesem Server gebannt sind, so wie Discord sie führt. Das Aufheben eines Banns wird als Fall festgehalten.",
+		"list": "Gebannt",
+		"count_one": "{{count, number}} Bann",
+		"count_other": "{{count, number}} Banns",
+		"search": "Suchen",
+		"searchHint": "Ein Benutzername, eine Discord-ID oder Wörter aus dem Grund.",
+		"unreadable": "{{bot}} braucht die Berechtigung „Mitglieder bannen“, um zu sehen, wer gebannt ist.",
+		"emptyTitle": "Niemand ist gebannt",
+		"emptyBody": "Banns aus Discord oder von hier erscheinen in dieser Liste.",
+		"noMatchTitle": "Kein Bann passt",
+		"noMatchBody": "Versuch es mit einem Teil des Namens oder füge die ID ein.",
+		"truncated": "Discord gibt {{max, number}} Banns auf einmal zurück, daher sind hier vielleicht nicht alle.",
+		"softban": "Softban · endet {{when}}",
+		"noReason": "Kein Grund angegeben",
+		"unban": "Entbannen",
+		"unbanName": "{{name}} entbannen",
+		"reason": "Grund",
+		"reasonHint": "Optional. Er steht im Fall und in Discords Audit-Log.",
+		"confirm": "{{name}} entbannen"
 	},
 	"raid": {
 		"title": "Raid-Schutz",

@@ -1,14 +1,14 @@
 import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings, guildOf } from "@api/context";
+import { actorOf, type ApiBindings, guildOf } from "@api/context";
 import { badRequest, forbidden, notFound } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
 import { problemText } from "@lib/format";
-import { banUser, kickMember, type Moderator, moderationProblem } from "@lib/moderation";
+import { banUser, kickMember, moderationProblem } from "@lib/moderation";
 import {
 	banBody,
 	boardQuery,
@@ -27,12 +27,6 @@ import {
 export const members = new Hono<ApiBindings>();
 
 members.use("*", requireGuild);
-
-/** `requireGuild` has already insisted on a session, so the fallbacks only satisfy the type. */
-function actorOf(context: Context<ApiBindings>): Moderator {
-	const session = context.get("session");
-	return { id: session?.userId ?? "", name: session?.username ?? "a server manager" };
-}
 
 members.get("/leaderboard", async (context) => {
 	const { board, page, sort, scope } = parseQuery(context, boardQuery);

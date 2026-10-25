@@ -127,6 +127,8 @@
 		"birthdaysHint": "Une publication pour les anniversaires que les membres partagent",
 		"cases": "Dossiers",
 		"casesHint": "Chaque action de modération, numérotée",
+		"bans": "Bannissements",
+		"bansHint": "Toutes les personnes bannies, et Débannir",
 		"raid": "Protection anti-raid",
 		"raidHint": "Retenir les nouveaux comptes, être prévenu des pics d’arrivées"
 	},
@@ -554,6 +556,28 @@
 		"ban": "Bannissement",
 		"softban": "Bannissement temporaire",
 		"unban": "Débannissement"
+	},
+	"bans": {
+		"title": "Bannissements",
+		"subtitle": "Toutes les personnes bannies de ce serveur, telles que Discord les garde. Lever un bannissement est enregistré comme un cas.",
+		"list": "Bannis",
+		"count_one": "{{count, number}} bannissement",
+		"count_other": "{{count, number}} bannissements",
+		"search": "Rechercher",
+		"searchHint": "Un nom d’utilisateur, un ID Discord ou des mots de la raison.",
+		"unreadable": "{{bot}} a besoin de la permission Bannir des membres pour voir qui est banni.",
+		"emptyTitle": "Personne n’est banni",
+		"emptyBody": "Les bannissements faits dans Discord ou ici apparaissent dans cette liste.",
+		"noMatchTitle": "Aucun bannissement ne correspond",
+		"noMatchBody": "Essayez une partie du nom, ou collez son ID.",
+		"truncated": "Discord renvoie {{max, number}} bannissements à la fois, cette liste n’est donc peut-être pas complète.",
+		"softban": "Softban · levé {{when}}",
+		"noReason": "Aucune raison donnée",
+		"unban": "Débannir",
+		"unbanName": "Débannir {{name}}",
+		"reason": "Raison",
+		"reasonHint": "Facultative. Elle figure dans le cas et dans le journal d’audit de Discord.",
+		"confirm": "Débannir {{name}}"
 	},
 	"raid": {
 		"title": "Protection anti-raid",

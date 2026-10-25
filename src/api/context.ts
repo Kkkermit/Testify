@@ -34,3 +34,9 @@ export function guildOf(context: Context<ApiBindings>): Guild {
 export function guildIdOf(context: Context<ApiBindings>): string {
 	return guildOf(context).id;
 }
+
+/** The person acting, as a moderation record names them; `requireGuild` has already insisted on a session. */
+export function actorOf(context: Context<ApiBindings>): { id: string; name: string } {
+	const session = context.get("session");
+	return { id: session?.userId ?? "", name: session?.username ?? "a server manager" };
+}
