@@ -1,6 +1,5 @@
 import { describeWithMongo } from "../helpers/mongo";
-import { StarPost } from "@database/models/starboard.schema";
-import { purgeGuild } from "@database/repositories/settingsRepository";
+import { purgeGuild } from "@database/repositories/guildRepository";
 import {
 	claimStarPost,
 	countStarPosts,
@@ -28,11 +27,6 @@ const fields = (guildId = GUILD, stars = 3) => ({
 });
 
 describeWithMongo("starboardRepository", () => {
-	beforeAll(async () => {
-		// The unique index is what decides a race; build it before the first test leans on it.
-		await StarPost.syncIndexes();
-	});
-
 	it("starts a server's settings at the defaults and keeps what is changed", async () => {
 		expect(await getStarboardSettings(GUILD)).toBeNull();
 

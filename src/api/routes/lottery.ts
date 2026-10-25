@@ -1,7 +1,7 @@
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
+import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { deleteLottery } from "@database/repositories/lotteryRepository";
@@ -11,13 +11,6 @@ import { lotteryPatch } from "@testify/shared";
 export const lottery = new Hono<ApiBindings>();
 
 lottery.use("*", requireGuild);
-
-function guildIdOf(context: Context<ApiBindings>): string {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 lottery.get("/", async (context) => context.json(await readLottery(guildIdOf(context))));
 

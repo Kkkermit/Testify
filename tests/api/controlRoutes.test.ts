@@ -6,11 +6,13 @@ import { control } from "@api/routes/control";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { shutdown } from "@core/shutdown";
+import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getBotSettings, saveBotSettings } from "@database/repositories/botSettingsRepository";
+import { getCounting } from "@database/repositories/countingRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
-import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
 import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
+import { getWelcome } from "@database/repositories/welcomeRepository";
 import { type BotControlState, type OwnerGuildDetail } from "@testify/shared";
 
 jest.mock("@core/shutdown", () => ({ shutdown: jest.fn(() => Promise.resolve()) }));
@@ -20,9 +22,13 @@ jest.mock("@database/repositories/botSettingsRepository", () => ({
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/countingRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/usageRepository", () => ({

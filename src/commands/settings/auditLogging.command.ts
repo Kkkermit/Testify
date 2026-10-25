@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
-import { getAuditLogConfig } from "@database/repositories/settingsRepository";
+import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { dashboardHint } from "@lib/bot";
 import { reply } from "@lib/discord";
 import { auditPanel } from "@lib/moderation";

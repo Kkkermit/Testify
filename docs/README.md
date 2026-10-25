@@ -42,6 +42,7 @@
 | 🐳 [`hosting.md`](hosting.md)                 | Running the bot and dashboard in Docker, and what is deliberately not there      |
 | 🔒 [`security.md`](security.md)               | Reporting a vulnerability, the data model, and every dependency exception        |
 | 🌱 [`code-of-conduct.md`](code-of-conduct.md) | The standard everybody here is held to, and how to report a problem              |
+| 🔭 [`future-feature.md`](future-feature.md)   | What could come next, what has never been tried live, and the upkeep waiting     |
 
 ### The dashboard
 

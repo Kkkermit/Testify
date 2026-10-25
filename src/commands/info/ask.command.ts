@@ -2,7 +2,7 @@ import { DEFAULT_PREFIX } from "@config/constants";
 import { theme } from "@config/theme";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getPrefix } from "@database/repositories/settingsRepository";
+import { getPrefix } from "@database/repositories/prefixRepository";
 import { dashboardUrl } from "@lib/bot";
 import { reply } from "@lib/discord";
 import { choiceName, suggestionName, supportContext, supportDesk, supportScreen } from "@lib/support";

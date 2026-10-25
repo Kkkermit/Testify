@@ -5,7 +5,8 @@ name: Nightly
 # found without waiting for someone to push.
 on:
   schedule:
-    - cron: "0 0 * * *"
+    # Off the hour: GitHub delays and can drop scheduled runs at the start of an hour, when its queue is busiest.
+    - cron: "37 3 * * *"
   workflow_dispatch:
 
 concurrency:

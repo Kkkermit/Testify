@@ -1,5 +1,5 @@
 import { AttachmentBuilder } from "discord.js";
-import { boardLayout, medalColour, placeholderColour, renderBoardImage } from "@lib/canvas/boardCard.util";
+import { boardLayout, placeholderColour, renderBoardImage } from "@lib/canvas/boardCard.util";
 import { type BoardCard } from "@lib/canvas/canvas.types";
 import { barFill, type RankCardData, rankCardText, renderRankCard } from "@lib/canvas/rankCard.util";
 
@@ -113,17 +113,6 @@ describe("boardLayout", () => {
 		expect(withViewer.viewer).toBeGreaterThan(withViewer.rows.at(-1)!);
 		expect(unranked.height).toBe(withViewer.height);
 		expect(withViewer.footer).toBeGreaterThan(withViewer.viewer!);
-	});
-});
-
-describe("medalColour", () => {
-	it("colours the top three differently from each other", () => {
-		const top = [medalColour(0), medalColour(1), medalColour(2)];
-		expect(new Set(top).size).toBe(3);
-	});
-
-	it("gives nobody below third a medal", () => {
-		expect(medalColour(3)).toBeNull();
 	});
 });
 

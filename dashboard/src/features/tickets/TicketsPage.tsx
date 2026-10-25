@@ -5,18 +5,20 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { LeaveGuard } from "@/app/LeaveGuard";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
+import {
+	ChannelKindPicker,
+	ChannelPicker,
+	Field,
+	FIELD,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	Warning,
+} from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
-import {
-	categoriesOf,
-	type Draft,
-	draftOf,
-	draftProblems,
-	isDirty,
-	staffRoleWarning,
-} from "@/features/tickets/tickets.utils";
+import { type Draft, draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
 import { useDisableTickets, useSaveTickets, useTickets } from "@/features/tickets/useTickets";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
@@ -108,23 +110,17 @@ export function TicketsPage(): React.JSX.Element {
 					}}
 				/>
 
-				<Field label={t("tickets.category")} htmlFor="ticket-category" hint={t("tickets.categoryHint")}>
-					<select
-						id="ticket-category"
-						className={SELECT}
-						value={draft.categoryId ?? ""}
-						onChange={(event) => {
-							set("categoryId", event.target.value === "" ? null : event.target.value);
-						}}
-					>
-						<option value="">{t("tickets.chooseCategory")}</option>
-						{categoriesOf(channels.data ?? []).map((category) => (
-							<option key={category.id} value={category.id}>
-								{category.name}
-							</option>
-						))}
-					</select>
-				</Field>
+				<ChannelKindPicker
+					kind="category"
+					label={t("tickets.category")}
+					hint={t("tickets.categoryHint")}
+					noneLabel={t("tickets.chooseCategory")}
+					channels={channels.data ?? []}
+					value={draft.categoryId}
+					onChange={(id) => {
+						set("categoryId", id);
+					}}
+				/>
 
 				<ChannelPicker
 					label={t("tickets.transcripts")}

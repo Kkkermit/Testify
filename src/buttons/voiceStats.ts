@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { getVoiceCounter, setVoiceCounter } from "@database/repositories/settingsRepository";
+import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { syncVoiceCounters, VOICESTATS_PANEL_ID, voiceStatsPanel, type VoiceStatsPanelState } from "@lib/settings";
 
 /** Every control on the voice-counter panel. */

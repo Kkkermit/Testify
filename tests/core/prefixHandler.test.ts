@@ -6,8 +6,13 @@ import { runMessageHandlers } from "@core/message";
 
 const prefixConfig = { prefix: "t?", isEnabled: true };
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/prefixRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve(prefixConfig)),
+}));
+// A run is counted without being awaited, and with no database its write would land after the suite ends.
+jest.mock("@database/repositories/usageRepository", () => ({ recordCommandUse: jest.fn(() => Promise.resolve()) }));
+jest.mock("@database/repositories/commandRunRepository", () => ({
+	recordCommandRun: jest.fn(() => Promise.resolve()),
 }));
 // Routing a message to the right command; the checks have their own tests.
 jest.mock("@core/checks", () => ({

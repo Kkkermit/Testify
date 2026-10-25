@@ -5,7 +5,7 @@ import { barWidth } from "@/components/primitives/UsageBars";
 import { levelFrom, percent, shortDay, windowFrom } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { logFeed, usageReport } from "@/test/handlers";
+import { logFeed, usageReport } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

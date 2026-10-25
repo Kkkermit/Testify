@@ -5,7 +5,7 @@ import { http, HttpResponse } from "msw";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { filterGuilds } from "@/features/guilds/guilds.utils";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild, cannotAdd, me, withoutBot } from "@/test/handlers";
+import { aGuild, cannotAdd, me, withoutBot } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

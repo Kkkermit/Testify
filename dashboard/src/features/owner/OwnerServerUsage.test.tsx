@@ -13,7 +13,8 @@ import {
 } from "@/features/owner/owner.utils";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild, commandRuns, guildUsage } from "@/test/handlers";
+import { commandRuns, guildUsage } from "@/test/fixtures/owner";
+import { aGuild } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

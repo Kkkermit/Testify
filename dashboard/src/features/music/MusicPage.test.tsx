@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { MusicPage } from "@/features/music/MusicPage";
 import { expectNoViolations } from "@/test/axe";
-import { musicSettings } from "@/test/handlers";
+import { musicSettings } from "@/test/fixtures/entertainment";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

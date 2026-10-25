@@ -4,7 +4,7 @@ import { delay, http, HttpResponse } from "msw";
 import { insertToken, messageTooLong } from "@/features/welcome/welcome.utils";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
 import { expectNoViolations } from "@/test/axe";
-import { welcomeConfig } from "@/test/handlers";
+import { welcomeConfig } from "@/test/fixtures/community";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

@@ -1,4 +1,4 @@
-import { type ChannelSummary, type RoleSummary, type TicketSettings, ticketMissing } from "@testify/shared";
+import { type RoleSummary, type TicketSettings, ticketMissing } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { problemText } from "@/lib/problemText";
 
@@ -35,10 +35,6 @@ export function draftProblems(draft: Draft, t: TFunction): string[] {
 		...(draft.description.trim() === "" ? [t("tickets.needsMessage")] : []),
 		...(draft.buttonLabel.trim() === "" ? [t("tickets.needsLabel")] : []),
 	];
-}
-
-export function categoriesOf(channels: ChannelSummary[]): ChannelSummary[] {
-	return channels.filter((channel) => channel.kind === "category");
 }
 
 /** A ticket channel is created under the category and its permissions are overwritten, so the bot needs the role beneath its own. */

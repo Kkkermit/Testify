@@ -1,4 +1,4 @@
-import { type WelcomeSettings } from "@database/models/guildSettings.schema";
+import { type WelcomeSettings } from "@database/models/welcome.schema";
 import { type WelcomeConfig } from "@lib/welcome/welcome.types";
 import {
 	DEFAULT_WELCOME_MESSAGE,

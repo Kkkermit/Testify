@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { createMemoryRouter, RouterProvider, useLocation } from "react-router";
 import { AppShell } from "@/app/AppShell";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild } from "@/test/handlers";
+import { aGuild } from "@/test/fixtures/session";
 
 function Where(): React.JSX.Element {
 	const location = useLocation();

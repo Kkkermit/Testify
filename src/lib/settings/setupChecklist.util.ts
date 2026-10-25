@@ -9,13 +9,9 @@ import {
 	type TextChannel,
 } from "discord.js";
 import { UserFacingError } from "@core/errors";
+import { getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import {
-	getAuditLogConfig,
-	getWelcome,
-	saveWelcome,
-	setAuditLogConfig,
-} from "@database/repositories/settingsRepository";
+import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { canPostInChannel } from "@lib/discord/channels.util";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import {

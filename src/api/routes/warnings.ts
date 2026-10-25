@@ -1,8 +1,8 @@
-import { type Guild, PermissionFlagsBits } from "discord.js";
+import { PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { forbidden, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { forbidden, notFound } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
@@ -28,13 +28,6 @@ import {
 export const warnings = new Hono<ApiBindings>();
 
 warnings.use("*", requireGuild);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 function actor(context: Context<ApiBindings>): { id: string; tag: string } {
 	const session = context.get("session");

@@ -1,11 +1,11 @@
-import { type IntervalHistogram, monitorEventLoopDelay } from "node:perf_hooks";
+import { monitorEventLoopDelay } from "node:perf_hooks";
 import { STATUS_LIMITS } from "@testify/shared";
 
 /** How long the process takes to get round to things: event-loop delay, and how long commands take to answer. */
 
 const NS_PER_MS = 1_000_000;
 
-let histogram: IntervalHistogram | null = null;
+let histogram: ReturnType<typeof monitorEventLoopDelay> | null = null;
 
 /** Idempotent, so the scheduler and a test can both call it. */
 export function startEventLoopMonitor(): void {

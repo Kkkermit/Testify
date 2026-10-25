@@ -4,7 +4,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { IdeasPage } from "@/features/ideas/IdeasPage";
 import { expectNoViolations } from "@/test/axe";
-import { ideaPage, ideaSettings } from "@/test/handlers";
+import { ideaPage, ideaSettings } from "@/test/fixtures/community";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

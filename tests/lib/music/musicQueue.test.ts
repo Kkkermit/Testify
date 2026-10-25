@@ -15,7 +15,6 @@ import {
 	shuffleUpcoming,
 	totalDurationMs,
 	upcomingPage,
-	withLoop,
 } from "@lib/music/musicQueue.util";
 
 function track(title: string, durationMs: number | null = 180_000): Track {
@@ -162,7 +161,7 @@ describe("nextIndex", () => {
 
 	it("has nowhere to go when there is nothing queued", () => {
 		expect(nextIndex(EMPTY_QUEUE)).toBeNull();
-		expect(nextIndex(withLoop(EMPTY_QUEUE, "queue"))).toBeNull();
+		expect(nextIndex({ ...EMPTY_QUEUE, loop: "queue" })).toBeNull();
 	});
 });
 

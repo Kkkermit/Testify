@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw";
 import { AppShell } from "@/app/AppShell";
 import { RequireAuth } from "@/app/RequireAuth";
 import { hardRedirect } from "@/lib/redirect";
-import { aGuild, me } from "@/test/handlers";
+import { aGuild, me } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

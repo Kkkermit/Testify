@@ -2,7 +2,7 @@ import { type APIEmbedField, type ColorResolvable, type Guild } from "discord.js
 import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
-import { getAuditLogConfig } from "@database/repositories/settingsRepository";
+import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { embed } from "@lib/discord/embeds.util";
 import { AUDIT_EVENTS, type AuditEvent } from "@testify/shared";
 

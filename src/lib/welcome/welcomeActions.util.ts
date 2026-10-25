@@ -1,5 +1,5 @@
 import { type AttachmentBuilder, type EmbedBuilder, type GuildMember } from "discord.js";
-import { type WelcomeSettings } from "@database/models/guildSettings.schema";
+import { type WelcomeSettings } from "@database/models/welcome.schema";
 import { renderWelcomeCard } from "@lib/canvas/welcomeCard.util";
 import { embed } from "@lib/discord/embeds.util";
 import { type WelcomeConfig } from "@lib/welcome/welcome.types";

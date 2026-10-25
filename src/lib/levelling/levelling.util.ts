@@ -1,5 +1,5 @@
 import { LEVELLING } from "@config/constants";
-import { type LevelReward, type LevelSettings, type XpBoost } from "@database/models/guildSettings.schema";
+import { type LevelReward, type LevelSettings, type XpBoost } from "@database/models/levelling.schema";
 import { type LevelConfig } from "@lib/levelling/levelling.types";
 import { LEVEL_LIMITS } from "@testify/shared";
 

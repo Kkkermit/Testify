@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { WarningsPage } from "@/features/warnings/WarningsPage";
 import { expectNoViolations } from "@/test/axe";
-import { guildWarnings } from "@/test/handlers";
+import { guildWarnings } from "@/test/fixtures/moderation";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

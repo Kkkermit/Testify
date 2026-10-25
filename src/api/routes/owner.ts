@@ -8,9 +8,11 @@ import { globalCommandToggles } from "@api/routes/commandToggles";
 import { parseQuery } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
 import { databaseConnected } from "@database/connection";
+import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
+import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
-import { getAuditLogConfig, getCounting, getWelcome } from "@database/repositories/settingsRepository";
 import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
+import { getWelcome } from "@database/repositories/welcomeRepository";
 import { ownerGuildQuery, type OwnerGuildRow, type OwnerGuildSort, type OwnerStats, type Paged } from "@testify/shared";
 
 export const owner = new Hono<ApiBindings>();

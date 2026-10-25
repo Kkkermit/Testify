@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import { defineMessageHandler } from "@core/message";
 import { adjustWallet } from "@database/repositories/economyRepository";
-import { getTreasureConfig } from "@database/repositories/settingsRepository";
+import { getTreasureConfig } from "@database/repositories/treasureRepository";
 import { embed } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 

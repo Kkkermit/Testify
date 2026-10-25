@@ -10,7 +10,7 @@ import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 const TONE: Record<IdeaRow["status"], BadgeTone> = { open: "warning", accepted: "success", declined: "danger" };
 
-export const STATUS_LABEL: Record<IdeaRow["status"], TranslationKey> = {
+const STATUS_LABEL: Record<IdeaRow["status"], TranslationKey> = {
 	open: "ideas.statusOpen",
 	accepted: "ideas.statusAccepted",
 	declined: "ideas.statusDeclined",

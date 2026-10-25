@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { TreasurePage } from "@/features/treasure/TreasurePage";
 import { expectNoViolations } from "@/test/axe";
-import { treasureSettings } from "@/test/handlers";
+import { treasureSettings } from "@/test/fixtures/economy";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

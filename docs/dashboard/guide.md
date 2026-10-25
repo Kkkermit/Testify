@@ -206,7 +206,7 @@ src/
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
 ├── hooks/              usePageTitle usePrefersReducedMotion useCountUp useDocumentVisible useDebounced
 ├── lib/                api cn queries redirect sanitise tint + three/ for the backdrop maths
-└── test/               handlers.ts (MSW), setup.ts, renderWithProviders.tsx, axe.ts
+└── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
 
 **A page holds routing, loading and error branches and nothing else.** Anything with a rule in it — which tab a
@@ -263,7 +263,8 @@ exercise is for.
 after the write succeeds.
 
 **4. `src/api/routes/guilds.ts`** — one `guilds.route("/:guildId/<name>", <name>)` line so it inherits
-`requireGuild`, plus a row in `featuresOf` if the overview grid should show it.
+`requireGuild`, plus an entry in `FEATURE_SOURCES` in `src/lib/settings/featureStatus.util.ts` if the overview
+grid should show it.
 
 > [!WARNING]
 > Step 4 is the one that **fails silently**. An unmounted sub-app falls through to the SPA catch-all and lands
@@ -277,7 +278,8 @@ Add the query key to `src/lib/queries.ts`.
 section), `config/features.ts` (the overview tile's path), and
 `features/commands/commands.utils.ts` (so the command stops counting as Discord-only on `/commands`).
 
-Then: MSW fixture in `src/test/handlers.ts`, a `.utils.test.ts`, a page test, and the API route test.
+Then: a fixture in `src/test/fixtures/`, its MSW handler in `src/test/handlers.ts`, a `.utils.test.ts`, a page
+test, and the API route test.
 
 ---
 
@@ -328,7 +330,7 @@ writing it once. Every piece has a test proven able to fail.
 Five things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, shape-checked before it is used to look anything up. A
-   handler reads `c.get("guild").id`, **never** a guild id from a body. This is the most likely way one guild's
+   handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, **never** a guild id from a body. This is the most likely way one guild's
    data leaks into another's — make it a review rule.
 2. **`guild.members.fetch()` is live, every request.** The OAuth guild list is a login-time snapshot, so
    somebody demoted five minutes ago still has it in their session.
@@ -644,8 +646,10 @@ so installing it needs `--force` and breaks `npm ci`.
 
 Jest + Testing Library + MSW. Coverage thresholds **80/80/80/80**.
 
-- **`src/test/handlers.ts`** — the MSW fixtures and default handlers. Add yours here; page tests override with
-  `server.use(...)` for the case under test.
+- **`src/test/fixtures/`** — the fake answers, one file per section of the sidebar (`community.ts`,
+  `moderation.ts` …) plus `session.ts`, `owner.ts` and `bot.ts`, each typed against `@testify/shared`.
+- **`src/test/handlers.ts`** — the default MSW handlers that serve them. Add a screen's fixture and its handler;
+  page tests override with `server.use(...)` for the case under test.
 - **`src/test/renderWithProviders.tsx`** — `renderWithProviders(<Page />, { route, path })`, returning the
   query `client` so a test can await `client.isMutating()`.
 - **`src/test/axe.ts`** — `expectNoViolations(container)`.

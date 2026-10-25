@@ -1,7 +1,7 @@
 import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/settingsRepository";
+import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
 import { modalForm, pickedChannelId } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 import {

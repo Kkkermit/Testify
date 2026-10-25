@@ -1,7 +1,7 @@
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
+import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { applyCasinoSettings, CASINO_GAME_LABELS, readCasinoSettings } from "@lib/casino";
@@ -10,13 +10,6 @@ import { type CasinoPatch, casinoPatch, isCasinoGame } from "@testify/shared";
 export const casino = new Hono<ApiBindings>();
 
 casino.use("*", requireGuild);
-
-function guildIdOf(context: Context<ApiBindings>): string {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 casino.get("/", async (context) => context.json(await readCasinoSettings(guildIdOf(context))));
 

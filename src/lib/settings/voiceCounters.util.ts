@@ -1,7 +1,7 @@
 import { type Guild } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { toError } from "@core/errors";
-import { getVoiceCounter } from "@database/repositories/settingsRepository";
+import { getVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { formatNumber } from "@lib/format/format.util";
 
 /** Four byte-identical event files (with `1`-suffixed variables) collapse into this. */

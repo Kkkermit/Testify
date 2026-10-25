@@ -1,7 +1,5 @@
-import { type Guild } from "discord.js";
-import { type Context, Hono } from "hono";
-import { type ApiBindings } from "@api/context";
-import { notInGuild } from "@api/errors";
+import { Hono } from "hono";
+import { type ApiBindings, guildOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { readMemberCounts } from "@lib/info";
 import { type MemberCounts } from "@testify/shared";
@@ -14,13 +12,6 @@ memberCount.use("*", requireGuild);
 const FRESH_FOR_MS = 60_000;
 
 const recent = new Map<string, { at: number; counts: MemberCounts }>();
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 memberCount.get("/", async (context) => {
 	const guild = guildOf(context);

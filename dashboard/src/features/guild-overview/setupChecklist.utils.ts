@@ -1,7 +1,7 @@
 import { type SetupStep, type SetupStepState } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
-export type StepAction = "start" | "create" | "choose" | null;
+type StepAction = "start" | "create" | "choose" | null;
 
 /** What the row's button does: nothing once done, a link to the screen when one click cannot do it. */
 export function actionFor(step: SetupStepState): StepAction {

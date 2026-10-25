@@ -2,7 +2,7 @@ import { DEFAULT_PREFIX } from "@config/constants";
 import { theme } from "@config/theme";
 import { botName } from "@core/brand";
 import { defineMessageHandler } from "@core/message";
-import { getPrefix } from "@database/repositories/settingsRepository";
+import { getPrefix } from "@database/repositories/prefixRepository";
 import { embed, linkButton, row } from "@lib/discord";
 
 /** Replies when someone mentions the bot on its own, and nothing else. */
