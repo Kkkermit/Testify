@@ -17,24 +17,8 @@ Checked against the code and the npm registry on **25 October 2026**.
 
 ## 🤖 New bot features
 
-None of these exist in any form today.
-
-| Feature             | What it would do                                                                                     | Build on                                                                                      |
-| ------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 🎂 Birthdays        | A post on a member's birthday, in a server that switched it on                                       | `profile.schema.ts` already stores a `birthday`                                               |
-| 📁 Moderation cases | One numbered case for every warning, timeout, kick, ban and softban, with a log channel and a reason | `issueWarning` already stores the step a warning took; the idea board numbers with one `$inc` |
-| 🛡️ Raid protection  | Hold back accounts younger than a server's minimum age, and tell staff when joins spike              | `/verify`, and the joins and leaves `insights.util.ts` already records                        |
-
-What each would have to respect:
-
-- **Birthdays are opt-in twice.** The profile is bot-wide by design (AGENTS.md §12), so a server announcing birthdays
-  needs its own switch, and the member needs to agree to their server being told. Post the day and month only, never
-  the year: an age is not the server's business. The privacy notice says what is stored and must say this too.
-- **Raid protection warns before it acts.** Holding a new account back or alerting staff is reversible; kicking or
-  banning on a heuristic is not, so neither should be a default. It must not try to look like anything other than a
-  bot, and an account-age gate needs nothing beyond the snowflake.
-- **Moderation cases need a migration on read** for the warnings already stored (AGENTS.md §13 rule 7), and the
-  dashboard's warnings screen would become the case list rather than sitting beside it.
+Nothing is waiting here. A new idea goes in a table with what it would do, what it would build on and what it would
+have to respect.
 
 ---
 
@@ -90,6 +74,11 @@ server, and each should be before it is relied on.
 - **Goodbye messages:** the post when somebody leaves, as text and as an embed.
 - **Auto-responders:** a reply in a busy channel, the ten-second pause, and silence in a channel the bot cannot read.
 - **Scheduled messages:** a daily post across a restart, and a post skipped for being an hour late.
+- **Birthdays:** the post on the day, once only across a restart, and a birthday forgotten when its member leaves.
+- **Moderation cases:** a case posted to the log channel for each kind of action, from Discord and from the dashboard,
+  with nobody pinged.
+- **Raid protection:** a timeout on a brand new account and the DM saying why, and one alert for a burst of joins that
+  pings only the chosen role.
 
 ---
 

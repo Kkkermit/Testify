@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 83](https://img.shields.io/badge/commands-83-8b5cf6?style=for-the-badge) ![subcommands: 135](https://img.shields.io/badge/subcommands-135-0ea5e9?style=for-the-badge) ![prefix aliases: 100](https://img.shields.io/badge/prefix%20aliases-100-16a34a?style=for-the-badge)
+![commands: 86](https://img.shields.io/badge/commands-86-8b5cf6?style=for-the-badge) ![subcommands: 142](https://img.shields.io/badge/subcommands-142-0ea5e9?style=for-the-badge) ![prefix aliases: 104](https://img.shields.io/badge/prefix%20aliases-104-16a34a?style=for-the-badge)
 
 </div>
 
@@ -14,16 +14,16 @@
 
 | Category                      | Commands | Subcommands |
 | ----------------------------- | :------: | :---------: |
-| [👥 Community](#-community)   |    9     |     10      |
+| [👥 Community](#-community)   |    10    |     14      |
 | [💰 Economy](#-economy)       |    20    |     25      |
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
 | [🎯 Games](#-games)           |    1     |      6      |
 | [📚 Info](#-info)             |    12    |      8      |
 | [📈 Levelling](#-levelling)   |    2     |      6      |
-| [🛡️ Moderation](#️-moderation) |    17    |     16      |
+| [🛡️ Moderation](#️-moderation) |    18    |     19      |
 | [🎵 Music](#-music)           |    2     |     14      |
-| [⚙️ Settings](#️-settings)     |    13    |     18      |
+| [⚙️ Settings](#️-settings)     |    14    |     18      |
 | [🎫 Tickets](#-tickets)       |    1     |      3      |
 | [🎁 Giveaways](#-giveaways)   |    1     |      4      |
 | [💬 Feedback](#-feedback)     |    2     |      0      |
@@ -33,6 +33,7 @@
 | Command        | Description                                                             | Subcommands                                                       | Prefix aliases                                                                                | Needs           |
 | -------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------------------------------------------- | --------------- |
 | `/afk`         | Tells anybody who mentions you that you are away, until you next speak. | —                                                                 | —                                                                                             | —               |
+| `/birthday`    | Shares your birthday with this server, or sets up birthday posts.       | `set`, `remove`, `list`, `settings`                               | `t?birthdays`                                                                                 | Manage guild    |
 | `/calculate`   | Evaluates a mathematical expression.                                    | —                                                                 | —                                                                                             | —               |
 | `/idea`        | Posts an idea for this server, for members to vote on.                  | `submit`, `settings`                                              | —                                                                                             | Manage guild    |
 | `/impersonate` | Sends a message through a webhook that looks like another member.       | —                                                                 | —                                                                                             | Manage webhooks |
@@ -112,25 +113,26 @@
 
 ## 🛡️ Moderation
 
-| Command     | Description                                             | Subcommands                                                        | Prefix aliases       | Needs                                                |
-| ----------- | ------------------------------------------------------- | ------------------------------------------------------------------ | -------------------- | ---------------------------------------------------- |
-| `/add`      | Adds an emoji or sticker to the server.                 | `emoji`, `sticker`                                                 | —                    | Manage emojis and stickers, Manage guild expressions |
-| `/announce` | Posts an announcement embed in a channel.               | —                                                                  | —                    | Manage guild                                         |
-| `/ban`      | Bans a user from the server.                            | —                                                                  | —                    | Ban members                                          |
-| `/clear`    | Bulk deletes recent messages in this channel.           | —                                                                  | `t?purge`, `t?prune` | Manage messages                                      |
-| `/create`   | Creates embeds and threads.                             | `embed`, `thread`                                                  | —                    | Manage messages                                      |
-| `/kick`     | Kicks a member from the server.                         | —                                                                  | —                    | Kick members                                         |
-| `/lock`     | Stops everyone from sending messages in a channel.      | —                                                                  | —                    | Manage channels                                      |
-| `/mute`     | Times a member out.                                     | —                                                                  | `t?timeout`          | Moderate members                                     |
-| `/nickname` | Changes or clears a member's nickname.                  | —                                                                  | —                    | Manage nicknames                                     |
-| `/role`     | Adds or removes a role from a member.                   | `add`, `remove`                                                    | —                    | Manage roles                                         |
-| `/say`      | Sends a message through the bot.                        | —                                                                  | —                    | Manage guild                                         |
-| `/slowmode` | Sets the slowmode for a channel.                        | —                                                                  | —                    | Manage channels                                      |
-| `/softban`  | Temporarily bans a user, lifting the ban automatically. | `add`, `remove`, `list`                                            | —                    | Ban members                                          |
-| `/unban`    | Unbans a user by ID.                                    | —                                                                  | —                    | Ban members                                          |
-| `/unlock`   | Lets everyone send messages in a channel again.         | —                                                                  | —                    | Manage channels                                      |
-| `/unmute`   | Removes a member's timeout.                             | —                                                                  | —                    | Moderate members                                     |
-| `/warn`     | Issues and manages warnings.                            | `create`, `punishments`, `list`, `info`, `edit`, `remove`, `clear` | —                    | Manage guild, Moderate members                       |
+| Command     | Description                                                   | Subcommands                                                        | Prefix aliases       | Needs                                                |
+| ----------- | ------------------------------------------------------------- | ------------------------------------------------------------------ | -------------------- | ---------------------------------------------------- |
+| `/add`      | Adds an emoji or sticker to the server.                       | `emoji`, `sticker`                                                 | —                    | Manage emojis and stickers, Manage guild expressions |
+| `/announce` | Posts an announcement embed in a channel.                     | —                                                                  | —                    | Manage guild                                         |
+| `/ban`      | Bans a user from the server.                                  | —                                                                  | —                    | Ban members                                          |
+| `/case`     | Looks up moderation cases, and chooses where they are logged. | `view`, `list`, `log`                                              | `t?cases`            | Manage guild, Moderate members                       |
+| `/clear`    | Bulk deletes recent messages in this channel.                 | —                                                                  | `t?purge`, `t?prune` | Manage messages                                      |
+| `/create`   | Creates embeds and threads.                                   | `embed`, `thread`                                                  | —                    | Manage messages                                      |
+| `/kick`     | Kicks a member from the server.                               | —                                                                  | —                    | Kick members                                         |
+| `/lock`     | Stops everyone from sending messages in a channel.            | —                                                                  | —                    | Manage channels                                      |
+| `/mute`     | Times a member out.                                           | —                                                                  | `t?timeout`          | Moderate members                                     |
+| `/nickname` | Changes or clears a member's nickname.                        | —                                                                  | —                    | Manage nicknames                                     |
+| `/role`     | Adds or removes a role from a member.                         | `add`, `remove`                                                    | —                    | Manage roles                                         |
+| `/say`      | Sends a message through the bot.                              | —                                                                  | —                    | Manage guild                                         |
+| `/slowmode` | Sets the slowmode for a channel.                              | —                                                                  | —                    | Manage channels                                      |
+| `/softban`  | Temporarily bans a user, lifting the ban automatically.       | `add`, `remove`, `list`                                            | —                    | Ban members                                          |
+| `/unban`    | Unbans a user by ID.                                          | —                                                                  | —                    | Ban members                                          |
+| `/unlock`   | Lets everyone send messages in a channel again.               | —                                                                  | —                    | Manage channels                                      |
+| `/unmute`   | Removes a member's timeout.                                   | —                                                                  | —                    | Moderate members                                     |
+| `/warn`     | Issues and manages warnings.                                  | `create`, `punishments`, `list`, `info`, `edit`, `remove`, `clear` | —                    | Manage guild, Moderate members                       |
 
 ## 🎵 Music
 
@@ -141,21 +143,22 @@
 
 ## ⚙️ Settings
 
-| Command           | Description                                                          | Subcommands                                                          | Prefix aliases                                   | Needs        |
-| ----------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ | ------------ |
-| `/anti-link`      | Deletes links posted by members without the bypass permission.       | —                                                                    | `t?antilink`, `t?link-filter`                    | Manage guild |
-| `/audit-logging`  | Chooses which server events get logged, and where.                   | —                                                                    | `t?auditlog`, `t?logging`                        | Manage guild |
-| `/auto-responder` | Words the bot answers with a reply you write.                        | —                                                                    | `t?autoresponder`, `t?auto-reply`, `t?autoreply` | Manage guild |
-| `/auto-role`      | Gives roles automatically to new members.                            | —                                                                    | `t?autorole`, `t?join-roles`                     | Manage roles |
-| `/automod`        | Creates Discord AutoMod rules.                                       | `flagged-words`, `spam`, `mention-spam`, `keyword`, `list`, `delete` | —                                                | Manage guild |
-| `/counting`       | Runs the counting game in a channel.                                 | —                                                                    | `t?count`                                        | Manage guild |
-| `/prefix`         | Shows and changes the prefix for text commands.                      | —                                                                    | —                                                | Manage guild |
-| `/role-menu`      | Posts menus members pick their own roles from.                       | —                                                                    | `t?rolemenu`, `t?self-roles`, `t?selfroles`      | Manage roles |
-| `/schedule`       | Posts a message later, once or every day or week.                    | `add`, `list`                                                        | `t?schedules`                                    | Manage guild |
-| `/sticky-message` | Keeps a message pinned to the bottom of a channel.                   | `setup`, `disable`, `check`                                          | —                                                | Manage guild |
-| `/verify`         | Configures the verification system.                                  | `setup`, `edit`, `disable`                                           | `t?verification`                                 | Manage guild |
-| `/voice-stats`    | Shows live member and bot counts in voice channel names.             | —                                                                    | `t?voicestats`, `t?counters`                     | Manage guild |
-| `/welcome`        | Greets new members when they join, and says goodbye when they leave. | `setup`, `background`, `goodbye`, `test`                             | `t?welcome-system`, `t?greet`, `t?goodbye`       | Manage guild |
+| Command            | Description                                                          | Subcommands                                                          | Prefix aliases                                   | Needs                          |
+| ------------------ | -------------------------------------------------------------------- | -------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------ |
+| `/anti-link`       | Deletes links posted by members without the bypass permission.       | —                                                                    | `t?antilink`, `t?link-filter`                    | Manage guild                   |
+| `/audit-logging`   | Chooses which server events get logged, and where.                   | —                                                                    | `t?auditlog`, `t?logging`                        | Manage guild                   |
+| `/auto-responder`  | Words the bot answers with a reply you write.                        | —                                                                    | `t?autoresponder`, `t?auto-reply`, `t?autoreply` | Manage guild                   |
+| `/auto-role`       | Gives roles automatically to new members.                            | —                                                                    | `t?autorole`, `t?join-roles`                     | Manage roles                   |
+| `/automod`         | Creates Discord AutoMod rules.                                       | `flagged-words`, `spam`, `mention-spam`, `keyword`, `list`, `delete` | —                                                | Manage guild                   |
+| `/counting`        | Runs the counting game in a channel.                                 | —                                                                    | `t?count`                                        | Manage guild                   |
+| `/prefix`          | Shows and changes the prefix for text commands.                      | —                                                                    | —                                                | Manage guild                   |
+| `/raid-protection` | Holds back brand new accounts and alerts staff when joins spike.     | —                                                                    | `t?raid`, `t?anti-raid`                          | Manage guild, Moderate members |
+| `/role-menu`       | Posts menus members pick their own roles from.                       | —                                                                    | `t?rolemenu`, `t?self-roles`, `t?selfroles`      | Manage roles                   |
+| `/schedule`        | Posts a message later, once or every day or week.                    | `add`, `list`                                                        | `t?schedules`                                    | Manage guild                   |
+| `/sticky-message`  | Keeps a message pinned to the bottom of a channel.                   | `setup`, `disable`, `check`                                          | —                                                | Manage guild                   |
+| `/verify`          | Configures the verification system.                                  | `setup`, `edit`, `disable`                                           | `t?verification`                                 | Manage guild                   |
+| `/voice-stats`     | Shows live member and bot counts in voice channel names.             | —                                                                    | `t?voicestats`, `t?counters`                     | Manage guild                   |
+| `/welcome`         | Greets new members when they join, and says goodbye when they leave. | `setup`, `background`, `goodbye`, `test`                             | `t?welcome-system`, `t?greet`, `t?goodbye`       | Manage guild                   |
 
 ## 🎫 Tickets
 

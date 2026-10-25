@@ -720,8 +720,11 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id`                    | Stat tiles, feature grid, permission warnings, recent changes                        |
 | `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                                     |
 | `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                         |
+| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next                    |
 | `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                   |
 | `/guilds/:id/automod`            | Discord's own filters — no database behind it                                        |
+| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted            |
+| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                            |
 | `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                   |
 | `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it              |
 | `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star             |
