@@ -2,15 +2,19 @@ import { PermissionFlagsBits } from "discord.js";
 import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import {
-	createSoftban,
-	deactivateSoftban,
-	getActiveSoftban,
-	listActiveSoftbans,
-} from "@database/repositories/moderationRepository";
+import { createSoftban, listActiveSoftbans } from "@database/repositories/moderationRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
+import { revokeSoftban } from "@lib/economy";
 import { discordTime, formatDurationLong, parseDuration } from "@lib/format";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderation";
+import {
+	actionEmbed,
+	assertModeratable,
+	DEFAULT_REASON,
+	dmEmbed,
+	moderatorOf,
+	notifyTarget,
+	recordCase,
+} from "@lib/moderation";
 
 export default defineCommand({
 	name: "softban",
@@ -64,6 +68,13 @@ export default defineCommand({
 					reason,
 					expiresAt,
 				});
+				await recordCase(guild, {
+					action: "softban",
+					user: target,
+					moderator: moderatorOf(interaction.user),
+					reason,
+					durationMs,
+				});
 
 				await reply(interaction, {
 					embeds: [
@@ -91,11 +102,9 @@ export default defineCommand({
 				const guild = inGuild(interaction);
 				const userId = interaction.options.getString("user-id", true).replace(/\D/g, "");
 
-				const active = await getActiveSoftban(guild.id, userId);
-				if (!active) throw new UserFacingError("There is no active softban for that user.");
-
-				await guild.bans.remove(userId, `Softban lifted early by ${interaction.user.username}`).catch(() => null);
-				await deactivateSoftban(guild.id, userId);
+				if (!(await revokeSoftban(guild, userId, moderatorOf(interaction.user)))) {
+					throw new UserFacingError("There is no active softban for that user.");
+				}
 
 				await reply(interaction, { embeds: [successEmbed("The softban has been lifted.")] });
 			},

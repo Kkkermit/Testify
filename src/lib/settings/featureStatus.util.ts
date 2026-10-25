@@ -5,6 +5,7 @@ import { listAutoResponders } from "@database/repositories/autoResponderReposito
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { countBirthdays, getBirthdaySettings } from "@database/repositories/birthdayRepository";
 import { getFixedStats } from "@database/repositories/botStatsRepository";
+import { getCaseSettings } from "@database/repositories/caseRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
@@ -101,6 +102,14 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 				enabled: verify !== null,
 				detail: verify === null ? null : countOf(verify.verifiedIds.length, "member verified", "members verified"),
 			};
+		},
+	},
+	{
+		key: "cases",
+		label: "Moderation cases",
+		async read(guild) {
+			const channelId = (await getCaseSettings(guild.id))?.logChannelId ?? null;
+			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
 		},
 	},
 	{

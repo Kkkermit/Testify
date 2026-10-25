@@ -1,6 +1,8 @@
 import {
 	type AuditLogConfigResponse,
 	type AutomodRules,
+	type CasePage,
+	type CaseSettings,
 	type GuildWarningsPage,
 	type MemberDetail,
 	type MemberMatch,
@@ -134,4 +136,36 @@ export const serverChanges: ServerChangesPage = {
 	perPage: 25,
 	discordReadable: true,
 	truncated: false,
+};
+
+export const caseSettings: CaseSettings = { logChannelId: "400000000000000001", canSend: true };
+
+export const casePage: CasePage = {
+	items: [
+		{
+			number: 2,
+			action: "softban",
+			userId: "100000000000000002",
+			username: "kit",
+			moderatorId: "100000000000000001",
+			moderatorName: "sam",
+			reason: "Raiding",
+			durationMs: 7 * 24 * 60 * 60 * 1_000,
+			at: "2026-10-24T18:00:00.000Z",
+		},
+		{
+			number: null,
+			action: "warn",
+			userId: "100000000000000003",
+			username: "ada",
+			moderatorId: "100000000000000001",
+			moderatorName: "sam",
+			reason: "Spam",
+			durationMs: null,
+			at: "2026-01-02T09:00:00.000Z",
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 10,
 };

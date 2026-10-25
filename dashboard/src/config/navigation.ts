@@ -28,6 +28,7 @@ import {
 	Ticket,
 	type LucideIcon,
 	Gauge,
+	Gavel,
 	History,
 	Gift,
 	Gem,
@@ -183,6 +184,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.warnings",
 							icon: TriangleAlert,
 							hintKey: "nav.warningsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/cases`,
+							labelKey: "nav.cases",
+							icon: Gavel,
+							hintKey: "nav.casesHint",
 						},
 						{
 							to: `/guilds/${guild.id}/changes`,

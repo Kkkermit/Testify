@@ -124,7 +124,9 @@
 		"scheduled": "Mensajes programados",
 		"scheduledHint": "Mensajes que {{bot}} publica a la hora que elijas",
 		"birthdays": "Cumpleaños",
-		"birthdaysHint": "Una publicación en los cumpleaños que comparten los miembros"
+		"birthdaysHint": "Una publicación en los cumpleaños que comparten los miembros",
+		"cases": "Casos",
+		"casesHint": "Cada acción de moderación, numerada"
 	},
 	"search": {
 		"open": "Buscar",
@@ -521,6 +523,35 @@
 		"emptyTitle": "Nadie ha compartido su cumpleaños todavía",
 		"emptyBody": "Los miembros comparten el suyo aquí con /birthday set. Sin eso, no se publica ningún cumpleaños.",
 		"on": "{{day}} de {{month}}"
+	},
+	"cases": {
+		"title": "Casos de moderación",
+		"subtitle": "Cada advertencia, aislamiento, expulsión, baneo y baneo temporal, numerado, venga de donde venga.",
+		"log": "Dónde se publican los casos",
+		"logChannel": "Publicar casos nuevos en",
+		"logHint": "Cada caso se publica al ocurrir. No se menciona a nadie.",
+		"noLog": "No publicarlos",
+		"cannotSend": "{{bot}} no puede publicar en ese canal, así que los casos se registran pero no se publican. Dale Enviar mensajes allí o elige otro.",
+		"list": "Todos los casos",
+		"count_one": "{{count, number}} caso",
+		"count_other": "{{count, number}} casos",
+		"search": "Buscar",
+		"searchHint": "Un número de caso, un nombre, una ID o una palabra del motivo.",
+		"action": "Qué se hizo",
+		"anyAction": "Cualquiera",
+		"emptyTitle": "Sin casos",
+		"emptyBody": "Nada coincide. Desde ahora, cada acción de moderación se numera aquí.",
+		"earlier": "Advertencia anterior",
+		"number": "Caso {{number}}",
+		"by": "Por {{name}}, {{when}}",
+		"for": "durante {{length}}",
+		"warn": "Advertencia",
+		"timeout": "Aislamiento",
+		"untimeout": "Aislamiento retirado",
+		"kick": "Expulsión",
+		"ban": "Baneo",
+		"softban": "Baneo temporal",
+		"unban": "Desbaneo"
 	},
 	"sticky": {
 		"title": "Mensajes fijos",

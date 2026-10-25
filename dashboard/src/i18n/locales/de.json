@@ -124,7 +124,9 @@
 		"scheduled": "Geplante Nachrichten",
 		"scheduledHint": "Nachrichten, die {{bot}} zu einer festgelegten Zeit postet",
 		"birthdays": "Geburtstage",
-		"birthdaysHint": "Ein Beitrag zu den Geburtstagen, die Mitglieder teilen"
+		"birthdaysHint": "Ein Beitrag zu den Geburtstagen, die Mitglieder teilen",
+		"cases": "Fälle",
+		"casesHint": "Jede Moderationsaktion, nummeriert"
 	},
 	"search": {
 		"open": "Suchen",
@@ -520,6 +522,35 @@
 		"emptyTitle": "Noch niemand hat einen Geburtstag geteilt",
 		"emptyBody": "Mitglieder teilen ihren hier mit /birthday set. Ohne das wird kein Geburtstag gepostet.",
 		"on": "{{day}}. {{month}}"
+	},
+	"cases": {
+		"title": "Moderationsfälle",
+		"subtitle": "Jede Verwarnung, jedes Timeout, jeder Kick, Bann und Softbann, nummeriert, egal woher.",
+		"log": "Wo Fälle gepostet werden",
+		"logChannel": "Neue Fälle posten in",
+		"logHint": "Jeder Fall wird gepostet, sobald er passiert. Niemand wird angepingt.",
+		"noLog": "Nicht posten",
+		"cannotSend": "{{bot}} kann in diesem Kanal nicht posten, also werden Fälle erfasst, aber nicht gepostet. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen.",
+		"list": "Alle Fälle",
+		"count_one": "{{count, number}} Fall",
+		"count_other": "{{count, number}} Fälle",
+		"search": "Suchen",
+		"searchHint": "Eine Fallnummer, ein Name, eine ID oder ein Wort aus dem Grund.",
+		"action": "Was passiert ist",
+		"anyAction": "Alles",
+		"emptyTitle": "Keine Fälle",
+		"emptyBody": "Nichts passt. Ab jetzt wird jede Moderationsaktion hier nummeriert.",
+		"earlier": "Frühere Verwarnung",
+		"number": "Fall {{number}}",
+		"by": "Von {{name}}, {{when}}",
+		"for": "für {{length}}",
+		"warn": "Verwarnung",
+		"timeout": "Timeout",
+		"untimeout": "Timeout aufgehoben",
+		"kick": "Kick",
+		"ban": "Bann",
+		"softban": "Softbann",
+		"unban": "Entbannung"
 	},
 	"sticky": {
 		"title": "Sticky-Nachrichten",

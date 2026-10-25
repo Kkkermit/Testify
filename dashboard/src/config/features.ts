@@ -6,6 +6,7 @@ import {
 	Coins,
 	Dices,
 	Gauge,
+	Gavel,
 	Gift,
 	Hash,
 	Info,
@@ -152,6 +153,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-moderation",
 		wash: "bg-feature-moderation/15",
 		path: (guildId) => `/guilds/${guildId}/settings`,
+	},
+	cases: {
+		icon: Gavel,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/cases`,
 	},
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	automod: {

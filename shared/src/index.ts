@@ -8,6 +8,7 @@ export * from "./blacklist";
 export * from "./botStats";
 export * from "./changes";
 export * from "./brand";
+export * from "./cases";
 export * from "./casino";
 export * from "./commandRunner";
 export * from "./commandToggles";

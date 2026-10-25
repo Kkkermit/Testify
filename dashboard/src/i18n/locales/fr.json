@@ -124,7 +124,9 @@
 		"scheduled": "Messages programmés",
 		"scheduledHint": "Des messages que {{bot}} publie à l’heure choisie",
 		"birthdays": "Anniversaires",
-		"birthdaysHint": "Une publication pour les anniversaires que les membres partagent"
+		"birthdaysHint": "Une publication pour les anniversaires que les membres partagent",
+		"cases": "Dossiers",
+		"casesHint": "Chaque action de modération, numérotée"
 	},
 	"search": {
 		"open": "Rechercher",
@@ -521,6 +523,35 @@
 		"emptyTitle": "Personne n’a encore partagé d’anniversaire",
 		"emptyBody": "Les membres partagent le leur ici avec /birthday set. Sans cela, aucun anniversaire n’est publié.",
 		"on": "{{day}} {{month}}"
+	},
+	"cases": {
+		"title": "Dossiers de modération",
+		"subtitle": "Chaque avertissement, exclusion temporaire, expulsion, bannissement et bannissement temporaire, numéroté, d’où qu’il vienne.",
+		"log": "Où les dossiers sont publiés",
+		"logChannel": "Publier les nouveaux dossiers dans",
+		"logHint": "Chaque dossier est publié dès qu’il arrive. Personne n’est mentionné.",
+		"noLog": "Ne pas les publier",
+		"cannotSend": "{{bot}} ne peut pas publier dans ce salon, donc les dossiers sont enregistrés mais pas publiés. Donne-lui Envoyer des messages là-bas, ou choisis-en un autre.",
+		"list": "Tous les dossiers",
+		"count_one": "{{count, number}} dossier",
+		"count_other": "{{count, number}} dossiers",
+		"search": "Rechercher",
+		"searchHint": "Un numéro de dossier, un nom, un identifiant ou un mot de la raison.",
+		"action": "Ce qui a été fait",
+		"anyAction": "Tout",
+		"emptyTitle": "Aucun dossier",
+		"emptyBody": "Rien ne correspond. Désormais, chaque action de modération est numérotée ici.",
+		"earlier": "Avertissement antérieur",
+		"number": "Dossier {{number}}",
+		"by": "Par {{name}}, {{when}}",
+		"for": "pendant {{length}}",
+		"warn": "Avertissement",
+		"timeout": "Exclusion temporaire",
+		"untimeout": "Exclusion levée",
+		"kick": "Expulsion",
+		"ban": "Bannissement",
+		"softban": "Bannissement temporaire",
+		"unban": "Débannissement"
 	},
 	"sticky": {
 		"title": "Messages épinglés",

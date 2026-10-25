@@ -124,7 +124,9 @@
 		"scheduled": "Messaggi programmati",
 		"scheduledHint": "Messaggi che {{bot}} pubblica all’ora che scegli",
 		"birthdays": "Compleanni",
-		"birthdaysHint": "Un messaggio per i compleanni che i membri condividono"
+		"birthdaysHint": "Un messaggio per i compleanni che i membri condividono",
+		"cases": "Casi",
+		"casesHint": "Ogni azione di moderazione, numerata"
 	},
 	"search": {
 		"open": "Cerca",
@@ -521,6 +523,35 @@
 		"emptyTitle": "Nessuno ha ancora condiviso un compleanno",
 		"emptyBody": "I membri condividono il proprio qui con /birthday set. Senza, nessun compleanno viene pubblicato.",
 		"on": "{{day}} {{month}}"
+	},
+	"cases": {
+		"title": "Casi di moderazione",
+		"subtitle": "Ogni avvertimento, timeout, espulsione, ban e ban temporaneo, numerato, da qualunque parte arrivi.",
+		"log": "Dove vengono pubblicati i casi",
+		"logChannel": "Pubblica i nuovi casi in",
+		"logHint": "Ogni caso viene pubblicato appena accade. Nessuno viene menzionato.",
+		"noLog": "Non pubblicarli",
+		"cannotSend": "{{bot}} non può scrivere in quel canale, quindi i casi vengono registrati ma non pubblicati. Dagli Invia messaggi lì, oppure scegline un altro.",
+		"list": "Tutti i casi",
+		"count_one": "{{count, number}} caso",
+		"count_other": "{{count, number}} casi",
+		"search": "Cerca",
+		"searchHint": "Un numero di caso, un nome, un ID o una parola del motivo.",
+		"action": "Cosa è stato fatto",
+		"anyAction": "Qualsiasi",
+		"emptyTitle": "Nessun caso",
+		"emptyBody": "Nessuna corrispondenza. D’ora in poi ogni azione di moderazione è numerata qui.",
+		"earlier": "Avvertimento precedente",
+		"number": "Caso {{number}}",
+		"by": "Da {{name}}, {{when}}",
+		"for": "per {{length}}",
+		"warn": "Avvertimento",
+		"timeout": "Timeout",
+		"untimeout": "Timeout rimosso",
+		"kick": "Espulsione",
+		"ban": "Ban",
+		"softban": "Ban temporaneo",
+		"unban": "Revoca del ban"
 	},
 	"sticky": {
 		"title": "Messaggi fissi",

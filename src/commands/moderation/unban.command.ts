@@ -3,7 +3,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, DEFAULT_REASON } from "@lib/moderation";
+import { actionEmbed, DEFAULT_REASON, moderatorOf, unbanUser } from "@lib/moderation";
 
 const SNOWFLAKE = /^\d{17,20}$/;
 
@@ -26,11 +26,7 @@ export default defineCommand({
 
 		if (!SNOWFLAKE.test(userId)) throw new UserFacingError("That is not a valid user ID.");
 
-		// so the "is this user banned" check never matched and unban always ran blind.
-		const ban = await guild.bans.fetch(userId).catch(() => null);
-		if (!ban) throw new UserFacingError("That user is not banned in this server.");
-
-		await guild.bans.remove(userId, `${interaction.user.username}: ${reason}`);
+		const unbanned = await unbanUser(guild, userId, moderatorOf(interaction.user), reason);
 
 		await reply(interaction, {
 			embeds: [
@@ -38,7 +34,7 @@ export default defineCommand({
 					action: "User unbanned",
 					emoji: theme.emoji.success,
 					guild,
-					target: ban.user,
+					target: unbanned,
 					moderator: interaction.user,
 					reason,
 				}),

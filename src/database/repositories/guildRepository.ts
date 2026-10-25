@@ -5,6 +5,7 @@ import { purgeAutoResponders } from "@database/repositories/autoResponderReposit
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
 import { purgeBirthdays } from "@database/repositories/birthdayRepository";
 import { purgeFixedStats } from "@database/repositories/botStatsRepository";
+import { purgeCaseSettings } from "@database/repositories/caseRepository";
 import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
@@ -31,6 +32,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
 		purgeBirthdays(guildId),
+		purgeCaseSettings(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),

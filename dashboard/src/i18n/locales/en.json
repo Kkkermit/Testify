@@ -124,7 +124,9 @@
 		"scheduled": "Scheduled messages",
 		"scheduledHint": "Messages {{bot}} posts at a time you set",
 		"birthdays": "Birthdays",
-		"birthdaysHint": "A post on the birthdays members share"
+		"birthdaysHint": "A post on the birthdays members share",
+		"cases": "Cases",
+		"casesHint": "Every moderation action, numbered"
 	},
 	"search": {
 		"open": "Search",
@@ -520,6 +522,35 @@
 		"emptyTitle": "Nobody has shared a birthday yet",
 		"emptyBody": "Members share theirs here with /birthday set. Nobody’s birthday is posted without it.",
 		"on": "{{day}} {{month}}"
+	},
+	"cases": {
+		"title": "Moderation cases",
+		"subtitle": "Every warning, timeout, kick, ban and softban, numbered, whichever surface it came from.",
+		"log": "Where cases are posted",
+		"logChannel": "Post new cases in",
+		"logHint": "Each case is posted as it happens. Nobody it names is pinged.",
+		"noLog": "Don’t post them",
+		"cannotSend": "{{bot}} can’t post in that channel, so cases are recorded but not posted. Give it Send Messages there, or pick another.",
+		"list": "All cases",
+		"count_one": "{{count, number}} case",
+		"count_other": "{{count, number}} cases",
+		"search": "Search",
+		"searchHint": "A case number, a name, an ID or a word from the reason.",
+		"action": "What was done",
+		"anyAction": "Anything",
+		"emptyTitle": "No cases",
+		"emptyBody": "Nothing matches. Every moderation action from now on is numbered here.",
+		"earlier": "Earlier warning",
+		"number": "Case {{number}}",
+		"by": "By {{name}}, {{when}}",
+		"for": "for {{length}}",
+		"warn": "Warning",
+		"timeout": "Timeout",
+		"untimeout": "Timeout removed",
+		"kick": "Kick",
+		"ban": "Ban",
+		"softban": "Softban",
+		"unban": "Unban"
 	},
 	"sticky": {
 		"title": "Sticky messages",
