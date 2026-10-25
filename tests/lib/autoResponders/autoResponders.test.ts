@@ -1,6 +1,5 @@
-import { AUTO_RESPONDER } from "@config/constants";
 import { nextMatch } from "@lib/autoResponders/autoResponderActions.util";
-import { responderFor, responderMatches, shouldAnswer } from "@lib/autoResponders/autoResponders.util";
+import { ANSWER_EVERY_MS, responderFor, responderMatches, shouldAnswer } from "@lib/autoResponders/autoResponders.util";
 import { type AutoResponder, autoResponderBlocked, triggerKey } from "@testify/shared";
 
 const responder = (trigger: string, match: AutoResponder["match"] = "word", id = trigger): AutoResponder => ({
@@ -63,7 +62,7 @@ describe("shouldAnswer", () => {
 		expect(shouldAnswer("g1", "c1", "r1", now)).toBe(true);
 		expect(shouldAnswer("g1", "c1", "r1", now + 1)).toBe(false);
 		expect(shouldAnswer("g1", "c2", "r1", now + 1)).toBe(true);
-		expect(shouldAnswer("g1", "c1", "r1", now + AUTO_RESPONDER.answerEveryMs)).toBe(true);
+		expect(shouldAnswer("g1", "c1", "r1", now + ANSWER_EVERY_MS)).toBe(true);
 	});
 
 	/** Keyed by server, so one server's chatter never silences another's. */

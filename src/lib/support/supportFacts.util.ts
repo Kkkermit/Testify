@@ -1,18 +1,23 @@
 import { PermissionsBitField } from "discord.js";
-import { DEFAULT_PREFIX, ECONOMY, ECONOMY_COOLDOWNS, LEVELLING, TICKET } from "@config/constants";
+import { AFK, DAY_MS, DEFAULT_PREFIX, ECONOMY, ECONOMY_COOLDOWNS, HOUR_MS, LEVELLING, TICKET } from "@config/constants";
+import { ANSWER_EVERY_MS } from "@lib/autoResponders/autoResponders.util";
 import { CASINO_TIMING } from "@lib/casino/casino.constants";
 import { COINFLIP_RETURN, DICE_RETURNS } from "@lib/casino/chance.util";
 import { HILO_EDGE, HILO_MAX_MULTIPLIER } from "@lib/casino/hilo.util";
 import { SLOT_PAYTABLE, slotsReturnToPlayer } from "@lib/casino/slots.util";
 import { formatDurationLong, formatNumber, humanisePermission } from "@lib/format/format.util";
+import { POLL_LIMITS } from "@lib/polls/polls.constants";
 import { REMINDER_LIMITS } from "@lib/reminders/reminders.constants";
+import { SCHEDULE_TIMING } from "@lib/scheduledMessages/scheduledMessages.constants";
 import { MAKE_PAUSE_MS } from "@lib/tempVoice/tempVoice.constants";
 import {
+	AUTO_RESPONDER_LIMITS,
 	GIVEAWAY_LIMITS,
 	INVITE_PERMISSIONS,
 	LEVEL_LIMITS,
 	LOTTERY_LIMITS,
 	ROLE_MENU_LIMITS,
+	SCHEDULE_LIMITS,
 	SETTINGS_LIMITS,
 	STARBOARD_LIMITS,
 	STICKY_LIMITS,
@@ -109,6 +114,22 @@ export const FACTS: Readonly<Record<string, string>> = {
 	"treasure.maxAmountLimit": formatNumber(TREASURE_LIMITS.maxAmount),
 
 	"ticket.closeDelay": formatDurationLong(TICKET.closeDelayMs),
+
+	"poll.minAnswers": formatNumber(POLL_LIMITS.minAnswers),
+	"poll.maxAnswers": formatNumber(POLL_LIMITS.maxAnswers),
+	"poll.defaultDuration": formatDurationLong(POLL_LIMITS.defaultHours * HOUR_MS),
+	"poll.maxDuration": formatDurationLong(POLL_LIMITS.maxHours * HOUR_MS),
+
+	"afk.maxNote": formatNumber(AFK.maxNote),
+	"afk.keep": formatDurationLong(AFK.keepDays * DAY_MS),
+	"afk.noticeEvery": formatDurationLong(AFK.noticeEveryMs),
+
+	"autoResponder.maxPerServer": formatNumber(AUTO_RESPONDER_LIMITS.maxPerGuild),
+	"autoResponder.pause": formatDurationLong(ANSWER_EVERY_MS),
+
+	"schedule.maxPerServer": formatNumber(SCHEDULE_LIMITS.maxPerGuild),
+	"schedule.lateBy": formatDurationLong(SCHEDULE_TIMING.lateByMs),
+	"schedule.maxAhead": formatDurationLong(SCHEDULE_LIMITS.maxAheadDays * DAY_MS),
 };
 
 const FACT = /\{fact:([a-zA-Z0-9.]+)\}/g;

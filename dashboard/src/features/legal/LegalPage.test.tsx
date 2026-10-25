@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 24 Oct 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 25 Oct 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -94,6 +94,11 @@ describe("the legal pages", () => {
 		// `recordTempChannel` keeps the channel and the member it was made for; `closeIfEmpty` forgets both.
 		expect(text).toMatch(/Join to create: .* the user id of the member it was made for/);
 		expect(text).toMatch(/Join-to-create channels: forgotten once the channel is deleted/);
+		// `/afk`'s note is `unlogged`, and `clearAfk` runs on the member's next message.
+		expect(text).toMatch(/Away notes: .* The note is never posted to the operator’s command logs/);
+		// Goodbye, auto-responder and scheduled message records each carry `updatedBy`, and `purgeGuild` removes all three.
+		expect(text).toMatch(/Goodbye messages, auto-responders and scheduled messages: .* who last changed each/);
+		expect(text).toMatch(/A scheduled message that posts once is deleted once it is posted/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);
@@ -108,6 +113,11 @@ describe("the legal pages", () => {
 
 		const retention = /retentionDays: (\d+)/.exec(constants)?.[1];
 		expect(text).toContain(`Audit records, command usage, screen counts and server counts: ${String(retention)} days`);
+
+		const away = /keepDays: (\d+)/.exec(constants)?.[1];
+		expect(text).toContain(
+			`Away notes: deleted when you next send a message in that server, or after ${String(away)} days`,
+		);
 
 		const runs = /RUN_RETENTION_DAYS = (\d+)/.exec(botSource("shared/src/analytics.ts"))?.[1];
 		expect(text).toContain(`Who ran a command: ${String(runs)} days`);

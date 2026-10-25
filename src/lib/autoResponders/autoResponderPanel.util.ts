@@ -1,11 +1,11 @@
 import { ButtonStyle } from "discord.js";
 import { customId } from "@core/button";
 import { AUTO_RESPONDER_PANEL_ID } from "@lib/autoResponders/autoResponders.constants";
-import { MATCH_LABELS } from "@lib/autoResponders/autoResponders.util";
+import { ANSWER_EVERY_MS, MATCH_LABELS } from "@lib/autoResponders/autoResponders.util";
 import { button, option, row, select } from "@lib/discord/components.util";
 import { container, containerMessage, divider, text, withoutPings } from "@lib/discord/containers.util";
 import { type ContainerMessage, type ContainerPart } from "@lib/discord/discord.types";
-import { escapeMarkdown, truncate } from "@lib/format/format.util";
+import { escapeMarkdown, formatDurationLong, truncate } from "@lib/format/format.util";
 import { settingsScreen, type ScreenAction } from "@lib/settings/settingsScreen.util";
 import { AUTO_RESPONDER_LIMITS, type AutoResponder } from "@testify/shared";
 
@@ -70,7 +70,7 @@ export function autoResponderHub(responders: readonly AutoResponder[], ownerId: 
 		text(
 			full
 				? "-# That is as many as a server can keep. Delete one to add another."
-				: "-# They answer members, never bots, at most once every ten seconds in a channel, and never ping anybody.",
+				: `-# They answer members, never bots, at most once every ${formatDurationLong(ANSWER_EVERY_MS)} in a channel, and never ping anybody.`,
 		),
 	);
 

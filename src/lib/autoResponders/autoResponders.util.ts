@@ -1,5 +1,5 @@
-import { AUTO_RESPONDER } from "@config/constants";
-import { type AutoResponder, type AutoResponderMatch, triggerKey } from "@testify/shared";
+import { SECOND_MS } from "@config/constants";
+import { AUTO_RESPONDER_LIMITS, type AutoResponder, type AutoResponderMatch, triggerKey } from "@testify/shared";
 
 /** Which responder a message sets off, and whether it may answer in that channel yet. */
 
@@ -42,6 +42,8 @@ export function responderFor(content: string, responders: readonly AutoResponder
 	return responders.find((responder) => responderMatches(content, responder)) ?? null;
 }
 
+export const ANSWER_EVERY_MS = AUTO_RESPONDER_LIMITS.answerEverySeconds * SECOND_MS;
+
 const lastAnswered = new Map<string, number>();
 
 /** A busy channel saying the trigger word over and over hears the answer once in a while, not every time. */
@@ -53,10 +55,10 @@ export function shouldAnswer(
 ): boolean {
 	const key = `${guildId}:${channelId}:${responderId}`;
 	const last = lastAnswered.get(key);
-	if (last !== undefined && now - last < AUTO_RESPONDER.answerEveryMs) return false;
+	if (last !== undefined && now - last < ANSWER_EVERY_MS) return false;
 
 	if (lastAnswered.size > 1_000) {
-		for (const [entry, at] of lastAnswered) if (now - at >= AUTO_RESPONDER.answerEveryMs) lastAnswered.delete(entry);
+		for (const [entry, at] of lastAnswered) if (now - at >= ANSWER_EVERY_MS) lastAnswered.delete(entry);
 	}
 	lastAnswered.set(key, now);
 	return true;

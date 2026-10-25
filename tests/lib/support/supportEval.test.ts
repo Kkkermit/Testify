@@ -139,6 +139,12 @@ const PARAPHRASES: [string, string[]][] = [
 	["welcome message isn't sending", ["welcome-not-sending"]],
 	["I'm not getting any xp", ["levels-not-counting"]],
 	["is there a support server", ["getting-more-help"]],
+	["make a poll for the server", ["polls", "command-poll"]],
+	["let people vote on something", ["polls", "command-poll", "ideas"]],
+	["tell people I'm away", ["afk", "command-afk"]],
+	["post a message when somebody leaves", ["goodbye"]],
+	["make the bot reply when someone says a word", ["auto-responders", "command-auto-responder"]],
+	["post a message every week", ["scheduled-messages", "command-schedule"]],
 ];
 
 /** Typos and half-typed words: what people actually send, including the ones in the request that asked for this. */

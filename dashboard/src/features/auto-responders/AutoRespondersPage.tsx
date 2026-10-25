@@ -1,4 +1,9 @@
-import { type AutoResponder, autoResponderBlocked, type AutoResponderInput } from "@testify/shared";
+import {
+	AUTO_RESPONDER_LIMITS,
+	type AutoResponder,
+	autoResponderBlocked,
+	type AutoResponderInput,
+} from "@testify/shared";
 import { MessageSquareReply, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -130,7 +135,9 @@ export function AutoRespondersPage(): React.JSX.Element {
 					<h2 id="add-heading" className={CARD_HEADING}>
 						{t("autoResponders.add")}
 					</h2>
-					<p className="text-muted-foreground text-sm">{t("autoResponders.addBody")}</p>
+					<p className="text-muted-foreground text-sm">
+						{t("autoResponders.addBody", { seconds: AUTO_RESPONDER_LIMITS.answerEverySeconds })}
+					</p>
 				</div>
 
 				<ResponderFields id="new-responder" value={draft} onChange={setDraft} />

@@ -11,6 +11,8 @@ export const SCHEDULE_LIMITS = {
 	/** The first post is at least this far ahead, so a clock a little behind cannot refuse it as past. */
 	minAheadMinutes: 1,
 	maxAheadDays: 365,
+	/** A post later than this is skipped rather than sent, so a stale announcement is never posted. */
+	lateByMinutes: 60,
 } as const;
 
 /** Every 24 hours or 7 days from the first post, so no time zone is ever stored. */

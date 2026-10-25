@@ -531,7 +531,7 @@
 		"inUse": "In Gebrauch",
 		"countOf": "{{used}} von {{limit}}",
 		"add": "Auto-Antwort hinzufügen",
-		"addBody": "Es antwortet Mitgliedern, nie Bots, höchstens einmal alle zehn Sekunden pro Kanal.",
+		"addBody": "Es antwortet Mitgliedern, nie Bots, höchstens einmal alle {{seconds}} Sekunden pro Kanal.",
 		"trigger": "Wörter, auf die es antwortet",
 		"triggerHint": "Groß- und Kleinschreibung und Leerzeichen spielen keine Rolle.",
 		"match": "Trifft zu",
@@ -551,7 +551,7 @@
 		"upcoming": "Demnächst",
 		"countOf": "{{used}} von {{limit}}",
 		"add": "Nachricht planen",
-		"addBody": "Ein Beitrag, der mehr als eine Stunde zu spät wäre, etwa weil {{bot}} offline war, wird übersprungen statt verspätet gesendet.",
+		"addBody": "Ein Beitrag, der mehr als {{minutes}} Minuten zu spät wäre, etwa weil {{bot}} offline war, wird übersprungen statt verspätet gesendet.",
 		"channel": "Posten in",
 		"when": "Erster Beitrag",
 		"whenHint": "In deiner Zeitzone. Danach alle 24 Stunden oder 7 Tage.",
@@ -1425,8 +1425,12 @@
 		"retentionL10": "Ideen und ihre Stimmen: bis jemand mit Verwaltungsrechten sie löscht oder der Bot vom Server entfernt wird.",
 		"storedL10": "Starboard: für jede Nachricht, die es aufs Board geschafft hat, ihre ID, ihr Kanal, wie viele ⭐ sie hat und die Benutzer-ID ihrer verfassenden Person, damit die Kopie dem Original folgen kann. Nie ihr Text, der in der Kopie auf Discord steht, und nie, wer einen Stern gegeben hat.",
 		"storedL11": "Beitreten und erstellen: für jeden Sprachkanal, den {{bot}} erstellt hat, der Kanal und die Benutzer-ID des Mitglieds, für das er erstellt wurde.",
+		"storedL12": "Abwesenheitsnotizen: die Notiz, die du mit /afk setzt, und wann du sie gesetzt hast, bis du in diesem Server wieder eine Nachricht schreibst. Die Notiz wird nie in die Befehlsprotokolle des Betreibers gepostet.",
+		"storedL13": "Abschiede, Auto-Antworten und geplante Nachrichten: der Text, den die Verwaltung des Servers jeweils geschrieben hat, die Kanäle und Zeiten, die sie nutzen, und wer jeweils zuletzt etwas geändert hat.",
 		"retentionL11": "Starboard-Einträge: werden mit der Originalnachricht gelöscht oder wenn der Bot vom Server entfernt wird.",
-		"retentionL12": "Kanäle von Beitreten und erstellen: werden vergessen, sobald der Kanal gelöscht ist oder der Bot vom Server entfernt wird."
+		"retentionL12": "Kanäle von Beitreten und erstellen: werden vergessen, sobald der Kanal gelöscht ist oder der Bot vom Server entfernt wird.",
+		"retentionL13": "Abwesenheitsnotizen: werden gelöscht, sobald du in diesem Server wieder schreibst, spätestens nach 30 Tagen.",
+		"retentionL14": "Abschiede, Auto-Antworten und geplante Nachrichten: werden gelöscht, wenn der Bot vom Server entfernt wird. Eine geplante Nachricht, die nur einmal gepostet wird, wird danach gelöscht."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",

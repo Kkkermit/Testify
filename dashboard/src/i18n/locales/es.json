@@ -532,7 +532,7 @@
 		"inUse": "En uso",
 		"countOf": "{{used}} de {{limit}}",
 		"add": "Añadir una respuesta automática",
-		"addBody": "Responde a los miembros, nunca a bots, como mucho una vez cada diez segundos por canal.",
+		"addBody": "Responde a los miembros, nunca a bots, como mucho una vez cada {{seconds}} segundos por canal.",
 		"trigger": "Palabras a las que responde",
 		"triggerHint": "Las mayúsculas y los espacios no importan.",
 		"match": "Coincide",
@@ -552,7 +552,7 @@
 		"upcoming": "Próximos",
 		"countOf": "{{used}} de {{limit}}",
 		"add": "Programar un mensaje",
-		"addBody": "Una publicación con más de una hora de retraso, por ejemplo porque {{bot}} estaba desconectado, se omite en vez de enviarse tarde.",
+		"addBody": "Una publicación con más de {{minutes}} minutos de retraso, por ejemplo porque {{bot}} estaba desconectado, se omite en vez de enviarse tarde.",
 		"channel": "Publicar en",
 		"when": "Primera publicación",
 		"whenHint": "En tu zona horaria. Se repite cada 24 horas o 7 días desde entonces.",
@@ -1426,8 +1426,12 @@
 		"retentionL10": "Las ideas y sus votos: hasta que un gestor las elimine o se quite el bot del servidor.",
 		"storedL10": "Starboard: por cada mensaje que llegó al tablero, su id, su canal, cuántas ⭐ tiene y el id de usuario de su autor, para que la copia siga al original. Nunca su texto, que está en la copia en Discord, ni quién le puso estrella.",
 		"storedL11": "Únete y crea: por cada canal de voz que {{bot}} creó, el canal y el id de usuario del miembro para quien se creó.",
+		"storedL12": "Notas de ausencia: la nota que pones con /afk y cuándo la pusiste, hasta que vuelvas a escribir en ese servidor. La nota nunca se publica en los registros de comandos del operador.",
+		"storedL13": "Despedidas, respuestas automáticas y mensajes programados: el texto que escribieron los administradores del servidor para cada uno, los canales y horas que usan, y quién cambió cada uno por última vez.",
 		"retentionL11": "Los registros del starboard: se eliminan con el mensaje original o cuando se quita el bot del servidor.",
-		"retentionL12": "Los canales de Únete y crea: se olvidan cuando se elimina el canal o cuando se quita el bot del servidor."
+		"retentionL12": "Los canales de Únete y crea: se olvidan cuando se elimina el canal o cuando se quita el bot del servidor.",
+		"retentionL13": "Notas de ausencia: se eliminan cuando vuelves a escribir en ese servidor, o a los 30 días.",
+		"retentionL14": "Despedidas, respuestas automáticas y mensajes programados: se eliminan cuando el bot sale del servidor. Un mensaje programado que se publica una sola vez se elimina al publicarse."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",

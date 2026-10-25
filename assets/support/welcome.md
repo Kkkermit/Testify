@@ -5,7 +5,7 @@ topic: setup
 keywords: welcome, greet, greeting, join message, new member, welcome message, welcome channel, joins
 questions: How do I set up a welcome message? | How do I greet new members? | How do I choose the welcome channel?
 commands: welcome
-related: welcome-styles, auto-role, welcome-not-sending
+related: welcome-styles, goodbye, auto-role, welcome-not-sending
 ---
 {bot} can greet everybody who joins, in a channel you choose.
 

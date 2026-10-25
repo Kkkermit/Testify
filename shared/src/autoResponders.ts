@@ -9,6 +9,8 @@ export const AUTO_RESPONDER_LIMITS = {
 	maxReply: 2_000,
 	/** Discord lists them in one select menu, which holds 25. */
 	maxPerGuild: 25,
+	/** How long one responder waits before answering in the same channel again. */
+	answerEverySeconds: 10,
 } as const;
 
 /** Whole words anywhere, the whole message, or the start of it. Never a bare substring, or "hi" answers "this". */

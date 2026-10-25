@@ -1,4 +1,4 @@
-import { scheduleBlocked, type ScheduledMessage } from "@testify/shared";
+import { SCHEDULE_LIMITS, scheduleBlocked, type ScheduledMessage } from "@testify/shared";
 import { CalendarClock, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -143,7 +143,9 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 					<h2 id="add-heading" className={CARD_HEADING}>
 						{t("scheduled.add")}
 					</h2>
-					<p className="text-muted-foreground text-sm">{t("scheduled.addBody")}</p>
+					<p className="text-muted-foreground text-sm">
+						{t("scheduled.addBody", { minutes: SCHEDULE_LIMITS.lateByMinutes })}
+					</p>
 				</div>
 
 				<ScheduleFields id="new-schedule" value={draft} channels={channels.data ?? []} onChange={setDraft} />

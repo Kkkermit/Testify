@@ -532,7 +532,7 @@
 		"inUse": "In uso",
 		"countOf": "{{used}} di {{limit}}",
 		"add": "Aggiungi una risposta automatica",
-		"addBody": "Risponde ai membri, mai ai bot, al massimo una volta ogni dieci secondi per canale.",
+		"addBody": "Risponde ai membri, mai ai bot, al massimo una volta ogni {{seconds}} secondi per canale.",
 		"trigger": "Parole a cui risponde",
 		"triggerHint": "Maiuscole e spazi non contano.",
 		"match": "Corrisponde",
@@ -552,7 +552,7 @@
 		"upcoming": "In arrivo",
 		"countOf": "{{used}} di {{limit}}",
 		"add": "Programma un messaggio",
-		"addBody": "Una pubblicazione in ritardo di oltre un’ora, ad esempio perché {{bot}} era offline, viene saltata invece di essere inviata in ritardo.",
+		"addBody": "Una pubblicazione in ritardo di oltre {{minutes}} minuti, ad esempio perché {{bot}} era offline, viene saltata invece di essere inviata in ritardo.",
 		"channel": "Pubblica in",
 		"when": "Prima pubblicazione",
 		"whenHint": "Nel tuo fuso orario. Si ripete ogni 24 ore o 7 giorni da allora.",
@@ -1426,8 +1426,12 @@
 		"retentionL10": "Le idee e i loro voti: finché un gestore non le elimina, o il bot non viene rimosso dal server.",
 		"storedL10": "Starboard: per ogni messaggio arrivato sulla bacheca, il suo id, il suo canale, quante ⭐ ha e l’id utente del suo autore, così la copia può seguire l’originale. Mai il suo testo, che si trova nella copia su Discord, né chi gli ha dato una stella.",
 		"storedL11": "Entra per creare: per ogni canale vocale creato da {{bot}}, il canale e l’id utente del membro per cui è stato creato.",
+		"storedL12": "Note di assenza: la nota che imposti con /afk e quando l’hai impostata, finché non scrivi di nuovo in quel server. La nota non viene mai pubblicata nei registri dei comandi dell’operatore.",
+		"storedL13": "Messaggi di addio, risposte automatiche e messaggi programmati: il testo che i gestori del server hanno scritto per ciascuno, i canali e gli orari che usano, e chi ha modificato ciascuno per ultimo.",
 		"retentionL11": "I dati della starboard: eliminati con il messaggio originale, o quando il bot viene rimosso dal server.",
-		"retentionL12": "I canali di Entra per creare: dimenticati appena il canale viene eliminato, o quando il bot viene rimosso dal server."
+		"retentionL12": "I canali di Entra per creare: dimenticati appena il canale viene eliminato, o quando il bot viene rimosso dal server.",
+		"retentionL13": "Note di assenza: eliminate quando scrivi di nuovo in quel server, o dopo 30 giorni.",
+		"retentionL14": "Messaggi di addio, risposte automatiche e messaggi programmati: eliminati quando il bot viene rimosso dal server. Un messaggio programmato che viene pubblicato una sola volta è eliminato dopo la pubblicazione."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",

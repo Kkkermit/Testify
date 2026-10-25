@@ -531,7 +531,7 @@
 		"inUse": "In use",
 		"countOf": "{{used}} of {{limit}}",
 		"add": "Add an auto-responder",
-		"addBody": "It answers members, never bots, at most once every ten seconds in a channel.",
+		"addBody": "It answers members, never bots, at most once every {{seconds}} seconds in a channel.",
 		"trigger": "Words it answers",
 		"triggerHint": "Case and spacing don’t matter.",
 		"match": "Matches",
@@ -551,7 +551,7 @@
 		"upcoming": "Upcoming",
 		"countOf": "{{used}} of {{limit}}",
 		"add": "Schedule a message",
-		"addBody": "A post more than an hour late, say because {{bot}} was offline, is skipped rather than sent late.",
+		"addBody": "A post more than {{minutes}} minutes late, say because {{bot}} was offline, is skipped rather than sent late.",
 		"channel": "Post in",
 		"when": "First post",
 		"whenHint": "In your own time zone. It repeats every 24 hours or 7 days from then.",
@@ -1425,8 +1425,12 @@
 		"retentionL10": "Ideas and their votes: until a manager deletes them, or the bot is removed from the server.",
 		"storedL10": "Starboard: for each message that reached the board, its id, its channel, how many ⭐ it has and its author’s user id, so the repost can follow the original. Never its text, which is in the repost on Discord, and never who starred it.",
 		"storedL11": "Join to create: for each voice channel {{bot}} made, the channel and the user id of the member it was made for.",
+		"storedL12": "Away notes: the note you set with /afk and when you set it, until you next send a message in that server. The note is never posted to the operator’s command logs.",
+		"storedL13": "Goodbye messages, auto-responders and scheduled messages: the text a server’s managers wrote for each, the channels and times they use, and who last changed each.",
 		"retentionL11": "Starboard records: deleted with the original message, or when the bot is removed from the server.",
-		"retentionL12": "Join-to-create channels: forgotten once the channel is deleted, or when the bot is removed from the server."
+		"retentionL12": "Join-to-create channels: forgotten once the channel is deleted, or when the bot is removed from the server.",
+		"retentionL13": "Away notes: deleted when you next send a message in that server, or after 30 days.",
+		"retentionL14": "Goodbye messages, auto-responders and scheduled messages: deleted when the bot is removed from the server. A scheduled message that posts once is deleted once it is posted."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
