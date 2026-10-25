@@ -1,6 +1,7 @@
 import { Events } from "discord.js";
 import { INTERVALS } from "@config/constants";
 import { defineEvent } from "@core/event";
+import { announceBirthdays } from "@jobs/birthdays.util";
 import { settleIdleHands } from "@jobs/casinoSweep.util";
 import { runLotteryDraws } from "@jobs/lotteryDraw.util";
 import { payPassiveIncome } from "@jobs/passiveIncome.util";
@@ -24,6 +25,8 @@ export default defineEvent({
 		client.timers.every("softbans", INTERVALS.softbanCheckMs, () => processExpiredSoftbans(client));
 		client.timers.every("reminders", INTERVALS.reminderCheckMs, () => deliverDueReminders(client));
 		client.timers.every("scheduled-messages", INTERVALS.scheduledMessageCheckMs, () => postDueSchedules(client));
+		client.timers.after("birthdays-first", 2 * 60_000, () => announceBirthdays(client));
+		client.timers.every("birthdays", INTERVALS.birthdayCheckMs, () => announceBirthdays(client));
 		client.timers.every("passive-income", INTERVALS.passiveIncomeMs, () => payPassiveIncome(client));
 		client.timers.every("bot-stats", INTERVALS.fixedStatsRefreshMs, () => refreshBotStats(client));
 		client.timers.every("insights", INTERVALS.insightsFlushMs, () => flushActivity(client.logger));

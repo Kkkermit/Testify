@@ -11,6 +11,7 @@ import {
 	ticketSettings,
 } from "@/test/fixtures/channels";
 import {
+	birthdayOverview,
 	economyBoard,
 	goodbyeConfig,
 	ideaPage,
@@ -78,6 +79,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
 	http.get("/api/guilds/:guildId/goodbye", () => HttpResponse.json(goodbyeConfig)),
+	http.get("/api/guilds/:guildId/birthdays", () => HttpResponse.json(birthdayOverview)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),

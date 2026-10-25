@@ -122,7 +122,9 @@
 		"autoResponders": "Auto-responders",
 		"autoRespondersHint": "Replies {{bot}} gives to words you choose",
 		"scheduled": "Scheduled messages",
-		"scheduledHint": "Messages {{bot}} posts at a time you set"
+		"scheduledHint": "Messages {{bot}} posts at a time you set",
+		"birthdays": "Birthdays",
+		"birthdaysHint": "A post on the birthdays members share"
 	},
 	"search": {
 		"open": "Search",
@@ -499,6 +501,25 @@
 		"say": "Say goodbye when somebody leaves",
 		"sayHint": "Off means {{bot}} says nothing when somebody leaves. The message is kept.",
 		"sendTo": "Send the goodbye to"
+	},
+	"birthdays": {
+		"title": "Birthdays",
+		"subtitle": "A post on a member’s birthday, for members who shared theirs here. Never their age.",
+		"posts": "Birthday posts",
+		"channel": "Post birthdays in",
+		"pickFirst": "Pick a channel and the rest of this card turns on.",
+		"cannotSend": "{{bot}} can’t post in that channel, so no birthday would be posted. Give it Send Messages there, or pick another.",
+		"post": "Post birthdays",
+		"postHint": "Posted on the day, in UTC. Off means nothing is posted; what members shared is kept.",
+		"message": "Birthday message",
+		"saveMessage": "Save message",
+		"pingNote": "Only the member whose birthday it is is pinged. Members share theirs with /birthday set, the day and month only.",
+		"upcoming": "Coming up",
+		"sharedCount_one": "{{count, number}} shared",
+		"sharedCount_other": "{{count, number}} shared",
+		"emptyTitle": "Nobody has shared a birthday yet",
+		"emptyBody": "Members share theirs here with /birthday set. Nobody’s birthday is posted without it.",
+		"on": "{{day}} {{month}}"
 	},
 	"sticky": {
 		"title": "Sticky messages",

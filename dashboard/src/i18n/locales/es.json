@@ -122,7 +122,9 @@
 		"autoResponders": "Respuestas automáticas",
 		"autoRespondersHint": "Lo que {{bot}} responde a las palabras que elijas",
 		"scheduled": "Mensajes programados",
-		"scheduledHint": "Mensajes que {{bot}} publica a la hora que elijas"
+		"scheduledHint": "Mensajes que {{bot}} publica a la hora que elijas",
+		"birthdays": "Cumpleaños",
+		"birthdaysHint": "Una publicación en los cumpleaños que comparten los miembros"
 	},
 	"search": {
 		"open": "Buscar",
@@ -500,6 +502,25 @@
 		"say": "Despedirse cuando alguien se va",
 		"sayHint": "Desactivado, {{bot}} no dice nada cuando alguien se va. El mensaje se conserva.",
 		"sendTo": "Enviar la despedida a"
+	},
+	"birthdays": {
+		"title": "Cumpleaños",
+		"subtitle": "Una publicación el día del cumpleaños, para los miembros que lo compartieron aquí. Nunca su edad.",
+		"posts": "Publicaciones de cumpleaños",
+		"channel": "Publicar cumpleaños en",
+		"pickFirst": "Elige un canal y el resto de esta tarjeta se activa.",
+		"cannotSend": "{{bot}} no puede publicar en ese canal, así que no se publicaría ningún cumpleaños. Dale Enviar mensajes allí o elige otro.",
+		"post": "Publicar cumpleaños",
+		"postHint": "Se publica el mismo día, en UTC. Desactivado no se publica nada; lo que compartieron se conserva.",
+		"message": "Mensaje de cumpleaños",
+		"saveMessage": "Guardar mensaje",
+		"pingNote": "Solo se menciona al miembro que cumple años. Los miembros comparten el suyo con /birthday set, solo el día y el mes.",
+		"upcoming": "Próximos",
+		"sharedCount_one": "{{count, number}} compartido",
+		"sharedCount_other": "{{count, number}} compartidos",
+		"emptyTitle": "Nadie ha compartido su cumpleaños todavía",
+		"emptyBody": "Los miembros comparten el suyo aquí con /birthday set. Sin eso, no se publica ningún cumpleaños.",
+		"on": "{{day}} de {{month}}"
 	},
 	"sticky": {
 		"title": "Mensajes fijos",

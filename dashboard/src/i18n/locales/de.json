@@ -122,7 +122,9 @@
 		"autoResponders": "Auto-Antworten",
 		"autoRespondersHint": "Was {{bot}} auf Wörter antwortet, die du wählst",
 		"scheduled": "Geplante Nachrichten",
-		"scheduledHint": "Nachrichten, die {{bot}} zu einer festgelegten Zeit postet"
+		"scheduledHint": "Nachrichten, die {{bot}} zu einer festgelegten Zeit postet",
+		"birthdays": "Geburtstage",
+		"birthdaysHint": "Ein Beitrag zu den Geburtstagen, die Mitglieder teilen"
 	},
 	"search": {
 		"open": "Suchen",
@@ -499,6 +501,25 @@
 		"say": "Verabschieden, wenn jemand geht",
 		"sayHint": "Aus bedeutet, dass {{bot}} nichts sagt, wenn jemand geht. Die Nachricht bleibt erhalten.",
 		"sendTo": "Abschied senden an"
+	},
+	"birthdays": {
+		"title": "Geburtstage",
+		"subtitle": "Ein Beitrag am Geburtstag, für Mitglieder, die ihren hier geteilt haben. Nie ihr Alter.",
+		"posts": "Geburtstagsbeiträge",
+		"channel": "Geburtstage posten in",
+		"pickFirst": "Wähle einen Kanal, dann wird der Rest dieser Karte aktiv.",
+		"cannotSend": "{{bot}} kann in diesem Kanal nicht posten, also würde kein Geburtstag gepostet. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen.",
+		"post": "Geburtstage posten",
+		"postHint": "Am Tag selbst, in UTC. Aus bedeutet, dass nichts gepostet wird; was Mitglieder geteilt haben, bleibt erhalten.",
+		"message": "Geburtstagsnachricht",
+		"saveMessage": "Nachricht speichern",
+		"pingNote": "Nur das Geburtstagskind wird angepingt. Mitglieder teilen ihren Geburtstag mit /birthday set, nur Tag und Monat.",
+		"upcoming": "Demnächst",
+		"sharedCount_one": "{{count, number}} geteilt",
+		"sharedCount_other": "{{count, number}} geteilt",
+		"emptyTitle": "Noch niemand hat einen Geburtstag geteilt",
+		"emptyBody": "Mitglieder teilen ihren hier mit /birthday set. Ohne das wird kein Geburtstag gepostet.",
+		"on": "{{day}}. {{month}}"
 	},
 	"sticky": {
 		"title": "Sticky-Nachrichten",

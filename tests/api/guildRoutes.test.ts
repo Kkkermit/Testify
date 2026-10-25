@@ -29,6 +29,10 @@ jest.mock("@database/repositories/scheduledMessageRepository", () => ({
 jest.mock("@database/repositories/autoResponderRepository", () => ({
 	listAutoResponders: jest.fn(() => Promise.resolve([])),
 }));
+jest.mock("@database/repositories/birthdayRepository", () => ({
+	getBirthdaySettings: jest.fn(() => Promise.resolve(null)),
+	countBirthdays: jest.fn(() => Promise.resolve(0)),
+}));
 jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(() => Promise.resolve(null)),
 }));

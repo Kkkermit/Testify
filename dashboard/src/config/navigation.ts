@@ -1,5 +1,6 @@
 import {
 	Activity,
+	Cake,
 	CalendarClock,
 	ChartColumn,
 	ChartLine,
@@ -120,6 +121,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.welcome",
 							icon: UserPlus,
 							hintKey: "nav.welcomeHint",
+						},
+						{
+							to: `/guilds/${guild.id}/birthdays`,
+							labelKey: "nav.birthdays",
+							icon: Cake,
+							hintKey: "nav.birthdaysHint",
 						},
 						{
 							to: `/guilds/${guild.id}/levelling`,

@@ -122,7 +122,9 @@
 		"autoResponders": "Réponses automatiques",
 		"autoRespondersHint": "Ce que {{bot}} répond aux mots que tu choisis",
 		"scheduled": "Messages programmés",
-		"scheduledHint": "Des messages que {{bot}} publie à l’heure choisie"
+		"scheduledHint": "Des messages que {{bot}} publie à l’heure choisie",
+		"birthdays": "Anniversaires",
+		"birthdaysHint": "Une publication pour les anniversaires que les membres partagent"
 	},
 	"search": {
 		"open": "Rechercher",
@@ -500,6 +502,25 @@
 		"say": "Dire au revoir quand quelqu’un part",
 		"sayHint": "Désactivé, {{bot}} ne dit rien quand quelqu’un part. Le message est conservé.",
 		"sendTo": "Envoyer l’au revoir dans"
+	},
+	"birthdays": {
+		"title": "Anniversaires",
+		"subtitle": "Une publication le jour de l’anniversaire, pour les membres qui l’ont partagé ici. Jamais leur âge.",
+		"posts": "Publications d’anniversaire",
+		"channel": "Publier les anniversaires dans",
+		"pickFirst": "Choisis un salon et le reste de cette carte s’active.",
+		"cannotSend": "{{bot}} ne peut pas publier dans ce salon, donc aucun anniversaire ne serait publié. Donne-lui Envoyer des messages là-bas, ou choisis-en un autre.",
+		"post": "Publier les anniversaires",
+		"postHint": "Publié le jour même, en UTC. Désactivé, rien n’est publié ; ce que les membres ont partagé est conservé.",
+		"message": "Message d’anniversaire",
+		"saveMessage": "Enregistrer le message",
+		"pingNote": "Seul le membre dont c’est l’anniversaire est mentionné. Les membres partagent le leur avec /birthday set, le jour et le mois seulement.",
+		"upcoming": "À venir",
+		"sharedCount_one": "{{count, number}} partagé",
+		"sharedCount_other": "{{count, number}} partagés",
+		"emptyTitle": "Personne n’a encore partagé d’anniversaire",
+		"emptyBody": "Les membres partagent le leur ici avec /birthday set. Sans cela, aucun anniversaire n’est publié.",
+		"on": "{{day}} {{month}}"
 	},
 	"sticky": {
 		"title": "Messages épinglés",

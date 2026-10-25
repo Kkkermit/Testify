@@ -3,6 +3,7 @@ import { getAntiLink } from "@database/repositories/antiLinkRepository";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
+import { countBirthdays, getBirthdaySettings } from "@database/repositories/birthdayRepository";
 import { getFixedStats } from "@database/repositories/botStatsRepository";
 import { getCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
@@ -80,6 +81,15 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const goodbye = await getGoodbyeSettings(guild.id);
 			const channelId = goodbye?.enabled === true ? goodbye.channelId : null;
 			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
+		},
+	},
+	{
+		key: "birthdays",
+		label: "Birthdays",
+		async read(guild) {
+			const [settings, shared] = await Promise.all([getBirthdaySettings(guild.id), countBirthdays(guild.id)]);
+			const enabled = settings?.enabled === true && settings.channelId !== null;
+			return { enabled, detail: enabled ? countOf(shared, "birthday shared", "birthdays shared") : null };
 		},
 	},
 	{

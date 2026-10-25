@@ -1,4 +1,4 @@
-import { WELCOME_PLACEHOLDERS } from "@testify/shared";
+import { WELCOME_PLACEHOLDERS, type WelcomePlaceholder } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/primitives";
 import { PLACEHOLDER_LABELS } from "@/features/welcome/welcome.labels";
@@ -7,15 +7,17 @@ import { PLACEHOLDER_LABELS } from "@/features/welcome/welcome.labels";
 export function PlaceholderHelp({
 	onInsert,
 	disabled = false,
+	tokens = WELCOME_PLACEHOLDERS,
 }: {
 	onInsert: (token: string) => void;
 	disabled?: boolean;
+	tokens?: readonly WelcomePlaceholder[];
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	return (
 		<div className="flex flex-wrap items-center gap-2">
 			<span className="text-muted-foreground text-xs">{t("welcome.insert")}</span>
-			{WELCOME_PLACEHOLDERS.map((token) => (
+			{tokens.map((token) => (
 				<Tooltip key={token} label={t(PLACEHOLDER_LABELS[token])}>
 					<button
 						type="button"

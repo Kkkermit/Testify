@@ -109,6 +109,8 @@ describe("the guild settings sub-routes", () => {
 		["GET", "/api/guilds/:guildId/welcome"],
 		["GET", "/api/guilds/:guildId/goodbye"],
 		["PATCH", "/api/guilds/:guildId/goodbye"],
+		["GET", "/api/guilds/:guildId/birthdays"],
+		["PATCH", "/api/guilds/:guildId/birthdays"],
 		["GET", "/api/guilds/:guildId/starboard"],
 		["PATCH", "/api/guilds/:guildId/starboard"],
 		["GET", "/api/guilds/:guildId/temp-voice"],

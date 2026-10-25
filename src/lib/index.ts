@@ -2,6 +2,7 @@
 
 export * from "./afk";
 export * from "./autoResponders";
+export * from "./birthdays";
 export * from "./bot";
 export * from "./canvas";
 export * from "./casino";

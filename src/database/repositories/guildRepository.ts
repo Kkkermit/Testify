@@ -3,6 +3,7 @@ import { purgeAntiLink } from "@database/repositories/antiLinkRepository";
 import { purgeAuditLog } from "@database/repositories/auditLogRepository";
 import { purgeAutoResponders } from "@database/repositories/autoResponderRepository";
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
+import { purgeBirthdays } from "@database/repositories/birthdayRepository";
 import { purgeFixedStats } from "@database/repositories/botStatsRepository";
 import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
@@ -29,6 +30,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeAfk(guildId),
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
+		purgeBirthdays(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),

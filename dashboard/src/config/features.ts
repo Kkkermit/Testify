@@ -1,5 +1,6 @@
 import {
 	AudioLines,
+	Cake,
 	CalendarClock,
 	Code2,
 	Coins,
@@ -164,6 +165,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-welcome",
 		wash: "bg-feature-welcome/15",
 		path: (guildId) => `/guilds/${guildId}/welcome`,
+	},
+	birthdays: {
+		icon: Cake,
+		tint: "text-feature-welcome",
+		wash: "bg-feature-welcome/15",
+		path: (guildId) => `/guilds/${guildId}/birthdays`,
 	},
 	goodbye: {
 		icon: UserMinus,

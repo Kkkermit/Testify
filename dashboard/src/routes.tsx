@@ -22,6 +22,7 @@ const LegalPage = page(async () => import("@/features/legal/LegalPage"), "LegalP
 const SettingsPage = page(async () => import("@/features/settings/SettingsPage"), "SettingsPage");
 const AutomodPage = page(async () => import("@/features/automod/AutomodPage"), "AutomodPage");
 const StickyPage = page(async () => import("@/features/sticky/StickyPage"), "StickyPage");
+const BirthdaysPage = page(async () => import("@/features/birthdays/BirthdaysPage"), "BirthdaysPage");
 const ScheduledMessagesPage = page(
 	async () => import("@/features/scheduled-messages/ScheduledMessagesPage"),
 	"ScheduledMessagesPage",
@@ -99,6 +100,7 @@ export const routes = [
 									{ path: "/guilds/:guildId/automod", element: lazily(<AutomodPage />) },
 									{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
 									{ path: "/guilds/:guildId/auto-responders", element: lazily(<AutoRespondersPage />) },
+									{ path: "/guilds/:guildId/birthdays", element: lazily(<BirthdaysPage />) },
 									{ path: "/guilds/:guildId/scheduled-messages", element: lazily(<ScheduledMessagesPage />) },
 									{ path: "/guilds/:guildId/role-menus", element: lazily(<RoleMenusPage />) },
 									{ path: "/guilds/:guildId/ideas", element: lazily(<IdeasPage />) },
