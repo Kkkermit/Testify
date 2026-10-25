@@ -101,7 +101,7 @@ describe("featuresOf", () => {
 		jest.mocked(readLottery).mockResolvedValue({ enabled: true, frozen: true, ticketsSold: 3 } as never);
 
 		expect((await byKey()).get("lottery")).toEqual(
-			expect.objectContaining({ enabled: false, detail: "3 ticket solds" }),
+			expect.objectContaining({ enabled: false, detail: "3 tickets sold" }),
 		);
 	});
 
@@ -117,5 +117,11 @@ describe("countOf", () => {
 		expect(countOf(1, "role")).toBe("1 role");
 		expect(countOf(0, "role")).toBe("0 roles");
 		expect(countOf(3, "role")).toBe("3 roles");
+	});
+
+	/** The overview once read "3 ticket solds" and "2 member verifieds". */
+	it("takes the plural of a phrase whose noun is not last", () => {
+		expect(countOf(3, "ticket sold", "tickets sold")).toBe("3 tickets sold");
+		expect(countOf(1, "ticket sold", "tickets sold")).toBe("1 ticket sold");
 	});
 });

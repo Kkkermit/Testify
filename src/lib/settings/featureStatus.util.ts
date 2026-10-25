@@ -32,8 +32,9 @@ interface FeatureSource {
 	read(guild: Guild): Promise<Reading>;
 }
 
-export function countOf(value: number, noun: string): string {
-	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
+/** A phrase ending in something other than its noun, like "ticket sold", gives its plural. */
+export function countOf(value: number, one: string, many = `${one}s`): string {
+	return `${String(value)} ${value === 1 ? one : many}`;
 }
 
 const posting = (channelId: string): string => `Posting in <#${channelId}>`;
@@ -78,7 +79,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const verify = await getVerifyConfig(guild.id);
 			return {
 				enabled: verify !== null,
-				detail: verify === null ? null : countOf(verify.verifiedIds.length, "member verified"),
+				detail: verify === null ? null : countOf(verify.verifiedIds.length, "member verified", "members verified"),
 			};
 		},
 	},
@@ -186,7 +187,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const tickets = await readTickets(guild);
 			return {
 				enabled: tickets.enabled,
-				detail: tickets.enabled ? countOf(tickets.openTickets, "ticket open") : null,
+				detail: tickets.enabled ? countOf(tickets.openTickets, "ticket open", "tickets open") : null,
 			};
 		},
 	},
@@ -197,7 +198,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const draw = await readLottery(guild.id);
 			return {
 				enabled: draw.enabled && !draw.frozen,
-				detail: draw.enabled ? countOf(draw.ticketsSold, "ticket sold") : null,
+				detail: draw.enabled ? countOf(draw.ticketsSold, "ticket sold", "tickets sold") : null,
 			};
 		},
 	},
