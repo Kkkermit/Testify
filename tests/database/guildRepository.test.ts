@@ -9,6 +9,7 @@ import { getCounting, setCounting } from "@database/repositories/countingReposit
 import { getGoodbyeSettings, saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { purgeGuild } from "@database/repositories/guildRepository";
 import { getPrefixConfig, setPrefix } from "@database/repositories/prefixRepository";
+import { createSchedule, listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { listSticky, setSticky } from "@database/repositories/stickyRepository";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
@@ -33,6 +34,7 @@ async function configure(guildId: string): Promise<void> {
 		saveTreasureConfig(guildId, { lastModifiedBy: ADMIN }),
 		saveGoodbyeSettings(guildId, { enabled: true, channelId: CHANNEL }, ADMIN),
 		createAutoResponder(guildId, { trigger: "rules", match: "word", reply: "Read #rules." }, ADMIN),
+		createSchedule(guildId, { channelId: CHANNEL, message: "Hello", repeat: "daily", nextAt: new Date() }, ADMIN),
 	]);
 }
 
@@ -50,6 +52,7 @@ async function settingsOf(guildId: string) {
 		treasure: await getTreasureConfig(guildId),
 		goodbye: await getGoodbyeSettings(guildId),
 		autoResponders: await listAutoResponders(guildId),
+		schedules: await listSchedules(guildId),
 	};
 }
 
@@ -73,6 +76,7 @@ describeWithMongo("guildRepository", () => {
 			treasure: null,
 			goodbye: null,
 			autoResponders: [],
+			schedules: [],
 		});
 	});
 

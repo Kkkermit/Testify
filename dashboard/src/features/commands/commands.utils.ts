@@ -15,6 +15,7 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	verify: { path: (guildId) => `/guilds/${guildId}/settings`, screen: "Server settings" },
 	"sticky-message": { path: (guildId) => `/guilds/${guildId}/sticky`, screen: "Sticky messages" },
 	"auto-responder": { path: (guildId) => `/guilds/${guildId}/auto-responders`, screen: "Auto-responders" },
+	schedule: { path: (guildId) => `/guilds/${guildId}/scheduled-messages`, screen: "Scheduled messages" },
 	idea: { path: (guildId) => `/guilds/${guildId}/ideas`, screen: "Idea board" },
 	starboard: { path: (guildId) => `/guilds/${guildId}/starboard`, screen: "Starboard" },
 	"temp-voice": { path: (guildId) => `/guilds/${guildId}/temp-voice`, screen: "Join to create" },

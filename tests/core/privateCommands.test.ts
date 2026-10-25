@@ -96,6 +96,8 @@ describe("which commands answer privately", () => {
 				"shop",
 				"softban list",
 				"starboard",
+				"schedule add",
+				"schedule list",
 				"sticky-message",
 				"suggest",
 				"temp-voice",

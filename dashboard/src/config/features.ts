@@ -1,5 +1,6 @@
 import {
 	AudioLines,
+	CalendarClock,
 	Code2,
 	Coins,
 	Dices,
@@ -71,6 +72,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-community",
 		wash: "bg-feature-community/15",
 		path: (guildId) => `/guilds/${guildId}/auto-responders`,
+	},
+	"scheduled-messages": {
+		icon: CalendarClock,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/scheduled-messages`,
 	},
 	starboard: {
 		icon: Star,

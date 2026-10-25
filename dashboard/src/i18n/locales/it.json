@@ -120,7 +120,9 @@
 		"tempVoice": "Entra per creare",
 		"tempVoiceHint": "Un canale vocale tutto suo per chi entra nella sala d’attesa",
 		"autoResponders": "Risposte automatiche",
-		"autoRespondersHint": "Cosa risponde {{bot}} alle parole che scegli"
+		"autoRespondersHint": "Cosa risponde {{bot}} alle parole che scegli",
+		"scheduled": "Messaggi programmati",
+		"scheduledHint": "Messaggi che {{bot}} pubblica all’ora che scegli"
 	},
 	"search": {
 		"open": "Cerca",
@@ -147,7 +149,8 @@
 		"idea": "l’idea n. {{number}}",
 		"sticky": "il messaggio fisso in {{channel}}",
 		"giveaway": "il giveaway per {{prize}}",
-		"autoResponder": "la risposta automatica per «{{trigger}}»"
+		"autoResponder": "la risposta automatica per «{{trigger}}»",
+		"scheduled": "il messaggio programmato in {{channel}}"
 	},
 	"leave": {
 		"title": "Uscire senza salvare?",
@@ -540,6 +543,29 @@
 		"matchWord": "Ovunque, come parole intere",
 		"matchExact": "Solo il messaggio intero",
 		"matchStarts": "All’inizio di un messaggio"
+	},
+	"scheduled": {
+		"title": "Messaggi programmati",
+		"subtitle": "Messaggi che {{bot}} pubblica più tardi, una volta o ogni giorno o settimana. Nessuno viene menzionato.",
+		"emptyTitle": "Niente di programmato",
+		"emptyBody": "Programmane uno qui sotto e {{bot}} lo pubblicherà all’ora che scegli.",
+		"upcoming": "In arrivo",
+		"countOf": "{{used}} di {{limit}}",
+		"add": "Programma un messaggio",
+		"addBody": "Una pubblicazione in ritardo di oltre un’ora, ad esempio perché {{bot}} era offline, viene saltata invece di essere inviata in ritardo.",
+		"channel": "Pubblica in",
+		"when": "Prima pubblicazione",
+		"whenHint": "Nel tuo fuso orario. Si ripete ogni 24 ore o 7 giorni da allora.",
+		"repeat": "Si ripete",
+		"message": "Messaggio",
+		"schedule": "Programma messaggio",
+		"full": "Un server non può avere altri messaggi programmati. Eliminane uno per aggiungerne un altro.",
+		"removeIn": "Elimina il messaggio programmato in {{channel}}",
+		"cannotPost": "{{bot}} non può scrivere in {{channel}}, quindi questo messaggio verrà saltato.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Una volta",
+		"daily": "Ogni giorno",
+		"weekly": "Ogni settimana"
 	},
 	"roleMenus": {
 		"title": "Menu dei ruoli",
@@ -1437,7 +1463,12 @@
 		"roleMenuTooManyRoles": "Un menu non può offrire più di {{max}} ruoli.",
 		"autoResponderTrigger": "Indica a quali parole risponde.",
 		"autoResponderReply": "Scrivi cosa risponde.",
-		"autoResponderDuplicate": "Esiste già una risposta automatica per quelle parole. Modifica quella."
+		"autoResponderDuplicate": "Esiste già una risposta automatica per quelle parole. Modifica quella.",
+		"scheduleChannel": "Scegli il canale in cui viene pubblicato.",
+		"scheduleMessage": "Scrivi il messaggio da pubblicare.",
+		"scheduleTime": "Scegli quando pubblicarlo.",
+		"schedulePast": "Quell’ora è già passata. Scegline una almeno un minuto più tardi.",
+		"scheduleTooFar": "Un messaggio può essere programmato al massimo {{max}} giorni prima."
 	},
 	"status": {
 		"title": "Stato",

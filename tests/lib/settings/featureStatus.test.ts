@@ -19,6 +19,9 @@ jest.mock("@database/repositories/antiLinkRepository", () => ({
 jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/scheduledMessageRepository", () => ({
+	listSchedules: jest.fn(() => Promise.resolve([])),
+}));
 jest.mock("@database/repositories/autoResponderRepository", () => ({
 	listAutoResponders: jest.fn(() => Promise.resolve([])),
 }));

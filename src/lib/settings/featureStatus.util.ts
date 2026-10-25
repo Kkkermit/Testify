@@ -9,6 +9,7 @@ import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
+import { listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
 import { listSticky } from "@database/repositories/stickyRepository";
 import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
@@ -186,6 +187,17 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			return {
 				enabled: responders.length > 0,
 				detail: responders.length === 0 ? null : countOf(responders.length, "auto-responder"),
+			};
+		},
+	},
+	{
+		key: "scheduled-messages",
+		label: "Scheduled messages",
+		async read(guild) {
+			const schedules = await listSchedules(guild.id);
+			return {
+				enabled: schedules.length > 0,
+				detail: schedules.length === 0 ? null : countOf(schedules.length, "message"),
 			};
 		},
 	},

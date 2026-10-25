@@ -15,6 +15,7 @@ import { purgeMusicSettings } from "@database/repositories/musicSettingsReposito
 import { purgePrefix } from "@database/repositories/prefixRepository";
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
+import { purgeSchedules } from "@database/repositories/scheduledMessageRepository";
 import { purgeStarboard } from "@database/repositories/starboardRepository";
 import { purgeSticky } from "@database/repositories/stickyRepository";
 import { purgeTempVoice } from "@database/repositories/tempVoiceRepository";
@@ -27,6 +28,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 	await Promise.all([
 		purgeAfk(guildId),
 		purgeAutoResponders(guildId),
+		purgeSchedules(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),

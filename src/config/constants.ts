@@ -53,6 +53,7 @@ export const INTERVALS = {
 	commandLogFlushMs: 5 * SECOND_MS,
 	softbanCheckMs: MINUTE_MS,
 	reminderCheckMs: 30 * SECOND_MS,
+	scheduledMessageCheckMs: 30 * SECOND_MS,
 	tempVoiceSweepMs: 10 * MINUTE_MS,
 	fixedStatsRefreshMs: 5 * MINUTE_MS,
 	passiveIncomeMs: HOUR_MS,

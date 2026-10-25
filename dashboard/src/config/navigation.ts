@@ -1,5 +1,6 @@
 import {
 	Activity,
+	CalendarClock,
 	ChartColumn,
 	ChartLine,
 	LayoutGrid,
@@ -241,6 +242,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.autoResponders",
 							icon: MessageSquareReply,
 							hintKey: "nav.autoRespondersHint",
+						},
+						{
+							to: `/guilds/${guild.id}/scheduled-messages`,
+							labelKey: "nav.scheduled",
+							icon: CalendarClock,
+							hintKey: "nav.scheduledHint",
 						},
 						{
 							to: `/guilds/${guild.id}/tickets`,

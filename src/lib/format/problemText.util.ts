@@ -37,6 +37,11 @@ const SENTENCES: Record<ProblemCode, (values: Record<string, number>) => string>
 	"autoResponder.trigger": () => "Say which words it answers.",
 	"autoResponder.reply": () => "Write what it replies with.",
 	"autoResponder.duplicate": () => "There is already an auto-responder for those words. Edit that one instead.",
+	"schedule.channel": () => "Choose the channel it is posted in.",
+	"schedule.message": () => "Write the message to post.",
+	"schedule.time": () => "Say when to post it, such as `30m`, `2h` or `1d`.",
+	"schedule.past": () => "That time has already gone. Pick one at least a minute from now.",
+	"schedule.tooFar": ({ max = 0 }) => `A message can be scheduled at most ${String(max)} days ahead.`,
 };
 
 export function problemText(problem: Problem): string;

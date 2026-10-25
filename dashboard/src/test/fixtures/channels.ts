@@ -1,5 +1,6 @@
 import {
 	type AutoResponderList,
+	type ScheduledMessageList,
 	type BotStatsSettings,
 	type MemberCounts,
 	type StickyList,
@@ -47,5 +48,19 @@ export const autoResponderList: AutoResponderList = {
 	responders: [
 		{ id: "a00000000000000000000001", trigger: "rules", match: "word", reply: "Read the rules in #rules." },
 		{ id: "a00000000000000000000002", trigger: "how do i get roles", match: "starts", reply: "Pick them in #roles." },
+	],
+};
+
+export const scheduledMessageList: ScheduledMessageList = {
+	limit: 10,
+	messages: [
+		{
+			id: "b00000000000000000000001",
+			channelId: "400000000000000001",
+			message: "Game night starts in an hour.",
+			repeat: "weekly",
+			nextAt: "2099-10-30T18:00:00.000Z",
+			canSend: true,
+		},
 	],
 };

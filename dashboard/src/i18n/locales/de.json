@@ -120,7 +120,9 @@
 		"tempVoice": "Beitreten und erstellen",
 		"tempVoiceHint": "Ein eigener Sprachkanal für alle, die der Lobby beitreten",
 		"autoResponders": "Auto-Antworten",
-		"autoRespondersHint": "Was {{bot}} auf Wörter antwortet, die du wählst"
+		"autoRespondersHint": "Was {{bot}} auf Wörter antwortet, die du wählst",
+		"scheduled": "Geplante Nachrichten",
+		"scheduledHint": "Nachrichten, die {{bot}} zu einer festgelegten Zeit postet"
 	},
 	"search": {
 		"open": "Suchen",
@@ -147,7 +149,8 @@
 		"idea": "Idee #{{number}}",
 		"sticky": "Sticky in {{channel}}",
 		"giveaway": "Verlosung um {{prize}}",
-		"autoResponder": "die Auto-Antwort für „{{trigger}}“"
+		"autoResponder": "die Auto-Antwort für „{{trigger}}“",
+		"scheduled": "die geplante Nachricht in {{channel}}"
 	},
 	"leave": {
 		"title": "Ohne Speichern verlassen?",
@@ -539,6 +542,29 @@
 		"matchWord": "Überall, als ganze Wörter",
 		"matchExact": "Nur die ganze Nachricht",
 		"matchStarts": "Am Anfang einer Nachricht"
+	},
+	"scheduled": {
+		"title": "Geplante Nachrichten",
+		"subtitle": "Nachrichten, die {{bot}} später postet, einmal oder täglich oder wöchentlich. Niemand wird angepingt.",
+		"emptyTitle": "Nichts geplant",
+		"emptyBody": "Plane unten eine, und {{bot}} postet sie zur gewählten Zeit.",
+		"upcoming": "Demnächst",
+		"countOf": "{{used}} von {{limit}}",
+		"add": "Nachricht planen",
+		"addBody": "Ein Beitrag, der mehr als eine Stunde zu spät wäre, etwa weil {{bot}} offline war, wird übersprungen statt verspätet gesendet.",
+		"channel": "Posten in",
+		"when": "Erster Beitrag",
+		"whenHint": "In deiner Zeitzone. Danach alle 24 Stunden oder 7 Tage.",
+		"repeat": "Wiederholung",
+		"message": "Nachricht",
+		"schedule": "Nachricht planen",
+		"full": "Mehr geplante Nachrichten kann ein Server nicht haben. Lösche eine, um eine neue hinzuzufügen.",
+		"removeIn": "Geplante Nachricht in {{channel}} löschen",
+		"cannotPost": "{{bot}} kann in {{channel}} nicht posten, daher wird diese Nachricht übersprungen.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Einmal",
+		"daily": "Jeden Tag",
+		"weekly": "Jede Woche"
 	},
 	"roleMenus": {
 		"title": "Rollenmenüs",
@@ -1436,7 +1462,12 @@
 		"roleMenuTooManyRoles": "Ein Menü kann höchstens {{max}} Rollen anbieten.",
 		"autoResponderTrigger": "Gib an, auf welche Wörter es antwortet.",
 		"autoResponderReply": "Schreib, was es antwortet.",
-		"autoResponderDuplicate": "Für diese Wörter gibt es schon eine Auto-Antwort. Bearbeite diese stattdessen."
+		"autoResponderDuplicate": "Für diese Wörter gibt es schon eine Auto-Antwort. Bearbeite diese stattdessen.",
+		"scheduleChannel": "Wähle den Kanal, in dem sie gepostet wird.",
+		"scheduleMessage": "Schreib die Nachricht, die gepostet werden soll.",
+		"scheduleTime": "Wähle, wann sie gepostet wird.",
+		"schedulePast": "Diese Zeit ist schon vorbei. Wähle eine, die mindestens eine Minute in der Zukunft liegt.",
+		"scheduleTooFar": "Eine Nachricht kann höchstens {{max}} Tage im Voraus geplant werden."
 	},
 	"status": {
 		"title": "Status",

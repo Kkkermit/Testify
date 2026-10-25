@@ -120,7 +120,9 @@
 		"tempVoice": "Únete y crea",
 		"tempVoiceHint": "Un canal de voz propio para quien entre en la sala de espera",
 		"autoResponders": "Respuestas automáticas",
-		"autoRespondersHint": "Lo que {{bot}} responde a las palabras que elijas"
+		"autoRespondersHint": "Lo que {{bot}} responde a las palabras que elijas",
+		"scheduled": "Mensajes programados",
+		"scheduledHint": "Mensajes que {{bot}} publica a la hora que elijas"
 	},
 	"search": {
 		"open": "Buscar",
@@ -147,7 +149,8 @@
 		"idea": "la idea n.º {{number}}",
 		"sticky": "el mensaje fijo de {{channel}}",
 		"giveaway": "el sorteo de {{prize}}",
-		"autoResponder": "la respuesta automática para «{{trigger}}»"
+		"autoResponder": "la respuesta automática para «{{trigger}}»",
+		"scheduled": "el mensaje programado en {{channel}}"
 	},
 	"leave": {
 		"title": "¿Salir sin guardar?",
@@ -540,6 +543,29 @@
 		"matchWord": "En cualquier parte, como palabras completas",
 		"matchExact": "Solo el mensaje completo",
 		"matchStarts": "Al principio del mensaje"
+	},
+	"scheduled": {
+		"title": "Mensajes programados",
+		"subtitle": "Mensajes que {{bot}} publica más tarde, una vez o cada día o semana. No se menciona a nadie.",
+		"emptyTitle": "Nada programado",
+		"emptyBody": "Programa uno abajo y {{bot}} lo publicará a la hora que elijas.",
+		"upcoming": "Próximos",
+		"countOf": "{{used}} de {{limit}}",
+		"add": "Programar un mensaje",
+		"addBody": "Una publicación con más de una hora de retraso, por ejemplo porque {{bot}} estaba desconectado, se omite en vez de enviarse tarde.",
+		"channel": "Publicar en",
+		"when": "Primera publicación",
+		"whenHint": "En tu zona horaria. Se repite cada 24 horas o 7 días desde entonces.",
+		"repeat": "Se repite",
+		"message": "Mensaje",
+		"schedule": "Programar mensaje",
+		"full": "Un servidor no puede tener más mensajes programados. Borra uno para añadir otro.",
+		"removeIn": "Borrar el mensaje programado en {{channel}}",
+		"cannotPost": "{{bot}} no puede publicar en {{channel}}, así que este mensaje se omitirá.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Una vez",
+		"daily": "Cada día",
+		"weekly": "Cada semana"
 	},
 	"roleMenus": {
 		"title": "Menús de roles",
@@ -1437,7 +1463,12 @@
 		"roleMenuTooManyRoles": "Un menú no puede ofrecer más de {{max}} roles.",
 		"autoResponderTrigger": "Indica a qué palabras responde.",
 		"autoResponderReply": "Escribe lo que responde.",
-		"autoResponderDuplicate": "Ya hay una respuesta automática para esas palabras. Edita esa."
+		"autoResponderDuplicate": "Ya hay una respuesta automática para esas palabras. Edita esa.",
+		"scheduleChannel": "Elige el canal donde se publica.",
+		"scheduleMessage": "Escribe el mensaje que se publicará.",
+		"scheduleTime": "Elige cuándo publicarlo.",
+		"schedulePast": "Esa hora ya ha pasado. Elige una al menos un minuto más tarde.",
+		"scheduleTooFar": "Un mensaje se puede programar como mucho con {{max}} días de antelación."
 	},
 	"status": {
 		"title": "Estado",

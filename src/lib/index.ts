@@ -19,6 +19,7 @@ export * from "./music";
 export * from "./polls";
 export * from "./reminders";
 export * from "./roles";
+export * from "./scheduledMessages";
 export * from "./settings";
 export * from "./starboard";
 export * from "./support";
