@@ -28,30 +28,11 @@ import { warnings } from "@api/routes/warnings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
 import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
-import { getIdeaSettings } from "@database/repositories/ideaRepository";
-import { getLevelSettings } from "@database/repositories/levelRepository";
-import { countRoleMenus } from "@database/repositories/roleMenuRepository";
-import {
-	getAntiLink,
-	getAuditLogConfig,
-	getAutoRoles,
-	getCounting,
-	getFixedStats,
-	getVoiceCounter,
-	getWelcome,
-	listSticky,
-} from "@database/repositories/settingsRepository";
-import { getStarboardSettings } from "@database/repositories/starboardRepository";
-import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
-import { getVerifyConfig } from "@database/repositories/verificationRepository";
-import { CASINO_GAMES, readCasinoSettings } from "@lib/casino";
 import { canPostInChannel } from "@lib/discord";
-import { readLottery, readTreasure } from "@lib/economy";
 import { readInsights } from "@lib/info";
-import { normaliseSettings } from "@lib/levelling";
 import { readServerChanges } from "@lib/moderation";
 import { isPowerful } from "@lib/roles";
-import { readTickets } from "@lib/tickets";
+import { featuresOf } from "@lib/settings";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
@@ -59,7 +40,6 @@ import {
 	insightsQuery,
 	type InsightWindow,
 	type ChannelSummary,
-	type FeatureStatus,
 	type GuildOverview,
 	guildIdParam,
 	type Paged,
@@ -200,173 +180,6 @@ function kindOf(channel: GuildBasedChannel): ChannelKind {
 
 function colourOf(role: Role): string | null {
 	return role.color === 0 ? null : `#${role.color.toString(16).padStart(6, "0")}`;
-}
-
-/** One line per feature, read through the repositories so the web and the Discord panels cannot disagree. */
-async function featuresOf(guild: Guild): Promise<FeatureStatus[]> {
-	const [
-		levels,
-		audit,
-		welcome,
-		antiLink,
-		counting,
-		autoRoles,
-		verify,
-		voice,
-		stickies,
-		treasure,
-		ticketing,
-		draw,
-		stats,
-		tables,
-		menus,
-		board,
-		stars,
-		lobby,
-	] = await Promise.all([
-		getLevelSettings(guild.id),
-		getAuditLogConfig(guild.id),
-		getWelcome(guild.id),
-		getAntiLink(guild.id),
-		getCounting(guild.id),
-		getAutoRoles(guild.id),
-		getVerifyConfig(guild.id),
-		getVoiceCounter(guild.id),
-		listSticky(guild.id),
-		readTreasure(guild.id),
-		readTickets(guild),
-		readLottery(guild.id),
-		getFixedStats(guild.id),
-		readCasinoSettings(guild.id),
-		countRoleMenus(guild.id),
-		getIdeaSettings(guild.id),
-		getStarboardSettings(guild.id),
-		getTempVoiceSettings(guild.id),
-	]);
-
-	const level = normaliseSettings(levels);
-
-	return [
-		{
-			key: "levelling",
-			label: "Levelling",
-			enabled: level.enabled,
-			detail: level.enabled
-				? `${count(level.rewards.length, "role reward")}, ${count(level.boosts.length, "boost")}`
-				: null,
-		},
-		{
-			key: "audit-logging",
-			label: "Audit logging",
-			enabled: audit !== null && audit.enabledLogs.length > 0,
-			detail: audit === null ? null : count(audit.enabledLogs.length, "event"),
-		},
-		{
-			key: "welcome",
-			label: "Welcome messages",
-			enabled: (welcome?.channelId ?? null) !== null,
-			detail: welcome?.channelId === undefined ? null : `Posting in <#${welcome.channelId}>`,
-		},
-		{
-			key: "verification",
-			label: "Verification",
-			enabled: verify !== null,
-			detail: verify === null ? null : count(verify.verifiedIds.length, "member verified"),
-		},
-		{
-			key: "anti-link",
-			label: "Anti-link",
-			enabled: antiLink !== null,
-			detail: antiLink === null ? null : `Bypass: ${antiLink.bypassPermission}`,
-		},
-		{
-			key: "counting",
-			label: "Counting",
-			enabled: counting !== null,
-			detail: counting === null ? null : `At ${String(counting.count)}`,
-		},
-		{
-			key: "auto-roles",
-			label: "Auto roles",
-			enabled: (autoRoles?.roleIds.length ?? 0) > 0,
-			detail: autoRoles === null ? null : count(autoRoles.roleIds.length, "role"),
-		},
-		{
-			key: "role-menus",
-			label: "Role menus",
-			enabled: menus > 0,
-			detail: menus === 0 ? null : count(menus, "menu"),
-		},
-		{
-			key: "ideas",
-			label: "Idea board",
-			enabled: board?.enabled === true,
-			detail: board?.enabled === true && board.channelId !== null ? `Posting in <#${board.channelId}>` : null,
-		},
-		{
-			key: "starboard",
-			label: "Starboard",
-			enabled: stars?.enabled === true,
-			detail:
-				stars?.enabled === true && stars.channelId !== null
-					? `${String(stars.threshold)} ⭐ to reach <#${stars.channelId}>`
-					: null,
-		},
-		{
-			key: "temp-voice",
-			label: "Join to create",
-			enabled: lobby?.enabled === true,
-			detail: lobby?.enabled === true && lobby.lobbyChannelId !== null ? `Lobby: <#${lobby.lobbyChannelId}>` : null,
-		},
-		{
-			key: "voice-stats",
-			label: "Voice stats",
-			enabled: voice !== null,
-			detail: null,
-		},
-		{
-			key: "sticky",
-			label: "Sticky messages",
-			enabled: stickies.length > 0,
-			detail: stickies.length === 0 ? null : count(stickies.length, "channel"),
-		},
-		{
-			key: "treasure",
-			label: "Treasure drops",
-			enabled: treasure.enabled,
-			detail: treasure.configured ? `${String(treasure.minAmount)}–${String(treasure.maxAmount)} a drop` : null,
-		},
-		{
-			key: "tickets",
-			label: "Tickets",
-			enabled: ticketing.enabled,
-			detail: ticketing.enabled ? count(ticketing.openTickets, "ticket open") : null,
-		},
-		{
-			key: "lottery",
-			label: "Lottery",
-			enabled: draw.enabled && !draw.frozen,
-			detail: draw.enabled ? count(draw.ticketsSold, "ticket sold") : null,
-		},
-		{
-			key: "casino",
-			label: "Casino",
-			enabled: tables.enabled,
-			detail: tables.enabled
-				? `${String(CASINO_GAMES.filter((game) => tables.games[game]).length)} of ${String(CASINO_GAMES.length)} games open`
-				: null,
-		},
-		{
-			key: "bot-stats",
-			label: "Bot statistics",
-			enabled: stats !== null,
-			detail: stats === null ? null : `Posting in <#${stats.channelId}>`,
-		},
-	];
-}
-
-function count(value: number, noun: string): string {
-	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
 }
 
 /** Permissions Discord can revoke silently, named so a manager can act on them. */
