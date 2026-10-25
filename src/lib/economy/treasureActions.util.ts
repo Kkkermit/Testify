@@ -1,5 +1,5 @@
-import { type TreasureConfigSettings } from "@database/models/guildSettings.schema";
-import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { type TreasureConfigSettings } from "@database/models/treasure.schema";
+import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { problemText } from "@lib/format/problemText.util";
 import { TREASURE_DEFAULTS, type TreasurePatch, type TreasureSettings, treasureProblem } from "@testify/shared";
 

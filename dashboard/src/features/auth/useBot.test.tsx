@@ -6,7 +6,7 @@ import { useBot } from "@/features/auth/useBot";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { currentBotName, nameTheBot } from "@/i18n";
 import { rememberedBotName } from "@/lib/brand";
-import { botProfile } from "@/test/handlers";
+import { botProfile } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

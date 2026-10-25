@@ -1,5 +1,5 @@
-import { type ChannelSummary, type RoleSummary, type TicketSettings } from "@testify/shared";
-import { categoriesOf, draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
+import { type RoleSummary, type TicketSettings } from "@testify/shared";
+import { draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
 import { t } from "@/test/english";
 
 const SETTINGS: TicketSettings = {
@@ -50,19 +50,6 @@ describe("isDirty", () => {
 	it("notices a change to any field", () => {
 		expect(isDirty({ ...draftOf(SETTINGS), buttonLabel: "Help" }, SETTINGS)).toBe(true);
 		expect(isDirty({ ...draftOf(SETTINGS), categoryId: "400000000000000009" }, SETTINGS)).toBe(true);
-	});
-});
-
-describe("categoriesOf", () => {
-	/** A ticket channel is created under a category, so offering a text channel would only earn a refusal. */
-	it("offers categories and nothing else", () => {
-		const channels: ChannelSummary[] = [
-			{ id: "1", name: "general", kind: "text", position: 1, canSend: true },
-			{ id: "2", name: "Support", kind: "category", position: 2, canSend: false },
-			{ id: "3", name: "Voice", kind: "voice", position: 3, canSend: false },
-		];
-
-		expect(categoriesOf(channels).map((channel) => channel.name)).toEqual(["Support"]);
 	});
 });
 

@@ -6,7 +6,7 @@ import { botRetryDelay, retryBot } from "@/features/auth/useBot";
 import { ApiError } from "@/lib/api";
 import { hardRedirect } from "@/lib/redirect";
 import { expectNoViolations } from "@/test/axe";
-import { botProfile } from "@/test/handlers";
+import { botProfile } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

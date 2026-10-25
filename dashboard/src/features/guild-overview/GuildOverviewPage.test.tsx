@@ -4,7 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { GuildOverviewPage } from "@/features/guild-overview/GuildOverviewPage";
 import { expectNoViolations } from "@/test/axe";
-import { aGuild, overview, setupDone } from "@/test/handlers";
+import { overview, setupDone } from "@/test/fixtures/server";
+import { aGuild } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

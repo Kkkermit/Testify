@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { CasinoPage } from "@/features/casino/CasinoPage";
 import { expectNoViolations } from "@/test/axe";
-import { casinoSettings } from "@/test/handlers";
+import { casinoSettings } from "@/test/fixtures/economy";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

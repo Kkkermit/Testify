@@ -1,6 +1,6 @@
 import { describeWithMongo } from "../helpers/mongo";
 import { StarPost } from "@database/models/starboard.schema";
-import { purgeGuild } from "@database/repositories/settingsRepository";
+import { purgeGuild } from "@database/repositories/guildRepository";
 import {
 	claimStarPost,
 	countStarPosts,

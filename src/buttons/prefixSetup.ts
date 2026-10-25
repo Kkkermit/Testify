@@ -2,7 +2,7 @@ import { MessageFlags, PermissionFlagsBits } from "discord.js";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/settingsRepository";
+import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
 import { modalForm } from "@lib/discord";
 import { checkPrefix, PREFIX_LIMITS, PREFIX_PANEL_ID, prefixPanel, type PrefixPanelState } from "@lib/settings";
 

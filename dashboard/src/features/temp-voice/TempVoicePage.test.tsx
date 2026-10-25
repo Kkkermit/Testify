@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { TempVoicePage } from "@/features/temp-voice/TempVoicePage";
 import { expectNoViolations } from "@/test/axe";
-import { tempVoiceSettings } from "@/test/handlers";
+import { tempVoiceSettings } from "@/test/fixtures/channels";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

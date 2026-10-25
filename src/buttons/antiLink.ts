@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/settingsRepository";
+import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
 import { humanisePermission } from "@lib/format";
 import {
 	ANTILINK_PANEL_ID,

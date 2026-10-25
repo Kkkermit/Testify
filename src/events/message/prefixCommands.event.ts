@@ -3,7 +3,7 @@ import { runChecks } from "@core/checks";
 import { runCommand } from "@core/errors";
 import { defineMessageHandler } from "@core/message";
 import { parseMessage, PrefixInteraction } from "@core/prefix";
-import { getPrefixConfig } from "@database/repositories/settingsRepository";
+import { getPrefixConfig } from "@database/repositories/prefixRepository";
 import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 

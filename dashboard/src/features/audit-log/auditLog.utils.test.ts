@@ -1,7 +1,7 @@
 import { AUDIT_EVENTS } from "@testify/shared";
 import { draftFrom, groupState, saveBlocked, setGroup, toggleEvent } from "@/features/audit-log/auditLog.utils";
 import { t } from "@/test/english";
-import { auditLogConfig } from "@/test/handlers";
+import { auditLogConfig } from "@/test/fixtures/moderation";
 
 describe("toggleEvent", () => {
 	it("adds one that is not chosen and removes one that is", () => {

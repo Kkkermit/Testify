@@ -44,8 +44,8 @@ self-hoster a browser download for something only a maintainer runs.
 
 1. **Build it.** `npm run build` — the screenshots are of the production bundle, not the dev server.
 2. **Serve `dashboard/dist` statically**, with every path that has no file extension answered by `index.html`.
-3. **Answer `/api/**` from the test stubs.** The handlers in `dashboard/src/test/handlers.ts` are the same fake
-   data the test suite uses; MSW's `getResponse(handlers, request)` turns an intercepted request into a response
+3. **Answer `/api/**` from the test stubs.** The handlers in `dashboard/src/test/handlers.ts` serve the same fake
+   data the test suite uses, from `dashboard/src/test/fixtures/`; MSW's `getResponse(handlers, request)` turns an intercepted request into a response
    outside a browser. Put any override first in the list — the first handler that matches wins.
 4. **Set the theme before the page loads**, by writing `light` or `dark` to `localStorage` under `testify:theme`,
    and turn reduced motion on so the backdrop is not caught mid-drift.

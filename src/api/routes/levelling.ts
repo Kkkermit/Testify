@@ -1,8 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
@@ -16,19 +15,9 @@ import {
 	rewardsSchema,
 } from "@testify/shared";
 
-type ApiContext = Context<ApiBindings>;
-
 export const levelling = new Hono<ApiBindings>();
 
 levelling.use("*", requireGuild);
-
-function guildIdOf(context: ApiContext): string {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 /** Exactly `normaliseSettings`, so the web shows what `/levelling edit` shows. */
 async function configOf(guildId: string): Promise<LevelConfigResponse> {

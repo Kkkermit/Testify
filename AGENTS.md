@@ -66,7 +66,7 @@ numbers, which drift):
 | Button handlers      | 38                                |
 | Events               | 29, in 6 groups                   |
 | `src/lib` helpers    | 172, in 22 domain folders         |
-| Schemas/repositories | 29 / 26                           |
+| Schemas/repositories | 38 / 36                           |
 | Scheduled jobs       | 8                                 |
 | Tests                | 6,600 across 382 suites           |
 
@@ -232,8 +232,8 @@ src/
 │       reminders/ ideas/ starboard/ tempVoice/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           29 Mongoose schemas
-│   └── repositories/     26 query layers. Commands never touch a model directly.
+│   ├── models/           38 Mongoose schemas, one file per feature
+│   └── repositories/     36 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 8 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         join-to-create channels)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
@@ -280,6 +280,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
 | Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
 | Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
+| Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers    |
 | Change a casino game's odds or payouts     | `src/lib/casino/<game>.util.ts` — pure rules, randomness passed in        |
 | Draw a casino animation                    | `src/lib/canvas/*.util.ts`, encoded by `gif.util.ts`                      |
 
@@ -707,9 +708,13 @@ Rules:
    absence is meaningful.
 4. **One collection per shape.** Two models sharing a collection with different shapes was the single worst
    finding in the audit of the original.
-5. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
+5. **A feature's settings have their own schema and repository, and leaving a server forgets them.** Each
+   repository exports a `purge<Feature>(guildId)`, and `purgeGuild` in `guildRepository.ts` calls every one when
+   the bot is removed. A new feature adds its purge there, and a test that writes its settings, calls
+   `purgeGuild` and finds nothing left — `guildRepository.test.ts` does it for the smaller settings at once.
+6. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
    model when it is not.
-6. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
+7. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
    not appear on records written yesterday, however `required: true` it is — so the type the schema declares is a
    promise about new writes, not a description of what a `find()` returns. When you add a field, normalise on
    read and type the input for what can actually arrive: `normaliseSettings` in `src/lib/levelling/levelling.util.ts` does
@@ -1949,7 +1954,7 @@ Rules that are easy to break and silent when broken:
 Everything behind it assumes it ran, so five things in it are load-bearing:
 
 1. **The guild id comes from the path parameter only**, and is shape-checked before it is used to look anything
-   up. A handler reads `c.get("guild").id`, never a guild id from a body. This is the most likely way one
+   up. A handler reads `guildOf(c)` or `guildIdOf(c)` from `@api/context`, never a guild id from a body. This is the most likely way one
    guild's data leaks into another's — make it a review rule.
 2. **`guild.members.fetch()` is live, every request.** The OAuth guild list is a login-time snapshot, so
    someone demoted five minutes ago still has it in their session. This is the difference between losing access
@@ -2072,8 +2077,9 @@ it rather than starting from a page.
 3. `src/api/routes/guilds.ts` — one `guilds.route("/:guildId/<name>", …)` line, so it inherits `requireGuild`.
 4. `dashboard/src/features/<name>/` — `use<Name>.ts`, `<name>.utils.ts` for the rules, then the page.
 5. `dashboard/src/routes.tsx` and `config/navigation.ts` — one lazy import and one nav entry.
-6. `config/features.ts` and `features/commands/commands.utils.ts` — the overview tile links to it, and the
-   command it replaces stops counting as Discord-only.
+6. `src/lib/settings/featureStatus.util.ts`, `config/features.ts` and `features/commands/commands.utils.ts` — one
+   entry in `FEATURE_SOURCES` says what the overview shows for it, the tile links to it, and the command it
+   replaces stops counting as Discord-only.
 
 Step 3 is the one that fails silently: an unmounted sub-app falls through to the SPA catch-all and lands the
 browser back on the guild picker. A request cannot tell that apart from a refusal, because `requireGuild`

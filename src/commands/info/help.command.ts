@@ -1,7 +1,7 @@
 import { DEFAULT_PREFIX } from "@config/constants";
 import { defineCommand } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getPrefix } from "@database/repositories/settingsRepository";
+import { getPrefix } from "@database/repositories/prefixRepository";
 import { reply } from "@lib/discord";
 import {
 	categoryControls,

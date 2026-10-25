@@ -11,7 +11,7 @@ beforeEach(() => {
 	reset("@config/env", "resetEnv");
 	reset("@core/checks", "clearCooldowns");
 	reset("@database/repositories/blacklistRepository", "clearBlacklistCache");
-	reset("@database/repositories/settingsRepository", "clearPrefixCache");
+	reset("@database/repositories/prefixRepository", "clearPrefixCache");
 });
 
 jest.setTimeout(20_000);

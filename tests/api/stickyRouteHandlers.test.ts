@@ -6,10 +6,10 @@ import { sticky } from "@api/routes/sticky";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { listSticky, removeSticky, setSticky } from "@database/repositories/settingsRepository";
+import { listSticky, removeSticky, setSticky } from "@database/repositories/stickyRepository";
 import { STICKY_LIMITS, type StickyList } from "@testify/shared";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/stickyRepository", () => ({
 	listSticky: jest.fn(() => Promise.resolve([])),
 	removeSticky: jest.fn(() => Promise.resolve(true)),
 	setSticky: jest.fn(() => Promise.resolve({})),

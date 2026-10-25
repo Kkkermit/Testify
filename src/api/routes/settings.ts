@@ -1,29 +1,18 @@
 import { PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
+import { type ApiBindings, guildIdOf, guildOf } from "@api/context";
 import { badRequest, notInGuild } from "@api/errors";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { botName } from "@core/brand";
-import {
-	disableAntiLink,
-	disableCounting,
-	getAntiLink,
-	getAutoRoles,
-	getCounting,
-	getPrefixConfig,
-	getVoiceCounter,
-	resetCount,
-	setAntiLink,
-	setAutoRoles,
-	setCounting,
-	setPrefix,
-	setPrefixEnabled,
-	setVoiceCounter,
-} from "@database/repositories/settingsRepository";
+import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
+import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
+import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
+import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
+import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import {
 	type AntiLinkPatch,
 	antiLinkPatch,
@@ -49,14 +38,6 @@ type ApiContext = Context<ApiBindings>;
 export const settings = new Hono<ApiBindings>();
 
 settings.use("*", requireGuild);
-
-function guildIdOf(context: ApiContext): string {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 async function settingsOf(guildId: string): Promise<ServerSettings> {
 	const [prefix, antiLink, autoRoles, counting, voice] = await Promise.all([
@@ -90,13 +71,6 @@ async function settingsOf(guildId: string): Promise<ServerSettings> {
 }
 
 settings.get("/", async (context) => context.json(await settingsOf(guildIdOf(context))));
-
-function guildOf(context: ApiContext) {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 /** The bot's nickname here; Discord has no per-guild avatar, so the rest is the owner's. */
 settings.get("/nickname", (context) => {

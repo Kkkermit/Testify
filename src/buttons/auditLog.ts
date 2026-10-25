@@ -1,6 +1,6 @@
 import { defineButton } from "@core/button";
 import { UserFacingError } from "@core/errors";
-import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
+import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { requireSendable } from "@lib/discord";
 import {
 	AUDIT_EVENTS,

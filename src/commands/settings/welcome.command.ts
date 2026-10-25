@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { getWelcome, saveWelcome } from "@database/repositories/settingsRepository";
+import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { reply, successEmbed } from "@lib/discord";
 import { checkBackground, greetingFor, normaliseWelcome, welcomePanel } from "@lib/welcome";
 

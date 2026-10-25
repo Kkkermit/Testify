@@ -2,7 +2,7 @@ import { screen, within } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { StatusPage } from "@/features/status/StatusPage";
 import { expectNoViolations } from "@/test/axe";
-import { botStatus } from "@/test/handlers";
+import { botStatus } from "@/test/fixtures/bot";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

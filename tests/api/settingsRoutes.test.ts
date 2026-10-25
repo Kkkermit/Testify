@@ -5,39 +5,36 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { settings } from "@api/routes/settings";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { disableAntiLink, getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
+import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
+import { disableCounting, getCounting, resetCount, setCounting } from "@database/repositories/countingRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import {
-	disableAntiLink,
-	disableCounting,
-	getAntiLink,
-	getAutoRoles,
-	getCounting,
-	getPrefixConfig,
-	getVoiceCounter,
-	resetCount,
-	setAntiLink,
-	setAutoRoles,
-	setCounting,
-	setPrefix,
-	setPrefixEnabled,
-	setVoiceCounter,
-} from "@database/repositories/settingsRepository";
+import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/repositories/prefixRepository";
+import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { type ServerSettings } from "@testify/shared";
 import { BOT_ABOVE_ROLES, grantableRoles } from "@tests/helpers/mocks";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/prefixRepository", () => ({
 	getPrefixConfig: jest.fn(() => Promise.resolve({ prefix: "t?", isEnabled: true })),
 	setPrefix: jest.fn(() => Promise.resolve("!")),
 	setPrefixEnabled: jest.fn(() => Promise.resolve({ prefix: "t?", isEnabled: false })),
+}));
+jest.mock("@database/repositories/antiLinkRepository", () => ({
 	getAntiLink: jest.fn(() => Promise.resolve(null)),
 	setAntiLink: jest.fn(() => Promise.resolve({})),
 	disableAntiLink: jest.fn(() => Promise.resolve(true)),
+}));
+jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(() => Promise.resolve(null)),
 	setAutoRoles: jest.fn(() => Promise.resolve({})),
+}));
+jest.mock("@database/repositories/countingRepository", () => ({
 	getCounting: jest.fn(() => Promise.resolve(null)),
 	setCounting: jest.fn(() => Promise.resolve({})),
 	disableCounting: jest.fn(() => Promise.resolve(true)),
 	resetCount: jest.fn(() => Promise.resolve()),
+}));
+jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
 	setVoiceCounter: jest.fn(() => Promise.resolve({})),
 }));

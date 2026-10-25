@@ -1,5 +1,6 @@
 export * from "./autoRolePanel.util";
 export * from "./countingPanel.util";
+export * from "./featureStatus.util";
 export * from "./prefixPanel.util";
 export * from "./settings.constants";
 export * from "./settings.types";

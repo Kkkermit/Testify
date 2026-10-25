@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { TicketsPage } from "@/features/tickets/TicketsPage";
 import { expectNoViolations } from "@/test/axe";
-import { ticketSettings } from "@/test/handlers";
+import { ticketSettings } from "@/test/fixtures/channels";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

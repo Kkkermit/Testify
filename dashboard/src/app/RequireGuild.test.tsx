@@ -7,7 +7,7 @@ import { GUILD_REFUSED_NOTICE, RequireGuild } from "@/app/RequireGuild";
 import { GuildPickerPage } from "@/features/guilds/GuildPickerPage";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
-import { aGuild } from "@/test/handlers";
+import { aGuild } from "@/test/fixtures/session";
 import { server } from "@/test/setup";
 
 const GUILD = aGuild.id;

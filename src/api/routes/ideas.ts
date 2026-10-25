@@ -1,8 +1,7 @@
-import { type Guild } from "discord.js";
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { listIdeas } from "@database/repositories/ideaRepository";
@@ -12,13 +11,6 @@ import { ideaDecision, ideaListQuery, ideaParams, type IdeaRow, ideaSettingsPatc
 export const ideas = new Hono<ApiBindings>();
 
 ideas.use("*", requireGuild);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 ideas.get("/", async (context) => context.json(await readIdeaSettings(guildOf(context))));
 

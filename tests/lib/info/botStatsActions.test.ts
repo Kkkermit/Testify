@@ -1,8 +1,8 @@
 import { UserFacingError } from "@core/errors";
-import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/settingsRepository";
+import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
 import { postBotStats, readBotStats, removeBotStats } from "@lib/info/botStatsActions.util";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/botStatsRepository", () => ({
 	getFixedStats: jest.fn(() => Promise.resolve(null)),
 	removeFixedStats: jest.fn(() => Promise.resolve(true)),
 	setFixedStats: jest.fn(() => Promise.resolve({})),

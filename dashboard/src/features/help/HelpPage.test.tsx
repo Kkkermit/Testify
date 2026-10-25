@@ -4,7 +4,7 @@ import { allNavItems, navigationFor } from "@/config/navigation";
 import { articlesByTopic, helpAreas, suggestionsFor } from "@/features/help/help.utils";
 import { HelpPage } from "@/features/help/HelpPage";
 import { expectNoViolations } from "@/test/axe";
-import { supportIndex } from "@/test/handlers";
+import { supportIndex } from "@/test/fixtures/bot";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
 function renderPage() {

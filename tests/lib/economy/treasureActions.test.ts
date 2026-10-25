@@ -1,8 +1,8 @@
-import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/settingsRepository";
+import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { applyTreasure, normaliseTreasure, readTreasure, resetTreasure } from "@lib/economy/treasureActions.util";
 import { TREASURE_DEFAULTS } from "@testify/shared";
 
-jest.mock("@database/repositories/settingsRepository", () => ({
+jest.mock("@database/repositories/treasureRepository", () => ({
 	getTreasureConfig: jest.fn(() => Promise.resolve(null)),
 	saveTreasureConfig: jest.fn(() => Promise.resolve({})),
 }));

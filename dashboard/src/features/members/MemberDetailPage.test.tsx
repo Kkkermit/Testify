@@ -4,7 +4,7 @@ import { http, HttpResponse } from "msw";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { MemberDetailPage } from "@/features/members/MemberDetailPage";
 import { expectNoViolations } from "@/test/axe";
-import { memberDetail, warningAdded } from "@/test/handlers";
+import { memberDetail, warningAdded } from "@/test/fixtures/moderation";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

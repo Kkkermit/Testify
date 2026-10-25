@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { StarboardPage } from "@/features/starboard/StarboardPage";
 import { expectNoViolations } from "@/test/axe";
-import { starboardSettings } from "@/test/handlers";
+import { starboardSettings } from "@/test/fixtures/community";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 

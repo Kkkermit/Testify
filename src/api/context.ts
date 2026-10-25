@@ -1,4 +1,6 @@
 import { type Guild, type GuildMember } from "discord.js";
+import { type Context } from "hono";
+import { notInGuild } from "@api/errors";
 import { type OauthConfig } from "@api/oauth";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -19,4 +21,16 @@ export interface ApiBindings {
 		member?: GuildMember;
 		isOwner?: boolean;
 	};
+}
+
+/** The guild `requireGuild` authorised, and the only one a handler may act on; without it the route is miswired. */
+export function guildOf(context: Context<ApiBindings>): Guild {
+	const guild = context.get("guild");
+	if (guild === undefined) throw notInGuild();
+
+	return guild;
+}
+
+export function guildIdOf(context: Context<ApiBindings>): string {
+	return guildOf(context).id;
 }

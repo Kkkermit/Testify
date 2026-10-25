@@ -5,7 +5,7 @@ import { countCapProblem, countProgress, prefixProblem } from "@/features/settin
 import { SettingsPage } from "@/features/settings/SettingsPage";
 import { expectNoViolations } from "@/test/axe";
 import { t } from "@/test/english";
-import { serverSettings } from "@/test/handlers";
+import { serverSettings } from "@/test/fixtures/server";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
