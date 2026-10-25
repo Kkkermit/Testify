@@ -48,10 +48,6 @@ export function placeholderColour(name: string): string {
 	return PLACEHOLDERS[hash % PLACEHOLDERS.length]!;
 }
 
-export function medalColour(index: number): string | null {
-	return MEDALS[index]?.[1] ?? null;
-}
-
 export interface BoardLayout {
 	height: number;
 	/** The top of each ranked row. */

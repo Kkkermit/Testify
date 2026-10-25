@@ -4,7 +4,6 @@ import {
 	deleteSession,
 	deleteSessionsFor,
 	findSession,
-	markGuildsCached,
 	type NewSession,
 	readTokens,
 	touchSession,
@@ -100,14 +99,6 @@ describeWithMongo("the dashboard session repository", () => {
 		const stored = await DashboardSessions.findById(issued.id).lean().exec();
 		expect(stored?.accessToken).not.toContain("newer");
 		expect(readTokens(box, (await findSession(issued.id))!)?.accessToken).toBe("newer");
-	});
-
-	it("records when the guild list was last cached", async () => {
-		const issued = await createSession(box, details(), 7);
-		expect((await findSession(issued.id))?.guildsCachedAt).toBeNull();
-
-		await markGuildsCached(issued.id);
-		expect((await findSession(issued.id))?.guildsCachedAt).toBeInstanceOf(Date);
 	});
 
 	it("deletes one session without touching the others", async () => {

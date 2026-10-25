@@ -40,7 +40,6 @@ export async function createSession(box: SecretBox, session: NewSession, ttlDays
 		accessToken: box.seal(session.accessToken),
 		refreshToken: box.seal(session.refreshToken),
 		tokenExpiresAt: session.tokenExpiresAt,
-		guildsCachedAt: null,
 		lastSeenAt: new Date(),
 		expiresAt,
 	});
@@ -93,10 +92,6 @@ export async function updateTokens(
 			},
 		},
 	).exec();
-}
-
-export async function markGuildsCached(id: string): Promise<void> {
-	await DashboardSessions.updateOne({ _id: id }, { $set: { guildsCachedAt: new Date() } }).exec();
 }
 
 export async function deleteSession(id: string): Promise<void> {

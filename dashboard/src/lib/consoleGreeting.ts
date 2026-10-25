@@ -4,12 +4,12 @@ import { themeColour } from "@/lib/three/tokens";
 /** What somebody who opens DevTools reads first: a welcome, where to report a bug, and a warning against pasting code. */
 
 /** One `console.log` call: text with a `%c` before each styled run, and those styles in the same order. */
-export interface ConsoleLine {
+interface ConsoleLine {
 	text: string;
 	styles: string[];
 }
 
-export interface ConsolePalette {
+interface ConsolePalette {
 	brand: string;
 	danger: string;
 }

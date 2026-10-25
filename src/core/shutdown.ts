@@ -4,6 +4,7 @@ import { ErrorThrottle, reportSurvivable } from "@core/resilience";
 import { disconnectDatabase } from "@database/connection";
 import { printReloading } from "@lib/bot/banner.util";
 import { flushCommandLog } from "@lib/bot/commandLog.util";
+import { stopEventLoopMonitor } from "@lib/bot/performance.util";
 import { flushActivity } from "@lib/info/insights.util";
 import { destroyAllSessions } from "@lib/music/musicSession.util";
 
@@ -18,6 +19,7 @@ export async function shutdown(client: TestifyClient, reason: string, code = 0):
 
 	try {
 		client.timers.stopAll();
+		stopEventLoopMonitor();
 		destroyAllSessions();
 		await client.api?.close();
 		// Counted messages live in memory until a flush, so the last minute's are written before the database goes.
