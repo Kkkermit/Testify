@@ -1,5 +1,6 @@
 import {
 	type BoardPage,
+	type GoodbyeSettings,
 	type IdeaRow,
 	type IdeaSettings,
 	type LevelConfigResponse,
@@ -28,6 +29,14 @@ export const welcomeConfig: WelcomeConfigResponse = {
 	message: "Welcome to **{server}**, {user}! You are member **{count}**.",
 	style: "card",
 	hasBackground: false,
+};
+
+export const goodbyeConfig: GoodbyeSettings = {
+	enabled: true,
+	channelId: "400000000000000001",
+	message: "**{username}** has left **{server}**.",
+	style: "text",
+	canSend: true,
 };
 
 export const economyBoard: BoardPage = {

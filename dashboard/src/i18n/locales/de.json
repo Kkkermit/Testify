@@ -474,7 +474,7 @@
 		"styleEmbedHint": "Ein farbiges Panel, das in einem belebten Kanal leichter auffällt.",
 		"styleText": "Einfacher Text",
 		"styleTextHint": "Eine gewöhnliche Nachricht im Kanal.",
-		"subtitle": "Was {{bot}} sagt, wenn jemand beitritt — und wo.",
+		"subtitle": "Was {{bot}} sagt, wenn jemand beitritt oder geht — und wo.",
 		"thisServer": "dieser Server",
 		"title": "Willkommensnachrichten",
 		"tokenCount": "Wie viele Mitglieder es jetzt gibt",
@@ -482,6 +482,17 @@
 		"tokenUser": "Erwähnt sie",
 		"tokenUsername": "Ihr Name, ohne Verlinkung",
 		"tooLong": "Diese Nachricht ist länger, als Discord annimmt. Kürze sie vor dem Speichern."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} kann in diesem Kanal nicht posten, also käme kein Abschied an. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen.",
+		"heading": "Abschied",
+		"mentionNote": "Niemand wird angepingt. Wenn jemand gegangen ist, kann {user} als unbekannter Nutzer erscheinen, daher liest sich {username} besser.",
+		"message": "Abschiedsnachricht",
+		"pickFirst": "Wähle einen Kanal, dann wird der Rest dieser Karte aktiv.",
+		"saveMessage": "Abschied speichern",
+		"say": "Verabschieden, wenn jemand geht",
+		"sayHint": "Aus bedeutet, dass {{bot}} nichts sagt, wenn jemand geht. Die Nachricht bleibt erhalten.",
+		"sendTo": "Abschied senden an"
 	},
 	"sticky": {
 		"title": "Sticky-Nachrichten",

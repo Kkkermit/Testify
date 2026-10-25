@@ -12,6 +12,7 @@ export * from "./commandToggles";
 export * from "./commands";
 export * from "./control";
 export * from "./giveaways";
+export * from "./goodbye";
 export * from "./ideas";
 export * from "./insights";
 export * from "./levelling";

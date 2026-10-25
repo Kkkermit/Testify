@@ -475,7 +475,7 @@
 		"styleEmbedHint": "Un panel de color, más fácil de ver en un canal con movimiento.",
 		"styleText": "Texto sencillo",
 		"styleTextHint": "Un mensaje normal en el canal.",
-		"subtitle": "Qué dice {{bot}} cuando alguien entra, y dónde.",
+		"subtitle": "Qué dice {{bot}} cuando alguien entra o se va, y dónde.",
 		"thisServer": "este servidor",
 		"title": "Mensajes de bienvenida",
 		"tokenCount": "Cuántos miembros hay ahora",
@@ -483,6 +483,17 @@
 		"tokenUser": "Les menciona",
 		"tokenUsername": "Su nombre, sin enlace",
 		"tooLong": "Ese mensaje es más largo de lo que Discord acepta. Acórtalo antes de guardar."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} no puede publicar en ese canal, así que no llegaría ninguna despedida. Dale Enviar mensajes allí o elige otro.",
+		"heading": "Despedida",
+		"mentionNote": "No se menciona a nadie. Cuando alguien ya se ha ido, {user} puede aparecer como usuario desconocido, así que {username} se lee mejor.",
+		"message": "Mensaje de despedida",
+		"pickFirst": "Elige un canal y el resto de esta tarjeta se activa.",
+		"saveMessage": "Guardar despedida",
+		"say": "Despedirse cuando alguien se va",
+		"sayHint": "Desactivado, {{bot}} no dice nada cuando alguien se va. El mensaje se conserva.",
+		"sendTo": "Enviar la despedida a"
 	},
 	"sticky": {
 		"title": "Mensajes fijos",

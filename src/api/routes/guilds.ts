@@ -9,6 +9,7 @@ import { botStats } from "@api/routes/botStats";
 import { casino } from "@api/routes/casino";
 import { guildCommandToggles } from "@api/routes/commandToggles";
 import { giveaways } from "@api/routes/giveaways";
+import { goodbye } from "@api/routes/goodbye";
 import { ideas } from "@api/routes/ideas";
 import { levelling } from "@api/routes/levelling";
 import { lottery } from "@api/routes/lottery";
@@ -55,6 +56,7 @@ guilds.use("/:guildId/*", requireReach);
 // Mounted here so they inherit `requireGuild` and read the guild from the path like everything else.
 guilds.route("/:guildId/levelling", levelling);
 guilds.route("/:guildId/welcome", welcome);
+guilds.route("/:guildId/goodbye", goodbye);
 guilds.route("/:guildId/audit-log", auditLog);
 guilds.route("/:guildId/settings", settings);
 guilds.route("/:guildId/commands", guildCommandToggles);

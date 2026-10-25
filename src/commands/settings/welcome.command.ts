@@ -3,12 +3,12 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { reply, successEmbed } from "@lib/discord";
-import { checkBackground, greetingFor, normaliseWelcome, welcomePanel } from "@lib/welcome";
+import { checkBackground, goodbyePanel, greetingFor, normaliseWelcome, readGoodbye, welcomePanel } from "@lib/welcome";
 
 /** One panel, plus the two things a panel cannot do: take a file upload, and post a real greeting. */
 export default defineCommand({
 	name: "welcome",
-	description: "Greets new members when they join.",
+	description: "Greets new members when they join, and says goodbye when they leave.",
 	category: "settings",
 	private: true,
 	aliases: ["welcome-system", "greet"],
@@ -66,6 +66,16 @@ export default defineCommand({
 				await reply(interaction, {
 					embeds: [successEmbed("Background saved, and the greeting is now an image card. Try `/welcome test`.")],
 				});
+			},
+		},
+		{
+			name: "goodbye",
+			description: "Open the goodbye panel, for a message when somebody leaves.",
+			aliases: ["goodbye"],
+			async run(interaction) {
+				const guild = inGuild(interaction);
+
+				await reply(interaction, goodbyePanel(await readGoodbye(guild), interaction.user.id));
 			},
 		},
 		{

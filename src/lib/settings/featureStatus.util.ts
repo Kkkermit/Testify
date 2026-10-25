@@ -4,6 +4,7 @@ import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getFixedStats } from "@database/repositories/botStatsRepository";
 import { getCounting } from "@database/repositories/countingRepository";
+import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
@@ -67,6 +68,15 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		label: "Welcome messages",
 		async read(guild) {
 			const channelId = (await getWelcome(guild.id))?.channelId ?? null;
+			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
+		},
+	},
+	{
+		key: "goodbye",
+		label: "Goodbye messages",
+		async read(guild) {
+			const goodbye = await getGoodbyeSettings(guild.id);
+			const channelId = goodbye?.enabled === true ? goodbye.channelId : null;
 			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
 		},
 	},

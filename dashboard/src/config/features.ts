@@ -25,6 +25,7 @@ import {
 	TrendingUp,
 	Volume2,
 	Pin,
+	UserMinus,
 	UserPlus,
 	Users,
 	type LucideIcon,
@@ -146,6 +147,12 @@ const LOOKS: Record<string, FeatureLook> = {
 	},
 	welcome: {
 		icon: Users,
+		tint: "text-feature-welcome",
+		wash: "bg-feature-welcome/15",
+		path: (guildId) => `/guilds/${guildId}/welcome`,
+	},
+	goodbye: {
+		icon: UserMinus,
 		tint: "text-feature-welcome",
 		wash: "bg-feature-welcome/15",
 		path: (guildId) => `/guilds/${guildId}/welcome`,

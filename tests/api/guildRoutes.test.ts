@@ -35,6 +35,9 @@ jest.mock("@database/repositories/botStatsRepository", () => ({
 jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/goodbyeRepository", () => ({
+	getGoodbyeSettings: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),
 }));

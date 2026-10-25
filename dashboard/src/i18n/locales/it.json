@@ -475,7 +475,7 @@
 		"styleEmbedHint": "Un pannello colorato, più facile da notare in un canale movimentato.",
 		"styleText": "Testo semplice",
 		"styleTextHint": "Un messaggio normale nel canale.",
-		"subtitle": "Cosa dice {{bot}} quando qualcuno entra, e dove.",
+		"subtitle": "Cosa dice {{bot}} quando qualcuno entra o esce, e dove.",
 		"thisServer": "questo server",
 		"title": "Messaggi di benvenuto",
 		"tokenCount": "Quanti membri ci sono adesso",
@@ -483,6 +483,17 @@
 		"tokenUser": "Le menziona",
 		"tokenUsername": "Il loro nome, senza collegamento",
 		"tooLong": "Quel messaggio è più lungo di quanto Discord accetti. Accorcialo prima di salvare."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} non può scrivere in quel canale, quindi nessun addio arriverebbe. Dagli Invia messaggi lì, oppure scegline un altro.",
+		"heading": "Addio",
+		"mentionNote": "Nessuno viene menzionato. Quando qualcuno se n’è andato, {user} può apparire come utente sconosciuto, quindi {username} si legge meglio.",
+		"message": "Messaggio di addio",
+		"pickFirst": "Scegli un canale e il resto di questa scheda si attiva.",
+		"saveMessage": "Salva addio",
+		"say": "Saluta quando qualcuno se ne va",
+		"sayHint": "Disattivato, {{bot}} non dice nulla quando qualcuno se ne va. Il messaggio resta salvato.",
+		"sendTo": "Invia l’addio in"
 	},
 	"sticky": {
 		"title": "Messaggi fissi",

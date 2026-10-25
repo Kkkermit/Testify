@@ -475,7 +475,7 @@
 		"styleEmbedHint": "Un panneau coloré, plus visible dans un salon actif.",
 		"styleText": "Texte simple",
 		"styleTextHint": "Un message ordinaire dans le salon.",
-		"subtitle": "Ce que dit {{bot}} quand quelqu’un arrive, et où.",
+		"subtitle": "Ce que dit {{bot}} quand quelqu’un arrive ou part, et où.",
 		"thisServer": "ce serveur",
 		"title": "Messages de bienvenue",
 		"tokenCount": "Combien de membres il y a maintenant",
@@ -483,6 +483,17 @@
 		"tokenUser": "Les mentionne",
 		"tokenUsername": "Leur nom, sans lien",
 		"tooLong": "Ce message dépasse ce que Discord accepte. Raccourcissez-le avant d’enregistrer."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} ne peut pas publier dans ce salon, donc aucun au revoir n’arriverait. Donne-lui Envoyer des messages là-bas, ou choisis-en un autre.",
+		"heading": "Au revoir",
+		"mentionNote": "Personne n’est mentionné. Une fois la personne partie, {user} peut s’afficher comme utilisateur inconnu, donc {username} se lit mieux.",
+		"message": "Message d’au revoir",
+		"pickFirst": "Choisis un salon et le reste de cette carte s’active.",
+		"saveMessage": "Enregistrer l’au revoir",
+		"say": "Dire au revoir quand quelqu’un part",
+		"sayHint": "Désactivé, {{bot}} ne dit rien quand quelqu’un part. Le message est conservé.",
+		"sendTo": "Envoyer l’au revoir dans"
 	},
 	"sticky": {
 		"title": "Messages épinglés",

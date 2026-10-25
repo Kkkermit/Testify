@@ -474,7 +474,7 @@
 		"styleEmbedHint": "A coloured panel, easier to spot in a busy channel.",
 		"styleText": "Plain text",
 		"styleTextHint": "A normal message in the channel.",
-		"subtitle": "What {{bot}} says when somebody joins, and where.",
+		"subtitle": "What {{bot}} says when somebody joins or leaves, and where.",
 		"thisServer": "this server",
 		"title": "Welcome messages",
 		"tokenCount": "How many members there are now",
@@ -482,6 +482,17 @@
 		"tokenUser": "Mentions them",
 		"tokenUsername": "Their name, unlinked",
 		"tooLong": "That message is longer than Discord will accept. Shorten it before saving."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} can’t post in that channel, so no goodbye would arrive. Give it Send Messages there, or pick another.",
+		"heading": "Goodbye",
+		"mentionNote": "Nobody is pinged. Once somebody has left, {user} can show as an unknown user, so {username} reads better.",
+		"message": "Goodbye message",
+		"pickFirst": "Pick a channel and the rest of this card turns on.",
+		"saveMessage": "Save goodbye",
+		"say": "Say goodbye when somebody leaves",
+		"sayHint": "Off means {{bot}} says nothing when somebody leaves. The message is kept.",
+		"sendTo": "Send the goodbye to"
 	},
 	"sticky": {
 		"title": "Sticky messages",

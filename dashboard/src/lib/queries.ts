@@ -15,6 +15,7 @@ export const keys = {
 		setupChecklist: () => ["guild", id, "setup-checklist"] as const,
 		levelling: () => ["guild", id, "levelling"] as const,
 		welcome: () => ["guild", id, "welcome"] as const,
+		goodbye: () => ["guild", id, "goodbye"] as const,
 		auditLog: () => ["guild", id, "audit-log"] as const,
 		settings: () => ["guild", id, "settings"] as const,
 		verification: () => ["guild", id, "verification"] as const,

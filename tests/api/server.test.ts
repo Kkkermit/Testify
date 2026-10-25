@@ -107,6 +107,12 @@ describe("the guild settings sub-routes", () => {
 	it.each([
 		["GET", "/api/guilds/:guildId/levelling"],
 		["GET", "/api/guilds/:guildId/welcome"],
+		["GET", "/api/guilds/:guildId/goodbye"],
+		["PATCH", "/api/guilds/:guildId/goodbye"],
+		["GET", "/api/guilds/:guildId/starboard"],
+		["PATCH", "/api/guilds/:guildId/starboard"],
+		["GET", "/api/guilds/:guildId/temp-voice"],
+		["PATCH", "/api/guilds/:guildId/temp-voice"],
 		["GET", "/api/guilds/:guildId/audit-log"],
 		["PUT", "/api/guilds/:guildId/audit-log"],
 		["GET", "/api/guilds/:guildId/settings"],
