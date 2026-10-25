@@ -6,6 +6,7 @@ import { countOpenTickets, getTicketSetup, saveTicketSetup } from "@database/rep
 import { button, row } from "@lib/discord/components.util";
 import { embed } from "@lib/discord/embeds.util";
 import { problemText } from "@lib/format/problemText.util";
+import { TICKET_ID } from "@lib/tickets/tickets.constants";
 import { type TicketPatch, type TicketSettings, ticketBlocked } from "@testify/shared";
 
 const DEFAULT_DESCRIPTION = "Press the button below and we will be with you shortly.";
@@ -55,7 +56,7 @@ export async function publishTicketPanel(
 		components: [
 			row(
 				button({
-					id: customId("ticket", "open"),
+					id: customId(TICKET_ID, "open"),
 					label: settings.buttonLabel,
 					emoji: "🎫",
 					style: ButtonStyle.Primary,
