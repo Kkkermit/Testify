@@ -1,4 +1,5 @@
 import {
+	type AutoResponderList,
 	type BotStatsSettings,
 	type MemberCounts,
 	type StickyList,
@@ -39,4 +40,12 @@ export const tempVoiceSettings: TempVoiceSettings = {
 	userLimit: 0,
 	canManage: true,
 	active: 2,
+};
+
+export const autoResponderList: AutoResponderList = {
+	limit: 25,
+	responders: [
+		{ id: "a00000000000000000000001", trigger: "rules", match: "word", reply: "Read the rules in #rules." },
+		{ id: "a00000000000000000000002", trigger: "how do i get roles", match: "starts", reply: "Pick them in #roles." },
+	],
 };

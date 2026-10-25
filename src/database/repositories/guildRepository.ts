@@ -1,6 +1,7 @@
 import { purgeAfk } from "@database/repositories/afkRepository";
 import { purgeAntiLink } from "@database/repositories/antiLinkRepository";
 import { purgeAuditLog } from "@database/repositories/auditLogRepository";
+import { purgeAutoResponders } from "@database/repositories/autoResponderRepository";
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
 import { purgeFixedStats } from "@database/repositories/botStatsRepository";
 import { purgeCasino } from "@database/repositories/casinoRepository";
@@ -25,6 +26,7 @@ import { purgeWelcome } from "@database/repositories/welcomeRepository";
 export async function purgeGuild(guildId: string): Promise<void> {
 	await Promise.all([
 		purgeAfk(guildId),
+		purgeAutoResponders(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),

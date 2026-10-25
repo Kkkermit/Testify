@@ -17,6 +17,7 @@ import {
 	Trophy,
 	Users,
 	UserPlus,
+	MessageSquareReply,
 	MessagesSquare,
 	Music,
 	LifeBuoy,
@@ -234,6 +235,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.sticky",
 							icon: Pin,
 							hintKey: "nav.stickyHint",
+						},
+						{
+							to: `/guilds/${guild.id}/auto-responders`,
+							labelKey: "nav.autoResponders",
+							icon: MessageSquareReply,
+							hintKey: "nav.autoRespondersHint",
 						},
 						{
 							to: `/guilds/${guild.id}/tickets`,

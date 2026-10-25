@@ -118,7 +118,9 @@
 		"starboard": "Starboard",
 		"starboardHint": "Mensajes con suficientes ⭐ republicados en un canal de destacados",
 		"tempVoice": "Únete y crea",
-		"tempVoiceHint": "Un canal de voz propio para quien entre en la sala de espera"
+		"tempVoiceHint": "Un canal de voz propio para quien entre en la sala de espera",
+		"autoResponders": "Respuestas automáticas",
+		"autoRespondersHint": "Lo que {{bot}} responde a las palabras que elijas"
 	},
 	"search": {
 		"open": "Buscar",
@@ -144,7 +146,8 @@
 		"roleMenu": "el menú de roles «{{title}}»",
 		"idea": "la idea n.º {{number}}",
 		"sticky": "el mensaje fijo de {{channel}}",
-		"giveaway": "el sorteo de {{prize}}"
+		"giveaway": "el sorteo de {{prize}}",
+		"autoResponder": "la respuesta automática para «{{trigger}}»"
 	},
 	"leave": {
 		"title": "¿Salir sin guardar?",
@@ -517,6 +520,26 @@
 		"deletedChannel": "un canal eliminado",
 		"deletedChannelTitle": "Un canal eliminado",
 		"sinceLast": "Mensajes desde la última publicación: {{done}} de {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Respuestas automáticas",
+		"subtitle": "Palabras a las que {{bot}} responde con lo que tú escribas. Nunca responde a un bot ni menciona a nadie.",
+		"emptyTitle": "Aún no hay respuestas automáticas",
+		"emptyBody": "Añade una abajo y {{bot}} responderá a esas palabras con tu respuesta.",
+		"inUse": "En uso",
+		"countOf": "{{used}} de {{limit}}",
+		"add": "Añadir una respuesta automática",
+		"addBody": "Responde a los miembros, nunca a bots, como mucho una vez cada diez segundos por canal.",
+		"trigger": "Palabras a las que responde",
+		"triggerHint": "Las mayúsculas y los espacios no importan.",
+		"match": "Coincide",
+		"reply": "Respuesta",
+		"addResponder": "Añadir respuesta automática",
+		"full": "Un servidor no puede tener más respuestas automáticas. Borra una para añadir otra.",
+		"removeFor": "Borrar la respuesta automática para «{{trigger}}»",
+		"matchWord": "En cualquier parte, como palabras completas",
+		"matchExact": "Solo el mensaje completo",
+		"matchStarts": "Al principio del mensaje"
 	},
 	"roleMenus": {
 		"title": "Menús de roles",
@@ -1411,7 +1434,10 @@
 		"roleMenuChannel": "Elige dónde se publica el menú.",
 		"roleMenuTitle": "Ponle un título al menú.",
 		"roleMenuRoles": "Elige al menos un rol para ofrecer.",
-		"roleMenuTooManyRoles": "Un menú no puede ofrecer más de {{max}} roles."
+		"roleMenuTooManyRoles": "Un menú no puede ofrecer más de {{max}} roles.",
+		"autoResponderTrigger": "Indica a qué palabras responde.",
+		"autoResponderReply": "Escribe lo que responde.",
+		"autoResponderDuplicate": "Ya hay una respuesta automática para esas palabras. Edita esa."
 	},
 	"status": {
 		"title": "Estado",

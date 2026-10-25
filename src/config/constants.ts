@@ -114,3 +114,8 @@ export const AFK = {
 } as const;
 
 /** Used where a "never expires" sentinel is needed instead of a made-up huge number. */
+
+export const AUTO_RESPONDER = {
+	/** How long one responder waits before answering in the same channel again. */
+	answerEveryMs: 10 * SECOND_MS,
+} as const;

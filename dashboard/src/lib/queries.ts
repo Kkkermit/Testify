@@ -20,6 +20,7 @@ export const keys = {
 		settings: () => ["guild", id, "settings"] as const,
 		verification: () => ["guild", id, "verification"] as const,
 		sticky: () => ["guild", id, "sticky"] as const,
+		autoResponders: () => ["guild", id, "auto-responders"] as const,
 		roleMenus: () => ["guild", id, "role-menus"] as const,
 		ideaSettings: () => ["guild", id, "ideas", "settings"] as const,
 		ideaList: (status: string, page: number) => ["guild", id, "ideas", "list", status, page] as const,

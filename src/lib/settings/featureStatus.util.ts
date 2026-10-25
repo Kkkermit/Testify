@@ -1,6 +1,7 @@
 import { type Guild } from "discord.js";
 import { getAntiLink } from "@database/repositories/antiLinkRepository";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
+import { listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getFixedStats } from "@database/repositories/botStatsRepository";
 import { getCounting } from "@database/repositories/countingRepository";
@@ -174,6 +175,17 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			return {
 				enabled: stickies.length > 0,
 				detail: stickies.length === 0 ? null : countOf(stickies.length, "channel"),
+			};
+		},
+	},
+	{
+		key: "auto-responders",
+		label: "Auto-responders",
+		async read(guild) {
+			const responders = await listAutoResponders(guild.id);
+			return {
+				enabled: responders.length > 0,
+				detail: responders.length === 0 ? null : countOf(responders.length, "auto-responder"),
 			};
 		},
 	},

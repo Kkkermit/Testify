@@ -118,7 +118,9 @@
 		"starboard": "Starboard",
 		"starboardHint": "Les messages avec assez de ⭐ republiés dans un salon des meilleurs moments",
 		"tempVoice": "Rejoindre pour créer",
-		"tempVoiceHint": "Un salon vocal à soi pour quiconque rejoint le salon d’attente"
+		"tempVoiceHint": "Un salon vocal à soi pour quiconque rejoint le salon d’attente",
+		"autoResponders": "Réponses automatiques",
+		"autoRespondersHint": "Ce que {{bot}} répond aux mots que tu choisis"
 	},
 	"search": {
 		"open": "Rechercher",
@@ -144,7 +146,8 @@
 		"roleMenu": "menu de rôles « {{title}} »",
 		"idea": "idée n° {{number}}",
 		"sticky": "message épinglé dans {{channel}}",
-		"giveaway": "tirage au sort pour {{prize}}"
+		"giveaway": "tirage au sort pour {{prize}}",
+		"autoResponder": "la réponse automatique pour « {{trigger}} »"
 	},
 	"leave": {
 		"title": "Quitter sans enregistrer ?",
@@ -517,6 +520,26 @@
 		"deletedChannel": "un salon supprimé",
 		"deletedChannelTitle": "Un salon supprimé",
 		"sinceLast": "Messages depuis la dernière publication : {{done}} sur {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Réponses automatiques",
+		"subtitle": "Des mots auxquels {{bot}} répond avec le texte que tu écris. Il ne répond jamais à un bot et ne mentionne personne.",
+		"emptyTitle": "Aucune réponse automatique",
+		"emptyBody": "Ajoutes-en une ci-dessous, et {{bot}} répondra à ces mots avec ton texte.",
+		"inUse": "En service",
+		"countOf": "{{used}} sur {{limit}}",
+		"add": "Ajouter une réponse automatique",
+		"addBody": "Elle répond aux membres, jamais aux bots, au plus une fois toutes les dix secondes par salon.",
+		"trigger": "Mots auxquels elle répond",
+		"triggerHint": "La casse et les espaces n’ont pas d’importance.",
+		"match": "Correspond",
+		"reply": "Réponse",
+		"addResponder": "Ajouter la réponse automatique",
+		"full": "Un serveur ne peut pas avoir plus de réponses automatiques. Supprimes-en une pour en ajouter une autre.",
+		"removeFor": "Supprimer la réponse automatique pour « {{trigger}} »",
+		"matchWord": "N’importe où, en mots entiers",
+		"matchExact": "Seulement le message entier",
+		"matchStarts": "Au début d’un message"
 	},
 	"roleMenus": {
 		"title": "Menus de rôles",
@@ -1411,7 +1434,10 @@
 		"roleMenuChannel": "Choisissez où le menu est publié.",
 		"roleMenuTitle": "Donnez un titre au menu.",
 		"roleMenuRoles": "Choisissez au moins un rôle à proposer.",
-		"roleMenuTooManyRoles": "Un menu ne peut pas proposer plus de {{max}} rôles."
+		"roleMenuTooManyRoles": "Un menu ne peut pas proposer plus de {{max}} rôles.",
+		"autoResponderTrigger": "Indique à quels mots elle répond.",
+		"autoResponderReply": "Écris ce qu’elle répond.",
+		"autoResponderDuplicate": "Une réponse automatique existe déjà pour ces mots. Modifie plutôt celle-là."
 	},
 	"status": {
 		"title": "État",

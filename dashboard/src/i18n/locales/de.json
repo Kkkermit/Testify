@@ -118,7 +118,9 @@
 		"starboard": "Starboard",
 		"starboardHint": "Nachrichten mit genug ⭐ in einem Highlight-Kanal erneut gepostet",
 		"tempVoice": "Beitreten und erstellen",
-		"tempVoiceHint": "Ein eigener Sprachkanal für alle, die der Lobby beitreten"
+		"tempVoiceHint": "Ein eigener Sprachkanal für alle, die der Lobby beitreten",
+		"autoResponders": "Auto-Antworten",
+		"autoRespondersHint": "Was {{bot}} auf Wörter antwortet, die du wählst"
 	},
 	"search": {
 		"open": "Suchen",
@@ -144,7 +146,8 @@
 		"roleMenu": "Rollenmenü „{{title}}“",
 		"idea": "Idee #{{number}}",
 		"sticky": "Sticky in {{channel}}",
-		"giveaway": "Verlosung um {{prize}}"
+		"giveaway": "Verlosung um {{prize}}",
+		"autoResponder": "die Auto-Antwort für „{{trigger}}“"
 	},
 	"leave": {
 		"title": "Ohne Speichern verlassen?",
@@ -516,6 +519,26 @@
 		"deletedChannel": "einem gelöschten Kanal",
 		"deletedChannelTitle": "Ein gelöschter Kanal",
 		"sinceLast": "Nachrichten seit dem letzten Post: {{done}} von {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Auto-Antworten",
+		"subtitle": "Wörter, auf die {{bot}} mit deinem Text antwortet. Es antwortet nie einem Bot und pingt nie jemanden an.",
+		"emptyTitle": "Noch keine Auto-Antworten",
+		"emptyBody": "Füge unten eine hinzu, und {{bot}} antwortet auf diese Wörter mit deiner Antwort.",
+		"inUse": "In Gebrauch",
+		"countOf": "{{used}} von {{limit}}",
+		"add": "Auto-Antwort hinzufügen",
+		"addBody": "Es antwortet Mitgliedern, nie Bots, höchstens einmal alle zehn Sekunden pro Kanal.",
+		"trigger": "Wörter, auf die es antwortet",
+		"triggerHint": "Groß- und Kleinschreibung und Leerzeichen spielen keine Rolle.",
+		"match": "Trifft zu",
+		"reply": "Antwort",
+		"addResponder": "Auto-Antwort hinzufügen",
+		"full": "Mehr Auto-Antworten kann ein Server nicht haben. Lösche eine, um eine neue hinzuzufügen.",
+		"removeFor": "Auto-Antwort für „{{trigger}}“ löschen",
+		"matchWord": "Überall, als ganze Wörter",
+		"matchExact": "Nur die ganze Nachricht",
+		"matchStarts": "Am Anfang einer Nachricht"
 	},
 	"roleMenus": {
 		"title": "Rollenmenüs",
@@ -1410,7 +1433,10 @@
 		"roleMenuChannel": "Wähle, wo das Menü gepostet wird.",
 		"roleMenuTitle": "Gib dem Menü einen Titel.",
 		"roleMenuRoles": "Wähle mindestens eine Rolle zum Anbieten.",
-		"roleMenuTooManyRoles": "Ein Menü kann höchstens {{max}} Rollen anbieten."
+		"roleMenuTooManyRoles": "Ein Menü kann höchstens {{max}} Rollen anbieten.",
+		"autoResponderTrigger": "Gib an, auf welche Wörter es antwortet.",
+		"autoResponderReply": "Schreib, was es antwortet.",
+		"autoResponderDuplicate": "Für diese Wörter gibt es schon eine Auto-Antwort. Bearbeite diese stattdessen."
 	},
 	"status": {
 		"title": "Status",

@@ -162,6 +162,11 @@ describe("goodbyePanel", () => {
 		for (const id of idsOf(goodbyePanel(settings(), OWNER))) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
 	});
 
+	/** The panel shows the message as typed, and a prefix run posts it where everybody can see. */
+	it("pings nobody the message names", () => {
+		expect(goodbyePanel(settings({ message: "@everyone bye" }), OWNER).allowedMentions).toEqual({ parse: [] });
+	});
+
 	it("cannot be switched on before a channel is chosen", () => {
 		const toggle = buttonsOf(goodbyePanel(settings(), OWNER)).find((button) => button.label === "Turn on");
 

@@ -37,6 +37,7 @@ describe("which commands answer privately", () => {
 				"anti-link",
 				"ask",
 				"audit-logging",
+				"auto-responder",
 				"auto-role",
 				"automod",
 				"balance",

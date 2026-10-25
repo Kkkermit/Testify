@@ -11,6 +11,7 @@ import {
 	Lightbulb,
 	Link as LinkIcon,
 	ListChecks,
+	MessageSquareReply,
 	MessageSquareWarning,
 	MessagesSquare,
 	Music,
@@ -64,6 +65,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-community",
 		wash: "bg-feature-community/15",
 		path: (guildId) => `/guilds/${guildId}/sticky`,
+	},
+	"auto-responders": {
+		icon: MessageSquareReply,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/auto-responders`,
 	},
 	starboard: {
 		icon: Star,

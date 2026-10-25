@@ -32,6 +32,7 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/changes`,
 				`/guilds/${guild.id}/insights`,
 				`/guilds/${guild.id}/sticky`,
+				`/guilds/${guild.id}/auto-responders`,
 				`/guilds/${guild.id}/role-menus`,
 				`/guilds/${guild.id}/ideas`,
 				`/guilds/${guild.id}/starboard`,

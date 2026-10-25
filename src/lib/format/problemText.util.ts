@@ -34,6 +34,9 @@ const SENTENCES: Record<ProblemCode, (values: Record<string, number>) => string>
 	"roleMenu.title": () => "Give the menu a title.",
 	"roleMenu.roles": () => "Pick at least one role to offer.",
 	"roleMenu.tooManyRoles": ({ max = 0 }) => `One menu cannot offer more than ${String(max)} roles.`,
+	"autoResponder.trigger": () => "Say which words it answers.",
+	"autoResponder.reply": () => "Write what it replies with.",
+	"autoResponder.duplicate": () => "There is already an auto-responder for those words. Edit that one instead.",
 };
 
 export function problemText(problem: Problem): string;

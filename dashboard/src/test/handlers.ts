@@ -2,6 +2,7 @@ import { type SupportReply, type WarnLadder } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 import { botStatus, catalogue, levellingArticle, supportIndex, supportReply } from "@/test/fixtures/bot";
 import {
+	autoResponderList,
 	botStatsSettings,
 	memberCounts,
 	stickyList,
@@ -87,6 +88,7 @@ export const handlers = [
 	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/auto-responders", () => HttpResponse.json(autoResponderList)),
 	http.get("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
 	http.post("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
 	http.post("/api/guilds/:guildId/giveaways/:messageId/end", () => HttpResponse.json(giveawayList)),

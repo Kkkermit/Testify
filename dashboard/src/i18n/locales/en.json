@@ -118,7 +118,9 @@
 		"starboard": "Starboard",
 		"starboardHint": "Messages with enough ⭐ reposted to a highlights channel",
 		"tempVoice": "Join to create",
-		"tempVoiceHint": "A voice channel of their own for whoever joins the lobby"
+		"tempVoiceHint": "A voice channel of their own for whoever joins the lobby",
+		"autoResponders": "Auto-responders",
+		"autoRespondersHint": "Replies {{bot}} gives to words you choose"
 	},
 	"search": {
 		"open": "Search",
@@ -144,7 +146,8 @@
 		"roleMenu": "the role menu “{{title}}”",
 		"idea": "idea #{{number}}",
 		"sticky": "the sticky message in {{channel}}",
-		"giveaway": "the giveaway for {{prize}}"
+		"giveaway": "the giveaway for {{prize}}",
+		"autoResponder": "the auto-responder for “{{trigger}}”"
 	},
 	"leave": {
 		"title": "Leave without saving?",
@@ -516,6 +519,26 @@
 		"deletedChannel": "a deleted channel",
 		"deletedChannelTitle": "A deleted channel",
 		"sinceLast": "Messages since the last post: {{done}} of {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Auto-responders",
+		"subtitle": "Words {{bot}} answers with a reply you write. It never answers a bot, and never pings anybody.",
+		"emptyTitle": "No auto-responders yet",
+		"emptyBody": "Add one below, and {{bot}} answers those words with your reply.",
+		"inUse": "In use",
+		"countOf": "{{used}} of {{limit}}",
+		"add": "Add an auto-responder",
+		"addBody": "It answers members, never bots, at most once every ten seconds in a channel.",
+		"trigger": "Words it answers",
+		"triggerHint": "Case and spacing don’t matter.",
+		"match": "Matches",
+		"reply": "Reply",
+		"addResponder": "Add auto-responder",
+		"full": "That is as many auto-responders as a server can keep. Delete one to add another.",
+		"removeFor": "Delete the auto-responder for “{{trigger}}”",
+		"matchWord": "Anywhere, as whole words",
+		"matchExact": "Only the whole message",
+		"matchStarts": "At the start of a message"
 	},
 	"roleMenus": {
 		"title": "Role menus",
@@ -1410,7 +1433,10 @@
 		"roleMenuChannel": "Choose where the menu is posted.",
 		"roleMenuTitle": "Give the menu a title.",
 		"roleMenuRoles": "Pick at least one role to offer.",
-		"roleMenuTooManyRoles": "One menu cannot offer more than {{max}} roles."
+		"roleMenuTooManyRoles": "One menu cannot offer more than {{max}} roles.",
+		"autoResponderTrigger": "Say which words it answers.",
+		"autoResponderReply": "Write what it replies with.",
+		"autoResponderDuplicate": "There is already an auto-responder for those words. Edit that one instead."
 	},
 	"status": {
 		"title": "Status",

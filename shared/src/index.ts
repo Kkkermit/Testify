@@ -2,6 +2,7 @@ export * from "./analytics";
 export * from "./api";
 export * from "./auditLog";
 export * from "./automod";
+export * from "./autoResponders";
 export * from "./blacklist";
 export * from "./botStats";
 export * from "./changes";
