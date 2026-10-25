@@ -2,6 +2,7 @@ import { type Guild } from "discord.js";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
+import { getRaidSettings } from "@database/repositories/raidRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
 import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
@@ -31,6 +32,9 @@ jest.mock("@database/repositories/birthdayRepository", () => ({
 }));
 jest.mock("@database/repositories/caseRepository", () => ({
 	getCaseSettings: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/raidRepository", () => ({
+	getRaidSettings: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(),
@@ -74,6 +78,7 @@ function fresh(): void {
 	jest.mocked(getGoodbyeSettings).mockResolvedValue(null);
 	jest.mocked(countRoleMenus).mockResolvedValue(0);
 	jest.mocked(getIdeaSettings).mockResolvedValue(null);
+	jest.mocked(getRaidSettings).mockResolvedValue(null);
 	jest.mocked(getStarboardSettings).mockResolvedValue(null);
 	jest.mocked(getTempVoiceSettings).mockResolvedValue(null);
 	jest.mocked(readLottery).mockResolvedValue({ enabled: false, frozen: false, ticketsSold: 0 } as never);
@@ -145,6 +150,25 @@ describe("featuresOf", () => {
 
 		jest.mocked(getGoodbyeSettings).mockResolvedValue({ ...settings, enabled: false });
 		expect((await byKey()).get("goodbye")).toEqual(expect.objectContaining({ enabled: false, detail: null }));
+	});
+
+	it("says whether raid protection is holding accounts or only watching", async () => {
+		const settings = {
+			enabled: true,
+			alertChannelId: "400000000000000006",
+			pingRoleId: null,
+			minAccountAgeDays: 7,
+			spikeJoins: 10,
+			spikeMinutes: 1,
+		};
+		jest.mocked(getRaidSettings).mockResolvedValue(settings);
+		expect((await byKey()).get("raid-protection")?.detail).toBe("Holding accounts under 7 days");
+
+		jest.mocked(getRaidSettings).mockResolvedValue({ ...settings, minAccountAgeDays: 0 });
+		expect((await byKey()).get("raid-protection")?.detail).toBe("Watching for spikes");
+
+		jest.mocked(getRaidSettings).mockResolvedValue({ ...settings, enabled: false });
+		expect((await byKey()).get("raid-protection")).toEqual(expect.objectContaining({ enabled: false, detail: null }));
 	});
 
 	it("says nothing about a switched-off board's channel", async () => {

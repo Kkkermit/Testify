@@ -126,7 +126,9 @@
 		"birthdays": "Cumpleaños",
 		"birthdaysHint": "Una publicación en los cumpleaños que comparten los miembros",
 		"cases": "Casos",
-		"casesHint": "Cada acción de moderación, numerada"
+		"casesHint": "Cada acción de moderación, numerada",
+		"raid": "Protección contra raids",
+		"raidHint": "Retén cuentas nuevas y entérate de los picos de entradas"
 	},
 	"search": {
 		"open": "Buscar",
@@ -552,6 +554,33 @@
 		"ban": "Baneo",
 		"softban": "Baneo temporal",
 		"unban": "Desbaneo"
+	},
+	"raid": {
+		"title": "Protección contra raids",
+		"subtitle": "Retén las cuentas recién creadas y entérate cuando las entradas se disparan. Nada de esto expulsa ni banea.",
+		"enabled": "Vigilar las entradas nuevas",
+		"enabledHint": "Se aplica a todos los que entren a partir de ahora.",
+		"enabledHintNothing": "Primero fija una antigüedad mínima de cuenta o elige un canal de alertas.",
+		"neverKicks": "La protección contra raids solo aísla temporalmente y avisa al equipo. Expulsar y banear sigue siendo decisión de un moderador.",
+		"hold": "Cuentas nuevas",
+		"holdBody": "Una cuenta más reciente que esto queda aislada hasta que tenga la antigüedad suficiente, y {{bot}} le explica por qué. Levanta la retención antes con /unmute.",
+		"minAge": "Antigüedad mínima de la cuenta, en días",
+		"minAgeHint": "0 no retiene a nadie. Como máximo {{max}}, el aislamiento más largo de Discord. Se guarda al salir del campo.",
+		"cannotHold": "{{bot}} necesita el permiso Aislar temporalmente a miembros para retener a alguien.",
+		"alerts": "Alertas de picos",
+		"alertsBody": "Cuando entra mucha gente a la vez, {{bot}} publica quién entró y lo nuevas que son sus cuentas.",
+		"channel": "Las alertas van a",
+		"channelHint": "Cada cuenta retenida también se avisa aquí, salvo que ya se esté avisando de un pico.",
+		"noAlerts": "Sin alertas",
+		"ping": "Mencionar en un pico",
+		"pingHint": "Lo único que una alerta menciona.",
+		"pingNobody": "A nadie",
+		"cannotPing": "Ese rol no se puede mencionar, así que no recibirá la mención. Hazlo mencionable o da a {{bot}} el permiso Mencionar a todos.",
+		"joins": "Entradas",
+		"minutes": "En minutos",
+		"range": "De {{min}} a {{max}}.",
+		"outOfRange": "Elige un número entero de {{min}} a {{max}}.",
+		"memory": "Un pico que continúa se vuelve a avisar cada {{minutes}} minutos. Las entradas se cuentan en memoria y nunca se guardan."
 	},
 	"sticky": {
 		"title": "Mensajes fijos",

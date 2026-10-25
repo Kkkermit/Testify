@@ -36,6 +36,9 @@ jest.mock("@database/repositories/birthdayRepository", () => ({
 jest.mock("@database/repositories/caseRepository", () => ({
 	getCaseSettings: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/raidRepository", () => ({
+	getRaidSettings: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(() => Promise.resolve(null)),
 }));

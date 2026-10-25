@@ -14,6 +14,7 @@ beforeEach(() => {
 	reset("@database/repositories/autoResponderRepository", "clearAutoResponderCache");
 	reset("@database/repositories/blacklistRepository", "clearBlacklistCache");
 	reset("@database/repositories/prefixRepository", "clearPrefixCache");
+	reset("@database/repositories/raidRepository", "clearRaidCache");
 });
 
 jest.setTimeout(20_000);

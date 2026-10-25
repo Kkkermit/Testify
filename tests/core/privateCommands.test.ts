@@ -92,6 +92,7 @@ describe("which commands answer privately", () => {
 				"ping",
 				"prefix",
 				"profile",
+				"raid-protection",
 				"remind list",
 				"remind me",
 				"reset",

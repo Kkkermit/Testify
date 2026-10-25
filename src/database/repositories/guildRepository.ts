@@ -15,6 +15,7 @@ import { purgeIdeas } from "@database/repositories/ideaRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { purgePrefix } from "@database/repositories/prefixRepository";
+import { purgeRaidSettings } from "@database/repositories/raidRepository";
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
 import { purgeSchedules } from "@database/repositories/scheduledMessageRepository";
@@ -33,6 +34,7 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeSchedules(guildId),
 		purgeBirthdays(guildId),
 		purgeCaseSettings(guildId),
+		purgeRaidSettings(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),

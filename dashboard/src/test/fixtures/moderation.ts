@@ -6,6 +6,7 @@ import {
 	type GuildWarningsPage,
 	type MemberDetail,
 	type MemberMatch,
+	type RaidOverview,
 	type ServerChangesPage,
 	type WarnLadder,
 	type WarningAdded,
@@ -139,6 +140,18 @@ export const serverChanges: ServerChangesPage = {
 };
 
 export const caseSettings: CaseSettings = { logChannelId: "400000000000000001", canSend: true };
+
+export const raidOverview: RaidOverview = {
+	enabled: true,
+	alertChannelId: "400000000000000001",
+	pingRoleId: null,
+	minAccountAgeDays: 7,
+	spikeJoins: 10,
+	spikeMinutes: 1,
+	canSend: true,
+	canHold: true,
+	canPing: true,
+};
 
 export const casePage: CasePage = {
 	items: [

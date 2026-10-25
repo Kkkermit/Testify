@@ -126,7 +126,9 @@
 		"birthdays": "Birthdays",
 		"birthdaysHint": "A post on the birthdays members share",
 		"cases": "Cases",
-		"casesHint": "Every moderation action, numbered"
+		"casesHint": "Every moderation action, numbered",
+		"raid": "Raid protection",
+		"raidHint": "Hold back new accounts, hear about join spikes"
 	},
 	"search": {
 		"open": "Search",
@@ -551,6 +553,33 @@
 		"ban": "Ban",
 		"softban": "Softban",
 		"unban": "Unban"
+	},
+	"raid": {
+		"title": "Raid protection",
+		"subtitle": "Hold back brand new accounts, and hear about it when joins spike. Nothing here kicks or bans.",
+		"enabled": "Watch new joins",
+		"enabledHint": "Applies to everybody who joins from now on.",
+		"enabledHintNothing": "Set a minimum account age or choose an alert channel first.",
+		"neverKicks": "Raid protection only ever times people out and tells staff. Kicking and banning stay a moderator’s decision.",
+		"hold": "New accounts",
+		"holdBody": "An account newer than this is timed out until it is old enough, and {{bot}} tells them why. Lift a hold sooner with /unmute.",
+		"minAge": "Minimum account age, in days",
+		"minAgeHint": "0 holds nobody back. At most {{max}}, Discord’s longest timeout. Saved when you leave the box.",
+		"cannotHold": "{{bot}} needs the Moderate Members permission to hold anybody back.",
+		"alerts": "Spike alerts",
+		"alertsBody": "When lots of people join at once, {{bot}} posts who joined and how new their accounts are.",
+		"channel": "Alerts go to",
+		"channelHint": "Each held account is reported here too, unless a spike is already being reported.",
+		"noAlerts": "No alerts",
+		"ping": "Ping on a spike",
+		"pingHint": "The only thing an alert ever pings.",
+		"pingNobody": "Nobody",
+		"cannotPing": "That role is not mentionable, so it will not be pinged. Make it mentionable, or give {{bot}} Mention Everyone.",
+		"joins": "Joins",
+		"minutes": "Within minutes",
+		"range": "From {{min}} to {{max}}.",
+		"outOfRange": "Choose a whole number from {{min}} to {{max}}.",
+		"memory": "A spike that goes on is reported again every {{minutes}} minutes. Joins are counted in memory and never stored."
 	},
 	"sticky": {
 		"title": "Sticky messages",

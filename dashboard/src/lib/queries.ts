@@ -19,6 +19,7 @@ export const keys = {
 		birthdays: () => ["guild", id, "birthdays"] as const,
 		cases: (page: number, query: string, action: string) => ["guild", id, "cases", page, query, action] as const,
 		caseSettings: () => ["guild", id, "case-settings"] as const,
+		raid: () => ["guild", id, "raid-protection"] as const,
 		auditLog: () => ["guild", id, "audit-log"] as const,
 		settings: () => ["guild", id, "settings"] as const,
 		verification: () => ["guild", id, "verification"] as const,

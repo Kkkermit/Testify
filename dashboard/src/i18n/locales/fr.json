@@ -126,7 +126,9 @@
 		"birthdays": "Anniversaires",
 		"birthdaysHint": "Une publication pour les anniversaires que les membres partagent",
 		"cases": "Dossiers",
-		"casesHint": "Chaque action de modération, numérotée"
+		"casesHint": "Chaque action de modération, numérotée",
+		"raid": "Protection anti-raid",
+		"raidHint": "Retenir les nouveaux comptes, être prévenu des pics d’arrivées"
 	},
 	"search": {
 		"open": "Rechercher",
@@ -552,6 +554,33 @@
 		"ban": "Bannissement",
 		"softban": "Bannissement temporaire",
 		"unban": "Débannissement"
+	},
+	"raid": {
+		"title": "Protection anti-raid",
+		"subtitle": "Retenez les comptes tout juste créés et soyez prévenu quand les arrivées s’emballent. Rien ici n’expulse ni ne bannit.",
+		"enabled": "Surveiller les nouvelles arrivées",
+		"enabledHint": "S’applique à toute personne qui rejoint à partir de maintenant.",
+		"enabledHintNothing": "Fixez d’abord un âge minimum de compte ou choisissez un salon d’alertes.",
+		"neverKicks": "La protection anti-raid ne fait qu’exclure temporairement et prévenir l’équipe. Expulser et bannir restent la décision d’un modérateur.",
+		"hold": "Nouveaux comptes",
+		"holdBody": "Un compte plus récent que cela est exclu temporairement jusqu’à ce qu’il soit assez ancien, et {{bot}} lui explique pourquoi. Levez la retenue plus tôt avec /unmute.",
+		"minAge": "Âge minimum du compte, en jours",
+		"minAgeHint": "0 ne retient personne. Au plus {{max}}, l’exclusion la plus longue de Discord. Enregistré quand vous quittez le champ.",
+		"cannotHold": "{{bot}} a besoin de la permission Exclure temporairement des membres pour retenir quelqu’un.",
+		"alerts": "Alertes de pics",
+		"alertsBody": "Quand beaucoup de monde arrive en même temps, {{bot}} publie qui est arrivé et l’âge de leurs comptes.",
+		"channel": "Les alertes vont dans",
+		"channelHint": "Chaque compte retenu y est aussi signalé, sauf si un pic est déjà en cours de signalement.",
+		"noAlerts": "Aucune alerte",
+		"ping": "Mentionner lors d’un pic",
+		"pingHint": "La seule chose qu’une alerte mentionne.",
+		"pingNobody": "Personne",
+		"cannotPing": "Ce rôle n’est pas mentionnable, il ne sera donc pas notifié. Rendez-le mentionnable ou donnez à {{bot}} la permission Mentionner tout le monde.",
+		"joins": "Arrivées",
+		"minutes": "En minutes",
+		"range": "De {{min}} à {{max}}.",
+		"outOfRange": "Choisissez un nombre entier de {{min}} à {{max}}.",
+		"memory": "Un pic qui dure est signalé à nouveau toutes les {{minutes}} minutes. Les arrivées sont comptées en mémoire et jamais enregistrées."
 	},
 	"sticky": {
 		"title": "Messages épinglés",

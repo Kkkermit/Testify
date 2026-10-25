@@ -23,6 +23,7 @@ import {
 	Settings,
 	Shield,
 	ShieldCheck,
+	Siren,
 	Smile,
 	Sparkles,
 	Star,
@@ -159,6 +160,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-moderation",
 		wash: "bg-feature-moderation/15",
 		path: (guildId) => `/guilds/${guildId}/cases`,
+	},
+	"raid-protection": {
+		icon: Siren,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/raid-protection`,
 	},
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	automod: {

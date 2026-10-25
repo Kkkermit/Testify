@@ -18,6 +18,7 @@ export * from "./levelling";
 export * from "./moderation";
 export * from "./music";
 export * from "./polls";
+export * from "./raid";
 export * from "./reminders";
 export * from "./roles";
 export * from "./scheduledMessages";

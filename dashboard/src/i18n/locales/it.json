@@ -126,7 +126,9 @@
 		"birthdays": "Compleanni",
 		"birthdaysHint": "Un messaggio per i compleanni che i membri condividono",
 		"cases": "Casi",
-		"casesHint": "Ogni azione di moderazione, numerata"
+		"casesHint": "Ogni azione di moderazione, numerata",
+		"raid": "Protezione anti-raid",
+		"raidHint": "Trattieni gli account nuovi e scopri i picchi di ingressi"
 	},
 	"search": {
 		"open": "Cerca",
@@ -552,6 +554,33 @@
 		"ban": "Ban",
 		"softban": "Ban temporaneo",
 		"unban": "Revoca del ban"
+	},
+	"raid": {
+		"title": "Protezione anti-raid",
+		"subtitle": "Trattieni gli account appena creati e scopri quando gli ingressi aumentano di colpo. Niente qui espelle o banna.",
+		"enabled": "Controlla i nuovi ingressi",
+		"enabledHint": "Vale per chiunque entri da adesso in poi.",
+		"enabledHintNothing": "Prima imposta un’età minima dell’account o scegli un canale per gli avvisi.",
+		"neverKicks": "La protezione anti-raid si limita a mettere in timeout e avvisare lo staff. Espellere e bannare restano una decisione di un moderatore.",
+		"hold": "Account nuovi",
+		"holdBody": "Un account più recente di così va in timeout finché non è abbastanza vecchio, e {{bot}} gli spiega perché. Togli il blocco prima con /unmute.",
+		"minAge": "Età minima dell’account, in giorni",
+		"minAgeHint": "0 non trattiene nessuno. Al massimo {{max}}, il timeout più lungo di Discord. Si salva quando esci dal campo.",
+		"cannotHold": "{{bot}} ha bisogno del permesso Metti i membri in timeout per trattenere qualcuno.",
+		"alerts": "Avvisi di picchi",
+		"alertsBody": "Quando entrano molte persone insieme, {{bot}} pubblica chi è entrato e quanto sono nuovi i loro account.",
+		"channel": "Gli avvisi vanno in",
+		"channelHint": "Ogni account trattenuto viene segnalato anche qui, a meno che non si stia già segnalando un picco.",
+		"noAlerts": "Nessun avviso",
+		"ping": "Menziona durante un picco",
+		"pingHint": "L’unica cosa che un avviso menziona.",
+		"pingNobody": "Nessuno",
+		"cannotPing": "Quel ruolo non è menzionabile, quindi non verrà notificato. Rendilo menzionabile o dai a {{bot}} il permesso Menziona tutti.",
+		"joins": "Ingressi",
+		"minutes": "Entro minuti",
+		"range": "Da {{min}} a {{max}}.",
+		"outOfRange": "Scegli un numero intero da {{min}} a {{max}}.",
+		"memory": "Un picco che continua viene segnalato di nuovo ogni {{minutes}} minuti. Gli ingressi sono contati in memoria e mai salvati."
 	},
 	"sticky": {
 		"title": "Messaggi fissi",

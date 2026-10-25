@@ -7,6 +7,7 @@ import {
 	LayoutGrid,
 	ScrollText,
 	ShieldAlert,
+	Siren,
 	Server,
 	ShieldCheck,
 	Pin,
@@ -190,6 +191,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.cases",
 							icon: Gavel,
 							hintKey: "nav.casesHint",
+						},
+						{
+							to: `/guilds/${guild.id}/raid-protection`,
+							labelKey: "nav.raid",
+							icon: Siren,
+							hintKey: "nav.raidHint",
 						},
 						{
 							to: `/guilds/${guild.id}/changes`,

@@ -10,6 +10,7 @@ import { getCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
+import { getRaidSettings } from "@database/repositories/raidRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
 import { listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
@@ -110,6 +111,19 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		async read(guild) {
 			const channelId = (await getCaseSettings(guild.id))?.logChannelId ?? null;
 			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
+		},
+	},
+	{
+		key: "raid-protection",
+		label: "Raid protection",
+		async read(guild) {
+			const raid = await getRaidSettings(guild.id);
+			const on = raid?.enabled === true;
+			const age = raid?.minAccountAgeDays ?? 0;
+			return {
+				enabled: on,
+				detail: on ? (age > 0 ? `Holding accounts under ${countOf(age, "day")}` : "Watching for spikes") : null,
+			};
 		},
 	},
 	{

@@ -152,6 +152,7 @@ describe("an action that needs more than Manage Server", () => {
 		["choosing the verified role", "PATCH", "/verification", { roleId: BELOW_YOU }],
 		["renaming the bot", "PATCH", "/settings/nickname", { nickname: "Robo" }],
 		["making a role menu", "POST", "/role-menus", { ...MENU, roleIds: [BELOW_YOU] }],
+		["changing raid protection", "PATCH", "/raid-protection", { minAccountAgeDays: 7 }],
 	];
 
 	/** A Manage Server manager kicked, banned and warned from the web, which Discord itself would not have let them do. */

@@ -26,6 +26,7 @@ export * from "./memberDetail";
 export * from "./members";
 export * from "./music";
 export * from "./problems";
+export * from "./raid";
 export * from "./roleMenus";
 export * from "./scheduledMessages";
 export * from "./schemas";

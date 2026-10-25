@@ -126,7 +126,9 @@
 		"birthdays": "Geburtstage",
 		"birthdaysHint": "Ein Beitrag zu den Geburtstagen, die Mitglieder teilen",
 		"cases": "Fälle",
-		"casesHint": "Jede Moderationsaktion, nummeriert"
+		"casesHint": "Jede Moderationsaktion, nummeriert",
+		"raid": "Raid-Schutz",
+		"raidHint": "Neue Konten zurückhalten, bei Beitrittswellen Bescheid bekommen"
 	},
 	"search": {
 		"open": "Suchen",
@@ -551,6 +553,33 @@
 		"ban": "Bann",
 		"softban": "Softbann",
 		"unban": "Entbannung"
+	},
+	"raid": {
+		"title": "Raid-Schutz",
+		"subtitle": "Halte ganz neue Konten zurück und erfahre, wenn plötzlich viele beitreten. Nichts hier kickt oder bannt.",
+		"enabled": "Neue Beitritte beobachten",
+		"enabledHint": "Gilt für alle, die ab jetzt beitreten.",
+		"enabledHintNothing": "Lege zuerst ein Mindestalter fest oder wähle einen Kanal für Warnungen.",
+		"neverKicks": "Der Raid-Schutz schickt nur in ein Timeout und benachrichtigt das Team. Kicken und Bannen bleibt die Entscheidung eines Moderators.",
+		"hold": "Neue Konten",
+		"holdBody": "Ein Konto, das jünger ist, bekommt ein Timeout, bis es alt genug ist, und {{bot}} sagt der Person, warum. Mit /unmute hebst du es früher auf.",
+		"minAge": "Mindestalter des Kontos, in Tagen",
+		"minAgeHint": "0 hält niemanden zurück. Höchstens {{max}}, Discords längstes Timeout. Wird gespeichert, wenn du das Feld verlässt.",
+		"cannotHold": "{{bot}} braucht die Berechtigung „Mitglieder im Timeout“, um jemanden zurückzuhalten.",
+		"alerts": "Warnungen bei Beitrittswellen",
+		"alertsBody": "Wenn viele auf einmal beitreten, postet {{bot}}, wer beigetreten ist und wie neu die Konten sind.",
+		"channel": "Warnungen gehen an",
+		"channelHint": "Jedes zurückgehaltene Konto wird auch hier gemeldet, außer es wird gerade schon eine Welle gemeldet.",
+		"noAlerts": "Keine Warnungen",
+		"ping": "Bei einer Welle erwähnen",
+		"pingHint": "Das Einzige, was eine Warnung jemals erwähnt.",
+		"pingNobody": "Niemanden",
+		"cannotPing": "Diese Rolle ist nicht erwähnbar und wird deshalb nicht angepingt. Mach sie erwähnbar oder gib {{bot}} „Alle erwähnen“.",
+		"joins": "Beitritte",
+		"minutes": "Innerhalb von Minuten",
+		"range": "Von {{min}} bis {{max}}.",
+		"outOfRange": "Wähle eine ganze Zahl von {{min}} bis {{max}}.",
+		"memory": "Eine anhaltende Welle wird alle {{minutes}} Minuten erneut gemeldet. Beitritte werden nur im Speicher gezählt und nie gespeichert."
 	},
 	"sticky": {
 		"title": "Sticky-Nachrichten",
