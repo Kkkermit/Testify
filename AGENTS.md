@@ -1110,11 +1110,14 @@ push and pull_request so a feature branch is verified before a PR exists. Node v
 hardcoded string. The `build` job **verifies the `dist/` artifact**, which is what catches the unrewritten alias
 problem.
 
-`.github/workflows/nightly.yml` — `cron: "0 0 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests`,
+`.github/workflows/nightly.yml` — `cron: "37 3 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests`,
 `npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false alarm, and skipped with a
 notice while the `SNYK_TOKEN` secret is unset, since it can only answer 401 without one), and
 `notify-on-failure` which opens a labelled issue. Permissions default to `contents: read` at the top and are
-escalated to `issues: write` on that one job only.
+escalated to `issues: write` on that one job only. **The schedule sits off the hour on purpose.** At `0 0 * * *` the
+runs started two and a half hours late and then stopped arriving at all for three weeks, while the workflow still
+showed as active: GitHub delays scheduled runs at the start of an hour, when its queue is busiest, and drops them
+under enough load. A schedule only takes effect from `main`, so a change to it waits for the next release.
 
 **Suppressions expire, and `tests/config/suppressions.test.ts` is what makes that true rather than a wish** —
 it fails on an active entry with no reason, no fixing version, a lapsed expiry, or one more than a year out.

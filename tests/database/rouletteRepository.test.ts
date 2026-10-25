@@ -1,5 +1,4 @@
 import { describeWithMongo } from "../helpers/mongo";
-import { RouletteRound } from "@database/models/rouletteRound.schema";
 import {
 	addBets,
 	claimRound,
@@ -37,10 +36,6 @@ async function opened(closesIn?: number): Promise<string> {
 }
 
 describeWithMongo("rouletteRepository", () => {
-	beforeAll(async () => {
-		await RouletteRound.syncIndexes();
-	});
-
 	/** Two Play again presses on one message must not start two rounds that both edit it. */
 	it("opens one round per message while it is taking bets", async () => {
 		const [first, second] = await Promise.all([

@@ -22,10 +22,6 @@ const play = (overrides: Partial<CasinoPlay>): CasinoPlay => ({
 });
 
 describeWithMongo("casinoStatsRepository", () => {
-	beforeAll(async () => {
-		await CasinoStats.syncIndexes();
-	});
-
 	beforeEach(async () => {
 		await CasinoStats.deleteMany({});
 	});
