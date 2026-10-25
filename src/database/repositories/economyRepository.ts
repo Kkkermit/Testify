@@ -332,6 +332,21 @@ export async function setFields(
 	).exec() as Promise<EconomyAccount>;
 }
 
+/** Moves `lastDaily` on only from the value it was read at, so two claims racing cannot both be paid. */
+export async function claimDailySlot(
+	guildId: string,
+	userId: string,
+	readAt: Date | null,
+	at: Date,
+	streak: number,
+): Promise<boolean> {
+	const result = await Economy.updateOne(
+		{ guildId, userId, lastDaily: readAt },
+		{ $set: { lastDaily: at, dailyStreak: streak } },
+	).exec();
+	return result.modifiedCount === 1;
+}
+
 export async function resetGuild(guildId: string): Promise<number> {
 	const result = await Economy.deleteMany({ guildId }).exec();
 	return result.deletedCount;
