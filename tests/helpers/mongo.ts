@@ -25,6 +25,8 @@ export function describeWithMongo(name: string, suite: () => void): void {
 	describe(name, () => {
 		beforeAll(async () => {
 			await mongoose.connect(uri, { dbName: `testify-test-${process.env["JEST_WORKER_ID"] ?? "1"}` });
+			// Mongoose builds indexes in the background, and a test racing two writes needs the unique one already there.
+			await Promise.all(Object.values(mongoose.models).map((model) => model.syncIndexes()));
 		});
 
 		afterAll(async () => {

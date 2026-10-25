@@ -1,5 +1,4 @@
 import { describeWithMongo } from "../helpers/mongo";
-import { CasinoHand } from "@database/models/casinoHand.schema";
 import {
 	advanceHand,
 	attachHandMessage,
@@ -20,11 +19,6 @@ function newHand(game: "blackjack" | "hilo" = "blackjack", expiresAt = new Date(
 }
 
 describeWithMongo("casinoRepository", () => {
-	beforeAll(async () => {
-		// The unique index is what stops two hands; build it before the first test leans on it.
-		await CasinoHand.syncIndexes();
-	});
-
 	/** The unique index is the whole guarantee: a check in code can pass twice before either insert lands. */
 	it("opens one hand of a game per player per server", async () => {
 		const [first, second] = await Promise.all([openHand(newHand()), openHand(newHand())]);
