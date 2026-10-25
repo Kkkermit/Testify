@@ -1,9 +1,9 @@
 import { ECONOMY, ECONOMY_COOLDOWNS } from "@config/constants";
 import {
 	adjustWallet,
+	claimDailySlot,
 	getOrCreateAccount,
 	removeInventoryItem,
-	setFields,
 } from "@database/repositories/economyRepository";
 import { findShopItem } from "@lib/economy/shop.util";
 import { formatDuration, formatNumber } from "@lib/format/format.util";
@@ -18,26 +18,29 @@ export interface DailyResult {
 	streak?: number;
 }
 
+const alreadyClaimed = (readyAt: number, now: number): DailyResult => ({
+	claimed: false,
+	message: `You have already claimed today. Come back in **${formatDuration(readyAt - now)}**.`,
+});
+
 export async function claimDaily(guildId: string, userId: string, now = Date.now()): Promise<DailyResult> {
 	const account = await getOrCreateAccount(guildId, userId);
+	const lastDaily = account.lastDaily ?? null;
 
-	if (account.lastDaily !== null) {
-		const readyAt = account.lastDaily.getTime() + ECONOMY_COOLDOWNS.daily;
-		if (now < readyAt) {
-			return {
-				claimed: false,
-				message: `You have already claimed today. Come back in **${formatDuration(readyAt - now)}**.`,
-			};
-		}
+	if (lastDaily !== null && now < lastDaily.getTime() + ECONOMY_COOLDOWNS.daily) {
+		return alreadyClaimed(lastDaily.getTime() + ECONOMY_COOLDOWNS.daily, now);
 	}
 
 	// A gap of more than two days breaks the streak.
-	const continues = account.lastDaily !== null && now - account.lastDaily.getTime() < ECONOMY_COOLDOWNS.daily * 2;
+	const continues = lastDaily !== null && now - lastDaily.getTime() < ECONOMY_COOLDOWNS.daily * 2;
 	const streak = continues ? Math.min(account.dailyStreak + 1, ECONOMY.dailyStreakCap) : 1;
 	const reward = ECONOMY.dailyBase + streak * ECONOMY.dailyStreakBonus;
 
+	// The claim is taken before the money moves, so a second press that read the same day is the one refused.
+	if (!(await claimDailySlot(guildId, userId, lastDaily, new Date(now), streak))) {
+		return alreadyClaimed(now + ECONOMY_COOLDOWNS.daily, now);
+	}
 	await adjustWallet(guildId, userId, reward);
-	await setFields(guildId, userId, { lastDaily: new Date(now), dailyStreak: streak });
 
 	return {
 		claimed: true,
