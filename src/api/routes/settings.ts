@@ -1,7 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
+import { type ApiBindings, guildIdOf, guildOf } from "@api/context";
 import { badRequest, notInGuild } from "@api/errors";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -50,14 +50,6 @@ export const settings = new Hono<ApiBindings>();
 
 settings.use("*", requireGuild);
 
-function guildIdOf(context: ApiContext): string {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
-
 async function settingsOf(guildId: string): Promise<ServerSettings> {
 	const [prefix, antiLink, autoRoles, counting, voice] = await Promise.all([
 		getPrefixConfig(guildId),
@@ -90,13 +82,6 @@ async function settingsOf(guildId: string): Promise<ServerSettings> {
 }
 
 settings.get("/", async (context) => context.json(await settingsOf(guildIdOf(context))));
-
-function guildOf(context: ApiContext) {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 /** The bot's nickname here; Discord has no per-guild avatar, so the rest is the owner's. */
 settings.get("/nickname", (context) => {

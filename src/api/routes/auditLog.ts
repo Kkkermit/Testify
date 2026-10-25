@@ -1,7 +1,7 @@
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notInGuild } from "@api/errors";
+import { type ApiBindings, guildIdOf } from "@api/context";
+import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { disableAuditLog, getAuditLogConfig, setAuditLogConfig } from "@database/repositories/settingsRepository";
@@ -14,19 +14,9 @@ import {
 	resolveEnabled,
 } from "@testify/shared";
 
-type ApiContext = Context<ApiBindings>;
-
 export const auditLog = new Hono<ApiBindings>();
 
 auditLog.use("*", requireGuild);
-
-function guildIdOf(context: ApiContext): string {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild.id;
-}
 
 /** No record is how the bot stores "off", so it becomes a disabled config a form can still render. */
 async function configOf(guildId: string): Promise<AuditLogConfigResponse> {

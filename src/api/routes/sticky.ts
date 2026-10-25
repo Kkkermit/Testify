@@ -1,8 +1,8 @@
 import { type Guild } from "discord.js";
-import { type Context, Hono } from "hono";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
 import { listSticky, removeSticky, setSticky } from "@database/repositories/settingsRepository";
@@ -12,13 +12,6 @@ import { STICKY_LIMITS, type StickyList, stickyChannelParam, stickyPut } from "@
 export const sticky = new Hono<ApiBindings>();
 
 sticky.use("*", requireGuild);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 async function listFor(guild: Guild): Promise<StickyList> {
 	const entries = await listSticky(guild.id);

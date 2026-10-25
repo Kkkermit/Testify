@@ -1,8 +1,8 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { badRequest, notFound } from "@api/errors";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams } from "@api/validate";
@@ -22,13 +22,6 @@ roleMenus.use("*", requireGuild);
 
 /** Handing out roles is what `/role-menu` asks Manage Roles for, so every write here asks the same. */
 const manageRoles = requirePermission(PermissionFlagsBits.ManageRoles);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 async function menuOf(context: Context<ApiBindings>, guild: Guild): Promise<StoredRoleMenu> {
 	const { menuId } = parseParams(context, roleMenuParams);

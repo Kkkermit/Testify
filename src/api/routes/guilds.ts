@@ -1,7 +1,6 @@
 import { ChannelType, type Guild, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
-import { type Context, Hono } from "hono";
-import { type ApiBindings } from "@api/context";
-import { notInGuild } from "@api/errors";
+import { Hono } from "hono";
+import { type ApiBindings, guildOf } from "@api/context";
 import { requireReach } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { auditLog } from "@api/routes/auditLog";
@@ -97,14 +96,6 @@ guilds.route("/:guildId/warnings", warnings);
 guilds.route("/:guildId/starboard", starboard);
 guilds.route("/:guildId/temp-voice", tempVoice);
 guilds.route("/:guildId/setup", setup);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 guilds.get("/:guildId/overview", async (context) => {
 	const guild = guildOf(context);

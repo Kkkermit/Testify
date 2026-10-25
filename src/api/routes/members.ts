@@ -1,8 +1,8 @@
 import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, forbidden, notFound, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { badRequest, forbidden, notFound } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
@@ -30,13 +30,6 @@ members.use("*", requireGuild);
 
 function actorName(context: Context<ApiBindings>): string {
 	return context.get("session")?.username ?? "a server manager";
-}
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
 }
 
 members.get("/leaderboard", async (context) => {

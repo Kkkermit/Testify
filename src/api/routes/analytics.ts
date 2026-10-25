@@ -95,7 +95,7 @@ analytics.get("/usage", async (context) => {
 
 analytics.get("/guilds/:guildId", async (context) => {
 	const { days } = parseQuery(context, analyticsQuery);
-	const guild = guildOf(context.get("client"), parseParams(context, guildIdParam).guildId);
+	const guild = botGuild(context.get("client"), parseParams(context, guildIdParam).guildId);
 	const memberDays = Math.min(days, RUN_RETENTION_DAYS);
 
 	const [tallies, daily, surfaces, dashboard, members] = await Promise.all([
@@ -126,7 +126,7 @@ analytics.get("/guilds/:guildId", async (context) => {
 analytics.get("/guilds/:guildId/members", async (context) => {
 	const { days, page, perPage, q = "" } = parseQuery(context, guildMembersQuery);
 	const client = context.get("client");
-	const guild = guildOf(client, parseParams(context, guildIdParam).guildId);
+	const guild = botGuild(client, parseParams(context, guildIdParam).guildId);
 
 	const all = (await memberTallies(guild.id, Math.min(days, RUN_RETENTION_DAYS))).filter(
 		(member) => q === "" || warningMatches(member, q),
@@ -144,7 +144,7 @@ analytics.get("/guilds/:guildId/members", async (context) => {
 
 analytics.get("/guilds/:guildId/runs", async (context) => {
 	const { days, page, perPage, userId, command } = parseQuery(context, guildRunsQuery);
-	const guild = guildOf(context.get("client"), parseParams(context, guildIdParam).guildId);
+	const guild = botGuild(context.get("client"), parseParams(context, guildIdParam).guildId);
 
 	const { items, total } = await recentRuns(
 		guild.id,
@@ -225,7 +225,7 @@ function leastUsed(client: TestifyClient, tallies: CommandTally[]): CommandUsage
 		.slice(0, TOP);
 }
 
-function guildOf(client: TestifyClient, guildId: string): Guild {
+function botGuild(client: TestifyClient, guildId: string): Guild {
 	const guild = client.guilds.cache.get(guildId);
 	if (guild === undefined) throw notInGuild();
 	return guild;

@@ -1,8 +1,8 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { type ApiBindings } from "@api/context";
-import { badRequest, notInGuild } from "@api/errors";
+import { type ApiBindings, guildOf } from "@api/context";
+import { badRequest } from "@api/errors";
 import { demandPermission, requireGrantable } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
@@ -14,13 +14,6 @@ import { type VerificationConfigResponse, type VerificationPatch, verificationPa
 export const verification = new Hono<ApiBindings>();
 
 verification.use("*", requireGuild);
-
-function guildOf(context: Context<ApiBindings>): Guild {
-	const guild = context.get("guild");
-	if (guild === undefined) throw notInGuild();
-
-	return guild;
-}
 
 function bodyOf(guild: Guild, stored: VerifyConfig, exists: boolean): VerificationConfigResponse {
 	return {
