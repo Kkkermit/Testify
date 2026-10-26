@@ -3,6 +3,7 @@ export { ChannelPicker, postableChannels } from "@/components/form/ChannelPicker
 export { CheckList } from "@/components/form/CheckList";
 export { CHECK_ROW, FIELD, LABEL, SELECT } from "@/components/form/fieldStyles";
 export { Field } from "@/components/form/Field";
+export { RadioCard } from "@/components/form/RadioCard";
 export { RoleChecklist } from "@/components/form/RoleChecklist";
 export { SavingIndicator, savingStateOf, type SavingState } from "@/components/form/SavingIndicator";
 export { SearchField } from "@/components/form/SearchField";

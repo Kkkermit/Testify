@@ -18,6 +18,7 @@ import {
 import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
+import { OpenTicketsCard } from "@/features/tickets/OpenTicketsCard";
 import { type Draft, draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
 import { useDisableTickets, useSaveTickets, useTickets } from "@/features/tickets/useTickets";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -92,6 +93,8 @@ export function TicketsPage(): React.JSX.Element {
 					{t("tickets.openNow", { count: settings.openTickets })}
 				</p>
 			</Card>
+
+			{settings.enabled && <OpenTicketsCard guildId={guildId} />}
 
 			<Card className="flex flex-col gap-4">
 				<div>

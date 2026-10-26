@@ -1,3 +1,4 @@
+export * from "./memberRoles.util";
 export * from "./roleMenuActions.util";
 export * from "./roleMenuPanel.util";
 export * from "./roleReach.util";

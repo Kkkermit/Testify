@@ -12,6 +12,7 @@ import {
 	getTicketSetup,
 	saveTicketSetup,
 } from "@database/repositories/ticketRepository";
+import { closeTicketFrom, readOpenTickets } from "@lib/tickets/openTickets.util";
 import { type TicketSettings } from "@testify/shared";
 
 jest.mock("@database/repositories/ticketRepository", () => ({
@@ -21,6 +22,10 @@ jest.mock("@database/repositories/ticketRepository", () => ({
 	saveTicketSetup: jest.fn(() => Promise.resolve({})),
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
+jest.mock("@lib/tickets/openTickets.util", () => ({
+	closeTicketFrom: jest.fn(() => Promise.resolve()),
+	readOpenTickets: jest.fn(() => Promise.resolve({ tickets: [], canClose: true })),
+}));
 
 const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
@@ -67,6 +72,7 @@ function app(): Hono<ApiBindings> {
 		channels: { fetch: jest.fn().mockResolvedValue({ isSendable: () => true, send }) },
 	};
 	const client = {
+		users: { fetch: jest.fn((id: string) => Promise.resolve({ id, username: "someone" })) },
 		guilds: { cache: new Collection<string, unknown>([[GUILD, guild]]) },
 		isOwner: (id: string) => id === OWNER,
 		logger: { error: jest.fn() },
@@ -208,5 +214,34 @@ describe("DELETE /tickets", () => {
 		await request("DELETE");
 
 		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "tickets.disable" }));
+	});
+});
+
+describe("open tickets", () => {
+	it("lists them for the person signed in", async () => {
+		const response = await app().request(`/guilds/${GUILD}/tickets/open`);
+
+		expect(response.status).toBe(200);
+		expect(readOpenTickets).toHaveBeenCalled();
+	});
+
+	/** The transcript names whoever closed it, so that has to be the person signed in, not the bot. */
+	it("closes one as the person signed in, and writes it down", async () => {
+		const response = await app().request(`/guilds/${GUILD}/tickets/open/400000000000000001/close`, { method: "POST" });
+
+		expect(response.status).toBe(200);
+		expect(closeTicketFrom).toHaveBeenCalledWith(
+			expect.anything(),
+			expect.objectContaining({ id: GUILD }),
+			"400000000000000001",
+			{ id: OWNER, username: "someone" },
+			undefined,
+		);
+		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "tickets.close" }));
+	});
+
+	it("refuses a channel id that is not one", async () => {
+		expect((await app().request(`/guilds/${GUILD}/tickets/open/nope/close`, { method: "POST" })).status).toBe(400);
+		expect(closeTicketFrom).not.toHaveBeenCalled();
 	});
 });

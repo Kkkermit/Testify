@@ -6,6 +6,8 @@ import {
 	type LevelBody,
 	type MemberDetail,
 	type MoneyBody,
+	type NicknameBody,
+	type TimeoutBody,
 	type WarningAdded,
 } from "@testify/shared";
 import {
@@ -13,8 +15,11 @@ import {
 	useChangeMoney,
 	useKick,
 	useLiftSoftban,
+	useLiftTimeout,
 	useMemberDetail,
+	useRename,
 	useSetLevel,
+	useTimeout,
 } from "@/features/members/useMemberDetail";
 import { useAddWarning, useClearWarnings, useEditWarning, useRemoveWarning } from "@/features/warnings/useWarnings";
 
@@ -29,6 +34,9 @@ interface MemberActions {
 	lift: UseMutationResult<MemberDetail, Error, void>;
 	kick: UseMutationResult<MemberDetail, Error, KickBody>;
 	ban: UseMutationResult<MemberDetail, Error, BanBody>;
+	timeout: UseMutationResult<MemberDetail, Error, TimeoutBody>;
+	liftTimeout: UseMutationResult<MemberDetail, Error, void>;
+	rename: UseMutationResult<MemberDetail, Error, NicknameBody>;
 	/** Any write in flight disables every control, so two cannot race on one member. */
 	busy: boolean;
 	/** The first failure of whichever write produced one, so the page shows one message rather than several. */
@@ -46,8 +54,11 @@ export function useMemberActions(guildId: string, userId: string): MemberActions
 	const lift = useLiftSoftban(guildId, userId);
 	const kick = useKick(guildId, userId);
 	const ban = useBan(guildId, userId);
+	const timeout = useTimeout(guildId, userId);
+	const liftTimeout = useLiftTimeout(guildId, userId);
+	const rename = useRename(guildId, userId);
 
-	const writes = [warn, edit, remove, clear, money, level, lift, kick, ban];
+	const writes = [warn, edit, remove, clear, money, level, lift, kick, ban, timeout, liftTimeout, rename];
 
 	return {
 		member,
@@ -60,6 +71,9 @@ export function useMemberActions(guildId: string, userId: string): MemberActions
 		lift,
 		kick,
 		ban,
+		timeout,
+		liftTimeout,
+		rename,
 		busy: writes.some((write) => write.isPending),
 		failure: writes.map((write) => write.error).find((error) => error !== null) ?? null,
 	};

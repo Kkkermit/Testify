@@ -28,7 +28,7 @@ function renderPage(inGuild = true) {
 const commands = catalogue.commands;
 
 /** A command with no screen, now that the fixture's own `/ban` has one on the member page. */
-const discordOnly = { ...commands[0]!, name: "slowmode", aliases: [] };
+const discordOnly = { ...commands[0]!, name: "clear", aliases: [] };
 
 describe("filterCommands", () => {
 	it("finds a command by name", () => {

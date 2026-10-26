@@ -5,6 +5,7 @@ import {
 	autoResponderList,
 	botStatsSettings,
 	memberCounts,
+	openTickets,
 	scheduledMessageList,
 	stickyList,
 	tempVoiceSettings,
@@ -26,12 +27,15 @@ import { giveawayList, musicSettings } from "@/test/fixtures/entertainment";
 import {
 	auditLogConfig,
 	automodRules,
+	banPage,
 	casePage,
 	caseSettings,
+	channelTools,
 	raidOverview,
 	guildWarnings,
 	memberDetail,
 	memberMatches,
+	memberRoles,
 	serverChanges,
 	warnLadder,
 	warningAdded,
@@ -86,6 +90,8 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/cases/settings", () => HttpResponse.json(caseSettings)),
 	http.get("/api/guilds/:guildId/cases", () => HttpResponse.json(casePage)),
 	http.get("/api/guilds/:guildId/raid-protection", () => HttpResponse.json(raidOverview)),
+	http.get("/api/guilds/:guildId/bans", () => HttpResponse.json(banPage)),
+	http.get("/api/guilds/:guildId/channel-tools", () => HttpResponse.json(channelTools)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),
@@ -108,6 +114,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
 	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.get("/api/guilds/:guildId/tickets/open", () => HttpResponse.json(openTickets)),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
 		const query = new URL(request.url).searchParams;
 		return HttpResponse.json({
@@ -120,6 +127,7 @@ export const handlers = [
 	// Before `:userId`, which MSW would otherwise match first, exactly as the real router would.
 	http.get("/api/guilds/:guildId/members/search", () => HttpResponse.json(memberMatches)),
 	http.get("/api/guilds/:guildId/members/:userId", () => HttpResponse.json(memberDetail)),
+	http.get("/api/guilds/:guildId/members/:userId/roles", () => HttpResponse.json(memberRoles)),
 	http.post("/api/guilds/:guildId/members/:userId/kick", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.post("/api/guilds/:guildId/members/:userId/ban", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.get("/api/guilds/:guildId/changes", () => HttpResponse.json(serverChanges)),

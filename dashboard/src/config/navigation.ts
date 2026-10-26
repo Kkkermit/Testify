@@ -1,5 +1,6 @@
 import {
 	Activity,
+	Ban,
 	Cake,
 	CalendarClock,
 	ChartColumn,
@@ -21,11 +22,13 @@ import {
 	Users,
 	UserPlus,
 	MessageSquareReply,
+	Megaphone,
 	MessagesSquare,
 	Music,
 	LifeBuoy,
 	Lightbulb,
 	ListChecks,
+	Lock,
 	Ticket,
 	type LucideIcon,
 	Gauge,
@@ -193,6 +196,18 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							hintKey: "nav.casesHint",
 						},
 						{
+							to: `/guilds/${guild.id}/bans`,
+							labelKey: "nav.bans",
+							icon: Ban,
+							hintKey: "nav.bansHint",
+						},
+						{
+							to: `/guilds/${guild.id}/channel-tools`,
+							labelKey: "nav.channelTools",
+							icon: Lock,
+							hintKey: "nav.channelToolsHint",
+						},
+						{
 							to: `/guilds/${guild.id}/raid-protection`,
 							labelKey: "nav.raid",
 							icon: Siren,
@@ -269,6 +284,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.scheduled",
 							icon: CalendarClock,
 							hintKey: "nav.scheduledHint",
+						},
+						{
+							to: `/guilds/${guild.id}/announcements`,
+							labelKey: "nav.announcements",
+							icon: Megaphone,
+							hintKey: "nav.announcementsHint",
 						},
 						{
 							to: `/guilds/${guild.id}/tickets`,

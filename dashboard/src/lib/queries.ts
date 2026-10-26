@@ -20,6 +20,9 @@ export const keys = {
 		cases: (page: number, query: string, action: string) => ["guild", id, "cases", page, query, action] as const,
 		caseSettings: () => ["guild", id, "case-settings"] as const,
 		raid: () => ["guild", id, "raid-protection"] as const,
+		bans: () => ["guild", id, "bans"] as const,
+		channelTools: () => ["guild", id, "channel-tools"] as const,
+		banPage: (page: number, query: string) => ["guild", id, "bans", page, query] as const,
 		auditLog: () => ["guild", id, "audit-log"] as const,
 		settings: () => ["guild", id, "settings"] as const,
 		verification: () => ["guild", id, "verification"] as const,
@@ -33,6 +36,7 @@ export const keys = {
 		automod: () => ["guild", id, "automod"] as const,
 		treasure: () => ["guild", id, "treasure"] as const,
 		tickets: () => ["guild", id, "tickets"] as const,
+		openTickets: () => ["guild", id, "open-tickets"] as const,
 		lottery: () => ["guild", id, "lottery"] as const,
 		giveaways: () => ["guild", id, "giveaways"] as const,
 		nickname: () => ["guild", id, "nickname"] as const,
@@ -56,6 +60,7 @@ export const keys = {
 		board: (board: string, page: number, sort: string, scope: string) =>
 			["guild", id, "board", board, page, sort, scope] as const,
 		member: (userId: string) => ["guild", id, "member", userId] as const,
+		memberRoles: (userId: string) => ["guild", id, "member-roles", userId] as const,
 	}),
 	owner: {
 		access: () => ["owner", "access"] as const,

@@ -1,10 +1,11 @@
 import { Collection, type Guild, type GuildMember } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
-import { ApiProblem, problemBody } from "@api/errors";
+import { ApiProblem, badRequest, problemBody } from "@api/errors";
 import { members } from "@api/routes/members";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { adjustBank, adjustWallet, findAccount, getEconomyRank } from "@database/repositories/economyRepository";
 import { addXp, getRank, getUserLevel, setLevel } from "@database/repositories/levelRepository";
@@ -64,6 +65,14 @@ const levelSet = jest.mocked(setLevel);
 const xpAdded = jest.mocked(addXp);
 const rewarded = jest.mocked(applyLevelRewards);
 const softbanLifted = jest.mocked(deactivateSoftban);
+const timedOut = jest.fn((_ms: number | null, _reason: string) => Promise.resolve());
+const renamed = jest.fn((_nickname: string | null, _reason: string) => Promise.resolve());
+const rolesAdded = jest.fn((_ids: string[], _reason: string) => Promise.resolve());
+const rolesRemoved = jest.fn((_ids: string[], _reason: string) => Promise.resolve());
+
+const BELOW = "300000000000000003";
+const HELD = "300000000000000004";
+const ABOVE = "300000000000000005";
 
 interface Scene {
 	actorPosition?: number;
@@ -71,6 +80,8 @@ interface Scene {
 	botPosition?: number;
 	guildOwnerId?: string;
 	targetMissing?: boolean;
+	timedOutUntil?: number | null;
+	manageable?: boolean;
 }
 
 function app(options: Scene = {}): Hono<ApiBindings> {
@@ -80,6 +91,8 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 		botPosition = 20,
 		guildOwnerId = "700000000000000001",
 		targetMissing = false,
+		timedOutUntil = null,
+		manageable = true,
 	} = options;
 
 	const member = (id: string, position: number, name: string): GuildMember =>
@@ -89,7 +102,13 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 			user: { id, username: name, bot: false, send: () => Promise.resolve() },
 			kickable: true,
 			bannable: true,
+			moderatable: true,
+			manageable,
+			nickname: null,
+			communicationDisabledUntilTimestamp: timedOutUntil,
 			kick: kicked,
+			timeout: timedOut,
+			setNickname: renamed,
 			joinedAt: new Date("2026-01-04T00:00:00.000Z"),
 			roles: { highest: { position }, cache: new Collection() },
 			// `requireGuild` reads this before any handler runs, so a member without it never reaches one.
@@ -108,6 +127,26 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 	const target = member(TARGET, targetPosition, "kate");
 	const actor = member(ACTOR, actorPosition, "someone");
 
+	(target as unknown as { roles: unknown }).roles = {
+		highest: { position: targetPosition },
+		cache: new Collection([[HELD, { id: HELD }]]),
+		add: jest.fn((ids: string[], reason: string) => rolesAdded(ids, reason).then(() => target)),
+		remove: jest.fn((ids: string[], reason: string) => rolesRemoved(ids, reason).then(() => target)),
+	};
+	const role = (id: string, name: string, position: number, managed = false) => [
+		id,
+		{ id, name, position, managed, hexColor: "#000000" },
+	];
+	(guild as { roles: unknown }).roles = {
+		cache: new Collection([
+			role(GUILD, "@everyone", 0),
+			role(BELOW, "Regulars", 3),
+			role(HELD, "Artists", 4),
+			role(ABOVE, "Admins", 15),
+			role("300000000000000006", "Bot role", 2, true),
+		] as never),
+	};
+
 	const lookalikeBot = { ...member("100000000000000003", 1, "kat-bot"), user: { username: "kat-bot", bot: true } };
 	searched.mockResolvedValue(
 		new Collection<string, unknown>([
@@ -121,7 +160,8 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 		cache: new Collection(),
 		ban: banned,
 		search: searched,
-		fetch: jest.fn((id: string) => {
+		fetch: jest.fn((query: string | { user: string }) => {
+			const id = typeof query === "string" ? query : query.user;
 			if (id === ACTOR) return Promise.resolve(actor);
 			if (id === TARGET && !targetMissing) return Promise.resolve(target);
 			return Promise.reject(new Error("Unknown Member"));
@@ -148,7 +188,13 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 	});
 	instance.route("/guilds/:guildId/members", members);
 	instance.onError((error) => {
-		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
+		// The same mapping the real app's boundary makes in `server.ts`.
+		const problem =
+			error instanceof ApiProblem
+				? error
+				: error instanceof UserFacingError
+					? badRequest(error.message)
+					: new ApiProblem(500, "internal", "boom");
 		return Response.json(problemBody(problem), { status: problem.status });
 	});
 
@@ -483,5 +529,96 @@ describe("DELETE /members/:userId/softban", () => {
 	it("says so when there is no active softban", async () => {
 		expect((await request("DELETE", "/softban")).status).toBe(404);
 		expect(softbanLifted).not.toHaveBeenCalled();
+	});
+});
+
+describe("timing a member out", () => {
+	/** A timeout is a sanction like a kick, so a stray click must not be enough to send one. */
+	it("asks for their username, then times them out as a case under the manager's name", async () => {
+		const refused = await request("POST", "/timeout", { minutes: 60, reason: "Spam", confirm: "someone else" });
+		expect(refused.status).toBe(400);
+		expect(timedOut).not.toHaveBeenCalled();
+
+		const response = await request("POST", "/timeout", { minutes: 60, reason: "Spam", confirm: "kate" });
+
+		expect(response.status).toBe(200);
+		expect(timedOut).toHaveBeenCalledWith(3_600_000, "someone: Spam");
+		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.timeout" }));
+	});
+
+	it("takes only the lengths the form offers, up to Discord's 28 days", async () => {
+		expect((await request("POST", "/timeout", { minutes: 7, reason: "Spam", confirm: "kate" })).status).toBe(400);
+		expect((await request("POST", "/timeout", { minutes: 40_320, reason: "Spam", confirm: "kate" })).status).toBe(200);
+	});
+
+	it("refuses somebody who outranks the manager", async () => {
+		const response = await request(
+			"POST",
+			"/timeout",
+			{ minutes: 60, reason: "Spam", confirm: "kate" },
+			{ targetPosition: 15 },
+		);
+
+		expect(response.status).toBe(403);
+		expect(timedOut).not.toHaveBeenCalled();
+	});
+
+	it("lifts a timeout that is running, and says so when none is", async () => {
+		expect((await request("DELETE", "/timeout", undefined, { timedOutUntil: Date.now() + 60_000 })).status).toBe(200);
+		expect(timedOut).toHaveBeenCalledWith(null, "someone: Lifted from the dashboard");
+
+		timedOut.mockClear();
+		expect((await request("DELETE", "/timeout")).status).toBe(400);
+		expect(timedOut).not.toHaveBeenCalled();
+	});
+});
+
+describe("renaming a member", () => {
+	it("sets and clears a nickname", async () => {
+		expect((await request("PATCH", "/nickname", { nickname: "Kate the Great" })).status).toBe(200);
+		expect(renamed).toHaveBeenCalledWith("Kate the Great", "Changed by someone");
+
+		expect((await request("PATCH", "/nickname", { nickname: null })).status).toBe(200);
+		expect(renamed).toHaveBeenLastCalledWith(null, "Changed by someone");
+	});
+
+	it("refuses a name past Discord's 32 characters, and a member the bot cannot rename", async () => {
+		expect((await request("PATCH", "/nickname", { nickname: "x".repeat(33) })).status).toBe(400);
+		expect((await request("PATCH", "/nickname", { nickname: "Kate" }, { manageable: false })).status).toBe(403);
+		expect(renamed).not.toHaveBeenCalled();
+	});
+});
+
+describe("a member's roles", () => {
+	/** The manager sits at position 10: Admins at 15 is theirs to see in Discord, not to hand out from here. */
+	it("offers only the roles the manager could hand out, with the ones held ticked", async () => {
+		const body = (await (await request("GET", "/roles")).json()) as {
+			roles: { id: string; held: boolean }[];
+		};
+
+		expect(body.roles).toEqual([
+			expect.objectContaining({ id: HELD, held: true }),
+			expect.objectContaining({ id: BELOW, held: false }),
+		]);
+	});
+
+	it("adds and removes only within reach", async () => {
+		const response = await request("PUT", "/roles", { roleIds: [BELOW] });
+
+		expect(response.status).toBe(200);
+		expect(rolesAdded).toHaveBeenCalledWith([BELOW], "Added by someone");
+		expect(rolesRemoved).toHaveBeenCalledWith([HELD], "Removed by someone");
+		expect(audited).toHaveBeenCalledWith(
+			expect.objectContaining({ action: "member.roles", after: { added: [BELOW], removed: [HELD] } }),
+		);
+	});
+
+	it("refuses a role above the manager's own, before anything changes", async () => {
+		const response = await request("PUT", "/roles", { roleIds: [HELD, ABOVE] });
+
+		expect(response.status).toBe(400);
+		expect(JSON.stringify(await response.json())).toContain("at or above your own highest role");
+		expect(rolesAdded).not.toHaveBeenCalled();
+		expect(rolesRemoved).not.toHaveBeenCalled();
 	});
 });

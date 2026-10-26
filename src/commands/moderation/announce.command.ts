@@ -1,7 +1,8 @@
 import { PermissionFlagsBits } from "discord.js";
-import { defineCommand, textChannelOption } from "@core/command";
+import { asMember, defineCommand, inGuild, textChannelOption } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { COLOUR_CHOICES, embed, reply, resolveColour, successEmbed } from "@lib/discord";
+import { COLOUR_CHOICES, reply, resolveColour, successEmbed } from "@lib/discord";
+import { announcementMessage, mentionProblem } from "@lib/moderation";
 
 export default defineCommand({
 	name: "announce",
@@ -30,20 +31,20 @@ export default defineCommand({
 			throw new UserFacingError("Pick a text channel I can send messages in.");
 		}
 
-		const announcement = embed({
-			colour: resolveColour(interaction.options.getString("color")),
-			title: interaction.options.getString("title") ?? "Announcement",
-			description: interaction.options.getString("description") ?? "*No description provided.*",
-			footer: `Posted by ${interaction.user.username}`,
-			footerIcon: interaction.user.displayAvatarURL(),
-		});
+		const mentions = (interaction.options.getBoolean("ping-everyone") ?? false) ? "everyone" : "none";
+		const problem = mentionProblem(channel, inGuild(interaction), asMember(interaction), mentions);
+		if (problem !== null) throw new UserFacingError(problem);
 
-		const pingEveryone = interaction.options.getBoolean("ping-everyone") ?? false;
-
-		await channel.send({
-			embeds: [announcement],
-			...(pingEveryone ? { content: "@everyone", allowedMentions: { parse: ["everyone"] as const } } : {}),
-		});
+		await channel.send(
+			announcementMessage({
+				style: "embed",
+				title: interaction.options.getString("title") ?? undefined,
+				message: interaction.options.getString("description") ?? "*No description provided.*",
+				colour: resolveColour(interaction.options.getString("color")),
+				mentions,
+				by: { name: interaction.user.username, avatarUrl: interaction.user.displayAvatarURL() },
+			}),
+		);
 
 		await reply(interaction, {
 			embeds: [successEmbed(`Announcement posted in ${channel}.`)],
