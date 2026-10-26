@@ -3,8 +3,10 @@ import {
 	countWarnings,
 	getWarnLadder,
 	listGuildWarnings,
+	setWarningCase,
 	setWarningStep,
 } from "@database/repositories/moderationRepository";
+import { recordCase } from "@lib/moderation/caseActions.util";
 import {
 	applyWarnStep,
 	issueWarning,
@@ -21,8 +23,10 @@ jest.mock("@database/repositories/moderationRepository", () => ({
 	getWarnLadder: jest.fn(() => Promise.resolve(null)),
 	listGuildWarnings: jest.fn(() => Promise.resolve([])),
 	saveWarnLadder: jest.fn(),
+	setWarningCase: jest.fn(() => Promise.resolve()),
 	setWarningStep: jest.fn(() => Promise.resolve()),
 }));
+jest.mock("@lib/moderation/caseActions.util", () => ({ recordCase: jest.fn(() => Promise.resolve({ number: 7 })) }));
 
 const GUILD = "900000000000000001";
 const USER = "100000000000000002";
@@ -177,6 +181,14 @@ describe("issueWarning", () => {
 			reason: "x",
 		});
 		expect(fourth.guild.members.ban).toHaveBeenCalledWith(USER, expect.anything());
+		// Each warning is a case, and so is the kick or ban it led to.
+		expect(jest.mocked(recordCase).mock.calls.map(([, input]) => input.action)).toEqual([
+			"warn",
+			"kick",
+			"warn",
+			"ban",
+		]);
+		expect(jest.mocked(recordCase).mock.calls[1]?.[1].reason).toBe("Warning 3: x");
 	});
 
 	/** A kicked or banned member can no longer be messaged, so the DM has to leave first. */
@@ -230,6 +242,33 @@ describe("issueWarning", () => {
 
 		expect(member?.kick).not.toHaveBeenCalled();
 		expect(issued.outcome.problem).toBe("outranked");
+		// A step that never happened is no case of its own.
+		expect(jest.mocked(recordCase).mock.calls.map(([, input]) => input.action)).toEqual(["warn"]);
+	});
+
+	/** The warning carries its case number, so the case list does not read it again as an earlier warning. */
+	it("ties the warning to its case", async () => {
+		const { user, member, guild } = world();
+
+		const issued = await issueWarning({
+			guild: guild as never,
+			user: user as never,
+			member: member as never,
+			moderator,
+			reason: "x",
+		});
+
+		expect(setWarningCase).toHaveBeenCalledWith(GUILD, USER, issued.entry.warnId, 7);
+		expect(issued.entry.caseNumber).toBe(7);
+	});
+
+	it("still warns when the case could not be recorded", async () => {
+		jest.mocked(recordCase).mockResolvedValueOnce(null);
+		const { user, member, guild } = world();
+
+		await issueWarning({ guild: guild as never, user: user as never, member: member as never, moderator, reason: "x" });
+
+		expect(setWarningCase).not.toHaveBeenCalled();
 	});
 });
 

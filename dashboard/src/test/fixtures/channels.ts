@@ -1,6 +1,9 @@
 import {
+	type AutoResponderList,
+	type ScheduledMessageList,
 	type BotStatsSettings,
 	type MemberCounts,
+	type OpenTicketList,
 	type StickyList,
 	type TempVoiceSettings,
 	type TicketSettings,
@@ -18,6 +21,23 @@ export const ticketSettings: TicketSettings = {
 	buttonLabel: "Create ticket",
 	posted: true,
 	openTickets: 3,
+};
+
+export const openTickets: OpenTicketList = {
+	canClose: true,
+	tickets: [
+		{
+			channelId: "400000000000000020",
+			channelName: "ticket-a1b2c3",
+			ticketId: "a1b2c3",
+			ownerId: "100000000000000002",
+			ownerName: "kate",
+			claimedById: "100000000000000001",
+			claimedByName: "someone",
+			isLocked: false,
+			openedAt: "2026-10-24T09:00:00.000Z",
+		},
+	],
 };
 
 export const botStatsSettings: BotStatsSettings = { channelId: null };
@@ -39,4 +59,26 @@ export const tempVoiceSettings: TempVoiceSettings = {
 	userLimit: 0,
 	canManage: true,
 	active: 2,
+};
+
+export const autoResponderList: AutoResponderList = {
+	limit: 25,
+	responders: [
+		{ id: "a00000000000000000000001", trigger: "rules", match: "word", reply: "Read the rules in #rules." },
+		{ id: "a00000000000000000000002", trigger: "how do i get roles", match: "starts", reply: "Pick them in #roles." },
+	],
+};
+
+export const scheduledMessageList: ScheduledMessageList = {
+	limit: 10,
+	messages: [
+		{
+			id: "b00000000000000000000001",
+			channelId: "400000000000000001",
+			message: "Game night starts in an hour.",
+			repeat: "weekly",
+			nextAt: "2099-10-30T18:00:00.000Z",
+			canSend: true,
+		},
+	],
 };

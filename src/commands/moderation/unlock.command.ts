@@ -1,8 +1,7 @@
 import { PermissionFlagsBits } from "discord.js";
 import { channelOption, defineCommand, inGuild, inTextChannel } from "@core/command";
-import { UserFacingError } from "@core/errors";
 import { embed, reply } from "@lib/discord";
-import { DEFAULT_REASON } from "@lib/moderation";
+import { DEFAULT_REASON, setLocked } from "@lib/moderation";
 
 export default defineCommand({
 	name: "unlock",
@@ -25,13 +24,7 @@ export default defineCommand({
 		const channel = channelOption(interaction, "channel") ?? inTextChannel(interaction);
 		const reason = interaction.options.getString("reason") ?? DEFAULT_REASON;
 
-		if (!("permissionOverwrites" in channel)) throw new UserFacingError("That channel cannot be unlocked.");
-
-		await channel.permissionOverwrites.edit(
-			guild.roles.everyone,
-			{ SendMessages: null },
-			{ reason: `${interaction.user.username}: ${reason}` },
-		);
+		await setLocked(channel, guild, false, `${interaction.user.username}: ${reason}`);
 
 		await reply(interaction, {
 			embeds: [

@@ -6,6 +6,7 @@ import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { countMove } from "@lib/info";
 import { writeAuditLog } from "@lib/moderation";
+import { guardJoin } from "@lib/raid";
 import { syncVoiceCounters } from "@lib/settings";
 import { greetingFor, normaliseWelcome } from "@lib/welcome";
 
@@ -13,6 +14,7 @@ export default defineEvent({
 	name: Events.GuildMemberAdd,
 	async run(client: TestifyClient, member: GuildMember) {
 		countMove(client, member, "join");
+		await guardJoin(client, member);
 
 		await writeAuditLog(client, member.guild, {
 			event: "memberJoin",

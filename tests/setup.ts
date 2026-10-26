@@ -10,8 +10,11 @@ beforeEach(() => {
 
 	reset("@config/env", "resetEnv");
 	reset("@core/checks", "clearCooldowns");
+	reset("@database/repositories/afkRepository", "clearAfkCache");
+	reset("@database/repositories/autoResponderRepository", "clearAutoResponderCache");
 	reset("@database/repositories/blacklistRepository", "clearBlacklistCache");
 	reset("@database/repositories/prefixRepository", "clearPrefixCache");
+	reset("@database/repositories/raidRepository", "clearRaidCache");
 });
 
 jest.setTimeout(20_000);

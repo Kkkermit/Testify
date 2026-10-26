@@ -22,6 +22,11 @@ export async function countOpenTickets(guildId: string): Promise<number> {
 	return Ticket.countDocuments({ guildId }).exec();
 }
 
+/** Oldest first, which is the order a queue is worked through. */
+export async function listOpenTickets(guildId: string): Promise<TicketRecord[]> {
+	return Ticket.find({ guildId }).sort({ createdAt: 1 }).lean<TicketRecord[]>().exec();
+}
+
 export async function findOpenTicket(guildId: string, ownerId: string): Promise<TicketRecord | null> {
 	return Ticket.findOne({ guildId, ownerId }).lean<TicketRecord>().exec();
 }

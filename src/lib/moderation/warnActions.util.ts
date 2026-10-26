@@ -7,9 +7,11 @@ import {
 	getWarnLadder,
 	listGuildWarnings,
 	saveWarnLadder,
+	setWarningCase,
 	setWarningStep,
 } from "@database/repositories/moderationRepository";
 import { formatDurationLong } from "@lib/format/format.util";
+import { recordCase } from "@lib/moderation/caseActions.util";
 import { dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 import {
 	type GuildWarning,
@@ -136,6 +138,12 @@ export async function issueWarning(options: {
 	const { guild, user, member, moderator, reason } = options;
 
 	const entry = await addWarning(guild.id, user.id, user.username, moderator, reason);
+	const byModerator = { id: moderator.id, name: moderator.tag };
+	const recorded = await recordCase(guild, { action: "warn", user, moderator: byModerator, reason });
+	if (recorded !== null && recorded.number !== null) {
+		await setWarningCase(guild.id, user.id, entry.warnId, recorded.number);
+		entry.caseNumber = recorded.number;
+	}
 	const [count, ladder] = await Promise.all([countWarnings(guild.id, user.id), readWarnLadder(guild.id)]);
 	const step = stepFor(ladder.steps, count);
 
@@ -168,6 +176,16 @@ export async function issueWarning(options: {
 		step,
 		`${moderator.tag}: ${reason} (warning ${String(count)})`,
 	);
+
+	if (step !== null && step.action !== "warn" && problem === null) {
+		await recordCase(guild, {
+			action: step.action,
+			user,
+			moderator: byModerator,
+			reason: `Warning ${String(count)}: ${reason}`,
+			durationMs: step.action === "timeout" ? step.minutes * 60_000 : null,
+		});
+	}
 
 	// A plain warning with no punishments set has nothing to record, and reads back as plain without it.
 	if (step !== null) {

@@ -1,9 +1,11 @@
 import { Events, type GuildMember, type PartialGuildMember } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { defineEvent } from "@core/event";
+import { forgetLeaver } from "@lib/birthdays";
 import { countMove } from "@lib/info";
 import { writeAuditLog } from "@lib/moderation";
 import { syncVoiceCounters } from "@lib/settings";
+import { sendGoodbye } from "@lib/welcome";
 
 export default defineEvent({
 	name: Events.GuildMemberRemove,
@@ -21,6 +23,8 @@ export default defineEvent({
 			thumbnail: member.user.displayAvatarURL(),
 		});
 
+		await sendGoodbye(client, member);
+		await forgetLeaver(member.guild.id, member.id);
 		await syncVoiceCounters(client, member.guild);
 	},
 });

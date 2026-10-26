@@ -437,3 +437,119 @@ describe("the member detail page", () => {
 		await expectNoViolations(container);
 	});
 });
+
+describe("timeouts, nicknames and roles", () => {
+	/** A timeout is a sanction like a kick, so it waits for the username before anything is sent. */
+	it("asks for the username before a timeout, and sends the length and reason", async () => {
+		const user = userEvent.setup();
+		const captured: { body: unknown } = { body: undefined };
+		server.use(
+			http.post(`/api/guilds/${GUILD}/members/${USER}/timeout`, async ({ request }) => {
+				captured.body = await request.json();
+				return HttpResponse.json(memberDetail);
+			}),
+		);
+		renderPage();
+
+		await user.click(await screen.findByRole("button", { name: "Time out" }));
+		await user.selectOptions(screen.getByLabelText("For how long"), "1440");
+		await user.type(screen.getByLabelText("Reason"), "Spam");
+		expect(screen.getByRole("button", { name: "Time them out" })).toBeDisabled();
+
+		await user.type(screen.getByLabelText(/type kate to confirm/i), "kate");
+		await user.click(screen.getByRole("button", { name: "Time them out" }));
+
+		await waitFor(() => {
+			expect(captured.body).toEqual({ minutes: 1440, reason: "Spam", confirm: "kate" });
+		});
+	});
+
+	it("shows a running timeout and lifts it with one press", async () => {
+		const user = userEvent.setup();
+		let lifted = false;
+		serve({ timedOutUntil: "2026-11-01T12:00:00.000Z" });
+		server.use(
+			http.delete(`/api/guilds/${GUILD}/members/${USER}/timeout`, () => {
+				lifted = true;
+				return HttpResponse.json(memberDetail);
+			}),
+		);
+		renderPage();
+
+		expect(await screen.findByText(/timed out until/i)).toBeInTheDocument();
+		await user.click(screen.getByRole("button", { name: "Lift the timeout" }));
+
+		await waitFor(() => {
+			expect(lifted).toBe(true);
+		});
+	});
+
+	it("saves a nickname, and an empty box clears it", async () => {
+		const user = userEvent.setup();
+		const sent: unknown[] = [];
+		server.use(
+			http.patch(`/api/guilds/${GUILD}/members/${USER}/nickname`, async ({ request }) => {
+				sent.push(await request.json());
+				return HttpResponse.json(memberDetail);
+			}),
+		);
+		serve({ nickname: "Katie" });
+		renderPage();
+
+		const box = await screen.findByLabelText(/^nickname/i);
+		expect(box).toHaveValue("Katie");
+		await user.clear(box);
+		await user.click(screen.getByRole("button", { name: "Clear nickname" }));
+
+		await waitFor(() => {
+			expect(sent).toEqual([{ nickname: null }]);
+		});
+	});
+
+	it("lists only the roles the reader could hand out, and saves the whole set at once", async () => {
+		const user = userEvent.setup();
+		const captured: { body: unknown } = { body: undefined };
+		server.use(
+			http.put(`/api/guilds/${GUILD}/members/${USER}/roles`, async ({ request }) => {
+				captured.body = await request.json();
+				return HttpResponse.json({ roles: [] });
+			}),
+		);
+		renderPage();
+
+		const roles = await screen.findByRole("group", { name: /roles you can give or take/i });
+		expect(within(roles).getByRole("checkbox", { name: /regulars/i })).toBeChecked();
+		expect(screen.getByRole("button", { name: "Save roles" })).toBeDisabled();
+
+		await user.click(within(roles).getByRole("checkbox", { name: /artists/i }));
+		await user.click(screen.getByRole("button", { name: "Save roles" }));
+
+		await waitFor(() => {
+			expect(captured.body).toEqual({ roleIds: ["300000000000000001", "300000000000000002"] });
+		});
+	});
+
+	it("says a reader without Manage Roles cannot change them", async () => {
+		server.use(
+			http.get(`/api/guilds/${GUILD}/members/${USER}/roles`, () =>
+				HttpResponse.json(
+					{ error: { code: "missing_permission", message: "You need the Manage Roles permission." } },
+					{ status: 403 },
+				),
+			),
+		);
+		renderPage();
+
+		expect(await screen.findByText(/you need the manage roles permission to change roles/i)).toBeInTheDocument();
+	});
+
+	/** Somebody who outranks the reader can still have roles below the reader handed to them, as in Discord. */
+	it("keeps the roles card when everything else is out of reach", async () => {
+		serve({ moderationProblem: "They outrank you." });
+		renderPage();
+
+		expect(await screen.findByRole("heading", { name: "Roles" })).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Time out" })).not.toBeInTheDocument();
+		expect(screen.queryByLabelText(/^nickname/i)).not.toBeInTheDocument();
+	});
+});

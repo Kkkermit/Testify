@@ -1,9 +1,15 @@
 import {
 	type AuditLogConfigResponse,
 	type AutomodRules,
+	type BanPage,
+	type CasePage,
+	type CaseSettings,
+	type ChannelToolList,
 	type GuildWarningsPage,
 	type MemberDetail,
 	type MemberMatch,
+	type MemberRoles,
+	type RaidOverview,
 	type ServerChangesPage,
 	type WarnLadder,
 	type WarningAdded,
@@ -50,6 +56,8 @@ export const memberDetail: MemberDetail = {
 	inGuild: true,
 	isBot: false,
 	joinedAt: "2026-01-04T00:00:00.000Z",
+	nickname: null,
+	timedOutUntil: null,
 	roles: [{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff" }],
 	economy: { wallet: 5_000, bank: 120, total: 5_120, rank: 2 },
 	levels: { level: 12, xp: 4_800, rank: 3 },
@@ -134,4 +142,102 @@ export const serverChanges: ServerChangesPage = {
 	perPage: 25,
 	discordReadable: true,
 	truncated: false,
+};
+
+export const caseSettings: CaseSettings = { logChannelId: "400000000000000001", canSend: true };
+
+export const memberRoles: MemberRoles = {
+	roles: [
+		{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff", held: true },
+		{ id: "300000000000000002", name: "Artists", colour: null, held: false },
+	],
+};
+
+export const channelTools: ChannelToolList = {
+	channels: [
+		{
+			id: "400000000000000001",
+			name: "general",
+			category: "Chat",
+			locked: false,
+			slowmodeSeconds: 0,
+			canLock: true,
+			canSlow: true,
+		},
+		{
+			id: "400000000000000006",
+			name: "memes",
+			category: "Chat",
+			locked: true,
+			slowmodeSeconds: 30,
+			canLock: true,
+			canSlow: true,
+		},
+	],
+};
+
+export const banPage: BanPage = {
+	readable: true,
+	items: [
+		{
+			userId: "100000000000000007",
+			username: "spammer",
+			avatarUrl: null,
+			reason: "Posting invite links",
+			softbanEndsAt: null,
+		},
+		{
+			userId: "100000000000000008",
+			username: "cooling-off",
+			avatarUrl: null,
+			reason: "Softban",
+			softbanEndsAt: "2026-11-01T12:00:00.000Z",
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 25,
+	truncated: false,
+};
+
+export const raidOverview: RaidOverview = {
+	enabled: true,
+	alertChannelId: "400000000000000001",
+	pingRoleId: null,
+	minAccountAgeDays: 7,
+	spikeJoins: 10,
+	spikeMinutes: 1,
+	canSend: true,
+	canHold: true,
+	canPing: true,
+};
+
+export const casePage: CasePage = {
+	items: [
+		{
+			number: 2,
+			action: "softban",
+			userId: "100000000000000002",
+			username: "kit",
+			moderatorId: "100000000000000001",
+			moderatorName: "sam",
+			reason: "Raiding",
+			durationMs: 7 * 24 * 60 * 60 * 1_000,
+			at: "2026-10-24T18:00:00.000Z",
+		},
+		{
+			number: null,
+			action: "warn",
+			userId: "100000000000000003",
+			username: "ada",
+			moderatorId: "100000000000000001",
+			moderatorName: "sam",
+			reason: "Spam",
+			durationMs: null,
+			at: "2026-01-02T09:00:00.000Z",
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 10,
 };

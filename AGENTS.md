@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 84, across 14 categories          |
-| Command files        | 105 (incl. folded-in subcommands) |
-| Subcommands          | 135                               |
-| Prefix aliases       | 95                                |
-| Button handlers      | 38                                |
-| Events               | 29, in 6 groups                   |
-| `src/lib` helpers    | 172, in 22 domain folders         |
-| Schemas/repositories | 38 / 36                           |
-| Scheduled jobs       | 8                                 |
-| Tests                | 6,600 across 382 suites           |
+| Commands             | 91, across 14 categories          |
+| Command files        | 112 (incl. folded-in subcommands) |
+| Subcommands          | 145                               |
+| Prefix aliases       | 104                               |
+| Button handlers      | 43                                |
+| Events               | 31, in 6 groups                   |
+| `src/lib` helpers    | 203, in 28 domain folders         |
+| Schemas/repositories | 45 / 43                           |
+| Scheduled jobs       | 10                                |
+| Tests                | 7,253 across 446 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -216,10 +216,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  105 files. Deeper `subcommands/` folders are NOT auto-loaded.
-├── events/               29 handlers in command, community, create, logging, ready and message
-├── buttons/              38 component handlers, keyed by custom-ID prefix
-├── lib/                  172 helpers in 22 domain folders, each behind its own index.ts barrel
+├── commands/<category>/  112 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── events/               31 handlers in command, community, create, logging, ready and message
+├── buttons/              41 component handlers, keyed by custom-ID prefix
+├── lib/                  203 helpers in 28 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -229,16 +229,16 @@ src/
 │   ├── casino/           the games' rules, the wallet flow, the card hands and every casino message
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
-│       reminders/ ideas/ starboard/ tempVoice/
+│       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           38 Mongoose schemas, one file per feature
-│   └── repositories/     36 query layers, one per feature. Commands never touch a model directly.
-├── jobs/                 8 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
-│                         join-to-create channels)
+│   ├── models/           45 Mongoose schemas, one file per feature
+│   └── repositories/     43 query layers, one per feature. Commands never touch a model directly.
+├── jobs/                 10 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
+│                         scheduled messages, join-to-create channels, birthdays)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 257 suites; the dashboard's 125 sit beside its code.
+tests/                    Mirrors src/. 309 suites; the dashboard's 137 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -304,6 +304,7 @@ Each is a pure state→message function paired with a handler in `src/buttons/`.
 | `roleMenuPanel.util.ts`       | `buttons/roleMenuAdmin.ts`     | A list of records, each opening its own editor             |
 | `ideaPanel.util.ts`           | `buttons/idea.ts`              | A public post anybody presses, with staff-only buttons     |
 | `tempVoicePanel.util.ts`      | `buttons/tempVoiceSettings.ts` | A setting with a button that makes the thing it points at  |
+| `autoResponderPanel.util.ts`  | `buttons/autoResponder.ts`     | Every record in one select menu, each opening its editor   |
 
 Image cards are the other half of the UI: `canvas.util.ts` holds the primitives, `rankCard.util.ts` draws
 `/rank`, `boardCard.util.ts` draws both leaderboards, and `welcomeCard.util.ts` the join card. Each keeps its
@@ -666,7 +667,10 @@ Gotchas found the hard way:
 - `container()` colours itself from `categoryColour`, which returns named colours for embeds; `setAccentColor`
   needs a number, so anything non-numeric falls back rather than throwing. A colour is never worth failing a
   message over.
-- Discord caps a V2 message at 40 components. Page long lists (the shop uses 5 entries per page).
+- Discord caps a V2 message at 40 components. Page long lists (the shop uses 5 entries per page), or, for a list
+  capped at 25, pick from one select menu (the auto-responder and scheduled message panels).
+- **A panel that shows typed text goes out through `withoutPings`.** A container's text pings whoever it mentions,
+  and a prefix run posts the panel where everybody can see it, so a reply reading `@everyone` would ping them all.
 
 Embeds are still correct for one-shot results — `/beg`, `/rob`, `/work` — where buttons would add noise. Do not
 convert something just to convert it.
@@ -1714,6 +1718,90 @@ where it goes and how many it holds. Four things about it are load-bearing:
   deleting recorded channels that emptied while the bot was away and forgetting those Discord no longer has.
   Tidying runs while the bot is paused; making does not.
 
+### Auto-responders and scheduled messages post what somebody typed, and never ping
+
+`/auto-responder` and `/schedule` and their two screens share one rule set with the starboard: every post goes out
+with `allowedMentions: { parse: [] }`, and a server has a cap (`AUTO_RESPONDER_LIMITS`, `SCHEDULE_LIMITS`). Four
+things about them are load-bearing:
+
+- **A trigger matches whole words, never a bare substring** (`responderMatches`), so "hi" never answers "this".
+  `triggerKey` in `@testify/shared` is what makes two spellings one trigger, on the form, in the actions and in the
+  unique `{ guildId, key }` index.
+- **A responder can never answer itself.** The handler does not ask for bots, so the bot's own reply never reaches
+  it. It runs at order 30, after the prefix commands, counting and the link filter, each of which stops the chain,
+  and answers a channel at most once every `answerEverySeconds`. The list is cached per server, since it is read
+  on every message, and every write replaces the cache.
+- **A scheduled message is claimed with a lease, like a reminder**, and moved on only once it is sent. `settleSchedule`
+  matches on the time it claimed, so an edit made while it was being sent survives, and a repeating post lands on the
+  first time after now (`nextAfter`), so days missed while the bot was away are not sent in a burst.
+- **A post more than `lateByMinutes` late is skipped, not sent.** A repeating one carries on at its next time, a
+  one-off is dropped, and both are logged. Repeats are every 24 hours or 7 days from the first post, so no time zone
+  is stored; the dashboard picks the first post in the reader's own time and sends it as UTC. Changing only the words
+  of a post never checks its time against the clock, or a post already due could not be corrected.
+
+### Away notes and goodbyes
+
+- **`/afk` is a message handler at order 2**, ahead of the prefix commands, so a member is welcomed back before
+  anything they typed is answered, and the message that sets a note is not the one that clears it. Who is away is
+  cached per server, so a message costs no query, and a note nobody came back to clear expires after `AFK.keepDays`.
+  The note is `unlogged`.
+- **A goodbye pings nobody**, because the member has already left. It uses the greeting's placeholders and
+  `fillTemplate`, `/welcome goodbye` opens its panel, and the dashboard shows it as a second card on the Welcome
+  screen, reading on its own so a failure there leaves the greeting working.
+
+### Birthdays are shared twice, and never with a year
+
+`/birthday` and the **Birthdays** screen. Four things about them are load-bearing:
+
+- **A member shares their own, with one server.** `/birthday set` stores a day and a month under that server and
+  nothing else: there is no year anywhere, so no server can learn an age, and the bot-wide profile's birthday is
+  never read, because a server announcing it needs the member's say-so in that server. Leaving forgets it
+  (`forgetLeaver`), and so does `purgeGuild`.
+- **The server has its own switch** and posts nothing until a manager picks a channel and turns it on.
+- **One post per member per year, at least once.** The hourly `birthdays` job claims each one with `claimBirthday`,
+  which sets `postedYear` only where it is not this year, so two runs cannot both post it; a post that fails is
+  handed back with `releaseBirthday` for the next run. The date is UTC's, and 29 February is posted on the 28th in
+  other years (`birthdaysOn`).
+- **It pings the member and nobody else** (`allowedMentions: { users: [member.id] }`), because the rest of the text is
+  whatever a manager typed.
+
+### Moderation cases number every action, wherever it came from
+
+`/case` and the **Cases** screen. Four things about them are load-bearing:
+
+- **`recordCase` is the one write.** `kickMember`, `banUser`, `unbanUser`, `timeoutMember`, `removeTimeout`,
+  `issueWarning` and the step it takes, the softban and `revokeSoftban` all call it, so `/kick`, the dashboard and a
+  warning's automatic step number the same way. The number comes from one `$inc` counter in `modcasecounters`, with
+  a unique `{ guildId, number }` index, so two actions at once cannot share one.
+- **A case never fails the action it records.** The kick has already happened, so `recordCase` catches every
+  failure, logs it and returns null. Its post to the log channel goes out with `allowedMentions: { parse: [] }`.
+- **Warnings written before cases existed are migrated on read.** `readCases` merges in every warning with no
+  `caseNumber` as a case numbered `null`, so the list is whole with no migration script, and a warning written since
+  carries the number of its case.
+- **Cases are member records, kept like warnings.** `purgeCaseSettings` forgets only where cases are posted, and the
+  privacy notice says so (`legal.storedL15`, `legal.retentionL16`).
+
+### Raid protection holds and tells, and never kicks or bans
+
+`/raid-protection` and the **Raid protection** screen. Five things about it are load-bearing:
+
+- **A hold is a Discord timeout until the account is old enough**, from the snowflake's own timestamp and nothing
+  else (`holdUntil`). Discord lifts it on its own, so there is no job and nothing about the member is stored, and the
+  minimum is capped at 28 days because that is Discord's longest timeout. Bots are never held, and the member is told
+  why in a DM.
+- **A hold is not a moderation case**, because no moderator decided it. Its reason is in Discord's audit log, which
+  the Changes page reads, and the alert channel names who was held.
+- **Joins are counted in memory and keyed by server** (`JoinWatch`), not read back from the insights collection,
+  because that would be a query per join during exactly the event where joins come fastest. A restart forgets them.
+  The settings are cached like the prefix for the same reason, and every save replaces the cache.
+- **One alert per spike.** `record` alerts when the window fills and again every `alertEveryMinutes` while it stays
+  full, and a hold is announced on its own only while no spike is being reported, so a raid of a hundred is a handful
+  of hold notices and one alert. The alert pings only the role a manager chose (`allowedMentions: { roles: [id] }`)
+  and names the joiners without pinging them.
+- **Setting it up asks Moderate Members as well as Manage Server**, on the command, on every panel press and on the
+  dashboard's `PATCH`, because a hold is a timeout and somebody who could not `/mute` must not be able to arrange one.
+  It cannot be on with nothing to do, and taking away the last thing it did turns it off.
+
 ### Global by design
 
 The blacklist, the user profile and reminders are intentionally not guild-scoped. See
@@ -1831,40 +1919,48 @@ four tabs, three shared components and two testable modules.
 
 **Every screen below is built.** A new one follows the six edits in [Adding to the dashboard](#adding-to-the-dashboard).
 
-| Route                      | Screen                                                                     |
-| -------------------------- | -------------------------------------------------------------------------- |
-| `/sign-in`                 | One button; also the setup screen for a half-install                       |
-| `/guilds`                  | Picker, with an invite card for guilds without the bot                     |
-| `/guilds/:id`              | Stat tiles, a setup checklist, feature grid, permission warnings, changes  |
-| `/guilds/:id/insights`     | Server facts, messages a day, busiest hours, top channels and members      |
-| `/guilds/:id/levelling`    | Four tabs, optimistic writes, hierarchy warnings                           |
-| `/guilds/:id/welcome`      | Greeting template, live preview, saved on blur                             |
-| `/guilds/:id/audit-log`    | Grouped event checklist held as a draft until Save                         |
-| `/guilds/:id/warnings`     | The five latest warnings and a search, the steps, warning a member by name |
-| `/guilds/:id/changes`      | Two weeks of changes, from the dashboard and Discord's audit log, searched |
-| `/guilds/:id/automod`      | Discord's own filters — no database behind it                              |
-| `/guilds/:id/role-menus`   | Menus members pick roles from; nothing above you or that moderates         |
-| `/guilds/:id/ideas`        | The idea board's channel and switch, every idea, and the decision on it    |
-| `/guilds/:id/starboard`    | Where starred messages go, the stars it takes, and the author's own star   |
-| `/guilds/:id/temp-voice`   | The lobby, made here if need be, and what each new voice channel is like   |
-| `/guilds/:id/sticky`       | A list keyed by channel; `PUT` upserts                                     |
-| `/guilds/:id/treasure`     | Random money drops; ranges validated as pairs                              |
-| `/guilds/:id/music`        | The music kill switch and the DJ roles                                     |
-| `/guilds/:id/tickets`      | Destinations, panel wording, explicit publish                              |
-| `/guilds/:id/bot-stats`    | The self-updating statistics message: post, move, remove                   |
-| `/guilds/:id/member-count` | People, bots and recent joins, counted at most once a minute               |
-| `/guilds/:id/lottery`      | Pot, schedule, freeze, and a confirmed end                                 |
-| `/guilds/:id/casino`       | Open or close it, switch single games off, and the bet limits              |
-| `/guilds/:id/giveaways`    | Start, end early, reroll and delete — each keyed to its own row            |
-| `/guilds/:id/members`      | Money and levels, each as a real table, with a jump to your own page       |
-| `…/members/:userId`        | One member: standing, roles, warnings, softban, kick and ban               |
-| `/guilds/:id/settings`     | Prefix, nickname, link filtering, roles on join, verification, counting    |
-| `/guilds/:id/commands`     | Per-command switches for this server                                       |
-| `/commands`                | Every command, searchable, with the coverage tile                          |
-| `/status`                  | Online or not, uptime, speed, packages and outside services, 30 days back  |
-| `/help`                    | Getting started, and the support assistant that answers from help articles |
-| `/terms`, `/privacy`       | Public — outside the sign-in gate, deliberately                            |
-| `/owner`                   | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control |
+| Route                            | Screen                                                                       |
+| -------------------------------- | ---------------------------------------------------------------------------- |
+| `/sign-in`                       | One button; also the setup screen for a half-install                         |
+| `/guilds`                        | Picker, with an invite card for guilds without the bot                       |
+| `/guilds/:id`                    | Stat tiles, a setup checklist, feature grid, permission warnings, changes    |
+| `/guilds/:id/insights`           | Server facts, messages a day, busiest hours, top channels and members        |
+| `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                             |
+| `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                 |
+| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next            |
+| `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                           |
+| `/guilds/:id/warnings`           | The five latest warnings and a search, the steps, warning a member by name   |
+| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted    |
+| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                           |
+| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now         |
+| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                    |
+| `/guilds/:id/changes`            | Two weeks of changes, from the dashboard and Discord's audit log, searched   |
+| `/guilds/:id/automod`            | Discord's own filters — no database behind it                                |
+| `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates           |
+| `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it      |
+| `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star     |
+| `/guilds/:id/temp-voice`         | The lobby, made here if need be, and what each new voice channel is like     |
+| `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                       |
+| `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                  |
+| `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first          |
+| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen         |
+| `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                |
+| `/guilds/:id/music`              | The music kill switch and the DJ roles                                       |
+| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket         |
+| `/guilds/:id/bot-stats`          | The self-updating statistics message: post, move, remove                     |
+| `/guilds/:id/member-count`       | People, bots and recent joins, counted at most once a minute                 |
+| `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                   |
+| `/guilds/:id/casino`             | Open or close it, switch single games off, and the bet limits                |
+| `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row              |
+| `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page         |
+| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban |
+| `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting      |
+| `/guilds/:id/commands`           | Per-command switches for this server                                         |
+| `/commands`                      | Every command, searchable, with the coverage tile                            |
+| `/status`                        | Online or not, uptime, speed, packages and outside services, 30 days back    |
+| `/help`                          | Getting started, and the support assistant that answers from help articles   |
+| `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                              |
+| `/owner`                         | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control   |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -2003,6 +2099,36 @@ were proved to go red.
 Manage Server sends the reader to `/guilds` with a notice, and any refusal later re-asks, so losing the role
 mid-session ejects. A refusal about one action — `missing_permission` — re-asks and finds access intact, so a
 manager without Kick Members stays where they are. `useRecheckOnRefusal` is the one mechanism both gates share.
+
+### The moderation screens ask what Discord would
+
+Bans, channel tools, announcements, open tickets and the member page's timeout, roles and nickname each call the
+function their command calls, so a case is numbered and a refusal is worded the same from both. Five things about
+them are load-bearing:
+
+- **Bans are read live and never stored.** `readBans` asks Discord for at most `BAN_LIMITS.maxRead` (1,000, its own
+  ceiling for one read) and says when the list was cut short. Reading them asks Ban Members, because Discord shows a
+  server's bans only to somebody who could lift them. A softban is lifted through `revokeSoftban`, never as a plain
+  unban, or its record stays active and the job unbans them again later.
+- **Roles are judged role by role, not by who outranks whom.** `grantableRoles` lists only what the reader could hand
+  out in Discord, and `PUT /members/:userId/roles` replaces the whole set within that reach, so a role above the
+  reader can never be taken away by being left off the list. The card stays when the member outranks the reader,
+  because Discord allows that too; the timeout and the nickname do not, since both ask the hierarchy.
+- **discord.js does not update its cache for a member edit or a permission overwrite.** `GuildMemberManager.edit`
+  patches a clone and `PermissionOverwriteManager.upsert` returns before Discord's channel update arrives, while a
+  channel edit is patched through `ChannelUpdate` as it returns — read out of their source, not assumed. So the
+  member routes re-read with `force` after a timeout or a rename, `setMemberRoles` returns the member `roles.add`
+  hands back, and the channel tools answer a lock with the state that was asked for.
+- **An announcement pings only what was chosen, and nobody by default.** `announcementMessage` lets only `@everyone`
+  or `@here` through `allowedMentions`, and `mentionProblem` asks Mention Everyone of the person and of the bot in
+  that channel. `/announce` once let anybody with Manage Server ping everybody, which Discord itself would not have
+  let them do; it goes through the same rule now.
+- **Closing a ticket asks for the staff role**, as its Close button does for somebody else's ticket, so Manage Server
+  can see the queue but not close it. The closer is the person signed in, fetched from Discord, because the
+  transcript names them.
+
+`/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in the
+channel, where they can be seen.
 
 ### Rules that carry over
 

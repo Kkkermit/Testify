@@ -1,9 +1,9 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { TicketsPage } from "@/features/tickets/TicketsPage";
 import { expectNoViolations } from "@/test/axe";
-import { ticketSettings } from "@/test/fixtures/channels";
+import { openTickets, ticketSettings } from "@/test/fixtures/channels";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -202,5 +202,51 @@ describe("the tickets page", () => {
 		await screen.findByLabelText(/button label/i);
 
 		await expectNoViolations(container);
+	});
+});
+
+describe("open tickets", () => {
+	it("lists each open ticket with who opened and claimed it", async () => {
+		renderPage();
+
+		const open = await screen.findByRole("region", { name: "Open tickets" });
+		expect(await within(open).findByText("#ticket-a1b2c3")).toBeInTheDocument();
+		expect(within(open).getByRole("link", { name: "kate" })).toHaveAttribute(
+			"href",
+			`/guilds/${GUILD}/members/100000000000000002`,
+		);
+		expect(within(open).getByText("Claimed by someone")).toBeInTheDocument();
+	});
+
+	/** Closing deletes the channel, so one press only asks; the second press is the one that closes it. */
+	it("asks before it closes a ticket, then closes it", async () => {
+		const user = userEvent.setup();
+		let closed = "";
+		server.use(
+			http.post("/api/guilds/:guildId/tickets/open/:channelId/close", ({ params }) => {
+				closed = String(params.channelId);
+				return HttpResponse.json({ canClose: true, tickets: [] });
+			}),
+		);
+		renderPage();
+
+		await user.click(await screen.findByRole("button", { name: "Close #ticket-a1b2c3" }));
+		expect(closed).toBe("");
+		await user.click(screen.getByRole("button", { name: "Close the ticket" }));
+
+		await waitFor(() => {
+			expect(closed).toBe("400000000000000020");
+		});
+		expect(await screen.findByText("No tickets are open")).toBeInTheDocument();
+	});
+
+	it("offers no Close to somebody without the staff role, and says why", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/tickets/open", () => HttpResponse.json({ ...openTickets, canClose: false })),
+		);
+		renderPage();
+
+		expect(await screen.findByText(/closing one asks for the ticket staff role/i)).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /^close #/i })).not.toBeInTheDocument();
 	});
 });

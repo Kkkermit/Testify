@@ -36,6 +36,14 @@ const KEYS: Record<ProblemCode, TranslationKey> = {
 	"roleMenu.title": "problem.roleMenuTitle",
 	"roleMenu.roles": "problem.roleMenuRoles",
 	"roleMenu.tooManyRoles": "problem.roleMenuTooManyRoles",
+	"autoResponder.trigger": "problem.autoResponderTrigger",
+	"autoResponder.reply": "problem.autoResponderReply",
+	"autoResponder.duplicate": "problem.autoResponderDuplicate",
+	"schedule.channel": "problem.scheduleChannel",
+	"schedule.message": "problem.scheduleMessage",
+	"schedule.time": "problem.scheduleTime",
+	"schedule.past": "problem.schedulePast",
+	"schedule.tooFar": "problem.scheduleTooFar",
 };
 
 export function problemText(problem: Problem, t: TFunction): string;

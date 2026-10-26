@@ -17,64 +17,16 @@ Checked against the code and the npm registry on **25 October 2026**.
 
 ## 🤖 New bot features
 
-None of these exist in any form today.
-
-| Feature               | What it would do                                                                                     | Build on                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| 🗳️ Polls              | `/poll` posts one of Discord's own polls, with a question, up to ten answers and a closing time      | discord.js sends native polls from `send({ poll })`, so there is nothing to count or store    |
-| 👋 Goodbye messages   | A message when somebody leaves, the mirror of the greeting                                           | `src/lib/welcome/` — the same template, placeholders and preview                              |
-| 💬 Auto-responders    | A server's own trigger words, each answered with a reply it wrote                                    | A message handler, like `sticky` and `counting`                                               |
-| ⏰ Scheduled messages | A message posted at a set time, once or every day or week                                            | The `reminders` job, which already claims with a lease and delivers at least once             |
-| 🎂 Birthdays          | A post on a member's birthday, in a server that switched it on                                       | `profile.schema.ts` already stores a `birthday`                                               |
-| 📁 Moderation cases   | One numbered case for every warning, timeout, kick, ban and softban, with a log channel and a reason | `issueWarning` already stores the step a warning took; the idea board numbers with one `$inc` |
-| 🛡️ Raid protection    | Hold back accounts younger than a server's minimum age, and tell staff when joins spike              | `/verify`, and the joins and leaves `insights.util.ts` already records                        |
-| 💤 AFK                | `/afk` sets a note that anybody mentioning you is shown, cleared when you next speak                 | A message handler, keyed `guildId:userId` like every other piece of state                     |
-
-What each would have to respect:
-
-- **Birthdays are opt-in twice.** The profile is bot-wide by design (AGENTS.md §12), so a server announcing birthdays
-  needs its own switch, and the member needs to agree to their server being told. Post the day and month only, never
-  the year: an age is not the server's business. The privacy notice says what is stored and must say this too.
-- **Auto-responders and scheduled messages post what somebody typed**, so every post goes out with
-  `allowedMentions: { parse: [] }` (the rule the role menus and starboard follow), a server has a cap on how many it
-  keeps, and a trigger cannot fire again on the bot's own reply.
-- **Raid protection warns before it acts.** Holding a new account back or alerting staff is reversible; kicking or
-  banning on a heuristic is not, so neither should be a default. It must not try to look like anything other than a
-  bot, and an account-age gate needs nothing beyond the snowflake.
-- **Moderation cases need a migration on read** for the warnings already stored (AGENTS.md §13 rule 7), and the
-  dashboard's warnings screen would become the case list rather than sitting beside it.
-- **AFK notes are typed by members**, so they are `unlogged` and go through the same leak rules as any other free
-  text.
+Nothing is waiting here. A new idea goes in a table with what it would do, what it would build on and what it would
+have to respect.
 
 ---
 
 ## 🖥️ Dashboard screens still missing
 
-These commands do something the dashboard cannot yet do. `features/commands/commands.utils.ts` is the list that
-decides, and the coverage tile on `/commands` counts it.
-
-| Screen                 | Commands it would cover            | Permission the route takes     | Notes                                                                                |
-| ---------------------- | ---------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
-| 🚫 Bans                | `/unban`                           | Ban Members                    | A list of the server's bans with Unban beside each; lifting a softban already exists |
-| 🔇 Timeouts            | `/mute`, `/unmute`                 | Moderate Members               | On the member page, beside kick and ban, with the same typed confirmation            |
-| 🔒 Channel tools       | `/lock`, `/unlock`, `/slowmode`    | Manage Channels                | Per channel, from a picker, showing the current slowmode                             |
-| 📣 Announcements       | `/announce`, `/say`                | Manage Server                  | A composer with a live preview, a channel picker and an explicit mentions choice     |
-| 🎫 Open tickets        | `/ticket` (the tickets themselves) | Manage Server                  | Who opened each, who claimed it, and Close, which files the transcript               |
-| 🏷️ Roles and nicknames | `/role`, `/nickname`               | Manage Roles, Manage Nicknames | On the member page; a role given still has to pass `requireGrantable`                |
-
-What each would have to respect:
-
-- **Every action asks what its command asks** (AGENTS.md §24, "Nothing on the web reaches further than Discord
-  would"). The permission column above is what each command asks of the person, and `requirePermission` goes on
-  the route. Manage Server is what opens the dashboard at all, so those two need nothing more.
-- **Open tickets are now within reach.** The flow moved into `src/lib/tickets/ticketFlow.util.ts`, which takes plain
-  values rather than an interaction, so the route can call `closeTicket` itself. It wants the `User` who closed it
-  for the transcript, which `client.users.fetch` gives from the session's user id. Inside Discord a ticket is
-  closed by its owner or the handler role, so decide whether the web asks for that role as well.
-- **An announcement is posted as the bot**, so the composer must make mentions an explicit choice that defaults to
-  none, and run the text through `plainText` like every other free-text field.
-- `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in
-  the channel, where you can see them.
+Nothing is waiting here. `features/commands/commands.utils.ts` is the list that decides which commands have a
+screen, and the coverage tile on `/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages
+from a browser tab is a worse tool than doing it in the channel, where you can see them.
 
 ---
 
@@ -95,6 +47,21 @@ server, and each should be before it is relied on.
 - **Role menus:** the post, the pre-ticked private select, and a role moved above the bot after the menu was made.
 - **Reminders:** the channel ping, and the fallback to a DM when the owner has left or the bot cannot post.
 - **The idea board:** the post, a vote moving from one side to the other, and the decision DMed to its author.
+- **Polls:** Discord's own poll from `/poll`, on both surfaces, including the `Send Polls` check.
+- **Away notes:** the notice on a mention and on a reply, and the welcome back on the next message.
+- **Goodbye messages:** the post when somebody leaves, as text and as an embed.
+- **Auto-responders:** a reply in a busy channel, the ten-second pause, and silence in a channel the bot cannot read.
+- **Scheduled messages:** a daily post across a restart, and a post skipped for being an hour late.
+- **Birthdays:** the post on the day, once only across a restart, and a birthday forgotten when its member leaves.
+- **Moderation cases:** a case posted to the log channel for each kind of action, from Discord and from the dashboard,
+  with nobody pinged.
+- **Raid protection:** a timeout on a brand new account and the DM saying why, and one alert for a burst of joins that
+  pings only the chosen role.
+- **The bans screen:** a server with hundreds of bans, a softban lifted from the list, and the case that records it.
+- **Channel tools:** a lock showing at once on the page and in Discord, and a slowmode set from the dashboard.
+- **Announcements:** an embed and plain text, and `@everyone` refused to somebody without Mention Everyone.
+- **Open tickets:** a ticket closed from the dashboard, with its transcript naming the person who closed it.
+- **The member page:** a timeout, a rename and a role change, each showing on the page without a reload.
 
 ---
 

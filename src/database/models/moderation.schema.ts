@@ -36,6 +36,8 @@ export interface WarnEntry {
 	step?: string | null;
 	/** Why that step could not be carried out, when it could not. */
 	stepProblem?: string | null;
+	/** The case it was recorded as; absent on warnings from before cases were numbered. */
+	caseNumber?: number | null;
 }
 
 export interface WarnRecord {
@@ -68,6 +70,7 @@ const warnEntrySchema = new Schema<WarnEntry>(
 		edits: { type: [warnEditSchema], required: true, default: [] },
 		step: { type: String, default: null },
 		stepProblem: { type: String, default: null },
+		caseNumber: { type: Number, default: null },
 	},
 	{ _id: false },
 );

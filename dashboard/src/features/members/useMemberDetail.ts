@@ -5,7 +5,16 @@ import {
 	type UseMutationResult,
 	type UseQueryResult,
 } from "@tanstack/react-query";
-import { type BanBody, type KickBody, type LevelBody, type MemberDetail, type MoneyBody } from "@testify/shared";
+import {
+	type BanBody,
+	type KickBody,
+	type LevelBody,
+	type MemberDetail,
+	type MemberRoles,
+	type MoneyBody,
+	type NicknameBody,
+	type TimeoutBody,
+} from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -44,6 +53,47 @@ export function useLiftSoftban(guildId: string, userId: string): UseMutationResu
 	return useMemberMutation(guildId, userId, () =>
 		api.delete<MemberDetail>(`/guilds/${guildId}/members/${userId}/softban`),
 	);
+}
+
+export function useTimeout(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, TimeoutBody> {
+	return useMemberMutation(guildId, userId, (body: TimeoutBody) =>
+		api.post<MemberDetail>(`/guilds/${guildId}/members/${userId}/timeout`, body),
+	);
+}
+
+export function useLiftTimeout(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, void> {
+	return useMemberMutation(guildId, userId, () =>
+		api.delete<MemberDetail>(`/guilds/${guildId}/members/${userId}/timeout`),
+	);
+}
+
+export function useRename(guildId: string, userId: string): UseMutationResult<MemberDetail, Error, NicknameBody> {
+	return useMemberMutation(guildId, userId, (body: NicknameBody) =>
+		api.patch<MemberDetail>(`/guilds/${guildId}/members/${userId}/nickname`, body),
+	);
+}
+
+export function useMemberRoles(guildId: string, userId: string, enabled: boolean): UseQueryResult<MemberRoles> {
+	return useQuery({
+		queryKey: keys.guild(guildId).memberRoles(userId),
+		queryFn: () => api.get<MemberRoles>(`/guilds/${guildId}/members/${userId}/roles`),
+		enabled,
+	});
+}
+
+/** The page's role badges come from the member, so both are read again once the roles land. */
+export function useSetMemberRoles(guildId: string, userId: string): UseMutationResult<MemberRoles, Error, string[]> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: (roleIds: string[]) => api.put<MemberRoles>(`/guilds/${guildId}/members/${userId}/roles`, { roleIds }),
+		onSuccess: (roles) => {
+			client.setQueryData(keys.guild(guildId).memberRoles(userId), roles);
+		},
+		onSettled: () => {
+			void client.invalidateQueries({ queryKey: keys.guild(guildId).member(userId) });
+		},
+	});
 }
 
 function useMemberMutation<Body>(

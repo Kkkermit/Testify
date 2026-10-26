@@ -23,6 +23,11 @@ export function containerMessage(container: ContainerBuilder): ContainerMessage 
 	return { components: [container], flags: MessageFlags.IsComponentsV2 };
 }
 
+/** For a panel showing text somebody typed, which would otherwise ping whoever it names when posted in the open. */
+export function withoutPings<Message extends object>(message: Message): Message & { allowedMentions: { parse: [] } } {
+	return { ...message, allowedMentions: { parse: [] } };
+}
+
 export function text(markdown: string): TextDisplayBuilder {
 	return new TextDisplayBuilder().setContent(markdown);
 }

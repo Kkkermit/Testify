@@ -22,6 +22,20 @@ const LegalPage = page(async () => import("@/features/legal/LegalPage"), "LegalP
 const SettingsPage = page(async () => import("@/features/settings/SettingsPage"), "SettingsPage");
 const AutomodPage = page(async () => import("@/features/automod/AutomodPage"), "AutomodPage");
 const StickyPage = page(async () => import("@/features/sticky/StickyPage"), "StickyPage");
+const CasesPage = page(async () => import("@/features/cases/CasesPage"), "CasesPage");
+const BirthdaysPage = page(async () => import("@/features/birthdays/BirthdaysPage"), "BirthdaysPage");
+const RaidPage = page(async () => import("@/features/raid-protection/RaidPage"), "RaidPage");
+const BansPage = page(async () => import("@/features/bans/BansPage"), "BansPage");
+const AnnouncementsPage = page(async () => import("@/features/announcements/AnnouncementsPage"), "AnnouncementsPage");
+const ChannelToolsPage = page(async () => import("@/features/channel-tools/ChannelToolsPage"), "ChannelToolsPage");
+const ScheduledMessagesPage = page(
+	async () => import("@/features/scheduled-messages/ScheduledMessagesPage"),
+	"ScheduledMessagesPage",
+);
+const AutoRespondersPage = page(
+	async () => import("@/features/auto-responders/AutoRespondersPage"),
+	"AutoRespondersPage",
+);
 const RoleMenusPage = page(async () => import("@/features/role-menus/RoleMenusPage"), "RoleMenusPage");
 const IdeasPage = page(async () => import("@/features/ideas/IdeasPage"), "IdeasPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
@@ -90,6 +104,14 @@ export const routes = [
 									{ path: "/guilds/:guildId/settings", element: lazily(<SettingsPage />) },
 									{ path: "/guilds/:guildId/automod", element: lazily(<AutomodPage />) },
 									{ path: "/guilds/:guildId/sticky", element: lazily(<StickyPage />) },
+									{ path: "/guilds/:guildId/auto-responders", element: lazily(<AutoRespondersPage />) },
+									{ path: "/guilds/:guildId/birthdays", element: lazily(<BirthdaysPage />) },
+									{ path: "/guilds/:guildId/cases", element: lazily(<CasesPage />) },
+									{ path: "/guilds/:guildId/raid-protection", element: lazily(<RaidPage />) },
+									{ path: "/guilds/:guildId/bans", element: lazily(<BansPage />) },
+									{ path: "/guilds/:guildId/channel-tools", element: lazily(<ChannelToolsPage />) },
+									{ path: "/guilds/:guildId/announcements", element: lazily(<AnnouncementsPage />) },
+									{ path: "/guilds/:guildId/scheduled-messages", element: lazily(<ScheduledMessagesPage />) },
 									{ path: "/guilds/:guildId/role-menus", element: lazily(<RoleMenusPage />) },
 									{ path: "/guilds/:guildId/ideas", element: lazily(<IdeasPage />) },
 									{ path: "/guilds/:guildId/starboard", element: lazily(<StarboardPage />) },

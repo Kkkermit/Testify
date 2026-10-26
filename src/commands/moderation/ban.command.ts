@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, assertModeratable, banUser, DEFAULT_REASON } from "@lib/moderation";
+import { actionEmbed, assertModeratable, banUser, DEFAULT_REASON, moderatorOf } from "@lib/moderation";
 
 export default defineCommand({
 	name: "ban",
@@ -37,7 +37,14 @@ export default defineCommand({
 		const member = await guild.members.fetch(target.id).catch(() => null);
 		if (member) assertModeratable(interaction, member);
 
-		const { notified: delivered } = await banUser(guild, target, member, interaction.user.username, reason, deleteDays);
+		const { notified: delivered } = await banUser(
+			guild,
+			target,
+			member,
+			moderatorOf(interaction.user),
+			reason,
+			deleteDays,
+		);
 
 		await reply(interaction, {
 			embeds: [

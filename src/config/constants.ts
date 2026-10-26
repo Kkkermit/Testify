@@ -53,6 +53,8 @@ export const INTERVALS = {
 	commandLogFlushMs: 5 * SECOND_MS,
 	softbanCheckMs: MINUTE_MS,
 	reminderCheckMs: 30 * SECOND_MS,
+	scheduledMessageCheckMs: 30 * SECOND_MS,
+	birthdayCheckMs: HOUR_MS,
 	tempVoiceSweepMs: 10 * MINUTE_MS,
 	fixedStatsRefreshMs: 5 * MINUTE_MS,
 	passiveIncomeMs: HOUR_MS,
@@ -101,6 +103,16 @@ export const ANALYTICS = {
 	maxWindowDays: 90,
 	/** Log lines kept in memory for the owner console, at every level; roughly 200 kB at worst. */
 	logRingCapacity: 1_000,
+} as const;
+
+export const AFK = {
+	maxNote: 100,
+	/** A note its member never came back to clear is deleted after this many days. */
+	keepDays: 30,
+	/** How often one channel is told that the same member is away. */
+	noticeEveryMs: MINUTE_MS,
+	/** How long the notice stays up before it tidies itself away. */
+	noticeShowsMs: 30 * SECOND_MS,
 } as const;
 
 /** Used where a "never expires" sentinel is needed instead of a made-up huge number. */
