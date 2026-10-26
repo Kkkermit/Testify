@@ -12,3 +12,6 @@ Three commands post messages for you.
 - `/announce` posts an announcement embed in a channel, with a title, description, colour and an optional everyone ping. It needs **Manage Server**.
 - `/say` sends a message through the bot, as plain text or an embed. It needs **Manage Server**.
 - `/create embed` builds a custom embed with an image, thumbnail, footer and up to three fields. `/create thread` opens a thread. Both need **Manage Messages**.
+
+### On the dashboard
+Open your server, then **Announcements** under Channels. Write the message as an embed or plain text, watch the preview, and choose who it pings: nobody, `@everyone` or `@here`. Nobody is the default. Pinging everybody needs **Mention Everyone** in that channel, for you and for {bot}, and `/announce` asks the same.

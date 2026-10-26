@@ -17,3 +17,6 @@ All of these need **Ban Members**, except kicking, which needs **Kick Members**.
 A softban is a ban that lifts itself. `/softban add` takes a length such as `12h` or `7d`, and the ban ends on its own when the time is up.
 - `/softban list` shows the active ones.
 - `/softban remove` lifts one early. So does **Lift it now** on the member's page on the dashboard.
+
+### On the dashboard
+Open your server, then **Bans** under Moderation. It lists everybody banned, with the reason Discord holds and when a softban lifts, and **Unban** beside each. Search by name, ID or reason. It needs **Ban Members**, and every unban is a numbered case.
