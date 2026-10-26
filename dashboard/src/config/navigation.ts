@@ -22,6 +22,7 @@ import {
 	Users,
 	UserPlus,
 	MessageSquareReply,
+	Megaphone,
 	MessagesSquare,
 	Music,
 	LifeBuoy,
@@ -283,6 +284,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.scheduled",
 							icon: CalendarClock,
 							hintKey: "nav.scheduledHint",
+						},
+						{
+							to: `/guilds/${guild.id}/announcements`,
+							labelKey: "nav.announcements",
+							icon: Megaphone,
+							hintKey: "nav.announcementsHint",
 						},
 						{
 							to: `/guilds/${guild.id}/tickets`,

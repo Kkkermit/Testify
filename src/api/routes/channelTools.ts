@@ -1,7 +1,7 @@
-import { PermissionFlagsBits, type GuildMember } from "discord.js";
-import { type Context, Hono } from "hono";
+import { PermissionFlagsBits } from "discord.js";
+import { Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { actorOf, type ApiBindings, guildOf } from "@api/context";
+import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
 import { forbidden } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -15,10 +15,6 @@ channelTools.use("*", requireGuild);
 
 // `/lock`, `/unlock` and `/slowmode` each ask for Manage Channels.
 const manageChannels = requirePermission(PermissionFlagsBits.ManageChannels);
-
-function readerOf(context: Context<ApiBindings>): GuildMember | undefined {
-	return context.get("isOwner") === true ? undefined : context.get("member");
-}
 
 channelTools.get("/", manageChannels, (context) => context.json(readChannelTools(guildOf(context), readerOf(context))));
 

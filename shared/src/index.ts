@@ -1,4 +1,5 @@
 export * from "./analytics";
+export * from "./announcements";
 export * from "./api";
 export * from "./auditLog";
 export * from "./automod";

@@ -38,6 +38,8 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	lock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
 	unlock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
 	slowmode: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
+	announce: { path: (guildId) => `/guilds/${guildId}/announcements`, screen: "Announcements" },
+	say: { path: (guildId) => `/guilds/${guildId}/announcements`, screen: "Announcements" },
 	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 };
 

@@ -35,6 +35,11 @@ export function guildIdOf(context: Context<ApiBindings>): string {
 	return guildOf(context).id;
 }
 
+/** The person reading, as the permission rules want them; a bot owner need not be in the server, so has none. */
+export function readerOf(context: Context<ApiBindings>): GuildMember | undefined {
+	return context.get("isOwner") === true ? undefined : context.get("member");
+}
+
 /** The person acting, as a moderation record names them; `requireGuild` has already insisted on a session. */
 export function actorOf(context: Context<ApiBindings>): { id: string; name: string } {
 	const session = context.get("session");

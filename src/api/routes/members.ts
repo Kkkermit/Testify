@@ -1,7 +1,7 @@
 import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
-import { actorOf, type ApiBindings, guildOf } from "@api/context";
+import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
 import { badRequest, forbidden, notFound } from "@api/errors";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -261,11 +261,6 @@ members.patch("/:userId/nickname", requirePermission(PermissionFlagsBits.ManageN
 
 	return context.json(await detail(context, true));
 });
-
-/** The person reading, as the grant rule wants them; a bot owner need not be in the server at all. */
-function readerOf(context: Context<ApiBindings>): GuildMember | undefined {
-	return context.get("isOwner") === true ? undefined : context.get("member");
-}
 
 const manageRoles = requirePermission(PermissionFlagsBits.ManageRoles);
 
