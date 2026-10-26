@@ -34,6 +34,9 @@ export interface MemberDetail {
 	inGuild: boolean;
 	isBot: boolean;
 	joinedAt: string | null;
+	nickname: string | null;
+	/** Set while a timeout is still running. */
+	timedOutUntil: string | null;
 	roles: { id: string; name: string; colour: string | null }[];
 	economy: { wallet: number; bank: number; total: number; rank: number | null } | null;
 	levels: { level: number; xp: number; rank: number | null } | null;

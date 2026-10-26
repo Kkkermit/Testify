@@ -10,8 +10,11 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { LevelCard } from "@/features/members/components/LevelCard";
 import { MemberIdentity, MemberStanding } from "@/features/members/components/MemberIdentity";
 import { MoneyCard } from "@/features/members/components/MoneyCard";
+import { NicknameCard } from "@/features/members/components/NicknameCard";
+import { RolesCard } from "@/features/members/components/RolesCard";
 import { SanctionCard } from "@/features/members/components/SanctionCard";
 import { SoftbanCard } from "@/features/members/components/SoftbanCard";
+import { TimeoutCard } from "@/features/members/components/TimeoutCard";
 import { WarningsCard } from "@/features/members/components/WarningsCard";
 import { softbanActive } from "@/features/members/memberDetail.utils";
 import { useMemberActions } from "@/features/members/useMemberActions";
@@ -25,10 +28,8 @@ export function MemberDetailPage(): React.JSX.Element {
 	const { guildId = "", userId = "" } = useParams();
 
 	const overview = useGuildOverview(guildId);
-	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = useMemberActions(
-		guildId,
-		userId,
-	);
+	const actions = useMemberActions(guildId, userId);
+	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = actions;
 	const [result, setResult] = useState<string | null>(null);
 
 	usePageTitle(member.data?.displayName ?? "Member", overview.data?.name);
@@ -88,6 +89,23 @@ export function MemberDetailPage(): React.JSX.Element {
 				</div>
 			)}
 
+			{/* Roles are judged role by role rather than by who outranks whom, so they stay when the rest cannot. */}
+			{canModerate ? (
+				<div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+					<NicknameCard
+						key={detail.nickname ?? ""}
+						detail={detail}
+						busy={busy}
+						onSave={(nickname) => {
+							actions.rename.mutate({ nickname });
+						}}
+					/>
+					<RolesCard guildId={guildId} userId={userId} />
+				</div>
+			) : (
+				detail.inGuild && <RolesCard guildId={guildId} userId={userId} />
+			)}
+
 			<WarningsCard
 				detail={detail}
 				busy={busy}
@@ -113,6 +131,19 @@ export function MemberDetailPage(): React.JSX.Element {
 					clear.mutate({ userId }, { onSuccess: done });
 				}}
 			/>
+
+			{canModerate && (
+				<TimeoutCard
+					detail={detail}
+					busy={busy}
+					onTimeout={(minutes, reason, confirm) => {
+						actions.timeout.mutate({ minutes, reason, confirm });
+					}}
+					onLift={() => {
+						actions.liftTimeout.mutate();
+					}}
+				/>
+			)}
 
 			{(canModerate || !detail.inGuild) && (
 				<SanctionCard

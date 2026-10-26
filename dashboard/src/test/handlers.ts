@@ -33,6 +33,7 @@ import {
 	guildWarnings,
 	memberDetail,
 	memberMatches,
+	memberRoles,
 	serverChanges,
 	warnLadder,
 	warningAdded,
@@ -122,6 +123,7 @@ export const handlers = [
 	// Before `:userId`, which MSW would otherwise match first, exactly as the real router would.
 	http.get("/api/guilds/:guildId/members/search", () => HttpResponse.json(memberMatches)),
 	http.get("/api/guilds/:guildId/members/:userId", () => HttpResponse.json(memberDetail)),
+	http.get("/api/guilds/:guildId/members/:userId/roles", () => HttpResponse.json(memberRoles)),
 	http.post("/api/guilds/:guildId/members/:userId/kick", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.post("/api/guilds/:guildId/members/:userId/ban", () => HttpResponse.json({ ...memberDetail, inGuild: false })),
 	http.get("/api/guilds/:guildId/changes", () => HttpResponse.json(serverChanges)),

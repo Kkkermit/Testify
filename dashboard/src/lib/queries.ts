@@ -58,6 +58,7 @@ export const keys = {
 		board: (board: string, page: number, sort: string, scope: string) =>
 			["guild", id, "board", board, page, sort, scope] as const,
 		member: (userId: string) => ["guild", id, "member", userId] as const,
+		memberRoles: (userId: string) => ["guild", id, "member-roles", userId] as const,
 	}),
 	owner: {
 		access: () => ["owner", "access"] as const,

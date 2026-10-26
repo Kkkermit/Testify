@@ -23,6 +23,7 @@ export * from "./levelling";
 export * from "./lottery";
 export * from "./markup";
 export * from "./memberCount";
+export * from "./memberActions";
 export * from "./memberDetail";
 export * from "./members";
 export * from "./music";

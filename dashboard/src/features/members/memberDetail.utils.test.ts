@@ -17,6 +17,8 @@ function detail(overrides: Partial<MemberDetail> = {}): MemberDetail {
 		inGuild: true,
 		isBot: false,
 		joinedAt: "2026-01-04T00:00:00.000Z",
+		nickname: null,
+		timedOutUntil: null,
 		roles: [],
 		economy: null,
 		levels: null,

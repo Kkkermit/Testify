@@ -8,7 +8,15 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
 import { problemText } from "@lib/format";
-import { banUser, kickMember, moderationProblem } from "@lib/moderation";
+import {
+	banUser,
+	containsProfanity,
+	kickMember,
+	moderationProblem,
+	removeTimeout,
+	timeoutMember,
+} from "@lib/moderation";
+import { memberRoles, setMemberRoles } from "@lib/roles";
 import {
 	banBody,
 	boardQuery,
@@ -19,9 +27,12 @@ import {
 	type MemberDetail,
 	type MemberMatch,
 	memberParams,
+	memberRolesBody,
 	memberSearchQuery,
 	moneyBody,
 	moneyProblem,
+	nicknameBody,
+	timeoutBody,
 } from "@testify/shared";
 
 export const members = new Hono<ApiBindings>();
@@ -37,8 +48,11 @@ members.get("/leaderboard", async (context) => {
 	);
 });
 
-/** One live fetch each, because a cached member says nothing about who was demoted five minutes ago. */
-async function scene(context: Context<ApiBindings>): Promise<{
+/** `fresh` skips the cache, which a timeout, a nickname or a role change made through the bot leaves out of date. */
+async function scene(
+	context: Context<ApiBindings>,
+	fresh = false,
+): Promise<{
 	guild: Guild;
 	userId: string;
 	member: GuildMember | null;
@@ -49,15 +63,15 @@ async function scene(context: Context<ApiBindings>): Promise<{
 	const actorId = context.get("session")?.userId ?? "";
 
 	const [member, moderator] = await Promise.all([
-		guild.members.fetch(userId).catch(() => null),
+		guild.members.fetch({ user: userId, force: fresh }).catch(() => null),
 		guild.members.fetch(actorId).catch(() => null),
 	]);
 
 	return { guild, userId, member, moderator };
 }
 
-async function detail(context: Context<ApiBindings>): Promise<MemberDetail> {
-	const { guild, userId, member, moderator } = await scene(context);
+async function detail(context: Context<ApiBindings>, fresh = false): Promise<MemberDetail> {
+	const { guild, userId, member, moderator } = await scene(context, fresh);
 
 	return readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
 }
@@ -196,4 +210,88 @@ members.delete("/:userId/softban", requirePermission(PermissionFlagsBits.BanMemb
 	await auditChange(context, { action: "member.softban.revoke", summary: "Lifted a softban early" });
 
 	return context.json(await detail(context));
+});
+
+members.post("/:userId/timeout", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
+	const { current, member } = await actOn(context);
+	const body = await parseBody(context, timeoutBody);
+	if (!confirmsName(body.confirm, current.username, current.userId)) throw badRequest(CONFIRM_REFUSED);
+
+	const { notified } = await timeoutMember(
+		guildOf(context),
+		member,
+		actorOf(context),
+		body.minutes * 60_000,
+		body.reason,
+	);
+	await auditChange(context, {
+		action: "member.timeout",
+		summary: `Timed out ${current.username}`,
+		after: { minutes: body.minutes, reason: body.reason, notified },
+	});
+
+	return context.json(await detail(context, true));
+});
+
+members.delete("/:userId/timeout", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
+	const { current, member } = await actOn(context);
+
+	await removeTimeout(guildOf(context), member, actorOf(context), "Lifted from the dashboard");
+	await auditChange(context, { action: "member.timeout.lift", summary: `Lifted ${current.username}'s timeout` });
+
+	return context.json(await detail(context, true));
+});
+
+// `/nickname` asks for Manage Nicknames; the hierarchy check on top is what Discord itself would ask of the person.
+members.patch("/:userId/nickname", requirePermission(PermissionFlagsBits.ManageNicknames), async (context) => {
+	const { current, member } = await actOn(context);
+	const { nickname } = await parseBody(context, nicknameBody);
+
+	if (nickname !== null && containsProfanity(nickname)) throw badRequest("That nickname is not allowed here.");
+	if (!member.manageable)
+		throw forbidden("cannot_moderate", "Their highest role is at or above mine, so I cannot rename them.");
+
+	await member.setNickname(nickname, `Changed by ${actorOf(context).name}`);
+	await auditChange(context, {
+		action: "member.nickname",
+		summary: nickname === null ? `Cleared ${current.username}'s nickname` : `Renamed ${current.username}`,
+		before: { nickname: current.nickname },
+		after: { nickname },
+	});
+
+	return context.json(await detail(context, true));
+});
+
+/** The person reading, as the grant rule wants them; a bot owner need not be in the server at all. */
+function readerOf(context: Context<ApiBindings>): GuildMember | undefined {
+	return context.get("isOwner") === true ? undefined : context.get("member");
+}
+
+const manageRoles = requirePermission(PermissionFlagsBits.ManageRoles);
+
+members.get("/:userId/roles", manageRoles, async (context) => {
+	const { guild, member } = await scene(context);
+	if (member === null) throw notFound("member_not_found", "They are no longer in this server.");
+
+	return context.json(memberRoles(guild, member, readerOf(context)));
+});
+
+members.put("/:userId/roles", manageRoles, async (context) => {
+	const { guild, member } = await scene(context);
+	if (member === null) throw notFound("member_not_found", "They are no longer in this server.");
+	const { roleIds } = await parseBody(context, memberRolesBody);
+	const reader = readerOf(context);
+
+	const {
+		added,
+		removed,
+		member: updated,
+	} = await setMemberRoles(guild, member, roleIds, reader, actorOf(context).name);
+	await auditChange(context, {
+		action: "member.roles",
+		summary: `Changed ${member.user.username}'s roles`,
+		after: { added, removed },
+	});
+
+	return context.json(memberRoles(guild, updated, reader));
 });

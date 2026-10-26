@@ -154,6 +154,10 @@ describe("an action that needs more than Manage Server", () => {
 		["making a role menu", "POST", "/role-menus", { ...MENU, roleIds: [BELOW_YOU] }],
 		["changing raid protection", "PATCH", "/raid-protection", { minAccountAgeDays: 7 }],
 		["lifting a ban", "POST", `/bans/${TARGET}/unban`, {}],
+		["timing a member out", "POST", `/members/${TARGET}/timeout`, { minutes: 60, reason: "spam", confirm: "x" }],
+		["lifting a timeout", "DELETE", `/members/${TARGET}/timeout`, {}],
+		["renaming a member", "PATCH", `/members/${TARGET}/nickname`, { nickname: "Kate" }],
+		["changing a member's roles", "PUT", `/members/${TARGET}/roles`, { roleIds: [BELOW_YOU] }],
 	];
 
 	/** A Manage Server manager kicked, banned and warned from the web, which Discord itself would not have let them do. */

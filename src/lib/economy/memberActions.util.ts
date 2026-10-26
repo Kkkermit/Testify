@@ -178,6 +178,12 @@ export async function decorateRows(
 	});
 }
 
+/** A timeout that has run out stays on the member until Discord next says otherwise, so the time decides. */
+function timedOutUntil(member: GuildMember | null, now: number = Date.now()): string | null {
+	const until = member?.communicationDisabledUntilTimestamp ?? null;
+	return until !== null && until > now ? new Date(until).toISOString() : null;
+}
+
 function toWarning(entry: {
 	warnId: string;
 	reason: string;
@@ -226,6 +232,8 @@ export async function readMemberDetail(options: {
 		inGuild: member !== null,
 		isBot: member?.user.bot ?? false,
 		joinedAt: member?.joinedAt?.toISOString() ?? null,
+		nickname: member?.nickname ?? null,
+		timedOutUntil: timedOutUntil(member),
 		roles:
 			member === null
 				? []

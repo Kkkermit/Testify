@@ -7,6 +7,7 @@ import {
 	type GuildWarningsPage,
 	type MemberDetail,
 	type MemberMatch,
+	type MemberRoles,
 	type RaidOverview,
 	type ServerChangesPage,
 	type WarnLadder,
@@ -54,6 +55,8 @@ export const memberDetail: MemberDetail = {
 	inGuild: true,
 	isBot: false,
 	joinedAt: "2026-01-04T00:00:00.000Z",
+	nickname: null,
+	timedOutUntil: null,
 	roles: [{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff" }],
 	economy: { wallet: 5_000, bank: 120, total: 5_120, rank: 2 },
 	levels: { level: 12, xp: 4_800, rank: 3 },
@@ -141,6 +144,13 @@ export const serverChanges: ServerChangesPage = {
 };
 
 export const caseSettings: CaseSettings = { logChannelId: "400000000000000001", canSend: true };
+
+export const memberRoles: MemberRoles = {
+	roles: [
+		{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff", held: true },
+		{ id: "300000000000000002", name: "Artists", colour: null, held: false },
+	],
+};
 
 export const banPage: BanPage = {
 	readable: true,
