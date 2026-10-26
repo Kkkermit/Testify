@@ -2,6 +2,7 @@
 
 export * from "./afk";
 export * from "./autoResponders";
+export * from "./birthdays";
 export * from "./bot";
 export * from "./canvas";
 export * from "./casino";
@@ -17,6 +18,7 @@ export * from "./levelling";
 export * from "./moderation";
 export * from "./music";
 export * from "./polls";
+export * from "./raid";
 export * from "./reminders";
 export * from "./roles";
 export * from "./scheduledMessages";

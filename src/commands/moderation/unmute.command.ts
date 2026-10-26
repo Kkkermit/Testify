@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, DEFAULT_REASON, dmEmbed, notifyTarget } from "@lib/moderation";
+import { actionEmbed, DEFAULT_REASON, moderatorOf, removeTimeout } from "@lib/moderation";
 
 export default defineCommand({
 	name: "unmute",
@@ -25,23 +25,7 @@ export default defineCommand({
 
 		const member = await guild.members.fetch(target.id).catch(() => null);
 		if (!member) throw new UserFacingError(strings.moderation.memberNotFound);
-		if (member.communicationDisabledUntilTimestamp === null) {
-			throw new UserFacingError(`${target.username} is not currently timed out.`);
-		}
-		if (!member.moderatable) throw new UserFacingError(strings.moderation.notModeratable);
-
-		await member.timeout(null, `${interaction.user.username}: ${reason}`);
-
-		const delivered = await notifyTarget(
-			target,
-			dmEmbed({
-				action: `untimed out in ${guild.name}`,
-				emoji: theme.emoji.success,
-				guild,
-				moderator: interaction.user,
-				reason,
-			}),
-		);
+		const { notified: delivered } = await removeTimeout(guild, member, moderatorOf(interaction.user), reason);
 
 		await reply(interaction, {
 			embeds: [

@@ -3,7 +3,9 @@ import { purgeAntiLink } from "@database/repositories/antiLinkRepository";
 import { purgeAuditLog } from "@database/repositories/auditLogRepository";
 import { purgeAutoResponders } from "@database/repositories/autoResponderRepository";
 import { purgeAutoRoles } from "@database/repositories/autoRoleRepository";
+import { purgeBirthdays } from "@database/repositories/birthdayRepository";
 import { purgeFixedStats } from "@database/repositories/botStatsRepository";
+import { purgeCaseSettings } from "@database/repositories/caseRepository";
 import { purgeCasino } from "@database/repositories/casinoRepository";
 import { purgeCasinoStats } from "@database/repositories/casinoStatsRepository";
 import { purgeCommandToggles } from "@database/repositories/commandToggleRepository";
@@ -13,6 +15,7 @@ import { purgeIdeas } from "@database/repositories/ideaRepository";
 import { purgeWarnLadder } from "@database/repositories/moderationRepository";
 import { purgeMusicSettings } from "@database/repositories/musicSettingsRepository";
 import { purgePrefix } from "@database/repositories/prefixRepository";
+import { purgeRaidSettings } from "@database/repositories/raidRepository";
 import { purgeRoleMenus } from "@database/repositories/roleMenuRepository";
 import { purgeRounds } from "@database/repositories/rouletteRepository";
 import { purgeSchedules } from "@database/repositories/scheduledMessageRepository";
@@ -29,6 +32,9 @@ export async function purgeGuild(guildId: string): Promise<void> {
 		purgeAfk(guildId),
 		purgeAutoResponders(guildId),
 		purgeSchedules(guildId),
+		purgeBirthdays(guildId),
+		purgeCaseSettings(guildId),
+		purgeRaidSettings(guildId),
 		purgeAntiLink(guildId),
 		purgeAuditLog(guildId),
 		purgeAutoRoles(guildId),

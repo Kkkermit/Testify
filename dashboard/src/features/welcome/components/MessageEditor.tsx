@@ -1,10 +1,10 @@
-import { WELCOME_LIMITS } from "@testify/shared";
+import { WELCOME_LIMITS, WELCOME_PLACEHOLDERS, type WelcomePlaceholder } from "@testify/shared";
 import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
 import { PlaceholderHelp } from "@/features/welcome/components/PlaceholderHelp";
-import { insertToken, messageTooLong } from "@/features/welcome/welcome.utils";
+import { insertToken } from "@/features/welcome/welcome.utils";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
@@ -18,6 +18,8 @@ export function MessageEditor({
 	disabled,
 	onDraft,
 	onSave,
+	max = WELCOME_LIMITS.maxMessage,
+	tokens = WELCOME_PLACEHOLDERS,
 }: {
 	id: string;
 	label: string;
@@ -27,11 +29,13 @@ export function MessageEditor({
 	disabled: boolean;
 	onDraft: (draft: string) => void;
 	onSave: (message: string) => void;
+	max?: number;
+	tokens?: readonly WelcomePlaceholder[];
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const textarea = useRef<HTMLTextAreaElement>(null);
 	const dirty = draft !== saved;
-	const tooLong = messageTooLong(draft);
+	const tooLong = draft.length > max;
 	const warning = markupWarning(draft);
 
 	function save(): void {
@@ -56,12 +60,13 @@ export function MessageEditor({
 					className={cn(FIELD, "resize-y font-mono", tooLong && "border-destructive")}
 				/>
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-					{draft.length} of {WELCOME_LIMITS.maxMessage}
+					{draft.length} of {max}
 				</span>
 			</Field>
 
 			<PlaceholderHelp
 				disabled={disabled}
+				tokens={tokens}
 				onInsert={(token) => {
 					onDraft(insertToken(draft, token, textarea.current?.selectionStart ?? null));
 					textarea.current?.focus();

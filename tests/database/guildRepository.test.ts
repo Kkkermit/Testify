@@ -4,11 +4,13 @@ import { getAntiLink, setAntiLink } from "@database/repositories/antiLinkReposit
 import { getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
 import { createAutoResponder, listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
+import { getBirthdaySettings, saveBirthdaySettings } from "@database/repositories/birthdayRepository";
 import { getFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
 import { getCounting, setCounting } from "@database/repositories/countingRepository";
 import { getGoodbyeSettings, saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { purgeGuild } from "@database/repositories/guildRepository";
 import { getPrefixConfig, setPrefix } from "@database/repositories/prefixRepository";
+import { getRaidSettings, saveRaidSettings } from "@database/repositories/raidRepository";
 import { createSchedule, listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { listSticky, setSticky } from "@database/repositories/stickyRepository";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
@@ -35,6 +37,8 @@ async function configure(guildId: string): Promise<void> {
 		saveGoodbyeSettings(guildId, { enabled: true, channelId: CHANNEL }, ADMIN),
 		createAutoResponder(guildId, { trigger: "rules", match: "word", reply: "Read #rules." }, ADMIN),
 		createSchedule(guildId, { channelId: CHANNEL, message: "Hello", repeat: "daily", nextAt: new Date() }, ADMIN),
+		saveBirthdaySettings(guildId, { enabled: true, channelId: CHANNEL }, ADMIN),
+		saveRaidSettings(guildId, { enabled: true, minAccountAgeDays: 7 }, ADMIN),
 	]);
 }
 
@@ -53,6 +57,8 @@ async function settingsOf(guildId: string) {
 		goodbye: await getGoodbyeSettings(guildId),
 		autoResponders: await listAutoResponders(guildId),
 		schedules: await listSchedules(guildId),
+		birthdays: await getBirthdaySettings(guildId),
+		raid: await getRaidSettings(guildId),
 	};
 }
 
@@ -77,6 +83,8 @@ describeWithMongo("guildRepository", () => {
 			goodbye: null,
 			autoResponders: [],
 			schedules: [],
+			birthdays: null,
+			raid: null,
 		});
 	});
 

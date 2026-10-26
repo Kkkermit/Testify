@@ -38,6 +38,10 @@ jest.mock("@lib/levelling/levellingActions.util", () => ({
 	applyLevelRewards: jest.fn(() => Promise.resolve({ added: [], removed: [], skipped: [] })),
 }));
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
+jest.mock("@lib/moderation/caseActions.util", () => ({
+	...jest.requireActual<object>("@lib/moderation/caseActions.util"),
+	recordCase: jest.fn(() => Promise.resolve(null)),
+}));
 
 const GUILD = "900000000000000001";
 const ACTOR = "100000000000000001";

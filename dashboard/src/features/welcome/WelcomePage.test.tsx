@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { delay, http, HttpResponse } from "msw";
-import { insertToken, messageTooLong } from "@/features/welcome/welcome.utils";
+import { insertToken } from "@/features/welcome/welcome.utils";
 import { WelcomePage } from "@/features/welcome/WelcomePage";
 import { expectNoViolations } from "@/test/axe";
 import { goodbyeConfig, welcomeConfig } from "@/test/fixtures/community";
@@ -40,16 +40,6 @@ describe("insertToken", () => {
 
 	it("appends rather than corrupting the message when the caret is out of range", () => {
 		expect(insertToken("Hi", "{user}", 99)).toBe("Hi{user}");
-	});
-});
-
-describe("messageTooLong", () => {
-	it("accepts an ordinary greeting", () => {
-		expect(messageTooLong("Welcome!")).toBe(false);
-	});
-
-	it("rejects one Discord would refuse", () => {
-		expect(messageTooLong("x".repeat(1_501))).toBe(true);
 	});
 });
 

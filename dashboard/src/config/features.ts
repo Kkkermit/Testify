@@ -1,10 +1,12 @@
 import {
 	AudioLines,
+	Cake,
 	CalendarClock,
 	Code2,
 	Coins,
 	Dices,
 	Gauge,
+	Gavel,
 	Gift,
 	Hash,
 	Info,
@@ -21,6 +23,7 @@ import {
 	Settings,
 	Shield,
 	ShieldCheck,
+	Siren,
 	Smile,
 	Sparkles,
 	Star,
@@ -152,6 +155,18 @@ const LOOKS: Record<string, FeatureLook> = {
 		wash: "bg-feature-moderation/15",
 		path: (guildId) => `/guilds/${guildId}/settings`,
 	},
+	cases: {
+		icon: Gavel,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/cases`,
+	},
+	"raid-protection": {
+		icon: Siren,
+		tint: "text-feature-moderation",
+		wash: "bg-feature-moderation/15",
+		path: (guildId) => `/guilds/${guildId}/raid-protection`,
+	},
 	moderation: { icon: Shield, tint: "text-feature-moderation", wash: "bg-feature-moderation/15" },
 	automod: {
 		icon: MessageSquareWarning,
@@ -164,6 +179,12 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-welcome",
 		wash: "bg-feature-welcome/15",
 		path: (guildId) => `/guilds/${guildId}/welcome`,
+	},
+	birthdays: {
+		icon: Cake,
+		tint: "text-feature-welcome",
+		wash: "bg-feature-welcome/15",
+		path: (guildId) => `/guilds/${guildId}/birthdays`,
 	},
 	goodbye: {
 		icon: UserMinus,

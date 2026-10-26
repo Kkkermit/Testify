@@ -1,4 +1,4 @@
-import { WELCOME_LIMITS, WELCOME_STYLES, type WelcomeStyle } from "@testify/shared";
+import { WELCOME_STYLES, type WelcomeStyle } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
 export const STYLE_LABELS: Record<WelcomeStyle, { label: TranslationKey; describes: TranslationKey }> = {
@@ -13,10 +13,6 @@ export const STYLE_ORDER = WELCOME_STYLES;
 export function insertToken(message: string, token: string, caret: number | null): string {
 	if (caret === null || caret < 0 || caret > message.length) return `${message}${token}`;
 	return `${message.slice(0, caret)}${token}${message.slice(caret)}`;
-}
-
-export function messageTooLong(message: string): boolean {
-	return message.length > WELCOME_LIMITS.maxMessage;
 }
 
 export interface MarkSpan {

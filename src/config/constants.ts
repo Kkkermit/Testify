@@ -54,6 +54,7 @@ export const INTERVALS = {
 	softbanCheckMs: MINUTE_MS,
 	reminderCheckMs: 30 * SECOND_MS,
 	scheduledMessageCheckMs: 30 * SECOND_MS,
+	birthdayCheckMs: HOUR_MS,
 	tempVoiceSweepMs: 10 * MINUTE_MS,
 	fixedStatsRefreshMs: 5 * MINUTE_MS,
 	passiveIncomeMs: HOUR_MS,

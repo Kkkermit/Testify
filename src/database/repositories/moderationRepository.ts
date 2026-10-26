@@ -64,6 +64,18 @@ export async function setWarningStep(
 	).exec();
 }
 
+export async function setWarningCase(
+	guildId: string,
+	userId: string,
+	warnId: string,
+	caseNumber: number,
+): Promise<void> {
+	await Warnings.updateOne(
+		{ guildId, userId, "warnings.warnId": warnId },
+		{ $set: { "warnings.$.caseNumber": caseNumber } },
+	).exec();
+}
+
 /** Every record in a server; a warning lives inside its member's record, so the list is flattened by the caller. */
 export async function listGuildWarnings(guildId: string): Promise<WarnRecord[]> {
 	return Warnings.find({ guildId, "warnings.0": { $exists: true } })

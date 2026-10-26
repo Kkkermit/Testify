@@ -4,7 +4,7 @@ import { theme } from "@config/theme";
 import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply } from "@lib/discord";
-import { actionEmbed, assertModeratable, DEFAULT_REASON, kickMember } from "@lib/moderation";
+import { actionEmbed, assertModeratable, DEFAULT_REASON, kickMember, moderatorOf } from "@lib/moderation";
 
 export default defineCommand({
 	name: "kick",
@@ -27,7 +27,7 @@ export default defineCommand({
 		if (!member) throw new UserFacingError(strings.moderation.memberNotFound);
 
 		assertModeratable(interaction, member);
-		const { notified: delivered } = await kickMember(guild, member, interaction.user.username, reason);
+		const { notified: delivered } = await kickMember(guild, member, moderatorOf(interaction.user), reason);
 
 		await reply(interaction, {
 			embeds: [

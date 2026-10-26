@@ -99,6 +99,14 @@ describe("the legal pages", () => {
 		// Goodbye, auto-responder and scheduled message records each carry `updatedBy`, and `purgeGuild` removes all three.
 		expect(text).toMatch(/Goodbye messages, auto-responders and scheduled messages: .* who last changed each/);
 		expect(text).toMatch(/A scheduled message that posts once is deleted once it is posted/);
+		// `shareBirthday` keeps a day and a month with no year, and `forgetLeaver` drops it when the member leaves.
+		expect(text).toMatch(/Birthdays: the day and month .* never the year/);
+		expect(text).toMatch(/Birthdays: until you remove yours .* you leave that server/);
+		// `recordCase` names the member and the moderator, and `purgeCaseSettings` keeps the cases themselves.
+		expect(text).toMatch(/Moderation cases: .* the member’s user id and username, the moderator’s/);
+		expect(text).toMatch(/Moderation cases: kept like warnings after the bot is removed/);
+		// `JoinWatch` lives in memory, and `raidsettings` holds nothing about any member.
+		expect(text).toMatch(/Raid protection: only its settings\. .* never stored/);
 		// The support desk logs no question and keeps none; `supportDesk.test.ts` pins the log half in the bot.
 		expect(text).toMatch(/It is not stored, and it is not written to the log/);
 		expect(text).toMatch(/sent to Anthropic/);

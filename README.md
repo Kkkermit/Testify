@@ -118,6 +118,8 @@ Everything the old bot did is still here, apart from the integrations that neede
 
 - **Ban, softban, kick, mute, lock, slowmode**, nicknames and roles
 - **Warnings that escalate** — set what the 1st, 2nd and 3rd warning do: a timeout, a kick or a ban
+- **Moderation cases** — every warning, timeout, kick and ban numbered, whichever surface it came from
+- **Raid protection** — brand new accounts held back and staff told about a join spike, never a kick or a ban
 - **AutoMod** — Discord's own filters for words, spam, mentions and links
 - **Audit logging** — 18 event types, each switchable per server
 - **Tickets** — panels, claiming, locking and HTML transcripts
@@ -170,6 +172,7 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **A starboard** that reposts the messages with enough ⭐, without pinging anybody again
 - **Join-to-create voice channels**, one per member and deleted once they empty
 - **Reminders** that ping you where you set them, or by DM
+- **Birthdays** — the day and month a member shares with one server, never the year
 - **Polls** — Discord's own, posted with `/poll`
 - **Away notes** — `/afk` tells whoever mentions you, until you next speak
 - **Auto-responders and scheduled messages**, neither of which ever pings anybody
@@ -473,22 +476,22 @@ seconds**, with a countdown saying so.
 Run `/help` in Discord for the browsable version, or see [`docs/commands.md`](docs/commands.md) for the full
 generated list.
 
-| Category      | Top-level | What is in it                                                                  |
-| ------------- | :-------: | ------------------------------------------------------------------------------ |
-| 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards            |
-| 🛡️ Moderation |    17     | Ban, kick, mute, warn, softban, lock, clear, roles, slowmode                   |
-| 📚 Info       |    12     | User, server and role info, avatars, profiles, ping, help, `/ask`              |
-| ⚙️ Settings   |    11     | Automod, audit logging, auto roles, role menus, counting, welcome, prefix      |
-| 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                    |
-| 👥 Community  |     7     | Reminders, the idea board, starboard, join to create, memes, translation, wiki |
-| 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                         |
-| 📈 Levelling  |     2     | Rank cards and the levelling settings                                          |
-| 💬 Feedback   |     2     | Suggestions and bug reports                                                    |
-| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume, DJ roles           |
-| 🎰 Casino     |     1     | Roulette, blackjack, slots, hi-lo, coinflip, dice, stats, bet limits           |
-| 🎯 Games      |     1     | Guess the number, Pokémon, fast type, RPS, 8ball                               |
-| 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                     |
-| 🎫 Tickets    |     1     | Setup, status, disable                                                         |
+| Category      | Top-level | What is in it                                                                |
+| ------------- | :-------: | ---------------------------------------------------------------------------- |
+| 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards          |
+| 🛡️ Moderation |    18     | Ban, kick, mute, warn, cases, softban, lock, clear, roles, slowmode          |
+| 📚 Info       |    12     | User, server and role info, avatars, profiles, ping, help, `/ask`            |
+| ⚙️ Settings   |    14     | Automod, raid protection, audit logging, auto-responders, schedules, welcome |
+| 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                  |
+| 👥 Community  |    10     | Birthdays, polls, away notes, reminders, ideas, starboard, join to create    |
+| 🎮 Fun        |     2     | ASCII art, fake tweets, hack, IQ, nitro, Oogway quotes                       |
+| 📈 Levelling  |     2     | Rank cards and the levelling settings                                        |
+| 💬 Feedback   |     2     | Suggestions and bug reports                                                  |
+| 🎵 Music      |     2     | Play by link or search, queue, loop, shuffle, skip, volume, DJ roles         |
+| 🎰 Casino     |     1     | Roulette, blackjack, slots, hi-lo, coinflip, dice, stats, bet limits         |
+| 🎯 Games      |     1     | Guess the number, Pokémon, fast type, RPS, 8ball                             |
+| 🎁 Giveaways  |     1     | Start, end, reroll, delete                                                   |
+| 🎫 Tickets    |     1     | Setup, status, disable                                                       |
 
 Some categories look small but hold a lot: `/casino`, `/game`, `/fun` and `/lookup` group many subcommands
 under one parent, which is how the bot stays under Discord's hard limit of 100 top-level commands.

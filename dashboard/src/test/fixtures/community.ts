@@ -1,4 +1,5 @@
 import {
+	type BirthdayOverview,
 	type BoardPage,
 	type GoodbyeSettings,
 	type IdeaRow,
@@ -145,5 +146,17 @@ export const ideaPage: Paged<IdeaRow> = {
 			createdAt: "2026-10-19T10:00:00.000Z",
 			messageUrl: null,
 		},
+	],
+};
+
+export const birthdayOverview: BirthdayOverview = {
+	enabled: true,
+	channelId: "400000000000000001",
+	message: "Happy birthday, {user}! 🎂",
+	canSend: true,
+	shared: 2,
+	upcoming: [
+		{ userId: "100000000000000001", name: "Sam", day: 25, month: 10 },
+		{ userId: "100000000000000002", name: "Kit", day: 3, month: 1 },
 	],
 };

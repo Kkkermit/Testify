@@ -8,7 +8,7 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
 import { problemText } from "@lib/format";
-import { banUser, kickMember, moderationProblem } from "@lib/moderation";
+import { banUser, kickMember, type Moderator, moderationProblem } from "@lib/moderation";
 import {
 	banBody,
 	boardQuery,
@@ -28,8 +28,10 @@ export const members = new Hono<ApiBindings>();
 
 members.use("*", requireGuild);
 
-function actorName(context: Context<ApiBindings>): string {
-	return context.get("session")?.username ?? "a server manager";
+/** `requireGuild` has already insisted on a session, so the fallbacks only satisfy the type. */
+function actorOf(context: Context<ApiBindings>): Moderator {
+	const session = context.get("session");
+	return { id: session?.userId ?? "", name: session?.username ?? "a server manager" };
 }
 
 members.get("/leaderboard", async (context) => {
@@ -152,7 +154,7 @@ members.post("/:userId/kick", requirePermission(PermissionFlagsBits.KickMembers)
 	const body = await parseBody(context, kickBody);
 	if (!confirmsName(body.confirm, current.username, current.userId)) throw badRequest(CONFIRM_REFUSED);
 
-	const { notified } = await kickMember(guildOf(context), member, actorName(context), body.reason);
+	const { notified } = await kickMember(guildOf(context), member, actorOf(context), body.reason);
 	await auditChange(context, {
 		action: "member.kick",
 		summary: `Kicked ${current.username}`,
@@ -180,7 +182,7 @@ members.post("/:userId/ban", requirePermission(PermissionFlagsBits.BanMembers), 
 	if (user === null) throw notFound("user_not_found", "Discord does not know that account.");
 	if (!confirmsName(body.confirm, user.username, user.id)) throw badRequest(CONFIRM_REFUSED);
 
-	const { notified } = await banUser(guild, user, member, actorName(context), body.reason, body.deleteDays);
+	const { notified } = await banUser(guild, user, member, actorOf(context), body.reason, body.deleteDays);
 	await auditChange(context, {
 		action: "member.ban",
 		summary: `Banned ${user.username}`,
@@ -194,9 +196,7 @@ members.post("/:userId/ban", requirePermission(PermissionFlagsBits.BanMembers), 
 members.delete("/:userId/softban", requirePermission(PermissionFlagsBits.BanMembers), async (context) => {
 	const guild = guildOf(context);
 	const { userId } = parseParams(context, memberParams);
-	const session = context.get("session");
-
-	if (!(await revokeSoftban(guild, userId, session?.username ?? "a server manager"))) {
+	if (!(await revokeSoftban(guild, userId, actorOf(context)))) {
 		throw notFound("softban_not_found", "There is no active softban for them.");
 	}
 	await auditChange(context, { action: "member.softban.revoke", summary: "Lifted a softban early" });

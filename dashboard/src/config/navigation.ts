@@ -1,11 +1,13 @@
 import {
 	Activity,
+	Cake,
 	CalendarClock,
 	ChartColumn,
 	ChartLine,
 	LayoutGrid,
 	ScrollText,
 	ShieldAlert,
+	Siren,
 	Server,
 	ShieldCheck,
 	Pin,
@@ -27,6 +29,7 @@ import {
 	Ticket,
 	type LucideIcon,
 	Gauge,
+	Gavel,
 	History,
 	Gift,
 	Gem,
@@ -122,6 +125,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							hintKey: "nav.welcomeHint",
 						},
 						{
+							to: `/guilds/${guild.id}/birthdays`,
+							labelKey: "nav.birthdays",
+							icon: Cake,
+							hintKey: "nav.birthdaysHint",
+						},
+						{
 							to: `/guilds/${guild.id}/levelling`,
 							labelKey: "nav.levelling",
 							icon: TrendingUp,
@@ -176,6 +185,18 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.warnings",
 							icon: TriangleAlert,
 							hintKey: "nav.warningsHint",
+						},
+						{
+							to: `/guilds/${guild.id}/cases`,
+							labelKey: "nav.cases",
+							icon: Gavel,
+							hintKey: "nav.casesHint",
+						},
+						{
+							to: `/guilds/${guild.id}/raid-protection`,
+							labelKey: "nav.raid",
+							icon: Siren,
+							hintKey: "nav.raidHint",
 						},
 						{
 							to: `/guilds/${guild.id}/changes`,
