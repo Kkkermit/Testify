@@ -724,6 +724,8 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                   |
 | `/guilds/:id/automod`            | Discord's own filters — no database behind it                                        |
 | `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted            |
+| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                                   |
+| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now                 |
 | `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                            |
 | `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                   |
 | `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it              |
@@ -732,12 +734,13 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                               |
 | `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                          |
 | `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first                  |
+| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen                 |
 | `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                        |
-| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish                                        |
+| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket                 |
 | `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                           |
 | `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row                      |
 | `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page                 |
-| `…/members/:userId`              | One member: standing, roles, warnings, softban — and the moderation controls         |
+| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban         |
 | `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |
 | `/guilds/:id/commands`           | Per-command switches for this server                                                 |
 | `/commands`                      | Every command, searchable, with the coverage tile                                    |

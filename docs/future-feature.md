@@ -24,31 +24,9 @@ have to respect.
 
 ## 🖥️ Dashboard screens still missing
 
-These commands do something the dashboard cannot yet do. `features/commands/commands.utils.ts` is the list that
-decides, and the coverage tile on `/commands` counts it.
-
-| Screen                 | Commands it would cover            | Permission the route takes     | Notes                                                                                |
-| ---------------------- | ---------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------ |
-| 🚫 Bans                | `/unban`                           | Ban Members                    | A list of the server's bans with Unban beside each; lifting a softban already exists |
-| 🔇 Timeouts            | `/mute`, `/unmute`                 | Moderate Members               | On the member page, beside kick and ban, with the same typed confirmation            |
-| 🔒 Channel tools       | `/lock`, `/unlock`, `/slowmode`    | Manage Channels                | Per channel, from a picker, showing the current slowmode                             |
-| 📣 Announcements       | `/announce`, `/say`                | Manage Server                  | A composer with a live preview, a channel picker and an explicit mentions choice     |
-| 🎫 Open tickets        | `/ticket` (the tickets themselves) | Manage Server                  | Who opened each, who claimed it, and Close, which files the transcript               |
-| 🏷️ Roles and nicknames | `/role`, `/nickname`               | Manage Roles, Manage Nicknames | On the member page; a role given still has to pass `requireGrantable`                |
-
-What each would have to respect:
-
-- **Every action asks what its command asks** (AGENTS.md §24, "Nothing on the web reaches further than Discord
-  would"). The permission column above is what each command asks of the person, and `requirePermission` goes on
-  the route. Manage Server is what opens the dashboard at all, so those two need nothing more.
-- **Open tickets are now within reach.** The flow moved into `src/lib/tickets/ticketFlow.util.ts`, which takes plain
-  values rather than an interaction, so the route can call `closeTicket` itself. It wants the `User` who closed it
-  for the transcript, which `client.users.fetch` gives from the session's user id. Inside Discord a ticket is
-  closed by its owner or the handler role, so decide whether the web asks for that role as well.
-- **An announcement is posted as the bot**, so the composer must make mentions an explicit choice that defaults to
-  none, and run the text through `plainText` like every other free-text field.
-- `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in
-  the channel, where you can see them.
+Nothing is waiting here. `features/commands/commands.utils.ts` is the list that decides which commands have a
+screen, and the coverage tile on `/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages
+from a browser tab is a worse tool than doing it in the channel, where you can see them.
 
 ---
 
@@ -79,6 +57,11 @@ server, and each should be before it is relied on.
   with nobody pinged.
 - **Raid protection:** a timeout on a brand new account and the DM saying why, and one alert for a burst of joins that
   pings only the chosen role.
+- **The bans screen:** a server with hundreds of bans, a softban lifted from the list, and the case that records it.
+- **Channel tools:** a lock showing at once on the page and in Discord, and a slowmode set from the dashboard.
+- **Announcements:** an embed and plain text, and `@everyone` refused to somebody without Mention Everyone.
+- **Open tickets:** a ticket closed from the dashboard, with its transcript naming the person who closed it.
+- **The member page:** a timeout, a rename and a role change, each showing on the page without a reload.
 
 ---
 
