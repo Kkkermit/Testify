@@ -3,6 +3,7 @@ import {
 	type ScheduledMessageList,
 	type BotStatsSettings,
 	type MemberCounts,
+	type OpenTicketList,
 	type StickyList,
 	type TempVoiceSettings,
 	type TicketSettings,
@@ -20,6 +21,23 @@ export const ticketSettings: TicketSettings = {
 	buttonLabel: "Create ticket",
 	posted: true,
 	openTickets: 3,
+};
+
+export const openTickets: OpenTicketList = {
+	canClose: true,
+	tickets: [
+		{
+			channelId: "400000000000000020",
+			channelName: "ticket-a1b2c3",
+			ticketId: "a1b2c3",
+			ownerId: "100000000000000002",
+			ownerName: "kate",
+			claimedById: "100000000000000001",
+			claimedByName: "someone",
+			isLocked: false,
+			openedAt: "2026-10-24T09:00:00.000Z",
+		},
+	],
 };
 
 export const botStatsSettings: BotStatsSettings = { channelId: null };

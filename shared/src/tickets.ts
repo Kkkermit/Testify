@@ -53,3 +53,27 @@ export function ticketMissing(draft: TicketDestinations): Problem[] {
 export function ticketBlocked(draft: TicketDestinations): Problem | null {
 	return ticketMissing(draft)[0] ?? null;
 }
+
+export interface OpenTicket {
+	channelId: string;
+	/** Null once the channel has gone without the record noticing. */
+	channelName: string | null;
+	ticketId: string;
+	ownerId: string;
+	ownerName: string;
+	claimedById: string | null;
+	claimedByName: string | null;
+	isLocked: boolean;
+	openedAt: string;
+}
+
+export interface OpenTicketList {
+	tickets: OpenTicket[];
+	/** Closing asks for the ticket staff role, as the Close button does inside Discord. */
+	canClose: boolean;
+}
+
+export const openTicketParams = z.object({
+	guildId: z.string().regex(/^\d{17,20}$/, "must be a Discord ID"),
+	channelId: z.string().regex(/^\d{17,20}$/, "must be a Discord ID"),
+});

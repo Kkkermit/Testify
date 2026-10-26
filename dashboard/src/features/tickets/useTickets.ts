@@ -5,7 +5,7 @@ import {
 	type UseMutationResult,
 	type UseQueryResult,
 } from "@tanstack/react-query";
-import { type TicketPatch, type TicketSettings } from "@testify/shared";
+import { type OpenTicketList, type TicketPatch, type TicketSettings } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
@@ -43,6 +43,29 @@ function useTicketMutation<Body>(
 			if (client.isMutating({ mutationKey: key }) !== 1) return;
 			void client.invalidateQueries({ queryKey: key });
 			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
+		},
+	});
+}
+
+export function useOpenTickets(guildId: string, enabled: boolean): UseQueryResult<OpenTicketList> {
+	return useQuery({
+		queryKey: keys.guild(guildId).openTickets(),
+		queryFn: () => api.get<OpenTicketList>(`/guilds/${guildId}/tickets/open`),
+		enabled,
+	});
+}
+
+/** The count on the settings card goes down with it, so both are read again. */
+export function useCloseTicket(guildId: string): UseMutationResult<OpenTicketList, Error, string> {
+	const client = useQueryClient();
+
+	return useMutation({
+		mutationFn: (channelId: string) => api.post<OpenTicketList>(`/guilds/${guildId}/tickets/open/${channelId}/close`),
+		onSuccess: (list) => {
+			client.setQueryData(keys.guild(guildId).openTickets(), list);
+		},
+		onSettled: () => {
+			void client.invalidateQueries({ queryKey: keys.guild(guildId).tickets() });
 		},
 	});
 }

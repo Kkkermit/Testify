@@ -5,6 +5,7 @@ import {
 	autoResponderList,
 	botStatsSettings,
 	memberCounts,
+	openTickets,
 	scheduledMessageList,
 	stickyList,
 	tempVoiceSettings,
@@ -113,6 +114,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/music", () => HttpResponse.json(musicSettings)),
 	http.get("/api/guilds/:guildId/casino", () => HttpResponse.json(casinoSettings)),
 	http.get("/api/guilds/:guildId/tickets", () => HttpResponse.json(ticketSettings)),
+	http.get("/api/guilds/:guildId/tickets/open", () => HttpResponse.json(openTickets)),
 	http.get("/api/guilds/:guildId/members/leaderboard", ({ request }) => {
 		const query = new URL(request.url).searchParams;
 		return HttpResponse.json({

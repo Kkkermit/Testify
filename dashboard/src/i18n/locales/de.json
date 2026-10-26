@@ -1079,7 +1079,20 @@
 		"needsMessage": "Das Panel braucht einen Text.",
 		"needsLabel": "Der Knopf braucht eine Beschriftung.",
 		"roleGone": "Diese Rolle gibt es nicht mehr. Wähle eine andere.",
-		"roleManaged": "{{role}} wird von einer Integration verwaltet, {{bot}} kann sie hier also nicht nutzen."
+		"roleManaged": "{{role}} wird von einer Integration verwaltet, {{bot}} kann sie hier also nicht nutzen.",
+		"openTitle": "Offene Tickets",
+		"openBody": "Älteste zuerst. Schließen legt das Protokoll ab und löscht den Kanal, wie der Schließen-Knopf.",
+		"openStaffOnly": "Älteste zuerst. Schließen braucht die Ticket-Teamrolle, wie der Schließen-Knopf in Discord.",
+		"noneOpen": "Keine offenen Tickets",
+		"noneOpenBody": "Ein Ticket erscheint hier, sobald es jemand öffnet.",
+		"lockedBadge": "Gesperrt",
+		"unclaimed": "Nicht übernommen",
+		"claimedBy": "Übernommen von {{name}}",
+		"opened": "geöffnet {{when}}",
+		"close": "Schließen",
+		"closeName": "#{{name}} schließen",
+		"closeWarning": "#{{name}} schließen? Das Protokoll wird abgelegt und der Kanal wenige Sekunden später gelöscht.",
+		"closeConfirm": "Ticket schließen"
 	},
 	"lottery": {
 		"title": "Lotterie",

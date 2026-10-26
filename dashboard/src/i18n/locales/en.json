@@ -1079,7 +1079,20 @@
 		"needsMessage": "The panel needs something to say.",
 		"needsLabel": "The button needs a label.",
 		"roleGone": "That role no longer exists. Pick another one.",
-		"roleManaged": "{{role}} is managed by an integration, so {{bot}} cannot use it here."
+		"roleManaged": "{{role}} is managed by an integration, so {{bot}} cannot use it here.",
+		"openTitle": "Open tickets",
+		"openBody": "Oldest first. Closing one files its transcript and deletes the channel, as its Close button does.",
+		"openStaffOnly": "Oldest first. Closing one asks for the ticket staff role, as its Close button does in Discord.",
+		"noneOpen": "No tickets are open",
+		"noneOpenBody": "A ticket shows up here as soon as somebody opens one.",
+		"lockedBadge": "Locked",
+		"unclaimed": "Unclaimed",
+		"claimedBy": "Claimed by {{name}}",
+		"opened": "opened {{when}}",
+		"close": "Close",
+		"closeName": "Close #{{name}}",
+		"closeWarning": "Close #{{name}}? Its transcript is filed and the channel is deleted a few seconds later.",
+		"closeConfirm": "Close the ticket"
 	},
 	"lottery": {
 		"title": "Lottery",

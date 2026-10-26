@@ -1080,7 +1080,20 @@
 		"needsMessage": "Le panneau a besoin de quelque chose à dire.",
 		"needsLabel": "Le bouton a besoin d’un libellé.",
 		"roleGone": "Ce rôle n’existe plus. Choisissez-en un autre.",
-		"roleManaged": "{{role}} est géré par une intégration, {{bot}} ne peut donc pas l’utiliser ici."
+		"roleManaged": "{{role}} est géré par une intégration, {{bot}} ne peut donc pas l’utiliser ici.",
+		"openTitle": "Tickets ouverts",
+		"openBody": "Les plus anciens d’abord. Fermer un ticket classe sa transcription et supprime le salon, comme son bouton Fermer.",
+		"openStaffOnly": "Les plus anciens d’abord. Fermer un ticket demande le rôle d’équipe des tickets, comme son bouton Fermer dans Discord.",
+		"noneOpen": "Aucun ticket ouvert",
+		"noneOpenBody": "Un ticket apparaît ici dès que quelqu’un en ouvre un.",
+		"lockedBadge": "Verrouillé",
+		"unclaimed": "Non pris en charge",
+		"claimedBy": "Pris en charge par {{name}}",
+		"opened": "ouvert {{when}}",
+		"close": "Fermer",
+		"closeName": "Fermer #{{name}}",
+		"closeWarning": "Fermer #{{name}} ? Sa transcription est classée et le salon supprimé quelques secondes après.",
+		"closeConfirm": "Fermer le ticket"
 	},
 	"lottery": {
 		"title": "Loterie",

@@ -1080,7 +1080,20 @@
 		"needsMessage": "Il pannello ha bisogno di qualcosa da dire.",
 		"needsLabel": "Il pulsante ha bisogno di un’etichetta.",
 		"roleGone": "Quel ruolo non esiste più. Scegline un altro.",
-		"roleManaged": "{{role}} è gestito da un’integrazione, quindi {{bot}} non può usarlo qui."
+		"roleManaged": "{{role}} è gestito da un’integrazione, quindi {{bot}} non può usarlo qui.",
+		"openTitle": "Ticket aperti",
+		"openBody": "Prima i più vecchi. Chiuderne uno archivia la trascrizione ed elimina il canale, come il suo pulsante Chiudi.",
+		"openStaffOnly": "Prima i più vecchi. Chiuderne uno richiede il ruolo dello staff dei ticket, come il suo pulsante Chiudi su Discord.",
+		"noneOpen": "Nessun ticket aperto",
+		"noneOpenBody": "Un ticket compare qui appena qualcuno lo apre.",
+		"lockedBadge": "Bloccato",
+		"unclaimed": "Non preso in carico",
+		"claimedBy": "Preso in carico da {{name}}",
+		"opened": "aperto {{when}}",
+		"close": "Chiudi",
+		"closeName": "Chiudi #{{name}}",
+		"closeWarning": "Chiudere #{{name}}? La trascrizione viene archiviata e il canale eliminato pochi secondi dopo.",
+		"closeConfirm": "Chiudi il ticket"
 	},
 	"lottery": {
 		"title": "Lotteria",

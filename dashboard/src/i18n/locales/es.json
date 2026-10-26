@@ -1080,7 +1080,20 @@
 		"needsMessage": "El panel necesita algo que decir.",
 		"needsLabel": "El botón necesita un texto.",
 		"roleGone": "Ese rol ya no existe. Elige otro.",
-		"roleManaged": "{{role}} lo gestiona una integración, así que {{bot}} no puede usarlo aquí."
+		"roleManaged": "{{role}} lo gestiona una integración, así que {{bot}} no puede usarlo aquí.",
+		"openTitle": "Tickets abiertos",
+		"openBody": "Los más antiguos primero. Cerrar uno archiva la transcripción y borra el canal, como su botón Cerrar.",
+		"openStaffOnly": "Los más antiguos primero. Cerrar uno requiere el rol del equipo de tickets, como su botón Cerrar en Discord.",
+		"noneOpen": "No hay tickets abiertos",
+		"noneOpenBody": "Un ticket aparece aquí en cuanto alguien lo abre.",
+		"lockedBadge": "Bloqueado",
+		"unclaimed": "Sin asignar",
+		"claimedBy": "Asignado a {{name}}",
+		"opened": "abierto {{when}}",
+		"close": "Cerrar",
+		"closeName": "Cerrar #{{name}}",
+		"closeWarning": "¿Cerrar #{{name}}? Se archiva la transcripción y el canal se borra unos segundos después.",
+		"closeConfirm": "Cerrar el ticket"
 	},
 	"lottery": {
 		"title": "Lotería",
