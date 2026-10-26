@@ -129,6 +129,8 @@
 		"casesHint": "Chaque action de modération, numérotée",
 		"bans": "Bannissements",
 		"bansHint": "Toutes les personnes bannies, et Débannir",
+		"channelTools": "Outils de salon",
+		"channelToolsHint": "Verrouiller un salon ou le ralentir",
 		"raid": "Protection anti-raid",
 		"raidHint": "Retenir les nouveaux comptes, être prévenu des pics d’arrivées"
 	},
@@ -578,6 +580,27 @@
 		"reason": "Raison",
 		"reasonHint": "Facultative. Elle figure dans le cas et dans le journal d’audit de Discord.",
 		"confirm": "Débannir {{name}}"
+	},
+	"channelTools": {
+		"title": "Outils de salon",
+		"subtitle": "Verrouillez un salon pour que seule l’équipe parle, ou fixez le délai entre deux messages.",
+		"channel": "Salon",
+		"locked": "Verrouillé",
+		"lockedHint": "@everyone ne peut pas envoyer de messages ici. Le déverrouiller lui rend la règle de sa catégorie.",
+		"cannotLock": "Verrouiller ce salon demande Gérer les salons pour vous et Gérer les rôles pour {{bot}} dans ce salon.",
+		"slowmode": "Mode lent",
+		"slowmodeHint": "Le délai que chaque membre attend entre deux messages.",
+		"off": "Désactivé",
+		"cannotSlow": "Le mode lent ici demande Gérer les salons pour vous et pour {{bot}} dans ce salon.",
+		"restricted": "Restreints en ce moment",
+		"restrictedBody": "Chaque salon verrouillé ou ralenti, où que ce soit fait.",
+		"nothingRestricted": "Aucun salon n’est verrouillé ni ralenti.",
+		"lockedBadge": "Verrouillé",
+		"slowBadge": "Mode lent {{length}}",
+		"choose": "Choisir",
+		"chooseName": "Choisir #{{name}}",
+		"noneTitle": "Aucun salon textuel",
+		"noneBody": "Ce serveur n’a aucun salon textuel à verrouiller ou ralentir."
 	},
 	"raid": {
 		"title": "Protection anti-raid",

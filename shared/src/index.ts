@@ -8,6 +8,7 @@ export * from "./birthdays";
 export * from "./blacklist";
 export * from "./botStats";
 export * from "./changes";
+export * from "./channelTools";
 export * from "./brand";
 export * from "./cases";
 export * from "./casino";

@@ -129,6 +129,8 @@
 		"casesHint": "Every moderation action, numbered",
 		"bans": "Bans",
 		"bansHint": "Everybody banned, and Unban",
+		"channelTools": "Channel tools",
+		"channelToolsHint": "Lock a channel or slow it down",
 		"raid": "Raid protection",
 		"raidHint": "Hold back new accounts, hear about join spikes"
 	},
@@ -577,6 +579,27 @@
 		"reason": "Reason",
 		"reasonHint": "Optional. It goes in the case and in Discord’s audit log.",
 		"confirm": "Unban {{name}}"
+	},
+	"channelTools": {
+		"title": "Channel tools",
+		"subtitle": "Lock a channel so only staff can talk, or set how long members wait between messages.",
+		"channel": "Channel",
+		"locked": "Locked",
+		"lockedHint": "@everyone cannot send messages here. Unlocking returns it to its category’s rule.",
+		"cannotLock": "Locking this channel needs Manage Channels for you and Manage Roles for {{bot}} in it.",
+		"slowmode": "Slowmode",
+		"slowmodeHint": "How long each member waits between messages.",
+		"off": "Off",
+		"cannotSlow": "Slowmode here needs Manage Channels for both you and {{bot}} in this channel.",
+		"restricted": "Restricted right now",
+		"restrictedBody": "Every channel that is locked or slowed, wherever it was done.",
+		"nothingRestricted": "No channel is locked or slowed.",
+		"lockedBadge": "Locked",
+		"slowBadge": "Slowmode {{length}}",
+		"choose": "Choose",
+		"chooseName": "Choose #{{name}}",
+		"noneTitle": "No text channels",
+		"noneBody": "This server has no text channels to lock or slow."
 	},
 	"raid": {
 		"title": "Raid protection",

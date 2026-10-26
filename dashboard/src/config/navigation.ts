@@ -27,6 +27,7 @@ import {
 	LifeBuoy,
 	Lightbulb,
 	ListChecks,
+	Lock,
 	Ticket,
 	type LucideIcon,
 	Gauge,
@@ -198,6 +199,12 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							labelKey: "nav.bans",
 							icon: Ban,
 							hintKey: "nav.bansHint",
+						},
+						{
+							to: `/guilds/${guild.id}/channel-tools`,
+							labelKey: "nav.channelTools",
+							icon: Lock,
+							hintKey: "nav.channelToolsHint",
 						},
 						{
 							to: `/guilds/${guild.id}/raid-protection`,

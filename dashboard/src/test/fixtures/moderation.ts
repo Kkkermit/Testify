@@ -4,6 +4,7 @@ import {
 	type BanPage,
 	type CasePage,
 	type CaseSettings,
+	type ChannelToolList,
 	type GuildWarningsPage,
 	type MemberDetail,
 	type MemberMatch,
@@ -149,6 +150,29 @@ export const memberRoles: MemberRoles = {
 	roles: [
 		{ id: "300000000000000001", name: "Regulars", colour: "#7c5cff", held: true },
 		{ id: "300000000000000002", name: "Artists", colour: null, held: false },
+	],
+};
+
+export const channelTools: ChannelToolList = {
+	channels: [
+		{
+			id: "400000000000000001",
+			name: "general",
+			category: "Chat",
+			locked: false,
+			slowmodeSeconds: 0,
+			canLock: true,
+			canSlow: true,
+		},
+		{
+			id: "400000000000000006",
+			name: "memes",
+			category: "Chat",
+			locked: true,
+			slowmodeSeconds: 30,
+			canLock: true,
+			canSlow: true,
+		},
 	],
 };
 

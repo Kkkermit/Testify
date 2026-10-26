@@ -129,6 +129,8 @@
 		"casesHint": "Cada acción de moderación, numerada",
 		"bans": "Baneos",
 		"bansHint": "Todos los baneados, y Desbanear",
+		"channelTools": "Herramientas de canal",
+		"channelToolsHint": "Bloquea un canal o ralentízalo",
 		"raid": "Protección contra raids",
 		"raidHint": "Retén cuentas nuevas y entérate de los picos de entradas"
 	},
@@ -578,6 +580,27 @@
 		"reason": "Motivo",
 		"reasonHint": "Opcional. Va en el caso y en el registro de auditoría de Discord.",
 		"confirm": "Desbanear a {{name}}"
+	},
+	"channelTools": {
+		"title": "Herramientas de canal",
+		"subtitle": "Bloquea un canal para que solo hable el equipo, o fija cuánto esperan los miembros entre mensajes.",
+		"channel": "Canal",
+		"locked": "Bloqueado",
+		"lockedHint": "@everyone no puede enviar mensajes aquí. Al desbloquearlo vuelve a la regla de su categoría.",
+		"cannotLock": "Bloquear este canal requiere Gestionar canales para ti y Gestionar roles para {{bot}} en él.",
+		"slowmode": "Modo lento",
+		"slowmodeHint": "Cuánto espera cada miembro entre mensajes.",
+		"off": "Desactivado",
+		"cannotSlow": "El modo lento aquí requiere Gestionar canales para ti y para {{bot}} en este canal.",
+		"restricted": "Restringidos ahora",
+		"restrictedBody": "Todos los canales bloqueados o ralentizados, se haya hecho donde se haya hecho.",
+		"nothingRestricted": "Ningún canal está bloqueado ni ralentizado.",
+		"lockedBadge": "Bloqueado",
+		"slowBadge": "Modo lento {{length}}",
+		"choose": "Elegir",
+		"chooseName": "Elegir #{{name}}",
+		"noneTitle": "No hay canales de texto",
+		"noneBody": "Este servidor no tiene canales de texto que bloquear o ralentizar."
 	},
 	"raid": {
 		"title": "Protección contra raids",

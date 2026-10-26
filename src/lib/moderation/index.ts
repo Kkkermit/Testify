@@ -6,6 +6,7 @@ export * from "./automodActions.util";
 export * from "./banList.util";
 export * from "./blacklistActions.util";
 export * from "./caseActions.util";
+export * from "./channelTools.util";
 export * from "./contentFilter.util";
 export * from "./moderation.constants";
 export * from "./moderation.types";

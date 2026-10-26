@@ -129,6 +129,8 @@
 		"casesHint": "Jede Moderationsaktion, nummeriert",
 		"bans": "Banns",
 		"bansHint": "Alle Gebannten, mit Entbannen",
+		"channelTools": "Kanalwerkzeuge",
+		"channelToolsHint": "Einen Kanal sperren oder verlangsamen",
 		"raid": "Raid-Schutz",
 		"raidHint": "Neue Konten zurückhalten, bei Beitrittswellen Bescheid bekommen"
 	},
@@ -577,6 +579,27 @@
 		"reason": "Grund",
 		"reasonHint": "Optional. Er steht im Fall und in Discords Audit-Log.",
 		"confirm": "{{name}} entbannen"
+	},
+	"channelTools": {
+		"title": "Kanalwerkzeuge",
+		"subtitle": "Sperre einen Kanal, damit nur das Team schreibt, oder lege fest, wie lange Mitglieder zwischen Nachrichten warten.",
+		"channel": "Kanal",
+		"locked": "Gesperrt",
+		"lockedHint": "@everyone kann hier keine Nachrichten senden. Entsperren stellt die Regel der Kategorie wieder her.",
+		"cannotLock": "Zum Sperren brauchst du hier „Kanäle verwalten“ und {{bot}} „Rollen verwalten“.",
+		"slowmode": "Langsamer Modus",
+		"slowmodeHint": "Wie lange jedes Mitglied zwischen Nachrichten wartet.",
+		"off": "Aus",
+		"cannotSlow": "Der langsame Modus braucht hier „Kanäle verwalten“ für dich und für {{bot}}.",
+		"restricted": "Gerade eingeschränkt",
+		"restrictedBody": "Jeder gesperrte oder verlangsamte Kanal, egal wo es eingestellt wurde.",
+		"nothingRestricted": "Kein Kanal ist gesperrt oder verlangsamt.",
+		"lockedBadge": "Gesperrt",
+		"slowBadge": "Langsam {{length}}",
+		"choose": "Auswählen",
+		"chooseName": "#{{name}} auswählen",
+		"noneTitle": "Keine Textkanäle",
+		"noneBody": "Dieser Server hat keine Textkanäle zum Sperren oder Verlangsamen."
 	},
 	"raid": {
 		"title": "Raid-Schutz",

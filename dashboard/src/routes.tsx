@@ -26,6 +26,7 @@ const CasesPage = page(async () => import("@/features/cases/CasesPage"), "CasesP
 const BirthdaysPage = page(async () => import("@/features/birthdays/BirthdaysPage"), "BirthdaysPage");
 const RaidPage = page(async () => import("@/features/raid-protection/RaidPage"), "RaidPage");
 const BansPage = page(async () => import("@/features/bans/BansPage"), "BansPage");
+const ChannelToolsPage = page(async () => import("@/features/channel-tools/ChannelToolsPage"), "ChannelToolsPage");
 const ScheduledMessagesPage = page(
 	async () => import("@/features/scheduled-messages/ScheduledMessagesPage"),
 	"ScheduledMessagesPage",
@@ -107,6 +108,7 @@ export const routes = [
 									{ path: "/guilds/:guildId/cases", element: lazily(<CasesPage />) },
 									{ path: "/guilds/:guildId/raid-protection", element: lazily(<RaidPage />) },
 									{ path: "/guilds/:guildId/bans", element: lazily(<BansPage />) },
+									{ path: "/guilds/:guildId/channel-tools", element: lazily(<ChannelToolsPage />) },
 									{ path: "/guilds/:guildId/scheduled-messages", element: lazily(<ScheduledMessagesPage />) },
 									{ path: "/guilds/:guildId/role-menus", element: lazily(<RoleMenusPage />) },
 									{ path: "/guilds/:guildId/ideas", element: lazily(<IdeasPage />) },

@@ -35,6 +35,9 @@ const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: 
 	kick: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
 	ban: { path: (guildId) => `/guilds/${guildId}/members`, screen: "Members" },
 	unban: { path: (guildId) => `/guilds/${guildId}/bans`, screen: "Bans" },
+	lock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
+	unlock: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
+	slowmode: { path: (guildId) => `/guilds/${guildId}/channel-tools`, screen: "Channel tools" },
 	"member-count": { path: (guildId) => `/guilds/${guildId}/member-count`, screen: "Member count" },
 };
 

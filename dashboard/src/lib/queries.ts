@@ -21,6 +21,7 @@ export const keys = {
 		caseSettings: () => ["guild", id, "case-settings"] as const,
 		raid: () => ["guild", id, "raid-protection"] as const,
 		bans: () => ["guild", id, "bans"] as const,
+		channelTools: () => ["guild", id, "channel-tools"] as const,
 		banPage: (page: number, query: string) => ["guild", id, "bans", page, query] as const,
 		auditLog: () => ["guild", id, "audit-log"] as const,
 		settings: () => ["guild", id, "settings"] as const,

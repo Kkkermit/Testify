@@ -114,6 +114,8 @@ describe("the guild settings sub-routes", () => {
 		["PUT", "/api/guilds/:guildId/cases/settings"],
 		["GET", "/api/guilds/:guildId/bans"],
 		["POST", "/api/guilds/:guildId/bans/:userId/unban"],
+		["GET", "/api/guilds/:guildId/channel-tools"],
+		["PATCH", "/api/guilds/:guildId/channel-tools/:channelId"],
 		["GET", "/api/guilds/:guildId/raid-protection"],
 		["PATCH", "/api/guilds/:guildId/raid-protection"],
 		["GET", "/api/guilds/:guildId/birthdays"],

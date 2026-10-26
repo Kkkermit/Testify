@@ -3,9 +3,8 @@ import { channelOption, defineCommand, inTextChannel } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { reply, successEmbed } from "@lib/discord";
 import { formatDurationLong, parseDuration } from "@lib/format";
-
-/** Discord's per-channel rate limit ceiling. */
-const MAX_SLOWMODE_SECONDS = 21_600;
+import { setSlowmode } from "@lib/moderation";
+import { CHANNEL_TOOL_LIMITS } from "@testify/shared";
 
 export default defineCommand({
 	name: "slowmode",
@@ -25,16 +24,16 @@ export default defineCommand({
 
 	async run(interaction) {
 		const channel = channelOption(interaction, "channel") ?? inTextChannel(interaction);
-		if (!("setRateLimitPerUser" in channel)) throw new UserFacingError("That channel does not support slowmode.");
 
 		const raw = interaction.options.getString("duration", true);
 		const durationMs = raw === "0" ? 0 : parseDuration(raw);
 		if (durationMs === null) throw new UserFacingError("That duration is not valid. Try `10s`, `5m` or `0`.");
 
 		const seconds = Math.floor(durationMs / 1_000);
-		if (seconds > MAX_SLOWMODE_SECONDS) throw new UserFacingError("Slowmode cannot be longer than six hours.");
+		if (seconds > CHANNEL_TOOL_LIMITS.maxSlowmodeSeconds)
+			throw new UserFacingError("Slowmode cannot be longer than six hours.");
 
-		await channel.setRateLimitPerUser(seconds, `Set by ${interaction.user.username}`);
+		await setSlowmode(channel, seconds, `Set by ${interaction.user.username}`);
 
 		await reply(interaction, {
 			embeds: [

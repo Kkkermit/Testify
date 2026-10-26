@@ -32,6 +32,7 @@ describe("navigationFor", () => {
 				`/guilds/${guild.id}/warnings`,
 				`/guilds/${guild.id}/cases`,
 				`/guilds/${guild.id}/bans`,
+				`/guilds/${guild.id}/channel-tools`,
 				`/guilds/${guild.id}/raid-protection`,
 				`/guilds/${guild.id}/changes`,
 				`/guilds/${guild.id}/insights`,
