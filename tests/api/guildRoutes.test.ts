@@ -23,6 +23,12 @@ jest.mock("@database/repositories/antiLinkRepository", () => ({
 jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/scheduledMessageRepository", () => ({
+	listSchedules: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock("@database/repositories/autoResponderRepository", () => ({
+	listAutoResponders: jest.fn(() => Promise.resolve([])),
+}));
 jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(() => Promise.resolve(null)),
 }));
@@ -34,6 +40,9 @@ jest.mock("@database/repositories/botStatsRepository", () => ({
 }));
 jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock("@database/repositories/goodbyeRepository", () => ({
+	getGoodbyeSettings: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(() => Promise.resolve(null)),

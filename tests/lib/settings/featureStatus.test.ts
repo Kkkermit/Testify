@@ -1,5 +1,6 @@
 import { type Guild } from "discord.js";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
+import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
@@ -18,6 +19,12 @@ jest.mock("@database/repositories/antiLinkRepository", () => ({
 jest.mock("@database/repositories/auditLogRepository", () => ({
 	getAuditLogConfig: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/scheduledMessageRepository", () => ({
+	listSchedules: jest.fn(() => Promise.resolve([])),
+}));
+jest.mock("@database/repositories/autoResponderRepository", () => ({
+	listAutoResponders: jest.fn(() => Promise.resolve([])),
+}));
 jest.mock("@database/repositories/autoRoleRepository", () => ({
 	getAutoRoles: jest.fn(),
 }));
@@ -30,6 +37,7 @@ jest.mock("@database/repositories/botStatsRepository", () => ({
 jest.mock("@database/repositories/voiceCounterRepository", () => ({
 	getVoiceCounter: jest.fn(() => Promise.resolve(null)),
 }));
+jest.mock("@database/repositories/goodbyeRepository", () => ({ getGoodbyeSettings: jest.fn() }));
 jest.mock("@database/repositories/welcomeRepository", () => ({
 	getWelcome: jest.fn(),
 }));
@@ -56,6 +64,7 @@ const allGames = { roulette: true, blackjack: true, slots: false, hilo: true, co
 function fresh(): void {
 	jest.mocked(getWelcome).mockResolvedValue(null);
 	jest.mocked(getAutoRoles).mockResolvedValue(null);
+	jest.mocked(getGoodbyeSettings).mockResolvedValue(null);
 	jest.mocked(countRoleMenus).mockResolvedValue(0);
 	jest.mocked(getIdeaSettings).mockResolvedValue(null);
 	jest.mocked(getStarboardSettings).mockResolvedValue(null);
@@ -118,6 +127,17 @@ describe("featuresOf", () => {
 		expect((await byKey()).get("lottery")).toEqual(
 			expect.objectContaining({ enabled: false, detail: "3 tickets sold" }),
 		);
+	});
+
+	it("names where goodbyes go only while they are switched on", async () => {
+		const settings = { enabled: true, channelId: "400000000000000005", message: "Bye", style: "text" } as const;
+		jest.mocked(getGoodbyeSettings).mockResolvedValue(settings);
+		expect((await byKey()).get("goodbye")).toEqual(
+			expect.objectContaining({ enabled: true, detail: "Posting in <#400000000000000005>" }),
+		);
+
+		jest.mocked(getGoodbyeSettings).mockResolvedValue({ ...settings, enabled: false });
+		expect((await byKey()).get("goodbye")).toEqual(expect.objectContaining({ enabled: false, detail: null }));
 	});
 
 	it("says nothing about a switched-off board's channel", async () => {

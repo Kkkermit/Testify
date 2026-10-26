@@ -4,6 +4,7 @@ import { defineEvent } from "@core/event";
 import { countMove } from "@lib/info";
 import { writeAuditLog } from "@lib/moderation";
 import { syncVoiceCounters } from "@lib/settings";
+import { sendGoodbye } from "@lib/welcome";
 
 export default defineEvent({
 	name: Events.GuildMemberRemove,
@@ -21,6 +22,7 @@ export default defineEvent({
 			thumbnail: member.user.displayAvatarURL(),
 		});
 
+		await sendGoodbye(client, member);
 		await syncVoiceCounters(client, member.guild);
 	},
 });

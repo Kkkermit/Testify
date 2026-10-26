@@ -1,12 +1,15 @@
 import { type Guild } from "discord.js";
 import { getAntiLink } from "@database/repositories/antiLinkRepository";
 import { getAuditLogConfig } from "@database/repositories/auditLogRepository";
+import { listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getFixedStats } from "@database/repositories/botStatsRepository";
 import { getCounting } from "@database/repositories/countingRepository";
+import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { countRoleMenus } from "@database/repositories/roleMenuRepository";
+import { listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
 import { listSticky } from "@database/repositories/stickyRepository";
 import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
@@ -67,6 +70,15 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		label: "Welcome messages",
 		async read(guild) {
 			const channelId = (await getWelcome(guild.id))?.channelId ?? null;
+			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
+		},
+	},
+	{
+		key: "goodbye",
+		label: "Goodbye messages",
+		async read(guild) {
+			const goodbye = await getGoodbyeSettings(guild.id);
+			const channelId = goodbye?.enabled === true ? goodbye.channelId : null;
 			return { enabled: channelId !== null, detail: channelId === null ? null : posting(channelId) };
 		},
 	},
@@ -164,6 +176,28 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			return {
 				enabled: stickies.length > 0,
 				detail: stickies.length === 0 ? null : countOf(stickies.length, "channel"),
+			};
+		},
+	},
+	{
+		key: "auto-responders",
+		label: "Auto-responders",
+		async read(guild) {
+			const responders = await listAutoResponders(guild.id);
+			return {
+				enabled: responders.length > 0,
+				detail: responders.length === 0 ? null : countOf(responders.length, "auto-responder"),
+			};
+		},
+	},
+	{
+		key: "scheduled-messages",
+		label: "Scheduled messages",
+		async read(guild) {
+			const schedules = await listSchedules(guild.id);
+			return {
+				enabled: schedules.length > 0,
+				detail: schedules.length === 0 ? null : countOf(schedules.length, "message"),
 			};
 		},
 	},

@@ -1,5 +1,6 @@
 import {
 	AudioLines,
+	CalendarClock,
 	Code2,
 	Coins,
 	Dices,
@@ -11,6 +12,7 @@ import {
 	Lightbulb,
 	Link as LinkIcon,
 	ListChecks,
+	MessageSquareReply,
 	MessageSquareWarning,
 	MessagesSquare,
 	Music,
@@ -25,6 +27,7 @@ import {
 	TrendingUp,
 	Volume2,
 	Pin,
+	UserMinus,
 	UserPlus,
 	Users,
 	type LucideIcon,
@@ -63,6 +66,18 @@ const LOOKS: Record<string, FeatureLook> = {
 		tint: "text-feature-community",
 		wash: "bg-feature-community/15",
 		path: (guildId) => `/guilds/${guildId}/sticky`,
+	},
+	"auto-responders": {
+		icon: MessageSquareReply,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/auto-responders`,
+	},
+	"scheduled-messages": {
+		icon: CalendarClock,
+		tint: "text-feature-community",
+		wash: "bg-feature-community/15",
+		path: (guildId) => `/guilds/${guildId}/scheduled-messages`,
 	},
 	starboard: {
 		icon: Star,
@@ -146,6 +161,12 @@ const LOOKS: Record<string, FeatureLook> = {
 	},
 	welcome: {
 		icon: Users,
+		tint: "text-feature-welcome",
+		wash: "bg-feature-welcome/15",
+		path: (guildId) => `/guilds/${guildId}/welcome`,
+	},
+	goodbye: {
+		icon: UserMinus,
 		tint: "text-feature-welcome",
 		wash: "bg-feature-welcome/15",
 		path: (guildId) => `/guilds/${guildId}/welcome`,

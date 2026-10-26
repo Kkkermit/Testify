@@ -2,11 +2,14 @@ import { describeWithMongo } from "../helpers/mongo";
 import { DEFAULT_PREFIX } from "@config/constants";
 import { getAntiLink, setAntiLink } from "@database/repositories/antiLinkRepository";
 import { getAuditLogConfig, setAuditLogConfig } from "@database/repositories/auditLogRepository";
+import { createAutoResponder, listAutoResponders } from "@database/repositories/autoResponderRepository";
 import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
 import { getCounting, setCounting } from "@database/repositories/countingRepository";
+import { getGoodbyeSettings, saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { purgeGuild } from "@database/repositories/guildRepository";
 import { getPrefixConfig, setPrefix } from "@database/repositories/prefixRepository";
+import { createSchedule, listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { listSticky, setSticky } from "@database/repositories/stickyRepository";
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
 import { getVoiceCounter, setVoiceCounter } from "@database/repositories/voiceCounterRepository";
@@ -29,6 +32,9 @@ async function configure(guildId: string): Promise<void> {
 		setVoiceCounter(guildId, { memberChannelId: CHANNEL }),
 		setFixedStats(guildId, CHANNEL, "500000000000000001", ADMIN),
 		saveTreasureConfig(guildId, { lastModifiedBy: ADMIN }),
+		saveGoodbyeSettings(guildId, { enabled: true, channelId: CHANNEL }, ADMIN),
+		createAutoResponder(guildId, { trigger: "rules", match: "word", reply: "Read #rules." }, ADMIN),
+		createSchedule(guildId, { channelId: CHANNEL, message: "Hello", repeat: "daily", nextAt: new Date() }, ADMIN),
 	]);
 }
 
@@ -44,6 +50,9 @@ async function settingsOf(guildId: string) {
 		voiceCounter: await getVoiceCounter(guildId),
 		botStats: await getFixedStats(guildId),
 		treasure: await getTreasureConfig(guildId),
+		goodbye: await getGoodbyeSettings(guildId),
+		autoResponders: await listAutoResponders(guildId),
+		schedules: await listSchedules(guildId),
 	};
 }
 
@@ -65,6 +74,9 @@ describeWithMongo("guildRepository", () => {
 			voiceCounter: null,
 			botStats: null,
 			treasure: null,
+			goodbye: null,
+			autoResponders: [],
+			schedules: [],
 		});
 	});
 

@@ -170,7 +170,10 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **A starboard** that reposts the messages with enough ⭐, without pinging anybody again
 - **Join-to-create voice channels**, one per member and deleted once they empty
 - **Reminders** that ping you where you set them, or by DM
-- **Welcome cards** drawn for every new member
+- **Polls** — Discord's own, posted with `/poll`
+- **Away notes** — `/afk` tells whoever mentions you, until you next speak
+- **Auto-responders and scheduled messages**, neither of which ever pings anybody
+- **Welcome cards** drawn for every new member, and a goodbye when they leave
 - **Counting, sticky messages, auto roles and verification**
 - **Voice-channel counters** and a self-updating bot statistics message
 

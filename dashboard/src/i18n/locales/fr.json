@@ -118,7 +118,11 @@
 		"starboard": "Starboard",
 		"starboardHint": "Les messages avec assez de ⭐ republiés dans un salon des meilleurs moments",
 		"tempVoice": "Rejoindre pour créer",
-		"tempVoiceHint": "Un salon vocal à soi pour quiconque rejoint le salon d’attente"
+		"tempVoiceHint": "Un salon vocal à soi pour quiconque rejoint le salon d’attente",
+		"autoResponders": "Réponses automatiques",
+		"autoRespondersHint": "Ce que {{bot}} répond aux mots que tu choisis",
+		"scheduled": "Messages programmés",
+		"scheduledHint": "Des messages que {{bot}} publie à l’heure choisie"
 	},
 	"search": {
 		"open": "Rechercher",
@@ -144,7 +148,9 @@
 		"roleMenu": "menu de rôles « {{title}} »",
 		"idea": "idée n° {{number}}",
 		"sticky": "message épinglé dans {{channel}}",
-		"giveaway": "tirage au sort pour {{prize}}"
+		"giveaway": "tirage au sort pour {{prize}}",
+		"autoResponder": "la réponse automatique pour « {{trigger}} »",
+		"scheduled": "le message programmé dans {{channel}}"
 	},
 	"leave": {
 		"title": "Quitter sans enregistrer ?",
@@ -475,7 +481,7 @@
 		"styleEmbedHint": "Un panneau coloré, plus visible dans un salon actif.",
 		"styleText": "Texte simple",
 		"styleTextHint": "Un message ordinaire dans le salon.",
-		"subtitle": "Ce que dit {{bot}} quand quelqu’un arrive, et où.",
+		"subtitle": "Ce que dit {{bot}} quand quelqu’un arrive ou part, et où.",
 		"thisServer": "ce serveur",
 		"title": "Messages de bienvenue",
 		"tokenCount": "Combien de membres il y a maintenant",
@@ -483,6 +489,17 @@
 		"tokenUser": "Les mentionne",
 		"tokenUsername": "Leur nom, sans lien",
 		"tooLong": "Ce message dépasse ce que Discord accepte. Raccourcissez-le avant d’enregistrer."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} ne peut pas publier dans ce salon, donc aucun au revoir n’arriverait. Donne-lui Envoyer des messages là-bas, ou choisis-en un autre.",
+		"heading": "Au revoir",
+		"mentionNote": "Personne n’est mentionné. Une fois la personne partie, {user} peut s’afficher comme utilisateur inconnu, donc {username} se lit mieux.",
+		"message": "Message d’au revoir",
+		"pickFirst": "Choisis un salon et le reste de cette carte s’active.",
+		"saveMessage": "Enregistrer l’au revoir",
+		"say": "Dire au revoir quand quelqu’un part",
+		"sayHint": "Désactivé, {{bot}} ne dit rien quand quelqu’un part. Le message est conservé.",
+		"sendTo": "Envoyer l’au revoir dans"
 	},
 	"sticky": {
 		"title": "Messages épinglés",
@@ -506,6 +523,49 @@
 		"deletedChannel": "un salon supprimé",
 		"deletedChannelTitle": "Un salon supprimé",
 		"sinceLast": "Messages depuis la dernière publication : {{done}} sur {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Réponses automatiques",
+		"subtitle": "Des mots auxquels {{bot}} répond avec le texte que tu écris. Il ne répond jamais à un bot et ne mentionne personne.",
+		"emptyTitle": "Aucune réponse automatique",
+		"emptyBody": "Ajoutes-en une ci-dessous, et {{bot}} répondra à ces mots avec ton texte.",
+		"inUse": "En service",
+		"countOf": "{{used}} sur {{limit}}",
+		"add": "Ajouter une réponse automatique",
+		"addBody": "Elle répond aux membres, jamais aux bots, au plus une fois toutes les {{seconds}} secondes par salon.",
+		"trigger": "Mots auxquels elle répond",
+		"triggerHint": "La casse et les espaces n’ont pas d’importance.",
+		"match": "Correspond",
+		"reply": "Réponse",
+		"addResponder": "Ajouter la réponse automatique",
+		"full": "Un serveur ne peut pas avoir plus de réponses automatiques. Supprimes-en une pour en ajouter une autre.",
+		"removeFor": "Supprimer la réponse automatique pour « {{trigger}} »",
+		"matchWord": "N’importe où, en mots entiers",
+		"matchExact": "Seulement le message entier",
+		"matchStarts": "Au début d’un message"
+	},
+	"scheduled": {
+		"title": "Messages programmés",
+		"subtitle": "Des messages que {{bot}} publie plus tard, une fois ou chaque jour ou semaine. Personne n’est mentionné.",
+		"emptyTitle": "Rien de programmé",
+		"emptyBody": "Programmes-en un ci-dessous, et {{bot}} le publiera à l’heure choisie.",
+		"upcoming": "À venir",
+		"countOf": "{{used}} sur {{limit}}",
+		"add": "Programmer un message",
+		"addBody": "Une publication en retard de plus de {{minutes}} minutes, par exemple parce que {{bot}} était hors ligne, est ignorée plutôt qu’envoyée en retard.",
+		"channel": "Publier dans",
+		"when": "Première publication",
+		"whenHint": "Dans ton fuseau horaire. Elle se répète toutes les 24 heures ou tous les 7 jours ensuite.",
+		"repeat": "Répétition",
+		"message": "Message",
+		"schedule": "Programmer le message",
+		"full": "Un serveur ne peut pas avoir plus de messages programmés. Supprimes-en un pour en ajouter un autre.",
+		"removeIn": "Supprimer le message programmé dans {{channel}}",
+		"cannotPost": "{{bot}} ne peut pas publier dans {{channel}}, donc ce message sera ignoré.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Une fois",
+		"daily": "Chaque jour",
+		"weekly": "Chaque semaine"
 	},
 	"roleMenus": {
 		"title": "Menus de rôles",
@@ -1366,8 +1426,12 @@
 		"retentionL10": "Les idées et leurs votes : jusqu’à ce qu’un gestionnaire les supprime, ou que le bot soit retiré du serveur.",
 		"storedL10": "Starboard : pour chaque message arrivé sur le tableau, son id, son salon, son nombre de ⭐ et l’id utilisateur de son auteur, pour que la copie suive l’original. Jamais son texte, qui se trouve dans la copie sur Discord, ni qui lui a donné une étoile.",
 		"storedL11": "Rejoindre pour créer : pour chaque salon vocal créé par {{bot}}, le salon et l’id utilisateur du membre pour qui il a été créé.",
+		"storedL12": "Notes d’absence : la note que vous définissez avec /afk et le moment où vous l’avez définie, jusqu’à votre prochain message dans ce serveur. La note n’est jamais publiée dans les journaux de commandes de l’opérateur.",
+		"storedL13": "Messages d’au revoir, réponses automatiques et messages programmés : le texte que les gestionnaires du serveur ont écrit pour chacun, les salons et horaires utilisés, et qui a modifié chacun en dernier.",
 		"retentionL11": "Les données du starboard : supprimées avec le message original, ou quand le bot est retiré du serveur.",
-		"retentionL12": "Les salons de Rejoindre pour créer : oubliés dès que le salon est supprimé, ou quand le bot est retiré du serveur."
+		"retentionL12": "Les salons de Rejoindre pour créer : oubliés dès que le salon est supprimé, ou quand le bot est retiré du serveur.",
+		"retentionL13": "Notes d’absence : supprimées à votre prochain message dans ce serveur, ou au bout de 30 jours.",
+		"retentionL14": "Messages d’au revoir, réponses automatiques et messages programmés : supprimés quand le bot est retiré du serveur. Un message programmé publié une seule fois est supprimé une fois publié."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
@@ -1400,7 +1464,15 @@
 		"roleMenuChannel": "Choisissez où le menu est publié.",
 		"roleMenuTitle": "Donnez un titre au menu.",
 		"roleMenuRoles": "Choisissez au moins un rôle à proposer.",
-		"roleMenuTooManyRoles": "Un menu ne peut pas proposer plus de {{max}} rôles."
+		"roleMenuTooManyRoles": "Un menu ne peut pas proposer plus de {{max}} rôles.",
+		"autoResponderTrigger": "Indique à quels mots elle répond.",
+		"autoResponderReply": "Écris ce qu’elle répond.",
+		"autoResponderDuplicate": "Une réponse automatique existe déjà pour ces mots. Modifie plutôt celle-là.",
+		"scheduleChannel": "Choisis le salon où il est publié.",
+		"scheduleMessage": "Écris le message à publier.",
+		"scheduleTime": "Choisis quand le publier.",
+		"schedulePast": "Cette heure est déjà passée. Choisis-en une au moins une minute plus tard.",
+		"scheduleTooFar": "Un message peut être programmé au plus {{max}} jours à l’avance."
 	},
 	"status": {
 		"title": "État",

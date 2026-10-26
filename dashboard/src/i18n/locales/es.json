@@ -118,7 +118,11 @@
 		"starboard": "Starboard",
 		"starboardHint": "Mensajes con suficientes ⭐ republicados en un canal de destacados",
 		"tempVoice": "Únete y crea",
-		"tempVoiceHint": "Un canal de voz propio para quien entre en la sala de espera"
+		"tempVoiceHint": "Un canal de voz propio para quien entre en la sala de espera",
+		"autoResponders": "Respuestas automáticas",
+		"autoRespondersHint": "Lo que {{bot}} responde a las palabras que elijas",
+		"scheduled": "Mensajes programados",
+		"scheduledHint": "Mensajes que {{bot}} publica a la hora que elijas"
 	},
 	"search": {
 		"open": "Buscar",
@@ -144,7 +148,9 @@
 		"roleMenu": "el menú de roles «{{title}}»",
 		"idea": "la idea n.º {{number}}",
 		"sticky": "el mensaje fijo de {{channel}}",
-		"giveaway": "el sorteo de {{prize}}"
+		"giveaway": "el sorteo de {{prize}}",
+		"autoResponder": "la respuesta automática para «{{trigger}}»",
+		"scheduled": "el mensaje programado en {{channel}}"
 	},
 	"leave": {
 		"title": "¿Salir sin guardar?",
@@ -475,7 +481,7 @@
 		"styleEmbedHint": "Un panel de color, más fácil de ver en un canal con movimiento.",
 		"styleText": "Texto sencillo",
 		"styleTextHint": "Un mensaje normal en el canal.",
-		"subtitle": "Qué dice {{bot}} cuando alguien entra, y dónde.",
+		"subtitle": "Qué dice {{bot}} cuando alguien entra o se va, y dónde.",
 		"thisServer": "este servidor",
 		"title": "Mensajes de bienvenida",
 		"tokenCount": "Cuántos miembros hay ahora",
@@ -483,6 +489,17 @@
 		"tokenUser": "Les menciona",
 		"tokenUsername": "Su nombre, sin enlace",
 		"tooLong": "Ese mensaje es más largo de lo que Discord acepta. Acórtalo antes de guardar."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} no puede publicar en ese canal, así que no llegaría ninguna despedida. Dale Enviar mensajes allí o elige otro.",
+		"heading": "Despedida",
+		"mentionNote": "No se menciona a nadie. Cuando alguien ya se ha ido, {user} puede aparecer como usuario desconocido, así que {username} se lee mejor.",
+		"message": "Mensaje de despedida",
+		"pickFirst": "Elige un canal y el resto de esta tarjeta se activa.",
+		"saveMessage": "Guardar despedida",
+		"say": "Despedirse cuando alguien se va",
+		"sayHint": "Desactivado, {{bot}} no dice nada cuando alguien se va. El mensaje se conserva.",
+		"sendTo": "Enviar la despedida a"
 	},
 	"sticky": {
 		"title": "Mensajes fijos",
@@ -506,6 +523,49 @@
 		"deletedChannel": "un canal eliminado",
 		"deletedChannelTitle": "Un canal eliminado",
 		"sinceLast": "Mensajes desde la última publicación: {{done}} de {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Respuestas automáticas",
+		"subtitle": "Palabras a las que {{bot}} responde con lo que tú escribas. Nunca responde a un bot ni menciona a nadie.",
+		"emptyTitle": "Aún no hay respuestas automáticas",
+		"emptyBody": "Añade una abajo y {{bot}} responderá a esas palabras con tu respuesta.",
+		"inUse": "En uso",
+		"countOf": "{{used}} de {{limit}}",
+		"add": "Añadir una respuesta automática",
+		"addBody": "Responde a los miembros, nunca a bots, como mucho una vez cada {{seconds}} segundos por canal.",
+		"trigger": "Palabras a las que responde",
+		"triggerHint": "Las mayúsculas y los espacios no importan.",
+		"match": "Coincide",
+		"reply": "Respuesta",
+		"addResponder": "Añadir respuesta automática",
+		"full": "Un servidor no puede tener más respuestas automáticas. Borra una para añadir otra.",
+		"removeFor": "Borrar la respuesta automática para «{{trigger}}»",
+		"matchWord": "En cualquier parte, como palabras completas",
+		"matchExact": "Solo el mensaje completo",
+		"matchStarts": "Al principio del mensaje"
+	},
+	"scheduled": {
+		"title": "Mensajes programados",
+		"subtitle": "Mensajes que {{bot}} publica más tarde, una vez o cada día o semana. No se menciona a nadie.",
+		"emptyTitle": "Nada programado",
+		"emptyBody": "Programa uno abajo y {{bot}} lo publicará a la hora que elijas.",
+		"upcoming": "Próximos",
+		"countOf": "{{used}} de {{limit}}",
+		"add": "Programar un mensaje",
+		"addBody": "Una publicación con más de {{minutes}} minutos de retraso, por ejemplo porque {{bot}} estaba desconectado, se omite en vez de enviarse tarde.",
+		"channel": "Publicar en",
+		"when": "Primera publicación",
+		"whenHint": "En tu zona horaria. Se repite cada 24 horas o 7 días desde entonces.",
+		"repeat": "Se repite",
+		"message": "Mensaje",
+		"schedule": "Programar mensaje",
+		"full": "Un servidor no puede tener más mensajes programados. Borra uno para añadir otro.",
+		"removeIn": "Borrar el mensaje programado en {{channel}}",
+		"cannotPost": "{{bot}} no puede publicar en {{channel}}, así que este mensaje se omitirá.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Una vez",
+		"daily": "Cada día",
+		"weekly": "Cada semana"
 	},
 	"roleMenus": {
 		"title": "Menús de roles",
@@ -1366,8 +1426,12 @@
 		"retentionL10": "Las ideas y sus votos: hasta que un gestor las elimine o se quite el bot del servidor.",
 		"storedL10": "Starboard: por cada mensaje que llegó al tablero, su id, su canal, cuántas ⭐ tiene y el id de usuario de su autor, para que la copia siga al original. Nunca su texto, que está en la copia en Discord, ni quién le puso estrella.",
 		"storedL11": "Únete y crea: por cada canal de voz que {{bot}} creó, el canal y el id de usuario del miembro para quien se creó.",
+		"storedL12": "Notas de ausencia: la nota que pones con /afk y cuándo la pusiste, hasta que vuelvas a escribir en ese servidor. La nota nunca se publica en los registros de comandos del operador.",
+		"storedL13": "Despedidas, respuestas automáticas y mensajes programados: el texto que escribieron los administradores del servidor para cada uno, los canales y horas que usan, y quién cambió cada uno por última vez.",
 		"retentionL11": "Los registros del starboard: se eliminan con el mensaje original o cuando se quita el bot del servidor.",
-		"retentionL12": "Los canales de Únete y crea: se olvidan cuando se elimina el canal o cuando se quita el bot del servidor."
+		"retentionL12": "Los canales de Únete y crea: se olvidan cuando se elimina el canal o cuando se quita el bot del servidor.",
+		"retentionL13": "Notas de ausencia: se eliminan cuando vuelves a escribir en ese servidor, o a los 30 días.",
+		"retentionL14": "Despedidas, respuestas automáticas y mensajes programados: se eliminan cuando el bot sale del servidor. Un mensaje programado que se publica una sola vez se elimina al publicarse."
 	},
 	"problem": {
 		"automodMentionLimit": "Elige cuántas menciones permitir.",
@@ -1400,7 +1464,15 @@
 		"roleMenuChannel": "Elige dónde se publica el menú.",
 		"roleMenuTitle": "Ponle un título al menú.",
 		"roleMenuRoles": "Elige al menos un rol para ofrecer.",
-		"roleMenuTooManyRoles": "Un menú no puede ofrecer más de {{max}} roles."
+		"roleMenuTooManyRoles": "Un menú no puede ofrecer más de {{max}} roles.",
+		"autoResponderTrigger": "Indica a qué palabras responde.",
+		"autoResponderReply": "Escribe lo que responde.",
+		"autoResponderDuplicate": "Ya hay una respuesta automática para esas palabras. Edita esa.",
+		"scheduleChannel": "Elige el canal donde se publica.",
+		"scheduleMessage": "Escribe el mensaje que se publicará.",
+		"scheduleTime": "Elige cuándo publicarlo.",
+		"schedulePast": "Esa hora ya ha pasado. Elige una al menos un minuto más tarde.",
+		"scheduleTooFar": "Un mensaje se puede programar como mucho con {{max}} días de antelación."
 	},
 	"status": {
 		"title": "Estado",

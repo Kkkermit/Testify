@@ -32,6 +32,14 @@ export const PROBLEM_CODES = [
 	"roleMenu.title",
 	"roleMenu.roles",
 	"roleMenu.tooManyRoles",
+	"autoResponder.trigger",
+	"autoResponder.reply",
+	"autoResponder.duplicate",
+	"schedule.channel",
+	"schedule.message",
+	"schedule.time",
+	"schedule.past",
+	"schedule.tooFar",
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

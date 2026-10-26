@@ -2,14 +2,17 @@ import { type SupportReply, type WarnLadder } from "@testify/shared";
 import { http, HttpResponse } from "msw";
 import { botStatus, catalogue, levellingArticle, supportIndex, supportReply } from "@/test/fixtures/bot";
 import {
+	autoResponderList,
 	botStatsSettings,
 	memberCounts,
+	scheduledMessageList,
 	stickyList,
 	tempVoiceSettings,
 	ticketSettings,
 } from "@/test/fixtures/channels";
 import {
 	economyBoard,
+	goodbyeConfig,
 	ideaPage,
 	ideaSettings,
 	levelConfig,
@@ -74,6 +77,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(setupDone)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),
 	http.get("/api/guilds/:guildId/welcome", () => HttpResponse.json(welcomeConfig)),
+	http.get("/api/guilds/:guildId/goodbye", () => HttpResponse.json(goodbyeConfig)),
 	http.get("/api/guilds/:guildId/audit-log", () => HttpResponse.json(auditLogConfig)),
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),
@@ -85,6 +89,8 @@ export const handlers = [
 	http.patch("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.delete("/api/guilds/:guildId/automod/:ruleId", () => HttpResponse.json(automodRules)),
 	http.get("/api/guilds/:guildId/sticky", () => HttpResponse.json(stickyList)),
+	http.get("/api/guilds/:guildId/auto-responders", () => HttpResponse.json(autoResponderList)),
+	http.get("/api/guilds/:guildId/scheduled-messages", () => HttpResponse.json(scheduledMessageList)),
 	http.get("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
 	http.post("/api/guilds/:guildId/giveaways", () => HttpResponse.json(giveawayList)),
 	http.post("/api/guilds/:guildId/giveaways/:messageId/end", () => HttpResponse.json(giveawayList)),

@@ -118,7 +118,11 @@
 		"starboard": "Starboard",
 		"starboardHint": "Messages with enough ⭐ reposted to a highlights channel",
 		"tempVoice": "Join to create",
-		"tempVoiceHint": "A voice channel of their own for whoever joins the lobby"
+		"tempVoiceHint": "A voice channel of their own for whoever joins the lobby",
+		"autoResponders": "Auto-responders",
+		"autoRespondersHint": "Replies {{bot}} gives to words you choose",
+		"scheduled": "Scheduled messages",
+		"scheduledHint": "Messages {{bot}} posts at a time you set"
 	},
 	"search": {
 		"open": "Search",
@@ -144,7 +148,9 @@
 		"roleMenu": "the role menu “{{title}}”",
 		"idea": "idea #{{number}}",
 		"sticky": "the sticky message in {{channel}}",
-		"giveaway": "the giveaway for {{prize}}"
+		"giveaway": "the giveaway for {{prize}}",
+		"autoResponder": "the auto-responder for “{{trigger}}”",
+		"scheduled": "the scheduled message in {{channel}}"
 	},
 	"leave": {
 		"title": "Leave without saving?",
@@ -474,7 +480,7 @@
 		"styleEmbedHint": "A coloured panel, easier to spot in a busy channel.",
 		"styleText": "Plain text",
 		"styleTextHint": "A normal message in the channel.",
-		"subtitle": "What {{bot}} says when somebody joins, and where.",
+		"subtitle": "What {{bot}} says when somebody joins or leaves, and where.",
 		"thisServer": "this server",
 		"title": "Welcome messages",
 		"tokenCount": "How many members there are now",
@@ -482,6 +488,17 @@
 		"tokenUser": "Mentions them",
 		"tokenUsername": "Their name, unlinked",
 		"tooLong": "That message is longer than Discord will accept. Shorten it before saving."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} can’t post in that channel, so no goodbye would arrive. Give it Send Messages there, or pick another.",
+		"heading": "Goodbye",
+		"mentionNote": "Nobody is pinged. Once somebody has left, {user} can show as an unknown user, so {username} reads better.",
+		"message": "Goodbye message",
+		"pickFirst": "Pick a channel and the rest of this card turns on.",
+		"saveMessage": "Save goodbye",
+		"say": "Say goodbye when somebody leaves",
+		"sayHint": "Off means {{bot}} says nothing when somebody leaves. The message is kept.",
+		"sendTo": "Send the goodbye to"
 	},
 	"sticky": {
 		"title": "Sticky messages",
@@ -505,6 +522,49 @@
 		"deletedChannel": "a deleted channel",
 		"deletedChannelTitle": "A deleted channel",
 		"sinceLast": "Messages since the last post: {{done}} of {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Auto-responders",
+		"subtitle": "Words {{bot}} answers with a reply you write. It never answers a bot, and never pings anybody.",
+		"emptyTitle": "No auto-responders yet",
+		"emptyBody": "Add one below, and {{bot}} answers those words with your reply.",
+		"inUse": "In use",
+		"countOf": "{{used}} of {{limit}}",
+		"add": "Add an auto-responder",
+		"addBody": "It answers members, never bots, at most once every {{seconds}} seconds in a channel.",
+		"trigger": "Words it answers",
+		"triggerHint": "Case and spacing don’t matter.",
+		"match": "Matches",
+		"reply": "Reply",
+		"addResponder": "Add auto-responder",
+		"full": "That is as many auto-responders as a server can keep. Delete one to add another.",
+		"removeFor": "Delete the auto-responder for “{{trigger}}”",
+		"matchWord": "Anywhere, as whole words",
+		"matchExact": "Only the whole message",
+		"matchStarts": "At the start of a message"
+	},
+	"scheduled": {
+		"title": "Scheduled messages",
+		"subtitle": "Messages {{bot}} posts later, once or every day or week. Nobody they mention is pinged.",
+		"emptyTitle": "Nothing scheduled",
+		"emptyBody": "Schedule one below, and {{bot}} posts it at the time you choose.",
+		"upcoming": "Upcoming",
+		"countOf": "{{used}} of {{limit}}",
+		"add": "Schedule a message",
+		"addBody": "A post more than {{minutes}} minutes late, say because {{bot}} was offline, is skipped rather than sent late.",
+		"channel": "Post in",
+		"when": "First post",
+		"whenHint": "In your own time zone. It repeats every 24 hours or 7 days from then.",
+		"repeat": "Repeats",
+		"message": "Message",
+		"schedule": "Schedule message",
+		"full": "That is as many scheduled messages as a server can keep. Delete one to add another.",
+		"removeIn": "Delete the scheduled message in {{channel}}",
+		"cannotPost": "{{bot}} can’t post in {{channel}}, so this message will be skipped.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Once",
+		"daily": "Every day",
+		"weekly": "Every week"
 	},
 	"roleMenus": {
 		"title": "Role menus",
@@ -1365,8 +1425,12 @@
 		"retentionL10": "Ideas and their votes: until a manager deletes them, or the bot is removed from the server.",
 		"storedL10": "Starboard: for each message that reached the board, its id, its channel, how many ⭐ it has and its author’s user id, so the repost can follow the original. Never its text, which is in the repost on Discord, and never who starred it.",
 		"storedL11": "Join to create: for each voice channel {{bot}} made, the channel and the user id of the member it was made for.",
+		"storedL12": "Away notes: the note you set with /afk and when you set it, until you next send a message in that server. The note is never posted to the operator’s command logs.",
+		"storedL13": "Goodbye messages, auto-responders and scheduled messages: the text a server’s managers wrote for each, the channels and times they use, and who last changed each.",
 		"retentionL11": "Starboard records: deleted with the original message, or when the bot is removed from the server.",
-		"retentionL12": "Join-to-create channels: forgotten once the channel is deleted, or when the bot is removed from the server."
+		"retentionL12": "Join-to-create channels: forgotten once the channel is deleted, or when the bot is removed from the server.",
+		"retentionL13": "Away notes: deleted when you next send a message in that server, or after 30 days.",
+		"retentionL14": "Goodbye messages, auto-responders and scheduled messages: deleted when the bot is removed from the server. A scheduled message that posts once is deleted once it is posted."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -1399,7 +1463,15 @@
 		"roleMenuChannel": "Choose where the menu is posted.",
 		"roleMenuTitle": "Give the menu a title.",
 		"roleMenuRoles": "Pick at least one role to offer.",
-		"roleMenuTooManyRoles": "One menu cannot offer more than {{max}} roles."
+		"roleMenuTooManyRoles": "One menu cannot offer more than {{max}} roles.",
+		"autoResponderTrigger": "Say which words it answers.",
+		"autoResponderReply": "Write what it replies with.",
+		"autoResponderDuplicate": "There is already an auto-responder for those words. Edit that one instead.",
+		"scheduleChannel": "Choose the channel it is posted in.",
+		"scheduleMessage": "Write the message to post.",
+		"scheduleTime": "Choose when to post it.",
+		"schedulePast": "That time has already gone. Pick one at least a minute from now.",
+		"scheduleTooFar": "A message can be scheduled at most {{max}} days ahead."
 	},
 	"status": {
 		"title": "Status",

@@ -12,20 +12,24 @@ export function GreetingPreview({
 	style,
 	guildName,
 	memberCount,
+	leaving = false,
 }: {
 	message: string;
 	style: WelcomeStyle;
 	guildName: string;
 	memberCount: number;
+	/** A goodbye is posted once they have gone, so the count is one fewer rather than one more. */
+	leaving?: boolean;
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const bot = useBot();
 	const name = bot.data?.name ?? BUILT_IN_BOT_NAME;
+	const person = leaving ? "someone" : "newcomer";
 	const filled = fillTemplate(message, {
-		mention: "@newcomer",
-		username: "newcomer",
+		mention: `@${person}`,
+		username: person,
 		serverName: guildName,
-		memberCount: memberCount + 1,
+		memberCount: leaving ? Math.max(0, memberCount - 1) : memberCount + 1,
 	});
 
 	return (

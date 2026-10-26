@@ -118,7 +118,11 @@
 		"starboard": "Starboard",
 		"starboardHint": "Nachrichten mit genug ⭐ in einem Highlight-Kanal erneut gepostet",
 		"tempVoice": "Beitreten und erstellen",
-		"tempVoiceHint": "Ein eigener Sprachkanal für alle, die der Lobby beitreten"
+		"tempVoiceHint": "Ein eigener Sprachkanal für alle, die der Lobby beitreten",
+		"autoResponders": "Auto-Antworten",
+		"autoRespondersHint": "Was {{bot}} auf Wörter antwortet, die du wählst",
+		"scheduled": "Geplante Nachrichten",
+		"scheduledHint": "Nachrichten, die {{bot}} zu einer festgelegten Zeit postet"
 	},
 	"search": {
 		"open": "Suchen",
@@ -144,7 +148,9 @@
 		"roleMenu": "Rollenmenü „{{title}}“",
 		"idea": "Idee #{{number}}",
 		"sticky": "Sticky in {{channel}}",
-		"giveaway": "Verlosung um {{prize}}"
+		"giveaway": "Verlosung um {{prize}}",
+		"autoResponder": "die Auto-Antwort für „{{trigger}}“",
+		"scheduled": "die geplante Nachricht in {{channel}}"
 	},
 	"leave": {
 		"title": "Ohne Speichern verlassen?",
@@ -474,7 +480,7 @@
 		"styleEmbedHint": "Ein farbiges Panel, das in einem belebten Kanal leichter auffällt.",
 		"styleText": "Einfacher Text",
 		"styleTextHint": "Eine gewöhnliche Nachricht im Kanal.",
-		"subtitle": "Was {{bot}} sagt, wenn jemand beitritt — und wo.",
+		"subtitle": "Was {{bot}} sagt, wenn jemand beitritt oder geht — und wo.",
 		"thisServer": "dieser Server",
 		"title": "Willkommensnachrichten",
 		"tokenCount": "Wie viele Mitglieder es jetzt gibt",
@@ -482,6 +488,17 @@
 		"tokenUser": "Erwähnt sie",
 		"tokenUsername": "Ihr Name, ohne Verlinkung",
 		"tooLong": "Diese Nachricht ist länger, als Discord annimmt. Kürze sie vor dem Speichern."
+	},
+	"goodbye": {
+		"cannotSend": "{{bot}} kann in diesem Kanal nicht posten, also käme kein Abschied an. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen.",
+		"heading": "Abschied",
+		"mentionNote": "Niemand wird angepingt. Wenn jemand gegangen ist, kann {user} als unbekannter Nutzer erscheinen, daher liest sich {username} besser.",
+		"message": "Abschiedsnachricht",
+		"pickFirst": "Wähle einen Kanal, dann wird der Rest dieser Karte aktiv.",
+		"saveMessage": "Abschied speichern",
+		"say": "Verabschieden, wenn jemand geht",
+		"sayHint": "Aus bedeutet, dass {{bot}} nichts sagt, wenn jemand geht. Die Nachricht bleibt erhalten.",
+		"sendTo": "Abschied senden an"
 	},
 	"sticky": {
 		"title": "Sticky-Nachrichten",
@@ -505,6 +522,49 @@
 		"deletedChannel": "einem gelöschten Kanal",
 		"deletedChannelTitle": "Ein gelöschter Kanal",
 		"sinceLast": "Nachrichten seit dem letzten Post: {{done}} von {{cap}}"
+	},
+	"autoResponders": {
+		"title": "Auto-Antworten",
+		"subtitle": "Wörter, auf die {{bot}} mit deinem Text antwortet. Es antwortet nie einem Bot und pingt nie jemanden an.",
+		"emptyTitle": "Noch keine Auto-Antworten",
+		"emptyBody": "Füge unten eine hinzu, und {{bot}} antwortet auf diese Wörter mit deiner Antwort.",
+		"inUse": "In Gebrauch",
+		"countOf": "{{used}} von {{limit}}",
+		"add": "Auto-Antwort hinzufügen",
+		"addBody": "Es antwortet Mitgliedern, nie Bots, höchstens einmal alle {{seconds}} Sekunden pro Kanal.",
+		"trigger": "Wörter, auf die es antwortet",
+		"triggerHint": "Groß- und Kleinschreibung und Leerzeichen spielen keine Rolle.",
+		"match": "Trifft zu",
+		"reply": "Antwort",
+		"addResponder": "Auto-Antwort hinzufügen",
+		"full": "Mehr Auto-Antworten kann ein Server nicht haben. Lösche eine, um eine neue hinzuzufügen.",
+		"removeFor": "Auto-Antwort für „{{trigger}}“ löschen",
+		"matchWord": "Überall, als ganze Wörter",
+		"matchExact": "Nur die ganze Nachricht",
+		"matchStarts": "Am Anfang einer Nachricht"
+	},
+	"scheduled": {
+		"title": "Geplante Nachrichten",
+		"subtitle": "Nachrichten, die {{bot}} später postet, einmal oder täglich oder wöchentlich. Niemand wird angepingt.",
+		"emptyTitle": "Nichts geplant",
+		"emptyBody": "Plane unten eine, und {{bot}} postet sie zur gewählten Zeit.",
+		"upcoming": "Demnächst",
+		"countOf": "{{used}} von {{limit}}",
+		"add": "Nachricht planen",
+		"addBody": "Ein Beitrag, der mehr als {{minutes}} Minuten zu spät wäre, etwa weil {{bot}} offline war, wird übersprungen statt verspätet gesendet.",
+		"channel": "Posten in",
+		"when": "Erster Beitrag",
+		"whenHint": "In deiner Zeitzone. Danach alle 24 Stunden oder 7 Tage.",
+		"repeat": "Wiederholung",
+		"message": "Nachricht",
+		"schedule": "Nachricht planen",
+		"full": "Mehr geplante Nachrichten kann ein Server nicht haben. Lösche eine, um eine neue hinzuzufügen.",
+		"removeIn": "Geplante Nachricht in {{channel}} löschen",
+		"cannotPost": "{{bot}} kann in {{channel}} nicht posten, daher wird diese Nachricht übersprungen.",
+		"rowTitle": "{{channel}} · {{when}}",
+		"once": "Einmal",
+		"daily": "Jeden Tag",
+		"weekly": "Jede Woche"
 	},
 	"roleMenus": {
 		"title": "Rollenmenüs",
@@ -1365,8 +1425,12 @@
 		"retentionL10": "Ideen und ihre Stimmen: bis jemand mit Verwaltungsrechten sie löscht oder der Bot vom Server entfernt wird.",
 		"storedL10": "Starboard: für jede Nachricht, die es aufs Board geschafft hat, ihre ID, ihr Kanal, wie viele ⭐ sie hat und die Benutzer-ID ihrer verfassenden Person, damit die Kopie dem Original folgen kann. Nie ihr Text, der in der Kopie auf Discord steht, und nie, wer einen Stern gegeben hat.",
 		"storedL11": "Beitreten und erstellen: für jeden Sprachkanal, den {{bot}} erstellt hat, der Kanal und die Benutzer-ID des Mitglieds, für das er erstellt wurde.",
+		"storedL12": "Abwesenheitsnotizen: die Notiz, die du mit /afk setzt, und wann du sie gesetzt hast, bis du in diesem Server wieder eine Nachricht schreibst. Die Notiz wird nie in die Befehlsprotokolle des Betreibers gepostet.",
+		"storedL13": "Abschiede, Auto-Antworten und geplante Nachrichten: der Text, den die Verwaltung des Servers jeweils geschrieben hat, die Kanäle und Zeiten, die sie nutzen, und wer jeweils zuletzt etwas geändert hat.",
 		"retentionL11": "Starboard-Einträge: werden mit der Originalnachricht gelöscht oder wenn der Bot vom Server entfernt wird.",
-		"retentionL12": "Kanäle von Beitreten und erstellen: werden vergessen, sobald der Kanal gelöscht ist oder der Bot vom Server entfernt wird."
+		"retentionL12": "Kanäle von Beitreten und erstellen: werden vergessen, sobald der Kanal gelöscht ist oder der Bot vom Server entfernt wird.",
+		"retentionL13": "Abwesenheitsnotizen: werden gelöscht, sobald du in diesem Server wieder schreibst, spätestens nach 30 Tagen.",
+		"retentionL14": "Abschiede, Auto-Antworten und geplante Nachrichten: werden gelöscht, wenn der Bot vom Server entfernt wird. Eine geplante Nachricht, die nur einmal gepostet wird, wird danach gelöscht."
 	},
 	"problem": {
 		"automodMentionLimit": "Wähle, wie viele Erwähnungen erlaubt sind.",
@@ -1399,7 +1463,15 @@
 		"roleMenuChannel": "Wähle, wo das Menü gepostet wird.",
 		"roleMenuTitle": "Gib dem Menü einen Titel.",
 		"roleMenuRoles": "Wähle mindestens eine Rolle zum Anbieten.",
-		"roleMenuTooManyRoles": "Ein Menü kann höchstens {{max}} Rollen anbieten."
+		"roleMenuTooManyRoles": "Ein Menü kann höchstens {{max}} Rollen anbieten.",
+		"autoResponderTrigger": "Gib an, auf welche Wörter es antwortet.",
+		"autoResponderReply": "Schreib, was es antwortet.",
+		"autoResponderDuplicate": "Für diese Wörter gibt es schon eine Auto-Antwort. Bearbeite diese stattdessen.",
+		"scheduleChannel": "Wähle den Kanal, in dem sie gepostet wird.",
+		"scheduleMessage": "Schreib die Nachricht, die gepostet werden soll.",
+		"scheduleTime": "Wähle, wann sie gepostet wird.",
+		"schedulePast": "Diese Zeit ist schon vorbei. Wähle eine, die mindestens eine Minute in der Zukunft liegt.",
+		"scheduleTooFar": "Eine Nachricht kann höchstens {{max}} Tage im Voraus geplant werden."
 	},
 	"status": {
 		"title": "Status",

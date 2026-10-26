@@ -32,10 +32,12 @@ describe("which commands answer privately", () => {
 		expect(privateNames()).toEqual(
 			[
 				"add",
+				"afk",
 				"announce",
 				"anti-link",
 				"ask",
 				"audit-logging",
+				"auto-responder",
 				"auto-role",
 				"automod",
 				"balance",
@@ -94,6 +96,8 @@ describe("which commands answer privately", () => {
 				"shop",
 				"softban list",
 				"starboard",
+				"schedule add",
+				"schedule list",
 				"sticky-message",
 				"suggest",
 				"temp-voice",

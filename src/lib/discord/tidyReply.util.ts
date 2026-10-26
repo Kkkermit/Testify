@@ -17,14 +17,18 @@ export function cleanupFooter(afterMs: number = TIDY_AFTER_MS): string {
 	return `This message disappears in ${seconds} second${seconds === 1 ? "" : "s"}.`;
 }
 
-/** Replies with the embed, then deletes the reply. */
+/** Replies with the embed, then deletes the reply; a quiet reply does not ping the person it answers. */
 export async function replyTemporarily(
 	client: TestifyClient,
 	message: Message,
 	content: EmbedBuilder,
 	afterMs: number = TIDY_AFTER_MS,
+	quiet = false,
 ): Promise<void> {
-	const sent = await message.reply({ embeds: [content.setFooter({ text: cleanupFooter(afterMs) })] });
+	const sent = await message.reply({
+		embeds: [content.setFooter({ text: cleanupFooter(afterMs) })],
+		...(quiet ? { allowedMentions: { parse: [], repliedUser: false } } : {}),
+	});
 
 	client.timers.after(`tidy:${sent.id}`, afterMs, async () => {
 		await sent.delete().catch(() => null);
