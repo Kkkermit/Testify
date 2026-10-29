@@ -11,6 +11,9 @@ export const SETTINGS_LIMITS = {
 	maxCount: 1_000_000,
 } as const;
 
+/** The prefix a server gets before anyone changes it, which the website's examples type too. */
+export const DEFAULT_PREFIX = "t?";
+
 export const BYPASS_PERMISSIONS = ["ManageMessages", "ManageGuild", "ModerateMembers", "Administrator"] as const;
 
 export type BypassPermission = (typeof BYPASS_PERMISSIONS)[number];

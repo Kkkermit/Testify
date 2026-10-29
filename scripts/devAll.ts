@@ -2,6 +2,7 @@ import { type ChildProcess, spawn, spawnSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { parse } from "dotenv";
+import { readDashboardEnv } from "./waitForApi";
 import { box, colourEnabled, painter } from "@core/terminal";
 
 /** Runs the bot and the dashboard without a shell between them, so one Ctrl+C stops both on Windows too. */
@@ -69,7 +70,7 @@ function print(lines: string[], tone: "info" | "warning" | "error", title: strin
 	);
 }
 
-/** Both halves read this file, so a missing one or a dashboard switched off is said once here rather than twice. */
+/** Both halves read this file, so a missing one or a website switched off is said once here rather than twice. */
 function readyToStart(file: string): Record<string, string> | null {
 	if (!existsSync(file)) {
 		print(
@@ -85,16 +86,16 @@ function readyToStart(file: string): Record<string, string> | null {
 	}
 
 	const values = parse(readFileSync(file));
-	if (values.DASHBOARD_ENABLED !== "true") {
+	if (!readDashboardEnv(values).enabled) {
 		print(
 			[
-				"DASHBOARD_ENABLED is not true in .env.development, so the bot starts",
-				"no API for the dashboard to talk to.",
+				"SITE_ENABLED is false and DASHBOARD_ENABLED is not true in",
+				".env.development, so the bot starts no API for the page to talk to.",
 				"",
-				`${paint.cyan("➜")} Set ${paint.bold("DASHBOARD_ENABLED=true")}, or run ${paint.bold("npm run dev")} for the bot alone.`,
+				`${paint.cyan("➜")} Turn either on, or run ${paint.bold("npm run dev")} for the bot alone.`,
 			],
 			"warning",
-			"The dashboard is switched off",
+			"The website is switched off",
 		);
 		return null;
 	}

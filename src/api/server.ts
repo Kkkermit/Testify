@@ -18,13 +18,16 @@ import { guilds } from "@api/routes/guilds";
 import { health } from "@api/routes/health";
 import { owner } from "@api/routes/owner";
 import { screens } from "@api/routes/screens";
+import { siteRoutes } from "@api/routes/site";
 import { status } from "@api/routes/status";
-import { support } from "@api/routes/support";
+import { supportArticles, supportQuestions } from "@api/routes/support";
 import { serveDashboard } from "@api/static";
 import { type Env } from "@config/env";
+import { theme } from "@config/theme";
 import { type TestifyClient } from "@core/client";
 import { toError, UserFacingError } from "@core/errors";
-import { dashboardUrl } from "@lib/bot";
+import { botVersion, siteUrl } from "@lib/bot";
+import { GitHubReader } from "@lib/site";
 
 /** Config patches, not uploads. Anything larger than this is a mistake or an attempt. */
 const MAX_BODY_BYTES = 128 * 1024;
@@ -52,8 +55,8 @@ function limiterPair(window: { limit: number; windowMs: number }): {
 }
 
 /**
- * The dashboard's HTTP API, inside the bot process so it reads the live cache; every route runs behind an error
- * boundary.
+ * The website's and the dashboard's HTTP API, inside the bot process so it reads the live cache; every route runs
+ * behind an error boundary.
  */
 export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const app = new Hono<ApiBindings>();
@@ -61,6 +64,12 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const signIn = limiterPair(SIGN_IN_LIMIT);
 	const asking = limiterPair(SUPPORT_LIMIT);
 	const oauth = oauthConfigFrom(env);
+	const github = new GitHubReader({
+		repository: theme.repository,
+		version: botVersion(),
+		token: env.SITE_GITHUB_TOKEN,
+		logger: client.logger,
+	});
 
 	app.use("*", async (context, next) => {
 		context.set("client", client);
@@ -85,8 +94,8 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 
 		if (error instanceof UpstreamProblem) {
 			client.logger.warn(
-				{ discordStatus: error.upstreamStatus, path: context.req.path, method: context.req.method },
-				"[API] Discord did not answer a dashboard request. The page offers a retry; nothing in the bot failed.",
+				{ service: error.service, status: error.upstreamStatus, path: context.req.path, method: context.req.method },
+				`[API] ${error.service} did not answer a request. The page offers a retry; nothing in the bot failed.`,
 			);
 		} else if (problem.status >= 500) {
 			client.logger.error(
@@ -112,17 +121,24 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 
 	app.notFound((context) => context.json(problemBody(notFound()), 404));
 
+	// Public: the website, the bot's profile and the help articles, all read before anybody can sign in.
 	app.route("/api/health", health);
-	app.route("/api/auth", auth);
 	app.route("/api/bot", bot);
-	app.route("/api/commands", commands);
-	app.route("/api/guilds", guilds);
-	app.route("/api/owner", owner);
-	app.route("/api/analytics", analytics);
-	app.route("/api/screens", screens);
-	app.route("/api/status", status);
-	app.route("/api/support", support);
-	app.route("/api/control", control);
+	app.route("/api/site", siteRoutes(github));
+	app.route("/api/support", supportArticles);
+
+	// Without the dashboard these do not exist at all, rather than answering every request with a refusal.
+	if (env.DASHBOARD_ENABLED) {
+		app.route("/api/auth", auth);
+		app.route("/api/commands", commands);
+		app.route("/api/guilds", guilds);
+		app.route("/api/owner", owner);
+		app.route("/api/analytics", analytics);
+		app.route("/api/screens", screens);
+		app.route("/api/status", status);
+		app.route("/api/support", supportQuestions);
+		app.route("/api/control", control);
+	}
 
 	return app;
 }
@@ -146,13 +162,13 @@ function raise(problem: ApiProblem): never {
 /** The two ways a listen fails are both the operator's to fix, so the log says which one and what to do. */
 export function listenAdvice(error: NodeJS.ErrnoException, port: number): string {
 	if (error.code === "EADDRINUSE") {
-		return `[DASHBOARD_ERROR] Port ${String(port)} is already in use. Stop whatever is on it, or set DASHBOARD_PORT to a free port. The bot is running without the dashboard.`;
+		return `[WEBSITE_ERROR] Port ${String(port)} is already in use. Stop whatever is on it, set DASHBOARD_PORT to a free port, or set SITE_ENABLED=false if you want no website. The bot is running without it.`;
 	}
 	if (error.code === "EACCES") {
-		return `[DASHBOARD_ERROR] Port ${String(port)} needs elevated privileges. Use a port above 1024. The bot is running without the dashboard.`;
+		return `[WEBSITE_ERROR] Port ${String(port)} needs elevated privileges. Use a port above 1024. The bot is running without the website.`;
 	}
 
-	return "[DASHBOARD_ERROR] The dashboard could not start listening. The bot is running without it.";
+	return "[WEBSITE_ERROR] The website could not start listening. The bot is running without it.";
 }
 
 /** How many times a listen is worth retrying, and how long to wait between attempts. */
@@ -201,8 +217,8 @@ export function startApi(client: TestifyClient, env: Env, options: ListenOptions
 		server = serve({ fetch: app.fetch, port: env.DASHBOARD_PORT, hostname: env.DASHBOARD_BIND }, (info) => {
 			const api = `http://${env.DASHBOARD_BIND}:${String(info.port)}`;
 			client.logger.info(
-				{ api, open: dashboardUrl(env) ?? api },
-				"[DASHBOARD] The API is listening. Open the dashboard at the `open` address.",
+				{ api, open: siteUrl(env) ?? api },
+				"[WEBSITE] The website is listening. Open it at the `open` address.",
 			);
 			listening(info.port);
 		}) as Server;
@@ -212,7 +228,7 @@ export function startApi(client: TestifyClient, env: Env, options: ListenOptions
 			if (remaining > 0 && worthRetrying(error)) {
 				client.logger.warn(
 					{ port: env.DASHBOARD_PORT, attemptsLeft: remaining },
-					"[DASHBOARD] The port is still busy. Trying again shortly.",
+					"[WEBSITE] The port is still busy. Trying again shortly.",
 				);
 				retry = setTimeout(() => attempt(remaining - 1), retryDelayMs);
 				retry.unref();

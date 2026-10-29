@@ -9,6 +9,7 @@ const config: Config = {
 	transform: {
 		// "automatic" or every test file would have to import React itself.
 		"^.+\\.[mc]?[tj]sx?$": ["@swc/jest", { jsc: { transform: { react: { runtime: "automatic" } } } }],
+		"\\.(?:md|example)$": "<rootDir>/src/test/rawText.cjs",
 	},
 	// These ship ESM only, so they are transformed rather than skipped with the rest of node_modules.
 	transformIgnorePatterns: [
@@ -21,9 +22,14 @@ const config: Config = {
 			"set-cookie-parser",
 			"@open-draft/deferred-promise",
 			"@epic-web/invariant",
+			"marked",
+			"lowlight",
+			"devlop",
 		].join("|")})/)`,
 	],
 	moduleNameMapper: {
+		// Vite hands these over as text; `rawText.cjs` does the same for the files they name.
+		"^@repo/(.*)\\?raw$": "<rootDir>/../$1",
 		// discord-html-transcripts hoists React 18 to the root, so both are pinned to the workspace's React 19.
 		"^react$": "<rootDir>/node_modules/react",
 		"^react/(.*)$": "<rootDir>/node_modules/react/$1",

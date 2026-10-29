@@ -31,6 +31,8 @@ export class ServiceError extends Error {
 	constructor(
 		readonly service: string,
 		override readonly cause: unknown,
+		/** The HTTP status the service answered with, when it answered at all. */
+		readonly status: number | null = null,
 	) {
 		super(`${service} is not responding`);
 		this.name = "ServiceError";

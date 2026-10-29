@@ -9,7 +9,7 @@
 [![Base image](https://img.shields.io/badge/base-node_24_bookworm--slim-5FA04E?style=for-the-badge&logo=node.js&logoColor=white)](../Dockerfile)
 [![Railway](https://img.shields.io/badge/Railway-works-0B0D0E?style=for-the-badge&logo=railway&logoColor=white)](#️-hosting-it-somewhere-other-than-your-own-machine)
 
-[Quick start](#-quick-start) · [Dashboard](#️-the-dashboard) · [The image](#-what-is-in-the-image) ·
+[Quick start](#-quick-start) · [Website and dashboard](#️-the-website-and-the-dashboard) · [The image](#-what-is-in-the-image) ·
 [Where to host](#️-hosting-it-somewhere-other-than-your-own-machine) · [Troubleshooting](#-troubleshooting)
 
 </div>
@@ -56,9 +56,13 @@ Data lives in the `mongo-data` volume and survives `docker compose down`. `docke
 
 ---
 
-## 🖥️ The dashboard
+## 🖥️ The website and the dashboard
 
-It is off by default here exactly as it is elsewhere. Turning it on takes four variables:
+The website — the landing page, the docs and the source browser — is on by default, here as elsewhere, and needs
+nothing set. It is what answers on the published port until the dashboard is turned on; `SITE_ENABLED=false` turns
+it off, and then nothing listens at all unless the dashboard is on.
+
+The dashboard is off by default here exactly as it is elsewhere. Turning it on takes four variables:
 
 ```bash
 DASHBOARD_ENABLED=true
@@ -134,12 +138,12 @@ connection open. There is no configuration that makes this bot run there.
 
 ## 🩺 There is deliberately no HEALTHCHECK
 
-The obvious probe is `/api/health`, and it only exists when `DASHBOARD_ENABLED` is true — so baking it into the
-image would mark every bot-only install permanently unhealthy. There is no HTTP surface to check on a bot whose
+The obvious probe is `/api/health`, and it only exists while the website or the dashboard is on — so baking it into
+the image would mark every install with `SITE_ENABLED=false` permanently unhealthy. There is no HTTP surface to check on a bot whose
 job is holding a gateway websocket open, and "the process is alive" is what `restart: unless-stopped` already
 acts on.
 
-If you run with the dashboard on and want one, add it to your own compose file rather than the image:
+If you run with either on and want one, add it to your own compose file rather than the image:
 
 ```yaml
 healthcheck:

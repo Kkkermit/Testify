@@ -24,6 +24,8 @@ export default defineConfig(({ command, mode }) => {
 			dedupe: ["react", "react-dom"],
 			alias: {
 				"@": fileURLToPath(new URL("./src", import.meta.url)),
+				// The docs render the repository's own Markdown, so the site cannot describe a bot that is not there.
+				"@repo": fileURLToPath(new URL("..", import.meta.url)),
 				"@testify/shared": fileURLToPath(new URL("../shared/src/index.ts", import.meta.url)),
 				react: packageRoot("react"),
 				"react-dom": packageRoot("react-dom"),
@@ -83,6 +85,8 @@ export default defineConfig(({ command, mode }) => {
 					manualChunks: (id) => {
 						// three is half a megabyte and only the lazy backdrop uses it, so it stays out of `vendor`.
 						if (id.includes("node_modules/three")) return "three";
+						// The docs and the source browser need these, and nothing a dashboard visitor opens first does.
+						if (/node_modules\/(?:marked|lowlight|highlight\.js|devlop|dequal)\//.test(id)) return "markdown";
 						// A vendor chunk of its own, so an app change does not invalidate the whole cache.
 						if (id.includes("node_modules")) return "vendor";
 						return undefined;

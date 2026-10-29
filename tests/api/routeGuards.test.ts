@@ -15,24 +15,33 @@ const PUBLIC = new Map<string, string>([
 	["/api/auth/me", "answers 401 with a shape the sign-in screen reads"],
 	["/api/auth/logout", "signing out cannot require being signed in to work"],
 	["/api/bot", "the bot's public profile, needed by the sign-in screen before a session exists"],
+	["/api/support", "the help articles' titles, which the docs list before anybody signs in"],
+	["/api/support/articles/:articleId", "one help article, which the docs show; asking a question stays signed in"],
 ]);
 
-function api() {
+/** The website's own API: the landing page, the docs and the source browser, which name no server and no member. */
+const PUBLIC_PREFIX = "/api/site";
+
+function api(dashboard = true) {
 	return createApi(createMockClient({ isReady: jest.fn(() => true) } as never), {
+		DASHBOARD_ENABLED: dashboard,
 		DASHBOARD_PORT: 3_000,
 		DASHBOARD_BIND: "127.0.0.1",
 	} as Env);
 }
+
+const isPublic = (path: string): boolean =>
+	PUBLIC.has(path) || path === PUBLIC_PREFIX || path.startsWith(`${PUBLIC_PREFIX}/`);
 
 /** Concrete enough to route: the parameters are replaced with a real snowflake. */
 function concrete(path: string): string {
 	return path.replaceAll(/:[a-zA-Z]+/g, "900000000000000001").replace(/\/\*$/, "");
 }
 
-function routes(): { method: string; path: string }[] {
+function routes(dashboard = true): { method: string; path: string }[] {
 	const seen = new Set<string>();
 
-	return api()
+	return api(dashboard)
 		.routes.filter((route) => route.path.startsWith("/api/") && route.method !== "ALL")
 		.filter((route) => {
 			const key = `${route.method} ${route.path}`;
@@ -53,7 +62,7 @@ describe("every API route", () => {
 		const leaks: string[] = [];
 
 		for (const route of routes()) {
-			if (PUBLIC.has(route.path)) continue;
+			if (isPublic(route.path)) continue;
 
 			const response = await app.request(concrete(route.path), {
 				method: route.method,
@@ -77,6 +86,12 @@ describe("every API route", () => {
 			expect(path.startsWith("/api/")).toBe(true);
 		}
 
-		expect(PUBLIC.size).toBeLessThanOrEqual(8);
+		expect(PUBLIC.size).toBeLessThanOrEqual(10);
+	});
+
+	/** The website runs on every install by default, and with the dashboard off nothing of the dashboard may answer. */
+	it("mounts nothing but the public routes while the dashboard is off", () => {
+		expect(routes(false).filter((route) => !isPublic(route.path))).toEqual([]);
+		expect(routes(false).length).toBeGreaterThan(5);
 	});
 });
