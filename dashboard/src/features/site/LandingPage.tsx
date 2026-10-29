@@ -79,7 +79,7 @@ export function LandingPage(): React.JSX.Element {
 				<h2 id="landing-features" className={SECTION_TITLE}>
 					{t("landing.featuresTitle")}
 				</h2>
-				<ul className="grid items-start gap-4 sm:grid-cols-2 lg:grid-cols-3 [&>li]:min-w-0">
+				<ul className="grid auto-rows-fr gap-4 sm:grid-cols-2 lg:grid-cols-3 [&>li]:min-w-0">
 					{FEATURES.map((feature) => {
 						const look = featureLook(feature.look);
 						const Icon = look.icon;
@@ -98,7 +98,7 @@ export function LandingPage(): React.JSX.Element {
 				</ul>
 			</section>
 
-			<section aria-label={t("landing.openSource")} className="grid items-start gap-4 py-10 lg:grid-cols-2">
+			<section aria-label={t("landing.openSource")} className="grid gap-4 py-10 lg:grid-cols-2">
 				<Card className="flex flex-col gap-4">
 					<h2 className={SECTION_TITLE}>{t("landing.selfHost.title")}</h2>
 					<p className="text-muted-foreground text-sm">{t("landing.selfHost.body")}</p>
@@ -127,7 +127,7 @@ export function LandingPage(): React.JSX.Element {
 					<p className="text-muted-foreground text-sm">
 						{t("landing.source.body", { version: site.data?.version ?? "" })}
 					</p>
-					<Link to="/source-code" className={cn(SECONDARY, "self-start")}>
+					<Link to="/source-code" className={cn(SECONDARY, "mt-auto self-start")}>
 						{t("landing.source.browse")}
 					</Link>
 				</Card>
