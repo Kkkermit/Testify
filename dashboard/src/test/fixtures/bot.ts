@@ -57,7 +57,7 @@ export const catalogue: CommandCatalogue = {
 			aliases: ["b"],
 			subcommands: [],
 			options: [{ name: "user", description: "Who.", type: "user", required: true, choices: [], min: null, max: null }],
-			permissions: ["ban members"],
+			permissions: ["BanMembers"],
 			botPermissions: [],
 			cooldownMs: null,
 			guildOnly: true,

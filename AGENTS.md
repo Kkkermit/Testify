@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 204, in 29 domain folders         |
 | Schemas/repositories | 46 / 44                           |
 | Scheduled jobs       | 10                                |
-| Tests                | 3,560 across 451 suites           |
+| Tests                | 3,571 across 453 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 309 suites; the dashboard's 142 sit beside its code.
+tests/                    Mirrors src/. 310 suites; the dashboard's 143 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -2317,11 +2317,14 @@ displayed until every picker was changed away and back. It now renders a disable
 and names a deleted channel rather than showing another. A form with several required fields names every one
 still missing (`ticketMissing`), not only the first, so they can be filled in any order.
 
-**Nor does one format its own dates.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`, `clockTime` and
-`since`, and the locale is pinned rather than left to the browser: a bare `toLocaleString()` renders `7/30/2026`
-for one admin and `30/07/2026` for another, and the two are unreadable as each other. `30 Jul 2026` cannot be
-misread by anybody, which matters most on an audit trail. Eleven call sites each had their own answer before
-this existed.
+**Nor does one format its own dates, numbers or units.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`,
+`clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
+All of them write in the language the reader chose and never in the browser's own region: a bare
+`toLocaleString()` renders `7/30/2026` for one admin and `30/07/2026` for another, and the two are unreadable as
+each other. English is British (`formattingLocale` maps `en` to `en-GB`), so `30 Jul 2026` cannot be misread, and
+every other language gets its own month names, separators and unit symbols — `30. Juli 2026`, `7,2 ko`, `42 мс`.
+The month is always a word, which matters most on an audit trail. Formatters are cached per locale, so switching
+language never reuses the old one.
 
 **Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
 places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
@@ -2504,7 +2507,10 @@ Rules that keep it from rotting, each with a test:
 - **A pure helper takes `t`, it does not return keys.** `describe()` in `ErrorState` stays one function whose
   output is the sentence a reader sees, so its tests assert on prose rather than on a key nobody reads.
 - **`locales.test.ts` fails on drift**: a key English has and a locale does not, a stale key after a rename, a
-  changed `{{placeholder}}`, and any key nothing renders. Dead copy in one file is dead copy in four.
+  changed `{{placeholder}}`, and any key nothing renders. Dead copy in one file is dead copy in four. It also fails
+  on a plural missing a form its language picks — Russian's `_few` and `_many`, the `_many` Spanish, French and
+  Italian use for a round million — because i18next answers a missing form from English, not from `_other`, so
+  "1 234 members" sat on the Russian server picker.
 - **`voice.test.ts` reads `en.json`**, so the British spelling, curly apostrophe and second-person rules now
   apply to the dictionary rather than to scattered literals.
 - **`@testify/shared` names a refusal, it does not write one.** A validator there returns a `Problem` — a
@@ -2517,6 +2523,22 @@ Rules that keep it from rotting, each with a test:
   `PLACEHOLDER_HELP` write the Discord panel's English, and `auditLog.labels.ts`, `automod.labels.ts` and
   `welcome.labels.ts` hold the dashboard's keys. `labels.test.ts` renders every one, so a key with nothing
   behind it fails rather than printing itself on the page.
+
+**Nothing a reader sees or hears is written into a component.** `tests/core/untranslated.test.ts` parses every
+dashboard module with TypeScript's own parser and fails on English it finds where a reader would meet it: JSX
+text, a read-aloud attribute (`aria-label`, `title`, `placeholder`, `label` and the like), a string an expression
+puts on the page through a ternary or `&&`, a template that builds a sentence round a value, and the `label`,
+`value` and `sub` of a row handed to a list. It lives in the root suite because the root `package.json` declares
+`typescript`. It was proved to fail, and found dozens of such strings when it was written, among them the lottery's
+"one dai from now" — the frequency with `ly` cut off. A keycap and Discord's own badge are the allow-list.
+
+**The server sends data, and the page words it.** English assembled on the server cannot follow the reader's
+language, so the overview's `FeatureDetail` is a kind and its numbers — `{ kind: "posting", channelId }`,
+`{ kind: "count", what: "ticketsSold", count }` — which `describeDetail` words and names the channel in, and
+`missingPermissions` and a command's `permissions` are Discord's flag names (`ManageGuild`), which
+`permissionLabel` turns into the name Discord's own client uses. The runner's dropped output is a code
+(`DroppedOutput`), and a licence GitHub does not recognise is `custom` rather than its English "Other". A label
+table falls back to what the server sent for a key it has not seen, so the API can ship first.
 
 **i18next does not touch the document.** `lang` is set from a `languageChanged` listener in `src/i18n/index.ts`
 — without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so
@@ -2903,6 +2925,11 @@ listener. Five things about it are load-bearing:
 docs page, `/source-code`, `/terms` and `/privacy` (`indexable`), and `robots.txt` says the same; a source file is
 GitHub's to be found by, not this copy's. `serveDashboard` answers a path with a file extension under
 `/source-code/` with the page rather than a 404, because `src/core/loader.ts` is a route there, not an asset.
+
+**The language is chosen on the site and kept through sign-in.** `LanguageSelect` sits in the site's header and on
+`/sign-in`, and writes the same `testify:locale` the Appearance screen does, so somebody who picks German on the
+landing page signs in to a dashboard already in German. Everything the site draws is translated; the docs' bodies
+are the repository's English, and a page read in another language says so (`docs.englishOnly`).
 
 **The landing page types real commands.** `Composer` is Discord's message box typing `/play`, `/remind me` and
 `/warn create`, with the menu filled from the generated `docs/commands.md`. `composer.utils.test.ts` reads each

@@ -1,5 +1,6 @@
 import { SETTINGS_LIMITS } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { formatNumber } from "@/lib/intl";
 
 /** The three rules the API enforces: whitespace matches every message, a space inside can never be typed, and `/` collides with Discord's own. */
 export function prefixProblem(value: string, t: TFunction): string | null {
@@ -21,7 +22,7 @@ export function countCapProblem(value: string, t: TFunction): string | null {
 
 	if (!Number.isInteger(parsed) || parsed < 1) return t("settings.countWhole");
 	if (parsed > SETTINGS_LIMITS.maxCount) {
-		return t("settings.countHigh", { max: SETTINGS_LIMITS.maxCount.toLocaleString() });
+		return t("settings.countHigh", { max: formatNumber(SETTINGS_LIMITS.maxCount) });
 	}
 
 	return null;

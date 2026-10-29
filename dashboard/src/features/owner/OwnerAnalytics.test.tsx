@@ -64,7 +64,7 @@ describe("the usage tab", () => {
 		renderTab("usage");
 
 		expect(await screen.findByRole("heading", { name: "Slowest commands" })).toBeInTheDocument();
-		expect(screen.getByText("4.2 s")).toBeInTheDocument();
+		expect(screen.getByText("4.2s")).toBeInTheDocument();
 		expect(screen.getByText("40 runs · typically 850 ms")).toBeInTheDocument();
 		expect(screen.getByText("1,300 runs · typically 90 ms")).toBeInTheDocument();
 		expect(screen.getByText(/over the last 30 days in servers/)).toBeInTheDocument();

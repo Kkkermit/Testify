@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet } from "react-router";
 import { BotMark } from "@/components/brand/BotMark";
+import { LanguageSelect } from "@/components/form/LanguageSelect";
 import { Backdrop } from "@/components/motion";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
@@ -38,10 +39,13 @@ export function SiteShell(): React.JSX.Element {
 				</Link>
 
 				{/* Last on a phone, under the name and the sign-in, so neither is pushed off the screen. */}
-				<nav aria-label={t("site.nav")} className="order-last flex w-full gap-2 sm:order-none sm:w-auto">
-					<SiteLink to="/docs">{t("site.docs")}</SiteLink>
-					<SiteLink to="/source-code">{t("site.source")}</SiteLink>
-				</nav>
+				<div className="order-last flex w-full items-center gap-2 sm:order-none sm:w-auto sm:gap-6">
+					<nav aria-label={t("site.nav")} className="mr-auto flex gap-2">
+						<SiteLink to="/docs">{t("site.docs")}</SiteLink>
+						<SiteLink to="/source-code">{t("site.source")}</SiteLink>
+					</nav>
+					<LanguageSelect />
+				</div>
 
 				{site.data?.dashboard === true && <AccountLink />}
 			</header>

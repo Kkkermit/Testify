@@ -24,6 +24,7 @@ import { PER_PAGE, useGuildMembers } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { cn } from "@/lib/cn";
 import { dateAndTime, since } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
 
 /** Everybody who ran a command there; pressing a name narrows the runs below to theirs. */
@@ -119,7 +120,7 @@ export function GuildMembers({ guildId, report }: { guildId: string; report: Gui
 									</button>
 								</td>
 								<td className={CELL_NUM}>
-									{member.runs.toLocaleString()}
+									{formatNumber(member.runs)}
 									{member.failures > 0 && (
 										<span className="text-destructive-text block text-xs">
 											{t("owner.failedCount", { count: member.failures })}
@@ -130,7 +131,7 @@ export function GuildMembers({ guildId, report }: { guildId: string; report: Gui
 									<span className="flex flex-wrap gap-1">
 										{member.topCommands.map((top) => (
 											<Badge key={top.command}>
-												/{top.command} · {top.count.toLocaleString()}
+												/{top.command} · {formatNumber(top.count)}
 											</Badge>
 										))}
 										{member.commandCount > member.topCommands.length && (

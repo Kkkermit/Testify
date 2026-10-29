@@ -17,6 +17,7 @@ import {
 	StatTile,
 	UNSELECTED,
 } from "@/components/primitives";
+import { categoryLabel } from "@/features/commands/categories.labels";
 import { configurableAt, coverage, filterCommands, groupByCategory } from "@/features/commands/commands.utils";
 import { CommandCard } from "@/features/commands/components/CommandCard";
 import { useCommands } from "@/features/commands/useCommands";
@@ -94,7 +95,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 				<StatTile label={t("commands.categories")} value={catalogue.data.categories.length} />
 				<StatTile
 					label={t("commands.onDashboard")}
-					value={`${String(covered)} of ${String(total)}`}
+					value={t("common.partOf", { part: covered, whole: total })}
 					hint={t("commands.onDashboardHint")}
 				/>
 			</section>
@@ -113,7 +114,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					{catalogue.data.categories.map((name) => (
 						<CategoryChip
 							key={name}
-							label={name}
+							label={categoryLabel(name, t)}
 							active={category === name}
 							onSelect={() => setCategory(category === name ? null : name)}
 						/>
@@ -142,7 +143,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					{groups.map(([name, group]) => (
 						<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">
 							<Eyebrow as="h2" id={`category-${name}`} count={group.length} className="capitalize">
-								{name}
+								{categoryLabel(name, t)}
 							</Eyebrow>
 							<ul className="flex flex-col gap-3">
 								{group.map((command, index) => (

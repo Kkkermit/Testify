@@ -1,6 +1,5 @@
 import { PermissionsBitField, type PermissionResolvable } from "discord.js";
 import { type Command, type CommandOption, type Subcommand } from "@core/command";
-import { humanisePermission } from "@lib/format/format.util";
 import {
 	type CommandCatalogue,
 	type CommandOptionSummary,
@@ -32,10 +31,11 @@ function subcommandOf(subcommand: Subcommand): SubcommandSummary {
 }
 
 /** Bit flags are meaningless to a reader, so they are resolved to the names Discord shows in its own UI. */
+/** Discord's own names for the flags, `ManageGuild` and so on, which each surface turns into words of its own. */
 function permissionNames(permissions: PermissionResolvable[] | undefined): string[] {
 	if (permissions === undefined || permissions.length === 0) return [];
 
-	return new PermissionsBitField(permissions).toArray().map((name) => humanisePermission(name));
+	return new PermissionsBitField(permissions).toArray();
 }
 
 export function summariseCommand(command: Command): CommandSummary {

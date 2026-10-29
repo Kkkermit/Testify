@@ -1,5 +1,6 @@
 import { BarChart3 } from "lucide-react";
 import { type ReactNode } from "react";
+import { formatNumber } from "@/lib/intl";
 
 /** A percentage of the busiest row, floored at 2 so a row with one use is still visibly a row. */
 export function barWidth(count: number, max: number): number {
@@ -53,7 +54,7 @@ export function UsageBars({
 						<span className="block truncate text-sm font-medium">{row.label}</span>
 						{row.sub !== undefined && <span className="text-muted-foreground block truncate text-xs">{row.sub}</span>}
 					</span>
-					<span className="shrink-0 font-mono text-sm tabular-nums">{row.value ?? row.count.toLocaleString()}</span>
+					<span className="shrink-0 font-mono text-sm tabular-nums">{row.value ?? formatNumber(row.count)}</span>
 				</li>
 			))}
 		</ol>

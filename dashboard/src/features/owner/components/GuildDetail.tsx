@@ -9,6 +9,7 @@ import { useGuildDetail, useLeaveGuild } from "@/features/owner/useControl";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 /** One server at a glance, opened from the fleet table rather than by hunting for its id. */
 export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: () => void }): React.JSX.Element {
@@ -27,30 +28,30 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 					<h3 className="truncate text-base font-semibold">{guild.name}</h3>
 					<p className="text-muted-foreground font-mono text-xs">{guild.id}</p>
 				</div>
-				<Button variant="ghost" onClick={onClose} aria-label={`Close ${guild.name}`}>
+				<Button variant="ghost" onClick={onClose} aria-label={t("owner.closeGuild", { name: guild.name })}>
 					<X size={15} aria-hidden="true" />
 				</Button>
 			</div>
 
 			<dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-				<Figure size="md" label={t("owner.members")} value={guild.memberCount.toLocaleString()} />
+				<Figure size="md" label={t("owner.members")} value={formatNumber(guild.memberCount)} />
 				<Figure size="md" label={t("overview.channels")} value={String(guild.channelCount)} />
-				<Figure size="md" label={t("owner.commands30d")} value={guild.usage.toLocaleString()} />
-				<Figure size="md" label={t("owner.dashboard30d")} value={guild.dashboardViews.toLocaleString()} />
+				<Figure size="md" label={t("owner.commands30d")} value={formatNumber(guild.usage)} />
+				<Figure size="md" label={t("owner.dashboard30d")} value={formatNumber(guild.dashboardViews)} />
 			</dl>
 
 			<DataList
 				dense
 				rows={[
 					{
-						label: "Joined",
-						value: guild.joinedAt === null ? "Unknown" : shortDate(guild.joinedAt),
+						label: t("owner.joined"),
+						value: guild.joinedAt === null ? t("owner.unknown") : shortDate(guild.joinedAt),
 					},
-					{ label: "Created", value: shortDate(guild.createdAt) },
-					{ label: t("overview.roles"), value: String(guild.roleCount) },
-					{ label: "Server owner", value: guild.ownerId, mono: true },
-					{ label: t("owner.nickname"), value: guild.nickname ?? "None set" },
-					{ label: t("owner.topRole"), value: guild.highestRole ?? "None" },
+					{ label: t("owner.created"), value: shortDate(guild.createdAt) },
+					{ label: t("overview.roles"), value: formatNumber(guild.roleCount) },
+					{ label: t("owner.serverOwner"), value: guild.ownerId, mono: true },
+					{ label: t("owner.nickname"), value: guild.nickname ?? t("owner.noneSet") },
+					{ label: t("owner.topRole"), value: guild.highestRole ?? t("owner.none") },
 				]}
 			/>
 

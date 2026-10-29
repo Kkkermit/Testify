@@ -157,7 +157,7 @@ export function BlacklistTab(): React.JSX.Element {
 									}}
 								>
 									<UserX size={16} aria-hidden="true" />
-									<span className="sr-only">Unblock {row.tag ?? row.userId}</span>
+									<span className="sr-only">{t("owner.unblockNamed", { name: row.tag ?? row.userId })}</span>
 								</Button>
 							</li>
 						))}

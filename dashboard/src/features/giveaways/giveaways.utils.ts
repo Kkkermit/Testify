@@ -1,10 +1,11 @@
 import { type GiveawayRow } from "@testify/shared";
+import { type TranslationKey } from "@/i18n";
 
 export const DURATION_UNITS = [
-	{ value: "minutes", label: "minutes", ms: 60_000 },
-	{ value: "hours", label: "hours", ms: 3_600_000 },
-	{ value: "days", label: "days", ms: 86_400_000 },
-] as const;
+	{ value: "minutes", labelKey: "giveaways.unitMinutes", ms: 60_000 },
+	{ value: "hours", labelKey: "giveaways.unitHours", ms: 3_600_000 },
+	{ value: "days", labelKey: "giveaways.unitDays", ms: 86_400_000 },
+] as const satisfies readonly { value: string; labelKey: TranslationKey; ms: number }[];
 
 export type DurationUnit = (typeof DURATION_UNITS)[number]["value"];
 

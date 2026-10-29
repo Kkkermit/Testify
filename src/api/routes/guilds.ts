@@ -54,6 +54,8 @@ import {
 	type Paged,
 	pagination,
 	type RoleSummary,
+	WATCHED_PERMISSIONS,
+	type WatchedPermission,
 } from "@testify/shared";
 
 export const guilds = new Hono<ApiBindings>();
@@ -201,17 +203,9 @@ function colourOf(role: Role): string | null {
 }
 
 /** Permissions Discord can revoke silently, named so a manager can act on them. */
-const WATCHED = [
-	[PermissionFlagsBits.ManageRoles, "Manage Roles — needed for level rewards, auto roles and verification"],
-	[PermissionFlagsBits.ManageMessages, "Manage Messages — needed for counting and sticky messages"],
-	[PermissionFlagsBits.ViewAuditLog, "View Audit Log — needed for audit logging to name who did what"],
-	[PermissionFlagsBits.ManageChannels, "Manage Channels — needed for voice stats and tickets"],
-	[PermissionFlagsBits.AttachFiles, "Attach Files — needed for rank cards, welcome images and the casino"],
-] as const;
-
-function missingPermissions(guild: Guild): string[] {
+function missingPermissions(guild: Guild): WatchedPermission[] {
 	const me = guild.members.me;
 	if (me === null) return [];
 
-	return WATCHED.filter(([flag]) => !me.permissions.has(flag)).map(([, description]) => description);
+	return WATCHED_PERMISSIONS.filter((flag) => !me.permissions.has(PermissionFlagsBits[flag]));
 }

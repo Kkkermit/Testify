@@ -1,4 +1,5 @@
 import { type SourceEntry } from "@testify/shared";
+import { formatUnit } from "@/lib/intl";
 
 /** The repository's flat list from GitHub as the folders a person browses. */
 
@@ -68,7 +69,7 @@ export function sourceRoute(path: string): string {
 
 /** Bytes as a person reads them, in the binary steps a file manager uses. */
 export function formatBytes(bytes: number): string {
-	if (bytes < 1024) return `${String(bytes)} B`;
-	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-	return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+	if (bytes < 1024) return formatUnit(bytes, "byte", { display: "long" });
+	if (bytes < 1024 * 1024) return formatUnit(bytes / 1024, "kilobyte", { digits: 1 });
+	return formatUnit(bytes / 1024 / 1024, "megabyte", { digits: 1 });
 }

@@ -260,11 +260,11 @@ describe("serialising what a command replied with", () => {
 			flags: MessageFlags.IsComponentsV2,
 		} as never);
 
-		expect(outputs).toContainEqual({ kind: "dropped", what: "a Components V2 panel" });
+		expect(outputs).toContainEqual({ kind: "dropped", what: "panel" });
 	});
 
 	it("names a dropped attachment", () => {
-		expect(serialiseReply({ files: ["card.png"] })).toContainEqual({ kind: "dropped", what: "an attachment" });
+		expect(serialiseReply({ files: ["card.png"] })).toContainEqual({ kind: "dropped", what: "attachment" });
 	});
 
 	it("yields nothing for an empty reply rather than an empty block", () => {

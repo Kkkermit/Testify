@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Languages } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useParams } from "react-router";
@@ -142,7 +142,7 @@ function DocsIndex(): React.JSX.Element {
 }
 
 function DocView({ page, articleId }: { page: DocPage; articleId: string | undefined }): React.JSX.Element {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 
 	return (
 		<article className="flex flex-col gap-6">
@@ -150,6 +150,13 @@ function DocView({ page, articleId }: { page: DocPage; articleId: string | undef
 				<Eyebrow>{t(GROUP_LABELS[page.group])}</Eyebrow>
 				<h1 className={PAGE_TITLE}>{t(page.titleKey)}</h1>
 				<p className="text-muted-foreground">{t(page.summaryKey)}</p>
+				{/* The page around a doc follows the reader's language; the doc itself is the repository's English. */}
+				{i18n.resolvedLanguage !== "en" && (
+					<p className="text-muted-foreground flex items-center gap-2 text-sm">
+						<Languages size={15} aria-hidden="true" className="shrink-0" />
+						{t("docs.englishOnly")}
+					</p>
+				)}
 			</header>
 
 			{page.kind === "markdown" && <MarkdownDoc page={page} />}

@@ -35,7 +35,10 @@
 		"first": "Erste",
 		"last": "Letzte",
 		"pageNumber": "Seite {{page}}",
-		"tooPowerful": "moderiert oder verwaltet"
+		"tooPowerful": "moderiert oder verwaltet",
+		"on": "An",
+		"off": "Aus",
+		"partOf": "{{part, number}} von {{whole, number}}"
 	},
 	"nav": {
 		"servers": "Server",
@@ -329,7 +332,48 @@
 		"recentChanges": "Letzte Änderungen",
 		"missingTitle": "{{bot}} fehlen Berechtigungen",
 		"missingBody": "Diese Funktionen sind eingerichtet, tun aber stillschweigend nichts, solange {{bot}} sie nicht bekommt.",
-		"seeAllChanges": "Alle Änderungen ansehen"
+		"seeAllChanges": "Alle Änderungen ansehen",
+		"notSetUp": "Nicht eingerichtet",
+		"countEvents_one": "{{count, number}} Ereignis",
+		"countEvents_other": "{{count, number}} Ereignisse",
+		"countBirthdays_one": "{{count, number}} Geburtstag geteilt",
+		"countBirthdays_other": "{{count, number}} Geburtstage geteilt",
+		"countVerified_one": "{{count, number}} Mitglied verifiziert",
+		"countVerified_other": "{{count, number}} Mitglieder verifiziert",
+		"countRoles_one": "{{count, number}} Rolle",
+		"countRoles_other": "{{count, number}} Rollen",
+		"countMenus_one": "{{count, number}} Menü",
+		"countMenus_other": "{{count, number}} Menüs",
+		"countChannels_one": "{{count, number}} Kanal",
+		"countChannels_other": "{{count, number}} Kanäle",
+		"countResponders_one": "{{count, number}} Auto-Antwort",
+		"countResponders_other": "{{count, number}} Auto-Antworten",
+		"countMessages_one": "{{count, number}} Nachricht",
+		"countMessages_other": "{{count, number}} Nachrichten",
+		"countTicketsOpen_one": "{{count, number}} Ticket offen",
+		"countTicketsOpen_other": "{{count, number}} Tickets offen",
+		"countTicketsSold_one": "{{count, number}} Los verkauft",
+		"countTicketsSold_other": "{{count, number}} Lose verkauft",
+		"countRewards_one": "{{count, number}} Rollenbelohnung",
+		"countRewards_other": "{{count, number}} Rollenbelohnungen",
+		"countBoosts_one": "{{count, number}} Boost",
+		"countBoosts_other": "{{count, number}} Boosts",
+		"detailHolding_one": "Hält Konten unter {{count, number}} Tag zurück",
+		"detailHolding_other": "Hält Konten unter {{count, number}} Tagen zurück",
+		"detailWatching": "Achtet auf Beitrittswellen",
+		"detailBypass": "Ausnahme: {{permission}}",
+		"detailCountingAt": "Bei {{at, number}}",
+		"detailPosting": "Postet in {{channel}}",
+		"detailStarboard": "{{threshold, number}} ⭐ für {{channel}}",
+		"detailLobby": "Lobby: {{channel}}",
+		"detailTreasure": "{{amount}} pro Fund",
+		"detailCasino": "{{open, number}} von {{total, number}} Spielen offen",
+		"deletedChannel": "einem gelöschten Kanal",
+		"missingManageRoles": "Rollen verwalten — nötig für Level-Belohnungen, automatische Rollen und Verifizierung",
+		"missingManageMessages": "Nachrichten verwalten — nötig fürs Zählen und angeheftete Nachrichten",
+		"missingViewAuditLog": "Audit-Log anzeigen — nötig, damit das Audit-Logging nennt, wer was getan hat",
+		"missingManageChannels": "Kanäle verwalten — nötig für Sprachstatistiken und Tickets",
+		"missingAttachFiles": "Dateien anhängen — nötig für Rangkarten, Willkommensbilder und das Casino"
 	},
 	"checklist": {
 		"title": "Erste Schritte",
@@ -385,7 +429,10 @@
 		"timesOut": "Setzt das Mitglied in Auszeit",
 		"title": "AutoMod",
 		"whatToBlock": "Was blockiert wird",
-		"wordOrPhrase": "Wort oder Ausdruck"
+		"wordOrPhrase": "Wort oder Ausdruck",
+		"noRules": "Noch keine AutoMod-Regeln",
+		"enableRule": "{{name}} aktivieren",
+		"removeRule": "{{name}} entfernen"
 	},
 	"auth": {
 		"almostThere": "Fast geschafft",
@@ -456,7 +503,9 @@
 		"whatBody": "Hake eine Überschrift an, um die ganze Gruppe zu nehmen.",
 		"whatTitle": "Was aufgezeichnet wird",
 		"whereBody": "Ein Kanal erhält jedes unten gewählte Ereignis.",
-		"whereTitle": "Wohin das Log geht"
+		"whereTitle": "Wohin das Log geht",
+		"selectAll": "Alle auswählen",
+		"clearAll": "Auswahl aufheben"
 	},
 	"treasure": {
 		"title": "Schatzfunde",
@@ -475,7 +524,9 @@
 		"resetDefaults": "Auf Standard zurücksetzen",
 		"messagesBetween": "Die Nachrichten müssen zwischen {{min}} und {{max}} liegen.",
 		"dropBetween": "Ein Fund muss zwischen {{min}} und {{max}} liegen.",
-		"cooldownBetween": "Die Abklingzeit muss zwischen {{min}} und {{max}} Minuten liegen."
+		"cooldownBetween": "Die Abklingzeit muss zwischen {{min}} und {{max}} Minuten liegen.",
+		"rate_one": "Ein Fund von {{amount}} alle {{messages}} Nachrichten, höchstens einmal alle {{count, number}} Minute.",
+		"rate_other": "Ein Fund von {{amount}} alle {{messages}} Nachrichten, höchstens einmal alle {{count, number}} Minuten."
 	},
 	"welcome": {
 		"cardAlt": "Bild der Willkommenskarte",
@@ -638,7 +689,21 @@
 		"preview": "Vorschau",
 		"previewEmpty": "Hier erscheint deine Nachricht.",
 		"defaultTitle": "Announcement",
-		"previewNote": "Discord zeichnet sie etwas anders, aber Text und Erwähnung sind genau diese."
+		"previewNote": "Discord zeichnet sie etwas anders, aber Text und Erwähnung sind genau diese.",
+		"colourAqua": "Cyan",
+		"colourBlurple": "Blurple",
+		"colourBlue": "Blau",
+		"colourFuchsia": "Fuchsia",
+		"colourGold": "Gold",
+		"colourGreen": "Grün",
+		"colourGrey": "Grau",
+		"colourNavy": "Marineblau",
+		"colourOrange": "Orange",
+		"colourPink": "Rosa",
+		"colourPurple": "Lila",
+		"colourRed": "Rot",
+		"colourWhite": "Weiß",
+		"colourYellow": "Gelb"
 	},
 	"raid": {
 		"title": "Raid-Schutz",
@@ -877,7 +942,48 @@
 		"locked": "{{bot}} braucht diesen eingeschaltet",
 		"owner": "Inhaber",
 		"nsfw": "NSFW",
-		"configure": "Einrichten"
+		"configure": "Einrichten",
+		"alsoAnswers": "Reagiert auch auf {{alias}}",
+		"needs": "Benötigt {{permissions}}",
+		"categoryCommunity": "Community",
+		"categoryEconomy": "Wirtschaft",
+		"categoryCasino": "Casino",
+		"categoryFun": "Spaß",
+		"categoryGames": "Spiele",
+		"categoryInfo": "Info",
+		"categoryLevelling": "Level",
+		"categoryModeration": "Moderation",
+		"categoryMusic": "Musik",
+		"categorySettings": "Einstellungen",
+		"categoryTickets": "Tickets",
+		"categoryGiveaway": "Gewinnspiele",
+		"categoryDeveloper": "Feedback",
+		"categoryOwner": "Inhaber",
+		"permissionAdministrator": "Administrator",
+		"permissionAttachFiles": "Dateien anhängen",
+		"permissionBanMembers": "Mitglieder bannen",
+		"permissionChangeNickname": "Nickname ändern",
+		"permissionConnect": "Verbinden",
+		"permissionEmbedLinks": "Links einbetten",
+		"permissionKickMembers": "Mitglieder kicken",
+		"permissionManageChannels": "Kanäle verwalten",
+		"permissionManageEvents": "Events verwalten",
+		"permissionManageGuild": "Server verwalten",
+		"permissionManageGuildExpressions": "Ausdrücke verwalten",
+		"permissionManageMessages": "Nachrichten verwalten",
+		"permissionManageNicknames": "Nicknames verwalten",
+		"permissionManageRoles": "Rollen verwalten",
+		"permissionManageThreads": "Threads verwalten",
+		"permissionManageWebhooks": "Webhooks verwalten",
+		"permissionMentionEveryone": "Alle erwähnen",
+		"permissionModerateMembers": "Mitglieder in Timeout versetzen",
+		"permissionMoveMembers": "Mitglieder verschieben",
+		"permissionReadMessageHistory": "Nachrichtenverlauf lesen",
+		"permissionSendMessages": "Nachrichten senden",
+		"permissionSendPolls": "Umfragen erstellen",
+		"permissionSpeak": "Sprechen",
+		"permissionViewAuditLog": "Audit-Log anzeigen",
+		"permissionViewChannel": "Kanäle ansehen"
 	},
 	"giveaways": {
 		"title": "Verlosungen",
@@ -905,7 +1011,10 @@
 		"inThisServer": "Auf diesem Server",
 		"startBody": "{{bot}} postet sie und lost die Gewinner aus, wenn die Zeit um ist. Teilgenommen wird mit der 🎉-Reaktion.",
 		"deleteFor": "Verlosung um {{prize}} löschen",
-		"runningCount": "{{count, number}} laufen"
+		"runningCount": "{{count, number}} laufen",
+		"unitMinutes": "Minuten",
+		"unitHours": "Stunden",
+		"unitDays": "Tage"
 	},
 	"levelling": {
 		"title": "Level",
@@ -933,7 +1042,12 @@
 		"tabGeneral": "Allgemein",
 		"tabRewards": "Rollenbelohnungen",
 		"tabBoosts": "XP-Boosts",
-		"tabIgnores": "Ignoriert"
+		"tabIgnores": "Ignoriert",
+		"levelN": "Level {{level}}",
+		"multiplierFor": "Multiplikator für {{role}}",
+		"removeReward": "Belohnung für Level {{level}} entfernen",
+		"levelTaken": "Level {{level}} hat schon eine Belohnung. Entferne sie zuerst oder wähle ein anderes Level.",
+		"rewardsBody": "Eine Rolle, die vergeben wird, wenn jemand ein Level erreicht. {{used, number}} von {{max, number}} belegt."
 	},
 	"members": {
 		"title": "Mitglieder",
@@ -1048,7 +1162,9 @@
 		"rolesNone": "Hier gibt es keine Rolle, die du der Person geben könntest.",
 		"rolesNeedPermission": "Du brauchst die Berechtigung „Rollen verwalten“, um Rollen zu ändern.",
 		"rolesUnreadable": "Die Rollen konnten nicht gelesen werden.",
-		"saveRoles": "Rollen speichern"
+		"saveRoles": "Rollen speichern",
+		"levelOnXp": "Level {{level}} mit {{xp}} XP.",
+		"levelRange": "0 bis {{max, number}}"
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1131,7 +1247,16 @@
 		"winnersBetween": "Zwischen {{min}} und {{max}} Gewinnern.",
 		"potTooBig": "Der Grundtopf darf nicht größer als {{max}} sein.",
 		"ticketTooDear": "Ein Los darf nicht mehr als {{max}} kosten.",
-		"moreWinnersThanTickets": "Es wurden nur {{tickets}} Lose verkauft, eine Ziehung mit {{winners}} Gewinnern ließe also einige leer ausgehen."
+		"moreWinnersThanTickets": "Es wurden nur {{tickets}} Lose verkauft, eine Ziehung mit {{winners}} Gewinnern ließe also einige leer ausgehen.",
+		"reschedulesHourly": "Speichern verschiebt die nächste Ziehung auf eine Stunde ab jetzt.",
+		"reschedulesDaily": "Speichern verschiebt die nächste Ziehung auf einen Tag ab jetzt.",
+		"reschedulesWeekly": "Speichern verschiebt die nächste Ziehung auf eine Woche ab jetzt.",
+		"endPot": "Der Topf von {{pot}} verfällt damit, und niemand bekommt etwas zurück.",
+		"everyHour": "Jede Stunde",
+		"everyDay": "Jeden Tag",
+		"everyWeek": "Jede Woche",
+		"freeze": "Einfrieren",
+		"unfreeze": "Auftauen"
 	},
 	"music": {
 		"title": "Musik",
@@ -1241,7 +1366,9 @@
 		"countWhole": "Das Ziel muss eine ganze Zahl von mindestens 1 sein.",
 		"countHigh": "Das Ziel darf nicht höher als {{max}} sein.",
 		"cannotGiveRoles": "{{bot}} kann {{roles}} nicht vergeben – verschiebe seine eigene Rolle in den Servereinstellungen darüber.",
-		"cannotGiveThis": " — {{bot}} kann diese Rolle nicht vergeben"
+		"cannotGiveThis": " — {{bot}} kann diese Rolle nicht vergeben",
+		"verifiedSoFar": "Bisher {{verified, number}} verifiziert",
+		"notPostedYet": "Noch nicht gepostet"
 	},
 	"owner": {
 		"title": "Inhaber-Konsole",
@@ -1442,7 +1569,37 @@
 		"showInLog": "im Log anzeigen",
 		"actions": "Aktionen",
 		"block": "Sperren",
-		"blockMember": "{{name}} für {{bot}} sperren"
+		"blockMember": "{{name}} für {{bot}} sperren",
+		"closeGuild": "{{name}} schließen",
+		"unblockNamed": "{{name}} entsperren",
+		"replied": "<command>/{{command}}</command> hat geantwortet",
+		"droppedPanel": "Die Antwort enthielt auch ein Components-V2-Panel, das nur in Discord funktioniert.",
+		"droppedButtons": "Die Antwort enthielt auch Schaltflächen, die nur in Discord funktionieren.",
+		"droppedAttachment": "Die Antwort enthielt auch einen Anhang, der nur in Discord funktioniert.",
+		"logsPause": "Pausieren",
+		"logsResume": "Fortsetzen",
+		"usageSummary_one": "{{count, number}} Befehl in den letzten {{days}} Tagen ausgeführt, {{failing}} davon fehlgeschlagen.",
+		"usageSummary_other": "{{count, number}} Befehle in den letzten {{days}} Tagen ausgeführt, {{failing}} davon fehlgeschlagen.",
+		"unknown": "Unbekannt",
+		"created": "Erstellt",
+		"serverOwner": "Serverinhaber",
+		"noneSet": "Keiner festgelegt",
+		"none": "Keine",
+		"runtimeEnvironment": "Umgebung",
+		"runtimeNode": "Node.js",
+		"runtimePlatform": "Plattform",
+		"runtimeStarted": "Gestartet",
+		"runtimeMemory": "{{heap}} Heap von {{total}}, {{rss}} resident",
+		"runtimeLoaded": "Geladen",
+		"runtimeLoadedValue": "{{commands, number}} Befehle, {{events, number}} Event-Listener",
+		"runtimeGateway": "Gateway",
+		"runtimeConnecting_one": "verbindet noch, {{count, number}} Shard",
+		"runtimeConnecting_other": "verbindet noch, {{count, number}} Shards",
+		"runtimePing_one": "{{ping}}, {{count, number}} Shard",
+		"runtimePing_other": "{{ping}}, {{count, number}} Shards",
+		"runtimeCached": "Im Cache",
+		"runtimeCachedValue": "{{servers, number}} Server, {{channels, number}} Kanäle, {{users, number}} Nutzer",
+		"categoryFailed": "{{category}} · {{failed, number}} fehlgeschlagen"
 	},
 	"legal": {
 		"backToDashboard": "Zurück zum Dashboard",
@@ -2078,7 +2235,8 @@
 			"missingTitle": "Diese Anleitung gibt es nicht",
 			"missingBody": "Vielleicht wurde sie umbenannt. Alle Anleitungen stehen unter Anleitungen.",
 			"related": "Verwandt"
-		}
+		},
+		"englishOnly": "Diese Seite ist auf Englisch, wie das Repository, aus dem sie gelesen wird."
 	},
 	"source": {
 		"title": "Quellcode",
@@ -2147,6 +2305,7 @@
 		"total_other": "{{count, number}} insgesamt",
 		"noTraffic": "Noch nichts gezählt.",
 		"day": "Tag",
-		"unique": "Eindeutig"
+		"unique": "Eindeutig",
+		"licenseOwn": "Lizenz: eigene"
 	}
 }

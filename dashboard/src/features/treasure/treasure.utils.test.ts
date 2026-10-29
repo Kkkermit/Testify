@@ -49,6 +49,6 @@ describe("describeRate", () => {
 	it("collapses a range whose ends match", () => {
 		const draft = { minMessages: 20, maxMessages: 20, minAmount: 5, maxAmount: 5, cooldownMinutes: 3 };
 
-		expect(describeRate(draft)).toBe("A drop of 5 every 20 messages, at most once every 3 minutes.");
+		expect(describeRate(draft, t)).toBe("A drop of 5 every 20 messages, at most once every 3 minutes.");
 	});
 });

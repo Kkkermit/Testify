@@ -24,7 +24,7 @@ const repo = (overrides: object = {}) => ({
 	forks_count: 57,
 	subscribers_count: 3,
 	open_issues_count: 1,
-	license: { name: "Other" },
+	license: { name: "Other", spdx_id: "NOASSERTION" },
 	default_branch: "main",
 	pushed_at: "2026-10-29T15:09:01Z",
 	...overrides,

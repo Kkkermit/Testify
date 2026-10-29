@@ -18,14 +18,58 @@ describe("the guild overview", () => {
 	it("warns when the bot is missing a permission a feature needs", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/overview", () =>
-				HttpResponse.json({ ...overview, missingPermissions: ["Manage Roles — needed for level rewards"] }),
+				HttpResponse.json({ ...overview, missingPermissions: ["ManageRoles"] }),
 			),
 		);
 
 		renderPage();
 
 		expect(await screen.findByText(/missing permissions/i)).toBeInTheDocument();
-		expect(screen.getByText(/manage roles/i)).toBeInTheDocument();
+		expect(screen.getByText(/manage roles — needed for level rewards/i)).toBeInTheDocument();
+	});
+
+	/** The server sends what each feature is doing as data, so the page names the channel and words the plural. */
+	it("says what each feature is doing, by channel name and in the right plural", async () => {
+		server.use(
+			http.get("/api/guilds/:guildId/overview", () =>
+				HttpResponse.json({
+					...overview,
+					features: [
+						{
+							key: "welcome",
+							label: "Welcome messages",
+							enabled: true,
+							detail: { kind: "posting", channelId: "400000000000000001" },
+						},
+						{
+							key: "cases",
+							label: "Moderation cases",
+							enabled: true,
+							detail: { kind: "posting", channelId: "499999999999999999" },
+						},
+						{
+							key: "lottery",
+							label: "Lottery",
+							enabled: true,
+							detail: { kind: "count", what: "ticketsSold", count: 1 },
+						},
+						{
+							key: "tickets",
+							label: "Tickets",
+							enabled: true,
+							detail: { kind: "count", what: "ticketsOpen", count: 3 },
+						},
+					],
+				}),
+			),
+		);
+
+		renderPage();
+
+		expect(await screen.findByText("Posting in #general")).toBeInTheDocument();
+		expect(screen.getByText("Posting in a deleted channel")).toBeInTheDocument();
+		expect(screen.getByText("1 ticket sold")).toBeInTheDocument();
+		expect(screen.getByText("3 tickets open")).toBeInTheDocument();
 	});
 
 	it("says nothing about permissions when none are missing", async () => {

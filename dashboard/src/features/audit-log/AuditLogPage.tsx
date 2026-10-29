@@ -107,7 +107,7 @@ export function AuditLogPage(): React.JSX.Element {
 				action={
 					<div className="flex items-center gap-2">
 						<p className="text-muted-foreground text-sm tabular-nums" aria-live="polite">
-							{draft.events.length} of {AUDIT_EVENTS.length} chosen
+							{t("common.chosen", { count: draft.events.length, max: AUDIT_EVENTS.length })}
 						</p>
 						<Button
 							variant="ghost"
@@ -115,7 +115,7 @@ export function AuditLogPage(): React.JSX.Element {
 								edit({ events: draft.events.length === AUDIT_EVENTS.length ? [] : [...AUDIT_EVENTS] });
 							}}
 						>
-							{draft.events.length === AUDIT_EVENTS.length ? "Clear all" : "Select all"}
+							{draft.events.length === AUDIT_EVENTS.length ? t("auditLog.clearAll") : t("auditLog.selectAll")}
 						</Button>
 					</div>
 				}

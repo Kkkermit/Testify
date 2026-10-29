@@ -1,6 +1,7 @@
 import { type HistoryLevel, type StatusDay, type StatusLevel } from "@testify/shared";
 import { type BadgeTone } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
+import { formatPercent, formatUnit } from "@/lib/intl";
 
 export const LEVEL_TONE: Record<StatusLevel, BadgeTone> = {
 	operational: "success",
@@ -57,11 +58,11 @@ export function averageUptime(days: StatusDay[]): number | null {
 export function percent(share: number): string {
 	const value = Math.min(100, Math.max(0, share * 100));
 
-	return value === 100 ? "100%" : `${(Math.floor(value * 100) / 100).toFixed(2)}%`;
+	return value === 100 ? formatPercent(1, 1) : formatPercent(Math.floor(value * 100) / 100, 100, { digits: 2 });
 }
 
 export function millis(value: number | null): string {
-	return value === null ? "—" : `${Math.round(value).toLocaleString("en-GB")} ms`;
+	return value === null ? "—" : formatUnit(Math.round(value), "millisecond");
 }
 
 const SERVICE_NAMES: Record<string, string> = {

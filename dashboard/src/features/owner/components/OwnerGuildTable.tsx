@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 export function OwnerGuildTable({
 	guilds,
@@ -95,12 +96,12 @@ export function OwnerGuildTable({
 							</button>
 						)}
 					</td>
-					<td className={CELL_NUM}>{guild.memberCount.toLocaleString()}</td>
+					<td className={CELL_NUM}>{formatNumber(guild.memberCount)}</td>
 					<td className={cn(CELL_NUM, "font-sans whitespace-nowrap", shown("joined"))}>
 						{guild.joinedAt === null ? "—" : shortDate(guild.joinedAt)}
 					</td>
-					<td className={cn(CELL_NUM, shown("commands"))}>{guild.commands.toLocaleString()}</td>
-					<td className={cn(CELL_NUM, shown("dashboard"))}>{guild.dashboardViews.toLocaleString()}</td>
+					<td className={cn(CELL_NUM, shown("commands"))}>{formatNumber(guild.commands)}</td>
+					<td className={cn(CELL_NUM, shown("dashboard"))}>{formatNumber(guild.dashboardViews)}</td>
 					<td className={cn(CELL, WIDE_ONLY)}>
 						{guild.configured.length === 0 ? (
 							<Badge tone="warning">{t("owner.nothingSetUp")}</Badge>
