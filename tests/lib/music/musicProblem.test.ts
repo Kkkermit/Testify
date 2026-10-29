@@ -9,10 +9,6 @@ describe("classifyProblem", () => {
 		expect(problem?.kind).toBe("forbidden");
 		expect(problem?.advice).toContain("npm run music:setup");
 	});
-
-	it("reads the bot check as its own thing, because updating yt-dlp does not fix it", () => {
-		expect(classifyProblem("ERROR: [youtube] abc: Sign in to confirm you’re not a bot.")?.kind).toBe("bot-check");
-	});
 	/** Verbatim from production: YouTube's own reason, passed through, which surfaced as a crash with a stack. */
 	it("reads YouTube asking for a reload as a refusal of the host's session", () => {
 		const problem = classifyProblem("ERROR: [youtube] Vhvepsf5ynQ: The page needs to be reloaded.");

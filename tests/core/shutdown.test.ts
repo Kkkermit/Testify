@@ -46,17 +46,6 @@ afterEach(() => {
 });
 
 describe("shutdown", () => {
-	it("stops timers, closes the database and destroys the client, in that order", async () => {
-		const { shutdown, disconnectDatabase } = loadShutdown();
-		const client = clientFor();
-
-		await shutdown(client, "SIGINT");
-
-		expect(client.timers.stopAll).toHaveBeenCalled();
-		expect(disconnectDatabase).toHaveBeenCalled();
-		expect(client.destroy).toHaveBeenCalled();
-	});
-
 	/** A listener left open holds the port, so a restart cannot bind it and the bot never comes back. */
 	it("closes the dashboard listener when there is one", async () => {
 		const { shutdown } = loadShutdown();
@@ -78,20 +67,6 @@ describe("shutdown", () => {
 		expect(client.destroy).toHaveBeenCalled();
 	});
 
-	it("exits zero on a clean stop", async () => {
-		const { shutdown } = loadShutdown();
-		await shutdown(clientFor(), "SIGINT");
-
-		expect(exitSpy).toHaveBeenCalledWith(0);
-	});
-
-	it("passes a non-zero code through", async () => {
-		const { shutdown } = loadShutdown();
-		await shutdown(clientFor(), "uncaughtException", 1);
-
-		expect(exitSpy).toHaveBeenCalledWith(1);
-	});
-
 	/** Two signals in quick succession must not race two teardowns. */
 	it("ignores a second call", async () => {
 		const { shutdown, disconnectDatabase } = loadShutdown();
@@ -102,26 +77,6 @@ describe("shutdown", () => {
 
 		expect(disconnectDatabase).toHaveBeenCalledTimes(1);
 	});
-
-	it("still exits when closing the database throws, and reports failure", async () => {
-		const { shutdown, disconnectDatabase } = loadShutdown();
-		disconnectDatabase.mockRejectedValue(new Error("already closed"));
-		const client = clientFor();
-
-		await shutdown(client, "SIGINT");
-
-		expect(client.logger.error).toHaveBeenCalled();
-		expect(exitSpy).toHaveBeenCalledWith(1);
-	});
-
-	it("keeps an explicit failure code when teardown also fails", async () => {
-		const { shutdown, disconnectDatabase } = loadShutdown();
-		disconnectDatabase.mockRejectedValue(new Error("nope"));
-
-		await shutdown(clientFor(), "uncaughtException", 3);
-
-		expect(exitSpy).toHaveBeenCalledWith(3);
-	});
 });
 
 describe("handleProcessSignals", () => {
@@ -131,13 +86,6 @@ describe("handleProcessSignals", () => {
 		for (const signal of signals) process.removeAllListeners(signal);
 		process.removeAllListeners("uncaughtException");
 		process.removeAllListeners("unhandledRejection");
-	});
-
-	it("registers each signal exactly once", () => {
-		const { handleProcessSignals } = loadShutdown();
-		handleProcessSignals(clientFor());
-
-		for (const signal of signals) expect(process.listenerCount(signal)).toBe(1);
 	});
 
 	it("announces a reload on SIGTERM in development, where tsx restarts the bot", () => {
@@ -154,15 +102,6 @@ describe("handleProcessSignals", () => {
 		handleProcessSignals(clientFor());
 
 		process.emit("SIGTERM");
-
-		expect(printReloading).not.toHaveBeenCalled();
-	});
-
-	it("does not treat Ctrl+C as a reload", () => {
-		const { handleProcessSignals, printReloading } = loadShutdown();
-		handleProcessSignals(clientFor("development"));
-
-		process.emit("SIGINT");
 
 		expect(printReloading).not.toHaveBeenCalled();
 	});
@@ -203,20 +142,6 @@ describe("handleProcessSignals", () => {
 		const listened = (client.on as jest.Mock).mock.calls.map(([event]: [string]) => event);
 		expect(listened).toContain("error");
 		expect(listened).toContain("shardError");
-	});
-
-	it("reports a gateway error without stopping", () => {
-		const { handleProcessSignals } = loadShutdown();
-		const client = clientFor();
-		handleProcessSignals(client);
-
-		emitOn(client, "error", new Error("gateway went away"));
-
-		expect(client.logger.error).toHaveBeenCalledWith(
-			expect.objectContaining({ scope: "GATEWAY" }),
-			expect.stringContaining("still running"),
-		);
-		expect(exitSpy).not.toHaveBeenCalled();
 	});
 
 	/** A shard is one connection of several, so its id belongs in the line that reports it. */

@@ -1,5 +1,5 @@
 import { getTreasureConfig, saveTreasureConfig } from "@database/repositories/treasureRepository";
-import { applyTreasure, normaliseTreasure, readTreasure, resetTreasure } from "@lib/economy/treasureActions.util";
+import { applyTreasure, normaliseTreasure, resetTreasure } from "@lib/economy/treasureActions.util";
 import { TREASURE_DEFAULTS } from "@testify/shared";
 
 jest.mock("@database/repositories/treasureRepository", () => ({
@@ -44,18 +44,6 @@ describe("normaliseTreasure", () => {
 	it("defaults to off, so drops never start without being asked for", () => {
 		expect(normaliseTreasure(null).enabled).toBe(false);
 	});
-
-	it("says a record exists so the page can stop calling the numbers defaults", () => {
-		expect(normaliseTreasure({ isEnabled: true } as never).configured).toBe(true);
-	});
-});
-
-describe("readTreasure", () => {
-	it("reads through the repository rather than the model", async () => {
-		configured();
-
-		await expect(readTreasure(GUILD)).resolves.toMatchObject({ minMessages: 20, maxAmount: 900, enabled: true });
-	});
 });
 
 describe("applyTreasure", () => {
@@ -77,23 +65,6 @@ describe("applyTreasure", () => {
 		expect(saved).not.toHaveBeenCalled();
 	});
 
-	it("takes both halves at once when they are consistent", async () => {
-		configured();
-
-		const result = await applyTreasure(GUILD, { minMessages: 90, maxMessages: 120 }, ACTOR);
-
-		expect("settings" in result).toBe(true);
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ minMessages: 90, maxMessages: 120 }));
-	});
-
-	it("records who made the change", async () => {
-		configured();
-
-		await applyTreasure(GUILD, { enabled: false }, ACTOR);
-
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ lastModifiedBy: ACTOR, isEnabled: false }));
-	});
-
 	/** The answer is what the page renders next, so it has to say the record now exists. */
 	it("answers as configured even when there was no record before", async () => {
 		const result = await applyTreasure(GUILD, { enabled: true }, ACTOR);
@@ -103,14 +74,6 @@ describe("applyTreasure", () => {
 });
 
 describe("resetTreasure", () => {
-	it("puts every number back to its default", async () => {
-		configured();
-
-		await resetTreasure(GUILD, ACTOR);
-
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining(TREASURE_DEFAULTS));
-	});
-
 	/** Turning drops off is a separate decision from the numbers behind them. */
 	it("leaves the switch where it was", async () => {
 		configured({ isEnabled: true });

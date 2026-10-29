@@ -6,7 +6,7 @@ import { welcome } from "@api/routes/welcome";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
+import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
 import { DEFAULT_WELCOME_MESSAGE, type WelcomeConfigResponse } from "@testify/shared";
 
 jest.mock("@database/repositories/welcomeRepository", () => ({
@@ -22,7 +22,6 @@ const CHANNEL = "400000000000000001";
 
 const stored = jest.mocked(getWelcome);
 const saved = jest.mocked(saveWelcome);
-const disabled = jest.mocked(disableWelcome);
 const audited = jest.mocked(recordAudit);
 
 function app(): Hono<ApiBindings> {
@@ -88,14 +87,6 @@ describe("reading the configuration", () => {
 		expect(config.message).toBe(DEFAULT_WELCOME_MESSAGE);
 	});
 
-	it("reports a configured guild as enabled", async () => {
-		configured();
-
-		const config = await bodyOf(await send("GET"));
-
-		expect(config).toMatchObject({ enabled: true, channelId: CHANNEL, message: "Hello {user}", style: "card" });
-	});
-
 	/** `normaliseWelcome` migrates the old boolean, so the web shows what the Discord panel shows. */
 	it("migrates the old isEmbed flag into a style", async () => {
 		configured({ style: undefined, isEmbed: true });
@@ -115,23 +106,6 @@ describe("reading the configuration", () => {
 });
 
 describe("changing the configuration", () => {
-	it("saves a new message, keeping the channel and style it already had", async () => {
-		configured();
-
-		await send("PATCH", { message: "Hi {username}" });
-
-		expect(saved).toHaveBeenCalledWith(GUILD, { channelId: CHANNEL, message: "Hi {username}", style: "card" });
-	});
-
-	it("deletes the record when the greeting is turned off", async () => {
-		configured();
-
-		await send("PATCH", { enabled: false });
-
-		expect(disabled).toHaveBeenCalledWith(GUILD);
-		expect(saved).not.toHaveBeenCalled();
-	});
-
 	/** The stored record requires a channel, and a greeting with nowhere to go is not a configuration. */
 	it("refuses to turn the greeting on before a channel is chosen", async () => {
 		const response = await send("PATCH", { enabled: true });

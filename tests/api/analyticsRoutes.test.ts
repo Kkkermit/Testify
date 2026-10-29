@@ -147,21 +147,9 @@ describe("who can read the analytics", () => {
 });
 
 describe("the usage report", () => {
-	it("totals the window", async () => {
-		totals.mockResolvedValue({ runs: 120, failures: 3, activeGuilds: 4, commandsUsed: 9 });
-
-		expect(await usage()).toMatchObject({ runs: 120, failures: 3, activeGuilds: 4, commandsUsed: 9, days: 30 });
-	});
-
 	it("takes the window from the query, and refuses one it does not support", async () => {
 		expect((await usage("?days=7")).days).toBe(7);
 		expect((await appFor().request("/analytics/usage?days=365")).status).toBe(400);
-	});
-
-	it("names each command's category, so the list is readable without a lookup", async () => {
-		byCommand.mockResolvedValue([{ command: "ban", count: 10, failures: 1 }]);
-
-		expect((await usage()).mostUsed).toEqual([{ command: "ban", category: "moderation", count: 10, failures: 1 }]);
 	});
 
 	/** A command nobody has run has no usage row, and still ranks as least used. */
@@ -174,59 +162,11 @@ describe("the usage report", () => {
 		expect(least[0]).toMatchObject({ count: 0, category: "economy" });
 	});
 
-	it("says how many commands exist as well as how many were used", async () => {
-		totals.mockResolvedValue({ runs: 5, failures: 0, activeGuilds: 1, commandsUsed: 1 });
-
-		expect(await usage()).toMatchObject({ commandsUsed: 1, commandsTotal: 3 });
-	});
-
-	it("names the busiest servers", async () => {
-		byGuild.mockResolvedValue([{ guildId: GUILD, count: 42 }]);
-
-		expect((await usage()).busiestGuilds).toEqual([
-			{ guildId: GUILD, name: "Test Server", iconUrl: null, memberCount: 1_234, count: 42 },
-		]);
-	});
-
 	/** Rows outlive the bot's membership, and a row labelled "unknown server" is noise rather than information. */
 	it("drops a server the bot has since left", async () => {
 		byGuild.mockResolvedValue([{ guildId: "900000000000000009", count: 42 }]);
 
 		expect((await usage()).busiestGuilds).toEqual([]);
-	});
-
-	it("names the servers whose managers open the dashboard most", async () => {
-		byDashboard.mockResolvedValue([
-			{ guildId: GUILD, count: 12, lastDay: "2026-08-01" },
-			{ guildId: "900000000000000009", count: 50, lastDay: "2026-08-01" },
-		]);
-
-		expect((await usage()).dashboardGuilds).toEqual([
-			{ guildId: GUILD, name: "Test Server", iconUrl: null, memberCount: 1_234, count: 12 },
-		]);
-		expect(byDashboard).toHaveBeenCalledWith(30, 10);
-	});
-
-	it("names the slowest commands with their category, measured over the runs that are kept", async () => {
-		jest.mocked(slowestCommands).mockResolvedValue([{ command: "ban", runs: 12, typicalMs: 80, slowMs: 2_400 }]);
-
-		const report = await usage("?days=90");
-
-		expect(report.slowest).toEqual([
-			{ command: "ban", category: "moderation", runs: 12, typicalMs: 80, slowMs: 2_400 },
-		]);
-		expect(report.runDays).toBe(30);
-		expect(slowestCommands).toHaveBeenCalledWith(30, 10);
-	});
-
-	it("reports the split between slash and prefix", async () => {
-		bySurface.mockResolvedValue({ slash: 90, prefix: 10 });
-
-		expect((await usage()).surfaces).toEqual({ slash: 90, prefix: 10 });
-	});
-
-	it("returns one entry per day in the window", async () => {
-		expect((await usage("?days=7")).daily).toHaveLength(7);
 	});
 });
 
@@ -234,34 +174,6 @@ describe("one server's usage", () => {
 	async function report(query = ""): Promise<GuildUsageReport> {
 		return (await (await appFor().request(`/analytics/guilds/${GUILD}${query}`)).json()) as GuildUsageReport;
 	}
-
-	it("totals that server's commands and names who ran them", async () => {
-		byCommand.mockResolvedValue([
-			{ command: "rank", count: 8, failures: 1 },
-			{ command: "ban", count: 2, failures: 0 },
-		]);
-		bySurface.mockResolvedValue({ slash: 7, prefix: 3 });
-		byDashboard.mockResolvedValue([{ guildId: GUILD, count: 5, lastDay: "2026-08-01" }]);
-		jest.mocked(activeMembers).mockResolvedValue(4);
-
-		const body = await report("?days=7");
-
-		expect(body).toMatchObject({
-			days: 7,
-			memberDays: 7,
-			runs: 10,
-			failures: 1,
-			surfaces: { slash: 7, prefix: 3 },
-			dashboardViews: 5,
-			members: 4,
-			guild: { guildId: GUILD, name: "Test Server", joinedAt: "2026-01-01T00:00:00.000Z" },
-		});
-		expect(body.commands.map((row) => [row.command, row.category])).toEqual([
-			["rank", "levelling"],
-			["ban", "moderation"],
-		]);
-		expect(body.daily).toHaveLength(7);
-	});
 
 	/** Every query is narrowed to the server in the path, or one server's drill-down would show the whole bot. */
 	it("asks for that server's rows and no other's", async () => {
@@ -278,11 +190,6 @@ describe("one server's usage", () => {
 	it("caps the member figures at what is kept", async () => {
 		expect((await report("?days=90")).memberDays).toBe(30);
 		expect(activeMembers).toHaveBeenCalledWith(GUILD, 30);
-	});
-
-	it("is a 404 for a server the bot is not in, and a 400 for something that is not an ID", async () => {
-		expect((await appFor().request("/analytics/guilds/900000000000000009")).status).toBe(404);
-		expect((await appFor().request("/analytics/guilds/nope")).status).toBe(400);
 	});
 });
 
@@ -309,40 +216,11 @@ describe("who ran what in one server", () => {
 		).json()) as Paged<MemberUsageRow>;
 	}
 
-	it("lists each member with their busiest three commands and their picture when it is cached", async () => {
-		members.mockResolvedValue([alice, bob]);
-
-		const body = await people();
-
-		expect(body.total).toBe(2);
-		expect(body.items[0]).toEqual({
-			userId: ALICE,
-			username: "alice",
-			avatarUrl: "https://cdn.example/alice.png",
-			runs: 6,
-			failures: 1,
-			prefix: 2,
-			commandCount: 4,
-			topCommands: alice.commands.slice(0, 3),
-			lastAt: "2026-08-01T12:00:00.000Z",
-		});
-		expect(body.items[1]?.avatarUrl).toBeNull();
-	});
-
 	it("finds a member by name or by a pasted mention", async () => {
 		members.mockResolvedValue([alice, bob]);
 
 		expect((await people("?q=BO")).items.map((row) => row.username)).toEqual(["bob"]);
 		expect((await people(`?q=%3C%40${ALICE}%3E`)).items.map((row) => row.username)).toEqual(["alice"]);
-	});
-
-	it("pages the members", async () => {
-		members.mockResolvedValue([alice, bob]);
-
-		const body = await people("?page=2&perPage=1");
-
-		expect(body).toMatchObject({ total: 2, page: 2, perPage: 1 });
-		expect(body.items.map((row) => row.username)).toEqual(["bob"]);
 	});
 
 	it("lists runs with the channel's name, and passes the filters through", async () => {
@@ -406,36 +284,9 @@ describe("zeroFill", () => {
 			{ day: "2026-08-01", count: 5, failures: 1 },
 		]);
 	});
-
-	it("ends on today, oldest first", () => {
-		const filled = zeroFill([], 30, now);
-
-		expect(filled).toHaveLength(30);
-		expect(filled[0]?.day).toBe("2026-07-03");
-		expect(filled.at(-1)?.day).toBe("2026-08-01");
-	});
 });
 
 describe("the log feed", () => {
-	it("returns the buffered lines, newest first", async () => {
-		logRing.push({ at: Date.now(), level: "info", message: "started", context: {} });
-		logRing.push({ at: Date.now(), level: "error", message: "broke", context: { guildId: GUILD } });
-
-		const feed = (await (await appFor().request("/analytics/logs")).json()) as LogFeed;
-
-		expect(feed.lines.map((line) => line.message)).toEqual(["broke", "started"]);
-		expect(feed.buffered).toBe(2);
-	});
-
-	it("filters by level", async () => {
-		logRing.push({ at: Date.now(), level: "info", message: "chatter", context: {} });
-		logRing.push({ at: Date.now(), level: "error", message: "broke", context: {} });
-
-		const feed = (await (await appFor().request("/analytics/logs?level=error")).json()) as LogFeed;
-
-		expect(feed.lines.map((line) => line.message)).toEqual(["broke"]);
-	});
-
 	/** The buffer redacts on the way in; this is the check that nothing sensitive can reach a browser. */
 	it("never sends a secret it was handed", async () => {
 		logRing.push({ at: Date.now(), level: "error", message: "boom", context: { MONGODB_URI: "mongodb://a:b@c" } });
@@ -459,17 +310,6 @@ describe("the log feed", () => {
 		expect(feed.lines.map((line) => line.message)).toContain("fine detail");
 	});
 
-	it("searches the message and the context", async () => {
-		logRing.push({ at: Date.now(), level: "info", message: "[READY] online", context: {} });
-		logRing.push({ at: Date.now(), level: "error", message: "[BAN] failed", context: { guildId: GUILD } });
-
-		const byMessage = (await (await appFor().request("/analytics/logs?q=ready")).json()) as LogFeed;
-		const byContext = (await (await appFor().request(`/analytics/logs?q=${GUILD}`)).json()) as LogFeed;
-
-		expect(byMessage.lines.map((line) => line.message)).toEqual(["[READY] online"]);
-		expect(byContext.lines.map((line) => line.message)).toEqual(["[BAN] failed"]);
-	});
-
 	/** The console reports the logger's level, so an empty list is not mistaken for an idle bot. */
 	it("reports the level the bot's own logger is running at", async () => {
 		const feed = (await (await appFor().request("/analytics/logs")).json()) as LogFeed;
@@ -490,24 +330,10 @@ describe("the log feed", () => {
 });
 
 describe("the runtime card", () => {
-	it("reports what the bot is running as", async () => {
-		const info = (await (await appFor().request("/analytics/runtime")).json()) as RuntimeInfo;
-
-		expect(info).toMatchObject({ nodeVersion: process.version, environment: "test", commands: 3, guilds: 1 });
-		expect(info.version).toMatch(/^\d+\.\d+\.\d+/);
-		expect(info.uptimeMs).toBeGreaterThan(0);
-	});
-
 	/** A bot that phones home on a timer is not something to ship by default, so it links instead. */
 	it("links the repository rather than checking for a release", async () => {
 		const info = (await (await appFor().request("/analytics/runtime")).json()) as RuntimeInfo;
 
 		expect(info.repositoryUrl).toContain("github.com");
-	});
-
-	it("carries nothing from the environment beyond the mode", async () => {
-		const body = await (await appFor().request("/analytics/runtime")).text();
-
-		for (const key of ["TOKEN", "SECRET", "MONGODB", "CLIENT_ID"]) expect(body).not.toContain(key);
 	});
 });

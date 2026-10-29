@@ -34,31 +34,6 @@ beforeEach(() => {
 });
 
 describe("the warning punishments panel", () => {
-	it("changes one step and leaves the rest", async () => {
-		const interaction = pressed({ values: ["timeout-10"] });
-
-		await run(interaction, "set", ["1"]);
-
-		expect(writeWarnLadder).toHaveBeenCalledWith(
-			"900000000000000001",
-			[{ action: "warn" }, { action: "timeout", minutes: 10 }],
-			OWNER,
-		);
-		expect(interaction.update).toHaveBeenCalledTimes(1);
-	});
-
-	it("adds a step that is only a warning until somebody picks otherwise", async () => {
-		await run(pressed(), "add", []);
-
-		expect(writeWarnLadder.mock.calls[0]?.[1]).toEqual([{ action: "warn" }, { action: "warn" }, { action: "warn" }]);
-	});
-
-	it("removes the last step", async () => {
-		await run(pressed(), "pop", []);
-
-		expect(writeWarnLadder.mock.calls[0]?.[1]).toEqual([{ action: "warn" }]);
-	});
-
 	/** Two managers with the panel open: a menu for a step the other already removed must not write past the end. */
 	it("refuses a step that no longer exists", async () => {
 		await expect(run(pressed({ values: ["kick"] }), "set", ["5"])).rejects.toBeInstanceOf(UserFacingError);

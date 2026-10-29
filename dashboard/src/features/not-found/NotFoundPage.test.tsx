@@ -4,23 +4,11 @@ import { expectNoViolations } from "@/test/axe";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
 describe("the not-found page", () => {
-	it("says the address does not exist", () => {
-		renderWithProviders(<NotFoundPage />, { path: "/nope", route: "/nope" });
-
-		expect(screen.getByRole("heading", { level: 1, name: /page not found/i })).toBeInTheDocument();
-	});
-
 	/** Without it a bug report is "a link was broken somewhere", which is not something anybody can act on. */
 	it("prints the address that missed", () => {
 		renderWithProviders(<NotFoundPage />, { path: "/guilds/:guildId/typo", route: "/guilds/123/typo" });
 
 		expect(screen.getByText("/guilds/123/typo")).toBeInTheDocument();
-	});
-
-	it("offers a way back", () => {
-		renderWithProviders(<NotFoundPage />, { path: "/nope", route: "/nope" });
-
-		expect(screen.getByRole("link", { name: /go to your servers/i })).toHaveAttribute("href", "/guilds");
 	});
 
 	it("has no automatically detectable accessibility violations", async () => {

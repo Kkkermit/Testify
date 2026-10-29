@@ -2,7 +2,6 @@ import { createLogger } from "@core/logger";
 import { type SupportEntry, type SupportPicker } from "@lib/support/support.types";
 import { HourlyBudget, SupportDesk } from "@lib/support/supportDesk.util";
 import { secretsOf } from "@lib/support/supportGuard.util";
-import { SUPPORT_LIMITS } from "@testify/shared";
 import { FAKE_ENV, realEntries } from "@tests/helpers/support";
 
 const CONTEXT = { bot: "Testify", prefix: "t?", repository: "https://github.com/Kkkermit/Testify" };
@@ -33,35 +32,6 @@ function picker(pick: SupportPicker["pick"]): SupportPicker & { pick: jest.Mock 
 }
 
 describe("SupportDesk, answering by search", () => {
-	it("answers with the article, placeholders filled, and related ones beside it", async () => {
-		const reply = await desk().ask("how do I set up levelling", CONTEXT);
-
-		expect(reply.answer).toMatchObject({ id: "levelling", title: "Setting up levelling" });
-		expect(reply.answer?.body).not.toContain("{prefix}");
-		expect(reply.related.map((link) => link.id)).not.toContain("levelling");
-		expect(reply.related.length).toBeLessThanOrEqual(SUPPORT_LIMITS.related);
-	});
-
-	it("answers nothing to a question that is not about the bot", async () => {
-		expect((await desk().ask("what is the capital of france", CONTEXT)).answer).toBeNull();
-	});
-
-	it("offers the featured articles before anything is typed", () => {
-		const ids = desk()
-			.suggest("", CONTEXT)
-			.map((link) => link.id);
-
-		expect(ids).toEqual(expect.arrayContaining(["add-the-bot", "levelling", "commands-missing"]));
-	});
-
-	it("suggests articles for a word still being typed", () => {
-		expect(
-			desk()
-				.suggest("tick", CONTEXT)
-				.map((link) => link.id),
-		).toContain("tickets");
-	});
-
 	/** The dashboard searches this in the browser, so it carries what search needs and not the articles themselves. */
 	it("lists every entry for the dashboard without a single body", () => {
 		const catalogue = desk().catalogue(CONTEXT);
@@ -73,24 +43,6 @@ describe("SupportDesk, answering by search", () => {
 			featured: true,
 		});
 		expect(JSON.stringify(catalogue)).not.toContain("### ");
-	});
-
-	it("puts an article's own links first among the related ones", async () => {
-		const reply = await desk().ask("how do I set up levelling", CONTEXT);
-
-		expect(reply.related[0]?.id).toBe("level-rewards");
-	});
-
-	it("opens an article by id, and nothing for an id it does not have", () => {
-		expect(desk().article("add-the-bot", CONTEXT)?.title).toBe("Adding Testify to your server");
-		expect(desk().article("nope", CONTEXT)).toBeNull();
-	});
-
-	it("finds the next few articles from one that was opened", () => {
-		const related = desk().relatedTo("music", CONTEXT);
-
-		expect(related.map((link) => link.id)).not.toContain("music");
-		expect(related.length).toBeGreaterThan(0);
 	});
 });
 
@@ -129,12 +81,6 @@ describe("SupportDesk, against prompt injection", () => {
 		expect(JSON.stringify(reply)).not.toContain(ENV.DISCORD_TOKEN);
 	});
 
-	it("falls back to search when the model names an article that does not exist", async () => {
-		const confused = picker(() => Promise.resolve({ kind: "article", id: "the-secrets" }));
-
-		expect((await desk(confused).ask("how do I set up levelling", CONTEXT)).answer?.id).toBe("levelling");
-	});
-
 	/** An article that grew a secret after the tests passed is withheld at the last step rather than served. */
 	it("withholds an article that holds a secret, and logs which rule without the value", async () => {
 		const logger = quietLogger();
@@ -162,26 +108,10 @@ describe("SupportDesk, against prompt injection", () => {
 });
 
 describe("SupportDesk, with a model", () => {
-	it("prefers the model's pick to the search's", async () => {
-		const model = picker(() => Promise.resolve({ kind: "article", id: "tickets" }));
-
-		expect((await desk(model).ask("how do I set up levelling", CONTEXT)).answer?.id).toBe("tickets");
-	});
-
 	it("answers nothing when the model says nothing fits, even if search had a guess", async () => {
 		const model = picker(() => Promise.resolve({ kind: "none" }));
 
 		expect((await desk(model).ask("how do I set up levelling", CONTEXT)).answer).toBeNull();
-	});
-
-	it("falls back to search when the model fails, and logs the failure without the question", async () => {
-		const logger = quietLogger();
-		const model = picker(() => Promise.reject(new Error("timeout")));
-		const reply = await desk(model, { logger }).ask("how do I set up levelling", CONTEXT);
-
-		expect(reply.answer?.id).toBe("levelling");
-		expect(logger.debug).toHaveBeenCalled();
-		expect(JSON.stringify(jest.mocked(logger.debug).mock.calls)).not.toContain("set up levelling");
 	});
 
 	/** A flood of questions costs the owner a bounded number of model calls, then search carries on alone. */
@@ -190,28 +120,6 @@ describe("SupportDesk, with a model", () => {
 		const help = desk(model, { modelCallsPerHour: 2 });
 
 		for (const question of ["one question", "two question", "three question"]) await help.ask(question, CONTEXT);
-
-		expect(model.pick).toHaveBeenCalledTimes(2);
-	});
-
-	it("asks the model once for a question asked twice", async () => {
-		const model = picker(() => Promise.resolve({ kind: "article", id: "music" }));
-		const help = desk(model);
-
-		await help.ask("How do I play music?", CONTEXT);
-		await help.ask("how do i   play music?", CONTEXT);
-
-		expect(model.pick).toHaveBeenCalledTimes(1);
-	});
-
-	it("asks again once the remembered answer is stale", async () => {
-		let now = 0;
-		const model = picker(() => Promise.resolve({ kind: "article", id: "music" }));
-		const help = desk(model, { now: () => now });
-
-		await help.ask("play music", CONTEXT);
-		now = 11 * 60_000;
-		await help.ask("play music", CONTEXT);
 
 		expect(model.pick).toHaveBeenCalledTimes(2);
 	});

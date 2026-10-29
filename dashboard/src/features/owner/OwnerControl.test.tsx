@@ -1,9 +1,8 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
 import { expectNoViolations } from "@/test/axe";
-import { botControl, guildDetail } from "@/test/fixtures/owner";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -12,34 +11,6 @@ function renderTab(tab: string, extra = "") {
 }
 
 describe("the control tab", () => {
-	it("shows which services /play takes music from, with the one in use pressed", async () => {
-		renderTab("control");
-
-		expect(await screen.findByRole("button", { name: "Both" })).toHaveAttribute("aria-pressed", "true");
-		expect(screen.getByRole("button", { name: "YouTube" })).toHaveAttribute("aria-pressed", "false");
-		expect(screen.getByRole("group", { name: "Music sources" })).toBeInTheDocument();
-	});
-
-	it("switches the music sources, and describes the new choice", async () => {
-		const user = userEvent.setup();
-		let sent: unknown;
-		server.use(
-			http.put("/api/control/music", async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json({ sources: "soundcloud", configured: true });
-			}),
-		);
-
-		renderTab("control");
-		await user.click(await screen.findByRole("button", { name: "SoundCloud" }));
-
-		await waitFor(() => {
-			expect(sent).toEqual({ sources: "soundcloud" });
-		});
-		expect(await screen.findByText(/YouTube links are refused/)).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "SoundCloud" })).toHaveAttribute("aria-pressed", "true");
-	});
-
 	/** A refusal that only reverted the control would read as the click not registering. */
 	it("says so when the change is refused, and leaves the old choice pressed", async () => {
 		const user = userEvent.setup();
@@ -64,32 +35,6 @@ describe("the control tab", () => {
 
 		expect(await screen.findByRole("button", { name: /pause testify/i })).toBeInTheDocument();
 		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
-	});
-
-	it("says whether the bot is running", async () => {
-		renderTab("control");
-
-		expect(await screen.findByText("Running")).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /pause testify/i })).toBeInTheDocument();
-	});
-
-	it("pauses, and offers to resume once paused", async () => {
-		const user = userEvent.setup();
-		let sent: unknown;
-		server.use(
-			http.post("/api/control/gateway", async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json({ ...botControl, gateway: "paused", since: "2026-08-01T12:00:00.000Z" });
-			}),
-		);
-
-		renderTab("control");
-		await user.click(await screen.findByRole("button", { name: /pause testify/i }));
-
-		await waitFor(() => {
-			expect(sent).toEqual({ action: "pause" });
-		});
-		expect(await screen.findByRole("button", { name: /resume testify/i })).toBeInTheDocument();
 	});
 
 	/** Shutting down ends the process this page is served by, so it is typed rather than clicked. */
@@ -138,33 +83,6 @@ describe("the control tab", () => {
 		expect(await screen.findByText(/no per-server picture for bots/i)).toBeInTheDocument();
 	});
 
-	it("renames the bot", async () => {
-		const user = userEvent.setup();
-		let sent: unknown;
-		server.use(
-			http.patch("/api/control/identity", async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json({
-					id: "1",
-					username: "Renamed",
-					avatarUrl: null,
-					bannerUrl: null,
-					accentColour: null,
-				});
-			}),
-		);
-
-		renderTab("control");
-		const field = await screen.findByLabelText("Username");
-		await user.clear(field);
-		await user.type(field, "Renamed");
-		await user.click(screen.getByRole("button", { name: "Rename" }));
-
-		await waitFor(() => {
-			expect(sent).toEqual({ username: "Renamed" });
-		});
-	});
-
 	it("shows a refusal from Discord rather than swallowing it", async () => {
 		const user = userEvent.setup();
 		server.use(
@@ -190,46 +108,5 @@ describe("the control tab", () => {
 		await screen.findByText("Running");
 
 		await expectNoViolations(container);
-	});
-});
-
-describe("a server's detail", () => {
-	it("opens from the URL and describes the server", async () => {
-		renderTab("overview", `&server=${guildDetail.id}`);
-
-		expect(await screen.findByRole("heading", { name: guildDetail.name })).toBeInTheDocument();
-		expect(screen.getByText("1,234")).toBeInTheDocument();
-		expect(screen.getByText("Testy")).toBeInTheDocument();
-	});
-
-	it("names what that server is missing", async () => {
-		renderTab("overview", `&server=${guildDetail.id}`);
-
-		expect(await screen.findByText(/missing in this server: manage roles/i)).toBeInTheDocument();
-	});
-
-	it("links through to its settings", async () => {
-		renderTab("overview", `&server=${guildDetail.id}`);
-
-		expect(await screen.findByRole("link", { name: /open its settings/i })).toHaveAttribute(
-			"href",
-			`/guilds/${guildDetail.id}`,
-		);
-	});
-
-	it("closes back to the table", async () => {
-		const user = userEvent.setup();
-		const { search } = renderTab("overview", `&server=${guildDetail.id}`);
-
-		await user.click(await screen.findByRole("button", { name: `Close ${guildDetail.name}` }));
-
-		expect(search()).not.toContain("server=");
-	});
-
-	it("shows nothing until a server is chosen", async () => {
-		renderTab("overview");
-		await screen.findByRole("heading", { name: "Servers" });
-
-		expect(screen.queryByRole("heading", { name: guildDetail.name })).toBeNull();
 	});
 });

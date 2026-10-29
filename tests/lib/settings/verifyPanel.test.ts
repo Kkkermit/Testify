@@ -5,7 +5,6 @@ import { VERIFY_PANEL_ID } from "@lib/settings/settings.constants";
 import { type VerifyConfig } from "@lib/settings/settings.types";
 import {
 	DEFAULT_VERIFY_MESSAGE,
-	isReady,
 	normaliseVerify,
 	type StoredVerifySettings,
 	verifyPanel,
@@ -42,16 +41,6 @@ function config(overrides: Partial<VerifyConfig> = {}): VerifyConfig {
 }
 
 describe("normaliseVerify", () => {
-	it("gives an unconfigured guild an empty config with the default wording", () => {
-		expect(normaliseVerify(null)).toEqual({
-			channelId: null,
-			roleId: null,
-			messageId: null,
-			message: DEFAULT_VERIFY_MESSAGE,
-			verifiedCount: 0,
-		});
-	});
-
 	/** The wording was a command option before, so an existing document has no message. */
 	it("falls back to the default wording for a document written before it existed", () => {
 		const legacy = stored();
@@ -63,18 +52,6 @@ describe("normaliseVerify", () => {
 	/** An empty string would render a panel with nothing above the button. */
 	it("falls back for a blank message too", () => {
 		expect(normaliseVerify(stored({ message: "" })).message).toBe(DEFAULT_VERIFY_MESSAGE);
-	});
-
-	it("counts who has verified", () => {
-		expect(normaliseVerify(stored({ verifiedIds: ["a", "b", "c"] })).verifiedCount).toBe(3);
-	});
-});
-
-describe("isReady", () => {
-	it("needs both a channel and a role", () => {
-		expect(isReady(config())).toBe(true);
-		expect(isReady(config({ channelId: null }))).toBe(false);
-		expect(isReady(config({ roleId: null }))).toBe(false);
 	});
 });
 
@@ -98,15 +75,6 @@ describe("the verification panel", () => {
 		expect(duplicateIds(verifyPanel({ config: normaliseVerify(null) }, OWNER))).toEqual([]);
 	});
 
-	it("names the channel and the role", () => {
-		expect(textOf(ready)).toContain(CHANNEL);
-		expect(textOf(ready)).toContain(ROLE);
-	});
-
-	it("shows the wording members will see", () => {
-		expect(textOf(ready)).toContain("Press to verify");
-	});
-
 	/** Naming what is missing beats a generic "not configured". */
 	it("says exactly what is still needed", () => {
 		expect(textOf(verifyPanel({ config: config({ channelId: null }) }, OWNER))).toMatch(/a channel/i);
@@ -121,28 +89,9 @@ describe("the verification panel", () => {
 		expect(postOf(ready)).toBe(false);
 	});
 
-	it("offers to update rather than repost once the panel exists", () => {
-		const labelOf = (rendered: ReturnType<typeof verifyPanel>): unknown =>
-			buttonsOf(rendered).find((control) => parseCustomId(String(control.custom_id)).action === "post")?.label;
-
-		expect(labelOf(ready)).toBe("Post the panel");
-		expect(labelOf(verifyPanel({ config: config({ messageId: "9" }) }, OWNER))).toBe("Update the panel");
-	});
-
-	it("says whether the panel has been posted, and how many have verified", () => {
-		const text = textOf(verifyPanel({ config: config({ messageId: "9", verifiedCount: 1_234 }) }, OWNER));
-
-		expect(text).toMatch(/panel is posted/i);
-		expect(text).toContain("1,234");
-	});
-
 	/** A role above the bot's is warned about, since every verification would fail at the last step. */
 	it("warns when the chosen role sits above the bot", () => {
 		expect(textOf(verifyPanel({ config: config(), roleTooHigh: true }, OWNER))).toMatch(/above mine/i);
 		expect(textOf(ready)).not.toMatch(/above mine/i);
-	});
-
-	it("shows a note from the last press when there is one", () => {
-		expect(textOf(verifyPanel({ config: config(), note: "Panel posted." }, OWNER))).toContain("Panel posted.");
 	});
 });

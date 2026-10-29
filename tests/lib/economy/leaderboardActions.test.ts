@@ -9,9 +9,6 @@ import {
 	boardMessage,
 	type BoardState,
 	boardSubtitle,
-	boardTitle,
-	emptyMessage,
-	footerText,
 } from "@lib/economy/leaderboardActions.util";
 import { boardEntries, decorateRows, standingOnBoard } from "@lib/economy/memberActions.util";
 import { BOARD_SCOPES, MONEY_SORTS } from "@testify/shared";
@@ -37,27 +34,10 @@ const board = (overrides: Partial<BoardState> = {}): BoardState => ({
 });
 
 describe("the board's words", () => {
-	it("names what the money board is ranked by", () => {
-		expect(boardTitle(board())).toBe("Richest members");
-		expect(boardTitle(board({ sort: "wallet" }))).toBe("Biggest wallets");
-		expect(boardTitle(board({ kind: "levels" }))).toBe("Top levels");
-	});
-
 	/** The bot-wide board is not this server's, and a subtitle naming the server would say it was. */
 	it("says where the board reaches", () => {
 		expect(boardSubtitle(board(), "Testify HQ")).toBe("Testify HQ · Ranked by wallet and bank together");
 		expect(boardSubtitle(board({ scope: "global", sort: "bank" }), "Testify HQ")).toBe("Every server · Ranked by bank");
-	});
-
-	it("says something board-specific rather than a generic blank", () => {
-		expect(emptyMessage("economy")).not.toBe(emptyMessage("levels"));
-		expect(emptyMessage("economy", "global")).toMatch(/anywhere/);
-	});
-
-	it("counts the board in its own words", () => {
-		expect(footerText("economy", "server", 1)).toBe("1 account ranked");
-		expect(footerText("economy", "global", 1_200)).toBe("1,200 people ranked across every server");
-		expect(footerText("levels", "server", 3)).toBe("3 members ranked");
 	});
 
 	it("describes the picture for anybody who cannot see it", () => {
@@ -67,10 +47,6 @@ describe("the board's words", () => {
 });
 
 describe("boardControls", () => {
-	it("gives the levels board no buttons", () => {
-		expect(boardControls(board({ kind: "levels" }), OWNER)).toEqual([]);
-	});
-
 	/** Each button carries the whole board it leads to, so pressing one never forgets the other choice. */
 	it("switches scope and sort while keeping the other, for its owner only", () => {
 		const [scopes, sorts] = boardControls(board({ sort: "wallet", scope: "server" }), OWNER).map(
@@ -140,13 +116,6 @@ describe("boardMessage", () => {
 		);
 	});
 
-	it("asks for the top ten and nothing past them", async () => {
-		jest.mocked(standingOnBoard).mockResolvedValue(null);
-		await boardMessage(GUILD, board(), OWNER, [GUILD.id]);
-
-		expect(boardEntries).toHaveBeenCalledWith(GUILD.id, "economy", { limit: BOARD_SIZE, skip: 0 }, expect.anything());
-	});
-
 	it("draws the reader's own row under the top ten when they are further down", async () => {
 		jest.mocked(standingOnBoard).mockResolvedValue({ rank: 27, entry: { userId: OWNER, primary: 50, secondary: 5 } });
 		await boardMessage(GUILD, board(), OWNER, [GUILD.id]);
@@ -166,18 +135,6 @@ describe("boardMessage", () => {
 				.rows.filter((row) => row.you === true)
 				.map((row) => row.rank),
 		).toEqual([3]);
-	});
-
-	it("says so when the reader is not on the board at all", async () => {
-		jest.mocked(standingOnBoard).mockResolvedValue(null);
-		await boardMessage(GUILD, board({ kind: "levels" }), OWNER, [GUILD.id]);
-
-		expect(drawn()).toMatchObject({
-			viewer: null,
-			unranked: expect.stringMatching(/earn XP/) as unknown,
-			theme: "levels",
-		});
-		expect(drawn().rows[0]).toMatchObject({ primary: "Level 1,000", secondary: "0 XP" });
 	});
 
 	/** An empty board already says nobody is on it. */

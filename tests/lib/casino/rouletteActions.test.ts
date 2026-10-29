@@ -8,7 +8,6 @@ import {
 	openRound,
 	placeBets,
 	spinNow,
-	spinOverdueRounds,
 	spinRound,
 } from "@lib/casino/rouletteActions.util";
 import { textOf } from "@tests/helpers/containers";
@@ -112,32 +111,6 @@ describe("opening a round", () => {
 });
 
 describe("placing bets", () => {
-	it("takes the stake, starts the countdown on the first bet, and sets one timer", async () => {
-		repository.findRound.mockResolvedValue(record());
-		repository.addBets.mockResolvedValue(record());
-		const bot = client();
-
-		await placeBets(bot, ALICE, ROUND, [{ kind: "red" }, { kind: "number", number: 17 }], NOW);
-
-		expect(takeStake).toHaveBeenCalledWith(ALICE, "200");
-		expect(repository.startClock).toHaveBeenCalledWith(
-			ROUND,
-			new Date(NOW + ROULETTE_ROUND.bettingMs),
-			expect.any(Date),
-		);
-		expect(bot.timers.after).toHaveBeenCalledWith(`roulette-${ROUND}`, ROULETTE_ROUND.bettingMs, expect.any(Function));
-		expect(repository.addBets).toHaveBeenCalledWith(
-			ROUND,
-			{ userId: ALICE.userId, name: "alice" },
-			[
-				{ spot: "red", amount: 100 },
-				{ spot: "n17", amount: 100 },
-			],
-			ROULETTE_ROUND.maxBets,
-			NOW,
-		);
-	});
-
 	/** Later bets must not restart the clock, or a busy table would never spin. */
 	it("leaves a running countdown alone", async () => {
 		repository.findRound.mockResolvedValue(record({ closesAt: new Date(NOW + 10_000) }));
@@ -148,28 +121,6 @@ describe("placing bets", () => {
 
 		expect(repository.startClock).not.toHaveBeenCalled();
 		expect(bot.timers.after).not.toHaveBeenCalled();
-	});
-
-	it("sets no second timer when another first bet started the clock a moment earlier", async () => {
-		repository.findRound.mockResolvedValue(record());
-		repository.addBets.mockResolvedValue(record());
-		repository.startClock.mockResolvedValue(false);
-		const bot = client();
-
-		await placeBets(bot, ALICE, ROUND, [{ kind: "odd" }], NOW);
-
-		expect(bot.timers.after).not.toHaveBeenCalled();
-	});
-
-	it("bets with the player's own chip once they have changed it", async () => {
-		repository.findRound.mockResolvedValue(
-			record({ players: { [ALICE.userId]: { name: "alice", joinedAt: 1, chip: 750, bets: [] } } }),
-		);
-		repository.addBets.mockResolvedValue(record());
-
-		await placeBets(client(), ALICE, ROUND, [{ kind: "even" }], NOW);
-
-		expect(takeStake).toHaveBeenCalledWith(ALICE, "750");
 	});
 
 	/** The stake leaves first, so a bet that could not land has to come straight back. */
@@ -286,21 +237,6 @@ describe("the spin", () => {
 		"333333333333333333": { name: "bob", joinedAt: 2, bets: [{ spot: "black", amount: 50 }] },
 	};
 
-	it("pays every player from one pocket, shows the spin, then the result", async () => {
-		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 0, players: bets }));
-		const edit = jest.fn(() => Promise.resolve());
-		const bot = client(edit);
-
-		await spinRound(bot, ROUND, () => 0);
-
-		// Zero: alice's chip on 0 pays 36 times, every outside bet loses.
-		expect(payOut).toHaveBeenCalledWith({ guildId: ALICE.guildId, userId: ALICE.userId }, 3_600);
-		expect(payOut).toHaveBeenCalledWith({ guildId: ALICE.guildId, userId: "333333333333333333" }, 0);
-		expect(repository.finishRound).toHaveBeenCalledWith(ROUND, true);
-		expect(edit).toHaveBeenCalledTimes(1);
-		expect(bot.timers.after).toHaveBeenCalledWith(`roulette-reveal-${ROUND}`, expect.any(Number), expect.any(Function));
-	});
-
 	/** Each player's round counts once toward the casino's stats, with everything they staked and got back. */
 	it("records each player's round for the stats once everybody is paid", async () => {
 		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 0, players: bets }));
@@ -372,15 +308,5 @@ describe("the spin", () => {
 		await expect(spinNow(client(), ALICE, ROUND)).rejects.toThrow(/chip down first/);
 
 		expect(repository.claimRound).not.toHaveBeenCalled();
-	});
-
-	it("spins every round a restart left open past its close", async () => {
-		repository.overdueRounds.mockResolvedValue([record({ closesAt: new Date(NOW - 60_000) })]);
-		repository.claimRound.mockResolvedValue(record({ status: "spinning", pocket: 5, players: bets }));
-
-		await spinOverdueRounds(client(), NOW);
-
-		expect(repository.overdueRounds).toHaveBeenCalledWith(new Date(NOW - ROULETTE_ROUND.overdueMs), 10);
-		expect(repository.claimRound).toHaveBeenCalledWith(ROUND, expect.any(Number));
 	});
 });

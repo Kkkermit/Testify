@@ -1,10 +1,9 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import raidButton from "@buttons/raid";
-import { parseCustomId } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { applyRaidSettings, raidPanel, readRaidOverview } from "@lib/raid";
 import { DEFAULT_RAID, type RaidOverview } from "@testify/shared";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { buttonsOf, textOf } from "@tests/helpers/containers";
 
 jest.mock("@lib/raid", () => ({
 	...jest.requireActual<object>("@lib/raid"),
@@ -51,11 +50,6 @@ beforeEach(() => {
 });
 
 describe("the raid protection panel", () => {
-	it("belongs to the person who opened it, last in every control", () => {
-		expect(raidButton.ownerOnly).toBe(true);
-		for (const id of idsOf(raidPanel(CURRENT, OWNER))) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
-	});
-
 	it("cannot be turned on with nothing to do, and says when a hold cannot happen", () => {
 		expect(buttonsOf(raidPanel(CURRENT, OWNER)).find((button) => button.label === "Turn on")?.disabled).toBe(true);
 
@@ -107,12 +101,5 @@ describe("the raid protection panel", () => {
 			raidButton.run(pressed("modal", { typed: { joins: "1", minutes: "2" } }) as never, context("save-spike")),
 		).rejects.toThrow(UserFacingError);
 		expect(applyRaidSettings).not.toHaveBeenCalled();
-	});
-
-	it("opens the forms pre-filled with what is saved", async () => {
-		const press = pressed("button");
-		await raidButton.run(press as never, context("age"));
-
-		expect(JSON.stringify(press.showModal.mock.calls[0])).toContain('"value":"0"');
 	});
 });

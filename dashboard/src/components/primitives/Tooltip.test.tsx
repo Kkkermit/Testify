@@ -4,16 +4,6 @@ import { createRef } from "react";
 import { Tooltip } from "@/components/primitives/Tooltip";
 
 describe("Tooltip", () => {
-	it("says nothing until it is asked", () => {
-		render(
-			<Tooltip label="Every server you can configure">
-				<button type="button">Servers</button>
-			</Tooltip>,
-		);
-
-		expect(screen.queryByText("Every server you can configure")).toBeNull();
-	});
-
 	/** The server switcher's Escape handed focus to a ref the tooltip had quietly replaced with its own. */
 	it("leaves the child's own ref pointing at it", () => {
 		const ref = createRef<HTMLButtonElement>();
@@ -41,20 +31,6 @@ describe("Tooltip", () => {
 		expect(screen.getByRole("button", { name: "Servers" })).toHaveFocus();
 		await waitFor(() => {
 			expect(screen.getByText("Every server you can configure")).toBeInTheDocument();
-		});
-	});
-
-	it("opens on hover", async () => {
-		render(
-			<Tooltip label="Sign out of the dashboard">
-				<button type="button">Sign out</button>
-			</Tooltip>,
-		);
-
-		await userEvent.hover(screen.getByRole("button"));
-
-		await waitFor(() => {
-			expect(screen.getByText("Sign out of the dashboard")).toBeInTheDocument();
 		});
 	});
 

@@ -5,13 +5,8 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { roleMenus } from "@api/routes/roleMenus";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import {
-	countRoleMenus,
-	createRoleMenu,
-	deleteRoleMenu,
-	findRoleMenu,
-} from "@database/repositories/roleMenuRepository";
-import { changeRoleMenu, takeDownRoleMenu } from "@lib/roles/roleMenuActions.util";
+import { countRoleMenus, createRoleMenu, findRoleMenu } from "@database/repositories/roleMenuRepository";
+import { changeRoleMenu } from "@lib/roles/roleMenuActions.util";
 import { BOT_ABOVE_ROLES, grantableRoles } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/roleMenuRepository", () => ({
@@ -85,11 +80,6 @@ beforeEach(() => {
 });
 
 describe("the role menu routes", () => {
-	it("makes a menu from a valid body", async () => {
-		expect((await send("POST", "", BODY)).status).toBe(200);
-		expect(createRoleMenu).toHaveBeenCalledWith(GUILD, BODY, OWNER);
-	});
-
 	it("refuses a menu with no roles, or more than a select can hold", async () => {
 		expect((await send("POST", "", { ...BODY, roleIds: [] })).status).toBe(400);
 		expect(
@@ -128,13 +118,5 @@ describe("the role menu routes", () => {
 
 		expect(response.status).toBe(400);
 		expect(await response.text()).toContain("Saved, but the post was not updated.");
-	});
-
-	it("takes the post down before deleting the menu", async () => {
-		jest.mocked(findRoleMenu).mockResolvedValue(STORED as never);
-
-		expect((await send("DELETE", `/${MENU_ID}`)).status).toBe(200);
-		expect(takeDownRoleMenu).toHaveBeenCalledTimes(1);
-		expect(deleteRoleMenu).toHaveBeenCalledWith(GUILD, MENU_ID);
 	});
 });

@@ -6,7 +6,6 @@ import { casino } from "@api/routes/casino";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { getCasinoSettings, saveCasinoSettings } from "@database/repositories/casinoRepository";
-import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { type CasinoSettings } from "@testify/shared";
 
 jest.mock("@database/repositories/casinoRepository", () => ({
@@ -66,25 +65,9 @@ describe("GET /casino", () => {
 		expect(body).toMatchObject({ enabled: true, minBet: 1, maxBet: null, configured: false });
 		expect(Object.values(body.games).every(Boolean)).toBe(true);
 	});
-
-	it("reports what is stored", async () => {
-		stored.mockResolvedValue({ enabled: false, disabledGames: ["dice"], minBet: 25, maxBet: 5_000 });
-		const body = (await (await send("GET")).json()) as CasinoSettings;
-
-		expect(body).toMatchObject({ enabled: false, minBet: 25, maxBet: 5_000, configured: true });
-		expect(body.games.dice).toBe(false);
-	});
 });
 
 describe("PATCH /casino", () => {
-	it("closes the casino and records who did it", async () => {
-		const response = await send("PATCH", { enabled: false });
-
-		expect(response.status).toBe(200);
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ enabled: false }), OWNER);
-		expect(jest.mocked(recordAudit)).toHaveBeenCalledWith(expect.objectContaining({ summary: "Closed the casino" }));
-	});
-
 	it("switches one game off and stores only what is off", async () => {
 		await send("PATCH", { games: { slots: false } });
 

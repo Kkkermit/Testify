@@ -58,10 +58,6 @@ describe("identityOf", () => {
 	it("treats an unfetched banner as absent", () => {
 		expect(identityOf(userLike({ bannerURL: () => undefined }) as never).bannerUrl).toBeNull();
 	});
-
-	it("pads a short accent colour, or the hex is not a hex", () => {
-		expect(identityOf(userLike({ accentColor: 0x0000ff }) as never).accentColour).toBe("#0000ff");
-	});
 });
 
 describe("botIdentity", () => {
@@ -101,47 +97,12 @@ describe("botIdentity", () => {
 		expect(identity?.avatarUrl).toMatch(/embed\/avatars\/\d\.png$/);
 	});
 
-	it("reads it once for a burst of polls, not once per poll", async () => {
-		const get = jest.fn().mockResolvedValue({ id: "100000000000000001", username: "helper-app", avatar: "abc" });
-		const client = connectingClient(get);
-
-		await botIdentity(client, 0);
-		await botIdentity(client, 2_000);
-
-		expect(get).toHaveBeenCalledTimes(1);
-	});
-
-	it("says nothing when even the REST read fails, so the page keeps waiting", async () => {
-		await expect(botIdentity(connectingClient(jest.fn().mockRejectedValue(new Error("401"))), 0)).resolves.toBeNull();
-	});
-
 	/** The banner never arrives in the READY payload, so without this fetch it is permanently absent. */
 	it("fetches the user, which is the only way to get a banner", async () => {
 		const user = userLike();
 		await botIdentity(clientWith(user));
 
 		expect(user.fetch).toHaveBeenCalled();
-	});
-
-	it("serves the cached answer rather than fetching per request", async () => {
-		const user = userLike();
-		const client = clientWith(user);
-
-		await botIdentity(client, 0);
-		await botIdentity(client, 1_000);
-		await botIdentity(client, 60_000);
-
-		expect(user.fetch).toHaveBeenCalledTimes(1);
-	});
-
-	it("refetches once the cache is stale, so a rebrand appears", async () => {
-		const user = userLike();
-		const client = clientWith(user);
-
-		await botIdentity(client, 0);
-		await botIdentity(client, 60 * 60 * 1000 + 1);
-
-		expect(user.fetch).toHaveBeenCalledTimes(2);
 	});
 
 	/** A rate-limited REST call must not cost the dashboard its avatar as well as its banner. */

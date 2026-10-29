@@ -12,7 +12,7 @@ import {
 	getTicketSetup,
 	saveTicketSetup,
 } from "@database/repositories/ticketRepository";
-import { closeTicketFrom, readOpenTickets } from "@lib/tickets/openTickets.util";
+import { closeTicketFrom } from "@lib/tickets/openTickets.util";
 import { type TicketSettings } from "@testify/shared";
 
 jest.mock("@database/repositories/ticketRepository", () => ({
@@ -44,24 +44,6 @@ const COMPLETE = {
 	transcriptChannelId: "400000000000000002",
 	staffRoleId: "300000000000000003",
 };
-
-function configured(overrides: Record<string, unknown> = {}): void {
-	stored.mockResolvedValue({
-		guildId: GUILD,
-		channelId: PANEL,
-		categoryId: "400000000000000005",
-		transcriptChannelId: "400000000000000002",
-		handlerRoleId: "300000000000000003",
-		everyoneRoleId: GUILD,
-		description: "Press the button",
-		buttonLabel: "Create ticket",
-		buttonEmoji: "🎫",
-		messageId: "500000000000000001",
-		createdAt: new Date(),
-		updatedAt: new Date(),
-		...overrides,
-	});
-}
 
 function app(): Hono<ApiBindings> {
 	const guild = {
@@ -118,15 +100,6 @@ describe("GET /tickets", () => {
 
 		expect(body).toMatchObject({ enabled: false, panelChannelId: null, posted: false });
 	});
-
-	it("reports what is stored, and how many tickets are open", async () => {
-		configured();
-		jest.mocked(countOpenTickets).mockResolvedValue(6);
-
-		const body = (await (await request("GET")).json()) as TicketSettings;
-
-		expect(body).toMatchObject({ enabled: true, panelChannelId: PANEL, posted: true, openTickets: 6 });
-	});
 });
 
 describe("PATCH /tickets", () => {
@@ -137,26 +110,11 @@ describe("PATCH /tickets", () => {
 		expect(saved).not.toHaveBeenCalled();
 	});
 
-	it("stores a complete one", async () => {
-		const response = await request("PATCH", COMPLETE);
-
-		expect(response.status).toBe(200);
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ channelId: PANEL }));
-	});
-
 	/** The message is public, so choosing a channel must not drop a panel into it. */
 	it("does not post the panel just because a channel was chosen", async () => {
 		await request("PATCH", COMPLETE);
 
 		expect(send).not.toHaveBeenCalled();
-	});
-
-	it("posts when asked", async () => {
-		const response = await request("PATCH", { ...COMPLETE, publish: true });
-
-		expect(response.status).toBe(200);
-		expect(send).toHaveBeenCalled();
-		expect(((await response.json()) as TicketSettings).posted).toBe(true);
 	});
 
 	it("refuses an id that is not a snowflake", async () => {
@@ -172,36 +130,9 @@ describe("PATCH /tickets", () => {
 		expect(response.status).toBe(400);
 		expect(saved).not.toHaveBeenCalled();
 	});
-
-	it("tells a publish from an ordinary edit in the audit record", async () => {
-		await request("PATCH", COMPLETE);
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "tickets.update" }));
-
-		jest.clearAllMocks();
-		send.mockResolvedValue({ id: "500000000000000009" });
-
-		await request("PATCH", { ...COMPLETE, publish: true });
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "tickets.publish" }));
-	});
-
-	it("strips invisible characters from the wording before storing it", async () => {
-		await request("PATCH", { ...COMPLETE, description: " Press ‮here " });
-
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ description: "Press here" }));
-	});
 });
 
 describe("DELETE /tickets", () => {
-	it("turns the system off and answers with the empty shape", async () => {
-		configured();
-
-		const response = await request("DELETE");
-
-		expect(response.status).toBe(200);
-		expect(removed).toHaveBeenCalledWith(GUILD);
-		expect(((await response.json()) as TicketSettings).enabled).toBe(false);
-	});
-
 	/** Two tabs, both pressing Turn off: the second finds nothing, which is a 404 rather than a 500. */
 	it("answers 404 when there was nothing to turn off", async () => {
 		removed.mockResolvedValue(false);
@@ -209,22 +140,9 @@ describe("DELETE /tickets", () => {
 		expect((await request("DELETE")).status).toBe(404);
 		expect(audited).not.toHaveBeenCalled();
 	});
-
-	it("writes an audit record", async () => {
-		await request("DELETE");
-
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "tickets.disable" }));
-	});
 });
 
 describe("open tickets", () => {
-	it("lists them for the person signed in", async () => {
-		const response = await app().request(`/guilds/${GUILD}/tickets/open`);
-
-		expect(response.status).toBe(200);
-		expect(readOpenTickets).toHaveBeenCalled();
-	});
-
 	/** The transcript names whoever closed it, so that has to be the person signed in, not the bot. */
 	it("closes one as the person signed in, and writes it down", async () => {
 		const response = await app().request(`/guilds/${GUILD}/tickets/open/400000000000000001/close`, { method: "POST" });

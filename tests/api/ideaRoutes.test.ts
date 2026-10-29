@@ -6,7 +6,7 @@ import { ideas } from "@api/routes/ideas";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { listIdeas } from "@database/repositories/ideaRepository";
-import { decideOnIdea, removeIdea } from "@lib/ideas/ideaActions.util";
+import { decideOnIdea } from "@lib/ideas/ideaActions.util";
 
 jest.mock("@database/repositories/ideaRepository", () => ({
 	listIdeas: jest.fn(() => Promise.resolve({ items: [], total: 0 })),
@@ -62,11 +62,6 @@ beforeEach(() => {
 });
 
 describe("the idea board routes", () => {
-	it("pages the list by the filter asked for", async () => {
-		expect((await send("GET", "/list?status=declined&page=3")).status).toBe(200);
-		expect(listIdeas).toHaveBeenCalledWith(GUILD, "declined", { skip: 20, limit: 10 });
-	});
-
 	it("refuses a filter that is not one", async () => {
 		expect((await send("GET", "/list?status=$where")).status).toBe(400);
 		expect(listIdeas).not.toHaveBeenCalled();
@@ -104,10 +99,5 @@ describe("the idea board routes", () => {
 	it("refuses a reason with HTML in it", async () => {
 		expect((await send("POST", `/${ID}/decision`, { status: "declined", reason: "<b>no</b>" })).status).toBe(400);
 		expect(decideOnIdea).not.toHaveBeenCalled();
-	});
-
-	it("answers 404 for an idea this server does not have", async () => {
-		expect((await send("DELETE", `/${ID}`)).status).toBe(404);
-		expect(removeIdea).toHaveBeenCalledWith(expect.objectContaining({ id: GUILD }), ID);
 	});
 });

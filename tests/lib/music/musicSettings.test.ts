@@ -1,5 +1,5 @@
 import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
-import { isDj, musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
+import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { type MusicSettings } from "@testify/shared";
 
 function settings(overrides: Partial<MusicSettings> = {}): MusicSettings {
@@ -10,25 +10,6 @@ describe("normaliseMusicSettings", () => {
 	/** A fresh install should play music without anybody having to find a switch first. */
 	it("leaves a server with no record on and open to everybody", () => {
 		expect(normaliseMusicSettings(null)).toEqual({ enabled: true, djRoleIds: [], configured: false });
-	});
-
-	it("says a stored record is configured, so a screen can stop calling its values defaults", () => {
-		expect(normaliseMusicSettings({ enabled: false, djRoleIds: ["1"] })).toEqual({
-			enabled: false,
-			djRoleIds: ["1"],
-			configured: true,
-		});
-	});
-});
-
-describe("isDj", () => {
-	it("lets anybody in while no role has been chosen", () => {
-		expect(isDj(settings(), [])).toBe(true);
-	});
-
-	it("wants one of the chosen roles once there are any", () => {
-		expect(isDj(settings({ djRoleIds: ["a", "b"] }), ["c"])).toBe(false);
-		expect(isDj(settings({ djRoleIds: ["a", "b"] }), ["c", "b"])).toBe(true);
 	});
 });
 

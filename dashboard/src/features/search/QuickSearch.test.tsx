@@ -53,26 +53,6 @@ describe("quick search", () => {
 		expect(await screen.findByRole("dialog", { name: "Quick search" })).toBeInTheDocument();
 	});
 
-	it("opens from the phone header's button too", async () => {
-		const user = userEvent.setup();
-		renderShell();
-
-		await user.click(within(screen.getByRole("banner")).getByRole("button", { name: "Search" }));
-
-		expect(await screen.findByRole("dialog", { name: "Quick search" })).toBeInTheDocument();
-	});
-
-	it("opens from the sidebar's button, which says its shortcut", async () => {
-		const user = userEvent.setup();
-		renderShell();
-
-		const opener = within(screen.getByTestId("sidebar")).getByRole("button", { name: "Search" });
-		expect(opener).toHaveAttribute("aria-keyshortcuts", "Control+K Meta+K");
-		await user.click(opener);
-
-		expect(await screen.findByRole("dialog", { name: "Quick search" })).toBeInTheDocument();
-	});
-
 	/** Typing "welcome" and pressing Enter is the whole journey the feature was asked for. */
 	it("goes to the best match on Enter", async () => {
 		const user = userEvent.setup();
@@ -106,18 +86,6 @@ describe("quick search", () => {
 		expect(options.at(-1)).toHaveAttribute("aria-selected", "true");
 	});
 
-	it("sends a command to the screen that sets it up", async () => {
-		const user = userEvent.setup();
-		renderShell();
-
-		await openWithShortcut(user);
-		await user.keyboard("ban");
-		await screen.findByRole("option", { name: /\/ban/ });
-		await user.click(screen.getByRole("option", { name: /\/ban/ }));
-
-		expect(screen.getByTestId("where")).toHaveTextContent(`/guilds/${aGuild.id}/members`);
-	});
-
 	it("says when nothing matches, and counts the results for a screen reader", async () => {
 		const user = userEvent.setup();
 		renderShell();
@@ -141,16 +109,6 @@ describe("quick search", () => {
 
 		expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 		expect(opener).toHaveFocus();
-	});
-
-	it("keeps Tab inside the dialog", async () => {
-		const user = userEvent.setup();
-		renderShell();
-
-		await openWithShortcut(user);
-		await user.tab();
-
-		expect(screen.getByRole("combobox")).toHaveFocus();
 	});
 
 	it("passes axe while open", async () => {

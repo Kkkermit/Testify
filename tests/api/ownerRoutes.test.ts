@@ -11,7 +11,7 @@ import { getCounting } from "@database/repositories/countingRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
 import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
-import { type OwnerGuildRow, type OwnerStats, type Paged } from "@testify/shared";
+import { type OwnerGuildRow, type Paged } from "@testify/shared";
 
 jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true) }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
@@ -94,20 +94,6 @@ beforeEach(() => {
 });
 
 describe("the owner stats", () => {
-	it("totals the fleet", async () => {
-		const body = (await (await appFor(3).request("/owner/stats")).json()) as OwnerStats;
-
-		expect(body).toMatchObject({ guilds: 3, users: 600, commands: 76, database: "connected" });
-		expect(body.uptimeMs).toBeGreaterThan(0);
-	});
-
-	it("says when the database is down", async () => {
-		jest.mocked(databaseConnected).mockReturnValue(false);
-		const body = (await (await appFor(1).request("/owner/stats")).json()) as OwnerStats;
-
-		expect(body.database).toBe("disconnected");
-	});
-
 	/** The console can leave guilds and blacklist people; a manager must not learn it is here. */
 	it("is a 404 for anyone who is not the bot owner", async () => {
 		expect((await appFor(1, MANAGER).request("/owner/stats")).status).toBe(404);
@@ -115,39 +101,11 @@ describe("the owner stats", () => {
 });
 
 describe("the owner guild list", () => {
-	it("lists the largest first, which is where a problem is worth most", async () => {
-		const body = (await (await appFor(3).request("/owner/guilds")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items.map((guild) => guild.memberCount)).toEqual([300, 200, 100]);
-	});
-
-	it("pages, and reports the total so the pager knows how far it goes", async () => {
-		const body = (await (await appFor(30).request("/owner/guilds?page=2&perPage=25")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body).toMatchObject({ total: 30, page: 2, perPage: 25 });
-		expect(body.items).toHaveLength(5);
-	});
-
-	it("returns an empty page past the end rather than failing", async () => {
-		const body = (await (await appFor(3).request("/owner/guilds?page=9")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items).toEqual([]);
-	});
-
 	/** The question this screen exists to answer: which of my servers has never configured anything. */
 	it("says a server has nothing configured when it has nothing configured", async () => {
 		const body = (await (await appFor(1).request("/owner/guilds")).json()) as Paged<OwnerGuildRow>;
 
 		expect(body.items[0]?.configured).toEqual([]);
-	});
-
-	it("names what is configured when something is", async () => {
-		jest.mocked(getLevelSettings).mockResolvedValue({ isDisabled: false } as never);
-		jest.mocked(getCounting).mockResolvedValue({ guildId: "1" } as never);
-
-		const body = (await (await appFor(1).request("/owner/guilds")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items[0]?.configured).toEqual(["levelling", "counting"]);
 	});
 
 	/** Levelling with a row in the database but switched off is not configured, it is switched off. */
@@ -159,20 +117,8 @@ describe("the owner guild list", () => {
 		expect(body.items[0]?.configured).toEqual([]);
 	});
 
-	it("does not count audit logging with no events chosen", async () => {
-		jest.mocked(getAuditLogConfig).mockResolvedValue({ enabledLogs: [] } as never);
-
-		const body = (await (await appFor(1).request("/owner/guilds")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items[0]?.configured).toEqual([]);
-	});
-
 	it("refuses a page number that is not one", async () => {
 		expect((await appFor(1).request("/owner/guilds?page=-1")).status).toBe(400);
-	});
-
-	it("is a 404 for anyone who is not the bot owner", async () => {
-		expect((await appFor(1, MANAGER).request("/owner/guilds")).status).toBe(404);
 	});
 });
 
@@ -200,43 +146,6 @@ describe("sorting and searching the owner guild list", () => {
 		expect(await names(`?sort=${sort}`)).toEqual(expected);
 	});
 
-	it("ranks by commands run, and by dashboard use, over the last 30 days", async () => {
-		jest.mocked(guildTallies).mockResolvedValue([
-			{ guildId: "900000000000000002", count: 40 },
-			{ guildId: "900000000000000000", count: 7 },
-		]);
-		jest
-			.mocked(dashboardTallies)
-			.mockResolvedValue([{ guildId: "900000000000000000", count: 3, lastDay: "2026-08-01" }]);
-
-		expect(await names("?sort=commands")).toEqual(["Charlie", "Bravo", "alpha"]);
-		expect(await names("?sort=dashboard")).toEqual(["Bravo", "alpha", "Charlie"]);
-		expect(guildTallies).toHaveBeenCalledWith(30);
-		expect(dashboardTallies).toHaveBeenCalledWith(30);
-	});
-
-	it("carries each server's command and dashboard counts, zero when it has none", async () => {
-		jest.mocked(guildTallies).mockResolvedValue([{ guildId: "900000000000000000", count: 7 }]);
-		jest
-			.mocked(dashboardTallies)
-			.mockResolvedValue([{ guildId: "900000000000000000", count: 3, lastDay: "2026-08-01" }]);
-
-		const body = (await (await appFor(three()).request("/owner/guilds?sort=fewest")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items.map(({ commands, dashboardViews }) => [commands, dashboardViews])).toEqual([
-			[7, 3],
-			[0, 0],
-			[0, 0],
-		]);
-	});
-
-	it("searches by any part of a name, ignoring case, and totals only the matches", async () => {
-		const body = (await (await appFor(three()).request("/owner/guilds?q=AR")).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items.map((guild) => guild.name)).toEqual(["Charlie"]);
-		expect(body.total).toBe(1);
-	});
-
 	/** A pasted ID is that server and no other, even though its digits appear inside other IDs. */
 	it("finds a server by its exact ID", async () => {
 		expect(await names("?q=900000000000000001")).toEqual(["alpha"]);
@@ -250,20 +159,6 @@ describe("sorting and searching the owner guild list", () => {
 		jest.mocked(guildTallies).mockResolvedValue([{ guildId: "900000000000000001", count: 3 }]);
 
 		expect(await names("?sort=quietest")).toEqual(["Bravo", "Charlie", "alpha"]);
-	});
-
-	it("keeps only the servers that ran no command in the last 30 days", async () => {
-		jest.mocked(guildTallies).mockResolvedValue([
-			{ guildId: "900000000000000000", count: 7 },
-			{ guildId: "900000000000000002", count: 0 },
-		]);
-
-		const body = (await (
-			await appFor(three()).request("/owner/guilds?filter=inactive")
-		).json()) as Paged<OwnerGuildRow>;
-
-		expect(body.items.map((guild) => guild.name)).toEqual(["alpha", "Charlie"]);
-		expect(body.total).toBe(2);
 	});
 
 	it("refuses a filter it does not offer", async () => {

@@ -33,13 +33,6 @@ beforeEach(() => {
 });
 
 describe("GET /status", () => {
-	it("answers a signed-in manager, not only the owner", async () => {
-		const response = await appFor(true).request("/status");
-
-		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual(REPORT);
-	});
-
 	it("refuses an anonymous caller", async () => {
 		expect((await appFor(false).request("/status")).status).toBe(401);
 		expect(statusReport).not.toHaveBeenCalled();

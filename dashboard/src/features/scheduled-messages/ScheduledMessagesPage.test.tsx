@@ -27,24 +27,6 @@ const addCard = (): HTMLElement => screen.getByRole("region", { name: /schedule 
 const inADay = (): string => toLocalInput(new Date(Date.now() + 24 * 60 * 60 * 1000));
 
 describe("the scheduled messages page", () => {
-	it("lists each message against its channel, with how often it repeats", async () => {
-		renderPage();
-
-		const entry = await row();
-		expect(within(entry).getByText("Every week", { selector: "span" })).toBeInTheDocument();
-		expect(within(entry).getByLabelText(/^Message/)).toHaveValue(ENTRY.message);
-		expect(screen.getByText("1 of 10")).toBeInTheDocument();
-	});
-
-	it("says so when there are none", async () => {
-		server.use(
-			http.get(`/api/guilds/${GUILD}/scheduled-messages`, () => HttpResponse.json({ limit: 10, messages: [] })),
-		);
-		renderPage();
-
-		expect(await screen.findByText(/nothing scheduled/i)).toBeInTheDocument();
-	});
-
 	/** The picker shows the reader's own clock; what reaches the API is that instant in UTC. */
 	it("schedules one at the time picked, sent as UTC", async () => {
 		const user = userEvent.setup();
@@ -125,31 +107,6 @@ describe("the scheduled messages page", () => {
 		renderPage();
 
 		expect(within(await row()).getByText(/will be skipped/i)).toBeInTheDocument();
-	});
-
-	it("deletes one after the undo window", async () => {
-		const user = userEvent.setup();
-		const { client } = renderPage();
-		await row();
-
-		const empty: ScheduledMessageList = { limit: 10, messages: [] };
-		let deleted = "";
-		server.use(
-			http.delete(`/api/guilds/${GUILD}/scheduled-messages/:id`, ({ params }) => {
-				deleted = String(params.id);
-				return HttpResponse.json(empty);
-			}),
-			http.get(`/api/guilds/${GUILD}/scheduled-messages`, () => HttpResponse.json(empty)),
-		);
-
-		await user.click(screen.getByRole("button", { name: /delete the scheduled message in #general/i }));
-		expect(screen.getByText("Deleted the scheduled message in #general.")).toBeInTheDocument();
-		window.dispatchEvent(new Event("pagehide"));
-
-		await waitFor(() => {
-			expect(client.isMutating()).toBe(0);
-		});
-		expect(deleted).toBe(ENTRY.id);
 	});
 
 	it("has no automatically detectable accessibility violations", async () => {

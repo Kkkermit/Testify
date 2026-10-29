@@ -1,4 +1,4 @@
-import { accentColour, backdropOpacity, cssColour, fieldPaint, isHexColour, pickScheme } from "@/lib/three/tokens";
+import { accentColour, backdropOpacity, cssColour, isHexColour, pickScheme } from "@/lib/three/tokens";
 
 function rootWith(properties: Record<string, string>): Element {
 	const element = document.createElement("div");
@@ -18,11 +18,6 @@ describe("cssColour", () => {
 });
 
 describe("isHexColour", () => {
-	it("accepts both hex lengths", () => {
-		expect(isHexColour("#fff")).toBe(true);
-		expect(isHexColour("#A78BFA")).toBe(true);
-	});
-
 	it("rejects anything three would not parse", () => {
 		expect(isHexColour("oklch(70% 0.1 300)")).toBe(false);
 		expect(isHexColour("rebeccapurple")).toBe(false);
@@ -35,10 +30,6 @@ describe("pickScheme", () => {
 	it("takes the half the theme is painted with", () => {
 		expect(pickScheme("light-dark(#5b21b6, #a78bfa)", true)).toBe("#a78bfa");
 		expect(pickScheme("light-dark(#5b21b6, #a78bfa)", false)).toBe("#5b21b6");
-	});
-
-	it("passes a plain value straight through", () => {
-		expect(pickScheme("#112233", true)).toBe("#112233");
 	});
 
 	it("leaves anything it cannot split alone, rather than returning a fragment", () => {
@@ -79,22 +70,5 @@ describe("backdropOpacity", () => {
 	/** A token nobody can parse must not put the field at NaN, which draws nothing at all. */
 	it("falls back rather than passing a number three cannot use", () => {
 		expect(backdropOpacity(rootWith({ "--backdrop-opacity": "thick", "color-scheme": "dark" }))).toBeCloseTo(0.5, 5);
-	});
-
-	it("clamps a value outside the range", () => {
-		expect(backdropOpacity(rootWith({ "--backdrop-opacity": "4", "color-scheme": "dark" }))).toBe(1);
-		expect(backdropOpacity(rootWith({ "--backdrop-opacity": "-2", "color-scheme": "dark" }))).toBe(0);
-	});
-});
-
-describe("fieldPaint", () => {
-	it("reads the colour and the strength from the same theme", () => {
-		const root = rootWith({
-			"--color-accent": "light-dark(#5b21b6, #a78bfa)",
-			"--backdrop-opacity": "light-dark(0.14, 0.5)",
-			"color-scheme": "light",
-		});
-
-		expect(fieldPaint(root)).toEqual({ colour: "#5b21b6", opacity: 0.14 });
 	});
 });

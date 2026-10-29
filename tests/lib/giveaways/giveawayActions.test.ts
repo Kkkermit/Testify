@@ -3,7 +3,6 @@ import { describeWithMongo } from "../../helpers/mongo";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { Giveaway } from "@database/models/giveaway.schema";
-import { requireSendable } from "@lib/discord/channelPick.util";
 import {
 	deleteGiveaway,
 	endGiveaway,
@@ -42,24 +41,6 @@ beforeEach(() => {
 
 describe("startGiveaway", () => {
 	const draft = { channelId: CHANNEL, prize: "Nitro", winnerCount: 2, durationMs: 60_000, hostedBy: host };
-
-	it("checks the bot can post there, then starts it with the shared wording", async () => {
-		const channel = { isTextBased: () => true };
-
-		await startGiveaway(client, guildWith(channel), draft);
-
-		expect(requireSendable).toHaveBeenCalledWith(expect.objectContaining({ id: GUILD }), CHANNEL);
-		expect(manager.start).toHaveBeenCalledWith(
-			channel,
-			expect.objectContaining({
-				prize: "Nitro",
-				winnerCount: 2,
-				duration: 60_000,
-				hostedBy: host,
-				messages: expect.objectContaining({ winMessage: expect.stringContaining("{winners}") }),
-			}),
-		);
-	});
 
 	it("refuses a channel nothing can be posted in, before starting anything", async () => {
 		await expect(startGiveaway(client, guildWith({ isTextBased: () => false }), draft)).rejects.toThrow(

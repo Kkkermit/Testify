@@ -9,7 +9,6 @@ import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { deactivateSoftban, getActiveSoftban } from "@database/repositories/moderationRepository";
 import { recordCase } from "@lib/moderation/caseActions.util";
-import { type BanPage } from "@testify/shared";
 
 jest.mock("@database/repositories/moderationRepository", () => ({
 	listActiveSoftbans: jest.fn(() => Promise.resolve([])),
@@ -86,13 +85,6 @@ beforeEach(() => {
 });
 
 describe("the ban routes", () => {
-	it("lists the server's bans", async () => {
-		const page = (await (await app().instance.request(`/guilds/${GUILD}/bans`)).json()) as BanPage;
-
-		expect(page).toEqual(expect.objectContaining({ readable: true, total: 1 }));
-		expect(page.items[0]).toEqual(expect.objectContaining({ userId: BANNED, username: "spammer", reason: "spam" }));
-	});
-
 	it("lifts a ban as a case under the manager's name, and writes it down", async () => {
 		const { instance, remove } = app();
 

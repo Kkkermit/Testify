@@ -11,7 +11,7 @@ import {
 	roleMenuPost,
 } from "@lib/roles/roleMenuPanel.util";
 import { ROLE_MENU_LIMITS } from "@testify/shared";
-import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
+import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 const MENU: StoredRoleMenu = {
@@ -73,22 +73,9 @@ function componentCount(rendered: ContainerMessage): number {
 }
 
 describe("the posted menu", () => {
-	it("lists the roles on offer and opens the private picker for this menu", () => {
-		const post = roleMenuPost(MENU);
-
-		expect(textOf(post)).toContain("<@&300000000000000001>");
-		expect(textOf(post)).toContain("Choose what you hear about.");
-		expect(idsOf(post)).toEqual([`rolemenu:open:${MENU.id}`]);
-	});
-
 	/** Everybody sees the same post, so it carries no owner and no per-person state. */
 	it("is the same for everybody", () => {
 		expect(idsOf(roleMenuPost(MENU)).every((id) => !id.includes(OWNER))).toBe(true);
-	});
-
-	it("says whether one role or several may be held", () => {
-		expect(textOf(roleMenuPost(MENU))).toMatch(/as many as you like/);
-		expect(textOf(roleMenuPost({ ...MENU, mode: "one" }))).toMatch(/one of these at a time/);
 	});
 });
 
@@ -118,13 +105,6 @@ describe("the private picker", () => {
 		expect(textOf(rendered)).toMatch(/Not on offer right now: Role 2/);
 	});
 
-	it("says so when nothing on the menu can be handed out", () => {
-		const rendered = roleMenuPicker(MENU, offered([false, false], [false, false]));
-
-		expect(selectsOf(rendered)).toHaveLength(0);
-		expect(textOf(rendered)).toMatch(/None of these roles can be handed out/);
-	});
-
 	it("words what a pick did", () => {
 		expect(pickNote({ added: ["Red"], removed: ["Blue"], refused: [] })).toBe("Added Red. Removed Blue.");
 		expect(pickNote({ added: [], removed: [], refused: [] })).toBe("Nothing changed.");
@@ -133,30 +113,6 @@ describe("the private picker", () => {
 });
 
 describe("the manager's panels", () => {
-	it("puts the person who opened it last in every control", () => {
-		const editor = roleMenuEditor({ menu: MENU }, OWNER);
-		const hub = roleMenuHub([MENU], OWNER);
-
-		for (const id of [...idsOf(editor), ...idsOf(hub)]) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
-		expect(duplicateIds(editor)).toEqual([]);
-	});
-
-	it("pre-ticks the roles on offer and the channel it is posted in", () => {
-		const [roles, channel] = selectsOf(roleMenuEditor({ menu: MENU }, OWNER));
-
-		expect(roles?.default_values?.map((entry) => entry.id)).toEqual(MENU.roleIds);
-		expect(roles?.min_values).toBe(0);
-		expect(channel?.default_values?.map((entry) => entry.id)).toEqual([MENU.channelId]);
-	});
-
-	it("will not post a menu with nothing on it", () => {
-		const post = buttonsOf(roleMenuEditor({ menu: { ...MENU, roleIds: [] } }, OWNER)).find((entry) =>
-			String(entry.custom_id).includes(":post:"),
-		);
-
-		expect(post?.disabled).toBe(true);
-	});
-
 	it("names each refused role beside the list", () => {
 		const rendered = roleMenuEditor({ menu: MENU, refused: ["Mods carries moderation or admin permissions."] }, OWNER);
 

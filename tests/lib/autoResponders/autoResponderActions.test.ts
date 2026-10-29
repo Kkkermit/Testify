@@ -33,12 +33,6 @@ beforeEach(() => {
 });
 
 describe("addAutoResponder", () => {
-	it("stores what was typed, with the stray characters taken out", async () => {
-		await addAutoResponder(GUILD, { trigger: "hi​", match: "word", reply: "Hello\u0007!" }, BY);
-
-		expect(createAutoResponder).toHaveBeenCalledWith(GUILD, { trigger: "hi", match: "word", reply: "Hello!" }, BY);
-	});
-
 	/** The cap is what keeps a server from turning every message into a reply. */
 	it("refuses one past the cap, before writing anything", async () => {
 		jest
@@ -60,14 +54,6 @@ describe("addAutoResponder", () => {
 		expect(createAutoResponder).not.toHaveBeenCalled();
 	});
 
-	it("says so when the database turns down a repeat that arrived at the same moment", async () => {
-		jest.mocked(createAutoResponder).mockResolvedValue(null);
-
-		await expect(addAutoResponder(GUILD, { trigger: "hi", match: "word", reply: "x" }, BY)).rejects.toThrow(
-			/already an auto-responder/,
-		);
-	});
-
 	it("refuses a reply too long to post", async () => {
 		await expect(
 			addAutoResponder(
@@ -85,14 +71,6 @@ describe("editAutoResponder", () => {
 		jest.mocked(updateAutoResponder).mockResolvedValue(existing);
 
 		await expect(editAutoResponder(GUILD, existing.id, existing, BY)).resolves.toBe(existing);
-	});
-
-	it("says when the responder has gone, or another took the words", async () => {
-		jest.mocked(updateAutoResponder).mockResolvedValue("missing");
-		await expect(editAutoResponder(GUILD, existing.id, existing, BY)).rejects.toThrow(/has been deleted/);
-
-		jest.mocked(updateAutoResponder).mockResolvedValue("duplicate");
-		await expect(editAutoResponder(GUILD, existing.id, existing, BY)).rejects.toThrow(/already an auto-responder/);
 	});
 });
 

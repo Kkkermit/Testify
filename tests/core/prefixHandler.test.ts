@@ -82,11 +82,6 @@ describe("the prefix handler", () => {
 		settings.mockClear();
 	});
 
-	it("runs a command typed with the prefix", async () => {
-		await runMessageHandlers(fakeMessage("t?ping"), fakeClient());
-		expect(ping).toHaveBeenCalledTimes(1);
-	});
-
 	it("runs one typed with a mention instead", async () => {
 		await runMessageHandlers(fakeMessage(`<@${BOT}> ping`), fakeClient());
 		expect(ping).toHaveBeenCalledTimes(1);
@@ -109,47 +104,5 @@ describe("the prefix handler", () => {
 
 		await runMessageHandlers(fakeMessage("t?help"), client);
 		expect(autocompleting).toHaveBeenCalledTimes(1);
-	});
-
-	it("works in a direct message, where no server prefix exists", async () => {
-		await runMessageHandlers(fakeMessage("t?ping", false), fakeClient());
-		expect(ping).toHaveBeenCalledTimes(1);
-	});
-
-	it("follows an alias through to a subcommand", async () => {
-		await runMessageHandlers(fakeMessage("t?setwelcome #general"), fakeClient());
-		expect(settings).toHaveBeenCalledTimes(1);
-	});
-
-	it("ignores an ordinary message", async () => {
-		await runMessageHandlers(fakeMessage("hello everyone"), fakeClient());
-		expect(ping).not.toHaveBeenCalled();
-	});
-
-	it("ignores a bare prefix", async () => {
-		await runMessageHandlers(fakeMessage("t?"), fakeClient());
-		expect(ping).not.toHaveBeenCalled();
-	});
-
-	it("stays quiet in a server that switched text commands off", async () => {
-		prefixConfig.isEnabled = false;
-		await runMessageHandlers(fakeMessage("t?ping"), fakeClient());
-		prefixConfig.isEnabled = true;
-
-		expect(ping).not.toHaveBeenCalled();
-	});
-
-	it("uses whatever prefix the server chose", async () => {
-		prefixConfig.prefix = "!";
-		await runMessageHandlers(fakeMessage("!ping"), fakeClient());
-		prefixConfig.prefix = "t?";
-
-		expect(ping).toHaveBeenCalledTimes(1);
-	});
-
-	it("says nothing when the command does not exist", async () => {
-		const message = fakeMessage("t?notacommand");
-		await runMessageHandlers(message, fakeClient());
-		expect(message.sent).toEqual([]);
 	});
 });

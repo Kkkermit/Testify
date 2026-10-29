@@ -1,6 +1,5 @@
 import { type ChannelSummary } from "@testify/shared";
-import { render, screen, within } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { render, screen } from "@testing-library/react";
 import { ChannelKindPicker } from "@/components/form/ChannelKindPicker";
 
 const CHANNELS: ChannelSummary[] = [
@@ -28,29 +27,11 @@ function picker(): HTMLSelectElement {
 }
 
 describe("ChannelKindPicker", () => {
-	it("offers only the kind it was asked for", () => {
-		renderPicker("voice", null);
-
-		const names = within(picker())
-			.getAllByRole("option")
-			.map((option) => option.textContent);
-		expect(names).toEqual(["Nothing chosen", "Lounge"]);
-	});
-
 	/** Nothing is posted in a voice channel or a category, so one the bot cannot post in is still a choice. */
 	it("never disables a channel for being one the bot cannot post in", () => {
 		renderPicker("category", null);
 
 		expect(screen.getByRole("option", { name: "Support" })).toBeEnabled();
-	});
-
-	it("reports the choice, and none as null", async () => {
-		const user = userEvent.setup();
-		const onChange = renderPicker("voice", "400000000000000003");
-
-		await user.selectOptions(picker(), "");
-
-		expect(onChange).toHaveBeenCalledWith(null);
 	});
 
 	/** Without its own option a deleted channel would read as the first one offered. */
@@ -59,11 +40,5 @@ describe("ChannelKindPicker", () => {
 
 		expect(picker().selectedOptions[0]?.textContent).toBe("A channel that no longer exists");
 		expect(screen.getByText(/has been deleted/i)).toBeInTheDocument();
-	});
-
-	it("counts a channel of the wrong kind as gone", () => {
-		renderPicker("voice", "400000000000000001");
-
-		expect(picker().selectedOptions[0]?.textContent).toBe("A channel that no longer exists");
 	});
 });

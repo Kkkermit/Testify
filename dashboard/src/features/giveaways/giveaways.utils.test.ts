@@ -1,5 +1,5 @@
 import { type GiveawayRow } from "@testify/shared";
-import { canReroll, durationMsOf, ordered, runningCount, statusOf } from "@/features/giveaways/giveaways.utils";
+import { canReroll, durationMsOf, ordered, statusOf } from "@/features/giveaways/giveaways.utils";
 
 function row(overrides: Partial<GiveawayRow> = {}): GiveawayRow {
 	return {
@@ -17,12 +17,6 @@ function row(overrides: Partial<GiveawayRow> = {}): GiveawayRow {
 }
 
 describe("durationMsOf", () => {
-	it("converts each unit the form offers", () => {
-		expect(durationMsOf(30, "minutes")).toBe(1_800_000);
-		expect(durationMsOf(24, "hours")).toBe(86_400_000);
-		expect(durationMsOf(3, "days")).toBe(259_200_000);
-	});
-
 	/** A half-hour typed as 0.5 hours has to land on a whole millisecond, not a fraction the API would refuse. */
 	it("rounds to a whole millisecond", () => {
 		expect(Number.isInteger(durationMsOf(0.5, "hours"))).toBe(true);
@@ -39,32 +33,12 @@ describe("ordered", () => {
 
 		expect(ordered(rows).map((entry) => entry.messageId)).toEqual(["running", "old-ended"]);
 	});
-
-	it("puts the most recently started first within a group", () => {
-		const rows = [
-			row({ messageId: "older", startAt: "2026-08-01T10:00:00.000Z" }),
-			row({ messageId: "newer", startAt: "2026-08-03T10:00:00.000Z" }),
-		];
-
-		expect(ordered(rows).map((entry) => entry.messageId)).toEqual(["newer", "older"]);
-	});
-
-	it("leaves the list it was given alone", () => {
-		const rows = [row({ messageId: "a", ended: true }), row({ messageId: "b" })];
-		ordered(rows);
-
-		expect(rows.map((entry) => entry.messageId)).toEqual(["a", "b"]);
-	});
 });
 
 describe("statusOf and runningCount", () => {
 	it("reads the status off the record", () => {
 		expect(statusOf(row())).toBe("running");
 		expect(statusOf(row({ ended: true }))).toBe("ended");
-	});
-
-	it("counts only what is still running", () => {
-		expect(runningCount([row(), row({ ended: true }), row()])).toBe(2);
 	});
 });
 

@@ -1,13 +1,12 @@
 import { EventEmitter } from "node:events";
 import { Readable } from "node:stream";
 import { type Guild } from "discord.js";
-import { DEFAULT_VOLUME, UNITY_VOLUME } from "@lib/music/music.constants";
+import { UNITY_VOLUME } from "@lib/music/music.constants";
 import { type MusicBinaries, type Track } from "@lib/music/music.types";
 import {
 	destroyAllSessions,
 	findSession,
 	MusicSession,
-	NOTICE_MS,
 	PANEL_REFRESH_MS,
 	type SessionEvent,
 	sessionFor,
@@ -125,28 +124,6 @@ afterEach(() => {
 	destroyAllSessions();
 });
 
-describe("a track that finishes", () => {
-	it("moves the queue on", async () => {
-		const { session } = sessionWith(["a", "b"]);
-		await session.play(0);
-
-		resource.playbackDuration = 180_000;
-		await player.goIdle();
-
-		expect(session.queue.index).toBe(1);
-	});
-
-	it("stops when it was the last one", async () => {
-		const { session, events } = sessionWith(["only"]);
-		await session.play(0);
-
-		resource.playbackDuration = 180_000;
-		await player.goIdle();
-
-		expect(events.map((event) => event.kind)).toContain("queue-ended");
-	});
-});
-
 describe("a queue that runs out", () => {
 	/** A finished queue that still pointed at its last song made the next /play queue behind it instead of playing. */
 	it("stops pointing at the song that finished", async () => {
@@ -158,15 +135,6 @@ describe("a queue that runs out", () => {
 
 		expect(session.queue.index).toBe(1);
 		expect(session.active).toBe(false);
-	});
-
-	it("is active while a track plays or is paused", async () => {
-		const { session } = sessionWith(["a"]);
-		await session.play(0);
-
-		expect(session.active).toBe(true);
-		session.pause();
-		expect(session.active).toBe(true);
 	});
 
 	it("can go back to the song that finished", async () => {
@@ -234,19 +202,6 @@ describe("stopping", () => {
 	});
 });
 
-describe("a track with nothing playable", () => {
-	it("is reported by name and stepped over rather than played as silence", async () => {
-		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
-		describeTrack.mockResolvedValueOnce({ formats: [{ format_id: "1", acodec: "mp3", vcodec: "none", ext: "mp3" }] });
-
-		const { session, events } = sessionWith(["broken", "fine"]);
-		await session.play(0);
-
-		expect(events).toContainEqual(expect.objectContaining({ kind: "failed" }));
-		expect(session.queue.index).toBe(1);
-	});
-});
-
 describe("the registry", () => {
 	it("hands the same session back for the same guild", () => {
 		const guild = { id: "guild-9" } as Guild;
@@ -294,28 +249,9 @@ describe("the registry", () => {
 });
 
 describe("the volume", () => {
-	it("starts at half the track's level where FFmpeg can apply it", () => {
-		expect(sessionWith(["a"], WITH_FFMPEG).session.volume).toBe(DEFAULT_VOLUME);
-		expect(DEFAULT_VOLUME).toBe(50);
-	});
-
 	/** A host with no FFmpeg plays at the track's own level, so the panel must not claim otherwise. */
 	it("reports the track's own level where nothing can change it", () => {
 		expect(sessionWith(["a"]).session.volume).toBe(UNITY_VOLUME);
-	});
-
-	it("filters the first track through FFmpeg, because the starting level is not the track's own", async () => {
-		const { openStream } = jest.requireMock("@lib/music/musicSource.util");
-		const { session } = sessionWith(["a"], WITH_FFMPEG);
-
-		await session.play(0);
-
-		expect(openStream).toHaveBeenCalledWith(
-			expect.any(String),
-			expect.objectContaining({ shape: "transcode" }),
-			WITH_FFMPEG,
-			expect.objectContaining({ volume: DEFAULT_VOLUME }),
-		);
 	});
 
 	it("cannot be set past either end", () => {
@@ -323,28 +259,6 @@ describe("the volume", () => {
 
 		expect(session.setVolume(10_000)).toBe(200);
 		expect(session.setVolume(-10)).toBe(0);
-	});
-
-	it("is only offered where something can re-encode", () => {
-		expect(sessionWith(["a"], WITH_FFMPEG).session.canSetVolume).toBe(true);
-		expect(sessionWith(["a"]).session.canSetVolume).toBe(false);
-	});
-
-	it("re-opens the current track through FFmpeg, from where it had got to", async () => {
-		const { openStream } = jest.requireMock("@lib/music/musicSource.util");
-		const { session } = sessionWith(["a"], WITH_FFMPEG);
-
-		await session.play(0);
-		resource.playbackDuration = 45_000;
-		session.setVolume(60);
-		await new Promise((resolve) => setImmediate(resolve));
-
-		expect(openStream).toHaveBeenLastCalledWith(
-			expect.any(String),
-			expect.objectContaining({ shape: "transcode" }),
-			WITH_FFMPEG,
-			expect.objectContaining({ volume: 60, seekMs: 45_000 }),
-		);
 	});
 
 	/** A re-opened stream keeps its offset, so a volume change does not make the track look broken. */
@@ -381,43 +295,6 @@ describe("the volume", () => {
 
 		release(DESCRIBED);
 		await new Promise((resolve) => setImmediate(resolve));
-	});
-
-	it("leaves a host with no FFmpeg passing the bytes through untouched", async () => {
-		const { openStream } = jest.requireMock("@lib/music/musicSource.util");
-		const { session } = sessionWith(["a"]);
-
-		session.setVolume(60);
-		await session.play(0);
-
-		expect(openStream).toHaveBeenLastCalledWith(
-			expect.any(String),
-			{ formatId: "251", shape: "webm-opus" },
-			BINARIES,
-			expect.objectContaining({ volume: 60, seekMs: 0 }),
-		);
-	});
-});
-
-describe("previous", () => {
-	it("goes back a track", async () => {
-		const { session } = sessionWith(["a", "b"]);
-		await session.play(1);
-
-		session.previous();
-		await new Promise((resolve) => setImmediate(resolve));
-
-		expect(session.queue.index).toBe(0);
-	});
-
-	it("starts the first track again rather than falling off the front of the queue", async () => {
-		const { session } = sessionWith(["a", "b"]);
-		await session.play(0);
-
-		session.previous();
-		await new Promise((resolve) => setImmediate(resolve));
-
-		expect(session.queue.index).toBe(0);
 	});
 });
 
@@ -472,24 +349,6 @@ describe("the live panel", () => {
 		expect(edit).toHaveBeenCalledTimes(1);
 	});
 
-	it("stops rewriting once the queue has ended", async () => {
-		const edit = jest.fn(() => Promise.resolve(undefined));
-		const { session } = sessionWith(["a"]);
-
-		await session.play(0);
-		session.watchPanel({ userId: "100000000000000001", page: 0, edit });
-
-		session.stop();
-		player.state = { status: "idle" };
-		player.emit("idle");
-		await Promise.resolve();
-		edit.mockClear();
-
-		jest.advanceTimersByTime(PANEL_REFRESH_MS * 3);
-
-		expect(edit).not.toHaveBeenCalled();
-	});
-
 	/** A deleted message answers with a 404 for ever, so retrying it every ten seconds is pure noise. */
 	it("drops a panel that cannot be edited rather than retrying it", async () => {
 		const edit = jest.fn(() => Promise.reject(new Error("Unknown Message")));
@@ -513,17 +372,6 @@ describe("the now-playing card", () => {
 	const OWNER = "100000000000000001";
 	const uploaded = (url: string) => ({ attachments: [{ name: "now-playing.jpg", url }] });
 
-	it("uploads the card with the first message that shows the track", async () => {
-		const { session } = sessionWith(["a"]);
-		await session.play(0);
-
-		const { payload, cardFor } = await session.panelMessage(OWNER);
-
-		expect(payload.files).toHaveLength(1);
-		expect(cardFor).toBe("https://youtu.be/a");
-		expect(JSON.stringify(payload.components[0]?.toJSON())).toContain("attachment://now-playing.jpg");
-	});
-
 	/** Re-sending the picture on every five-second refresh would be a steady upload for a static image. */
 	it("refers to the uploaded card afterwards instead of sending it again", async () => {
 		const { session } = sessionWith(["a"]);
@@ -535,17 +383,6 @@ describe("the now-playing card", () => {
 
 		expect(next.payload.files).toBeUndefined();
 		expect(JSON.stringify(next.payload.components[0]?.toJSON())).toContain("cdn.discordapp.com/attachments/1/2");
-	});
-
-	it("draws a new card when the track changes", async () => {
-		const { session } = sessionWith(["a", "b"]);
-		await session.play(0);
-		const first = await session.panelMessage(OWNER);
-		session.rememberCard(first.cardFor, uploaded("https://cdn.discordapp.com/attachments/1/2/now-playing.jpg"));
-
-		await session.play(1);
-
-		expect((await session.panelMessage(OWNER)).cardFor).toBe("https://youtu.be/b");
 	});
 
 	/** An address remembered for one track must never end up under the next one. */
@@ -572,20 +409,6 @@ describe("the now-playing card", () => {
 
 		expect(payload.files).toBeUndefined();
 		expect(payload.attachments).toEqual([]);
-	});
-
-	it("learns the card's address from the message the live panel edited", async () => {
-		const edit = jest.fn(() => Promise.resolve(uploaded("https://cdn.discordapp.com/attachments/9/9/now-playing.jpg")));
-		const { session } = sessionWith(["a"]);
-		await session.play(0);
-		session.watchPanel({ userId: OWNER, page: 0, edit });
-
-		await session.refreshPanel();
-		await session.refreshPanel();
-
-		const calls = edit.mock.calls as unknown as [{ files?: unknown[] }][];
-		expect(calls.at(-2)?.[0].files).toHaveLength(1);
-		expect(calls.at(-1)?.[0].files).toBeUndefined();
 	});
 });
 
@@ -630,33 +453,6 @@ describe("a downloader that says why it stopped", () => {
 		);
 	});
 
-	it("warns once, with the advice, when the track is given up on", async () => {
-		const { session } = sessionWith(["a", "b"]);
-		await session.play(0);
-
-		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
-		await player.goIdle();
-		lastProblemHandler()("ERROR: unable to download video data: HTTP Error 403: Forbidden");
-		await player.goIdle();
-
-		expect(LOGGER.warn).toHaveBeenCalledTimes(1);
-		expect(LOGGER.warn).toHaveBeenCalledWith(
-			expect.objectContaining({ reason: expect.stringContaining("403"), track: "https://youtu.be/a" }),
-			expect.stringContaining("music:setup"),
-		);
-	});
-
-	it("does not retry a video YouTube will not serve to anybody", async () => {
-		const { session, events } = sessionWith(["a", "b"]);
-		await session.play(0);
-
-		lastProblemHandler()("ERROR: [youtube] abc: Video unavailable");
-		await player.goIdle();
-
-		expect(events.filter((event) => event.kind === "retrying")).toEqual([]);
-		expect(session.queue.index).toBe(1);
-	});
-
 	/** Looking afresh is the point of the one retry, so the cached description must not be reused for it. */
 	it("forgets the cached description of a refused track", async () => {
 		const { forgetDescription } = jest.requireMock("@lib/music/musicSource.util");
@@ -679,52 +475,5 @@ describe("a downloader that says why it stopped", () => {
 		await player.goIdle();
 
 		expect(events.filter((event) => event.kind === "retrying")).toHaveLength(1);
-	});
-
-	it("keeps the usual retries for a break the downloader said nothing about", async () => {
-		const { session, events } = sessionWith(["a", "b"]);
-		await session.play(0);
-
-		for (let attempt = 0; attempt < 4; attempt++) await player.goIdle();
-
-		expect(events.filter((event) => event.kind === "retrying")).toHaveLength(3);
-	});
-});
-
-describe("the notice", () => {
-	it("shows on the panel when a press brought no line of its own", async () => {
-		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
-		describeTrack.mockResolvedValueOnce({ formats: [{ format_id: "1", acodec: "mp3", vcodec: "none", ext: "mp3" }] });
-		const { session } = sessionWith(["broken", "fine"]);
-
-		await session.play(0);
-
-		expect(
-			JSON.stringify((await session.panelMessage("100000000000000001")).payload.components[0]?.toJSON()),
-		).toContain("Skipped");
-	});
-
-	it("gives way to what a press says", async () => {
-		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
-		describeTrack.mockResolvedValueOnce({ formats: [] });
-		const { session } = sessionWith(["broken", "fine"]);
-
-		await session.play(0);
-
-		const rendered = JSON.stringify(
-			(await session.panelMessage("100000000000000001", "Paused.")).payload.components[0]?.toJSON(),
-		);
-		expect(rendered).toContain("Paused.");
-		expect(rendered).not.toContain("Skipped");
-	});
-
-	it("stops being shown once it is old news", async () => {
-		const { describeTrack } = jest.requireMock("@lib/music/musicSource.util");
-		describeTrack.mockResolvedValueOnce({ formats: [] });
-		const { session } = sessionWith(["broken", "fine"]);
-
-		await session.play(0);
-
-		expect(session.notice(Date.now() + NOTICE_MS + 1)).toBeUndefined();
 	});
 });

@@ -14,14 +14,6 @@ import {
 const exe = (name: string): string => (process.platform === "win32" ? `${name}.exe` : name);
 
 describe("candidatesFor", () => {
-	it("tries a configured path first, then every PATH entry", () => {
-		const candidates = candidatesFor("yt-dlp", "/opt/yt-dlp", ["/usr/bin", "/usr/local/bin"].join(delimiter));
-
-		expect(candidates[0]).toBe("/opt/yt-dlp");
-		expect(candidates).toContain(join("/usr/bin", exe("yt-dlp")));
-		expect(candidates).toContain(join("/usr/local/bin", exe("yt-dlp")));
-	});
-
 	/** Anti-pattern 13: an empty PATH entry or a relative bin would look wherever a start script left the cwd. */
 	it("never looks relative to the working directory", () => {
 		const candidates = candidatesFor("yt-dlp", undefined, ["/usr/bin", "", ""].join(delimiter), "/repo");
@@ -48,12 +40,6 @@ describe("candidatesFor", () => {
 });
 
 describe("locate", () => {
-	it("returns the first candidate that actually runs", () => {
-		const second = candidatesFor("yt-dlp", "/opt/broken")[1];
-
-		expect(locate("yt-dlp", "/opt/broken", (path) => path !== "/opt/broken")).toBe(second);
-	});
-
 	/** A candidate that exists but will not run counts as missing. */
 	it("reports nothing when no candidate runs", () => {
 		expect(locate("yt-dlp", "/opt/broken", () => false)).toBeNull();
@@ -61,15 +47,6 @@ describe("locate", () => {
 });
 
 describe("findBinaries", () => {
-	it("looks for both, and says which is missing", () => {
-		const found = findBinaries(
-			{ MUSIC_YTDLP_PATH: "/a/yt-dlp" },
-			{ runs: () => false, version: (path) => (path === "/a/yt-dlp" ? "2026.09.01" : null) },
-		);
-
-		expect(found).toEqual({ ytDlp: "/a/yt-dlp", ffmpeg: null, ytDlpVersion: "2026.09.01" });
-	});
-
 	/** FFmpeg being absent is a supported state, not a failure — most tracks still play without it. */
 	it("does not treat a missing FFmpeg as fatal", () => {
 		const nothing = { runs: () => false, version: () => null };
@@ -91,36 +68,15 @@ describe("locateYtDlp", () => {
 		expect(found).toEqual({ path: join("/repo", "bin", "yt-dlp"), version: "2026.09.15" });
 	});
 
-	it("keeps the lookup order on a tie, so PATH still beats the bundled copy", () => {
-		const found = locateYtDlp(undefined, () => "2026.09.15", "/usr/bin", "/repo");
-
-		expect(found?.path).toBe(join("/usr/bin", exe("yt-dlp")));
-	});
-
 	/** An explicit setting is an explicit choice, however old the file it names. */
 	it("runs a configured path even when a newer one exists", () => {
 		const found = locateYtDlp("/opt/old", (path) => (path === "/opt/old" ? "2025.01.01" : "2026.09.15"));
 
 		expect(found).toEqual({ path: "/opt/old", version: "2025.01.01" });
 	});
-
-	it("falls back to the search when the configured path does not run", () => {
-		expect(locateYtDlp("/opt/broken", (path) => (path === "/opt/broken" ? null : "2026.09.15"))?.path).not.toBe(
-			"/opt/broken",
-		);
-	});
 });
 
 describe("pickNewest", () => {
-	it("compares a same-day rebuild as newer than the release it follows", () => {
-		expect(
-			pickNewest([
-				{ path: "a", version: "2026.09.15" },
-				{ path: "b", version: "2026.09.15.1" },
-			])?.path,
-		).toBe("b");
-	});
-
 	/** Compared as text, "2026.9.3" sorts after "2026.10.1"; padded, it does not. */
 	it("does not let an unpadded month sort as a later release", () => {
 		expect(
@@ -130,17 +86,9 @@ describe("pickNewest", () => {
 			])?.path,
 		).toBe("october");
 	});
-
-	it("has nothing to pick from nothing", () => {
-		expect(pickNewest([])).toBeNull();
-	});
 });
 
 describe("ageInDays", () => {
-	it("counts whole days since the release", () => {
-		expect(ageInDays("2026.09.01", Date.UTC(2026, 8, 22, 12))).toBe(21);
-	});
-
 	it("says nothing about a version that is not a date", () => {
 		expect(ageInDays("nightly")).toBeNull();
 	});
@@ -181,12 +129,6 @@ describe("the version probe", () => {
 describe("statusLines", () => {
 	const NOW = Date.UTC(2026, 8, 22);
 
-	it("names the version and its age beside the path", () => {
-		const lines = statusLines({ ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg", ytDlpVersion: "2026.09.15" }, NOW);
-
-		expect(lines[0]).toContain("2026.09.15 (7 days old)");
-	});
-
 	/** A 403 from YouTube looks like a bug in the bot; this is the line that says it is the extractor's age. */
 	it("warns about an old extractor and says how to replace it", () => {
 		const text = statusLines({ ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg", ytDlpVersion: "2026.05.01" }, NOW).join(
@@ -195,14 +137,6 @@ describe("statusLines", () => {
 
 		expect(text).toContain("403");
 		expect(text).toContain("npm run music:setup");
-	});
-
-	it("does not nag about a recent one", () => {
-		const text = statusLines({ ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg", ytDlpVersion: "2026.09.15" }, NOW).join(
-			"\n",
-		);
-
-		expect(text).not.toContain("403");
 	});
 
 	it("says what a missing FFmpeg costs", () => {

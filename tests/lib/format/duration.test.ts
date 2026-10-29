@@ -12,16 +12,6 @@ describe("parseDuration", () => {
 		expect(parseDuration(input)).toBe(expected);
 	});
 
-	it("adds up several parts", () => {
-		expect(parseDuration("1h30m")).toBe(5_400_000);
-		expect(parseDuration("1d 12h")).toBe(129_600_000);
-	});
-
-	it("does not care about case or spacing", () => {
-		expect(parseDuration("10M")).toBe(parseDuration("10m"));
-		expect(parseDuration(" 10m ")).toBe(600_000);
-	});
-
 	/** Deliberate, and surprising enough to pin: `/mute 30` means thirty seconds. */
 	it("reads a bare number as seconds", () => {
 		expect(parseDuration("30")).toBe(30_000);

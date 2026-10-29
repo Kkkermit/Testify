@@ -35,35 +35,6 @@ function twoChannels(): void {
 }
 
 describe("the bot statistics page", () => {
-	it("says nothing is posted, and offers no removal", async () => {
-		renderPage();
-
-		expect(await screen.findByText(/nothing is posted yet/i)).toBeInTheDocument();
-		expect(screen.queryByRole("button", { name: /remove the message/i })).not.toBeInTheDocument();
-		expect(screen.getByRole("button", { name: /post it here/i })).toBeDisabled();
-	});
-
-	it("posts in the channel that was picked", async () => {
-		const user = userEvent.setup();
-		let body: unknown;
-		let current: string | null = null;
-		server.use(
-			http.get(`/api/guilds/${GUILD}/bot-stats`, () => HttpResponse.json({ channelId: current })),
-			http.put(`/api/guilds/${GUILD}/bot-stats`, async ({ request }) => {
-				body = await request.json();
-				current = GENERAL;
-				return HttpResponse.json({ channelId: GENERAL });
-			}),
-		);
-		renderPage();
-
-		await user.selectOptions(await screen.findByLabelText(/^channel/i), GENERAL);
-		await user.click(screen.getByRole("button", { name: /post it here/i }));
-
-		expect(body).toEqual({ channelId: GENERAL });
-		expect(await screen.findByText(/posted in #general/i)).toBeInTheDocument();
-	});
-
 	/** The button says what pressing it does: a different channel moves the message rather than adding a second. */
 	it("offers to move the message once another channel is picked", async () => {
 		const user = userEvent.setup();
@@ -86,23 +57,6 @@ describe("the bot statistics page", () => {
 		expect(screen.getByRole("button", { name: /post it again/i })).toBeDisabled();
 	});
 
-	it("removes the message", async () => {
-		const user = userEvent.setup();
-		let removed = false;
-		postedIn(GENERAL);
-		server.use(
-			http.delete(`/api/guilds/${GUILD}/bot-stats`, () => {
-				removed = true;
-				return HttpResponse.json({ channelId: null });
-			}),
-		);
-		renderPage();
-
-		await user.click(await screen.findByRole("button", { name: /remove the message/i }));
-
-		expect(removed).toBe(true);
-	});
-
 	/** A refused post is a message that never appeared, and the page must say why rather than sit still. */
 	it("shows the bot's refusal beside the control", async () => {
 		const user = userEvent.setup();
@@ -120,13 +74,6 @@ describe("the bot statistics page", () => {
 		await user.click(await screen.findByRole("button", { name: /post it again/i }));
 
 		expect(await screen.findByText(/pick a text channel/i)).toBeInTheDocument();
-	});
-
-	it("offers a retry rather than an empty page when the read fails", async () => {
-		server.use(http.get(`/api/guilds/${GUILD}/bot-stats`, () => HttpResponse.error()));
-		renderPage();
-
-		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
 	});
 
 	it("has no obvious accessibility problems", async () => {

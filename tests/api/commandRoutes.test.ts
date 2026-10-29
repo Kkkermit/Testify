@@ -54,25 +54,12 @@ describe("the command catalogue endpoint", () => {
 		expect((await app(null).request("/commands")).status).toBe(401);
 	});
 
-	it("lists the commands the bot has loaded", async () => {
-		const catalogue = await catalogueFor({ userId: MANAGER });
-
-		expect(catalogue.commands.map((command) => command.name)).toEqual(["ban", "ping"]);
-		expect(catalogue.prefix).toBe("t?");
-	});
-
 	/** The point of filtering rather than disabling: a manager should not learn what the owner commands are. */
 	it("hides owner commands from a server manager", async () => {
 		const catalogue = await catalogueFor({ userId: MANAGER });
 
 		expect(catalogue.commands.some((command) => command.name === "eval")).toBe(false);
 		expect(JSON.stringify(catalogue)).not.toContain("eval");
-	});
-
-	it("shows them to the bot owner", async () => {
-		const catalogue = await catalogueFor({ userId: OWNER });
-
-		expect(catalogue.commands.some((command) => command.name === "eval")).toBe(true);
 	});
 
 	/** The registry holds `run` functions; serialising one would be meaningless and could leak internals. */

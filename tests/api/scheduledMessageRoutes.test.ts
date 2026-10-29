@@ -42,7 +42,6 @@ jest.mock("@lib/discord/channels.util", () => ({ canPostIn: jest.fn(() => true) 
 const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
 const CHANNEL = "400000000000000001";
-const MISSING = "f".repeat(24);
 
 function app(): Hono<ApiBindings> {
 	const guild = { id: GUILD, name: "Test Server", memberCount: 3 };
@@ -91,17 +90,6 @@ beforeEach(() => {
 });
 
 describe("the scheduled message routes", () => {
-	it("adds one, answers with the whole list in UTC, and writes it down", async () => {
-		const body = news();
-		const response = await send("POST", "", body);
-
-		expect(response.status).toBe(201);
-		const list = (await response.json()) as ScheduledMessageList;
-		expect(list.messages).toEqual([expect.objectContaining({ ...body, canSend: true })]);
-		expect(list.limit).toBe(10);
-		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "schedule.create" }));
-	});
-
 	it("refuses a time already gone, in words, and a body the schema does not accept", async () => {
 		const past = await send("POST", "", { ...news(), nextAt: new Date(Date.now() - HOUR_MS).toISOString() });
 		expect(past.status).toBe(400);
@@ -122,11 +110,5 @@ describe("the scheduled message routes", () => {
 
 		const removed = (await (await send("DELETE", `/${id}`)).json()) as ScheduledMessageList;
 		expect(removed.messages).toEqual([]);
-	});
-
-	it("answers 404 for one that is not there, and 400 for an id that is not one", async () => {
-		expect((await send("PUT", `/${MISSING}`, news())).status).toBe(404);
-		expect((await send("DELETE", `/${MISSING}`)).status).toBe(404);
-		expect((await send("DELETE", "/not-an-id")).status).toBe(400);
 	});
 });

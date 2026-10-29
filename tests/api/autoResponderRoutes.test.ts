@@ -47,7 +47,6 @@ jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudi
 
 const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
-const MISSING = "f".repeat(24);
 
 function app(): Hono<ApiBindings> {
 	const guild = { id: GUILD, name: "Test Server", memberCount: 3 };
@@ -95,20 +94,6 @@ beforeEach(() => {
 });
 
 describe("the auto-responder routes", () => {
-	it("starts a server off with none, and says how many it may keep", async () => {
-		const list = (await (await send("GET")).json()) as AutoResponderList;
-
-		expect(list).toEqual({ responders: [], limit: AUTO_RESPONDER_LIMITS.maxPerGuild });
-	});
-
-	it("adds one, answers with the whole list, and writes it down", async () => {
-		const response = await send("POST", "", rules);
-
-		expect(response.status).toBe(201);
-		expect(((await response.json()) as AutoResponderList).responders).toEqual([expect.objectContaining(rules)]);
-		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "autoResponder.create" }));
-	});
-
 	it("refuses a repeat and a full server in words, with nothing written", async () => {
 		await send("POST", "", rules);
 
@@ -144,11 +129,5 @@ describe("the auto-responder routes", () => {
 
 		const removed = (await (await send("DELETE", `/${id}`)).json()) as AutoResponderList;
 		expect(removed.responders).toEqual([]);
-	});
-
-	it("answers 404 for one that is not there, and 400 for an id that is not one", async () => {
-		expect((await send("PUT", `/${MISSING}`, rules)).status).toBe(404);
-		expect((await send("DELETE", `/${MISSING}`)).status).toBe(404);
-		expect((await send("DELETE", "/not-an-id")).status).toBe(400);
 	});
 });

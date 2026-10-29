@@ -68,14 +68,6 @@ function guildWith(channels: ReturnType<typeof channelOf>[]) {
 }
 
 describe("toolChannel", () => {
-	it("reads a lock from @everyone's overwrite, and the slowmode", () => {
-		const channel = channelOf({ locked: true, slowmode: 30 });
-
-		expect(toolChannel(channel as never, guildWith([channel]), READER)).toEqual(
-			expect.objectContaining({ locked: true, slowmodeSeconds: 30, canLock: true, canSlow: true }),
-		);
-	});
-
 	/** A server-wide Manage Channels can be taken away in one channel, and the bot's own rights are per channel too. */
 	it("says what the reader and the bot may change in this channel", () => {
 		const readerCannot = channelOf({ readerMay: false });

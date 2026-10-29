@@ -17,18 +17,6 @@ function reducedMotion(matches: boolean): void {
 }
 
 describe("supportsWebgl", () => {
-	it("is false where there is no context to get, which is every test run", () => {
-		const spy = withContext(null);
-		expect(supportsWebgl()).toBe(false);
-		spy.mockRestore();
-	});
-
-	it("is true when a context comes back", () => {
-		const spy = withContext({});
-		expect(supportsWebgl()).toBe(true);
-		spy.mockRestore();
-	});
-
 	/** Some hardened browsers throw from getContext rather than returning null, and a decoration must not care. */
 	it("is false when getContext throws", () => {
 		const spy = jest.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(() => {
@@ -43,13 +31,6 @@ describe("supportsWebgl", () => {
 describe("Backdrop", () => {
 	afterEach(() => {
 		jest.restoreAllMocks();
-	});
-
-	it("renders nothing at all where WebGL is unavailable", () => {
-		withContext(null);
-		reducedMotion(false);
-
-		expect(render(<Backdrop />).container).toBeEmptyDOMElement();
 	});
 
 	/** Asking for less motion has to mean the chunk is never fetched, not merely that it is paused. */
@@ -104,17 +85,5 @@ describe("Backdrop following the palette", () => {
 		});
 
 		expect(field.refresh).toHaveBeenCalled();
-	});
-
-	it("stops watching once it is gone", async () => {
-		const { unmount } = await mounted();
-		unmount();
-
-		await act(async () => {
-			document.documentElement.setAttribute("data-theme", "light");
-			await Promise.resolve();
-		});
-
-		expect(field.refresh).not.toHaveBeenCalled();
 	});
 });

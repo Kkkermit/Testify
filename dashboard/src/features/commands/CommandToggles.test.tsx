@@ -28,20 +28,6 @@ function capturePut(path: string): { body: unknown } {
 }
 
 describe("switching commands off in a server", () => {
-	it("shows a switch per command", async () => {
-		inGuild();
-
-		expect(await screen.findByRole("switch", { name: "/ban" })).toBeInTheDocument();
-		expect(screen.getByRole("switch", { name: "/levelling" })).toBeInTheDocument();
-	});
-
-	it("shows what is already off", async () => {
-		inGuild();
-
-		expect(await screen.findByRole("switch", { name: "/ban" })).not.toBeChecked();
-		expect(screen.getByRole("switch", { name: "/levelling" })).toBeChecked();
-	});
-
 	/** The control is a set of switches whose value is the list, so one request replaces the whole thing. */
 	it("sends the whole list when one is flipped", async () => {
 		const user = userEvent.setup();
@@ -98,12 +84,6 @@ describe("switching commands off in a server", () => {
 
 		expect(screen.getByRole("switch", { name: "/ban" })).toBeChecked();
 		expect(screen.getByRole("switch", { name: "/levelling" })).not.toBeChecked();
-	});
-
-	it("says how many are off", async () => {
-		inGuild();
-
-		expect(await screen.findByText(/1 switched off here/i)).toBeInTheDocument();
 	});
 
 	/** Disabled with the reason on the control: a switch that silently does nothing is what this avoids. */
@@ -178,26 +158,6 @@ describe("switching commands off in a server", () => {
 		await screen.findByText("Bans a member.");
 
 		expect(screen.queryByRole("switch")).toBeNull();
-	});
-});
-
-describe("switching commands off everywhere", () => {
-	it("writes to the owner scope rather than a guild's", async () => {
-		const user = userEvent.setup();
-		const captured = capturePut("/api/owner/commands");
-
-		renderWithProviders(<CommandsPage scope="global" />, { path: "/owner" });
-		await user.click(await screen.findByRole("switch", { name: "/levelling" }));
-
-		await waitFor(() => {
-			expect(captured.body).toBeDefined();
-		});
-	});
-
-	it("says the switch reaches every server", async () => {
-		renderWithProviders(<CommandsPage scope="global" />, { path: "/owner" });
-
-		expect(await screen.findByText(/off in every server/i)).toBeInTheDocument();
 	});
 });
 

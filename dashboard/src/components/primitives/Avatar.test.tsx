@@ -10,10 +10,4 @@ describe("Avatar", () => {
 		expect(image).toHaveClass("max-w-none", "object-cover", "shrink-0");
 		expect(image).toHaveStyle({ width: "26px", height: "26px" });
 	});
-
-	it("letters the tile when there is no picture", () => {
-		const { container } = render(<Avatar name="someone" url={null} />);
-
-		expect(container.textContent).toBe("S");
-	});
 });

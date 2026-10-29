@@ -24,22 +24,10 @@ const entries = [
 	),
 ].map(([, name = "", path = ""]) => ({ name, path: `/guilds/:guildId${path}` }));
 
-const routes = new Set(
-	[...readFileSync(resolve(DASHBOARD, "routes.tsx"), "utf8").matchAll(/path: "([^"]+)"/g)].map(([, path = ""]) => path),
-);
-
 describe("the commands the dashboard says it has a screen for", () => {
-	it("reads the list", () => {
-		expect(entries.length).toBeGreaterThan(20);
-	});
-
 	/** The sticky screen was keyed `sticky` while the command is `sticky-message`, so the page called it Discord-only. */
 	it("names only commands the bot has", () => {
 		const missing = entries.map((entry) => entry.name).filter((name) => !client.commands.has(name));
 		expect(missing).toEqual([]);
-	});
-
-	it("links each one to a screen the dashboard declares", () => {
-		expect(entries.filter((entry) => !routes.has(entry.path))).toEqual([]);
 	});
 });

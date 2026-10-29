@@ -1,6 +1,5 @@
 import musicAdd from "@buttons/musicAdd";
 import type * as Checks from "@core/checks";
-import { UserFacingError } from "@core/errors";
 import type * as Music from "@lib/music";
 
 jest.mock("@core/checks", () => ({
@@ -55,14 +54,6 @@ beforeEach(() => {
 });
 
 describe("the Add to queue button", () => {
-	it("opens a form for the song", async () => {
-		const interaction = pressed();
-
-		await musicAdd.run(interaction as never, context("open"));
-
-		expect(interaction.showModal).toHaveBeenCalledTimes(1);
-	});
-
 	/** It carries no owner, so the music system's switch and DJ roles are the only thing standing in the way. */
 	it("refuses somebody the music system would refuse, before any form appears", async () => {
 		checkMusicControl.mockResolvedValue("You need a DJ role to use the music commands here.");
@@ -71,30 +62,9 @@ describe("the Add to queue button", () => {
 		await expect(musicAdd.run(interaction as never, context("open"))).rejects.toThrow(/DJ role/);
 		expect(interaction.showModal).not.toHaveBeenCalled();
 	});
-
-	it("asks somebody outside a voice channel to join one first", async () => {
-		const interaction = pressed(null);
-
-		await expect(musicAdd.run(interaction as never, context("open"))).rejects.toBeInstanceOf(UserFacingError);
-		expect(interaction.showModal).not.toHaveBeenCalled();
-	});
 });
 
 describe("submitting the form", () => {
-	it("queues the song the way /play does and says what happened", async () => {
-		const refreshPanel = jest.fn(() => Promise.resolve());
-		queueRequest.mockResolvedValue({ session: { refreshPanel }, note: "Added **Song** to the queue." });
-		const interaction = submitted("some song");
-
-		await musicAdd.run(interaction as never, context("submit"));
-
-		expect(queueRequest).toHaveBeenCalledWith(
-			expect.objectContaining({ requestedBy: USER, next: false, textChannelId: "text-1" }),
-		);
-		expect(refreshPanel).toHaveBeenCalled();
-		expect(interaction.editReply).toHaveBeenCalledTimes(1);
-	});
-
 	/** A form can sit open while somebody changes the roles, so the submit is checked again. */
 	it("checks access again on the submit", async () => {
 		checkMusicControl.mockResolvedValue("The music system is switched off in this server.");

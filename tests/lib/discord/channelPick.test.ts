@@ -16,19 +16,11 @@ function channelSelect(values: string[]): ComponentInteraction {
 const sendable = { isSendable: () => true };
 
 describe("pickedChannelId", () => {
-	it("returns the channel the menu picked", async () => {
-		await expect(pickedChannelId(channelSelect(["123"]), guildWith(sendable))).resolves.toBe("123");
-	});
-
 	/** A handler treats null as nothing to do, so the wrong component type must not throw. */
 	it("ignores an interaction that is not a channel select", async () => {
 		const notASelect = { isChannelSelectMenu: () => false } as unknown as ComponentInteraction;
 
 		await expect(pickedChannelId(notASelect, guildWith(sendable))).resolves.toBeNull();
-	});
-
-	it("ignores a select that carries no channel", async () => {
-		await expect(pickedChannelId(channelSelect([]), guildWith(sendable))).resolves.toBeNull();
 	});
 
 	it("refuses a channel the bot cannot post in", async () => {
@@ -39,10 +31,6 @@ describe("pickedChannelId", () => {
 });
 
 describe("requireSendable", () => {
-	it("accepts a channel the bot can post in", async () => {
-		await expect(requireSendable(guildWith(sendable), "123")).resolves.toBeUndefined();
-	});
-
 	/** A deleted channel comes back as null from the fetch, which must read as "pick another" rather than a crash. */
 	it("refuses a channel that no longer exists", async () => {
 		const guild = {

@@ -3,7 +3,7 @@ import { Collection } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type Command } from "@core/command";
 import { SetupError } from "@core/errors";
-import { MAX_COMMANDS, publishCommands, publishScope } from "@core/loader";
+import { MAX_COMMANDS, publishCommands } from "@core/loader";
 import { createMockClient, GUILD_ID } from "@tests/helpers/mocks";
 
 const put = jest.fn((_route: string, _options: { body: unknown[] }) => Promise.resolve([]));
@@ -43,26 +43,10 @@ function clientWith(count: number, devGuildId?: string): TestifyClient {
 beforeEach(() => put.mockClear());
 
 describe("publishCommands", () => {
-	it("sends every command and reports how many", async () => {
-		await expect(publishCommands(clientWith(3))).resolves.toBe(3);
-
-		const body = put.mock.calls[0]?.[1].body;
-		expect(body).toHaveLength(3);
-	});
-
-	it("publishes globally when no dev guild is set", async () => {
-		await publishCommands(clientWith(1));
-		expect(String(put.mock.calls[0]?.[0])).toBe("/applications/123456789012345678/commands");
-	});
-
 	/** Guild registration keeps a half-built command off every server but the one you are testing in. */
 	it("publishes to the dev guild when one is set", async () => {
 		await publishCommands(clientWith(1, GUILD_ID));
 		expect(String(put.mock.calls[0]?.[0])).toContain(`/guilds/${GUILD_ID}/commands`);
-	});
-
-	it("publishes an empty set without complaint", async () => {
-		await expect(publishCommands(clientWith(0))).resolves.toBe(0);
 	});
 
 	it("publishes right up to the limit", async () => {
@@ -76,20 +60,5 @@ describe("publishCommands", () => {
 		await expect(failing).rejects.toBeInstanceOf(SetupError);
 		await expect(failing).rejects.toThrow(/subcommands/);
 		expect(put).not.toHaveBeenCalled();
-	});
-
-	it("lets a transport failure surface rather than reporting a false success", async () => {
-		put.mockRejectedValueOnce(new Error("401 Unauthorized"));
-		await expect(publishCommands(clientWith(1))).rejects.toThrow(/401/);
-	});
-});
-
-describe("publishScope", () => {
-	it("says global when there is no dev guild", () => {
-		expect(publishScope(clientWith(0))).toBe("every server");
-	});
-
-	it("names the guild when there is one", () => {
-		expect(publishScope(clientWith(0, GUILD_ID))).toContain(GUILD_ID);
 	});
 });

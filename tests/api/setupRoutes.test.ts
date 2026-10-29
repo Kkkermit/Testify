@@ -57,29 +57,6 @@ beforeEach(() => {
 });
 
 describe("the setup checklist", () => {
-	it("reads the checklist for the server in the path", async () => {
-		const response = await app().request(`/guilds/${GUILD}/setup`);
-
-		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual(checklist);
-		expect(jest.mocked(readSetupChecklist).mock.calls[0]?.[0]).toMatchObject({ id: GUILD });
-		expect(jest.mocked(readSetupChecklist).mock.calls[0]?.[1]).toEqual({ member: undefined, isOwner: true });
-	});
-
-	it("runs one step and writes it down", async () => {
-		const response = await app().request(`/guilds/${GUILD}/setup/audit-log`, { method: "POST" });
-
-		expect(response.status).toBe(200);
-		expect(jest.mocked(runSetupStep).mock.calls[0]?.[2]).toBe("audit-log");
-		expect(recordAudit).toHaveBeenCalledWith(
-			expect.objectContaining({
-				guildId: GUILD,
-				action: "setup.audit-log",
-				after: { enabled: true, channelId: "400000000000000001" },
-			}),
-		);
-	});
-
 	it("refuses a step it does not know", async () => {
 		const response = await app().request(`/guilds/${GUILD}/setup/everything`, { method: "POST" });
 

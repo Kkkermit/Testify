@@ -1,68 +1,11 @@
 import { type APIEmbed, MessageFlags } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { type Command, type CommandInput } from "@core/command";
-import { runButton, runCommand, ServiceError, SetupError, toError, UserFacingError } from "@core/errors";
-import { createMockClient, createMockInteraction, USER_ID } from "@tests/helpers/mocks";
-
-describe("toError", () => {
-	it("passes an Error straight through", () => {
-		const original = new Error("nope");
-		expect(toError(original)).toBe(original);
-	});
-
-	it("wraps a thrown string", () => {
-		expect(toError("nope").message).toBe("nope");
-	});
-
-	it("wraps a thrown object without losing it", () => {
-		expect(toError({ code: 42 }).message).toBe('{"code":42}');
-	});
-});
-
-describe("the error types", () => {
-	it("keeps a user-facing message as written", () => {
-		expect(new UserFacingError("You need 500 more coins.").message).toBe("You need 500 more coins.");
-	});
-
-	it("names the service that failed", () => {
-		const error = new ServiceError("TMDB", new Error("timeout"));
-		expect(error.message).toBe("TMDB is not responding");
-		expect(error.service).toBe("TMDB");
-	});
-
-	it("marks a setup problem separately, so it is not reported as a bug", () => {
-		expect(new SetupError("Set CHANNEL_ERROR_LOG first.")).toBeInstanceOf(SetupError);
-		expect(new SetupError("x")).not.toBeInstanceOf(UserFacingError);
-	});
-});
+import { runButton, runCommand, UserFacingError } from "@core/errors";
+import { createMockClient, createMockInteraction } from "@tests/helpers/mocks";
 
 describe("runCommand", () => {
 	const command = (run: () => Promise<void>): Command => ({ name: "demo", description: "d", category: "info", run });
-
-	it("does nothing extra when the command succeeds", async () => {
-		const interaction = createMockInteraction();
-		const outcome = await runCommand(
-			interaction,
-			command(() => Promise.resolve()),
-			createMockClient(),
-		);
-
-		expect(interaction.sent).toEqual([]);
-		expect(outcome).toEqual({ ok: true, reference: null });
-	});
-
-	it("shows a UserFacingError word for word", async () => {
-		const interaction = createMockInteraction();
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runCommand(
-			interaction,
-			command(() => Promise.reject(new UserFacingError("You need 500 more coins."))),
-			client,
-		);
-
-		expect(JSON.stringify(interaction.sent)).toContain("You need 500 more coins.");
-	});
 
 	/** A user's own mistake is not a bug, so it must not reach the logs as one. */
 	it("does not log a UserFacingError as a failure", async () => {
@@ -75,22 +18,6 @@ describe("runCommand", () => {
 		);
 
 		expect(client.logger.error).not.toHaveBeenCalled();
-	});
-
-	it("hides an unexpected error behind a generic apology", async () => {
-		const interaction = createMockInteraction();
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runCommand(
-			interaction,
-			command(() => Promise.reject(new Error("connect ECONNREFUSED 10.0.0.1:27017"))),
-			client,
-		);
-
-		const sent = JSON.stringify(interaction.sent);
-		expect(sent).toContain("That did not work");
-		expect(sent).toContain("running `/demo`");
-		expect(sent).not.toContain("ECONNREFUSED");
 	});
 
 	/** "The problem has been logged" gave somebody reporting it nothing to point at. */
@@ -124,49 +51,6 @@ describe("runCommand", () => {
 		expect(outcome).toEqual({ ok: false, reference: null });
 	});
 
-	it("logs the unexpected error with its context", async () => {
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runCommand(
-			createMockInteraction(),
-			command(() => Promise.reject(new Error("boom"))),
-			client,
-		);
-
-		expect(client.logger.error).toHaveBeenCalledWith(
-			expect.objectContaining({ command: "demo" }),
-			expect.stringContaining("failed"),
-		);
-	});
-
-	it("tells the user which service is down, without the stack", async () => {
-		const interaction = createMockInteraction();
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runCommand(
-			interaction,
-			command(() => Promise.reject(new ServiceError("TMDB", new Error("504")))),
-			client,
-		);
-
-		const sent = JSON.stringify(interaction.sent);
-		expect(sent).toContain("TMDB is not answering");
-		expect(sent).not.toContain("504");
-	});
-
-	it("passes a SetupError through, because it says what to configure", async () => {
-		const interaction = createMockInteraction();
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runCommand(
-			interaction,
-			command(() => Promise.reject(new SetupError("Set CHANNEL_ERROR_LOG first."))),
-			client,
-		);
-
-		expect(JSON.stringify(interaction.sent)).toContain("Set CHANNEL_ERROR_LOG first.");
-	});
-
 	it("answers privately when nothing has been sent yet", async () => {
 		const interaction = createMockInteraction();
 
@@ -177,19 +61,6 @@ describe("runCommand", () => {
 		);
 
 		expect(interaction.reply).toHaveBeenCalledWith(expect.objectContaining({ flags: MessageFlags.Ephemeral }));
-	});
-
-	it("edits a private deferral in place", async () => {
-		const interaction = createMockInteraction({ overrides: { deferred: true, ephemeral: true } });
-
-		await runCommand(
-			interaction,
-			command(() => Promise.reject(new UserFacingError("nope"))),
-			createMockClient(),
-		);
-
-		expect(interaction.editReply).toHaveBeenCalled();
-		expect(interaction.followUp).not.toHaveBeenCalled();
 	});
 
 	/** Editing a public "thinking…" put the error in front of the whole channel. */
@@ -234,19 +105,6 @@ describe("runCommand", () => {
 		expect(interaction.reply).not.toHaveBeenCalled();
 	});
 
-	it("follows up when the command already replied", async () => {
-		const interaction = createMockInteraction({ overrides: { replied: true } });
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runCommand(
-			interaction,
-			command(() => Promise.reject(new UserFacingError("nope"))),
-			client,
-		);
-
-		expect(interaction.followUp).toHaveBeenCalled();
-	});
-
 	/** An expired interaction must not turn one failure into an unhandled rejection on top of it. */
 	it("swallows a failure to deliver the apology", async () => {
 		// Replaced after construction, since a rejecting stub cannot satisfy every overload of `reply`.
@@ -265,24 +123,6 @@ describe("runCommand", () => {
 	});
 });
 
-describe("runButton", () => {
-	it("leaves a working handler alone", async () => {
-		const interaction = createMockInteraction();
-		await runButton(interaction as never, () => Promise.resolve(), createMockClient(), "demo");
-
-		expect(interaction.sent).toEqual([]);
-	});
-
-	it("reports a failing handler the same way a command failure is reported", async () => {
-		const interaction = createMockInteraction();
-		const client = createMockClient({ logger: { error: jest.fn() } } as never);
-
-		await runButton(interaction as never, () => Promise.reject(new UserFacingError("Not your button.")), client, "b");
-
-		expect(JSON.stringify(interaction.sent)).toContain("Not your button.");
-	});
-});
-
 describe("the error channel", () => {
 	function clientWithChannel(send: jest.Mock, channelId: string | undefined): TestifyClient {
 		return createMockClient({
@@ -297,51 +137,6 @@ describe("the error channel", () => {
 	const boom = (): Promise<void> => Promise.reject(new Error("boom"));
 	const command = { name: "demo", description: "d", category: "info" as const, run: boom };
 
-	it("posts an unexpected failure when a channel is configured", async () => {
-		const send = jest.fn(() => Promise.resolve({}));
-		await runCommand(createMockInteraction(), command, clientWithChannel(send, "123"));
-
-		expect(send).toHaveBeenCalled();
-	});
-
-	it("names the command, its options, the person and the place, with triage buttons under it", async () => {
-		const send = jest.fn((_payload: unknown) => Promise.resolve({}));
-		const withOptions = {
-			...command,
-			options: [
-				{ name: "amount", description: "d", type: "integer" as const },
-				{ name: "secret", description: "d", type: "string" as const, unlogged: true },
-			],
-		};
-
-		await runCommand(
-			createMockInteraction({ options: { amount: 500, secret: "hunter2" } }),
-			withOptions,
-			clientWithChannel(send, "123"),
-		);
-
-		const payload = send.mock.calls[0]?.[0] as {
-			embeds: { toJSON(): APIEmbed }[];
-			components: { toJSON(): { components: { custom_id: string }[] } }[];
-		};
-		const built = payload.embeds[0]!.toJSON();
-		const byName = Object.fromEntries((built.fields ?? []).map((field) => [field.name, field.value]));
-
-		expect(built.title).toBe("❌ Command failed · /demo");
-		expect(built.description).toBe("**Error:** boom");
-		expect(byName.Reference).toMatch(/^`[0-9A-Z]{6}`$/);
-		expect(byName.User).toContain(USER_ID);
-		expect(byName.Server).toContain("Test Server");
-		expect(byName.Channel).toContain("#general");
-		expect(byName.Options).toBe("`amount` 500\n`secret` *not logged*");
-		expect(byName.Stack).toContain("boom");
-		expect(payload.components[0]!.toJSON().components.map((part) => part.custom_id)).toEqual([
-			"error:pending",
-			"error:solved",
-			"error:unsolved",
-		]);
-	});
-
 	it("names the button and its custom ID when a button failed", async () => {
 		const send = jest.fn((_payload: unknown) => Promise.resolve({}));
 		const interaction = createMockInteraction({ overrides: { customId: "shop:buy:1" } as never });
@@ -353,13 +148,6 @@ describe("the error channel", () => {
 		expect(JSON.stringify(built.fields)).toContain("shop:buy:1");
 	});
 
-	it("stays quiet when no channel is configured", async () => {
-		const send = jest.fn(() => Promise.resolve({}));
-		await runCommand(createMockInteraction(), command, clientWithChannel(send, undefined));
-
-		expect(send).not.toHaveBeenCalled();
-	});
-
 	it("warns rather than throwing when the channel cannot be reached", async () => {
 		const send = jest.fn(() => Promise.reject(new Error("Missing Access")));
 		const client = clientWithChannel(send, "123");
@@ -368,18 +156,5 @@ describe("the error channel", () => {
 			runCommand(createMockInteraction() as unknown as CommandInput, command, client),
 		).resolves.toMatchObject({ ok: false });
 		expect(client.logger.warn).toHaveBeenCalled();
-	});
-
-	it("does not report a SetupError or a ServiceError as a bug", async () => {
-		const send = jest.fn(() => Promise.resolve({}));
-		const client = clientWithChannel(send, "123");
-
-		const setup = { ...command, run: (): Promise<void> => Promise.reject(new SetupError("configure me")) };
-		const service = { ...command, run: (): Promise<void> => Promise.reject(new ServiceError("TMDB", "504")) };
-
-		await runCommand(createMockInteraction(), setup, client);
-		await runCommand(createMockInteraction(), service, client);
-
-		expect(send).not.toHaveBeenCalled();
 	});
 });

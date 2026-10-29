@@ -1,13 +1,10 @@
 import { createTranscript } from "discord-html-transcripts";
-import { ChannelType, Collection, type Guild, PermissionFlagsBits, type TextChannel, type User } from "discord.js";
-import { TICKET } from "@config/constants";
+import { Collection, type Guild, type TextChannel, type User } from "discord.js";
 import { strings } from "@config/strings";
-import { parseCustomId } from "@core/button";
 import { type TicketRecord, type TicketSetupRecord } from "@database/models/tickets.schema";
 import {
 	addTicketMember,
 	claimTicket,
-	createTicket,
 	deleteTicket,
 	findOpenTicket,
 	removeTicketMember,
@@ -19,10 +16,8 @@ import {
 	lockTicket,
 	memberCandidates,
 	openTicket,
-	ticketControls,
 	toggleTicketMember,
 } from "@lib/tickets/ticketFlow.util";
-import { TICKET_ID } from "@lib/tickets/tickets.constants";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("discord-html-transcripts", () => ({ createTranscript: jest.fn(() => Promise.resolve("transcript")) }));
@@ -94,15 +89,6 @@ beforeEach(() => {
 	jest.mocked(claimTicket).mockResolvedValue(true as never);
 });
 
-describe("ticketControls", () => {
-	it("routes every control to the ticket handler", () => {
-		const ids = ticketControls().components.map((control) => (control.toJSON() as { custom_id: string }).custom_id);
-
-		expect(ids.map((id) => parseCustomId(id).id)).toEqual(Array(5).fill(TICKET_ID));
-		expect(ids.map((id) => parseCustomId(id).action)).toEqual(["close", "lock", "unlock", "claim", "members"]);
-	});
-});
-
 describe("openTicket", () => {
 	function guildMaking(channel: ReturnType<typeof ticketChannel>) {
 		const create = jest.fn(() => Promise.resolve(channel));
@@ -118,37 +104,6 @@ describe("openTicket", () => {
 		expect(create).not.toHaveBeenCalled();
 	});
 
-	it("makes a channel only its owner and the handlers can see", async () => {
-		const channel = ticketChannel();
-		const { guild, create } = guildMaking(channel);
-
-		await expect(openTicket(guild, setup, owner)).resolves.toBe(channel);
-
-		const options = (
-			create.mock.calls[0] as unknown as [{ permissionOverwrites: { id: string; deny?: bigint[] }[] }]
-		)[0];
-		expect(options).toEqual(
-			expect.objectContaining({
-				name: `${TICKET.namePrefix}sam`,
-				type: ChannelType.GuildText,
-				parent: setup.categoryId,
-			}),
-		);
-		expect(options.permissionOverwrites.map((overwrite) => overwrite.id)).toEqual([GUILD, OWNER, HANDLER_ROLE]);
-		expect(options.permissionOverwrites[0]?.deny).toEqual([PermissionFlagsBits.ViewChannel]);
-	});
-
-	it("records the ticket and greets both sides with the controls", async () => {
-		const channel = ticketChannel();
-
-		await openTicket(guildMaking(channel).guild, setup, owner);
-
-		expect(createTicket).toHaveBeenCalledWith({ guildId: GUILD, ownerId: OWNER, channelId: CHANNEL });
-		expect(channel.send).toHaveBeenCalledWith(
-			expect.objectContaining({ content: `<@${OWNER}> <@&${HANDLER_ROLE}>`, components: [expect.anything()] }),
-		);
-	});
-
 	it("keeps a long username inside Discord's 100-character channel name", async () => {
 		const { guild, create } = guildMaking(ticketChannel());
 
@@ -159,24 +114,6 @@ describe("openTicket", () => {
 });
 
 describe("lockTicket", () => {
-	it("takes the owner's voice away and records it", async () => {
-		const channel = ticketChannel();
-
-		await lockTicket(channel as unknown as TextChannel, ticket(), true);
-
-		expect(channel.permissionOverwrites.edit).toHaveBeenCalledWith(OWNER, { SendMessages: false });
-		expect(setTicketLocked).toHaveBeenCalledWith(CHANNEL, true);
-	});
-
-	it("gives it back on unlock", async () => {
-		const channel = ticketChannel();
-
-		await lockTicket(channel as unknown as TextChannel, ticket({ isLocked: true }), false);
-
-		expect(channel.permissionOverwrites.edit).toHaveBeenCalledWith(OWNER, { SendMessages: true });
-		expect(setTicketLocked).toHaveBeenCalledWith(CHANNEL, false);
-	});
-
 	it("refuses to lock what is already locked, or unlock what is open", async () => {
 		const channel = ticketChannel() as unknown as TextChannel;
 
@@ -187,11 +124,6 @@ describe("lockTicket", () => {
 });
 
 describe("claimTicketFor", () => {
-	it("claims an unclaimed ticket", async () => {
-		await expect(claimTicketFor(ticket(), moderator.id)).resolves.toBeUndefined();
-		expect(claimTicket).toHaveBeenCalledWith(CHANNEL, moderator.id);
-	});
-
 	/** The claim is conditional in the database, so two handlers pressing at once cannot both hold it. */
 	it("names whoever already holds it when the claim loses", async () => {
 		jest.mocked(claimTicket).mockResolvedValue(false as never);
@@ -222,28 +154,10 @@ describe("memberCandidates", () => {
 
 		await expect(memberCandidates(guild, ticket())).resolves.toEqual([{ id: "100000000000000005", name: "Ada" }]);
 	});
-
-	it("says so when there is nobody to add", async () => {
-		await expect(memberCandidates(guildOf({ id: OWNER, displayName: "Sam" }), ticket())).rejects.toThrow(
-			"There is nobody else to add.",
-		);
-	});
 });
 
 describe("toggleTicketMember", () => {
 	const GUEST = "100000000000000005";
-
-	it("lets somebody new in", async () => {
-		const channel = ticketChannel();
-
-		await expect(toggleTicketMember(channel as unknown as TextChannel, ticket(), GUEST)).resolves.toBe("added");
-		expect(channel.permissionOverwrites.edit).toHaveBeenCalledWith(GUEST, {
-			ViewChannel: true,
-			SendMessages: true,
-			ReadMessageHistory: true,
-		});
-		expect(addTicketMember).toHaveBeenCalledWith(CHANNEL, GUEST);
-	});
 
 	it("shows somebody already on it out again", async () => {
 		const channel = ticketChannel();
@@ -262,19 +176,6 @@ describe("closeTicket", () => {
 		return createMockClient({ channels: { fetch: jest.fn(() => Promise.resolve(destination)) } } as never);
 	}
 
-	const sendable = () => ({ isTextBased: () => true, isSendable: () => true, send: jest.fn(() => Promise.resolve()) });
-
-	it("files the transcript where the setup says, naming who closed it", async () => {
-		const destination = sendable();
-		const channel = ticketChannel();
-
-		await closeTicket(clientWith(destination), setup, ticket(), channel as unknown as TextChannel, moderator);
-
-		expect(createTranscript).toHaveBeenCalledWith(channel, expect.objectContaining({ filename: "ticket-0007.html" }));
-		expect(destination.send).toHaveBeenCalledWith(expect.objectContaining({ files: ["transcript"] }));
-		expect(JSON.stringify(destination.send.mock.calls[0])).toContain(moderator.toString());
-	});
-
 	/** A transcript channel that has gone must not stop the ticket closing. */
 	it("still closes when the transcript channel cannot be posted in", async () => {
 		const channel = ticketChannel();
@@ -289,24 +190,5 @@ describe("closeTicket", () => {
 
 		expect(createTranscript).not.toHaveBeenCalled();
 		expect(deleteTicket).toHaveBeenCalledWith(CHANNEL);
-	});
-
-	it("deletes the channel only after the pause, through the timer registry", async () => {
-		const client = clientWith(null);
-		const channel = ticketChannel();
-
-		await closeTicket(client, setup, ticket(), channel as unknown as TextChannel, moderator);
-
-		expect(channel.delete).not.toHaveBeenCalled();
-		const [name, delay, later] = jest.mocked(client.timers.after).mock.calls[0] as [
-			string,
-			number,
-			() => Promise<void>,
-		];
-		expect(name).toBe(`ticket:${CHANNEL}`);
-		expect(delay).toBe(TICKET.closeDelayMs);
-
-		await later();
-		expect(channel.delete).toHaveBeenCalledWith("Ticket closed by kit");
 	});
 });

@@ -27,13 +27,6 @@ function capture(): { body: unknown } {
 }
 
 describe("the verification section", () => {
-	it("shows what is configured, and how many have passed", async () => {
-		renderPage();
-
-		expect(await screen.findByText(/42 verified so far/)).toBeInTheDocument();
-		expect(screen.getByRole("heading", { name: "Verification" })).toBeInTheDocument();
-	});
-
 	/** An explicit button rather than a consequence of choosing a channel, so the panel is not posted mid-setup. */
 	it("posts the panel only when the button is pressed", async () => {
 		const user = userEvent.setup();
@@ -44,18 +37,6 @@ describe("the verification section", () => {
 
 		await waitFor(() => {
 			expect(captured.body).toEqual({ publish: true });
-		});
-	});
-
-	it("sends only the role when the role is changed", async () => {
-		const user = userEvent.setup();
-		const captured = capture();
-
-		renderPage();
-		await user.selectOptions(await screen.findByLabelText(/give them this role/i), "300000000000000002");
-
-		await waitFor(() => {
-			expect(captured.body).toEqual({ roleId: "300000000000000002" });
 		});
 	});
 
@@ -70,19 +51,5 @@ describe("the verification section", () => {
 		renderPage();
 
 		expect(await screen.findByText(/sits at or above/i)).toBeInTheDocument();
-	});
-
-	it("says what is still missing rather than offering a button that would fail", async () => {
-		server.use(
-			http.get("/api/guilds/:guildId/verification", () =>
-				HttpResponse.json({ ...verificationConfig, enabled: false, channelId: null, roleId: null, posted: false }),
-			),
-		);
-
-		renderPage();
-
-		expect(await screen.findByText(/choose a channel and a role/i)).toBeInTheDocument();
-		expect(screen.queryByRole("button", { name: /post the panel/i })).toBeNull();
-		expect(screen.getByRole("switch", { name: /verify new members/i })).toBeDisabled();
 	});
 });

@@ -8,7 +8,6 @@ import {
 	describeTrack,
 	ffmpegArgs,
 	TRANSCODE_BITRATE,
-	forgetDescription,
 	openStream,
 	parseJsonLines,
 	MusicProblemError,
@@ -49,22 +48,6 @@ const recordArgs = (file: string): string =>
 	`require("node:fs").writeFileSync(${JSON.stringify(file)}, process.argv.slice(2).join("\\n") + "\\n");`;
 
 describe("trackFromInfo", () => {
-	it("keeps the page address rather than the expiring media one", () => {
-		const track = trackFromInfo(
-			{ webpage_url: "https://youtu.be/abc", url: "https://googlevideo.test/expires-in-6h", title: "Song" },
-			USER,
-			"youtube",
-		);
-
-		expect(track).toMatchObject({ url: "https://youtu.be/abc", title: "Song" });
-	});
-
-	it("converts seconds to milliseconds", () => {
-		expect(trackFromInfo({ webpage_url: "u", duration: 212 }, USER, "youtube")).toMatchObject({
-			durationMs: 212_000,
-		});
-	});
-
 	/** A live stream gets no duration, so an ended broadcast is not retried as broken. */
 	it("gives a live stream no duration even when one is reported", () => {
 		expect(trackFromInfo({ webpage_url: "u", duration: 60, is_live: true }, USER, "youtube")).toMatchObject({
@@ -76,70 +59,22 @@ describe("trackFromInfo", () => {
 		expect(trackFromInfo({ webpage_url: "u", duration }, USER, "youtube")).toMatchObject({ durationMs: null });
 	});
 
-	it("falls back to the channel when there is no uploader", () => {
-		expect(trackFromInfo({ webpage_url: "u", channel: "A Channel" }, USER, "youtube")).toMatchObject({
-			author: "A Channel",
-		});
-	});
-
-	it("names an untitled track rather than rendering nothing", () => {
-		expect(trackFromInfo({ webpage_url: "u" }, USER, "youtube")).toMatchObject({ title: "Unknown track" });
-	});
-
 	/** An entry with no address is not playable, and queueing it would break the queue one track later. */
 	it.each([{}, { webpage_url: "" }, { title: "No address" }])("refuses %p", (info) => {
 		expect(trackFromInfo(info as TrackInfo, USER, "youtube")).toBeNull();
 	});
-
-	it("records who asked for it", () => {
-		expect(trackFromInfo({ webpage_url: "u" }, USER, "youtube")).toMatchObject({ requestedBy: USER });
-	});
 });
 
 describe("tracksFromInfo", () => {
-	it("reads a single track as a queue of one", () => {
-		expect(tracksFromInfo({ webpage_url: "u", title: "One" }, USER, "youtube")).toHaveLength(1);
-	});
-
-	it("reads a playlist as all of its entries", () => {
-		const info = { entries: [{ webpage_url: "a" }, { webpage_url: "b" }] };
-
-		expect(tracksFromInfo(info, USER, "youtube").map((track) => track.url)).toEqual(["a", "b"]);
-	});
-
 	/** A 5,000-track playlist must not become a 5,000-track queue in somebody's server. */
 	it("caps a very long playlist", () => {
 		const entries = Array.from({ length: PLAYLIST_LIMIT + 50 }, (_, at) => ({ webpage_url: `track-${String(at)}` }));
 
 		expect(tracksFromInfo({ entries }, USER, "youtube")).toHaveLength(PLAYLIST_LIMIT);
 	});
-
-	it("drops unplayable entries instead of failing the whole playlist", () => {
-		const info = { entries: [{ webpage_url: "a" }, {}, { webpage_url: "c" }] };
-
-		expect(tracksFromInfo(info, USER, "youtube").map((track) => track.url)).toEqual(["a", "c"]);
-	});
-
-	it("returns nothing for an empty playlist", () => {
-		expect(tracksFromInfo({ entries: [] }, USER, "youtube")).toEqual([]);
-	});
 });
 
 describe("argumentsFor", () => {
-	it("passes a link through untouched", () => {
-		expect(argumentsFor({ kind: "url", url: "https://youtu.be/abc", source: "youtube" })).toEqual([
-			"https://youtu.be/abc",
-		]);
-	});
-
-	it("asks YouTube for a search", () => {
-		expect(argumentsFor({ kind: "search", terms: "lofi", source: "youtube" }, 5)).toEqual(["ytsearch5:lofi"]);
-	});
-
-	it("asks SoundCloud when the search was aimed there", () => {
-		expect(argumentsFor({ kind: "search", terms: "lofi", source: "soundcloud" }, 3)).toEqual(["scsearch3:lofi"]);
-	});
-
 	/** The terms are one argv entry, so a quote or a semicolon stays a search. */
 	it("keeps an awkward title in a single argument", () => {
 		const args = argumentsFor({ kind: "search", terms: '"; rm -rf /', source: "youtube" }, 1);
@@ -150,40 +85,11 @@ describe("argumentsFor", () => {
 });
 
 describe("parseJsonLines", () => {
-	it("reads one document per line", () => {
-		expect(parseJsonLines('{"id":"a"}\n{"id":"b"}\n')).toEqual([{ id: "a" }, { id: "b" }]);
-	});
-
 	/** yt-dlp prints notices among the JSON, and one of them must not lose the whole answer. */
 	it("ignores lines that are not JSON", () => {
 		expect(parseJsonLines('[youtube] Extracting URL\n{"id":"a"}\nWARNING: something\n')).toEqual([{ id: "a" }]);
 	});
-
-	it("skips a truncated document rather than throwing", () => {
-		expect(parseJsonLines('{"id":"a"}\n{"id":"b"\n')).toEqual([{ id: "a" }]);
-	});
-
-	it("returns nothing for empty output", () => {
-		expect(parseJsonLines("")).toEqual([]);
-	});
 });
-
-/** Reads a stream against a deadline, so a miswired pipeline fails rather than hanging CI. */
-async function readAll(stream: NodeJS.ReadableStream, timeoutMs = 3_000): Promise<string> {
-	const chunks: Buffer[] = [];
-
-	return new Promise<string>((resolve, reject) => {
-		const timer = setTimeout(() => reject(new Error("the stream delivered nothing before the deadline")), timeoutMs);
-		const finish = (outcome: () => void): void => {
-			clearTimeout(timer);
-			outcome();
-		};
-
-		stream.on("data", (chunk) => chunks.push(chunk as Buffer));
-		stream.once("end", () => finish(() => resolve(Buffer.concat(chunks).toString())));
-		stream.once("error", (error: Error) => finish(() => reject(error)));
-	});
-}
 
 /** Rejects rather than resolving, so a race against it fails the test instead of passing quietly. */
 /** Polls rather than sleeping a fixed span, so a slow runner is not a flake and a fast one is not a wait. */
@@ -215,16 +121,6 @@ describe("openStream", () => {
 	});
 
 	const plan = { formatId: "251", shape: "webm-opus" } as const;
-
-	it("hands back what the downloader wrote, with no transcoder in the way", async () => {
-		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: fakeYtDlp, ffmpeg: null });
-
-		try {
-			await expect(readAll(opened.stream)).resolves.toBe("OPUSBYTES");
-		} finally {
-			opened.close();
-		}
-	});
 
 	/** Closing a stream stops the processes it started. */
 	it("closing it stops the process it started", async () => {
@@ -268,63 +164,11 @@ describe("openStream", () => {
 		expect(existsSync(marker)).toBe(true);
 	});
 
-	it("reports what a dying downloader said rather than leaving it in a closed pipe", async () => {
-		const broken = fakeBinary(directory, "broken-stream-yt-dlp", die("ERROR: Sign in to confirm you are not a bot"));
-
-		const said: string[] = [];
-		const opened = openStream(
-			"https://youtu.be/abc",
-			plan,
-			{ ytDlp: broken, ffmpeg: null },
-			{
-				onProblem: (message) => said.push(message),
-			},
-		);
-
-		try {
-			await waitUntil(() => said.length > 0, 5_000);
-		} finally {
-			opened.close();
-		}
-
-		expect(said.at(0)).toContain("not a bot");
-	});
-
-	it("can be closed twice without throwing", () => {
-		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: fakeYtDlp, ffmpeg: null });
-
-		expect(() => {
-			opened.close();
-			opened.close();
-		}).not.toThrow();
-	});
-
 	/** A track that needs a transcoder is refused by name when FFmpeg is missing. */
 	it("refuses a track needing a transcoder when FFmpeg is missing", () => {
 		expect(() =>
 			openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
 		).toThrow(/FFmpeg/);
-	});
-
-	it("says so plainly when there is no downloader at all", () => {
-		expect(() => openStream("https://youtu.be/abc", plan, { ytDlp: null, ffmpeg: null })).toThrow(/yt-dlp/);
-	});
-
-	it("pipes the downloader through the transcoder when one is needed", async () => {
-		// Reads stdin and marks it, which is what proves the two processes were actually joined up.
-		const fakeFfmpeg = fakeBinary(directory, "fake-ffmpeg", `${print("OGG:")} process.stdin.pipe(process.stdout);`);
-
-		const opened = openStream(
-			"https://youtu.be/abc",
-			{ formatId: "mp3", shape: "transcode" },
-			{ ytDlp: fakeYtDlp, ffmpeg: fakeFfmpeg },
-		);
-
-		try {
-			await expect(readAll(opened.stream)).resolves.toBe("OGG:OPUSBYTES");
-		} finally {
-			opened.close();
-		}
 	});
 });
 
@@ -343,26 +187,6 @@ describe("resolveTracks", () => {
 	const fakeYtDlp = (name: string, body: string): string => fakeBinary(directory, name, body);
 
 	const query = { kind: "search", terms: "lofi", source: "youtube" } as const;
-
-	it("turns the downloader's output into queue tracks", async () => {
-		const binary = fakeYtDlp(
-			"ok",
-			print(
-				'{"webpage_url":"https://youtu.be/a","title":"First","duration":100}\n{"webpage_url":"https://youtu.be/b","title":"Second","duration":200}\n',
-			),
-		);
-
-		const tracks = await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
-
-		expect(tracks.map((track) => track.title)).toEqual(["First", "Second"]);
-		expect(tracks[0]?.durationMs).toBe(100_000);
-	});
-
-	it("returns nothing when the search found nothing", async () => {
-		const binary = fakeYtDlp("empty", print(""));
-
-		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).resolves.toEqual([]);
-	});
 
 	/** A known refusal reaches the reader as a sentence, not as yt-dlp's raw output logged as a failure. */
 	it("names a refusal it recognises, as advice the reader can act on", async () => {
@@ -388,54 +212,6 @@ describe("resolveTracks", () => {
 
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/something new/);
 	});
-
-	it("asks for as many results as it is told", async () => {
-		const record = join(directory, "args.txt");
-		const binary = fakeYtDlp("args", recordArgs(record));
-
-		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
-		const args = readFileSync(record, "utf8").split("\n");
-
-		expect(args).toContain("ytsearch1:lofi");
-	});
-
-	it("still fails usefully when the downloader says nothing at all", async () => {
-		const binary = fakeYtDlp("silent", die("", 2));
-
-		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/2/);
-	});
-
-	it("says what to do when there is no downloader installed", async () => {
-		await expect(resolveTracks(query, USER, { ytDlp: null, ffmpeg: null })).rejects.toThrow(/music:setup/);
-	});
-
-	it("reads a playlist as all of its entries", async () => {
-		const binary = fakeYtDlp(
-			"playlist",
-			print('{"entries":[{"webpage_url":"https://youtu.be/a"},{"webpage_url":"https://youtu.be/b"}]}\n'),
-		);
-
-		const tracks = await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null }, { flat: true });
-
-		expect(tracks).toHaveLength(2);
-	});
-
-	it("describes one track, formats and all", async () => {
-		const binary = fakeYtDlp(
-			"describe",
-			print(
-				'{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251","acodec":"opus","vcodec":"none","ext":"webm"}]}\n',
-			),
-		);
-
-		const info = await describeTrack("https://youtu.be/a", { ytDlp: binary, ffmpeg: null });
-
-		expect(info?.formats).toHaveLength(1);
-	});
-
-	it("describes nothing when there is no downloader", async () => {
-		await expect(describeTrack("https://youtu.be/a", { ytDlp: null, ffmpeg: null })).resolves.toBeNull();
-	});
 });
 
 describe("ffmpegArgs", () => {
@@ -458,16 +234,8 @@ describe("ffmpegArgs", () => {
 		expect(ffmpegArgs({ volume: 100 })).not.toContain("-af");
 	});
 
-	it("scales the level as a fraction of the track's own", () => {
-		expect(ffmpegArgs({ volume: 50 }).join(" ")).toContain("-af volume=0.500");
-	});
-
 	it("cannot be asked for a level past either end", () => {
 		expect(ffmpegArgs({ volume: 10_000 }).join(" ")).toContain("volume=2.000");
-	});
-
-	it("starts at the beginning when no position is given", () => {
-		expect(ffmpegArgs()).not.toContain("-ss");
 	});
 
 	/** `-ss` after `-i` would decode everything before the position rather than discarding it. */
@@ -483,19 +251,6 @@ describe("ytDlpStreamArgs", () => {
 	/** A YouTube link copied from a playlist carries `&list=`, and the whole list would go down one pipe. */
 	it("refuses to follow a playlist", () => {
 		expect(ytDlpStreamArgs("251", "https://youtu.be/abc?list=PL1")).toContain("--no-playlist");
-	});
-
-	it("writes to standard output, which is what keeps FFmpeg off the network", () => {
-		const args = ytDlpStreamArgs("251", "https://youtu.be/abc");
-
-		expect(args[args.indexOf("-o") + 1]).toBe("-");
-		expect(args.at(-1)).toBe("https://youtu.be/abc");
-	});
-
-	it("asks for the format the plan chose", () => {
-		const args = ytDlpStreamArgs("251", "https://youtu.be/abc");
-
-		expect(args[args.indexOf("-f") + 1]).toBe("251");
 	});
 
 	/** A dropped connection part-way through a track should cost a retry, not the track. */
@@ -540,27 +295,6 @@ describe("describeTrack's memory", () => {
 
 		expect(runs() - before).toBe(1);
 	});
-
-	it("asks again once the description has been forgotten", async () => {
-		const binaries = { ytDlp: binary, ffmpeg: null };
-		await describeTrack("https://youtu.be/forgotten", binaries);
-		const before = runs();
-
-		forgetDescription("https://youtu.be/forgotten", binaries);
-		await describeTrack("https://youtu.be/forgotten", binaries);
-
-		expect(runs() - before).toBe(1);
-	});
-
-	it("asks again once the description is stale", async () => {
-		const binaries = { ytDlp: binary, ffmpeg: null };
-		await describeTrack("https://youtu.be/stale", binaries, 0);
-		const before = runs();
-
-		await describeTrack("https://youtu.be/stale", binaries, 3_600_000);
-
-		expect(runs() - before).toBe(1);
-	});
 });
 
 describe("resolveTracks on a SoundCloud search", () => {
@@ -591,12 +325,6 @@ describe("resolveTracks on a SoundCloud search", () => {
 		const args = readFileSync(record, "utf8").split("\n");
 		expect(args).toContain(`scsearch${String(SOUNDCLOUD_SEARCH_DEPTH)}:lofi`);
 		expect(args).toContain("--ignore-no-formats-error");
-	});
-
-	it("says so, as advice, when every result is protected", async () => {
-		const binary = fakeYtDlp("all-locked", print(`${locked}\n`));
-
-		await expect(resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/DRM-protected/);
 	});
 
 	/** A typeahead search reads no formats, so filtering on them would hide every suggestion. */

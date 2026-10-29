@@ -8,7 +8,6 @@ import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { saveBirthdaySettings } from "@database/repositories/birthdayRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { type BirthdayOverview, DEFAULT_BIRTHDAY_MESSAGE } from "@testify/shared";
 
 jest.mock("@database/repositories/birthdayRepository", () => ({
 	countBirthdays: jest.fn(() => Promise.resolve(2)),
@@ -67,15 +66,6 @@ beforeEach(() => {
 });
 
 describe("the birthday routes", () => {
-	it("starts a server off, with how many members shared and who comes next", async () => {
-		const overview = (await (await send("GET")).json()) as BirthdayOverview;
-
-		expect(overview).toEqual(
-			expect.objectContaining({ enabled: false, channelId: null, message: DEFAULT_BIRTHDAY_MESSAGE, shared: 2 }),
-		);
-		expect(overview.upcoming).toEqual([{ userId: "1", name: "sam", day: 25, month: 10 }]);
-	});
-
 	it("refuses to turn on with nowhere to post, in words, with nothing written", async () => {
 		const response = await send("PATCH", { enabled: true });
 

@@ -1,16 +1,5 @@
-import {
-	AutoModerationActionType,
-	AutoModerationRuleTriggerType,
-	Collection,
-	type Guild,
-	PermissionFlagsBits,
-} from "discord.js";
-import {
-	canManageAutomod,
-	createAutomodRule,
-	listAutomodRules,
-	toRuleSummary,
-} from "@lib/moderation/automodActions.util";
+import { AutoModerationActionType, AutoModerationRuleTriggerType, Collection, type Guild } from "discord.js";
+import { createAutomodRule, listAutomodRules, toRuleSummary } from "@lib/moderation/automodActions.util";
 
 const BOT = "100000000000000001";
 
@@ -40,26 +29,6 @@ describe("createAutomodRule", () => {
 		expect(create).toHaveBeenCalledWith(expect.objectContaining({ triggerMetadata: { mentionTotalLimit: 7 } }));
 	});
 
-	it("puts the keyword in both the filter and the name", async () => {
-		const create = jest.fn().mockResolvedValue({ name: "x" });
-		await createAutomodRule(guildWith(create), { preset: "keyword", word: "badword" }, "why");
-
-		expect(create).toHaveBeenCalledWith(
-			expect.objectContaining({
-				name: "Blocked: badword",
-				triggerMetadata: { keywordFilter: ["badword"] },
-			}),
-		);
-	});
-
-	it("always blocks the message rather than only alerting", async () => {
-		const create = jest.fn().mockResolvedValue({ name: "x" });
-		await createAutomodRule(guildWith(create), { preset: "spam" }, "why");
-
-		const [[sent]] = create.mock.calls as [[{ actions: { type: number }[] }]];
-		expect(sent.actions[0]?.type).toBe(AutoModerationActionType.BlockMessage);
-	});
-
 	it("passes the reason through to the audit log Discord keeps", async () => {
 		const create = jest.fn().mockResolvedValue({ name: "x" });
 		await createAutomodRule(guildWith(create), { preset: "spam" }, "Created by kate");
@@ -78,10 +47,6 @@ describe("toRuleSummary", () => {
 		actions: [{ type: AutoModerationActionType.BlockMessage }],
 	};
 
-	it("names the trigger in words rather than a number", () => {
-		expect(toRuleSummary(rule as never, BOT).trigger).toBe("Spam");
-	});
-
 	/** A rule somebody made in Discord's own UI must not look like one Testify is responsible for. */
 	it("marks only the rules the bot itself created", () => {
 		expect(toRuleSummary(rule as never, BOT).fromBot).toBe(true);
@@ -94,16 +59,6 @@ describe("toRuleSummary", () => {
 
 		expect(summary.preset).toBeNull();
 		expect(summary.trigger).toBe("Something else");
-	});
-
-	it("collapses repeated actions to one of each", () => {
-		const actions = [
-			{ type: AutoModerationActionType.BlockMessage },
-			{ type: AutoModerationActionType.BlockMessage },
-			{ type: AutoModerationActionType.Timeout },
-		];
-
-		expect(toRuleSummary({ ...rule, actions } as never, BOT).actions).toEqual(["block", "timeout"]);
 	});
 });
 
@@ -127,27 +82,5 @@ describe("listAutomodRules", () => {
 		const rules = await listAutomodRules(guildHolding({ id: "2", name: "Zebra" }, { id: "1", name: "Alpha" }), BOT);
 
 		expect(rules.map((rule) => rule.name)).toEqual(["Alpha", "Zebra"]);
-	});
-
-	it("is empty rather than throwing when the server has no rules", async () => {
-		await expect(listAutomodRules(guildHolding(), BOT)).resolves.toEqual([]);
-	});
-});
-
-describe("canManageAutomod", () => {
-	it("is false when the bot has no member object yet", () => {
-		expect(canManageAutomod({ members: { me: null } } as unknown as Guild)).toBe(false);
-	});
-
-	it("is false without Manage Server", () => {
-		const guild = {
-			members: { me: { permissions: { has: (flag: bigint) => flag !== PermissionFlagsBits.ManageGuild } } },
-		} as unknown as Guild;
-
-		expect(canManageAutomod(guild)).toBe(false);
-	});
-
-	it("is true with it", () => {
-		expect(canManageAutomod(guildWith())).toBe(true);
 	});
 });

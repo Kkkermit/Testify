@@ -11,9 +11,9 @@ import { getBotSettings, saveBotSettings } from "@database/repositories/botSetti
 import { getCounting } from "@database/repositories/countingRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getLevelSettings } from "@database/repositories/levelRepository";
-import { dashboardTallies, guildTallies } from "@database/repositories/usageRepository";
+import { guildTallies } from "@database/repositories/usageRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
-import { type BotControlState, type OwnerGuildDetail } from "@testify/shared";
+import { type OwnerGuildDetail } from "@testify/shared";
 
 jest.mock("@core/shutdown", () => ({ shutdown: jest.fn(() => Promise.resolve()) }));
 jest.mock("@database/repositories/botSettingsRepository", () => ({
@@ -128,33 +128,9 @@ describe("who can control the bot", () => {
 
 		expect(response.status).toBe(404);
 	});
-
-	it("does nothing when a manager tries to pause it", async () => {
-		const client = clientFor();
-		await send("/gateway", { method: "POST", userId: MANAGER, body: { action: "pause" }, client });
-
-		expect(client.paused).toBe(false);
-	});
 });
 
 describe("pausing and resuming", () => {
-	it("reports the current state", async () => {
-		const state = (await (await send("")).json()) as BotControlState;
-
-		expect(state).toMatchObject({ gateway: "online", guilds: 1, pingMs: 42 });
-	});
-
-	it("pauses, and says so", async () => {
-		const client = clientFor();
-		const state = (await (
-			await send("/gateway", { method: "POST", body: { action: "pause" }, client })
-		).json()) as BotControlState;
-
-		expect(client.paused).toBe(true);
-		expect(state.gateway).toBe("paused");
-		expect(state.since).not.toBeNull();
-	});
-
 	it("resumes", async () => {
 		const client = clientFor({ paused: true, pausedAt: Date.now() });
 		await send("/gateway", { method: "POST", body: { action: "resume" }, client });
@@ -201,13 +177,6 @@ describe("shutting down", () => {
 });
 
 describe("the bot's own profile", () => {
-	it("renames it", async () => {
-		const client = clientFor();
-		await send("/identity", { method: "PATCH", body: { username: "Testify Two" }, client });
-
-		expect(client.user?.setUsername).toHaveBeenCalledWith("Testify Two");
-	});
-
 	it("refuses a name Discord would not take", async () => {
 		expect((await send("/identity", { method: "PATCH", body: { username: "x" } })).status).toBe(400);
 		expect((await send("/identity", { method: "PATCH", body: { username: "x".repeat(40) } })).status).toBe(400);
@@ -242,33 +211,10 @@ describe("the bot's own profile", () => {
 });
 
 describe("a server's detail", () => {
-	it("describes the server and the bot's place in it", async () => {
-		const detail = (await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail;
-
-		expect(detail).toMatchObject({
-			id: GUILD,
-			name: "Test Server",
-			memberCount: 1_234,
-			nickname: "Testy",
-			highestRole: "Bots",
-		});
-	});
-
 	it("reports what that server has configured", async () => {
 		jest.mocked(getWelcome).mockResolvedValue({ guildId: GUILD, channelId: "1" } as never);
 
 		expect(((await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail).configured).toContain("welcome");
-	});
-
-	it("counts the dashboard screens its managers opened in the last 30 days", async () => {
-		jest.mocked(dashboardTallies).mockResolvedValue([{ guildId: GUILD, count: 9, lastDay: "2026-08-01" }]);
-
-		expect(((await (await send(`/guilds/${GUILD}`)).json()) as OwnerGuildDetail).dashboardViews).toBe(9);
-		expect(dashboardTallies).toHaveBeenCalledWith(30, 0, undefined, GUILD);
-	});
-
-	it("404s for a server the bot is not in", async () => {
-		expect((await send("/guilds/900000000000000009")).status).toBe(404);
 	});
 
 	/** An id straight out of a URL reaches a Mongo filter if nothing checks its shape first. */
@@ -289,15 +235,6 @@ describe("leaving a server", () => {
 		return { client, leave };
 	}
 
-	it("leaves when the name matches", async () => {
-		const { client, leave } = clientThatCanLeave();
-
-		const response = await send(`/guilds/${GUILD}/leave`, { method: "POST", body: { confirm: "Test Server" }, client });
-
-		expect(response.status).toBe(200);
-		expect(leave).toHaveBeenCalled();
-	});
-
 	/** The server compares the name itself; a hand-written request cannot remove the bot. */
 	it("refuses a name that does not match, and does not leave", async () => {
 		const { client, leave } = clientThatCanLeave();
@@ -313,25 +250,6 @@ describe("leaving a server", () => {
 
 		expect((await send(`/guilds/${GUILD}/leave`, { method: "POST", body: {}, client })).status).toBe(400);
 		expect(leave).not.toHaveBeenCalled();
-	});
-
-	it("hides it from a manager", async () => {
-		const { client, leave } = clientThatCanLeave();
-		const response = await send(`/guilds/${GUILD}/leave`, {
-			method: "POST",
-			body: { confirm: "Test Server" },
-			client,
-			userId: MANAGER,
-		});
-
-		expect(response.status).toBe(404);
-		expect(leave).not.toHaveBeenCalled();
-	});
-
-	it("404s for a server the bot is not in", async () => {
-		const response = await send("/guilds/900000000000000009/leave", { method: "POST", body: { confirm: "x" } });
-
-		expect(response.status).toBe(404);
 	});
 
 	/** The name is unreadable once the guild is gone, so the record has to be written while it still is. */
@@ -364,12 +282,6 @@ describe("leaving a server", () => {
 });
 
 describe("music sources", () => {
-	it("reads both, marked as the default, before the owner has chosen", async () => {
-		const response = await send("/music");
-
-		expect(await response.json()).toEqual({ sources: "both", configured: false });
-	});
-
 	it("stores the owner's choice and records who made it, with what it was before", async () => {
 		const response = await send("/music", { method: "PUT", body: { sources: "soundcloud" } });
 

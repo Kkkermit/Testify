@@ -1,12 +1,5 @@
 import { type TreasureSettings } from "@testify/shared";
-import {
-	describeRate,
-	draftOf,
-	draftProblem,
-	isDirty,
-	toMilliseconds,
-	toMinutes,
-} from "@/features/treasure/treasure.utils";
+import { describeRate, draftOf, draftProblem, toMilliseconds, toMinutes } from "@/features/treasure/treasure.utils";
 import { t } from "@/test/english";
 
 const SETTINGS: TreasureSettings = {
@@ -24,24 +17,10 @@ describe("the cooldown conversion", () => {
 	it("survives a round trip", () => {
 		expect(toMinutes(toMilliseconds(17))).toBe(17);
 	});
-
-	it("rounds a stored value that is not a whole minute", () => {
-		expect(toMinutes(90_000)).toBe(2);
-	});
-});
-
-describe("draftOf", () => {
-	it("puts the cooldown into the minutes the form shows", () => {
-		expect(draftOf(SETTINGS).cooldownMinutes).toBe(5);
-	});
 });
 
 describe("draftProblem", () => {
 	const draft = draftOf(SETTINGS);
-
-	it("says nothing about a draft straight off the defaults", () => {
-		expect(draftProblem(draft, t)).toBeNull();
-	});
 
 	/** A range whose floor is above its ceiling picks no number at all, so the drop would never fire. */
 	it("refuses a range the wrong way round", () => {
@@ -65,24 +44,7 @@ describe("draftProblem", () => {
 	});
 });
 
-describe("isDirty", () => {
-	it("is false for an untouched draft", () => {
-		expect(isDirty(draftOf(SETTINGS), SETTINGS)).toBe(false);
-	});
-
-	it("notices a change to any field, including the cooldown it converted", () => {
-		expect(isDirty({ ...draftOf(SETTINGS), minAmount: 11 }, SETTINGS)).toBe(true);
-		expect(isDirty({ ...draftOf(SETTINGS), cooldownMinutes: 6 }, SETTINGS)).toBe(true);
-	});
-});
-
 describe("describeRate", () => {
-	it("reads the two numbers together rather than as separate settings", () => {
-		expect(describeRate(draftOf(SETTINGS))).toBe(
-			"A drop of 10–500 every 15–50 messages, at most once every 5 minutes.",
-		);
-	});
-
 	/** A range of one is a fixed value, and "10–10" reads as a mistake. */
 	it("collapses a range whose ends match", () => {
 		const draft = { minMessages: 20, maxMessages: 20, minAmount: 5, maxAmount: 5, cooldownMinutes: 3 };

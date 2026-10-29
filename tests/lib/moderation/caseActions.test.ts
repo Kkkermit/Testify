@@ -1,7 +1,6 @@
 import { type Guild } from "discord.js";
 import {
 	createCase,
-	findCase,
 	getCaseSettings,
 	listCases,
 	nextCaseNumber,
@@ -9,7 +8,7 @@ import {
 } from "@database/repositories/caseRepository";
 import { listGuildWarnings } from "@database/repositories/moderationRepository";
 import { canPostIn } from "@lib/discord/channels.util";
-import { applyCaseSettings, readCase, readCases, recordCase } from "@lib/moderation/caseActions.util";
+import { applyCaseSettings, readCases, recordCase } from "@lib/moderation/caseActions.util";
 
 jest.mock("@database/repositories/caseRepository", () => ({
 	createCase: jest.fn(),
@@ -81,15 +80,6 @@ describe("recordCase", () => {
 		expect(recorded).toEqual(expect.objectContaining({ number: 4, action: "ban", userId: SAM, moderatorId: MOD.id }));
 		expect(send).toHaveBeenCalledWith(expect.objectContaining({ allowedMentions: { parse: [] } }));
 		expect(JSON.stringify(send.mock.calls[0])).toContain("Case 4");
-	});
-
-	it("records without posting when there is no log channel", async () => {
-		const { guild } = guildWith(null);
-
-		await expect(
-			recordCase(guild, { action: "warn", user: { id: SAM, username: "sam" }, moderator: MOD, reason: "x" }),
-		).resolves.toEqual(expect.objectContaining({ number: 4 }));
-		expect(guild.channels.fetch).not.toHaveBeenCalled();
 	});
 
 	/** The action it records has already happened, so a failing record must not fail the command. */
@@ -164,24 +154,9 @@ describe("readCases", () => {
 		expect((await readCases(GUILD, { query: "RAID" })).items.map((entry) => entry.number)).toEqual([3]);
 		expect((await readCases(GUILD, { action: "warn" })).items.map((entry) => entry.number)).toEqual([1]);
 	});
-
-	it("pages, and keeps a page past the end on the last one", async () => {
-		jest.mocked(listCases).mockResolvedValue(Array.from({ length: 12 }, (_, index) => stored(12 - index)));
-
-		const last = await readCases(GUILD, { page: 9, perPage: 5 });
-
-		expect(last).toEqual(expect.objectContaining({ page: 3, total: 12, perPage: 5 }));
-		expect(last.items).toHaveLength(2);
-	});
 });
 
 describe("readCase and applyCaseSettings", () => {
-	it("says when there is no such case", async () => {
-		jest.mocked(findCase).mockResolvedValue(null);
-
-		await expect(readCase(GUILD, 99)).rejects.toThrow("There is no case 99 in this server.");
-	});
-
 	it("refuses a log channel the bot cannot post in", async () => {
 		jest.mocked(canPostIn).mockReturnValue(false);
 

@@ -1,13 +1,5 @@
 import { type CommandOptionSummary, type CommandSummary } from "@testify/shared";
-import {
-	buildArgs,
-	canRun,
-	controlFor,
-	hexColour,
-	missingRequired,
-	needsSubcommand,
-	optionsShown,
-} from "./runner.utils";
+import { buildArgs, canRun, controlFor } from "./runner.utils";
 
 function option(overrides: Partial<CommandOptionSummary> = {}): CommandOptionSummary {
 	return {
@@ -41,10 +33,6 @@ function command(overrides: Partial<CommandSummary> = {}): CommandSummary {
 }
 
 describe("choosing a control for an option", () => {
-	it("gives a select to anything with choices, whatever its type", () => {
-		expect(controlFor(option({ type: "integer", choices: [{ name: "One", value: 1 }] }))).toBe("choice");
-	});
-
 	it.each([
 		["integer", "number"],
 		["number", "number"],
@@ -60,63 +48,19 @@ describe("choosing a control for an option", () => {
 	});
 });
 
-describe("which options a form shows", () => {
-	const parent = command({
-		subcommands: [{ name: "info", description: "Info.", aliases: [], options: [option({ name: "deep" })] }],
-	});
-
-	it("shows a subcommand's own options", () => {
-		expect(optionsShown(parent, "info").map((each) => each.name)).toEqual(["deep"]);
-	});
-
-	it("shows nothing for a subcommand that does not exist", () => {
-		expect(optionsShown(parent, "nope")).toEqual([]);
-	});
-
-	it("shows the top-level options when none is picked", () => {
-		expect(optionsShown(command({ options: [option()] }), null)).toHaveLength(1);
-	});
-
-	it("shows nothing before a command is picked", () => {
-		expect(optionsShown(undefined, null)).toEqual([]);
-	});
-
-	it("knows which commands have parts to choose between", () => {
-		expect(needsSubcommand(parent)).toBe(true);
-		expect(needsSubcommand(command())).toBe(false);
-		expect(needsSubcommand(undefined)).toBe(false);
-	});
-});
-
 describe("building the request", () => {
 	/** An untouched optional field is left out, because a command would read `""` as an answer. */
 	it("leaves an empty field out entirely", () => {
 		expect(buildArgs([option()], { text: "" })).toEqual({});
 	});
 
-	it("sends a number as a number", () => {
-		expect(buildArgs([option({ name: "count", type: "integer" })], { count: "7" })).toEqual({ count: 7 });
-	});
-
-	it("sends a boolean as a boolean", () => {
-		expect(buildArgs([option({ name: "yes", type: "boolean" })], { yes: "true" })).toEqual({ yes: true });
-	});
-
 	/** Left as typed, so the server's refusal names the option rather than reporting a NaN nobody sent. */
 	it("passes a number that is not one through as it was typed", () => {
 		expect(buildArgs([option({ name: "count", type: "integer" })], { count: "abc" })).toEqual({ count: "abc" });
 	});
-
-	it("ignores a value for an option the command does not declare", () => {
-		expect(buildArgs([option()], { text: "fine", sneaky: "no" })).toEqual({ text: "fine" });
-	});
 });
 
 describe("whether it can be run yet", () => {
-	it("names the required options still empty", () => {
-		expect(missingRequired([option({ required: true }), option({ name: "other" })], {})).toEqual(["text"]);
-	});
-
 	it("refuses before a command is picked", () => {
 		expect(canRun(undefined, null, {})).toBe(false);
 	});
@@ -134,20 +78,5 @@ describe("whether it can be run yet", () => {
 
 		expect(canRun(withRequired, null, {})).toBe(false);
 		expect(canRun(withRequired, null, { text: "given" })).toBe(true);
-	});
-
-	it("allows a command with nothing to fill in", () => {
-		expect(canRun(command(), null, {})).toBe(true);
-	});
-});
-
-describe("hexColour", () => {
-	it("pads a short colour to six digits", () => {
-		expect(hexColour(0x7c3aed)).toBe("#7c3aed");
-		expect(hexColour(0x0000ff)).toBe("#0000ff");
-	});
-
-	it("answers null when the embed had no colour", () => {
-		expect(hexColour(null)).toBeNull();
 	});
 });

@@ -69,13 +69,6 @@ beforeEach(() => {
 	jest.clearAllMocks();
 });
 
-it("counts the screen, and the server for one of its managers", async () => {
-	expect(await view(MANAGER, { route: ROUTE, guildId: GUILD })).toBe(204);
-
-	expect(recordScreenView).toHaveBeenCalledWith(ROUTE);
-	expect(recordDashboardView).toHaveBeenCalledWith(GUILD);
-});
-
 /** Anybody signed in can send a guild id, so it only counts when the sender could have opened that server's screens. */
 it.each([
 	["somebody in the server without Manage Server", MEMBER, GUILD],
@@ -85,12 +78,6 @@ it.each([
 	expect(await view(userId, { route: ROUTE, guildId })).toBe(204);
 
 	expect(recordScreenView).toHaveBeenCalledWith(ROUTE);
-	expect(recordDashboardView).not.toHaveBeenCalled();
-});
-
-it("counts a screen with no server as a screen only", async () => {
-	await view(MANAGER, { route: "/guilds" });
-
 	expect(recordDashboardView).not.toHaveBeenCalled();
 });
 

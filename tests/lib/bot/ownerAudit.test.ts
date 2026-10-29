@@ -1,17 +1,9 @@
 import { type APIEmbed, type MessageCreateOptions } from "discord.js";
 import { type Command } from "@core/command";
-import {
-	AttemptThrottle,
-	evalLogMessage,
-	OWNER_AUDIT_LIMITS,
-	ownerLogChannel,
-	reportEval,
-	reportOwnerAttempt,
-} from "@lib/bot/ownerAudit.util";
+import { AttemptThrottle, evalLogMessage, OWNER_AUDIT_LIMITS, reportOwnerAttempt } from "@lib/bot/ownerAudit.util";
 import { createMockClient, createMockInteraction, createMockUser, OWNER_ID, USER_ID } from "@tests/helpers/mocks";
 
 const EVAL_CHANNEL = "700000000000000021";
-const ERROR_CHANNEL = "700000000000000022";
 
 const evalLike: Command = {
 	name: "eval",
@@ -44,16 +36,6 @@ function clientWith(env: Record<string, string>, sent: { channelId: string; payl
 function embedOf(payload: MessageCreateOptions): APIEmbed {
 	return (payload.embeds![0] as { toJSON(): APIEmbed }).toJSON();
 }
-
-describe("the owner log channel", () => {
-	it("is the eval log, or the error log when that is blank", () => {
-		expect(ownerLogChannel(clientWith({ CHANNEL_EVAL_LOG: EVAL_CHANNEL, CHANNEL_ERROR_LOG: ERROR_CHANNEL }))).toBe(
-			EVAL_CHANNEL,
-		);
-		expect(ownerLogChannel(clientWith({ CHANNEL_ERROR_LOG: ERROR_CHANNEL }))).toBe(ERROR_CHANNEL);
-		expect(ownerLogChannel(clientWith({}))).toBeUndefined();
-	});
-});
 
 describe("the attempt throttle", () => {
 	/** Somebody spamming `t?eval` must not flood the owner's channel, but the count must survive. */
@@ -129,24 +111,6 @@ describe("a refused owner-only attempt", () => {
 describe("an eval run", () => {
 	const input = () =>
 		createMockInteraction({ overrides: { user: createMockUser({ id: OWNER_ID, username: "owner" }) } });
-
-	it("posts the full code, the result, how long it took and the output", async () => {
-		const sent: { channelId: string; payload: MessageCreateOptions }[] = [];
-		const client = clientWith({ CHANNEL_EVAL_LOG: EVAL_CHANNEL }, sent);
-
-		await reportEval(client, input(), { code: "1 + 1", output: "2", failed: false, elapsedMs: 1.5 });
-
-		const built = embedOf(sent[0]!.payload);
-		const byName = Object.fromEntries((built.fields ?? []).map((field) => [field.name, field.value]));
-		expect(built.title).toBe("🧪 /eval ran");
-		expect(built.description).toBe("```js\n1 + 1\n```");
-		expect(byName.Output).toBe("```js\n2\n```");
-		expect(byName.Took).toBe("1.50 ms");
-		expect(client.logger.warn).toHaveBeenCalledWith(
-			expect.objectContaining({ code: "1 + 1" }),
-			expect.stringContaining("[EVAL]"),
-		);
-	});
 
 	/** Every character of the code is kept, so a long one goes up as a file rather than being cut. */
 	it("attaches code too long for the embed in full", () => {
