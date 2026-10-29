@@ -2,8 +2,8 @@
 
 # 🔭 Future features
 
-**What could come next: features the bot does not have, screens the dashboard is missing, checks nobody has run
-against a live Discord, and the upkeep waiting on dependencies.**
+**What could come next: a public site with the docs and the source, features the bot does not have, screens the
+dashboard is missing, checks nobody has run against a live Discord, and the upkeep waiting on dependencies.**
 
 </div>
 
@@ -12,6 +12,101 @@ to respect, so whoever picks one up starts from the code rather than from a blan
 it from this file in the same pull request.
 
 Checked against the code and the npm registry on **25 October 2026**.
+
+---
+
+## 🌐 A landing page with the docs and the source
+
+A public site for anybody running their own copy of the bot. It explains how to run it, host it and change it, and
+lets them read the code. It is on by default wherever it can be, and `DASHBOARD_ENABLED` still decides alone whether
+sign-in and the server screens exist.
+
+### The guide
+
+Everything needed to run the bot yourself, in the order somebody needs it. Each page is built from the code or from a
+document that already exists, so the site cannot describe a bot that is no longer there.
+
+| Page                 | What it covers                                                                                   | Built from                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Requirements         | Node ≥ 24.11, MongoDB 7.0 or newer, a Discord application, FFmpeg and yt-dlp for music, the OSes | `.nvmrc`, `engines` in `package.json`, the README's Compatibility                       |
+| Getting set up       | The application, the token, the privileged intents, `npm run setup`, inviting the bot            | The README's Full setup guide, `scripts/setupEnv.ts`, `INVITE_PERMISSIONS`              |
+| Running it           | `npm run dev`, `npm start`, `npm run dev:all` and every other script                             | AGENTS.md §3, the README's Scripts                                                      |
+| Hosting it           | Docker and Compose, hosts that build the `Dockerfile`, and why a serverless host cannot          | `docs/hosting.md`                                                                       |
+| Configuration        | Every environment variable, what it does, its default and whether it is required                 | The zod schema in `src/config/env.ts`, which declares every one                         |
+| Commands             | Every command, its options, permissions, aliases, cooldown and where it works                    | The registry `npm run docs:commands` reads, and the help desk's generated command pages |
+| Using it in a server | Setting up each feature, in the words `/ask` answers with                                        | `assets/support/*.md`                                                                   |
+| Building a command   | One file and `defineCommand`, subcommands, panels and Components V2                              | AGENTS.md §8–11                                                                         |
+| The codebase         | The folder map, where to look for a job, aliases and barrels, the naming rules                   | AGENTS.md §4–7                                                                          |
+| CI/CD                | The four CI jobs, the nightly run, the hooks, branches and releases                              | `.github/workflows/`, AGENTS.md §19–20                                                  |
+| The dashboard        | Turning it on, its security model, adding a screen                                               | AGENTS.md §24, `docs/dashboard/guide.md`                                                |
+
+### The source page
+
+- **A file tree and a file viewer** for the repository, each file with a link to the same file on GitHub.
+- **The repository's standing:** stars, forks, watchers, open issues and the latest release.
+- **Its traffic:** clones and unique cloners, views and unique visitors, the top referrers and the most viewed pages.
+
+### What exists to build on
+
+- **The material is already written.** `docs/`, AGENTS.md and the dashboard guide cover every page above, and
+  `npm run docs:commands` and `npm run docs:images` already generate from the real code.
+- **The help desk's Markdown reader and `SupportSearch`.** The reader in `src/lib/support/` renders the articles, and
+  the search in `@testify/shared` already runs in a browser, so the site can search its pages the way the Help page
+  searches articles.
+- **Public pages exist.** `/terms` and `/privacy` sit outside the sign-in gate, and `GET /api/bot` takes no session,
+  so a fork's site can wear its own name and picture.
+- **`theme.repository` is the one place the repository's address is written.**
+
+### What it has to respect
+
+1. **On by default, without exposing anything that is not exposed today.** There are two ways to have it on by
+   default, and both are worth having from one build:
+   - **A static build published to GitHub Pages** by a workflow on every push to `main`. Nobody has to configure
+     anything, and the docs can be read before anybody has a bot running, which is when they are needed most. A fork
+     gets its own copy by turning Pages on.
+   - **The same build served by the bot**, so a self-hosted copy carries the docs for the version it runs. The web
+     server only starts with `DASHBOARD_ENABLED` today, so this needs its own switch, defaulting to on. That switch
+     keeps `DASHBOARD_BIND`'s default of `127.0.0.1`, and a busy port must still cost the website rather than the
+     bot.
+
+   With `DASHBOARD_ENABLED` false the site still answers, and its button for the dashboard is hidden rather than
+   leading to a refusal.
+
+2. **Stars and forks are public, and traffic is not.** GitHub answers the repository endpoint without a token, so
+   stars, forks and the latest release can be on by default.
+
+   The traffic endpoints are different:
+   - they need a token with push access, which for a fine-grained token is Administration read;
+   - the `GITHUB_TOKEN` a workflow gets cannot be given that;
+   - so traffic needs a token in a repository secret for the Pages build, or in an environment variable for the
+     bot, and the page says how to add one rather than showing zeros;
+   - GitHub keeps only 14 days of traffic, so a longer history has to be stored. The nightly workflow could append
+     each day to a JSON file the Pages build reads.
+
+3. **"Testify never phones home" stays true.** The Pages build asks GitHub while it builds, inside GitHub's own
+   runner. The bot must not poll GitHub on a timer by default. Asking on request and caching the answer for an hour,
+   recorded through `fetchRaw` like every other outside call, keeps it to what a reader asked for. Whether the bot
+   shows any GitHub numbers at all is a decision to make before building it.
+4. **The CSP does not move.** With `connect-src 'self'` a browser never asks `api.github.com` directly. The build or
+   the server fetches, and the page reads its own origin. GitHub refuses to be shown in a frame, so the source
+   viewer draws files itself, from GitHub's git tree and contents endpoints or from the checkout at build time. Its
+   highlighting runs no inline script.
+5. **Generated, never copied.** Commands come from the registry, variables from the zod schema, and numbers from
+   the constants `supportFacts.util.ts` already reads. `docs/commands.md` stays the generated file, and the site
+   renders it rather than keeping a second copy.
+6. **Markdown becomes HTML here for the first time.** Every source is in the repository, but the renderer still
+   escapes HTML rather than passing it through, and the lint ban on `dangerouslySetInnerHTML` stays.
+7. **The dashboard's budget is untouched.** Its first load is 200 kB gzipped, and is met exactly. The site is its
+   own entry point, so the dashboard does not grow, and the highlighter loads only on the source page.
+
+### Decisions to make first
+
+- **Where it lives.** A fourth workspace, `site/`, sharing `@testify/shared` and the dashboard's design tokens, would
+  keep the docs out of the dashboard's bundle and away from its sign-in assumptions. Routes inside `dashboard/` would
+  be less code, but would tie the docs to the dashboard's build.
+- **What the bot's own copy shows** of the GitHub numbers, given point 3.
+- **What the new switch is called.** The web server's settings are all named `DASHBOARD_*`. Whether the site reuses
+  `DASHBOARD_PORT` and `DASHBOARD_BIND` or gets names of its own changes every `.env` already written.
 
 ---
 
