@@ -38,7 +38,11 @@ const fields = z.object({
 	CHANNEL_SUGGESTION_LOG: id.optional(),
 	CHANNEL_EVAL_LOG: id.optional(),
 
-	// Dashboard. Off by default, so a bot-only install needs none of these.
+	// The website: a landing page, the docs and the source browser. On by default, and needs no other setting.
+	SITE_ENABLED: flag.default(true),
+	SITE_GITHUB_TOKEN: z.string().min(1).optional(),
+
+	// Dashboard. Off by default, so a bot-only install needs none of these. The website shares its port and address.
 	DASHBOARD_ENABLED: flag.default(false),
 	DISCORD_CLIENT_SECRET: z.string().min(1).optional(),
 	DASHBOARD_BASE_URL: z.string().url().optional(),

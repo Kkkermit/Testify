@@ -5,6 +5,7 @@ import { SignInPage } from "@/features/auth/SignInPage";
 import { hardRedirect } from "@/lib/redirect";
 import { expectNoViolations } from "@/test/axe";
 import { botProfile } from "@/test/fixtures/session";
+import { siteInfo } from "@/test/fixtures/site";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -134,5 +135,16 @@ describe("SignInPage accessibility", () => {
 		await screen.findByRole("button", { name: /sign in with discord/i });
 
 		await expectNoViolations(container);
+	});
+});
+
+describe("a host with no dashboard", () => {
+	/** The website runs without a dashboard by default, so a sign-in link from anywhere must not lead to a refusal. */
+	it("says the dashboard is off rather than offering a sign-in that would be refused", async () => {
+		server.use(http.get("/api/site", () => HttpResponse.json({ ...siteInfo, dashboard: false })));
+		renderWithProviders(<SignInPage />, { path: "/sign-in" });
+
+		expect(await screen.findByRole("heading", { name: /the dashboard is off/i })).toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: /sign in with discord/i })).toBeNull();
 	});
 });

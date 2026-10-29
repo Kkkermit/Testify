@@ -97,8 +97,9 @@ export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): 
 			return context.body(new Uint8Array(readFileSync(asset)));
 		}
 
-		// A missing file is a 404: answering `/favicon.ico` with the page hands a home-screen icon an HTML document.
-		if (extname(context.req.path) !== "") return context.notFound();
+		// A missing file is a 404: answering `/favicon.ico` with the page hands a home-screen icon an HTML document. The
+		// source browser's addresses are the repository's own paths, so a `.ts` under it is a page rather than an asset.
+		if (extname(context.req.path) !== "" && !context.req.path.startsWith("/source-code/")) return context.notFound();
 
 		// Anything else is a client route: React Router takes it from here.
 		context.header("Cache-Control", "no-cache");

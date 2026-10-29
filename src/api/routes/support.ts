@@ -7,19 +7,23 @@ import { DEFAULT_PREFIX } from "@config/constants";
 import { supportContext, supportDesk } from "@lib/support";
 import { supportArticleParams, type SupportIndex, supportQuestion, type SupportReply } from "@testify/shared";
 
+/** The help articles, public because the docs show them to somebody who has not signed in. */
+export const supportArticles = new Hono<ApiBindings>();
+
 /** The Help page's assistant; every answer is a written article, and the question is neither stored nor logged. */
-export const support = new Hono<ApiBindings>();
+export const supportQuestions = new Hono<ApiBindings>();
 
-support.use("*", requireAuth);
+// Asking may cost a model call, so it stays behind a sign-in, and exists only with the dashboard.
+supportQuestions.use("*", requireAuth);
 
-support.get("/", (context) => {
+supportArticles.get("/", (context) => {
 	const client = context.get("client");
 	const body: SupportIndex = { articles: supportDesk(client).catalogue(supportContext(DEFAULT_PREFIX)) };
 
 	return context.json(body);
 });
 
-support.post("/ask", async (context) => {
+supportQuestions.post("/ask", async (context) => {
 	const client = context.get("client");
 	const { question } = await parseBody(context, supportQuestion);
 	const body: SupportReply = await supportDesk(client).ask(question, supportContext(DEFAULT_PREFIX));
@@ -27,7 +31,7 @@ support.post("/ask", async (context) => {
 	return context.json(body);
 });
 
-support.get("/articles/:articleId", (context) => {
+supportArticles.get("/articles/:articleId", (context) => {
 	const client = context.get("client");
 	const { articleId } = parseParams(context, supportArticleParams);
 	const help = supportContext(DEFAULT_PREFIX);

@@ -6,17 +6,21 @@ dist
 coverage
 **/coverage
 
-# The image is configured through the environment and reads no .env at all, so none of these — including the
-# templates — has any reason to reach a layer.
+# The image is configured through the environment and reads no .env at all. The one template kept is what the
+# website's configuration page is drawn from, and it reaches only the build stage.
 .env
 .env.*
+!.env.example
 
 .git
 .github
 .husky
 .vscode
 .claude
-docs
+# Only the Markdown the website bundles; the pictures stay out.
+docs/images
+docs/banner.png
+docs/dashboard/screenshots
 tests
 **/*.test.ts
 **/*.test.tsx

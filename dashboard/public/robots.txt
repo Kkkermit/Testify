@@ -1,4 +1,9 @@
-# Testify's dashboard is an admin panel for a single self-hosted bot. There is nothing here worth indexing,
-# and every useful page is behind a sign-in gate anyway.
+# The landing page, the docs and the legal pages are public and worth finding. Everything else is an admin panel
+# behind a sign-in, and each source file is read from GitHub on request, so neither is crawled.
 User-agent: *
+Allow: /$
+Allow: /docs
+Allow: /source-code$
+Allow: /terms
+Allow: /privacy
 Disallow: /

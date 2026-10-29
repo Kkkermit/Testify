@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, problemBody } from "@api/errors";
-import { support } from "@api/routes/support";
+import { supportArticles, supportQuestions } from "@api/routes/support";
 import { resetSupportDesk } from "@lib/support/supportDesk.util";
 import { createMockClient } from "@tests/helpers/mocks";
 
@@ -12,7 +12,8 @@ function appFor(signedIn: boolean): Hono<ApiBindings> {
 		if (signedIn) context.set("session", { _id: "s", userId: "100000000000000002" } as never);
 		await next();
 	});
-	app.route("/support", support);
+	app.route("/support", supportArticles);
+	app.route("/support", supportQuestions);
 	app.onError((error) => {
 		const problem = error instanceof ApiProblem ? error : new ApiProblem(500, "internal", "boom");
 		return Response.json(problemBody(problem), { status: problem.status });
@@ -67,7 +68,8 @@ describe("GET /support", () => {
 		expect(body.articles.some((entry) => entry.body !== undefined)).toBe(false);
 	});
 
-	it("refuses an anonymous caller", async () => {
-		expect((await appFor(false).request("/support")).status).toBe(401);
+	/** The docs list the articles to somebody who has not signed in, and may never have a dashboard to sign in to. */
+	it("answers without a sign-in", async () => {
+		expect((await appFor(false).request("/support")).status).toBe(200);
 	});
 });

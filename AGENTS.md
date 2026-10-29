@@ -65,10 +65,10 @@ numbers, which drift):
 | Prefix aliases       | 104                               |
 | Button handlers      | 43                                |
 | Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 203, in 28 domain folders         |
-| Schemas/repositories | 45 / 43                           |
+| `src/lib` helpers    | 204, in 29 domain folders         |
+| Schemas/repositories | 46 / 44                           |
 | Scheduled jobs       | 10                                |
-| Tests                | 3,469 across 439 suites           |
+| Tests                | 3,560 across 451 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -92,8 +92,10 @@ own question rather than after the last one. To do it by hand, copy `.env.exampl
 **Optional:** `NODE_ENV`, `LOG_LEVEL`,
 `DISCORD_DEV_GUILD_ID`, the `CHANNEL_*_LOG` channels (error, guild, DM, slash command, prefix command, bug report,
 suggestion and eval — see [§15](#15-logging)), `SUPPORT_AI_API_KEY` and `SUPPORT_AI_MODEL` (the support assistant's
-optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)), and the
-`DASHBOARD_*` block — off unless you want the web dashboard, and covered in [§24](#24-the-dashboard).
+optional matcher — see [§21](#the-support-assistant-answers-with-articles-never-with-generated-text)),
+`SITE_ENABLED` and `SITE_GITHUB_TOKEN` (the website, on unless switched off — see
+[§24](#the-website-is-on-by-default-and-the-dashboard-is-a-part-of-it)), and the `DASHBOARD_*` block — off unless
+you want the web dashboard, and covered in [§24](#24-the-dashboard).
 
 Then:
 
@@ -219,7 +221,7 @@ src/
 ├── commands/<category>/  112 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               31 handlers in command, community, create, logging, ready and message
 ├── buttons/              41 component handlers, keyed by custom-ID prefix
-├── lib/                  203 helpers in 28 domain folders, each behind its own index.ts barrel
+├── lib/                  204 helpers in 29 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -230,15 +232,16 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
+│       site/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           45 Mongoose schemas, one file per feature
-│   └── repositories/     43 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           46 Mongoose schemas, one file per feature
+│   └── repositories/     44 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 10 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays)
-└── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
+└── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 306 suites; the dashboard's 133 sit beside its code.
+tests/                    Mirrors src/. 309 suites; the dashboard's 142 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -1903,7 +1906,8 @@ takes, the components, the traps and the per-screen checklist; **this section wi
 
 **It is off by default.** `DASHBOARD_ENABLED` is the switch, and while it is false a bot-only install needs none
 of the other dashboard variables. Enabling it without `DISCORD_CLIENT_SECRET`, `DASHBOARD_BASE_URL` and
-`DASHBOARD_SESSION_SECRET` fails at startup naming all three at once.
+`DASHBOARD_SESSION_SECRET` fails at startup naming all three at once. The website it sits inside is the opposite, on
+by default, and has [its own part of this section](#the-website-is-on-by-default-and-the-dashboard-is-a-part-of-it).
 
 ### Three workspaces, one repository
 
@@ -1939,6 +1943,9 @@ four tabs, three shared components and two testable modules.
 
 | Route                            | Screen                                                                       |
 | -------------------------------- | ---------------------------------------------------------------------------- |
+| `/`                              | The landing page; signing in is its main button. Public                      |
+| `/docs`, `/docs/:slug`           | The docs, read out of the repository's Markdown at build time. Public        |
+| `/source-code/*`                 | The repository at the running release, its numbers and traffic. Public       |
 | `/sign-in`                       | One button; also the setup screen for a half-install                         |
 | `/guilds`                        | Picker, with an invite card for guilds without the bot                       |
 | `/guilds/:id`                    | Stat tiles, a setup checklist, feature grid, permission warnings, changes    |
@@ -1995,10 +2002,10 @@ work with no CORS configuration at all. In production the API serves `dashboard/
 seconds the bot spends connecting there is nothing on the port — and the proxy answers every poll in that window
 with a stack trace that reads like a broken install. `scripts/waitForApi.ts` polls `/api/health` first (no
 `wait-on`; it is a `fetch` in a loop, and one fewer install matters for a self-hosted bot), and refuses with a
-sentence naming the cause when `DASHBOARD_ENABLED` is false or the bot never comes up. `tsx watch` restarts the
-bot on every save, which the ordering cannot help with, so the proxy's own error handler is replaced with one
-line per outage — Vite registers its handler immediately **after** calling `configure`, so the replacement waits
-a tick, and that ordering was read out of `vite/dist/node/chunks/node.js` rather than guessed.
+sentence naming the cause when the website and the dashboard are both off, or the bot never comes up. `tsx watch`
+restarts the bot on every save, which the ordering cannot help with, so the proxy's own error handler is replaced
+with one line per outage — Vite registers its handler immediately **after** calling `configure`, so the replacement
+waits a tick, and that ordering was read out of `vite/dist/node/chunks/node.js` rather than guessed.
 
 ### `@testify/shared` is a real package, not an alias
 
@@ -2853,6 +2860,55 @@ that decides "slow" lives in `STATUS_LIMITS` in `shared/src/status.ts`. Seven th
   page links the releases rather than asking GitHub for the latest one.
 - **The event-loop window is per heartbeat.** `recordHeartbeat` resets the histogram after reading it, so each
   sample covers its own five minutes rather than everything since start-up.
+
+### The website is on by default, and the dashboard is a part of it
+
+`/`, `/docs` and `/source-code` are a public website for whoever runs a copy of the bot: what it is, how to run it
+and change it, and its code. They are routes in the same SPA and the same process as the dashboard, under
+`features/site/`, `features/docs/` and `features/source/`, wrapped in `SiteShell` rather than `AppShell`.
+`SITE_ENABLED` is on unless it says `false`, and the API starts when either it or `DASHBOARD_ENABLED` is on, on the
+same `DASHBOARD_PORT` and `DASHBOARD_BIND` — a second set of names would have been a second place to configure one
+listener. Five things about it are load-bearing:
+
+- **With the dashboard off, nothing of it is mounted.** `createApi` always mounts the public routes — health,
+  `/api/bot`, `/api/site` and the help articles — and everything else only under `DASHBOARD_ENABLED`, so a site-only
+  install answers 404 to `/api/auth` rather than a half-configured sign-in. `GET /api/site` tells the page which it
+  is: the header's dashboard link and the landing page's sign-in disappear, and `/sign-in` explains why. The support
+  router is split for the same reason: reading articles is public, asking needs a session.
+- **The docs are the repository's own Markdown, bundled at build time.** `docs.pages.ts` names a file, or sections
+  of one by heading, per page, and `?raw` imports through the `@repo` alias pull them in as their own chunks — so a
+  copy's docs describe the code it runs, and nothing is fetched to read them. `docs.pages.test.ts` fails on a section
+  that no longer exists, which is what catches a renamed heading. The Dockerfile copies `README.md`, `AGENTS.md`,
+  `docs/` and `.env.example` into the build stage for this, and `.dockerignore` keeps only the pictures out.
+- **Markdown is lexed by marked and drawn as React elements, never as HTML.** A raw HTML token is dropped and its
+  entities decoded; `dangerouslySetInnerHTML` stays banned. A link to a file a docs page shows goes to that page, any
+  other repository path to the source browser, and a picture becomes its description with a link. Highlighting is
+  lowlight's tree turned into spans, with every colour a token `contrast.test.ts` measures. `marked`, `lowlight` and
+  `highlight.js` sit in their own `markdown` chunk, so the first load grew by the routes and the English strings,
+  about 6 kB gzipped, and not by the renderer.
+- **GitHub is read on request, never on a timer.** `GitHubReader` in `src/lib/site/` asks only when a page does,
+  keeps each answer an hour, shares a request already on its way and keeps no failure; every call goes through
+  `fetchJson`/`fetchRaw` and lands on the status page as GitHub. The code shown is the running release's tag
+  (`release/v<version>`, then `v<version>` or the bare version), and the default branch only without one. A file
+  is served only if the tree lists it, and a private repository is refused outright, because a host's token could
+  otherwise read it out to anybody. Without `SITE_GITHUB_TOKEN` that is GitHub's 60 requests an hour per address,
+  which the cache keeps clear of. The token is never sent anywhere but `api.github.com`, and `findLeak` treats it
+  as a secret.
+- **Traffic needs the token and is kept, the numbers do not.** GitHub holds 14 days of views and clones and wants
+  Administration read for them; `githubtraffic` keeps a row per day for `SITE_LIMITS.trafficDaysKept` (365) under a
+  TTL, written whenever the page reads them, so the chart reaches past a fortnight. Without a token, or with one
+  GitHub refuses, the card says how to add one rather than drawing zeros.
+
+**Only the website is indexable.** `security.ts` sends `X-Robots-Tag: noindex` on every path but `/`, `/docs`, a
+docs page, `/source-code`, `/terms` and `/privacy` (`indexable`), and `robots.txt` says the same; a source file is
+GitHub's to be found by, not this copy's. `serveDashboard` answers a path with a file extension under
+`/source-code/` with the page rather than a 404, because `src/core/loader.ts` is a route there, not an asset.
+
+**The landing page types real commands.** `Composer` is Discord's message box typing `/play`, `/remind me` and
+`/warn create`, with the menu filled from the generated `docs/commands.md`. `composer.utils.test.ts` reads each
+command's own file and fails on a command, option or prefix alias it types that the bot no longer declares. It holds
+still on the finished line under reduced motion, stops while the tab is hidden, and says what it typed in words for
+a screen reader, since the box itself is `aria-hidden`.
 
 ### The dashboard wears the bot's face
 

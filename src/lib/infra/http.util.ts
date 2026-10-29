@@ -41,7 +41,7 @@ export async function fetchRaw(service: string, url: string, options: RequestOpt
 		settle(response.status < 500);
 
 		if (!response.ok) {
-			throw new ServiceError(service, new Error(`HTTP ${response.status} from ${url}`));
+			throw new ServiceError(service, new Error(`HTTP ${response.status} from ${url}`), response.status);
 		}
 
 		return response;

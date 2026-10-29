@@ -34,15 +34,17 @@ export class ApiProblem extends Error {
 	}
 }
 
-/** Discord refusing or failing to answer: an outside service having a bad moment, not a bug in the bot. */
+/** Discord or GitHub refusing or failing to answer: an outside service having a bad moment, not a bug in the bot. */
 export class UpstreamProblem extends ApiProblem {
-	/** What Discord answered, so a log line can tell a rate limit from an outage. */
+	/** What the service answered, so a log line can tell a rate limit from an outage; 0 when it did not answer. */
 	readonly upstreamStatus: number;
+	readonly service: "Discord" | "GitHub";
 
-	constructor(upstreamStatus: number, message: string) {
-		super(502, "discord_unreachable", message);
+	constructor(upstreamStatus: number, message: string, service: "Discord" | "GitHub" = "Discord") {
+		super(502, service === "Discord" ? "discord_unreachable" : "github_unreachable", message);
 		this.name = "UpstreamProblem";
 		this.upstreamStatus = upstreamStatus;
+		this.service = service;
 	}
 }
 

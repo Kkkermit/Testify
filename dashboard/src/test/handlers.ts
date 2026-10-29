@@ -65,9 +65,17 @@ import {
 	verificationConfig,
 } from "@/test/fixtures/server";
 import { aGuild, botProfile, configured, healthy, me } from "@/test/fixtures/session";
+import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fixtures/site";
 
 export const handlers = [
 	http.get("/api/health", () => HttpResponse.json(healthy)),
+	http.get("/api/site", () => HttpResponse.json(siteInfo)),
+	http.get("/api/site/repository", () => HttpResponse.json(standing)),
+	http.get("/api/site/traffic", () => HttpResponse.json(noTraffic)),
+	http.get("/api/site/tree", () => HttpResponse.json(sourceTree)),
+	http.get("/api/site/file", ({ request }) =>
+		HttpResponse.json(sourceFile(new URL(request.url).searchParams.get("path") ?? "")),
+	),
 	http.get("/api/support", () => HttpResponse.json(supportIndex)),
 	http.post("/api/support/ask", () => HttpResponse.json(supportReply)),
 	http.get("/api/support/articles/:articleId", ({ params }) =>

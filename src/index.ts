@@ -10,12 +10,12 @@ import { connectDatabase } from "@database/connection";
 import {
 	BootReport,
 	botVersion,
-	dashboardUrl,
 	describeDatabase,
 	exitOnFatalClose,
 	MINIMUM_NODE,
 	nodeTooOld,
 	printStartupFailure,
+	websiteLine,
 } from "@lib/bot";
 
 async function main(): Promise<void> {
@@ -62,21 +62,22 @@ async function main(): Promise<void> {
 		(count) => `${String(count)} registered in ${publishScope(client)}`,
 	);
 
-	if (!env.DASHBOARD_ENABLED) {
-		report.note("skipped", "Dashboard", "off — set DASHBOARD_ENABLED=true to turn it on");
+	const website = env.DASHBOARD_ENABLED || env.SITE_ENABLED;
+	if (!website) {
+		report.note("skipped", "Website", "off — set SITE_ENABLED=true to serve the landing page and docs");
 	} else if (env.NODE_ENV !== "development" && !dashboardBuilt()) {
-		report.note("warning", "Dashboard", "the API will run, but the pages are not built — run npm run build");
+		report.note("warning", "Website", "the API will run, but the pages are not built — run npm run build");
 	}
 
 	exitOnFatalClose(client);
 	report.note("working", "Discord", "logging in…");
 	await client.login(env.DISCORD_TOKEN);
 
-	// After login, so the cache is filled; a dashboard that fails to start does not stop the bot.
-	if (env.DASHBOARD_ENABLED) {
+	// After login, so the cache is filled; a website that fails to start does not stop the bot.
+	if (website) {
 		startApi(client, env)
-			.ready.then(() => report.note("done", "Dashboard", dashboardUrl(env) ?? ""))
-			.catch(() => report.note("warning", "Dashboard", "could not start — the reason is in the log above"));
+			.ready.then(() => report.note("done", "Website", websiteLine(env)))
+			.catch(() => report.note("warning", "Website", "could not start — the reason is in the log above"));
 	}
 }
 

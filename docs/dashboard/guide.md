@@ -146,7 +146,7 @@ go. It builds `@testify/shared` before either child starts, for the reason in th
 twenty-odd seconds the bot spends connecting there is nothing on the port, and the proxy answers every poll in
 that window with a stack trace that reads like a broken install. `scripts/waitForApi.ts` polls `/api/health`
 first — a `fetch` in a loop rather than a `wait-on` dependency, because one fewer install matters for a
-self-hosted bot — and refuses with a sentence naming the cause when `DASHBOARD_ENABLED` is false.
+self-hosted bot — and refuses with a sentence naming the cause when the website and the dashboard are both off.
 
 `tsx watch` restarts the bot on every save, which the ordering cannot help with, so the proxy's own error
 handler is replaced with one line per outage. Vite registers its handler immediately **after** calling

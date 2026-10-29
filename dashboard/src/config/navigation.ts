@@ -1,6 +1,7 @@
 import {
 	Activity,
 	Ban,
+	BookOpen,
 	Cake,
 	CalendarClock,
 	ChartColumn,
@@ -15,6 +16,7 @@ import {
 	SlidersHorizontal,
 	Coins,
 	Dices,
+	FileCode,
 	Terminal,
 	TrendingUp,
 	TriangleAlert,
@@ -92,6 +94,8 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				},
 				{ to: "/status", labelKey: "nav.status", icon: Activity, hintKey: "nav.statusHint" },
 				{ to: "/help", labelKey: "nav.help", icon: LifeBuoy, hintKey: "nav.helpHint" },
+				{ to: "/docs", labelKey: "nav.docs", icon: BookOpen, hintKey: "nav.docsHint", exact: false },
+				{ to: "/source-code", labelKey: "nav.source", icon: FileCode, hintKey: "nav.sourceHint", exact: false },
 			],
 		},
 	];
