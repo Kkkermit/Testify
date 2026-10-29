@@ -89,6 +89,7 @@
 	--animate-fade: fade 200ms var(--ease-out-soft) both;
 	--animate-pop: pop 200ms var(--ease-out-soft) both;
 	--animate-sheen: sheen 1.6s linear infinite;
+	--animate-caret: caret 1.1s steps(1) infinite;
 
 	@keyframes reveal {
 		from {
@@ -118,6 +119,12 @@
 		to {
 			opacity: 1;
 			transform: none;
+		}
+	}
+
+	@keyframes caret {
+		50% {
+			opacity: 0;
 		}
 	}
 
@@ -266,6 +273,12 @@
 		text-wrap: balance;
 		/* Set on the element rather than the size token, so `text-base` prose keeps its reading measure. */
 		line-height: 1.2;
+	}
+
+	/* JetBrains Mono draws `!==` and `=>` as single glyphs, which misquotes the code a reader may copy. */
+	code,
+	pre {
+		font-variant-ligatures: none;
 	}
 
 	/* Without this a tap waits ~300ms for a second one that is never coming, because zoom is still possible. */
@@ -471,4 +484,65 @@
 
 :root[data-motion="reduced"] .skeleton-sheen::after {
 	display: none;
+}
+
+/**
+ * Highlighted code, from the token classes highlight.js names. Every colour is a token `contrast.test.ts` already
+ * measures as text on the card, which is the surface every code block is drawn on.
+ */
+@layer components {
+	.code-tokens {
+		.hljs-comment,
+		.hljs-quote {
+			color: var(--color-muted-foreground);
+			font-style: italic;
+		}
+		.hljs-keyword,
+		.hljs-selector-tag,
+		.hljs-meta .hljs-keyword,
+		.hljs-doctag {
+			color: var(--color-accent);
+		}
+		.hljs-string,
+		.hljs-regexp,
+		.hljs-addition,
+		.hljs-meta .hljs-string {
+			color: var(--color-success);
+		}
+		.hljs-number,
+		.hljs-literal,
+		.hljs-symbol,
+		.hljs-bullet {
+			color: var(--color-warning);
+		}
+		.hljs-title,
+		.hljs-section,
+		.hljs-name,
+		.hljs-selector-id,
+		.hljs-selector-class {
+			color: var(--color-feature-tickets);
+		}
+		.hljs-attr,
+		.hljs-attribute,
+		.hljs-property,
+		.hljs-variable,
+		.hljs-template-variable,
+		.hljs-tag {
+			color: var(--color-feature-community);
+		}
+		.hljs-built_in,
+		.hljs-type,
+		.hljs-meta {
+			color: var(--color-feature-economy);
+		}
+		.hljs-deletion {
+			color: var(--color-destructive-text);
+		}
+		.hljs-emphasis {
+			font-style: italic;
+		}
+		.hljs-strong {
+			font-weight: 700;
+		}
+	}
 }

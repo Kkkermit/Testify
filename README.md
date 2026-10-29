@@ -71,6 +71,7 @@ and games — plus an optional web dashboard. Every command works as <code>/ban<
 - [⌨️ Slash and prefix](#️-slash-and-prefix)
 - [🗂️ Command categories](#️-command-categories)
 - [🛠️ Adding your own command](#️-adding-your-own-command)
+- [🌐 The website](#-the-website)
 - [🖥️ The web dashboard](#️-the-web-dashboard)
 - [📜 Scripts](#-scripts)
 - [❓ FAQ](#-faq)
@@ -103,7 +104,7 @@ The whole thing was rebuilt around the problems the old codebase actually had.
 | **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
 | **Tests**          | A handful                                                                              | **About 3,500 tests** on Windows, Linux and macOS, with a 75% coverage floor |
 | **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
-| **Web**            | None                                                                                   | An optional dashboard served from the bot itself                             |
+| **Web**            | None                                                                                   | Its own website with the docs and the source, and an optional dashboard      |
 
 Everything the old bot did is still here, apart from the integrations that needed paid or personal API keys
 (Spotify, Valorant, Instagram and the AI commands).
@@ -533,6 +534,27 @@ nothing to import by hand.
 
 Options, subcommands, buttons and the 100-command limit are covered in
 [`docs/contributing.md`](docs/contributing.md).
+
+## 🌐 The website
+
+The bot serves a small website of its own: a landing page, these docs, and a browser for the source code of the
+release it is running. It is **on by default** and needs nothing set. After `npm run build`, `npm start` serves it at
+`http://localhost:3000`; while you work on it, `npm run dev:all` serves it at `http://localhost:5174`. It listens on
+`DASHBOARD_PORT` and `DASHBOARD_BIND`, so it stays on your own machine until you put a reverse proxy in front of it.
+
+| Variable            | What it is                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `SITE_ENABLED`      | `false` to turn it off. With the dashboard off too, the bot then listens on no port at all |
+| `SITE_GITHUB_TOKEN` | Optional. Lets the source page show views, clones and referrers as well as stars and forks |
+
+Nothing on it is written twice. The docs are this README, `AGENTS.md` and `docs/`, bundled when the page is built,
+so they describe the version you run. The source browser and the repository's numbers come from GitHub, asked only
+when somebody opens the page and kept for an hour, so nothing runs on a timer and a busy page stays well inside the
+60 requests an hour GitHub allows without a token. Traffic needs a token with **Administration: read** on the
+repository. GitHub keeps only 14 days of it, so the bot keeps every day it reads for a year, and the chart grows past
+a fortnight as long as somebody opens the page at least that often.
+
+With the dashboard on, the landing page's main button signs you in, and one address serves both.
 
 ## 🖥️ The web dashboard
 

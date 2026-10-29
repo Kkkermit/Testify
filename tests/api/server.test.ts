@@ -11,7 +11,7 @@ jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true
 const connected = jest.mocked(databaseConnected);
 
 function apiFor(client: TestifyClient): ReturnType<typeof createApi> {
-	return createApi(client, { DASHBOARD_PORT: 3_000, DASHBOARD_BIND: "127.0.0.1" } as Env);
+	return createApi(client, { DASHBOARD_ENABLED: true, DASHBOARD_PORT: 3_000, DASHBOARD_BIND: "127.0.0.1" } as Env);
 }
 
 function readyClient(isReady = true): TestifyClient {
@@ -81,7 +81,10 @@ describe("the error boundary", () => {
 
 		expect(response.status).toBe(502);
 		expect(errors).not.toHaveBeenCalled();
-		expect(warnings).toHaveBeenCalledWith(expect.objectContaining({ discordStatus: 429 }), expect.any(String));
+		expect(warnings).toHaveBeenCalledWith(
+			expect.objectContaining({ service: "Discord", status: 429 }),
+			expect.any(String),
+		);
 	});
 
 	it("answers an unknown path with the same error shape", async () => {
@@ -239,7 +242,7 @@ describe("startApi", () => {
 	});
 
 	/** The bound port is not the address to open in development, and the log said only the bound port. */
-	it("logs where the dashboard is opened alongside where the API listens", async () => {
+	it("logs where the website is opened alongside where the API listens", async () => {
 		const client = readyClient();
 		const logged = jest.spyOn(client.logger, "info");
 		const running = startApi(client, {
@@ -253,7 +256,7 @@ describe("startApi", () => {
 			await running.ready;
 			expect(logged).toHaveBeenCalledWith(
 				expect.objectContaining({ open: "http://localhost:5174" }),
-				expect.stringContaining("[DASHBOARD]"),
+				expect.stringContaining("[WEBSITE]"),
 			);
 		} finally {
 			await running.close();

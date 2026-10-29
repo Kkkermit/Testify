@@ -25,6 +25,9 @@ COPY shared ./shared
 # COPY merges rather than replaces, which this depends on: the install above puts React 19 in
 # dashboard/node_modules while the root holds 18, and losing it would build a page that cannot mount.
 COPY dashboard ./dashboard
+# The website's docs are read from these at build time, so the page describes the code it ships with.
+COPY README.md AGENTS.md .env.example ./
+COPY docs ./docs
 
 # shared first: both the bot and the SPA import it, and tsx reads its built dist rather than its source.
 RUN npm run build:shared && npm run build:bot && npm run build:dashboard

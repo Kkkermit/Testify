@@ -28,6 +28,13 @@ const PUBLIC = new Set([
 	"GET /api/auth/setup",
 	"GET /api/auth/login",
 	"GET /api/auth/callback",
+	"GET /api/support",
+	"GET /api/support/articles/:articleId",
+	"GET /api/site",
+	"GET /api/site/repository",
+	"GET /api/site/traffic",
+	"GET /api/site/tree",
+	"GET /api/site/file",
 ]);
 const OWNER_ONLY = ["/api/owner/", "/api/analytics/", "/api/control/"];
 const GUILD_SCOPED = "/api/guilds/:guildId/";
