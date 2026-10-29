@@ -19,8 +19,14 @@ permissions:
 
 jobs:
   unit-tests:
-    name: Tests
-    runs-on: ubuntu-latest
+    name: Tests (${{ matrix.os }})
+    # Every system the bot is run on. CI tests Windows on each push; this is where Linux and macOS are checked.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Every system reports, so a failure on one is never hidden by a failure on another.
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
     steps:
       - uses: actions/checkout@v7
 
@@ -42,7 +48,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: nightly-coverage
+          name: nightly-coverage-${{ matrix.os }}
           path: coverage/
           retention-days: 7
 
