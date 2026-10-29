@@ -1,2 +1,0 @@
-# The tests run in CI, not here, so a push costs a lint rather than the whole suite.
-npm run lint

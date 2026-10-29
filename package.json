@@ -57,11 +57,11 @@
 		"verify:bundle": "tsx scripts/verifyBundle.ts"
 	},
 	"lint-staged": {
-		"*.ts": [
-			"eslint --fix",
+		"*.{ts,tsx,mts,cts,js,mjs,cjs}": [
+			"eslint --fix --no-warn-ignored",
 			"prettier --write"
 		],
-		"*.{json,md,yml,yaml}": [
+		"*.{json,md,yml,yaml,css,html}": [
 			"prettier --write"
 		]
 	},
