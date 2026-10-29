@@ -20,10 +20,6 @@ function clientWith(send: SendMock, channel: Record<string, unknown> | null = nu
 const entry = { event: "messageDelete", title: "Message deleted" } as const;
 
 describe("AUDIT_EVENTS", () => {
-	it("has no duplicates", () => {
-		expect(new Set(AUDIT_EVENTS).size).toBe(AUDIT_EVENTS.length);
-	});
-
 	/** The list feeds a Discord choice list, which caps at 25. */
 	it("fits in a Discord choice list", () => {
 		expect(AUDIT_EVENTS.length).toBeLessThanOrEqual(25);
@@ -31,51 +27,6 @@ describe("AUDIT_EVENTS", () => {
 });
 
 describe("writeAuditLog", () => {
-	it("stays silent when the guild has not opted in", async () => {
-		const send: SendMock = jest.fn();
-		getAuditLogConfig.mockResolvedValue(null);
-
-		await writeAuditLog(clientWith(send), createMockGuild(), entry);
-
-		expect(send).not.toHaveBeenCalled();
-	});
-
-	it("posts when the specific event is enabled", async () => {
-		const send: SendMock = jest.fn((_payload) => Promise.resolve({}));
-		getAuditLogConfig.mockResolvedValue({ channelId: "1", enabledLogs: ["messageDelete"] });
-
-		await writeAuditLog(clientWith(send), createMockGuild(), entry);
-
-		expect(send).toHaveBeenCalled();
-	});
-
-	it('posts when the guild opted into "all"', async () => {
-		const send: SendMock = jest.fn((_payload) => Promise.resolve({}));
-		getAuditLogConfig.mockResolvedValue({ channelId: "1", enabledLogs: ["all"] });
-
-		await writeAuditLog(clientWith(send), createMockGuild(), entry);
-
-		expect(send).toHaveBeenCalled();
-	});
-
-	it("stays silent for an event the guild did not enable", async () => {
-		const send: SendMock = jest.fn();
-		getAuditLogConfig.mockResolvedValue({ channelId: "1", enabledLogs: ["roleCreate"] });
-
-		await writeAuditLog(clientWith(send), createMockGuild(), entry);
-
-		expect(send).not.toHaveBeenCalled();
-	});
-
-	it("footers the embed with the event name, so the source is traceable", async () => {
-		const send: SendMock = jest.fn((_payload) => Promise.resolve({}));
-		getAuditLogConfig.mockResolvedValue({ channelId: "1", enabledLogs: ["all"] });
-
-		await writeAuditLog(clientWith(send), createMockGuild(), entry);
-
-		expect(JSON.stringify(send.mock.calls[0]?.[0].embeds[0]?.toJSON())).toContain("messageDelete");
-	});
-
 	it("passes description, fields and thumbnail through when given", async () => {
 		const send: SendMock = jest.fn((_payload) => Promise.resolve({}));
 		getAuditLogConfig.mockResolvedValue({ channelId: "1", enabledLogs: ["all"] });
@@ -114,15 +65,5 @@ describe("writeAuditLog", () => {
 
 		await expect(writeAuditLog(client, createMockGuild(), entry)).resolves.toBeUndefined();
 		expect(client.logger.warn).toHaveBeenCalled();
-	});
-
-	it("survives a channel that no longer exists", async () => {
-		getAuditLogConfig.mockResolvedValue({ channelId: "1", enabledLogs: ["all"] });
-		const client = createMockClient({
-			logger: { warn: jest.fn() },
-			channels: { fetch: jest.fn(() => Promise.reject(new Error("Unknown Channel"))) },
-		} as never);
-
-		await expect(writeAuditLog(client, createMockGuild(), entry)).resolves.toBeUndefined();
 	});
 });

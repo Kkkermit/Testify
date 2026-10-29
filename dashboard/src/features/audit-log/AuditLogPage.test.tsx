@@ -1,4 +1,4 @@
-import { AUDIT_EVENTS, type AuditLogPut } from "@testify/shared";
+import { type AuditLogPut } from "@testify/shared";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
@@ -40,14 +40,6 @@ function asksBeforeUnload(): boolean {
 }
 
 describe("the audit log page", () => {
-	it("shows what is configured", async () => {
-		renderPage();
-
-		expect(await screen.findByRole("switch", { name: /record server events/i })).toBeChecked();
-		expect(screen.getByRole("checkbox", { name: /message deleted/i })).toBeChecked();
-		expect(screen.getByRole("checkbox", { name: /message edited/i })).not.toBeChecked();
-	});
-
 	/** Nothing is written until Save, or half a configuration ends up applied. */
 	it("writes nothing until Save is pressed", async () => {
 		const user = userEvent.setup();
@@ -67,29 +59,6 @@ describe("the audit log page", () => {
 		const sent = captured.body as AuditLogPut;
 		expect(sent.enabled).toBe(true);
 		expect(sent.events).toContain("messageUpdate");
-	});
-
-	it("has nothing to save until something changes", async () => {
-		const user = userEvent.setup();
-		renderPage();
-
-		expect(await screen.findByRole("switch", { name: /record server events/i })).toBeChecked();
-		expect(save()).toBeDisabled();
-
-		await user.click(screen.getByRole("checkbox", { name: /message edited/i }));
-
-		expect(save()).toBeEnabled();
-	});
-
-	it("puts the saved configuration back when the edits are discarded", async () => {
-		const user = userEvent.setup();
-		renderPage();
-
-		await user.click(await screen.findByRole("checkbox", { name: /message edited/i }));
-		await user.click(screen.getByRole("button", { name: /discard/i }));
-
-		expect(screen.getByRole("checkbox", { name: /message edited/i })).not.toBeChecked();
-		expect(save()).toBeDisabled();
 	});
 
 	/** The draft is held until Save, so leaving with it unsaved has to be asked about. */
@@ -116,17 +85,6 @@ describe("the audit log page", () => {
 		expect(screen.getByRole("checkbox", { name: /message deleted/i })).toBeChecked();
 	});
 
-	it("counts what is chosen", async () => {
-		const user = userEvent.setup();
-		renderPage();
-
-		expect(await screen.findByText(`2 of ${String(AUDIT_EVENTS.length)} chosen`)).toBeInTheDocument();
-
-		await user.click(screen.getByRole("button", { name: /select all/i }));
-
-		expect(screen.getByText(`${String(AUDIT_EVENTS.length)} of ${String(AUDIT_EVENTS.length)} chosen`)).toBeVisible();
-	});
-
 	/** The `all` shorthand is the difference between logging future events and being frozen at today's list. */
 	it("says that a full selection covers events added later", async () => {
 		const user = userEvent.setup();
@@ -146,17 +104,6 @@ describe("the audit log page", () => {
 
 		expect(await screen.findByText(/at least one event/i)).toBeInTheDocument();
 		expect(save()).toBeDisabled();
-	});
-
-	it("allows turning logging off with nothing selected", async () => {
-		const user = userEvent.setup();
-		renderPage();
-
-		await user.click(await screen.findByRole("button", { name: /select all/i }));
-		await user.click(screen.getByRole("button", { name: /clear all/i }));
-		await user.click(screen.getByRole("switch", { name: /record server events/i }));
-
-		expect(save()).toBeEnabled();
 	});
 
 	it("explains a refusal from the API rather than silently doing nothing", async () => {

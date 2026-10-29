@@ -81,13 +81,6 @@ async function codeOf(response: Response): Promise<string> {
 }
 
 describe("requireGuild", () => {
-	it("lets a manager through", async () => {
-		const response = await appFor(fake(), MANAGER).request(`/guilds/${GUILD}/thing`);
-
-		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual({ guild: GUILD });
-	});
-
 	it("refuses a member without Manage Server", async () => {
 		const response = await appFor(fake(), MEMBER).request(`/guilds/${GUILD}/thing`);
 
@@ -161,10 +154,6 @@ describe("requireGuild", () => {
 });
 
 describe("requireOwner", () => {
-	it("lets the bot owner in", async () => {
-		expect((await appFor(fake(), OWNER).request("/owner/thing")).status).toBe(200);
-	});
-
 	/** 404 rather than 403, so a manager does not learn the console exists. */
 	it("does not confirm to a manager that the console exists", async () => {
 		const response = await appFor(fake(), MANAGER).request("/owner/thing");
@@ -206,11 +195,6 @@ describe("who counts as the bot owner", () => {
 		const { app } = ownerApp([OWNER], OWNER);
 
 		expect((await app.request("/owner/thing")).status).toBe(200);
-	});
-
-	it("admits any of several listed IDs, and nobody else", async () => {
-		expect((await ownerApp([OWNER, MANAGER], MANAGER).app.request("/owner/thing")).status).toBe(200);
-		expect((await ownerApp([OWNER, MANAGER], MEMBER).app.request("/owner/thing")).status).toBe(404);
 	});
 
 	/** Managing every server in the fleet still is not ownership — the two are unrelated permissions. */

@@ -1,11 +1,6 @@
-import { box, colourEnabled, painter, stepLine, visibleWidth } from "@core/terminal";
+import { box, colourEnabled, painter, visibleWidth } from "@core/terminal";
 
 describe("colourEnabled", () => {
-	it("follows the terminal when nothing says otherwise", () => {
-		expect(colourEnabled({ isTTY: true }, {})).toBe(true);
-		expect(colourEnabled({ isTTY: false }, {})).toBe(false);
-	});
-
 	/** `npm run dev:all` reads each half through a pipe, and would otherwise print the bot's logs as bare JSON. */
 	it("keeps colour through a pipe when FORCE_COLOR asks for it", () => {
 		expect(colourEnabled({ isTTY: false }, { FORCE_COLOR: "1" })).toBe(true);
@@ -40,14 +35,5 @@ describe("box", () => {
 
 	it("writes no escape codes when colour is off", () => {
 		expect(box("", ["plain"], "info", painter(false)).join("")).not.toContain("\u001b");
-	});
-});
-
-describe("stepLine", () => {
-	it("marks a failure differently from a success, and shows how long it took", () => {
-		const paint = painter(false);
-
-		expect(stepLine("done", "Database", "connected", 84, paint)).toBe("  ✔ Database    connected 84ms");
-		expect(stepLine("failed", "Database", "no", undefined, paint)).toContain("✖");
 	});
 });

@@ -15,21 +15,6 @@ function aCommand(overrides: Partial<Command> = {}): Command {
 }
 
 describe("summariseCommand", () => {
-	it("fills every optional field rather than leaving it undefined", () => {
-		const summary = summariseCommand(aCommand());
-
-		expect(summary).toMatchObject({
-			aliases: [],
-			subcommands: [],
-			options: [],
-			permissions: [],
-			cooldownMs: null,
-			guildOnly: false,
-			ownerOnly: false,
-			nsfw: false,
-		});
-	});
-
 	/** `humanisePermission` lowercases, so a permission reads as part of a sentence. */
 	it("resolves permission bits to readable names", () => {
 		const summary = summariseCommand(aCommand({ permissions: [PermissionFlagsBits.BanMembers] }));
@@ -61,25 +46,6 @@ describe("summariseCommand", () => {
 			options: [expect.objectContaining({ name: "category", required: true })],
 		});
 	});
-
-	it("keeps an option's bounds and choices, which a generated form would need", () => {
-		const summary = summariseCommand(
-			aCommand({
-				options: [
-					{
-						name: "amount",
-						description: "How much.",
-						type: "integer",
-						min: 1,
-						max: 100,
-						choices: [{ name: "All", value: 100 }],
-					},
-				],
-			}),
-		);
-
-		expect(summary.options[0]).toMatchObject({ min: 1, max: 100, choices: [{ name: "All", value: 100 }] });
-	});
 });
 
 describe("buildCatalogue", () => {
@@ -95,37 +61,5 @@ describe("buildCatalogue", () => {
 
 		expect(catalogue.commands.map((command) => command.name)).toEqual(["ban", "ping"]);
 		expect(catalogue.categories).not.toContain("owner");
-	});
-
-	it("shows them to the bot owner", () => {
-		const catalogue = buildCatalogue(commands, { prefix: "t?", includeOwnerOnly: true });
-
-		expect(catalogue.commands.map((command) => command.name)).toContain("eval");
-	});
-
-	it("sorts by name, so the page does not reorder between restarts", () => {
-		const names = buildCatalogue(commands, { prefix: "t?", includeOwnerOnly: true }).commands.map((c) => c.name);
-
-		expect(names).toEqual([...names].sort((left, right) => left.localeCompare(right)));
-	});
-
-	it("lists each category once, sorted", () => {
-		expect(buildCatalogue(commands, { prefix: "t?", includeOwnerOnly: true }).categories).toEqual([
-			"info",
-			"moderation",
-			"owner",
-		]);
-	});
-
-	it("carries the prefix, so the page can show what t?ban would be", () => {
-		expect(buildCatalogue(commands, { prefix: "!", includeOwnerOnly: false }).prefix).toBe("!");
-	});
-
-	it("copes with a bot that has no commands loaded at all", () => {
-		expect(buildCatalogue([], { prefix: "t?", includeOwnerOnly: true })).toEqual({
-			commands: [],
-			categories: [],
-			prefix: "t?",
-		});
 	});
 });

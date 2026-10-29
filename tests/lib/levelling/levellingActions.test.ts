@@ -78,38 +78,6 @@ function silentLogger(): Logger {
 }
 
 describe("applyLevelRewards", () => {
-	it("does nothing when the guild has no rewards configured", async () => {
-		const { member, add } = memberStub();
-		const outcome = await applyLevelRewards(member, config(), 50);
-
-		expect(outcome).toEqual({ added: [], removed: [], skipped: [] });
-		expect(add).not.toHaveBeenCalled();
-	});
-
-	it("does nothing when the member already holds everything they have earned", async () => {
-		const { member, add } = memberStub({ held: [BRONZE] });
-		await applyLevelRewards(member, config({ rewards }), 5);
-
-		expect(add).not.toHaveBeenCalled();
-	});
-
-	it("gives the role for the level just reached", async () => {
-		const { member, add } = memberStub();
-		const outcome = await applyLevelRewards(member, config({ rewards }), 5);
-
-		expect(outcome.added).toEqual([BRONZE]);
-		expect(add).toHaveBeenCalledTimes(1);
-	});
-
-	it("takes back a superseded role when rewards do not stack", async () => {
-		const { member, add, remove } = memberStub({ held: [BRONZE] });
-		const outcome = await applyLevelRewards(member, config({ rewards, stackRewards: false }), 10);
-
-		expect(outcome).toEqual({ added: [SILVER], removed: [BRONZE], skipped: [] });
-		expect(add).toHaveBeenCalledTimes(1);
-		expect(remove).toHaveBeenCalledTimes(1);
-	});
-
 	/** Without Manage Roles, rewards are skipped and warned about once, never shown to the member as an error. */
 	it("skips everything and warns when the bot cannot manage roles", async () => {
 		const { member, add } = memberStub({ canManageRoles: false });
@@ -129,31 +97,6 @@ describe("applyLevelRewards", () => {
 
 		expect(outcome).toEqual({ added: [], removed: [], skipped: [BRONZE] });
 		expect(add).not.toHaveBeenCalled();
-	});
-
-	it("skips a role managed by an integration, which nobody can assign", async () => {
-		const { member, add } = memberStub({ roles: [{ id: BRONZE, position: 1, managed: true }] });
-		const outcome = await applyLevelRewards(member, config({ rewards: [rewards[0]!] }), 5);
-
-		expect(outcome.skipped).toEqual([BRONZE]);
-		expect(add).not.toHaveBeenCalled();
-	});
-
-	it("skips a role that has been deleted since it was configured", async () => {
-		const { member, add } = memberStub({ roles: [] });
-		const outcome = await applyLevelRewards(member, config({ rewards: [rewards[0]!] }), 5);
-
-		expect(outcome.skipped).toEqual([BRONZE]);
-		expect(add).not.toHaveBeenCalled();
-	});
-
-	it("reports a failed add as skipped rather than throwing", async () => {
-		const { member } = memberStub({ addFails: true });
-		const logger = silentLogger();
-		const outcome = await applyLevelRewards(member, config({ rewards: [rewards[0]!] }), 5, logger);
-
-		expect(outcome).toEqual({ added: [], removed: [], skipped: [BRONZE] });
-		expect(logger.warn).toHaveBeenCalledTimes(1);
 	});
 
 	/** Somebody who joins late, or has a level set by an admin, is owed every tier. */

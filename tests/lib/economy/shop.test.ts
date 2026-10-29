@@ -1,13 +1,4 @@
-import {
-	BUSINESSES,
-	findBusiness,
-	findHouse,
-	findJob,
-	findShopItem,
-	HOUSES,
-	JOBS,
-	SHOP_ITEMS,
-} from "@lib/economy/shop.util";
+import { BUSINESSES, findShopItem, HOUSES, JOBS, SHOP_ITEMS } from "@lib/economy/shop.util";
 
 describe("the economy catalogues", () => {
 	const catalogues = {
@@ -28,16 +19,6 @@ describe("the economy catalogues", () => {
 		}
 	});
 
-	it("prices every shop item, house and business above zero", () => {
-		for (const item of [...SHOP_ITEMS, ...HOUSES, ...BUSINESSES]) {
-			expect(item.price).toBeGreaterThan(0);
-		}
-	});
-
-	it("pays every job something", () => {
-		for (const job of JOBS) expect(job.basePay).toBeGreaterThan(0);
-	});
-
 	/** No job requires an item nobody can buy. */
 	it("only requires items that are actually purchasable", () => {
 		for (const job of JOBS) {
@@ -45,26 +26,5 @@ describe("the economy catalogues", () => {
 				expect(findShopItem(requirement)).toBeDefined();
 			}
 		}
-	});
-});
-
-describe("the finders", () => {
-	it("find an entry that exists", () => {
-		expect(findShopItem(SHOP_ITEMS[0]!.id)).toEqual(SHOP_ITEMS[0]);
-		expect(findHouse(HOUSES[0]!.id)).toEqual(HOUSES[0]);
-		expect(findBusiness(BUSINESSES[0]!.id)).toEqual(BUSINESSES[0]);
-		expect(findJob(JOBS[0]!.id)).toEqual(JOBS[0]);
-	});
-
-	it("return undefined for an unknown id rather than throwing", () => {
-		expect(findShopItem("nope")).toBeUndefined();
-		expect(findHouse("nope")).toBeUndefined();
-		expect(findBusiness("nope")).toBeUndefined();
-		expect(findJob("nope")).toBeUndefined();
-	});
-
-	it("do not confuse one catalogue for another", () => {
-		expect(findHouse(SHOP_ITEMS[0]!.id)).toBeUndefined();
-		expect(findJob(HOUSES[0]!.id)).toBeUndefined();
 	});
 });

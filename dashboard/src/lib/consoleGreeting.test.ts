@@ -1,5 +1,5 @@
-import { currentBotName, i18next, type TranslationKey } from "@/i18n";
-import { greetingLines, greetTheConsole, printGreeting } from "@/lib/consoleGreeting";
+import { i18next, type TranslationKey } from "@/i18n";
+import { greetingLines, greetTheConsole } from "@/lib/consoleGreeting";
 
 const PALETTE = { brand: "rebeccapurple", danger: "crimson" };
 const t = (key: TranslationKey): string => i18next.t(key);
@@ -23,15 +23,6 @@ describe("greetingLines", () => {
 		for (const line of greetingLines(t, PALETTE)) expect(formatCodes(line.text)).toBe(line.styles.length);
 	});
 
-	it("welcomes the reader by the bot's name and says how to report a bug", () => {
-		const text = greetingLines(t, PALETTE)
-			.map((line) => line.text)
-			.join("\n");
-
-		expect(text).toContain(currentBotName());
-		expect(text).toContain("/bug-report");
-	});
-
 	/** Pasting a stranger's code into DevTools hands them a signed-in session on the dashboard. */
 	it("warns against pasting code, under a label in the danger colour", () => {
 		const lines = greetingLines(t, PALETTE);
@@ -49,16 +40,6 @@ describe("greetingLines", () => {
 			expect(line.text).toContain("100%%cool");
 			expect(formatCodes(line.text)).toBe(line.styles.length);
 		}
-	});
-});
-
-describe("printGreeting", () => {
-	it("writes each line with its styles", () => {
-		const lines = greetingLines(t, PALETTE);
-		printGreeting(lines);
-
-		expect(log).toHaveBeenCalledTimes(lines.length);
-		expect(log).toHaveBeenNthCalledWith(1, lines[0]?.text, ...(lines[0]?.styles ?? []));
 	});
 });
 

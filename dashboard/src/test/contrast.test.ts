@@ -59,51 +59,56 @@ describe("contrast", () => {
 	});
 });
 
-describe.each(["light", "dark"] as const)("the %s palette", (scheme) => {
-	const background = token("background", scheme);
-	const card = token("card", scheme);
-	const token_ = (name: string): string => token(name, scheme);
+const SCHEMES = ["light", "dark"] as const;
 
-	it.each([
-		["foreground on the page", "foreground", background, TEXT],
-		["foreground on a card", "foreground", card, TEXT],
-		["muted text on the page", "muted-foreground", background, TEXT],
-		["muted text on a card", "muted-foreground", card, TEXT],
-		["muted text on a recessed fill", "muted-foreground", "muted", TEXT],
-		["a link on the page", "accent", background, TEXT],
-		["a link on a card", "accent", card, TEXT],
-		["red text on a card", "destructive-text", card, TEXT],
-		["success on a card", "success", card, TEXT],
-		["warning on a card", "warning", card, TEXT],
-		["a field border on a card", "input", card, NON_TEXT],
-		["the focus ring on the page", "ring", background, NON_TEXT],
-		["a filled primary against the page", "primary", background, NON_TEXT],
-	])("%s meets its threshold", (_name, colour, against, need) => {
-		const other = against.startsWith("#") ? against : token_(against);
+/** Each pair is [name, foreground, background, threshold]; what comes back names every one that falls short. */
+function shortfalls(pairs: [name: string, colour: string, against: string, need: number][]): string[] {
+	return pairs.flatMap(([name, colour, against, need]) => {
+		const ratio = contrast(colour, against);
 
-		expect(contrast(token_(colour), other)).toBeGreaterThanOrEqual(need);
+		return ratio >= need ? [] : [`${name}: ${ratio.toFixed(2)} < ${String(need)}`];
+	});
+}
+
+it("meets every threshold the base palette is used at, in both themes", () => {
+	const missed = SCHEMES.flatMap((scheme) => {
+		const of = (name: string): string => token(name, scheme);
+		const page = of("background");
+		const card = of("card");
+
+		return shortfalls(
+			(
+				[
+					["foreground on the page", of("foreground"), page, TEXT],
+					["foreground on a card", of("foreground"), card, TEXT],
+					["muted text on the page", of("muted-foreground"), page, TEXT],
+					["muted text on a card", of("muted-foreground"), card, TEXT],
+					["muted text on a recessed fill", of("muted-foreground"), of("muted"), TEXT],
+					["a link on the page", of("accent"), page, TEXT],
+					["a link on a card", of("accent"), card, TEXT],
+					["red text on a card", of("destructive-text"), card, TEXT],
+					["success on a card", of("success"), card, TEXT],
+					["warning on a card", of("warning"), card, TEXT],
+					["a field border on a card", of("input"), card, NON_TEXT],
+					["the focus ring on the page", of("ring"), page, NON_TEXT],
+					["a filled primary against the page", of("primary"), page, NON_TEXT],
+					// A filled button is measured with the text colour it actually draws, not `foreground`.
+					["white on primary", "#ffffff", of("primary"), TEXT],
+					["white on destructive", "#ffffff", of("destructive"), TEXT],
+					// Each tint is an icon colour and a 15% wash, so the icon has to survive on a card.
+					...["levelling", "economy", "moderation", "welcome", "tickets", "community"].map(
+						(feature) => [`the ${feature} tint on a card`, of(`feature-${feature}`), card, TEXT] as const,
+					),
+				] as [string, string, string, number][]
+			).map(([name, ...rest]) => [`${scheme}: ${name}`, ...rest]),
+		);
 	});
 
-	/** A filled button is measured with the text colour it actually draws, not `foreground`. */
-	it.each([
-		["white on primary", "primary"],
-		["white on destructive", "destructive"],
-	])("%s is legible", (_name, fill) => {
-		expect(contrast("#ffffff", token_(fill))).toBeGreaterThanOrEqual(TEXT);
-	});
+	expect(missed).toEqual([]);
+});
 
-	/** Each tint is used as an icon colour and as a 15% wash, so the icon has to survive on a card. */
-	it.each(["levelling", "economy", "moderation", "welcome", "tickets", "community"])(
-		"the %s tint is legible on a card",
-		(feature) => {
-			expect(contrast(token_(`feature-${feature}`), card)).toBeGreaterThanOrEqual(TEXT);
-		},
-	);
-
-	it("keeps the fill violet and the text violet as separate tokens", () => {
-		expect(token_("primary")).not.toBe(token_("accent"));
-		expect(contrast(token_("accent"), background)).toBeGreaterThanOrEqual(TEXT);
-	});
+it("keeps the fill violet and the text violet as separate tokens", () => {
+	for (const scheme of SCHEMES) expect(token("primary", scheme)).not.toBe(token("accent", scheme));
 });
 
 /** The dark fill violet (3.47:1) stays out of use as body text. */
@@ -112,36 +117,40 @@ it("keeps the dark fill violet out of reach as a text colour", () => {
 });
 
 /** Every accent the picker offers, in both themes. */
-describe.each(ACCENTS)("the %s accent", (accent) => {
-	describe.each(["light", "dark"] as const)("in %s", (scheme) => {
-		const of = (name: string): string => accentToken(accent, name, scheme);
-		const background = token("background", scheme);
-		const card = token("card", scheme);
+it("meets every threshold with each accent, in both themes", () => {
+	const missed = ACCENTS.flatMap((accent) =>
+		SCHEMES.flatMap((scheme) => {
+			const of = (name: string): string => accentToken(accent, name, scheme);
+			const page = token("background", scheme);
+			const card = token("card", scheme);
 
-		it.each([
-			["a link on the page", "accent", () => background, TEXT],
-			["a link on a card", "accent", () => card, TEXT],
-			["a filled button against the page", "primary", () => background, NON_TEXT],
-			["the focus ring on the page", "ring", () => background, NON_TEXT],
-		])("%s meets its threshold", (_name, colour, against, need) => {
-			expect(contrast(of(colour), against())).toBeGreaterThanOrEqual(need);
-		});
+			return shortfalls([
+				[`${accent} in ${scheme}: a link on the page`, of("accent"), page, TEXT],
+				[`${accent} in ${scheme}: a link on a card`, of("accent"), card, TEXT],
+				[`${accent} in ${scheme}: a filled button against the page`, of("primary"), page, NON_TEXT],
+				[`${accent} in ${scheme}: the focus ring on the page`, of("ring"), page, NON_TEXT],
+				// The fill only ever wears white, so this is the pair a button actually draws.
+				[`${accent} in ${scheme}: white on its fill`, "#ffffff", of("primary"), TEXT],
+			]);
+		}),
+	);
 
-		/** The fill only ever wears white, so this is the pair a button actually draws. */
-		it("carries white on its fill", () => {
-			expect(contrast("#ffffff", of("primary"))).toBeGreaterThanOrEqual(TEXT);
-		});
-	});
+	expect(missed).toEqual([]);
+});
 
-	/** The same hazard the base violet has: a fill that reads as legible text on near-black, and is not. */
-	it("keeps its dark fill out of reach as a text colour", () => {
-		expect(contrast(accentToken(accent, "primary", "dark"), token("background", "dark"))).toBeLessThan(TEXT);
-	});
+/** The same hazard the base violet has: a fill that reads as legible text on near-black, and is not. */
+it("keeps every accent's dark fill out of reach as a text colour", () => {
+	const legible = ACCENTS.filter(
+		(accent) => contrast(accentToken(accent, "primary", "dark"), token("background", "dark")) >= TEXT,
+	);
+
+	expect(legible).toEqual([]);
 });
 
 /** The violet block has to match the base tokens, or its swatch shows a colour it does not select. */
-describe.each(["light", "dark"] as const)("the violet block in %s", (scheme) => {
-	it.each(["primary", "accent", "ring"])("matches the base %s token", (name) => {
-		expect(accentToken("violet", name, scheme)).toBe(token(name, scheme));
-	});
+it("keeps the violet block equal to the base tokens", () => {
+	for (const scheme of SCHEMES) {
+		for (const name of ["primary", "accent", "ring"])
+			expect(accentToken("violet", name, scheme)).toBe(token(name, scheme));
+	}
 });

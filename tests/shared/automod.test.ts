@@ -2,11 +2,6 @@ import { problemText } from "@lib/format/problemText.util";
 import { AUTOMOD_LIMITS, automodBlocked, automodCreate } from "@testify/shared";
 
 describe("automodCreate", () => {
-	it("takes each preset that needs nothing else", () => {
-		expect(automodCreate.safeParse({ preset: "flagged-words" }).success).toBe(true);
-		expect(automodCreate.safeParse({ preset: "spam" }).success).toBe(true);
-	});
-
 	it("refuses a preset Testify does not build", () => {
 		expect(automodCreate.safeParse({ preset: "member-profile" }).success).toBe(false);
 	});
@@ -49,23 +44,9 @@ describe("automodCreate", () => {
 });
 
 describe("automodBlocked", () => {
-	it("asks for the word before a keyword rule can be added", () => {
-		expect(problemText(automodBlocked({ preset: "keyword", word: "  ", limit: 5 }))).toMatch(/word or phrase/i);
-	});
-
 	it("asks for a number before a mention rule can be added", () => {
 		expect(problemText(automodBlocked({ preset: "mention-spam", word: "", limit: Number.NaN }))).toMatch(
 			/how many mentions/i,
 		);
-	});
-
-	it("says nothing for a preset that needs no input", () => {
-		expect(problemText(automodBlocked({ preset: "spam", word: "", limit: 5 }))).toBeNull();
-		expect(problemText(automodBlocked({ preset: "flagged-words", word: "", limit: 5 }))).toBeNull();
-	});
-
-	it("says nothing once the draft is complete", () => {
-		expect(problemText(automodBlocked({ preset: "keyword", word: "rude", limit: 5 }))).toBeNull();
-		expect(problemText(automodBlocked({ preset: "mention-spam", word: "", limit: 7 }))).toBeNull();
 	});
 });

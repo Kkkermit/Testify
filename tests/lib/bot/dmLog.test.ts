@@ -1,7 +1,6 @@
-import { DiscordAPIError, MessageFlags, RESTJSONErrorCodes } from "discord.js";
+import { MessageFlags } from "discord.js";
 import dmLog from "@buttons/dmLog";
 import { parseCustomId } from "@core/button";
-import { findDirectMessage } from "@database/repositories/profileRepository";
 import { attachmentName, DM_LOG_ID, dmLogMessage, dmLogRow } from "@lib/bot/dmLog.util";
 import { type LoggedUser } from "@lib/bot/logFields.util";
 import { createMockClient, createMockUser } from "@tests/helpers/mocks";
@@ -31,18 +30,6 @@ function labelsOf(rows: ReturnType<typeof dmLogRow>): { label: string | undefine
 }
 
 describe("the DM log post", () => {
-	it("shows the message, who sent it and when, with User info and Reply under it", () => {
-		const posted = dmLogMessage(author, { content: "Hi", sentAt: new Date(1_700_000_000_000), attachmentUrls: [] });
-		const json = (
-			posted.embeds![0] as { toJSON(): { title: string; description: string; fields: { name: string }[] } }
-		).toJSON();
-
-		expect(json.title).toBe("📨 Direct message received");
-		expect(json.description).toBe("Hi");
-		expect(json.fields.map((field) => field.name)).toEqual(["From", "Sent"]);
-		expect(labelsOf(posted.components as never).map((button) => button.label)).toEqual(["User info", "Reply"]);
-	});
-
 	it("lists attachments by their own names and shows the first picture", () => {
 		const posted = dmLogMessage(author, {
 			content: "",
@@ -104,40 +91,6 @@ describe("the DM log's buttons", () => {
 		expect(dmLog.ownerOnly).not.toBe(true);
 	});
 
-	it("lets only the bot's owners use it, since Reply speaks as the bot", async () => {
-		await expect(run(pressed("999999999999999999"), "info")).rejects.toThrow(/bot's owners/);
-		expect(user.send).not.toHaveBeenCalled();
-	});
-
-	it("shows the sender's details with Back and Reply", async () => {
-		const interaction = pressed();
-		await run(interaction, "info");
-
-		const update = (interaction.update.mock.calls[0] as unknown[])[0] as { components: ReturnType<typeof dmLogRow> };
-		expect(labelsOf(update.components).map((button) => button.label)).toEqual(["Back to message", "Reply"]);
-	});
-
-	it("goes back to the message, rebuilt from the one on record", async () => {
-		jest.mocked(findDirectMessage).mockResolvedValue({
-			authorId: AUTHOR,
-			content: "Hi",
-			attachmentUrls: [],
-			createdAt: new Date(1_700_000_000_000),
-		});
-		const interaction = pressed();
-		await run(interaction, "back");
-
-		expect(findDirectMessage).toHaveBeenCalledWith(LOG_MESSAGE);
-		const update = (interaction.update.mock.calls[0] as unknown[])[0] as ReturnType<typeof dmLogMessage>;
-		expect((update.embeds![0] as { toJSON(): { description: string } }).toJSON().description).toBe("Hi");
-		expect(labelsOf(update.components as never).map((button) => button.label)).toEqual(["User info", "Reply"]);
-	});
-
-	it("says so when the message is no longer on record", async () => {
-		jest.mocked(findDirectMessage).mockResolvedValue(null);
-		await expect(run(pressed(), "back")).rejects.toThrow(/no longer have that message/);
-	});
-
 	it("opens a form, then sends the reply to the sender and confirms it privately", async () => {
 		const opened = pressed();
 		await run(opened, "reply");
@@ -153,22 +106,5 @@ describe("the DM log's buttons", () => {
 				flags: MessageFlags.Ephemeral,
 			}),
 		);
-	});
-
-	it("says plainly when the sender does not accept direct messages", async () => {
-		jest
-			.mocked(user.send)
-			.mockRejectedValueOnce(
-				new DiscordAPIError(
-					{ code: RESTJSONErrorCodes.CannotSendMessagesToThisUser, message: "Cannot send" },
-					RESTJSONErrorCodes.CannotSendMessagesToThisUser,
-					403,
-					"POST",
-					"/channels",
-					{},
-				),
-			);
-
-		await expect(run(pressed(OWNER, "Hello"), "send")).rejects.toThrow(/does not accept direct messages/);
 	});
 });

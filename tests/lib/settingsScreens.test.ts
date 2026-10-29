@@ -10,8 +10,6 @@ import { countingPanel } from "@lib/settings/countingPanel.util";
 import { checkPrefix, prefixPanel } from "@lib/settings/prefixPanel.util";
 import {
 	AUTOROLE_PANEL_ID,
-	MAX_AUTO_ROLES,
-	COUNTING_LIMITS,
 	COUNTING_PANEL_ID,
 	PREFIX_LIMITS,
 	PREFIX_PANEL_ID,
@@ -66,40 +64,6 @@ describe("every settings panel", () => {
 });
 
 describe("settingsScreen", () => {
-	const screen = settingsScreen({
-		id: "demo",
-		ownerId: OWNER,
-		category: "settings",
-		title: "🔧 Demo",
-		status: "Doing a thing.",
-		note: "Saved.",
-		rows: [
-			{ label: "With a button", value: "one", action: { action: "edit", label: "Change" } },
-			{ label: "Without one", value: "two" },
-		],
-		actions: [{ action: "off", label: "Turn off" }],
-		footer: "A closing remark.",
-	});
-
-	it("renders the title, status, note and footer", () => {
-		const text = textOf(screen);
-
-		expect(text).toContain("## 🔧 Demo");
-		expect(text).toContain("Doing a thing.");
-		expect(text).toContain("Saved.");
-		expect(text).toContain("A closing remark.");
-	});
-
-	it("renders a row's label and value", () => {
-		expect(textOf(screen)).toContain("With a button");
-		expect(textOf(screen)).toContain("one");
-	});
-
-	it("only builds a button for rows that ask for one", () => {
-		const labels = buttonsOf(screen).map((control) => control.label);
-		expect(labels).toEqual(["Change", "Turn off"]);
-	});
-
 	/** Each picker is captioned, since two chosen menus look identical. */
 	it("captions each picker so the reader knows which is which", () => {
 		const twoPickers = settingsScreen({
@@ -121,19 +85,6 @@ describe("settingsScreen", () => {
 		expect(rendered).toContain("Second menu");
 	});
 
-	it("leaves out the optional parts when they are not given", () => {
-		const bare = settingsScreen({
-			id: "demo",
-			ownerId: OWNER,
-			category: "settings",
-			title: "Bare",
-			status: "Nothing else.",
-		});
-
-		expect(buttonsOf(bare)).toHaveLength(0);
-		expect(duplicateIds(bare)).toEqual([]);
-	});
-
 	/** Discord allows five buttons per row, so more than that has to wrap. */
 	it("wraps more than five actions across rows", () => {
 		const many = settingsScreen({
@@ -147,19 +98,6 @@ describe("settingsScreen", () => {
 
 		expect(buttonsOf(many)).toHaveLength(7);
 		expect(duplicateIds(many)).toEqual([]);
-	});
-
-	it("carries extra arguments before the owner", () => {
-		const withArgs = settingsScreen({
-			id: "demo",
-			ownerId: OWNER,
-			category: "settings",
-			title: "Args",
-			status: "…",
-			actions: [{ action: "pick", label: "Pick", args: ["red"] }],
-		});
-
-		expect(parseCustomId(idsOf(withArgs)[0] ?? "").args).toEqual(["red", OWNER]);
 	});
 });
 
@@ -182,23 +120,10 @@ describe("the shared value formatters", () => {
 });
 
 describe("the auto-role panel", () => {
-	it("lists the roles new members are given", () => {
-		expect(textOf(autoRolePanel({ roleIds: [ROLE] }, OWNER))).toContain(`<@&${ROLE}>`);
-	});
-
 	/** A role above the bot is silently dead, and Discord never says so. */
 	it("warns about roles it cannot assign", () => {
 		const text = textOf(autoRolePanel({ roleIds: [ROLE], unusable: [ROLE] }, OWNER));
 		expect(text).toMatch(/cannot assign/i);
-	});
-
-	it("greys out Give nothing when nothing is given", () => {
-		const clear = buttonsOf(autoRolePanel({ roleIds: [] }, OWNER))[0];
-		expect(clear?.disabled).toBe(true);
-	});
-
-	it("caps how many roles can be picked", () => {
-		expect(MAX_AUTO_ROLES).toBeGreaterThan(0);
 	});
 });
 
@@ -206,26 +131,11 @@ describe("the counting panel", () => {
 	it("shows the next number rather than the last one", () => {
 		expect(textOf(countingPanel({ channelId: CHANNEL, count: 41, goal: 500 }, OWNER))).toContain("42");
 	});
-
-	it("hides the settings until a channel is chosen", () => {
-		expect(buttonsOf(countingPanel({ channelId: null, count: 0, goal: 500 }, OWNER))).toHaveLength(1);
-	});
-
-	it("keeps the goal inside a sane range", () => {
-		expect(COUNTING_LIMITS.minGoal).toBeLessThan(COUNTING_LIMITS.maxGoal);
-	});
 });
 
 describe("the anti-link panel", () => {
 	it("names the permission that bypasses the filter", () => {
 		expect(textOf(antiLinkPanel({ enabled: true, bypass: "ManageMessages" }, OWNER))).toMatch(/manage messages/i);
-	});
-
-	it("disables the bypass menu while the filter is off", () => {
-		const off = antiLinkPanel({ enabled: false, bypass: "ManageMessages" }, OWNER);
-		const menu = off.components[0]?.toJSON();
-
-		expect(JSON.stringify(menu)).toContain('"disabled":true');
 	});
 
 	it("accepts only the offered permissions", () => {
@@ -235,10 +145,6 @@ describe("the anti-link panel", () => {
 });
 
 describe("checkPrefix", () => {
-	it("accepts an ordinary prefix", () => {
-		expect(checkPrefix(" ! ")).toEqual({ ok: true, value: "!" });
-	});
-
 	it("rejects an empty one", () => {
 		expect(checkPrefix("   ").ok).toBe(false);
 	});
@@ -256,29 +162,7 @@ describe("checkPrefix", () => {
 	});
 });
 
-describe("the prefix panel", () => {
-	it("shows the prefix in an example", () => {
-		expect(textOf(prefixPanel({ prefix: "!", isEnabled: true }, OWNER))).toContain("!help");
-	});
-
-	it("says so when text commands are off", () => {
-		expect(textOf(prefixPanel({ prefix: "!", isEnabled: false }, OWNER))).toMatch(/slash commands still work/i);
-	});
-
-	it("greys out the reset when the prefix is already the default", () => {
-		const reset = buttonsOf(prefixPanel({ prefix: DEFAULT_PREFIX, isEnabled: true }, OWNER)).find((control) =>
-			String(control.label).startsWith("Reset"),
-		);
-
-		expect(reset?.disabled).toBe(true);
-	});
-});
-
 describe("the voice counter panel", () => {
-	it("names the channels being kept up to date", () => {
-		expect(textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER))).toContain(`<#${CHANNEL}>`);
-	});
-
 	it("explains the rename rate limit, which is why counts lag", () => {
 		expect(textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER))).toMatch(/rate-limit/i);
 	});

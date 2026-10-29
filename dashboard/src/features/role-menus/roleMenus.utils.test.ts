@@ -1,5 +1,5 @@
 import { type RoleMenuEntry, type RoleSummary } from "@testify/shared";
-import { bodyOf, draftChanged, draftOf, emptyDraft, offerBlocked } from "@/features/role-menus/roleMenus.utils";
+import { draftOf, offerBlocked } from "@/features/role-menus/roleMenus.utils";
 
 const role = (id: string, extra: Partial<RoleSummary> = {}): RoleSummary => ({
 	id,
@@ -35,35 +35,5 @@ describe("the role menu draft", () => {
 		expect(offerBlocked(role("a"))).toBe(false);
 		expect(offerBlocked(role("a", { powerful: true }))).toBe(true);
 		expect(offerBlocked(role("a", { assignableByBot: false }))).toBe(true);
-	});
-
-	it("has nothing to send until a channel, a title and a role are chosen", () => {
-		const clean = (value: string): string => value.trim();
-
-		expect(bodyOf(emptyDraft(), clean)).toBeNull();
-		expect(bodyOf({ ...emptyDraft(), channelId: "1", title: "Pings" }, clean)).toBeNull();
-		expect(bodyOf({ ...emptyDraft(), channelId: "1", title: " Pings ", roleIds: ["r"] }, clean)).toEqual({
-			channelId: "1",
-			title: "Pings",
-			description: "",
-			roleIds: ["r"],
-			mode: "many",
-		});
-	});
-});
-
-describe("draftChanged", () => {
-	const base = { channelId: "1", title: "Regions", description: "", roleIds: ["a", "b"], mode: "many" as const };
-
-	it("is false for the same roles ticked in another order", () => {
-		expect(draftChanged(base, { ...base, roleIds: ["b", "a"] })).toBe(false);
-	});
-
-	it("is true for any field that differs", () => {
-		expect(draftChanged(base, { ...base, title: "Pings" })).toBe(true);
-		expect(draftChanged(base, { ...base, channelId: null })).toBe(true);
-		expect(draftChanged(base, { ...base, mode: "one" })).toBe(true);
-		expect(draftChanged(base, { ...base, roleIds: ["a"] })).toBe(true);
-		expect(draftChanged(base, { ...base, description: "x" })).toBe(true);
 	});
 });

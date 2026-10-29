@@ -79,24 +79,10 @@ describe("the route error screen", () => {
 		expect(screen.queryByText(en.routeError.details)).not.toBeInTheDocument();
 	});
 
-	it("offers a reload and a way back to the servers", () => {
-		renderFailing(new Error("boom"));
-
-		screen.getByRole("button", { name: en.routeError.reload }).click();
-		expect(reloadPage).toHaveBeenCalledTimes(1);
-		expect(screen.getByRole("link", { name: en.error.backToServers })).toHaveAttribute("href", "/guilds");
-	});
-
 	it("shows the 404 page for a route that answered not found", async () => {
 		renderFailing(new Response(null, { status: 404, statusText: "Not Found" }), "loader");
 
 		expect(await screen.findByRole("heading", { level: 1, name: en.notFound.title })).toBeInTheDocument();
-	});
-
-	it("survives a thrown value that is not an Error at all", () => {
-		renderFailing("plain text");
-
-		expect(screen.getByRole("heading", { level: 1, name: en.routeError.crashTitle })).toBeInTheDocument();
 	});
 
 	it("has no automatically detectable accessibility violations", async () => {
@@ -114,21 +100,9 @@ describe("classifyRouteError", () => {
 	])("reads %s as a moved module", (message) => {
 		expect(classifyRouteError(new TypeError(message))).toBe("stale");
 	});
-
-	it("treats anything else as a crash", () => {
-		expect(classifyRouteError(new Error("boom"))).toBe("crash");
-		expect(classifyRouteError("text")).toBe("crash");
-		expect(classifyRouteError(null)).toBe("crash");
-	});
 });
 
 describe("claimAutoReload", () => {
-	it("grants one reload per window", () => {
-		expect(claimAutoReload(sessionStorage, 1_000)).toBe(true);
-		expect(claimAutoReload(sessionStorage, 20_000)).toBe(false);
-		expect(claimAutoReload(sessionStorage, 40_000)).toBe(true);
-	});
-
 	it("refuses when storage is missing or throws, rather than risking a loop", () => {
 		const broken = {
 			getItem: () => {

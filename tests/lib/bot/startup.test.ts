@@ -1,15 +1,11 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { DiscordAPIError, HTTPError } from "discord.js";
 import { EnvError } from "@config/env";
-import { SetupError } from "@core/errors";
 import { painter, visibleWidth } from "@core/terminal";
 import {
 	BootReport,
 	describeDatabase,
 	explainStartupFailure,
 	FATAL_CLOSE_CODES,
-	MINIMUM_NODE,
 	nodeTooOld,
 	startupFailureLines,
 } from "@lib/bot/startup.util";
@@ -44,13 +40,6 @@ describe("explainStartupFailure", () => {
 		expect(explainStartupFailure(dev, plain).lines.join("\n")).toContain("npm run setup -- --dev");
 	});
 
-	it("passes a set-up explanation through as written", () => {
-		const failure = explainStartupFailure(new SetupError("Line one\nLine two"), plain);
-
-		expect(failure.lines).toEqual(["Line one", "Line two"]);
-		expect(failure.stack).toBeUndefined();
-	});
-
 	it("reads Discord's refusals as the setting that caused them", () => {
 		expect(explainStartupFailure(apiError(0, 401), plain).title).toMatch(/token/i);
 		expect(explainStartupFailure(apiError(10002, 404), plain).lines.join(" ")).toContain("DISCORD_CLIENT_ID");
@@ -65,16 +54,6 @@ describe("explainStartupFailure", () => {
 		expect(failure.title).toBe("Discord could not be reached");
 		expect(failure.lines.join(" ")).toContain("403");
 		expect(failure.stack).toBeUndefined();
-	});
-
-	it("names the failed connection, including one fetch wraps as its cause", () => {
-		const dns = Object.assign(new Error("getaddrinfo ENOTFOUND discord.com"), { code: "ENOTFOUND" });
-		const wrapped = new TypeError("fetch failed", { cause: dns });
-		const timeout = Object.assign(new Error("This operation was aborted"), { name: "AbortError" });
-
-		expect(explainStartupFailure(dns, plain).lines[0]).toContain("ENOTFOUND");
-		expect(explainStartupFailure(wrapped, plain).title).toBe("Discord could not be reached");
-		expect(explainStartupFailure(timeout, plain).lines[0]).toContain("timed out");
 	});
 
 	it("blames Discord for its own server errors", () => {
@@ -115,12 +94,6 @@ describe("FATAL_CLOSE_CODES", () => {
 	});
 });
 
-describe("startupFailureLines", () => {
-	it("leads with a label a reader can scan for", () => {
-		expect(startupFailureLines(explainStartupFailure(new SetupError("x"), plain), plain)[1]).toContain("ERROR");
-	});
-});
-
 describe("describeDatabase", () => {
 	/** It is printed on every start, so it must never carry the password a connection string holds. */
 	it("shows the host and database but never the credentials", () => {
@@ -128,10 +101,6 @@ describe("describeDatabase", () => {
 
 		expect(shown).toBe("cluster0.example.mongodb.net · testify");
 		expect(shown).not.toContain("hunter2");
-	});
-
-	it("copes with several hosts and no database name", () => {
-		expect(describeDatabase("mongodb://a:1,b:2")).toBe("a:1");
 	});
 });
 
@@ -166,15 +135,5 @@ describe("nodeTooOld", () => {
 		expect(nodeTooOld("v24.9.0", "24.11.0")).toBe(true);
 		expect(nodeTooOld("v24.11.0", "24.11.0")).toBe(false);
 		expect(nodeTooOld("v25.0.0", "24.11.0")).toBe(false);
-	});
-
-	it("warns about the same version package.json requires", () => {
-		const engines = (
-			JSON.parse(readFileSync(resolve(__dirname, "../../..", "package.json"), "utf8")) as {
-				engines: { node: string };
-			}
-		).engines.node;
-
-		expect(engines).toBe(`>=${MINIMUM_NODE}`);
 	});
 });

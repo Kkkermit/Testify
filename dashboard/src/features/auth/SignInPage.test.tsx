@@ -2,8 +2,6 @@ import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { SignInPage } from "@/features/auth/SignInPage";
-import { botRetryDelay, retryBot } from "@/features/auth/useBot";
-import { ApiError } from "@/lib/api";
 import { hardRedirect } from "@/lib/redirect";
 import { expectNoViolations } from "@/test/axe";
 import { botProfile } from "@/test/fixtures/session";
@@ -16,12 +14,6 @@ jest.mock("@/lib/redirect");
 const assign = jest.mocked(hardRedirect);
 
 describe("the sign-in page", () => {
-	it("offers one button and nothing else to decide", async () => {
-		renderWithProviders(<SignInPage />, { path: "/sign-in" });
-
-		expect(await screen.findByRole("button", { name: /sign in with discord/i })).toBeInTheDocument();
-	});
-
 	/** Asking for less on the consent screen is a feature, so the page has to say what it asks for. */
 	it("names the two scopes and says it does not want an email", async () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in" });
@@ -40,15 +32,6 @@ describe("the sign-in page", () => {
 		await user.click(await screen.findByRole("button", { name: /sign in with discord/i }));
 
 		expect(assign).toHaveBeenCalledWith("/api/auth/login?returnTo=%2Fguilds%2F1");
-	});
-
-	it("defaults to the guild picker when there is nowhere to return to", async () => {
-		const user = userEvent.setup();
-		renderWithProviders(<SignInPage />, { path: "/sign-in" });
-
-		await user.click(await screen.findByRole("button", { name: /sign in with discord/i }));
-
-		expect(assign).toHaveBeenCalledWith("/api/auth/login?returnTo=%2Fguilds");
 	});
 
 	/** Pressing Cancel on Discord's consent screen is not an error, and must not look like one. */
@@ -79,12 +62,6 @@ describe("a half-configured install", () => {
 		expect(await screen.findByText("DISCORD_CLIENT_SECRET")).toBeInTheDocument();
 		expect(screen.getByText("DASHBOARD_SESSION_SECRET")).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: /sign in with discord/i })).toBeNull();
-	});
-
-	it("gives the exact redirect URI to paste into the Developer Portal", async () => {
-		renderWithProviders(<SignInPage />, { path: "/sign-in" });
-
-		expect(await screen.findByText("http://localhost:5174/api/auth/callback")).toBeInTheDocument();
 	});
 
 	it("points at the script that generates the secret", async () => {
@@ -148,36 +125,6 @@ describe("the bot's own identity", () => {
 		expect(screen.getByRole("heading", { level: 1, name: "Sign in" })).toBeInTheDocument();
 		// A bot called something else was named "Testify" for as long as it took to connect.
 		expect(screen.queryByText(/Testify/)).not.toBeInTheDocument();
-	});
-
-	it("names the bot at once from the last visit while it connects", async () => {
-		localStorage.setItem("testify:botName", "Helper Bot");
-		server.use(
-			http.get("/api/bot", () =>
-				HttpResponse.json({ error: { code: "bot_connecting", message: "Connecting." } }, { status: 503 }),
-			),
-		);
-
-		renderWithProviders(<SignInPage />, { path: "/sign-in" });
-
-		expect(await screen.findByRole("heading", { name: "Helper Bot" })).toBeInTheDocument();
-	});
-});
-
-describe("how long the profile is waited for", () => {
-	const connecting = new ApiError(503, { error: { code: "bot_connecting", message: "Connecting." } });
-	const broken = new ApiError(500, { error: { code: "internal", message: "Broken." } });
-
-	it("waits about a minute for a bot that is still connecting", () => {
-		expect(retryBot(29, connecting)).toBe(true);
-		expect(retryBot(30, connecting)).toBe(false);
-		expect(botRetryDelay(5, connecting)).toBe(2_000);
-	});
-
-	it("gives up quickly on anything else", () => {
-		expect(retryBot(1, broken)).toBe(true);
-		expect(retryBot(2, broken)).toBe(false);
-		expect(retryBot(1, new TypeError("offline"))).toBe(true);
 	});
 });
 

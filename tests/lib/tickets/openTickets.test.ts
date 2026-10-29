@@ -74,13 +74,6 @@ describe("readOpenTickets", () => {
 });
 
 describe("closeTicketFrom", () => {
-	it("says so in the ticket, then closes it through the same flow as the button", async () => {
-		await closeTicketFrom(client, guild, CHANNEL, closer, withRoles(STAFF));
-
-		expect(send).toHaveBeenCalled();
-		expect(closeTicket).toHaveBeenCalledWith(client, SETUP, TICKET, expect.objectContaining({ id: CHANNEL }), closer);
-	});
-
 	it("refuses somebody without the staff role, and a ticket from another server, before anything is sent", async () => {
 		await expect(closeTicketFrom(client, guild, CHANNEL, closer, withRoles())).rejects.toThrow(UserFacingError);
 

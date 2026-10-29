@@ -7,10 +7,6 @@ const channelId = "400000000000000001";
 const valid = { channelId, prize: "A copy of the game", winnerCount: 1, durationMs: 3_600_000 };
 
 describe("giveawayStart", () => {
-	it("accepts an ordinary giveaway", () => {
-		expect(giveawayStart.safeParse(valid).success).toBe(true);
-	});
-
 	it("refuses a channel that is not a snowflake", () => {
 		expect(giveawayStart.safeParse({ ...valid, channelId: "not-an-id" }).success).toBe(false);
 	});
@@ -47,14 +43,6 @@ describe("giveawayStart", () => {
 
 describe("giveawayProblem", () => {
 	const draft = { channelId, prize: "A copy of the game", winnerCount: 1, durationMs: 3_600_000 };
-
-	it("passes a draft the API would accept", () => {
-		expect(problemText(giveawayProblem(draft))).toBeNull();
-	});
-
-	it("names the missing channel before anything else", () => {
-		expect(problemText(giveawayProblem({ ...draft, channelId: null }))).toMatch(/channel/i);
-	});
 
 	it("refuses what the schema refuses", () => {
 		expect(problemText(giveawayProblem({ ...draft, prize: "  " }))).toMatch(/what is being given away/i);

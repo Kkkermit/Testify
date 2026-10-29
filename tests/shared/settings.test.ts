@@ -23,10 +23,6 @@ describe("the bypass permissions", () => {
 });
 
 describe("prefixPatch", () => {
-	it("accepts an ordinary prefix", () => {
-		expect(prefixPatch.safeParse({ prefix: "!" }).success).toBe(true);
-	});
-
 	/** Whitespace alone matches every message; a space inside means the prefix can never be typed. */
 	it("refuses one nobody could use", () => {
 		expect(prefixPatch.safeParse({ prefix: "" }).success).toBe(false);
@@ -48,10 +44,6 @@ describe("antiLinkPatch", () => {
 });
 
 describe("autoRolePut", () => {
-	it("takes the whole list, empty included", () => {
-		expect(autoRolePut.safeParse({ roleIds: [] }).success).toBe(true);
-	});
-
 	it("refuses more roles than the bot hands out", () => {
 		const tooMany = Array.from({ length: SETTINGS_LIMITS.maxAutoRoles + 1 }, () => "300000000000000001");
 

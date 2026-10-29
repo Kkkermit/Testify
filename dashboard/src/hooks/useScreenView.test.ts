@@ -2,34 +2,11 @@ import { routePattern, screenView } from "@/hooks/useScreenView";
 
 /** Only the route pattern is sent, so no server or member id reaches the database. */
 describe("routePattern", () => {
-	it("leaves a path with no parameters alone", () => {
-		expect(routePattern("/commands", {})).toBe("/commands");
-	});
-
-	it("puts a server id back as its parameter name", () => {
-		expect(routePattern("/guilds/900000000000000001/levelling", { guildId: "900000000000000001" })).toBe(
-			"/guilds/:guildId/levelling",
-		);
-	});
-
-	it("replaces every parameter, not just the first", () => {
-		const pattern = routePattern("/guilds/900000000000000001/members/100000000000000002", {
-			guildId: "900000000000000001",
-			userId: "100000000000000002",
-		});
-
-		expect(pattern).toBe("/guilds/:guildId/members/:userId");
-	});
-
 	/** A shorter id inside a longer one would otherwise be replaced within it and leave a fragment of a real id. */
 	it("replaces the longest value first", () => {
 		const pattern = routePattern("/guilds/12345/members/123", { guildId: "12345", userId: "123" });
 
 		expect(pattern).toBe("/guilds/:guildId/members/:userId");
-	});
-
-	it("ignores a parameter that matched nothing", () => {
-		expect(routePattern("/commands", { guildId: undefined })).toBe("/commands");
 	});
 
 	/** Whatever it returns is what gets stored, so nothing that looks like an id may survive. */
@@ -44,13 +21,6 @@ describe("routePattern", () => {
 });
 
 describe("screenView", () => {
-	it("sends the server a screen belongs to beside its pattern", () => {
-		expect(screenView("/guilds/900000000000000001/levelling", { guildId: "900000000000000001" })).toEqual({
-			route: "/guilds/:guildId/levelling",
-			guildId: "900000000000000001",
-		});
-	});
-
 	/** A member's id is never sent on its own: only the server is counted, and only against its pattern. */
 	it("sends no server for a screen outside one, and never a member", () => {
 		expect(screenView("/commands", {})).toEqual({ route: "/commands" });

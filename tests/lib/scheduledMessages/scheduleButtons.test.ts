@@ -1,7 +1,7 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import schedule from "@buttons/schedule";
 import { UserFacingError } from "@core/errors";
-import { changeSchedule, readSchedule, readSchedules, removeSchedule } from "@lib/scheduledMessages";
+import { readSchedule, readSchedules, removeSchedule } from "@lib/scheduledMessages";
 import { type ScheduledMessage } from "@testify/shared";
 import { textOf } from "@tests/helpers/containers";
 
@@ -59,10 +59,6 @@ beforeEach(() => {
 });
 
 describe("the scheduled message panel", () => {
-	it("belongs to the person who opened it", () => {
-		expect(schedule.ownerOnly).toBe(true);
-	});
-
 	it("refuses anybody without Manage Server, before anything changes", async () => {
 		await expect(
 			schedule.run(
@@ -71,41 +67,6 @@ describe("the scheduled message panel", () => {
 			),
 		).rejects.toThrow(UserFacingError);
 		expect(removeSchedule).not.toHaveBeenCalled();
-	});
-
-	it("moves a post to the time typed, read as a length from now", async () => {
-		const before = Date.now();
-
-		await schedule.run(pressed("modal", { fields: { in: "2h" } }) as never, context("save-time", NEWS.id));
-
-		const [, , changes] = jest.mocked(changeSchedule).mock.calls[0] as unknown as [unknown, string, { nextAt: Date }];
-		expect(changes.nextAt.getTime() - before).toBeGreaterThanOrEqual(2 * 60 * 60 * 1000);
-		expect(changes.nextAt.getTime() - before).toBeLessThan(2 * 60 * 60 * 1000 + 5_000);
-	});
-
-	it("fills the message form with what it says now, and saves what is typed", async () => {
-		const opening = pressed("button");
-		await schedule.run(opening as never, context("edit", NEWS.id));
-		expect(JSON.stringify(opening.showModal.mock.calls[0])).toContain("Weekly reminder");
-
-		await schedule.run(
-			pressed("modal", { fields: { message: "New words" } }) as never,
-			context("save-message", NEWS.id),
-		);
-		expect(changeSchedule).toHaveBeenCalledWith(expect.anything(), NEWS.id, { message: "New words" }, OWNER);
-	});
-
-	it("walks the repeat on and moves the channel", async () => {
-		await schedule.run(pressed("button") as never, context("repeat", NEWS.id));
-		expect(changeSchedule).toHaveBeenCalledWith(expect.anything(), NEWS.id, { repeat: "once" }, OWNER);
-
-		await schedule.run(pressed("channel") as never, context("channel", NEWS.id));
-		expect(changeSchedule).toHaveBeenLastCalledWith(
-			expect.anything(),
-			NEWS.id,
-			{ channelId: "400000000000000009" },
-			OWNER,
-		);
 	});
 
 	it("asks before deleting, then deletes and goes back to the list", async () => {

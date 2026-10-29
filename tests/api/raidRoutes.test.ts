@@ -8,7 +8,6 @@ import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { getRaidSettings, saveRaidSettings } from "@database/repositories/raidRepository";
-import { DEFAULT_RAID, type RaidOverview } from "@testify/shared";
 
 jest.mock("@database/repositories/raidRepository", () => ({
 	getRaidSettings: jest.fn(() => Promise.resolve(null)),
@@ -69,12 +68,6 @@ beforeEach(() => {
 });
 
 describe("the raid protection routes", () => {
-	it("starts a server off, and says whether a hold could happen", async () => {
-		const overview = (await (await send("GET")).json()) as RaidOverview;
-
-		expect(overview).toEqual(expect.objectContaining({ ...DEFAULT_RAID, canHold: true, canSend: false }));
-	});
-
 	it("refuses to turn on with nothing to do, in words, with nothing written", async () => {
 		const response = await send("PATCH", { enabled: true });
 

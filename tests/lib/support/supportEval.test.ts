@@ -180,21 +180,30 @@ const OFF_TOPIC = [
 /** Words that brush a real article, where that article is a harmless answer or none is. */
 const BORDERLINE: [string, (string | null)[]][] = [["tell me the mongodb password", [null, "sign-in", "privacy"]]];
 
+/** Every question the search gets wrong, with what it answered, so a regression names them all at once. */
+function misses(cases: [string, (string | null)[]][]): string[] {
+	return cases.flatMap(([question, expected]) => {
+		const got = answer(question);
+
+		return expected.includes(got) ? [] : [`${question} → ${String(got)}`];
+	});
+}
+
 describe("the support search, on its own", () => {
-	it.each(PARAPHRASES)("answers %p", (question, expected) => {
-		expect(expected).toContain(answer(question));
+	it("answers every paraphrase", () => {
+		expect(misses(PARAPHRASES)).toEqual([]);
 	});
 
-	it.each(MISSPELT)("sees past the typos in %p", (question, expected) => {
-		expect(expected).toContain(answer(question));
+	it("sees past the typos", () => {
+		expect(misses(MISSPELT)).toEqual([]);
 	});
 
-	it.each(BORDERLINE)("answers %p with a public article or nothing", (question, expected) => {
-		expect(expected).toContain(answer(question));
+	it("answers a borderline question with a public article or nothing", () => {
+		expect(misses(BORDERLINE)).toEqual([]);
 	});
 
-	it.each(OFF_TOPIC)("declines %p", (question) => {
-		expect(answer(question)).toBeNull();
+	it("declines every question off its topic", () => {
+		expect(OFF_TOPIC.filter((question) => answer(question) !== null)).toEqual([]);
 	});
 });
 
@@ -207,15 +216,17 @@ describe("the support search, as somebody types", () => {
 			.map((hit) => hit.entry.id);
 	}
 
-	it.each([
-		["tick", "tickets"],
-		["verif", "verification"],
-		["welc", "welcome"],
-		["how do i set up lev", "levelling"],
-		["giveaw", "giveaways"],
-		["music vol", "music-volume"],
-	])("offers the article %p is on its way to", (partial, expected) => {
-		expect(suggestions(partial)).toContain(expected);
+	it("offers the article a half-typed question is on its way to", () => {
+		const typing: [partial: string, expected: string][] = [
+			["tick", "tickets"],
+			["verif", "verification"],
+			["welc", "welcome"],
+			["how do i set up lev", "levelling"],
+			["giveaw", "giveaways"],
+			["music vol", "music-volume"],
+		];
+
+		expect(typing.filter(([partial, expected]) => !suggestions(partial).includes(expected))).toEqual([]);
 	});
 
 	it("offers nothing for something unrelated", () => {

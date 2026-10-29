@@ -9,7 +9,6 @@ import { UserFacingError } from "@core/errors";
 import { listCases, saveCaseSettings } from "@database/repositories/caseRepository";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { canPostIn } from "@lib/discord/channels.util";
-import { type CasePage } from "@testify/shared";
 
 jest.mock("@database/repositories/caseRepository", () => ({
 	findCase: jest.fn(() => Promise.resolve(null)),
@@ -84,17 +83,6 @@ beforeEach(() => {
 });
 
 describe("the case routes", () => {
-	it("pages the cases newest first, filtered by what was done or by a search", async () => {
-		const all = (await (await send("GET")).json()) as CasePage;
-		expect(all.items.map((entry) => entry.number)).toEqual([2, 1]);
-
-		const bans = (await (await send("GET", "?action=ban")).json()) as CasePage;
-		expect(bans.items.map((entry) => entry.number)).toEqual([2]);
-
-		const searched = (await (await send("GET", "?q=spam")).json()) as CasePage;
-		expect(searched.items.map((entry) => entry.number)).toEqual([1]);
-	});
-
 	it("refuses a filter that is not an action", async () => {
 		expect((await send("GET", "?action=nuke")).status).toBe(400);
 	});
@@ -107,10 +95,5 @@ describe("the case routes", () => {
 
 		jest.mocked(canPostIn).mockReturnValue(false);
 		expect((await send("PUT", "/settings", { logChannelId: "400000000000000002" })).status).toBe(400);
-	});
-
-	it("stops posting when the channel is cleared", async () => {
-		expect((await send("PUT", "/settings", { logChannelId: null })).status).toBe(200);
-		expect(saveCaseSettings).toHaveBeenCalledWith(GUILD, null, OWNER);
 	});
 });

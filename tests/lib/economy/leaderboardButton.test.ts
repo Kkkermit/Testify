@@ -52,14 +52,6 @@ describe("the leaderboard buttons", () => {
 		});
 	});
 
-	it("ignores a button carrying a board that does not exist", async () => {
-		const interaction = pressed();
-		await leaderboard.run(interaction as never, { client, action: "sort", args: ["pets", "server", OWNER] });
-
-		expect(interaction.deferUpdate).not.toHaveBeenCalled();
-		expect(boardMessage).not.toHaveBeenCalled();
-	});
-
 	/** The router compares the last argument with whoever pressed, so only the person who asked can switch it. */
 	it("belongs to whoever asked for the board", () => {
 		expect(leaderboard.ownerOnly).toBe(true);

@@ -39,7 +39,8 @@ jobs:
 
   test:
     name: Tests
-    runs-on: ubuntu-latest
+    # Windows, because that is what most people clone this onto. Linux and macOS run every night.
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v7
 

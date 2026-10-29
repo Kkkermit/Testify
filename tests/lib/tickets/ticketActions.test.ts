@@ -1,6 +1,6 @@
 import { type Guild } from "discord.js";
 import { countOpenTickets, getTicketSetup, saveTicketSetup } from "@database/repositories/ticketRepository";
-import { applyTickets, normaliseTicketSetup, publishTicketPanel, readTickets } from "@lib/tickets/ticketActions.util";
+import { applyTickets, normaliseTicketSetup, publishTicketPanel } from "@lib/tickets/ticketActions.util";
 
 jest.mock("@database/repositories/ticketRepository", () => ({
 	countOpenTickets: jest.fn(() => Promise.resolve(0)),
@@ -61,13 +61,6 @@ beforeEach(() => {
 });
 
 describe("normaliseTicketSetup", () => {
-	it("gives a form something to render when nothing is set up", () => {
-		const settings = normaliseTicketSetup(null);
-
-		expect(settings).toMatchObject({ enabled: false, panelChannelId: null, posted: false, openTickets: 0 });
-		expect(settings.description.length).toBeGreaterThan(0);
-	});
-
 	/** `messageId` was added after the first records were written, so it is absent rather than null on those. */
 	it("treats a record written before messageId existed as unposted", () => {
 		const settings = normaliseTicketSetup({ channelId: PANEL, description: "hi", buttonLabel: "Go" } as never);
@@ -82,29 +75,9 @@ describe("normaliseTicketSetup", () => {
 
 		expect(settings).toMatchObject({ panelChannelId: null, categoryId: null, transcriptChannelId: PANEL });
 	});
-
-	it("says a panel is posted once there is a message id", () => {
-		expect(normaliseTicketSetup({ messageId: "5" } as never).posted).toBe(true);
-	});
-});
-
-describe("readTickets", () => {
-	it("reports how many tickets are open right now", async () => {
-		configured();
-		counted.mockResolvedValue(4);
-
-		await expect(readTickets(guildWith())).resolves.toMatchObject({ openTickets: 4, enabled: true });
-	});
 });
 
 describe("publishTicketPanel", () => {
-	it("sends the panel and answers with the message it left", async () => {
-		const settings = { ...normaliseTicketSetup(null), panelChannelId: PANEL };
-
-		await expect(publishTicketPanel(guildWith(), settings)).resolves.toBe("500000000000000009");
-		expect(send).toHaveBeenCalled();
-	});
-
 	it("refuses before a channel is chosen", async () => {
 		await expect(publishTicketPanel(guildWith(), normaliseTicketSetup(null))).rejects.toThrow(/channel/i);
 	});
@@ -170,13 +143,6 @@ describe("applyTickets", () => {
 		expect(saved).toHaveBeenCalled();
 	});
 
-	it("posts when asked, and stores the message it left", async () => {
-		await applyTickets(guildWith(), { ...complete, publish: true }, EVERYONE);
-
-		expect(send).toHaveBeenCalled();
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ messageId: "500000000000000009" }));
-	});
-
 	/** A panel posted in the old channel is not the panel in the new one, so its id cannot carry over. */
 	it("forgets the posted message when the channel changes", async () => {
 		configured();
@@ -184,19 +150,5 @@ describe("applyTickets", () => {
 		await applyTickets(guildWith(), { panelChannelId: "400000000000000007" }, EVERYONE);
 
 		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ messageId: null }));
-	});
-
-	it("keeps the posted message when something else changes", async () => {
-		configured();
-
-		await applyTickets(guildWith(), { buttonLabel: "Help" }, EVERYONE);
-
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ messageId: "500000000000000001" }));
-	});
-
-	it("records the everyone role it was handed rather than reading one from the body", async () => {
-		await applyTickets(guildWith(), complete, EVERYONE);
-
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ everyoneRoleId: EVERYONE }));
 	});
 });

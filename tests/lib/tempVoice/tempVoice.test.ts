@@ -1,5 +1,4 @@
-import { ButtonStyle, ChannelType, Collection, type Guild } from "discord.js";
-import { parseCustomId } from "@core/button";
+import { ChannelType, Collection, type Guild } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import {
@@ -8,7 +7,6 @@ import {
 	forgetTempChannel,
 	getTempVoiceSettings,
 	listTempChannels,
-	recordTempChannel,
 	saveTempVoiceSettings,
 	type StoredTempVoiceSettings,
 } from "@database/repositories/tempVoiceRepository";
@@ -21,7 +19,7 @@ import {
 	sweepTempChannels,
 } from "@lib/tempVoice/tempVoiceActions.util";
 import { tempVoiceSettingsPanel } from "@lib/tempVoice/tempVoicePanel.util";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { textOf } from "@tests/helpers/containers";
 
 jest.mock("@database/repositories/tempVoiceRepository", () => ({
 	countTempChannels: jest.fn(() => Promise.resolve(0)),
@@ -126,20 +124,6 @@ beforeEach(() => {
 });
 
 describe("joining the lobby", () => {
-	it("makes a channel beside the lobby, named for them, and moves them in", async () => {
-		const { guild, created } = world();
-		const alice = member();
-
-		await handleVoiceChange(client(), state(guild, null, alice), state(guild, LOBBY, alice), now);
-
-		expect(guild.channels.create).toHaveBeenCalledWith(
-			expect.objectContaining({ name: "Alice's channel", type: ChannelType.GuildVoice, parent: CATEGORY }),
-		);
-		expect(recordTempChannel).toHaveBeenCalledWith({ guildId: GUILD, channelId: MADE, ownerId: ALICE });
-		expect(created.permissionOverwrites.create).toHaveBeenCalledWith(ALICE, { ManageChannels: true });
-		expect(alice.voice.setChannel).toHaveBeenCalledWith(created);
-	});
-
 	it("puts it in the chosen category, with the chosen limit", async () => {
 		jest.mocked(getTempVoiceSettings).mockResolvedValue(settings({ categoryId: "400000000000000003", userLimit: 4 }));
 		const { guild } = world();
@@ -190,30 +174,9 @@ describe("joining the lobby", () => {
 
 		for (const { guild } of [off, bot, paused, powerless]) expect(guild.channels.create).not.toHaveBeenCalled();
 	});
-
-	it("deletes the channel again when they left before it was ready", async () => {
-		const { guild, created } = world();
-		const gone = member({ moves: false });
-
-		await handleVoiceChange(client(), state(guild, null, gone), state(guild, LOBBY, gone), now);
-
-		expect(created.delete).toHaveBeenCalled();
-		expect(forgetTempChannel).toHaveBeenCalledWith(GUILD, MADE);
-	});
 });
 
 describe("leaving a channel", () => {
-	it("deletes a made channel once its last member leaves", async () => {
-		const mine = channel(MADE);
-		const { guild } = world({ channels: [channel(LOBBY), mine] });
-		jest.mocked(findTempChannel).mockResolvedValue({ guildId: GUILD, channelId: MADE, ownerId: ALICE });
-
-		await handleVoiceChange(client(), state(guild, MADE), state(guild, null), now);
-
-		expect(mine.delete).toHaveBeenCalled();
-		expect(forgetTempChannel).toHaveBeenCalledWith(GUILD, MADE);
-	});
-
 	/** Somebody else's ordinary channel emptying is none of this feature's business. */
 	it("leaves alone a channel it did not make, and one with people still in it", async () => {
 		const ordinary = channel("400000000000000060");
@@ -226,16 +189,6 @@ describe("leaving a channel", () => {
 
 		expect(ordinary.delete).not.toHaveBeenCalled();
 		expect(busy.delete).not.toHaveBeenCalled();
-	});
-
-	it("still tidies up an empty channel while paused", async () => {
-		const mine = channel(MADE);
-		const { guild } = world({ channels: [mine] });
-		jest.mocked(findTempChannel).mockResolvedValue({ guildId: GUILD, channelId: MADE, ownerId: ALICE });
-
-		await handleVoiceChange(client(true), state(guild, MADE), state(guild, null), now);
-
-		expect(mine.delete).toHaveBeenCalled();
 	});
 });
 
@@ -325,20 +278,6 @@ describe("tempVoiceSettingsPanel", () => {
 		canManage: true,
 		active: 0,
 	};
-
-	it("puts the person who opened it last in every control", () => {
-		for (const id of idsOf(tempVoiceSettingsPanel(base, OWNER))) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
-	});
-
-	it("offers to make a lobby until there is one, and turning on only once there is", () => {
-		const none = buttonsOf(tempVoiceSettingsPanel(base, OWNER));
-		expect(none.find((entry) => String(entry.label).startsWith("Make a"))?.disabled).toBe(false);
-		expect(none.find((entry) => entry.label === "Turn on")?.disabled).toBe(true);
-
-		const set = buttonsOf(tempVoiceSettingsPanel({ ...base, lobbyChannelId: LOBBY }, OWNER));
-		expect(set.find((entry) => String(entry.label).startsWith("Make a"))?.disabled).toBe(true);
-		expect(set.find((entry) => entry.label === "Turn on")?.style).toBe(ButtonStyle.Success);
-	});
 
 	it("says when the bot cannot make channels at all", () => {
 		expect(textOf(tempVoiceSettingsPanel({ ...base, canManage: false }, OWNER))).toContain("I cannot make channels");

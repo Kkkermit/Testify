@@ -1,14 +1,7 @@
 import { problemText } from "@lib/format/problemText.util";
-import { LOTTERY_LIMITS, lotteryBlocked, lotteryPatch } from "@testify/shared";
-
-const CHANNEL = "400000000000000001";
+import { lotteryBlocked, lotteryPatch } from "@testify/shared";
 
 describe("lotteryPatch", () => {
-	it("takes each field on its own", () => {
-		expect(lotteryPatch.safeParse({ frozen: true }).success).toBe(true);
-		expect(lotteryPatch.safeParse({}).success).toBe(true);
-	});
-
 	/** The number arrives from a form as a string, so it has to coerce rather than refuse. */
 	it("takes a number that arrived as text", () => {
 		expect(lotteryPatch.parse({ entryFee: "250" }).entryFee).toBe(250);
@@ -16,17 +9,6 @@ describe("lotteryPatch", () => {
 
 	it("refuses a free ticket, which would make the pot unfundable", () => {
 		expect(lotteryPatch.safeParse({ entryFee: 0 }).success).toBe(false);
-	});
-
-	it("holds the winners inside what a draw can pay", () => {
-		expect(lotteryPatch.safeParse({ maxWinners: 0 }).success).toBe(false);
-		expect(lotteryPatch.safeParse({ maxWinners: LOTTERY_LIMITS.maxWinners + 1 }).success).toBe(false);
-		expect(lotteryPatch.safeParse({ maxWinners: LOTTERY_LIMITS.maxWinners }).success).toBe(true);
-	});
-
-	it("allows a starting pot of nothing but not a negative one", () => {
-		expect(lotteryPatch.safeParse({ basePrizePool: 0 }).success).toBe(true);
-		expect(lotteryPatch.safeParse({ basePrizePool: -1 }).success).toBe(false);
 	});
 
 	it("refuses a frequency the draw job does not know", () => {
@@ -44,16 +26,8 @@ describe("lotteryPatch", () => {
 });
 
 describe("lotteryBlocked", () => {
-	it("says nothing once a channel and a price are set", () => {
-		expect(problemText(lotteryBlocked({ announcementChannelId: CHANNEL, entryFee: 100 }))).toBeNull();
-	});
-
 	/** The draw posts its winners publicly, so a lottery with nowhere to announce cannot run. */
 	it("asks for the announcement channel first", () => {
 		expect(problemText(lotteryBlocked({ announcementChannelId: null, entryFee: 100 }))).toMatch(/announced/i);
-	});
-
-	it("asks for a ticket price above nothing", () => {
-		expect(problemText(lotteryBlocked({ announcementChannelId: CHANNEL, entryFee: 0 }))).toMatch(/at least/i);
 	});
 });

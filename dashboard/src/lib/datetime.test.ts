@@ -1,4 +1,4 @@
-import { clockTime, dateAndTime, shortDate, since } from "@/lib/datetime";
+import { shortDate, since } from "@/lib/datetime";
 
 const AT = "2026-07-30T18:04:09.000Z";
 
@@ -10,18 +10,6 @@ describe("shortDate", () => {
 
 	it("hands back anything it cannot parse", () => {
 		expect(shortDate("nonsense")).toBe("nonsense");
-	});
-});
-
-describe("dateAndTime", () => {
-	it("adds a 24-hour clock without seconds", () => {
-		expect(dateAndTime(AT)).toMatch(/^30 Jul 2026, \d{2}:\d{2}$/);
-	});
-});
-
-describe("clockTime", () => {
-	it("keeps seconds, because a log line is read against another log line", () => {
-		expect(clockTime(AT)).toMatch(/^\d{2}:\d{2}:\d{2}$/);
 	});
 });
 

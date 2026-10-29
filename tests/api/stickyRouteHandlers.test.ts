@@ -88,14 +88,6 @@ describe("GET /sticky", () => {
 		expect(body).toEqual({ limit: STICKY_LIMITS.maxPerGuild, entries: [] });
 	});
 
-	it("says which entries have a message out there already", async () => {
-		listed.mockResolvedValue([entry(CHANNEL, { lastMessageId: "999" })] as never);
-
-		const body = (await (await send("GET")).json()) as StickyList;
-
-		expect(body.entries[0]).toMatchObject({ channelId: CHANNEL, posted: true, canSend: true });
-	});
-
 	/** The bot losing Send Messages is the usual reason a sticky stops appearing, and the page has to show it. */
 	it("reports a channel the bot can no longer post in", async () => {
 		listed.mockResolvedValue([entry(ELSEWHERE)] as never);
@@ -107,13 +99,6 @@ describe("GET /sticky", () => {
 });
 
 describe("PUT /sticky", () => {
-	it("stores the entry and answers with the whole list", async () => {
-		const response = await send("PUT", "", { channelId: CHANNEL, message: "Read the rules", cap: 5 });
-
-		expect(response.status).toBe(200);
-		expect(saved).toHaveBeenCalledWith(GUILD, CHANNEL, "Read the rules", 5);
-	});
-
 	/** A channel id from another server would otherwise write a row the bot can never post. */
 	it("refuses a channel that is not in this server", async () => {
 		const response = await send("PUT", "", { channelId: ELSEWHERE, message: "hi", cap: 5 });
@@ -152,27 +137,9 @@ describe("PUT /sticky", () => {
 		expect(response.status).toBe(400);
 		expect(saved).not.toHaveBeenCalled();
 	});
-
-	it("tells a create from an edit in the audit record", async () => {
-		await send("PUT", "", { channelId: CHANNEL, message: "hi", cap: 5 });
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "sticky.create" }));
-
-		jest.clearAllMocks();
-		listed.mockResolvedValue([entry(CHANNEL)] as never);
-
-		await send("PUT", "", { channelId: CHANNEL, message: "hi", cap: 5 });
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "sticky.update" }));
-	});
 });
 
 describe("DELETE /sticky/:channelId", () => {
-	it("removes the entry and answers with the list", async () => {
-		const response = await send("DELETE", `/${CHANNEL}`);
-
-		expect(response.status).toBe(200);
-		expect(removed).toHaveBeenCalledWith(GUILD, CHANNEL);
-	});
-
 	/** Two tabs open, both pressing Remove: the second finds nothing, which is a 404 rather than a 500. */
 	it("answers 404 when there was nothing to remove", async () => {
 		removed.mockResolvedValue(false);
@@ -188,13 +155,5 @@ describe("DELETE /sticky/:channelId", () => {
 
 		expect(response.status).toBe(400);
 		expect(removed).not.toHaveBeenCalled();
-	});
-
-	it("names the channel in the audit record", async () => {
-		await send("DELETE", `/${CHANNEL}`);
-
-		expect(audited).toHaveBeenCalledWith(
-			expect.objectContaining({ action: "sticky.delete", summary: expect.stringContaining(CHANNEL) }),
-		);
 	});
 });

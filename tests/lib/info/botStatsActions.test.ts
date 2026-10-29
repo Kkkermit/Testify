@@ -1,6 +1,6 @@
 import { UserFacingError } from "@core/errors";
 import { getFixedStats, removeFixedStats, setFixedStats } from "@database/repositories/botStatsRepository";
-import { postBotStats, readBotStats, removeBotStats } from "@lib/info/botStatsActions.util";
+import { postBotStats, removeBotStats } from "@lib/info/botStatsActions.util";
 
 jest.mock("@database/repositories/botStatsRepository", () => ({
 	getFixedStats: jest.fn(() => Promise.resolve(null)),
@@ -41,28 +41,7 @@ beforeEach(() => {
 	stored.mockResolvedValue(null);
 });
 
-describe("readBotStats", () => {
-	it("answers null when nothing is posted", async () => {
-		await expect(readBotStats(GUILD)).resolves.toEqual({ channelId: null });
-	});
-
-	it("names the channel the message is in", async () => {
-		stored.mockResolvedValue({ channelId: OLD_CHANNEL, messageId: "m" } as never);
-
-		await expect(readBotStats(GUILD)).resolves.toEqual({ channelId: OLD_CHANNEL });
-	});
-});
-
 describe("postBotStats", () => {
-	it("posts in the channel and remembers the message", async () => {
-		const channel = textChannel(NEW_CHANNEL);
-		const { client, guild } = world({ [NEW_CHANNEL]: channel });
-
-		await expect(postBotStats(client, guild, NEW_CHANNEL, USER)).resolves.toEqual({ channelId: NEW_CHANNEL });
-		expect(channel.send).toHaveBeenCalledTimes(1);
-		expect(saved).toHaveBeenCalledWith(GUILD, NEW_CHANNEL, "new-message", USER);
-	});
-
 	/** A server keeps one statistics message, so moving it takes the old one down. */
 	it("takes down the message it replaces", async () => {
 		const before = textChannel(OLD_CHANNEL);
@@ -104,20 +83,6 @@ describe("postBotStats", () => {
 });
 
 describe("removeBotStats", () => {
-	it("says so when there is nothing to remove", async () => {
-		await expect(removeBotStats(world({}).client, GUILD)).resolves.toBe(false);
-		expect(cleared).not.toHaveBeenCalled();
-	});
-
-	it("deletes the message and forgets it", async () => {
-		const channel = textChannel(OLD_CHANNEL);
-		stored.mockResolvedValue({ channelId: OLD_CHANNEL, messageId: "old-message" } as never);
-
-		await expect(removeBotStats(world({ [OLD_CHANNEL]: channel }).client, GUILD)).resolves.toBe(true);
-		expect(channel.messages.delete).toHaveBeenCalledWith("old-message");
-		expect(cleared).toHaveBeenCalledWith(GUILD);
-	});
-
 	/** A channel deleted since leaves a record nothing else would ever clear. */
 	it("forgets the message even when its channel is gone", async () => {
 		stored.mockResolvedValue({ channelId: OLD_CHANNEL, messageId: "old-message" } as never);

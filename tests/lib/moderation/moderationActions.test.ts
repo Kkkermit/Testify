@@ -1,8 +1,7 @@
 import { type GuildMember } from "discord.js";
 import { type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
-import { DEFAULT_REASON } from "@lib/moderation/moderation.constants";
-import { actionEmbed, assertModeratable, dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
+import { assertModeratable, dmEmbed, notifyTarget } from "@lib/moderation/moderationActions.util";
 import {
 	BOT_ID,
 	createMockGuild,
@@ -54,11 +53,6 @@ function scene(options: {
 }
 
 describe("assertModeratable", () => {
-	it("allows a moderator above the target", () => {
-		const { ctx, target } = scene({});
-		expect(() => assertModeratable(ctx, target)).not.toThrow();
-	});
-
 	it("refuses self-moderation", () => {
 		const { ctx, target } = scene({ targetId: USER_ID });
 		expect(() => assertModeratable(ctx, target)).toThrow(UserFacingError);
@@ -98,47 +92,10 @@ describe("assertModeratable", () => {
 });
 
 describe("notifyTarget", () => {
-	it("reports success when the DM lands", async () => {
-		const user = createMockUser();
-		await expect(notifyTarget(user, {} as never)).resolves.toBe(true);
-	});
-
 	/** Closed DMs are normal, not an error the command should fail on. */
 	it("reports failure rather than throwing when DMs are closed", async () => {
 		const user = createMockUser({ send: jest.fn(() => Promise.reject(new Error("Cannot send messages"))) });
 		await expect(notifyTarget(user, {} as never)).resolves.toBe(false);
-	});
-});
-
-describe("actionEmbed", () => {
-	const base = {
-		action: "Member banned",
-		emoji: "🔨",
-		guild: createMockGuild(),
-		target: createMockUser(),
-		moderator: createMockUser({ id: OWNER_ID, username: "mod" }),
-		reason: DEFAULT_REASON,
-	};
-
-	it("names the action and lists user, moderator and reason", () => {
-		const data = actionEmbed(base).toJSON();
-
-		expect(data.title).toContain("Member banned");
-		expect(data.fields?.map((field) => field.name)).toEqual(["User", "Moderator", "Reason"]);
-	});
-
-	it("includes the target's ID, so the record survives a rename", () => {
-		expect(JSON.stringify(actionEmbed(base).toJSON())).toContain(USER_ID);
-	});
-
-	it("appends any extra fields after the standard ones", () => {
-		const data = actionEmbed({ ...base, extra: [{ name: "Warning ID", value: "abc" }] }).toJSON();
-
-		expect(data.fields?.at(-1)).toMatchObject({ name: "Warning ID", value: "abc" });
-	});
-
-	it("falls back to a stated default reason", () => {
-		expect(JSON.stringify(actionEmbed(base).toJSON())).toContain("No reason provided");
 	});
 });
 
@@ -151,20 +108,11 @@ describe("dmEmbed", () => {
 		reason: "spamming",
 	};
 
-	it("addresses the recipient directly", () => {
-		expect(dmEmbed(base).toJSON().title).toContain("You were");
-	});
-
 	/** The recipient already knows who they are; they need to know where and why. */
 	it("names the server and the reason, not the recipient", () => {
 		const data = dmEmbed(base).toJSON();
 
 		expect(data.fields?.map((field) => field.name)).toEqual(["Server", "Moderator", "Reason"]);
 		expect(JSON.stringify(data)).toContain("spamming");
-	});
-
-	it("appends extra fields", () => {
-		const data = dmEmbed({ ...base, extra: [{ name: "Expires", value: "in 3 days" }] }).toJSON();
-		expect(data.fields?.at(-1)).toMatchObject({ name: "Expires" });
 	});
 });

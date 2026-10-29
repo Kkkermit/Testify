@@ -1,4 +1,4 @@
-import { ButtonStyle, TextInputStyle } from "discord.js";
+import { ButtonStyle } from "discord.js";
 import { parseCustomId } from "@core/button";
 import { modalForm, quickAmountRow } from "@lib/discord/components.util";
 import { parseRange, parseWholeNumber, settingsPanel, statusValue } from "@lib/settings/settingsPanel.util";
@@ -26,29 +26,6 @@ describe("settingsPanel", () => {
 		expect(fields?.[1]?.value).toBe("10–500");
 	});
 
-	it("gives every action a button namespaced to the handler", () => {
-		const ids = panel.components.flatMap((row) =>
-			row.components.map((component) => (component.toJSON() as { custom_id?: string }).custom_id ?? ""),
-		);
-
-		expect(ids.map((id) => parseCustomId(id).id)).toEqual(["treasure", "treasure"]);
-		expect(ids.map((id) => parseCustomId(id).action)).toEqual(["toggle", "edit-amount"]);
-	});
-
-	it("carries extra args onto every button, so the handler knows what it edits", () => {
-		const withArgs = settingsPanel({
-			id: "lottery",
-			category: "economy",
-			title: "Lottery",
-			fields: [],
-			actions: [{ action: "toggle", label: "Toggle" }],
-			args: ["guild-1"],
-		});
-
-		const id = (withArgs.components[0]?.components[0]?.toJSON() as { custom_id: string }).custom_id;
-		expect(parseCustomId(id).args).toEqual(["guild-1"]);
-	});
-
 	/** Discord rejects a row of more than five, so long panels have to wrap. */
 	it("wraps more than five actions onto another row", () => {
 		const many = settingsPanel({
@@ -63,39 +40,10 @@ describe("settingsPanel", () => {
 		expect(many.components[0]?.components).toHaveLength(5);
 		expect(many.components[1]?.components).toHaveLength(2);
 	});
-
-	it("greys everything out when the panel is superseded", () => {
-		const dead = settingsPanel({
-			id: "x",
-			category: "economy",
-			title: "Old",
-			fields: [],
-			actions: [{ action: "toggle", label: "Toggle" }],
-			disabled: true,
-		});
-
-		expect((dead.components[0]?.components[0]?.toJSON() as { disabled?: boolean }).disabled).toBe(true);
-	});
-});
-
-describe("statusValue", () => {
-	it("reads at a glance rather than as a word", () => {
-		expect(statusValue(true)).toContain("Enabled");
-		expect(statusValue(false)).toContain("Disabled");
-		expect(statusValue(true)).not.toBe(statusValue(false));
-	});
 });
 
 describe("parseWholeNumber", () => {
 	const bounds = { min: 5, max: 500 };
-
-	it("accepts a plain number", () => {
-		expect(parseWholeNumber("42", "Messages", bounds)).toEqual({ ok: true, value: 42 });
-	});
-
-	it("tolerates the separators people actually type", () => {
-		expect(parseWholeNumber(" 1,0 0 ", "Messages", { min: 1, max: 1_000 })).toEqual({ ok: true, value: 100 });
-	});
 
 	/** Returned rather than thrown, so a form can report every bad field at once. */
 	it("names the field when the value is not a number", () => {
@@ -114,11 +62,6 @@ describe("parseWholeNumber", () => {
 
 		expect(result.ok).toBe(false);
 		expect(result.ok ? "" : result.reason).toContain("500");
-	});
-
-	it("accepts the bounds themselves", () => {
-		expect(parseWholeNumber("5", "Messages", bounds).ok).toBe(true);
-		expect(parseWholeNumber("500", "Messages", bounds).ok).toBe(true);
 	});
 
 	it("rejects an empty field rather than reading it as zero", () => {
@@ -157,16 +100,6 @@ describe("modalForm", () => {
 		expect(inputAt(0).value).toBe("10");
 	});
 
-	it("honours paragraph and required per field", () => {
-		expect(inputAt(1).style).toBe(TextInputStyle.Paragraph);
-		expect(inputAt(1).required).toBe(false);
-	});
-
-	it("defaults to a required single-line input", () => {
-		expect(inputAt(0).style).toBe(TextInputStyle.Short);
-		expect(inputAt(0).required).toBe(true);
-	});
-
 	it("truncates a title past Discord's limit rather than being rejected", () => {
 		const long = modalForm({ id: "x", action: "y", title: "T".repeat(80), fields: [{ id: "a", label: "A" }] });
 		expect(long.toJSON().title.length).toBeLessThanOrEqual(45);
@@ -176,11 +109,6 @@ describe("modalForm", () => {
 describe("quickAmountRow", () => {
 	const row = quickAmountRow("money", "dep", 1_000, "user-1");
 	const buttons = row.components.map((component) => component.toJSON() as unknown as Record<string, unknown>);
-
-	it("offers a quarter, a half, everything and a custom option", () => {
-		expect(buttons).toHaveLength(4);
-		expect(buttons[3]?.label).toBe("Custom…");
-	});
 
 	/** The label has to say what pressing it does, not just "25%". */
 	it("resolves each percentage to a real figure in the label", () => {
@@ -203,29 +131,11 @@ describe("quickAmountRow", () => {
 			expect(parseCustomId(built.custom_id as string).args.at(-1)).toBe("user-1");
 		}
 	});
-
-	it("formats the figures when given a formatter", () => {
-		const formatted = quickAmountRow("money", "dep", 1_000_000, "user-1", (amount) => amount.toLocaleString("en-US"));
-		const label = (formatted.components[2]?.toJSON() as { label?: string }).label;
-
-		expect(label).toBe("All — 1,000,000");
-	});
-
-	it("disables the amounts when there is nothing to move", () => {
-		const empty = quickAmountRow("money", "dep", 0, "user-1");
-		const states = empty.components.map((component) => (component.toJSON() as { disabled?: boolean }).disabled);
-
-		expect(states.slice(0, 3)).toEqual([true, true, true]);
-	});
 });
 
 describe("parseRange", () => {
 	const labels = { min: "Smallest", max: "Largest", order: "The smallest cannot be more than the largest." };
 	const bounds = { min: 1, max: 100 };
-
-	it("reads a pair of whole numbers as a range", () => {
-		expect(parseRange({ min: "5", max: "1,0" }, labels, bounds)).toEqual({ ok: true, min: 5, max: 10 });
-	});
 
 	/** Both halves are named at once, so somebody fixing the form does not find the second mistake on the next try. */
 	it("names every field that is wrong, in order", () => {

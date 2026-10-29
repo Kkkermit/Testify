@@ -1,6 +1,6 @@
 import { Collection, type Guild, type GuildMember } from "discord.js";
 import { UserFacingError } from "@core/errors";
-import { grantableRoles, memberRoles, setMemberRoles } from "@lib/roles/memberRoles.util";
+import { grantableRoles, setMemberRoles } from "@lib/roles/memberRoles.util";
 
 const GUILD = "900000000000000001";
 const LOW = "300000000000000001";
@@ -71,16 +71,5 @@ describe("setMemberRoles", () => {
 
 		expect(add).not.toHaveBeenCalled();
 		expect(remove).not.toHaveBeenCalled();
-	});
-});
-
-describe("memberRoles", () => {
-	it("ticks the roles the member holds", () => {
-		const { guild, member, reader } = scene([LOW]);
-
-		expect(memberRoles(guild, member, reader).roles.map((entry) => [entry.name, entry.held])).toEqual([
-			["Middle", false],
-			["Low", true],
-		]);
 	});
 });

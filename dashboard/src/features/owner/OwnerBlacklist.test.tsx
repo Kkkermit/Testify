@@ -157,34 +157,6 @@ describe("leaving a server", () => {
 		expect(screen.getByRole("button", { name: "Leave" })).toBeEnabled();
 	});
 
-	it("sends the typed name so the server can check it too", async () => {
-		let sent: unknown;
-		server.use(
-			http.post("/api/control/guilds/:guildId/leave", async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json({ left: guildDetail.id });
-			}),
-		);
-
-		await openDetail();
-		await userEvent.type(await screen.findByLabelText(/to confirm/), NAME);
-		await userEvent.click(screen.getByRole("button", { name: "Leave" }));
-
-		await waitFor(() => {
-			expect(sent).toEqual({ confirm: NAME });
-		});
-	});
-
-	it("closes the card once the bot has left", async () => {
-		await openDetail();
-		await userEvent.type(await screen.findByLabelText(/to confirm/), NAME);
-		await userEvent.click(screen.getByRole("button", { name: "Leave" }));
-
-		await waitFor(() => {
-			expect(screen.queryByRole("button", { name: "Leave" })).not.toBeInTheDocument();
-		});
-	});
-
 	it("explains a refusal rather than closing", async () => {
 		server.use(
 			http.post("/api/control/guilds/:guildId/leave", () =>

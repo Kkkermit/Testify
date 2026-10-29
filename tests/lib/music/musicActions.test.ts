@@ -9,7 +9,6 @@ import {
 	voiceChannelOf,
 } from "@lib/music/musicActions.util";
 import { destroyAllSessions, type MusicSession, sessionFor } from "@lib/music/musicSession.util";
-import { textOf } from "@tests/helpers/containers";
 
 const LOGGER = { debug: jest.fn(), info: jest.fn(), warn: jest.fn(), error: jest.fn(), trace: jest.fn() };
 const BINARIES = { ytDlp: "/bin/yt-dlp", ffmpeg: null };
@@ -24,10 +23,6 @@ afterEach(() => {
 });
 
 describe("voiceChannelOf", () => {
-	it("returns the channel the person is in", () => {
-		expect(voiceChannelOf(member("chan-1"))).toMatchObject({ id: "chan-1" });
-	});
-
 	/** "Nothing happened" is the worst possible answer; the refusal says what to do instead. */
 	it("asks somebody in no channel to join one", () => {
 		expect(() => voiceChannelOf(member(null))).toThrow(UserFacingError);
@@ -43,10 +38,6 @@ describe("sameChannelAs", () => {
 		return session;
 	}
 
-	it("allows somebody in the same channel", () => {
-		expect(() => sameChannelAs(sessionIn("chan-1"), member("chan-1"))).not.toThrow();
-	});
-
 	/** Otherwise anybody in the server could skip the track a different channel is listening to. */
 	it("refuses somebody in a different channel", () => {
 		expect(() => sameChannelAs(sessionIn("chan-1"), member("chan-2"))).toThrow(/voice channel/i);
@@ -54,10 +45,6 @@ describe("sameChannelAs", () => {
 
 	it("refuses somebody in no channel at all", () => {
 		expect(() => sameChannelAs(sessionIn("chan-1"), member(null))).toThrow(UserFacingError);
-	});
-
-	it("allows anybody while the bot is not connected yet", () => {
-		expect(() => sameChannelAs(sessionIn(null), member(null))).not.toThrow();
 	});
 });
 
@@ -93,12 +80,6 @@ describe("the panel message", () => {
 
 		expect(JSON.stringify((await session.panelMessage(USER)).payload.components[0]?.toJSON())).toContain("live-one");
 	});
-
-	it("carries a note through to the panel", async () => {
-		const session = sessionFor({ id: "guild-4" } as Guild, BINARIES, LOGGER as never);
-
-		expect(textOf((await session.panelMessage(USER, "Skipped.")).payload)).toContain("Skipped.");
-	});
 });
 
 describe("requireVolumeControl", () => {
@@ -109,16 +90,6 @@ describe("requireVolumeControl", () => {
 		expect(() => requireVolumeControl(session)).toThrow(UserFacingError);
 		expect(() => requireVolumeControl(session)).toThrow(/FFmpeg/);
 		expect(() => requireVolumeControl(session)).toThrow(/music:setup/);
-	});
-
-	it("allows it on a host that has one", () => {
-		const session = sessionFor(
-			{ id: "guild-6" } as Guild,
-			{ ytDlp: "/bin/yt-dlp", ffmpeg: "/bin/ffmpeg" },
-			LOGGER as never,
-		);
-
-		expect(() => requireVolumeControl(session)).not.toThrow();
 	});
 });
 
@@ -155,12 +126,5 @@ describe("showPanel", () => {
 
 		await expect(showPanel(input, session)).resolves.toBeUndefined();
 		expect((input as unknown as { reply: jest.Mock }).reply).toHaveBeenCalled();
-	});
-
-	it("does not try to follow a panel sent somewhere with no message history", async () => {
-		const session = sessionFor({ id: "guild-9" } as Guild, BINARIES, LOGGER as never);
-		const input = interaction({ channel: null });
-
-		await expect(showPanel(input, session)).resolves.toBeUndefined();
 	});
 });

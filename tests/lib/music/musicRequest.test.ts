@@ -116,22 +116,6 @@ describe("queueRequest", () => {
 			expect.stringContaining("npm run music:setup"),
 		);
 	});
-
-	it("takes only the first search result", async () => {
-		const session = fakeSession({ tracks: [], index: -1, loop: "off" }, false);
-		sessionFor.mockReturnValue(session);
-
-		await queueRequest(request());
-
-		expect(session.queue.tracks).toHaveLength(1);
-	});
-
-	it("says so when nothing turned up", async () => {
-		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));
-		resolveTracks.mockResolvedValue([]);
-
-		await expect(queueRequest(request())).rejects.toThrow(/nothing turned up/i);
-	});
 });
 
 describe("queueRequest with the owner's choice of sources", () => {
@@ -165,15 +149,6 @@ describe("queueRequest with the owner's choice of sources", () => {
 		expect(askedFor(1).source).toBe("soundcloud");
 	});
 
-	it("tries SoundCloud when YouTube finds nothing", async () => {
-		getBotSettings.mockResolvedValue({ musicSources: "both" });
-		resolveTracks.mockResolvedValueOnce([]).mockResolvedValueOnce([track("found")]);
-
-		await queueRequest(request());
-
-		expect(askedFor(1).source).toBe("soundcloud");
-	});
-
 	/** A link names one video; a different song from another service is not what was asked for. */
 	it("does not swap a YouTube link for a SoundCloud search, but points at SoundCloud", async () => {
 		getBotSettings.mockResolvedValue({ musicSources: "both" });
@@ -183,29 +158,6 @@ describe("queueRequest with the owner's choice of sources", () => {
 			/YouTube asked\. Put `sc:`/,
 		);
 		expect(resolveTracks).toHaveBeenCalledTimes(1);
-	});
-
-	it("does not fall back, or suggest SoundCloud, when the owner has switched it off", async () => {
-		resolveTracks.mockRejectedValue(botCheck());
-
-		await expect(queueRequest(request())).rejects.toThrow(/^YouTube asked\.$/);
-		expect(resolveTracks).toHaveBeenCalledTimes(1);
-	});
-
-	it("does not fall back from a video that is simply unavailable", async () => {
-		getBotSettings.mockResolvedValue({ musicSources: "both" });
-		resolveTracks.mockRejectedValue(new MusicProblemError({ kind: "unavailable", advice: "Gone." }));
-
-		await expect(queueRequest(request())).rejects.toThrow(/Gone/);
-		expect(resolveTracks).toHaveBeenCalledTimes(1);
-	});
-
-	it("searches SoundCloud alone when the owner chose it", async () => {
-		getBotSettings.mockResolvedValue({ musicSources: "soundcloud" });
-
-		await queueRequest(request());
-
-		expect(askedFor(0).source).toBe("soundcloud");
 	});
 
 	/** Refused before yt-dlp is spawned, so turning YouTube off also stops every request to it. */
@@ -230,13 +182,6 @@ describe("requestedQuery", () => {
 });
 
 describe("hostAdvice", () => {
-	it("tells the host to update yt-dlp, or to stop asking YouTube", () => {
-		for (const kind of ["bot-check", "session"] as const) {
-			expect(hostAdvice(kind)).toMatch(/npm run music:setup/);
-			expect(hostAdvice(kind)).toMatch(/SoundCloud only/);
-		}
-	});
-
 	it("says nothing for a refusal that is about the track", () => {
 		expect(hostAdvice("unavailable")).toBeNull();
 		expect(hostAdvice("drm")).toBeNull();

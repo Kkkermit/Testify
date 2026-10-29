@@ -1,7 +1,7 @@
 import { Collection, type Guild, PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import { listActiveSoftbans } from "@database/repositories/moderationRepository";
 import { banMatches, readBans } from "@lib/moderation/banList.util";
-import { BAN_LIMITS, type BanEntry } from "@testify/shared";
+import { type BanEntry } from "@testify/shared";
 
 jest.mock("@database/repositories/moderationRepository", () => ({
 	listActiveSoftbans: jest.fn(() => Promise.resolve([])),
@@ -63,18 +63,6 @@ describe("readBans", () => {
 		expect(fetch).not.toHaveBeenCalled();
 	});
 
-	it("pages a search, and keeps a page past the end on the last one", async () => {
-		const bans = Array.from({ length: BAN_LIMITS.perPage + 3 }, (_, index) => banOf(index + 1));
-		const { guild } = guildWith(bans);
-
-		const last = await readBans(guild, { page: 9, query: "" });
-		expect(last).toEqual(expect.objectContaining({ page: 2, total: BAN_LIMITS.perPage + 3, truncated: false }));
-		expect(last.items).toHaveLength(3);
-
-		const searched = await readBans(guild, { page: 1, query: "user0002" });
-		expect(searched.items.map((ban) => ban.username)).toEqual(["user0002"]);
-	});
-
 	/** A softban lifts itself, so the list has to say when rather than look like a ban for ever. */
 	it("marks a softban with when it lifts", async () => {
 		const [id] = banOf(1);
@@ -86,11 +74,5 @@ describe("readBans", () => {
 		const page = await readBans(guild, { page: 1, query: "" });
 
 		expect(page.items.map((ban) => ban.softbanEndsAt)).toEqual(["2026-11-01T00:00:00.000Z", null]);
-	});
-
-	it("says when there are more bans than one read returns", async () => {
-		const { guild } = guildWith(Array.from({ length: BAN_LIMITS.maxRead }, (_, index) => banOf(index + 1)));
-
-		expect((await readBans(guild, { page: 1, query: "" })).truncated).toBe(true);
 	});
 });

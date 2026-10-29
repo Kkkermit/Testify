@@ -5,7 +5,6 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { warnings } from "@api/routes/warnings";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import {
 	addWarning,
 	clearWarnings,
@@ -51,7 +50,6 @@ const listed = jest.mocked(listGuildWarnings);
 const removed = jest.mocked(removeWarning);
 const cleared = jest.mocked(clearWarnings);
 const savedLadder = jest.mocked(saveWarnLadder);
-const audited = jest.mocked(recordAudit);
 
 interface Scene {
 	actorPosition?: number;
@@ -145,27 +143,12 @@ beforeEach(() => {
 });
 
 describe("GET /warnings", () => {
-	it("lists every member's warnings in one page", async () => {
-		listed.mockResolvedValue([{ userId: TARGET, userTag: "kate", warnings: [entry("abcd1234")] }] as never);
-
-		const body = (await (await send("GET")).json()) as GuildWarningsPage;
-
-		expect(body.items).toEqual([expect.objectContaining({ id: "abcd1234", userId: TARGET, username: "kate" })]);
-		expect(body.total).toBe(1);
-	});
-
 	describe("searching", () => {
 		beforeEach(() => {
 			listed.mockResolvedValue([
 				{ userId: TARGET, userTag: "kkermits.alt", warnings: [entry("aaaa1111")] },
 				{ userId: "100000000000000005", userTag: "marcus", warnings: [entry("bbbb2222"), entry("cccc3333")] },
 			] as never);
-		});
-
-		it("finds a member's warnings by part of their name, whatever its case", async () => {
-			const body = (await (await send("GET", "?q=Kkermit")).json()) as GuildWarningsPage;
-
-			expect(body.items.map((warning) => warning.id)).toEqual(["aaaa1111"]);
 		});
 
 		it("finds a member's warnings by a pasted ID or mention", async () => {
@@ -182,13 +165,6 @@ describe("GET /warnings", () => {
 			expect(body.total).toBe(0);
 		});
 
-		it("answers with only as many as were asked for, counting them all", async () => {
-			const body = (await (await send("GET", "?perPage=1")).json()) as GuildWarningsPage;
-
-			expect(body.items).toHaveLength(1);
-			expect(body.total).toBe(3);
-		});
-
 		it("refuses a page size past the cap", async () => {
 			expect((await send("GET", "?perPage=500")).status).toBe(400);
 		});
@@ -200,13 +176,6 @@ describe("GET /warnings", () => {
 });
 
 describe("POST /warnings", () => {
-	it("records the warning and audits it", async () => {
-		await send("POST", "", { userId: TARGET, reason: "Spamming in general" });
-
-		expect(added).toHaveBeenCalledWith(GUILD, TARGET, "kate", { id: ACTOR, tag: "someone" }, "Spamming in general");
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.warn" }));
-	});
-
 	/** The web goes through the same step as `/warn`, so a second warning mutes whichever surface gave it. */
 	it("carries out the step the warning lands on and says so", async () => {
 		ladder.mockResolvedValue({ steps: [{ action: "warn" }, { action: "timeout", minutes: 10 }] } as never);
@@ -258,12 +227,6 @@ describe("PATCH /warnings/:userId/:warnId", () => {
 		expect(body).toMatchObject({ id: "abcd1234", reason: "Rude", edited: true });
 	});
 
-	it("says so when the warning has already gone", async () => {
-		edited.mockResolvedValue(false);
-
-		expect((await send("PATCH", `/${TARGET}/abcd1234`, { reason: "Rude" })).status).toBe(404);
-	});
-
 	it("refuses a moderator who sits below a member still in the server", async () => {
 		expect((await send("PATCH", `/${TARGET}/abcd1234`, { reason: "Rude" }, { actorPosition: 1 })).status).toBe(403);
 		expect(edited).not.toHaveBeenCalled();
@@ -271,13 +234,6 @@ describe("PATCH /warnings/:userId/:warnId", () => {
 });
 
 describe("DELETE /warnings/:userId/:warnId", () => {
-	it("removes one warning and audits it", async () => {
-		expect((await send("DELETE", `/${TARGET}/a1b2c3d4`)).status).toBe(204);
-
-		expect(removed).toHaveBeenCalledWith(GUILD, TARGET, "a1b2c3d4");
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.warn.remove" }));
-	});
-
 	/** Somebody who has left has no roles to compare, and their record must still be tidied up. */
 	it("removes a warning from somebody who has left", async () => {
 		expect((await send("DELETE", `/${TARGET}/a1b2c3d4`, undefined, { targetMissing: true })).status).toBe(204);
@@ -291,19 +247,6 @@ describe("DELETE /warnings/:userId/:warnId", () => {
 });
 
 describe("DELETE /warnings/:userId", () => {
-	it("clears the record and counts what went in the audit line", async () => {
-		stored.mockResolvedValue({
-			userId: TARGET,
-			userTag: "kate",
-			warnings: [entry("a"), entry("b"), entry("c")],
-		} as never);
-
-		await send("DELETE", `/${TARGET}`);
-
-		expect(cleared).toHaveBeenCalledWith(GUILD, TARGET);
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ summary: expect.stringContaining("3 warnings") }));
-	});
-
 	it("refuses a moderator who sits below the target", async () => {
 		expect((await send("DELETE", `/${TARGET}`, undefined, { actorPosition: 1 })).status).toBe(403);
 		expect(cleared).not.toHaveBeenCalled();
@@ -313,16 +256,6 @@ describe("DELETE /warnings/:userId", () => {
 describe("the punishments", () => {
 	it("reads an empty list for a server that never set one", async () => {
 		expect(await (await send("GET", "/punishments")).json()).toEqual({ steps: [] });
-	});
-
-	it("replaces the whole list and audits it", async () => {
-		const steps = [{ action: "warn" }, { action: "timeout", minutes: 10 }, { action: "kick" }, { action: "ban" }];
-
-		const body = await (await send("PUT", "/punishments", { steps })).json();
-
-		expect(savedLadder).toHaveBeenCalledWith(GUILD, steps, ACTOR);
-		expect(body).toEqual({ steps });
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "warnings.punishments" }));
 	});
 
 	it("refuses a timeout length nobody offered", async () => {

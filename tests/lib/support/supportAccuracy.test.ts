@@ -41,32 +41,41 @@ describe("the help articles", () => {
 		expect(SUPPORT_TOPICS.filter((topic) => topic !== "commands" && !topics.has(topic))).toEqual([]);
 	});
 
-	it.each(bodies)("%s names only commands and subcommands that exist", (_id, body) => {
-		const wrong: string[] = [];
+	it("name only commands and subcommands that exist", () => {
+		const wrong = bodies.flatMap(([id, body]) => {
+			const named: string[] = [];
 
-		for (const [, name = "", sub] of body.matchAll(/`\/([a-z0-9-]+)(?: ([a-z0-9-]+))?/g)) {
-			const command = client.commands.get(name);
-			if (command === undefined) wrong.push(`/${name}`);
-			else if (
-				sub !== undefined &&
-				command.subcommands !== undefined &&
-				!command.subcommands.some((s) => s.name === sub)
-			) {
-				wrong.push(`/${name} ${sub}`);
+			for (const [, name = "", sub] of body.matchAll(/`\/([a-z0-9-]+)(?: ([a-z0-9-]+))?/g)) {
+				const command = client.commands.get(name);
+				if (command === undefined) named.push(`/${name}`);
+				else if (
+					sub !== undefined &&
+					command.subcommands !== undefined &&
+					!command.subcommands.some((s) => s.name === sub)
+				) {
+					named.push(`/${name} ${sub}`);
+				}
 			}
-		}
 
-		for (const [, name = ""] of body.matchAll(/`\{prefix\}([a-z0-9-]+)/g)) {
-			if (!client.commands.has(name) && !client.aliases.has(name)) wrong.push(`{prefix}${name}`);
-		}
+			for (const [, name = ""] of body.matchAll(/`\{prefix\}([a-z0-9-]+)/g)) {
+				if (!client.commands.has(name) && !client.aliases.has(name)) named.push(`{prefix}${name}`);
+			}
+
+			return named.map((name) => `${id}: ${name}`);
+		});
 
 		expect(wrong).toEqual([]);
 	});
 
-	it.each(bodies)("%s links only to dashboard pages that exist", (_id, body) => {
-		const paths = [...body.matchAll(/\]\((\/[^)]*)\)/g)].map((match) => (match[1] ?? "").split("?")[0] ?? "");
+	it("link only to dashboard pages that exist", () => {
+		const wrong = bodies.flatMap(([id, body]) =>
+			[...body.matchAll(/\]\((\/[^)]*)\)/g)]
+				.map((match) => (match[1] ?? "").split("?")[0] ?? "")
+				.filter((path) => !routes.includes(path))
+				.map((path) => `${id}: ${path}`),
+		);
 
-		expect(paths.filter((path) => !routes.includes(path))).toEqual([]);
+		expect(wrong).toEqual([]);
 	});
 
 	it("has the dashboard's routes to check against, so a broken pattern cannot pass vacuously", () => {
@@ -81,9 +90,8 @@ describe("every answer, as Discord would receive it", () => {
 		topic: "setup" as const,
 	}));
 
-	it.each(entries.map((entry) => [entry.id, entry] as const))(
-		"%s fits in one message, placeholders filled",
-		(_id, entry) => {
+	it("each fit in one message, with every placeholder filled", () => {
+		const wrong = entries.flatMap((entry) => {
 			const answer = {
 				id: entry.id,
 				title: fillPlaceholders(entry.title, context),
@@ -99,9 +107,14 @@ describe("every answer, as Discord would receive it", () => {
 					supportServer: "https://discord.gg/example",
 				},
 			);
+			const length = textOf(screen).length;
 
-			expect(textOf(screen).length).toBeLessThanOrEqual(DISCORD_TEXT_MAX);
-			expect(answer.body).not.toMatch(/\{(?:fact:[^}]*|bot|prefix|repository)\}/);
-		},
-	);
+			return [
+				...(length > DISCORD_TEXT_MAX ? [`${entry.id}: ${String(length)} characters`] : []),
+				...(/\{(?:fact:[^}]*|bot|prefix|repository)\}/.test(answer.body) ? [`${entry.id}: a placeholder left`] : []),
+			];
+		});
+
+		expect(wrong).toEqual([]);
+	});
 });

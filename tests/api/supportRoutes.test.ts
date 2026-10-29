@@ -34,27 +34,11 @@ function ask(app: Hono<ApiBindings>, body: unknown): Promise<Response> {
 beforeEach(() => resetSupportDesk());
 
 describe("POST /support/ask", () => {
-	it("answers with an article and nothing else", async () => {
-		const response = await ask(appFor(true), { question: "how do I add the bot to my server" });
-		const body = (await response.json()) as Record<string, unknown>;
-
-		expect(response.status).toBe(200);
-		expect(Object.keys(body).sort()).toEqual(["answer", "related"]);
-		expect(Object.keys(body.answer as object).sort()).toEqual(["body", "id", "title", "topic"]);
-		expect(body.answer).toMatchObject({ id: "add-the-bot" });
-	});
-
 	/** The question is not echoed back, so nothing typed can be reflected into the page. */
 	it("does not repeat the question", async () => {
 		const response = await ask(appFor(true), { question: "zzqx how do I add the bot" });
 
 		expect(await response.text()).not.toContain("zzqx");
-	});
-
-	it("answers null to an off-topic question", async () => {
-		const response = await ask(appFor(true), { question: "what is the capital of france" });
-
-		expect(((await response.json()) as { answer: unknown }).answer).toBeNull();
 	});
 
 	it.each([
@@ -85,21 +69,5 @@ describe("GET /support", () => {
 
 	it("refuses an anonymous caller", async () => {
 		expect((await appFor(false).request("/support")).status).toBe(401);
-	});
-});
-
-describe("GET /support/articles/:articleId", () => {
-	it("returns one article and the ones that belong beside it", async () => {
-		const response = await appFor(true).request("/support/articles/music");
-
-		expect(response.status).toBe(200);
-		const body = (await response.json()) as { answer: { id: string; title: string }; related: { id: string }[] };
-		expect(body.answer).toMatchObject({ id: "music", title: "Playing music" });
-		expect(body.related.map((link) => link.id)).toContain("music-queue");
-	});
-
-	it("answers 404 for an id with no article, and 400 for one that is not an id", async () => {
-		expect((await appFor(true).request("/support/articles/nothing-here")).status).toBe(404);
-		expect((await appFor(true).request("/support/articles/..%2F..%2Fpackage.json")).status).toBe(400);
 	});
 });

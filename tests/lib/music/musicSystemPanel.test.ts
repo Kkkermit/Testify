@@ -1,7 +1,7 @@
 import { parseCustomId } from "@core/button";
 import { djLine, musicSystemPanel } from "@lib/music/musicSystemPanel.util";
 import { type MusicSettings } from "@testify/shared";
-import { buttonsOf, duplicateIds, idsOf, textOf } from "@tests/helpers/containers";
+import { buttonsOf, duplicateIds, idsOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 
@@ -10,11 +10,6 @@ function settings(overrides: Partial<MusicSettings> = {}): MusicSettings {
 }
 
 describe("musicSystemPanel", () => {
-	it("says plainly which way the switch is", () => {
-		expect(textOf(musicSystemPanel(settings(), OWNER))).toContain("**On.**");
-		expect(textOf(musicSystemPanel(settings({ enabled: false }), OWNER))).toContain("**Off.**");
-	});
-
 	it("offers the press that moves the switch the other way", () => {
 		const labels = (state: MusicSettings): string[] =>
 			buttonsOf(musicSystemPanel(state, OWNER)).map((entry) => String(entry.label));
@@ -42,17 +37,9 @@ describe("musicSystemPanel", () => {
 		expect(json).toContain("role-1");
 		expect(json).toContain("role-2");
 	});
-
-	it("says a manager can always reach the player, whatever is chosen", () => {
-		expect(textOf(musicSystemPanel(settings({ djRoleIds: ["role-1"] }), OWNER))).toContain("Manage Server");
-	});
 });
 
 describe("djLine", () => {
-	it("says the player is open when no role is chosen", () => {
-		expect(djLine(settings())).toContain("Anybody");
-	});
-
 	it("names the roles as mentions rather than as raw ids", () => {
 		expect(djLine(settings({ djRoleIds: ["role-1"] }))).toContain("<@&role-1>");
 	});

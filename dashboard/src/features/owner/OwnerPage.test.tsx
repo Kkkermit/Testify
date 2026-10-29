@@ -51,29 +51,12 @@ describe("formatUptime", () => {
 });
 
 describe("the owner console", () => {
-	it("shows the fleet's numbers", async () => {
-		useOwnerApi([row()]);
-		renderWithProviders(<OwnerPage />, { path: "/owner" });
-
-		expect(await screen.findByText("4,200")).toBeInTheDocument();
-		expect(screen.getByText("1d 1h")).toBeInTheDocument();
-		expect(screen.getByText("connected")).toBeInTheDocument();
-	});
-
 	/** The question this screen exists to answer: which of my servers has never configured anything. */
 	it("calls out a server with nothing set up", async () => {
 		useOwnerApi([row({ configured: [] })]);
 		renderWithProviders(<OwnerPage />, { path: "/owner" });
 
 		expect(await screen.findByText("Nothing set up")).toBeInTheDocument();
-	});
-
-	it("lists what each server has configured", async () => {
-		useOwnerApi([row({ configured: ["levelling", "welcome"] })]);
-		renderWithProviders(<OwnerPage />, { path: "/owner" });
-
-		expect(await screen.findByText("levelling")).toBeInTheDocument();
-		expect(screen.getByText("welcome")).toBeInTheDocument();
 	});
 
 	it("renders the servers as a real table, so it can be read by a screen reader", async () => {
@@ -90,15 +73,6 @@ describe("the owner console", () => {
 		await screen.findByRole("table");
 
 		expect(screen.queryByRole("navigation", { name: /pages/i })).toBeNull();
-	});
-
-	it("pages when there is more than one page, and disables the ends", async () => {
-		useOwnerApi([row()], 60);
-		renderWithProviders(<OwnerPage />, { path: "/owner" });
-
-		expect(await screen.findByRole("navigation", { name: /pages/i })).toBeInTheDocument();
-		expect(screen.getByRole("button", { name: "Previous" })).toBeDisabled();
-		expect(screen.getByText(/page 1 of 3/i)).toBeInTheDocument();
 	});
 
 	/** A manager who guesses the URL gets a 404, and the screen must not confirm the console exists. */

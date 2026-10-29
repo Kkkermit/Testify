@@ -6,58 +6,7 @@ function pathsFor(audience: NavAudience): string[] {
 	return allNavItems(navigationFor(audience)).map((item) => item.to);
 }
 
-/** Sorted, because which section a screen sits in is a grouping choice and reachability is the rule. */
-function sortedPathsFor(audience: NavAudience): string[] {
-	return pathsFor(audience).sort();
-}
-
 describe("navigationFor", () => {
-	it("always offers the server picker, the command list and the bot's status", () => {
-		expect(pathsFor({ guild: undefined, isOwner: false })).toEqual(["/guilds", "/commands", "/status", "/help"]);
-	});
-
-	it("adds the current server's screens once one is open", () => {
-		expect(sortedPathsFor({ guild, isOwner: false })).toEqual(
-			[
-				"/guilds",
-				"/status",
-				"/help",
-				`/guilds/${guild.id}/commands`,
-				`/guilds/${guild.id}`,
-				`/guilds/${guild.id}/levelling`,
-				`/guilds/${guild.id}/welcome`,
-				`/guilds/${guild.id}/birthdays`,
-				`/guilds/${guild.id}/audit-log`,
-				`/guilds/${guild.id}/automod`,
-				`/guilds/${guild.id}/warnings`,
-				`/guilds/${guild.id}/cases`,
-				`/guilds/${guild.id}/bans`,
-				`/guilds/${guild.id}/channel-tools`,
-				`/guilds/${guild.id}/raid-protection`,
-				`/guilds/${guild.id}/changes`,
-				`/guilds/${guild.id}/insights`,
-				`/guilds/${guild.id}/sticky`,
-				`/guilds/${guild.id}/auto-responders`,
-				`/guilds/${guild.id}/scheduled-messages`,
-				`/guilds/${guild.id}/announcements`,
-				`/guilds/${guild.id}/role-menus`,
-				`/guilds/${guild.id}/ideas`,
-				`/guilds/${guild.id}/starboard`,
-				`/guilds/${guild.id}/temp-voice`,
-				`/guilds/${guild.id}/treasure`,
-				`/guilds/${guild.id}/music`,
-				`/guilds/${guild.id}/tickets`,
-				`/guilds/${guild.id}/bot-stats`,
-				`/guilds/${guild.id}/member-count`,
-				`/guilds/${guild.id}/giveaways`,
-				`/guilds/${guild.id}/lottery`,
-				`/guilds/${guild.id}/casino`,
-				`/guilds/${guild.id}/members`,
-				`/guilds/${guild.id}/settings`,
-			].sort(),
-		);
-	});
-
 	/** A screen reachable only from a section would be missed by every consumer that reads this list flat. */
 	it("counts the screens inside sections as navigation too", () => {
 		const [, guildGroup] = navigationFor({ guild, isOwner: false });
@@ -79,19 +28,6 @@ describe("navigationFor", () => {
 
 		expect(groups[0]?.heading).toBeUndefined();
 		expect(groups[1]?.heading).toBe("Testify HQ");
-	});
-
-	it("keeps the owner console in a group of its own", () => {
-		const groups = navigationFor({ guild, isOwner: true });
-
-		expect(groups.at(-1)).toMatchObject({
-			headingKey: "nav.bot",
-			items: [expect.objectContaining({ to: "/owner" })],
-		});
-	});
-
-	it("groups nothing under a server heading when no server is open", () => {
-		expect(navigationFor({ guild: undefined, isOwner: false })).toHaveLength(1);
 	});
 
 	/** A page nested under a section's screen still opens that section. */

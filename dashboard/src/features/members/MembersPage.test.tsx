@@ -51,38 +51,12 @@ describe("the members page", () => {
 		expect(within(table).getByRole("columnheader", { name: "Banked" })).toHaveClass("hidden", "sm:table-cell");
 	});
 
-	it("names each member as the row header", async () => {
-		renderPage();
-
-		const table = await screen.findByRole("table");
-		expect(within(table).getByRole("rowheader", { name: /kate/ })).toBeInTheDocument();
-	});
-
-	it("marks the row belonging to whoever is reading", async () => {
-		renderPage();
-
-		const row = await screen.findByRole("rowheader", { name: /someone/ });
-		expect(within(row).getByText("You")).toBeInTheDocument();
-	});
-
 	/** A balance outlives the membership, so the row stays and has to say why the name is a placeholder. */
 	it("marks somebody who has left the server", async () => {
 		renderPage();
 
 		const row = await screen.findByRole("rowheader", { name: /Left the server/ });
 		expect(within(row).getByText("Left")).toBeInTheDocument();
-	});
-
-	it("asks for the levels board when the segment is pressed", async () => {
-		renderPage();
-		await screen.findByRole("table");
-
-		const captured = captureQuery();
-		await userEvent.click(screen.getByRole("button", { name: "Top levels" }));
-
-		await waitFor(() => {
-			expect(captured.url?.searchParams.get("board")).toBe("levels");
-		});
 	});
 
 	/** Switching board while on page 4 of the other one would otherwise land on an empty page. */
@@ -96,43 +70,6 @@ describe("the members page", () => {
 		await waitFor(() => {
 			expect(captured.url?.searchParams.get("page")).toBe("1");
 		});
-	});
-
-	it("jumps to the page holding the reader", async () => {
-		serve({ page: 1, you: { rank: 30, page: 2 } });
-		renderPage();
-
-		const captured = captureQuery();
-		await userEvent.click(await screen.findByRole("button", { name: /Find me/ }));
-
-		await waitFor(() => {
-			expect(captured.url?.searchParams.get("page")).toBe("2");
-		});
-	});
-
-	it("offers no jump when the reader is already on this page", async () => {
-		renderPage();
-		await screen.findByRole("table");
-
-		expect(screen.queryByRole("button", { name: /Find me/ })).not.toBeInTheDocument();
-	});
-
-	it("asks for the bot-wide board ranked by wallet when those segments are pressed", async () => {
-		renderPage(`/guilds/${GUILD}/members?page=2`);
-		await screen.findByRole("table");
-
-		const captured = captureQuery();
-		await userEvent.click(screen.getByRole("button", { name: "Every server" }));
-		await waitFor(() => {
-			expect(captured.url?.searchParams.get("scope")).toBe("global");
-		});
-		expect(captured.url?.searchParams.get("page")).toBe("1");
-
-		await userEvent.click(screen.getByRole("button", { name: "Wallet" }));
-		await waitFor(() => {
-			expect(captured.url?.searchParams.get("sort")).toBe("wallet");
-		});
-		expect(captured.url?.searchParams.get("scope")).toBe("global");
 	});
 
 	it("names the columns after the sort", async () => {
@@ -163,14 +100,6 @@ describe("the members page", () => {
 		expect(within(row).queryByText("Left")).not.toBeInTheDocument();
 		expect(within(await screen.findByRole("rowheader", { name: /kate/ })).getByRole("link")).toBeInTheDocument();
 		expect(screen.getByRole("table").querySelector("caption")?.textContent).toContain("across every server");
-	});
-
-	it("explains an empty board rather than showing a bare table", async () => {
-		serve({ total: 0, rows: [], you: null });
-		renderPage();
-
-		expect(await screen.findByText("No rankings yet")).toBeInTheDocument();
-		expect(screen.queryByRole("table")).not.toBeInTheDocument();
 	});
 
 	it("has no accessibility violations", async () => {

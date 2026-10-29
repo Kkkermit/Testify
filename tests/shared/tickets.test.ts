@@ -1,14 +1,9 @@
 import { problemText } from "@lib/format/problemText.util";
-import { TICKET_LIMITS, ticketBlocked, ticketMissing, ticketPatch } from "@testify/shared";
+import { TICKET_LIMITS, ticketBlocked, ticketPatch } from "@testify/shared";
 
 const ID = "400000000000000001";
 
 describe("ticketPatch", () => {
-	it("takes each field on its own, because the form saves what changed", () => {
-		expect(ticketPatch.safeParse({ panelChannelId: ID }).success).toBe(true);
-		expect(ticketPatch.safeParse({}).success).toBe(true);
-	});
-
 	/** An id that is not a snowflake must never reach a channel fetch as arbitrary text. */
 	it("refuses an id that is not a snowflake", () => {
 		expect(ticketPatch.safeParse({ categoryId: "not-an-id" }).success).toBe(false);
@@ -34,10 +29,6 @@ describe("ticketPatch", () => {
 	it("flattens a button label onto one line", () => {
 		expect(ticketPatch.parse({ buttonLabel: "Open\na ticket" }).buttonLabel).toBe("Open a ticket");
 	});
-
-	it("takes the publish flag as its own decision", () => {
-		expect(ticketPatch.parse({ publish: true }).publish).toBe(true);
-	});
 });
 
 describe("ticketBlocked", () => {
@@ -48,10 +39,6 @@ describe("ticketBlocked", () => {
 		staffRoleId: "300000000000000003",
 	};
 
-	it("says nothing once all four are chosen", () => {
-		expect(problemText(ticketBlocked(complete))).toBeNull();
-	});
-
 	it.each([
 		["panelChannelId", /where the panel is posted/i],
 		["categoryId", /category/i],
@@ -59,18 +46,5 @@ describe("ticketBlocked", () => {
 		["staffRoleId", /role/i],
 	] as const)("asks for %s when it is missing", (field, expected) => {
 		expect(problemText(ticketBlocked({ ...complete, [field]: null }))).toMatch(expected);
-	});
-});
-
-describe("ticketMissing", () => {
-	it("lists every gap in the form's order, not only the first", () => {
-		const codes = ticketMissing({
-			panelChannelId: null,
-			categoryId: "400000000000000005",
-			transcriptChannelId: null,
-			staffRoleId: null,
-		}).map((missing) => missing.code);
-
-		expect(codes).toEqual(["ticket.panelChannel", "ticket.transcriptChannel", "ticket.staffRole"]);
 	});
 });

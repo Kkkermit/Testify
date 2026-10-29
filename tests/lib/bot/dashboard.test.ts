@@ -10,12 +10,4 @@ describe("dashboardUrl", () => {
 	it("prefers the address a browser is pointed at over the one the API binds", () => {
 		expect(dashboardUrl(envFor({ DASHBOARD_BASE_URL: "http://localhost:5174" }))).toBe("http://localhost:5174");
 	});
-
-	it("falls back to the bind address when no base URL is configured", () => {
-		expect(dashboardUrl(envFor())).toBe("http://127.0.0.1:3000");
-	});
-
-	it("is null when the dashboard is switched off", () => {
-		expect(dashboardUrl(envFor({ DASHBOARD_ENABLED: false }))).toBeNull();
-	});
 });

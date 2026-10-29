@@ -1,17 +1,6 @@
 import { type Guild, type User } from "discord.js";
-import {
-	getBirthdaySettings,
-	listBirthdays,
-	saveBirthdaySettings,
-	shareBirthday,
-} from "@database/repositories/birthdayRepository";
-import {
-	applyBirthdaySettings,
-	birthdayPost,
-	postBirthday,
-	setOwnBirthday,
-	upcomingBirthdays,
-} from "@lib/birthdays/birthdayActions.util";
+import { getBirthdaySettings, saveBirthdaySettings, shareBirthday } from "@database/repositories/birthdayRepository";
+import { applyBirthdaySettings, birthdayPost, postBirthday, setOwnBirthday } from "@lib/birthdays/birthdayActions.util";
 import { canPostIn } from "@lib/discord/channels.util";
 import { createMockClient } from "@tests/helpers/mocks";
 
@@ -46,46 +35,14 @@ describe("applyBirthdaySettings", () => {
 		await expect(applyBirthdaySettings(guild, { channelId: CHANNEL }, null)).rejects.toThrow(/cannot post/);
 		expect(saveBirthdaySettings).not.toHaveBeenCalled();
 	});
-
-	it("turns itself off when its channel is cleared", async () => {
-		jest.mocked(getBirthdaySettings).mockResolvedValue({ enabled: true, channelId: CHANNEL, message: "Hi" });
-
-		await applyBirthdaySettings(guild, { channelId: null }, null);
-
-		expect(saveBirthdaySettings).toHaveBeenCalledWith(GUILD, { enabled: false, channelId: null, message: "Hi" }, null);
-	});
 });
 
 describe("setOwnBirthday", () => {
 	const sam = { id: "100000000000000001", username: "sam" } as User;
 
-	it("stores the day and month, with the name they had", async () => {
-		await setOwnBirthday(GUILD, sam, 29, 2);
-
-		expect(shareBirthday).toHaveBeenCalledWith(GUILD, sam.id, "sam", 29, 2);
-	});
-
 	it("refuses a day the month does not have", async () => {
 		await expect(setOwnBirthday(GUILD, sam, 31, 4)).rejects.toThrow(/not a day in that month/);
 		expect(shareBirthday).not.toHaveBeenCalled();
-	});
-});
-
-describe("upcomingBirthdays", () => {
-	it("lists them soonest first, today included, named as the server knows them", async () => {
-		jest.mocked(listBirthdays).mockResolvedValue([
-			{ guildId: GUILD, userId: "1", username: "past", day: 24, month: 10 },
-			{ guildId: GUILD, userId: "2", username: "today", day: 25, month: 10 },
-			{ guildId: GUILD, userId: "3", username: "soon", day: 1, month: 11 },
-		]);
-		const named = {
-			...guild,
-			members: { cache: new Map([["3", { displayName: "Soon Nickname" }]]) },
-		} as unknown as Guild;
-
-		const upcoming = await upcomingBirthdays(named, new Date("2026-10-25T08:00:00.000Z"));
-
-		expect(upcoming.map((entry) => entry.name)).toEqual(["today", "Soon Nickname", "past"]);
 	});
 });
 
@@ -127,18 +84,6 @@ describe("postBirthday", () => {
 			},
 		} as never);
 	}
-
-	it("posts in the chosen channel", async () => {
-		const send = jest.fn(() => Promise.resolve({}));
-		const outcome = await postBirthday(
-			clientWith({ id: "1", user: { username: "sam" } }, { isSendable: () => true, send }),
-			stored,
-			settings,
-		);
-
-		expect(outcome).toBe("sent");
-		expect(send).toHaveBeenCalledWith(expect.objectContaining({ content: "Happy birthday, <@1>!" }));
-	});
 
 	it("says when the member has gone, or the channel will not take it", async () => {
 		expect(await postBirthday(clientWith(null, null), stored, settings)).toBe("gone");

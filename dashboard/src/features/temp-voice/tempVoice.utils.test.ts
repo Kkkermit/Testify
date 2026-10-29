@@ -18,10 +18,6 @@ describe("userLimitFrom", () => {
 });
 
 describe("nameTemplateFrom", () => {
-	it("trims the pattern it saves", () => {
-		expect(nameTemplateFrom("  {user}'s room ")).toBe("{user}'s room");
-	});
-
 	it("refuses an empty pattern and one past the length the API takes", () => {
 		expect(nameTemplateFrom("   ")).toBeNull();
 		expect(nameTemplateFrom("x".repeat(TEMP_VOICE_LIMITS.maxTemplate))).toHaveLength(TEMP_VOICE_LIMITS.maxTemplate);

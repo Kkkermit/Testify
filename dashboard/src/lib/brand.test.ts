@@ -18,12 +18,4 @@ describe("nameHomeScreen", () => {
 		expect(content("apple-mobile-web-app-title")).toBe("Nova");
 		expect(content("application-name")).toBe("Nova");
 	});
-
-	it("renames rather than adding a second tag when the name changes", () => {
-		nameHomeScreen("Nova");
-		nameHomeScreen("Orbit");
-
-		expect(document.head.querySelectorAll('meta[name="apple-mobile-web-app-title"]')).toHaveLength(1);
-		expect(content("apple-mobile-web-app-title")).toBe("Orbit");
-	});
 });

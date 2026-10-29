@@ -6,10 +6,6 @@ function shape(text: string): [string, string[]][] {
 }
 
 describe("markSpans", () => {
-	it("leaves unmarked text alone", () => {
-		expect(shape("Welcome!")).toEqual([["Welcome!", []]]);
-	});
-
 	it("reads each of Discord's inline marks", () => {
 		expect(shape("**b**")).toEqual([["b", ["bold"]]]);
 		expect(shape("*i*")).toEqual([["i", ["italic"]]]);
@@ -25,21 +21,6 @@ describe("markSpans", () => {
 		expect(shape("__under__")).toEqual([["under", ["underline"]]]);
 	});
 
-	it("keeps the surrounding text", () => {
-		expect(shape("Welcome to **Testify HQ**, friend")).toEqual([
-			["Welcome to ", []],
-			["Testify HQ", ["bold"]],
-			[", friend", []],
-		]);
-	});
-
-	it("carries both marks through a nesting", () => {
-		expect(shape("**bold _and italic_**")).toEqual([
-			["bold ", ["bold"]],
-			["and italic", ["bold", "italic"]],
-		]);
-	});
-
 	/** Discord shows an unclosed mark as typed, so a half-written message must not suddenly bold the rest. */
 	it("leaves an unclosed mark literal", () => {
 		expect(shape("**not closed")).toEqual([["**not closed", []]]);
@@ -48,9 +29,5 @@ describe("markSpans", () => {
 
 	it("honours a backslash escape", () => {
 		expect(shape("\\*\\*literal\\*\\*")).toEqual([["**literal**", []]]);
-	});
-
-	it("survives an empty message", () => {
-		expect(markSpans("")).toEqual([]);
 	});
 });

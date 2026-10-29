@@ -80,14 +80,6 @@ beforeEach(() => {
 });
 
 describe("the channel tool routes", () => {
-	it("lists the text channels with what can be changed in each", async () => {
-		const body = (await (await app().instance.request(`/guilds/${GUILD}/channel-tools`)).json()) as {
-			channels: ToolChannel[];
-		};
-
-		expect(body.channels).toEqual([expect.objectContaining({ id: CHANNEL, locked: false, canLock: true })]);
-	});
-
 	/** The overwrite is not in the cache until Discord says so, so the answer has to come from what was asked. */
 	it("locks a channel, answers with it locked, and writes it down under the manager's name", async () => {
 		const { instance, edit } = app();

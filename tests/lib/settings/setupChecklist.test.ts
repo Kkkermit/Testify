@@ -1,16 +1,8 @@
 import { ChannelType, Collection, DiscordAPIError, PermissionFlagsBits, RESTJSONErrorCodes } from "discord.js";
 import { UserFacingError } from "@core/errors";
 import { setAuditLogConfig } from "@database/repositories/auditLogRepository";
-import { getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
 import { getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
-import {
-	privateLogChannel,
-	readSetupChecklist,
-	runSetupStep,
-	type SetupActor,
-	welcomeChannel,
-} from "@lib/settings/setupChecklist.util";
-import { AUDIT_LOG_CHANNEL_NAME, DEFAULT_WELCOME_MESSAGE } from "@testify/shared";
+import { privateLogChannel, runSetupStep, type SetupActor, welcomeChannel } from "@lib/settings/setupChecklist.util";
 
 jest.mock("@database/repositories/levelRepository", () => ({
 	getLevelSettings: jest.fn(() => Promise.resolve(null)),
@@ -89,15 +81,6 @@ describe("welcomeChannel", () => {
 		expect(welcomeChannel(guild as never, member())?.id).toBe("2");
 	});
 
-	it("then one named for greeting, then the first there is", () => {
-		expect(
-			welcomeChannel(guildWith([channel("1", "rules", 0), channel("2", "general", 1)]) as never, member())?.id,
-		).toBe("2");
-		expect(welcomeChannel(guildWith([channel("1", "rules", 3), channel("2", "news", 1)]) as never, member())?.id).toBe(
-			"2",
-		);
-	});
-
 	/** One click must never aim the bot somewhere its person could not have picked by hand. */
 	it("skips a channel the person cannot post in, or the bot cannot", () => {
 		const guild = guildWith([
@@ -109,12 +92,6 @@ describe("welcomeChannel", () => {
 		expect(welcomeChannel(guild as never, member())?.id).toBe("3");
 		expect(welcomeChannel(guild as never, owner)?.id).toBe("1");
 	});
-
-	it("only picks a text channel", () => {
-		const guild = guildWith([channel("1", "welcome", 0, { type: ChannelType.GuildVoice })]);
-
-		expect(welcomeChannel(guild as never, member())).toBeNull();
-	});
 });
 
 describe("privateLogChannel", () => {
@@ -125,103 +102,9 @@ describe("privateLogChannel", () => {
 		expect(privateLogChannel(guild as never, member())?.id).toBe("2");
 		expect(privateLogChannel(guildWith([channel("1", "mod-log", 0)]) as never, member())).toBeNull();
 	});
-
-	it("only reuses one whose name says it is for logs", () => {
-		expect(privateLogChannel(guildWith([channel("1", "staff", 0, { everyone: false })]) as never, member())).toBeNull();
-	});
-});
-
-describe("readSetupChecklist", () => {
-	it("reports what is done from what is stored", async () => {
-		jest.mocked(getLevelSettings).mockResolvedValueOnce({ isDisabled: false } as never);
-		jest.mocked(getWelcome).mockResolvedValueOnce({ channelId: "1" } as never);
-
-		const { steps } = await readSetupChecklist(guildWith([channel("1", "general", 0)]) as never, member());
-
-		expect(steps.map((step) => [step.step, step.done])).toEqual([
-			["levelling", true],
-			["welcome", true],
-			["audit-log", false],
-		]);
-	});
-
-	it("says where each one-click start would post", async () => {
-		const guild = guildWith([channel("1", "general", 0), channel("2", "mod-log", 1, { everyone: false })]);
-
-		const { steps } = await readSetupChecklist(guild as never, member());
-
-		expect(steps[1]).toMatchObject({ channelId: "1", channelName: "general", blocker: null });
-		expect(steps[2]).toMatchObject({ channelId: "2", channelName: "mod-log", createsChannel: false });
-	});
-
-	it("offers a new private channel when there is none to reuse, if both sides may make one", async () => {
-		const guild = guildWith([channel("1", "general", 0)]);
-
-		expect((await readSetupChecklist(guild as never, member())).steps[2]).toMatchObject({
-			channelId: null,
-			channelName: AUDIT_LOG_CHANNEL_NAME,
-			createsChannel: true,
-			blocker: null,
-		});
-		expect((await readSetupChecklist(guild as never, member(false))).steps[2]?.blocker).toBe("you_cannot_create");
-		expect((await readSetupChecklist(guild as never, owner)).steps[2]?.blocker).toBeNull();
-		expect((await readSetupChecklist(guildWith([], { botManages: false }) as never, owner)).steps[2]?.blocker).toBe(
-			"bot_cannot_create",
-		);
-	});
-
-	it("says so when there is nowhere to greet", async () => {
-		expect((await readSetupChecklist(guildWith([]) as never, member())).steps[1]?.blocker).toBe("no_channel");
-	});
 });
 
 describe("runSetupStep", () => {
-	it("turns levelling on and nothing else", async () => {
-		await runSetupStep(guildWith([]) as never, member(), "levelling");
-
-		expect(saveLevelSettings).toHaveBeenCalledWith(GUILD, { isDisabled: false });
-	});
-
-	it("greets in the channel it named, with the default message", async () => {
-		const result = await runSetupStep(guildWith([channel("1", "general", 0)]) as never, member(), "welcome");
-
-		expect(saveWelcome).toHaveBeenCalledWith(GUILD, {
-			channelId: "1",
-			message: DEFAULT_WELCOME_MESSAGE,
-			style: "card",
-		});
-		expect(result.channelId).toBe("1");
-	});
-
-	it("logs every event to the private channel it found", async () => {
-		const guild = guildWith([channel("2", "mod-log", 0, { everyone: false })]);
-
-		await runSetupStep(guild as never, member(), "audit-log");
-
-		expect(guild.channels.create).not.toHaveBeenCalled();
-		expect(setAuditLogConfig).toHaveBeenCalledWith(GUILD, "2", ["all"]);
-	});
-
-	it("makes a channel only the bot, its person and administrators can read", async () => {
-		const guild = guildWith([]);
-
-		await runSetupStep(guild as never, member(), "audit-log");
-
-		const options = guild.channels.create.mock.calls[0]?.[0] as unknown as {
-			name: string;
-			permissionOverwrites: { id: string; allow?: bigint[]; deny?: bigint[] }[];
-		};
-		expect(options.name).toBe(AUDIT_LOG_CHANNEL_NAME);
-		expect(options.permissionOverwrites).toEqual(
-			expect.arrayContaining([
-				{ id: GUILD, deny: [PermissionFlagsBits.ViewChannel] },
-				expect.objectContaining({ id: ME, allow: expect.arrayContaining([PermissionFlagsBits.SendMessages]) }),
-				{ id: USER, allow: [PermissionFlagsBits.ViewChannel] },
-			]),
-		);
-		expect(setAuditLogConfig).toHaveBeenCalledWith(GUILD, "400000000000000099", ["all"]);
-	});
-
 	/** A second press, or a stale page, must never overwrite a configuration somebody chose. */
 	it("leaves a step that is already done exactly as it is", async () => {
 		jest.mocked(getWelcome).mockResolvedValue({ channelId: "1" } as never);

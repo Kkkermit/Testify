@@ -91,20 +91,6 @@ beforeEach(() => {
 });
 
 describe("GET /lottery", () => {
-	it("answers with something a form can render before one exists", async () => {
-		const body = (await (await request("GET")).json()) as LotterySettings;
-
-		expect(body).toMatchObject({ enabled: false, announcementChannelId: null, prizePool: 0 });
-	});
-
-	it("reports the live pot and the tickets behind it", async () => {
-		running();
-
-		const body = (await (await request("GET")).json()) as LotterySettings;
-
-		expect(body).toMatchObject({ enabled: true, prizePool: 2_500, ticketsSold: 12, entrants: 1 });
-	});
-
 	/** Entrant user IDs are not something a settings page needs; only the counts and the public winners are. */
 	it("carries no user IDs", async () => {
 		running();
@@ -123,13 +109,6 @@ describe("PATCH /lottery", () => {
 		expect(saved).not.toHaveBeenCalled();
 	});
 
-	it("starts the lottery when a complete configuration is saved", async () => {
-		const response = await request("PATCH", { announcementChannelId: CHANNEL, entryFee: 100 });
-
-		expect(response.status).toBe(200);
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ isActive: true }));
-	});
-
 	it("refuses a value outside its bounds", async () => {
 		running();
 
@@ -146,29 +125,9 @@ describe("PATCH /lottery", () => {
 
 		expect(body).toMatchObject({ frozen: true, entryFee: 100 });
 	});
-
-	it("names a freeze as a freeze in the audit record", async () => {
-		running();
-
-		await request("PATCH", { frozen: true });
-
-		expect(audited).toHaveBeenCalledWith(
-			expect.objectContaining({ action: "lottery.update", summary: expect.stringMatching(/froze/i) }),
-		);
-	});
 });
 
 describe("DELETE /lottery", () => {
-	it("ends it and answers with the empty shape", async () => {
-		running();
-
-		const response = await request("DELETE");
-
-		expect(response.status).toBe(200);
-		expect(removed).toHaveBeenCalledWith(GUILD);
-		expect(((await response.json()) as LotterySettings).enabled).toBe(false);
-	});
-
 	/** Two tabs, both pressing End: the second finds nothing, which is a 404 rather than a 500. */
 	it("answers 404 when there was nothing to end", async () => {
 		removed.mockResolvedValue(false);

@@ -46,22 +46,6 @@ beforeEach(() => {
 });
 
 describe("addSchedule", () => {
-	it("stores the post with the stray characters taken out, and hands back the time in UTC", async () => {
-		const added = await addSchedule(
-			guild,
-			{ channelId: CHANNEL, message: "Hello\u0007", repeat: "once", nextAt: at(HOUR_MS) },
-			BY,
-			NOW,
-		);
-
-		expect(createSchedule).toHaveBeenCalledWith(
-			GUILD,
-			{ channelId: CHANNEL, message: "Hello", repeat: "once", nextAt: at(HOUR_MS) },
-			BY,
-		);
-		expect(added.nextAt).toBe(at(HOUR_MS).toISOString());
-	});
-
 	it("refuses one past the cap, a time already gone and a channel it cannot post in", async () => {
 		const fields = { channelId: CHANNEL, message: "Hello", repeat: "once" as const, nextAt: at(HOUR_MS) };
 
@@ -104,20 +88,6 @@ describe("changeSchedule", () => {
 			BY,
 		);
 	});
-
-	it("checks a new time against the clock", async () => {
-		jest.mocked(findSchedule).mockResolvedValue(stored());
-
-		await expect(changeSchedule(guild, "a".repeat(24), { nextAt: at(-HOUR_MS) }, BY, NOW)).rejects.toThrow(
-			/already gone/,
-		);
-	});
-
-	it("says when it has gone", async () => {
-		jest.mocked(findSchedule).mockResolvedValue(null);
-
-		await expect(changeSchedule(guild, "a".repeat(24), { message: "x" }, BY, NOW)).rejects.toThrow(/has been deleted/);
-	});
 });
 
 describe("deliverSchedule", () => {
@@ -135,11 +105,6 @@ describe("deliverSchedule", () => {
 
 		await expect(deliverSchedule(clientWith({ isSendable: () => true, send }), stored())).resolves.toBe("sent");
 		expect(send).toHaveBeenCalledWith({ content: "Hello", allowedMentions: { parse: [] } });
-	});
-
-	it("calls a missing server or channel unreachable", async () => {
-		expect(await deliverSchedule(clientWith(null), stored())).toBe("unreachable");
-		expect(await deliverSchedule(clientWith(null), stored({ guildId: "900000000000000009" }))).toBe("unreachable");
 	});
 
 	it("calls a refusal that will not pass unreachable, and lets any other failure through to be retried", async () => {

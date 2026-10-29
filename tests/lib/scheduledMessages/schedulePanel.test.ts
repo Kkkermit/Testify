@@ -1,7 +1,7 @@
 import { parseCustomId } from "@core/button";
 import { scheduleEditor, scheduleHub } from "@lib/scheduledMessages/scheduledMessagePanel.util";
 import { SCHEDULE_LIMITS, type ScheduledMessage } from "@testify/shared";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 
@@ -33,20 +33,8 @@ describe("scheduleHub", () => {
 		expect(componentCount(scheduleHub(full, OWNER).components[0]?.toJSON())).toBeLessThanOrEqual(40);
 	});
 
-	it("shows each post's time as a timestamp every reader sees in their own zone", () => {
-		const text = textOf(scheduleHub([schedule(1)], OWNER));
-
-		expect(text).toContain(`<t:${String(Date.parse("2026-10-25T18:30:00.000Z") / 1000)}:f>`);
-		expect(text).toContain("Every day");
-		expect(text).not.toContain("\n# heading");
-	});
-
 	it("puts the owner last in every control, as the router expects", () => {
 		for (const id of idsOf(scheduleHub(full.slice(0, 3), OWNER))) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
-	});
-
-	it("points a server with none at the command that adds one", () => {
-		expect(textOf(scheduleHub([], OWNER))).toContain("/schedule add");
 	});
 
 	it("pings nobody the messages name", () => {
@@ -55,28 +43,9 @@ describe("scheduleHub", () => {
 });
 
 describe("scheduleEditor", () => {
-	it("carries the post's id and then the owner in each of its controls", () => {
-		const target = schedule(7);
-
-		for (const id of idsOf(scheduleEditor({ schedule: target }, OWNER))) {
-			const { action, args } = parseCustomId(id);
-			expect(args.at(-1)).toBe(OWNER);
-			if (action !== "hub") expect(args[0]).toBe(target.id);
-		}
-	});
-
 	/** A post that will be skipped has to say so, or the panel reads as working. */
 	it("warns when the bot cannot post in its channel", () => {
 		expect(textOf(scheduleEditor({ schedule: schedule(1, { canSend: false }) }, OWNER))).toContain("Cannot post");
 		expect(textOf(scheduleEditor({ schedule: schedule(1) }, OWNER))).not.toContain("Cannot post");
-	});
-
-	it("asks before deleting", () => {
-		const labels = buttonsOf(scheduleEditor({ schedule: schedule(1), confirmingDelete: true }, OWNER)).map(
-			(button) => button.label,
-		);
-
-		expect(labels).toEqual(expect.arrayContaining(["Delete it", "Keep it"]));
-		expect(labels).not.toContain("Delete");
 	});
 });

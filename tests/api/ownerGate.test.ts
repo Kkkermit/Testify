@@ -54,21 +54,37 @@ describe("the owner console's routes", () => {
 		);
 	});
 
-	it.each(routes)("refuse a signed-in non-owner on $method $path with a bare 404", async ({ method, path }) => {
-		const response = await appAs(MANAGER).request(path, {
-			method,
-			headers: { "content-type": "application/json" },
-			...(method === "GET" ? {} : { body: "{}" }),
-		});
+	/** Each route that answered anything else, by method and path, so one run names every hole. */
+	async function answering(userId: string | null, expected: (status: number, body: unknown) => boolean) {
+		const app = appAs(userId);
+		const answers = await Promise.all(
+			routes.map(async ({ method, path }) => {
+				const response = await app.request(path, {
+					method,
+					headers: { "content-type": "application/json" },
+					...(method === "GET" ? {} : { body: "{}" }),
+				});
+				const body: unknown = await response.json().catch(() => null);
 
-		expect(response.status).toBe(404);
-		expect(await response.json()).toEqual({ error: expect.objectContaining({ code: "not_found" }) });
+				return expected(response.status, body) ? [] : [`${method} ${path} answered ${String(response.status)}`];
+			}),
+		);
+
+		return answers.flat();
+	}
+
+	it("refuse a signed-in non-owner on every route with a bare 404", async () => {
+		// Nothing but the error, so a refusal cannot carry a hint of what the route would have answered.
+		const bare = (status: number, body: unknown): boolean =>
+			status === 404 &&
+			Object.keys(body ?? {}).join() === "error" &&
+			(body as { error?: { code?: string } }).error?.code === "not_found";
+
+		expect(await answering(MANAGER, bare)).toEqual([]);
 	});
 
-	it.each(routes)("refuse somebody signed out on $method $path", async ({ method, path }) => {
-		const response = await appAs(null).request(path, { method, ...(method === "GET" ? {} : { body: "{}" }) });
-
-		expect(response.status).toBe(401);
+	it("refuse somebody signed out on every route", async () => {
+		expect(await answering(null, (status) => status === 401)).toEqual([]);
 	});
 
 	it("let the owner through the access check the page asks first", async () => {

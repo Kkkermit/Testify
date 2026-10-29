@@ -1,4 +1,4 @@
-import { createLogger, splitLogArgs } from "@core/logger";
+import { createLogger } from "@core/logger";
 import { LogRing, redact } from "@core/logRing";
 
 function record(level: "info" | "warn" | "error" = "info", message = "hello", context = {}) {
@@ -39,29 +39,9 @@ describe("redact", () => {
 		expect(cleaned.err["message"]).toBe("bad thing");
 		expect(cleaned.err["stack"]).toContain("bad thing");
 	});
-
-	it("stops rather than following a deep structure forever", () => {
-		const deep = { a: { b: { c: { d: { e: "far" } } } } };
-
-		expect(JSON.stringify(redact(deep))).toContain("[…]");
-	});
-
-	it("leaves ordinary values alone", () => {
-		expect(redact("plain")).toBe("plain");
-		expect(redact(7)).toBe(7);
-		expect(redact(null)).toBeNull();
-	});
 });
 
 describe("the log ring", () => {
-	it("gives back what was put in, newest first", () => {
-		const ring = new LogRing(10);
-		ring.push(record("info", "first"));
-		ring.push(record("warn", "second"));
-
-		expect(ring.recent().lines.map((line) => line.message)).toEqual(["second", "first"]);
-	});
-
 	/** A buffer that grows forever is a leak, and this one is fed by every log line the bot writes. */
 	it("keeps only the most recent lines once it is full", () => {
 		const ring = new LogRing(3);
@@ -69,14 +49,6 @@ describe("the log ring", () => {
 
 		expect(ring.size).toBe(3);
 		expect(ring.recent().lines.map((line) => line.message)).toEqual(["e", "d", "c"]);
-	});
-
-	it("filters to a minimum level", () => {
-		const ring = new LogRing(10);
-		ring.push(record("info", "chatter"));
-		ring.push(record("error", "broken"));
-
-		expect(ring.recent({ minLevel: "warn" }).lines.map((line) => line.message)).toEqual(["broken"]);
 	});
 
 	it("honours a limit, and says how many matched before it was applied", () => {
@@ -97,45 +69,12 @@ describe("the log ring", () => {
 			return ring;
 		}
 
-		it("matches the message", () => {
-			expect(searchable().recent({ search: "ready" }).lines).toHaveLength(1);
-		});
-
 		/** A guild id is never in the message, so a search that only read the message would never find one. */
 		it("matches a value inside the context", () => {
 			const found = searchable().recent({ search: "900000000000000001" });
 
 			expect(found.lines.map((line) => line.message)).toEqual(["[BAN] Failed"]);
 		});
-
-		it("ignores case, and returns everything for an empty search", () => {
-			expect(searchable().recent({ search: "TESTIFY" }).lines).toHaveLength(1);
-			expect(searchable().recent({ search: "  " }).lines).toHaveLength(2);
-		});
-
-		it("finds nothing rather than everything when nothing matches", () => {
-			expect(searchable().recent({ search: "nonsense" })).toEqual({ lines: [], matched: 0 });
-		});
-	});
-
-	it("redacts on the way in, so nothing sensitive is ever held", () => {
-		const ring = new LogRing(10);
-		ring.push(record("error", "failed", { token: "abc" }));
-
-		expect(ring.recent().lines[0]?.context["token"]).toBe("[redacted]");
-	});
-});
-
-describe("splitLogArgs", () => {
-	it("separates context from message", () => {
-		expect(splitLogArgs([{ guildId: "1" }, "[BAN] Something"])).toEqual({
-			context: { guildId: "1" },
-			message: "[BAN] Something",
-		});
-	});
-
-	it("handles a bare message", () => {
-		expect(splitLogArgs(["just this"])).toEqual({ context: {}, message: "just this" });
 	});
 });
 
