@@ -79,6 +79,18 @@ export async function claimStarPost(
 	}
 }
 
+/** Deletes a claim made before `before` that never posted, so the next claim can take its place; true if it did. */
+export async function releaseStaleClaim(guildId: string, messageId: string, before: Date): Promise<boolean> {
+	const result = await StarPost.deleteOne({
+		guildId,
+		messageId,
+		boardMessageId: null,
+		removed: false,
+		createdAt: { $lt: before },
+	}).exec();
+	return result.deletedCount === 1;
+}
+
 export async function recordStars(guildId: string, messageId: string, stars: number): Promise<StoredStarPost | null> {
 	const row = await StarPost.findOneAndUpdate({ guildId, messageId }, { $set: { stars } }, { new: true })
 		.lean<Lean>()

@@ -4,10 +4,12 @@ import {
 	type Message,
 	type MessageReaction,
 	type PartialMessageReaction,
+	ReactionType,
 	RESTJSONErrorCodes,
 } from "discord.js";
+import { MINUTE_MS } from "@config/constants";
 import { type TestifyClient } from "@core/client";
-import { UserFacingError } from "@core/errors";
+import { toError, UserFacingError } from "@core/errors";
 import {
 	claimStarPost,
 	countStarPosts,
@@ -17,6 +19,7 @@ import {
 	getStarboardSettings,
 	markStarPostRemoved,
 	recordStars,
+	releaseStaleClaim,
 	saveStarboardSettings,
 	setBoardMessage,
 	type StoredStarPost,
@@ -99,11 +102,35 @@ function starred(message: Message<true>): StarredMessage {
 	};
 }
 
-async function countStars(reaction: MessageReaction, authorId: string, selfStar: boolean): Promise<number> {
-	if (reaction.count > VOTER_PAGE) return reaction.count;
-	const voters = await reaction.users.fetch({ limit: VOTER_PAGE });
-	return starsFrom([...voters.values()], authorId, selfStar);
+/** The stars that count, and whether the author's own was left out, which is the usual surprise. */
+async function countStars(
+	reaction: MessageReaction,
+	authorId: string,
+	selfStar: boolean,
+): Promise<{ stars: number; ownStar: boolean }> {
+	if (reaction.count > VOTER_PAGE) return { stars: reaction.count, ownStar: false };
+	const normal = await reaction.users.fetch({ limit: VOTER_PAGE });
+	// Super reactions are listed on their own, and the count holds both kinds.
+	const all =
+		normal.size < reaction.count
+			? normal.concat(await reaction.users.fetch({ limit: VOTER_PAGE, type: ReactionType.Burst }))
+			: normal;
+	const voters = [...all.values()];
+	return {
+		stars: starsFrom(voters, authorId, selfStar),
+		ownStar: !selfStar && voters.some((voter) => voter.id === authorId),
+	};
 }
+
+/** 50001 and 50013: a permission the operator can grant. */
+const NO_ACCESS = new Set<number>([RESTJSONErrorCodes.MissingAccess, RESTJSONErrorCodes.MissingPermissions]);
+
+function lacksAccess(error: unknown): boolean {
+	return error instanceof DiscordAPIError && NO_ACCESS.has(Number(error.code));
+}
+
+/** A claim this old that never posted was left by a run that failed, and would keep its message off the board. */
+const STALE_CLAIM_MS = MINUTE_MS;
 
 /** Moves the count on a repost; one a moderator has deleted is remembered, so it is never posted again. */
 async function updateRepost(guild: Guild, post: StoredStarPost, stars: number): Promise<void> {
@@ -133,34 +160,65 @@ export async function handleStarChange(
 	const guild = partial.message.guild;
 	if (guild === null) return;
 
-	const settings = await getStarboardSettings(guild.id);
-	if (settings?.enabled !== true || settings.channelId === null) return;
-	// Stars on the board itself would repost the board to itself.
-	if (partial.message.channelId === settings.channelId) return;
+	const where = { guildId: guild.id, channelId: partial.message.channelId, messageId: partial.message.id };
+	const trace = (reason: string): void => {
+		client.logger.debug(where, `[STARBOARD] ${reason}`);
+	};
 
-	const reaction = partial.partial ? await partial.fetch().catch(() => null) : partial;
+	const settings = await getStarboardSettings(guild.id);
+	if (settings?.enabled !== true || settings.channelId === null) return trace("The starboard is off in this server.");
+	// Stars on the board itself would repost the board to itself.
+	if (partial.message.channelId === settings.channelId) return trace("A ⭐ on the board itself does not count.");
+
+	const unreadable = (error: unknown): null => {
+		if (lacksAccess(error)) {
+			client.logger.warn(
+				where,
+				"[STARBOARD] I cannot read a starred message. Give me View Channel and Read Message History in its channel.",
+			);
+		} else {
+			client.logger.debug({ ...where, err: toError(error) }, "[STARBOARD] A starred message was gone.");
+		}
+		return null;
+	};
+	const reaction = partial.partial ? await partial.fetch().catch(unreadable) : partial;
 	if (reaction === null) return;
-	const message = reaction.message.partial ? await reaction.message.fetch().catch(() => null) : reaction.message;
+	const message = reaction.message.partial ? await reaction.message.fetch().catch(unreadable) : reaction.message;
 	if (message?.inGuild() !== true || message.system) return;
 
 	// Nothing from an age-restricted channel reaches a board that is not one.
 	const board = await guild.channels.fetch(settings.channelId).catch(() => null);
 	const sourceNsfw = "nsfw" in message.channel && message.channel.nsfw;
 	const boardNsfw = board !== null && "nsfw" in board && board.nsfw;
-	if (sourceNsfw && !boardNsfw) return;
+	if (sourceNsfw && !boardNsfw)
+		return trace("A ⭐ in an age-restricted channel does not reach a board that is not one.");
 
-	const existing = await findStarPost(guild.id, message.id);
-	if (existing?.removed === true) return;
+	let existing = await findStarPost(guild.id, message.id);
+	if (existing?.removed === true) return trace("A moderator took this message's repost down, so it stays off.");
+	if (
+		existing?.boardMessageId === null &&
+		(await releaseStaleClaim(guild.id, message.id, new Date(Date.now() - STALE_CLAIM_MS)))
+	) {
+		existing = null;
+	}
 	// Below the line with nothing posted, the exact count cannot matter, so the voters are not fetched.
-	if (existing === null && reaction.count < settings.threshold) return;
+	if (existing === null && reaction.count < settings.threshold) {
+		return trace(`It has ${String(reaction.count)} of the ${String(settings.threshold)} ⭐ it needs.`);
+	}
 
-	const stars = await countStars(reaction, message.author.id, settings.selfStar);
+	const { stars, ownStar } = await countStars(reaction, message.author.id, settings.selfStar);
 
 	if (existing !== null) {
 		await updateRepost(guild, existing, stars);
 		return;
 	}
-	if (stars < settings.threshold) return;
+	if (stars < settings.threshold) {
+		return trace(
+			ownStar
+				? `The author's own ⭐ does not count here, which leaves ${String(stars)} of the ${String(settings.threshold)} it needs.`
+				: `It has ${String(stars)} of the ${String(settings.threshold)} ⭐ it needs.`,
+		);
+	}
 
 	const { post, created } = await claimStarPost({
 		guildId: guild.id,
@@ -174,14 +232,24 @@ export async function handleStarChange(
 		return;
 	}
 
+	// Every way out short of a repost lets go of the claim, so the message can still make it once the board is fixed.
 	if (board?.isSendable() !== true) {
-		// Let go of the claim, so the message can still make it once the channel is fixed.
 		await deleteStarPost(guild.id, message.id);
+		client.logger.warn(where, "[STARBOARD] The board's channel is gone. Pick another with /starboard.");
 		return;
 	}
-
-	const sent = await board.send(starboardPost(starred(message), stars));
+	const sent = await board.send(starboardPost(starred(message), stars)).catch(async (error: unknown) => {
+		await deleteStarPost(guild.id, message.id);
+		if (!lacksAccess(error)) throw error;
+		client.logger.warn(
+			{ ...where, boardId: board.id },
+			"[STARBOARD] I cannot post on the board. Give me View Channel, Send Messages and Embed Links in its channel.",
+		);
+		return null;
+	});
+	if (sent === null) return;
 	await setBoardMessage(guild.id, message.id, { channelId: board.id, messageId: sent.id });
+	trace(`Reposted it with ${String(stars)} ⭐.`);
 
 	// A star that landed while this one was posting moved only the stored count.
 	const latest = await findStarPost(guild.id, message.id);

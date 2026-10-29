@@ -1,4 +1,4 @@
-import { Collection, DiscordAPIError, type Guild, RESTJSONErrorCodes } from "discord.js";
+import { Collection, DiscordAPIError, type Guild, ReactionType, RESTJSONErrorCodes } from "discord.js";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import {
@@ -9,6 +9,7 @@ import {
 	getStarboardSettings,
 	markStarPostRemoved,
 	recordStars,
+	releaseStaleClaim,
 	saveStarboardSettings,
 	setBoardMessage,
 	type StoredStarPost,
@@ -31,6 +32,7 @@ jest.mock("@database/repositories/starboardRepository", () => ({
 	getStarboardSettings: jest.fn(),
 	markStarPostRemoved: jest.fn(() => Promise.resolve()),
 	recordStars: jest.fn(),
+	releaseStaleClaim: jest.fn(() => Promise.resolve(false)),
 	saveStarboardSettings: jest.fn(() => Promise.resolve({})),
 	setBoardMessage: jest.fn(() => Promise.resolve()),
 }));
@@ -66,15 +68,11 @@ const post = (overrides: Partial<StoredStarPost> = {}): StoredStarPost => ({
 	...overrides,
 });
 
-const unknownMessage = (): DiscordAPIError =>
-	new DiscordAPIError(
-		{ code: RESTJSONErrorCodes.UnknownMessage, message: "Unknown Message" },
-		RESTJSONErrorCodes.UnknownMessage,
-		404,
-		"PATCH",
-		"/channels/x/messages/y",
-		{ body: undefined, files: undefined },
-	);
+const discordError = (code: RESTJSONErrorCodes, status: number): DiscordAPIError =>
+	new DiscordAPIError({ code, message: "Refused" }, code, status, "POST", "/channels/x/messages", {
+		body: undefined,
+		files: undefined,
+	});
 
 function world(options: { boardSendable?: boolean; boardNsfw?: boolean } = {}) {
 	const sent = { id: REPOST, edit: jest.fn(() => Promise.resolve()) };
@@ -99,11 +97,13 @@ function reaction(
 		emoji?: string;
 		count?: number;
 		voters?: { id: string; bot: boolean }[];
+		burst?: { id: string; bot: boolean }[];
 		channelId?: string;
 		nsfw?: boolean;
 	} = {},
 ) {
 	const voters = options.voters ?? [voter("a"), voter("b"), voter("c")];
+	const burst = options.burst ?? [];
 	const message = {
 		id: MESSAGE,
 		guild,
@@ -121,14 +121,21 @@ function reaction(
 	};
 	return {
 		emoji: { name: options.emoji ?? "⭐" },
-		count: options.count ?? voters.length,
+		count: options.count ?? voters.length + burst.length,
 		partial: false,
 		message,
-		users: { fetch: jest.fn(() => Promise.resolve(new Collection(voters.map((entry) => [entry.id, entry])))) },
+		users: {
+			fetch: jest.fn(({ type }: { type?: ReactionType }) =>
+				Promise.resolve(
+					new Collection((type === ReactionType.Burst ? burst : voters).map((entry) => [entry.id, entry])),
+				),
+			),
+		},
 	};
 }
 
-const client = (paused = false) => ({ paused }) as unknown as TestifyClient;
+const logger = { debug: jest.fn(), warn: jest.fn() };
+const client = (paused = false) => ({ paused, logger }) as unknown as TestifyClient;
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -245,7 +252,7 @@ describe("handleStarChange", () => {
 	it("notices a repost deleted while the bot was not looking", async () => {
 		const { guild, board } = world();
 		jest.mocked(findStarPost).mockResolvedValue(post());
-		board.messages.edit.mockRejectedValueOnce(unknownMessage());
+		board.messages.edit.mockRejectedValueOnce(discordError(RESTJSONErrorCodes.UnknownMessage, 404));
 
 		await handleStarChange(client(), reaction(guild) as never);
 
@@ -259,6 +266,59 @@ describe("handleStarChange", () => {
 
 		expect(board.send).not.toHaveBeenCalled();
 		expect(deleteStarPost).toHaveBeenCalledWith(GUILD, MESSAGE);
+	});
+
+	/** Issue #143: a repost that failed kept its claim, and every later ⭐ on that message did nothing, silently. */
+	it("lets go of the claim when the repost is refused, and says which permission to grant", async () => {
+		const { guild, board } = world();
+		board.send.mockRejectedValueOnce(discordError(RESTJSONErrorCodes.MissingPermissions, 403));
+
+		await handleStarChange(client(), reaction(guild) as never);
+
+		expect(deleteStarPost).toHaveBeenCalledWith(GUILD, MESSAGE);
+		expect(setBoardMessage).not.toHaveBeenCalled();
+		expect(logger.warn).toHaveBeenCalledWith(expect.anything(), expect.stringContaining("Send Messages"));
+	});
+
+	it("lets go of the claim before an unexpected failure is reported", async () => {
+		const { guild, board } = world();
+		board.send.mockRejectedValueOnce(new Error("boom"));
+
+		await expect(handleStarChange(client(), reaction(guild) as never)).rejects.toThrow("boom");
+		expect(deleteStarPost).toHaveBeenCalledWith(GUILD, MESSAGE);
+	});
+
+	/** Issue #143: a claim left by a run that died held its message off the board for ever. */
+	it("reposts a message whose claim never posted, once that claim is stale", async () => {
+		const { guild, board } = world();
+		jest.mocked(findStarPost).mockResolvedValue(post({ boardChannelId: null, boardMessageId: null }));
+		jest.mocked(releaseStaleClaim).mockResolvedValueOnce(false).mockResolvedValueOnce(true);
+
+		await handleStarChange(client(), reaction(guild) as never);
+		expect(board.send).not.toHaveBeenCalled();
+
+		await handleStarChange(client(), reaction(guild) as never);
+		expect(board.send).toHaveBeenCalledTimes(1);
+	});
+
+	/** Discord lists super reactions apart from the rest, so a super ⭐ alone used to count as none. */
+	it("counts a super reaction", async () => {
+		const { guild, board } = world();
+		jest.mocked(getStarboardSettings).mockResolvedValue(settings({ threshold: 1 }));
+
+		await handleStarChange(client(), reaction(guild, { voters: [], burst: [voter("a")] }) as never);
+
+		expect(board.send).toHaveBeenCalledWith(expect.objectContaining({ content: expect.stringContaining("**1**") }));
+	});
+
+	/** Issue #143: every quiet way out says why at debug, so "nothing happened" can be read in the log. */
+	it("says why a star did nothing", async () => {
+		const { guild } = world();
+		jest.mocked(getStarboardSettings).mockResolvedValue(settings({ threshold: 1 }));
+
+		await handleStarChange(client(), reaction(guild, { voters: [voter(AUTHOR)] }) as never);
+
+		expect(logger.debug).toHaveBeenCalledWith(expect.anything(), expect.stringContaining("author's own ⭐"));
 	});
 });
 
