@@ -20,4 +20,4 @@ Run `/starboard`, pick the channel reposts go to, and turn it on. You need **Man
 - Deleting the original takes its repost down too. A repost a moderator deletes stays off the board for good.
 - A message from an age-restricted channel only reaches a board that is age-restricted too.
 
-> **Tip:** if nothing reaches the board, check that {bot} can send messages in its channel. The panel and the dashboard both warn when it cannot.
+> **Tip:** if nothing reaches the board, check that {bot} can see the channel the message is in, with **View Channel** and **Read Message History**, and can **Send Messages** and **Embed Links** in the board's channel. The panel and the dashboard both warn when it cannot post there.

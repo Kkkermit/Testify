@@ -1703,18 +1703,23 @@ idea board's and `checkMusicControl` and `checkCasinoPlay` all start with it.
 ### The starboard reposts without pinging, and only once
 
 `/starboard` and the dashboard's **Starboard** screen choose a channel, a number of ⭐ and whether the author's own
-star counts; the `community` events do the rest. Four things about it are load-bearing:
+star counts; the `community` events do the rest. Five things about it are load-bearing:
 
 - **A repost is claimed, not checked for.** `claimStarPost` inserts the `starposts` row under a unique
   `{ guildId, messageId }` index, and only the call that inserted it posts, so two stars landing together cannot
-  post twice. A board the bot cannot post in lets the claim go again, so the message can still make it later.
+  post twice. Every way out short of a repost lets the claim go again — a board that is gone, a send Discord
+  refuses — and a claim still unposted after `STALE_CLAIM_MS` was left by a run that died, so the next star takes it
+  over (`releaseStaleClaim`). A claim that was kept used to hold its message off the board for good, silently.
 - **Every repost goes out with `allowedMentions: { parse: [] }`**, because it quotes somebody's message and its
   mentions would otherwise ping everybody again.
 - **A repost a moderator deletes stays off the board** (`removed`), and deleting the original deletes its repost
   and its record. Nothing from an age-restricted channel reaches a board that is not one.
 - **Who starred is read, never kept.** The voters are fetched only for a message at or past the line, to leave out
-  bots and, unless it is allowed, the author; past `VOTER_PAGE` the raw count stands. Only the count is stored, and
-  the privacy notice says so (`legal.storedL10`).
+  bots and, unless it is allowed, the author; past `VOTER_PAGE` the raw count stands. Discord lists super reactions
+  apart from the rest (`ReactionType.Burst`), so they are asked for when the first list is short of the count. Only
+  the count is stored, and the privacy notice says so (`legal.storedL10`).
+- **Every quiet way out says why at `debug`**, and one the operator can fix — a channel the bot cannot read, a board
+  it cannot post on — at `warn`, with the permission to grant. A ⭐ that did nothing is then one log line away.
 
 ### Join to create deletes only what it made
 

@@ -9,6 +9,7 @@ import {
 	getStarboardSettings,
 	markStarPostRemoved,
 	recordStars,
+	releaseStaleClaim,
 	saveStarboardSettings,
 	setBoardMessage,
 } from "@database/repositories/starboardRepository";
@@ -45,6 +46,22 @@ describeWithMongo("starboardRepository", () => {
 
 		expect(results.filter((result) => result.created)).toHaveLength(1);
 		expect(new Set(results.map((result) => result.post.messageId))).toEqual(new Set([MESSAGE]));
+	});
+
+	/** Issue #143: a claim that never posted kept its message off the board for good. */
+	it("lets go of a claim only once it is stale and only if it never posted", async () => {
+		await claimStarPost(fields());
+		const past = new Date(Date.now() - 60_000);
+		const future = new Date(Date.now() + 60_000);
+
+		expect(await releaseStaleClaim(GUILD, MESSAGE, past)).toBe(false);
+		await setBoardMessage(GUILD, MESSAGE, { channelId: BOARD, messageId: "600000000000000001" });
+		expect(await releaseStaleClaim(GUILD, MESSAGE, future)).toBe(false);
+
+		await deleteStarPost(GUILD, MESSAGE);
+		await claimStarPost(fields());
+		expect(await releaseStaleClaim(GUILD, MESSAGE, future)).toBe(true);
+		expect(await findStarPost(GUILD, MESSAGE)).toBeNull();
 	});
 
 	it("keeps one server's posts apart from another's", async () => {
