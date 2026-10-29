@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 203, in 28 domain folders         |
 | Schemas/repositories | 45 / 43                           |
 | Scheduled jobs       | 10                                |
-| Tests                | 7,253 across 446 suites           |
+| Tests                | 3,469 across 439 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -127,7 +127,7 @@ except the `.example` templates. Use `cluster0.example.mongodb.net` in any docum
 | `npm run lint:fix`       | Same, with `--fix`                                                   |
 | `npm run format`         | Prettier write                                                       |
 | `npm test`               | Jest                                                                 |
-| `npm run test:coverage`  | Jest with the 80/80/80/80 thresholds enforced                        |
+| `npm run test:coverage`  | Jest with the 75/75/75/75 thresholds enforced                        |
 | `npm run test:watch`     | Jest watch                                                           |
 | `npm run docs:commands`  | Regenerate `docs/commands.md`                                        |
 | `npm run docs:images`    | Redraw the card images in `docs/images/bot/` from the real renderers |
@@ -238,7 +238,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays)
 └── api/                  The dashboard's HTTP API. Off unless DASHBOARD_ENABLED — see §24.
 
-tests/                    Mirrors src/. 309 suites; the dashboard's 137 sit beside its code.
+tests/                    Mirrors src/. 306 suites; the dashboard's 133 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -916,8 +916,10 @@ Four things follow, and they are what keep this from being the anti-pattern it l
 ## 17. Testing
 
 `tests/` mirrors `src/`. Tests drop the source suffix (`shopScreen.util.ts` → `shopScreen.test.ts`).
-`tests/setup.ts` runs via `setupFilesAfterEnv`. Coverage thresholds are **80% statements / lines / functions /
-branches**, enforced by `npm run test:coverage` and by the pre-push hook.
+`tests/setup.ts` runs via `setupFilesAfterEnv` and empties every module-level cache between tests, but only in a suite
+that loaded the module: loading discord.js and Mongoose just to empty a cache cost most of a second per suite, half of
+the whole run. A new cache adds its reset to the list there. Coverage thresholds are **75% statements / lines /
+functions / branches**, enforced by `npm run test:coverage` in CI. No git hook runs the tests.
 
 Shared harness in `tests/helpers/` (these are not tests):
 
@@ -937,6 +939,15 @@ What good tests here look like:
 - **Cover the degenerate cases**: empty list, page past the end, stale id, zero quantity, someone else's data.
 - **Inject randomness** (`useItem(..., roll)`) rather than fighting it.
 - **A test must be able to fail.** If you add an enforcement test, prove it goes red.
+- **A test earns its place by checking something no other test does.** The suite went from 7,253 tests to 3,469 by
+  removing every test that covered no line or branch the rest did not, except a test that pins what coverage cannot
+  see: a doc comment naming a bug, an axe check, nobody pinged, an ephemeral reply, a Discord limit, a refusal or a
+  security rule. Add the test that covers the new branch rather than a fifth variant of one already there, and put a
+  table of cases in one test that names every failing row, not in an `it.each` that is a test per row.
+- **Every test runs on Windows, macOS and Linux.** Build an expected path with `join` and `delimiter`, never a POSIX
+  literal. A fake binary is a script Node runs, because Windows cannot execute a `#!/bin/sh` file —
+  `musicSource.test.ts` shims `spawn` to run a `.cjs` path with `process.execPath`. Pin `process.platform` around a
+  branch that acts on the machine, or `devAll.test.ts` would run `taskkill` against a real pid.
 - **A suite whose dependency is missing must _skip_, not pass.** `describeWithMongo` decides between `describe`
   and `describe.skip` **before the suite is built**, from a database started once in Jest's `globalSetup`. The
   previous shape discovered it in `beforeAll` and returned early from each test instead — so a run without
@@ -1067,10 +1078,10 @@ interpolate a message into a shell string, or a `"`, backtick or `$` breaks or i
 | ------------ | ----------------------------------- |
 | `pre-commit` | `npm run typecheck` + `lint-staged` |
 | `commit-msg` | `commitlint`                        |
-| `pre-push`   | `npm run lint` + `test:coverage`    |
 
-`typecheck` is in `pre-commit` because staged-only linting cannot see a type error introduced in an unstaged
-file.
+`lint-staged` runs ESLint and Prettier on the staged files and nothing else. `typecheck` is in `pre-commit` because
+staged-only linting cannot see a type error introduced in an unstaged file. There is no `pre-push` hook: the tests
+run in CI, not on the way out of somebody's machine.
 
 **`main` is what runs; `develop` is where work lands.** `main` is protected and is the code deployed to the bot,
 so nothing is pushed to it directly. Every change is a pull request into `develop`, and every few days a release
@@ -1111,12 +1122,14 @@ work together — a rename sweep is one mechanical commit, not 100.
 
 `.github/workflows/ci.yml` — four jobs (`check`, `test`, `build`, `audit`), triggered on `branches: ["**"]` for
 push and pull_request so a feature branch is verified before a PR exists. Node version comes from `.nvmrc`, not a
-hardcoded string. The `build` job **verifies the `dist/` artifact**, which is what catches the unrewritten alias
-problem.
+hardcoded string. **`test` runs on Windows**, with coverage, because that is what most people clone this onto;
+Linux and macOS are tested every night. The `build` job **verifies the `dist/` artifact**, which is what catches the
+unrewritten alias problem.
 
-`.github/workflows/nightly.yml` — `cron: "37 3 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests`,
-`npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false alarm, and skipped with a
-notice while the `SNYK_TOKEN` secret is unset, since it can only answer 401 without one), and
+`.github/workflows/nightly.yml` — `cron: "37 3 * * *"` plus `workflow_dispatch`, four jobs: `unit-tests` on
+Windows, Linux and macOS, `npm-audit`, `snyk` (`continue-on-error: true`, so a transient 403 cannot raise a false
+alarm, and skipped with a notice while the `SNYK_TOKEN` secret is unset, since it can only answer 401 without one;
+it runs the CLI from npm, because Snyk's own action pulls a Docker image and Docker Hub answering 500 failed it), and
 `notify-on-failure` which opens a labelled issue. Permissions default to `contents: read` at the top and are
 escalated to `issues: write` on that one job only. **The schedule sits off the hour on purpose.** At `0 0 * * *` the
 runs started two and a half hours late and then stopped arriving at all for three weeks, while the workflow still

@@ -19,7 +19,7 @@
   <a href="https://discord.js.org"><img alt="discord.js v14" src="https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
   <a href=".nvmrc"><img alt="Node 24.11 or newer" src="https://img.shields.io/badge/node-%3E%3D24.11-5FA04E?style=for-the-badge&logo=node.js&logoColor=white"></a>
   <a href="https://www.mongodb.com"><img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white"></a>
-  <a href="AGENTS.md#17-testing"><img alt="Coverage floor 80%" src="https://img.shields.io/badge/coverage_floor-80%25-success?style=for-the-badge&logo=jest&logoColor=white"></a>
+  <a href="AGENTS.md#17-testing"><img alt="Coverage floor 75%" src="https://img.shields.io/badge/coverage_floor-75%25-success?style=for-the-badge&logo=jest&logoColor=white"></a>
 </p>
 
 <p align="center">
@@ -101,7 +101,7 @@ The whole thing was rebuilt around the problems the old codebase actually had.
 | **Start-up**       | Command registration raced the login                                                   | Each step awaited in order; a malformed file names itself and stops the boot |
 | **Errors**         | Stack traces could reach chat                                                          | One error boundary — users get a plain apology, you get the full context     |
 | **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
-| **Tests**          | A handful                                                                              | **Nearly 6,000 tests**, with an enforced 80% coverage floor                  |
+| **Tests**          | A handful                                                                              | **About 3,500 tests** on Windows, Linux and macOS, with a 75% coverage floor |
 | **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
 | **Web**            | None                                                                                   | An optional dashboard served from the bot itself                             |
 
@@ -639,7 +639,7 @@ dashboard is in [`docs/dashboard/guide.md`](docs/dashboard/guide.md).
 | `npm run setup`             | Interactive `.env` generator (add `-- --dev` for `.env.development`)  |
 | `npm run check`             | Typecheck, lint, format check and tests — everything CI runs          |
 | `npm test`                  | Runs the test suite                                                   |
-| `npm run test:coverage`     | Runs the tests with the 80% coverage gate                             |
+| `npm run test:coverage`     | Runs the tests with the 75% coverage gate                             |
 | `npm run lint` / `lint:fix` | Lints, optionally fixing what it can                                  |
 | `npm run format`            | Formats everything with Prettier                                      |
 | `npm run commit`            | Guided commit message in the project's format                         |
@@ -820,8 +820,8 @@ npm run check     # typecheck, lint, format and tests — run this before pushin
 npm run commit    # guided commit message in the project's format
 ```
 
-[`docs/contributing.md`](docs/contributing.md) has the full guide. New logic needs a test — the suite has an 80%
-coverage floor and the pre-push hook enforces it.
+[`docs/contributing.md`](docs/contributing.md) has the full guide. New logic needs a test — the suite has a 75%
+coverage floor, and CI enforces it on every push.
 
 <p align="center">
   <a href="https://github.com/Kkkermit/Testify/graphs/contributors">

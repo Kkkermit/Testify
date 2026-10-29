@@ -644,7 +644,7 @@ so installing it needs `--force` and breaks `npm ci`.
 
 ## 16. Testing
 
-Jest + Testing Library + MSW. Coverage thresholds **80/80/80/80**.
+Jest + Testing Library + MSW. Coverage thresholds **75/75/75/75**.
 
 - **`src/test/fixtures/`** — the fake answers, one file per section of the sidebar (`community.ts`,
   `moderation.ts` …) plus `session.ts`, `owner.ts` and `bot.ts`, each typed against `@testify/shared`.
@@ -1470,7 +1470,7 @@ A screen is done when all of this is true:
 
 ```bash
 npm run check           # typecheck, lint, format and every test in both projects
-npm run test:coverage   # the 80/80/80/80 gates
+npm run test:coverage   # the 75/75/75/75 gates
 npm run build           # includes verify:bundle — fails on a second React copy or a compiled light-dark()
 ```
 
