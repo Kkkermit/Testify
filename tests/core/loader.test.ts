@@ -6,7 +6,7 @@ import { type TestifyClient } from "@core/client";
 import { buildSlashCommand, subcommandsOf } from "@core/command";
 import { loadEverything, MAX_COMMANDS } from "@core/loader";
 import { createLogger } from "@core/logger";
-import { ALLOWED_IN_DASHBOARD, NEVER_IN_DASHBOARD } from "@lib/bot/commandRunner.util";
+import { ALLOWED_IN_DASHBOARD } from "@lib/bot/commandRunner.util";
 
 /** Loads every command, button, event and message handler from disk. */
 const bound: string[] = [];
@@ -61,19 +61,30 @@ describe("loadEverything", () => {
 describe("every command", () => {
 	const commands = [...client.commands.values()];
 
-	it.each(commands.map((command) => [command.name, command] as const))("%s is valid", (_name, command) => {
-		expect(command.name).toMatch(/^[a-z0-9-]{1,32}$/);
-		expect(command.description.length).toBeGreaterThan(0);
-		expect(command.description.length).toBeLessThanOrEqual(100);
-		expect(Object.keys(CATEGORIES)).toContain(command.category);
+	it("has a valid name, description and category", () => {
+		const invalid = commands.filter(
+			(command) =>
+				!/^[a-z0-9-]{1,32}$/.test(command.name) ||
+				command.description.length === 0 ||
+				command.description.length > 100 ||
+				!Object.keys(CATEGORIES).includes(command.category),
+		);
+
+		expect(invalid.map((command) => command.name)).toEqual([]);
 	});
 
-	it.each(commands.map((command) => [command.name, command] as const))(
-		"%s builds a payload Discord accepts",
-		(_name, command) => {
-			expect(() => buildSlashCommand(command).toJSON()).not.toThrow();
-		},
-	);
+	it("builds a payload Discord accepts", () => {
+		const refused = commands.flatMap((command) => {
+			try {
+				buildSlashCommand(command).toJSON();
+				return [];
+			} catch (error) {
+				return [`${command.name}: ${String(error)}`];
+			}
+		});
+
+		expect(refused).toEqual([]);
+	});
 
 	it("never mixes top-level options with subcommands", () => {
 		const mixed = commands.filter((command) => subcommandsOf(command).length > 0 && (command.options?.length ?? 0) > 0);
@@ -150,13 +161,8 @@ describe("every button", () => {
 
 /** Every name on the runner's allowlist is a real command. */
 describe("the dashboard command allowlist", () => {
-	it.each([...ALLOWED_IN_DASHBOARD])("%s is a real command", (name) => {
-		expect(client.commands.has(name)).toBe(true);
-	});
-
-	/** The never-list is the backstop, so a name on it that no longer exists is worth knowing about too. */
-	it.each([...NEVER_IN_DASHBOARD])("%s is either a real command or already gone", (name) => {
-		expect(typeof name).toBe("string");
+	it("names only real commands", () => {
+		expect([...ALLOWED_IN_DASHBOARD].filter((name) => !client.commands.has(name))).toEqual([]);
 	});
 
 	it("offers nothing that opens a panel, which cannot render here", () => {

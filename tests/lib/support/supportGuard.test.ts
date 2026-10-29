@@ -25,22 +25,24 @@ describe("findLeak", () => {
 		expect(findLeak("Run `/levelling setup` and choose **Rewards**. The prefix is t?.", secrets)).toBeNull();
 	});
 
-	it.each([
-		["secret", `the password is ${FAKE.databasePassword}`],
-		["discord-token", `token: ${FAKE.otherDiscordToken}`],
-		["credentials-in-url", "connect with mongodb://admin:letmein@db.internal/x"],
-		["api-key", `use ${FAKE.otherAnthropicKey}`],
-		["api-key", `a ${FAKE.githubToken} token`],
-		["private-key", FAKE.privateKey],
-		["email", "write to someone@example.com"],
-		["discord-id", "the owner is 123456789012345678"],
-		["ip-address", "it runs on 10.0.0.12"],
-		["env-name", "set DISCORD_TOKEN first"],
-		["env-name", "turn on DASHBOARD_ENABLED"],
-		["env-file", "open your .env and"],
-		["file-path", "logs are in /home/bot/testify"],
-	])("names %s", (rule, text) => {
-		expect(findLeak(text, secrets)).toBe(rule);
+	it("names the rule each kind of leak breaks", () => {
+		const leaks: [rule: string, text: string][] = [
+			["secret", `the password is ${FAKE.databasePassword}`],
+			["discord-token", `token: ${FAKE.otherDiscordToken}`],
+			["credentials-in-url", "connect with mongodb://admin:letmein@db.internal/x"],
+			["api-key", `use ${FAKE.otherAnthropicKey}`],
+			["api-key", `a ${FAKE.githubToken} token`],
+			["private-key", FAKE.privateKey],
+			["email", "write to someone@example.com"],
+			["discord-id", "the owner is 123456789012345678"],
+			["ip-address", "it runs on 10.0.0.12"],
+			["env-name", "set DISCORD_TOKEN first"],
+			["env-name", "turn on DASHBOARD_ENABLED"],
+			["env-file", "open your .env and"],
+			["file-path", "logs are in /home/bot/testify"],
+		];
+
+		expect(leaks.map(([, text]) => findLeak(text, secrets))).toEqual(leaks.map(([rule]) => rule));
 	});
 
 	/** The rule name is what gets logged, so it must never be the value that matched. */
@@ -62,10 +64,15 @@ describe("the real help corpus", () => {
 		expect(entries.filter((entry) => entry.kind === "command").length).toBeGreaterThan(40);
 	});
 
-	it.each(entries.map((entry) => [entry.id, entry] as const))("%s holds nothing secret or personal", (_id, entry) => {
-		const text = fillPlaceholders(`${entry.title}\n${entry.keywords.join(" ")}\n${entry.body}`, context);
+	it("holds nothing secret or personal in any article or command page", () => {
+		const leaks = entries.flatMap((entry) => {
+			const text = fillPlaceholders(`${entry.title}\n${entry.keywords.join(" ")}\n${entry.body}`, context);
+			const rule = findLeak(text, secretsOf(ENV));
 
-		expect(findLeak(text, secretsOf(ENV))).toBeNull();
+			return rule === null ? [] : [`${entry.id}: ${rule}`];
+		});
+
+		expect(leaks).toEqual([]);
 	});
 
 	/** An owner command's page would name a control the reader cannot use, and advertise that it exists. */

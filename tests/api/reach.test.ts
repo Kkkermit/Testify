@@ -124,9 +124,15 @@ function asking(who: string, method: string, path: string, body: unknown = {}): 
 }
 
 /** Past every gate here; what the route then does without a database is not what these tests are about. */
+function stopped(answer: Answer): boolean {
+	return (
+		/missing_permission|out_of_reach/.test(answer.code ?? "") ||
+		/^That (channel|role) is not in this server/.test(answer.message ?? "")
+	);
+}
+
 function passed(answer: Answer): void {
-	expect(answer.code ?? "").not.toMatch(/missing_permission|out_of_reach/);
-	expect(answer.message ?? "").not.toMatch(/^That (channel|role) is not in this server/);
+	expect(stopped(answer)).toBe(false);
 }
 
 beforeAll(() => {
@@ -162,13 +168,28 @@ describe("an action that needs more than Manage Server", () => {
 		["locking a channel", "PATCH", `/channel-tools/${OPEN}`, { locked: true }],
 	];
 
+	/** Each action as one caller, with the answer it got, so one run names every route that answered wrongly. */
+	async function answers(who: string): Promise<[name: string, answer: Answer][]> {
+		return Promise.all(
+			actions.map(
+				async ([name, method, path, body]) => [name, await asking(who, method, path, body)] as [string, Answer],
+			),
+		);
+	}
+
 	/** A Manage Server manager kicked, banned and warned from the web, which Discord itself would not have let them do. */
-	it.each(actions)("refuses %s to a manager without the command's own permission", async (_, method, path, body) => {
-		expect(await asking(MANAGER, method, path, body)).toMatchObject({ status: 403, code: "missing_permission" });
+	it("refuses each action to a manager without the command's own permission", async () => {
+		const allowed = (await answers(MANAGER)).filter(
+			([, answer]) => answer.status !== 403 || answer.code !== "missing_permission",
+		);
+
+		expect(allowed.map(([name]) => name)).toEqual([]);
 	});
 
-	it.each(actions)("lets %s through for somebody who has it", async (_, method, path, body) => {
-		passed(await asking(MODERATOR, method, path, body));
+	it("lets each action through for somebody who has it", async () => {
+		const refused = (await answers(MODERATOR)).filter(([, answer]) => stopped(answer));
+
+		expect(refused.map(([name]) => name)).toEqual([]);
 	});
 
 	it("names the permission that is missing", async () => {
