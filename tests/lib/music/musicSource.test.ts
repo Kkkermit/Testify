@@ -1,3 +1,5 @@
+import type * as ChildProcesses from "node:child_process";
+import { type ChildProcess, type SpawnOptions } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -19,7 +21,32 @@ import {
 	ytDlpStreamArgs,
 } from "@lib/music/musicSource.util";
 
+// A fake binary is a script, which only Node can run on every system, so the spawn behind the real one runs it.
+jest.mock("node:child_process", () => {
+	const actual = jest.requireActual<typeof ChildProcesses>("node:child_process");
+	const spawn = (command: string, args: string[], options: SpawnOptions): ChildProcess =>
+		command.endsWith(".cjs")
+			? actual.spawn(process.execPath, [command, ...args], options)
+			: actual.spawn(command, args, options);
+
+	return { ...actual, spawn };
+});
+
 const USER = "100000000000000001";
+
+/** A stand-in downloader or transcoder, so spawning and piping are exercised without a network or the real binary. */
+function fakeBinary(directory: string, name: string, body: string): string {
+	const path = join(directory, `${name}.cjs`);
+	writeFileSync(path, body);
+
+	return path;
+}
+
+const print = (text: string): string => `process.stdout.write(${JSON.stringify(text)});`;
+const die = (stderr: string, code = 1): string =>
+	`${stderr === "" ? "" : `process.stderr.write(${JSON.stringify(`${stderr}\n`)});`} process.exitCode = ${String(code)};`;
+const recordArgs = (file: string): string =>
+	`require("node:fs").writeFileSync(${JSON.stringify(file)}, process.argv.slice(2).join("\\n") + "\\n");`;
 
 describe("trackFromInfo", () => {
 	it("keeps the page address rather than the expiring media one", () => {
@@ -178,11 +205,9 @@ describe("openStream", () => {
 	let directory: string;
 	let fakeYtDlp: string;
 
-	/** A stand-in binary, so the spawning and piping are exercised without a network or a real downloader. */
 	beforeAll(() => {
 		directory = mkdtempSync(join(tmpdir(), "testify-music-"));
-		fakeYtDlp = join(directory, "fake-yt-dlp");
-		writeFileSync(fakeYtDlp, "#!/bin/sh\nprintf 'OPUSBYTES'\n", { mode: 0o755 });
+		fakeYtDlp = fakeBinary(directory, "fake-yt-dlp", print("OPUSBYTES"));
 	});
 
 	afterAll(() => {
@@ -203,9 +228,12 @@ describe("openStream", () => {
 
 	/** Closing a stream stops the processes it started. */
 	it("closing it stops the process it started", async () => {
-		const slow = join(directory, "slow-yt-dlp");
-		// The byte proves the process runs; the fork is what survives a signal to the parent.
-		writeFileSync(slow, "#!/bin/sh\nprintf 'X'\nsleep 30 &\nwait\n", { mode: 0o755 });
+		// The byte proves the process runs; the grandchild holding the pipe is what survives a signal to the parent.
+		const slow = fakeBinary(
+			directory,
+			"slow-yt-dlp",
+			`${print("X")} require("node:child_process").spawn(process.execPath, ["-e", "setTimeout(() => {}, 30000)"], { stdio: "inherit" }); setTimeout(() => {}, 30000);`,
+		);
 
 		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: slow, ffmpeg: null });
 		const closed = new Promise<void>((resolve) => opened.stream.once("close", () => resolve()));
@@ -221,10 +249,12 @@ describe("openStream", () => {
 	/** The downloader finishes into the buffer without waiting for the player. */
 	it("lets the downloader finish without waiting for the player to catch up", async () => {
 		const marker = join(directory, "finished");
-		const bulky = join(directory, "bulky-yt-dlp");
-		writeFileSync(bulky, `#!/bin/sh\ndd if=/dev/zero bs=1024 count=1024 2>/dev/null\nprintf 'done' > ${marker}\n`, {
-			mode: 0o755,
-		});
+		// The marker is written only once the megabyte has left the process, which a full pipe would never allow.
+		const bulky = fakeBinary(
+			directory,
+			"bulky-yt-dlp",
+			`process.stdout.write(Buffer.alloc(1024 * 1024), () => require("node:fs").writeFileSync(${JSON.stringify(marker)}, "done"));`,
+		);
 
 		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: bulky, ffmpeg: null });
 
@@ -239,10 +269,7 @@ describe("openStream", () => {
 	});
 
 	it("reports what a dying downloader said rather than leaving it in a closed pipe", async () => {
-		const broken = join(directory, "broken-stream-yt-dlp");
-		writeFileSync(broken, "#!/bin/sh\necho 'ERROR: Sign in to confirm you are not a bot' >&2\nexit 1\n", {
-			mode: 0o755,
-		});
+		const broken = fakeBinary(directory, "broken-stream-yt-dlp", die("ERROR: Sign in to confirm you are not a bot"));
 
 		const said: string[] = [];
 		const opened = openStream(
@@ -284,9 +311,8 @@ describe("openStream", () => {
 	});
 
 	it("pipes the downloader through the transcoder when one is needed", async () => {
-		const fakeFfmpeg = join(directory, "fake-ffmpeg");
 		// Reads stdin and marks it, which is what proves the two processes were actually joined up.
-		writeFileSync(fakeFfmpeg, "#!/bin/sh\nprintf 'OGG:'\ncat\n", { mode: 0o755 });
+		const fakeFfmpeg = fakeBinary(directory, "fake-ffmpeg", `${print("OGG:")} process.stdin.pipe(process.stdout);`);
 
 		const opened = openStream(
 			"https://youtu.be/abc",
@@ -314,19 +340,16 @@ describe("resolveTracks", () => {
 	});
 
 	/** A stand-in downloader printing exactly what yt-dlp prints, so the JSON round trip is real. */
-	function fakeYtDlp(name: string, script: string): string {
-		const path = join(directory, name);
-		writeFileSync(path, `#!/bin/sh\n${script}\n`, { mode: 0o755 });
-
-		return path;
-	}
+	const fakeYtDlp = (name: string, body: string): string => fakeBinary(directory, name, body);
 
 	const query = { kind: "search", terms: "lofi", source: "youtube" } as const;
 
 	it("turns the downloader's output into queue tracks", async () => {
 		const binary = fakeYtDlp(
 			"ok",
-			`printf '{"webpage_url":"https://youtu.be/a","title":"First","duration":100}\\n{"webpage_url":"https://youtu.be/b","title":"Second","duration":200}\\n'`,
+			print(
+				'{"webpage_url":"https://youtu.be/a","title":"First","duration":100}\n{"webpage_url":"https://youtu.be/b","title":"Second","duration":200}\n',
+			),
 		);
 
 		const tracks = await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
@@ -336,14 +359,14 @@ describe("resolveTracks", () => {
 	});
 
 	it("returns nothing when the search found nothing", async () => {
-		const binary = fakeYtDlp("empty", "printf ''");
+		const binary = fakeYtDlp("empty", print(""));
 
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).resolves.toEqual([]);
 	});
 
 	/** A known refusal reaches the reader as a sentence, not as yt-dlp's raw output logged as a failure. */
 	it("names a refusal it recognises, as advice the reader can act on", async () => {
-		const binary = fakeYtDlp("broken", "echo 'ERROR: Video unavailable' >&2\nexit 1");
+		const binary = fakeYtDlp("broken", die("ERROR: Video unavailable"));
 
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(
 			/That video is unavailable/,
@@ -352,10 +375,7 @@ describe("resolveTracks", () => {
 
 	/** Every result of the old eight-result search was extracted, so one flagged host hit the bot check eight times. */
 	it("turns YouTube's bot check into advice", async () => {
-		const binary = fakeYtDlp(
-			"botcheck",
-			'echo "ERROR: [youtube] abc: Sign in to confirm you\'re not a bot." >&2\nexit 1',
-		);
+		const binary = fakeYtDlp("botcheck", die("ERROR: [youtube] abc: Sign in to confirm you're not a bot."));
 
 		const refused = resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null });
 		await expect(refused).rejects.toBeInstanceOf(MusicProblemError);
@@ -364,14 +384,14 @@ describe("resolveTracks", () => {
 
 	/** yt-dlp's own message is the useful one when nothing recognises it — "exited 1" tells nobody why. */
 	it("surfaces what the downloader complained about when it is nothing it knows", async () => {
-		const binary = fakeYtDlp("strange", "echo 'ERROR: something new' >&2\nexit 1");
+		const binary = fakeYtDlp("strange", die("ERROR: something new"));
 
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/something new/);
 	});
 
 	it("asks for as many results as it is told", async () => {
 		const record = join(directory, "args.txt");
-		const binary = fakeYtDlp("args", `printf '%s\\n' "$@" > '${record}'`);
+		const binary = fakeYtDlp("args", recordArgs(record));
 
 		await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
 		const args = readFileSync(record, "utf8").split("\n");
@@ -380,7 +400,7 @@ describe("resolveTracks", () => {
 	});
 
 	it("still fails usefully when the downloader says nothing at all", async () => {
-		const binary = fakeYtDlp("silent", "exit 2");
+		const binary = fakeYtDlp("silent", die("", 2));
 
 		await expect(resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/2/);
 	});
@@ -392,7 +412,7 @@ describe("resolveTracks", () => {
 	it("reads a playlist as all of its entries", async () => {
 		const binary = fakeYtDlp(
 			"playlist",
-			`printf '{"entries":[{"webpage_url":"https://youtu.be/a"},{"webpage_url":"https://youtu.be/b"}]}\\n'`,
+			print('{"entries":[{"webpage_url":"https://youtu.be/a"},{"webpage_url":"https://youtu.be/b"}]}\n'),
 		);
 
 		const tracks = await resolveTracks(query, USER, { ytDlp: binary, ffmpeg: null }, { flat: true });
@@ -403,7 +423,9 @@ describe("resolveTracks", () => {
 	it("describes one track, formats and all", async () => {
 		const binary = fakeYtDlp(
 			"describe",
-			`printf '{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251","acodec":"opus","vcodec":"none","ext":"webm"}]}\\n'`,
+			print(
+				'{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251","acodec":"opus","vcodec":"none","ext":"webm"}]}\n',
+			),
 		);
 
 		const info = await describeTrack("https://youtu.be/a", { ytDlp: binary, ffmpeg: null });
@@ -492,12 +514,11 @@ describe("describeTrack's memory", () => {
 	beforeAll(() => {
 		directory = mkdtempSync(join(tmpdir(), "testify-describe-"));
 		counter = join(directory, "runs");
-		binary = join(directory, "counting-yt-dlp");
 		// Appends a line per run, so the test can count how often YouTube would have been asked.
-		writeFileSync(
-			binary,
-			`#!/bin/sh\necho run >> ${counter}\nprintf '{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251"}]}\\n'\n`,
-			{ mode: 0o755 },
+		binary = fakeBinary(
+			directory,
+			"counting-yt-dlp",
+			`require("node:fs").appendFileSync(${JSON.stringify(counter)}, "run\\n"); ${print('{"webpage_url":"https://youtu.be/a","formats":[{"format_id":"251"}]}\n')}`,
 		);
 	});
 
@@ -553,12 +574,7 @@ describe("resolveTracks on a SoundCloud search", () => {
 		rmSync(directory, { recursive: true, force: true });
 	});
 
-	function fakeYtDlp(name: string, script: string): string {
-		const path = join(directory, name);
-		writeFileSync(path, `#!/bin/sh\n${script}\n`, { mode: 0o755 });
-
-		return path;
-	}
+	const fakeYtDlp = (name: string, body: string): string => fakeBinary(directory, name, body);
 
 	const search = { kind: "search", terms: "lofi", source: "soundcloud" } as const;
 	const locked = `{"webpage_url":"https://soundcloud.com/a/locked","title":"Locked","formats":[]}`;
@@ -567,7 +583,7 @@ describe("resolveTracks on a SoundCloud search", () => {
 	/** The bug from production: the first result was DRM-protected, and that one track failed the whole search. */
 	it("steps past a DRM-protected result to one that plays", async () => {
 		const record = join(directory, "args.txt");
-		const binary = fakeYtDlp("mixed", `printf '%s\\n' "$@" > '${record}'\nprintf '${locked}\\n${open}\\n'`);
+		const binary = fakeYtDlp("mixed", `${recordArgs(record)} ${print(`${locked}\n${open}\n`)}`);
 
 		const tracks = await resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
 
@@ -578,14 +594,14 @@ describe("resolveTracks on a SoundCloud search", () => {
 	});
 
 	it("says so, as advice, when every result is protected", async () => {
-		const binary = fakeYtDlp("all-locked", `printf '${locked}\\n'`);
+		const binary = fakeYtDlp("all-locked", print(`${locked}\n`));
 
 		await expect(resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null })).rejects.toThrow(/DRM-protected/);
 	});
 
 	/** A typeahead search reads no formats, so filtering on them would hide every suggestion. */
 	it("leaves a flat search alone", async () => {
-		const binary = fakeYtDlp("flat", `printf '{"url":"https://soundcloud.com/a/b","title":"Flat"}\\n'`);
+		const binary = fakeYtDlp("flat", print('{"url":"https://soundcloud.com/a/b","title":"Flat"}\n'));
 
 		const tracks = await resolveTracks(search, USER, { ytDlp: binary, ffmpeg: null }, { flat: true });
 
@@ -595,7 +611,7 @@ describe("resolveTracks on a SoundCloud search", () => {
 	/** YouTube is asked for one result on purpose, since request volume is what gets a host flagged. */
 	it("does not widen a YouTube search", async () => {
 		const record = join(directory, "yt-args.txt");
-		const binary = fakeYtDlp("yt", `printf '%s\\n' "$@" > '${record}'`);
+		const binary = fakeYtDlp("yt", recordArgs(record));
 
 		await resolveTracks({ ...search, source: "youtube" }, USER, { ytDlp: binary, ffmpeg: null }, { results: 1 });
 
@@ -604,10 +620,7 @@ describe("resolveTracks on a SoundCloud search", () => {
 	});
 
 	it("turns yt-dlp's DRM refusal of a link into advice rather than a crash", async () => {
-		const binary = fakeYtDlp(
-			"drm-link",
-			`echo 'ERROR: [soundcloud] 2398987035: This video is DRM protected' >&2\nexit 1`,
-		);
+		const binary = fakeYtDlp("drm-link", die("ERROR: [soundcloud] 2398987035: This video is DRM protected"));
 		const link = { kind: "url", url: "https://soundcloud.com/a/locked", source: "soundcloud" } as const;
 
 		const refused = resolveTracks(link, USER, { ytDlp: binary, ffmpeg: null });

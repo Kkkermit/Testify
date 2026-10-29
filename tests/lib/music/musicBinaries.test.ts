@@ -1,6 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { delimiter, isAbsolute, join } from "node:path";
 import {
 	ageInDays,
 	candidatesFor,
@@ -12,37 +10,29 @@ import {
 	statusLines,
 } from "@lib/music/musicBinaries.util";
 
+/** The file name the lookup tries first on this system, so the expectations hold on Windows too. */
+const exe = (name: string): string => (process.platform === "win32" ? `${name}.exe` : name);
+
 describe("candidatesFor", () => {
-	it("tries a configured path before anything on PATH", () => {
-		expect(candidatesFor("yt-dlp", "/opt/yt-dlp", "/usr/bin")[0]).toBe("/opt/yt-dlp");
+	it("tries a configured path first, then every PATH entry", () => {
+		const candidates = candidatesFor("yt-dlp", "/opt/yt-dlp", ["/usr/bin", "/usr/local/bin"].join(delimiter));
+
+		expect(candidates[0]).toBe("/opt/yt-dlp");
+		expect(candidates).toContain(join("/usr/bin", exe("yt-dlp")));
+		expect(candidates).toContain(join("/usr/local/bin", exe("yt-dlp")));
 	});
 
-	it("looks in every PATH entry", () => {
-		const candidates = candidatesFor("yt-dlp", undefined, "/usr/bin:/usr/local/bin");
+	/** Anti-pattern 13: an empty PATH entry or a relative bin would look wherever a start script left the cwd. */
+	it("never looks relative to the working directory", () => {
+		const candidates = candidatesFor("yt-dlp", undefined, ["/usr/bin", "", ""].join(delimiter), "/repo");
 
-		expect(candidates).toContain("/usr/bin/yt-dlp");
-		expect(candidates).toContain("/usr/local/bin/yt-dlp");
-	});
-
-	/** An empty PATH entry resolves to the working directory, which is not somewhere to look for a binary. */
-	it("ignores empty PATH entries", () => {
-		expect(candidatesFor("yt-dlp", undefined, "/usr/bin::")).toEqual(expect.not.arrayContaining(["yt-dlp/yt-dlp"]));
-	});
-
-	it("falls back to the local bin the setup script writes to", () => {
-		expect(candidatesFor("yt-dlp", undefined, "", "/repo")).toContain("/repo/bin/yt-dlp");
-	});
-
-	/** Anti-pattern 13: a working directory a start script changed would look for the binary somewhere else. */
-	it("resolves the local bin from the repository, never the working directory", () => {
-		for (const candidate of candidatesFor("yt-dlp", undefined, "", "/repo")) {
-			expect(candidate.startsWith("bin/")).toBe(false);
-		}
+		expect(candidates.filter((candidate) => !isAbsolute(candidate))).toEqual([]);
+		expect(candidates).toContain(join("/repo", "bin", exe("yt-dlp")));
 	});
 
 	it.each([
-		["yt-dlp", "/repo/node_modules/youtube-dl-exec/bin/yt-dlp"],
-		["ffmpeg", "/repo/node_modules/ffmpeg-static/ffmpeg"],
+		["yt-dlp", join("/repo", "node_modules", "youtube-dl-exec", "bin", exe("yt-dlp"))],
+		["ffmpeg", join("/repo", "node_modules", "ffmpeg-static", exe("ffmpeg"))],
 	])("finds %s where its optional npm package puts it", (name, expected) => {
 		expect(candidatesFor(name, undefined, "", "/repo")).toContain(expected);
 	});
@@ -51,21 +41,17 @@ describe("candidatesFor", () => {
 	it("prefers one on PATH over the bundled copy", () => {
 		const candidates = candidatesFor("yt-dlp", undefined, "/usr/bin", "/repo");
 
-		expect(candidates.indexOf("/usr/bin/yt-dlp")).toBeLessThan(
-			candidates.indexOf("/repo/node_modules/youtube-dl-exec/bin/yt-dlp"),
+		expect(candidates.indexOf(join("/usr/bin", exe("yt-dlp")))).toBeLessThan(
+			candidates.indexOf(join("/repo", "node_modules", "youtube-dl-exec", "bin", exe("yt-dlp"))),
 		);
-	});
-
-	it("prefers an explicitly configured path over everything", () => {
-		expect(candidatesFor("yt-dlp", "/opt/mine", "/usr/bin", "/repo")[0]).toBe("/opt/mine");
 	});
 });
 
 describe("locate", () => {
 	it("returns the first candidate that actually runs", () => {
-		const found = locate("yt-dlp", "/opt/broken", (path) => path === "/usr/bin/yt-dlp");
+		const second = candidatesFor("yt-dlp", "/opt/broken")[1];
 
-		expect(found).toBe("/usr/bin/yt-dlp");
+		expect(locate("yt-dlp", "/opt/broken", (path) => path !== "/opt/broken")).toBe(second);
 	});
 
 	/** A candidate that exists but will not run counts as missing. */
@@ -108,7 +94,7 @@ describe("locateYtDlp", () => {
 	it("keeps the lookup order on a tie, so PATH still beats the bundled copy", () => {
 		const found = locateYtDlp(undefined, () => "2026.09.15", "/usr/bin", "/repo");
 
-		expect(found?.path).toBe(join("/usr/bin", "yt-dlp"));
+		expect(found?.path).toBe(join("/usr/bin", exe("yt-dlp")));
 	});
 
 	/** An explicit setting is an explicit choice, however old the file it names. */
@@ -180,21 +166,15 @@ describe("the version probe", () => {
 		expect(asked["/x/yt-dlp"]).toEqual(["--version"]);
 	});
 
+	/** Node itself is the picky binary: it exits 0 for `--version` and 9 for `-version`, on every system. */
 	it("passes the flag through to the process rather than dropping it", () => {
-		const directory = mkdtempSync(join(tmpdir(), "testify-probe-"));
-		const picky = join(directory, "picky");
-		// Exits 0 only for `-version`, which is exactly how the real FFmpeg behaves.
-		writeFileSync(picky, '#!/bin/sh\n[ "$1" = "-version" ] && exit 0\nexit 8\n', { mode: 0o755 });
+		const node = process.execPath;
 
-		try {
-			expect(runs(picky, ["-version"])).toBe(true);
-			expect(runs(picky, ["--version"])).toBe(false);
-			expect(locate("ffmpeg", picky)).toBe(picky);
-			// A configured path that fails the probe falls through to PATH; this one was rejected.
-			expect(locate("yt-dlp", picky)).not.toBe(picky);
-		} finally {
-			rmSync(directory, { recursive: true, force: true });
-		}
+		expect(runs(node, ["--version"])).toBe(true);
+		expect(runs(node, ["-version"])).toBe(false);
+		expect(locate("yt-dlp", node)).toBe(node);
+		// A configured path that fails the probe falls through to PATH; this one was rejected.
+		expect(locate("ffmpeg", node)).not.toBe(node);
 	});
 });
 
