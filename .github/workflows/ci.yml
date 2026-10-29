@@ -38,8 +38,17 @@ jobs:
         run: npm run format:check
 
   test:
-    name: Tests
-    runs-on: ubuntu-latest
+    name: Tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # Every system reports, so a failure on one is never hidden by a failure on another.
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    # A run that could not start MongoDB would otherwise report every database suite as skipped and still pass.
+    # Here the data layer is not optional: no database means a failed build.
+    env:
+      REQUIRE_DB_TESTS: "1"
     steps:
       - uses: actions/checkout@v7
 
@@ -52,15 +61,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Coverage is the same on every system, so it is measured once.
       - name: Run tests with coverage
-        # A run that could not start MongoDB would otherwise report every database suite as skipped and
-        # still pass. Here the data layer is not optional: no database means a failed build.
-        env:
-          REQUIRE_DB_TESTS: "1"
+        if: matrix.os == 'ubuntu-latest'
         run: npm run test:coverage
 
+      - name: Run tests
+        if: matrix.os != 'ubuntu-latest'
+        run: npm test
+
       - name: Upload coverage
-        if: always()
+        if: always() && matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v7
         with:
           name: coverage
