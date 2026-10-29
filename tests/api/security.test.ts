@@ -1,3 +1,4 @@
+import { indexable } from "@api/middleware/security";
 import { createApi } from "@api/server";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
@@ -57,6 +58,15 @@ describe("security headers", () => {
 	/** robots.txt only asks; this tells a crawler that ignored it not to keep what it found. */
 	it("refuses to be indexed", async () => {
 		expect((await apiFor().request("/api/health")).headers.get("x-robots-tag")).toBe("noindex, nofollow, noarchive");
+	});
+
+	/** The landing page and the docs are there to be found; a server's screens and each source file are not. */
+	it("lets the website's own pages be indexed and nothing else", () => {
+		const pages = ["/", "/docs", "/docs/hosting", "/source-code", "/terms", "/privacy"];
+		const hidden = ["/guilds", "/sign-in", "/owner", "/source-code/src/index.ts", "/docs/a/b", "/api/site", "/status"];
+
+		expect(pages.filter((path) => !indexable(path))).toEqual([]);
+		expect(hidden.filter((path) => indexable(path))).toEqual([]);
 	});
 
 	it("stops a JSON response being sniffed as HTML", async () => {

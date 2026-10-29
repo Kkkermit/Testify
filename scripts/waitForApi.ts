@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { box, painter, stepLine } from "@core/terminal";
 
-/** Holds the dashboard back until the bot's API answers, so Vite's proxy does not fail while the bot connects. */
+/** Holds the page back until the bot's API answers, so Vite's proxy does not fail while the bot connects. */
 
 const POLL_MS = 500;
 
@@ -31,7 +31,8 @@ export function readDashboardEnv(source: Record<string, string | undefined>): Da
 	const port = Number(source.DASHBOARD_PORT);
 
 	return {
-		enabled: source.DASHBOARD_ENABLED === "true",
+		// The website is on unless it says exactly false, and either one starts the API.
+		enabled: source.DASHBOARD_ENABLED === "true" || source.SITE_ENABLED !== "false",
 		port: Number.isInteger(port) && port > 0 && port <= 65_535 ? port : 3_000,
 	};
 }
@@ -58,10 +59,10 @@ export async function main(): Promise<void> {
 
 	if (!enabled) {
 		const lines = [
-			"DASHBOARD_ENABLED is not true, so the bot starts no API for the dashboard.",
-			"Set DASHBOARD_ENABLED=true in .env.development, or run `npm run dev` for the bot alone.",
+			"SITE_ENABLED is false and DASHBOARD_ENABLED is not true, so the bot starts no API.",
+			"Turn either on in .env.development, or run `npm run dev` for the bot alone.",
 		];
-		process.stderr.write(`\n${box("The dashboard is switched off", lines, "warning", paint).join("\n")}\n\n`);
+		process.stderr.write(`\n${box("The website is switched off", lines, "warning", paint).join("\n")}\n\n`);
 		process.exitCode = 1;
 		return;
 	}
@@ -73,7 +74,7 @@ export async function main(): Promise<void> {
 
 	while (Date.now() < deadline) {
 		if (await answering(url)) {
-			say(stepLine("done", "API", `answering on port ${String(port)} — starting the dashboard`, undefined, paint));
+			say(stepLine("done", "API", `answering on port ${String(port)} — starting the page`, undefined, paint));
 			return;
 		}
 

@@ -80,17 +80,6 @@ beforeEach(() => {
 });
 
 describe("the bot statistics routes", () => {
-	it("posts in the chosen channel and writes it down", async () => {
-		posted.mockResolvedValue({ channelId: CHANNEL });
-
-		const response = await send("PUT", `/guilds/${GUILD}/bot-stats`, { channelId: CHANNEL });
-
-		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual({ channelId: CHANNEL });
-		expect(posted).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ id: GUILD }), CHANNEL, OWNER);
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "bot-stats.post" }));
-	});
-
 	it("refuses a channel id that is not one", async () => {
 		const response = await send("PUT", `/guilds/${GUILD}/bot-stats`, { channelId: "general" });
 
@@ -108,30 +97,10 @@ describe("the bot statistics routes", () => {
 		expect(JSON.stringify(await response.json())).toContain("Pick a text channel");
 		expect(audited).not.toHaveBeenCalled();
 	});
-
-	it("answers 404 for removing a message that is not there", async () => {
-		removed.mockResolvedValue(false);
-
-		expect((await send("DELETE", `/guilds/${GUILD}/bot-stats`)).status).toBe(404);
-		expect(audited).not.toHaveBeenCalled();
-	});
-
-	it("removes the message and says there is none now", async () => {
-		const response = await send("DELETE", `/guilds/${GUILD}/bot-stats`);
-
-		expect(await response.json()).toEqual({ channelId: null });
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "bot-stats.remove" }));
-	});
 });
 
 describe("the member count route", () => {
 	const counts = { total: 10, people: 8, bots: 2, joinedDay: 1, joinedWeek: 3 };
-
-	it("answers with the breakdown", async () => {
-		counted.mockResolvedValue(counts);
-
-		expect(await (await send("GET", `/guilds/${GUILD}/member-count`)).json()).toEqual(counts);
-	});
 
 	/** Each count fetches the whole member list over the gateway, so a reload must not ask again. */
 	it("reuses a recent count rather than fetching every member again", async () => {

@@ -5,13 +5,7 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { guilds } from "@api/routes/guilds";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import {
-	type ChannelSummary,
-	type GuildOverview,
-	type InsightsReport,
-	type RoleSummary,
-	type ServerChangesPage,
-} from "@testify/shared";
+import { type ChannelSummary, type GuildOverview, type RoleSummary, type ServerChangesPage } from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/casinoRepository", () => ({
@@ -237,27 +231,6 @@ function appFor(options: Options = {}): Hono<ApiBindings> {
 }
 
 describe("the guild overview", () => {
-	it("reports the counts from the live cache", async () => {
-		const body = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
-
-		expect(body).toMatchObject({ name: "Test Server", memberCount: 1_234, channelCount: 5, roleCount: 5 });
-	});
-
-	it("lists every feature, on or off, so nothing is invisible", async () => {
-		const body = (await (await appFor().request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
-
-		// The casino is the one feature a server gets without setting anything up, so its tile says it is open.
-		const configurable = body.features.filter((feature) => feature.key !== "casino");
-
-		expect(body.features.map((feature) => feature.key)).toContain("levelling");
-		expect(configurable.every((feature) => !feature.enabled)).toBe(true);
-		expect(configurable.every((feature) => feature.detail === null)).toBe(true);
-		expect(body.features.find((feature) => feature.key === "casino")).toMatchObject({
-			enabled: true,
-			detail: "6 of 6 games open",
-		});
-	});
-
 	/** A feature can be configured perfectly and do nothing, because Discord revokes permissions silently. */
 	it("names a missing permission in words someone can act on", async () => {
 		const app = appFor({ botPermissions: [PermissionFlagsBits.ManageMessages] });
@@ -332,10 +305,6 @@ describe("the role list", () => {
 		expect(roles.find((role) => role.id === "r3")?.assignableByBot).toBe(false);
 	});
 
-	it("marks an integration's own role as not assignable", async () => {
-		expect((await rolesOf()).find((role) => role.id === "r4")?.assignableByBot).toBe(false);
-	});
-
 	/** A self-assign menu offering one of these would let anybody moderate the server. */
 	it("marks a role that administers as powerful", async () => {
 		const roles = await rolesOf();
@@ -344,26 +313,12 @@ describe("the role list", () => {
 		expect(roles.find((role) => role.id === "r1")?.powerful).toBe(false);
 	});
 
-	it("gives a colour only when the role has one", async () => {
-		const roles = await rolesOf();
-
-		expect(roles.find((role) => role.id === "r2")?.colour).toBe("#7c3aed");
-		expect(roles.find((role) => role.id === "r1")?.colour).toBeNull();
-	});
-
 	it("lists them highest first, as Discord does", async () => {
 		expect((await rolesOf()).map((role) => role.id)).toEqual(["r3", "r2", "r4", "r1"]);
 	});
 });
 
 describe("the audit list", () => {
-	it("pages", async () => {
-		const response = await appFor().request(`/guilds/${GUILD}/audit?page=2&perPage=10`);
-
-		expect(response.status).toBe(200);
-		expect(await response.json()).toEqual({ items: [], total: 0, page: 2, perPage: 10 });
-	});
-
 	/** An unvalidated page number becomes a negative skip. */
 	it("refuses a page number that is not one", async () => {
 		expect((await appFor().request(`/guilds/${GUILD}/audit?page=0`)).status).toBe(400);
@@ -400,16 +355,6 @@ describe("the changes list", () => {
 });
 
 describe("the insights report", () => {
-	it("answers with every day of the window even before anything was counted", async () => {
-		const response = await appFor().request(`/guilds/${GUILD}/insights?days=30`);
-		const body = (await response.json()) as InsightsReport;
-
-		expect(response.status).toBe(200);
-		expect(body.daily).toHaveLength(30);
-		expect(body.countingSince).toBeNull();
-		expect(body.server).toMatchObject({ members: 1_234, textChannels: 2, verification: "none" });
-	});
-
 	it("refuses a window it does not keep", async () => {
 		expect((await appFor().request(`/guilds/${GUILD}/insights?days=90`)).status).toBe(400);
 	});

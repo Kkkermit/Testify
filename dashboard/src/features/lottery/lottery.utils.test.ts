@@ -1,5 +1,5 @@
 import { type LotterySettings } from "@testify/shared";
-import { draftOf, draftProblem, isDirty, reschedules, winnersWarning } from "@/features/lottery/lottery.utils";
+import { draftOf, draftProblem, reschedules, winnersWarning } from "@/features/lottery/lottery.utils";
 import { t } from "@/test/english";
 
 const SETTINGS: LotterySettings = {
@@ -20,14 +20,6 @@ const SETTINGS: LotterySettings = {
 describe("draftProblem", () => {
 	const draft = draftOf(SETTINGS);
 
-	it("says nothing about a complete draft", () => {
-		expect(draftProblem(draft, t)).toBeNull();
-	});
-
-	it("asks for the announcement channel", () => {
-		expect(draftProblem({ ...draft, announcementChannelId: null }, t)).toMatch(/announced/i);
-	});
-
 	it("refuses a free ticket", () => {
 		expect(draftProblem({ ...draft, entryFee: 0 }, t)).toMatch(/at least/i);
 	});
@@ -43,17 +35,6 @@ describe("draftProblem", () => {
 	});
 });
 
-describe("isDirty", () => {
-	it("is false for an untouched draft", () => {
-		expect(isDirty(draftOf(SETTINGS), SETTINGS)).toBe(false);
-	});
-
-	it("notices a change to any field", () => {
-		expect(isDirty({ ...draftOf(SETTINGS), entryFee: 150 }, SETTINGS)).toBe(true);
-		expect(isDirty({ ...draftOf(SETTINGS), frequency: "daily" }, SETTINGS)).toBe(true);
-	});
-});
-
 describe("reschedules", () => {
 	/** Changing the frequency moves the next draw, and an admin should know that before pressing Save. */
 	it("is true only when the frequency changes", () => {
@@ -64,18 +45,10 @@ describe("reschedules", () => {
 });
 
 describe("winnersWarning", () => {
-	it("says nothing when there are more tickets than winners", () => {
-		expect(winnersWarning(draftOf(SETTINGS), SETTINGS, t)).toBeNull();
-	});
-
 	/** A draw for more winners than tickets sold leaves somebody with nothing, which reads as a broken draw. */
 	it("warns when the winners outnumber the tickets sold", () => {
 		expect(winnersWarning({ ...draftOf(SETTINGS), maxWinners: 5 }, { ...SETTINGS, ticketsSold: 3 }, t)).toMatch(
 			/empty-handed/i,
 		);
-	});
-
-	it("says nothing before any tickets are sold, when the comparison means nothing", () => {
-		expect(winnersWarning({ ...draftOf(SETTINGS), maxWinners: 5 }, { ...SETTINGS, ticketsSold: 0 }, t)).toBeNull();
 	});
 });

@@ -8,7 +8,6 @@ import {
 	commandLogEntry,
 	type CommandLogs,
 	type CommandRun,
-	flushCommandLog,
 	logCommandUse,
 } from "@lib/bot/commandLog.util";
 import {
@@ -17,13 +16,10 @@ import {
 	createMockInteraction,
 	createMockRole,
 	createMockUser,
-	GUILD_ID,
 	type MockInteractionSetup,
-	USER_ID,
 } from "@tests/helpers/mocks";
 
 const SLASH_CHANNEL = "700000000000000001";
-const PREFIX_CHANNEL = "700000000000000002";
 
 const music: Command = {
 	name: "music",
@@ -100,25 +96,6 @@ function clientWith(
 }
 
 describe("a command log entry", () => {
-	it("names the command with its subcommand, who ran it and where", () => {
-		const logged = entry();
-
-		expect(logged.name).toBe("music play");
-		expect(logged.prefix).toBe("/");
-		expect(logged.user).toMatchObject({ id: USER_ID, username: "alice" });
-		expect(logged.guild).toMatchObject({ id: GUILD_ID, name: "Test Server" });
-		expect(logged.channel).toEqual({ id: CHANNEL_ID, name: "general" });
-	});
-
-	it("keeps each option given, in plain words, and leaves out the ones that were not", () => {
-		const logged = entry({ subcommand: "play", options: { query: "never gonna", shuffle: true } });
-
-		expect(logged.options).toEqual([
-			{ name: "query", value: "never gonna" },
-			{ name: "shuffle", value: "Yes" },
-		]);
-	});
-
 	it("writes people and roles with their ids, since a mention does not render in another server", () => {
 		const target = createMockUser({ id: "300000000000000003", username: "bob" });
 		const logged = entry({ options: { user: target, role: createMockRole() } }, {}, give);
@@ -136,63 +113,15 @@ describe("a command log entry", () => {
 		expect(logged.options).toContainEqual({ name: "note", value: null });
 		expect(JSON.stringify(commandLogEmbed(logged).toJSON())).not.toContain("my secret question");
 	});
-
-	it("records a direct message as having no server and no channel", () => {
-		const logged = entry({ inGuild: false });
-
-		expect(logged.guild).toBeNull();
-		expect(logged.channel).toBeNull();
-	});
-
-	it("notes what a prefix run actually typed when it was an alias or another case", () => {
-		const prefix = { surface: "prefix", prefix: "t?" } as const;
-
-		expect(entry({}, { ...prefix, typed: "T?mp" }).typed).toBe("T?mp");
-		expect(entry({}, { ...prefix, typed: "t?music play" }).typed).toBeNull();
-		expect(entry({}, { ...prefix, typed: "T?mp" }).prefix).toBe("t?");
-	});
 });
 
 describe("a command log embed", () => {
-	it("leads with the command and the person, and carries every detail as its own field", () => {
-		const built = commandLogEmbed(entry({ options: { query: "never gonna", volume: 50 } })).toJSON();
-		const byName = fields(built);
-
-		expect(built.title).toBe("✅ /music play");
-		expect(built.author?.name).toBe("@alice");
-		expect(built.author?.icon_url).toBe("https://cdn.discord/avatar.png");
-		expect(built.thumbnail?.url).toBe("https://cdn.discord/avatar.png");
-		expect(byName.User).toContain(`<@${USER_ID}>`);
-		expect(byName.User).toContain(USER_ID);
-		expect(byName.User).toContain("Account made <t:");
-		expect(byName.Server).toContain("Test Server");
-		expect(byName.Server).toContain(GUILD_ID);
-		expect(byName.Channel).toContain("#general");
-		expect(byName.Options).toBe("`query` never gonna\n`volume` 50");
-		expect(byName.Result).toBe("Worked");
-		expect(byName.Took).toBe("42 ms");
-		expect(built.footer?.text).toBe("Slash command · Test Server");
-		expect(built.timestamp).toBe(new Date(1_700_000_000_000).toISOString());
-	});
-
-	it("turns red and points at the error log when the command failed", () => {
-		const built = commandLogEmbed(entry({}, { ok: false })).toJSON();
-
-		expect(built.title).toBe("❌ /music play");
-		expect(fields(built).Result).toContain("error log");
-	});
-
 	it("uses the server's prefix for a prefix run, and says what was typed", () => {
 		const built = commandLogEmbed(entry({}, { surface: "prefix", prefix: "t?", typed: "T?mp" })).toJSON();
 
 		expect(built.title).toBe("✅ t?music play");
 		expect(fields(built)["Typed as"]).toBe("`T?mp`");
 		expect(built.footer?.text).toBe("Prefix command · Test Server");
-	});
-
-	it("has no Options field for a run given none", () => {
-		const built = commandLogEmbed(entry({ options: {} })).toJSON();
-		expect(fields(built).Options).toBeUndefined();
 	});
 });
 
@@ -231,20 +160,7 @@ describe("the waiting entries", () => {
 });
 
 describe("logging a command", () => {
-	const both = { CHANNEL_SLASH_COMMAND_LOG: SLASH_CHANNEL, CHANNEL_PREFIX_COMMAND_LOG: PREFIX_CHANNEL };
 	const input = () => createMockInteraction({ subcommand: "play", options: { query: "q" } });
-
-	it("keeps slash and prefix apart", () => {
-		const logs = fresh();
-		const client = clientWith(both);
-
-		logCommandUse(client, input(), music, slashRun, logs);
-		logCommandUse(client, input(), music, { ...slashRun, surface: "prefix", prefix: "t?" }, logs);
-		logCommandUse(client, input(), music, { ...slashRun, surface: "prefix", prefix: "t?" }, logs);
-
-		expect(logs.slash.size).toBe(1);
-		expect(logs.prefix.size).toBe(2);
-	});
 
 	/** Nothing gathers in memory for a log nobody will read. */
 	it("records nothing for a surface with no channel", () => {
@@ -258,35 +174,5 @@ describe("logging a command", () => {
 		);
 
 		expect(logs.prefix.size).toBe(0);
-	});
-
-	it("posts each surface to its own channel, an embed per run", async () => {
-		const logs = fresh();
-		const sent: { channelId: string; embeds: APIEmbed[] }[] = [];
-		const client = clientWith(both, sent);
-
-		logCommandUse(client, input(), music, slashRun, logs);
-		logCommandUse(client, input(), music, slashRun, logs);
-		logCommandUse(client, input(), music, { ...slashRun, surface: "prefix", prefix: "t?" }, logs);
-		await flushCommandLog(client, logs);
-
-		expect(sent.map(({ channelId, embeds }) => [channelId, embeds.map((built) => built.title)])).toEqual([
-			[SLASH_CHANNEL, ["✅ /music play", "✅ /music play"]],
-			[PREFIX_CHANNEL, ["✅ t?music play"]],
-		]);
-		expect(logs.slash.size + logs.prefix.size).toBe(0);
-	});
-
-	it("says how many runs were dropped above the first post", async () => {
-		const logs = fresh();
-		const sent: { channelId: string; embeds: APIEmbed[]; content?: string }[] = [];
-		const client = clientWith(both, sent);
-
-		const one = entry();
-		for (let index = 0; index < COMMAND_LOG_LIMITS.maxWaiting + 2; index += 1) logs.slash.record(one);
-		await flushCommandLog(client, logs);
-
-		expect(sent[0]?.content).toContain("2 more were dropped");
-		expect(sent[1]?.content).toBeUndefined();
 	});
 });

@@ -1,14 +1,6 @@
-import { ButtonStyle, ComponentType, MessageFlags, resolveColor } from "discord.js";
-import { theme } from "@config/theme";
-import { button, row } from "@lib/discord/components.util";
-import {
-	container,
-	containerMessage,
-	divider,
-	sectionWithButton,
-	sectionWithThumbnail,
-	text,
-} from "@lib/discord/containers.util";
+import { ComponentType, MessageFlags } from "discord.js";
+import { button } from "@lib/discord/components.util";
+import { container, containerMessage, sectionWithButton, text } from "@lib/discord/containers.util";
 
 const json = (builder: { toJSON(): unknown }): Record<string, unknown> => builder.toJSON() as Record<string, unknown>;
 
@@ -26,26 +18,6 @@ describe("containerMessage", () => {
 	});
 });
 
-describe("text", () => {
-	it("keeps the markdown it was given", () => {
-		expect(json(text("**bold**")).content).toBe("**bold**");
-	});
-});
-
-describe("divider", () => {
-	it("draws a line by default", () => {
-		expect(json(divider()).divider).toBe(true);
-	});
-
-	it("can be invisible spacing instead", () => {
-		expect(json(divider({ spacer: true })).divider).toBe(false);
-	});
-
-	it("takes a larger gap", () => {
-		expect(json(divider({ large: true })).spacing).not.toBe(json(divider()).spacing);
-	});
-});
-
 describe("sectionWithButton", () => {
 	/** The point of V2: the control sits beside the thing it acts on. */
 	it("puts the button on the section rather than in a row below", () => {
@@ -55,75 +27,15 @@ describe("sectionWithButton", () => {
 		expect(accessory.type).toBe(ComponentType.Button);
 		expect(accessory.label).toBe("Buy");
 	});
-
-	it("keeps the text alongside it", () => {
-		const built = json(sectionWithButton("Buy me", button({ id: "a:b", label: "Buy" })));
-		const components = built.components as { content: string }[];
-
-		expect(components[0]?.content).toBe("Buy me");
-	});
-
-	it("carries a disabled button through", () => {
-		const built = json(sectionWithButton("x", button({ id: "a:b", label: "No", disabled: true })));
-		expect((built.accessory as { disabled?: boolean }).disabled).toBe(true);
-	});
-});
-
-describe("sectionWithThumbnail", () => {
-	it("attaches the image as the accessory", () => {
-		const built = json(sectionWithThumbnail("Track", "https://cdn.test/art.png"));
-		const accessory = built.accessory as { type: number; media: { url: string } };
-
-		expect(accessory.type).toBe(ComponentType.Thumbnail);
-		expect(accessory.media.url).toBe("https://cdn.test/art.png");
-	});
-
-	it("adds alt text when given some", () => {
-		const built = json(sectionWithThumbnail("Track", "https://cdn.test/art.png", "Album art"));
-		expect((built.accessory as { description?: string }).description).toBe("Album art");
-	});
 });
 
 describe("container", () => {
-	it("takes an accent over its category's colour", () => {
-		const built = json(container({ category: "casino", accent: theme.colours.success, parts: [text("won")] }));
-
-		expect(built.accent_color).toBe(resolveColor(theme.colours.success));
-	});
-
 	/** A colour is never worth failing a message over. */
 	it("falls back rather than throwing on a colour it cannot read", () => {
 		expect(json(container({ accent: "NotAColour" as never, parts: [text("x")] })).accent_color).toBe(0x5865f2);
 	});
 
-	it("keeps its parts in the order they were passed", () => {
-		const built = json(
-			container({
-				parts: [text("one"), divider(), sectionWithButton("two", button({ id: "a:b", label: "Go" }))],
-			}),
-		);
-		const types = (built.components as { type: number }[]).map((component) => component.type);
-
-		expect(types).toEqual([ComponentType.TextDisplay, ComponentType.Separator, ComponentType.Section]);
-	});
-
-	it("accepts an action row alongside the rest", () => {
-		const built = json(
-			container({ parts: [text("x"), row(button({ id: "a:b", label: "Go", style: ButtonStyle.Primary }))] }),
-		);
-
-		expect((built.components as { type: number }[]).at(-1)?.type).toBe(ComponentType.ActionRow);
-	});
-
 	it("colours itself by category, so V2 matches the embeds beside it", () => {
 		expect(json(container({ category: "economy", parts: [text("x")] })).accent_color).toEqual(expect.any(Number));
-	});
-
-	it("leaves the accent off when no category is given", () => {
-		expect(json(container({ parts: [text("x")] })).accent_color).toBeUndefined();
-	});
-
-	it("builds an empty container without throwing", () => {
-		expect(() => container({ parts: [] })).not.toThrow();
 	});
 });

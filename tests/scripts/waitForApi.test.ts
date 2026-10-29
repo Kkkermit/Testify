@@ -1,11 +1,12 @@
 import { readDashboardEnv, timeoutMs } from "../../scripts/waitForApi";
 
 describe("readDashboardEnv", () => {
-	/** `flag` in env.ts reads only the literal string, so anything else is off — and off means no API to wait for. */
-	it("treats anything but the literal true as off", () => {
-		expect(readDashboardEnv({ DASHBOARD_ENABLED: "true" }).enabled).toBe(true);
-		expect(readDashboardEnv({ DASHBOARD_ENABLED: "1" }).enabled).toBe(false);
-		expect(readDashboardEnv({}).enabled).toBe(false);
+	/** The website is on by default and starts the API by itself, so only both switched off leaves nothing to wait for. */
+	it("waits while the website or the dashboard is on", () => {
+		expect(readDashboardEnv({}).enabled).toBe(true);
+		expect(readDashboardEnv({ SITE_ENABLED: "false" }).enabled).toBe(false);
+		expect(readDashboardEnv({ SITE_ENABLED: "false", DASHBOARD_ENABLED: "1" }).enabled).toBe(false);
+		expect(readDashboardEnv({ SITE_ENABLED: "false", DASHBOARD_ENABLED: "true" }).enabled).toBe(true);
 	});
 
 	it("reads the port the bot will actually listen on", () => {

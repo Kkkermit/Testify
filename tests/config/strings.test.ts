@@ -31,15 +31,15 @@ describe("strings", () => {
 		expect(leaves.length).toBeGreaterThan(20);
 	});
 
-	it.each(leaves)("%s renders without a hole in it", (name, leaf) => {
-		const rendered =
-			typeof leaf === "function" ? (leaf as (...args: unknown[]) => string)(...(ARGUMENTS[name] ?? [1])) : leaf;
+	it("renders every line without a hole in it", () => {
+		const holed = leaves.filter(([name, leaf]) => {
+			const rendered =
+				typeof leaf === "function" ? (leaf as (...args: unknown[]) => string)(...(ARGUMENTS[name] ?? [1])) : leaf;
 
-		expect(typeof rendered).toBe("string");
-		expect(rendered.length).toBeGreaterThan(0);
-		expect(rendered).not.toContain("undefined");
-		expect(rendered).not.toContain("[object Object]");
-		expect(rendered).not.toContain("NaN");
+			return typeof rendered !== "string" || rendered.length === 0 || /undefined|\[object Object\]|NaN/.test(rendered);
+		});
+
+		expect(holed.map(([name]) => name)).toEqual([]);
 	});
 
 	it("interpolates the values it is given", () => {

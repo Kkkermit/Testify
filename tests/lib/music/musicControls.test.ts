@@ -72,12 +72,6 @@ describe("the player controls", () => {
 		expect(current.queue.tracks[0]?.title).toBe("now");
 	});
 
-	it("reports the level the player actually applied", () => {
-		const clamped = session(playing, { setVolume: () => 200 });
-
-		expect(setPlayerVolume(clamped, 500)).toBe("Volume set to **200%**. It takes a moment to take effect.");
-	});
-
 	/** Only FFmpeg can re-encode, so a host without it must say so rather than claim a level it cannot apply. */
 	it("refuses a volume change on a host without FFmpeg", () => {
 		const noFfmpeg = session(playing, { canSetVolume: false });

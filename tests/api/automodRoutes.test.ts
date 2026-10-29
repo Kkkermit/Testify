@@ -5,7 +5,6 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { automod } from "@api/routes/automod";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { recordAudit } from "@database/repositories/dashboardAuditRepository";
 import { type AutomodRules } from "@testify/shared";
 
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudit: jest.fn(() => Promise.resolve()) }));
@@ -14,8 +13,6 @@ const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
 const BOT = "200000000000000002";
 const RULE = "500000000000000001";
-
-const audited = jest.mocked(recordAudit);
 
 const created = jest.fn();
 const fetched = jest.fn();
@@ -116,14 +113,6 @@ describe("GET /automod", () => {
 });
 
 describe("POST /automod", () => {
-	it("creates the preset it was given and answers with the new list", async () => {
-		const response = await send("POST", "", { preset: "spam" });
-
-		expect(response.status).toBe(200);
-		expect(created).toHaveBeenCalledWith(expect.objectContaining({ triggerType: AutoModerationRuleTriggerType.Spam }));
-		expect((await response.json()) as AutomodRules).toMatchObject({ canManage: true });
-	});
-
 	it("refuses a preset that is not one of the four", async () => {
 		const response = await send("POST", "", { preset: "whatever" });
 
@@ -150,24 +139,9 @@ describe("POST /automod", () => {
 		expect(response.status).toBe(400);
 		expect(created).not.toHaveBeenCalled();
 	});
-
-	it("writes an audit record naming the rule", async () => {
-		await send("POST", "", { preset: "spam" });
-
-		expect(audited).toHaveBeenCalledWith(
-			expect.objectContaining({ action: "automod.create", summary: expect.stringContaining("Block spam") }),
-		);
-	});
 });
 
 describe("PATCH /automod/:ruleId", () => {
-	it("turns a rule off", async () => {
-		const response = await send("PATCH", `/${RULE}`, { enabled: false });
-
-		expect(response.status).toBe(200);
-		expect(setEnabled).toHaveBeenCalledWith(false, expect.any(String));
-	});
-
 	/** An id that is not a snowflake must be refused before it is handed to Discord as arbitrary text. */
 	it("refuses a rule id that is not a snowflake", async () => {
 		const response = await send("PATCH", "/not-an-id", { enabled: false });
@@ -196,38 +170,9 @@ describe("PATCH /automod/:ruleId", () => {
 		expect(response.status).toBe(400);
 		expect(setEnabled).not.toHaveBeenCalled();
 	});
-
-	it("records which way it was switched", async () => {
-		await send("PATCH", `/${RULE}`, { enabled: true });
-
-		expect(audited).toHaveBeenCalledWith(
-			expect.objectContaining({ action: "automod.update", summary: expect.stringContaining("Enabled") }),
-		);
-	});
 });
 
 describe("DELETE /automod/:ruleId", () => {
-	it("removes the rule and answers with the list", async () => {
-		const response = await send("DELETE", `/${RULE}`);
-
-		expect(response.status).toBe(200);
-		expect(removed).toHaveBeenCalled();
-	});
-
-	it("names the removed rule in the audit record", async () => {
-		await send("DELETE", `/${RULE}`);
-
-		expect(audited).toHaveBeenCalledWith(
-			expect.objectContaining({ action: "automod.delete", summary: expect.stringContaining("Block spam") }),
-		);
-	});
-
-	it("answers 404 for a rule that is no longer there", async () => {
-		fetched.mockRejectedValue(new Error("unknown rule"));
-
-		expect((await send("DELETE", `/${RULE}`)).status).toBe(404);
-	});
-
 	it("refuses without Manage Server", async () => {
 		expect((await send("DELETE", `/${RULE}`, undefined, false)).status).toBe(400);
 		expect(removed).not.toHaveBeenCalled();

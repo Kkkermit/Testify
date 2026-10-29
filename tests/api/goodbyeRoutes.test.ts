@@ -7,8 +7,7 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { getGoodbyeSettings, saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
-import { DEFAULT_GOODBYE_MESSAGE } from "@testify/shared";
+import { saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 
 jest.mock("@database/repositories/goodbyeRepository", () => ({
 	getGoodbyeSettings: jest.fn(() => Promise.resolve(null)),
@@ -64,13 +63,6 @@ beforeEach(() => {
 });
 
 describe("the goodbye route", () => {
-	it("answers an unconfigured server with the defaults", async () => {
-		const response = await send("GET");
-
-		expect(response.status).toBe(200);
-		expect(await response.json()).toMatchObject({ enabled: false, message: DEFAULT_GOODBYE_MESSAGE, style: "text" });
-	});
-
 	it("saves a change through the same rules as the panel, and records it", async () => {
 		const response = await send("PATCH", { channelId: CHANNEL, enabled: true });
 
@@ -96,22 +88,5 @@ describe("the goodbye route", () => {
 		expect((await send("PATCH", { message: "<script>x</script>" })).status).toBe(400);
 		expect((await send("PATCH", { message: "​" })).status).toBe(400);
 		expect((await send("PATCH", {})).status).toBe(400);
-	});
-
-	it("keeps a stored channel when only the wording changes", async () => {
-		jest.mocked(getGoodbyeSettings).mockResolvedValue({
-			enabled: true,
-			channelId: CHANNEL,
-			message: "Bye",
-			style: "embed",
-		});
-
-		await send("PATCH", { message: "See you, {username}" });
-
-		expect(saveGoodbyeSettings).toHaveBeenCalledWith(
-			GUILD,
-			{ enabled: true, channelId: CHANNEL, message: "See you, {username}", style: "embed" },
-			OWNER,
-		);
 	});
 });

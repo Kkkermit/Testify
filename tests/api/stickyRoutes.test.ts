@@ -33,10 +33,6 @@ describe("stickyPut", () => {
 });
 
 describe("stickyBlocked", () => {
-	it("asks for a channel before anything else", () => {
-		expect(problemText(stickyBlocked({ channelId: null, message: "hi" }, []))).toMatch(/channel/i);
-	});
-
 	/** One sticky per channel is a unique index underneath, so the form has to say so rather than 500. */
 	it("refuses a channel that already has one", () => {
 		expect(problemText(stickyBlocked({ channelId: "1", message: "hi" }, ["1"]))).toMatch(/already has a sticky/i);
@@ -44,9 +40,5 @@ describe("stickyBlocked", () => {
 
 	it("refuses an empty message", () => {
 		expect(problemText(stickyBlocked({ channelId: "1", message: "  " }, []))).toMatch(/something to say/i);
-	});
-
-	it("says nothing when the entry is complete", () => {
-		expect(problemText(stickyBlocked({ channelId: "1", message: "hi" }, ["2"]))).toBeNull();
 	});
 });

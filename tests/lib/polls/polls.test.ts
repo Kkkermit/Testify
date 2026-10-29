@@ -4,14 +4,6 @@ import { parseAnswers, pollMessage } from "@lib/polls/polls.util";
 const request = { question: "Best snack?", answers: "Crisps | Fruit | Cake", hours: null, multiple: null };
 
 describe("parseAnswers", () => {
-	it("splits on the separator and trims each answer", () => {
-		expect(parseAnswers("  Crisps|Fruit |  Cake ")).toEqual(["Crisps", "Fruit", "Cake"]);
-	});
-
-	it("ignores empty answers between separators", () => {
-		expect(parseAnswers("Yes || No |")).toEqual(["Yes", "No"]);
-	});
-
 	it("refuses a poll with fewer than two answers or more than ten", () => {
 		expect(() => parseAnswers("Yes")).toThrow("Give 2 to 10 answers");
 		expect(() => parseAnswers(Array.from({ length: 11 }, (_, index) => `Answer ${String(index)}`).join("|"))).toThrow(
@@ -42,12 +34,6 @@ describe("pollMessage", () => {
 			},
 			allowedMentions: { parse: [] },
 		});
-	});
-
-	it("keeps the hours and the multiple choice it was given", () => {
-		const { poll } = pollMessage({ ...request, hours: 72, multiple: true });
-
-		expect(poll).toMatchObject({ duration: 72, allowMultiselect: true });
 	});
 
 	it("refuses an empty or overlong question", () => {

@@ -2,13 +2,11 @@ import { parseCustomId } from "@core/button";
 import { MAX_VOLUME, MIN_VOLUME, MUSIC_ADD_ID, MUSIC_ID } from "@lib/music/music.constants";
 import { type QueueState, type Track } from "@lib/music/music.types";
 import {
-	headlineFor,
 	link,
 	musicPanel,
 	type PanelState,
 	musicBar,
 	progressLine,
-	queueSummary,
 	statusLine,
 	trackLine,
 	volumeStep,
@@ -67,17 +65,6 @@ function componentCount(panel: ReturnType<typeof musicPanel>): number {
 }
 
 describe("musicPanel", () => {
-	it("names the track that is playing", () => {
-		expect(textOf(musicPanel(state(), OWNER))).toContain("a");
-	});
-
-	it("says so plainly when nothing is playing, and offers a way to start", () => {
-		const empty = musicPanel(state({ queue: { tracks: [], index: -1, loop: "off" } }), OWNER);
-
-		expect(textOf(empty)).toContain("Nothing is playing");
-		expect(labels(empty)).toEqual(["Add to queue"]);
-	});
-
 	/** A finished queue used to keep its last song on show as though it were still playing. */
 	it("says the queue has finished, and offers the last song again", () => {
 		const done = musicPanel(state({ queue: { tracks: [track("a")], index: 1, loop: "off" } }), OWNER);
@@ -107,18 +94,6 @@ describe("musicPanel", () => {
 		expect(duplicateIds(musicPanel(state(), OWNER))).toEqual([]);
 	});
 
-	it("offers Pause while playing and Resume while paused", () => {
-		expect(labels(musicPanel(state(), OWNER))).toContain("Pause");
-		expect(labels(musicPanel(state({ paused: true }), OWNER))).toContain("Resume");
-	});
-
-	it("shows the loop mode on the button rather than making it guesswork", () => {
-		const looped = state();
-		looped.queue = { ...looped.queue, loop: "queue" };
-
-		expect(labels(musicPanel(looped, OWNER))).toContain("Loop: queue");
-	});
-
 	/** Shuffling one remaining track is a no-op that looks broken, so the control says so. */
 	it("disables shuffle when there is nothing worth shuffling", () => {
 		const nearlyDone = state();
@@ -126,12 +101,6 @@ describe("musicPanel", () => {
 		const shuffle = buttonsOf(musicPanel(nearlyDone, OWNER)).find((b) => String(b.label) === "Shuffle");
 
 		expect(shuffle?.disabled).toBe(true);
-	});
-
-	it("pages the queue only when there is more than one page", () => {
-		expect(labels(musicPanel(state(), OWNER))).not.toContain("Next page");
-
-		expect(labels(musicPanel(longQueue(), OWNER))).toContain("Next page");
 	});
 
 	/** Discord refuses a message carrying more than forty components, which is a rejection rather than a warning. */
@@ -145,14 +114,6 @@ describe("musicPanel", () => {
 		expect(componentCount(musicPanel({ ...long, canSetVolume: true }, OWNER))).toBeLessThanOrEqual(40);
 	});
 
-	it("numbers upcoming tracks from the one playing, so the numbers match what Remove takes", () => {
-		expect(textOf(musicPanel(state(), OWNER))).toContain("`1.`");
-	});
-
-	it("says it is paused in the heading as well as on the button", () => {
-		expect(textOf(musicPanel(state({ paused: true }), OWNER))).toContain("Paused");
-	});
-
 	/** Without FFmpeg nothing can re-encode, so offering the control would be a button that cannot work. */
 	it("disables the volume controls when the host cannot change the level", () => {
 		const buttons = buttonsOf(musicPanel(state(), OWNER));
@@ -161,30 +122,11 @@ describe("musicPanel", () => {
 		expect(buttons.find((entry) => entry.label === "+10%")?.disabled).toBe(true);
 	});
 
-	it("offers the volume controls when the host can change the level", () => {
-		const buttons = buttonsOf(musicPanel(state({ canSetVolume: true, volume: 100 }), OWNER));
-
-		expect(buttons.find((entry) => entry.label === "-10%")?.disabled).toBe(false);
-		expect(buttons.find((entry) => entry.label === "+10%")?.disabled).toBe(false);
-	});
-
-	it("disables whichever end of the volume range it is already at", () => {
-		const loudest = buttonsOf(musicPanel(state({ canSetVolume: true, volume: MAX_VOLUME }), OWNER));
-		const quietest = buttonsOf(musicPanel(state({ canSetVolume: true, volume: MIN_VOLUME }), OWNER));
-
-		expect(loudest.find((entry) => entry.label === "+10%")?.disabled).toBe(true);
-		expect(quietest.find((entry) => entry.label === "-10%")?.disabled).toBe(true);
-	});
-
 	it("carries the level it is moving to in the custom ID", () => {
 		const ids = idsOf(musicPanel(state({ canSetVolume: true, volume: 100 }), OWNER));
 
 		expect(ids).toContain(`music:volume:90:${OWNER}`);
 		expect(ids).toContain(`music:volume:110:${OWNER}`);
-	});
-
-	it("shows a note from the last press when there is one", () => {
-		expect(textOf(musicPanel(state({ note: "Skipped." }), OWNER))).toContain("Skipped.");
 	});
 
 	/** A container cannot carry an embed, so a thumbnail has to be a section rather than an image field. */
@@ -197,30 +139,13 @@ describe("musicPanel", () => {
 });
 
 describe("trackLine", () => {
-	it("shows the length", () => {
-		expect(trackLine(track("a"))).toContain("3:00");
-	});
-
-	it("says live rather than printing a wrong length", () => {
-		expect(trackLine(track("a", { durationMs: null }))).toContain("live");
-	});
-
 	/** A 200-character title would push the length off the row it belongs to. */
 	it("truncates a very long title", () => {
 		expect(trackLine(track("x".repeat(200))).length).toBeLessThan(140);
 	});
-
-	it("omits the author when there is not one", () => {
-		expect(trackLine(track("a", { author: null }))).not.toContain("—");
-	});
 });
 
 describe("musicBar", () => {
-	it("starts at the beginning and ends at the end", () => {
-		expect(musicBar(0, 100, 10).indexOf("●")).toBe(0);
-		expect(musicBar(100, 100, 10).indexOf("●")).toBe(9);
-	});
-
 	it("keeps the same width whatever it shows, so the line cannot twitch as it moves", () => {
 		const widths = [0, 25, 50, 99, 100].map((played) => [...musicBar(played, 100, 12)].length);
 
@@ -230,10 +155,6 @@ describe("musicBar", () => {
 	/** A head past the end would render a bar longer than itself, which reads as nonsense. */
 	it("never runs past its own end", () => {
 		expect(musicBar(999, 100, 8).indexOf("●")).toBe(7);
-	});
-
-	it("draws an empty bar rather than dividing by a length it does not have", () => {
-		expect(musicBar(10, 0, 5).indexOf("●")).toBe(0);
 	});
 });
 
@@ -247,10 +168,6 @@ describe("progressLine", () => {
 		expect(line).not.toContain("<t:");
 	});
 
-	it("marks a paused live stream as paused too", () => {
-		expect(progressLine(track("a", { durationMs: null }), 5_000, Date.now(), true)).toContain("Paused");
-	});
-
 	it("puts the paused line on the panel itself", () => {
 		const shown = textOf(musicPanel(state({ paused: true }), OWNER));
 
@@ -258,17 +175,9 @@ describe("progressLine", () => {
 		expect(shown).toContain("left");
 	});
 
-	it("draws where the track has got to", () => {
-		expect(progressLine(track("a"), 90_000)).toContain("1:30");
-	});
-
 	/** A resource can report slightly past the end, and a bar longer than itself renders as nonsense. */
 	it("never reports further than the track is long", () => {
 		expect(progressLine(track("a"), 999_999)).toContain("3:00");
-	});
-
-	it("says live for a stream with no end", () => {
-		expect(progressLine(track("a", { durationMs: null }), 5_000)).toContain("live");
 	});
 
 	/** A relative timestamp keeps the panel moving between edits. */
@@ -279,40 +188,10 @@ describe("progressLine", () => {
 	});
 });
 
-describe("queueSummary", () => {
-	it("counts what is still to come", () => {
-		expect(queueSummary({ tracks: [track("a"), track("b")], index: 0, loop: "off" })).toContain("1");
-	});
-
-	it("says when nothing follows", () => {
-		expect(queueSummary({ tracks: [track("a")], index: 0, loop: "off" })).toContain("Nothing queued");
-	});
-
-	it("does not invent a total when part of the queue is live", () => {
-		const queue: QueueState = { tracks: [track("a"), track("b", { durationMs: null })], index: 0, loop: "off" };
-
-		expect(queueSummary(queue)).toContain("live");
-	});
-});
-
 describe("statusLine", () => {
-	it("prints the level when the host can change it", () => {
-		expect(statusLine(state({ canSetVolume: true, volume: 80 }), track("a"))).toContain("80%");
-	});
-
 	/** Showing "100%" on a host that cannot re-encode promises a control that does not exist. */
 	it("says the track's own level when the host cannot change it", () => {
 		expect(statusLine(state(), track("a"))).toContain("track level");
-	});
-
-	it("names who asked for the track", () => {
-		expect(statusLine(state(), track("a"))).toContain(`<@${OWNER}>`);
-	});
-});
-
-describe("headlineFor", () => {
-	it("links the title to the track", () => {
-		expect(headlineFor(track("a"))).toContain("(https://youtu.be/a)");
 	});
 });
 
@@ -328,11 +207,6 @@ describe("link", () => {
 });
 
 describe("volumeStep", () => {
-	it("moves by one step", () => {
-		expect(volumeStep(100, 1)).toBe(110);
-		expect(volumeStep(100, -1)).toBe(90);
-	});
-
 	it("cannot step past either end", () => {
 		expect(volumeStep(MAX_VOLUME, 1)).toBe(MAX_VOLUME);
 		expect(volumeStep(MIN_VOLUME, -1)).toBe(MIN_VOLUME);

@@ -108,6 +108,12 @@ export function fields(isDev: boolean): Field[] {
 			hint: "Blank answers questions by search alone and contacts nobody",
 			required: false,
 		},
+		{
+			key: "SITE_GITHUB_TOKEN",
+			message: "GitHub token for the source page's traffic",
+			hint: "Blank shows stars and forks without the traffic",
+			required: false,
+		},
 	];
 }
 

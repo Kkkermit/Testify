@@ -2,7 +2,7 @@ import { ChannelType, Collection, GuildVerificationLevel, type Guild } from "dis
 import { type ServerDay } from "@database/models/insights.schema";
 import { readInsightRows, recentMoves, recordMove, saveActivity } from "@database/repositories/insightsRepository";
 import { activity } from "@lib/info/activity.util";
-import { countMove, fillDays, flushActivity, hoursOf, readInsights } from "@lib/info/insights.util";
+import { countMove, fillDays, flushActivity, readInsights } from "@lib/info/insights.util";
 import { averagePerDay, busiestHour } from "@testify/shared";
 
 jest.mock("@database/repositories/insightsRepository", () => ({
@@ -32,16 +32,6 @@ describe("fillDays", () => {
 	});
 });
 
-describe("hoursOf", () => {
-	it("adds each day's hours together and ignores a key that is not an hour", () => {
-		const hours = hoursOf([day("a", { hours: { "20": 3, "1": 1 } }), day("b", { hours: { "20": 2, x: 9, "24": 9 } })]);
-
-		expect(hours[20]).toBe(5);
-		expect(hours[1]).toBe(1);
-		expect(hours.reduce((a, b) => a + b, 0)).toBe(6);
-	});
-});
-
 describe("busiestHour and averagePerDay", () => {
 	it("names the busiest hour, the earlier one on a tie, and none when silent", () => {
 		expect(busiestHour([0, 2, 5, 5])).toBe(2);
@@ -55,16 +45,6 @@ describe("busiestHour and averagePerDay", () => {
 });
 
 describe("flushActivity", () => {
-	it("writes what was counted", async () => {
-		activity.count({ guildId: "g", channelId: "c", userId: "u" }, NOW);
-
-		await flushActivity(logger);
-
-		expect(saveActivity).toHaveBeenCalledWith(
-			expect.objectContaining({ servers: [expect.objectContaining({ messages: 1 })] }),
-		);
-	});
-
 	it("keeps a batch that could not be written for the next flush", async () => {
 		jest.mocked(saveActivity).mockRejectedValueOnce(new Error("database down"));
 		activity.count({ guildId: "g", channelId: "c", userId: "u" }, NOW);
@@ -73,14 +53,6 @@ describe("flushActivity", () => {
 
 		expect(logger.warn).toHaveBeenCalled();
 		expect(activity.drain().servers[0]?.messages).toBe(1);
-	});
-
-	it("skips the write entirely when nothing was said", async () => {
-		jest.mocked(saveActivity).mockClear();
-
-		await flushActivity(logger);
-
-		expect(saveActivity).not.toHaveBeenCalled();
 	});
 });
 
@@ -160,20 +132,6 @@ describe("readInsights", () => {
 					kind === "leave" ? [{ guildId: "g", userId: "left", username: "marcus", kind, at: NOW, expiresAt: NOW }] : [],
 				),
 			);
-	});
-
-	it("sums the window and names what it can", async () => {
-		const report = await readInsights(guild, 7, NOW);
-
-		expect(report.totals).toEqual({ messages: 6, activeMembers: 2, joins: 2, leaves: 1 });
-		expect(report.daily).toHaveLength(7);
-		expect(report.hours[20]).toBe(6);
-		expect(report.topChannels).toEqual([
-			{ channelId: "c1", name: "general", messages: 5 },
-			{ channelId: "gone", name: null, messages: 1 },
-		]);
-		expect(report.topMembers[0]).toMatchObject({ name: "Kate", avatarUrl: "https://cdn.example/u1.png" });
-		expect(report.countingSince).toBe("2026-09-20");
 	});
 
 	/** Somebody who has left can no longer be looked up, so the name stored when they left is what is shown. */

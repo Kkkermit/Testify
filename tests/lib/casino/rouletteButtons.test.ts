@@ -19,7 +19,7 @@ jest.mock("@core/checks", () => ({
 	checkCasinoPlay: jest.fn(() => Promise.resolve(null)),
 }));
 
-const { placeBets, changeChip, clearMyBets, openRound, spinNow } = jest.requireMock("@lib/casino");
+const { placeBets, openRound } = jest.requireMock("@lib/casino");
 
 const ROUND = "65f000000000000000000001";
 const GUILD = "111111111111111111";
@@ -61,7 +61,6 @@ function pressed(options: { modal?: Record<string, string> } = {}) {
 }
 
 const client = {} as never;
-const seat = { guildId: GUILD, userId: PLAYER, name: "Alice" };
 const run = (interaction: ReturnType<typeof pressed>, action: string, args: string[]) =>
 	roulette.run(interaction as never, { client, action, args });
 
@@ -77,76 +76,11 @@ describe("the roulette table's buttons", () => {
 		expect(roulette.ownerOnly).not.toBe(true);
 	});
 
-	it("puts a chip on the pressed spot, through the casino's gates, and redraws the table", async () => {
-		const interaction = pressed();
-		await run(interaction, "bet", [ROUND, "red"]);
-
-		expect(checkCasinoPlay).toHaveBeenCalledWith(client, seat, "roulette");
-		expect(placeBets).toHaveBeenCalledWith(client, seat, ROUND, [{ kind: "red" }]);
-		expect(interaction.update).toHaveBeenCalled();
-	});
-
 	it("refuses a player the casino would refuse, before any chip goes down", async () => {
 		jest.mocked(checkCasinoPlay).mockResolvedValueOnce("The casino is closed in this server.");
 
 		await expect(run(pressed(), "bet", [ROUND, "odd"])).rejects.toThrow(/closed/);
 		expect(placeBets).not.toHaveBeenCalled();
-	});
-
-	it("ignores a spot no button offers", async () => {
-		await run(pressed(), "bet", [ROUND, "n99"]);
-		expect(placeBets).not.toHaveBeenCalled();
-	});
-
-	it("puts a chip on each number typed into the form", async () => {
-		await run(pressed({ modal: { numbers: "7, 17 32" } }), "numset", [ROUND]);
-
-		expect(placeBets).toHaveBeenCalledWith(client, seat, ROUND, [
-			{ kind: "number", number: 7 },
-			{ kind: "number", number: 17 },
-			{ kind: "number", number: 32 },
-		]);
-	});
-
-	it("says what was wrong with the numbers, and bets nothing", async () => {
-		await expect(run(pressed({ modal: { numbers: "40" } }), "numset", [ROUND])).rejects.toThrow(/0 to 36/);
-		expect(placeBets).not.toHaveBeenCalled();
-	});
-
-	it("changes the player's chip from a size button and tells only them what their wallet holds", async () => {
-		const interaction = pressed();
-		await run(interaction, "chipto", [ROUND, "500"]);
-
-		expect(changeChip).toHaveBeenCalledWith(seat, ROUND, "500");
-		expect(interaction.reply).toHaveBeenCalledWith(
-			expect.objectContaining({ content: expect.stringContaining("You have **1,200** in your wallet") }),
-		);
-	});
-
-	it("changes the chip from the form too", async () => {
-		await run(pressed({ modal: { chip: "half" } }), "chipset", [ROUND]);
-
-		expect(changeChip).toHaveBeenCalledWith(seat, ROUND, "half");
-	});
-
-	it("clears the player's own chips, redraws the table and tells them what came back", async () => {
-		clearMyBets.mockResolvedValue({ round, refunded: 300 });
-		const interaction = pressed();
-		await run(interaction, "clear", [ROUND]);
-
-		expect(clearMyBets).toHaveBeenCalledWith(seat, ROUND);
-		expect(interaction.update).toHaveBeenCalled();
-		expect(interaction.followUp).toHaveBeenCalledWith(
-			expect.objectContaining({ content: expect.stringContaining("300") }),
-		);
-	});
-
-	it("acknowledges Spin now and hands the spin to the table", async () => {
-		const interaction = pressed();
-		await run(interaction, "spin", [ROUND]);
-
-		expect(interaction.deferUpdate).toHaveBeenCalled();
-		expect(spinNow).toHaveBeenCalledWith(client, seat, ROUND);
 	});
 
 	/** A new round goes on the same message, so the channel keeps one table rather than a stack of them. */

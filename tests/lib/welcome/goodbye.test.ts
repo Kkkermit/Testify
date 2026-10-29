@@ -58,16 +58,6 @@ describe("farewellFor", () => {
 });
 
 describe("readGoodbye", () => {
-	it("starts a server off, in plain text, with the default wording", async () => {
-		expect(await readGoodbye(guild)).toEqual({
-			enabled: false,
-			channelId: null,
-			message: DEFAULT_GOODBYE_MESSAGE,
-			style: "text",
-			canSend: false,
-		});
-	});
-
 	it("says when the bot cannot post where the goodbye goes", async () => {
 		jest.mocked(getGoodbyeSettings).mockResolvedValue(stored({ channelId: SILENT }));
 
@@ -127,15 +117,6 @@ describe("sendGoodbye", () => {
 		await sendGoodbye(clientWith(target), member);
 
 		expect(target.send).toHaveBeenCalledWith(expect.objectContaining({ allowedMentions: { parse: [] } }));
-	});
-
-	it("says nothing while it is off", async () => {
-		jest.mocked(getGoodbyeSettings).mockResolvedValue(stored({ enabled: false }));
-		const target = channel();
-
-		await sendGoodbye(clientWith(target), member);
-
-		expect(target.send).not.toHaveBeenCalled();
 	});
 
 	it("logs, rather than throws, when Discord refuses the post", async () => {

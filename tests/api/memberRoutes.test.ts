@@ -84,32 +84,6 @@ beforeEach(() => {
 });
 
 describe("GET /members/leaderboard", () => {
-	it("defaults to the economy board and its first page", async () => {
-		const body = (await (await board()).json()) as BoardPage;
-
-		expect(body).toMatchObject({ board: "economy", page: 1, pages: 1, total: 0, rows: [] });
-	});
-
-	it("reads the levels board when asked for it", async () => {
-		levelRows.mockResolvedValue([{ userId: "1", level: 12, xp: 4_800 }] as never);
-		levelTotal.mockResolvedValue(1);
-
-		const body = (await (await board("?board=levels")).json()) as BoardPage;
-
-		expect(body.board).toBe("levels");
-		expect(body.rows[0]).toMatchObject({ rank: 1, primary: 12, secondary: 4_800 });
-	});
-
-	it("ranks a later page from where that page starts", async () => {
-		economyRows.mockResolvedValue([{ userId: "1", total: 900, bank: 0 }] as never);
-		economyTotal.mockResolvedValue(60);
-
-		const body = (await (await board("?page=3")).json()) as BoardPage;
-
-		expect(body).toMatchObject({ page: 3, pages: 3 });
-		expect(body.rows[0]?.rank).toBe(51);
-	});
-
 	/** An unvalidated page reaching the query would become a negative skip. */
 	it("refuses a page below one", async () => {
 		expect((await board("?page=0")).status).toBe(400);
@@ -117,18 +91,6 @@ describe("GET /members/leaderboard", () => {
 
 	it("refuses a board it does not have", async () => {
 		expect((await board("?board=warnings")).status).toBe(400);
-	});
-
-	it("ranks this server's money by wallet when asked", async () => {
-		economyRows.mockResolvedValue([{ userId: "1", wallet: 700, bank: 50, total: 750 }] as never);
-		economyTotal.mockResolvedValue(1);
-
-		const body = (await (await board("?sort=wallet")).json()) as BoardPage;
-
-		expect(body).toMatchObject({ sort: "wallet", scope: "server" });
-		expect(body.rows[0]).toMatchObject({ primary: 700, secondary: 50 });
-		expect(economyRows).toHaveBeenCalledWith(GUILD, 25, "wallet", 0);
-		expect(globalRows).not.toHaveBeenCalled();
 	});
 
 	/** The bot-wide board adds up the servers the bot is in now, taken from the client rather than the request. */

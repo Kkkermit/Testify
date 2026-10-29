@@ -22,7 +22,10 @@ export default ts.config(
 	{
 		languageOptions: {
 			parserOptions: {
-				projectService: { allowDefaultProject: ["eslint.config.mjs", "commitlint.config.mjs"] },
+				projectService: {
+					// Config files, and the dashboard's `?raw` Jest transform, which no tsconfig includes.
+					allowDefaultProject: ["eslint.config.mjs", "commitlint.config.mjs", "dashboard/src/test/rawText.cjs"],
+				},
 				tsconfigRootDir: import.meta.dirname,
 			},
 		},
@@ -134,6 +137,11 @@ export default ts.config(
 		// The dashboard's DevTools greeting and self-XSS warning exist to be read in the console.
 		files: ["dashboard/src/lib/consoleGreeting.ts"],
 		rules: { "no-console": "off" },
+	},
+	{
+		// A `.cjs` file is CommonJS, so `module` is real there.
+		files: ["**/*.cjs"],
+		languageOptions: { sourceType: "commonjs", globals: { module: "writable" } },
 	},
 	{
 		files: ["scripts/**/*.ts", "**/*.config.ts"],

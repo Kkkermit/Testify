@@ -118,6 +118,14 @@ describe("serveDashboard", () => {
 		}
 	});
 
+	/** A file's address in the source browser ends in its extension, and a hard refresh on one must still open the page. */
+	it("hands a source file's address to the SPA, extension and all", async () => {
+		const response = await appFor().request("/source-code/src/core/loader.ts");
+
+		expect(response.status).toBe(200);
+		expect(await response.text()).toContain("id=root");
+	});
+
 	/** React Router owns every path the API does not, which is what makes a deep link work on a hard refresh. */
 	it("hands an unknown path to the SPA, uncached", async () => {
 		const response = await appFor().request("/guilds/900000000000000001/levelling");

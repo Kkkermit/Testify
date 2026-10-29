@@ -1,5 +1,5 @@
 import { type ComponentType, lazy, type LazyExoticComponent, Suspense } from "react";
-import { createBrowserRouter, Navigate } from "react-router";
+import { createBrowserRouter } from "react-router";
 import { AppShell } from "@/app/AppShell";
 import { OwnerRouteError } from "@/app/OwnerRouteError";
 import { RequireAuth } from "@/app/RequireAuth";
@@ -9,8 +9,9 @@ import { RouteError } from "@/app/RouteError";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
-// Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 import { NotFoundPage } from "@/features/not-found/NotFoundPage";
+import { SiteShell } from "@/features/site/SiteShell";
+// Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 
 // Lazy per route, so a server manager never downloads the owner console.
 const GuildPickerPage = page(async () => import("@/features/guilds/GuildPickerPage"), "GuildPickerPage");
@@ -58,6 +59,9 @@ const OwnerPage = page(async () => import("@/features/owner/OwnerPage"), "OwnerP
 const HelpPage = page(async () => import("@/features/help/HelpPage"), "HelpPage");
 const StatusPage = page(async () => import("@/features/status/StatusPage"), "StatusPage");
 const AppearancePage = page(async () => import("@/features/appearance/AppearancePage"), "AppearancePage");
+const LandingPage = page(async () => import("@/features/site/LandingPage"), "LandingPage");
+const DocsPage = page(async () => import("@/features/docs/DocsPage"), "DocsPage");
+const SourcePage = page(async () => import("@/features/source/SourcePage"), "SourcePage");
 
 /** A lazy route component from one named export, which is how every feature module exposes its page. */
 function page<Name extends string, Props extends object>(
@@ -76,7 +80,17 @@ function lazily(element: React.JSX.Element): React.JSX.Element {
 }
 
 export const routes = [
-	{ path: "/", element: <Navigate to="/guilds" replace /> },
+	// Public, with or without a dashboard on this host: the front door, the docs and the code behind them.
+	{
+		element: <SiteShell />,
+		children: [
+			{ path: "/", element: lazily(<LandingPage />) },
+			{ path: "/docs", element: lazily(<DocsPage />) },
+			{ path: "/docs/:slug", element: lazily(<DocsPage />) },
+			{ path: "/docs/guides/:articleId", element: lazily(<DocsPage />) },
+			{ path: "/source-code/*", element: lazily(<SourcePage />) },
+		],
+	},
 	{ path: "/sign-in", element: <SignInPage /> },
 	// Outside RequireAuth: somebody deciding whether to add the bot has to be able to read these first.
 	{ path: "/terms", element: lazily(<LegalPage document={TERMS} />) },

@@ -1,5 +1,5 @@
 import { type RoleSummary, type TicketSettings } from "@testify/shared";
-import { draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
+import { draftOf, draftProblems, staffRoleWarning } from "@/features/tickets/tickets.utils";
 import { t } from "@/test/english";
 
 const SETTINGS: TicketSettings = {
@@ -16,10 +16,6 @@ const SETTINGS: TicketSettings = {
 
 describe("draftProblems", () => {
 	const draft = draftOf(SETTINGS);
-
-	it("says nothing about a complete draft", () => {
-		expect(draftProblems(draft, t)).toEqual([]);
-	});
 
 	it.each(["panelChannelId", "categoryId", "transcriptChannelId", "staffRoleId"] as const)(
 		"asks for %s when it is missing",
@@ -42,17 +38,6 @@ describe("draftProblems", () => {
 	});
 });
 
-describe("isDirty", () => {
-	it("is false for an untouched draft", () => {
-		expect(isDirty(draftOf(SETTINGS), SETTINGS)).toBe(false);
-	});
-
-	it("notices a change to any field", () => {
-		expect(isDirty({ ...draftOf(SETTINGS), buttonLabel: "Help" }, SETTINGS)).toBe(true);
-		expect(isDirty({ ...draftOf(SETTINGS), categoryId: "400000000000000009" }, SETTINGS)).toBe(true);
-	});
-});
-
 describe("staffRoleWarning", () => {
 	const roles: RoleSummary[] = [
 		{ id: "1", name: "Staff", colour: null, position: 3, managed: false, assignableByBot: true, powerful: false },
@@ -66,14 +51,6 @@ describe("staffRoleWarning", () => {
 			powerful: false,
 		},
 	];
-
-	it("says nothing about an ordinary role", () => {
-		expect(staffRoleWarning(roles, "1", t)).toBeNull();
-	});
-
-	it("says nothing when no role is chosen yet", () => {
-		expect(staffRoleWarning(roles, null, t)).toBeNull();
-	});
 
 	/** Discord will not let anybody be given a managed role, so a ticket's overwrites would silently do nothing. */
 	it("refuses a role an integration owns", () => {

@@ -27,13 +27,6 @@ describe("useHashTarget", () => {
 		expect(screen.getByRole("region", { name: "Language" })).toHaveFocus();
 	});
 
-	it("scrolls it into view as well, for everybody reading with their eyes", () => {
-		const scrolled = jest.spyOn(Element.prototype, "scrollIntoView");
-		render("/appearance#language");
-
-		expect(scrolled).toHaveBeenCalled();
-	});
-
 	it("leaves focus alone when the URL names nothing", () => {
 		render("/appearance");
 

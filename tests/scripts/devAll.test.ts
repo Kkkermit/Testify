@@ -51,12 +51,19 @@ describe("stopping a child", () => {
 
 	/** The whole process group is signalled, since the real work runs in a grandchild. */
 	it("signals the whole process group, and falls back to the child when there is none", () => {
+		// Pinned, because on Windows the real branch runs `taskkill` against pid 1234, whatever that is there.
+		const platform = Object.getOwnPropertyDescriptor(process, "platform") ?? { value: process.platform };
+		Object.defineProperty(process, "platform", { ...platform, value: "linux" });
 		const killSpy = jest.spyOn(process, "kill").mockImplementation(() => {
 			throw new Error("ESRCH");
 		});
 		const child = fake();
 
-		stopTree(child);
+		try {
+			stopTree(child);
+		} finally {
+			Object.defineProperty(process, "platform", platform);
+		}
 
 		expect(killSpy).toHaveBeenCalledWith(-1234, "SIGTERM");
 		expect(child.kill).toHaveBeenCalledWith("SIGTERM");

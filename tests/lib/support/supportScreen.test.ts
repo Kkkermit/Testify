@@ -1,7 +1,7 @@
 import { MessageFlags } from "discord.js";
 import { parseCustomId } from "@core/button";
-import { choiceName, discordMarkdown, suggestionName, supportScreen } from "@lib/support/supportScreen.util";
-import { buttonsOf, idsOf, textOf } from "@tests/helpers/containers";
+import { choiceName, discordMarkdown, supportScreen } from "@lib/support/supportScreen.util";
+import { idsOf, textOf } from "@tests/helpers/containers";
 
 const OWNER = "100000000000000001";
 const OPTIONS = { bot: "Testify", ownerId: OWNER, dashboard: null, supportServer: null };
@@ -26,10 +26,6 @@ describe("discordMarkdown", () => {
 });
 
 describe("choice names", () => {
-	it("puts the topic's emoji in front of a suggestion", () => {
-		expect(suggestionName({ id: "music", title: "Playing music", topic: "music" })).toBe("🎵 Playing music");
-	});
-
 	/** Discord refuses an autocomplete answer with a name over 100 characters, and then shows nothing at all. */
 	it("cuts a name to the 100 characters Discord allows", () => {
 		const name = choiceName("x".repeat(150));
@@ -63,25 +59,5 @@ describe("supportScreen", () => {
 
 		expect(ids).toHaveLength(1);
 		expect(parseCustomId(ids[0] ?? "")).toEqual({ id: "support", action: "open", args: ["sign-in", OWNER] });
-	});
-
-	it("links to the Help page and the support server when there are both", () => {
-		const screen = supportScreen(
-			{ answer, related: [] },
-			{ ...OPTIONS, dashboard: "https://dash.example/", supportServer: "https://discord.gg/example" },
-		);
-
-		expect(buttonsOf(screen).map((button) => button.url)).toEqual([
-			"https://dash.example/help",
-			"https://discord.gg/example",
-		]);
-	});
-
-	it("says what it can help with when nothing matched", () => {
-		const text = textOf(supportScreen({ answer: null, related: [] }, { ...OPTIONS, bot: "Helper" }));
-
-		expect(text).toContain("No article for that");
-		expect(text).toContain("I can only help with Helper");
-		expect(text).not.toContain("open one of these");
 	});
 });

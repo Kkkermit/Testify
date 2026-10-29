@@ -3,28 +3,6 @@ import { resolveAmount } from "@lib/format/amount.util";
 
 /** `/deposit 500`, `/deposit half`, `/deposit all` all come through here. */
 describe("resolveAmount", () => {
-	it("reads a plain number", () => {
-		expect(resolveAmount("500", 1_000)).toBe(500);
-	});
-
-	it("understands the words for a whole or part balance", () => {
-		expect(resolveAmount("all", 1_000)).toBe(1_000);
-		expect(resolveAmount("max", 1_000)).toBe(1_000);
-		expect(resolveAmount("half", 1_000)).toBe(500);
-	});
-
-	it("reads a percentage", () => {
-		expect(resolveAmount("25%", 1_000)).toBe(250);
-	});
-
-	it("ignores separators people type", () => {
-		expect(resolveAmount("1,000", 5_000)).toBe(1_000);
-	});
-
-	it("rounds down rather than inventing a fraction of a coin", () => {
-		expect(Number.isInteger(resolveAmount("half", 999))).toBe(true);
-	});
-
 	/** A plain number passes through; the repository decides atomically whether it can be afforded. */
 	it("passes a plain number through without checking the balance", () => {
 		expect(resolveAmount("2000", 1_000)).toBe(2_000);

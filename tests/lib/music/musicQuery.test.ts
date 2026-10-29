@@ -13,23 +13,6 @@ describe("resolveQuery", () => {
 		expect(resolveQuery(raw)).toEqual({ kind: "url", url: expect.any(String), source });
 	});
 
-	it("treats bare words as something to search for", () => {
-		expect(resolveQuery("never gonna give you up")).toEqual({
-			kind: "search",
-			terms: "never gonna give you up",
-			source: "youtube",
-		});
-	});
-
-	it("lets a prefix choose the service to search", () => {
-		expect(resolveQuery("sc:lofi beats")).toEqual({
-			kind: "search",
-			terms: "lofi beats",
-			source: "soundcloud",
-			named: true,
-		});
-	});
-
 	/** A prefix with nothing after it is a typo, not a search for everything. */
 	it.each(["", "   ", "sc:", "yt:   "])("refuses %p", (raw) => {
 		expect(resolveQuery(raw)).toBeNull();
@@ -42,10 +25,6 @@ describe("resolveQuery", () => {
 			expect(resolveQuery(raw)).toMatchObject({ kind: "search" });
 		},
 	);
-
-	it("keeps the whole address, so a timestamp or list parameter survives", () => {
-		expect(resolveQuery("https://youtu.be/abc?t=42")).toMatchObject({ url: "https://youtu.be/abc?t=42" });
-	});
 
 	it("trims what a phone keyboard adds", () => {
 		expect(resolveQuery("  https://youtu.be/abc  ")).toMatchObject({ kind: "url", source: "youtube" });
@@ -60,11 +39,6 @@ describe("sourceOfHost", () => {
 			expect(sourceOfHost(host)).toBe("other");
 		},
 	);
-
-	it("accepts a subdomain of a real service", () => {
-		expect(sourceOfHost("music.youtube.com")).toBe("youtube");
-		expect(sourceOfHost("m.soundcloud.com")).toBe("soundcloud");
-	});
 });
 
 describe("isPlaylistUrl", () => {

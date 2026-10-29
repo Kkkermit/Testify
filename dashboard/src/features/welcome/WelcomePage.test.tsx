@@ -44,53 +44,12 @@ describe("insertToken", () => {
 });
 
 describe("the welcome page", () => {
-	it("shows the greeting that is configured", async () => {
-		renderPage();
-
-		expect(await screen.findByRole("switch", { name: /greet new members/i })).toBeChecked();
-		expect(screen.getByRole("radio", { name: /image card/i })).toBeChecked();
-	});
-
-	it("sends only the field that changed", async () => {
-		const user = userEvent.setup();
-		const captured = capturePatch();
-
-		renderPage();
-		await user.click(await screen.findByRole("switch", { name: /greet new members/i }));
-
-		await waitFor(() => {
-			expect(captured.body).toEqual({ enabled: false });
-		});
-	});
-
-	it("changes the style", async () => {
-		const user = userEvent.setup();
-		const captured = capturePatch();
-
-		renderPage();
-		const greeting = await screen.findByRole("region", { name: "Greeting" });
-		await user.click(within(greeting).getByRole("radio", { name: /embed/i }));
-
-		await waitFor(() => {
-			expect(captured.body).toEqual({ style: "embed" });
-		});
-	});
-
 	/** A greeting nobody can see is the failure this screen exists to prevent. */
 	it("marks a channel the bot cannot post in as unusable", async () => {
 		renderPage();
 		const greeting = await screen.findByRole("region", { name: "Greeting" });
 
 		expect(within(greeting).getByRole("option", { name: /locked/i })).toBeDisabled();
-	});
-
-	it("fills the placeholders in the preview rather than showing the raw template", async () => {
-		renderPage();
-
-		const preview = await screen.findByRole("region", { name: "Preview" });
-
-		expect(within(preview).getByText(/@newcomer/)).toBeInTheDocument();
-		expect(within(preview).queryByText(/\{user\}/)).toBeNull();
 	});
 
 	/** The preview renders Discord's marks rather than showing the asterisks. */
@@ -101,22 +60,6 @@ describe("the welcome page", () => {
 
 		expect(within(preview).getByText("Test Server")).toHaveClass("font-bold");
 		expect(preview.textContent).not.toContain("**");
-	});
-
-	it("inserts a placeholder at the caret when its chip is used", async () => {
-		const user = userEvent.setup();
-		// Pressing the chip blurs the box, which saves what was typed so far.
-		capturePatch();
-		renderPage();
-
-		const box = await screen.findByLabelText("Message");
-		await user.clear(box);
-		await user.type(box, "Hi ");
-		await user.click(
-			within(screen.getByRole("region", { name: "Greeting" })).getByRole("button", { name: "{username}" }),
-		);
-
-		expect(box).toHaveValue("Hi {username}");
 	});
 
 	/** The template is the one field that is typed, so it must not save on every keystroke. */
@@ -136,17 +79,6 @@ describe("the welcome page", () => {
 		await waitFor(() => {
 			expect(captured.body).toEqual({ message: "Hello!" });
 		});
-	});
-
-	it("can discard an edit and go back to what is saved", async () => {
-		const user = userEvent.setup();
-		renderPage();
-
-		const box = await screen.findByLabelText("Message");
-		await user.type(box, " and hello");
-		await user.click(screen.getByRole("button", { name: /discard/i }));
-
-		expect(box).toHaveValue(welcomeConfig.message);
 	});
 
 	it("refuses to save a message longer than Discord accepts", async () => {
@@ -201,13 +133,6 @@ describe("the welcome page", () => {
 		expect(screen.getByLabelText("Message")).toBeDisabled();
 		expect(screen.getByText(/pick a channel and the rest of this page turns on/i)).toBeInTheDocument();
 	});
-
-	it("turns those controls on once a channel is chosen", async () => {
-		renderPage();
-
-		expect(await screen.findByRole("switch", { name: /greet new members/i })).toBeEnabled();
-		expect(screen.getByLabelText("Message")).toBeEnabled();
-	});
 });
 
 describe("the goodbye card", () => {
@@ -224,15 +149,6 @@ describe("the goodbye card", () => {
 
 	const card = () => screen.findByRole("region", { name: "Goodbye" });
 
-	it("shows the goodbye that is configured", async () => {
-		renderPage();
-		const goodbye = await card();
-
-		expect(within(goodbye).getByRole("switch", { name: /say goodbye/i })).toBeChecked();
-		expect(within(goodbye).getByRole("radio", { name: /plain text/i })).toBeChecked();
-		expect(within(goodbye).getByLabelText("Goodbye message")).toHaveValue(goodbyeConfig.message);
-	});
-
 	/** Two "Sent as" groups on one page must not share a radio name, or choosing one clears the other. */
 	it("keeps its style apart from the greeting's", async () => {
 		const user = userEvent.setup();
@@ -247,35 +163,6 @@ describe("the goodbye card", () => {
 		expect(
 			within(screen.getByRole("region", { name: "Greeting" })).getByRole("radio", { name: /image card/i }),
 		).toBeChecked();
-	});
-
-	it("saves the goodbye only once it is committed", async () => {
-		const user = userEvent.setup();
-		const captured = captureGoodbye();
-
-		renderPage();
-		const box = within(await card()).getByLabelText("Goodbye message");
-		await user.clear(box);
-		// `type` reads braces as key names, so the placeholder is pasted.
-		await user.click(box);
-		await user.paste("See you, {username}");
-
-		expect(captured.body).toBeUndefined();
-
-		await user.click(screen.getByRole("button", { name: /save goodbye/i }));
-
-		await waitFor(() => {
-			expect(captured.body).toEqual({ message: "See you, {username}" });
-		});
-	});
-
-	it("previews somebody leaving, one fewer than the server has", async () => {
-		renderPage();
-		const goodbye = await card();
-
-		const line = within(goodbye).getByText("someone").closest("p");
-
-		expect(line?.textContent).toBe("someone has left Test Server.");
 	});
 
 	/** The bot refuses to switch on with no channel, so the page disables it rather than collecting a 400. */

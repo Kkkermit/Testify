@@ -60,9 +60,6 @@ export const INTERVALS = {
 	passiveIncomeMs: HOUR_MS,
 } as const;
 
-/** The prefix a server gets before anyone changes it. */
-export const DEFAULT_PREFIX = "t?";
-
 export const CACHE = {
 	guildSettingsTtlMs: 5 * MINUTE_MS,
 	guildSettingsMaxEntries: 5_000,
@@ -91,7 +88,7 @@ export const TICKET = {
 	closeDelayMs: 5 * SECOND_MS,
 } as const;
 
-export { TREASURE_DEFAULTS } from "@testify/shared";
+export { DEFAULT_PREFIX, TREASURE_DEFAULTS } from "@testify/shared";
 
 export const COUNTING_DEFAULT_MAX = 1_000_000;
 

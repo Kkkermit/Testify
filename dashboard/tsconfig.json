@@ -9,6 +9,7 @@
 
 		"paths": {
 			"@/*": ["./src/*"],
+			"@repo/*": ["../*"],
 			"@testify/shared": ["../shared/src/index.ts"],
 			"@testify/shared/*": ["../shared/src/*"]
 		},

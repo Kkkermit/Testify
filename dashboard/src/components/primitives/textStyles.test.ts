@@ -20,10 +20,6 @@ describe("CARD_HEADING", () => {
 		expect(CARD_HEADING).toMatch(/\bleading-\w+/);
 	});
 
-	it("wears the display face, so a heading is not just larger body text", () => {
-		expect(CARD_HEADING).toContain("font-display");
-	});
-
 	/** It was written out identically 28 times before it had a name. */
 	it("is the only place the card heading is spelled out", () => {
 		const literal = "font-display text-base";

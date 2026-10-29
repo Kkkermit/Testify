@@ -23,6 +23,13 @@ const CSP = [
 	"form-action 'self'",
 ].join("; ");
 
+/** The website's own pages, which are there to be found; a source file is not, so no crawler walks GitHub through the bot. */
+const INDEXABLE = /^\/(?:docs(?:\/[\w-]+)?|source-code|terms|privacy)?\/?$/;
+
+export function indexable(path: string): boolean {
+	return INDEXABLE.test(path);
+}
+
 export function securityHeaders(env: Env): ReturnType<typeof createMiddleware<ApiBindings>> {
 	const overTls = env.DASHBOARD_BASE_URL?.startsWith("https://") === true;
 
@@ -39,7 +46,7 @@ export function securityHeaders(env: Env): ReturnType<typeof createMiddleware<Ap
 		context.header("Cross-Origin-Resource-Policy", "same-origin");
 		context.header("Permissions-Policy", "camera=(), microphone=(), geolocation=(), interest-cohort=()");
 		// robots.txt asks a crawler not to look; this asks one that looked not to keep what it found.
-		context.header("X-Robots-Tag", "noindex, nofollow, noarchive");
+		if (!indexable(context.req.path)) context.header("X-Robots-Tag", "noindex, nofollow, noarchive");
 
 		// Sending HSTS over plain HTTP would pin a self-hoster's localhost to a scheme it cannot serve.
 		if (overTls) context.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains");

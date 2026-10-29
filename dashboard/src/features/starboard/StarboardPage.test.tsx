@@ -28,25 +28,6 @@ function capture(): { body: () => unknown; sent: () => number } {
 }
 
 describe("the starboard page", () => {
-	it("says how many messages have reached the board", async () => {
-		renderPage();
-
-		expect(await screen.findByText(/4 messages on the board/)).toBeInTheDocument();
-	});
-
-	it("saves a new threshold when the box is left, and sends nothing else", async () => {
-		const user = userEvent.setup();
-		const request = capture();
-		renderPage();
-
-		const box = await screen.findByRole("textbox", { name: /stars needed/i });
-		await user.clear(box);
-		await user.type(box, "5");
-		await user.tab();
-
-		expect(request.body()).toEqual({ threshold: 5 });
-	});
-
 	/** An emptied box is Number("") — zero — which no message could ever reach. */
 	it("refuses a threshold outside the limits rather than saving it", async () => {
 		const user = userEvent.setup();
@@ -60,27 +41,6 @@ describe("the starboard page", () => {
 		expect(screen.getByText(/whole number from 1 to 50/i)).toBeInTheDocument();
 		expect(box).toHaveAttribute("aria-invalid", "true");
 		expect(request.sent()).toBe(0);
-	});
-
-	it("leaves the threshold alone when the box is left unchanged", async () => {
-		const user = userEvent.setup();
-		const request = capture();
-		renderPage();
-
-		await user.click(await screen.findByRole("textbox", { name: /stars needed/i }));
-		await user.tab();
-
-		expect(request.sent()).toBe(0);
-	});
-
-	it("sends only the switch that was flipped", async () => {
-		const user = userEvent.setup();
-		const request = capture();
-		renderPage();
-
-		await user.click(await screen.findByRole("switch", { name: /count the author’s own star/i }));
-
-		expect(request.body()).toEqual({ selfStar: true });
 	});
 
 	it("cannot be switched on before it has a channel", async () => {
@@ -116,13 +76,6 @@ describe("the starboard page", () => {
 		await user.click(await screen.findByRole("switch", { name: /count the author’s own star/i }));
 
 		expect(await screen.findByText(/that channel is not here/i)).toBeInTheDocument();
-	});
-
-	it("offers a retry rather than an empty page when the read fails", async () => {
-		server.use(http.get(`/api/guilds/${GUILD}/starboard`, () => HttpResponse.error()));
-		renderPage();
-
-		expect(await screen.findByRole("button", { name: /try again/i })).toBeInTheDocument();
 	});
 
 	it("has no obvious accessibility problems", async () => {

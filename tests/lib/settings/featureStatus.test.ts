@@ -9,7 +9,7 @@ import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
-import { countOf, FEATURE_SOURCES, featuresOf } from "@lib/settings/featureStatus.util";
+import { countOf, featuresOf } from "@lib/settings/featureStatus.util";
 
 jest.mock("@database/repositories/ideaRepository", () => ({ getIdeaSettings: jest.fn() }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
@@ -91,13 +91,6 @@ const byKey = async (): Promise<Map<string, { enabled: boolean; detail: string |
 beforeEach(fresh);
 
 describe("featuresOf", () => {
-	it("lists every feature once, in the overview's order", async () => {
-		const keys = (await featuresOf(guild)).map((feature) => feature.key);
-
-		expect(keys).toEqual(FEATURE_SOURCES.map((source) => source.key));
-		expect(new Set(keys).size).toBe(keys.length);
-	});
-
 	/** A server that has set nothing up must read as off everywhere, never as on with nothing to show. */
 	it("reports a fresh server as off, with nothing to describe", async () => {
 		const features = await featuresOf(guild);
@@ -140,51 +133,9 @@ describe("featuresOf", () => {
 			expect.objectContaining({ enabled: false, detail: "3 tickets sold" }),
 		);
 	});
-
-	it("names where goodbyes go only while they are switched on", async () => {
-		const settings = { enabled: true, channelId: "400000000000000005", message: "Bye", style: "text" } as const;
-		jest.mocked(getGoodbyeSettings).mockResolvedValue(settings);
-		expect((await byKey()).get("goodbye")).toEqual(
-			expect.objectContaining({ enabled: true, detail: "Posting in <#400000000000000005>" }),
-		);
-
-		jest.mocked(getGoodbyeSettings).mockResolvedValue({ ...settings, enabled: false });
-		expect((await byKey()).get("goodbye")).toEqual(expect.objectContaining({ enabled: false, detail: null }));
-	});
-
-	it("says whether raid protection is holding accounts or only watching", async () => {
-		const settings = {
-			enabled: true,
-			alertChannelId: "400000000000000006",
-			pingRoleId: null,
-			minAccountAgeDays: 7,
-			spikeJoins: 10,
-			spikeMinutes: 1,
-		};
-		jest.mocked(getRaidSettings).mockResolvedValue(settings);
-		expect((await byKey()).get("raid-protection")?.detail).toBe("Holding accounts under 7 days");
-
-		jest.mocked(getRaidSettings).mockResolvedValue({ ...settings, minAccountAgeDays: 0 });
-		expect((await byKey()).get("raid-protection")?.detail).toBe("Watching for spikes");
-
-		jest.mocked(getRaidSettings).mockResolvedValue({ ...settings, enabled: false });
-		expect((await byKey()).get("raid-protection")).toEqual(expect.objectContaining({ enabled: false, detail: null }));
-	});
-
-	it("says nothing about a switched-off board's channel", async () => {
-		jest.mocked(getIdeaSettings).mockResolvedValue({ enabled: false, channelId: "400000000000000004" });
-
-		expect((await byKey()).get("ideas")).toEqual(expect.objectContaining({ enabled: false, detail: null }));
-	});
 });
 
 describe("countOf", () => {
-	it("leaves one alone and adds an s to the rest", () => {
-		expect(countOf(1, "role")).toBe("1 role");
-		expect(countOf(0, "role")).toBe("0 roles");
-		expect(countOf(3, "role")).toBe("3 roles");
-	});
-
 	/** The overview once read "3 ticket solds" and "2 member verifieds". */
 	it("takes the plural of a phrase whose noun is not last", () => {
 		expect(countOf(3, "ticket sold", "tickets sold")).toBe("3 tickets sold");

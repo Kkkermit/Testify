@@ -7,6 +7,8 @@ import { Button, Card, Eyebrow, PAGE_TITLE, Skeleton } from "@/components/primit
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
 import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
+import { DashboardOff } from "@/features/site/components/DashboardOff";
+import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { rememberedBotName } from "@/lib/brand";
 import { hardRedirect } from "@/lib/redirect";
@@ -18,10 +20,12 @@ export function SignInPage(): React.JSX.Element {
 	const [params] = useSearchParams();
 	const setup = useSetup();
 	const bot = useBot();
+	const site = useSite();
 	const returnTo = params.get("returnTo") ?? "/guilds";
 	// Never the built-in name: a bot not called that is misnamed on the one screen everybody sees first.
 	const name = bot.data?.name ?? rememberedBotName();
 
+	if (site.data?.dashboard === false) return <DashboardOff />;
 	if (setup.data?.configured === false)
 		return <SetupNeeded missing={setup.data.missing} redirectUri={setup.data.redirectUri} />;
 

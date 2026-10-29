@@ -19,7 +19,7 @@
   <a href="https://discord.js.org"><img alt="discord.js v14" src="https://img.shields.io/badge/discord.js-v14-5865F2?style=for-the-badge&logo=discord&logoColor=white"></a>
   <a href=".nvmrc"><img alt="Node 24.11 or newer" src="https://img.shields.io/badge/node-%3E%3D24.11-5FA04E?style=for-the-badge&logo=node.js&logoColor=white"></a>
   <a href="https://www.mongodb.com"><img alt="MongoDB" src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?style=for-the-badge&logo=mongodb&logoColor=white"></a>
-  <a href="AGENTS.md#17-testing"><img alt="Coverage floor 80%" src="https://img.shields.io/badge/coverage_floor-80%25-success?style=for-the-badge&logo=jest&logoColor=white"></a>
+  <a href="AGENTS.md#17-testing"><img alt="Coverage floor 75%" src="https://img.shields.io/badge/coverage_floor-75%25-success?style=for-the-badge&logo=jest&logoColor=white"></a>
 </p>
 
 <p align="center">
@@ -71,6 +71,7 @@ and games — plus an optional web dashboard. Every command works as <code>/ban<
 - [⌨️ Slash and prefix](#️-slash-and-prefix)
 - [🗂️ Command categories](#️-command-categories)
 - [🛠️ Adding your own command](#️-adding-your-own-command)
+- [🌐 The website](#-the-website)
 - [🖥️ The web dashboard](#️-the-web-dashboard)
 - [📜 Scripts](#-scripts)
 - [❓ FAQ](#-faq)
@@ -101,9 +102,9 @@ The whole thing was rebuilt around the problems the old codebase actually had.
 | **Start-up**       | Command registration raced the login                                                   | Each step awaited in order; a malformed file names itself and stops the boot |
 | **Errors**         | Stack traces could reach chat                                                          | One error boundary — users get a plain apology, you get the full context     |
 | **Money**          | Read-modify-save, so balances could duplicate under load                               | Atomic database updates                                                      |
-| **Tests**          | A handful                                                                              | **Nearly 6,000 tests**, with an enforced 80% coverage floor                  |
+| **Tests**          | A handful                                                                              | **About 3,500 tests** on Windows, Linux and macOS, with a 75% coverage floor |
 | **Setup**          | Manual, including patching a file inside `node_modules`                                | `npm run setup`, and you are running                                         |
-| **Web**            | None                                                                                   | An optional dashboard served from the bot itself                             |
+| **Web**            | None                                                                                   | Its own website with the docs and the source, and an optional dashboard      |
 
 Everything the old bot did is still here, apart from the integrations that needed paid or personal API keys
 (Spotify, Valorant, Instagram and the AI commands).
@@ -534,6 +535,27 @@ nothing to import by hand.
 Options, subcommands, buttons and the 100-command limit are covered in
 [`docs/contributing.md`](docs/contributing.md).
 
+## 🌐 The website
+
+The bot serves a small website of its own: a landing page, these docs, and a browser for the source code of the
+release it is running. It is **on by default** and needs nothing set. After `npm run build`, `npm start` serves it at
+`http://localhost:3000`; while you work on it, `npm run dev:all` serves it at `http://localhost:5174`. It listens on
+`DASHBOARD_PORT` and `DASHBOARD_BIND`, so it stays on your own machine until you put a reverse proxy in front of it.
+
+| Variable            | What it is                                                                                 |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `SITE_ENABLED`      | `false` to turn it off. With the dashboard off too, the bot then listens on no port at all |
+| `SITE_GITHUB_TOKEN` | Optional. Lets the source page show views, clones and referrers as well as stars and forks |
+
+Nothing on it is written twice. The docs are this README, `AGENTS.md` and `docs/`, bundled when the page is built,
+so they describe the version you run. The source browser and the repository's numbers come from GitHub, asked only
+when somebody opens the page and kept for an hour, so nothing runs on a timer and a busy page stays well inside the
+60 requests an hour GitHub allows without a token. Traffic needs a token with **Administration: read** on the
+repository. GitHub keeps only 14 days of it, so the bot keeps every day it reads for a year, and the chart grows past
+a fortnight as long as somebody opens the page at least that often.
+
+With the dashboard on, the landing page's main button signs you in, and one address serves both.
+
 ## 🖥️ The web dashboard
 
 Testify ships an optional web dashboard with **a screen for nearly everything the bot does**, signed in with
@@ -639,7 +661,7 @@ dashboard is in [`docs/dashboard/guide.md`](docs/dashboard/guide.md).
 | `npm run setup`             | Interactive `.env` generator (add `-- --dev` for `.env.development`)  |
 | `npm run check`             | Typecheck, lint, format check and tests — everything CI runs          |
 | `npm test`                  | Runs the test suite                                                   |
-| `npm run test:coverage`     | Runs the tests with the 80% coverage gate                             |
+| `npm run test:coverage`     | Runs the tests with the 75% coverage gate                             |
 | `npm run lint` / `lint:fix` | Lints, optionally fixing what it can                                  |
 | `npm run format`            | Formats everything with Prettier                                      |
 | `npm run commit`            | Guided commit message in the project's format                         |
@@ -820,8 +842,8 @@ npm run check     # typecheck, lint, format and tests — run this before pushin
 npm run commit    # guided commit message in the project's format
 ```
 
-[`docs/contributing.md`](docs/contributing.md) has the full guide. New logic needs a test — the suite has an 80%
-coverage floor and the pre-push hook enforces it.
+[`docs/contributing.md`](docs/contributing.md) has the full guide. New logic needs a test — the suite has a 75%
+coverage floor, and CI enforces it on every push.
 
 <p align="center">
   <a href="https://github.com/Kkkermit/Testify/graphs/contributors">

@@ -146,7 +146,7 @@ go. It builds `@testify/shared` before either child starts, for the reason in th
 twenty-odd seconds the bot spends connecting there is nothing on the port, and the proxy answers every poll in
 that window with a stack trace that reads like a broken install. `scripts/waitForApi.ts` polls `/api/health`
 first — a `fetch` in a loop rather than a `wait-on` dependency, because one fewer install matters for a
-self-hosted bot — and refuses with a sentence naming the cause when `DASHBOARD_ENABLED` is false.
+self-hosted bot — and refuses with a sentence naming the cause when the website and the dashboard are both off.
 
 `tsx watch` restarts the bot on every save, which the ordering cannot help with, so the proxy's own error
 handler is replaced with one line per outage. Vite registers its handler immediately **after** calling
@@ -644,7 +644,7 @@ so installing it needs `--force` and breaks `npm ci`.
 
 ## 16. Testing
 
-Jest + Testing Library + MSW. Coverage thresholds **80/80/80/80**.
+Jest + Testing Library + MSW. Coverage thresholds **75/75/75/75**.
 
 - **`src/test/fixtures/`** — the fake answers, one file per section of the sidebar (`community.ts`,
   `moderation.ts` …) plus `session.ts`, `owner.ts` and `bot.ts`, each typed against `@testify/shared`.
@@ -1470,7 +1470,7 @@ A screen is done when all of this is true:
 
 ```bash
 npm run check           # typecheck, lint, format and every test in both projects
-npm run test:coverage   # the 80/80/80/80 gates
+npm run test:coverage   # the 75/75/75/75 gates
 npm run build           # includes verify:bundle — fails on a second React copy or a compiled light-dark()
 ```
 

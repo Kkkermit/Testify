@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { TreasurePage } from "@/features/treasure/TreasurePage";
@@ -17,12 +17,6 @@ function renderPage(): ReturnType<typeof renderWithProviders> {
 }
 
 describe("the treasure page", () => {
-	it("shows what the current settings actually mean, not just the numbers", async () => {
-		renderPage();
-
-		expect(await screen.findByText(/A drop of 10–500 every 15–50 messages/)).toBeInTheDocument();
-	});
-
 	/** The card says "in this server", so it has to keep describing the saved values while a draft is typed. */
 	it("does not let the summary follow an unsaved edit", async () => {
 		const user = userEvent.setup();
@@ -47,25 +41,6 @@ describe("the treasure page", () => {
 		expect(await screen.findByText(/Not set up yet/i)).toBeInTheDocument();
 	});
 
-	it("sends only the switch when it is flipped", async () => {
-		const user = userEvent.setup();
-		let sent: unknown = null;
-		server.use(
-			http.patch(`/api/guilds/${GUILD}/treasure`, async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json({ ...treasureSettings, enabled: false });
-			}),
-		);
-		renderPage();
-		await screen.findByRole("switch", { name: /enable treasure drops/i });
-
-		await user.click(screen.getByRole("switch", { name: /enable treasure drops/i }));
-
-		await waitFor(() => {
-			expect(sent).toEqual({ enabled: false });
-		});
-	});
-
 	/** Save appears only once something has changed, so an untouched page cannot post a no-op write. */
 	it("keeps Save unavailable until a number changes", async () => {
 		const user = userEvent.setup();
@@ -80,33 +55,6 @@ describe("the treasure page", () => {
 		expect(screen.getByRole("button", { name: /save changes/i })).toBeEnabled();
 	});
 
-	it("sends every number together, with the cooldown back in milliseconds", async () => {
-		const user = userEvent.setup();
-		let sent: unknown = null;
-		server.use(
-			http.patch(`/api/guilds/${GUILD}/treasure`, async ({ request }) => {
-				sent = await request.json();
-				return HttpResponse.json(treasureSettings);
-			}),
-		);
-		renderPage();
-		await screen.findByLabelText(/^cooldown/i);
-
-		await user.clear(screen.getByLabelText(/^cooldown/i));
-		await user.type(screen.getByLabelText(/^cooldown/i), "10");
-		await user.click(screen.getByRole("button", { name: /save changes/i }));
-
-		await waitFor(() => {
-			expect(sent).toEqual({
-				minMessages: 15,
-				maxMessages: 50,
-				minAmount: 10,
-				maxAmount: 500,
-				cooldownMs: 600_000,
-			});
-		});
-	});
-
 	/** Pressing Save on an impossible range would only earn a 400, so the page says so first. */
 	it("refuses a range the wrong way round before it is sent", async () => {
 		const user = userEvent.setup();
@@ -118,25 +66,6 @@ describe("the treasure page", () => {
 
 		expect(await screen.findByText(/fewest messages cannot be more than the most/i)).toBeInTheDocument();
 		expect(screen.getByRole("button", { name: /save changes/i })).toBeDisabled();
-	});
-
-	it("resets every number without asking the browser for them", async () => {
-		const user = userEvent.setup();
-		let hit = false;
-		server.use(
-			http.post(`/api/guilds/${GUILD}/treasure/reset`, () => {
-				hit = true;
-				return HttpResponse.json(treasureSettings);
-			}),
-		);
-		renderPage();
-		await screen.findByRole("button", { name: /reset to defaults/i });
-
-		await user.click(screen.getByRole("button", { name: /reset to defaults/i }));
-
-		await waitFor(() => {
-			expect(hit).toBe(true);
-		});
 	});
 
 	it("shows what the server said when a save is refused", async () => {

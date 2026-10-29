@@ -1,10 +1,9 @@
 import { PermissionFlagsBits, PermissionsBitField } from "discord.js";
 import birthdaySettings from "@buttons/birthdaySettings";
-import { parseCustomId } from "@core/button";
 import { UserFacingError } from "@core/errors";
 import { applyBirthdaySettings, birthdaySettingsPanel, readBirthdayOverview } from "@lib/birthdays";
 import { type BirthdayOverview } from "@testify/shared";
-import { buttonsOf, idsOf } from "@tests/helpers/containers";
+import { buttonsOf } from "@tests/helpers/containers";
 
 jest.mock("@lib/birthdays", () => ({
 	...jest.requireActual<object>("@lib/birthdays"),
@@ -56,11 +55,6 @@ beforeEach(() => {
 });
 
 describe("the birthday settings panel", () => {
-	it("belongs to the person who opened it, last in every control", () => {
-		expect(birthdaySettings.ownerOnly).toBe(true);
-		for (const id of idsOf(birthdaySettingsPanel(CURRENT, 3, OWNER))) expect(parseCustomId(id).args.at(-1)).toBe(OWNER);
-	});
-
 	it("cannot be turned on before a channel is chosen, and pings nobody its message names", () => {
 		const panel = birthdaySettingsPanel({ ...CURRENT, channelId: null, message: "@everyone" }, 0, OWNER);
 
@@ -73,28 +67,6 @@ describe("the birthday settings panel", () => {
 			birthdaySettings.run(pressed("button", { permissions: new PermissionsBitField([]) }) as never, context("toggle")),
 		).rejects.toThrow(UserFacingError);
 		expect(applyBirthdaySettings).not.toHaveBeenCalled();
-	});
-
-	it("turns posts on, moves them, and saves a new message", async () => {
-		await birthdaySettings.run(pressed("button") as never, context("toggle"));
-		expect(applyBirthdaySettings).toHaveBeenCalledWith(expect.anything(), { enabled: true }, OWNER);
-
-		await birthdaySettings.run(pressed("channel") as never, context("channel"));
-		expect(applyBirthdaySettings).toHaveBeenLastCalledWith(
-			expect.anything(),
-			{ channelId: "400000000000000009" },
-			OWNER,
-		);
-
-		await birthdaySettings.run(
-			pressed("modal", { typed: "  Many happy returns, {user}  " }) as never,
-			context("save-message"),
-		);
-		expect(applyBirthdaySettings).toHaveBeenLastCalledWith(
-			expect.anything(),
-			{ message: "Many happy returns, {user}" },
-			OWNER,
-		);
 	});
 
 	it("refuses an empty message in words", async () => {

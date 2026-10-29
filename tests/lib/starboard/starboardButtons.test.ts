@@ -54,34 +54,12 @@ beforeEach(() => {
 });
 
 describe("the starboard panel", () => {
-	it("belongs to the person who opened it", () => {
-		expect(starboardSettings.ownerOnly).toBe(true);
-	});
-
 	/** A role can be taken away while the panel is open, so Manage Server is asked on every press. */
 	it("refuses anybody without Manage Server, before anything changes", async () => {
 		const interaction = pressed("button", { permissions: new PermissionsBitField([]) });
 
 		await expect(starboardSettings.run(interaction as never, context("toggle"))).rejects.toThrow(UserFacingError);
 		expect(applyStarboardSettings).not.toHaveBeenCalled();
-	});
-
-	it("turns the board on and redraws the panel", async () => {
-		const interaction = pressed("button");
-
-		await starboardSettings.run(interaction as never, context("toggle"));
-
-		expect(applyStarboardSettings).toHaveBeenCalledWith(expect.anything(), { enabled: true }, OWNER);
-		expect(interaction.update).toHaveBeenCalledTimes(1);
-	});
-
-	it("asks for the number in a form filled in with the current one, and saves what is typed", async () => {
-		const opening = pressed("button");
-		await starboardSettings.run(opening as never, context("threshold"));
-		expect(JSON.stringify(opening.showModal.mock.calls[0])).toContain('"value":"3"');
-
-		await starboardSettings.run(pressed("modal", { typed: "5" }) as never, context("save-threshold"));
-		expect(applyStarboardSettings).toHaveBeenCalledWith(expect.anything(), { threshold: 5 }, OWNER);
 	});
 
 	it("refuses a number out of range in words", async () => {

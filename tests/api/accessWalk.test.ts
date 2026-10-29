@@ -1,8 +1,9 @@
 import { Collection, PermissionFlagsBits } from "discord.js";
+import mongoose from "mongoose";
 import { createApi } from "@api/server";
 import { type TestifyClient } from "@core/client";
 import { findSession } from "@database/repositories/dashboardSessionRepository";
-import { API_ENV, ask, sessionOf } from "@tests/helpers/apiHarness";
+import { type Answer, API_ENV, ask, sessionOf } from "@tests/helpers/apiHarness";
 import { createMockClient } from "@tests/helpers/mocks";
 
 /** Every route in the real app, asked by somebody it should refuse; a route added without its gate fails here. */
@@ -27,6 +28,13 @@ const PUBLIC = new Set([
 	"GET /api/auth/setup",
 	"GET /api/auth/login",
 	"GET /api/auth/callback",
+	"GET /api/support",
+	"GET /api/support/articles/:articleId",
+	"GET /api/site",
+	"GET /api/site/repository",
+	"GET /api/site/traffic",
+	"GET /api/site/tree",
+	"GET /api/site/file",
 ]);
 const OWNER_ONLY = ["/api/owner/", "/api/analytics/", "/api/control/"];
 const GUILD_SCOPED = "/api/guilds/:guildId/";
@@ -53,7 +61,13 @@ function clientFor(): TestifyClient {
 	} as unknown as Partial<TestifyClient>);
 }
 
-function routesOf(app: ReturnType<typeof createApi>): { method: string; pattern: string; path: string }[] {
+interface Route {
+	method: string;
+	pattern: string;
+	path: string;
+}
+
+function routesOf(app: ReturnType<typeof createApi>): Route[] {
 	const seen = new Set<string>();
 	return app.routes
 		.filter((route) => route.method !== "ALL" && !route.path.includes("*") && route.path.startsWith("/api/"))
@@ -72,6 +86,11 @@ function routesOf(app: ReturnType<typeof createApi>): { method: string; pattern:
 		});
 }
 
+beforeAll(() => {
+	// The one request that passes the gate meets no database, and should fail at once rather than wait ten seconds.
+	mongoose.set("bufferCommands", false);
+});
+
 beforeEach(() => {
 	jest
 		.mocked(findSession)
@@ -85,6 +104,20 @@ const gated = all.filter((route) => !PUBLIC.has(`${route.method} ${route.pattern
 const guildScoped = all.filter((route) => route.pattern.startsWith(GUILD_SCOPED));
 const ownerOnly = all.filter((route) => OWNER_ONLY.some((prefix) => route.pattern.startsWith(prefix)));
 
+/** Asks every route as one caller, on one app, and names each route whose answer was not the refusal expected. */
+async function letThrough(routes: Route[], who: string | null, refusal: Partial<Answer>): Promise<string[]> {
+	const app = createApi(clientFor(), API_ENV);
+	const answers = await Promise.all(
+		routes.map(async (route) => ({ route, answer: await ask(app, who, route.method, route.path) })),
+	);
+
+	return answers
+		.filter(({ answer }) => Object.entries(refusal).some(([key, value]) => answer[key as keyof Answer] !== value))
+		.map(
+			({ route, answer }) => `${route.method} ${route.pattern} answered ${String(answer.status)} ${answer.code ?? ""}`,
+		);
+}
+
 describe("walking every route in the dashboard's API", () => {
 	it("finds them all, so nothing below passes by testing nothing", () => {
 		expect(all.length).toBeGreaterThan(80);
@@ -94,28 +127,20 @@ describe("walking every route in the dashboard's API", () => {
 		for (const exempt of PUBLIC) expect(all.map((route) => `${route.method} ${route.pattern}`)).toContain(exempt);
 	});
 
-	it.each(gated)("refuses somebody signed out: $method $pattern", async ({ method, path }) => {
-		const app = createApi(clientFor(), API_ENV);
-
-		expect(await ask(app, null, method, path)).toMatchObject({ status: 401 });
+	it("refuses somebody signed out on every route that is not public", async () => {
+		expect(await letThrough(gated, null, { status: 401 })).toEqual([]);
 	});
 
-	it.each(guildScoped)("refuses a member without Manage Server: $method $pattern", async ({ method, path }) => {
-		const app = createApi(clientFor(), API_ENV);
-
-		expect(await ask(app, MEMBER, method, path)).toMatchObject({ status: 403, code: "missing_manage_guild" });
+	it("refuses a member without Manage Server on every server route", async () => {
+		expect(await letThrough(guildScoped, MEMBER, { status: 403, code: "missing_manage_guild" })).toEqual([]);
 	});
 
-	it.each(guildScoped)("refuses somebody who is not in the server: $method $pattern", async ({ method, path }) => {
-		const app = createApi(clientFor(), API_ENV);
-
-		expect(await ask(app, OUTSIDER, method, path)).toMatchObject({ status: 403, code: "not_a_member" });
+	it("refuses somebody who is not in the server on every server route", async () => {
+		expect(await letThrough(guildScoped, OUTSIDER, { status: 403, code: "not_a_member" })).toEqual([]);
 	});
 
-	it.each(ownerOnly)("refuses a server manager on the owner's routes: $method $pattern", async ({ method, path }) => {
-		const app = createApi(clientFor(), API_ENV);
-
-		expect(await ask(app, MANAGER, method, path)).toMatchObject({ status: 404, code: "not_found" });
+	it("refuses a server manager on every one of the owner's routes", async () => {
+		expect(await letThrough(ownerOnly, MANAGER, { status: 404, code: "not_found" })).toEqual([]);
 	});
 
 	it("lets a manager past the gate, so the refusals above are the gate's and not a broken harness", async () => {

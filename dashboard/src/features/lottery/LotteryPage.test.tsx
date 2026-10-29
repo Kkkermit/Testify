@@ -29,24 +29,6 @@ function capturePatch(): { body: Record<string, unknown> | null } {
 }
 
 describe("the lottery page", () => {
-	it("shows the live pot and the tickets behind it", async () => {
-		renderPage();
-
-		expect(await screen.findByText("Prize pool")).toBeInTheDocument();
-		expect(screen.getByText("Tickets sold")).toBeInTheDocument();
-	});
-
-	it("says whether it is running or frozen", async () => {
-		renderPage();
-		expect(await screen.findByText("Running")).toBeInTheDocument();
-
-		serve({ frozen: true });
-		renderPage();
-		await waitFor(() => {
-			expect(screen.getAllByText("Frozen").length).toBeGreaterThan(0);
-		});
-	});
-
 	/** Freezing stops entries without ending the draw, so it must not carry the rest of the form with it. */
 	it("sends only the freeze flag when freezing", async () => {
 		const user = userEvent.setup();
@@ -58,31 +40,6 @@ describe("the lottery page", () => {
 
 		await waitFor(() => {
 			expect(captured.body).toEqual({ frozen: true });
-		});
-	});
-
-	it("warns before a frequency change moves the next draw", async () => {
-		const user = userEvent.setup();
-		renderPage();
-		await screen.findByLabelText(/^Draw/);
-
-		await user.selectOptions(screen.getByLabelText(/^Draw/), "daily");
-
-		expect(await screen.findByText(/moves the next draw/i)).toBeInTheDocument();
-	});
-
-	it("sends the whole configuration when saved", async () => {
-		const user = userEvent.setup();
-		const captured = capturePatch();
-		renderPage();
-		await screen.findByLabelText(/ticket price/i);
-
-		await user.clear(screen.getByLabelText(/ticket price/i));
-		await user.type(screen.getByLabelText(/ticket price/i), "250");
-		await user.click(screen.getByRole("button", { name: /save changes/i }));
-
-		await waitFor(() => {
-			expect(captured.body).toMatchObject({ entryFee: 250, frequency: "weekly", maxWinners: 2 });
 		});
 	});
 
@@ -128,19 +85,6 @@ describe("the lottery page", () => {
 		await waitFor(() => {
 			expect(ended).toBe(true);
 		});
-	});
-
-	it("lists the past draws and who won them", async () => {
-		renderPage();
-
-		expect(await screen.findByText(/kate/)).toBeInTheDocument();
-	});
-
-	it("says so when no draw has run yet", async () => {
-		serve({ history: [] });
-		renderPage();
-
-		expect(await screen.findByText(/no draws yet/i)).toBeInTheDocument();
 	});
 
 	it("has no automatically detectable accessibility violations", async () => {

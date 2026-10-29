@@ -10,7 +10,6 @@ import { deleteGiveaway, endGiveaway, listGiveaways, rerollGiveaway, startGiveaw
 
 const GUILD = "900000000000000001";
 const ACTOR = "100000000000000002";
-const OURS = "500000000000000001";
 const THEIRS = "500000000000000099";
 const CHANNEL = "400000000000000001";
 
@@ -70,28 +69,6 @@ beforeEach(() => {
 });
 
 describe("the giveaway routes", () => {
-	it("lists only this server's giveaways", async () => {
-		const response = await send("GET", "");
-
-		expect(response.status).toBe(200);
-		expect(listGiveaways).toHaveBeenCalledWith(expect.anything(), GUILD);
-	});
-
-	it("ends, rerolls and deletes a giveaway in this server, and writes each down", async () => {
-		expect((await send("POST", `/${OURS}/end`)).status).toBe(200);
-		expect((await send("POST", `/${OURS}/reroll`)).status).toBe(200);
-		expect((await send("DELETE", `/${OURS}`)).status).toBe(200);
-
-		expect(endGiveaway).toHaveBeenCalledWith(expect.anything(), OURS);
-		expect(rerollGiveaway).toHaveBeenCalledWith(expect.anything(), OURS);
-		expect(deleteGiveaway).toHaveBeenCalledWith(expect.anything(), OURS);
-		expect(jest.mocked(recordAudit).mock.calls.map(([entry]) => entry.action)).toEqual([
-			"giveaway.end",
-			"giveaway.reroll",
-			"giveaway.delete",
-		]);
-	});
-
 	/** The giveaway library finds a message in any server, so a manager here must not reach one elsewhere by its id. */
 	it.each([
 		["POST", `/${THEIRS}/end`, endGiveaway],

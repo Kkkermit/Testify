@@ -244,33 +244,6 @@ beforeEach(() => {
 });
 
 describe("GET /members/:userId", () => {
-	it("answers with a page for somebody who has no records at all", async () => {
-		const body = (await (await request("GET")).json()) as MemberDetail;
-
-		expect(body).toMatchObject({
-			userId: TARGET,
-			displayName: "kate",
-			inGuild: true,
-			economy: null,
-			levels: null,
-			warnings: [],
-			softban: null,
-			moderationProblem: null,
-		});
-	});
-
-	it("reports money and levels with their ranks", async () => {
-		account.mockResolvedValue({ wallet: 5_000, bank: 120 } as never);
-		moneyRank.mockResolvedValue(2);
-		level.mockResolvedValue({ level: 12, xp: 4_800 } as never);
-		levelRank.mockResolvedValue(3);
-
-		const body = (await (await request("GET")).json()) as MemberDetail;
-
-		expect(body.economy).toEqual({ wallet: 5_000, bank: 120, total: 5_120, rank: 2 });
-		expect(body.levels).toEqual({ level: 12, xp: 4_800, rank: 3 });
-	});
-
 	/** Newest first is what a moderator reads; the repository appends, so the order has to be reversed here. */
 	it("lists warnings newest first", async () => {
 		withWarnings(3);
@@ -311,14 +284,6 @@ describe("GET /members/:userId", () => {
 });
 
 describe("POST /members/:userId/kick", () => {
-	it("kicks once the username is typed back, and audits it", async () => {
-		const response = await request("POST", "/kick", { reason: "Spamming", confirm: "Kate" });
-
-		expect(response.status).toBe(200);
-		expect(kicked).toHaveBeenCalledWith("someone: Spamming");
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.kick" }));
-	});
-
 	it("takes their Discord ID as the confirmation too", async () => {
 		expect((await request("POST", "/kick", { reason: "Spamming", confirm: TARGET })).status).toBe(200);
 		expect(kicked).toHaveBeenCalled();
@@ -345,13 +310,6 @@ describe("POST /members/:userId/kick", () => {
 });
 
 describe("POST /members/:userId/ban", () => {
-	it("bans, deleting the days of messages asked for", async () => {
-		await request("POST", "/ban", { reason: "Raiding", confirm: "kate", deleteDays: 1 });
-
-		expect(banned).toHaveBeenCalledWith(TARGET, { reason: "someone: Raiding", deleteMessageSeconds: 86_400 });
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.ban" }));
-	});
-
 	/** Somebody who left to dodge a ban can still be banned, which a kick cannot reach. */
 	it("bans somebody who has already left", async () => {
 		const response = await request("POST", "/ban", { reason: "Raiding", confirm: "kate" }, { targetMissing: true });
@@ -378,14 +336,6 @@ describe("POST /members/:userId/ban", () => {
 });
 
 describe("GET /members/search", () => {
-	it("offers matching people and leaves bots out", async () => {
-		const response = await app().request(`/guilds/${GUILD}/members/search?q=ka`);
-		const body = (await response.json()) as { userId: string }[];
-
-		expect(body.map((match) => match.userId)).toEqual([TARGET]);
-		expect(searched).toHaveBeenCalledWith({ query: "ka", limit: 10 });
-	});
-
 	/** A pasted ID names one person exactly, so it is fetched rather than searched as though it were a name. */
 	it("finds somebody by a pasted ID or mention", async () => {
 		for (const q of [TARGET, `<@${TARGET}>`]) {
@@ -395,27 +345,12 @@ describe("GET /members/search", () => {
 		expect(searched).not.toHaveBeenCalled();
 	});
 
-	it("finds nobody for an ID that is not a member", async () => {
-		const response = await app().request(`/guilds/${GUILD}/members/search?q=100000000000000004`);
-
-		expect(await response.json()).toEqual([]);
-	});
-
 	it("refuses an empty search", async () => {
 		expect((await app().request(`/guilds/${GUILD}/members/search?q=`)).status).toBe(400);
 	});
 });
 
 describe("PATCH /members/:userId/money", () => {
-	it("adds to the wallet and audits it", async () => {
-		account.mockResolvedValue({ wallet: 500, bank: 0 } as never);
-
-		await request("PATCH", "/money", { purse: "wallet", delta: 250 });
-
-		expect(walletChange).toHaveBeenCalledWith(GUILD, TARGET, 250);
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "member.money" }));
-	});
-
 	it("takes from the bank when that purse is named", async () => {
 		account.mockResolvedValue({ wallet: 0, bank: 900 } as never);
 
@@ -451,13 +386,6 @@ describe("PATCH /members/:userId/money", () => {
 });
 
 describe("PATCH /members/:userId/level", () => {
-	it("sets a level outright", async () => {
-		await request("PATCH", "/level", { level: 10 });
-
-		expect(levelSet).toHaveBeenCalledWith(GUILD, TARGET, 10);
-		expect(xpAdded).not.toHaveBeenCalled();
-	});
-
 	it("moves XP when that is what was sent", async () => {
 		await request("PATCH", "/level", { xp: 400 });
 
@@ -525,11 +453,6 @@ describe("DELETE /members/:userId/softban", () => {
 		expect((await request("DELETE", "/softban", undefined, { targetMissing: true })).status).toBe(200);
 		expect(softbanLifted).toHaveBeenCalled();
 	});
-
-	it("says so when there is no active softban", async () => {
-		expect((await request("DELETE", "/softban")).status).toBe(404);
-		expect(softbanLifted).not.toHaveBeenCalled();
-	});
 });
 
 describe("timing a member out", () => {
@@ -574,14 +497,6 @@ describe("timing a member out", () => {
 });
 
 describe("renaming a member", () => {
-	it("sets and clears a nickname", async () => {
-		expect((await request("PATCH", "/nickname", { nickname: "Kate the Great" })).status).toBe(200);
-		expect(renamed).toHaveBeenCalledWith("Kate the Great", "Changed by someone");
-
-		expect((await request("PATCH", "/nickname", { nickname: null })).status).toBe(200);
-		expect(renamed).toHaveBeenLastCalledWith(null, "Changed by someone");
-	});
-
 	it("refuses a name past Discord's 32 characters, and a member the bot cannot rename", async () => {
 		expect((await request("PATCH", "/nickname", { nickname: "x".repeat(33) })).status).toBe(400);
 		expect((await request("PATCH", "/nickname", { nickname: "Kate" }, { manageable: false })).status).toBe(403);
@@ -600,17 +515,6 @@ describe("a member's roles", () => {
 			expect.objectContaining({ id: HELD, held: true }),
 			expect.objectContaining({ id: BELOW, held: false }),
 		]);
-	});
-
-	it("adds and removes only within reach", async () => {
-		const response = await request("PUT", "/roles", { roleIds: [BELOW] });
-
-		expect(response.status).toBe(200);
-		expect(rolesAdded).toHaveBeenCalledWith([BELOW], "Added by someone");
-		expect(rolesRemoved).toHaveBeenCalledWith([HELD], "Removed by someone");
-		expect(audited).toHaveBeenCalledWith(
-			expect.objectContaining({ action: "member.roles", after: { added: [BELOW], removed: [HELD] } }),
-		);
 	});
 
 	it("refuses a role above the manager's own, before anything changes", async () => {

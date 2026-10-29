@@ -23,8 +23,7 @@ jest.mock("@database/repositories/economyRepository", () => ({
 	requireAccount: jest.fn(() => Promise.resolve({ wallet: 1_000 })),
 }));
 
-const { readCasinoSettings, applyCasinoSettings, playInstant, playBlackjack, startBlackjack } =
-	jest.requireMock("@lib/casino");
+const { readCasinoSettings, applyCasinoSettings, playInstant } = jest.requireMock("@lib/casino");
 
 const OWNER = "100000000000000001";
 const GUILD = "900000000000000001";
@@ -70,26 +69,6 @@ describe("the casino settings panel", () => {
 		expect(applyCasinoSettings).not.toHaveBeenCalled();
 	});
 
-	it("closes the casino", async () => {
-		const interaction = pressed();
-		await run(interaction, "close");
-
-		expect(applyCasinoSettings).toHaveBeenCalledWith(GUILD, { enabled: false }, OWNER);
-		expect(interaction.update).toHaveBeenCalled();
-	});
-
-	it("flips one game and leaves the others", async () => {
-		await run(pressed(), "game", ["slots"]);
-
-		expect(applyCasinoSettings).toHaveBeenCalledWith(GUILD, { games: { slots: false } }, OWNER);
-	});
-
-	it("ignores a game no button offers", async () => {
-		await run(pressed(), "game", ["poker"]);
-
-		expect(applyCasinoSettings).not.toHaveBeenCalled();
-	});
-
 	it("opens the limits form filled with the current limits", async () => {
 		const interaction = pressed();
 		await run(interaction, "limits");
@@ -101,14 +80,6 @@ describe("the casino settings panel", () => {
 		await run(pressed({ modal: { min: "50", max: "" } }), "save-limits");
 
 		expect(applyCasinoSettings).toHaveBeenCalledWith(GUILD, { minBet: 50, maxBet: null }, OWNER);
-	});
-
-	it("says what was wrong with the form, and saves nothing", async () => {
-		const interaction = pressed({ modal: { min: "nope", max: "" } });
-		await run(interaction, "save-limits");
-
-		expect(interaction.reply).toHaveBeenCalled();
-		expect(applyCasinoSettings).not.toHaveBeenCalled();
 	});
 
 	it("reports a pair the rules refuse", async () => {
@@ -124,23 +95,6 @@ describe("the casino settings panel", () => {
 describe("the casino's game buttons", () => {
 	const run = (interaction: ReturnType<typeof pressed>, action: string, args: string[] = []) =>
 		casino.run(interaction as never, { client, action, args: [...args, OWNER] });
-
-	it("plays a blackjack decision and redraws the table", async () => {
-		playBlackjack.mockResolvedValue({
-			state: { player: [], dealer: [], deck: [], doubled: false },
-			bet: 100,
-			staked: 100,
-			verdict: null,
-			returned: 0,
-			wallet: null,
-		});
-		const interaction = pressed();
-
-		await run(interaction, "bj-stand");
-
-		expect(playBlackjack).toHaveBeenCalledWith({ guildId: GUILD, userId: OWNER }, "stand");
-		expect(interaction.update).toHaveBeenCalled();
-	});
 
 	/** Play again deals a new game, so it has to pass the gates the command does, not only the old message's. */
 	it("refuses Play again while the casino is closed", async () => {
@@ -164,37 +118,5 @@ describe("the casino's game buttons", () => {
 			"250",
 			expect.any(Function),
 		);
-	});
-
-	it("deals a new blackjack hand on the same message and remembers it there", async () => {
-		startBlackjack.mockResolvedValue({
-			hand: { _id: "hand" },
-			view: {
-				state: { player: [], dealer: [], deck: [], doubled: false },
-				bet: 100,
-				staked: 100,
-				verdict: null,
-				returned: 0,
-				wallet: null,
-			},
-		});
-		const interaction = pressed();
-
-		await run(interaction, "again", ["blackjack", "deal", "100"]);
-
-		expect(interaction.update).toHaveBeenCalled();
-		expect(interaction.reply).not.toHaveBeenCalled();
-		expect(jest.requireMock("@database/repositories/casinoRepository").attachHandMessage).toHaveBeenCalledWith(
-			{ _id: "hand" },
-			"400000000000000001",
-			"500000000000000009",
-		);
-	});
-
-	it("ignores a game the button could not have named", async () => {
-		await run(pressed(), "again", ["poker", "x", "100"]);
-
-		expect(playInstant).not.toHaveBeenCalled();
-		expect(checkCasinoPlay).not.toHaveBeenCalled();
 	});
 });

@@ -1,6 +1,6 @@
 {
 	"name": "testify",
-	"version": "2.0.9",
+	"version": "2.1.0",
 	"description": "Open source, multipurpose Discord bot written in TypeScript",
 	"main": "dist/index.js",
 	"license": "SEE LICENSE IN LICENSE",
@@ -57,11 +57,11 @@
 		"verify:bundle": "tsx scripts/verifyBundle.ts"
 	},
 	"lint-staged": {
-		"*.ts": [
-			"eslint --fix",
+		"*.{ts,tsx,mts,cts,js,mjs,cjs}": [
+			"eslint --fix --no-warn-ignored",
 			"prettier --write"
 		],
-		"*.{json,md,yml,yaml}": [
+		"*.{json,md,yml,yaml,css,html}": [
 			"prettier --write"
 		]
 	},

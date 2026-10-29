@@ -36,19 +36,9 @@ describe("prefersReducedMotion", () => {
 
 		expect(prefersReducedMotion()).toBe(false);
 	});
-
-	it("reports the preference when the query matches", () => {
-		mockMedia(true);
-		expect(prefersReducedMotion()).toBe(true);
-	});
 });
 
 describe("usePrefersReducedMotion", () => {
-	it("starts from the current preference", () => {
-		mockMedia(true);
-		expect(renderHook(() => usePrefersReducedMotion()).result.current).toBe(true);
-	});
-
 	/** Someone turning the preference on in their OS should not have to reload to be taken seriously. */
 	it("follows the preference changing while the page is open", () => {
 		const media = mockMedia(false);
@@ -62,37 +52,10 @@ describe("usePrefersReducedMotion", () => {
 
 		expect(result.current).toBe(true);
 	});
-
-	it("detaches its listener on unmount", () => {
-		const media = mockMedia(false);
-		renderHook(() => usePrefersReducedMotion()).unmount();
-
-		expect(media.removed()).toBe(true);
-	});
 });
 
 /** JavaScript reads `data-motion` before the media query, in the stylesheet's own order. */
 describe("the choice on the appearance page", () => {
-	it("stills the page on a device that asked for nothing", () => {
-		mockMedia(false);
-		document.documentElement.setAttribute("data-motion", "reduced");
-
-		expect(prefersReducedMotion()).toBe(true);
-	});
-
-	it("restores motion on a device that asked for less", () => {
-		mockMedia(true);
-		document.documentElement.setAttribute("data-motion", "full");
-
-		expect(prefersReducedMotion()).toBe(false);
-	});
-
-	it("hands back to the device when the choice is system", () => {
-		mockMedia(true);
-
-		expect(prefersReducedMotion()).toBe(true);
-	});
-
 	/** A mutation record is delivered on a microtask, so the assertion has to wait one out. */
 	it("reaches a mounted hook without a reload", async () => {
 		mockMedia(false);

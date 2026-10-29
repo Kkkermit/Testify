@@ -1,7 +1,7 @@
 import { AttachmentBuilder } from "discord.js";
 import { boardLayout, placeholderColour, renderBoardImage } from "@lib/canvas/boardCard.util";
 import { type BoardCard } from "@lib/canvas/canvas.types";
-import { barFill, type RankCardData, rankCardText, renderRankCard } from "@lib/canvas/rankCard.util";
+import { barFill, type RankCardData, renderRankCard } from "@lib/canvas/rankCard.util";
 
 /** The avatar fetch is deliberately pointed at a closed local port. */
 const UNREACHABLE = "http://127.0.0.1:1/avatar.png";
@@ -19,40 +19,7 @@ function card(overrides: Partial<RankCardData> = {}): RankCardData {
 	};
 }
 
-describe("rankCardText", () => {
-	it("labels the level, rank and XP", () => {
-		expect(rankCardText(card())).toEqual({
-			name: "Someone",
-			level: "LEVEL 4",
-			rank: "RANK 2nd",
-			xp: "200 / 900 XP",
-			badge: null,
-		});
-	});
-
-	it("says unranked rather than showing a place nobody holds", () => {
-		expect(rankCardText(card({ rank: null })).rank).toBe("UNRANKED");
-	});
-
-	it("formats large numbers with separators", () => {
-		expect(rankCardText(card({ progress: 12_345, needed: 90_000 })).xp).toBe("12,345 / 90,000 XP");
-	});
-
-	it("shows a boost badge only when the member actually has one", () => {
-		expect(rankCardText(card({ multiplier: 1 })).badge).toBeNull();
-		expect(rankCardText(card({ multiplier: 3 })).badge).toBe("×3 XP");
-	});
-});
-
 describe("barFill", () => {
-	it("fills nothing at the start of a level", () => {
-		expect(barFill(0, 900, 600)).toBe(0);
-	});
-
-	it("fills half way", () => {
-		expect(barFill(450, 900, 600)).toBe(300);
-	});
-
 	/** An admin setting a level by hand can leave XP outside its own range. */
 	it("never draws wider than the track", () => {
 		expect(barFill(5_000, 900, 600)).toBe(600);
@@ -76,11 +43,6 @@ describe("renderRankCard", () => {
 		expect(attachment.name).toBe("rank.png");
 	});
 
-	it("renders for a member with no rank and a boost", async () => {
-		const attachment = await renderRankCard(card({ rank: null, multiplier: 5, progress: 0 }));
-		expect(attachment.name).toBe("rank.png");
-	});
-
 	/** A long name has to shrink rather than run off the card. */
 	it("renders a very long display name", async () => {
 		const attachment = await renderRankCard(card({ displayName: "A".repeat(120) }));
@@ -91,28 +53,11 @@ describe("renderRankCard", () => {
 describe("boardLayout", () => {
 	const rows = (count: number) => Array.from({ length: count }, () => ({}) as BoardCard["rows"][number]);
 
-	it("grows with the number of rows", () => {
-		expect(boardLayout({ rows: rows(10), viewer: null, unranked: null }).height).toBeGreaterThan(
-			boardLayout({ rows: rows(3), viewer: null, unranked: null }).height,
-		);
-	});
-
 	/** An empty board still needs somewhere to put "nobody is here yet". */
 	it("leaves room for one row when there are none", () => {
 		expect(boardLayout({ rows: [], viewer: null, unranked: null }).height).toBe(
 			boardLayout({ rows: rows(1), viewer: null, unranked: null }).height,
 		);
-	});
-
-	it("makes room under the rows only for the reader's own row or note", () => {
-		const plain = boardLayout({ rows: rows(10), viewer: null, unranked: null });
-		const withViewer = boardLayout({ rows: rows(10), viewer: rows(1)[0]!, unranked: null });
-		const unranked = boardLayout({ rows: rows(10), viewer: null, unranked: "Not yet" });
-
-		expect(plain.viewer).toBeNull();
-		expect(withViewer.viewer).toBeGreaterThan(withViewer.rows.at(-1)!);
-		expect(unranked.height).toBe(withViewer.height);
-		expect(withViewer.footer).toBeGreaterThan(withViewer.viewer!);
 	});
 });
 

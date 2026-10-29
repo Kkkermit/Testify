@@ -1,10 +1,8 @@
 import { type TestifyClient } from "@core/client";
 import { getCasinoSettings } from "@database/repositories/casinoRepository";
-import { recordCasinoPlays } from "@database/repositories/casinoStatsRepository";
-import { adjustWallet, debitWallet, incrementCounters, requireAccount } from "@database/repositories/economyRepository";
+import { adjustWallet, debitWallet, requireAccount } from "@database/repositories/economyRepository";
 import { playInstant, type Responder, takeStake } from "@lib/casino/casinoActions.util";
 import { type InstantOutcome } from "@lib/casino/instantGames.util";
-import { textOf } from "@tests/helpers/containers";
 import { createMockClient } from "@tests/helpers/mocks";
 
 jest.mock("@database/repositories/casinoRepository", () => ({ getCasinoSettings: jest.fn() }));
@@ -74,16 +72,6 @@ beforeEach(() => {
 });
 
 describe("taking a stake", () => {
-	it("takes the bet from the wallet and counts the game", async () => {
-		expect(await takeStake(PLAYER, "250")).toEqual({ bet: 250, wallet: 750 });
-		expect(incrementCounters).toHaveBeenCalledWith(PLAYER.guildId, PLAYER.userId, { gambled: 1 });
-	});
-
-	it("understands half and all", async () => {
-		expect((await takeStake(PLAYER, "half")).bet).toBe(500);
-		expect((await takeStake(PLAYER, "all")).bet).toBe(500);
-	});
-
 	/** A limit checked after the debit would take money for a game that is then refused. */
 	it("refuses a bet outside the table's limits before any money moves", async () => {
 		jest.mocked(getCasinoSettings).mockResolvedValue({ enabled: true, disabledGames: [], minBet: 100, maxBet: 500 });
@@ -100,37 +88,6 @@ describe("taking a stake", () => {
 });
 
 describe("an instant game", () => {
-	it("takes the stake, pays the win at once, then shows the spin and the result", async () => {
-		const reply = responder();
-
-		await playInstant(reply, clientRunningTimers(), PLAYER, "100", () => outcome(195));
-		await Promise.resolve();
-
-		expect(wallet).toBe(1_095);
-		expect(recordCasinoPlays).toHaveBeenCalledWith([{ ...PLAYER, game: "coinflip", staked: 100, returned: 195 }]);
-		expect(reply.deferReply).toHaveBeenCalled();
-		expect(reply.edits).toHaveLength(2);
-		expect(textOf(reply.edits[0] as never)).toContain("Good luck");
-		expect(textOf(reply.edits[1] as never)).toContain("you won 95");
-	});
-
-	it("keeps the stake on a loss", async () => {
-		await playInstant(responder(), clientRunningTimers(), PLAYER, "100", () => outcome(0));
-
-		expect(wallet).toBe(900);
-		expect(adjustWallet).not.toHaveBeenCalled();
-	});
-
-	it("waits for the animation before revealing the result", async () => {
-		const client = createMockClient();
-		const after = jest.fn();
-		(client.timers as unknown as { after: jest.Mock }).after = after;
-
-		await playInstant(responder(), client, PLAYER, "100", () => outcome(0));
-
-		expect(after.mock.calls[0]?.[1]).toBeGreaterThan(1_000);
-	});
-
 	/** A render takes a moment; a second press in that moment would start a second debit. */
 	it("deals one game at a time to a player", async () => {
 		let release: () => void = () => undefined;

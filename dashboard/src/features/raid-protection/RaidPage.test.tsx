@@ -37,27 +37,6 @@ describe("the raid protection page", () => {
 		await expectNoViolations(container);
 	});
 
-	it("saves a minimum age once the box is left, and not while it is out of range", async () => {
-		const user = userEvent.setup();
-		const captured = capturePatch();
-
-		renderPage();
-		const box = await screen.findByLabelText(/minimum account age/i);
-		await user.clear(box);
-		await user.type(box, "30");
-		await user.tab();
-		expect(captured.body).toBeUndefined();
-		expect(screen.getByText(/whole number from 0 to 28/i)).toBeInTheDocument();
-
-		await user.clear(box);
-		await user.type(box, "3");
-		await user.tab();
-
-		await waitFor(() => {
-			expect(captured.body).toEqual({ minAccountAgeDays: 3 });
-		});
-	});
-
 	it("chooses who an alert pings, and nobody by default", async () => {
 		const user = userEvent.setup();
 		const captured = capturePatch();

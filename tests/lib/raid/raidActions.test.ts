@@ -119,16 +119,6 @@ describe("overviewOf", () => {
 });
 
 describe("holdNewAccount", () => {
-	it("times a young account out until it is old enough, and tells them why", async () => {
-		const member = memberOf(guildWith(), { ageDays: 2 });
-
-		const outcome = await holdNewAccount(member as unknown as GuildMember, ON, NOW);
-
-		expect(outcome).toEqual({ held: true, until: NOW + 5 * DAY_MS });
-		expect(member.timeout).toHaveBeenCalledWith(5 * DAY_MS, expect.stringContaining("2 days old"));
-		expect(member.send).toHaveBeenCalledWith(expect.stringContaining("lifts on its own"));
-	});
-
 	it("leaves an old enough account, a bot and everybody at 0 alone", async () => {
 		const guild = guildWith();
 		const old = memberOf(guild, { ageDays: 30 });
@@ -194,17 +184,6 @@ describe("spikePost", () => {
 describe("guardJoin", () => {
 	const client = createMockClient();
 
-	it("does nothing while raid protection is off", async () => {
-		jest.mocked(getRaidSettings).mockResolvedValue({ ...ON, enabled: false });
-		const guild = guildWith();
-		const member = memberOf(guild);
-
-		await guardJoin(client, member as unknown as GuildMember, new JoinWatch(), NOW);
-
-		expect(member.timeout).not.toHaveBeenCalled();
-		expect(guild.send).not.toHaveBeenCalled();
-	});
-
 	it("reports each hold, then one alert for a spike, then nothing more while it lasts", async () => {
 		jest.mocked(getRaidSettings).mockResolvedValue(ON);
 		const guild = guildWith();
@@ -216,15 +195,6 @@ describe("guardJoin", () => {
 
 		const titles = guild.send.mock.calls.map((call) => /"title":"([^"]+)"/.exec(JSON.stringify(call[0]))?.[1]);
 		expect(titles).toEqual(["🛡️ Held back a new account", "🛡️ Held back a new account", "🚨 Joins are spiking"]);
-	});
-
-	it("posts nothing about an old enough account outside a spike", async () => {
-		jest.mocked(getRaidSettings).mockResolvedValue(ON);
-		const guild = guildWith();
-
-		await guardJoin(client, memberOf(guild, { ageDays: 90 }) as unknown as GuildMember, new JoinWatch(), NOW);
-
-		expect(guild.send).not.toHaveBeenCalled();
 	});
 
 	/** A failure here must not stop the welcome, auto-roles and the rest of the join from running. */

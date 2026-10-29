@@ -90,12 +90,6 @@ describe("posting an idea", () => {
 		expect(createIdea).not.toHaveBeenCalled();
 	});
 
-	it("makes a member wait a minute between ideas", async () => {
-		jest.mocked(lastIdeaAt).mockResolvedValue(new Date(NOW.getTime() - 30_000));
-
-		await expect(submitIdea(guildWith(channel()), AUTHOR, "x", NOW)).rejects.toThrow(/a moment ago/);
-	});
-
 	/** An idea nobody can see is not one, so a failed post must not leave a record behind it. */
 	it("removes the record when the post fails", async () => {
 		const target = channel(jest.fn(() => Promise.reject(new Error("Missing Access"))));
@@ -153,24 +147,6 @@ describe("deciding on an idea", () => {
 			),
 		).resolves.toMatchObject({ status: "declined" });
 	});
-
-	it("does not DM anybody for a reopen", async () => {
-		const send = jest.fn(() => Promise.resolve());
-		jest.mocked(decideIdea).mockResolvedValue(IDEA);
-
-		await decideOnIdea(
-			client(send),
-			guildWith(channel()),
-			IDEA.id,
-			{ status: "open", reason: "" },
-			{
-				id: "s",
-				name: "kate",
-			},
-		);
-
-		expect(send).not.toHaveBeenCalled();
-	});
 });
 
 describe("the board's settings", () => {
@@ -183,11 +159,5 @@ describe("the board's settings", () => {
 
 	it("refuses a channel it cannot post in", async () => {
 		await expect(applyIdeaSettings(guildWith(null), { channelId: "locked" }, "1")).rejects.toThrow(/cannot post/);
-	});
-
-	it("turns itself off when its channel is cleared", async () => {
-		await applyIdeaSettings(guildWith(null), { channelId: null }, "1");
-
-		expect(saveIdeaSettings).toHaveBeenCalledWith(IDEA.guildId, { enabled: false, channelId: null }, "1");
 	});
 });

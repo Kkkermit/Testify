@@ -70,8 +70,9 @@ git checkout -b testify/feature-02 origin/develop
 npm run check
 ```
 
-That runs the typecheck, the linter, the formatter check and the tests — exactly what CI runs. The git hooks run
-most of it for you, and the pre-push hook also enforces the coverage floor.
+That runs the typecheck, the linter, the formatter check and the tests — what CI runs, which it does on Windows
+for every push and on Windows, Linux and macOS every night. The git hooks lint and format only what you staged,
+and none of them runs the tests.
 
 - [ ] `npm run check` passes
 - [ ] New logic has a test, and a new enforcement test has been seen to fail
@@ -207,8 +208,10 @@ formatting, pagination, the levelling curve, a repository, a panel renderer — 
 - **Repository tests use an in-memory MongoDB.** Without one they report as _skipped_, never as passed — and CI
   sets `REQUIRE_DB_TESTS=1`, so a runner that cannot start a database fails rather than going quietly green.
 
-The coverage floor is **80%** of statements, lines, functions and branches, checked by `npm run test:coverage` and
-by the pre-push hook.
+The coverage floor is **75%** of statements, lines, functions and branches, checked by `npm run test:coverage` in
+CI. A new test should cover something no other test does, or pin what coverage cannot see — a bug, a refusal, a
+Discord limit — and a table of cases belongs in one test that names every failing row. Write paths with `join`, so
+the test passes on Windows too.
 
 ## 📝 Commits
 
@@ -237,7 +240,8 @@ fix: Stopped losing XP when two messages arrive together
 | ------------ | ----------------------------- | ---------------------------------------------------------------- |
 | `pre-commit` | `typecheck`, then lint-staged | Staged-only linting cannot see a type error in an unstaged file  |
 | `commit-msg` | `commitlint`                  | The commit format holds without relying on people remembering it |
-| `pre-push`   | `lint`, `test:coverage`       | Coverage thresholds gate the push, not just CI                   |
+
+lint-staged runs ESLint and Prettier on the staged files only. There is no `pre-push` hook: the tests run in CI.
 
 ## 🐛 Reporting a bug or asking for a feature
 

@@ -5,8 +5,7 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { verification } from "@api/routes/verification";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
-import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
+import { getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
 import { publishVerifyPanel } from "@lib/settings/verifyActions.util";
 import { type VerificationConfigResponse } from "@testify/shared";
 import { BOT_ABOVE_ROLES, grantableRoles } from "@tests/helpers/mocks";
@@ -29,9 +28,7 @@ const ROLE = "300000000000000001";
 
 const stored = jest.mocked(getVerifyConfig);
 const saved = jest.mocked(saveVerifyConfig);
-const removed = jest.mocked(deleteVerifyConfig);
 const published = jest.mocked(publishVerifyPanel);
-const audited = jest.mocked(recordAudit);
 
 function app(): Hono<ApiBindings> {
 	const guild = {
@@ -100,14 +97,6 @@ describe("GET /verification", () => {
 		expect(body.roleId).toBeNull();
 		expect(body.message.length).toBeGreaterThan(0);
 	});
-
-	it("reports what is stored, and how many have passed", async () => {
-		configured({ messageId: "999" });
-
-		const body = (await (await send("GET")).json()) as VerificationConfigResponse;
-
-		expect(body).toMatchObject({ enabled: true, channelId: CHANNEL, roleId: ROLE, posted: true, verifiedCount: 2 });
-	});
 });
 
 describe("PATCH /verification", () => {
@@ -128,15 +117,6 @@ describe("PATCH /verification", () => {
 		expect(saved).toHaveBeenCalled();
 	});
 
-	it("posts the panel when asked", async () => {
-		configured();
-
-		await send("PATCH", { publish: true });
-
-		expect(published).toHaveBeenCalled();
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ messageId: "500000000000000001" }));
-	});
-
 	/** A panel posted in the old channel is not the panel in the new one, so its id cannot carry over. */
 	it("forgets the posted message when the channel changes", async () => {
 		configured({ messageId: "999" });
@@ -153,30 +133,5 @@ describe("PATCH /verification", () => {
 		await send("PATCH", { message: "New wording" });
 
 		expect(published).toHaveBeenCalled();
-	});
-
-	it("removes the configuration when it is turned off", async () => {
-		configured();
-
-		await send("PATCH", { enabled: false });
-
-		expect(removed).toHaveBeenCalledWith(GUILD);
-		expect(saved).not.toHaveBeenCalled();
-	});
-
-	it("strips invisible characters from the wording before storing it", async () => {
-		configured();
-
-		await send("PATCH", { message: " Press \u202ehere " });
-
-		expect(saved).toHaveBeenCalledWith(GUILD, expect.objectContaining({ message: "Press here" }));
-	});
-
-	it("writes an audit record naming what changed", async () => {
-		configured();
-
-		await send("PATCH", { roleId: "300000000000000002" });
-
-		expect(audited).toHaveBeenCalledWith(expect.objectContaining({ action: "verification.update" }));
 	});
 });

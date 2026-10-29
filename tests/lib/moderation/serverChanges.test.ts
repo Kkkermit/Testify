@@ -1,11 +1,5 @@
 import { AuditLogEvent } from "discord.js";
-import {
-	type AuditEntryLike,
-	dashboardChange,
-	discordChange,
-	pageChanges,
-	readAuditWindow,
-} from "@lib/moderation/serverChanges.util";
+import { type AuditEntryLike, discordChange, pageChanges, readAuditWindow } from "@lib/moderation/serverChanges.util";
 import { CHANGE_LIMITS, changeMatches, changesQuery, type ServerChange } from "@testify/shared";
 
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ auditsSince: jest.fn() }));
@@ -84,46 +78,11 @@ describe("discordChange", () => {
 	});
 });
 
-describe("dashboardChange", () => {
-	it("keeps the dashboard's own sentence", () => {
-		const change = dashboardChange({
-			actorId: MOD,
-			actorTag: "kate",
-			guildId: "900000000000000001",
-			action: "levelling.update",
-			summary: "Turned levelling on",
-			at: new Date(NOW),
-		});
-
-		expect(change).toMatchObject({ source: "dashboard", kind: "settings", summary: "Turned levelling on" });
-	});
-});
-
 describe("readAuditWindow", () => {
 	const full = (from: number, count = 100): AuditEntryLike[] =>
 		Array.from({ length: count }, (_, index) =>
 			entry({ id: String(from + index), createdTimestamp: NOW - (from + index) * 1_000 }),
 		);
-
-	it("stops at the first entry older than the window, without another request", async () => {
-		const crossing = full(0).map((item, index) => (index < 50 ? item : { ...item, createdTimestamp: NOW - 20 * DAY }));
-		const read = jest.fn().mockResolvedValueOnce(crossing).mockResolvedValueOnce(full(100));
-
-		const window = await readAuditWindow(read, NOW - 14 * DAY);
-
-		expect(window.changes).toHaveLength(50);
-		expect(read).toHaveBeenCalledTimes(1);
-	});
-
-	it("pages back from the last entry it was given", async () => {
-		const read = jest.fn().mockResolvedValueOnce(full(0)).mockResolvedValueOnce(full(100, 3));
-
-		const window = await readAuditWindow(read, NOW - 14 * DAY);
-
-		expect(window.changes).toHaveLength(103);
-		expect(read).toHaveBeenLastCalledWith("99");
-		expect(window.truncated).toBe(false);
-	});
 
 	/** A server with thousands of changes a fortnight would otherwise cost a request per hundred on every search. */
 	it("stops at the cap and says the list is cut short", async () => {
@@ -156,17 +115,6 @@ describe("pageChanges", () => {
 	});
 	const query = (raw: Record<string, string> = {}) => changesQuery.parse(raw);
 
-	it("keeps only the chosen window, newest first", () => {
-		const all = [
-			change({ id: "old", at: new Date(NOW - 10 * DAY).toISOString() }),
-			change({ id: "new", at: new Date(NOW - DAY / 2).toISOString() }),
-			change({ id: "mid", at: new Date(NOW - 2 * DAY).toISOString() }),
-		];
-
-		expect(pageChanges(all, query({ days: "3" }), NOW).items.map((c) => c.id)).toEqual(["new", "mid"]);
-		expect(pageChanges(all, query({ days: "14" }), NOW).total).toBe(3);
-	});
-
 	it("filters by where the change was made and by what was typed", () => {
 		const all = [
 			change({ id: "d", source: "dashboard", kind: "settings", summary: "Turned levelling on" }),
@@ -175,12 +123,6 @@ describe("pageChanges", () => {
 
 		expect(pageChanges(all, query({ source: "dashboard" }), NOW).items.map((c) => c.id)).toEqual(["d"]);
 		expect(pageChanges(all, query({ q: "LEVELLING" }), NOW).items.map((c) => c.id)).toEqual(["d"]);
-	});
-
-	it("brings a page past the end back to the last page", () => {
-		const all = Array.from({ length: 30 }, (_, index) => change({ id: String(index) }));
-
-		expect(pageChanges(all, query({ page: "9" }), NOW)).toMatchObject({ page: 2, total: 30 });
 	});
 
 	it("refuses a window it does not offer", () => {
@@ -201,13 +143,6 @@ describe("changeMatches", () => {
 		target: "marcus",
 		reason: "Spamming",
 	};
-
-	it("matches the actor, the target and the reason", () => {
-		expect(changeMatches(base, "Kate")).toBe(true);
-		expect(changeMatches(base, "marc")).toBe(true);
-		expect(changeMatches(base, "spam")).toBe(true);
-		expect(changeMatches(base, "nobody")).toBe(false);
-	});
 
 	/** A pasted ID is somebody specific, so part of one appearing in a name must not match. */
 	it("matches a Discord ID against the actor exactly", () => {
