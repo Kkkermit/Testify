@@ -11,6 +11,7 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 
 export function BotStatsPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -60,7 +61,7 @@ export function BotStatsPage(): React.JSX.Element {
 							? t("botStats.noneBody")
 							: placement.kind === "gone"
 								? t("botStats.goneBody")
-								: t("botStats.postedBody", { channel: placement.name })}
+								: t("botStats.postedBody", { channel: channelLabel(channels.data ?? [], settings.channelId, t) })}
 					</p>
 				</div>
 

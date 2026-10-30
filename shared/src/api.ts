@@ -149,7 +149,8 @@ export type ChannelKind = "text" | "announcement" | "voice" | "category" | "othe
 
 export interface ChannelSummary {
 	id: string;
-	name: string;
+	/** Null for a channel the reader cannot see in Discord, which the page names nowhere and offers nowhere. */
+	name: string | null;
 	kind: ChannelKind;
 	position: number;
 	/** Computed from the live client, so a channel the bot cannot post in is greyed out before anyone saves. */

@@ -13,6 +13,7 @@ import { StickyRow } from "@/features/sticky/components/StickyRow";
 import { useRemoveSticky, useSaveSticky, useSticky } from "@/features/sticky/useSticky";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
@@ -42,10 +43,7 @@ export function StickyPage(): React.JSX.Element {
 	const taken = list.data.entries.map((entry) => entry.channelId);
 	const keyOf = (channel: string): string => `sticky:${guildId}:${channel}`;
 	const entries = list.data.entries.filter((entry) => !undo.isHidden(keyOf(entry.channelId)));
-	const channelName = (id: string): string => {
-		const found = channels.data?.find((channel) => channel.id === id)?.name;
-		return found === undefined ? t("sticky.deletedChannel") : `#${found}`;
-	};
+	const channelName = (id: string): string => channelLabel(channels.data ?? [], id, t);
 	const blocked = problemText(stickyBlocked({ channelId, message }, taken), t);
 	const full = taken.length >= list.data.limit;
 

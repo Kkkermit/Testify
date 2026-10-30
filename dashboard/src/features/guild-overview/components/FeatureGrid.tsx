@@ -7,6 +7,7 @@ import { Badge, CARD_ROW, cardClass, HoverChevron } from "@/components/primitive
 import { featureLook } from "@/config/features";
 import { describeDetail, featureLabel } from "@/features/guild-overview/featureStatus.labels";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
 /** A card links to its settings screen where the dashboard has one, and is inert where the feature is Discord-only. */
@@ -19,9 +20,8 @@ export function FeatureGrid({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const channels = useChannels(guildId);
-	// Until the list answers a channel is "…", and a channel missing from it has been deleted.
-	const channelName = (id: string): string | null =>
-		channels.data === undefined ? "…" : (channels.data.find((channel) => channel.id === id)?.name ?? null);
+	// Until the list answers a channel is "…".
+	const channelName = (id: string): string => (channels.data === undefined ? "…" : channelLabel(channels.data, id, t));
 
 	return (
 		// A grid item defaults to `min-width: auto`, so without this the widest tile sets the row's width.

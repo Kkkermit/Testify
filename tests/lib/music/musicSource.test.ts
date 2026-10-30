@@ -454,6 +454,20 @@ describe("resolveTracks on a SoundCloud search", () => {
 		expect(readFileSync(record, "utf8")).not.toContain("--ignore-no-formats-error");
 	});
 
+	/** The generic extractor fetches whatever it is handed, which made `/play` a way to reach the host's own network. */
+	it("only ever runs yt-dlp's site extractors", async () => {
+		const record = join(directory, "link-args.txt");
+		const binary = fakeYtDlp("link", recordArgs(record));
+		const link = { kind: "url", url: "https://example.com/song", source: "other" } as const;
+
+		await resolveTracks(link, USER, { ytDlp: binary, ffmpeg: null });
+
+		const args = readFileSync(record, "utf8").split("\n");
+		expect(args[args.indexOf("--use-extractors") + 1]).toBe("default,-generic");
+		const stream = ytDlpStreamArgs("251", "https://example.com/song");
+		expect(stream[stream.indexOf("--use-extractors") + 1]).toBe("default,-generic");
+	});
+
 	it("turns yt-dlp's DRM refusal of a link into advice rather than a crash", async () => {
 		const binary = fakeYtDlp("drm-link", die("ERROR: [soundcloud] 2398987035: This video is DRM protected"));
 		const link = { kind: "url", url: "https://soundcloud.com/a/locked", source: "soundcloud" } as const;

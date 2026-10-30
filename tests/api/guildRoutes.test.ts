@@ -5,6 +5,7 @@ import { ApiProblem, problemBody } from "@api/errors";
 import { guilds } from "@api/routes/guilds";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
+import { auditPage, auditsSince, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
 import { type ChannelSummary, type GuildOverview, type RoleSummary, type ServerChangesPage } from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
@@ -108,6 +109,7 @@ jest.mock("@database/repositories/dashboardAuditRepository", () => ({
 
 const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
+const MANAGER = "100000000000000002";
 
 /** The bot's own highest role sits at 5, so anything at or above that is out of reach. */
 const BOT_HIGHEST = 5;
@@ -116,6 +118,10 @@ interface Options {
 	botPermissions?: bigint[];
 	canSendIn?: Set<string>;
 	hasMe?: boolean;
+	/** Signs in as a manager holding these, rather than as the bot's owner, who is asked nothing. */
+	readerHolds?: bigint[];
+	/** Channels the manager cannot see. */
+	hiddenFromReader?: Set<string>;
 }
 
 function fakeGuild(options: Options = {}) {
@@ -135,13 +141,22 @@ function fakeGuild(options: Options = {}) {
 					roles: { highest: { position: BOT_HIGHEST } },
 				};
 
+	const reader = {
+		id: MANAGER,
+		permissions: {
+			has: (flags: bigint | bigint[]) => [flags].flat().every((flag) => options.readerHolds?.includes(flag)),
+		},
+	};
+
 	const channel = (id: string, name: string, type: ChannelType, position: number) => ({
 		id,
 		name,
 		type,
 		position,
 		isTextBased: () => type === ChannelType.GuildText || type === ChannelType.GuildAnnouncement,
-		permissionsFor: () => ({ has: () => options.canSendIn?.has(id) ?? true }),
+		permissionsFor: (who: unknown) => ({
+			has: () => (who === reader ? !options.hiddenFromReader?.has(id) : (options.canSendIn?.has(id) ?? true)),
+		}),
 	});
 
 	const channels = new Collection<string, unknown>([
@@ -176,7 +191,11 @@ function fakeGuild(options: Options = {}) {
 		iconURL: () => null,
 		channels: { cache: channels },
 		roles: { cache: roles },
-		members: { me, cache: new Collection(), fetch: () => Promise.reject(new Error("Unknown Member")) },
+		members: {
+			me,
+			cache: new Collection(),
+			fetch: (id: string) => (id === MANAGER ? Promise.resolve(reader) : Promise.reject(new Error("Unknown Member"))),
+		},
 		ownerId: OWNER,
 		createdAt: new Date("2020-01-01T00:00:00.000Z"),
 		premiumTier: 0,
@@ -208,8 +227,7 @@ function fakeGuild(options: Options = {}) {
 	};
 }
 
-function appFor(options: Options = {}): Hono<ApiBindings> {
-	const guild = fakeGuild(options);
+function appFor(options: Options = {}, guild = fakeGuild(options)): Hono<ApiBindings> {
 	const cache = new Collection<string, unknown>([[GUILD, guild]]);
 	const client = { guilds: { cache }, isOwner: (id: string) => id === OWNER } as unknown as TestifyClient;
 
@@ -218,7 +236,7 @@ function appFor(options: Options = {}): Hono<ApiBindings> {
 		context.set("client", client);
 		context.set("env", {} as Env);
 		context.set("oauth", null);
-		context.set("session", { _id: "s", userId: OWNER } as never);
+		context.set("session", { _id: "s", userId: options.readerHolds === undefined ? OWNER : MANAGER } as never);
 		await next();
 	});
 	app.route("/guilds", guilds);
@@ -284,6 +302,18 @@ describe("the channel list", () => {
 
 	it("orders them the way Discord shows them", async () => {
 		expect((await channelsOf()).map((channel) => channel.id)).toEqual(["4", "1", "2", "3"]);
+	});
+
+	/** Discord never names a channel to somebody who cannot view it; the id stays, so a setting is not read as deleted. */
+	it("names no channel the reader cannot see", async () => {
+		const channels = await channelsOf({
+			readerHolds: [PermissionFlagsBits.ManageGuild],
+			hiddenFromReader: new Set(["2"]),
+		});
+
+		expect(channels.find((channel) => channel.id === "2")?.name).toBeNull();
+		expect(channels.find((channel) => channel.id === "1")?.name).toBe("general");
+		expect(JSON.stringify(channels)).not.toContain("locked");
 	});
 });
 
@@ -351,6 +381,49 @@ describe("the changes list", () => {
 
 	it("refuses a window it does not offer", async () => {
 		expect((await appFor().request(`/guilds/${GUILD}/changes?days=30`)).status).toBe(400);
+	});
+
+	/** Discord shows its audit log only to View Audit Log, and `/case list` asks Moderate Members, so the page does too. */
+	it("asks the reader's own permissions before it shows either record", async () => {
+		const options = { readerHolds: [PermissionFlagsBits.ManageGuild] };
+		const guild = fakeGuild(options);
+		const body = (await (await appFor(options, guild).request(`/guilds/${GUILD}/changes`)).json()) as ServerChangesPage;
+
+		expect(body).toMatchObject({ discordWithheld: true, moderationWithheld: true });
+		expect(body.items.map((change) => change.source)).toEqual(["dashboard"]);
+		expect(jest.mocked(auditsSince)).toHaveBeenLastCalledWith(GUILD, expect.any(Date), undefined, {
+			moderation: false,
+			auditLog: false,
+		});
+		expect(guild.fetchAuditLogs).not.toHaveBeenCalled();
+	});
+
+	it("shows both to a reader who holds what Discord asks", async () => {
+		const options = {
+			readerHolds: [
+				PermissionFlagsBits.ManageGuild,
+				PermissionFlagsBits.ViewAuditLog,
+				PermissionFlagsBits.ModerateMembers,
+			],
+		};
+		const body = (await (await appFor(options).request(`/guilds/${GUILD}/changes`)).json()) as ServerChangesPage;
+
+		expect(body).toMatchObject({ discordWithheld: false, moderationWithheld: false });
+		expect(body.items.map((change) => change.source)).toContain("discord");
+	});
+});
+
+describe("the dashboard's own records", () => {
+	/** A warning, kick or ban made on the web is a moderation record, which only Moderate Members reads in Discord. */
+	it("leaves moderation out of the audit list and the overview for a manager without Moderate Members", async () => {
+		const app = appFor({ readerHolds: [PermissionFlagsBits.ManageGuild] });
+
+		await app.request(`/guilds/${GUILD}/audit`);
+		await app.request(`/guilds/${GUILD}/overview`);
+
+		expect(jest.mocked(auditPage)).toHaveBeenLastCalledWith(GUILD, 1, expect.any(Number), { moderation: false });
+		expect(jest.mocked(countAudits)).toHaveBeenLastCalledWith(GUILD, { moderation: false });
+		expect(jest.mocked(recentAudits)).toHaveBeenLastCalledWith(GUILD, 8, { moderation: false });
 	});
 });
 

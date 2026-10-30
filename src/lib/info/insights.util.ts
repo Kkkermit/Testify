@@ -1,9 +1,10 @@
-import { ChannelType, type Guild, GuildVerificationLevel } from "discord.js";
+import { ChannelType, type Guild, type GuildMember, GuildVerificationLevel } from "discord.js";
 import { type Logger } from "pino";
 import { toError } from "@core/errors";
 import { type ServerDay } from "@database/models/insights.schema";
 import { readInsightRows, recentMoves, recordMove, saveActivity } from "@database/repositories/insightsRepository";
 import { dayKey, since } from "@database/repositories/usageRepository";
+import { readerSees } from "@lib/discord/channels.util";
 import { activity } from "@lib/info/activity.util";
 import { readMemberCounts } from "@lib/info/memberCount.util";
 import {
@@ -99,7 +100,13 @@ export function hoursOf(rows: readonly ServerDay[]): number[] {
 	return hours;
 }
 
-export async function readInsights(guild: Guild, days: InsightWindow, now: Date = new Date()): Promise<InsightsReport> {
+/** A channel the reader cannot see is left off the top channels, as Discord leaves it off their channel list. */
+export async function readInsights(
+	guild: Guild,
+	days: InsightWindow,
+	reader: GuildMember | undefined,
+	now: Date = new Date(),
+): Promise<InsightsReport> {
 	const [server, rows, joins, leaves] = await Promise.all([
 		serverFacts(guild),
 		readInsightRows(guild.id, since(days, now)),
@@ -127,11 +134,11 @@ export async function readInsights(guild: Guild, days: InsightWindow, now: Date 
 		},
 		daily,
 		hours: hoursOf(rows.days),
-		topChannels: rows.channels.map((row) => ({
-			channelId: row.channelId,
-			name: guild.channels.cache.get(row.channelId)?.name ?? null,
-			messages: row.messages,
-		})),
+		topChannels: rows.channels.flatMap((row) => {
+			const channel = guild.channels.cache.get(row.channelId);
+			if (channel !== undefined && !readerSees(channel, reader)) return [];
+			return [{ channelId: row.channelId, name: channel?.name ?? null, messages: row.messages }];
+		}),
 		topMembers: rows.members.map((row) => {
 			const member = guild.members.cache.get(row.userId);
 			return {

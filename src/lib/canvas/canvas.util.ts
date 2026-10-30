@@ -8,11 +8,31 @@ import { clusters, drawText } from "@lib/canvas/text.util";
 export { createCanvas };
 export type { Canvas, SKRSContext2D };
 
+/** Larger than any picture a card draws, so a hostile address cannot hand the bot a body it has to hold. */
+const MAX_PICTURE_BYTES = 8 * 1024 * 1024;
+
+const PICTURE_TIMEOUT_MS = 5_000;
+
+/** An https picture's bytes, or null; a redirect is refused, so an address cannot lead the bot somewhere else. */
+export async function fetchPicture(url: string, timeoutMs = PICTURE_TIMEOUT_MS): Promise<Buffer | null> {
+	if (!/^https:\/\//i.test(url)) return null;
+
+	try {
+		const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs), redirect: "error" });
+		if (!response.ok || Number(response.headers.get("content-length") ?? 0) > MAX_PICTURE_BYTES) return null;
+
+		const bytes = Buffer.from(await response.arrayBuffer());
+		return bytes.length > MAX_PICTURE_BYTES ? null : bytes;
+	} catch {
+		return null;
+	}
+}
+
 async function fetchImage(url: string): Promise<Image> {
 	try {
-		const response = await fetch(url);
-		if (!response.ok) throw new Error(`HTTP ${response.status}`);
-		return await loadImage(Buffer.from(await response.arrayBuffer()));
+		const bytes = await fetchPicture(url);
+		if (bytes === null) throw new Error("No picture could be read from that address.");
+		return await loadImage(bytes);
 	} catch (error) {
 		throw new ServiceError("image", error);
 	}

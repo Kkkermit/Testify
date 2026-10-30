@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { createApi } from "@api/server";
 import { type TestifyClient } from "@core/client";
 import { findSession } from "@database/repositories/dashboardSessionRepository";
-import { API_ENV, type Answer, ask, sessionOf } from "@tests/helpers/apiHarness";
+import { API_ENV, type Answer, ask, askRaw, sessionOf } from "@tests/helpers/apiHarness";
 import { createMockClient, createMockRole, grantableRoles } from "@tests/helpers/mocks";
 
 /** A manager of this server, reaching through the dashboard for more than Discord would let them do themselves. */
@@ -166,6 +166,10 @@ describe("an action that needs more than Manage Server", () => {
 		["renaming a member", "PATCH", `/members/${TARGET}/nickname`, { nickname: "Kate" }],
 		["changing a member's roles", "PUT", `/members/${TARGET}/roles`, { roleIds: [BELOW_YOU] }],
 		["locking a channel", "PATCH", `/channel-tools/${OPEN}`, { locked: true }],
+		["reading the bans", "GET", "/bans", undefined],
+		["reading moderation cases", "GET", "/cases", undefined],
+		["reading warnings", "GET", "/warnings", undefined],
+		["setting a level, which hands out its rewards", "PATCH", `/members/${TARGET}/level`, { level: 5 }],
 	];
 
 	/** Each action as one caller, with the answer it got, so one run names every route that answered wrongly. */
@@ -196,6 +200,17 @@ describe("an action that needs more than Manage Server", () => {
 		const { message } = await asking(MANAGER, "POST", `/members/${TARGET}/kick`, { confirm: "x" });
 
 		expect(message).toContain("kick members");
+	});
+});
+
+describe("a write's body", () => {
+	/** Walking a body nested thousands deep for channel ids overflowed the stack, which answered as a crash. */
+	it("is refused, not walked, when it is nested past any form the page sends", async () => {
+		// Written out as text, since building it with `JSON.stringify` would overflow this test's own stack first.
+		const deep = `${'{"inner":'.repeat(10_000)}{"channelId":"${OPEN}"}${"}".repeat(10_000)}`;
+		const app = createApi(clientFor(), API_ENV);
+
+		expect(await askRaw(app, MANAGER, "PATCH", `/api/guilds/${GUILD}/welcome`, deep)).toMatchObject({ status: 400 });
 	});
 });
 

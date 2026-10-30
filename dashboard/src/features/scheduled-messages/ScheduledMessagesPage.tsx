@@ -29,6 +29,7 @@ import {
 } from "@/features/scheduled-messages/useScheduledMessages";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
@@ -65,10 +66,7 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 	const saving = add.isPending || edit.isPending || remove.isPending;
 	const said = (error: Error | null): string | null =>
 		error === null ? null : error instanceof ApiError ? error.message : t("common.couldNotSave");
-	const channelName = (id: string): string => {
-		const found = channels.data?.find((channel) => channel.id === id)?.name;
-		return found === undefined ? t("sticky.deletedChannel") : `#${found}`;
-	};
+	const channelName = (id: string): string => channelLabel(channels.data ?? [], id, t);
 
 	function submit(): void {
 		if (blocked !== null || full || draft.channelId === null || nextAt === null) return;

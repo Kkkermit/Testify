@@ -59,17 +59,8 @@ export function featureLabel(key: string, fallback: string, t: TFunction): strin
 	return label === undefined ? fallback : t(label);
 }
 
-/** One line about a feature, with each channel named as the server names it. */
-export function describeDetail(
-	detail: FeatureDetail,
-	t: TFunction,
-	channelName: (id: string) => string | null,
-): string {
-	const channel = (id: string): string => {
-		const name = channelName(id);
-		return name === null ? t("overview.deletedChannel") : `#${name}`;
-	};
-
+/** One line about a feature, with each channel named as `channel` names it for this reader. */
+export function describeDetail(detail: FeatureDetail, t: TFunction, channel: (id: string) => string): string {
 	switch (detail.kind) {
 		case "posting":
 			return t("overview.detailPosting", { channel: channel(detail.channelId) });

@@ -94,6 +94,14 @@ describe("destinationOf", () => {
 		});
 		expect(destinationOf("https://discord.com", context)).toEqual({ kind: "external", href: "https://discord.com" });
 	});
+
+	/** React does not refuse a script link on its own, so a scheme that is not the web's is no link at all. */
+	it("makes nothing of a scheme a link should never follow", () => {
+		for (const href of ["JaVaScRiPt:alert(1)", "data:text/html,<b>x</b>", "vbscript:x", "file:///etc"]) {
+			expect(destinationOf(href, context)).toEqual({ kind: "none" });
+		}
+		expect(destinationOf("mailto:someone@example.com", context)).toMatchObject({ kind: "external" });
+	});
 });
 
 describe("normalisePath", () => {

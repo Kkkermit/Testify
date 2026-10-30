@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 204, in 29 domain folders         |
 | Schemas/repositories | 46 / 44                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,585 across 456 suites           |
+| Tests                | 3,627 across 458 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 310 suites; the dashboard's 146 sit beside its code.
+tests/                    Mirrors src/. 311 suites; the dashboard's 147 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -1227,6 +1227,15 @@ that makes it look like a browser. A host YouTube refuses is told to update yt-d
 only, which the owner console does in one click. Do not add a way to sign the bot in: getting past YouTube's bot
 check is not this project's to do.
 
+**`/play` can never be pointed at the host's own network.** yt-dlp's generic extractor fetches whatever address it is
+handed, so `http://127.0.0.1:27017` or a cloud metadata address was a request the bot made for anybody in a voice
+channel. Every run passes `--use-extractors default,-generic` (`SITE_EXTRACTORS`), which leaves only the site
+extractors, and a site extractor that hands a link on to the generic one by name finds it missing too — read out of
+`YoutubeDL.py`'s `extract_info` and `add_default_info_extractors`, not assumed. A link whose host is an address
+literal, a bare name or `.local`/`.internal`/`localhost` reads as search text before anything runs, and a link to a
+plain file on some other site no longer plays, which is the price. The artwork and avatars the cards draw go through
+`fetchPicture`: `https` only, no redirect, five seconds and 8 MB at most.
+
 > [!WARNING]
 > **The two binaries take different version flags.** `ffmpeg -version` exits 0 and `ffmpeg --version` exits 8;
 > `yt-dlp --version` exits 0 and `yt-dlp -version` exits 2. One hardcoded flag in the probe hid FFmpeg on every
@@ -2125,27 +2134,48 @@ registered behind it silently never runs.
 
 Manage Server is what opens a server's screens, and it is not what Discord asks for most of what those screens do.
 The dashboard once let a Manage Server manager kick, ban, warn and hand out roles, because the bot has those rights
-and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and three things about it are load-bearing:
+and was doing it for them. `src/api/middleware/reach.ts` holds the rule, and five things about it are load-bearing:
 
 - **An action asks what its command asks.** `requirePermission` sits on the route: Kick Members for a kick, Ban
   Members for a ban or a lifted softban, Moderate Members for warnings, Manage Roles for roles on join, level
-  rewards and the verified role, Manage Nicknames for the bot's nickname, and Administrator for setting a balance,
-  which is what `/give` asks. A new write that does more than change the bot's own settings takes the permission
-  its command already declares.
+  rewards and the verified role, Manage Nicknames for the bot's nickname, and Administrator for setting a balance or
+  a level, which is what `/give` asks — a level hands out its role rewards. A new write that does more than change
+  the bot's own settings takes the permission its command already declares.
+- **So does a read of anything Discord itself would hide.** `/case list` and `/warn list` ask Moderate Members, so
+  `GET /cases` and `GET /warnings` do; a member's page leaves out their warnings without it and their softban
+  without Ban Members (`holdsPermission`), and the dashboard's own records of warnings, timeouts, kicks and bans
+  (`AuditAudience`) are left out of the overview, `/audit` and `/changes` the same way. Discord shows its audit log
+  only to View Audit Log, so `/changes` asks the reader's, not just the bot's, and says which one was missing
+  (`discordWithheld`, `moderationWithheld`).
+- **A channel its person cannot see is named nowhere.** `/channels` keeps such a channel's id with `name: null`, so
+  a setting pointing there reads as "a channel you can't see" rather than as deleted, and no picker offers it
+  (`seenChannels`, `channelLabel`). Channel tools leave it out and answer an id for it exactly as a missing one, and
+  insights leave it off the top channels. `readerSees` is the one rule: discord.js does not drop a member's other
+  permissions in a channel they cannot view, as Discord does, so Manage Channels there is asked beside View Channel.
 - **Every channel and role a write names is checked, whatever the route.** `requireReach` runs on every write under
   `/guilds/:guildId/*` and walks the body for snowflakes under a key naming a channel, category or role: each must
   be in this server, and a channel must be one its person can see — and post in, when the key is singular and the
   bot will post there. Without it a manager could aim this server's welcome text at another server's channel by
   id. Keying on names means a new field is covered with no edit, which is the point; a field whose name does not
-  say channel or role is not.
+  say channel or role is not. It walks no deeper than `MAX_DEPTH`: a body nested ten thousand deep overflowed the
+  stack, and a deeper one is now a 400.
 - **A role the bot hands out sits below its person's own highest role** (`requireGrantable`), as Discord's own
   Manage Roles rule does, unless they own the server — and never above the bot, never managed, never `@everyone`,
   even for the bot's owner. Boost roles, ignore lists and DJ roles are never handed out, so they only need to exist.
 
-A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each of the
-three and `tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody
-in the server without Manage Server and somebody not in it; a route added without its gate fails the build. Both
-were proved to go red.
+A refusal names what was missing and comes before anything is read. `tests/api/reach.test.ts` covers each rule and
+`tests/api/accessWalk.test.ts` builds the real app and asks every route as somebody signed out, somebody in the
+server without Manage Server and somebody not in it; a route added without its gate fails the build. It also asks
+every server route as a manager holding Manage Server and nothing else, and the routes that refuse them must be
+exactly `ASKS_MORE`, so gaining or losing a gate is a line in that list. Every write is sent a body nested ten
+thousand deep and one aimed at `Object.prototype`, and none may crash or pollute anything. The gate list and the
+deep body were proved to go red; nothing merges a body into an object today, so the pollution check has nothing to
+break yet.
+
+**What is deliberately not narrowed.** A manager sees every sticky, scheduled message, giveaway, idea and open ticket
+the bot keeps in the server, including ones in channels they cannot see, because `/sticky-message`, `/schedule`,
+`/giveaway` and `/ticket` show them to Manage Server too, and Manage Server can point the bot anywhere already.
+Narrowing those is a change to the commands as well, not to the dashboard alone.
 
 **The page asks too, and never trusts the guild list it was given.** `RequireGuild` wraps every
 `/guilds/:guildId/*` screen and draws nothing until the overview answers; signed out, not a member or without
@@ -2670,7 +2700,9 @@ cache in front of the bot can never pass the owner's copy on. Somebody else gets
 file, and a faked answer then has no console to draw. A session lookup that fails refuses the same way, so the file never answers
 with a status that sets it apart; and `OwnerRouteError` sends whoever cannot load it back to their servers with the
 owner-only notice, after one reload for a tab left open across a deploy. It is judged on the **resolved** file (`isOwnerChunk`), so no
-spelling of the address reaches it. Two things keep it one chunk: nothing outside `features/owner` may import from it
+spelling of the address reaches it — and a file is served only by the exact name the build holds (`builtFiles`, read
+once at start-up), because a Windows or macOS disk answered `/assets/ownerpage-…js`, a trailing dot or `::$DATA` with
+the owner's file under a name no check recognised. Two things keep it one chunk: nothing outside `features/owner` may import from it
 except `routes.tsx`'s lazy import (`ownerChunk.test.ts` — shared pieces live in `components/primitives`, `lib/` and
 `app/useOwnerAccess.ts`), and `verifyBundle` fails the build if the chunk is missing or anything imports it
 statically. A `manualChunks` rule for it is the wrong tool: Rollup pulls a manual chunk's dependencies into it, which
@@ -2752,7 +2784,9 @@ count exists for — which screens are worth investing in — and nothing else.
 
 **Which servers use the dashboard is a second count, narrower again.** The owner asked for it, and `dashboardview`
 answers it with a server, a day and a number — no user id and no route — so it says how much a server's managers
-use the dashboard and never what they looked at. The browser sends the server beside the pattern (`screenView`),
+use the dashboard and never what they looked at. A pattern must be one of `SCREEN_ROUTES`, so nobody can fill the
+tally with rows of their own, and `useScreenView.test.ts` pins that list to `routes.tsx`. The browser sends the server
+beside the pattern (`screenView`),
 and it counts only when the sender is a member with Manage Server there, checked live like `requireGuild`
 (`managesGuild` in `routes/screens.ts`): anybody signed in can post a guild id, and an owner browsing a server is
 not that server using the dashboard, so the owner is held to the same rule.
@@ -2879,7 +2913,10 @@ and three things about it are load-bearing:
 - **Discord's side is read, never stored.** `readAuditWindow` pages back a hundred entries at a time until it passes
   fourteen days or reaches `CHANGE_LIMITS.maxDiscordEntries`, and the result is kept in memory for a minute so a
   search is not five requests to Discord per keystroke. The page says when the cap cut the list short.
-- **Without View Audit Log the page says so** (`discordReadable`) rather than showing a Discord that looks quiet.
+- **Without View Audit Log the page says so** (`discordReadable`) rather than showing a Discord that looks quiet,
+  and the same goes for the reader's own: Discord shows the log only to View Audit Log, so without it Discord is not
+  asked at all (`discordWithheld`), and without Moderate Members the dashboard's moderation records are left out
+  (`moderationWithheld`).
 - **A Discord entry carries a kind and a verb, not a sentence**, because each surface words it: `discordChange`
   maps discord.js's target and action types, and reads a timeout out of a member update, where Discord hides it.
   The dashboard's `KIND_LABELS` and `VERB_LABELS` are the translated tables.
@@ -2931,7 +2968,8 @@ listener. Five things about it are load-bearing:
   that no longer exists, which is what catches a renamed heading. The Dockerfile copies `README.md`, `AGENTS.md`,
   `docs/` and `.env.example` into the build stage for this, and `.dockerignore` keeps only the pictures out.
 - **Markdown is lexed by marked and drawn as React elements, never as HTML.** A raw HTML token is dropped and its
-  entities decoded; `dangerouslySetInnerHTML` stays banned. A link to a file a docs page shows goes to that page, any
+  entities decoded; `dangerouslySetInnerHTML` stays banned, and a link with any scheme but `http`, `https` or `mailto`
+  is drawn as its text (`SAFE_SCHEME`). A link to a file a docs page shows goes to that page, any
   other repository path to the source browser, and a picture becomes its description with a link. Highlighting is
   lowlight's tree turned into spans, with every colour a token `contrast.test.ts` measures. `marked`, `lowlight` and
   `highlight.js` sit in their own `markdown` chunk, so the first load grew by the routes and the English strings,

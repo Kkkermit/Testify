@@ -57,6 +57,14 @@ describe("resolveAsset", () => {
 		expect(resolveAsset(root, "/%")).toBeNull();
 	});
 
+	/** A disk that ignores case, a trailing dot or a stream name would otherwise hand a file over under a name no check knows. */
+	it("answers only a name the build holds exactly", () => {
+		for (const path of ["/ASSETS/INDEX-ABC123.JS", "/assets/index-abc123.js.", "/assets/index-abc123.js::$DATA"]) {
+			expect(resolveAsset(root, path)).toBeNull();
+		}
+		expect(resolveAsset(root, "/assets/index-abc123.js", new Set(["assets/INDEX-abc123.js"]))).toBeNull();
+	});
+
 	it("returns nothing for a file that is not there", () => {
 		expect(resolveAsset(root, "/assets/nope.js")).toBeNull();
 	});

@@ -1,6 +1,7 @@
 import { DashboardAudits } from "@database/models/dashboardAudit.schema";
 import {
 	auditPage,
+	auditsSince,
 	countAudits,
 	type NewAudit,
 	recentAudits,
@@ -42,6 +43,25 @@ describeWithMongo("the dashboard audit repository", () => {
 		for (let index = 0; index < 5; index += 1) await recordAudit(entry({ summary: `change ${String(index)}` }));
 
 		expect(await recentAudits(GUILD, 2)).toHaveLength(2);
+	});
+
+	/** Moderation is what `/case list` shows only to Moderate Members, so a reader without it never receives a record. */
+	it("leaves moderation out for a reader who may not see it, from every read", async () => {
+		for (const action of ["member.warn", "member.warn.clear", "member.kick", "member.ban", "member.timeout.lift"]) {
+			await recordAudit(entry({ action }));
+		}
+		await recordAudit(entry({ action: "member.money" }));
+		await recordAudit(entry({ action: "member.warnings-export" }));
+		const reader = { moderation: false };
+
+		expect((await recentAudits(GUILD, 20, reader)).map((record) => record.action).sort()).toEqual([
+			"member.money",
+			"member.warnings-export",
+		]);
+		expect(await countAudits(GUILD, reader)).toBe(2);
+		expect(await auditPage(GUILD, 1, 25, reader)).toHaveLength(2);
+		expect(await auditsSince(GUILD, new Date(0), 500, reader)).toHaveLength(2);
+		expect(await countAudits(GUILD)).toBe(7);
 	});
 
 	it("keeps one guild's history out of another's", async () => {

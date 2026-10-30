@@ -36,6 +36,20 @@ describe("the changes page", () => {
 		expect(screen.getByText("Nothing changed in this period.")).toBeInTheDocument();
 	});
 
+	/** Withheld because of the reader, not the bot, so the advice is about the reader's own permission. */
+	it("says which of the reader's permissions each missing record needs", async () => {
+		server.use(
+			http.get(`/api/guilds/${GUILD}/changes`, () =>
+				HttpResponse.json({ ...serverChanges, discordWithheld: true, moderationWithheld: true }),
+			),
+		);
+		renderPage();
+
+		expect(await screen.findByText(/You need the View Audit Log permission/)).toBeInTheDocument();
+		expect(screen.getByText(/You need the Timeout Members permission to see the warnings/)).toBeInTheDocument();
+		expect(screen.queryByText(/Give the bot View Audit Log/)).not.toBeInTheDocument();
+	});
+
 	it("has no automatically detectable accessibility violations", async () => {
 		const { container } = renderPage();
 		await screen.findByText("marcus");
