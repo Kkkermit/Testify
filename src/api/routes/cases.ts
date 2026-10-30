@@ -1,6 +1,8 @@
+import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
+import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseQuery } from "@api/validate";
 import { applyCaseSettings, readCases, readCaseSettings } from "@lib/moderation";
@@ -27,7 +29,7 @@ cases.put("/settings", async (context) => {
 	return context.json(settings);
 });
 
-cases.get("/", async (context) => {
+cases.get("/", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const { page, q, action } = parseQuery(context, caseQuery);
 	return context.json(
 		await readCases(guildOf(context).id, { page, query: q, ...(action === undefined ? {} : { action }) }),

@@ -38,11 +38,22 @@ export async function ask(
 	path: string,
 	body: unknown = {},
 ): Promise<Answer> {
+	return askRaw(app, who, method, path, method === "GET" ? null : JSON.stringify(body));
+}
+
+/** The same, with the body sent as written, for one no serialiser would produce. */
+export async function askRaw(
+	app: ReturnType<typeof createApi>,
+	who: string | null,
+	method: string,
+	path: string,
+	text: string | null,
+): Promise<Answer> {
 	const cookie = [`${CSRF_COOKIE}=${CSRF}`, ...(who === null ? [] : [`${SESSION_COOKIE}=${who}`])].join("; ");
 	const response = await app.request(path, {
 		method,
 		headers: { cookie, "x-csrf-token": CSRF, "content-type": "application/json" },
-		...(method === "GET" ? {} : { body: JSON.stringify(body) }),
+		...(text === null ? {} : { body: text }),
 	});
 	const parsed = (await response.json().catch(() => ({}))) as { error?: { code?: string; message?: string } };
 	return { status: response.status, code: parsed.error?.code, message: parsed.error?.message };

@@ -40,7 +40,9 @@ export interface MemberDetail {
 	roles: { id: string; name: string; colour: string | null }[];
 	economy: { wallet: number; bank: number; total: number; rank: number | null } | null;
 	levels: { level: number; xp: number; rank: number | null } | null;
-	warnings: MemberWarning[];
+	/** Null when the reader lacks Moderate Members, which `/warn list` asks. */
+	warnings: MemberWarning[] | null;
+	/** Null when there is none, or when the reader lacks Ban Members. */
 	softban: MemberSoftban | null;
 	/** Why the person reading may not act on this member, in the words the page shows. Null means they may. */
 	moderationProblem: string | null;

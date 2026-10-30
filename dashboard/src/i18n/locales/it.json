@@ -31,7 +31,7 @@
 		"channelGone": "Un canale che non esiste più",
 		"channelGoneWarning": "Il canale scelto prima è stato eliminato. Scegline un altro.",
 		"cannotPostHere": " — {{bot}} non può scrivere qui",
-		"cannotPostIn": "{{bot}} non può scrivere in #{{channel}}. Dagli «Invia messaggi» lì, o scegli un altro canale.",
+		"cannotPostIn": "{{bot}} non può scrivere in {{channel}}. Dagli «Invia messaggi» lì, o scegli un altro canale.",
 		"aboveBot": "sopra {{bot}}",
 		"first": "Prima",
 		"last": "Ultima",
@@ -39,7 +39,12 @@
 		"tooPowerful": "modera o amministra",
 		"on": "Attivo",
 		"off": "Disattivo",
-		"partOf": "{{part, number}} di {{whole, number}}"
+		"partOf": "{{part, number}} di {{whole, number}}",
+		"deletedChannel": "un canale eliminato",
+		"deletedChannelTitle": "Un canale eliminato",
+		"hiddenChannel": "un canale che non puoi vedere",
+		"hiddenChannelTitle": "Un canale che non puoi vedere",
+		"hiddenChannelWarning": "Non puoi vedere questo canale su Discord, quindi solo chi lo vede può cambiarlo."
 	},
 	"nav": {
 		"servers": "Server",
@@ -384,7 +389,6 @@
 		"detailLobby": "Lobby: {{channel}}",
 		"detailTreasure": "{{amount}} per tesoro",
 		"detailCasino": "{{open, number}} di {{total, number}} giochi aperti",
-		"deletedChannel": "un canale eliminato",
 		"missingManageRoles": "Gestire i ruoli — serve per le ricompense di livello, i ruoli automatici e la verifica",
 		"missingManageMessages": "Gestire i messaggi — serve per il conteggio e i messaggi fissi",
 		"missingViewAuditLog": "Visualizzare il registro attività — serve al registro per indicare chi ha fatto cosa",
@@ -770,9 +774,7 @@
 		"addSticky": "Aggiungi",
 		"countOf": "{{used}} di {{limit}}",
 		"removeIn": "Rimuovi il messaggio fisso in {{channel}}",
-		"cannotPost": "{{bot}} non può scrivere in #{{channel}}, quindi questo messaggio fisso non apparirà mai.",
-		"deletedChannel": "un canale eliminato",
-		"deletedChannelTitle": "Un canale eliminato",
+		"cannotPost": "{{bot}} non può scrivere in {{channel}}, quindi questo messaggio fisso non apparirà mai.",
 		"sinceLast": "Messaggi dall’ultima pubblicazione: {{done}} su {{cap}}"
 	},
 	"autoResponders": {
@@ -1192,7 +1194,8 @@
 		"rolesUnreadable": "Non è stato possibile leggere i suoi ruoli.",
 		"saveRoles": "Salva ruoli",
 		"levelOnXp": "Livello {{level}} con {{xp}} XP.",
-		"levelRange": "Da 0 a {{max, number}}"
+		"levelRange": "Da 0 a {{max, number}}",
+		"warningsHidden": "Ti serve il permesso {{permission}} in questo server per vedere o dare avvertimenti."
 	},
 	"tickets": {
 		"title": "Ticket",
@@ -1943,7 +1946,7 @@
 		"notPosted": "Non pubblicato",
 		"noneBody": "Non c’è ancora niente di pubblicato. Scegli un canale qui sotto.",
 		"goneBody": "Il canale in cui si trovava è stato eliminato. Pubblicalo altrove o rimuovilo.",
-		"postedBody": "Pubblicato in #{{channel}}.",
+		"postedBody": "Pubblicato in {{channel}}.",
 		"remove": "Rimuovi il messaggio",
 		"chooseTitle": "Scegli un canale",
 		"chooseBody": "Pubblicare invia un nuovo messaggio e rimuove il vecchio, così ce n’è sempre uno solo.",
@@ -2073,7 +2076,9 @@
 		"verbPinned": "Fissato",
 		"verbUnpinned": "Rimosso dai fissati",
 		"verbBotAdded": "Bot aggiunto",
-		"verbOther": "Modificato"
+		"verbOther": "Modificato",
+		"discordWithheld": "Ti serve il permesso {{permission}} in questo server per vedere le modifiche fatte su Discord. Sono elencate solo quelle della dashboard.",
+		"moderationWithheld": "Ti serve il permesso {{permission}} per vedere avvertimenti, timeout, espulsioni e ban fatti qui."
 	},
 	"insights": {
 		"title": "Statistiche",

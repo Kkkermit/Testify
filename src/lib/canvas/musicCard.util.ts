@@ -1,5 +1,5 @@
 import { type Image, loadImage } from "@napi-rs/canvas";
-import { createCanvas, roundedRect, type SKRSContext2D } from "@lib/canvas/canvas.util";
+import { createCanvas, fetchPicture, roundedRect, type SKRSContext2D } from "@lib/canvas/canvas.util";
 import { DISPLAY, drawText, measureText, type TextStyle, wrapLines } from "@lib/canvas/text.util";
 import { coverRect } from "@lib/canvas/welcomeCard.util";
 import { formatClock } from "@lib/format/format.util";
@@ -60,16 +60,7 @@ export function musicCardText(track: Track): MusicCardText {
 
 /** The artwork's bytes, or null; a picture is never worth failing the panel over. */
 export async function fetchArtwork(url: string | null): Promise<Buffer | null> {
-	if (url === null) return null;
-
-	try {
-		const response = await fetch(url, { signal: AbortSignal.timeout(ARTWORK_TIMEOUT_MS) });
-		if (!response.ok) return null;
-
-		return Buffer.from(await response.arrayBuffer());
-	} catch {
-		return null;
-	}
+	return url === null ? null : fetchPicture(url, ARTWORK_TIMEOUT_MS);
 }
 
 async function decode(bytes: Buffer | null): Promise<Image | null> {

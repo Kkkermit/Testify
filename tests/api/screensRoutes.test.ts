@@ -95,3 +95,11 @@ it("answers 204 when the count cannot be written, because a navigation must neve
 
 	expect(await view(MANAGER, { route: ROUTE, guildId: GUILD })).toBe(204);
 });
+
+/** Each route is a row in the owner's tally, so free text would let one person write as many rows as they liked. */
+it("refuses a route that is not one of the dashboard's screens", async () => {
+	for (const route of ["/guilds/:guildId/levelling/", "/x".repeat(40), "<script>", "/guilds/900000000000000001"]) {
+		expect(await view(MANAGER, { route })).toBe(400);
+	}
+	expect(recordScreenView).not.toHaveBeenCalled();
+});

@@ -21,6 +21,7 @@ import { hasWork, numberIn } from "@/features/raid-protection/raid.utils";
 import { useRaid, useUpdateRaid } from "@/features/raid-protection/useRaid";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
 /** Holding back brand new accounts, and where staff hear about a spike in joins. */
@@ -41,7 +42,7 @@ export function RaidPage(): React.JSX.Element {
 
 	const settings = raid.data;
 	const postable = postableChannels(channels.data ?? []);
-	const channel = postable.find((entry) => entry.id === settings.alertChannelId)?.name ?? "";
+	const channel = channelLabel(postable, settings.alertChannelId, t);
 	const pingable = (roles.data ?? []).filter((role) => role.id !== guildId && !role.managed);
 	const write = (patch: RaidPatch): void => {
 		save.mutate(patch);

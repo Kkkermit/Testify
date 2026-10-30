@@ -51,7 +51,7 @@ async function mayChange(context: Context<ApiBindings>, userId: string): Promise
 	if (problem !== null) throw forbidden("cannot_moderate", problem);
 }
 
-warnings.get("/", async (context) => {
+warnings.get("/", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const { page, perPage, q } = parseQuery(context, warningsQuery);
 
 	return context.json(

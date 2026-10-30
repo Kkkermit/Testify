@@ -1,4 +1,4 @@
-import { type ScreenView } from "@testify/shared";
+import { isScreenRoute, type ScreenView } from "@testify/shared";
 import { useEffect } from "react";
 import { useLocation, useParams } from "react-router";
 import { api } from "@/lib/api";
@@ -7,16 +7,20 @@ import { api } from "@/lib/api";
 export function useScreenView(): void {
 	const { pathname } = useLocation();
 	const params = useParams();
-	const { route, guildId } = screenView(pathname, params);
+	const view = screenView(pathname, params);
+	const route = view?.route;
+	const guildId = view?.guildId;
 
 	useEffect(() => {
+		if (route === undefined) return;
 		void api.post("/screens", guildId === undefined ? { route } : { route, guildId }).catch(() => undefined);
 	}, [route, guildId]);
 }
 
 /** The server goes alongside the pattern rather than inside it, and only the API decides whether it counts. */
-export function screenView(pathname: string, params: Readonly<Record<string, string | undefined>>): ScreenView {
+export function screenView(pathname: string, params: Readonly<Record<string, string | undefined>>): ScreenView | null {
 	const route = routePattern(pathname, params);
+	if (!isScreenRoute(route)) return null;
 	const guildId = params.guildId;
 
 	return guildId !== undefined && /^\d{17,20}$/.test(guildId) ? { route, guildId } : { route };

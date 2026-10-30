@@ -5,6 +5,7 @@ import { Refusal } from "@/features/levelling/components/Refusal";
 import { TabPanel } from "@/features/levelling/components/TabPanel";
 import { type TabProps } from "@/features/levelling/levelling.types";
 import { useUpdateIgnores } from "@/features/levelling/useLevelling";
+import { seenChannels } from "@/lib/channels";
 
 export function IgnoresTab({
 	guildId,
@@ -24,7 +25,10 @@ export function IgnoresTab({
 		>
 			<CheckList
 				label={t("levelling.ignoredChannels")}
-				items={postableChannels(channels).map((channel) => ({ id: channel.id, label: `#${channel.name}` }))}
+				items={seenChannels(postableChannels(channels)).map((channel) => ({
+					id: channel.id,
+					label: `#${channel.name}`,
+				}))}
 				value={channelIds}
 				max={LEVEL_LIMITS.maxIgnoredChannels}
 				onChange={(ids) => {

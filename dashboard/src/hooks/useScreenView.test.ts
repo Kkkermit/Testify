@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { SCREEN_ROUTES } from "@testify/shared";
 import { routePattern, screenView } from "@/hooks/useScreenView";
 
 /** Only the route pattern is sent, so no server or member id reaches the database. */
@@ -29,5 +32,21 @@ describe("screenView", () => {
 
 	it("leaves out a server id the API would refuse, so the screen is still counted", () => {
 		expect(screenView("/guilds/abc", { guildId: "abc" })).toEqual({ route: "/guilds/:guildId" });
+	});
+});
+
+describe("the screens a view may be counted against", () => {
+	/** A screen missing from the list is refused by the API, so its views would vanish without a word. */
+	it("are exactly the screens the dashboard routes to", () => {
+		const routes = readFileSync(resolve(__dirname, "..", "routes.tsx"), "utf8");
+		const screens = [...routes.matchAll(/path: "([^"]+)"/g)]
+			.map(([, path]) => path ?? "")
+			.filter((path) => /^\/(guilds|commands|help|status|owner|appearance)(\/|$)/.test(path));
+
+		expect([...SCREEN_ROUTES].sort()).toEqual(screens.sort());
+	});
+
+	it("sends nothing for a path that is not a screen", () => {
+		expect(screenView("/guilds/900000000000000001/levelling/", { guildId: "900000000000000001" })).toBeNull();
 	});
 });

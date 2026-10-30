@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Field } from "@/components/form/Field";
 import { SELECT } from "@/components/form/fieldStyles";
 import { Warning } from "@/components/form/Warning";
+import { channelLabel, seenChannels } from "@/lib/channels";
 
 /** Only channels a message can be sent to, and the ones the bot cannot post in say so rather than disappearing. */
 export function postableChannels(channels: ChannelSummary[]): ChannelSummary[] {
@@ -28,8 +29,10 @@ export function ChannelPicker({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const postable = postableChannels(channels);
-	const chosen = postable.find((channel) => channel.id === value);
-	const gone = value !== null && chosen === undefined && channels.length > 0;
+	const offered = seenChannels(postable);
+	const chosen = offered.find((channel) => channel.id === value);
+	const hidden = value !== null && chosen === undefined && postable.some((channel) => channel.id === value);
+	const gone = value !== null && chosen === undefined && !hidden && channels.length > 0;
 
 	return (
 		<Field label={label} {...(hint === undefined ? {} : { hint })}>
@@ -50,12 +53,12 @@ export function ChannelPicker({
 						</option>
 					)
 				)}
-				{gone && (
+				{(gone || hidden) && (
 					<option value={value} disabled>
-						{t("common.channelGone")}
+						{hidden ? t("common.hiddenChannelTitle") : t("common.channelGone")}
 					</option>
 				)}
-				{postable.map((channel) => (
+				{offered.map((channel) => (
 					<option key={channel.id} value={channel.id} disabled={!channel.canSend}>
 						#{channel.name}
 						{channel.canSend ? "" : t("common.cannotPostHere")}
@@ -64,7 +67,10 @@ export function ChannelPicker({
 			</select>
 
 			{gone && <Warning>{t("common.channelGoneWarning")}</Warning>}
-			{chosen?.canSend === false && <Warning>{t("common.cannotPostIn", { channel: chosen.name })}</Warning>}
+			{hidden && <Warning>{t("common.hiddenChannelWarning")}</Warning>}
+			{chosen?.canSend === false && (
+				<Warning>{t("common.cannotPostIn", { channel: channelLabel(channels, chosen.id, t) })}</Warning>
+			)}
 		</Field>
 	);
 }

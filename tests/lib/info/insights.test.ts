@@ -1,4 +1,4 @@
-import { ChannelType, Collection, GuildVerificationLevel, type Guild } from "discord.js";
+import { ChannelType, Collection, type Guild, type GuildMember, GuildVerificationLevel } from "discord.js";
 import { type ServerDay } from "@database/models/insights.schema";
 import { readInsightRows, recentMoves, recordMove, saveActivity } from "@database/repositories/insightsRepository";
 import { activity } from "@lib/info/activity.util";
@@ -90,7 +90,8 @@ describe("readInsights", () => {
 		verificationLevel: GuildVerificationLevel.Medium,
 		channels: {
 			cache: new Collection([
-				["c1", { name: "general", type: ChannelType.GuildText }],
+				["c1", { name: "general", type: ChannelType.GuildText, permissionsFor: () => ({ has: () => true }) }],
+				["c3", { name: "staff", type: ChannelType.GuildText, permissionsFor: () => ({ has: () => false }) }],
 				["c2", { name: "Lounge", type: ChannelType.GuildVoice }],
 			]),
 		},
@@ -115,6 +116,7 @@ describe("readInsights", () => {
 		jest.mocked(readInsightRows).mockResolvedValue({
 			days: [day("2026-09-27", { messages: 6, joins: 2, leaves: 1, hours: { "20": 6 } })],
 			channels: [
+				{ channelId: "c3", messages: 9 },
 				{ channelId: "c1", messages: 5 },
 				{ channelId: "gone", messages: 1 },
 			],
@@ -136,19 +138,27 @@ describe("readInsights", () => {
 
 	/** Somebody who has left can no longer be looked up, so the name stored when they left is what is shown. */
 	it("names somebody who left by the username kept when they went", async () => {
-		const report = await readInsights(guild, 7, NOW);
+		const report = await readInsights(guild, 7, undefined, NOW);
 
 		expect(report.recentLeaves).toEqual([{ userId: "left", name: "marcus", at: NOW.toISOString() }]);
 		expect(report.topMembers[1]).toMatchObject({ name: "left", avatarUrl: null });
 	});
 
+	/** Discord hides a channel from whoever cannot view it, so its name and its count stay off their report. */
+	it("leaves out a channel the reader cannot see, and keeps a deleted one", async () => {
+		const reader = { id: "u1" } as GuildMember;
+
+		expect((await readInsights(guild, 7, reader, NOW)).topChannels.map((row) => row.channelId)).toEqual(["c1", "gone"]);
+		expect((await readInsights(guild, 7, undefined, NOW)).topChannels).toHaveLength(3);
+	});
+
 	it("describes the server from Discord's own cache", async () => {
-		const { server } = await readInsights(guild, 7, NOW);
+		const { server } = await readInsights(guild, 7, undefined, NOW);
 
 		expect(server).toMatchObject({
 			ownerName: "owner",
 			members: 3,
-			textChannels: 1,
+			textChannels: 2,
 			voiceChannels: 1,
 			roles: 1,
 			emojis: 1,

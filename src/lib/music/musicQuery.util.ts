@@ -35,12 +35,21 @@ export function resolveQuery(raw: string): Query | null {
 	return { kind: "search", terms: trimmed, source: "youtube" };
 }
 
-/** Only http(s): a `file:` or `data:` argument must read as search text rather than as something to open. */
+/** Names that only ever lead into the host's own network, which no music service is reached by. */
+const LOCAL_NAME = /(?:^|\.)(?:localhost|local|internal|lan|home\.arpa)$/i;
+
+/** An address literal or a bare name is the host's own network rather than a site, whatever its numbers. */
+function isLocalHost(hostname: string): boolean {
+	return hostname.startsWith("[") || /^[\d.]+$/.test(hostname) || !hostname.includes(".") || LOCAL_NAME.test(hostname);
+}
+
+/** Only http(s) to a public name: anything else reads as search text rather than as somewhere to fetch. */
 function asUrl(value: string): URL | null {
 	if (!/^https?:\/\//i.test(value)) return null;
 
 	try {
-		return new URL(value);
+		const url = new URL(value);
+		return isLocalHost(url.hostname) ? null : url;
 	} catch {
 		return null;
 	}

@@ -95,6 +95,9 @@ export class MusicProblemError extends UserFacingError {
 }
 
 /** What yt-dlp is asked for, given what the person typed. */
+/** yt-dlp's generic extractor fetches whatever address it is handed, so only the site extractors run. */
+const SITE_EXTRACTORS = ["--use-extractors", "default,-generic"];
+
 export function argumentsFor(query: Query, results = SEARCH_RESULTS): string[] {
 	if (query.kind === "url") return [query.url];
 
@@ -203,6 +206,7 @@ export async function resolveTracks(
 		"--no-warnings",
 		"--no-progress",
 		"--ignore-config",
+		...SITE_EXTRACTORS,
 		...(flat ? ["--flat-playlist"] : ["--no-playlist"]),
 		...(skipping ? ["--ignore-no-formats-error"] : []),
 		...argumentsFor(query, results),
@@ -252,6 +256,7 @@ export async function describeTrack(url: string, binaries: MusicBinaries, now = 
 		"--no-warnings",
 		"--no-progress",
 		"--ignore-config",
+		...SITE_EXTRACTORS,
 		"--no-playlist",
 		url,
 	]);
@@ -294,6 +299,7 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 		"--no-warnings",
 		"--no-progress",
 		"--ignore-config",
+		...SITE_EXTRACTORS,
 		"--no-playlist",
 		"--retries",
 		"10",

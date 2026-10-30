@@ -10,12 +10,14 @@ import { grantProblem } from "@lib/roles";
 
 const SNOWFLAKE = /^\d{17,20}$/;
 
+/** Whether the person reading holds a permission in this server; a bot owner, who need not be a member, always does. */
+export function holdsPermission(context: Context<ApiBindings>, ...flags: bigint[]): boolean {
+	return context.get("isOwner") === true || context.get("member")?.permissions.has(flags) === true;
+}
+
 /** The permission the matching Discord command asks for; a bot owner, who need not be a member, is not asked. */
 export function demandPermission(context: Context<ApiBindings>, ...flags: bigint[]): void {
-	if (context.get("isOwner") === true) return;
-
-	const member = context.get("member");
-	if (!member?.permissions.has(flags)) {
+	if (!holdsPermission(context, ...flags)) {
 		const names = new PermissionsBitField(flags).toArray().map(humanisePermission).join(" and ");
 		throw forbidden("missing_permission", `You need the ${names} permission in that server to do that.`);
 	}
@@ -34,12 +36,17 @@ interface Named {
 	roles: string[];
 }
 
+/** Deeper than any form the page sends, and shallow enough that a hostile body cannot exhaust the stack. */
+const MAX_DEPTH = 16;
+
 /** Snowflakes under a key naming a channel or a role, at any depth; a singular channel key is somewhere the bot posts. */
-function collect(value: unknown, key: string, found: Named): Named {
+function collect(value: unknown, key: string, found: Named, depth = 0): Named {
+	if (depth > MAX_DEPTH) throw badRequest("That request is nested too deeply.");
+
 	if (Array.isArray(value)) {
-		for (const item of value) collect(item, key, found);
+		for (const item of value) collect(item, key, found, depth + 1);
 	} else if (typeof value === "object" && value !== null) {
-		for (const [inner, child] of Object.entries(value)) collect(child, inner, found);
+		for (const [inner, child] of Object.entries(value)) collect(child, inner, found, depth + 1);
 	} else if (typeof value === "string" && SNOWFLAKE.test(value)) {
 		if (/channel|category/i.test(key)) {
 			found.channels.push(value);

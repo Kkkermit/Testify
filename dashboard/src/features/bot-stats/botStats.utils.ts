@@ -2,14 +2,14 @@ import { type BotStatsSettings, type ChannelSummary } from "@testify/shared";
 
 /** The rules behind the bot statistics screen, kept out of the page so they can be tested without rendering. */
 
-type Placement = { kind: "none" } | { kind: "posted"; name: string } | { kind: "gone" };
+type Placement = { kind: "none" } | { kind: "posted" } | { kind: "gone" };
 
 /** A channel deleted since the message was posted is named as gone, not left looking configured. */
 export function placementOf(settings: BotStatsSettings, channels: ChannelSummary[]): Placement {
 	if (settings.channelId === null) return { kind: "none" };
 
 	const channel = channels.find((candidate) => candidate.id === settings.channelId);
-	return channel === undefined ? { kind: "gone" } : { kind: "posted", name: channel.name };
+	return channel === undefined ? { kind: "gone" } : { kind: "posted" };
 }
 
 type PostAction = "post" | "move" | "repost";

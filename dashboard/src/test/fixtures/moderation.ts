@@ -141,6 +141,8 @@ export const serverChanges: ServerChangesPage = {
 	page: 1,
 	perPage: 25,
 	discordReadable: true,
+	discordWithheld: false,
+	moderationWithheld: false,
 	truncated: false,
 };
 

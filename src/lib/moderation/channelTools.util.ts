@@ -7,6 +7,7 @@ import {
 	type TextChannel,
 } from "discord.js";
 import { UserFacingError } from "@core/errors";
+import { readerSees } from "@lib/discord/channels.util";
 import { type ChannelToolList, type ToolChannel } from "@testify/shared";
 
 /** Locking a channel and its slowmode: the one path `/lock`, `/unlock`, `/slowmode` and the dashboard share. */
@@ -37,7 +38,10 @@ export async function setSlowmode(channel: GuildBasedChannel, seconds: number, r
 /** No reader means a bot owner, who is held only to what the bot itself can do. */
 export function toolChannel(channel: TextChannel, guild: Guild, reader: GuildMember | undefined): ToolChannel {
 	const me = guild.members.me;
-	const readerMay = reader === undefined || channel.permissionsFor(reader).has(PermissionFlagsBits.ManageChannels);
+	// discord.js does not drop the rest when View Channel is missing, as Discord itself does, so both are asked.
+	const readerMay =
+		reader === undefined ||
+		channel.permissionsFor(reader).has([PermissionFlagsBits.ViewChannel, PermissionFlagsBits.ManageChannels]);
 	const botMay = (flag: bigint): boolean => me !== null && channel.permissionsFor(me).has(flag);
 
 	return {
@@ -51,16 +55,19 @@ export function toolChannel(channel: TextChannel, guild: Guild, reader: GuildMem
 	};
 }
 
-export function textChannelOf(guild: Guild, channelId: string): TextChannel {
+/** A channel its reader cannot see is answered exactly as one that is not there, so a refusal never names it. */
+export function textChannelOf(guild: Guild, channelId: string, reader?: GuildMember): TextChannel {
 	const channel = guild.channels.cache.get(channelId);
-	if (channel?.type !== ChannelType.GuildText) throw new UserFacingError("That is not a text channel in this server.");
+	if (channel?.type !== ChannelType.GuildText || !readerSees(channel, reader)) {
+		throw new UserFacingError("That is not a text channel in this server.");
+	}
 	return channel;
 }
 
 /** In the order Discord lists them: by category, then by position. */
 export function readChannelTools(guild: Guild, reader: GuildMember | undefined): ChannelToolList {
 	const channels = [...guild.channels.cache.values()].filter(
-		(channel): channel is TextChannel => channel.type === ChannelType.GuildText,
+		(channel): channel is TextChannel => channel.type === ChannelType.GuildText && readerSees(channel, reader),
 	);
 	channels.sort((a, b) => (a.parent?.position ?? -1) - (b.parent?.position ?? -1) || a.rawPosition - b.rawPosition);
 
