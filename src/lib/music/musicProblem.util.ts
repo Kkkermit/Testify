@@ -29,6 +29,12 @@ const PATTERNS: { kind: ProblemKind; pattern: RegExp; advice: string }[] = [
 		advice:
 			"YouTube refused the download. An out-of-date yt-dlp is the usual cause — run `npm run music:setup` on the host.",
 	},
+	{
+		// yt-dlp's wording when a fragmented stream's pieces cannot be written, which no retry can change.
+		kind: "disk",
+		pattern: /unable to open for writing|permission denied|no space left on device|read-only file system/i,
+		advice: "The bot could not save the download on its host — the system's temporary folder is full or not writable.",
+	},
 ];
 
 /** The service answered about this one track, which is neither a fault on its side nor worth trying elsewhere. */

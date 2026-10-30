@@ -22,8 +22,8 @@ export const MUSIC_ID = "music";
 export const MUSIC_ADD_ID = "musicadd";
 
 /**
- * How many more tries a track gets after each refusal: a 403 can be an expired address, the rest are YouTube's
- * decision.
+ * How many more tries a track gets after each refusal: a 403 can be an expired address, the rest are the service's
+ * decision or the host's disk.
  */
 export const RETRIES_AFTER: Record<ProblemKind, number> = {
 	forbidden: 1,
@@ -31,6 +31,7 @@ export const RETRIES_AFTER: Record<ProblemKind, number> = {
 	session: 0,
 	unavailable: 0,
 	drm: 0,
+	disk: 0,
 };
 
 export const MUSIC_SOURCES = ["youtube", "soundcloud", "spotify", "other"] as const;

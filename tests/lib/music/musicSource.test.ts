@@ -1,8 +1,9 @@
 import type * as ChildProcesses from "node:child_process";
 import { type ChildProcess, type SpawnOptions } from "node:child_process";
+import type * as Fs from "node:fs";
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { basename, join } from "node:path";
 import {
 	argumentsFor,
 	describeTrack,
@@ -162,6 +163,58 @@ describe("openStream", () => {
 		}
 
 		expect(existsSync(marker)).toBe(true);
+	});
+
+	/**
+	 * Verbatim from production: yt-dlp writes a SoundCloud stream's pieces as `--Frag<n>.part` into its working
+	 * directory, which a container's app folder refused with "[Errno 13] Permission denied", so every track was empty.
+	 */
+	it("gives each download a writable folder of its own, and clears it once the download ends", async () => {
+		const record = join(directory, "folders");
+		const piecewise = fakeBinary(
+			directory,
+			"piecewise-yt-dlp",
+			`const fs = require("node:fs"); fs.writeFileSync("--Frag1.part", "piece"); fs.appendFileSync(${JSON.stringify(record)}, process.cwd() + "\\n"); ${print("OPUS")}`,
+		);
+		const problems: string[] = [];
+		const binaries = { ytDlp: piecewise, ffmpeg: null };
+		const folders = (): string[] => (existsSync(record) ? readFileSync(record, "utf8").trim().split("\n") : []);
+
+		// Two at once, because two servers playing SoundCloud together wrote pieces with the same names.
+		const opened = [1, 2].map(() =>
+			openStream("https://soundcloud.com/a/b", plan, binaries, { onProblem: (reason) => problems.push(reason) }),
+		);
+		try {
+			await waitUntil(() => folders().length === 2, 5_000);
+		} finally {
+			opened.forEach((stream) => stream.close());
+		}
+
+		const [first = "", second = ""] = folders();
+		await waitUntil(() => !existsSync(first) && !existsSync(second), 5_000);
+
+		expect(problems).toEqual([]);
+		expect([basename(first), basename(second)]).toEqual([
+			expect.stringMatching(/^testify-music-/),
+			expect.stringMatching(/^testify-music-/),
+		]);
+		expect(first).not.toBe(second);
+		expect([existsSync(first), existsSync(second)]).toEqual([false, false]);
+	});
+
+	/** A stream that arrives whole writes no pieces, so a host with no writable temporary folder still plays it. */
+	it("still plays a whole stream when no temporary folder can be made", async () => {
+		jest.spyOn(jest.requireActual<typeof Fs>("node:fs"), "mkdtempSync").mockImplementationOnce(() => {
+			throw Object.assign(new Error("EACCES: permission denied, mkdtemp"), { code: "EACCES" });
+		});
+
+		const opened = openStream("https://youtu.be/abc", plan, { ytDlp: fakeYtDlp, ffmpeg: null });
+		try {
+			const chunk = await new Promise<Buffer>((resolve) => opened.stream.once("data", resolve));
+			expect(chunk.toString()).toBe("OPUSBYTES");
+		} finally {
+			opened.close();
+		}
 	});
 
 	/** A track that needs a transcoder is refused by name when FFmpeg is missing. */

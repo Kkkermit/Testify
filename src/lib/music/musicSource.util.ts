@@ -1,4 +1,8 @@
 import { spawn } from "node:child_process";
+import { mkdtempSync } from "node:fs";
+import { rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { PassThrough, type Readable } from "node:stream";
 import { toError, UserFacingError } from "@core/errors";
 import { observe } from "@lib/infra/serviceHealth.util";
@@ -306,6 +310,19 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 }
 
 /**
+ * yt-dlp writes a fragmented stream's pieces to `--Frag<n>.part` in its working directory whatever `--paths` says,
+ * so each download gets a writable folder, and two downloads at once never share one.
+ */
+function scratchFolder(): string | undefined {
+	try {
+		return mkdtempSync(join(tmpdir(), "testify-music-"));
+	} catch {
+		// Without one, a stream that arrives whole still plays from the bot's own folder.
+		return undefined;
+	}
+}
+
+/**
  * Reads `source` into a buffer the player drains at its own pace; `pipe` does not carry errors, so they are forwarded
  * by hand.
  */
@@ -360,7 +377,9 @@ export function openStream(
 ): OpenStream {
 	if (binaries.ytDlp === null) throw new UserFacingError("Music needs `yt-dlp`, which is not installed.");
 
+	const scratch = scratchFolder();
 	const source = spawn(binaries.ytDlp, ytDlpStreamArgs(plan.formatId, url), {
+		cwd: scratch,
 		stdio: ["ignore", "pipe", "pipe"],
 		windowsHide: true,
 	});
@@ -369,6 +388,8 @@ export function openStream(
 	source.stderr.setEncoding("utf8");
 	source.stderr.on("data", (chunk: string) => (complaint = `${complaint}${chunk}`.slice(-PROBLEM_TAIL)));
 	source.once("close", (code) => {
+		// A killed download leaves its pieces behind.
+		if (scratch !== undefined) void rm(scratch, { recursive: true, force: true }).catch(() => undefined);
 		if (code !== 0 && code !== null)
 			options.onProblem?.(complaint.trim() === "" ? `yt-dlp exited ${String(code)}` : complaint.trim());
 	});

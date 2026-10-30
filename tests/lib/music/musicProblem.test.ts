@@ -33,6 +33,15 @@ describe("classifyProblem", () => {
 		expect(aboutTheTrack(classifyProblem("HTTP Error 403: Forbidden"))).toBe(false);
 	});
 
+	/** Verbatim from production: a disk the bot cannot write to fails every try alike, so it is named and not retried. */
+	it("reads a download that could not be written as the host's disk, not the track", () => {
+		const problem = classifyProblem("ERROR: unable to open for writing: [Errno 13] Permission denied: '--Frag18.part'");
+
+		expect(problem?.kind).toBe("disk");
+		expect(aboutTheTrack(problem)).toBe(false);
+		expect(classifyProblem("ERROR: unable to write data: [Errno 28] No space left on device")?.kind).toBe("disk");
+	});
+
 	/** Anything unrecognised keeps the ordinary retries rather than being given up on early. */
 	it("says nothing about a failure it does not recognise", () => {
 		expect(classifyProblem("yt-dlp exited 1")).toBeNull();
@@ -42,6 +51,6 @@ describe("classifyProblem", () => {
 describe("RETRIES_AFTER", () => {
 	/** A 403 is sometimes an address that expired between asking and downloading, so it earns exactly one. */
 	it("gives a 403 one more go and the others none", () => {
-		expect(RETRIES_AFTER).toEqual({ forbidden: 1, "bot-check": 0, session: 0, unavailable: 0, drm: 0 });
+		expect(RETRIES_AFTER).toEqual({ forbidden: 1, "bot-check": 0, session: 0, unavailable: 0, drm: 0, disk: 0 });
 	});
 });
