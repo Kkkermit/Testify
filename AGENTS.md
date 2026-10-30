@@ -957,6 +957,10 @@ What good tests here look like:
   MongoDB reported **41 passing tests that asserted nothing**, and a mutation replacing an atomic `$inc` with
   `$set` survived all of them. `tests/core/conventions.test.ts` refuses the early-return pattern, and CI sets
   `REQUIRE_DB_TESTS=1` so a runner that cannot start a database fails rather than going quietly green.
+- **A worker's database outlives each suite.** Every test starts on emptied collections, but the database is not
+  dropped between suites, because dropping it made the next suite build every collection and index again: 464
+  collection creations a run instead of 137, and on the Windows runner five suites once timed out together while
+  building them. The setup hook has 60 seconds, since a worker's first suite still builds the lot.
 
 **Mutation is how you find a test that cannot fail.** Coverage says a line ran, never that anything checked it.
 Changing one operator and re-running the suite that should care is the only cheap proof: it is what found the
