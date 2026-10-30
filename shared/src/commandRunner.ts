@@ -5,6 +5,9 @@ import { snowflake } from "./schemas";
 
 export const RUN_LIMITS = { maxStringArg: 2_000, maxArgs: 25 } as const;
 
+/** A part of a reply that only works inside Discord, named by kind so each surface words it. */
+export type DroppedOutput = "panel" | "buttons" | "attachment";
+
 /** What a command replied with, flattened to something a browser can draw. */
 export type RunOutput =
 	| { kind: "text"; content: string }
@@ -17,7 +20,7 @@ export type RunOutput =
 			footer: string | null;
 	  }
 	/** Something that only works inside Discord. Named rather than silently dropped. */
-	| { kind: "dropped"; what: string };
+	| { kind: "dropped"; what: DroppedOutput };
 
 export interface CommandRunResult {
 	command: string;

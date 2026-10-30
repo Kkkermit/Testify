@@ -61,6 +61,29 @@ describe.each(Object.entries(DICTIONARIES))("the %s dictionary", (_name, diction
 	});
 });
 
+/**
+ * Russian picks `_few` for 1,234 and French `_many` for a round million, and i18next answers a form a dictionary lacks
+ * from English rather than from `_other`.
+ */
+describe.each(Object.entries({ en, ...DICTIONARIES }))("the %s plurals", (locale, dictionary) => {
+	it("spell every form the language chooses between", () => {
+		const forms = new Intl.PluralRules(locale).resolvedOptions().pluralCategories;
+		const spelled = new Map<string, Set<string>>();
+		for (const key of paths(dictionary)) {
+			const form = PLURAL_SUFFIX.exec(key)?.[0].slice(1);
+			if (form === undefined) continue;
+
+			const message = key.replace(PLURAL_SUFFIX, "");
+			spelled.set(message, (spelled.get(message) ?? new Set()).add(form));
+		}
+
+		const short = [...spelled].flatMap(([message, have]) =>
+			forms.filter((form) => !have.has(form)).map((form) => `${message}_${form}`),
+		);
+		expect(short).toEqual([]);
+	});
+});
+
 function lookup(node: Json, path: string): string | undefined {
 	let current: string | Json | undefined = node;
 	for (const part of path.split(".")) {

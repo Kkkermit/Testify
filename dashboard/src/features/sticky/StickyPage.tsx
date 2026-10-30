@@ -129,7 +129,7 @@ export function StickyPage(): React.JSX.Element {
 						className={cn(FIELD, "resize-y")}
 					/>
 					<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-						{message.length} of {STICKY_LIMITS.maxMessage}
+						{t("common.partOf", { part: message.length, whole: STICKY_LIMITS.maxMessage })}
 					</span>
 				</Field>
 

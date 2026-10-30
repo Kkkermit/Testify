@@ -4,6 +4,7 @@ import { Link } from "react-router";
 import { Avatar, Badge, CELL, CELL_NUM, DataTable, TH, TH_NUM, WIDE_ONLY } from "@/components/primitives";
 import { columnsFor, opensMember } from "@/features/members/members.utils";
 import { cn } from "@/lib/cn";
+import { formatNumber } from "@/lib/intl";
 
 export function BoardTable({
 	data,
@@ -60,8 +61,8 @@ export function BoardTable({
 							</span>
 						)}
 					</th>
-					<td className={CELL_NUM}>{row.primary.toLocaleString()}</td>
-					<td className={cn(CELL_NUM, WIDE_ONLY, "text-muted-foreground")}>{row.secondary.toLocaleString()}</td>
+					<td className={CELL_NUM}>{formatNumber(row.primary)}</td>
+					<td className={cn(CELL_NUM, WIDE_ONLY, "text-muted-foreground")}>{formatNumber(row.secondary)}</td>
 				</tr>
 			))}
 		</DataTable>

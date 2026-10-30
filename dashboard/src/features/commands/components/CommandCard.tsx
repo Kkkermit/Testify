@@ -6,6 +6,7 @@ import { Badge, Card, DividedList, Tooltip } from "@/components/primitives";
 import { featureLook } from "@/config/features";
 import { type CommandPlace } from "@/features/commands/commands.utils";
 import { CommandSwitch } from "@/features/commands/components/CommandSwitch";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { cn } from "@/lib/cn";
 
 export function CommandCard({
@@ -38,7 +39,7 @@ export function CommandCard({
 					<div className="flex flex-wrap items-center gap-2">
 						<code className="font-mono text-sm font-medium">/{command.name}</code>
 						{command.aliases.map((alias) => (
-							<Tooltip key={alias} label={`Also answers to ${prefix}${alias}`}>
+							<Tooltip key={alias} label={t("commands.alsoAnswers", { alias: `${prefix}${alias}` })}>
 								<code
 									tabIndex={0}
 									className="bg-muted text-muted-foreground rounded-chip px-2 py-0.5 font-mono text-xs"
@@ -82,7 +83,9 @@ export function CommandCard({
 			{command.permissions.length > 0 && (
 				<p className="text-muted-foreground flex items-center gap-2 text-xs">
 					<Shield size={12} aria-hidden="true" className="shrink-0" />
-					Needs {command.permissions.join(", ")}
+					{t("commands.needs", {
+						permissions: command.permissions.map((flag) => permissionLabel(flag, t)).join(", "),
+					})}
 				</p>
 			)}
 

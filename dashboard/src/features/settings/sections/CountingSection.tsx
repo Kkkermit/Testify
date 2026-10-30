@@ -8,6 +8,7 @@ import { Section } from "@/features/settings/components/Section";
 import { countCapProblem, countProgress } from "@/features/settings/settings.utils";
 import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
+import { formatNumber } from "@/lib/intl";
 
 export function CountingSection({
 	guildId,
@@ -85,7 +86,7 @@ export function CountingSection({
 						<p className="text-muted-foreground text-sm">
 							<Trans
 								i18nKey="settings.currentlyAt"
-								values={{ count: value.count.toLocaleString() }}
+								values={{ count: formatNumber(value.count) }}
 								components={{ count: <span className="text-foreground font-mono" /> }}
 							/>
 						</p>

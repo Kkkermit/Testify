@@ -38,9 +38,20 @@ export function RuleRow({
 				</p>
 			</div>
 
-			<Toggle label={`Enable ${rule.name}`} hideLabel checked={rule.enabled} disabled={busy} onChange={onToggle} />
+			<Toggle
+				label={t("automod.enableRule", { name: rule.name })}
+				hideLabel
+				checked={rule.enabled}
+				disabled={busy}
+				onChange={onToggle}
+			/>
 
-			<Button variant="ghost" aria-label={`Remove ${rule.name}`} disabled={busy} onClick={onRemove}>
+			<Button
+				variant="ghost"
+				aria-label={t("automod.removeRule", { name: rule.name })}
+				disabled={busy}
+				onClick={onRemove}
+			>
 				<Trash2 size={16} aria-hidden="true" />
 			</Button>
 		</li>

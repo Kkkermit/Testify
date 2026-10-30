@@ -78,13 +78,52 @@ export interface SetupStatus {
 	redirectUri: string;
 }
 
+/** What the overview counts for a feature, so each surface words the noun and its plural itself. */
+export type FeatureCount =
+	| "events"
+	| "birthdays"
+	| "verified"
+	| "roles"
+	| "menus"
+	| "channels"
+	| "responders"
+	| "messages"
+	| "ticketsOpen"
+	| "ticketsSold";
+
+/** A feature's one-line summary as data rather than English, so the page can say it in its reader's language. */
+export type FeatureDetail =
+	| { kind: "posting"; channelId: string }
+	| { kind: "count"; what: FeatureCount; count: number }
+	| { kind: "levelling"; rewards: number; boosts: number }
+	| { kind: "holding"; days: number }
+	| { kind: "watching" }
+	| { kind: "bypass"; permission: string }
+	| { kind: "countingAt"; count: number }
+	| { kind: "starboard"; threshold: number; channelId: string }
+	| { kind: "lobby"; channelId: string }
+	| { kind: "treasure"; min: number; max: number }
+	| { kind: "casino"; open: number; total: number };
+
 export interface FeatureStatus {
 	key: string;
+	/** The bot's own name for it, for a page that does not know this feature yet. */
 	label: string;
 	enabled: boolean;
-	/** A one-line summary of the configuration, or null when there is nothing set up yet. */
-	detail: string | null;
+	/** Null when there is nothing set up yet. */
+	detail: FeatureDetail | null;
 }
+
+/** The permissions the overview warns about, each needed by a feature that otherwise quietly does nothing. */
+export const WATCHED_PERMISSIONS = [
+	"ManageRoles",
+	"ManageMessages",
+	"ViewAuditLog",
+	"ManageChannels",
+	"AttachFiles",
+] as const;
+
+export type WatchedPermission = (typeof WATCHED_PERMISSIONS)[number];
 
 export interface AuditEntrySummary {
 	actorTag: string;
@@ -101,8 +140,8 @@ export interface GuildOverview {
 	channelCount: number;
 	roleCount: number;
 	features: FeatureStatus[];
-	/** Permissions the bot is missing that some configured feature needs, in a form fit to show a person. */
-	missingPermissions: string[];
+	/** Permissions the bot is missing that some feature needs, by Discord's name for each. */
+	missingPermissions: WatchedPermission[];
 	recentChanges: AuditEntrySummary[];
 }
 

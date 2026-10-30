@@ -543,8 +543,8 @@ The canvas is `aria-hidden` and `pointer-events-none`. It carries no information
 
 ## 13. Copy and languages
 
-Every string the dashboard renders comes from `src/i18n/locales/*.json`. English is the source; Spanish, German
-and French are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
+Every string the dashboard renders comes from `src/i18n/locales/*.json`. English is the source; Spanish, German,
+French, Italian and Russian are translated from it. Keys are typed, so a mistyped one is a compile error rather than a screen
 rendering `nav.serrvers`.
 
 Writing a screen:
@@ -555,7 +555,7 @@ const { t } = useTranslation();
 <PageHeader title={t("levelling.title")} subtitle={t("levelling.subtitle")} />
 ```
 
-Four rules, each with a test behind it:
+Six rules, each with a test behind it:
 
 1. **A module-level map holds keys, not text.** It is built once, before a locale exists, so `t` cannot be
    called there. Type the table `Record<X, TranslationKey>` and translate where it is read.
@@ -565,6 +565,11 @@ Four rules, each with a test behind it:
    sees, and its tests keep asserting on prose.
 4. **Counts use `{{count, number}}`**, and plurals are `_one` / `_other` keys — some languages need `_many`,
    which is why the parity test compares messages rather than raw keys.
+5. **No English in a component.** `tests/core/untranslated.test.ts` fails on JSX text, a read-aloud attribute or
+   a row's `label` written in English, so a string added in a hurry is caught before a German reader meets it.
+6. **Dates, numbers and units go through `lib/datetime.ts` and `lib/intl.ts`**, never `toLocaleString()`, so
+   they follow the language chosen rather than the browser's region. The server sends data and codes, not
+   sentences, and the page words them — a feature's detail, a missing permission, a licence it does not know.
 
 **Adding a language** — three steps, and the tests name anything missed:
 
@@ -573,12 +578,16 @@ cp src/i18n/locales/en.json src/i18n/locales/it.json   # then translate the valu
 ```
 
 then add `"it"` to `LOCALES` and its endonym to `LOCALE_NAMES` in `src/i18n/index.ts`. `locales.test.ts` fails
-on any key English has that the new file does not, on a stale key left behind by a rename, and on a changed
-`{{placeholder}}`.
+on any key English has that the new file does not, on a stale key left behind by a rename, on a changed
+`{{placeholder}}`, and on a plural missing a form the language picks — `Intl.PluralRules` says which forms those are.
+
+**The language is chosen anywhere.** The site's header (from 640px) and the sign-in screen carry `LanguageSelect`,
+and the Appearance screen the flag picker; all three write the same `testify:locale`, so a choice made on the landing
+page is the one the dashboard opens in. Appearance needs no account, and every site page links it.
 
 **What is deliberately not translated:** anything a server has typed itself — a welcome message, a ticket panel,
-a role name — and the bot's own replies inside Discord. This is the dashboard only, and the language picker
-says so.
+a role name — the bot's own replies inside Discord, and the repository's own Markdown on the docs pages, which say
+so in any other language. The Appearance screen says the bot's replies are not.
 
 ## 14. Navigation
 

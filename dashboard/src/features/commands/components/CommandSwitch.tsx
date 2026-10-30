@@ -32,7 +32,7 @@ export function CommandSwitch({
 			title={t(DESCRIBES[availability])}
 			className={cn(INLINE_TARGET, "shrink-0 gap-2", fixed ? "cursor-not-allowed opacity-60" : "cursor-pointer")}
 		>
-			<span className="text-muted-foreground text-xs">{on ? "On" : "Off"}</span>
+			<span className="text-muted-foreground text-xs">{on ? t("common.on") : t("common.off")}</span>
 			<input
 				type="checkbox"
 				role="switch"

@@ -1,9 +1,11 @@
+import { type WatchedPermission } from "@testify/shared";
 import { AlertTriangle } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card } from "@/components/primitives";
+import { MISSING_LABELS } from "@/features/guild-overview/featureStatus.labels";
 
 /** Configured features that will quietly do nothing are worth more than a badge, so this sits above the grid. */
-export function MissingPermissions({ permissions }: { permissions: string[] }): React.JSX.Element | null {
+export function MissingPermissions({ permissions }: { permissions: WatchedPermission[] }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	if (permissions.length === 0) return null;
 
@@ -16,7 +18,7 @@ export function MissingPermissions({ permissions }: { permissions: string[] }): 
 			<p className="text-muted-foreground text-sm">{t("overview.missingBody")}</p>
 			<ul className="flex list-disc flex-col gap-1 pl-5 text-sm">
 				{permissions.map((permission) => (
-					<li key={permission}>{permission}</li>
+					<li key={permission}>{t(MISSING_LABELS[permission])}</li>
 				))}
 			</ul>
 		</Card>

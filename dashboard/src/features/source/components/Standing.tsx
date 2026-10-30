@@ -84,7 +84,11 @@ export function Standing(): React.JSX.Element {
 							)}
 						</span>
 						<span>{t("source.reading", { ref: repo.ref })}</span>
-						{repo.license !== null && <span>{t("source.license", { name: repo.license })}</span>}
+						{repo.license !== null && (
+							<span>
+								{repo.license.custom ? t("source.licenseOwn") : t("source.license", { name: repo.license.name })}
+							</span>
+						)}
 					</Card>
 				</>
 			)}

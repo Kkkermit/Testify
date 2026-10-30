@@ -75,7 +75,7 @@ export function LogsTab({
 					}}
 				>
 					{paused ? <Play size={15} aria-hidden="true" /> : <Pause size={15} aria-hidden="true" />}
-					{paused ? "Resume" : "Pause"}
+					{paused ? t("owner.logsResume") : t("owner.logsPause")}
 				</Button>
 			</Card>
 

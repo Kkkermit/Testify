@@ -1,13 +1,16 @@
 import { errorRate, type AnalyticsWindow, type GuildUsageRow } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Avatar, Card, Figure, SegmentedControl, Skeleton, UsageBars } from "@/components/primitives";
+import { categoryLabel } from "@/features/commands/categories.labels";
 import { GuildUsage } from "@/features/owner/components/GuildUsage";
 import { UsageChart } from "@/features/owner/components/UsageChart";
 import { UsagePanel as Panel } from "@/features/owner/components/UsagePanel";
 import { formatMs, percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } from "@/features/owner/owner.utils";
 import { useUsage } from "@/features/owner/useOwner";
+import { formatNumber } from "@/lib/intl";
 
 /** What the bot is actually used for, or, with `?guild=`, who in one server ran what. */
 export function UsageTab({
@@ -49,26 +52,29 @@ function FleetUsage({
 		<div className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<p className="text-muted-foreground text-sm">
-					{report.runs.toLocaleString()} commands run in the last {days} days, {percent(report.failures, report.runs)}{" "}
-					of them failing.
+					{t("owner.usageSummary", {
+						count: report.runs,
+						days,
+						failing: percent(report.failures, report.runs),
+					})}
 				</p>
 				<SegmentedControl label={t("owner.window")} segments={WINDOWS} value={days} onChange={onWindow} />
 			</div>
 
 			<Card padding="none" className="divide-border divide-y">
 				<dl className="grid grid-cols-2 divide-x divide-y sm:grid-cols-4 sm:divide-y-0 [&>*]:border-border">
-					<Figure className="px-6 py-4" label={t("owner.commandsRun")} value={report.runs.toLocaleString()} />
+					<Figure className="px-6 py-4" label={t("owner.commandsRun")} value={formatNumber(report.runs)} />
 					<Figure
 						className="px-6 py-4"
 						label={t("owner.failed")}
 						value={percent(report.failures, report.runs)}
 						{...(errorRate(report) > 0.05 ? { tone: "text-destructive-text" } : {})}
 					/>
-					<Figure className="px-6 py-4" label={t("owner.activeServers")} value={report.activeGuilds.toLocaleString()} />
+					<Figure className="px-6 py-4" label={t("owner.activeServers")} value={formatNumber(report.activeGuilds)} />
 					<Figure
 						className="px-6 py-4"
 						label={t("owner.commandsUsed")}
-						value={`${String(report.commandsUsed)} of ${String(report.commandsTotal)}`}
+						value={t("common.partOf", { part: report.commandsUsed, whole: report.commandsTotal })}
 					/>
 				</dl>
 
@@ -85,7 +91,10 @@ function FleetUsage({
 						rows={report.mostUsed.map((row) => ({
 							id: row.command,
 							label: `/${row.command}`,
-							sub: row.failures > 0 ? `${row.category} · ${String(row.failures)} failed` : row.category,
+							sub:
+								row.failures > 0
+									? t("owner.categoryFailed", { category: categoryLabel(row.category, t), failed: row.failures })
+									: categoryLabel(row.category, t),
 							count: row.count,
 						}))}
 					/>
@@ -98,7 +107,7 @@ function FleetUsage({
 						rows={report.leastUsed.map((row) => ({
 							id: row.command,
 							label: `/${row.command}`,
-							sub: row.category,
+							sub: categoryLabel(row.category, t),
 							count: row.count,
 						}))}
 					/>
@@ -108,7 +117,7 @@ function FleetUsage({
 					<UsageBars
 						tint="bg-feature-tickets/25"
 						empty={t("owner.noServerRun")}
-						rows={report.busiestGuilds.map((row) => guildBar(row, params))}
+						rows={report.busiestGuilds.map((row) => guildBar(row, params, t))}
 					/>
 				</Panel>
 
@@ -116,7 +125,7 @@ function FleetUsage({
 					<UsageBars
 						tint="bg-feature-economy/25"
 						empty={t("owner.noServerDashboard")}
-						rows={report.dashboardGuilds.map((row) => guildBar(row, params))}
+						rows={report.dashboardGuilds.map((row) => guildBar(row, params, t))}
 					/>
 				</Panel>
 
@@ -164,7 +173,11 @@ function FleetUsage({
 }
 
 /** A server's row opens its own usage, keeping the window it was found in. */
-function guildBar(row: GuildUsageRow, params: URLSearchParams): React.ComponentProps<typeof UsageBars>["rows"][number] {
+function guildBar(
+	row: GuildUsageRow,
+	params: URLSearchParams,
+	t: TFunction,
+): React.ComponentProps<typeof UsageBars>["rows"][number] {
 	return {
 		id: row.guildId,
 		label: (
@@ -176,7 +189,7 @@ function guildBar(row: GuildUsageRow, params: URLSearchParams): React.ComponentP
 				<span className="truncate">{row.name}</span>
 			</Link>
 		),
-		sub: `${row.memberCount.toLocaleString()} members`,
+		sub: t("common.memberCount", { count: row.memberCount }),
 		count: row.count,
 	};
 }

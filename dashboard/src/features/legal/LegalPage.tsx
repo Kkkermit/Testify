@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { BackLink, Card, CARD_HEADING, DataList, PageHeader, PublicPage } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { type LegalDocument, type LegalSection, sectionId } from "@/features/legal/legal.content";
+import { TrailBack } from "@/features/site/components/TrailBack";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
@@ -15,7 +16,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 
 	return (
 		<PublicPage>
-			<BackLink to="/guilds">{t("legal.backToDashboard")}</BackLink>
+			<TrailBack fallback={<BackLink to="/guilds">{t("legal.backToDashboard")}</BackLink>} />
 
 			<div className="flex flex-col gap-2">
 				<PageHeader title={t(document.title)} subtitle={t(document.summary)} />

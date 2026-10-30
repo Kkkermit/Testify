@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Card, DataList } from "@/components/primitives";
 import { VERIFICATION_LABELS } from "@/features/insights/insights.utils";
 import { shortDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 export function ServerFactsCard({ server }: { server: ServerFacts }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -25,7 +26,7 @@ export function ServerFactsCard({ server }: { server: ServerFacts }): React.JSX.
 							categories: server.categories,
 						}),
 					},
-					{ label: t("insights.roles"), value: server.roles.toLocaleString() },
+					{ label: t("insights.roles"), value: formatNumber(server.roles) },
 					{
 						label: t("insights.emojis"),
 						value: t("insights.emojisValue", { emojis: server.emojis, stickers: server.stickers }),

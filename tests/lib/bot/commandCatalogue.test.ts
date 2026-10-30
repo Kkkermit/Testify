@@ -15,11 +15,11 @@ function aCommand(overrides: Partial<Command> = {}): Command {
 }
 
 describe("summariseCommand", () => {
-	/** `humanisePermission` lowercases, so a permission reads as part of a sentence. */
-	it("resolves permission bits to readable names", () => {
+	/** Discord's flag names, so each surface can word a permission in its own language. */
+	it("resolves permission bits to their flag names", () => {
 		const summary = summariseCommand(aCommand({ permissions: [PermissionFlagsBits.BanMembers] }));
 
-		expect(summary.permissions).toEqual(["ban members"]);
+		expect(summary.permissions).toEqual(["BanMembers"]);
 	});
 
 	it("carries subcommands with their own options and prefix aliases", () => {

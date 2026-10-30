@@ -29,7 +29,7 @@ describe("the rest of the tree's rules", () => {
 
 	it("counts lines without a phantom one after the last newline, and sizes in the steps a file manager uses", () => {
 		expect([lineCount(""), lineCount("a"), lineCount("a\nb\n")]).toEqual([0, 1, 2]);
-		expect([formatBytes(512), formatBytes(2_048), formatBytes(3 * 1024 * 1024)]).toEqual(["512 B", "2.0 KB", "3.0 MB"]);
+		expect([formatBytes(512), formatBytes(2_048), formatBytes(3 * 1024 * 1024)]).toEqual(["512 bytes", "2 kB", "3 MB"]);
 	});
 
 	/** A path is part of the address, so a space or a `#` in a file name cannot end it early. */

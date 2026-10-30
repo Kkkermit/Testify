@@ -5,6 +5,7 @@ import { PageHeader, SegmentedControl } from "@/components/primitives";
 import { AccentSwatch } from "@/features/appearance/components/AccentSwatch";
 import { AppearanceCard } from "@/features/appearance/components/AppearanceCard";
 import { ThemePreview } from "@/features/appearance/components/ThemePreview";
+import { TrailBack } from "@/features/site/components/TrailBack";
 import { ACCENTS, useAccent, type Accent } from "@/hooks/useAccent";
 import { useHashTarget } from "@/hooks/useHashTarget";
 import { MOTIONS, useMotion, type Motion } from "@/hooks/useMotion";
@@ -50,6 +51,7 @@ export function AppearancePage(): React.JSX.Element {
 
 	return (
 		<div className="flex flex-col gap-6">
+			<TrailBack />
 			<PageHeader title={t("appearance.title")} subtitle={t("appearance.subtitle")} />
 
 			<AppearanceCard id="theme" title={t("appearance.theme")} describes={t("appearance.themeDescribes")}>

@@ -1,5 +1,6 @@
 import { TREASURE_LIMITS, type TreasureSettings, treasureProblem } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { formatNumber } from "@/lib/intl";
 import { problemText } from "@/lib/problemText";
 
 const MINUTE = 60_000;
@@ -67,15 +68,13 @@ export function isDirty(draft: Draft, settings: TreasureSettings): boolean {
 }
 
 /** How often a drop can actually appear, which is the pair of numbers read together rather than separately. */
-export function describeRate(draft: Draft): string {
-	const messages =
-		draft.minMessages === draft.maxMessages
-			? `every ${String(draft.minMessages)} messages`
-			: `every ${String(draft.minMessages)}–${String(draft.maxMessages)} messages`;
-	const amount =
-		draft.minAmount === draft.maxAmount
-			? String(draft.minAmount)
-			: `${String(draft.minAmount)}–${String(draft.maxAmount)}`;
+export function describeRate(draft: Draft, t: TFunction): string {
+	const range = (low: number, high: number): string =>
+		low === high ? formatNumber(low) : `${formatNumber(low)}–${formatNumber(high)}`;
 
-	return `A drop of ${amount} ${messages}, at most once every ${String(draft.cooldownMinutes)} minutes.`;
+	return t("treasure.rate", {
+		amount: range(draft.minAmount, draft.maxAmount),
+		messages: range(draft.minMessages, draft.maxMessages),
+		count: draft.cooldownMinutes,
+	});
 }

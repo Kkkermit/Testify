@@ -18,6 +18,7 @@ import { type TranslationKey } from "@/i18n";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
+import { formatUnit } from "@/lib/intl";
 import { sanitiseInput } from "@/lib/sanitise";
 
 const SOURCE_LABELS: Record<MusicSourceChoice, { label: TranslationKey; hint: TranslationKey }> = {
@@ -113,7 +114,7 @@ export function ControlTab(): React.JSX.Element {
 					<div className="flex gap-2">
 						<dt>{t("owner.gatewayPing")}</dt>
 						<dd className="text-foreground font-mono tabular-nums">
-							{state.pingMs === null ? "—" : `${String(state.pingMs)} ms`}
+							{state.pingMs === null ? "—" : formatUnit(state.pingMs, "millisecond")}
 						</dd>
 					</div>
 					{state.since !== null && (

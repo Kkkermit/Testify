@@ -20,7 +20,7 @@ export const standing: RepositoryStanding = {
 	forks: 57,
 	watchers: 3,
 	openIssues: 1,
-	license: "Other",
+	license: { name: "Other", custom: true },
 	defaultBranch: "main",
 	pushedAt: "2026-10-29T15:09:01Z",
 	latestRelease: {

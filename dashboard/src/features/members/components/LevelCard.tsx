@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card, CARD_HEADING } from "@/components/primitives";
+import { formatNumber } from "@/lib/intl";
 
 export function LevelCard({
 	detail,
@@ -31,12 +32,16 @@ export function LevelCard({
 				<p className="text-muted-foreground text-sm">
 					{detail.levels === null
 						? t("members.noXpYet")
-						: `Level ${String(detail.levels.level)} on ${detail.levels.xp.toLocaleString()} XP.`}
+						: t("members.levelOnXp", { level: detail.levels.level, xp: formatNumber(detail.levels.xp) })}
 				</p>
 			</div>
 
 			<div className="grid gap-4 sm:grid-cols-2">
-				<Field label={t("members.setLevel")} hint={`0 to ${String(MEMBER_LIMITS.maxLevel)}`} htmlFor="member-level">
+				<Field
+					label={t("members.setLevel")}
+					hint={t("members.levelRange", { max: MEMBER_LIMITS.maxLevel })}
+					htmlFor="member-level"
+				>
 					<input
 						id="member-level"
 						className={FIELD}

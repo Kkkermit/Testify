@@ -21,7 +21,7 @@ export const overview: GuildOverview = {
 	channelCount: 20,
 	roleCount: 8,
 	features: [
-		{ key: "levelling", label: "Levelling", enabled: true, detail: "2 role rewards, 1 boost" },
+		{ key: "levelling", label: "Levelling", enabled: true, detail: { kind: "levelling", rewards: 2, boosts: 1 } },
 		{ key: "welcome", label: "Welcome messages", enabled: false, detail: null },
 	],
 	missingPermissions: [],

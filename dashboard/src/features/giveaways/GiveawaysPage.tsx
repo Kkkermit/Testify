@@ -143,7 +143,7 @@ export function GiveawaysPage(): React.JSX.Element {
 							>
 								{DURATION_UNITS.map((entry) => (
 									<option key={entry.value} value={entry.value}>
-										{entry.label}
+										{t(entry.labelKey)}
 									</option>
 								))}
 							</select>

@@ -4,8 +4,9 @@ import { api, ApiError } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
 /** The bootstrap call. A 401 means "show the sign-in screen", so it is neither retried nor treated as an error. */
-export function useMe(): UseQueryResult<MeResponse | null> {
+export function useMe({ enabled = true }: { enabled?: boolean } = {}): UseQueryResult<MeResponse | null> {
 	return useQuery({
+		enabled,
 		queryKey: keys.me(),
 		queryFn: async () => {
 			try {

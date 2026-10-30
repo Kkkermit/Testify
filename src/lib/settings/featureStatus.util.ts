@@ -24,7 +24,7 @@ import { readLottery } from "@lib/economy/lotteryActions.util";
 import { readTreasure } from "@lib/economy/treasureActions.util";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { readTickets } from "@lib/tickets/ticketActions.util";
-import { CASINO_GAMES, type FeatureStatus } from "@testify/shared";
+import { CASINO_GAMES, type FeatureCount, type FeatureDetail, type FeatureStatus } from "@testify/shared";
 
 /** What the overview says about each feature: one entry each, read through the same repositories the panels use. */
 
@@ -36,12 +36,8 @@ interface FeatureSource {
 	read(guild: Guild): Promise<Reading>;
 }
 
-/** A phrase ending in something other than its noun, like "ticket sold", gives its plural. */
-export function countOf(value: number, one: string, many = `${one}s`): string {
-	return `${String(value)} ${value === 1 ? one : many}`;
-}
-
-const posting = (channelId: string): string => `Posting in <#${channelId}>`;
+const posting = (channelId: string): FeatureDetail => ({ kind: "posting", channelId });
+const counted = (what: FeatureCount, count: number): FeatureDetail => ({ kind: "count", what, count });
 
 export const FEATURE_SOURCES: readonly FeatureSource[] = [
 	{
@@ -52,7 +48,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			return {
 				enabled: level.enabled,
 				detail: level.enabled
-					? `${countOf(level.rewards.length, "role reward")}, ${countOf(level.boosts.length, "boost")}`
+					? { kind: "levelling", rewards: level.rewards.length, boosts: level.boosts.length }
 					: null,
 			};
 		},
@@ -64,7 +60,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const audit = await getAuditLogConfig(guild.id);
 			return {
 				enabled: audit !== null && audit.enabledLogs.length > 0,
-				detail: audit === null ? null : countOf(audit.enabledLogs.length, "event"),
+				detail: audit === null ? null : counted("events", audit.enabledLogs.length),
 			};
 		},
 	},
@@ -91,7 +87,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		async read(guild) {
 			const [settings, shared] = await Promise.all([getBirthdaySettings(guild.id), countBirthdays(guild.id)]);
 			const enabled = settings?.enabled === true && settings.channelId !== null;
-			return { enabled, detail: enabled ? countOf(shared, "birthday shared", "birthdays shared") : null };
+			return { enabled, detail: enabled ? counted("birthdays", shared) : null };
 		},
 	},
 	{
@@ -101,7 +97,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const verify = await getVerifyConfig(guild.id);
 			return {
 				enabled: verify !== null,
-				detail: verify === null ? null : countOf(verify.verifiedIds.length, "member verified", "members verified"),
+				detail: verify === null ? null : counted("verified", verify.verifiedIds.length),
 			};
 		},
 	},
@@ -122,7 +118,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const age = raid?.minAccountAgeDays ?? 0;
 			return {
 				enabled: on,
-				detail: on ? (age > 0 ? `Holding accounts under ${countOf(age, "day")}` : "Watching for spikes") : null,
+				detail: on ? (age > 0 ? { kind: "holding", days: age } : { kind: "watching" }) : null,
 			};
 		},
 	},
@@ -131,7 +127,10 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		label: "Anti-link",
 		async read(guild) {
 			const antiLink = await getAntiLink(guild.id);
-			return { enabled: antiLink !== null, detail: antiLink === null ? null : `Bypass: ${antiLink.bypassPermission}` };
+			return {
+				enabled: antiLink !== null,
+				detail: antiLink === null ? null : { kind: "bypass", permission: antiLink.bypassPermission },
+			};
 		},
 	},
 	{
@@ -139,7 +138,10 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		label: "Counting",
 		async read(guild) {
 			const counting = await getCounting(guild.id);
-			return { enabled: counting !== null, detail: counting === null ? null : `At ${String(counting.count)}` };
+			return {
+				enabled: counting !== null,
+				detail: counting === null ? null : { kind: "countingAt", count: counting.count },
+			};
 		},
 	},
 	{
@@ -149,7 +151,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const roleIds = (await getAutoRoles(guild.id))?.roleIds ?? null;
 			return {
 				enabled: (roleIds?.length ?? 0) > 0,
-				detail: roleIds === null ? null : countOf(roleIds.length, "role"),
+				detail: roleIds === null ? null : counted("roles", roleIds.length),
 			};
 		},
 	},
@@ -158,7 +160,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 		label: "Role menus",
 		async read(guild) {
 			const menus = await countRoleMenus(guild.id);
-			return { enabled: menus > 0, detail: menus === 0 ? null : countOf(menus, "menu") };
+			return { enabled: menus > 0, detail: menus === 0 ? null : counted("menus", menus) };
 		},
 	},
 	{
@@ -178,7 +180,10 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const on = stars?.enabled === true;
 			return {
 				enabled: on,
-				detail: on && stars.channelId !== null ? `${String(stars.threshold)} ⭐ to reach <#${stars.channelId}>` : null,
+				detail:
+					on && stars.channelId !== null
+						? { kind: "starboard", threshold: stars.threshold, channelId: stars.channelId }
+						: null,
 			};
 		},
 	},
@@ -190,7 +195,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const on = lobby?.enabled === true;
 			return {
 				enabled: on,
-				detail: on && lobby.lobbyChannelId !== null ? `Lobby: <#${lobby.lobbyChannelId}>` : null,
+				detail: on && lobby.lobbyChannelId !== null ? { kind: "lobby", channelId: lobby.lobbyChannelId } : null,
 			};
 		},
 	},
@@ -208,7 +213,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const stickies = await listSticky(guild.id);
 			return {
 				enabled: stickies.length > 0,
-				detail: stickies.length === 0 ? null : countOf(stickies.length, "channel"),
+				detail: stickies.length === 0 ? null : counted("channels", stickies.length),
 			};
 		},
 	},
@@ -219,7 +224,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const responders = await listAutoResponders(guild.id);
 			return {
 				enabled: responders.length > 0,
-				detail: responders.length === 0 ? null : countOf(responders.length, "auto-responder"),
+				detail: responders.length === 0 ? null : counted("responders", responders.length),
 			};
 		},
 	},
@@ -230,7 +235,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const schedules = await listSchedules(guild.id);
 			return {
 				enabled: schedules.length > 0,
-				detail: schedules.length === 0 ? null : countOf(schedules.length, "message"),
+				detail: schedules.length === 0 ? null : counted("messages", schedules.length),
 			};
 		},
 	},
@@ -241,7 +246,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const treasure = await readTreasure(guild.id);
 			return {
 				enabled: treasure.enabled,
-				detail: treasure.configured ? `${String(treasure.minAmount)}–${String(treasure.maxAmount)} a drop` : null,
+				detail: treasure.configured ? { kind: "treasure", min: treasure.minAmount, max: treasure.maxAmount } : null,
 			};
 		},
 	},
@@ -252,7 +257,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const tickets = await readTickets(guild);
 			return {
 				enabled: tickets.enabled,
-				detail: tickets.enabled ? countOf(tickets.openTickets, "ticket open", "tickets open") : null,
+				detail: tickets.enabled ? counted("ticketsOpen", tickets.openTickets) : null,
 			};
 		},
 	},
@@ -263,7 +268,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const draw = await readLottery(guild.id);
 			return {
 				enabled: draw.enabled && !draw.frozen,
-				detail: draw.enabled ? countOf(draw.ticketsSold, "ticket sold", "tickets sold") : null,
+				detail: draw.enabled ? counted("ticketsSold", draw.ticketsSold) : null,
 			};
 		},
 	},
@@ -275,7 +280,7 @@ export const FEATURE_SOURCES: readonly FeatureSource[] = [
 			const open = CASINO_GAMES.filter((game) => tables.games[game]).length;
 			return {
 				enabled: tables.enabled,
-				detail: tables.enabled ? `${String(open)} of ${String(CASINO_GAMES.length)} games open` : null,
+				detail: tables.enabled ? { kind: "casino", open, total: CASINO_GAMES.length } : null,
 			};
 		},
 	},

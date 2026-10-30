@@ -63,7 +63,7 @@ export function TreasurePage(): React.JSX.Element {
 				<div>
 					<h2 className={CARD_HEADING}>{t("treasure.dropsHere")}</h2>
 					<p className="text-muted-foreground text-sm">
-						{settings.configured ? describeRate(draftOf(settings)) : t("treasure.notSetUpYet")}
+						{settings.configured ? describeRate(draftOf(settings), t) : t("treasure.notSetUpYet")}
 					</p>
 				</div>
 

@@ -5,6 +5,7 @@ import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card, CARD_HEADING, SegmentedControl } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
+import { formatNumber } from "@/lib/intl";
 import { problemText } from "@/lib/problemText";
 
 const LABELS: Record<MoneyPurse, TranslationKey> = { wallet: "members.wallet", bank: "members.bank" };
@@ -37,7 +38,7 @@ export function MoneyCard({
 				<p className="text-muted-foreground text-sm">
 					{detail.economy === null
 						? t("members.noAccountYet")
-						: t("members.holds", { amount: held.toLocaleString(), purse: t(LABELS[purse]).toLowerCase() })}
+						: t("members.holds", { amount: formatNumber(held), purse: t(LABELS[purse]).toLowerCase() })}
 				</p>
 			</div>
 

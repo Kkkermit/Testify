@@ -9,7 +9,8 @@ import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
-import { countOf, featuresOf } from "@lib/settings/featureStatus.util";
+import { featuresOf } from "@lib/settings/featureStatus.util";
+import { type FeatureStatus } from "@testify/shared";
 
 jest.mock("@database/repositories/ideaRepository", () => ({ getIdeaSettings: jest.fn() }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
@@ -85,7 +86,7 @@ function fresh(): void {
 	jest.mocked(readCasinoSettings).mockResolvedValue({ enabled: false, games: allGames } as never);
 }
 
-const byKey = async (): Promise<Map<string, { enabled: boolean; detail: string | null }>> =>
+const byKey = async (): Promise<Map<string, FeatureStatus>> =>
 	new Map((await featuresOf(guild)).map((feature) => [feature.key, feature]));
 
 beforeEach(fresh);
@@ -116,13 +117,17 @@ describe("featuresOf", () => {
 		const features = await byKey();
 
 		expect(features.get("welcome")).toEqual(
-			expect.objectContaining({ enabled: true, detail: "Posting in <#400000000000000001>" }),
+			expect.objectContaining({ enabled: true, detail: { kind: "posting", channelId: "400000000000000001" } }),
 		);
-		expect(features.get("auto-roles")?.detail).toBe("2 roles");
-		expect(features.get("role-menus")?.detail).toBe("1 menu");
-		expect(features.get("starboard")?.detail).toBe("5 ⭐ to reach <#400000000000000002>");
-		expect(features.get("temp-voice")?.detail).toBe("Lobby: <#400000000000000003>");
-		expect(features.get("casino")?.detail).toBe("5 of 6 games open");
+		expect(features.get("auto-roles")?.detail).toEqual({ kind: "count", what: "roles", count: 2 });
+		expect(features.get("role-menus")?.detail).toEqual({ kind: "count", what: "menus", count: 1 });
+		expect(features.get("starboard")?.detail).toEqual({
+			kind: "starboard",
+			threshold: 5,
+			channelId: "400000000000000002",
+		});
+		expect(features.get("temp-voice")?.detail).toEqual({ kind: "lobby", channelId: "400000000000000003" });
+		expect(features.get("casino")?.detail).toEqual({ kind: "casino", open: 5, total: 6 });
 	});
 
 	/** A frozen lottery takes no tickets, so the overview must not call it running. */
@@ -130,15 +135,7 @@ describe("featuresOf", () => {
 		jest.mocked(readLottery).mockResolvedValue({ enabled: true, frozen: true, ticketsSold: 3 } as never);
 
 		expect((await byKey()).get("lottery")).toEqual(
-			expect.objectContaining({ enabled: false, detail: "3 tickets sold" }),
+			expect.objectContaining({ enabled: false, detail: { kind: "count", what: "ticketsSold", count: 3 } }),
 		);
-	});
-});
-
-describe("countOf", () => {
-	/** The overview once read "3 ticket solds" and "2 member verifieds". */
-	it("takes the plural of a phrase whose noun is not last", () => {
-		expect(countOf(3, "ticket sold", "tickets sold")).toBe("3 tickets sold");
-		expect(countOf(1, "ticket sold", "tickets sold")).toBe("1 ticket sold");
 	});
 });

@@ -280,10 +280,10 @@ export function serialiseReply(reply: InteractionReplyOptions | InteractionEditR
 	}
 
 	if ((payload.components ?? []).length > 0) {
-		outputs.push({ kind: "dropped", what: isV2(payload.flags) ? "a Components V2 panel" : "buttons" });
+		outputs.push({ kind: "dropped", what: isV2(payload.flags) ? "panel" : "buttons" });
 	}
 
-	if ((payload.files ?? []).length > 0) outputs.push({ kind: "dropped", what: "an attachment" });
+	if ((payload.files ?? []).length > 0) outputs.push({ kind: "dropped", what: "attachment" });
 
 	return outputs;
 }

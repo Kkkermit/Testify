@@ -60,7 +60,7 @@ export function MessageEditor({
 					className={cn(FIELD, "resize-y font-mono", tooLong && "border-destructive")}
 				/>
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-					{draft.length} of {max}
+					{t("common.partOf", { part: draft.length, whole: max })}
 				</span>
 			</Field>
 

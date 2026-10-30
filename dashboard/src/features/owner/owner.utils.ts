@@ -11,6 +11,7 @@ import {
 	type ReportedLogLevel,
 } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
+import { formattingLocale, formatPercent, formatUnit } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
 export const WINDOWS = ANALYTICS_WINDOWS.map((days) => ({ value: days, label: `${String(days)}d` }));
@@ -27,8 +28,7 @@ export function levelFrom(raw: string | null): ReportedLogLevel {
 }
 
 export function percent(part: number, whole: number): string {
-	if (whole <= 0) return "0%";
-	return `${(Math.round((part / whole) * 1000) / 10).toString()}%`;
+	return formatPercent(part, Math.max(whole, 0));
 }
 
 /** `2026-08-01` as `1 Aug`, which is all a chart axis or a tooltip has room for. */
@@ -36,7 +36,7 @@ export function shortDay(day: string): string {
 	const at = new Date(`${day}T00:00:00.000Z`);
 	if (Number.isNaN(at.getTime())) return day;
 
-	return at.toLocaleDateString(undefined, { day: "numeric", month: "short", timeZone: "UTC" });
+	return at.toLocaleDateString(formattingLocale(), { day: "numeric", month: "short", timeZone: "UTC" });
 }
 
 /** The same rule the API validates against, so the form cannot disagree with the refusal it would get. */
@@ -85,7 +85,9 @@ export function commandFrom(raw: string | null): string | null {
 
 /** Milliseconds under a second, seconds to one place above it. */
 export function formatMs(ms: number): string {
-	return ms < 1_000 ? `${ms.toLocaleString("en-GB")} ms` : `${(ms / 1_000).toFixed(1)} s`;
+	return ms < 1_000
+		? formatUnit(ms, "millisecond")
+		: formatUnit(ms / 1_000, "second", { digits: 1, display: "narrow" });
 }
 
 /** `/music play`, the way it was typed. */

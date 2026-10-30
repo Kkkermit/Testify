@@ -62,7 +62,7 @@ export function ResponderFields({
 					className={cn(FIELD, "resize-y")}
 				/>
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-					{value.reply.length} of {AUTO_RESPONDER_LIMITS.maxReply}
+					{t("common.partOf", { part: value.reply.length, whole: AUTO_RESPONDER_LIMITS.maxReply })}
 				</span>
 			</Field>
 		</>

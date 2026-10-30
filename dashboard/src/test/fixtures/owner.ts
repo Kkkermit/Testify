@@ -29,7 +29,7 @@ export const guildDetail: OwnerGuildDetail = {
 	ownerId: "700000000000000001",
 	nickname: "Testy",
 	highestRole: "Bots",
-	missingPermissions: ["Manage Roles"],
+	missingPermissions: ["ManageRoles"],
 	configured: ["levelling"],
 	usage: 900,
 	dashboardViews: 12,

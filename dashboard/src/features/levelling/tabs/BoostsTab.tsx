@@ -45,7 +45,7 @@ export function BoostsTab({
 							<label className="flex items-center gap-2">
 								<span className="text-muted-foreground text-xs">{t("levelling.multiplier")}</span>
 								<select
-									aria-label={`Multiplier for ${roleNameOf(roles, boost.roleId)}`}
+									aria-label={t("levelling.multiplierFor", { role: roleNameOf(roles, boost.roleId) })}
 									value={boost.multiplier}
 									onChange={(event) => {
 										update.mutate(

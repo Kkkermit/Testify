@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import { type ReactNode } from "react";
+import { type MouseEventHandler, type ReactNode } from "react";
 import { Link } from "react-router";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { cn } from "@/lib/cn";
@@ -10,9 +10,21 @@ export function PublicPage({ children }: { children: ReactNode }): React.JSX.Ele
 }
 
 /** A way back for a page with no sidebar to leave from. */
-export function BackLink({ to, children }: { to: string; children: ReactNode }): React.JSX.Element {
+export function BackLink({
+	to,
+	onClick,
+	children,
+}: {
+	to: string;
+	onClick?: MouseEventHandler<HTMLAnchorElement>;
+	children: ReactNode;
+}): React.JSX.Element {
 	return (
-		<Link to={to} className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}>
+		<Link
+			to={to}
+			onClick={onClick}
+			className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground gap-2 self-start text-sm")}
+		>
 			<ArrowLeft size={15} aria-hidden="true" />
 			{children}
 		</Link>
