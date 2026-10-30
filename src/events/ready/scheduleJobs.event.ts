@@ -4,6 +4,7 @@ import { defineEvent } from "@core/event";
 import { announceBirthdays } from "@jobs/birthdays.util";
 import { settleIdleHands } from "@jobs/casinoSweep.util";
 import { runLotteryDraws } from "@jobs/lotteryDraw.util";
+import { sweepMusicScratch } from "@jobs/musicScratchSweep.util";
 import { payPassiveIncome } from "@jobs/passiveIncome.util";
 import { refreshBotStats } from "@jobs/refreshBotStats.util";
 import { deliverDueReminders } from "@jobs/reminders.util";
@@ -36,6 +37,8 @@ export default defineEvent({
 		// Once soon after start-up for what emptied while the bot was away, then as a backstop.
 		client.timers.after("temp-voice-first", 30_000, () => sweepTempVoice(client));
 		client.timers.every("temp-voice", INTERVALS.tempVoiceSweepMs, () => sweepTempVoice(client));
+		// Once, because only a run that died mid-track leaves a download folder behind.
+		client.timers.after("music-scratch", 30_000, () => sweepMusicScratch(client));
 
 		startEventLoopMonitor();
 		watchDiscordApi(client);

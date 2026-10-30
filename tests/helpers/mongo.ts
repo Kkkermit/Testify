@@ -6,8 +6,13 @@ function testUri(): string | undefined {
 	return uri === undefined || uri === "" ? undefined : uri;
 }
 
-/** A worker's first suite builds every index, and on a busy Windows runner that can outlast a test's budget. */
+/** A shared server busy with another worker can stall for longer than a test's budget, which is not this suite's doing. */
 const SETUP_MS = 60_000;
+
+/** Each worker has a database of its own, so suites in parallel never empty each other's collections. */
+export function workerDatabase(workerId: string): string {
+	return `testify-test-${workerId}`;
+}
 
 export function mongoAvailable(): boolean {
 	return testUri() !== undefined;
@@ -27,7 +32,7 @@ export function describeWithMongo(name: string, suite: () => void): void {
 
 	describe(name, () => {
 		beforeAll(async () => {
-			await mongoose.connect(uri, { dbName: `testify-test-${process.env["JEST_WORKER_ID"] ?? "1"}` });
+			await mongoose.connect(uri, { dbName: workerDatabase(process.env["JEST_WORKER_ID"] ?? "1") });
 			// Mongoose builds indexes in the background, and a test racing two writes needs the unique one already there.
 			await Promise.all(Object.values(mongoose.models).map((model) => model.syncIndexes()));
 		}, SETUP_MS);
@@ -40,7 +45,7 @@ export function describeWithMongo(name: string, suite: () => void): void {
 		// Only this suite's models can reach a collection, so only theirs need emptying.
 		beforeEach(async () => {
 			await Promise.all(Object.values(mongoose.models).map(async (model) => model.collection.deleteMany({})));
-		});
+		}, SETUP_MS);
 
 		suite();
 	});
