@@ -46,6 +46,18 @@ describe("the member detail page", () => {
 		expect(await screen.findByText("Warning 2 recorded: Time out for 10 minutes.")).toBeInTheDocument();
 	});
 
+	/** The API leaves warnings out for a manager without Timeout Members, and the card says why rather than "none". */
+	it("says which permission the warnings need when they were left out", async () => {
+		serve({ warnings: null });
+		renderPage();
+
+		expect(
+			await screen.findByText("You need the Timeout Members permission in this server to see or give warnings."),
+		).toBeInTheDocument();
+		expect(screen.queryByText("No warnings on record.")).not.toBeInTheDocument();
+		expect(screen.queryByRole("button", { name: "Add warning" })).not.toBeInTheDocument();
+	});
+
 	/** No moderation controls for a caller the server would refuse anyway. */
 	it("offers no moderation controls when the caller may not act", async () => {
 		serve({ moderationProblem: "You cannot moderate somebody above you." });

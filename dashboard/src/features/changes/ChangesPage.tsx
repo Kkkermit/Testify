@@ -9,6 +9,7 @@ import { Card, DividedList, PageHeader, Pager, SegmentedControl, Skeleton } from
 import { SOURCE_LABELS, WINDOW_LABELS } from "@/features/changes/changes.utils";
 import { ChangeRow } from "@/features/changes/components/ChangeRow";
 import { useServerChanges } from "@/features/changes/useChanges";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { pageCountOf } from "@/features/warnings/warnings.utils";
 import { useDebounced } from "@/hooks/useDebounced";
@@ -82,7 +83,14 @@ export function ChangesPage(): React.JSX.Element {
 				<Skeleton className="h-64 w-full" />
 			) : (
 				<>
-					{!changes.data.discordReadable && <Warning>{t("changes.cannotReadDiscord")}</Warning>}
+					{changes.data.discordWithheld ? (
+						<Warning>{t("changes.discordWithheld", { permission: permissionLabel("ViewAuditLog", t) })}</Warning>
+					) : (
+						!changes.data.discordReadable && <Warning>{t("changes.cannotReadDiscord")}</Warning>
+					)}
+					{changes.data.moderationWithheld && (
+						<Warning>{t("changes.moderationWithheld", { permission: permissionLabel("ModerateMembers", t) })}</Warning>
+					)}
 					<p className="text-muted-foreground text-sm" aria-live="polite">
 						{t("changes.count", { count: changes.data.total })}
 						{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}

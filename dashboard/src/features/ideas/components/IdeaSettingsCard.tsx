@@ -2,6 +2,7 @@ import { type ChannelSummary, type IdeaSettings } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { ChannelPicker, Toggle, Warning } from "@/components/form";
 import { Card, CARD_HEADING } from "@/components/primitives";
+import { channelLabel } from "@/lib/channels";
 
 /** The switch and the channel, each saved the moment it changes. */
 export function IdeaSettingsCard({
@@ -18,7 +19,7 @@ export function IdeaSettingsCard({
 	onChange: (patch: { enabled?: boolean; channelId?: string | null }) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const channel = channels.find((entry) => entry.id === settings.channelId)?.name ?? "";
+	const channel = channelLabel(channels, settings.channelId, t);
 
 	return (
 		<Card className="flex flex-col gap-4">

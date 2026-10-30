@@ -1,4 +1,4 @@
-import { Collection, type Guild, type GuildMember } from "discord.js";
+import { Collection, type Guild, type GuildMember, PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, badRequest, problemBody } from "@api/errors";
@@ -82,6 +82,8 @@ interface Scene {
 	targetMissing?: boolean;
 	timedOutUntil?: number | null;
 	manageable?: boolean;
+	/** What the person reading holds; left out, they hold everything. */
+	actorHolds?: bigint[];
 }
 
 function app(options: Scene = {}): Hono<ApiBindings> {
@@ -93,6 +95,7 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 		targetMissing = false,
 		timedOutUntil = null,
 		manageable = true,
+		actorHolds,
 	} = options;
 
 	const member = (id: string, position: number, name: string): GuildMember =>
@@ -126,6 +129,11 @@ function app(options: Scene = {}): Hono<ApiBindings> {
 	const me = member(BOT, botPosition, "Testify");
 	const target = member(TARGET, targetPosition, "kate");
 	const actor = member(ACTOR, actorPosition, "someone");
+	if (actorHolds !== undefined) {
+		(actor as unknown as { permissions: unknown }).permissions = {
+			has: (flags: bigint | bigint[]) => [flags].flat().every((flag) => actorHolds.includes(flag)),
+		};
+	}
 
 	(target as unknown as { roles: unknown }).roles = {
 		highest: { position: targetPosition },
@@ -250,7 +258,26 @@ describe("GET /members/:userId", () => {
 
 		const body = (await (await request("GET")).json()) as MemberDetail;
 
-		expect(body.warnings.map((warning) => warning.id)).toEqual(["warn2", "warn1", "warn0"]);
+		expect(body.warnings?.map((warning) => warning.id)).toEqual(["warn2", "warn1", "warn0"]);
+	});
+
+	/** `/warn list` asks Moderate Members and a softban is Ban Members' to lift, so neither reaches a manager without them. */
+	it("leaves out warnings and a softban the reader could not see in Discord", async () => {
+		withWarnings(2);
+		softban.mockResolvedValue({
+			reason: "Spam",
+			moderatorId: ACTOR,
+			expiresAt: new Date(Date.now() + 60_000),
+		} as never);
+
+		const scene = { actorHolds: [PermissionFlagsBits.ManageGuild] };
+		const body = (await (await request("GET", "", undefined, scene)).json()) as MemberDetail;
+		const moderator = { actorHolds: [PermissionFlagsBits.ManageGuild, PermissionFlagsBits.ModerateMembers] };
+		const partial = (await (await request("GET", "", undefined, moderator)).json()) as MemberDetail;
+
+		expect(body).toMatchObject({ warnings: null, softban: null });
+		expect(partial.warnings).toHaveLength(2);
+		expect(partial.softban).toBeNull();
 	});
 
 	/** A balance and a warning record outlive the membership, so leaving must not turn the page into a 404. */
@@ -386,6 +413,14 @@ describe("PATCH /members/:userId/money", () => {
 });
 
 describe("PATCH /members/:userId/level", () => {
+	/** A level hands out its role rewards, which in Discord is `/give`, and that asks Administrator. */
+	it("refuses a manager who is not an administrator", async () => {
+		const response = await request("PATCH", "/level", { level: 10 }, { actorHolds: [PermissionFlagsBits.ManageGuild] });
+
+		expect(response.status).toBe(403);
+		expect(levelSet).not.toHaveBeenCalled();
+	});
+
 	it("moves XP when that is what was sent", async () => {
 		await request("PATCH", "/level", { xp: 400 });
 

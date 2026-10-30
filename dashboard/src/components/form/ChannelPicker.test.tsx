@@ -6,6 +6,7 @@ import { ChannelPicker } from "@/components/form/ChannelPicker";
 const CHANNELS: ChannelSummary[] = [
 	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
 	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
+	{ id: "400000000000000003", name: null, kind: "text", position: 3, canSend: true },
 ];
 
 function renderPicker(value: string | null, onChange = jest.fn()): jest.Mock {
@@ -46,6 +47,18 @@ describe("ChannelPicker", () => {
 
 		expect(picker().selectedOptions[0]?.textContent).toBe("A channel that no longer exists");
 		expect(screen.getByText(/has been deleted/)).toBeInTheDocument();
+	});
+
+	/** Discord never names a channel to somebody who cannot view it, and never offers it to them either. */
+	it("neither names nor offers a channel the reader cannot see, and says why it cannot be changed", () => {
+		renderPicker("400000000000000003");
+
+		expect(picker().selectedOptions[0]?.textContent).toBe("A channel you can’t see");
+		expect(screen.getByText(/only somebody who can may change it/)).toBeInTheDocument();
+		expect(screen.queryByText(/no longer exists/)).not.toBeInTheDocument();
+		expect([...picker().options].filter((option) => !option.disabled).map((option) => option.value)).toEqual([
+			"400000000000000001",
+		]);
 	});
 
 	it("warns when the bot cannot post in the saved channel", () => {

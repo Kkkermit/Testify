@@ -67,7 +67,7 @@ describe("the sticky page", () => {
 		renderPage();
 		await screen.findByRole("heading", { name: "#general" });
 
-		await user.click(screen.getByRole("button", { name: /remove the sticky in general/i }));
+		await user.click(screen.getByRole("button", { name: /remove the sticky in #general/i }));
 
 		expect(screen.queryByRole("heading", { name: "#general" })).not.toBeInTheDocument();
 		expect(screen.queryByRole("option", { name: "#general" })).not.toBeInTheDocument();

@@ -12,6 +12,7 @@ import { Warning } from "@/components/form";
 import { Button, cardClass } from "@/components/primitives";
 import { ScheduleFields, type ScheduleDraft } from "@/features/scheduled-messages/components/ScheduleFields";
 import { fromLocalInput, REPEAT_LABELS, toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
+import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { problemText } from "@/lib/problemText";
 import { markupWarning } from "@/lib/sanitise";
@@ -62,8 +63,7 @@ export function ScheduleRow({
 		problemText(scheduleContentBlocked(draft), t) ??
 		(timeChanged ? problemText(scheduleTimeBlocked(nextAt, new Date()), t) : null) ??
 		markupWarning(draft.message);
-	const found = channels.find((channel) => channel.id === entry.channelId)?.name;
-	const channel = found === undefined ? t("sticky.deletedChannel") : `#${found}`;
+	const channel = channelLabel(channels, entry.channelId, t);
 
 	return (
 		<li className={cardClass("compact", "flex flex-col gap-3")}>

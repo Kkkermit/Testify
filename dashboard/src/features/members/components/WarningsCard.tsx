@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Field, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
 import { Button, Card, CARD_HEADING, DividedList } from "@/components/primitives";
+import { permissionLabel } from "@/features/commands/permissions.labels";
 import { canChangeWarnings, clearConfirmed, warningSummary } from "@/features/members/memberDetail.utils";
 import { WarningRow } from "@/features/warnings/components/WarningRow";
 import { problemText } from "@/lib/problemText";
@@ -36,24 +37,36 @@ export function WarningsCard({
 	const canModerate = detail.moderationProblem === null;
 	const canChange = canChangeWarnings(detail);
 	const problem = problemText(warningProblem(reason), t);
+	const warnings = detail.warnings;
 
 	function cancel(): void {
 		setConfirming(false);
 		setTyped("");
 	}
 
+	if (warnings === null) {
+		return (
+			<Card className="flex flex-col gap-2">
+				<h2 className={CARD_HEADING}>{t("members.warnings")}</h2>
+				<p className="text-muted-foreground text-sm">
+					{t("members.warningsHidden", { permission: permissionLabel("ModerateMembers", t) })}
+				</p>
+			</Card>
+		);
+	}
+
 	return (
 		<Card className="flex flex-col gap-4">
 			<div>
 				<h2 className={CARD_HEADING}>{t("members.warnings")}</h2>
-				<p className="text-muted-foreground text-sm">{warningSummary(detail.warnings, t)}</p>
+				<p className="text-muted-foreground text-sm">{warningSummary(warnings, t)}</p>
 			</div>
 
 			{!canModerate && <Warning>{detail.moderationProblem}</Warning>}
 
-			{detail.warnings.length > 0 && (
+			{warnings.length > 0 && (
 				<DividedList>
-					{detail.warnings.map((warning) => (
+					{warnings.map((warning) => (
 						<WarningRow
 							key={warning.id}
 							warning={warning}
@@ -103,7 +116,7 @@ export function WarningsCard({
 				</>
 			)}
 
-			{canChange && detail.warnings.length > 0 && !confirming && (
+			{canChange && warnings.length > 0 && !confirming && (
 				<div>
 					<Button
 						variant="ghost"

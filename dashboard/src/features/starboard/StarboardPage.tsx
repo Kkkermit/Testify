@@ -20,6 +20,7 @@ import { thresholdFrom } from "@/features/starboard/starboard.utils";
 import { useSaveStarboard, useStarboard } from "@/features/starboard/useStarboard";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
 /** Where starred messages are reposted, how many stars that takes, and whether the author's own star counts. */
@@ -39,7 +40,7 @@ export function StarboardPage(): React.JSX.Element {
 
 	const settings = starboard.data;
 	const postable = postableChannels(channels.data ?? []);
-	const channel = postable.find((entry) => entry.id === settings.channelId)?.name ?? "";
+	const channel = channelLabel(postable, settings.channelId, t);
 	const write = (patch: StarboardPatch): void => {
 		save.mutate(patch);
 	};

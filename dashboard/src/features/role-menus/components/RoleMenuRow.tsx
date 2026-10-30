@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { RoleSwatch } from "@/components/form/RoleSwatch";
 import { Badge, Button, CARD_HEADING, cardClass } from "@/components/primitives";
+import { channelLabel } from "@/lib/channels";
 
 /** One menu, with what it offers and the actions beside it. */
 export function RoleMenuRow({
@@ -24,7 +25,7 @@ export function RoleMenuRow({
 	onRemove: () => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const channel = channels.find((entry) => entry.id === menu.channelId)?.name ?? t("common.channelGone");
+	const channel = channelLabel(channels, menu.channelId, t, "title");
 	const offered = menu.roleIds.map((roleId) => roles.find((role) => role.id === roleId));
 
 	return (
@@ -33,7 +34,7 @@ export function RoleMenuRow({
 				<div className="min-w-0">
 					<h3 className={CARD_HEADING}>{menu.title}</h3>
 					<p className="text-muted-foreground text-xs">
-						#{channel} · {t(menu.mode === "one" ? "roleMenus.holdOne" : "roleMenus.holdMany")}
+						{channel} · {t(menu.mode === "one" ? "roleMenus.holdOne" : "roleMenus.holdMany")}
 					</p>
 				</div>
 				{menu.posted ? (
@@ -55,7 +56,9 @@ export function RoleMenuRow({
 				))}
 			</ul>
 
-			{!menu.canSend && <Warning>{t("common.cannotPostIn", { channel })}</Warning>}
+			{!menu.canSend && (
+				<Warning>{t("common.cannotPostIn", { channel: channelLabel(channels, menu.channelId, t) })}</Warning>
+			)}
 
 			<div className="flex flex-wrap gap-2">
 				<Button variant="secondary" disabled={busy} onClick={onEdit}>

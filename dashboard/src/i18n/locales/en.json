@@ -30,7 +30,7 @@
 		"channelGone": "A channel that no longer exists",
 		"channelGoneWarning": "The channel chosen before has been deleted. Pick another one.",
 		"cannotPostHere": " — {{bot}} cannot post here",
-		"cannotPostIn": "{{bot}} cannot post in #{{channel}}. Give it Send Messages there, or pick another channel.",
+		"cannotPostIn": "{{bot}} cannot post in {{channel}}. Give it Send Messages there, or pick another channel.",
 		"aboveBot": "above {{bot}}",
 		"first": "First",
 		"last": "Last",
@@ -38,7 +38,12 @@
 		"tooPowerful": "moderates or administers",
 		"on": "On",
 		"off": "Off",
-		"partOf": "{{part, number}} of {{whole, number}}"
+		"partOf": "{{part, number}} of {{whole, number}}",
+		"deletedChannel": "a deleted channel",
+		"deletedChannelTitle": "A deleted channel",
+		"hiddenChannel": "a channel you can’t see",
+		"hiddenChannelTitle": "A channel you can’t see",
+		"hiddenChannelWarning": "You can’t see this channel in Discord, so only somebody who can may change it."
 	},
 	"nav": {
 		"servers": "Servers",
@@ -368,7 +373,6 @@
 		"detailLobby": "Lobby: {{channel}}",
 		"detailTreasure": "{{amount}} a drop",
 		"detailCasino": "{{open, number}} of {{total, number}} games open",
-		"deletedChannel": "a deleted channel",
 		"missingManageRoles": "Manage Roles — needed for level rewards, auto roles and verification",
 		"missingManageMessages": "Manage Messages — needed for counting and sticky messages",
 		"missingViewAuditLog": "View Audit Log — needed for audit logging to name who did what",
@@ -750,9 +754,7 @@
 		"addSticky": "Add sticky",
 		"countOf": "{{used}} of {{limit}}",
 		"removeIn": "Remove the sticky in {{channel}}",
-		"cannotPost": "{{bot}} cannot post in #{{channel}}, so this sticky will never appear.",
-		"deletedChannel": "a deleted channel",
-		"deletedChannelTitle": "A deleted channel",
+		"cannotPost": "{{bot}} cannot post in {{channel}}, so this sticky will never appear.",
 		"sinceLast": "Messages since the last post: {{done}} of {{cap}}"
 	},
 	"autoResponders": {
@@ -1164,7 +1166,8 @@
 		"rolesUnreadable": "Their roles could not be read.",
 		"saveRoles": "Save roles",
 		"levelOnXp": "Level {{level}} on {{xp}} XP.",
-		"levelRange": "0 to {{max, number}}"
+		"levelRange": "0 to {{max, number}}",
+		"warningsHidden": "You need the {{permission}} permission in this server to see or give warnings."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1906,7 +1909,7 @@
 		"notPosted": "Not posted",
 		"noneBody": "Nothing is posted yet. Choose a channel below.",
 		"goneBody": "The channel it was in has been deleted. Post it somewhere else, or remove it.",
-		"postedBody": "Posted in #{{channel}}.",
+		"postedBody": "Posted in {{channel}}.",
 		"remove": "Remove the message",
 		"chooseTitle": "Choose a channel",
 		"chooseBody": "Posting sends a new message and takes down the old one, so there is only ever one.",
@@ -2034,7 +2037,9 @@
 		"verbPinned": "Pinned",
 		"verbUnpinned": "Unpinned",
 		"verbBotAdded": "Bot added",
-		"verbOther": "Changed"
+		"verbOther": "Changed",
+		"discordWithheld": "You need the {{permission}} permission in this server to see changes made in Discord. Only dashboard changes are listed.",
+		"moderationWithheld": "You need the {{permission}} permission to see the warnings, timeouts, kicks and bans made here."
 	},
 	"insights": {
 		"title": "Insights",

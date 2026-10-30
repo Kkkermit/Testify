@@ -26,6 +26,21 @@ describe("resolveQuery", () => {
 		},
 	);
 
+	/** No music service is reached by an address literal or a bare name, and each of these is the host's own network. */
+	it.each([
+		"http://127.0.0.1:27017/",
+		"http://localhost:3000/api/owner/stats",
+		"http://[::1]/",
+		"http://169.254.169.254/latest/meta-data/",
+		"http://2130706433/",
+		"http://0x7f.1/",
+		"http://metadata.google.internal/",
+		"http://router/",
+		"http://printer.local/",
+	])("searches for %p as text rather than fetching it", (raw) => {
+		expect(resolveQuery(raw)).toMatchObject({ kind: "search" });
+	});
+
 	it("trims what a phone keyboard adds", () => {
 		expect(resolveQuery("  https://youtu.be/abc  ")).toMatchObject({ kind: "url", source: "youtube" });
 	});

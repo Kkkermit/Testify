@@ -1,7 +1,7 @@
 import { ChannelType, type Guild, type GuildBasedChannel, PermissionFlagsBits, type Role } from "discord.js";
-import { Hono } from "hono";
-import { type ApiBindings, guildOf } from "@api/context";
-import { requireReach } from "@api/middleware/reach";
+import { type Context, Hono } from "hono";
+import { type ApiBindings, guildOf, readerOf } from "@api/context";
+import { holdsPermission, requireReach } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { announcements } from "@api/routes/announcements";
 import { auditLog } from "@api/routes/auditLog";
@@ -36,8 +36,13 @@ import { verification } from "@api/routes/verification";
 import { warnings } from "@api/routes/warnings";
 import { welcome } from "@api/routes/welcome";
 import { parseParams, parseQuery } from "@api/validate";
-import { auditPage, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
-import { canPostInChannel } from "@lib/discord";
+import {
+	auditPage,
+	type AuditAudience,
+	countAudits,
+	recentAudits,
+} from "@database/repositories/dashboardAuditRepository";
+import { canPostInChannel, readerSees } from "@lib/discord";
 import { readInsights } from "@lib/info";
 import { readServerChanges } from "@lib/moderation";
 import { isPowerful } from "@lib/roles";
@@ -99,7 +104,7 @@ guilds.route("/:guildId/setup", setup);
 
 guilds.get("/:guildId/overview", async (context) => {
 	const guild = guildOf(context);
-	const [features, recent] = await Promise.all([featuresOf(guild), recentAudits(guild.id, 8)]);
+	const [features, recent] = await Promise.all([featuresOf(guild), recentAudits(guild.id, 8, audienceOf(context))]);
 
 	const body: GuildOverview = {
 		id: guild.id,
@@ -122,17 +127,19 @@ guilds.get("/:guildId/overview", async (context) => {
  */
 guilds.get("/:guildId/channels", (context) => {
 	const guild = guildOf(context);
+	const reader = readerOf(context);
 
+	// A channel the reader cannot see keeps its id, so a setting pointing there is not mistaken for a deleted one.
 	const channels = [...guild.channels.cache.values()]
 		.filter((channel) => kindOf(channel) !== "other")
 		.map<ChannelSummary>((channel) => ({
 			id: channel.id,
-			name: channel.name,
+			name: readerSees(channel, reader) ? channel.name : null,
 			kind: kindOf(channel),
 			position: "position" in channel ? channel.position : 0,
 			canSend: canPostInChannel(guild, channel),
 		}))
-		.sort((a, b) => a.position - b.position || a.name.localeCompare(b.name));
+		.sort((a, b) => a.position - b.position || (a.name ?? "").localeCompare(b.name ?? ""));
 
 	return context.json(channels);
 });
@@ -162,7 +169,11 @@ guilds.get("/:guildId/audit", async (context) => {
 	const { guildId } = parseParams(context, guildIdParam);
 	const { page, perPage } = parseQuery(context, pagination);
 
-	const [rows, total] = await Promise.all([auditPage(guildId, page, perPage), countAudits(guildId)]);
+	const audience = audienceOf(context);
+	const [rows, total] = await Promise.all([
+		auditPage(guildId, page, perPage, audience),
+		countAudits(guildId, audience),
+	]);
 
 	const body: Paged<AuditEntrySummary> = { items: rows.map(toAuditSummary), total, page, perPage };
 	return context.json(body);
@@ -172,14 +183,24 @@ guilds.get("/:guildId/audit", async (context) => {
 guilds.get("/:guildId/changes", async (context) => {
 	const query = parseQuery(context, changesQuery);
 
-	return context.json(await readServerChanges(guildOf(context), query));
+	return context.json(
+		await readServerChanges(guildOf(context), query, {
+			...audienceOf(context),
+			auditLog: holdsPermission(context, PermissionFlagsBits.ViewAuditLog),
+		}),
+	);
 });
 
 guilds.get("/:guildId/insights", async (context) => {
 	const { days } = parseQuery(context, insightsQuery);
 
-	return context.json(await readInsights(guildOf(context), days as InsightWindow));
+	return context.json(await readInsights(guildOf(context), days as InsightWindow, readerOf(context)));
 });
+
+/** Moderation records are what `/case list` shows, so they ask what it asks. */
+function audienceOf(context: Context<ApiBindings>): AuditAudience {
+	return { moderation: holdsPermission(context, PermissionFlagsBits.ModerateMembers) };
+}
 
 function toAuditSummary(record: { actorTag: string; action: string; summary: string; at: Date }): AuditEntrySummary {
 	return { actorTag: record.actorTag, action: record.action, summary: record.summary, at: record.at.toISOString() };

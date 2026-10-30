@@ -109,7 +109,13 @@ export function withoutMarkup(markdown: string): string {
 
 /** Where a link in a document goes on this site. */
 export type Destination =
-	{ kind: "route"; to: string } | { kind: "external"; href: string } | { kind: "anchor"; id: string };
+	| { kind: "route"; to: string }
+	| { kind: "external"; href: string }
+	| { kind: "anchor"; id: string }
+	| { kind: "none" };
+
+/** The only schemes a docs link may leave by; any other, a script or `data:` one included, is not a link at all. */
+const SAFE_SCHEME = /^(?:https?|mailto):/i;
 
 export interface LinkContext {
 	/** The file the link was written in, relative to the repository's root. */
@@ -144,7 +150,7 @@ function directoryOf(file: string): string {
 
 /** A docs page when one shows it, this site's source browser for any other file, and the web for everything else. */
 export function destinationOf(href: string, context: LinkContext): Destination {
-	if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return { kind: "external", href };
+	if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return SAFE_SCHEME.test(href) ? { kind: "external", href } : { kind: "none" };
 
 	const [rawPath = "", hash = ""] = href.split("#", 2);
 	if (rawPath === "") {

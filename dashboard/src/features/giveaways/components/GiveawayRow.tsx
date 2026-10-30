@@ -3,6 +3,7 @@ import { Dices, Square, Trash2 } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Badge, Button, CARD_HEADING, cardClass } from "@/components/primitives";
 import { canReroll } from "@/features/giveaways/giveaways.utils";
+import { channelLabel } from "@/lib/channels";
 import { dateAndTime, since } from "@/lib/datetime";
 
 /** One giveaway, with its actions beside it — the reason this screen exists is that Discord asks for a message id. */
@@ -22,7 +23,7 @@ export function GiveawayRow({
 	onDelete: () => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const channel = channels.find((entry) => entry.id === row.channelId)?.name ?? "a deleted channel";
+	const channel = channelLabel(channels, row.channelId, t, "title");
 
 	return (
 		<li className={cardClass("compact", "flex flex-col gap-3")}>
@@ -30,7 +31,7 @@ export function GiveawayRow({
 				<div className="min-w-0">
 					<h3 className={CARD_HEADING}>{row.prize}</h3>
 					<p className="text-muted-foreground text-xs">
-						#{channel} · {t("giveaways.winnerCount", { count: row.winnerCount })}
+						{channel} · {t("giveaways.winnerCount", { count: row.winnerCount })}
 					</p>
 				</div>
 				{row.ended ? <Badge>{t("giveaways.ended")}</Badge> : <Badge tone="success">{t("giveaways.running")}</Badge>}

@@ -79,6 +79,10 @@ export interface ServerChange {
 export interface ServerChangesPage extends Paged<ServerChange> {
 	/** False when the bot cannot read the audit log, so only dashboard changes can be shown. */
 	discordReadable: boolean;
+	/** True when the reader lacks View Audit Log, which Discord asks before it shows anybody the log. */
+	discordWithheld: boolean;
+	/** True when the reader lacks Moderate Members, so the warnings, kicks and bans made here are left out. */
+	moderationWithheld: boolean;
 	/** True when the server changed more in the window than `maxDiscordEntries`, so the oldest are not listed. */
 	truncated: boolean;
 }

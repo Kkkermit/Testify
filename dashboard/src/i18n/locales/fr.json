@@ -31,7 +31,7 @@
 		"channelGone": "Un salon qui n’existe plus",
 		"channelGoneWarning": "Le salon choisi auparavant a été supprimé. Choisis-en un autre.",
 		"cannotPostHere": " — {{bot}} ne peut pas publier ici",
-		"cannotPostIn": "{{bot}} ne peut pas publier dans #{{channel}}. Donne-lui « Envoyer des messages » là-bas, ou choisis un autre salon.",
+		"cannotPostIn": "{{bot}} ne peut pas publier dans {{channel}}. Donne-lui « Envoyer des messages » là-bas, ou choisis un autre salon.",
 		"aboveBot": "au-dessus de {{bot}}",
 		"first": "Première",
 		"last": "Dernière",
@@ -39,7 +39,12 @@
 		"tooPowerful": "modère ou administre",
 		"on": "Activé",
 		"off": "Désactivé",
-		"partOf": "{{part, number}} sur {{whole, number}}"
+		"partOf": "{{part, number}} sur {{whole, number}}",
+		"deletedChannel": "un salon supprimé",
+		"deletedChannelTitle": "Un salon supprimé",
+		"hiddenChannel": "un salon que tu ne peux pas voir",
+		"hiddenChannelTitle": "Un salon que tu ne peux pas voir",
+		"hiddenChannelWarning": "Tu ne peux pas voir ce salon dans Discord, donc seule une personne qui le voit peut le modifier."
 	},
 	"nav": {
 		"servers": "Serveurs",
@@ -384,7 +389,6 @@
 		"detailLobby": "Salon d’accueil : {{channel}}",
 		"detailTreasure": "{{amount}} par trésor",
 		"detailCasino": "{{open, number}} jeux ouverts sur {{total, number}}",
-		"deletedChannel": "un salon supprimé",
 		"missingManageRoles": "Gérer les rôles — nécessaire pour les récompenses de niveau, les rôles automatiques et la vérification",
 		"missingManageMessages": "Gérer les messages — nécessaire pour le comptage et les messages épinglés",
 		"missingViewAuditLog": "Voir les logs du serveur — nécessaire pour que la journalisation indique qui a fait quoi",
@@ -770,9 +774,7 @@
 		"addSticky": "Ajouter",
 		"countOf": "{{used}} sur {{limit}}",
 		"removeIn": "Retirer le message épinglé dans {{channel}}",
-		"cannotPost": "{{bot}} ne peut pas publier dans #{{channel}}, donc ce message épinglé n’apparaîtra jamais.",
-		"deletedChannel": "un salon supprimé",
-		"deletedChannelTitle": "Un salon supprimé",
+		"cannotPost": "{{bot}} ne peut pas publier dans {{channel}}, donc ce message épinglé n’apparaîtra jamais.",
 		"sinceLast": "Messages depuis la dernière publication : {{done}} sur {{cap}}"
 	},
 	"autoResponders": {
@@ -1192,7 +1194,8 @@
 		"rolesUnreadable": "Ses rôles n’ont pas pu être lus.",
 		"saveRoles": "Enregistrer les rôles",
 		"levelOnXp": "Niveau {{level}} avec {{xp}} XP.",
-		"levelRange": "De 0 à {{max, number}}"
+		"levelRange": "De 0 à {{max, number}}",
+		"warningsHidden": "Il te faut la permission {{permission}} sur ce serveur pour voir ou donner des avertissements."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1943,7 +1946,7 @@
 		"notPosted": "Non publié",
 		"noneBody": "Rien n’est encore publié. Choisissez un salon ci-dessous.",
 		"goneBody": "Le salon où il se trouvait a été supprimé. Publiez-le ailleurs ou retirez-le.",
-		"postedBody": "Publié dans #{{channel}}.",
+		"postedBody": "Publié dans {{channel}}.",
 		"remove": "Retirer le message",
 		"chooseTitle": "Choisir un salon",
 		"chooseBody": "Publier envoie un nouveau message et retire l’ancien, il n’y en a donc jamais qu’un.",
@@ -2073,7 +2076,9 @@
 		"verbPinned": "Épinglé",
 		"verbUnpinned": "Désépinglé",
 		"verbBotAdded": "Bot ajouté",
-		"verbOther": "Modifié"
+		"verbOther": "Modifié",
+		"discordWithheld": "Il te faut la permission {{permission}} sur ce serveur pour voir les modifications faites dans Discord. Seules celles du tableau de bord sont listées.",
+		"moderationWithheld": "Il te faut la permission {{permission}} pour voir les avertissements, exclusions temporaires, expulsions et bannissements faits ici."
 	},
 	"insights": {
 		"title": "Statistiques",

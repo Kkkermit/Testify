@@ -1,6 +1,6 @@
 import { AuditLogEvent, type Guild, PermissionFlagsBits } from "discord.js";
 import { type DashboardAudit } from "@database/models/dashboardAudit.schema";
-import { auditsSince } from "@database/repositories/dashboardAuditRepository";
+import { type AuditAudience, auditsSince } from "@database/repositories/dashboardAuditRepository";
 import {
 	CHANGE_LIMITS,
 	type ChangeKind,
@@ -192,22 +192,32 @@ export function pageChanges(
 	return { items: matching.slice((page - 1) * perPage, page * perPage), total: matching.length, page, perPage };
 }
 
+/** What the person reading may see, as Discord would decide it for them. */
+export interface ChangesReader extends AuditAudience {
+	/** Discord shows its audit log only to View Audit Log. */
+	auditLog: boolean;
+}
+
+const UNREAD: DiscordRead = { changes: [], readable: true, truncated: false };
+
 export async function readServerChanges(
 	guild: Guild,
 	query: ChangesQuery,
+	reader: ChangesReader,
 	now = Date.now(),
 ): Promise<ServerChangesPage> {
 	const since = new Date(now - CHANGE_LIMITS.maxDays * DAY_MS);
+	const askDiscord = query.source !== "dashboard" && reader.auditLog;
 	const [records, discord] = await Promise.all([
-		query.source === "discord" ? Promise.resolve([]) : auditsSince(guild.id, since),
-		query.source === "dashboard"
-			? Promise.resolve<DiscordRead>({ changes: [], readable: true, truncated: false })
-			: discordChanges(guild, now),
+		query.source === "discord" ? Promise.resolve([]) : auditsSince(guild.id, since, undefined, reader),
+		askDiscord ? discordChanges(guild, now) : Promise.resolve(UNREAD),
 	]);
 
 	return {
 		...pageChanges([...records.map(dashboardChange), ...discord.changes], query, now),
 		discordReadable: discord.readable,
+		discordWithheld: query.source !== "dashboard" && !reader.auditLog,
+		moderationWithheld: query.source !== "discord" && !reader.moderation,
 		truncated: discord.truncated,
 	};
 }

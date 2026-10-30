@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, Warning } from "@/components/form";
 import { Button, cardClass } from "@/components/primitives";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { markupWarning } from "@/lib/sanitise";
 
@@ -30,17 +31,14 @@ export function StickyRow({
 		setCap(entry.cap);
 	}, [entry.message, entry.cap]);
 
-	const found = channels.find((channel) => channel.id === entry.channelId)?.name;
-	const name = found ?? t("sticky.deletedChannel");
+	const name = channelLabel(channels, entry.channelId, t);
 	const dirty = message !== entry.message || cap !== entry.cap;
 	const blocked = markupWarning(message);
 
 	return (
 		<li className={cardClass("compact", "flex flex-col gap-3")}>
 			<div className="flex flex-wrap items-center justify-between gap-2">
-				<h3 className="font-mono text-sm font-medium">
-					{found === undefined ? t("sticky.deletedChannelTitle") : `#${found}`}
-				</h3>
+				<h3 className="font-mono text-sm font-medium">{channelLabel(channels, entry.channelId, t, "title")}</h3>
 				<span className="text-muted-foreground text-xs tabular-nums">
 					{t("sticky.sinceLast", { done: entry.count, cap: entry.cap })}
 				</span>

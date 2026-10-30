@@ -23,8 +23,8 @@ channelTools.patch("/:channelId", manageChannels, async (context) => {
 	const guild = guildOf(context);
 	const { channelId } = parseParams(context, channelToolParams);
 	const patch = await parseBody(context, channelToolPatch);
-	const channel = textChannelOf(guild, channelId);
 	const reader = readerOf(context);
+	const channel = textChannelOf(guild, channelId, reader);
 	const before = toolChannel(channel, guild, reader);
 
 	if (patch.locked !== undefined && !before.canLock) {

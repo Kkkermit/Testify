@@ -206,6 +206,7 @@ function DocLink({ link, scope }: { link: Tokens.Link; scope: Scope }): React.JS
 			</Link>
 		);
 	}
+	if (to.kind === "none") return <>{children}</>;
 
 	return (
 		<a

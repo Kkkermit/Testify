@@ -3,7 +3,7 @@ import { type Context, Hono } from "hono";
 import { auditChange } from "@api/audit";
 import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
 import { badRequest, forbidden, notFound } from "@api/errors";
-import { requirePermission } from "@api/middleware/reach";
+import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
@@ -73,7 +73,14 @@ async function scene(
 async function detail(context: Context<ApiBindings>, fresh = false): Promise<MemberDetail> {
 	const { guild, userId, member, moderator } = await scene(context, fresh);
 
-	return readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
+	const found = await readMemberDetail({ guild, userId, member, moderator, botId: context.get("client").user?.id });
+
+	// `/warn list` asks Moderate Members and a softban is Ban Members' to see, so a manager without them sees neither.
+	return {
+		...found,
+		warnings: holdsPermission(context, PermissionFlagsBits.ModerateMembers) ? found.warnings : null,
+		softban: holdsPermission(context, PermissionFlagsBits.BanMembers) ? found.softban : null,
+	};
 }
 
 /** The moderation commands' own hierarchy check, run before every write; the greyed button is only a courtesy. */
@@ -116,7 +123,8 @@ members.get("/search", async (context) => {
 
 members.get("/:userId", async (context) => context.json(await detail(context)));
 
-members.patch("/:userId/level", async (context) => {
+// Role rewards follow the level, so this asks what `/give` does.
+members.patch("/:userId/level", requirePermission(PermissionFlagsBits.Administrator), async (context) => {
 	const { current, member } = await actOn(context);
 	const body = await parseBody(context, levelBody);
 	const client = context.get("client");

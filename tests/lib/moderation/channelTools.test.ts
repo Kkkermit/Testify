@@ -25,6 +25,8 @@ function channelOf(options: {
 	locked?: boolean;
 	slowmode?: number;
 	readerMay?: boolean;
+	/** False keeps Manage Channels but takes View Channel away, which discord.js does not fold in on its own. */
+	readerSees?: boolean;
 	botFlags?: bigint[];
 	parent?: { name: string; position: number } | null;
 	rawPosition?: number;
@@ -48,7 +50,10 @@ function channelOf(options: {
 					? (options.botFlags ?? [PermissionFlagsBits.ManageRoles, PermissionFlagsBits.ManageChannels])
 					: options.readerMay === false
 						? []
-						: [PermissionFlagsBits.ManageChannels],
+						: [
+								PermissionFlagsBits.ManageChannels,
+								...(options.readerSees === false ? [] : [PermissionFlagsBits.ViewChannel]),
+							],
 			),
 	};
 }
@@ -129,5 +134,16 @@ describe("readChannelTools", () => {
 	it("refuses anything that is not a text channel here", () => {
 		expect(() => textChannelOf(guildWith([]), "400000000000000099")).toThrow(UserFacingError);
 		expect(() => textChannelOf(guildWith([]), "400000000000000123")).toThrow(UserFacingError);
+	});
+
+	/** Discord hides a channel from whoever cannot view it, so the tools neither list it nor act on it or name it. */
+	it("treats a channel the reader cannot see as one that is not there", () => {
+		const hidden = channelOf({ id: "400000000000000002", name: "staff", readerSees: false });
+		const guild = guildWith([channelOf({ id: "400000000000000001", name: "chat" }), hidden]);
+
+		expect(readChannelTools(guild, READER).channels.map((channel) => channel.name)).toEqual(["chat"]);
+		expect(toolChannel(hidden as never, guild, READER)).toMatchObject({ canLock: false, canSlow: false });
+		expect(() => textChannelOf(guild, hidden.id, READER)).toThrow("That is not a text channel in this server.");
+		expect(textChannelOf(guild, hidden.id).id).toBe(hidden.id);
 	});
 });

@@ -30,7 +30,7 @@
 		"channelGone": "Ein Kanal, den es nicht mehr gibt",
 		"channelGoneWarning": "Der zuvor gewählte Kanal wurde gelöscht. Wähle einen anderen.",
 		"cannotPostHere": " — {{bot}} kann hier nicht posten",
-		"cannotPostIn": "{{bot}} kann in #{{channel}} nicht posten. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen Kanal.",
+		"cannotPostIn": "{{bot}} kann in {{channel}} nicht posten. Gib ihm dort „Nachrichten senden“ oder wähle einen anderen Kanal.",
 		"aboveBot": "über {{bot}}",
 		"first": "Erste",
 		"last": "Letzte",
@@ -38,7 +38,12 @@
 		"tooPowerful": "moderiert oder verwaltet",
 		"on": "An",
 		"off": "Aus",
-		"partOf": "{{part, number}} von {{whole, number}}"
+		"partOf": "{{part, number}} von {{whole, number}}",
+		"deletedChannel": "einem gelöschten Kanal",
+		"deletedChannelTitle": "Ein gelöschter Kanal",
+		"hiddenChannel": "einem Kanal, den du nicht sehen kannst",
+		"hiddenChannelTitle": "Ein Kanal, den du nicht sehen kannst",
+		"hiddenChannelWarning": "Du kannst diesen Kanal in Discord nicht sehen, daher kann ihn nur jemand ändern, der ihn sieht."
 	},
 	"nav": {
 		"servers": "Server",
@@ -368,7 +373,6 @@
 		"detailLobby": "Lobby: {{channel}}",
 		"detailTreasure": "{{amount}} pro Fund",
 		"detailCasino": "{{open, number}} von {{total, number}} Spielen offen",
-		"deletedChannel": "einem gelöschten Kanal",
 		"missingManageRoles": "Rollen verwalten — nötig für Level-Belohnungen, automatische Rollen und Verifizierung",
 		"missingManageMessages": "Nachrichten verwalten — nötig fürs Zählen und angeheftete Nachrichten",
 		"missingViewAuditLog": "Audit-Log anzeigen — nötig, damit das Audit-Logging nennt, wer was getan hat",
@@ -750,9 +754,7 @@
 		"addSticky": "Hinzufügen",
 		"countOf": "{{used}} von {{limit}}",
 		"removeIn": "Sticky in {{channel}} entfernen",
-		"cannotPost": "{{bot}} kann in #{{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen.",
-		"deletedChannel": "einem gelöschten Kanal",
-		"deletedChannelTitle": "Ein gelöschter Kanal",
+		"cannotPost": "{{bot}} kann in {{channel}} nicht posten, daher wird diese Sticky-Nachricht nie erscheinen.",
 		"sinceLast": "Nachrichten seit dem letzten Post: {{done}} von {{cap}}"
 	},
 	"autoResponders": {
@@ -1164,7 +1166,8 @@
 		"rolesUnreadable": "Die Rollen konnten nicht gelesen werden.",
 		"saveRoles": "Rollen speichern",
 		"levelOnXp": "Level {{level}} mit {{xp}} XP.",
-		"levelRange": "0 bis {{max, number}}"
+		"levelRange": "0 bis {{max, number}}",
+		"warningsHidden": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um Verwarnungen zu sehen oder zu vergeben."
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1906,7 +1909,7 @@
 		"notPosted": "Nicht gepostet",
 		"noneBody": "Noch ist nichts gepostet. Wähle unten einen Kanal.",
 		"goneBody": "Der Kanal, in dem sie stand, wurde gelöscht. Poste sie woanders oder entferne sie.",
-		"postedBody": "Gepostet in #{{channel}}.",
+		"postedBody": "Gepostet in {{channel}}.",
 		"remove": "Nachricht entfernen",
 		"chooseTitle": "Kanal wählen",
 		"chooseBody": "Beim Posten wird eine neue Nachricht gesendet und die alte entfernt, es gibt also immer nur eine.",
@@ -2034,7 +2037,9 @@
 		"verbPinned": "Angeheftet",
 		"verbUnpinned": "Losgelöst",
 		"verbBotAdded": "Bot hinzugefügt",
-		"verbOther": "Geändert"
+		"verbOther": "Geändert",
+		"discordWithheld": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um in Discord vorgenommene Änderungen zu sehen. Es werden nur Dashboard-Änderungen angezeigt.",
+		"moderationWithheld": "Du brauchst die Berechtigung „{{permission}}“, um hier vergebene Verwarnungen, Timeouts, Kicks und Banns zu sehen."
 	},
 	"insights": {
 		"title": "Einblicke",
