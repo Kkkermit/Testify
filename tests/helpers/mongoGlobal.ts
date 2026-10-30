@@ -64,7 +64,9 @@ export default async function setup(globalConfig: GlobalConfig): Promise<void> {
 	} catch (error) {
 		// Each suite would still build what it uses, but CI would then be back to stalling, so CI hears about it.
 		if (process.env["REQUIRE_DB_TESTS"] === "1") {
-			throw new Error("The test databases could not be built ahead of the run.", { cause: error });
+			// Jest prints only the message of a global setup's error, so the cause has to be in it.
+			const cause = error instanceof Error ? error.message : String(error);
+			throw new Error(`The test databases could not be built ahead of the run: ${cause}`, { cause: error });
 		}
 
 		console.warn("\nThe test databases could not be built ahead of the run; each suite will build its own.\n", error);

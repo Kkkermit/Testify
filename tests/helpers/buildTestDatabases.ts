@@ -1,5 +1,6 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
+import { pathToFileURL } from "node:url";
 import mongoose, { type Model } from "mongoose";
 import { workerDatabase } from "./mongo";
 
@@ -11,7 +12,8 @@ async function everyModel(): Promise<Model<unknown>[]> {
 	const files = readdirSync(MODELS).filter((file) => file.endsWith(".schema.ts"));
 	await Promise.all(
 		files.map(async (file) => {
-			await import(join(MODELS, file));
+			// A Windows path is read as a URL whose scheme is the drive letter, so it has to be a file URL.
+			await import(pathToFileURL(join(MODELS, file)).href);
 		}),
 	);
 	return Object.values(mongoose.models) as Model<unknown>[];
