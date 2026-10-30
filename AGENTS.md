@@ -67,8 +67,8 @@ numbers, which drift):
 | Events               | 31, in 6 groups                   |
 | `src/lib` helpers    | 204, in 29 domain folders         |
 | Schemas/repositories | 46 / 44                           |
-| Scheduled jobs       | 10                                |
-| Tests                | 3,581 across 456 suites           |
+| Scheduled jobs       | 11                                |
+| Tests                | 3,585 across 456 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -237,8 +237,8 @@ src/
 │   ├── connection.ts
 │   ├── models/           46 Mongoose schemas, one file per feature
 │   └── repositories/     44 query layers, one per feature. Commands never touch a model directly.
-├── jobs/                 10 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
-│                         scheduled messages, join-to-create channels, birthdays)
+├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
+│                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
 tests/                    Mirrors src/. 310 suites; the dashboard's 146 sit beside its code.
@@ -960,7 +960,16 @@ What good tests here look like:
 - **A worker's database outlives each suite.** Every test starts on emptied collections, but the database is not
   dropped between suites, because dropping it made the next suite build every collection and index again: 464
   collection creations a run instead of 137, and on the Windows runner five suites once timed out together while
-  building them. The setup hook has 60 seconds, since a worker's first suite still builds the lot.
+  building them.
+- **On CI every worker's database is built before the first suite.** Building collections during the run still
+  stalled the shared server: one `deleteMany` on a single collection outlasted its 20-second hook while two other
+  workers built theirs. So when Jest knows it is on CI (`globalConfig.ci`, which the `CI` variable sets),
+  `mongoGlobal.ts` runs `buildTestDatabases.ts` under tsx — the schemas import `@config` aliases, which Node alone
+  cannot resolve there — and it creates every model's collection and indexes in each worker's database, one database
+  at a time: 186 collections before the run, none during it, about 3 seconds on Linux. A local run builds lazily, so
+  one test file pays for one collection rather than for every worker's. A builder that fails is fatal under
+  `REQUIRE_DB_TESTS`, since the run would quietly be back to stalling, and a warning elsewhere. The emptying hook has
+  the setup hook's 60 seconds, because a stall on the shared server is not the suite's doing.
 
 **Mutation is how you find a test that cannot fail.** Coverage says a line ran, never that anything checked it.
 Changing one operator and re-running the suite that should care is the only cheap proof: it is what found the
@@ -1245,6 +1254,20 @@ Two things go with it. `ytDlpStreamArgs` passes `--no-playlist` — a YouTube li
 dropped connection costs a retry rather than the track. And **stderr is captured rather than discarded**: a
 downloader that dies now says why through `onProblem`, which is the difference between a log line naming
 "Sign in to confirm you are not a bot" and one saying a stream closed.
+
+**Every download runs in a temporary folder of its own.** yt-dlp writes a stream that arrives in pieces — SoundCloud's
+HLS, any `m3u8` — to `--Frag<n>.part` in its working directory, and ignores `--paths` when the output is stdout, which
+it says itself ("--paths is ignored when an outputting to stdout", read out of `YoutubeDL.py`). The container runs as
+`USER node` in a `/app` that root owns, so every such track failed with `[Errno 13] Permission denied: '--Frag1.part'`
+and then "The downloaded file is empty", reproduced with the real yt-dlp against a local HLS stream. `openStream` now
+spawns it in a fresh `mkdtemp` folder, removed when the process closes, so two downloads at once never write pieces
+with the same names either. Without a temporary folder a stream that arrives whole still plays, and a write that fails
+anyway is the `disk` problem, which gets no retry because every try would fail alike. Only one piece is on disk at a
+time — `--concurrent-fragments` defaults to 1 and each is deleted once appended — and a song is never a file. A bot
+that dies mid-track cannot clear its folders, so each is named with the process id that made it and
+`sweepScratchFolders` runs once after start-up, removing a folder only when that process is gone, or, for its own id,
+when the folder predates this start: a container is process 1 every time, and a development and a production bot can
+share one `/tmp`.
 
 **A stall and an ending arrive as the same event, and that distinction is the whole design.** `decideOnIdle` in
 `musicQueue.util.ts` compares `AudioResource.playbackDuration` against the track's stated length: short by more
