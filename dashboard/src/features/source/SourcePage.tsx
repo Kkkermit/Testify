@@ -5,6 +5,7 @@ import { Link, useParams } from "react-router";
 import { PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { SiteError } from "@/features/site/components/SiteError";
+import { TrailBack } from "@/features/site/components/TrailBack";
 import { FileTree } from "@/features/source/components/FileTree";
 import { FileView } from "@/features/source/components/FileView";
 import { FolderView } from "@/features/source/components/FolderView";
@@ -27,6 +28,7 @@ export function SourcePage(): React.JSX.Element {
 
 	return (
 		<div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 pt-6 sm:px-6">
+			<TrailBack />
 			{path === "" ? <Standing /> : <Breadcrumbs path={path} />}
 
 			{tree.isError ? (

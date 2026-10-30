@@ -265,7 +265,7 @@
 	},
 	"appearance": {
 		"title": "Apparence",
-		"subtitle": "L’aspect de ce tableau de bord dans votre navigateur. Personne d’autre n’est affecté.",
+		"subtitle": "L’aspect de ce site dans votre navigateur. Personne d’autre n’est affecté.",
 		"theme": "Thème",
 		"themeDescribes": "Suit le système et change quand votre appareil change, au coucher du soleil ou selon l’horaire que vous avez déjà défini.",
 		"system": "Système",
@@ -297,7 +297,7 @@
 		"motionFullHint": "Animer même si l’appareil en demande moins",
 		"motionReducedHint": "Tout garder immobile, quoi que demande l’appareil",
 		"language": "Langue",
-		"languageDescribes": "Les messages de {{bot}} dans Discord ne sont pas traduits : ceci ne concerne que le tableau de bord."
+		"languageDescribes": "Les messages de {{bot}} dans Discord ne sont pas traduits : seul ce site l’est."
 	},
 	"guilds": {
 		"title": "Serveurs",
@@ -2144,6 +2144,7 @@
 		"privacy": "Confidentialité",
 		"github": "GitHub",
 		"version": "v{{version}}",
+		"backTo": "Retour à {{page}}",
 		"offTitle": "Le tableau de bord est désactivé",
 		"offBody": "Cette copie de {{bot}} sert sa documentation et son code source, mais personne ne peut s’y connecter. Son propriétaire peut activer le tableau de bord.",
 		"backHome": "Retour à l’accueil",

@@ -265,7 +265,7 @@
 	},
 	"appearance": {
 		"title": "Aspetto",
-		"subtitle": "Come appare questa dashboard nel tuo browser. Nessun altro ne è toccato.",
+		"subtitle": "Come appare questo sito nel tuo browser. Nessun altro ne è toccato.",
 		"theme": "Tema",
 		"themeDescribes": "Segue il sistema e cambia quando cambia il dispositivo, al tramonto o secondo l’orario che hai già impostato.",
 		"system": "Sistema",
@@ -297,7 +297,7 @@
 		"motionFullHint": "Anima anche se il dispositivo chiede di meno",
 		"motionReducedHint": "Tieni tutto fermo, qualunque cosa chieda il dispositivo",
 		"language": "Lingua",
-		"languageDescribes": "I messaggi di {{bot}} dentro Discord non sono tradotti: questa è solo la dashboard."
+		"languageDescribes": "I messaggi di {{bot}} dentro Discord non sono tradotti: solo questo sito lo è."
 	},
 	"guilds": {
 		"title": "Server",
@@ -2144,6 +2144,7 @@
 		"privacy": "Privacy",
 		"github": "GitHub",
 		"version": "v{{version}}",
+		"backTo": "Torna a {{page}}",
 		"offTitle": "La dashboard è disattivata",
 		"offBody": "Questa copia di {{bot}} mostra la documentazione e il codice sorgente, ma nessuno può accedervi. Chi la gestisce può attivare la dashboard.",
 		"backHome": "Torna alla pagina iniziale",

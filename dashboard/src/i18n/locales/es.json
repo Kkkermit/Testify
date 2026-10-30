@@ -265,7 +265,7 @@
 	},
 	"appearance": {
 		"title": "Apariencia",
-		"subtitle": "Cómo se ve este panel en tu navegador. No afecta a nadie más.",
+		"subtitle": "Cómo se ve este sitio en tu navegador. No afecta a nadie más.",
 		"theme": "Tema",
 		"themeDescribes": "Sigue al sistema y cambiará cuando lo haga tu dispositivo, al anochecer o según el horario que ya tengas puesto.",
 		"system": "Sistema",
@@ -297,7 +297,7 @@
 		"motionFullHint": "Animar aunque el dispositivo pida menos",
 		"motionReducedHint": "Mantenerlo todo quieto, pida lo que pida el dispositivo",
 		"language": "Idioma",
-		"languageDescribes": "Los mensajes de {{bot}} dentro de Discord no están traducidos: esto es solo el panel."
+		"languageDescribes": "Los mensajes de {{bot}} dentro de Discord no están traducidos: solo este sitio."
 	},
 	"guilds": {
 		"title": "Servidores",
@@ -2144,6 +2144,7 @@
 		"privacy": "Privacidad",
 		"github": "GitHub",
 		"version": "v{{version}}",
+		"backTo": "Volver a {{page}}",
 		"offTitle": "El panel está desactivado",
 		"offBody": "Esta copia de {{bot}} muestra su documentación y su código fuente, pero nadie puede iniciar sesión. Quien la gestiona puede activar el panel.",
 		"backHome": "Volver al inicio",

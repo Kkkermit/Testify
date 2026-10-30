@@ -262,7 +262,7 @@
 	},
 	"appearance": {
 		"title": "Appearance",
-		"subtitle": "How this dashboard looks in your browser. Nobody else is affected.",
+		"subtitle": "How this site looks in your browser. Nobody else is affected.",
 		"theme": "Theme",
 		"themeDescribes": "Follow the system and it changes when your device does, at sunset or on a schedule you already set.",
 		"system": "System",
@@ -294,7 +294,7 @@
 		"motionFullHint": "Animate, even where this device asks for less",
 		"motionReducedHint": "Hold everything still, whatever the device asks for",
 		"language": "Language",
-		"languageDescribes": "{{bot}}’s own messages in Discord are not translated — this is the dashboard only."
+		"languageDescribes": "{{bot}}’s own messages in Discord are not translated — only this site is."
 	},
 	"guilds": {
 		"title": "Servers",
@@ -2105,6 +2105,7 @@
 		"privacy": "Privacy",
 		"github": "GitHub",
 		"version": "v{{version}}",
+		"backTo": "Back to {{page}}",
 		"offTitle": "The dashboard is off",
 		"offBody": "This copy of {{bot}} serves its docs and its source code, but nobody can sign in to it. Its owner can turn the dashboard on.",
 		"backHome": "Back to the home page",

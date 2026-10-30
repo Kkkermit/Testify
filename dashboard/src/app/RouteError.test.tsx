@@ -133,11 +133,13 @@ function* walk(routes: RouteObject[]): Generator<RouteObject> {
 }
 
 describe("where the error screens sit", () => {
-	/** A page that fails inside the shell keeps the sidebar, so the reader can go somewhere else. */
+	/** A page that fails inside the shell keeps the sidebar, or the site's header, so the reader can go somewhere else. */
 	it("catches page failures inside the shell", async () => {
 		const { routes } = await import("@/routes");
-		const boundary = [...walk(routes as RouteObject[])].find((route) => route.errorElement !== undefined);
+		const boundaries = [...walk(routes as RouteObject[])].filter((route) => route.errorElement !== undefined);
+		const caught = (path: string): boolean =>
+			boundaries.some((boundary) => boundary.children?.some((route) => route.path === path) === true);
 
-		expect(boundary?.children?.some((route) => route.path === "/guilds")).toBe(true);
+		expect([caught("/guilds"), caught("/appearance")]).toEqual([true, true]);
 	});
 });

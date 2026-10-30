@@ -28,4 +28,12 @@ describe("the site's header", () => {
 		expect(screen.getAllByRole("link", { name: "Quellcode" })).toHaveLength(2);
 		expect(localStorage.getItem("testify:locale")).toBe("de");
 	});
+
+	/** Theme and language belong to the reader, so the website reaches them without an account. */
+	it("links the appearance settings from the header and the footer", async () => {
+		renderWithProviders(<SiteShell />);
+
+		const links = await screen.findAllByRole("link", { name: "Appearance" });
+		expect(links.map((link) => link.getAttribute("href"))).toEqual(["/appearance", "/appearance"]);
+	});
 });

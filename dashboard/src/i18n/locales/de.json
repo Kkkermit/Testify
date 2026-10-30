@@ -262,7 +262,7 @@
 	},
 	"appearance": {
 		"title": "Darstellung",
-		"subtitle": "Wie dieses Dashboard in deinem Browser aussieht. Niemand sonst ist betroffen.",
+		"subtitle": "Wie diese Seite in deinem Browser aussieht. Niemand sonst ist betroffen.",
 		"theme": "Design",
 		"themeDescribes": "Folgt dem System und wechselt, wenn dein Gerät es tut — bei Sonnenuntergang oder nach deinem eigenen Zeitplan.",
 		"system": "System",
@@ -294,7 +294,7 @@
 		"motionFullHint": "Animieren, auch wenn das Gerät weniger verlangt",
 		"motionReducedHint": "Alles ruhig halten, egal was das Gerät verlangt",
 		"language": "Sprache",
-		"languageDescribes": "{{bot}}s eigene Nachrichten in Discord sind nicht übersetzt — das hier betrifft nur das Dashboard."
+		"languageDescribes": "{{bot}}s eigene Nachrichten in Discord sind nicht übersetzt — nur diese Seite."
 	},
 	"guilds": {
 		"title": "Server",
@@ -2105,6 +2105,7 @@
 		"privacy": "Datenschutz",
 		"github": "GitHub",
 		"version": "v{{version}}",
+		"backTo": "Zurück zu {{page}}",
 		"offTitle": "Das Dashboard ist aus",
 		"offBody": "Diese Kopie von {{bot}} zeigt ihre Doku und ihren Quellcode, aber niemand kann sich anmelden. Ihr Betreiber kann das Dashboard einschalten.",
 		"backHome": "Zurück zur Startseite",

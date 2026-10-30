@@ -22,6 +22,7 @@ import {
 } from "@/features/docs/docs.pages";
 import { sectionsOf } from "@/features/docs/markdown.utils";
 import { SiteError } from "@/features/site/components/SiteError";
+import { TrailBack } from "@/features/site/components/TrailBack";
 import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -38,17 +39,21 @@ export function DocsPage(): React.JSX.Element {
 	);
 
 	return (
-		<div className="mx-auto grid w-full max-w-6xl gap-6 px-4 pt-6 sm:px-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
-			<DocsNav current={page?.slug} />
+		<div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pt-6 sm:px-6">
+			<TrailBack />
 
-			<div className="min-w-0">
-				{slug === undefined && articleId === undefined ? (
-					<DocsIndex />
-				) : page === undefined ? (
-					<SiteError title={t("docs.missingTitle")} body={t("docs.missingBody")} />
-				) : (
-					<DocView page={page} articleId={articleId} />
-				)}
+			<div className="grid gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
+				<DocsNav current={page?.slug} />
+
+				<div className="min-w-0">
+					{slug === undefined && articleId === undefined ? (
+						<DocsIndex />
+					) : page === undefined ? (
+						<SiteError title={t("docs.missingTitle")} body={t("docs.missingBody")} />
+					) : (
+						<DocView page={page} articleId={articleId} />
+					)}
+				</div>
 			</div>
 		</div>
 	);

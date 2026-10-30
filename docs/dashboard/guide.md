@@ -581,9 +581,9 @@ then add `"it"` to `LOCALES` and its endonym to `LOCALE_NAMES` in `src/i18n/inde
 on any key English has that the new file does not, on a stale key left behind by a rename, on a changed
 `{{placeholder}}`, and on a plural missing a form the language picks — `Intl.PluralRules` says which forms those are.
 
-**The language is chosen anywhere.** The site's header and the sign-in screen carry `LanguageSelect`, and the
-Appearance screen the flag picker; all three write the same `testify:locale`, so a choice made on the landing page
-is the one the dashboard opens in.
+**The language is chosen anywhere.** The site's header (from 640px) and the sign-in screen carry `LanguageSelect`,
+and the Appearance screen the flag picker; all three write the same `testify:locale`, so a choice made on the landing
+page is the one the dashboard opens in. Appearance needs no account, and every site page links it.
 
 **What is deliberately not translated:** anything a server has typed itself — a welcome message, a ticket panel,
 a role name — the bot's own replies inside Discord, and the repository's own Markdown on the docs pages, which say

@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 204, in 29 domain folders         |
 | Schemas/repositories | 46 / 44                           |
 | Scheduled jobs       | 10                                |
-| Tests                | 3,571 across 453 suites           |
+| Tests                | 3,581 across 456 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 310 suites; the dashboard's 143 sit beside its code.
+tests/                    Mirrors src/. 310 suites; the dashboard's 146 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -1985,6 +1985,7 @@ four tabs, three shared components and two testable modules.
 | `/status`                        | Online or not, uptime, speed, packages and outside services, 30 days back    |
 | `/help`                          | Getting started, and the support assistant that answers from help articles   |
 | `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                              |
+| `/appearance`                    | Theme, accent, motion and language; public, in whichever frame suits         |
 | `/owner`                         | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control   |
 
 | Command                 | What it does                                                  |
@@ -2930,6 +2931,29 @@ GitHub's to be found by, not this copy's. `serveDashboard` answers a path with a
 `/sign-in`, and writes the same `testify:locale` the Appearance screen does, so somebody who picks German on the
 landing page signs in to a dashboard already in German. Everything the site draws is translated; the docs' bodies
 are the repository's English, and a page read in another language says so (`docs.englishOnly`).
+
+**Appearance belongs to the reader, so it needs no account.** `/appearance` sits outside `RequireAuth` under
+`ReaderShell`, which draws it in the website for somebody signed out, or on a host with no dashboard, and in the
+dashboard for somebody signed in; on a host with no dashboard it never asks `/auth/me`, which would only refuse. The
+site's header links it with a palette icon and the footer by name. Below 640px the header holds only the links and that
+icon, with the language reached through Appearance: measured at 320px in all six languages, the select did not fit
+beside Spanish, Italian or Russian, and a link label that wraps reads as two links. Header links never wrap.
+
+**A link followed out of the docs or the source leaves a way back.** `followTrails` in `lib/trail.ts` subscribes to
+the router, so the page a link was followed from is recorded before React renders the page it leads to and
+`TrailBack` can show "Back to …" on that page's first render; a trail recorded in an effect would arrive one render
+late. Three things about it are load-bearing:
+
+- **The trail belongs to the history entry**, keyed by `location.key` and kept in `sessionStorage`, so Back,
+  Forward and a reload all find it again. What is read back must name a docs or source page, so nothing written into
+  storage by hand becomes a link off the site.
+- **The button goes back through history, not forward to the address** (`navigate(-1)`), which is what returns the
+  reader to their place on the page — measured in a browser, a link followed from 7,694px down a docs page comes back
+  to 7,694px. A modified click is left alone, so it opens the page afresh as any link would.
+- **`ScrollRestoration` is mounted only on the site's pages** (`remembersScroll`), by `ScrollMemory` at the router's
+  root. It returns a new page to its top on every change of address, and the dashboard's screens keep their filters,
+  pages and tabs in the address, so mounted everywhere it would throw a reader to the top of the members list on each
+  keystroke. The site's pages never write their own address.
 
 **The landing page types real commands.** `Composer` is Discord's message box typing `/play`, `/remind me` and
 `/warn create`, with the menu filled from the generated `docs/commands.md`. `composer.utils.test.ts` reads each

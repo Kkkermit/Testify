@@ -2,15 +2,18 @@ import { type ComponentType, lazy, type LazyExoticComponent, Suspense } from "re
 import { createBrowserRouter } from "react-router";
 import { AppShell } from "@/app/AppShell";
 import { OwnerRouteError } from "@/app/OwnerRouteError";
+import { ReaderShell } from "@/app/ReaderShell";
 import { RequireAuth } from "@/app/RequireAuth";
 import { RequireGuild } from "@/app/RequireGuild";
 import { RequireOwner } from "@/app/RequireOwner";
 import { RouteError } from "@/app/RouteError";
+import { ScrollMemory } from "@/app/ScrollMemory";
 import { Skeleton } from "@/components/primitives";
 import { SignInPage } from "@/features/auth/SignInPage";
 import { PRIVACY, TERMS } from "@/features/legal/legal.content";
 import { NotFoundPage } from "@/features/not-found/NotFoundPage";
 import { SiteShell } from "@/features/site/SiteShell";
+import { followTrails } from "@/lib/trail";
 // Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 
 // Lazy per route, so a server manager never downloads the owner console.
@@ -91,6 +94,13 @@ export const routes = [
 			{ path: "/source-code/*", element: lazily(<SourcePage />) },
 		],
 	},
+	// Theme, accent, motion and language are the reader's, so they need no account and keep the frame they were opened in.
+	{
+		element: <ReaderShell />,
+		children: [
+			{ errorElement: <RouteError />, children: [{ path: "/appearance", element: lazily(<AppearancePage />) }] },
+		],
+	},
 	{ path: "/sign-in", element: <SignInPage /> },
 	// Outside RequireAuth: somebody deciding whether to add the bot has to be able to read these first.
 	{ path: "/terms", element: lazily(<LegalPage document={TERMS} />) },
@@ -148,7 +158,6 @@ export const routes = [
 							{ path: "/commands", element: lazily(<CommandsPage />) },
 							{ path: "/help", element: lazily(<HelpPage />) },
 							{ path: "/status", element: lazily(<StatusPage />) },
-							{ path: "/appearance", element: lazily(<AppearancePage />) },
 							// Behind its own guard, so the console's existence is not disclosed by rendering its shell.
 							{
 								element: <RequireOwner />,
@@ -165,4 +174,8 @@ export const routes = [
 ];
 
 // Anything the shell cannot catch — the sign-in page, the gate itself — still gets a page rather than the router's own.
-export const router = createBrowserRouter([{ errorElement: <RouteError standalone />, children: routes }]);
+export const router = createBrowserRouter([
+	{ element: <ScrollMemory />, errorElement: <RouteError standalone />, children: routes },
+]);
+
+followTrails(router);
