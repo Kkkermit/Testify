@@ -1,10 +1,22 @@
 import { averageUptime, HISTORY_FILL, percent } from "@/features/status/status.utils";
+import { i18next } from "@/i18n";
 
 describe("percent", () => {
 	/** Rounding up would call a day with a real outage a perfect one. */
 	it("never rounds a near miss up to a clean 100%", () => {
 		expect(percent(0.99999)).toBe("99.99%");
 		expect(percent(1)).toBe("100%");
+	});
+
+	/** A French reader writes `96,66 %`, with a comma and a space the browser's region never decides. */
+	it("writes the share the way the reader's language does", async () => {
+		await i18next.changeLanguage("fr");
+		try {
+			// ICU releases disagree on which no-break space comes before the sign.
+			expect(percent(0.9666)).toMatch(/^96,66[\u00a0\u202f]%$/);
+		} finally {
+			await i18next.changeLanguage("en");
+		}
 	});
 });
 

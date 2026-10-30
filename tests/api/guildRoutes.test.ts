@@ -236,8 +236,8 @@ describe("the guild overview", () => {
 		const app = appFor({ botPermissions: [PermissionFlagsBits.ManageMessages] });
 		const body = (await (await app.request(`/guilds/${GUILD}/overview`)).json()) as GuildOverview;
 
-		expect(body.missingPermissions.join(" ")).toMatch(/Manage Roles/);
-		expect(body.missingPermissions.join(" ")).not.toMatch(/Manage Messages/);
+		expect(body.missingPermissions).toContain("ManageRoles");
+		expect(body.missingPermissions).not.toContain("ManageMessages");
 	});
 
 	it("says nothing about permissions when the bot has them all", async () => {

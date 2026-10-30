@@ -1,5 +1,6 @@
 import { LOTTERY_LIMITS, type LotteryFrequency, type LotterySettings, lotteryBlocked } from "@testify/shared";
 import { type TFunction } from "i18next";
+import { formatNumber } from "@/lib/intl";
 import { problemText } from "@/lib/problemText";
 
 export interface Draft {
@@ -37,10 +38,10 @@ export function draftProblem(draft: Draft, t: TFunction): string | null {
 		return t("lottery.winnersBetween", { min: LOTTERY_LIMITS.minWinners, max: LOTTERY_LIMITS.maxWinners });
 	}
 	if (!Number.isInteger(basePrizePool) || basePrizePool < 0 || basePrizePool > LOTTERY_LIMITS.maxBasePool) {
-		return t("lottery.potTooBig", { max: LOTTERY_LIMITS.maxBasePool.toLocaleString() });
+		return t("lottery.potTooBig", { max: formatNumber(LOTTERY_LIMITS.maxBasePool) });
 	}
 	if (Number.isInteger(entryFee) && entryFee > LOTTERY_LIMITS.maxEntryFee) {
-		return t("lottery.ticketTooDear", { max: LOTTERY_LIMITS.maxEntryFee.toLocaleString() });
+		return t("lottery.ticketTooDear", { max: formatNumber(LOTTERY_LIMITS.maxEntryFee) });
 	}
 
 	return problemText(lotteryBlocked(draft), t);

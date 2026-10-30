@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ChannelPicker, Field, FIELD, postableChannels, RadioCard, SELECT, Warning } from "@/components/form";
 import { Button, Card, CARD_HEADING, Eyebrow, PageHeader } from "@/components/primitives";
+import { COLOUR_LABELS } from "@/features/announcements/announcements.labels";
 import {
 	type AnnouncementDraft,
 	bodyOf,
@@ -108,7 +109,7 @@ export function AnnouncementsPage(): React.JSX.Element {
 								>
 									{EMBED_COLOURS.map((colour) => (
 										<option key={colour.value} value={colour.value}>
-											{colour.name}
+											{t(COLOUR_LABELS[colour.value])}
 										</option>
 									))}
 								</select>

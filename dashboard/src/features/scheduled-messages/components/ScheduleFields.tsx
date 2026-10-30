@@ -82,7 +82,7 @@ export function ScheduleFields({
 					className={cn(FIELD, "resize-y")}
 				/>
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-					{value.message.length} of {SCHEDULE_LIMITS.maxMessage}
+					{t("common.partOf", { part: value.message.length, whole: SCHEDULE_LIMITS.maxMessage })}
 				</span>
 			</Field>
 		</>

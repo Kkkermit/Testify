@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, ExternalLink } from "lucide-react";
+import { ArrowRight, ExternalLink, Languages } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useParams } from "react-router";
@@ -22,6 +22,7 @@ import {
 } from "@/features/docs/docs.pages";
 import { sectionsOf } from "@/features/docs/markdown.utils";
 import { SiteError } from "@/features/site/components/SiteError";
+import { TrailBack } from "@/features/site/components/TrailBack";
 import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
@@ -38,17 +39,21 @@ export function DocsPage(): React.JSX.Element {
 	);
 
 	return (
-		<div className="mx-auto grid w-full max-w-6xl gap-6 px-4 pt-6 sm:px-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
-			<DocsNav current={page?.slug} />
+		<div className="mx-auto flex w-full max-w-6xl flex-col gap-4 px-4 pt-6 sm:px-6">
+			<TrailBack />
 
-			<div className="min-w-0">
-				{slug === undefined && articleId === undefined ? (
-					<DocsIndex />
-				) : page === undefined ? (
-					<SiteError title={t("docs.missingTitle")} body={t("docs.missingBody")} />
-				) : (
-					<DocView page={page} articleId={articleId} />
-				)}
+			<div className="grid gap-6 lg:grid-cols-[13rem_minmax(0,1fr)]">
+				<DocsNav current={page?.slug} />
+
+				<div className="min-w-0">
+					{slug === undefined && articleId === undefined ? (
+						<DocsIndex />
+					) : page === undefined ? (
+						<SiteError title={t("docs.missingTitle")} body={t("docs.missingBody")} />
+					) : (
+						<DocView page={page} articleId={articleId} />
+					)}
+				</div>
 			</div>
 		</div>
 	);
@@ -142,7 +147,7 @@ function DocsIndex(): React.JSX.Element {
 }
 
 function DocView({ page, articleId }: { page: DocPage; articleId: string | undefined }): React.JSX.Element {
-	const { t } = useTranslation();
+	const { t, i18n } = useTranslation();
 
 	return (
 		<article className="flex flex-col gap-6">
@@ -150,6 +155,13 @@ function DocView({ page, articleId }: { page: DocPage; articleId: string | undef
 				<Eyebrow>{t(GROUP_LABELS[page.group])}</Eyebrow>
 				<h1 className={PAGE_TITLE}>{t(page.titleKey)}</h1>
 				<p className="text-muted-foreground">{t(page.summaryKey)}</p>
+				{/* The page around a doc follows the reader's language; the doc itself is the repository's English. */}
+				{i18n.resolvedLanguage !== "en" && (
+					<p className="text-muted-foreground flex items-center gap-2 text-sm">
+						<Languages size={15} aria-hidden="true" className="shrink-0" />
+						{t("docs.englishOnly")}
+					</p>
+				)}
 			</header>
 
 			{page.kind === "markdown" && <MarkdownDoc page={page} />}

@@ -16,11 +16,16 @@ describeWithMongo("stickyRepository", () => {
 
 	/** A burst of messages arriving together must repost the sticky once, not once per message past the cap. */
 	it("reposts once however many messages cross the cap together", async () => {
-		await setSticky(GUILD, CHANNEL, "Read the rules", 3);
+		const reposts: number[] = [];
+		// One burst after another, because the first on a fresh connection tends to arrive a message at a time.
+		for (const channel of ["400000000000000011", "400000000000000012", "400000000000000013", "400000000000000014"]) {
+			await setSticky(GUILD, channel, "Read the rules", 3);
+			// One short of twice the cap: six can rightly cross it twice, when a reset lands between the third and fourth.
+			const results = await Promise.all(Array.from({ length: 5 }, async () => bumpSticky(GUILD, channel)));
+			reposts.push(results.filter((result) => result !== null).length);
+		}
 
-		const results = await Promise.all(Array.from({ length: 6 }, async () => bumpSticky(GUILD, CHANNEL)));
-
-		expect(results.filter((result) => result !== null)).toHaveLength(1);
+		expect(reposts).toEqual([1, 1, 1, 1]);
 	});
 
 	it("does nothing in a channel with no sticky", async () => {

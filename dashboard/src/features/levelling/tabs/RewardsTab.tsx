@@ -26,7 +26,7 @@ export function RewardsTab({
 
 	return (
 		<TabPanel
-			description={`A role handed out when someone reaches a level. ${String(rewards.length)} of ${String(LEVEL_LIMITS.maxRewards)} used.`}
+			description={t("levelling.rewardsBody", { used: rewards.length, max: LEVEL_LIMITS.maxRewards })}
 			saving={savingStateOf(update.isPending, update.isSuccess)}
 		>
 			{rewards.length === 0 ? (
@@ -39,12 +39,12 @@ export function RewardsTab({
 							className="hover:bg-muted/40 flex items-center gap-3 px-3 py-2 text-sm transition-colors duration-150"
 						>
 							<span className="bg-muted rounded-chip px-2 py-0.5 font-mono text-xs tabular-nums">
-								Level {reward.level}
+								{t("levelling.levelN", { level: reward.level })}
 							</span>
 							<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, reward.roleId)}</span>
 							<Button
 								variant="ghost"
-								aria-label={`Remove the reward for level ${String(reward.level)}`}
+								aria-label={t("levelling.removeReward", { level: reward.level })}
 								onClick={() => {
 									update.mutate(rewards.filter((candidate) => candidate.level !== reward.level));
 								}}
@@ -98,7 +98,7 @@ export function RewardsTab({
 			</div>
 
 			{full && <Warning>{t("levelling.rewardsFull")}</Warning>}
-			{taken && <Warning>Level {level} already has a reward. Remove it first, or pick another level.</Warning>}
+			{taken && <Warning>{t("levelling.levelTaken", { level })}</Warning>}
 			{assignable.length < roles.length && <Warning>{t("levelling.hierarchyNote")}</Warning>}
 			<Refusal error={update.error} />
 		</TabPanel>

@@ -41,7 +41,8 @@ export interface RepositoryStanding {
 	forks: number;
 	watchers: number;
 	openIssues: number;
-	license: string | null;
+	/** `custom` is GitHub saying the licence is not one it recognises, which it names "Other". */
+	license: { name: string; custom: boolean } | null;
 	defaultBranch: string;
 	pushedAt: string | null;
 	latestRelease: LatestRelease | null;

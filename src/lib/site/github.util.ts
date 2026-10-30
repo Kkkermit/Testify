@@ -71,7 +71,7 @@ const repositorySchema = z.object({
 	// `watchers_count` is the star count under an old name; subscribers are the people watching.
 	subscribers_count: z.number(),
 	open_issues_count: z.number(),
-	license: z.object({ name: z.string() }).nullable(),
+	license: z.object({ name: z.string(), spdx_id: z.string().nullable() }).nullable(),
 	default_branch: z.string(),
 	pushed_at: z.string().nullable(),
 });
@@ -189,7 +189,8 @@ export class GitHubReader {
 				forks: repo.forks_count,
 				watchers: repo.subscribers_count,
 				openIssues: repo.open_issues_count,
-				license: repo.license?.name ?? null,
+				license:
+					repo.license === null ? null : { name: repo.license.name, custom: repo.license.spdx_id === "NOASSERTION" },
 				defaultBranch: repo.default_branch,
 				pushedAt: repo.pushed_at,
 				latestRelease:

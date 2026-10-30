@@ -35,7 +35,10 @@
 		"first": "First",
 		"last": "Last",
 		"pageNumber": "Page {{page}}",
-		"tooPowerful": "moderates or administers"
+		"tooPowerful": "moderates or administers",
+		"on": "On",
+		"off": "Off",
+		"partOf": "{{part, number}} of {{whole, number}}"
 	},
 	"nav": {
 		"servers": "Servers",
@@ -259,7 +262,7 @@
 	},
 	"appearance": {
 		"title": "Appearance",
-		"subtitle": "How this dashboard looks in your browser. Nobody else is affected.",
+		"subtitle": "How this site looks in your browser. Nobody else is affected.",
 		"theme": "Theme",
 		"themeDescribes": "Follow the system and it changes when your device does, at sunset or on a schedule you already set.",
 		"system": "System",
@@ -291,7 +294,7 @@
 		"motionFullHint": "Animate, even where this device asks for less",
 		"motionReducedHint": "Hold everything still, whatever the device asks for",
 		"language": "Language",
-		"languageDescribes": "{{bot}}’s own messages in Discord are not translated — this is the dashboard only."
+		"languageDescribes": "{{bot}}’s own messages in Discord are not translated — only this site is."
 	},
 	"guilds": {
 		"title": "Servers",
@@ -329,7 +332,48 @@
 		"recentChanges": "Recent changes",
 		"missingTitle": "{{bot}} is missing permissions",
 		"missingBody": "These features are configured but will quietly do nothing until {{bot}} is granted them.",
-		"seeAllChanges": "See every change"
+		"seeAllChanges": "See every change",
+		"notSetUp": "Not set up",
+		"countEvents_one": "{{count, number}} event",
+		"countEvents_other": "{{count, number}} events",
+		"countBirthdays_one": "{{count, number}} birthday shared",
+		"countBirthdays_other": "{{count, number}} birthdays shared",
+		"countVerified_one": "{{count, number}} member verified",
+		"countVerified_other": "{{count, number}} members verified",
+		"countRoles_one": "{{count, number}} role",
+		"countRoles_other": "{{count, number}} roles",
+		"countMenus_one": "{{count, number}} menu",
+		"countMenus_other": "{{count, number}} menus",
+		"countChannels_one": "{{count, number}} channel",
+		"countChannels_other": "{{count, number}} channels",
+		"countResponders_one": "{{count, number}} auto-responder",
+		"countResponders_other": "{{count, number}} auto-responders",
+		"countMessages_one": "{{count, number}} message",
+		"countMessages_other": "{{count, number}} messages",
+		"countTicketsOpen_one": "{{count, number}} ticket open",
+		"countTicketsOpen_other": "{{count, number}} tickets open",
+		"countTicketsSold_one": "{{count, number}} ticket sold",
+		"countTicketsSold_other": "{{count, number}} tickets sold",
+		"countRewards_one": "{{count, number}} role reward",
+		"countRewards_other": "{{count, number}} role rewards",
+		"countBoosts_one": "{{count, number}} boost",
+		"countBoosts_other": "{{count, number}} boosts",
+		"detailHolding_one": "Holding accounts under {{count, number}} day",
+		"detailHolding_other": "Holding accounts under {{count, number}} days",
+		"detailWatching": "Watching for spikes",
+		"detailBypass": "Bypass: {{permission}}",
+		"detailCountingAt": "At {{at, number}}",
+		"detailPosting": "Posting in {{channel}}",
+		"detailStarboard": "{{threshold, number}} ⭐ to reach {{channel}}",
+		"detailLobby": "Lobby: {{channel}}",
+		"detailTreasure": "{{amount}} a drop",
+		"detailCasino": "{{open, number}} of {{total, number}} games open",
+		"deletedChannel": "a deleted channel",
+		"missingManageRoles": "Manage Roles — needed for level rewards, auto roles and verification",
+		"missingManageMessages": "Manage Messages — needed for counting and sticky messages",
+		"missingViewAuditLog": "View Audit Log — needed for audit logging to name who did what",
+		"missingManageChannels": "Manage Channels — needed for voice stats and tickets",
+		"missingAttachFiles": "Attach Files — needed for rank cards, welcome images and the casino"
 	},
 	"checklist": {
 		"title": "Get started",
@@ -385,7 +429,10 @@
 		"timesOut": "Times the member out",
 		"title": "AutoMod",
 		"whatToBlock": "What to block",
-		"wordOrPhrase": "Word or phrase"
+		"wordOrPhrase": "Word or phrase",
+		"noRules": "No AutoMod rules yet",
+		"enableRule": "Enable {{name}}",
+		"removeRule": "Remove {{name}}"
 	},
 	"auth": {
 		"almostThere": "Almost there",
@@ -456,7 +503,9 @@
 		"whatBody": "Tick a heading to take the whole group.",
 		"whatTitle": "What gets recorded",
 		"whereBody": "One channel receives every event chosen below.",
-		"whereTitle": "Where the log goes"
+		"whereTitle": "Where the log goes",
+		"selectAll": "Select all",
+		"clearAll": "Clear all"
 	},
 	"treasure": {
 		"title": "Treasure drops",
@@ -475,7 +524,9 @@
 		"resetDefaults": "Reset to defaults",
 		"messagesBetween": "Messages must be between {{min}} and {{max}}.",
 		"dropBetween": "A drop must be between {{min}} and {{max}}.",
-		"cooldownBetween": "The cooldown must be between {{min}} and {{max}} minutes."
+		"cooldownBetween": "The cooldown must be between {{min}} and {{max}} minutes.",
+		"rate_one": "A drop of {{amount}} every {{messages}} messages, at most once every {{count, number}} minute.",
+		"rate_other": "A drop of {{amount}} every {{messages}} messages, at most once every {{count, number}} minutes."
 	},
 	"welcome": {
 		"cardAlt": "Welcome card image",
@@ -638,7 +689,21 @@
 		"preview": "Preview",
 		"previewEmpty": "Your message appears here.",
 		"defaultTitle": "Announcement",
-		"previewNote": "Discord draws it a little differently, but the words and the ping are exactly these."
+		"previewNote": "Discord draws it a little differently, but the words and the ping are exactly these.",
+		"colourAqua": "Aqua",
+		"colourBlurple": "Blurple",
+		"colourBlue": "Blue",
+		"colourFuchsia": "Fuchsia",
+		"colourGold": "Gold",
+		"colourGreen": "Green",
+		"colourGrey": "Grey",
+		"colourNavy": "Navy",
+		"colourOrange": "Orange",
+		"colourPink": "Pink",
+		"colourPurple": "Purple",
+		"colourRed": "Red",
+		"colourWhite": "White",
+		"colourYellow": "Yellow"
 	},
 	"raid": {
 		"title": "Raid protection",
@@ -877,7 +942,48 @@
 		"locked": "{{bot}} needs this one to stay on",
 		"owner": "Owner",
 		"nsfw": "NSFW",
-		"configure": "Configure"
+		"configure": "Configure",
+		"alsoAnswers": "Also answers to {{alias}}",
+		"needs": "Needs {{permissions}}",
+		"categoryCommunity": "Community",
+		"categoryEconomy": "Economy",
+		"categoryCasino": "Casino",
+		"categoryFun": "Fun",
+		"categoryGames": "Games",
+		"categoryInfo": "Info",
+		"categoryLevelling": "Levelling",
+		"categoryModeration": "Moderation",
+		"categoryMusic": "Music",
+		"categorySettings": "Settings",
+		"categoryTickets": "Tickets",
+		"categoryGiveaway": "Giveaways",
+		"categoryDeveloper": "Feedback",
+		"categoryOwner": "Owner",
+		"permissionAdministrator": "Administrator",
+		"permissionAttachFiles": "Attach Files",
+		"permissionBanMembers": "Ban Members",
+		"permissionChangeNickname": "Change Nickname",
+		"permissionConnect": "Connect",
+		"permissionEmbedLinks": "Embed Links",
+		"permissionKickMembers": "Kick Members",
+		"permissionManageChannels": "Manage Channels",
+		"permissionManageEvents": "Manage Events",
+		"permissionManageGuild": "Manage Server",
+		"permissionManageGuildExpressions": "Manage Expressions",
+		"permissionManageMessages": "Manage Messages",
+		"permissionManageNicknames": "Manage Nicknames",
+		"permissionManageRoles": "Manage Roles",
+		"permissionManageThreads": "Manage Threads",
+		"permissionManageWebhooks": "Manage Webhooks",
+		"permissionMentionEveryone": "Mention Everyone",
+		"permissionModerateMembers": "Timeout Members",
+		"permissionMoveMembers": "Move Members",
+		"permissionReadMessageHistory": "Read Message History",
+		"permissionSendMessages": "Send Messages",
+		"permissionSendPolls": "Create Polls",
+		"permissionSpeak": "Speak",
+		"permissionViewAuditLog": "View Audit Log",
+		"permissionViewChannel": "View Channels"
 	},
 	"giveaways": {
 		"title": "Giveaways",
@@ -905,7 +1011,10 @@
 		"inThisServer": "In this server",
 		"startBody": "{{bot}} posts it and draws the winners when the time is up. Members enter with the 🎉 reaction.",
 		"deleteFor": "Delete the giveaway for {{prize}}",
-		"runningCount": "{{count, number}} running"
+		"runningCount": "{{count, number}} running",
+		"unitMinutes": "minutes",
+		"unitHours": "hours",
+		"unitDays": "days"
 	},
 	"levelling": {
 		"title": "Levelling",
@@ -933,7 +1042,12 @@
 		"tabGeneral": "General",
 		"tabRewards": "Role rewards",
 		"tabBoosts": "XP boosts",
-		"tabIgnores": "Ignored"
+		"tabIgnores": "Ignored",
+		"levelN": "Level {{level}}",
+		"multiplierFor": "Multiplier for {{role}}",
+		"removeReward": "Remove the reward for level {{level}}",
+		"levelTaken": "Level {{level}} already has a reward. Remove it first, or pick another level.",
+		"rewardsBody": "A role handed out when someone reaches a level. {{used, number}} of {{max, number}} used."
 	},
 	"members": {
 		"title": "Members",
@@ -1048,7 +1162,9 @@
 		"rolesNone": "There are no roles here that you could give them.",
 		"rolesNeedPermission": "You need the Manage Roles permission to change roles.",
 		"rolesUnreadable": "Their roles could not be read.",
-		"saveRoles": "Save roles"
+		"saveRoles": "Save roles",
+		"levelOnXp": "Level {{level}} on {{xp}} XP.",
+		"levelRange": "0 to {{max, number}}"
 	},
 	"tickets": {
 		"title": "Tickets",
@@ -1131,7 +1247,16 @@
 		"winnersBetween": "Between {{min}} and {{max}} winners.",
 		"potTooBig": "The starting pot cannot be more than {{max}}.",
 		"ticketTooDear": "A ticket cannot cost more than {{max}}.",
-		"moreWinnersThanTickets": "Only {{tickets}} tickets have been sold, so a draw for {{winners}} winners would leave some empty-handed."
+		"moreWinnersThanTickets": "Only {{tickets}} tickets have been sold, so a draw for {{winners}} winners would leave some empty-handed.",
+		"reschedulesHourly": "Saving this moves the next draw to an hour from now.",
+		"reschedulesDaily": "Saving this moves the next draw to a day from now.",
+		"reschedulesWeekly": "Saving this moves the next draw to a week from now.",
+		"endPot": "The pot of {{pot}} goes with it, and nobody is refunded.",
+		"everyHour": "Every hour",
+		"everyDay": "Every day",
+		"everyWeek": "Every week",
+		"freeze": "Freeze",
+		"unfreeze": "Unfreeze"
 	},
 	"music": {
 		"title": "Music",
@@ -1241,7 +1366,9 @@
 		"countWhole": "The target has to be a whole number of at least 1.",
 		"countHigh": "The target cannot be higher than {{max}}.",
 		"cannotGiveRoles": "{{bot}} cannot give {{roles}} — move its own role above them in the server settings.",
-		"cannotGiveThis": " — {{bot}} cannot give this out"
+		"cannotGiveThis": " — {{bot}} cannot give this out",
+		"verifiedSoFar": "{{verified, number}} verified so far",
+		"notPostedYet": "Not posted yet"
 	},
 	"owner": {
 		"title": "Owner console",
@@ -1442,7 +1569,37 @@
 		"showInLog": "show it in the log",
 		"actions": "Actions",
 		"block": "Block",
-		"blockMember": "Block {{name}} from {{bot}}"
+		"blockMember": "Block {{name}} from {{bot}}",
+		"closeGuild": "Close {{name}}",
+		"unblockNamed": "Unblock {{name}}",
+		"replied": "<command>/{{command}}</command> replied",
+		"droppedPanel": "The reply also carried a Components V2 panel, which only works inside Discord.",
+		"droppedButtons": "The reply also carried buttons, which only work inside Discord.",
+		"droppedAttachment": "The reply also carried an attachment, which only works inside Discord.",
+		"logsPause": "Pause",
+		"logsResume": "Resume",
+		"usageSummary_one": "{{count, number}} command run in the last {{days}} days, {{failing}} of them failing.",
+		"usageSummary_other": "{{count, number}} commands run in the last {{days}} days, {{failing}} of them failing.",
+		"unknown": "Unknown",
+		"created": "Created",
+		"serverOwner": "Server owner",
+		"noneSet": "None set",
+		"none": "None",
+		"runtimeEnvironment": "Environment",
+		"runtimeNode": "Node.js",
+		"runtimePlatform": "Platform",
+		"runtimeStarted": "Started",
+		"runtimeMemory": "{{heap}} heap of {{total}}, {{rss}} resident",
+		"runtimeLoaded": "Loaded",
+		"runtimeLoadedValue": "{{commands, number}} commands, {{events, number}} event listeners",
+		"runtimeGateway": "Gateway",
+		"runtimeConnecting_one": "still connecting, {{count, number}} shard",
+		"runtimeConnecting_other": "still connecting, {{count, number}} shards",
+		"runtimePing_one": "{{ping}}, {{count, number}} shard",
+		"runtimePing_other": "{{ping}}, {{count, number}} shards",
+		"runtimeCached": "Cached",
+		"runtimeCachedValue": "{{servers, number}} servers, {{channels, number}} channels, {{users, number}} users",
+		"categoryFailed": "{{category}} · {{failed, number}} failed"
 	},
 	"legal": {
 		"backToDashboard": "Back to the dashboard",
@@ -1948,6 +2105,7 @@
 		"privacy": "Privacy",
 		"github": "GitHub",
 		"version": "v{{version}}",
+		"backTo": "Back to {{page}}",
 		"offTitle": "The dashboard is off",
 		"offBody": "This copy of {{bot}} serves its docs and its source code, but nobody can sign in to it. Its owner can turn the dashboard on.",
 		"backHome": "Back to the home page",
@@ -2078,7 +2236,8 @@
 			"missingTitle": "There is no such guide",
 			"missingBody": "It may have been renamed. Every guide is listed under Guides.",
 			"related": "Related"
-		}
+		},
+		"englishOnly": "This page is in English, like the repository it is read from."
 	},
 	"source": {
 		"title": "Source code",
@@ -2147,6 +2306,7 @@
 		"total_other": "{{count, number}} in total",
 		"noTraffic": "Nothing counted yet.",
 		"day": "Day",
-		"unique": "Unique"
+		"unique": "Unique",
+		"licenseOwn": "Licence: its own"
 	}
 }

@@ -104,7 +104,7 @@ describe("adding a sticky", () => {
 		renderPage();
 		await fillIn(user, "abc");
 
-		expect(screen.getByText(/^3 of \d+$/)).toBeInTheDocument();
+		expect(screen.getByText(/^3 of [\d,]+$/)).toBeInTheDocument();
 	});
 
 	/** The warning is a heads-up, not a refusal: the strip runs on the way out and the save goes through. */

@@ -1,6 +1,7 @@
 import { confirmsName, type MemberDetail, type MemberWarning } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { shortDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 export function describeJoined(joinedAt: string | null, t: TFunction): string {
 	return joinedAt === null ? t("members.joinUnknown") : t("members.joined", { date: shortDate(joinedAt) });
@@ -33,15 +34,15 @@ export function statsOf(detail: MemberDetail, t: TFunction): { label: string; va
 
 	if (detail.economy !== null) {
 		rows.push(
-			{ label: t("members.wallet"), value: detail.economy.wallet.toLocaleString() },
-			{ label: t("members.bank"), value: detail.economy.bank.toLocaleString() },
+			{ label: t("members.wallet"), value: formatNumber(detail.economy.wallet) },
+			{ label: t("members.bank"), value: formatNumber(detail.economy.bank) },
 			{ label: t("members.moneyRank"), value: rank(detail.economy.rank) },
 		);
 	}
 	if (detail.levels !== null) {
 		rows.push(
-			{ label: t("members.level"), value: detail.levels.level.toLocaleString() },
-			{ label: t("members.xp"), value: detail.levels.xp.toLocaleString() },
+			{ label: t("members.level"), value: formatNumber(detail.levels.level) },
+			{ label: t("members.xp"), value: formatNumber(detail.levels.xp) },
 			{ label: t("members.levelRank"), value: rank(detail.levels.rank) },
 		);
 	}

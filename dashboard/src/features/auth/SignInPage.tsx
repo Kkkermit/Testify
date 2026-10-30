@@ -2,6 +2,7 @@ import { Trans, useTranslation } from "react-i18next";
 import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
+import { LanguageSelect } from "@/components/form/LanguageSelect";
 import { Backdrop } from "@/components/motion";
 import { Button, Card, Eyebrow, PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
@@ -32,6 +33,7 @@ export function SignInPage(): React.JSX.Element {
 	return (
 		<main className="mx-auto flex min-h-dvh max-w-md flex-col justify-center gap-6 p-6">
 			<Backdrop />
+			<LanguageSelect className="self-end" />
 
 			<Card padding="none" className="motion-pop overflow-hidden">
 				<BotBanner src={bot.data?.bannerUrl} accent={bot.data?.accentColour} className="h-24" />

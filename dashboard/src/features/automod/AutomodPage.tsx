@@ -73,7 +73,7 @@ export function AutomodPage(): React.JSX.Element {
 					<Card>
 						<EmptyState
 							icon={<ShieldAlert size={28} />}
-							title={canManage ? "No AutoMod rules yet" : t("automod.nothingToShow")}
+							title={canManage ? t("automod.noRules") : t("automod.nothingToShow")}
 							body={canManage ? t("automod.addOneBelow") : t("automod.needsPermission")}
 						/>
 					</Card>

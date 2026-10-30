@@ -6,6 +6,9 @@ function testUri(): string | undefined {
 	return uri === undefined || uri === "" ? undefined : uri;
 }
 
+/** A worker's first suite builds every index, and on a busy Windows runner that can outlast a test's budget. */
+const SETUP_MS = 60_000;
+
 export function mongoAvailable(): boolean {
 	return testUri() !== undefined;
 }
@@ -27,16 +30,16 @@ export function describeWithMongo(name: string, suite: () => void): void {
 			await mongoose.connect(uri, { dbName: `testify-test-${process.env["JEST_WORKER_ID"] ?? "1"}` });
 			// Mongoose builds indexes in the background, and a test racing two writes needs the unique one already there.
 			await Promise.all(Object.values(mongoose.models).map((model) => model.syncIndexes()));
-		});
+		}, SETUP_MS);
 
+		// The database outlives the suite, so the next one in this worker finds its indexes already built.
 		afterAll(async () => {
-			await mongoose.connection.dropDatabase();
 			await mongoose.disconnect();
 		});
 
+		// Only this suite's models can reach a collection, so only theirs need emptying.
 		beforeEach(async () => {
-			const collections = await mongoose.connection.db?.collections();
-			for (const collection of collections ?? []) await collection.deleteMany({});
+			await Promise.all(Object.values(mongoose.models).map(async (model) => model.collection.deleteMany({})));
 		});
 
 		suite();

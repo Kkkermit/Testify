@@ -1,6 +1,7 @@
 import { busiestHour } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { barHeight, hourLabel } from "@/features/insights/insights.utils";
+import { formatNumber } from "@/lib/intl";
 
 export function HoursChart({ hours }: { hours: number[] }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -16,7 +17,7 @@ export function HoursChart({ hours }: { hours: number[] }): React.JSX.Element {
 				{hours.map((count, hour) => (
 					<span
 						key={hour}
-						title={`${hourLabel(hour)}: ${count.toLocaleString()}`}
+						title={`${hourLabel(hour)}: ${formatNumber(count)}`}
 						className={`min-h-px flex-1 rounded-t-chip ${hour === busiest ? "bg-primary/70" : "bg-primary/25"}`}
 						style={{ height: `${String(barHeight(count, max))}%` }}
 					/>

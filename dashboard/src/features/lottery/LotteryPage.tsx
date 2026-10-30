@@ -9,6 +9,7 @@ import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton, StatTile } fro
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { DrawHistory } from "@/features/lottery/components/DrawHistory";
+import { FREQUENCY_LABELS, RESCHEDULE_NOTES } from "@/features/lottery/lottery.labels";
 import {
 	type Draft,
 	draftOf,
@@ -21,6 +22,7 @@ import { useEndLottery, useLottery, useSaveLottery } from "@/features/lottery/us
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { formatNumber } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
 export function LotteryPage(): React.JSX.Element {
@@ -81,7 +83,7 @@ export function LotteryPage(): React.JSX.Element {
 							save.mutate({ frozen: !settings.frozen });
 						}}
 					>
-						<Snowflake size={16} aria-hidden="true" /> {settings.frozen ? "Unfreeze" : "Freeze"}
+						<Snowflake size={16} aria-hidden="true" /> {settings.frozen ? t("lottery.unfreeze") : t("lottery.freeze")}
 					</Button>
 				)}
 			</Card>
@@ -124,7 +126,7 @@ export function LotteryPage(): React.JSX.Element {
 					>
 						{LOTTERY_FREQUENCIES.map((frequency) => (
 							<option key={frequency} value={frequency}>
-								{frequency}
+								{t(FREQUENCY_LABELS[frequency])}
 							</option>
 						))}
 					</select>
@@ -178,9 +180,7 @@ export function LotteryPage(): React.JSX.Element {
 				</div>
 
 				{warning !== null && <Warning>{warning}</Warning>}
-				{reschedules(draft, settings) && settings.enabled && (
-					<Warning>Saving this moves the next draw to one {draft.frequency.replace(/ly$/, "")} from now.</Warning>
-				)}
+				{reschedules(draft, settings) && settings.enabled && <Warning>{t(RESCHEDULE_NOTES[draft.frequency])}</Warning>}
 				{problem !== null && <Warning>{problem}</Warning>}
 				{save.error !== null && (
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
@@ -199,7 +199,7 @@ export function LotteryPage(): React.JSX.Element {
 							});
 						}}
 					>
-						{settings.enabled ? "Save changes" : t("lottery.start")}
+						{settings.enabled ? t("common.saveChanges") : t("lottery.start")}
 					</Button>
 				</div>
 			</Card>
@@ -212,7 +212,7 @@ export function LotteryPage(): React.JSX.Element {
 						<div>
 							<h2 className={CARD_HEADING}>{t("lottery.endIt")}</h2>
 							<p className="text-muted-foreground text-sm">
-								The pot of {settings.prizePool.toLocaleString()} goes with it, and nobody is refunded.
+								{t("lottery.endPot", { pot: formatNumber(settings.prizePool) })}
 							</p>
 						</div>
 

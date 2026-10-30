@@ -1,10 +1,17 @@
-import { type CommandRunResult } from "@testify/shared";
+import { type CommandRunResult, type DroppedOutput } from "@testify/shared";
 import { Info } from "lucide-react";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
 import { Warning } from "@/components/form";
 import { Card, CARD_HEADING } from "@/components/primitives";
 import { hexColour } from "@/features/owner/runner.utils";
+import { type TranslationKey } from "@/i18n";
 import { clockTime } from "@/lib/datetime";
+
+const DROPPED: Record<DroppedOutput, TranslationKey> = {
+	panel: "owner.droppedPanel",
+	buttons: "owner.droppedButtons",
+	attachment: "owner.droppedAttachment",
+};
 
 /** The command's reply as cards; anything that could not cross the gap is named rather than dropped. */
 export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.Element {
@@ -13,11 +20,11 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 		<Card className="flex flex-col gap-4">
 			<div className="flex flex-wrap items-baseline justify-between gap-2">
 				<h2 className={CARD_HEADING}>
-					<span className="font-mono">
-						/{result.command}
-						{result.subcommand === null ? "" : ` ${result.subcommand}`}
-					</span>{" "}
-					replied
+					<Trans
+						i18nKey="owner.replied"
+						values={{ command: result.subcommand === null ? result.command : `${result.command} ${result.subcommand}` }}
+						components={{ command: <span className="font-mono" /> }}
+					/>
 				</h2>
 				<time className="text-muted-foreground text-xs" dateTime={result.ranAt}>
 					{clockTime(result.ranAt)}
@@ -39,7 +46,7 @@ export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.
 					return (
 						<p key={index} className="text-muted-foreground flex items-center gap-2 text-sm">
 							<Info size={15} aria-hidden="true" />
-							The reply also carried {output.what}, which only works inside Discord.
+							{t(DROPPED[output.what])}
 						</p>
 					);
 				}

@@ -2,6 +2,7 @@ import { type InsightDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { barHeight } from "@/features/insights/insights.utils";
 import { shortDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 /** Messages a day as bars; the numbers, joins and leaves included, are a real table for anybody not seeing the bars. */
 export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Element {
@@ -14,7 +15,7 @@ export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Eleme
 				{days.map((day) => (
 					<span
 						key={day.day}
-						title={`${shortDate(day.day)}: ${day.messages.toLocaleString()}`}
+						title={`${shortDate(day.day)}: ${formatNumber(day.messages)}`}
 						className="bg-primary/30 hover:bg-primary/60 min-h-px flex-1 rounded-t-chip transition-colors duration-150"
 						style={{ height: `${String(barHeight(day.messages, max))}%` }}
 					/>

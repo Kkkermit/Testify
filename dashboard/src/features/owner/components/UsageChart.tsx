@@ -1,6 +1,7 @@
 import { type UsageDay } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { shortDay } from "@/features/owner/owner.utils";
+import { formatNumber } from "@/lib/intl";
 
 /** A `<table>` rather than a canvas, so a screen reader gets the numbers. No chart library — a bar is a div with a height. */
 export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
@@ -13,7 +14,7 @@ export function UsageChart({ days }: { days: UsageDay[] }): React.JSX.Element {
 				{days.map((day) => (
 					<span
 						key={day.day}
-						title={`${shortDay(day.day)}: ${day.count.toLocaleString()}`}
+						title={`${shortDay(day.day)}: ${formatNumber(day.count)}`}
 						className="bg-primary/30 hover:bg-primary/60 min-h-px flex-1 rounded-t-chip transition-colors duration-150"
 						style={{ height: `${String(Math.round((day.count / max) * 100))}%` }}
 					/>

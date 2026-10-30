@@ -3,6 +3,7 @@ import { History } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Card, CARD_HEADING, EmptyState } from "@/components/primitives";
 import { dateAndTime, shortDate } from "@/lib/datetime";
+import { formatNumber } from "@/lib/intl";
 
 export function DrawHistory({
 	draws,
@@ -38,17 +39,15 @@ export function DrawHistory({
 								</time>
 								<p className="text-muted-foreground text-xs tabular-nums">
 									{t("lottery.drawSummary", {
-										pot: draw.prizePool.toLocaleString(),
-										tickets: draw.tickets.toLocaleString(),
+										pot: formatNumber(draw.prizePool),
+										tickets: formatNumber(draw.tickets),
 									})}
 								</p>
 							</div>
 							<p className="text-muted-foreground text-sm">
 								{draw.winners.length === 0
 									? t("lottery.rolledOver")
-									: draw.winners
-											.map((winner) => `${winner.userTag} (${winner.prizeAmount.toLocaleString()})`)
-											.join(", ")}
+									: draw.winners.map((winner) => `${winner.userTag} (${formatNumber(winner.prizeAmount)})`).join(", ")}
 							</p>
 						</li>
 					))}

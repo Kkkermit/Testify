@@ -11,6 +11,7 @@ import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/ow
 import { PER_PAGE, useOwnerGuilds, useOwnerStats } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { formatUptime } from "@/lib/datetime";
+import { formatUnit } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
 
 /** Answers "which of my servers is misconfigured", which is the reason the console exists at all. */
@@ -76,7 +77,7 @@ export function OverviewTab(): React.JSX.Element {
 						/>
 						<StatTile
 							label={t("owner.memory")}
-							value={`${String(stats.memoryMb)} MB`}
+							value={formatUnit(stats.memoryMb, "megabyte")}
 							icon={Cpu}
 							tint="text-feature-economy"
 						/>

@@ -7,6 +7,7 @@ import { useRuntime } from "@/features/owner/useOwner";
 import { currentBotName } from "@/i18n";
 import { cn } from "@/lib/cn";
 import { formatUptime, dateAndTime } from "@/lib/datetime";
+import { formatUnit } from "@/lib/intl";
 
 /** What this bot is running as — the first thing to check before believing anything else on this screen. */
 export function RuntimeTab(): React.JSX.Element {
@@ -27,30 +28,41 @@ export function RuntimeTab(): React.JSX.Element {
 					mono
 					rows={[
 						{ label: currentBotName(), value: `v${info.version}` },
-						{ label: "Environment", value: info.environment },
-						{ label: "Node", value: info.nodeVersion },
+						{ label: t("owner.runtimeEnvironment"), value: info.environment },
+						{ label: t("owner.runtimeNode"), value: info.nodeVersion },
 						{ label: "discord.js", value: `v${info.discordVersion}` },
-						{ label: "Platform", value: info.platform },
+						{ label: t("owner.runtimePlatform"), value: info.platform },
 						{
-							label: "Started",
+							label: t("owner.runtimeStarted"),
 							value: `${dateAndTime(info.startedAt)} (${formatUptime(info.uptimeMs)})`,
 						},
 						{
-							label: "Memory",
-							value: `${String(info.memoryMb.heapUsed)} MB heap of ${String(info.memoryMb.heapTotal)} MB, ${String(info.memoryMb.rss)} MB resident`,
+							label: t("owner.memory"),
+							value: t("owner.runtimeMemory", {
+								heap: formatUnit(info.memoryMb.heapUsed, "megabyte"),
+								total: formatUnit(info.memoryMb.heapTotal, "megabyte"),
+								rss: formatUnit(info.memoryMb.rss, "megabyte"),
+							}),
 						},
-						{ label: "Loaded", value: `${String(info.commands)} commands, ${String(info.events)} event listeners` },
 						{
-							label: "Gateway",
+							label: t("owner.runtimeLoaded"),
+							value: t("owner.runtimeLoadedValue", { commands: info.commands, events: info.events }),
+						},
+						{
+							label: t("owner.runtimeGateway"),
 							// -1 is what discord.js reports before the first heartbeat comes back, not a real latency.
 							value:
 								info.gatewayPingMs < 0
-									? `still connecting, ${String(info.shards)} shard${info.shards === 1 ? "" : "s"}`
-									: `${String(info.gatewayPingMs)} ms, ${String(info.shards)} shard${info.shards === 1 ? "" : "s"}`,
+									? t("owner.runtimeConnecting", { count: info.shards })
+									: t("owner.runtimePing", { ping: formatUnit(info.gatewayPingMs, "millisecond"), count: info.shards }),
 						},
 						{
-							label: "Cached",
-							value: `${info.guilds.toLocaleString()} servers, ${info.cachedChannels.toLocaleString()} channels, ${info.cachedUsers.toLocaleString()} users`,
+							label: t("owner.runtimeCached"),
+							value: t("owner.runtimeCachedValue", {
+								servers: info.guilds,
+								channels: info.cachedChannels,
+								users: info.cachedUsers,
+							}),
 						},
 					]}
 				/>

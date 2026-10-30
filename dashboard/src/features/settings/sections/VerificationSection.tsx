@@ -118,7 +118,9 @@ export function VerificationSection({
 								{value.posted ? t("settings.updatePanel") : t("settings.postPanel")}
 							</Button>
 							<p className="text-muted-foreground text-sm tabular-nums">
-								{value.posted ? `${value.verifiedCount.toLocaleString()} verified so far` : "Not posted yet"}
+								{value.posted
+									? t("settings.verifiedSoFar", { verified: value.verifiedCount })
+									: t("settings.notPostedYet")}
 							</p>
 						</div>
 					)}
