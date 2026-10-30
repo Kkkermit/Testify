@@ -960,7 +960,16 @@ What good tests here look like:
 - **A worker's database outlives each suite.** Every test starts on emptied collections, but the database is not
   dropped between suites, because dropping it made the next suite build every collection and index again: 464
   collection creations a run instead of 137, and on the Windows runner five suites once timed out together while
-  building them. The setup hook has 60 seconds, since a worker's first suite still builds the lot.
+  building them.
+- **On CI every worker's database is built before the first suite.** Building collections during the run still
+  stalled the shared server: one `deleteMany` on a single collection outlasted its 20-second hook while two other
+  workers built theirs. So when Jest knows it is on CI (`globalConfig.ci`, which the `CI` variable sets),
+  `mongoGlobal.ts` runs `buildTestDatabases.ts` under tsx — the schemas import `@config` aliases, which Node alone
+  cannot resolve there — and it creates every model's collection and indexes in each worker's database, one database
+  at a time: 186 collections before the run, none during it, about 3 seconds on Linux. A local run builds lazily, so
+  one test file pays for one collection rather than for every worker's. A builder that fails is fatal under
+  `REQUIRE_DB_TESTS`, since the run would quietly be back to stalling, and a warning elsewhere. The emptying hook has
+  the setup hook's 60 seconds, because a stall on the shared server is not the suite's doing.
 
 **Mutation is how you find a test that cannot fail.** Coverage says a line ran, never that anything checked it.
 Changing one operator and re-running the suite that should care is the only cheap proof: it is what found the
