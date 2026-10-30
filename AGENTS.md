@@ -67,8 +67,8 @@ numbers, which drift):
 | Events               | 31, in 6 groups                   |
 | `src/lib` helpers    | 204, in 29 domain folders         |
 | Schemas/repositories | 46 / 44                           |
-| Scheduled jobs       | 10                                |
-| Tests                | 3,584 across 456 suites           |
+| Scheduled jobs       | 11                                |
+| Tests                | 3,585 across 456 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -237,8 +237,8 @@ src/
 │   ├── connection.ts
 │   ├── models/           46 Mongoose schemas, one file per feature
 │   └── repositories/     44 query layers, one per feature. Commands never touch a model directly.
-├── jobs/                 10 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
-│                         scheduled messages, join-to-create channels, birthdays)
+├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
+│                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
 tests/                    Mirrors src/. 310 suites; the dashboard's 146 sit beside its code.
@@ -1253,7 +1253,12 @@ it says itself ("--paths is ignored when an outputting to stdout", read out of `
 and then "The downloaded file is empty", reproduced with the real yt-dlp against a local HLS stream. `openStream` now
 spawns it in a fresh `mkdtemp` folder, removed when the process closes, so two downloads at once never write pieces
 with the same names either. Without a temporary folder a stream that arrives whole still plays, and a write that fails
-anyway is the `disk` problem, which gets no retry because every try would fail alike.
+anyway is the `disk` problem, which gets no retry because every try would fail alike. Only one piece is on disk at a
+time — `--concurrent-fragments` defaults to 1 and each is deleted once appended — and a song is never a file. A bot
+that dies mid-track cannot clear its folders, so each is named with the process id that made it and
+`sweepScratchFolders` runs once after start-up, removing a folder only when that process is gone, or, for its own id,
+when the folder predates this start: a container is process 1 every time, and a development and a production bot can
+share one `/tmp`.
 
 **A stall and an ending arrive as the same event, and that distinction is the whole design.** `decideOnIdle` in
 `musicQueue.util.ts` compares `AudioResource.playbackDuration` against the track's stated length: short by more

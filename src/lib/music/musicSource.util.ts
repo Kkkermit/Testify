@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { mkdtempSync } from "node:fs";
-import { rm } from "node:fs/promises";
+import { readdir, rm, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { PassThrough, type Readable } from "node:stream";
@@ -309,17 +309,52 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 	];
 }
 
+const SCRATCH_PREFIX = "testify-music-";
+
 /**
  * yt-dlp writes a fragmented stream's pieces to `--Frag<n>.part` in its working directory whatever `--paths` says,
  * so each download gets a writable folder, and two downloads at once never share one.
  */
 function scratchFolder(): string | undefined {
 	try {
-		return mkdtempSync(join(tmpdir(), "testify-music-"));
+		// The process id is how a later start tells a stranded folder from one another running bot is using.
+		return mkdtempSync(join(tmpdir(), `${SCRATCH_PREFIX}${String(process.pid)}-`));
 	} catch {
 		// Without one, a stream that arrives whole still plays from the bot's own folder.
 		return undefined;
 	}
+}
+
+/** Signal 0 only asks whether a process exists; EPERM means it does, under another user. */
+function isRunning(pid: number): boolean {
+	try {
+		process.kill(pid, 0);
+		return true;
+	} catch (error) {
+		return (error as NodeJS.ErrnoException).code === "EPERM";
+	}
+}
+
+/** Removes the download folders a bot that crashed or was killed mid-track left behind, and returns how many. */
+export async function sweepScratchFolders(
+	root = tmpdir(),
+	startedAt = Date.now() - process.uptime() * 1_000,
+): Promise<number> {
+	const stranded = async (name: string): Promise<boolean> => {
+		const pid = Number(new RegExp(`^${SCRATCH_PREFIX}(\\d+)-`).exec(name)?.[1]);
+		if (!Number.isInteger(pid)) return false;
+		const path = join(root, name);
+
+		// A container starts the bot as the same process every time, so a folder with this id is stale only if older.
+		if (pid === process.pid ? (await stat(path)).mtimeMs >= startedAt : isRunning(pid)) return false;
+
+		await rm(path, { recursive: true, force: true });
+		return true;
+	};
+
+	// One that cannot be read or removed belongs to another user or has just gone, and is not this run's to fix.
+	const outcomes = await Promise.allSettled((await readdir(root)).map(stranded));
+	return outcomes.filter((outcome) => outcome.status === "fulfilled" && outcome.value).length;
 }
 
 /**

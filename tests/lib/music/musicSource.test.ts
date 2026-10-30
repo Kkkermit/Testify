@@ -1,7 +1,16 @@
 import type * as ChildProcesses from "node:child_process";
-import { type ChildProcess, type SpawnOptions } from "node:child_process";
+import { type ChildProcess, type SpawnOptions, spawnSync } from "node:child_process";
 import type * as Fs from "node:fs";
-import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+	existsSync,
+	mkdirSync,
+	mkdtempSync,
+	readdirSync,
+	readFileSync,
+	rmSync,
+	utimesSync,
+	writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import {
@@ -15,6 +24,7 @@ import {
 	resolveTracks,
 	SOUNDCLOUD_SEARCH_DEPTH,
 	PLAYLIST_LIMIT,
+	sweepScratchFolders,
 	type TrackInfo,
 	trackFromInfo,
 	tracksFromInfo,
@@ -113,7 +123,7 @@ describe("openStream", () => {
 	let fakeYtDlp: string;
 
 	beforeAll(() => {
-		directory = mkdtempSync(join(tmpdir(), "testify-music-"));
+		directory = mkdtempSync(join(tmpdir(), "testify-fakes-"));
 		fakeYtDlp = fakeBinary(directory, "fake-yt-dlp", print("OPUSBYTES"));
 	});
 
@@ -193,11 +203,10 @@ describe("openStream", () => {
 		const [first = "", second = ""] = folders();
 		await waitUntil(() => !existsSync(first) && !existsSync(second), 5_000);
 
+		// The process id in the name is what the start-up sweep tells a stranded folder by.
+		const named = expect.stringMatching(new RegExp(`^testify-music-${String(process.pid)}-`));
 		expect(problems).toEqual([]);
-		expect([basename(first), basename(second)]).toEqual([
-			expect.stringMatching(/^testify-music-/),
-			expect.stringMatching(/^testify-music-/),
-		]);
+		expect([basename(first), basename(second)]).toEqual([named, named]);
 		expect(first).not.toBe(second);
 		expect([existsSync(first), existsSync(second)]).toEqual([false, false]);
 	});
@@ -222,6 +231,51 @@ describe("openStream", () => {
 		expect(() =>
 			openStream("https://youtu.be/abc", { formatId: "mp3", shape: "transcode" }, { ytDlp: fakeYtDlp, ffmpeg: null }),
 		).toThrow(/FFmpeg/);
+	});
+});
+
+describe("sweepScratchFolders", () => {
+	let root: string;
+
+	beforeEach(() => {
+		root = mkdtempSync(join(tmpdir(), "testify-sweep-"));
+	});
+
+	afterEach(() => {
+		rmSync(root, { recursive: true, force: true });
+	});
+
+	/**
+	 * A bot killed mid-track never runs its own clean-up, and a development and a production bot can share one
+	 * temporary folder, so only a folder whose process is gone may be removed.
+	 */
+	it("removes the folders of runs that died, and leaves every live one alone", async () => {
+		const dead = spawnSync(process.execPath, ["-e", ""]).pid ?? 0;
+		const startedAt = Date.now() - 60_000;
+		const hourAgo = new Date(Date.now() - 3_600_000);
+		const folder = (name: string, modified?: Date): void => {
+			mkdirSync(join(root, name));
+			writeFileSync(join(root, name, "--Frag3.part"), "piece");
+			if (modified !== undefined) utimesSync(join(root, name), modified, modified);
+		};
+
+		folder(`testify-music-${String(dead)}-crashed`);
+		folder(`testify-music-${String(process.ppid)}-another-bot`);
+		// A container starts the bot as the same process every time, so its own id alone proves nothing.
+		folder(`testify-music-${String(process.pid)}-before-restart`, hourAgo);
+		folder(`testify-music-${String(process.pid)}-playing-now`);
+		folder("testify-music-not-a-process", hourAgo);
+		folder("somebody-elses-folder", hourAgo);
+
+		await expect(sweepScratchFolders(root, startedAt)).resolves.toBe(2);
+		expect(readdirSync(root).sort()).toEqual(
+			[
+				"somebody-elses-folder",
+				`testify-music-${String(process.pid)}-playing-now`,
+				`testify-music-${String(process.ppid)}-another-bot`,
+				"testify-music-not-a-process",
+			].sort(),
+		);
 	});
 });
 

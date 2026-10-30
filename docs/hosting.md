@@ -107,6 +107,11 @@ only what runs.
   releases because Debian's build is far too old to track YouTube, and the build runs `yt-dlp --version` so a
   bad download fails the image rather than the first `/play`. This adds roughly 100 MB.
 - **It runs as the `node` user**, not root.
+- **Music writes only to the system's temporary folder, and only a little.** No song is ever saved as a file:
+  yt-dlp streams it into memory, up to 16 MB for each server that is playing. A SoundCloud stream arrives in
+  pieces, which yt-dlp writes one at a time into a folder of its own under `/tmp` and deletes as each is passed
+  on, and the folder goes when the track ends. A folder a crash left behind is removed the next time the bot
+  starts. A container run with `read_only: true` needs `tmpfs: /tmp` for that.
 - **No secret is baked in.** `.env` is excluded from the build context and configuration arrives through the
   environment, so the image is safe to push to a registry.
 
@@ -186,6 +191,7 @@ to reap orphaned processes.
 | `401 Unauthorized` fetching `docker/dockerfile:1`    | A stale Docker Hub login. `docker logout`, or sign in again in Docker Desktop |
 | `npm ci` … `Missing: … from lock file`               | `npm install` rewrote the lockfile. `git checkout -- package-lock.json`       |
 | `Database` fails with `localhost` in the address     | `localhost` is the bot's own container. Remove `MONGODB_URI` to use `mongo`   |
+| `Permission denied: '--Frag1.part'` playing music    | yt-dlp cannot write to `/tmp`. On a read-only container, add `tmpfs: /tmp`    |
 
 ---
 
