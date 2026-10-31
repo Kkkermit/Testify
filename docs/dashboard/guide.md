@@ -722,39 +722,39 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 
 ## 18. Current screens
 
-| Route                            | Screen                                                                               |
-| -------------------------------- | ------------------------------------------------------------------------------------ |
-| `/sign-in`                       | One button; also the setup screen for a half-install                                 |
-| `/guilds`                        | Picker, with an invite card for guilds without the bot                               |
-| `/guilds/:id`                    | Stat tiles, feature grid, permission warnings, recent changes                        |
-| `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                                     |
-| `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                         |
-| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next                    |
-| `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                   |
-| `/guilds/:id/automod`            | Discord's own filters — no database behind it                                        |
-| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted            |
-| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                                   |
-| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now                 |
-| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                            |
-| `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                   |
-| `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it              |
-| `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star             |
-| `/guilds/:id/temp-voice`         | The lobby, made here if need be, and what each new voice channel is like             |
-| `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                               |
-| `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                          |
-| `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first                  |
-| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen                 |
-| `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                        |
-| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket                 |
-| `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                           |
-| `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row                      |
-| `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page                 |
-| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban         |
-| `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats |
-| `/guilds/:id/commands`           | Per-command switches for this server                                                 |
-| `/commands`                      | Every command, searchable, with the coverage tile                                    |
-| `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                                      |
-| `/owner`                         | Eight tabs: fleet, usage, commands, logs, run, blacklist, runtime, control           |
+| Route                            | Screen                                                                                   |
+| -------------------------------- | ---------------------------------------------------------------------------------------- |
+| `/sign-in`                       | One button; also the setup screen for a half-install                                     |
+| `/guilds`                        | Picker, with an invite card for guilds without the bot                                   |
+| `/guilds/:id`                    | Stat tiles, feature grid, permission warnings, recent changes                            |
+| `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                                         |
+| `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                             |
+| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next                        |
+| `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                       |
+| `/guilds/:id/automod`            | Discord's own filters — no database behind it                                            |
+| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted                |
+| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                                       |
+| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now                     |
+| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                                |
+| `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                       |
+| `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it                  |
+| `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star                 |
+| `/guilds/:id/temp-voice`         | The lobby, made here if need be, and what each new voice channel is like                 |
+| `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                                   |
+| `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                              |
+| `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first                      |
+| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen                     |
+| `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                            |
+| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket                     |
+| `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                               |
+| `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row                          |
+| `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page                     |
+| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban             |
+| `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats     |
+| `/guilds/:id/commands`           | Per-command switches for this server                                                     |
+| `/commands`                      | Every command, searchable, with the coverage tile                                        |
+| `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                                          |
+| `/owner`                         | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
 `/settings`, because a join gate is one control rather than a screen. `features/settings/sections/` is where the
@@ -1224,6 +1224,7 @@ All behind `requireOwner`, which answers **404** so a manager never learns the c
 | Find out what broke   | `/owner?tab=logs` → level filter and a search that matches message **and** context                     |
 | Run a command         | `/owner?tab=run` → pick one → the form is generated from its own options → the reply is drawn below    |
 | Block somebody        | `/owner?tab=blacklist` → paste an ID, give a reason → the row appears with a name if Discord knows one |
+| Tell everybody        | `/owner?tab=notifications` → post now or later, and choose how long it stays up                        |
 | Leave a server        | `/owner` → the server's detail card → type its name → Leave                                            |
 | Pause or stop the bot | `/owner?tab=control` → Pause is reversible here; Shut down is typed and final                          |
 
@@ -1358,7 +1359,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | #   | Rule                               | Verdict | Note                                                                                            |
 | --- | ---------------------------------- | ------- | ----------------------------------------------------------------------------------------------- |
 | 11  | Simplicity by reduction            | Held    | `AGENTS.md`'s "two commands that do one job" is the same instinct applied to the bot            |
-| 12  | Organisation makes many look fewer | Held    | Collapsible sidebar sections, the eight-tab owner console, seven settings sections on one page  |
+| 12  | Organisation makes many look fewer | Held    | Collapsible sidebar sections, the nine-tab owner console, seven settings sections on one page   |
 | 13  | Don't make users think             | Held    | A channel the bot cannot post in is disabled **before** saving, not refused after               |
 | 14  | As little design as possible       | Held    | No drop shadows, no chart library, one accent colour                                            |
 | 15  | Break big tasks into steps         | N/A     | There is no multi-step task here. The one long flow — OAuth — is Discord's                      |

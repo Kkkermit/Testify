@@ -19,6 +19,7 @@ const TABS: { tab: string; endpoint: string; query?: string }[] = [
 	{ tab: "logs", endpoint: "/api/analytics/logs" },
 	{ tab: "run", endpoint: "/api/owner/runner" },
 	{ tab: "blacklist", endpoint: "/api/owner/blacklist" },
+	{ tab: "notifications", endpoint: "/api/owner/notices" },
 	{ tab: "runtime", endpoint: "/api/analytics/runtime" },
 	{ tab: "control", endpoint: "/api/control" },
 ];

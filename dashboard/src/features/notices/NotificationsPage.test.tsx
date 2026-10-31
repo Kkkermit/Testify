@@ -5,6 +5,7 @@ import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
 import { NotificationsPage } from "@/features/notices/NotificationsPage";
 import { expectNoViolations } from "@/test/axe";
 import { musicNotice } from "@/test/fixtures/bot";
+import { me } from "@/test/fixtures/session";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
@@ -46,6 +47,25 @@ describe("the notifications page", () => {
 		expect(within(older as HTMLElement).queryByText("New")).toBeNull();
 		expect(within(older as HTMLElement).getByText(/edited/)).toBeInTheDocument();
 		await expectNoViolations(container);
+	});
+
+	/** Only a pointer: the owner console behind it refuses everybody else on its own. */
+	it("points only the bot's owners at the place to manage them", async () => {
+		server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, isOwner: true })));
+		const { unmount } = renderWithProviders(<NotificationsPage />, { path: "/notifications" });
+
+		expect(await screen.findByRole("link", { name: "Manage notifications" })).toHaveAttribute(
+			"href",
+			"/owner?tab=notifications",
+		);
+		unmount();
+
+		server.use(http.get("/api/auth/me", () => HttpResponse.json(me)));
+		const { client } = renderWithProviders(<NotificationsPage />, { path: "/notifications" });
+		await waitFor(() => {
+			expect(client.getQueryData(["me"])).toBeDefined();
+		});
+		expect(screen.queryByRole("link", { name: "Manage notifications" })).toBeNull();
 	});
 
 	it("says when one comes down", async () => {
