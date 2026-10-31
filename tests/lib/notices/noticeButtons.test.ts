@@ -20,6 +20,7 @@ const MUSIC: Notice = {
 	body: "YouTube is refusing the bot.",
 	tone: "problem",
 	publishedAt: "2026-10-31T10:00:00.000Z",
+	endsAt: null,
 	updatedAt: "2026-10-31T10:00:00.000Z",
 };
 
@@ -46,7 +47,9 @@ beforeEach(() => {
 	jest.mocked(allNotices).mockResolvedValue([MUSIC]);
 	jest.mocked(readNotice).mockResolvedValue(MUSIC);
 	jest.mocked(changeNotice).mockResolvedValue(MUSIC);
-	jest.mocked(postNotice).mockImplementation((input) => Promise.resolve({ ...MUSIC, ...input }));
+	jest
+		.mocked(postNotice)
+		.mockImplementation((input) => Promise.resolve({ ...MUSIC, ...input, endsAt: input.endsAt ?? null }));
 	jest.mocked(removeNotice).mockResolvedValue();
 });
 
@@ -74,8 +77,9 @@ describe("the notifications panel's controls", () => {
 		await notices.run(interaction as never, context("create", true, "problem"));
 
 		expect(postNotice).toHaveBeenCalledWith(
-			{ title: "Music is down", body: "SoundCloud still plays.", tone: "problem" },
+			{ title: "Music is down", body: "SoundCloud still plays.", tone: "problem", endsAt: null },
 			OWNER,
+			expect.any(Date),
 		);
 		expect(textOf(interaction.update.mock.calls[0]?.[0] as never)).toContain("Posted.");
 	});
@@ -93,5 +97,47 @@ describe("the notifications panel's controls", () => {
 
 		await notices.run(pressed("button") as never, context("remove-yes", true, MUSIC.id));
 		expect(removeNotice).toHaveBeenCalledWith(MUSIC.id);
+	});
+});
+
+describe("timing on the panel", () => {
+	const HOUR_MS = 60 * 60 * 1000;
+
+	it("schedules a new one and counts how long it stays up from when it goes up", async () => {
+		const before = Date.now();
+		const interaction = pressed("modal", { title: "Maintenance", body: "Back soon.", start: "2h", keep: "3d" });
+
+		await notices.run(interaction as never, context("create", true, "info"));
+
+		const input = jest.mocked(postNotice).mock.calls[0]?.[0];
+		expect(Date.parse(input?.startsAt ?? "") - before).toBeGreaterThanOrEqual(2 * HOUR_MS);
+		expect(Date.parse(input?.endsAt ?? "") - Date.parse(input?.startsAt ?? "")).toBe(72 * HOUR_MS);
+		expect(textOf(interaction.update.mock.calls[0]?.[0] as never)).toContain("Scheduled.");
+	});
+
+	it("refuses a length of time nobody could read, by the field's name", async () => {
+		const interaction = pressed("modal", { title: "x", body: "y", start: "soonish" });
+
+		await expect(notices.run(interaction as never, context("create", true, "info"))).rejects.toThrow(/Put it up in/);
+		expect(postNotice).not.toHaveBeenCalled();
+	});
+
+	/** Blank is the way back: no end means up until removed, and no start means now. */
+	it("clears the end, or posts a waiting one now, when the field is left blank", async () => {
+		await notices.run(pressed("modal", { time: "" }) as never, context("end-save", true, MUSIC.id));
+		await notices.run(pressed("modal", { time: "" }) as never, context("start-save", true, MUSIC.id));
+
+		expect(changeNotice).toHaveBeenNthCalledWith(1, MUSIC.id, { endsAt: null }, expect.any(Date));
+		expect(changeNotice).toHaveBeenNthCalledWith(2, MUSIC.id, { notifyAgain: true }, expect.any(Date));
+	});
+
+	it("takes one already up down after the time given, counted from now", async () => {
+		const before = Date.now();
+
+		await notices.run(pressed("modal", { time: "6h" }) as never, context("end-save", true, MUSIC.id));
+
+		const patch = jest.mocked(changeNotice).mock.calls[0]?.[1];
+		expect(Date.parse(patch?.endsAt ?? "") - before).toBeGreaterThanOrEqual(6 * HOUR_MS);
+		expect(Date.parse(patch?.endsAt ?? "") - before).toBeLessThan(6 * HOUR_MS + 5_000);
 	});
 });

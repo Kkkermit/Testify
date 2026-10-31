@@ -1,6 +1,6 @@
 import { defineCommand } from "@core/command";
 import { reply } from "@lib/discord";
-import { noticeBoard, readNoticeFeed } from "@lib/notices";
+import { allNotices, noticeBoard, readNoticeFeed } from "@lib/notices";
 
 export default defineCommand({
 	name: "bot-notifications",
@@ -11,9 +11,9 @@ export default defineCommand({
 
 	async run(interaction, client) {
 		const { notices } = await readNoticeFeed(interaction.user.id, { markRead: true });
-		// The controls are drawn only for the bot's owners, and every press on them checks again.
+		// The controls, and the ones still waiting to go up, are only for the bot's owners; every press checks again.
 		const ownerId = client.isOwner(interaction.user.id) ? interaction.user.id : null;
 
-		await reply(interaction, noticeBoard(notices, ownerId));
+		await reply(interaction, noticeBoard(ownerId === null ? notices : await allNotices(), ownerId));
 	},
 });

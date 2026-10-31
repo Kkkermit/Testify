@@ -42,6 +42,10 @@ const SENTENCES: Record<ProblemCode, (values: Record<string, number>) => string>
 	"schedule.time": () => "Say when to post it, such as `30m`, `2h` or `1d`.",
 	"schedule.past": () => "That time has already gone. Pick one at least a minute from now.",
 	"schedule.tooFar": ({ max = 0 }) => `A message can be scheduled at most ${String(max)} days ahead.`,
+	"notice.startPast": () => "That time has already gone. Pick one at least a minute from now, or post it now.",
+	"notice.startTooFar": ({ max = 0 }) => `A notification can go up at most ${String(max)} days ahead.`,
+	"notice.endBeforeStart": () => "It has to come down after it goes up, and later than now.",
+	"notice.endTooLong": ({ max = 0 }) => `A notification can stay up for at most ${String(max)} days.`,
 };
 
 export function problemText(problem: Problem): string;

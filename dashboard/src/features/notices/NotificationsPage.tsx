@@ -1,12 +1,16 @@
 import { BellOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Card, EmptyState, PageHeader, Skeleton } from "@/components/primitives";
+import { INLINE_TARGET } from "@/components/primitives/targetStyles";
+import { useMe } from "@/features/auth/useMe";
 import { NoticeCard } from "@/features/notices/components/NoticeCard";
 import { newNoticeIds } from "@/features/notices/notices.utils";
 import { useMarkNoticesSeen, useNoticeFeed } from "@/features/notices/useNotices";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { cn } from "@/lib/cn";
 
 /** Opening the page is reading them, so it marks them read once they are on screen. */
 export function NotificationsPage(): React.JSX.Element {
@@ -25,7 +29,15 @@ export function NotificationsPage(): React.JSX.Element {
 		if (feed.data.unread > 0) mutate();
 	}, [feed.data, fresh, mutate]);
 
-	const header = <PageHeader title={t("notices.title")} subtitle={t("notices.subtitle")} />;
+	const me = useMe();
+	// A pointer for the owners only; the console behind it is what refuses everybody else.
+	const manage =
+		me.data?.isOwner === true ? (
+			<Link to="/owner?tab=notifications" className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}>
+				{t("notices.manage")}
+			</Link>
+		) : undefined;
+	const header = <PageHeader title={t("notices.title")} subtitle={t("notices.subtitle")} action={manage} />;
 
 	if (feed.isError) {
 		return (

@@ -24,6 +24,7 @@ const MUSIC: Notice = {
 	body: "YouTube is refusing the bot.",
 	tone: "problem",
 	publishedAt: "2026-10-31T10:00:00.000Z",
+	endsAt: null,
 	updatedAt: "2026-10-31T10:00:00.000Z",
 };
 
