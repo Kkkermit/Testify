@@ -6,7 +6,9 @@ export interface NoticeRecord {
 	title: string;
 	body: string;
 	tone: NoticeTone;
+	/** In the future while it waits to go up. */
 	publishedAt: Date;
+	endsAt: Date | null;
 	authorId: string;
 	createdAt: Date;
 	updatedAt: Date;
@@ -18,12 +20,15 @@ const noticeSchema = new Schema<NoticeRecord>(
 		body: { type: String, required: true },
 		tone: { type: String, enum: NOTICE_TONES, required: true, default: "info" },
 		publishedAt: { type: Date, required: true },
+		endsAt: { type: Date, default: null },
 		authorId: { type: String, required: true },
 	},
 	{ timestamps: true },
 );
 
 noticeSchema.index({ publishedAt: -1 });
+// A null end is not a date, so the TTL leaves a notification with no end alone.
+noticeSchema.index({ endsAt: 1 }, { expireAfterSeconds: 0 });
 
 export const BotNotice = model<NoticeRecord>("botnotices", noticeSchema);
 

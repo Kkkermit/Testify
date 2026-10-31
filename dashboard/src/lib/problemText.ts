@@ -44,6 +44,10 @@ const KEYS: Record<ProblemCode, TranslationKey> = {
 	"schedule.time": "problem.scheduleTime",
 	"schedule.past": "problem.schedulePast",
 	"schedule.tooFar": "problem.scheduleTooFar",
+	"notice.startPast": "problem.noticeStartPast",
+	"notice.startTooFar": "problem.noticeStartTooFar",
+	"notice.endBeforeStart": "problem.noticeEndBeforeStart",
+	"notice.endTooLong": "problem.noticeEndTooLong",
 };
 
 export function problemText(problem: Problem, t: TFunction): string;

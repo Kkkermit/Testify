@@ -38,6 +38,7 @@ const MUSIC: Notice = {
 	body: "YouTube is refusing the bot.",
 	tone: "problem",
 	publishedAt: "2026-10-31T10:00:00.000Z",
+	endsAt: null,
 	updatedAt: "2026-10-31T10:00:00.000Z",
 };
 
@@ -78,7 +79,9 @@ beforeEach(() => {
 	jest.mocked(readerState).mockResolvedValue({ seenAt: null, hintedAt: null });
 	jest.mocked(markNoticesSeen).mockResolvedValue();
 	jest.mocked(findNotice).mockResolvedValue(MUSIC);
-	jest.mocked(createNotice).mockImplementation((input) => Promise.resolve({ ...MUSIC, ...input }));
+	jest
+		.mocked(createNotice)
+		.mockImplementation((input) => Promise.resolve({ ...MUSIC, ...input, endsAt: input.endsAt ?? null }));
 	jest.mocked(updateNotice).mockResolvedValue(MUSIC);
 	jest.mocked(deleteNotice).mockResolvedValue(true);
 	jest.mocked(recordAudit).mockResolvedValue();
@@ -128,6 +131,22 @@ describe("the owner's notification routes", () => {
 		expect((await send(OWNER, "PATCH", "/owner/notices/not-an-id", { title: "x" })).status).toBe(400);
 		expect(createNotice).not.toHaveBeenCalled();
 		expect(updateNotice).not.toHaveBeenCalled();
+	});
+
+	/** The times are judged by the same rule as on Discord, so a hand-written request cannot schedule one in the past. */
+	it("refuse a time the rule will not keep, in words", async () => {
+		const past = new Date(Date.now() - 60_000).toISOString();
+
+		const response = await send(OWNER, "POST", "/owner/notices", {
+			title: "x",
+			body: "y",
+			tone: "info",
+			startsAt: past,
+		});
+
+		expect(response.status).toBe(400);
+		expect(((await response.json()) as { error: { message: string } }).error.message).toMatch(/already gone/);
+		expect(createNotice).not.toHaveBeenCalled();
 	});
 
 	it("say so in words when the cap is reached", async () => {

@@ -68,7 +68,7 @@ numbers, which drift):
 | `src/lib` helpers    | 207, in 30 domain folders         |
 | Schemas/repositories | 47 / 45                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,681 across 466 suites           |
+| Tests                | 3,704 across 468 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 318 suites; the dashboard's 148 sit beside its code.
+tests/                    Mirrors src/. 319 suites; the dashboard's 149 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -1878,9 +1878,17 @@ console's control tab, both through `src/lib/notices/`. Five things about it are
   is not recorded, so the next command tries again.
 - **Editing tells nobody again; Tell everybody again does.** `publishedAt` moves only when a notification is posted
   and on `notifyAgain`, so fixing a typo does not interrupt everybody who already read it, and music coming back can.
-- **At most `NOTICE_LIMITS.maxActive` (5) are up at once.** The board shows every one whole in one Components V2
-  message, five at their longest stay inside Discord's 4,000 characters (a test pins it), and a sixth is refused on
-  both surfaces. Every post goes out through `withoutPings`, so `@everyone` in a notification pings nobody.
+- **At most `NOTICE_LIMITS.maxActive` (5) are up or waiting at once.** The owners' board shows every one whole in one
+  Components V2 message, five at their longest stay inside Discord's 4,000 characters (a test pins it), and a sixth is
+  refused on both surfaces. Every post goes out through `withoutPings`, so `@everyone` in a notification pings nobody.
+- **One can wait to go up, and can take itself down.** A `publishedAt` in the future is a scheduled one, and
+  `liveNotices` keeps it from readers, from the hint and from the dashboard's feed until then, so nobody is told before
+  it goes up; the owners' lists show it marked, with **Post now** in place of **Tell everybody again**. `endsAt` carries
+  a TTL index, so MongoDB deletes one once it passes, and every read filters on it as well because the sweep runs a
+  minute or so late. `noticeTimingBlocked` in `@testify/shared` is the one rule — at most `maxAheadDays` ahead, at most
+  `maxUpDays` up, an end after the start — and the start of one already up cannot move, because moving it would take
+  it down until then. Discord takes lengths (`2h`, `3d`, as `/remind` does) and the dashboard a time in the reader's
+  own zone; how long it stays up counts from when it goes up while it waits, and from now once it is up, on both.
 - **A reader is two times and nothing else.** `noticereaders` holds a user id, when they last read the notifications
   and when they were last told about one, and expires `NOTICE_LIMITS.readerDays` (90) after the later of the two. The
   privacy notice says so (`legal.storedP3`, `legal.retentionL17`).

@@ -1,7 +1,8 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { OwnerPage } from "@/features/owner/OwnerPage";
+import { toLocalInput } from "@/features/scheduled-messages/scheduledMessages.utils";
 import { expectNoViolations } from "@/test/axe";
 import { musicNotice } from "@/test/fixtures/bot";
 import { renderWithProviders } from "@/test/renderWithProviders";
@@ -144,7 +145,7 @@ describe("the notifications card", () => {
 		await user.click(post);
 
 		await waitFor(() => {
-			expect(sent.bodies).toEqual([{ title: "Music is down", body: "Soon.", tone: "problem" }]);
+			expect(sent.bodies).toEqual([{ title: "Music is down", body: "Soon.", tone: "problem", endsAt: null }]);
 		});
 		await waitFor(() => {
 			expect(within(form).getByLabelText("Title")).toHaveValue("");
@@ -218,6 +219,52 @@ describe("the notifications card", () => {
 		await user.click(within(await row()).getByRole("button", { name: "Tell everybody again" }));
 
 		expect(await within(await row()).findByText("That notification is gone.")).toBeInTheDocument();
+	});
+
+	it("schedules one for later with an end, and refuses a time that has gone", async () => {
+		const user = userEvent.setup();
+		const sent = capture("post");
+		renderTab("control");
+
+		const post = await screen.findByRole("button", { name: "Post a notification" });
+		const form = post.closest<HTMLElement>("div.flex-col")!;
+		await user.type(within(form).getByLabelText("Title"), "Maintenance");
+		await user.type(within(form).getByLabelText(/What everybody should know/), "Back soon.");
+		await user.click(within(form).getByRole("button", { name: "Later" }));
+		const startAt = within(form).getByLabelText(/Goes up at/);
+
+		fireEvent.change(startAt, { target: { value: toLocalInput(new Date(Date.now() - 60 * 60 * 1000)) } });
+		expect(within(form).getByText(/That time has already gone/)).toBeInTheDocument();
+		expect(post).toBeDisabled();
+
+		fireEvent.change(startAt, { target: { value: toLocalInput(new Date(Date.now() + 2 * 60 * 60 * 1000)) } });
+		await user.selectOptions(within(form).getByLabelText(/How long it stays up/), "6");
+		await user.click(post);
+
+		await waitFor(() => {
+			expect(sent.bodies).toHaveLength(1);
+		});
+		const body = sent.bodies[0] as { startsAt: string; endsAt: string };
+		expect(Date.parse(body.startsAt)).toBeGreaterThan(Date.now());
+		expect(Date.parse(body.endsAt) - Date.parse(body.startsAt)).toBe(6 * 60 * 60 * 1000);
+	});
+
+	/** Tell everybody again would mean nothing for one not up yet, so it is offered as Post now instead. */
+	it("marks one waiting to go up, and posts it now when asked", async () => {
+		const user = userEvent.setup();
+		const sent = capture("patch");
+		const later = new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString();
+		server.use(http.get("/api/owner/notices", () => HttpResponse.json([{ ...musicNotice, publishedAt: later }])));
+		renderTab("control");
+
+		const waiting = await row();
+		expect(within(waiting).getByText("Scheduled")).toBeInTheDocument();
+		expect(within(waiting).getByText(/^Goes up/)).toBeInTheDocument();
+		await user.click(within(waiting).getByRole("button", { name: "Post now" }));
+
+		await waitFor(() => {
+			expect(sent.bodies).toEqual([{ notifyAgain: true }]);
+		});
 	});
 
 	/** Its read is its own, so a failure here must not take pause or shut down with it. */

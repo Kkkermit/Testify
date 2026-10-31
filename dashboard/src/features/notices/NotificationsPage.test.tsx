@@ -48,6 +48,14 @@ describe("the notifications page", () => {
 		await expectNoViolations(container);
 	});
 
+	it("says when one comes down", async () => {
+		feedOf({ notices: [{ ...musicNotice, endsAt: "2026-11-02T09:00:00.000Z" }], unread: 0 });
+
+		renderWithProviders(<NotificationsPage />, { path: "/notifications" });
+
+		expect(await screen.findByText(/Up until/)).toBeInTheDocument();
+	});
+
 	it("asks nothing of the server when nothing is new", async () => {
 		const seen = { count: 0 };
 		feedOf({ notices: [OLDER], unread: 0 }, seen);

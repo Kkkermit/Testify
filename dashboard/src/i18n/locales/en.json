@@ -1622,7 +1622,25 @@
 		"noticeRemove": "Remove",
 		"noticeRemoveConfirm": "Remove it? Nobody sees it after this.",
 		"noticeRemoveIt": "Remove it",
-		"noticeKeep": "Keep it"
+		"noticeKeep": "Keep it",
+		"noticeStart": "When it goes up",
+		"noticeStartNow": "Now",
+		"noticeStartLater": "Later",
+		"noticeStartAt": "Goes up at",
+		"noticeStartAtHint": "In your time zone.",
+		"noticeUpFor": "How long it stays up",
+		"noticeUpForHint": "Counted from when it goes up. It takes itself down after that.",
+		"noticeUpForHintNow": "Counted from now. It takes itself down after that.",
+		"noticeUpForever": "Until it is removed",
+		"noticeKeepEnd": "Keep: until {{when}}",
+		"noticeScheduled": "Scheduled",
+		"noticeGoesUp": "Goes up {{when}}",
+		"noticeComesDown": "Comes down {{when}}",
+		"noticePostNow": "Post now",
+		"noticeUpForHours_one": "{{count, number}} hour",
+		"noticeUpForHours_other": "{{count, number}} hours",
+		"noticeUpForDays_one": "{{count, number}} day",
+		"noticeUpForDays_other": "{{count, number}} days"
 	},
 	"legal": {
 		"backToDashboard": "Back to the dashboard",
@@ -1859,7 +1877,11 @@
 		"scheduleMessage": "Write the message to post.",
 		"scheduleTime": "Choose when to post it.",
 		"schedulePast": "That time has already gone. Pick one at least a minute from now.",
-		"scheduleTooFar": "A message can be scheduled at most {{max}} days ahead."
+		"scheduleTooFar": "A message can be scheduled at most {{max}} days ahead.",
+		"noticeStartPast": "That time has already gone. Pick one at least a minute from now, or post it now.",
+		"noticeStartTooFar": "A notification can go up at most {{max}} days ahead.",
+		"noticeEndBeforeStart": "It has to come down after it goes up, and later than now.",
+		"noticeEndTooLong": "A notification can stay up for at most {{max}} days."
 	},
 	"status": {
 		"title": "Status",
@@ -2348,6 +2370,7 @@
 		"new": "New",
 		"posted": "Posted {{when}}",
 		"edited": "edited {{when}}",
+		"until": "Up until {{when}}",
 		"toneInfo": "Notice",
 		"toneProblem": "Problem",
 		"toneFixed": "Fixed"

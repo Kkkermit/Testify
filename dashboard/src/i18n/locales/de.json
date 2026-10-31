@@ -1622,7 +1622,25 @@
 		"noticeRemove": "Entfernen",
 		"noticeRemoveConfirm": "Entfernen? Danach sieht sie niemand mehr.",
 		"noticeRemoveIt": "Entfernen",
-		"noticeKeep": "Behalten"
+		"noticeKeep": "Behalten",
+		"noticeStart": "Wann sie erscheint",
+		"noticeStartNow": "Jetzt",
+		"noticeStartLater": "Später",
+		"noticeStartAt": "Erscheint am",
+		"noticeStartAtHint": "In deiner Zeitzone.",
+		"noticeUpFor": "Wie lange sie bleibt",
+		"noticeUpForHint": "Gezählt ab dem Erscheinen. Danach verschwindet sie von selbst.",
+		"noticeUpForHintNow": "Gezählt ab jetzt. Danach verschwindet sie von selbst.",
+		"noticeUpForever": "Bis sie entfernt wird",
+		"noticeKeepEnd": "Beibehalten: bis {{when}}",
+		"noticeScheduled": "Geplant",
+		"noticeGoesUp": "Erscheint am {{when}}",
+		"noticeComesDown": "Verschwindet am {{when}}",
+		"noticePostNow": "Jetzt veröffentlichen",
+		"noticeUpForHours_one": "{{count, number}} Stunde",
+		"noticeUpForHours_other": "{{count, number}} Stunden",
+		"noticeUpForDays_one": "{{count, number}} Tag",
+		"noticeUpForDays_other": "{{count, number}} Tage"
 	},
 	"legal": {
 		"backToDashboard": "Zurück zum Dashboard",
@@ -1859,7 +1877,11 @@
 		"scheduleMessage": "Schreib die Nachricht, die gepostet werden soll.",
 		"scheduleTime": "Wähle, wann sie gepostet wird.",
 		"schedulePast": "Diese Zeit ist schon vorbei. Wähle eine, die mindestens eine Minute in der Zukunft liegt.",
-		"scheduleTooFar": "Eine Nachricht kann höchstens {{max}} Tage im Voraus geplant werden."
+		"scheduleTooFar": "Eine Nachricht kann höchstens {{max}} Tage im Voraus geplant werden.",
+		"noticeStartPast": "Diese Zeit ist schon vorbei. Wähle eine, die mindestens eine Minute in der Zukunft liegt, oder veröffentliche sie jetzt.",
+		"noticeStartTooFar": "Eine Benachrichtigung kann höchstens {{max}} Tage im Voraus geplant werden.",
+		"noticeEndBeforeStart": "Sie muss nach ihrem Erscheinen verschwinden, und später als jetzt.",
+		"noticeEndTooLong": "Eine Benachrichtigung kann höchstens {{max}} Tage lang sichtbar bleiben."
 	},
 	"status": {
 		"title": "Status",
@@ -2348,6 +2370,7 @@
 		"new": "Neu",
 		"posted": "Veröffentlicht {{when}}",
 		"edited": "bearbeitet {{when}}",
+		"until": "Sichtbar bis {{when}}",
 		"toneInfo": "Hinweis",
 		"toneProblem": "Problem",
 		"toneFixed": "Behoben"

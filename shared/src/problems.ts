@@ -40,6 +40,10 @@ export const PROBLEM_CODES = [
 	"schedule.time",
 	"schedule.past",
 	"schedule.tooFar",
+	"notice.startPast",
+	"notice.startTooFar",
+	"notice.endBeforeStart",
+	"notice.endTooLong",
 ] as const;
 
 export type ProblemCode = (typeof PROBLEM_CODES)[number];

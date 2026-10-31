@@ -1,12 +1,20 @@
 import { UserFacingError } from "@core/errors";
 import {
 	createNotice,
+	findNotice,
 	listNotices,
 	markNoticeHinted,
 	markNoticesSeen,
 	readerState,
+	updateNotice,
 } from "@database/repositories/noticeRepository";
-import { mentionNewNotices, postNotice, readNoticeFeed } from "@lib/notices/noticeActions.util";
+import {
+	allNotices,
+	changeNotice,
+	mentionNewNotices,
+	postNotice,
+	readNoticeFeed,
+} from "@lib/notices/noticeActions.util";
 import { type Notice } from "@testify/shared";
 
 jest.mock("@database/repositories/noticeRepository", () => ({
@@ -23,11 +31,13 @@ jest.mock("@database/repositories/noticeRepository", () => ({
 const USER = "100000000000000002";
 
 function notice(id: string, publishedAt: string): Notice {
-	return { id, title: `Notice ${id}`, body: "Body", tone: "info", publishedAt, updatedAt: publishedAt };
+	return { id, title: `Notice ${id}`, body: "Body", tone: "info", publishedAt, endsAt: null, updatedAt: publishedAt };
 }
 
 const OLDER = notice("a", "2026-10-30T10:00:00.000Z");
 const NEWER = notice("b", "2026-10-31T10:00:00.000Z");
+const HOUR_MS = 60 * 60 * 1000;
+const WAITING = notice("w", new Date(Date.now() + HOUR_MS).toISOString());
 
 function reader(seenAt: string | null, hintedAt: string | null = null): void {
 	jest.mocked(readerState).mockResolvedValue({
@@ -90,7 +100,7 @@ describe("mentionNewNotices", () => {
 		jest.mocked(listNotices).mockResolvedValue([OLDER]);
 		await mentionNewNotices(USER, tell);
 
-		const newest = notice("c", "2026-11-01T10:00:00.000Z");
+		const newest = notice("c", "2026-10-31T11:00:00.000Z");
 		jest.mocked(listNotices).mockResolvedValue([newest, OLDER]);
 		reader(null, OLDER.publishedAt);
 		await mentionNewNotices(USER, tell);
@@ -133,5 +143,52 @@ describe("postNotice", () => {
 		jest.mocked(createNotice).mockResolvedValue(null);
 
 		await expect(postNotice({ title: "x", body: "x", tone: "info" }, USER)).rejects.toThrow(/already 5/);
+	});
+});
+
+describe("notifications with a time", () => {
+	/** One waiting to go up is the owners' to see, and nobody is told of it until it does. */
+	it("shows readers nothing still waiting to go up, and tells nobody about it", async () => {
+		jest.mocked(listNotices).mockResolvedValue([WAITING, NEWER]);
+		reader(NEWER.publishedAt);
+		const tell = jest.fn(() => Promise.resolve());
+
+		expect(await readNoticeFeed(USER)).toEqual({ notices: [NEWER], unread: 0 });
+		await mentionNewNotices(USER, tell);
+		expect(tell).not.toHaveBeenCalled();
+		expect(await allNotices()).toEqual([WAITING, NEWER]);
+	});
+
+	/** The list is cached for minutes, so one that ends while it is held must drop out of the owners' list too. */
+	it("leaves out of the owners' list one whose end passed while the list was held", async () => {
+		const ended = { ...NEWER, id: "e", endsAt: new Date(Date.now() - 1_000).toISOString() };
+		jest.mocked(listNotices).mockResolvedValue([WAITING, ended, OLDER]);
+
+		expect(await allNotices()).toEqual([WAITING, OLDER]);
+	});
+
+	it("refuses a time that cannot be kept before anything is written", async () => {
+		const now = new Date();
+		const past = new Date(now.getTime() - HOUR_MS).toISOString();
+		const soon = new Date(now.getTime() + HOUR_MS).toISOString();
+
+		await expect(postNotice({ ...NEWER, startsAt: past }, USER, now)).rejects.toThrow(/already gone/);
+		await expect(postNotice({ ...NEWER, startsAt: soon, endsAt: past }, USER, now)).rejects.toThrow(/after it goes up/);
+		expect(createNotice).not.toHaveBeenCalled();
+	});
+
+	/** Moving the start of one already up would take it down until then, which nobody asked for. */
+	it("will not move the start of one already up, but will post one that is waiting", async () => {
+		const soon = new Date(Date.now() + 2 * HOUR_MS).toISOString();
+		jest.mocked(findNotice).mockResolvedValue(NEWER);
+		jest.mocked(updateNotice).mockResolvedValue(NEWER);
+
+		await expect(changeNotice(NEWER.id, { startsAt: soon })).rejects.toThrow(/already up/);
+		expect(updateNotice).not.toHaveBeenCalled();
+
+		await changeNotice(NEWER.id, { endsAt: soon });
+		jest.mocked(findNotice).mockResolvedValue(WAITING);
+		await changeNotice(WAITING.id, { startsAt: soon });
+		expect(updateNotice).toHaveBeenCalledTimes(2);
 	});
 });

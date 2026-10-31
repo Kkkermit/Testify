@@ -1656,7 +1656,27 @@
 		"noticeRemove": "Rimuovi",
 		"noticeRemoveConfirm": "Rimuoverla? Nessuno la vedrà più.",
 		"noticeRemoveIt": "Rimuovila",
-		"noticeKeep": "Tienila"
+		"noticeKeep": "Tienila",
+		"noticeStart": "Quando viene pubblicata",
+		"noticeStartNow": "Ora",
+		"noticeStartLater": "Più tardi",
+		"noticeStartAt": "Pubblicata il",
+		"noticeStartAtHint": "Nel tuo fuso orario.",
+		"noticeUpFor": "Per quanto resta visibile",
+		"noticeUpForHint": "Contato da quando viene pubblicata. Poi si rimuove da sola.",
+		"noticeUpForHintNow": "Contato da adesso. Poi si rimuove da sola.",
+		"noticeUpForever": "Finché non viene rimossa",
+		"noticeKeepEnd": "Mantieni: fino al {{when}}",
+		"noticeScheduled": "Programmata",
+		"noticeGoesUp": "Verrà pubblicata il {{when}}",
+		"noticeComesDown": "Verrà rimossa il {{when}}",
+		"noticePostNow": "Pubblica ora",
+		"noticeUpForHours_one": "{{count, number}} ora",
+		"noticeUpForHours_other": "{{count, number}} ore",
+		"noticeUpForHours_many": "{{count, number}} ore",
+		"noticeUpForDays_one": "{{count, number}} giorno",
+		"noticeUpForDays_other": "{{count, number}} giorni",
+		"noticeUpForDays_many": "{{count, number}} giorni"
 	},
 	"legal": {
 		"backToDashboard": "Torna alla dashboard",
@@ -1893,7 +1913,11 @@
 		"scheduleMessage": "Scrivi il messaggio da pubblicare.",
 		"scheduleTime": "Scegli quando pubblicarlo.",
 		"schedulePast": "Quell’ora è già passata. Scegline una almeno un minuto più tardi.",
-		"scheduleTooFar": "Un messaggio può essere programmato al massimo {{max}} giorni prima."
+		"scheduleTooFar": "Un messaggio può essere programmato al massimo {{max}} giorni prima.",
+		"noticeStartPast": "Quell’ora è già passata. Scegline una almeno un minuto più tardi, o pubblicala ora.",
+		"noticeStartTooFar": "Una notifica può essere programmata al massimo {{max}} giorni prima.",
+		"noticeEndBeforeStart": "Deve essere rimossa dopo la pubblicazione, e più tardi di adesso.",
+		"noticeEndTooLong": "Una notifica può restare visibile al massimo {{max}} giorni."
 	},
 	"status": {
 		"title": "Stato",
@@ -2391,6 +2415,7 @@
 		"new": "Nuova",
 		"posted": "Pubblicata {{when}}",
 		"edited": "modificata {{when}}",
+		"until": "Visibile fino al {{when}}",
 		"toneInfo": "Avviso",
 		"toneProblem": "Problema",
 		"toneFixed": "Risolto"
