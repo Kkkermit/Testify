@@ -6,6 +6,7 @@ import { parseMessage, PrefixInteraction } from "@core/prefix";
 import { getPrefixConfig } from "@database/repositories/prefixRepository";
 import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
+import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 
 /** Runs `t?ban @someone` through the same code and checks as `/ban`. */
 export default defineMessageHandler({
@@ -59,6 +60,10 @@ export default defineMessageHandler({
 		} as const;
 		countCommandUse(client, interaction, command, run);
 		logCommandUse(client, interaction, command, run);
+		// A message cannot be private, so the hint clears itself like a refusal.
+		mentionNoticesAfterCommand(message.author.id, client.logger, (unread) =>
+			replyTemporarily(client, message, noticeHint(unread, `${prefix}${NOTICE_COMMAND}`)),
+		);
 		return true;
 	},
 });

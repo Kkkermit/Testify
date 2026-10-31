@@ -5,6 +5,7 @@ import { requireOwner } from "@api/middleware/session";
 import { blacklist } from "@api/routes/blacklist";
 import { commandRunner } from "@api/routes/commandRunner";
 import { globalCommandToggles } from "@api/routes/commandToggles";
+import { ownerNotices } from "@api/routes/ownerNotices";
 import { parseQuery } from "@api/validate";
 import { ANALYTICS } from "@config/constants";
 import { databaseConnected } from "@database/connection";
@@ -23,6 +24,7 @@ owner.use("*", requireOwner);
 owner.route("/commands", globalCommandToggles);
 owner.route("/blacklist", blacklist);
 owner.route("/runner", commandRunner);
+owner.route("/notices", ownerNotices);
 
 /** The page asks this before drawing anything, because the `isOwner` on `/auth/me` is only as honest as the browser. */
 owner.get("/access", (context) => context.body(null, 204));

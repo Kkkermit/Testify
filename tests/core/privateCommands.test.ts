@@ -48,6 +48,7 @@ describe("which commands answer privately", () => {
 				"birthday settings",
 				"blacklist",
 				"bot",
+				"bot-notifications",
 				"bot-stats-channel",
 				"bug-report",
 				"calculate",

@@ -1,6 +1,7 @@
 import {
 	Activity,
 	Ban,
+	Bell,
 	BookOpen,
 	Cake,
 	CalendarClock,
@@ -93,6 +94,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					hintKey: guild === undefined ? "nav.commandsHintAll" : "nav.commandsHintGuild",
 				},
 				{ to: "/status", labelKey: "nav.status", icon: Activity, hintKey: "nav.statusHint" },
+				{ to: "/notifications", labelKey: "nav.notifications", icon: Bell, hintKey: "nav.notificationsHint" },
 				{ to: "/help", labelKey: "nav.help", icon: LifeBuoy, hintKey: "nav.helpHint" },
 				{ to: "/docs", labelKey: "nav.docs", icon: BookOpen, hintKey: "nav.docsHint", exact: false },
 				{ to: "/source-code", labelKey: "nav.source", icon: FileCode, hintKey: "nav.sourceHint", exact: false },

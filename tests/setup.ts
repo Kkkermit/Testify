@@ -5,8 +5,10 @@ const RESETS: readonly (readonly [module: string, name: string])[] = [
 	["@database/repositories/afkRepository", "clearAfkCache"],
 	["@database/repositories/autoResponderRepository", "clearAutoResponderCache"],
 	["@database/repositories/blacklistRepository", "clearBlacklistCache"],
+	["@database/repositories/noticeRepository", "clearNoticeCache"],
 	["@database/repositories/prefixRepository", "clearPrefixCache"],
 	["@database/repositories/raidRepository", "clearRaidCache"],
+	["@lib/notices/noticeActions.util", "clearNoticeHints"],
 ];
 
 beforeEach(() => {

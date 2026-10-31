@@ -146,7 +146,9 @@
 		"docs": "Docs",
 		"docsHint": "How to run, use and change the bot",
 		"source": "Source code",
-		"sourceHint": "Every file of the release this site runs"
+		"sourceHint": "Every file of the release this site runs",
+		"notifications": "Notifications",
+		"notificationsHint": "What the bot’s owners want everybody to know"
 	},
 	"search": {
 		"open": "Search",
@@ -1602,7 +1604,25 @@
 		"runtimePing_other": "{{ping}}, {{count, number}} shards",
 		"runtimeCached": "Cached",
 		"runtimeCachedValue": "{{servers, number}} servers, {{channels, number}} channels, {{users, number}} users",
-		"categoryFailed": "{{category}} · {{failed, number}} failed"
+		"categoryFailed": "{{category}} · {{failed, number}} failed",
+		"notices": "Notifications",
+		"noticesBody": "Tell everybody who uses the bot something, such as music being down. Each new one is mentioned once to everybody, after their next command and on the dashboard, and /bot-notifications shows them all.",
+		"noticesNone": "Nothing is up.",
+		"postNotice": "Post a notification",
+		"noticesFull": "{{max, number}} is as many as can be up at once. Remove one to post another.",
+		"noticeTitle": "Title",
+		"noticeTitlePlaceholder": "Music is down for now",
+		"noticeBody": "What everybody should know",
+		"noticeBodyHint": "Plain text. Line breaks are kept.",
+		"noticeBodyPlaceholder": "YouTube is refusing the bot. SoundCloud still plays while it is looked into.",
+		"noticeKind": "Kind",
+		"noticeEdit": "Edit",
+		"noticeSave": "Save",
+		"noticeAgain": "Tell everybody again",
+		"noticeRemove": "Remove",
+		"noticeRemoveConfirm": "Remove it? Nobody sees it after this.",
+		"noticeRemoveIt": "Remove it",
+		"noticeKeep": "Keep it"
 	},
 	"legal": {
 		"backToDashboard": "Back to the dashboard",
@@ -1668,7 +1688,7 @@
 		"storedL4": "Moderation: warnings with their reasons and who gave them, and temporary bans until they expire.",
 		"storedL5": "Tickets, giveaways, lotteries and verification: who opened, joined or claimed a ticket, each giveaway’s host and winners, lottery entries and winners, and who has verified.",
 		"storedL6": "Counting: who counted last, so that nobody counts twice in a row.",
-		"storedP2": "Your profile, if you create one with /profile set, is the one record not tied to a server. It holds only what you wrote into it, anybody using the bot can view it, and /profile delete removes it.",
+		"storedP2": "Your profile, if you create one with /profile set, is not tied to a server. It holds only what you wrote into it, anybody using the bot can view it, and /profile delete removes it.",
 		"messages": "Messages",
 		"messagesP1": "Messages in servers are never stored. They are read in memory for the features a server turns on — commands, automod, link filtering, counting, XP and sticky messages — and then dropped.",
 		"messagesP2": "If a server turns on audit logging, edits and deletions — including the earlier text of the message — are posted to a channel that server chooses. Ticket transcripts work the same way: when a ticket closes, a copy of its messages is posted to the server’s transcript channel. Both copies live in Discord, under that server’s control, not in the bot’s database.",
@@ -1796,7 +1816,9 @@
 		"retentionL13": "Away notes: deleted when you next send a message in that server, or after 30 days.",
 		"retentionL14": "Goodbye messages, auto-responders and scheduled messages: deleted when the bot is removed from the server. A scheduled message that posts once is deleted once it is posted.",
 		"retentionL15": "Birthdays: until you remove yours with /birthday remove, you leave that server, or the bot is removed from it.",
-		"retentionL16": "Moderation cases: kept like warnings after the bot is removed, until the operator deletes them. Where they are posted is forgotten when the bot is removed."
+		"retentionL16": "Moderation cases: kept like warnings after the bot is removed, until the operator deletes them. Where they are posted is forgotten when the bot is removed.",
+		"storedP3": "Notifications are what the bot’s owners post for everybody. So that each new one is mentioned to you once, {{bot}} keeps when you last read them and when it last told you about one, against your user id and nothing else. That record is not tied to a server either, and it is deleted 90 days after you last read the notifications or were told about one.",
+		"retentionL17": "When you last read the notifications: 90 days after you last read them or were told about one, then deleted automatically."
 	},
 	"problem": {
 		"automodMentionLimit": "Choose how many mentions to allow.",
@@ -2313,5 +2335,21 @@
 		"day": "Day",
 		"unique": "Unique",
 		"licenseOwn": "Licence: its own"
+	},
+	"notices": {
+		"title": "Notifications",
+		"subtitle": "What the people who run {{bot}} want everybody to know, newest first.",
+		"none": "Nothing to tell you right now",
+		"noneBody": "When the bot’s owners post something, such as a feature being down, it appears here.",
+		"banner_one": "You have {{count, number}} new notification from the people who run {{bot}}.",
+		"banner_other": "You have {{count, number}} new notifications from the people who run {{bot}}.",
+		"bannerLabel": "New notifications",
+		"open": "Read them",
+		"new": "New",
+		"posted": "Posted {{when}}",
+		"edited": "edited {{when}}",
+		"toneInfo": "Notice",
+		"toneProblem": "Problem",
+		"toneFixed": "Fixed"
 	}
 }

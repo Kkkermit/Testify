@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 91, across 14 categories          |
-| Command files        | 112 (incl. folded-in subcommands) |
+| Commands             | 92, across 14 categories          |
+| Command files        | 113 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
-| Prefix aliases       | 104                               |
-| Button handlers      | 43                                |
+| Prefix aliases       | 106                               |
+| Button handlers      | 44                                |
 | Events               | 31, in 6 groups                   |
-| `src/lib` helpers    | 204, in 29 domain folders         |
-| Schemas/repositories | 46 / 44                           |
+| `src/lib` helpers    | 207, in 30 domain folders         |
+| Schemas/repositories | 47 / 45                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,627 across 458 suites           |
+| Tests                | 3,681 across 466 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -218,10 +218,10 @@ src/
 │   ├── constants.ts      Fixed operational values (ECONOMY, cooldowns …)
 │   ├── theme.ts          Colours, emoji, repo URL
 │   └── strings.ts        User-facing copy
-├── commands/<category>/  112 files. Deeper `subcommands/` folders are NOT auto-loaded.
+├── commands/<category>/  113 files. Deeper `subcommands/` folders are NOT auto-loaded.
 ├── events/               31 handlers in command, community, create, logging, ready and message
-├── buttons/              41 component handlers, keyed by custom-ID prefix
-├── lib/                  204 helpers in 29 domain folders, each behind its own index.ts barrel
+├── buttons/              44 component handlers, keyed by custom-ID prefix
+├── lib/                  207 helpers in 30 domain folders, each behind its own index.ts barrel
 │   ├── discord/          components, containers, embeds, reply, pagination, channel pickers
 │   ├── format/           numbers, durations, amounts, and the English for a shared refusal
 │   ├── canvas/           the drawing primitives and every image card
@@ -232,16 +232,16 @@ src/
 │   ├── roles/            role menus, and who may have the bot hand out which role
 │   └── economy/ levelling/ moderation/ music/ settings/ welcome/ giveaways/ tickets/ info/ games/
 │       reminders/ ideas/ starboard/ tempVoice/ afk/ polls/ autoResponders/ scheduledMessages/ birthdays/ raid/
-│       site/
+│       site/ notices/
 ├── database/
 │   ├── connection.ts
-│   ├── models/           46 Mongoose schemas, one file per feature
-│   └── repositories/     44 query layers, one per feature. Commands never touch a model directly.
+│   ├── models/           47 Mongoose schemas, one file per feature
+│   └── repositories/     45 query layers, one per feature. Commands never touch a model directly.
 ├── jobs/                 11 scheduled jobs (lottery, income, bot stats, softbans, heartbeat, casino hands, reminders,
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 311 suites; the dashboard's 147 sit beside its code.
+tests/                    Mirrors src/. 318 suites; the dashboard's 148 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -281,6 +281,7 @@ union type, so a mistyped category is a **compile error**. Adding a category the
 | Change a colour or emoji                   | `src/config/theme.ts`                                                     |
 | Add a scheduled job                        | `src/jobs/*.util.ts` + `events/ready/scheduleJobs.event.ts`               |
 | Change what the status page checks         | `src/lib/bot/status.util.ts`, thresholds in `shared/src/status.ts`        |
+| Change how the owners' notifications work  | `src/lib/notices/` — `/bot-notifications`, the hint and the web share it  |
 | Share logic between a command and a button | `src/lib/<domain>/*Actions.util.ts` (e.g. `economyActions.util.ts`)       |
 | Change what a music control does or says   | `src/lib/music/musicControls.util.ts` — `/music` and the buttons share it |
 | Change how a ticket opens or closes        | `src/lib/tickets/ticketFlow.util.ts` — the button handler only answers    |
@@ -689,9 +690,10 @@ Rules:
 
 1. **Every schema carries `guildId`, and every query filters on it** — `{ guildId, userId }`. Never query by
    `userId` alone for per-guild data.
-2. **Three deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
-   profile (about the person, not the server) and reminders (somebody's own, so `/remind list` shows every one
-   they have wherever they set it, and every lookup filters on `userId` instead). Do not "fix" these.
+2. **Four deliberate exceptions:** the blacklist (a bot-owner-level ban list, global by design), the user
+   profile (about the person, not the server), reminders (somebody's own, so `/remind list` shows every one
+   they have wherever they set it, and every lookup filters on `userId` instead) and when somebody last read the
+   bot's notifications (which are about the bot, not a server). Do not "fix" these.
 3. **In-memory state must be guild-keyed.** `gameKey(guildId, userId)`, and command cooldowns are keyed
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
@@ -1859,9 +1861,37 @@ things about them are load-bearing:
   dashboard's `PATCH`, because a hold is a timeout and somebody who could not `/mute` must not be able to arrange one.
   It cannot be on with nothing to do, and taking away the last thing it did turns it off.
 
+### The owners' notifications are mentioned once, and only the owners change them
+
+`/bot-notifications` and the dashboard's **Notifications** page show what the bot's owners want everybody to know —
+music being down, say. The owners post, edit and remove them from the same command's panel and from the owner
+console's control tab, both through `src/lib/notices/`. Five things about it are load-bearing:
+
+- **Only `DISCORD_OWNER_IDS` can change one, on either surface.** The panel's handler is `ownerOnly` and also asks
+  `client.isOwner` on every press and every form, so a panel somebody else can reach changes nothing; everybody else
+  is shown the board without its controls. The web routes sit under the owner router and answer 404.
+- **Each new notification is mentioned once, after a command has answered, never instead of it.**
+  `mentionNoticesAfterCommand` runs at both dispatch sites without being awaited: a private follow-up on a slash
+  command, a reply that tidies itself away on a prefix one. Somebody is told only when the newest notification was
+  published after they last read or were told (`readerState`), and an in-memory note (`told`, bounded) keeps a burst
+  of commands from asking the database each time. A hint that cannot be given — a command that answered with a form —
+  is not recorded, so the next command tries again.
+- **Editing tells nobody again; Tell everybody again does.** `publishedAt` moves only when a notification is posted
+  and on `notifyAgain`, so fixing a typo does not interrupt everybody who already read it, and music coming back can.
+- **At most `NOTICE_LIMITS.maxActive` (5) are up at once.** The board shows every one whole in one Components V2
+  message, five at their longest stay inside Discord's 4,000 characters (a test pins it), and a sixth is refused on
+  both surfaces. Every post goes out through `withoutPings`, so `@everyone` in a notification pings nobody.
+- **A reader is two times and nothing else.** `noticereaders` holds a user id, when they last read the notifications
+  and when they were last told about one, and expires `NOTICE_LIMITS.readerDays` (90) after the later of the two. The
+  privacy notice says so (`legal.storedP3`, `legal.retentionL17`).
+
+On the dashboard, `NoticeBanner` sits above every screen in `AppShell` while anything is unread and never on
+`/notifications`, which marks them read once they are on screen and keeps the "New" badges from its first answer, so
+they do not vanish while being read.
+
 ### Global by design
 
-The blacklist, the user profile and reminders are intentionally not guild-scoped. See
+The blacklist, the user profile, reminders and the notifications' read state are intentionally not guild-scoped. See
 [§12](#12-multi-guild-rules).
 
 ---
@@ -2019,6 +2049,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/commands`           | Per-command switches for this server                                         |
 | `/commands`                      | Every command, searchable, with the coverage tile                            |
 | `/status`                        | Online or not, uptime, speed, packages and outside services, 30 days back    |
+| `/notifications`                 | What the bot's owners want everybody to know; opening it reads them          |
 | `/help`                          | Getting started, and the support assistant that answers from help articles   |
 | `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                              |
 | `/appearance`                    | Theme, accent, motion and language; public, in whichever frame suits         |
@@ -2680,7 +2711,8 @@ Two rules it enforces:
 Eight tabs — overview, usage, commands, logs, run, blacklist, runtime, control — all behind `requireOwner`, which answers **404** so the API
 confirms nothing to somebody probing it. Each tab fetches its own data, deliberately: a failing `/owner/stats` used to blank
 the whole console, and the logs tab is precisely the screen you want when something is wrong. Inside the control
-tab the music sources card reads on its own too, so a failure there leaves pause and shut down working.
+tab the music sources and notifications cards each read on their own too, so a failure there leaves pause and shut
+down working.
 
 **The page asks the server, never `/auth/me` alone.** `isOwner` on `/auth/me` is only as honest as the browser that
 received it: rewritten in DevTools, it once drew the console's frame for somebody who was not the owner, every tab

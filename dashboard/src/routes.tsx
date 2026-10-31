@@ -61,6 +61,7 @@ const CommandsPage = page(async () => import("@/features/commands/CommandsPage")
 const OwnerPage = page(async () => import("@/features/owner/OwnerPage"), "OwnerPage");
 const HelpPage = page(async () => import("@/features/help/HelpPage"), "HelpPage");
 const StatusPage = page(async () => import("@/features/status/StatusPage"), "StatusPage");
+const NotificationsPage = page(async () => import("@/features/notices/NotificationsPage"), "NotificationsPage");
 const AppearancePage = page(async () => import("@/features/appearance/AppearancePage"), "AppearancePage");
 const LandingPage = page(async () => import("@/features/site/LandingPage"), "LandingPage");
 const DocsPage = page(async () => import("@/features/docs/DocsPage"), "DocsPage");
@@ -158,6 +159,7 @@ export const routes = [
 							{ path: "/commands", element: lazily(<CommandsPage />) },
 							{ path: "/help", element: lazily(<HelpPage />) },
 							{ path: "/status", element: lazily(<StatusPage />) },
+							{ path: "/notifications", element: lazily(<NotificationsPage />) },
 							// Behind its own guard, so the console's existence is not disclosed by rendering its shell.
 							{
 								element: <RequireOwner />,
