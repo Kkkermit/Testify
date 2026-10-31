@@ -147,7 +147,9 @@
 		"docs": "Documentazione",
 		"docsHint": "Come far girare, usare e modificare il bot",
 		"source": "Codice sorgente",
-		"sourceHint": "Ogni file della versione su cui gira questo sito"
+		"sourceHint": "Ogni file della versione su cui gira questo sito",
+		"notifications": "Notifiche",
+		"notificationsHint": "Ciò che i proprietari del bot vogliono far sapere a tutti"
 	},
 	"search": {
 		"open": "Cerca",
@@ -1636,7 +1638,25 @@
 		"runtimePing_other": "{{ping}}, {{count, number}} shard",
 		"runtimeCached": "In cache",
 		"runtimeCachedValue": "{{servers, number}} server, {{channels, number}} canali, {{users, number}} utenti",
-		"categoryFailed": "{{category}} · {{failed, number}} non riusciti"
+		"categoryFailed": "{{category}} · {{failed, number}} non riusciti",
+		"notices": "Notifiche",
+		"noticesBody": "Fai sapere qualcosa a tutti quelli che usano il bot, ad esempio che la musica non funziona. Ogni nuova viene segnalata una volta a tutti, dopo il loro prossimo comando e nella dashboard, e /bot-notifications le mostra tutte.",
+		"noticesNone": "Non ce n’è nessuna.",
+		"postNotice": "Pubblica una notifica",
+		"noticesFull": "{{max, number}} è il massimo alla volta. Rimuovine una per pubblicarne un’altra.",
+		"noticeTitle": "Titolo",
+		"noticeTitlePlaceholder": "La musica non funziona per ora",
+		"noticeBody": "Ciò che tutti devono sapere",
+		"noticeBodyHint": "Testo semplice. Gli a capo vengono mantenuti.",
+		"noticeBodyPlaceholder": "YouTube sta rifiutando il bot. SoundCloud funziona ancora mentre si verifica il problema.",
+		"noticeKind": "Tipo",
+		"noticeEdit": "Modifica",
+		"noticeSave": "Salva",
+		"noticeAgain": "Avvisa di nuovo tutti",
+		"noticeRemove": "Rimuovi",
+		"noticeRemoveConfirm": "Rimuoverla? Nessuno la vedrà più.",
+		"noticeRemoveIt": "Rimuovila",
+		"noticeKeep": "Tienila"
 	},
 	"legal": {
 		"backToDashboard": "Torna alla dashboard",
@@ -1702,7 +1722,7 @@
 		"storedL4": "Moderazione: le ammonizioni con il motivo e chi le ha date, e i ban temporanei fino alla scadenza.",
 		"storedL5": "Ticket, giveaway, lotterie e verifica: chi ha aperto, si è unito o ha preso in carico un ticket, l’organizzatore e i vincitori di ogni giveaway, le partecipazioni e i vincitori della lotteria, e chi si è verificato.",
 		"storedL6": "Conteggio: chi ha contato per ultimo, così che nessuno conti due volte di fila.",
-		"storedP2": "Il tuo profilo, se ne crei uno con /profile set, è l’unico dato non legato a un server. Contiene solo ciò che ci hai scritto, chiunque usi il bot può vederlo, e /profile delete lo rimuove.",
+		"storedP2": "Il tuo profilo, se ne crei uno con /profile set, non è legato a un server. Contiene solo ciò che ci hai scritto, chiunque usi il bot può vederlo, e /profile delete lo rimuove.",
 		"messages": "Messaggi",
 		"messagesP1": "I messaggi nei server non vengono mai salvati. Vengono letti in memoria per le funzioni che un server attiva — comandi, automod, filtro link, conteggio, XP e messaggi fissi — e poi scartati.",
 		"messagesP2": "Se un server attiva il registro di audit, le modifiche e le eliminazioni — compreso il testo precedente del messaggio — vengono pubblicate in un canale scelto da quel server. Le trascrizioni dei ticket funzionano allo stesso modo: alla chiusura di un ticket, una copia dei suoi messaggi viene pubblicata nel canale trascrizioni del server. Entrambe le copie stanno in Discord, sotto il controllo di quel server, non nel database del bot.",
@@ -1830,7 +1850,9 @@
 		"retentionL13": "Note di assenza: eliminate quando scrivi di nuovo in quel server, o dopo 30 giorni.",
 		"retentionL14": "Messaggi di addio, risposte automatiche e messaggi programmati: eliminati quando il bot viene rimosso dal server. Un messaggio programmato che viene pubblicato una sola volta è eliminato dopo la pubblicazione.",
 		"retentionL15": "Compleanni: finché non rimuovi il tuo con /birthday remove, non lasci quel server o il bot non viene rimosso.",
-		"retentionL16": "Casi di moderazione: conservati come gli avvertimenti dopo la rimozione del bot, finché l’operatore non li elimina. Il canale in cui vengono pubblicati viene dimenticato alla rimozione del bot."
+		"retentionL16": "Casi di moderazione: conservati come gli avvertimenti dopo la rimozione del bot, finché l’operatore non li elimina. Il canale in cui vengono pubblicati viene dimenticato alla rimozione del bot.",
+		"storedP3": "Le notifiche sono ciò che i proprietari del bot pubblicano per tutti. Perché ogni nuova ti venga segnalata una sola volta, {{bot}} conserva quando le hai lette l’ultima volta e quando te ne ha segnalata una, legati al tuo ID utente e a nient’altro. Anche questo dato non è legato a un server e viene eliminato 90 giorni dopo l’ultima volta che hai letto le notifiche o te ne è stata segnalata una.",
+		"retentionL17": "Quando hai letto le notifiche l’ultima volta: 90 giorni dopo l’ultima lettura o l’ultima segnalazione, poi eliminato automaticamente."
 	},
 	"problem": {
 		"automodMentionLimit": "Scegli quante menzioni consentire.",
@@ -2355,5 +2377,22 @@
 		"day": "Giorno",
 		"unique": "Unici",
 		"licenseOwn": "Licenza: propria"
+	},
+	"notices": {
+		"title": "Notifiche",
+		"subtitle": "Ciò che chi gestisce {{bot}} vuole far sapere a tutti, dalla più recente.",
+		"none": "Niente da dirti per ora",
+		"noneBody": "Quando i proprietari del bot pubblicano qualcosa, ad esempio una funzione non disponibile, compare qui.",
+		"banner_one": "Hai {{count, number}} nuova notifica da chi gestisce {{bot}}.",
+		"banner_many": "Hai {{count, number}} nuove notifiche da chi gestisce {{bot}}.",
+		"banner_other": "Hai {{count, number}} nuove notifiche da chi gestisce {{bot}}.",
+		"bannerLabel": "Nuove notifiche",
+		"open": "Leggile",
+		"new": "Nuova",
+		"posted": "Pubblicata {{when}}",
+		"edited": "modificata {{when}}",
+		"toneInfo": "Avviso",
+		"toneProblem": "Problema",
+		"toneFixed": "Risolto"
 	}
 }

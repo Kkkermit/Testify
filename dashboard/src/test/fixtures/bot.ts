@@ -1,5 +1,7 @@
 import {
 	type CommandCatalogue,
+	type Notice,
+	type NoticeFeed,
 	type StatusResponse,
 	type SupportArticle,
 	type SupportCatalogueEntry,
@@ -112,3 +114,15 @@ export const supportReply: SupportReply = {
 	answer: levellingArticle,
 	related: [{ id: "role-order", title: "The bot cannot give or remove a role", topic: "troubleshooting" }],
 };
+
+export const musicNotice: Notice = {
+	id: "a".repeat(24),
+	title: "Music is down",
+	body: "YouTube is refusing the bot.\nSoundCloud still plays.",
+	tone: "problem",
+	publishedAt: "2026-10-31T10:00:00.000Z",
+	updatedAt: "2026-10-31T10:00:00.000Z",
+};
+
+/** Nothing unread, so the banner stays out of every screen's test but the ones about it. */
+export const quietFeed: NoticeFeed = { notices: [], unread: 0 };

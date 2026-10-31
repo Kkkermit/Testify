@@ -13,6 +13,7 @@ export const keys = {
 	},
 	commands: () => ["commands"] as const,
 	status: () => ["status"] as const,
+	notices: () => ["notices"] as const,
 	support: () => ["support"] as const,
 	supportArticle: (id: string) => ["support", "article", id] as const,
 	/** Null is the bot-wide scope, which only the owner can read. */
@@ -88,5 +89,6 @@ export const keys = {
 		guildDetail: (id: string) => ["owner", "guild", id] as const,
 		blacklist: () => ["owner", "blacklist"] as const,
 		runner: () => ["owner", "runner"] as const,
+		notices: () => ["owner", "notices"] as const,
 	},
 };

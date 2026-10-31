@@ -4,7 +4,7 @@
 
 **Every command works as `/name` and as `t?name` — one implementation, two ways in.**
 
-![commands: 86](https://img.shields.io/badge/commands-86-8b5cf6?style=for-the-badge) ![subcommands: 142](https://img.shields.io/badge/subcommands-142-0ea5e9?style=for-the-badge) ![prefix aliases: 104](https://img.shields.io/badge/prefix%20aliases-104-16a34a?style=for-the-badge)
+![commands: 87](https://img.shields.io/badge/commands-87-8b5cf6?style=for-the-badge) ![subcommands: 142](https://img.shields.io/badge/subcommands-142-0ea5e9?style=for-the-badge) ![prefix aliases: 106](https://img.shields.io/badge/prefix%20aliases-106-16a34a?style=for-the-badge)
 
 </div>
 
@@ -19,7 +19,7 @@
 | [🎰 Casino](#-casino)         |    1     |      9      |
 | [🎮 Fun](#-fun)               |    2     |     16      |
 | [🎯 Games](#-games)           |    1     |      6      |
-| [📚 Info](#-info)             |    12    |      8      |
+| [📚 Info](#-info)             |    13    |      8      |
 | [📈 Levelling](#-levelling)   |    2     |      6      |
 | [🛡️ Moderation](#️-moderation) |    18    |     19      |
 | [🎵 Music](#-music)           |    2     |     14      |
@@ -89,20 +89,21 @@
 
 ## 📚 Info
 
-| Command              | Description                                                        | Subcommands               | Prefix aliases            | Needs        |
-| -------------------- | ------------------------------------------------------------------ | ------------------------- | ------------------------- | ------------ |
-| `/ask`               | Answers questions about the bot, its dashboard, and setting it up. | —                         | `t?support`, `t?faq`      | —            |
-| `/avatar`            | Shows a user's avatar and banner.                                  | —                         | `t?av`, `t?pfp`           | —            |
-| `/bot`               | Information about the bot itself.                                  | `info`, `uptime`, `specs` | —                         | —            |
-| `/bot-stats-channel` | Posts a self-updating bot statistics message in a channel.         | `set`, `remove`           | —                         | Manage guild |
-| `/help`              | Everything the bot can do, category by category.                   | —                         | `t?commands`, `t?h`       | —            |
-| `/member-count`      | Charts the member breakdown for this server.                       | —                         | —                         | —            |
-| `/permissions`       | Lists the permissions a member has in this server.                 | —                         | —                         | —            |
-| `/ping`              | Checks the bot's latency.                                          | —                         | `t?latency`               | —            |
-| `/profile`           | Views and edits your public profile.                               | `view`, `set`, `delete`   | —                         | —            |
-| `/role-info`         | Shows information about a role.                                    | —                         | —                         | —            |
-| `/server-info`       | Displays information about this server.                            | —                         | `t?server`, `t?guildinfo` | —            |
-| `/user-info`         | Shows information about a user.                                    | —                         | `t?whois`, `t?ui`         | —            |
+| Command              | Description                                                                       | Subcommands               | Prefix aliases                 | Needs        |
+| -------------------- | --------------------------------------------------------------------------------- | ------------------------- | ------------------------------ | ------------ |
+| `/ask`               | Answers questions about the bot, its dashboard, and setting it up.                | —                         | `t?support`, `t?faq`           | —            |
+| `/avatar`            | Shows a user's avatar and banner.                                                 | —                         | `t?av`, `t?pfp`                | —            |
+| `/bot`               | Information about the bot itself.                                                 | `info`, `uptime`, `specs` | —                              | —            |
+| `/bot-notifications` | Shows what the bot's owners want everybody to know, such as a feature being down. | —                         | `t?notifications`, `t?notices` | —            |
+| `/bot-stats-channel` | Posts a self-updating bot statistics message in a channel.                        | `set`, `remove`           | —                              | Manage guild |
+| `/help`              | Everything the bot can do, category by category.                                  | —                         | `t?commands`, `t?h`            | —            |
+| `/member-count`      | Charts the member breakdown for this server.                                      | —                         | —                              | —            |
+| `/permissions`       | Lists the permissions a member has in this server.                                | —                         | —                              | —            |
+| `/ping`              | Checks the bot's latency.                                                         | —                         | `t?latency`                    | —            |
+| `/profile`           | Views and edits your public profile.                                              | `view`, `set`, `delete`   | —                              | —            |
+| `/role-info`         | Shows information about a role.                                                   | —                         | —                              | —            |
+| `/server-info`       | Displays information about this server.                                           | —                         | `t?server`, `t?guildinfo`      | —            |
+| `/user-info`         | Shows information about a user.                                                   | —                         | `t?whois`, `t?ui`              | —            |
 
 ## 📈 Levelling
 
