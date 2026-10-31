@@ -52,6 +52,14 @@ describe("the owner console's routes", () => {
 		expect(routes).toEqual(
 			expect.arrayContaining([{ method: "GET", path: "/api/analytics/guilds/900000000000000001/runs" }]),
 		);
+		// Posting and changing what everybody is told speaks for the bot, so only its owners may.
+		expect(routes).toEqual(
+			expect.arrayContaining([
+				{ method: "POST", path: "/api/owner/notices" },
+				{ method: "PATCH", path: "/api/owner/notices/ping" },
+				{ method: "DELETE", path: "/api/owner/notices/ping" },
+			]),
+		);
 	});
 
 	/** Each route that answered anything else, by method and path, so one run names every hole. */

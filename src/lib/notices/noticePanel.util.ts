@@ -8,7 +8,7 @@ import { embed } from "@lib/discord/embeds.util";
 import { escapeMarkdown, truncate } from "@lib/format/format.util";
 import { NOTICE_PANEL_ID } from "@lib/notices/notices.constants";
 import { settingsScreen, type ScreenAction } from "@lib/settings/settingsScreen.util";
-import { type Notice, NOTICE_LIMITS, NOTICE_TONES, type NoticeTone } from "@testify/shared";
+import { isScheduled, type Notice, NOTICE_LIMITS, NOTICE_TONES, type NoticeTone } from "@testify/shared";
 
 type QuietPanel = ContainerMessage & { allowedMentions: { parse: [] } };
 
@@ -25,23 +25,32 @@ export function nextTone(tone: NoticeTone): NoticeTone {
 	return NOTICE_TONES[(NOTICE_TONES.indexOf(tone) + 1) % NOTICE_TONES.length] ?? "info";
 }
 
-function stamp(iso: string): string {
-	return `<t:${String(Math.floor(Date.parse(iso) / 1_000))}:R>`;
+function stamp(iso: string, style: "R" | "f" = "R"): string {
+	return `<t:${String(Math.floor(Date.parse(iso) / 1_000))}:${style}>`;
 }
 
-function noticeText(notice: Notice): string {
+const fullStamp = (iso: string): string => `${stamp(iso, "f")} (${stamp(iso)})`;
+
+function noticeText(notice: Notice, now: Date): string {
 	const look = NOTICE_TONE_LOOK[notice.tone];
 	const edited = Date.parse(notice.updatedAt) - Date.parse(notice.publishedAt) > EDIT_GRACE_MS;
+	const when = isScheduled(notice, now)
+		? `⏳ goes up ${stamp(notice.publishedAt)}`
+		: `posted ${stamp(notice.publishedAt)}${edited ? ` · edited ${stamp(notice.updatedAt)}` : ""}`;
+	const ends = notice.endsAt === null ? "" : ` · comes down ${stamp(notice.endsAt)}`;
 
-	return [
-		`### ${look.emoji} ${escapeMarkdown(notice.title)}`,
-		notice.body,
-		`-# ${look.label} · posted ${stamp(notice.publishedAt)}${edited ? ` · edited ${stamp(notice.updatedAt)}` : ""}`,
-	].join("\n");
+	return [`### ${look.emoji} ${escapeMarkdown(notice.title)}`, notice.body, `-# ${look.label} · ${when}${ends}`].join(
+		"\n",
+	);
 }
 
 /** Every notification, newest first; one of the bot's owners also gets the controls, so `ownerId` is null for anybody else. */
-export function noticeBoard(notices: readonly Notice[], ownerId: string | null, note?: string): QuietPanel {
+export function noticeBoard(
+	notices: readonly Notice[],
+	ownerId: string | null,
+	note?: string,
+	now = new Date(),
+): QuietPanel {
 	const parts: ContainerPart[] = [text(`## 📣 Bot notifications\n-# From the people who run ${botName()}.`)];
 	if (note !== undefined) parts.push(text(`-# ${note}`));
 
@@ -54,7 +63,7 @@ export function noticeBoard(notices: readonly Notice[], ownerId: string | null, 
 			),
 		);
 	}
-	for (const notice of notices) parts.push(divider(), text(noticeText(notice)));
+	for (const notice of notices) parts.push(divider(), text(noticeText(notice, now)));
 
 	if (ownerId !== null) {
 		const full = notices.length >= NOTICE_LIMITS.maxActive;
@@ -70,7 +79,10 @@ export function noticeBoard(notices: readonly Notice[], ownerId: string | null, 
 							option({
 								label: truncate(notice.title, 100),
 								value: notice.id,
-								description: truncate(notice.body.replace(/\s+/g, " "), 100),
+								description: truncate(
+									`${isScheduled(notice, now) ? "Goes up later · " : ""}${notice.body.replace(/\s+/g, " ")}`,
+									100,
+								),
 								emoji: NOTICE_TONE_LOOK[notice.tone].emoji,
 							}),
 						),
@@ -108,11 +120,12 @@ export interface NoticeEditorState {
 	confirmingRemove?: boolean;
 }
 
-/** One notification, for the bot's owners: its words and its kind, each applied on the press. */
-export function noticeEditor(state: NoticeEditorState, ownerId: string): QuietPanel {
+/** One notification, for the bot's owners: its words, its kind and when it goes up and comes down, each applied on the press. */
+export function noticeEditor(state: NoticeEditorState, ownerId: string, now = new Date()): QuietPanel {
 	const { notice } = state;
 	const args = [notice.id];
 	const look = NOTICE_TONE_LOOK[notice.tone];
+	const waiting = isScheduled(notice, now);
 
 	const actions: ScreenAction[] = state.confirmingRemove
 		? [
@@ -120,7 +133,9 @@ export function noticeEditor(state: NoticeEditorState, ownerId: string): QuietPa
 				{ action: "remove-no", label: "Keep it", args },
 			]
 		: [
-				{ action: "again", label: "Tell everybody again", emoji: "🔔", args },
+				waiting
+					? { action: "again", label: "Post now", emoji: "📣", style: ButtonStyle.Success, args }
+					: { action: "again", label: "Tell everybody again", emoji: "🔔", args },
 				{ action: "remove", label: "Remove", style: ButtonStyle.Danger, args },
 				{ action: "board", label: "All notifications" },
 			];
@@ -143,7 +158,18 @@ export function noticeEditor(state: NoticeEditorState, ownerId: string): QuietPa
 					action: { action: "tone", label: "Change", args },
 				},
 				{ label: "Message", value: notice.body },
-				{ label: "Posted", value: stamp(notice.publishedAt) },
+				waiting
+					? {
+							label: "Goes up",
+							value: fullStamp(notice.publishedAt),
+							action: { action: "start", label: "Change", args },
+						}
+					: { label: "Went up", value: stamp(notice.publishedAt) },
+				{
+					label: "Comes down",
+					value: notice.endsAt === null ? "When it is removed" : fullStamp(notice.endsAt),
+					action: { action: "end", label: "Change", args },
+				},
 			],
 			actions,
 		}),

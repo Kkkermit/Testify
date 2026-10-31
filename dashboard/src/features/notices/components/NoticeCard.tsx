@@ -19,6 +19,7 @@ export function NoticeCard({ notice, isNew }: { notice: Notice; isNew: boolean }
 			<p className="text-muted-foreground text-xs">
 				{t("notices.posted", { when: dateAndTime(notice.publishedAt) })}
 				{wasEdited(notice) && ` · ${t("notices.edited", { when: dateAndTime(notice.updatedAt) })}`}
+				{notice.endsAt !== null && ` · ${t("notices.until", { when: dateAndTime(notice.endsAt) })}`}
 			</p>
 		</Card>
 	);

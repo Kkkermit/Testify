@@ -10,7 +10,10 @@ import {
 	readerState,
 	updateNotice,
 } from "@database/repositories/noticeRepository";
+import { problemText } from "@lib/format/problemText.util";
 import {
+	isScheduled,
+	liveNotices,
 	type Notice,
 	type NoticeFeed,
 	noticeInput,
@@ -18,6 +21,7 @@ import {
 	NOTICE_LIMITS,
 	noticePatch,
 	type NoticePatch,
+	noticeTimingBlocked,
 	unreadNotices,
 } from "@testify/shared";
 
@@ -32,8 +36,26 @@ function parsed<T>(
 	);
 }
 
-export async function postNotice(input: NoticeInput, authorId: string): Promise<Notice> {
-	const notice = await createNotice(parsed(noticeInput.safeParse(input)), authorId);
+function refuseTiming(timing: Parameters<typeof noticeTimingBlocked>[0], now: Date): void {
+	const blocked = noticeTimingBlocked(timing, now);
+	if (blocked !== null) throw new UserFacingError(problemText(blocked));
+}
+
+const dateOf = (iso: string | null | undefined): Date | null =>
+	iso === null || iso === undefined ? null : new Date(iso);
+
+export async function postNotice(input: NoticeInput, authorId: string, now = new Date()): Promise<Notice> {
+	const valid = parsed(noticeInput.safeParse(input));
+	refuseTiming(
+		{
+			startsAt: dateOf(valid.startsAt) ?? now,
+			endsAt: dateOf(valid.endsAt),
+			rescheduled: valid.startsAt !== undefined,
+		},
+		now,
+	);
+
+	const notice = await createNotice(valid, authorId);
 	if (notice === null) {
 		throw new UserFacingError(
 			`There are already ${String(NOTICE_LIMITS.maxActive)} notifications up. Remove one before posting another.`,
@@ -42,8 +64,25 @@ export async function postNotice(input: NoticeInput, authorId: string): Promise<
 	return notice;
 }
 
-export async function changeNotice(id: string, patch: NoticePatch): Promise<Notice> {
-	const notice = await updateNotice(id, parsed(noticePatch.safeParse(patch)));
+export async function changeNotice(id: string, patch: NoticePatch, now = new Date()): Promise<Notice> {
+	const valid = parsed(noticePatch.safeParse(patch));
+
+	if (valid.startsAt !== undefined || valid.endsAt !== undefined) {
+		const current = await readNotice(id);
+		if (valid.startsAt !== undefined && !isScheduled(current, now)) {
+			throw new UserFacingError("It is already up, so when it goes up cannot be moved. Remove it and post it again.");
+		}
+		refuseTiming(
+			{
+				startsAt: valid.notifyAgain === true ? now : (dateOf(valid.startsAt) ?? new Date(current.publishedAt)),
+				endsAt: valid.endsAt === undefined ? dateOf(current.endsAt) : dateOf(valid.endsAt),
+				rescheduled: valid.startsAt !== undefined && valid.notifyAgain !== true,
+			},
+			now,
+		);
+	}
+
+	const notice = await updateNotice(id, valid);
 	if (notice === null) throw new UserFacingError("That notification has already been removed.");
 	return notice;
 }
@@ -52,9 +91,9 @@ export async function removeNotice(id: string): Promise<void> {
 	if (!(await deleteNotice(id))) throw new UserFacingError("That notification has already been removed.");
 }
 
-/** Newest first, as every surface lists them. */
-export async function allNotices(): Promise<Notice[]> {
-	return listNotices();
+/** For the owners: newest first, the ones still waiting to go up included. */
+export async function allNotices(now = new Date()): Promise<Notice[]> {
+	return (await listNotices()).filter((notice) => notice.endsAt === null || Date.parse(notice.endsAt) > now.getTime());
 }
 
 export async function readNotice(id: string): Promise<Notice> {
@@ -65,7 +104,8 @@ export async function readNotice(id: string): Promise<Notice> {
 
 /** What somebody has to read, and how much of it is new to them; reading it here marks it read when asked to. */
 export async function readNoticeFeed(userId: string, options: { markRead?: boolean } = {}): Promise<NoticeFeed> {
-	const [notices, reader] = await Promise.all([listNotices(), readerState(userId)]);
+	const [all, reader] = await Promise.all([listNotices(), readerState(userId)]);
+	const notices = liveNotices(all, new Date());
 	if (options.markRead === true) {
 		if (notices.length > 0) await markNoticesSeen(userId);
 		return { notices, unread: 0 };
@@ -83,7 +123,7 @@ const TOLD_MAX = 10_000;
  * that fails is tried again on their next command.
  */
 export async function mentionNewNotices(userId: string, tell: (unread: number) => Promise<unknown>): Promise<void> {
-	const notices = await listNotices();
+	const notices = liveNotices(await listNotices(), new Date());
 	const newest = notices[0];
 	if (newest === undefined) return;
 

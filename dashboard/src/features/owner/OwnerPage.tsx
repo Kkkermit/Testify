@@ -8,6 +8,7 @@ import { levelFrom, windowFrom } from "@/features/owner/owner.utils";
 import { BlacklistTab } from "@/features/owner/tabs/BlacklistTab";
 import { ControlTab } from "@/features/owner/tabs/ControlTab";
 import { LogsTab } from "@/features/owner/tabs/LogsTab";
+import { NotificationsTab } from "@/features/owner/tabs/NotificationsTab";
 import { OverviewTab } from "@/features/owner/tabs/OverviewTab";
 import { RunnerTab } from "@/features/owner/tabs/RunnerTab";
 import { RuntimeTab } from "@/features/owner/tabs/RuntimeTab";
@@ -76,6 +77,7 @@ export function OwnerPage(): React.JSX.Element {
 				{tab === "commands" && <CommandsPage scope="global" />}
 				{tab === "run" && <RunnerTab />}
 				{tab === "blacklist" && <BlacklistTab />}
+				{tab === "notifications" && <NotificationsTab />}
 				{tab === "runtime" && <RuntimeTab />}
 				{tab === "control" && <ControlTab />}
 			</TabContent>

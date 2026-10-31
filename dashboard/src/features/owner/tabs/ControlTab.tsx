@@ -6,7 +6,6 @@ import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
 import { Badge, Button, Card, CARD_HEADING, SegmentedControl, Skeleton } from "@/components/primitives";
 import { useBot } from "@/features/auth/useBot";
-import { NoticesCard } from "@/features/owner/components/NoticesCard";
 import {
 	useBotControl,
 	useBotIdentity,
@@ -143,8 +142,6 @@ export function ControlTab(): React.JSX.Element {
 					<Warning>{gateway.error instanceof ApiError ? gateway.error.message : t("common.didNotWork")}</Warning>
 				)}
 			</Card>
-
-			<NoticesCard />
 
 			<MusicSourcesCard />
 

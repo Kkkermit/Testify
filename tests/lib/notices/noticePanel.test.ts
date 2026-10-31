@@ -12,6 +12,7 @@ function notice(index: number, overrides: Partial<Notice> = {}): Notice {
 		body: "Music is down for now.",
 		tone: "problem",
 		publishedAt: "2026-10-31T10:00:00.000Z",
+		endsAt: null,
 		updatedAt: "2026-10-31T10:00:00.000Z",
 		...overrides,
 	};
@@ -46,6 +47,7 @@ describe("noticeBoard", () => {
 				title: "T".repeat(NOTICE_LIMITS.maxTitle),
 				body: "B".repeat(NOTICE_LIMITS.maxBody),
 				updatedAt: "2026-10-31T12:00:00.000Z",
+				endsAt: "2026-11-30T12:00:00.000Z",
 			}),
 		);
 
@@ -96,5 +98,31 @@ describe("noticeHint", () => {
 			/is 1 new notification .* `\/bot-notifications` to read it\./,
 		);
 		expect(noticeHint(3, "t?bot-notifications").data.description).toMatch(/are 3 new notifications .* read them\./);
+	});
+});
+
+describe("a notification with a time", () => {
+	const NOW = new Date("2026-10-31T12:00:00.000Z");
+	const waiting = notice(1, { publishedAt: "2026-11-01T09:00:00.000Z", endsAt: "2026-11-02T09:00:00.000Z" });
+	const actionsOf = (panel: ReturnType<typeof noticeEditor>): string[] =>
+		idsOf(panel).map((id) => parseCustomId(id).action);
+
+	it("says when one goes up and comes down", () => {
+		const text = textOf(noticeBoard([waiting, notice(2)], OWNER, undefined, NOW));
+
+		expect(text).toContain("⏳ goes up <t:1793523600:R> · comes down <t:1793610000:R>");
+		expect(text).toContain("posted <t:1793440800:R>");
+	});
+
+	/** Tell everybody again on one that is not up yet would mean nothing, so it is offered as Post now instead. */
+	it("lets one still waiting be moved or posted now, and one already up only have its end changed", () => {
+		const waitingEditor = noticeEditor({ notice: waiting }, OWNER, NOW);
+		const liveEditor = noticeEditor({ notice: notice(2) }, OWNER, NOW);
+
+		expect(actionsOf(waitingEditor)).toEqual(expect.arrayContaining(["start", "end", "again"]));
+		expect(buttonsOf(waitingEditor).map((entry) => entry["label"])).toContain("Post now");
+		expect(actionsOf(liveEditor)).toContain("end");
+		expect(actionsOf(liveEditor)).not.toContain("start");
+		expect(textOf(liveEditor)).toContain("When it is removed");
 	});
 });
