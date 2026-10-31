@@ -5,6 +5,7 @@ import { runButton, runCommand, toError } from "@core/errors";
 import { defineEvent } from "@core/event";
 import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { errorEmbed, refusalEmbed } from "@lib/discord";
+import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 
 /** The only `interactionCreate` listener. */
 export default defineEvent({
@@ -50,6 +51,9 @@ export default defineEvent({
 			const run = { surface: "slash", ok, reference, durationMs, channelId: interaction.channelId } as const;
 			countCommandUse(client, interaction, command, run);
 			logCommandUse(client, interaction, command, run);
+			mentionNoticesAfterCommand(interaction.user.id, client.logger, (unread) =>
+				interaction.followUp({ embeds: [noticeHint(unread, `/${NOTICE_COMMAND}`)], flags: MessageFlags.Ephemeral }),
+			);
 			return;
 		}
 

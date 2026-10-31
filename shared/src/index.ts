@@ -29,6 +29,7 @@ export * from "./memberActions";
 export * from "./memberDetail";
 export * from "./members";
 export * from "./music";
+export * from "./notices";
 export * from "./problems";
 export * from "./raid";
 export * from "./roleMenus";

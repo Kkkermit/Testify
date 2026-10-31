@@ -16,6 +16,7 @@ import { commands } from "@api/routes/commands";
 import { control } from "@api/routes/control";
 import { guilds } from "@api/routes/guilds";
 import { health } from "@api/routes/health";
+import { notices } from "@api/routes/notices";
 import { owner } from "@api/routes/owner";
 import { screens } from "@api/routes/screens";
 import { siteRoutes } from "@api/routes/site";
@@ -136,6 +137,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 		app.route("/api/analytics", analytics);
 		app.route("/api/screens", screens);
 		app.route("/api/status", status);
+		app.route("/api/notices", notices);
 		app.route("/api/support", supportQuestions);
 		app.route("/api/control", control);
 	}

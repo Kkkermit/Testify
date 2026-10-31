@@ -190,6 +190,7 @@ Everything the old bot did is still here, apart from the integrations that neede
 - **Games** — guess the number, guess the Pokémon, fast type, RPS, 8ball
 - **`/ask`** — a help desk that answers from written articles, never generated text
 - **Per-command switches**, per server or bot-wide, from Discord or the dashboard
+- **Notifications from the bot's owners**, mentioned once after your next command and on the dashboard
 
 </td>
 </tr>
@@ -481,7 +482,7 @@ generated list.
 | ------------- | :-------: | ---------------------------------------------------------------------------- |
 | 💰 Economy    |    20     | Balance, work, daily, rob, heist, shop, pets, lottery, leaderboards          |
 | 🛡️ Moderation |    18     | Ban, kick, mute, warn, cases, softban, lock, clear, roles, slowmode          |
-| 📚 Info       |    12     | User, server and role info, avatars, profiles, ping, help, `/ask`            |
+| 📚 Info       |    13     | User, server and role info, avatars, profiles, ping, help, `/ask`, notices   |
 | ⚙️ Settings   |    14     | Automod, raid protection, audit logging, auto-responders, schedules, welcome |
 | 👑 Owner      |     5     | Eval, blacklist, guild list, DM, flush logs                                  |
 | 👥 Community  |    10     | Birthdays, polls, away notes, reminders, ideas, starboard, join to create    |

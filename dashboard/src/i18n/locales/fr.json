@@ -147,7 +147,9 @@
 		"docs": "Docs",
 		"docsHint": "Comment faire tourner, utiliser et modifier le bot",
 		"source": "Code source",
-		"sourceHint": "Chaque fichier de la version que ce site exécute"
+		"sourceHint": "Chaque fichier de la version que ce site exécute",
+		"notifications": "Notifications",
+		"notificationsHint": "Ce que les propriétaires du bot veulent faire savoir à tous"
 	},
 	"search": {
 		"open": "Rechercher",
@@ -1636,7 +1638,25 @@
 		"runtimePing_other": "{{ping}}, {{count, number}} shards",
 		"runtimeCached": "En cache",
 		"runtimeCachedValue": "{{servers, number}} serveurs, {{channels, number}} salons, {{users, number}} utilisateurs",
-		"categoryFailed": "{{category}} · {{failed, number}} en échec"
+		"categoryFailed": "{{category}} · {{failed, number}} en échec",
+		"notices": "Notifications",
+		"noticesBody": "Fais savoir quelque chose à tous ceux qui utilisent le bot, par exemple que la musique est en panne. Chaque nouvelle est signalée une fois à tous, après leur prochaine commande et sur le tableau de bord, et /bot-notifications les affiche toutes.",
+		"noticesNone": "Aucune n’est publiée.",
+		"postNotice": "Publier une notification",
+		"noticesFull": "{{max, number}}, c’est le maximum à la fois. Retire-en une pour en publier une autre.",
+		"noticeTitle": "Titre",
+		"noticeTitlePlaceholder": "La musique est en panne pour l’instant",
+		"noticeBody": "Ce que tout le monde doit savoir",
+		"noticeBodyHint": "Texte brut. Les retours à la ligne sont conservés.",
+		"noticeBodyPlaceholder": "YouTube refuse le bot. SoundCloud fonctionne toujours pendant que le problème est examiné.",
+		"noticeKind": "Type",
+		"noticeEdit": "Modifier",
+		"noticeSave": "Enregistrer",
+		"noticeAgain": "Prévenir tout le monde à nouveau",
+		"noticeRemove": "Retirer",
+		"noticeRemoveConfirm": "La retirer ? Personne ne la verra plus.",
+		"noticeRemoveIt": "La retirer",
+		"noticeKeep": "La garder"
 	},
 	"legal": {
 		"backToDashboard": "Retour au tableau de bord",
@@ -1702,7 +1722,7 @@
 		"storedL4": "Modération : les avertissements avec leur motif et leur auteur, et les bannissements temporaires jusqu’à leur expiration.",
 		"storedL5": "Tickets, giveaways, loteries et vérification : qui a ouvert, rejoint ou pris en charge un ticket, l’organisateur et les gagnants de chaque giveaway, les participations et gagnants de la loterie, et qui s’est vérifié.",
 		"storedL6": "Comptage : qui a compté en dernier, pour que personne ne compte deux fois de suite.",
-		"storedP2": "Votre profil, si vous en créez un avec /profile set, est la seule fiche qui n’est liée à aucun serveur. Il ne contient que ce que vous y avez écrit, toute personne utilisant le bot peut le voir, et /profile delete le supprime.",
+		"storedP2": "Votre profil, si vous en créez un avec /profile set, n’est lié à aucun serveur. Il ne contient que ce que vous y avez écrit, toute personne utilisant le bot peut le voir, et /profile delete le supprime.",
 		"messages": "Messages",
 		"messagesP1": "Les messages des serveurs ne sont jamais enregistrés. Ils sont lus en mémoire pour les fonctions qu’un serveur active — commandes, automod, filtre de liens, comptage, XP et messages épinglés — puis oubliés.",
 		"messagesP2": "Si un serveur active la journalisation, les modifications et suppressions — y compris le texte précédent du message — sont publiées dans un salon choisi par ce serveur. Les transcriptions de tickets fonctionnent de même : à la fermeture d’un ticket, une copie de ses messages est publiée dans le salon de transcriptions du serveur. Ces deux copies sont dans Discord, sous le contrôle de ce serveur, pas dans la base du bot.",
@@ -1830,7 +1850,9 @@
 		"retentionL13": "Notes d’absence : supprimées à votre prochain message dans ce serveur, ou au bout de 30 jours.",
 		"retentionL14": "Messages d’au revoir, réponses automatiques et messages programmés : supprimés quand le bot est retiré du serveur. Un message programmé publié une seule fois est supprimé une fois publié.",
 		"retentionL15": "Anniversaires : jusqu’à ce que vous retiriez le vôtre avec /birthday remove, que vous quittiez ce serveur ou que le bot en soit retiré.",
-		"retentionL16": "Cas de modération : conservés comme les avertissements après le retrait du bot, jusqu’à ce que l’opérateur les supprime. Le salon où ils sont publiés est oublié au retrait du bot."
+		"retentionL16": "Cas de modération : conservés comme les avertissements après le retrait du bot, jusqu’à ce que l’opérateur les supprime. Le salon où ils sont publiés est oublié au retrait du bot.",
+		"storedP3": "Les notifications sont ce que les propriétaires du bot publient pour tous. Pour que chaque nouvelle vous soit signalée une seule fois, {{bot}} conserve le moment où vous les avez lues pour la dernière fois et celui où il vous en a signalé une, rattachés à votre identifiant d’utilisateur et à rien d’autre. Cette fiche n’est liée à aucun serveur non plus, et elle est supprimée 90 jours après la dernière fois que vous avez lu les notifications ou qu’on vous en a signalé une.",
+		"retentionL17": "Le moment où vous avez lu les notifications pour la dernière fois : 90 jours après la dernière lecture ou le dernier signalement, puis supprimé automatiquement."
 	},
 	"problem": {
 		"automodMentionLimit": "Choisis le nombre de mentions autorisées.",
@@ -2355,5 +2377,22 @@
 		"day": "Jour",
 		"unique": "Uniques",
 		"licenseOwn": "Licence : propre au projet"
+	},
+	"notices": {
+		"title": "Notifications",
+		"subtitle": "Ce que les personnes qui gèrent {{bot}} veulent faire savoir à tous, la plus récente d’abord.",
+		"none": "Rien à te dire pour l’instant",
+		"noneBody": "Quand les propriétaires du bot publient quelque chose, par exemple une fonction en panne, ça apparaît ici.",
+		"banner_one": "Tu as {{count, number}} nouvelle notification des personnes qui gèrent {{bot}}.",
+		"banner_many": "Tu as {{count, number}} nouvelles notifications des personnes qui gèrent {{bot}}.",
+		"banner_other": "Tu as {{count, number}} nouvelles notifications des personnes qui gèrent {{bot}}.",
+		"bannerLabel": "Nouvelles notifications",
+		"open": "Les lire",
+		"new": "Nouvelle",
+		"posted": "Publiée {{when}}",
+		"edited": "modifiée {{when}}",
+		"toneInfo": "Annonce",
+		"toneProblem": "Problème",
+		"toneFixed": "Résolu"
 	}
 }

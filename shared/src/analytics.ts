@@ -276,6 +276,7 @@ export const SCREEN_ROUTES = [
 	"/commands",
 	"/help",
 	"/status",
+	"/notifications",
 	"/owner",
 ] as const;
 

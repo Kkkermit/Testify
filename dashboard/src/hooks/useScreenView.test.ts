@@ -35,13 +35,26 @@ describe("screenView", () => {
 	});
 });
 
+/** The website's pages, which no screen view is counted for; every other route is a dashboard screen. */
+const SITE_PAGES = new Set([
+	"/",
+	"/docs",
+	"/docs/:slug",
+	"/docs/guides/:articleId",
+	"/source-code/*",
+	"/sign-in",
+	"/terms",
+	"/privacy",
+	"*",
+]);
+
 describe("the screens a view may be counted against", () => {
 	/** A screen missing from the list is refused by the API, so its views would vanish without a word. */
 	it("are exactly the screens the dashboard routes to", () => {
 		const routes = readFileSync(resolve(__dirname, "..", "routes.tsx"), "utf8");
 		const screens = [...routes.matchAll(/path: "([^"]+)"/g)]
 			.map(([, path]) => path ?? "")
-			.filter((path) => /^\/(guilds|commands|help|status|owner|appearance)(\/|$)/.test(path));
+			.filter((path) => !SITE_PAGES.has(path));
 
 		expect([...SCREEN_ROUTES].sort()).toEqual(screens.sort());
 	});

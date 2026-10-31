@@ -8,6 +8,7 @@ import { UndoProvider } from "@/app/UndoProvider";
 import { Backdrop } from "@/components/motion";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
 import { QuickSearch } from "@/features/search/QuickSearch";
 import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
 import { useScreenView } from "@/hooks/useScreenView";
@@ -78,6 +79,7 @@ export function AppShell(): React.JSX.Element {
 					key={location.pathname}
 					className="motion-fade mx-auto flex w-full max-w-[1100px] min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6"
 				>
+					<NoticeBanner />
 					<Outlet />
 				</main>
 			</div>

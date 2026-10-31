@@ -1,6 +1,14 @@
 import { type SupportReply, type WarnLadder } from "@testify/shared";
 import { http, HttpResponse } from "msw";
-import { botStatus, catalogue, levellingArticle, supportIndex, supportReply } from "@/test/fixtures/bot";
+import {
+	botStatus,
+	catalogue,
+	levellingArticle,
+	musicNotice,
+	quietFeed,
+	supportIndex,
+	supportReply,
+} from "@/test/fixtures/bot";
 import {
 	autoResponderList,
 	botStatsSettings,
@@ -85,6 +93,8 @@ export const handlers = [
 		} satisfies SupportReply),
 	),
 	http.get("/api/status", () => HttpResponse.json(botStatus)),
+	http.get("/api/notices", () => HttpResponse.json(quietFeed)),
+	http.post("/api/notices/seen", () => HttpResponse.json(quietFeed)),
 	http.get("/api/auth/setup", () => HttpResponse.json(configured)),
 	http.get("/api/bot", () => HttpResponse.json(botProfile)),
 	http.get("/api/commands", () => HttpResponse.json(catalogue)),
@@ -219,6 +229,10 @@ export const handlers = [
 	),
 	http.get("/api/owner/guilds", () => HttpResponse.json({ items: [], total: 0, page: 1, perPage: 25 })),
 	http.get("/api/owner/blacklist", () => HttpResponse.json(blacklistRows)),
+	http.get("/api/owner/notices", () => HttpResponse.json([musicNotice])),
+	http.post("/api/owner/notices", () => HttpResponse.json(musicNotice, { status: 201 })),
+	http.patch("/api/owner/notices/:noticeId", () => HttpResponse.json(musicNotice)),
+	http.delete("/api/owner/notices/:noticeId", () => new HttpResponse(null, { status: 204 })),
 	http.get("/api/owner/runner", () => HttpResponse.json(runnable)),
 	http.post("/api/owner/runner/:name", () => HttpResponse.json(runResult)),
 	http.post("/api/owner/blacklist", () => HttpResponse.json(blacklistRows[0])),
