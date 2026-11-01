@@ -30,6 +30,7 @@ export * from "./memberDetail";
 export * from "./members";
 export * from "./music";
 export * from "./notices";
+export * from "./places";
 export * from "./problems";
 export * from "./raid";
 export * from "./roleMenus";

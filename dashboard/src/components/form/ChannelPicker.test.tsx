@@ -4,9 +4,9 @@ import userEvent from "@testing-library/user-event";
 import { ChannelPicker } from "@/components/form/ChannelPicker";
 
 const CHANNELS: ChannelSummary[] = [
-	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
-	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
-	{ id: "400000000000000003", name: null, kind: "text", position: 3, canSend: true },
+	{ id: "400000000000000001", name: "general", kind: "text", position: 1, parentId: null, canSend: true },
+	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, parentId: null, canSend: false },
+	{ id: "400000000000000003", name: null, kind: "text", position: 3, parentId: null, canSend: true },
 ];
 
 function renderPicker(value: string | null, onChange = jest.fn()): jest.Mock {

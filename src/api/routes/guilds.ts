@@ -46,7 +46,7 @@ import { canPostInChannel, readerSees } from "@lib/discord";
 import { readInsights } from "@lib/info";
 import { readServerChanges } from "@lib/moderation";
 import { isPowerful } from "@lib/roles";
-import { featuresOf } from "@lib/settings";
+import { featuresOf, placesOf } from "@lib/settings";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
@@ -55,6 +55,7 @@ import {
 	type InsightWindow,
 	type ChannelSummary,
 	type GuildOverview,
+	type GuildPlaces,
 	guildIdParam,
 	type Paged,
 	pagination,
@@ -121,6 +122,12 @@ guilds.get("/:guildId/overview", async (context) => {
 	return context.json(body);
 });
 
+/** Which channels each feature uses, for the dashboard's map of the server; the channel list names them. */
+guilds.get("/:guildId/places", async (context) => {
+	const body: GuildPlaces = { features: await placesOf(guildOf(context)) };
+	return context.json(body);
+});
+
 /**
  * `canSend` comes from the live client, so the picker can grey out a channel before a configuration that cannot work is
  * saved.
@@ -137,6 +144,7 @@ guilds.get("/:guildId/channels", (context) => {
 			name: readerSees(channel, reader) ? channel.name : null,
 			kind: kindOf(channel),
 			position: "position" in channel ? channel.position : 0,
+			parentId: channel.parentId,
 			canSend: canPostInChannel(guild, channel),
 		}))
 		.sort((a, b) => a.position - b.position || (a.name ?? "").localeCompare(b.name ?? ""));

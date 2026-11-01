@@ -3,18 +3,21 @@ import { getAutoRoles } from "@database/repositories/autoRoleRepository";
 import { getGoodbyeSettings } from "@database/repositories/goodbyeRepository";
 import { getIdeaSettings } from "@database/repositories/ideaRepository";
 import { getRaidSettings } from "@database/repositories/raidRepository";
-import { countRoleMenus } from "@database/repositories/roleMenuRepository";
+import { listRoleMenus } from "@database/repositories/roleMenuRepository";
+import { listSchedules } from "@database/repositories/scheduledMessageRepository";
 import { getStarboardSettings } from "@database/repositories/starboardRepository";
 import { getTempVoiceSettings } from "@database/repositories/tempVoiceRepository";
+import { getVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { readCasinoSettings } from "@lib/casino/casinoSettings.util";
 import { readLottery } from "@lib/economy/lotteryActions.util";
-import { featuresOf } from "@lib/settings/featureStatus.util";
-import { type FeatureStatus } from "@testify/shared";
+import { FEATURE_SOURCES, featuresOf, placesOf } from "@lib/settings/featureStatus.util";
+import { readTickets } from "@lib/tickets/ticketActions.util";
+import { FEATURE_PLACES, type FeatureStatus, isWaiting } from "@testify/shared";
 
 jest.mock("@database/repositories/ideaRepository", () => ({ getIdeaSettings: jest.fn() }));
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
-jest.mock("@database/repositories/roleMenuRepository", () => ({ countRoleMenus: jest.fn() }));
+jest.mock("@database/repositories/roleMenuRepository", () => ({ listRoleMenus: jest.fn() }));
 jest.mock("@database/repositories/antiLinkRepository", () => ({
 	getAntiLink: jest.fn(() => Promise.resolve(null)),
 }));
@@ -77,7 +80,7 @@ function fresh(): void {
 	jest.mocked(getWelcome).mockResolvedValue(null);
 	jest.mocked(getAutoRoles).mockResolvedValue(null);
 	jest.mocked(getGoodbyeSettings).mockResolvedValue(null);
-	jest.mocked(countRoleMenus).mockResolvedValue(0);
+	jest.mocked(listRoleMenus).mockResolvedValue([]);
 	jest.mocked(getIdeaSettings).mockResolvedValue(null);
 	jest.mocked(getRaidSettings).mockResolvedValue(null);
 	jest.mocked(getStarboardSettings).mockResolvedValue(null);
@@ -103,7 +106,7 @@ describe("featuresOf", () => {
 	it("describes what a configured feature is doing", async () => {
 		jest.mocked(getWelcome).mockResolvedValue({ channelId: "400000000000000001" } as never);
 		jest.mocked(getAutoRoles).mockResolvedValue({ roleIds: ["1", "2"] } as never);
-		jest.mocked(countRoleMenus).mockResolvedValue(1);
+		jest.mocked(listRoleMenus).mockResolvedValue([{ channelId: "400000000000000004" }] as never);
 		jest.mocked(getStarboardSettings).mockResolvedValue({
 			enabled: true,
 			channelId: "400000000000000002",
@@ -137,5 +140,73 @@ describe("featuresOf", () => {
 		expect((await byKey()).get("lottery")).toEqual(
 			expect.objectContaining({ enabled: false, detail: { kind: "count", what: "ticketsSold", count: 3 } }),
 		);
+	});
+});
+
+describe("placesOf", () => {
+	/** A feature with no entry in the shared table would vanish from the channel map, so the two lists must match. */
+	it("knows where every feature on the overview can work", () => {
+		expect(FEATURE_SOURCES.map((source) => source.key).sort()).toEqual(Object.keys(FEATURE_PLACES).sort());
+	});
+
+	it("leaves the overview's own shape alone", async () => {
+		expect(Object.keys((await featuresOf(guild))[0] ?? {}).sort()).toEqual(["detail", "enabled", "key", "label"]);
+	});
+
+	it("shows a fresh server's channel features as waiting, and nothing else", async () => {
+		const waiting = (await placesOf(guild)).filter(isWaiting).map((feature) => feature.key);
+
+		expect(waiting.sort()).toEqual(
+			Object.entries(FEATURE_PLACES)
+				.filter(([, rule]) => rule.reach === "channel")
+				.map(([key]) => key)
+				.sort(),
+		);
+	});
+
+	/** A switched-off goodbye still belongs to its channel, so turning it back on starts where it was. */
+	it("keeps the channel of a feature that is switched off", async () => {
+		jest.mocked(getGoodbyeSettings).mockResolvedValue({ enabled: false, channelId: "400000000000000001" } as never);
+
+		const goodbye = (await placesOf(guild)).find((feature) => feature.key === "goodbye");
+
+		expect(goodbye).toEqual(
+			expect.objectContaining({
+				enabled: false,
+				detail: null,
+				places: [{ channelId: "400000000000000001", role: "posts" }],
+			}),
+		);
+	});
+
+	it("reads every channel a feature uses, each once", async () => {
+		jest
+			.mocked(listSchedules)
+			.mockResolvedValue([
+				{ channelId: "400000000000000001" },
+				{ channelId: "400000000000000001" },
+				{ channelId: "400000000000000002" },
+			] as never);
+		jest.mocked(readTickets).mockResolvedValue({
+			enabled: true,
+			openTickets: 0,
+			panelChannelId: "400000000000000003",
+			transcriptChannelId: "400000000000000004",
+		} as never);
+		jest
+			.mocked(getVoiceCounter)
+			.mockResolvedValue({ memberChannelId: "400000000000000005", botChannelId: null } as never);
+
+		const places = new Map((await placesOf(guild)).map((feature) => [feature.key, feature.places]));
+
+		expect(places.get("scheduled-messages")).toEqual([
+			{ channelId: "400000000000000001", role: "posts" },
+			{ channelId: "400000000000000002", role: "posts" },
+		]);
+		expect(places.get("tickets")).toEqual([
+			{ channelId: "400000000000000003", role: "panel" },
+			{ channelId: "400000000000000004", role: "logs" },
+		]);
+		expect(places.get("voice-stats")).toEqual([{ channelId: "400000000000000005", role: "counter" }]);
 	});
 });

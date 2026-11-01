@@ -64,10 +64,10 @@ export const commandToggles: CommandToggleState = {
 };
 
 export const someChannels: ChannelSummary[] = [
-	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
-	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, canSend: false },
-	{ id: "400000000000000003", name: "Voice", kind: "voice", position: 3, canSend: false },
-	{ id: "400000000000000005", name: "Support", kind: "category", position: 4, canSend: false },
+	{ id: "400000000000000001", name: "general", kind: "text", position: 1, parentId: null, canSend: true },
+	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, parentId: null, canSend: false },
+	{ id: "400000000000000003", name: "Voice", kind: "voice", position: 3, parentId: null, canSend: false },
+	{ id: "400000000000000005", name: "Support", kind: "category", position: 4, parentId: null, canSend: false },
 ];
 
 export const someRoles: RoleSummary[] = [

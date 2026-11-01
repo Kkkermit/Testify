@@ -153,6 +153,8 @@ export interface ChannelSummary {
 	name: string | null;
 	kind: ChannelKind;
 	position: number;
+	/** The category it sits under, so the dashboard can draw the channel list the way Discord does. */
+	parentId: string | null;
 	/** Computed from the live client, so a channel the bot cannot post in is greyed out before anyone saves. */
 	canSend: boolean;
 }

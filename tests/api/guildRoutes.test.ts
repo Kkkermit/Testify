@@ -6,7 +6,14 @@ import { guilds } from "@api/routes/guilds";
 import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { auditPage, auditsSince, countAudits, recentAudits } from "@database/repositories/dashboardAuditRepository";
-import { type ChannelSummary, type GuildOverview, type RoleSummary, type ServerChangesPage } from "@testify/shared";
+import { getWelcome } from "@database/repositories/welcomeRepository";
+import {
+	type ChannelSummary,
+	type GuildOverview,
+	type GuildPlaces,
+	type RoleSummary,
+	type ServerChangesPage,
+} from "@testify/shared";
 
 jest.mock("@database/repositories/levelRepository", () => ({ getLevelSettings: jest.fn(() => Promise.resolve(null)) }));
 jest.mock("@database/repositories/casinoRepository", () => ({
@@ -70,7 +77,7 @@ jest.mock("@database/repositories/ideaRepository", () => ({
 	getIdeaSettings: jest.fn(() => Promise.resolve(null)),
 }));
 jest.mock("@database/repositories/roleMenuRepository", () => ({
-	countRoleMenus: jest.fn(() => Promise.resolve(0)),
+	listRoleMenus: jest.fn(() => Promise.resolve([])),
 }));
 jest.mock("@database/repositories/starboardRepository", () => ({
 	getStarboardSettings: jest.fn(() => Promise.resolve(null)),
@@ -153,6 +160,7 @@ function fakeGuild(options: Options = {}) {
 		name,
 		type,
 		position,
+		parentId: type === ChannelType.GuildText ? "4" : null,
 		isTextBased: () => type === ChannelType.GuildText || type === ChannelType.GuildAnnouncement,
 		permissionsFor: (who: unknown) => ({
 			has: () => (who === reader ? !options.hiddenFromReader?.has(id) : (options.canSendIn?.has(id) ?? true)),
@@ -300,8 +308,11 @@ describe("the channel list", () => {
 		expect(channels.find((channel) => channel.id === "4")?.canSend).toBe(false);
 	});
 
-	it("orders them the way Discord shows them", async () => {
-		expect((await channelsOf()).map((channel) => channel.id)).toEqual(["4", "1", "2", "3"]);
+	it("orders them the way Discord shows them, each under its category", async () => {
+		const channels = await channelsOf();
+
+		expect(channels.map((channel) => channel.id)).toEqual(["4", "1", "2", "3"]);
+		expect(channels.map((channel) => channel.parentId)).toEqual([null, "4", "4", null]);
 	});
 
 	/** Discord never names a channel to somebody who cannot view it; the id stays, so a setting is not read as deleted. */
@@ -314,6 +325,22 @@ describe("the channel list", () => {
 		expect(channels.find((channel) => channel.id === "2")?.name).toBeNull();
 		expect(channels.find((channel) => channel.id === "1")?.name).toBe("general");
 		expect(JSON.stringify(channels)).not.toContain("locked");
+	});
+});
+
+describe("the channel map", () => {
+	it("says which channel each feature uses, and which features are still waiting for one", async () => {
+		jest.mocked(getWelcome).mockResolvedValueOnce({ channelId: "1" } as never);
+
+		const { features } = (await (await appFor().request(`/guilds/${GUILD}/places`)).json()) as GuildPlaces;
+		const welcome = features.find((feature) => feature.key === "welcome");
+
+		expect(welcome).toEqual(
+			expect.objectContaining({ enabled: true, reach: "channel", places: [{ channelId: "1", role: "posts" }] }),
+		);
+		expect(features.find((feature) => feature.key === "goodbye")).toEqual(
+			expect.objectContaining({ enabled: false, reach: "channel", accepts: "text", places: [] }),
+		);
 	});
 });
 
