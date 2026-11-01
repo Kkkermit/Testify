@@ -1,0 +1,521 @@
+<!doctype html>
+<html lang="en-GB">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Testify Line Map</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Overpass+Mono&family=Overpass:wght@400;600;700&display=swap"
+			rel="stylesheet"
+		/>
+		<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.3"></script>
+		<script src="https://cdn.jsdelivr.net/npm/motion@14.3.0/dist/motion.js"></script>
+		<style type="text/tailwindcss">
+			/* Direction H, line map: the server drawn as a transit map a member travels along, one stop per feature. */
+			@theme {
+				--color-ground: #f6f7f8;
+				--color-paper: #ffffff;
+				--color-ink: #15191c;
+				--color-muted: #59616a;
+				--color-line: #e1e4e8;
+				--color-arrive: #0c7d56;
+				--color-part: #d9730d;
+				--color-help: #1d6fc4;
+				--color-safe: #c43d3d;
+				--color-leave: #7a55b8;
+				--color-stop-off: #8d96a0;
+				--color-dc: #282b30;
+				--color-mention: #c9d0ff;
+				--font-body: "Overpass", system-ui, sans-serif;
+				--font-mono: "Overpass Mono", ui-monospace, monospace;
+			}
+			/* Inside a layer, so Tailwind's utilities can still override these. */
+			@layer components {
+				:root {
+					color-scheme: light;
+				}
+				body {
+					background: var(--color-ground);
+					color: var(--color-ink);
+					font-family: var(--font-body);
+					margin: 0;
+				}
+				:focus-visible {
+					outline: 2px solid var(--color-ink);
+					outline-offset: 3px;
+				}
+				.stop {
+					position: absolute;
+					transform: translate(-50%, -50%);
+					display: grid;
+					place-items: center;
+					text-decoration: none;
+					color: var(--color-ink);
+				}
+				.stop .dot {
+					width: 20px;
+					height: 20px;
+					border-radius: 50%;
+					background: var(--color-paper);
+					border: 2px dashed var(--color-stop-off);
+				}
+				.stop.on .dot {
+					border: 5px solid var(--c);
+				}
+				.stop.big .dot {
+					width: 26px;
+					height: 26px;
+					border: 4px solid var(--color-ink);
+				}
+				.stop.big .name {
+					top: 31px;
+				}
+				.stop .name {
+					position: absolute;
+					top: 24px;
+					white-space: nowrap;
+					font-size: 14px;
+					font-weight: 600;
+					text-align: center;
+					line-height: 1.15;
+				}
+				.stop:not(.on) .name {
+					color: var(--color-muted);
+					font-weight: 400;
+				}
+				.stop .state {
+					display: block;
+					font-size: 11.5px;
+					font-weight: 400;
+					color: var(--color-muted);
+				}
+				.stop:hover .dot,
+				.stop:focus-visible .dot {
+					box-shadow: 0 0 0 5px rgb(21 25 28 / 0.1);
+				}
+				.stop .ring {
+					position: absolute;
+					width: 20px;
+					height: 20px;
+					border-radius: 50%;
+					border: 3px solid var(--c);
+					opacity: 0;
+					pointer-events: none;
+				}
+				.switch {
+					position: relative;
+					flex: none;
+					width: 44px;
+					height: 26px;
+					border-radius: 13px;
+					background: var(--color-stop-off);
+				}
+				.switch[aria-checked="true"] {
+					background: var(--color-arrive);
+				}
+				.switch .knob {
+					position: absolute;
+					top: 3px;
+					left: 3px;
+					width: 20px;
+					height: 20px;
+					border-radius: 50%;
+					background: #fff;
+					box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+				}
+				.field {
+					width: 100%;
+					background: var(--color-paper);
+					border: 1px solid #b6bec7;
+					border-radius: 8px;
+					padding: 9px 12px;
+					font: inherit;
+					color: inherit;
+				}
+				.mention {
+					color: var(--color-mention);
+					background: rgb(120 140 255 / 0.22);
+					border-radius: 3px;
+					padding: 0 2px;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app" class="min-h-dvh">
+			<header class="border-line bg-paper flex h-14 items-center gap-3 border-b px-4 sm:px-6">
+				<a href="#home" class="flex items-center gap-2 font-bold">
+					<span class="bg-ink grid size-7 place-items-center rounded-full text-[13px] text-white">T</span
+					><span class="max-sm:hidden">Testify</span>
+				</a>
+				<button
+					type="button"
+					class="border-line flex items-center gap-2 rounded-full border px-3 py-1 text-sm font-semibold"
+				>
+					Testify HQ <span class="text-muted" aria-hidden="true">⌄</span>
+				</button>
+				<nav aria-label="Testify HQ" class="text-muted ml-4 flex gap-5 text-sm max-md:hidden">
+					<a href="#home" class="text-ink font-semibold">Map</a><a href="#home">Members</a><a href="#home">Moderation</a
+					><a href="#home">Settings</a>
+				</nav>
+				<button type="button" class="text-muted ml-auto text-sm">Search</button>
+				<span
+					class="grid size-8 place-items-center rounded-full bg-[#5b6170] text-sm font-semibold text-white"
+					aria-label="Signed in as kkk"
+					>K</span
+				>
+			</header>
+
+			<main class="mx-auto max-w-[1240px] px-4 pt-8 pb-20 sm:px-6">
+				<div class="flex flex-wrap items-end gap-x-8 gap-y-4">
+					<div class="min-w-0 flex-1 basis-80">
+						<h1 class="text-[34px] leading-tight font-bold tracking-tight">Testify HQ</h1>
+						<p class="text-muted mt-1 max-w-[62ch] text-lg">
+							Follow somebody through your server. A filled stop is on; an empty one is waiting for you.
+						</p>
+					</div>
+					<button
+						id="ride"
+						type="button"
+						class="bg-ink flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold text-white"
+					>
+						<span aria-hidden="true">▶</span> Send a new member through
+					</button>
+				</div>
+
+				<div class="bg-paper border-line relative mt-6 rounded-2xl border px-4 py-6 max-lg:hidden">
+					<div id="map" class="relative mx-auto aspect-[1160/430] w-full max-w-[1160px]">
+						<svg
+							viewBox="0 0 1160 430"
+							class="absolute inset-0 size-full"
+							aria-hidden="true"
+							fill="none"
+							stroke-width="8"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						>
+							<path d="M60 110 H580" stroke="var(--color-arrive)" />
+							<path d="M580 110 H980" stroke="var(--color-part)" />
+							<path d="M980 110 H1100" stroke="var(--color-leave)" />
+							<path d="M770 110 L870 210 Q890 230 916 230 H1050" stroke="var(--color-help)" />
+							<path d="M120 340 H640" stroke="var(--color-safe)" />
+						</svg>
+						<p class="absolute text-xs font-semibold" style="left: 2.6%; top: 9%">
+							<span class="mr-1.5 inline-block size-2.5 rounded-full bg-[var(--color-arrive)]"></span>Arriving
+						</p>
+						<p class="absolute text-xs font-semibold" style="left: 51%; top: 9%">
+							<span class="mr-1.5 inline-block size-2.5 rounded-full bg-[var(--color-part)]"></span>Taking part
+						</p>
+						<p class="absolute text-xs font-semibold" style="left: 88%; top: 9%">
+							<span class="mr-1.5 inline-block size-2.5 rounded-full bg-[var(--color-leave)]"></span>Leaving
+						</p>
+						<p class="absolute text-xs font-semibold" style="left: 77%; top: 66%">
+							<span class="mr-1.5 inline-block size-2.5 rounded-full bg-[var(--color-help)]"></span>Getting help
+						</p>
+						<p class="absolute text-xs font-semibold" style="left: 10.3%; top: 70%">
+							<span class="mr-1.5 inline-block size-2.5 rounded-full bg-[var(--color-safe)]"></span>Keeping it safe, the
+							whole time
+						</p>
+						<div id="stops"></div>
+						<div
+							id="rider"
+							class="bg-ink pointer-events-none absolute z-10 grid size-8 -translate-x-1/2 -translate-y-1/2 place-items-center rounded-full text-sm font-bold text-white opacity-0 ring-4 ring-white"
+							aria-hidden="true"
+						>
+							O
+						</div>
+					</div>
+				</div>
+
+				<div id="vertical" class="mt-6 grid gap-6 lg:hidden"></div>
+
+				<section class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" aria-labelledby="board-h">
+					<div class="bg-paper border-line rounded-2xl border p-5">
+						<h2 id="board-h" class="font-bold">What happened on the way</h2>
+						<ol id="board" class="mt-3 grid gap-2 text-[15px]" aria-live="polite">
+							<li class="text-muted">
+								Press “Send a new member through” to watch what Testify does for somebody who joins today.
+							</li>
+						</ol>
+					</div>
+					<div class="text-muted text-sm">
+						<p>
+							<b class="text-ink" id="count">4 of 14</b> stops are on. Levelling and tickets are running; warnings and
+							cases are always kept.
+						</p>
+						<p class="mt-3">Click any stop to change it. The map keeps its place behind the settings.</p>
+					</div>
+				</section>
+			</main>
+		</div>
+
+		<div id="sheet" class="fixed inset-0 z-40" hidden>
+			<div data-scrim class="bg-ink/30 absolute inset-0"></div>
+			<aside
+				role="dialog"
+				aria-modal="true"
+				aria-labelledby="sheet-h"
+				data-panel
+				class="bg-paper absolute inset-y-0 right-0 flex w-full flex-col overflow-y-auto shadow-[-24px_0_48px_-24px_rgb(21_25_28/0.35)] sm:w-[460px]"
+			>
+				<div class="h-1.5 shrink-0 bg-[var(--color-arrive)]"></div>
+				<div class="grid gap-5 p-6">
+					<div class="flex items-start gap-3">
+						<div class="min-w-0 flex-1">
+							<p class="text-muted text-sm">Arriving line, stop 4 of 5</p>
+							<h2 id="sheet-h" class="text-[28px] leading-tight font-bold">Welcome</h2>
+						</div>
+						<a href="#home" data-close class="border-line rounded-full border px-3 py-1.5 text-sm font-semibold"
+							>Back to the map</a
+						>
+					</div>
+					<p id="sheet-summary" class="text-[17px]"></p>
+					<div class="border-line flex items-center gap-4 border-y py-4">
+						<div class="min-w-0 flex-1">
+							<p class="font-semibold">Greet new members</p>
+							<p class="text-muted text-sm">Posted the moment they join.</p>
+						</div>
+						<button
+							id="greet"
+							class="switch"
+							type="button"
+							role="switch"
+							aria-checked="false"
+							aria-label="Greet new members"
+						>
+							<span class="knob"></span>
+						</button>
+					</div>
+					<div id="greet-fields" class="grid gap-5" hidden>
+						<div class="grid gap-2">
+							<label for="channel" class="font-semibold">Post in</label
+							><select id="channel" class="field">
+								<option># welcome</option>
+								<option># general</option>
+								<option># arrivals</option>
+							</select>
+						</div>
+						<div class="grid gap-2">
+							<label for="msg" class="font-semibold">Message</label
+							><textarea id="msg" rows="3" class="field resize-y">
+Welcome to {server}, {user}! Grab some roles in #roles and say hi.</textarea>
+							<p class="text-muted text-sm">
+								{user} mentions them, {server} is the server’s name and {count} the member count.
+							</p>
+						</div>
+						<div class="grid gap-2">
+							<p class="text-muted text-sm">How it looks</p>
+							<div id="preview" class="bg-dc flex gap-3 rounded-xl p-4 text-[#eceef1]">
+								<span class="grid size-10 shrink-0 place-items-center rounded-full bg-[#7c5cd6] font-semibold">T</span>
+								<div class="min-w-0">
+									<p class="text-[15px]">
+										<span class="font-semibold">Testify</span>
+										<span class="rounded-sm bg-[#5865c8] px-1 text-[10px] font-bold">APP</span>
+										<span class="text-xs text-[#a2a7b0]">Today at 14:02</span>
+									</p>
+									<p id="preview-text" class="mt-0.5 text-[15px] leading-snug"></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</aside>
+		</div>
+
+		<script>
+			const { animate, stagger } = Motion;
+			const calm = matchMedia("(prefers-reduced-motion: reduce)").matches;
+			const springy = { type: "spring", bounce: 0.2, visualDuration: 0.35 };
+			const play = (el, keyframes, options = {}) =>
+				animate(el, keyframes, calm ? { duration: 0 } : { ...springy, ...options });
+			const $ = (selector) => document.querySelector(selector);
+			const W = 1160;
+			const H = 430;
+
+			const LINES = {
+				arrive: { name: "Arriving", colour: "var(--color-arrive)" },
+				part: { name: "Taking part", colour: "var(--color-part)" },
+				help: { name: "Getting help", colour: "var(--color-help)" },
+				safe: { name: "Keeping it safe", colour: "var(--color-safe)" },
+				leave: { name: "Leaving", colour: "var(--color-leave)" },
+			};
+			const STOPS = [
+				{ id: "joins", name: "Joins", line: "arrive", x: 60, y: 110, on: true, big: true, fixed: "Start" },
+				{ id: "raid", name: "Raid check", line: "arrive", x: 190, y: 110, on: false },
+				{ id: "verify", name: "Verification", line: "arrive", x: 320, y: 110, on: false },
+				{ id: "welcome", name: "Welcome", line: "arrive", x: 450, y: 110, on: false, href: "#welcome" },
+				{ id: "roles", name: "Roles on join", line: "arrive", x: 580, y: 110, on: false, big: true },
+				{ id: "level", name: "Levelling", line: "part", x: 720, y: 110, on: true, big: true },
+				{ id: "economy", name: "Economy", line: "part", x: 850, y: 110, on: false },
+				{ id: "star", name: "Starboard", line: "part", x: 980, y: 110, on: false },
+				{ id: "bye", name: "Goodbye", line: "leave", x: 1100, y: 110, on: false, big: true },
+				{ id: "tickets", name: "Tickets", line: "help", x: 930, y: 230, on: true },
+				{ id: "ideas", name: "Idea board", line: "help", x: 1045, y: 230, on: false },
+				{ id: "automod", name: "AutoMod", line: "safe", x: 190, y: 340, on: false },
+				{ id: "links", name: "Link filter", line: "safe", x: 320, y: 340, on: false },
+				{ id: "warn", name: "Warnings", line: "safe", x: 450, y: 340, on: true, fixed: "Always" },
+				{ id: "cases", name: "Cases", line: "safe", x: 580, y: 340, on: true, fixed: "Always" },
+			];
+			const RIDE = {
+				joins: () => "Orbit joins Testify HQ.",
+				raid: (on) =>
+					on
+						? "Raid protection checks the account’s age."
+						: "Raid protection is off, so nobody checks how new the account is.",
+				verify: (on) =>
+					on ? "Orbit is asked to verify first." : "No verification step, so Orbit can talk straight away.",
+				welcome: (on) =>
+					on ? "Testify greets Orbit in #welcome." : "Nobody says hello. Turn on Welcome to greet people here.",
+				roles: (on) => (on ? "Orbit is given @Member." : "Orbit gets no roles yet."),
+				level: () => "Orbit earns XP for chatting, and level-ups are announced in #general.",
+				economy: (on) => (on ? "Orbit can earn coins." : "No coins: the economy is off."),
+				star: (on) =>
+					on ? "Stars on Orbit’s messages can reach the starboard." : "Stars go nowhere: the starboard is off.",
+			};
+			const byId = Object.fromEntries(STOPS.map((s) => [s.id, s]));
+			const stateLabel = (s) => s.fixed ?? (s.on ? "On" : "Off");
+
+			function stopHtml(s) {
+				const classes = ["stop", s.on ? "on" : "", s.big ? "big" : ""].join(" ");
+				const label = `${s.name}, ${stateLabel(s).toLowerCase()}. ${s.href ? "Open its settings" : "Open it"}`;
+				return `<a class="${classes}" data-stop="${s.id}" href="${s.href ?? "#home"}" aria-label="${label}" style="left:${(s.x / W) * 100}%;top:${(s.y / H) * 100}%;--c:${LINES[s.line].colour}"><span class="ring"></span><span class="dot"></span><span class="name">${s.name}<span class="state">${stateLabel(s)}</span></span></a>`;
+			}
+			function verticalHtml() {
+				return Object.entries(LINES)
+					.map(([key, line]) => {
+						const rows = STOPS.filter((s) => s.line === key)
+							.map(
+								(s) =>
+									`<li><a href="${s.href ?? "#home"}" data-row="${s.id}" class="flex items-center gap-3 rounded-lg py-2 pr-2"><span class="relative z-10 -ml-[13px] size-[22px] shrink-0 rounded-full bg-[var(--color-paper)] ${s.on ? "border-[5px]" : "border-2 border-dashed border-[var(--color-stop-off)]"}" style="${s.on ? `border-color:${line.colour}` : ""}"></span><span class="min-w-0 flex-1 ${s.on ? "font-semibold" : "text-muted"}">${s.name}</span><span class="text-muted text-sm">${stateLabel(s)}</span><span class="text-muted" aria-hidden="true">›</span></a></li>`,
+							)
+							.join("");
+						return `<section class="bg-paper border-line rounded-2xl border p-4"><h2 class="mb-2 flex items-center gap-2 text-sm font-bold"><span class="inline-block size-2.5 rounded-full" style="background:${line.colour}"></span>${line.name}</h2><ol class="ml-3 border-l-[6px] pl-3" style="border-color:${line.colour}">${rows}</ol></section>`;
+					})
+					.join("");
+			}
+			function draw() {
+				$("#stops").innerHTML = STOPS.map(stopHtml).join("");
+				$("#vertical").innerHTML = verticalHtml();
+				const on = STOPS.filter((s) => s.on && s.id !== "joins").length;
+				$("#count").textContent = `${on} of ${STOPS.length - 1}`;
+			}
+
+			const wait = (ms) => new Promise((r) => setTimeout(r, calm ? 0 : ms));
+			function pulse(id) {
+				const ring = document.querySelector(`[data-stop="${id}"] .ring`);
+				if (ring && !calm) animate(ring, { opacity: [0.8, 0], scale: [1, 2.4] }, { duration: 0.7 });
+				const row = document.querySelector(`[data-row="${id}"]`);
+				if (row) play(row, { backgroundColor: ["#e7eaee", "rgb(231 234 238 / 0)"] }, { type: "tween", duration: 1 });
+			}
+			let riding = false;
+			async function ride() {
+				if (riding) return;
+				riding = true;
+				const board = $("#board");
+				board.innerHTML = "";
+				const rider = $("#rider");
+				const path = Object.keys(RIDE);
+				let did = 0;
+				rider.style.left = `${(byId.joins.x / W) * 100}%`;
+				rider.style.top = `${(byId.joins.y / H) * 100}%`;
+				play(rider, { opacity: [0, 1], scale: [0.4, 1] });
+				for (const [i, id] of path.entries()) {
+					const stop = byId[id];
+					if (i > 0)
+						await play(
+							rider,
+							{ left: `${(stop.x / W) * 100}%` },
+							{ type: "tween", ease: [0.45, 0, 0.25, 1], duration: 0.75 },
+						);
+					pulse(id);
+					if (stop.on && id !== "joins") did += 1;
+					const li = document.createElement("li");
+					li.className = "grid grid-cols-[3.5rem_minmax(0,1fr)] gap-2";
+					li.innerHTML = `<time class="text-muted text-sm [font-family:var(--font-mono)]">14:0${2 + i}</time><span class="${stop.on ? "" : "text-muted"}"><b class="text-ink">${stop.name}.</b> ${RIDE[id](stop.on)}</span>`;
+					board.append(li);
+					play(li, { opacity: [0, 1], x: [-8, 0] });
+					await wait(650);
+				}
+				const end = document.createElement("li");
+				end.className = "border-line mt-1 border-t pt-3 font-semibold";
+				end.innerHTML = `That’s Orbit’s first day: ${did} of ${path.length - 1} stops did something. ${byId.welcome.on ? "" : '<a href="#welcome" class="text-[var(--color-arrive)] underline underline-offset-4">Turn on Welcome</a>'}`;
+				board.append(end);
+				play(end, { opacity: [0, 1] });
+				play(rider, { opacity: 0, scale: 0.6 }, { delay: calm ? 0 : 0.8 });
+				riding = false;
+			}
+			$("#ride").addEventListener("click", ride);
+
+			const sheet = $("#sheet");
+			const panel = sheet.querySelector("[data-panel]");
+			let opener = null;
+			function syncSheet(animateIt) {
+				const on = byId.welcome.on;
+				const greet = $("#greet");
+				greet.setAttribute("aria-checked", String(on));
+				const knob = greet.querySelector(".knob");
+				if (animateIt) play(knob, { x: on ? 18 : 0 }, { bounce: 0.4 });
+				else knob.style.transform = on ? "translateX(18px)" : "none";
+				$("#sheet-summary").textContent = on
+					? "New members are greeted in #welcome the moment they join."
+					: "Nobody is greeted when they join. Turn it on to choose where and what to say.";
+				const fields = $("#greet-fields");
+				if (on && fields.hidden) {
+					fields.hidden = false;
+					if (animateIt) play(fields.children, { opacity: [0, 1], y: [8, 0] }, { delay: stagger(0.06) });
+				} else if (!on) fields.hidden = true;
+			}
+			$("#greet").addEventListener("click", () => {
+				byId.welcome.on = !byId.welcome.on;
+				syncSheet(true);
+				draw();
+				const dot = document.querySelector('[data-stop="welcome"] .dot');
+				if (byId.welcome.on && dot) play(dot, { scale: [0.5, 1.15, 1] }, { type: "tween", duration: 0.45 });
+			});
+			function preview() {
+				$("#preview-text").innerHTML = $("#msg")
+					.value.replace(/[&<>]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[ch])
+					.replaceAll("{user}", '<span class="mention">@Orbit</span>')
+					.replaceAll("{server}", "Testify HQ")
+					.replaceAll("{count}", "1,235")
+					.replace(/#([a-z-]+)/g, '<span class="mention">#$1</span>');
+			}
+			$("#msg").addEventListener("input", () => {
+				preview();
+				play($("#preview"), { backgroundColor: ["#343841", "#282b30"] }, { type: "tween", duration: 0.6 });
+			});
+
+			function show(first) {
+				const open = location.hash === "#welcome";
+				if (open && sheet.hidden) {
+					opener = document.activeElement;
+					sheet.hidden = false;
+					syncSheet(false);
+					if (!first) {
+						play(sheet.querySelector("[data-scrim]"), { opacity: [0, 1] }, { type: "tween", duration: 0.2 });
+						play(panel, { x: ["100%", "0%"] }, { bounce: 0.08, visualDuration: 0.4 });
+					}
+					pulse("welcome");
+					panel.querySelector("[data-close]").focus();
+				} else if (!open && !sheet.hidden) {
+					play(sheet.querySelector("[data-scrim]"), { opacity: 0 }, { type: "tween", duration: 0.2 });
+					play(panel, { x: "100%" }, { bounce: 0, visualDuration: 0.3 }).then(() => {
+						sheet.hidden = true;
+						panel.style.transform = "";
+						sheet.querySelector("[data-scrim]").style.opacity = "";
+						(document.querySelector('[data-stop="welcome"]') ?? opener)?.focus?.();
+					});
+				}
+			}
+			sheet.querySelector("[data-scrim]").addEventListener("click", () => (location.hash = "#home"));
+			addEventListener("keydown", (e) => e.key === "Escape" && !sheet.hidden && (location.hash = "#home"));
+			addEventListener("hashchange", () => show(false));
+
+			if (location.hash === "#welcome") byId.welcome.on = true;
+			draw();
+			preview();
+			document.fonts.ready.then(() => show(true));
+		</script>
+	</body>
+</html>

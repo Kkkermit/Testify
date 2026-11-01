@@ -1,27 +1,30 @@
 # Dashboard redesign: a proposal
 
-**Status: proposal. Nothing here is built.** It is a brief for one decision: which of six directions, drawn in two
-rounds, the dashboard should be redrawn in. Once a direction is chosen, the plan at the end says what changes, in what order and
-in which files.
+**Status: proposal. Nothing here is built.** It is a brief for one decision: which of nine directions, drawn in
+three rounds, the dashboard should be redrawn in. Once a direction is chosen, the plan at the end says what changes, in
+what order and in which files.
 
 The aim is a dashboard that reads as something a person made for running a Discord bot. Today it reads as a
 generated template: a dark page with a glow, a starfield, a card around everything and a tinted icon square in
 every card. The brief keeps every feature, route and permission exactly as it is. Only the visual design changes.
 
 Each direction is mocked up for the same two screens, the server overview and **Welcome and goodbye**, with the
-second screen also shown at phone width. A, B and C are static HTML. D, E and F are clickable prototypes built with
+second screen also shown at phone width. A, B and C are static HTML. D to I are clickable prototypes built with
 Tailwind and [Motion](https://motion.dev), because their navigation and motion are the point and a still cannot
 show either. The pages use invented data: a server called Testify
 HQ with 1,234 members, and people called Orbit, Nova, kate and Juniper.
 
-| Direction                              | Overview                                                                  | Welcome and goodbye                                                 | Phone                                  |
-| -------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------- |
-| [A. Plain settings](#a-plain-settings) | [png](a-plain/overview.png) · [html](a-plain/overview.html)               | [png](a-plain/welcome.png) · [html](a-plain/welcome.html)           | [png](a-plain/welcome-phone.png)       |
-| [B. Speaks Discord](#b-speaks-discord) | [png](b-discord/overview.png) · [html](b-discord/overview.html)           | [png](b-discord/welcome.png) · [html](b-discord/welcome.html)       | [png](b-discord/welcome-phone.png)     |
-| [C. Logbook](#c-logbook)               | [png](c-logbook/overview.png) · [html](c-logbook/overview.html)           | [png](c-logbook/welcome.png) · [html](c-logbook/welcome.html)       | [png](c-logbook/welcome-phone.png)     |
-| [D. Columns](#d-columns)               | [png](d-columns/overview.png) · [prototype](d-columns/index.html)         | [png](d-columns/welcome.png)                                        | [png](d-columns/welcome-phone.png)     |
-| [E. Switchboard](#e-switchboard)       | [png](e-switchboard/overview.png) · [prototype](e-switchboard/index.html) | [png](e-switchboard/welcome.png)                                    | [png](e-switchboard/welcome-phone.png) |
-| [F. Slash](#f-slash)                   | [png](f-slash/overview.png) · [prototype](f-slash/index.html)             | [png](f-slash/welcome.png) · [command bar](f-slash/command-bar.png) | [png](f-slash/welcome-phone.png)       |
+| Direction                              | Overview                                                                  | Welcome and goodbye                                                  | Phone                                  |
+| -------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------------- |
+| [A. Plain settings](#a-plain-settings) | [png](a-plain/overview.png) · [html](a-plain/overview.html)               | [png](a-plain/welcome.png) · [html](a-plain/welcome.html)            | [png](a-plain/welcome-phone.png)       |
+| [B. Speaks Discord](#b-speaks-discord) | [png](b-discord/overview.png) · [html](b-discord/overview.html)           | [png](b-discord/welcome.png) · [html](b-discord/welcome.html)        | [png](b-discord/welcome-phone.png)     |
+| [C. Logbook](#c-logbook)               | [png](c-logbook/overview.png) · [html](c-logbook/overview.html)           | [png](c-logbook/welcome.png) · [html](c-logbook/welcome.html)        | [png](c-logbook/welcome-phone.png)     |
+| [D. Columns](#d-columns)               | [png](d-columns/overview.png) · [prototype](d-columns/index.html)         | [png](d-columns/welcome.png)                                         | [png](d-columns/welcome-phone.png)     |
+| [E. Switchboard](#e-switchboard)       | [png](e-switchboard/overview.png) · [prototype](e-switchboard/index.html) | [png](e-switchboard/welcome.png)                                     | [png](e-switchboard/welcome-phone.png) |
+| [F. Slash](#f-slash)                   | [png](f-slash/overview.png) · [prototype](f-slash/index.html)             | [png](f-slash/welcome.png) · [command bar](f-slash/command-bar.png)  | [png](f-slash/welcome-phone.png)       |
+| [G. Sentences](#g-sentences)           | [png](g-sentences/overview.png) · [prototype](g-sentences/index.html)     | [png](g-sentences/welcome.png) · [choosing](g-sentences/picking.png) | [png](g-sentences/welcome-phone.png)   |
+| [H. Line map](#h-line-map)             | [png](h-linemap/overview.png) · [prototype](h-linemap/index.html)         | [png](h-linemap/welcome.png) · [the ride](h-linemap/ride.png)        | [png](h-linemap/map-phone.png)         |
+| [I. Channels](#i-channels)             | [png](i-channels/overview.png) · [prototype](i-channels/index.html)       | [png](i-channels/welcome.png) · [dragging](i-channels/dragging.png)  | [png](i-channels/welcome-phone.png)    |
 
 **Recommendation:** make E's switchboard the server's home, keep A's plain rows for each feature's full settings,
 let F's `/command` names drive the search bar, and draw every message the bot will post the way Discord draws it.
@@ -65,7 +68,7 @@ What is **not** wrong: the structure. The routes, the sidebar sections, the orde
 permission warnings, the undo and the server switcher are all sound. The problem is the visual layer around them,
 which is why this can be done mostly in tokens and primitives.
 
-## Principles the three directions share
+## Principles every direction shares
 
 - **Rows, not cards.** A setting is a row: what it is and what it does on the left, the control on the right, a
   hairline underneath. A container is used only for something that is a separate object: a preview of a message, a
@@ -100,7 +103,7 @@ is which.
 
 ---
 
-## The three directions
+## Round one: three static directions
 
 ### A. Plain settings
 
@@ -430,6 +433,182 @@ Moderation and Activity, because the bar replaces the long sidebar.
 **The risk.** People who never use slash commands, or never press Ctrl K, rely on the index alone, and a list of
 twenty commands is still a list.
 
+## Round three: three more ways in
+
+Every direction so far organises the dashboard by feature. These three each organise it around a different question
+a server manager asks, so each one is a way into the same settings rather than a new set of them. They are built
+like round two: one HTML file each, Tailwind and Motion from jsDelivr, every animation with a reduced-motion path,
+and the typefaces checked for Cyrillic.
+
+### G. Sentences
+
+![Direction G, the overview written as sentences](g-sentences/overview.png)
+
+**The question it answers:** "What does the bot actually do here?"
+
+**The idea.** The whole server's setup is written out as plain sentences, one paragraph per part of a member's life,
+and the underlined words are the controls. "When someone joins, Testify _does nothing_." Click "does nothing", choose
+"greets them", and the sentence grows: "…greets them in _#welcome_ with _"Welcome to {server}…"_ and a picture card."
+There is no form to read, because the setting and its description are the same text. Each paragraph's label in the
+margin leads to the full page for that part, which is written the same way, with the live preview beside it.
+
+| Role      | Value                  | Use                                                     |
+| --------- | ---------------------- | ------------------------------------------------------- |
+| Ground    | `#f3f5f9`              | A cool, slightly blue white                             |
+| Ink       | `#1a1d24`              | Text                                                    |
+| Muted     | `#5d6472`              | Labels, and a setting that is off (5.5:1 on the ground) |
+| Token     | `#3a4fd6` on `#eceefe` | An underlined phrase you can change (5.9:1)             |
+| Attention | `#8a5400` on `#fff3d6` | The note under a sentence that cannot do what it says   |
+
+**Type.** Source Serif 4 for the sentences, at 22px, and Commissioner for everything around them. It is the one
+direction with a serif, because these pages are meant to be read like prose.
+
+**Signature.** The sentence that grows. Turning something on adds the words it needs, and they arrive highlighted
+before fading to the page's colour. Turning it off takes them away again.
+
+**Motion.**
+
+- A phrase's menu opens from the phrase itself.
+- A changed phrase eases from its old width to its new one, so the rest of the line moves rather than jumps.
+- New words fade in on a highlight that clears.
+- "Saved" appears under the sentence that changed and fades.
+
+**What it costs.**
+
+- **Translation is the hard part.** A sentence with controls inside it has to stay one translation key with
+  placeholders where the controls go (i18next's `Trans`), because German puts the verb last and Russian changes the
+  ending of a word with the number before it. Every option has to read correctly in every language's sentence. Of the
+  nine directions, this is the one the six dictionaries make most expensive.
+- **No new data.** Each phrase writes through the route its page already uses.
+- **Screen readers.** Each phrase is a button inside a paragraph, so its accessible name needs the context the
+  sentence gives it, for example "does nothing: change what happens when someone joins".
+
+**The risk.** It only works while the sentences stay short. Levelling's four tabs would make a long paragraph, so
+deep settings still need a page of rows.
+
+### H. Line map
+
+![Direction H, the server as a line map](h-linemap/overview.png)
+
+**The question it answers:** "What happens to somebody who joins?"
+
+**The idea.** The server is drawn as a transit map. Each line is a part of a member's life (Arriving, Taking part,
+Getting help, Keeping it safe, Leaving), and each stop is a feature. A filled stop is on and an empty one is waiting.
+**Send a new member through** sends a rider named Orbit along the line, stop by stop. Under the map, a log says what
+each stop did: "Raid check: off, so nobody checks how new the account is." "Welcome: nobody says hello." The ride ends
+with a count of how many stops did something and a link to the first one worth turning on. Clicking a stop slides its
+settings over the map, so you never lose your place on it. On a phone, the map becomes one vertical line per group.
+
+| Role            | Value     | Use                                                   |
+| --------------- | --------- | ----------------------------------------------------- |
+| Ground          | `#f6f7f8` | A neutral, very light grey                            |
+| Ink             | `#15191c` | Text and the interchange stops                        |
+| Muted           | `#59616a` | A stop that is off (5.9:1)                            |
+| Arriving        | `#0c7d56` | The line, and its switch and link (5.1:1 on white)    |
+| Taking part     | `#d9730d` | The line                                              |
+| Getting help    | `#1d6fc4` | The line                                              |
+| Keeping it safe | `#c43d3d` | The line                                              |
+| Leaving         | `#7a55b8` | The line                                              |
+| Stop off        | `#8d96a0` | The dashed ring of an empty stop (3.0:1, the minimum) |
+
+**Type.** Overpass, a face drawn after American road signs, for everything, and Overpass Mono for the times in the
+log. The line names are never written in their line's colour: they carry a swatch instead, because orange on white
+cannot reach 4.5:1.
+
+**Signature.** The ride. It is the only direction that shows the consequence of a setting rather than the setting
+itself, and it makes a missing feature obvious without a warning banner.
+
+**Motion.**
+
+- The rider moves stop to stop with an eased slide and a pause.
+- Each stop it reaches sends out a ring.
+- Each line of the log slides in as it is written.
+- A stop's settings slide in from the right over a dimmed map.
+- Turning a feature on fills its stop with a small pop.
+
+**What it costs.**
+
+- **The map is drawn, not generated.** Every stop has coordinates, so adding a feature means placing a stop, like an
+  entry in `config/features.ts` with a position.
+- **The ride needs no new data.** It is worked out from the current settings, not from anything recorded.
+- **Every stop is a real link with a name**, such as "Welcome, off. Open its settings". The drawing itself is hidden
+  from screen readers.
+
+**The risk.** The metaphor is the most playful of the nine. Some people will find it charming and some will find it a
+gimmick. It also does not scale to forty screens, so it suits the overview, with the feature pages drawn in A's rows.
+
+### I. Channels
+
+![Direction I, placing a feature by dragging it onto a channel](i-channels/dragging.png)
+
+**The question it answers:** "What happens where?"
+
+**The idea.** The navigation is the server's own channel list, the one everybody already knows from Discord. A
+channel where Testify does something shows a count, and opening it shows each thing Testify does there as it will
+appear in that channel. The welcome message is the message itself: click it to edit the text in place, and leave it
+to see the result. Features that are not placed anywhere wait on the overview as chips. Drag one onto a channel to
+start it there. **Place in** does the same from the keyboard, and **Move to** moves something that is already placed.
+
+| Role   | Value                  | Use                                          |
+| ------ | ---------------------- | -------------------------------------------- |
+| Ground | `#f2f3f6`              | The page                                     |
+| Side   | `#e7e9ee`              | The channel list                             |
+| Ink    | `#1b1e24`              | Text                                         |
+| Muted  | `#565d6b`              | Channels with nothing in them (5.5:1)        |
+| Accent | `#8a2a6b` on `#f6e9f2` | Counts, the drop target, the editing outline |
+
+**Type.** Rubik for everything, and Fira Mono for `{placeholders}`.
+
+**Signature.** Dragging a feature onto a channel. You pick the chip up and it tilts. The channel under it lights up
+and grows a little. When you let go, the chip flies into the channel, the channel's count pops, and you land in the
+channel with the feature already there.
+
+**Motion.**
+
+- The dragged chip tilts and lifts, and springs back home if it is dropped on nothing.
+- A channel under the chip scales up as a target.
+- On a drop, the chip shrinks into the channel's row.
+- The message turns into its editor in place and back.
+- Moving a feature slides it out of one channel before you arrive in the other.
+
+**What it costs.**
+
+- **The channel list exists.** The dashboard already reads it (`/channels`), and the rule that a channel its reader
+  cannot see is named nowhere carries straight over.
+- **Where each feature posts is stored per feature.** The overview's data reports a channel for five of them
+  (`FeatureDetail` of kind `posting`). The rest read theirs from their own settings, so building this means a map from
+  feature to channel fields.
+- **Some features live in several channels** (the ticket panel and its transcripts) and some in none (AutoMod,
+  warnings), which is what the "Everywhere" row is for.
+- **Drag and drop always needs another way.** Place in and Move to are that way here, and every drop target is an
+  ordinary link.
+
+**The risk.** A server with eighty channels has a long list. It mirrors Discord's, which helps, but it may want a
+"channels Testify uses" filter.
+
+## More ideas, not prototyped
+
+Each of these could be a screen inside whichever direction is chosen, rather than a whole direction.
+
+- **Inbox.** One list of what needs you: open tickets, ideas waiting for a decision, a missing permission, a post
+  that failed. You work through it like email, with keyboard shortcuts, and a handled item slides away with an undo.
+  Tickets, ideas and permissions are already read by their screens. A post that failed is not recorded anywhere yet.
+- **This week.** Everything Testify will do in the next seven days on one agenda: scheduled messages, the lottery
+  draw, giveaways ending and birthdays. Each of these already stores its own time. Reminders stay out, because they
+  belong to the person who set them, not the server.
+- **What does a role get?** A page per role that lists every feature that gives it or depends on it: level rewards,
+  role menus, roles on join, DJ roles, ticket staff and the raid alert's ping. It answers "can I delete this role?"
+  before somebody finds out the hard way.
+- **Try it.** A **Send me a test** button beside anything that posts, which sends the real message to the reader's
+  direct messages. `/welcome test` already does this inside Discord.
+- **Settings as they were.** A slider back through the server's setup, to see how something was configured last
+  week and put it back. The dashboard's own audit records already keep `before` and `after` values
+  (`dashboardAudit.schema.ts`). I haven't checked whether changes made with commands in Discord are recorded the same
+  way, and the slider would need both.
+- **Several servers side by side.** For somebody who manages more than one server: one table, with servers as columns
+  and features as rows, and **Copy this setup to…**. Copying is a functional change, and it would have to ask each
+  server's own permissions.
+
 ## Motion: what moves, and why
 
 The current dashboard moves for its own sake. A starfield drifts behind every page, sections fade in on load and
@@ -507,6 +686,17 @@ around":
   version that exists today. The full log is a candidate for later, once somebody decides to build the feed.
 - **Motion stays small:** the moves listed under [Motion](#motion-what-moves-and-why), the lazy build, and nothing
   that moves on load.
+
+**Where round three fits.** G, H and I are ways in rather than replacements, and each can sit beside the recommendation
+without changing it:
+
+- **G's sentence is the summary line** that A puts at the top of every page, made editable. Start there, with the
+  sentence written for the switchboard's rows, and decide on whole pages of sentences only once the translations have
+  been tried in German and Russian.
+- **H's ride is a second overview.** It suits a server that has just added the bot, because it shows what is missing
+  by its consequence. Offer it as a tab beside the switchboard rather than instead of it.
+- **I's channel view is a second index.** "What happens in #general" is a question the switchboard cannot answer.
+  It reads data the dashboard mostly has, and it gives drag and drop a job that a list does not.
 
 ---
 
