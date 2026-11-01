@@ -1,6 +1,6 @@
 import { CircleDot, Eye, GitFork, Star, Tag } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Card, Eyebrow, PAGE_TITLE, Skeleton, StatTile } from "@/components/primitives";
+import { Card, SectionHeading, PAGE_TITLE, Skeleton, StatTile } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { SiteError } from "@/features/site/components/SiteError";
 import { useStanding } from "@/features/source/useSource";
@@ -15,7 +15,7 @@ export function Standing(): React.JSX.Element {
 	return (
 		<header className="flex flex-col gap-4">
 			<div className="flex flex-col gap-2">
-				<Eyebrow>{t("source.eyebrow")}</Eyebrow>
+				<SectionHeading>{t("source.eyebrow")}</SectionHeading>
 				<h1 className={PAGE_TITLE}>{t("source.title")}</h1>
 				{repo === undefined ? (
 					standing.isError ? null : (

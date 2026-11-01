@@ -42,7 +42,7 @@ export function ChannelToolsPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("channelTools.title")}
 				subtitle={t("channelTools.subtitle")}
 				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}

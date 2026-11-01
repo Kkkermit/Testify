@@ -33,7 +33,7 @@ export function LevellingPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("levelling.title")} subtitle={t("levelling.subtitle")} />
+			<PageHeader server={overview.data} title={t("levelling.title")} subtitle={t("levelling.subtitle")} />
 
 			<Tabs
 				active={tab}

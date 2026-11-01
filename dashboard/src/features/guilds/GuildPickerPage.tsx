@@ -6,7 +6,7 @@ import { GUILD_REFUSED_NOTICE } from "@/app/RequireGuild";
 import { OWNER_ONLY_NOTICE } from "@/app/RequireOwner";
 import { FIELD, Warning } from "@/components/form";
 import { Reveal } from "@/components/motion";
-import { EmptyState, Eyebrow, PageHeader, Pager, Skeleton } from "@/components/primitives";
+import { EmptyState, SectionHeading, PageHeader, Pager, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
@@ -113,9 +113,9 @@ export function GuildPickerPage(): React.JSX.Element {
 					return (
 						<section key={group.key} aria-labelledby={`guilds-${group.key}`} className="flex flex-col gap-3">
 							<div className="flex flex-col gap-1">
-								<Eyebrow as="h2" id={`guilds-${group.key}`} count={group.guilds.length}>
+								<SectionHeading as="h2" id={`guilds-${group.key}`} count={group.guilds.length}>
 									{t(group.titleKey)}
-								</Eyebrow>
+								</SectionHeading>
 								<p className="text-muted-foreground text-sm">{t(group.describesKey)}</p>
 							</div>
 

@@ -40,7 +40,7 @@ describe("BotBanner", () => {
 		const { container } = render(<BotBanner src={null} accent={null} />);
 
 		expect(container.querySelector("img")).toBeNull();
-		expect(container.firstChild).toHaveClass("bg-gradient-to-br");
+		expect(container.firstChild).toHaveClass("bg-accent-wash");
 	});
 
 	it("uses the profile accent when Discord gives one", () => {

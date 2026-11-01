@@ -77,7 +77,7 @@ export function TicketsPage(): React.JSX.Element {
 		<>
 			<LeaveGuard when={dirty && !busy} />
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("tickets.title")}
 				subtitle={t("tickets.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}

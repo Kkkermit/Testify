@@ -8,7 +8,7 @@ import {
 	Avatar,
 	Card,
 	CARD_HEADING,
-	Eyebrow,
+	SectionHeading,
 	PageHeader,
 	SegmentedControl,
 	Skeleton,
@@ -34,9 +34,7 @@ export function InsightsPage(): React.JSX.Element {
 
 	usePageTitle(t("insights.title"), overview.data?.name);
 
-	const header = (
-		<PageHeader eyebrow={overview.data?.name} title={t("insights.title")} subtitle={t("insights.subtitle")} />
-	);
+	const header = <PageHeader server={overview.data} title={t("insights.title")} subtitle={t("insights.subtitle")} />;
 	if (insights.isError) {
 		return (
 			<>
@@ -61,17 +59,17 @@ export function InsightsPage(): React.JSX.Element {
 			{header}
 
 			<section aria-labelledby="insights-server" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="insights-server">
+				<SectionHeading as="h2" id="insights-server">
 					{t("insights.serverTitle")}
-				</Eyebrow>
+				</SectionHeading>
 				<ServerFactsCard server={report.server} />
 			</section>
 
 			<section aria-labelledby="insights-activity" className="flex flex-col gap-4">
 				<div className="flex flex-wrap items-center justify-between gap-3">
-					<Eyebrow as="h2" id="insights-activity">
+					<SectionHeading as="h2" id="insights-activity">
 						{t("insights.activityTitle")}
-					</Eyebrow>
+					</SectionHeading>
 					<SegmentedControl
 						label={t("insights.windowLabel")}
 						segments={INSIGHT_WINDOWS.map((value) => ({ value, label: t(INSIGHT_WINDOW_LABELS[value]) }))}
@@ -142,9 +140,9 @@ export function InsightsPage(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="insights-moves" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="insights-moves">
+				<SectionHeading as="h2" id="insights-moves">
 					{t("insights.movesTitle")}
-				</Eyebrow>
+				</SectionHeading>
 				<div className="grid items-start gap-4 lg:grid-cols-2">
 					<Card className="flex flex-col gap-3">
 						<h3 className={CARD_HEADING}>{t("insights.recentJoins")}</h3>

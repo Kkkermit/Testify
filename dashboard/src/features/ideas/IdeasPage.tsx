@@ -5,7 +5,15 @@ import { useParams, useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Card, EmptyState, Eyebrow, PageHeader, Pager, SegmentedControl, Skeleton } from "@/components/primitives";
+import {
+	Card,
+	EmptyState,
+	SectionHeading,
+	PageHeader,
+	Pager,
+	SegmentedControl,
+	Skeleton,
+} from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { IdeaItem } from "@/features/ideas/components/IdeaItem";
 import { IdeaSettingsCard } from "@/features/ideas/components/IdeaSettingsCard";
@@ -71,7 +79,7 @@ export function IdeasPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("ideas.title")}
 				subtitle={t("ideas.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending || busy, save.isSuccess)} />}
@@ -89,9 +97,9 @@ export function IdeasPage(): React.JSX.Element {
 
 			<section aria-labelledby="ideas-heading" className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-center justify-between gap-3">
-					<Eyebrow as="h2" id="ideas-heading">
+					<SectionHeading as="h2" id="ideas-heading">
 						{t("ideas.posted")}
-					</Eyebrow>
+					</SectionHeading>
 					<SegmentedControl
 						label={t("ideas.filter")}
 						value={filter}

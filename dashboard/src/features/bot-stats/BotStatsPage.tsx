@@ -40,7 +40,7 @@ export function BotStatsPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("botStats.title")}
 				subtitle={t("botStats.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, post.isSuccess || remove.isSuccess)} />}

@@ -16,7 +16,7 @@ export function WarningsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("warnings.title")} subtitle={t("warnings.subtitle")} />
+			<PageHeader server={overview.data} title={t("warnings.title")} subtitle={t("warnings.subtitle")} />
 			<PunishmentsCard guildId={guildId} />
 			<WarnMemberCard guildId={guildId} />
 			<WarningsListCard guildId={guildId} />

@@ -41,7 +41,7 @@ export function BansPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("bans.title")} subtitle={t("bans.subtitle")} />
+			<PageHeader server={overview.data} title={t("bans.title")} subtitle={t("bans.subtitle")} />
 
 			<section aria-labelledby="bans-heading">
 				<Card className="flex flex-col gap-4">

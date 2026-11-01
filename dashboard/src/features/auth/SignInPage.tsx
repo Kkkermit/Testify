@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router";
 import { BotBanner } from "@/components/brand/BotBanner";
 import { BotMark } from "@/components/brand/BotMark";
 import { LanguageSelect } from "@/components/form/LanguageSelect";
-import { Button, Card, Eyebrow, PAGE_TITLE, Skeleton } from "@/components/primitives";
+import { Button, Card, SectionHeading, PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { SetupNeeded } from "@/features/auth/SetupNeeded";
 import { useBot } from "@/features/auth/useBot";
 import { useSetup } from "@/features/auth/useMe";
@@ -42,7 +42,7 @@ export function SignInPage(): React.JSX.Element {
 					<div className="-mt-14 flex items-end gap-3">
 						<BotMark src={bot.data?.avatarUrl} size={64} className="ring-card rounded-tile ring-4" />
 						<div className="flex flex-col gap-1 pb-1">
-							<Eyebrow>{t("auth.signIn")}</Eyebrow>
+							<SectionHeading>{t("auth.signIn")}</SectionHeading>
 							{name === null ? (
 								<>
 									<h1 className="sr-only">{t("auth.signIn")}</h1>

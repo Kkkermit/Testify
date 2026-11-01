@@ -35,7 +35,7 @@ export function CasesPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("cases.title")} subtitle={t("cases.subtitle")} />
+			<PageHeader server={overview.data} title={t("cases.title")} subtitle={t("cases.subtitle")} />
 			<LogCard guildId={guildId} />
 			<CaseList guildId={guildId} />
 		</>

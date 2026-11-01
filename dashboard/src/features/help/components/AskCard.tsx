@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { describe } from "@/app/ErrorState";
 import { FIELD, LABEL, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, Disclosure, Eyebrow, Skeleton } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, Disclosure, SectionHeading, Skeleton } from "@/components/primitives";
 import { ArticleBody } from "@/features/help/components/ArticleBody";
 import { TOPIC_LABELS } from "@/features/help/help.labels";
 import { articlesByTopic, suggestionsFor } from "@/features/help/help.utils";
@@ -79,7 +79,7 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 	const loading = opened !== null && article.isPending;
 
 	return (
-		<Card focal className="flex flex-col gap-4">
+		<Card className="flex flex-col gap-4">
 			<div className="flex flex-col gap-1">
 				<div className="flex items-center gap-2">
 					<MessageCircleQuestion size={18} aria-hidden="true" className="text-accent shrink-0" />
@@ -207,7 +207,7 @@ function Article({
 	return (
 		<article aria-labelledby={headingId} className="border-border flex flex-col gap-3 border-t pt-4">
 			<div className="flex flex-col gap-1">
-				<Eyebrow>{t(TOPIC_LABELS[article.topic])}</Eyebrow>
+				<SectionHeading>{t(TOPIC_LABELS[article.topic])}</SectionHeading>
 				<h3
 					id={headingId}
 					ref={heading}

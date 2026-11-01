@@ -52,7 +52,7 @@ export function MembersPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("members.title")} subtitle={t("members.subtitle")} />
+			<PageHeader server={overview.data} title={t("members.title")} subtitle={t("members.subtitle")} />
 
 			<div className="flex flex-wrap items-center justify-between gap-3">
 				<div className="flex flex-wrap items-center gap-3">

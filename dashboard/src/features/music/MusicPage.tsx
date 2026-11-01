@@ -32,7 +32,7 @@ export function MusicPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("music.title")}
 				subtitle={t("music.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}

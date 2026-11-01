@@ -49,7 +49,7 @@ export function AuditLogPage(): React.JSX.Element {
 		<>
 			<LeaveGuard when={dirty && !save.isPending} />
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("auditLog.title")}
 				subtitle={t("auditLog.subtitle")}
 				action={

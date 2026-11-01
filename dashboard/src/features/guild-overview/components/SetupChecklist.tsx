@@ -36,7 +36,7 @@ export function SetupChecklist({ guildId }: { guildId: string }): React.JSX.Elem
 	const first = steps.find((step) => actionFor(step) === "start" || actionFor(step) === "create");
 
 	return (
-		<Card focal className="motion-reveal flex flex-col gap-4">
+		<Card className="motion-reveal flex flex-col gap-4">
 			<div className="flex items-start justify-between gap-2">
 				<div className="flex min-w-0 flex-1 flex-col gap-1">
 					<h2 id="checklist-heading" className="font-semibold">

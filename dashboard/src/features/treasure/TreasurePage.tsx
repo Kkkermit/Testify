@@ -53,7 +53,7 @@ export function TreasurePage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("treasure.title")}
 				subtitle={t("treasure.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess)} />}

@@ -72,7 +72,7 @@ export function StatusPage(): React.JSX.Element {
 		return (
 			<>
 				{header}
-				<Card focal className="flex flex-col items-start gap-3">
+				<Card className="flex flex-col items-start gap-3">
 					<Headline level="down" text={t("status.unreachable", { name })} />
 					<p className="text-muted-foreground text-sm">{t("status.unreachableBody")}</p>
 					<Button variant="secondary" onClick={() => void status.refetch()}>
@@ -90,7 +90,7 @@ export function StatusPage(): React.JSX.Element {
 		<>
 			{header}
 
-			<Card focal className="flex flex-col gap-3">
+			<Card className="flex flex-col gap-3">
 				{/* Only the headline is live, so a poll that changes nothing but the clock is not read out. */}
 				<div aria-live="polite">
 					{stale ? (

@@ -12,7 +12,7 @@ import {
 	CARD_HEADING,
 	cardClass,
 	EmptyState,
-	Eyebrow,
+	SectionHeading,
 	PageHeader,
 	Skeleton,
 } from "@/components/primitives";
@@ -88,20 +88,20 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("scheduled.title")}
 				subtitle={t("scheduled.subtitle")}
 				action={<SavingIndicator state={savingStateOf(saving, add.isSuccess || edit.isSuccess)} />}
 			/>
 
 			<section aria-labelledby="scheduled-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="scheduled-heading"
 					count={t("scheduled.countOf", { used: all.length, limit: list.data.limit })}
 				>
 					{t("scheduled.upcoming")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{shown.length === 0 ? (
 					<Card>

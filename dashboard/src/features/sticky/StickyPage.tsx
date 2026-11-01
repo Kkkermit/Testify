@@ -6,7 +6,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { StickyRow } from "@/features/sticky/components/StickyRow";
@@ -57,20 +57,20 @@ export function StickyPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("sticky.title")}
 				subtitle={t("sticky.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending || remove.isPending, save.isSuccess)} />}
 			/>
 
 			<section aria-labelledby="current-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="current-heading"
 					count={t("sticky.countOf", { used: taken.length, limit: list.data.limit })}
 				>
 					{t("sticky.inUse")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{entries.length === 0 ? (
 					<Card>

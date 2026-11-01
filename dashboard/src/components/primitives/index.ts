@@ -10,7 +10,7 @@ export { CELL, CELL_NUM, DataTable, LARGE_ONLY, TH, TH_NUM, WIDE_ONLY } from "@/
 export { DividedList } from "@/components/primitives/DividedList";
 export { Disclosure } from "@/components/primitives/Disclosure";
 export { EmptyState } from "@/components/primitives/EmptyState";
-export { Eyebrow } from "@/components/primitives/Eyebrow";
+export { SectionHeading } from "@/components/primitives/SectionHeading";
 export { PageHeader } from "@/components/primitives/PageHeader";
 export { Pager } from "@/components/primitives/Pager";
 export { BackLink, PublicPage } from "@/components/primitives/PublicPage";

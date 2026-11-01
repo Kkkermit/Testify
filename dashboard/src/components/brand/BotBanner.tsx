@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 
-/** The profile banner, or a wash in the accent colour Discord returns — the one colour here written as a value rather than a token. */
+/** The profile banner, or the accent colour Discord returns — the one colour here written as a value rather than a token. */
 export function BotBanner({
 	src,
 	accent,
@@ -17,7 +17,7 @@ export function BotBanner({
 	return (
 		<div
 			aria-hidden="true"
-			className={cn("from-primary/35 via-primary/10 to-card relative overflow-hidden bg-gradient-to-br", className)}
+			className={cn("bg-accent-wash relative overflow-hidden", className)}
 			style={accent === null || accent === undefined ? undefined : { backgroundColor: accent }}
 		>
 			{showImage && (
@@ -31,8 +31,6 @@ export function BotBanner({
 					className="h-full w-full object-cover"
 				/>
 			)}
-			{/* Keeps the mark and any text above it legible whatever the banner turns out to be. */}
-			<div className="from-card absolute inset-0 bg-gradient-to-t to-transparent" />
 		</div>
 	);
 }

@@ -51,7 +51,7 @@ export function RaidPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("raid.title")}
 				subtitle={t("raid.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}

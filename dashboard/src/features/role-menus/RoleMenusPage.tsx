@@ -6,7 +6,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { postableChannels, SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { Card, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { Card, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { RoleMenuForm } from "@/features/role-menus/components/RoleMenuForm";
@@ -80,20 +80,20 @@ export function RoleMenusPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("roleMenus.title")}
 				subtitle={t("roleMenus.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, create.isSuccess || update.isSuccess)} />}
 			/>
 
 			<section aria-labelledby="menus-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="menus-heading"
 					count={t("roleMenus.countOf", { used: list.data.menus.length, limit: list.data.limit })}
 				>
 					{t("roleMenus.inUse")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{menus.length === 0 ? (
 					<Card>

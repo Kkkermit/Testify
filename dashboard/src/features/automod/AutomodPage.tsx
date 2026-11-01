@@ -11,7 +11,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
 import { PRESET_LABELS } from "@/features/automod/automod.labels";
 import { RuleRow } from "@/features/automod/components/RuleRow";
 import { useAddRule, useAutomod, useRemoveRule, useToggleRule } from "@/features/automod/useAutomod";
@@ -56,7 +56,7 @@ export function AutomodPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("automod.title")}
 				subtitle={t("automod.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, add.isSuccess)} />}
@@ -65,9 +65,9 @@ export function AutomodPage(): React.JSX.Element {
 			{!canManage && <Warning>{t("automod.needsManageServer")}</Warning>}
 
 			<section aria-labelledby="rules-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="rules-heading" count={list.length}>
+				<SectionHeading as="h2" id="rules-heading" count={list.length}>
 					{t("automod.rules")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{list.length === 0 ? (
 					<Card>

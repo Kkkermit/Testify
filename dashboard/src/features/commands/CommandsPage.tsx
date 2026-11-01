@@ -10,7 +10,7 @@ import { Reveal } from "@/components/motion";
 import {
 	Card,
 	EmptyState,
-	Eyebrow,
+	SectionHeading,
 	PageHeader,
 	SELECTED,
 	Skeleton,
@@ -83,7 +83,7 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 				</p>
 			) : (
 				<PageHeader
-					eyebrow={overview.data?.name}
+					server={overview.data}
 					title={t("commands.title")}
 					subtitle={`${subtitleFor(global, state !== undefined, t)} ${switchedOff(state, global, t)}`}
 				/>
@@ -142,9 +142,9 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 				<div className="flex flex-col gap-6">
 					{groups.map(([name, group]) => (
 						<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">
-							<Eyebrow as="h2" id={`category-${name}`} count={group.length} className="capitalize">
+							<SectionHeading as="h2" id={`category-${name}`} count={group.length} className="capitalize">
 								{categoryLabel(name, t)}
-							</Eyebrow>
+							</SectionHeading>
 							<ul className="flex flex-col gap-3">
 								{group.map((command, index) => (
 									<Reveal as="li" key={command.name} index={index}>

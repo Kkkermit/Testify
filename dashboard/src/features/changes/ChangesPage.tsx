@@ -30,7 +30,7 @@ export function ChangesPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("changes.title")} subtitle={t("changes.subtitle")} />
+			<PageHeader server={overview.data} title={t("changes.title")} subtitle={t("changes.subtitle")} />
 
 			<Card className="flex flex-col gap-4">
 				<Field label={t("changes.searchLabel")} hint={t("changes.searchHint")} htmlFor="changes-search">

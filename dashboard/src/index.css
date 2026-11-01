@@ -433,33 +433,6 @@
 	border-top: 1px solid var(--color-border);
 }
 
-/**
- * A hairline of accent along the top edge, for the one card on a screen that is the point of the screen.
- * Rule 9 wants a focal point; this is how a card claims it without shouting.
- */
-@utility card-focal {
-	position: relative;
-}
-
-@utility card-focal-mark {
-	content: "";
-	position: absolute;
-	inset-inline: -1px;
-	top: -1px;
-	height: 2px;
-	border-radius: var(--radius-card) var(--radius-card) 0 0;
-	background: linear-gradient(90deg, var(--color-accent), transparent 70%);
-}
-
-/**
- * Elevation is expressed differently by theme because the same trick cannot work in both: on near-black a drop
- * shadow reads as a smudge, so a card lifts by a 1px inset highlight; on paper that highlight is invisible and
- * a real shadow is what separates a white card from the ground.
- */
-@utility surface-edge {
-	box-shadow: light-dark(0 1px 2px 0 rgb(21 21 31 / 6%), inset 0 1px 0 0 rgb(255 255 255 / 6%));
-}
-
 /* The pulse a skeleton uses is a brightness change; this is the highlight sweeping across it. */
 @utility skeleton-sheen {
 	position: relative;

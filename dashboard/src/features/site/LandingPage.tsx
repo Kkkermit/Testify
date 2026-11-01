@@ -4,7 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Link } from "react-router";
-import { Button, Card, CARD_HEADING, Eyebrow } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, SectionHeading } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
 import { useBot } from "@/features/auth/useBot";
@@ -47,7 +47,7 @@ export function LandingPage(): React.JSX.Element {
 				className="grid items-center gap-6 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-20 [&>*]:min-w-0"
 			>
 				<div className="motion-reveal flex flex-col gap-6">
-					<Eyebrow>{t("landing.eyebrow")}</Eyebrow>
+					<SectionHeading>{t("landing.eyebrow")}</SectionHeading>
 					<h1
 						id="landing-title"
 						className="font-display text-4xl leading-[1.05] font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl"

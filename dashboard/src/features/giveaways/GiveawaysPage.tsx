@@ -6,7 +6,7 @@ import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
 import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
 import { GiveawayRow } from "@/features/giveaways/components/GiveawayRow";
 import {
 	DURATION_UNITS,
@@ -70,7 +70,7 @@ export function GiveawaysPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("giveaways.title")}
 				subtitle={t("giveaways.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, start.isSuccess)} />}
@@ -165,9 +165,13 @@ export function GiveawaysPage(): React.JSX.Element {
 			</Card>
 
 			<section aria-labelledby="giveaways-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="giveaways-heading" count={t("giveaways.runningCount", { count: runningCount(rows) })}>
+				<SectionHeading
+					as="h2"
+					id="giveaways-heading"
+					count={t("giveaways.runningCount", { count: runningCount(rows) })}
+				>
 					{t("giveaways.inThisServer")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{rows.length === 0 ? (
 					<Card>

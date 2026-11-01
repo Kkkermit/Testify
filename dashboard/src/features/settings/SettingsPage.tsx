@@ -35,7 +35,7 @@ export function SettingsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("settings.title")} subtitle={t("settings.subtitle")} />
+			<PageHeader server={overview.data} title={t("settings.title")} subtitle={t("settings.subtitle")} />
 
 			<Disclosure label={t("settings.groupBot")}>
 				<Group>

@@ -1,19 +1,21 @@
 import { type ReactNode } from "react";
-import { UNSELECTED } from "@/components/primitives/stateStyles";
 import { cn } from "@/lib/cn";
 
+/** A word in its tone's colour inside a hairline, so a list of badges does not read as a row of coloured blocks. */
 const TONES = {
-	muted: UNSELECTED,
-	success: "bg-success/15 text-success",
-	warning: "bg-warning/15 text-warning",
-	danger: "bg-destructive/15 text-destructive-text",
+	muted: "border-border text-muted-foreground",
+	success: "border-success/40 text-success",
+	warning: "border-warning/40 text-warning",
+	danger: "border-destructive-text/40 text-destructive-text",
 } as const;
 
 export type BadgeTone = keyof typeof TONES;
 
 export function Badge({ tone = "muted", children }: { tone?: BadgeTone; children: ReactNode }): React.JSX.Element {
 	return (
-		<span className={cn("shrink-0 rounded-full px-2 py-0.5 text-xs font-medium whitespace-nowrap", TONES[tone])}>
+		<span
+			className={cn("rounded-chip shrink-0 border px-1.5 py-px text-xs font-medium whitespace-nowrap", TONES[tone])}
+		>
 			{children}
 		</span>
 	);

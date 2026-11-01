@@ -55,7 +55,7 @@ export function Composer({ palette }: { palette: readonly PaletteCommand[] }): R
 	return (
 		<figure className="flex flex-col gap-3">
 			{/* The moving box is for the eye; what it types is said once, in words, below it. */}
-			<div aria-hidden="true" className="bg-card border-border surface-edge rounded-card overflow-hidden border">
+			<div aria-hidden="true" className="bg-card border-border rounded-card overflow-hidden border">
 				<div className="text-muted-foreground border-border flex items-center gap-2 border-b px-4 py-2.5 text-sm">
 					<Hash size={15} />
 					<span className="text-foreground font-medium">{t("landing.composer.channel")}</span>

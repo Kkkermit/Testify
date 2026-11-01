@@ -53,7 +53,7 @@ export function GreetingPreview({
 							))}
 						</p>
 						{style === "card" && (
-							<div className="from-primary/30 to-card mt-2 flex h-24 items-center justify-center rounded-field bg-gradient-to-br">
+							<div className="bg-accent-wash mt-2 flex h-24 items-center justify-center rounded-field">
 								<span className="text-muted-foreground text-xs">{t("welcome.cardAlt")}</span>
 							</div>
 						)}

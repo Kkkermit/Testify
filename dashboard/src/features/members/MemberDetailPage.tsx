@@ -43,7 +43,7 @@ export function MemberDetailPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={detail.displayName}
 				subtitle={`@${detail.username}`}
 				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess || edit.isSuccess)} />}

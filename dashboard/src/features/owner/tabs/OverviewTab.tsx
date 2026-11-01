@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { LABEL, SearchField, SELECT } from "@/components/form";
-import { Card, Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
+import { Card, SectionHeading, Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
 import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
@@ -92,9 +92,9 @@ export function OverviewTab(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="servers-heading">
+				<SectionHeading as="h2" id="servers-heading">
 					{t("owner.servers")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{/* A new order or a new search starts again from the first page, which is where its answer is. */}
 				<Card padding="compact" className="flex flex-wrap items-end gap-3">

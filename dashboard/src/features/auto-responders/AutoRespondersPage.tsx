@@ -17,7 +17,7 @@ import {
 	CARD_HEADING,
 	cardClass,
 	EmptyState,
-	Eyebrow,
+	SectionHeading,
 	PageHeader,
 	Skeleton,
 } from "@/components/primitives";
@@ -82,20 +82,20 @@ export function AutoRespondersPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("autoResponders.title")}
 				subtitle={t("autoResponders.subtitle")}
 				action={<SavingIndicator state={savingStateOf(saving, add.isSuccess || edit.isSuccess)} />}
 			/>
 
 			<section aria-labelledby="responders-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="responders-heading"
 					count={t("autoResponders.countOf", { used: all.length, limit: list.data.limit })}
 				>
 					{t("autoResponders.inUse")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{shown.length === 0 ? (
 					<Card>

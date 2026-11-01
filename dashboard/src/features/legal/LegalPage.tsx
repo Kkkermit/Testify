@@ -25,7 +25,7 @@ export function LegalPage({ document }: { document: LegalDocument }): React.JSX.
 				{i18n.resolvedLanguage !== "en" && <p className="text-muted-foreground text-xs">{t("legal.englishGoverns")}</p>}
 			</div>
 
-			<Card padding="none" focal>
+			<Card padding="none">
 				<h2 className={cn(CARD_HEADING, "px-6 pt-6 pb-2")}>{t("legal.glance")}</h2>
 				<DataList rows={document.glance.map((row) => ({ label: t(row.label), value: t(row.value) }))} />
 			</Card>

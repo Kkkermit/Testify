@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { cardClass, Eyebrow, Skeleton } from "@/components/primitives";
+import { cardClass, SectionHeading, Skeleton } from "@/components/primitives";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { StyleChoice } from "@/features/welcome/components/StyleChoice";
@@ -41,9 +41,9 @@ export function GoodbyeCard({
 	return (
 		<section aria-labelledby="goodbye-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
 			<div className="flex items-center justify-between gap-3">
-				<Eyebrow as="h2" id="goodbye-heading">
+				<SectionHeading as="h2" id="goodbye-heading">
 					{t("goodbye.heading")}
-				</Eyebrow>
+				</SectionHeading>
 				<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
 			</div>
 
@@ -107,7 +107,7 @@ export function GoodbyeCard({
 			)}
 
 			<div className="flex flex-col gap-3">
-				<Eyebrow as="h3">{t("welcome.preview")}</Eyebrow>
+				<SectionHeading as="h3">{t("welcome.preview")}</SectionHeading>
 				<GreetingPreview
 					message={draft}
 					style={goodbye.style}

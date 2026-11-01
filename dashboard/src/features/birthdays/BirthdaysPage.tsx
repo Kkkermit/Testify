@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Card, cardClass, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { Card, cardClass, EmptyState, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
 import { useBirthdays, useUpdateBirthdays } from "@/features/birthdays/useBirthdays";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
@@ -44,13 +44,13 @@ export function BirthdaysPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("birthdays.title")} subtitle={t("birthdays.subtitle")} />
+			<PageHeader server={overview.data} title={t("birthdays.title")} subtitle={t("birthdays.subtitle")} />
 
 			<section aria-labelledby="posts-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
 				<div className="flex items-center justify-between gap-3">
-					<Eyebrow as="h2" id="posts-heading">
+					<SectionHeading as="h2" id="posts-heading">
 						{t("birthdays.posts")}
-					</Eyebrow>
+					</SectionHeading>
 					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
 				</div>
 
@@ -99,9 +99,9 @@ export function BirthdaysPage(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="upcoming-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="upcoming-heading" count={t("birthdays.sharedCount", { count: birthdays.shared })}>
+				<SectionHeading as="h2" id="upcoming-heading" count={t("birthdays.sharedCount", { count: birthdays.shared })}>
 					{t("birthdays.upcoming")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{birthdays.upcoming.length === 0 ? (
 					<Card>

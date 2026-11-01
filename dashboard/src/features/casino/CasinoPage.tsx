@@ -54,7 +54,7 @@ export function CasinoPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("casino.title")}
 				subtitle={t("casino.subtitle")}
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}

@@ -114,7 +114,7 @@ function Code({ path, text }: { path: string; text: string }): React.JSX.Element
 			role="region"
 			aria-label={t("source.codeOf", { path })}
 			tabIndex={0}
-			className="bg-card border-border surface-edge rounded-card focus-visible:outline-ring overflow-x-auto border focus-visible:outline-2"
+			className="bg-card border-border rounded-card focus-visible:outline-ring overflow-x-auto border focus-visible:outline-2"
 		>
 			<div className="flex min-w-max font-mono text-[0.8125rem] leading-6">
 				<pre

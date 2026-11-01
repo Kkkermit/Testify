@@ -46,7 +46,7 @@ export function TempVoicePage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("tempVoice.title")}
 				subtitle={t("tempVoice.subtitle")}
 				action={

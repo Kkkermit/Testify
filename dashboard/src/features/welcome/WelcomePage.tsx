@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { ChannelPicker, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { cardClass, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import { cardClass, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { GoodbyeCard } from "@/features/welcome/components/GoodbyeCard";
@@ -42,13 +42,13 @@ export function WelcomePage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("welcome.title")} subtitle={t("welcome.subtitle")} />
+			<PageHeader server={overview.data} title={t("welcome.title")} subtitle={t("welcome.subtitle")} />
 
 			<section aria-labelledby="greeting-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
 				<div className="flex items-center justify-between gap-3">
-					<Eyebrow as="h2" id="greeting-heading">
+					<SectionHeading as="h2" id="greeting-heading">
 						{t("welcome.greeting")}
-					</Eyebrow>
+					</SectionHeading>
 					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
 				</div>
 
@@ -113,9 +113,9 @@ export function WelcomePage(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="preview-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="preview-heading">
+				<SectionHeading as="h2" id="preview-heading">
 					{t("welcome.preview")}
-				</Eyebrow>
+				</SectionHeading>
 				<GreetingPreview
 					message={draft}
 					style={welcome.style}

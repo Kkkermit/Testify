@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ChannelPicker, Field, FIELD, postableChannels, RadioCard, SELECT, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, Eyebrow, PageHeader } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, SectionHeading, PageHeader } from "@/components/primitives";
 import { COLOUR_LABELS } from "@/features/announcements/announcements.labels";
 import {
 	type AnnouncementDraft,
@@ -42,11 +42,7 @@ export function AnnouncementsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader
-				eyebrow={overview.data?.name}
-				title={t("announcements.title")}
-				subtitle={t("announcements.subtitle")}
-			/>
+			<PageHeader server={overview.data} title={t("announcements.title")} subtitle={t("announcements.subtitle")} />
 
 			<div className="grid gap-6 lg:grid-cols-2 lg:items-start">
 				<Card className="flex flex-col gap-4">
@@ -204,9 +200,9 @@ function Preview({ draft }: { draft: AnnouncementDraft }): React.JSX.Element {
 
 	return (
 		<section aria-labelledby="announcement-preview" className="flex flex-col gap-3">
-			<Eyebrow as="h2" id="announcement-preview">
+			<SectionHeading as="h2" id="announcement-preview">
 				{t("announcements.preview")}
-			</Eyebrow>
+			</SectionHeading>
 			<Card className="flex flex-col gap-2">
 				{ping !== null && (
 					<span className="bg-primary/15 text-primary w-fit rounded-chip px-1.5 text-sm font-medium">{ping}</span>

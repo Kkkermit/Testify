@@ -61,7 +61,7 @@ export function LotteryPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("lottery.title")}
 				subtitle={t("lottery.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}
