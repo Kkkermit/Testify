@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet } from "react-router";
 import { BotMark } from "@/components/brand/BotMark";
 import { LanguageSelect } from "@/components/form/LanguageSelect";
-import { Backdrop } from "@/components/motion";
 import { Tooltip } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
@@ -31,8 +30,6 @@ export function SiteShell({ column = false }: { column?: boolean }): React.JSX.E
 
 	return (
 		<div className="flex min-h-dvh flex-col">
-			<Backdrop opacity={0.6} />
-
 			<header className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-4 sm:px-6">
 				<Link
 					to="/"

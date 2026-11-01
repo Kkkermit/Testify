@@ -1,12 +1,7 @@
-/** WebGL takes numbers, not class names, so this is the one place a token is read rather than applied — and it is read off `:root`. */
+/** The console greeting styles text with values, not class names, so this is where a token is read rather than applied. */
 export function cssColour(name: string, fallback: string, root: Element = document.documentElement): string {
 	const value = getComputedStyle(root).getPropertyValue(name).trim();
 	return value === "" ? fallback : value;
-}
-
-/** three's Color parses `#rgb` and `#rrggbb`, so anything else from a token is refused before it reaches it. */
-export function isHexColour(value: string): boolean {
-	return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
 }
 
 /** `getComputedStyle` returns a `light-dark()` token as source text, so the half is picked by hand. */
@@ -29,25 +24,4 @@ function prefersDark(root: Element = document.documentElement): boolean {
 /** A colour token's half for the scheme the page is showing, for the places that need a value rather than a class. */
 export function themeColour(name: string, fallback: string, root?: Element): string {
 	return pickScheme(cssColour(name, fallback, root), prefersDark(root));
-}
-
-export function accentColour(root?: Element): string {
-	const value = themeColour("--color-accent", "#a78bfa", root);
-	return isHexColour(value) ? value : "#a78bfa";
-}
-
-/** The field is composited over the page rather than added to it, so paper needs a far weaker one than near-black. */
-export function backdropOpacity(root?: Element): number {
-	const value = Number.parseFloat(pickScheme(cssColour("--backdrop-opacity", "0.5", root), prefersDark(root)));
-	return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0.5;
-}
-
-interface FieldPaint {
-	colour: string;
-	opacity: number;
-}
-
-/** Read together, because the two only make sense as a pair: the same colour at the other theme's strength is dust. */
-export function fieldPaint(root?: Element): FieldPaint {
-	return { colour: accentColour(root), opacity: backdropOpacity(root) };
 }

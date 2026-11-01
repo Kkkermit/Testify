@@ -28,7 +28,7 @@ export function usePrefersReducedMotion(): boolean {
 		const media = typeof window.matchMedia === "function" ? window.matchMedia(QUERY) : null;
 		media?.addEventListener("change", onChange);
 
-		// Watched on the element, so a change on the appearance page reaches the backdrop.
+		// Watched on the element, so a change on the appearance page reaches what is already on screen.
 		const observer = new MutationObserver(onChange);
 		observer.observe(document.documentElement, { attributeFilter: ["data-motion"] });
 

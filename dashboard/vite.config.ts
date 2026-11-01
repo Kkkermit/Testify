@@ -76,15 +76,11 @@ export default defineConfig(({ command, mode }) => {
 			 * The first releases with native `light-dark()`; below them the polyfill stops a nested `color-scheme` working.
 			 */
 			cssTarget: ["chrome123", "safari17.5", "firefox120", "edge123"],
-			// three is over the default and is already split and loaded on demand.
-			chunkSizeWarningLimit: 600,
 			// A map hands anybody the source tree file by file in DevTools, so a build ships only the minified bundle.
 			sourcemap: false,
 			rollupOptions: {
 				output: {
 					manualChunks: (id) => {
-						// three is half a megabyte and only the lazy backdrop uses it, so it stays out of `vendor`.
-						if (id.includes("node_modules/three")) return "three";
 						// The docs and the source browser need these, and nothing a dashboard visitor opens first does.
 						if (/node_modules\/(?:marked|lowlight|highlight\.js|devlop|dequal)\//.test(id)) return "markdown";
 						// A vendor chunk of its own, so an app change does not invalidate the whole cache.

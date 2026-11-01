@@ -1,5 +1,5 @@
 import { i18next, type TranslationKey } from "@/i18n";
-import { themeColour } from "@/lib/three/tokens";
+import { themeColour } from "@/lib/tokens";
 
 /** What somebody who opens DevTools reads first: a welcome, where to report a bug, and a warning against pasting code. */
 
@@ -52,7 +52,7 @@ export function printGreeting(lines: ConsoleLine[]): void {
 export function greetTheConsole(): void {
 	const greet = (): void => {
 		const palette = {
-			brand: themeColour("--color-primary", "#7c3aed"),
+			brand: themeColour("--color-primary", "#8a2a6b"),
 			danger: themeColour("--color-destructive", "#dc2626"),
 		};
 		printGreeting(greetingLines((key) => i18next.t(key), palette));

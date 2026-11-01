@@ -20,15 +20,6 @@ function renderAppearance(): void {
 	);
 }
 
-// Reduced motion skips the WebGL backdrop, which jsdom has no canvas to draw.
-beforeEach(() => {
-	document.documentElement.setAttribute("data-motion", "reduced");
-});
-
-afterEach(() => {
-	document.documentElement.removeAttribute("data-motion");
-});
-
 describe("the appearance page's frame", () => {
 	/** Theme, accent and language are the reader's, so a visitor with no account reaches them from the website. */
 	it("opens in the website for somebody signed out", async () => {

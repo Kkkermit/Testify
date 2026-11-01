@@ -5,7 +5,6 @@ import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { UndoProvider } from "@/app/UndoProvider";
-import { Backdrop } from "@/components/motion";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
@@ -13,7 +12,7 @@ import { QuickSearch } from "@/features/search/QuickSearch";
 import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
 import { useScreenView } from "@/hooks/useScreenView";
 
-/** Navigation, backdrop and the outlet. */
+/** Navigation and the outlet. */
 export function AppShell(): React.JSX.Element {
 	const me = useMe();
 	const bot = useBot();
@@ -50,9 +49,6 @@ export function AppShell(): React.JSX.Element {
 	return (
 		<UndoProvider>
 			<div className="flex min-h-dvh flex-col md:flex-row">
-				{/* Dimmer than the sign-in screen: behind a settings form it is a texture, not the subject. */}
-				{/* Under half of what the sign-in screen wears: there is a page to read in front of this one. */}
-				<Backdrop opacity={0.45} />
 				<RouteAnnouncer />
 
 				<a

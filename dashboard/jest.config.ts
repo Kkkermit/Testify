@@ -40,14 +40,8 @@ const config: Config = {
 		"^@testify/shared/(.*)$": "<rootDir>/../shared/src/$1",
 		"\\.css$": "<rootDir>/src/test/styleMock.ts",
 	},
-	// Vendored shadcn is not ours to test, and starfield.ts needs a WebGL context jsdom does not have.
-	collectCoverageFrom: [
-		"src/**/*.{ts,tsx}",
-		"!src/components/ui/**",
-		"!src/lib/three/starfield.ts",
-		"!src/main.tsx",
-		"!src/**/*.d.ts",
-	],
+	// Vendored shadcn is not ours to test.
+	collectCoverageFrom: ["src/**/*.{ts,tsx}", "!src/components/ui/**", "!src/main.tsx", "!src/**/*.d.ts"],
 	coverageThreshold: { global: { statements: 75, branches: 75, functions: 75, lines: 75 } },
 };
 
