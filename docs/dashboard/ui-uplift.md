@@ -19,7 +19,7 @@ chip onto a channel, open `#welcome` and click the message.
 6. [The look](#the-look)
 7. [Phases](#phases)
 8. [How a phase is finished](#how-a-phase-is-finished)
-9. [Decisions taken, and questions still open](#decisions-taken-and-questions-still-open)
+9. [Decisions taken](#decisions-taken)
 
 ---
 
@@ -203,16 +203,14 @@ passes.
   leave `dashboard/public/fonts`. The canvas fonts in `assets/fonts` are a separate set and stay.
 - **Accents.** Plum becomes the default. The twelve-accent picker on Appearance stays, each accent re-measured
   against the new grounds.
-- **Removed:**
-  - `Backdrop` and `lib/three/`, except `tokens.ts`, which the console greeting reads and which moves to `lib/`;
-  - the body wash;
-  - `Eyebrow`;
-  - the feature tints;
-  - `StatTile` on the overview;
-  - `Reveal`, `AnimatedNumber` and `useCountUp`.
-- **Motion.** `LazyMotion` with `m` components and the features chunk loaded asynchronously: 5.6 kB gzipped in the
-  first load, measured with esbuild against `motion@14.3.0`. `MotionConfig reducedMotion="user"` sits beside the
-  existing `data-motion` attribute. What moves is listed in the
+- **Removed in phase 2:** `Backdrop` and `lib/three/`, except `tokens.ts`, which the console greeting reads and
+  which moved to `lib/`; three.js itself; the body wash; the focal card's gradient and the cards' inset highlight;
+  the tinted badges. `Eyebrow` became `SectionHeading`, the page's own type with no letterspacing or rule.
+- **Still to remove**, with the screens that use them: the feature tints, `StatTile` on the overview, and `Reveal`,
+  `AnimatedNumber` and `useCountUp`.
+- **Motion.** The shell moves with CSS transitions only. `motion` arrives in phase 4, imported only by the channel
+  pages, which are lazily loaded routes, so the first load does not grow. `MotionConfig reducedMotion="user"` sits
+  beside the existing `data-motion` attribute. What moves is listed in the
   [brief's Motion section](redesign/README.md#motion-what-moves-and-why).
 
 ## Phases
@@ -220,20 +218,20 @@ passes.
 Each phase is one or more commits on this branch. Each leaves the dashboard working with `npm run check` green, so
 the branch can be reviewed or paused at any point.
 
-| #   | Phase                                                                                                                                                                                                                                                                                                                                                                                                                       | Status |
-| --- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 0   | This plan                                                                                                                                                                                                                                                                                                                                                                                                                   | Done   |
-| 1   | **The channel map's data.** `shared/src/places.ts` (types and the feature list), each `FEATURE_SOURCES` reading carrying its channels, `GET /guilds/:id/places`, `parentId` on `ChannelSummary`, and tests, including one that fails when the feature list and `FEATURE_SOURCES` disagree. No visible change.                                                                                                               | Done   |
-| 2   | **Foundations.** New tokens in `index.css`, light and dark, and the fonts. Add `motion` with `LazyMotion`. Remove the backdrop, the wash and the eyebrow. Restyle `Card`, `Badge`, `PageHeader` (a breadcrumb that names the server, so `pageHeader.test.ts` keeps its rule), the form controls and `SwitchTrack`. Rewrite `contrast`, `radius` and `spacing` tests to the new values, and update guide §19 and AGENTS §24. | To do  |
-| 3   | **The shell.** The sidebar as the channel list (`ChannelNav`), with Overview, Inbox, This week, Everywhere, Members, Roles, Moderation and Settings. `MobileNav` makes the list its first screen. Quick search adds channels. `navigation.ts` keeps every existing path reachable, and `navigation.test.ts` still asserts the full set.                                                                                     | To do  |
-| 4   | **Overview, channel pages and Everywhere.** "Where Testify works", the chips with drag and Place in, `/channels/:channelId` with a block per feature, Move to, and a `DiscordPreview` component used by every block. Editing in place for welcome, goodbye, level-up and birthday messages; every other block links to its full page.                                                                                       | To do  |
-| 5   | **Every feature page restyled**, one per commit, in the order of the table above, each keeping its route and tests: rows rather than cards, the sentence summary at the top, and the preview beside anything that posts.                                                                                                                                                                                                    | To do  |
-| 6   | **Inbox, This week, Roles** (ideas 1–3), each with its read route and its page.                                                                                                                                                                                                                                                                                                                                             | To do  |
-| 7   | **Send me a test** (idea 4).                                                                                                                                                                                                                                                                                                                                                                                                | To do  |
-| 8   | **History and restore** on the Changes page (idea 5).                                                                                                                                                                                                                                                                                                                                                                       | To do  |
-| 9   | **Several servers side by side** (idea 6), read-only.                                                                                                                                                                                                                                                                                                                                                                       | To do  |
-| 10  | **Everything outside a server**: the server picker, commands, status, notifications, help, appearance, the owner console, sign-in and the public site, in the new tokens.                                                                                                                                                                                                                                                   | To do  |
-| 11  | **Finish**: re-shoot the README's screenshots, update AGENTS §24 and the guide throughout, run a browser sweep at 320, 390, 820 and 1440 in both themes, with `prefers-contrast: more` and reduced motion, then open a pull request into `develop`.                                                                                                                                                                         | To do  |
+| #   | Phase                                                                                                                                                                                                                                                                                                                                                                  | Status |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| 0   | This plan                                                                                                                                                                                                                                                                                                                                                              | Done   |
+| 1   | **The channel map's data.** `shared/src/places.ts` (types and the feature list), each `FEATURE_SOURCES` reading carrying its channels, `GET /guilds/:id/places`, `parentId` on `ChannelSummary`, and tests, including one that fails when the feature list and `FEATURE_SOURCES` disagree. No visible change.                                                          | Done   |
+| 2   | **Foundations.** New tokens in `index.css`, light and dark, and the fonts. Remove the backdrop, the wash and the eyebrow. Restyle `Card`, `Badge`, `PageHeader` (a breadcrumb that names the server, so `pageHeader.test.ts` keeps its rule), the form controls and `SwitchTrack`. Re-measure every accent in `contrast.test.ts`, and update guide §19 and AGENTS §24. | Done   |
+| 3   | **The shell.** The sidebar as the channel list (`ChannelNav`), with Overview, Inbox, This week, Everywhere, Members, Roles, Moderation and Settings. `MobileNav` makes the list its first screen. Quick search adds channels. `navigation.ts` keeps every existing path reachable, and `navigation.test.ts` still asserts the full set.                                | To do  |
+| 4   | **Overview, channel pages and Everywhere.** "Where Testify works", the chips with drag and Place in, `/channels/:channelId` with a block per feature, Move to, and a `DiscordPreview` component used by every block. Editing in place for welcome, goodbye, level-up and birthday messages; every other block links to its full page.                                  | To do  |
+| 5   | **Every feature page restyled**, one per commit, in the order of the table above, each keeping its route and tests: rows rather than cards, the sentence summary at the top, and the preview beside anything that posts.                                                                                                                                               | To do  |
+| 6   | **Inbox, This week, Roles** (ideas 1–3), each with its read route and its page.                                                                                                                                                                                                                                                                                        | To do  |
+| 7   | **Send me a test** (idea 4).                                                                                                                                                                                                                                                                                                                                           | To do  |
+| 8   | **History and restore** on the Changes page (idea 5).                                                                                                                                                                                                                                                                                                                  | To do  |
+| 9   | **Several servers side by side** (idea 6), read-only.                                                                                                                                                                                                                                                                                                                  | To do  |
+| 10  | **Everything outside a server**: the server picker, commands, status, notifications, help, appearance, the owner console, sign-in and the public site, in the new tokens.                                                                                                                                                                                              | To do  |
+| 11  | **Finish**: re-shoot the README's screenshots, update AGENTS §24 and the guide throughout, run a browser sweep at 320, 390, 820 and 1440 in both themes, with `prefers-contrast: more` and reduced motion, then open a pull request into `develop`.                                                                                                                    | To do  |
 
 ## How a phase is finished
 
@@ -245,7 +243,7 @@ the branch can be reviewed or paused at any point.
 - Screens that changed are checked in a real browser, because jsdom cannot see a layout.
 - AGENTS.md §24 and `docs/dashboard/guide.md` say what the phase changed, in the same commit.
 
-## Decisions taken, and questions still open
+## Decisions taken
 
 **Taken, and easy to change:**
 
@@ -256,13 +254,9 @@ the branch can be reviewed or paused at any point.
 - **Placing writes through each feature's own route**, not through a new general write endpoint.
 - **Plum is the new default accent**, and the other eleven stay.
 - **The dark theme** follows the graphite recommended in the brief.
-
-**Open, and needing an answer before the phase that depends on them:**
-
-1. **The first-load budget (phase 2).** Motion adds 5.6 kB gzipped to a first load the guide records as already at
-   its 200 kB budget. Either the budget rises by that much, or something else is cut to make room.
-2. **Recording failed posts (phase 6).** The inbox can say "the welcome message could not be posted" only if the bot
-   records each failure. That is a new collection, and a line in the privacy notice. Without it, the inbox shows
-   what can already be read.
-3. **Copying a setup between servers (phase 9).** It is a new kind of write that touches several servers at once,
-   each with its own permission check. The read-only comparison does not need it.
+- **The first-load budget does not move.** Motion stays out of the first load, as above, rather than the budget
+  rising to make room for it.
+- **The inbox shows what is already stored.** Failed posts are not recorded, so there is no new collection and no
+  change to the privacy notice. Adding them later is a phase of its own.
+- **Several servers side by side stays read-only.** Copying a setup between servers is a new kind of write across
+  several permission checks, and is left for a later decision.

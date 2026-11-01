@@ -173,8 +173,8 @@ and CI both do.
 - **`resolve.dedupe` plus explicit `react` / `react-dom` aliases**, resolved through
   `createRequire(import.meta.url)` so they find whichever copy the app itself imports rather than a hardcoded
   path that breaks the day the hoisting changes.
-- **`manualChunks`** gives three.js its own ~513 kB chunk. Left in `vendor` it would be in the initial load,
-  which is the opposite of lazy.
+- **`manualChunks`** gives the docs' Markdown renderer its own chunk and everything else from `node_modules` a
+  `vendor` chunk, so an app change does not invalidate the whole cache.
 - An alias from `@testify/shared` to its **source**, so no build step sits between editing shared and seeing it.
 
 ---
@@ -198,14 +198,14 @@ src/
 │   │                   SegmentedControl Skeleton StatTile TabBar Tooltip
 │   ├── form/           ChannelPicker CheckList Field RoleChecklist RoleSwatch
 │   │                   SavingIndicator Toggle Warning + fieldStyles.ts
-│   ├── motion/         Backdrop (three.js), Reveal, AnimatedNumber
+│   ├── motion/         Reveal, AnimatedNumber
 │   └── ui/             Reserved for shadcn's CLI. Excluded from coverage — keep your own out.
 ├── config/
 │   ├── navigation.ts   The sidebar, as data
 │   └── features.ts     Each bot feature's icon, tint and dashboard path
 ├── features/<name>/    The page, its components/, use<Name>.ts, <name>.utils.ts, .types.ts
 ├── hooks/              usePageTitle usePrefersReducedMotion useCountUp useDocumentVisible useDebounced
-├── lib/                api cn queries redirect sanitise tint + three/ for the backdrop maths
+├── lib/                api cn queries redirect sanitise tint tokens
 └── test/               handlers.ts (MSW), fixtures/, setup.ts, renderWithProviders.tsx, axe.ts
 ```
 
@@ -448,18 +448,18 @@ Three files with their own segmented control is three places to fix an `aria-pre
 
 ### Primitives
 
-| Component                                                    | Notes                                                                   |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>` |
-| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`          |
-| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                  |
-| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`             |
-| `PageHeader`                                                 | `title`, `subtitle`, `action`, `eyebrow` — the server, on guild screens |
-| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                    |
-| `Skeleton`                                                   | What `isPending` returns                                                |
-| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike      |
-| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page    |
-| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                         |
+| Component                                                    | Notes                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| `Card`                                                       | `padding="none" \| "compact" \| "default"`. `cardClass()` for an `<li>`  |
+| `Button`                                                     | `variant="primary" \| "secondary" \| "ghost" \| "destructive"`           |
+| `Badge`                                                      | `tone="neutral" \| "success" \| "warning" \| "danger"`                   |
+| `StatTile`                                                   | Takes an **icon component**, not an element: `icon={Coins}`              |
+| `PageHeader`                                                 | `title`, `subtitle`, `action`, `server` — a breadcrumb, on guild screens |
+| `EmptyState`                                                 | Takes an **element**: `icon={<History size={28} />}`                     |
+| `Skeleton`                                                   | What `isPending` returns                                                 |
+| `Avatar`                                                     | Circular image with a lettered fallback — servers and people alike       |
+| `Pager`                                                      | Previous / Next with a live page count; renders nothing for one page     |
+| `TabBar`, `SegmentedControl`, `DataList`/`Figure`, `Tooltip` |                                                                          |
 
 ### Form
 
@@ -524,20 +524,6 @@ Tailwind v4, CSS-first. **Everything comes from `@theme` in `src/index.css`.**
   `padding-right`.
 
 `cn()` in `src/lib/cn.ts` is clsx + tailwind-merge — use it wherever classes are conditional or merged.
-
-### The WebGL backdrop
-
-`components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things keep an
-ornament from costing anything:
-
-- **three is imported dynamically and chunked on its own.**
-- **`prefers-reduced-motion` skips the import entirely**, rather than loading three and then sitting still. So
-  does a machine with no WebGL; `createStarfield` returns null rather than throwing.
-- **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, easing and
-  parallax — pure and unit tested. `starfield.ts` is the one file excluded from coverage.
-- **It reads the palette** off `:root` rather than restating it.
-
-The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never take a click.
 
 ---
 
@@ -851,22 +837,25 @@ Names are **roles, not colours**. `--color-destructive` is red today; the name s
 makes it orange. Renaming a token to its hue is how a palette stops being swappable.
 
 Every value is `light-dark(light, dark)`, so one line carries both themes and neither can be edited without the
-other in view. The dark half is listed first below because it is the theme the product was designed in.
+other in view. The values come from the channels design in [`ui-uplift.md`](ui-uplift.md): a graphite dark theme
+and a cool grey light one, with plum as the accent.
 
 | Token                        | Dark                                                                         | Light                                                                        | What it is for                                                                     |
 | ---------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `--color-background`         | ![](https://img.shields.io/badge/%20-%20-07070b?style=flat-square) `#07070b` | ![](https://img.shields.io/badge/%20-%20-f4f4f9?style=flat-square) `#f4f4f9` | The page. Everything else sits on it                                               |
-| `--color-foreground`         | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | ![](https://img.shields.io/badge/%20-%20-15151f?style=flat-square) `#15151f` | Body text, headings, an active icon                                                |
-| `--color-muted`              | ![](https://img.shields.io/badge/%20-%20-1c1c2a?style=flat-square) `#1c1c2a` | ![](https://img.shields.io/badge/%20-%20-e9e8f2?style=flat-square) `#e9e8f2` | A recessed fill: secondary buttons, hover states, icon tiles                       |
-| `--color-muted-foreground`   | ![](https://img.shields.io/badge/%20-%20-a2a2ba?style=flat-square) `#a2a2ba` | ![](https://img.shields.io/badge/%20-%20-55556e?style=flat-square) `#55556e` | Secondary text, meta lines, an inactive icon                                       |
-| `--color-card`               | ![](https://img.shields.io/badge/%20-%20-12121c?style=flat-square) `#12121c` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Every card and panel surface                                                       |
-| `--color-popover`            | ![](https://img.shields.io/badge/%20-%20-171722?style=flat-square) `#171722` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
-| `--color-border`             | ![](https://img.shields.io/badge/%20-%20-262639?style=flat-square) `#262639` | ![](https://img.shields.io/badge/%20-%20-dcdae8?style=flat-square) `#dcdae8` | Card borders, dividers, table rules                                                |
-| `--color-input`              | ![](https://img.shields.io/badge/%20-%20-7676a0?style=flat-square) `#7676a0` | ![](https://img.shields.io/badge/%20-%20-6b6b8a?style=flat-square) `#6b6b8a` | Field borders — further from the page than a divider, so a control looks touchable |
-| `--color-primary`            | ![](https://img.shields.io/badge/%20-%20-7c3aed?style=flat-square) `#7c3aed` | ![](https://img.shields.io/badge/%20-%20-6d28d9?style=flat-square) `#6d28d9` | The one action colour: primary buttons, the active nav marker                      |
+| `--color-background`         | ![](https://img.shields.io/badge/%20-%20-1f2125?style=flat-square) `#1f2125` | ![](https://img.shields.io/badge/%20-%20-f2f3f6?style=flat-square) `#f2f3f6` | The page. Everything else sits on it                                               |
+| `--color-foreground`         | ![](https://img.shields.io/badge/%20-%20-eceef1?style=flat-square) `#eceef1` | ![](https://img.shields.io/badge/%20-%20-1b1e24?style=flat-square) `#1b1e24` | Body text, headings, an active icon                                                |
+| `--color-sidebar`            | ![](https://img.shields.io/badge/%20-%20-191b1f?style=flat-square) `#191b1f` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | The column the server's channels are listed in                                     |
+| `--color-muted`              | ![](https://img.shields.io/badge/%20-%20-33363c?style=flat-square) `#33363c` | ![](https://img.shields.io/badge/%20-%20-e7e9ee?style=flat-square) `#e7e9ee` | A recessed fill: secondary buttons, hover states, icon tiles                       |
+| `--color-muted-foreground`   | ![](https://img.shields.io/badge/%20-%20-a2a7b0?style=flat-square) `#a2a7b0` | ![](https://img.shields.io/badge/%20-%20-565d6b?style=flat-square) `#565d6b` | Secondary text, meta lines, an inactive icon                                       |
+| `--color-card`               | ![](https://img.shields.io/badge/%20-%20-282b30?style=flat-square) `#282b30` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Every card and panel surface                                                       |
+| `--color-popover`            | ![](https://img.shields.io/badge/%20-%20-2e3137?style=flat-square) `#2e3137` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Anything floating: tooltips, native `<option>` lists                               |
+| `--color-border`             | ![](https://img.shields.io/badge/%20-%20-383c43?style=flat-square) `#383c43` | ![](https://img.shields.io/badge/%20-%20-d9dde4?style=flat-square) `#d9dde4` | Card borders, dividers, table rules                                                |
+| `--color-input`              | ![](https://img.shields.io/badge/%20-%20-7d838e?style=flat-square) `#7d838e` | ![](https://img.shields.io/badge/%20-%20-767d8a?style=flat-square) `#767d8a` | Field borders — further from the page than a divider, so a control looks touchable |
+| `--color-primary`            | ![](https://img.shields.io/badge/%20-%20-bf3a94?style=flat-square) `#bf3a94` | ![](https://img.shields.io/badge/%20-%20-8a2a6b?style=flat-square) `#8a2a6b` | The one action colour: primary buttons, the active nav marker                      |
 | `--color-primary-foreground` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | ![](https://img.shields.io/badge/%20-%20-ffffff?style=flat-square) `#ffffff` | Text on primary                                                                    |
-| `--color-accent`             | ![](https://img.shields.io/badge/%20-%20-a78bfa?style=flat-square) `#a78bfa` | ![](https://img.shields.io/badge/%20-%20-5b21b6?style=flat-square) `#5b21b6` | **Every violet that is text**: links, the eyebrow rule, the WebGL field            |
-| `--color-ring`               | ![](https://img.shields.io/badge/%20-%20-a78bfa?style=flat-square) `#a78bfa` | ![](https://img.shields.io/badge/%20-%20-6d28d9?style=flat-square) `#6d28d9` | The focus ring, and nothing else                                                   |
+| `--color-accent`             | ![](https://img.shields.io/badge/%20-%20-e08ac4?style=flat-square) `#e08ac4` | ![](https://img.shields.io/badge/%20-%20-7a2260?style=flat-square) `#7a2260` | **Every accent colour that is text**: links, live state                            |
+| `--color-accent-wash`        | ![](https://img.shields.io/badge/%20-%20-3a2433?style=flat-square) `#3a2433` | ![](https://img.shields.io/badge/%20-%20-f6e9f2?style=flat-square) `#f6e9f2` | Behind a chosen row or chip, under accent text                                     |
+| `--color-ring`               | ![](https://img.shields.io/badge/%20-%20-e08ac4?style=flat-square) `#e08ac4` | ![](https://img.shields.io/badge/%20-%20-8a2a6b?style=flat-square) `#8a2a6b` | The focus ring, and nothing else                                                   |
 | `--color-success`            | ![](https://img.shields.io/badge/%20-%20-3ddc97?style=flat-square) `#3ddc97` | ![](https://img.shields.io/badge/%20-%20-047857?style=flat-square) `#047857` | Saved, connected, healthy                                                          |
 | `--color-warning`            | ![](https://img.shields.io/badge/%20-%20-fbbf24?style=flat-square) `#fbbf24` | ![](https://img.shields.io/badge/%20-%20-a16207?style=flat-square) `#a16207` | A missing permission, a hierarchy problem, "nothing set up"                        |
 | `--color-destructive`        | ![](https://img.shields.io/badge/%20-%20-dc2626?style=flat-square) `#dc2626` | ![](https://img.shields.io/badge/%20-%20-b91c1c?style=flat-square) `#b91c1c` | Delete, leave, block — as a **fill**, always with white on it                      |
@@ -903,20 +892,21 @@ the dashboard knows about it and the grid renders a row rather than a hole. Ther
 
 ### 19.4 Type
 
-**Three faces, all self-hosted, 104 kB for the lot.** Before the rewrite `@theme` named `"Inter var"` with no
-`@font-face` behind it, so every install had silently been rendering in `system-ui` — the scale below meant
-nothing until the faces actually existed.
+**Two faces, both self-hosted, split by script.** Rubik is the whole interface, headings included, at a heavier
+weight rather than in a second family; its rounded corners sit close to Discord's own type, which is the thing
+every screen is configuring. Fira Mono marks what is typed literally: ids, placeholders such as `{user}`, code.
 
-| Token            | Face           | Job                                                     |
-| ---------------- | -------------- | ------------------------------------------------------- |
-| `--font-sans`    | Inter          | Everything that is prose or a control                   |
-| `--font-display` | Space Grotesk  | The page title, every card heading, the brand — 32 uses |
-| `--font-mono`    | JetBrains Mono | Numbers, IDs, the eyebrow, a command name — 42 uses     |
+| Token            | Face      | Job                                                 |
+| ---------------- | --------- | --------------------------------------------------- |
+| `--font-sans`    | Rubik     | Everything that is prose or a control               |
+| `--font-display` | Rubik     | The page title, every card heading, the brand       |
+| `--font-mono`    | Fira Mono | Ids, placeholders, a command name, code in the docs |
 
-Inter and Space Grotesk are `<link rel="preload">`-ed in `index.html`; mono is not, because it carries small
-labels where a swap is much less visible than it would be in a heading. Verified in a production build that
-each font is fetched **once** — a preload that does not dedupe is worse than no preload. No external host, so
-the CSP is untouched and a self-hosted bot still phones nowhere.
+Each face is three files, Latin, Latin Extended and Cyrillic, each with its `unicode-range`, so a reader only
+downloads the scripts their language uses and Russian gets Cyrillic from the same family. Rubik is variable from
+300 to 900; Fira Mono ships 400 and 700. Only Rubik's Latin file is `<link rel="preload">`-ed in `index.html`. The
+licences sit beside the files in `public/fonts`. No external host, so the CSP is untouched and a self-hosted bot
+still phones nowhere.
 
 Sizes, measured across `dashboard/src` rather than aspirational: **three do 96% of the work.**
 
@@ -941,32 +931,31 @@ Rules that hold today and are worth keeping:
 
 - **One `<h1>` per page**, and it is the `PageHeader` title. The browser sweep counts them, and it caught the
   owner console mounting the whole of `CommandsPage` — `PageHeader` and all — inside a tab.
-- **A guild screen names its server above that `<h1>`**, in the `eyebrow`. With the drawer closed on a phone
-  nothing else on the page says which server the switches belong to. The overview is exempt: its title is the
-  name already.
+- **A guild screen names its server above that `<h1>`**, as a breadcrumb in `server`. With the drawer closed on a
+  phone nothing else on the page says which server the switches belong to. The overview is exempt: its title is
+  the name already.
 - **Headings never skip a level.** Every card heading is an `<h2>`; two `<h3>`s in the owner console were
   jumping straight from the page's `<h1>` and left a hole in the outline.
 - **A card heading is `CARD_HEADING`**, not a string you write out — it was spelled identically in 28 files
   before it had a name, and the line height has to live on it. The step between a page and a card is carried by
   the size _and_ the face; adding a third size in between makes cards compete with the page.
-- **A section label is an `Eyebrow`, not a heading you style yourself.** 14 uses, and ten of them were
-  hand-rolled copies of the same class string until the primitive grew an `as` prop.
+- **A section label is a `SectionHeading`, not a heading you style yourself.** It is the page's own type at
+  `text-sm font-semibold`, with an optional count in muted text, and takes `as` to become an `<h2>`. Letterspaced
+  uppercase labels are gone: they read as a template rather than as a heading.
 - **An ID is always `font-mono text-xs`** with `--color-muted-foreground`. It is a reference, not a name.
 - **Headings carry `text-wrap: balance`** from the base layer, so a title never leaves one word on its own line.
 - **`text-xl` appears once** in the whole app. If a rewrite wants it, use it deliberately or delete it.
 
 ### 19.5 Surfaces and elevation
 
-**There are no drop shadows anywhere.** On a near-black background a shadow reads as a smudge, not as height.
-Depth comes from three things instead:
+**There are no shadows, highlights or gradients anywhere.** Depth comes from two things:
 
-1. **Surface colour** — `--color-background` → `--color-card` → `--color-popover`, each a step lighter.
+1. **Surface colour** — `--color-background` → `--color-card` → `--color-popover`, each a step away from the page.
 2. **A 1px `--color-border`** around a card.
-3. **`surface-edge`**, a `@utility` putting a 1px inset white highlight at 6% along the top edge. That single
-   line is what stops a card reading as a flat rectangle.
 
-The body also carries a fixed radial wash of `--color-primary` at 14%, top-left, so the page still has depth
-when WebGL is unavailable and the backdrop never loads.
+A card used to carry an inset highlight along its top edge, the page a radial wash in the accent and a WebGL field
+of points, and the screen's one "focal" card a gradient hairline. Together they were what made the dashboard read
+as generated rather than made, and none of them told the reader anything.
 
 ### 19.6 Spacing and rhythm
 
@@ -1049,25 +1038,22 @@ Tokens cover almost everything, but not quite. Work in this order and the browse
 back clean.
 
 1. **Rewrite the palette in `@theme`.** Keep the role names. Every component follows.
-2. **Then the four things that cannot read a token**, because nothing else will:
+2. **Then the three things that cannot read a token**, because nothing else will:
    - The **select chevron** is an inline SVG data URI in `@layer base` with `stroke='%23a1a1b5'` hardcoded —
      `currentColor` cannot be used inside a `url()`. Change it to the new `--color-muted-foreground` by hand.
-   - The **body wash** hardcodes its geometry (`80rem 50rem at 15% -10%`) though not its colour.
    - The **tippy theme block** (`.tippy-box[data-theme~="testify"]`) reads tokens but restates the radius,
      padding and font size. Check it still matches the new field radius.
    - The **`prefers-contrast: more` block** remaps `--color-border` to `--color-input` and muted text to
      foreground. If the new palette changes their relationship, this remap may need inverting.
-3. **Check the backdrop.** `lib/three/tokens.ts` reads `--color-accent` off `:root` at runtime and falls back
-   rather than rendering a black field, so a token three cannot parse fails quietly. Load a page and look.
-4. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
+3. **Re-check contrast.** Body text, muted text on card, every feature tint as text, and every badge tone. The
    automated axe pass has `color-contrast` **disabled** — jsdom computes no styles, so it can only report false
    negatives. This step is manual and there is no substitute.
-5. **Run a real browser sweep** at 1440 / 820 / 390. [§22](#22-checking-a-screen) lists what to check and the
+4. **Run a real browser sweep** at 1440 / 820 / 390. [§22](#22-checking-a-screen) lists what to check and the
    manual passes.
-6. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
+5. **Look at it in `prefers-contrast: more` and `prefers-reduced-motion: reduce`.** Both are one devtools toggle.
 
 > [!WARNING]
-> **A hex value in a `.tsx` is a review comment.** The four exceptions above are all in `index.css` and all
+> **A hex value in a `.tsx` is a review comment.** The three exceptions above are all in `index.css` and all
 > commented in place. If a rewrite adds a fifth, comment it there too — a hardcoded colour nobody knows about is
 > the thing that makes the _next_ re-skin look half-finished.
 
@@ -1383,7 +1369,7 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 | 23  | Typography hierarchy            | Held    | §19.4                                                                                                                                                                                                                                                                                                   |
 | 24  | Prioritise readability          | Held    | Inter, 14px body, `font-mono` reserved for IDs                                                                                                                                                                                                                                                          |
 | 25  | Reflect brand mood              | Held    | Three self-hosted faces where there had been none, and the section label is the bot's own boot banner in HTML. The type is no longer anonymous                                                                                                                                                          |
-| 26  | Pair fonts wisely               | Held    | Two: Inter and JetBrains Mono, each with one job                                                                                                                                                                                                                                                        |
+| 26  | Pair fonts wisely               | Held    | Two: Rubik and Fira Mono, each with one job                                                                                                                                                                                                                                                             |
 | 27  | Limit font and style variations | Held    | §19.4 — four sizes carry 96% of the app                                                                                                                                                                                                                                                                 |
 | 28  | Line spacing, kerning, height   | Held    | Body is 1.55, headings 1.2, card headings `leading-tight` on `CARD_HEADING` because a size utility beats both `@theme` and the base layer. Measured, not assumed                                                                                                                                        |
 | 29  | Contrast is key                 | Held    | **Closed.** Phase 0 computed every pair, found two live AA failures, and split fill from text to fix them. `src/test/contrast.ts` reads the tokens out of `index.css` in the test suite, so the table cannot drift from the palette                                                                     |
@@ -1406,14 +1392,14 @@ Each rule gets a verdict, because a checklist where everything is "todo" is not 
 
 ### 🛸 Novelty (41–46)
 
-| #   | Rule                                 | Verdict | Note                                                                                                                                                      |
-| --- | ------------------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 41  | Originality and uniqueness           | Apply   | Better — a display face, the console voice, a WebGL field. Still recognisably a dashboard, and this one is the reader's call rather than mine             |
-| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19, a WebGL backdrop that costs nothing when unwanted                                                                        |
-| 43  | Most advanced, yet acceptable        | Held    | The backdrop is the whole of the risk taken, and it degrades to a CSS wash                                                                                |
-| 44  | Inspiration from other industries    | Held    | `Eyebrow` is the terminal boot banner `bannerLines()` prints on every start, rendered as HTML. It looks at the bot itself rather than at other dashboards |
-| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                                                                        |
-| 46  | Novelty must enhance, not complicate | Held    | The rule that keeps the backdrop `aria-hidden` and `pointer-events-none`                                                                                  |
+| #   | Rule                                 | Verdict | Note                                                                                                                             |
+| --- | ------------------------------------ | ------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| 41  | Originality and uniqueness           | Apply   | A palette and type chosen for the subject, Discord's own type and a plum accent, rather than a template. Still the reader's call |
+| 42  | Leverage the latest technology       | Held    | Tailwind v4 CSS-first, React 19                                                                                                  |
+| 43  | Most advanced, yet acceptable        | Held    | The channels design in `ui-uplift.md` is the risk taken; the look around it stays quiet                                          |
+| 44  | Inspiration from other industries    | Held    | The channel map takes its shape from Discord's own channel list rather than from other dashboards                                |
+| 45  | Trends, but not blindly              | Held    | No glassmorphism, no neumorphism, no gradient text                                                                               |
+| 46  | Novelty must enhance, not complicate | Held    | Nothing decorative is left to keep out of the reader's way                                                                       |
 
 ### 🎛 Consistency (47–52)
 

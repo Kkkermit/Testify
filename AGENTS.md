@@ -2000,12 +2000,12 @@ components/
   primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
                 SegmentedControl, DataList/Figure, Tooltip
   form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
-  motion/       Backdrop (three.js), Reveal, AnimatedNumber
+  motion/       Reveal, AnimatedNumber
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
 hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible, useDebounced
-lib/            api, cn, paging, queries, redirect, tint, and three/ for the backdrop's maths and shaders
+lib/            api, cn, paging, queries, redirect, tint, and tokens for reading a colour in JavaScript
 ```
 
 A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL
@@ -2524,7 +2524,7 @@ a fallback. The fallback **removes** the attribute rather than writing it, so an
 correct before any script runs — which is the only option the CSP leaves, and is what makes all three
 flash-free. The element is the state, not a React store, so CSS and JavaScript cannot end up disagreeing:
 `usePrefersReducedMotion` reads `data-motion` first and the media query second, in the stylesheet's own order,
-and watches the attribute with a `MutationObserver` so a change reaches the WebGL backdrop without a reload.
+and watches the attribute with a `MutationObserver` so a change reaches what is already on screen without a reload.
 
 `applyStoredPreferences()` runs once in `main.tsx`, **before** the app mounts. Without it the choices were only
 applied while the appearance page itself was mounted, so a reader who picked light and then landed on `/guilds`
@@ -2533,19 +2533,20 @@ got the system theme back — remembered, and never applied. `preferences.test.t
 **An accent is a block of three tokens, and every one is measured.** `--color-primary`, `--color-accent` and
 `--color-ring` move; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
 `contrast.test.ts` reads the blocks out of `index.css` and checks all twelve accents against both backgrounds — an
-accent nobody measured is worse than no accent, because a control invites everybody to try it. Six of them
-(sky, cyan, teal, emerald, amber, orange) take **one fill for both themes**: those hues only carry white at 4.5:1
-down at the light theme's shade, and lightening the fill for dark would fail the button drawn on it. A new accent
-is a block in `index.css`, a name in `ACCENTS` and a label in every locale; the test tells you if its colours fail.
+accent nobody measured is worse than no accent, because a control invites everybody to try it. **A dark fill has
+a narrow band to sit in**: at least 3:1 against the dark ground, so a button is seen, and at least 4.5:1 under
+white, so its label is read. That is a relative luminance between about 0.15 and 0.18 whatever the hue, so each
+dark fill is its light fill moved into that band. A new accent is a block in `index.css`, a name in `ACCENTS` and a
+label in every locale; the test tells you if its colours fail.
 
 Two things about the blocks are load-bearing:
 
 - **The selector is `[data-accent="…"]`, not `:root[data-accent="…"]`.** A swatch carries its own attribute and
   paints itself in that accent while the page wears another — the same trick `ThemePreview` plays with
   `color-scheme`. Verified in a real browser: an amber swatch reads `rgb(180, 83, 9)` on a teal page.
-- **Violet restates the base palette instead of relying on it.** Choosing violet leaves the page unmarked, but
-  the swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a Violet
-  swatch drawn in amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
+- **Plum restates the base palette instead of relying on it.** Choosing plum leaves the page unmarked, but the
+  swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a swatch drawn in
+  amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
 
 That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
 no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
@@ -2561,9 +2562,8 @@ development:
   the page's own theme, so the Light sample was black on a dark page. An element cannot opt into the other half
   of a token that was already resolved above it.
 - **`pickScheme` can no longer read a token**, because `getComputedStyle` hands back
-  `var(--lightningcss-light,…)var(--lightningcss-dark,…)` rather than `light-dark(…)`. `accentColour()` fell
-  through to its hardcoded fallback, so the WebGL backdrop was the same violet in every theme and ignored the
-  accent entirely.
+  `var(--lightningcss-light,…)var(--lightningcss-dark,…)` rather than `light-dark(…)`. `themeColour()` then
+  falls through to its hard-coded fallback, and the console greeting is drawn in colours the page is not wearing.
 
 `npm run verify:bundle` fails the build if the polyfill returns **or** if `light-dark()` vanishes altogether,
 and `build:dashboard` runs it. Proved both ways: removing `cssTarget` exits 1, restoring it exits 0.
@@ -2580,13 +2580,13 @@ none. Two things it caught that are worth keeping in mind:
 - **A pair can pass for the wrong reason.** The destructive button renders `text-white` literally, so checking
   it against `foreground` only worked while `foreground` happened to be white. Check the colour the component
   actually draws.
-- **Elevation cannot be recoloured.** On near-black a drop shadow reads as a smudge, so a card lifts by a 1px
-  inset highlight; on paper that highlight is invisible and only a real shadow separates card from ground.
-  `surface-edge` therefore switches technique by theme rather than switching colour.
+- **Elevation is a colour and a line, never a shadow.** A card is the surface colour and a 1px border in both
+  themes. A shadow reads as a smudge on the dark ground and a highlight is invisible on the light one, and either
+  one is what made every card look lifted off the page.
 
 **`getComputedStyle` never resolves a custom property**, so anything reading a token in JavaScript receives
-`light-dark(…)` as source text. `lib/three/tokens.ts` splits it by the resolved `color-scheme`; before that the
-backdrop failed its hex check and silently fell back to one colour in both themes.
+`light-dark(…)` as source text. `lib/tokens.ts` splits it by the resolved `color-scheme`, for the console greeting,
+which styles text with values rather than classes.
 
 ### Every string comes from i18next
 
@@ -2666,10 +2666,10 @@ them from the accessibility tree and leaves every navigation link named nothing 
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
 unit test pins the class and a real browser check confirms the accessible name survives.
 
-**Every guild-scoped screen names its server, in `PageHeader`'s `eyebrow`.** Below `md` the sidebar is a drawer,
+**Every guild-scoped screen names its server, in `PageHeader`'s `server`.** Below `md` the sidebar is a drawer,
 so with it closed nothing else on the page says which server is being configured — and "turn levelling off" is a
-different decision in each of them. The overview is the one exception: its `<h1>` _is_ the name, so an eyebrow
-there would say it twice. `src/test/pageHeader.test.ts` reads the guild-scoped routes out of `routes.tsx` and
+different decision in each of them. The name sits above the title as a breadcrumb linking to the server's overview.
+The overview is the one exception: its `<h1>` _is_ the name, so a breadcrumb there would say it twice. `src/test/pageHeader.test.ts` reads the guild-scoped routes out of `routes.tsx` and
 names any screen that stopped passing it, because the prop existed unused on all twelve for as long as it
 existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
@@ -3079,36 +3079,6 @@ own bot without a line of CSS. Two things about it are easy to get wrong:
 
 The endpoint takes no session because the sign-in screen needs it before one exists; it carries nothing beyond
 the public profile, and a test pins the exact key set so nothing private drifts into it.
-
-### The WebGL backdrop
-
-`components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things about it are
-load-bearing, and all four are what keep an ornament from costing anything:
-
-- **three is imported dynamically and chunked on its own.** `manualChunks` in `dashboard/vite.config.ts` gives
-  it its own 513 kB chunk — left in `vendor` it would be in the initial load, which is the opposite of lazy.
-  `vendor` is the same size with the backdrop as without it.
-- **`prefers-reduced-motion` skips the import entirely**, rather than loading three and then sitting still. So
-  does a machine with no WebGL, and `createStarfield` returns null rather than throwing if the context is
-  refused. Verified in a real browser: with the preference set, no canvas and no chunk fetched.
-- **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, the frame-rate
-  independent easing and the parallax, all pure and unit tested; `starfield.ts` is the part that needs a GPU and
-  is the one file excluded from coverage.
-- **It reads the palette rather than restating it, and re-reads it.** `lib/three/tokens.ts` pulls
-  `--color-accent` off `:root`, so the design tokens in `index.css` stay the only place a colour is written, and
-  a token three cannot parse falls back instead of rendering a black field. Theme and accent are both chosen on
-  a screen this is drawn behind, so `Backdrop` watches `data-theme` and `data-accent` and calls `refresh()`
-  rather than keeping whichever colour it started with.
-
-**Strength is a token too, and it is not the same in both themes.** The field is composited over the page rather
-than added to it, so the same points that read as stars on near-black read as dust on paper —
-`--backdrop-opacity` is `light-dark(0.14, 0.5)`, and `Backdrop`'s `opacity` prop scales that rather than
-replacing it, so a screen can be quieter in both themes at once. Measured in a browser rather than judged from
-the source: the brightest pixel in an empty strip goes `rgb(43, 30, 102)` on violet, `rgb(103, 57, 8)` on amber,
-and never exceeds the page's own `rgb(244, 244, 249)` in light.
-
-The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never be able to take
-a click meant for a control.
 
 ### The browser is handed the minified bundle, and greeted when it looks
 
