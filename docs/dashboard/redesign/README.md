@@ -1,31 +1,38 @@
 # Dashboard redesign: a proposal
 
-**Status: proposal. Nothing here is built.** It is a brief for one decision: which of three directions the
-dashboard should be redrawn in. Once a direction is chosen, the plan at the end says what changes, in what order and
+**Status: proposal. Nothing here is built.** It is a brief for one decision: which of six directions, drawn in two
+rounds, the dashboard should be redrawn in. Once a direction is chosen, the plan at the end says what changes, in what order and
 in which files.
 
 The aim is a dashboard that reads as something a person made for running a Discord bot. Today it reads as a
 generated template: a dark page with a glow, a starfield, a card around everything and a tinted icon square in
 every card. The brief keeps every feature, route and permission exactly as it is. Only the visual design changes.
 
-Each direction is mocked up as static HTML for the same two screens, the server overview and **Welcome and
-goodbye**, with the second screen also shown at phone width. The pages use invented data: a server called Testify
+Each direction is mocked up for the same two screens, the server overview and **Welcome and goodbye**, with the
+second screen also shown at phone width. A, B and C are static HTML. D, E and F are clickable prototypes built with
+Tailwind and [Motion](https://motion.dev), because their navigation and motion are the point and a still cannot
+show either. The pages use invented data: a server called Testify
 HQ with 1,234 members, and people called Orbit, Nova, kate and Juniper.
 
-| Direction                              | Overview                                                        | Welcome and goodbye                                           | Phone                              |
-| -------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------- |
-| [A. Plain settings](#a-plain-settings) | [png](a-plain/overview.png) · [html](a-plain/overview.html)     | [png](a-plain/welcome.png) · [html](a-plain/welcome.html)     | [png](a-plain/welcome-phone.png)   |
-| [B. Speaks Discord](#b-speaks-discord) | [png](b-discord/overview.png) · [html](b-discord/overview.html) | [png](b-discord/welcome.png) · [html](b-discord/welcome.html) | [png](b-discord/welcome-phone.png) |
-| [C. Logbook](#c-logbook)               | [png](c-logbook/overview.png) · [html](c-logbook/overview.html) | [png](c-logbook/welcome.png) · [html](c-logbook/welcome.html) | [png](c-logbook/welcome-phone.png) |
+| Direction                              | Overview                                                                  | Welcome and goodbye                                                 | Phone                                  |
+| -------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------- |
+| [A. Plain settings](#a-plain-settings) | [png](a-plain/overview.png) · [html](a-plain/overview.html)               | [png](a-plain/welcome.png) · [html](a-plain/welcome.html)           | [png](a-plain/welcome-phone.png)       |
+| [B. Speaks Discord](#b-speaks-discord) | [png](b-discord/overview.png) · [html](b-discord/overview.html)           | [png](b-discord/welcome.png) · [html](b-discord/welcome.html)       | [png](b-discord/welcome-phone.png)     |
+| [C. Logbook](#c-logbook)               | [png](c-logbook/overview.png) · [html](c-logbook/overview.html)           | [png](c-logbook/welcome.png) · [html](c-logbook/welcome.html)       | [png](c-logbook/welcome-phone.png)     |
+| [D. Columns](#d-columns)               | [png](d-columns/overview.png) · [prototype](d-columns/index.html)         | [png](d-columns/welcome.png)                                        | [png](d-columns/welcome-phone.png)     |
+| [E. Switchboard](#e-switchboard)       | [png](e-switchboard/overview.png) · [prototype](e-switchboard/index.html) | [png](e-switchboard/welcome.png)                                    | [png](e-switchboard/welcome-phone.png) |
+| [F. Slash](#f-slash)                   | [png](f-slash/overview.png) · [prototype](f-slash/index.html)             | [png](f-slash/welcome.png) · [command bar](f-slash/command-bar.png) | [png](f-slash/welcome-phone.png)       |
 
-**Recommendation:** build A, and take one thing from B: drawing every message the bot will post the way Discord
-draws it, right beside the setting that changes it. The reasons are in [the recommendation](#recommendation).
+**Recommendation:** make E's switchboard the server's home, keep A's plain rows for each feature's full settings,
+let F's `/command` names drive the search bar, and draw every message the bot will post the way Discord draws it.
+The reasons are in [the recommendation](#recommendation).
 
 > [!NOTE]
 > The mockups load their fonts from Google Fonts so that they open in a browser with nothing installed. The
 > dashboard itself cannot do that, because the CSP allows no outside font host and Testify never phones home. The
-> real build self-hosts each font in `dashboard/public/fonts`, as it does today. All three typefaces are under the
-> SIL Open Font License.
+> real build self-hosts each font in `dashboard/public/fonts`, as it does today. Every typeface here is under the
+> SIL Open Font License, and the six in D, E and F were checked to include Cyrillic, which the Russian dashboard
+> needs.
 
 ---
 
@@ -277,9 +284,214 @@ phone that row scrolls sideways.
 
 ---
 
+## Round two: three prototypes with motion
+
+The first round fixed how the dashboard looks. This round is about how it is used: fewer places to go, less on each
+screen and a shorter way to the thing you came for. Each direction is one HTML file. Open it in a browser and click:
+the overview and Welcome and goodbye both work, along with the switches, the message and its preview, and the
+navigation between them. The URL's `#welcome` opens the second screen directly.
+
+They load Tailwind's browser build (`@tailwindcss/browser@4.3.3`) and Motion's script build (`motion@14.3.0`) from
+jsDelivr so that they need no build step. The dashboard already runs Tailwind 4 through Vite, so only Motion would be
+new. Every animation in them has a reduced-motion path. All three were run with `prefers-reduced-motion: reduce`,
+and each one lands in the same end state without moving.
+
+### D. Columns
+
+![Direction D, Welcome and goodbye](d-columns/welcome.png)
+
+**The idea.** Navigation as columns, like a file browser's column view. You choose a server, then an area such as
+Community, then a feature. Each choice opens the next column, and the columns you have passed shrink to give the
+settings room. The path you took is always on screen, so you can never be lost three screens deep. On a phone, the
+columns become a stack with a back link (‹ Community).
+
+| Role   | Value                 | Use                                                        |
+| ------ | --------------------- | ---------------------------------------------------------- |
+| Ground | `#e8ecf1`             | Behind everything                                          |
+| Sunk   | `#f1f4f7`             | The columns                                                |
+| Pane   | `#fbfcfd`             | The content and the chosen row                             |
+| Ink    | `#10151c`             | Text                                                       |
+| Muted  | `#566070`             | Help and counts (5.8:1 on the columns)                     |
+| Path   | `#e4572e` / `#b23a14` | The thread and the chosen row's bar, and link text (5.8:1) |
+
+**Type.** Geologica for headings and Golos Text for everything else.
+
+**Signature.** An orange thread joins the chosen row in each column to the next column, and then to the page's
+heading. It draws itself when you choose something, and it redraws as the content scrolls.
+
+**Motion.**
+
+- The new column slides in 24px as it fades up.
+- The servers column shrinks to its icons with a spring.
+- The page fades in as it moves 16px.
+- The thread draws along its length in 0.55s.
+- Switches spring, the picture card opens to its own height, the preview flashes faintly when the message changes,
+  and "Saved" redraws its tick.
+
+**What it costs.**
+
+- **Layout.** The shell changes completely: `AppShell`, `Sidebar` and `MobileNav` become columns.
+- **Width.** The columns take width. Below about 1280px, the page beside them is narrow, so the servers column has to
+  shrink sooner. Below 1024px it is the stack.
+
+**The risk.** It is the most unusual of the six. Discord users know a sidebar, and a column view is a new habit to
+learn.
+
+### E. Switchboard
+
+![Direction E, Welcome messages switched on](e-switchboard/welcome.png)
+
+**The idea.** One page holds every feature, grouped by what it does for the server: Greet people, Reward people,
+Keep it safe, Help people and Have fun. Each feature is a row with a lamp, a sentence saying what it is doing and a
+switch. Flip a switch, and its row opens in place and asks only what the feature needs to start: where to post and
+what to say. The live preview sits beside those questions. Everything else waits behind "All welcome settings". The
+header's links jump to each group and follow you as you scroll.
+
+| Role      | Value                  | Use                                                        |
+| --------- | ---------------------- | ---------------------------------------------------------- |
+| Ground    | `#eef1ec`              | A grey with a little green in it                           |
+| Panel     | `#ffffff`              | One panel per group                                        |
+| Ink       | `#1b211d`              | Text                                                       |
+| Muted     | `#586159`              | Descriptions (6.4:1 on a panel)                            |
+| On        | `#1f7a52`              | A switch that is on (5.3:1 against the panel)              |
+| Off       | `#858e86`              | A switch that is off (3.4:1, past the 3:1 a control needs) |
+| Lamp      | `#2fa36b`              | A running feature                                          |
+| Attention | `#8a5400` on `#fff3d6` | The one thing that needs you                               |
+
+**Type.** Wix Madefor Display for headings and Wix Madefor Text for everything else.
+
+**Signature.** The switch, and what happens when you flip it.
+
+- The lamp lights with a short pulse.
+- The count at the top ("3 of 15 switched on") counts up.
+- The row opens, and its questions arrive one after another.
+- The rest of the page dims until you press Done.
+
+The next step is always under your pointer, so the page needs no wizard, no modal and no separate setup screen.
+
+**Motion.**
+
+- The knob springs across with a little overshoot.
+- The row opens to its own height with a spring, and its four parts stagger in 50ms apart.
+- The other rows fade to 45%.
+- Choosing a channel gives its chip a small press.
+- The group marker under the header slides to the group you are reading.
+
+**What it costs.**
+
+- **A switch per feature is a functional change.** Today each screen writes its own settings, and some features have no
+  single on or off. The overview counts many of them as on because something exists: a ticket setup, a role menu, a
+  sticky message or a scheduled post (`featureStatus.util.ts`). Each switch needs a rule for what it does, and a route
+  to do it. _Outside a visual brief, so flagged for whoever builds it._
+- **Deeper settings still need pages.** Levelling's four tabs or the ticket panel's wording would not fit a row. Those
+  stay as pages, drawn in A's rows.
+
+**The risk.** A long page. The jump links and the groups carry it, but a server with every feature on gets a long
+list of open rows if nobody presses Done.
+
+### F. Slash
+
+![Direction F, the command bar](f-slash/command-bar.png)
+
+**The idea.** The dashboard speaks the same language as the bot. Every feature is listed under the command that
+runs it in Discord (`/welcome`, `/warn`, `/raid-protection`), with what it is and whether it is on. A command bar at
+the top opens with Ctrl K or `/` and finds features, actions such as "Warn a member" and people. Choose a result and
+you are on its page, where the command name stays as the page's label. The tabs drop to four, Home, Members,
+Moderation and Activity, because the bar replaces the long sidebar.
+
+| Role    | Value     | Use                                                         |
+| ------- | --------- | ----------------------------------------------------------- |
+| Ground  | `#1d2026` | A blue-grey dark, lighter than the near-black used today    |
+| Surface | `#262931` | The bar, the panels                                         |
+| Ink     | `#eeeef1` | Text                                                        |
+| Muted   | `#a3a6b0` | Descriptions (6.7:1)                                        |
+| Gold    | `#f0c048` | Command names, a switch that is on, the current tab (9.6:1) |
+| On      | `#5cc58d` | "On" in the list                                            |
+
+**Type.** Onest for text and Martian Mono for command names, times and keys.
+
+**Signature.** The command bar.
+
+- **Opening it:** the bar scales in from 97% as it fades.
+- **Results:** they arrive 25ms apart as you type.
+- **The highlight:** one block slides from row to row with the arrow keys, rather than each row lighting up.
+- **Choosing a result:** its `/welcome` label flies from the bar to its place above the page's title. That shows
+  you arrived where you asked to go.
+
+**What it costs.**
+
+- **The bar exists already.** Ctrl K already opens quick search (`searchEntries` is built from the sidebar and the
+  command catalogue), so the bar is a restyle plus actions and members.
+- **The commands page exists too.** It is the commands catalogue (`GET /api/commands`) grouped by area, with each
+  feature's state from the overview.
+- **The index has to be kept honest.** Every name in the mockup was checked against `docs/commands.md`. In the real
+  page the names come from the registry, so they cannot drift.
+
+**The risk.** People who never use slash commands, or never press Ctrl K, rely on the index alone, and a list of
+twenty commands is still a list.
+
+## Motion: what moves, and why
+
+The current dashboard moves for its own sake. A starfield drifts behind every page, sections fade in on load and
+numbers count up. The prototypes move only when something changed, and only to say what changed.
+
+- **A change of state moves:** a switch, a lamp, "Saved" and a count.
+- **A change of place moves:** a column arriving, a row opening and the command name flying to the page title.
+- **Nothing moves on load or at rest.** A page opens finished, which is also what a screenshot or a screen reader
+  sees.
+- **Springs for things you push, tweens for things that appear.** Switches and panels use a spring with a bounce
+  of 0.15 to 0.4 and a visual duration of about 0.35s. Fades and the thread are short tweens.
+- **Reduced motion is the same page with no movement**, not a different page. Every call goes through one helper
+  that sets the duration to zero.
+
+**Bringing Motion into the dashboard.** These sizes were measured by bundling `motion@14.3.0` with esbuild and
+gzipping the result, with React left out:
+
+| Import                                               | Gzipped |
+| ---------------------------------------------------- | ------- |
+| `motion` component from `motion/react`               | 45.1 kB |
+| `LazyMotion` + `m` + `domAnimation`, loaded together | 31.0 kB |
+| `LazyMotion` + `m`, with `domAnimation` loaded later | 5.6 kB  |
+| `animate` from `motion` (the prototypes' build)      | 26.0 kB |
+| `animate` from `motion/mini`                         | 3.7 kB  |
+
+The way in is `LazyMotion` with `m` components, with the features imported asynchronously. That puts 5.6 kB in the
+first load and the rest in a chunk fetched after it.
+
+Two notes on that:
+
+- **The budget is already full.** The guide records the first load's budget, 200 kB gzipped, as met exactly. So
+  even 5.6 kB is a decision: it either needs that much found elsewhere or a higher budget. Deleting `Reveal`,
+  `AnimatedNumber` and `useCountUp` returns a little.
+- **Removing the backdrop saves no first-load budget.** The three.js chunk is already lazy, so it frees nothing
+  there, though it removes the 513 kB chunk AGENTS.md describes.
+
+**Reduced motion in React.** `MotionConfig reducedMotion="user"` is how the React version honours the setting,
+alongside the existing `data-motion` attribute that Appearance writes.
+
+**Layout animations.** In React they would use `layout` and `AnimatePresence`, which the prototypes imitate by hand
+with heights and transforms. Motion animates through inline styles set from script, which the CSP already allows
+(`style-src 'unsafe-inline'`, the same allowance tippy relies on).
+
+---
+
 ## Recommendation
 
-**Build A, add B's message preview, and take the dark theme from B's graphite.**
+**Make E's switchboard the server's home, draw the feature pages in A's rows, let the search bar speak F's
+commands, and keep B's preview and graphite.** Each piece answers a different part of "less cluttered, easy to get
+around":
+
+- **E removes most of the navigation.** Most visits are "turn this on" or "change where it posts", and the
+  switchboard does both without leaving the page. The overview's stat tiles, feature grid and setup checklist all
+  become one list of switches that says what is running.
+- **A is still how a full feature page should look.** Levelling's tabs, the ticket panel's wording and the casino's
+  limits are long forms. A's rows, sentence summaries and lack of cards are the calm way to draw them, and they are
+  where "All welcome settings" leads.
+- **F's commands make the search bar the shortcut.** Ctrl K already exists. Showing every feature under its Discord
+  command, in the bar and as each page's label, ties the two surfaces together for anybody who already knows the bot
+  by its commands. Its index of commands replaces the long sidebar for everything that is not on the switchboard.
+- **D is the most unusual, and the most expensive to learn.** The thread is worth keeping as an idea, for showing
+  where a deep page sits, but the column shell is not recommended.
 
 - **A fixes every item on the list above**, using data the dashboard already has and changes that stay inside
   tokens and primitives. No route, API or permission moves. It is the only one of the three that is purely visual,
@@ -291,8 +503,10 @@ phone that row scrolls sideways.
 - **B's graphite is a better dark theme than near-black.** The dashboard keeps both themes (`light-dark()`). A's
   values become the light half, and B's rail, list and page greys become the dark half, measured by
   `contrast.test.ts` like every other pair.
-- **C's log is the best overview of the three, but it needs a new API.** A's "Recently changed" list is the version
-  that exists today. The full log is a candidate for later, once somebody decides to build the feed.
+- **C's log is the best record of what happened, but it needs a new API.** A's "Recently changed" list is the
+  version that exists today. The full log is a candidate for later, once somebody decides to build the feed.
+- **Motion stays small:** the moves listed under [Motion](#motion-what-moves-and-why), the lazy build, and nothing
+  that moves on load.
 
 ---
 
@@ -391,6 +605,29 @@ These are previews, motion and the empty, loading and error states.
 15. **On a phone, rows stack.** The label goes above the control, the summary stays first, and the preview follows
     the form, as the phone mockups show. Check at 320, 390 and 820 against guide §22.
 16. **Later, if wanted: C's activity log** as the overview, once the feed exists. This is a functional change.
+
+### If the switchboard home is chosen
+
+This is on top of the three phases, which still apply to every feature page.
+
+1. **Decide what each switch does.** This is a functional change, outside a visual brief, so flag it first.
+   - For each feature in `FEATURE_SOURCES` (`src/lib/settings/featureStatus.util.ts`), say what "off" and "on" mean
+     and which existing route writes them.
+   - A feature with no single switch gets a row whose control is "Set up" instead.
+   - The overview response already says what each feature is doing (`FeatureDetail`), so the sentence on each row
+     needs no new read.
+2. **Build the home** in `features/guild-overview/`:
+   - groups from `config/features.ts`;
+   - a `FeatureSwitchRow` primitive with the lamp, the sentence, the switch and an optional in-place panel;
+   - for Welcome, the panel reuses the Welcome page's own fields and preview components, not copies of them.
+3. **Change the navigation.** In `config/navigation.ts`, the long list of feature screens leaves the sidebar, because
+   the switchboard and the command bar reach them. The sidebar keeps Overview, Members, Moderation, Activity and
+   Settings.
+4. **Command names everywhere.** Quick search (`searchEntries`) shows each feature's command and its state, and every
+   feature page shows its command above its title.
+5. **Motion**, as [the Motion section](#motion-what-moves-and-why) says. `LazyMotion` goes in `AppShell`, with the
+   features chunk imported asynchronously and `MotionConfig reducedMotion="user"`. `Reveal`, `AnimatedNumber` and
+   `useCountUp` are deleted.
 
 ### What does not move
 
