@@ -2674,23 +2674,34 @@ names any screen that stopped passing it, because the prop existed unused on all
 existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
 
-**A server's screens are grouped into collapsible sections** — Community, Moderation, Economy, Entertainment,
-Channels — because a flat list grew past what one glance takes. A screen goes where it is decided alongside, not
-where its command is filed: automod is a `settings` command and still sits in Moderation. `NavGroup.sections` in `config/navigation.ts` holds them, `SidebarSection` renders one, and adding a
-screen now means choosing which section it belongs in — `items` stays for the screens that are not a category
-(Overview and Settings). Three things about it are load-bearing:
+**A server's sidebar is its own channel list.** Overview comes first, then the server's channels in Discord's
+categories and order (`ChannelNav`), then Everywhere, Members and Settings, then three collapsible sections: Moderation,
+More, and **Every feature**, which lists each feature's own page for anybody who would rather find it by name than by
+where it works. `NavGroup.afterChannels` holds the rows below the channel list, `NavGroup.sections` the sections, and
+`SidebarSection` renders one. Five things about it are load-bearing:
 
+- **The channel list is drawn from `/channels`, never from this file.** `channelTree` in
+  `features/channels/channelMap.utils.ts` leaves out every channel whose name is `null`, which is how `/channels` marks
+  one its reader cannot see, so the sidebar names nothing Discord would not. A category the reader cannot see keeps
+  its channels together with no heading, rather than a placeholder for a name.
+- **A channel's count is how many features work there**, from `/places` (`featureCounts`), counting a feature once
+  however many jobs it does in that channel. The count is `aria-hidden` and spoken as a sentence beside it.
+- **The rail has no channel list.** At the icon-only width a column of identical `#` icons says nothing, so
+  `ChannelNav` is `hidden lg:flex` there; the drawer and the full sidebar show it.
+- **A highlight in the sidebar is the surface colour, not `muted`.** The sidebar is already `--color-sidebar`, which is
+  the muted grey in the light theme, so a `bg-muted` selection there was invisible.
 - **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
   toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed
   section at that width would hide the icons and leave nothing to click. The button being `display: none` is
   what keeps `aria-expanded="false"` from contradicting a list the rail is still showing.
 - **The section holding the current page opens itself** (`sectionHolds`), so a collapsed section can never hide
   where you are, and it re-opens when a navigation lands inside it.
-- **`allNavItems` reaches into sections.** It is what the tests and every flat consumer read; a screen reachable
-  only from a section would otherwise look like it had left the navigation entirely.
+- **`allNavItems` reaches into sections and `afterChannels`.** It is what quick search, the help page and the tests
+  read; a screen reachable only from a section would otherwise look like it had left the navigation entirely.
 
-`navigation.test.ts` asserts the **sorted** set of paths rather than their order, because which section a screen
-sits in is a grouping choice and reachability is the rule.
+`navigation.test.ts` pins the **sorted** set of every server screen's path rather than their order, because which
+section a screen sits in is a grouping choice and reachability is the rule. Quick search adds the server's channels
+from the same `channelTree`, so a channel found there is one the sidebar would show.
 
 ### Getting every command onto the dashboard
 

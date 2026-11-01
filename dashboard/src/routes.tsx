@@ -43,6 +43,8 @@ const AutoRespondersPage = page(
 const RoleMenusPage = page(async () => import("@/features/role-menus/RoleMenusPage"), "RoleMenusPage");
 const IdeasPage = page(async () => import("@/features/ideas/IdeasPage"), "IdeasPage");
 const StarboardPage = page(async () => import("@/features/starboard/StarboardPage"), "StarboardPage");
+const ChannelPage = page(async () => import("@/features/channels/ChannelPage"), "ChannelPage");
+const EverywherePage = page(async () => import("@/features/channels/EverywherePage"), "EverywherePage");
 const TempVoicePage = page(async () => import("@/features/temp-voice/TempVoicePage"), "TempVoicePage");
 const TreasurePage = page(async () => import("@/features/treasure/TreasurePage"), "TreasurePage");
 const MusicPage = page(async () => import("@/features/music/MusicPage"), "MusicPage");
@@ -140,6 +142,8 @@ export const routes = [
 									{ path: "/guilds/:guildId/role-menus", element: lazily(<RoleMenusPage />) },
 									{ path: "/guilds/:guildId/ideas", element: lazily(<IdeasPage />) },
 									{ path: "/guilds/:guildId/starboard", element: lazily(<StarboardPage />) },
+									{ path: "/guilds/:guildId/channels/:channelId", element: lazily(<ChannelPage />) },
+									{ path: "/guilds/:guildId/everywhere", element: lazily(<EverywherePage />) },
 									{ path: "/guilds/:guildId/temp-voice", element: lazily(<TempVoicePage />) },
 									{ path: "/guilds/:guildId/treasure", element: lazily(<TreasurePage />) },
 									{ path: "/guilds/:guildId/music", element: lazily(<MusicPage />) },

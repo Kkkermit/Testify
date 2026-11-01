@@ -19,7 +19,7 @@ export function SidebarLink({ item, expanded = false }: { item: NavItem; expande
 				className={({ isActive }) =>
 					cn(
 						"rounded-card relative flex items-center gap-3 px-2 py-2 text-sm transition-colors duration-150",
-						isActive ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-muted/60",
+						isActive ? "bg-card text-foreground" : "text-muted-foreground hover:text-foreground hover:bg-card/60",
 					)
 				}
 			>

@@ -583,26 +583,30 @@ tooltips, active marker and mobile drawer all follow.
 ```ts
 export interface NavGroup {
 	heading?: string;
-	items: NavItem[]; // always visible
+	items: NavItem[]; // always visible, above a server's channel list
+	afterChannels?: NavItem[]; // a server's group only, below its channel list
 	sections?: NavSection[]; // collapsible
 }
 ```
 
-A server's screens are grouped into collapsible sections — **Community**, **Moderation**, **Economy**,
-**Entertainment**, **Channels** — because a flat list grew past what one glance takes. `items` stays for the
-screens that are not a category — Overview and Settings. A screen goes in the section it is decided alongside,
-not the one its command happens to be filed under: automod and audit logging are `settings` commands and still
-sit in Moderation, and Music was once in Economy, which it has nothing to do with. `navigation.test.ts` refuses a
-section of one screen and two screens in one section sharing an icon. Three things are load-bearing:
+Inside a server the sidebar is the server's own channel list, as [`ui-uplift.md`](ui-uplift.md) describes: Overview,
+then the channels in Discord's categories and order (`ChannelNav`, drawn from `/channels` and `/places` rather than
+from this file), then Everywhere, Members and Settings, then **Moderation**, **More** and **Every feature**. Every
+feature's own page stays reachable from that last section, which is also what quick search and the help page read.
+`navigation.test.ts` pins the full set of server paths, refuses a section of one screen, and refuses two screens in
+one section sharing an icon. Four things are load-bearing:
 
+- **The sidebar names no channel its reader cannot see.** `channelTree` skips every channel whose name is `null`.
 - **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
   toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed
   section at that width would hide the icons and leave nothing to click. The button being `display: none` is
   what keeps `aria-expanded="false"` from contradicting a list the rail is still showing.
 - **The section holding the current page opens itself** (`sectionHolds`), so a collapsed section can never hide
   where you are.
-- **`allNavItems` reaches into sections.** It is what every flat consumer reads; a screen reachable only from a
-  section would otherwise look like it had left the navigation.
+- **`allNavItems` reaches into sections and `afterChannels`.** It is what every flat consumer reads; a screen
+  reachable only from a section would otherwise look like it had left the navigation.
+- **A highlight in the sidebar is `bg-card`.** The sidebar's own colour is the light theme's `muted`, so a
+  `bg-muted` selection disappears into it.
 
 ### Three widths
 

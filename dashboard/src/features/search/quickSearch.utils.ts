@@ -1,10 +1,11 @@
-import { type CommandSummary, type ManageableGuild } from "@testify/shared";
+import { type ChannelSummary, type CommandSummary, type ManageableGuild } from "@testify/shared";
 import { type TFunction } from "i18next";
-import { FileText, type LucideIcon, Palette, ShieldQuestion, Terminal } from "lucide-react";
+import { FileText, Hash, type LucideIcon, Palette, ShieldQuestion, Terminal, Volume2 } from "lucide-react";
 import { allNavItems, type NavAudience, navigationFor } from "@/config/navigation";
+import { channelPath, channelTree } from "@/features/channels/channelMap.utils";
 import { configurableAt } from "@/features/commands/commands.utils";
 
-export type SearchKind = "screen" | "command" | "server";
+export type SearchKind = "screen" | "channel" | "command" | "server";
 
 export interface SearchEntry {
 	id: string;
@@ -33,10 +34,13 @@ export function searchEntries({
 	guilds,
 	isOwner,
 	commands,
+	channels = [],
 }: NavAudience & {
 	t: TFunction;
 	guilds: readonly ManageableGuild[];
 	commands: readonly CommandSummary[];
+	/** The current server's channels; only those its reader can see become entries. */
+	channels?: readonly ChannelSummary[];
 }): SearchEntry[] {
 	const screens = [...allNavItems(navigationFor({ guild, isOwner })), ...EXTRA_PAGES].map<SearchEntry>((item) => ({
 		id: `screen:${item.to}`,
@@ -47,6 +51,21 @@ export function searchEntries({
 		icon: item.icon,
 		terms: [],
 	}));
+
+	const channelEntries =
+		guild === undefined
+			? []
+			: channelTree(channels)
+					.flatMap((group) => group.channels)
+					.map<SearchEntry>((channel) => ({
+						id: `channel:${channel.id}`,
+						kind: "channel",
+						label: channel.kind === "voice" ? channel.name : `#${channel.name}`,
+						detail: t("search.channel"),
+						to: channelPath(guild.id, channel.id),
+						icon: channel.kind === "voice" ? Volume2 : Hash,
+						terms: [],
+					}));
 
 	const servers = guilds
 		.filter((candidate) => candidate.botPresent)
@@ -77,7 +96,7 @@ export function searchEntries({
 		};
 	});
 
-	return [...screens, ...servers, ...commandEntries];
+	return [...screens, ...channelEntries, ...servers, ...commandEntries];
 }
 
 /** Lower-cased with accents removed, so "parametres" finds "Paramètres". */
@@ -112,7 +131,7 @@ export function scoreOf(entry: SearchEntry, query: string): number | null {
 	return null;
 }
 
-const KIND_ORDER: Record<SearchKind, number> = { screen: 0, command: 1, server: 2 };
+const KIND_ORDER: Record<SearchKind, number> = { screen: 0, channel: 1, command: 2, server: 3 };
 
 const RESULT_LIMIT = 8;
 

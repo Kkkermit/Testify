@@ -73,8 +73,8 @@ describe("the app shell", () => {
 		});
 		await screen.findByRole("link", { name: "Overview" });
 
-		expect(screen.getByRole("button", { name: "Economy" })).toHaveAttribute("aria-expanded", "true");
-		expect(screen.getByRole("button", { name: "Community" })).toHaveAttribute("aria-expanded", "false");
+		expect(screen.getByRole("button", { name: "Every feature" })).toHaveAttribute("aria-expanded", "true");
+		expect(screen.getByRole("button", { name: "Moderation" })).toHaveAttribute("aria-expanded", "false");
 	});
 
 	/** `aria-controls` has to point at a list that exists. */
@@ -82,10 +82,25 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });
 
-		const controls = screen.getByRole("button", { name: "Community" }).getAttribute("aria-controls");
+		const controls = screen.getByRole("button", { name: "Moderation" }).getAttribute("aria-controls");
 
 		expect(controls).not.toBeNull();
 		expect(document.getElementById(controls ?? "")).not.toBeNull();
+	});
+
+	/** The sidebar is the server's own channel list, so a channel is found where Discord puts it. */
+	it("lists the server's channels under their categories, each linking to what happens there", async () => {
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		const channels = await screen.findByRole("list", { name: "Channels" });
+
+		expect(within(channels).getByRole("link", { name: /general/ })).toHaveAttribute(
+			"href",
+			`/guilds/${aGuild.id}/channels/400000000000000001`,
+		);
+		expect(within(channels).getByRole("button", { name: "Support" })).toHaveAttribute("aria-expanded", "true");
+		// Tickets keeps two places in #locked and still counts once.
+		expect(await within(channels).findByRole("link", { name: /locked.*Features here: 1/ })).toBeInTheDocument();
+		expect(within(channels).queryByRole("link", { name: /Support/ })).toBeNull();
 	});
 
 	/** Every screen stays reachable whatever a section is set to — the rail has no toggles to open. */
@@ -179,11 +194,11 @@ describe("the mobile menu", () => {
 
 		await user.click(screen.getByRole("button", { name: "Menu" }));
 		const drawer = screen.getByTestId("sidebar-drawer");
-		const community = within(drawer).getByRole("button", { name: "Community" });
-		await user.click(community);
+		const moderation = within(drawer).getByRole("button", { name: "Moderation" });
+		await user.click(moderation);
 
 		expect(screen.getByTestId("sidebar-drawer")).toBeInTheDocument();
-		expect(community).toHaveAttribute("aria-expanded", "true");
+		expect(moderation).toHaveAttribute("aria-expanded", "true");
 	});
 
 	/** The drawer could not scroll, so a swipe moved the page behind it and the drawer's foot was out of reach. */

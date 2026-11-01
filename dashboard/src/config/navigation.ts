@@ -15,18 +15,16 @@ import {
 	ShieldCheck,
 	Pin,
 	SlidersHorizontal,
-	Coins,
 	Dices,
+	Ellipsis,
 	FileCode,
 	Terminal,
 	TrendingUp,
 	TriangleAlert,
-	Trophy,
 	Users,
 	UserPlus,
 	MessageSquareReply,
 	Megaphone,
-	MessagesSquare,
 	Music,
 	LifeBuoy,
 	Lightbulb,
@@ -35,6 +33,7 @@ import {
 	Ticket,
 	type LucideIcon,
 	Gauge,
+	Globe,
 	Gavel,
 	History,
 	Gift,
@@ -45,7 +44,7 @@ import {
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
-/** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips and active marker follow. */
+/** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips, search and active marker follow. */
 export interface NavItem {
 	to: string;
 	/** A translation key, not text: this module is data and has no hook to translate with. */
@@ -64,7 +63,7 @@ export interface NavSection {
 	items: NavItem[];
 }
 
-/** Groups put a server's own settings under its name, so it is always clear which server is being edited. */
+/** Groups put a server's own screens under its name, so it is always clear which server is being edited. */
 export interface NavGroup {
 	/** A server's own name, shown exactly as typed. Absent for the first group, which needs no heading. */
 	heading?: string;
@@ -73,7 +72,9 @@ export interface NavGroup {
 	/** Set on a server's own group, whose heading is the switcher to the same screen in another server. */
 	guildId?: string;
 	items: NavItem[];
-	/** Rendered after `items`, each behind its own toggle. */
+	/** A server's group only: rendered after the server's channel list, which sits between these and `items`. */
+	afterChannels?: NavItem[];
+	/** Rendered last, each behind its own toggle. */
 	sections?: NavSection[];
 }
 
@@ -103,224 +104,84 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 	];
 
 	if (guild !== undefined) {
+		const at = (path: string): string => `/guilds/${guild.id}${path}`;
 		groups.push({
 			heading: guild.name,
 			guildId: guild.id,
-			items: [
-				{ to: `/guilds/${guild.id}`, labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" },
-				{
-					to: `/guilds/${guild.id}/insights`,
-					labelKey: "nav.insights",
-					icon: ChartLine,
-					hintKey: "nav.insightsHint",
-				},
-				{
-					to: `/guilds/${guild.id}/settings`,
-					labelKey: "nav.settings",
-					icon: SlidersHorizontal,
-					hintKey: "nav.settingsHint",
-				},
+			items: [{ to: at(""), labelKey: "nav.overview", icon: Server, hintKey: "nav.overviewHint" }],
+			// The server's own channel list sits between these, drawn from Discord rather than from this file.
+			afterChannels: [
+				{ to: at("/everywhere"), labelKey: "nav.everywhere", icon: Globe, hintKey: "nav.everywhereHint" },
+				// A member's own page lives under this path, and it is still where you are in the sidebar.
+				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
+				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
 			],
-			// Grouped by what the person is trying to do, so a screen sits beside the ones it is decided alongside.
 			sections: [
 				{
-					labelKey: "nav.community",
-					icon: Users,
-					items: [
-						{
-							to: `/guilds/${guild.id}/welcome`,
-							labelKey: "nav.welcome",
-							icon: UserPlus,
-							hintKey: "nav.welcomeHint",
-						},
-						{
-							to: `/guilds/${guild.id}/birthdays`,
-							labelKey: "nav.birthdays",
-							icon: Cake,
-							hintKey: "nav.birthdaysHint",
-						},
-						{
-							to: `/guilds/${guild.id}/levelling`,
-							labelKey: "nav.levelling",
-							icon: TrendingUp,
-							hintKey: "nav.levellingHint",
-						},
-						{
-							to: `/guilds/${guild.id}/role-menus`,
-							labelKey: "nav.roleMenus",
-							icon: ListChecks,
-							hintKey: "nav.roleMenusHint",
-						},
-						{
-							to: `/guilds/${guild.id}/ideas`,
-							labelKey: "nav.ideas",
-							icon: Lightbulb,
-							hintKey: "nav.ideasHint",
-						},
-						{
-							to: `/guilds/${guild.id}/starboard`,
-							labelKey: "nav.starboard",
-							icon: Star,
-							hintKey: "nav.starboardHint",
-						},
-						{
-							to: `/guilds/${guild.id}/members`,
-							labelKey: "nav.leaderboards",
-							icon: Trophy,
-							hintKey: "nav.leaderboardsHint",
-							// A member's own page lives under this path, and it is still where you are in the sidebar.
-							exact: false,
-						},
-					],
-				},
-				{
 					labelKey: "nav.moderation",
-					icon: ShieldAlert,
+					icon: Gavel,
 					items: [
-						{
-							to: `/guilds/${guild.id}/automod`,
-							labelKey: "nav.automod",
-							icon: ShieldAlert,
-							hintKey: "nav.automodHint",
-						},
-						{
-							to: `/guilds/${guild.id}/audit-log`,
-							labelKey: "nav.auditLog",
-							icon: ScrollText,
-							hintKey: "nav.auditLogHint",
-						},
-						{
-							to: `/guilds/${guild.id}/warnings`,
-							labelKey: "nav.warnings",
-							icon: TriangleAlert,
-							hintKey: "nav.warningsHint",
-						},
-						{
-							to: `/guilds/${guild.id}/cases`,
-							labelKey: "nav.cases",
-							icon: Gavel,
-							hintKey: "nav.casesHint",
-						},
-						{
-							to: `/guilds/${guild.id}/bans`,
-							labelKey: "nav.bans",
-							icon: Ban,
-							hintKey: "nav.bansHint",
-						},
-						{
-							to: `/guilds/${guild.id}/channel-tools`,
-							labelKey: "nav.channelTools",
-							icon: Lock,
-							hintKey: "nav.channelToolsHint",
-						},
-						{
-							to: `/guilds/${guild.id}/raid-protection`,
-							labelKey: "nav.raid",
-							icon: Siren,
-							hintKey: "nav.raidHint",
-						},
-						{
-							to: `/guilds/${guild.id}/changes`,
-							labelKey: "nav.changes",
-							icon: History,
-							hintKey: "nav.changesHint",
-						},
+						{ to: at("/warnings"), labelKey: "nav.warnings", icon: TriangleAlert, hintKey: "nav.warningsHint" },
+						{ to: at("/cases"), labelKey: "nav.cases", icon: Gavel, hintKey: "nav.casesHint" },
+						{ to: at("/bans"), labelKey: "nav.bans", icon: Ban, hintKey: "nav.bansHint" },
+						{ to: at("/channel-tools"), labelKey: "nav.channelTools", icon: Lock, hintKey: "nav.channelToolsHint" },
+						{ to: at("/changes"), labelKey: "nav.changes", icon: History, hintKey: "nav.changesHint" },
 					],
 				},
 				{
-					labelKey: "nav.economy",
-					icon: Coins,
+					labelKey: "nav.more",
+					icon: Ellipsis,
 					items: [
+						{ to: at("/insights"), labelKey: "nav.insights", icon: ChartLine, hintKey: "nav.insightsHint" },
 						{
-							to: `/guilds/${guild.id}/treasure`,
-							labelKey: "nav.treasure",
-							icon: Gem,
-							hintKey: "nav.treasureHint",
-						},
-						{
-							to: `/guilds/${guild.id}/lottery`,
-							labelKey: "nav.lottery",
-							icon: Ticket,
-							hintKey: "nav.lotteryHint",
-						},
-						{
-							to: `/guilds/${guild.id}/casino`,
-							labelKey: "nav.casino",
-							icon: Dices,
-							hintKey: "nav.casinoHint",
+							to: at("/announcements"),
+							labelKey: "nav.announcements",
+							icon: Megaphone,
+							hintKey: "nav.announcementsHint",
 						},
 					],
 				},
+				// Every feature's own page, for anybody who would rather find it by name than by where it works.
 				{
-					labelKey: "nav.entertainment",
+					labelKey: "nav.everyFeature",
 					icon: Sparkles,
 					items: [
+						{ to: at("/welcome"), labelKey: "nav.welcome", icon: UserPlus, hintKey: "nav.welcomeHint" },
+						{ to: at("/birthdays"), labelKey: "nav.birthdays", icon: Cake, hintKey: "nav.birthdaysHint" },
+						{ to: at("/levelling"), labelKey: "nav.levelling", icon: TrendingUp, hintKey: "nav.levellingHint" },
+						{ to: at("/role-menus"), labelKey: "nav.roleMenus", icon: ListChecks, hintKey: "nav.roleMenusHint" },
+						{ to: at("/ideas"), labelKey: "nav.ideas", icon: Lightbulb, hintKey: "nav.ideasHint" },
+						{ to: at("/starboard"), labelKey: "nav.starboard", icon: Star, hintKey: "nav.starboardHint" },
+						{ to: at("/tickets"), labelKey: "nav.tickets", icon: LifeBuoy, hintKey: "nav.ticketsHint" },
+						{ to: at("/sticky"), labelKey: "nav.sticky", icon: Pin, hintKey: "nav.stickyHint" },
 						{
-							to: `/guilds/${guild.id}/music`,
-							labelKey: "nav.music",
-							icon: Music,
-							hintKey: "nav.musicHint",
-						},
-						{
-							to: `/guilds/${guild.id}/giveaways`,
-							labelKey: "nav.giveaways",
-							icon: Gift,
-							hintKey: "nav.giveawaysHint",
-						},
-					],
-				},
-				{
-					labelKey: "nav.channels",
-					icon: MessagesSquare,
-					items: [
-						{
-							to: `/guilds/${guild.id}/sticky`,
-							labelKey: "nav.sticky",
-							icon: Pin,
-							hintKey: "nav.stickyHint",
-						},
-						{
-							to: `/guilds/${guild.id}/auto-responders`,
+							to: at("/auto-responders"),
 							labelKey: "nav.autoResponders",
 							icon: MessageSquareReply,
 							hintKey: "nav.autoRespondersHint",
 						},
 						{
-							to: `/guilds/${guild.id}/scheduled-messages`,
+							to: at("/scheduled-messages"),
 							labelKey: "nav.scheduled",
 							icon: CalendarClock,
 							hintKey: "nav.scheduledHint",
 						},
+						{ to: at("/temp-voice"), labelKey: "nav.tempVoice", icon: Volume2, hintKey: "nav.tempVoiceHint" },
+						{ to: at("/bot-stats"), labelKey: "nav.botStats", icon: Gauge, hintKey: "nav.botStatsHint" },
 						{
-							to: `/guilds/${guild.id}/announcements`,
-							labelKey: "nav.announcements",
-							icon: Megaphone,
-							hintKey: "nav.announcementsHint",
-						},
-						{
-							to: `/guilds/${guild.id}/tickets`,
-							labelKey: "nav.tickets",
-							icon: LifeBuoy,
-							hintKey: "nav.ticketsHint",
-						},
-						{
-							to: `/guilds/${guild.id}/temp-voice`,
-							labelKey: "nav.tempVoice",
-							icon: Volume2,
-							hintKey: "nav.tempVoiceHint",
-						},
-						{
-							to: `/guilds/${guild.id}/bot-stats`,
-							labelKey: "nav.botStats",
-							icon: Gauge,
-							hintKey: "nav.botStatsHint",
-						},
-						{
-							to: `/guilds/${guild.id}/member-count`,
+							to: at("/member-count"),
 							labelKey: "nav.memberCount",
 							icon: ChartColumn,
 							hintKey: "nav.memberCountHint",
 						},
+						{ to: at("/audit-log"), labelKey: "nav.auditLog", icon: ScrollText, hintKey: "nav.auditLogHint" },
+						{ to: at("/automod"), labelKey: "nav.automod", icon: ShieldAlert, hintKey: "nav.automodHint" },
+						{ to: at("/raid-protection"), labelKey: "nav.raid", icon: Siren, hintKey: "nav.raidHint" },
+						{ to: at("/treasure"), labelKey: "nav.treasure", icon: Gem, hintKey: "nav.treasureHint" },
+						{ to: at("/lottery"), labelKey: "nav.lottery", icon: Ticket, hintKey: "nav.lotteryHint" },
+						{ to: at("/casino"), labelKey: "nav.casino", icon: Dices, hintKey: "nav.casinoHint" },
+						{ to: at("/music"), labelKey: "nav.music", icon: Music, hintKey: "nav.musicHint" },
+						{ to: at("/giveaways"), labelKey: "nav.giveaways", icon: Gift, hintKey: "nav.giveawaysHint" },
 					],
 				},
 			],
@@ -338,7 +199,11 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 }
 
 export function allNavItems(groups: NavGroup[]): NavItem[] {
-	return groups.flatMap((group) => [...group.items, ...(group.sections ?? []).flatMap((section) => section.items)]);
+	return groups.flatMap((group) => [
+		...group.items,
+		...(group.afterChannels ?? []),
+		...(group.sections ?? []).flatMap((section) => section.items),
+	]);
 }
 
 /** Open on arrival when the current page is inside it, so a collapsed section never hides where you are. */

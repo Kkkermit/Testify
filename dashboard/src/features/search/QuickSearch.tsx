@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router";
 import { Avatar, Badge } from "@/components/primitives";
 import { useCommands } from "@/features/commands/useCommands";
+import { useChannels } from "@/features/levelling/useLevelling";
 import { type SearchEntry, type SearchKind, searchEntries, searchFor } from "@/features/search/quickSearch.utils";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
@@ -13,6 +14,7 @@ const KIND_LABEL: Record<SearchKind, TranslationKey> = {
 	screen: "search.kindScreen",
 	command: "search.kindCommand",
 	server: "search.kindServer",
+	channel: "search.kindChannel",
 };
 
 /** A combobox in a dialog: the box keeps focus, and the arrows move a highlight through the results. */
@@ -30,14 +32,23 @@ export function QuickSearch({
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const commands = useCommands();
+	const channels = useChannels(guild?.id ?? null);
 	const listId = useId();
 	const inputRef = useRef<HTMLInputElement>(null);
 	const [query, setQuery] = useState("");
 	const [active, setActive] = useState(0);
 
 	const entries = useMemo(
-		() => searchEntries({ t, guild, guilds, isOwner, commands: commands.data?.commands ?? [] }),
-		[t, guild, guilds, isOwner, commands.data],
+		() =>
+			searchEntries({
+				t,
+				guild,
+				guilds,
+				isOwner,
+				commands: commands.data?.commands ?? [],
+				channels: channels.data ?? [],
+			}),
+		[t, guild, guilds, isOwner, commands.data, channels.data],
 	);
 	const results = useMemo(() => searchFor(entries, query), [entries, query]);
 	const current = results[Math.min(active, results.length - 1)];

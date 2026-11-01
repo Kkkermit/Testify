@@ -19,10 +19,12 @@ export function useLevelling(guildId: string): UseQueryResult<LevelConfigRespons
 	});
 }
 
-export function useChannels(guildId: string): UseQueryResult<ChannelSummary[]> {
+/** Takes null where there may be no server, as quick search outside one, so the hook can still be called. */
+export function useChannels(guildId: string | null): UseQueryResult<ChannelSummary[]> {
 	return useQuery({
-		queryKey: keys.guild(guildId).channels(),
-		queryFn: () => api.get<ChannelSummary[]>(`/guilds/${guildId}/channels`),
+		queryKey: keys.guild(guildId ?? "").channels(),
+		queryFn: () => api.get<ChannelSummary[]>(`/guilds/${guildId ?? ""}/channels`),
+		enabled: guildId !== null,
 		staleTime: 5 * 60_000,
 	});
 }

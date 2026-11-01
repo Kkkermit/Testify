@@ -46,7 +46,7 @@ describe("quick search", () => {
 		renderShell();
 
 		await openWithShortcut(user);
-		expect(screen.getByRole("combobox", { name: "Search screens, servers and commands" })).toHaveFocus();
+		expect(screen.getByRole("combobox", { name: "Search screens, channels, servers and commands" })).toHaveFocus();
 
 		await user.keyboard("{Escape}");
 		await user.keyboard("{Meta>}k{/Meta}");

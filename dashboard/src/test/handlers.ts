@@ -69,6 +69,7 @@ import {
 	serverSettings,
 	setupDone,
 	someChannels,
+	guildPlaces,
 	someRoles,
 	verificationConfig,
 } from "@/test/fixtures/server";
@@ -114,6 +115,7 @@ export const handlers = [
 	http.get("/api/guilds/:guildId/settings", () => HttpResponse.json(serverSettings)),
 	http.get("/api/guilds/:guildId/settings/nickname", () => HttpResponse.json(guildNickname)),
 	http.get("/api/guilds/:guildId/channels", () => HttpResponse.json(someChannels)),
+	http.get("/api/guilds/:guildId/places", () => HttpResponse.json(guildPlaces)),
 	http.get("/api/guilds/:guildId/roles", () => HttpResponse.json(someRoles)),
 	http.get("/api/guilds/:guildId/verification", () => HttpResponse.json(verificationConfig)),
 	http.get("/api/guilds/:guildId/automod", () => HttpResponse.json(automodRules)),

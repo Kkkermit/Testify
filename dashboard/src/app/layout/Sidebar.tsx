@@ -3,6 +3,7 @@ import { type BotIdentity, type DashboardUser, type ManageableGuild } from "@tes
 import { FileText, LogOut, Palette, Search, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
+import { CATEGORY_HEADING, ChannelNav } from "@/app/layout/ChannelNav";
 import { GuildSwitcher } from "@/app/layout/GuildSwitcher";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
@@ -74,7 +75,7 @@ export function Sidebar({
 				<span aria-hidden="true" className={ICON_SLOT}>
 					<BotMark src={bot?.avatarUrl} size={22} />
 				</span>
-				<span className={label("font-display truncate text-[0.9375rem] font-bold tracking-tight")}>
+				<span className={label("font-display truncate text-[0.9375rem] font-semibold")}>
 					{bot?.name ?? BUILT_IN_BOT_NAME}
 				</span>
 			</Link>
@@ -97,10 +98,7 @@ export function Sidebar({
 									// Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's.
 									<p
 										aria-hidden="true"
-										className={cn(
-											"text-muted-foreground truncate px-2 pb-1 font-mono text-[0.6875rem] tracking-[0.18em] uppercase",
-											expanded ? "" : "hidden lg:block",
-										)}
+										className={cn(CATEGORY_HEADING, "truncate px-2 pb-1", expanded ? "" : "hidden lg:block")}
 									>
 										{heading}
 									</p>
@@ -109,6 +107,16 @@ export function Sidebar({
 						)}
 						<ul className="flex flex-col gap-1" {...(heading === undefined ? {} : { "aria-label": heading })}>
 							{group.items.map((item) => (
+								<li key={item.to}>
+									<SidebarLink item={item} expanded={expanded} />
+								</li>
+							))}
+							{group.guildId !== undefined && (
+								<li>
+									<ChannelNav guildId={group.guildId} expanded={expanded} />
+								</li>
+							)}
+							{(group.afterChannels ?? []).map((item) => (
 								<li key={item.to}>
 									<SidebarLink item={item} expanded={expanded} />
 								</li>
@@ -141,7 +149,7 @@ export function Sidebar({
 								to={to}
 								className={cn(
 									ROW,
-									"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+									"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 								)}
 							>
 								<Icon size={18} aria-hidden="true" className="shrink-0" />
@@ -156,7 +164,7 @@ export function Sidebar({
 						to="/appearance#language"
 						className={cn(
 							ROW,
-							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+							"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 						)}
 					>
 						<span aria-hidden="true" className={ICON_SLOT}>
@@ -174,7 +182,7 @@ export function Sidebar({
 						onClick={() => void signOut()}
 						className={cn(
 							ROW,
-							"text-muted-foreground hover:text-foreground hover:bg-muted text-sm transition-colors duration-150",
+							"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 						)}
 					>
 						<LogOut size={18} aria-hidden="true" className="shrink-0" />
@@ -206,7 +214,7 @@ function SearchRow({
 				aria-keyshortcuts="Control+K Meta+K"
 				className={cn(
 					ROW,
-					"border-border text-muted-foreground hover:text-foreground hover:bg-muted mb-3 w-full border text-sm transition-colors duration-150",
+					"border-border text-muted-foreground hover:text-foreground hover:bg-card/60 mb-3 w-full border text-sm transition-colors duration-150",
 				)}
 			>
 				<Search size={18} aria-hidden="true" className="shrink-0" />
@@ -226,10 +234,10 @@ function SearchRow({
 	);
 }
 
-/** Opaque in the drawer, and capped to the viewport in the rail — a flex child otherwise stretches to a container that grows with the page. */
+/** Capped to the viewport in the rail — a flex child otherwise stretches to a container that grows with the page. */
 function cnSidebar(expanded: boolean): string {
 	const base = "border-border flex shrink-0 flex-col p-3";
 	return expanded
-		? `${base} bg-card h-full w-64 overflow-y-auto overscroll-contain border-r`
-		: `${base} bg-card/80 scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r backdrop-blur-sm md:flex lg:w-60`;
+		? `${base} bg-sidebar h-full w-64 overflow-y-auto overscroll-contain border-r`
+		: `${base} bg-sidebar scrollbar-none sticky top-0 hidden h-dvh w-16 overflow-y-auto border-r md:flex lg:w-60`;
 }

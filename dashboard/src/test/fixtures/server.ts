@@ -3,6 +3,7 @@ import {
 	type CommandToggleState,
 	type GuildNickname,
 	type GuildOverview,
+	type GuildPlaces,
 	type InsightsReport,
 	type RoleSummary,
 	type ServerSettings,
@@ -65,7 +66,14 @@ export const commandToggles: CommandToggleState = {
 
 export const someChannels: ChannelSummary[] = [
 	{ id: "400000000000000001", name: "general", kind: "text", position: 1, parentId: null, canSend: true },
-	{ id: "400000000000000002", name: "locked", kind: "text", position: 2, parentId: null, canSend: false },
+	{
+		id: "400000000000000002",
+		name: "locked",
+		kind: "text",
+		position: 2,
+		parentId: "400000000000000005",
+		canSend: false,
+	},
 	{ id: "400000000000000003", name: "Voice", kind: "voice", position: 3, parentId: null, canSend: false },
 	{ id: "400000000000000005", name: "Support", kind: "category", position: 4, parentId: null, canSend: false },
 ];
@@ -135,4 +143,49 @@ export const insightsReport: InsightsReport = {
 	topMembers: [{ userId: "100000000000000002", name: "kate", avatarUrl: null, messages: 40 }],
 	recentJoins: [{ userId: "100000000000000002", name: "kate", at: "2026-09-27T10:00:00.000Z" }],
 	recentLeaves: [],
+};
+
+/** Welcome posts in #general, tickets keep their panel and logs in #locked, goodbye waits, levelling is server-wide. */
+export const guildPlaces: GuildPlaces = {
+	features: [
+		{
+			key: "levelling",
+			label: "Levelling",
+			enabled: true,
+			detail: { kind: "levelling", rewards: 2, boosts: 1 },
+			reach: "everywhere",
+			accepts: null,
+			places: [],
+		},
+		{
+			key: "welcome",
+			label: "Welcome messages",
+			enabled: true,
+			detail: { kind: "posting", channelId: "400000000000000001" },
+			reach: "channel",
+			accepts: "text",
+			places: [{ channelId: "400000000000000001", role: "posts" }],
+		},
+		{
+			key: "goodbye",
+			label: "Goodbye messages",
+			enabled: false,
+			detail: null,
+			reach: "channel",
+			accepts: "text",
+			places: [],
+		},
+		{
+			key: "tickets",
+			label: "Tickets",
+			enabled: true,
+			detail: { kind: "count", what: "ticketsOpen", count: 3 },
+			reach: "channel",
+			accepts: "text",
+			places: [
+				{ channelId: "400000000000000002", role: "panel" },
+				{ channelId: "400000000000000002", role: "logs" },
+			],
+		},
+	],
 };

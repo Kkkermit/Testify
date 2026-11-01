@@ -56,7 +56,7 @@ export function MobileNav({
 
 	return (
 		<>
-			<header className="border-border bg-card/80 flex items-center gap-3 border-b p-3 backdrop-blur-sm md:hidden">
+			<header className="border-border bg-sidebar flex items-center gap-3 border-b p-3 md:hidden">
 				<button
 					ref={openerRef}
 					type="button"
@@ -65,7 +65,7 @@ export function MobileNav({
 					onClick={() => {
 						onOpenChange(!open);
 					}}
-					className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-card p-2 transition-colors duration-150"
+					className="text-muted-foreground hover:text-foreground hover:bg-card/60 rounded-card p-2 transition-colors duration-150"
 				>
 					<Menu size={20} aria-hidden="true" />
 					<span className="sr-only">{t("nav.menu")}</span>
@@ -77,7 +77,7 @@ export function MobileNav({
 				<button
 					type="button"
 					onClick={onSearch}
-					className="text-muted-foreground hover:text-foreground hover:bg-muted rounded-card ml-auto p-2 transition-colors duration-150"
+					className="text-muted-foreground hover:text-foreground hover:bg-card/60 rounded-card ml-auto p-2 transition-colors duration-150"
 				>
 					<Search size={20} aria-hidden="true" />
 					<span className="sr-only">{t("search.open")}</span>

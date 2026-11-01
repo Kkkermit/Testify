@@ -30,13 +30,61 @@ describe("navigationFor", () => {
 		expect(groups[1]?.heading).toBe("Testify HQ");
 	});
 
-	/** A page nested under a section's screen still opens that section. */
-	it("opens the Community section for a page nested under one of its screens", () => {
+	/** A collapsed section opens on arrival when the page is one of its own, and stays shut for any other. */
+	it("opens a section for its own screens and no others", () => {
 		const [, guildGroup] = navigationFor({ guild, isOwner: false });
-		const membersSection = (guildGroup?.sections ?? []).find((section) => section.labelKey === "nav.community");
+		const moderation = (guildGroup?.sections ?? []).find((section) => section.labelKey === "nav.moderation");
 
-		expect(membersSection).toBeDefined();
-		expect(sectionHolds(membersSection as never, `/guilds/${guild.id}/members/100000000000000002`)).toBe(true);
+		expect(moderation).toBeDefined();
+		expect(sectionHolds(moderation as never, `/guilds/${guild.id}/cases`)).toBe(true);
+		expect(sectionHolds(moderation as never, `/guilds/${guild.id}/welcome`)).toBe(false);
+	});
+
+	/** Help articles, bookmarks and quick search all name these paths, so regrouping must never drop one. */
+	it("keeps every server screen reachable", () => {
+		const prefix = `/guilds/${guild.id}`;
+		const screens = pathsFor({ guild, isOwner: false })
+			.filter((path) => path.startsWith(prefix))
+			.map((path) => path.slice(prefix.length) || "/")
+			.sort();
+
+		expect(screens).toEqual(
+			[
+				"/",
+				"/announcements",
+				"/audit-log",
+				"/auto-responders",
+				"/automod",
+				"/bans",
+				"/birthdays",
+				"/bot-stats",
+				"/cases",
+				"/casino",
+				"/changes",
+				"/channel-tools",
+				"/commands",
+				"/everywhere",
+				"/giveaways",
+				"/ideas",
+				"/insights",
+				"/levelling",
+				"/lottery",
+				"/member-count",
+				"/members",
+				"/music",
+				"/raid-protection",
+				"/role-menus",
+				"/scheduled-messages",
+				"/settings",
+				"/starboard",
+				"/sticky",
+				"/temp-voice",
+				"/tickets",
+				"/treasure",
+				"/warnings",
+				"/welcome",
+			].sort(),
+		);
 	});
 
 	/** A heading over a single screen is a click that leads nowhere new, and says the grouping has gone wrong. */
