@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en-GB">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Welcome and goodbye — Direction A</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link
+			href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+			rel="stylesheet"
+		/>
+		<link rel="stylesheet" href="style.css" />
+	</head>
+	<body>
+		<div class="topbar"><span>Testify HQ ⌄</span><span class="menu">Menu</span></div>
+		<div class="shell">
+			<aside class="side">
+				<div class="switcher"><span class="mark">TH</span>Testify HQ<span class="chev">⌄</span></div>
+				<nav class="nav" aria-label="This server">
+					<a href="overview.html">Overview</a>
+					<a href="#">Insights</a>
+					<a href="#">Server settings</a>
+				</nav>
+				<nav class="nav" aria-label="Community">
+					<h2>Community</h2>
+					<a href="#" aria-current="page">Welcome and goodbye</a>
+					<a href="#">Levelling</a>
+					<a href="#">Role menus</a>
+					<a href="#">Birthdays</a>
+					<a href="#">Starboard</a>
+				</nav>
+				<nav class="nav" aria-label="Moderation">
+					<h2>Moderation</h2>
+					<a href="#">Warnings</a>
+					<a href="#">Cases</a>
+					<a href="#">AutoMod</a>
+					<a href="#">Changes</a>
+				</nav>
+				<nav class="nav" aria-label="More">
+					<h2>More</h2>
+					<a href="#">Economy and casino</a>
+					<a href="#">Tickets</a>
+					<a href="#">Channels and messages</a>
+				</nav>
+				<div class="foot">
+					<a href="#">All servers</a><a href="#">Commands</a><a href="#">Help</a><a href="#">you · Sign out</a>
+				</div>
+			</aside>
+
+			<main>
+				<div class="crumbs"><a href="overview.html">Testify HQ</a> / Community</div>
+				<h1>Welcome and goodbye</h1>
+				<p class="summary">
+					Right now new members are greeted in <span class="mention">#welcome</span> with a picture card, and nobody is
+					told when someone leaves. <span class="saved">Saved a moment ago.</span>
+				</p>
+
+				<section aria-labelledby="g">
+					<h2 id="g">When someone joins</h2>
+					<div class="row">
+						<div>
+							<div class="label">Greet new members</div>
+							<div class="help">Posted the moment they join.</div>
+						</div>
+						<span class="switch on" role="switch" aria-checked="true" aria-label="Greet new members"></span>
+					</div>
+					<div class="row select">
+						<div>
+							<div class="label">Post in</div>
+							<div class="help">Testify can post here.</div>
+						</div>
+						<select aria-label="Post in">
+							<option>#welcome</option>
+						</select>
+					</div>
+					<div class="row stack">
+						<label class="label" for="msg">Message</label>
+						<textarea id="msg">Welcome to {server}, {user}! Grab some roles in #roles and say hi.</textarea>
+						<div class="help">
+							You can use <code>{user}</code>, <code>{server}</code> and <code>{count}</code>. Mentions in the message
+							don’t ping anyone but the new member.
+						</div>
+					</div>
+					<div class="row">
+						<div>
+							<div class="label">Add a picture card</div>
+							<div class="help">Their avatar, name and member number, drawn by Testify.</div>
+						</div>
+						<span class="switch on" role="switch" aria-checked="true" aria-label="Add a picture card"></span>
+					</div>
+					<div class="row stack">
+						<div class="label">How it will look</div>
+						<div class="preview">
+							<span class="who">Testify</span><span class="bot">APP</span><br />Welcome to Testify HQ,
+							<span class="mention">@Orbit</span>! Grab some roles in <span class="mention">#roles</span> and say hi.
+						</div>
+					</div>
+				</section>
+
+				<section aria-labelledby="l">
+					<h2 id="l">When someone leaves</h2>
+					<div class="row">
+						<div>
+							<div class="label">Say goodbye</div>
+							<div class="help">Off. Turn it on to choose a channel and a message.</div>
+						</div>
+						<span class="switch" role="switch" aria-checked="false" aria-label="Say goodbye"></span>
+					</div>
+				</section>
+			</main>
+		</div>
+	</body>
+</html>
