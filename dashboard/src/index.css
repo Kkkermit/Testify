@@ -1,55 +1,120 @@
 @import "tailwindcss";
 
 /**
- * Self-hosted, latin subset, variable. Nothing is fetched from a font host: the CSP forbids it, and a
- * self-hosted bot should not phone out to render its own settings page. Before this, `"Inter var"` was named
- * but never loaded — every install fell through to `system-ui`, which is why the type looked different on every
- * machine and like nothing in particular on all of them.
+ * Self-hosted, never fetched from a font host: the CSP forbids it, and a self-hosted bot should not phone out to
+ * draw its own settings page. Each face is split by `unicode-range`, so a reader only downloads the scripts their
+ * language uses, and Russian gets Cyrillic from the same family rather than from whatever the system has.
  */
 @font-face {
-	font-family: "Space Grotesk";
-	src: url("/fonts/space-grotesk-latin.woff2") format("woff2");
-	font-weight: 300 700;
+	font-family: "Rubik";
+	src: url("/fonts/rubik-latin.woff2") format("woff2");
+	font-weight: 300 900;
 	font-display: swap;
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+		U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-	font-family: "Inter";
-	src: url("/fonts/inter-latin.woff2") format("woff2");
-	font-weight: 100 900;
+	font-family: "Rubik";
+	src: url("/fonts/rubik-latin-ext.woff2") format("woff2");
+	font-weight: 300 900;
 	font-display: swap;
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-	font-family: "JetBrains Mono";
-	src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
-	font-weight: 100 800;
+	font-family: "Rubik";
+	src: url("/fonts/rubik-cyrillic.woff2") format("woff2");
+	font-weight: 300 900;
 	font-display: swap;
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+		U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-ext-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-cyrillic-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-700.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+		U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-ext-700.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-cyrillic-700.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
 /**
- * The console palette. Every value is verified against WCAG before it lands, by `src/test/contrast.test.ts`,
- * which fails if one drops below its threshold.
+ * The palette. Every value is verified against WCAG before it lands, by `src/test/contrast.test.ts`, which fails if
+ * one drops below its threshold.
  *
- * Two colours carry the violet because one cannot: `--color-primary` is a **fill** and only ever wears white
- * text on it, while `--color-accent` is the **text** violet for links and live state. Using the fill colour as
- * 14px text measured 3.47:1 and failed AA in five real places.
+ * Two colours carry the accent because one cannot: `--color-primary` is a **fill** that only ever wears white text,
+ * while `--color-accent` is the **text** colour for links and live state.
  */
 @theme {
 	/* Every colour is `light-dark(light, dark)`, so a token is one line holding both themes and the two can
 	   never drift to different sets. `contrast.test.ts` reads both halves and checks each against WCAG. */
-	--color-background: light-dark(#f4f4f9, #07070b);
-	--color-foreground: light-dark(#15151f, #ffffff);
-	--color-muted: light-dark(#e9e8f2, #1c1c2a);
-	--color-muted-foreground: light-dark(#55556e, #a2a2ba);
-	--color-card: light-dark(#ffffff, #12121c);
-	--color-popover: light-dark(#ffffff, #171722);
-	--color-border: light-dark(#dcdae8, #262639);
-	--color-input: light-dark(#6b6b8a, #7676a0);
-	--color-primary: light-dark(#6d28d9, #7c3aed);
+	--color-background: light-dark(#f2f3f6, #1f2125);
+	--color-foreground: light-dark(#1b1e24, #eceef1);
+	--color-muted: light-dark(#e7e9ee, #33363c);
+	--color-muted-foreground: light-dark(#565d6b, #a2a7b0);
+	--color-card: light-dark(#ffffff, #282b30);
+	--color-popover: light-dark(#ffffff, #2e3137);
+	--color-border: light-dark(#d9dde4, #383c43);
+	--color-input: light-dark(#767d8a, #7d838e);
+	/* The column a server's channels are listed in, a step back from the page as Discord's own is. */
+	--color-sidebar: light-dark(#e7e9ee, #191b1f);
+	--color-primary: light-dark(#8a2a6b, #bf3a94);
 	--color-primary-foreground: #ffffff;
-	--color-accent: light-dark(#5b21b6, #a78bfa);
-	--color-ring: light-dark(#6d28d9, #a78bfa);
+	--color-accent: light-dark(#7a2260, #e08ac4);
+	/* Behind the selected row or chip, under accent text. */
+	--color-accent-wash: light-dark(#f6e9f2, #3a2433);
+	--color-ring: light-dark(#8a2a6b, #e08ac4);
 	--color-success: light-dark(#047857, #3ddc97);
 	--color-warning: light-dark(#a16207, #fbbf24);
 	--color-destructive: light-dark(#b91c1c, #dc2626);
@@ -70,11 +135,11 @@
 	--radius-card: 0.625rem;
 	--radius-tile: 1rem;
 
-	/* Three roles, three faces. Space Grotesk is the proportional cut of Space Mono, so a console's headings and
-	   its data are drawn from the same skeleton — the pairing is the concept rather than a taste. */
-	--font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-	--font-mono: "JetBrains Mono", ui-monospace, monospace;
+	/* Rubik is rounded at the corners like Discord's own type, and Fira Mono marks what is typed literally: ids,
+	   placeholders such as {user}, and code. Headings are Rubik at a heavier weight rather than a second family. */
+	--font-display: "Rubik", ui-sans-serif, system-ui, sans-serif;
+	--font-sans: "Rubik", ui-sans-serif, system-ui, sans-serif;
+	--font-mono: "Fira Mono", ui-monospace, monospace;
 
 	/* Tailwind's default for this size is 1.43, which is tight for prose — and `text-sm` is most of the app. */
 	--text-sm--line-height: 1.55;
@@ -170,115 +235,102 @@
 	}
 
 	/**
-	 * The accent choices. Only the three violet-carrying tokens move: success, warning and destructive keep
-	 * their own meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair
-	 * is measured against both backgrounds by `contrast.test.ts`, which reads these blocks rather than keeping
-	 * a list of its own.
+	 * The accent choices. Only the three accent-carrying tokens move: success, warning and destructive keep their own
+	 * meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair is measured
+	 * against both grounds by `contrast.test.ts`, which reads these blocks rather than keeping a list of its own.
 	 *
-	 * The attribute is not pinned to `:root`, so the picker can put one on a swatch and have it paint itself
-	 * in that accent while the page around it stays on the chosen one — the same trick `ThemePreview` plays
-	 * with `color-scheme`. These sit in the `base` layer, which is what puts them ahead of `@theme`.
+	 * The attribute is not pinned to `:root`, so the picker can put one on a swatch and have it paint itself in that
+	 * accent while the page around it stays on the chosen one. These sit in the `base` layer, which is what puts them
+	 * ahead of `@theme`.
 	 *
-	 * Violet restates the base palette rather than relying on it: choosing violet leaves the page unmarked, but
-	 * a swatch still has to paint violet while the page around it wears something else. The test asserts the two
-	 * copies are identical.
+	 * Plum restates the base palette rather than relying on it: choosing plum leaves the page unmarked, but a swatch
+	 * still has to paint plum while the page around it wears something else. The test asserts the two copies match.
+	 *
+	 * A dark fill has to sit between 3:1 against the dark ground and 4.5:1 under white, which leaves a narrow band of
+	 * lightness for every hue; each dark fill below is its light fill moved into that band.
 	 */
-	[data-accent="violet"] {
-		--color-primary: light-dark(#6d28d9, #7c3aed);
-		--color-accent: light-dark(#5b21b6, #a78bfa);
-		--color-ring: light-dark(#6d28d9, #a78bfa);
+	[data-accent="plum"] {
+		--color-primary: light-dark(#8a2a6b, #bf3a94);
+		--color-accent: light-dark(#7a2260, #e08ac4);
+		--color-ring: light-dark(#8a2a6b, #e08ac4);
 	}
 
 	[data-accent="indigo"] {
-		--color-primary: light-dark(#4338ca, #4f46e5);
-		--color-accent: light-dark(#3730a3, #818cf8);
-		--color-ring: light-dark(#4338ca, #818cf8);
+		--color-primary: light-dark(#4338ca, #6961d5);
+		--color-accent: light-dark(#3730a3, #a5b4fc);
+		--color-ring: light-dark(#4338ca, #a5b4fc);
 	}
 
 	[data-accent="blue"] {
-		--color-primary: light-dark(#1d4ed8, #2563eb);
-		--color-accent: light-dark(#1e40af, #60a5fa);
-		--color-ring: light-dark(#1d4ed8, #60a5fa);
+		--color-primary: light-dark(#1d4ed8, #3a66e5);
+		--color-accent: light-dark(#1e40af, #93c5fd);
+		--color-ring: light-dark(#1d4ed8, #93c5fd);
 	}
 
-	/* Sky, cyan, teal, emerald, amber and orange take one fill for both themes: these hues only carry white text at
-	   4.5:1 down at the shade the light theme uses, and a fill lightened for dark would fail the button drawn on it. */
 	[data-accent="sky"] {
-		--color-primary: #0369a1;
-		--color-accent: light-dark(#075985, #38bdf8);
-		--color-ring: light-dark(#0369a1, #38bdf8);
+		--color-primary: light-dark(#0369a1, #0376b4);
+		--color-accent: light-dark(#075985, #7dd3fc);
+		--color-ring: light-dark(#0369a1, #7dd3fc);
 	}
 
 	[data-accent="cyan"] {
-		--color-primary: #0e7490;
-		--color-accent: light-dark(#155e75, #22d3ee);
-		--color-ring: light-dark(#0e7490, #22d3ee);
+		--color-primary: light-dark(#0e7490, #0f7997);
+		--color-accent: light-dark(#155e75, #67e8f9);
+		--color-ring: light-dark(#0e7490, #67e8f9);
 	}
 
 	[data-accent="teal"] {
-		--color-primary: #0f766e;
-		--color-accent: light-dark(#115e59, #2dd4bf);
-		--color-ring: light-dark(#0f766e, #2dd4bf);
+		--color-primary: light-dark(#0f766e, #107e75);
+		--color-accent: light-dark(#115e59, #5eead4);
+		--color-ring: light-dark(#0f766e, #5eead4);
 	}
 
 	[data-accent="emerald"] {
-		--color-primary: #047857;
-		--color-accent: light-dark(#065f46, #34d399);
-		--color-ring: light-dark(#047857, #34d399);
+		--color-primary: light-dark(#047857, #04805c);
+		--color-accent: light-dark(#065f46, #6ee7b7);
+		--color-ring: light-dark(#047857, #6ee7b7);
 	}
 
 	[data-accent="amber"] {
-		--color-primary: #b45309;
-		--color-accent: light-dark(#92400e, #fbbf24);
-		--color-ring: light-dark(#b45309, #fbbf24);
+		--color-primary: light-dark(#b45309, #b65409);
+		--color-accent: light-dark(#92400e, #fcd34d);
+		--color-ring: light-dark(#b45309, #fcd34d);
 	}
 
 	[data-accent="orange"] {
-		--color-primary: #c2410c;
-		--color-accent: light-dark(#9a3412, #fb923c);
-		--color-ring: light-dark(#c2410c, #fb923c);
+		--color-primary: light-dark(#c2410c, #c7430c);
+		--color-accent: light-dark(#9a3412, #fdba74);
+		--color-ring: light-dark(#c2410c, #fdba74);
 	}
 
 	[data-accent="rose"] {
-		--color-primary: light-dark(#be123c, #e11d48);
-		--color-accent: light-dark(#9f1239, #fb7185);
-		--color-ring: light-dark(#be123c, #fb7185);
+		--color-primary: light-dark(#be123c, #dc1546);
+		--color-accent: light-dark(#9f1239, #fda4af);
+		--color-ring: light-dark(#be123c, #fda4af);
 	}
 
 	[data-accent="pink"] {
-		--color-primary: light-dark(#be185d, #db2777);
-		--color-accent: light-dark(#9d174d, #f472b6);
-		--color-ring: light-dark(#be185d, #f472b6);
+		--color-primary: light-dark(#be185d, #d71b69);
+		--color-accent: light-dark(#9d174d, #f9a8d4);
+		--color-ring: light-dark(#be185d, #f9a8d4);
 	}
 
 	[data-accent="slate"] {
-		--color-primary: light-dark(#475569, #64748b);
-		--color-accent: light-dark(#334155, #94a3b8);
-		--color-ring: light-dark(#475569, #94a3b8);
+		--color-primary: light-dark(#475569, #5f718c);
+		--color-accent: light-dark(#334155, #cbd5e1);
+		--color-ring: light-dark(#475569, #cbd5e1);
 	}
 
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
-		/* A single wash behind the WebGL field, so the page still has depth when WebGL is unavailable. */
-		background-image:
-			radial-gradient(70rem 45rem at 12% -12%, --alpha(var(--color-accent) / 10%), transparent 62%),
-			radial-gradient(50rem 35rem at 92% 4%, --alpha(var(--color-primary) / 8%), transparent 58%);
-		background-attachment: fixed;
 	}
 
 	h1,
 	h2,
 	h3 {
-		font-feature-settings: "ss01", "cv11";
 		text-wrap: balance;
 		/* Set on the element rather than the size token, so `text-base` prose keeps its reading measure. */
 		line-height: 1.2;
-	}
-
-	/* JetBrains Mono draws `!==` and `=>` as single glyphs, which misquotes the code a reader may copy. */
-	code,
-	pre {
-		font-variant-ligatures: none;
 	}
 
 	/* Without this a tap waits ~300ms for a second one that is never coming, because zoom is still possible. */

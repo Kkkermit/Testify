@@ -1,7 +1,7 @@
 import { type Preference, useRootPreference } from "@/hooks/rootPreference";
 
 export const ACCENTS = [
-	"violet",
+	"plum",
 	"indigo",
 	"blue",
 	"sky",
@@ -16,12 +16,12 @@ export const ACCENTS = [
 ] as const;
 export type Accent = (typeof ACCENTS)[number];
 
-/** Violet is the base palette in `index.css`, so choosing it removes the attribute rather than restating it. */
+/** Plum is the base palette in `index.css`, so choosing it removes the attribute rather than restating it. */
 export const ACCENT: Preference<Accent> = {
 	attribute: "data-accent",
 	storageKey: "testify:accent",
 	options: ACCENTS,
-	fallback: "violet",
+	fallback: "plum",
 };
 
 export function useAccent(): { accent: Accent; setAccent: (next: Accent) => void } {

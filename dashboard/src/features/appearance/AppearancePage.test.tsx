@@ -62,9 +62,9 @@ describe("choosing an accent", () => {
 	/** Each swatch paints itself in its own accent, whatever the page is wearing. */
 	it("shows every swatch in its own colours", async () => {
 		render();
-		const violet = await screen.findByRole("button", { name: "Violet" });
+		const plum = await screen.findByRole("button", { name: "Plum" });
 
-		expect(violet).toHaveAttribute("data-accent", "violet");
+		expect(plum).toHaveAttribute("data-accent", "plum");
 		expect(screen.getByRole("button", { name: "Amber" })).toHaveAttribute("data-accent", "amber");
 	});
 });

@@ -84,6 +84,9 @@ it("meets every threshold the base palette is used at, in both themes", () => {
 					["muted text on the page", of("muted-foreground"), page, TEXT],
 					["muted text on a card", of("muted-foreground"), card, TEXT],
 					["muted text on a recessed fill", of("muted-foreground"), of("muted"), TEXT],
+					["foreground in the sidebar", of("foreground"), of("sidebar"), TEXT],
+					["muted text in the sidebar", of("muted-foreground"), of("sidebar"), TEXT],
+					["accent text on its wash", of("accent"), of("accent-wash"), TEXT],
 					["a link on the page", of("accent"), page, TEXT],
 					["a link on a card", of("accent"), card, TEXT],
 					["red text on a card", of("destructive-text"), card, TEXT],
@@ -107,12 +110,12 @@ it("meets every threshold the base palette is used at, in both themes", () => {
 	expect(missed).toEqual([]);
 });
 
-it("keeps the fill violet and the text violet as separate tokens", () => {
+it("keeps the fill accent and the text accent as separate tokens", () => {
 	for (const scheme of SCHEMES) expect(token("primary", scheme)).not.toBe(token("accent", scheme));
 });
 
-/** The dark fill violet (3.47:1) stays out of use as body text. */
-it("keeps the dark fill violet out of reach as a text colour", () => {
+/** The dark fill stays out of use as body text, because it is only legible as a fill. */
+it("keeps the dark fill out of reach as a text colour", () => {
 	expect(contrast(token("primary", "dark"), token("background", "dark"))).toBeLessThan(TEXT);
 });
 
@@ -138,7 +141,7 @@ it("meets every threshold with each accent, in both themes", () => {
 	expect(missed).toEqual([]);
 });
 
-/** The same hazard the base violet has: a fill that reads as legible text on near-black, and is not. */
+/** The same hazard the base fill has: one that reads as legible text on the dark ground, and is not. */
 it("keeps every accent's dark fill out of reach as a text colour", () => {
 	const legible = ACCENTS.filter(
 		(accent) => contrast(accentToken(accent, "primary", "dark"), token("background", "dark")) >= TEXT,
@@ -147,10 +150,10 @@ it("keeps every accent's dark fill out of reach as a text colour", () => {
 	expect(legible).toEqual([]);
 });
 
-/** The violet block has to match the base tokens, or its swatch shows a colour it does not select. */
-it("keeps the violet block equal to the base tokens", () => {
+/** The plum block has to match the base tokens, or its swatch shows a colour it does not select. */
+it("keeps the plum block equal to the base tokens", () => {
 	for (const scheme of SCHEMES) {
 		for (const name of ["primary", "accent", "ring"])
-			expect(accentToken("violet", name, scheme)).toBe(token(name, scheme));
+			expect(accentToken("plum", name, scheme)).toBe(token(name, scheme));
 	}
 });

@@ -21,7 +21,7 @@ const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hi
 };
 
 const ACCENT_LABELS: Record<Accent, TranslationKey> = {
-	violet: "appearance.accentViolet",
+	plum: "appearance.accentPlum",
 	indigo: "appearance.accentIndigo",
 	blue: "appearance.accentBlue",
 	sky: "appearance.accentSky",
