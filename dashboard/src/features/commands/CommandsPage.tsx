@@ -27,11 +27,10 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/** `scope` decides which list is edited. Neither scope is a permission — the API answers 404 or 403 regardless. */
+/** Not a permission: the API answers 404 or 403 regardless. */
 export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("commands.title"));
-	// Present when the page is reached from inside a server, which is what makes a Configure link possible.
 	const { guildId = null } = useParams();
 
 	const global = scope === "global";
@@ -41,7 +40,6 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 
 	const catalogue = useCommands();
 	const overview = useGuildOverview(guildId);
-	// In the address, so quick search can open this page already filtered to one command.
 	const [params, setParams] = useSearchParams();
 	const search = params.get("q") ?? "";
 	const setSearch = (value: string): void => {
@@ -62,7 +60,6 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	const groups = useMemo(() => groupByCategory(shown, catalogue.data?.categories ?? []), [shown, catalogue.data]);
 
 	if (catalogue.isPending) return <Skeleton className="h-96 w-full" />;
-	// Mounted inside an owner console tab, this page has no header of its own — the console owns the `<h1>`.
 	if (catalogue.isError)
 		return <ErrorState as={global ? "h2" : "h1"} error={catalogue.error} onRetry={() => void catalogue.refetch()} />;
 
@@ -75,7 +72,6 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	}
 
 	return (
-		// Its own rhythm rather than the shell's: mounted in an owner console tab there is no gap-6 column above it.
 		<div className="flex flex-col gap-6">
 			{global ? (
 				<p className="text-muted-foreground text-sm">{subtitleFor(global, state !== undefined, t)}</p>
@@ -138,7 +134,6 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 					/>
 				</Card>
 			) : (
-				// Sections are nested one level deep, so §19.6's between-sections gap-6 applies here rather than the shell's.
 				<div className="flex flex-col gap-6">
 					{groups.map(([name, group]) => (
 						<section key={name} aria-labelledby={`category-${name}`} className="flex flex-col gap-3">
@@ -172,7 +167,6 @@ export function CommandsPage({ scope }: { scope?: "global" } = {}): React.JSX.El
 	);
 }
 
-/** Says what the switches do wherever there are any, because a row of them with no explanation is a guess. */
 function switchedOff(state: { disabled: string[] }, global: boolean, t: TFunction): string {
 	if (state.disabled.length === 0) return t(global ? "commands.availableEverywhere" : "commands.availableHere");
 

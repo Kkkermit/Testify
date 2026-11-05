@@ -7,7 +7,6 @@ import { BotMark } from "@/components/brand/BotMark";
 import { type NavAudience } from "@/config/navigation";
 import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 
-/** A drawer below `md`, closing on Escape, on a link, and returning focus to its button. */
 export function MobileNav({
 	user,
 	bot,

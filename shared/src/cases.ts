@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/** One numbered record for every moderation action, whichever surface took it. */
-
 export const CASE_ACTIONS = ["warn", "timeout", "untimeout", "kick", "ban", "softban", "unban"] as const;
 
 export type CaseAction = (typeof CASE_ACTIONS)[number];

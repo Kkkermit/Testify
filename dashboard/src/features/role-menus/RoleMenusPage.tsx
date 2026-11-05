@@ -22,7 +22,6 @@ import {
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
-/** Menus members pick their own roles from; the roles they hand out stay below the manager's own and the bot's. */
 export function RoleMenusPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -47,7 +46,6 @@ export function RoleMenusPage(): React.JSX.Element {
 	const keyOf = (menuId: string): string => `role-menu:${guildId}:${menuId}`;
 	const menus = list.data.menus.filter((menu) => !undo.isHidden(keyOf(menu.id)));
 	const editingMenu = menus.find((menu) => menu.id === editing) ?? null;
-	// One waiting to be deleted still holds its place against the limit until it has gone.
 	const full = list.data.menus.length >= list.data.limit;
 	const busy = create.isPending || update.isPending || publish.isPending || remove.isPending;
 	const message = (error: Error | null, fallback: string): string | null =>
@@ -140,7 +138,6 @@ export function RoleMenusPage(): React.JSX.Element {
 				<Warning>{t("roleMenus.full")}</Warning>
 			) : (
 				<RoleMenuForm
-					// A fresh form per menu, so switching between them never carries one's draft into another.
 					key={editingMenu?.id ?? `new-${String(made)}`}
 					initial={editingMenu === null ? emptyDraft() : draftOf(editingMenu, roleList)}
 					editing={editingMenu?.title ?? null}

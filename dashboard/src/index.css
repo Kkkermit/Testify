@@ -1,10 +1,6 @@
 @import "tailwindcss";
 
-/**
- * Self-hosted, never fetched from a font host: the CSP forbids it, and a self-hosted bot should not phone out to
- * draw its own settings page. Each face is split by `unicode-range`, so a reader only downloads the scripts their
- * language uses, and Russian gets Cyrillic from the same family rather than from whatever the system has.
- */
+/** Self-hosted, because the CSP forbids a font host; `unicode-range` means a reader downloads only their own scripts. */
 @font-face {
 	font-family: "Rubik";
 	src: url("/fonts/rubik-latin.woff2") format("woff2");
@@ -89,16 +85,9 @@
 	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
-/**
- * The palette. Every value is verified against WCAG before it lands, by `src/test/contrast.test.ts`, which fails if
- * one drops below its threshold.
- *
- * Two colours carry the accent because one cannot: `--color-primary` is a **fill** that only ever wears white text,
- * while `--color-accent` is the **text** colour for links and live state.
- */
+/** The palette, measured against WCAG by `src/test/contrast.test.ts`: `primary` is a fill under white, `accent` the text colour. */
 @theme {
-	/* Every colour is `light-dark(light, dark)`, so a token is one line holding both themes and the two can
-	   never drift to different sets. `contrast.test.ts` reads both halves and checks each against WCAG. */
+	/* Every colour is `light-dark(light, dark)`, so one line holds both themes. */
 	--color-background: light-dark(#f2f3f6, #1f2125);
 	--color-foreground: light-dark(#1b1e24, #eceef1);
 	--color-muted: light-dark(#e7e9ee, #33363c);
@@ -121,7 +110,7 @@
 	/* Red is legible as a fill or as text, never as both, so the text cut is its own token. */
 	--color-destructive-text: light-dark(#b91c1c, #f87171);
 
-	/* Feature tints. Text colours at AA on the card, used as icons and as 15% fills. */
+	/* Category hues, at AA as text on the card, worn on icons. */
 	--color-hue-violet: light-dark(#6d28d9, #a78bfa);
 	--color-hue-amber: light-dark(#a16207, #fbbf24);
 	--color-hue-red: light-dark(#b91c1c, #f87171);
@@ -135,8 +124,7 @@
 	--radius-card: 0.625rem;
 	--radius-tile: 1rem;
 
-	/* Rubik is rounded at the corners like Discord's own type, and Fira Mono marks what is typed literally: ids,
-	   placeholders such as {user}, and code. Headings are Rubik at a heavier weight rather than a second family. */
+	/* Rubik is rounded like Discord's own type; Fira Mono marks what is typed literally. */
 	--font-display: "Rubik", ui-sans-serif, system-ui, sans-serif;
 	--font-sans: "Rubik", ui-sans-serif, system-ui, sans-serif;
 	--font-mono: "Fira Mono", ui-monospace, monospace;
@@ -188,8 +176,7 @@
 }
 
 @layer base {
-	/* The theme switch. `light-dark()` holds both values on one token, so `color-scheme` is the only thing that
-	   moves — and the system default needs no script, which the CSP could not have run inline anyway. */
+	/* `color-scheme` is all the theme switch moves, so the system default needs no script. */
 	:root {
 		color-scheme: light dark;
 	}
@@ -202,14 +189,7 @@
 		color-scheme: dark;
 	}
 
-	/**
-	 * A sample of one theme drawn on a page wearing the other, for the previews on the appearance screen.
-	 *
-	 * It has to be a rule in this file rather than an inline `style={{ colorScheme }}`: Lightning CSS polyfills
-	 * `light-dark()` into a pair of variables and only emits the flip for selectors where it saw a
-	 * `color-scheme` declaration, so an element that sets one inline keeps whichever half the root resolved and
-	 * every sample renders in the page's own theme.
-	 */
+	/** A sample of the other theme, as a rule here because Lightning CSS only flips `light-dark()` where it sees `color-scheme`. */
 	[data-scheme="light"] {
 		color-scheme: light;
 	}
@@ -218,21 +198,7 @@
 		color-scheme: dark;
 	}
 
-	/**
-	 * The accent choices. Only the accent-carrying tokens move: success, warning and destructive keep their own
-	 * meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair is measured
-	 * against both grounds by `contrast.test.ts`, which reads these blocks rather than keeping a list of its own.
-	 *
-	 * The attribute is not pinned to `:root`, so the picker can put one on a swatch and have it paint itself in that
-	 * accent while the page around it stays on the chosen one. These sit in the `base` layer, which is what puts them
-	 * ahead of `@theme`.
-	 *
-	 * Plum restates the base palette rather than relying on it: choosing plum leaves the page unmarked, but a swatch
-	 * still has to paint plum while the page around it wears something else. The test asserts the two copies match.
-	 *
-	 * A dark fill has to sit between 3:1 against the dark ground and 4.5:1 under white, which leaves a narrow band of
-	 * lightness for every hue; each dark fill below is its light fill moved into that band.
-	 */
+	/** Only the accent tokens move; the attribute is not pinned to `:root` so a swatch can paint itself, and plum restates the base for its swatch. */
 	[data-accent="plum"] {
 		--color-primary: light-dark(#8a2a6b, #bf3a94);
 		--color-accent: light-dark(#7a2260, #e08ac4);
@@ -317,9 +283,7 @@
 		--color-ring: light-dark(#475569, #cbd5e1);
 	}
 
-	/* Somebody's own colour. `customAccent` fits it into each theme and writes the shades onto the root, where this reads
-	   them; the fallbacks are plum's, for a page marked custom with nothing stored. The wash moves too, so a tint behind
-	   accent text is drawn from the same colour as the text. */
+	/* Somebody's own colour, written onto the root by `customAccent`, with plum's shades as the fallback. */
 	[data-accent="custom"] {
 		--color-primary: light-dark(var(--custom-primary-light, #8a2a6b), var(--custom-primary-dark, #bf3a94));
 		--color-accent: light-dark(var(--custom-accent-light, #7a2260), var(--custom-accent-dark, #e08ac4));
@@ -389,7 +353,7 @@
 		border-radius: var(--radius-chip);
 	}
 
-	/** Firefox and WebKit take different properties for this, and without both a dark page gets the platform's light scrollbar. */
+	/** Firefox and WebKit each need their own properties, or a dark page gets a light scrollbar. */
 	* {
 		scrollbar-width: thin;
 		scrollbar-color: var(--color-border) transparent;
@@ -417,7 +381,7 @@
 		background: transparent;
 	}
 
-	/** A native select leaves no room for a chevron of ours, so it is an inline SVG background; `currentColor` cannot be used in a `url()`. */
+	/** The chevron is an inline SVG background, because `currentColor` cannot be used in a `url()`. */
 	select {
 		appearance: none;
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -433,7 +397,7 @@
 	}
 }
 
-/** For a scroller whose bar would sit on top of what it scrolls. The content still scrolls, so this is never the only way to reach it. */
+/** For a scroller whose bar would sit on top of what it scrolls. */
 @utility scrollbar-none {
 	scrollbar-width: none;
 
@@ -450,7 +414,7 @@
 	animation: var(--animate-pop);
 }
 
-/** The boot banner draws its sections with a heavy rule and its rows with a thin one; these are those two. */
+/** The boot banner's heavy and thin rules. */
 @utility rule-heavy {
 	border-top: 2px solid var(--color-border);
 }
@@ -473,7 +437,7 @@
 	}
 }
 
-/** Tippy ships a light theme, so this is the whole of its appearance here, reading the same tokens as everything else. */
+/** The whole of a tooltip's look, from the same tokens as everything else. */
 .tippy-box[data-theme~="testify"] {
 	background-color: var(--color-popover);
 	color: var(--color-foreground);
@@ -497,14 +461,7 @@
 	}
 }
 
-/**
- * Motion here is feedback, not decoration, so removing it costs nothing and keeps the dashboard usable.
- *
- * The system preference is the default because it applies before any script runs — the CSP forbids the inline
- * bootstrap that would set an attribute earlier — and the appearance page overrides it in both directions.
- * Two selector lists rather than one because a media query and an attribute cannot be combined into a single
- * condition; the declarations they gate are the same four either way.
- */
+/** Reduced motion follows the system unless Appearance says otherwise; a media query and an attribute cannot share a selector. */
 @media (prefers-reduced-motion: reduce) {
 	:root:not([data-motion="full"]) *,
 	:root:not([data-motion="full"]) *::before,
@@ -533,10 +490,7 @@
 	display: none;
 }
 
-/**
- * Highlighted code, from the token classes highlight.js names. Every colour is a token `contrast.test.ts` already
- * measures as text on the card, which is the surface every code block is drawn on.
- */
+/** Highlighted code; every colour is a token `contrast.test.ts` measures as text on the card. */
 @layer components {
 	.code-tokens {
 		.hljs-comment,

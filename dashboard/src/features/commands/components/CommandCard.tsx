@@ -19,7 +19,6 @@ export function CommandCard({
 	command: CommandSummary;
 	prefix: string;
 	place: CommandPlace | null;
-	/** Absent when nobody on this page may switch commands, which is most visitors on `/commands`. */
 	availability?: CommandAvailability;
 	onToggle?: (on: boolean) => void;
 }): React.JSX.Element {

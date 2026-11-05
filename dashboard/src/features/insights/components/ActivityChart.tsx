@@ -4,7 +4,6 @@ import { barHeight } from "@/features/insights/insights.utils";
 import { shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 
-/** Messages a day as bars; the numbers, joins and leaves included, are a real table for anybody not seeing the bars. */
 export function ActivityChart({ days }: { days: InsightDay[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const max = Math.max(0, ...days.map((day) => day.messages));

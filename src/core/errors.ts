@@ -26,7 +26,6 @@ export class UserFacingError extends Error {
 	}
 }
 
-/** An external API failed. */
 export class ServiceError extends Error {
 	constructor(
 		readonly service: string,
@@ -52,7 +51,6 @@ export function toError(value: unknown): Error {
 	return new Error(typeof value === "string" ? value : JSON.stringify(value));
 }
 
-/** Red, with a cross, and a heading when the reader needs telling it was not their doing. */
 function failureEmbed(message: string, title?: string): EmbedBuilder {
 	const built = new EmbedBuilder().setColor(theme.colours.error);
 	return title === undefined

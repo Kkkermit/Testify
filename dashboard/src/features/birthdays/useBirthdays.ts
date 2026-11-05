@@ -9,7 +9,6 @@ import { type BirthdayOverview, type BirthdayPatch } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** A spread would let an absent field overwrite a present one with `undefined`. */
 function applyPatch(current: BirthdayOverview, patch: BirthdayPatch): BirthdayOverview {
 	return {
 		...current,
@@ -26,7 +25,6 @@ export function useBirthdays(guildId: string): UseQueryResult<BirthdayOverview> 
 	});
 }
 
-/** Optimistic, with the previous value kept so a refusal puts it back. */
 export function useUpdateBirthdays(guildId: string): UseMutationResult<BirthdayOverview, Error, BirthdayPatch> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).birthdays();

@@ -30,7 +30,6 @@ const PRIMARY_LINK = cn(
 );
 const SECTION_TITLE = "font-display text-2xl leading-tight font-bold tracking-tight";
 
-/** The front door: what the bot is in one line, signing in as the one thing to do, and the docs and code behind it. */
 export function LandingPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("landing.pageTitle"));
@@ -136,7 +135,6 @@ export function LandingPage(): React.JSX.Element {
 	);
 }
 
-/** Signing in is the page's one job, so the primary action is it until it is done, and then the servers it opens. */
 function SignedInAware({ invite, name }: { invite: string | null; name: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const me = useMe();

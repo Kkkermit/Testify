@@ -2,7 +2,6 @@ import { type ChannelSummary, type IdeaSettings as Settings } from "@testify/sha
 import { useTranslation } from "react-i18next";
 import { ChannelPicker, SettingRows, Toggle } from "@/components/form";
 
-/** The switch and the channel, each saved the moment it changes. */
 export function IdeaSettings({
 	settings,
 	channels,

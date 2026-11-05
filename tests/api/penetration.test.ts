@@ -46,7 +46,7 @@ function appAs(userId: string, client: TestifyClient) {
 	});
 
 	app.get("/owner/stats", requireOwner, (context) => context.json({ secret: "fleet" }));
-	// `requireGuild` sets it, and the whole point of these cases is whether the request reaches this handler.
+	// `requireGuild` sets it, and these cases are about whether the request reaches this handler.
 	const reached = (context: Context<ApiBindings>) => context.json({ id: context.get("guild")?.id ?? null });
 
 	app.get("/guilds/:guildId/settings", requireGuild, reached);

@@ -6,7 +6,6 @@ import { getPrefixConfig, setPrefix, setPrefixEnabled } from "@database/reposito
 import { modalForm } from "@lib/discord";
 import { checkPrefix, PREFIX_LIMITS, PREFIX_PANEL_ID, prefixPanel, type PrefixPanelState } from "@lib/settings";
 
-/** Every control on the prefix panel. */
 export async function prefixState(guildId: string): Promise<PrefixPanelState> {
 	return getPrefixConfig(guildId);
 }

@@ -86,10 +86,7 @@ export function musicBar(playedMs: number, durationMs: number, cells = BAR_CELLS
 	return `${"━".repeat(head)}●${"─".repeat(cells - head - 1)}`;
 }
 
-/**
- * The elapsed/total line, or nothing for a stream with no end; `<t:…:R>` counts down in the reader's client between
- * edits, which is why a paused track says so instead of offering a countdown that would keep running.
- */
+/** The elapsed/total line, or nothing for a stream with no end; a paused track says so rather than counting down. */
 export function progressLine(track: Track, playedMs: number, now = Date.now(), paused = false): string {
 	if (track.durationMs === null) return paused ? "`🔴 live`\n-# ⏸️ Paused" : "`🔴 live`";
 

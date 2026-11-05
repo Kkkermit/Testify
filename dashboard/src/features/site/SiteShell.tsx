@@ -17,10 +17,6 @@ const NAV_LINK = cn(
 	"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
 );
 
-/**
- * The landing page, the docs and the source browser: public, and the same whether or not this host has a dashboard.
- * `column` gives a page written for the dashboard's own column, Appearance, the website's margins.
- */
 export function SiteShell({ column = false }: { column?: boolean }): React.JSX.Element {
 	const { t } = useTranslation();
 	const bot = useBot();
@@ -103,7 +99,6 @@ function AppearanceLink(): React.JSX.Element {
 	);
 }
 
-/** Asked only where the dashboard exists, so a docs-only host never makes a request it knows will be refused. */
 function AccountLink(): React.JSX.Element {
 	const { t } = useTranslation();
 	const me = useMe();

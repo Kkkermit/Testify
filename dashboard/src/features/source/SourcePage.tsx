@@ -17,7 +17,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/** `/source-code` is the repository and its numbers; anything under it is a folder or a file of the running release. */
 export function SourcePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const path = (useParams()["*"] ?? "").replace(/\/+$/, "");
@@ -36,7 +35,6 @@ export function SourcePage(): React.JSX.Element {
 			) : index === null || tree.data === undefined ? (
 				<Skeleton className="h-96 w-full" />
 			) : (
-				// The file comes first, so a phone opens on it rather than below every folder; the grid puts the tree left.
 				<div className="grid items-start gap-6 lg:grid-cols-[17rem_minmax(0,1fr)]">
 					<div className="flex min-w-0 flex-col gap-4 lg:col-start-2 lg:row-start-1">
 						{tree.data.truncated && <p className="text-warning text-sm">{t("source.truncated")}</p>}

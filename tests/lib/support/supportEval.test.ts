@@ -150,7 +150,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["stop a raid of brand new accounts", ["raid-protection", "command-raid-protection"]],
 ];
 
-/** Typos and half-typed words: what people actually send, including the ones in the request that asked for this. */
+/** Typos and half-typed words, which is what people actually send. */
 const MISSPELT: [string, string[]][] = [
 	["how do i setup levling", ["levelling"]],
 	["welcom mesage", ["welcome", "welcome-styles", "welcome-not-sending"]],

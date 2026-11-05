@@ -4,10 +4,7 @@ import { BIRTHDAY_LIMITS } from "./birthdays";
 import { plainText } from "./text";
 import { WELCOME_LIMITS, WELCOME_STYLES } from "./welcome";
 
-/**
- * "Send me a test": a draft rendered by the bot's own builders and sent only to the person asking, in a direct message.
- * The draft is sent rather than the saved setting, so a message can be tried before it is saved.
- */
+/** Sent only to the person asking, as a direct message; the draft goes rather than the saved setting. */
 
 export const TEST_POST_LIMITS = {
 	/** Per person per server; a direct message is cheap to send and easy to flood somebody's inbox with. */
@@ -16,7 +13,6 @@ export const TEST_POST_LIMITS = {
 	maxMessage: 2_000,
 } as const;
 
-/** Every kind a dashboard preview can be tested as; scheduled, sticky and auto-responder posts are all plain text. */
 export const testPostBody = z.discriminatedUnion("kind", [
 	z.object({
 		kind: z.literal("greeting"),

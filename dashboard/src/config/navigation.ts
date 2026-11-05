@@ -49,37 +49,26 @@ import {
 } from "lucide-react";
 import { type TranslationKey } from "@/i18n";
 
-/** The sidebar as data: a new screen is one entry here and one route, and the rail, tooltips, search and active marker follow. */
 export interface NavItem {
 	to: string;
-	/** A translation key, not text: this module is data and has no hook to translate with. */
 	labelKey: TranslationKey;
 	icon: LucideIcon;
-	/** What the tooltip adds beyond the label. Omitted when the label already says everything. */
 	hintKey?: TranslationKey;
-	/** False when child routes should keep this item marked as current. */
 	exact?: boolean;
-	/** A live count drawn beside the label: what is waiting in this server's inbox. */
 	badge?: { kind: "inbox"; guildId: string };
 }
 
-/** A collapsible run of related screens, so a server's settings stay one scan rather than ten rows. */
 export interface NavSection {
 	labelKey: TranslationKey;
 	icon: LucideIcon;
 	items: NavItem[];
 }
 
-/** Groups put a server's own screens under its name, so it is always clear which server is being edited. */
 export interface NavGroup {
-	/** A server's own name, shown exactly as typed. Absent for the first group, which needs no heading. */
 	heading?: string;
-	/** For a group that is not named after a server, so its heading is translated rather than a name. */
 	headingKey?: TranslationKey;
-	/** Set on a server's own group, whose heading is the switcher to the same screen in another server. */
 	guildId?: string;
 	items: NavItem[];
-	/** Rendered last, each behind its own toggle. */
 	sections?: NavSection[];
 }
 
@@ -123,15 +112,11 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					badge: { kind: "inbox", guildId: guild.id },
 				},
 				{ to: at("/week"), labelKey: "nav.week", icon: CalendarDays, hintKey: "nav.weekHint" },
-				// One channel's page lives under this path, so Channels stays marked while it is open.
 				{ to: at("/channels"), labelKey: "nav.channels", icon: Hash, hintKey: "nav.channelsHint", exact: false },
-				// A member's own page lives under this path, and it is still where you are in the sidebar.
 				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
-				// A role's own page lives under this path too.
 				{ to: at("/roles"), labelKey: "nav.roles", icon: Shield, hintKey: "nav.rolesHint", exact: false },
 				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
 			],
-			// Each section holds only the screens it names, so a feature is found where its purpose says it is.
 			sections: [
 				{
 					labelKey: "nav.community",
@@ -235,7 +220,6 @@ export function allNavItems(groups: NavGroup[]): NavItem[] {
 	return groups.flatMap((group) => [...group.items, ...(group.sections ?? []).flatMap((section) => section.items)]);
 }
 
-/** Open on arrival when the current page is inside it, so a collapsed section never hides where you are. */
 export function sectionHolds(section: NavSection, pathname: string): boolean {
 	return section.items.some((item) => pathname === item.to || (item.exact === false && pathname.startsWith(item.to)));
 }

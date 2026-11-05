@@ -14,8 +14,6 @@ import { treasurePatch } from "./treasure";
 import { verificationPatchSchema } from "./verification";
 import { welcomePatchSchema } from "./welcome";
 
-/** The settings changes the Changes page can put back, each through the very route that made it. */
-
 export interface Restorable {
 	/** Under `/guilds/:guildId`, so the route's own gates decide a put-back exactly as they decided the change. */
 	path: string;
@@ -141,7 +139,6 @@ export function isRestorable(action: string): action is RestorableAction {
 	return Object.hasOwn(RESTORABLE, action);
 }
 
-/** How a recorded change is put back: what to send, and what the setting must still hold for that to undo only it. */
 export interface ChangeRestore {
 	action: RestorableAction;
 	/** The old values of the fields this change altered. */

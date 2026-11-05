@@ -9,7 +9,6 @@ import { usePunishments, useSavePunishments } from "@/features/warnings/useWarni
 import { addStep, replaceStep, STEP_OPTIONS, stepText } from "@/features/warnings/warnings.utils";
 import { ApiError } from "@/lib/api";
 
-/** What each warning does, one picker per warning number, written the moment a choice is made. */
 export function PunishmentsCard({ guildId }: { guildId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const punishments = usePunishments(guildId);
@@ -57,7 +56,7 @@ function PunishmentSteps({
 				steps.map((step, index) => {
 					const id = `punishment-${String(index)}`;
 					return (
-						// A step has no identity but its position, which is exactly what it means.
+						// A step has no identity but its position.
 						<Field key={index} label={t("warnings.warningNumber", { count: index + 1 })} htmlFor={id}>
 							<select
 								id={id}

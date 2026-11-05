@@ -11,17 +11,13 @@ export interface SearchEntry {
 	id: string;
 	kind: SearchKind;
 	label: string;
-	/** What the row says under its label, and more words to match on. */
 	detail: string;
 	to: string;
 	icon: LucideIcon | null;
-	/** Set on a server, whose row shows its picture instead of an icon. */
 	guild?: ManageableGuild;
-	/** Words that find the entry without being shown, such as a command's aliases. */
 	terms: string[];
 }
 
-/** The pages outside the sidebar's groups, which the footer reaches. */
 const EXTRA_PAGES = [
 	{ to: "/guilds/compare", labelKey: "nav.compare", hintKey: "nav.compareHint", icon: Columns3 },
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint", icon: Palette },
@@ -40,7 +36,6 @@ export function searchEntries({
 	t: TFunction;
 	guilds: readonly ManageableGuild[];
 	commands: readonly CommandSummary[];
-	/** The current server's channels; only those its reader can see become entries. */
 	channels?: readonly ChannelSummary[];
 }): SearchEntry[] {
 	const screens = [...allNavItems(navigationFor({ guild, isOwner })), ...EXTRA_PAGES].map<SearchEntry>((item) => ({
@@ -84,7 +79,6 @@ export function searchEntries({
 	const commandList = guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`;
 	const commandEntries = commands.map<SearchEntry>((command) => {
 		const place = configurableAt(command, guild?.id ?? null);
-		// The sidebar's own name for the screen, which is translated where the command map's is not.
 		const screen = place === null ? null : (screens.find((entry) => entry.to === place.path)?.label ?? place.screen);
 		return {
 			id: `command:${command.name}`,
@@ -100,7 +94,6 @@ export function searchEntries({
 	return [...screens, ...channelEntries, ...servers, ...commandEntries];
 }
 
-/** Lower-cased with accents removed, so "parametres" finds "Paramètres". */
 export function fold(text: string): string {
 	return text
 		.normalize("NFD")
@@ -114,7 +107,6 @@ function words(text: string): string[] {
 		.filter((word) => word !== "");
 }
 
-/** Lower is better; null when a word of the query appears nowhere in the entry. */
 export function scoreOf(entry: SearchEntry, query: string): number | null {
 	const wanted = words(query);
 	if (wanted.length === 0) return null;
@@ -136,7 +128,6 @@ const KIND_ORDER: Record<SearchKind, number> = { screen: 0, channel: 1, command:
 
 const RESULT_LIMIT = 8;
 
-/** Best match first, then screens before commands before servers; an empty query offers the start of the list. */
 export function searchFor(entries: readonly SearchEntry[], query: string, limit = RESULT_LIMIT): SearchEntry[] {
 	if (query.trim() === "") return entries.filter((entry) => entry.kind !== "command").slice(0, limit);
 
@@ -148,7 +139,6 @@ export function searchFor(entries: readonly SearchEntry[], query: string, limit 
 		.map((ranked) => ranked.entry);
 }
 
-/** The modifier this reader's keyboard calls it by. */
 export function shortcutLabel(platform: string): string {
 	return /Mac|iPhone|iPad/i.test(platform) ? "⌘K" : "Ctrl K";
 }

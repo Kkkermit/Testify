@@ -8,7 +8,6 @@ import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
 
-/** The three fields of a responder, the same whether it is being added or edited. */
 export function ResponderFields({
 	id,
 	value,
@@ -80,7 +79,6 @@ export function ResponderFields({
 	);
 }
 
-/** Inside rows each field is a row of its own; outside them the trigger and its match share a line. */
 function Pair({ row, children }: { row: boolean; children: ReactNode }): React.JSX.Element {
 	return row ? <>{children}</> : <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_16rem]">{children}</div>;
 }

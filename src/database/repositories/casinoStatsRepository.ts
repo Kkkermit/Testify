@@ -34,7 +34,6 @@ export interface CasinoStatsReport {
 	byGame: (Omit<CasinoTotals, "players" | "since"> & { game: CasinoGame })[];
 	biggestWin: CasinoStandout | null;
 	biggestBet: CasinoStandout | null;
-	/** Most ahead overall, and most behind. */
 	topWinner: CasinoStandout | null;
 	topLoser: CasinoStandout | null;
 	mine: Omit<CasinoTotals, "players" | "since"> | null;

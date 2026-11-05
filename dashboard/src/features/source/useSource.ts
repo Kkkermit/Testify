@@ -3,10 +3,8 @@ import { type RepositoryStanding, type RepositoryTraffic, type SourceFile, type 
 import { api, ApiError } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** The bot asks GitHub at most hourly, so the browser keeps each answer for the visit rather than asking again. */
 const HOUR = 60 * 60 * 1000;
 
-/** A refusal is the answer, not a hiccup, so only a failure GitHub might recover from is tried again. */
 function retryUnlessRefused(failures: number, error: Error): boolean {
 	return !(error instanceof ApiError && [403, 404].includes(error.status)) && failures < 2;
 }

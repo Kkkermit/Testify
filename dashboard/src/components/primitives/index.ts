@@ -1,5 +1,3 @@
-/** The handful of primitives every screen needs, each reading the design tokens rather than a hex value. */
-
 export { Avatar } from "@/components/primitives/Avatar";
 export { Badge, type BadgeTone } from "@/components/primitives/Badge";
 export { Button } from "@/components/primitives/Button";

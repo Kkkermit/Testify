@@ -29,7 +29,6 @@ export function MembersPage(): React.JSX.Element {
 
 	const board = boardFrom(params.get("board"));
 	const page = pageFrom(params.get("page"));
-	// The levels board has one figure and one server, so a sort or scope left in the URL means nothing there.
 	const sort = board === "economy" ? sortFrom(params.get("sort")) : "total";
 	const scope = board === "economy" ? scopeFrom(params.get("scope")) : "server";
 
@@ -39,7 +38,7 @@ export function MembersPage(): React.JSX.Element {
 
 	usePageTitle(t("members.title"), overview.data?.name);
 
-	// Merged rather than replaced, so switching board does not strip the page you came from.
+	// Merged rather than replaced, or switching board drops the rest of the address.
 	function put(changes: Record<string, string>): void {
 		setParams((current) => {
 			const merged = new URLSearchParams(current);

@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-/** A word in its tone's colour inside a hairline, so a list of badges does not read as a row of coloured blocks. */
 const TONES = {
 	muted: "border-border text-muted-foreground",
 	success: "border-success/40 text-success",

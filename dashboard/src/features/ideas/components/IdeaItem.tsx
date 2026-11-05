@@ -16,7 +16,6 @@ const STATUS_LABEL: Record<IdeaRow["status"], TranslationKey> = {
 	declined: "ideas.statusDeclined",
 };
 
-/** One idea, with its votes and the decision beside it; deciding here posts and DMs exactly as Discord's buttons do. */
 export function IdeaItem({
 	idea,
 	busy,

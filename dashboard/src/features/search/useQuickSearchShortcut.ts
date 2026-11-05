@@ -1,6 +1,5 @@
 import { useEffect } from "react";
 
-/** Ctrl+K, or ⌘K on a Mac, from anywhere on the page, including inside a text box. */
 export function useQuickSearchShortcut(onToggle: () => void): void {
 	useEffect(() => {
 		const onKeyDown = (event: KeyboardEvent): void => {

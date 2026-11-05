@@ -1,7 +1,5 @@
 import { COUNTING_DEFAULT_MAX } from "@config/constants";
 
-/** The identifiers, limits and defaults more than one module in this domain reads. */
-
 export const AUTOROLE_PANEL_ID = "autorole";
 
 /** Discord's cap on a role select, and plenty for a join list. */

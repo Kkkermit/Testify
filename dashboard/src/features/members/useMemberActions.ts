@@ -37,9 +37,7 @@ interface MemberActions {
 	timeout: UseMutationResult<MemberDetail, Error, TimeoutBody>;
 	liftTimeout: UseMutationResult<MemberDetail, Error, void>;
 	rename: UseMutationResult<MemberDetail, Error, NicknameBody>;
-	/** Any write in flight disables every control, so two cannot race on one member. */
 	busy: boolean;
-	/** The first failure of whichever write produced one, so the page shows one message rather than several. */
 	failure: Error | null;
 }
 

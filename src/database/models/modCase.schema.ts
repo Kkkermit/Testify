@@ -1,7 +1,6 @@
 import { model, Schema } from "mongoose";
 import { CASE_ACTIONS, type CaseAction } from "@testify/shared";
 
-/** One moderation action, numbered within its server. */
 export interface ModCaseRecord {
 	guildId: string;
 	number: number;
@@ -22,7 +21,6 @@ export interface ModCaseCounterRecord {
 	last: number;
 }
 
-/** Where a server's cases are posted. */
 export interface ModCaseSettingsRecord {
 	guildId: string;
 	logChannelId: string | null;

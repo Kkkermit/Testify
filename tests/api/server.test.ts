@@ -96,10 +96,7 @@ describe("the error boundary", () => {
 	});
 });
 
-/**
- * Each settings screen's `guilds.route(…)` line is mounted; a missing one falls through to the SPA silently, so this
- * reads the route table.
- */
+/** Every settings screen's `guilds.route(…)` line is mounted. */
 describe("the guild settings sub-routes", () => {
 	/** Put back sends the old values to the route that made the change, so a path that moved would answer 404 there. */
 	it("serve every route a change is put back through, and the read it is checked against", () => {

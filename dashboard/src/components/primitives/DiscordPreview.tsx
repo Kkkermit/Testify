@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { BotMark } from "@/components/brand/BotMark";
 
-/** A message as Discord draws one from the bot: its picture, its name and the app badge, then the body. */
 export function DiscordPreview({
 	name,
 	avatarUrl,

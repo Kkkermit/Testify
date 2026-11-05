@@ -12,7 +12,6 @@ const ROW = cn(
 	"focus-visible:outline-ring focus-visible:outline-2 focus-visible:-outline-offset-2",
 );
 
-/** The repository as folders that open in place; a filter swaps the tree for every file whose path matches. */
 export function FileTree({
 	index,
 	entries,
@@ -28,7 +27,6 @@ export function FileTree({
 	const [query, setQuery] = useState("");
 	const [open, setOpen] = useState<ReadonlySet<string>>(() => new Set([...ancestorsOf(current), current]));
 
-	// A link from elsewhere lands deep in the tree, which opens to show where it is.
 	useEffect(() => {
 		setOpen((was) => new Set([...was, ...ancestorsOf(current), current]));
 	}, [current]);

@@ -17,7 +17,7 @@ import { type MusicSourceChoice } from "@testify/shared";
 
 let cached: MusicBinaries | null = null;
 
-/** Memoised because locating a binary runs it, and doing that per command would be absurd. */
+/** Memoised because locating a binary runs it. */
 export function musicBinaries(client: TestifyClient): MusicBinaries {
 	cached ??= findBinaries(client.env);
 
@@ -122,7 +122,6 @@ export async function queueRequest(request: TrackRequest): Promise<{ session: Mu
 
 	if (found.length === 0) throw new UserFacingError("Nothing turned up for that.");
 
-	// A search offers several; only the first is wanted unless a playlist was asked for by name.
 	const tracks = query.kind === "search" ? found.slice(0, 1) : found;
 	const added = addTracks(session.queue, tracks, { next: request.next, idle: !session.active });
 

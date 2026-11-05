@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { oneOf } from "@/lib/oneOf";
 
-/**
- * An appearance choice lives on `document.documentElement`; its absence is the default, so CSS is correct before any
- * script runs.
- */
+/** Its absence is the default, so CSS is correct before any script runs. */
 export interface Preference<T extends string> {
 	readonly attribute: string;
 	readonly storageKey: string;

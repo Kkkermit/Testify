@@ -3,8 +3,6 @@ import { resolve } from "node:path";
 import { config as loadDotenv } from "dotenv";
 import { z } from "zod";
 
-/** Everything the bot reads from the environment, in one list. */
-
 const id = z.string().regex(/^\d{17,20}$/, "should be a Discord ID (17-20 digits)");
 
 /** `true`/`false` as written in a .env file. `z.coerce.boolean()` reads "false" as true. */
@@ -105,7 +103,6 @@ export interface EnvProblem {
 	message: string;
 }
 
-/** Carries each problem apart, so start-up can say where to find every missing value. */
 export class EnvError extends Error {
 	readonly file: EnvFile;
 	readonly problems: EnvProblem[];

@@ -3,7 +3,7 @@ import { type MeResponse, type SetupStatus } from "@testify/shared";
 import { api, ApiError } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** The bootstrap call. A 401 means "show the sign-in screen", so it is neither retried nor treated as an error. */
+/** A 401 means "show the sign-in screen", so it is neither retried nor an error. */
 export function useMe({ enabled = true }: { enabled?: boolean } = {}): UseQueryResult<MeResponse | null> {
 	return useQuery({
 		enabled,
@@ -21,7 +21,6 @@ export function useMe({ enabled = true }: { enabled?: boolean } = {}): UseQueryR
 	});
 }
 
-/** Answers Journey 4: a self-hoster who enabled the dashboard and has not filled in the OAuth settings yet. */
 export function useSetup(): UseQueryResult<SetupStatus> {
 	return useQuery({
 		queryKey: keys.setup(),

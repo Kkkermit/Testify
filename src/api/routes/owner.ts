@@ -20,7 +20,6 @@ export const owner = new Hono<ApiBindings>();
 
 owner.use("*", requireOwner);
 
-// Behind the same gate as the rest of the console, so a manager cannot reach the bot-wide switches.
 owner.route("/commands", globalCommandToggles);
 owner.route("/blacklist", blacklist);
 owner.route("/runner", commandRunner);
@@ -44,7 +43,6 @@ owner.get("/stats", (context) => {
 	return context.json(body);
 });
 
-/** Answers "which of my servers has never configured anything", which is the reason this screen exists. */
 owner.get("/guilds", async (context) => {
 	const { page, perPage, sort, filter, q = "" } = parseQuery(context, ownerGuildQuery);
 	const client = context.get("client");
@@ -84,7 +82,6 @@ export interface GuildCounts {
 
 type Listed = Pick<Guild, "id" | "name" | "memberCount" | "joinedTimestamp">;
 
-/** An ID matches exactly and a name matches anywhere, ignoring case. */
 export function guildMatches(guild: Pick<Guild, "id" | "name">, query: string): boolean {
 	const wanted = query.trim().toLowerCase();
 	if (wanted === "") return true;

@@ -52,10 +52,7 @@ export async function findRound(roundId: string): Promise<RoundRecord | null> {
 	return normalised(await RouletteRound.findById(roundId).lean<StoredRound>().exec());
 }
 
-/**
- * Adds bets only while the round is open and the player stays within `maxBets`; null means nothing was added, and the
- * caller hands the stake back.
- */
+/** Adds bets only while the round is open and the player stays within `maxBets`; null means the caller hands the stake back. */
 export async function addBets(
 	roundId: string,
 	player: { userId: string; name: string },

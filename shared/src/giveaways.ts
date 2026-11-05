@@ -45,7 +45,6 @@ export interface GiveawayRow {
 	startAt: string;
 	endAt: string;
 	ended: boolean;
-	/** Announced publicly by the bot when it draws, so listing them here reveals nothing new. */
 	winners: GiveawayWinner[];
 	hostedBy: string | null;
 }
@@ -66,7 +65,6 @@ export type GiveawayStart = z.infer<typeof giveawayStart>;
 /** A Discord message id, which is how `discord-giveaways` keys everything. */
 export const giveawayParams = z.object({ messageId: snowflake });
 
-/** Says what is wrong with a draft, so the form can refuse before the request rather than after it. */
 export function giveawayProblem(draft: {
 	channelId: string | null;
 	prize: string;

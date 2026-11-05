@@ -14,7 +14,6 @@ import { cn } from "@/lib/cn";
 
 const LINK = "text-accent hover:text-foreground text-sm underline-offset-2 hover:underline";
 
-/** Questions are matched to a written help article; nothing on this card is generated. */
 export function AskCard({ name }: { name: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const inputId = useId();
@@ -53,7 +52,6 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 			event.preventDefault();
 			setFocused(true);
 			const last = suggestions.length - 1;
-			// Moving past either end returns to the text box, the way a native list of suggestions behaves.
 			setActive((current) =>
 				event.key === "ArrowDown" ? (current >= last ? -1 : current + 1) : current <= -1 ? last : current - 1,
 			);
@@ -188,7 +186,6 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 	);
 }
 
-/** `focus` moves to the heading when an article is opened by a button, so a reader lands on what they chose. */
 function Article({
 	article,
 	focus,

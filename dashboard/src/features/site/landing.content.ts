@@ -1,6 +1,5 @@
 import { type TranslationKey } from "@/i18n";
 
-/** The hero's three commands, each a real one whose options are named as the bot declares them. */
 export const SCENES: readonly {
 	command: string;
 	prefixName: string;
@@ -25,7 +24,6 @@ export const SCENES: readonly {
 	},
 ];
 
-/** What the bot does, in the feature registry's own keys so each wears the icon and tint it has everywhere else. */
 export const FEATURES: readonly { look: string; titleKey: TranslationKey; bodyKey: TranslationKey }[] = [
 	{ look: "moderation", titleKey: "landing.features.moderation", bodyKey: "landing.features.moderationBody" },
 	{ look: "levelling", titleKey: "landing.features.levelling", bodyKey: "landing.features.levellingBody" },
@@ -35,7 +33,6 @@ export const FEATURES: readonly { look: string; titleKey: TranslationKey; bodyKe
 	{ look: "community", titleKey: "landing.features.community", bodyKey: "landing.features.communityBody" },
 ];
 
-/** Running a copy is a real sequence, which is the only reason these are numbered. */
 export const SELF_HOST_STEPS: readonly { slug: string; labelKey: TranslationKey }[] = [
 	{ slug: "requirements", labelKey: "landing.selfHost.requirements" },
 	{ slug: "setup", labelKey: "landing.selfHost.setup" },

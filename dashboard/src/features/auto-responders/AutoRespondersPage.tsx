@@ -32,7 +32,6 @@ function cleaned(input: AutoResponderInput): AutoResponderInput {
 	return { trigger: sanitiseInput(input.trigger), match: input.match, reply: sanitiseInput(input.reply) };
 }
 
-/** A list of the server's own trigger words, each with the reply it gets. */
 export function AutoRespondersPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -51,7 +50,7 @@ export function AutoRespondersPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	// One waiting to be deleted still holds its words and its place, so nothing can be added into the gap.
+	// A row waiting to be deleted still counts, so nothing can be added into the gap.
 	const all = list.data.responders;
 	const keyOf = (responder: AutoResponder): string => `auto-responder:${guildId}:${responder.id}`;
 	const shown = all.filter((responder) => !undo.isHidden(keyOf(responder)));

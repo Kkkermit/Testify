@@ -24,7 +24,6 @@ import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
-/** Where starred messages are reposted, how many stars that takes, and whether the author's own star counts. */
 export function StarboardPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -104,7 +103,7 @@ export function StarboardPage(): React.JSX.Element {
 	);
 }
 
-/** Keyed by the stored value, so a save that lands puts the box back in step with it. */
+/** Keyed by the stored value, so a save that lands resets the box. */
 function ThresholdField({
 	stored,
 	onSave,

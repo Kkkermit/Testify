@@ -1,5 +1,3 @@
-/** Every place the bot gives a role or reads one, so a manager can tell what deleting a role would stop. */
-
 export type RoleUse =
 	| { kind: "levelReward"; level: number }
 	| { kind: "levelBoost"; multiplier: number }

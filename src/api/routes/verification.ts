@@ -95,7 +95,6 @@ async function answer(
 	return context.json(after);
 }
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: VerificationPatch): string {
 	const parts: string[] = [];
 

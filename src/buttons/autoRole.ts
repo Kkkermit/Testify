@@ -4,7 +4,6 @@ import { UserFacingError } from "@core/errors";
 import { getAutoRoles, setAutoRoles } from "@database/repositories/autoRoleRepository";
 import { AUTOROLE_PANEL_ID, autoRolePanel, MAX_AUTO_ROLES } from "@lib/settings";
 
-/** Every control on the auto-role panel. */
 export function unusableRoles(guild: Guild, roleIds: readonly string[]): string[] {
 	const ceiling = guild.members.me?.roles.highest.position ?? Number.POSITIVE_INFINITY;
 
@@ -60,7 +59,6 @@ export default defineButton({
 	},
 });
 
-/** Re-read here so the command and the handler cannot disagree on what is stored. */
 export async function currentRoles(guildId: string): Promise<string[]> {
 	return (await getAutoRoles(guildId))?.roleIds ?? [];
 }

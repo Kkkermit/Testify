@@ -13,7 +13,6 @@ export function generateSecret(): string {
 	return randomBytes(32).toString("base64url");
 }
 
-/** Replaces the line if the key is already there, appends it if not, and leaves every other line alone. */
 export function withSecret(contents: string, secret: string): string {
 	const line = `${KEY}=${secret}`;
 	const pattern = new RegExp(`^${KEY}=.*$`, "m");

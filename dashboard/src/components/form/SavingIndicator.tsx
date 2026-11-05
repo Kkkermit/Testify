@@ -4,7 +4,6 @@ import { cn } from "@/lib/cn";
 
 export type SavingState = "idle" | "saving" | "saved";
 
-/** Idle → Saving → Saved, announced politely so a screen reader hears the outcome without stealing focus. */
 export function SavingIndicator({ state }: { state: SavingState }): React.JSX.Element {
 	const { t } = useTranslation();
 	return (

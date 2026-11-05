@@ -15,8 +15,6 @@ import {
 	type WarningAdded,
 } from "@testify/shared";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const auditLogConfig: AuditLogConfigResponse = {
 	enabled: true,
 	channelId: "400000000000000001",

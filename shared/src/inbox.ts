@@ -1,8 +1,6 @@
 import { type WatchedPermission } from "./api";
 import { type FeatureKey } from "./places";
 
-/** What needs a manager in one server, each kind pointing at the screen where it is dealt with. */
-
 export const INBOX_LIMITS = {
 	/** How many tickets and ideas are listed before the page says how many more there are. */
 	shown: 5,
@@ -25,7 +23,6 @@ export interface InboxIdea {
 	createdAt: string;
 }
 
-/** A switched-on feature whose channel the bot can no longer post in, or that no longer exists. */
 export interface InboxChannelProblem {
 	feature: FeatureKey;
 	label: string;
@@ -36,7 +33,6 @@ export interface InboxChannelProblem {
 export interface GuildInbox {
 	/** Open tickets nobody has claimed yet, oldest first. */
 	tickets: { total: number; items: InboxTicket[] };
-	/** Ideas waiting for a decision, newest first. */
 	ideas: { total: number; items: InboxIdea[] };
 	permissions: WatchedPermission[];
 	channels: InboxChannelProblem[];

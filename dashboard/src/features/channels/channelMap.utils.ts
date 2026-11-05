@@ -1,10 +1,8 @@
 import { type ChannelSummary, type FeaturePlaces } from "@testify/shared";
 
-/** A channel the dashboard can show: one its reader can see, of a kind a feature can work in. */
 export type VisibleChannel = ChannelSummary & { name: string };
 
 export interface ChannelGroup {
-	/** Null for the channels that sit above every category, as Discord lists them. */
 	category: { id: string; name: string | null } | null;
 	channels: VisibleChannel[];
 }
@@ -21,7 +19,6 @@ function byDiscordOrder(a: ChannelSummary, b: ChannelSummary): number {
 	return voice !== 0 ? voice : a.position - b.position;
 }
 
-/** The server's channels in Discord's categories and order, leaving out anything the reader cannot see. */
 export function channelTree(channels: readonly ChannelSummary[]): ChannelGroup[] {
 	const shown = channels.filter(visible);
 	const categories = channels.filter((channel) => channel.kind === "category").sort((a, b) => a.position - b.position);
@@ -38,7 +35,6 @@ export function channelTree(channels: readonly ChannelSummary[]): ChannelGroup[]
 	return groups;
 }
 
-/** Everything a channel holds, in the order the features are listed. */
 export function featuresIn(features: readonly FeaturePlaces[], channelId: string): FeaturePlaces[] {
 	return features.filter((feature) => feature.places.some((place) => place.channelId === channelId));
 }

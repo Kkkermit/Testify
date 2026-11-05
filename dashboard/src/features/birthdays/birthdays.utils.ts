@@ -1,7 +1,6 @@
 import { type BirthdaySettings } from "@testify/shared";
 import { type TFunction } from "i18next";
 
-/** Where birthdays are posted, or why none are, as the sentence the page opens with. */
 export function birthdaySummary(
 	settings: Pick<BirthdaySettings, "enabled" | "channelId">,
 	channel: string,

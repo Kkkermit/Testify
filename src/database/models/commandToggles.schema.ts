@@ -8,7 +8,6 @@ export interface CommandToggles {
 	guildId: string;
 	/** Command names that are off. Absent from this list means on, so a new command ships enabled. */
 	disabled: string[];
-	/** Who last changed it, for the audit trail the dashboard writes alongside. */
 	updatedBy: string | null;
 	createdAt: Date;
 	updatedAt: Date;

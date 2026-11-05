@@ -69,13 +69,11 @@ export function useBotIdentity(): UseMutationResult<BotIdentity, Error, BotIdent
 	return useMutation({
 		mutationFn: (patch: BotIdentityPatch) => api.patch<BotIdentity>("/control/identity", patch),
 		onSuccess: () => {
-			// Every brand surface reads this, so the whole shell has to re-render with the new name.
 			void client.invalidateQueries({ queryKey: keys.bot() });
 		},
 	});
 }
 
-/** The fleet table and the stats are refetched, because their counts are the bot's to report. */
 export function useLeaveGuild(guildId: string): UseMutationResult<{ left: string }, Error, string> {
 	const client = useQueryClient();
 
@@ -102,7 +100,6 @@ export function useOwnerNotices(): UseQueryResult<Notice[]> {
 	return useQuery({ queryKey: keys.owner.notices(), queryFn: () => api.get<Notice[]>("/owner/notices") });
 }
 
-/** Every change to a notification is also a change to what everybody's feed says, the owner's own included. */
 function useNoticeWrite<Variables, Result>(
 	write: (variables: Variables) => Promise<Result>,
 ): UseMutationResult<Result, Error, Variables> {

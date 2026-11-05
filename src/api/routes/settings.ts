@@ -32,8 +32,6 @@ import {
 	voiceStatsPatch,
 } from "@testify/shared";
 
-/** Configuration-only settings; each section has its own endpoint and writes on change. */
-
 type ApiContext = Context<ApiBindings>;
 
 export const settings = new Hono<ApiBindings>();
@@ -73,7 +71,6 @@ async function settingsOf(guildId: string): Promise<ServerSettings> {
 
 settings.get("/", async (context) => context.json(await settingsOf(guildIdOf(context))));
 
-/** The bot's nickname here; Discord has no per-guild avatar, so the rest is the owner's. */
 settings.get("/nickname", (context) => {
 	const me = guildOf(context).members.me;
 
@@ -189,7 +186,6 @@ settings.patch("/voice-stats", async (context) => {
 	return answer(context, guildId, before, "settings.voice-stats", "Changed the voice stat channels");
 });
 
-/** Every write answers with the whole document, so the page never shows a value the server does not have. */
 async function answer(
 	context: ApiContext,
 	guildId: string,

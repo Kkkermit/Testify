@@ -14,7 +14,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { THEMES, useTheme, type Theme } from "@/hooks/useTheme";
 import { type TranslationKey } from "@/i18n";
 
-/** One row per theme: the icon, its name and what it does. A template-literal key would hide these from a search. */
 const THEME_OPTIONS: Record<Theme, { icon: LucideIcon; label: TranslationKey; hint: TranslationKey }> = {
 	system: { icon: Monitor, label: "appearance.system", hint: "appearance.systemHint" },
 	light: { icon: Sun, label: "appearance.light", hint: "appearance.alwaysLight" },

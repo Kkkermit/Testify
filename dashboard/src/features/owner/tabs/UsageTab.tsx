@@ -12,7 +12,6 @@ import { formatMs, percent, screenLabel, searchWith, snowflakeFrom, WINDOWS } fr
 import { useUsage } from "@/features/owner/useOwner";
 import { formatNumber } from "@/lib/intl";
 
-/** What the bot is actually used for, or, with `?guild=`, who in one server ran what. */
 export function UsageTab({
 	days,
 	onWindow,
@@ -30,7 +29,6 @@ export function UsageTab({
 	);
 }
 
-/** Which commands, by which servers, on which surface. */
 function FleetUsage({
 	days,
 	onWindow,
@@ -43,7 +41,6 @@ function FleetUsage({
 	const usage = useUsage(days);
 
 	if (usage.isPending) return <Skeleton className="h-96 w-full" />;
-	// A failed read is not an empty one: reporting it as "no usage yet" tells an owner their bot is unused.
 	if (usage.isError) return <ErrorState as="h2" error={usage.error} onRetry={() => void usage.refetch()} />;
 
 	const report = usage.data;
@@ -172,7 +169,6 @@ function FleetUsage({
 	);
 }
 
-/** A server's row opens its own usage, keeping the window it was found in. */
 function guildBar(
 	row: GuildUsageRow,
 	params: URLSearchParams,

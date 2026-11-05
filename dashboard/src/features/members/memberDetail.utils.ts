@@ -3,7 +3,6 @@ import { type TFunction } from "i18next";
 import { dateAndTime, shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 
-/** One sentence on where the member stands, the gravest state first. */
 export function memberSummary(detail: MemberDetail, t: TFunction, now = Date.now()): string {
 	if (softbanActive(detail, now) && detail.softban !== null) {
 		return t("members.summarySoftbanned", { when: dateAndTime(detail.softban.expiresAt) });
@@ -21,7 +20,7 @@ export function memberSummary(detail: MemberDetail, t: TFunction, now = Date.now
 		: t("members.summaryJoinedWarned", { date, count: warned });
 }
 
-/** A softban that has already lapsed is history, not a live restriction — the job just has not swept it yet. */
+/** A lapsed softban the job has not swept yet is history, not a live restriction. */
 export function softbanActive(detail: MemberDetail, now = Date.now()): boolean {
 	return detail.softban !== null && new Date(detail.softban.expiresAt).getTime() > now;
 }
@@ -32,12 +31,10 @@ export function warningSummary(warnings: MemberWarning[], t: TFunction): string 
 	return t("members.warningCount", { count: warnings.length });
 }
 
-/** Clearing wipes a record that cannot be recovered, so the confirmation asks for the name rather than a click. */
 export function clearConfirmed(typed: string, detail: MemberDetail): boolean {
 	return confirmsName(typed, detail.username, detail.userId);
 }
 
-/** Warnings can still be tidied up once somebody has left, when there are no roles left to compare. */
 export function canChangeWarnings(detail: MemberDetail): boolean {
 	return detail.moderationProblem === null || !detail.inGuild;
 }

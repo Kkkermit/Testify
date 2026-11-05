@@ -41,7 +41,6 @@ ideas.get("/list", async (context) => {
 	return context.json(body);
 });
 
-/** The same decision a staff button makes in Discord, so the post and the author's DM follow it either way. */
 ideas.post("/:ideaId/decision", async (context) => {
 	const guild = guildOf(context);
 	const { ideaId } = parseParams(context, ideaParams);

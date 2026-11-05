@@ -22,7 +22,6 @@ import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 
-/** Lock a channel or slow it down, from a picker, with every channel already restricted listed beneath. */
 export function ChannelToolsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

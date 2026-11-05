@@ -37,7 +37,6 @@ import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
 
-/** Every warning, timeout, kick, ban and softban in the server, numbered, and where new ones are posted. */
 export function CasesPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

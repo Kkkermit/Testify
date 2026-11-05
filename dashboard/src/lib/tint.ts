@@ -1,4 +1,3 @@
-/** The tints a lettered fallback avatar can take, over the `--color-hue-*` tokens in `index.css`. */
 const TINTS = [
 	"bg-hue-violet/20 text-hue-violet",
 	"bg-hue-amber/20 text-hue-amber",
@@ -8,7 +7,6 @@ const TINTS = [
 	"bg-hue-red/20 text-hue-red",
 ] as const;
 
-/** A stable colour per server, so the picker is scannable by shape and the same server keeps its colour between visits. */
 export function tintFor(seed: string): string {
 	let hash = 0;
 	for (const character of seed) hash = (hash * 31 + character.codePointAt(0)!) % 100_000;

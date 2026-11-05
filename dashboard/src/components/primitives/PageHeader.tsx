@@ -11,7 +11,6 @@ export function PageHeader({
 }: {
 	title: string;
 	subtitle?: string;
-	/** Which server this screen is about — the sidebar is a drawer on a phone, so the page has to say. */
 	server?: { id: string; name: string } | undefined;
 	action?: ReactNode;
 }): React.JSX.Element {

@@ -1,9 +1,7 @@
 import { fromHsl, type Hsl, luminance, type Rgb, toHex, toHsl } from "@/lib/colour";
 
-/** What the colour picker shows before anybody has chosen, the plum the page starts in. */
 export const CUSTOM_STARTING_POINT = "#8a2a6b";
 
-/** The three accent tokens and the wash, for one theme. */
 export interface AccentShades {
 	readonly primary: string;
 	readonly accent: string;
@@ -17,19 +15,14 @@ export interface CustomAccent {
 
 type Band = readonly [low: number, high: number];
 
-/**
- * The luminance each token may sit at, inside every threshold a preset accent is held to, with a margin for rounding.
- * `contrast.test.ts` sweeps the colour space through `customAccent` against the real grounds in `index.css`.
- */
+/** Each token's luminance band, inside every threshold a preset is held to; `contrast.test.ts` sweeps the colour space through it. */
 const BANDS: Record<"light" | "dark", Record<keyof AccentShades, Band>> = {
 	light: { primary: [0, 0.17], accent: [0, 0.15], wash: [0.87, 0.93] },
 	dark: { primary: [0.152, 0.175], accent: [0.3, 1], wash: [0.016, 0.025] },
 };
 
-/** A wash is a tint behind text, so it is never as saturated as the colour it is drawn from. */
 const WASH_SATURATION: Record<"light" | "dark", number> = { light: 0.55, dark: 0.3 };
 
-/** The colour itself when it already sits in the band, otherwise the nearest lightness that does. */
 function fit(colour: Hsl, [low, high]: Band): Rgb {
 	const at = (l: number): Rgb => fromHsl({ ...colour, l });
 	const now = at(colour.l);
@@ -59,13 +52,11 @@ function shades(colour: Hsl, scheme: "light" | "dark"): AccentShades {
 	};
 }
 
-/** Each theme's shades of a colour somebody chose, lightened or darkened only as far as legible text needs. */
 export function customAccent(colour: Rgb): CustomAccent {
 	const hsl = toHsl(colour);
 	return { light: shades(hsl, "light"), dark: shades(hsl, "dark") };
 }
 
-/** The properties `[data-accent="custom"]` in `index.css` reads, by name. */
 export function customProperties({ light, dark }: CustomAccent): Record<string, string> {
 	return {
 		"--custom-primary-light": light.primary,

@@ -13,7 +13,6 @@ botStats.use("*", requireGuild);
 
 botStats.get("/", async (context) => context.json(await readBotStats(guildOf(context).id)));
 
-/** Posting is the whole setting, so choosing a channel and sending the message are one request. */
 botStats.put("/", async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, botStatsPost);

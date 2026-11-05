@@ -18,7 +18,7 @@ function useNickname(guildId: string): UseQueryResult<GuildNickname> {
 	});
 }
 
-/** The only part of the bot's appearance a manager may change: Discord has no per-server avatar for bots. */
+/** Discord has no per-server avatar for bots, so the nickname is all a manager may change. */
 export function NicknameSection({ guildId }: { guildId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const client = useQueryClient();

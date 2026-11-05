@@ -6,7 +6,6 @@ import { SELECT } from "@/components/form/fieldStyles";
 import { Warning } from "@/components/form/Warning";
 import { seenChannels } from "@/lib/channels";
 
-/** A voice channel or a category, which nothing is posted in, so whether the bot can post there is no concern of it. */
 export function ChannelKindPicker({
 	kind,
 	channels,
@@ -24,7 +23,6 @@ export function ChannelKindPicker({
 	label: string;
 	hint?: string;
 	noneLabel: string;
-	/** Anything that belongs under the picker, such as a button that makes the channel it lacks. */
 	children?: ReactNode;
 }): React.JSX.Element {
 	const { t } = useTranslation();

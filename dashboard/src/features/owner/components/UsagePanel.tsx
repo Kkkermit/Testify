@@ -1,7 +1,6 @@
 import { Card, CARD_HEADING } from "@/components/primitives";
 import { cn } from "@/lib/cn";
 
-/** One titled list on the usage tab; `wide` spans both columns, for the odd one out of a two-column grid. */
 export function UsagePanel({
 	title,
 	hint,

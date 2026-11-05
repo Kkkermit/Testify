@@ -7,7 +7,6 @@ import { Button, Skeleton } from "@/components/primitives";
 import { useMemberRoles, useSetMemberRoles } from "@/features/members/useMemberDetail";
 import { ApiError } from "@/lib/api";
 
-/** The roles the reader could hand out themselves, held as a draft until Save so a list goes in one request. */
 export function RolesCard({ guildId, userId }: { guildId: string; userId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const roles = useMemberRoles(guildId, userId, true);

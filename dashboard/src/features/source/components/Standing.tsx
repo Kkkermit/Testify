@@ -6,7 +6,6 @@ import { SiteError } from "@/features/site/components/SiteError";
 import { useStanding } from "@/features/source/useSource";
 import { cn } from "@/lib/cn";
 
-/** What GitHub says of the repository without a token, read once an hour at most and only because this page asked. */
 export function Standing(): React.JSX.Element {
 	const { t } = useTranslation();
 	const standing = useStanding();

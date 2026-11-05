@@ -8,7 +8,6 @@ import { useSaveVerification, useVerification } from "@/features/settings/useVer
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** Posting the panel is its own button rather than a side effect of choosing a channel, because it is a message in a public channel. */
 export function VerificationSection({
 	guildId,
 	channels,

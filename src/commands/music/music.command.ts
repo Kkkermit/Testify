@@ -32,8 +32,6 @@ import {
 	upcomingPage,
 } from "@lib/music";
 
-/** Everything about the player that is not "start something", which `/play` owns. */
-
 const SYSTEM_ACTIONS = { enable: "enable", disable: "disable", roles: "roles" } as const;
 
 function sessionOf(interaction: CommandInput): MusicSession {

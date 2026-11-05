@@ -17,7 +17,6 @@ function everySourceFile(directory: string, found: string[] = []): string[] {
 }
 
 describe("the category palette", () => {
-	/** Every category has its own embed colour. */
 	it("gives every category its own colour", () => {
 		const byColour = new Map<number, string[]>();
 

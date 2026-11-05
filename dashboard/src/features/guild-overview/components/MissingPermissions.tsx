@@ -4,7 +4,6 @@ import { useTranslation } from "react-i18next";
 import { Card } from "@/components/primitives";
 import { MISSING_LABELS } from "@/features/guild-overview/featureStatus.labels";
 
-/** Configured features that will quietly do nothing are worth more than a badge, so this sits above the grid. */
 export function MissingPermissions({ permissions }: { permissions: WatchedPermission[] }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	if (permissions.length === 0) return null;

@@ -125,34 +125,26 @@ guilds.get("/:guildId/overview", async (context) => {
 	return context.json(body);
 });
 
-/** What needs a manager here: tickets nobody has claimed, ideas waiting, permissions and channels that stop a feature. */
 guilds.get("/:guildId/inbox", async (context) => {
 	const body: GuildInbox = await readInbox(context.get("client"), guildOf(context));
 	return context.json(body);
 });
 
-/** The next seven days: scheduled posts, the lottery draw, giveaways ending and birthdays the server marks. */
 guilds.get("/:guildId/week", async (context) => {
 	const body: GuildWeek = await readWeek(context.get("client"), guildOf(context));
 	return context.json(body);
 });
 
-/** Every feature that gives or reads each role, so a manager can see what deleting one would stop. */
 guilds.get("/:guildId/role-uses", async (context) => {
 	const body: GuildRoleUses = await readRoleUses(guildOf(context).id);
 	return context.json(body);
 });
 
-/** Which channels each feature uses, for the dashboard's map of the server; the channel list names them. */
 guilds.get("/:guildId/places", async (context) => {
 	const body: GuildPlaces = { features: await placesOf(guildOf(context)) };
 	return context.json(body);
 });
 
-/**
- * `canSend` comes from the live client, so the picker can grey out a channel before a configuration that cannot work is
- * saved.
- */
 guilds.get("/:guildId/channels", (context) => {
 	const guild = guildOf(context);
 	const reader = readerOf(context);
@@ -185,7 +177,6 @@ guilds.get("/:guildId/roles", (context) => {
 			colour: colourOf(role),
 			position: role.position,
 			managed: role.managed,
-			// The check `applyLevelRewards` already does at runtime, surfaced at configuration time instead.
 			assignableByBot: !role.managed && role.position < highest,
 			powerful: isPowerful(role),
 		}))
@@ -208,7 +199,6 @@ guilds.get("/:guildId/audit", async (context) => {
 	return context.json(body);
 });
 
-/** The last fortnight's changes, from the dashboard and from Discord's own audit log, newest first. */
 guilds.get("/:guildId/changes", async (context) => {
 	const query = parseQuery(context, changesQuery);
 

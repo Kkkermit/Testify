@@ -9,7 +9,6 @@ import { type RaidOverview, type RaidPatch } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** A spread would let an absent field overwrite a present one with `undefined`. */
 function applyPatch(current: RaidOverview, patch: RaidPatch): RaidOverview {
 	const next = { ...current };
 	for (const [key, value] of Object.entries(patch)) {
@@ -25,7 +24,6 @@ export function useRaid(guildId: string): UseQueryResult<RaidOverview> {
 	});
 }
 
-/** Optimistic, with the previous value kept so a refusal puts it back. */
 export function useUpdateRaid(guildId: string): UseMutationResult<RaidOverview, Error, RaidPatch> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).raid();

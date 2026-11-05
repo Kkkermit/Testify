@@ -16,7 +16,6 @@ export function useStarboard(guildId: string): UseQueryResult<StarboardSettings>
 	});
 }
 
-/** Not optimistic: turning the board on can be refused for a channel the bot cannot post in. */
 export function useSaveStarboard(guildId: string): UseMutationResult<StarboardSettings, Error, StarboardPatch> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).starboard();

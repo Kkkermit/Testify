@@ -11,7 +11,6 @@ import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 
-/** One server at a glance, opened from the fleet table rather than by hunting for its id. */
 export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: () => void }): React.JSX.Element {
 	const { t } = useTranslation();
 	const detail = useGuildDetail(guildId);
@@ -87,7 +86,6 @@ export function GuildDetail({ guildId, onClose }: { guildId: string; onClose: ()
 	);
 }
 
-/** Leaving needs a fresh invite to undo, so this asks for the name; the server checks it too. */
 function LeaveServer({ guild, onLeft }: { guild: OwnerGuildDetail; onLeft: () => void }): React.JSX.Element {
 	const { t } = useTranslation();
 	const leave = useLeaveGuild(guild.id);

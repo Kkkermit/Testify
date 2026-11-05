@@ -16,7 +16,6 @@ setup.use("*", requireGuild);
 
 function scopeOf(context: ApiContext): { guild: Guild; actor: SetupActor } {
 	const guild = context.get("guild");
-	// `requireGuild` sets this before any handler runs; reaching here without it is a wiring mistake.
 	if (guild === undefined) throw notInGuild();
 
 	return { guild, actor: { member: context.get("member"), isOwner: context.get("isOwner") === true } };

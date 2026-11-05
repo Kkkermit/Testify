@@ -5,7 +5,6 @@ import { type Locale } from "@/i18n";
 const RATIO = { width: 21, height: 15 } as const;
 
 const FLAGS: Record<Locale, React.JSX.Element> = {
-	// At 21px the saltire's offset is under a pixel, so the diagonals are centred and no clip path is needed.
 	en: (
 		<>
 			<rect width="21" height="15" fill="#012169" />
@@ -51,7 +50,6 @@ const FLAGS: Record<Locale, React.JSX.Element> = {
 	),
 };
 
-/** Decorative: the name beside it is what a reader and a screen reader both go by. */
 export function FlagIcon({ locale, className }: { locale: Locale; className?: string }): React.JSX.Element {
 	return (
 		<svg
@@ -60,7 +58,6 @@ export function FlagIcon({ locale, className }: { locale: Locale; className?: st
 			role="presentation"
 			aria-hidden="true"
 			focusable="false"
-			// A hairline keeps a white or near-white flag from dissolving into a light card.
 			className={`border-border shrink-0 border ${className ?? ""}`}
 		>
 			{FLAGS[locale]}

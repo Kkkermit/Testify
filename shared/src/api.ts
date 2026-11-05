@@ -1,4 +1,3 @@
-/** Every error the API returns has this shape, so the client can branch on `code`. */
 export interface ApiErrorBody {
 	error: {
 		code: string;
@@ -14,18 +13,15 @@ export interface HealthResponse {
 	database: "connected" | "disconnected";
 }
 
-/** The bot's public profile, unauthenticated so the sign-in screen can carry the bot's identity. */
+/** Unauthenticated, so the sign-in screen can carry the bot's identity. */
 export interface BotIdentity {
 	id: string;
-	/** What to call the bot: its Discord username. */
 	name: string;
 	username: string;
 	avatarUrl: string;
-	/** Applications rarely have one, so every surface needs a fallback. */
 	bannerUrl: string | null;
 	/** The profile accent as a CSS hex, when the application has set one. */
 	accentColour: string | null;
-	/** Where to ask for help, and where the code is. Both come from the bot's own theme, so a fork points at its own. */
 	supportUrl: string;
 	repositoryUrl: string;
 }
@@ -42,7 +38,6 @@ export interface ManageableGuild {
 	iconUrl: string | null;
 	memberCount: number | null;
 	botPresent: boolean;
-	/** Whether this person could add the bot, which needs Manage Server. */
 	canInvite: boolean;
 }
 
@@ -78,7 +73,6 @@ export interface SetupStatus {
 	redirectUri: string;
 }
 
-/** What the overview counts for a feature, so each surface words the noun and its plural itself. */
 export type FeatureCount =
 	| "events"
 	| "birthdays"
@@ -91,7 +85,6 @@ export type FeatureCount =
 	| "ticketsOpen"
 	| "ticketsSold";
 
-/** A feature's one-line summary as data rather than English, so the page can say it in its reader's language. */
 export type FeatureDetail =
 	| { kind: "posting"; channelId: string }
 	| { kind: "count"; what: FeatureCount; count: number }
@@ -107,14 +100,12 @@ export type FeatureDetail =
 
 export interface FeatureStatus {
 	key: string;
-	/** The bot's own name for it, for a page that does not know this feature yet. */
 	label: string;
 	enabled: boolean;
 	/** Null when there is nothing set up yet. */
 	detail: FeatureDetail | null;
 }
 
-/** The permissions the overview warns about, each needed by a feature that otherwise quietly does nothing. */
 export const WATCHED_PERMISSIONS = [
 	"ManageRoles",
 	"ManageMessages",
@@ -140,7 +131,6 @@ export interface GuildOverview {
 	channelCount: number;
 	roleCount: number;
 	features: FeatureStatus[];
-	/** Permissions the bot is missing that some feature needs, by Discord's name for each. */
 	missingPermissions: WatchedPermission[];
 	recentChanges: AuditEntrySummary[];
 }
@@ -153,9 +143,7 @@ export interface ChannelSummary {
 	name: string | null;
 	kind: ChannelKind;
 	position: number;
-	/** The category it sits under, so the dashboard can draw the channel list the way Discord does. */
 	parentId: string | null;
-	/** Computed from the live client, so a channel the bot cannot post in is greyed out before anyone saves. */
 	canSend: boolean;
 }
 

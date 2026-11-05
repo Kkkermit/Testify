@@ -30,7 +30,6 @@ function subcommandOf(subcommand: Subcommand): SubcommandSummary {
 	};
 }
 
-/** Bit flags are meaningless to a reader, so they are resolved to the names Discord shows in its own UI. */
 /** Discord's own names for the flags, `ManageGuild` and so on, which each surface turns into words of its own. */
 function permissionNames(permissions: PermissionResolvable[] | undefined): string[] {
 	if (permissions === undefined || permissions.length === 0) return [];

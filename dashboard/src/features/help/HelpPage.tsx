@@ -13,7 +13,6 @@ import { cn } from "@/lib/cn";
 
 const LINK = cn(INLINE_TARGET, "text-accent hover:text-foreground gap-1 text-sm");
 
-/** The first screen a new admin should read: what to do first, how commands work, and what every area is for. */
 export function HelpPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("help.title"));

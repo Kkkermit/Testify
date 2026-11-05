@@ -97,7 +97,6 @@ auth.get("/callback", async (context) => {
 	// One state, one use — cleared whether this succeeds or not.
 	clearAuthCookies(context, env);
 
-	// They pressed Cancel. A friendly page, not a stack trace.
 	if (query.error !== undefined) return context.redirect("/sign-in?denied=1", 302);
 	if (query.code === undefined || query.state === undefined) throw badRequest("That sign-in link is incomplete.");
 
@@ -174,7 +173,6 @@ function readPending(context: ApiContext): Pending | null {
 	}
 }
 
-/** Guilds the user and the bot share, plus the rest so the picker can offer an invite. */
 async function guildsFor(
 	context: ApiContext,
 	oauth: OauthConfig,

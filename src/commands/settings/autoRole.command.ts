@@ -4,7 +4,6 @@ import { defineCommand, inGuild } from "@core/command";
 import { reply } from "@lib/discord";
 import { autoRolePanel } from "@lib/settings";
 
-/** One panel instead of `add`, `remove` and `list`. */
 export default defineCommand({
 	name: "auto-role",
 	description: "Gives roles automatically to new members.",

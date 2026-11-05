@@ -14,7 +14,6 @@ import {
 	welcomePanel,
 } from "@lib/welcome";
 
-/** Every control on the welcome panel. */
 async function currentConfig(guildId: string): Promise<WelcomeConfig | null> {
 	return normaliseWelcome(await getWelcome(guildId));
 }

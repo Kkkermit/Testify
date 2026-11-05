@@ -10,21 +10,18 @@ const resolver = createRequire(import.meta.url);
 /** Resolved from this file, so it finds the copy the app itself imports whether npm hoisted it or nested it. */
 const packageRoot = (name: string): string => dirname(resolver.resolve(`${name}/package.json`));
 
-// The proxy reads the bot's own port variable, so changing DASHBOARD_PORT does not break development.
 export default defineConfig(({ command, mode }) => {
 	const env = loadEnv(mode, fileURLToPath(new URL("..", import.meta.url)), ["DASHBOARD_"]);
 	const port = env.DASHBOARD_PORT ?? "3000";
 
 	return {
 		plugins: [react(), tailwind()],
-		// The error screen prints a stack only on the dev server, never in a build somebody deploys.
 		define: { __DEV_ERRORS__: JSON.stringify(command === "serve") },
 		resolve: {
 			// discord-html-transcripts hoists React 18, so hoisted packages must resolve this workspace's React 19.
 			dedupe: ["react", "react-dom"],
 			alias: {
 				"@": fileURLToPath(new URL("./src", import.meta.url)),
-				// The docs render the repository's own Markdown, so the site cannot describe a bot that is not there.
 				"@repo": fileURLToPath(new URL("..", import.meta.url)),
 				"@testify/shared": fileURLToPath(new URL("../shared/src/index.ts", import.meta.url)),
 				react: packageRoot("react"),
@@ -33,11 +30,11 @@ export default defineConfig(({ command, mode }) => {
 		},
 		server: {
 			port: 5174,
-			// Same-origin in the browser, so session cookies work with no CORS at all.
+			// Same-origin in the browser, so session cookies need no CORS.
 			proxy: {
 				"/api": {
 					target: `http://localhost:${port}`,
-					/** `tsx watch` restarts the bot on every save, so Vite's handler would print a stack per refused request; this is one line per outage instead. Vite registers its own handler immediately after calling this, so the replacement waits a tick. */
+					/** One line per outage rather than a stack per refused request; Vite registers its own handler just after calling this, so the replacement waits a tick. */
 					configure: (proxy) => {
 						let reported = false;
 
@@ -76,14 +73,12 @@ export default defineConfig(({ command, mode }) => {
 			 * The first releases with native `light-dark()`; below them the polyfill stops a nested `color-scheme` working.
 			 */
 			cssTarget: ["chrome123", "safari17.5", "firefox120", "edge123"],
-			// A map hands anybody the source tree file by file in DevTools, so a build ships only the minified bundle.
+			// A source map hands anybody the source tree in DevTools.
 			sourcemap: false,
 			rollupOptions: {
 				output: {
 					manualChunks: (id) => {
-						// The docs and the source browser need these, and nothing a dashboard visitor opens first does.
 						if (/node_modules\/(?:marked|lowlight|highlight\.js|devlop|dequal)\//.test(id)) return "markdown";
-						// A vendor chunk of its own, so an app change does not invalidate the whole cache.
 						if (id.includes("node_modules")) return "vendor";
 						return undefined;
 					},

@@ -53,7 +53,6 @@ describe("quick search", () => {
 		expect(await screen.findByRole("dialog", { name: "Quick search" })).toBeInTheDocument();
 	});
 
-	/** Typing "welcome" and pressing Enter is the whole journey the feature was asked for. */
 	it("goes to the best match on Enter", async () => {
 		const user = userEvent.setup();
 		renderShell();

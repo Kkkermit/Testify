@@ -1,6 +1,5 @@
 import { type CommandSummary, matchesSearch } from "@testify/shared";
 
-/** Which commands the dashboard can configure, keyed by name; everything unlisted is Discord-only and is what the coverage tile counts. */
 const CONFIGURABLE: Record<string, { path: (guildId: string) => string; screen: string }> = {
 	levelling: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
 	rank: { path: (guildId) => `/guilds/${guildId}/levelling`, screen: "Levelling" },
@@ -73,7 +72,6 @@ export function filterCommands(
 	);
 }
 
-/** Grouped for display, in the order the categories arrive so the page and the filter agree. */
 export function groupByCategory(commands: CommandSummary[], categories: string[]): [string, CommandSummary[]][] {
 	return categories
 		.map((category): [string, CommandSummary[]] => [

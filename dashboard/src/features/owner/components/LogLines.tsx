@@ -12,7 +12,6 @@ const TONE: Record<string, string> = {
 	info: "text-muted-foreground",
 };
 
-/** The bot's own log, as the terminal would show it — monospaced, newest first, one line per record. */
 export function LogLines({ lines }: { lines: LogLine[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	if (lines.length === 0) {
@@ -45,7 +44,6 @@ export function LogLines({ lines }: { lines: LogLine[] }): React.JSX.Element {
 	);
 }
 
-/** One line of `key=value`, because a pretty-printed object per record turns the feed into a wall. */
 function summarise(context: Record<string, unknown>): string {
 	return Object.entries(context)
 		.map(([key, value]) => `${key}=${render(value)}`)
@@ -57,7 +55,7 @@ function render(value: unknown): string {
 	if (typeof value === "string") return value;
 	if (typeof value === "number" || typeof value === "boolean" || typeof value === "bigint") return value.toString();
 
-	// An error arrives as `{ name, message, stack }`; its message is the only part worth a line here.
+	// An error arrives as `{ name, message, stack }`.
 	if (typeof value === "object") {
 		const message = (value as { message?: unknown }).message;
 		return typeof message === "string" ? message : JSON.stringify(value).slice(0, 200);

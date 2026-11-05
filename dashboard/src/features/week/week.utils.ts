@@ -15,7 +15,6 @@ function localDay(at: Date): string {
 	return `${String(at.getFullYear())}-${String(at.getMonth() + 1)}-${String(at.getDate())}`;
 }
 
-/** One group per day that has anything on it, headed Today and Tomorrow while those words are true. */
 export function groupByDay(events: readonly WeekEvent[], t: TFunction, now: Date = new Date()): WeekDay[] {
 	const today = localDay(now);
 	const tomorrow = localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
@@ -48,7 +47,6 @@ export function eventTitle(event: WeekEvent, channels: readonly ChannelSummary[]
 	}
 }
 
-/** What the line under the title adds; a birthday says all it needs to in its title. */
 export function eventDetail(event: WeekEvent, channels: readonly ChannelSummary[], t: TFunction): string | undefined {
 	switch (event.kind) {
 		case "scheduled":

@@ -19,7 +19,6 @@ export function useLevelling(guildId: string): UseQueryResult<LevelConfigRespons
 	});
 }
 
-/** Takes null where there may be no server, as quick search outside one, so the hook can still be called. */
 export function useChannels(guildId: string | null): UseQueryResult<ChannelSummary[]> {
 	return useQuery({
 		queryKey: keys.guild(guildId ?? "").channels(),
@@ -37,7 +36,6 @@ export function useRoles(guildId: string): UseQueryResult<RoleSummary[]> {
 	});
 }
 
-/** Optimistic with a rollback, and every mutation here goes through it so none can forget one. */
 function useLevellingMutation<TInput>(
 	guildId: string,
 	send: (input: TInput) => Promise<LevelConfigResponse>,
@@ -61,11 +59,9 @@ function useLevellingMutation<TInput>(
 			if (context?.previous !== undefined) client.setQueryData(key, context.previous);
 		},
 		onSuccess: (config) => {
-			// The server's answer is authoritative — it has been through `normaliseSettings`.
 			client.setQueryData(key, config);
 		},
 		onSettled: () => {
-			// The overview shows which features are on, so it is stale the moment this lands.
 			void client.invalidateQueries({ queryKey: keys.guild(guildId).overview() });
 		},
 	});

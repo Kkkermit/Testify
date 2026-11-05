@@ -27,7 +27,6 @@ const ICONS: Record<WeekEvent["kind"], LucideIcon> = {
 	birthday: Cake,
 };
 
-/** An agenda of what the bot will do, a day at a time, each event opening the page that sets it up. */
 export function WeekPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

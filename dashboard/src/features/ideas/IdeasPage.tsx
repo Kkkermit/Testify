@@ -39,7 +39,6 @@ const FILTER_LABEL: Record<IdeaFilter, TranslationKey> = {
 	declined: "ideas.filterDeclined",
 };
 
-/** The server's idea board: where it posts, and every idea with its votes and the decision on it. */
 export function IdeasPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

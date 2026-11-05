@@ -13,8 +13,6 @@ import {
 } from "@testify/shared";
 import { aGuild } from "@/test/fixtures/session";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const botControl: BotControlState = { gateway: "online", since: null, guilds: 3, pingMs: 42 };
 
 export const guildDetail: OwnerGuildDetail = {
@@ -35,7 +33,6 @@ export const guildDetail: OwnerGuildDetail = {
 	dashboardViews: 12,
 };
 
-/** What the runner offers: one plain command, one with subcommands, one needing a server. */
 export const runnable: CommandCatalogue = {
 	prefix: "t?",
 	categories: ["info"],

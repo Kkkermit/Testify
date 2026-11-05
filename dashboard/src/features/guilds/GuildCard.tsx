@@ -36,7 +36,6 @@ export function GuildCard({
 		);
 	}
 
-	// An anchor rather than a Link: the invite is Discord's own consent screen, not a route in this app.
 	if (group === "invitable" && clientId !== undefined) {
 		return (
 			<a

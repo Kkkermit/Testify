@@ -58,7 +58,7 @@ beforeEach(() => {
 });
 
 describe("queueRequest", () => {
-	/** The bug this exists for: after the last song ended, the next request sat in the queue instead of playing. */
+	/** After the last song ended, the next request sat in the queue instead of playing. */
 	it("plays straight away once the previous song has finished", async () => {
 		const session = fakeSession(finished({ tracks: [track("done")], index: 0, loop: "off" }), false);
 		sessionFor.mockReturnValue(session);
@@ -127,7 +127,7 @@ describe("queueRequest with the owner's choice of sources", () => {
 		sessionFor.mockReturnValue(fakeSession({ tracks: [], index: -1, loop: "off" }, false));
 	});
 
-	/** The point of "both": a host YouTube has flagged still plays what was asked for. */
+	/** Under "both", a host YouTube has flagged still plays what was asked for. */
 	it("tries SoundCloud when YouTube refuses a plain search, and says so", async () => {
 		getBotSettings.mockResolvedValue({ musicSources: "both" });
 		resolveTracks.mockRejectedValueOnce(botCheck()).mockResolvedValueOnce([track("from soundcloud")]);

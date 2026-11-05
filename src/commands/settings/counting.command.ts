@@ -4,7 +4,6 @@ import { defineCommand, inGuild } from "@core/command";
 import { reply } from "@lib/discord";
 import { countingPanel } from "@lib/settings";
 
-/** One panel instead of `setup`, `disable`, `reset` and `status`. */
 export default defineCommand({
 	name: "counting",
 	description: "Runs the counting game in a channel.",

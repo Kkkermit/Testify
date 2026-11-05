@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 
-/** The bot's picture; until there is one, or when the CDN will not load it, its initial, and never a built-in mark. */
 export function BotMark({
 	src,
 	name,
@@ -9,7 +8,6 @@ export function BotMark({
 	className,
 }: {
 	src: string | null | undefined;
-	/** The bot's name, whose first letter stands in for a picture that cannot be shown. */
 	name: string | null;
 	size?: number;
 	className?: string;

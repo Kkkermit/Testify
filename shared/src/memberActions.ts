@@ -3,8 +3,6 @@ import { WARNING_LIMITS } from "./memberDetail";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/** What the member page does beyond warnings and money: a timeout, their roles and their nickname. */
-
 /** The lengths a warning's step offers, and Discord's own ceiling of 28 days. */
 export const MEMBER_TIMEOUT_MINUTES = [5, 10, 30, 60, 360, 1_440, 10_080, 40_320] as const;
 

@@ -137,7 +137,6 @@ describe("the settings page", () => {
 		const warning = await screen.findByText("Choose a channel first.");
 
 		expect(warning).toBeInTheDocument();
-		// Beside its own control, not at the top of the page: the reader may never have scrolled past it.
 		expect(warning.closest("section, div")).toContainElement(
 			screen.getByRole("switch", { name: /run a counting channel/i }),
 		);

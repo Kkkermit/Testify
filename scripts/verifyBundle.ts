@@ -1,16 +1,12 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-/**
- * Fails on what only goes wrong in the built dashboard: a second copy of React, a polyfilled `light-dark()`, a missing
- * file from `dashboard/public`, or a source map that would hand out the original code.
- */
+/** Fails on what only goes wrong in the built dashboard. */
 
 const DIST = resolve(process.cwd(), "dashboard", "dist");
 const ASSETS = join(DIST, "assets");
 const PUBLIC = resolve(process.cwd(), "dashboard", "public");
 
-/** React writes its own version into its bundle, once per copy. */
 const VERSION = /version\s*[=:]\s*[`"']([\d]+\.[\d]+\.[\d]+)[`"']/g;
 
 /**
@@ -45,7 +41,6 @@ export function schemeProblem(css: string): string | null {
 	return null;
 }
 
-/** Every file under a directory, relative to it, so adding one to `dashboard/public` is checked with no edit here. */
 export function filesUnder(root: string, prefix = ""): string[] {
 	if (!existsSync(root)) return [];
 
@@ -58,10 +53,8 @@ export function missingFrom(root: string, files: readonly string[]): string[] {
 	return files.filter((file) => !existsSync(join(root, file)));
 }
 
-/** A static import of the owner console, which would make every visitor's page need a file only owners are served. */
 const STATIC_OWNER_IMPORT = /(?:from|import)\s*["']\.\/OwnerPage-[\w-]+\.js["']/;
 
-/** Null when the owner console is one chunk that nothing else imports statically; otherwise what is wrong. */
 export function ownerChunkProblem(files: Record<string, string>): string | null {
 	const chunks = Object.keys(files).filter((name) => /^OwnerPage-[\w-]+\.js$/.test(name));
 	if (chunks.length !== 1) return `Expected one owner console chunk, found ${String(chunks.length)}.`;
@@ -72,10 +65,8 @@ export function ownerChunkProblem(files: Record<string, string>): string | null 
 	return importer === undefined ? null : `${importer[0]} imports the owner console statically.`;
 }
 
-/** The comment that tells a browser where a file's source map is. */
 const MAP_POINTER = /[#@]\s*sourceMappingURL=/;
 
-/** Null when nothing in the build is or points at a source map; otherwise the first file that does. */
 export function sourceMapProblem(files: Record<string, string>): string | null {
 	const map = Object.keys(files).find((name) => name.endsWith(".map"));
 	if (map !== undefined) return `The build ships a source map, ${map}, which rebuilds the original code.`;

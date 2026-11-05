@@ -1,4 +1,4 @@
-/** BM25 over the help articles, shared so the dashboard's typeahead and the bot's answers rank the same way. */
+/** BM25 over the help articles, shared so the dashboard's typeahead and the bot rank the same way. */
 
 const STOP_WORDS = new Set(
 	(
@@ -12,7 +12,6 @@ const STOP_WORDS = new Set(
 	).split(" "),
 );
 
-/** Words a reader uses for something the articles call by another name. */
 const ALSO_MEANS: Record<string, string[]> = {
 	leveling: ["levelling"],
 	levels: ["level"],
@@ -173,7 +172,6 @@ const MAX_COMPLETIONS = 8;
 interface Option {
 	term: string;
 	weight: number;
-	/** How much of the word's importance a match earns towards coverage. */
 	credit: number;
 }
 
@@ -195,7 +193,6 @@ function pairsOf(tokens: readonly string[]): string[] {
 export class SupportSearch<T extends SearchableEntry> {
 	readonly #documents: Indexed<T>[];
 	readonly #frequency = new Map<string, number>();
-	/** Single words only, the most common first, which is the order completions are offered in. */
 	readonly #vocabulary: string[];
 	readonly #corrections = new Map<string, string | null>();
 	readonly #averageLength: number;
@@ -235,7 +232,6 @@ export class SupportSearch<T extends SearchableEntry> {
 		this.#averageLength = this.#documents.length === 0 ? 1 : total / this.#documents.length;
 	}
 
-	/** A word no article uses weighs the most, so a question made of them has almost nothing covered. */
 	idf(token: string): number {
 		const count = this.#documents.length;
 		const holding = this.#frequency.get(token) ?? 0;
@@ -243,7 +239,6 @@ export class SupportSearch<T extends SearchableEntry> {
 		return Math.log(1 + (count - holding + 0.5) / (holding + 0.5));
 	}
 
-	/** The word the articles use that a misspelt one was nearest to, or null when nothing is close enough. */
 	correct(term: string): string | null {
 		if (term.length < 4 || this.#frequency.has(term)) return this.#frequency.has(term) ? term : null;
 

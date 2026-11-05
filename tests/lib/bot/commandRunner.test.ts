@@ -36,7 +36,7 @@ function optionsFrom(args: Record<string, string | number | boolean>, guild: unk
 }
 
 describe("the allowlist", () => {
-	/** Opting in beats opting out: a command added later must not become web-reachable by accident. */
+	/** Opt-in, so a command added later does not become web-reachable by accident. */
 	it("refuses a command that is not on it", () => {
 		expect(runnableInDashboard("ban")).toBe(false);
 		expect(runnableInDashboard("levelling")).toBe(false);
@@ -209,7 +209,7 @@ describe("the interaction adapter", () => {
 		expect(interaction.captured).toHaveLength(2);
 	});
 
-	/** A modal is a second Discord round trip. There is nowhere for it to go, so it says so. */
+	/** A modal is a second Discord round trip with nowhere to go here, so it says so. */
 	it("refuses a modal rather than hanging", () => {
 		expect(() => interactionFor().showModal()).toThrow(UserFacingError);
 	});

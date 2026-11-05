@@ -1,8 +1,5 @@
 import { type FeatureStatus } from "./api";
 
-/** Where each feature works in a server, which the dashboard draws as a map of the server's own channels. */
-
-/** What a feature does in a channel: posts there, logs there, keeps a panel there, uses it as a lobby, names it with a count, or reads what is typed there. */
 export const PLACE_ROLES = ["posts", "logs", "panel", "lobby", "counter", "listens"] as const;
 export type PlaceRole = (typeof PLACE_ROLES)[number];
 
@@ -47,7 +44,6 @@ export const FEATURE_PLACES = {
 
 export type FeatureKey = keyof typeof FEATURE_PLACES;
 
-/** A feature's overview reading and where it works. */
 export type FeaturePlaces = FeatureStatus & {
 	reach: PlaceReach;
 	/** Every channel it uses, whether or not it is switched on, so a switched-off feature still shows where it was. */

@@ -1,6 +1,3 @@
-/** The rules that turn the repository's own Markdown into the docs: which part of a file a page shows, and where each link goes. */
-
-/** GitHub's anchor for a heading, so a link written for GitHub lands on the same heading here. */
 export function headingSlug(text: string): string {
 	return text
 		.trim()
@@ -9,7 +6,6 @@ export function headingSlug(text: string): string {
 		.replace(/ /g, "-");
 }
 
-/** Repeats take `-1`, `-2` and so on, as GitHub numbers them. */
 export class Slugger {
 	readonly #seen = new Map<string, number>();
 
@@ -21,7 +17,6 @@ export class Slugger {
 	}
 }
 
-/** A heading's words without its emoji, its section number or its punctuation, which is how a page names the part it shows. */
 export function headingName(text: string): string {
 	return text
 		.toLowerCase()
@@ -32,7 +27,6 @@ export function headingName(text: string): string {
 		.trim();
 }
 
-/** The same name read back out of an anchor, so a link to a section finds the page that shows it. */
 export function anchorName(anchor: string): string {
 	return headingName(anchor.replace(/-/g, " "));
 }
@@ -67,7 +61,6 @@ function headingsOf(lines: readonly string[]): Heading[] {
 	return found;
 }
 
-/** Each named heading with everything under it, in the order asked for; null for a name the file no longer has. */
 export function sectionsOf(markdown: string, names: readonly string[]): (string | null)[] {
 	const lines = markdown.split("\n");
 	const headings = headingsOf(lines);
@@ -82,13 +75,11 @@ export function sectionsOf(markdown: string, names: readonly string[]): (string 
 	});
 }
 
-/** Every heading's anchor in a file, for knowing whether a link to one stays on this page. */
 export function anchorsOf(markdown: string): string[] {
 	const slugger = new Slugger();
 	return headingsOf(markdown.split("\n")).map((heading) => slugger.slug(inlineText(heading.text)));
 }
 
-/** A heading's words without its Markdown, which is what GitHub builds the anchor from. */
 export function inlineText(markdown: string): string {
 	return markdown
 		.replace(/!?\[([^\]]*)\]\([^)]*\)/g, "$1")
@@ -96,10 +87,7 @@ export function inlineText(markdown: string): string {
 		.trim();
 }
 
-/**
- * GitHub's collapsible FAQ, `<details>` around a `<summary>`, as a heading and its answer: the renderer shows no HTML
- * at all, and the question is the part worth keeping.
- */
+/** GitHub's `<details>` FAQ becomes a heading and its answer, because no HTML is rendered. */
 export function withoutMarkup(markdown: string): string {
 	return markdown
 		.replace(/<!--[\s\S]*?-->/g, "")
@@ -107,7 +95,6 @@ export function withoutMarkup(markdown: string): string {
 		.replace(/^\s*<\/?details>\s*$/gm, "");
 }
 
-/** Where a link in a document goes on this site. */
 export type Destination =
 	| { kind: "route"; to: string }
 	| { kind: "external"; href: string }
@@ -118,13 +105,9 @@ export type Destination =
 const SAFE_SCHEME = /^(?:https?|mailto):/i;
 
 export interface LinkContext {
-	/** The file the link was written in, relative to the repository's root. */
 	file: string;
-	/** The anchors on the page being shown, so an in-page link stays in it. */
 	anchors: ReadonlySet<string>;
-	/** Pages that show a whole file, by the file's path. */
 	pagesByFile: Readonly<Record<string, string>>;
-	/** Pages that show one section, by the file's path and that section's name. */
 	pagesBySection: Readonly<Record<string, string>>;
 	repository: string;
 }
@@ -148,7 +131,6 @@ function directoryOf(file: string): string {
 	return file.includes("/") ? file.slice(0, file.lastIndexOf("/")) : "";
 }
 
-/** A docs page when one shows it, this site's source browser for any other file, and the web for everything else. */
 export function destinationOf(href: string, context: LinkContext): Destination {
 	if (/^[a-z][a-z0-9+.-]*:/i.test(href)) return SAFE_SCHEME.test(href) ? { kind: "external", href } : { kind: "none" };
 
@@ -173,13 +155,10 @@ export function destinationOf(href: string, context: LinkContext): Destination {
 export interface EnvVariable {
 	name: string;
 	description: string;
-	/** What the template fills in, which is blank for nearly all of them. */
 	example: string;
-	/** The template's own heading for the block it sits in. */
 	group: string | null;
 }
 
-/** Every variable in a `.env` template with the comment written above it, in the template's own order and groups. */
 export function variablesIn(template: string): EnvVariable[] {
 	const variables: EnvVariable[] = [];
 	let comment: string[] = [];
@@ -238,7 +217,6 @@ export function decodeEntities(text: string): string {
 export const ALERTS = ["note", "tip", "important", "warning", "caution"] as const;
 export type Alert = (typeof ALERTS)[number];
 
-/** GitHub's `> [!NOTE]`, and the text after the marker. */
 export function alertOf(quote: string): { kind: Alert; body: string } | null {
 	const match = /^\s*\[!(note|tip|important|warning|caution)\]\s*\n?/i.exec(quote);
 	if (match?.[1] === undefined) return null;

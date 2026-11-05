@@ -26,7 +26,6 @@ import { channelLabel } from "@/lib/channels";
 const CELL = "border-border min-w-44 border-t px-4 py-3 text-left align-top";
 const ROW_HEAD = "bg-card border-border sticky left-0 z-10 min-w-40 border-t px-4 py-3 text-left align-top font-medium";
 
-/** Servers as columns and features as rows, each column read through that server's own overview. Read-only. */
 export function ComparePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const me = useMe();
@@ -165,7 +164,6 @@ function ServerName({ guild }: { guild: ManageableGuild }): React.JSX.Element {
 	);
 }
 
-/** A column whose server refused says so in its heading, and the rest of the table stays readable. */
 function ServerHead({
 	guild,
 	query,

@@ -3,7 +3,6 @@ import { type Preference, storedPreference, useRootPreference } from "@/hooks/ro
 import { readHex, toHex } from "@/lib/colour";
 import { customAccent, customProperties } from "@/lib/customAccent";
 
-/** The accents offered as swatches, each a block in `index.css` that `contrast.test.ts` measures. */
 export const ACCENTS = [
 	"plum",
 	"indigo",
@@ -29,7 +28,6 @@ export const ACCENT: Preference<Accent> = {
 	fallback: "plum",
 };
 
-/** Kept apart from the accent, so choosing a swatch does not forget the colour somebody made. */
 export const CUSTOM_COLOUR_KEY = "testify:accent-colour";
 
 export function storedCustomColour(): string | null {
@@ -41,7 +39,6 @@ export function storedCustomColour(): string | null {
 	}
 }
 
-/** Writes each theme's shades onto the root, where `[data-accent="custom"]` reads them, or clears them. */
 export function applyCustomColour(hex: string | null): void {
 	const style = document.documentElement.style;
 	const colour = readHex(hex);
@@ -65,12 +62,12 @@ export function useAccent(): { accent: Accent; setAccent: (next: Accent) => void
 	return { accent: value === "custom" && storedCustomColour() === null ? ACCENT.fallback : value, setAccent: choose };
 }
 
-/** The colour somebody made, remembered and applied; false when it was not a colour, and nothing changed. */
+/** False when it was not a colour, and nothing changed. */
 export function useCustomColour(): { colour: string | null; setColour: (value: string) => boolean } {
 	const [colour, setState] = useState<string | null>(storedCustomColour);
 
 	const setColour = useCallback((value: string) => {
-		// Only a colour reaches the page or storage, whoever calls this and with whatever string.
+		// Only a colour reaches the page or storage, whatever string arrives.
 		const read = readHex(value);
 		if (read === null) return false;
 

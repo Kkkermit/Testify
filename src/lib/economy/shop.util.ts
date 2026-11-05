@@ -1,5 +1,3 @@
-/** The shop catalogue. */
-
 export interface ShopItem {
 	id: string;
 	name: string;

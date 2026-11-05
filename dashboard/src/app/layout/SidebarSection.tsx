@@ -7,7 +7,6 @@ import { ICON_SLOT } from "@/app/layout/sidebarStyles";
 import { type NavSection, sectionHolds } from "@/config/navigation";
 import { cn } from "@/lib/cn";
 
-/** The icon-only rail has no room for a toggle, so below `lg` the button is absent and the items stay flat. */
 export function SidebarSection({
 	section,
 	expanded = false,
@@ -57,7 +56,6 @@ export function SidebarSection({
 				id={listId}
 				className={cn(
 					"flex flex-col gap-1",
-					// Indented only where the label column exists; the rail keeps every icon on one line.
 					expanded
 						? "ml-[9px] border-l border-border pl-[9px]"
 						: "lg:ml-[9px] lg:border-l lg:border-border lg:pl-[9px]",

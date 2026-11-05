@@ -16,7 +16,6 @@ export function useSetupChecklist(guildId: string): UseQueryResult<SetupChecklis
 	});
 }
 
-/** A step changes the feature tiles as well, so the whole server is read again rather than patched. */
 export function useRunSetupStep(guildId: string): UseMutationResult<SetupChecklist, Error, SetupStep> {
 	const client = useQueryClient();
 

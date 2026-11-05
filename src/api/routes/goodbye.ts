@@ -10,7 +10,6 @@ export const goodbye = new Hono<ApiBindings>();
 
 goodbye.use("*", requireGuild);
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: GoodbyePatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned goodbyes on" : "Turned goodbyes off");

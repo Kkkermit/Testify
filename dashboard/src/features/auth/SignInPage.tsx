@@ -12,7 +12,6 @@ import { useSite } from "@/features/site/useSite";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { hardRedirect } from "@/lib/redirect";
 
-/** One button, and the two scopes named — asking for less is a feature, so say what it is. */
 export function SignInPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("auth.title"));
@@ -21,7 +20,6 @@ export function SignInPage(): React.JSX.Element {
 	const bot = useBotLook();
 	const site = useSite();
 	const returnTo = params.get("returnTo") ?? "/guilds";
-	// Never the built-in name: a bot not called that is misnamed on the one screen everybody sees first.
 	const name = bot.name;
 
 	if (site.data?.dashboard === false) return <DashboardOff />;

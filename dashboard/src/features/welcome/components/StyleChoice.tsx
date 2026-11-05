@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { RadioCard } from "@/components/form";
 import { STYLE_LABELS } from "@/features/welcome/welcome.utils";
 
-/** One radio of a "Sent as" group; `group` keeps two groups on one page from sharing a selection. */
 export function StyleChoice({
 	group,
 	style,

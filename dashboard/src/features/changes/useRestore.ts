@@ -13,7 +13,6 @@ function entryOf(restore: ChangeRestore): Restorable {
 	return RESTORABLE[restore.action];
 }
 
-/** The setting as it stands, read afresh whenever the panel opens, because what matters is what it holds now. */
 export function useCurrentSetting(guildId: string, restore: ChangeRestore, enabled: boolean): UseQueryResult<unknown> {
 	const entry = entryOf(restore);
 	const path = entry.read ?? entry.path;
@@ -26,7 +25,6 @@ export function useCurrentSetting(guildId: string, restore: ChangeRestore, enabl
 	});
 }
 
-/** Sends the old values to the route that made the change, so its own gates decide this as they decided that. */
 export function usePutBack(guildId: string): UseMutationResult<unknown, Error, ChangeRestore> {
 	const client = useQueryClient();
 

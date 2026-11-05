@@ -1,7 +1,5 @@
 import { ESLint } from "eslint";
 
-/** `npm run lint`: a per-file report where errors fail and warnings never do. */
-
 const colour = {
 	reset: "\u001b[0m",
 	bold: "\u001b[1m",
@@ -34,7 +32,6 @@ export function totalsOf(results: ESLint.LintResult[]): LintTotals {
 	);
 }
 
-/** Errors fail; warnings are reported and forgiven. */
 export function exitCodeFor(totals: LintTotals): number {
 	return totals.errors > 0 ? 1 : 0;
 }

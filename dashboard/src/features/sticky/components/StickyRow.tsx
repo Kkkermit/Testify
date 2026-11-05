@@ -8,7 +8,6 @@ import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { markupWarning } from "@/lib/sanitise";
 
-/** One row, edited in place and saved explicitly — a sticky is a posted message, not a switch. */
 export function StickyRow({
 	entry,
 	channels,

@@ -4,8 +4,6 @@ import { UserFacingError } from "@core/errors";
 import { readWarnLadder, stepLabel, WARN_LADDER_ID, warnLadderPanel, writeWarnLadder } from "@lib/moderation";
 import { stepFromValue, WARN_LIMITS, type WarnStep } from "@testify/shared";
 
-/** The `/warn punishments` panel: every change is written at once, against a fresh read of the list. */
-
 const STALE = "That step has changed since this panel was drawn. Open it again with `/warn punishments`.";
 
 export default defineButton({
@@ -16,7 +14,6 @@ export default defineButton({
 		const guild = interaction.guild;
 		if (guild === null || !interaction.isMessageComponent()) return;
 
-		// Re-checked on every press, because the panel outlives the permission it was opened with.
 		if (!(interaction.member as GuildMember).permissions.has(PermissionFlagsBits.ManageGuild)) {
 			throw new UserFacingError("You need the Manage Server permission to change warning punishments.");
 		}

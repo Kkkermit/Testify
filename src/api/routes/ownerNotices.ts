@@ -6,7 +6,6 @@ import { parseBody, parseParams } from "@api/validate";
 import { allNotices, changeNotice, postNotice, readNotice, removeNotice } from "@lib/notices";
 import { noticeInput, noticeParams, noticePatch } from "@testify/shared";
 
-/** The same three actions `/bot-notifications` gives the bot's owners, on the same store. */
 export const ownerNotices = new Hono<ApiBindings>();
 
 ownerNotices.use("*", requireOwner);

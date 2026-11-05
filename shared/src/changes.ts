@@ -3,10 +3,7 @@ import { type Paged } from "./api";
 import { type ChangeRestore } from "./restore";
 import { plainLine } from "./text";
 
-/** A server's recent changes: what managers did on the dashboard and what Discord's own audit log recorded. */
-
 export const CHANGE_LIMITS = {
-	/** How far back a search reaches. */
 	maxDays: 14,
 	perPage: 25,
 	/** Discord hands its audit log over a hundred entries at a time, so a busy server is read this far and no further. */
@@ -72,10 +69,8 @@ export interface ServerChange {
 	verb: ChangeVerb;
 	/** A dashboard change's own sentence; a Discord one is worded by each surface from `kind` and `verb`. */
 	summary: string | null;
-	/** The channel, role, member or other thing changed, by name, when Discord still knows it. */
 	target: string | null;
 	reason: string | null;
-	/** How a dashboard settings change can be put back, or null when it cannot. */
 	restore: ChangeRestore | null;
 }
 
@@ -98,7 +93,6 @@ export const changesQuery = z.object({
 		.refine((days) => CHANGE_WINDOWS.some((window) => window === days), "must be 1, 3, 7 or 14")
 		.default(7),
 	source: z.enum(CHANGE_SOURCES).default("all"),
-	/** A name, a Discord ID or any words from the change itself. */
 	q: plainLine(1, 64).optional(),
 });
 

@@ -13,7 +13,7 @@ import {
 } from "@/lib/brand";
 import { keys } from "@/lib/queries";
 
-/** The API answers 503 until Discord says the bot is ready, and `dev:all`'s proxy answers 503 while the bot restarts; both take far longer than two quick retries. */
+/** The API answers 503 while the bot connects or restarts, which outlasts two quick retries. */
 const CONNECTING_RETRIES = 30;
 const CONNECTING_RETRY_MS = 2_000;
 
@@ -29,7 +29,6 @@ export function botRetryDelay(failures: number, error: Error): number {
 	return stillConnecting(error) ? CONNECTING_RETRY_MS : Math.min(1_000 * 2 ** failures, 30_000);
 }
 
-/** Cached for the session rather than refetched per screen; every consumer falls back to the built-in mark. */
 export function useBot(): UseQueryResult<BotIdentity> {
 	const bot = useQuery({
 		queryKey: keys.bot(),
@@ -56,7 +55,6 @@ export function useBot(): UseQueryResult<BotIdentity> {
 	return bot;
 }
 
-/** The bot's face: the live profile once it answers, and the one it last gave until then, so its picture is always shown. */
 export function useBotLook(): BotLook {
 	const bot = useBot();
 	const remembered = useMemo(rememberedBotLook, []);

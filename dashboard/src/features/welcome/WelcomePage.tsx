@@ -41,7 +41,6 @@ export function WelcomePage(): React.JSX.Element {
 
 	const [draft, setDraft] = useState("");
 
-	// The template is the one field that is edited rather than toggled, so it is held locally and saved on blur.
 	useEffect(() => {
 		if (config.data !== undefined) setDraft(config.data.message);
 	}, [config.data?.message]);

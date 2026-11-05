@@ -110,7 +110,7 @@ export function parseUserLimit(input: string): number {
 	return value;
 }
 
-/** Makes a voice channel to be the lobby, in the category new channels go to, and makes it the lobby. */
+/** Makes a voice channel in the category new channels go to, and sets it as the lobby. */
 export async function makeLobby(guild: Guild, updatedBy: string | null): Promise<TempVoiceSettings> {
 	if (!botCanManage(guild)) throw new UserFacingError("I need Manage Channels and Move Members to make a lobby.");
 	const current = await readTempVoiceSettings(guild);

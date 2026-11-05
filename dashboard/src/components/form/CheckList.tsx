@@ -7,12 +7,10 @@ import { cn } from "@/lib/cn";
 export interface CheckItem {
 	id: string;
 	label: ReactNode;
-	/** Shown greyed with a reason rather than hidden, so the limit explains itself. */
 	blocked?: boolean;
 	blockedNote?: string;
 }
 
-/** The scrolling checkbox list both pickers are built from. */
 export function CheckList({
 	label,
 	hint,
@@ -33,7 +31,7 @@ export function CheckList({
 	const nameId = `checklist-${useId()}`;
 	const row = useRowLayout();
 
-	// A named group rather than a `Field`: a `<label>` names one control. A `<legend>` is not a flex item, so a `<fieldset>` would lose the gap.
+	// Not a `<fieldset>`: a `<legend>` is not a flex item, so the gap would be lost.
 	return (
 		<div role="group" aria-labelledby={nameId} className={row ? ROW_GRID : FIELD_GROUP}>
 			<span className="flex flex-col gap-1">

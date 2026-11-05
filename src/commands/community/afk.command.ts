@@ -3,7 +3,6 @@ import { defineCommand, inGuild } from "@core/command";
 import { AFK_COMMAND, awayConfirm, goAway } from "@lib/afk";
 import { reply } from "@lib/discord";
 
-/** Marks somebody away in this server until they next send a message here. */
 export default defineCommand({
 	name: AFK_COMMAND,
 	description: "Tells anybody who mentions you that you are away, until you next speak.",
@@ -16,7 +15,6 @@ export default defineCommand({
 			description: "What to tell people, like back at six.",
 			type: "string",
 			maxLength: AFK.maxNote,
-			// The note is somebody's own words, so the operator's logs never see it.
 			unlogged: true,
 		},
 	],

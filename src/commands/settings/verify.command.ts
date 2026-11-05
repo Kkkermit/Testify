@@ -5,7 +5,6 @@ import { deleteVerifyConfig, getVerifyConfig } from "@database/repositories/veri
 import { reply, successEmbed } from "@lib/discord";
 import { normaliseVerify, verifyPanel } from "@lib/settings";
 
-/** One panel instead of three subcommands. */
 async function openPanel(interaction: CommandInput): Promise<void> {
 	const guild = inGuild(interaction);
 	const config = normaliseVerify(await getVerifyConfig(guild.id));

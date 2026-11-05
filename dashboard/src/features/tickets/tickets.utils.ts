@@ -28,7 +28,6 @@ export function isDirty(draft: Draft, settings: TicketSettings): boolean {
 	return (Object.keys(saved) as (keyof Draft)[]).some((field) => draft[field] !== saved[field]);
 }
 
-/** Everything stopping the panel being posted, all at once, so the fields can be filled in any order. */
 export function draftProblems(draft: Draft, t: TFunction): string[] {
 	return [
 		...ticketMissing(draft).map((missing) => problemText(missing, t)),
@@ -48,7 +47,6 @@ export function staffRoleWarning(roles: RoleSummary[], staffRoleId: string | nul
 	return null;
 }
 
-/** Whether members can open a ticket and how many are open, as the sentence the page opens with. */
 export function ticketSummary(
 	settings: Pick<TicketSettings, "enabled" | "posted" | "openTickets">,
 	panelChannel: string,

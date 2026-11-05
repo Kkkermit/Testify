@@ -9,8 +9,6 @@ import {
 	type SupportReply,
 } from "@testify/shared";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 const CHECKED_AT = "2026-09-23T12:00:00.000Z";
 
 export const botStatus: StatusResponse = {
@@ -125,5 +123,4 @@ export const musicNotice: Notice = {
 	updatedAt: "2026-10-31T10:00:00.000Z",
 };
 
-/** Nothing unread, so the banner stays out of every screen's test but the ones about it. */
 export const quietFeed: NoticeFeed = { notices: [], unread: 0 };

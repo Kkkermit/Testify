@@ -67,7 +67,7 @@ describe("reaching /owner", () => {
 		expect(asked).toBe(false);
 	});
 
-	/** The report: `isOwner` rewritten to true in the browser drew the console, because nothing else was asked. */
+	/** `isOwner` rewritten to true in the browser drew the console, because nothing else was asked. */
 	it("ejects a rewritten /me the server does not agree with, without drawing the console", async () => {
 		claimsOwner(true);
 		accessAnswers(404);

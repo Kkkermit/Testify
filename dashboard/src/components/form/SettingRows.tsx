@@ -2,7 +2,6 @@ import { type FormEvent, type ReactNode, useId } from "react";
 import { RowLayout } from "@/components/form/rowLayout";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 
-/** One panel of settings, a row each, divided by hairlines rather than split into cards. */
 export function SettingRows({
 	title,
 	description,
@@ -12,9 +11,7 @@ export function SettingRows({
 }: {
 	title?: string;
 	description?: ReactNode;
-	/** Beside the title, such as the panel's own saving indicator. */
 	action?: ReactNode;
-	/** Makes the panel a form, so Enter in any of its fields submits it. */
 	onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
 	children: ReactNode;
 }): React.JSX.Element {

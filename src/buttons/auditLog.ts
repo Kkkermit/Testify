@@ -16,7 +16,6 @@ import {
 	resolveEnabled,
 } from "@lib/moderation";
 
-/** Every control on the audit logging panel. */
 async function currentState(guildId: string): Promise<AuditPanelState> {
 	const config = await getAuditLogConfig(guildId);
 	return { channelId: config?.channelId ?? null, enabled: config?.enabledLogs ?? [] };
@@ -56,7 +55,6 @@ export default defineButton({
 				if (channelId === undefined) return;
 				await requireSendable(guild, channelId);
 
-				// A first setup starts with everything ticked.
 				const fresh = saved.channelId === null && saved.enabled.length === 0 && draft.events.length === 0;
 				await showEditor({ channelId, events: fresh ? [...AUDIT_EVENTS] : draft.events });
 				return;

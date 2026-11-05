@@ -5,7 +5,6 @@ import { DividedList, HoverChevron } from "@/components/primitives";
 import { channelPath, channelTree, featuresIn } from "@/features/channels/channelMap.utils";
 import { featureLabel } from "@/features/guild-overview/featureStatus.labels";
 
-/** Every channel the bot works in, in Discord's order, each naming what it does there and opening that channel. */
 export function ChannelList({
 	features,
 	channels,

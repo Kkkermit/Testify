@@ -15,7 +15,6 @@ export function AutoRoleSection({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const save = useSaveSection<AutoRolePut>(guildId, "auto-roles", "put");
-	// The same check `applyLevelRewards` makes at runtime, surfaced before anybody saves a list that cannot work.
 	const unassignable = roles.filter((role) => value.roleIds.includes(role.id) && !role.assignableByBot);
 
 	return (

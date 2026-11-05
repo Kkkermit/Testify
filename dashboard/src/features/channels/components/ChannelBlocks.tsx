@@ -23,7 +23,6 @@ interface BlockProps {
 	guildId: string;
 }
 
-/** One block per feature working in a channel: what it does there, how it looks, and where to change the rest. */
 export function ChannelBlocks({
 	features,
 	...rest
@@ -78,7 +77,6 @@ function ChannelBlock({ feature, channelId, channels, guildId }: BlockProps): Re
 	);
 }
 
-/** The post itself where the dashboard can draw it, and what the feature is doing where it cannot yet. */
 function BlockBody({ feature, channels, guildId }: Omit<BlockProps, "channelId">): React.JSX.Element {
 	const { t } = useTranslation();
 

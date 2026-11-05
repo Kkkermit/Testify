@@ -15,7 +15,6 @@ import { useDocumentVisible } from "@/hooks/useDocumentVisible";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { cn } from "@/lib/cn";
 
-/** Discord's own message box typing a real command, which is the one thing a server manager recognises at a glance. */
 export function Composer({ palette }: { palette: readonly PaletteCommand[] }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const reduced = usePrefersReducedMotion();
@@ -83,7 +82,6 @@ function slashLine(scene: ComposerScene): string {
 	return [`/${scene.command}`, ...scene.options.map((option) => `${option.name}: ${option.value}`)].join(" ");
 }
 
-/** Faint lines of earlier conversation, so the menu opens over a channel rather than over nothing. */
 function History(): React.JSX.Element {
 	return (
 		<div className="flex flex-1 flex-col justify-end gap-4 overflow-hidden opacity-60">
@@ -123,7 +121,6 @@ function Menu({ commands, typed }: { commands: readonly PaletteCommand[]; typed:
 	);
 }
 
-/** Once picked, the command is a pill and each option a labelled field, which is how Discord draws them. */
 function Line({ frame, command }: { frame: ComposerFrame; command: string }): React.JSX.Element {
 	return (
 		<div className="bg-muted rounded-field flex min-h-12 flex-wrap items-center gap-2 px-3 py-2 font-mono text-sm">

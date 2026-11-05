@@ -16,7 +16,6 @@ import { channelLabel } from "@/lib/channels";
 export function LevellingPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
-	// In the URL, so a link to the rewards tab is a link to the rewards tab and Back works.
 	const [params, setParams] = useSearchParams();
 	const tab = tabFrom(params.get("tab"));
 

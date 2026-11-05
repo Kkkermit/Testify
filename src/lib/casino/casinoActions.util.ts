@@ -61,10 +61,7 @@ let reveals = 0;
 /** Players whose last game is still being drawn: a render takes a moment, and a player gets one at a time per server. */
 const drawing = new Set<string>();
 
-/**
- * Takes the stake, settles and pays the game, then shows it being played: the animation first, swapped for the
- * settled picture once it has had time to run, so a client that loops the GIF still ends on the result.
- */
+/** Takes the stake, settles and pays, then plays the animation and swaps it for the settled picture once it has run. */
 export async function playInstant(
 	responder: Responder,
 	client: TestifyClient,

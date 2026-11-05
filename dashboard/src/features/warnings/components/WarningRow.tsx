@@ -10,7 +10,6 @@ import { shortDate } from "@/lib/datetime";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** One warning with its own Edit and Remove, shared by the server's list and a member's page. */
 export function WarningRow({
 	warning,
 	member,
@@ -20,7 +19,6 @@ export function WarningRow({
 	onRemove,
 }: {
 	warning: MemberWarning;
-	/** Set on the server-wide list, where the row has to say whose warning it is. */
 	member?: { name: string; href: string };
 	canChange: boolean;
 	busy: boolean;

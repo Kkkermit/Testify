@@ -122,7 +122,7 @@ describe("the English dictionary", () => {
 	});
 });
 
-/** Every module the app ships, so a key used anywhere counts as used. Tests and the locales themselves do not. */
+/** Every module the app ships, so a key used anywhere counts as used; tests and the locales do not count. */
 function sourceText(): string {
 	const read = (dir: string): string =>
 		readdirSync(dir, { withFileTypes: true })

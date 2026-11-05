@@ -9,17 +9,14 @@ import { NotFoundContent } from "@/features/not-found/NotFoundPage";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-/** Only the development build defines it, so a production reader never sees a stack or a file path. */
 const SHOW_DETAILS = typeof __DEV_ERRORS__ === "boolean" && __DEV_ERRORS__;
 
-/** The router's `errorElement`: inside the shell it keeps the sidebar, outside it brings its own page. */
 export function RouteError({ standalone = false }: { standalone?: boolean }): React.JSX.Element {
 	const error = useRouteError();
 	const failure = classifyRouteError(error);
 	const [reloading, setReloading] = useState(failure === "stale");
 	const decided = useRef(false);
 
-	// A file that moved under an open tab is fixed by loading the new one, so the reader never has to see this.
 	useEffect(() => {
 		if (failure !== "stale" || decided.current) return;
 		decided.current = true;

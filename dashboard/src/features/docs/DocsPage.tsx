@@ -28,7 +28,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { keys } from "@/lib/queries";
 
-/** `/docs` lists every page; `/docs/:slug` shows one, and `/docs/guides/:articleId` one help article. */
 export function DocsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { slug, articleId } = useParams();
@@ -171,7 +170,6 @@ function DocView({ page, articleId }: { page: DocPage; articleId: string | undef
 	);
 }
 
-/** One section of a file drops its own heading, which would only repeat the page's; a whole file drops its title. */
 async function sourcesOf(page: MarkdownPage): Promise<MarkdownSource[]> {
 	return Promise.all(
 		page.sources.map(async (source) => {

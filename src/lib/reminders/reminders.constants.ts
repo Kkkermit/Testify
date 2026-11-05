@@ -1,13 +1,10 @@
 import { DAY_MS, MINUTE_MS } from "@config/constants";
 
-/** The identifiers and limits more than one module in this domain reads. */
-
 export const REMINDER_ID = "reminder";
 
 export const REMINDER_LIMITS = {
 	minMs: MINUTE_MS,
 	maxMs: 365 * DAY_MS,
-	/** Per person, wherever they were set. */
 	maxActive: 25,
 	maxText: 500,
 	/** How long a delivery may hold a reminder before another run may try it again. */

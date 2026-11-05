@@ -2,7 +2,6 @@ import { fillTemplate, type WelcomeStyle } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 
-/** Filled by the same function the bot posts with, so nobody has to save a template and join with an alt to find out what `{count}` does. */
 export function GreetingPreview({
 	message,
 	style,

@@ -52,7 +52,6 @@ describe("returnTo", () => {
 		expect(returnTo.safeParse(inner).success).toBe(false);
 	});
 
-	/** A protocol-relative URL is an open redirect. */
 	it("rejects a protocol-relative URL", () => {
 		expect(returnTo.safeParse("//evil").success).toBe(false);
 		expect(returnTo.safeParse("//evil/path").success).toBe(false);

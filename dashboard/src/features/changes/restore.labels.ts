@@ -1,7 +1,6 @@
 import { type RESTORABLE, type RestorableAction } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
-/** Each field a change can put back, named as its own page names it; typed, so a new field cannot go unlabelled. */
 export const RESTORE_FIELD_LABELS: {
 	[Action in RestorableAction]: Record<(typeof RESTORABLE)[Action]["fields"][number], TranslationKey>;
 } = {
@@ -81,7 +80,6 @@ export const RESTORE_FIELD_LABELS: {
 	"settings.voice-stats": { memberChannelId: "settings.voiceMembers", botChannelId: "settings.voiceBots" },
 };
 
-/** The screen each setting is changed on, under `/guilds/:guildId`; several share one. */
 export const RESTORE_SCREENS: Record<RestorableAction, string> = {
 	"welcome.update": "/welcome",
 	"goodbye.update": "/welcome",

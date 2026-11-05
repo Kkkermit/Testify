@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { pagination, snowflake } from "./schemas";
 
-/** What the owner console reports: counts per command, server and day, and who ran what inside one server. */
-
 export const ANALYTICS_WINDOWS = [7, 30, 90] as const;
 
 export type AnalyticsWindow = (typeof ANALYTICS_WINDOWS)[number];
@@ -32,7 +30,7 @@ export interface GuildUsageRow {
 	count: number;
 }
 
-/** How long a command kept somebody waiting, from every run in a server: half took `typicalMs` or less. */
+/** `typicalMs` is the median run in a server. */
 export interface SlowCommandRow {
 	command: string;
 	category: string;
@@ -54,7 +52,6 @@ export interface UsageReport {
 	runs: number;
 	failures: number;
 	activeGuilds: number;
-	/** How many distinct commands were run at least once. */
 	commandsUsed: number;
 	/** Every command the bot has, so "used 0 times" is a number rather than an absence. */
 	commandsTotal: number;
@@ -64,29 +61,24 @@ export interface UsageReport {
 	mostUsed: CommandUsageRow[];
 	leastUsed: CommandUsageRow[];
 	busiestGuilds: GuildUsageRow[];
-	/** Servers whose managers opened the dashboard the most, each a count of screens opened there. */
 	dashboardGuilds: GuildUsageRow[];
 	/** Read from the run log, so it covers at most `RUN_RETENTION_DAYS`. */
 	runDays: number;
 	slowest: SlowCommandRow[];
-	/** Which dashboard screens were opened, bot-wide. */
 	screens: ScreenTally[];
 }
 
 /** Who ran what is kept for fewer days than the counts, so the per-member figures can cover less than the window. */
 export const RUN_RETENTION_DAYS = 30;
 
-/** One server, as the owner sees it: the counts for the window and who has been running what. */
 export interface GuildUsageReport {
 	guild: GuildUsageRow & { joinedAt: string | null };
 	days: number;
-	/** How many days the member figures and the run list cover. */
 	memberDays: number;
 	runs: number;
 	failures: number;
 	surfaces: { slash: number; prefix: number };
 	daily: UsageDay[];
-	/** Every command run there, busiest first. */
 	commands: CommandUsageRow[];
 	dashboardViews: number;
 	members: number;
@@ -100,9 +92,7 @@ export interface MemberUsageRow {
 	runs: number;
 	failures: number;
 	prefix: number;
-	/** How many different commands they ran. */
 	commandCount: number;
-	/** Their busiest three. */
 	topCommands: { command: string; count: number }[];
 	lastAt: string;
 }
@@ -138,7 +128,6 @@ export const guildRunsQuery = analyticsQuery.extend(pagination.shape).extend({
 		.optional(),
 });
 
-/** How the owner's server list can be ordered; `commands` and `dashboard` rank by the default window. */
 export const OWNER_GUILD_SORTS = [
 	"members",
 	"fewest",
@@ -162,16 +151,13 @@ export const MAX_GUILD_SEARCH = 100;
 export const ownerGuildQuery = pagination.extend({
 	sort: z.enum(OWNER_GUILD_SORTS).default("members"),
 	filter: z.enum(OWNER_GUILD_FILTERS).default("all"),
-	/** A server's name, or its ID. */
 	q: z.string().trim().max(MAX_GUILD_SEARCH).optional(),
 });
 
-/** Every level pino has, so the console can show the whole buffer rather than a slice of it. */
 export const LOG_LEVELS = ["trace", "debug", "info", "warn", "error", "fatal"] as const;
 
 export type ReportedLogLevel = (typeof LOG_LEVELS)[number];
 
-/** Ranked, so "at least warn" is a comparison rather than a list membership test. */
 export const LOG_LEVEL_RANK: Record<ReportedLogLevel, number> = {
 	trace: 10,
 	debug: 20,
@@ -200,12 +186,9 @@ export interface LogLine {
 
 export interface LogFeed {
 	lines: LogLine[];
-	/** How many the buffer is holding, so the page can say "the last 250" honestly. */
 	buffered: number;
 	capacity: number;
-	/** The logger's level, so the console can say why nothing below it appears. */
 	loggerLevel: ReportedLogLevel;
-	/** How many lines matched, before `limit` cut the list down. */
 	matched: number;
 }
 
@@ -218,12 +201,10 @@ export interface RuntimeInfo {
 	startedAt: string;
 	uptimeMs: number;
 	memoryMb: { heapUsed: number; heapTotal: number; rss: number };
-	/** Where to look for a newer release. The bot never phones home to check. */
 	repositoryUrl: string;
 	commands: number;
 	events: number;
 	guilds: number;
-	/** Round trip to Discord’s gateway. The one number that says whether the bot is healthy right now. */
 	gatewayPingMs: number;
 	shards: number;
 	cachedUsers: number;

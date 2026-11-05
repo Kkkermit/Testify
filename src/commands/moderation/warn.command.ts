@@ -17,7 +17,6 @@ import {
 import { type WarnOutcome } from "@testify/shared";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
-/** Autocompleted rather than typed. */
 const WARN_ID_OPTION = {
 	name: "warn-id",
 	description: "Start typing to pick a warning.",
@@ -26,7 +25,6 @@ const WARN_ID_OPTION = {
 	autocomplete: true,
 } as const;
 
-/** What the warning's number did to the member, including when the bot could not do it. */
 function consequenceLine(outcome: WarnOutcome): string {
 	if (outcome.step === null) return "No punishment is set for warnings here. `/warn punishments` sets them up.";
 	if (outcome.problem !== null) {
@@ -231,7 +229,6 @@ export default defineCommand({
 		});
 	},
 
-	/** Offers the chosen member's warnings, newest first, described not just listed. */
 	async autocomplete(interaction) {
 		const guildId = interaction.guildId;
 		// Autocomplete does not resolve users, so the option arrives as a snowflake.

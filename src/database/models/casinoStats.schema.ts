@@ -14,7 +14,6 @@ export interface CasinoStatsRecord {
 	wins: number;
 	losses: number;
 	pushes: number;
-	/** The most one game came out ahead by. */
 	biggestWin: number;
 	biggestBet: number;
 	createdAt: Date;

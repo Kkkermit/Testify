@@ -24,7 +24,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { since } from "@/lib/datetime";
 
-/** Every row points at the screen where it is dealt with; nothing here changes anything itself. */
 export function InboxPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -153,7 +152,6 @@ function InboxGroup({
 	);
 }
 
-/** A row that opens where its item is dealt with, or plain text when that place is Discord itself. */
 function InboxRow({
 	to,
 	icon: Icon,

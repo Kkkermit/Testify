@@ -26,7 +26,6 @@ import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
 const EMPTY: ScheduleDraft = { channelId: null, message: "", repeat: "once", localTime: "" };
 
-/** Messages the bot posts later, soonest first, each edited where it is listed. */
 export function ScheduledMessagesPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -46,7 +45,6 @@ export function ScheduledMessagesPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	// One waiting to be deleted still holds its place against the limit, so nothing can be added into the gap.
 	const all = list.data.messages;
 	const keyOf = (entry: ScheduledMessage): string => `scheduled:${guildId}:${entry.id}`;
 	const shown = all.filter((entry) => !undo.isHidden(keyOf(entry)));

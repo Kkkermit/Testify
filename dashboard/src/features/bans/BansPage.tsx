@@ -27,7 +27,6 @@ import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** Everybody banned from the server, as Discord holds them, with Unban beside each. */
 export function BansPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -37,7 +36,6 @@ export function BansPage(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const searched = useDebounced(query).trim();
 	const list = useBans(guildId, { page, query: searched });
-	// The first page unsearched is already cached from arrival, so the summary costs no request while searching.
 	const all = useBans(guildId, { page: 1, query: "" });
 
 	usePageTitle(t("bans.title"), overview.data?.name);
@@ -115,7 +113,6 @@ export function BansPage(): React.JSX.Element {
 	);
 }
 
-/** Unban opens a reason in the row itself, so the confirm sits beside the person it is about. */
 function BanRow({ guildId, entry }: { guildId: string; entry: BanEntry }): React.JSX.Element {
 	const { t } = useTranslation();
 	const unban = useUnban(guildId);

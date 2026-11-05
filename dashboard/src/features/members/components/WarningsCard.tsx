@@ -22,7 +22,6 @@ export function WarningsCard({
 }: {
 	detail: MemberDetail;
 	busy: boolean;
-	/** What the last warning issued here did to the member, once it has come back. */
 	result: string | null;
 	onWarn: (reason: string, done: () => void) => void;
 	onEdit: (warnId: string, reason: string, done: () => void) => void;

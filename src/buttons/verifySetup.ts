@@ -13,7 +13,6 @@ import {
 	verifyPanel,
 } from "@lib/settings";
 
-/** Every control on the verification setup panel. */
 async function currentConfig(guildId: string): Promise<VerifyConfig> {
 	return normaliseVerify(await getVerifyConfig(guildId));
 }

@@ -18,8 +18,6 @@ import { type BotLook, BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
-/** Every row shares `ROW`, so all four icons sit on one vertical line and all four labels on another. */
-
 const FOOTER_LINKS = [
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
 	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint" },
@@ -39,11 +37,8 @@ export function Sidebar({
 	onSearch,
 }: NavAudience & {
 	user: DashboardUser | null;
-	/** Every server this person manages, for the switcher. */
 	guilds?: readonly ManageableGuild[];
-	/** The bot's own profile, so a fork's sidebar carries its identity rather than the original's. */
 	bot?: BotLook | undefined;
-	/** True inside the mobile drawer, where there is room for the labels. */
 	expanded?: boolean;
 	onNavigate?: () => void;
 	onSearch?: () => void;
@@ -63,7 +58,6 @@ export function Sidebar({
 		<nav
 			aria-label={t("nav.sections")}
 			onClick={(event) => {
-				// Only following a link leaves the drawer; a section toggle or the language picker keeps it open.
 				if (event.target instanceof Element && event.target.closest("a") !== null) onNavigate?.();
 			}}
 			className={cnSidebar(expanded)}
@@ -82,7 +76,6 @@ export function Sidebar({
 			{onSearch !== undefined && <SearchRow onSearch={onSearch} expanded={expanded} label={label} />}
 
 			{navigationFor({ guild, isOwner }).map((group, index) => {
-				// A server group is headed by its name; every other group by a translated one.
 				const heading = group.headingKey === undefined ? group.heading : t(group.headingKey);
 
 				return (
@@ -94,7 +87,6 @@ export function Sidebar({
 								{guild !== undefined && group.guildId === guild.id ? (
 									<GuildSwitcher guild={guild} guilds={guilds} expanded={expanded} />
 								) : (
-									// Shown but not a heading: the list's own label names the group, so the page's heading outline stays the page's.
 									<p
 										aria-hidden="true"
 										className={cn(GROUP_HEADING, "truncate px-2 pb-1", expanded ? "" : "hidden lg:block")}

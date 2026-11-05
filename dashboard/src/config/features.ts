@@ -36,19 +36,13 @@ import {
 	type LucideIcon,
 } from "lucide-react";
 
-/** An unknown key falls back rather than rendering a hole, so the API can ship a feature before this knows about it. */
 interface FeatureLook {
 	icon: LucideIcon;
-	/** The category's hue on its icon, so commands and features of one kind read as one at a glance. */
 	tint: string;
-	/** The settings screen for it, where the dashboard has one. Absent while a feature is Discord-only. */
 	path?: (guildId: string) => string;
 }
 
-/**
- * A hue is a part of the bot, as the sidebar groups it: green community, blue messages, stats and information, red
- * moderation and support, amber money, pink entertainment, violet games, and grey for the bot's own settings.
- */
+/** Each hue is a part of the bot, grouped as the sidebar groups it. */
 const LOOKS: Record<string, FeatureLook> = {
 	"bot-stats": {
 		icon: Gauge,

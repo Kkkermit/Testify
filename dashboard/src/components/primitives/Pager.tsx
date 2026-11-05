@@ -7,7 +7,6 @@ import { pageWindow } from "@/lib/paging";
 const STEP = "min-w-11 px-3";
 const NUMBER = "min-w-11 px-0 tabular-nums";
 
-/** `label` names the list being paged, which a screen needs when it holds more than one pager. */
 export function Pager({
 	page,
 	pages,

@@ -3,7 +3,6 @@ import { type TFunction } from "i18next";
 
 const FILTERS: readonly IdeaFilter[] = ["all", ...IDEA_STATUSES];
 
-/** A filter from the URL; anything the API would refuse reads as every idea. */
 export function ideaFilterFrom(value: string | null): IdeaFilter {
 	return FILTERS.find((filter) => filter === value) ?? "all";
 }
@@ -17,7 +16,6 @@ export function pageCount(total: number, perPage: number): number {
 	return Math.max(1, Math.ceil(total / perPage));
 }
 
-/** Where ideas go and whether members can post them, as the sentence the page opens with. */
 export function ideaSummary(
 	settings: Pick<IdeaSettings, "enabled" | "channelId">,
 	channel: string,

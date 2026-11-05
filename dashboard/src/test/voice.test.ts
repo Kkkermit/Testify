@@ -91,7 +91,6 @@ describe("the dashboard's voice", () => {
 		expect(wrong).toEqual([]);
 	});
 
-	/** A straight quote beside a curly one in the next card is exactly the drift this file exists to catch. */
 	it("uses curly apostrophes in prose", () => {
 		const wrong = copy
 			.filter(({ text }) => /[a-z]'[a-z]/i.test(text))

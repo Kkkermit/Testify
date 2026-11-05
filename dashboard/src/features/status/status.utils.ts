@@ -54,7 +54,7 @@ export function averageUptime(days: StatusDay[]): number | null {
 	return known.reduce((sum, uptime) => sum + uptime, 0) / known.length;
 }
 
-/** Two decimals, because 99.9% and 99.99% are eight hours a year apart; a clean 100% keeps none. */
+/** Two decimals, because 99.9% and 99.99% are eight hours a year apart. */
 export function percent(share: number): string {
 	const value = Math.min(100, Math.max(0, share * 100));
 
@@ -80,7 +80,6 @@ export function serviceName(name: string): string {
 	return SERVICE_NAMES[name] ?? name;
 }
 
-/** A share of the tallest bar, with a floor so a fast reading still draws something to hover. */
 export function barHeight(value: number | null, tallest: number): number {
 	if (value === null || tallest <= 0) return 0;
 

@@ -17,7 +17,6 @@ const KIND_LABEL: Record<SearchKind, TranslationKey> = {
 	channel: "search.kindChannel",
 };
 
-/** A combobox in a dialog: the box keeps focus, and the arrows move a highlight through the results. */
 export function QuickSearch({
 	guild,
 	guilds,
@@ -86,7 +85,6 @@ export function QuickSearch({
 			event.stopPropagation();
 			onClose();
 		} else if (event.key === "Tab") {
-			// Nothing else in the dialog takes focus, so Tab would only walk off the end of it.
 			event.preventDefault();
 		}
 	}

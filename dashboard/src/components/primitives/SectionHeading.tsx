@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { cn } from "@/lib/cn";
 
-/** The name of a group of rows on a page, in the page's own type rather than a label style of its own. */
 export function SectionHeading({
 	children,
 	count,

@@ -1,8 +1,6 @@
 import { type Readable } from "node:stream";
 import { type MUSIC_SOURCES, type LOOP_MODES } from "@lib/music/music.constants";
 
-/** The types more than one module in this domain shares. */
-
 export interface MusicBinaries {
 	/** Required: nothing can be resolved or streamed without it. */
 	ytDlp: string | null;

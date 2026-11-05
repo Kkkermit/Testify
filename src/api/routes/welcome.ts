@@ -49,7 +49,6 @@ welcome.patch("/", async (context) => {
 	} else {
 		const channelId = patch.channelId ?? before.channelId;
 
-		// The greeting has nowhere to go without one, and the stored record requires it.
 		if (channelId === null) throw badRequest("Choose a channel for the greeting before turning it on.");
 
 		await saveWelcome(guildId, {
@@ -65,7 +64,6 @@ welcome.patch("/", async (context) => {
 	return context.json(after);
 });
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarisePatch(patch: WelcomePatch): string {
 	const parts: string[] = [];
 

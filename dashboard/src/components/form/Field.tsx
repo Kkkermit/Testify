@@ -3,7 +3,7 @@ import { FIELD_GROUP, LABEL } from "@/components/form/fieldStyles";
 import { ROW_GRID, ROW_LABEL, useRowLayout } from "@/components/form/rowLayout";
 import { cn } from "@/lib/cn";
 
-/** Every labelled control goes through this. Pass `htmlFor` when the control has its own id; omit it and the control is wrapped. */
+/** Pass `htmlFor` when the control has its own id; omit it and the control is wrapped. */
 export function Field({
 	label,
 	hint,

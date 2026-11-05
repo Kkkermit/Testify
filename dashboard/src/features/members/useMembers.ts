@@ -15,7 +15,6 @@ export function useBoard(
 	return useQuery({
 		queryKey: keys.guild(guildId).board(board, page, sort, scope),
 		queryFn: () => api.get<BoardPage>(`/guilds/${guildId}/members/leaderboard?${query.toString()}`),
-		// A leaderboard read a moment ago is still the answer; refetching on every tab focus is noise.
 		staleTime: 30_000,
 	});
 }

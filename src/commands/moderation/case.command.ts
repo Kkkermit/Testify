@@ -4,7 +4,6 @@ import { embed, reply, successEmbed } from "@lib/discord";
 import { discordTime, truncate } from "@lib/format";
 import { applyCaseSettings, CASE_ACTION_LABELS, caseEmbed, readCase, readCases } from "@lib/moderation";
 
-/** Every warning, timeout, kick, ban and softban, numbered, and where new ones are posted. */
 export default defineCommand({
 	name: "case",
 	description: "Looks up moderation cases, and chooses where they are logged.",

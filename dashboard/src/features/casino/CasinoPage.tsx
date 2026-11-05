@@ -42,7 +42,6 @@ export function CasinoPage(): React.JSX.Element {
 
 	const settings = casino.data;
 	const [draft, setDraft] = useState<LimitsDraft | null>(null);
-	// Which card made the last write, so a refusal lands beside the control that caused it.
 	const [source, setSource] = useState<"state" | "games" | "limits">("state");
 
 	useEffect(() => {

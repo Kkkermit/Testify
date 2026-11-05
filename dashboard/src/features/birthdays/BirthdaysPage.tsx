@@ -26,7 +26,6 @@ import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { monthName } from "@/lib/datetime";
 
-/** Where and how a server's birthdays are posted, and whose come next. */
 export function BirthdaysPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

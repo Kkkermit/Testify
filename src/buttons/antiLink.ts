@@ -11,7 +11,6 @@ import {
 	isBypassPermission,
 } from "@lib/moderation";
 
-/** Every control on the link-removal panel. */
 export async function antiLinkState(guildId: string): Promise<AntiLinkPanelState> {
 	const settings = await getAntiLink(guildId);
 	const stored = settings?.bypassPermission ?? "";

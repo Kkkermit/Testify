@@ -126,7 +126,6 @@ export default defineButton({
 					);
 					return;
 
-				// Destructive, so it asks first.
 				case "reset":
 					await interaction.update({
 						embeds: [errorEmbed("Reset every treasure setting back to its default?")],
@@ -185,7 +184,6 @@ export default defineButton({
 			return;
 		}
 
-		// Reported on the panel, so the values just typed stay on screen.
 		if (problems.length > 0) {
 			await interaction.reply({ embeds: [errorEmbed(problems.join("\n"))], flags: MessageFlags.Ephemeral });
 			return;
@@ -193,7 +191,7 @@ export default defineButton({
 
 		await saveTreasureConfig(guildId, { ...toStored(next), lastModifiedBy: interaction.user.id });
 
-		// A modal opened elsewhere cannot edit this message, so answer privately.
+		// A modal opened elsewhere cannot edit this message, so it answers privately.
 		if (interaction.isFromMessage()) await interaction.update(await render(guildId));
 		else await interaction.reply({ ...(await render(guildId)), flags: MessageFlags.Ephemeral });
 	},

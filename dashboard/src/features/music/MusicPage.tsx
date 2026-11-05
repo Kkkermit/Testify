@@ -20,7 +20,6 @@ export function MusicPage(): React.JSX.Element {
 	const roles = useRoles(guildId);
 	const overview = useGuildOverview(guildId);
 	const save = useSaveMusic(guildId);
-	// Which group made the last write, so a refusal lands beside the control that caused it.
 	const [source, setSource] = useState<"state" | "roles">("state");
 
 	usePageTitle(t("music.title"), overview.data?.name);

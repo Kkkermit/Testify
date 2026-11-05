@@ -11,7 +11,6 @@ export function renderWithProviders(
 ): RenderResult & { client: QueryClient; search: () => string } {
 	const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-	// AppShell provides undo in the app, and a page rendered on its own still needs somewhere to wait.
 	const router = createMemoryRouter([{ path: options.path ?? "/", element: <UndoProvider>{ui}</UndoProvider> }], {
 		initialEntries: [options.route ?? options.path ?? "/"],
 	});

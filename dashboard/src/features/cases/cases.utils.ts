@@ -22,14 +22,12 @@ const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
 const DAY = 24 * HOUR;
 
-/** In the largest whole unit, worded in the reader's own language. */
 export function durationText(ms: number): string {
 	if (ms % DAY === 0) return formatUnit(ms / DAY, "day", { display: "long" });
 	if (ms % HOUR === 0) return formatUnit(ms / HOUR, "hour", { display: "long" });
 	return formatUnit(Math.round(ms / MINUTE), "minute", { display: "long" });
 }
 
-/** The query the list asks with, leaving out what is at its default so a cache key stays short. */
 export function caseSearch(options: { page: number; query: string; action: CaseAction | null }): string {
 	const params = new URLSearchParams();
 	if (options.page > 1) params.set("page", String(options.page));

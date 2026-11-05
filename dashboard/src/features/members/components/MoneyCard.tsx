@@ -28,7 +28,6 @@ export function MoneyCard({
 	const parsed = Number(amount);
 	const valid = amount.trim() !== "" && Number.isInteger(parsed);
 
-	// Both directions are checked against the same amount, so Take can be refused while Add is still offered.
 	const addProblem = valid ? problemText(moneyProblem(Math.abs(parsed), purse, held), t) : null;
 	const takeProblem = valid ? problemText(moneyProblem(-Math.abs(parsed), purse, held), t) : null;
 

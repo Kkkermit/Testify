@@ -6,7 +6,6 @@ import { HoverChevron } from "@/components/primitives";
 import { inboxSummary } from "@/features/inbox/inbox.utils";
 import { useInbox } from "@/features/inbox/useInbox";
 
-/** One line, shown only while something is waiting, so a quiet server's overview stays as it was. */
 export function InboxLine({ guildId }: { guildId: string }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const inbox = useInbox(guildId);

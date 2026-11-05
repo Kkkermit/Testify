@@ -8,7 +8,6 @@ import { SendTest } from "@/features/test-post/SendTest";
 import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
 
-/** A schedule as the form holds it: the time is the reader's own wall-clock time until it is sent. */
 export interface ScheduleDraft {
 	channelId: string | null;
 	message: string;
@@ -16,7 +15,6 @@ export interface ScheduleDraft {
 	localTime: string;
 }
 
-/** The four fields of a scheduled message, the same whether it is being added or edited. */
 export function ScheduleFields({
 	id,
 	value,

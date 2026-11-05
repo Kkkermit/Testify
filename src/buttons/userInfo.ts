@@ -4,7 +4,6 @@ import { UserFacingError } from "@core/errors";
 import { button, row } from "@lib/discord";
 import { avatarEmbed, bannerEmbed, userInfoEmbed } from "@lib/info";
 
-/** One handler for the whole `userinfo` namespace. */
 export default defineButton({
 	id: "userinfo",
 	ownerOnly: true,

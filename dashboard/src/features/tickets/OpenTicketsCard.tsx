@@ -10,7 +10,6 @@ import { useCloseTicket, useOpenTickets } from "@/features/tickets/useTickets";
 import { ApiError } from "@/lib/api";
 import { dateAndTime } from "@/lib/datetime";
 
-/** Every ticket still open, who opened and claimed it, and Close, which files the transcript like the button. */
 export function OpenTicketsCard({ guildId }: { guildId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const open = useOpenTickets(guildId, true);

@@ -84,7 +84,7 @@ describe("assertModeratable", () => {
 		expect(() => assertModeratable(ctx, target)).not.toThrow();
 	});
 
-	/** Skipping this is what produced raw API errors in the JavaScript commands. */
+	/** Skipping this check hands the user Discord's raw API error. */
 	it("refuses when the bot itself is not high enough", () => {
 		const { ctx, target } = scene({ moderatorPosition: 30, targetPosition: 20, botPosition: 10 });
 		expect(() => assertModeratable(ctx, target)).toThrow(UserFacingError);

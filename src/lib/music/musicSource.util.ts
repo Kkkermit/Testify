@@ -317,10 +317,7 @@ export function ytDlpStreamArgs(formatId: string, url: string): string[] {
 
 const SCRATCH_PREFIX = "testify-music-";
 
-/**
- * yt-dlp writes a fragmented stream's pieces to `--Frag<n>.part` in its working directory whatever `--paths` says,
- * so each download gets a writable folder, and two downloads at once never share one.
- */
+/** yt-dlp writes a fragmented stream's pieces to `--Frag<n>.part` in its working directory whatever `--paths` says, so each download gets a folder of its own. */
 function scratchFolder(): string | undefined {
 	try {
 		// The process id is how a later start tells a stranded folder from one another running bot is using.

@@ -9,7 +9,6 @@ import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** The one typed field on this page, so it is held locally and saved on blur rather than per keystroke. */
 export function PrefixSection({ guildId, value }: { guildId: string; value: PrefixSetting }): React.JSX.Element {
 	const { t } = useTranslation();
 	const save = useSaveSection<PrefixPatch>(guildId, "prefix");

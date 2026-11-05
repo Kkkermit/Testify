@@ -133,7 +133,6 @@ describe("the levelling panel", () => {
 	});
 
 	describe("the rewards tab", () => {
-		/** Stacking is meaningless with nothing to stack. */
 		it("greys out the stacking toggle until a reward exists", () => {
 			const rendered = panel("rewards");
 			const stack = buttonsOf(rendered).find((control) => parseCustomId(String(control.custom_id)).action === "stack");

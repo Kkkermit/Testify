@@ -8,7 +8,6 @@ import { sendTestStatus } from "@/features/test-post/testPost.utils";
 import { useSendTest } from "@/features/test-post/useSendTest";
 import { cn } from "@/lib/cn";
 
-/** Sends the draft as it stands, saved or not, to the reader alone, in the server the page is for. */
 export function SendTest({ test }: { test: TestPost }): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

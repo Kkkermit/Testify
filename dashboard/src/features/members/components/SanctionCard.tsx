@@ -14,7 +14,6 @@ type Sanction = "kick" | "ban";
 
 const DELETE_DAYS = Array.from({ length: WARN_LIMITS.maxDeleteDays + 1 }, (_, days) => days);
 
-/** Kick or ban, each behind the member's username typed back, which is what the server checks too. */
 export function SanctionCard({
 	detail,
 	busy,
@@ -32,7 +31,6 @@ export function SanctionCard({
 	const [typed, setTyped] = useState("");
 	const [deleteDays, setDeleteDays] = useState(0);
 
-	// Somebody who has left can still be banned, which is the one thing a kick cannot reach.
 	const canKick = detail.moderationProblem === null;
 	const problem = problemText(warningProblem(reason), t);
 	const ready = problem === null && clearConfirmed(typed, detail) && !busy;

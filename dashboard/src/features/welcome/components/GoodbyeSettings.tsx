@@ -19,7 +19,6 @@ import { StyleChoice } from "@/features/welcome/components/StyleChoice";
 import { useGoodbye, useUpdateGoodbye } from "@/features/welcome/useGoodbye";
 import { ApiError } from "@/lib/api";
 
-/** Reads on its own, so a failing goodbye leaves the greeting above it working. */
 export function GoodbyeSettings({
 	guildId,
 	channels,

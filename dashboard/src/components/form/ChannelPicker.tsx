@@ -5,7 +5,6 @@ import { SELECT } from "@/components/form/fieldStyles";
 import { Warning } from "@/components/form/Warning";
 import { channelLabel, seenChannels } from "@/lib/channels";
 
-/** Only channels a message can be sent to, and the ones the bot cannot post in say so rather than disappearing. */
 export function postableChannels(channels: ChannelSummary[]): ChannelSummary[] {
 	return channels.filter((channel) => channel.kind === "text" || channel.kind === "announcement");
 }

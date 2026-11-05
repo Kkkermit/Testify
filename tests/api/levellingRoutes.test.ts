@@ -82,7 +82,7 @@ describe("reading the configuration", () => {
 });
 
 describe("patching the configuration", () => {
-	/** The stored field is the inverse and has been since the first version; getting it backwards is silent. */
+	/** The stored field is the inverse, and getting it backwards is silent. */
 	it("writes isDisabled as the opposite of enabled", async () => {
 		await send("PATCH", "", { enabled: true });
 
@@ -118,7 +118,7 @@ describe("patching the configuration", () => {
 });
 
 describe("the boost list", () => {
-	/** The same limit the Discord panel enforces. The web accepting a sixth is how the two surfaces disagree. */
+	/** The same limit the Discord panel enforces, or the two surfaces disagree. */
 	it("refuses more boosts than the panel can render", async () => {
 		const tooMany = Array.from({ length: 6 }, (_, index) => ({
 			roleId: `30000000000000000${String(index)}`,
@@ -192,7 +192,7 @@ describe("clearing the configuration", () => {
 });
 
 describe("the audit record", () => {
-	/** The change did happen. Failing the request over the bookkeeping would be the worse answer. */
+	/** The change did happen, so failing the request over the bookkeeping would be the worse answer. */
 	it("still succeeds when the audit write fails", async () => {
 		audited.mockRejectedValueOnce(new Error("mongo is down"));
 

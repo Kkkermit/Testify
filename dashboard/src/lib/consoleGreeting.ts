@@ -1,9 +1,6 @@
 import { i18next, type TranslationKey } from "@/i18n";
 import { themeColour } from "@/lib/tokens";
 
-/** What somebody who opens DevTools reads first: a welcome, where to report a bug, and a warning against pasting code. */
-
-/** One `console.log` call: text with a `%c` before each styled run, and those styles in the same order. */
 interface ConsoleLine {
 	text: string;
 	styles: string[];
@@ -48,7 +45,6 @@ export function printGreeting(lines: ConsoleLine[]): void {
 	for (const line of lines) console.log(line.text, ...line.styles);
 }
 
-/** Waits for the reader's dictionary, so the warning arrives in the language the rest of the page is in. */
 export function greetTheConsole(): void {
 	const greet = (): void => {
 		const palette = {

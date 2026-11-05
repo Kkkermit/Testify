@@ -9,7 +9,6 @@ import { useCurrentSetting, usePutBack } from "@/features/changes/useRestore";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { ApiError } from "@/lib/api";
 
-/** Reads the setting as it is now, and offers it back only while it still holds what this change left. */
 export function RestorePanel({
 	id,
 	guildId,

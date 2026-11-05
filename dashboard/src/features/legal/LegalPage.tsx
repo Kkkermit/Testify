@@ -9,7 +9,6 @@ import { shortDate } from "@/lib/datetime";
 
 const PROSE = "text-muted-foreground text-sm leading-relaxed";
 
-/** Both documents are public — read before signing in — which is why these routes sit outside `RequireAuth`. */
 export function LegalPage({ document }: { document: LegalDocument }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	usePageTitle(t(document.title));

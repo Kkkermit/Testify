@@ -13,7 +13,6 @@ const OPTION = cn(
 	"text-muted-foreground hover:text-foreground hover:bg-card/60 text-sm transition-colors duration-150",
 );
 
-/** The server group's heading, opening onto the same screen in each other server. */
 export function GuildSwitcher({
 	guild,
 	guilds,
@@ -40,7 +39,7 @@ export function GuildSwitcher({
 		<div
 			onKeyDown={(event) => {
 				if (event.key !== "Escape" || !open) return;
-				// The drawer also closes on Escape, and this press was only meant for the list.
+				// The drawer closes on Escape too, and this press is only for the list.
 				event.stopPropagation();
 				setOpen(false);
 				buttonRef.current?.focus();

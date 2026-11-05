@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 
-/** An icon, one sentence naming what would be here, and the one action that fixes it. */
 export function EmptyState({
 	icon,
 	title,

@@ -12,7 +12,6 @@ import { ApiError } from "@/lib/api";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** Warn somebody by finding them by name, never by pasting an ID. */
 export function WarnMemberCard({ guildId }: { guildId: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [query, setQuery] = useState("");

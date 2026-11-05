@@ -3,7 +3,6 @@ import { requireAccount } from "@database/repositories/economyRepository";
 import { reply } from "@lib/discord";
 import { inventoryScreen } from "@lib/economy";
 
-/** `use` is an alias rather than its own command. */
 export default defineCommand({
 	name: "inventory",
 	description: "Shows what you own, and uses it.",

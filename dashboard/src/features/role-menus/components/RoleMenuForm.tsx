@@ -25,7 +25,6 @@ import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** One form for a new menu and for changing one, saved explicitly because a posted menu is a message. */
 export function RoleMenuForm({
 	initial,
 	editing,
@@ -37,7 +36,6 @@ export function RoleMenuForm({
 	onCancel,
 }: {
 	initial: RoleMenuDraft;
-	/** The title of the menu being changed, or null for a new one. */
 	editing: string | null;
 	channels: ChannelSummary[];
 	roles: RoleSummary[];

@@ -20,7 +20,7 @@ function entriesIn(guild: typeof aGuild | undefined) {
 }
 
 describe("searchEntries", () => {
-	/** "ban" was the request: a command with a screen goes to that screen, named as the sidebar names it. */
+	/** A command with a screen goes to that screen, named as the sidebar names it. */
 	it("sends a command to the screen that configures it", () => {
 		const ban = entriesIn(aGuild).find((entry) => entry.label === "/ban");
 

@@ -39,7 +39,6 @@ import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { markupWarning } from "@/lib/sanitise";
 
-/** A message posted as the bot, with a live preview, and nobody pinged unless that is chosen on purpose. */
 export function AnnouncementsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -200,7 +199,6 @@ export function AnnouncementsPage(): React.JSX.Element {
 	);
 }
 
-/** Roughly what Discord will draw, so the words and the ping can be checked before they are everybody's. */
 function Preview({ draft }: { draft: AnnouncementDraft }): React.JSX.Element {
 	const { t } = useTranslation();
 	const bot = useBotLook();

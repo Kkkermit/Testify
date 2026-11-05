@@ -12,7 +12,6 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-/** What the bot does in one channel, each feature linking to its own page. */
 export function ChannelPage(): React.JSX.Element {
 	const { guildId = "", channelId = "" } = useParams();
 	const { t } = useTranslation();
@@ -27,7 +26,6 @@ export function ChannelPage(): React.JSX.Element {
 	if (places.isError) return <ErrorState error={places.error} onRetry={() => void places.refetch()} />;
 	if (channels.isPending || places.isPending) return <Skeleton className="h-64" />;
 
-	// A channel the reader cannot see is named nowhere, so it reads exactly like one that does not exist.
 	if (channel?.name === undefined || channel.name === null || channel.kind === "category") {
 		return (
 			<>

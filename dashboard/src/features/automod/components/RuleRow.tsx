@@ -5,7 +5,6 @@ import { Toggle } from "@/components/form";
 import { Badge, cardClass, Button } from "@/components/primitives";
 import { type TranslationKey } from "@/i18n";
 
-/** Keys rather than text: a module-level map is built once, long before a locale is chosen. */
 const ACTION_KEY: Record<AutomodAction, TranslationKey> = {
 	block: "automod.blocks",
 	alert: "automod.alerts",

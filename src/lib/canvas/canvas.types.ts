@@ -1,5 +1,3 @@
-/** The types more than one module in this domain shares. */
-
 export interface BoardRow {
 	rank: number;
 	displayName: string;
@@ -8,7 +6,6 @@ export interface BoardRow {
 	primary: string;
 	/** The supporting figure, in smaller grey text under the name. */
 	secondary: string;
-	/** The person reading, whose row is outlined. */
 	you?: boolean;
 }
 

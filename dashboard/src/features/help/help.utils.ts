@@ -9,14 +9,12 @@ import { type LucideIcon } from "lucide-react";
 import { allNavItems, navigationFor, type NavGroup } from "@/config/navigation";
 import { type TranslationKey } from "@/i18n";
 
-/** One area of the dashboard, as the tour describes it. */
 interface HelpArea {
 	labelKey: TranslationKey;
 	hintKey: TranslationKey | undefined;
 	icon: LucideIcon;
 }
 
-/** The tour reads the sidebar's registry; it has no server in scope, so this id is never read. */
 const UNUSED_GUILD = { id: "0", name: "" };
 
 export function helpAreas(isOwner: boolean): HelpArea[] {
@@ -29,7 +27,6 @@ export function helpAreas(isOwner: boolean): HelpArea[] {
 	}));
 }
 
-/** Suggestions for what has been typed so far; before anything is typed, the articles most people start from. */
 export function suggestionsFor(
 	search: SupportSearch<SupportCatalogueEntry> | null,
 	entries: readonly SupportCatalogueEntry[],
@@ -51,7 +48,6 @@ interface TopicGroup {
 	articles: SupportCatalogueEntry[];
 }
 
-/** The written articles by topic, in reading order; command pages are left to the command list, which already has them all. */
 export function articlesByTopic(entries: readonly SupportCatalogueEntry[]): TopicGroup[] {
 	return SUPPORT_TOPICS.filter((topic) => topic !== "commands").flatMap((topic) => {
 		const articles = entries

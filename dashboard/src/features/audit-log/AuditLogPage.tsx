@@ -43,7 +43,6 @@ export function AuditLogPage(): React.JSX.Element {
 
 	const [draft, setDraft] = useState<AuditLogPut | null>(null);
 
-	// A channel and a set of events are one decision, so nothing is written until Save.
 	useEffect(() => {
 		if (config.data !== undefined) setDraft(draftFrom(config.data));
 	}, [config.data]);

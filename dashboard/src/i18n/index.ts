@@ -6,13 +6,11 @@ import en from "@/i18n/locales/en.json";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { formatNumber } from "@/lib/intl";
 
-/** Every key English defines. A nav entry or a component naming one that is not there fails the build. */
 export type TranslationKey = ParseKeys<"translation">;
 
 export const LOCALES = ["en", "de", "es", "fr", "it", "ru"] as const;
 export type Locale = (typeof LOCALES)[number];
 
-/** Endonyms: somebody looking for their own language is looking for the word they call it by. */
 export const LOCALE_NAMES: Record<Locale, string> = {
 	en: "English",
 	de: "Deutsch",
@@ -40,7 +38,6 @@ export function readableTag(language: string): string {
 	}
 }
 
-/** English is bundled as the fallback; the other languages load only when chosen. */
 const lazyDictionaries = resourcesToBackend(
 	async (language: string) => (await import(`./locales/${language}.json`)) as { default: Record<string, unknown> },
 );
@@ -66,19 +63,16 @@ void i18next
 		interpolation: {
 			// React escapes before anything reaches the DOM, and escaping twice mangles an apostrophe.
 			escapeValue: false,
-			// `{{bot}}` in any string is the bot's own name, so a renamed or forked bot is always called by its own name.
 			defaultVariables: { bot: BUILT_IN_BOT_NAME },
 		},
 		react: { bindI18n: `languageChanged ${BOT_NAMED}` },
 	});
 
-/** The name `{{bot}}` fills in: the one `/api/bot` reports once it has answered, the one built in from `.env` before. */
 export function currentBotName(): string {
 	const name: unknown = i18next.options.interpolation?.defaultVariables?.bot;
 	return typeof name === "string" ? name : BUILT_IN_BOT_NAME;
 }
 
-/** Every `useTranslation` listens for `BOT_NAMED`, so each string naming the bot re-renders with the new name. */
 export function nameTheBot(name: string): void {
 	const variables = i18next.options.interpolation?.defaultVariables;
 	if (variables === undefined || variables.bot === name) return;
@@ -93,7 +87,7 @@ i18next.services.formatter?.add("number", (value: unknown) =>
 	typeof value === "number" ? formatNumber(value) : String(value),
 );
 
-/** Sets `lang` to the language the page is written in, which i18next does not, so a screen reader reads it in its own voice. */
+/** i18next does not set `lang`, and a screen reader needs it to read each language in its own voice. */
 function markDocumentLanguage(): void {
 	document.documentElement.lang = isLocale(i18next.resolvedLanguage) ? i18next.resolvedLanguage : "en";
 }

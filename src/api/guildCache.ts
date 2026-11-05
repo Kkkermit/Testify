@@ -1,7 +1,5 @@
 import { type OauthGuild } from "@api/discord";
 
-/** Each signed-in person's last guild list from Discord, so a refresh does not cost a round trip every time. */
-
 /** Reused outright inside this window; Discord limits `/users/@me/guilds` tightly. */
 export const FRESH_MS = 30_000;
 /** Served instead of an error while Discord is refusing, for up to this long after it was fetched. */

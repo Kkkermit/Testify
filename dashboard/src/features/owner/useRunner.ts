@@ -10,7 +10,6 @@ export function useRunnable(): UseQueryResult<CommandCatalogue> {
 	});
 }
 
-/** Not cached: a run is an action, and the same arguments twice are two runs. */
 export function useRunCommand(): UseMutationResult<CommandRunResult, Error, { name: string } & CommandRunRequest> {
 	return useMutation({
 		mutationFn: ({ name, ...body }) => api.post<CommandRunResult>(`/owner/runner/${name}`, body),

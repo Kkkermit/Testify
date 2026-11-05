@@ -194,7 +194,6 @@ describe("subcommands from a message", () => {
 		expect(input.options.getSubcommand()).toBe("remove");
 	});
 
-	/** Building the object must not throw. */
 	it("does not throw while being constructed", () => {
 		expect(() => new PrefixInteraction(fakeMessage(), welcome, [])).not.toThrow();
 		expect(() => new PrefixInteraction(fakeMessage(), welcome, ["nope"])).not.toThrow();

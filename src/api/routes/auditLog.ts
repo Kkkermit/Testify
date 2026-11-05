@@ -59,7 +59,6 @@ auditLog.put("/", async (context) => {
 	return context.json(after);
 });
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(before: AuditLogConfigResponse, next: AuditLogPut): string {
 	if (!next.enabled) return "Turned audit logging off";
 	if (!before.enabled) return "Turned audit logging on";

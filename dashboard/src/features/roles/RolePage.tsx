@@ -12,7 +12,6 @@ import { useRoleUses } from "@/features/roles/useRoleUses";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-/** One role, and everything in the bot that gives or reads it: the answer to "can I delete this?". */
 export function RolePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "", roleId = "" } = useParams();

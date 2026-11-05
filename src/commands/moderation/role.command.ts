@@ -4,7 +4,6 @@ import { asMember, defineCommand, inGuild, roleOption, type CommandInput } from 
 import { UserFacingError } from "@core/errors";
 import { reply, successEmbed } from "@lib/discord";
 
-/** `addRole` and `removeRole` were separate prefix commands and a separate slash command with two subcommands. */
 export default defineCommand({
 	name: "role",
 	description: "Adds or removes a role from a member.",

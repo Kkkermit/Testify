@@ -14,17 +14,14 @@ import { formatUptime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
 
-/** Answers "which of my servers is misconfigured", which is the reason the console exists at all. */
 export function OverviewTab(): React.JSX.Element {
 	const { t } = useTranslation();
-	// In the URL rather than in state, so a link to page 3 is a link to page 3.
 	const [params, setParams] = useSearchParams();
 	const page = pageFrom(params.get("page"));
 	const sort = guildSortFrom(params.get("sort"));
 	const filter = guildFilterFrom(params.get("filter"));
 	const search = params.get("search") ?? "";
 	const health = useOwnerStats();
-	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
 	const guilds = useOwnerGuilds(page, sort, filter, useDebounced(search));
 
 	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
@@ -32,7 +29,7 @@ export function OverviewTab(): React.JSX.Element {
 	const selected = params.get("server");
 	const stats = health.data;
 
-	// Merged rather than replaced, or paging would drop the `?tab=` that got you here.
+	// Merged rather than replaced, or paging drops `?tab=`.
 	function put(changes: Record<string, string | null>, replace = false): void {
 		setParams(
 			(current) => {

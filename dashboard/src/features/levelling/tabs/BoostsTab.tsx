@@ -27,7 +27,6 @@ export function BoostsTab({
 				value={boosts.map((boost) => boost.roleId)}
 				max={LEVEL_LIMITS.maxBoosts}
 				onChange={(roleIds) => {
-					// The list is replaced whole, so a role keeps its multiplier across an unrelated add or remove.
 					update.mutate(
 						roleIds.map((roleId) => ({
 							roleId,

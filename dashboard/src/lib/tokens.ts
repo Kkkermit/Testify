@@ -1,4 +1,3 @@
-/** The console greeting styles text with values, not class names, so this is where a token is read rather than applied. */
 export function cssColour(name: string, fallback: string, root: Element = document.documentElement): string {
 	const value = getComputedStyle(root).getPropertyValue(name).trim();
 	return value === "" ? fallback : value;
@@ -21,7 +20,6 @@ function prefersDark(root: Element = document.documentElement): boolean {
 	return window.matchMedia("(prefers-color-scheme: dark)").matches;
 }
 
-/** A colour token's half for the scheme the page is showing, for the places that need a value rather than a class. */
 export function themeColour(name: string, fallback: string, root?: Element): string {
 	return pickScheme(cssColour(name, fallback, root), prefersDark(root));
 }

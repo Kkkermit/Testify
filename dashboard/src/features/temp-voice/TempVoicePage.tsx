@@ -25,11 +25,9 @@ import { cn } from "@/lib/cn";
 
 type GroupName = "lobby" | "channels";
 
-/** The lobby people join, and what the channel each of them gets is called, where it goes and how many it holds. */
 export function TempVoicePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
-	// One write serves both groups, so a refusal is shown under the group whose control sent it.
 	const [origin, setOrigin] = useState<GroupName>("lobby");
 
 	const tempVoice = useTempVoice(guildId);
@@ -147,7 +145,7 @@ export function TempVoicePage(): React.JSX.Element {
 	);
 }
 
-/** Keyed by the stored pattern, so a save that lands puts the box back in step with it. */
+/** Keyed by the stored pattern, so a save that lands resets the box. */
 function NameField({ stored, onSave }: { stored: string; onSave: (name: string) => void }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [text, setText] = useState(stored);

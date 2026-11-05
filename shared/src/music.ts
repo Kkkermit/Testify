@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { snowflake } from "./schemas";
 
-/** The music system's per-server settings: whether it runs at all, and who is allowed to drive it. */
-
 export const MUSIC_LIMITS = {
 	/** Discord's own cap on a role select, which is what the Discord panel uses to edit this. */
 	maxDjRoles: 25,
@@ -25,7 +23,6 @@ export const musicPatch = z
 
 export type MusicPatch = z.infer<typeof musicPatch>;
 
-/** Which services the player takes music from, set by the bot's owner for every server at once. */
 export const MUSIC_SOURCE_CHOICES = ["both", "youtube", "soundcloud"] as const;
 
 export type MusicSourceChoice = (typeof MUSIC_SOURCE_CHOICES)[number];

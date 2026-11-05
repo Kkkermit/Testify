@@ -1,5 +1,3 @@
-/** The command registry as the dashboard sees it, from the same metadata registered with Discord. */
-
 export const OPTION_TYPES = [
 	"string",
 	"integer",
@@ -34,11 +32,9 @@ export interface CommandSummary {
 	name: string;
 	description: string;
 	category: string;
-	/** Extra names the prefix surface answers to. */
 	aliases: string[];
 	subcommands: SubcommandSummary[];
 	options: CommandOptionSummary[];
-	/** Human-readable permission names, not raw bit flags. */
 	permissions: string[];
 	botPermissions: string[];
 	cooldownMs: number | null;
@@ -49,7 +45,6 @@ export interface CommandSummary {
 
 export interface CommandCatalogue {
 	commands: CommandSummary[];
-	/** Every category in use, so the browser does not have to derive and sort it. */
 	categories: string[];
 	prefix: string;
 }
@@ -58,7 +53,6 @@ export function countSubcommands(commands: CommandSummary[]): number {
 	return commands.reduce((total, command) => total + command.subcommands.length, 0);
 }
 
-/** Matches a command by its name, an alias, a subcommand name or its description. */
 export function matchesSearch(command: CommandSummary, search: string): boolean {
 	const term = search.trim().toLowerCase();
 	if (term === "") return true;

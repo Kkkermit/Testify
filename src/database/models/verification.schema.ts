@@ -5,7 +5,6 @@ export interface VerifySettings {
 	channelId: string;
 	roleId: string;
 	messageId: string | null;
-	/** The text on the public panel. */
 	message?: string;
 	verifiedIds: string[];
 	createdAt: Date;

@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Avatar, Badge, Card, CARD_HEADING, Figure } from "@/components/primitives";
 import { softbanActive, statsOf } from "@/features/members/memberDetail.utils";
 
-/** How many roles fit before the header stops being a glance. */
 const ROLES_SHOWN = 12;
 
 export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.Element {

@@ -1,4 +1,3 @@
-/** Every user-facing string the framework itself produces. */
 export const strings = {
 	generic: {
 		failureTitle: "That did not work",

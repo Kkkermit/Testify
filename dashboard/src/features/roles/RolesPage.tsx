@@ -22,7 +22,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 
 const ROW = "hover:bg-muted/60 group flex items-center gap-3 px-4 py-3 transition-colors duration-150";
 
-/** Every role in Discord's order, each saying whether the bot uses it, and opening what does. */
 export function RolesPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();

@@ -14,9 +14,7 @@ export function StatTile({
 	label: string;
 	value: string | number;
 	icon?: LucideIcon;
-	/** A hue for the icon, so a row of tiles reads as different figures at a glance. */
 	tint?: string;
-	/** Explains what the figure counts, for anything a label cannot say in two words. */
 	hint?: string;
 }): React.JSX.Element {
 	const tile = (

@@ -16,7 +16,6 @@ import { SiteShell } from "@/features/site/SiteShell";
 import { followTrails } from "@/lib/trail";
 // Eager: the route error screen already needs it, so a chunk of its own would save nothing.
 
-// Lazy per route, so a server manager never downloads the owner console.
 const GuildPickerPage = page(async () => import("@/features/guilds/GuildPickerPage"), "GuildPickerPage");
 const ComparePage = page(async () => import("@/features/compare/ComparePage"), "ComparePage");
 const GuildOverviewPage = page(async () => import("@/features/guild-overview/GuildOverviewPage"), "GuildOverviewPage");
@@ -74,7 +73,6 @@ const LandingPage = page(async () => import("@/features/site/LandingPage"), "Lan
 const DocsPage = page(async () => import("@/features/docs/DocsPage"), "DocsPage");
 const SourcePage = page(async () => import("@/features/source/SourcePage"), "SourcePage");
 
-/** A lazy route component from one named export, which is how every feature module exposes its page. */
 function page<Name extends string, Props extends object>(
 	load: () => Promise<Record<Name, ComponentType<Props>>>,
 	name: Name,
@@ -91,7 +89,6 @@ function lazily(element: React.JSX.Element): React.JSX.Element {
 }
 
 export const routes = [
-	// Public, with or without a dashboard on this host: the front door, the docs and the code behind them.
 	{
 		element: <SiteShell />,
 		children: [
@@ -102,7 +99,6 @@ export const routes = [
 			{ path: "/source-code/*", element: lazily(<SourcePage />) },
 		],
 	},
-	// Theme, accent, motion and language are the reader's, so they need no account and keep the frame they were opened in.
 	{
 		element: <ReaderShell />,
 		children: [
@@ -110,7 +106,6 @@ export const routes = [
 		],
 	},
 	{ path: "/sign-in", element: <SignInPage /> },
-	// Outside RequireAuth: somebody deciding whether to add the bot has to be able to read these first.
 	{ path: "/terms", element: lazily(<LegalPage document={TERMS} />) },
 	{ path: "/privacy", element: lazily(<LegalPage document={PRIVACY} />) },
 	{
@@ -118,15 +113,12 @@ export const routes = [
 		children: [
 			{
 				element: <AppShell />,
-				// A page that fails renders inside the shell, so the sidebar is still there to leave by.
 				children: [
 					{
 						errorElement: <RouteError />,
 						children: [
 							{ path: "/guilds", element: lazily(<GuildPickerPage />) },
-							// Each column asks its own server, so this page sits outside the one-server gate.
 							{ path: "/guilds/compare", element: lazily(<ComparePage />) },
-							// Drawn only once the server says this person may manage the guild in the path.
 							{
 								element: <RequireGuild />,
 								children: [
@@ -175,7 +167,6 @@ export const routes = [
 							{ path: "/help", element: lazily(<HelpPage />) },
 							{ path: "/status", element: lazily(<StatusPage />) },
 							{ path: "/notifications", element: lazily(<NotificationsPage />) },
-							// Behind its own guard, so the console's existence is not disclosed by rendering its shell.
 							{
 								element: <RequireOwner />,
 								children: [{ path: "/owner", element: lazily(<OwnerPage />), errorElement: <OwnerRouteError /> }],
@@ -186,11 +177,9 @@ export const routes = [
 			},
 		],
 	},
-	// A real 404 rather than a redirect, which would hide a typo or a dead link.
 	{ path: "*", element: <NotFoundPage /> },
 ];
 
-// Anything the shell cannot catch — the sign-in page, the gate itself — still gets a page rather than the router's own.
 export const router = createBrowserRouter([
 	{ element: <ScrollMemory />, errorElement: <RouteError standalone />, children: routes },
 ]);

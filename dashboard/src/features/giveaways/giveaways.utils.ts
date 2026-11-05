@@ -10,7 +10,6 @@ export const DURATION_UNITS = [
 
 export type DurationUnit = (typeof DURATION_UNITS)[number]["value"];
 
-/** A number and a unit rather than a `3d` box: the shorthand is a second syntax to learn and to get wrong. */
 export function durationMsOf(amount: number, unit: DurationUnit): number {
 	const found = DURATION_UNITS.find((entry) => entry.value === unit);
 
@@ -23,7 +22,6 @@ export function statusOf(row: GiveawayRow): GiveawayStatus {
 	return row.ended ? "ended" : "running";
 }
 
-/** Running first, then most recently started, since the actions differ by status. */
 export function ordered(rows: GiveawayRow[]): GiveawayRow[] {
 	return [...rows].sort((a, b) => {
 		if (a.ended !== b.ended) return a.ended ? 1 : -1;
@@ -36,12 +34,10 @@ export function runningCount(rows: GiveawayRow[]): number {
 	return rows.filter((row) => !row.ended).length;
 }
 
-/** Reroll only makes sense once it has drawn, and only when it actually drew somebody. */
 export function canReroll(row: GiveawayRow): boolean {
 	return row.ended && row.winners.length > 0;
 }
 
-/** When the soonest running giveaway draws, for the page's summary. */
 export function nextDraw(rows: GiveawayRow[]): string | null {
 	const ends = rows.filter((row) => !row.ended).map((row) => row.endAt);
 
@@ -54,7 +50,6 @@ export interface GiveawayPost {
 	footer: string;
 }
 
-/** The bot's own copy with its placeholders filled as Discord shows them; the prize is the embed's title. */
 export function giveawayPost(draft: { winnerCount: number; durationMs: number }, host: string | null): GiveawayPost {
 	return {
 		content: GIVEAWAY_POST.giveaway,

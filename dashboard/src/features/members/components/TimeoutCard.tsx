@@ -14,7 +14,6 @@ import { sanitiseInput } from "@/lib/sanitise";
 
 type Minutes = (typeof MEMBER_TIMEOUT_MINUTES)[number];
 
-/** A timeout behind the username typed back, like a kick; lifting one early needs nothing but the press. */
 export function TimeoutCard({
 	detail,
 	busy,

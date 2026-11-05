@@ -34,13 +34,11 @@ export interface ScreenRow {
 }
 
 export interface SettingsScreenOptions {
-	/** The button handler's ID. */
 	id: string;
 	ownerId: string;
 	category: Category;
 	title: string;
 	status: string;
-	/** A one-line result from the last press. */
 	note?: string;
 	rows?: ScreenRow[];
 	/** Pre-built select rows, which only the caller knows how to fill. */

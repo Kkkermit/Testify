@@ -6,7 +6,6 @@ export interface MusicSettingsRecord {
 	enabled: boolean;
 	/** Empty means anybody may use the player. */
 	djRoleIds: string[];
-	/** Who last changed it, for the audit trail the dashboard writes alongside. */
 	updatedBy: string | null;
 	createdAt: Date;
 	updatedAt: Date;

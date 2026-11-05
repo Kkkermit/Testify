@@ -10,7 +10,6 @@ export const starboard = new Hono<ApiBindings>();
 
 starboard.use("*", requireGuild);
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: StarboardPatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned the starboard on" : "Turned the starboard off");

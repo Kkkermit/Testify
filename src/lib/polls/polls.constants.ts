@@ -1,5 +1,3 @@
-/** The identifiers and limits more than one module in this domain reads. */
-
 export const POLL_COMMAND = "poll";
 
 /** Discord's own limits on a poll, so a refusal names them before Discord refuses the whole message. */

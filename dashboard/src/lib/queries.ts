@@ -1,4 +1,3 @@
-/** Query keys in one place, so nothing is a hand-written string that a rename can silently miss. */
 export const keys = {
 	setup: () => ["setup"] as const,
 	me: () => ["me"] as const,
@@ -16,7 +15,6 @@ export const keys = {
 	notices: () => ["notices"] as const,
 	support: () => ["support"] as const,
 	supportArticle: (id: string) => ["support", "article", id] as const,
-	/** Null is the bot-wide scope, which only the owner can read. */
 	commandToggles: (guildId: string | null) => ["command-toggles", guildId ?? "global"] as const,
 	guild: (id: string) => ({
 		all: () => ["guild", id] as const,

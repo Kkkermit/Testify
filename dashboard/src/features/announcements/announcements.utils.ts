@@ -39,7 +39,6 @@ export const STYLE_LABELS: Record<AnnouncementStyle, { label: TranslationKey; de
 	text: { label: "announcements.styleText", describes: "announcements.styleTextHint" },
 };
 
-/** What is still missing, as a key the form shows, or null when it can be posted. */
 export function draftProblem(draft: AnnouncementDraft): TranslationKey | null {
 	if (draft.channelId === null) return "announcements.needChannel";
 	if (draft.message.trim() === "") return "announcements.needMessage";
@@ -47,12 +46,10 @@ export function draftProblem(draft: AnnouncementDraft): TranslationKey | null {
 	return null;
 }
 
-/** Only what the chosen style uses is sent, so a title typed and then switched away from never arrives. */
 export function bodyOf(draft: AnnouncementDraft & { channelId: string }): AnnouncementBody {
 	return { channelId: draft.channelId, mentions: draft.mentions, ...contentOf(draft) };
 }
 
-/** The same post as a test, which goes to one person and so has no channel and pings nobody. */
 export function testOf(draft: AnnouncementDraft): Extract<TestPost, { kind: "announcement" }> {
 	return { kind: "announcement", ...contentOf(draft) };
 }
@@ -66,7 +63,6 @@ function contentOf(draft: AnnouncementDraft): Pick<AnnouncementBody, "style" | "
 	};
 }
 
-/** Where this draft goes and whom it pings, as the sentence the page opens with. */
 export function announcementSummary(
 	draft: Pick<AnnouncementDraft, "channelId" | "mentions">,
 	channel: string,

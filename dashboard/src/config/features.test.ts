@@ -57,7 +57,6 @@ describe("category coverage", () => {
 });
 
 describe("the feature grid's links", () => {
-	/** Every feature with a screen links its overview tile to it. */
 	it("links every feature whose screen exists", () => {
 		const routed: Record<string, string> = {
 			levelling: "levelling",

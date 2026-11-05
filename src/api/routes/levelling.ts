@@ -72,7 +72,6 @@ levelling.put("/rewards", requirePermission(PermissionFlagsBits.ManageRoles), as
 	);
 	const before = await configOf(guildId);
 
-	// Stored sorted, so every reader gets them in order without sorting again.
 	await saveLevelSettings(guildId, { rewards: sortRewards(rewards) });
 
 	await auditChange(context, {
@@ -127,7 +126,6 @@ function count(value: number, noun: string): string {
 	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
 }
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarisePatch(patch: Record<string, unknown>): string {
 	const parts: string[] = [];
 

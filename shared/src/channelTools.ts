@@ -3,14 +3,11 @@ import { WARNING_LIMITS } from "./memberDetail";
 import { snowflake } from "./schemas";
 import { plainLine } from "./text";
 
-/** Locking a channel and setting its slowmode, from Discord or the dashboard. */
-
 export const CHANNEL_TOOL_LIMITS = {
 	/** Discord's own ceiling: six hours between messages. */
 	maxSlowmodeSeconds: 21_600,
 } as const;
 
-/** The lengths Discord's own channel settings offer. */
 export const SLOWMODE_SECONDS = [0, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1_800, 3_600, 7_200, 21_600] as const;
 
 export interface ToolChannel {

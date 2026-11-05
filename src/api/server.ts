@@ -122,7 +122,6 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 
 	app.notFound((context) => context.json(problemBody(notFound()), 404));
 
-	// Public: the website, the bot's profile and the help articles, all read before anybody can sign in.
 	app.route("/api/health", health);
 	app.route("/api/bot", bot);
 	app.route("/api/site", siteRoutes(github));
@@ -161,7 +160,6 @@ function raise(problem: ApiProblem): never {
 	throw problem;
 }
 
-/** The two ways a listen fails are both the operator's to fix, so the log says which one and what to do. */
 export function listenAdvice(error: NodeJS.ErrnoException, port: number): string {
 	if (error.code === "EADDRINUSE") {
 		return `[WEBSITE_ERROR] Port ${String(port)} is already in use. Stop whatever is on it, set DASHBOARD_PORT to a free port, or set SITE_ENABLED=false if you want no website. The bot is running without it.`;
@@ -173,7 +171,6 @@ export function listenAdvice(error: NodeJS.ErrnoException, port: number): string
 	return "[WEBSITE_ERROR] The website could not start listening. The bot is running without it.";
 }
 
-/** How many times a listen is worth retrying, and how long to wait between attempts. */
 const LISTEN_RETRIES = 5;
 const LISTEN_RETRY_MS = 3_000;
 

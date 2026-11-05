@@ -15,8 +15,6 @@ import {
 } from "@testify/shared";
 import { aGuild } from "@/test/fixtures/session";
 
-/** Typed against the shared contract, so a fixture cannot drift from what the API actually returns. */
-
 export const overview: GuildOverview = {
 	id: aGuild.id,
 	name: aGuild.name,
@@ -32,7 +30,6 @@ export const overview: GuildOverview = {
 	recentChanges: [],
 };
 
-/** Everything done, so the checklist stays out of the way of tests about something else. */
 export const setupDone: SetupChecklist = {
 	steps: [
 		{ step: "levelling", done: true, channelId: null, channelName: null, createsChannel: false, blocker: null },
@@ -148,7 +145,6 @@ export const insightsReport: InsightsReport = {
 	recentLeaves: [],
 };
 
-/** Welcome posts in #general, tickets keep their panel and logs in #locked, goodbye waits, levelling is server-wide. */
 export const guildPlaces: GuildPlaces = {
 	features: [
 		{
@@ -189,7 +185,6 @@ export const guildPlaces: GuildPlaces = {
 	],
 };
 
-/** Nothing waiting, so a screen that is not about the inbox draws no count and no overview line. */
 export const quietInbox: GuildInbox = {
 	tickets: { total: 0, items: [] },
 	ideas: { total: 0, items: [] },
@@ -197,7 +192,6 @@ export const quietInbox: GuildInbox = {
 	channels: [],
 };
 
-/** One ticket of three shown, one idea, a missing permission and a log channel the bot cannot post in. */
 export const busyInbox: GuildInbox = {
 	tickets: {
 		total: 3,
@@ -248,7 +242,6 @@ export function busyWeek(now = Date.now()): GuildWeek {
 
 export const noRoleUses: GuildRoleUses = { uses: {} };
 
-/** Member is handed out on join and at level 5, and a deleted role is still the ticket staff role. */
 export const someRoleUses: GuildRoleUses = {
 	uses: {
 		"300000000000000001": [{ kind: "joinRole" }, { kind: "levelReward", level: 5 }],

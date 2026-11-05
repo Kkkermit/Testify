@@ -4,7 +4,6 @@ import { ChannelKindPicker, savingStateOf } from "@/components/form";
 import { Section } from "@/features/settings/components/Section";
 import { useSaveSection } from "@/features/settings/useSettings";
 
-/** The count is the voice channel's own name, so these are voice channels rather than ones a message is posted in. */
 export function VoiceStatsSection({
 	guildId,
 	value,

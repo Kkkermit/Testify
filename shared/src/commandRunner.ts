@@ -5,10 +5,8 @@ import { snowflake } from "./schemas";
 
 export const RUN_LIMITS = { maxStringArg: 2_000, maxArgs: 25 } as const;
 
-/** A part of a reply that only works inside Discord, named by kind so each surface words it. */
 export type DroppedOutput = "panel" | "buttons" | "attachment";
 
-/** What a command replied with, flattened to something a browser can draw. */
 export type RunOutput =
 	| { kind: "text"; content: string }
 	| {
@@ -27,7 +25,6 @@ export interface CommandRunResult {
 	subcommand: string | null;
 	ranAt: string;
 	outputs: RunOutput[];
-	/** True when anything was dropped, so the page can say so once rather than per block. */
 	degraded: boolean;
 }
 

@@ -4,7 +4,6 @@ import { ApiError } from "@/lib/api";
 
 type SendState = "idle" | "pending" | "success" | "error";
 
-/** One line beside the button: what it does until it is pressed, then what happened. */
 export function sendTestStatus(state: SendState, error: Error | null, t: TFunction): string {
 	if (state === "pending") return t("testPost.sending");
 	if (state === "success") return t("testPost.sent");

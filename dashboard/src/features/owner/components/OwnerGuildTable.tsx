@@ -16,18 +16,15 @@ export function OwnerGuildTable({
 	guilds: OwnerGuildRow[];
 	sort?: OwnerGuildSort;
 	filter?: OwnerGuildFilter;
-	/** Said in place of an empty table, when a search is what emptied it. */
 	empty?: string | null;
 	selected?: string | null;
 	onSelect?: (guildId: string) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	// A wide-screen column stays on a phone while the list is sorted by it.
 	const shown = (column: "joined" | "commands" | "dashboard"): string | false => {
 		const active = { joined: ["newest", "oldest"], commands: ["commands", "quietest"], dashboard: ["dashboard"] }[
 			column
 		];
-		// An inactive server is only worth leaving once it has had time to be used, so when it joined stays in view.
 		if (column === "joined" && filter === "inactive") return false;
 		return !active.includes(sort) && LARGE_ONLY;
 	};
@@ -80,7 +77,6 @@ export function OwnerGuildTable({
 								</span>
 							</span>
 						) : (
-							// A button rather than a clickable row: a row is not focusable and announces nothing.
 							<button
 								type="button"
 								aria-pressed={selected === guild.id}

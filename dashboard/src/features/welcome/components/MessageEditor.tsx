@@ -8,7 +8,6 @@ import { insertToken } from "@/features/welcome/welcome.utils";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** A template held as a draft and saved on blur; the draft is the caller's, so a preview can follow it. */
 export function MessageEditor({
 	id,
 	label,
@@ -32,7 +31,6 @@ export function MessageEditor({
 	onSave: (message: string) => void;
 	max?: number;
 	tokens?: readonly WelcomePlaceholder[];
-	/** Drawn under the editor, in the same column, so a preview sits beside what it previews. */
 	children?: ReactNode;
 }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -46,7 +44,6 @@ export function MessageEditor({
 		onSave(sanitiseInput(draft));
 	}
 
-	// One field holds the lot, so inside `SettingRows` the editor and everything about it are one row.
 	return (
 		<Field label={label} htmlFor={id}>
 			<textarea

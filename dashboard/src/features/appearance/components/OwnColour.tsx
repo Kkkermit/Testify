@@ -8,7 +8,6 @@ import { cn } from "@/lib/cn";
 import { COLOUR_TEXT_MAX, parseColour, readHex, sanitiseColourText, toHex, toHslText, toRgbText } from "@/lib/colour";
 import { CUSTOM_STARTING_POINT } from "@/lib/customAccent";
 
-/** `data-scheme` and `data-accent` resolve every token inside, so the sample shows the other theme too. */
 function Sample({ scheme, label }: { scheme: "light" | "dark"; label: string }): React.JSX.Element {
 	const { t } = useTranslation();
 
@@ -32,7 +31,6 @@ function Sample({ scheme, label }: { scheme: "light" | "dark"; label: string }):
 	);
 }
 
-/** A colour of the reader's own: picked, or typed as a hex code, RGB or HSL, and applied as soon as it is read. */
 export function OwnColour({
 	colour,
 	inUse,

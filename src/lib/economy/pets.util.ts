@@ -1,5 +1,4 @@
 import { type PetRarity, type PetSpecies } from "@lib/economy/economy.types";
-/** The pet catalogue, grouped by rarity. */
 
 export const PETS_BY_RARITY: Record<Lowercase<PetRarity>, readonly PetSpecies[]> = {
 	common: [

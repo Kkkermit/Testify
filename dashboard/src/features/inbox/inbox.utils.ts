@@ -8,12 +8,10 @@ export function inboxSummary(inbox: GuildInbox, t: TFunction): string {
 	return count === 0 ? t("inbox.summaryClear") : t("inbox.summary", { count });
 }
 
-/** How many a list holds beyond the ones it shows. */
 export function moreThan(list: { total: number; items: readonly unknown[] }): number {
 	return Math.max(0, list.total - list.items.length);
 }
 
-/** Named as the reader knows the channel, so one they cannot see stays unnamed here too. */
 export function channelProblemText(
 	problem: InboxChannelProblem,
 	channels: readonly ChannelSummary[],

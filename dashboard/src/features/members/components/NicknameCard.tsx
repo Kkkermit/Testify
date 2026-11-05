@@ -6,7 +6,7 @@ import { FIELD } from "@/components/form/fieldStyles";
 import { Button } from "@/components/primitives";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** Keyed by the saved nickname on the page, so a rename that lands puts the box back in step with it. */
+/** Keyed by the saved nickname, so a rename that lands resets the box. */
 export function NicknameCard({
 	detail,
 	busy,

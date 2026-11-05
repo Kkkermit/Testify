@@ -28,7 +28,7 @@ export function createSecretBox(secret: string, salt = "testify"): SecretBox {
 
 				return Buffer.concat([decipher.update(Buffer.from(body, "base64url")), decipher.final()]).toString("utf8");
 			} catch {
-				// A wrong key or a tampered value fails the tag check. Neither is a bug worth a stack trace.
+				// A wrong key or a tampered value fails the tag check, which is not a bug worth a stack trace.
 				return null;
 			}
 		},

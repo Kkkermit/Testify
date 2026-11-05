@@ -12,7 +12,6 @@ import { QuickSearch } from "@/features/search/QuickSearch";
 import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
 import { useScreenView } from "@/hooks/useScreenView";
 
-/** Navigation and the outlet. */
 export function AppShell(): React.JSX.Element {
 	const me = useMe();
 	const bot = useBotLook();
@@ -41,7 +40,6 @@ export function AppShell(): React.JSX.Element {
 	const audience = { guild, guilds: me.data?.guilds ?? [], isOwner: me.data?.isOwner === true };
 	const user = me.data?.user ?? null;
 
-	// A drawer left open across a navigation covers the page it just moved to.
 	useEffect(() => {
 		setMenuOpen(false);
 	}, [location.pathname]);
@@ -69,7 +67,7 @@ export function AppShell(): React.JSX.Element {
 				<Sidebar {...audience} user={user} bot={bot} onSearch={openSearch} />
 				{searching && <QuickSearch {...audience} onClose={closeSearch} />}
 
-				{/* Keyed on the path so each screen fades in on arrival, and `min-w-0` because a flex item will not otherwise shrink below its content. */}
+				{/* Keyed on the path so each screen mounts afresh, and `min-w-0` because a flex item will not otherwise shrink below its content. */}
 				<main
 					id="content"
 					key={location.pathname}

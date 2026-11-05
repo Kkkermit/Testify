@@ -10,7 +10,6 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { channelLabel } from "@/lib/channels";
 
-/** What the bot does in each channel, then what works across the whole server. */
 export function ChannelsPage(): React.JSX.Element {
 	const { guildId = "" } = useParams();
 	const { t } = useTranslation();

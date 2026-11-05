@@ -56,7 +56,7 @@ describe("a half-configured install", () => {
 		);
 	});
 
-	/** Journey 4: a half-configured install has to name each missing variable. */
+	/** A half-configured install has to name each missing variable. */
 	it("lists exactly what is missing instead of offering a button that cannot work", async () => {
 		renderWithProviders(<SignInPage />, { path: "/sign-in" });
 
@@ -78,7 +78,7 @@ describe("the bot's own identity", () => {
 		localStorage.removeItem("testify:botName");
 	});
 
-	/** 08-DESIGN.md: a fork should look like their bot without anybody editing CSS. */
+	/** A fork should look like its own bot without anybody editing CSS. */
 	it("shows the bot's name and avatar rather than a hardcoded brand", async () => {
 		server.use(http.get("/api/bot", () => HttpResponse.json({ ...botProfile, name: "Helper Bot" })));
 		const { container } = renderWithProviders(<SignInPage />, { path: "/sign-in" });

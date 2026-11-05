@@ -4,7 +4,6 @@ import { dayFill, percent } from "@/features/status/status.utils";
 import { cn } from "@/lib/cn";
 import { shortDate } from "@/lib/datetime";
 
-/** One bar per day; the table under it is what a screen reader gets. */
 export function UptimeStrip({ days }: { days: StatusDay[] }): React.JSX.Element {
 	const { t } = useTranslation();
 	const label = (day: StatusDay): string =>

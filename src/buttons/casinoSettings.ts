@@ -20,7 +20,6 @@ export default defineButton({
 		const guildId = interaction.guildId;
 		if (guildId === null) return;
 
-		// Checked on every press, because a role can be taken away while the panel is still open.
 		if (interaction.memberPermissions?.has(PermissionFlagsBits.ManageGuild) !== true) {
 			throw new UserFacingError("You need the Manage Server permission to change the casino.");
 		}
@@ -88,7 +87,7 @@ export default defineButton({
 		}
 
 		const panel = casinoSettingsPanel(result.settings, interaction.user.id, note);
-		// A modal opened elsewhere cannot edit this message, so it answers privately instead.
+		// A modal opened elsewhere cannot edit this message, so it answers privately.
 		if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
 			await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
 		} else if (interaction.isButton() || interaction.isModalSubmit()) {

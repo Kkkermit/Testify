@@ -3,7 +3,6 @@ import { type ReactNode } from "react";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
 import { cn } from "@/lib/cn";
 
-/** A named, foldable group of cards, open unless a caller says otherwise — the fold is for the reader who wants it. */
 export function Disclosure({
 	label,
 	children,

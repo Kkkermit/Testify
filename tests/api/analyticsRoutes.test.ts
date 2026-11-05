@@ -301,7 +301,7 @@ describe("the log feed", () => {
 		expect((await appFor().request("/analytics/logs?level=verbose")).status).toBe(400);
 	});
 
-	/** Every level now, so a debug line put in the buffer can actually be got back out of it. */
+	/** Every level, so a debug line put in the buffer can be got back out. */
 	it("serves debug and trace", async () => {
 		logRing.push({ at: Date.now(), level: "debug", message: "fine detail", context: {} });
 

@@ -6,7 +6,6 @@ import { cn } from "@/lib/cn";
 
 const LINK = "text-accent hover:text-foreground underline underline-offset-2";
 
-/** An article's Markdown subset drawn as elements, so nothing in it is ever parsed as HTML. */
 export function ArticleBody({ body }: { body: string }): React.JSX.Element {
 	const blocks = useMemo(() => articleBlocks(body), [body]);
 

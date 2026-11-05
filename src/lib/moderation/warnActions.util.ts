@@ -50,7 +50,6 @@ export async function writeWarnLadder(guildId: string, steps: WarnStep[], userId
 	return ladderOf(await saveWarnLadder(guildId, steps.slice(0, WARN_LIMITS.maxSteps), userId));
 }
 
-/** The bot's own English for a step. */
 export function stepLabel(step: WarnStep): string {
 	switch (step.action) {
 		case "warn":

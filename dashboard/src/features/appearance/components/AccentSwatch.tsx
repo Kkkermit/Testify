@@ -2,7 +2,6 @@ import { Check } from "lucide-react";
 import { type PresetAccent } from "@/hooks/useAccent";
 import { cn } from "@/lib/cn";
 
-/** `data-accent` makes every token inside resolve to that accent, so nothing here names a colour. */
 export function AccentSwatch({
 	accent,
 	label,

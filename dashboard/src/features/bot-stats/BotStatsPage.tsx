@@ -31,7 +31,6 @@ export function BotStatsPage(): React.JSX.Element {
 
 	const settings = stats.data;
 	const placement = placementOf(settings, channels.data ?? []);
-	// A deleted channel cannot be posted in again, so the picker starts empty rather than holding it.
 	const target = chosen ?? (placement.kind === "posted" ? settings.channelId : null);
 	const action = postActionOf(settings, chosen);
 	const busy = post.isPending || remove.isPending;

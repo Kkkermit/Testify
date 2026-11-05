@@ -4,7 +4,6 @@ import { defineCommand, inTextChannel, type CommandOption } from "@core/command"
 import { UserFacingError } from "@core/errors";
 import { COLOUR_CHOICES, embed, reply, resolveColour, successEmbed } from "@lib/discord";
 
-/** Three pairs, generated, covers the same ground without the copy-paste. */
 const FIELD_OPTIONS: CommandOption[] = [1, 2, 3].flatMap((index) => [
 	{
 		name: `field-${index}-name`,

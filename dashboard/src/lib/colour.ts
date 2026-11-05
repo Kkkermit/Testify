@@ -1,5 +1,3 @@
-/** Reading a colour somebody typed, and the conversions between the formats they might type it in. */
-
 export interface Rgb {
 	readonly r: number;
 	readonly g: number;
@@ -34,7 +32,6 @@ function fromHex(digits: string): Rgb {
 	return { r: r ?? 0, g: g ?? 0, b: b ?? 0 };
 }
 
-/** The numbers inside `name(…)`, or the bare list when there is no wrapper; null when it is wrapped in something else. */
 function argumentsOf(text: string, names: readonly string[]): string[] | null {
 	const open = text.indexOf("(");
 	if (open === -1) return names.includes("") ? text.split(SEPARATORS).filter(Boolean) : null;
@@ -46,7 +43,6 @@ function argumentsOf(text: string, names: readonly string[]): string[] | null {
 		.filter(Boolean);
 }
 
-/** The first three parts as numbers, a fourth only as an opacity, which is read and then dropped. */
 function channels(parts: readonly string[], units: readonly string[]): number[] | null {
 	if (parts.length !== 3 && parts.length !== 4) return null;
 	if (parts.length === 4 && !DECIMAL.test((parts[3] ?? "").replace(/%$/, ""))) return null;
@@ -80,12 +76,10 @@ function hslFrom(text: string): Rgb | null {
 	return fromHsl({ h, s: s / 100, l: l / 100 });
 }
 
-/** What somebody types, with every character no colour is written with removed and the length capped. */
 export function sanitiseColourText(input: string): string {
 	return input.replace(OUTSIDE_COLOUR, "").slice(0, COLOUR_TEXT_MAX);
 }
 
-/** A hex code, `rgb(…)`, three bare numbers read as RGB, or `hsl(…)`; null for anything else, refused unread. */
 export function parseColour(input: string): Rgb | null {
 	const text = input.trim().toLowerCase();
 	if (text === "" || text.length > COLOUR_TEXT_MAX) return null;
@@ -159,7 +153,6 @@ export function fromHsl({ h, s, l }: Hsl): Rgb {
 	return { r: channel(red), g: channel(green), b: channel(blue) };
 }
 
-/** WCAG 2.2 relative luminance. */
 export function luminance({ r, g, b }: Rgb): number {
 	const linear = (value: number): number => {
 		const unit = value / 255;

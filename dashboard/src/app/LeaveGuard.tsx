@@ -3,14 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useBlocker } from "react-router";
 import { Button } from "@/components/primitives";
 
-/** Asks before leaving a screen whose draft is not saved; a reload or a closed tab gets the browser's own question. */
 export function LeaveGuard({ when }: { when: boolean }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const titleId = useId();
 	const bodyId = useId();
 	const stay = useRef<HTMLButtonElement>(null);
 	const opener = useRef<HTMLElement | null>(null);
-	// A tab or a filter on the same screen is not leaving it.
 	const blocker = useBlocker(
 		({ currentLocation, nextLocation }) => when && currentLocation.pathname !== nextLocation.pathname,
 	);
@@ -54,7 +52,6 @@ export function LeaveGuard({ when }: { when: boolean }): React.JSX.Element | nul
 						event.preventDefault();
 						keepEditing();
 					} else if (event.key === "Tab") {
-						// Two buttons and nothing else, so Tab moves between them rather than off into the page.
 						const buttons = [...event.currentTarget.querySelectorAll("button")];
 						const at = buttons.indexOf(document.activeElement as HTMLButtonElement);
 						event.preventDefault();

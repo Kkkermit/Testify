@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { SectionHeading } from "@/components/primitives/SectionHeading";
 
 describe("SectionHeading", () => {
-	/** Nine screens used it to label a `<section>`, so it has to be able to carry the id that names one. */
+	/** A screen labels a `<section>` with it, so it has to carry the id that names one. */
 	it("becomes a heading that a section can point at", () => {
 		render(
 			<section aria-labelledby="servers-heading">

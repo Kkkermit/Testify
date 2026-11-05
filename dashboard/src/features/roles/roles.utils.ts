@@ -3,7 +3,6 @@ import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 import { formatNumber } from "@/lib/intl";
 
-/** Where each use is set, named as the sidebar names that screen. */
 export const USE_SCREENS: Record<RoleUseKind, { path: string; labelKey: TranslationKey }> = {
 	levelReward: { path: "/levelling", labelKey: "nav.levelling" },
 	levelBoost: { path: "/levelling", labelKey: "nav.levelling" },
@@ -39,7 +38,6 @@ export function useText(use: RoleUse, t: TFunction): string {
 	}
 }
 
-/** Roles a setting still names that the server no longer has, which is exactly what deleting a role leaves behind. */
 export function deletedRoleIds(uses: Record<string, RoleUse[]>, roles: readonly RoleSummary[]): string[] {
 	const known = new Set(roles.map((role) => role.id));
 	return Object.keys(uses).filter((id) => !known.has(id) && (uses[id]?.length ?? 0) > 0);

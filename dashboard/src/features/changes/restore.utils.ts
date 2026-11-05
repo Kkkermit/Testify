@@ -17,7 +17,6 @@ interface Lookups {
 const CHANNEL = /(?:^c|C)hannelId$|^categoryId$/;
 const ROLE = /(?:^r|R)oleIds?$/;
 
-/** A stored value as the reader would recognise it on the setting's own page: a channel by name, a switch as On or Off. */
 export function describeValue(field: string, value: unknown, { channels, roles, t }: Lookups): string {
 	if (value === null || value === undefined || (Array.isArray(value) && value.length === 0)) return t("restore.notSet");
 	if (typeof value === "boolean") return t(value ? "common.on" : "common.off");
@@ -49,7 +48,6 @@ export interface RestoreLine {
 	back: string;
 }
 
-/** One line per field the put-back changes, saying what it holds now and what it goes back to. */
 export function restoreLines(restore: ChangeRestore, lookups: Lookups): RestoreLine[] {
 	const labels: Record<string, TranslationKey | undefined> = RESTORE_FIELD_LABELS[restore.action];
 

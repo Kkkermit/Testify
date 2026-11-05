@@ -7,7 +7,6 @@ export const STICKY_LIMITS = {
 	maxMessage: 2_000,
 	minCap: 1,
 	maxCap: 50,
-	/** One sticky per channel, and a server with hundreds would repost more than it reads. */
 	maxPerGuild: 25,
 } as const;
 
@@ -16,10 +15,9 @@ export interface StickyEntry {
 	message: string;
 	/** Messages between reposts. The bot counts up and reposts when it reaches this. */
 	cap: number;
-	/** How many messages have passed since the last repost. */
 	count: number;
 	posted: boolean;
-	/** False when the bot cannot post in the channel, so a sticky that will never appear says so. */
+	/** False when the bot cannot post in the channel. */
 	canSend: boolean;
 }
 
@@ -38,7 +36,6 @@ export type StickyPut = z.infer<typeof stickyPut>;
 
 export const stickyChannelParam = z.object({ channelId: snowflake });
 
-/** Why a sticky cannot be saved, in the words the form shows — the same rules the API enforces. */
 export function stickyBlocked(entry: { channelId: string | null; message: string }, taken: string[]): Problem | null {
 	if (entry.channelId === null) return problem("sticky.channel");
 	if (taken.includes(entry.channelId)) return problem("sticky.duplicate");

@@ -27,7 +27,6 @@ lottery.patch("/", async (context) => {
 	return context.json(result.settings);
 });
 
-/** The pot goes with it, so this is the one control on the page that needs a confirmation in front of it. */
 lottery.delete("/", async (context) => {
 	const guildId = guildIdOf(context);
 

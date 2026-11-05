@@ -4,7 +4,6 @@ import { useInbox } from "@/features/inbox/useInbox";
 import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/intl";
 
-/** The inbox's count beside its link; at the icon-only width a dot stands in, and a screen reader hears the number. */
 export function InboxBadge({ guildId, expanded }: { guildId: string; expanded: boolean }): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const inbox = useInbox(guildId);

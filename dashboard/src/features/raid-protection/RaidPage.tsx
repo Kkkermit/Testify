@@ -25,7 +25,6 @@ import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
-/** Holding back brand new accounts, and where staff hear about a spike in joins. */
 export function RaidPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -156,7 +155,7 @@ export function RaidPage(): React.JSX.Element {
 	);
 }
 
-/** Keyed by the stored value, so a save that lands puts the box back in step with it. */
+/** Keyed by the stored value, so a save that lands resets the box. */
 function NumberField({
 	id,
 	label,

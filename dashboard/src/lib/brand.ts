@@ -3,7 +3,6 @@ import { DEFAULT_BOT_NAME } from "@testify/shared";
 const STORAGE_KEY = "testify:botName";
 const LOOK_KEY = "testify:botLook";
 
-/** Everything the dashboard draws the bot with, so its face is there before `/api/bot` answers, or when it cannot. */
 export interface BotLook {
 	name: string | null;
 	avatarUrl: string | null;
@@ -26,7 +25,6 @@ function hexColour(value: unknown): string | null {
 	return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : null;
 }
 
-/** The name the bot last reported, so a returning visitor sees it before `/api/bot` has answered. */
 export function rememberedBotName(): string | null {
 	try {
 		const name = localStorage.getItem(STORAGE_KEY);
@@ -44,7 +42,6 @@ export function rememberBotName(name: string): void {
 	}
 }
 
-/** The picture, banner and colour the bot last reported, each dropped unless it is still the shape Discord sends. */
 export function rememberedBotLook(): BotLook {
 	let stored: Record<string, unknown> = {};
 	try {
@@ -73,7 +70,6 @@ export function rememberBotLook(look: Omit<BotLook, "name">): void {
 	}
 }
 
-/** The tab's icon is the bot's own picture rather than the file shipped in `public/`. */
 export function showBotIcon(url: string, doc: Document = document): void {
 	for (const link of doc.head.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')) {
 		link.removeAttribute("type");
@@ -82,10 +78,8 @@ export function showBotIcon(url: string, doc: Document = document): void {
 	}
 }
 
-/** What to call the bot before `/api/bot` has answered: the name it last gave, else the built-in one. */
 export const BUILT_IN_BOT_NAME: string = rememberedBotName() ?? DEFAULT_BOT_NAME;
 
-/** The label a phone suggests for a home-screen shortcut, which is otherwise the page title of whichever screen is open. */
 export function nameHomeScreen(name: string, doc: Document = document): void {
 	for (const key of ["apple-mobile-web-app-title", "application-name"]) {
 		let meta = doc.head.querySelector<HTMLMetaElement>(`meta[name="${key}"]`);

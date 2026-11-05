@@ -2,7 +2,7 @@ import { type ReactNode, useId } from "react";
 import { FIELD_GROUP, LABEL } from "@/components/form/fieldStyles";
 import { ROW_GRID, ROW_LABEL, useRowLayout } from "@/components/form/rowLayout";
 
-/** A name over several controls, such as a set of radio cards; a `<fieldset>` cannot be laid out as a row's grid. */
+/** Not a `<fieldset>`, which cannot be laid out as a grid. */
 export function FieldGroup({
 	label,
 	hint,
@@ -11,7 +11,6 @@ export function FieldGroup({
 }: {
 	label: string;
 	hint?: string;
-	/** False when the control inside already carries this name, so a screen reader does not hear it twice. */
 	named?: boolean;
 	children: ReactNode;
 }): React.JSX.Element {

@@ -7,7 +7,6 @@ export const FREQUENCY_LABELS: Record<LotteryFrequency, TranslationKey> = {
 	weekly: "lottery.everyWeek",
 };
 
-/** What saving a new frequency does to the next draw, as one sentence per frequency. */
 export const RESCHEDULE_NOTES: Record<LotteryFrequency, TranslationKey> = {
 	hourly: "lottery.reschedulesHourly",
 	daily: "lottery.reschedulesDaily",

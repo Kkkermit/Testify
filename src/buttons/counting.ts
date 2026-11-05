@@ -12,7 +12,6 @@ import {
 	parseWholeNumber,
 } from "@lib/settings";
 
-/** Every control on the counting panel. */
 export async function countingState(guildId: string): Promise<CountingPanelState> {
 	const settings = await getCounting(guildId);
 

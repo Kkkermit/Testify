@@ -8,7 +8,7 @@ import { expectNoViolations } from "@/test/axe";
 import { t } from "@/test/english";
 import { renderWithProviders } from "@/test/renderWithProviders";
 
-/** The documents are keys now, so the prose a reader sees is what English resolves them to. */
+/** The documents are translation keys, so the prose under test is what English resolves them to. */
 function english(key: string): string {
 	return (en.legal as Record<string, string>)[key.replace("legal.", "")] ?? key;
 }

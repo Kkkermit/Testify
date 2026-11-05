@@ -9,7 +9,6 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 
-/** A card links to its settings screen where the dashboard has one, and is inert where the feature is Discord-only. */
 export function FeatureGrid({
 	features,
 	guildId,
@@ -19,7 +18,6 @@ export function FeatureGrid({
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const channels = useChannels(guildId);
-	// Until the list answers a channel is "…".
 	const channelName = (id: string): string => (channels.data === undefined ? "…" : channelLabel(channels.data, id, t));
 
 	return (

@@ -79,7 +79,7 @@ describe("the usage tab", () => {
 });
 
 describe("the logs tab", () => {
-	/** Every level is offered now, so a debug line can actually be found. */
+	/** Every level is offered, so a debug line can be found. */
 	it("offers every level the bot can write", async () => {
 		renderTab("logs");
 		await screen.findByText("[READY] Logged in");

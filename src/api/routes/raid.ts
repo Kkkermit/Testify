@@ -12,7 +12,6 @@ export const raid = new Hono<ApiBindings>();
 
 raid.use("*", requireGuild);
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: RaidPatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined)

@@ -1,8 +1,6 @@
 import { type AuditEvent, type AuditGroup } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
-/** What each audit event and group is called here; the grouping itself lives in `@testify/shared`. */
-
 export const EVENT_LABELS: Record<AuditEvent, { label: TranslationKey; describes: TranslationKey }> = {
 	messageDelete: { label: "auditLog.messageDelete", describes: "auditLog.messageDeleteAbout" },
 	messageUpdate: { label: "auditLog.messageUpdate", describes: "auditLog.messageUpdateAbout" },

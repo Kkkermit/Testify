@@ -32,7 +32,6 @@ describe("the app shell", () => {
 			server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, guilds: [...me.guilds, second] })));
 		});
 
-		/** Going back to the picker to reach another server's Levelling was two clicks and a scroll too many. */
 		it("offers the same screen in every other server the bot is in", async () => {
 			const user = userEvent.setup();
 			renderWithProviders(<AppShell />, {

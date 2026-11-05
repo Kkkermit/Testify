@@ -1,7 +1,5 @@
 import { type ScheduleRepeat } from "./scheduledMessages";
 
-/** What the bot will do in one server over the next seven days, each event at the moment it happens. */
-
 export const WEEK_LIMITS = {
 	days: 7,
 	/** A daily post is listed once per day, so a week holds at most this many of any one post. */
@@ -20,6 +18,5 @@ export type WeekEventKind = WeekEvent["kind"];
 export interface GuildWeek {
 	from: string;
 	to: string;
-	/** Soonest first. */
 	events: WeekEvent[];
 }

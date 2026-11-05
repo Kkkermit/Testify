@@ -102,7 +102,7 @@ describe("opening a round", () => {
 		expect(bot.timers.after).not.toHaveBeenCalled();
 	});
 
-	/** The command no longer asks for an amount, so the opening chip has to respect the server's own limits. */
+	/** The command asks for no amount, so the opening chip has to respect the server's own limits. */
 	it("opens with the usual chip, moved inside the server's bet limits", () => {
 		expect(openingChip({ minBet: 1, maxBet: null })).toBe(ROULETTE_ROUND.defaultChip);
 		expect(openingChip({ minBet: 500, maxBet: null })).toBe(500);

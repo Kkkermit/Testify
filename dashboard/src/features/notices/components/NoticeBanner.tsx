@@ -7,7 +7,6 @@ import { cn } from "@/lib/cn";
 
 export const NOTIFICATIONS_PATH = "/notifications";
 
-/** Shown on every screen while anything is unread, and never on the page that reads them. */
 export function NoticeBanner(): React.JSX.Element | null {
 	const { t } = useTranslation();
 	const { pathname } = useLocation();

@@ -30,7 +30,6 @@ import { cn } from "@/lib/cn";
 import { problemText } from "@/lib/problemText";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** A list keyed by channel rather than a page of switches, which is why this is its own screen. */
 export function StickyPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -51,7 +50,6 @@ export function StickyPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	// One waiting to be deleted still holds its channel, so nothing new can be added there before it goes.
 	const taken = list.data.entries.map((entry) => entry.channelId);
 	const keyOf = (channel: string): string => `sticky:${guildId}:${channel}`;
 	const entries = list.data.entries.filter((entry) => !undo.isHidden(keyOf(entry.channelId)));

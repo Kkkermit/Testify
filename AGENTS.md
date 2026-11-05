@@ -1052,7 +1052,7 @@ What still earns one:
 - A `/** */` above a test naming the bug it pins.
 
 Match the surrounding density. Measured over non-blank lines with tests excluded: `dashboard/src` sits at
-**3.6%** comment lines, `src/` at **4.3%** and `shared/src` at **11.1%**. The higher figures in `src/api/` and
+**0.7%** comment lines, `src/` at **4.0%** and `shared/src` at **7.3%**. The higher figures in `src/api/` and
 `shared/` are deliberate, because a security constraint and a two-surface contract are exactly the things a reader
 cannot infer. Outside those, a new file well above the local figure is a signal to cut rather than a sign of
 thoroughness. `npm run check` will not catch a comment that only restates its identifier; read it back and ask

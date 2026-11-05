@@ -2,7 +2,6 @@ import { ROW_LABEL, useRowLayout } from "@/components/form/rowLayout";
 import { SwitchTrack } from "@/components/form/SwitchTrack";
 import { cn } from "@/lib/cn";
 
-/** A real checkbox drives it and stays in the accessibility tree; the track is decoration the peer selectors follow. */
 export function Toggle({
 	label,
 	hint,
@@ -16,10 +15,8 @@ export function Toggle({
 	checked: boolean;
 	onChange: (next: boolean) => void;
 	disabled?: boolean;
-	/** For a row that already names the thing. `sr-only`, never `hidden` — the switch keeps its name either way. */
 	hideLabel?: boolean;
 }): React.JSX.Element {
-	// In a row the words take the name column and the switch starts the control column, beside every other control.
 	const row = useRowLayout();
 
 	return (

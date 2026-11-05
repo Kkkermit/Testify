@@ -217,7 +217,6 @@ export interface RouletteBoardView {
 	chips: readonly BoardChip[];
 	/** Where the ball landed; absent while bets are still going down. */
 	pocket?: number;
-	/** Earlier spins at this table, newest first. */
 	history?: readonly number[];
 }
 

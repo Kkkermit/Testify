@@ -99,7 +99,7 @@ function Preview({ path, text }: { path: string; text: string }): React.JSX.Elem
 	);
 }
 
-/** The line numbers are a column of their own, so a copy of the code never carries them. */
+/** A column of its own, so copied code never carries the line numbers. */
 function Code({ path, text }: { path: string; text: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const lines = lineCount(text);

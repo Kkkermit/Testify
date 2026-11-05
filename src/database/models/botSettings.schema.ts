@@ -5,7 +5,6 @@ import { MUSIC_SOURCE_CHOICES, type MusicSourceChoice } from "@testify/shared";
 export interface BotSettingsRecord {
 	scope: string;
 	musicSources: MusicSourceChoice;
-	/** Who last changed it, for the audit trail the dashboard writes alongside. */
 	updatedBy: string | null;
 	createdAt: Date;
 	updatedAt: Date;

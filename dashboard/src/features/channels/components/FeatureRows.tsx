@@ -6,7 +6,6 @@ import { featureLook } from "@/config/features";
 import { describeDetail, featureLabel } from "@/features/guild-overview/featureStatus.labels";
 import { cn } from "@/lib/cn";
 
-/** One row per feature, saying what it is doing and opening its own page. */
 export function FeatureRows({
 	features,
 	guildId,

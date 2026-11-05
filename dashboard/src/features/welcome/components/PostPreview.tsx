@@ -5,7 +5,6 @@ import { markSpans, type MarkSpan } from "@/features/welcome/welcome.utils";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
 import { cn } from "@/lib/cn";
 
-/** Any text the bot posts, drawn as its own message with Discord's marks, so what is typed is checked before it is sent. */
 export function PostPreview({
 	text,
 	style = "text",
@@ -13,9 +12,7 @@ export function PostPreview({
 	children,
 }: {
 	text: string;
-	/** An embed draws the text in a coloured panel; anything else is a plain message. */
 	style?: string;
-	/** Shown in place of the text while nothing is typed. */
 	empty?: string;
 	children?: ReactNode;
 }): React.JSX.Element {
@@ -45,7 +42,6 @@ export function PostPreview({
 	);
 }
 
-/** Discord's own marks, so the preview answers "what will this look like" rather than "what did I type". */
 function Marked({ span }: { span: MarkSpan }): React.JSX.Element {
 	if (span.marks.includes("code"))
 		return <code className="bg-muted rounded-chip px-1 py-0.5 font-mono">{span.text}</code>;

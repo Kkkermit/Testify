@@ -4,10 +4,8 @@ import { fromLocalInput, toLocalInput } from "@/features/scheduled-messages/sche
 
 const HOUR_MS = 60 * 60 * 1000;
 
-/** How long one can be set to stay up, in hours; each fits inside `NOTICE_LIMITS.maxUpDays`. */
 export const UP_FOR_HOURS = [1, 6, 12, 24, 72, 168, 336, 720] as const;
 
-/** `keep` leaves an end that is already set where it is, and is only offered when there is one. */
 export type UpFor = "keep" | "forever" | (typeof UP_FOR_HOURS)[number];
 
 export interface TimingDraft {
@@ -34,7 +32,6 @@ export interface TimingChange {
 	endsAt?: string | null;
 }
 
-/** What to send for the times, or the rule broken; one already up counts from now, as on Discord, and keeps its start. */
 export function timingChange(
 	draft: TimingDraft,
 	notice: Notice | null,
@@ -66,7 +63,6 @@ export function timingChange(
 	return { change, problem: blocked };
 }
 
-/** Hours under a day read as hours, and the rest as days. */
 export function upForLabel(hours: (typeof UP_FOR_HOURS)[number], t: TFunction): string {
 	return hours < 24 ? t("owner.noticeUpForHours", { count: hours }) : t("owner.noticeUpForDays", { count: hours / 24 });
 }

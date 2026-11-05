@@ -10,7 +10,6 @@ import { useSupportArticle, useSupportSearch } from "@/features/help/useSupport"
 import { SiteError } from "@/features/site/components/SiteError";
 import { cn } from "@/lib/cn";
 
-/** The help articles `/ask` answers with, filled in by the bot for its own prefix and limits, and readable signed out. */
 export function Guides({ articleId }: { articleId: string | null }): React.JSX.Element {
 	return articleId === null ? <GuideList /> : <Guide id={articleId} />;
 }

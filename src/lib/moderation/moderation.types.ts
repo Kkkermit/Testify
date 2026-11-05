@@ -1,7 +1,5 @@
 import { type BypassPermission, type AuditEvent } from "@testify/shared";
 
-/** The types more than one module in this domain shares. */
-
 export interface AntiLinkPanelState {
 	enabled: boolean;
 	bypass: BypassPermission;
@@ -10,7 +8,7 @@ export interface AntiLinkPanelState {
 
 export interface AuditPanelState {
 	channelId: string | null;
-	/** `["all"]` means every event, which is how the config has always stored it. */
+	/** `["all"]` means every event, which is how the config stores it. */
 	enabled: string[];
 	/** True when the panel is showing edits that are not in the database yet. */
 	dirty?: boolean;

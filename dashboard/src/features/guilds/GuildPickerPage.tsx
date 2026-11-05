@@ -28,7 +28,6 @@ export function GuildPickerPage(): React.JSX.Element {
 	const me = useMe();
 	const bot = useBot();
 	const [search, setSearch] = useState("");
-	// One page number per section, in the URL, so Back and a refresh land where the reader was.
 	const [params, setParams] = useSearchParams();
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -51,13 +50,11 @@ export function GuildPickerPage(): React.JSX.Element {
 			else next.set(key, String(page));
 			return next;
 		});
-		// The pager sits under the list, so a shorter last page would otherwise leave the reader below it.
 		document.getElementById(`guilds-${key}`)?.scrollIntoView({ block: "nearest" });
 	}
 
 	function searchFor(value: string): void {
 		setSearch(value);
-		// A new search is a new list, so every section starts again from its first page.
 		setParams(
 			(current) => {
 				const next = new URLSearchParams(current);

@@ -15,7 +15,6 @@ import { SCHEDULE_LIMITS, SCHEDULE_REPEATS, type ScheduleRepeat } from "@testify
 const isRepeat = (value: string | null): value is ScheduleRepeat =>
 	(SCHEDULE_REPEATS as readonly (string | null)[]).includes(value);
 
-/** Messages the bot posts later, once or every day or week, made and changed from one panel. */
 export default defineCommand({
 	name: SCHEDULE_COMMAND,
 	description: "Posts a message later, once or every day or week.",

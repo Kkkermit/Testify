@@ -15,7 +15,6 @@ import { VoiceStatsSection } from "@/features/settings/sections/VoiceStatsSectio
 import { useSettings } from "@/features/settings/useSettings";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/** Each section writes on change and has its own endpoint, so a refusal in one leaves the others alone. */
 export function SettingsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -73,7 +72,6 @@ export function SettingsPage(): React.JSX.Element {
 	);
 }
 
-/** One column, because every card is full width. */
 function Group({ children }: { children: ReactNode }): React.JSX.Element {
 	return <div className="flex flex-col gap-4">{children}</div>;
 }

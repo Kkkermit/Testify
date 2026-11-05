@@ -1,5 +1,3 @@
-/** Time, size and rate limits. */
-
 export const SECOND_MS = 1_000;
 export const MINUTE_MS = 60 * SECOND_MS;
 export const HOUR_MS = 60 * MINUTE_MS;
@@ -77,7 +75,6 @@ export const LIMITS = {
 	autocompleteChoices: 25,
 	bulkDeleteMax: 100,
 	bulkDeleteMin: 1,
-	/** Ours. */
 	defaultPageSize: 6,
 	componentTimeoutMs: 5 * MINUTE_MS,
 	externalApiTimeoutMs: 10 * SECOND_MS,
@@ -95,7 +92,6 @@ export const COUNTING_DEFAULT_MAX = 1_000_000;
 export const ANALYTICS = {
 	/** Long enough to see a month-on-month trend, short enough that the collection stays small. */
 	retentionDays: 90,
-	/** What the owner console asks for unless a window is chosen. */
 	defaultWindowDays: 30,
 	maxWindowDays: 90,
 	/** Log lines kept in memory for the owner console, at every level; roughly 200 kB at worst. */

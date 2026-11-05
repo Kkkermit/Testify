@@ -77,7 +77,6 @@ describe("the commands page", () => {
 		expect(search()).toBe("");
 	});
 
-	/** The whole point of the coverage tile: it is the visible progress toward covering every command. */
 	it("says how much of the command surface the dashboard covers", async () => {
 		server.use(
 			http.get("/api/commands", () => HttpResponse.json({ ...catalogue, commands: [...commands, discordOnly] })),

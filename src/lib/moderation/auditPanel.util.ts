@@ -35,7 +35,6 @@ export function decodeDraft(args: string[]): AuditDraft {
 	return { channelId: channelId === NO_CHANNEL ? null : channelId, events: decodeEvents(events) };
 }
 
-/** Whether Save has anything to do. */
 export function hasUnsavedChanges(saved: AuditPanelState, draft: AuditDraft): boolean {
 	if (saved.channelId !== draft.channelId) return true;
 

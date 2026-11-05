@@ -67,7 +67,6 @@ export function StatusPage(): React.JSX.Element {
 		);
 	}
 
-	// With no answer at all, the bot's own API is what failed, and that is the answer.
 	if (status.data === undefined) {
 		return (
 			<>

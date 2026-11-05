@@ -11,14 +11,11 @@ export function barWidth(count: number, max: number): number {
 interface BarRow {
 	id: string;
 	label: ReactNode;
-	/** Sits under the label — a category, a member count, whatever names the row further. */
 	sub?: string;
 	count: number;
-	/** Shown in place of the count, for a figure with a unit; the bar still follows `count`. */
 	value?: string;
 }
 
-/** The bar sits behind the row rather than beside it, so the label is never squeezed by the value. */
 export function UsageBars({
 	rows,
 	empty,
@@ -28,7 +25,6 @@ export function UsageBars({
 	empty: string;
 	tint?: string;
 }): React.JSX.Element {
-	// A full EmptyState here is 200px of nothing beside a list of ten, which is the "massive gap" it looks like.
 	if (rows.length === 0) {
 		return (
 			<p className="text-muted-foreground flex items-center gap-2 py-2 text-sm">

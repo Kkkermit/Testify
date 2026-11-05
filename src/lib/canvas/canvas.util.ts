@@ -3,8 +3,6 @@ import { AttachmentBuilder } from "discord.js";
 import { ServiceError } from "@core/errors";
 import { clusters, drawText } from "@lib/canvas/text.util";
 
-/** Shared canvas helpers. */
-
 export { createCanvas };
 export type { Canvas, SKRSContext2D };
 
@@ -114,7 +112,6 @@ export function drawAvatarImage(
 	});
 }
 
-/** The avatar, or a lettered circle when it cannot be fetched. */
 export async function drawAvatarOrInitial(
 	ctx: SKRSContext2D,
 	url: string,

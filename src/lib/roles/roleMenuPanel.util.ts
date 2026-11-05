@@ -77,7 +77,6 @@ export function roleMenuPicker(menu: StoredRoleMenu, roles: OfferedRole[], note?
 	return containerMessage(container({ category: "settings", parts }));
 }
 
-/** What a pick did, in one line. */
 export function pickNote(names: { added: string[]; removed: string[]; refused: string[] }): string {
 	const lines: string[] = [];
 	if (names.added.length > 0) lines.push(`Added ${names.added.join(", ")}.`);

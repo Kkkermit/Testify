@@ -4,7 +4,6 @@ import { Badge, Card, CARD_HEADING } from "@/components/primitives";
 import { NOTICE_TONE_BADGES, NOTICE_TONE_LABELS, wasEdited } from "@/features/notices/notices.utils";
 import { dateAndTime } from "@/lib/datetime";
 
-/** One notification as everybody reads it; its words are text, never markup. */
 export function NoticeCard({ notice, isNew }: { notice: Notice; isNew: boolean }): React.JSX.Element {
 	const { t } = useTranslation();
 

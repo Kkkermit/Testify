@@ -19,14 +19,12 @@ export function toLocalInput(at: Date | string): string {
 	return `${String(date.getFullYear())}-${two(date.getMonth() + 1)}-${two(date.getDate())}T${two(date.getHours())}:${two(date.getMinutes())}`;
 }
 
-/** Null for an empty or unreadable value, which the shared rule then names. */
 export function fromLocalInput(value: string): Date | null {
 	if (value === "") return null;
 	const date = new Date(value);
 	return Number.isNaN(date.getTime()) ? null : date;
 }
 
-/** What is scheduled and when the next one goes, as the sentence the page opens with. */
 export function scheduleSummary(
 	messages: readonly Pick<ScheduledMessage, "channelId" | "nextAt">[],
 	channelName: (id: string) => string,

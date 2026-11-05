@@ -8,7 +8,6 @@ import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { ApiError } from "@/lib/api";
 
-/** A templated post shown as it will appear; pressing it opens the template beside the preview, which follows the draft. */
 export function EditablePost({
 	id,
 	message,
@@ -33,7 +32,6 @@ export function EditablePost({
 	max?: number;
 	saving: boolean;
 	error: Error | null;
-	/** The test this message makes, so Send me a test sends the draft while editing and the saved text otherwise. */
 	testOf: (message: string) => TestPost;
 	onSave: (message: string, done: () => void) => void;
 }): React.JSX.Element {

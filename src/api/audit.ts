@@ -21,7 +21,6 @@ export async function auditChange<Action extends string>(
 	await write(context, entry);
 }
 
-/** A settings change the Changes page can put back: every field it could restore, as stored before and after. */
 export async function auditSettings(
 	context: Context<ApiBindings>,
 	entry: { action: RestorableAction; summary: string; before: unknown; after: unknown },

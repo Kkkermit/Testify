@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/cn";
 
-/** The profile banner, or the accent colour Discord returns — the one colour here written as a value rather than a token. */
+/** Discord's accent colour arrives as a value, the one colour here not from a token. */
 export function BotBanner({
 	src,
 	accent,

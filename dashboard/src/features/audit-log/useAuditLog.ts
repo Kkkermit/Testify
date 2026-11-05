@@ -16,7 +16,6 @@ export function useAuditLog(guildId: string): UseQueryResult<AuditLogConfigRespo
 	});
 }
 
-/** Not optimistic, unlike the toggles elsewhere: this screen holds a draft until Save, so a refusal leaves it on screen to correct. */
 export function useSaveAuditLog(guildId: string): UseMutationResult<AuditLogConfigResponse, Error, AuditLogPut> {
 	const client = useQueryClient();
 
