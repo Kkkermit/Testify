@@ -773,7 +773,7 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                        |
 | `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                  |
 | `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                             |
-| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                        |
+| `/guilds/:id/members`             | Everybody, searched and filtered, acted on one at a time or 25 at once; the boards a tab    |
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting, voice stats        |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
@@ -1257,7 +1257,7 @@ about at configuration time rather than at the moment it fails to be assigned.
 **Who:** a manager dealing with somebody specific. The first journey that writes to a **person** rather than to
 a setting.
 
-1. `/guilds/:id/members` — money and levels as real tables, with a "find me" jump to your own page.
+1. `/guilds/:id/members` — everybody in the server, searched and filtered, with the money and levels boards as a tab.
 2. They open a member, or arrive directly at `…/members/:userId`.
 3. The page shows standing, roles, warnings and any live softban. `moderationProblem` travels in the response,
    so if the caller may not act on this member the controls are not rendered and the reason is shown once.

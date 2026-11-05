@@ -5,11 +5,13 @@ import { actorOf, type ApiBindings, guildOf, readerOf } from "@api/context";
 import { badRequest, forbidden, notFound } from "@api/errors";
 import { holdsPermission, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
+import { directory } from "@api/routes/memberDirectory";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { changeLevel, changeMoney, readBoard, readMemberDetail, revokeSoftban } from "@lib/economy";
 import { problemText } from "@lib/format";
 import {
 	banUser,
+	blockText,
 	containsProfanity,
 	kickMember,
 	moderationProblem,
@@ -38,6 +40,9 @@ import {
 export const members = new Hono<ApiBindings>();
 
 members.use("*", requireGuild);
+
+// Before `/:userId`, which would otherwise read "bulk" as a member id.
+members.route("/", directory);
 
 members.get("/leaderboard", async (context) => {
 	const { board, page, sort, scope } = parseQuery(context, boardQuery);
@@ -186,10 +191,7 @@ members.post("/:userId/ban", requirePermission(PermissionFlagsBits.BanMembers), 
 	const client = context.get("client");
 
 	if (member !== null) {
-		const problem =
-			moderator === null
-				? "Only somebody in this server can moderate its members."
-				: moderationProblem(moderator, member, client.user?.id);
+		const problem = moderator === null ? blockText("notMember") : moderationProblem(moderator, member, client.user?.id);
 		if (problem !== null) throw forbidden("cannot_moderate", problem);
 	}
 

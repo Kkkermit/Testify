@@ -9,7 +9,7 @@ import { server } from "@/test/setup";
 
 const GUILD = "900000000000000001";
 
-function renderPage(route = `/guilds/${GUILD}/members`): ReturnType<typeof renderWithProviders> {
+function renderPage(route = `/guilds/${GUILD}/members?tab=boards`): ReturnType<typeof renderWithProviders> {
 	return renderWithProviders(<MembersPage />, { route, path: "/guilds/:guildId/members" });
 }
 
@@ -61,7 +61,7 @@ describe("the members page", () => {
 
 	/** Switching board while on page 4 of the other one would otherwise land on an empty page. */
 	it("goes back to the first page when the board changes", async () => {
-		renderPage(`/guilds/${GUILD}/members?page=2`);
+		renderPage(`/guilds/${GUILD}/members?tab=boards&page=2`);
 		await screen.findByRole("table");
 
 		const captured = captureQuery();
@@ -74,7 +74,7 @@ describe("the members page", () => {
 
 	it("names the columns after the sort", async () => {
 		serve({ sort: "bank" });
-		renderPage(`/guilds/${GUILD}/members?sort=bank`);
+		renderPage(`/guilds/${GUILD}/members?tab=boards&sort=bank`);
 
 		const table = await screen.findByRole("table");
 		expect(within(table).getByRole("columnheader", { name: "Bank" })).toBeInTheDocument();
@@ -93,7 +93,7 @@ describe("the members page", () => {
 	/** Somebody from another server has no page here, and is not somebody who left this one. */
 	it("neither links nor marks as left somebody on the bot-wide board from another server", async () => {
 		serve({ scope: "global" });
-		renderPage(`/guilds/${GUILD}/members?scope=global`);
+		renderPage(`/guilds/${GUILD}/members?tab=boards&scope=global`);
 
 		const row = await screen.findByRole("rowheader", { name: /Left the server/ });
 		expect(within(row).queryByRole("link")).not.toBeInTheDocument();

@@ -205,7 +205,7 @@ describe("the member detail page", () => {
 	it("gives the back link enough height to be a target", async () => {
 		renderPage();
 
-		const link = await screen.findByRole("link", { name: /Back to the leaderboards/ });
+		const link = await screen.findByRole("link", { name: /Back to members/ });
 		expect(link.className).toContain(INLINE_TARGET);
 	});
 

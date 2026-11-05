@@ -2101,7 +2101,7 @@ four tabs, three shared components and two testable modules.
 | `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                  |
 | `/guilds/:id/casino`              | Open or close it, switch single games off, and the bet limits                               |
 | `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                             |
-| `/guilds/:id/members`             | Money and levels, each as a real table, with a jump to your own page                        |
+| `/guilds/:id/members`             | Everybody, searched and filtered, acted on one at a time or 25 at once; the boards a tab    |
 | `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
 | `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
@@ -2302,6 +2302,31 @@ them are load-bearing:
 
 `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in the
 channel, where they can be seen.
+
+### The member directory reads Discord a page at a time, and acts on one member at a time
+
+`…/members` opens on everybody in the server, with the money and levels boards a tab beside it; a `?board=` link
+still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/memberDirectory.util.ts` is the read and
+`actOnEach` in `memberBulk.util.ts` the write, and nothing new is stored. Five things about it are load-bearing:
+
+- **Never one big list.** `guild.members.list` is read a thousand at a time from a cursor, a search is
+  `guild.members.search` (prefix only, at most a thousand, and the page says when it hit that), and a role filter
+  reads the members themselves rather than `role.members`, which knows only the cached ones. A filter that matches
+  little stops after `DIRECTORY_LIMITS.maxScan` members and hands back a cursor, so no page can stall on a server
+  of 100,000. The warned filter reads the warned ids from the database and fetches only those, and asks Moderate
+  Members, as `/warn list` does; so do the counts on each row.
+- **A row offers what Discord would.** `moderationBlock` is `moderationProblem` as a code, so the page words why a
+  member cannot be acted on, and roles are only those `grantableRoles` allows. The reader, the server's owner and
+  the bot are never acted on by a bulk request, even for roles, where Discord asks no role order of the member.
+- **A bulk request is at most `DIRECTORY_LIMITS.maxBatch` (25) members, acted on in turn.** Each is answered for
+  (`BulkOutcome`): done, or skipped with a `BulkSkip` code, because a kick that has happened cannot be rolled back,
+  so the request is never all or nothing. One Discord refusal is logged at `debug` and the rest carry on.
+- **Confirmation scales with reach** (`bulkConfirmed`, checked on both sides): one member by their username or ID,
+  as on their own page; a kick or ban of several by typing how many. Each kick, ban and timeout still records its
+  own numbered case, and one audit record (`member.kick.bulk` and the rest) lists everybody touched.
+- **The bulk routes are `/members/bulk/*`, mounted before `/:userId`**, each asking its command's permission, and
+  `ASKS_MORE` in `accessWalk.test.ts` names all four. A single warning from a row goes through `POST /warnings`;
+  there is no bulk warning, because a warning's step can kick or ban and would skip the typed count.
 
 ### Rules that carry over
 

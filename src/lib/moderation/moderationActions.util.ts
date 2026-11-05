@@ -3,24 +3,43 @@ import { strings } from "@config/strings";
 import { asMember, type CommandInput } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { embed } from "@lib/discord/embeds.util";
+import { type MemberBlock } from "@testify/shared";
 
-/** Why this moderator may not act on this target, or null; every surface asks here. */
-export function moderationProblem(moderator: GuildMember, target: GuildMember, botId?: string): string | null {
+/** Why this moderator may not act on this target, as a code, or null; every surface asks here. */
+export function moderationBlock(moderator: GuildMember, target: GuildMember, botId?: string): MemberBlock | null {
 	const guild = target.guild;
 
-	if (target.id === moderator.id) return strings.moderation.selfTarget;
+	if (target.id === moderator.id) return "you";
 	// The id is passed rather than read off `members.me`, which is null when the bot's own member is uncached.
-	if (target.id === (botId ?? guild.members.me?.id)) return strings.moderation.botTarget;
-	if (target.id === guild.ownerId) return "You cannot moderate the server owner.";
+	if (target.id === (botId ?? guild.members.me?.id)) return "bot";
+	if (target.id === guild.ownerId) return "owner";
 
 	if (moderator.id !== guild.ownerId && moderator.roles.highest.position <= target.roles.highest.position) {
-		return strings.moderation.hierarchyUser;
+		return "outranked";
 	}
 
 	const me = guild.members.me;
-	if (me && me.roles.highest.position <= target.roles.highest.position) return strings.moderation.hierarchyBot;
+	if (me && me.roles.highest.position <= target.roles.highest.position) return "botOutranked";
 
 	return null;
+}
+
+const BLOCK_TEXT: Record<MemberBlock, string> = {
+	you: strings.moderation.selfTarget,
+	bot: strings.moderation.botTarget,
+	owner: "You cannot moderate the server owner.",
+	outranked: strings.moderation.hierarchyUser,
+	botOutranked: strings.moderation.hierarchyBot,
+	notMember: "Only somebody in this server can moderate its members.",
+};
+
+export function blockText(block: MemberBlock): string {
+	return BLOCK_TEXT[block];
+}
+
+export function moderationProblem(moderator: GuildMember, target: GuildMember, botId?: string): string | null {
+	const block = moderationBlock(moderator, target, botId);
+	return block === null ? null : BLOCK_TEXT[block];
 }
 
 export function assertModeratable(ctx: CommandInput, target: GuildMember): void {

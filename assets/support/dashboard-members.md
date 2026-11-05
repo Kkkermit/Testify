@@ -4,9 +4,9 @@ title: Leaderboards and member pages on the dashboard
 topic: dashboard
 keywords: members page, leaderboard dashboard, member page, edit balance, give xp, set level, warnings dashboard, find me, member detail, kick from dashboard, ban from dashboard
 questions: How do I change someone's level on the dashboard? | How do I give someone XP or money from the dashboard? | Where do I see a member's warnings? | Can I kick or ban someone from the dashboard?
-related: leaderboards, warnings, bans
+related: member-directory, leaderboards, warnings, bans
 ---
-Open your server, then **Leaderboards** under Community.
+Open your server, then **Members** and its **Leaderboards** tab.
 
 ### The leaderboards
 Money and levels each have a table, the same boards `/leaderboard` shows in Discord. The money board can be ranked by total, wallet or bank, for this server or every server {bot} is in. **Find me** jumps to the page you are on.

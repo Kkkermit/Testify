@@ -73,6 +73,8 @@ export const keys = {
 		audit: (page: number) => ["guild", id, "audit", page] as const,
 		board: (board: string, page: number, sort: string, scope: string) =>
 			["guild", id, "board", board, page, sort, scope] as const,
+		directory: (search: string) => ["guild", id, "directory", search] as const,
+		directoryAll: () => ["guild", id, "directory"] as const,
 		member: (userId: string) => ["guild", id, "member", userId] as const,
 		memberRoles: (userId: string) => ["guild", id, "member-roles", userId] as const,
 	}),

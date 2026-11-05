@@ -9,6 +9,8 @@ export * from "./blacklistActions.util";
 export * from "./caseActions.util";
 export * from "./channelTools.util";
 export * from "./contentFilter.util";
+export * from "./memberBulk.util";
+export * from "./memberDirectory.util";
 export * from "./moderation.constants";
 export * from "./moderation.types";
 export * from "./moderationActions.util";

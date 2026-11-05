@@ -23,6 +23,7 @@ import { MAKE_PAUSE_MS } from "@lib/tempVoice/tempVoice.constants";
 import {
 	AUTO_RESPONDER_LIMITS,
 	BIRTHDAY_LIMITS,
+	DIRECTORY_LIMITS,
 	GIVEAWAY_LIMITS,
 	INVITE_PERMISSIONS,
 	LEVEL_LIMITS,
@@ -147,6 +148,8 @@ export const FACTS: Readonly<Record<string, string>> = {
 
 	"raid.maxAccountAge": formatDurationLong(RAID_LIMITS.maxAccountAgeDays * DAY_MS),
 	"raid.alertEvery": formatDurationLong(RAID_LIMITS.alertEveryMinutes * MINUTE_MS),
+
+	"directory.maxBatch": formatNumber(DIRECTORY_LIMITS.maxBatch),
 };
 
 const FACT = /\{fact:([a-zA-Z0-9.]+)\}/g;
