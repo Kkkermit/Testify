@@ -689,6 +689,10 @@
 		"confirm": "Débannir {{name}}"
 	},
 	"channelTools": {
+		"summary_other": "{{count, number}} salons sont verrouillés ou ralentis pour le moment.",
+		"summary_many": "{{count, number}} de salons sont verrouillés ou ralentis pour le moment.",
+		"summary_one": "{{count, number}} salon est verrouillé ou ralenti pour le moment.",
+		"summaryNone": "Aucun salon n’est verrouillé ni ralenti pour le moment.",
 		"title": "Outils de salon",
 		"subtitle": "Verrouillez un salon pour que seule l’équipe parle, ou fixez le délai entre deux messages.",
 		"channel": "Salon",

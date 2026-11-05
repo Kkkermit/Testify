@@ -689,6 +689,10 @@
 		"confirm": "Revoca il ban di {{name}}"
 	},
 	"channelTools": {
+		"summary_other": "Al momento {{count, number}} canali sono bloccati o rallentati.",
+		"summary_many": "Al momento {{count, number}} di canali sono bloccati o rallentati.",
+		"summary_one": "Al momento {{count, number}} canale è bloccato o rallentato.",
+		"summaryNone": "Al momento nessun canale è bloccato o rallentato.",
 		"title": "Strumenti canale",
 		"subtitle": "Blocca un canale perché parli solo lo staff, o imposta quanto aspettano i membri tra un messaggio e l’altro.",
 		"channel": "Canale",

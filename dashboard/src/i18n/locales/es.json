@@ -689,6 +689,10 @@
 		"confirm": "Desbanear a {{name}}"
 	},
 	"channelTools": {
+		"summary_other": "Ahora mismo {{count, number}} canales están bloqueados o ralentizados.",
+		"summary_many": "Ahora mismo {{count, number}} de canales están bloqueados o ralentizados.",
+		"summary_one": "Ahora mismo {{count, number}} canal está bloqueado o ralentizado.",
+		"summaryNone": "Ahora mismo no hay ningún canal bloqueado ni ralentizado.",
 		"title": "Herramientas de canal",
 		"subtitle": "Bloquea un canal para que solo hable el equipo, o fija cuánto esperan los miembros entre mensajes.",
 		"channel": "Canal",

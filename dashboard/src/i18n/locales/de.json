@@ -667,6 +667,9 @@
 		"confirm": "{{name}} entbannen"
 	},
 	"channelTools": {
+		"summary_other": "Gerade sind {{count, number}} Kanäle gesperrt oder verlangsamt.",
+		"summary_one": "Gerade ist {{count, number}} Kanal gesperrt oder verlangsamt.",
+		"summaryNone": "Gerade ist kein Kanal gesperrt oder verlangsamt.",
 		"title": "Kanalwerkzeuge",
 		"subtitle": "Sperre einen Kanal, damit nur das Team schreibt, oder lege fest, wie lange Mitglieder zwischen Nachrichten warten.",
 		"channel": "Kanal",

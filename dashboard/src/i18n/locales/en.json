@@ -667,6 +667,9 @@
 		"confirm": "Unban {{name}}"
 	},
 	"channelTools": {
+		"summary_other": "{{count, number}} channels are locked or slowed down right now.",
+		"summary_one": "{{count, number}} channel is locked or slowed down right now.",
+		"summaryNone": "No channel is locked or slowed down right now.",
 		"title": "Channel tools",
 		"subtitle": "Lock a channel so only staff can talk, or set how long members wait between messages.",
 		"channel": "Channel",

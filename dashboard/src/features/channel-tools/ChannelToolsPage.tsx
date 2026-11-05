@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Field, SavingIndicator, savingStateOf, SELECT, Toggle, Warning } from "@/components/form";
+import { Field, SavingIndicator, savingStateOf, SELECT, SettingRows, Toggle, Warning } from "@/components/form";
 import {
 	Badge,
 	Button,
@@ -14,6 +14,7 @@ import {
 	EmptyState,
 	PageHeader,
 	Skeleton,
+	Summary,
 } from "@/components/primitives";
 import { restricted, slowmodeChoices, slowmodeText } from "@/features/channel-tools/channelTools.utils";
 import { useChannelTools, useUpdateChannel } from "@/features/channel-tools/useChannelTools";
@@ -48,12 +49,16 @@ export function ChannelToolsPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}
 			/>
 
+			<Summary>
+				{limited.length === 0 ? t("channelTools.summaryNone") : t("channelTools.summary", { count: limited.length })}
+			</Summary>
+
 			{chosen === undefined ? (
 				<Card>
 					<EmptyState icon={<Lock size={28} />} title={t("channelTools.noneTitle")} body={t("channelTools.noneBody")} />
 				</Card>
 			) : (
-				<Card className="flex flex-col gap-4">
+				<SettingRows>
 					<Field label={t("channelTools.channel")} htmlFor="channel-tools-channel">
 						<select
 							id="channel-tools-channel"
@@ -85,7 +90,7 @@ export function ChannelToolsPage(): React.JSX.Element {
 					{update.error !== null && (
 						<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
 					)}
-				</Card>
+				</SettingRows>
 			)}
 
 			<section aria-labelledby="restricted-heading">
