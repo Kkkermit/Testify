@@ -43,7 +43,7 @@ describe("the warnings page", () => {
 		});
 	});
 
-	/** Picking somebody from a search is the whole point: nobody should have to paste an ID. */
+	/** Somebody is picked from a search, so nobody has to paste an ID. */
 	it("warns a member found by name and says what it did", async () => {
 		let body: unknown;
 		server.use(

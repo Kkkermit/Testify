@@ -39,7 +39,6 @@ describe("planStream", () => {
 		expect(plan).toBeNull();
 	});
 
-	/** Refusing by name beats playing silence. */
 	it("refuses an mp3-only track when FFmpeg is missing", () => {
 		expect(planStream([format({ format_id: "mp3_0", acodec: "mp3", ext: "mp3" })], WITHOUT_FFMPEG)).toBeNull();
 	});

@@ -58,7 +58,7 @@ describe("every active advisory suppression", () => {
 		expect(entry.expiry).toBeGreaterThan(Date.now());
 	});
 
-	/** And one years away is the same blind spot with a longer fuse; with no fix to wait for, the fuse is shorter still. */
+	/** One years away is the same blind spot with a longer fuse; with no fix to wait for, the fuse is shorter still. */
 	it.each(entries)("%s expires within a year, or 90 days when there is no fix yet", (_id, entry) => {
 		const days = /no fixed release yet/i.test(entry.notes) ? 90 : 366;
 		expect(entry.expiry).toBeLessThan(Date.now() + days * 24 * 60 * 60 * 1000);

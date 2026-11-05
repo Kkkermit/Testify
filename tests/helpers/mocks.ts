@@ -206,7 +206,6 @@ export interface MockInteractionSetup {
 	overrides?: Overrides<ChatInputCommandInteraction>;
 }
 
-/** A slash interaction. */
 export function createMockInteraction(setup: MockInteractionSetup = {}): ChatInputCommandInteraction & {
 	sent: Record<string, unknown>[];
 } {
@@ -259,7 +258,6 @@ export interface MockMessageSetup {
 	overrides?: Overrides<Message>;
 }
 
-/** A message, for the prefix surface. */
 export function createMockMessage(setup: MockMessageSetup = {}): Message & { sent: Record<string, unknown>[] } {
 	const { content = "", inGuild = true, mentions = [], attachments = [], overrides = {} } = setup;
 
@@ -298,7 +296,6 @@ export function createMockMessage(setup: MockMessageSetup = {}): Message & { sen
 	return merge(base, overrides as Overrides<typeof base>);
 }
 
-/** A Mongoose model stub. */
 export interface MockQuery {
 	lean: jest.Mock<MockQuery>;
 	sort: jest.Mock<MockQuery>;

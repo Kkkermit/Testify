@@ -6,12 +6,10 @@ export type MemberBoard = (typeof MEMBER_BOARDS)[number];
 
 export const BOARD_PAGE_SIZE = 25;
 
-/** What the money board ranks by. */
 export const MONEY_SORTS = ["total", "wallet", "bank"] as const;
 
 export type MoneySort = (typeof MONEY_SORTS)[number];
 
-/** One server, or every server the bot is in, where a person's balances are added together. */
 export const BOARD_SCOPES = ["server", "global"] as const;
 
 export type BoardScope = (typeof BOARD_SCOPES)[number];
@@ -30,14 +28,12 @@ export interface BoardRow {
 
 export interface BoardPage {
 	board: MemberBoard;
-	/** Only the money board is ranked by anything but its one figure, or across servers. */
 	sort: MoneySort;
 	scope: BoardScope;
 	page: number;
 	pages: number;
 	total: number;
 	rows: BoardRow[];
-	/** Where the person reading sits, so the page can offer to jump there. */
 	you: { rank: number; page: number } | null;
 }
 
@@ -48,7 +44,6 @@ export const boardQuery = z.object({
 	scope: z.enum(BOARD_SCOPES).default("server"),
 });
 
-/** The money board's two figures for each sort: the one it ranks by first. */
 export const MONEY_SORT_LABELS: Record<MoneySort, { heading: string; primary: string; secondary: string }> = {
 	total: { heading: "Richest", primary: "Total", secondary: "Banked" },
 	wallet: { heading: "Biggest wallets", primary: "Wallet", secondary: "Banked" },

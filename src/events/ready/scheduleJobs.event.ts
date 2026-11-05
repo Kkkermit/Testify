@@ -17,7 +17,6 @@ import { CASINO_TIMING, spinOverdueRounds } from "@lib/casino";
 import { flushActivity } from "@lib/info";
 import { STATUS_LIMITS } from "@testify/shared";
 
-/** Starts the repeating background jobs. */
 export default defineEvent({
 	name: Events.ClientReady,
 	once: true,

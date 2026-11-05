@@ -24,7 +24,7 @@ describe("totalsOf", () => {
 	});
 });
 
-/** The substance of the runner: a warning is there to be seen, not to stop work. */
+/** A warning is there to be seen, not to stop work. */
 describe("exitCodeFor", () => {
 	it("fails on an error", () => {
 		expect(exitCodeFor({ files: 1, errors: 1, warnings: 0, fixable: 0 })).toBe(1);

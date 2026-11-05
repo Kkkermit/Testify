@@ -12,14 +12,13 @@ import { useMarkNoticesSeen, useNoticeFeed } from "@/features/notices/useNotices
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 
-/** Opening the page is reading them, so it marks them read once they are on screen. */
 export function NotificationsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("notices.title"));
 
 	const feed = useNoticeFeed();
 	const seen = useMarkNoticesSeen();
-	// Held from the first answer, so marking them read does not take the "New" badges away while they are read.
+	// Held from the first answer, so marking them read does not take the "New" badges away.
 	const [fresh, setFresh] = useState<Set<string> | null>(null);
 	const { mutate } = seen;
 
@@ -30,7 +29,6 @@ export function NotificationsPage(): React.JSX.Element {
 	}, [feed.data, fresh, mutate]);
 
 	const me = useMe();
-	// A pointer for the owners only; the console behind it is what refuses everybody else.
 	const manage =
 		me.data?.isOwner === true ? (
 			<Link to="/owner?tab=notifications" className={cn(INLINE_TARGET, "text-accent hover:text-foreground text-sm")}>

@@ -2,10 +2,9 @@ import "@testing-library/jest-dom";
 import { configure } from "@testing-library/react";
 import { setupServer } from "msw/node";
 import { handlers } from "@/test/handlers";
-// Initialises the shared i18next instance, so every component under test resolves keys rather than rendering them.
 import "@/i18n";
 
-// A stat tile counts up over 650ms after its request lands, which a loaded CI runner can push past the 1s default.
+// A loaded CI runner can push a render past the 1s default.
 configure({ asyncUtilTimeout: 3_000 });
 
 export const server = setupServer(...handlers);
@@ -17,13 +16,15 @@ beforeAll(() => {
 
 afterEach(() => {
 	server.resetHandlers();
+	// Any test that renders the shell remembers the bot's look, which would answer the next test before its request did.
+	localStorage.removeItem("testify:botLook");
 });
 
 afterAll(() => {
 	server.close();
 });
 
-// jsdom has no matchMedia, and the motion hooks read it; "no preference" puts the animated path under test, and individual tests override it.
+// jsdom has no `matchMedia`, and the motion hooks read it.
 window.matchMedia = jest.fn().mockImplementation((query: string) => ({
 	matches: false,
 	media: query,

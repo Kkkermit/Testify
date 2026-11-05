@@ -4,8 +4,6 @@ import { type Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { signedInOwner } from "@api/middleware/session";
 
-/** Serves the built SPA from the API's own origin, so cookies work with no CORS and one URL sits behind a proxy. */
-
 const TYPES: Record<string, string> = {
 	".html": "text/html; charset=utf-8",
 	".js": "text/javascript; charset=utf-8",
@@ -106,7 +104,6 @@ export function serveDashboard(app: Hono<ApiBindings>, root = dashboardRoot()): 
 		// source browser's addresses are the repository's own paths, so a `.ts` under it is a page rather than an asset.
 		if (extname(context.req.path) !== "" && !context.req.path.startsWith("/source-code/")) return context.notFound();
 
-		// Anything else is a client route: React Router takes it from here.
 		context.header("Cache-Control", "no-cache");
 		return context.html(index);
 	});

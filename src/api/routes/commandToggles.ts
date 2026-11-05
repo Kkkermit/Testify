@@ -11,8 +11,6 @@ import {
 } from "@database/repositories/commandToggleRepository";
 import { ALWAYS_ENABLED, type CommandToggleState, commandTogglePut } from "@testify/shared";
 
-/** Which commands are switched off, per server or bot-wide; the bot-wide mount sits under `/owner`. */
-
 type ApiContext = Context<ApiBindings>;
 
 /** Owner-only names are filtered out on the way out and refused on the way in. */

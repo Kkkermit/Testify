@@ -18,7 +18,6 @@ import { embed } from "@lib/discord/embeds.util";
 import { truncate } from "@lib/format/format.util";
 import { HELP_HOME } from "@lib/info/info.constants";
 
-/** How the help pages are laid out. */
 export type Surface = "slash" | "prefix";
 
 export const HELP_PAGE_SIZE = 6;
@@ -138,7 +137,6 @@ export function categoryPage(
 	});
 }
 
-/** Everything about one command. */
 export function commandPage(command: Command, surface: Surface, prefix: string): EmbedBuilder {
 	const subs = subcommandsOf(command);
 
@@ -177,7 +175,6 @@ export function commandPage(command: Command, surface: Surface, prefix: string):
 	});
 }
 
-/** The category picker. */
 export function categoryMenu(client: TestifyClient, surface: Surface, chosen: Category | null, ownerId: string) {
 	const options = [
 		new StringSelectMenuOptionBuilder()
@@ -201,7 +198,6 @@ export function categoryMenu(client: TestifyClient, surface: Surface, chosen: Ca
 	);
 }
 
-/** Page arrows plus the slash/prefix toggle. */
 export function categoryControls(
 	category: Category,
 	page: number,
@@ -236,7 +232,6 @@ export function categoryControls(
 	);
 }
 
-/** Links, shown under the front page. */
 export function helpLinks() {
 	return row(linkButton("Support server", theme.supportServer), linkButton("Source code", theme.repository));
 }

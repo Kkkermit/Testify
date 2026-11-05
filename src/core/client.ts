@@ -22,18 +22,12 @@ const intents = [
 
 const partials = [Partials.User, Partials.Channel, Partials.GuildMember, Partials.Message, Partials.Reaction];
 
-/** The bot. */
 export class TestifyClient extends Client {
-	/** Every loaded command, by name. */
 	readonly commands = new Collection<string, Command>();
-	/** Alternative prefix-command names, pointing at the command they belong to. */
 	readonly aliases = new Collection<string, string>();
-	/** Button, select-menu and modal handlers, by custom-ID prefix. */
 	readonly buttons = new Collection<string, Button>();
-	/** Things that run on every message, in order. */
 	readonly messageHandlers: MessageHandler[] = [];
 
-	/** What the loader found, filled in by `loadEverything()` and shown on the banner. */
 	loaded: { commands: number; buttons: number; events: number; messageHandlers: number } = {
 		commands: 0,
 		buttons: 0,

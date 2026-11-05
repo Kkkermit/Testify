@@ -7,8 +7,6 @@ import { modalForm } from "@lib/discord";
 import { decideOnIdea, IDEA_COMMAND, IDEA_ID, ideaPost } from "@lib/ideas";
 import { IDEA_LIMITS, ideaDecision, type IdeaStatus } from "@testify/shared";
 
-/** The buttons on every posted idea: anybody votes, and staff with Manage Server decide. */
-
 const DECISIONS: Record<string, IdeaStatus> = { accept: "accepted", decline: "declined", reopen: "open" };
 
 export default defineButton({

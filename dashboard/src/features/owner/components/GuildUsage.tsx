@@ -11,10 +11,8 @@ import { GuildUsageSummary } from "@/features/owner/components/GuildUsageSummary
 import { searchWith, WINDOWS } from "@/features/owner/owner.utils";
 import { useGuildUsage } from "@/features/owner/useOwner";
 
-/** Everything the drill-down keeps in the URL, cleared together on the way back to every server. */
 const DRILL_DOWN = { guild: null, who: null, people: null, member: null, command: null, runs: null };
 
-/** One server: what was run there, who ran it, and each run, newest first. */
 export function GuildUsage({
 	guildId,
 	days,

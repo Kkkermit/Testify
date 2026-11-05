@@ -4,7 +4,6 @@ import { reply } from "@lib/discord";
 import { type BoardKind, boardMessage } from "@lib/economy";
 import { type BoardScope, type MoneySort } from "@testify/shared";
 
-/** Both boards as one picture of the top ten; the money board's buttons change what it ranks and where. */
 async function show(interaction: CommandInput, client: TestifyClient, kind: BoardKind): Promise<void> {
 	const guild = inGuild(interaction);
 	// A prefix command can type anything here, so an unknown word falls back rather than failing.

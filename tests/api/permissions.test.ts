@@ -133,7 +133,7 @@ describe("requireGuild", () => {
 		expect((await appFor(state, MANAGER).request(`/guilds/${GUILD}/thing`)).status).toBe(403);
 	});
 
-	/** Requiring the bot owner to join a server before they can support someone would be absurd. */
+	/** The bot owner need not be in a server to support it. */
 	it("lets a bot owner through without being in the guild", async () => {
 		const state = fake({ membersInGuild: new Set(), managers: new Set() });
 		const response = await appFor(state, OWNER).request(`/guilds/${GUILD}/thing`);

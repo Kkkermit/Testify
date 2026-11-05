@@ -9,8 +9,8 @@ import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
 
 describe("the guild picker", () => {
-	/** The invite is a real conversion path, so a guild without the bot is shown rather than hidden. */
-	/** Three states, not two: a server you can invite the bot to and one you cannot looked identical while only one had an action that would work. */
+	/** A server without the bot is shown with an invite rather than hidden. */
+	/** A server you can invite the bot to and one you cannot looked identical while only one had a working action. */
 	it("separates the servers you can add Testify to from the ones you cannot", async () => {
 		renderWithProviders(<GuildPickerPage />);
 

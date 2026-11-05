@@ -3,7 +3,6 @@ import { type TranslationKey } from "@/i18n";
 
 type StepAction = "start" | "create" | "choose" | null;
 
-/** What the row's button does: nothing once done, a link to the screen when one click cannot do it. */
 export function actionFor(step: SetupStepState): StepAction {
 	if (step.done) return null;
 	if (step.blocker !== null) return "choose";
@@ -16,7 +15,6 @@ export const STEP_TITLE: Record<SetupStep, TranslationKey> = {
 	"audit-log": "checklist.auditTitle",
 };
 
-/** The sentence under a row, which says exactly what one press will do, or why it cannot. */
 export function describeStep(step: SetupStepState): TranslationKey {
 	if (step.step === "levelling") return step.done ? "checklist.levellingDone" : "checklist.levellingBody";
 
@@ -42,7 +40,6 @@ function hiddenGuilds(): string[] {
 	}
 }
 
-/** A per-browser convenience: the checklist is advice, and hiding it changes nothing on the server. */
 export function isChecklistHidden(guildId: string): boolean {
 	return hiddenGuilds().includes(guildId);
 }

@@ -47,12 +47,10 @@ export function draftProblem(draft: Draft, t: TFunction): string | null {
 	return problemText(lotteryBlocked(draft), t);
 }
 
-/** Changing how often the draw runs moves the next one, so the form says that before the admin presses Save. */
 export function reschedules(draft: Draft, settings: LotterySettings): boolean {
 	return draft.frequency !== settings.frequency;
 }
 
-/** More winners than tickets sold means somebody wins nothing, which reads as the draw having failed. */
 export function winnersWarning(draft: Draft, settings: LotterySettings, t: TFunction): string | null {
 	if (settings.ticketsSold === 0 || draft.maxWinners <= settings.ticketsSold) return null;
 

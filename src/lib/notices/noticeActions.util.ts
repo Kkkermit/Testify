@@ -118,10 +118,7 @@ export async function readNoticeFeed(userId: string, options: { markRead?: boole
 const told = new Map<string, number>();
 const TOLD_MAX = 10_000;
 
-/**
- * Tells somebody who just ran a command how many notifications are new to them, once per notification; a `tell`
- * that fails is tried again on their next command.
- */
+/** Tells somebody who just ran a command how many notifications are new to them, once per notification. */
 export async function mentionNewNotices(userId: string, tell: (unread: number) => Promise<unknown>): Promise<void> {
 	const notices = liveNotices(await listNotices(), new Date());
 	const newest = notices[0];
@@ -156,6 +153,10 @@ export function mentionNoticesAfterCommand(
 	void mentionNewNotices(userId, tell).catch((error: unknown) => {
 		logger.debug({ err: toError(error), userId }, "[NOTICES] Could not mention new notifications after a command.");
 	});
+}
+
+export function forgetNoticeHint(userId: string): void {
+	told.delete(userId);
 }
 
 export function clearNoticeHints(): void {

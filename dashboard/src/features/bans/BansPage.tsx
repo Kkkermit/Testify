@@ -16,6 +16,7 @@ import {
 	PageHeader,
 	Pager,
 	Skeleton,
+	Summary,
 } from "@/components/primitives";
 import { useBans, useUnban } from "@/features/bans/useBans";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
@@ -26,7 +27,6 @@ import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** Everybody banned from the server, as Discord holds them, with Unban beside each. */
 export function BansPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -36,12 +36,16 @@ export function BansPage(): React.JSX.Element {
 	const [page, setPage] = useState(1);
 	const searched = useDebounced(query).trim();
 	const list = useBans(guildId, { page, query: searched });
+	const all = useBans(guildId, { page: 1, query: "" });
 
 	usePageTitle(t("bans.title"), overview.data?.name);
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("bans.title")} subtitle={t("bans.subtitle")} />
+			<PageHeader server={overview.data} title={t("bans.title")} subtitle={t("bans.subtitle")} />
+			{all.data?.readable === true && (
+				<Summary>{all.data.total === 0 ? t("bans.summaryNone") : t("bans.summary", { count: all.data.total })}</Summary>
+			)}
 
 			<section aria-labelledby="bans-heading">
 				<Card className="flex flex-col gap-4">
@@ -109,7 +113,6 @@ export function BansPage(): React.JSX.Element {
 	);
 }
 
-/** Unban opens a reason in the row itself, so the confirm sits beside the person it is about. */
 function BanRow({ guildId, entry }: { guildId: string; entry: BanEntry }): React.JSX.Element {
 	const { t } = useTranslation();
 	const unban = useUnban(guildId);

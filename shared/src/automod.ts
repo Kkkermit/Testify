@@ -49,7 +49,6 @@ export const automodPatch = z.object({ enabled: z.boolean() });
 
 export const automodRuleParam = z.object({ ruleId: z.string().regex(/^\d{17,20}$/, "is not a rule id") });
 
-/** Why a create would be refused, in the words the form shows. */
 export function automodBlocked(draft: { preset: AutomodPreset; word: string; limit: number }): Problem | null {
 	if (draft.preset === "keyword" && draft.word.trim() === "") return problem("automod.word");
 	if (draft.preset === "mention-spam" && !Number.isInteger(draft.limit)) return problem("automod.mentionLimit");

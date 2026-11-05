@@ -9,16 +9,12 @@ import { useBlacklist, useBlockUser, useUnblockUser } from "@/features/owner/use
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
-/**
- * The bot-wide block list; an id rather than a picker, because a blocked account is rarely in a server the bot can see.
- */
 export function BlacklistTab(): React.JSX.Element {
 	const { t } = useTranslation();
 	const rows = useBlacklist();
 	const block = useBlockUser();
 	const unblock = useUnblockUser();
 	const [params, setParams] = useSearchParams();
-	// `?block=` is how a member row on the usage tab sends somebody here; the owner still presses Block.
 	const [prefilled] = useState(() => snowflakeFrom(params.get("block")));
 
 	const [userId, setUserId] = useState(prefilled ?? "");
@@ -49,7 +45,7 @@ export function BlacklistTab(): React.JSX.Element {
 
 	return (
 		<div className="flex flex-col gap-4">
-			<Card focal className="flex flex-col gap-4">
+			<Card className="flex flex-col gap-4">
 				<div>
 					<h2 className={CARD_HEADING}>{t("owner.blockSomeone")}</h2>
 					<p className="text-muted-foreground text-sm">{t("owner.blacklistBody")}</p>
@@ -73,7 +69,6 @@ export function BlacklistTab(): React.JSX.Element {
 					<Field htmlFor="blacklist-reason" label={t("owner.reasonOptional")}>
 						<input
 							id="blacklist-reason"
-							// With the ID already filled in, the reason is the one thing left to type.
 							autoFocus={prefilled !== null}
 							value={reason}
 							autoComplete="off"

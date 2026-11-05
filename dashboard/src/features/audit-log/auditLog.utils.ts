@@ -8,14 +8,12 @@ import {
 } from "@testify/shared";
 import { type TFunction } from "i18next";
 
-/** How much of one group is ticked, which is what the group's own checkbox has to show. */
 export type GroupState = "none" | "some" | "all";
 
 export function draftFrom(config: AuditLogConfigResponse): AuditLogPut {
 	return { enabled: config.enabled, channelId: config.channelId, events: config.events };
 }
 
-/** Selections are kept in `AUDIT_EVENTS` order, so the saved list and the rendered list never disagree. */
 function ordered(events: Iterable<AuditEvent>): AuditEvent[] {
 	const chosen = new Set(events);
 	return AUDIT_EVENTS.filter((event) => chosen.has(event));
@@ -39,11 +37,21 @@ export function groupState(events: AuditEvent[], group: AuditGroup): GroupState 
 	return chosen === inGroup.length ? "all" : "some";
 }
 
-/** Why Save is unavailable, in the words shown beside it, so nobody discovers it after pressing the button. */
 export function saveBlocked(draft: AuditLogPut, t: TFunction): string | null {
 	if (!draft.enabled) return null;
 	if (draft.channelId === null) return t("auditLog.pickChannel");
 	if (draft.events.length === 0) return t("auditLog.pickEvent");
 
 	return null;
+}
+
+export function auditSummary(
+	saved: Pick<AuditLogPut, "enabled" | "channelId" | "events">,
+	channel: string,
+	t: TFunction,
+): string {
+	if (!saved.enabled || saved.channelId === null || saved.events.length === 0) return t("auditLog.summaryOff");
+	return saved.events.length === AUDIT_EVENTS.length
+		? t("auditLog.summaryAll", { channel })
+		: t("auditLog.summarySome", { count: saved.events.length, channel });
 }

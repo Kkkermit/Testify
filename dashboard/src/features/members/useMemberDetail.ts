@@ -81,7 +81,6 @@ export function useMemberRoles(guildId: string, userId: string, enabled: boolean
 	});
 }
 
-/** The page's role badges come from the member, so both are read again once the roles land. */
 export function useSetMemberRoles(guildId: string, userId: string): UseMutationResult<MemberRoles, Error, string[]> {
 	const client = useQueryClient();
 
@@ -108,7 +107,6 @@ function useMemberMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (detail) => {
-			// A whole-document answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, detail);
 		},
 		onSettled: () => {

@@ -1,5 +1,11 @@
 import { AuditLogEvent } from "discord.js";
-import { type AuditEntryLike, discordChange, pageChanges, readAuditWindow } from "@lib/moderation/serverChanges.util";
+import {
+	type AuditEntryLike,
+	dashboardChange,
+	discordChange,
+	pageChanges,
+	readAuditWindow,
+} from "@lib/moderation/serverChanges.util";
 import { CHANGE_LIMITS, changeMatches, changesQuery, type ServerChange } from "@testify/shared";
 
 jest.mock("@database/repositories/dashboardAuditRepository", () => ({ auditsSince: jest.fn() }));
@@ -99,6 +105,46 @@ describe("readAuditWindow", () => {
 	});
 });
 
+describe("dashboardChange", () => {
+	const record = (action: string, before: unknown, after: unknown) =>
+		dashboardChange({
+			actorId: MOD,
+			actorTag: "kate",
+			guildId: "1",
+			action,
+			summary: "Changed it",
+			before,
+			after,
+			at: new Date(NOW),
+		});
+
+	/** A record from before put-back existed kept only the fields it changed, and still offers those. */
+	it("offers a settings change back with the values it replaced, and nothing else back", () => {
+		expect(record("starboard.update", { threshold: 3 }, { threshold: 5 }).restore).toEqual({
+			action: "starboard.update",
+			put: { threshold: 3 },
+			expect: { threshold: 5 },
+		});
+		expect(record("member.kick", { userId: "1" }, undefined).restore).toBeNull();
+	});
+
+	/** A record made before commands were recorded has no source, and was made on the dashboard. */
+	it("says a command's record came from a command, and an older one from the dashboard", () => {
+		expect(record("starboard.update", {}, {}).source).toBe("dashboard");
+		expect(
+			dashboardChange({
+				actorId: MOD,
+				actorTag: "kate",
+				guildId: "1",
+				action: "x",
+				summary: "y",
+				source: "command",
+				at: new Date(NOW),
+			}).source,
+		).toBe("command");
+	});
+});
+
 describe("pageChanges", () => {
 	const change = (overrides: Partial<ServerChange>): ServerChange => ({
 		id: "x",
@@ -111,6 +157,7 @@ describe("pageChanges", () => {
 		summary: null,
 		target: "general",
 		reason: null,
+		restore: null,
 		...overrides,
 	});
 	const query = (raw: Record<string, string> = {}) => changesQuery.parse(raw);
@@ -119,9 +166,11 @@ describe("pageChanges", () => {
 		const all = [
 			change({ id: "d", source: "dashboard", kind: "settings", summary: "Turned levelling on" }),
 			change({ id: "c" }),
+			change({ id: "m", source: "command", kind: "settings", summary: "Turned the starboard on" }),
 		];
 
 		expect(pageChanges(all, query({ source: "dashboard" }), NOW).items.map((c) => c.id)).toEqual(["d"]);
+		expect(pageChanges(all, query({ source: "command" }), NOW).items.map((c) => c.id)).toEqual(["m"]);
 		expect(pageChanges(all, query({ q: "LEVELLING" }), NOW).items.map((c) => c.id)).toEqual(["d"]);
 	});
 
@@ -142,6 +191,7 @@ describe("changeMatches", () => {
 		summary: null,
 		target: "marcus",
 		reason: "Spamming",
+		restore: null,
 	};
 
 	/** A pasted ID is somebody specific, so part of one appearing in a name must not match. */

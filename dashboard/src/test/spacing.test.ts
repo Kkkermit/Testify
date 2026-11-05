@@ -2,7 +2,7 @@ import { everySource, offenders } from "./sourceFiles";
 
 /** The spacing scale from the guide's §19.6: five gaps and no others. */
 
-/** Half-steps that came in one at a time. Each is within 2px of a value already on the scale. */
+/** Half-steps, each within 2px of a value already on the scale. */
 const OFF_SCALE = /\b(?:gap|gap-x|gap-y|space-x|space-y)-(?:0\.5|1\.5|2\.5|3\.5|5|7|8|9|10|11|12)\b/;
 
 /** `p-4` on a card puts its text 8px left of every other card on the page. */

@@ -38,7 +38,6 @@ export function useOwnerGuilds(
 	return useQuery({
 		queryKey: keys.owner.guilds(page, sort, filter, search.trim()),
 		queryFn: () => api.get<Paged<OwnerGuildRow>>(`/owner/guilds?${query.toString()}`),
-		// The last page stays on screen while the next loads, so a sort or a keystroke does not flash a skeleton.
 		placeholderData: keepPreviousData,
 	});
 }
@@ -93,7 +92,6 @@ export function useGuildRuns(
 	});
 }
 
-/** The one screen worth polling; pausing stops the poll rather than freezing a snapshot, so a line cannot scroll away while it is being read. */
 export function useLogs(level: ReportedLogLevel, search: string, paused: boolean): UseQueryResult<LogFeed> {
 	const query = new URLSearchParams({ level, limit: "300" });
 	if (search.trim() !== "") query.set("q", search.trim());

@@ -67,12 +67,11 @@ export function StatusPage(): React.JSX.Element {
 		);
 	}
 
-	// With no answer at all, the bot's own API is what failed, and that is the answer.
 	if (status.data === undefined) {
 		return (
 			<>
 				{header}
-				<Card focal className="flex flex-col items-start gap-3">
+				<Card className="flex flex-col items-start gap-3">
 					<Headline level="down" text={t("status.unreachable", { name })} />
 					<p className="text-muted-foreground text-sm">{t("status.unreachableBody")}</p>
 					<Button variant="secondary" onClick={() => void status.refetch()}>
@@ -90,7 +89,7 @@ export function StatusPage(): React.JSX.Element {
 		<>
 			{header}
 
-			<Card focal className="flex flex-col gap-3">
+			<Card className="flex flex-col gap-3">
 				{/* Only the headline is live, so a poll that changes nothing but the clock is not read out. */}
 				<div aria-live="polite">
 					{stale ? (
@@ -174,7 +173,7 @@ function History({ report }: { report: StatusResponse }): React.JSX.Element {
 			<section className="flex flex-col gap-3">
 				<div className="flex flex-wrap items-baseline justify-between gap-2">
 					<h2 className={CARD_HEADING}>{t("status.lastThirtyDays")}</h2>
-					<span className="text-muted-foreground font-mono text-sm tabular-nums">
+					<span className="text-muted-foreground text-sm tabular-nums">
 						{average === null ? t("status.noData") : t("status.upFor", { share: percent(average) })}
 					</span>
 				</div>

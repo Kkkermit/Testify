@@ -11,11 +11,9 @@ const paint = painter();
 export interface Field {
 	key: string;
 	message: string;
-	/** Shown dimmed under the question, so the answer can be found without leaving the terminal. */
 	hint?: string;
 	required: boolean;
 	initial?: string;
-	/** Returns what is wrong with an answer, or null; a blank optional answer is never checked. */
 	check?: (value: string) => string | null;
 }
 
@@ -117,7 +115,6 @@ export function fields(isDev: boolean): Field[] {
 	];
 }
 
-/** Asked only when the dashboard is wanted; the session secret is generated rather than typed. */
 export function dashboardFields(isDev: boolean): Field[] {
 	return [
 		{
@@ -158,7 +155,6 @@ async function ask(list: Field[]): Promise<Record<string, string>> {
 			name: field.key,
 			message: question(field),
 			...(field.initial === undefined || field.initial === "" ? {} : { initial: field.initial }),
-			// Checked as it is typed, so a mistake is fixed there rather than after every other question.
 			validate: (raw: string) => {
 				const value = raw.trim();
 				if (value === "") return field.required ? "This one is required." : true;
@@ -176,7 +172,6 @@ function print(lines: string[]): void {
 }
 
 async function main(): Promise<void> {
-	// `--dev` writes the file `npm run dev` reads.
 	const isDev = process.argv.includes("--dev");
 	const filename = isDev ? ".env.development" : ".env";
 	const target = resolve(process.cwd(), filename);

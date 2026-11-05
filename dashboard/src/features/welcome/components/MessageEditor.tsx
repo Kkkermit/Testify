@@ -1,5 +1,5 @@
 import { WELCOME_LIMITS, WELCOME_PLACEHOLDERS, type WelcomePlaceholder } from "@testify/shared";
-import { useRef } from "react";
+import { type ReactNode, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, Warning } from "@/components/form";
 import { Button } from "@/components/primitives";
@@ -8,7 +8,6 @@ import { insertToken } from "@/features/welcome/welcome.utils";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
-/** A template held as a draft and saved on blur; the draft is the caller's, so a preview can follow it. */
 export function MessageEditor({
 	id,
 	label,
@@ -20,6 +19,7 @@ export function MessageEditor({
 	onSave,
 	max = WELCOME_LIMITS.maxMessage,
 	tokens = WELCOME_PLACEHOLDERS,
+	children,
 }: {
 	id: string;
 	label: string;
@@ -31,6 +31,7 @@ export function MessageEditor({
 	onSave: (message: string) => void;
 	max?: number;
 	tokens?: readonly WelcomePlaceholder[];
+	children?: ReactNode;
 }): React.JSX.Element {
 	const { t } = useTranslation();
 	const textarea = useRef<HTMLTextAreaElement>(null);
@@ -44,25 +45,23 @@ export function MessageEditor({
 	}
 
 	return (
-		<>
+		<Field label={label} htmlFor={id}>
+			<textarea
+				id={id}
+				ref={textarea}
+				rows={3}
+				value={draft}
+				disabled={disabled}
+				onChange={(event) => {
+					onDraft(event.target.value);
+				}}
+				onBlur={save}
+				className={cn(FIELD, "resize-y font-mono", tooLong && "border-destructive")}
+			/>
 			{/* The counter is a status, not part of the field's name, so it sits after the control. */}
-			<Field label={label} htmlFor={id}>
-				<textarea
-					id={id}
-					ref={textarea}
-					rows={3}
-					value={draft}
-					disabled={disabled}
-					onChange={(event) => {
-						onDraft(event.target.value);
-					}}
-					onBlur={save}
-					className={cn(FIELD, "resize-y font-mono", tooLong && "border-destructive")}
-				/>
-				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
-					{t("common.partOf", { part: draft.length, whole: max })}
-				</span>
-			</Field>
+			<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
+				{t("common.partOf", { part: draft.length, whole: max })}
+			</span>
 
 			<PlaceholderHelp
 				disabled={disabled}
@@ -90,6 +89,7 @@ export function MessageEditor({
 					</Button>
 				</div>
 			)}
-		</>
+			{children}
+		</Field>
 	);
 }

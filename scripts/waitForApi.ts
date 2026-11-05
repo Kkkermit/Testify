@@ -31,7 +31,6 @@ export function readDashboardEnv(source: Record<string, string | undefined>): Da
 	const port = Number(source.DASHBOARD_PORT);
 
 	return {
-		// The website is on unless it says exactly false, and either one starts the API.
 		enabled: source.DASHBOARD_ENABLED === "true" || source.SITE_ENABLED !== "false",
 		port: Number.isInteger(port) && port > 0 && port <= 65_535 ? port : 3_000,
 	};
@@ -49,7 +48,6 @@ async function answering(url: string): Promise<boolean> {
 	try {
 		return (await fetch(url, { signal: AbortSignal.timeout(2_000) })).ok;
 	} catch {
-		// Refused, reset or timed out: the bot is still starting, which is the case this script exists for.
 		return false;
 	}
 }

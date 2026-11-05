@@ -6,7 +6,6 @@ import { canReroll } from "@/features/giveaways/giveaways.utils";
 import { channelLabel } from "@/lib/channels";
 import { dateAndTime, since } from "@/lib/datetime";
 
-/** One giveaway, with its actions beside it — the reason this screen exists is that Discord asks for a message id. */
 export function GiveawayRow({
 	row,
 	channels,
@@ -52,7 +51,7 @@ export function GiveawayRow({
 						<dd className="text-foreground">
 							{row.winners.length === 0
 								? t("giveaways.nobodyEntered")
-								: row.winners.map((winner) => winner.tag ?? winner.id).join(", ")}
+								: row.winners.map((winner) => winner.tag ?? winner.id).join(t("common.listSeparator"))}
 						</dd>
 					</div>
 				)}

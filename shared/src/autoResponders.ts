@@ -2,14 +2,11 @@ import { z } from "zod";
 import { type Problem, problem } from "./problems";
 import { plainLine, plainText } from "./text";
 
-/** A server's own trigger words, each answered with a reply somebody wrote. Neither ever pings anybody. */
-
 export const AUTO_RESPONDER_LIMITS = {
 	maxTrigger: 100,
 	maxReply: 2_000,
 	/** Discord lists them in one select menu, which holds 25. */
 	maxPerGuild: 25,
-	/** How long one responder waits before answering in the same channel again. */
 	answerEverySeconds: 10,
 } as const;
 
@@ -47,7 +44,6 @@ export function triggerKey(trigger: string): string {
 	return trigger.normalize("NFKC").toLowerCase().trim().replace(/\s+/g, " ");
 }
 
-/** Why a responder cannot be saved, as the form and the bot both say it; `others` excludes the one being edited. */
 export function autoResponderBlocked(
 	entry: { trigger: string; reply: string },
 	others: readonly Pick<AutoResponder, "trigger">[],

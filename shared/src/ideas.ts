@@ -2,8 +2,6 @@ import { z } from "zod";
 import { pagination, snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/** A server's own idea board, which is not `/suggest`: that one goes to the bot's developers. */
-
 export const IDEA_LIMITS = {
 	maxText: 1_000,
 	maxReason: 500,
@@ -17,7 +15,7 @@ export type IdeaStatus = (typeof IDEA_STATUSES)[number];
 export interface IdeaSettings {
 	enabled: boolean;
 	channelId: string | null;
-	/** False when the bot cannot post in the channel, so a board that will never appear says so. */
+	/** False when the bot cannot post in the channel. */
 	canSend: boolean;
 	counts: Record<IdeaStatus, number>;
 }
@@ -35,7 +33,6 @@ export interface IdeaRow {
 	up: number;
 	down: number;
 	createdAt: string;
-	/** A link to the post, while there is one. */
 	messageUrl: string | null;
 }
 
@@ -48,7 +45,6 @@ export const ideaSettingsPatch = z
 
 export type IdeaSettingsPatch = z.infer<typeof ideaSettingsPatch>;
 
-/** Reopening is a decision too, which is how a mistaken accept is undone. */
 export const ideaDecision = z.object({
 	status: z.enum(IDEA_STATUSES),
 	reason: plainText(0, IDEA_LIMITS.maxReason),

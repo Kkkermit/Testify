@@ -2,7 +2,6 @@ import { SETTINGS_LIMITS } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { formatNumber } from "@/lib/intl";
 
-/** The three rules the API enforces: whitespace matches every message, a space inside can never be typed, and `/` collides with Discord's own. */
 export function prefixProblem(value: string, t: TFunction): string | null {
 	const trimmed = value.trim();
 
@@ -16,7 +15,6 @@ export function prefixProblem(value: string, t: TFunction): string | null {
 	return null;
 }
 
-/** A typed number out of an input can be anything, including nothing. */
 export function countCapProblem(value: string, t: TFunction): string | null {
 	const parsed = Number(value);
 
@@ -28,7 +26,6 @@ export function countCapProblem(value: string, t: TFunction): string | null {
 	return null;
 }
 
-/** How far through the count a server is, for the progress readout. */
 export function countProgress(count: number, maxCount: number): number {
 	if (maxCount <= 0) return 0;
 	return Math.min(100, Math.round((count / maxCount) * 100));

@@ -12,7 +12,6 @@ import {
 	useItem,
 } from "@lib/economy";
 
-/** Using an item, and moving between the economy panels. */
 export default defineButton({
 	id: INVENTORY_PANEL_ID,
 	ownerOnly: true,

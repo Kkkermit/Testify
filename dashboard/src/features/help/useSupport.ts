@@ -4,12 +4,10 @@ import { useMemo } from "react";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** The articles never change while the bot runs, so one read lasts the session. */
 function useSupportIndex(): UseQueryResult<SupportIndex> {
 	return useQuery({ queryKey: keys.support(), queryFn: () => api.get<SupportIndex>("/support"), staleTime: Infinity });
 }
 
-/** The same search the bot answers with, run in the browser, so a suggestion appears on every keystroke without a request. */
 export function useSupportSearch(): {
 	entries: SupportCatalogueEntry[];
 	search: SupportSearch<SupportCatalogueEntry> | null;

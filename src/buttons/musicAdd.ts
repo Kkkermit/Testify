@@ -6,8 +6,6 @@ import { UserFacingError } from "@core/errors";
 import { modalForm, successEmbed } from "@lib/discord";
 import { findSession, MUSIC_ADD_ID, queueRequest, requestedQuery, sameChannelAs, voiceChannelOf } from "@lib/music";
 
-/** The player's Add to queue button: anybody the music system lets in may add a song, not only the panel's owner. */
-
 const QUERY_FIELD = "query";
 
 /** Re-checked on the submit as well, because a form can sit open while a role or a switch changes. */
@@ -70,7 +68,6 @@ export default defineButton({
 			textChannelId: interaction.channelId,
 		});
 
-		// The panel everybody is watching shows the addition, not only the person who made it.
 		await session.refreshPanel();
 		await interaction.editReply({ embeds: [successEmbed(note)] });
 	},

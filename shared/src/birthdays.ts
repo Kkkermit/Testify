@@ -2,11 +2,8 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/** Birthdays a member chose to share with one server: the day and the month, never the year. */
-
 export const BIRTHDAY_LIMITS = {
 	maxMessage: 500,
-	/** How many upcoming birthdays the dashboard and `/birthday list` show. */
 	upcoming: 25,
 } as const;
 
@@ -54,7 +51,6 @@ export interface UpcomingBirthday {
 }
 
 export interface BirthdayOverview extends BirthdaySettings {
-	/** How many members have shared their birthday here. */
 	shared: number;
 	upcoming: UpcomingBirthday[];
 }

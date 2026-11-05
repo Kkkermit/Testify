@@ -2,7 +2,6 @@ import { Search } from "lucide-react";
 import { FIELD } from "@/components/form/fieldStyles";
 import { cn } from "@/lib/cn";
 
-/** The label is `sr-only` rather than absent, because a placeholder stops naming the box once somebody types. */
 export function SearchField({
 	label,
 	placeholder,

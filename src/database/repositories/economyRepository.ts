@@ -4,11 +4,8 @@ import { strings } from "@config/strings";
 import { UserFacingError } from "@core/errors";
 import { Economy, type EconomyAccount, type InventoryItem } from "@database/models/economy.schema";
 
-/** The only place economy queries live. */
-
 const LEAN = { lean: true as const, new: true as const };
 
-/** Fetches the account, creating it on first use. */
 export async function getOrCreateAccount(guildId: string, userId: string): Promise<EconomyAccount> {
 	return Economy.findOneAndUpdate(
 		{ guildId, userId },
@@ -17,7 +14,6 @@ export async function getOrCreateAccount(guildId: string, userId: string): Promi
 	).exec() as Promise<EconomyAccount>;
 }
 
-/** Reads without creating. */
 export async function findAccount(guildId: string, userId: string): Promise<EconomyAccount | null> {
 	return Economy.findOne({ guildId, userId }).lean<EconomyAccount>().exec();
 }
@@ -74,7 +70,6 @@ async function debitBank(guildId: string, userId: string, amount: number): Promi
 		.exec();
 }
 
-/** Wallet → bank. */
 export async function deposit(guildId: string, userId: string, amount: number): Promise<EconomyAccount | null> {
 	const debited = await debitWallet(guildId, userId, amount);
 	if (!debited) return null;

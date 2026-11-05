@@ -139,7 +139,6 @@ describe("adding to the blacklist", () => {
 		expect(addToBlacklist).toHaveBeenCalledWith(TARGET, "No reason provided");
 	});
 
-	/** No owner may blacklist another owner. */
 	it("refuses to blacklist a bot owner", async () => {
 		const response = await send("", { method: "POST", body: { userId: OWNER, reason: "oops" } });
 

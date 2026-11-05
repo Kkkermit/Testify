@@ -4,7 +4,6 @@ import { reply, successEmbed } from "@lib/discord";
 import { IDEA_COMMAND, ideaLink, ideaSettingsPanel, readIdeaSettings, submitIdea } from "@lib/ideas";
 import { IDEA_LIMITS } from "@testify/shared";
 
-/** The server's own idea board: members post and vote, and staff decide. `/suggest` is the bot's developers' instead. */
 export default defineCommand({
 	name: IDEA_COMMAND,
 	description: "Posts an idea for this server, for members to vote on.",

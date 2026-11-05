@@ -5,7 +5,6 @@ import { UserFacingError } from "@core/errors";
 import { findRoleMenu } from "@database/repositories/roleMenuRepository";
 import { applyRolePicks, offeredRoles, pickNote, ROLE_MENU_ID, roleMenuPicker } from "@lib/roles";
 
-/** The public post's button and the private menu it opens; anybody in the server may press them. */
 export default defineButton({
 	id: ROLE_MENU_ID,
 

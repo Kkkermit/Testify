@@ -12,7 +12,6 @@ const CONGRATULATIONS = [
 	"{user} levelled up to **{level}**!",
 ];
 
-/** XP is awarded once per cooldown window through an atomic update. */
 export default defineMessageHandler({
 	name: "levelling",
 	order: 40,

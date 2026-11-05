@@ -10,7 +10,6 @@ import { formatBytes, nameOf, readmeIn, sourceRoute, type TreeIndex } from "@/fe
 import { useSourceFile } from "@/features/source/useSource";
 import { cn } from "@/lib/cn";
 
-/** A folder's contents, folders first, and its README under them as GitHub would show it. */
 export function FolderView({ index, folder }: { index: TreeIndex; folder: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const readme = readmeIn(index, folder);
@@ -35,9 +34,7 @@ export function FolderView({ index, folder }: { index: TreeIndex; folder: string
 								)}
 								<span className="min-w-0 flex-1 truncate">{nameOf(entry.path)}</span>
 								{entry.size !== null && (
-									<span className="text-muted-foreground shrink-0 font-mono text-xs tabular-nums">
-										{formatBytes(entry.size)}
-									</span>
+									<span className="text-muted-foreground shrink-0 text-xs tabular-nums">{formatBytes(entry.size)}</span>
 								)}
 							</Link>
 						</li>
@@ -62,7 +59,6 @@ function Readme({ path }: { path: string }): React.JSX.Element | null {
 		return text === null || text === undefined ? null : prepareDoc([{ file: path, markdown: text }]);
 	}, [file.data, path]);
 
-	// The listing above still links to it, so a README that will not load is simply not shown.
 	if (file.isError) return null;
 	if (doc === null) return <Skeleton className="h-40 w-full" />;
 

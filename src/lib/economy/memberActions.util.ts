@@ -28,7 +28,7 @@ import { type RewardOutcome } from "@lib/levelling/levelling.types";
 import { normaliseSettings } from "@lib/levelling/levelling.util";
 import { applyLevelRewards } from "@lib/levelling/levellingActions.util";
 import { recordCase } from "@lib/moderation/caseActions.util";
-import { moderationProblem } from "@lib/moderation/moderationActions.util";
+import { blockText, moderationProblem } from "@lib/moderation/moderationActions.util";
 import { type Moderator } from "@lib/moderation/sanctions.util";
 import {
 	BOARD_PAGE_SIZE,
@@ -133,10 +133,7 @@ export async function standingOnBoard(
 	return standing === null ? null : { rank: standing.rank, entry: moneyEntry(standing, view.sort) };
 }
 
-/**
- * Names and avatars come from one bulk member fetch; on the bot-wide board, somebody who was never in this server is
- * named from their Discord profile instead.
- */
+/** Names and avatars come from one bulk member fetch, and somebody never in this server from their Discord profile. */
 export async function decorateRows(
 	guild: Guild,
 	entries: BoardEntry[],
@@ -269,7 +266,7 @@ export async function readMemberDetail(options: {
 			member === null
 				? "They are no longer in this server."
 				: moderator === null
-					? "Only somebody in this server can moderate its members."
+					? blockText("notMember")
 					: moderationProblem(moderator, member, botId),
 	};
 }

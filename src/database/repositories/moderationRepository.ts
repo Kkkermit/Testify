@@ -83,6 +83,16 @@ export async function listGuildWarnings(guildId: string): Promise<WarnRecord[]> 
 		.exec();
 }
 
+/** How many warnings each warned member of a server has. */
+export async function warningCounts(guildId: string): Promise<Map<string, number>> {
+	const rows = await Warnings.aggregate<{ _id: string; count: number }>([
+		{ $match: { guildId, "warnings.0": { $exists: true } } },
+		{ $project: { _id: "$userId", count: { $size: "$warnings" } } },
+	]).exec();
+
+	return new Map(rows.map((row) => [row._id, row.count]));
+}
+
 export async function countWarnings(guildId: string, userId: string): Promise<number> {
 	return (await getWarnings(guildId, userId))?.warnings.length ?? 0;
 }

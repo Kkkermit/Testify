@@ -1,8 +1,30 @@
 import { DEFAULT_BOT_NAME } from "@testify/shared";
 
 const STORAGE_KEY = "testify:botName";
+const LOOK_KEY = "testify:botLook";
 
-/** The name the bot last reported, so a returning visitor sees it before `/api/bot` has answered. */
+export interface BotLook {
+	name: string | null;
+	avatarUrl: string | null;
+	bannerUrl: string | null;
+	accentColour: string | null;
+}
+
+/** Only Discord's own CDN, because what comes back out of storage is whatever was last written there. */
+function cdnUrl(value: unknown): string | null {
+	if (typeof value !== "string") return null;
+	try {
+		const url = new URL(value);
+		return url.protocol === "https:" && url.hostname === "cdn.discordapp.com" ? url.href : null;
+	} catch {
+		return null;
+	}
+}
+
+function hexColour(value: unknown): string | null {
+	return typeof value === "string" && /^#[0-9a-f]{6}$/i.test(value) ? value : null;
+}
+
 export function rememberedBotName(): string | null {
 	try {
 		const name = localStorage.getItem(STORAGE_KEY);
@@ -20,10 +42,44 @@ export function rememberBotName(name: string): void {
 	}
 }
 
-/** What to call the bot before `/api/bot` has answered: the name it last gave, else the built-in one. */
+export function rememberedBotLook(): BotLook {
+	let stored: Record<string, unknown> = {};
+	try {
+		const parsed: unknown = JSON.parse(localStorage.getItem(LOOK_KEY) ?? "null");
+		if (typeof parsed === "object" && parsed !== null) stored = parsed as Record<string, unknown>;
+	} catch {
+		// Unreadable storage is the same as none.
+	}
+
+	return {
+		name: rememberedBotName(),
+		avatarUrl: cdnUrl(stored.avatarUrl),
+		bannerUrl: cdnUrl(stored.bannerUrl),
+		accentColour: hexColour(stored.accentColour),
+	};
+}
+
+export function rememberBotLook(look: Omit<BotLook, "name">): void {
+	try {
+		localStorage.setItem(
+			LOOK_KEY,
+			JSON.stringify({ avatarUrl: look.avatarUrl, bannerUrl: look.bannerUrl, accentColour: look.accentColour }),
+		);
+	} catch {
+		// A browser that refuses storage shows the picture once `/api/bot` answers instead.
+	}
+}
+
+export function showBotIcon(url: string, doc: Document = document): void {
+	for (const link of doc.head.querySelectorAll<HTMLLinkElement>('link[rel="icon"]')) {
+		link.removeAttribute("type");
+		link.removeAttribute("sizes");
+		link.href = url;
+	}
+}
+
 export const BUILT_IN_BOT_NAME: string = rememberedBotName() ?? DEFAULT_BOT_NAME;
 
-/** The label a phone suggests for a home-screen shortcut, which is otherwise the page title of whichever screen is open. */
 export function nameHomeScreen(name: string, doc: Document = document): void {
 	for (const key of ["apple-mobile-web-app-title", "application-name"]) {
 		let meta = doc.head.querySelector<HTMLMetaElement>(`meta[name="${key}"]`);

@@ -485,10 +485,7 @@ export class MusicSession {
 		}
 	}
 
-	/**
-	 * The panel for a message: the card is uploaded with the first message that shows a track and referred to by its
-	 * address after that, so a refresh every few seconds never sends the picture again.
-	 */
+	/** The card is uploaded with the first message that shows a track, and referred to by its address after that. */
 	async panelMessage(userId: string, note?: string, page = 0): Promise<PanelMessage> {
 		const state: PanelState = {
 			queue: this.queue,
@@ -596,7 +593,7 @@ export class MusicSession {
 	}
 }
 
-/** Live voice sessions, one per guild. Process state by necessity: a connection cannot live in a database. */
+/** Live voice sessions, one per guild, held in memory because a connection cannot live in a database. */
 const sessions = new Map<string, MusicSession>();
 
 export function sessionFor(guild: Guild, binaries: MusicBinaries, logger: Logger): MusicSession {

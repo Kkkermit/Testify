@@ -1,8 +1,6 @@
 name: Nightly
 
-# Dependency scanning belongs on a schedule rather than on every commit: it is
-# slow, it depends on third-party APIs, and a CVE published overnight should be
-# found without waiting for someone to push.
+# Dependency scanning runs on a schedule, so an advisory published overnight is found without a push.
 on:
   schedule:
     # Off the hour: GitHub delays and can drop scheduled runs at the start of an hour, when its queue is busiest.
@@ -65,16 +63,14 @@ jobs:
 
       - run: npm ci
 
-      # The same script CI runs, so there is one definition of what an audit means here. It reads .nsprc,
-      # where every suppression carries a reason and an expiry.
+      # The same script CI runs, which reads .nsprc.
       - name: Audit
         run: npm run audit
 
   snyk:
     name: Snyk
     runs-on: ubuntu-latest
-    # A Snyk token quota or an org permission change must not fail the pipeline
-    # and raise a false alarm about this repository's dependencies.
+    # A Snyk quota or permission change must not raise a false alarm about this repository.
     continue-on-error: true
     # A secret cannot be read in `if:` directly, so it is lifted into the job's environment first.
     env:

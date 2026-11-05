@@ -6,7 +6,6 @@ export function filterGuilds(guilds: ManageableGuild[], search: string): Managea
 	return term === "" ? guilds : guilds.filter((guild) => guild.name.toLowerCase().includes(term));
 }
 
-/** Ten to a section, so a manager of dozens of servers reaches the next heading without scrolling past them all. */
 export const GUILDS_PER_PAGE = 10;
 
 /** Autofocus costs a phone its list and a screen reader its heading, so only a long list earns it. */
@@ -49,7 +48,6 @@ const GROUPS: {
 	},
 ];
 
-/** Three states: the bot is in it, you could invite it, or you could not. Empty groups are dropped. */
 export function groupGuilds(guilds: ManageableGuild[]): GuildGroup[] {
 	return GROUPS.map(({ holds, ...group }) => ({ ...group, guilds: guilds.filter(holds) })).filter(
 		(group) => group.guilds.length > 0,

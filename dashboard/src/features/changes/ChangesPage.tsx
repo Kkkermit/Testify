@@ -30,7 +30,7 @@ export function ChangesPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("changes.title")} subtitle={t("changes.subtitle")} />
+			<PageHeader server={overview.data} title={t("changes.title")} subtitle={t("changes.subtitle")} />
 
 			<Card className="flex flex-col gap-4">
 				<Field label={t("changes.searchLabel")} hint={t("changes.searchHint")} htmlFor="changes-search">
@@ -91,10 +91,12 @@ export function ChangesPage(): React.JSX.Element {
 					{changes.data.moderationWithheld && (
 						<Warning>{t("changes.moderationWithheld", { permission: permissionLabel("ModerateMembers", t) })}</Warning>
 					)}
-					<p className="text-muted-foreground text-sm" aria-live="polite">
-						{t("changes.count", { count: changes.data.total })}
-						{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
-					</p>
+					<div className="text-muted-foreground flex flex-col gap-1 text-sm">
+						<p aria-live="polite">
+							{t("changes.count", { count: changes.data.total })}
+							{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
+						</p>
+					</div>
 					{changes.data.items.length === 0 ? (
 						<Card>
 							<p className="text-sm">{searched === "" ? t("changes.none") : t("changes.noMatch")}</p>

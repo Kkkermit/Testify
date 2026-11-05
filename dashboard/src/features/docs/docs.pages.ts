@@ -1,8 +1,6 @@
 import { headingName } from "@/features/docs/markdown.utils";
 import { type TranslationKey } from "@/i18n";
 
-/** The docs as data: every page names the file it is read from, so it cannot describe a bot that is no longer there. */
-
 export const DOC_FILES = [
 	"README.md",
 	"AGENTS.md",
@@ -16,7 +14,6 @@ export const DOC_FILES = [
 
 export type DocFile = (typeof DOC_FILES)[number];
 
-/** Each file is its own chunk, so a page downloads only what it shows. */
 export const LOADERS: Record<DocFile, () => Promise<string>> = {
 	"README.md": async () => (await import("@repo/README.md?raw")).default,
 	"AGENTS.md": async () => (await import("@repo/AGENTS.md?raw")).default,
@@ -44,18 +41,15 @@ interface PageBase {
 	summaryKey: TranslationKey;
 }
 
-/** A page of Markdown: whole files, or named sections of one, shown in the order listed. */
 export interface MarkdownPage extends PageBase {
 	kind: "markdown";
 	sources: readonly { file: DocFile; sections?: readonly string[] }[];
 }
 
-/** Every environment variable, read out of `.env.example`. */
 export interface ConfigurationPage extends PageBase {
 	kind: "configuration";
 }
 
-/** The help articles `/ask` answers with, filled in by the bot for its own prefix and limits. */
 export interface GuidesPage extends PageBase {
 	kind: "guides";
 }
@@ -235,7 +229,6 @@ export function docPage(slug: string | undefined): DocPage | undefined {
 	return DOC_PAGES.find((page) => page.slug === slug);
 }
 
-/** The page that shows a whole file, for a link written to that file. */
 export const PAGES_BY_FILE: Readonly<Record<string, string>> = Object.fromEntries(
 	DOC_PAGES.flatMap((page) =>
 		page.kind === "markdown"
@@ -244,7 +237,6 @@ export const PAGES_BY_FILE: Readonly<Record<string, string>> = Object.fromEntrie
 	),
 );
 
-/** The page that shows one section, for a link written to that section's anchor. */
 export const PAGES_BY_SECTION: Readonly<Record<string, string>> = Object.fromEntries(
 	DOC_PAGES.flatMap((page) =>
 		page.kind === "markdown"

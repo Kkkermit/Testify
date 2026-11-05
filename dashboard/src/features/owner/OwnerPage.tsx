@@ -15,11 +15,9 @@ import { RuntimeTab } from "@/features/owner/tabs/RuntimeTab";
 import { UsageTab } from "@/features/owner/tabs/UsageTab";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/** Each tab fetches its own data, so a failing endpoint takes out one tab rather than the console. */
 export function OwnerPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("owner.title"));
-	// In the URL, so a link to the usage tab is a link to the usage tab and Back works.
 	const [params, setParams] = useSearchParams();
 	const tab = ownerTabFrom(params.get("tab"));
 

@@ -4,6 +4,7 @@ import { UserFacingError } from "@core/errors";
 import { applyStarboardSettings, readStarboardSettings } from "@lib/starboard";
 import { type StarboardSettings } from "@testify/shared";
 
+jest.mock("@lib/settings/settingsReaders.util", () => ({ SETTING_READERS: {} }));
 jest.mock("@lib/starboard", () => ({
 	...jest.requireActual<object>("@lib/starboard"),
 	applyStarboardSettings: jest.fn(),

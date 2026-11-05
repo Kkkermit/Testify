@@ -167,7 +167,6 @@ describe("the voice counter panel", () => {
 		expect(textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER))).toMatch(/rate-limit/i);
 	});
 
-	/** The report that prompted this: two identical menus with no way to tell them apart. */
 	it("labels which counter each menu changes", () => {
 		const rendered = textOf(voiceStatsPanel({ memberChannelId: CHANNEL, botChannelId: null }, OWNER));
 

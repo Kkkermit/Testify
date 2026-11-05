@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import { PageHeader, Skeleton } from "@/components/primitives";
+import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { LevelCard } from "@/features/members/components/LevelCard";
@@ -16,7 +16,7 @@ import { SanctionCard } from "@/features/members/components/SanctionCard";
 import { SoftbanCard } from "@/features/members/components/SoftbanCard";
 import { TimeoutCard } from "@/features/members/components/TimeoutCard";
 import { WarningsCard } from "@/features/members/components/WarningsCard";
-import { softbanActive } from "@/features/members/memberDetail.utils";
+import { memberSummary, softbanActive } from "@/features/members/memberDetail.utils";
 import { useMemberActions } from "@/features/members/useMemberActions";
 import { outcomeText } from "@/features/warnings/warnings.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -32,7 +32,7 @@ export function MemberDetailPage(): React.JSX.Element {
 	const { member, warn, edit, remove, clear, money, level, lift, kick, ban, busy, failure } = actions;
 	const [result, setResult] = useState<string | null>(null);
 
-	usePageTitle(member.data?.displayName ?? "Member", overview.data?.name);
+	usePageTitle(member.data?.displayName ?? t("members.member"), overview.data?.name);
 
 	if (member.isError) return <ErrorState error={member.error} onRetry={() => void member.refetch()} />;
 	if (member.data === undefined) return <Skeleton className="h-96 w-full" />;
@@ -43,7 +43,7 @@ export function MemberDetailPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={detail.displayName}
 				subtitle={`@${detail.username}`}
 				action={<SavingIndicator state={savingStateOf(busy, warn.isSuccess || edit.isSuccess)} />}
@@ -54,8 +54,10 @@ export function MemberDetailPage(): React.JSX.Element {
 				to={`/guilds/${guildId}/members`}
 				className={cn(INLINE_TARGET, "text-muted-foreground hover:text-foreground -mt-3 w-fit gap-1 text-sm")}
 			>
-				<ArrowLeft size={16} aria-hidden="true" /> {t("members.backToLeaderboards")}
+				<ArrowLeft size={16} aria-hidden="true" /> {t("members.backToMembers")}
 			</Link>
+
+			<Summary>{memberSummary(detail, t)}</Summary>
 
 			<MemberIdentity detail={detail} />
 			<MemberStanding detail={detail} />
@@ -71,7 +73,7 @@ export function MemberDetailPage(): React.JSX.Element {
 			)}
 
 			{canModerate && (
-				<div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+				<>
 					<MoneyCard
 						detail={detail}
 						busy={busy}
@@ -86,12 +88,12 @@ export function MemberDetailPage(): React.JSX.Element {
 							level.mutate(body);
 						}}
 					/>
-				</div>
+				</>
 			)}
 
 			{/* Roles are judged role by role rather than by who outranks whom, so they stay when the rest cannot. */}
 			{canModerate ? (
-				<div className="grid gap-6 lg:grid-cols-2 lg:items-start">
+				<>
 					<NicknameCard
 						key={detail.nickname ?? ""}
 						detail={detail}
@@ -101,7 +103,7 @@ export function MemberDetailPage(): React.JSX.Element {
 						}}
 					/>
 					<RolesCard guildId={guildId} userId={userId} />
-				</div>
+				</>
 			) : (
 				detail.inGuild && <RolesCard guildId={guildId} userId={userId} />
 			)}

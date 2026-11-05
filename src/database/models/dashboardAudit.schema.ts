@@ -9,6 +9,8 @@ export interface DashboardAudit {
 	summary: string;
 	before?: unknown;
 	after?: unknown;
+	/** Set only for a setting changed with a command in Discord; absent is the dashboard, as every older record is. */
+	source?: "command";
 	at: Date;
 }
 
@@ -20,6 +22,7 @@ const auditSchema = new Schema<DashboardAudit>({
 	summary: { type: String, required: true },
 	before: { type: Schema.Types.Mixed, default: undefined },
 	after: { type: Schema.Types.Mixed, default: undefined },
+	source: { type: String, enum: ["command"], default: undefined },
 	at: { type: Date, required: true, default: Date.now },
 });
 

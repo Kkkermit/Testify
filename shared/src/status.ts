@@ -1,5 +1,3 @@
-/** The status page's contract: what the bot reports about its own health, and where "slow" starts. */
-
 export const STATUS_LEVELS = ["operational", "degraded", "down", "unknown"] as const;
 
 export type StatusLevel = (typeof STATUS_LEVELS)[number];
@@ -89,7 +87,6 @@ export interface StatusBucket {
 
 export interface StatusResponse {
 	level: StatusLevel;
-	/** The running bot's own `package.json` version. */
 	version: string;
 	checkedAt: string;
 	startedAt: string;

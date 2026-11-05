@@ -75,7 +75,7 @@ describe("ladderOf", () => {
 describe("issueWarning", () => {
 	const moderator = { id: "100000000000000001", tag: "mod" };
 
-	/** The example asked for: a second warning mutes for ten minutes. */
+	/** A second warning mutes for ten minutes. */
 	it("carries out the step the warning's number lands on", async () => {
 		steps({ action: "warn" }, { action: "timeout", minutes: 10 }, { action: "kick" }, { action: "ban" });
 		counted.mockResolvedValue(2);

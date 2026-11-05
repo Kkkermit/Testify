@@ -1,7 +1,6 @@
 import { type EmbedColour } from "@testify/shared";
 import { type TranslationKey } from "@/i18n";
 
-/** The colours by value, since the shared list names them in the English the bot's own choices use. */
 export const COLOUR_LABELS: Record<EmbedColour, TranslationKey> = {
 	"#00ffff": "announcements.colourAqua",
 	"#7289da": "announcements.colourBlurple",

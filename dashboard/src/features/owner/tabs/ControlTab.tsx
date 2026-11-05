@@ -27,7 +27,6 @@ const SOURCE_LABELS: Record<MusicSourceChoice, { label: TranslationKey; hint: Tr
 	soundcloud: { label: "owner.sourceSoundcloud", hint: "owner.sourceSoundcloudHint" },
 };
 
-/** Its own read, so a failure here leaves the rest of the tab working. */
 function MusicSourcesCard(): React.JSX.Element {
 	const { t } = useTranslation();
 	const setting = useMusicSources();
@@ -72,7 +71,6 @@ function MusicSourcesCard(): React.JSX.Element {
 	);
 }
 
-/** There is no Start: this API is served by the bot process, so a stopped bot has nothing left to answer with. */
 export function ControlTab(): React.JSX.Element {
 	const { t } = useTranslation();
 	const control = useBotControl();
@@ -85,7 +83,6 @@ export function ControlTab(): React.JSX.Element {
 	const [confirm, setConfirm] = useState("");
 
 	if (control.isPending) return <Skeleton className="h-64 w-full" />;
-	// Without this the tab sits on a skeleton for ever, which reads as still loading rather than as failed.
 	if (control.data === undefined)
 		return <ErrorState as="h2" error={control.error} onRetry={() => void control.refetch()} />;
 
@@ -109,11 +106,11 @@ export function ControlTab(): React.JSX.Element {
 				<dl className="text-muted-foreground flex flex-wrap gap-x-6 gap-y-1 text-sm">
 					<div className="flex gap-2">
 						<dt>{t("owner.servers")}</dt>
-						<dd className="text-foreground font-mono tabular-nums">{state.guilds}</dd>
+						<dd className="text-foreground tabular-nums">{state.guilds}</dd>
 					</div>
 					<div className="flex gap-2">
 						<dt>{t("owner.gatewayPing")}</dt>
-						<dd className="text-foreground font-mono tabular-nums">
+						<dd className="text-foreground tabular-nums">
 							{state.pingMs === null ? "—" : formatUnit(state.pingMs, "millisecond")}
 						</dd>
 					</div>

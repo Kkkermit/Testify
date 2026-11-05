@@ -3,18 +3,12 @@ import { join } from "node:path";
 import type { GlobalConfig } from "jest";
 import { MongoMemoryServer } from "mongodb-memory-server";
 
-/**
- * One in-memory MongoDB for the run, started before suites are built so `describeWithMongo` can decide synchronously;
- * the handle is on `globalThis` because teardown loads in a separate registry.
- */
+/** One in-memory MongoDB for the run, started before suites are built so `describeWithMongo` can decide synchronously. */
 const HANDLE = Symbol.for("testify.test.mongo");
 
 type Holder = typeof globalThis & { [HANDLE]?: MongoMemoryServer };
 
-/**
- * Every worker's collections and indexes, built before the first suite: on a busy Windows runner, building them while
- * other workers ran tests stalled the shared server past a test's budget.
- */
+/** Every worker's collections and indexes, built before the first suite, since building them mid-run stalled the shared server. */
 async function buildWorkerDatabases(uri: string, workers: number): Promise<void> {
 	const builder = join(__dirname, "buildTestDatabases.ts");
 	const child = spawn(process.execPath, [require.resolve("tsx/cli"), builder, uri, String(workers)], {

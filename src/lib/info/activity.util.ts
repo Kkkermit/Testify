@@ -48,6 +48,11 @@ export class ActivityCounter {
 		return batch;
 	}
 
+	/** Drops one person's counts not yet written, for somebody who has just deleted their data. */
+	forget(userId: string): void {
+		for (const [key, member] of this.#members) if (member.userId === userId) this.#members.delete(key);
+	}
+
 	/** Puts a batch that failed to save back, so a database blip delays the counts rather than losing them. */
 	restore(batch: ActivityBatch): void {
 		for (const server of batch.servers) {

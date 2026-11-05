@@ -14,7 +14,6 @@ import { MUSIC_SYSTEM_SUBCOMMAND } from "@lib/music/music.constants";
 import { musicRefusal, normaliseMusicSettings } from "@lib/music/musicSettings.util";
 import { type CasinoGame, isAlwaysEnabled, isCasinoGame } from "@testify/shared";
 
-/** A refusal with a heading of its own, for a state that is nobody's mistake. */
 export interface TitledRefusal {
 	title: string;
 	message: string;
@@ -23,10 +22,8 @@ export interface TitledRefusal {
 	tone?: "notice" | "error";
 }
 
-/** Why a command was refused, or null if it may run. */
 export type CheckFailure = string | TitledRefusal | null;
 
-/** The refusal as plain text, for a surface that cannot show a heading. */
 export function refusalText(refusal: string | TitledRefusal): string {
 	if (typeof refusal === "string") return refusal;
 
@@ -38,7 +35,9 @@ export const OWNER_ONLY_REFUSAL = "This command is only for the bot owner. The a
 
 const cooldowns = new Map<string, number>();
 
-/** Everything that can stop a command before it runs, in one place and in order. */
+/** Deleting your own data is not something the blacklist takes away; the blacklist entry itself is never deleted. */
+const OPEN_TO_THE_BLACKLISTED: ReadonlySet<string> = new Set(["delete-my-data"]);
+
 export async function runChecks(
 	interaction: CommandInput,
 	command: Command,
@@ -53,7 +52,7 @@ export async function runChecks(
 	if (client.paused) return pausedRefusal();
 
 	const blacklisted = await findBlacklistEntry(interaction.user.id);
-	if (blacklisted) return blacklistRefusal(blacklisted);
+	if (blacklisted && !OPEN_TO_THE_BLACKLISTED.has(command.name)) return blacklistRefusal(blacklisted);
 
 	const switchedOff = await checkSwitchedOff(command.name, interaction.guildId);
 	if (switchedOff !== null) return switchedOff;
@@ -94,7 +93,6 @@ export async function runChecks(
 	return checkCooldown(interaction, command, client);
 }
 
-/** Final, so it says what the block covers, why, since when, and who can lift it. */
 export function blacklistRefusal(entry: { reason: string; createdAt: Date }): TitledRefusal {
 	const since = Math.floor(new Date(entry.createdAt).getTime() / 1_000);
 
@@ -136,10 +134,7 @@ export async function checkOpenControl(
 	return checkSwitchedOff(command, who.guildId);
 }
 
-/**
- * The gates `/play` passes, for a control that queues music without running the command — anybody may press it, so the
- * panel's owner having passed them says nothing about the person pressing.
- */
+/** The gates `/play` passes, for a control anybody may press to queue music. */
 export async function checkMusicControl(
 	client: TestifyClient,
 	who: { userId: string; guildId: string; member: CommandInput["member"] },
@@ -155,7 +150,6 @@ export async function checkMusicControl(
 	});
 }
 
-/** The gates a new casino game passes, for a button that deals one without running the command. */
 export async function checkCasinoPlay(
 	client: TestifyClient,
 	who: { userId: string; guildId: string },

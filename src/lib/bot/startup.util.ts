@@ -292,7 +292,7 @@ export function describeDatabase(uri: string): string {
 	return database === "" ? host : `${host} · ${database}`;
 }
 
-/** Discord will never accept this login after these codes, and the client would otherwise wait for ever. */
+/** Without this the client would wait for ever after a close code Discord will never accept. */
 export function exitOnFatalClose(client: Client, exit: (code: number) => void = (code) => process.exit(code)): void {
 	client.on(Events.ShardDisconnect, (event) => {
 		const failure = FATAL_CLOSE_CODES[event.code];

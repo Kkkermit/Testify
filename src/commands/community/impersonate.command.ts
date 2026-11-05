@@ -11,7 +11,6 @@ export default defineCommand({
 	category: "community",
 	private: true,
 	guildOnly: true,
-	// exist, so the gate crashed on `undefined` instead of checking anything.
 	permissions: [PermissionFlagsBits.ManageWebhooks],
 	botPermissions: [PermissionFlagsBits.ManageWebhooks],
 	cooldown: 10_000,

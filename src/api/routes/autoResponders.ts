@@ -12,7 +12,6 @@ export const autoResponders = new Hono<ApiBindings>();
 
 autoResponders.use("*", requireGuild);
 
-/** The trigger is typed text, so the audit line quotes only the start of it. */
 const quoted = (trigger: string): string => `“${trigger.length > 60 ? `${trigger.slice(0, 59)}…` : trigger}”`;
 
 async function existing(guildId: string, responderId: string): Promise<void> {
@@ -23,7 +22,6 @@ async function existing(guildId: string, responderId: string): Promise<void> {
 
 autoResponders.get("/", async (context) => context.json(await readAutoResponders(guildIdOf(context))));
 
-/** Every write answers with the whole list, so the page shows what the server holds rather than what it sent. */
 autoResponders.post("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const body = await parseBody(context, autoResponderInput);

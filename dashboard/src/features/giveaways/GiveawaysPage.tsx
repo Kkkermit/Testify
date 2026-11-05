@@ -5,13 +5,27 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	FieldGroup,
+	RowActions,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	SettingRows,
+	Warning,
+} from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
+import { useMe } from "@/features/auth/useMe";
 import { GiveawayRow } from "@/features/giveaways/components/GiveawayRow";
 import {
 	DURATION_UNITS,
 	type DurationUnit,
 	durationMsOf,
+	giveawayPost,
+	nextDraw,
 	ordered,
 	runningCount,
 } from "@/features/giveaways/giveaways.utils";
@@ -24,8 +38,11 @@ import {
 } from "@/features/giveaways/useGiveaways";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/cn";
+import { dateAndTime } from "@/lib/datetime";
 import { oneOf } from "@/lib/oneOf";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
@@ -42,6 +59,7 @@ export function GiveawaysPage(): React.JSX.Element {
 	const reroll = useRerollGiveaway(guildId);
 	const remove = useDeleteGiveaway(guildId);
 	const undo = useUndo();
+	const me = useMe();
 
 	const [channelId, setChannelId] = useState<string | null>(null);
 	const [prize, setPrize] = useState("");
@@ -58,6 +76,8 @@ export function GiveawaysPage(): React.JSX.Element {
 	const blocked = problemText(giveawayProblem({ channelId, prize, winnerCount: winners, durationMs }), t);
 	const busy = start.isPending || end.isPending || reroll.isPending || remove.isPending;
 	const failure = start.error ?? end.error ?? reroll.error ?? remove.error;
+	const next = nextDraw(rows);
+	const post = giveawayPost({ winnerCount: winners, durationMs }, me.data?.user.username ?? null);
 
 	function create(): void {
 		if (blocked !== null || channelId === null) return;
@@ -70,104 +90,121 @@ export function GiveawaysPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("giveaways.title")}
 				subtitle={t("giveaways.subtitle")}
 				action={<SavingIndicator state={savingStateOf(busy, start.isSuccess)} />}
 			/>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("giveaways.start")}</h2>
-					<p className="text-muted-foreground text-sm">{t("giveaways.startBody")}</p>
-				</div>
+			<Summary>
+				{next === null
+					? t("giveaways.summaryNone")
+					: t("giveaways.summaryRunning", { count: runningCount(rows), when: dateAndTime(next) })}
+			</Summary>
 
-				<div className="grid gap-4 sm:grid-cols-2">
-					<ChannelPicker
-						label={t("giveaways.channel")}
-						channels={channels.data ?? []}
-						value={channelId}
-						onChange={setChannelId}
-						allowNone={false}
+			<SettingRows title={t("giveaways.start")} description={t("giveaways.startBody")}>
+				<ChannelPicker
+					label={t("giveaways.channel")}
+					channels={channels.data ?? []}
+					value={channelId}
+					onChange={setChannelId}
+					allowNone={false}
+				/>
+
+				<Field htmlFor="giveaway-prize" label={t("giveaways.prize")}>
+					<input
+						id="giveaway-prize"
+						value={prize}
+						maxLength={GIVEAWAY_LIMITS.maxPrize}
+						autoComplete="off"
+						placeholder={t("giveaways.prizePlaceholder")}
+						onChange={(event) => setPrize(event.target.value)}
+						className={FIELD}
 					/>
+				</Field>
 
-					<Field htmlFor="giveaway-prize" label={t("giveaways.prize")}>
-						<input
-							id="giveaway-prize"
-							value={prize}
-							maxLength={GIVEAWAY_LIMITS.maxPrize}
-							autoComplete="off"
-							placeholder={t("giveaways.prizePlaceholder")}
-							onChange={(event) => setPrize(event.target.value)}
-							className={FIELD}
-						/>
-					</Field>
+				<Field htmlFor="giveaway-winners" label={t("giveaways.winners")}>
+					<input
+						id="giveaway-winners"
+						type="number"
+						inputMode="numeric"
+						min={GIVEAWAY_LIMITS.minWinners}
+						max={GIVEAWAY_LIMITS.maxWinners}
+						value={winners}
+						onChange={(event) => setWinners(Number(event.target.value))}
+						className={cn(FIELD, "max-w-32 tabular-nums")}
+					/>
+				</Field>
 
-					<Field htmlFor="giveaway-winners" label={t("giveaways.winners")}>
+				<Field htmlFor="giveaway-amount" label={t("giveaways.runsFor")}>
+					<div className="flex max-w-80 gap-2">
 						<input
-							id="giveaway-winners"
+							id="giveaway-amount"
 							type="number"
 							inputMode="numeric"
-							min={GIVEAWAY_LIMITS.minWinners}
-							max={GIVEAWAY_LIMITS.maxWinners}
-							value={winners}
-							onChange={(event) => setWinners(Number(event.target.value))}
-							className={FIELD}
+							min={1}
+							value={amount}
+							onChange={(event) => setAmount(Number(event.target.value))}
+							className={cn(FIELD, "tabular-nums")}
 						/>
-					</Field>
+						<select
+							aria-label={t("giveaways.durationUnit")}
+							value={unit}
+							onChange={(event) =>
+								setUnit(
+									oneOf(
+										DURATION_UNITS.map((entry) => entry.value),
+										event.target.value,
+										"hours",
+									),
+								)
+							}
+							className={SELECT}
+						>
+							{DURATION_UNITS.map((entry) => (
+								<option key={entry.value} value={entry.value}>
+									{t(entry.labelKey)}
+								</option>
+							))}
+						</select>
+					</div>
+				</Field>
 
-					<Field htmlFor="giveaway-amount" label={t("giveaways.runsFor")}>
-						<div className="flex gap-2">
-							<input
-								id="giveaway-amount"
-								type="number"
-								inputMode="numeric"
-								min={1}
-								value={amount}
-								onChange={(event) => setAmount(Number(event.target.value))}
-								className={FIELD}
-							/>
-							<select
-								aria-label={t("giveaways.durationUnit")}
-								value={unit}
-								onChange={(event) =>
-									setUnit(
-										oneOf(
-											DURATION_UNITS.map((entry) => entry.value),
-											event.target.value,
-											"hours",
-										),
-									)
-								}
-								className={SELECT}
-							>
-								{DURATION_UNITS.map((entry) => (
-									<option key={entry.value} value={entry.value}>
-										{t(entry.labelKey)}
-									</option>
-								))}
-							</select>
+				<FieldGroup label={t("common.preview")}>
+					<PostPreview text={post.content}>
+						<div className="border-primary bg-card rounded-r-field mt-2 flex flex-col gap-1 border-l-4 p-3">
+							<p className={cn("font-semibold", prize.trim() === "" && "text-muted-foreground")}>
+								{prize.trim() === "" ? t("giveaways.prizePlaceholder") : prize}
+							</p>
+							{post.lines.map((line) => (
+								<p key={line}>{line}</p>
+							))}
+							<p className="text-muted-foreground mt-1 text-xs">{post.footer}</p>
 						</div>
-					</Field>
-				</div>
+					</PostPreview>
+				</FieldGroup>
 
-				<div className="flex flex-wrap items-center gap-3">
+				{blocked !== null && prize !== "" && <Warning>{blocked}</Warning>}
+				{failure !== null && (
+					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
+				)}
+
+				<RowActions>
 					<Button disabled={blocked !== null || busy} onClick={create}>
 						<Plus size={15} aria-hidden="true" />
 						{t("giveaways.startIt")}
 					</Button>
-					{blocked !== null && prize !== "" && <Warning>{blocked}</Warning>}
-				</div>
-
-				{failure !== null && (
-					<Warning>{failure instanceof ApiError ? failure.message : t("common.couldNotSave")}</Warning>
-				)}
-			</Card>
+				</RowActions>
+			</SettingRows>
 
 			<section aria-labelledby="giveaways-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="giveaways-heading" count={t("giveaways.runningCount", { count: runningCount(rows) })}>
+				<SectionHeading
+					as="h2"
+					id="giveaways-heading"
+					count={t("giveaways.runningCount", { count: runningCount(rows) })}
+				>
 					{t("giveaways.inThisServer")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{rows.length === 0 ? (
 					<Card>

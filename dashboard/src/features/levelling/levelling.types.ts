@@ -2,7 +2,6 @@ import { type ChannelSummary, type RoleSummary } from "@testify/shared";
 import { EyeOff, Gift, Settings2, Zap } from "lucide-react";
 import { type TabDefinition } from "@/components/primitives";
 
-/** Adding a tab is an entry here and a branch in the page; the tab bar and the URL handling follow. */
 export const TABS = [
 	{ key: "general", label: "levelling.tabGeneral", icon: Settings2 },
 	{ key: "rewards", label: "levelling.tabRewards", icon: Gift },
@@ -12,7 +11,6 @@ export const TABS = [
 
 export type Tab = (typeof TABS)[number]["key"];
 
-/** Every tab is handed the guild it is editing and the lists it needs, and fetches nothing itself. */
 export interface TabProps {
 	guildId: string;
 	channels: ChannelSummary[];

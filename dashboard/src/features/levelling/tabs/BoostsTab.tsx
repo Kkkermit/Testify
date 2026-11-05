@@ -27,7 +27,6 @@ export function BoostsTab({
 				value={boosts.map((boost) => boost.roleId)}
 				max={LEVEL_LIMITS.maxBoosts}
 				onChange={(roleIds) => {
-					// The list is replaced whole, so a role keeps its multiplier across an unrelated add or remove.
 					update.mutate(
 						roleIds.map((roleId) => ({
 							roleId,
@@ -38,36 +37,38 @@ export function BoostsTab({
 			/>
 
 			{boosts.length > 0 && (
-				<DividedList>
-					{boosts.map((boost) => (
-						<li key={boost.roleId} className="flex items-center gap-3 px-3 py-2 text-sm">
-							<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, boost.roleId)}</span>
-							<label className="flex items-center gap-2">
-								<span className="text-muted-foreground text-xs">{t("levelling.multiplier")}</span>
-								<select
-									aria-label={t("levelling.multiplierFor", { role: roleNameOf(roles, boost.roleId) })}
-									value={boost.multiplier}
-									onChange={(event) => {
-										update.mutate(
-											boosts.map((candidate) =>
-												candidate.roleId === boost.roleId
-													? { ...candidate, multiplier: Number(event.target.value) }
-													: candidate,
-											),
-										);
-									}}
-									className={cn(SELECT, "w-auto py-1 pl-2")}
-								>
-									{multiplierChoices().map((value) => (
-										<option key={value} value={value}>
-											×{value}
-										</option>
-									))}
-								</select>
-							</label>
-						</li>
-					))}
-				</DividedList>
+				<div>
+					<DividedList>
+						{boosts.map((boost) => (
+							<li key={boost.roleId} className="flex items-center gap-3 px-3 py-2 text-sm">
+								<span className="min-w-0 flex-1 truncate">{roleNameOf(roles, boost.roleId)}</span>
+								<label className="flex items-center gap-2">
+									<span className="text-muted-foreground text-xs">{t("levelling.multiplier")}</span>
+									<select
+										aria-label={t("levelling.multiplierFor", { role: roleNameOf(roles, boost.roleId) })}
+										value={boost.multiplier}
+										onChange={(event) => {
+											update.mutate(
+												boosts.map((candidate) =>
+													candidate.roleId === boost.roleId
+														? { ...candidate, multiplier: Number(event.target.value) }
+														: candidate,
+												),
+											);
+										}}
+										className={cn(SELECT, "w-auto py-1 pl-2")}
+									>
+										{multiplierChoices().map((value) => (
+											<option key={value} value={value}>
+												×{value}
+											</option>
+										))}
+									</select>
+								</label>
+							</li>
+						))}
+					</DividedList>
+				</div>
 			)}
 
 			<Refusal error={update.error} />

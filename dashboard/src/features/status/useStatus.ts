@@ -5,7 +5,7 @@ import { keys } from "@/lib/queries";
 
 const STATUS_REFRESH_MS = 30_000;
 
-/** Polls while the tab is visible; React Query stops the interval in a background tab on its own. */
+/** React Query stops the interval in a background tab on its own. */
 export function useStatus(): UseQueryResult<StatusResponse> {
 	return useQuery({
 		queryKey: keys.status(),

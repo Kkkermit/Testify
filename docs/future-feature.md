@@ -11,22 +11,15 @@ Nothing here is promised or scheduled. Each entry says what exists already to bu
 to respect, so whoever picks one up starts from the code rather than from a blank page. When an entry ships, delete
 it from this file in the same pull request.
 
-Checked against the code and the npm registry on **25 October 2026**.
-
----
-
-## 🤖 New bot features
-
-Nothing is waiting here. A new idea goes in a table with what it would do, what it would build on and what it would
-have to respect.
+Checked against the code and the npm registry on **5 November 2026**.
 
 ---
 
 ## 🖥️ Dashboard screens still missing
 
-Nothing is waiting here. `features/commands/commands.utils.ts` is the list that decides which commands have a
-screen, and the coverage tile on `/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages
-from a browser tab is a worse tool than doing it in the channel, where you can see them.
+None at the moment. `features/commands/commands.utils.ts` is the list that decides which commands have a screen, and
+the coverage tile on `/commands` counts it. `/clear` is left out on purpose: deleting a hundred messages from a browser
+tab is a worse tool than doing it in the channel, where you can see them.
 
 ---
 
@@ -62,6 +55,9 @@ server, and each should be before it is relied on.
 - **Announcements:** an embed and plain text, and `@everyone` refused to somebody without Mention Everyone.
 - **Open tickets:** a ticket closed from the dashboard, with its transcript naming the person who closed it.
 - **The member page:** a timeout, a rename and a role change, each showing on the page without a reload.
+- **Settings changed in Discord:** a panel press showing on the Changes page as a command change, and Put back on it.
+- **The member directory:** paging through a server of thousands, a role filter on members the bot has never cached, and
+  a bulk kick of several with one refused by Discord.
 
 ---
 
@@ -69,16 +65,14 @@ server, and each should be before it is relied on.
 
 ### Dependencies behind their latest release
 
-| Package                    | Here    | Latest | What it takes                                                                                                                                     |
-| -------------------------- | ------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `discord-html-transcripts` | 3.2.0   | 3.3.0  | It moves to undici 7, so the `undici` override in `package.json` can go. It pins React to exactly 19.1.1, so the React pins in Jest and Vite stay |
-| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                 |
-| `mongoose`                 | 8.24.1  | 9.11.4 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                          |
-| `react-router`             | 7.18.2  | 8.5.0  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                               |
-| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `dashboard/screenshots/README.md`                                               |
-| `jest-axe`                 | 10.0.0  | 11.0.0 | A major, test-only                                                                                                                                |
-| `tsup`                     | 8.5.1   | 9.0.0  | A major. The build's `dist/` checks in AGENTS.md §3 are the test                                                                                  |
-| `@anthropic-ai/sdk`        | 0.128.0 | 1.3.0  | Its first major. Only the support assistant's optional model picker uses it                                                                       |
+| Package                    | Here    | Latest | What it takes                                                                                                                                                                                                                                                                 |
+| -------------------------- | ------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `discord-html-transcripts` | 3.2.0   | 3.3.0  | It moves to undici 7, so the `undici` override can go, but it pins React to exactly 19.1.1. Installed over this lockfile, React 18 stays hoisted for its components and a transcript fails with "Objects are not valid as a React child"; it needs React 19 at the root first |
+| `typescript`               | 5.9.3   | 7.0.2  | The native compiler. `baseUrl` is already gone from `tsconfig.json`; `tsc-alias` and `tsup` need checking with it                                                                                                                                                             |
+| `mongoose`                 | 8.24.1  | 9.12.0 | A major. Read its migration guide against every repository, then run the suite with `REQUIRE_DB_TESTS=1`                                                                                                                                                                      |
+| `react-router`             | 7.18.2  | 8.5.1  | A major. `useBlocker` (the leave guard) and the lazy routes are what to check first                                                                                                                                                                                           |
+| `msw`                      | 2.15.0  | 3.0.3  | A major, test-only. `handlers.ts` uses it, and so do the steps in `docs/dashboard/screenshots/README.md`                                                                                                                                                                      |
+| `@anthropic-ai/sdk`        | 0.128.0 | 1.6.0  | Its first major. Only the support assistant's optional model picker uses it                                                                                                                                                                                                   |
 
 `discord-giveaways` is at its latest, 6.0.1, but that was published in **August 2022** and nothing since. Replacing it
 with a giveaway system of the bot's own — records in MongoDB, a job that ends them, entries counted from a button —
@@ -87,13 +81,7 @@ would follow the shape the starboard and idea board already have, and drop a dep
 ### Overrides to look at again
 
 Each `overrides` pin in `package.json` exists because a parent asked for a version with an advisory open. Every one
-is explained in [`security.md`](security.md); check whether each parent now asks for a fixed version by itself, and
-remove the pin when it does: `brace-expansion`, `js-yaml` (both lines), `fast-uri`, and `undici` under
-`discord-html-transcripts`.
-
-### Leaving a server forgets most settings, but not levelling's
-
-`purgeGuild` deletes every feature's settings when the bot is removed from a server, except the levelling setup in
-`levelsetup`. Members' levels and balances are kept as well, which may be deliberate, since a server that adds the
-bot back keeps its standings. The levelling setup is configuration like every other setting, so it most likely
-belongs in the purge. Decide, then either add `purgeLevelSettings` to `guildRepository.ts` or write down why not.
+is explained in [`security.md`](security.md); remove a pin once its parent asks for a fixed version by itself. On
+5 November 2026 none did: minimatch 10 still asks `brace-expansion` `^5.0.5` (only minimatch 11 asks `^5.0.12`),
+cosmiconfig 9 asks `js-yaml` `^4.1.0`, ajv asks `fast-uri` `^3.0.1`, `@istanbuljs/load-nyc-config` asks `js-yaml`
+`^3.13.1`, and `discord-html-transcripts` 3.2.0 still pins undici v5.

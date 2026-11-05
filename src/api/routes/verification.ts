@@ -1,6 +1,6 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { demandPermission, requireGrantable } from "@api/middleware/reach";
@@ -8,31 +8,21 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
 import { botName } from "@core/brand";
 import { deleteVerifyConfig, getVerifyConfig, saveVerifyConfig } from "@database/repositories/verificationRepository";
-import { isReady, normaliseVerify, publishVerifyPanel, roleTooHigh, type VerifyConfig } from "@lib/settings";
+import {
+	isReady,
+	normaliseVerify,
+	publishVerifyPanel,
+	readVerificationConfig,
+	roleTooHigh,
+	type VerifyConfig,
+} from "@lib/settings";
 import { type VerificationConfigResponse, type VerificationPatch, verificationPatchSchema } from "@testify/shared";
 
 export const verification = new Hono<ApiBindings>();
 
 verification.use("*", requireGuild);
 
-function bodyOf(guild: Guild, stored: VerifyConfig, exists: boolean): VerificationConfigResponse {
-	return {
-		enabled: exists,
-		channelId: stored.channelId,
-		roleId: stored.roleId,
-		message: stored.message,
-		posted: stored.messageId !== null,
-		verifiedCount: stored.verifiedCount,
-		roleTooHigh: roleTooHigh(guild, stored.roleId),
-	};
-}
-
-async function configOf(guild: Guild): Promise<VerificationConfigResponse> {
-	const record = await getVerifyConfig(guild.id);
-	return bodyOf(guild, normaliseVerify(record), record !== null);
-}
-
-verification.get("/", async (context) => context.json(await configOf(guildOf(context))));
+verification.get("/", async (context) => context.json(await readVerificationConfig(guildOf(context))));
 
 /** A save edits a panel already posted, but a first post is always the explicit publish. */
 verification.patch("/", async (context) => {
@@ -43,7 +33,7 @@ verification.patch("/", async (context) => {
 		demandPermission(context, PermissionFlagsBits.ManageRoles);
 		requireGrantable(context, [patch.roleId]);
 	}
-	const before = await configOf(guild);
+	const before = await readVerificationConfig(guild);
 
 	if (patch.enabled === false) {
 		await deleteVerifyConfig(guild.id);
@@ -88,27 +78,13 @@ async function answer(
 	patch: VerificationPatch,
 	before: VerificationConfigResponse,
 ): Promise<Response> {
-	const after = await configOf(guild);
+	const after = await readVerificationConfig(guild);
 
-	await auditChange(context, {
-		action: "verification.update",
-		summary: summarise(patch),
-		before: pick(before, patch),
-		after: pick(after, patch),
-	});
+	await auditSettings(context, { action: "verification.update", summary: summarise(patch), before, after });
 
 	return context.json(after);
 }
 
-function pick(config: VerificationConfigResponse, patch: VerificationPatch): Record<string, unknown> {
-	return Object.fromEntries(
-		Object.keys(patch)
-			.filter((key) => key in config)
-			.map((key) => [key, config[key as keyof VerificationConfigResponse]]),
-	);
-}
-
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: VerificationPatch): string {
 	const parts: string[] = [];
 

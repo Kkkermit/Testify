@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { plainText } from "./text";
 
-/** The support assistant's contract: a question in, a vetted help article out, and a safe Markdown subset to draw it. */
-
 export const SUPPORT_LIMITS = {
 	questionMin: 3,
 	questionMax: 300,
@@ -13,7 +11,6 @@ export const SUPPORT_LIMITS = {
 	bodyMax: 3_000,
 } as const;
 
-/** Where an article is filed, in the order a newcomer would read them. */
 export const SUPPORT_TOPICS = [
 	"getting-started",
 	"dashboard",
@@ -48,7 +45,6 @@ export interface SupportArticleLink {
 }
 
 export interface SupportArticle extends SupportArticleLink {
-	/** The Markdown subset `articleBlocks` reads, which Discord also renders as written. */
 	body: string;
 }
 

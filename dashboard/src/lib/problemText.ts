@@ -2,8 +2,6 @@ import { type Problem, type ProblemCode } from "@testify/shared";
 import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 
-/** The translation key for a refusal `@testify/shared` names, so the rule is shared and the wording is not. */
-
 const KEYS: Record<ProblemCode, TranslationKey> = {
 	"automod.word": "problem.automodWord",
 	"automod.mentionLimit": "problem.automodMentionLimit",

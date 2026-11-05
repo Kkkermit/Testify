@@ -5,6 +5,7 @@ import {
 	type RoleMenuMode,
 	type RoleSummary,
 } from "@testify/shared";
+import { type TFunction } from "i18next";
 
 export interface RoleMenuDraft {
 	channelId: string | null;
@@ -18,7 +19,6 @@ export function emptyDraft(): RoleMenuDraft {
 	return { channelId: null, title: "", description: "", roleIds: [], mode: "many" };
 }
 
-/** Roles are a set, so ticking the same ones in another order is not a change. */
 export function draftChanged(from: RoleMenuDraft, to: RoleMenuDraft): boolean {
 	const roles = (draft: RoleMenuDraft): string => [...draft.roleIds].sort().join(",");
 
@@ -31,12 +31,10 @@ export function draftChanged(from: RoleMenuDraft, to: RoleMenuDraft): boolean {
 	);
 }
 
-/** Roles nobody may pick for themselves, which the checklist shows greyed rather than hides. */
 export function offerBlocked(role: RoleSummary): boolean {
 	return !role.assignableByBot || role.powerful;
 }
 
-/** A role that has gone, or can no longer be offered, leaves the draft: it could not be unticked, and saving it is refused. */
 export function draftOf(entry: RoleMenuEntry, roles: readonly RoleSummary[]): RoleMenuDraft {
 	const offerable = new Set(roles.filter((role) => !offerBlocked(role)).map((role) => role.id));
 
@@ -49,7 +47,6 @@ export function draftOf(entry: RoleMenuEntry, roles: readonly RoleSummary[]): Ro
 	};
 }
 
-/** The body to send, or null while `roleMenuBlocked` has something to say; `clean` sanitises the free text. */
 export function bodyOf(draft: RoleMenuDraft, clean: (value: string) => string): RoleMenuBody | null {
 	if (roleMenuBlocked(draft) !== null || draft.channelId === null) return null;
 
@@ -60,4 +57,10 @@ export function bodyOf(draft: RoleMenuDraft, clean: (value: string) => string): 
 		roleIds: draft.roleIds,
 		mode: draft.mode,
 	};
+}
+
+export function roleMenuSummary(menus: readonly Pick<RoleMenuEntry, "posted">[], t: TFunction): string {
+	if (menus.length === 0) return t("roleMenus.summaryNone");
+	const posted = menus.filter((menu) => menu.posted).length;
+	return posted === 0 ? t("roleMenus.summaryNonePosted") : t("roleMenus.summaryPosted", { count: posted });
 }

@@ -4,7 +4,6 @@ import { toError } from "@core/errors";
 import { getVoiceCounter } from "@database/repositories/voiceCounterRepository";
 import { formatNumber } from "@lib/format/format.util";
 
-/** Four byte-identical event files (with `1`-suffixed variables) collapse into this. */
 export async function syncVoiceCounters(client: TestifyClient, guild: Guild): Promise<void> {
 	const settings = await getVoiceCounter(guild.id);
 	if (!settings) return;

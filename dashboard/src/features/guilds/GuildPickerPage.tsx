@@ -1,15 +1,15 @@
-import { Search, ServerOff } from "lucide-react";
+import { Columns3, Search, ServerOff } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router";
 import { GUILD_REFUSED_NOTICE } from "@/app/RequireGuild";
 import { OWNER_ONLY_NOTICE } from "@/app/RequireOwner";
 import { FIELD, Warning } from "@/components/form";
-import { Reveal } from "@/components/motion";
-import { EmptyState, Eyebrow, PageHeader, Pager, Skeleton } from "@/components/primitives";
+import { EmptyState, SectionHeading, PageHeader, Pager, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
+import { comparable } from "@/features/compare/compare.utils";
 import { GuildCard } from "@/features/guilds/GuildCard";
 import {
 	filterGuilds,
@@ -28,7 +28,6 @@ export function GuildPickerPage(): React.JSX.Element {
 	const me = useMe();
 	const bot = useBot();
 	const [search, setSearch] = useState("");
-	// One page number per section, in the URL, so Back and a refresh land where the reader was.
 	const [params, setParams] = useSearchParams();
 	const location = useLocation();
 	const navigate = useNavigate();
@@ -51,13 +50,11 @@ export function GuildPickerPage(): React.JSX.Element {
 			else next.set(key, String(page));
 			return next;
 		});
-		// The pager sits under the list, so a shorter last page would otherwise leave the reader below it.
 		document.getElementById(`guilds-${key}`)?.scrollIntoView({ block: "nearest" });
 	}
 
 	function searchFor(value: string): void {
 		setSearch(value);
-		// A new search is a new list, so every section starts again from its first page.
 		setParams(
 			(current) => {
 				const next = new URLSearchParams(current);
@@ -74,7 +71,7 @@ export function GuildPickerPage(): React.JSX.Element {
 			{notice === OWNER_ONLY_NOTICE && <Warning>{t("guilds.ownerOnly")}</Warning>}
 			{notice === GUILD_REFUSED_NOTICE && <Warning>{t("guilds.guildRefused")}</Warning>}
 
-			<label className="motion-reveal relative block">
+			<label className="relative block">
 				<span className="sr-only">{t("guilds.search")}</span>
 				<Search
 					size={18}
@@ -92,6 +89,16 @@ export function GuildPickerPage(): React.JSX.Element {
 					className={cn(FIELD, "py-3 pr-4 pl-12 text-base")}
 				/>
 			</label>
+
+			{comparable(me.data?.guilds ?? []).length >= 2 && (
+				<Link
+					to="/guilds/compare"
+					className={cn(INLINE_TARGET, "text-accent hover:text-foreground gap-2 self-start text-sm")}
+				>
+					<Columns3 size={16} aria-hidden="true" />
+					{t("guilds.compare")}
+				</Link>
+			)}
 
 			{found === 0 ? (
 				<EmptyState
@@ -113,19 +120,19 @@ export function GuildPickerPage(): React.JSX.Element {
 					return (
 						<section key={group.key} aria-labelledby={`guilds-${group.key}`} className="flex flex-col gap-3">
 							<div className="flex flex-col gap-1">
-								<Eyebrow as="h2" id={`guilds-${group.key}`} count={group.guilds.length}>
+								<SectionHeading as="h2" id={`guilds-${group.key}`} count={group.guilds.length}>
 									{t(group.titleKey)}
-								</Eyebrow>
+								</SectionHeading>
 								<p className="text-muted-foreground text-sm">{t(group.describesKey)}</p>
 							</div>
 
 							{/* A grid item defaults to `min-width: auto`, so the widest card sets the row and a phone gets a
 							    horizontal scrollbar. */}
 							<ul className="grid gap-4 sm:grid-cols-2 [&>li]:min-w-0">
-								{shown.items.map((guild, index) => (
-									<Reveal as="li" key={guild.id} index={index}>
+								{shown.items.map((guild) => (
+									<li key={guild.id}>
 										<GuildCard guild={guild} group={group.key} clientId={bot.data?.id} />
-									</Reveal>
+									</li>
 								))}
 							</ul>
 

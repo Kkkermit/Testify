@@ -1,7 +1,6 @@
 import { type ColorResolvable } from "discord.js";
 import { CATEGORIES, type Category } from "@config/categories";
 
-/** Colours, emoji and branding. */
 export const theme = {
 	author: "Kkermit",
 	repository: "https://github.com/Kkkermit/Testify",

@@ -32,7 +32,6 @@ describe("the app shell", () => {
 			server.use(http.get("/api/auth/me", () => HttpResponse.json({ ...me, guilds: [...me.guilds, second] })));
 		});
 
-		/** Going back to the picker to reach another server's Levelling was two clicks and a scroll too many. */
 		it("offers the same screen in every other server the bot is in", async () => {
 			const user = userEvent.setup();
 			renderWithProviders(<AppShell />, {
@@ -74,7 +73,7 @@ describe("the app shell", () => {
 		await screen.findByRole("link", { name: "Overview" });
 
 		expect(screen.getByRole("button", { name: "Economy" })).toHaveAttribute("aria-expanded", "true");
-		expect(screen.getByRole("button", { name: "Community" })).toHaveAttribute("aria-expanded", "false");
+		expect(screen.getByRole("button", { name: "Moderation" })).toHaveAttribute("aria-expanded", "false");
 	});
 
 	/** `aria-controls` has to point at a list that exists. */
@@ -82,10 +81,22 @@ describe("the app shell", () => {
 		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
 		await screen.findByRole("link", { name: "Overview" });
 
-		const controls = screen.getByRole("button", { name: "Community" }).getAttribute("aria-controls");
+		const controls = screen.getByRole("button", { name: "Moderation" }).getAttribute("aria-controls");
 
 		expect(controls).not.toBeNull();
 		expect(document.getElementById(controls ?? "")).not.toBeNull();
+	});
+
+	/** The sidebar holds screens, not a server's channels, which can run to hundreds. */
+	it("offers the server's channels as one Channels entry rather than listing them", async () => {
+		renderWithProviders(<AppShell />, { path: "/guilds/:guildId", route: `/guilds/${aGuild.id}` });
+		const sidebar = await screen.findByTestId("sidebar");
+
+		expect(await within(sidebar).findByRole("link", { name: "Channels" })).toHaveAttribute(
+			"href",
+			`/guilds/${aGuild.id}/channels`,
+		);
+		expect(within(sidebar).queryByRole("link", { name: /general/ })).toBeNull();
 	});
 
 	/** Every screen stays reachable whatever a section is set to — the rail has no toggles to open. */
@@ -179,11 +190,11 @@ describe("the mobile menu", () => {
 
 		await user.click(screen.getByRole("button", { name: "Menu" }));
 		const drawer = screen.getByTestId("sidebar-drawer");
-		const community = within(drawer).getByRole("button", { name: "Community" });
-		await user.click(community);
+		const moderation = within(drawer).getByRole("button", { name: "Moderation" });
+		await user.click(moderation);
 
 		expect(screen.getByTestId("sidebar-drawer")).toBeInTheDocument();
-		expect(community).toHaveAttribute("aria-expanded", "true");
+		expect(moderation).toHaveAttribute("aria-expanded", "true");
 	});
 
 	/** The drawer could not scroll, so a swipe moved the page behind it and the drawer's foot was out of reach. */

@@ -1,27 +1,25 @@
-import { type CommandSummary, type ManageableGuild } from "@testify/shared";
+import { type ChannelSummary, type CommandSummary, type ManageableGuild } from "@testify/shared";
 import { type TFunction } from "i18next";
-import { FileText, type LucideIcon, Palette, ShieldQuestion, Terminal } from "lucide-react";
+import { Columns3, FileText, Hash, type LucideIcon, Palette, ShieldQuestion, Terminal, Volume2 } from "lucide-react";
 import { allNavItems, type NavAudience, navigationFor } from "@/config/navigation";
+import { channelPath, channelTree } from "@/features/channels/channelMap.utils";
 import { configurableAt } from "@/features/commands/commands.utils";
 
-export type SearchKind = "screen" | "command" | "server";
+export type SearchKind = "screen" | "channel" | "command" | "server";
 
 export interface SearchEntry {
 	id: string;
 	kind: SearchKind;
 	label: string;
-	/** What the row says under its label, and more words to match on. */
 	detail: string;
 	to: string;
 	icon: LucideIcon | null;
-	/** Set on a server, whose row shows its picture instead of an icon. */
 	guild?: ManageableGuild;
-	/** Words that find the entry without being shown, such as a command's aliases. */
 	terms: string[];
 }
 
-/** The pages outside the sidebar's groups, which the footer reaches. */
 const EXTRA_PAGES = [
+	{ to: "/guilds/compare", labelKey: "nav.compare", hintKey: "nav.compareHint", icon: Columns3 },
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint", icon: Palette },
 	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint", icon: FileText },
 	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint", icon: ShieldQuestion },
@@ -33,10 +31,12 @@ export function searchEntries({
 	guilds,
 	isOwner,
 	commands,
+	channels = [],
 }: NavAudience & {
 	t: TFunction;
 	guilds: readonly ManageableGuild[];
 	commands: readonly CommandSummary[];
+	channels?: readonly ChannelSummary[];
 }): SearchEntry[] {
 	const screens = [...allNavItems(navigationFor({ guild, isOwner })), ...EXTRA_PAGES].map<SearchEntry>((item) => ({
 		id: `screen:${item.to}`,
@@ -47,6 +47,21 @@ export function searchEntries({
 		icon: item.icon,
 		terms: [],
 	}));
+
+	const channelEntries =
+		guild === undefined
+			? []
+			: channelTree(channels)
+					.flatMap((group) => group.channels)
+					.map<SearchEntry>((channel) => ({
+						id: `channel:${channel.id}`,
+						kind: "channel",
+						label: channel.kind === "voice" ? channel.name : `#${channel.name}`,
+						detail: t("search.channel"),
+						to: channelPath(guild.id, channel.id),
+						icon: channel.kind === "voice" ? Volume2 : Hash,
+						terms: [],
+					}));
 
 	const servers = guilds
 		.filter((candidate) => candidate.botPresent)
@@ -64,7 +79,6 @@ export function searchEntries({
 	const commandList = guild === undefined ? "/commands" : `/guilds/${guild.id}/commands`;
 	const commandEntries = commands.map<SearchEntry>((command) => {
 		const place = configurableAt(command, guild?.id ?? null);
-		// The sidebar's own name for the screen, which is translated where the command map's is not.
 		const screen = place === null ? null : (screens.find((entry) => entry.to === place.path)?.label ?? place.screen);
 		return {
 			id: `command:${command.name}`,
@@ -77,10 +91,9 @@ export function searchEntries({
 		};
 	});
 
-	return [...screens, ...servers, ...commandEntries];
+	return [...screens, ...channelEntries, ...servers, ...commandEntries];
 }
 
-/** Lower-cased with accents removed, so "parametres" finds "Paramètres". */
 export function fold(text: string): string {
 	return text
 		.normalize("NFD")
@@ -94,7 +107,6 @@ function words(text: string): string[] {
 		.filter((word) => word !== "");
 }
 
-/** Lower is better; null when a word of the query appears nowhere in the entry. */
 export function scoreOf(entry: SearchEntry, query: string): number | null {
 	const wanted = words(query);
 	if (wanted.length === 0) return null;
@@ -112,11 +124,10 @@ export function scoreOf(entry: SearchEntry, query: string): number | null {
 	return null;
 }
 
-const KIND_ORDER: Record<SearchKind, number> = { screen: 0, command: 1, server: 2 };
+const KIND_ORDER: Record<SearchKind, number> = { screen: 0, channel: 1, command: 2, server: 3 };
 
 const RESULT_LIMIT = 8;
 
-/** Best match first, then screens before commands before servers; an empty query offers the start of the list. */
 export function searchFor(entries: readonly SearchEntry[], query: string, limit = RESULT_LIMIT): SearchEntry[] {
 	if (query.trim() === "") return entries.filter((entry) => entry.kind !== "command").slice(0, limit);
 
@@ -128,7 +139,6 @@ export function searchFor(entries: readonly SearchEntry[], query: string, limit 
 		.map((ranked) => ranked.entry);
 }
 
-/** The modifier this reader's keyboard calls it by. */
 export function shortcutLabel(platform: string): string {
 	return /Mac|iPhone|iPad/i.test(platform) ? "⌘K" : "Ctrl K";
 }

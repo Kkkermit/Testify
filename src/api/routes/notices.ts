@@ -4,7 +4,6 @@ import { unauthorised } from "@api/errors";
 import { requireAuth } from "@api/middleware/session";
 import { readNoticeFeed } from "@lib/notices";
 
-/** What the bot's owners want everybody to know, for whoever is signed in; it names no server and no member. */
 export const notices = new Hono<ApiBindings>();
 
 notices.use("*", requireAuth);

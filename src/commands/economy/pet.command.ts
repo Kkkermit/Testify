@@ -33,7 +33,6 @@ export default defineCommand({
 				const rarity = interaction.options.getString("rarity") ?? "common";
 				const account = await requireAccount(guild.id, interaction.user.id);
 
-				// The pet shop is the shop's pets section — one browser, not two.
 				await reply(
 					interaction,
 					shopScreen(

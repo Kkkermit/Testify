@@ -159,7 +159,6 @@ export async function decideOnIdea(
 	return decided;
 }
 
-/** Takes the post down with the record. */
 export async function removeIdea(guild: Guild, ideaId: string): Promise<StoredIdea | null> {
 	const removed = await deleteIdea(guild.id, ideaId);
 	if (removed?.messageId === null || removed === null) return removed;

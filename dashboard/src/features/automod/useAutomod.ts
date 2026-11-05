@@ -16,7 +16,6 @@ export function useAutomod(guildId: string): UseQueryResult<AutomodRules> {
 	});
 }
 
-/** Not optimistic: a row that appeared before Discord agreed would be claiming a rule that may not exist. */
 export function useAddRule(guildId: string): UseMutationResult<AutomodRules, Error, AutomodCreate> {
 	return useRuleMutation(guildId, (body) => api.post<AutomodRules>(`/guilds/${guildId}/automod`, body));
 }
@@ -44,7 +43,6 @@ function useRuleMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (rules) => {
-			// A whole-list answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, rules);
 		},
 		onSettled: () => {

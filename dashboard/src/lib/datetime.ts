@@ -1,10 +1,12 @@
 import { formattingLocale, formatUnit } from "@/lib/intl";
 
-/** Every date the dashboard renders, in the reader's language, with the month always a word so `30 Jul 2026` cannot be misread. */
-
 const DATE: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" };
 const DATE_TIME: Intl.DateTimeFormatOptions = { ...DATE, hour: "2-digit", minute: "2-digit" };
 const TIME: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
+const WEEKDAY: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long" };
+const HOUR_MINUTE: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
+const DAY_MONTH: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", timeZone: "UTC" };
+const MONTH: Intl.DateTimeFormatOptions = { month: "long", timeZone: "UTC" };
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -27,7 +29,6 @@ function parse(iso: string): Date | null {
 	return Number.isNaN(at.getTime()) ? null : at;
 }
 
-/** An unparseable value is returned as it arrived — a stored string nobody can read still says more than `Invalid Date`. */
 function format(iso: string, name: string, options: Intl.DateTimeFormatOptions): string {
 	const at = parse(iso);
 	return at === null ? iso : made(name, (locale) => new Intl.DateTimeFormat(locale, options)).format(at);
@@ -41,11 +42,27 @@ export function dateAndTime(iso: string): string {
 	return format(iso, "dateTime", DATE_TIME);
 }
 
+export function weekdayDate(iso: string): string {
+	return format(iso, "weekday", WEEKDAY);
+}
+
+export function timeOfDay(iso: string): string {
+	return format(iso, "hourMinute", HOUR_MINUTE);
+}
+
+/** `1 Aug`, a calendar day by itself, read in UTC because it names a stored day rather than a moment. */
+export function dayAndMonth(iso: string): string {
+	return format(iso, "dayMonth", DAY_MONTH);
+}
+
+export function monthName(month: number): string {
+	return made("month", (locale) => new Intl.DateTimeFormat(locale, MONTH)).format(Date.UTC(2000, month - 1, 1));
+}
+
 export function clockTime(iso: string): string {
 	return format(iso, "time", TIME);
 }
 
-/** How long ago, switching to the date past a week. */
 export function since(iso: string, now = Date.now()): string {
 	const at = parse(iso);
 	if (at === null) return iso;
@@ -63,7 +80,13 @@ export function since(iso: string, now = Date.now()): string {
 	return ago.format(-Math.floor(elapsed / DAY), "day");
 }
 
-/** `1d 1h`: the two largest units, each as short as the reader's language writes it. */
+export function ahead(ms: number): string {
+	const later = made("ahead", (locale) => new Intl.RelativeTimeFormat(locale, { numeric: "always" }));
+	if (ms < HOUR) return later.format(Math.max(1, Math.round(ms / MINUTE)), "minute");
+	if (ms < DAY) return later.format(Math.round(ms / HOUR), "hour");
+	return later.format(Math.round(ms / DAY), "day");
+}
+
 export function formatUptime(ms: number): string {
 	const minutes = Math.floor(ms / 60_000);
 	const hours = Math.floor(minutes / 60);

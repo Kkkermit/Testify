@@ -19,7 +19,7 @@ const SCREENS: { name: string; path: string; endpoint: string; element: React.JS
 	{ name: "tickets", path: "tickets", endpoint: "tickets", element: <TicketsPage /> },
 	{ name: "lottery", path: "lottery", endpoint: "lottery", element: <LotteryPage /> },
 	{ name: "giveaways", path: "giveaways", endpoint: "giveaways", element: <GiveawaysPage /> },
-	{ name: "members", path: "members", endpoint: "members/leaderboard", element: <MembersPage /> },
+	{ name: "members", path: "members", endpoint: "members", element: <MembersPage /> },
 ];
 
 describe("a guild screen whose read fails", () => {

@@ -16,10 +16,8 @@ import {
 } from "@lib/notices";
 import { isScheduled, type Notice, NOTICE_LIMITS, NOTICE_TONES, type NoticeTone } from "@testify/shared";
 
-/** The bot's owners' controls on `/bot-notifications`: post, change and remove what everybody is told. */
-
 async function show(interaction: ComponentInteraction, panel: ContainerMessage): Promise<void> {
-	// A modal opened elsewhere cannot edit this message, so it answers privately instead.
+	// A modal opened elsewhere cannot edit this message, so it answers privately.
 	if (interaction.isModalSubmit() && !interaction.isFromMessage()) {
 		await interaction.reply({ ...panel, flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
 	} else if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
@@ -79,7 +77,6 @@ function timeForm(
 	});
 }
 
-/** Null for a blank field; a length of time nobody could read is refused by the field's own name. */
 function typedLength(interaction: ComponentInteraction, id: string, label: string): number | null {
 	if (!interaction.isModalSubmit()) throw new UserFacingError("Open the form again and fill it in.");
 	const value = interaction.fields.getTextInputValue(id).trim();

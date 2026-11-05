@@ -1,68 +1,122 @@
 @import "tailwindcss";
 
-/**
- * Self-hosted, latin subset, variable. Nothing is fetched from a font host: the CSP forbids it, and a
- * self-hosted bot should not phone out to render its own settings page. Before this, `"Inter var"` was named
- * but never loaded — every install fell through to `system-ui`, which is why the type looked different on every
- * machine and like nothing in particular on all of them.
- */
+/** Self-hosted, because the CSP forbids a font host; `unicode-range` means a reader downloads only their own scripts. */
 @font-face {
-	font-family: "Space Grotesk";
-	src: url("/fonts/space-grotesk-latin.woff2") format("woff2");
-	font-weight: 300 700;
+	font-family: "Rubik";
+	src: url("/fonts/rubik-latin.woff2") format("woff2");
+	font-weight: 300 900;
 	font-display: swap;
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+		U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
 
 @font-face {
-	font-family: "Inter";
-	src: url("/fonts/inter-latin.woff2") format("woff2");
-	font-weight: 100 900;
+	font-family: "Rubik";
+	src: url("/fonts/rubik-latin-ext.woff2") format("woff2");
+	font-weight: 300 900;
 	font-display: swap;
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
 
 @font-face {
-	font-family: "JetBrains Mono";
-	src: url("/fonts/jetbrains-mono-latin.woff2") format("woff2");
-	font-weight: 100 800;
+	font-family: "Rubik";
+	src: url("/fonts/rubik-cyrillic.woff2") format("woff2");
+	font-weight: 300 900;
 	font-display: swap;
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
-/**
- * The console palette. Every value is verified against WCAG before it lands, by `src/test/contrast.test.ts`,
- * which fails if one drops below its threshold.
- *
- * Two colours carry the violet because one cannot: `--color-primary` is a **fill** and only ever wears white
- * text on it, while `--color-accent` is the **text** violet for links and live state. Using the fill colour as
- * 14px text measured 3.47:1 and failed AA in five real places.
- */
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+		U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-ext-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-cyrillic-400.woff2") format("woff2");
+	font-weight: 400;
+	font-display: swap;
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-700.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+	unicode-range:
+		U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC,
+		U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-latin-ext-700.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+	unicode-range:
+		U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+		U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+	font-family: "Fira Mono";
+	src: url("/fonts/fira-mono-cyrillic-700.woff2") format("woff2");
+	font-weight: 700;
+	font-display: swap;
+	unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/** The palette, measured against WCAG by `src/test/contrast.test.ts`: `primary` is a fill under white, `accent` the text colour. */
 @theme {
-	/* Every colour is `light-dark(light, dark)`, so a token is one line holding both themes and the two can
-	   never drift to different sets. `contrast.test.ts` reads both halves and checks each against WCAG. */
-	--color-background: light-dark(#f4f4f9, #07070b);
-	--color-foreground: light-dark(#15151f, #ffffff);
-	--color-muted: light-dark(#e9e8f2, #1c1c2a);
-	--color-muted-foreground: light-dark(#55556e, #a2a2ba);
-	--color-card: light-dark(#ffffff, #12121c);
-	--color-popover: light-dark(#ffffff, #171722);
-	--color-border: light-dark(#dcdae8, #262639);
-	--color-input: light-dark(#6b6b8a, #7676a0);
-	--color-primary: light-dark(#6d28d9, #7c3aed);
+	/* Every colour is `light-dark(light, dark)`, so one line holds both themes. */
+	--color-background: light-dark(#f2f3f6, #1f2125);
+	--color-foreground: light-dark(#1b1e24, #eceef1);
+	--color-muted: light-dark(#e7e9ee, #33363c);
+	--color-muted-foreground: light-dark(#565d6b, #a2a7b0);
+	--color-card: light-dark(#ffffff, #282b30);
+	--color-popover: light-dark(#ffffff, #2e3137);
+	--color-border: light-dark(#d9dde4, #383c43);
+	--color-input: light-dark(#767d8a, #7d838e);
+	/* The sidebar, a step back from the page as Discord's own column is. */
+	--color-sidebar: light-dark(#e7e9ee, #191b1f);
+	--color-primary: light-dark(#8a2a6b, #bf3a94);
 	--color-primary-foreground: #ffffff;
-	--color-accent: light-dark(#5b21b6, #a78bfa);
-	--color-ring: light-dark(#6d28d9, #a78bfa);
+	--color-accent: light-dark(#7a2260, #e08ac4);
+	/* Behind the selected row or chip, under accent text. */
+	--color-accent-wash: light-dark(#f6e9f2, #3a2433);
+	--color-ring: light-dark(#8a2a6b, #e08ac4);
 	--color-success: light-dark(#047857, #3ddc97);
 	--color-warning: light-dark(#a16207, #fbbf24);
 	--color-destructive: light-dark(#b91c1c, #dc2626);
 	/* Red is legible as a fill or as text, never as both, so the text cut is its own token. */
 	--color-destructive-text: light-dark(#b91c1c, #f87171);
 
-	/* Feature tints. Text colours at AA on the card, used as icons and as 15% fills. */
-	--color-feature-levelling: light-dark(#6d28d9, #a78bfa);
-	--color-feature-economy: light-dark(#a16207, #fbbf24);
-	--color-feature-moderation: light-dark(#b91c1c, #f87171);
-	--color-feature-welcome: light-dark(#047857, #3ddc97);
-	--color-feature-tickets: light-dark(#1d4ed8, #60a5fa);
-	--color-feature-community: light-dark(#be185d, #f472b6);
+	/* Category hues, at AA as text on the card, worn on icons. */
+	--color-hue-violet: light-dark(#6d28d9, #a78bfa);
+	--color-hue-amber: light-dark(#a16207, #fbbf24);
+	--color-hue-red: light-dark(#b91c1c, #f87171);
+	--color-hue-green: light-dark(#047857, #3ddc97);
+	--color-hue-blue: light-dark(#1d4ed8, #60a5fa);
+	--color-hue-pink: light-dark(#be185d, #f472b6);
 
 	/* One scale, so nothing is left to Tailwind's defaults and nothing reads as a corner that was missed. */
 	--radius-chip: 0.375rem;
@@ -70,37 +124,20 @@
 	--radius-card: 0.625rem;
 	--radius-tile: 1rem;
 
-	/* Three roles, three faces. Space Grotesk is the proportional cut of Space Mono, so a console's headings and
-	   its data are drawn from the same skeleton — the pairing is the concept rather than a taste. */
-	--font-display: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
-	--font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-	--font-mono: "JetBrains Mono", ui-monospace, monospace;
+	/* Rubik is rounded like Discord's own type; Fira Mono marks what is typed literally. */
+	--font-display: "Rubik", ui-sans-serif, system-ui, sans-serif;
+	--font-sans: "Rubik", ui-sans-serif, system-ui, sans-serif;
+	--font-mono: "Fira Mono", ui-monospace, monospace;
 
 	/* Tailwind's default for this size is 1.43, which is tight for prose — and `text-sm` is most of the app. */
 	--text-sm--line-height: 1.55;
 
-	/* The WebGL field is composited over the page, so on paper the same points that read as stars on near-black
-	   read as dust. Roughly the strength of the radial wash behind them, in each theme. */
-	--backdrop-opacity: light-dark(0.14, 0.5);
-
 	--ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
-	--animate-reveal: reveal 320ms var(--ease-out-soft) both;
 	--animate-fade: fade 200ms var(--ease-out-soft) both;
 	--animate-pop: pop 200ms var(--ease-out-soft) both;
 	--animate-sheen: sheen 1.6s linear infinite;
 	--animate-caret: caret 1.1s steps(1) infinite;
-
-	@keyframes reveal {
-		from {
-			opacity: 0;
-			transform: translate3d(0, 6px, 0);
-		}
-		to {
-			opacity: 1;
-			transform: none;
-		}
-	}
 
 	@keyframes fade {
 		from {
@@ -139,8 +176,7 @@
 }
 
 @layer base {
-	/* The theme switch. `light-dark()` holds both values on one token, so `color-scheme` is the only thing that
-	   moves — and the system default needs no script, which the CSP could not have run inline anyway. */
+	/* `color-scheme` is all the theme switch moves, so the system default needs no script. */
 	:root {
 		color-scheme: light dark;
 	}
@@ -153,14 +189,7 @@
 		color-scheme: dark;
 	}
 
-	/**
-	 * A sample of one theme drawn on a page wearing the other, for the previews on the appearance screen.
-	 *
-	 * It has to be a rule in this file rather than an inline `style={{ colorScheme }}`: Lightning CSS polyfills
-	 * `light-dark()` into a pair of variables and only emits the flip for selectors where it saw a
-	 * `color-scheme` declaration, so an element that sets one inline keeps whichever half the root resolved and
-	 * every sample renders in the page's own theme.
-	 */
+	/** A sample of the other theme, as a rule here because Lightning CSS only flips `light-dark()` where it sees `color-scheme`. */
 	[data-scheme="light"] {
 		color-scheme: light;
 	}
@@ -169,116 +198,115 @@
 		color-scheme: dark;
 	}
 
-	/**
-	 * The accent choices. Only the three violet-carrying tokens move: success, warning and destructive keep
-	 * their own meanings, so Delete stays red and a saved badge stays green whatever is chosen here. Each pair
-	 * is measured against both backgrounds by `contrast.test.ts`, which reads these blocks rather than keeping
-	 * a list of its own.
-	 *
-	 * The attribute is not pinned to `:root`, so the picker can put one on a swatch and have it paint itself
-	 * in that accent while the page around it stays on the chosen one — the same trick `ThemePreview` plays
-	 * with `color-scheme`. These sit in the `base` layer, which is what puts them ahead of `@theme`.
-	 *
-	 * Violet restates the base palette rather than relying on it: choosing violet leaves the page unmarked, but
-	 * a swatch still has to paint violet while the page around it wears something else. The test asserts the two
-	 * copies are identical.
-	 */
-	[data-accent="violet"] {
-		--color-primary: light-dark(#6d28d9, #7c3aed);
-		--color-accent: light-dark(#5b21b6, #a78bfa);
-		--color-ring: light-dark(#6d28d9, #a78bfa);
+	/** Only the accent tokens move; the attribute is not pinned to `:root` so a swatch can paint itself, and plum restates the base for its swatch. */
+	[data-accent="plum"] {
+		--color-primary: light-dark(#8a2a6b, #bf3a94);
+		--color-accent: light-dark(#7a2260, #e08ac4);
+		--color-accent-wash: light-dark(#f6e9f2, #3a2433);
+		--color-ring: light-dark(#8a2a6b, #e08ac4);
 	}
 
 	[data-accent="indigo"] {
-		--color-primary: light-dark(#4338ca, #4f46e5);
-		--color-accent: light-dark(#3730a3, #818cf8);
-		--color-ring: light-dark(#4338ca, #818cf8);
+		--color-primary: light-dark(#4338ca, #6961d5);
+		--color-accent: light-dark(#3730a3, #a5b4fc);
+		--color-accent-wash: light-dark(#f0effa, #2a2849);
+		--color-ring: light-dark(#4338ca, #a5b4fc);
 	}
 
 	[data-accent="blue"] {
-		--color-primary: light-dark(#1d4ed8, #2563eb);
-		--color-accent: light-dark(#1e40af, #60a5fa);
-		--color-ring: light-dark(#1d4ed8, #60a5fa);
+		--color-primary: light-dark(#1d4ed8, #3a66e5);
+		--color-accent: light-dark(#1e40af, #93c5fd);
+		--color-accent-wash: light-dark(#ecf0fa, #242b42);
+		--color-ring: light-dark(#1d4ed8, #93c5fd);
 	}
 
-	/* Sky, cyan, teal, emerald, amber and orange take one fill for both themes: these hues only carry white text at
-	   4.5:1 down at the shade the light theme uses, and a fill lightened for dark would fail the button drawn on it. */
 	[data-accent="sky"] {
-		--color-primary: #0369a1;
-		--color-accent: light-dark(#075985, #38bdf8);
-		--color-ring: light-dark(#0369a1, #38bdf8);
+		--color-primary: light-dark(#0369a1, #0376b4);
+		--color-accent: light-dark(#075985, #7dd3fc);
+		--color-accent-wash: light-dark(#e6f2f8, #1d2e37);
+		--color-ring: light-dark(#0369a1, #7dd3fc);
 	}
 
 	[data-accent="cyan"] {
-		--color-primary: #0e7490;
-		--color-accent: light-dark(#155e75, #22d3ee);
-		--color-ring: light-dark(#0e7490, #22d3ee);
+		--color-primary: light-dark(#0e7490, #0f7997);
+		--color-accent: light-dark(#155e75, #67e8f9);
+		--color-accent-wash: light-dark(#e3f3f7, #1c2e34);
+		--color-ring: light-dark(#0e7490, #67e8f9);
 	}
 
 	[data-accent="teal"] {
-		--color-primary: #0f766e;
-		--color-accent: light-dark(#115e59, #2dd4bf);
-		--color-ring: light-dark(#0f766e, #2dd4bf);
+		--color-primary: light-dark(#0f766e, #107e75);
+		--color-accent: light-dark(#115e59, #5eead4);
+		--color-accent-wash: light-dark(#ddf5f3, #1a2f2e);
+		--color-ring: light-dark(#0f766e, #5eead4);
 	}
 
 	[data-accent="emerald"] {
-		--color-primary: #047857;
-		--color-accent: light-dark(#065f46, #34d399);
-		--color-ring: light-dark(#047857, #34d399);
+		--color-primary: light-dark(#047857, #04805c);
+		--color-accent: light-dark(#065f46, #6ee7b7);
+		--color-accent-wash: light-dark(#def5ef, #1a3029);
+		--color-ring: light-dark(#047857, #6ee7b7);
 	}
 
 	[data-accent="amber"] {
-		--color-primary: #b45309;
-		--color-accent: light-dark(#92400e, #fbbf24);
-		--color-ring: light-dark(#b45309, #fbbf24);
+		--color-primary: light-dark(#b45309, #b65409);
+		--color-accent: light-dark(#92400e, #fcd34d);
+		--color-accent-wash: light-dark(#f8efe7, #37291e);
+		--color-ring: light-dark(#b45309, #fcd34d);
 	}
 
 	[data-accent="orange"] {
-		--color-primary: #c2410c;
-		--color-accent: light-dark(#9a3412, #fb923c);
-		--color-ring: light-dark(#c2410c, #fb923c);
+		--color-primary: light-dark(#c2410c, #c7430c);
+		--color-accent: light-dark(#9a3412, #fdba74);
+		--color-accent-wash: light-dark(#f9eee9, #3b2720);
+		--color-ring: light-dark(#c2410c, #fdba74);
 	}
 
 	[data-accent="rose"] {
-		--color-primary: light-dark(#be123c, #e11d48);
-		--color-accent: light-dark(#9f1239, #fb7185);
-		--color-ring: light-dark(#be123c, #fb7185);
+		--color-primary: light-dark(#be123c, #dc1546);
+		--color-accent: light-dark(#9f1239, #fda4af);
+		--color-accent-wash: light-dark(#faedf0, #41232a);
+		--color-ring: light-dark(#be123c, #fda4af);
 	}
 
 	[data-accent="pink"] {
-		--color-primary: light-dark(#be185d, #db2777);
-		--color-accent: light-dark(#9d174d, #f472b6);
-		--color-ring: light-dark(#be185d, #f472b6);
+		--color-primary: light-dark(#be185d, #d71b69);
+		--color-accent: light-dark(#9d174d, #f9a8d4);
+		--color-accent-wash: light-dark(#faedf2, #40232f);
+		--color-ring: light-dark(#be185d, #f9a8d4);
 	}
 
 	[data-accent="slate"] {
-		--color-primary: light-dark(#475569, #64748b);
-		--color-accent: light-dark(#334155, #94a3b8);
-		--color-ring: light-dark(#475569, #94a3b8);
+		--color-primary: light-dark(#475569, #5f718c);
+		--color-accent: light-dark(#334155, #cbd5e1);
+		--color-accent-wash: light-dark(#eef0f4, #252c37);
+		--color-ring: light-dark(#475569, #cbd5e1);
+	}
+
+	/* Somebody's own colour, written onto the root by `customAccent`, with plum's shades as the fallback. */
+	[data-accent="custom"] {
+		--color-primary: light-dark(var(--custom-primary-light, #8a2a6b), var(--custom-primary-dark, #bf3a94));
+		--color-accent: light-dark(var(--custom-accent-light, #7a2260), var(--custom-accent-dark, #e08ac4));
+		--color-accent-wash: light-dark(var(--custom-wash-light, #f6e9f2), var(--custom-wash-dark, #3a2433));
+		--color-ring: light-dark(var(--custom-primary-light, #8a2a6b), var(--custom-accent-dark, #e08ac4));
 	}
 
 	body {
 		@apply bg-background text-foreground font-sans antialiased;
-		/* A single wash behind the WebGL field, so the page still has depth when WebGL is unavailable. */
-		background-image:
-			radial-gradient(70rem 45rem at 12% -12%, --alpha(var(--color-accent) / 10%), transparent 62%),
-			radial-gradient(50rem 35rem at 92% 4%, --alpha(var(--color-primary) / 8%), transparent 58%);
-		background-attachment: fixed;
+	}
+
+	/* Japanese has no spaces to wrap at, so lines break between phrases and never start with ー or a small kana. */
+	:root:lang(ja) {
+		line-break: strict;
+		word-break: auto-phrase;
 	}
 
 	h1,
 	h2,
 	h3 {
-		font-feature-settings: "ss01", "cv11";
 		text-wrap: balance;
 		/* Set on the element rather than the size token, so `text-base` prose keeps its reading measure. */
 		line-height: 1.2;
-	}
-
-	/* JetBrains Mono draws `!==` and `=>` as single glyphs, which misquotes the code a reader may copy. */
-	code,
-	pre {
-		font-variant-ligatures: none;
 	}
 
 	/* Without this a tap waits ~300ms for a second one that is never coming, because zoom is still possible. */
@@ -311,7 +339,27 @@
 		flex-shrink: 0;
 	}
 
-	/** Firefox and WebKit take different properties for this, and without both a dark page gets the platform's light scrollbar. */
+	/** The colour picker draws only its swatch, inside the field's own border, in both engines. */
+	input[type="color"] {
+		appearance: none;
+		cursor: pointer;
+	}
+
+	input[type="color"]::-webkit-color-swatch-wrapper {
+		padding: 0;
+	}
+
+	input[type="color"]::-webkit-color-swatch {
+		border: none;
+		border-radius: var(--radius-chip);
+	}
+
+	input[type="color"]::-moz-color-swatch {
+		border: none;
+		border-radius: var(--radius-chip);
+	}
+
+	/** Firefox and WebKit each need their own properties, or a dark page gets a light scrollbar. */
 	* {
 		scrollbar-width: thin;
 		scrollbar-color: var(--color-border) transparent;
@@ -339,7 +387,7 @@
 		background: transparent;
 	}
 
-	/** A native select leaves no room for a chevron of ours, so it is an inline SVG background; `currentColor` cannot be used in a `url()`. */
+	/** The chevron is an inline SVG background, because `currentColor` cannot be used in a `url()`. */
 	select {
 		appearance: none;
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a1a1b5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -355,17 +403,13 @@
 	}
 }
 
-/** For a scroller whose bar would sit on top of what it scrolls. The content still scrolls, so this is never the only way to reach it. */
+/** For a scroller whose bar would sit on top of what it scrolls. */
 @utility scrollbar-none {
 	scrollbar-width: none;
 
 	&::-webkit-scrollbar {
 		display: none;
 	}
-}
-
-@utility motion-reveal {
-	animation: var(--animate-reveal);
 }
 
 @utility motion-fade {
@@ -376,40 +420,13 @@
 	animation: var(--animate-pop);
 }
 
-/** The boot banner draws its sections with a heavy rule and its rows with a thin one; these are those two. */
+/** The boot banner's heavy and thin rules. */
 @utility rule-heavy {
 	border-top: 2px solid var(--color-border);
 }
 
 @utility rule-thin {
 	border-top: 1px solid var(--color-border);
-}
-
-/**
- * A hairline of accent along the top edge, for the one card on a screen that is the point of the screen.
- * Rule 9 wants a focal point; this is how a card claims it without shouting.
- */
-@utility card-focal {
-	position: relative;
-}
-
-@utility card-focal-mark {
-	content: "";
-	position: absolute;
-	inset-inline: -1px;
-	top: -1px;
-	height: 2px;
-	border-radius: var(--radius-card) var(--radius-card) 0 0;
-	background: linear-gradient(90deg, var(--color-accent), transparent 70%);
-}
-
-/**
- * Elevation is expressed differently by theme because the same trick cannot work in both: on near-black a drop
- * shadow reads as a smudge, so a card lifts by a 1px inset highlight; on paper that highlight is invisible and
- * a real shadow is what separates a white card from the ground.
- */
-@utility surface-edge {
-	box-shadow: light-dark(0 1px 2px 0 rgb(21 21 31 / 6%), inset 0 1px 0 0 rgb(255 255 255 / 6%));
 }
 
 /* The pulse a skeleton uses is a brightness change; this is the highlight sweeping across it. */
@@ -426,7 +443,7 @@
 	}
 }
 
-/** Tippy ships a light theme, so this is the whole of its appearance here, reading the same tokens as everything else. */
+/** The whole of a tooltip's look, from the same tokens as everything else. */
 .tippy-box[data-theme~="testify"] {
 	background-color: var(--color-popover);
 	color: var(--color-foreground);
@@ -450,14 +467,7 @@
 	}
 }
 
-/**
- * Motion here is feedback, not decoration, so removing it costs nothing and keeps the dashboard usable.
- *
- * The system preference is the default because it applies before any script runs — the CSP forbids the inline
- * bootstrap that would set an attribute earlier — and the appearance page overrides it in both directions.
- * Two selector lists rather than one because a media query and an attribute cannot be combined into a single
- * condition; the declarations they gate are the same four either way.
- */
+/** Reduced motion follows the system unless Appearance says otherwise; a media query and an attribute cannot share a selector. */
 @media (prefers-reduced-motion: reduce) {
 	:root:not([data-motion="full"]) *,
 	:root:not([data-motion="full"]) *::before,
@@ -486,10 +496,7 @@
 	display: none;
 }
 
-/**
- * Highlighted code, from the token classes highlight.js names. Every colour is a token `contrast.test.ts` already
- * measures as text on the card, which is the surface every code block is drawn on.
- */
+/** Highlighted code; every colour is a token `contrast.test.ts` measures as text on the card. */
 @layer components {
 	.code-tokens {
 		.hljs-comment,
@@ -520,7 +527,7 @@
 		.hljs-name,
 		.hljs-selector-id,
 		.hljs-selector-class {
-			color: var(--color-feature-tickets);
+			color: var(--color-hue-blue);
 		}
 		.hljs-attr,
 		.hljs-attribute,
@@ -528,12 +535,12 @@
 		.hljs-variable,
 		.hljs-template-variable,
 		.hljs-tag {
-			color: var(--color-feature-community);
+			color: var(--color-hue-pink);
 		}
 		.hljs-built_in,
 		.hljs-type,
 		.hljs-meta {
-			color: var(--color-feature-economy);
+			color: var(--color-hue-amber);
 		}
 		.hljs-deletion {
 			color: var(--color-destructive-text);

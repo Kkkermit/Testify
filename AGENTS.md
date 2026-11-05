@@ -59,16 +59,16 @@ numbers, which drift):
 
 | Thing                | Count                             |
 | -------------------- | --------------------------------- |
-| Commands             | 92, across 14 categories          |
-| Command files        | 113 (incl. folded-in subcommands) |
+| Commands             | 93, across 14 categories          |
+| Command files        | 114 (incl. folded-in subcommands) |
 | Subcommands          | 145                               |
 | Prefix aliases       | 106                               |
-| Button handlers      | 44                                |
+| Button handlers      | 45                                |
 | Events               | 31, in 6 groups                   |
 | `src/lib` helpers    | 207, in 30 domain folders         |
 | Schemas/repositories | 47 / 45                           |
 | Scheduled jobs       | 11                                |
-| Tests                | 3,711 across 469 suites           |
+| Tests                | 3,833 across 500 suites           |
 
 **The music system was removed and later rebuilt** on a different architecture — see
 [§21](#21-decisions-already-made--do-not-relitigate) before changing it.
@@ -241,7 +241,7 @@ src/
 │                         scheduled messages, join-to-create channels, birthdays, music download folders)
 └── api/                  The website's and the dashboard's HTTP API — see §24.
 
-tests/                    Mirrors src/. 319 suites; the dashboard's 150 sit beside its code.
+tests/                    Mirrors src/. 325 suites; the dashboard's 175 sit beside its code.
 └── helpers/              mocks.ts, mongo.ts, containers.ts (shared harness — not tests)
 scripts/                  One-off tooling. `no-console` is off here.
 shared/                   npm workspace @testify/shared — types and zod both surfaces import
@@ -698,7 +698,8 @@ Rules:
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
 4. **Never cache a guild-specific setting in a module-level variable.** Read it per interaction.
-5. **A job that scans across guilds is correct** — `lotteryDraw` finding every due draw is the intended shape.
+5. **A job that scans across guilds is correct** — `lotteryDraw` finding every due draw is the intended shape. So
+   is Delete my data, which is about one person everywhere.
 
 ---
 
@@ -721,6 +722,12 @@ Rules:
    repository exports a `purge<Feature>(guildId)`, and `purgeGuild` in `guildRepository.ts` calls every one when
    the bot is removed. A new feature adds its purge there, and a test that writes its settings, calls
    `purgeGuild` and finds nothing left — `guildRepository.test.ts` does it for the smaller settings at once.
+   **The levelling, ticket, verification, lottery and giveaway setup is kept on purpose**, with every member record,
+   so a server that adds the bot back finds its standings and the setup they hang on; the privacy notice promises
+   exactly that (`legal.retentionL2`). Do not add them to `purgeGuild` without changing the notice with them.
+   **A field that names a person is listed in `ERASURE`** in `accountRepository.ts`, saying what Delete my data does
+   to it; the coverage test fails on a new one that is not (see
+   [§21](#delete-my-data-wipes-what-is-theirs-at-once-and-for-good)).
 6. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
    model when it is not.
 7. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
@@ -762,8 +769,9 @@ IDs) and its default.
   gateway is ready:** while it connects, `botIdentity` reads the bot's own user over REST with the token
   (`client.restName`), so `/api/bot` answers from the start rather than 503-ing the sign-in screen into showing the
   built-in name. The dashboard's strings write `{{bot}}`, which i18next fills from `defaultVariables` and
-  `useBot()` updates once the answer lands; the answer is also kept in `localStorage` (`rememberedBotName`), and
-  with nothing remembered the sign-in screen shows a placeholder rather than a name the bot may not have. A help
+  `useBot()` updates once the answer lands; the answer is also kept in `localStorage` (`rememberedBotName`, and
+  the picture with it — see [§24](#the-dashboard-wears-the-bots-face)), and with nothing remembered the sign-in
+  screen shows a placeholder rather than a name the bot may not have. A help
   article writes `{bot}`. `tests/config/brand.test.ts` fails on the name written anywhere else in `src`,
   `shared/src`, `dashboard/src`, the articles or `index.html`.
 - **Every variable reaches every way of running the bot.** `tests/config/setupFiles.test.ts` fails on a variable
@@ -1051,7 +1059,7 @@ What still earns one:
 - A `/** */` above a test naming the bug it pins.
 
 Match the surrounding density. Measured over non-blank lines with tests excluded: `dashboard/src` sits at
-**3.6%** comment lines, `src/` at **4.3%** and `shared/src` at **11.1%**. The higher figures in `src/api/` and
+**0.7%** comment lines, `src/` at **4.0%** and `shared/src` at **7.3%**. The higher figures in `src/api/` and
 `shared/` are deliberate, because a security constraint and a two-surface contract are exactly the things a reader
 cannot infer. Outside those, a new file well above the local figure is a signal to cut rather than a sign of
 thoroughness. `npm run check` will not catch a comment that only restates its identifier; read it back and ask
@@ -1897,6 +1905,44 @@ On the dashboard, `NoticeBanner` sits above every screen in `AppShell` while any
 `/notifications`, which marks them read once they are on screen and keeps the "New" badges from its first answer, so
 they do not vanish while being read.
 
+### Delete my data wipes what is theirs, at once and for good
+
+Anybody can delete everything the bot keeps about them, in every server: on the dashboard's **Your data** (`/account`)
+or with `/delete-my-data` in Discord, both ending in `eraseAccount`. Each asks for their username or Discord ID back
+(`confirmsName`, compared on the server) before anything goes. Nothing is held for a grace period and nothing can bring
+it back, which both say before the button. Six things about it are load-bearing:
+
+- **`ERASURE` in `src/database/repositories/accountRepository.ts` is the contract**, one line per field that names a
+  person, saying whether its record is deleted, its id pulled from a list, its id and name replaced, or the record
+  kept. `accountRepository.test.ts` walks every Mongoose schema, subdocument arrays included, and fails on a field
+  ending `Id`, `Ids`, `By` or `Voters` that the map does not name, so a new feature cannot forget it. It was proved to
+  go red. The integration half, which writes a record to every collection and erases it, needs MongoDB, so it runs on
+  CI.
+- **Moderation records about them are kept.** Warnings, cases, softbans and a blacklist entry protect the servers
+  they are in, and deleting them would let anybody wipe their own record. The privacy notice says so
+  (`legal.removalP3`) and `LegalPage.test.tsx` pins the claim to the `keep` lines in the map.
+  **A blacklist entry above all:** only `/blacklist` and the owner console's Blacklist tab may add or lift one, both
+  owner-only, and `blacklistWriters.test.ts` fails on any other module that touches the model or imports
+  `addToBlacklist` or `removeFromBlacklist`, the deletion included. Each of its guards was proved to go red.
+- **What they did for a server stays, without them.** A case they opened, a ticket, a giveaway they hosted or a
+  setting they changed keeps its place in the server's record, with the id replaced by `DELETED_USER_ID` ("0", which
+  no Discord id is) and the name by `DELETED_USER_NAME`, because a required field would refuse an empty one.
+  `mentionOf` writes that name where Discord would show `<@0>`, and the dashboard's `personName` translates it.
+- **Everything that remembers them in memory is told too.** `eraseAccount` drops their pending activity counts, the
+  notifications hint and the away-note cache, takes down the idea posts the bot made for them (a post Discord will
+  not delete is not worth failing over), and the route then ends every session they have and clears the cookies.
+- **It writes no audit record**, since a record of who erased themselves is the one thing that must not be left, and
+  `/api/auth/erase` has a rate limit of its own (three a minute), because one request touches every collection.
+- **The command answers only the person who ran it, and deletes nothing until the third step.** It is `private`, so a
+  slash run is ephemeral, and a prefix run, which would answer in the open, sends the panel to their direct messages
+  instead. The panel (`erasePanel`) says what goes and what stays, with **Cancel** and **Delete**; Delete only opens a
+  form (`eraseConfirmForm`) saying it is the last step and asking for the username, and only a submit that matches
+  calls `eraseAccount`. Discord's forms cannot hold buttons, which is why the warning with its buttons is a message
+  and the form is the confirmation. `buttons/deleteMyData.ts` is `ownerOnly` and checks the presser again. The
+  command is in `ALWAYS_ENABLED`, so no server can switch it off, and it is the one command `runChecks` lets a
+  blacklisted account run (`OPEN_TO_THE_BLACKLISTED`), as the dashboard already did: the blacklist entry stays.
+  `deleteMyData.test.ts` pins every step, and Delete erasing straight away was proved to turn it red.
+
 ### Global by design
 
 The blacklist, the user profile, reminders and the notifications' read state are intentionally not guild-scoped. See
@@ -1996,16 +2042,16 @@ Inside `dashboard/src`, the same rule as the bot: technical role first, then dom
 ```
 app/            AppShell, RequireAuth, ErrorState, and layout/ for the sidebar
 components/
-  brand/        Logo and LogoTile — the mark, inline, inheriting currentColor
+  brand/        BotMark and BotBanner — the bot's own picture and banner, FlagIcon
   primitives/   Button, Card, Badge, Skeleton, StatTile, EmptyState, PageHeader, GuildIcon, TabBar,
                 SegmentedControl, DataList/Figure, Tooltip
   form/         ChannelPicker, RoleChecklist, CheckList, Toggle, SavingIndicator, Warning, FIELD/LABEL
-  motion/       Backdrop (three.js), Reveal, AnimatedNumber
   ui/           reserved for shadcn's CLI — excluded from coverage, so keep your own out of it
 config/         navigation and feature registries — see "Adding to the dashboard" below
 features/<name>/  the page, its components/, its use<Name>.ts, its <name>.utils.ts and .types.ts
-hooks/          usePageTitle, usePrefersReducedMotion, useCountUp, useDocumentVisible, useDebounced
-lib/            api, cn, paging, queries, redirect, tint, and three/ for the backdrop's maths and shaders
+hooks/          usePageTitle, usePrefersReducedMotion, useDocumentVisible, useDebounced
+lib/            api, cn, datetime and intl, colour and customAccent, paging, queries, redirect, tint, and tokens
+                for reading a colour in JavaScript
 ```
 
 A page holds routing, loading and error branches and nothing else. Anything with a rule in it — which tab a URL
@@ -2015,53 +2061,61 @@ four tabs, three shared components and two testable modules.
 
 **Every screen below is built.** A new one follows the six edits in [Adding to the dashboard](#adding-to-the-dashboard).
 
-| Route                            | Screen                                                                                   |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `/`                              | The landing page; signing in is its main button. Public                                  |
-| `/docs`, `/docs/:slug`           | The docs, read out of the repository's Markdown at build time. Public                    |
-| `/source-code/*`                 | The repository at the running release, its numbers and traffic. Public                   |
-| `/sign-in`                       | One button; also the setup screen for a half-install                                     |
-| `/guilds`                        | Picker, with an invite card for guilds without the bot                                   |
-| `/guilds/:id`                    | Stat tiles, a setup checklist, feature grid, permission warnings, changes                |
-| `/guilds/:id/insights`           | Server facts, messages a day, busiest hours, top channels and members                    |
-| `/guilds/:id/levelling`          | Four tabs, optimistic writes, hierarchy warnings                                         |
-| `/guilds/:id/welcome`            | Greeting and goodbye templates, live previews, saved on blur                             |
-| `/guilds/:id/birthdays`          | Where birthdays are posted and in what words, and whose come next                        |
-| `/guilds/:id/audit-log`          | Grouped event checklist held as a draft until Save                                       |
-| `/guilds/:id/warnings`           | The five latest warnings and a search, the steps, warning a member by name               |
-| `/guilds/:id/cases`              | Every numbered case, searched and filtered, and where new ones are posted                |
-| `/guilds/:id/bans`               | Everybody banned, searched, with Unban beside each                                       |
-| `/guilds/:id/channel-tools`      | Lock a channel or set its slowmode, and every channel restricted now                     |
-| `/guilds/:id/raid-protection`    | The minimum account age, the spike alert and who it pings                                |
-| `/guilds/:id/changes`            | Two weeks of changes, from the dashboard and Discord's audit log, searched               |
-| `/guilds/:id/automod`            | Discord's own filters — no database behind it                                            |
-| `/guilds/:id/role-menus`         | Menus members pick roles from; nothing above you or that moderates                       |
-| `/guilds/:id/ideas`              | The idea board's channel and switch, every idea, and the decision on it                  |
-| `/guilds/:id/starboard`          | Where starred messages go, the stars it takes, and the author's own star                 |
-| `/guilds/:id/temp-voice`         | The lobby, made here if need be, and what each new voice channel is like                 |
-| `/guilds/:id/sticky`             | A list keyed by channel; `PUT` upserts                                                   |
-| `/guilds/:id/auto-responders`    | Trigger words and their replies, each edited in its own row                              |
-| `/guilds/:id/scheduled-messages` | Posts for later, timed in the reader's own time zone, soonest first                      |
-| `/guilds/:id/announcements`      | A message posted as the bot, previewed, pinging nobody unless chosen                     |
-| `/guilds/:id/treasure`           | Random money drops; ranges validated as pairs                                            |
-| `/guilds/:id/music`              | The music kill switch and the DJ roles                                                   |
-| `/guilds/:id/tickets`            | Destinations, panel wording, explicit publish, and every open ticket                     |
-| `/guilds/:id/bot-stats`          | The self-updating statistics message: post, move, remove                                 |
-| `/guilds/:id/member-count`       | People, bots and recent joins, counted at most once a minute                             |
-| `/guilds/:id/lottery`            | Pot, schedule, freeze, and a confirmed end                                               |
-| `/guilds/:id/casino`             | Open or close it, switch single games off, and the bet limits                            |
-| `/guilds/:id/giveaways`          | Start, end early, reroll and delete — each keyed to its own row                          |
-| `/guilds/:id/members`            | Money and levels, each as a real table, with a jump to your own page                     |
-| `…/members/:userId`              | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban             |
-| `/guilds/:id/settings`           | Prefix, nickname, link filtering, roles on join, verification, counting                  |
-| `/guilds/:id/commands`           | Per-command switches for this server                                                     |
-| `/commands`                      | Every command, searchable, with the coverage tile                                        |
-| `/status`                        | Online or not, uptime, speed, packages and outside services, 30 days back                |
-| `/notifications`                 | What the bot's owners want everybody to know; opening it reads them                      |
-| `/help`                          | Getting started, and the support assistant that answers from help articles               |
-| `/terms`, `/privacy`             | Public — outside the sign-in gate, deliberately                                          |
-| `/appearance`                    | Theme, accent, motion and language; public, in whichever frame suits                     |
-| `/owner`                         | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control |
+| Route                             | Screen                                                                                      |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `/`                               | The landing page; signing in is its main button. Public                                     |
+| `/docs`, `/docs/:slug`            | The docs, read out of the repository's Markdown at build time. Public                       |
+| `/source-code/*`                  | The repository at the running release, its numbers and traffic. Public                      |
+| `/sign-in`                        | One button; also the setup screen for a half-install                                        |
+| `/guilds`                         | Picker, with an invite card for guilds without the bot                                      |
+| `/guilds/compare`                 | Two to four servers side by side, feature by feature, each read through its own overview    |
+| `/guilds/:id`                     | Stat tiles, a setup checklist, feature grid, permission warnings, changes                   |
+| `/guilds/:id/channels`            | What the bot does in each channel, then what works across the whole server                  |
+| `/guilds/:id/inbox`               | Unclaimed tickets, ideas waiting, missing permissions and channels a feature cannot post in |
+| `/guilds/:id/week`                | What the bot will do in the next seven days, a day at a time, in the reader's time zone     |
+| `/guilds/:id/roles`               | Every role and how many features give or read it, deleted roles a setting names first       |
+| `…/roles/:roleId`                 | One role and everything that gives or reads it: what deleting it would stop                 |
+| `/guilds/:id/channels/:channelId` | What the bot does in one channel, its posts drawn as Discord draws them and edited there    |
+| `/guilds/:id/insights`            | Server facts, messages a day, busiest hours, top channels and members                       |
+| `/guilds/:id/levelling`           | Four tabs, optimistic writes, hierarchy warnings                                            |
+| `/guilds/:id/welcome`             | Greeting and goodbye templates, live previews, saved on blur                                |
+| `/guilds/:id/birthdays`           | Where birthdays are posted and in what words, and whose come next                           |
+| `/guilds/:id/audit-log`           | Grouped event checklist held as a draft until Save                                          |
+| `/guilds/:id/warnings`            | The five latest warnings and a search, the steps, warning a member by name                  |
+| `/guilds/:id/cases`               | Every numbered case, searched and filtered, and where new ones are posted                   |
+| `/guilds/:id/bans`                | Everybody banned, searched, with Unban beside each                                          |
+| `/guilds/:id/channel-tools`       | Lock a channel or set its slowmode, and every channel restricted now                        |
+| `/guilds/:id/raid-protection`     | The minimum account age, the spike alert and who it pings                                   |
+| `/guilds/:id/changes`             | Two weeks of changes, from the dashboard and Discord's audit log, searched                  |
+| `/guilds/:id/automod`             | Discord's own filters — no database behind it                                               |
+| `/guilds/:id/role-menus`          | Menus members pick roles from; nothing above you or that moderates                          |
+| `/guilds/:id/ideas`               | The idea board's channel and switch, every idea, and the decision on it                     |
+| `/guilds/:id/starboard`           | Where starred messages go, the stars it takes, and the author's own star                    |
+| `/guilds/:id/temp-voice`          | The lobby, made here if need be, and what each new voice channel is like                    |
+| `/guilds/:id/sticky`              | A list keyed by channel; `PUT` upserts                                                      |
+| `/guilds/:id/auto-responders`     | Trigger words and their replies, each edited in its own row                                 |
+| `/guilds/:id/scheduled-messages`  | Posts for later, timed in the reader's own time zone, soonest first                         |
+| `/guilds/:id/announcements`       | A message posted as the bot, previewed, pinging nobody unless chosen                        |
+| `/guilds/:id/treasure`            | Random money drops; ranges validated as pairs                                               |
+| `/guilds/:id/music`               | The music kill switch and the DJ roles                                                      |
+| `/guilds/:id/tickets`             | Destinations, panel wording, explicit publish, and every open ticket                        |
+| `/guilds/:id/bot-stats`           | The self-updating statistics message: post, move, remove                                    |
+| `/guilds/:id/member-count`        | People, bots and recent joins, counted at most once a minute                                |
+| `/guilds/:id/lottery`             | Pot, schedule, freeze, and a confirmed end                                                  |
+| `/guilds/:id/casino`              | Open or close it, switch single games off, and the bet limits                               |
+| `/guilds/:id/giveaways`           | Start, end early, reroll and delete — each keyed to its own row                             |
+| `/guilds/:id/members`             | Everybody, searched and filtered, acted on one at a time or 25 at once; the boards a tab    |
+| `…/members/:userId`               | One member: standing, roles, nickname, warnings, timeout, softban, kick, ban                |
+| `/guilds/:id/settings`            | Prefix, nickname, link filtering, roles on join, verification, counting                     |
+| `/guilds/:id/commands`            | Per-command switches for this server                                                        |
+| `/commands`                       | Every command, searchable, with the coverage tile                                           |
+| `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
+| `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
+| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
+| `/help`                           | Getting started, and the support assistant that answers from help articles                  |
+| `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
+| `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |
+| `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 | Command                 | What it does                                                  |
 | ----------------------- | ------------------------------------------------------------- |
@@ -2252,6 +2306,31 @@ them are load-bearing:
 `/clear` is left out on purpose: deleting a hundred messages from a browser tab is a worse tool than doing it in the
 channel, where they can be seen.
 
+### The member directory reads Discord a page at a time, and acts on one member at a time
+
+`…/members` opens on everybody in the server, with the money and levels boards a tab beside it; a `?board=` link
+still opens the boards (`tabFrom`). `readDirectory` in `src/lib/moderation/memberDirectory.util.ts` is the read and
+`actOnEach` in `memberBulk.util.ts` the write, and nothing new is stored. Five things about it are load-bearing:
+
+- **Never one big list.** `guild.members.list` is read a thousand at a time from a cursor, a search is
+  `guild.members.search` (prefix only, at most a thousand, and the page says when it hit that), and a role filter
+  reads the members themselves rather than `role.members`, which knows only the cached ones. A filter that matches
+  little stops after `DIRECTORY_LIMITS.maxScan` members and hands back a cursor, so no page can stall on a server
+  of 100,000. The warned filter reads the warned ids from the database and fetches only those, and asks Moderate
+  Members, as `/warn list` does; so do the counts on each row.
+- **A row offers what Discord would.** `moderationBlock` is `moderationProblem` as a code, so the page words why a
+  member cannot be acted on, and roles are only those `grantableRoles` allows. The reader, the server's owner and
+  the bot are never acted on by a bulk request, even for roles, where Discord asks no role order of the member.
+- **A bulk request is at most `DIRECTORY_LIMITS.maxBatch` (25) members, acted on in turn.** Each is answered for
+  (`BulkOutcome`): done, or skipped with a `BulkSkip` code, because a kick that has happened cannot be rolled back,
+  so the request is never all or nothing. One Discord refusal is logged at `debug` and the rest carry on.
+- **Confirmation scales with reach** (`bulkConfirmed`, checked on both sides): one member by their username or ID,
+  as on their own page; a kick or ban of several by typing how many. Each kick, ban and timeout still records its
+  own numbered case, and one audit record (`member.kick.bulk` and the rest) lists everybody touched.
+- **The bulk routes are `/members/bulk/*`, mounted before `/:userId`**, each asking its command's permission, and
+  `ASKS_MORE` in `accessWalk.test.ts` names all four. A single warning from a row goes through `POST /warnings`;
+  there is no bulk warning, because a warning's step can kick or ban and would skip the typed count.
+
 ### Rules that carry over
 
 - **The dashboard owns no logic.** It is a third surface onto the same domain — repositories and
@@ -2355,8 +2434,19 @@ where a skill disagrees with it, the skill wins and §19 is updated. What does *
 single source, the accessibility floor only rises, and the CSP is untouchable.
 
 **No component writes a colour, a radius or a duration.** They come from `@theme` in `index.css` — including the
-`--color-feature-*` tints and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
+`--color-hue-*` colours and the radius scale — which is what makes a fork's rebrand one file. A hex value in a
 `.tsx` is a review comment.
+
+**Nothing moves on load, and a colour names a part of the bot rather than decorating it.** A page arrives whole;
+motion is kept for a change somebody caused — a dialog, a tab, a warning — and for a skeleton's sheen. Each feature
+and command category wears one of the six `--color-hue-*` colours **on its icon only**, over the neutral `bg-muted`
+tile, grouped as the sidebar groups the bot: green community, blue messages, stats and information, red moderation and
+support, amber money, pink entertainment, violet games, grey the bot's own settings. `features.test.ts` fails if the
+categories collapse into fewer hues or reach for one `contrast.test.ts` does not measure. Stat tiles colour their icon
+the same way, and the owner console's usage panels each draw their bars in a hue at a fifth of its strength. A wash
+behind the icon is what made a page of twenty tiles loud, and it stays gone. A figure is the page's face with
+`tabular-nums`; mono is for what is typed literally. A label is sentence case, never letterspaced capitals. The guide's
+§19.3, §19.4 and §19.8 hold the detail.
 
 **The radius scale is four tokens and nothing else**: `--radius-chip` (6px) for inline chips, bars and the
 segmented control's buttons, `--radius-field` (8px) for inputs, list shells and rows, `--radius-card` (10px) for
@@ -2395,11 +2485,13 @@ the same way and neither can be reasoned around:
 
 **The settings page is the worked example of getting this wrong.** Seven cards over four groups meant a group
 with one card left half the page blank, and a short card beside a tall one left a 300px void — reported as
-"massive gaps", and correctly. Two columns of cards was the wrong container for it. Each card is now full width
-and splits _inside_: what the setting is on the left in a fixed 288px column, the controls on the right at a
-readable measure. No arrangement of card heights can leave a hole, the descriptions all start on one column,
-and the page reads as the list of settings it is. Reach for that shape before a masonry whenever the cards are
-forms rather than tiles.
+"massive gaps", and correctly. Two columns of cards was the wrong container for it. Every feature page is now
+`SettingRows`: full-width panels of hairline-divided rows, each the setting's name in a fixed 18rem column on the
+left and its control on the right, under a `Summary` sentence saying what the feature does right now. `Field`,
+`Toggle`, `CheckList`, `FieldGroup` and `RowActions` become rows by themselves inside a panel, so no screen lays out a
+row by hand. No arrangement of heights can leave a hole, the names all start on one column, and each page reads as the
+list of settings it is. Reach for that shape before a masonry whenever the cards are forms rather than tiles; the
+guide's §11 has the rules.
 
 **No two modules may differ only by case.** `Field.tsx` beside `field.ts` is two files on Linux and one on
 macOS or Windows, so `@/components/form/Field` resolves to the class strings there and the page dies at start-up
@@ -2415,13 +2507,20 @@ and names a deleted channel rather than showing another. A form with several req
 still missing (`ticketMissing`), not only the first, so they can be filled in any order.
 
 **Nor does one format its own dates, numbers or units.** `lib/datetime.ts` holds `shortDate`, `dateAndTime`,
-`clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
+`dayAndMonth`, `monthName`, `clockTime`, `since` and `formatUptime`, and `lib/intl.ts` holds `formatNumber`, `formatPercent` and `formatUnit`.
 All of them write in the language the reader chose and never in the browser's own region: a bare
 `toLocaleString()` renders `7/30/2026` for one admin and `30/07/2026` for another, and the two are unreadable as
 each other. English is British (`formattingLocale` maps `en` to `en-GB`), so `30 Jul 2026` cannot be misread, and
 every other language gets its own month names, separators and unit symbols — `30. Juli 2026`, `7,2 ko`, `42 мс`.
 The month is always a word, which matters most on an audit trail. Formatters are cached per locale, so switching
-language never reuses the old one.
+language never reuses the old one. **No other file builds an `Intl` formatter or calls `toLocaleDateString`**, because
+only `formattingLocale` is guaranteed a tag the browser accepts: four screens passed `i18n.language` instead, which is
+whatever the browser reported, and Chromium's `en-US@posix` made `Intl.DateTimeFormat` throw and took the birthdays page
+down. `src/test/formatters.test.ts` fails on one anywhere else, and was proved to name all four. **i18next's own
+`{{count, number}}` is one of these too**: its built-in formatter is built from `i18n.language`, so the same tag left
+every count in the dashboard ungrouped — `1234 members` — and wrote `lang="en-US@posix"` onto the page. The language
+detector now hands i18next `readableTag` of what the browser said, the `number` format is `formatNumber`, and `lang`
+is the resolved locale. `src/i18n/index.test.ts` pins both, and reproduces `1234` without the fix.
 
 **Repeated markup becomes a primitive, not a copy.** Three files with their own segmented control is three
 places to fix an `aria-pressed` bug: `SegmentedControl`, `DataList`/`Figure`, `TabBar`, `Card` and the `FIELD` /
@@ -2524,28 +2623,55 @@ a fallback. The fallback **removes** the attribute rather than writing it, so an
 correct before any script runs — which is the only option the CSP leaves, and is what makes all three
 flash-free. The element is the state, not a React store, so CSS and JavaScript cannot end up disagreeing:
 `usePrefersReducedMotion` reads `data-motion` first and the media query second, in the stylesheet's own order,
-and watches the attribute with a `MutationObserver` so a change reaches the WebGL backdrop without a reload.
+and watches the attribute with a `MutationObserver` so a change reaches what is already on screen without a reload.
 
 `applyStoredPreferences()` runs once in `main.tsx`, **before** the app mounts. Without it the choices were only
 applied while the appearance page itself was mounted, so a reader who picked light and then landed on `/guilds`
 got the system theme back — remembered, and never applied. `preferences.test.ts` pins it.
 
-**An accent is a block of three tokens, and every one is measured.** `--color-primary`, `--color-accent` and
-`--color-ring` move; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
-`contrast.test.ts` reads the blocks out of `index.css` and checks all twelve accents against both backgrounds — an
-accent nobody measured is worse than no accent, because a control invites everybody to try it. Six of them
-(sky, cyan, teal, emerald, amber, orange) take **one fill for both themes**: those hues only carry white at 4.5:1
-down at the light theme's shade, and lightening the fill for dark would fail the button drawn on it. A new accent
-is a block in `index.css`, a name in `ACCENTS` and a label in every locale; the test tells you if its colours fail.
+**An accent is a block of four tokens, and every one is measured.** `--color-primary`, `--color-accent`,
+`--color-accent-wash` and `--color-ring` move — the wash too, or a chip of blue text sat on plum's pink tint; `success`, `warning` and `destructive` never do, so Delete stays red whatever is chosen.
+`contrast.test.ts` reads the blocks out of `index.css` and checks all twelve accents against both backgrounds, and
+each one's text on its own wash — an
+accent nobody measured is worse than no accent, because a control invites everybody to try it. **A dark fill has
+a narrow band to sit in**: at least 3:1 against the dark ground, so a button is seen, and at least 4.5:1 under
+white, so its label is read. That is a relative luminance between about 0.15 and 0.18 whatever the hue, so each
+dark fill is its light fill moved into that band. A new accent is a block in `index.css`, a name in `ACCENTS` and a
+label in every locale; the test tells you if its colours fail.
+
+**`primary` is a fill and never a text colour.** It only ever wears white, and as text on the dark ground it reads at
+3.3:1; `accent` is the cut for links, live state and anything else written in the accent. `src/test/accentText.test.ts`
+fails on `text-primary` anywhere, and was proved to. **Nor is anything faded to say it is not in effect**: an `opacity`
+on a card takes its muted text below AA with it, which is what the browser sweep found on the server picker and the
+command switches. A card that is not in effect has a dashed border and keeps its text; only a disabled control may be
+faded, since WCAG exempts an inactive one.
 
 Two things about the blocks are load-bearing:
 
 - **The selector is `[data-accent="…"]`, not `:root[data-accent="…"]`.** A swatch carries its own attribute and
   paints itself in that accent while the page wears another — the same trick `ThemePreview` plays with
   `color-scheme`. Verified in a real browser: an amber swatch reads `rgb(180, 83, 9)` on a teal page.
-- **Violet restates the base palette instead of relying on it.** Choosing violet leaves the page unmarked, but
-  the swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a Violet
-  swatch drawn in amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
+- **Plum restates the base palette instead of relying on it.** Choosing plum leaves the page unmarked, but the
+  swatch still needs a block or it inherits whatever the page is wearing — which shipped once as a swatch drawn in
+  amber, caught by a screenshot rather than by any test. The two copies are pinned equal.
+
+**A reader's own colour is fitted, never trusted.** Appearance takes any colour, picked or typed as a hex code, RGB or
+HSL (`parseColour` in `lib/colour.ts`), and `customAccent` in `lib/customAccent.ts` keeps its hue and saturation and
+moves its lightness only as far as each token's luminance band needs — the bands that hold every preset to the same
+thresholds, the wash included. The shades go onto the root as
+`--custom-*` properties, which `[data-accent="custom"]` reads with plum as the fallback, and the colour is stored apart
+from the accent (`testify:accent-colour`), so choosing a swatch does not forget it. Three things are load-bearing:
+
+- **The thresholds are proved over the colour space, not over one colour.** `contrast.test.ts` puts a sweep of hues,
+  saturations and lightnesses through `customAccent` and measures every result against the real grounds in
+  `index.css`; widening a band goes red.
+- **Only six hex digits ever reach a style property or storage, whatever the way in.** The field keeps only the
+  characters a colour is written with (`sanitiseColourText`), `parseColour` refuses anything outside that allowlist
+  before reading it, and the picker, `setColour`, `applyCustomColour` and the read back from storage each pass the
+  value through `readHex`, so the only string written is the one `toHex` makes from three integers. What was typed is
+  only ever an input's value, never markup. `colour.test.ts`, `useAccent.test.ts` and the page's test feed it script,
+  markup and CSS, and loosening the allowlist or the check in `setColour` goes red.
+- **It is applied before the app mounts**, with the other preferences, so a reader who made one lands in it.
 
 That shape is forced by the CSP, and is better for it. `script-src` has no `'unsafe-inline'`, so the usual
 no-flash bootstrap script cannot run at all; with the system preference answered in CSS there is nothing to
@@ -2561,9 +2687,8 @@ development:
   the page's own theme, so the Light sample was black on a dark page. An element cannot opt into the other half
   of a token that was already resolved above it.
 - **`pickScheme` can no longer read a token**, because `getComputedStyle` hands back
-  `var(--lightningcss-light,…)var(--lightningcss-dark,…)` rather than `light-dark(…)`. `accentColour()` fell
-  through to its hardcoded fallback, so the WebGL backdrop was the same violet in every theme and ignored the
-  accent entirely.
+  `var(--lightningcss-light,…)var(--lightningcss-dark,…)` rather than `light-dark(…)`. `themeColour()` then
+  falls through to its hard-coded fallback, and the console greeting is drawn in colours the page is not wearing.
 
 `npm run verify:bundle` fails the build if the polyfill returns **or** if `light-dark()` vanishes altogether,
 and `build:dashboard` runs it. Proved both ways: removing `cssTarget` exits 1, restoring it exits 0.
@@ -2580,18 +2705,18 @@ none. Two things it caught that are worth keeping in mind:
 - **A pair can pass for the wrong reason.** The destructive button renders `text-white` literally, so checking
   it against `foreground` only worked while `foreground` happened to be white. Check the colour the component
   actually draws.
-- **Elevation cannot be recoloured.** On near-black a drop shadow reads as a smudge, so a card lifts by a 1px
-  inset highlight; on paper that highlight is invisible and only a real shadow separates card from ground.
-  `surface-edge` therefore switches technique by theme rather than switching colour.
+- **Elevation is a colour and a line, never a shadow.** A card is the surface colour and a 1px border in both
+  themes. A shadow reads as a smudge on the dark ground and a highlight is invisible on the light one, and either
+  one is what made every card look lifted off the page.
 
 **`getComputedStyle` never resolves a custom property**, so anything reading a token in JavaScript receives
-`light-dark(…)` as source text. `lib/three/tokens.ts` splits it by the resolved `color-scheme`; before that the
-backdrop failed its hex check and silently fell back to one colour in both themes.
+`light-dark(…)` as source text. `lib/tokens.ts` splits it by the resolved `color-scheme`, for the console greeting,
+which styles text with values rather than classes.
 
 ### Every string comes from i18next
 
-`src/i18n/` holds the setup and six JSON dictionaries. English is the source; Spanish, German, French, Italian
-and Russian sit beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
+`src/i18n/` holds the setup and eight JSON dictionaries. English is the source; Spanish, German, French, Italian,
+Russian, Dutch and Japanese sit beside it. Keys are typed by declaration merging (`i18next.d.ts`), so `t("nav.serrvers")` is a compile error,
 and `TranslationKey` is exported for the places that store a key rather than call `t` — `NavItem.labelKey` and
 every module-level lookup table.
 
@@ -2641,8 +2766,15 @@ table falls back to what the server sent for a key it has not seen, so the API c
 — without it a screen reader narrates French copy in an English voice. Counts use `{{count, number}}` so
 grouping follows the chosen language rather than the browser.
 
-**Adding a language** is three steps: copy `en.json`, translate the values, and add the code to `LOCALES` and
-`LOCALE_NAMES` in `src/i18n/index.ts`. The parity test names anything missed.
+**Japanese is written without spaces, and two things follow.** A list is joined with `common.listSeparator`, which is
+`、` there and `, ` elsewhere, never with a literal comma — `src/test/listSeparator.test.ts` fails on a `.join(", ")`
+and was proved to. And `index.css` gives `:root:lang(ja)` `line-break: strict` and `word-break: auto-phrase`: without
+them the landing page's headline broke サーバー in half and started a line with ー, which a browser showed and jsdom
+cannot. A language with rules of its own gets them the same way, on its `lang`.
+
+**Adding a language** is four steps: copy `en.json`, translate the values, add the code to `LOCALES` and
+`LOCALE_NAMES` in `src/i18n/index.ts`, and draw its flag in `FlagIcon.tsx`, which the `Locale` type demands. The parity
+test names anything missed, and the plural test names a form the language needs that English does not have.
 
 ### Responsiveness, and the label trap
 
@@ -2666,31 +2798,115 @@ them from the accessibility tree and leaves every navigation link named nothing 
 exists to avoid. jsdom loads no stylesheet, so a unit test cannot tell the two apart by computing a name; the
 unit test pins the class and a real browser check confirms the accessible name survives.
 
-**Every guild-scoped screen names its server, in `PageHeader`'s `eyebrow`.** Below `md` the sidebar is a drawer,
+**Every guild-scoped screen names its server, in `PageHeader`'s `server`.** Below `md` the sidebar is a drawer,
 so with it closed nothing else on the page says which server is being configured — and "turn levelling off" is a
-different decision in each of them. The overview is the one exception: its `<h1>` _is_ the name, so an eyebrow
-there would say it twice. `src/test/pageHeader.test.ts` reads the guild-scoped routes out of `routes.tsx` and
+different decision in each of them. The name sits above the title as a breadcrumb linking to the server's overview.
+The overview is the one exception: its `<h1>` _is_ the name, so a breadcrumb there would say it twice. `src/test/pageHeader.test.ts` reads the guild-scoped routes out of `routes.tsx` and
 names any screen that stopped passing it, because the prop existed unused on all twelve for as long as it
 existed. `useGuildOverview` takes `null` for the screens that serve both a server and the whole bot
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
 
-**A server's screens are grouped into collapsible sections** — Community, Moderation, Economy, Entertainment,
-Channels — because a flat list grew past what one glance takes. A screen goes where it is decided alongside, not
-where its command is filed: automod is a `settings` command and still sits in Moderation. `NavGroup.sections` in `config/navigation.ts` holds them, `SidebarSection` renders one, and adding a
-screen now means choosing which section it belongs in — `items` stays for the screens that are not a category
-(Overview and Settings). Three things about it are load-bearing:
+**A server's sidebar names its screens, never its channels.** Overview, Inbox, This week, Channels, Members, Roles and
+Settings come first, then
+six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
+menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
+messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, channel tools, tickets,
+the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
+casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
+for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
+`NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,
+with a count beside each and features dragged onto them, and both were taken out after review: a real server's
+channels turned the sidebar into a scroll, and dragging was the hardest of three ways to choose a channel. Do not put
+either back. Six things about it are load-bearing:
 
+- **Channels is one page, `/guilds/:id/channels`.** It lists the channels the bot works in, in Discord's order
+  (`channelTree` in `features/channels/channelMap.utils.ts`), each opening that channel's page, then the features
+  that work across the whole server. `channelTree` leaves out every channel whose name is `null`, which is how
+  `/channels` marks one its reader cannot see, so the page names nothing Discord would not. The entry is
+  `exact: false`, so it stays marked on a channel's own page.
+- **A feature's channel is chosen on the feature's own page, and nowhere else.** There is no dragging, no Place in
+  and no Move to; the page already has the picker, and one way to do a thing is the one people find.
+- **A highlight in the sidebar is the surface colour, not `muted`.** The sidebar is already `--color-sidebar`, which is
+  the muted grey in the light theme, so a `bg-muted` selection there was invisible.
 - **Collapsing only exists where labels do.** At the icon-only rail there is nothing to read and no room for a
   toggle, so the button is `hidden lg:flex` and the items stay flat there whatever the state says. A collapsed
   section at that width would hide the icons and leave nothing to click. The button being `display: none` is
   what keeps `aria-expanded="false"` from contradicting a list the rail is still showing.
 - **The section holding the current page opens itself** (`sectionHolds`), so a collapsed section can never hide
   where you are, and it re-opens when a navigation lands inside it.
-- **`allNavItems` reaches into sections.** It is what the tests and every flat consumer read; a screen reachable
-  only from a section would otherwise look like it had left the navigation entirely.
+- **`allNavItems` reaches into sections.** It is what quick search, the help page and the tests read; a screen
+  reachable only from a section would otherwise look like it had left the navigation entirely.
 
-`navigation.test.ts` asserts the **sorted** set of paths rather than their order, because which section a screen
-sits in is a grouping choice and reachability is the rule.
+`navigation.test.ts` pins the **sorted** set of every server screen's path rather than their order, because which
+section a screen sits in is a grouping choice and reachability is the rule. Quick search adds the server's channels
+from the same `channelTree`, so a channel found there opens the page the Channels list would.
+
+### The inbox, This week and Roles read what is already stored
+
+Each is one read route under `requireGuild` and keeps nothing of its own: `readInbox` and `readWeek` in
+`src/lib/settings/` and `readRoleUses` in `src/lib/roles/` read the repositories each feature's own screen reads, so
+none of them asks more of the reader than Manage Server, as those screens do. Four things about them are load-bearing:
+
+- **The inbox lists what needs a person, not everything there is.** A ticket somebody has claimed is being dealt
+  with, so only unclaimed ones count; a channel problem is a switched-on feature pointing at a channel that is gone or
+  one the bot cannot post in, and only where the bot itself posts (`POSTS`), since a lobby or a counter needs other
+  permissions. A failed post is not recorded anywhere, so it is not listed. The sidebar's count and the overview's
+  one line read the same query, and say nothing while nothing waits.
+- **This week lists only what will happen.** A repeating post is listed once per time it goes out (`scheduleTimes`,
+  capped at `WEEK_LIMITS.perSchedule`), a frozen lottery does not draw and is left out, and a birthday appears only
+  while the server's birthday posts are on. Days are grouped by the reader's own calendar, never UTC's.
+- **A role a setting still names after it was deleted is listed first on Roles**, because that is the one already
+  broken; its own page says so in place of the "deleting it would stop" sentence, which cannot be true of it.
+- **Every row opens the screen where the thing is set**, and nothing on these pages changes anything itself, so no
+  new write has to be gated.
+
+### A channel's page shows its posts as Discord draws them
+
+- **A post is edited where it is shown.** The welcome, goodbye and birthday blocks on a channel page draw the post
+  with `DiscordPreview` and open `MessageEditor` beside it, writing through the feature's own update hook. Level-ups
+  have no template, so their block says what they do rather than drawing a message.
+- **The places query sits under the overview's key**, so every write that already refreshes the overview refreshes
+  the Channels page and every channel's page with it.
+
+### Send me a test sends the real post, to its reader and nobody else
+
+**Send me a test** sits beside every preview of something the bot posts: the greeting, the goodbye, a birthday, an
+announcement, a sticky, a scheduled message and an auto-responder's reply, on their own screens and on a channel's
+page. It sends the draft as it stands, saved or not, through `POST /guilds/:id/test-post`. Four things about it are
+load-bearing:
+
+- **There is no recipient field.** The test goes to whoever asked, fetched as a member so the placeholders fill in for
+  them, and somebody not in the server — an owner looking round — is refused with `not_a_member`. Nothing a request
+  says can make the bot message anybody else.
+- **It is built by the function the real post uses** (`testPostMessage` calls `greetingFor`, `farewellFor`,
+  `birthdayPost` and `announcementMessage`), so what arrives is what members get, and then `allowedMentions` becomes
+  `{ parse: [] }`: a draft reading `@everyone` pings nobody, and an announcement's chosen ping is dropped. A note goes
+  first naming the server it came from.
+- **Three a minute per person per server** (`TEST_POST_LIMITS.perMinute`), because a direct message is cheap to send
+  and easy to flood somebody with. Each one is audit-logged as `test.send` with its kind and never its words, which
+  the privacy notice says (`legal.usingDashboardP2`) and a route test pins.
+- **Closed direct messages are the reader's setting, not a fault.** `sendTestPost` answers `closed` for
+  `CannotSendMessagesToThisUser`, the route answers 403 `dm_closed`, and the line beside the button says which setting
+  to change.
+
+Tickets and giveaways have no button: a ticket's Open button and a giveaway's entry cannot work in a direct message,
+so a test of either would show a control that does nothing.
+
+### Side by side reads each server as its own page would
+
+`/guilds/compare` puts two to four servers the reader manages in columns and every feature in rows, so somebody running
+several servers sees at a glance where one is set up differently. Three things about it are load-bearing:
+
+- **It has no route of its own.** Each column is that server's own `GET /guilds/:id/overview` and `/channels`, so
+  `requireGuild` asks about every column live, exactly as on that server's page, and a server the reader can no
+  longer manage says so in its column while the others stay readable. It sits outside `RequireGuild` because no one
+  server is in its path.
+- **What is offered comes from `/auth/me`, and what is shown from each answer.** `comparable` offers servers with the
+  bot where the reader could manage it, and `chosenFrom` drops any id in `?servers=` that is not one of them, so a
+  typed address cannot ask about a server the reader was never shown.
+- **It is read-only.** Every cell links to the feature on that server, and "only where they differ" leaves out which
+  channel a feature posts in, because two servers can never share one. Copying a setup across servers is a write
+  across several permission checks and is not built.
 
 ### Getting every command onto the dashboard
 
@@ -2858,7 +3074,8 @@ Four things about it are load-bearing:
   `TitledRefusal` — "under maintenance", and that the command may come back — which `refusalEmbed` shows as a
   warning with its own heading; `refusalText` flattens it where a surface has no heading to give it.
 - **`ALWAYS_ENABLED` cannot be switched off anywhere.** `/help` is how somebody finds out what is left; a server
-  that turned it off would have no way back inside Discord. The API refuses rather than trusting the form.
+  that turned it off would have no way back inside Discord. `/delete-my-data` is there because no server may keep
+  somebody from deleting their own data. The API refuses rather than trusting the form.
 - **A manager's list can never contain an owner command.** They are filtered out on the way in _and_ on the way
   out, so a hand-written request cannot make one visible or switch one off.
 
@@ -2947,8 +3164,8 @@ wrote. Four things about it are load-bearing:
 
 ### The changes page
 
-`/guilds/:id/changes` puts two records in one list: what managers did here (`dashboardaudit`) and what Discord's own
-audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
+`/guilds/:id/changes` puts two records in one list: what managers did here and with the bot's commands
+(`dashboardaudit`), and what Discord's own audit log says happened in the server. `readServerChanges` in `src/lib/moderation/serverChanges.util.ts` merges them,
 and three things about it are load-bearing:
 
 - **Discord's side is read, never stored.** `readAuditWindow` pages back a hundred entries at a time until it passes
@@ -2961,6 +3178,47 @@ and three things about it are load-bearing:
 - **A Discord entry carries a kind and a verb, not a sentence**, because each surface words it: `discordChange`
   maps discord.js's target and action types, and reads a timeout out of a member update, where Discord hides it.
   The dashboard's `KIND_LABELS` and `VERB_LABELS` are the translated tables.
+
+**A settings change can be put back, through the route that made it, and only while nothing has changed since.**
+`RESTORABLE` in `shared/src/restore.ts` lists the eighteen settings writes this covers — welcome, goodbye, birthdays,
+levelling, the starboard, the idea board, join to create, raid protection, cases, verification, music, treasure, the
+lottery and the settings page's five sections — each with its route, where it is read and the fields it may send.
+Four things about Put back are load-bearing:
+
+- **Every one of those writes keeps what it replaced.** `auditSettings` records every restorable field as stored
+  before and after, read with the same function the route's `GET` uses, and `auditChange` refuses a restorable action
+  at compile time, so a route cannot record one without that snapshot. A field that acts rather than stores —
+  verification's `publish`, counting's `reset` — is never one. The privacy notice says a settings change keeps
+  what it replaced (`legal.usingDashboardP2`).
+- **Only what the change altered goes back** (`restoreOf`), and only when the old values pass the route's own schema,
+  so a button is never offered for a write that would be refused as malformed.
+- **The setting must still hold what the change left** (`stillAsLeft`), read afresh when the panel opens. A later
+  change, from the dashboard or from a command in Discord, is never undone without anybody seeing it; the panel says
+  so and links the setting's page instead.
+- **The browser sends the old values to the feature's own route**, so `requireGuild`, `requireReach`, the permission
+  the route asks and its validation decide a put-back exactly as they decided the change, and the route records it as
+  a change of its own, which can itself be put back. Nothing new can be reached this way: the request is one the
+  reader could already have made by hand.
+
+**A setting changed with a command or a panel in Discord is recorded the same way**, with `source: "command"` on the
+record, so the Changes page lists it, filters it under its own source and can put it back. A record with no source is
+the dashboard's, which is every record written before commands were. Four things about it are load-bearing:
+
+- **The handler is wrapped, not the write.** `recordsSettings(["starboard.update"], defineButton({…}))` in
+  `src/lib/settings/settingsRecord.util.ts` reads the setting before a press or a run, runs it, and reads it again in a
+  `finally`, so a change is recorded even when the reply after it fails. Recording inside each `apply*` function
+  would record every dashboard change twice, since the route already records its own, and half the settings —
+  the prefix, counting, roles on join — are written straight to their repository with no `apply*` to put it in.
+- **It reads with the route's own readers.** `SETTING_READERS` in `settingsReaders.util.ts` is what each route's `GET`
+  answers with — the welcome, levelling, verification and settings routes import their readers from there — so a
+  record from Discord has exactly the shape Put back expects, and `stillAsLeft` guards it the same way.
+- **The words are written, not derived.** `describeChange` names a switch as one ("Turned the starboard on") and every
+  other field from `WORDS`, so the page never shows `lobbyChannelId`; `settingsRecord.test.ts` fails on a field with
+  no words.
+- **A record never fails the change.** A reading that fails records nothing, and a record that cannot be written is
+  logged as `[SETTINGS]` and dropped, because the setting has already changed. `settingsWriters.test.ts` names the
+  writers of every restorable setting and fails on a button or command that calls one without `recordsSettings`
+  naming that setting, which was proved to go red.
 
 ### The status page
 
@@ -3042,7 +3300,7 @@ are the repository's English, and a page read in another language says so (`docs
 `ReaderShell`, which draws it in the website for somebody signed out, or on a host with no dashboard, and in the
 dashboard for somebody signed in; on a host with no dashboard it never asks `/auth/me`, which would only refuse. The
 site's header links it with a palette icon and the footer by name. Below 640px the header holds only the links and that
-icon, with the language reached through Appearance: measured at 320px in all six languages, the select did not fit
+icon, with the language reached through Appearance: measured at 320px in every language, the select did not fit
 beside Spanish, Italian or Russian, and a link label that wraps reads as two links. Header links never wrap.
 
 **A link followed out of the docs or the source leaves a way back.** `followTrails` in `lib/trail.ts` subscribes to
@@ -3074,41 +3332,18 @@ own bot without a line of CSS. Two things about it are easy to get wrong:
 
 - **The banner is not in the READY payload.** `client.user.banner` is undefined until the user is fetched over
   REST, so `botIdentity()` fetches once and caches for an hour. A failed fetch still yields the avatar.
-- **Everything falls back to `components/brand/Logo`** — no profile yet, no avatar, or a CDN that will not load.
-  A brand mark is never worth a broken image icon, and `BotMark` handles all three the same way.
+- **The bot's own picture and banner are always what is drawn, never a built-in logo.** There is no logo component:
+  a fork's sign-in screen once wore the shield whenever `/api/bot` had not answered, which under `npm run dev:all`
+  is every bot restart. `useBotLook()` answers with the live profile, or until it lands the picture, banner and
+  colour it last gave, which `rememberBotLook` keeps in `localStorage` beside the name; `rememberedBotLook` reads
+  back only `https://cdn.discordapp.com` addresses and a `#rrggbb` colour, because storage holds whatever was last
+  written to it. The tab's icon becomes the same picture (`showBotIcon`). With nothing remembered, or a CDN that will
+  not load, `BotMark` draws the bot's initial, and a picture that failed is tried again once the address changes.
+- **A restart is waited out like a connection.** `useBot` keeps asking every two seconds for a minute while the
+  answer is `bot_connecting` or the development proxy's `api_down`, rather than giving up after two quick retries.
 
 The endpoint takes no session because the sign-in screen needs it before one exists; it carries nothing beyond
 the public profile, and a test pins the exact key set so nothing private drifts into it.
-
-### The WebGL backdrop
-
-`components/motion/Backdrop.tsx` draws a drifting field of points behind every screen. Four things about it are
-load-bearing, and all four are what keep an ornament from costing anything:
-
-- **three is imported dynamically and chunked on its own.** `manualChunks` in `dashboard/vite.config.ts` gives
-  it its own 513 kB chunk — left in `vendor` it would be in the initial load, which is the opposite of lazy.
-  `vendor` is the same size with the backdrop as without it.
-- **`prefers-reduced-motion` skips the import entirely**, rather than loading three and then sitting still. So
-  does a machine with no WebGL, and `createStarfield` returns null rather than throwing if the context is
-  refused. Verified in a real browser: with the preference set, no canvas and no chunk fetched.
-- **Everything testable is out of the three.js file.** `lib/three/field.ts` holds the scatter, the frame-rate
-  independent easing and the parallax, all pure and unit tested; `starfield.ts` is the part that needs a GPU and
-  is the one file excluded from coverage.
-- **It reads the palette rather than restating it, and re-reads it.** `lib/three/tokens.ts` pulls
-  `--color-accent` off `:root`, so the design tokens in `index.css` stay the only place a colour is written, and
-  a token three cannot parse falls back instead of rendering a black field. Theme and accent are both chosen on
-  a screen this is drawn behind, so `Backdrop` watches `data-theme` and `data-accent` and calls `refresh()`
-  rather than keeping whichever colour it started with.
-
-**Strength is a token too, and it is not the same in both themes.** The field is composited over the page rather
-than added to it, so the same points that read as stars on near-black read as dust on paper —
-`--backdrop-opacity` is `light-dark(0.14, 0.5)`, and `Backdrop`'s `opacity` prop scales that rather than
-replacing it, so a screen can be quieter in both themes at once. Measured in a browser rather than judged from
-the source: the brightest pixel in an empty strip goes `rgb(43, 30, 102)` on violet, `rgb(103, 57, 8)` on amber,
-and never exceeds the page's own `rgb(244, 244, 249)` in light.
-
-The canvas is `aria-hidden` and `pointer-events-none`. It carries no information and must never be able to take
-a click meant for a control.
 
 ### The browser is handed the minified bundle, and greeted when it looks
 

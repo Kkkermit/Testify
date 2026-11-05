@@ -41,7 +41,14 @@ export const VERB_LABELS: Record<ChangeVerb, TranslationKey> = {
 export const SOURCE_LABELS: Record<ChangeSource, TranslationKey> = {
 	all: "changes.sourceAll",
 	dashboard: "changes.sourceDashboard",
+	command: "changes.sourceCommand",
 	discord: "changes.sourceDiscord",
+};
+
+export const WHERE_LABELS: Record<Exclude<ChangeSource, "all">, TranslationKey> = {
+	dashboard: "changes.onDashboard",
+	command: "changes.withCommand",
+	discord: "changes.inDiscord",
 };
 
 export const WINDOW_LABELS: Record<ChangeWindow, TranslationKey> = {
@@ -51,7 +58,6 @@ export const WINDOW_LABELS: Record<ChangeWindow, TranslationKey> = {
 	14: "changes.window14",
 };
 
-/** Removals and moderation read loudest, so a scan down the list stops on them first. */
 export function verbTone(verb: ChangeVerb): BadgeTone {
 	switch (verb) {
 		case "deleted":

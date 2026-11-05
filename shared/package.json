@@ -1,6 +1,6 @@
 {
 	"name": "@testify/shared",
-	"version": "2.1.5",
+	"version": "2.2.0",
 	"private": true,
 	"description": "Types and zod schemas shared by the bot's API and the dashboard.",
 	"license": "SEE LICENSE IN ../LICENSE",
@@ -17,6 +17,6 @@
 		"zod": "4.6.7"
 	},
 	"devDependencies": {
-		"tsup": "8.5.1"
+		"tsup": "9.0.0"
 	}
 }

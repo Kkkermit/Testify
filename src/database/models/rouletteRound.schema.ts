@@ -27,7 +27,6 @@ export interface RouletteRoundRecord {
 	hostName?: string;
 	/** Only the host may bet at a private table. */
 	private?: boolean;
-	/** The chip everybody starts with. */
 	chip: number;
 	status: "betting" | "spinning" | "settled";
 	/** Null until the first bet lands, which is what starts the countdown. */

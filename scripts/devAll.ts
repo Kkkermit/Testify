@@ -12,10 +12,8 @@ const WEB = "web";
 const COLOURS: Record<string, "magenta" | "cyan"> = { [BOT]: "magenta", [WEB]: "cyan" };
 const paint = painter();
 
-/** How long a child gets to stop politely before it is killed outright. */
 const GRACE_MS = 5_000;
 
-/** Colour is dropped when the output is being piped, the same rule the boot banner follows. */
 function label(name: string): string {
 	const colour = COLOURS[name];
 	return colour === undefined || !colourEnabled() ? `[${name}] ` : `${paint.bold(paint[colour](`[${name}]`))} `;
@@ -44,7 +42,6 @@ function pipe(name: string, process_: ChildProcess): void {
 	process_.stderr?.on("data", (chunk: Buffer) => process.stderr.write(prefixLines(name, chunk.toString())));
 }
 
-/** Signals the whole process tree, since both halves run their real work in a grandchild. */
 export function stopTree(target: ChildProcess, signal: NodeJS.Signals = "SIGTERM"): void {
 	if (target.pid === undefined || target.exitCode !== null || target.signalCode !== null) return;
 
@@ -57,7 +54,6 @@ export function stopTree(target: ChildProcess, signal: NodeJS.Signals = "SIGTERM
 		// A negative pid is the process group, which is why the children are spawned detached.
 		process.kill(-target.pid, signal);
 	} catch {
-		// The group is already gone; the child alone is all that is left to try.
 		target.kill(signal);
 	}
 }
@@ -70,7 +66,6 @@ function print(lines: string[], tone: "info" | "warning" | "error", title: strin
 	);
 }
 
-/** Both halves read this file, so a missing one or a website switched off is said once here rather than twice. */
 function readyToStart(file: string): Record<string, string> | null {
 	if (!existsSync(file)) {
 		print(
@@ -150,7 +145,6 @@ function main(): void {
 		// SIGINT, as a Ctrl+C in either half's own terminal would be; a SIGTERM reads as a save to the bot.
 		for (const [, process_] of children) stopTree(process_, "SIGINT");
 
-		// Whatever has not exited by now is killed.
 		setTimeout(() => {
 			for (const [, process_] of children) stopTree(process_, "SIGKILL");
 			process.exit(process.exitCode ?? 0);
@@ -168,7 +162,6 @@ function main(): void {
 
 			stopAll();
 			alive -= 1;
-			// Both gone, so there is nothing left to supervise — exit rather than sit on an empty event loop.
 			if (alive === 0) process.exit(process.exitCode ?? 0);
 		});
 	}

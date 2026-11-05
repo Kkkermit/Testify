@@ -2,8 +2,6 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/** Verification: a public button that grants a role once somebody types a short code back. */
-
 export const VERIFY_LIMITS = {
 	maxMessage: 1_000,
 } as const;
@@ -14,7 +12,6 @@ export interface VerificationConfigResponse {
 	channelId: string | null;
 	roleId: string | null;
 	message: string;
-	/** True once the public panel has been posted, so the page can offer to post or to re-post it. */
 	posted: boolean;
 	verifiedCount: number;
 	/** Discord refuses a role at or above the bot's own, and the form is the only place to say so in time. */
@@ -35,7 +32,6 @@ export const verificationPatchSchema = z
 
 export type VerificationPatch = z.infer<typeof verificationPatchSchema>;
 
-/** Both have to be chosen before the panel is worth posting, and the page says which one is missing. */
 export function verificationBlocked(config: { channelId: string | null; roleId: string | null }): string | null {
 	const missing = [
 		config.channelId === null ? "a channel" : null,

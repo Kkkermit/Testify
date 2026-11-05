@@ -1,5 +1,5 @@
 import { AUDIT_EVENTS } from "@testify/shared";
-import { draftFrom, saveBlocked, setGroup, toggleEvent } from "@/features/audit-log/auditLog.utils";
+import { auditSummary, draftFrom, saveBlocked, setGroup, toggleEvent } from "@/features/audit-log/auditLog.utils";
 import { t } from "@/test/english";
 
 describe("toggleEvent", () => {
@@ -39,5 +39,19 @@ describe("draftFrom", () => {
 		const draft = draftFrom({ enabled: false, channelId: null, events: [...AUDIT_EVENTS], all: true });
 
 		expect(draft.events).toHaveLength(AUDIT_EVENTS.length);
+	});
+});
+
+describe("auditSummary", () => {
+	const saved = { enabled: true, channelId: "1", events: ["memberBan", "memberUnban"] as never };
+
+	/** Recording with no channel or no events posts nothing, so the sentence must not claim it does. */
+	it("says what is recorded and where, or that nothing is", () => {
+		expect(auditSummary({ ...saved, enabled: false }, "#logs", t)).toBe("Nothing is recorded to a log channel.");
+		expect(auditSummary({ ...saved, events: [] }, "#logs", t)).toBe("Nothing is recorded to a log channel.");
+		expect(auditSummary(saved, "#logs", t)).toBe("2 kinds of server event are posted to #logs.");
+		expect(auditSummary({ ...saved, events: [...AUDIT_EVENTS] }, "#logs", t)).toBe(
+			"Every kind of server event is posted to #logs, including ones added later.",
+		);
 	});
 });

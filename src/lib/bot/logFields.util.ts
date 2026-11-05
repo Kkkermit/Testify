@@ -1,7 +1,7 @@
 import { SnowflakeUtil, type User } from "discord.js";
 import { discordTime, escapeMarkdown, truncate } from "@lib/format/format.util";
 
-/** Who and where, written the same way in every log channel post; the log channel is usually in another server. */
+/** Who and where, written the same way in every log channel post. */
 
 export interface LoggedUser {
 	id: string;

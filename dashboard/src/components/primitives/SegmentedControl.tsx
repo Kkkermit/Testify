@@ -5,11 +5,9 @@ import { cn } from "@/lib/cn";
 export interface Segment<Value extends string | number> {
 	value: Value;
 	label: string;
-	/** What the segment adds beyond its label. A description only — the label is what names it. */
 	hint?: string;
 }
 
-/** `aria-pressed` rather than radio semantics: these switch what is shown rather than submitting a value. */
 export function SegmentedControl<Value extends string | number>({
 	label,
 	segments,
@@ -21,7 +19,6 @@ export function SegmentedControl<Value extends string | number>({
 	segments: readonly Segment<Value>[];
 	value: Value;
 	onChange: (value: Value) => void;
-	/** For a layout the caller needs, such as an even grid of segments on a phone. */
 	className?: string;
 }): React.JSX.Element {
 	return (

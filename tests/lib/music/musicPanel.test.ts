@@ -152,7 +152,6 @@ describe("musicBar", () => {
 		expect(new Set(widths)).toEqual(new Set([12]));
 	});
 
-	/** A head past the end would render a bar longer than itself, which reads as nonsense. */
 	it("never runs past its own end", () => {
 		expect(musicBar(999, 100, 8).indexOf("●")).toBe(7);
 	});

@@ -3,8 +3,6 @@ import { snowflake } from "./schemas";
 import { plainText } from "./text";
 import { WELCOME_LIMITS } from "./welcome";
 
-/** The message posted when somebody leaves. It takes the greeting's placeholders, and it never pings anybody. */
-
 export const GOODBYE_STYLES = ["text", "embed"] as const;
 
 export type GoodbyeStyle = (typeof GOODBYE_STYLES)[number];
@@ -16,7 +14,7 @@ export interface GoodbyeSettings {
 	channelId: string | null;
 	message: string;
 	style: GoodbyeStyle;
-	/** False when the bot cannot post in the channel, so a goodbye that will never arrive says so. */
+	/** False when the bot cannot post in the channel. */
 	canSend: boolean;
 }
 

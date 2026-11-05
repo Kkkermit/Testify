@@ -6,10 +6,6 @@ import { claimDueDraw, recordDraw } from "@database/repositories/lotteryReposito
 import { embed } from "@lib/discord";
 import { formatNumber } from "@lib/format";
 
-/**
- * The draw is claimed by pushing `nextDrawTime` forward in the query that selects it, so a slow draw cannot pay out
- * twice.
- */
 export async function runLotteryDraws(client: TestifyClient): Promise<void> {
 	for (let processed = 0; processed < 10; processed += 1) {
 		const lottery = await claimDueDraw();

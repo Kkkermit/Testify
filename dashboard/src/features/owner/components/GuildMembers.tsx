@@ -27,7 +27,6 @@ import { dateAndTime, since } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
 
-/** Everybody who ran a command there; pressing a name narrows the runs below to theirs. */
 export function GuildMembers({ guildId, report }: { guildId: string; report: GuildUsageReport }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [params, setParams] = useSearchParams();

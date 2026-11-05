@@ -24,7 +24,6 @@ import { cn } from "@/lib/cn";
 import { dateAndTime, since } from "@/lib/datetime";
 import { pageCount, pageFrom } from "@/lib/paging";
 
-/** Every run, newest first, narrowed to one member or one command; what was typed into it is never kept. */
 export function GuildRuns({ guildId, report }: { guildId: string; report: GuildUsageReport }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [params, setParams] = useSearchParams();

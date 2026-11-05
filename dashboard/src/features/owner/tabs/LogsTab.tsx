@@ -10,10 +10,7 @@ import { useLogs } from "@/features/owner/useOwner";
 import { useDebounced } from "@/hooks/useDebounced";
 import { type TranslationKey } from "@/i18n";
 
-/**
- * Keys rather than text, and written out because engines disagree on whether `text-transform` changes an accessible
- * name.
- */
+/** Written out, because engines disagree on whether `text-transform` changes an accessible name. */
 const LEVELS: Record<ReportedLogLevel, { label: TranslationKey; hint: TranslationKey }> = {
 	trace: { label: "owner.levelAll", hint: "owner.levelTrace" },
 	debug: { label: "owner.levelDebugName", hint: "owner.levelDebug" },
@@ -23,7 +20,6 @@ const LEVELS: Record<ReportedLogLevel, { label: TranslationKey; hint: Translatio
 	fatal: { label: "owner.levelFatalName", hint: "owner.levelFatal" },
 };
 
-/** Held in memory rather than in the database, so a restart clears it. */
 export function LogsTab({
 	level,
 	search,
@@ -45,7 +41,6 @@ export function LogsTab({
 		label: t(LEVELS[level].label),
 		hint: t(LEVELS[level].hint),
 	}));
-	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
 	const logs = useLogs(level, useDebounced(search), paused);
 
 	return (
@@ -107,7 +102,6 @@ export function LogsTab({
 	);
 }
 
-/** Says what is on screen and what is behind it, so nobody reads a truncated list as the whole buffer. */
 function summarise(feed: LogFeed | undefined, paused: boolean, t: TFunction): string {
 	if (feed === undefined) return t("owner.readingBuffer");
 

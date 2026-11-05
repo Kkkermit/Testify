@@ -20,7 +20,6 @@ const TYPES = [
 	{ value: "remove", title: "remove", description: "Removing features or files" },
 ];
 
-/** `added the thing` -> `Added the thing`, and no trailing full stop. */
 export function formatSubject(input: string): string {
 	const trimmed = input.trim().replace(/\.+$/, "");
 	return trimmed.charAt(0).toUpperCase() + trimmed.slice(1);

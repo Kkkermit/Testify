@@ -5,18 +5,16 @@ import { MobileNav } from "@/app/layout/MobileNav";
 import { Sidebar } from "@/app/layout/Sidebar";
 import { RouteAnnouncer } from "@/app/RouteAnnouncer";
 import { UndoProvider } from "@/app/UndoProvider";
-import { Backdrop } from "@/components/motion";
-import { useBot } from "@/features/auth/useBot";
+import { useBotLook } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
 import { NoticeBanner } from "@/features/notices/components/NoticeBanner";
 import { QuickSearch } from "@/features/search/QuickSearch";
 import { useQuickSearchShortcut } from "@/features/search/useQuickSearchShortcut";
 import { useScreenView } from "@/hooks/useScreenView";
 
-/** Navigation, backdrop and the outlet. */
 export function AppShell(): React.JSX.Element {
 	const me = useMe();
-	const bot = useBot();
+	const bot = useBotLook();
 	const { guildId } = useParams();
 	const location = useLocation();
 	const { t } = useTranslation();
@@ -42,7 +40,6 @@ export function AppShell(): React.JSX.Element {
 	const audience = { guild, guilds: me.data?.guilds ?? [], isOwner: me.data?.isOwner === true };
 	const user = me.data?.user ?? null;
 
-	// A drawer left open across a navigation covers the page it just moved to.
 	useEffect(() => {
 		setMenuOpen(false);
 	}, [location.pathname]);
@@ -50,9 +47,6 @@ export function AppShell(): React.JSX.Element {
 	return (
 		<UndoProvider>
 			<div className="flex min-h-dvh flex-col md:flex-row">
-				{/* Dimmer than the sign-in screen: behind a settings form it is a texture, not the subject. */}
-				{/* Under half of what the sign-in screen wears: there is a page to read in front of this one. */}
-				<Backdrop opacity={0.45} />
 				<RouteAnnouncer />
 
 				<a
@@ -65,19 +59,19 @@ export function AppShell(): React.JSX.Element {
 				<MobileNav
 					{...audience}
 					user={user}
-					bot={bot.data}
+					bot={bot}
 					open={menuOpen}
 					onOpenChange={setMenuOpen}
 					onSearch={openSearch}
 				/>
-				<Sidebar {...audience} user={user} bot={bot.data} onSearch={openSearch} />
+				<Sidebar {...audience} user={user} bot={bot} onSearch={openSearch} />
 				{searching && <QuickSearch {...audience} onClose={closeSearch} />}
 
-				{/* Keyed on the path so each screen fades in on arrival, and `min-w-0` because a flex item will not otherwise shrink below its content. */}
+				{/* Keyed on the path so each screen mounts afresh, and `min-w-0` because a flex item will not otherwise shrink below its content. */}
 				<main
 					id="content"
 					key={location.pathname}
-					className="motion-fade mx-auto flex w-full max-w-[1100px] min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6"
+					className="mx-auto flex w-full max-w-[1100px] min-w-0 flex-1 flex-col gap-6 p-4 sm:p-6"
 				>
 					<NoticeBanner />
 					<Outlet />

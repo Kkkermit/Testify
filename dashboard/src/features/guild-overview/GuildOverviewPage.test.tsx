@@ -28,7 +28,6 @@ describe("the guild overview", () => {
 		expect(screen.getByText(/manage roles — needed for level rewards/i)).toBeInTheDocument();
 	});
 
-	/** The server sends what each feature is doing as data, so the page names the channel and words the plural. */
 	it("says what each feature is doing, by channel name and in the right plural", async () => {
 		server.use(
 			http.get("/api/guilds/:guildId/overview", () =>

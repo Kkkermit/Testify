@@ -2,18 +2,18 @@ import { type MemberDetail, MEMBER_TIMEOUT_MINUTES, WARNING_LIMITS, warningProbl
 import { Timer } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, Warning } from "@/components/form";
+import { Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD, SELECT } from "@/components/form/fieldStyles";
-import { Button, Card, CARD_HEADING } from "@/components/primitives";
+import { Button } from "@/components/primitives";
 import { durationText } from "@/features/cases/cases.utils";
 import { clearConfirmed } from "@/features/members/memberDetail.utils";
+import { cn } from "@/lib/cn";
 import { dateAndTime } from "@/lib/datetime";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
 type Minutes = (typeof MEMBER_TIMEOUT_MINUTES)[number];
 
-/** A timeout behind the username typed back, like a kick; lifting one early needs nothing but the press. */
 export function TimeoutCard({
 	detail,
 	busy,
@@ -25,7 +25,7 @@ export function TimeoutCard({
 	onTimeout: (minutes: Minutes, reason: string, confirm: string) => void;
 	onLift: () => void;
 }): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 	const [open, setOpen] = useState(false);
 	const [minutes, setMinutes] = useState<Minutes>(60);
 	const [reason, setReason] = useState("");
@@ -42,42 +42,43 @@ export function TimeoutCard({
 	}
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("members.timeoutTitle")}</h2>
-				<p className="text-muted-foreground text-sm">
-					{detail.timedOutUntil === null ? (
-						t("members.timeoutBody")
-					) : (
-						<>
-							{t("members.timedOutUntil")}{" "}
-							<time dateTime={detail.timedOutUntil}>{dateAndTime(detail.timedOutUntil)}</time>
-						</>
-					)}
-				</p>
-			</div>
-
+		<SettingRows
+			title={t("members.timeoutTitle")}
+			description={
+				detail.timedOutUntil === null ? (
+					t("members.timeoutBody")
+				) : (
+					<>
+						{t("members.timedOutUntil")}{" "}
+						<time dateTime={detail.timedOutUntil}>{dateAndTime(detail.timedOutUntil)}</time>
+					</>
+				)
+			}
+		>
 			{detail.timedOutUntil !== null ? (
-				<Button variant="secondary" className="w-fit" disabled={busy} onClick={onLift}>
-					{t("members.liftTimeout")}
-				</Button>
+				<RowActions>
+					<Button variant="secondary" disabled={busy} onClick={onLift}>
+						{t("members.liftTimeout")}
+					</Button>
+				</RowActions>
 			) : !open ? (
-				<Button
-					variant="secondary"
-					className="w-fit"
-					disabled={busy}
-					onClick={() => {
-						setOpen(true);
-					}}
-				>
-					<Timer size={16} aria-hidden="true" /> {t("members.timeOut")}
-				</Button>
+				<RowActions>
+					<Button
+						variant="secondary"
+						disabled={busy}
+						onClick={() => {
+							setOpen(true);
+						}}
+					>
+						<Timer size={16} aria-hidden="true" /> {t("members.timeOut")}
+					</Button>
+				</RowActions>
 			) : (
-				<div className="border-destructive/40 flex flex-col gap-3 rounded-field border p-4">
+				<>
 					<Field label={t("members.timeoutLength")} htmlFor="timeout-length">
 						<select
 							id="timeout-length"
-							className={SELECT}
+							className={cn(SELECT, "max-w-64")}
 							value={minutes}
 							onChange={(event) => {
 								const chosen = MEMBER_TIMEOUT_MINUTES.find((entry) => entry === Number(event.target.value));
@@ -86,7 +87,7 @@ export function TimeoutCard({
 						>
 							{MEMBER_TIMEOUT_MINUTES.map((entry) => (
 								<option key={entry} value={entry}>
-									{durationText(entry * 60_000, i18n.language)}
+									{durationText(entry * 60_000)}
 								</option>
 							))}
 						</select>
@@ -122,7 +123,7 @@ export function TimeoutCard({
 
 					<Warning>{t("members.timeoutWarning")}</Warning>
 
-					<div className="flex flex-wrap gap-3">
+					<RowActions>
 						<Button
 							variant="destructive"
 							disabled={!ready}
@@ -136,9 +137,9 @@ export function TimeoutCard({
 						<Button variant="ghost" onClick={close}>
 							{t("common.cancel")}
 						</Button>
-					</div>
-				</div>
+					</RowActions>
+				</>
 			)}
-		</Card>
+		</SettingRows>
 	);
 }

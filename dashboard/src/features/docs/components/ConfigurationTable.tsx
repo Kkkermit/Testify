@@ -7,12 +7,10 @@ import { variablesIn } from "@/features/docs/markdown.utils";
 import { SiteError } from "@/features/site/components/SiteError";
 import { keys } from "@/lib/queries";
 
-/** The four the bot will not start without, as `src/config/env.ts` declares them; a test holds the two together. */
 export const REQUIRED_VARIABLES = ["DISCORD_TOKEN", "DISCORD_CLIENT_ID", "DISCORD_OWNER_IDS", "MONGODB_URI"] as const;
 
 const required = new Set<string>(REQUIRED_VARIABLES);
 
-/** Every variable in `.env.example`, grouped as the template groups them, with the comment written above it. */
 export function ConfigurationTable(): React.JSX.Element {
 	const { t } = useTranslation();
 	const template = useQuery({

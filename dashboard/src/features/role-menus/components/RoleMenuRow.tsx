@@ -6,7 +6,6 @@ import { RoleSwatch } from "@/components/form/RoleSwatch";
 import { Badge, Button, CARD_HEADING, cardClass } from "@/components/primitives";
 import { channelLabel } from "@/lib/channels";
 
-/** One menu, with what it offers and the actions beside it. */
 export function RoleMenuRow({
 	menu,
 	channels,

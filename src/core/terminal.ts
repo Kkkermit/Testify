@@ -4,10 +4,7 @@ interface ColourTarget {
 	isTTY?: boolean;
 }
 
-/**
- * `NO_COLOR` and `FORCE_COLOR` are the terminal's own conventions rather than the bot's configuration, and
- * `FORCE_COLOR` is how `npm run dev:all` keeps colour through the pipe it reads each half from.
- */
+/** `NO_COLOR` wins, then `FORCE_COLOR`, which is how `npm run dev:all` keeps colour through its pipe, then a terminal. */
 export function colourEnabled(
 	stream: ColourTarget = process.stdout,
 	env: Record<string, string | undefined> = process.env,
@@ -74,7 +71,6 @@ export type Tone = "info" | "success" | "warning" | "error";
 const TONE_STYLE: Record<Tone, StyleName> = { info: "cyan", success: "green", warning: "yellow", error: "red" };
 const TONE_BADGE: Record<Tone, StyleName> = { info: "onBlue", success: "onGreen", warning: "onYellow", error: "onRed" };
 
-/** A rounded box with a coloured border, and a title set into its top edge when there is one. */
 export function box(title: string, body: string[], tone: Tone, paint: Paint = painter()): string[] {
 	const border = paint[TONE_STYLE[tone]];
 	const width = Math.max(visibleWidth(title) + 4, ...body.map(visibleWidth)) + 2;
@@ -93,7 +89,6 @@ export function box(title: string, body: string[], tone: Tone, paint: Paint = pa
 	];
 }
 
-/** A short label on a coloured background, such as ` ERROR ` at the start of a failure. */
 export function badge(label: string, tone: Tone, paint: Paint = painter()): string {
 	return paint.bold(paint[TONE_BADGE[tone]](` ${label} `));
 }

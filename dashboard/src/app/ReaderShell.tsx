@@ -4,11 +4,9 @@ import { useMe } from "@/features/auth/useMe";
 import { SiteShell } from "@/features/site/SiteShell";
 import { useSite } from "@/features/site/useSite";
 
-/** A page that belongs to the reader rather than an account: inside the dashboard when signed in, the website when not. */
 export function ReaderShell(): React.JSX.Element {
 	const site = useSite();
 	const dashboard = site.data?.dashboard === true;
-	// A host with no dashboard would only refuse, so it is never asked who is signed in.
 	const me = useMe({ enabled: dashboard });
 
 	if (site.isPending || (dashboard && me.isPending)) {

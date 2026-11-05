@@ -41,7 +41,7 @@ describe("the announcements page", () => {
 		await writeAnnouncement(user, "Event at eight");
 		await user.click(screen.getByRole("radio", { name: /@here/i }));
 
-		const preview = screen.getByRole("region", { name: "Preview" });
+		const preview = screen.getByRole("group", { name: "Preview" });
 		expect(within(preview).getByText("Event at eight")).toBeInTheDocument();
 		expect(within(preview).getByText("@here")).toBeInTheDocument();
 	});

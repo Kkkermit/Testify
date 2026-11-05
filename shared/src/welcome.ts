@@ -2,8 +2,6 @@ import { z } from "zod";
 import { snowflake } from "./schemas";
 import { plainText } from "./text";
 
-/** The greeting's rules, shared so the form, the API and the Discord panel all enforce the same ones. */
-
 export const WELCOME_LIMITS = {
 	maxMessage: 1_500,
 	/** Bigger than this and the guild settings document starts to matter. */
@@ -18,7 +16,6 @@ export function isWelcomeStyle(value: string): value is WelcomeStyle {
 	return (WELCOME_STYLES as readonly string[]).includes(value);
 }
 
-/** What a greeting can say about the member who just joined; each surface describes them in its own words. */
 export const WELCOME_PLACEHOLDERS = ["{user}", "{username}", "{server}", "{count}"] as const;
 
 export type WelcomePlaceholder = (typeof WELCOME_PLACEHOLDERS)[number];

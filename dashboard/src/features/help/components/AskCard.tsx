@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { describe } from "@/app/ErrorState";
 import { FIELD, LABEL, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, Disclosure, Eyebrow, Skeleton } from "@/components/primitives";
+import { Button, Card, CARD_HEADING, Disclosure, SectionHeading, Skeleton } from "@/components/primitives";
 import { ArticleBody } from "@/features/help/components/ArticleBody";
 import { TOPIC_LABELS } from "@/features/help/help.labels";
 import { articlesByTopic, suggestionsFor } from "@/features/help/help.utils";
@@ -14,7 +14,6 @@ import { cn } from "@/lib/cn";
 
 const LINK = "text-accent hover:text-foreground text-sm underline-offset-2 hover:underline";
 
-/** Questions are matched to a written help article; nothing on this card is generated. */
 export function AskCard({ name }: { name: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const inputId = useId();
@@ -53,7 +52,6 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 			event.preventDefault();
 			setFocused(true);
 			const last = suggestions.length - 1;
-			// Moving past either end returns to the text box, the way a native list of suggestions behaves.
 			setActive((current) =>
 				event.key === "ArrowDown" ? (current >= last ? -1 : current + 1) : current <= -1 ? last : current - 1,
 			);
@@ -79,7 +77,7 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 	const loading = opened !== null && article.isPending;
 
 	return (
-		<Card focal className="flex flex-col gap-4">
+		<Card className="flex flex-col gap-4">
 			<div className="flex flex-col gap-1">
 				<div className="flex items-center gap-2">
 					<MessageCircleQuestion size={18} aria-hidden="true" className="text-accent shrink-0" />
@@ -188,7 +186,6 @@ export function AskCard({ name }: { name: string }): React.JSX.Element {
 	);
 }
 
-/** `focus` moves to the heading when an article is opened by a button, so a reader lands on what they chose. */
 function Article({
 	article,
 	focus,
@@ -207,7 +204,7 @@ function Article({
 	return (
 		<article aria-labelledby={headingId} className="border-border flex flex-col gap-3 border-t pt-4">
 			<div className="flex flex-col gap-1">
-				<Eyebrow>{t(TOPIC_LABELS[article.topic])}</Eyebrow>
+				<SectionHeading>{t(TOPIC_LABELS[article.topic])}</SectionHeading>
 				<h3
 					id={headingId}
 					ref={heading}

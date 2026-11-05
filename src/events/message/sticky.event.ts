@@ -2,7 +2,6 @@ import { defineMessageHandler } from "@core/message";
 import { bumpSticky, setStickyMessageId } from "@database/repositories/stickyRepository";
 import { embed } from "@lib/discord";
 
-/** The counter advance and the "time to repost" decision happen in one atomic update. */
 export default defineMessageHandler({
 	name: "stickyMessage",
 	order: 60,

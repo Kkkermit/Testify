@@ -1,17 +1,16 @@
 import { Trans, useTranslation } from "react-i18next";
-import { Card, Eyebrow, PAGE_TITLE } from "@/components/primitives";
+import { Card, SectionHeading, PAGE_TITLE } from "@/components/primitives";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/** Names each missing variable and the exact redirect URI to paste, because this is where most self-hosted dashboards lose people. */
 export function SetupNeeded({ missing, redirectUri }: { missing: string[]; redirectUri: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("auth.finishSetup"));
 
 	return (
 		<main className="mx-auto flex min-h-dvh max-w-xl flex-col justify-center gap-6 p-6">
-			<Card className="motion-pop flex flex-col gap-4">
+			<Card className="flex flex-col gap-4">
 				<div className="flex flex-col gap-1">
-					<Eyebrow>{t("auth.setup")}</Eyebrow>
+					<SectionHeading>{t("auth.setup")}</SectionHeading>
 					<h1 className={PAGE_TITLE}>{t("auth.almostThere")}</h1>
 				</div>
 				<p className="text-muted-foreground text-sm">

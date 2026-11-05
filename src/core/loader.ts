@@ -46,7 +46,6 @@ export interface LoadCounts {
 	messageHandlers: number;
 }
 
-/** Loads everything from disk and registers it on the client. */
 export function loadEverything(client: TestifyClient): LoadCounts {
 	const counts = {
 		commands: loadCommands(client),
@@ -159,7 +158,6 @@ function loadEvents(client: TestifyClient): number {
 	return count;
 }
 
-/** Tells Discord about the commands. */
 export const MAX_COMMANDS = 100;
 
 export async function publishCommands(client: TestifyClient): Promise<number> {
@@ -192,7 +190,6 @@ export async function publishCommands(client: TestifyClient): Promise<number> {
 	return body.length;
 }
 
-/** Where the commands went, for the start-up banner. */
 export function publishScope(client: TestifyClient): string {
 	return client.env.DISCORD_DEV_GUILD_ID === undefined
 		? "every server"

@@ -11,8 +11,6 @@ import {
 	type MediaGalleryBuilder,
 } from "discord.js";
 
-/** The types more than one module in this domain shares. */
-
 /** What every panel returns: one embed set and its controls. */
 export interface RenderedScreen {
 	embeds: EmbedBuilder[];

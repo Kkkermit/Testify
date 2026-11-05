@@ -2,7 +2,6 @@ import { type TestifyClient } from "@core/client";
 import { Economy } from "@database/models/economy.schema";
 import { findBusiness, findHouse } from "@lib/economy";
 
-/** Pays out house and business income. */
 export async function payPassiveIncome(client: TestifyClient): Promise<void> {
 	const cursor = Economy.find({
 		$or: [{ house: { $ne: null } }, { "businesses.0": { $exists: true } }],

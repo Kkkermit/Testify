@@ -49,7 +49,6 @@ export interface LevelSettings {
 	/** Keep every reward earned so far, rather than only the newest one. */
 	stackRewards: boolean;
 	levelUpChannelId: string | null;
-	/** Announce level-ups at all. */
 	announce: boolean;
 	ignoredChannelIds: string[];
 	ignoredRoleIds: string[];

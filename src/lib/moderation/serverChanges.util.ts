@@ -9,6 +9,7 @@ import {
 	type ChangeVerb,
 	type ServerChange,
 	type ServerChangesPage,
+	restoreOf,
 } from "@testify/shared";
 
 /** One list of a server's changes, from the dashboard's own records and from Discord's audit log. */
@@ -104,13 +105,14 @@ export function discordChange(entry: AuditEntryLike): ServerChange {
 		summary: null,
 		target: targetName(entry),
 		reason: entry.reason,
+		restore: null,
 	};
 }
 
 export function dashboardChange(record: DashboardAudit & { _id?: { toString(): string } }): ServerChange {
 	return {
 		id: record._id?.toString() ?? `${record.at.toISOString()}-${record.action}`,
-		source: "dashboard",
+		source: record.source === "command" ? "command" : "dashboard",
 		at: record.at.toISOString(),
 		actorId: record.actorId,
 		actorTag: record.actorTag,
@@ -119,6 +121,7 @@ export function dashboardChange(record: DashboardAudit & { _id?: { toString(): s
 		summary: record.summary,
 		target: null,
 		reason: null,
+		restore: restoreOf(record.action, record.before, record.after),
 	};
 }
 
@@ -207,7 +210,8 @@ export async function readServerChanges(
 	now = Date.now(),
 ): Promise<ServerChangesPage> {
 	const since = new Date(now - CHANGE_LIMITS.maxDays * DAY_MS);
-	const askDiscord = query.source !== "dashboard" && reader.auditLog;
+	const botOnly = query.source === "dashboard" || query.source === "command";
+	const askDiscord = !botOnly && reader.auditLog;
 	const [records, discord] = await Promise.all([
 		query.source === "discord" ? Promise.resolve([]) : auditsSince(guild.id, since, undefined, reader),
 		askDiscord ? discordChanges(guild, now) : Promise.resolve(UNREAD),
@@ -216,7 +220,7 @@ export async function readServerChanges(
 	return {
 		...pageChanges([...records.map(dashboardChange), ...discord.changes], query, now),
 		discordReadable: discord.readable,
-		discordWithheld: query.source !== "dashboard" && !reader.auditLog,
+		discordWithheld: !botOnly && !reader.auditLog,
 		moderationWithheld: query.source !== "discord" && !reader.moderation,
 		truncated: discord.truncated,
 	};

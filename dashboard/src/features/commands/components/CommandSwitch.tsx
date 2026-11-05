@@ -5,7 +5,6 @@ import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { type TranslationKey } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-/** Keys rather than text: a module-level map is built once, long before a locale is chosen. */
 const DESCRIBES: Record<CommandAvailability, TranslationKey> = {
 	on: "commands.availableToAll",
 	"off-here": "commands.offHere",
@@ -13,7 +12,6 @@ const DESCRIBES: Record<CommandAvailability, TranslationKey> = {
 	locked: "commands.locked",
 };
 
-/** Locked and bot-wide-off render disabled with the reason on the control, not in a footnote. */
 export function CommandSwitch({
 	name,
 	availability,

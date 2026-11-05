@@ -16,7 +16,7 @@ function renderPage() {
 }
 
 describe("the giveaways page", () => {
-	/** The whole reason for the screen: Discord makes you read a message id out of a channel and retype it. */
+	/** Discord makes you read a message id out of a channel and retype it. */
 	it("puts the actions beside the giveaway rather than asking for an id", async () => {
 		renderPage();
 

@@ -2,7 +2,6 @@ import { useEffect } from "react";
 import { useLocation } from "react-router";
 import { prefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 
-/** Brings the element a URL fragment names into view and puts focus on it, so a deep link lands a reader where it promised. */
 export function useHashTarget(): void {
 	const { hash, key } = useLocation();
 

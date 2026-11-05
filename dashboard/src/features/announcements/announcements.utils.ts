@@ -4,7 +4,9 @@ import {
 	type AnnouncementMentions,
 	type AnnouncementStyle,
 	type EmbedColour,
+	type TestPost,
 } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 import { sanitiseInput } from "@/lib/sanitise";
 
@@ -37,7 +39,6 @@ export const STYLE_LABELS: Record<AnnouncementStyle, { label: TranslationKey; de
 	text: { label: "announcements.styleText", describes: "announcements.styleTextHint" },
 };
 
-/** What is still missing, as a key the form shows, or null when it can be posted. */
 export function draftProblem(draft: AnnouncementDraft): TranslationKey | null {
 	if (draft.channelId === null) return "announcements.needChannel";
 	if (draft.message.trim() === "") return "announcements.needMessage";
@@ -45,14 +46,30 @@ export function draftProblem(draft: AnnouncementDraft): TranslationKey | null {
 	return null;
 }
 
-/** Only what the chosen style uses is sent, so a title typed and then switched away from never arrives. */
 export function bodyOf(draft: AnnouncementDraft & { channelId: string }): AnnouncementBody {
+	return { channelId: draft.channelId, mentions: draft.mentions, ...contentOf(draft) };
+}
+
+export function testOf(draft: AnnouncementDraft): Extract<TestPost, { kind: "announcement" }> {
+	return { kind: "announcement", ...contentOf(draft) };
+}
+
+function contentOf(draft: AnnouncementDraft): Pick<AnnouncementBody, "style" | "title" | "message" | "colour"> {
 	const title = sanitiseInput(draft.title).trim();
 	return {
-		channelId: draft.channelId,
 		style: draft.style,
 		message: sanitiseInput(draft.message),
-		mentions: draft.mentions,
 		...(draft.style === "embed" ? { colour: draft.colour, ...(title === "" ? {} : { title }) } : {}),
 	};
+}
+
+export function announcementSummary(
+	draft: Pick<AnnouncementDraft, "channelId" | "mentions">,
+	channel: string,
+	t: TFunction,
+): string {
+	if (draft.channelId === null) return t("announcements.summaryNoChannel");
+	return draft.mentions === "none"
+		? t("announcements.summaryNobody", { channel })
+		: t("announcements.summaryPing", { channel, ping: `@${draft.mentions}` });
 }

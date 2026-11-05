@@ -1,8 +1,6 @@
 import { z } from "zod";
 import { type Problem, problem } from "./problems";
 
-/** The casino's per-server settings: whether it runs, which games are open, and how much a single bet may be. */
-
 export const CASINO_GAMES = ["roulette", "blackjack", "slots", "hilo", "coinflip", "dice"] as const;
 
 export type CasinoGame = (typeof CASINO_GAMES)[number];

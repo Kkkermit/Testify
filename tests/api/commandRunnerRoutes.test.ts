@@ -130,7 +130,7 @@ describe("what can be run", () => {
 		expect((await send("/nonsense", { method: "POST", body: { args: {} } })).status).toBe(404);
 	});
 
-	/** `/eval` over HTTP is a shell. It is refused even if it somehow reached the allowlist. */
+	/** `/eval` over HTTP is a shell, so it is refused even if it reached the allowlist. */
 	it("refuses eval", async () => {
 		const client = clientFor([{ ...pingCommand(), name: "eval" }]);
 

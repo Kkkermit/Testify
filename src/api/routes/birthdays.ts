@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
@@ -10,7 +10,6 @@ export const birthdays = new Hono<ApiBindings>();
 
 birthdays.use("*", requireGuild);
 
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarise(patch: BirthdayPatch): string {
 	const parts: string[] = [];
 	if (patch.enabled !== undefined) parts.push(patch.enabled ? "Turned birthday posts on" : "Turned birthday posts off");
@@ -24,9 +23,11 @@ birthdays.get("/", async (context) => context.json(await readBirthdayOverview(gu
 birthdays.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, birthdayPatch);
+	const before = await readBirthdayOverview(guild);
 
 	await applyBirthdaySettings(guild, patch, context.get("session")?.userId ?? null);
-	await auditChange(context, { action: "birthdays.update", summary: summarise(patch) });
+	const after = await readBirthdayOverview(guild);
+	await auditSettings(context, { action: "birthdays.update", summary: summarise(patch), before, after });
 
-	return context.json(await readBirthdayOverview(guild));
+	return context.json(after);
 });

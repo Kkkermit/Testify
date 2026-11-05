@@ -25,7 +25,6 @@ async function existing(guildId: string, messageId: string): Promise<void> {
 
 scheduledMessages.get("/", async (context) => context.json(await readSchedules(guildOf(context))));
 
-/** Every write answers with the whole list, so the page shows what the server holds rather than what it sent. */
 scheduledMessages.post("/", async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, scheduledMessageInput);

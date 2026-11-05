@@ -1,7 +1,9 @@
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 import { ChangesPage } from "@/features/changes/ChangesPage";
 import { expectNoViolations } from "@/test/axe";
+import { levelConfig } from "@/test/fixtures/community";
 import { serverChanges } from "@/test/fixtures/moderation";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -53,6 +55,73 @@ describe("the changes page", () => {
 	it("has no automatically detectable accessibility violations", async () => {
 		const { container } = renderPage();
 		await screen.findByText("marcus");
+
+		await expectNoViolations(container);
+	});
+});
+
+describe("putting a change back", () => {
+	async function openPanel(): Promise<ReturnType<typeof userEvent.setup>> {
+		const user = userEvent.setup();
+		renderPage();
+		await user.click(await screen.findByRole("button", { name: "Put back" }));
+		return user;
+	}
+
+	/** It goes through the route that made the change, so its own gates decide, and sends only what that change altered. */
+	it("shows what the setting holds now and goes back to, then sends the old values to the same route", async () => {
+		let sent: unknown = null;
+		server.use(
+			http.patch(`/api/guilds/${GUILD}/levelling`, async ({ request }) => {
+				sent = await request.json();
+				return HttpResponse.json({ ...levelConfig, enabled: false });
+			}),
+		);
+		const user = await openPanel();
+
+		const lines = await screen.findByRole("definition");
+		expect(within(lines).getByText("Now: On")).toBeInTheDocument();
+		expect(within(lines).getByText("Back to: Off")).toBeInTheDocument();
+		expect(screen.getByRole("term")).toHaveTextContent("Members earn XP");
+
+		await user.click(screen.getByRole("button", { name: "Put it back" }));
+
+		expect(await screen.findByText("Put back. That is now the newest change in the list.")).toBeInTheDocument();
+		expect(sent).toEqual({ enabled: false });
+		expect(screen.queryByRole("button", { name: "Put back" })).not.toBeInTheDocument();
+	});
+
+	/** A later change, perhaps made with a command in Discord, is not undone without the reader seeing it. */
+	it("refuses once the setting has been changed since, and points at its page", async () => {
+		server.use(http.get(`/api/guilds/${GUILD}/levelling`, () => HttpResponse.json({ ...levelConfig, enabled: false })));
+		await openPanel();
+
+		expect(await screen.findByText(/has been changed since/)).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Open its page" })).toHaveAttribute("href", `/guilds/${GUILD}/levelling`);
+		expect(screen.queryByRole("button", { name: "Put it back" })).not.toBeInTheDocument();
+	});
+
+	it("says why the route refused, beside the button", async () => {
+		server.use(
+			http.patch(`/api/guilds/${GUILD}/levelling`, () =>
+				HttpResponse.json(
+					{ error: { code: "missing_permission", message: "You need Manage Roles." } },
+					{ status: 403 },
+				),
+			),
+		);
+		const user = await openPanel();
+
+		await user.click(await screen.findByRole("button", { name: "Put it back" }));
+
+		expect(await screen.findByText("You need Manage Roles.")).toBeInTheDocument();
+	});
+
+	it("has no automatically detectable accessibility violations with the panel open", async () => {
+		const user = userEvent.setup();
+		const { container } = renderPage();
+		await user.click(await screen.findByRole("button", { name: "Put back" }));
+		await screen.findByRole("button", { name: "Put it back" });
 
 		await expectNoViolations(container);
 	});

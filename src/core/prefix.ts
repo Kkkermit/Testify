@@ -52,7 +52,6 @@ export interface ParsedMessage {
 	prefix: string | null;
 }
 
-/** Finds the command name in a message. */
 export function parseMessage(content: string, prefix: string, botId: string): ParsedMessage | null {
 	const mention = new RegExp(`^<@!?${botId}>\\s+`);
 	// `T?help` reaches the same command as `t?help`, the way a phone's auto-capitalisation types it.
@@ -67,7 +66,6 @@ export function parseMessage(content: string, prefix: string, botId: string): Pa
 	return { name: name.toLowerCase(), args, prefix: mentioned === null ? used : null };
 }
 
-/** Answers the option questions a command asks. */
 class PrefixOptions implements CommandInputOptions {
 	private readonly message: Message;
 	private readonly command: Command;
@@ -116,16 +114,12 @@ class PrefixOptions implements CommandInputOptions {
 		return this.parsed;
 	}
 
-	/**
-	 * Fetches anybody given by ID or mention that the cache does not hold, so `t?ban 123…` reaches somebody who has
-	 * left or has not spoken since the bot started, exactly as the slash command's user box does.
-	 */
+	/** Fetches anybody given by ID or mention that the cache lacks, so `t?ban <id>` reaches somebody who has left. */
 	async prepare(): Promise<void> {
 		let state: { values: Map<string, string>; declared: CommandOption[] };
 		try {
 			state = this.state;
 		} catch {
-			// A missing subcommand is the command's own error to report, inside its own error boundary.
 			return;
 		}
 
@@ -238,7 +232,6 @@ class PrefixOptions implements CommandInputOptions {
 		return this.require(name, found ?? null, required);
 	}
 
-	/** Attachments come off the message itself; there is nowhere else for them to be. */
 	getAttachment(name: string, required: true): Attachment;
 	getAttachment(name: string, required?: boolean): Attachment | null;
 	getAttachment(name: string, required?: boolean): Attachment | null {
@@ -363,7 +356,6 @@ export class PrefixInteraction implements CommandInput {
 		});
 	}
 
-	/** Autocomplete never reaches a prefix command; this keeps the shape complete. */
 	respond(): Promise<void> {
 		return Promise.resolve();
 	}

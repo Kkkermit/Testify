@@ -16,7 +16,7 @@ export function mayClose(reader: GuildMember | undefined, handlerRoleId: string 
 }
 
 /** Names come from the cache, then from Discord, so a member who has left still reads as who they were. */
-async function nameOf(client: TestifyClient, guild: Guild, userId: string): Promise<string> {
+export async function nameOf(client: TestifyClient, guild: Guild, userId: string): Promise<string> {
 	const member = guild.members.cache.get(userId);
 	if (member !== undefined) return member.displayName;
 	return (await client.users.fetch(userId).catch(() => null))?.username ?? userId;

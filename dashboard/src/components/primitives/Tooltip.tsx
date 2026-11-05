@@ -3,7 +3,7 @@ import tippy, { type Instance, type Placement } from "tippy.js";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import "tippy.js/dist/tippy.css";
 
-/** Describes, never names — hence `describedby`. Drives tippy.js directly: `@tippyjs/react` reads `element.ref`, removed in React 19. */
+/** Drives tippy.js directly, because `@tippyjs/react` reads `element.ref`, which React 19 removed. */
 export function Tooltip({
 	label,
 	placement = "top",
@@ -30,7 +30,6 @@ export function Tooltip({
 			interactive: true,
 			interactiveBorder: 8,
 			duration: reduced ? 0 : 120,
-			// `focusin` is what carries focus through to the anchor, so a keyboard reaches this too.
 			trigger: "mouseenter focusin",
 			aria: { content: "describedby", expanded: false },
 			// A tap already follows the link, and a box shown mid-swipe stops the drawer scrolling under the finger.

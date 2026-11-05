@@ -10,17 +10,8 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import {
-	Button,
-	Card,
-	CARD_HEADING,
-	cardClass,
-	EmptyState,
-	Eyebrow,
-	PageHeader,
-	Skeleton,
-} from "@/components/primitives";
+import { RowActions, SavingIndicator, savingStateOf, SettingRows, Warning } from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { ResponderFields } from "@/features/auto-responders/components/ResponderFields";
 import { ResponderRow } from "@/features/auto-responders/components/ResponderRow";
 import {
@@ -41,7 +32,6 @@ function cleaned(input: AutoResponderInput): AutoResponderInput {
 	return { trigger: sanitiseInput(input.trigger), match: input.match, reply: sanitiseInput(input.reply) };
 }
 
-/** A list of the server's own trigger words, each with the reply it gets. */
 export function AutoRespondersPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -60,7 +50,7 @@ export function AutoRespondersPage(): React.JSX.Element {
 	if (list.isPending) return <Skeleton className="h-96 w-full" />;
 	if (list.isError) return <ErrorState error={list.error} onRetry={() => void list.refetch()} />;
 
-	// One waiting to be deleted still holds its words and its place, so nothing can be added into the gap.
+	// A row waiting to be deleted still counts, so nothing can be added into the gap.
 	const all = list.data.responders;
 	const keyOf = (responder: AutoResponder): string => `auto-responder:${guildId}:${responder.id}`;
 	const shown = all.filter((responder) => !undo.isHidden(keyOf(responder)));
@@ -82,20 +72,24 @@ export function AutoRespondersPage(): React.JSX.Element {
 	return (
 		<>
 			<PageHeader
-				eyebrow={overview.data?.name}
+				server={overview.data}
 				title={t("autoResponders.title")}
 				subtitle={t("autoResponders.subtitle")}
 				action={<SavingIndicator state={savingStateOf(saving, add.isSuccess || edit.isSuccess)} />}
 			/>
 
+			<Summary>
+				{shown.length === 0 ? t("autoResponders.summaryNone") : t("autoResponders.summary", { count: shown.length })}
+			</Summary>
+
 			<section aria-labelledby="responders-heading" className="flex flex-col gap-3">
-				<Eyebrow
+				<SectionHeading
 					as="h2"
 					id="responders-heading"
 					count={t("autoResponders.countOf", { used: all.length, limit: list.data.limit })}
 				>
 					{t("autoResponders.inUse")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{shown.length === 0 ? (
 					<Card>
@@ -130,28 +124,22 @@ export function AutoRespondersPage(): React.JSX.Element {
 				)}
 			</section>
 
-			<section aria-labelledby="add-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
-				<div>
-					<h2 id="add-heading" className={CARD_HEADING}>
-						{t("autoResponders.add")}
-					</h2>
-					<p className="text-muted-foreground text-sm">
-						{t("autoResponders.addBody", { seconds: AUTO_RESPONDER_LIMITS.answerEverySeconds })}
-					</p>
-				</div>
-
+			<SettingRows
+				title={t("autoResponders.add")}
+				description={t("autoResponders.addBody", { seconds: AUTO_RESPONDER_LIMITS.answerEverySeconds })}
+			>
 				<ResponderFields id="new-responder" value={draft} onChange={setDraft} />
 
 				{full && <Warning>{t("autoResponders.full")}</Warning>}
 				{blocked !== null && (draft.trigger !== "" || draft.reply !== "") && <Warning>{blocked}</Warning>}
 				{add.error !== null && <Warning>{said(add.error)}</Warning>}
 
-				<div>
+				<RowActions>
 					<Button disabled={blocked !== null || full || saving} onClick={submit}>
 						<Plus size={16} aria-hidden="true" /> {t("autoResponders.addResponder")}
 					</Button>
-				</div>
-			</section>
+				</RowActions>
+			</SettingRows>
 
 			{remove.error !== null && (
 				<Warning>

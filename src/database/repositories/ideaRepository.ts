@@ -158,7 +158,6 @@ export async function decideIdea(
 	return row === null ? null : toIdea(row);
 }
 
-/** Newest first. */
 export async function listIdeas(
 	guildId: string,
 	status: IdeaFilter,

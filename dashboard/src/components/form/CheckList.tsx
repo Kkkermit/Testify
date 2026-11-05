@@ -1,17 +1,16 @@
 import { useId, type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { CHECK_ROW, FIELD_GROUP, LABEL, SCROLL_LIST } from "@/components/form/fieldStyles";
+import { ROW_GRID, ROW_LABEL, useRowLayout } from "@/components/form/rowLayout";
 import { cn } from "@/lib/cn";
 
 export interface CheckItem {
 	id: string;
 	label: ReactNode;
-	/** Shown greyed with a reason rather than hidden, so the limit explains itself. */
 	blocked?: boolean;
 	blockedNote?: string;
 }
 
-/** The scrolling checkbox list both pickers are built from. */
 export function CheckList({
 	label,
 	hint,
@@ -30,12 +29,13 @@ export function CheckList({
 	const { t } = useTranslation();
 	const atLimit = value.length >= max;
 	const nameId = `checklist-${useId()}`;
+	const row = useRowLayout();
 
-	// A named group rather than a `Field`: a `<label>` names one control. A `<legend>` is not a flex item, so a `<fieldset>` would lose the gap.
+	// Not a `<fieldset>`: a `<legend>` is not a flex item, so the gap would be lost.
 	return (
-		<div role="group" aria-labelledby={nameId} className={FIELD_GROUP}>
+		<div role="group" aria-labelledby={nameId} className={row ? ROW_GRID : FIELD_GROUP}>
 			<span className="flex flex-col gap-1">
-				<span id={nameId} className={LABEL}>
+				<span id={nameId} className={row ? ROW_LABEL : LABEL}>
 					{label}
 				</span>
 				{hint !== undefined && <span className="text-muted-foreground text-xs">{hint}</span>}
@@ -44,7 +44,7 @@ export function CheckList({
 				</span>
 			</span>
 
-			<div className={SCROLL_LIST}>
+			<div className={cn(SCROLL_LIST, row && "min-w-0 md:max-w-md")}>
 				{items.map((item) => {
 					const checked = value.includes(item.id);
 					const disabled = item.blocked === true || (atLimit && !checked);

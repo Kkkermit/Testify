@@ -1,35 +1,25 @@
 import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { deleteLevelSettings, getLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
-import { normaliseSettings, sortRewards } from "@lib/levelling";
-import {
-	boostsSchema,
-	ignoresSchema,
-	type LevelConfigResponse,
-	levellingPatchSchema,
-	rewardsSchema,
-} from "@testify/shared";
+import { deleteLevelSettings, saveLevelSettings } from "@database/repositories/levelRepository";
+import { sortRewards } from "@lib/levelling";
+import { readLevelConfig } from "@lib/settings";
+import { boostsSchema, ignoresSchema, levellingPatchSchema, rewardsSchema } from "@testify/shared";
 
 export const levelling = new Hono<ApiBindings>();
 
 levelling.use("*", requireGuild);
 
-/** Exactly `normaliseSettings`, so the web shows what `/levelling edit` shows. */
-async function configOf(guildId: string): Promise<LevelConfigResponse> {
-	return normaliseSettings(await getLevelSettings(guildId));
-}
-
-levelling.get("/", async (context) => context.json(await configOf(guildIdOf(context))));
+levelling.get("/", async (context) => context.json(await readLevelConfig(guildIdOf(context))));
 
 levelling.patch("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const patch = await parseBody(context, levellingPatchSchema);
-	const before = await configOf(guildId);
+	const before = await readLevelConfig(guildId);
 
 	await saveLevelSettings(guildId, {
 		// The stored field is the inverse, and has been since the first version.
@@ -39,13 +29,8 @@ levelling.patch("/", async (context) => {
 		...(patch.levelUpChannelId === undefined ? {} : { levelUpChannelId: patch.levelUpChannelId }),
 	});
 
-	const after = await configOf(guildId);
-	await auditChange(context, {
-		action: "levelling.update",
-		summary: summarisePatch(patch),
-		before: pick(before, patch),
-		after: pick(after, patch),
-	});
+	const after = await readLevelConfig(guildId);
+	await auditSettings(context, { action: "levelling.update", summary: summarisePatch(patch), before, after });
 
 	return context.json(after);
 });
@@ -53,7 +38,7 @@ levelling.patch("/", async (context) => {
 levelling.put("/boosts", async (context) => {
 	const guildId = guildIdOf(context);
 	const boosts = await parseBody(context, boostsSchema);
-	const before = await configOf(guildId);
+	const before = await readLevelConfig(guildId);
 
 	await saveLevelSettings(guildId, { boosts });
 
@@ -64,7 +49,7 @@ levelling.put("/boosts", async (context) => {
 		after: { boosts },
 	});
 
-	return context.json(await configOf(guildId));
+	return context.json(await readLevelConfig(guildId));
 });
 
 // The bot hands these roles out, so choosing them asks what `/autorole` asks.
@@ -75,9 +60,8 @@ levelling.put("/rewards", requirePermission(PermissionFlagsBits.ManageRoles), as
 		context,
 		rewards.map((reward) => reward.roleId),
 	);
-	const before = await configOf(guildId);
+	const before = await readLevelConfig(guildId);
 
-	// Stored sorted, so every reader gets them in order without sorting again.
 	await saveLevelSettings(guildId, { rewards: sortRewards(rewards) });
 
 	await auditChange(context, {
@@ -87,13 +71,13 @@ levelling.put("/rewards", requirePermission(PermissionFlagsBits.ManageRoles), as
 		after: { rewards },
 	});
 
-	return context.json(await configOf(guildId));
+	return context.json(await readLevelConfig(guildId));
 });
 
 levelling.put("/ignores", async (context) => {
 	const guildId = guildIdOf(context);
 	const ignores = await parseBody(context, ignoresSchema);
-	const before = await configOf(guildId);
+	const before = await readLevelConfig(guildId);
 
 	await saveLevelSettings(guildId, {
 		ignoredChannelIds: ignores.channelIds,
@@ -107,13 +91,13 @@ levelling.put("/ignores", async (context) => {
 		after: { ignoredChannelIds: ignores.channelIds, ignoredRoleIds: ignores.roleIds },
 	});
 
-	return context.json(await configOf(guildId));
+	return context.json(await readLevelConfig(guildId));
 });
 
 /** Clears the configuration only. Everyone keeps the XP they earned, which the response says out loud. */
 levelling.delete("/", async (context) => {
 	const guildId = guildIdOf(context);
-	const before = await configOf(guildId);
+	const before = await readLevelConfig(guildId);
 
 	await deleteLevelSettings(guildId);
 	await auditChange(context, {
@@ -123,7 +107,7 @@ levelling.delete("/", async (context) => {
 	});
 
 	return context.json({
-		config: await configOf(guildId),
+		config: await readLevelConfig(guildId),
 		message: "Levelling settings cleared. Nobody lost the XP they had already earned.",
 	});
 });
@@ -132,11 +116,6 @@ function count(value: number, noun: string): string {
 	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
 }
 
-function pick(config: LevelConfigResponse, patch: Record<string, unknown>): Record<string, unknown> {
-	return Object.fromEntries(Object.keys(patch).map((key) => [key, config[key as keyof LevelConfigResponse]]));
-}
-
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarisePatch(patch: Record<string, unknown>): string {
 	const parts: string[] = [];
 

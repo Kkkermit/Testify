@@ -1,12 +1,12 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { resolve } from "node:path";
 
-/** Every guild-scoped screen names its server in `PageHeader`'s `eyebrow`, since a phone hides the sidebar. */
+/** Every guild-scoped screen names its server in `PageHeader`'s `server`, since a phone hides the sidebar. */
 
 const FEATURES = resolve(__dirname, "..", "features");
 const ROUTES = readFileSync(resolve(__dirname, "..", "routes.tsx"), "utf8");
 
-/** The overview's own `<h1>` is the server name, so an eyebrow above it would say it twice. */
+/** The overview's own `<h1>` is the server name, so naming it above would say it twice. */
 const NAMED_BY_ITS_TITLE = new Set(["GuildOverviewPage"]);
 
 function guildScopedPages(): string[] {
@@ -36,7 +36,7 @@ describe("guild-scoped screens", () => {
 	});
 
 	it("name the server in the page header", () => {
-		const silent = guildScopedPages().filter((component) => !sourceOf(component).includes("eyebrow={"));
+		const silent = guildScopedPages().filter((component) => !sourceOf(component).includes("server={"));
 
 		expect(silent).toEqual([]);
 	});

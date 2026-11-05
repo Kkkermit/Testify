@@ -14,7 +14,6 @@ export function sanitiseText(value: string): string {
 	return value.normalize("NFC").replace(CONTROL, "").replace(INVISIBLE, "").trim();
 }
 
-/** A single-line field, where a newline would break the layout the value is written into. */
 export function sanitiseLine(value: string): string {
 	return sanitiseText(value).replace(/\s+/g, " ");
 }

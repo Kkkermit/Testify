@@ -9,7 +9,6 @@ import pepeSign from "@commands/fun/subcommands/pepeSign.command";
 import relationship from "@commands/fun/subcommands/relationship.command";
 import { asSubcommand, defineCommand } from "@core/command";
 
-/** Discord allows an application 100 commands, so related ones live together here. */
 export default defineCommand({
 	name: "fun",
 	description: "Jokes, generators and other nonsense.",

@@ -8,7 +8,6 @@ import { countCommandUse, logCommandUse, recordCommandTime } from "@lib/bot";
 import { refusalEmbed, replyTemporarily } from "@lib/discord";
 import { mentionNoticesAfterCommand, NOTICE_COMMAND, noticeHint } from "@lib/notices";
 
-/** Runs `t?ban @someone` through the same code and checks as `/ban`. */
 export default defineMessageHandler({
 	name: "prefixCommands",
 	order: 10,

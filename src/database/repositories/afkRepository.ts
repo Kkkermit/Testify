@@ -57,7 +57,7 @@ export async function clearAfk(guildId: string, userId: string): Promise<StoredA
 	return row === null ? null : toAfk(row);
 }
 
-/** Used by the tests, so no suite inherits another's idea of who is away. */
+/** Used by the tests, and after somebody deletes their data, so nobody is remembered as away. */
 export function clearAfkCache(): void {
 	away.clear();
 }

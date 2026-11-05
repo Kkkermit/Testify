@@ -4,7 +4,7 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
-import { discordTime, truncate } from "@lib/format";
+import { discordTime, mentionOf, truncate } from "@lib/format";
 import {
 	assertModeratable,
 	issueWarning,
@@ -17,7 +17,6 @@ import {
 import { type WarnOutcome } from "@testify/shared";
 
 const USER_OPTION = { name: "user", description: "The member in question.", type: "user", required: true } as const;
-/** Autocompleted rather than typed. */
 const WARN_ID_OPTION = {
 	name: "warn-id",
 	description: "Start typing to pick a warning.",
@@ -26,7 +25,6 @@ const WARN_ID_OPTION = {
 	autocomplete: true,
 } as const;
 
-/** What the warning's number did to the member, including when the bot could not do it. */
 function consequenceLine(outcome: WarnOutcome): string {
 	if (outcome.step === null) return "No punishment is set for warnings here. `/warn punishments` sets them up.";
 	if (outcome.problem !== null) {
@@ -120,7 +118,7 @@ export default defineCommand({
 								.map(
 									(warning) =>
 										`\`${warning.warnId}\` — ${truncate(warning.reason, 80)}\n` +
-										`> by <@${warning.executorId}> ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}`,
+										`> by ${mentionOf(warning.executorId)} ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}`,
 								)
 								.join("\n\n"),
 							thumbnail: target.displayAvatarURL(),
@@ -149,7 +147,7 @@ export default defineCommand({
 							title: `Warning ${warning.warnId}`,
 							fields: [
 								{ name: "User", value: `${target}`, inline: true },
-								{ name: "Moderator", value: `<@${warning.executorId}>`, inline: true },
+								{ name: "Moderator", value: mentionOf(warning.executorId), inline: true },
 								{ name: "Issued", value: discordTime(warning.timestamp, "F"), inline: true },
 								{ name: "Action", value: warningActionText(warning), inline: true },
 								{ name: "Reason", value: warning.reason },
@@ -231,7 +229,6 @@ export default defineCommand({
 		});
 	},
 
-	/** Offers the chosen member's warnings, newest first, described not just listed. */
 	async autocomplete(interaction) {
 		const guildId = interaction.guildId;
 		// Autocomplete does not resolve users, so the option arrives as a snowflake.

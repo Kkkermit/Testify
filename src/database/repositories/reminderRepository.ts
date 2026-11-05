@@ -37,7 +37,6 @@ export async function countReminders(userId: string): Promise<number> {
 	return Reminder.countDocuments({ userId }).exec();
 }
 
-/** Soonest first. */
 export async function listReminders(userId: string): Promise<StoredReminder[]> {
 	const rows = await Reminder.find({ userId }).sort({ dueAt: 1 }).lean<Lean[]>().exec();
 	return rows.map(toReminder);

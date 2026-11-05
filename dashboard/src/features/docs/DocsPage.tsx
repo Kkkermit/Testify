@@ -3,7 +3,7 @@ import { ArrowRight, ExternalLink, Languages } from "lucide-react";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useParams } from "react-router";
-import { Card, CARD_HEADING, Eyebrow, PAGE_TITLE, Skeleton } from "@/components/primitives";
+import { Card, CARD_HEADING, SectionHeading, PAGE_TITLE, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot } from "@/features/auth/useBot";
 import { ConfigurationTable } from "@/features/docs/components/ConfigurationTable";
@@ -28,7 +28,6 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { cn } from "@/lib/cn";
 import { keys } from "@/lib/queries";
 
-/** `/docs` lists every page; `/docs/:slug` shows one, and `/docs/guides/:articleId` one help article. */
 export function DocsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { slug, articleId } = useParams();
@@ -64,7 +63,7 @@ function DocsNav({ current }: { current: string | undefined }): React.JSX.Elemen
 
 	const groups = DOC_GROUPS.map((group) => (
 		<div key={group} className="flex flex-col gap-1">
-			<Eyebrow as="h2">{t(GROUP_LABELS[group])}</Eyebrow>
+			<SectionHeading as="h2">{t(GROUP_LABELS[group])}</SectionHeading>
 			<ul className="flex flex-col">
 				{DOC_PAGES.filter((page) => page.group === group).map((page) => (
 					<li key={page.slug}>
@@ -122,7 +121,7 @@ function DocsIndex(): React.JSX.Element {
 								<Link
 									to={`/docs/${page.slug}`}
 									className={cn(
-										"bg-card border-border surface-edge rounded-card group flex h-full flex-col gap-1 border px-6 py-4",
+										"bg-card border-border rounded-card group flex h-full flex-col gap-1 border px-6 py-4",
 										"hover:border-accent/60 transition-colors duration-150",
 										"focus-visible:outline-ring focus-visible:outline-2 focus-visible:outline-offset-2",
 									)}
@@ -152,7 +151,7 @@ function DocView({ page, articleId }: { page: DocPage; articleId: string | undef
 	return (
 		<article className="flex flex-col gap-6">
 			<header className="flex flex-col gap-2">
-				<Eyebrow>{t(GROUP_LABELS[page.group])}</Eyebrow>
+				<SectionHeading>{t(GROUP_LABELS[page.group])}</SectionHeading>
 				<h1 className={PAGE_TITLE}>{t(page.titleKey)}</h1>
 				<p className="text-muted-foreground">{t(page.summaryKey)}</p>
 				{/* The page around a doc follows the reader's language; the doc itself is the repository's English. */}
@@ -171,7 +170,6 @@ function DocView({ page, articleId }: { page: DocPage; articleId: string | undef
 	);
 }
 
-/** One section of a file drops its own heading, which would only repeat the page's; a whole file drops its title. */
 async function sourcesOf(page: MarkdownPage): Promise<MarkdownSource[]> {
 	return Promise.all(
 		page.sources.map(async (source) => {
@@ -250,7 +248,7 @@ function MarkdownDoc({ page }: { page: MarkdownPage }): React.JSX.Element {
 					aria-label={t("docs.onThisPage")}
 					className="hidden xl:sticky xl:top-6 xl:flex xl:flex-col xl:gap-2 xl:self-start"
 				>
-					<Eyebrow as="h2">{t("docs.onThisPage")}</Eyebrow>
+					<SectionHeading as="h2">{t("docs.onThisPage")}</SectionHeading>
 					<ul className="flex flex-col gap-1 text-sm">
 						{doc.headings
 							.filter((heading) => heading.level <= 3)

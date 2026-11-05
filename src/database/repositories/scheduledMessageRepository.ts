@@ -25,7 +25,6 @@ function inGuild(guildId: string, id: string): { guildId: string; _id: string } 
 	return isValidObjectId(id) ? { guildId, _id: id } : null;
 }
 
-/** Soonest first. */
 export async function listSchedules(guildId: string): Promise<StoredSchedule[]> {
 	const rows = await ScheduledPost.find({ guildId }).sort({ nextAt: 1, _id: 1 }).lean<Lean[]>().exec();
 	return rows.map(toSchedule);
@@ -90,10 +89,7 @@ export async function claimDueSchedule(now: Date, leaseMs: number): Promise<Stor
 	return row === null ? null : toSchedule(row);
 }
 
-/**
- * Moves a post on to its next time, or deletes a one-off when `nextAt` is null. Matched on the time it was claimed
- * at, so an edit made while it was being sent is kept rather than overwritten.
- */
+/** Moves a post on to its next time, or deletes a one-off, matched on its claim time so an edit made mid-send is kept. */
 export async function settleSchedule(claimed: StoredSchedule, nextAt: Date | null): Promise<void> {
 	const filter = { _id: claimed.id, nextAt: claimed.nextAt };
 	if (nextAt === null) {

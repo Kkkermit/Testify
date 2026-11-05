@@ -16,7 +16,6 @@ export function useVerification(guildId: string): UseQueryResult<VerificationCon
 	});
 }
 
-/** Not optimistic: a write here can post a message into a public channel, so nothing may move before the server agrees. */
 export function useSaveVerification(
 	guildId: string,
 ): UseMutationResult<VerificationConfigResponse, Error, VerificationPatch> {

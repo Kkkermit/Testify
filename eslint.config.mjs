@@ -94,7 +94,7 @@ export default ts.config(
 		rules: { "@typescript-eslint/no-require-imports": "off" },
 	},
 	{
-		// Where embeds are actually built.
+		// The three files allowed to build an embed.
 		files: ["src/lib/discord/embeds.util.ts", "src/core/errors.ts", "src/buttons/errorTriage.ts"],
 		rules: { "no-restricted-syntax": "off" },
 	},
@@ -144,6 +144,7 @@ export default ts.config(
 		languageOptions: { sourceType: "commonjs", globals: { module: "writable" } },
 	},
 	{
+		// Scripts write to a terminal, and tooling may import development dependencies.
 		files: ["scripts/**/*.ts", "**/*.config.ts"],
 		rules: {
 			"no-console": "off",
@@ -152,6 +153,7 @@ export default ts.config(
 		},
 	},
 	{
+		// Tests drive mocks and partial shapes that the type-aware rules cannot follow.
 		files: ["tests/**/*.ts"],
 		rules: {
 			"no-console": "off",

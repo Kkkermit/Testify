@@ -16,7 +16,6 @@ export function useSticky(guildId: string): UseQueryResult<StickyList> {
 	});
 }
 
-/** Not optimistic: a sticky is a message the bot posts, and the answer is the whole list. */
 export function useSaveSticky(guildId: string): UseMutationResult<StickyList, Error, StickyPut> {
 	return useListMutation(guildId, (body) => api.put<StickyList>(`/guilds/${guildId}/sticky`, body));
 }
@@ -36,7 +35,6 @@ function useListMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (list) => {
-			// The same guard the settings sections use: a whole-list answer is only trusted when it is alone.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, list);
 		},
 		onSettled: () => {

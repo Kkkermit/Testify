@@ -35,7 +35,6 @@ function useLotteryMutation<Body>(
 		mutationKey: key,
 		mutationFn: send,
 		onSuccess: (settings) => {
-			// A whole-document answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
 		},
 		onSettled: () => {

@@ -7,7 +7,6 @@ interface DataRow {
 	mono?: boolean;
 }
 
-/** Label-and-value pairs as a real `<dl>`; `dense` drops the padding and dividers for a list inside a card that has both. */
 export function DataList({
 	rows,
 	mono = false,
@@ -34,7 +33,6 @@ export function DataList({
 	);
 }
 
-/** A number with its name above it — the shape every stat block on the console repeats. */
 export function Figure({
 	label,
 	value,
@@ -51,9 +49,7 @@ export function Figure({
 	return (
 		<div className={className}>
 			<dt className="text-muted-foreground text-xs">{label}</dt>
-			<dd className={cn("mt-1 font-mono tabular-nums", size === "lg" ? "text-xl" : "font-mono text-lg", tone)}>
-				{value}
-			</dd>
+			<dd className={cn("mt-1 font-semibold tabular-nums", size === "lg" ? "text-xl" : "text-lg", tone)}>{value}</dd>
 		</div>
 	);
 }

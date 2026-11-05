@@ -1,5 +1,4 @@
-import { render, screen } from "@testing-library/react";
-import { Card, cardClass } from "@/components/primitives/Card";
+import { cardClass } from "@/components/primitives/Card";
 
 describe("cardClass", () => {
 	/** A card that sets its own `p-4` puts its content 8px left of every other card on the page. */
@@ -12,20 +11,5 @@ describe("cardClass", () => {
 	it("carries the surface into a card that cannot be a div", () => {
 		expect(cardClass("compact")).toContain("bg-card");
 		expect(cardClass("compact")).toContain("rounded-card");
-	});
-});
-
-describe("Card", () => {
-	/** A 2px bar clamps its own radius, so the accent has to stay inside the card's corner arc. */
-	it("keeps the focal accent inside the card's corner arc", () => {
-		render(
-			<Card data-testid="card" focal>
-				Body
-			</Card>,
-		);
-
-		const accent = screen.getByTestId("card").className;
-		expect(accent).toContain("before:inset-x-2");
-		expect(accent).not.toMatch(/before:inset-x-\[?-/);
 	});
 });

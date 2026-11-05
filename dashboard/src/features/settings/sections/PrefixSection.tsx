@@ -1,5 +1,4 @@
 import { type PrefixPatch, type PrefixSetting } from "@testify/shared";
-import { Terminal } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { Field, FIELD, savingStateOf, Toggle, Warning } from "@/components/form";
@@ -10,7 +9,6 @@ import { useSaveSection } from "@/features/settings/useSettings";
 import { cn } from "@/lib/cn";
 import { sanitiseInput } from "@/lib/sanitise";
 
-/** The one typed field on this page, so it is held locally and saved on blur rather than per keystroke. */
 export function PrefixSection({ guildId, value }: { guildId: string; value: PrefixSetting }): React.JSX.Element {
 	const { t } = useTranslation();
 	const save = useSaveSection<PrefixPatch>(guildId, "prefix");
@@ -30,8 +28,6 @@ export function PrefixSection({ guildId, value }: { guildId: string; value: Pref
 
 	return (
 		<Section
-			icon={Terminal}
-			tint="text-feature-levelling"
 			title={t("settings.prefixTitle")}
 			describes={t("settings.prefixBody")}
 			saving={savingStateOf(save.isPending, save.isSuccess && !dirty)}

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Card, CARD_HEADING, EmptyState } from "@/components/primitives";
 import { dateAndTime, shortDate } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
+import { personName } from "@/lib/people";
 
 export function DrawHistory({
 	draws,
@@ -47,7 +48,9 @@ export function DrawHistory({
 							<p className="text-muted-foreground text-sm">
 								{draw.winners.length === 0
 									? t("lottery.rolledOver")
-									: draw.winners.map((winner) => `${winner.userTag} (${formatNumber(winner.prizeAmount)})`).join(", ")}
+									: draw.winners
+											.map((winner) => `${personName(winner.userTag, t)} (${formatNumber(winner.prizeAmount)})`)
+											.join(t("common.listSeparator"))}
 							</p>
 						</li>
 					))}

@@ -18,20 +18,20 @@ fork carries them.**
 
 ## 🖼️ The set
 
-| File                | Route                              | Theme | Size       |
-| ------------------- | ---------------------------------- | ----- | ---------- |
-| `overview.png`      | `/guilds/:guildId`                 | dark  | viewport   |
-| `guilds.png`        | `/guilds`                          | dark  | 640px tall |
-| `levelling.png`     | `/guilds/:guildId/levelling`       | light | viewport   |
-| `insights.png`      | `/guilds/:guildId/insights`        | dark  | whole page |
-| `warnings.png`      | `/guilds/:guildId/warnings`        | light | whole page |
-| `member.png`        | `/guilds/:guildId/members/:userId` | dark  | whole page |
-| `status.png`        | `/status`                          | dark  | whole page |
-| `casino.png`        | `/guilds/:guildId/casino`          | dark  | whole page |
-| `settings.png`      | `/guilds/:guildId/settings`        | dark  | viewport   |
-| `help.png`          | `/help`                            | light | 860px tall |
-| `appearance.png`    | `/appearance`                      | light | viewport   |
-| `owner-console.png` | `/owner?tab=usage`                 | dark  | viewport   |
+| File                | Route                              | Theme | Size        |
+| ------------------- | ---------------------------------- | ----- | ----------- |
+| `overview.png`      | `/guilds/:guildId`                 | dark  | 800px tall  |
+| `guilds.png`        | `/guilds`                          | dark  | 640px tall  |
+| `levelling.png`     | `/guilds/:guildId/levelling`       | light | 720px tall  |
+| `insights.png`      | `/guilds/:guildId/insights`        | dark  | whole page  |
+| `warnings.png`      | `/guilds/:guildId/warnings`        | light | whole page  |
+| `member.png`        | `/guilds/:guildId/members/:userId` | dark  | 1400px tall |
+| `status.png`        | `/status`                          | dark  | whole page  |
+| `casino.png`        | `/guilds/:guildId/casino`          | dark  | whole page  |
+| `settings.png`      | `/guilds/:guildId/settings`        | dark  | 900px tall  |
+| `help.png`          | `/help`                            | light | 860px tall  |
+| `appearance.png`    | `/appearance`                      | light | 900px tall  |
+| `owner-console.png` | `/owner?tab=usage`                 | dark  | 900px tall  |
 
 Both themes appear on purpose: a reader deciding whether to run this should see that the light one is real rather
 than an afterthought.
@@ -47,9 +47,13 @@ self-hoster a browser download for something only a maintainer runs.
 3. **Answer `/api/**` from the test stubs.** The handlers in `dashboard/src/test/handlers.ts` serve the same fake
    data the test suite uses, from `dashboard/src/test/fixtures/`; MSW's `getResponse(handlers, request)` turns an intercepted request into a response
    outside a browser. Put any override first in the list — the first handler that matches wins.
-4. **Set the theme before the page loads**, by writing `light` or `dark` to `localStorage` under `testify:theme`,
-   and turn reduced motion on so the backdrop is not caught mid-drift.
-5. **Load the route at 1280px wide** and wait for the network to settle. For a whole page, resize the viewport to
+4. **Set the theme before the page loads**, by writing `light` or `dark` to `localStorage` under `testify:theme`.
+   Override the stubs so the server is `Testify HQ` and the account `you`, give the overview a few features, a
+   missing permission and recent changes, and give the usage tab a month of runs, so each picture shows what its
+   caption says.
+5. **Answer `cdn.discordapp.com` with `dashboard/public/icon-512.png`**, so the bot wears its own picture rather than
+   the initial it falls back to when Discord's CDN cannot be reached.
+6. **Load the route at 1280px wide** and wait for the network to settle. For a whole page, resize the viewport to
    the page's own height before the shot rather than using a full-page capture — the sidebar is as tall as the
    viewport, and a full-page capture leaves it stopping part-way down.
 

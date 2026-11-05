@@ -25,7 +25,7 @@ describe("where the not-found page sits", () => {
 		const catchAll = routes.find((route) => "path" in route && route.path === "*");
 
 		expect(catchAll).toBeDefined();
-		// A `Navigate` carries `to`; the 404 element does not. `/` redirecting to `/guilds` is separate and correct.
+		// A `Navigate` carries `to` and the 404 element does not; `/` redirecting to `/guilds` is separate and correct.
 		expect((catchAll as { element: { props: Record<string, unknown> } }).element.props.to).toBeUndefined();
 	});
 });

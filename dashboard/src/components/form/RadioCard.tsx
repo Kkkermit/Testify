@@ -1,6 +1,5 @@
 import { cn } from "@/lib/cn";
 
-/** One radio of a group, drawn as a card with a line of description; `name` keeps two groups on one page apart. */
 export function RadioCard({
 	name,
 	label,

@@ -24,7 +24,7 @@ describe("reactVersionsIn", () => {
 		]);
 	});
 
-	/** The real bug: React 18 hoisted beside the dashboard's 19, so every hook reads a null dispatcher. */
+	/** React 18 hoisted beside the dashboard's 19, so every hook read a null dispatcher. */
 	it("reports both when two copies are bundled", () => {
 		const code = [
 			"e.useTransition=function(){return w.H.useTransition()},e.version=`19.2.8`",

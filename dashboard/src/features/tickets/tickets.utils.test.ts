@@ -1,5 +1,5 @@
 import { type RoleSummary, type TicketSettings } from "@testify/shared";
-import { draftOf, draftProblems, staffRoleWarning } from "@/features/tickets/tickets.utils";
+import { draftOf, draftProblems, staffRoleWarning, ticketSummary } from "@/features/tickets/tickets.utils";
 import { t } from "@/test/english";
 
 const SETTINGS: TicketSettings = {
@@ -60,5 +60,23 @@ describe("staffRoleWarning", () => {
 	/** A role deleted since the page loaded would otherwise fail at the moment a ticket is opened. */
 	it("says so when the stored role has been deleted", () => {
 		expect(staffRoleWarning(roles, "999", t)).toMatch(/no longer exists/i);
+	});
+});
+
+describe("ticketSummary", () => {
+	const on = { enabled: true, posted: true, openTickets: 2 };
+
+	/** Tickets switched on with no panel posted still let nobody in, so the sentence says so. */
+	it("says whether members can open a ticket, and how many are open", () => {
+		expect(ticketSummary({ ...on, enabled: false }, "#help", t)).toBe("Tickets are off, so members cannot open one.");
+		expect(ticketSummary({ ...on, posted: false }, "#help", t)).toBe(
+			"Tickets are on, but the panel is not posted yet, so nobody can open one.",
+		);
+		expect(ticketSummary({ ...on, openTickets: 1 }, "#help", t)).toBe(
+			"Members open a ticket from the panel in #help, and 1 is open right now.",
+		);
+		expect(ticketSummary(on, "#help", t)).toBe(
+			"Members open a ticket from the panel in #help, and 2 are open right now.",
+		);
 	});
 });

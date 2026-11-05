@@ -37,7 +37,6 @@ giveaways.post("/", async (context) => {
 	return context.json(await listFor(context, guild));
 });
 
-/** Keyed by the message id from the list, so nobody has to retype one. */
 giveaways.post("/:messageId/end", async (context) => {
 	const guild = guildOf(context);
 	const { messageId } = parseParams(context, giveawayParams);

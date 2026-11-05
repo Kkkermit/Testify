@@ -49,7 +49,6 @@ const config: Config = {
 		"!shared/src/index.ts",
 		"!src/lib/canvas.util.ts",
 	],
-	// The agreed floor, which CI enforces through `npm run test:coverage`.
 	coverageThreshold: { global: { statements: 75, lines: 75, functions: 75, branches: 75 } },
 	clearMocks: true,
 	restoreMocks: true,

@@ -1,7 +1,6 @@
 import { type ReactNode } from "react";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 
-/** An icon, one sentence naming what would be here, and the one action that fixes it. */
 export function EmptyState({
 	icon,
 	title,
@@ -14,7 +13,7 @@ export function EmptyState({
 	action?: ReactNode;
 }): React.JSX.Element {
 	return (
-		<div className="motion-fade flex flex-col items-center gap-2 py-8 text-center">
+		<div className="flex flex-col items-center gap-2 py-8 text-center">
 			<div className="bg-muted text-muted-foreground rounded-full p-3" aria-hidden="true">
 				{icon}
 			</div>

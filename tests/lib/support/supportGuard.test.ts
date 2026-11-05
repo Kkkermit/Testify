@@ -51,10 +51,7 @@ describe("findLeak", () => {
 	});
 });
 
-/**
- * Every article and every command page, as a reader would receive it, has to pass: a help article that mentions a
- * variable name, an id or an address is refused at start-up, so this is where the author finds out.
- */
+/** Every article and command page, as a reader would receive it, has to pass, or it is refused at start-up. */
 describe("the real help corpus", () => {
 	const entries = realEntries();
 	const context = { bot: "Testify", prefix: "t?", repository: "https://github.com/Kkkermit/Testify" };

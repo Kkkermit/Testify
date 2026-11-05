@@ -4,7 +4,6 @@ import { permissionLabel } from "@/features/commands/permissions.labels";
 import { type TranslationKey } from "@/i18n";
 import { formatNumber } from "@/lib/intl";
 
-/** Each feature by the name its own screen goes by, so the overview and the sidebar never disagree. */
 const FEATURE_LABELS: Record<string, TranslationKey> = {
 	levelling: "levelling.title",
 	"audit-logging": "auditLog.title",
@@ -53,13 +52,11 @@ export const MISSING_LABELS: Record<WatchedPermission, TranslationKey> = {
 	AttachFiles: "overview.missingAttachFiles",
 };
 
-/** A feature the dashboard has not been told about yet keeps the name the bot gave it. */
 export function featureLabel(key: string, fallback: string, t: TFunction): string {
 	const label = FEATURE_LABELS[key];
 	return label === undefined ? fallback : t(label);
 }
 
-/** One line about a feature, with each channel named as `channel` names it for this reader. */
 export function describeDetail(detail: FeatureDetail, t: TFunction, channel: (id: string) => string): string {
 	switch (detail.kind) {
 		case "posting":
@@ -67,7 +64,10 @@ export function describeDetail(detail: FeatureDetail, t: TFunction, channel: (id
 		case "count":
 			return t(COUNT_LABELS[detail.what], { count: detail.count });
 		case "levelling":
-			return `${t("overview.countRewards", { count: detail.rewards })}, ${t("overview.countBoosts", { count: detail.boosts })}`;
+			return [
+				t("overview.countRewards", { count: detail.rewards }),
+				t("overview.countBoosts", { count: detail.boosts }),
+			].join(t("common.listSeparator"));
 		case "holding":
 			return t("overview.detailHolding", { count: detail.days });
 		case "watching":

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
@@ -15,9 +15,10 @@ music.get("/", async (context) => context.json(await readMusicSettings(guildIdOf
 music.patch("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const body = await parseBody(context, musicPatch);
+	const before = await readMusicSettings(guildId);
 
 	const settings = await applyMusicSettings(guildId, body, context.get("session")?.userId ?? null);
-	await auditChange(context, { action: "music.update", summary: summaryOf(body) });
+	await auditSettings(context, { action: "music.update", summary: summaryOf(body), before, after: settings });
 
 	return context.json(settings);
 });

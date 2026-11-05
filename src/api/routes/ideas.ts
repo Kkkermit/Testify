@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
@@ -17,10 +17,13 @@ ideas.get("/", async (context) => context.json(await readIdeaSettings(guildOf(co
 ideas.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, ideaSettingsPatch);
+	const before = await readIdeaSettings(guild);
 
 	const settings = await applyIdeaSettings(guild, patch, context.get("session")?.userId ?? null);
-	await auditChange(context, {
+	await auditSettings(context, {
 		action: "ideas.update",
+		before,
+		after: settings,
 		summary:
 			patch.enabled === undefined ? "Moved the idea board" : `Turned the idea board ${patch.enabled ? "on" : "off"}`,
 	});
@@ -38,7 +41,6 @@ ideas.get("/list", async (context) => {
 	return context.json(body);
 });
 
-/** The same decision a staff button makes in Discord, so the post and the author's DM follow it either way. */
 ideas.post("/:ideaId/decision", async (context) => {
 	const guild = guildOf(context);
 	const { ideaId } = parseParams(context, ideaParams);

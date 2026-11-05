@@ -7,7 +7,6 @@ import { EVENT_LABELS, GROUP_LABELS } from "@/features/audit-log/auditLog.labels
 import { type GroupState } from "@/features/audit-log/auditLog.utils";
 import { cn } from "@/lib/cn";
 
-/** One part of a server as its own panel: eighteen flat checkboxes are a wall, five bordered groups are a decision. */
 export function EventGroup({
 	group,
 	state,

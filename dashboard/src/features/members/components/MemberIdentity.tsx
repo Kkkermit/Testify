@@ -1,9 +1,8 @@
 import { type MemberDetail } from "@testify/shared";
 import { useTranslation } from "react-i18next";
 import { Avatar, Badge, Card, CARD_HEADING, Figure } from "@/components/primitives";
-import { describeJoined, softbanActive, statsOf } from "@/features/members/memberDetail.utils";
+import { softbanActive, statsOf } from "@/features/members/memberDetail.utils";
 
-/** How many roles fit before the header stops being a glance. */
 const ROLES_SHOWN = 12;
 
 export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.Element {
@@ -21,7 +20,6 @@ export function MemberIdentity({ detail }: { detail: MemberDetail }): React.JSX.
 					{!detail.inGuild && <Badge tone="warning">{t("members.leftServer")}</Badge>}
 					{softbanActive(detail) && <Badge tone="danger">{t("members.softbanned")}</Badge>}
 				</p>
-				<p className="text-muted-foreground text-xs">{describeJoined(detail.joinedAt, t)}</p>
 
 				{detail.roles.length > 0 && (
 					<ul className="mt-2 flex flex-wrap gap-1">

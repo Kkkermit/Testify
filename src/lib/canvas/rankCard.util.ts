@@ -49,7 +49,6 @@ export function rankCardText(data: RankCardData): RankCardText {
 	};
 }
 
-/** How much of the track to fill. */
 export function barFill(progress: number, needed: number, trackWidth: number): number {
 	if (needed <= 0) return trackWidth;
 

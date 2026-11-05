@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Tooltip } from "@/components/primitives";
 import { PLACEHOLDER_LABELS } from "@/features/welcome/welcome.labels";
 
-/** Clicking a token inserts it, because retyping `{username}` exactly is the sort of thing people get wrong. */
 export function PlaceholderHelp({
 	onInsert,
 	disabled = false,

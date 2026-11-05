@@ -17,13 +17,10 @@ export default defineConfig({
 	sourcemap: true,
 	clean: true,
 	splitting: false,
-	// The module loader globs real files at runtime, so the emitted tree has to
-	// mirror src/ file-for-file. Bundling would collapse it and break discovery.
+	// The loader globs real files at runtime, so the emitted tree mirrors src/ file for file.
 	bundle: false,
 	async onSuccess() {
-		// esbuild leaves `@core/…` specifiers alone when it is not bundling, so the
-		// emitted CommonJS would not resolve at runtime. This rewrites them to the
-		// relative paths Node can follow, using the same map from tsconfig.json.
+		// esbuild leaves `@core/…` specifiers alone when it is not bundling, so this rewrites them with tsconfig.json's map.
 		await run("npx", ["tsc-alias", "-p", "tsconfig.json", "--outDir", "dist"]);
 		await cp(resolve("assets"), resolve("dist/assets"), { recursive: true });
 	},

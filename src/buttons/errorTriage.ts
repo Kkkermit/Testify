@@ -9,7 +9,6 @@ const COLOURS = {
 	unsolved: theme.colours.error,
 } as const;
 
-/** Recolours the error report in place. */
 export default defineButton({
 	id: ERROR_TRIAGE_ID,
 

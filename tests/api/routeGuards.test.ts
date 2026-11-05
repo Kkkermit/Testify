@@ -6,7 +6,7 @@ jest.mock("@database/connection", () => ({ databaseConnected: jest.fn(() => true
 
 /** Every route is either deliberately public or refuses an anonymous caller. */
 
-/** Reachable without a session, on purpose. Each entry says why, because that is the thing worth reviewing. */
+/** Reachable without a session on purpose, each entry saying why. */
 const PUBLIC = new Map<string, string>([
 	["/api/health", "a liveness probe, and it carries no guild or user data"],
 	["/api/auth/setup", "the setup screen for a half-configured install, before anybody can sign in"],
@@ -79,7 +79,7 @@ describe("every API route", () => {
 		expect(leaks).toEqual([]);
 	});
 
-	/** A public route added without a reason is the thing this list exists to make somebody argue for. */
+	/** A public route needs a reason written here. */
 	it("keeps the public list short and explained", () => {
 		for (const [path, why] of PUBLIC) {
 			expect(why.length).toBeGreaterThan(10);

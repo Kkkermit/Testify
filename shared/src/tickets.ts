@@ -40,7 +40,6 @@ interface TicketDestinations {
 	staffRoleId: string | null;
 }
 
-/** Everything still missing before a panel can be posted, in the order the form lists it. */
 export function ticketMissing(draft: TicketDestinations): Problem[] {
 	return [
 		draft.panelChannelId === null ? problem("ticket.panelChannel") : null,

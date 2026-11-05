@@ -24,7 +24,6 @@ export function useSaveCasino(guildId: string): UseMutationResult<CasinoSettings
 		mutationKey: key,
 		mutationFn: (body: CasinoPatch) => api.patch<CasinoSettings>(`/guilds/${guildId}/casino`, body),
 		onSuccess: (settings) => {
-			// A whole-document answer is only trusted while it is the only write in flight.
 			if (client.isMutating({ mutationKey: key }) === 1) client.setQueryData(key, settings);
 		},
 		onSettled: () => {

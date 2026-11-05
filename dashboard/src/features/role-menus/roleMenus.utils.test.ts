@@ -1,5 +1,6 @@
 import { type RoleMenuEntry, type RoleSummary } from "@testify/shared";
-import { draftOf, offerBlocked } from "@/features/role-menus/roleMenus.utils";
+import { draftOf, offerBlocked, roleMenuSummary } from "@/features/role-menus/roleMenus.utils";
+import { i18next } from "@/i18n";
 
 const role = (id: string, extra: Partial<RoleSummary> = {}): RoleSummary => ({
 	id,
@@ -35,5 +36,23 @@ describe("the role menu draft", () => {
 		expect(offerBlocked(role("a"))).toBe(false);
 		expect(offerBlocked(role("a", { powerful: true }))).toBe(true);
 		expect(offerBlocked(role("a", { assignableByBot: false }))).toBe(true);
+	});
+});
+
+describe("roleMenuSummary", () => {
+	const t = i18next.getFixedT("en");
+
+	/** A menu that was never posted hands out nothing, so it must not be counted as one members can use. */
+	it("counts only the menus members can pick from", () => {
+		expect(roleMenuSummary([], t)).toBe("There are no role menus yet, so members cannot pick their own roles.");
+		expect(roleMenuSummary([{ posted: false }], t)).toBe(
+			"No menu is posted yet, so members cannot pick roles from one.",
+		);
+		expect(roleMenuSummary([{ posted: true }, { posted: false }], t)).toBe(
+			"Members pick their own roles from 1 posted menu.",
+		);
+		expect(roleMenuSummary([{ posted: true }, { posted: true }], t)).toBe(
+			"Members pick their own roles from 2 posted menus.",
+		);
 	});
 });

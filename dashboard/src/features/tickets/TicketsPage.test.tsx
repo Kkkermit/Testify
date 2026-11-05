@@ -71,7 +71,7 @@ describe("the tickets page", () => {
 		expect(sent).not.toHaveProperty("publish");
 	});
 
-	/** Posting is what the whole page is for, so an unconfigured server has to say what is still missing. */
+	/** An unconfigured server has to say what is still missing before it can post. */
 	it("refuses to post until every destination is chosen", async () => {
 		serve({ enabled: false, panelChannelId: null, categoryId: null, posted: false, openTickets: 0 });
 		renderPage();

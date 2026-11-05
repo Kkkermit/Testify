@@ -9,7 +9,6 @@ import { type WelcomeConfigResponse, type WelcomePatch } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** A spread would let an absent field overwrite a present one with `undefined`. */
 function applyPatch(current: WelcomeConfigResponse, patch: WelcomePatch): WelcomeConfigResponse {
 	return {
 		...current,
@@ -27,7 +26,6 @@ export function useWelcome(guildId: string): UseQueryResult<WelcomeConfigRespons
 	});
 }
 
-/** Optimistic, with the previous value kept so a refusal puts it back rather than leaving a lie on screen. */
 export function useUpdateWelcome(guildId: string): UseMutationResult<WelcomeConfigResponse, Error, WelcomePatch> {
 	const client = useQueryClient();
 	const key = keys.guild(guildId).welcome();

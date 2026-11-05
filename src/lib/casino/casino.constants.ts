@@ -1,6 +1,5 @@
 import { DAY_MS, MINUTE_MS, SECOND_MS } from "@config/constants";
 
-/** The custom-ID prefixes the casino's panels and their button handlers share. */
 export const CASINO_ID = "casino";
 export const CASINO_SETTINGS_ID = "casinoset";
 
@@ -23,7 +22,6 @@ export const CASINO_COMMAND = "casino";
 export const ROULETTE_ROUND = {
 	bettingMs: 30 * SECOND_MS,
 	maxBets: 10,
-	/** How many earlier spins the table shows. */
 	history: 5,
 	/** What a chip is worth when a table opens, kept within the server's own bet limits. */
 	defaultChip: 100,

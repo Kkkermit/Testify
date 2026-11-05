@@ -4,7 +4,6 @@ import { SELECT } from "@/components/form/fieldStyles";
 import { isLocale, type Locale, LOCALE_NAMES, LOCALES } from "@/i18n";
 import { cn } from "@/lib/cn";
 
-/** The language as one compact control, for a header; it writes the same stored choice the Appearance screen does. */
 export function LanguageSelect({ className }: { className?: string }): React.JSX.Element {
 	const { t, i18n } = useTranslation();
 	const active: Locale = isLocale(i18n.resolvedLanguage) ? i18n.resolvedLanguage : "en";
@@ -21,7 +20,6 @@ export function LanguageSelect({ className }: { className?: string }): React.JSX
 				className={cn(SELECT, "min-h-10 w-auto pl-9")}
 			>
 				{LOCALES.map((locale) => (
-					// `lang` on each name, so a screen reader pronounces "Français" in French.
 					<option key={locale} value={locale} lang={locale}>
 						{LOCALE_NAMES[locale]}
 					</option>

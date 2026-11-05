@@ -4,7 +4,6 @@ import { type Undo, type UndoableDelete, UndoContext, UNDO_WINDOW_MS } from "@/a
 import { Button } from "@/components/primitives";
 import { ApiError } from "@/lib/api";
 
-/** Deletions wait here for a few seconds behind a notice with Undo; nothing is sent until the window closes. */
 export function UndoProvider({ children }: { children: ReactNode }): React.JSX.Element {
 	const { t } = useTranslation();
 	const [waiting, setWaiting] = useState<UndoableDelete | null>(null);
@@ -33,7 +32,6 @@ export function UndoProvider({ children }: { children: ReactNode }): React.JSX.E
 			current.current = null;
 			setWaiting(null);
 			entry.commit().catch((error: unknown) => {
-				// It is still there, so it comes back, and the reason is said wherever the reader now is.
 				setHidden((was) => without(was, entry.key));
 				setFailure({ label: entry.label, message: error instanceof ApiError ? error.message : "" });
 			});
@@ -58,7 +56,6 @@ export function UndoProvider({ children }: { children: ReactNode }): React.JSX.E
 			current.current = entry;
 			left.current = UNDO_WINDOW_MS;
 			held.current = { hover: false, focus: false };
-			// The row and its button vanish, so a keyboard reader is handed the one control that matters now.
 			focusUndo.current = lastInput.current === "keyboard";
 			setFailure(null);
 			setHidden((was) => new Set([...was, entry.key]));
@@ -88,7 +85,7 @@ export function UndoProvider({ children }: { children: ReactNode }): React.JSX.E
 		const pointer = (): void => {
 			lastInput.current = "pointer";
 		};
-		// Closing or leaving the page is the end of the window, and a keepalive delete outlives the page.
+		// A keepalive delete outlives the page.
 		const leaving = (): void => {
 			if (current.current !== null) send(current.current);
 		};

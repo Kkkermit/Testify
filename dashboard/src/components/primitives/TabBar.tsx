@@ -9,7 +9,6 @@ interface StripEdges {
 	end: boolean;
 }
 
-/** Which ends of a horizontal scroller still have content past them, so each can say so rather than cutting. */
 export function edgesOf(node: { scrollLeft: number; clientWidth: number; scrollWidth: number }): StripEdges {
 	return {
 		start: node.scrollLeft > 1,
@@ -23,7 +22,6 @@ export interface TabDefinition<Key extends string = string> {
 	icon: LucideIcon;
 }
 
-/** Stable ids so a tab can point at its panel and the panel can borrow the tab's name. */
 function tabIds(label: string, key: string): { tabId: string; panelId: string } {
 	const group = label.toLowerCase().replace(/[^a-z0-9]+/g, "-");
 	return { tabId: `${group}-tab-${key}`, panelId: `${group}-panel-${key}` };
@@ -69,7 +67,6 @@ export function TabBar<Key extends string>({
 		document.getElementById(tabIds(label, active).tabId)?.scrollIntoView({ block: "nearest", inline: "nearest" });
 	}, [label, active]);
 
-	/** Arrow keys move between tabs and Tab leaves the set, which is what the tabs pattern asks for. */
 	function onKeyDown(event: React.KeyboardEvent): void {
 		const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
 		const jump = { Home: 0, End: tabs.length - 1 }[event.key];
@@ -94,7 +91,6 @@ export function TabBar<Key extends string>({
 				onKeyDown={onKeyDown}
 				className={cn(
 					"scrollbar-none flex gap-1 overflow-x-auto",
-					// Fade whichever end still has content, so a clipped strip says there is more.
 					edges.end && "mask-r-from-[calc(100%-2rem)]",
 					edges.start && "mask-l-from-[calc(100%-2rem)]",
 				)}
@@ -110,14 +106,12 @@ export function TabBar<Key extends string>({
 							role="tab"
 							aria-selected={active === key}
 							aria-controls={panelId}
-							// One stop for the whole set, so Tab reaches the panel rather than the eighth tab.
 							tabIndex={active === key ? 0 : -1}
 							onClick={() => {
 								onSelect(key);
 							}}
 							className={cn(
-								// The first tab is flush left, so its label sits on the same column as the page title above it.
-								"relative flex shrink-0 items-center gap-2 px-4 py-2 font-mono text-[0.75rem] tracking-[0.08em] uppercase first:pl-0",
+								"relative flex shrink-0 items-center gap-2 px-4 py-2 text-sm font-medium first:pl-0",
 								"transition-colors duration-150",
 								active === key ? "text-foreground" : "text-muted-foreground hover:text-foreground",
 							)}
@@ -135,7 +129,6 @@ export function TabBar<Key extends string>({
 	);
 }
 
-/** The other half of the pattern: a panel named by the tab that opens it. */
 export function TabContent({
 	label,
 	active,

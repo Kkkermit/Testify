@@ -1,12 +1,9 @@
 import { z } from "zod";
 
-/** The starters on a new server's overview: each turns one feature on with defaults the server chooses. */
-
 export const SETUP_STEPS = ["levelling", "welcome", "audit-log"] as const;
 
 export type SetupStep = (typeof SETUP_STEPS)[number];
 
-/** The name a new private log channel is given when the server has none to reuse. */
 export const AUDIT_LOG_CHANNEL_NAME = "audit-log";
 
 /**
@@ -18,7 +15,6 @@ export type SetupBlocker = "no_channel" | "bot_cannot_create" | "you_cannot_crea
 export interface SetupStepState {
 	step: SetupStep;
 	done: boolean;
-	/** Where a one-click start would post, so the button can say so before it is pressed. */
 	channelId: string | null;
 	channelName: string | null;
 	/** True when a one-click start makes a new private channel rather than reusing one. */

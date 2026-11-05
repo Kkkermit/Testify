@@ -2,10 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { everyModule } from "./sourceFiles";
 
-/**
- * The owner console's code is served only to owners, which works only while it stays in a chunk of its own; one import
- * from anywhere else pulls it into a file every visitor loads.
- */
+/** The owner console's code is served only to owners, which holds only while it stays in its own chunk. */
 
 const SRC = resolve(__dirname, "..");
 const OWNER_IMPORT = /from\s+["']@\/features\/owner\/|import\(\s*["']@\/features\/owner\//;

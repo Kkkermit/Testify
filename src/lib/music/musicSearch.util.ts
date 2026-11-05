@@ -136,10 +136,7 @@ export const RESPONSE_MARGIN_MS = 800;
 /** What is left of the window when nothing is known about the interaction's own age. */
 const SEARCH_BUDGET_MS = INTERACTION_WINDOW_MS - RESPONSE_MARGIN_MS;
 
-/**
- * How long the interaction has been open: the larger of Discord's clock and this host's, ignoring the snowflake when
- * the two disagree by more than the window.
- */
+/** How long the interaction has been open: the larger of Discord's clock and this host's, dropping the snowflake when they disagree by more than the window. */
 export function interactionAge(createdTimestamp: number, receivedAt: number, now = Date.now()): number {
 	const sinceReceipt = Math.max(0, now - receivedAt);
 	const sinceCreated = now - createdTimestamp;

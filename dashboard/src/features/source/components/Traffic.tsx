@@ -6,7 +6,6 @@ import { SiteError } from "@/features/site/components/SiteError";
 import { useTraffic } from "@/features/source/useSource";
 import { shortDate } from "@/lib/datetime";
 
-/** Views and clones as GitHub counts them, which needs a token the host chooses to give; without one the page says how. */
 export function Traffic(): React.JSX.Element {
 	const { t } = useTranslation();
 	const traffic = useTraffic();
@@ -83,7 +82,6 @@ export function Traffic(): React.JSX.Element {
 	);
 }
 
-/** A bar per day, and the numbers behind them in a table a screen reader can read. */
 function DayChart({
 	title,
 	days,

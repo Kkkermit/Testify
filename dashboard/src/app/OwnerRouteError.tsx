@@ -5,10 +5,6 @@ import { RouteError } from "@/app/RouteError";
 import { claimAutoReload, classifyRouteError, reloadPage, sessionStore } from "@/app/routeError.utils";
 import { Skeleton } from "@/components/primitives";
 
-/**
- * The owner console's file is served only to owners, so once a reload has ruled out a stale tab, failing to load it
- * is a refusal: the reader goes back to their servers, never to a screen inviting them to retry.
- */
 export function OwnerRouteError(): React.JSX.Element {
 	const failure = classifyRouteError(useRouteError());
 	const [reloading, setReloading] = useState(failure === "stale");

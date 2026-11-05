@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -18,10 +18,13 @@ cases.get("/settings", async (context) => context.json(await readCaseSettings(gu
 cases.put("/settings", async (context) => {
 	const guild = guildOf(context);
 	const { logChannelId } = await parseBody(context, casePatch);
+	const before = await readCaseSettings(guild);
 
 	const settings = await applyCaseSettings(guild, logChannelId, context.get("session")?.userId ?? null);
-	await auditChange(context, {
+	await auditSettings(context, {
 		action: "cases.settings",
+		before,
+		after: settings,
 		summary:
 			logChannelId === null ? "Stopped posting moderation cases" : `Moderation cases posted in <#${logChannelId}>`,
 	});

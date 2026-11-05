@@ -1,5 +1,5 @@
 import { i18next } from "@/i18n";
-import { shortDate, since } from "@/lib/datetime";
+import { ahead, shortDate, since } from "@/lib/datetime";
 
 const AT = "2026-07-30T18:04:09.000Z";
 
@@ -47,5 +47,16 @@ describe("since", () => {
 
 	it("hands back anything it cannot parse", () => {
 		expect(since("nonsense", now)).toBe("nonsense");
+	});
+});
+
+describe("ahead", () => {
+	/** Under a minute still reads as a minute, since Discord never writes "in 0 minutes". */
+	it("picks the unit as Discord's relative timestamp does", () => {
+		expect([ahead(30_000), ahead(3 * 3_600_000), ahead(2 * 86_400_000)]).toEqual([
+			"in 1 minute",
+			"in 3 hours",
+			"in 2 days",
+		]);
 	});
 });

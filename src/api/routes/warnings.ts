@@ -8,6 +8,7 @@ import { requireGuild } from "@api/middleware/session";
 import { parseBody, parseParams, parseQuery } from "@api/validate";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import {
+	blockText,
 	issueWarning,
 	moderationProblem,
 	readGuildWarnings,
@@ -45,9 +46,7 @@ async function mayChange(context: Context<ApiBindings>, userId: string): Promise
 	if (member === null) return;
 
 	const problem =
-		moderator === null
-			? "Only somebody in this server can moderate its members."
-			: moderationProblem(moderator, member, context.get("client").user?.id);
+		moderator === null ? blockText("notMember") : moderationProblem(moderator, member, context.get("client").user?.id);
 	if (problem !== null) throw forbidden("cannot_moderate", problem);
 }
 
@@ -61,7 +60,6 @@ warnings.get("/", requirePermission(PermissionFlagsBits.ModerateMembers), async 
 
 warnings.get("/punishments", async (context) => context.json(await readWarnLadder(guildOf(context).id)));
 
-/** The whole list in one request, because the control is the list and a partial write would reorder it. */
 warnings.put("/punishments", async (context) => {
 	const guild = guildOf(context);
 	const { steps } = await parseBody(context, warnLadderPut);
@@ -76,7 +74,6 @@ warnings.put("/punishments", async (context) => {
 	return context.json(saved);
 });
 
-/** The same checks `/warn create` makes, against a live fetch of both people. */
 warnings.post("/", requirePermission(PermissionFlagsBits.ModerateMembers), async (context) => {
 	const guild = guildOf(context);
 	const body = await parseBody(context, warningAdd);
@@ -90,9 +87,7 @@ warnings.post("/", requirePermission(PermissionFlagsBits.ModerateMembers), async
 	if (member.user.bot) throw forbidden("cannot_moderate", "Bots cannot be warned.");
 
 	const problem =
-		moderator === null
-			? "Only somebody in this server can moderate its members."
-			: moderationProblem(moderator, member, context.get("client").user?.id);
+		moderator === null ? blockText("notMember") : moderationProblem(moderator, member, context.get("client").user?.id);
 	if (problem !== null) throw forbidden("cannot_moderate", problem);
 
 	const { entry, outcome } = await issueWarning({

@@ -9,7 +9,6 @@ import { type NoticeFeed } from "@testify/shared";
 import { api } from "@/lib/api";
 import { keys } from "@/lib/queries";
 
-/** Asked again every few minutes, so a tab left open still hears about a new notification. */
 const NOTICE_REFRESH_MS = 5 * 60_000;
 
 export function useNoticeFeed(): UseQueryResult<NoticeFeed> {

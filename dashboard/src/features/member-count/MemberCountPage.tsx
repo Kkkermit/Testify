@@ -25,22 +25,17 @@ export function MemberCountPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("memberCount.title")} subtitle={t("memberCount.subtitle")} />
+			<PageHeader server={overview.data} title={t("memberCount.title")} subtitle={t("memberCount.subtitle")} />
 
 			<section aria-label={t("memberCount.breakdown")} className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-				<StatTile label={t("memberCount.total")} value={counts.total} icon={Users} tint="text-feature-welcome" />
-				<StatTile
-					label={t("memberCount.people")}
-					value={counts.people}
-					icon={UserRound}
-					tint="text-feature-levelling"
-				/>
-				<StatTile label={t("memberCount.bots")} value={counts.bots} icon={Bot} tint="text-feature-tickets" />
+				<StatTile label={t("memberCount.total")} value={counts.total} icon={Users} tint="text-hue-green" />
+				<StatTile label={t("memberCount.people")} value={counts.people} icon={UserRound} tint="text-hue-violet" />
+				<StatTile label={t("memberCount.bots")} value={counts.bots} icon={Bot} tint="text-hue-blue" />
 				<StatTile
 					label={t("memberCount.joinedWeek")}
 					value={counts.joinedWeek}
 					icon={CalendarDays}
-					tint="text-feature-economy"
+					tint="text-hue-amber"
 				/>
 			</section>
 

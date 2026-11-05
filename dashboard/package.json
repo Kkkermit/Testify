@@ -1,6 +1,6 @@
 {
 	"name": "@testify/dashboard",
-	"version": "2.1.5",
+	"version": "2.2.0",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -25,7 +25,6 @@
 		"react-i18next": "17.0.15",
 		"react-router": "7.18.2",
 		"tailwind-merge": "3.7.0",
-		"three": "0.185.1",
 		"tippy.js": "6.3.7"
 	},
 	"devDependencies": {
@@ -36,9 +35,8 @@
 		"@types/jest-axe": "3.5.9",
 		"@types/react": "19.2.18",
 		"@types/react-dom": "19.2.4",
-		"@types/three": "0.185.2",
 		"@vitejs/plugin-react": "6.1.1",
-		"jest-axe": "10.0.0",
+		"jest-axe": "11.0.0",
 		"jest-environment-jsdom": "30.4.1",
 		"jest-fixed-jsdom": "0.0.11",
 		"msw": "2.15.0",

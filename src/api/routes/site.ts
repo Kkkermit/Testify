@@ -8,8 +8,6 @@ import { botVersion } from "@lib/bot";
 import { type GitHubReader, SiteProblem, type SiteRefusal } from "@lib/site";
 import { type SiteInfo, sourceFileQuery } from "@testify/shared";
 
-/** Unauthenticated: the landing page, the docs and the source browser, which are read before any sign-in exists. */
-
 const REFUSALS: Record<SiteRefusal, () => ApiProblem> = {
 	no_repository: () => notFound("no_repository", "This bot's code is not in a GitHub repository this page can read."),
 	private_repository: () =>

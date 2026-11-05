@@ -13,7 +13,6 @@ const DROPPED: Record<DroppedOutput, TranslationKey> = {
 	attachment: "owner.droppedAttachment",
 };
 
-/** The command's reply as cards; anything that could not cross the gap is named rather than dropped. */
 export function RunOutputs({ result }: { result: CommandRunResult }): React.JSX.Element {
 	const { t } = useTranslation();
 	return (

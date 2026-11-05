@@ -55,7 +55,6 @@ describe("buildCatalogue", () => {
 		aCommand({ name: "eval", category: "owner", ownerOnly: true }),
 	];
 
-	/** Owner commands are hidden from everybody else. */
 	it("hides owner commands from everybody else", () => {
 		const catalogue = buildCatalogue(commands, { prefix: "t?", includeOwnerOnly: false });
 

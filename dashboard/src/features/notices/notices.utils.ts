@@ -14,7 +14,6 @@ export const NOTICE_TONE_BADGES: Record<NoticeTone, BadgeTone> = {
 	fixed: "success",
 };
 
-/** The list is newest first and only what came after the last read is new, so the new ones are the first `unread`. */
 export function newNoticeIds(notices: readonly { id: string }[], unread: number): Set<string> {
 	return new Set(notices.slice(0, unread).map((notice) => notice.id));
 }

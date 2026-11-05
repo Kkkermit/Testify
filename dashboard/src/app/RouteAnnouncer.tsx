@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "react-router";
 
-/** An SPA changes page without a load, so this reads the new title once; the first render is skipped. */
 export function RouteAnnouncer(): React.JSX.Element {
 	const { pathname } = useLocation();
 	const [message, setMessage] = useState("");

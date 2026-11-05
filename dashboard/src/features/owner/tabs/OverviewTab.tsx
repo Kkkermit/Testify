@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useSearchParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { LABEL, SearchField, SELECT } from "@/components/form";
-import { Card, Eyebrow, Pager, Skeleton, StatTile } from "@/components/primitives";
+import { Card, SectionHeading, Pager, Skeleton, StatTile } from "@/components/primitives";
 import { GuildDetail } from "@/features/owner/components/GuildDetail";
 import { OwnerGuildTable } from "@/features/owner/components/OwnerGuildTable";
 import { guildFilterFrom, GUILD_SORT_LABELS, guildSortFrom } from "@/features/owner/owner.utils";
@@ -14,17 +14,14 @@ import { formatUptime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
 import { pageCount, pageFrom } from "@/lib/paging";
 
-/** Answers "which of my servers is misconfigured", which is the reason the console exists at all. */
 export function OverviewTab(): React.JSX.Element {
 	const { t } = useTranslation();
-	// In the URL rather than in state, so a link to page 3 is a link to page 3.
 	const [params, setParams] = useSearchParams();
 	const page = pageFrom(params.get("page"));
 	const sort = guildSortFrom(params.get("sort"));
 	const filter = guildFilterFrom(params.get("filter"));
 	const search = params.get("search") ?? "";
 	const health = useOwnerStats();
-	// The field stays live while the request trails it, so a search is one query rather than one per keystroke.
 	const guilds = useOwnerGuilds(page, sort, filter, useDebounced(search));
 
 	if (health.isError) return <ErrorState as="h2" error={health.error} onRetry={() => void health.refetch()} />;
@@ -32,7 +29,7 @@ export function OverviewTab(): React.JSX.Element {
 	const selected = params.get("server");
 	const stats = health.data;
 
-	// Merged rather than replaced, or paging would drop the `?tab=` that got you here.
+	// Merged rather than replaced, or paging drops `?tab=`.
 	function put(changes: Record<string, string | null>, replace = false): void {
 		setParams(
 			(current) => {
@@ -54,32 +51,27 @@ export function OverviewTab(): React.JSX.Element {
 					[0, 1, 2, 3, 4, 5].map((index) => <Skeleton key={index} className="h-[86px]" />)
 				) : (
 					<>
-						<StatTile label={t("owner.servers")} value={stats.guilds} icon={Server} tint="text-feature-tickets" />
+						<StatTile label={t("owner.servers")} value={stats.guilds} icon={Server} tint="text-hue-blue" />
 						<StatTile
 							label={t("owner.members")}
 							value={stats.users}
 							icon={Users}
-							tint="text-feature-welcome"
+							tint="text-hue-green"
 							hint={t("owner.membersHint")}
 						/>
-						<StatTile
-							label={t("owner.commands")}
-							value={stats.commands}
-							icon={Terminal}
-							tint="text-feature-levelling"
-						/>
+						<StatTile label={t("owner.commands")} value={stats.commands} icon={Terminal} tint="text-hue-violet" />
 						<StatTile
 							label={t("owner.uptime")}
 							value={formatUptime(stats.uptimeMs)}
 							icon={Clock}
-							tint="text-feature-economy"
+							tint="text-hue-amber"
 							hint={t("owner.uptimeHint")}
 						/>
 						<StatTile
 							label={t("owner.memory")}
 							value={formatUnit(stats.memoryMb, "megabyte")}
 							icon={Cpu}
-							tint="text-feature-economy"
+							tint="text-hue-amber"
 						/>
 						<StatTile
 							label={t("owner.database")}
@@ -92,9 +84,9 @@ export function OverviewTab(): React.JSX.Element {
 			</section>
 
 			<section aria-labelledby="servers-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="servers-heading">
+				<SectionHeading as="h2" id="servers-heading">
 					{t("owner.servers")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{/* A new order or a new search starts again from the first page, which is where its answer is. */}
 				<Card padding="compact" className="flex flex-wrap items-end gap-3">

@@ -1,0 +1,561 @@
+/* Direction C — logbook. The home page is what happened, written as sentences; settings read like a form. */
+:root {
+	--page: #f7f8fa;
+	--sheet: #ffffff;
+	--ink: #16181d;
+	--muted: #5f6672;
+	--rule: #e3e6eb;
+	--field: #b9c0ca;
+	--primary: #3046c5;
+	--primary-wash: #eef0fc;
+	--attention: #9a5b00;
+	--attention-wash: #fff8eb;
+	--community: #1a7a50;
+	--moderation: #c2412d;
+	--economy: #b7791f;
+	--settings: #3046c5;
+	--members: #6b7280;
+	--sans: "Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, sans-serif;
+	--mono: "Atkinson Hyperlegible Mono", ui-monospace, monospace;
+}
+
+* {
+	box-sizing: border-box;
+}
+html {
+	color-scheme: light;
+}
+body {
+	margin: 0;
+	background: var(--page);
+	color: var(--ink);
+	font: 400 15px/1.55 var(--sans);
+}
+a {
+	color: var(--primary);
+	text-decoration: underline;
+	text-decoration-thickness: 1px;
+	text-underline-offset: 3px;
+	text-decoration-color: rgb(48 70 197 / 0.35);
+}
+a:hover {
+	text-decoration-color: currentColor;
+}
+:focus-visible {
+	outline: 2px solid var(--primary);
+	outline-offset: 2px;
+}
+
+/* Top navigation: six places, named for what is done there. */
+.top {
+	background: var(--sheet);
+	border-bottom: 1px solid var(--rule);
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding: 0 32px;
+	height: 56px;
+}
+.brand {
+	font-weight: 700;
+	font-size: 16px;
+	color: var(--ink);
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.brand i {
+	width: 22px;
+	height: 22px;
+	border-radius: 6px;
+	background: var(--ink);
+	color: #fff;
+	font-style: normal;
+	font-size: 13px;
+	display: grid;
+	place-items: center;
+}
+.server {
+	border: 1px solid var(--rule);
+	border-radius: 8px;
+	padding: 5px 10px;
+	font: inherit;
+	background: var(--page);
+	color: var(--ink);
+	display: flex;
+	gap: 8px;
+	align-items: center;
+}
+.server b {
+	width: 20px;
+	height: 20px;
+	border-radius: 5px;
+	background: #2e7d5b;
+	color: #fff;
+	font-size: 10px;
+	display: grid;
+	place-items: center;
+}
+.top nav {
+	display: flex;
+	gap: 4px;
+	height: 100%;
+}
+.top nav a {
+	color: var(--muted);
+	text-decoration: none;
+	display: flex;
+	align-items: center;
+	padding: 0 10px;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+}
+.top nav a:hover {
+	color: var(--ink);
+}
+.top nav a[aria-current] {
+	color: var(--ink);
+	font-weight: 700;
+	border-bottom-color: var(--ink);
+}
+.top .right {
+	margin-left: auto;
+	display: flex;
+	gap: 16px;
+	align-items: center;
+	color: var(--muted);
+	font-size: 14px;
+}
+.top .right a {
+	color: var(--muted);
+	text-decoration: none;
+}
+.top .av {
+	width: 28px;
+	height: 28px;
+	border-radius: 50%;
+	background: #5b6170;
+	color: #fff;
+	display: grid;
+	place-items: center;
+	font-size: 13px;
+	font-weight: 700;
+}
+.menu {
+	display: none;
+}
+
+/* A second row lists the screens inside the current place. */
+.sub {
+	background: var(--sheet);
+	border-bottom: 1px solid var(--rule);
+	padding: 0 32px;
+	display: flex;
+	gap: 20px;
+	font-size: 14px;
+	overflow-x: auto;
+	scrollbar-width: none;
+}
+.sub a {
+	color: var(--muted);
+	text-decoration: none;
+	padding: 10px 0;
+	white-space: nowrap;
+	border-bottom: 2px solid transparent;
+}
+.sub a[aria-current] {
+	color: var(--primary);
+	border-bottom-color: var(--primary);
+	font-weight: 700;
+}
+
+.layout {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 300px;
+	gap: 40px;
+	max-width: 1180px;
+	margin: 0 auto;
+	padding: 32px 32px 64px;
+	align-items: start;
+}
+
+h1 {
+	font-size: 28px;
+	line-height: 1.2;
+	margin: 0 0 8px;
+	letter-spacing: -0.01em;
+}
+.lede {
+	font-size: 17px;
+	margin: 0 0 24px;
+	max-width: 60ch;
+}
+
+/* The one container: a sheet of paper holding the page's main subject. */
+.sheet {
+	background: var(--sheet);
+	border: 1px solid var(--rule);
+	border-radius: 10px;
+	padding: 8px 28px 20px;
+}
+
+.filters {
+	display: flex;
+	gap: 4px;
+	margin: 0 0 4px;
+	padding-top: 12px;
+	font-size: 14px;
+}
+.filters a {
+	text-decoration: none;
+	color: var(--muted);
+	padding: 4px 10px;
+	border-radius: 6px;
+}
+.filters a[aria-current] {
+	color: var(--ink);
+	background: var(--page);
+	font-weight: 700;
+}
+
+/* The log: a time, a dot for the area, and a sentence. */
+.day h2 {
+	font-size: 15px;
+	margin: 24px 0 4px;
+	display: flex;
+	gap: 10px;
+	align-items: baseline;
+}
+.day h2 span {
+	color: var(--muted);
+	font-weight: 400;
+	font-size: 14px;
+}
+.log {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	position: relative;
+}
+.log::before {
+	content: "";
+	position: absolute;
+	left: 67px;
+	top: 8px;
+	bottom: 8px;
+	width: 1px;
+	background: var(--rule);
+}
+.log li {
+	display: grid;
+	grid-template-columns: 52px 30px minmax(0, 1fr);
+	align-items: start;
+	padding: 8px 0;
+}
+.log time {
+	font: 400 13px/1.9 var(--mono);
+	color: var(--muted);
+}
+.log .dot {
+	width: 9px;
+	height: 9px;
+	border-radius: 50%;
+	margin: 7px 0 0 11px;
+	background: var(--members);
+	box-shadow: 0 0 0 3px var(--sheet);
+	position: relative;
+}
+.log .community {
+	background: var(--community);
+}
+.log .moderation {
+	background: var(--moderation);
+}
+.log .economy {
+	background: var(--economy);
+}
+.log .settings {
+	background: var(--settings);
+}
+.log p {
+	margin: 0;
+}
+.log .note {
+	color: var(--muted);
+	font-size: 14px;
+	display: block;
+}
+.mention {
+	color: var(--primary);
+	background: var(--primary-wash);
+	border-radius: 4px;
+	padding: 0 3px;
+}
+.older {
+	display: inline-block;
+	margin-top: 16px;
+	font-size: 14px;
+}
+
+/* The aside: what to do next, then what is running. */
+aside h2 {
+	font-size: 13px;
+	font-weight: 700;
+	color: var(--muted);
+	margin: 0 0 8px;
+}
+aside section {
+	margin-bottom: 28px;
+}
+.attention {
+	border-left: 3px solid var(--attention);
+	background: var(--attention-wash);
+	padding: 12px 14px;
+	border-radius: 0 8px 8px 0;
+}
+.attention h2 {
+	color: var(--attention);
+}
+.attention p {
+	margin: 0 0 6px;
+}
+.running {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+.running li {
+	display: flex;
+	align-items: baseline;
+	gap: 8px;
+	padding: 6px 0;
+	border-bottom: 1px solid var(--rule);
+}
+.running li span {
+	color: var(--muted);
+	font-size: 14px;
+}
+.running li a {
+	margin-left: auto;
+	font-size: 14px;
+}
+.legend {
+	font-size: 13px;
+	color: var(--muted);
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 4px 12px;
+}
+.legend i {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	margin-right: 6px;
+}
+
+/* Settings as a form: label above the field, help under it. */
+.form section {
+	padding: 20px 0 8px;
+	border-top: 1px solid var(--rule);
+}
+.form section:first-of-type {
+	border-top: 0;
+}
+.form h2 {
+	font-size: 19px;
+	margin: 0 0 4px;
+}
+.form .intro {
+	color: var(--muted);
+	margin: 0 0 16px;
+}
+.field {
+	margin: 0 0 20px;
+}
+.field > label,
+.field > .label {
+	display: block;
+	font-weight: 700;
+	margin-bottom: 6px;
+}
+.field .help {
+	color: var(--muted);
+	font-size: 14px;
+	margin-top: 6px;
+}
+select,
+textarea {
+	font: inherit;
+	color: var(--ink);
+	background: var(--sheet);
+	border: 1px solid var(--field);
+	border-radius: 8px;
+	padding: 9px 12px;
+	width: 100%;
+	max-width: 420px;
+}
+textarea {
+	max-width: none;
+	min-height: 92px;
+	resize: vertical;
+}
+code {
+	font: 13px var(--mono);
+	background: var(--page);
+	border: 1px solid var(--rule);
+	border-radius: 4px;
+	padding: 0 4px;
+}
+.check {
+	display: grid;
+	grid-template-columns: 22px 1fr;
+	gap: 10px;
+	margin: 0 0 20px;
+}
+.check input {
+	width: 18px;
+	height: 18px;
+	margin: 3px 0 0;
+	accent-color: var(--primary);
+}
+.check b {
+	display: block;
+	color: var(--ink);
+}
+.check span {
+	color: var(--muted);
+	font-size: 14px;
+}
+.preview {
+	border: 1px solid var(--rule);
+	border-radius: 8px;
+	padding: 12px 14px;
+	display: grid;
+	grid-template-columns: 40px minmax(0, 1fr);
+	gap: 12px;
+}
+.preview .av {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	background: #7c5cd6;
+	color: #fff;
+	display: grid;
+	place-items: center;
+	font-weight: 700;
+}
+.preview .who {
+	font-weight: 700;
+}
+.preview .tag {
+	font-size: 10px;
+	font-weight: 700;
+	background: #5865c8;
+	color: #fff;
+	border-radius: 3px;
+	padding: 1px 4px;
+	margin-left: 4px;
+	vertical-align: 2px;
+}
+.preview .time {
+	color: var(--muted);
+	font-size: 12px;
+	margin-left: 6px;
+}
+.preview .card {
+	margin-top: 8px;
+	width: 320px;
+	max-width: 100%;
+	border-radius: 8px;
+	background: #1d2a33;
+	color: #fff;
+	padding: 16px 20px;
+	display: flex;
+	gap: 14px;
+	align-items: center;
+}
+.preview .card .big {
+	width: 56px;
+	height: 56px;
+	border-radius: 50%;
+	background: #4f7cac;
+	border: 3px solid #e8edf2;
+	display: grid;
+	place-items: center;
+	font-size: 22px;
+	font-weight: 700;
+	flex: none;
+}
+.preview .card small {
+	display: block;
+	color: #b9c6d0;
+	font-size: 12px;
+}
+.preview .card strong {
+	font-size: 18px;
+}
+.saved {
+	color: var(--community);
+	font-size: 14px;
+}
+
+.toc {
+	position: sticky;
+	top: 24px;
+	font-size: 14px;
+}
+.toc a {
+	display: block;
+	padding: 4px 0 4px 12px;
+	border-left: 2px solid var(--rule);
+	color: var(--muted);
+	text-decoration: none;
+}
+.toc a[aria-current] {
+	color: var(--ink);
+	border-left-color: var(--ink);
+	font-weight: 700;
+}
+
+@media (max-width: 760px) {
+	.top {
+		padding: 0 16px;
+		gap: 12px;
+	}
+	.top nav,
+	.top .right {
+		display: none;
+	}
+	.menu {
+		display: block;
+		margin-left: auto;
+		color: var(--ink);
+		text-decoration: none;
+		font-weight: 700;
+	}
+	.sub {
+		padding: 0 16px;
+	}
+	.layout {
+		grid-template-columns: minmax(0, 1fr);
+		padding: 20px 16px 48px;
+		gap: 24px;
+	}
+	.filters {
+		flex-wrap: wrap;
+	}
+	.sheet {
+		padding: 4px 16px 16px;
+	}
+	.toc {
+		display: none;
+	}
+	h1 {
+		font-size: 24px;
+	}
+	.lede {
+		font-size: 16px;
+	}
+}

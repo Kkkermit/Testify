@@ -5,6 +5,7 @@ import { applyRaidSettings, raidPanel, readRaidOverview } from "@lib/raid";
 import { DEFAULT_RAID, type RaidOverview } from "@testify/shared";
 import { buttonsOf, textOf } from "@tests/helpers/containers";
 
+jest.mock("@lib/settings/settingsReaders.util", () => ({ SETTING_READERS: {} }));
 jest.mock("@lib/raid", () => ({
 	...jest.requireActual<object>("@lib/raid"),
 	applyRaidSettings: jest.fn(),

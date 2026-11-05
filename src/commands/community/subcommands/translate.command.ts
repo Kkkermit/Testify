@@ -5,7 +5,6 @@ import { embed, reply } from "@lib/discord";
 import { truncate } from "@lib/format";
 import { fetchJson } from "@lib/infra";
 
-/** The shape of Google Translate's response, typed at the boundary. */
 const responseSchema = z.tuple([z.array(z.array(z.string().nullable())), z.unknown(), z.string()]).rest(z.unknown());
 
 const LANGUAGES = [

@@ -35,7 +35,6 @@ import { type Category } from "@config/categories";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 
-/** What a command is allowed to ask of whoever invoked it. */
 export interface CommandInput {
 	readonly user: User;
 	readonly member: GuildMember | APIInteractionGuildMember | null;
@@ -60,11 +59,9 @@ export interface CommandInput {
 	deleteReply?(): Promise<unknown>;
 	/** A message cannot be private, so a prefix command's version of one deletes itself instead. */
 	replyBriefly?(embed: EmbedBuilder): Promise<unknown>;
-	/** Called on a prefix command marked private, whose replies then delete themselves. */
 	tidyAway?(): void;
 }
 
-/** The option getters, in both their "give me it or null" and "it must be there" forms. */
 export interface CommandInputOptions {
 	getSubcommand(required?: boolean): string;
 	getString(name: string, required: true): string;
@@ -130,22 +127,15 @@ export interface Command {
 	options?: CommandOption[];
 	subcommands?: Subcommand[];
 
-	/** Extra names this command answers to as a prefix command, e.g. */
 	aliases?: string[];
 
-	/** Permissions the person running it needs. */
 	permissions?: PermissionResolvable[];
-	/** Permissions the bot needs. */
 	botPermissions?: PermissionResolvable[];
 	/** Milliseconds a user must wait between uses. */
 	cooldown?: number;
-	/** Only usable inside a server. */
 	guildOnly?: boolean;
-	/** Only usable by the IDs in DISCORD_OWNER_IDS. */
 	ownerOnly?: boolean;
-	/** Only usable in age-restricted channels. */
 	nsfw?: boolean;
-	/** Only the person who ran it sees the answer, whichever subcommand it was. */
 	private?: boolean;
 
 	/** Optional when the command is nothing but subcommands. */
@@ -158,7 +148,6 @@ const _slashSatisfiesCommandInput: (interaction: ChatInputCommandInteraction) =>
 	interaction;
 void _slashSatisfiesCommandInput;
 
-/** Wraps a command so TypeScript checks it as you write it. */
 export function defineCommand(command: Command): Command {
 	return command;
 }
@@ -167,7 +156,6 @@ export function subcommandsOf(command: Command): Subcommand[] {
 	return command.subcommands ?? [];
 }
 
-/** Exposes a standalone command as a subcommand of another. */
 export function asSubcommand(command: Command, aliases: string[] = []): Subcommand {
 	if (command.subcommands?.length) {
 		throw new Error(`${command.name} already has subcommands, and Discord only allows one level of nesting.`);
@@ -190,7 +178,6 @@ function withEphemeral<T extends { flags?: unknown }>(options: T | undefined): T
 	return { ...options, flags: flags.add(MessageFlags.Ephemeral).bitfield } as T;
 }
 
-/** Every reply the command sends reaches only its runner. */
 export function privately(interaction: CommandInput): CommandInput {
 	if (interaction.tidyAway !== undefined) {
 		interaction.tidyAway();
@@ -286,7 +273,6 @@ export function givenOptions(input: CommandInput, command: Command): GivenOption
 	return given;
 }
 
-/** Sends the interaction to the right handler. */
 export async function dispatch(interaction: CommandInput, command: Command, client: TestifyClient): Promise<void> {
 	const subcommands = subcommandsOf(command);
 	const chosen = subcommands.length > 0 ? interaction.options.getSubcommand(false) : null;
@@ -305,7 +291,6 @@ export async function dispatch(interaction: CommandInput, command: Command, clie
 	await command.run(input, client);
 }
 
-/** Turns a command into the payload Discord expects. */
 export function buildSlashCommand(
 	command: Command,
 ): SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder {
@@ -337,7 +322,6 @@ export function buildSlashCommand(
 	return builder;
 }
 
-/** What both `SlashCommandBuilder` and `SlashCommandSubcommandBuilder` can do. */
 interface OptionHost {
 	addStringOption(build: (option: SlashCommandStringOption) => SlashCommandStringOption): unknown;
 	addIntegerOption(build: (option: SlashCommandIntegerOption) => SlashCommandIntegerOption): unknown;
@@ -438,7 +422,6 @@ export function textChannelOption(interaction: CommandInput, name: string): Guil
 	return channel;
 }
 
-/** Any kind of channel, resolved to the real object rather than the API stub. */
 export function channelOption(interaction: CommandInput, name: string): GuildBasedChannel | null {
 	const picked = interaction.options.getChannel(name);
 	if (!picked) return null;
@@ -449,7 +432,6 @@ export function channelOption(interaction: CommandInput, name: string): GuildBas
 	return channel;
 }
 
-/** The same idea for a `role` option. */
 export function roleOption(interaction: CommandInput, name: string, required = false): Role | null {
 	const picked = interaction.options.getRole(name, required);
 	if (!picked) return null;

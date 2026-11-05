@@ -17,7 +17,6 @@ import { renderWelcomeCard } from "@lib/canvas/welcomeCard.util";
 
 const OUT = resolve(repoRoot(), "docs/images/bot");
 
-/** A soft two-colour gradient, standing in for a picture somebody uploaded. */
 function gradient(width: number, height: number, from: string, to: string): Buffer {
 	const canvas = createCanvas(width, height);
 	const ctx = canvas.getContext("2d");

@@ -9,13 +9,11 @@ import { cn } from "@/lib/cn";
 import { formatUptime, dateAndTime } from "@/lib/datetime";
 import { formatUnit } from "@/lib/intl";
 
-/** What this bot is running as — the first thing to check before believing anything else on this screen. */
 export function RuntimeTab(): React.JSX.Element {
 	const { t } = useTranslation();
 	const runtime = useRuntime();
 
 	if (runtime.isPending) return <Skeleton className="h-64 w-full" />;
-	// Without this the tab sits on a skeleton for ever, which reads as still loading rather than as failed.
 	if (runtime.data === undefined)
 		return <ErrorState as="h2" error={runtime.error} onRetry={() => void runtime.refetch()} />;
 

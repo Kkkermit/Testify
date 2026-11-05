@@ -1,55 +1,29 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
 import { parseBody } from "@api/validate";
-import { disableWelcome, getWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
-import { normaliseWelcome } from "@lib/welcome";
-import {
-	DEFAULT_WELCOME_MESSAGE,
-	type WelcomeConfigResponse,
-	type WelcomePatch,
-	welcomePatchSchema,
-} from "@testify/shared";
+import { disableWelcome, saveWelcome } from "@database/repositories/welcomeRepository";
+import { readWelcomeConfig } from "@lib/settings";
+import { type WelcomePatch, welcomePatchSchema } from "@testify/shared";
 
 export const welcome = new Hono<ApiBindings>();
 
 welcome.use("*", requireGuild);
 
-/**
- * No record means off, so an absent one becomes a disabled config with defaults; `normaliseWelcome` migrates old
- * records.
- */
-async function configOf(guildId: string): Promise<WelcomeConfigResponse> {
-	const stored = normaliseWelcome(await getWelcome(guildId));
-
-	if (stored === null) {
-		return {
-			enabled: false,
-			channelId: null,
-			message: DEFAULT_WELCOME_MESSAGE,
-			style: "card",
-			hasBackground: false,
-		};
-	}
-
-	return { enabled: true, ...stored };
-}
-
-welcome.get("/", async (context) => context.json(await configOf(guildIdOf(context))));
+welcome.get("/", async (context) => context.json(await readWelcomeConfig(guildIdOf(context))));
 
 welcome.patch("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const patch = await parseBody(context, welcomePatchSchema);
-	const before = await configOf(guildId);
+	const before = await readWelcomeConfig(guildId);
 
 	if (patch.enabled === false) {
 		await disableWelcome(guildId);
 	} else {
 		const channelId = patch.channelId ?? before.channelId;
 
-		// The greeting has nowhere to go without one, and the stored record requires it.
 		if (channelId === null) throw badRequest("Choose a channel for the greeting before turning it on.");
 
 		await saveWelcome(guildId, {
@@ -59,22 +33,12 @@ welcome.patch("/", async (context) => {
 		});
 	}
 
-	const after = await configOf(guildId);
-	await auditChange(context, {
-		action: "welcome.update",
-		summary: summarisePatch(patch),
-		before: pick(before, patch),
-		after: pick(after, patch),
-	});
+	const after = await readWelcomeConfig(guildId);
+	await auditSettings(context, { action: "welcome.update", summary: summarisePatch(patch), before, after });
 
 	return context.json(after);
 });
 
-function pick(config: WelcomeConfigResponse, patch: WelcomePatch): Record<string, unknown> {
-	return Object.fromEntries(Object.keys(patch).map((key) => [key, config[key as keyof WelcomeConfigResponse]]));
-}
-
-/** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */
 function summarisePatch(patch: WelcomePatch): string {
 	const parts: string[] = [];
 

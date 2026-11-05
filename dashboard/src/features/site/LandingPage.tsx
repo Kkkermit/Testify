@@ -3,8 +3,8 @@ import { inviteUrl } from "@testify/shared";
 import { ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { Button, Card, CARD_HEADING, Eyebrow } from "@/components/primitives";
+import { Link, useLocation } from "react-router";
+import { Button, Card, CARD_HEADING, SectionHeading, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
 import { useBot } from "@/features/auth/useBot";
@@ -30,7 +30,6 @@ const PRIMARY_LINK = cn(
 );
 const SECTION_TITLE = "font-display text-2xl leading-tight font-bold tracking-tight";
 
-/** The front door: what the bot is in one line, signing in as the one thing to do, and the docs and code behind it. */
 export function LandingPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	usePageTitle(t("landing.pageTitle"));
@@ -39,6 +38,7 @@ export function LandingPage(): React.JSX.Element {
 	const palette = useMemo(() => paletteFrom(commandList), []);
 	const name = bot.data?.name ?? rememberedBotName() ?? "";
 	const invite = bot.data === undefined ? null : inviteUrl(bot.data.id);
+	const erased = (useLocation().state as { erased?: boolean } | null)?.erased === true;
 
 	return (
 		<div className="mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6">
@@ -46,8 +46,13 @@ export function LandingPage(): React.JSX.Element {
 				aria-labelledby="landing-title"
 				className="grid items-center gap-6 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-20 [&>*]:min-w-0"
 			>
-				<div className="motion-reveal flex flex-col gap-6">
-					<Eyebrow>{t("landing.eyebrow")}</Eyebrow>
+				<div className="flex flex-col gap-6">
+					{erased && (
+						<p role="status" className="bg-card border-border rounded-card border px-4 py-3 text-sm">
+							{t("account.erased")}
+						</p>
+					)}
+					<SectionHeading>{t("landing.eyebrow")}</SectionHeading>
 					<h1
 						id="landing-title"
 						className="font-display text-4xl leading-[1.05] font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl"
@@ -56,7 +61,9 @@ export function LandingPage(): React.JSX.Element {
 					</h1>
 					<p className="text-muted-foreground max-w-xl text-lg text-pretty">{t("landing.lede")}</p>
 
-					{site.data?.dashboard === true ? (
+					{site.isPending ? (
+						<Skeleton className="h-11 w-48" />
+					) : site.data?.dashboard === true ? (
 						<SignedInAware invite={invite} name={name} />
 					) : (
 						<div className="flex flex-wrap gap-3">
@@ -86,7 +93,7 @@ export function LandingPage(): React.JSX.Element {
 						return (
 							<li key={feature.look}>
 								<Card className="flex h-full flex-col gap-3">
-									<span className={cn("rounded-field flex size-10 items-center justify-center", look.wash)}>
+									<span className="rounded-field bg-muted flex size-10 items-center justify-center">
 										<Icon size={20} aria-hidden="true" className={look.tint} />
 									</span>
 									<h3 className={CARD_HEADING}>{t(feature.titleKey)}</h3>
@@ -136,7 +143,6 @@ export function LandingPage(): React.JSX.Element {
 	);
 }
 
-/** Signing in is the page's one job, so the primary action is it until it is done, and then the servers it opens. */
 function SignedInAware({ invite, name }: { invite: string | null; name: string }): React.JSX.Element {
 	const { t } = useTranslation();
 	const me = useMe();
@@ -145,7 +151,10 @@ function SignedInAware({ invite, name }: { invite: string | null; name: string }
 	return (
 		<div className="flex flex-col gap-3">
 			<div className="flex flex-wrap gap-3">
-				{signedIn ? (
+				{/* Until the session answers neither button is right, so the place is held rather than guessed. */}
+				{me.isPending ? (
+					<Skeleton className="h-11 w-48" />
+				) : signedIn ? (
 					<Link to="/guilds" className={PRIMARY_LINK}>
 						{t("site.openDashboard")}
 					</Link>
@@ -164,7 +173,7 @@ function SignedInAware({ invite, name }: { invite: string | null; name: string }
 					</a>
 				)}
 			</div>
-			{!signedIn && (
+			{!me.isPending && !signedIn && (
 				<p className="text-muted-foreground text-xs">
 					<Trans
 						i18nKey="auth.agree"

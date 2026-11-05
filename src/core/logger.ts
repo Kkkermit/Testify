@@ -19,10 +19,7 @@ export function splitLogArgs(args: unknown[]): Pick<LogRecord, "message" | "cont
 	return { context: {}, message: typeof first === "string" ? first : "" };
 }
 
-/**
- * Pretty output on a terminal, or through `npm run dev:all`'s pipe, and JSON for a log collector otherwise. Every
- * line is also copied into `ring` through a hook, so `LOG_LEVEL` still decides what exists.
- */
+/** Pretty on a terminal or through `npm run dev:all`'s pipe, JSON otherwise, and every line copied into `ring`. */
 export function createLogger(
 	level: LogLevel,
 	pretty: boolean = process.stdout.isTTY === true || colourEnabled(),

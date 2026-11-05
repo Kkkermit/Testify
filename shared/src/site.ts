@@ -1,27 +1,20 @@
 import { z } from "zod";
 
-/** The public website's contract: what the landing page, the docs and the source browser read before any sign-in. */
-
 export const SITE_LIMITS = {
 	/** GitHub is asked at most this often for one answer, and only because somebody opened a page that shows it. */
 	cacheMinutes: 60,
 	/** Larger files are listed and linked, never shown, because a browser tab is not the place to read them. */
 	maxFileBytes: 512 * 1024,
-	/** Read files kept in memory, so browsing back and forth costs nobody a second request. */
 	filesCached: 200,
 	/** GitHub keeps 14 days of traffic, so each day it reports is kept here for this long. */
 	trafficDaysKept: 365,
-	/** The chart's longest window. */
 	trafficDaysShown: 90,
 	pathMax: 400,
 } as const;
 
 export interface SiteInfo {
-	/** Whether sign-in and the server screens exist on this host; the site answers either way. */
 	dashboard: boolean;
-	/** The repository the source browser reads, as `theme.repository` names it. */
 	repository: string;
-	/** The release this copy runs, which the source browser and the docs describe. */
 	version: string;
 }
 
@@ -32,7 +25,6 @@ export interface LatestRelease {
 	publishedAt: string | null;
 }
 
-/** Everything GitHub says about the repository without a token. */
 export interface RepositoryStanding {
 	url: string;
 	fullName: string;
@@ -74,7 +66,6 @@ export type RepositoryTraffic =
 			/** Oldest first, every day kept here as well as the 14 GitHub still holds. */
 			days: TrafficDay[];
 			referrers: TrafficSource[];
-			/** Each named by its path on GitHub, so the most viewed pages can link back. */
 			pages: (TrafficSource & { path: string })[];
 	  };
 
@@ -127,7 +118,6 @@ export function repositoryCoordinates(url: string): { owner: string; repo: strin
 	return owner === undefined || repo === undefined ? null : { owner, repo };
 }
 
-/** The same file on GitHub, at the ref the browser read it from. */
 export function githubFileUrl(repository: string, ref: string, path: string): string {
 	const encoded = (value: string): string => value.split("/").map(encodeURIComponent).join("/");
 	return `${repository}/blob/${encoded(ref)}/${encoded(path)}`;

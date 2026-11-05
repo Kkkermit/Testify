@@ -2,7 +2,7 @@ import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { Disclosure, PageHeader, Skeleton } from "@/components/primitives";
+import { Disclosure, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { AntiLinkSection } from "@/features/settings/sections/AntiLinkSection";
@@ -15,7 +15,6 @@ import { VoiceStatsSection } from "@/features/settings/sections/VoiceStatsSectio
 import { useSettings } from "@/features/settings/useSettings";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
-/** Each section writes on change and has its own endpoint, so a refusal in one leaves the others alone. */
 export function SettingsPage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
@@ -35,7 +34,13 @@ export function SettingsPage(): React.JSX.Element {
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("settings.title")} subtitle={t("settings.subtitle")} />
+			<PageHeader server={overview.data} title={t("settings.title")} subtitle={t("settings.subtitle")} />
+
+			<Summary>
+				{value.prefix.enabled
+					? t("settings.summaryPrefix", { prefix: value.prefix.prefix })
+					: t("settings.summarySlashOnly")}
+			</Summary>
 
 			<Disclosure label={t("settings.groupBot")}>
 				<Group>
@@ -67,7 +72,6 @@ export function SettingsPage(): React.JSX.Element {
 	);
 }
 
-/** One column, because every card is full width. */
 function Group({ children }: { children: ReactNode }): React.JSX.Element {
 	return <div className="flex flex-col gap-4">{children}</div>;
 }

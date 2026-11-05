@@ -50,7 +50,6 @@ export function placeholderColour(name: string): string {
 
 export interface BoardLayout {
 	height: number;
-	/** The top of each ranked row. */
 	rows: number[];
 	/** The top of the reader's own row, or of the note saying they are unranked; null when neither is drawn. */
 	viewer: number | null;

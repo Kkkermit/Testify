@@ -21,7 +21,6 @@ export const TARGET_FILES: Record<Target, EnvFile["name"]> = {
 	production: ".env",
 };
 
-/** `--dev` or `--prod` answers the question; neither, or both, leaves it to be asked. */
 export function targetFromArgs(argv: readonly string[]): Target | null {
 	const dev = argv.includes("--dev");
 	if (dev === argv.includes("--prod")) return null;
@@ -30,7 +29,6 @@ export function targetFromArgs(argv: readonly string[]): Target | null {
 
 const SAME_HOST: Record<string, string> = { "127.0.0.1": "localhost", "[::1]": "localhost" };
 
-/** Every host and the database a connection string names, credentials dropped, written the same way each time. */
 export function databaseKey(uri: string): string | null {
 	const match = /^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^/?]+)(?:\/([^?]*))?/i.exec(uri.trim());
 	if (match === null) return null;
@@ -52,7 +50,6 @@ export function sameDatabase(a: string, b: string): boolean {
 	return key !== null && key === databaseKey(b);
 }
 
-/** The connection string in one env file, read without loading the file into this process. */
 function uriIn(file: EnvFile): string | null {
 	if (!file.exists) return null;
 	const uri = parse(readFileSync(file.path, "utf8")).MONGODB_URI?.trim() ?? "";
@@ -80,7 +77,6 @@ async function chooseTarget(): Promise<Target | null> {
 
 type Collection = mongoose.mongo.Collection;
 
-/** The export and schema file behind a collection, so a row names the model the code calls it by. */
 export interface ModelOwner {
 	name: string;
 	file: string;
@@ -90,7 +86,6 @@ function isModel(value: unknown): value is mongoose.Model<unknown> {
 	return typeof value === "function" && (value as { prototype: unknown }).prototype instanceof mongoose.Model;
 }
 
-/** Which exported model, in which schema file, writes each collection. */
 export function modelOwners(modules: Record<string, Record<string, unknown>>): Map<string, ModelOwner> {
 	const owners = new Map<string, ModelOwner>();
 
@@ -120,7 +115,6 @@ function documents(count: number): string {
 	return `${count.toLocaleString("en-GB")} ${count === 1 ? "document" : "documents"}`;
 }
 
-/** One row of the picker: the model first, since that is what the schema files call it. */
 export function collectionTitle(collection: string, count: number, owner: ModelOwner | undefined): string {
 	if (owner === undefined) return `${collection} · no model, left by an older version · ${documents(count)}`;
 	return `${owner.name} · ${collection} in ${owner.file} · ${documents(count)}`;

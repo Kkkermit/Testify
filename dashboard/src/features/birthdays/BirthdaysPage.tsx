@@ -1,26 +1,33 @@
-import { BIRTHDAY_LIMITS, BIRTHDAY_PLACEHOLDERS, MONTHS } from "@testify/shared";
+import { BIRTHDAY_LIMITS, BIRTHDAY_PLACEHOLDERS } from "@testify/shared";
 import { Cake } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Card, cardClass, EmptyState, Eyebrow, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	ChannelPicker,
+	postableChannels,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Toggle,
+	Warning,
+} from "@/components/form";
+import { Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
+import { birthdaySummary } from "@/features/birthdays/birthdays.utils";
 import { useBirthdays, useUpdateBirthdays } from "@/features/birthdays/useBirthdays";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
+import { SendTest } from "@/features/test-post/SendTest";
+import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
+import { monthName } from "@/lib/datetime";
 
-/** The month is English on Discord, and shown through the browser's own month names here. */
-function monthName(month: number, locale: string): string {
-	return new Intl.DateTimeFormat(locale, { month: "long", timeZone: "UTC" }).format(Date.UTC(2000, month - 1, 1));
-}
-
-/** Where and how a server's birthdays are posted, and whose come next. */
 export function BirthdaysPage(): React.JSX.Element {
-	const { t, i18n } = useTranslation();
+	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const config = useBirthdays(guildId);
@@ -41,19 +48,21 @@ export function BirthdaysPage(): React.JSX.Element {
 
 	const birthdays = config.data;
 	const needsChannel = birthdays.channelId === null;
+	const channel = channelLabel(postableChannels(channels.data ?? []), birthdays.channelId, t);
 
 	return (
 		<>
-			<PageHeader eyebrow={overview.data?.name} title={t("birthdays.title")} subtitle={t("birthdays.subtitle")} />
+			<PageHeader
+				server={overview.data}
+				title={t("birthdays.title")}
+				subtitle={t("birthdays.subtitle")}
+				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}
+			/>
 
-			<section aria-labelledby="posts-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
-				<div className="flex items-center justify-between gap-3">
-					<Eyebrow as="h2" id="posts-heading">
-						{t("birthdays.posts")}
-					</Eyebrow>
-					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
-				</div>
+			<Summary>{birthdaySummary(birthdays, channel, t)}</Summary>
+			{!needsChannel && !birthdays.canSend && <Warning>{t("birthdays.cannotSend")}</Warning>}
 
+			<SettingRows>
 				<ChannelPicker
 					label={t("birthdays.channel")}
 					channels={channels.data ?? []}
@@ -64,12 +73,9 @@ export function BirthdaysPage(): React.JSX.Element {
 					}}
 				/>
 
-				{needsChannel && <Warning>{t("birthdays.pickFirst")}</Warning>}
-				{!needsChannel && !birthdays.canSend && <Warning>{t("birthdays.cannotSend")}</Warning>}
-
 				<Toggle
 					label={t("birthdays.post")}
-					hint={t("birthdays.postHint")}
+					hint={needsChannel ? t("birthdays.pickFirst") : t("birthdays.postHint")}
 					checked={birthdays.enabled}
 					disabled={needsChannel}
 					onChange={(enabled) => {
@@ -90,18 +96,26 @@ export function BirthdaysPage(): React.JSX.Element {
 					onSave={(message) => {
 						update.mutate({ message });
 					}}
-				/>
-				<p className="text-muted-foreground text-xs">{t("birthdays.pingNote")}</p>
+				>
+					<GreetingPreview
+						message={draft}
+						style="text"
+						guildName={overview.data?.name ?? t("welcome.thisServer")}
+						memberCount={overview.data?.memberCount ?? 0}
+					/>
+					<p className="text-muted-foreground text-xs">{t("birthdays.pingNote")}</p>
+					<SendTest test={{ kind: "birthday", message: draft }} />
+				</MessageEditor>
+			</SettingRows>
 
-				{update.error !== null && (
-					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-				)}
-			</section>
+			{update.error !== null && (
+				<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
+			)}
 
 			<section aria-labelledby="upcoming-heading" className="flex flex-col gap-3">
-				<Eyebrow as="h2" id="upcoming-heading" count={t("birthdays.sharedCount", { count: birthdays.shared })}>
+				<SectionHeading as="h2" id="upcoming-heading" count={t("birthdays.sharedCount", { count: birthdays.shared })}>
 					{t("birthdays.upcoming")}
-				</Eyebrow>
+				</SectionHeading>
 
 				{birthdays.upcoming.length === 0 ? (
 					<Card>
@@ -116,7 +130,7 @@ export function BirthdaysPage(): React.JSX.Element {
 									<span className="text-muted-foreground shrink-0 tabular-nums">
 										{t("birthdays.on", {
 											day: entry.day,
-											month: monthName(entry.month, i18n.language) || MONTHS[entry.month - 1],
+											month: monthName(entry.month),
 										})}
 									</span>
 								</li>

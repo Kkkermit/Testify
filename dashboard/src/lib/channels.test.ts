@@ -3,8 +3,8 @@ import { channelLabel, seenChannels } from "@/lib/channels";
 import { t } from "@/test/english";
 
 const CHANNELS: ChannelSummary[] = [
-	{ id: "400000000000000001", name: "general", kind: "text", position: 1, canSend: true },
-	{ id: "400000000000000002", name: null, kind: "text", position: 2, canSend: true },
+	{ id: "400000000000000001", name: "general", kind: "text", position: 1, parentId: null, canSend: true },
+	{ id: "400000000000000002", name: null, kind: "text", position: 2, parentId: null, canSend: true },
 ];
 
 describe("channelLabel", () => {
