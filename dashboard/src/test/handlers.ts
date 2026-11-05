@@ -77,7 +77,16 @@ import {
 	quietWeek,
 	noRoleUses,
 } from "@/test/fixtures/server";
-import { aGuild, botProfile, configured, healthy, me } from "@/test/fixtures/session";
+import {
+	accountHistory,
+	accountReminders,
+	accountSessions,
+	aGuild,
+	botProfile,
+	configured,
+	healthy,
+	me,
+} from "@/test/fixtures/session";
 import { noTraffic, siteInfo, sourceFile, sourceTree, standing } from "@/test/fixtures/site";
 
 export const handlers = [
@@ -104,6 +113,9 @@ export const handlers = [
 	http.get("/api/bot", () => HttpResponse.json(botProfile)),
 	http.get("/api/commands", () => HttpResponse.json(catalogue)),
 	http.get("/api/auth/me", () => HttpResponse.json(me)),
+	http.get("/api/account/history", () => HttpResponse.json(accountHistory)),
+	http.get("/api/account/reminders", () => HttpResponse.json(accountReminders)),
+	http.get("/api/account/sessions", () => HttpResponse.json(accountSessions)),
 	http.get("/api/guilds/:guildId/overview", () => HttpResponse.json(overview)),
 	http.get("/api/guilds/:guildId/setup", () => HttpResponse.json(setupDone)),
 	http.get("/api/guilds/:guildId/levelling", () => HttpResponse.json(levelConfig)),

@@ -1,8 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type DashboardUser, type ManageableGuild } from "@testify/shared";
-import { FileText, LogOut, Palette, Search, ShieldQuestion, UserCog } from "lucide-react";
+import { FileText, LogOut, Palette, Search, Settings2, ShieldQuestion } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router";
+import { Link, NavLink } from "react-router";
 import { GuildSwitcher } from "@/app/layout/GuildSwitcher";
 import { SidebarLink } from "@/app/layout/SidebarLink";
 import { SidebarSection } from "@/app/layout/SidebarSection";
@@ -19,14 +19,12 @@ import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
 const FOOTER_LINKS = [
-	{ to: "/account", labelKey: "nav.account", hintKey: "nav.accountHint" },
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
 	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint" },
 	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint" },
 ] as const;
 
 const FOOTER_ICON = {
-	"/account": UserCog,
 	"/appearance": Palette,
 	"/terms": FileText,
 	"/privacy": ShieldQuestion,
@@ -119,12 +117,30 @@ export function Sidebar({
 			{/* Pinned to the foot of the desktop rail; in the drawer it follows on, or a tall phone leaves a band of nothing above it. */}
 			<div className={cn("border-border flex flex-col gap-1 border-t pt-3", expanded ? "mt-4" : "mt-auto")}>
 				{user !== null && (
-					<div className={ROW}>
-						<span aria-hidden="true" className={ICON_SLOT}>
-							<Avatar name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
-						</span>
-						<span className={label("truncate text-sm")}>{user.username}</span>
-					</div>
+					<Tooltip label={t("nav.accountHint")} placement="right">
+						<NavLink
+							to="/account"
+							className={({ isActive }) =>
+								cn(ROW, "group text-sm transition-colors duration-150", isActive ? "bg-card" : "hover:bg-card/60")
+							}
+						>
+							<span aria-hidden="true" className={ICON_SLOT}>
+								<Avatar name={user.username} url={user.avatarUrl} size={26} seed={user.id} />
+							</span>
+							<span className={label("flex min-w-0 flex-1 flex-col leading-tight")}>
+								<span className="truncate">{user.username}</span>
+								<span className="text-muted-foreground truncate text-xs">{t("nav.account")}</span>
+							</span>
+							<Settings2
+								size={16}
+								aria-hidden="true"
+								className={cn(
+									"text-muted-foreground group-hover:text-foreground shrink-0",
+									expanded ? "" : "hidden lg:block",
+								)}
+							/>
+						</NavLink>
+					</Tooltip>
 				)}
 
 				{/* Rows rather than small links, because `hidden` at the icon-only width took these off the page entirely. */}

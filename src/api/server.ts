@@ -9,6 +9,7 @@ import { RateLimiter, rateLimit } from "@api/middleware/rateLimit";
 import { securityHeaders } from "@api/middleware/security";
 import { loadSession } from "@api/middleware/session";
 import { oauthConfigFrom } from "@api/oauth";
+import { account } from "@api/routes/account";
 import { analytics } from "@api/routes/analytics";
 import { auth } from "@api/routes/auth";
 import { bot } from "@api/routes/bot";
@@ -135,6 +136,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	// Without the dashboard these do not exist at all, rather than answering every request with a refusal.
 	if (env.DASHBOARD_ENABLED) {
 		app.route("/api/auth", auth);
+		app.route("/api/account", account);
 		app.route("/api/commands", commands);
 		app.route("/api/guilds", guilds);
 		app.route("/api/owner", owner);

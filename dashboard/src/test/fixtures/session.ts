@@ -1,4 +1,7 @@
 import {
+	type AccountHistory,
+	type AccountReminder,
+	type AccountSession,
 	type BotIdentity,
 	type HealthResponse,
 	type ManageableGuild,
@@ -57,3 +60,69 @@ export const me: MeResponse = {
 	isOwner: false,
 	guilds: [aGuild, withoutBot, cannotAdd],
 };
+
+export const accountHistory: AccountHistory = {
+	items: [
+		{
+			id: "a".repeat(24),
+			at: "2026-11-05T10:00:00.000Z",
+			guildId: aGuild.id,
+			guildName: aGuild.name,
+			source: "command",
+			summary: "Turned levelling on",
+		},
+		{
+			id: "b".repeat(24),
+			at: "2026-11-04T10:00:00.000Z",
+			guildId: "900000000000000099",
+			guildName: null,
+			source: "dashboard",
+			summary: "Changed the welcome channel",
+		},
+	],
+	total: 2,
+	page: 1,
+	perPage: 25,
+	servers: [
+		{ id: aGuild.id, name: aGuild.name },
+		{ id: "900000000000000099", name: null },
+	],
+};
+
+export const accountReminders: AccountReminder[] = [
+	{
+		id: "c".repeat(24),
+		text: "Feed the cat",
+		dueAt: "2099-01-01T09:00:00.000Z",
+		deliver: "channel",
+		canPing: true,
+		guildId: aGuild.id,
+		guildName: aGuild.name,
+	},
+	{
+		id: "d".repeat(24),
+		text: "Call home",
+		dueAt: "2099-01-02T09:00:00.000Z",
+		deliver: "dm",
+		canPing: false,
+		guildId: null,
+		guildName: null,
+	},
+];
+
+export const accountSessions: AccountSession[] = [
+	{
+		id: "e".repeat(24),
+		createdAt: "2026-11-01T10:00:00.000Z",
+		lastSeenAt: "2026-11-03T10:00:00.000Z",
+		expiresAt: "2026-11-10T10:00:00.000Z",
+		current: false,
+	},
+	{
+		id: "f".repeat(24),
+		createdAt: "2026-11-05T10:00:00.000Z",
+		lastSeenAt: "2026-11-05T10:00:00.000Z",
+		expiresAt: "2026-11-12T10:00:00.000Z",
+		current: true,
+	},
+];
