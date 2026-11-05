@@ -47,6 +47,7 @@ export * from "./sticky";
 export * from "./support";
 export * from "./supportSearch";
 export * from "./tempVoice";
+export * from "./testPost";
 export * from "./text";
 export * from "./tickets";
 export * from "./treasure";

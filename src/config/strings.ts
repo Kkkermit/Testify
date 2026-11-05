@@ -90,6 +90,21 @@ export const strings = {
 		dmFailed: "I could not send them a direct message, but the action still went through.",
 	},
 
+	testPost: {
+		note: (what: string, server: string): string =>
+			`-# A test of ${what} from the dashboard of **${server}**, sent only to you. The next message is what members will see.`,
+		what: {
+			greeting: "the welcome message",
+			goodbye: "the goodbye message",
+			birthday: "the birthday post",
+			announcement: "an announcement",
+			plain: "a message",
+		},
+		dmClosed:
+			"Discord would not deliver a direct message to you. Allow direct messages from members of this server in your privacy settings, then try again.",
+		notAMember: "You are not in this server, so there is no member to fill the message in for.",
+	},
+
 	verification: {
 		alreadyVerified: "You are already verified in this server.",
 		wrongCode: "That code is not correct. Try again.",

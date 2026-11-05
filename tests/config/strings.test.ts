@@ -24,6 +24,7 @@ const ARGUMENTS: Record<string, unknown[]> = {
 	"economy.targetNoAccount": ["alice"],
 	"economy.insufficientWallet": [1234],
 	"economy.insufficientBank": [50],
+	"testPost.note": ["the welcome message", "Test Server"],
 };
 
 describe("strings", () => {

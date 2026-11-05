@@ -30,6 +30,7 @@ import { setup } from "@api/routes/setup";
 import { starboard } from "@api/routes/starboard";
 import { sticky } from "@api/routes/sticky";
 import { tempVoice } from "@api/routes/tempVoice";
+import { testPost } from "@api/routes/testPost";
 import { tickets } from "@api/routes/tickets";
 import { treasure } from "@api/routes/treasure";
 import { verification } from "@api/routes/verification";
@@ -103,6 +104,7 @@ guilds.route("/:guildId/warnings", warnings);
 guilds.route("/:guildId/starboard", starboard);
 guilds.route("/:guildId/temp-voice", tempVoice);
 guilds.route("/:guildId/setup", setup);
+guilds.route("/:guildId/test-post", testPost);
 
 guilds.get("/:guildId/overview", async (context) => {
 	const guild = guildOf(context);

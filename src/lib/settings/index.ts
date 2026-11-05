@@ -8,6 +8,7 @@ export * from "./settings.types";
 export * from "./settingsPanel.util";
 export * from "./settingsScreen.util";
 export * from "./setupChecklist.util";
+export * from "./testPost.util";
 export * from "./verifyActions.util";
 export * from "./verifyPanel.util";
 export * from "./voiceCounters.util";
