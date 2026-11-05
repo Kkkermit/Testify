@@ -10,13 +10,14 @@ import {
 	postableChannels,
 	SavingIndicator,
 	savingStateOf,
+	SettingRows,
 	Toggle,
 	Warning,
 } from "@/components/form";
-import { Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
-import { thresholdFrom } from "@/features/starboard/starboard.utils";
+import { starboardSummary, thresholdFrom } from "@/features/starboard/starboard.utils";
 import { useSaveStarboard, useStarboard } from "@/features/starboard/useStarboard";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
@@ -54,12 +55,10 @@ export function StarboardPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(save.isPending, save.isSuccess)} />}
 			/>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("starboard.board")}</h2>
-					<p className="text-muted-foreground text-sm">{t("starboard.boardBody")}</p>
-				</div>
+			<Summary>{starboardSummary(settings, channel, t)}</Summary>
+			{settings.channelId !== null && !settings.canSend && <Warning>{t("common.cannotPostIn", { channel })}</Warning>}
 
+			<SettingRows>
 				<Toggle
 					label={t("starboard.enabled")}
 					hint={settings.channelId === null ? t("starboard.enabledHintNoChannel") : t("starboard.enabledHint")}
@@ -80,7 +79,6 @@ export function StarboardPage(): React.JSX.Element {
 						write({ channelId });
 					}}
 				/>
-				{settings.channelId !== null && !settings.canSend && <Warning>{t("common.cannotPostIn", { channel })}</Warning>}
 
 				<ThresholdField key={settings.threshold} stored={settings.threshold} onSave={write} />
 
@@ -93,15 +91,15 @@ export function StarboardPage(): React.JSX.Element {
 						write({ selfStar });
 					}}
 				/>
+			</SettingRows>
 
-				<p className="text-muted-foreground text-sm">
-					{t("starboard.posts", { count: settings.posts })} · {t("starboard.deleting")}
-				</p>
+			{save.error !== null && (
+				<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
+			)}
 
-				{save.error !== null && (
-					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
-				)}
-			</Card>
+			<p className="text-muted-foreground text-sm">
+				{t("starboard.posts", { count: settings.posts })} · {t("starboard.deleting")}
+			</p>
 		</>
 	);
 }

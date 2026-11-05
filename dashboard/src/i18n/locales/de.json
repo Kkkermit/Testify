@@ -875,10 +875,12 @@
 		"deleteIdea": "Idee Nr. {{number}} löschen"
 	},
 	"starboard": {
+		"summaryNoChannel": "Das Starboard hat noch keinen Kanal, daher wird nichts erneut gepostet.",
+		"summaryOff": "Das Starboard ist aus. Eingeschaltet postet es in {{channel}}.",
+		"summaryOn": "Eine Nachricht mit {{n, number}} ⭐ wird in {{channel}} erneut gepostet; der eigene Stern des Autors zählt nicht.",
+		"summaryOnSelf": "Eine Nachricht mit {{n, number}} ⭐ wird in {{channel}} erneut gepostet; der eigene Stern des Autors zählt mit.",
 		"title": "Starboard",
 		"subtitle": "Nachrichten mit genug ⭐ werden in einem Highlight-Kanal erneut gepostet.",
-		"board": "Das Board",
-		"boardBody": "Reagiere mit ⭐ auf eine Nachricht. Sobald es genug sind, postet {{bot}} sie erneut, mit einem Link zurück.",
 		"enabled": "Markierte Nachrichten erneut posten",
 		"enabledHint": "Sterne auf dem Board selbst zählen nicht.",
 		"enabledHintNoChannel": "Wähle zuerst einen Kanal.",

@@ -17,6 +17,7 @@ export { Pager } from "@/components/primitives/Pager";
 export { BackLink, PublicPage } from "@/components/primitives/PublicPage";
 export { type Segment, SegmentedControl } from "@/components/primitives/SegmentedControl";
 export { Skeleton } from "@/components/primitives/Skeleton";
+export { Summary } from "@/components/primitives/Summary";
 export { SELECTED, UNSELECTED } from "@/components/primitives/stateStyles";
 export { StatTile } from "@/components/primitives/StatTile";
 export { TabBar, TabContent, type TabDefinition } from "@/components/primitives/TabBar";

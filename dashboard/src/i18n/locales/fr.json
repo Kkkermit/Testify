@@ -895,10 +895,12 @@
 		"deleteIdea": "Supprimer l’idée n° {{number}}"
 	},
 	"starboard": {
+		"summaryNoChannel": "Le starboard n’a pas encore de salon, donc rien n’est republié.",
+		"summaryOff": "Le starboard est désactivé. Activé, il republie dans {{channel}}.",
+		"summaryOn": "Un message qui obtient {{n, number}} ⭐ est republié dans {{channel}}, sans compter l’étoile de son auteur.",
+		"summaryOnSelf": "Un message qui obtient {{n, number}} ⭐ est republié dans {{channel}}, en comptant l’étoile de son auteur.",
 		"title": "Starboard",
 		"subtitle": "Les messages qui récoltent assez de ⭐ sont republiés dans un salon des meilleurs moments.",
-		"board": "Le tableau",
-		"boardBody": "Réagissez avec ⭐ à un message. Une fois qu’il en a assez, {{bot}} le republie avec un lien vers l’original.",
 		"enabled": "Republier les messages étoilés",
 		"enabledHint": "Les étoiles sur le tableau lui-même ne comptent pas.",
 		"enabledHintNoChannel": "Choisissez d’abord un salon.",

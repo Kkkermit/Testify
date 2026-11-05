@@ -895,10 +895,12 @@
 		"deleteIdea": "Eliminar la idea n.º {{number}}"
 	},
 	"starboard": {
+		"summaryNoChannel": "El starboard aún no tiene canal, así que no se republica nada.",
+		"summaryOff": "El starboard está desactivado. Activado, republica en {{channel}}.",
+		"summaryOn": "Un mensaje que reúne {{n, number}} ⭐ se republica en {{channel}}, sin contar la estrella del autor.",
+		"summaryOnSelf": "Un mensaje que reúne {{n, number}} ⭐ se republica en {{channel}}, contando la estrella del autor.",
 		"title": "Starboard",
 		"subtitle": "Los mensajes que reúnen suficientes ⭐ se republican en un canal de destacados.",
-		"board": "El tablón",
-		"boardBody": "Reacciona con ⭐ a un mensaje. Cuando tenga suficientes, {{bot}} lo republica con un enlace al original.",
 		"enabled": "Republicar los mensajes destacados",
 		"enabledHint": "Las estrellas en el propio tablón no cuentan.",
 		"enabledHintNoChannel": "Elige un canal primero.",

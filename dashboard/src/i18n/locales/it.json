@@ -895,10 +895,12 @@
 		"deleteIdea": "Elimina l’idea n. {{number}}"
 	},
 	"starboard": {
+		"summaryNoChannel": "Lo starboard non ha ancora un canale, quindi non viene ripubblicato nulla.",
+		"summaryOff": "Lo starboard è disattivato. Se attivo, ripubblica in {{channel}}.",
+		"summaryOn": "Un messaggio che raccoglie {{n, number}} ⭐ viene ripubblicato in {{channel}}, senza contare la stella dell’autore.",
+		"summaryOnSelf": "Un messaggio che raccoglie {{n, number}} ⭐ viene ripubblicato in {{channel}}, contando la stella dell’autore.",
 		"title": "Starboard",
 		"subtitle": "I messaggi che raccolgono abbastanza ⭐ vengono ripubblicati in un canale dei momenti migliori.",
-		"board": "La bacheca",
-		"boardBody": "Reagisci con ⭐ a un messaggio. Quando ne ha abbastanza, {{bot}} lo ripubblica con un link all’originale.",
 		"enabled": "Ripubblica i messaggi con le stelle",
 		"enabledHint": "Le stelle sulla bacheca stessa non contano.",
 		"enabledHintNoChannel": "Scegli prima un canale.",

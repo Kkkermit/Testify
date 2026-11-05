@@ -875,10 +875,12 @@
 		"deleteIdea": "Delete idea #{{number}}"
 	},
 	"starboard": {
+		"summaryNoChannel": "The starboard has no channel yet, so nothing is reposted.",
+		"summaryOff": "The starboard is off. Turned on, it reposts to {{channel}}.",
+		"summaryOn": "A message that collects {{n, number}} ⭐ is reposted to {{channel}}, not counting the author’s own star.",
+		"summaryOnSelf": "A message that collects {{n, number}} ⭐ is reposted to {{channel}}, counting the author’s own star.",
 		"title": "Starboard",
 		"subtitle": "Messages that collect enough ⭐ are reposted to a highlights channel.",
-		"board": "The board",
-		"boardBody": "React with ⭐ to a message. Once it has enough, {{bot}} reposts it with a link back.",
 		"enabled": "Repost starred messages",
 		"enabledHint": "Stars on the board itself do not count.",
 		"enabledHintNoChannel": "Choose a channel first.",

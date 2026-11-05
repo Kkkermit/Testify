@@ -7,6 +7,7 @@ export { RadioCard } from "@/components/form/RadioCard";
 export { RoleChecklist } from "@/components/form/RoleChecklist";
 export { SavingIndicator, savingStateOf, type SavingState } from "@/components/form/SavingIndicator";
 export { SearchField } from "@/components/form/SearchField";
+export { SettingRows } from "@/components/form/SettingRows";
 export { SwitchTrack } from "@/components/form/SwitchTrack";
 export { Toggle } from "@/components/form/Toggle";
 export { Warning } from "@/components/form/Warning";
