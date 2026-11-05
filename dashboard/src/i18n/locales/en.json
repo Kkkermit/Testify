@@ -1324,18 +1324,19 @@
 		"unfreeze": "Unfreeze"
 	},
 	"music": {
+		"stateDjs_one": "On, limited to {{count, number}} DJ role.",
+		"stateDjs_other": "On, limited to {{count, number}} DJ roles.",
+		"staleRoles_one": "{{count, number}} chosen role no longer exists in this server. Saving again will drop it.",
+		"staleRoles_other": "{{count, number}} chosen roles no longer exist in this server. Saving again will drop them.",
 		"title": "Music",
 		"subtitle": "Whether {{bot}} plays music in this server, and who is allowed to drive the player.",
-		"system": "Music system",
 		"enable": "Enable the music system",
 		"stateOff": "Off — every music command is refused in this server.",
 		"stateEverybody": "On, and open to everybody in the server.",
-		"stateDjs": "On, limited to {{count, number}} DJ roles.",
 		"djRoles": "DJ roles",
 		"djBody": "Leave every role unticked to let anybody use the player. Anybody with Manage Server can always use it.",
 		"djPick": "Roles that may use the player",
-		"djHint": "Someone needs one of these roles to run a music command.",
-		"staleRoles": "{{count, number}} chosen roles no longer exist in this server. Saving again will drop them."
+		"djHint": "Someone needs one of these roles to run a music command."
 	},
 	"casino": {
 		"title": "Casino",

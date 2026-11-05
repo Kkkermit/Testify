@@ -1363,18 +1363,21 @@
 		"unfreeze": "Descongelar"
 	},
 	"music": {
+		"stateDjs_one": "Activado, limitado a {{count, number}} rol de DJ.",
+		"stateDjs_many": "Activado, limitado a {{count, number}} de roles de DJ.",
+		"stateDjs_other": "Activado, limitado a {{count, number}} roles de DJ.",
+		"staleRoles_one": "{{count, number}} rol elegido ya no existe en este servidor. Al guardar de nuevo se eliminará.",
+		"staleRoles_many": "{{count, number}} de roles elegidos ya no existen en este servidor. Al guardar de nuevo se eliminarán.",
+		"staleRoles_other": "{{count, number}} roles elegidos ya no existen en este servidor. Al guardar de nuevo se eliminarán.",
 		"title": "Música",
 		"subtitle": "Si {{bot}} reproduce música en este servidor y quién puede manejar el reproductor.",
-		"system": "Sistema de música",
 		"enable": "Activar el sistema de música",
 		"stateOff": "Desactivado: se rechaza cualquier comando de música en este servidor.",
 		"stateEverybody": "Activado y abierto a todo el mundo en el servidor.",
-		"stateDjs": "Activado, limitado a {{count, number}} roles de DJ.",
 		"djRoles": "Roles de DJ",
 		"djBody": "Deja todos los roles sin marcar para que cualquiera pueda usar el reproductor. Quien tenga Gestionar servidor siempre podrá usarlo.",
 		"djPick": "Roles que pueden usar el reproductor",
-		"djHint": "Hace falta uno de estos roles para ejecutar un comando de música.",
-		"staleRoles": "{{count, number}} roles elegidos ya no existen en este servidor. Al guardar de nuevo se eliminarán."
+		"djHint": "Hace falta uno de estos roles para ejecutar un comando de música."
 	},
 	"casino": {
 		"title": "Casino",

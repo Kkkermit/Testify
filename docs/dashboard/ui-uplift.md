@@ -137,7 +137,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/treasure`                                 | Economy       | —                   | Done                      |
 | `…/lottery`                                  | Economy       | —                   | Done                      |
 | `…/casino`                                   | Economy       | —                   | Done                      |
-| `…/music`                                    | Entertainment | —                   | To do                     |
+| `…/music`                                    | Entertainment | —                   | Done                      |
 | `…/giveaways`                                | Entertainment | —                   | To do                     |
 | `…/members`, `…/members/:userId`             | Members       | —                   | To do                     |
 | `…/settings`                                 | Settings      | —                   | To do                     |

@@ -1324,18 +1324,19 @@
 		"unfreeze": "Auftauen"
 	},
 	"music": {
+		"stateDjs_one": "An, beschränkt auf {{count, number}} DJ-Rolle.",
+		"stateDjs_other": "An, beschränkt auf {{count, number}} DJ-Rollen.",
+		"staleRoles_one": "{{count, number}} gewählte Rolle gibt es auf diesem Server nicht mehr. Beim nächsten Speichern fällt sie weg.",
+		"staleRoles_other": "{{count, number}} gewählte Rollen gibt es auf diesem Server nicht mehr. Beim nächsten Speichern fallen sie weg.",
 		"title": "Musik",
 		"subtitle": "Ob {{bot}} auf diesem Server Musik abspielt und wer den Player bedienen darf.",
-		"system": "Musiksystem",
 		"enable": "Musiksystem aktivieren",
 		"stateOff": "Aus – jeder Musikbefehl wird auf diesem Server abgelehnt.",
 		"stateEverybody": "An und für alle auf dem Server offen.",
-		"stateDjs": "An, beschränkt auf {{count, number}} DJ-Rollen.",
 		"djRoles": "DJ-Rollen",
 		"djBody": "Lass alle Rollen ungesetzt, damit jeder den Player nutzen kann. Wer Server verwalten hat, kann ihn immer nutzen.",
 		"djPick": "Rollen, die den Player nutzen dürfen",
-		"djHint": "Für einen Musikbefehl wird eine dieser Rollen gebraucht.",
-		"staleRoles": "{{count, number}} gewählte Rollen gibt es auf diesem Server nicht mehr. Beim nächsten Speichern fallen sie weg."
+		"djHint": "Für einen Musikbefehl wird eine dieser Rollen gebraucht."
 	},
 	"casino": {
 		"title": "Casino",
