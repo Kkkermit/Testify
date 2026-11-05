@@ -1216,7 +1216,10 @@ is a staleness problem in the picker only, never a security one.
    tab is a link to a tab.
 4. They change a control. **What happens next depends on the control's shape** — see 19.8.
 5. The `SavingIndicator` in the header says saved. A refusal appears beside the control instead.
-6. The change is written to the audit log and shows up in "recent changes" on the overview.
+6. The change is written to the audit log and shows up in "recent changes" on the overview. On the Changes page, a
+   settings change carries **Put back**, which sends the old values to the same route while the setting still holds
+   what that change left. A new settings route joins it with one `RESTORABLE` entry, `auditSettings` in place of
+   `auditChange`, and a label per field in `restore.labels.ts`.
 
 **The check that makes this journey trustworthy:** a channel the bot cannot post in is disabled in the picker
 _before_ anybody saves a configuration that would silently do nothing, and a role above the bot's own is warned

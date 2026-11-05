@@ -1899,7 +1899,7 @@
 		"enforcementP3": "Si crees que te han incluido en la lista negra por error, contacta con el operador de esta instancia. Levantarla queda a su criterio.",
 		"usingDashboard": "Uso del panel",
 		"usingDashboardP1": "Inicias sesión con tu cuenta de Discord. Solo puedes configurar un servidor donde tengas Gestionar servidor, y ese permiso se comprueba en vivo en cada petición, así que perderlo tiene efecto en tu siguiente clic.",
-		"usingDashboardP2": "Cada cambio hecho aquí se escribe en un registro de auditoría con tu cuenta de Discord adjunta, para que los demás administradores del servidor vean quién cambió qué. Una prueba que te envías se registra igual, con el tipo de publicación y nunca con su texto.",
+		"usingDashboardP2": "Cada cambio hecho aquí se escribe en un registro de auditoría con tu cuenta de Discord adjunta, para que los demás administradores del servidor vean quién cambió qué. Un cambio de ajustes guarda también lo que había antes, para poder restaurarlo. Una prueba que te envías se registra igual, con el tipo de publicación y nunca con su texto.",
 		"usingDashboardP3": "No compartas tu sesión, no automatices peticiones al panel ni intentes llegar a un servidor o una página a la que no tienes acceso. Las peticiones tienen un límite, y abusar del panel se trata igual que abusar de los comandos.",
 		"inBot": "Economía, niveles y demás cosas del bot",
 		"inBotP1": "Las monedas, los niveles, los objetos, las mascotas y cualquier otra cosa que registre el bot son virtuales. No tienen valor monetario, no se pueden cambiar por dinero ni por nada fuera del bot, y los moderadores del servidor o el operador pueden restablecerlos en cualquier momento.",

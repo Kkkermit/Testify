@@ -1899,7 +1899,7 @@
 		"enforcementP3": "Se pensi di essere stato messo nella blacklist per errore, contatta l’operatore di questa istanza. Toglierti dalla blacklist è a sua discrezione.",
 		"usingDashboard": "Usare la dashboard",
 		"usingDashboardP1": "Accedi con il tuo account Discord. Puoi configurare solo un server in cui hai Gestire il server, e quel permesso viene verificato in tempo reale a ogni richiesta, quindi perderlo ha effetto dal clic successivo.",
-		"usingDashboardP2": "Ogni modifica fatta qui viene scritta in un registro di controllo con il tuo account Discord, così gli altri gestori del server vedono chi ha cambiato cosa. Una prova che invii a te stesso viene registrata allo stesso modo, con il tipo di messaggio e mai il suo testo.",
+		"usingDashboardP2": "Ogni modifica fatta qui viene scritta in un registro di controllo con il tuo account Discord, così gli altri gestori del server vedono chi ha cambiato cosa. Una modifica alle impostazioni conserva anche il valore precedente, così si può ripristinare. Una prova che invii a te stesso viene registrata allo stesso modo, con il tipo di messaggio e mai il suo testo.",
 		"usingDashboardP3": "Non condividere la tua sessione, non automatizzare richieste alla dashboard e non cercare di raggiungere un server o una pagina a cui non hai accesso. Le richieste sono limitate, e abusare della dashboard è trattato come abusare dei comandi.",
 		"inBot": "Economia, livelli e altre cose del bot",
 		"inBotP1": "Monete, livelli, oggetti, animali e qualsiasi altra cosa tracciata dal bot sono virtuali. Non hanno valore monetario, non si possono scambiare con denaro né con nulla al di fuori del bot, e possono essere azzerati in qualsiasi momento dai moderatori di un server o dall’operatore.",

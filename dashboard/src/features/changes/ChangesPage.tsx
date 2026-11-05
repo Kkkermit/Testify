@@ -91,11 +91,13 @@ export function ChangesPage(): React.JSX.Element {
 					{changes.data.moderationWithheld && (
 						<Warning>{t("changes.moderationWithheld", { permission: permissionLabel("ModerateMembers", t) })}</Warning>
 					)}
-					<p className="text-muted-foreground text-sm" aria-live="polite">
-						{t("changes.count", { count: changes.data.total })}
-						{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
-					</p>
-					<p className="text-muted-foreground text-sm">{t("changes.commandsNotListed")}</p>
+					<div className="text-muted-foreground flex flex-col gap-1 text-sm">
+						<p aria-live="polite">
+							{t("changes.count", { count: changes.data.total })}
+							{changes.data.truncated && ` ${t("changes.truncated", { max: CHANGE_LIMITS.maxDiscordEntries })}`}
+						</p>
+						<p>{t("changes.commandsNotListed")}</p>
+					</div>
 					{changes.data.items.length === 0 ? (
 						<Card>
 							<p className="text-sm">{searched === "" ? t("changes.none") : t("changes.noMatch")}</p>

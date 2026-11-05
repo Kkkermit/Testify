@@ -1838,7 +1838,7 @@
 		"enforcementP3": "If you think you were blacklisted by mistake, contact the operator of this instance. Lifting a blacklist is at their discretion.",
 		"usingDashboard": "Using the dashboard",
 		"usingDashboardP1": "You sign in with your Discord account. You can only configure a server where you have Manage Server, and that permission is checked live on every request, so losing it takes effect on your next click.",
-		"usingDashboardP2": "Every change made here is written to an audit log with your Discord account attached, so the server’s other managers can see who changed what. A test you send yourself is recorded the same way, by the kind of post and never its words.",
+		"usingDashboardP2": "Every change made here is written to an audit log with your Discord account attached, so the server’s other managers can see who changed what. A settings change also keeps what the setting held before, so it can be put back. A test you send yourself is recorded the same way, by the kind of post and never its words.",
 		"usingDashboardP3": "Do not share your session, automate requests against the dashboard, or try to reach a server or page you have not been given. Requests are rate limited, and abusing the dashboard is treated the same as abusing commands.",
 		"inBot": "Economy, levels and other in-bot things",
 		"inBotP1": "Coins, levels, items, pets and anything else the bot tracks are virtual. They have no monetary value, cannot be exchanged for money or for anything outside the bot, and may be reset at any time by a server’s moderators or by the operator.",

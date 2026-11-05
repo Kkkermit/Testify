@@ -3042,6 +3042,28 @@ and three things about it are load-bearing:
   maps discord.js's target and action types, and reads a timeout out of a member update, where Discord hides it.
   The dashboard's `KIND_LABELS` and `VERB_LABELS` are the translated tables.
 
+**A settings change can be put back, through the route that made it, and only while nothing has changed since.**
+`RESTORABLE` in `shared/src/restore.ts` lists the eighteen settings writes this covers — welcome, goodbye, birthdays,
+levelling, the starboard, the idea board, join to create, raid protection, cases, verification, music, treasure, the
+lottery and the settings page's five sections — each with its route, where it is read and the fields it may send.
+There is no slider back through a server's setup, because the records cannot rebuild one: settings changed with the
+bot's commands in Discord are recorded nowhere, and the page says so. Four things about Put back are load-bearing:
+
+- **Every one of those writes keeps what it replaced.** `auditSettings` records every restorable field as stored
+  before and after, read with the same function the route's `GET` uses, and `auditChange` refuses a restorable action
+  at compile time, so a route cannot record one without that snapshot. A field that acts rather than stores —
+  verification's `publish`, counting's `reset` — is never one. The privacy notice says a settings change keeps
+  what it replaced (`legal.usingDashboardP2`).
+- **Only what the change altered goes back** (`restoreOf`), and only when the old values pass the route's own schema,
+  so a button is never offered for a write that would be refused as malformed.
+- **The setting must still hold what the change left** (`stillAsLeft`), read afresh when the panel opens. A later
+  change, from the dashboard or from a command in Discord, is never undone without anybody seeing it; the panel says
+  so and links the setting's page instead.
+- **The browser sends the old values to the feature's own route**, so `requireGuild`, `requireReach`, the permission
+  the route asks and its validation decide a put-back exactly as they decided the change, and the route records it as
+  a change of its own, which can itself be put back. Nothing new can be reached this way: the request is one the
+  reader could already have made by hand.
+
 ### The status page
 
 `/status` is open to anybody signed in, because it names no server and no member — only how the bot itself is

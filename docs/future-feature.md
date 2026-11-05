@@ -11,14 +11,36 @@ Nothing here is promised or scheduled. Each entry says what exists already to bu
 to respect, so whoever picks one up starts from the code rather than from a blank page. When an entry ships, delete
 it from this file in the same pull request.
 
-Checked against the code and the npm registry on **25 October 2026**; the member directory added on **5 November 2026**.
+Checked against the code and the npm registry on **25 October 2026**; the member directory and recording command changes added on **5 November 2026**.
 
 ---
 
 ## 🤖 New bot features
 
-Nothing is waiting here. A new idea goes in a table with what it would do, what it would build on and what it would
-have to respect.
+### Record settings changed with commands, as the dashboard records its own
+
+**What it would do.** The Changes page lists what managers did on the dashboard and what Discord's own audit log
+recorded. A setting changed with a command in Discord — `/welcome`, `/starboard`, a settings panel's buttons — is in
+neither, so it never appears, and it cannot be put back. Recording those too would make the list whole, and would let
+the page offer a history of a setting rather than one change at a time.
+
+**What it builds on.**
+
+- `auditSettings` in `src/api/audit.ts` and `RESTORABLE` in `shared/src/restore.ts` already say which fields each
+  setting keeps, and record them before and after.
+- Most panels write through the same `apply*` function the dashboard's route calls (`applyStarboardSettings`,
+  `applyGoodbye`, `applyRaidSettings` and the rest), and those already take who made the change.
+
+**What it would have to respect.**
+
+- **One place records it.** Recording from each `apply*` function, rather than from each command and each route, is
+  what keeps the two surfaces from disagreeing about what was changed.
+- **Who did it is a Discord account either way**, so the record keeps the same actor fields; the source says whether it
+  was the dashboard or a command.
+- **The privacy notice changes**: it says changes made on the dashboard are recorded, and would need to say the same of
+  commands (`legal.usingDashboardP2`, `LegalPage.test.tsx`).
+- **Put back stays guarded by the setting as it is now** (`stillAsLeft`), which already protects against a command's
+  change today.
 
 ---
 
