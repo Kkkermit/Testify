@@ -46,6 +46,11 @@
 		"hiddenChannelWarning": "Du kannst diesen Kanal in Discord nicht sehen, daher kann ihn nur jemand ändern, der ihn sieht."
 	},
 	"nav": {
+		"entertainment": "Unterhaltung",
+		"economy": "Wirtschaft",
+		"community": "Community",
+		"stats": "Statistiken",
+		"messages": "Nachrichten",
 		"channelsHint": "Was {{bot}} in jedem Kanal macht",
 		"servers": "Server",
 		"serversHint": "Jeder Server, den du einrichten kannst",
@@ -56,8 +61,6 @@
 		"overviewHint": "Dieser Server auf einen Blick",
 		"members": "Mitglieder",
 		"membersHint": "Geld, Level und die Seite jedes Mitglieds",
-		"more": "Mehr",
-		"everyFeature": "Alle Funktionen",
 		"settings": "Einstellungen",
 		"settingsHint": "Präfix, Linkfilter, Beitritte und Zählen",
 		"levelling": "Level",

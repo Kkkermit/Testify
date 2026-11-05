@@ -2678,7 +2678,12 @@ existed. `useGuildOverview` takes `null` for the screens that serve both a serve
 (`/commands` is both), so neither has to invent an id to satisfy the hook.
 
 **A server's sidebar names its screens, never its channels.** Overview, Channels, Members and Settings come first, then
-three collapsible sections: Moderation, More, and **Every feature**, which lists each feature's own page.
+six collapsible sections, each holding only the screens it names: **Community** (welcome, birthdays, levelling, role
+menus, the idea board, the starboard, join to create), **Messages** (announcements, scheduled messages, sticky
+messages, auto-responders), **Moderation** (AutoMod, raid protection, warnings, cases, bans, channel tools, tickets,
+the audit log, changes), **Stats** (insights, member count, bot statistics), **Economy** (treasure, the lottery, the
+casino) and **Entertainment** (music, giveaways). There is no catch-all section: a feature is found under what it is
+for, and `navigation.test.ts` pins each section's screens so moving one is a decision rather than a drift.
 `NavGroup.sections` holds the sections and `SidebarSection` renders one. The sidebar once listed the server's channels,
 with a count beside each and features dragged onto them, and both were taken out after review: a real server's
 channels turned the sidebar into a scroll, and dragging was the hardest of three ways to choose a channel. Do not put

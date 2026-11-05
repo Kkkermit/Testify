@@ -16,7 +16,9 @@ import {
 	Pin,
 	SlidersHorizontal,
 	Dices,
-	Ellipsis,
+	ChartPie,
+	Coins,
+	MessagesSquare,
 	FileCode,
 	Terminal,
 	TrendingUp,
@@ -114,35 +116,11 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 				{ to: at("/members"), labelKey: "nav.members", icon: Users, hintKey: "nav.membersHint", exact: false },
 				{ to: at("/settings"), labelKey: "nav.settings", icon: SlidersHorizontal, hintKey: "nav.settingsHint" },
 			],
+			// Each section holds only the screens it names, so a feature is found where its purpose says it is.
 			sections: [
 				{
-					labelKey: "nav.moderation",
-					icon: Gavel,
-					items: [
-						{ to: at("/warnings"), labelKey: "nav.warnings", icon: TriangleAlert, hintKey: "nav.warningsHint" },
-						{ to: at("/cases"), labelKey: "nav.cases", icon: Gavel, hintKey: "nav.casesHint" },
-						{ to: at("/bans"), labelKey: "nav.bans", icon: Ban, hintKey: "nav.bansHint" },
-						{ to: at("/channel-tools"), labelKey: "nav.channelTools", icon: Lock, hintKey: "nav.channelToolsHint" },
-						{ to: at("/changes"), labelKey: "nav.changes", icon: History, hintKey: "nav.changesHint" },
-					],
-				},
-				{
-					labelKey: "nav.more",
-					icon: Ellipsis,
-					items: [
-						{ to: at("/insights"), labelKey: "nav.insights", icon: ChartLine, hintKey: "nav.insightsHint" },
-						{
-							to: at("/announcements"),
-							labelKey: "nav.announcements",
-							icon: Megaphone,
-							hintKey: "nav.announcementsHint",
-						},
-					],
-				},
-				// Every feature's own page, for anybody who would rather find it by name than by where it works.
-				{
-					labelKey: "nav.everyFeature",
-					icon: Sparkles,
+					labelKey: "nav.community",
+					icon: Users,
 					items: [
 						{ to: at("/welcome"), labelKey: "nav.welcome", icon: UserPlus, hintKey: "nav.welcomeHint" },
 						{ to: at("/birthdays"), labelKey: "nav.birthdays", icon: Cake, hintKey: "nav.birthdaysHint" },
@@ -150,13 +128,18 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 						{ to: at("/role-menus"), labelKey: "nav.roleMenus", icon: ListChecks, hintKey: "nav.roleMenusHint" },
 						{ to: at("/ideas"), labelKey: "nav.ideas", icon: Lightbulb, hintKey: "nav.ideasHint" },
 						{ to: at("/starboard"), labelKey: "nav.starboard", icon: Star, hintKey: "nav.starboardHint" },
-						{ to: at("/tickets"), labelKey: "nav.tickets", icon: LifeBuoy, hintKey: "nav.ticketsHint" },
-						{ to: at("/sticky"), labelKey: "nav.sticky", icon: Pin, hintKey: "nav.stickyHint" },
+						{ to: at("/temp-voice"), labelKey: "nav.tempVoice", icon: Volume2, hintKey: "nav.tempVoiceHint" },
+					],
+				},
+				{
+					labelKey: "nav.messages",
+					icon: MessagesSquare,
+					items: [
 						{
-							to: at("/auto-responders"),
-							labelKey: "nav.autoResponders",
-							icon: MessageSquareReply,
-							hintKey: "nav.autoRespondersHint",
+							to: at("/announcements"),
+							labelKey: "nav.announcements",
+							icon: Megaphone,
+							hintKey: "nav.announcementsHint",
 						},
 						{
 							to: at("/scheduled-messages"),
@@ -164,20 +147,57 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 							icon: CalendarClock,
 							hintKey: "nav.scheduledHint",
 						},
-						{ to: at("/temp-voice"), labelKey: "nav.tempVoice", icon: Volume2, hintKey: "nav.tempVoiceHint" },
-						{ to: at("/bot-stats"), labelKey: "nav.botStats", icon: Gauge, hintKey: "nav.botStatsHint" },
+						{ to: at("/sticky"), labelKey: "nav.sticky", icon: Pin, hintKey: "nav.stickyHint" },
+						{
+							to: at("/auto-responders"),
+							labelKey: "nav.autoResponders",
+							icon: MessageSquareReply,
+							hintKey: "nav.autoRespondersHint",
+						},
+					],
+				},
+				{
+					labelKey: "nav.moderation",
+					icon: Gavel,
+					items: [
+						{ to: at("/automod"), labelKey: "nav.automod", icon: ShieldAlert, hintKey: "nav.automodHint" },
+						{ to: at("/raid-protection"), labelKey: "nav.raid", icon: Siren, hintKey: "nav.raidHint" },
+						{ to: at("/warnings"), labelKey: "nav.warnings", icon: TriangleAlert, hintKey: "nav.warningsHint" },
+						{ to: at("/cases"), labelKey: "nav.cases", icon: Gavel, hintKey: "nav.casesHint" },
+						{ to: at("/bans"), labelKey: "nav.bans", icon: Ban, hintKey: "nav.bansHint" },
+						{ to: at("/channel-tools"), labelKey: "nav.channelTools", icon: Lock, hintKey: "nav.channelToolsHint" },
+						{ to: at("/tickets"), labelKey: "nav.tickets", icon: LifeBuoy, hintKey: "nav.ticketsHint" },
+						{ to: at("/audit-log"), labelKey: "nav.auditLog", icon: ScrollText, hintKey: "nav.auditLogHint" },
+						{ to: at("/changes"), labelKey: "nav.changes", icon: History, hintKey: "nav.changesHint" },
+					],
+				},
+				{
+					labelKey: "nav.stats",
+					icon: ChartPie,
+					items: [
+						{ to: at("/insights"), labelKey: "nav.insights", icon: ChartLine, hintKey: "nav.insightsHint" },
 						{
 							to: at("/member-count"),
 							labelKey: "nav.memberCount",
 							icon: ChartColumn,
 							hintKey: "nav.memberCountHint",
 						},
-						{ to: at("/audit-log"), labelKey: "nav.auditLog", icon: ScrollText, hintKey: "nav.auditLogHint" },
-						{ to: at("/automod"), labelKey: "nav.automod", icon: ShieldAlert, hintKey: "nav.automodHint" },
-						{ to: at("/raid-protection"), labelKey: "nav.raid", icon: Siren, hintKey: "nav.raidHint" },
+						{ to: at("/bot-stats"), labelKey: "nav.botStats", icon: Gauge, hintKey: "nav.botStatsHint" },
+					],
+				},
+				{
+					labelKey: "nav.economy",
+					icon: Coins,
+					items: [
 						{ to: at("/treasure"), labelKey: "nav.treasure", icon: Gem, hintKey: "nav.treasureHint" },
 						{ to: at("/lottery"), labelKey: "nav.lottery", icon: Ticket, hintKey: "nav.lotteryHint" },
 						{ to: at("/casino"), labelKey: "nav.casino", icon: Dices, hintKey: "nav.casinoHint" },
+					],
+				},
+				{
+					labelKey: "nav.entertainment",
+					icon: Sparkles,
+					items: [
 						{ to: at("/music"), labelKey: "nav.music", icon: Music, hintKey: "nav.musicHint" },
 						{ to: at("/giveaways"), labelKey: "nav.giveaways", icon: Gift, hintKey: "nav.giveawaysHint" },
 					],

@@ -87,6 +87,37 @@ describe("navigationFor", () => {
 		);
 	});
 
+	/** A feature is looked for under what it is for, so no section is a catch-all and each holds only its own. */
+	it("puts each feature page under the section its purpose names", () => {
+		const [, guildGroup] = navigationFor({ guild, isOwner: false });
+		const prefix = `/guilds/${guild.id}`;
+		const sections = Object.fromEntries(
+			(guildGroup?.sections ?? []).map((section) => [
+				section.labelKey,
+				section.items.map((item) => item.to.slice(prefix.length)).sort(),
+			]),
+		);
+
+		expect(sections).toEqual({
+			"nav.community": ["/birthdays", "/ideas", "/levelling", "/role-menus", "/starboard", "/temp-voice", "/welcome"],
+			"nav.messages": ["/announcements", "/auto-responders", "/scheduled-messages", "/sticky"],
+			"nav.moderation": [
+				"/audit-log",
+				"/automod",
+				"/bans",
+				"/cases",
+				"/changes",
+				"/channel-tools",
+				"/raid-protection",
+				"/tickets",
+				"/warnings",
+			],
+			"nav.stats": ["/bot-stats", "/insights", "/member-count"],
+			"nav.economy": ["/casino", "/lottery", "/treasure"],
+			"nav.entertainment": ["/giveaways", "/music"],
+		});
+	});
+
 	/** A heading over a single screen is a click that leads nowhere new, and says the grouping has gone wrong. */
 	it("gives every section more than one screen", () => {
 		const [, guildGroup] = navigationFor({ guild, isOwner: false });

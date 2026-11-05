@@ -588,12 +588,13 @@ export interface NavGroup {
 }
 ```
 
-Inside a server the sidebar is Overview, Channels, Members and Settings, then **Moderation**, **More** and **Every
-feature**. It never lists the server's channels: those are on the Channels page, in Discord's order, and a feature's
+Inside a server the sidebar is Overview, Channels, Members and Settings, then **Community**, **Messages**,
+**Moderation**, **Stats**, **Economy** and **Entertainment**, each holding only the screens its name says, with no
+catch-all. It never lists the server's channels: those are on the Channels page, in Discord's order, and a feature's
 channel is chosen on that feature's own page ([AGENTS §24](../../AGENTS.md#24-the-dashboard) says why). Every
-feature's own page stays reachable from the last section, which is also what quick search and the help page read.
-`navigation.test.ts` pins the full set of server paths, refuses a section of one screen, and refuses two screens in
-one section sharing an icon. Four things are load-bearing:
+feature's own page sits in one of those sections, which are also what quick search and the help page read.
+`navigation.test.ts` pins the full set of server paths and which screens each section holds, refuses a section of
+one screen, and refuses two screens in one section sharing an icon. Four things are load-bearing:
 
 - **The Channels page names no channel its reader cannot see.** `channelTree` skips every channel whose name is
   `null`.

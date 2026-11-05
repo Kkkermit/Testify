@@ -47,6 +47,11 @@
 		"hiddenChannelWarning": "Tu ne peux pas voir ce salon dans Discord, donc seule une personne qui le voit peut le modifier."
 	},
 	"nav": {
+		"entertainment": "Divertissement",
+		"economy": "Économie",
+		"community": "Communauté",
+		"stats": "Statistiques",
+		"messages": "Messages",
 		"channelsHint": "Ce que {{bot}} fait dans chaque salon",
 		"servers": "Serveurs",
 		"serversHint": "Tous les serveurs que vous pouvez configurer",
@@ -57,8 +62,6 @@
 		"overviewHint": "Ce serveur en un coup d’œil",
 		"members": "Membres",
 		"membersHint": "Argent, niveaux et la page de chaque membre",
-		"more": "Plus",
-		"everyFeature": "Toutes les fonctions",
 		"settings": "Réglages",
 		"settingsHint": "Préfixe, filtrage des liens, arrivées et comptage",
 		"levelling": "Niveaux",

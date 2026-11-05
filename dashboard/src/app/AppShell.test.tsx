@@ -73,7 +73,7 @@ describe("the app shell", () => {
 		});
 		await screen.findByRole("link", { name: "Overview" });
 
-		expect(screen.getByRole("button", { name: "Every feature" })).toHaveAttribute("aria-expanded", "true");
+		expect(screen.getByRole("button", { name: "Economy" })).toHaveAttribute("aria-expanded", "true");
 		expect(screen.getByRole("button", { name: "Moderation" })).toHaveAttribute("aria-expanded", "false");
 	});
 
