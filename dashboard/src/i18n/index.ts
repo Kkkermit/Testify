@@ -4,6 +4,7 @@ import resourcesToBackend from "i18next-resources-to-backend";
 import { initReactI18next } from "react-i18next";
 import en from "@/i18n/locales/en.json";
 import { BUILT_IN_BOT_NAME } from "@/lib/brand";
+import { formatNumber } from "@/lib/intl";
 
 /** Every key English defines. A nav entry or a component naming one that is not there fails the build. */
 export type TranslationKey = ParseKeys<"translation">;
@@ -29,6 +30,16 @@ export function isLocale(value: unknown): value is Locale {
 	return LOCALES.some((locale) => locale === value);
 }
 
+/** A browser's language as a tag `Intl` accepts: Chromium on a POSIX host reports `en-US@posix`, which throws. */
+export function readableTag(language: string): string {
+	const tag = language.split("@")[0]?.replace(/_/g, "-") ?? "";
+	try {
+		return Intl.getCanonicalLocales(tag)[0] ?? "en";
+	} catch {
+		return "en";
+	}
+}
+
 /** English is bundled as the fallback; the other languages load only when chosen. */
 const lazyDictionaries = resourcesToBackend(
 	async (language: string) => (await import(`./locales/${language}.json`)) as { default: Record<string, unknown> },
@@ -50,6 +61,7 @@ void i18next
 			order: ["localStorage", "navigator"],
 			lookupLocalStorage: LOCALE_STORAGE_KEY,
 			caches: ["localStorage"],
+			convertDetectedLanguage: readableTag,
 		},
 		interpolation: {
 			// React escapes before anything reaches the DOM, and escaping twice mangles an apostrophe.
@@ -76,12 +88,17 @@ export function nameTheBot(name: string): void {
 	queueMicrotask(() => i18next.emit(BOT_NAMED));
 }
 
-/** Sets `lang`, which i18next does not, so a screen reader reads each language in its own voice. */
-function markDocumentLanguage(language: string): void {
-	document.documentElement.lang = language;
+// `{{count, number}}` is written by the same formatter as every other number, in a locale the browser accepts.
+i18next.services.formatter?.add("number", (value: unknown) =>
+	typeof value === "number" ? formatNumber(value) : String(value),
+);
+
+/** Sets `lang` to the language the page is written in, which i18next does not, so a screen reader reads it in its own voice. */
+function markDocumentLanguage(): void {
+	document.documentElement.lang = isLocale(i18next.resolvedLanguage) ? i18next.resolvedLanguage : "en";
 }
 
 i18next.on("languageChanged", markDocumentLanguage);
-if (typeof document !== "undefined") markDocumentLanguage(i18next.resolvedLanguage ?? "en");
+if (typeof document !== "undefined") markDocumentLanguage();
 
 export { i18next };
