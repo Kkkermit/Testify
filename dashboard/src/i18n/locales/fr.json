@@ -1379,7 +1379,6 @@
 	"casino": {
 		"title": "Casino",
 		"subtitle": "Roulette, blackjack, machines à sous et plus encore, joués avec le portefeuille des membres. Chaque mise quitte le portefeuille aussitôt, et chaque gain y revient aussitôt.",
-		"state": "Le casino",
 		"stateOpen": "Ouvert, avec {{open, number}} jeux sur {{total, number}} en service.",
 		"stateClosed": "Fermé. Tous les jeux sont refusés sur ce serveur jusqu’à sa réouverture. Les mains déjà distribuées peuvent se terminer.",
 		"enable": "Ouvrir le casino",

@@ -1379,7 +1379,6 @@
 	"casino": {
 		"title": "Casinò",
 		"subtitle": "Roulette, blackjack, slot e altro, giocati con il portafoglio dei membri. Ogni puntata esce subito dal portafoglio e ogni vincita ci torna subito.",
-		"state": "Il casinò",
 		"stateOpen": "Aperto, con {{open, number}} giochi su {{total, number}} attivi.",
 		"stateClosed": "Chiuso. Ogni gioco viene rifiutato in questo server finché non viene riaperto. Le mani già distribuite possono concludersi.",
 		"enable": "Apri il casinò",

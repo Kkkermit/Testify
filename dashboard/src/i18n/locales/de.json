@@ -1340,7 +1340,6 @@
 	"casino": {
 		"title": "Casino",
 		"subtitle": "Roulette, Blackjack, Spielautomaten und mehr, gespielt mit dem Guthaben der Mitglieder. Jeder Einsatz verlässt das Guthaben sofort, und jeder Gewinn fließt sofort zurück.",
-		"state": "Das Casino",
 		"stateOpen": "Geöffnet, {{open, number}} von {{total, number}} Spielen laufen.",
 		"stateClosed": "Geschlossen. Jedes Spiel wird auf diesem Server abgelehnt, bis das Casino wieder öffnet. Bereits ausgeteilte Hände können noch zu Ende gespielt werden.",
 		"enable": "Casino öffnen",

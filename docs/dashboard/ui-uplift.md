@@ -136,7 +136,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/bot-stats`                                | Stats         | —                   | Done                      |
 | `…/treasure`                                 | Economy       | —                   | Done                      |
 | `…/lottery`                                  | Economy       | —                   | Done                      |
-| `…/casino`                                   | Economy       | —                   | To do                     |
+| `…/casino`                                   | Economy       | —                   | Done                      |
 | `…/music`                                    | Entertainment | —                   | To do                     |
 | `…/giveaways`                                | Entertainment | —                   | To do                     |
 | `…/members`, `…/members/:userId`             | Members       | —                   | To do                     |

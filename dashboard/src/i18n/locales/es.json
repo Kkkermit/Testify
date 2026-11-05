@@ -1379,7 +1379,6 @@
 	"casino": {
 		"title": "Casino",
 		"subtitle": "Ruleta, blackjack, tragaperras y más, jugados con la cartera de los miembros. Cada apuesta sale de la cartera al momento y cada premio vuelve a ella al momento.",
-		"state": "El casino",
 		"stateOpen": "Abierto, con {{open, number}} de {{total, number}} juegos activos.",
 		"stateClosed": "Cerrado. Todos los juegos se rechazan en este servidor hasta que se vuelva a abrir. Las manos ya repartidas pueden terminar.",
 		"enable": "Abrir el casino",
