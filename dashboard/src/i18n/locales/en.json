@@ -2664,7 +2664,8 @@
 		"rolePanel": "Keeps its panel here",
 		"roleLobby": "Uses this as its lobby",
 		"roleCounter": "Shows a count in this channel’s name",
-		"roleListens": "Reads what members type here"
+		"roleListens": "Reads what members type here",
+		"allChannels": "Every channel"
 	},
 	"notices": {
 		"title": "Notifications",

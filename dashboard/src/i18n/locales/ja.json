@@ -2590,7 +2590,8 @@
 		"rolePanel": "ここにパネルを置く",
 		"roleLobby": "ロビーとして使用",
 		"roleCounter": "このチャンネル名に数を表示",
-		"roleListens": "メンバーがここに書いた内容を読む"
+		"roleListens": "メンバーがここに書いた内容を読む",
+		"allChannels": "すべてのチャンネル"
 	},
 	"notices": {
 		"title": "通知",

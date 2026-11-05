@@ -2664,7 +2664,8 @@
 		"rolePanel": "Hat hier sein Panel",
 		"roleLobby": "Nutzt diesen Kanal als Lobby",
 		"roleCounter": "Zeigt eine Zahl im Namen dieses Kanals",
-		"roleListens": "Liest, was Mitglieder hier schreiben"
+		"roleListens": "Liest, was Mitglieder hier schreiben",
+		"allChannels": "Alle Kanäle"
 	},
 	"notices": {
 		"title": "Benachrichtigungen",

@@ -21,6 +21,10 @@ describe("a channel's page", () => {
 		const { container } = renderChannel("400000000000000002");
 
 		expect(await screen.findByRole("heading", { level: 1, name: "#locked" })).toBeInTheDocument();
+		expect(screen.getByRole("link", { name: "Every channel" })).toHaveAttribute(
+			"href",
+			"/guilds/900000000000000001/channels",
+		);
 		const tickets = screen.getByRole("region", { name: "Tickets" });
 		expect(within(tickets).getByText("Keeps its panel here · Keeps its log here")).toBeInTheDocument();
 		expect(within(tickets).getByRole("link", { name: "Open the Tickets page" })).toHaveAttribute(

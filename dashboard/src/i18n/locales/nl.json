@@ -2664,7 +2664,8 @@
 		"rolePanel": "Houdt hier zijn paneel",
 		"roleLobby": "Gebruikt dit als lobby",
 		"roleCounter": "Toont een telling in de naam van dit kanaal",
-		"roleListens": "Leest wat leden hier typen"
+		"roleListens": "Leest wat leden hier typen",
+		"allChannels": "Alle kanalen"
 	},
 	"notices": {
 		"title": "Meldingen",

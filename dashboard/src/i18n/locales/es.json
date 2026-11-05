@@ -2738,7 +2738,8 @@
 		"rolePanel": "Tiene aquí su panel",
 		"roleLobby": "Usa este canal como sala de espera",
 		"roleCounter": "Muestra un número en el nombre de este canal",
-		"roleListens": "Lee lo que escriben los miembros aquí"
+		"roleListens": "Lee lo que escriben los miembros aquí",
+		"allChannels": "Todos los canales"
 	},
 	"notices": {
 		"title": "Notificaciones",

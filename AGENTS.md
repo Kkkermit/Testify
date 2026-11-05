@@ -2909,7 +2909,7 @@ several servers sees at a glance where one is set up differently. Three things a
   channel a feature posts in, because two servers can never share one. Copying a setup across servers is a write
   across several permission checks and is not built.
 
-Its header carries **Back to your servers**, through `PageHeader`'s `back`, which the member and role pages use too:
+Its header carries **Back to your servers**, through `PageHeader`'s `back`, which the member, role and channel pages use too:
 a phone has no sidebar on screen, so a screen opened from another one names the way back to it.
 
 ### Your account is the reader's own, and nothing on it is about anybody else

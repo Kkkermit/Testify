@@ -2738,7 +2738,8 @@
 		"rolePanel": "Garde son panneau ici",
 		"roleLobby": "Utilise ce salon comme salle d’attente",
 		"roleCounter": "Affiche un nombre dans le nom de ce salon",
-		"roleListens": "Lit ce que les membres écrivent ici"
+		"roleListens": "Lit ce que les membres écrivent ici",
+		"allChannels": "Tous les salons"
 	},
 	"notices": {
 		"title": "Notifications",
