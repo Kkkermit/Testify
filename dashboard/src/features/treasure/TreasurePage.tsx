@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import { RowActions, SavingIndicator, savingStateOf, SettingRows, Toggle, Warning } from "@/components/form";
+import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { NumberField } from "@/features/treasure/components/NumberField";
 import {
@@ -59,14 +59,15 @@ export function TreasurePage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess)} />}
 			/>
 
-			<Card className="flex flex-wrap items-center justify-between gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("treasure.dropsHere")}</h2>
-					<p className="text-muted-foreground text-sm">
-						{settings.configured ? describeRate(draftOf(settings), t) : t("treasure.notSetUpYet")}
-					</p>
-				</div>
+			<Summary>
+				{!settings.configured
+					? t("treasure.notSetUpYet")
+					: settings.enabled
+						? describeRate(draftOf(settings), t)
+						: t("treasure.summaryOff")}
+			</Summary>
 
+			<SettingRows>
 				<Toggle
 					label={t("treasure.enable")}
 					checked={settings.enabled}
@@ -75,74 +76,67 @@ export function TreasurePage(): React.JSX.Element {
 						save.mutate({ enabled });
 					}}
 				/>
-			</Card>
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("treasure.howOften")}</h2>
-					<p className="text-muted-foreground text-sm">{t("treasure.howBody")}</p>
-				</div>
-
-				<div className="grid gap-4 sm:grid-cols-2">
-					<NumberField
-						id="treasure-min-messages"
-						label={t("treasure.fewest")}
-						value={draft.minMessages}
-						min={TREASURE_LIMITS.minMessages}
-						max={TREASURE_LIMITS.maxMessages}
-						onChange={(value) => {
-							set("minMessages", value);
-						}}
-					/>
-					<NumberField
-						id="treasure-max-messages"
-						label={t("treasure.most")}
-						value={draft.maxMessages}
-						min={TREASURE_LIMITS.minMessages}
-						max={TREASURE_LIMITS.maxMessages}
-						onChange={(value) => {
-							set("maxMessages", value);
-						}}
-					/>
-					<NumberField
-						id="treasure-min-amount"
-						label={t("treasure.smallest")}
-						value={draft.minAmount}
-						min={TREASURE_LIMITS.minAmount}
-						max={TREASURE_LIMITS.maxAmount}
-						onChange={(value) => {
-							set("minAmount", value);
-						}}
-					/>
-					<NumberField
-						id="treasure-max-amount"
-						label={t("treasure.largest")}
-						value={draft.maxAmount}
-						min={TREASURE_LIMITS.minAmount}
-						max={TREASURE_LIMITS.maxAmount}
-						onChange={(value) => {
-							set("maxAmount", value);
-						}}
-					/>
-					<NumberField
-						id="treasure-cooldown"
-						label={t("treasure.cooldown")}
-						hint={t("treasure.cooldownHint")}
-						value={draft.cooldownMinutes}
-						min={TREASURE_LIMITS.minCooldownMinutes}
-						max={TREASURE_LIMITS.maxCooldownMinutes}
-						onChange={(value) => {
-							set("cooldownMinutes", value);
-						}}
-					/>
-				</div>
+			<SettingRows title={t("treasure.howOften")} description={t("treasure.howBody")}>
+				<NumberField
+					id="treasure-min-messages"
+					label={t("treasure.fewest")}
+					value={draft.minMessages}
+					min={TREASURE_LIMITS.minMessages}
+					max={TREASURE_LIMITS.maxMessages}
+					onChange={(value) => {
+						set("minMessages", value);
+					}}
+				/>
+				<NumberField
+					id="treasure-max-messages"
+					label={t("treasure.most")}
+					value={draft.maxMessages}
+					min={TREASURE_LIMITS.minMessages}
+					max={TREASURE_LIMITS.maxMessages}
+					onChange={(value) => {
+						set("maxMessages", value);
+					}}
+				/>
+				<NumberField
+					id="treasure-min-amount"
+					label={t("treasure.smallest")}
+					value={draft.minAmount}
+					min={TREASURE_LIMITS.minAmount}
+					max={TREASURE_LIMITS.maxAmount}
+					onChange={(value) => {
+						set("minAmount", value);
+					}}
+				/>
+				<NumberField
+					id="treasure-max-amount"
+					label={t("treasure.largest")}
+					value={draft.maxAmount}
+					min={TREASURE_LIMITS.minAmount}
+					max={TREASURE_LIMITS.maxAmount}
+					onChange={(value) => {
+						set("maxAmount", value);
+					}}
+				/>
+				<NumberField
+					id="treasure-cooldown"
+					label={t("treasure.cooldown")}
+					hint={t("treasure.cooldownHint")}
+					value={draft.cooldownMinutes}
+					min={TREASURE_LIMITS.minCooldownMinutes}
+					max={TREASURE_LIMITS.maxCooldownMinutes}
+					onChange={(value) => {
+						set("cooldownMinutes", value);
+					}}
+				/>
 
 				{problem !== null && <Warning>{problem}</Warning>}
 				{save.error !== null && (
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
-				<div className="flex flex-wrap items-center gap-3">
+				<RowActions>
 					<Button
 						disabled={!dirty || problem !== null || busy}
 						onClick={() => {
@@ -167,8 +161,8 @@ export function TreasurePage(): React.JSX.Element {
 					>
 						<RotateCcw size={16} aria-hidden="true" /> {t("treasure.resetDefaults")}
 					</Button>
-				</div>
-			</Card>
+				</RowActions>
+			</SettingRows>
 
 			{reset.error !== null && (
 				<Warning>{reset.error instanceof ApiError ? reset.error.message : t("common.couldNotReset")}</Warning>

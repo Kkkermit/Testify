@@ -530,9 +530,9 @@
 		"clearAll": "Auswahl aufheben"
 	},
 	"treasure": {
+		"summaryOff": "Schatzfunde sind aus, daher fällt nichts, während Mitglieder schreiben.",
 		"title": "Schatzfunde",
 		"subtitle": "{{bot}} wirft ab und zu Geld in den Chat, und wer die Nachricht geschrieben hat, auf der es landet, behält es.",
-		"dropsHere": "Funde auf diesem Server",
 		"enable": "Schatzfunde aktivieren",
 		"howOften": "Wie oft und wie viel",
 		"fewest": "Wenigste Nachrichten zwischen Funden",

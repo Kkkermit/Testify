@@ -548,9 +548,9 @@
 		"clearAll": "Deseleziona tutto"
 	},
 	"treasure": {
+		"summaryOff": "I tesori sono disattivati, quindi non cade niente mentre i membri parlano.",
 		"title": "Tesori",
 		"subtitle": "{{bot}} lascia cadere denaro in chat di tanto in tanto, e lo tiene chi ha inviato il messaggio su cui cade.",
-		"dropsHere": "Tesori in questo server",
 		"enable": "Attiva i tesori",
 		"howOften": "Ogni quanto, e quanto",
 		"fewest": "Minimo di messaggi tra un tesoro e l’altro",

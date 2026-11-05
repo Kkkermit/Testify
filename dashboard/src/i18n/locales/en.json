@@ -530,9 +530,9 @@
 		"clearAll": "Clear all"
 	},
 	"treasure": {
+		"summaryOff": "Treasure drops are off, so nothing is dropped while members talk.",
 		"title": "Treasure drops",
 		"subtitle": "{{bot}} drops money into chat now and then, and whoever sent the message it lands on keeps it.",
-		"dropsHere": "Drops in this server",
 		"enable": "Enable treasure drops",
 		"howOften": "How often, and how much",
 		"fewest": "Fewest messages between drops",

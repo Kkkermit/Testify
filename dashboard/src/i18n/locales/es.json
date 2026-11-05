@@ -548,9 +548,9 @@
 		"clearAll": "Quitar todo"
 	},
 	"treasure": {
+		"summaryOff": "Los tesoros están desactivados, así que no cae nada mientras los miembros hablan.",
 		"title": "Tesoros",
 		"subtitle": "{{bot}} suelta dinero en el chat de vez en cuando, y se lo queda quien envió el mensaje en el que cae.",
-		"dropsHere": "Tesoros en este servidor",
 		"enable": "Activar los tesoros",
 		"howOften": "Con qué frecuencia y cuánto",
 		"fewest": "Mínimo de mensajes entre tesoros",

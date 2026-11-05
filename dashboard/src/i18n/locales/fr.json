@@ -548,9 +548,9 @@
 		"clearAll": "Tout désélectionner"
 	},
 	"treasure": {
+		"summaryOff": "Les trésors sont désactivés, donc rien ne tombe pendant que les membres discutent.",
 		"title": "Trésors",
 		"subtitle": "{{bot}} laisse tomber de l’argent dans le salon de temps en temps, et l’auteur du message sur lequel il tombe le garde.",
-		"dropsHere": "Trésors sur ce serveur",
 		"enable": "Activer les trésors",
 		"howOften": "À quelle fréquence, et combien",
 		"fewest": "Minimum de messages entre deux trésors",
