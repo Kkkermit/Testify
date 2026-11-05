@@ -799,6 +799,10 @@
 		"sinceLast": "Messages depuis la dernière publication : {{done}} sur {{cap}}"
 	},
 	"autoResponders": {
+		"summary_other": "{{count, number}} mots ou expressions reçoivent une réponse automatique, dans n’importe quel salon.",
+		"summary_many": "{{count, number}} de mots ou expressions reçoivent une réponse automatique, dans n’importe quel salon.",
+		"summary_one": "{{count, number}} mot ou expression reçoit une réponse automatique, dans n’importe quel salon.",
+		"summaryNone": "Rien ne reçoit encore de réponse automatique.",
 		"title": "Réponses automatiques",
 		"subtitle": "Des mots auxquels {{bot}} répond avec le texte que tu écris. Il ne répond jamais à un bot et ne mentionne personne.",
 		"emptyTitle": "Aucune réponse automatique",

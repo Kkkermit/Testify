@@ -121,7 +121,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/announcements`                            | Messages      | The announcement    | Done                    |
 | `…/scheduled-messages`                       | Messages      | Each post           | Done                    |
 | `…/sticky`                                   | Messages      | Each sticky message | Done                    |
-| `…/auto-responders`                          | Messages      | Each reply          | To do                   |
+| `…/auto-responders`                          | Messages      | Each reply          | Done                    |
 | `…/automod`                                  | Moderation    | —                   | To do                   |
 | `…/raid-protection`                          | Moderation    | —                   | To do                   |
 | `…/warnings`                                 | Moderation    | —                   | To do                   |

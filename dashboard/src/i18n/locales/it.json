@@ -799,6 +799,10 @@
 		"sinceLast": "Messaggi dall’ultima pubblicazione: {{done}} su {{cap}}"
 	},
 	"autoResponders": {
+		"summary_other": "{{count, number}} parole o frasi ricevono una risposta automatica, in qualsiasi canale.",
+		"summary_many": "{{count, number}} di parole o frasi ricevono una risposta automatica, in qualsiasi canale.",
+		"summary_one": "{{count, number}} parola o frase riceve una risposta automatica, in qualsiasi canale.",
+		"summaryNone": "Non c’è ancora niente con una risposta automatica.",
 		"title": "Risposte automatiche",
 		"subtitle": "Parole a cui {{bot}} risponde con il testo che scrivi. Non risponde mai a un bot e non menziona nessuno.",
 		"emptyTitle": "Ancora nessuna risposta automatica",

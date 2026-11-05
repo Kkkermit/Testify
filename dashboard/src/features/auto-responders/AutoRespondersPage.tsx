@@ -10,17 +10,8 @@ import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
 import { useUndo } from "@/app/undo";
-import { SavingIndicator, savingStateOf, Warning } from "@/components/form";
-import {
-	Button,
-	Card,
-	CARD_HEADING,
-	cardClass,
-	EmptyState,
-	SectionHeading,
-	PageHeader,
-	Skeleton,
-} from "@/components/primitives";
+import { RowActions, SavingIndicator, savingStateOf, SettingRows, Warning } from "@/components/form";
+import { Button, Card, EmptyState, PageHeader, SectionHeading, Skeleton, Summary } from "@/components/primitives";
 import { ResponderFields } from "@/features/auto-responders/components/ResponderFields";
 import { ResponderRow } from "@/features/auto-responders/components/ResponderRow";
 import {
@@ -88,6 +79,10 @@ export function AutoRespondersPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(saving, add.isSuccess || edit.isSuccess)} />}
 			/>
 
+			<Summary>
+				{shown.length === 0 ? t("autoResponders.summaryNone") : t("autoResponders.summary", { count: shown.length })}
+			</Summary>
+
 			<section aria-labelledby="responders-heading" className="flex flex-col gap-3">
 				<SectionHeading
 					as="h2"
@@ -130,28 +125,22 @@ export function AutoRespondersPage(): React.JSX.Element {
 				)}
 			</section>
 
-			<section aria-labelledby="add-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
-				<div>
-					<h2 id="add-heading" className={CARD_HEADING}>
-						{t("autoResponders.add")}
-					</h2>
-					<p className="text-muted-foreground text-sm">
-						{t("autoResponders.addBody", { seconds: AUTO_RESPONDER_LIMITS.answerEverySeconds })}
-					</p>
-				</div>
-
+			<SettingRows
+				title={t("autoResponders.add")}
+				description={t("autoResponders.addBody", { seconds: AUTO_RESPONDER_LIMITS.answerEverySeconds })}
+			>
 				<ResponderFields id="new-responder" value={draft} onChange={setDraft} />
 
 				{full && <Warning>{t("autoResponders.full")}</Warning>}
 				{blocked !== null && (draft.trigger !== "" || draft.reply !== "") && <Warning>{blocked}</Warning>}
 				{add.error !== null && <Warning>{said(add.error)}</Warning>}
 
-				<div>
+				<RowActions>
 					<Button disabled={blocked !== null || full || saving} onClick={submit}>
 						<Plus size={16} aria-hidden="true" /> {t("autoResponders.addResponder")}
 					</Button>
-				</div>
-			</section>
+				</RowActions>
+			</SettingRows>
 
 			{remove.error !== null && (
 				<Warning>

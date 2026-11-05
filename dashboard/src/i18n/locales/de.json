@@ -778,6 +778,9 @@
 		"sinceLast": "Nachrichten seit dem letzten Post: {{done}} von {{cap}}"
 	},
 	"autoResponders": {
+		"summary_other": "{{count, number}} Wörter oder Sätze bekommen in jedem Kanal eine automatische Antwort.",
+		"summary_one": "{{count, number}} Wort oder Satz bekommt in jedem Kanal eine automatische Antwort.",
+		"summaryNone": "Noch wird nichts automatisch beantwortet.",
 		"title": "Auto-Antworten",
 		"subtitle": "Wörter, auf die {{bot}} mit deinem Text antwortet. Es antwortet nie einem Bot und pingt nie jemanden an.",
 		"emptyTitle": "Noch keine Auto-Antworten",

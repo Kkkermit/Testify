@@ -778,6 +778,9 @@
 		"sinceLast": "Messages since the last post: {{done}} of {{cap}}"
 	},
 	"autoResponders": {
+		"summary_other": "{{count, number}} words or phrases get an automatic reply, in any channel.",
+		"summary_one": "{{count, number}} word or phrase gets an automatic reply, in any channel.",
+		"summaryNone": "Nothing is answered automatically yet.",
 		"title": "Auto-responders",
 		"subtitle": "Words {{bot}} answers with a reply you write. It never answers a bot, and never pings anybody.",
 		"emptyTitle": "No auto-responders yet",

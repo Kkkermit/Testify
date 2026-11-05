@@ -1,7 +1,10 @@
 import { AUTO_RESPONDER_LIMITS, type AutoResponderInput } from "@testify/shared";
+import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { Field, FIELD, SELECT } from "@/components/form";
+import { useRowLayout } from "@/components/form/rowLayout";
 import { MATCH_LABELS, MATCH_ORDER } from "@/features/auto-responders/autoResponders.utils";
+import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { cn } from "@/lib/cn";
 
 /** The three fields of a responder, the same whether it is being added or edited. */
@@ -15,10 +18,11 @@ export function ResponderFields({
 	onChange: (next: AutoResponderInput) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
+	const row = useRowLayout();
 
 	return (
 		<>
-			<div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_16rem]">
+			<Pair row={row}>
 				<Field label={t("autoResponders.trigger")} htmlFor={`${id}-trigger`} hint={t("autoResponders.triggerHint")}>
 					<input
 						id={`${id}-trigger`}
@@ -48,7 +52,7 @@ export function ResponderFields({
 						))}
 					</select>
 				</Field>
-			</div>
+			</Pair>
 
 			<Field label={t("autoResponders.reply")} htmlFor={`${id}-reply`}>
 				<textarea
@@ -64,7 +68,13 @@ export function ResponderFields({
 				<span className="text-muted-foreground text-xs tabular-nums" aria-live="polite">
 					{t("common.partOf", { part: value.reply.length, whole: AUTO_RESPONDER_LIMITS.maxReply })}
 				</span>
+				{row && <PostPreview text={value.reply} empty={t("common.previewEmpty")} />}
 			</Field>
 		</>
 	);
+}
+
+/** Inside rows each field is a row of its own; outside them the trigger and its match share a line. */
+function Pair({ row, children }: { row: boolean; children: ReactNode }): React.JSX.Element {
+	return row ? <>{children}</> : <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_16rem]">{children}</div>;
 }
