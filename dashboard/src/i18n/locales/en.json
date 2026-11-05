@@ -840,10 +840,11 @@
 		"full": "That is as many menus as a server can have. Delete one to make another."
 	},
 	"ideas": {
+		"summaryOn": "Members post ideas to {{channel}} with /idea submit, and vote on each one there.",
+		"summaryOff": "The idea board is off. Turned on, members post ideas to {{channel}} with /idea submit.",
+		"summaryNoChannel": "The idea board has no channel yet, so members cannot post ideas.",
 		"title": "Idea board",
 		"subtitle": "Members post ideas with /idea submit and vote on them. This is the server’s own board; /suggest goes to {{bot}}’s developers instead.",
-		"board": "The board",
-		"boardBody": "Where ideas are posted, and whether members can post them.",
 		"enabled": "Members can post ideas",
 		"enabledHint": "With /idea submit, from any channel.",
 		"enabledHintNoChannel": "Pick a channel first.",

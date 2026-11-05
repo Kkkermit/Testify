@@ -860,10 +860,11 @@
 		"full": "Un serveur ne peut pas avoir plus de menus. Supprimez-en un pour en créer un autre."
 	},
 	"ideas": {
+		"summaryOn": "Les membres publient leurs idées dans {{channel}} avec /idea submit, et votent pour chacune là-bas.",
+		"summaryOff": "Le tableau d’idées est désactivé. Activé, les membres publient leurs idées dans {{channel}} avec /idea submit.",
+		"summaryNoChannel": "Le tableau d’idées n’a pas encore de salon, donc les membres ne peuvent pas publier d’idées.",
 		"title": "Tableau d’idées",
 		"subtitle": "Les membres publient des idées avec /idea submit et votent dessus. C’est le tableau du serveur lui-même ; /suggest va plutôt aux développeurs de {{bot}}.",
-		"board": "Le tableau",
-		"boardBody": "Où les idées sont publiées, et si les membres peuvent en publier.",
 		"enabled": "Les membres peuvent publier des idées",
 		"enabledHint": "Avec /idea submit, depuis n’importe quel salon.",
 		"enabledHintNoChannel": "Choisissez d’abord un salon.",

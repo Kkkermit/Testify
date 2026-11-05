@@ -840,10 +840,11 @@
 		"full": "Mehr Menüs kann ein Server nicht haben. Lösche eines, um ein neues zu erstellen."
 	},
 	"ideas": {
+		"summaryOn": "Mitglieder posten Ideen mit /idea submit in {{channel}} und stimmen dort über jede ab.",
+		"summaryOff": "Das Ideenbrett ist aus. Eingeschaltet posten Mitglieder Ideen mit /idea submit in {{channel}}.",
+		"summaryNoChannel": "Das Ideenbrett hat noch keinen Kanal, daher können Mitglieder keine Ideen posten.",
 		"title": "Ideenbrett",
 		"subtitle": "Mitglieder posten Ideen mit /idea submit und stimmen darüber ab. Das ist das eigene Brett des Servers; /suggest geht stattdessen an die Entwickler von {{bot}}.",
-		"board": "Das Brett",
-		"boardBody": "Wo Ideen gepostet werden und ob Mitglieder sie posten können.",
 		"enabled": "Mitglieder können Ideen posten",
 		"enabledHint": "Mit /idea submit, aus jedem Kanal.",
 		"enabledHintNoChannel": "Wähle zuerst einen Kanal.",

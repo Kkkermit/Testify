@@ -1,33 +1,23 @@
-import { type ChannelSummary, type IdeaSettings } from "@testify/shared";
+import { type ChannelSummary, type IdeaSettings as Settings } from "@testify/shared";
 import { useTranslation } from "react-i18next";
-import { ChannelPicker, Toggle, Warning } from "@/components/form";
-import { Card, CARD_HEADING } from "@/components/primitives";
-import { channelLabel } from "@/lib/channels";
+import { ChannelPicker, SettingRows, Toggle } from "@/components/form";
 
 /** The switch and the channel, each saved the moment it changes. */
-export function IdeaSettingsCard({
+export function IdeaSettings({
 	settings,
 	channels,
 	saving,
-	error,
 	onChange,
 }: {
-	settings: IdeaSettings;
+	settings: Settings;
 	channels: ChannelSummary[];
 	saving: boolean;
-	error: string | null;
 	onChange: (patch: { enabled?: boolean; channelId?: string | null }) => void;
 }): React.JSX.Element {
 	const { t } = useTranslation();
-	const channel = channelLabel(channels, settings.channelId, t);
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("ideas.board")}</h2>
-				<p className="text-muted-foreground text-sm">{t("ideas.boardBody")}</p>
-			</div>
-
+		<SettingRows>
 			<Toggle
 				label={t("ideas.enabled")}
 				hint={settings.channelId === null ? t("ideas.enabledHintNoChannel") : t("ideas.enabledHint")}
@@ -48,9 +38,6 @@ export function IdeaSettingsCard({
 					onChange({ channelId });
 				}}
 			/>
-
-			{settings.channelId !== null && !settings.canSend && <Warning>{t("common.cannotPostIn", { channel })}</Warning>}
-			{error !== null && <Warning>{error}</Warning>}
-		</Card>
+		</SettingRows>
 	);
 }

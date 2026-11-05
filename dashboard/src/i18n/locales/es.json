@@ -860,10 +860,11 @@
 		"full": "Ese es el máximo de menús de un servidor. Elimina uno para crear otro."
 	},
 	"ideas": {
+		"summaryOn": "Los miembros publican ideas en {{channel}} con /idea submit y votan cada una allí.",
+		"summaryOff": "El tablón de ideas está desactivado. Activado, los miembros publican ideas en {{channel}} con /idea submit.",
+		"summaryNoChannel": "El tablón de ideas aún no tiene canal, así que los miembros no pueden publicar ideas.",
 		"title": "Tablón de ideas",
 		"subtitle": "Los miembros publican ideas con /idea submit y las votan. Es el tablón del propio servidor; /suggest va a los desarrolladores de {{bot}}.",
-		"board": "El tablón",
-		"boardBody": "Dónde se publican las ideas y si los miembros pueden publicarlas.",
 		"enabled": "Los miembros pueden publicar ideas",
 		"enabledHint": "Con /idea submit, desde cualquier canal.",
 		"enabledHintNoChannel": "Elige primero un canal.",

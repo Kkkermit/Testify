@@ -860,10 +860,11 @@
 		"full": "Un server non può avere altri menu. Eliminane uno per crearne un altro."
 	},
 	"ideas": {
+		"summaryOn": "I membri pubblicano idee in {{channel}} con /idea submit e votano ciascuna lì.",
+		"summaryOff": "La bacheca delle idee è disattivata. Se attiva, i membri pubblicano idee in {{channel}} con /idea submit.",
+		"summaryNoChannel": "La bacheca delle idee non ha ancora un canale, quindi i membri non possono pubblicare idee.",
 		"title": "Bacheca delle idee",
 		"subtitle": "I membri pubblicano idee con /idea submit e le votano. È la bacheca del server stesso; /suggest va invece agli sviluppatori di {{bot}}.",
-		"board": "La bacheca",
-		"boardBody": "Dove vengono pubblicate le idee, e se i membri possono pubblicarne.",
 		"enabled": "I membri possono pubblicare idee",
 		"enabledHint": "Con /idea submit, da qualsiasi canale.",
 		"enabledHintNoChannel": "Scegli prima un canale.",
