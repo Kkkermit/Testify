@@ -1,5 +1,6 @@
 {
 	"common": {
+		"preview": "Aperçu",
 		"previewEmpty": "Votre message apparaît ici.",
 		"saved": "Enregistré",
 		"retry": "Réessayer",
@@ -743,7 +744,6 @@
 		"needChannel": "Choisissez d’abord un salon.",
 		"needMessage": "Écrivez le message.",
 		"tooLong": "Le message est plus long que ce que Discord permet.",
-		"preview": "Aperçu",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord l’affiche un peu différemment, mais le texte et la mention sont exactement ceux-ci.",
 		"colourAqua": "Cyan",
@@ -1266,10 +1266,13 @@
 		"warningsHidden": "Il te faut la permission {{permission}} sur ce serveur pour voir ou donner des avertissements."
 	},
 	"tickets": {
+		"summaryOn_other": "Les membres ouvrent un ticket depuis le panneau dans {{channel}}, et {{count, number}} sont ouverts en ce moment.",
+		"summaryOn_many": "Les membres ouvrent un ticket depuis le panneau dans {{channel}}, et {{count, number}} de tickets sont ouverts en ce moment.",
+		"summaryOn_one": "Les membres ouvrent un ticket depuis le panneau dans {{channel}}, et {{count, number}} est ouvert en ce moment.",
+		"summaryNotPosted": "Les tickets sont activés, mais le panneau n’est pas encore publié, donc personne ne peut en ouvrir.",
+		"summaryOff": "Les tickets sont désactivés, donc les membres ne peuvent pas en ouvrir.",
 		"title": "Tickets",
 		"subtitle": "Un bouton que les membres pressent pour ouvrir un salon privé avec votre équipe.",
-		"here": "Tickets sur ce serveur",
-		"panelPosted": "Panneau publié",
 		"whereTitle": "Où vivent les tickets",
 		"whereBody": "Les quatre sont nécessaires avant de pouvoir publier le panneau.",
 		"panelChannel": "Salon du panneau",
@@ -1290,9 +1293,6 @@
 		"nothingPosted": "Rien n’est publié tant que vous n’avez pas pressé le bouton ci-dessous.",
 		"updatePanel": "Mettre à jour le panneau",
 		"postPanel": "Publier le panneau",
-		"on": "Activé",
-		"off": "Désactivé",
-		"openNow": "{{count}} ouverts en ce moment",
 		"turnOffBody": "Les salons de ticket ouverts sont laissés tels quels. Le message du panneau doit être supprimé à la main.",
 		"turnOffAction": "Désactiver",
 		"needsMessage": "Le panneau a besoin de quelque chose à dire.",

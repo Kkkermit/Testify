@@ -128,7 +128,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/cases`                                    | Moderation    | —                   | Done                    |
 | `…/bans`                                     | Moderation    | —                   | Done                    |
 | `…/channel-tools`                            | Moderation    | —                   | Done                    |
-| `…/tickets`                                  | Moderation    | The ticket panel    | To do                   |
+| `…/tickets`                                  | Moderation    | The ticket panel    | Done                    |
 | `…/audit-log`                                | Moderation    | —                   | To do                   |
 | `…/changes` (history and restore in phase 8) | Moderation    | —                   | To do                   |
 | `…/insights`                                 | Stats         | —                   | To do                   |

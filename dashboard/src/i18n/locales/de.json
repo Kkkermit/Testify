@@ -1,5 +1,6 @@
 {
 	"common": {
+		"preview": "Vorschau",
 		"previewEmpty": "Hier erscheint deine Nachricht.",
 		"saved": "Gespeichert",
 		"retry": "Erneut versuchen",
@@ -720,7 +721,6 @@
 		"needChannel": "Wähle zuerst einen Kanal.",
 		"needMessage": "Schreib die Nachricht.",
 		"tooLong": "Die Nachricht ist länger, als Discord erlaubt.",
-		"preview": "Vorschau",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord zeichnet sie etwas anders, aber Text und Erwähnung sind genau diese.",
 		"colourAqua": "Cyan",
@@ -1229,10 +1229,12 @@
 		"warningsHidden": "Du brauchst auf diesem Server die Berechtigung „{{permission}}“, um Verwarnungen zu sehen oder zu vergeben."
 	},
 	"tickets": {
+		"summaryOn_other": "Mitglieder öffnen ein Ticket über das Panel in {{channel}}, und gerade sind {{count, number}} offen.",
+		"summaryOn_one": "Mitglieder öffnen ein Ticket über das Panel in {{channel}}, und gerade ist {{count, number}} offen.",
+		"summaryNotPosted": "Tickets sind an, aber das Panel ist noch nicht gepostet, daher kann niemand eins öffnen.",
+		"summaryOff": "Tickets sind aus, daher können Mitglieder keins öffnen.",
 		"title": "Tickets",
 		"subtitle": "Ein Knopf, mit dem Mitglieder einen privaten Kanal mit deinem Team öffnen.",
-		"here": "Tickets auf diesem Server",
-		"panelPosted": "Panel veröffentlicht",
 		"whereTitle": "Wo die Tickets leben",
 		"whereBody": "Alle vier werden gebraucht, bevor das Panel veröffentlicht werden kann.",
 		"panelChannel": "Panel-Kanal",
@@ -1253,9 +1255,6 @@
 		"nothingPosted": "Es wird nichts veröffentlicht, bis du unten den Knopf drückst.",
 		"updatePanel": "Panel aktualisieren",
 		"postPanel": "Panel veröffentlichen",
-		"on": "An",
-		"off": "Aus",
-		"openNow": "{{count}} gerade offen",
 		"turnOffBody": "Offene Ticket-Kanäle bleiben unangetastet. Die Panel-Nachricht muss von Hand gelöscht werden.",
 		"turnOffAction": "Abschalten",
 		"needsMessage": "Das Panel braucht einen Text.",

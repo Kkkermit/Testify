@@ -1,5 +1,6 @@
 {
 	"common": {
+		"preview": "Vista previa",
 		"previewEmpty": "Tu mensaje aparece aquí.",
 		"saved": "Guardado",
 		"retry": "Reintentar",
@@ -743,7 +744,6 @@
 		"needChannel": "Elige primero un canal.",
 		"needMessage": "Escribe el mensaje.",
 		"tooLong": "El mensaje es más largo de lo que permite Discord.",
-		"preview": "Vista previa",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord lo dibuja algo distinto, pero el texto y la mención son exactamente estos.",
 		"colourAqua": "Aguamarina",
@@ -1266,10 +1266,13 @@
 		"warningsHidden": "Necesitas el permiso {{permission}} en este servidor para ver o dar avisos."
 	},
 	"tickets": {
+		"summaryOn_other": "Los miembros abren un ticket desde el panel en {{channel}}, y ahora mismo hay {{count, number}} abiertos.",
+		"summaryOn_many": "Los miembros abren un ticket desde el panel en {{channel}}, y ahora mismo hay {{count, number}} de abiertos.",
+		"summaryOn_one": "Los miembros abren un ticket desde el panel en {{channel}}, y ahora mismo hay {{count, number}} abierto.",
+		"summaryNotPosted": "Los tickets están activados, pero el panel aún no está publicado, así que nadie puede abrir uno.",
+		"summaryOff": "Los tickets están desactivados, así que los miembros no pueden abrir uno.",
 		"title": "Tickets",
 		"subtitle": "Un botón que los miembros pulsan para abrir un canal privado con tu equipo.",
-		"here": "Tickets en este servidor",
-		"panelPosted": "Panel publicado",
 		"whereTitle": "Dónde viven los tickets",
 		"whereBody": "Hacen falta los cuatro antes de poder publicar el panel.",
 		"panelChannel": "Canal del panel",
@@ -1290,9 +1293,6 @@
 		"nothingPosted": "No se publica nada hasta que pulses el botón de abajo.",
 		"updatePanel": "Actualizar el panel",
 		"postPanel": "Publicar el panel",
-		"on": "Activado",
-		"off": "Desactivado",
-		"openNow": "{{count}} abiertos ahora mismo",
 		"turnOffBody": "Los canales de ticket abiertos se dejan como están. El mensaje del panel hay que borrarlo a mano.",
 		"turnOffAction": "Desactivar",
 		"needsMessage": "El panel necesita algo que decir.",

@@ -1,5 +1,6 @@
 {
 	"common": {
+		"preview": "Preview",
 		"previewEmpty": "Your message appears here.",
 		"saved": "Saved",
 		"retry": "Try again",
@@ -720,7 +721,6 @@
 		"needChannel": "Choose a channel first.",
 		"needMessage": "Write the message.",
 		"tooLong": "The message is longer than Discord allows.",
-		"preview": "Preview",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord draws it a little differently, but the words and the ping are exactly these.",
 		"colourAqua": "Aqua",
@@ -1229,10 +1229,12 @@
 		"warningsHidden": "You need the {{permission}} permission in this server to see or give warnings."
 	},
 	"tickets": {
+		"summaryOn_other": "Members open a ticket from the panel in {{channel}}, and {{count, number}} are open right now.",
+		"summaryOn_one": "Members open a ticket from the panel in {{channel}}, and {{count, number}} is open right now.",
+		"summaryNotPosted": "Tickets are on, but the panel is not posted yet, so nobody can open one.",
+		"summaryOff": "Tickets are off, so members cannot open one.",
 		"title": "Tickets",
 		"subtitle": "A button members press to open a private channel with your staff.",
-		"here": "Tickets in this server",
-		"panelPosted": "Panel posted",
 		"whereTitle": "Where tickets live",
 		"whereBody": "All four are needed before the panel can be posted.",
 		"panelChannel": "Panel channel",
@@ -1253,9 +1255,6 @@
 		"nothingPosted": "Nothing is posted until you press the button below.",
 		"updatePanel": "Update the panel",
 		"postPanel": "Post the panel",
-		"on": "On",
-		"off": "Off",
-		"openNow": "{{count}} open right now",
 		"turnOffBody": "Open ticket channels are left alone. The panel message has to be deleted by hand.",
 		"turnOffAction": "Turn off",
 		"needsMessage": "The panel needs something to say.",

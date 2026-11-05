@@ -1,5 +1,6 @@
 {
 	"common": {
+		"preview": "Anteprima",
 		"previewEmpty": "Qui compare il tuo messaggio.",
 		"saved": "Salvato",
 		"retry": "Riprova",
@@ -743,7 +744,6 @@
 		"needChannel": "Scegli prima un canale.",
 		"needMessage": "Scrivi il messaggio.",
 		"tooLong": "Il messaggio è più lungo di quanto Discord consenta.",
-		"preview": "Anteprima",
 		"defaultTitle": "Announcement",
 		"previewNote": "Discord lo disegna un po’ diversamente, ma il testo e la menzione sono proprio questi.",
 		"colourAqua": "Ciano",
@@ -1266,10 +1266,13 @@
 		"warningsHidden": "Ti serve il permesso {{permission}} in questo server per vedere o dare avvertimenti."
 	},
 	"tickets": {
+		"summaryOn_other": "I membri aprono un ticket dal pannello in {{channel}}, e al momento ne sono aperti {{count, number}}.",
+		"summaryOn_many": "I membri aprono un ticket dal pannello in {{channel}}, e al momento ne sono aperti {{count, number}} di ticket.",
+		"summaryOn_one": "I membri aprono un ticket dal pannello in {{channel}}, e al momento ne è aperto {{count, number}}.",
+		"summaryNotPosted": "I ticket sono attivi, ma il pannello non è ancora pubblicato, quindi nessuno può aprirne uno.",
+		"summaryOff": "I ticket sono disattivati, quindi i membri non possono aprirne uno.",
 		"title": "Ticket",
 		"subtitle": "Un pulsante che i membri premono per aprire un canale privato con il tuo staff.",
-		"here": "Ticket in questo server",
-		"panelPosted": "Pannello pubblicato",
 		"whereTitle": "Dove vivono i ticket",
 		"whereBody": "Servono tutti e quattro prima di poter pubblicare il pannello.",
 		"panelChannel": "Canale del pannello",
@@ -1290,9 +1293,6 @@
 		"nothingPosted": "Non viene pubblicato nulla finché non premi il pulsante qui sotto.",
 		"updatePanel": "Aggiorna il pannello",
 		"postPanel": "Pubblica il pannello",
-		"on": "Attivo",
-		"off": "Disattivo",
-		"openNow": "{{count}} aperti in questo momento",
 		"turnOffBody": "I canali ticket aperti restano intatti. Il messaggio del pannello va cancellato a mano.",
 		"turnOffAction": "Disattiva",
 		"needsMessage": "Il pannello ha bisogno di qualcosa da dire.",

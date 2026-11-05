@@ -156,7 +156,7 @@ export function AnnouncementsPage(): React.JSX.Element {
 					))}
 				</FieldGroup>
 
-				<FieldGroup label={t("announcements.preview")} hint={t("announcements.previewNote")}>
+				<FieldGroup label={t("common.preview")} hint={t("announcements.previewNote")}>
 					<Preview draft={draft} />
 				</FieldGroup>
 

@@ -47,3 +47,14 @@ export function staffRoleWarning(roles: RoleSummary[], staffRoleId: string | nul
 
 	return null;
 }
+
+/** Whether members can open a ticket and how many are open, as the sentence the page opens with. */
+export function ticketSummary(
+	settings: Pick<TicketSettings, "enabled" | "posted" | "openTickets">,
+	panelChannel: string,
+	t: TFunction,
+): string {
+	if (!settings.enabled) return t("tickets.summaryOff");
+	if (!settings.posted) return t("tickets.summaryNotPosted");
+	return t("tickets.summaryOn", { count: settings.openTickets, channel: panelChannel });
+}

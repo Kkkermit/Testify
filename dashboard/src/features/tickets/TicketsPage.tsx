@@ -12,17 +12,30 @@ import {
 	FIELD,
 	SavingIndicator,
 	savingStateOf,
+	FieldGroup,
+	postableChannels,
+	RowActions,
 	SELECT,
+	SettingRows,
 	Warning,
 } from "@/components/form";
-import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton } from "@/components/primitives";
+import { Button, PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels, useRoles } from "@/features/levelling/useLevelling";
 import { OpenTicketsCard } from "@/features/tickets/OpenTicketsCard";
-import { type Draft, draftOf, draftProblems, isDirty, staffRoleWarning } from "@/features/tickets/tickets.utils";
+import {
+	type Draft,
+	draftOf,
+	draftProblems,
+	isDirty,
+	staffRoleWarning,
+	ticketSummary,
+} from "@/features/tickets/tickets.utils";
 import { useDisableTickets, useSaveTickets, useTickets } from "@/features/tickets/useTickets";
+import { PostPreview } from "@/features/welcome/components/PostPreview";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { cn } from "@/lib/cn";
 import { markupWarning, sanitiseInput } from "@/lib/sanitise";
 
@@ -37,7 +50,7 @@ export function TicketsPage(): React.JSX.Element {
 	const save = useSaveTickets(guildId);
 	const disable = useDisableTickets(guildId);
 
-	usePageTitle("Tickets", overview.data?.name);
+	usePageTitle(t("tickets.title"), overview.data?.name);
 
 	const settings = tickets.data;
 	const [draft, setDraft] = useState<Draft | null>(null);
@@ -83,25 +96,13 @@ export function TicketsPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}
 			/>
 
-			<Card className="flex flex-wrap items-center justify-between gap-4">
-				<div className="flex flex-wrap items-center gap-3">
-					<h2 className={CARD_HEADING}>{t("tickets.here")}</h2>
-					{settings.enabled ? <Badge tone="success">{t("tickets.on")}</Badge> : <Badge>{t("tickets.off")}</Badge>}
-					{settings.posted && <Badge>{t("tickets.panelPosted")}</Badge>}
-				</div>
-				<p className="text-muted-foreground text-sm tabular-nums">
-					{t("tickets.openNow", { count: settings.openTickets })}
-				</p>
-			</Card>
+			<Summary>
+				{ticketSummary(settings, channelLabel(postableChannels(channels.data ?? []), settings.panelChannelId, t), t)}
+			</Summary>
 
 			{settings.enabled && <OpenTicketsCard guildId={guildId} />}
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("tickets.whereTitle")}</h2>
-					<p className="text-muted-foreground text-sm">{t("tickets.whereBody")}</p>
-				</div>
-
+			<SettingRows title={t("tickets.whereTitle")} description={t("tickets.whereBody")}>
 				<ChannelPicker
 					label={t("tickets.panelChannel")}
 					hint={t("tickets.panelChannelHint")}
@@ -155,16 +156,12 @@ export function TicketsPage(): React.JSX.Element {
 				</Field>
 
 				{roleProblem !== null && <Warning>{roleProblem}</Warning>}
-			</Card>
+			</SettingRows>
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("tickets.panelSays")}</h2>
-					<p className="text-muted-foreground text-sm">
-						{settings.posted ? t("tickets.postAgain") : t("tickets.nothingPosted")}
-					</p>
-				</div>
-
+			<SettingRows
+				title={t("tickets.panelSays")}
+				description={settings.posted ? t("tickets.postAgain") : t("tickets.nothingPosted")}
+			>
 				<Field label={t("tickets.message")} htmlFor="ticket-description">
 					<textarea
 						id="ticket-description"
@@ -190,13 +187,21 @@ export function TicketsPage(): React.JSX.Element {
 					/>
 				</Field>
 
+				<FieldGroup label={t("common.preview")}>
+					<PostPreview text={draft.description} empty={t("common.previewEmpty")}>
+						<span className="bg-primary rounded-field mt-2 inline-block px-3 py-1.5 text-sm font-medium text-white">
+							{draft.buttonLabel}
+						</span>
+					</PostPreview>
+				</FieldGroup>
+
 				{markupWarning(draft.description) !== null && <Warning>{markupWarning(draft.description)}</Warning>}
 				{blocked && <Warning>{problems.join(" ")}</Warning>}
 				{save.error !== null && (
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
-				<div className="flex flex-wrap items-center gap-3">
+				<RowActions>
 					<Button
 						disabled={!dirty || blocked || busy}
 						onClick={() => {
@@ -215,26 +220,23 @@ export function TicketsPage(): React.JSX.Element {
 					>
 						<Send size={16} aria-hidden="true" /> {settings.posted ? t("tickets.updatePanel") : t("tickets.postPanel")}
 					</Button>
-				</div>
-			</Card>
+				</RowActions>
+			</SettingRows>
 
 			{settings.enabled && (
-				<Card className="flex flex-wrap items-center justify-between gap-4">
-					<div>
-						<h2 className={CARD_HEADING}>{t("tickets.turnOff")}</h2>
-						<p className="text-muted-foreground text-sm">{t("tickets.turnOffBody")}</p>
-					</div>
-
-					<Button
-						variant="ghost"
-						disabled={busy}
-						onClick={() => {
-							disable.mutate();
-						}}
-					>
-						<Power size={16} aria-hidden="true" /> {t("tickets.turnOffAction")}
-					</Button>
-				</Card>
+				<SettingRows title={t("tickets.turnOff")} description={t("tickets.turnOffBody")}>
+					<RowActions>
+						<Button
+							variant="ghost"
+							disabled={busy}
+							onClick={() => {
+								disable.mutate();
+							}}
+						>
+							<Power size={16} aria-hidden="true" /> {t("tickets.turnOffAction")}
+						</Button>
+					</RowActions>
+				</SettingRows>
 			)}
 
 			{disable.error !== null && (
