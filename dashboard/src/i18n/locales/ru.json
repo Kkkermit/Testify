@@ -502,6 +502,12 @@
 		"title": "Вход"
 	},
 	"auditLog": {
+		"summarySome_other": "{{count, number}} вида событий сервера публикуются в {{channel}}.",
+		"summarySome_many": "{{count, number}} видов событий сервера публикуются в {{channel}}.",
+		"summarySome_few": "{{count, number}} вида событий сервера публикуются в {{channel}}.",
+		"summarySome_one": "{{count, number}} вид событий сервера публикуется в {{channel}}.",
+		"summaryAll": "Все виды событий сервера публикуются в {{channel}}, включая добавленные позже.",
+		"summaryOff": "Ничего не записывается в канал журнала.",
 		"allSelected": "Выбрано всё, поэтому события, добавленные в будущих версиях, тоже попадут в журнал.",
 		"banAdd": "Участник забанен",
 		"banAddAbout": "Кого-то забанили",

@@ -468,6 +468,10 @@
 		"title": "Sign in"
 	},
 	"auditLog": {
+		"summarySome_other": "{{count, number}} kinds of server event are posted to {{channel}}.",
+		"summarySome_one": "{{count, number}} kind of server event is posted to {{channel}}.",
+		"summaryAll": "Every kind of server event is posted to {{channel}}, including ones added later.",
+		"summaryOff": "Nothing is recorded to a log channel.",
 		"allSelected": "Everything is selected, so events added in a future update are logged too.",
 		"banAdd": "Member banned",
 		"banAddAbout": "Someone was banned",

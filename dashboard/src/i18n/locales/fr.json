@@ -485,6 +485,11 @@
 		"title": "Connexion"
 	},
 	"auditLog": {
+		"summarySome_other": "{{count, number}} types d’événements du serveur sont publiés dans {{channel}}.",
+		"summarySome_many": "{{count, number}} de types d’événements du serveur sont publiés dans {{channel}}.",
+		"summarySome_one": "{{count, number}} type d’événement du serveur est publié dans {{channel}}.",
+		"summaryAll": "Chaque type d’événement du serveur est publié dans {{channel}}, y compris ceux ajoutés plus tard.",
+		"summaryOff": "Rien n’est enregistré dans un salon de journal.",
 		"allSelected": "Tout est sélectionné : les événements ajoutés dans une future mise à jour seront aussi enregistrés.",
 		"banAdd": "Membre banni",
 		"banAddAbout": "Quelqu’un a été banni",

@@ -485,6 +485,11 @@
 		"title": "Accesso"
 	},
 	"auditLog": {
+		"summarySome_other": "{{count, number}} tipi di eventi del server vengono pubblicati in {{channel}}.",
+		"summarySome_many": "{{count, number}} di tipi di eventi del server vengono pubblicati in {{channel}}.",
+		"summarySome_one": "{{count, number}} tipo di evento del server viene pubblicato in {{channel}}.",
+		"summaryAll": "Ogni tipo di evento del server viene pubblicato in {{channel}}, compresi quelli aggiunti in seguito.",
+		"summaryOff": "Niente viene registrato in un canale di log.",
 		"allSelected": "È tutto selezionato, quindi verranno registrati anche gli eventi aggiunti in futuro.",
 		"banAdd": "Membro bandito",
 		"banAddAbout": "Qualcuno è stato bandito",

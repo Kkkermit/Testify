@@ -485,6 +485,11 @@
 		"title": "Iniciar sesión"
 	},
 	"auditLog": {
+		"summarySome_other": "{{count, number}} tipos de eventos del servidor se publican en {{channel}}.",
+		"summarySome_many": "{{count, number}} de tipos de eventos del servidor se publican en {{channel}}.",
+		"summarySome_one": "{{count, number}} tipo de evento del servidor se publica en {{channel}}.",
+		"summaryAll": "Todo tipo de evento del servidor se publica en {{channel}}, incluidos los que se añadan después.",
+		"summaryOff": "No se registra nada en un canal de registro.",
 		"allSelected": "Está todo seleccionado, así que los eventos que se añadan en el futuro también se registrarán.",
 		"banAdd": "Miembro baneado",
 		"banAddAbout": "Alguien fue baneado",

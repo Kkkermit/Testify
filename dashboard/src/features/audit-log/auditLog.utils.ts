@@ -47,3 +47,15 @@ export function saveBlocked(draft: AuditLogPut, t: TFunction): string | null {
 
 	return null;
 }
+
+/** Whether events are recorded, how many kinds and where, as the sentence the page opens with. */
+export function auditSummary(
+	saved: Pick<AuditLogPut, "enabled" | "channelId" | "events">,
+	channel: string,
+	t: TFunction,
+): string {
+	if (!saved.enabled || saved.channelId === null || saved.events.length === 0) return t("auditLog.summaryOff");
+	return saved.events.length === AUDIT_EVENTS.length
+		? t("auditLog.summaryAll", { channel })
+		: t("auditLog.summarySome", { count: saved.events.length, channel });
+}

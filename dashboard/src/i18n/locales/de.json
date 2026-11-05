@@ -468,6 +468,10 @@
 		"title": "Anmelden"
 	},
 	"auditLog": {
+		"summarySome_other": "{{count, number}} Arten von Server-Ereignissen werden in {{channel}} gepostet.",
+		"summarySome_one": "{{count, number}} Art von Server-Ereignis wird in {{channel}} gepostet.",
+		"summaryAll": "Jede Art von Server-Ereignis wird in {{channel}} gepostet, auch später hinzugefügte.",
+		"summaryOff": "Nichts wird in einem Log-Kanal festgehalten.",
 		"allSelected": "Alles ist ausgewählt, damit auch künftig hinzukommende Ereignisse mitgeschrieben werden.",
 		"banAdd": "Mitglied gebannt",
 		"banAddAbout": "Jemand wurde gebannt",
