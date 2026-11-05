@@ -1,6 +1,5 @@
 import { DiscordAPIError, type GuildMember, type MessageCreateOptions, RESTJSONErrorCodes } from "discord.js";
 import { strings } from "@config/strings";
-import { UserFacingError } from "@core/errors";
 import { getWelcome } from "@database/repositories/welcomeRepository";
 import { birthdayPost } from "@lib/birthdays/birthdayActions.util";
 import { announcementMessage } from "@lib/moderation/announcements.util";
@@ -39,8 +38,8 @@ async function build(test: TestPost, member: GuildMember): Promise<MessageCreate
 	}
 }
 
-/** A note first, so the test itself arrives exactly as members will see it. */
-export async function sendTestPost(test: TestPost, member: GuildMember): Promise<void> {
+/** A note first, so the test itself arrives exactly as members will see it; `closed` when Discord will not deliver. */
+export async function sendTestPost(test: TestPost, member: GuildMember): Promise<"sent" | "closed"> {
 	const message = await testPostMessage(test, member);
 	try {
 		await member.send({
@@ -48,9 +47,10 @@ export async function sendTestPost(test: TestPost, member: GuildMember): Promise
 			allowedMentions: { parse: [] },
 		});
 		await member.send(message);
+		return "sent";
 	} catch (error) {
 		if (error instanceof DiscordAPIError && error.code === RESTJSONErrorCodes.CannotSendMessagesToThisUser) {
-			throw new UserFacingError(strings.testPost.dmClosed);
+			return "closed";
 		}
 		throw error;
 	}

@@ -1,4 +1,4 @@
-import { Collection } from "discord.js";
+import { Collection, DiscordAPIError, RESTJSONErrorCodes } from "discord.js";
 import { Hono } from "hono";
 import { type ApiBindings } from "@api/context";
 import { ApiProblem, badRequest, problemBody } from "@api/errors";
@@ -13,8 +13,18 @@ jest.mock("@database/repositories/dashboardAuditRepository", () => ({ recordAudi
 const GUILD = "900000000000000001";
 const OWNER = "100000000000000001";
 
-function app(inServer = true) {
-	const send = jest.fn((_message: unknown) => Promise.resolve({}));
+function app(inServer = true, delivered = true) {
+	const closed = new DiscordAPIError(
+		{ code: RESTJSONErrorCodes.CannotSendMessagesToThisUser, message: "Cannot send messages to this user" },
+		RESTJSONErrorCodes.CannotSendMessagesToThisUser,
+		403,
+		"POST",
+		"/channels/1/messages",
+		{},
+	);
+	const send = jest.fn((_message: unknown): Promise<object> =>
+		delivered ? Promise.resolve({}) : Promise.reject(closed),
+	);
 	const guild = { id: GUILD, name: "Test Server", memberCount: 10 };
 	const member = { id: OWNER, user: { username: "owner" }, displayName: "Owner", guild, send };
 	Object.assign(guild, {
@@ -92,6 +102,17 @@ describe("the test-post route", () => {
 
 		expect(response.status).toBe(403);
 		expect(send).not.toHaveBeenCalled();
+	});
+
+	/** Shut direct messages are the reader's setting, not a fault, so the page can tell them which one to change. */
+	it("answers dm_closed and records nothing when Discord will not deliver", async () => {
+		const { instance } = app(true, false);
+
+		const response = await post(instance, { kind: "plain", message: "Hi" });
+
+		expect(response.status).toBe(403);
+		expect(((await response.json()) as { error: { code: string } }).error.code).toBe("dm_closed");
+		expect(recordAudit).not.toHaveBeenCalled();
 	});
 
 	it("refuses a kind it does not know", async () => {

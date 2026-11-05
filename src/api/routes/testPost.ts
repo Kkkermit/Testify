@@ -29,7 +29,7 @@ testPost.post("/", async (context) => {
 	const verdict = testPostLimiter.check(`${guild.id}:${reader.id}`);
 	if (!verdict.allowed) throw tooManyRequests(Math.ceil(verdict.retryAfterMs / 1000));
 
-	await sendTestPost(body, reader);
+	if ((await sendTestPost(body, reader)) === "closed") throw forbidden("dm_closed", strings.testPost.dmClosed);
 	await auditChange(context, {
 		action: "test.send",
 		summary: `Sent themselves a test of ${strings.testPost.what[body.kind]}`,

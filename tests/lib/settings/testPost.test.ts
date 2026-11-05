@@ -1,5 +1,4 @@
 import { DiscordAPIError, type GuildMember, RESTJSONErrorCodes } from "discord.js";
-import { UserFacingError } from "@core/errors";
 import { sendTestPost, testPostMessage } from "@lib/settings/testPost.util";
 
 jest.mock("@database/repositories/welcomeRepository", () => ({ getWelcome: jest.fn(() => Promise.resolve(null)) }));
@@ -38,7 +37,7 @@ describe("testPostMessage", () => {
 });
 
 describe("sendTestPost", () => {
-	it("tells somebody whose direct messages are closed how to open them", async () => {
+	it("answers closed, not a failure, when somebody's direct messages are shut", async () => {
 		const closed = new DiscordAPIError(
 			{ code: RESTJSONErrorCodes.CannotSendMessagesToThisUser, message: "Cannot send messages to this user" },
 			RESTJSONErrorCodes.CannotSendMessagesToThisUser,
@@ -49,6 +48,6 @@ describe("sendTestPost", () => {
 		);
 		const send = jest.fn((_message: unknown): Promise<object> => Promise.reject(closed));
 
-		await expect(sendTestPost({ kind: "plain", message: "Hi" }, member(send))).rejects.toThrow(UserFacingError);
+		expect(await sendTestPost({ kind: "plain", message: "Hi" }, member(send))).toBe("closed");
 	});
 });
