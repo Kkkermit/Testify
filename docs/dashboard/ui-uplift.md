@@ -4,8 +4,9 @@
 **Channels** direction (I) from [the redesign brief](redesign/README.md#i-channels), and for building the six further
 ideas listed there. It is updated as each phase lands, and the phase table below says where things stand.
 
-The prototype is [`redesign/i-channels/index.html`](redesign/i-channels/index.html): open it in a browser, drag a
-chip onto a channel, open `#welcome` and click the message.
+The prototype is [`redesign/i-channels/index.html`](redesign/i-channels/index.html). Its look and its channel pages
+were kept; its channel list in the sidebar and its dragging were tried and taken out (see
+[Decisions taken](#decisions-taken)).
 
 ---
 
@@ -25,21 +26,24 @@ chip onto a channel, open `#welcome` and click the message.
 
 ## What changes
 
-Today the dashboard is organised by feature: a sidebar of about forty screens in five sections, each screen a form.
-After this work it is organised the way the server already is in Discord.
+The dashboard keeps its sidebar of feature sections, which is the quickest way to a screen, and gains a view of the
+server the way Discord shows it.
 
+- **The sidebar** is Overview, Channels, Members and Settings, then Community, Messages, Moderation, Stats, Economy
+  and Entertainment, each holding only the screens it names.
 - **A Channels page lists what Testify does in each channel**, in Discord's order, showing only the channels the reader
-  can see, then what works across the whole server. The sidebar keeps one entry for it rather than the channels
-  themselves.
+  can see, then what works across the whole server.
 - **A channel's page shows what Testify does there, as it will appear there.** The welcome message is drawn as the
   message itself, and clicking it edits it. Each block also links to the feature's full page.
 - **A feature's channel is chosen on its own page.** The overview keeps its stat tiles and feature grid, so something
   not set up reads as "Not set up" there and opens the page that sets it up.
+- **Every feature page reads the same way**: one sentence saying what the feature does right now, then its settings
+  as rows, and a preview beside any message it posts.
 - **Six new screens** come from the brief's further ideas: an **Inbox** of what needs you, **This week** (what Testify
   will do in the next seven days), a page per **role** showing what gives or uses it, **Send me a test** beside
   anything that posts, **history and restore** on the Changes page, and **several servers side by side**.
 - **The look** is the prototype's: light and dark palettes, Rubik and Fira Mono, rows instead of cards, no starfield,
-  no glow and no eyebrows. Motion comes from [Motion](https://motion.dev), used only where something changed.
+  no glow and no eyebrows. Motion is CSS transitions only, and only where something changed.
 
 ## What does not change
 
@@ -49,114 +53,106 @@ Everything in AGENTS.md §24 still holds. The rules this work is most likely to 
   path `routes.tsx` no longer declares. Bookmarks and quick search also depend on them. New screens add routes;
   nothing is renamed or removed.
 - **The dashboard owns no logic.** A channel page, the inbox and the role page read through the same repositories
-  and `*Actions.util.ts` the commands use. Placing or moving a feature writes through that feature's existing route,
-  so its validation and `requireReach` checks apply unchanged.
-- **A channel its reader cannot see is named nowhere.** The channel list and every channel page are built from
-  `seenChannels`. A feature placed in a hidden channel says "a channel you can't see", as the pickers already do.
+  and `*Actions.util.ts` the commands use. Editing a post on a channel page writes through that feature's existing
+  route, so its validation and `requireReach` checks apply unchanged.
+- **A channel its reader cannot see is named nowhere.** The Channels page and every channel page are built from
+  `seenChannels`. A feature working in a hidden channel says "a channel you can't see", as the pickers already do.
 - **`requireGuild` stays the boundary.** Every new route sits under `/guilds/:guildId/*` and inherits it, and
   `accessWalk.test.ts` and `ASKS_MORE` grow with them.
 - **The CSP is untouchable.** Fonts are self-hosted, and no script is inline. Motion animates through inline styles
   set from script, which `style-src 'unsafe-inline'` already allows, as it does for tippy.
 - **Six languages, every string through i18next.** `untranslated.test.ts`, `locales.test.ts` and `voice.test.ts`
   apply to every new screen.
-- **The accessibility floor only rises.** Drag and drop always has a keyboard route (Place in, Move to). Every channel
-  row is a link with a name, and axe runs on every new page.
+- **The accessibility floor only rises.** Every channel row is a link with a name, a setting row keeps its control's
+  accessible name, and axe runs on every new page.
 - **Tokens stay the single source.** There is no hex value in a `.tsx` file, and every colour is a
   `light-dark()` pair measured by `contrast.test.ts`.
 
 ## The new map of the dashboard
 
-> [!NOTE]
-> This is the map as first planned. After review the sidebar lists screens rather than channels, and nothing is
-> dragged; [Decisions taken](#decisions-taken) has what changed.
-
-Inside a server, the shell becomes:
+Inside a server the shell is:
 
 ```
 ┌───────────────────────────────────────────────────────────────────────────┐
-│ Testify  [TH Testify HQ ⌄]                         Search (Ctrl K)  ●  K  │
+│ Testify  [TH Testify HQ ⌄]                                Search (Ctrl K) │
 ├─────────────────────┬─────────────────────────────────────────────────────┤
 │ ◎ Overview          │                                                     │
 │ ✉ Inbox          3  │   The page for whatever is chosen on the left.      │
 │ ◷ This week         │                                                     │
-│                     │                                                     │
-│ INFORMATION         │                                                     │
-│  # welcome       1  │                                                     │
-│  # rules            │                                                     │
-│ CHAT                │                                                     │
-│  # general       2  │                                                     │
-│ SUPPORT             │                                                     │
-│  # support       1  │                                                     │
-│ ♪ Lounge            │                                                     │
-│                     │                                                     │
-│ Everywhere       5  │                                                     │
-│ Members · Roles     │                                                     │
-│ Moderation          │                                                     │
-│ Settings · More     │                                                     │
+│ # Channels          │                                                     │
+│ ☺ Members           │                                                     │
+│ ⛉ Roles             │                                                     │
+│ ⚙ Settings          │                                                     │
+│ ▸ Community         │                                                     │
+│ ▸ Messages          │                                                     │
+│ ▸ Moderation        │                                                     │
+│ ▸ Stats             │                                                     │
+│ ▸ Economy           │                                                     │
+│ ▸ Entertainment     │                                                     │
 └─────────────────────┴─────────────────────────────────────────────────────┘
 ```
 
-- **Overview** is "Where Testify works" (channel by channel), "Waiting for a channel" (the chips) and a short
-  "Needs you" that links to the Inbox.
-- **The channel list** uses the server's own category names, which is why those are shown exactly as Discord has them.
-  Every other label is translated.
-- **Everywhere** lists the server-wide features, each opening its full page.
-- **Members · Roles** is the member tables and the new role pages.
-- **Moderation** holds warnings, cases, bans, channel tools and the Changes page with its history.
-- **Settings · More** holds server settings, commands, insights, and the screens that are neither placed nor
-  server-wide, such as announcements.
+- **Overview** is the stat tiles, the setup checklist, the feature grid, missing permissions and recent changes. Once
+  the Inbox exists it gains one line linking to it whenever something needs you.
+- **Inbox**, **This week** and **Roles** arrive in phase 6, at the top beside Overview, because each covers the whole
+  server rather than one feature.
+- **Channels** lists the channels the bot works in, each opening its own page, then what works across the whole
+  server.
+- **The sections** hold every feature page, each under what it is for. They are pinned by `navigation.test.ts`.
 
-On a phone, the sidebar is the first screen, as Discord's own app does it. Choosing a channel opens it with
-"‹ Channels" to return, which is the layout the prototype already shows.
+On a phone the same sidebar is the drawer behind the menu button.
 
 ## Where every current screen goes
 
-No URL changes. This table says how each screen is reached in the new map, and whether its page is restyled in place
-or also shown as a block on a channel page.
+No URL changes. This table is phase 5's checklist: where each screen sits in the sidebar, whether it posts a message
+that gets a preview beside its editor, and whether its page has been restyled.
 
-| Today                            | In the new map                                                                                                                    | On a channel page                |
-| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `/guilds/:id`                    | Overview, rebuilt                                                                                                                 | —                                |
-| `…/welcome`                      | Its channel; full page kept                                                                                                       | Welcome message, edited in place |
-| `…/welcome` (goodbye card)       | Its channel                                                                                                                       | Goodbye message, edited in place |
-| `…/levelling`                    | Its announcement channel, and Everywhere for XP                                                                                   | Level-up message                 |
-| `…/birthdays`                    | Its channel                                                                                                                       | Birthday message                 |
-| `…/starboard`                    | Its board channel                                                                                                                 | A sample repost                  |
-| `…/ideas`                        | Its board channel                                                                                                                 | A sample idea post               |
-| `…/role-menus`                   | Each menu's channel                                                                                                               | The menu's post                  |
-| `…/tickets`                      | Panel channel and transcript channel                                                                                              | The ticket panel; transcripts    |
-| `…/sticky`                       | Each sticky's channel                                                                                                             | The sticky message               |
-| `…/scheduled-messages`           | Each schedule's channel                                                                                                           | The post and its next time       |
-| `…/auto-responders`              | Everywhere (they answer in any channel)                                                                                           | —                                |
-| `…/temp-voice`                   | Its lobby (a voice channel)                                                                                                       | The lobby's settings             |
-| `…/member-count`                 | Its counter channels (voice)                                                                                                      | The live names                   |
-| `…/bot-stats`                    | Its channel                                                                                                                       | The stats message                |
-| `…/giveaways`                    | Each giveaway's channel                                                                                                           | The giveaway post                |
-| `…/lottery`                      | Its announcement channel, if set; otherwise Everywhere                                                                            | The draw post                    |
-| `…/audit-log`                    | Its log channel                                                                                                                   | A sample log entry               |
-| `…/cases`                        | Moderation; its log channel                                                                                                       | A sample case post               |
-| `…/raid-protection`              | Everywhere; its alert channel                                                                                                     | A sample alert                   |
-| `…/automod`                      | Everywhere                                                                                                                        | —                                |
-| `…/warnings`                     | Moderation                                                                                                                        | —                                |
-| `…/bans`                         | Moderation                                                                                                                        | —                                |
-| `…/channel-tools`                | Moderation, and a **Lock** / **Slowmode** row on every channel page                                                               | Lock and slowmode controls       |
-| `…/changes`                      | Moderation, with history and restore (idea 5)                                                                                     | —                                |
-| `…/announcements`                | More, and **Announce here** on every channel page                                                                                 | A composer that posts here       |
-| `…/treasure`                     | Everywhere (drops land in active channels)                                                                                        | —                                |
-| `…/casino`                       | Everywhere                                                                                                                        | —                                |
-| `…/music`                        | Everywhere                                                                                                                        | —                                |
-| `…/settings`                     | Settings (prefix, nickname, link filter, roles on join, verification, counting); verification and counting also on their channels | Verification and counting posts  |
-| `…/insights`                     | More                                                                                                                              | Messages a day for that channel  |
-| `…/members`, `…/members/:userId` | Members                                                                                                                           | —                                |
-| `…/commands`                     | Settings                                                                                                                          | —                                |
+| Screen                                       | Sidebar       | Preview             | Restyled                |
+| -------------------------------------------- | ------------- | ------------------- | ----------------------- |
+| `/guilds/:id`                                | Overview      | —                   | Kept as it is           |
+| `…/channels`, `…/channels/:channelId`        | Channels      | Its posts           | Built in phases 3 and 4 |
+| `…/welcome` (greeting and goodbye)           | Community     | Both messages       | To do                   |
+| `…/birthdays`                                | Community     | The birthday post   | Done                    |
+| `…/levelling`                                | Community     | —                   | To do                   |
+| `…/role-menus`                               | Community     | —                   | To do                   |
+| `…/ideas`                                    | Community     | —                   | Done                    |
+| `…/starboard`                                | Community     | —                   | Done                    |
+| `…/temp-voice`                               | Community     | —                   | Done                    |
+| `…/announcements`                            | Messages      | The announcement    | To do                   |
+| `…/scheduled-messages`                       | Messages      | Each post           | To do                   |
+| `…/sticky`                                   | Messages      | Each sticky message | To do                   |
+| `…/auto-responders`                          | Messages      | Each reply          | To do                   |
+| `…/automod`                                  | Moderation    | —                   | To do                   |
+| `…/raid-protection`                          | Moderation    | —                   | To do                   |
+| `…/warnings`                                 | Moderation    | —                   | To do                   |
+| `…/cases`                                    | Moderation    | —                   | To do                   |
+| `…/bans`                                     | Moderation    | —                   | To do                   |
+| `…/channel-tools`                            | Moderation    | —                   | To do                   |
+| `…/tickets`                                  | Moderation    | The ticket panel    | To do                   |
+| `…/audit-log`                                | Moderation    | —                   | To do                   |
+| `…/changes` (history and restore in phase 8) | Moderation    | —                   | To do                   |
+| `…/insights`                                 | Stats         | —                   | To do                   |
+| `…/member-count`                             | Stats         | —                   | To do                   |
+| `…/bot-stats`                                | Stats         | —                   | To do                   |
+| `…/treasure`                                 | Economy       | —                   | To do                   |
+| `…/lottery`                                  | Economy       | —                   | To do                   |
+| `…/casino`                                   | Economy       | —                   | To do                   |
+| `…/music`                                    | Entertainment | —                   | To do                   |
+| `…/giveaways`                                | Entertainment | —                   | To do                   |
+| `…/members`, `…/members/:userId`             | Members       | —                   | To do                   |
+| `…/settings`                                 | Settings      | —                   | To do                   |
+| `…/commands`                                 | Commands      | —                   | To do                   |
+
+A list page — bans, cases, warnings, changes, members, commands — keeps its list and gains only the summary, since
+its rows are records rather than settings.
 
 Outside a server, `/guilds`, `/commands`, `/status`, `/notifications`, `/help`, `/appearance`, `/owner` and the public
 site keep their routes and are restyled in phase 10.
 
 **New routes:**
 
-- `/guilds/:id/channels/:channelId`
-- `/guilds/:id/everywhere`
+- `/guilds/:id/channels` (built)
+- `/guilds/:id/channels/:channelId` (built)
 - `/guilds/:id/inbox`
 - `/guilds/:id/week`
 - `/guilds/:id/roles`
@@ -172,8 +168,7 @@ already knows how to check.
 | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
 | Which channel each feature uses | `FEATURE_SOURCES` in `src/lib/settings/featureStatus.util.ts` reads every feature's settings once, and each reading now carries its channels as well. `placesOf` answers the map and `featuresOf` the overview, from the same read, so the two cannot disagree about whether a feature is on. | **Phase 1**: `GET /guilds/:id/places`                      |
 | The channel list                | `GET /guilds/:id/channels` (`ChannelSummary`, with `name: null` for one the reader cannot see). Categories need their parent id, which `ChannelSummary` does not carry yet.                                                                                                                   | Phase 1 adds `parentId`                                    |
-| Placing and moving              | Each feature's own write route. The dashboard holds one small map from feature to its route and field, so no second write path exists.                                                                                                                                                        | Phase 4                                                    |
-| Inbox                           | Open tickets (`/tickets`), ideas awaiting a decision (`/ideas`), missing permissions (overview), placed features whose channel the bot cannot post in (`canSend` × places). A post that failed is not recorded anywhere today.                                                                | Phase 6: one read route; failed posts are a question below |
+| Inbox                           | Open tickets (`/tickets`), ideas awaiting a decision (`/ideas`), missing permissions (overview), features whose channel the bot cannot post in (`canSend` × places). A post that failed is not recorded anywhere today.                                                                       | Phase 6: one read route; failed posts are a question below |
 | This week                       | Scheduled messages' next times, the lottery draw, giveaways ending, upcoming birthdays. Each is stored already. Reminders stay out, because they belong to a person, not the server.                                                                                                          | Phase 6: one read route                                    |
 | What a role gets                | Level rewards and boosts, roles on join, role menus, DJ roles, the ticket staff role, raid protection's alert role and the verified role, each read from its own repository.                                                                                                                  | Phase 6: one read route                                    |
 | Send me a test                  | The bot's own renderers (`fillTemplate`, the welcome card), as `/welcome test` already uses, sent to the reader's DMs. Rate-limited and audit-logged.                                                                                                                                         | Phase 7: one write route                                   |
@@ -209,32 +204,30 @@ passes.
 - **Removed in phase 2:** `Backdrop` and `lib/three/`, except `tokens.ts`, which the console greeting reads and
   which moved to `lib/`; three.js itself; the body wash; the focal card's gradient and the cards' inset highlight;
   the tinted badges. `Eyebrow` became `SectionHeading`, the page's own type with no letterspacing or rule.
-- **Still to remove**, with the screens that use them: the feature tints, `StatTile` on the overview, and `Reveal`,
-  `AnimatedNumber` and `useCountUp`.
-- **Motion.** The shell moves with CSS transitions only. `motion` arrives in phase 4, imported only by the channel
-  pages, which are lazily loaded routes, so the first load does not grow. `MotionConfig reducedMotion="user"` sits
-  beside the existing `data-motion` attribute. What moves is listed in the
-  [brief's Motion section](redesign/README.md#motion-what-moves-and-why).
+- **Still to remove**, with the screens that use them: the feature tints, and `Reveal`, `AnimatedNumber` and
+  `useCountUp`. The overview's stat tiles stay, because the overview is kept as it is.
+- **Motion.** CSS transitions only. The `motion` library was planned for the channel pages and turned out not to be
+  needed, so it was never added.
 
 ## Phases
 
 Each phase is one or more commits on this branch. Each leaves the dashboard working with `npm run check` green, so
 the branch can be reviewed or paused at any point.
 
-| #   | Phase                                                                                                                                                                                                                                                                                                                                                                  | Status |
-| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| 0   | This plan                                                                                                                                                                                                                                                                                                                                                              | Done   |
-| 1   | **The channel map's data.** `shared/src/places.ts` (types and the feature list), each `FEATURE_SOURCES` reading carrying its channels, `GET /guilds/:id/places`, `parentId` on `ChannelSummary`, and tests, including one that fails when the feature list and `FEATURE_SOURCES` disagree. No visible change.                                                          | Done   |
-| 2   | **Foundations.** New tokens in `index.css`, light and dark, and the fonts. Remove the backdrop, the wash and the eyebrow. Restyle `Card`, `Badge`, `PageHeader` (a breadcrumb that names the server, so `pageHeader.test.ts` keeps its rule), the form controls and `SwitchTrack`. Re-measure every accent in `contrast.test.ts`, and update guide §19 and AGENTS §24. | Done   |
-| 3   | **The shell.** The sidebar with Overview, Channels, Members, Settings and a section for each kind of feature; a Channels page and a page per channel listing what works where, each linking to its full page; quick search finds channels. Inbox, This week and Roles join the sidebar with their pages in phase 6. `navigation.test.ts` pins every server path.       | Done   |
-| 4   | **Channel pages.** Each feature working in a channel gets a block drawn with `DiscordPreview`, and the welcome, goodbye and birthday messages are edited in place. Level-ups have no template, so their block describes them. The drag-and-drop overview built here was taken out after review, with the sidebar's channel list: see Decisions.                        | Done   |
-| 5   | **Every feature page restyled**, one per commit, in the order of the table above, each keeping its route and tests: rows rather than cards, the sentence summary at the top, and the preview beside anything that posts.                                                                                                                                               | To do  |
-| 6   | **Inbox, This week, Roles** (ideas 1–3), each with its read route and its page.                                                                                                                                                                                                                                                                                        | To do  |
-| 7   | **Send me a test** (idea 4).                                                                                                                                                                                                                                                                                                                                           | To do  |
-| 8   | **History and restore** on the Changes page (idea 5).                                                                                                                                                                                                                                                                                                                  | To do  |
-| 9   | **Several servers side by side** (idea 6), read-only.                                                                                                                                                                                                                                                                                                                  | To do  |
-| 10  | **Everything outside a server**: the server picker, commands, status, notifications, help, appearance, the owner console, sign-in and the public site, in the new tokens.                                                                                                                                                                                              | To do  |
-| 11  | **Finish**: re-shoot the README's screenshots, update AGENTS §24 and the guide throughout, run a browser sweep at 320, 390, 820 and 1440 in both themes, with `prefers-contrast: more` and reduced motion, then open a pull request into `develop`.                                                                                                                    | To do  |
+| #   | Phase                                                                                                                                                                                                                                                                                                                                                                  | Status      |
+| --- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| 0   | This plan                                                                                                                                                                                                                                                                                                                                                              | Done        |
+| 1   | **The channel map's data.** `shared/src/places.ts` (types and the feature list), each `FEATURE_SOURCES` reading carrying its channels, `GET /guilds/:id/places`, `parentId` on `ChannelSummary`, and tests, including one that fails when the feature list and `FEATURE_SOURCES` disagree. No visible change.                                                          | Done        |
+| 2   | **Foundations.** New tokens in `index.css`, light and dark, and the fonts. Remove the backdrop, the wash and the eyebrow. Restyle `Card`, `Badge`, `PageHeader` (a breadcrumb that names the server, so `pageHeader.test.ts` keeps its rule), the form controls and `SwitchTrack`. Re-measure every accent in `contrast.test.ts`, and update guide §19 and AGENTS §24. | Done        |
+| 3   | **The shell.** The sidebar with Overview, Channels, Members, Settings and a section for each kind of feature; a Channels page and a page per channel listing what works where, each linking to its full page; quick search finds channels. Inbox, This week and Roles join the sidebar with their pages in phase 6. `navigation.test.ts` pins every server path.       | Done        |
+| 4   | **Channel pages.** Each feature working in a channel gets a block drawn with `DiscordPreview`, and the welcome, goodbye and birthday messages are edited in place. Level-ups have no template, so their block describes them. The drag-and-drop overview built here was taken out after review, with the sidebar's channel list: see Decisions.                        | Done        |
+| 5   | **Every feature page restyled**, one per commit, in the order of the table above, each keeping its route and tests: the sentence summary at the top, settings as rows (`SettingRows`, which turns every `Field` and `Toggle` inside it into a row), and the preview beside anything that posts. The table above marks each page.                                       | In progress |
+| 6   | **Inbox, This week, Roles** (ideas 1–3), each with its read route and its page, at the top of the sidebar beside Overview.                                                                                                                                                                                                                                             | To do       |
+| 7   | **Send me a test** (idea 4).                                                                                                                                                                                                                                                                                                                                           | To do       |
+| 8   | **History and restore** on the Changes page (idea 5).                                                                                                                                                                                                                                                                                                                  | To do       |
+| 9   | **Several servers side by side** (idea 6), read-only.                                                                                                                                                                                                                                                                                                                  | To do       |
+| 10  | **Everything outside a server**: the server picker, commands, status, notifications, help, appearance, the owner console, sign-in and the public site, in the new tokens.                                                                                                                                                                                              | To do       |
+| 11  | **Finish**: re-shoot the README's screenshots, update AGENTS §24 and the guide throughout, run a browser sweep at 320, 390, 820 and 1440 in both themes, with `prefers-contrast: more` and reduced motion, then open a pull request into `develop`.                                                                                                                    | To do       |
 
 ## How a phase is finished
 
