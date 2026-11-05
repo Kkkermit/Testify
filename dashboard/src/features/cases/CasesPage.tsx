@@ -4,7 +4,17 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	postableChannels,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	SettingRows,
+	Warning,
+} from "@/components/form";
 import {
 	Badge,
 	Card,
@@ -14,6 +24,7 @@ import {
 	PageHeader,
 	Pager,
 	Skeleton,
+	Summary,
 } from "@/components/primitives";
 import { ACTION_LABELS, ACTION_ORDER, durationText, isCaseAction } from "@/features/cases/cases.utils";
 import { useCases, useCaseSettings, useUpdateCaseSettings } from "@/features/cases/useCases";
@@ -22,6 +33,7 @@ import { useChannels } from "@/features/levelling/useLevelling";
 import { useDebounced } from "@/hooks/useDebounced";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
 
@@ -52,26 +64,34 @@ function LogCard({ guildId }: { guildId: string }): React.JSX.Element {
 	if (settings.isPending) return <Skeleton className="h-36 w-full" />;
 
 	return (
-		<Card className="motion-pop flex flex-col gap-4">
-			<div className="flex items-center justify-between gap-3">
-				<h2 className={CARD_HEADING}>{t("cases.log")}</h2>
-				<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
-			</div>
-			<ChannelPicker
-				label={t("cases.logChannel")}
-				hint={t("cases.logHint")}
-				channels={channels.data ?? []}
-				value={settings.data.logChannelId}
-				noneLabel={t("cases.noLog")}
-				onChange={(logChannelId) => {
-					update.mutate({ logChannelId });
-				}}
-			/>
-			{settings.data.logChannelId !== null && !settings.data.canSend && <Warning>{t("cases.cannotSend")}</Warning>}
-			{update.error !== null && (
-				<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
-			)}
-		</Card>
+		<>
+			<Summary>
+				{settings.data.logChannelId === null
+					? t("cases.summaryNoLog")
+					: t("cases.summaryLog", {
+							channel: channelLabel(postableChannels(channels.data ?? []), settings.data.logChannelId, t),
+						})}
+			</Summary>
+			<SettingRows
+				title={t("cases.log")}
+				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}
+			>
+				<ChannelPicker
+					label={t("cases.logChannel")}
+					hint={t("cases.logHint")}
+					channels={channels.data ?? []}
+					value={settings.data.logChannelId}
+					noneLabel={t("cases.noLog")}
+					onChange={(logChannelId) => {
+						update.mutate({ logChannelId });
+					}}
+				/>
+				{settings.data.logChannelId !== null && !settings.data.canSend && <Warning>{t("cases.cannotSend")}</Warning>}
+				{update.error !== null && (
+					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
+				)}
+			</SettingRows>
+		</>
 	);
 }
 

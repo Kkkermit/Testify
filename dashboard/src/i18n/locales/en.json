@@ -611,6 +611,8 @@
 		"on": "{{day}} {{month}}"
 	},
 	"cases": {
+		"summaryLog": "Every moderation action is numbered here as a case and posted in {{channel}} as it happens.",
+		"summaryNoLog": "Every moderation action is numbered here as a case, and none is posted to a channel.",
 		"title": "Moderation cases",
 		"subtitle": "Every warning, timeout, kick, ban and softban, numbered, whichever surface it came from.",
 		"log": "Where cases are posted",

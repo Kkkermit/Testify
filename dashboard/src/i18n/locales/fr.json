@@ -630,6 +630,8 @@
 		"on": "{{day}} {{month}}"
 	},
 	"cases": {
+		"summaryLog": "Chaque action de modération est numérotée ici comme un dossier et publiée dans {{channel}} dès qu’elle a lieu.",
+		"summaryNoLog": "Chaque action de modération est numérotée ici comme un dossier, et aucun n’est publié dans un salon.",
 		"title": "Dossiers de modération",
 		"subtitle": "Chaque avertissement, exclusion temporaire, expulsion, bannissement et bannissement temporaire, numéroté, d’où qu’il vienne.",
 		"log": "Où les dossiers sont publiés",

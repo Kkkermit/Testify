@@ -611,6 +611,8 @@
 		"on": "{{day}}. {{month}}"
 	},
 	"cases": {
+		"summaryLog": "Jede Moderationsmaßnahme wird hier als Fall nummeriert und sofort in {{channel}} gepostet.",
+		"summaryNoLog": "Jede Moderationsmaßnahme wird hier als Fall nummeriert, und keiner wird in einem Kanal gepostet.",
 		"title": "Moderationsfälle",
 		"subtitle": "Jede Verwarnung, jedes Timeout, jeder Kick, Bann und Softbann, nummeriert, egal woher.",
 		"log": "Wo Fälle gepostet werden",

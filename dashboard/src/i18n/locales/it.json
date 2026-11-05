@@ -630,6 +630,8 @@
 		"on": "{{day}} {{month}}"
 	},
 	"cases": {
+		"summaryLog": "Ogni azione di moderazione viene numerata qui come caso e pubblicata in {{channel}} appena avviene.",
+		"summaryNoLog": "Ogni azione di moderazione viene numerata qui come caso, e nessuno viene pubblicato in un canale.",
 		"title": "Casi di moderazione",
 		"subtitle": "Ogni avvertimento, timeout, espulsione, ban e ban temporaneo, numerato, da qualunque parte arrivi.",
 		"log": "Dove vengono pubblicati i casi",

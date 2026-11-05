@@ -125,7 +125,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/automod`                                  | Moderation    | —                   | Done                    |
 | `…/raid-protection`                          | Moderation    | —                   | Done                    |
 | `…/warnings`                                 | Moderation    | —                   | Done                    |
-| `…/cases`                                    | Moderation    | —                   | To do                   |
+| `…/cases`                                    | Moderation    | —                   | Done                    |
 | `…/bans`                                     | Moderation    | —                   | To do                   |
 | `…/channel-tools`                            | Moderation    | —                   | To do                   |
 | `…/tickets`                                  | Moderation    | The ticket panel    | To do                   |
