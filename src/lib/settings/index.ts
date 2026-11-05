@@ -12,3 +12,4 @@ export * from "./verifyActions.util";
 export * from "./verifyPanel.util";
 export * from "./voiceCounters.util";
 export * from "./voiceStatsPanel.util";
+export * from "./week.util";

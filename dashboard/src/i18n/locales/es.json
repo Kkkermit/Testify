@@ -49,6 +49,8 @@
 		"hiddenChannelWarning": "No puedes ver este canal en Discord, así que solo puede cambiarlo alguien que sí lo vea."
 	},
 	"nav": {
+		"week": "Esta semana",
+		"weekHint": "Lo que {{bot}} hará en los próximos siete días",
 		"inbox": "Bandeja de entrada",
 		"inboxHint": "Lo que te espera en este servidor",
 		"entertainment": "Entretenimiento",
@@ -1186,6 +1188,23 @@
 		"waiting_many": "{{count, number}} pendientes",
 		"waiting_other": "{{count, number}} pendientes",
 		"open": "Abrir la bandeja de entrada"
+	},
+	"week": {
+		"title": "Esta semana",
+		"subtitle": "Lo que {{bot}} hará en este servidor durante los próximos siete días, en tu propia zona horaria.",
+		"summaryNone": "No hay nada previsto para los próximos siete días.",
+		"summary_one": "Hay {{count, number}} cosa prevista para los próximos siete días.",
+		"summary_many": "Hay {{count, number}} de cosas previstas para los próximos siete días.",
+		"summary_other": "Hay {{count, number}} cosas previstas para los próximos siete días.",
+		"today": "Hoy",
+		"tomorrow": "Mañana",
+		"scheduled": "Un mensaje programado en {{channel}}",
+		"lottery": "El sorteo de la lotería",
+		"lotteryPot": "{{pot}} en el bote",
+		"giveaway": "Termina el sorteo de {{prize}}",
+		"birthday": "Cumpleaños de {{name}}",
+		"emptyTitle": "Una semana tranquila",
+		"emptyBody": "Aquí aparecen los mensajes programados, el sorteo de la lotería, los sorteos que terminan y los cumpleaños de los miembros cuando caen en los próximos siete días."
 	},
 	"members": {
 		"summarySoftbanned": "Con softban, que se levanta el {{when}}.",

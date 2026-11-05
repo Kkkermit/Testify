@@ -83,6 +83,7 @@ describe("navigationFor", () => {
 				"/tickets",
 				"/treasure",
 				"/warnings",
+				"/week",
 				"/welcome",
 			].sort(),
 		);

@@ -5,6 +5,8 @@ import { formattingLocale, formatUnit } from "@/lib/intl";
 const DATE: Intl.DateTimeFormatOptions = { day: "numeric", month: "short", year: "numeric" };
 const DATE_TIME: Intl.DateTimeFormatOptions = { ...DATE, hour: "2-digit", minute: "2-digit" };
 const TIME: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
+const WEEKDAY: Intl.DateTimeFormatOptions = { weekday: "long", day: "numeric", month: "long" };
+const HOUR_MINUTE: Intl.DateTimeFormatOptions = { hour: "2-digit", minute: "2-digit" };
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -39,6 +41,16 @@ export function shortDate(iso: string): string {
 
 export function dateAndTime(iso: string): string {
 	return format(iso, "dateTime", DATE_TIME);
+}
+
+/** `Monday 3 August`, for a heading over one day's events. */
+export function weekdayDate(iso: string): string {
+	return format(iso, "weekday", WEEKDAY);
+}
+
+/** `14:30`, in the reader's own time zone. */
+export function timeOfDay(iso: string): string {
+	return format(iso, "hourMinute", HOUR_MINUTE);
 }
 
 export function clockTime(iso: string): string {

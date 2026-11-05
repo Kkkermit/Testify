@@ -49,6 +49,8 @@
 		"hiddenChannelWarning": "Tu ne peux pas voir ce salon dans Discord, donc seule une personne qui le voit peut le modifier."
 	},
 	"nav": {
+		"week": "Cette semaine",
+		"weekHint": "Ce que {{bot}} fera dans les sept prochains jours",
 		"inbox": "Boîte de réception",
 		"inboxHint": "Ce qui vous attend sur ce serveur",
 		"entertainment": "Divertissement",
@@ -1186,6 +1188,23 @@
 		"waiting_many": "{{count, number}} en attente",
 		"waiting_other": "{{count, number}} en attente",
 		"open": "Ouvrir la boîte de réception"
+	},
+	"week": {
+		"title": "Cette semaine",
+		"subtitle": "Ce que {{bot}} fera sur ce serveur dans les sept prochains jours, dans votre fuseau horaire.",
+		"summaryNone": "Rien n’est prévu pour les sept prochains jours.",
+		"summary_one": "{{count, number}} chose est prévue pour les sept prochains jours.",
+		"summary_many": "{{count, number}} de choses sont prévues pour les sept prochains jours.",
+		"summary_other": "{{count, number}} choses sont prévues pour les sept prochains jours.",
+		"today": "Aujourd’hui",
+		"tomorrow": "Demain",
+		"scheduled": "Un message programmé dans {{channel}}",
+		"lottery": "Le tirage de la loterie",
+		"lotteryPot": "{{pot}} dans la cagnotte",
+		"giveaway": "Le tirage au sort pour {{prize}} se termine",
+		"birthday": "Anniversaire de {{name}}",
+		"emptyTitle": "Une semaine calme",
+		"emptyBody": "Les messages programmés, le tirage de la loterie, les tirages au sort qui se terminent et les anniversaires des membres apparaissent ici lorsqu’ils tombent dans les sept prochains jours."
 	},
 	"members": {
 		"summarySoftbanned": "Softban, levé le {{when}}.",

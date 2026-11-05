@@ -5,6 +5,7 @@ import {
 	BookOpen,
 	Cake,
 	CalendarClock,
+	CalendarDays,
 	ChartColumn,
 	ChartLine,
 	LayoutGrid,
@@ -120,6 +121,7 @@ export function navigationFor({ guild, isOwner }: NavAudience): NavGroup[] {
 					hintKey: "nav.inboxHint",
 					badge: { kind: "inbox", guildId: guild.id },
 				},
+				{ to: at("/week"), labelKey: "nav.week", icon: CalendarDays, hintKey: "nav.weekHint" },
 				// One channel's page lives under this path, so Channels stays marked while it is open.
 				{ to: at("/channels"), labelKey: "nav.channels", icon: Hash, hintKey: "nav.channelsHint", exact: false },
 				// A member's own page lives under this path, and it is still where you are in the sidebar.

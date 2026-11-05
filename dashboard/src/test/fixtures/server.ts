@@ -5,6 +5,7 @@ import {
 	type GuildNickname,
 	type GuildOverview,
 	type GuildPlaces,
+	type GuildWeek,
 	type InsightsReport,
 	type RoleSummary,
 	type ServerSettings,
@@ -222,3 +223,24 @@ export const busyInbox: GuildInbox = {
 		{ feature: "audit-logging", label: "Audit logging", channelId: "400000000000000002", problem: "cannotPost" },
 	],
 };
+
+export const quietWeek: GuildWeek = { from: "2026-09-27T10:00:00.000Z", to: "2026-10-04T10:00:00.000Z", events: [] };
+
+/** Relative to the moment the test runs, so the Today heading is always true. */
+export function busyWeek(now = Date.now()): GuildWeek {
+	const at = (hours: number): string => new Date(now + hours * 3_600_000).toISOString();
+	return {
+		from: at(0),
+		to: at(168),
+		events: [
+			{
+				kind: "giveaway",
+				at: at(0.1),
+				messageId: "700000000000000001",
+				channelId: "400000000000000001",
+				prize: "Nitro",
+			},
+			{ kind: "lottery", at: at(50), prizePool: 1200 },
+		],
+	};
+}

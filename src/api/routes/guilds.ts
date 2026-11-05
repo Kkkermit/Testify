@@ -46,7 +46,7 @@ import { canPostInChannel, readerSees } from "@lib/discord";
 import { readInsights } from "@lib/info";
 import { readServerChanges } from "@lib/moderation";
 import { isPowerful } from "@lib/roles";
-import { featuresOf, missingPermissions, placesOf, readInbox } from "@lib/settings";
+import { featuresOf, missingPermissions, placesOf, readInbox, readWeek } from "@lib/settings";
 import {
 	type AuditEntrySummary,
 	type ChannelKind,
@@ -57,6 +57,7 @@ import {
 	type GuildOverview,
 	type GuildInbox,
 	type GuildPlaces,
+	type GuildWeek,
 	guildIdParam,
 	type Paged,
 	pagination,
@@ -124,6 +125,12 @@ guilds.get("/:guildId/overview", async (context) => {
 /** What needs a manager here: tickets nobody has claimed, ideas waiting, permissions and channels that stop a feature. */
 guilds.get("/:guildId/inbox", async (context) => {
 	const body: GuildInbox = await readInbox(context.get("client"), guildOf(context));
+	return context.json(body);
+});
+
+/** The next seven days: scheduled posts, the lottery draw, giveaways ending and birthdays the server marks. */
+guilds.get("/:guildId/week", async (context) => {
+	const body: GuildWeek = await readWeek(context.get("client"), guildOf(context));
 	return context.json(body);
 });
 

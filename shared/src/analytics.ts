@@ -257,6 +257,7 @@ export const SCREEN_ROUTES = [
 	"/guilds/:guildId/channels/:channelId",
 	"/guilds/:guildId/channels",
 	"/guilds/:guildId/inbox",
+	"/guilds/:guildId/week",
 	"/guilds/:guildId/announcements",
 	"/guilds/:guildId/scheduled-messages",
 	"/guilds/:guildId/role-menus",

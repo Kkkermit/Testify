@@ -48,6 +48,8 @@
 		"hiddenChannelWarning": "You can’t see this channel in Discord, so only somebody who can may change it."
 	},
 	"nav": {
+		"week": "This week",
+		"weekHint": "What {{bot}} will do in the next seven days",
 		"inbox": "Inbox",
 		"inboxHint": "What needs you in this server",
 		"entertainment": "Entertainment",
@@ -1147,6 +1149,22 @@
 		"waiting_one": "{{count, number}} waiting",
 		"waiting_other": "{{count, number}} waiting",
 		"open": "Open the inbox"
+	},
+	"week": {
+		"title": "This week",
+		"subtitle": "What {{bot}} will do in this server over the next seven days, in your own time zone.",
+		"summaryNone": "Nothing is planned for the next seven days.",
+		"summary_one": "{{count, number}} thing is planned for the next seven days.",
+		"summary_other": "{{count, number}} things are planned for the next seven days.",
+		"today": "Today",
+		"tomorrow": "Tomorrow",
+		"scheduled": "A scheduled message in {{channel}}",
+		"lottery": "The lottery draw",
+		"lotteryPot": "{{pot}} in the pot",
+		"giveaway": "The giveaway for {{prize}} ends",
+		"birthday": "{{name}}’s birthday",
+		"emptyTitle": "A quiet week",
+		"emptyBody": "Scheduled messages, the lottery draw, giveaways ending and members’ birthdays appear here when they fall in the next seven days."
 	},
 	"members": {
 		"summarySoftbanned": "Softbanned, and the ban lifts on {{when}}.",
