@@ -4,7 +4,7 @@ import { defineCommand, inGuild } from "@core/command";
 import { UserFacingError } from "@core/errors";
 import { clearWarnings, editWarning, getWarnings, removeWarning } from "@database/repositories/moderationRepository";
 import { embed, reply, successEmbed } from "@lib/discord";
-import { discordTime, truncate } from "@lib/format";
+import { discordTime, mentionOf, truncate } from "@lib/format";
 import {
 	assertModeratable,
 	issueWarning,
@@ -118,7 +118,7 @@ export default defineCommand({
 								.map(
 									(warning) =>
 										`\`${warning.warnId}\` — ${truncate(warning.reason, 80)}\n` +
-										`> by <@${warning.executorId}> ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}`,
+										`> by ${mentionOf(warning.executorId)} ${discordTime(warning.timestamp, "R")} · ${warningActionText(warning)}`,
 								)
 								.join("\n\n"),
 							thumbnail: target.displayAvatarURL(),
@@ -147,7 +147,7 @@ export default defineCommand({
 							title: `Warning ${warning.warnId}`,
 							fields: [
 								{ name: "User", value: `${target}`, inline: true },
-								{ name: "Moderator", value: `<@${warning.executorId}>`, inline: true },
+								{ name: "Moderator", value: mentionOf(warning.executorId), inline: true },
 								{ name: "Issued", value: discordTime(warning.timestamp, "F"), inline: true },
 								{ name: "Action", value: warningActionText(warning), inline: true },
 								{ name: "Reason", value: warning.reason },

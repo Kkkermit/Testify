@@ -7,6 +7,7 @@ import { Badge, Button } from "@/components/primitives";
 import { KIND_LABELS, VERB_LABELS, verbTone } from "@/features/changes/changes.utils";
 import { RestorePanel } from "@/features/changes/components/RestorePanel";
 import { dateAndTime, since } from "@/lib/datetime";
+import { personName } from "@/lib/people";
 
 export function ChangeRow({ change }: { change: ServerChange }): React.JSX.Element {
 	const { t } = useTranslation();
@@ -35,7 +36,7 @@ export function ChangeRow({ change }: { change: ServerChange }): React.JSX.Eleme
 					</div>
 					<p className="text-muted-foreground text-xs">
 						{t("changes.byline", {
-							who: change.actorTag,
+							who: personName(change.actorTag, t),
 							where: change.source === "dashboard" ? t("changes.onDashboard") : t("changes.inDiscord"),
 						})}
 						{" · "}

@@ -3,8 +3,8 @@ import { inviteUrl } from "@testify/shared";
 import { ArrowRight } from "lucide-react";
 import { useMemo } from "react";
 import { Trans, useTranslation } from "react-i18next";
-import { Link } from "react-router";
-import { Button, Card, CARD_HEADING, SectionHeading } from "@/components/primitives";
+import { Link, useLocation } from "react-router";
+import { Button, Card, CARD_HEADING, SectionHeading, Skeleton } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { featureLook } from "@/config/features";
 import { useBot } from "@/features/auth/useBot";
@@ -38,6 +38,7 @@ export function LandingPage(): React.JSX.Element {
 	const palette = useMemo(() => paletteFrom(commandList), []);
 	const name = bot.data?.name ?? rememberedBotName() ?? "";
 	const invite = bot.data === undefined ? null : inviteUrl(bot.data.id);
+	const erased = (useLocation().state as { erased?: boolean } | null)?.erased === true;
 
 	return (
 		<div className="mx-auto flex w-full max-w-6xl flex-col px-4 sm:px-6">
@@ -46,6 +47,11 @@ export function LandingPage(): React.JSX.Element {
 				className="grid items-center gap-6 py-10 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)] lg:py-20 [&>*]:min-w-0"
 			>
 				<div className="flex flex-col gap-6">
+					{erased && (
+						<p role="status" className="bg-card border-border rounded-card border px-4 py-3 text-sm">
+							{t("account.erased")}
+						</p>
+					)}
 					<SectionHeading>{t("landing.eyebrow")}</SectionHeading>
 					<h1
 						id="landing-title"
@@ -55,7 +61,9 @@ export function LandingPage(): React.JSX.Element {
 					</h1>
 					<p className="text-muted-foreground max-w-xl text-lg text-pretty">{t("landing.lede")}</p>
 
-					{site.data?.dashboard === true ? (
+					{site.isPending ? (
+						<Skeleton className="h-11 w-48" />
+					) : site.data?.dashboard === true ? (
 						<SignedInAware invite={invite} name={name} />
 					) : (
 						<div className="flex flex-wrap gap-3">
@@ -143,7 +151,10 @@ function SignedInAware({ invite, name }: { invite: string | null; name: string }
 	return (
 		<div className="flex flex-col gap-3">
 			<div className="flex flex-wrap gap-3">
-				{signedIn ? (
+				{/* Until the session answers neither button is right, so the place is held rather than guessed. */}
+				{me.isPending ? (
+					<Skeleton className="h-11 w-48" />
+				) : signedIn ? (
 					<Link to="/guilds" className={PRIMARY_LINK}>
 						{t("site.openDashboard")}
 					</Link>
@@ -162,7 +173,7 @@ function SignedInAware({ invite, name }: { invite: string | null; name: string }
 					</a>
 				)}
 			</div>
-			{!signedIn && (
+			{!me.isPending && !signedIn && (
 				<p className="text-muted-foreground text-xs">
 					<Trans
 						i18nKey="auth.agree"

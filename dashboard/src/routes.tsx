@@ -68,6 +68,7 @@ const OwnerPage = page(async () => import("@/features/owner/OwnerPage"), "OwnerP
 const HelpPage = page(async () => import("@/features/help/HelpPage"), "HelpPage");
 const StatusPage = page(async () => import("@/features/status/StatusPage"), "StatusPage");
 const NotificationsPage = page(async () => import("@/features/notices/NotificationsPage"), "NotificationsPage");
+const AccountPage = page(async () => import("@/features/account/AccountPage"), "AccountPage");
 const AppearancePage = page(async () => import("@/features/appearance/AppearancePage"), "AppearancePage");
 const LandingPage = page(async () => import("@/features/site/LandingPage"), "LandingPage");
 const DocsPage = page(async () => import("@/features/docs/DocsPage"), "DocsPage");
@@ -167,6 +168,7 @@ export const routes = [
 							{ path: "/help", element: lazily(<HelpPage />) },
 							{ path: "/status", element: lazily(<StatusPage />) },
 							{ path: "/notifications", element: lazily(<NotificationsPage />) },
+							{ path: "/account", element: lazily(<AccountPage />) },
 							{
 								element: <RequireOwner />,
 								children: [{ path: "/owner", element: lazily(<OwnerPage />), errorElement: <OwnerRouteError /> }],

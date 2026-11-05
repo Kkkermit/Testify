@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { Link, NavLink, Outlet } from "react-router";
 import { BotMark } from "@/components/brand/BotMark";
 import { LanguageSelect } from "@/components/form/LanguageSelect";
-import { Tooltip } from "@/components/primitives";
+import { Skeleton, Tooltip } from "@/components/primitives";
 import { INLINE_TARGET } from "@/components/primitives/targetStyles";
 import { useBot, useBotLook } from "@/features/auth/useBot";
 import { useMe } from "@/features/auth/useMe";
@@ -49,7 +49,7 @@ export function SiteShell({ column = false }: { column?: boolean }): React.JSX.E
 					</div>
 				</div>
 
-				{site.data?.dashboard === true && <AccountLink />}
+				{site.isPending ? <Skeleton className="h-10 w-32" /> : site.data?.dashboard === true && <AccountLink />}
 			</header>
 
 			<main
@@ -103,6 +103,8 @@ function AccountLink(): React.JSX.Element {
 	const { t } = useTranslation();
 	const me = useMe();
 	const signedIn = me.data !== null && me.data !== undefined;
+
+	if (me.isPending) return <Skeleton className="h-10 w-32" />;
 
 	return (
 		<Link

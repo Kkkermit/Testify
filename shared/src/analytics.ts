@@ -219,6 +219,7 @@ export interface ScreenTally {
 
 /** Every dashboard screen a view is counted against, so a request cannot fill the tally with routes of its own. */
 export const SCREEN_ROUTES = [
+	"/account",
 	"/appearance",
 	"/guilds",
 	"/guilds/compare",

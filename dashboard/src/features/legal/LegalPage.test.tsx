@@ -60,7 +60,7 @@ describe("the legal pages", () => {
 	it("says when the text last changed, and sums it up before the detail", () => {
 		renderWithProviders(<LegalPage document={TERMS} />, { path: "/terms" });
 
-		expect(screen.getByText("Last updated 31 Oct 2026")).toBeInTheDocument();
+		expect(screen.getByText("Last updated 5 Nov 2026")).toBeInTheDocument();
 		expect(screen.getByRole("heading", { level: 2, name: "At a glance" })).toBeInTheDocument();
 		expect(screen.getByText(english("legal.termsGlanceCoinsV"))).toBeInTheDocument();
 	});
@@ -114,6 +114,13 @@ describe("the legal pages", () => {
 		expect(text).toMatch(
 			/keeps when you last read them and when it last told you about one, against your user id and nothing else/,
 		);
+		// `ERASURE` keeps the blacklist, warnings, cases and softbans about somebody, and anonymises what they did as staff.
+		const erasure = botSource("src/database/repositories/accountRepository.ts");
+		expect(erasure).toMatch(/blacklist: \{ userId: "keep" \}/);
+		expect(erasure).toMatch(/modcases: \{ userId: "keep", moderatorId: "anonymise" \}/);
+		expect(text).toMatch(/delete their own data at any time .* can’t be undone/);
+		expect(text).toMatch(/Warnings, cases, softbans and blocks against you are kept/);
+		expect(text).toMatch(/stays with your name taken off/);
 		// `purgeGuild` keeps member records, so the notice must not promise they go with the bot.
 		expect(text).toMatch(/every member record .* kept after the bot is removed/);
 	});

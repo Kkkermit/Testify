@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { type DashboardUser, type ManageableGuild } from "@testify/shared";
-import { FileText, LogOut, Palette, Search, ShieldQuestion } from "lucide-react";
+import { FileText, LogOut, Palette, Search, ShieldQuestion, UserCog } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { GuildSwitcher } from "@/app/layout/GuildSwitcher";
@@ -19,12 +19,18 @@ import { cn } from "@/lib/cn";
 import { hardRedirect } from "@/lib/redirect";
 
 const FOOTER_LINKS = [
+	{ to: "/account", labelKey: "nav.account", hintKey: "nav.accountHint" },
 	{ to: "/appearance", labelKey: "nav.appearance", hintKey: "nav.appearanceHint" },
 	{ to: "/terms", labelKey: "nav.terms", hintKey: "nav.termsHint" },
 	{ to: "/privacy", labelKey: "nav.privacy", hintKey: "nav.privacyHint" },
 ] as const;
 
-const FOOTER_ICON = { "/appearance": Palette, "/terms": FileText, "/privacy": ShieldQuestion } as const;
+const FOOTER_ICON = {
+	"/account": UserCog,
+	"/appearance": Palette,
+	"/terms": FileText,
+	"/privacy": ShieldQuestion,
+} as const;
 
 export function Sidebar({
 	user,

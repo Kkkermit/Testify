@@ -27,7 +27,7 @@ import { badRequest, unauthorised, UpstreamProblem } from "@api/errors";
 import { guildLists } from "@api/guildCache";
 import { requireAuth } from "@api/middleware/session";
 import { missingSettings, type OauthConfig, requireOauth } from "@api/oauth";
-import { parseQuery } from "@api/validate";
+import { parseBody, parseQuery } from "@api/validate";
 import { type DashboardSession } from "@database/models/dashboardSession.schema";
 import {
 	createSession,
@@ -36,7 +36,15 @@ import {
 	readTokens,
 	updateTokens,
 } from "@database/repositories/dashboardSessionRepository";
-import { type ManageableGuild, type MeResponse, returnTo as returnToSchema, type SetupStatus } from "@testify/shared";
+import { eraseAccount } from "@lib/account";
+import {
+	confirmsName,
+	eraseAccountSchema,
+	type ManageableGuild,
+	type MeResponse,
+	returnTo as returnToSchema,
+	type SetupStatus,
+} from "@testify/shared";
 
 type ApiContext = Context<ApiBindings>;
 
@@ -141,6 +149,22 @@ auth.post("/logout", requireAuth, async (context) => {
 auth.post("/logout-all", requireAuth, async (context) => {
 	await deleteSessionsFor(sessionOf(context).userId);
 	guildLists.forget(sessionOf(context).userId);
+	clearAuthCookies(context, context.get("env"));
+
+	return context.body(null, 204);
+});
+
+/** Anybody signed in may delete what the bot keeps about them; the typed username is the confirmation. */
+auth.post("/erase", requireAuth, async (context) => {
+	const session = sessionOf(context);
+	const body = await parseBody(context, eraseAccountSchema);
+	if (!confirmsName(body.confirm, session.username, session.userId)) {
+		throw badRequest("Type your username or your Discord ID exactly to confirm.");
+	}
+
+	await eraseAccount(context.get("client"), session.userId);
+	await deleteSessionsFor(session.userId);
+	guildLists.forget(session.userId);
 	clearAuthCookies(context, context.get("env"));
 
 	return context.body(null, 204);

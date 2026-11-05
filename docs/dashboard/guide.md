@@ -779,6 +779,7 @@ a gap; jsdom computes no styles, so it pins the class and a browser measurement 
 | `/guilds/:id/commands`            | Per-command switches for this server                                                        |
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
+| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
 | `/owner`                          | Nine tabs: fleet, usage, commands, logs, run, blacklist, notifications, runtime, control    |
 
 Verification has its own API route and `useVerification.ts` but no page of its own — it is a section of
@@ -1267,6 +1268,16 @@ a setting.
 
 **The greying is a courtesy; `actOn()` is the gate**, asked again before every write.
 
+### 20.6a Deleting your own data
+
+**Who:** anybody signed in, manager or not. The one journey that needs no server.
+
+1. The sidebar's footer links **Your data** (`/account`), beside Appearance.
+2. The page lists what goes and what stays before it offers anything to press.
+3. **Delete my data** opens a warning that it is immediate and cannot be undone, and a field for their username or
+   Discord ID. Delete everything stays disabled until it matches.
+4. On success the query cache is emptied and the reader lands on `/` signed out, with a notice saying it is done.
+
 ### 20.7 The owner journeys
 
 All behind `requireOwner`, which answers **404** so a manager never learns the console is there.
@@ -1317,11 +1328,11 @@ Two corollaries:
 
 ### 20.9 Confirmations — three tiers
 
-| Tier              | Cost of a misclick                     | Examples                           |
-| ----------------- | -------------------------------------- | ---------------------------------- |
-| None              | Reversible from the same screen        | Every toggle, every picker, Pause  |
-| Typed **name**    | Unrecoverable, but scoped to one thing | Clear all warnings, leave a server |
-| Typed **literal** | Ends the process or affects everything | `shut down`                        |
+| Tier              | Cost of a misclick                     | Examples                                           |
+| ----------------- | -------------------------------------- | -------------------------------------------------- |
+| None              | Reversible from the same screen        | Every toggle, every picker, Pause                  |
+| Typed **name**    | Unrecoverable, but scoped to one thing | Clear all warnings, leave a server, Delete my data |
+| Typed **literal** | Ends the process or affects everything | `shut down`                                        |
 
 **The server checks it too.** The browser asking for the name is the warning; `confirm !== guild.name` in the
 route is what makes a hand-written request with an empty body impossible. A confirmation that exists only in the

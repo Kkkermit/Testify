@@ -155,6 +155,10 @@ export function mentionNoticesAfterCommand(
 	});
 }
 
+export function forgetNoticeHint(userId: string): void {
+	told.delete(userId);
+}
+
 export function clearNoticeHints(): void {
 	told.clear();
 }

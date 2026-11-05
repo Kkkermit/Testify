@@ -698,7 +698,8 @@ Rules:
    `guildId:command:userId`. A global cooldown key was a real bug: since the economy is per-guild, `/beg` in one
    server blocked `/beg` in another.
 4. **Never cache a guild-specific setting in a module-level variable.** Read it per interaction.
-5. **A job that scans across guilds is correct** — `lotteryDraw` finding every due draw is the intended shape.
+5. **A job that scans across guilds is correct** — `lotteryDraw` finding every due draw is the intended shape. So
+   is Delete my data, which is about one person everywhere.
 
 ---
 
@@ -721,6 +722,9 @@ Rules:
    repository exports a `purge<Feature>(guildId)`, and `purgeGuild` in `guildRepository.ts` calls every one when
    the bot is removed. A new feature adds its purge there, and a test that writes its settings, calls
    `purgeGuild` and finds nothing left — `guildRepository.test.ts` does it for the smaller settings at once.
+   **A field that names a person is listed in `ERASURE`** in `accountRepository.ts`, saying what Delete my data does
+   to it; the coverage test fails on a new one that is not (see
+   [§21](#delete-my-data-wipes-what-is-theirs-at-once-and-for-good)).
 6. Use `mongodb-memory-server` (`tests/helpers/mongo.ts`) when the query itself is under test, and a mocked
    model when it is not.
 7. **Mongoose applies defaults on write, not to documents already on disk.** A field added to a schema today does
@@ -1898,6 +1902,32 @@ On the dashboard, `NoticeBanner` sits above every screen in `AppShell` while any
 `/notifications`, which marks them read once they are on screen and keeps the "New" badges from its first answer, so
 they do not vanish while being read.
 
+### Delete my data wipes what is theirs, at once and for good
+
+Anybody who can sign in to the dashboard can open **Your data** (`/account`) and delete everything the bot keeps about
+them, in every server, after typing their username or Discord ID back (`confirmsName`, compared by the server). Nothing
+is held for a grace period and nothing can bring it back, which the page says before the button. Five things about it
+are load-bearing:
+
+- **`ERASURE` in `src/database/repositories/accountRepository.ts` is the contract**, one line per field that names a
+  person, saying whether its record is deleted, its id pulled from a list, its id and name replaced, or the record
+  kept. `accountRepository.test.ts` walks every Mongoose schema, subdocument arrays included, and fails on a field
+  ending `Id`, `Ids`, `By` or `Voters` that the map does not name, so a new feature cannot forget it. It was proved to
+  go red. The integration half, which writes a record to every collection and erases it, needs MongoDB, so it runs on
+  CI.
+- **Moderation records about them are kept.** Warnings, cases, softbans and a blacklist entry protect the servers
+  they are in, and deleting them would let anybody wipe their own record. The privacy notice says so
+  (`legal.removalP3`) and `LegalPage.test.tsx` pins the claim to the `keep` lines in the map.
+- **What they did for a server stays, without them.** A case they opened, a ticket, a giveaway they hosted or a
+  setting they changed keeps its place in the server's record, with the id replaced by `DELETED_USER_ID` ("0", which
+  no Discord id is) and the name by `DELETED_USER_NAME`, because a required field would refuse an empty one.
+  `mentionOf` writes that name where Discord would show `<@0>`, and the dashboard's `personName` translates it.
+- **Everything that remembers them in memory is told too.** `eraseAccount` drops their pending activity counts, the
+  notifications hint and the away-note cache, takes down the idea posts the bot made for them (a post Discord will
+  not delete is not worth failing over), and the route then ends every session they have and clears the cookies.
+- **It writes no audit record**, since a record of who erased themselves is the one thing that must not be left, and
+  `/api/auth/erase` has a rate limit of its own (three a minute), because one request touches every collection.
+
 ### Global by design
 
 The blacklist, the user profile, reminders and the notifications' read state are intentionally not guild-scoped. See
@@ -2066,6 +2096,7 @@ four tabs, three shared components and two testable modules.
 | `/commands`                       | Every command, searchable, with the coverage tile                                           |
 | `/status`                         | Online or not, uptime, speed, packages and outside services, 30 days back                   |
 | `/notifications`                  | What the bot's owners want everybody to know; opening it reads them                         |
+| `/account`                        | What the bot keeps about the reader, and Delete my data                                     |
 | `/help`                           | Getting started, and the support assistant that answers from help articles                  |
 | `/terms`, `/privacy`              | Public — outside the sign-in gate, deliberately                                             |
 | `/appearance`                     | Theme, an accent or a colour of your own, motion and language; public, in any frame         |

@@ -19,6 +19,7 @@ import {
 	CASE_LIMITS,
 	type CasePage,
 	type CaseSettings,
+	DELETED_USER_ID,
 	idFromQuery,
 	type ModCase,
 } from "@testify/shared";
@@ -63,7 +64,14 @@ export function caseEmbed(modCase: ModCase): EmbedBuilder {
 		title: `${modCase.number === null ? "Earlier warning" : `Case ${String(modCase.number)}`} · ${CASE_ACTION_LABELS[modCase.action]}`,
 		fields: [
 			{ name: "Member", value: `<@${modCase.userId}> · ${modCase.username} (\`${modCase.userId}\`)`, inline: false },
-			{ name: "Moderator", value: `<@${modCase.moderatorId}> · ${modCase.moderatorName}`, inline: true },
+			{
+				name: "Moderator",
+				value:
+					modCase.moderatorId === DELETED_USER_ID
+						? modCase.moderatorName
+						: `<@${modCase.moderatorId}> · ${modCase.moderatorName}`,
+				inline: true,
+			},
 			...(modCase.durationMs === null
 				? []
 				: [{ name: "For", value: formatDurationLong(modCase.durationMs), inline: true }]),

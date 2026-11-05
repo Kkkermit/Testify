@@ -7,6 +7,7 @@ import { FIELD } from "@/components/form/fieldStyles";
 import { Badge, Button } from "@/components/primitives";
 import { actionOf } from "@/features/warnings/warnings.utils";
 import { shortDate } from "@/lib/datetime";
+import { personName } from "@/lib/people";
 import { problemText } from "@/lib/problemText";
 import { sanitiseInput } from "@/lib/sanitise";
 
@@ -62,7 +63,7 @@ export function WarningRow({
 
 				<p className="text-muted-foreground flex flex-wrap items-center gap-2 text-xs">
 					<span>
-						{t("warnings.givenBy", { name: warning.byTag })} ·{" "}
+						{t("warnings.givenBy", { name: personName(warning.byTag, t) })} ·{" "}
 						<time dateTime={warning.at}>{shortDate(warning.at)}</time>
 					</span>
 					<Badge tone={action.tone}>{action.label}</Badge>

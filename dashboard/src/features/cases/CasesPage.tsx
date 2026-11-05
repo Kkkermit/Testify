@@ -36,6 +36,7 @@ import { ApiError } from "@/lib/api";
 import { channelLabel } from "@/lib/channels";
 import { dateAndTime } from "@/lib/datetime";
 import { pageCount } from "@/lib/paging";
+import { personName } from "@/lib/people";
 
 export function CasesPage(): React.JSX.Element {
 	const { t } = useTranslation();
@@ -201,7 +202,7 @@ function CaseRow({ guildId, modCase }: { guildId: string; modCase: ModCase }): R
 			</div>
 			<p className="text-sm break-words">{modCase.reason}</p>
 			<p className="text-muted-foreground text-xs">
-				{t("cases.by", { name: modCase.moderatorName, when: dateAndTime(modCase.at) })}
+				{t("cases.by", { name: personName(modCase.moderatorName, t), when: dateAndTime(modCase.at) })}
 				{modCase.durationMs !== null && ` · ${t("cases.for", { length: durationText(modCase.durationMs) })}`}
 			</p>
 		</li>

@@ -42,6 +42,9 @@ const SIGN_IN_LIMIT = { limit: 20, windowMs: 60_000 };
 /** A question may cost the owner a model call, so it is counted apart and far tighter than reading a page. */
 const SUPPORT_LIMIT = { limit: 10, windowMs: 60_000 };
 
+/** Deleting somebody's data touches every collection, so it is counted apart from everything else. */
+const ERASE_LIMIT = { limit: 3, windowMs: 60_000 };
+
 /** One address can be a household, an office or a school, so its ceiling is a multiple of one person's. */
 const ADDRESS_MULTIPLIER = 6;
 
@@ -64,6 +67,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	const general = limiterPair(GENERAL_LIMIT);
 	const signIn = limiterPair(SIGN_IN_LIMIT);
 	const asking = limiterPair(SUPPORT_LIMIT);
+	const erasing = limiterPair(ERASE_LIMIT);
 	const oauth = oauthConfigFrom(env);
 	const github = new GitHubReader({
 		repository: theme.repository,
@@ -86,6 +90,7 @@ export function createApi(client: TestifyClient, env: Env): Hono<ApiBindings> {
 	app.use("/api/auth/login", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/auth/callback", rateLimit(signIn, { name: "sign-in", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	app.use("/api/support/ask", rateLimit(asking, { name: "support", trustProxy: env.DASHBOARD_TRUST_PROXY }));
+	app.use("/api/auth/erase", rateLimit(erasing, { name: "erase", trustProxy: env.DASHBOARD_TRUST_PROXY }));
 	// Before `verifyCsrf`, which compares against the session's stored secret when there is one.
 	app.use("/api/*", loadSession);
 	app.use("*", verifyCsrf);

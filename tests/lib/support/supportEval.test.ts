@@ -72,6 +72,7 @@ const PARAPHRASES: [string, string[]][] = [
 	["dark mode", ["appearance"]],
 	["change the language of the dashboard", ["appearance"]],
 	["what data do you store about me", ["privacy"]],
+	["delete everything you have on me", ["privacy"]],
 	["report a bug", ["report-a-problem"]],
 	["how do I remove the bot", ["remove-the-bot"]],
 	["can I host my own version", ["self-hosting"]],

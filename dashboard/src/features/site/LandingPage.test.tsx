@@ -4,6 +4,7 @@ import { http, HttpResponse } from "msw";
 import { LandingPage } from "@/features/site/LandingPage";
 import { hardRedirect } from "@/lib/redirect";
 import { expectNoViolations } from "@/test/axe";
+import { me } from "@/test/fixtures/session";
 import { siteInfo } from "@/test/fixtures/site";
 import { renderWithProviders } from "@/test/renderWithProviders";
 import { server } from "@/test/setup";
@@ -34,6 +35,29 @@ describe("the landing page", () => {
 		renderWithProviders(<LandingPage />);
 
 		expect(await screen.findByRole("link", { name: /open your servers/i })).toHaveAttribute("href", "/guilds");
+		expect(screen.queryByRole("button", { name: /sign in/i })).toBeNull();
+	});
+
+	/** The page showed Sign in to somebody already signed in, then swapped it for Open your servers. */
+	it("offers neither button until the session has answered", async () => {
+		let answer: () => void = () => undefined;
+		const answered = new Promise<void>((resolve) => {
+			answer = resolve;
+		});
+		server.use(
+			http.get("/api/auth/me", async () => {
+				await answered;
+				return HttpResponse.json(me);
+			}),
+		);
+		renderWithProviders(<LandingPage />);
+
+		await screen.findByRole("link", { name: /add to discord/i });
+		expect(screen.queryByRole("button", { name: /sign in/i })).toBeNull();
+		expect(screen.queryByRole("link", { name: /open your servers/i })).toBeNull();
+
+		answer();
+		expect(await screen.findByRole("link", { name: /open your servers/i })).toBeInTheDocument();
 		expect(screen.queryByRole("button", { name: /sign in/i })).toBeNull();
 	});
 
