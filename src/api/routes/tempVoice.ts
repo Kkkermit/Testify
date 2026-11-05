@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -27,9 +27,10 @@ tempVoice.get("/", async (context) => context.json(await readTempVoiceSettings(g
 tempVoice.patch("/", async (context) => {
 	const guild = guildOf(context);
 	const patch = await parseBody(context, tempVoicePatch);
+	const before = await readTempVoiceSettings(guild);
 
 	const settings = await applyTempVoiceSettings(guild, patch, context.get("session")?.userId ?? null);
-	await auditChange(context, { action: "temp-voice.update", summary: summarise(patch) });
+	await auditSettings(context, { action: "temp-voice.update", summary: summarise(patch), before, after: settings });
 
 	return context.json(settings);
 });

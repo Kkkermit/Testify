@@ -9,6 +9,7 @@ import {
 	type ChangeVerb,
 	type ServerChange,
 	type ServerChangesPage,
+	restoreOf,
 } from "@testify/shared";
 
 /** One list of a server's changes, from the dashboard's own records and from Discord's audit log. */
@@ -104,6 +105,7 @@ export function discordChange(entry: AuditEntryLike): ServerChange {
 		summary: null,
 		target: targetName(entry),
 		reason: entry.reason,
+		restore: null,
 	};
 }
 
@@ -119,6 +121,7 @@ export function dashboardChange(record: DashboardAudit & { _id?: { toString(): s
 		summary: record.summary,
 		target: null,
 		reason: null,
+		restore: restoreOf(record.action, record.before, record.after),
 	};
 }
 

@@ -7,7 +7,8 @@ import { type Env } from "@config/env";
 import { type TestifyClient } from "@core/client";
 import { UserFacingError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
-import { saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
+import { getGoodbyeSettings, saveGoodbyeSettings } from "@database/repositories/goodbyeRepository";
+import { restoreOf } from "@testify/shared";
 
 jest.mock("@database/repositories/goodbyeRepository", () => ({
 	getGoodbyeSettings: jest.fn(() => Promise.resolve(null)),
@@ -73,6 +74,32 @@ describe("the goodbye route", () => {
 			OWNER,
 		);
 		expect(recordAudit).toHaveBeenCalledWith(expect.objectContaining({ action: "goodbye.update" }));
+	});
+
+	/** What the change replaced is what lets the Changes page put it back, so it is every field it could restore. */
+	it("records every field it could put back, as stored before and after, and nothing else", async () => {
+		const saved = { enabled: true, channelId: CHANNEL, message: "Bye {user}", style: "text" as const };
+		jest
+			.mocked(getGoodbyeSettings)
+			.mockResolvedValueOnce(null)
+			.mockResolvedValueOnce(null)
+			.mockResolvedValueOnce(saved);
+
+		await send("PATCH", { channelId: CHANNEL, enabled: true });
+
+		const record = jest.mocked(recordAudit).mock.calls[0]?.[0];
+		expect(record?.before).toEqual({
+			enabled: false,
+			channelId: null,
+			message: expect.any(String) as unknown,
+			style: "text",
+		});
+		expect(record?.after).toEqual(saved);
+		expect(restoreOf(record?.action ?? "", record?.before, record?.after)?.put).toEqual({
+			enabled: false,
+			channelId: null,
+			message: (record?.before as { message: string }).message,
+		});
 	});
 
 	it("refuses to switch on with no channel, in words", async () => {

@@ -1,6 +1,6 @@
 import { type Guild, PermissionFlagsBits } from "discord.js";
 import { type Context, Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditSettings } from "@api/audit";
 import { type ApiBindings, guildOf } from "@api/context";
 import { badRequest } from "@api/errors";
 import { demandPermission, requireGrantable } from "@api/middleware/reach";
@@ -90,22 +90,9 @@ async function answer(
 ): Promise<Response> {
 	const after = await configOf(guild);
 
-	await auditChange(context, {
-		action: "verification.update",
-		summary: summarise(patch),
-		before: pick(before, patch),
-		after: pick(after, patch),
-	});
+	await auditSettings(context, { action: "verification.update", summary: summarise(patch), before, after });
 
 	return context.json(after);
-}
-
-function pick(config: VerificationConfigResponse, patch: VerificationPatch): Record<string, unknown> {
-	return Object.fromEntries(
-		Object.keys(patch)
-			.filter((key) => key in config)
-			.map((key) => [key, config[key as keyof VerificationConfigResponse]]),
-	);
 }
 
 /** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */

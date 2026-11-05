@@ -34,6 +34,7 @@ export * from "./notices";
 export * from "./places";
 export * from "./problems";
 export * from "./raid";
+export * from "./restore";
 export * from "./roleMenus";
 export * from "./roleUses";
 export * from "./scheduledMessages";

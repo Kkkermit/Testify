@@ -1,6 +1,6 @@
 import { PermissionFlagsBits } from "discord.js";
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { requireGrantable, requirePermission } from "@api/middleware/reach";
 import { requireGuild } from "@api/middleware/session";
@@ -40,12 +40,7 @@ levelling.patch("/", async (context) => {
 	});
 
 	const after = await configOf(guildId);
-	await auditChange(context, {
-		action: "levelling.update",
-		summary: summarisePatch(patch),
-		before: pick(before, patch),
-		after: pick(after, patch),
-	});
+	await auditSettings(context, { action: "levelling.update", summary: summarisePatch(patch), before, after });
 
 	return context.json(after);
 });
@@ -130,10 +125,6 @@ levelling.delete("/", async (context) => {
 
 function count(value: number, noun: string): string {
 	return `${String(value)} ${noun}${value === 1 ? "" : "s"}`;
-}
-
-function pick(config: LevelConfigResponse, patch: Record<string, unknown>): Record<string, unknown> {
-	return Object.fromEntries(Object.keys(patch).map((key) => [key, config[key as keyof LevelConfigResponse]]));
 }
 
 /** Read on the overview's recent-changes card, so it has to say what changed without opening the diff. */

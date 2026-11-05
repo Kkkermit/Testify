@@ -123,6 +123,7 @@ export const serverChanges: ServerChangesPage = {
 			summary: null,
 			target: "marcus",
 			reason: "Spamming invites",
+			restore: null,
 		},
 		{
 			id: "d1",
@@ -135,6 +136,7 @@ export const serverChanges: ServerChangesPage = {
 			summary: "Turned levelling on",
 			target: null,
 			reason: null,
+			restore: { action: "levelling.update", put: { enabled: false }, expect: { enabled: true } },
 		},
 	],
 	total: 2,

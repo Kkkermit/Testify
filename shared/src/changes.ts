@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { type Paged } from "./api";
+import { type ChangeRestore } from "./restore";
 import { plainLine } from "./text";
 
 /** A server's recent changes: what managers did on the dashboard and what Discord's own audit log recorded. */
@@ -74,6 +75,8 @@ export interface ServerChange {
 	/** The channel, role, member or other thing changed, by name, when Discord still knows it. */
 	target: string | null;
 	reason: string | null;
+	/** How a dashboard settings change can be put back, or null when it cannot. */
+	restore: ChangeRestore | null;
 }
 
 export interface ServerChangesPage extends Paged<ServerChange> {

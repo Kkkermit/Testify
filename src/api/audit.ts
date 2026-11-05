@@ -2,12 +2,39 @@ import { type Context } from "hono";
 import { type ApiBindings } from "@api/context";
 import { toError } from "@core/errors";
 import { recordAudit } from "@database/repositories/dashboardAuditRepository";
+import { type RestorableAction, restorableFields } from "@testify/shared";
 
 /**
  * Written after the change succeeds; a failed audit write is logged and the request still succeeds. Keep `before` and
  * `after` to the field that changed.
  */
-export async function auditChange(
+export async function auditChange<Action extends string>(
+	context: Context<ApiBindings>,
+	// A change that can be put back goes through `auditSettings`, so it cannot be recorded without what it replaced.
+	entry: {
+		action: Action extends RestorableAction ? never : Action;
+		summary: string;
+		before?: unknown;
+		after?: unknown;
+	},
+): Promise<void> {
+	await write(context, entry);
+}
+
+/** A settings change the Changes page can put back: every field it could restore, as stored before and after. */
+export async function auditSettings(
+	context: Context<ApiBindings>,
+	entry: { action: RestorableAction; summary: string; before: unknown; after: unknown },
+): Promise<void> {
+	await write(context, {
+		action: entry.action,
+		summary: entry.summary,
+		before: restorableFields(entry.action, entry.before),
+		after: restorableFields(entry.action, entry.after),
+	});
+}
+
+async function write(
 	context: Context<ApiBindings>,
 	entry: { action: string; summary: string; before?: unknown; after?: unknown },
 ): Promise<void> {

@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { auditChange } from "@api/audit";
+import { auditChange, auditSettings } from "@api/audit";
 import { type ApiBindings, guildIdOf } from "@api/context";
 import { badRequest, notFound } from "@api/errors";
 import { requireGuild } from "@api/middleware/session";
@@ -17,11 +17,12 @@ lottery.get("/", async (context) => context.json(await readLottery(guildIdOf(con
 lottery.patch("/", async (context) => {
 	const guildId = guildIdOf(context);
 	const body = await parseBody(context, lotteryPatch);
+	const before = await readLottery(guildId);
 
 	const result = await applyLottery(guildId, body, context.get("session")?.userId ?? "");
 	if ("problem" in result) throw badRequest(result.problem);
 
-	await auditChange(context, { action: "lottery.update", summary: summaryOf(body) });
+	await auditSettings(context, { action: "lottery.update", summary: summaryOf(body), before, after: result.settings });
 
 	return context.json(result.settings);
 });
