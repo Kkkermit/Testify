@@ -1280,12 +1280,12 @@
 		"closeConfirm": "Close the ticket"
 	},
 	"lottery": {
+		"summaryNext": "The lottery is running with {{pot}} in the pot, and the next draw is on {{when}}.",
+		"summaryRunning": "The lottery is running with {{pot}} in the pot.",
+		"summaryFrozen": "The lottery is frozen with {{pot}} in the pot: no tickets are sold and nothing is drawn.",
+		"summaryOff": "The lottery is not running, so no tickets are sold.",
 		"title": "Lottery",
 		"subtitle": "A pot members buy tickets into, drawn on a schedule.",
-		"here": "This server’s lottery",
-		"notRunning": "Not running",
-		"frozen": "Frozen",
-		"running": "Running",
 		"prizePool": "Prize pool",
 		"ticketsSold": "Tickets sold",
 		"entrants": "Entrants",

@@ -1280,12 +1280,12 @@
 		"closeConfirm": "Ticket schließen"
 	},
 	"lottery": {
+		"summaryNext": "Die Lotterie läuft mit {{pot}} im Topf, und die nächste Ziehung ist am {{when}}.",
+		"summaryRunning": "Die Lotterie läuft mit {{pot}} im Topf.",
+		"summaryFrozen": "Die Lotterie ist mit {{pot}} im Topf eingefroren: Es werden keine Lose verkauft und nichts gezogen.",
+		"summaryOff": "Die Lotterie läuft nicht, daher werden keine Lose verkauft.",
 		"title": "Lotterie",
 		"subtitle": "Ein Topf, in den Mitglieder Lose kaufen, nach Zeitplan gezogen.",
-		"here": "Die Lotterie dieses Servers",
-		"notRunning": "Läuft nicht",
-		"frozen": "Eingefroren",
-		"running": "Läuft",
 		"prizePool": "Gewinntopf",
 		"ticketsSold": "Verkaufte Lose",
 		"entrants": "Teilnehmer",

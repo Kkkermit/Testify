@@ -4,8 +4,18 @@ import { useEffect, useState } from "react";
 import { Trans, useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, Field, FIELD, SavingIndicator, savingStateOf, SELECT, Warning } from "@/components/form";
-import { Badge, Button, Card, CARD_HEADING, PageHeader, Skeleton, StatTile } from "@/components/primitives";
+import {
+	ChannelPicker,
+	Field,
+	FIELD,
+	RowActions,
+	SavingIndicator,
+	savingStateOf,
+	SELECT,
+	SettingRows,
+	Warning,
+} from "@/components/form";
+import { Button, PageHeader, Skeleton, StatTile, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
 import { DrawHistory } from "@/features/lottery/components/DrawHistory";
@@ -22,6 +32,7 @@ import { useEndLottery, useLottery, useSaveLottery } from "@/features/lottery/us
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { dateAndTime } from "@/lib/datetime";
 import { formatNumber } from "@/lib/intl";
 import { oneOf } from "@/lib/oneOf";
 
@@ -35,7 +46,7 @@ export function LotteryPage(): React.JSX.Element {
 	const save = useSaveLottery(guildId);
 	const end = useEndLottery(guildId);
 
-	usePageTitle("Lottery", overview.data?.name);
+	usePageTitle(t("lottery.title"), overview.data?.name);
 
 	const settings = lottery.data;
 	const [draft, setDraft] = useState<Draft | null>(null);
@@ -67,26 +78,18 @@ export function LotteryPage(): React.JSX.Element {
 				action={<SavingIndicator state={savingStateOf(busy, save.isSuccess && !dirty)} />}
 			/>
 
-			<Card className="flex flex-wrap items-center justify-between gap-4">
-				<div className="flex flex-wrap items-center gap-3">
-					<h2 className={CARD_HEADING}>{t("lottery.here")}</h2>
-					{!settings.enabled && <Badge>{t("lottery.notRunning")}</Badge>}
-					{settings.enabled && settings.frozen && <Badge tone="warning">{t("lottery.frozen")}</Badge>}
-					{settings.enabled && !settings.frozen && <Badge tone="success">{t("lottery.running")}</Badge>}
-				</div>
-
-				{settings.enabled && (
-					<Button
-						variant="ghost"
-						disabled={busy}
-						onClick={() => {
-							save.mutate({ frozen: !settings.frozen });
-						}}
-					>
-						<Snowflake size={16} aria-hidden="true" /> {settings.frozen ? t("lottery.unfreeze") : t("lottery.freeze")}
-					</Button>
-				)}
-			</Card>
+			<Summary>
+				{!settings.enabled
+					? t("lottery.summaryOff")
+					: settings.frozen
+						? t("lottery.summaryFrozen", { pot: formatNumber(settings.prizePool) })
+						: settings.nextDrawAt === null
+							? t("lottery.summaryRunning", { pot: formatNumber(settings.prizePool) })
+							: t("lottery.summaryNext", {
+									pot: formatNumber(settings.prizePool),
+									when: dateAndTime(settings.nextDrawAt),
+								})}
+			</Summary>
 
 			{settings.enabled && (
 				<div className="grid gap-4 sm:grid-cols-3">
@@ -96,14 +99,10 @@ export function LotteryPage(): React.JSX.Element {
 				</div>
 			)}
 
-			<Card className="flex flex-col gap-4">
-				<div>
-					<h2 className={CARD_HEADING}>{t("lottery.howTitle")}</h2>
-					<p className="text-muted-foreground text-sm">
-						<Trans i18nKey="lottery.howBody" components={{ command: <code /> }} />
-					</p>
-				</div>
-
+			<SettingRows
+				title={t("lottery.howTitle")}
+				description={<Trans i18nKey="lottery.howBody" components={{ command: <code /> }} />}
+			>
 				<ChannelPicker
 					label={t("lottery.announcements")}
 					hint={t("lottery.announcementsHint")}
@@ -132,52 +131,50 @@ export function LotteryPage(): React.JSX.Element {
 					</select>
 				</Field>
 
-				<div className="grid gap-4 sm:grid-cols-3">
-					<Field label={t("lottery.ticketPrice")} htmlFor="lottery-fee">
-						<input
-							id="lottery-fee"
-							type="number"
-							inputMode="numeric"
-							min={LOTTERY_LIMITS.minEntryFee}
-							max={LOTTERY_LIMITS.maxEntryFee}
-							value={draft.entryFee}
-							onChange={(event) => {
-								set("entryFee", Number(event.target.value));
-							}}
-							className={cn(FIELD, "tabular-nums")}
-						/>
-					</Field>
+				<Field label={t("lottery.ticketPrice")} htmlFor="lottery-fee">
+					<input
+						id="lottery-fee"
+						type="number"
+						inputMode="numeric"
+						min={LOTTERY_LIMITS.minEntryFee}
+						max={LOTTERY_LIMITS.maxEntryFee}
+						value={draft.entryFee}
+						onChange={(event) => {
+							set("entryFee", Number(event.target.value));
+						}}
+						className={cn(FIELD, "max-w-40 tabular-nums")}
+					/>
+				</Field>
 
-					<Field label={t("lottery.winnersADraw")} htmlFor="lottery-winners">
-						<input
-							id="lottery-winners"
-							type="number"
-							inputMode="numeric"
-							min={LOTTERY_LIMITS.minWinners}
-							max={LOTTERY_LIMITS.maxWinners}
-							value={draft.maxWinners}
-							onChange={(event) => {
-								set("maxWinners", Number(event.target.value));
-							}}
-							className={cn(FIELD, "tabular-nums")}
-						/>
-					</Field>
+				<Field label={t("lottery.winnersADraw")} htmlFor="lottery-winners">
+					<input
+						id="lottery-winners"
+						type="number"
+						inputMode="numeric"
+						min={LOTTERY_LIMITS.minWinners}
+						max={LOTTERY_LIMITS.maxWinners}
+						value={draft.maxWinners}
+						onChange={(event) => {
+							set("maxWinners", Number(event.target.value));
+						}}
+						className={cn(FIELD, "max-w-40 tabular-nums")}
+					/>
+				</Field>
 
-					<Field label={t("lottery.startingPot")} htmlFor="lottery-base" hint={t("lottery.startingPotHint")}>
-						<input
-							id="lottery-base"
-							type="number"
-							inputMode="numeric"
-							min={LOTTERY_LIMITS.minBasePool}
-							max={LOTTERY_LIMITS.maxBasePool}
-							value={draft.basePrizePool}
-							onChange={(event) => {
-								set("basePrizePool", Number(event.target.value));
-							}}
-							className={cn(FIELD, "tabular-nums")}
-						/>
-					</Field>
-				</div>
+				<Field label={t("lottery.startingPot")} htmlFor="lottery-base" hint={t("lottery.startingPotHint")}>
+					<input
+						id="lottery-base"
+						type="number"
+						inputMode="numeric"
+						min={LOTTERY_LIMITS.minBasePool}
+						max={LOTTERY_LIMITS.maxBasePool}
+						value={draft.basePrizePool}
+						onChange={(event) => {
+							set("basePrizePool", Number(event.target.value));
+						}}
+						className={cn(FIELD, "max-w-40 tabular-nums")}
+					/>
+				</Field>
 
 				{warning !== null && <Warning>{warning}</Warning>}
 				{reschedules(draft, settings) && settings.enabled && <Warning>{t(RESCHEDULE_NOTES[draft.frequency])}</Warning>}
@@ -186,7 +183,7 @@ export function LotteryPage(): React.JSX.Element {
 					<Warning>{save.error instanceof ApiError ? save.error.message : t("common.couldNotSave")}</Warning>
 				)}
 
-				<div>
+				<RowActions>
 					<Button
 						disabled={!dirty || problem !== null || busy}
 						onClick={() => {
@@ -201,21 +198,28 @@ export function LotteryPage(): React.JSX.Element {
 					>
 						{settings.enabled ? t("common.saveChanges") : t("lottery.start")}
 					</Button>
-				</div>
-			</Card>
+					{settings.enabled && (
+						<Button
+							variant="ghost"
+							disabled={busy}
+							onClick={() => {
+								save.mutate({ frozen: !settings.frozen });
+							}}
+						>
+							<Snowflake size={16} aria-hidden="true" /> {settings.frozen ? t("lottery.unfreeze") : t("lottery.freeze")}
+						</Button>
+					)}
+				</RowActions>
+			</SettingRows>
 
 			<DrawHistory draws={settings.history} nextDrawAt={settings.enabled ? settings.nextDrawAt : null} />
 
 			{settings.enabled && (
-				<Card className="flex flex-col gap-3">
-					<div className="flex flex-wrap items-center justify-between gap-4">
-						<div>
-							<h2 className={CARD_HEADING}>{t("lottery.endIt")}</h2>
-							<p className="text-muted-foreground text-sm">
-								{t("lottery.endPot", { pot: formatNumber(settings.prizePool) })}
-							</p>
-						</div>
-
+				<SettingRows
+					title={t("lottery.endIt")}
+					description={t("lottery.endPot", { pot: formatNumber(settings.prizePool) })}
+				>
+					<RowActions>
 						<Button
 							variant="ghost"
 							disabled={busy}
@@ -225,10 +229,9 @@ export function LotteryPage(): React.JSX.Element {
 						>
 							<Trash2 size={16} aria-hidden="true" /> {t("lottery.endIt")}
 						</Button>
-					</div>
-
+					</RowActions>
 					{confirming && (
-						<div className="flex flex-wrap items-center gap-3">
+						<RowActions>
 							<Warning>{t("lottery.cannotUndo")}</Warning>
 							<Button
 								variant="destructive"
@@ -240,9 +243,9 @@ export function LotteryPage(): React.JSX.Element {
 							>
 								{t("lottery.yesEndIt")}
 							</Button>
-						</div>
+						</RowActions>
 					)}
-				</Card>
+				</SettingRows>
 			)}
 
 			{end.error !== null && (

@@ -1319,12 +1319,12 @@
 		"closeConfirm": "Chiudi il ticket"
 	},
 	"lottery": {
+		"summaryNext": "La lotteria è attiva con {{pot}} nel montepremi, e la prossima estrazione è il {{when}}.",
+		"summaryRunning": "La lotteria è attiva con {{pot}} nel montepremi.",
+		"summaryFrozen": "La lotteria è congelata con {{pot}} nel montepremi: non si vendono biglietti e non si estrae nulla.",
+		"summaryOff": "La lotteria non è attiva, quindi non si vendono biglietti.",
 		"title": "Lotteria",
 		"subtitle": "Un montepremi in cui i membri comprano biglietti, estratto a cadenza fissa.",
-		"here": "La lotteria di questo server",
-		"notRunning": "Ferma",
-		"frozen": "Congelata",
-		"running": "In corso",
 		"prizePool": "Montepremi",
 		"ticketsSold": "Biglietti venduti",
 		"entrants": "Partecipanti",

@@ -1319,12 +1319,12 @@
 		"closeConfirm": "Cerrar el ticket"
 	},
 	"lottery": {
+		"summaryNext": "La lotería está en marcha con {{pot}} en el bote, y el próximo sorteo es el {{when}}.",
+		"summaryRunning": "La lotería está en marcha con {{pot}} en el bote.",
+		"summaryFrozen": "La lotería está congelada con {{pot}} en el bote: no se venden boletos ni se sortea nada.",
+		"summaryOff": "La lotería no está en marcha, así que no se venden boletos.",
 		"title": "Lotería",
 		"subtitle": "Un bote al que los miembros compran boletos, sorteado según un horario.",
-		"here": "La lotería de este servidor",
-		"notRunning": "Parada",
-		"frozen": "Congelada",
-		"running": "En marcha",
 		"prizePool": "Bote",
 		"ticketsSold": "Boletos vendidos",
 		"entrants": "Participantes",

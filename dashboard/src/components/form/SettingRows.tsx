@@ -10,7 +10,7 @@ export function SettingRows({
 	children,
 }: {
 	title?: string;
-	description?: string;
+	description?: ReactNode;
 	/** Beside the title, such as the panel's own saving indicator. */
 	action?: ReactNode;
 	children: ReactNode;

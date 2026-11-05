@@ -1319,12 +1319,12 @@
 		"closeConfirm": "Fermer le ticket"
 	},
 	"lottery": {
+		"summaryNext": "La loterie tourne avec {{pot}} dans la cagnotte, et le prochain tirage a lieu le {{when}}.",
+		"summaryRunning": "La loterie tourne avec {{pot}} dans la cagnotte.",
+		"summaryFrozen": "La loterie est gelée avec {{pot}} dans la cagnotte : aucun ticket n’est vendu et rien n’est tiré.",
+		"summaryOff": "La loterie ne tourne pas, donc aucun ticket n’est vendu.",
 		"title": "Loterie",
 		"subtitle": "Une cagnotte où les membres achètent des tickets, tirée selon un calendrier.",
-		"here": "La loterie de ce serveur",
-		"notRunning": "Arrêtée",
-		"frozen": "Gelée",
-		"running": "En cours",
 		"prizePool": "Cagnotte",
 		"ticketsSold": "Tickets vendus",
 		"entrants": "Participants",

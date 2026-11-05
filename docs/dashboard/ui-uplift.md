@@ -135,7 +135,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/member-count`                             | Stats         | —                   | Kept; a page of figures   |
 | `…/bot-stats`                                | Stats         | —                   | Done                      |
 | `…/treasure`                                 | Economy       | —                   | Done                      |
-| `…/lottery`                                  | Economy       | —                   | To do                     |
+| `…/lottery`                                  | Economy       | —                   | Done                      |
 | `…/casino`                                   | Economy       | —                   | To do                     |
 | `…/music`                                    | Entertainment | —                   | To do                     |
 | `…/giveaways`                                | Entertainment | —                   | To do                     |
