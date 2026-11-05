@@ -1152,6 +1152,14 @@
 		"rewardsBody": "Un rol que se entrega cuando alguien alcanza un nivel. {{used, number}} de {{max, number}} en uso."
 	},
 	"members": {
+		"summarySoftbanned": "Con softban, que se levanta el {{when}}.",
+		"summaryLeft": "Salió del servidor.",
+		"summaryTimedOut": "Aislado hasta el {{when}}.",
+		"summaryJoined": "En el servidor desde el {{date}}.",
+		"summaryJoinedWarned_one": "En el servidor desde el {{date}}, con {{count, number}} aviso registrado.",
+		"summaryJoinedWarned_many": "En el servidor desde el {{date}}, con {{count, number}} de avisos registrados.",
+		"summaryJoinedWarned_other": "En el servidor desde el {{date}}, con {{count, number}} avisos registrados.",
+		"summaryHere": "En el servidor.",
 		"title": "Miembros",
 		"subtitle": "Quién va por delante en dinero y en niveles. Son las mismas listas que muestra /leaderboard en Discord.",
 		"leaderboard": "Clasificación",
@@ -1204,8 +1212,6 @@
 		"rankedMembers_one": "{{count, number}} miembro clasificado.",
 		"rankedMembers_many": "{{count, number}} miembros clasificados.",
 		"rankedMembers_other": "{{count, number}} miembros clasificados.",
-		"joinUnknown": "Fecha de entrada desconocida",
-		"joined": "Entró el {{date}}",
 		"noWarnings": "Sin avisos registrados.",
 		"warningCount_one": "{{count}} aviso registrado.",
 		"warningCount_many": "{{count}} avisos registrados.",

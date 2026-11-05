@@ -1,9 +1,10 @@
 import { type LevelBody, MEMBER_LIMITS, type MemberDetail } from "@testify/shared";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Field, Warning } from "@/components/form";
+import { Field, RowActions, SettingRows, Warning } from "@/components/form";
 import { FIELD } from "@/components/form/fieldStyles";
-import { Button, Card, CARD_HEADING } from "@/components/primitives";
+import { Button } from "@/components/primitives";
+import { cn } from "@/lib/cn";
 import { formatNumber } from "@/lib/intl";
 
 export function LevelCard({
@@ -26,57 +27,51 @@ export function LevelCard({
 	const xpValid = xp.trim() !== "" && Number.isInteger(xpValue) && xpValue !== 0;
 
 	return (
-		<Card className="flex flex-col gap-4">
-			<div>
-				<h2 className={CARD_HEADING}>{t("members.levelAndXp")}</h2>
-				<p className="text-muted-foreground text-sm">
-					{detail.levels === null
-						? t("members.noXpYet")
-						: t("members.levelOnXp", { level: detail.levels.level, xp: formatNumber(detail.levels.xp) })}
-				</p>
-			</div>
+		<SettingRows
+			title={t("members.levelAndXp")}
+			description={
+				detail.levels === null
+					? t("members.noXpYet")
+					: t("members.levelOnXp", { level: detail.levels.level, xp: formatNumber(detail.levels.xp) })
+			}
+		>
+			<Field
+				label={t("members.setLevel")}
+				hint={t("members.levelRange", { max: MEMBER_LIMITS.maxLevel })}
+				htmlFor="member-level"
+			>
+				<input
+					id="member-level"
+					className={cn(FIELD, "max-w-48 tabular-nums")}
+					type="number"
+					inputMode="numeric"
+					min={0}
+					max={MEMBER_LIMITS.maxLevel}
+					value={level}
+					onChange={(event) => {
+						setLevel(event.target.value);
+					}}
+				/>
+			</Field>
 
-			<div className="grid gap-4 sm:grid-cols-2">
-				<Field
-					label={t("members.setLevel")}
-					hint={t("members.levelRange", { max: MEMBER_LIMITS.maxLevel })}
-					htmlFor="member-level"
-				>
-					<input
-						id="member-level"
-						className={FIELD}
-						type="number"
-						inputMode="numeric"
-						min={0}
-						max={MEMBER_LIMITS.maxLevel}
-						value={level}
-						onChange={(event) => {
-							setLevel(event.target.value);
-						}}
-					/>
-				</Field>
-
-				<Field label={t("members.changeXp")} hint={t("members.changeXpHint")} htmlFor="member-xp">
-					<input
-						id="member-xp"
-						className={FIELD}
-						type="number"
-						inputMode="numeric"
-						min={-MEMBER_LIMITS.maxXpGrant}
-						max={MEMBER_LIMITS.maxXpGrant}
-						value={xp}
-						onChange={(event) => {
-							setXp(event.target.value);
-						}}
-					/>
-				</Field>
-			</div>
+			<Field label={t("members.changeXp")} hint={t("members.changeXpHint")} htmlFor="member-xp">
+				<input
+					id="member-xp"
+					className={cn(FIELD, "max-w-48 tabular-nums")}
+					type="number"
+					inputMode="numeric"
+					min={-MEMBER_LIMITS.maxXpGrant}
+					max={MEMBER_LIMITS.maxXpGrant}
+					value={xp}
+					onChange={(event) => {
+						setXp(event.target.value);
+					}}
+				/>
+			</Field>
 
 			{levelValid && xpValid && <Warning>{t("members.levelOrXp")}</Warning>}
 
-			<p className="text-muted-foreground text-xs">{t("members.levelRewardNote")}</p>
-
-			<div className="flex flex-wrap gap-3">
+			<RowActions>
 				<Button
 					variant="secondary"
 					disabled={!levelValid || xpValid || busy}
@@ -97,7 +92,8 @@ export function LevelCard({
 				>
 					{t("members.changeXpAction")}
 				</Button>
-			</div>
-		</Card>
+				<span className="text-muted-foreground text-xs">{t("members.levelRewardNote")}</span>
+			</RowActions>
+		</SettingRows>
 	);
 }

@@ -1118,6 +1118,13 @@
 		"rewardsBody": "A role handed out when someone reaches a level. {{used, number}} of {{max, number}} used."
 	},
 	"members": {
+		"summarySoftbanned": "Softbanned, and the ban lifts on {{when}}.",
+		"summaryLeft": "They have left the server.",
+		"summaryTimedOut": "Timed out until {{when}}.",
+		"summaryJoined": "In the server since {{date}}.",
+		"summaryJoinedWarned_one": "In the server since {{date}}, with {{count, number}} warning on record.",
+		"summaryJoinedWarned_other": "In the server since {{date}}, with {{count, number}} warnings on record.",
+		"summaryHere": "In the server.",
 		"title": "Members",
 		"subtitle": "Who is ahead on money and on levels. Both boards are the same ones Discord’s /leaderboard shows.",
 		"leaderboard": "Leaderboard",
@@ -1168,8 +1175,6 @@
 		"ranked_other": "{{count, number}} accounts ranked.",
 		"rankedMembers_one": "{{count, number}} member ranked.",
 		"rankedMembers_other": "{{count, number}} members ranked.",
-		"joinUnknown": "Join date unknown",
-		"joined": "Joined {{date}}",
 		"noWarnings": "No warnings on record.",
 		"warningCount_one": "{{count}} warning on record.",
 		"warningCount_other": "{{count}} warnings on record.",

@@ -1,5 +1,5 @@
 import { type MemberDetail } from "@testify/shared";
-import { clearConfirmed, softbanActive, warningSummary } from "@/features/members/memberDetail.utils";
+import { clearConfirmed, memberSummary, softbanActive, warningSummary } from "@/features/members/memberDetail.utils";
 import { t } from "@/test/english";
 
 function detail(overrides: Partial<MemberDetail> = {}): MemberDetail {
@@ -56,5 +56,38 @@ describe("clearConfirmed", () => {
 	/** The whole point is that a click alone cannot delete a record, so anything else has to be refused. */
 	it.each(["", "kat", "someone"])("refuses %p", (typed) => {
 		expect(clearConfirmed(typed, detail())).toBe(false);
+	});
+});
+
+describe("memberSummary", () => {
+	const now = Date.parse("2026-08-01T00:00:00.000Z");
+	const warning = {
+		id: "w1",
+		reason: "Spam",
+		byId: "1",
+		byTag: "mod",
+		at: "2026-07-01T00:00:00.000Z",
+		edited: false,
+		step: null,
+		stepProblem: null,
+	};
+
+	/** A softban outranks a warning count, and a timeout that has run out says nothing about today. */
+	it("leads with the gravest state that is still true", () => {
+		const rows = [
+			memberSummary(
+				detail({ softban: { reason: "Spam", moderatorId: "1", expiresAt: "2026-08-10T00:00:00.000Z" } }),
+				t,
+				now,
+			),
+			memberSummary(detail({ inGuild: false, joinedAt: null }), t, now),
+			memberSummary(detail({ timedOutUntil: "2026-07-30T00:00:00.000Z" }), t, now),
+			memberSummary(detail({ warnings: [warning] }), t, now),
+		];
+
+		expect(rows[0]).toMatch(/^Softbanned/);
+		expect(rows[1]).toBe("They have left the server.");
+		expect(rows[2]).toBe("In the server since 4 Jan 2026.");
+		expect(rows[3]).toBe("In the server since 4 Jan 2026, with 1 warning on record.");
 	});
 });

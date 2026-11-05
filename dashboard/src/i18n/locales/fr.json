@@ -1152,6 +1152,14 @@
 		"rewardsBody": "Un rôle attribué quand quelqu’un atteint un niveau. {{used, number}} sur {{max, number}} utilisés."
 	},
 	"members": {
+		"summarySoftbanned": "Softban, levé le {{when}}.",
+		"summaryLeft": "A quitté le serveur.",
+		"summaryTimedOut": "Exclu jusqu’au {{when}}.",
+		"summaryJoined": "Sur le serveur depuis le {{date}}.",
+		"summaryJoinedWarned_one": "Sur le serveur depuis le {{date}}, avec {{count, number}} avertissement enregistré.",
+		"summaryJoinedWarned_many": "Sur le serveur depuis le {{date}}, avec {{count, number}} d’avertissements enregistrés.",
+		"summaryJoinedWarned_other": "Sur le serveur depuis le {{date}}, avec {{count, number}} avertissements enregistrés.",
+		"summaryHere": "Sur le serveur.",
 		"title": "Membres",
 		"subtitle": "Qui mène en argent et en niveaux. Ce sont les mêmes classements que /leaderboard dans Discord.",
 		"leaderboard": "Classement",
@@ -1204,8 +1212,6 @@
 		"rankedMembers_one": "{{count, number}} membre classé.",
 		"rankedMembers_many": "{{count, number}} membres classés.",
 		"rankedMembers_other": "{{count, number}} membres classés.",
-		"joinUnknown": "Date d’arrivée inconnue",
-		"joined": "Arrivé le {{date}}",
 		"noWarnings": "Aucun avertissement enregistré.",
 		"warningCount_one": "{{count}} avertissement enregistré.",
 		"warningCount_many": "{{count}} avertissements enregistrés.",

@@ -139,7 +139,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | `…/casino`                                   | Economy       | —                   | Done                      |
 | `…/music`                                    | Entertainment | —                   | Done                      |
 | `…/giveaways`                                | Entertainment | —                   | Done                      |
-| `…/members`, `…/members/:userId`             | Members       | —                   | To do                     |
+| `…/members`, `…/members/:userId`             | Members       | —                   | Done                      |
 | `…/settings`                                 | Settings      | —                   | To do                     |
 | `…/commands`                                 | Commands      | —                   | To do                     |
 

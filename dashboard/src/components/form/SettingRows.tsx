@@ -1,4 +1,4 @@
-import { type ReactNode, useId } from "react";
+import { type FormEvent, type ReactNode, useId } from "react";
 import { RowLayout } from "@/components/form/rowLayout";
 import { CARD_HEADING } from "@/components/primitives/textStyles";
 
@@ -7,19 +7,24 @@ export function SettingRows({
 	title,
 	description,
 	action,
+	onSubmit,
 	children,
 }: {
 	title?: string;
 	description?: ReactNode;
 	/** Beside the title, such as the panel's own saving indicator. */
 	action?: ReactNode;
+	/** Makes the panel a form, so Enter in any of its fields submits it. */
+	onSubmit?: (event: FormEvent<HTMLFormElement>) => void;
 	children: ReactNode;
 }): React.JSX.Element {
 	const headingId = useId();
+	const Panel = onSubmit === undefined ? "section" : "form";
 
 	return (
-		<section
+		<Panel
 			{...(title === undefined ? {} : { "aria-labelledby": headingId })}
+			{...(onSubmit === undefined ? {} : { onSubmit })}
 			className="bg-card border-border rounded-card divide-border divide-y border [&>*]:px-6 [&>*]:py-4"
 		>
 			{(title !== undefined || description !== undefined) && (
@@ -36,6 +41,6 @@ export function SettingRows({
 				</div>
 			)}
 			<RowLayout.Provider value>{children}</RowLayout.Provider>
-		</section>
+		</Panel>
 	);
 }

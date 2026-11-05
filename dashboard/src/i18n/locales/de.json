@@ -1118,6 +1118,13 @@
 		"rewardsBody": "Eine Rolle, die vergeben wird, wenn jemand ein Level erreicht. {{used, number}} von {{max, number}} belegt."
 	},
 	"members": {
+		"summarySoftbanned": "Softgebannt, der Bann endet am {{when}}.",
+		"summaryLeft": "Hat den Server verlassen.",
+		"summaryTimedOut": "Im Timeout bis {{when}}.",
+		"summaryJoined": "Seit {{date}} auf dem Server.",
+		"summaryJoinedWarned_one": "Seit {{date}} auf dem Server, mit {{count, number}} vermerkten Verwarnung.",
+		"summaryJoinedWarned_other": "Seit {{date}} auf dem Server, mit {{count, number}} vermerkten Verwarnungen.",
+		"summaryHere": "Auf dem Server.",
 		"title": "Mitglieder",
 		"subtitle": "Wer bei Geld und Leveln vorn liegt. Beides sind dieselben Listen, die /leaderboard in Discord zeigt.",
 		"leaderboard": "Bestenliste",
@@ -1168,8 +1175,6 @@
 		"ranked_other": "{{count, number}} Konten in der Wertung.",
 		"rankedMembers_one": "{{count, number}} Mitglied in der Wertung.",
 		"rankedMembers_other": "{{count, number}} Mitglieder in der Wertung.",
-		"joinUnknown": "Beitrittsdatum unbekannt",
-		"joined": "Beigetreten am {{date}}",
 		"noWarnings": "Keine Verwarnungen vermerkt.",
 		"warningCount_one": "{{count}} Verwarnung vermerkt.",
 		"warningCount_other": "{{count}} Verwarnungen vermerkt.",
