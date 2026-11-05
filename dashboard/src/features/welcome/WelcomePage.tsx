@@ -2,24 +2,36 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams } from "react-router";
 import { ErrorState } from "@/app/ErrorState";
-import { ChannelPicker, LABEL, SavingIndicator, savingStateOf, Toggle, Warning } from "@/components/form";
-import { cardClass, SectionHeading, PageHeader, Skeleton } from "@/components/primitives";
+import {
+	ChannelPicker,
+	FieldGroup,
+	postableChannels,
+	SavingIndicator,
+	savingStateOf,
+	SettingRows,
+	Toggle,
+	Warning,
+} from "@/components/form";
+import { PageHeader, Skeleton, Summary } from "@/components/primitives";
 import { useGuildOverview } from "@/features/guild-overview/useGuildOverview";
 import { useChannels } from "@/features/levelling/useLevelling";
-import { GoodbyeCard } from "@/features/welcome/components/GoodbyeCard";
+import { GoodbyeSettings } from "@/features/welcome/components/GoodbyeSettings";
 import { GreetingPreview } from "@/features/welcome/components/GreetingPreview";
 import { MessageEditor } from "@/features/welcome/components/MessageEditor";
 import { StyleChoice } from "@/features/welcome/components/StyleChoice";
+import { useGoodbye } from "@/features/welcome/useGoodbye";
 import { useUpdateWelcome, useWelcome } from "@/features/welcome/useWelcome";
-import { STYLE_ORDER } from "@/features/welcome/welcome.utils";
+import { STYLE_ORDER, welcomeSummary } from "@/features/welcome/welcome.utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { ApiError } from "@/lib/api";
+import { channelLabel } from "@/lib/channels";
 
 export function WelcomePage(): React.JSX.Element {
 	const { t } = useTranslation();
 	const { guildId = "" } = useParams();
 
 	const config = useWelcome(guildId);
+	const goodbye = useGoodbye(guildId);
 	const channels = useChannels(guildId);
 	const overview = useGuildOverview(guildId);
 	const update = useUpdateWelcome(guildId);
@@ -39,19 +51,28 @@ export function WelcomePage(): React.JSX.Element {
 	const welcome = config.data;
 	// The stored record requires a channel, so the API refuses every write except "off" until there is one.
 	const needsChannel = welcome.channelId === null;
+	const postable = postableChannels(channels.data ?? []);
+	const guildName = overview.data?.name ?? t("welcome.thisServer");
+	const memberCount = overview.data?.memberCount ?? 0;
 
 	return (
 		<>
 			<PageHeader server={overview.data} title={t("welcome.title")} subtitle={t("welcome.subtitle")} />
 
-			<section aria-labelledby="greeting-heading" className={cardClass("default", "motion-pop flex flex-col gap-4")}>
-				<div className="flex items-center justify-between gap-3">
-					<SectionHeading as="h2" id="greeting-heading">
-						{t("welcome.greeting")}
-					</SectionHeading>
-					<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />
-				</div>
+			<Summary>
+				{welcomeSummary(
+					welcome,
+					channelLabel(postable, welcome.channelId, t),
+					goodbye.data,
+					channelLabel(postable, goodbye.data?.channelId ?? null, t),
+					t,
+				)}
+			</Summary>
 
+			<SettingRows
+				title={t("welcome.greeting")}
+				action={<SavingIndicator state={savingStateOf(update.isPending, update.isSuccess)} />}
+			>
 				<ChannelPicker
 					label={t("welcome.sendTo")}
 					hint={t("welcome.sendToHint")}
@@ -63,11 +84,9 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				/>
 
-				{needsChannel && <Warning>{t("welcome.pickFirst")}</Warning>}
-
 				<Toggle
 					label={t("welcome.greet")}
-					hint={t("welcome.greetHint")}
+					hint={needsChannel ? t("welcome.pickFirst") : t("welcome.greetHint")}
 					checked={welcome.enabled}
 					disabled={needsChannel}
 					onChange={(enabled) => {
@@ -75,24 +94,20 @@ export function WelcomePage(): React.JSX.Element {
 					}}
 				/>
 
-				{/* A `<legend>` is not a flex item, so the gap under it has to be a margin on the group itself. */}
-				<fieldset disabled={needsChannel}>
-					<legend className={LABEL}>{t("welcome.sentAs")}</legend>
-					<div className="mt-2 grid gap-2 sm:grid-cols-3">
-						{STYLE_ORDER.map((style) => (
-							<StyleChoice
-								key={style}
-								group="welcome-style"
-								style={style}
-								checked={welcome.style === style}
-								disabled={needsChannel}
-								onChange={() => {
-									update.mutate({ style });
-								}}
-							/>
-						))}
-					</div>
-				</fieldset>
+				<FieldGroup label={t("welcome.sentAs")}>
+					{STYLE_ORDER.map((style) => (
+						<StyleChoice
+							key={style}
+							group="welcome-style"
+							style={style}
+							checked={welcome.style === style}
+							disabled={needsChannel}
+							onChange={() => {
+								update.mutate({ style });
+							}}
+						/>
+					))}
+				</FieldGroup>
 
 				<MessageEditor
 					id="welcome-message"
@@ -105,30 +120,20 @@ export function WelcomePage(): React.JSX.Element {
 					onSave={(message) => {
 						update.mutate({ message });
 					}}
-				/>
+				>
+					<GreetingPreview message={draft} style={welcome.style} guildName={guildName} memberCount={memberCount} />
+				</MessageEditor>
 
 				{update.error !== null && (
 					<Warning>{update.error instanceof ApiError ? update.error.message : t("common.couldNotSave")}</Warning>
 				)}
-			</section>
+			</SettingRows>
 
-			<section aria-labelledby="preview-heading" className="flex flex-col gap-3">
-				<SectionHeading as="h2" id="preview-heading">
-					{t("welcome.preview")}
-				</SectionHeading>
-				<GreetingPreview
-					message={draft}
-					style={welcome.style}
-					guildName={overview.data?.name ?? t("welcome.thisServer")}
-					memberCount={overview.data?.memberCount ?? 0}
-				/>
-			</section>
-
-			<GoodbyeCard
+			<GoodbyeSettings
 				guildId={guildId}
 				channels={channels.data ?? []}
-				guildName={overview.data?.name ?? t("welcome.thisServer")}
-				memberCount={overview.data?.memberCount ?? 0}
+				guildName={guildName}
+				memberCount={memberCount}
 			/>
 		</>
 	);

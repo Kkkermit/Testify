@@ -1,4 +1,5 @@
-import { WELCOME_STYLES, type WelcomeStyle } from "@testify/shared";
+import { type GoodbyeSettings, WELCOME_STYLES, type WelcomeConfigResponse, type WelcomeStyle } from "@testify/shared";
+import { type TFunction } from "i18next";
 import { type TranslationKey } from "@/i18n";
 
 export const STYLE_LABELS: Record<WelcomeStyle, { label: TranslationKey; describes: TranslationKey }> = {
@@ -71,4 +72,31 @@ export function markSpans(text: string): MarkSpan[] {
 
 	flush();
 	return spans;
+}
+
+type Post = Pick<WelcomeConfigResponse, "enabled" | "channelId">;
+
+/** What happens when somebody joins, then when somebody leaves; the second half waits for its own answer. */
+export function welcomeSummary(
+	greeting: Post,
+	greetingChannel: string,
+	goodbye: Pick<GoodbyeSettings, "enabled" | "channelId"> | undefined,
+	goodbyeChannel: string,
+	t: TFunction,
+): string {
+	const hello =
+		greeting.channelId === null
+			? t("welcome.summaryNoChannel")
+			: greeting.enabled
+				? t("welcome.summaryOn", { channel: greetingChannel })
+				: t("welcome.summaryOff");
+	if (goodbye === undefined) return hello;
+
+	const bye =
+		goodbye.channelId === null
+			? t("goodbye.summaryNoChannel")
+			: goodbye.enabled
+				? t("goodbye.summaryOn", { channel: goodbyeChannel })
+				: t("goodbye.summaryOff");
+	return `${hello} ${bye}`;
 }

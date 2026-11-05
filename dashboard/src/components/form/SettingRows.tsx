@@ -6,10 +6,13 @@ import { CARD_HEADING } from "@/components/primitives/textStyles";
 export function SettingRows({
 	title,
 	description,
+	action,
 	children,
 }: {
 	title?: string;
 	description?: string;
+	/** Beside the title, such as the panel's own saving indicator. */
+	action?: ReactNode;
 	children: ReactNode;
 }): React.JSX.Element {
 	const headingId = useId();
@@ -20,11 +23,14 @@ export function SettingRows({
 			className="bg-card border-border rounded-card divide-border divide-y border [&>*]:px-6 [&>*]:py-4"
 		>
 			{title !== undefined && (
-				<div>
-					<h2 id={headingId} className={CARD_HEADING}>
-						{title}
-					</h2>
-					{description !== undefined && <p className="text-muted-foreground text-sm">{description}</p>}
+				<div className="flex items-start justify-between gap-3">
+					<div>
+						<h2 id={headingId} className={CARD_HEADING}>
+							{title}
+						</h2>
+						{description !== undefined && <p className="text-muted-foreground text-sm">{description}</p>}
+					</div>
+					{action}
 				</div>
 			)}
 			<RowLayout.Provider value>{children}</RowLayout.Provider>

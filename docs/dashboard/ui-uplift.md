@@ -111,7 +111,7 @@ that gets a preview beside its editor, and whether its page has been restyled.
 | -------------------------------------------- | ------------- | ------------------- | ----------------------- |
 | `/guilds/:id`                                | Overview      | —                   | Kept as it is           |
 | `…/channels`, `…/channels/:channelId`        | Channels      | Its posts           | Built in phases 3 and 4 |
-| `…/welcome` (greeting and goodbye)           | Community     | Both messages       | To do                   |
+| `…/welcome` (greeting and goodbye)           | Community     | Both messages       | Done                    |
 | `…/birthdays`                                | Community     | The birthday post   | Done                    |
 | `…/levelling`                                | Community     | —                   | To do                   |
 | `…/role-menus`                               | Community     | —                   | To do                   |
